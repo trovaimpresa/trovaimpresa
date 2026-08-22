@@ -13752,3 +13752,98 @@ noleggio**, poi i prezzi del preventivo AI, il paywall nel database, la mina di
 `sql/gest-computo-metrico.sql`, il totale del preventivo, i dati che si
 perdono, la lista del geometra, le 5 pagine duplicate in Search Console e le
 piccole.
+
+
+# ✅ 22 agosto 2026 — I DOCUMENTI DELLA PRATICA (i PDF)
+
+Punto 1a della lista nuova: **CHIUSO**. Un file toccato,
+`gestionale-app.html`. Nessun SQL, nessuna tabella nuova, nessuna query.
+
+## IL BUCO
+
+Nella scheda del lavoro/pratica si potevano mettere **solo immagini e video**
+(`accept="image/*"`). Quello che un geometra ha in mano su una pratica è
+tutt'altro: **visura catastale, planimetria, elaborato, ricevuta di protocollo
+del Comune**. Sono PDF, e non avevano un posto: restavano in una cartella sul
+computer, e otto mesi dopo — quando il Comune chiede l'integrazione — il
+fascicolo nel gestionale era a metà.
+
+⚠️ **Il magazzino c'era già.** Bucket `gestionale-foto`, tabella `gest_foto`,
+e i PDF li accetta da sempre: lo fanno la fattura in PDF e i documenti dei
+fornitori. **Mancava solo la porta.**
+
+## COSA C'È ADESSO
+
+Nella scheda del lavoro, sotto «Foto e video», un blocco **📎 Documenti di
+questo lavoro**: l'elenco dei file col nome e la data, «Apri», «Elimina», e il
+pulsante «＋ Aggiungi documento». **Non miniature**: un PDF non si guarda come
+una foto, si apre.
+
+- Vale per **tutti**, non solo per lo studio tecnico. Stessa schermata, zero
+  righe in più, e anche un'impresa ha PDF da tenere lì (capitolato, permesso,
+  DURC del subappaltatore). Deciso così e detto ad Alessio prima di partire.
+- Sta **chiuso finché il lavoro non è salvato**: un documento ha bisogno di un
+  `lavoro_id` a cui attaccarsi. Stessa regola delle spese e delle ore.
+- Le funzioni sono copiate riga per riga da quelle dei documenti del
+  **fornitore**: stessa tabella, stesso deposito, stesso modo di aprire e
+  eliminare. Cambia solo `lavoro_id` invece di `fornitore_id`, e
+  `tipo:"documento"`.
+
+## ⛔ IL PEZZO CHE POTEVA ROMPERE TUTTO IL RESTO
+
+`gest_foto` non tiene solo le foto: ora dentro ci sono anche i documenti. E
+**chi disegna le foto assume sempre un `<img>`** — un PDF ci sarebbe entrato
+come immagine rotta.
+
+I posti da cui i documenti devono restare fuori erano **quattro**: il
+contatore Galleria del **Riepilogo**, il contatore dentro la **scheda del
+lavoro**, la **Galleria**, e le foto del **verbale**. Tre di questi
+conoscevano già la parola «fattura», scritta a mano in ognuno.
+
+⛔ **Adesso l'elenco sta in un posto solo**: `TIPI_NON_FOTO` (+ `_nonFotoSql`
+per PostgREST e `_nonFoto` per il JavaScript). Se domani nasce un quinto tipo
+di file, si aggiunge lì e basta. Era la quarta volta in tre giorni che la
+stessa regola provava a stare in più posti.
+
+## ⚠️ TRE COSE CHE HA TROVATO IL BANCO, NON L'OCCHIO
+
+1. ⛔ **Un apice rovescio dentro un commento HTML ha spezzato tutto il file.**
+   Il commento che ho scritto sta **dentro una stringa a template** di
+   JavaScript (il modulo del lavoro si costruisce così): un apice rovescio la
+   chiude, e da lì in poi non è più codice. Il file smetteva di funzionare
+   **tutto insieme e in silenzio**. L'ha visto il controllo che legge il
+   JavaScript con un lettore vero (acorn), non l'occhio. Ora c'è scritto sul
+   posto: ⛔ niente apici rovesci in quel commento.
+2. **`renderDocLavoro()` non era atteso**: il messaggio «Documento eliminato»
+   arrivava mentre l'elenco mostrava ancora il documento. Due `await`.
+3. ⚠️ **Il Cestino è acceso**, quindi eliminare un documento lo mette nel
+   Cestino e **il file NON si tocca**: se si togliesse, il ripristino darebbe
+   un documento rotto. C'è una prova per tutti e due i casi.
+
+## IL BANCO — nei due versi
+
+`prove/documenti-lavoro/` (nel contenitore di Claude): `banco.js` ·
+`sabotaggi.js` · `finto-supabase.js`.
+
+**20 verdi · 23 sabotaggi su 23 accusati.**
+
+⛔ **La cosa che ha fatto la differenza: il finto Supabase applica i filtri
+davvero.** Quello di stamattina rispondeva sempre con tutte le righe e
+ignorava `eq`/`neq`/`not`: con un finto così, la prova «i documenti non
+compaiono nella Galleria» sarebbe stata verde **anche col filtro tolto**.
+Questo applica eq · neq · in · not-in · is, fa funzionare `update()` (serve al
+Cestino, che trasforma ogni `delete` in una data) e registra upload, insert e
+file rimossi.
+
+⚠️ **E tre prove sono state riscritte perché non potevano diventare rosse:**
+- «su un lavoro nuovo il blocco resta chiuso» era verde sempre — il modulo del
+  lavoro nuovo quel blocco non ce l'ha proprio;
+- «i documenti non entrano nel verbale» guardava solo le letture già fatte, e
+  il verbale non lo apriva nessuno: adesso lo apre davvero;
+- «il file esce dal deposito» chiedeva una cosa che col Cestino acceso non
+  succede mai: spezzata in due prove, una col Cestino acceso e una spento.
+
+⚠️ **E il banco stesso poteva mentire**: quando un sabotaggio lo faceva
+cadere, l'assenza di righe rosse veniva letta come «nessuna prova rossa» —
+cioè come un sabotaggio non accusato. Adesso un banco che non arriva in fondo
+viene segnalato a parte: **va guardato, non ignorato.**

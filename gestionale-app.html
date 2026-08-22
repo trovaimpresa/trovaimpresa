@@ -276,6 +276,10 @@
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
       <input type="file" id="forn-doc-file" multiple style="display:none">
+      <!-- 22 agosto 2026 — i documenti del lavoro/pratica: PDF e foto.
+           Sta qui e non dentro la finestra del lavoro perche' la finestra
+           si ridisegna a ogni apertura e l'input perderebbe il suo onchange. -->
+      <input type="file" id="lav-doc-file" multiple style="display:none">
     </section>
 
     <section id="squadra">
@@ -3560,6 +3564,23 @@
      niente: e' rosso il preventivo fermo da PIU' DI UNA SETTIMANA, non quello
      di ieri. */
   let _rieMale=new Set();
+  /* ============================================================
+     ⛔ 22 agosto 2026 — QUALI RIGHE DI `gest_foto` NON SONO FOTO
+     ============================================================
+     `gest_foto` non tiene solo le foto del lavoro: dentro ci stanno anche
+     file che foto non sono — il PDF della fattura e, da oggi, i DOCUMENTI
+     della pratica (visura, planimetria, ricevuta di protocollo).
+     ⚠️ Chi disegna foto li deve lasciare fuori, perche' il rendering
+     assume sempre un `<img>`: un PDF diventa un'immagine rotta.
+     ⛔ Prima la parola «fattura» stava scritta in QUATTRO punti (il
+     contatore del Riepilogo, quello della scheda, la Galleria e il verbale).
+     Bastava dimenticarne uno. Adesso l'elenco sta qui, e basta.
+     ⚠️ `_nonFotoSql` e' la forma per PostgREST; `_nonFoto` quella per
+     filtrare in JavaScript. Stessa lista tutte e due. */
+  const TIPI_NON_FOTO=['fattura','documento'];
+  const _nonFotoSql='('+TIPI_NON_FOTO.join(',')+')';
+  const _nonFoto=t=>TIPI_NON_FOTO.indexOf(String(t||''))>=0;
+
   function rieCard(o){
     /* ===== 15 agosto 2026 — IL RIEPILOGO CHE SI RIEMPIE DA SOLO =====
        Prima le 16 schede c'erano sempre tutte, anche appena aperto un reparto
@@ -3752,7 +3773,7 @@
       const carteIds=(carteTutte||[]).map(c=>c.id);
       const q=await Promise.all([
         ids.length?sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({data:[]}),
-        ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
+        ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids).not("tipo","in",_nonFotoSql):Promise.resolve({count:0}),
         ids.length?sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
         attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]}),
         carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]}),
@@ -6774,6 +6795,78 @@ ${vecchi?`
     renderDocForn();toast("Documento eliminato");
   }
 
+  /* ============================================================
+     ⛔ 22 agosto 2026 — I DOCUMENTI DEL LAVORO / DELLA PRATICA
+     ============================================================
+     Copiate riga per riga da quelle dei documenti del fornitore, qui sopra:
+     stessa tabella (`gest_foto`), stesso deposito, stesso modo di aprire e
+     di eliminare. Cambia solo il collegamento: `lavoro_id` invece di
+     `fornitore_id`, e `tipo:"documento"`.
+     ⛔ `tipo:"documento"` NON e' un dettaglio: e' il nome che tiene questi
+     file fuori dalla Galleria e dai contatori delle foto. Sta nell'elenco
+     `TIPI_NON_FOTO`, in un posto solo.
+     ⚠️ Non si comprime niente: preparaFileUpload lascia intatto quello che
+     non e' un'immagine, e applica solo il limite dei 15 MB. Una foto invece
+     la comprime, ed e' giusto: una planimetria fotografata col telefono pesa
+     come otto PDF. */
+  let docLavId=null;
+  async function renderDocLavoro(lavoroId){
+    docLavId=lavoroId||null;
+    const wrap=$("#lav-doc-wrap"), box=$("#lav-doc-lista");
+    if(!wrap||!box)return;
+    if(!docLavId||!sb||!sbUid){wrap.style.display="none";return;}
+    wrap.style.display="";
+    const {data,error}=await sb.from("gest_foto").select("id,storage_path,nome_file,created_at")
+      .eq("user_id",sbUid).eq("lavoro_id",docLavId).eq("tipo","documento")
+      .order("created_at",{ascending:false});
+    if(error){box.innerHTML='<div class="campo-aiuto" style="color:var(--attesa)">Non riesco a leggere i documenti: '+esc(error.message||"")+'</div>';return;}
+    if(!data||!data.length){box.innerHTML='<div class="campo-aiuto">Nessun documento per ora. Usa il pulsante qui sotto.</div>';return;}
+    box.innerHTML=data.map(d=>{
+      const nome=d.nome_file||String(d.storage_path||"").split("/").pop()||"documento";
+      const quando2=d.created_at?new Date(d.created_at).toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}):"";
+      return '<div class="doc-riga">'
+        +'<span class="doc-ico">'+docCliIcona(nome)+'</span>'
+        +'<span class="doc-nome">'+esc(nome)+'<small>'+esc(quando2)+'</small></span>'
+        +'<button type="button" class="btn" data-action="doc-cli-apri" data-id="'+esc(d.id)+'">Apri</button>'
+        +'<button type="button" class="btn b-del" data-action="lav-doc-del" data-id="'+esc(d.id)+'">Elimina</button>'
+        +'</div>';
+    }).join("");
+  }
+  async function uploadDocLavoro(files){
+    if(!files||!files.length||!docLavId)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    let ok=0;
+    for(const file of Array.from(files)){
+      const pr=await preparaFileUpload(file);
+      if(pr.errore){toast(pr.errore);continue;}
+      const safe=String(pr.nome||"documento").replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=sbUid+"/"+docLavId+"/doc/"+Date.now()+"_"+safe;
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,pr.file);
+      if(up){toast("Non caricato: "+up.message);continue;}
+      /* ⚠️ come dappertutto: se la riga non si scrive, il file nel deposito
+         resta orfano e non lo vede piu' nessuno. Si toglie subito. */
+      const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:docLavId,tipo:"documento",operatore:"Capo",storage_path:path,nome_file:pr.nome||safe});
+      if(ins){await _fileOrfano("gestionale-foto",path);toast("Non registrato: "+ins.message);continue;}
+      ok++;
+    }
+    if(ok)toast(ok+(ok===1?" documento caricato ✔":" documenti caricati ✔"));
+    /* ⚠️ con l'await: senza, il messaggio arriva mentre l'elenco e' ancora
+       quello di prima. Trovato dal banco, non a occhio. */
+    await renderDocLavoro(docLavId);
+  }
+  async function lavDocElimina(id){
+    if(!gconfirm("Eliminare questo documento?"))return;
+    const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    /* la .select('id') fa da cancello: se la RLS blocca, PostgREST tocca zero
+       righe e risponde OK — senza questo si direbbe «eliminato» a vuoto. */
+    const {data:okD,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!okD||!okD.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+    /* col cestino il file NON si tocca: se no il ripristino darebbe un documento rotto */
+    if(r&&r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){try{await sb.storage.from("gestionale-foto").remove([r.storage_path]);}catch(e){}}
+    await renderDocLavoro(docLavId);toast("Documento eliminato");
+  }
+
   let _tiRisultati=[];
   function fornForm(f){
     const isNew=!(f&&f.id);f=f||{};
@@ -7875,6 +7968,10 @@ ${vecchi?`
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
     editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa,fattura:!!fattura};
     fotoSupa={};   /* registro delle foto su Supabase: è del lavoro aperto, non va ereditato */
+    /* 22 agosto 2026 — stessa ragione: il lavoro a cui si attaccano i
+       documenti non si eredita da quello aperto prima. Chi lo apre davvero
+       (edit-job) lo rimette subito dopo con renderDocLavoro(). */
+    docLavId=null;
     if(supa){
       /* 9 agosto 2026 — finestra GRANDE a due colonne anche qui.
          Prima era la finestrella piccola: con i "Dati della pratica" in fondo
@@ -7938,6 +8035,30 @@ ${vecchi?`
       <div class="sh-b sh-b-c">
       <div class="field campo-titolo"><label>Foto e video</label>
         <div class="lav-media" id="lav-media">Sto controllando…</div>
+      </div>
+      </div>
+      <!-- ============================================================
+           ⛔ 22 agosto 2026 — I DOCUMENTI DEL LAVORO (e della PRATICA)
+           ============================================================
+           Fino a ieri qui dentro entravano solo immagini e video. Per uno
+           studio tecnico quello che ha in mano su una pratica e' tutt'altro:
+           visura catastale, planimetria, elaborato, ricevuta di protocollo
+           del Comune. Sono PDF, e non avevano un posto: restavano in una
+           cartella sul computer, e otto mesi dopo il fascicolo era a meta'.
+           ⚠️ Il magazzino c'era gia' (bucket "gestionale-foto", tabella
+           "gest_foto") e i PDF li accetta gia': lo fanno la fattura in PDF e
+           i documenti dei fornitori. Mancava solo la porta.
+           ⚠️ Sta chiuso finche' il lavoro non e' salvato: un documento ha
+           bisogno di un "lavoro_id" a cui attaccarsi. Stessa regola delle
+           spese e delle ore.
+           ⛔ NIENTE APICI ROVESCI IN QUESTO COMMENTO: sta dentro una stringa
+           a template di JavaScript, e un apice rovescio la chiude. Il file
+           smette di funzionare tutto insieme, in silenzio. -->
+      <div class="sh-b">
+      <div class="field campo-titolo" id="lav-doc-wrap" style="display:none"><label>📎 Documenti di questo lavoro</label>
+        <div class="sh-nota" style="margin-top:0">Visura, planimetria, elaborato, ricevuta di protocollo, capitolato, DURC: qui restano attaccati e non si perdono. PDF o foto, massimo 15 MB per file.</div>
+        <div id="lav-doc-lista"></div>
+        <button type="button" class="btn quick-add" data-action="lav-doc-scegli">＋ Aggiungi documento</button>
       </div>
       </div>
       ${bloccoScadenzePratica()}
@@ -8149,7 +8270,7 @@ ${vecchi?`
     let nF=0,nV=0;
     try{
       const [f,v]=await Promise.all([
-        sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("lavoro_id",lav).neq("tipo","fattura"),
+        sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("lavoro_id",lav).not("tipo","in",_nonFotoSql),
         sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("lavoro_id",lav)
       ]);
       nF=f.count||0;nV=v.count||0;
@@ -9706,7 +9827,7 @@ ${vecchi?`
     const lavIds=new Set(lavArr.map(l=>l.id));
 
     /* le foto di tipo "fattura" non sono foto di cantiere: restano fuori */
-    const tutteF=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
+    const tutteF=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&!_nonFoto(f.tipo));
     const tutteV=(video||[]).filter(v=>lavIds.has(v.lavoro_id));
     galRigheFoto={};tutteF.forEach(f=>galRigheFoto[f.id]=f);
     galRigheVideo={};tutteV.forEach(v=>galRigheVideo[v.id]=v);
@@ -12586,7 +12707,7 @@ ${vecchi?`
     verFoto=[];
     try{
       const {data:fs}=await sb.from("gest_foto").select("id,storage_path,tipo,created_at")
-        .eq("user_id",sbUid).eq("lavoro_id",lavId).neq("tipo","fattura")
+        .eq("user_id",sbUid).eq("lavoro_id",lavId).not("tipo","in",_nonFotoSql)
         .order("created_at",{ascending:true}).limit(12);
       for(const f of (fs||[])){
         const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
@@ -14889,7 +15010,7 @@ ${vecchi?`
          filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
       const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
       if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
-      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);}return;}
+      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
@@ -15184,6 +15305,8 @@ ${vecchi?`
     if(a==="new-fattf-forn")return fattfForm({fornitore_id:id});
     if(a==="forn-doc")return fornDocApri(id);
     if(a==="forn-doc-scegli"){const i=$("#forn-doc-file");if(i)i.click();return;}
+    if(a==="lav-doc-scegli"){const i=$("#lav-doc-file");if(i)i.click();return;}
+    if(a==="lav-doc-del")return lavDocElimina(id);
     if(a==="forn-doc-del")return fornDocElimina(id);
     if(a==="save-forn")return saveForn(id||null);
     if(a==="del-forn"){
@@ -15303,6 +15426,7 @@ ${vecchi?`
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
   if($("#cli-doc-file"))$("#cli-doc-file").onchange=e=>{uploadDocCliente(e.target.files);e.target.value="";};
   if($("#forn-doc-file"))$("#forn-doc-file").onchange=e=>{uploadDocFornitore(e.target.files);e.target.value="";};
+  if($("#lav-doc-file"))$("#lav-doc-file").onchange=e=>{uploadDocLavoro(e.target.files);e.target.value="";};
 
   load().then(()=>{if(!cur)renderLanding();});
 </script>
