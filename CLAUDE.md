@@ -14341,3 +14341,117 @@ pagina senza che nessuno se ne accorgesse.
 scritte al posto dell'ARG l'attesa resta a 30 s di default; e senza il **finto
 Supabase** il codice del pannello si ferma alla prima riga, così `impresaCorrente`
 non nasce nemmeno e non è colpa della pagina.
+
+---
+
+# 22 AGOSTO 2026 — I LUCCHETTI
+
+Chiesto da Alessio: «controlla se realmente i lucchetti funzionano tutti e
+bene». Il referto completo sta in `prove-claude/LUCCHETTI-22-agosto.md`
+(non va online). Qui il risultato e cosa si è chiuso.
+
+## Come stavano le cose
+
+Controllato sul **database vero**, non sui file:
+
+- le regole (RLS) sono **accese su tutte** le tabelle `gest_` `neg_` `nol_`:
+  nessuno legge la roba di un altro, e quello tiene;
+- **nessuna regola nomina il piano.** Le regole dicono una cosa sola:
+  «questa riga è tua?». `gest_puo_sezione` comincia con
+  `select _impresa = auth.uid()` — il titolare passa sempre, senza che
+  nessuno guardi che piano ha;
+- il guardiano del 21 agosto proteggeva **tre colonne**: `piano`,
+  `premium_pagato`, `premium_scadenza`.
+
+⛔ Quindi: **il lucchetto del gestionale sta solo nella finestra del
+browser.** E in `gestionale-app.html`, riga 15831, c'è scritto che «i dati
+restano comunque protetti da RLS». È vero che ognuno vede solo i propri.
+**Non è vero che il piano c'entri qualcosa.**
+
+## ✅ Quello che invece tiene davvero
+
+`ai-claude.js` · `ai-preventivo-background.js` (chi chiama si ricava dal
+gettone, l'`impresa_id` del browser è ignorato; piano, scadenza e tetto
+giornaliero) · `ai-orienta.js` (non una porta ma un tetto: origine, conteggio
+giornaliero, risposta accettata solo fra le quattro previste) ·
+`ai-generate` su Supabase (401 senza `Authorization`). Stanno **sul server**:
+dal browser non si aggirano.
+
+## 1. `gestionale_attivo` uno se lo accendeva da solo
+
+Le due colonne che aprono il gestionale del **negozio** (l'add-on da 12 €/mese)
+non erano nell'elenco del guardiano. Dalla console del browser bastava:
+
+```sql
+update imprese set gestionale_attivo = true where user_id = auth.uid();
+```
+
+`sql/blocco-gestionale-attivo.sql` (nuovo) **riscrive** il guardiano del 21
+agosto aggiungendo `gestionale_attivo` e `gestionale_scadenza`, e sulla riga
+nuova forza `gestionale_attivo = false`. Passano ancora, identici a prima:
+service_role (il webhook di Stripe, l'unico che deve poterlo accendere),
+l'SQL Editor e la mail del fondatore.
+
+⚠️ **Non è un secondo guardiano: è lo stesso, riscritto.** Se un giorno si
+rilancia `sql/blocco-piano-premium.sql`, quello riporta indietro la versione a
+tre colonne **in silenzio**. Allora si rilancia questo, che è più nuovo. È
+scritto in cima al file.
+
+## 2. Il cancello del negozio era girato al contrario
+
+`gestionale-negozio.html`:
+
+```js
+if(!s){hideGate();return;}      // ⛔ nessuna sessione -> ENTRA
+```
+
+Chi **non** aveva fatto l'accesso entrava nel gestionale intero. Adesso vede
+una schermata nuova, `#gate-login`, col link a `/login-impresa.html`.
+⚠️ Non il paywall: i pulsanti da 12 € partirebbero senza email e il pagamento
+non saprebbe a chi darlo.
+
+E la lettura di `imprese` non aveva nessun ramo per l'errore: la pagina
+restava appesa su «Verifica accesso in corso…». Adesso, **nel dubbio il
+cancello si chiude**: si resta fuori con scritto di ricaricare. Vale per tutti
+e tre i modi di andare storto (errore dentro la risposta, lettura che lancia,
+sessione illeggibile).
+
+⚠️ Le tre schermate adesso si spengono a vicenda da un **elenco solo**
+(`SCHERMATE`): con due erano scritte a mano una per una, e con la terza
+dimenticarne una avrebbe lasciato due schermate sovrapposte.
+
+## Il banco — nei due versi
+
+- `prove/lucchetti/` (Postgres **vero** in container, con addosso un finto
+  Supabase: schema `auth`, `auth.uid()`, il ruolo dentro il gettone):
+  **20 verdi · 14 sabotaggi su 14 accusati.**
+- `prove/negozio-cancello/` (la pagina vera aperta nei casi che capitano
+  davvero): **12 verdi · 14 sabotaggi su 14 accusati.**
+
+⚠️ Due inciampi miei nei banchi, scritti perché non si ripetano: attaccando un
+booleano a un testo Postgres scrive `false`, non `f` (tre rossi che erano
+colpa mia); e le prove rosse incollate in una riga sola si separano con `;`,
+quindi l'inizio di una prova è un `;` e non un `^` — con `^` due sabotaggi
+sembravano muti mentre erano accusati benissimo.
+
+## ⛔ DECISIONI DI ALESSIO — non si ripropongono
+
+- **Il gestionale noleggio resta senza lucchetto.** Gli ho fatto vedere che
+  `gestionale-noleggio.html` non ha nessun cancello e ha scelto «lascialo
+  com'è». Deciso il 22 agosto.
+- **Il lucchetto del piano dentro il database** (le regole che guardano
+  `piano`) resta da fare: tocca tutte le tabelle `gest_`, ed è un lavoro a
+  parte. Oggi il gestionale è comunque chiuso da `MANUTENZIONE = true`.
+
+## ⚠️ Resta in lista: le due strade che aprono da sole
+
+In `gestionale-app.html`, quando `MANUTENZIONE` tornerà `false`:
+
+```js
+/* rete lenta o bloccata: dopo 8 secondi decide comunque e fa entrare */
+setTimeout(function(){decidi(window._gestEmail||'','ok');},8000);
+```
+
+e il ramo dell'errore di lettura, che entra «per non bloccare chi paga».
+La ragione è buona, **il verso è sbagliato**: la porta si apre da sola invece
+di chiudersi, e per entrare basta rallentare quella richiesta.

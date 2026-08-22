@@ -2763,6 +2763,18 @@
       <p style="margin:16px 0 0;font-size:12px;color:#9aa7b4;text-align:center;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
       <p style="margin:14px 0 0;text-align:center;"><a href="#" onclick="history.back();return false;" style="color:#0066ff;font-size:13px;text-decoration:none;">&larr; Torna indietro</a></p>
     </div>
+    <!-- ⛔ 22 agosto 2026 — CHI NON HA FATTO L'ACCESSO.
+         Prima il cancello si APRIVA: "if(!s){hideGate();return;}". Chi
+         scriveva l'indirizzo senza account entrava nel gestionale intero.
+         Adesso vede questa schermata. Non il paywall: i pulsanti da 12 euro
+         partirebbero senza email e il pagamento non saprebbe a chi darlo. -->
+    <div id="gate-login" style="display:none;padding:28px 28px 32px;color:#1a2733;">
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">Il Gestionale &egrave; riservato agli iscritti: magazzino, ordini, scadenze e clienti del tuo negozio.</p>
+      <p id="gate-login-msg" style="margin:0 0 18px;font-size:15px;line-height:1.6;">Entra nel tuo account per continuare.</p>
+      <a href="/login-impresa.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:14px;margin-bottom:10px;border-radius:10px;background:#0066ff;color:#fff;font-size:15px;font-weight:700;">Entra nel tuo account</a>
+      <a href="/registrazione-negozio.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:14px;border-radius:10px;background:#f4f6f9;color:#1a2733;font-size:15px;font-weight:700;">Non sei ancora iscritto? Iscriviti</a>
+      <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:#0066ff;font-size:13px;text-decoration:none;">&larr; Torna a TrovaImpresa</a></p>
+    </div>
   </div>
 </div>
 <script>
@@ -2771,8 +2783,19 @@
   var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
   var RETURN=location.origin+location.pathname;
   function q(id){return document.getElementById(id);}
-  function showChecking(t){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='block';q('gate-checking').textContent=t;q('gate-paywall').style.display='none';document.body.style.overflow='hidden';}
-  function showPaywall(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='block';document.body.style.overflow='hidden';}
+  /* ⛔ 22 agosto 2026 — le tre schermate si spengono a vicenda TUTTE.
+     Prima ce n'erano due e ognuna spegneva l'altra a mano: aggiungendo la
+     terza, dimenticarne una avrebbe lasciato due schermate una sopra
+     l'altra. Adesso l'elenco e' uno solo. */
+  var SCHERMATE=['gate-checking','gate-paywall','gate-login'];
+  function mostra(quale){
+    q('gate-gestionale').style.display='flex';
+    SCHERMATE.forEach(function(s){ var e=q(s); if(e)e.style.display=(s===quale?'block':'none'); });
+    document.body.style.overflow='hidden';
+  }
+  function showChecking(t){mostra('gate-checking');q('gate-checking').textContent=t;}
+  function showPaywall(){mostra('gate-paywall');}
+  function showLogin(msg){mostra('gate-login');if(msg)q('gate-login-msg').textContent=msg;}
   function hideGate(){q('gate-gestionale').style.display='none';document.body.style.overflow='';}
   window.attivaGestionale=function(piano){
     var b=q('gate-btns');b.style.opacity='0.5';b.style.pointerEvents='none';
@@ -2786,9 +2809,15 @@
     var gc=window.supabase.createClient(SU,SK);
     showChecking('Verifica accesso in corso…');
     gc.auth.getSession().then(function(r){
-      var s=r.data.session;
-      if(!s){hideGate();return;}
+      var s=r.data&&r.data.session;
+      /* ⛔ 22 agosto 2026 — qui c'era «if(!s){hideGate();return;}»: senza
+         accesso si ENTRAVA. Era girato al contrario. */
+      if(!s){showLogin();return;}
       gc.from('imprese').select('gestionale_attivo,gestionale_scadenza,email').eq('user_id',s.user.id).maybeSingle().then(function(res){
+        /* ⚠️ Supabase non lancia: l'errore torna dentro la risposta. Se la
+           lettura non e' riuscita non si sa che piano ha, e allora si resta
+           FUORI: nel dubbio il cancello si chiude, non si apre. */
+        if(!res||res.error){showLogin('Non riesco a verificare il tuo accesso adesso. Ricarica la pagina fra qualche secondo.');return;}
         var row=res.data;
         window._gestEmail=(row&&row.email)||s.user.email||'';
         var attivo=row&&row.gestionale_attivo&&(!row.gestionale_scadenza||new Date(row.gestionale_scadenza)>new Date());
@@ -2796,7 +2825,12 @@
         var p=new URLSearchParams(location.search);
         if(p.get('gest')==='ok'){showChecking('Pagamento ricevuto! Attivazione in corso… se non si sblocca, ricarica la pagina tra qualche secondo.');setTimeout(function(){location.reload();},6000);return;}
         showPaywall();
+      },function(){
+        /* e se proprio lanciasse (rete caduta), stessa strada: chiuso */
+        showLogin('Non riesco a verificare il tuo accesso adesso. Ricarica la pagina fra qualche secondo.');
       });
+    },function(){
+      showLogin('Non riesco a verificare il tuo accesso adesso. Ricarica la pagina fra qualche secondo.');
     });
   }
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
