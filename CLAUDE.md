@@ -14760,19 +14760,24 @@ circa venti minuti.
 
 ## Cosa resta, in ordine
 
-1. **Il lucchetto del piano dentro il database.** Controllato sul database
-   vero: **nessuna regola guarda il piano**, le regole dicono solo «questa
-   riga è tua?». Un account gratis può leggere e scrivere tutte le tabelle
-   `gest_*` passando dall'API. Tocca tutte le tabelle: è un lavoro a parte, e
-   va fatto **prima di riaprire il gestionale al pubblico**.
-2. **Le 5 pagine «duplicata senza URL canonico»** in Search Console — serve
+1. **Le 5 pagine «duplicata senza URL canonico»** in Search Console — serve
    la schermata di Alessio.
-3. **Gestionale negozio e noleggio**: `esc()` sulle card `neg_*`, il banner
+2. **Gestionale negozio e noleggio**: `esc()` sulle card `neg_*`, il banner
    quando la lettura non riesce, la numerazione dei preventivi che oggi la fa
    il browser — **e la casella «Importo», che oggi butta via i centesimi
    (vedi qui sotto)**.
-4. **26 agosto**: rimisurare Meta confrontando `al_giorno_7` con
+3. **26 agosto**: rimisurare Meta confrontando `al_giorno_7` con
    `al_giorno_30`.
+4. **I file nei bidoni di Storage** (foto e video): le righe `gest_foto` e
+   `gest_video` adesso sono chiuse dal lucchetto del piano, ma il caricamento
+   del file passa dalle regole di `storage.objects`, che sono un'altra cosa.
+   Chi è scaduto può caricare un file che poi non riesce a registrare: resta
+   un file orfano, non un buco di soldi.
+
+✅ **Il lucchetto del piano dentro il database è FATTO** (22 agosto, sera).
+Vedi la sezione 10 qui sotto. `sql/lucchetto-piano-gestionale.sql` è pronto
+ma **VA ESEGUITO** nell'SQL Editor: finché non lo esegui, il buco è ancora
+aperto.
 
 ## Da non cominciare senza dirglielo
 
@@ -14913,9 +14918,77 @@ frasi-geometra 8 · aiuti-sezione 10 · porta-gestionale 16 ·
 **decreto 45** (le tavole e la formula, + 9 sabotaggi) ·
 **decreto-schermo 112** (il riquadro dentro la parcella, su due misure,
 + 11 sabotaggi) · **euro 24** (il punto delle migliaia e DOVE è stato messo,
-+ 9 sabotaggi) · **pdf-parcella 16** (il PDF generato e riletto davvero).
++ 9 sabotaggi) · **pdf-parcella 16** (il PDF generato e riletto davvero) ·
+**lucchetto-piano 50** (il piano dentro il database, su Postgres vero con
+pg_safeupdate e 104 chiavi esterne, + 12 sabotaggi).
 **Tutti verdi, e ognuno col suo file dei sabotaggi.**
 I quattro nuovi stanno anche in `prove-claude/banco-decreto-22ago.zip`.
+
+## 10. IL LUCCHETTO DEL PIANO DENTRO IL DATABASE
+
+**`sql/lucchetto-piano-gestionale.sql` (nuovo).** Chiude il buco numero 3 del
+referto dei lucchetti: un account gratis, passando dall'API di Supabase senza
+mai aprire la pagina, leggeva e scriveva **tutte** le tabelle `gest_*`. Il
+controllo del piano stava solo nella finestra del browser.
+
+⛔ **Il file è scritto e provato, ma va ESEGUITO nell'SQL Editor.** Finché non
+lo esegui non cambia niente. Si può rilanciare quante volte si vuole.
+
+**Come è fatto** — tre pezzi, nessuna copia:
+
+1. `gest_piano_ok(titolare)` — **l'unico posto** dove sta scritto cosa vuol
+   dire «Premium attivo». Le stesse tre condizioni di `haPremium()` in
+   `gestionale-app.html`. Se cambia il piano, si cambia lì e cambia ovunque.
+2. `gest_blocco_piano()` — **un guardiano solo**, prima di ogni scrittura. Il
+   nome della colonna del proprietario gli arriva come argomento del trigger:
+   così la stessa funzione vale per `gest_membri` (`impresa_id`) e per tutte
+   le altre (`user_id`).
+3. Un ciclo che lo attacca a tutte le `gest_*` che trova. **36 tabelle su 40.**
+
+**Chi scade: legge ed esporta, non scrive.** Non perde una riga, e appena
+rinnova riscrive nello stesso istante. Deciso da Alessio il 22 agosto: chi si
+dimentica di pagare per due giorni non deve trovarsi chiuso fuori dai suoi
+lavori.
+
+**I collaboratori passano dal piano del titolare**, e non è stato aggiunto
+niente per farlo funzionare: le righe che scrivono portano già il `user_id`
+del titolare.
+
+**Le quattro tabelle fuori, apposta**: `gest_accessi` (deve poter scrivere
+«ha trovato il paywall»), `gest_interessati` («avvisami quando è pronto»),
+`gest_richieste` («chiedi una funzione»), e `gest_dalsito_avvisi` che non ha
+colonna del proprietario ed è già chiusa a tutti tranne al server.
+
+### ⛔ LE DUE TRAPPOLE (trovate provando, non leggendo)
+
+**1. La riga senza padrone.** `gest_rifornimenti.user_id` nel database vero
+non ha nemmeno la chiave esterna e può stare vuoto. Un guardiano che blocca
+le righe con la colonna vuota avrebbe impedito a un cliente **pagante** di
+cancellare un suo mezzo: cancellare un mezzo cancella a catena i
+rifornimenti, e cancellare un operatore ne svuota la casella
+(`on delete set null`), che è una **modifica** e sveglia il guardiano. Sulla
+riga senza padrone il guardiano si fa da parte: decidono le regole (RLS), che
+lì dicono già di no.
+
+**2. `revoke ... from public` non è un di più.** Postgres regala il permesso
+di eseguire una funzione **a tutti** appena nasce. Senza quella riga, il
+`grant` a `authenticated` non cambiava niente e anche un visitatore senza
+account poteva chiedere al database se un certo account paga.
+
+### ⚠️ QUANDO NASCE UNA TABELLA `gest_` NUOVA, SI RILANCIA IL FILE
+
+Il guardiano si mette sulle tabelle che ci sono **nel momento in cui lo
+esegui**. La riga di risultato dice sempre su quante sta e nomina quelle
+rimaste senza motivo.
+
+### Cosa NON copre
+
+Storage (foto e video: il file, non la riga) · il gestionale **negozio** che
+ha un lucchetto suo (`gestionale_attivo`) e il **noleggio** che non ne ha
+nessuno · la frase sbagliata in `gestionale-app.html` riga 15831 («i dati
+restano comunque protetti da RLS»), che adesso è vera ma andrebbe riscritta.
+
+Referto: `prove-claude/LUCCHETTO-PIANO-22-agosto.md`.
 
 ⚠️ `prove/porta-gestionale` e `prove/dati-che-si-perdono` sono **lenti**:
 aspettano davvero la rete che non risponde e accendono Postgres. Un giro
