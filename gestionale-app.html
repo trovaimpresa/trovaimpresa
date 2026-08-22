@@ -11765,6 +11765,43 @@ ${vecchi?`
   }
   function dpPerc(fraz){ return Math.round((+fraz||0)*10000)/100; }
 
+  /* ⛔ 22 agosto 2026 — IL PUNTO DELLE MIGLIAIA LO METTE LA CASELLA, NON LUI
+     Detto da Alessio guardando la schermata: «l'ho messo io, non esce di suo».
+     Su una casella dove si scrive mezzo milione, «500000» e «500.000» sono lo
+     stesso numero ma non si leggono uguale: il primo lo devi contare con il
+     dito. E se uno sbaglia una cifra — 5000000 invece di 500000 — a occhio
+     nudo non se ne accorge, mentre 5.000.000 contro 500.000 si vede subito.
+     Su un compenso quello zero in piu' vale decine di migliaia di euro.
+
+     ⚠️ Si riscrive la casella SOLO se il cursore sta in fondo (cioe' mentre
+     si sta scrivendo normalmente). Se sta in mezzo — perche' uno e' tornato
+     indietro a correggere una cifra — non si tocca niente: cambiare il testo
+     sposterebbe il cursore in fondo a ogni tasto, e correggere diventerebbe
+     impossibile. Quello che resta storto si raddrizza da solo appena si esce
+     dalla casella (blur).
+
+     ⚠️ La virgola dei decimali resta dov'e': qui si toccano solo le migliaia.
+     Il numero lo rilegge sempre _numIt, che «500.000» lo capisce gia' (un
+     punto solo con tre cifre dopo = migliaia, vedi _numeroIt). */
+  function dpFormattaImporto(el,forza){
+    if(!el)return;
+    let inFondo=true;
+    try{ inFondo = (el.selectionStart==null) || (el.selectionStart===el.value.length); }catch(e){}
+    if(!inFondo&&!forza)return;
+    const grezzo=String(el.value||"");
+    const meno=/^\s*-/.test(grezzo);
+    const pulito=grezzo.replace(/[^\d,]/g,"");
+    if(pulito===""){ if(grezzo!=="")el.value=""; return; }
+    const parti=pulito.split(",");
+    const intero=parti[0].replace(/^0+(?=\d)/,"");
+    const dec=(parti.length>1) ? ","+parti.slice(1).join("").slice(0,2) : "";
+    const conPunti=(intero===""?"0":intero).replace(/\B(?=(\d{3})+(?!\d))/g,".");
+    const nuovo=(meno?"-":"")+conPunti+dec;
+    if(nuovo===grezzo)return;
+    el.value=nuovo;
+    try{ el.setSelectionRange(nuovo.length,nuovo.length); }catch(e){}
+  }
+
   function bloccoDecreto(){
     if(!dpDisponibile())return "";
     const D=window.DecretoParametri;
@@ -11948,7 +11985,13 @@ ${vecchi?`
   function dpAscolta(){
     if(!dpDisponibile())return;
     const cat=$("#dp-cat"); if(cat)cat.addEventListener("change",dpRicalcola);
-    const v=$("#dp-v");     if(v)v.addEventListener("input",dpRicalcola);
+    const v=$("#dp-v");
+    if(v){
+      v.addEventListener("input",function(){ dpFormattaImporto(v,false); dpRicalcola(); });
+      /* uscendo dalla casella si raddrizza comunque, anche se stava
+         correggendo in mezzo al numero */
+      v.addEventListener("blur",function(){ dpFormattaImporto(v,true); dpRicalcola(); });
+    }
     const pr=$("#dp-prest");if(pr)pr.addEventListener("change",dpTotale);
     const sp=$("#dp-spese");if(sp)sp.addEventListener("change",dpTotale);
     const spp=$("#dp-spese-perc");
