@@ -13555,6 +13555,7 @@ finestra, diventa rossa.
 Deciso da Alessio prima di chiudere. **Si riparte da qui, in quest'ordine.**
 
 ## 1. IL GESTIONALE ARTIGIANO — deciso tutto, si costruisce e si collauda
+### ✅ FATTO il 22 agosto 2026 — il resoconto è l'ultima sezione del file.
 
 ⛔ **NON è un file suo. È la terza faccia di `gestionale-app.html`**, come lo
 studio tecnico. Alessio ha chiesto due volte se non fosse meglio un file
@@ -13625,3 +13626,104 @@ Alessio aveva scritto: **non aprire `gestionale-negozio.html` e
 letto dentro `gestionale-noleggio.html` l'elenco delle tabelle e il numero di
 righe. Solo quello, non il contenuto — ma la regola era secca, e gliel'ho
 detto subito. ⚠️ La prossima volta si chiede prima.
+
+
+# ✅ 22 agosto 2026 — IL GESTIONALE ARTIGIANO, LA TERZA FACCIA
+
+Punto 1 della lista «da dove si riparte»: **CHIUSO**. Un file toccato,
+`gestionale-app.html`. Nessun file nuovo, nessuna tabella nuova, nessuna query.
+
+## COSA VEDE ADESSO L'ARTIGIANO
+
+**15 voci**: Riepilogo · Lavori e interventi · Clienti · Preventivi · Fatture ·
+Scadenzario · Calendario · Richieste dal sito · Galleria · Cestino ·
+Fornitori · Mezzi · Attrezzature · Report · Mappa.
+
+**7 spente**: Computo metrico · Prezzario · Stati di avanzamento ·
+Crediti formativi · Squadra · Agenda operatore · Carte.
+
+⛔ **Si nasconde soltanto**: i dati restano nel database e le voci tornano da
+sole se `imprese.tipo` cambia. Nessuna cancellazione.
+
+## COME È FATTO
+
+- Nasce **`adattaMenuArtigiano()`** accanto a `adattaMenuProfessionista()`, e
+  nel bivio di `logRuoloUtente()` c'è un ramo nuovo: prima l'artigiano cadeva
+  in `adattaMenuImpresa()`, ed **è da lì** che gli arrivavano computo,
+  prezzario e SAL.
+- ⚠️ **Le voci non erano tutte accese allo stesso modo.** `computi`,
+  `prezzario`, `sal` e `crediti` nell'HTML nascono già con `display:none`: le
+  accendeva **solo** il ramo dell'impresa (le prime tre) e quello del
+  professionista (tutte e quattro). All'artigiano bastava non passare di lì.
+  Quelle da spegnere davvero a mano erano tre: `squadra`, `agenda`, `carte`.
+  Le altre quattro le rimetto a `none` lo stesso, esplicitamente: se un domani
+  qualcuno le accende in un terzo posto, l'artigiano non se le ritrova addosso
+  in silenzio.
+- La parola: **«Lavori» → «Lavori e interventi»**, tutte e due, come chiesto.
+  ⛔ Sta in **TRE posti**: la voce del menu, il titolo della sezione e la
+  **barra in basso del telefono**. Dimenticare la terza è esattamente il
+  difetto aperto sul gestionale del geometra («sul telefono il menù resta
+  Lavori»). C'è una prova apposta, la n. 6.
+
+## ⛔ IL PEZZO CHE NON ERA NELLA LISTA: IL RIEPILOGO
+
+Nascondere la voce del menu **non basta**: il Riepilogo disegna una scheda per
+ogni voce, e ogni scheda è un pulsante che porta dentro la sezione. Senza
+questo pezzo l'artigiano avrebbe trovato le schede **Squadra, Agenda
+operatore, Carte, Computo e SAL** nella sua prima schermata, e un clic lo
+avrebbe portato in una sezione senza voce di menu.
+
+Era già successo il 10 agosto agli studi tecnici, e la toppa di allora
+(`_proNascosto`) sapeva solo dei professionisti. Adesso l'elenco delle voci
+spente sta in **un posto solo**, `tabNascosti()` / `tabNascosto()`, e lo
+chiedono tutti e due: il menu e il Riepilogo. È la regola «una regola che sta
+in due posti non si sistema a metà».
+
+⚠️ `tabNascosto()` **non guarda il `display` del pulsante**: il Riepilogo può
+disegnarsi prima che il menu sia stato adattato, e leggerebbe «acceso» per
+tutti. Guarda il ruolo.
+
+Effetto in più: all'artigiano il Riepilogo **non fa nemmeno le due letture**
+dei computi (`gest_computi`, `gest_computo_totali`).
+
+## ⚠️ DUE COSE CONTROLLATE PRIMA DI COSTRUIRE, E ANDATE DIVERSAMENTE
+
+1. **Il nodo «chi ce l'ha in mano» in Attrezzature NON ESISTE.** In memoria era
+   scritto che Attrezzature pesca il nome dalla Squadra e che spegnendo la
+   Squadra sarebbe rimasta una tendina vuota. Guardato nel codice
+   (`mezzoForm`): non c'è nessuna tendina. C'è una **nota libera**, con dentro
+   scritto «Dove si trova, chi lo usa, promemoria». Niente da cambiare.
+2. **La tendina «Chi ci va» nella scheda del LAVORO** invece esiste davvero e
+   pesca dalla squadra: con Squadra spenta l'artigiano non può aggiungere
+   nessuno, quindi gli resta vuota. Chiesto ad Alessio: **«per adesso
+   lasciala»**. Resta com'è, di proposito.
+
+## IL BANCO — nei due versi
+
+`prove/artigiano/` (nel contenitore di Claude): `banco.js` · `sabotaggi.js`.
+Le prove aprono la pagina in un **Chromium vero**, a due misure, con un finto
+Supabase.
+
+**20 verdi · 20 sabotaggi su 20 accusati.**
+
+⚠️ **La cosa che ha fatto la differenza: i dati finti dovevano essere PIENI.**
+`rieCard()` non disegna la scheda se la sezione è vuota (`o.dati===false`). Con
+un database finto vuoto, la prova «la scheda Squadra non c'è» sarebbe stata
+verde **anche col difetto dentro**. Perciò il finto database ha una squadra,
+delle carte, dei lavori assegnati, un computo e un SAL — e c'è la prova 14 che
+verifica che all'**impresa** quelle stesse schede **ci sono**: se sparissero da
+tutti, la prova 13 non proverebbe niente.
+
+⚠️ **Un sabotaggio ha corretto me, non il codice.** «adattaMenuArtigiano gira
+anche per l'impresa edile»: mi aspettavo che lo accusasse la prova 8, e la
+prova 8 è restata verde — perché chiama `adattaMenuImpresa()` **a mano** e
+quindi non passa dal bivio. Lo accusa la prova 20, che il bivio lo percorre
+davvero. L'attesa era sbagliata, non la prova.
+
+## ⛔ COSA RESTA APERTO
+
+L'ordine di Alessio non cambia: **2. gestionale negozio · 3. gestionale
+noleggio**, poi i prezzi del preventivo AI, il paywall nel database, la mina di
+`sql/gest-computo-metrico.sql`, il totale del preventivo, i dati che si
+perdono, la lista del geometra, le 5 pagine duplicate in Search Console e le
+piccole.

@@ -899,6 +899,11 @@
       adattaMenuProfessionista();
       renderScadenze();
       if(!cur)renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
+    } else if(ruoloUtente==='artigiano'){
+      /* ⛔ 22 agosto 2026 — la terza faccia. Prima l'artigiano cadeva qui sotto,
+         nel ramo dell'impresa edile, ed e' da li' che gli arrivavano Computo
+         metrico, Prezzario e Stati di avanzamento. */
+      adattaMenuArtigiano();
     } else {
       adattaMenuImpresa();
     }
@@ -1008,6 +1013,98 @@
       }
     }catch(_){}
   }
+  /* ============================================================
+     ⛔ 22 agosto 2026 — LA TERZA FACCIA: IL GESTIONALE ARTIGIANO
+     ============================================================
+     Deciso da Alessio il 21 agosto sera, foglio in
+     `prove-claude/GESTIONALE-ARTIGIANO.md`. NON e' un file suo: e' la terza
+     faccia di questo, come lo studio tecnico. 24.323 righe di cui cambia
+     meno dell'1%: un file separato vuol dire pagare due volte ogni
+     correzione.
+
+     ⛔ SI NASCONDE SOLTANTO. I dati restano nel database e le voci tornano
+     da sole se `imprese.tipo` cambia. Nessuna cancellazione, nessuna query.
+
+     ⚠️ ATTENZIONE A COME SONO ACCESE LE VOCI, perche' non sono tutte uguali:
+       - `computi`, `prezzario`, `sal`, `crediti` nell'HTML nascono gia' con
+         `style="display:none"`. Non le accende nessuno per conto suo: le
+         accendeva SOLO adattaMenuImpresa() (le prime tre) e
+         adattaMenuProfessionista() (tutte e quattro). Quindi all'artigiano
+         basta NON passare da li'. Le rimetto comunque a `none` qui sotto,
+         esplicitamente: se un domani qualcuno le accende in un terzo posto,
+         l'artigiano non se le ritrova addosso in silenzio.
+       - `squadra`, `agenda`, `carte` sono accese per tutti nell'HTML:
+         quelle vanno spente a mano.
+
+     ⚠️ Squadra si spegne ma Attrezzature resta. Guardato nel codice: nella
+     scheda dell'attrezzatura NON c'e' nessuna tendina che pesca dalla
+     squadra — c'e' solo la nota libera «Dove si trova, chi lo usa». Quindi
+     non resta nessuna tendina vuota e non c'e' niente da cambiare.
+     La tendina «Chi ci va» nella scheda del LAVORO invece resta com'e':
+     scelta di Alessio, 22 agosto — «per adesso lasciala».
+     ============================================================ */
+  /* Le tre accese per tutti, che all'artigiano vanno spente */
+  const TAB_NASCOSTI_ART=['squadra','agenda','carte'];
+  /* Le quattro da appalti/professionisti: gia' spente nell'HTML, qui si
+     tengono spente per sicurezza */
+  const TAB_APPALTI_ART=['computi','prezzario','sal','crediti'];
+  /* ⛔ LA PAROLA STA IN UN POSTO SOLO (qui), ma va scritta in TRE punti.
+     «Lavori» diventa «Lavori e interventi»: Alessio ha chiesto di tenere
+     tutte e due le parole, cosi' va bene sia a chi fa cantieri sia a chi fa
+     mezze giornate. ⚠️ Il terzo punto e' la BARRA IN BASSO del telefono:
+     dimenticarla e' esattamente il difetto trovato sul gestionale del
+     geometra («sul telefono il menu resta Lavori»). */
+  const LAV_ART='Lavori e interventi';
+  function adattaMenuArtigiano(){
+    if(ruoloUtente!=='artigiano')return;
+    try{
+      /* ⚠️ tutto dentro `nav.tabs`: fuori di li' ci sono i pulsantini
+         `.lav-dots` delle righe, che hanno anche loro un `data-tab`. */
+      const nav=document.querySelector('nav.tabs');
+      if(!nav)return;
+      TAB_NASCOSTI_ART.concat(TAB_APPALTI_ART).forEach(function(t){
+        nav.querySelectorAll('[data-tab="'+t+'"]').forEach(function(el){ el.style.display='none'; });
+      });
+      /* 1) la voce del menu di sinistra */
+      nav.querySelectorAll('[data-tab="lavori"] span').forEach(function(s){
+        if(s.textContent.trim()==='Lavori')s.textContent=LAV_ART;
+      });
+      /* 2) il titolo della sezione */
+      var _h=document.querySelector('#lavori h2');
+      if(_h&&_h.textContent.trim()==='Lavori')_h.textContent=LAV_ART;
+      /* 3) la barra in basso del telefono */
+      document.querySelectorAll('#barra-basso [data-vai="lavori"] span').forEach(function(s){
+        if(s.textContent.trim()==='Lavori')s.textContent=LAV_ART;
+      });
+      /* se era gia' dentro una sezione che adesso e' spenta, torna al riepilogo */
+      var attivo=nav.querySelector('[data-tab].active');
+      if(attivo && tabNascosto(attivo.getAttribute('data-tab'))){
+        var home=nav.querySelector('[data-tab="riepilogo"]');
+        if(home)home.click();
+      }
+    }catch(_){}
+  }
+
+  /* ============================================================
+     ⛔ 22 agosto 2026 — QUALI VOCI SONO SPENTE: SI CHIEDE QUI, E SOLO QUI
+     ============================================================
+     Una regola che sta in due posti non si sistema a meta'. Le voci spente
+     servono a DUE schermate:
+       1. il menu di sinistra (adattaMenuProfessionista / adattaMenuArtigiano);
+       2. il RIEPILOGO, che ha una scheda per ogni voce del menu.
+     Se l'elenco restasse solo nel menu, il Riepilogo mostrerebbe la scheda di
+     una sezione senza voce, e un clic porterebbe in una schermata fantasma —
+     e' esattamente il motivo per cui il 10 agosto era nato `_proNascosto`.
+     Adesso lo chiedono tutti e due a questa funzione.
+     ⚠️ NON si guarda il `display` del pulsante: il Riepilogo puo' disegnarsi
+     prima che il menu sia stato adattato, e si leggerebbe «acceso» per tutti. */
+  function tabNascosti(){
+    if(ruoloUtente==='professionista')return TAB_NASCOSTI_PRO;
+    if(ruoloUtente==='artigiano')return TAB_NASCOSTI_ART.concat(TAB_APPALTI_ART);
+    return [];
+  }
+  function tabNascosto(t){ return tabNascosti().indexOf(t)>=0; }
+
   /* ============================================================
      20 agosto 2026 — IL COMPUTO SI APRE ANCHE ALLE IMPRESE
      ============================================================
@@ -3534,7 +3631,10 @@
        scheda del Riepilogo non sarebbe mai comparsa: la sezione nel menu e
        nessuna scheda che ci porta. Una regola che sta in due posti non si
        sistema a meta'. */
-    const pComputi=Promise.all([
+    /* ⛔ 22 agosto 2026 — all'artigiano il computo e' spento: le sue due
+       letture non partono nemmeno. Stessa fonte del menu (tabNascosto), non
+       un secondo elenco. Il risultato si aspetta solo dentro lo stesso `if`. */
+    const pComputi=tabNascosto("computi")?null:Promise.all([
       /* ⚠️ «tipo» SERVE, anche se qui non si mostra — 14 agosto 2026.
          Da oggi compRiepilogoDa guarda il tipo del computo: gli oneri
          della sicurezza restano fuori dal ribasso solo sui lavori
@@ -3949,7 +4049,7 @@
         t:l.descrizione||"Lavoro", v:q.testo, cls:q.classe, action:"edit-job", id:l.id};})
     }));
 
-    C.push(rieCard({
+    if(!tabNascosto("agenda"))C.push(rieCard({
       tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id),
       lab:_plur(opeOrd.length,"operatore con lavori assegnati","operatori con lavori assegnati"), tono:opeOrd.length?"info":"neutro",
       vuoto:"Nessun lavoro assegnato",
@@ -3960,7 +4060,11 @@
     /* il professionista ha Mezzi, Attrezzature e Carte nascosti nel menu:
        le loro schede non devono comparire nemmeno nel Riepilogo, altrimenti
        un clic lo porta in una sezione "fantasma" senza voce di menu */
-    const _proNascosto=t=>ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(t)>=0;
+    /* ⛔ 22 agosto 2026: l'elenco non sta piu' qui dentro — lo dice
+       tabNascosto(), che lo dice anche al menu. Vale per lo studio tecnico
+       (mezzi, carte) e per l'artigiano (squadra, agenda, carte, e le quattro
+       da appalti). */
+    const _proNascosto=tabNascosto;
     if(!_proNascosto("mezzi"))C.push(rieCard({
       tab:"mezzi", titolo:"Mezzi", n:MZveicoli.length, dati:MZveicoli.length>0,
       lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
@@ -3986,7 +4090,7 @@
         v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
     }));
 
-    C.push(rieCard({
+    if(!tabNascosto("squadra"))C.push(rieCard({
       tab:"squadra", titolo:"Squadra", n:OPE.length, dati:OPE.length>0,
       lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+(Math.round(oreMese*10)/10)+" h questo mese",
       tono:"neutro", vuoto:"Nessun operatore registrato",
@@ -4038,7 +4142,7 @@
        dentro un try: se sql/gest-computo-metrico.sql non e' stato eseguito la
        scheda non compare e il Riepilogo resta intero — meglio una scheda in
        meno che un Riepilogo rotto. */
-    {
+    if(!tabNascosto("computi")){
       try{
         const [rCo,rTo]=await pComputi;            /* partita in cima, qui si aspetta */
         if(!rCo.error){
