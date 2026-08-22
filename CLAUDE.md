@@ -14249,3 +14249,95 @@ proprio questo: **che i numeri di prova facciano vedere il difetto**.
 ⚠️ E la prova «nessuno somma più a mano» guarda solo le righe di **codice**:
 la formula vecchia scritta dentro un commento non fa danno, e cercarla lì
 avrebbe dato un rosso finto.
+
+---
+
+# 22 AGOSTO 2026 — LE TRE PICCOLE
+
+Tre cose piccole, che però si vedono: due stanno sul **sito pubblico**.
+
+## 1. I cancelletti e le stelline nel testo scritto dall'AI
+
+Nelle risposte dell'assistente restavano a schermo i `#` dei titoli e gli `*`
+del grassetto. Sono i segni con cui l'AI scrive (si chiama «markdown»): a lei
+servono, a chi legge no.
+
+Prima ogni pannello se la cavava con **mezza riga, uguale in tutti e quattro**:
+si trasformava solo `**grassetto**` e tutto il resto restava com'era.
+⛔ **Una regola che sta in quattro posti non si sistema a metà.**
+
+Adesso c'è **`js/testo-ai.js`**, uno solo, caricato dai quattro pannelli
+(stessa strada di `js/vai-dal-cliente.js` del 21 agosto). Fa, in quest'ordine:
+
+1. i titoli `# Titolo` → grassetto (**solo a inizio riga**: un cancelletto in
+   mezzo a una frase è un cancelletto vero e resta dov'è)
+2. gli elenchi `- cosa` / `* cosa` / `+ cosa` → pallino
+3. il **grassetto** e poi il *corsivo* (in quest'ordine, vedi sotto)
+4. gli apici rovesci intorno ai nomi dei pulsanti → via
+5. le righe fatte solo di trattini → via
+6. gli a capo veri; tre o più a capo di fila diventano due
+
+⛔ **Prima si rende innocuo il testo, poi si decora.** Quello che arriva
+dall'AI non è nostro: si scappa PRIMA (`<` diventa `&lt;`), e solo dopo si
+mettono i tag nostri. Se no un `<script>` scritto là dentro diventerebbe codice.
+
+⚠️ Se il file non si caricasse, i pannelli tornano al modo di prima: la
+risposta si legge lo stesso invece di sparire.
+
+## 2. «Vedi gli artigiani di roma»
+
+Chi cerca scrive in minuscolo, e il pulsante della home ripeteva la città
+com'era stata battuta. Adesso `index.html` carica `js/geo-italia.js` e passa
+dalla funzione `cittaBella()`: prima cerca il nome fra i **106 capoluoghi**
+senza guardare maiuscole e accenti, se non lo trova mette la maiuscola a ogni
+parola (anche dopo l'apostrofo), lasciando piccole le paroline in mezzo —
+«San Giovanni **in** Fiore», non «In Fiore».
+
+## 3. La striscia arancione
+
+Diceva «Non ho trovato la risposta · Contatta assistenza», sotto un riquadro
+che diceva «Non hai trovato la risposta? Chiedi all'assistente AI»: due volte
+la stessa frase, e sembravano due modi di chiedere all'AI. Adesso:
+
+- il riquadro: «Chiedi all'assistente AI: **risponde subito**, di notte e nei festivi»
+- la striscia: «✉️ **Ti serve una persona?** Scrivi all'assistenza»
+
+## IL BANCO — nei due versi
+
+`prove/piccole/`: `banco.js` · `sabotaggi.js`.
+**19 verdi · 19 sabotaggi su 19 accusati.** Rifatti tutti gli altri banchi:
+artigiano 23 · documenti 20 · ore 20 · misure 18 · geometra 13 ·
+totale 11 · guardia SQL 16. Tutti verdi.
+
+⛔ **Tre sabotaggi sono restati MUTI, e ognuno ha insegnato una cosa.**
+
+**S5 — «grassetto e corsivo al contrario».** Avevo scritto nel file che
+invertendoli «il corsivo si mangia metà del grassetto». Non era vero: il
+corsivo si rifiuta già di toccare le stelline doppie, e nelle frasi normali
+l'ordine non cambia niente. Cambia in **un caso solo**, `***così***`, che è
+proprio come l'AI scrive le cose che vuole gridare — e quel caso non lo
+provava nessuno. Aggiunto alla risposta di prova, e aggiunta la **prova 19**.
+Corretto anche il commento sbagliato nel file.
+
+**S9 — «un pannello torna al modo vecchio».** ⚠️ **Lezione 8, e ci sono appena
+ricascato:** la prova cercava la scritta `window.testoAI(data.risposta)`
+dentro i quattro file. Il sabotaggio lasciava la scritta al suo posto e
+cambiava la **condizione sopra**: la risposta tornava quella vecchia e la
+prova restava verde. Adesso la prova 9 **preme davvero il pulsante** in tutti
+e quattro i pannelli (col finto Supabase e la risposta dell'AI finta) e
+guarda **cosa finisce a schermo**. Stessa cosa per la **prova 17**, che
+cercava `apriModalSegnalazione()` e la trovava più sotto, dove la funzione è
+scritta: adesso la striscia si preme e si guarda se l'assistenza si apre.
+
+**S12 — «l'elenco dei capoluoghi non si carica».** Guardandolo davvero: per
+**tutti e 106** i capoluoghi il ripiego (maiuscola a ogni parola) dà lo stesso
+identico nome dell'elenco. L'elenco serve per un'altra cosa — **l'accento**:
+uno scrive «forli» sulla tastiera e il pulsante deve dire «Forlì», che dal
+ripiego non può uscire. Senza quel caso, `geo-italia.js` poteva sparire dalla
+pagina senza che nessuno se ne accorgesse.
+
+⚠️ Due inciampi miei nel banco, scritti perché non si ripetano:
+`waitForFunction(stringa, ARG, opzioni)` — le opzioni sono il **terzo** pezzo,
+scritte al posto dell'ARG l'attesa resta a 30 s di default; e senza il **finto
+Supabase** il codice del pannello si ferma alla prima riga, così `impresaCorrente`
+non nasce nemmeno e non è colpa della pagina.

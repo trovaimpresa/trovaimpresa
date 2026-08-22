@@ -1533,6 +1533,9 @@
     </script>
 
 <script src="/cookie-banner.js"></script>
+<!-- 22 agosto 2026 — i 106 capoluoghi con il nome scritto giusto: servono a
+     cittaBella() qui sotto, per non scrivere «di roma» sul pulsante. -->
+<script src="/js/geo-italia.js"></script>
 <script>
 /* Se arrivo qui da un clic su una categoria (?vai=...), mostro il pulsante che
    riprende il filo del discorso invece di far ricominciare da capo. */
@@ -1544,6 +1547,27 @@
     'cerca-professionisti.html':'Vedi i professionisti',
     'professionisti.html':'Vedi i professionisti'
   };
+  var PICCOLE=['di','de','del','dei','della','delle','da','in','nel','nell','su','sul','sull','a','al','e','d'];
+  function cittaBella(c){
+    var t=String(c||'').trim();
+    if(!t)return t;
+    /* 1. la si cerca fra i capoluoghi veri, senza guardare maiuscole e accenti */
+    try{
+      var piatta=function(x){return String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();};
+      var cerco=piatta(t), G=window.GEO_ITALIA;
+      if(G)for(var reg in G)for(var pro in G[reg]){
+        var el=G[reg][pro];
+        for(var i=0;i<el.length;i++) if(piatta(el[i])===cerco) return el[i];
+      }
+    }catch(e){}
+    /* 2. se non si riconosce: maiuscola a ogni parola, e anche dopo
+          l'apostrofo, ma le paroline in mezzo restano piccole */
+    return t.toLowerCase().split(/(\s+)/).map(function(w,i){
+      if(/^\s+$/.test(w))return w;
+      if(i>0 && PICCOLE.indexOf(w.replace(/['\u2019]$/,''))>=0) return w;
+      return w.replace(/(^|['\u2019])([a-zà-öø-ÿ])/g,function(_,pre,ch){return pre+ch.toUpperCase();});
+    }).join('');
+  }
   function avvia(){
     var p=new URLSearchParams(location.search);
     var vai=p.get('vai'), citta=(p.get('citta')||'').trim();
@@ -1553,8 +1577,17 @@
     var t=document.getElementById('riprendi-testo');
     if(!a||!t)return;
     a.href=vai+'?citta='+encodeURIComponent(citta)+(mest?'&mestiere='+encodeURIComponent(mest):'');
-    t.textContent=mest ? (ETICHETTE[vai]+' per '+mest+' a '+citta)
-                       : (ETICHETTE[vai]+' di '+citta);
+    /* ⛔ 22 agosto 2026 — «Vedi gli artigiani di roma». Segnalato da Alessio.
+       La citta' arriva dall'indirizzo della pagina, cioe' come l'ha scritta
+       chi cercava: se ha scritto «roma», sul pulsante si leggeva «roma».
+       Prima si prova a riconoscerla fra i 106 capoluoghi veri (GEO_ITALIA):
+       cosi' «reggio calabria» torna «Reggio Calabria» e «l'aquila» torna
+       «L'Aquila», scritti come si scrivono. Se non la si riconosce, si
+       mette la maiuscola a ogni parola, lasciando piccole le paroline in
+       mezzo (di, del, in...) — «reggio nell'emilia» non deve diventare
+       «Reggio Nell'Emilia». */
+    t.textContent=mest ? (ETICHETTE[vai]+' per '+mest+' a '+cittaBella(citta))
+                       : (ETICHETTE[vai]+' di '+cittaBella(citta));
     a.style.display='flex';
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',avvia);else avvia();

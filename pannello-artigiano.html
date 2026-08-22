@@ -19,6 +19,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/vai-dal-cliente.js" defer></script>
+<!-- 22 agosto 2026 — toglie cancelletti e asterischi dalle risposte dell'AI.
+     Un file solo per tutti e quattro i pannelli: una correzione qui vale
+     ovunque, invece di pagarla quattro volte. -->
+<script src="/js/testo-ai.js" defer></script>
 <style>
   :root {
     --verde:   #0066ff;
@@ -1358,7 +1362,7 @@
         <div class="faq-list" id="faq-list"></div>
         <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
           <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
-          <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
+          <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Chiedi all'assistente AI: risponde subito, di notte e nei festivi.</p>
           <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
           <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
             style="margin-top:10px;padding:11px 18px;background:#0066ff;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
@@ -1368,7 +1372,12 @@
           <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#0a2a4d;"></div>
         </div>
         <div class="faq-cta-help">
-          <button onclick="apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
+          <!-- ⛔ 22 agosto 2026 — segnalato da Alessio: questa striscia sembrava
+               un SECONDO modo di chiedere all'AI, perche' diceva quasi la stessa
+               frase del riquadro qui sopra («Non hai trovato la risposta?»).
+               Non e' la stessa cosa: sopra risponde una macchina, qui una
+               persona. Adesso lo dice. -->
+          <button onclick="apriModalSegnalazione();">✉️ Ti serve una persona? Scrivi all'assistenza</button>
         </div>
       </div>
     </div>
@@ -3503,7 +3512,14 @@ async function chiediSupportoAI() {
       return;
     }
     if (data && data.risposta) {
-      out.innerHTML = escHtml(data.risposta).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      /* 22 agosto 2026 — prima qui si trasformava SOLO il grassetto, e i
+         cancelletti dei titoli restavano a schermo. Adesso ci pensa
+         js/testo-ai.js, che e' uno solo per tutti e quattro i pannelli.
+         ⚠️ Se il file non si fosse caricato si torna al modo di prima,
+         cosi' la risposta si legge lo stesso invece di sparire. */
+      out.innerHTML = (typeof window.testoAI === 'function')
+        ? window.testoAI(data.risposta)
+        : escHtml(data.risposta).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     } else {
       out.textContent = 'Risposta vuota.';
     }
