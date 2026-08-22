@@ -14535,3 +14535,75 @@ che nasca; il lucchetto del telefono è il div `#gate` che si nasconde con una
 classe, e guardare il `display` del `<p>` dentro diceva sempre «è visibile»;
 e l'SQL passato dentro `su postgres -c "..."` perde gli a capo — va passato da
 un file.
+
+---
+
+# 22 AGOSTO 2026 — LE FRASI DEL GEOMETRA, E IL MESSAGGIO DEL DATABASE
+
+## 1. Le frasi sgrammaticate dello studio tecnico
+
+Il traduttore scambia le parole una per una, ma **«cantiere» è maschile e
+«pratica» è femminile**, e **«operaio» comincia per vocale mentre
+«collaboratore» comincia per consonante**. Da lì:
+
+| prima | usciva |
+|---|---|
+| Nessun rapportino dal **cantiere** | dal **pratica** |
+| lo lega al **cantiere** giusto | al **pratica** giusto |
+| le metrature del **cantiere** | del **pratica** |
+| far vedere all'**operatore** | all'**collaboratore** |
+| le vedrà l'**operaio** | l'**collaboratore** |
+| fa sparire la **manodopera** | la **tempo speso** |
+
+⛔ **Non trovate a occhio.** `prove/frasi-geometra/cerca.js` prende **tutte le
+2.999 scritte** che stanno nel file, le fa passare dal traduttore VERO della
+pagina e segna quelle che escono con l'articolo sbagliato o con l'apostrofo
+davanti a una consonante. Erano 8 (sei diverse). Adesso sono **zero**.
+
+La cura sono righe a più parole messe **prima** di quella secca, perché
+l'elenco si applica in ordine e la prima che acchiappa vince.
+
+⚠️ **Una prova sola non bastava**: «nessuna frase esce storta» sarebbe verde
+anche se il traduttore non traducesse più niente. Accanto c'è la prova 2, che
+conta quante scritte vengono davvero tradotte (oltre 200).
+
+## 2. Il messaggio che mandava contro un muro
+
+Dodici punti, in cinque file, dicevano la stessa frase scritta a mano:
+«esegui `sql/gest-computo-metrico.sql`». Da ieri quel file ha una **guardia**:
+se le viste nuove ci sono già si **rifiuta** di partire — e fa bene, perché
+rilanciandolo i prezzi costruiti con l'analisi tornerebbero indietro in
+silenzio. Chi leggeva quel messaggio ci sbatteva contro.
+
+Adesso la frase sta in **un posto solo** (`js/gest-computo.js`, accanto a
+`_compManca`) e dice tutte e due le cose: esegui il primo file, **e se ti
+risponde «FERMO QUI» esegui invece `sql/gest-analisi-prezzi.sql`**.
+⛔ Una frase che sta in dodici posti non si sistema a metà.
+
+⚠️ **Mi ero corretto sbagliando.** Avevo detto ad Alessio che quei messaggi
+erano **2 e non 14**: avevo contato solo dentro `gestionale-app.html`. Erano
+**12**, sparsi in cinque file. Gliel'ho detto.
+
+## Il banco — nei due versi
+
+`prove/frasi-geometra/`: **8 verdi · 16 sabotaggi su 16 accusati.**
+Rifatti gli altri sette: artigiano 23 · documenti 20 · ore 20 · geometra 13 ·
+misure 18 · totale 11 · dati che si perdono 13. Tutti verdi.
+
+⛔ **Tre sabotaggi muti, e avevano ragione tutti e tre.**
+
+- **`['dal cantiere','dalla pratica']` non serviva.** Le righe a più parole si
+  cercano dentro la frase pezzo per pezzo, quindi `al cantiere` acchiappa già
+  la coda di «d-al cantiere» e ne esce «d-alla pratica». Riga tolta.
+- **`window.COMP_SQL_TESTO = ...` non serviva.** `js/gest-computo.js` non è
+  chiuso dentro niente, quindi un `const` scritto lì lo vedono già tutti gli
+  altri script della pagina. Due righe tolte.
+- La terza era mia nel banco: avevo scritto la prova del ruolo su
+  `_swapPratiche`, che **traduce sempre**. Il controllo del ruolo sta in
+  `localizzaPratiche`, che è quella che tocca la pagina. Prova rifatta sulla
+  funzione giusta.
+
+⚠️ E un rosso finto: la prova «il nome del file sta in un posto solo» leggeva
+anche **dentro i commenti**, dove il nome del file ci deve stare. I commenti
+adesso si tolgono davvero (anche quelli lunghi su più righe), invece di
+riconoscerli dall'inizio della riga.

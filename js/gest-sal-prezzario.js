@@ -1009,7 +1009,7 @@
       .order("usata_volte",{ascending:false}).limit(PZ_MAX);
     if(error){
       box.innerHTML='<div class="lm-vuoto">'+(_compManca(error)
-        ? 'Per il prezzario serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina.'
+        ? ('Per il prezzario serve l\'aggiornamento del database: '+COMP_SQL_HTML)
         : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
       return;
     }
@@ -1118,7 +1118,7 @@
     if(id)res=await sb.from("gest_prezzi_propri").update(riga).eq("id",id).eq("user_id",sbUid).select("id");
     else  res=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid},riga)).select("id");
     if(res.error){
-      toast(_compManca(res.error)?"Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)":("Errore: "+res.error.message));
+      toast(_compManca(res.error)?("Per il prezzario serve l'aggiornamento del database: "+COMP_SQL_TESTO):("Errore: "+res.error.message));
       return;
     }
     if(!res.data||!res.data.length){toast("Non salvata: nessuna riga scritta. Riprova.");return;}

@@ -750,7 +750,7 @@
     const errP=await ppCarica();
     if(errP){
       toast(_compManca(errP)
-        ? "Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)"
+        ? ("Per il prezzario serve l'aggiornamento del database: "+COMP_SQL_TESTO)
         : ("Non riesco a leggere il prezzario: "+errP.message));
       return;
     }
@@ -814,7 +814,7 @@
         .or(filtro).order("codice").limit(PRZ_TETTO);
       if(error){
         toast(_compManca(error)
-          ? "Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)"
+          ? ("Per il prezzario serve l'aggiornamento del database: "+COMP_SQL_TESTO)
           : ("Non riesco a leggere il prezzario: "+error.message));
         return;
       }

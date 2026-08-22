@@ -1387,17 +1387,59 @@
     ['Cliente / Cantiere','Cliente'],
     ['Cantiere','Pratica'],
     ['cantieri','pratiche'],
+    /* ⛔ 22 agosto 2026 — L'ARTICOLO. «cantiere» è maschile, «pratica» è
+       femminile: scambiando la sola parola usciva «dal pratica», «del
+       pratica», «al pratica». Queste righe stanno PRIMA di quella secca
+       qui sotto, perché l'elenco si applica in ordine e la prima che
+       acchiappa vince. Trovate facendo girare il traduttore su tutte le
+       2.958 scritte della pagina, non a occhio: prove/frasi-geometra/.
+       ⚠️ «dal cantiere» non c'è, e non è una dimenticanza: queste righe a
+       più parole si cercano dentro la frase pezzo per pezzo, quindi
+       «al cantiere» acchiappa anche la coda di «d-al cantiere» e ne esce
+       «d-alla pratica». L'avevo scritta lo stesso, e il sabotaggio che la
+       toglieva restava muto: aveva ragione lui, ed è stata tolta. */
+    ['del cantiere','della pratica'],
+    ['al cantiere','alla pratica'],
+    ['nel cantiere','nella pratica'],
+    ['sul cantiere','sulla pratica'],
+    ['col cantiere','con la pratica'],
+    ['il cantiere','la pratica'],
+    ['un cantiere','una pratica'],
+    ['Il cantiere','La pratica'],
+    ['Un cantiere','Una pratica'],
     ['cantiere','pratica'],
 
     /* parole singole: minuscole e maiuscole erano trattate diversamente */
     ['app operaio','app collaboratore'],
     ['app dell\'operaio','app del collaboratore'],
+    /* ⛔ 22 agosto 2026 — L'APOSTROFO. «operaio» comincia per vocale,
+       «collaboratore» per consonante: lo scambio secco faceva
+       «all'collaboratore», «l'collaboratore». Dopo l'apostrofo di un
+       articolo ci vuole una vocale, quindi l'articolo va rifatto intero. */
+    ['all\'operaio','al collaboratore'],
+    ['dell\'operaio','del collaboratore'],
+    ['nell\'operaio','nel collaboratore'],
+    ['sull\'operaio','sul collaboratore'],
+    ['dall\'operaio','dal collaboratore'],
+    ['un\'operaio','un collaboratore'],
+    ['l\'operaio','il collaboratore'],
+    ['L\'operaio','Il collaboratore'],
     ['Operaio','Collaboratore'],
     ['operaio','collaboratore'],
     ['operai','collaboratori'],
     ['dipendenti','collaboratori'],
     ['Muratore','Disegnatore CAD'],
     ['la manodopera sui lavori','il tempo speso sulle pratiche'],
+    /* ⛔ 22 agosto 2026 — l'articolo, di nuovo al contrario: «manodopera» è
+       femminile, «tempo speso» è maschile → usciva «la tempo speso». */
+    ['della manodopera','del tempo speso'],
+    ['dalla manodopera','dal tempo speso'],
+    ['alla manodopera','al tempo speso'],
+    ['nella manodopera','nel tempo speso'],
+    ['sulla manodopera','sul tempo speso'],
+    ['la manodopera','il tempo speso'],
+    ['una manodopera','un tempo speso'],
+    ['La manodopera','Il tempo speso'],
     ['manodopera','tempo speso'],
     ['Capo (io)','Io'],
     ['imprese come la tua','studi come il tuo'],
@@ -1423,6 +1465,14 @@
     ['operatori con lavori assegnati','collaboratori con pratiche assegnate'],
     ['cantiere aperto con un indirizzo','pratica aperta con un indirizzo'],
     ['operatori','collaboratori'],
+    /* ⛔ 22 agosto 2026 — stesso apostrofo di «operaio» qui sopra */
+    ['all\'operatore','al collaboratore'],
+    ['dell\'operatore','del collaboratore'],
+    ['nell\'operatore','nel collaboratore'],
+    ['sull\'operatore','sul collaboratore'],
+    ['dall\'operatore','dal collaboratore'],
+    ['l\'operatore','il collaboratore'],
+    ['L\'operatore','Il collaboratore'],
     ['operatore','collaboratore'],
     ['Nessun operatore registrato','Nessun collaboratore registrato'],
 
@@ -14103,7 +14153,7 @@ ${vecchi?`
     }
     if(res.error){
       toast(_compManca(res.error)
-        ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-metrico.sql su Supabase"
+        ? ("Prima serve l'aggiornamento del database: "+COMP_SQL_TESTO)
         : "Errore: "+res.error.message);
       return;
     }
@@ -14242,7 +14292,7 @@ ${vecchi?`
     )).select("id").single();
     if(e1||!nuovo){
       toast(_compManca(e1)
-        ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-metrico.sql su Supabase"
+        ? ("Prima serve l'aggiornamento del database: "+COMP_SQL_TESTO)
         : "Copia non riuscita: "+((e1&&e1.message)||"nessuna riga scritta"));
       return;
     }

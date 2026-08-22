@@ -17,6 +17,22 @@
   const COMP_STATO_LAB={bozza:"Bozza",definitivo:"Definitivo"};
   const COMP_BAR={bozza:"da_fare",definitivo:"fatto"};
 
+  /* ⛔ 22 agosto 2026 — DOVE SI MANDA CHI LEGGE QUESTO MESSAGGIO.
+     La stessa frase stava scritta a mano in DODICI punti dentro cinque file,
+     e diceva tutta la stessa cosa: «esegui sql/gest-computo-metrico.sql».
+     Da ieri quel file ha una guardia: su un database dove le viste nuove ci
+     sono gia' si RIFIUTA di partire, e fa bene (rilanciandolo i prezzi
+     costruiti con l'analisi tornerebbero indietro in silenzio). Quindi chi
+     legge va mandato anche sull'altro file, se no sbatte contro un muro.
+     ⛔ Una frase che sta in dodici posti non si sistema a meta': adesso sta
+     qui, e i dodici punti la vengono a prendere. */
+  const COMP_SQL_TESTO="esegui sql/gest-computo-metrico.sql su Supabase (SQL Editor -> Run) e ricarica la pagina. Se ti risponde «FERMO QUI», esegui invece sql/gest-analisi-prezzi.sql.";
+  const COMP_SQL_HTML ="esegui <b>sql/gest-computo-metrico.sql</b> su Supabase (SQL Editor &rarr; Run) e ricarica la pagina. Se ti risponde &laquo;FERMO QUI&raquo;, esegui invece <b>sql/gest-analisi-prezzi.sql</b>.";
+  /* ⚠️ niente «window.COMP_SQL_TESTO = ...»: questo file non e' chiuso
+     dentro niente, quindi un const scritto qui lo vedono gia' tutti gli
+     altri script della pagina. L'avevo aggiunto, e il sabotaggio che lo
+     toglieva restava muto: erano due righe che non facevano niente. */
+
   /* la tabella non c'e' ancora: lo si dice, invece di restare a girare */
   function _compManca(err){
     const m=(err&&(err.message||err.details||""))||"";
@@ -45,7 +61,7 @@
       box.innerHTML=tabVuoto(
         _compManca(rc.error)?"Questa sezione non è ancora accesa":"Non riesco a leggere i computi",
         _compManca(rc.error)
-          ? "Esegui <b>sql/gest-computo-metrico.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina."
+          ? ("Per i computi serve l'aggiornamento del database: "+COMP_SQL_HTML)
           : "Il database ha risposto: "+esc(rc.error.message),
         _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>');
       return;
@@ -162,7 +178,7 @@
   /* ---- la scheda del computo ---- */
   async function computoForm(c){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
-    if(!compTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-computo-metrico.sql)");return;}
+    if(!compTabellaOk){toast("Prima serve l'aggiornamento del database: "+COMP_SQL_TESTO);return;}
     c=c||{};
     const isNew=!c.id;
     /* le tariffe che hai davvero nel Prezzario: servono alla tendina qui sotto */
@@ -1580,7 +1596,7 @@
     if(rc.error||rv.error){
       const e=rc.error||rv.error;
       box.innerHTML='<div class="lm-vuoto">'+(_compManca(e)
-        ? 'Per le lavorazioni serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase.'
+        ? ('Per le lavorazioni serve l\'aggiornamento del database: '+COMP_SQL_HTML)
         : 'Non riesco a leggere le lavorazioni: '+esc(e.message))+'</div>';
       return;
     }
@@ -2099,7 +2115,7 @@
       const error=await ppCarica();
       if(error){
         box.innerHTML='<div class="sh-nota">'+(_compManca(error)
-          ? 'Per il prezzario serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase.'
+          ? ('Per il prezzario serve l\'aggiornamento del database: '+COMP_SQL_HTML)
           : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
         return;
       }
@@ -2217,7 +2233,7 @@
       ({error}=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid,fonte:"mio"},riga)));
     }
     if(error){
-      toast(_compManca(error)?"Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)":("Errore: "+error.message));
+      toast(_compManca(error)?("Per il prezzario serve l'aggiornamento del database: "+COMP_SQL_TESTO):("Errore: "+error.message));
       return;
     }
     await ppCerca(true);
