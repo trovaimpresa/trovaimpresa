@@ -905,8 +905,10 @@
     }).join(""):`<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`;
   }
 
+  const NOL_ULTIMO="nol_ultimo_reparto";
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
+    try{localStorage.setItem(NOL_ULTIMO,id);}catch(e){}
     const r=document.documentElement.style;
     r.setProperty("--accent",p.a);r.setProperty("--accent-d",p.ad);r.setProperty("--accent-soft",p.as);
     $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Categoria "+p.nome;
@@ -2514,7 +2516,23 @@
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
 
-  (async()=>{await load();renderLanding();})();
+  /* ⛔ 22 agosto 2026 — IL NOLEGGIO SI APRE GIA' DENTRO.
+     Prima la prima cosa che si vedeva era «Scegli il reparto», e per chi
+     arriva dal menu del gestionale era un clic in piu' che non serviva a
+     niente. Adesso si entra dritti nell'ultimo reparto usato — o nel primo,
+     la prima volta. La schermata dei reparti non e' sparita: ci si torna con
+     la freccia «← Indietro», e serve a chi di reparti ne ha piu' d'uno. */
+  (async()=>{
+    await load();
+    renderLanding();
+    const ps=state.panels||[];
+    if(ps.length){
+      let id=null;
+      try{id=localStorage.getItem(NOL_ULTIMO);}catch(e){}
+      if(!ps.some(p=>p.id===id)) id=ps[0].id;
+      enterPanel(id);
+    }
+  })();
 })();
 </script>
 <script src="/js/fondatore.js"></script>
