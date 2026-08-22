@@ -1079,7 +1079,7 @@
       +    '<div class="field"><label>Unità di misura</label><select id="pz-uni">'+uniOpts+'</select></div>'
       +  '</div>'
       +  '<div class="field"><label>Descrizione</label><textarea id="pz-desc" rows="5" placeholder="Come la scrive il prezzario, per esteso">'+esc(x.descrizione||"")+'</textarea></div>'
-      +  '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="pz-prezzo"'+_noAuto()+' value="'+(x.prezzo_unitario!=null?_prezzoTesto(x.prezzo_unitario):"")+'" placeholder="18,50" style="max-width:200px"></div>'
+      +  '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="pz-prezzo"'+_noAuto()+' value="'+(x.prezzo_unitario!=null?_prezzoTesto(x.prezzo_unitario):"")+'" placeholder="18,50" style="max-width:200px" data-euro></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Per ritrovarla</div>'

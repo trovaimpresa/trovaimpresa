@@ -808,7 +808,7 @@
     const inPerc=(r.p!=null&&r.p!=="");
     return '<div class="qe-riga" data-qe>'
       +'<input class="qe-d" placeholder="Voce del quadro economico" value="'+esc(r.d||"")+'">'
-      +'<input class="qe-e" type="text" inputmode="decimal" placeholder="€" value="'+(inPerc?"":_numTesto(r.e))+'">'
+      +'<input class="qe-e" type="text" inputmode="decimal" placeholder="€" value="'+(inPerc?"":_numTesto(r.e))+'" data-euro>'
       +'<input class="qe-p" type="text" inputmode="decimal" placeholder="%" value="'+(inPerc?_numTesto(r.p):"")+'">'
       +'<span class="qe-v"></span>'
       +'<button type="button" class="rdel" data-action="qe-riga-del">×</button></div>';
@@ -1933,7 +1933,7 @@
       +  '</div>'
       +  '<div class="field"><label>Descrizione</label><textarea id="cv-desc" rows="4" placeholder="Come la scrive il prezzario, per esteso">'+esc(v.descrizione||"")+'</textarea></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50">'
+      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50" data-euro>'
       /* ⚠️ se la lavorazione ha l'analisi, questa casella non comanda piu'
          niente: si spegne e mostra il prezzo costruito (vedi
          anPrezzoCasella). Una casella che si puo' scrivere e che non serve
@@ -1963,7 +1963,7 @@
         ? '<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
           +'<div class="row2">'
           +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano"'+_noAuto()+' value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="35"></div>'
-          +  '<div class="field"><label>Oneri della sicurezza (€)</label><input type="text" inputmode="decimal" id="cv-sic"'+_noAuto()+' value="'+(v.oneri_sicurezza!=null?String(v.oneri_sicurezza).replace(".",","):"")+'" placeholder="0"></div>'
+          +  '<div class="field"><label>Oneri della sicurezza (€)</label><input type="text" inputmode="decimal" id="cv-sic"'+_noAuto()+' value="'+(v.oneri_sicurezza!=null?String(v.oneri_sicurezza).replace(".",","):"")+'" placeholder="0" data-euro></div>'
           +'</div>'
           +'<div class="sh-nota">Sono le due cose che nelle gare vanno dichiarate. Gli oneri della sicurezza non sono soggetti a ribasso.</div>'
           +'</div>'
@@ -2588,7 +2588,7 @@
       +  ' value="'+(inCorr?_v(inCorr.quantita):"")+'" placeholder="1,05"></div>'
       +'</div>'
       +'<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="an-prezzo"'+_noAuto()
-      +' value="'+(inCorr?esc(_prezzoTesto(inCorr.prezzo_unitario)):"")+'" placeholder="42,00" style="max-width:200px"></div>'
+      +' value="'+(inCorr?esc(_prezzoTesto(inCorr.prezzo_unitario)):"")+'" placeholder="42,00" style="max-width:200px" data-euro></div>'
       +'<button type="button" class="btn-primary quick-add" data-action="an-add" data-id="'+esc(String(voceId))+'">'
       + (inCorr?"Salva la riga":"+ Aggiungi al prezzo")+'</button>'
       + (inCorr?' <button type="button" class="btn-ghost quick-add" data-action="an-annulla">Annulla la correzione</button>':'')

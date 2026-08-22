@@ -723,7 +723,7 @@
     return '<div class="fatt-riga" data-riga>'
       + '<input class="fr-desc" placeholder="Descrizione voce" value="'+esc(r.descrizione||"")+'">'
       + '<input class="fr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="'+_numTesto(r.qta!=null?r.qta:1)+'">'
-      + '<input class="fr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="'+_prezzoCasella(r.prezzo)+'">'
+      + '<input class="fr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="'+_prezzoCasella(r.prezzo)+'" data-euro>'
       + '<select class="fr-iva"'+(fattForfettario()?' style="display:none"':'')+'>'+opts+'</select>'
       + '<button type="button" class="rdel" data-action="fatt-riga-del">×</button></div>';
   }
@@ -859,8 +859,8 @@
 
       + '<div class="sh-b"><div class="sh-tit">In fondo alla fattura</div>'
       +   '<div class="row2">'
-      +     '<div class="field"><label>Sconto (€)</label><input type="text" inputmode="decimal" id="fa-sconto" value="'+_numTesto(+f.sconto||"")+'" placeholder="0"></div>'
-      +     '<div class="field"><label>Bollo (€)</label><input type="text" inputmode="decimal" id="fa-bollo" value="'+_numTesto(+f.bollo||"")+'" placeholder="0"></div>'
+      +     '<div class="field"><label>Sconto (€)</label><input type="text" inputmode="decimal" id="fa-sconto" value="'+_numTesto(+f.sconto||"")+'" placeholder="0" data-euro></div>'
+      +     '<div class="field"><label>Bollo (€)</label><input type="text" inputmode="decimal" id="fa-bollo" value="'+_numTesto(+f.bollo||"")+'" placeholder="0" data-euro></div>'
       +   '</div>'
       /* ===== 9 agosto 2026 — la cassa previdenziale =====
          C'era nel preventivo e mancava in fattura: un geometra non poteva
@@ -890,10 +890,10 @@
                    schermo, e la casella del rimborso scriverebbe un numero che
                    nessuno legge: qui il modulo si adatta alla fattura. */
                 + (fattRegimeCorrente==="art15"
-                    ? '<div class="field"><label>Spese anticipate (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
-                    + '<div class="field"><label>Rimborso spese (trasferte, materiali)</label><input type="text" inputmode="decimal" id="fa-spese-iva" value="'+_numTesto(+f.spese_iva||"")+'" placeholder="0"></div>'
+                    ? '<div class="field"><label>Spese anticipate (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0" data-euro></div>'
+                    + '<div class="field"><label>Rimborso spese (trasferte, materiali)</label><input type="text" inputmode="decimal" id="fa-spese-iva" value="'+_numTesto(+f.spese_iva||"")+'" placeholder="0" data-euro></div>'
                     + '<div class="sh-nota">Le <b>spese anticipate</b> sono quelle che hai pagato tu per il cliente con la ricevuta intestata a lui e senza guadagnarci niente: bolli, diritti, visure. Sono escluse dall\'IVA (art. 15) e non entrano né nella cassa né nella ritenuta.<br><br>Il <b>rimborso spese</b> è per trasferte, carburante e materiali: quello l\'IVA ce l\'ha, ed entra nella ritenuta.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu: cambia da cassa a cassa, e il gestionale non la indovina al posto tuo.</div>'
-                    : '<div class="field"><label>Spese documentate</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
+                    : '<div class="field"><label>Spese documentate</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0" data-euro></div>'
                     + '<div class="sh-nota"><b>Questa fattura è nata prima del 13 agosto 2026</b>, quindi le spese seguono ancora il conto di allora: entrano nell\'imponibile e prendono l\'IVA. Non la cambio, perché è già stata mandata allo SDI così e deve restare uguale a quella che ha in mano il cliente.<br><br>Dalla prossima fattura nuova troverai due caselle separate: spese anticipate (escluse IVA, art. 15) e rimborso spese.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu.</div>');
               })()
             : '')

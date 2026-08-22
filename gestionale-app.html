@@ -507,6 +507,8 @@
 <script src="/js/gest-computo.js"></script>
 <script src="/js/gest-sal-prezzario.js"></script>
 <script src="/js/gest-computo-pdf.js"></script>
+<!-- il punto delle migliaia nelle caselle in euro: basta `data-euro` sulla casella -->
+<script src="/js/euro-casella.js"></script>
 <!-- Le tavole del decreto parametri (DM 17 giugno 2016): servono solo agli
      studi tecnici, ma sono dati fermi e si caricano una volta sola.
      ⛔ I numeri li' dentro sono di legge: non si toccano a mano. -->
@@ -5792,7 +5794,7 @@ ${vecchi?`
             <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
             <datalist id="d-mansioni-list">${MANSIONI.map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
           <div class="field"><label>Costo orario (\u20ac)</label>
-            <input id="d-costo" type="text" inputmode="decimal" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(_numTesto(op.costo_orario)):""}" placeholder="Es. 22,50"></div>
+            <input id="d-costo" type="text" inputmode="decimal" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(_numTesto(op.costo_orario)):""}" placeholder="Es. 22,50" data-euro></div>
         </div>
         <div class="sh-nota">Il costo orario serve per calcolare la manodopera sui lavori.</div>
       </div>
@@ -6460,7 +6462,7 @@ ${vecchi?`
         <div class="row2">
           <div class="field"><label style="font-size:1rem">Tipo</label><select id="mv-tipo" style="font-size:1.05rem;padding:10px">
             <option value="ricarica" selected>Ricarica (aggiunge soldi)</option><option value="spesa">Spesa (toglie soldi)</option></select></div>
-          <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="text" id="mv-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="text" id="mv-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px" data-euro></div>
         </div>
         <div class="field"><label style="font-size:1rem">Per cosa</label><input id="mv-causale" placeholder="Es. Viti e tasselli, ricarica mensile..." style="font-size:1.05rem;padding:10px"></div>
         <button class="btn btn-primary" style="width:100%;font-size:1.05rem;padding:12px" data-action="save-movimento" data-id="${id}">+ Aggiungi movimento</button>
@@ -6554,7 +6556,7 @@ ${vecchi?`
         <div style="font-weight:700;color:#0a2a4d;margin-bottom:14px;font-size:1.1rem">➕ Nuovo pieno</div>
         <div class="row2">
           <div class="field"><label style="font-size:1rem">Giorno</label><input type="date" id="rf-data" value="${todayStr()}" style="font-size:1.05rem;padding:10px"></div>
-          <div class="field"><label style="font-size:1rem">Quanto hai speso (€)</label><input type="text" id="rf-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Quanto hai speso (€)</label><input type="text" id="rf-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px" data-euro></div>
         </div>
         <div class="field"><label style="font-size:1rem">Come hai pagato</label><select id="rf-pag" style="font-size:1.05rem;padding:10px">${optPag}</select></div>
         <div class="field" id="rf-carta-box"><label style="font-size:1rem">Con quale carta</label>
@@ -7104,7 +7106,7 @@ ${vecchi?`
       +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
       +'<div class="field"><label>Data fattura</label><input type="date" id="ff-data" value="'+(f.data||todayStr())+'"></div></div>'
       +'<div class="row2">'
-      +'<div class="field"><label>Importo (€)</label><input type="text" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0"></div>'
+      +'<div class="field"><label>Importo (€)</label><input type="text" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0" data-euro></div>'
       +'<div class="field"><label>Da pagare entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -8122,7 +8124,7 @@ ${vecchi?`
         +'</div><div class="sh-col">'
         +'<div class="sh-b">'
         +`<div class="sh-tit">${pro?"Compenso":"Importo"}</div>`
-        +`<div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div>`
+        +`<div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0" data-euro></div>`
         +`<p class="sh-nota" style="margin-bottom:0">Puoi lasciarlo a zero adesso e metterlo dopo${pro?", quando fai la parcella":""}.</p>`
         +'</div>'
         +(pro?('<div class="sh-b"><div class="sh-tit">\ud83d\udcc4 Dati della pratica</div>'+bloccoPratica(job,true)+'</div>'):'')
@@ -8196,7 +8198,7 @@ ${vecchi?`
         <div class="spese-list" id="spese-list"></div>
         <div class="spesa-add">
           <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
-          <input id="sp-imp" type="text" inputmode="decimal" placeholder="€ (es. 12,50)">
+          <input id="sp-imp" type="text" inputmode="decimal" placeholder="€ (es. 12,50)" data-euro>
           <select id="sp-forn" title="Da quale fornitore (facoltativo)"><option value="">— fornitore —</option></select>
           <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
@@ -8208,7 +8210,7 @@ ${vecchi?`
       <div class="field" id="andamento-wrap" style="display:none"></div>
       <div class="row2">
         <div class="field"><label>Ore lavorate</label><input type="text" id="j-ore" inputmode="decimal" value="${_numTesto(job.ore)}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div></div>
+        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0" data-euro></div></div>
       <div class="field campo-titolo" id="ore-wrap" style="display:none"><label>⏱ Registro delle ore</label>
         <div class="spese-list" id="ore-list"></div>
         <div class="spesa-add ore-add">
@@ -9522,7 +9524,7 @@ ${vecchi?`
              arrivano col prezzo vuoto. Se la colonna nel database non c'e'
              ancora, saveAzienda la lascia cadere e tutto il resto si salva. -->
         <div class="field"><label>Quanto chiedi all'ora (€)</label>
-          <input type="text" id="a-tariffa" inputmode="decimal" value="${a.tariffa_oraria!=null&&a.tariffa_oraria!==""?esc(_numTesto(a.tariffa_oraria)):""}" placeholder="Es. 35,00"></div>
+          <input type="text" id="a-tariffa" inputmode="decimal" value="${a.tariffa_oraria!=null&&a.tariffa_oraria!==""?esc(_numTesto(a.tariffa_oraria)):""}" placeholder="Es. 35,00" data-euro></div>
         <div class="sh-nota">Serve al pulsante <b>«Porta le ore nella parcella»</b> nel registro delle ore: le ore diventano righe già col prezzo. Se lo lasci vuoto, le righe arrivano <b>senza prezzo</b> e lo scrivi tu. ⛔ Non è il costo di un collaboratore: è quanto <b>chiedi tu</b>.</div>
         ${ruoloUtente==='professionista'?`
         <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
@@ -11586,7 +11588,7 @@ ${vecchi?`
     return `<div class="prev-riga" data-riga>
       <input class="pr-desc" placeholder="Es. Demolizione tramezzo" value="${esc(r.descrizione||"")}">
       <input class="pr-qta" type="text" inputmode="decimal" placeholder="Es. 12" value="${_numTesto(r.qta!=null?r.qta:1)}">
-      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Es. 24,00" value="${_prezzoCasella(r.prezzo)}">
+      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Es. 24,00" value="${_prezzoCasella(r.prezzo)}" data-euro>
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
   }
   /* ============================================================
@@ -11713,7 +11715,7 @@ ${vecchi?`
         <div class="field"><label>Contributo cassa (%)</label><input type="text" inputmode="decimal" id="pv-cassa" value="${_numTesto(cassa)}" placeholder="Es. 4" autocomplete="off"></div>
         <div class="field"><label>IVA</label><select id="pv-iva">${opzIva}</select></div>
       </div>
-      <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="text" id="pv-spese" inputmode="decimal" value="${_numTesto(spese)}" placeholder="0"></div>
+      <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="text" id="pv-spese" inputmode="decimal" value="${_numTesto(spese)}" placeholder="0" data-euro></div>
       <div class="field">
         <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer">
           <input type="checkbox" id="pv-rit" ${(!forf&&rit)?"checked":""} ${forf?"disabled":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
@@ -11765,43 +11767,10 @@ ${vecchi?`
   }
   function dpPerc(fraz){ return Math.round((+fraz||0)*10000)/100; }
 
-  /* ⛔ 22 agosto 2026 — IL PUNTO DELLE MIGLIAIA LO METTE LA CASELLA, NON LUI
-     Detto da Alessio guardando la schermata: «l'ho messo io, non esce di suo».
-     Su una casella dove si scrive mezzo milione, «500000» e «500.000» sono lo
-     stesso numero ma non si leggono uguale: il primo lo devi contare con il
-     dito. E se uno sbaglia una cifra — 5000000 invece di 500000 — a occhio
-     nudo non se ne accorge, mentre 5.000.000 contro 500.000 si vede subito.
-     Su un compenso quello zero in piu' vale decine di migliaia di euro.
-
-     ⚠️ Si riscrive la casella SOLO se il cursore sta in fondo (cioe' mentre
-     si sta scrivendo normalmente). Se sta in mezzo — perche' uno e' tornato
-     indietro a correggere una cifra — non si tocca niente: cambiare il testo
-     sposterebbe il cursore in fondo a ogni tasto, e correggere diventerebbe
-     impossibile. Quello che resta storto si raddrizza da solo appena si esce
-     dalla casella (blur).
-
-     ⚠️ La virgola dei decimali resta dov'e': qui si toccano solo le migliaia.
-     Il numero lo rilegge sempre _numIt, che «500.000» lo capisce gia' (un
-     punto solo con tre cifre dopo = migliaia, vedi _numeroIt). */
-  function dpFormattaImporto(el,forza){
-    if(!el)return;
-    let inFondo=true;
-    try{ inFondo = (el.selectionStart==null) || (el.selectionStart===el.value.length); }catch(e){}
-    if(!inFondo&&!forza)return;
-    const grezzo=String(el.value||"");
-    const meno=/^\s*-/.test(grezzo);
-    const pulito=grezzo.replace(/[^\d,]/g,"");
-    if(pulito===""){ if(grezzo!=="")el.value=""; return; }
-    const parti=pulito.split(",");
-    const intero=parti[0].replace(/^0+(?=\d)/,"");
-    const dec=(parti.length>1) ? ","+parti.slice(1).join("").slice(0,2) : "";
-    const conPunti=(intero===""?"0":intero).replace(/\B(?=(\d{3})+(?!\d))/g,".");
-    const nuovo=(meno?"-":"")+conPunti+dec;
-    if(nuovo===grezzo)return;
-    el.value=nuovo;
-    try{ el.setSelectionRange(nuovo.length,nuovo.length); }catch(e){}
-  }
-
+  /* ⚠️ Il punto delle migliaia nella casella dell'importo NON si scrive qui:
+     lo mette js/euro-casella.js a chiunque abbia `data-euro`. La regola sta in
+     un posto solo apposta — due copie si disallineano, ed e' li' che si
+     nascondono i difetti. */
   function bloccoDecreto(){
     if(!dpDisponibile())return "";
     const D=window.DecretoParametri;
@@ -11827,7 +11796,7 @@ ${vecchi?`
           <div class="field"><label>Categoria dell'opera (tavola Z-1)</label>
             <select id="dp-cat"><option value="">— scegli —</option>${opts}</select></div>
           <div class="field"><label>Importo dei lavori (€)</label>
-            <input type="text" id="dp-v" inputmode="decimal" placeholder="Es. 250.000" autocomplete="off"></div>
+            <input type="text" id="dp-v" inputmode="decimal" placeholder="Es. 250.000" autocomplete="off" data-euro></div>
         </div>
         <div id="dp-info" class="dp-info"></div>
         <div class="field"><label>Cosa fai su questo lavoro</label>
@@ -11987,10 +11956,11 @@ ${vecchi?`
     const cat=$("#dp-cat"); if(cat)cat.addEventListener("change",dpRicalcola);
     const v=$("#dp-v");
     if(v){
-      v.addEventListener("input",function(){ dpFormattaImporto(v,false); dpRicalcola(); });
-      /* uscendo dalla casella si raddrizza comunque, anche se stava
-         correggendo in mezzo al numero */
-      v.addEventListener("blur",function(){ dpFormattaImporto(v,true); dpRicalcola(); });
+      v.addEventListener("input",dpRicalcola);
+      /* il punto delle migliaia lo mette euro-casella.js in cattura, quindi
+         quando arriva qui la casella e' gia' a posto; uscendo si raddrizza
+         anche quello che era stato corretto in mezzo al numero */
+      v.addEventListener("blur",dpRicalcola);
     }
     const pr=$("#dp-prest");if(pr)pr.addEventListener("change",dpTotale);
     const sp=$("#dp-spese");if(sp)sp.addEventListener("change",dpTotale);

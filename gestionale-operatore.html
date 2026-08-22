@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/cestino.js"></script>
 <script src="/js/foto-upload.js"></script>
+<script src="/js/euro-casella.js"></script>
 <style>
   :root{
     --green:#0066ff; --green-d:#0052cc; --green-l:#e8f3ec;
@@ -270,7 +271,7 @@
       <div id="carta-storico"></div>
       <button class="btn-line" id="btn-carta-spesa" style="width:100%;margin-top:10px">💳 Registra una spesa</button>
       <div id="carta-form" class="hidden" style="margin-top:10px">
-        <input type="text" inputmode="decimal" id="carta-imp" placeholder="Importo speso (es. 12,50)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
+        <input type="text" inputmode="decimal" id="carta-imp" placeholder="Importo speso (es. 12,50)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box" data-euro>
         <input type="text" id="carta-causale" placeholder="Per cosa? (es. viti e tasselli)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
         <div class="row-btns">
           <button class="btn-line" id="btn-carta-annulla" style="flex:1">Annulla</button>
@@ -1137,7 +1138,7 @@ function rvDisegna(){
   if(RV.tipo==="spesa"){
     tit.textContent="Quanto hai speso?";
     corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' \u00b7 oggi</div>'
-      +'<input class="rv-in" id="rv-imp" type="text" inputmode="decimal" placeholder="Importo (es. 24,50)">'
+      +'<input class="rv-in" id="rv-imp" type="text" inputmode="decimal" placeholder="Importo (es. 24,50)" data-euro>'
       +'<input class="rv-in" id="rv-testo" type="text" placeholder="Per cosa? (es. viti e tasselli)">'
       +'<button type="button" class="rv-ok" id="rv-ok">Conferma</button>'
       +'<div class="rv-nota">Questi soldi entrano nel conto di questo cantiere. La carta aziendale \u00e8 un\u2019altra cosa e resta dov\u2019\u00e8.</div>';
@@ -1368,7 +1369,7 @@ function voceDisegnaControllo(nomeLavoro){
   if(puoSpesa){
     h+='<div class="rv-sez">Spesa</div>'
       +'<input class="rv-in" id="rv-v-imp" type="text" inputmode="decimal" placeholder="Importo (es. 24,50)" value="'
-        +esc(c.spesaImp===null?"":String(c.spesaImp).replace(".",","))+'">'
+        +esc(c.spesaImp===null?"":String(c.spesaImp).replace(".",","))+'" data-euro>'
       +'<input class="rv-in" id="rv-v-des" type="text" placeholder="Per cosa?" value="'+esc(c.spesaDes)+'">';
   }else if(c.spesaImp!==null){
     /* ha parlato di soldi ma non ha il permesso: dirglielo, non ingoiarlo */
