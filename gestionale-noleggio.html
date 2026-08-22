@@ -489,6 +489,16 @@
 <link rel="stylesheet" href="/css/gestionale.css">
 <style>
 /* --- il conto del noleggio (22 agosto 2026) --- */
+/* ⛔ LA SCHEDA VA A TUTTA PAGINA, deciso da Alessio.
+   css/gestionale.css sullo schermo grande la stringe a 640 px e la mette in
+   mezzo come una finestrella (riga 536). Qui, e SOLO qui nel noleggio, si
+   riporta a tutta pagina: si compila un noleggio guardando il conto che si
+   fa da solo, e in una finestrella da 640 px non ci sta. */
+#overlay{background:var(--sfondo,#f3f5f2);backdrop-filter:none}
+#overlay .sheet{max-width:none;min-height:100vh;margin:0;border-radius:0;
+  padding:26px 5vw 40px;box-shadow:none}
+#overlay .sheet h3{font-size:24px;margin-bottom:20px}
+#overlay .sheet-actions{border-radius:0;max-width:900px}
 .nol-riq{background:#f7f9fc;border:1px solid #dbe4f0;border-radius:12px;padding:12px;margin-bottom:10px}
 .nol-riq h4{margin:0 0 8px;font-size:15px;color:#2e537d}
 .nol-due{display:grid;grid-template-columns:1fr 1fr;gap:8px}
