@@ -13924,3 +13924,108 @@ tutto verde. Adesso il clic parte dal pulsante vero e passa da `data-action`.
 ⚠️ **Il finto Supabase adesso è UNO SOLO** (`prove/finto-supabase.js`), usato
 da tutti e due i banchi di oggi. Prima erano due copie, e una correzione
 andava pagata due volte.
+
+
+# ✅ 22 agosto 2026 — LE MISURE DEL PREVENTIVO AI, E IL CLIENTE NUOVO
+
+Due file: `gestionale-app.html` e `supabase/functions/ai-generate/index.ts`
+(⚠️ quest'ultimo **non passa da Netlify**: va pubblicato su Supabase).
+
+## ⛔ IL PUNTO 3 DELLA LISTA NON ESISTEVA PIÙ
+
+Era «i prezzi del preventivo AI sono il doppio: 14.600 € per un bagno».
+Alessio l'ha provato sulla pagina vera davanti a me: **6.445 € per un bagno da
+8 mq chiavi in mano**, dentro il suo numero (6.000-7.000 € per un 6 mq a
+Rieti). Quei 14.600 € erano del **vecchio** Preventivo AI dei pannelli, quello
+sparito la notte del 21 con gli Strumenti.
+
+⛔ Gli avevo proposto un lavoro grosso sui prezzi **senza aver provato prima
+se il difetto c'era ancora**. È la lezione «guarda se c'è già», rifatta
+identica. Provare costava un clic.
+
+## IL DIFETTO VERO: LE MISURE
+
+Alessio aveva scritto «rifacimento bagno completo chiavi in mano, piastrelle,
+sanitari...» **senza dire quanto era grande**. L'AI:
+
+1. si è data da sola «bagno standard di circa 8 mq»;
+2. l'ha scritto **solo nella nota in fondo**, dove non lo legge nessuno;
+3. e poi **non ha nemmeno usato la sua stessa misura**: 8 mq di pavimento e
+   **12 mq di pareti**. Un bagno da 8 mq rivestito a 2 metri fa **21-23 mq**.
+
+⛔ **Una quantità che manca è peggio di un prezzo sbagliato.** Il prezzo
+strano si vede; il rivestimento dimezzato no — il totale «sembra giusto» e
+l'impresa ci rimette la posa di mezzo bagno.
+
+⚠️ **E l'altezza vale metà del conto**, come ha fatto notare Alessio: lo
+stesso bagno rivestito a 1 metro fa 9 mq invece di 21.
+
+## COSA C'È ADESSO
+
+**Nel gestionale**, sotto la casella dell'AI, una riga fissa: «Scrivi anche
+**quanti mq** e **fino a che altezza vanno le piastrelle**: se no le quantità
+me le invento io».
+
+⚠️ **Deciso da Alessio a metà lavoro.** Avevo costruito e collaudato un
+controllo che si fermava a chiedere le misure prima di chiamare l'AI (gratis,
+senza spendere un credito). Lui: *«forse non serve richiedere i mq, basta
+scriverlo»*. Buttato e rifatto: **si scrive, non si chiede.** Nessuna
+interruzione, nessun clic in più.
+
+**Nell'istruzione della funzione**, le regole che mancavano:
+- usa SOLO le misure che ti dà l'utente, non inventarne;
+- il pavimento è i mq della stanza; **le pareti si ricavano dal perimetro**
+  (≈ 4 × radice dei mq) per l'altezza del rivestimento, **meno 2 mq per la
+  porta**;
+- se l'altezza non te la dà, usa 2 m e **dillo nella PRIMA riga delle note**;
+- stuccatura, battiscopa e silicone dalle stesse misure: le quantità devono
+  tornare fra loro;
+- se una misura manca e non si ricava: quantità 1, prezzo 0, e nelle note che
+  va misurata. **Non inventare una quantità per far tornare il totale.**
+
+## ✅ E IL CLIENTE NUOVO DENTRO IL PREVENTIVO
+
+Segnalato da Alessio con la pagina davanti: nella scheda del **lavoro** c'è
+«+ Aggiungi nuovo cliente», nel **preventivo** no. Toccava uscire, creare il
+cliente e ricominciare.
+
+⛔ Non si poteva copiare il pulsante del lavoro: quello (`quick-cli`) apre il
+modulo del cliente **al posto** del preventivo e avvisa che quel che hai
+scritto va perso. Su un lavoro sono tre caselle, su un preventivo sono dieci
+voci.
+
+Adesso: **«+ Nuovo cliente»** apre una casella lì dov'è la tendina, scrivi il
+**nome**, premi Aggiungi e il cliente nasce ed è già scelto. Niente finestre
+sopra, niente uscita, niente perso. Telefono e indirizzo si completano dopo,
+dai Clienti.
+
+⚠️ Se un cliente con quel nome c'è già (confronto tollerante: maiuscole,
+spazi, accenti) **non si crea un doppione**: si sceglie quello. Due «Rossi
+Mario» in rubrica sono un guaio che si scopre mesi dopo, sulle fatture.
+
+## IL BANCO — nei due versi
+
+`prove/misure-preventivo/`: `banco.js` · `sabotaggi.js`.
+**18 verdi · 25 sabotaggi su 25 accusati.**
+Rifatti anche gli altri tre banchi di oggi sul file nuovo: artigiano 23,
+documenti 20, ore 20 — tutti verdi.
+
+## ⚠️ TRE LEZIONI, TUTTE GIÀ SCRITTE QUI SOPRA E RICOMPARSE
+
+1. ⛔ **Un apice rovescio dentro un commento HTML ha spezzato il file. DUE
+   VOLTE OGGI.** Quei commenti stanno dentro stringhe a template di
+   JavaScript: un apice rovescio le chiude e il file muore tutto insieme, in
+   silenzio. Adesso c'è scritto sul posto, in tutti e due i punti.
+2. ⛔ **Il banco premeva la funzione, non il pulsante.** Il sabotaggio «torna
+   il modo vecchio, apri il modulo cliente» restava **verde**, perché la prova
+   chiamava `pvCliSalva()` a mano invece di premere «Aggiungi». Stessa
+   identica lezione di stamattina, ricomparsa nel pomeriggio.
+3. ⛔ **Cercare una parola non è controllare.** Due sabotaggi restavano verdi
+   perché la parola cercata compariva anche altrove: «porta» stava pure
+   nell'esempio, «prima riga delle note» pure nelle regole sopra. Le prove
+   adesso cercano la **frase della regola**, non la parola.
+
+⚠️ E una quarta, sul contare: la prova sugli apici rovesci della funzione
+contava se erano **pari in tutto il file**. Due in più dentro l'istruzione
+tengono il conto pari e spezzano lo stesso la stringa. Adesso si contano
+**dentro il blocco**: devono essere esattamente due.

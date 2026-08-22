@@ -2047,6 +2047,22 @@
       + '<div class="ai-riga-giu" id="ai-riga-giu" hidden>'
       +   '<label class="ai-riga-lab" for="ai-riga-in">Scrivi come parleresti al telefono</label>'
       +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(m.esempio) + '"></textarea>'
+      /* ⛔ 22 agosto 2026 — LE MISURE, SCRITTE PRIMA DI SCRIVERE.
+         Alessio aveva chiesto un preventivo per un bagno senza dire quanto
+         era grande: l'AI si e' data da sola «bagno standard di circa 8 mq»
+         e l'ha scritto solo nella nota in fondo, dove non lo legge nessuno.
+         Poi non ha nemmeno usato la sua stessa misura (8 mq di pavimento,
+         12 mq di pareti: un bagno da 8 mq rivestito a due metri fa il
+         doppio). Una quantita' che manca e' peggio di un prezzo sbagliato:
+         il prezzo strano si vede, il rivestimento dimezzato no.
+         ⚠️ Deciso da Alessio: NON si chiede, si SCRIVE — «forse non serve
+         richiedere i mq, basta scriverlo». Nessuna interruzione, nessun clic
+         in piu'. La rete di sicurezza sta dall'altra parte: l'istruzione
+         della funzione obbliga l'AI a dire nella PRIMA riga delle note
+         quali misure ha supposto. */
+      +   (m.feature==='preventivo'
+            ? '<div class="campo-aiuto">Scrivi anche <b>quanti mq</b> e <b>fino a che altezza vanno le piastrelle</b> (di solito 1 m o 2 m): se no le quantità me le invento io.</div>'
+            : '')
       +   '<div class="ai-riga-az">'
       +     '<button type="button" class="ai-riga-go" id="ai-riga-go">Riempi le caselle</button>'
       +     '<span class="ai-riga-st" id="ai-riga-st"></span>'
@@ -2097,6 +2113,27 @@
     }
     apri.onclick=()=>mostra(giu.hasAttribute("hidden"));
 
+    /* ============================================================
+       ⛔ 22 agosto 2026 — LE MISURE SI CHIEDONO PRIMA, E GRATIS
+       ============================================================
+       Segnalato da Alessio con la pagina vera davanti. Aveva scritto
+       «rifacimento bagno completo chiavi in mano, piastrelle, sanitari...»
+       SENZA nessuna misura. L'AI se n'e' inventata una — «bagno standard di
+       circa 8 mq» — e l'ha scritto solo nella nota in fondo, dove non lo
+       legge nessuno. Poi non ha nemmeno usato la sua stessa misura: 8 mq di
+       pavimento e 12 mq di pareti, quando un bagno da 8 mq rivestito a due
+       metri fa piu' del doppio.
+       ⛔ Una quantita' che manca e' peggio di un prezzo sbagliato: il prezzo
+       strano si vede, il rivestimento dimezzato no — il totale «sembra
+       giusto» e l'impresa ci rimette la posa di mezzo bagno.
+
+       ⚠️ La domanda si fa QUI, nel gestionale, PRIMA di chiamare l'AI:
+       se a chiedere fosse l'AI costerebbe un credito e non porterebbe a casa
+       nessun preventivo.
+
+       ⚠️ E NON BLOCCA: si chiede una volta sola. Se premi di nuovo si va
+       avanti lo stesso — ci sono lavori che una misura non ce l'hanno
+       (sostituire una caldaia, montare un condizionatore). */
     go.onclick=async function(){
       const testo=inp.value.trim();
       if(!testo){ st.className="ai-riga-st ai-riga-st--err"; st.textContent="Scrivi due righe qui sopra e riprovo."; inp.focus(); return; }
@@ -11707,7 +11744,32 @@ ${vecchi?`
       ${isNew?aiRigaHTML('preventivo'):''}
       <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
       <div class="row2">
-        <div class="field"><label>Cliente</label><select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
+        <!-- ⛔ 22 agosto 2026 — IL CLIENTE NUOVO SENZA USCIRE DAL PREVENTIVO.
+             Segnalato da Alessio con la pagina davanti: nella scheda del
+             LAVORO c'e' «+ Aggiungi nuovo cliente», nel preventivo no. Ti
+             toccava uscire, creare il cliente e ricominciare.
+             ⛔ NIENTE APICI ROVESCI QUI DENTRO: questo commento sta dentro
+             una stringa a template di JavaScript, e un apice rovescio la
+             chiude — il file smette di funzionare tutto insieme, in
+             silenzio. E' la SECONDA volta oggi.
+             ⚠️ Il pulsante del lavoro (quick-cli) apre il modulo del
+             cliente AL POSTO di questo e avvisa che quello che hai scritto
+             va perso: su un lavoro sono tre caselle, su un preventivo sono
+             dieci voci. Qui non si puo' fare cosi'.
+             ⛔ E niente finestre sopra: si scrive il NOME e basta, nella
+             riga dove stava la tendina. Il resto della scheda cliente
+             (telefono, indirizzo) si completa dopo, dai Clienti. -->
+        <div class="field"><label>Cliente</label>
+          <select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select>
+          <div id="pv-cli-nuovo" style="display:none;margin-top:8px">
+            <div class="spesa-add" style="margin:0">
+              <input id="pv-cli-nome" placeholder="Nome del cliente (es. Rossi Mario)" autocomplete="off">
+              <button type="button" class="btn" data-action="pv-cli-salva">Aggiungi</button>
+              <button type="button" class="btn b-cancel" data-action="pv-cli-annulla">Annulla</button>
+            </div>
+            <div class="campo-aiuto">Basta il nome: telefono e indirizzo li metti dopo, dai Clienti.</div>
+          </div>
+          <button type="button" class="btn-ghost quick-add" id="pv-cli-apri" data-action="pv-cli-nuovo">+ Nuovo cliente</button></div>
         <div class="field"><label>Data</label><input type="date" id="pv-data" value="${p.data||todayStr()}"></div></div>
       <div class="field"><label>Note (compaiono sul PDF)</label>
         <div id="pv-note-lista">${prevNoteRighe(p.note)}</div>
@@ -11754,6 +11816,50 @@ ${vecchi?`
        il momento in cui serve davvero e' un attimo prima di «Scarica PDF» */
     ctrAscolta('preventivo');
   }
+  /* ⛔ 22 agosto 2026 — crea il cliente col solo NOME e lo sceglie subito.
+     Niente finestre, niente uscita dal preventivo, niente perdita di quello
+     che hai gia' scritto. */
+  async function pvCliSalva(){
+    const campo=$("#pv-cli-nome"), sel=$("#pv-cli");
+    if(!campo||!sel)return;
+    const nome=String(campo.value||"").trim();
+    if(!nome){toast("Scrivi il nome del cliente");campo.focus();return;}
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    /* ⚠️ se un cliente con quello stesso nome c'e' gia', NON se ne crea un
+       secondo: si sceglie quello. Due «Rossi Mario» in rubrica sono un
+       guaio che si scopre mesi dopo, sulle fatture. */
+    const uguale=(cliCache||[]).find(c=>_aiNorm(c.nome)===_aiNorm(nome));
+    if(uguale){
+      sel.value=uguale.id;
+      sel.dispatchEvent(new Event("change",{bubbles:true}));
+      $("#pv-cli-nuovo").style.display="none";
+      const ap0=$("#pv-cli-apri"); if(ap0)ap0.style.display="";
+      toast("Quel cliente c'era già: l'ho scelto");
+      return;
+    }
+    const {data,error}=await sb.from("gest_clienti")
+      .insert({user_id:sbUid,mestiere_id:curMestiere(),nome:nome,tipo:"privato"})
+      .select("id,nome");
+    if(error){toast("Non sono riuscito a creare il cliente: "+error.message);return;}
+    if(!data||!data.length){toast("Cliente non creato: nessuna riga scritta. Riprova.");return;}
+    const c=data[0];
+    cliCache.push({id:c.id,nome:c.nome||nome});
+    /* la nuova opzione si mette in ordine alfabetico, come l'elenco */
+    const opt=document.createElement("option");
+    opt.value=c.id; opt.textContent=c.nome||nome;
+    let messo=false;
+    for(let i=1;i<sel.options.length;i++){
+      if(_aiNorm(sel.options[i].textContent)>_aiNorm(opt.textContent)){sel.insertBefore(opt,sel.options[i]);messo=true;break;}
+    }
+    if(!messo)sel.appendChild(opt);
+    sel.value=c.id;
+    sel.dispatchEvent(new Event("change",{bubbles:true}));
+    $("#pv-cli-nuovo").style.display="none";
+    const ap=$("#pv-cli-apri"); if(ap)ap.style.display="";
+    rinfresca("clienti");
+    toast("Cliente aggiunto ✔");
+  }
+
   async function savePrev(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const titolo=$("#pv-tit").value.trim();if(!titolo){toast("Scrivi il titolo del preventivo");return;}
@@ -14935,6 +15041,19 @@ ${vecchi?`
       if(b&&!b.querySelector("[data-nota]"))b.insertAdjacentHTML("beforeend",prevNotaRigaHtml(""));}
       return;}
     if(a==="ore-parcella")return orePortaInParcella();
+    if(a==="pv-cli-nuovo"){
+      const box=$("#pv-cli-nuovo"), apri=$("#pv-cli-apri");
+      if(box){box.style.display="";const n=$("#pv-cli-nome");if(n){n.value="";n.focus();}}
+      if(apri)apri.style.display="none";
+      return;
+    }
+    if(a==="pv-cli-annulla"){
+      const box=$("#pv-cli-nuovo"), apri=$("#pv-cli-apri");
+      if(box)box.style.display="none";
+      if(apri)apri.style.display="";
+      return;
+    }
+    if(a==="pv-cli-salva")return pvCliSalva();
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     /* un capitolo si può aggiungere anche a mano, non solo arrivando da un
        computo: chi scrive il preventivo a mano ha lo stesso bisogno di
