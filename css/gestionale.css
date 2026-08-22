@@ -3932,3 +3932,66 @@ body:has(#ti-fondatore) .side{
 
 /* ⛔ .no-ico non ha bisogno di regole sue: e\' solo il cartello che dice a
    _iconizza di non passare di qui. */
+
+/* ============================================================
+   IL RIQUADRO DEL DECRETO PARAMETRI (solo studi tecnici)
+   ============================================================
+   Sta DENTRO il modulo del preventivo, sotto le voci di costo: non e' una
+   finestra sopra, perche' una finestra sopra butterebbe via le voci gia'
+   scritte. Vedi bloccoDecreto() in gestionale-app.html.
+
+   ⚠️ Niente testo sotto i 13px: qui si leggono numeri di legge, e questo
+   gestionale lo usa chi ha la dislessia. */
+.dp-box{
+  border:1px solid var(--bordo-forte);
+  border-left:4px solid var(--blu);
+  border-radius:12px;
+  background:var(--sfondo);
+  padding:14px 14px 12px;
+  margin:10px 0 12px;
+}
+.dp-info{
+  font-size:14px; line-height:1.6; color:var(--testo-2);
+  background:var(--card); border:1px solid var(--bordo);
+  border-radius:9px; padding:9px 11px; margin:2px 0 12px;
+}
+.dp-info b{ color:var(--blu-scuro); }
+.dp-cat-nome{ color:var(--testo-3); }
+
+/* le fasi: chiuse di partenza, cosi' non si vedono 96 righe tutte insieme */
+.dp-fase{
+  border:1px solid var(--bordo); border-radius:10px;
+  background:var(--card); margin-bottom:8px; overflow:hidden;
+}
+.dp-fase > summary{
+  cursor:pointer; list-style:none; padding:11px 12px;
+  font-size:14.5px; font-weight:800; color:var(--blu-scuro);
+  display:flex; align-items:center; gap:9px;
+}
+.dp-fase > summary::-webkit-details-marker{ display:none; }
+.dp-fase > summary::before{ content:"▸"; font-size:13px; color:var(--testo-3); }
+.dp-fase[open] > summary::before{ content:"▾"; }
+.dp-fase > summary:hover{ background:var(--blu-tenue); }
+.dp-conta{
+  margin-left:auto; font-size:13px; font-weight:700; color:var(--testo-3);
+  background:var(--sfondo); border-radius:20px; padding:2px 9px;
+}
+
+/* una prestazione: casella, nome, importo. Su telefono l'importo va a capo. */
+.dp-voce{
+  display:grid; grid-template-columns:20px 1fr auto; gap:10px;
+  align-items:start; padding:9px 12px;
+  border-top:1px solid var(--bordo); cursor:pointer;
+}
+.dp-voce:hover{ background:var(--sfondo); }
+.dp-voce input[type=checkbox]{ width:18px; height:18px; margin-top:2px; flex-shrink:0; }
+.dp-nome{ font-size:14px; line-height:1.5; color:var(--testo); }
+.dp-q{ color:var(--testo-3); font-size:13px; white-space:nowrap; }
+.dp-imp{ font-size:14.5px; font-weight:800; color:var(--blu-scuro); white-space:nowrap; }
+
+.dp-azioni{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+
+@media (max-width:560px){
+  .dp-voce{ grid-template-columns:20px 1fr; }
+  .dp-imp{ grid-column:2; }
+}

@@ -507,6 +507,10 @@
 <script src="/js/gest-computo.js"></script>
 <script src="/js/gest-sal-prezzario.js"></script>
 <script src="/js/gest-computo-pdf.js"></script>
+<!-- Le tavole del decreto parametri (DM 17 giugno 2016): servono solo agli
+     studi tecnici, ma sono dati fermi e si caricano una volta sola.
+     ⛔ I numeri li' dentro sono di legge: non si toccano a mano. -->
+<script src="/js/decreto-parametri.js"></script>
 <script>
   const KEY="gestionale_multiservizi_v5";
   /* ⚠️ 21 agosto 2026 — LE ICONE DEL REPARTO: 14 -> 50, E DIVISE PER MESTIERE.
@@ -11727,6 +11731,231 @@ ${vecchi?`
         il totale supera i 77,47 &euro; &mdash; si aggiunge al momento della fattura.</p>`:""}
       <div id="pv-riepilogo" class="prev-somma" style="text-align:left;line-height:1.9"></div>`;
   }
+  /* ============================================================
+     IL COMPENSO COL DECRETO PARAMETRI — DM 17 giugno 2016
+     ============================================================
+     A cosa serve: sui lavori PUBBLICI il compenso del professionista non se
+     lo inventa lui, lo dice il decreto. La formula e':
+
+         CP = somma di ( V x G x Q x P )
+
+     V = importo dei lavori di quella categoria · G = quanto e' complessa
+     (tavola Z-1) · Q = quanto pesa quella prestazione (tavola Z-2) ·
+     P = 0,03 + 10/V^0,4 (art. 3 del decreto).
+
+     ⛔ I NUMERI NON STANNO QUI. Stanno in js/decreto-parametri.js, letti dal
+     PDF ufficiale della Gazzetta. Qui c'e' solo la schermata. Cosi' quando il
+     decreto cambia si sostituisce quel file e basta, come il prezzario.
+
+     ⛔ NIENTE FINESTRA SOPRA IL MODULO. La scheda del preventivo ha dentro
+     dieci voci gia' scritte: aprire una seconda finestra le butterebbe via
+     (e' la stessa ragione per cui il cliente nuovo si crea con una riga qui
+     dentro, non con una finestra). Percio' questo e' un riquadro che si apre
+     DENTRO il modulo, sotto le voci di costo.
+
+     ⚠️ Se il file delle tavole non c'e' (non ancora pubblicato, oppure
+     bloccato dalla rete), il pulsante non compare proprio: meglio niente
+     pulsante che un pulsante che non fa niente. */
+  function dpDisponibile(){
+    return ruoloUtente==='professionista' && !!window.DecretoParametri;
+  }
+  function dpCorto(t,n){
+    t=String(t||"").trim();
+    return t.length>(n||70) ? t.slice(0,(n||70)).replace(/[\s,;.-]+$/,"")+"…" : t;
+  }
+  function dpPerc(fraz){ return Math.round((+fraz||0)*10000)/100; }
+
+  function bloccoDecreto(){
+    if(!dpDisponibile())return "";
+    const D=window.DecretoParametri;
+    const ordine=[], perGruppo={};
+    D.Z1.forEach(function(c){
+      if(!perGruppo[c.gruppo]){perGruppo[c.gruppo]=[];ordine.push(c.gruppo);}
+      perGruppo[c.gruppo].push(c);
+    });
+    const opts=ordine.map(function(g){
+      return '<optgroup label="'+esc(g)+'">'+perGruppo[g].map(function(c){
+        return '<option value="'+esc(c.cod)+'">'+esc(c.cod+" — "+dpCorto(c.opere))+'</option>';
+      }).join("")+'</optgroup>';
+    }).join("");
+    return `
+      <button type="button" class="btn-ghost quick-add" id="dp-apri" data-action="dp-apri">📐 Calcola col decreto parametri</button>
+      <div id="dp-box" class="dp-box" style="display:none">
+        <div class="sh-tit" style="margin-top:0">📐 Compenso col decreto parametri</div>
+        <p class="campo-aiuto" style="margin-top:0">
+          Scegli la categoria dell'opera, scrivi l'importo dei lavori e spunta cosa fai.
+          Le voci finiscono qui sopra, nelle voci di costo, e da lì la parcella va avanti
+          come sempre: cassa, IVA e ritenuta le fa lei.</p>
+        <div class="row2">
+          <div class="field"><label>Categoria dell'opera (tavola Z-1)</label>
+            <select id="dp-cat"><option value="">— scegli —</option>${opts}</select></div>
+          <div class="field"><label>Importo dei lavori (€)</label>
+            <input type="text" id="dp-v" inputmode="decimal" placeholder="Es. 250.000" autocomplete="off"></div>
+        </div>
+        <div id="dp-info" class="dp-info"></div>
+        <div class="field"><label>Cosa fai su questo lavoro</label>
+          <div id="dp-prest"></div></div>
+        <div class="field">
+          <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer">
+            <input type="checkbox" id="dp-spese" style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
+            <span>Aggiungi anche le spese e oneri accessori (art. 5 del decreto)</span></label>
+          <div class="row2" style="margin-top:8px">
+            <div class="field"><label>Percentuale sul compenso</label>
+              <input type="text" id="dp-spese-perc" inputmode="decimal" autocomplete="off"></div>
+            <div class="field"><label>Il tetto di legge</label>
+              <div id="dp-spese-nota" class="campo-aiuto" style="margin-top:0"></div></div>
+          </div>
+          <p class="campo-aiuto">Sono un'altra cosa dalle «Spese (bolli, diritti, copie)» qui sotto:
+            quelle sono anticipate per conto del cliente e restano fuori dall'IVA (art. 15),
+            queste fanno parte del compenso e l'IVA ce l'hanno.</p>
+        </div>
+        <div class="prev-somma" id="dp-tot" style="text-align:left"></div>
+        <div class="dp-azioni">
+          <button type="button" class="btn-primary" data-action="dp-metti">Metti le voci nella parcella</button>
+          <button type="button" class="btn b-cancel" data-action="dp-chiudi">Chiudi</button>
+        </div>
+      </div>`;
+  }
+
+  /* Rifà l'elenco delle prestazioni: cambia con la categoria (le colonne del
+     decreto non sono uguali per tutti) e con l'importo (13 prestazioni hanno
+     un valore diverso per fascia d'importo, a scaglioni come l'IRPEF). */
+  function dpRicalcola(){
+    if(!dpDisponibile())return;
+    const D=window.DecretoParametri, box=$("#dp-prest"), info=$("#dp-info");
+    if(!box)return;
+    const cod=$("#dp-cat")?$("#dp-cat").value:"";
+    const V=_numIt("#dp-v")||0;
+    const c=D.categoria(cod);
+    /* quello che era gia' spuntato resta spuntato */
+    const scelte={};
+    $$("#dp-prest input[type=checkbox]").forEach(function(x){ if(x.checked)scelte[x.getAttribute("data-cod")]=1; });
+    if(!c||!(V>0)){
+      if(info)info.innerHTML="Scegli la categoria e scrivi l'importo dei lavori: qui sotto compare cosa puoi mettere in conto.";
+      box.innerHTML=""; dpTotale(); return;
+    }
+    const P=D.parametroP(V);
+    if(info)info.innerHTML="Grado di complessità <b>G = "+_numTesto(c.G)+"</b> &nbsp;·&nbsp; parametro base <b>P = "
+      +String(P).replace(".",",")+"</b> &nbsp;·&nbsp; <span class=\"dp-cat-nome\">"+esc(dpCorto(c.opere,130))+"</span>";
+    const fasi=[], perFase={};
+    D.Z2.forEach(function(p){
+      const q=D.valoreQ(p.cod,cod,V);
+      if(q===null||q===undefined)return;
+      if(!perFase[p.fase]){perFase[p.fase]=[];fasi.push(p.fase);}
+      perFase[p.fase].push({p:p,q:q,imp:Math.round(V*c.G*q*P*100)/100});
+    });
+    box.innerHTML=fasi.map(function(f){
+      const voci=perFase[f], aperta=voci.some(function(x){return scelte[x.p.cod];});
+      return '<details class="dp-fase"'+(aperta?" open":"")+'>'
+        +'<summary>'+esc(f)+' <span class="dp-conta">'+voci.length+'</span></summary>'
+        +voci.map(function(x){
+          return '<label class="dp-voce"><input type="checkbox" data-cod="'+esc(x.p.cod)+'" data-imp="'+x.imp+'"'
+            +(scelte[x.p.cod]?" checked":"")+'>'
+            +'<span class="dp-nome">'+esc(x.p.nome)+'<span class="dp-q"> Q '+String(x.q).replace(".",",")+'</span></span>'
+            +'<span class="dp-imp">'+eur2(x.imp)+'</span></label>';
+        }).join("")
+        +'</details>';
+    }).join("");
+    dpTotale();
+  }
+
+  /* Il totale del riquadro. Le spese sono un TETTO, non una cifra fissa:
+     il decreto dice «in misura non superiore a». Se si scrive di piu', si
+     riporta al massimo e si dice perché. */
+  function dpTotale(){
+    if(!dpDisponibile())return {compenso:0,spese:0,quante:0};
+    const D=window.DecretoParametri;
+    let tot=0, n=0;
+    $$("#dp-prest input[type=checkbox]").forEach(function(x){
+      if(x.checked){ tot+=(+x.getAttribute("data-imp")||0); n++; }
+    });
+    tot=Math.round(tot*100)/100;
+    const V=_numIt("#dp-v")||0, maxFraz=D.speseMaxPerc(V);
+    const spunta=$("#dp-spese"), campo=$("#dp-spese-perc"), nota=$("#dp-spese-nota");
+    let spese=0, avviso="";
+    if(maxFraz!=null){
+      const maxPerc=dpPerc(maxFraz);
+      if(campo&&(campo.value===""||campo.getAttribute("data-auto")==="1")){
+        campo.value=_numTesto(maxPerc); campo.setAttribute("data-auto","1");
+      }
+      if(spunta&&spunta.checked){
+        let perc=_numIt("#dp-spese-perc");
+        if(perc==null)perc=maxPerc;
+        if(perc>maxPerc){ perc=maxPerc; if(campo)campo.value=_numTesto(maxPerc);
+          avviso=" Il massimo qui è "+_numTesto(maxPerc)+"%: l'ho riportata lì."; }
+        if(perc<0)perc=0;
+        /* ⚠️ si arrotonda al centesimo NELLA STESSA MANIERA del resto del
+           gestionale (Math.round(x*100)/100, come impRiga e calcolaParcella).
+           Su 4.270,98 al 25% il conto esatto fa 1.067,745: qui esce 1.067,74,
+           e la fattura che nascera' da questa parcella dira' lo stesso numero.
+           Se un giorno si cambia il modo di arrotondare, si cambia LI', non
+           qui: due arrotondamenti diversi sono due totali diversi. */
+        spese=Math.round((tot*perc/100)*100)/100;
+      }
+      if(nota)nota.innerHTML="Non oltre il <b>"+_numTesto(maxPerc)+"%</b>."+(avviso?" ⚠️"+esc(avviso):"");
+    }else if(nota)nota.innerHTML="Scrivi prima l'importo dei lavori.";
+    const el=$("#dp-tot");
+    if(el){
+      el.innerHTML = n
+        ? ("Compenso: <b>"+eur2(tot)+"</b>"
+           +(spese>0?" &nbsp;·&nbsp; spese: <b>"+eur2(spese)+"</b> &nbsp;·&nbsp; in tutto: <b>"+eur2(Math.round((tot+spese)*100)/100)+"</b>":""))
+        : "Spunta le prestazioni che fai: qui compare il compenso.";
+    }
+    return {compenso:tot, spese:spese, quante:n};
+  }
+
+  /* Porta le voci nella parcella. Una riga per prestazione, col codice
+     davanti: su una gara il codice e' quello che il committente cerca. */
+  function dpMetti(){
+    if(!dpDisponibile())return;
+    const D=window.DecretoParametri;
+    const cod=$("#dp-cat")?$("#dp-cat").value:"";
+    const V=_numIt("#dp-v")||0, c=D.categoria(cod);
+    if(!c||!(V>0)){toast("Scegli la categoria e scrivi l'importo dei lavori");return;}
+    const scelte=[];
+    $$("#dp-prest input[type=checkbox]").forEach(function(x){
+      if(x.checked)scelte.push({cod:x.getAttribute("data-cod"), imp:(+x.getAttribute("data-imp")||0)});
+    });
+    if(!scelte.length){toast("Spunta almeno una prestazione");return;}
+    const r=dpTotale();
+    const box=$("#prev-righe"); if(!box)return;
+    /* le righe vuote del modulo appena aperto si tolgono, se no restano
+       in mezzo alle voci vere e finiscono anche sul PDF */
+    $$("#prev-righe [data-riga]").forEach(function(d){
+      if(d.hasAttribute("data-sezione"))return;
+      const de=d.querySelector(".pr-desc"), pr=d.querySelector(".pr-prezzo");
+      if(de&&!String(de.value||"").trim()&&pr&&!String(pr.value||"").trim())d.remove();
+    });
+    box.insertAdjacentHTML("beforeend", prevRigaHtml({sezione:true,
+      descrizione:"Decreto parametri — "+c.cod+" · lavori "+eur2(V)+" · G "+_numTesto(c.G)}));
+    scelte.forEach(function(s){
+      const p=D.prestazione(s.cod);
+      box.insertAdjacentHTML("beforeend", prevRigaHtml({
+        descrizione:s.cod+" — "+(p?p.nome:""), qta:1, prezzo:s.imp}));
+    });
+    if(r.spese>0){
+      box.insertAdjacentHTML("beforeend", prevRigaHtml({
+        descrizione:"Spese e oneri accessori (art. 5 del decreto)", qta:1, prezzo:r.spese}));
+    }
+    prevTotaleLive(); aggiornaRiepilogoParcella();
+    const quante=scelte.length+(r.spese>0?1:0);
+    toast(quante===1?"Una voce messa in parcella ✔":(quante+" voci messe in parcella ✔"));
+    const bx=$("#dp-box"); if(bx)bx.style.display="none";
+    const ap=$("#dp-apri"); if(ap)ap.style.display="";
+  }
+
+  /* Accende il riquadro quando il modulo del preventivo e' gia' sullo schermo */
+  function dpAscolta(){
+    if(!dpDisponibile())return;
+    const cat=$("#dp-cat"); if(cat)cat.addEventListener("change",dpRicalcola);
+    const v=$("#dp-v");     if(v)v.addEventListener("input",dpRicalcola);
+    const pr=$("#dp-prest");if(pr)pr.addEventListener("change",dpTotale);
+    const sp=$("#dp-spese");if(sp)sp.addEventListener("change",dpTotale);
+    const spp=$("#dp-spese-perc");
+    if(spp)spp.addEventListener("input",function(){ this.setAttribute("data-auto","0"); dpTotale(); });
+    dpRicalcola();
+  }
+
   /* Riscrive il riepilogo della parcella ogni volta che si tocca qualcosa */
   function aggiornaRiepilogoParcella(){
     if(ruoloUtente!=='professionista')return;
@@ -11917,6 +12146,7 @@ ${vecchi?`
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <button type="button" class="btn-ghost quick-add" data-action="prev-cap-add">+ Aggiungi capitolo</button>
+        ${bloccoDecreto()}
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0))}</div></div>
       </div>
       <div class="sh-b">
@@ -11936,6 +12166,7 @@ ${vecchi?`
         if(el&&el.tagName==="INPUT"&&el.type!=="checkbox")el.addEventListener("input",aggiornaRiepilogoParcella);
       });
       aggiornaRiepilogoParcella();
+      dpAscolta();
     }else{
       /* imprese e artigiani: il totale con l'IVA si aggiorna mentre si scrive */
       $("#prev-righe").addEventListener("input",aggiornaRiepilogoIvaImpresa);
@@ -15195,6 +15426,19 @@ ${vecchi?`
       return;
     }
     if(a==="pv-cli-salva")return pvCliSalva();
+    if(a==="dp-apri"){
+      const box=$("#dp-box"), apri=$("#dp-apri");
+      if(box){box.style.display="";const c=$("#dp-cat");if(c)c.focus();}
+      if(apri)apri.style.display="none";
+      return;
+    }
+    if(a==="dp-chiudi"){
+      const box=$("#dp-box"), apri=$("#dp-apri");
+      if(box)box.style.display="none";
+      if(apri)apri.style.display="";
+      return;
+    }
+    if(a==="dp-metti")return dpMetti();
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     /* un capitolo si può aggiungere anche a mano, non solo arrivando da un
        computo: chi scrive il preventivo a mano ha lo stesso bisogno di
