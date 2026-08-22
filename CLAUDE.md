@@ -14735,7 +14735,7 @@ circa venti minuti.
 
 # DA DOVE SI RIPARTE — dopo il 22 agosto 2026
 
-## Fatto oggi (sette lavori, sette push)
+## Fatto oggi (nove lavori)
 
 1. **Le tre piccole** — `js/testo-ai.js` (nuovo), i quattro pannelli,
    `index.html`. Cancelletti e stelline via, città con la maiuscola, la
@@ -14753,23 +14753,25 @@ circa venti minuti.
 6. **Gli aiuti sul telefono** — ogni sezione si presenta con la sua riga.
 7. **La porta che si apriva da sola** — il gestionale non si apre più a chi
    rallenta la rete.
+8. **Il decreto parametri** — `js/decreto-parametri.js` (nuovo) e il riquadro
+   dentro la parcella. Vedi la sezione qui sotto.
+9. **Il punto delle migliaia nelle caselle in euro** — `js/euro-casella.js`
+   (nuovo). Vedi la sezione qui sotto.
 
 ## Cosa resta, in ordine
 
-1. **Il decreto parametri (DM 17/6/2016)** — come architetti e ingegneri
-   decidono quanto chiedere. Sessione sua: il prompt è già pronto in
-   `prove-claude/PROMPT-DECRETO-PARAMETRI.md`.
-2. **Il lucchetto del piano dentro il database.** Controllato sul database
+1. **Il lucchetto del piano dentro il database.** Controllato sul database
    vero: **nessuna regola guarda il piano**, le regole dicono solo «questa
    riga è tua?». Un account gratis può leggere e scrivere tutte le tabelle
    `gest_*` passando dall'API. Tocca tutte le tabelle: è un lavoro a parte, e
    va fatto **prima di riaprire il gestionale al pubblico**.
-3. **Le 5 pagine «duplicata senza URL canonico»** in Search Console — serve
+2. **Le 5 pagine «duplicata senza URL canonico»** in Search Console — serve
    la schermata di Alessio.
-4. **Gestionale negozio**: `esc()` sulle card `neg_*`, il banner quando la
-   lettura non riesce, la numerazione dei preventivi che oggi la fa il
-   browser. Poi **gestionale noleggio**.
-5. **26 agosto**: rimisurare Meta confrontando `al_giorno_7` con
+3. **Gestionale negozio e noleggio**: `esc()` sulle card `neg_*`, il banner
+   quando la lettura non riesce, la numerazione dei preventivi che oggi la fa
+   il browser — **e la casella «Importo», che oggi butta via i centesimi
+   (vedi qui sotto)**.
+4. **26 agosto**: rimisurare Meta confrontando `al_giorno_7` con
    `al_giorno_30`.
 
 ## Da non cominciare senza dirglielo
@@ -14786,14 +14788,134 @@ Tutte quelle di prima, più quelle di oggi:
 - **Il gestionale noleggio resta senza lucchetto** (22 agosto).
 - **Le spiegazioni delle sezioni compaiono solo sul telefono**, sotto il
   titolo — e la **(i) nel menu non torna** (14 e 22 agosto).
+- **Il punto delle migliaia va su TUTTE le caselle in euro**, non solo su
+  quella del decreto (22 agosto, sera): «il punto mettilo su tutti i
+  gestionali dove serve il punto».
+- **Negozio e Noleggio si lasciano stare per adesso** (22 agosto, sera),
+  compresa la casella «Importo» che butta via i centesimi.
+- **Le tavole del decreto si fanno PIENE, non ridotte** (22 agosto): ridotte
+  vorrebbe dire che su una gara vera potrebbero non bastare, e allora è
+  peggio di niente.
+- **Il calcolo del decreto sta DENTRO la parcella**, non in una sezione sua
+  (22 agosto).
+
+## 8. IL DECRETO PARAMETRI — il compenso di architetti e ingegneri
+
+**Cosa fa**: nel modulo della parcella (solo `ruoloUtente==='professionista'`)
+c'è **«📐 Calcola col decreto parametri»**. Scegli la categoria dell'opera e
+l'importo dei lavori, spunti le prestazioni che fai, e le voci finiscono nelle
+voci di costo. Da lì la parcella va avanti come sempre.
+
+    CP = somma di ( V x G x Q x P )      P = 0,03 + 10 / V^0,4
+
+- **`js/decreto-parametri.js` (nuovo)** — le due tavole del DM 17 giugno 2016
+  (61 categorie in Z-1, 96 prestazioni in Z-2) e la formula. ⛔ **Numeri di
+  legge: non si toccano a mano.** Quando il decreto cambia si rifà la lettura
+  dal PDF nuovo e si sostituisce il file intero, come il prezzario.
+- **`gestionale-app.html`** — `bloccoDecreto()`, `dpRicalcola()`, `dpTotale()`,
+  `dpMetti()`, `dpAscolta()`. Niente finestra sopra il modulo: è un riquadro
+  che si apre DENTRO, come il cliente nuovo.
+- **`css/gestionale.css`** — `.dp-box` e compagnia, in fondo.
+
+### ⛔ LE TRE TRAPPOLE DELLE TAVOLE (trovate leggendo il PDF, non a memoria)
+
+**1. Le colonne della Z-2 non sono otto: strutture e impianti sono spaccate
+in due, e i due numeri sono diversi.** Riga QbII.01: impianti **A = 0,16**,
+impianti **B = 0,20**. Chi legge «otto colonne» sbaglia del 20% su metà degli
+impianti. Nel file le chiavi sono `STRUTTURE_A` (categorie S.01 e S.03),
+`STRUTTURE_B` (S.02, S.04, S.05, S.06), `IMPIANTI_A` (IA.xx), `IMPIANTI_B`
+(IB.xx) — la divisione la dice l'intestazione del decreto.
+
+**2. Sette numeri sono spezzati su due righe nel PDF.** «0,1» sopra e «5»
+sotto vuol dire **0,15**. Letti come stanno sarebbero stati sette compensi
+sbagliati. Il PDF va letto ricucendo i frammenti, non riga per riga.
+
+**3. Tredici prestazioni non hanno un numero solo, ma uno per fascia
+d'importo**, a scaglioni come l'IRPEF (campo `scaglioni`). E **tre** hanno le
+fasce **per ABITANTI**, non per euro (`Qa.0.01`, `Qa.0.02`, `Qa.0.06`): quelle
+sono marcate `a_mano:true` e `valoreQ()` risponde **null**. Meglio «non lo so»
+che un numero credibile e sbagliato.
+
+### Come si è verificato (e come si rifà, se le tavole cambiano)
+
+- Le tavole lette in **tre modi indipendenti** e confrontate: due dall'allegato
+  ufficiale, la terza dal decreto completo (tipografia diversa). Z-1: 61 su 61
+  identici. Z-2: 90 righe su 91 identiche, e la 91ª è quel `0,15` spezzato.
+- **Confronto con un calcolatore pubblico** (BibLus/ACCA, esempio: scuola E.09,
+  lavori 500.000 €): P = 0,082531 · G = 1,15 · CP = 51.228,02 contro i loro
+  51.228,03. Tutte e 17 le righe al centesimo.
+- ⚠️ **P si arrotonda alla SESTA cifra decimale.** Il decreto non dice come
+  arrotondare; i calcolatori pubblici scrivono P con sei decimali e fanno i
+  conti con quello. Con la precisione piena uscivano 28 centesimi di
+  differenza: pochi, ma su una gara il professionista confronta il nostro
+  numero col loro, e due numeri diversi sono un numero sbagliato.
+- ⚠️ **Il correttivo (D.Lgs. 209/2024) NON ha cambiato i valori** di G e Q: ha
+  cambiato come le prestazioni si raggruppano nei livelli di progetto (due
+  invece di tre). Per direzione lavori, sicurezza e collaudo vale ancora il DM
+  2016 pieno.
+- Il **PDF della parcella** è stato generato davvero e riletto: titolo
+  PARCELLA, i codici delle prestazioni, la riga delle spese art. 5, il
+  riepilogo fino a NETTO A PAGARE, e i numeri identici a quelli dello schermo.
+  Copia in `prove-claude/parcella-decreto-prova.pdf`.
+
+## 9. IL PUNTO DELLE MIGLIAIA NELLE CASELLE IN EURO
+
+Detto da Alessio guardando la schermata: **«l'ho messo io, non esce di suo»**.
+Su una casella dove si scrive mezzo milione, `500000` e `500.000` sono lo
+stesso numero ma non si leggono uguale — e uno zero di troppo (5.000.000
+contro 500.000) a occhio nudo si vede solo col punto.
+
+**`js/euro-casella.js` (nuovo)**: si mette `data-euro` sulla casella e basta.
+Il file si mette in ascolto da solo su tutta la pagina, in **cattura**, anche
+sui moduli che nascono dopo (e nel gestionale nascono tutti dopo, con
+innerHTML). Caricato da `gestionale-app.html` e `gestionale-operatore.html`.
+Marcate **23 caselle** fra Gestionale, Computo, Fatture, SAL e App operaio.
+
+### ⛔ DOVE `data-euro` NON SI METTE, MAI
+
+1. **Quantità, misure, ore, litri, percentuali.** Nel computo «0.500» vuol
+   dire mezzo metro: un punto delle migliaia lì farebbe un disastro.
+2. **Caselle il cui numero viene riletto con `parseFloat` o con `+valore`**
+   invece che con `_numIt`/`_numeroIt`: quelle il punto non lo capiscono,
+   `+"1.250"` fa **1,25**.
+   ⚠️ Prima di aggiungere un `data-euro` nuovo: guardare **CHI legge** quella
+   casella. Se non è `_numIt`, il punto non si mette.
+
+Altre due regole dentro il file: **i decimali non si toccano mai** (i prezzari
+regionali ne usano quattro: tagliarli a due cambierebbe un prezzo solo aprendo
+e richiudendo un modulo), e **mentre si corregge in mezzo a un numero non si
+riscrive niente** (se no il cursore salta in fondo a ogni tasto). Quello che
+resta storto si raddrizza da sé uscendo dalla casella.
+
+### ⛔ IL DIFETTO TROVATO STRADA FACENDO — Negozio e Noleggio
+
+`gestionale-negozio.html` e `gestionale-noleggio.html` leggono l'importo del
+lavoro così:
+
+    const importo = +($("#j-imp") ? $("#j-imp").value : 0) || 0;
+
+`+"1250,50"` fa **NaN**, quindi `||0` lo trasforma in **zero** e il lavoro si
+salva **senza importo**, senza dire niente. **Chi scrive i centesimi con la
+virgola — cioè chiunque — perde il numero.**
+
+⚠️ **Non è stato sistemato** (deciso il 22 agosto: prima le cose del decreto).
+Lì il `data-euro` **non c'è apposta**: metterlo prima di sistemare la lettura
+peggiorerebbe le cose. La cura è una riga: leggere con `_numIt` come fanno
+Gestionale e App operaio. C'è un banco che sorveglia che nessuno ce lo metta
+per sbaglio.
 
 ## I banchi (tutti nel container, in `prove/`)
 
 artigiano 23 · documenti-lavoro 20 · ore-parcella 20 · misure-preventivo 18 ·
 guardia-sql 16 · geometra 13 · totale-preventivo 11 · piccole 19 ·
 lucchetti 20 · negozio-cancello 12 · dati-che-si-perdono 13 ·
-frasi-geometra 8 · aiuti-sezione 10 · porta-gestionale 16.
+frasi-geometra 8 · aiuti-sezione 10 · porta-gestionale 16 ·
+**decreto 45** (le tavole e la formula, + 9 sabotaggi) ·
+**decreto-schermo 112** (il riquadro dentro la parcella, su due misure,
++ 11 sabotaggi) · **euro 24** (il punto delle migliaia e DOVE è stato messo,
++ 9 sabotaggi) · **pdf-parcella 16** (il PDF generato e riletto davvero).
 **Tutti verdi, e ognuno col suo file dei sabotaggi.**
+I quattro nuovi stanno anche in `prove-claude/banco-decreto-22ago.zip`.
 
 ⚠️ `prove/porta-gestionale` e `prove/dati-che-si-perdono` sono **lenti**:
 aspettano davvero la rete che non risponde e accendono Postgres. Un giro
