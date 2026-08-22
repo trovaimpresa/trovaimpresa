@@ -14173,3 +14173,79 @@ ore 20 · misure 18. Tutti verdi.
   segnalazione di Alessio;
 - **`js/aiuti-gestionale.js` non è caricato da nessuna pagina**: o si collega
   o si butta. Da decidere con lui.
+
+
+# ✅ 22 agosto 2026 — IL TOTALE È LA SOMMA DI QUELLO CHE SI STAMPA
+
+Punto 5 della lista: **CHIUSO**. Due file: `gestionale-app.html` e
+`js/gest-fatture.js`. E via `js/aiuti-gestionale.js`, deciso con Alessio.
+
+## IL DIFETTO
+
+Ogni riga si **stampa** arrotondata al centesimo, ma nel **totale** entrava il
+numero intero, con tutti i decimali.
+
+> 2 × 5,003 = 10,006 → sul foglio si legge **10,01**, nel totale entrava
+> **10,006**.
+
+Con tre righe così il totale scritto è 42,02 e la somma delle righe stampate è
+42,03. Il cliente prende la calcolatrice e non trova lo stesso numero. Poi la
+fattura nasce da quel totale e non torna nemmeno lei.
+
+## LA CORREZIONE
+
+⛔ **L'importo di una riga si arrotonda PRIMA di sommarlo**, e il conto sta in
+**un posto solo**: `impRiga(qta,prezzo)`.
+
+⚠️ Prima quella moltiplicazione era scritta a mano in **quattordici punti**:
+l'elenco dei preventivi, il Riepilogo, il modulo, il PDF, la parcella, il
+riquadro dell'IVA, il verbale, l'esportazione. Quattordici occasioni per
+dimenticarsene una. Adesso chi somma chiede a `impRiga()`, e ci sono 18
+chiamate.
+
+È la stessa regola già scritta il 20 agosto sul computo: «l'importo si fa con
+LO STESSO prezzo di sopra, non con un altro».
+
+## ⚠️ E LA FATTURA AVEVA LO STESSO DIFETTO — CON UN RISCHIO IN PIÙ
+
+In `js/gest-fatture.js` l'importo di riga era anche lui non arrotondato.
+⛔ Lì pesa il doppio: nel file per lo **SdI**, `<PrezzoTotale>` è scritto a due
+decimali, mentre `<ImponibileImporto>` del riepilogo nasceva da quella somma
+**non** arrotondata. Due numeri che devono combaciare, e potevano non
+combaciare.
+
+Corretto in `fattBasi` (dove nascono le righe che usano sia il PDF sia l'XML),
+nel PDF e nella scialuppa dell'XML. Il `c2()` che serviva c'era già: lo usava
+la cassa, arrotondata subito **per la stessa ragione**, scritta lì dall'11
+agosto. La regola c'era; mancava di applicarla anche alle righe.
+
+## 🗑️ VIA `js/aiuti-gestionale.js`
+
+Non lo caricava nessuna pagina. Il suo lavoro lo fa già `js/aiuti.js`, che è
+caricato ed è più grande (533 righe contro 286): tenerli tutti e due avrebbe
+messo **due sistemi di aiuti** sugli stessi pulsanti. Deciso con Alessio:
+si butta (`git rm`).
+
+⚠️ **Quello che si perde, e va detto**: quello vecchio era nato apposta perché
+`aiuti.js` funziona **solo col mouse** — c'è scritto in cima al file, ed è una
+scelta voluta. Quindi **sul telefono gli aiuti non ci sono**, e il geometra in
+cantiere sta sul telefono. Resta in lista.
+
+## IL BANCO — nei due versi
+
+`prove/totale-preventivo/`: `banco.js` · `sabotaggi.js`.
+**11 verdi · 15 sabotaggi su 15 accusati.**
+Rifatti gli altri cinque banchi: artigiano 23 · documenti 20 · ore 20 ·
+misure 18 · geometra 13. Tutti verdi.
+
+⛔ **La prova 0 guarda il BANCO, non il gestionale**, e ha fatto il suo
+mestiere subito. I primi numeri di prova li avevo scelti «sporchi» a occhio
+(2,5 × 12,345…): la differenza fra i due modi di sommare c'era, ma era **sotto
+il mezzo centesimo**, quindi a schermo i due totali si leggevano **uguali** e
+il banco sarebbe stato verde anche col difetto dentro. Adesso i numeri sono
+scelti col conto in mano — 42,02 contro 42,03 — e c'è una prova che verifica
+proprio questo: **che i numeri di prova facciano vedere il difetto**.
+
+⚠️ E la prova «nessuno somma più a mano» guarda solo le righe di **codice**:
+la formula vecchia scritta dentro un commento non fa danno, e cercarla lì
+avrebbe dato un rosso finto.

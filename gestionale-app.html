@@ -3946,7 +3946,7 @@
     const attesa=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato")
                    .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
     rieprevCache=attesa;
-    const totPrev={};PR.forEach(r=>{totPrev[r.preventivo_id]=(totPrev[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    const totPrev={};PR.forEach(r=>{totPrev[r.preventivo_id]=(totPrev[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     /* 9 agosto 2026 — anche qui il numero che vede il cliente, come nella
        lista Preventivi e nel PDF: tre schermate, un numero solo. */
     PV.forEach(function(p){
@@ -4420,7 +4420,7 @@
     const L=rieprevCache.slice().sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
     const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",L.map(p=>p.id));
     const cliMap=cliMapIn||{};
-    const tot={};(rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    const tot={};(rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     box.innerHTML=`<div class="mini-title">Preventivi in attesa di risposta</div><div class="righe">`
       +L.map(p=>{
         const q=quando(p.data,{neutro:true});          /* neutro: qui il rosso non c'entra */
@@ -11265,7 +11265,7 @@ ${vecchi?`
     let tot={};
     if(prevCache.length){
       const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id));
-      (rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+      (rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     }
     /* ===== 9 agosto 2026 — a schermo lo STESSO numero del PDF =====
        Prima la colonna "Importo" mostrava l'imponibile (10.000) mentre il PDF
@@ -11446,7 +11446,7 @@ ${vecchi?`
      SEMPRE qta 0 e prezzo 0.
 
      Non è pignoleria, è la rete di sicurezza. In sette posti diversi il
-     totale del preventivo si fa con (+r.qta||1)*(+r.prezzo||0) — il ||1
+     totale del preventivo si fa con impRiga(r.qta,r.prezzo) — il ||1
      serve alle righe scritte a mano, dove quantità vuota vuol dire "una".
      Con qta 0 e prezzo 0 quel conto fa 1 × 0 = 0: anche il punto del
      gestionale che non sa niente dei capitoli somma zero e non sbaglia
@@ -11518,13 +11518,41 @@ ${vecchi?`
       <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Es. 24,00" value="${_prezzoCasella(r.prezzo)}">
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
   }
+  /* ============================================================
+     ⛔ 22 agosto 2026 — IL TOTALE E' LA SOMMA DI QUELLO CHE SI STAMPA
+     ============================================================
+     Segnalato da Alessio: su un preventivo vero il totale in fondo non era
+     la somma delle righe stampate — ballavano tre centesimi, e poi la
+     fattura non tornava.
+
+     Il motivo: ogni riga si STAMPA arrotondata al centesimo, ma nel totale
+     entrava il numero intero, con tutti i decimali.
+     Esempio: 2,5 x 12,345 = 30,8625. Sul foglio si legge «30,86», nel totale
+     entrava 30,8625. Con dieci righe cosi' il cliente somma con la
+     calcolatrice e non trova lo stesso numero.
+
+     ⛔ La regola: l'importo di una riga si arrotonda PRIMA di sommarlo. E'
+     la stessa cosa gia' fatta il 20 agosto sul computo («l'importo si fa con
+     LO STESSO prezzo di sopra, non con un altro»).
+
+     ⚠️ E STA IN UN POSTO SOLO. Prima quel conto era scritto a mano in
+     QUATTORDICI punti: l'elenco, il Riepilogo, il modulo, il PDF, la
+     parcella, l'IVA, il verbale, l'esportazione. Quattordici occasioni per
+     dimenticarsene una. Adesso chi somma chiede a `impRiga()`.
+
+     ⚠️ `qta` vuota vale 1 (una voce «a corpo» non ha una quantita'), e il
+     prezzo vuoto vale 0: erano gia' cosi', non si cambia. */
+  function impRiga(qta,prezzo){
+    return Math.round(((+qta||1)*(+prezzo||0))*100)/100;
+  }
+
   function prevTotaleLive(){
     /* le righe di capitolo si saltano apposta. Senza il salto il conto
        tornerebbe comunque (non hanno .pr-qta né .pr-prezzo, quindi 1 × 0),
        ma è meglio che qui si legga la regola invece di fidarsi di un caso. */
     let t=0;$$("#prev-righe [data-riga]").forEach(d=>{
       if(d.hasAttribute("data-sezione"))return;
-      t+=_numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);});
+      t+=impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0));});
     const el=$("#prev-somma");if(el)el.textContent="Totale: "+eur2(t);
     return t;
   }
@@ -11638,7 +11666,7 @@ ${vecchi?`
     const box=$("#pv-riepilogo"); if(!box)return;
     let compenso=0;
     $$("#prev-righe [data-riga]").forEach(d=>{
-      compenso += _numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);
+      compenso += impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0));
     });
     const c=calcolaParcella(compenso, _numIt("#pv-cassa")||0, $("#pv-iva")?$("#pv-iva").value:0,
       $("#pv-rit")?$("#pv-rit").checked:false, 20, _numIt("#pv-spese")||0);
@@ -11711,7 +11739,7 @@ ${vecchi?`
     if(!sel||sel.value===""){box.innerHTML="";return;}
     let imponibile=0;
     $$("#prev-righe [data-riga]").forEach(d=>{
-      imponibile += _numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);
+      imponibile += impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0));
     });
     /* il totale si somma sull'IVA GIA' arrotondata ai centesimi, se no le due
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
@@ -11822,7 +11850,7 @@ ${vecchi?`
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <button type="button" class="btn-ghost quick-add" data-action="prev-cap-add">+ Aggiungi capitolo</button>
-        <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
+        <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0))}</div></div>
       </div>
       <div class="sh-b">
       ${bloccoParcella(p)}
@@ -12049,7 +12077,7 @@ ${vecchi?`
       candidate=cand||[];
     }
     const {data:rr}=await sb.from("gest_preventivo_righe").select("descrizione,qta,prezzo").eq("preventivo_id",id).order("ordine");
-    const tot=(rr||[]).reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0);
+    const tot=(rr||[]).reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0);
 
     if(!candidate.length){
       if(!gconfirm("Il cliente ha accettato? Creo "+(pro?"la pratica":"il lavoro")+" dal preventivo N. "+p.numero+"."))return;
@@ -12172,7 +12200,7 @@ ${vecchi?`
         y+=th;
         return;
       }
-      const rt=(+r.qta||1)*(+r.prezzo||0);tot+=rt;
+      const rt=impRiga(r.qta,r.prezzo);tot+=rt;
       const lines=doc.splitTextToSize(r.descrizione,R-M-72);
       const rowH=lines.length*5+4;
       if(y+rowH>270){doc.addPage();y=20;}
@@ -12367,7 +12395,7 @@ ${vecchi?`
     if(!pol.completa){polizzaFerma(pol);return aziendaForm();}
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
-    let tot=0; righe.forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
+    let tot=0; righe.forEach(r=>{tot+=impRiga(r.qta,r.prezzo);});
     const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
     const mem=incLeggiMem();
 
@@ -12457,7 +12485,7 @@ ${vecchi?`
        sarebbe peggio del problema. */
     if(pol.scaduta&&!gconfirm("La tua polizza professionale risulta scaduta il "+fdate(pol.scad)+".\n\nSe stampi adesso, la lettera che firma il cliente riporterà questa data.\n\nVuoi stamparla lo stesso?"))return;
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
-    let tot=0;(rr||[]).forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
+    let tot=0;(rr||[]).forEach(r=>{tot+=impRiga(r.qta,r.prezzo);});
     const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
 
     const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};
@@ -12718,7 +12746,7 @@ ${vecchi?`
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
-    let imponibile=0; righe.forEach(r=>{imponibile+=(+r.qta||1)*(+r.prezzo||0);});
+    let imponibile=0; righe.forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
     const ivaVal=perc?Math.round(imponibile*perc)/100:0;
     const totale=Math.round((imponibile+ivaVal)*100)/100;
@@ -12787,7 +12815,7 @@ ${vecchi?`
     let c={};
     c=await cliDelDocumento(p.cliente_id);
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
-    let imponibile=0;(rr||[]).forEach(r=>{imponibile+=(+r.qta||1)*(+r.prezzo||0);});
+    let imponibile=0;(rr||[]).forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
     const ivaVal=perc?Math.round(imponibile*perc)/100:0;
     const totale=Math.round((imponibile+ivaVal)*100)/100;
@@ -14672,9 +14700,9 @@ ${vecchi?`
     }
     add("Clienti",D.cli.map(c=>({Reparto:mN[c.mestiere_id]||"",Nome:c.nome||"",Indirizzo:c.indirizzo||"",Referente:c.referente||"",Telefono:c.telefono||""})));
     add(_pro?"Collaboratori":"Squadra",D.ops.map(o=>({Reparto:mN[o.mestiere_id]||"",Nome:o.nome||"",Telefono:o.telefono||""})));
-    const tot={};D.righe.forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    const tot={};D.righe.forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     add("Preventivi",D.prev.map(p=>({Numero:p.numero,Titolo:p.titolo||"",Reparto:mN[p.mestiere_id]||"",Cliente:cN[p.cliente_id]||"",Data:p.data||"",Stato:p.stato||"","Totale €":tot[p.id]||0,Note:p.note||""})));
-    add("Voci preventivi",D.righe.map(r=>({"N. preventivo":pN[r.preventivo_id]||"",Descrizione:r.descrizione||"","Q.tà":+r.qta||1,"Prezzo €":+r.prezzo||0,"Totale €":(+r.qta||1)*(+r.prezzo||0)})));
+    add("Voci preventivi",D.righe.map(r=>({"N. preventivo":pN[r.preventivo_id]||"",Descrizione:r.descrizione||"","Q.tà":+r.qta||1,"Prezzo €":+r.prezzo||0,"Totale €":impRiga(r.qta,r.prezzo)})));
     add("Spese",D.spese.map(s=>({Lavoro:lN[s.lavoro_id]||"",Descrizione:s.descrizione||"","Importo €":+s.importo||0,Data:s.data||""})));
     const zN=Object.fromEntries(D.mezzi.map(m=>[m.id,m.nome||""]));
     const zCat={mezzo:"Mezzo",attrezzatura:"Attrezzatura"};

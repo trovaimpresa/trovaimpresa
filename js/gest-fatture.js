@@ -179,7 +179,18 @@
     const RR=R||[];
     let compenso=0;
     const linee=RR.map(function(r){
-      const imp=(+r.qta||0)*(+r.prezzo||0);
+      /* ⛔ 22 agosto 2026 — L'IMPORTO DELLA RIGA SI ARROTONDA SUBITO.
+         Stesso difetto trovato sul preventivo: la riga si STAMPA arrotondata
+         al centesimo, ma nel totale entrava il numero intero con tutti i
+         decimali. 2,5 x 12,345 = 30,8625: sul foglio «30,86», nel totale
+         30,8625. Il cliente somma le righe con la calcolatrice e non trova
+         lo stesso numero.
+         ⚠️ E qui pesa il doppio: `PrezzoTotale` nel file per lo SdI e' a due
+         decimali, mentre `ImponibileImporto` del riepilogo nasceva da questa
+         somma non arrotondata. Due numeri che devono combaciare, e potevano
+         non combaciare. Stessa ragione per cui la cassa, tre righe sotto, si
+         arrotonda subito. */
+      const imp=c2((+r.qta||0)*(+r.prezzo||0));
       compenso+=imp;
       return {iva:forf?0:(+r.iva||0), pieno:imp, sconto:0, totale:imp};
     });
@@ -1412,7 +1423,9 @@
     doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
 
     R.forEach(r=>{
-      const imp=(+r.qta||0)*(+r.prezzo||0);
+      /* arrotondato come in fattBasi: sul PDF e nel totale deve essere lo
+         stesso numero, non due (22 agosto 2026) */
+      const imp=Math.round(((+r.qta||0)*(+r.prezzo||0))*100)/100;
       const al=forf?0:(+r.iva||0);
       const lines=doc.splitTextToSize(r.descrizione||"",colQ-M-8);
       const h=Math.max(lines.length*4.6+5, 9);
@@ -1866,8 +1879,10 @@
       const al=forf?0:(+r.iva||0);
       /* la riga gia' scontata la calcola fattBasi, in un posto solo: qui non si
          rifa' il conto, se no le due copie prima o poi si scollano */
-      const L=(c.linee&&c.linee[i])||{pieno:(+r.qta||0)*(+r.prezzo||0),sconto:0,
-                                      totale:(+r.qta||0)*(+r.prezzo||0)};
+      /* la scialuppa, se le linee non ci fossero: arrotondata come tutto
+         il resto (22 agosto 2026) */
+      const _impR=Math.round(((+r.qta||0)*(+r.prezzo||0))*100)/100;
+      const L=(c.linee&&c.linee[i])||{pieno:_impR,sconto:0,totale:_impR};
       x+='      <DettaglioLinee>\n';
       x+='        <NumeroLinea>'+(i+1)+'</NumeroLinea>\n';
       x+='        <Descrizione>'+xesc(xtaglia(r.descrizione,1000))+'</Descrizione>\n';
