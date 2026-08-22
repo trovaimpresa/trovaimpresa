@@ -115,6 +115,11 @@
       <div class="side-group">Azienda</div>
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
       <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Attrezzature</span><span class="tab-cnt" id="cnt-attrezzature"></span></button>
+      <!-- 22 agosto 2026 — IL NOLEGGIO ENTRA NEL MENU.
+           Non e' una sezione di questa pagina: e' il gestionale noleggio, che
+           sta in un file suo. Percio' non ha "data-tab" ma "data-vai", e il
+           gestore dei pulsanti qui sotto lo riconosce e ci porta. -->
+      <button data-vai="/gestionale-noleggio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Noleggio</span></button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computo metrico</span><span class="tab-cnt" id="cnt-computi"></span></button>
       <button data-tab="prezzario" id="tab-prezzario" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Prezzario</span><span class="tab-cnt" id="cnt-prezzario"></span></button>
@@ -16017,6 +16022,11 @@ ${vecchi?`
 
   $$("nav.tabs button").forEach(b=>{
     b.onclick=()=>{
+      /* 22 agosto 2026 — i pulsanti che portano a un'ALTRA pagina (Noleggio).
+         Vanno riconosciuti per primi: non hanno una sezione da accendere, e
+         senza questa riga il menu andrebbe a cercare "#undefined" e morirebbe
+         in silenzio, portandosi dietro tutti gli altri pulsanti. */
+      if(b.dataset.vai){location.href=b.dataset.vai;return;}
       $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
       /* Render pigro: la sezione si ridisegna all'apertura se è segnata "da
