@@ -414,7 +414,24 @@
       '.ti-i:hover,.ti-i[aria-expanded=true]{opacity:1;color:#0b4bc4}' +
       '.ti-i:focus-visible{outline:2px solid #0b4bc4;outline-offset:2px}' +
       '.job-actions>.ti-i{margin-left:auto;align-self:center}' +
-      '@media (max-width:560px){.ti-i{width:22px;height:22px;min-width:22px;font-size:13px;opacity:1}}';
+      '@media (max-width:560px){.ti-i{width:22px;height:22px;min-width:22px;font-size:13px;opacity:1}}' +
+      /* ⛔ 22 agosto 2026 — LA RIGA CHE PRESENTA LA SEZIONE, SUL TELEFONO.
+         Le frasi qui sopra (AIUTI_TAB) spiegano una per una le 24 voci del
+         menu, e finora si leggevano SOLO passandoci sopra col mouse: sul
+         telefono non le vedeva nessuno. Nel menu la (i) non ci va (scelta di
+         Alessio del 14 agosto, e resta), quindi la frase compare DENTRO la
+         sezione, sotto il titolo, appena ci entri.
+         ⚠️ 13 px e' il minimo del gestionale (regola dislessia): questa sta
+         a 14. E su computer sparisce: li' la spiegazione c'e' gia' col
+         mouse, e due volte la stessa frase e' rumore. */
+      '.ti-sez{margin:2px 0 12px;color:#5b6b80;font-size:14px;line-height:1.5;max-width:60ch}';
+      /* ⚠️ qui c'era anche una regola CSS che nascondeva la riga dove c'e' il
+         mouse. Era un secondo lucchetto sulla stessa porta: la riga, dove c'e'
+         il mouse, non viene proprio creata (rigaSezione esce subito). Il
+         sabotaggio che toglieva la regola CSS restava muto, e aveva ragione:
+         due lucchetti di cui uno non si puo' provare sono uno solo piu' una
+         decorazione. Il controllo e' quello di conMouse, come per tutto il
+         resto del file. */
     document.head.appendChild(s2);
   }
   function creaI(testo) {
@@ -438,11 +455,41 @@
     el.appendChild(document.createTextNode(' '));
     el.appendChild(creaI(testo));
   }
+  /* la riga che presenta la sezione (solo dove il mouse non c'e') */
+  /* ⚠️ si mettono in TUTTE le sezioni, non solo in quella aperta: cambiare
+     sezione vuol dire cambiare una CLASSE, e l'osservatore qui sotto guarda
+     solo chi nasce e chi muore, non le classi. Guardando la sola sezione
+     aperta la riga non compariva mai — ci sono cascato, e il banco l'ha
+     detto. Le sezioni chiuse non si vedono comunque. */
+  function rigaSezione() {
+    if (conMouse) return;
+    document.querySelectorAll('section[id]').forEach(function (sez) {
+      var t = AIUTI_TAB[sez.id];
+      if (!t) return;
+      if (sez.querySelector('.ti-sez')) return;
+      /* ⚠️ certe sezioni una riga di presentazione ce l'hanno gia' scritta a
+         mano (il Riepilogo, l'Agenda, la Galleria): due frasi che dicono la
+         stessa cosa una sotto l'altra sono peggio di nessuna. */
+      if (sez.querySelector('.gal-intro, .rie-intro p, .sez-intro')) return;
+      var h = sez.querySelector('h2');
+      if (!h) return;
+      var p = document.createElement('p');
+      p.className = 'ti-sez';
+      p.textContent = t;
+      /* il titolo spesso sta dentro una riga con i pulsanti a fianco: la
+         frase va SOTTO tutta quella riga, non in mezzo ai pulsanti */
+      var testa = h.parentNode;
+      if (testa !== sez && testa.children.length > 1) testa.insertAdjacentElement('afterend', p);
+      else h.insertAdjacentElement('afterend', p);
+    });
+  }
+
   function passata() {
     if (stoScrivendo) return;
     stoScrivendo = true;
     try {
       stileI();
+      rigaSezione();
       document.querySelectorAll('label:not([data-ti-i])').forEach(function (l) {
         var t = testoPerParola(l.textContent); if (t) attaccaI(l, t);
       });

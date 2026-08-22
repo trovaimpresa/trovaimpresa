@@ -14607,3 +14607,61 @@ misure 18 · totale 11 · dati che si perdono 13. Tutti verdi.
 anche **dentro i commenti**, dove il nome del file ci deve stare. I commenti
 adesso si tolgono davvero (anche quelli lunghi su più righe), invece di
 riconoscerli dall'inizio della riga.
+
+---
+
+# 22 AGOSTO 2026 — GLI AIUTI SUL TELEFONO
+
+⚠️ **Prima ho controllato se la voce della lista era ancora vera**, invece di
+fidarmi. Metà era vecchia:
+
+- gli aiuti **funzionano** al tocco: il pulsantino **(i)** si preme e si apre
+  (era già stato sistemato il 14 agosto);
+- ma nel gestionale c'è **un solo** elemento con l'aiuto attaccato, e le **24
+  voci del menu** hanno una spiegazione scritta ciascuna (`AIUTI_TAB`, dentro
+  `js/aiuti.js`) che **si legge solo passandoci sopra col mouse**.
+
+Quindi sul telefono quelle 24 spiegazioni non le leggeva nessuno. E nel file
+c'era scritto che «appena entri, la sezione si presenta da sola con la sua
+riga di spiegazione»: **quella riga non esisteva**.
+
+⛔ **La (i) nel menu non si rimette** (scelta di Alessio del 14 agosto: sul
+telefono faceva diventare le voci alte il doppio). La frase compare **dentro
+la sezione, sotto il titolo**, appena ci entri — e solo dove il mouse non c'è.
+Scelta di Alessio, 22 agosto.
+
+## Come è fatta
+
+`js/aiuti.js`, funzione `rigaSezione()`: un `<p class="ti-sez">` col testo di
+`AIUTI_TAB[sezione]`, a 14 px (il minimo del gestionale è 13).
+
+⚠️ **Si mette in TUTTE le sezioni, non solo in quella aperta.** Cambiare
+sezione vuol dire cambiare una **classe**, e l'osservatore guarda solo chi
+nasce e chi muore, non le classi: guardando la sola sezione aperta la riga non
+compariva mai. Ci sono cascato, e il banco l'ha detto. Le sezioni chiuse non
+si vedono comunque.
+
+⚠️ Dove una presentazione c'è già scritta a mano (Riepilogo, Agenda, Galleria)
+**non se ne aggiunge una seconda**.
+
+⚠️ La riga sta dentro `#appview`, quindi il traduttore dello studio tecnico ci
+passa già: al geometra esce «pratiche», non «cantieri».
+
+## Il banco — nei due versi
+
+`prove/aiuti-sezione/`: **10 verdi · 10 sabotaggi su 10 accusati.** Le prove
+girano su un **iPhone 13 simulato** (niente mouse, tocco acceso) *e* su un
+computer vero: il difetto del 14 agosto si vedeva solo così, perché a 390 px
+su un finto computer `hover:hover` resta acceso.
+
+⛔ **Un sabotaggio muto, e aveva ragione lui.** Avevo messo **due lucchetti
+sulla stessa porta**: il controllo in JavaScript (`if (conMouse) return`) e una
+regola CSS che nascondeva la riga dove c'è il mouse. Togliendo la regola CSS
+non diventava rossa nessuna prova, perché con il mouse la riga non viene
+proprio creata. Regola CSS tolta: il controllo è quello di `conMouse`, come per
+tutto il resto del file.
+
+⚠️ E una prova mia troppo larga: «la riga viene dopo il titolo» era verde anche
+con la riga infilata **dentro** la testata, fra il titolo e i pulsanti — lì il
+titolo precedente c'è lo stesso. Adesso la prova guarda che la riga sia appesa
+alla **sezione**, non alla testata.
