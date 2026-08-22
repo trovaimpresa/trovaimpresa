@@ -226,7 +226,7 @@
     <div class="top-in">
       <div class="brand">
         <button class="back" data-action="home">← Indietro</button>
-        <div><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
+        <div style="cursor:pointer" data-action="reparti" title="Cambia reparto"><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
       </div>
       <!-- 6 agosto 2026: in un noleggio non si creano "lavori": si registrano noleggi. -->
       <button class="btn-new" data-action="new-nol">+ Nuovo noleggio</button>
@@ -906,11 +906,45 @@
   }
 
   const NOL_ULTIMO="nol_ultimo_reparto";
+
+  /* ================================================================
+     LA FRECCIA INDIETRO — regola decisa da Alessio il 22 agosto 2026
+       · dentro una sezione (Mezzi, Clienti, Noleggi...) → torna al Riepilogo
+       · nel Riepilogo                                   → esce dal noleggio
+     E la scritta sulla freccia dice sempre dove porta, cosi' non si scopre
+     dove si va dopo averci cliccato.
+     Per cambiare reparto si clicca il NOME del reparto qui accanto.
+     ================================================================ */
+  function nolSezioneAttiva(){
+    const b=document.querySelector("nav.tabs button.active");
+    return b?b.dataset.tab:"riepilogo";
+  }
+  function nolScriviFreccia(){
+    const f=document.querySelector(".back"); if(!f) return;
+    f.textContent = nolSezioneAttiva()==="riepilogo" ? "← Esci" : "← Riepilogo";
+  }
+  function nolIndietro(){
+    if(nolSezioneAttiva()!=="riepilogo"){
+      const r=document.querySelector('nav.tabs button[data-tab="riepilogo"]');
+      if(r){r.click();return;}
+    }
+    /* si esce: si torna da dove si e' arrivati, se si sa. Se no, al gestionale. */
+    try{
+      if(document.referrer && new URL(document.referrer).origin===location.origin
+         && document.referrer.indexOf("gestionale-noleggio")<0){ history.back(); return; }
+    }catch(e){}
+    location.href="/gestionale";
+  }
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
     try{localStorage.setItem(NOL_ULTIMO,id);}catch(e){}
+    /* ⛔ 22 agosto 2026 — IL NOLEGGIO E' SEMPRE BLU.
+       Ogni reparto ha il suo colore, e col reparto "casa" la testata diventava
+       verde: sembrava un'altra applicazione. Il noleggio e' uno solo, e il suo
+       colore e' quello del gestionale. Il colore del reparto resta scritto sul
+       reparto (serve alle sue card), semplicemente non tinge piu' la testata. */
     const r=document.documentElement.style;
-    r.setProperty("--accent",p.a);r.setProperty("--accent-d",p.ad);r.setProperty("--accent-soft",p.as);
+    r.setProperty("--accent","#0066ff");r.setProperty("--accent-d","#0047b3");r.setProperty("--accent-soft","#e8f1ff");
     $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Categoria "+p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="block";
@@ -920,7 +954,7 @@
     $$("#stato-chips .chip").forEach(c=>c.classList.toggle("on",c.dataset.stato==="tutti"));
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
-    renderAll();renderRiepilogoNegozio();window.scrollTo(0,0);
+    renderAll();renderRiepilogoNegozio();nolScriviFreccia();window.scrollTo(0,0);
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
@@ -2170,7 +2204,8 @@
     if(a==="new-panel")return panelForm();
     if(a==="save-panel")return savePanel();
     if(a==="del-panel")return delPanel(t.dataset.id);
-    if(a==="home")return goHome();
+    if(a==="home")return nolIndietro();
+    if(a==="reparti")return goHome();
     if(a==="azienda")return aziendaForm();
     if(a==="save-azienda")return saveAzienda();
     if(a==="pdf")return generaPdf(id);
@@ -2264,6 +2299,7 @@
        arriva trova la testata tagliata a meta'. Si apre dall'alto e basta. */
     window.scrollTo(0,0);
     document.documentElement.scrollTop=0; document.body.scrollTop=0;
+    nolScriviFreccia();
   });
 
   let editProdId=null;
