@@ -15880,6 +15880,21 @@ ${vecchi?`
       <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; il Premium? <a href="/login-impresa.html" style="color:var(--blu);font-weight:700;text-decoration:none;">Accedi</a></p>
       <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
     </div>
+    <!-- ⛔ 22 agosto 2026 — LA PORTA CHE SI APRIVA DA SOLA.
+         Qui non c'era niente: se la rete era lenta, dopo 8 secondi il
+         gestionale si apriva a chiunque, e se la lettura del piano andava in
+         errore pure. La ragione era buona (non lasciare fuori chi paga) ma il
+         verso era sbagliato: per entrare bastava rallentare quella richiesta.
+         Adesso, quando non si riesce a verificare, si vede questa schermata:
+         resta FUORI, ma con un pulsante per riprovare e una strada per
+         scrivere. Nessuno resta chiuso fuori senza sapere perche'. -->
+    <div id="gate-lento" style="display:none;padding:28px 28px 32px;color:var(--testo);">
+      <p style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Non riesco a verificare il tuo accesso</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">La linea sta rispondendo troppo lentamente, oppure &egrave; caduta. Il tuo abbonamento non c&rsquo;entra: appena la linea torna, entri.</p>
+      <button type="button" onclick="location.reload();" style="display:block;width:100%;padding:16px;margin-bottom:10px;border:none;border-radius:10px;background:var(--blu);color:#fff;font-size:17px;font-weight:700;cursor:pointer;">Riprova</button>
+      <p style="margin:16px 0 0;font-size:15px;text-align:center;line-height:1.6;">Se non si sblocca, scrivi a <a href="mailto:info@trovaimpresa.com" style="color:var(--blu);font-weight:700;text-decoration:none;">info@trovaimpresa.com</a></p>
+      <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
+    </div>
   </div>
 </div>
 <script>
@@ -15918,9 +15933,19 @@ ${vecchi?`
     return true;
   }
 
-  function showChecking(t){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='block';q('gate-checking').textContent=t;q('gate-paywall').style.display='none';q('gate-manutenzione').style.display='none';document.body.style.overflow='hidden';}
-  function showPaywall(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='block';document.body.style.overflow='hidden';}
-  function showManutenzione(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='none';q('gate-manutenzione').style.display='block';document.body.style.overflow='hidden';}
+  /* ⛔ 22 agosto 2026 — le schermate si spengono a vicenda da un ELENCO SOLO.
+     Prima ognuna spegneva le altre a mano: con la quarta (gate-lento)
+     dimenticarne una avrebbe lasciato due schermate una sopra l'altra. */
+  var GATE_SCHERMATE=['gate-checking','gate-paywall','gate-manutenzione','gate-lento'];
+  function gateMostra(quale){
+    q('gate-gestionale').style.display='flex';
+    GATE_SCHERMATE.forEach(function(id){ var e=q(id); if(e)e.style.display=(id===quale?'block':'none'); });
+    document.body.style.overflow='hidden';
+  }
+  function showChecking(t){gateMostra('gate-checking');q('gate-checking').textContent=t;}
+  function showPaywall(){gateMostra('gate-paywall');}
+  function showManutenzione(){gateMostra('gate-manutenzione');}
+  function showLento(){gateMostra('gate-lento');}
 
   /* "Avvisami quando è pronto" */
   window.avvisamiGestionale=function(){
@@ -15985,35 +16010,70 @@ ${vecchi?`
     showChecking('Apertura del gestionale…');
     var deciso=false;
     var chiave=(new URLSearchParams(location.search).get('chiave')==='apri');
-    /* esito: 'ok' entra · 'manutenzione' · 'premium' mostra la schermata del Premium */
+    /* esito: 'ok' entra · 'manutenzione' · 'premium' mostra il Premium ·
+              'lento' non si e' riuscito a verificare */
     var decidi=function(email,esito){
       if(deciso)return; deciso=true;
       if(chiave){hideGate();return;}                       /* scorciatoia per Alessio */
+      if(esito==='lento'){showLento();return;}             /* nel dubbio, FUORI */
       if(!ammesso(email)){showManutenzione();return;}
       if(esito==='premium'){showPaywall();return;}
       hideGate();
     };
-    gc.auth.getSession().then(function(r){
-      var s=r.data && r.data.session;
-      /* senza login non si entra: si vede la schermata del Premium col link per accedere */
-      if(!s){decidi('','premium');return;}
-      window._gestUid=s.user.id;
-      gc.from('imprese').select('email, piano, premium_scadenza').eq('user_id',s.user.id).maybeSingle().then(function(res){
-        var row=res && res.data;
-        window._gestEmail=(row&&row.email)||s.user.email||'';
-        var ok=haPremium(row);
-        window._gestPremium=ok;
-        registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
-        decidi(window._gestEmail, ok?'ok':'premium');
+
+    /* ⛔ 22 agosto 2026 — LE DUE PORTE CHE SI APRIVANO DA SOLE.
+       Qui c'erano due strade che finivano con «entra»: il tempo scaduto dopo
+       8 secondi, e la lettura del piano andata in errore. Erano scelte
+       volute, e la ragione era buona — non lasciare fuori chi paga. Ma il
+       verso era sbagliato: per entrare gratis bastava RALLENTARE quella
+       richiesta, cosa che si fa dal menu degli sviluppatori in tre secondi.
+       Adesso il dubbio chiude, non apre. E perche' chi paga non resti fuori
+       per un tentennamento della rete, prima di chiudere si RIPROVA una
+       seconda volta: due tentativi da 8 secondi, e solo dopo la schermata
+       «non riesco a verificare», che ha il pulsante per riprovare. */
+    var TEMPO=8000, tentativi=0, timer=null;
+
+    function prova(){
+      tentativi++;
+      clearTimeout(timer);
+      timer=setTimeout(function(){
+        if(deciso)return;
+        if(tentativi<2){ showChecking('La linea è lenta: riprovo…'); prova(); }
+        else decidi(window._gestEmail||'','lento');
+      },TEMPO);
+
+      gc.auth.getSession().then(function(r){
+        var s=r.data && r.data.session;
+        /* senza login non si entra: si vede la schermata del Premium col link per accedere */
+        if(!s){clearTimeout(timer);decidi('','premium');return;}
+        window._gestUid=s.user.id;
+        gc.from('imprese').select('email, piano, premium_scadenza').eq('user_id',s.user.id).maybeSingle().then(function(res){
+          /* ⚠️ Supabase non lancia: l'errore torna DENTRO la risposta. Senza
+             questa riga una lettura rifiutata passava per «nessuna riga»,
+             cioe' per «non e' Premium»: colpa data al piano invece che alla
+             rete. */
+          if(res&&res.error){ if(tentativi<2){prova();} else {clearTimeout(timer);decidi(window._gestEmail||'','lento');} return; }
+          clearTimeout(timer);
+          var row=res && res.data;
+          window._gestEmail=(row&&row.email)||s.user.email||'';
+          var ok=haPremium(row);
+          window._gestPremium=ok;
+          registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
+          decidi(window._gestEmail, ok?'ok':'premium');
+        },function(){
+          /* la lettura non e' riuscita: si riprova, e se non va nemmeno la
+             seconda volta si resta FUORI dicendolo (prima qui si entrava) */
+          if(tentativi<2){ prova(); return; }
+          clearTimeout(timer);
+          decidi(window._gestEmail||'','lento');
+        });
       },function(){
-        /* la lettura non è riuscita (rete): si entra, per non bloccare chi paga */
-        window._gestEmail=s.user.email||'';
-        registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail));
-        decidi(window._gestEmail,'ok');
+        if(tentativi<2){ prova(); return; }
+        clearTimeout(timer);
+        decidi('','lento');
       });
-    },function(){decidi('','premium');});
-    /* rete lenta o bloccata: dopo 8 secondi decide comunque e fa entrare */
-    setTimeout(function(){decidi(window._gestEmail||'','ok');},8000);
+    }
+    prova();
   }
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
 })();

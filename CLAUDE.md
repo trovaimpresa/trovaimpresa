@@ -14665,3 +14665,136 @@ tutto il resto del file.
 con la riga infilata **dentro** la testata, fra il titolo e i pulsanti — lì il
 titolo precedente c'è lo stesso. Adesso la prova guarda che la riga sia appesa
 alla **sezione**, non alla testata.
+
+---
+
+# 22 AGOSTO 2026 — LA PORTA CHE SI APRIVA DA SOLA
+
+Trovata guardando i lucchetti, stamattina. In `gestionale-app.html` il
+cancello aveva **due strade che finivano con «entra»**:
+
+```js
+/* rete lenta o bloccata: dopo 8 secondi decide comunque e fa entrare */
+setTimeout(function(){decidi(window._gestEmail||'','ok');},8000);
+```
+
+e il ramo dell'errore di lettura, che commentava «si entra, per non bloccare
+chi paga». Tutte e due scelte volute, e la ragione era buona. **Ma il verso
+era sbagliato**: per entrare gratis bastava **rallentare quella richiesta**,
+cosa che si fa dal menu degli sviluppatori in tre secondi.
+
+Oggi non si vedeva perché `MANUTENZIONE = true`. **Il giorno che si rimette a
+`false` diventava vero.** Per questo si è chiuso prima di riaprire.
+
+## Come è adesso
+
+Il dubbio **chiude**, non apre. E perché chi paga non resti fuori per un
+tentennamento della rete, prima di chiudere si **riprova una seconda volta**:
+due tentativi da 8 secondi, e solo dopo la schermata **«Non riesco a
+verificare il tuo accesso»**, che dice che l'abbonamento non c'entra, ha il
+pulsante **Riprova** e l'indirizzo a cui scrivere.
+
+⚠️ Aggiunto anche il controllo che mancava: `if(res && res.error)`. Supabase
+non lancia — l'errore torna **dentro** la risposta. Senza quella riga una
+lettura rifiutata passava per «nessuna riga», cioè per «non è Premium»: colpa
+data al piano invece che alla rete.
+
+⚠️ Le quattro schermate del cancello adesso si spengono a vicenda da un
+**elenco solo** (`GATE_SCHERMATE`): erano tre e ognuna spegneva le altre a
+mano, con la quarta dimenticarne una avrebbe lasciato due schermate
+sovrapposte. Stessa cura fatta stamattina sul negozio.
+
+⛔ Restano com'erano: la scorciatoia `?chiave=apri` e la manutenzione.
+
+## Il banco — nei due versi
+
+`prove/porta-gestionale/`: **16 verdi · 14 sabotaggi su 14 accusati.**
+Rifatti gli altri: artigiano 23 · geometra 13 · dati che si perdono 13 ·
+frasi geometra 8 · aiuti sezione 10. Tutti verdi.
+
+⚠️ **Due inciampi miei nel banco, e uno era grosso.**
+
+1. Il finto Supabase contava **tutte** le letture, ma la pagina legge
+   `imprese` anche per conto suo appena parte: la prova «ci riprova davvero»
+   era verde anche con il secondo tentativo tolto. Adesso il finto riconosce
+   la lettura **della porta** da quello che chiede (`premium_scadenza`).
+2. Le prove «entra / non entra» le avevo scritte con un'email qualsiasi: con
+   la manutenzione accesa entra **solo** l'email dell'elenco `AMMESSI`, quindi
+   si vedeva sempre la schermata della manutenzione e non si provava più
+   niente. Cinque rossi tutti uguali.
+
+⛔ E un sabotaggio muto: il ramo «non riesco nemmeno a leggere la sessione»
+non lo provava nessuno, e cambiandolo in «entra» restava verde. Aggiunte due
+prove (4b e 4c).
+
+⚠️ **Il banco è lento apposta**: due prove aspettano davvero 20 secondi per
+far vedere la rete che non risponde. Un giro completo di sabotaggi sono
+circa venti minuti.
+
+---
+
+# DA DOVE SI RIPARTE — dopo il 22 agosto 2026
+
+## Fatto oggi (sette lavori, sette push)
+
+1. **Le tre piccole** — `js/testo-ai.js` (nuovo), i quattro pannelli,
+   `index.html`. Cancelletti e stelline via, città con la maiuscola, la
+   striscia arancione che adesso dice che risponde una persona.
+2. **I lucchetti** — controllo di tutti quanti, referto in
+   `prove-claude/LUCCHETTI-22-agosto.md`. Chiusi due buchi:
+   `sql/blocco-gestionale-attivo.sql` (nuovo, **già eseguito** su Supabase) e
+   il cancello del negozio che si apriva a chi non aveva fatto l'accesso.
+3. **I dati che si perdono** — il «fatto» segnato dal telefono che non
+   risultava a nessuno, e le ore che sparivano dal margine.
+4. **Le frasi del geometra** — sei frasi sgrammaticate, trovate facendo
+   girare il traduttore su tutte le scritte della pagina.
+5. **Il messaggio del database** — dodici punti in cinque file, adesso in
+   uno solo.
+6. **Gli aiuti sul telefono** — ogni sezione si presenta con la sua riga.
+7. **La porta che si apriva da sola** — il gestionale non si apre più a chi
+   rallenta la rete.
+
+## Cosa resta, in ordine
+
+1. **Il decreto parametri (DM 17/6/2016)** — come architetti e ingegneri
+   decidono quanto chiedere. Sessione sua: il prompt è già pronto in
+   `prove-claude/PROMPT-DECRETO-PARAMETRI.md`.
+2. **Il lucchetto del piano dentro il database.** Controllato sul database
+   vero: **nessuna regola guarda il piano**, le regole dicono solo «questa
+   riga è tua?». Un account gratis può leggere e scrivere tutte le tabelle
+   `gest_*` passando dall'API. Tocca tutte le tabelle: è un lavoro a parte, e
+   va fatto **prima di riaprire il gestionale al pubblico**.
+3. **Le 5 pagine «duplicata senza URL canonico»** in Search Console — serve
+   la schermata di Alessio.
+4. **Gestionale negozio**: `esc()` sulle card `neg_*`, il banner quando la
+   lettura non riesce, la numerazione dei preventivi che oggi la fa il
+   browser. Poi **gestionale noleggio**.
+5. **26 agosto**: rimisurare Meta confrontando `al_giorno_7` con
+   `al_giorno_30`.
+
+## Da non cominciare senza dirglielo
+
+Fattura elettronica allo SdI (serve un intermediario accreditato) · prezzo del
+materiale dai negozi · fattura PA (FPA12) e reverse charge N6.7 (prima il
+commercialista) · POS · contabilità lavori pubblici · formati di scambio ·
+computo da foto.
+
+## ⛔ Decisioni di Alessio — non si ripropongono
+
+Tutte quelle di prima, più quelle di oggi:
+
+- **Il gestionale noleggio resta senza lucchetto** (22 agosto).
+- **Le spiegazioni delle sezioni compaiono solo sul telefono**, sotto il
+  titolo — e la **(i) nel menu non torna** (14 e 22 agosto).
+
+## I banchi (tutti nel container, in `prove/`)
+
+artigiano 23 · documenti-lavoro 20 · ore-parcella 20 · misure-preventivo 18 ·
+guardia-sql 16 · geometra 13 · totale-preventivo 11 · piccole 19 ·
+lucchetti 20 · negozio-cancello 12 · dati-che-si-perdono 13 ·
+frasi-geometra 8 · aiuti-sezione 10 · porta-gestionale 16.
+**Tutti verdi, e ognuno col suo file dei sabotaggi.**
+
+⚠️ `prove/porta-gestionale` e `prove/dati-che-si-perdono` sono **lenti**:
+aspettano davvero la rete che non risponde e accendono Postgres. Un giro
+completo di sabotaggi è una ventina di minuti.
