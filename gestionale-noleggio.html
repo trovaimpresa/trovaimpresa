@@ -280,138 +280,17 @@
     </section>
 
     <section id="mezzi">
-      <h2 style="margin:0 0 16px">Mezzi</h2>
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px">Nuovo mezzo</h3>
-        <input id="nz-nome" placeholder="Nome mezzo *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nz-codice" placeholder="Codice / matricola" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nz-categoria" placeholder="Categoria (es. sollevamento)" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <select id="nz-stato" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          <option value="disponibile">Disponibile</option>
-          <option value="noleggiato">Noleggiato</option>
-          <option value="manutenzione">In manutenzione</option>
-        </select>
-        <div class="nol-riq nol-cam">
-          <h4>Quanto costa a tempo</h4>
-          <div class="nol-due">
-            <div><label>A ora €</label><input id="nz-tora" inputmode="decimal" placeholder="0,00"></div>
-            <div><label>Al giorno €</label><input id="nz-tgiorno" inputmode="decimal" placeholder="0,00"></div>
-            <div><label>A settimana €</label><input id="nz-tsett" inputmode="decimal" placeholder="0,00"></div>
-            <div><label>Al mese €</label><input id="nz-tmese" inputmode="decimal" placeholder="0,00"></div>
-          </div>
-          <p style="margin:8px 0 0;font-size:13px;color:#666">Quella che lasci a zero non viene usata. Il conto sceglie da solo la combinazione che costa meno al cliente.</p>
-        </div>
-
-        <div class="nol-riq nol-cam">
-          <h4>Quanto costa a consumo</h4>
-          <label class="nol-spunta"><input type="checkbox" id="nz-contaore"> Questo mezzo ha il contaore</label>
-          <div id="nz-box-ore" style="display:none">
-            <div class="nol-due">
-              <div><label>Ore comprese in una giornata</label><input id="nz-oreincl" inputmode="decimal" placeholder="8"></div>
-              <div><label>Ogni ora in più €</label><input id="nz-toraextra" inputmode="decimal" placeholder="0,00"></div>
-            </div>
-          </div>
-          <label class="nol-spunta"><input type="checkbox" id="nz-contakm"> Questo mezzo ha il contachilometri</label>
-          <div id="nz-box-km" style="display:none">
-            <div class="nol-due">
-              <div><label>Km compresi in una giornata</label><input id="nz-kmincl" inputmode="decimal" placeholder="100"></div>
-              <div><label>Ogni km in più €</label><input id="nz-tkm" inputmode="decimal" placeholder="0,00"></div>
-            </div>
-          </div>
-          <div class="nol-due" style="margin-top:8px">
-            <div><label>Usura, quota fissa €</label><input id="nz-usurafissa" inputmode="decimal" placeholder="0,00"></div>
-            <div><label>Usura, % sul tempo</label><input id="nz-usuraperc" inputmode="decimal" placeholder="0"></div>
-          </div>
-        </div>
-
-        <div class="nol-riq nol-cam">
-          <h4>Cauzione</h4>
-          <div><label>Quanto si lascia in deposito €</label><input id="nz-cauzione" inputmode="decimal" placeholder="0,00"></div>
-          <p style="margin:8px 0 0;font-size:13px;color:#666">La cauzione non entra nel totale del noleggio: è un deposito che torna indietro.</p>
-        </div>
-        <input id="nz-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button id="nz-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi mezzo</button>
-      </div>
+      <div class="sec-head"><h2>Mezzi</h2><button class="btn add" data-action="new-mezzo">+ Nuovo mezzo</button></div>
       <div id="mezzi-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
     </section>
 
     <section id="clienti-nol">
-      <h2 style="margin:0 0 16px">Clienti</h2>
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px">Nuovo cliente</h3>
-        <input id="ncl-nome" placeholder="Nome cliente *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="ncl-telefono" placeholder="Telefono" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="ncl-email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="ncl-indirizzo" placeholder="Indirizzo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="ncl-piva" placeholder="P.IVA / Cod. Fiscale" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="ncl-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button id="ncl-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi cliente</button>
-      </div>
+      <div class="sec-head"><h2>Clienti</h2><button class="btn add" data-action="new-clinol">+ Nuovo cliente</button></div>
       <div id="clienti-nol-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
     </section>
 
     <section id="noleggi">
-      <h2 style="margin:0 0 16px">Noleggi</h2>
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px">Nuovo noleggio</h3>
-        <select id="nn-mezzo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box"><option value="">— Seleziona mezzo —</option></select>
-        <select id="nn-cliente" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box"><option value="">— Seleziona cliente —</option></select>
-        <div class="nol-riq nol-cam">
-          <h4>Quando</h4>
-          <div class="nol-due">
-            <div><label>Data uscita</label><input id="nn-uscita" type="date"></div>
-            <div><label>Rientro previsto</label><input id="nn-prevista" type="date"></div>
-            <div><label>Rientro effettivo</label><input id="nn-effettivo" type="date"></div>
-            <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">Lascia vuoto se il mezzo è ancora fuori.</p></div>
-          </div>
-          <div class="nol-due" id="nn-box-ore-giorno" style="margin-top:8px">
-            <div><label>Ora di uscita</label><input id="nn-ora-uscita" type="time"></div>
-            <div><label>Ora di rientro</label><input id="nn-ora-rientro" type="time"></div>
-          </div>
-          <p style="margin:8px 0 0;font-size:13px;color:#666">Le ore contano solo quando il mezzo esce e rientra <b>lo stesso giorno</b>.</p>
-        </div>
-
-        <div class="nol-riq nol-cam" id="nn-box-contaore" style="display:none">
-          <h4>Contaore</h4>
-          <div class="nol-due">
-            <div><label>Lettura all'uscita</label><input id="nn-contaore-usc" inputmode="decimal" placeholder="0"></div>
-            <div><label>Lettura al rientro</label><input id="nn-contaore-rie" inputmode="decimal" placeholder="0"></div>
-          </div>
-        </div>
-
-        <div class="nol-riq nol-cam" id="nn-box-km" style="display:none">
-          <h4>Chilometri</h4>
-          <div class="nol-due">
-            <div><label>Contakm all'uscita</label><input id="nn-km-usc" inputmode="decimal" placeholder="0"></div>
-            <div><label>Contakm al rientro</label><input id="nn-km-rie" inputmode="decimal" placeholder="0"></div>
-          </div>
-        </div>
-
-        <div class="nol-riq nol-cam">
-          <h4>Materiale consumato</h4>
-          <div id="nn-consumi"></div>
-          <button type="button" class="nol-agg" id="nn-cons-add">+ Aggiungi una riga</button>
-          <p style="margin:8px 0 0;font-size:13px;color:#666">Gasolio, dischi, catene: quello che si addebita a parte.</p>
-        </div>
-
-        <div class="nol-conto" id="nn-conto"><h4>Il conto</h4><p style="margin:0;color:#666;font-size:14px">Scegli il mezzo e le date: il conto si fa da solo.</p></div>
-
-        <div class="nol-riq nol-cam">
-          <h4>Quanto si fa pagare</h4>
-          <div class="nol-due">
-            <div><label>Importo €</label><input id="nn-importo" inputmode="decimal" placeholder="0,00"></div>
-            <div><label>Cauzione €</label><input id="nn-cauzione" inputmode="decimal" placeholder="0,00"></div>
-          </div>
-          <p style="margin:8px 0 0;font-size:13px;color:#666">L'importo lo puoi sempre correggere a mano: quello che scrivi qui è quello che si fa pagare.</p>
-        </div>
-        <select id="nn-pagamento" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          <option value="da_pagare">Da pagare</option>
-          <option value="pagato">Pagato</option>
-        </select>
-        <input id="nn-danni" placeholder="Danni al rientro" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nn-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button id="nn-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi noleggio</button>
-      </div>
+      <div class="sec-head"><h2>Noleggi</h2><button class="btn add" data-action="new-noleggio">+ Nuovo noleggio</button></div>
       <div id="noleggi-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
     </section>
 
@@ -627,6 +506,11 @@
 .nol-conto .cauz{color:#666;font-size:14px;margin-top:6px}
 .nol-avviso{background:#fff8e1;border:1px solid #ffe0a3;border-radius:8px;padding:9px 12px;margin-top:8px;font-size:14px;color:#5d4200}
 .nol-cons-riga{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:6px}
+.nol-azioni{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.nol-az{font-size:13px;padding:7px 12px;border:1px solid #0066ff;color:#0066ff;background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600}
+.nol-az:hover{background:#eef5ff}
+.nol-az-rosso{border-color:#c62828;color:#c62828}
+.nol-az-rosso:hover{background:#fdecec}
 .nol-cons-riga input{padding:9px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:15px;width:100%}
 .nol-cons-via{border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;padding:0 12px;cursor:pointer;font-size:15px}
 .nol-agg{border:1px solid #2e537d;color:#2e537d;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px}
@@ -1047,8 +931,9 @@
     if(o) o.style.display=($("#nz-contaore")&&$("#nz-contaore").checked)?"":"none";
     if(k) k.style.display=($("#nz-contakm")&&$("#nz-contakm").checked)?"":"none";
   }
-  $("#nz-contaore")?.addEventListener("change",nolMostraBox);
-  $("#nz-contakm")?.addEventListener("change",nolMostraBox);
+  document.addEventListener("change",e=>{
+    if(e.target.id==="nz-contaore"||e.target.id==="nz-contakm") nolMostraBox();
+  });
 
   function nolIdDaNome(sel,nome){
     const s=$(sel); if(!s||!nome) return "";
@@ -1074,17 +959,30 @@
       .filter(c=>String(c.descrizione||"").trim()||_numIt(c.quantita)||_numIt(c.prezzo))
       .map(c=>({descrizione:String(c.descrizione||"").trim(),quantita:_numIt(c.quantita),prezzo:_numIt(c.prezzo)}));
   }
-  $("#nn-cons-add")?.addEventListener("click",()=>{
-    nolConsumi.push({descrizione:"",quantita:"",prezzo:""}); nolDisegnaConsumi();
+  /* ⚠️ ASCOLTATORI DELEGATI, non attaccati alle singole caselle.
+     Le caselle adesso nascono dentro la SCHEDA, cioe' dopo che la pagina si e'
+     aperta: un ascoltatore messo all'avvio su "#nn-mezzo" si attaccherebbe a
+     un elemento che ancora non esiste, e non scatterebbe mai. Qui si ascolta
+     il documento e si guarda chi ha fatto rumore. Trovato provandolo: il
+     riquadro del contaore restava chiuso anche sul mezzo che ce l'ha. */
+  document.addEventListener("click",e=>{
+    if(e.target.closest("#nn-cons-add")){
+      nolConsumi.push({descrizione:"",quantita:"",prezzo:""}); nolDisegnaConsumi(); return;
+    }
+    const via=e.target.closest("#nn-consumi [data-via]");
+    if(via){ nolConsumi.splice(+via.dataset.via,1); nolDisegnaConsumi(); nolAggiornaConto(); }
   });
-  $("#nn-consumi")?.addEventListener("input",e=>{
-    const t=e.target; if(!t.dataset||!t.dataset.cons) return;
-    nolConsumi[+t.dataset.i][t.dataset.cons]=t.value; nolAggiornaConto();
-  });
-  $("#nn-consumi")?.addEventListener("click",e=>{
-    const b=e.target.closest("[data-via]"); if(!b) return;
-    nolConsumi.splice(+b.dataset.via,1); nolDisegnaConsumi(); nolAggiornaConto();
-  });
+  const NOL_CASELLE="#nn-mezzo,#nn-uscita,#nn-prevista,#nn-effettivo,#nn-ora-uscita,"
+                  + "#nn-ora-rientro,#nn-contaore-usc,#nn-contaore-rie,#nn-km-usc,#nn-km-rie,#nn-cauzione";
+  function nolAscolta(e){
+    const t=e.target;
+    if(t.matches&&t.matches("[data-cons]")){
+      nolConsumi[+t.dataset.i][t.dataset.cons]=t.value; nolAggiornaConto(); return;
+    }
+    if(t.matches&&t.matches(NOL_CASELLE)) nolAggiornaConto();
+  }
+  document.addEventListener("input",nolAscolta);
+  document.addEventListener("change",nolAscolta);
 
   /* ---- il conto ---- */
   function nolCalcolaOra(){
@@ -1143,15 +1041,9 @@
   }
 
   /* il conto si rifa' a ogni tasto: chi noleggia deve vedere il numero
-     mentre parla al telefono, non dopo aver premuto Salva */
-  ["#nn-mezzo","#nn-uscita","#nn-prevista","#nn-effettivo","#nn-ora-uscita","#nn-ora-rientro",
-   "#nn-contaore-usc","#nn-contaore-rie","#nn-km-usc","#nn-km-rie","#nn-cauzione"].forEach(id=>{
-    const e=$(id); if(!e) return;
-    e.addEventListener("input",nolAggiornaConto);
-    e.addEventListener("change",nolAggiornaConto);
-  });
+     mentre parla al telefono, non dopo aver premuto Salva. Gli ascoltatori
+     stanno qui sopra, delegati al documento. */
 
-  let editMezzoId=null;
   async function loadMezzi(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("nol_mezzi")
@@ -1166,16 +1058,241 @@
         <div style="display:flex;justify-content:space-between;align-items:center"><strong>${x.nome||"—"}</strong><span style="background:${c};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${(x.stato||"").toUpperCase()}</span></div>
         <div style="color:#666;font-size:14px;margin-top:4px">${x.categoria?x.categoria+" · ":""}${x.codice?"cod. "+x.codice:""}</div>
         <div style="color:#666;font-size:13px;margin-top:2px">€/g ${x.tariffa_giorno??0} · €/sett ${x.tariffa_settimana??0} · €/mese ${x.tariffa_mese??0}${x.cauzione?" · cauz. €"+x.cauzione:""}</div>
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="mezzo-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="mezzo-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div></div>`;
+        ${nolPulsanti("mezzo",x.id)}</div></div>`;
     }).join("");
   }
-  $("#nz-save")?.addEventListener("click",async()=>{
+
+  /* ================================================================
+     LE SCHEDE A TUTTA PAGINA — 22 agosto 2026
+     Stesso stampo del resto del gestionale: openSheet() + i due pulsanti
+     in fondo. Gli id delle caselle sono rimasti quelli di prima, cosi' il
+     conto del noleggio continua a leggerle senza sapere che sono altrove.
+     ================================================================ */
+
+  /* ================================================================
+     I PULSANTI DI OGNI SCHEDA — 22 agosto 2026
+     Modifica · Copia · PDF · Stampa · Elimina, gli stessi su Mezzi,
+     Clienti e Noleggi. Una funzione sola li disegna e una sola li
+     esegue: se domani se ne aggiunge uno, si aggiunge in un punto.
+     ================================================================ */
+  function nolPulsanti(tipo,id){
+    return `<div class="nol-azioni">
+      <button class="nol-az" data-action="nol-mod"    data-t="${tipo}" data-id="${id}">Modifica</button>
+      <button class="nol-az" data-action="nol-copia"  data-t="${tipo}" data-id="${id}">Copia</button>
+      <button class="nol-az" data-action="nol-pdf"    data-t="${tipo}" data-id="${id}">PDF</button>
+      <button class="nol-az" data-action="nol-stampa" data-t="${tipo}" data-id="${id}">Stampa</button>
+      <button class="nol-az nol-az-rosso" data-action="nol-elim" data-t="${tipo}" data-id="${id}">Elimina</button>
+    </div>`;
+  }
+
+  const NOL_TIPI={
+    mezzo:  {tab:"nol_mezzi",   che:"Mezzo",   ricarica:()=>loadMezzi(),      scheda:d=>schedaMezzo(d)},
+    cliente:{tab:"nol_clienti", che:"Cliente", ricarica:()=>loadClientiNol(), scheda:d=>schedaClienteNol(d)},
+    noleggio:{tab:"nol_noleggi",che:"Noleggio",ricarica:()=>loadNoleggi(),    scheda:d=>schedaNoleggio(d)}
+  };
+
+  async function nolLeggi(tipo,id){
+    const t=NOL_TIPI[tipo]; if(!t||!sb) return null;
+    const {data}=await sb.from(t.tab).select("*").eq("id",id).single();
+    return data||null;
+  }
+
+  /* le righe da mettere sul foglio: etichetta e valore, niente colonne vuote */
+  function nolRighe(tipo,d){
+    const e=(x)=>x==null||x===""?null:String(x);
+    const soldi=(x)=>(x==null||x==="")?null:_eur(_numIt(x));
+    let r=[];
+    if(tipo==="mezzo") r=[
+      ["Nome",e(d.nome)],["Codice / matricola",e(d.codice)],["Categoria",e(d.categoria)],
+      ["Stato",e(d.stato)],
+      ["Tariffa a ora",soldi(d.tariffa_ora)],["Tariffa al giorno",soldi(d.tariffa_giorno)],
+      ["Tariffa a settimana",soldi(d.tariffa_settimana)],["Tariffa al mese",soldi(d.tariffa_mese)],
+      ["Ore comprese al giorno",d.ha_contaore?e(d.ore_incluse_giorno):null],
+      ["Ogni ora in piu'",d.ha_contaore?soldi(d.tariffa_ora_extra):null],
+      ["Km compresi al giorno",d.ha_contakm?e(d.km_inclusi_giorno):null],
+      ["Ogni km in piu'",d.ha_contakm?soldi(d.tariffa_km):null],
+      ["Usura, quota fissa",soldi(d.usura_fissa)],
+      ["Usura, % sul tempo",d.usura_percento?d.usura_percento+"%":null],
+      ["Cauzione",soldi(d.cauzione)],["Note",e(d.note)]];
+    if(tipo==="cliente") r=[
+      ["Nome",e(d.nome)],["Telefono",e(d.telefono)],["Email",e(d.email)],
+      ["Indirizzo",e(d.indirizzo)],["P.IVA / Cod. Fiscale",e(d.piva)],["Note",e(d.note)]];
+    if(tipo==="noleggio"){
+      r=[["Mezzo",e(d.mezzo)],["Cliente",e(d.cliente)],
+         ["Uscita",e(d.data_uscita)+(d.ora_uscita?" alle "+String(d.ora_uscita).slice(0,5):"")],
+         ["Rientro previsto",e(d.data_rientro_prevista)],
+         ["Rientro effettivo",e(d.data_rientro_effettivo)],
+         ["Contaore uscita",e(d.contaore_uscita)],["Contaore rientro",e(d.contaore_rientro)],
+         ["Km uscita",e(d.km_uscita)],["Km rientro",e(d.km_rientro)]];
+      const dp=d.dettaglio_prezzo;
+      if(dp&&Array.isArray(dp.righe)) dp.righe.forEach(x=>r.push([x.voce+"  ("+x.dettaglio+")",_eur(x.importo)]));
+      r.push(["IMPORTO",soldi(d.importo)]);
+      r.push(["Cauzione (deposito, a parte)",soldi(d.cauzione)]);
+      r.push(["Pagamento",d.stato_pagamento==="pagato"?"Pagato":"Da pagare"]);
+      r.push(["Danni",e(d.danni)]);
+      r.push(["Note",e(d.note)]);
+    }
+    return r.filter(x=>x[1]!=null&&x[1]!=="");
+  }
+
+  function nolTitolo(tipo,d){
+    return (NOL_TIPI[tipo]?NOL_TIPI[tipo].che:"Scheda")+" — "+
+           (d.nome||[d.mezzo,d.cliente].filter(Boolean).join(" · ")||"senza nome");
+  }
+
+  /* ---- STAMPA: una finestra pulita, senza il resto della pagina ---- */
+  function nolStampa(tipo,d){
+    const righe=nolRighe(tipo,d);
+    const az=(state.azienda&&state.azienda.nome)?state.azienda.nome:"";
+    const w=window.open("","_blank","width=900,height=1000");
+    if(!w){toast("Il browser ha bloccato la finestra di stampa");return;}
+    w.document.write(`<!doctype html><html lang="it"><head><meta charset="utf-8">
+      <title>${esc(nolTitolo(tipo,d))}</title><style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#222;margin:32px;font-size:15px}
+      h1{font-size:22px;margin:0 0 4px}
+      .az{color:#666;font-size:14px;margin-bottom:18px}
+      table{width:100%;border-collapse:collapse}
+      td{padding:8px 0;border-bottom:1px solid #eee;vertical-align:top}
+      td.l{color:#666;width:42%}
+      td.v{font-weight:600}
+      </style></head><body>
+      <h1>${esc(nolTitolo(tipo,d))}</h1>
+      <div class="az">${esc(az)}</div>
+      <table>${righe.map(x=>`<tr><td class="l">${esc(x[0])}</td><td class="v">${esc(x[1])}</td></tr>`).join("")}</table>
+      </body></html>`);
+    w.document.close();
+    /* si aspetta che la finestra abbia finito di disegnarsi: senza, su
+       Chrome la stampa parte su una pagina ancora bianca */
+    w.onload=()=>{w.focus();w.print();};
+    setTimeout(()=>{try{w.focus();w.print();}catch(e){}},350);
+  }
+
+  /* ---- PDF: la stessa scheda, ma da tenere ---- */
+  function nolPdf(tipo,d){
+    if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non e' disponibile adesso");return;}
+    const righe=nolRighe(tipo,d);
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=18, R=210-M; let y=22;
+    const az=(state.azienda&&state.azienda.nome)?state.azienda.nome:"";
+    doc.setFont("helvetica","bold");doc.setFontSize(16);
+    doc.text(nolTitolo(tipo,d),M,y); y+=7;
+    if(az){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(110);doc.text(az,M,y);y+=6;}
+    doc.setTextColor(30); y+=2;
+    righe.forEach(x=>{
+      if(y>272){doc.addPage();y=22;}
+      doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(110);
+      doc.text(String(x[0]),M,y);
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(30);
+      /* il valore va a destra, e se e' lungo va a capo invece di uscire dal foglio */
+      const linee=doc.splitTextToSize(String(x[1]),R-M-72);
+      doc.text(linee,M+72,y);
+      y+=Math.max(7,linee.length*5.5);
+      doc.setDrawColor(230);doc.line(M,y-3,R,y-3);
+    });
+    const nome=nolTitolo(tipo,d).replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g,"-");
+    doc.save(nome+".pdf");
+  }
+
+  /* ---- COPIA: lo stesso, con "(copia)" nel nome ---- */
+  async function nolCopia(tipo,d){
+    const t=NOL_TIPI[tipo]; if(!t||!sbUid) return;
+    const nuovo=Object.assign({},d);
+    /* ⚠️ via l'id e la data di creazione: se restassero, il database
+       rifiuterebbe la riga nuova perche' quell'id esiste gia'. */
+    delete nuovo.id; delete nuovo.created_at;
+    nuovo.user_id=sbUid;
+    if(nuovo.nome) nuovo.nome=nuovo.nome+" (copia)";
+    if(tipo==="noleggio"){ nuovo.data_rientro_effettivo=null; nuovo.stato_pagamento="da_pagare"; }
+    const {error}=await sb.from(t.tab).insert(nuovo);
+    if(error){toast("Errore: "+error.message);return;}
+    t.ricarica(); toast(t.che+" copiato ✔");
+  }
+
+  /* ---- ELIMINA ---- */
+  async function nolElimina(tipo,d){
+    const t=NOL_TIPI[tipo]; if(!t) return;
+    if(!confirm("Eliminare "+t.che.toLowerCase()+" «"+(d.nome||d.mezzo||"questa scheda")+"»?\nNon si torna indietro.")) return;
+    const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    t.ricarica(); renderRiepilogoNegozio(); toast(t.che+" eliminato");
+  }
+
+  /* un gestore solo per tutti e cinque i pulsanti, di tutte e tre le schede */
+  document.addEventListener("click",async e=>{
+    const b=e.target.closest('[data-action^="nol-"]'); if(!b) return;
+    const tipo=b.dataset.t, id=b.dataset.id, a=b.dataset.action;
+    const d=await nolLeggi(tipo,id);
+    if(!d){toast("Questa scheda non si trova piu'");return;}
+    if(a==="nol-mod")    return NOL_TIPI[tipo].scheda(d);
+    if(a==="nol-copia")  return nolCopia(tipo,d);
+    if(a==="nol-pdf")    return nolPdf(tipo,d);
+    if(a==="nol-stampa") return nolStampa(tipo,d);
+    if(a==="nol-elim")   return nolElimina(tipo,d);
+  });
+
+  function schedaMezzo(m){
+    const isNew=!m; m=m||{};
+    const v=(k)=>esc(m[k]==null?"":m[k]);
+    openSheet(`<h3>${isNew?"Nuovo mezzo":"Modifica mezzo"}</h3>
+      <div class="field"><label>Nome del mezzo *</label><input id="nz-nome" value="${v('nome')}" placeholder="Es. Escavatore 3t"></div>
+      <div class="row2">
+        <div class="field"><label>Codice / matricola</label><input id="nz-codice" value="${v('codice')}" placeholder="Es. E-01"></div>
+        <div class="field"><label>Categoria</label><input id="nz-categoria" value="${v('categoria')}" placeholder="Es. movimento terra"></div>
+      </div>
+      <div class="field"><label>Stato</label><select id="nz-stato">
+        <option value="disponibile">Disponibile</option>
+        <option value="noleggiato">Noleggiato</option>
+        <option value="manutenzione">In manutenzione</option></select></div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Quanto costa a tempo</h4>
+        <div class="nol-due">
+          <div><label>A ora €</label><input id="nz-tora" inputmode="decimal" value="${v('tariffa_ora')}" placeholder="0,00"></div>
+          <div><label>Al giorno €</label><input id="nz-tgiorno" inputmode="decimal" value="${v('tariffa_giorno')}" placeholder="0,00"></div>
+          <div><label>A settimana €</label><input id="nz-tsett" inputmode="decimal" value="${v('tariffa_settimana')}" placeholder="0,00"></div>
+          <div><label>Al mese €</label><input id="nz-tmese" inputmode="decimal" value="${v('tariffa_mese')}" placeholder="0,00"></div>
+        </div>
+        <p style="margin:8px 0 0;font-size:13px;color:#666">Quella che lasci a zero non viene usata. Il conto sceglie da solo la combinazione che costa meno al cliente.</p>
+      </div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Quanto costa a consumo</h4>
+        <label class="nol-spunta"><input type="checkbox" id="nz-contaore" ${m.ha_contaore?"checked":""}> Questo mezzo ha il contaore</label>
+        <div id="nz-box-ore" style="display:${m.ha_contaore?"":"none"}">
+          <div class="nol-due">
+            <div><label>Ore comprese in una giornata</label><input id="nz-oreincl" inputmode="decimal" value="${v('ore_incluse_giorno')}" placeholder="8"></div>
+            <div><label>Ogni ora in più €</label><input id="nz-toraextra" inputmode="decimal" value="${v('tariffa_ora_extra')}" placeholder="0,00"></div>
+          </div>
+        </div>
+        <label class="nol-spunta"><input type="checkbox" id="nz-contakm" ${m.ha_contakm?"checked":""}> Questo mezzo ha il contachilometri</label>
+        <div id="nz-box-km" style="display:${m.ha_contakm?"":"none"}">
+          <div class="nol-due">
+            <div><label>Km compresi in una giornata</label><input id="nz-kmincl" inputmode="decimal" value="${v('km_inclusi_giorno')}" placeholder="100"></div>
+            <div><label>Ogni km in più €</label><input id="nz-tkm" inputmode="decimal" value="${v('tariffa_km')}" placeholder="0,00"></div>
+          </div>
+        </div>
+        <div class="nol-due" style="margin-top:8px">
+          <div><label>Usura, quota fissa €</label><input id="nz-usurafissa" inputmode="decimal" value="${v('usura_fissa')}" placeholder="0,00"></div>
+          <div><label>Usura, % sul tempo</label><input id="nz-usuraperc" inputmode="decimal" value="${v('usura_percento')}" placeholder="0"></div>
+        </div>
+      </div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Cauzione</h4>
+        <div><label>Quanto si lascia in deposito €</label><input id="nz-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00"></div>
+        <p style="margin:8px 0 0;font-size:13px;color:#666">La cauzione non entra nel totale del noleggio: è un deposito che torna indietro.</p>
+      </div>
+
+      <div class="field"><label>Note</label><input id="nz-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+    if(m.stato) $("#nz-stato").value=m.stato;
+  }
+
+  async function salvaMezzo(id){
     const nome=$("#nz-nome").value.trim();
-    if(!nome){alert("Inserisci il nome");return;}
-    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    if(!nome){toast("Scrivi il nome del mezzo");return;}
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={nome,
       codice:$("#nz-codice").value.trim()||null,
       categoria:$("#nz-categoria").value.trim()||null,
@@ -1196,18 +1313,158 @@
       usura_percento:_numIt($("#nz-usuraperc").value),
       cauzione:_numIt($("#nz-cauzione").value),
       note:$("#nz-note").value.trim()||null};
-    let error;
-    if(editMezzoId){({error}=await sb.from("nol_mezzi").update(dati).eq("id",editMezzoId));}
-    else {({error}=await sb.from("nol_mezzi").insert({user_id:sbUid,...dati}));}
-    if(error){alert("Errore: "+error.message);return;}
-    ["nz-nome","nz-codice","nz-categoria","nz-tora","nz-tgiorno","nz-tsett","nz-tmese",
-     "nz-oreincl","nz-toraextra","nz-kmincl","nz-tkm","nz-usurafissa","nz-usuraperc",
-     "nz-cauzione","nz-note"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
-    $("#nz-contaore").checked=false; $("#nz-contakm").checked=false; nolMostraBox();
-    $("#nz-stato").value="disponibile";
-    editMezzoId=null; $("#nz-save").textContent="Aggiungi mezzo";
-    loadMezzi();
-  });
+    const {error}=id
+      ? await sb.from("nol_mezzi").update(dati).eq("id",id).eq("user_id",sbUid)
+      : await sb.from("nol_mezzi").insert({user_id:sbUid,...dati});
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet(); loadMezzi(); renderRiepilogoNegozio(); toast(id?"Mezzo aggiornato ✔":"Mezzo aggiunto ✔");
+  }
+
+  function schedaClienteNol(c){
+    const isNew=!c; c=c||{};
+    const v=(k)=>esc(c[k]==null?"":c[k]);
+    openSheet(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>
+      <div class="field"><label>Nome / Ragione sociale *</label><input id="ncl-nome" value="${v('nome')}" placeholder="Es. Rossi Costruzioni srl"></div>
+      <div class="row2">
+        <div class="field"><label>Telefono</label><input id="ncl-telefono" value="${v('telefono')}" placeholder="Numero"></div>
+        <div class="field"><label>Email</label><input id="ncl-email" value="${v('email')}" placeholder="Indirizzo email"></div>
+      </div>
+      <div class="field"><label>Indirizzo</label><input id="ncl-indirizzo" value="${v('indirizzo')}" placeholder="Via, numero, città"></div>
+      <div class="field"><label>P.IVA / Codice Fiscale</label><input id="ncl-piva" value="${v('piva')}" placeholder="Per la fattura"></div>
+      <div class="field"><label>Note</label><input id="ncl-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-clinol" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+  }
+
+  async function salvaClienteNol(id){
+    const nome=$("#ncl-nome").value.trim();
+    if(!nome){toast("Scrivi il nome");return;}
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const dati={nome,
+      telefono:$("#ncl-telefono").value.trim()||null,
+      email:$("#ncl-email").value.trim()||null,
+      indirizzo:$("#ncl-indirizzo").value.trim()||null,
+      piva:$("#ncl-piva").value.trim()||null,
+      note:$("#ncl-note").value.trim()||null};
+    const {error}=id
+      ? await sb.from("nol_clienti").update(dati).eq("id",id).eq("user_id",sbUid)
+      : await sb.from("nol_clienti").insert({user_id:sbUid,...dati});
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet(); loadClientiNol(); toast(id?"Cliente aggiornato ✔":"Cliente aggiunto ✔");
+  }
+
+  async function schedaNoleggio(n){
+    const isNew=!n; n=n||{};
+    const v=(k)=>esc(n[k]==null?"":n[k]);
+    openSheet(`<h3>${isNew?"Nuovo noleggio":"Modifica noleggio"}</h3>
+      <div class="row2">
+        <div class="field"><label>Mezzo *</label><select id="nn-mezzo"></select></div>
+        <div class="field"><label>Cliente</label><select id="nn-cliente"></select></div>
+      </div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Quando</h4>
+        <div class="nol-due">
+          <div><label>Data uscita</label><input id="nn-uscita" type="date" value="${v('data_uscita')}"></div>
+          <div><label>Rientro previsto</label><input id="nn-prevista" type="date" value="${v('data_rientro_prevista')}"></div>
+          <div><label>Rientro effettivo</label><input id="nn-effettivo" type="date" value="${v('data_rientro_effettivo')}"></div>
+          <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">Lascia vuoto se il mezzo è ancora fuori.</p></div>
+        </div>
+        <div class="nol-due" style="margin-top:8px">
+          <div><label>Ora di uscita</label><input id="nn-ora-uscita" type="time" value="${String(n.ora_uscita||"").slice(0,5)}"></div>
+          <div><label>Ora di rientro</label><input id="nn-ora-rientro" type="time" value="${String(n.ora_rientro||"").slice(0,5)}"></div>
+        </div>
+        <p style="margin:8px 0 0;font-size:13px;color:#666">Le ore contano solo quando il mezzo esce e rientra <b>lo stesso giorno</b>.</p>
+      </div>
+
+      <div class="nol-riq nol-cam" id="nn-box-contaore" style="display:none">
+        <h4>Contaore</h4>
+        <div class="nol-due">
+          <div><label>Lettura all'uscita</label><input id="nn-contaore-usc" inputmode="decimal" value="${v('contaore_uscita')}" placeholder="0"></div>
+          <div><label>Lettura al rientro</label><input id="nn-contaore-rie" inputmode="decimal" value="${v('contaore_rientro')}" placeholder="0"></div>
+        </div>
+      </div>
+
+      <div class="nol-riq nol-cam" id="nn-box-km" style="display:none">
+        <h4>Chilometri</h4>
+        <div class="nol-due">
+          <div><label>Contakm all'uscita</label><input id="nn-km-usc" inputmode="decimal" value="${v('km_uscita')}" placeholder="0"></div>
+          <div><label>Contakm al rientro</label><input id="nn-km-rie" inputmode="decimal" value="${v('km_rientro')}" placeholder="0"></div>
+        </div>
+      </div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Materiale consumato</h4>
+        <div id="nn-consumi"></div>
+        <button type="button" class="nol-agg" id="nn-cons-add">+ Aggiungi una riga</button>
+        <p style="margin:8px 0 0;font-size:13px;color:#666">Gasolio, dischi, catene: quello che si addebita a parte.</p>
+      </div>
+
+      <div class="nol-conto" id="nn-conto"><h4>Il conto</h4>
+        <p style="margin:0;color:#666;font-size:14px">Scegli il mezzo e le date: il conto si fa da solo.</p></div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Quanto si fa pagare</h4>
+        <div class="nol-due">
+          <div><label>Importo €</label><input id="nn-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00"></div>
+          <div><label>Cauzione €</label><input id="nn-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00"></div>
+        </div>
+        <p style="margin:8px 0 0;font-size:13px;color:#666">L'importo lo puoi sempre correggere a mano: quello che scrivi qui è quello che si fa pagare.</p>
+      </div>
+
+      <div class="field"><label>Pagamento</label><select id="nn-pagamento">
+        <option value="da_pagare">Da pagare</option>
+        <option value="pagato">Pagato</option></select></div>
+      <div class="field"><label>Danni al rientro</label><input id="nn-danni" value="${v('danni')}" placeholder="Se il mezzo è tornato con qualcosa di rotto"></div>
+      <div class="field"><label>Note</label><input id="nn-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-noleggio" data-id="${n.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+
+    await popolaSelectNoleggi();
+    /* prima si prova col collegamento vero; se quel noleggio e' vecchio e non
+       ce l'ha, si ripiega sul nome scritto */
+    $("#nn-mezzo").value   = n.mezzo_id   || nolIdDaNome("#nn-mezzo",   n.mezzo)   || "";
+    $("#nn-cliente").value = n.cliente_id || nolIdDaNome("#nn-cliente", n.cliente) || "";
+    if(n.stato_pagamento) $("#nn-pagamento").value=n.stato_pagamento;
+    nolConsumi = Array.isArray(n.consumi) ? n.consumi.slice() : [];
+    nolDisegnaConsumi();
+    nolAggiornaConto();
+  }
+
+  async function salvaNoleggio(id){
+    const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
+    if(!selM.value){toast("Scegli un mezzo");return;}
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const nomeM=selM.selectedOptions[0]?selM.selectedOptions[0].dataset.nome:"";
+    const nomeC=selC.selectedOptions[0]?selC.selectedOptions[0].dataset.nome:"";
+    const conto=nolCalcolaOra();
+    const vuoto=id2=>$(id2).value===""?null:_numIt($(id2).value);
+    const dati={mezzo:nomeM||null, mezzo_id:selM.value||null,
+      cliente:nomeC||null, cliente_id:selC.value||null,
+      data_uscita:$("#nn-uscita").value||null,
+      data_rientro_prevista:$("#nn-prevista").value||null,
+      data_rientro_effettivo:$("#nn-effettivo").value||null,
+      ora_uscita:$("#nn-ora-uscita").value||null,
+      ora_rientro:$("#nn-ora-rientro").value||null,
+      contaore_uscita:vuoto("#nn-contaore-usc"), contaore_rientro:vuoto("#nn-contaore-rie"),
+      km_uscita:vuoto("#nn-km-usc"), km_rientro:vuoto("#nn-km-rie"),
+      consumi:nolLeggiConsumi(),
+      /* ⚠️ il conto si salva riga per riga: fra sei mesi le tariffe saranno
+         cambiate, e a un cliente che contesta si risponde col conto DI ALLORA. */
+      dettaglio_prezzo:conto?{giorni:conto.giorni,righe:conto.righe,totale:conto.totaleEuro,avvisi:conto.avvisi}:null,
+      importo_calcolato:conto?conto.totaleEuro:null,
+      importo:_numIt($("#nn-importo").value),
+      cauzione:_numIt($("#nn-cauzione").value),
+      stato_pagamento:$("#nn-pagamento").value,
+      danni:$("#nn-danni").value.trim()||null,
+      note:$("#nn-note").value.trim()||null};
+    const {error}=id
+      ? await sb.from("nol_noleggi").update(dati).eq("id",id).eq("user_id",sbUid)
+      : await sb.from("nol_noleggi").insert({user_id:sbUid,...dati});
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet(); loadNoleggi(); renderRiepilogoNegozio(); toast(id?"Noleggio aggiornato ✔":"Noleggio aggiunto ✔");
+  }
+
   $('[data-tab="mezzi"]')?.addEventListener("click",loadMezzi);
   $("#mezzi-body")?.addEventListener("click",async e=>{
     const ed=e.target.closest(".mezzo-edit"), del=e.target.closest(".mezzo-del");
@@ -1219,24 +1476,10 @@
     }
     if(ed){
       const {data}=await sb.from("nol_mezzi").select("*").eq("id",ed.dataset.id).single();
-      if(!data)return;
-      $("#nz-nome").value=data.nome||""; $("#nz-codice").value=data.codice||"";
-      $("#nz-categoria").value=data.categoria||""; $("#nz-stato").value=data.stato||"disponibile";
-      $("#nz-tora").value=data.tariffa_ora??""; $("#nz-tgiorno").value=data.tariffa_giorno??"";
-      $("#nz-tsett").value=data.tariffa_settimana??""; $("#nz-tmese").value=data.tariffa_mese??"";
-      $("#nz-contaore").checked=!!data.ha_contaore; $("#nz-oreincl").value=data.ore_incluse_giorno??"";
-      $("#nz-toraextra").value=data.tariffa_ora_extra??"";
-      $("#nz-contakm").checked=!!data.ha_contakm; $("#nz-kmincl").value=data.km_inclusi_giorno??"";
-      $("#nz-tkm").value=data.tariffa_km??"";
-      $("#nz-usurafissa").value=data.usura_fissa??""; $("#nz-usuraperc").value=data.usura_percento??"";
-      $("#nz-cauzione").value=data.cauzione??""; $("#nz-note").value=data.note||"";
-      nolMostraBox();
-      editMezzoId=data.id; $("#nz-save").textContent="Salva modifica";
-      window.scrollTo({top:0,behavior:"smooth"});
+      if(data) schedaMezzo(data);
     }
   });
 
-  let editClienteNolId=null;
   async function loadClientiNol(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("nol_clienti")
@@ -1250,32 +1493,10 @@
         <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
         ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
         ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="clinol-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="clinol-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div>
+        ${nolPulsanti("cliente",x.id)}
       </div>`).join("");
   }
-  $("#ncl-save")?.addEventListener("click",async()=>{
-    const nome=$("#ncl-nome").value.trim();
-    if(!nome){alert("Inserisci il nome");return;}
-    if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const dati={nome,
-      telefono:$("#ncl-telefono").value.trim()||null,
-      email:$("#ncl-email").value.trim()||null,
-      indirizzo:$("#ncl-indirizzo").value.trim()||null,
-      piva:$("#ncl-piva").value.trim()||null,
-      note:$("#ncl-note").value.trim()||null};
-    let error;
-    if(editClienteNolId){({error}=await sb.from("nol_clienti").update(dati).eq("id",editClienteNolId));}
-    else {({error}=await sb.from("nol_clienti").insert({user_id:sbUid,...dati}));}
-    if(error){alert("Errore: "+error.message);return;}
-    ["ncl-nome","ncl-telefono","ncl-email","ncl-indirizzo","ncl-piva","ncl-note"].forEach(id=>$("#"+id).value="");
-    editClienteNolId=null; $("#ncl-save").textContent="Aggiungi cliente";
-    loadClientiNol();
-  });
   $('[data-tab="clienti-nol"]')?.addEventListener("click",loadClientiNol);
-  let editNoleggioId=null;
   async function popolaSelectNoleggi(){
     if(!(sb&&sbUid)) return;
     /* ⚠️ nella casellina ci va l'ID, non il nome. Prima ci andava il nome, e
@@ -1306,52 +1527,9 @@
         <div style="color:#666;font-size:14px;margin-top:4px">${x.cliente?"Cliente: "+x.cliente:""}</div>
         <div style="color:#666;font-size:13px;margin-top:2px">Uscita ${x.data_uscita||"—"} · prev. ${x.data_rientro_prevista||"—"}${x.data_rientro_effettivo?" · rientro "+x.data_rientro_effettivo:""}</div>
         <div style="color:#666;font-size:13px;margin-top:2px">€ ${x.importo??0}${x.cauzione?" · cauz. €"+x.cauzione:""} · ${x.stato_pagamento==="pagato"?"PAGATO":"DA PAGARE"}${x.danni?" · danni: "+x.danni:""}</div>
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="nol-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="nol-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div></div>`;
+        ${nolPulsanti("noleggio",x.id)}</div></div>`;
     }).join("");
   }
-  $("#nn-save")?.addEventListener("click",async()=>{
-    const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
-    if(!selM.value){alert("Seleziona un mezzo");return;}
-    if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const nomeM=selM.selectedOptions[0]?selM.selectedOptions[0].dataset.nome:"";
-    const nomeC=selC.selectedOptions[0]?selC.selectedOptions[0].dataset.nome:"";
-    const conto=nolCalcolaOra();
-    const dati={mezzo:nomeM||null, mezzo_id:selM.value||null,
-      cliente:nomeC||null, cliente_id:selC.value||null,
-      data_uscita:$("#nn-uscita").value||null,
-      data_rientro_prevista:$("#nn-prevista").value||null,
-      data_rientro_effettivo:$("#nn-effettivo").value||null,
-      ora_uscita:$("#nn-ora-uscita").value||null,
-      ora_rientro:$("#nn-ora-rientro").value||null,
-      contaore_uscita:$("#nn-contaore-usc").value===""?null:_numIt($("#nn-contaore-usc").value),
-      contaore_rientro:$("#nn-contaore-rie").value===""?null:_numIt($("#nn-contaore-rie").value),
-      km_uscita:$("#nn-km-usc").value===""?null:_numIt($("#nn-km-usc").value),
-      km_rientro:$("#nn-km-rie").value===""?null:_numIt($("#nn-km-rie").value),
-      consumi:nolLeggiConsumi(),
-      /* ⚠️ il conto si salva riga per riga: fra sei mesi le tariffe saranno
-         cambiate, e a un cliente che contesta si risponde col conto DI ALLORA. */
-      dettaglio_prezzo:conto?{giorni:conto.giorni,righe:conto.righe,totale:conto.totaleEuro,avvisi:conto.avvisi,il:new Date().toISOString()}:null,
-      importo_calcolato:conto?conto.totaleEuro:null,
-      importo:_numIt($("#nn-importo").value),
-      cauzione:_numIt($("#nn-cauzione").value),
-      stato_pagamento:$("#nn-pagamento").value,
-      danni:$("#nn-danni").value.trim()||null,
-      note:$("#nn-note").value.trim()||null};
-    let error;
-    if(editNoleggioId){({error}=await sb.from("nol_noleggi").update(dati).eq("id",editNoleggioId));}
-    else {({error}=await sb.from("nol_noleggi").insert({user_id:sbUid,...dati}));}
-    if(error){alert("Errore: "+error.message);return;}
-    ["nn-uscita","nn-prevista","nn-effettivo","nn-ora-uscita","nn-ora-rientro",
-     "nn-contaore-usc","nn-contaore-rie","nn-km-usc","nn-km-rie",
-     "nn-importo","nn-cauzione","nn-danni","nn-note"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
-    $("#nn-mezzo").value="";$("#nn-cliente").value="";$("#nn-pagamento").value="da_pagare";
-    nolConsumi=[]; nolDisegnaConsumi(); nolAggiornaConto();
-    editNoleggioId=null; $("#nn-save").textContent="Aggiungi noleggio";
-    loadNoleggi();
-  });
   $("#noleggi-body")?.addEventListener("click",async e=>{
     const ed=e.target.closest(".nol-edit"), del=e.target.closest(".nol-del");
     if(del){
@@ -1362,25 +1540,7 @@
     }
     if(ed){
       const {data}=await sb.from("nol_noleggi").select("*").eq("id",ed.dataset.id).single();
-      if(!data)return;
-      await popolaSelectNoleggi();
-      /* prima si prova col collegamento vero; se quel noleggio e' vecchio e
-         non ce l'ha, si ripiega sul nome scritto */
-      $("#nn-mezzo").value=data.mezzo_id||nolIdDaNome("#nn-mezzo",data.mezzo);
-      $("#nn-cliente").value=data.cliente_id||nolIdDaNome("#nn-cliente",data.cliente);
-      $("#nn-uscita").value=data.data_uscita||""; $("#nn-prevista").value=data.data_rientro_prevista||"";
-      $("#nn-effettivo").value=data.data_rientro_effettivo||""; $("#nn-importo").value=data.importo??"";
-      $("#nn-ora-uscita").value=(data.ora_uscita||"").slice(0,5);
-      $("#nn-ora-rientro").value=(data.ora_rientro||"").slice(0,5);
-      $("#nn-contaore-usc").value=data.contaore_uscita??""; $("#nn-contaore-rie").value=data.contaore_rientro??"";
-      $("#nn-km-usc").value=data.km_uscita??""; $("#nn-km-rie").value=data.km_rientro??"";
-      nolConsumi=Array.isArray(data.consumi)?data.consumi.slice():[];
-      nolDisegnaConsumi();
-      $("#nn-cauzione").value=data.cauzione??""; $("#nn-pagamento").value=data.stato_pagamento||"da_pagare";
-      $("#nn-danni").value=data.danni||""; $("#nn-note").value=data.note||"";
-      nolAggiornaConto();
-      editNoleggioId=data.id; $("#nn-save").textContent="Salva modifica";
-      window.scrollTo({top:0,behavior:"smooth"});
+      if(data) schedaNoleggio(data);
     }
   });
   $('[data-tab="noleggi"]')?.addEventListener("click",()=>{loadNoleggi().then(nolAggiornaConto);});
@@ -1394,12 +1554,7 @@
     }
     if(ed){
       const {data}=await sb.from("nol_clienti").select("*").eq("id",ed.dataset.id).single();
-      if(!data)return;
-      $("#ncl-nome").value=data.nome||""; $("#ncl-telefono").value=data.telefono||"";
-      $("#ncl-email").value=data.email||""; $("#ncl-indirizzo").value=data.indirizzo||"";
-      $("#ncl-piva").value=data.piva||""; $("#ncl-note").value=data.note||"";
-      editClienteNolId=data.id; $("#ncl-save").textContent="Salva modifica";
-      window.scrollTo({top:0,behavior:"smooth"});
+      if(data) schedaClienteNol(data);
     }
   });
 
@@ -2205,6 +2360,13 @@
     if(a==="save-panel")return savePanel();
     if(a==="del-panel")return delPanel(t.dataset.id);
     if(a==="home")return nolIndietro();
+    /* 22 agosto 2026 — le schede del noleggio */
+    if(a==="new-mezzo")     return schedaMezzo(null);
+    if(a==="new-clinol")    return schedaClienteNol(null);
+    if(a==="new-noleggio")  return schedaNoleggio(null);
+    if(a==="save-mezzo")    return salvaMezzo(id);
+    if(a==="save-clinol")   return salvaClienteNol(id);
+    if(a==="save-noleggio") return salvaNoleggio(id);
     if(a==="reparti")return goHome();
     if(a==="azienda")return aziendaForm();
     if(a==="save-azienda")return saveAzienda();
