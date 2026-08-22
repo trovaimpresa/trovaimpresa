@@ -14105,3 +14105,71 @@ I **quattordici** messaggi del gestionale che invitano a eseguire
 `gest-computo-metrico.sql` non sono stati toccati: adesso sono innocui
 (il file si ferma da solo e spiega), ma chi li legge va comunque verso il file
 sbagliato. Da sistemare quando si passa di lì.
+
+
+# ✅ 22 agosto 2026 — IL NOME CHE SI CAMBIAVA DA SOLO, E LA BARRA DEL GEOMETRA
+
+Un file: `gestionale-app.html`. Due voci della lista del geometra, chiuse.
+
+## ⛔ 1. «Edilcantiere» diventava «Edilpratica»
+
+Nella ricerca in alto, allo studio tecnico, i **nomi dei clienti** venivano
+riscritti. La colpa non era della ricerca: era del traduttore. L'elenco
+`_FRASI` si applicava **come pezzo di testo**, quindi «cantiere» veniva
+trovato e cambiato **anche dentro un'altra parola**.
+
+⚠️ **È la terza volta che questo difetto esce, sempre da una porta diversa:**
+- 12 agosto: le **tendine** («Edilcantiere Srl» in un `<option>`);
+- 20 agosto: il **testo del prezzario** («nell'ambito del PRATICA»);
+- oggi: la **ricerca in alto**.
+
+⛔ Ogni volta si era chiuso **il posto**, mai **la causa**. Adesso è chiusa la
+causa: le voci fatte di **una sola parola** (sono 16 su 138) si cambiano
+**solo quando quella parola sta da sola**. Le frasi, che hanno gli spazi
+dentro e in un nome non ci finiscono, restano come prima.
+
+⚠️ **Niente lookbehind nell'espressione**: su Safari vecchi non c'è e
+l'intero blocco morirebbe. Si tiene il carattere di prima in un gruppo e lo si
+rimette.
+
+⚠️ **E la cintura resta**: `.ct-t` e `.ct-s` (le righe dei risultati) sono
+entrate in `_SKIP_UTENTE`. Sono due difese diverse, per due casi diversi:
+la regola della parola intera salva «Edil**cantiere**»; l'elenco dei
+contenitori salva un cliente che si chiama davvero «**Muratore** Giuseppe» —
+lì la parola è intera, e solo il `_SKIP_UTENTE` la protegge.
+
+## ✅ 2. Sul telefono la barra in basso diceva «Lavori»
+
+Il traduttore guardava dentro `#appview` e `#sheet`. **`#barra-basso` sta
+fuori da tutti e due**, quindi al geometra tutto diceva «Pratiche» tranne la
+barra del telefono. Aggiunta all'elenco: una parola sola, in un posto
+dimenticato.
+
+## IL BANCO — nei due versi
+
+`prove/geometra/`: `banco.js` · `sabotaggi.js`.
+**13 verdi · 11 sabotaggi su 11 accusati.**
+Rifatti anche gli altri quattro banchi di oggi: artigiano 23 · documenti 20 ·
+ore 20 · misure 18. Tutti verdi.
+
+⚠️ **Quattro sabotaggi sono nati muti, e nessuno è stato aggirato:**
+1. «il confine vale solo a sinistra» non lo accusava nessuno: **mancava il
+   caso a destra** («cantieristica»). Aggiunto.
+2. «tolgo `.ct-s` dai contenitori dell'utente» restava verde perché il nome
+   di prova era «Edilcantiere», che ormai è protetto **dall'altra difesa**.
+   Cambiato il cliente di prova in «Muratore Giuseppe», dove la parola è
+   intera e solo il `_SKIP_UTENTE` può salvarla.
+3. «il traduttore gira anche per l'artigiano» restava verde perché «Lavori e
+   interventi» il traduttore non la tocca: la prova era verde **per fortuna,
+   non per merito**. Adesso guarda la cosa vera — che per l'artigiano il
+   traduttore **non parta proprio**.
+4. «un apice rovescio nel commento» non faceva danno: quel commento è un
+   commento JavaScript normale. Spostato dove il danno si fa davvero — un
+   commento HTML **dentro una stringa a template**.
+
+## ⚠️ COSA RESTA DELLA LISTA DEL GEOMETRA
+
+- le **quattro frasi sgrammaticate**: non si sa quali siano, serve la
+  segnalazione di Alessio;
+- **`js/aiuti-gestionale.js` non è caricato da nessuna pagina**: o si collega
+  o si butta. Da decidere con lui.

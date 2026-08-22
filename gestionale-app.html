@@ -1438,8 +1438,35 @@
     ['Chi ci ha lavorato (facoltativo)','Chi ci ha messo mano (facoltativo)'],
     ['le ore dei dipendenti giorno per giorno','le ore dei collaboratori giorno per giorno'],
   ];
+  /* ============================================================
+     ⛔ 22 agosto 2026 — UNA PAROLA SI CAMBIA SOLO SE E' UNA PAROLA INTERA
+     ============================================================
+     Segnalato da Alessio: nella ricerca in alto un cliente che si chiama
+     «Edilcantiere» diventava «Edilpratica». La colpa non era della ricerca:
+     era di qui. L'elenco `_FRASI` si applicava come pezzo di testo, quindi
+     «cantiere» veniva trovato e cambiato ANCHE dentro un'altra parola.
+
+     ⚠️ E' la TERZA volta che questo difetto esce, sempre da una porta
+     diversa: le tendine (12 agosto), il testo del prezzario (20 agosto), la
+     ricerca in alto (oggi). Ogni volta si era chiuso il posto, mai la causa.
+     ⛔ Adesso si chiude la causa: le voci fatte di UNA SOLA PAROLA si
+     cambiano solo quando quella parola sta da sola. Le frasi (che hanno gli
+     spazi dentro, e dentro un nome non ci finiscono) restano come prima.
+
+     ⚠️ Niente lookbehind nell'espressione: su Safari vecchi non c'e' e
+     l'intero blocco morirebbe. Si tiene il carattere di prima in un gruppo
+     e lo si rimette. */
+  const _SOLA_PAROLA=/^[A-Za-zÀ-ÖØ-öø-ÿ]+$/;
+  const _FRASI_RX=_FRASI.map(function(f){
+    if(!_SOLA_PAROLA.test(f[0]))return [f[0],f[1],false];
+    return [new RegExp('([^A-Za-zÀ-ÖØ-öø-ÿ]|^)'+f[0]+'(?![A-Za-zÀ-ÖØ-öø-ÿ])','g'),f[1],true];
+  });
+
   function _swapPratiche(s){
-    for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
+    for(const f of _FRASI_RX){
+      if(f[2]){ s=s.replace(f[0],'$1'+f[1]); }
+      else if(s.indexOf(f[0])>=0){ s=s.split(f[0]).join(f[1]); }
+    }
     /* conteggi nudi: "1 lavoro"→"1 pratica", "N lavori"→"N pratiche" */
     s=s.replace(/(\d+)\s+lavori\b/g,'$1 pratiche').replace(/(\d+)\s+lavoro\b/g,'$1 pratica');
     /* tab/intestazione: nodo composto SOLO dalla parola */
@@ -1475,7 +1502,13 @@
      conferma del PDF, cronoprogramma). Una classe sola, un posto solo:
      chi domani disegna una schermata nuova col testo di una lavorazione
      dentro se la mette e non ci pensa piu'. */
-  const _SKIP_UTENTE='option,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
+  /* ⚠️ 22 agosto 2026 — «.ct-t» e «.ct-s»: le righe dei risultati della
+     ricerca in alto. Dentro ci sono NOMI scritti dall'utente (clienti,
+     pratiche, fornitori) e il traduttore ci passava sopra. La radice e' gia'
+     chiusa qui sopra (una parola si cambia solo se e' intera), ma questi due
+     restano nell'elenco lo stesso: sono contenuto dell'utente e non vanno
+     toccati nemmeno per caso. */
+  const _SKIP_UTENTE='option,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
   /* ⛔ 21 agosto 2026 — DUE LISTE, NON UNA.
      «textarea» sta in _SKIP_UTENTE per proteggere quello che l'utente SCRIVE
      DENTRO la casella. Ma il suggerimento grigio (`placeholder`) e il `title`
@@ -1535,7 +1568,12 @@
   function localizzaPratiche(){
     if(ruoloUtente!=='professionista')return;
     if(_praticheObs)_praticheObs.disconnect(); /* si stacca durante la riscrittura: le mutazioni che genera (e quelle già in coda) vengono scartate → niente loop */
-    ['#appview','#sheet'].forEach(sel=>{
+    /* ⛔ 22 agosto 2026 — «#barra-basso» MANCAVA, ed e' il difetto segnalato
+       da Alessio: sul telefono la barra in basso diceva ancora «Lavori»
+       mentre tutto il resto diceva «Pratiche». Il traduttore guardava solo
+       dentro la schermata e dentro le finestre; la barra sta fuori da tutte
+       e due. Una parola sola, in un posto dimenticato. */
+    ['#appview','#sheet','#barra-basso'].forEach(sel=>{
       const root=document.querySelector(sel);if(!root)return;
       const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
