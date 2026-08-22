@@ -14,7 +14,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   #app-root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--ink);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 16px 120px}
+  .wrap{max-width:none;margin:0 auto;padding:0 16px 120px}
 
   /* LANDING */
   .landing-top{background:linear-gradient(135deg,#1f446f,#143f33);color:#fff;padding:30px 16px 26px;text-align:center}
@@ -40,16 +40,19 @@
 
   /* HEADER pannello */
   header.top{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;
-    padding:16px 16px 14px;position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-  .top-in{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    padding:16px 16px 14px;position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(0,0,0,.12);
+    scroll-margin-top:0}
+  .top-in{max-width:none;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{display:flex;align-items:center;gap:10px}
-  .back{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:9px;padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+  /* 22 agosto 2026 — la freccia si deve vedere: era piccola e finiva
+     sotto la barra viola del fondatore. */
+  .back{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:800;cursor:pointer;white-space:nowrap}
   .back:active{transform:translateY(1px)}
   .brand h1{font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.1}
   .brand small{display:block;font-size:11px;font-weight:500;opacity:.85;letter-spacing:.3px;text-transform:uppercase}
   .btn-new{background:#fff;color:var(--accent-d);border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12)}
   .btn-new:active{transform:translateY(1px)}
-  nav.tabs{display:flex;gap:2px;max-width:1040px;margin:12px auto 0;padding:0 16px;overflow-x:auto}
+  nav.tabs{display:flex;gap:2px;max-width:none;margin:12px auto 0;padding:0 16px;overflow-x:auto}
   nav.tabs button{flex:0 0 auto;background:none;border:none;color:rgba(255,255,255,.78);font-size:14px;font-weight:600;padding:8px 13px 12px;cursor:pointer;border-bottom:3px solid transparent}
   nav.tabs button.active{color:#fff;border-bottom-color:#fff}
 
@@ -193,8 +196,12 @@
   #lightbox img{max-width:100%;max-height:100%;border-radius:8px}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:11px;font-size:14px;font-weight:600;z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-  .wrap{max-width:1140px}
-  header .top-in, nav.tabs{max-width:1140px}
+  /* ⛔ 22 agosto 2026 — A TUTTA PAGINA, deciso da Alessio.
+     Prima c'era un tetto di 1140 px: su uno schermo grande restava mezza
+     pagina bianca ai lati e i moduli sembravano finestrelle. Adesso si
+     allarga fino in fondo, con solo un po' di aria ai bordi. */
+  .wrap{max-width:none;padding-left:28px;padding-right:28px}
+  header .top-in, nav.tabs{max-width:none}
   body{zoom:1.2}
 </style>
 
@@ -218,7 +225,7 @@
   <header class="top">
     <div class="top-in">
       <div class="brand">
-        <button class="back" data-action="home">← Pannelli</button>
+        <button class="back" data-action="home">← Indietro</button>
         <div><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
       </div>
       <!-- 6 agosto 2026: in un noleggio non si creano "lavori": si registrano noleggi. -->
@@ -387,7 +394,7 @@
           <p style="margin:8px 0 0;font-size:13px;color:#666">Gasolio, dischi, catene: quello che si addebita a parte.</p>
         </div>
 
-        <div class="nol-conto" id="nn-conto"></div>
+        <div class="nol-conto" id="nn-conto"><h4>Il conto</h4><p style="margin:0;color:#666;font-size:14px">Scegli il mezzo e le date: il conto si fa da solo.</p></div>
 
         <div class="nol-riq nol-cam">
           <h4>Quanto si fa pagare</h4>
@@ -1339,7 +1346,7 @@
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
-  $('[data-tab="noleggi"]')?.addEventListener("click",loadNoleggi);
+  $('[data-tab="noleggi"]')?.addEventListener("click",()=>{loadNoleggi().then(nolAggiornaConto);});
   $("#clienti-nol-body")?.addEventListener("click",async e=>{
     const ed=e.target.closest(".clinol-edit"), del=e.target.closest(".clinol-del");
     if(del){
@@ -2249,7 +2256,11 @@
   $$("nav.tabs button").forEach(b=>b.onclick=()=>{
     $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
     $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
-    window.scrollTo({top:0,behavior:"smooth"});
+    /* ⚠️ 22 agosto 2026 — secco, non "smooth". Con lo scorrimento morbido la
+       sezione nuova si disegna mentre la pagina sta ancora scendendo, e chi
+       arriva trova la testata tagliata a meta'. Si apre dall'alto e basta. */
+    window.scrollTo(0,0);
+    document.documentElement.scrollTop=0; document.body.scrollTop=0;
   });
 
   let editProdId=null;
