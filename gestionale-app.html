@@ -10601,14 +10601,15 @@ ${vecchi?`
     /* 12 agosto 2026 — la manodopera entra nel margine: ore x costo orario
        della persona che le ha fatte, media della squadra per le ore senza
        nome. Prima il costo orario si compilava e non serviva a niente. */
-    let md=0, oreSenzaNome=0, mediaSquadra=0;
+    let md=0, oreSenzaNome=0, mediaSquadra=0, oreLette=true;
     try{
       const _l=[{id:lavoroId, ore:_numIt("#j-ore")||0}];
       const _m=await caricaManodopera(curMestiere(),_l);
       md=_m.per[String(lavoroId)]||0;
       oreSenzaNome=_m.senzaNome[String(lavoroId)]||0;
       mediaSquadra=(_m.tariffe&&+_m.tariffe.media)||0;
-    }catch(e){}
+      oreLette=(_m.oreLette!==false);
+    }catch(e){ oreLette=false; }
     const imp=($("#j-imp")?(_numIt("#j-imp")||0):(+importo||0));
     const marg=margineLavoro(imp,tot,totFF,md);
     /* ⚠️ 18 agosto 2026 — «Spese: −0,00 €». Il meno era scritto a mano
@@ -10634,7 +10635,11 @@ ${vecchi?`
                  qualcuno e' nel Cestino). Adesso parla solo delle ore che
                  riguarda davvero, cioe' quelle senza nome. */
               : `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`)
-          : "");
+          : "")
+      /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere il margine
+         qui sopra e' scritto SENZA la manodopera, e senza questa riga
+         sembrerebbe un margine vero. Meglio saperlo che crederci. */
+      +(oreLette?"":`<span class="sp-forn" style="flex-basis:100%">⚠️ Non sono riuscito a leggere le ore di questo lavoro: nel margine qui sopra <b>la manodopera non c'è</b>. Ricarica la pagina.</span>`);
     renderAndamentoSpese(sp,imp);
   }
 
@@ -10737,7 +10742,13 @@ ${vecchi?`
      riga sparisce davvero e il database mette a NULL gest_ore.operatore_id —
      li' il ripiego sulla media e' l'unica cosa che rimane. */
   async function caricaManodopera(mid,lavori){
-    const vuoto={per:{},senzaNome:{},tariffe:{per:{},media:0}};
+    /* ⛔ 22 agosto 2026 — «oreLette» dice se le ore si sono POTUTE leggere.
+       Prima non c'era: se la lettura andava storta il conto proseguiva come
+       se le ore fossero ZERO, in silenzio, e il lavoro sembrava piu' in
+       guadagno di quello che era. «Nessuna ora» e «non ho potuto leggerle»
+       sono due cose diverse — la stessa lezione della squadra, dieci righe
+       piu' sotto, che qui non era stata applicata. */
+    const vuoto={per:{},senzaNome:{},tariffe:{per:{},media:0},oreLette:false};
     if(!sb||!sbUid)return vuoto;
     try{
       /* .bind(sb) NON si tocca: sb.from staccato dall'oggetto perde il "this" e
@@ -10763,8 +10774,14 @@ ${vecchi?`
          che era gia' scritto. */
       const opsVivi=(rVivi&&!rVivi.error&&rVivi.data)?rVivi.data:(ops||[]);
       const tariffe=costiOrari(ops||[],opsVivi);
+      /* ⚠️ senza lavori da guardare la lettura non parte nemmeno e al suo
+         posto arriva {data:[]}: nessun errore, elenco vuoto, quindi conta
+         come «lette» senza bisogno di scriverlo a parte. (Il caso a parte
+         l'avevo scritto, e il sabotaggio che lo toglieva restava muto: era
+         una riga che non serviva a niente.) */
+      const oreLette=!!(ore && !ore.error && ore.data);
       const md=costoManodopera((ore&&ore.data)||[],lavori,tariffe);
-      return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe};
+      return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe, oreLette:oreLette};
     }catch(e){ return vuoto; }
   }
 
@@ -14510,7 +14527,15 @@ ${vecchi?`
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.sp/mlMax*100,m.sp?1:0)}%"></div></div>
       <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · Manodopera "+eur(m.md):""}</div></div>`;
     }).join("");
+    /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere, TUTTI i
+       margini di questa pagina (e i Totali storici, e il CSV) sono scritti
+       senza la manodopera. Prima non lo diceva nessuno e il Report faceva
+       sembrare i lavori piu' in guadagno di quello che erano. */
+    const avvisoOre=(_md.oreLette===false)
+      ? `<p class="fatt-empty" style="margin:0 0 12px;color:var(--err);font-weight:700">⚠️ Non sono riuscito a leggere le ore: in questa pagina <b>la manodopera non è contata</b>, quindi i margini qui sotto sono più alti del vero. Ricarica la pagina.</p>`
+      : "";
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
+      ${avvisoOre}
       <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Incasso</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
       ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
       ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;

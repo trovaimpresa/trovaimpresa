@@ -14455,3 +14455,83 @@ setTimeout(function(){decidi(window._gestEmail||'','ok');},8000);
 e il ramo dell'errore di lettura, che entra «per non bloccare chi paga».
 La ragione è buona, **il verso è sbagliato**: la porta si apre da sola invece
 di chiudersi, e per entrare basta rallentare quella richiesta.
+
+---
+
+# 22 AGOSTO 2026 — I DATI CHE SI PERDONO SENZA DIRLO
+
+Due cose diverse, tutte e due «il programma dice sì e non è vero».
+
+## 1. Il collaboratore che segna «fatto» e non risulta a nessuno
+
+`gestionale-operatore.html`, i due pulsanti che scrivono su `gest_lavori`:
+**«Segna come fatto»** e le note **«Cosa hai fatto»**.
+
+⛔ **Quando la regola del database rifiuta la riga, PostgREST non risponde con
+un errore: risponde «va bene, ho cambiato zero righe».** Il codice guardava
+solo `error`. Quindi sul telefono compariva «Segnato come fatto ✔», il
+collaboratore tornava a casa convinto, e nel gestionale del titolare il lavoro
+restava aperto. **Nessuno dei due lo sapeva.**
+
+Provato per davvero, non ragionato: `prove/dati-che-si-perdono/`, prova 1,
+accende **Postgres vero**, scrive una regola RLS come quella di Alessio e fa
+provare a un collaboratore senza permesso. Risultato: **nessun errore, righe
+cambiate 0, il valore nel database non si muove.**
+
+Adesso c'è una funzione sola, `scriviLavoro(patch)`, che dopo l'update
+**chiede indietro la riga** (`.select("id")`): se non torna niente, non è
+stato scritto niente, e lo dice — *«Non l'ho segnato: il capo non ti ha dato
+il permesso sui Lavori. Chiediglielo e riprova.»* L'errore vero della linea
+resta un messaggio diverso: non si dà la colpa al permesso quando è caduta la
+rete.
+
+⚠️ Funziona perché **chi può modificare un lavoro può anche leggerlo**
+(`lavori_update` vuole «lavori», `lavori_read` si accontenta di «lavori»
+oppure «fatture»). Se un giorno quelle due regole cambiassero, un salvataggio
+riuscito potrebbe tornare vuoto e il messaggio direbbe una bugia al contrario.
+È scritto nel file, sopra la funzione.
+
+⚠️ E il pulsante delle note chiede il permesso **«note»**, ma la riga che
+scrive sta in `gest_lavori`, che il database protegge col permesso
+**«lavori»**: due parole diverse per la stessa cosa. **Il controllo della
+pagina non è il controllo del database.** (Oggi chi non ha «lavori» non arriva
+nemmeno ad aprire un lavoro, quindi a schermo quel caso non si vede —
+controllato prima di scriverlo.)
+
+## 2. Le ore che sparivano dal margine
+
+`gestionale-app.html`, `caricaManodopera`. Se la lettura delle ore andava
+storta, il conto proseguiva **come se le ore fossero zero**, zitto: il margine
+del lavoro e tutto il Report facevano sembrare i lavori **più in guadagno di
+quello che erano**.
+
+Adesso la funzione torna anche `oreLette`, e i due posti che leggono il
+margine lo dicono:
+
+- nella scheda del lavoro: *«Non sono riuscito a leggere le ore: nel margine
+  qui sopra la manodopera non c'è. Ricarica la pagina.»*
+- in cima al Report: la stessa cosa, in rosso, perché lì i margini sono tanti.
+
+⚠️ È la stessa lezione già imparata dieci righe più sotto per la squadra
+(«squadra vuota» e «non ho potuto leggere la squadra» sono due cose diverse):
+**era stata applicata alla squadra e non alle ore.**
+
+## Il banco — nei due versi
+
+`prove/dati-che-si-perdono/`: **13 verdi · 14 sabotaggi su 14 accusati.**
+Rifatti tutti gli altri: artigiano 23 · documenti 20 · ore 20 · misure 18 ·
+geometra 13 · totale 11 · cancello negozio 12 · piccole 19 · guardiano 20.
+
+⛔ **Un sabotaggio muto, e aveva ragione lui.** Avevo scritto un caso a parte
+per «nessun lavoro da guardare»: toglierlo non faceva diventare rossa nessuna
+prova. Guardato invece di aggirato: quando i lavori sono zero **la lettura non
+parte nemmeno** e al suo posto arriva `{data:[]}` — nessun errore, elenco
+vuoto, cioè già «letta bene». Quella riga non serviva a niente ed è stata
+tolta.
+
+⚠️ Tre inciampi miei nel banco: `js/cestino.js` avvolge il client e fa
+`q.delete.bind(q)`, quindi un finto senza `delete` fa morire la pagina prima
+che nasca; il lucchetto del telefono è il div `#gate` che si nasconde con una
+classe, e guardare il `display` del `<p>` dentro diceva sempre «è visibile»;
+e l'SQL passato dentro `su postgres -c "..."` perde gli a capo — va passato da
+un file.
