@@ -13847,3 +13847,80 @@ file rimossi.
 cadere, l'assenza di righe rosse veniva letta come «nessuna prova rossa» —
 cioè come un sabotaggio non accusato. Adesso un banco che non arriva in fondo
 viene segnalato a parte: **va guardato, non ignorato.**
+
+
+# ✅ 22 agosto 2026 — LE ORE DIVENTANO UNA PARCELLA
+
+Punto 1b: **CHIUSO**. Due file: `gestionale-app.html` e un file SQL nuovo,
+`sql/gest-azienda-tariffa-oraria.sql` (⚠️ **da eseguire su Supabase**).
+
+## IL BUCO
+
+Le ore si segnavano già bene — giorno, chi, quante, cosa ha fatto — e poi
+finivano lì. Per uno studio la parcella spesso **nasce dalle ore**: tre
+sopralluoghi, sei ore di disegno, due al Comune. Quel conto si rifaceva a
+mano, su un foglio.
+
+## COSA C'È ADESSO
+
+Nel «⏱ Registro delle ore» della scheda della pratica c'è
+**«💶 Porta le ore nella parcella»** (per l'impresa: «…nel preventivo»), che
+compare **solo se delle ore ci sono**. Premendolo si apre una parcella nuova,
+già col cliente e il titolo della pratica, e **una riga per persona** con la
+quantità uguale alle sue ore.
+
+- ⚠️ **Una riga per PERSONA, non per giorno.** Un cliente non vuole leggere
+  quaranta righe da mezz'ora: vuole sapere quante ore e a quanto. Le ore
+  segnate dal titolare (senza un nome) fanno una riga sola.
+- Cliente e titolo si prendono da **quello che è aperto sullo schermo**, non
+  da una seconda lettura: così valgono anche le modifiche non ancora salvate.
+
+## ⛔ IL PREZZO — LA DECISIONE DI ALESSIO
+
+Chiesto a lui: prezzo vuoto o tariffa che si riempie da sola? Risposta:
+**«facciamo entrambe — si riempie da sola, se non gli va bene lo cancella e
+riempie a mano»**. La casella del prezzo era già scrivibile, quindi il «a
+mano» non è costato niente.
+
+Nasce **`gest_azienda.tariffa_oraria`** e la casella **«Quanto chiedi
+all'ora»** nei Dati azienda.
+
+⛔ **NON è il costo del collaboratore.** `gest_operatori.costo_orario` è
+quanto COSTA lui, e serve al Report per dire se un lavoro ci ha guadagnato.
+Usarlo come prezzo vorrebbe dire **fatturare al cliente il proprio costo**.
+C'è un sabotaggio apposta (S9) che diventa rosso se qualcuno li confonde.
+
+⚠️ **Senza tariffa il prezzo arriva VUOTO, non a zero.** Uno zero sembra un
+prezzo; il vuoto si vede che manca. E la nota nel modulo dice dove si mette la
+tariffa una volta per tutte.
+
+⚠️ **Se la query SQL non è stata eseguita non si rompe niente**: la casella
+non compare (saveAzienda lascia cadere la colonna, come fa già per la polizza
+e la patente) e le righe arrivano senza prezzo.
+
+## IL BANCO — nei due versi
+
+`prove/ore-parcella/` (nel contenitore di Claude): `banco.js` ·
+`sabotaggi.js`, col finto Supabase condiviso `prove/finto-supabase.js`.
+
+**20 verdi · 23 sabotaggi su 23 accusati.**
+
+⚠️ **Quattro prove rosse su cinque erano colpa del BANCO, non del codice**, e
+capirle una per una è servito:
+- il finto Supabase non sapeva fare `upsert()` — i Dati azienda si salvano
+  così, quindi «la tariffa non si scrive» era una bugia del banco;
+- non sapeva fare `.insert(...).select().single()`;
+- ⛔ trattava un **elenco** di righe come se fosse **una riga sola**: la prova
+  «le voci si salvano» diceva «1 riga, descrizione vuota». Le voci di un
+  preventivo si scrivono tutte insieme;
+- la tendina dei clienti nel banco era vuota, quindi il cliente non si poteva
+  nemmeno scegliere.
+
+⛔ **E una lezione nuova: il banco premeva la funzione, non il pulsante.**
+Chiamare `orePortaInParcella()` a mano lasciava il filo fra il pulsante e la
+funzione **senza nessuna prova**: tagliato quel filo (S4), il banco restava
+tutto verde. Adesso il clic parte dal pulsante vero e passa da `data-action`.
+
+⚠️ **Il finto Supabase adesso è UNO SOLO** (`prove/finto-supabase.js`), usato
+da tutti e due i banchi di oggi. Prima erano due copie, e una correzione
+andava pagata due volte.

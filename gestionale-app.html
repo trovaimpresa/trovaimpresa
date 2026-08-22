@@ -8088,7 +8088,12 @@ ${vecchi?`
           <select id="or-chi" title="Chi ci ha lavorato (facoltativo)"><option value="">— chi —</option></select>
           <button type="button" class="btn" data-action="ore-add">+ Aggiungi</button></div>
         <input id="or-nota" placeholder="Cosa hai fatto (facoltativo)" style="margin-top:6px;width:100%">
-        <div class="margine-box" id="ora-box"></div></div>
+        <div class="margine-box" id="ora-box"></div>
+        <!-- 22 agosto 2026 — IL PONTE FRA LE ORE E LA PARCELLA.
+             Le ore si segnavano e finivano li': il conto per la parcella si
+             rifaceva a mano. Il pulsante compare solo quando delle ore ci
+             sono davvero (lo accende renderOreBlock). -->
+        <button type="button" class="btn quick-add" id="ore-in-parcella" data-action="ore-parcella" style="display:none;margin-top:10px">💶 Porta le ore nella parcella</button></div>
       <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>Rapportini di giornata</label>
         <div class="spese-list" id="rap-list"></div>
         <div class="campo-aiuto">Li scrive chi sta in cantiere, dal telefono. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme. Per correggere le ore senza toccare il rapportino usa il registro qui sopra.</div></div>
@@ -9380,6 +9385,16 @@ ${vecchi?`
         <div class="field"><label>Entro quanti giorni ti devono pagare</label>
           <input type="number" id="a-gg" inputmode="numeric" value="${a.giorni_pagamento||30}" placeholder="30"></div>
         <div class="sh-nota">I giorni servono alle Fatture per dirti quando una fattura è scaduta. Di solito 30.</div>
+        <!-- ⛔ 22 agosto 2026 — QUANTO CHIEDI ALL'ORA.
+             Non e' il costo del collaboratore (gest_operatori.costo_orario, che
+             e' quanto COSTA lui e serve al Report): questo e' quanto CHIEDI tu
+             al cliente. Confonderli vuol dire fatturare il proprio costo.
+             Serve al pulsante «Porta le ore nella parcella»: senza, le righe
+             arrivano col prezzo vuoto. Se la colonna nel database non c'e'
+             ancora, saveAzienda la lascia cadere e tutto il resto si salva. -->
+        <div class="field"><label>Quanto chiedi all'ora (€)</label>
+          <input type="text" id="a-tariffa" inputmode="decimal" value="${a.tariffa_oraria!=null&&a.tariffa_oraria!==""?esc(_numTesto(a.tariffa_oraria)):""}" placeholder="Es. 35,00"></div>
+        <div class="sh-nota">Serve al pulsante <b>«Porta le ore nella parcella»</b> nel registro delle ore: le ore diventano righe già col prezzo. Se lo lasci vuoto, le righe arrivano <b>senza prezzo</b> e lo scrivi tu. ⛔ Non è il costo di un collaboratore: è quanto <b>chiedi tu</b>.</div>
         ${ruoloUtente==='professionista'?`
         <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
           <label>Crediti formativi da fare ogni anno (CFP)</label>
@@ -9492,6 +9507,12 @@ ${vecchi?`
     /* riepilogo del lunedì: la casella c'e' per tutti i ruoli, quindi qui non
        serve la precauzione della patente e della polizza */
     if($("#a-rieplun"))row.riepilogo_lunedi=!!$("#a-rieplun").checked;
+    /* 22 agosto 2026 — la tariffa oraria. Vuoto = null, non zero: uno zero
+       sembra un prezzo, il vuoto si vede che manca. */
+    if($("#a-tariffa")){
+      const tv=String($("#a-tariffa").value||"").trim();
+      row.tariffa_oraria = tv===""?null:Math.max(0,_numeroIt(tv)||0);
+    }
 
     let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
     /* se una colonna aggiunta di recente non c'e' ancora nel database, salvo
@@ -9499,7 +9520,7 @@ ${vecchi?`
     const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti","cfp_obiettivo",
                "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec",
                "pol_compagnia","pol_numero","pol_massimale","pol_scadenza",
-               "riepilogo_lunedi"];
+               "riepilogo_lunedi","tariffa_oraria"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
@@ -10777,6 +10798,9 @@ ${vecchi?`
      La riga che conta è l'ultima: **quanto rende un'ora su questo lavoro**.
      Tabella: sql/gest-ore-e-crediti.sql. Se manca, il riquadro lo dice. */
   let oreLavoroId=null, oreTabellaOk=true;
+  /* le righe del registro delle ore del lavoro aperto: le tiene renderOreBlock
+     e le rilegge orePortaInParcella, senza tornare al database */
+  let oreCache=[];
   function _oreManca(err){
     const m=(err&&err.message)||"";
     return /gest_ore/i.test(m)||/schema cache|does not exist|relation/i.test(m);
@@ -10818,6 +10842,16 @@ ${vecchi?`
         +'</span><b>'+_oreTesto(x.ore)+'</b>'
         +'<button type="button" class="rdel" data-action="ore-del" data-id="'+esc(String(x.id))+'" title="Elimina">×</button></div>';
     }).join(""):'<p class="fatt-empty">Nessuna ora registrata.</p>';
+
+    /* 22 agosto 2026 — il pulsante che porta le ore nella parcella: si accende
+       solo se delle ore ci sono. Le righe restano qui in memoria, cosi' non si
+       rilegge il database quando lo si preme. */
+    oreCache=righe;
+    const btnPar=$("#ore-in-parcella");
+    if(btnPar){
+      btnPar.style.display=righe.length?"":"none";
+      btnPar.textContent=pro?"💶 Porta le ore nella parcella":"💶 Porta le ore nel preventivo";
+    }
 
     /* il campo "Ore lavorate" diventa lo specchio del registro: si scrive da
        solo e non si tocca più a mano, se no i due numeri litigano */
@@ -11057,6 +11091,82 @@ ${vecchi?`
     const v=String(campo.value||"").trim();
     const tot=v===""?null:(_numeroIt(v)||0);  /* vuoto = nessuna ora, non zero finto */
     try{ await sb.from("gest_lavori").update({ore:tot}).eq("id",oreLavoroId).eq("user_id",sbUid); }catch(e){}
+  }
+
+  /* ============================================================
+     ⛔ 22 agosto 2026 — LE ORE DIVENTANO UNA PARCELLA
+     ============================================================
+     Le ore si segnavano bene (giorno, chi, quante, cosa) e poi finivano li':
+     per fare la parcella il conto si rifaceva a mano, su un foglio. Per uno
+     studio la parcella spesso NASCE dalle ore — tre sopralluoghi, sei ore di
+     disegno, due al Comune.
+
+     ⛔ IL PREZZO NON SI INVENTA. L'unico numero orario che il gestionale ha
+     sempre avuto e' `gest_operatori.costo_orario`, che e' quanto ti COSTA un
+     collaboratore: serve al Report per dirti se un lavoro ci ha guadagnato.
+     Usarlo come prezzo vorrebbe dire fatturare al cliente il proprio costo.
+     Il prezzo viene dalla TARIFFA scritta nei Dati azienda
+     (`gest_azienda.tariffa_oraria`, sql/gest-azienda-tariffa-oraria.sql), e
+     se quella manca la riga arriva SENZA PREZZO: uno zero sembrerebbe un
+     prezzo, il vuoto si vede che manca.
+
+     ⚠️ Una riga per persona, non una riga per giorno. Un cliente non vuole
+     leggere quaranta righe da mezz'ora: vuole sapere quante ore e a quanto.
+     Le ore senza un nome (segnate dal titolare) finiscono in una riga sola.
+     ============================================================ */
+  async function orePortaInParcella(){
+    if(!oreLavoroId){toast("Apri prima una pratica");return;}
+    const righeOre=(oreCache||[]).filter(x=>(+x.ore||0)>0);
+    if(!righeOre.length){toast("Non ci sono ore da portare");return;}
+    const pro=(ruoloUtente==='professionista');
+
+    /* la tariffa: dai Dati azienda, gia' letti dal modulo del preventivo.
+       Se la colonna non c'e' ancora nel database, `tariffa_oraria` e'
+       semplicemente undefined e il prezzo resta vuoto. */
+    if(!fattAzienda&&sb&&sbUid){
+      try{
+        const {data:_az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+        fattAzienda=_az||null;
+      }catch(e){}
+    }
+    const tariffa=(fattAzienda&&fattAzienda.tariffa_oraria!=null&&fattAzienda.tariffa_oraria!=="")
+                    ? (+fattAzienda.tariffa_oraria||0) : null;
+
+    /* si somma per persona, tenendo l'ordine in cui compaiono */
+    const perChi=[], visto={};
+    righeOre.forEach(function(x){
+      const k=String(x.operatore_id||"");
+      if(!visto[k]){visto[k]={chi:k,ore:0};visto[k]._i=perChi.push(visto[k])-1;}
+      visto[k].ore+=(+x.ore||0);
+    });
+    const nomeDi=function(id){const d=(dipCache||[]).find(y=>String(y.id)===String(id));return d?d.nome:"";};
+    const voce=pro?"Ore di studio":"Ore di lavoro";
+    const _righe=perChi.map(function(g,i){
+      const chi=nomeDi(g.chi);
+      return {descrizione: chi?(voce+" — "+chi):voce,
+              qta: Math.round(g.ore*100)/100,
+              prezzo: (tariffa===null?"":tariffa),
+              sezione:false, ordine:i};
+    });
+
+    /* cliente e titolo si prendono da quello che e' aperto sullo schermo, non
+       da una seconda lettura: cosi' valgono anche le modifiche non salvate */
+    const cliSel=$("#j-cli"), descEl=$("#j-desc");
+    const cliente_id=(cliSel&&cliSel.value)||null;
+    const desc=(descEl&&String(descEl.value||"").trim())||"";
+    const totOre=_righe.reduce(function(t,r){return t+(+r.qta||0);},0);
+
+    closeSheet();
+    await prevForm(null,{
+      cliente_id:cliente_id,
+      titolo:desc||(pro?"Parcella":"Preventivo"),
+      _righe:_righe,
+      _noteOre:(tariffa===null
+        ? "Le ore sono arrivate dal registro della pratica ("+_numTesto(totOre)+" in tutto). "
+          +"Il prezzo dell'ora non c'e': scrivilo qui, oppure mettilo una volta sola nei Dati azienda, alla voce «Quanto chiedi all'ora»."
+        : "Le ore sono arrivate dal registro della pratica ("+_numTesto(totOre)+" in tutto), al prezzo scritto nei Dati azienda. Cambialo pure riga per riga.")
+    });
+    toast(_righe.length===1?"Una riga portata dalle ore":(_righe.length+" righe portate dalle ore"));
   }
 
   /* ---- PREVENTIVI ---- */
@@ -11566,6 +11676,13 @@ ${vecchi?`
       /* stessa rete di sicurezza della fattura: savePrev cancella le voci e le
          riscrive, quindi un modulo aperto vuoto per colpa della rete
          svuoterebbe il preventivo con un bel "Salvato" verde. */
+      /* 22 agosto 2026 — una parcella NUOVA puo' nascere gia' con le sue
+         righe: e' il pulsante «Porta le ore nella parcella». Prima le righe
+         si leggevano solo da un preventivo che esisteva gia', quindi un
+         precompilato poteva portare il cliente e il titolo ma non le voci. */
+      if(isNew&&preset&&preset._righe&&preset._righe.length){
+        righe=preset._righe;
+      }
       if(p.id){
         const {data:rr,error:erP}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");
         if(erP){
@@ -11600,6 +11717,7 @@ ${vecchi?`
       </div><div class="sh-col">
       <div class="sh-b">
       <div class="sh-tit">Le voci di costo</div>
+      ${p._noteOre?`<div class="sh-nota" style="margin-top:0">⏱ ${esc(p._noteOre)}</div>`:""}
       <div class="field">
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
@@ -14816,6 +14934,7 @@ ${vecchi?`
       /* se le togli tutte resta una riga vuota: se no non hai piu' dove scrivere */
       if(b&&!b.querySelector("[data-nota]"))b.insertAdjacentHTML("beforeend",prevNotaRigaHtml(""));}
       return;}
+    if(a==="ore-parcella")return orePortaInParcella();
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     /* un capitolo si può aggiungere anche a mano, non solo arrivando da un
        computo: chi scrive il preventivo a mano ha lo stesso bisogno di
