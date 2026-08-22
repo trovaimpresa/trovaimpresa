@@ -498,6 +498,11 @@
 #overlay .sheet{max-width:none;min-height:100vh;margin:0;border-radius:0;
   padding:26px 5vw 40px;box-shadow:none}
 #overlay .sheet h3{font-size:24px;margin-bottom:20px}
+.sheet-back{position:sticky;top:0;z-index:5;display:inline-block;margin:-6px 0 14px;
+  background:#fff;border:1px solid #cfd9e6;color:#0066ff;border-radius:10px;
+  padding:11px 18px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;
+  box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.sheet-back:hover{background:#eef5ff}
 #overlay .sheet-actions{border-radius:0;max-width:900px}
 .nol-riq{background:#f7f9fc;border:1px solid #dbe4f0;border-radius:12px;padding:12px;margin-bottom:10px}
 .nol-riq h4{margin:0 0 8px;font-size:15px;color:#2e537d}
@@ -1095,6 +1100,20 @@
     </div>`;
   }
 
+  /* Gli stessi pulsanti anche DENTRO la scheda aperta: chi sta guardando un
+     mezzo o un noleggio deve poterlo stampare, farne il PDF, copiarlo o
+     buttarlo da li', senza chiuderlo e ritrovare la riga nell'elenco.
+     "Modifica" qui non c'e': ci sei gia' dentro. */
+  function nolPulsantiScheda(tipo,id){
+    if(!id) return "";
+    return `<div class="nol-azioni" style="margin:0 0 18px">
+      <button class="nol-az" data-action="nol-copia"  data-t="${tipo}" data-id="${id}">Copia</button>
+      <button class="nol-az" data-action="nol-pdf"    data-t="${tipo}" data-id="${id}">PDF</button>
+      <button class="nol-az" data-action="nol-stampa" data-t="${tipo}" data-id="${id}">Stampa</button>
+      <button class="nol-az nol-az-rosso" data-action="nol-elim" data-t="${tipo}" data-id="${id}">Elimina</button>
+    </div>`;
+  }
+
   const NOL_TIPI={
     mezzo:  {tab:"nol_mezzi",   che:"Mezzo",   ricarica:()=>loadMezzi(),      scheda:d=>schedaMezzo(d)},
     cliente:{tab:"nol_clienti", che:"Cliente", ricarica:()=>loadClientiNol(), scheda:d=>schedaClienteNol(d)},
@@ -1243,7 +1262,7 @@
   function schedaMezzo(m){
     const isNew=!m; m=m||{};
     const v=(k)=>esc(m[k]==null?"":m[k]);
-    openSheet(`<h3>${isNew?"Nuovo mezzo":"Modifica mezzo"}</h3>
+    openSheet(`<h3>${isNew?"Nuovo mezzo":"Modifica mezzo"}</h3>${nolPulsantiScheda("mezzo",m.id||"")}
       <div class="field"><label>Nome del mezzo *</label><input id="nz-nome" value="${v('nome')}" placeholder="Es. Escavatore 3t"></div>
       <div class="row2">
         <div class="field"><label>Codice / matricola</label><input id="nz-codice" value="${v('codice')}" placeholder="Es. E-01"></div>
@@ -1333,7 +1352,7 @@
   function schedaClienteNol(c){
     const isNew=!c; c=c||{};
     const v=(k)=>esc(c[k]==null?"":c[k]);
-    openSheet(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>
+    openSheet(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>${nolPulsantiScheda("cliente",c.id||"")}
       <div class="field"><label>Nome / Ragione sociale *</label><input id="ncl-nome" value="${v('nome')}" placeholder="Es. Rossi Costruzioni srl"></div>
       <div class="row2">
         <div class="field"><label>Telefono</label><input id="ncl-telefono" value="${v('telefono')}" placeholder="Numero"></div>
@@ -1366,7 +1385,7 @@
   async function schedaNoleggio(n){
     const isNew=!n; n=n||{};
     const v=(k)=>esc(n[k]==null?"":n[k]);
-    openSheet(`<h3>${isNew?"Nuovo noleggio":"Modifica noleggio"}</h3>
+    openSheet(`<h3>${isNew?"Nuovo noleggio":"Modifica noleggio"}</h3>${nolPulsantiScheda("noleggio",n.id||"")}
       <div class="row2">
         <div class="field"><label>Mezzo *</label><select id="nn-mezzo"></select></div>
         <div class="field"><label>Cliente</label><select id="nn-cliente"></select></div>
@@ -2358,7 +2377,16 @@
     if(body)body.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
   }
 
-  function openSheet(html){$("#sheet").innerHTML=html;$("#overlay").classList.add("open");}
+  /* ⛔ 22 agosto 2026 — LA FRECCIA IN CIMA A OGNI SCHEDA.
+     Si mette QUI, dentro openSheet, e non su una scheda per volta: cosi' ce
+     l'hanno tutte, anche quelle che nasceranno domani, e non si puo'
+     dimenticarla. Alessio l'ha dovuta chiedere piu' di una volta perche'
+     "Annulla" sta in fondo e su una scheda lunga non si vede. */
+  function openSheet(html){
+    $("#sheet").innerHTML='<button class="sheet-back" data-action="close" title="Torna indietro">← Indietro</button>'+html;
+    $("#overlay").classList.add("open");
+    $("#overlay").scrollTop=0;
+  }
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
 
