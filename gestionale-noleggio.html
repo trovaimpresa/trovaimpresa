@@ -587,6 +587,15 @@
   padding:6px 8px;font-size:13px;color:#666}
 .media-x{border:none;background:none;color:#c62828;font-size:20px;line-height:1;
   cursor:pointer;font-family:inherit;padding:0 2px}
+/* la firma col dito (23 agosto 2026) */
+.firma-riq{margin-top:14px;background:#fff;border:1px solid #cfd9e6;border-radius:12px;padding:12px}
+.firma-riq .firma-eti{display:block;font-size:14px;color:#26415f;font-weight:600;margin-bottom:6px}
+.firma-area{border:2px dashed #cfd9e6;border-radius:10px;background:#fff;overflow:hidden}
+/* ⛔ touch-action:none, se no sul telefono il dito fa scorrere la pagina
+   invece di disegnare, e la firma non si riesce proprio a fare */
+.firma-tela{display:block;width:100%;height:150px;touch-action:none;cursor:crosshair}
+.firma-img{display:block;width:100%;height:150px;object-fit:contain;object-position:left center;background:#fff}
+.firma-nota{margin:6px 0 0;font-size:13px;color:#666}
 /* la videocamera dentro il gestionale (23 agosto 2026) */
 #reg-video{width:100%;max-width:520px;max-height:60vh;background:#111;border-radius:10px;display:block}
 .reg-stato{font-size:15px;color:#26415f;font-weight:600;margin:8px 0 0;min-height:22px}
@@ -2163,6 +2172,10 @@
   async function schedaNoleggio(n){
     const isNew=!n; n=n||{};
     nolIdApertoNoleggio=n.id||null;
+    /* ⚠️ PRIMA di disegnare la scheda: firmaBlocco legge le firme mentre
+       costruisce l'HTML, e se si caricassero dopo resterebbero quelle
+       della scheda di prima. */
+    firmeDa(n,[["contr","firma_contr_img"],["contr2","firma_contr2_img"]]);
     const v=(k)=>esc(n[k]==null?"":n[k]);
     openSheet(`<h3>${isNew?"Nuovo noleggio":"Modifica noleggio"}</h3>${nolPulsantiScheda("noleggio",n.id||"")}
       <div class="row2">
@@ -2240,6 +2253,15 @@
           <div><label>Com'era alla consegna</label><input id="nn-stato-cons" value="${v('stato_consegna')}" placeholder="Es. carrozzeria integra, pieno di gasolio"></div>
           <div><label>Com'&egrave; tornato</label><input id="nn-stato-rie" value="${v('stato_rientro')}" placeholder="Si compila al rientro"></div>
         </div>
+        <div class="nol-due" style="margin-top:14px">
+          <div><label>Chi firma per il cliente</label>
+            <input id="nn-firma-nome" value="${v('firma_contr_nome')}" placeholder="Cognome e nome di chi firma"></div>
+          <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">Le firme qui sotto finiscono dentro il contratto stampato e in PDF.</p></div>
+        </div>
+        ${firmaBlocco("contr","Firma del Conduttore",
+          "Dai il telefono al cliente e fallo firmare qui.")}
+        ${firmaBlocco("contr2","&#9888; Seconda firma — clausole 6 e 8 (artt. 1341-1342 c.c.)",
+          "Senza questa seconda firma le clausole sui danni e sul ritardo NON valgono.")}
         <div class="nol-azioni" style="margin-top:16px">
           <button type="button" class="nol-az nol-az-apri" data-action="nol-contr-stampa" data-id="${n.id||""}">Stampa il contratto</button>
           <button type="button" class="nol-az" data-action="nol-contr-pdf" data-id="${n.id||""}">Contratto in PDF</button>
@@ -2336,6 +2358,7 @@
     nolDisegnaOperatori();
     nolMostraOperatori();
     nolCauApert=n;
+    firmaSveglia(["contr","contr2"]);
     if(n.cauzione_forma&&$("#nn-cau-forma")) $("#nn-cau-forma").value=n.cauzione_forma;
     nolMostraCauzione();
     nolAggiornaConto();
@@ -2560,7 +2583,9 @@
       /* ⛔ la SECONDA firma: senza, le clausole 6 e 8 non sono opponibili.
          Va solo sul contratto — sul verbale e sul DDT non c'entra niente. */
       secondaFirma:"Il Conduttore, per approvazione specifica delle clausole 6 e 8",
-      colonne:[["Il Locatore",A.nome||""],["Il Conduttore",C.nome||n.cliente||""]]});
+      secondaFirmaImg:n.firma_contr2_img||null,
+      colonne:[["Il Locatore",A.nome||"",null],
+               ["Il Conduttore",n.firma_contr_nome||C.nome||n.cliente||"",n.firma_contr_img||null]]});
 
     return {blocchi, titolo:"Contratto di noleggio — "+(M.nome||n.mezzo||"mezzo")+
             (C.nome||n.cliente?" · "+(C.nome||n.cliente):"")};
@@ -2609,10 +2634,15 @@
           + '</ol>';
       }
       if(b.t==="firme"){
+        /* ⛔ 23 agosto: se c'e' il disegno della firma va SOPRA la riga.
+           Un nome scritto non e' una firma. */
+        const dis=(img)=>img?'<img class="segno" src="'+img+'" alt="firma">':'<div class="vuoto"></div>';
         h+=(b.vessatorie?'<p class="pic">'+esc(b.vessatorie)+'</p>':'')+'<div class="firme">'
-          + b.colonne.map(c=>'<div><div class="riga"></div>'+esc(c[0])+(c[1]?'<div class="pic">'+esc(c[1])+'</div>':'')+'</div>').join("")
+          + b.colonne.map(c=>'<div>'+dis(c[2])+'<div class="riga"></div>'+esc(c[0])
+              +(c[1]?'<div class="pic">'+esc(c[1])+'</div>':'')+'</div>').join("")
           + '</div>'
-          + (b.secondaFirma?'<div class="firme"><div><div class="riga"></div>'+esc(b.secondaFirma)+'</div><div></div></div>':'');
+          + (b.secondaFirma?'<div class="firme"><div>'+dis(b.secondaFirmaImg)+'<div class="riga"></div>'
+              +esc(b.secondaFirma)+'</div><div></div></div>':'');
       }
     });
     const w=window.open("","_blank","width=980,height=1100");
@@ -2629,7 +2659,9 @@
       + 'table.griglia td,table.griglia th{border:1px solid #bbb;padding:7px 8px;text-align:left;font-size:13px}'
       + 'ol{padding-left:20px}ol li{margin-bottom:7px}'
       + '.firme{display:flex;gap:40px;margin-top:34px}.firme>div{flex:1;font-size:13px}'
-      + '.riga{border-top:1px solid #222;margin-bottom:5px;height:34px}'
+      + '.riga{border-top:1px solid #222;margin-bottom:5px;height:0}'
+      + '.segno{display:block;max-width:100%;height:46px;object-fit:contain;object-position:left bottom}'
+      + '.vuoto{height:46px}'
       + '@media print{body{margin:14mm}}'
       + '</style></head><body>'+h+'</body></html>');
     w.document.close();
@@ -2648,21 +2680,32 @@
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
     const M=16, R=210-M, L=R-M; let y=20;
     const salta=(h)=>{ if(y+h>282){doc.addPage();y=20;} };
+    /* ⛔ 23 agosto 2026 — LE FACCINE NEL PDF.
+       Provando il PDF per davvero (prima il banco bloccava jsPDF e non si
+       provava mai) e' saltato fuori che «⚠️ Nessuna foto allegata» sul
+       foglio diventava «& þ Nessuna foto allegata»: i caratteri fuori dal
+       Latin-1 le font standard del PDF non li sanno scrivere e li storpiano.
+       Qui si tolgono, e le virgolette e i trattini strani si raddrizzano. */
+    const pulisci=(t)=>String(t==null?"":t)
+      .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
+      .replace(/[–—]/g,"-").replace(/…/g,"...")
+      .replace(/[^\x00-\xFF€]/g,"")
+      .replace(/[ \t]{2,}/g," ").trim();
     const testo=(t,x,larg,size,stile,col)=>{
       doc.setFont("helvetica",stile||"normal");doc.setFontSize(size||10);
       doc.setTextColor(col==null?30:col);
-      const linee=doc.splitTextToSize(String(t),larg);
+      const linee=doc.splitTextToSize(pulisci(t),larg);
       linee.forEach(l=>{ salta(6); doc.text(l,x,y); y+=size>=13?6.5:5; });
     };
     blocchi.forEach(b=>{
       if(b.t==="testata"){
-        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(b.azienda,M,y);
-        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(b.titolo,R,y,{align:"right"});
+        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(pulisci(b.azienda),M,y);
+        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(pulisci(b.titolo),R,y,{align:"right"});
         y+=6;
         doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(110);
         const n1=b.sotto.length;
-        b.sotto.forEach((x,i)=>doc.text(x,M,y+i*4.2));
-        doc.text(b.dettaglio,R,y,{align:"right"});
+        b.sotto.forEach((x,i)=>doc.text(pulisci(x),M,y+i*4.2));
+        doc.text(pulisci(b.dettaglio),R,y,{align:"right"});
         y+=Math.max(n1*4.2,5)+4;
         doc.setDrawColor(60);doc.setLineWidth(.5);doc.line(M,y,R,y);doc.setLineWidth(.2);y+=7;
         doc.setTextColor(30);
@@ -2675,9 +2718,9 @@
         r.forEach(x=>{
           salta(8);
           doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(110);
-          doc.text(String(x[0]),M,y);
+          doc.text(pulisci(x[0]),M,y);
           doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(30);
-          const linee=doc.splitTextToSize(String(x[1]),L-74);
+          const linee=doc.splitTextToSize(pulisci(x[1]),L-74);
           doc.text(linee,M+74,y);
           y+=Math.max(6,linee.length*5);
           doc.setDrawColor(225);doc.line(M,y-2.5,R,y-2.5);
@@ -2692,43 +2735,73 @@
       if(b.t==="tabella"){
         salta(30); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
         testo(b.intro,M,L,9.5,"normal",60); y+=3;
-        const larg=[L*0.32,L*0.28,L*0.24,L*0.16];
+        /* ⛔ 23 agosto: le colonne erano fisse per quattro e sommavano l'84%
+           della riga — su una tabella da tre la tabella finiva a meta'
+           foglio. Adesso le larghezze si scelgono in base a quante sono. */
+        const nc=b.colonne.length;
+        const pesi = nc===4 ? [.32,.28,.24,.16]
+                   : nc===3 ? [.46,.32,.22]
+                   : nc===2 ? [.55,.45]
+                   : b.colonne.map(()=>1/nc);
+        const larg=pesi.map(p=>L*p);
+        /* ⛔ e le celle si scrivevano su UNA riga sola: «Documenti a bordo:
+           libretto, dichiarazione CE» usciva tagliato a meta' su un verbale
+           che si firma. Adesso vanno a capo e la riga si alza. */
         const riga=(cel,grassetto)=>{
-          salta(10);
-          doc.setFont("helvetica",grassetto?"bold":"normal");doc.setFontSize(9);doc.setTextColor(30);
+          doc.setFont("helvetica",grassetto?"bold":"normal");doc.setFontSize(9);
+          const linee=cel.map((c,i)=>doc.splitTextToSize(pulisci(c),larg[i]-3).slice(0,4));
+          const quante=Math.max(1,...linee.map(l=>l.length));
+          const alta=4+quante*4;
+          salta(alta+4);
+          doc.setTextColor(30);
           let x=M;
-          cel.forEach((c,i)=>{ doc.rect(x,y-4,larg[i],8);
-            doc.text(doc.splitTextToSize(String(c||""),larg[i]-3)[0]||"",x+1.5,y+1); x+=larg[i]; });
-          y+=8;
+          cel.forEach((c,i)=>{ doc.rect(x,y-4,larg[i],alta);
+            linee[i].forEach((ln,k)=>doc.text(ln,x+1.5,y+1+k*4));
+            x+=larg[i]; });
+          y+=alta;
         };
         doc.setDrawColor(150);
         riga(b.colonne,true);
         b.righe.forEach(r=>riga(r,false));
-        y+=3; testo(b.nota,M,L,9,"normal",110); y+=3; return;
+        y+=3; if(b.nota){ testo(b.nota,M,L,9,"normal",110); y+=3; } return;
       }
       if(b.t==="numerato"){
         salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
         b.righe.forEach((x,i)=>{
           salta(10);
           doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(30);
-          doc.text((i+1)+". "+x[0],M,y); y+=4.6;
+          doc.text(pulisci((i+1)+". "+x[0]),M,y); y+=4.6;
           testo(x[1].replace("⚠️ ",""),M+4,L-4,9,"normal",60); y+=2.5;
         });
         y+=2; return;
       }
       if(b.t==="firme"){
-        salta(48);
+        salta(56);
         if(b.vessatorie){ testo(b.vessatorie,M,L,9,"normal",110); y+=8; }
         const meta=(L-10)/2;
+        /* ⛔ 23 agosto: il disegno della firma va SOPRA la riga, non un nome
+           scritto a macchina. Se non c'e', resta lo spazio bianco per
+           firmare a penna, come prima. */
+        const segno=(img,x)=>{ if(!img) return;
+          try{ doc.addImage(img,"PNG",x,y-17,Math.min(meta,58),16); }catch(e){} };
+        y+=17;
+        segno(b.colonne[0][2],M); segno(b.colonne[1][2],M+meta+10);
         doc.setDrawColor(60);
         doc.line(M,y,M+meta,y); doc.line(M+meta+10,y,R,y); y+=4.5;
         doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(30);
-        doc.text(b.colonne[0][0],M,y); doc.text(b.colonne[1][0],M+meta+10,y); y+=14;
+        doc.text(pulisci(b.colonne[0][0]),M,y); doc.text(pulisci(b.colonne[1][0]),M+meta+10,y); y+=4.5;
+        /* ⚠️ 23 agosto: sotto la riga della firma mancava il NOME, che sulla
+           carta stampata c'era: due fogli uguali che dicevano cose diverse. */
+        doc.setFontSize(8.5);doc.setTextColor(110);
+        if(b.colonne[0][1]) doc.text(pulisci(b.colonne[0][1]),M,y);
+        if(b.colonne[1][1]) doc.text(pulisci(b.colonne[1][1]),M+meta+10,y);
+        y+=10;
         if(b.secondaFirma){
-          salta(20);
+          salta(26);
+          y+=17; segno(b.secondaFirmaImg,M);
           doc.line(M,y,M+meta,y); y+=4.5;
           doc.setFontSize(8.5);doc.setTextColor(110);
-          doc.text(b.secondaFirma,M,y);
+          doc.text(pulisci(b.secondaFirma),M,y);
         }
         return;
       }
@@ -2835,8 +2908,9 @@
 
     blocchi.push({t:"firme",
       vessatorie:"Il presente verbale è redatto in contraddittorio e sottoscritto da entrambe le parti. Fa fede dello stato dell'attrezzatura al momento indicato.",
-      colonne:[["Il Locatore",A.nome||""],
-               ["Il Conduttore",(rientro?n.firma_rientro:n.firma_uscita)||C.nome||n.cliente||""]]});
+      colonne:[["Il Locatore",A.nome||"",null],
+               ["Il Conduttore",(rientro?n.firma_rientro:n.firma_uscita)||C.nome||n.cliente||"",
+                (rientro?n.firma_rientro_img:n.firma_uscita_img)||null]]});
 
     return {blocchi,titolo:(rientro?"Verbale di riconsegna — ":"Verbale di consegna — ")+
             (M.nome||n.mezzo||"mezzo")};
@@ -3500,6 +3574,125 @@
   $('[data-tab="documenti"]')?.addEventListener("click",loadDocumenti);
   $("#documenti-search")?.addEventListener("input",e=>{docsQ=e.target.value;loadDocumenti();});
 
+  /* ================================================================
+     LA FIRMA COL DITO — 23 agosto 2026
+
+     ⛔ PERCHE'. Sul verbale c'era scritto un NOME. Un nome scritto non e'
+     una firma: chi contesta i danni dice «io non ho firmato niente», e ha
+     ragione. Il verbale vale perche' e' fatto in contraddittorio e
+     SOTTOSCRITTO dalle due parti; senza sottoscrizione e' un foglio che ti
+     sei scritto da solo.
+
+     ⛔ UN RIQUADRO SOLO, riusato dappertutto: i due verbali, il contratto
+     e la seconda firma delle clausole vessatorie. Se domani serve una
+     firma su un altro foglio, si chiama questo e basta.
+
+     ⚠️ La firma e' un disegno PNG scritto come testo (sui 10 KB) e sta
+     ATTACCATO alla riga del noleggio, non in un file a parte: un file si
+     perde, e il verbale resterebbe senza firma senza che nessuno se ne
+     accorga.
+
+     ⚠️ Si disegna coi «pointer events», che sul telefono sono il dito e
+     sul computer il mouse: uno solo, e vale per tutti e due.
+     ================================================================ */
+  let firmeVal={};
+
+  function firmaBlocco(chiave,etichetta,nota){
+    const v=firmeVal[chiave]||"";
+    return `<div class="firma-riq" id="firma-riq-${chiave}">
+      <label class="firma-eti">${esc(etichetta)}</label>
+      <div class="firma-area" id="firma-area-${chiave}">
+        ${v?`<img class="firma-img" id="firma-img-${chiave}" src="${v}" alt="firma">`
+           :`<canvas class="firma-tela" id="firma-tela-${chiave}" width="800" height="240"></canvas>`}
+      </div>
+      <div class="nol-azioni" style="margin-top:6px">
+        ${v?`<button type="button" class="nol-az" data-action="firma-rifai" data-k="${chiave}">Rifai la firma</button>`
+           :`<button type="button" class="nol-az" data-action="firma-pulisci" data-k="${chiave}">Cancella</button>`}
+      </div>
+      <p class="firma-nota">${v?"Firmata &#10003;":esc(nota||"Firma qui col dito, o col mouse.")}</p>
+    </div>`;
+  }
+
+  /* si attacca DOPO che il riquadro e' nella pagina */
+  function firmaAttiva(chiave){
+    const tela=document.getElementById("firma-tela-"+chiave);
+    if(!tela||tela.dataset.pronta==="1") return;
+    tela.dataset.pronta="1";
+    const ctx=tela.getContext("2d");
+    ctx.lineWidth=3; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#111";
+    let giu=false, ultimo=null, scritto=false;
+    const dove=ev=>{
+      const r=tela.getBoundingClientRect();
+      return {x:(ev.clientX-r.left)*(tela.width/r.width),
+              y:(ev.clientY-r.top)*(tela.height/r.height)};
+    };
+    const inizio=ev=>{ giu=true; ultimo=dove(ev); ev.preventDefault();
+      try{ tela.setPointerCapture(ev.pointerId); }catch(e){} };
+    const muovi=ev=>{
+      if(!giu) return;
+      const p=dove(ev);
+      ctx.beginPath(); ctx.moveTo(ultimo.x,ultimo.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+      ultimo=p; scritto=true; ev.preventDefault();
+    };
+    const fine=()=>{ if(!giu) return; giu=false;
+      if(scritto){ firmeVal[chiave]=firmaRitaglia(tela); } };
+    tela.addEventListener("pointerdown",inizio);
+    tela.addEventListener("pointermove",muovi);
+    tela.addEventListener("pointerup",fine);
+    tela.addEventListener("pointercancel",fine);
+    tela.addEventListener("pointerleave",fine);
+  }
+  /* ⛔ SI RITAGLIA INTORNO AL SEGNO. Una tela da 800x240 quasi tutta
+     trasparente pesava 250 KB e nel PDF diventava tre quarti di mega, per
+     una firma grande come un francobollo in mezzo al bianco. Ritagliata:
+     poche decine di KB, e sul foglio si vede grande e diritta. */
+  function firmaRitaglia(tela){
+    let d;
+    try{ d=tela.getContext("2d").getImageData(0,0,tela.width,tela.height); }
+    catch(e){ return tela.toDataURL("image/png"); }
+    const a=d.data, W=tela.width, H=tela.height;
+    let x0=W, y0=H, x1=-1, y1=-1;
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+      if(a[(y*W+x)*4+3]>10){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+    }
+    if(x1<0) return "";
+    const p=10;
+    x0=Math.max(0,x0-p); y0=Math.max(0,y0-p);
+    x1=Math.min(W-1,x1+p); y1=Math.min(H-1,y1+p);
+    const w=x1-x0+1, h=y1-y0+1;
+    const c2=document.createElement("canvas"); c2.width=w; c2.height=h;
+    c2.getContext("2d").drawImage(tela,x0,y0,w,h,0,0,w,h);
+    return c2.toDataURL("image/png");
+  }
+  function firmaPulisci(chiave){
+    const tela=document.getElementById("firma-tela-"+chiave);
+    if(tela) tela.getContext("2d").clearRect(0,0,tela.width,tela.height);
+    delete firmeVal[chiave];
+  }
+  function firmaRifai(chiave){
+    delete firmeVal[chiave];
+    const riq=document.getElementById("firma-riq-"+chiave);
+    if(!riq) return;
+    const eti=riq.querySelector(".firma-eti");
+    const nuovo=document.createElement("div");
+    nuovo.innerHTML=firmaBlocco(chiave,eti?eti.textContent:"Firma","");
+    riq.replaceWith(nuovo.firstElementChild);
+    firmaAttiva(chiave);
+  }
+  /* le firme di partenza, lette dalla riga del noleggio */
+  function firmeDa(n,coppie){
+    firmeVal={};
+    coppie.forEach(([chiave,campo])=>{ if(n&&n[campo]) firmeVal[chiave]=n[campo]; });
+  }
+  function firmaSveglia(chiavi){ chiavi.forEach(firmaAttiva); }
+  document.addEventListener("click",e=>{
+    const p=e.target.closest('[data-action="firma-pulisci"]');
+    if(p){ firmaPulisci(p.dataset.k); return; }
+    const r=e.target.closest('[data-action="firma-rifai"]');
+    if(r){ firmaRifai(r.dataset.k); return; }
+  });
+  window.__firmaPerProva=(k)=>firmeVal[k]||"";
+
   function docsRiquadro(n,momento){
     const rientro=(momento==="rientro");
     const lista=docsCheck[momento];
@@ -3524,6 +3717,9 @@
         <div><label>Numero del DDT</label>
           <input value="${esc(ddt||"")}" placeholder="Si assegna da solo" readonly style="background:#f2f5f8"></div>
       </div>
+      ${firmaBlocco("verb-"+momento,
+        rientro?"Firma del cliente alla riconsegna":"Firma del cliente alla consegna",
+        "Dai il telefono al cliente e fallo firmare qui: è la sottoscrizione che rende il verbale una prova.")}
       <div class="nol-azioni" style="margin-top:14px">
         <button type="button" class="nol-az nol-az-apri" data-action="verb-stampa" data-m="${momento}">Stampa il verbale</button>
         <button type="button" class="nol-az" data-action="verb-pdf" data-m="${momento}">Verbale in PDF</button>
@@ -3539,6 +3735,7 @@
     docsApertoId=n.id;
     docsCheck={uscita:verbaleNormalizza(n.check_uscita),
                rientro:verbaleNormalizza(n.check_rientro)};
+    firmeDa(n,[["verb-uscita","firma_uscita_img"],["verb-rientro","firma_rientro_img"]]);
     const rientrato=!!n.data_rientro_effettivo;
     openSheet(`<h3>Documenti — ${esc(n.mezzo||"mezzo")}${n.cliente?" · "+esc(n.cliente):""}</h3>
       <div class="nol-riq nol-cam">
@@ -3560,6 +3757,7 @@
       ${nolDocBlocco("noleggio",n.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-docs" data-id="${n.id}">Salva</button></div>`);
+    firmaSveglia(["verb-uscita","verb-rientro"]);
   }
 
   /* le due carte della cauzione, dentro i Documenti: ⛔ la regola di Alessio
@@ -3603,11 +3801,20 @@
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={check_uscita:docsCheck.uscita};
     const fu=$("#verb-firma-uscita"); if(fu) dati.firma_uscita=fu.value.trim()||null;
+    dati.firma_uscita_img=firmeVal["verb-uscita"]||null;
     if($("#verb-firma-rientro")){
       dati.check_rientro=docsCheck.rientro;
       dati.firma_rientro=$("#verb-firma-rientro").value.trim()||null;
+      dati.firma_rientro_img=firmeVal["verb-rientro"]||null;
     }
-    const {error}=await sb.from("nol_noleggi").update(dati).eq("id",id).eq("user_id",sbUid);
+    let {error}=await sb.from("nol_noleggi").update(dati).eq("id",id).eq("user_id",sbUid);
+    /* rete di salvataggio: se sql/noleggio-firme.sql non e' ancora passato,
+       il verbale si salva lo stesso senza il disegno della firma */
+    if(error&&/firma_.*_img/i.test(error.message||"")&&/column|schema cache/i.test(error.message||"")){
+      const senza={...dati}; delete senza.firma_uscita_img; delete senza.firma_rientro_img;
+      ({error}=await sb.from("nol_noleggi").update(senza).eq("id",id).eq("user_id",sbUid));
+      if(!error) toast("Salvato, ma la firma no: manca sql/noleggio-firme.sql");
+    }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet(); loadDocumenti(); toast("Verbale salvato ✔");
   }
@@ -3621,7 +3828,17 @@
     patch[momento==="rientro"?"check_rientro":"check_uscita"]=docsCheck[momento];
     const f=$("#verb-firma-"+momento); if(f) patch[momento==="rientro"?"firma_rientro":"firma_uscita"]=f.value.trim()||null;
     patch[momento==="rientro"?"verbale_rientro_il":"verbale_uscita_il"]=new Date().toISOString();
-    await sb.from("nol_noleggi").update(patch).eq("id",n.id).eq("user_id",sbUid);
+    const chiaveImg=momento==="rientro"?"firma_rientro_img":"firma_uscita_img";
+    patch[chiaveImg]=firmeVal["verb-"+momento]||null;
+    /* ⚠️ stampare il verbale lo CHIUDE: la firma disegnata va salvata qui
+       dentro, se no si stampa un foglio firmato che nel database non
+       risulta firmato. */
+    let {error:eSalva}=await sb.from("nol_noleggi").update(patch).eq("id",n.id).eq("user_id",sbUid);
+    if(eSalva&&/firma_.*_img/i.test(eSalva.message||"")&&/column|schema cache/i.test(eSalva.message||"")){
+      const senza={...patch}; delete senza[chiaveImg];
+      await sb.from("nol_noleggi").update(senza).eq("id",n.id).eq("user_id",sbUid);
+      toast("Stampo, ma la firma non si salva: manca sql/noleggio-firme.sql");
+    }
     const agg=Object.assign({},n,patch);
     const dati=await nolVerbaleDati(agg,momento);
     if(inPdf) nolDocPdf(dati); else nolDocStampa(dati);
@@ -3752,6 +3969,10 @@
   window.__nolVerbalePerProva=(n,m)=>nolVerbaleDati(n,m);
   window.__nolDdtPerProva=(n,m)=>nolDdtDati(n,m);
   window.nolVerbaleStampaProva=async(n,m)=>nolDocStampa(await nolVerbaleDati(n,m));
+  /* ⛔ 23 agosto: il banco bloccava cdnjs, quindi jsPDF non c'era e il PDF
+     non si provava MAI — si provava solo la stampa su carta. Da questa
+     porta il banco puo' scaricare il PDF vero e guardarlo. */
+  window.__nolDocPdfProva=(dati)=>nolDocPdf(dati);
   window.nolDdtStampaProva=async(n,m)=>nolDocStampa(await nolDdtDati(n,m));
   window.__nolCauzionePerProva=(n,m)=>nolCauzioneDati(n,m);
   window.nolCauzioneStampaProva=async(n,m)=>nolDocStampa(await nolCauzioneDati(n,m));
@@ -3822,7 +4043,15 @@
       contratto_data:$("#nn-cdata")?($("#nn-cdata").value||null):null,
       operatori:nolLeggiOperatori(),
       stato_consegna:$("#nn-stato-cons")?($("#nn-stato-cons").value.trim()||null):null,
-      stato_rientro:$("#nn-stato-rie")?($("#nn-stato-rie").value.trim()||null):null};
+      stato_rientro:$("#nn-stato-rie")?($("#nn-stato-rie").value.trim()||null):null,
+      /* ── le firme del contratto ── (23 agosto 2026)
+         ⛔ la seconda firma non e' un doppione: senza quella, le clausole 6
+         e 8 (danni e ritardo) non sono opponibili al cliente. */
+      firma_contr_img:firmeVal["contr"]||null,
+      firma_contr2_img:firmeVal["contr2"]||null,
+      firma_contr_nome:$("#nn-firma-nome")?($("#nn-firma-nome").value.trim()||null):null,
+      firma_contr_il:firmeVal["contr"]
+        ? ((nolCauApert&&nolCauApert.firma_contr_il)||new Date().toISOString()) : null};
     /* ── la cauzione ── (23 agosto 2026)
        Lo stato non si chiede: si ricava. Zero euro = nessuna cauzione;
        spuntata «chiusa» = svincolata; tutto il resto = ce l'hai in mano. */
@@ -3850,13 +4079,14 @@
     /* rete di salvataggio: se sql/noleggio-contratto.sql non e' ancora
        passato, il noleggio si salva lo stesso senza le colonne nuove
        invece di andare perso */
-    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro|fase|prenotazione_nota|cauzione_/i.test(error.message||"")
+    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro|fase|prenotazione_nota|cauzione_|firma_contr/i.test(error.message||"")
             &&/column|schema cache/i.test(error.message||"")){
       const senza={...dati};
       ["tipo_nolo","contratto_num","contratto_data","operatori","stato_consegna","stato_rientro",
        "fase","prenotazione_nota",
        "cauzione_forma","cauzione_rif","cauzione_ricevuta_il","cauzione_stato",
-       "cauzione_svincolata_il","cauzione_trattenuta","cauzione_restituita","cauzione_motivo"
+       "cauzione_svincolata_il","cauzione_trattenuta","cauzione_restituita","cauzione_motivo",
+       "firma_contr_img","firma_contr2_img","firma_contr_nome","firma_contr_il"
       ].forEach(k=>delete senza[k]);
       ({error}=await scrivi(senza));
       if(!error) toast("Salvato, ma non tutto: mancano le query SQL del contratto o delle cauzioni");
