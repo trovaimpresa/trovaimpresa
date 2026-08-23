@@ -587,6 +587,11 @@
   padding:6px 8px;font-size:13px;color:#666}
 .media-x{border:none;background:none;color:#c62828;font-size:20px;line-height:1;
   cursor:pointer;font-family:inherit;padding:0 2px}
+/* la videocamera dentro il gestionale (23 agosto 2026) */
+#reg-video{width:100%;max-width:520px;max-height:60vh;background:#111;border-radius:10px;display:block}
+.reg-stato{font-size:15px;color:#26415f;font-weight:600;margin:8px 0 0;min-height:22px}
+.reg-pallino{color:#c62828}
+.reg-male{color:#c62828;font-weight:600}
 /* i documenti allegati a una scheda */
 .doc-riga{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6ecf3;
   border-radius:10px;padding:9px 12px;margin-bottom:8px}
@@ -4662,7 +4667,8 @@
         <p style="margin:0 0 10px;font-size:14px;color:#666">Fotografa il mezzo da tutti i lati e fai un giro in video. &Egrave; questa la prova che al rientro vale.</p>
         <div class="nol-azioni">
           <button type="button" class="nol-az nol-az-apri" data-action="media-add" data-m="uscita" data-g="foto">+ Foto</button>
-          <button type="button" class="nol-az" data-action="media-add" data-m="uscita" data-g="video">+ Video</button>
+          <button type="button" class="nol-az" data-action="media-reg" data-m="uscita">&#9679; Registra qui il video</button>
+          <button type="button" class="nol-az" data-action="media-add" data-m="uscita" data-g="video">Carica un video</button>
         </div>
         <div class="media-griglia" id="media-uscita"></div>
       </div>
@@ -4671,10 +4677,26 @@
         <p style="margin:0 0 10px;font-size:14px;color:#666">Le stesse inquadrature di prima: cos&igrave; il confronto si vede a colpo d'occhio.</p>
         <div class="nol-azioni">
           <button type="button" class="nol-az nol-az-apri" data-action="media-add" data-m="rientro" data-g="foto">+ Foto</button>
-          <button type="button" class="nol-az" data-action="media-add" data-m="rientro" data-g="video">+ Video</button>
+          <button type="button" class="nol-az" data-action="media-reg" data-m="rientro">&#9679; Registra qui il video</button>
+          <button type="button" class="nol-az" data-action="media-add" data-m="rientro" data-g="video">Carica un video</button>
         </div>
         <div class="media-griglia" id="media-rientro"></div>
       </div>
+
+      <!-- ⛔ LA VIDEOCAMERA DENTRO IL GESTIONALE — 23 agosto 2026.
+           Un video girato dall'app Fotocamera dell'iPhone pesa 100–150 MB al
+           minuto: non entra nemmeno nel deposito (tetto 50 MB per file), e
+           Safari non sa rimpicciolirlo dopo. Girandolo QUI, a 720p e 1,2
+           Mbps, nasce sui 10 MB al minuto: entra, si carica in fretta e si
+           vede lo stesso benissimo. -->
+      <div class="nol-riq" id="reg-box" style="display:none">
+        <h4 id="reg-tit">Registra il video</h4>
+        <p id="reg-spiega" style="margin:0 0 10px;font-size:14px;color:#666">Gira intorno al mezzo con calma: parti da un angolo e fai tutto il giro, poi le parti che si rovinano (cingoli, vetri, benna). Puoi parlare: la voce si registra.</p>
+        <video id="reg-video" playsinline muted autoplay></video>
+        <div id="reg-stato" class="reg-stato"></div>
+        <div class="nol-azioni" id="reg-tasti"></div>
+      </div>
+
       <div id="media-lavoro" style="font-size:15px;color:#0066ff;font-weight:600;min-height:22px"></div>
       ${nolDocBlocco("noleggio",n.id||"")}
       <input type="file" id="media-file" style="display:none">
@@ -4714,6 +4736,174 @@
 
   /* ---- caricare ---- */
   let mediaChiesto=null;
+  /* ================================================================
+     LA VIDEOCAMERA DENTRO IL GESTIONALE — 23 agosto 2026
+
+     ⛔ IL PROBLEMA VERO, IN UN NUMERO: il deposito accetta 50 MB per file.
+     Un minuto girato con l'app Fotocamera di un iPhone pesa 100–150 MB.
+     Non e' che «occupa troppo spazio»: NON SI CARICA PROPRIO. E Safari non
+     sa rimpicciolire un video dopo (captureStream su un <video> non ce
+     l'ha), quindi nemmeno la riduzione nel browser lo salva.
+
+     ⛔ Percio' il video si gira QUI: 720p, 1,2 Mbps, audio a 64 kbps mono.
+     Nasce sui 10 MB al minuto — cioe' entra, si carica in un attimo, e per
+     far vedere un graffio si vede benissimo lo stesso.
+
+     ⚠️ L'AUDIO SI TIENE, e non e' un dettaglio: «qui c'era gia' questo
+     segno» detto ad alta voce mentre lo si inquadra vale piu' di dieci
+     fotografie mute.
+
+     ⚠️ DUE FRENI, perche' nessuno si ritrovi con un file che non si carica:
+     tre minuti al massimo, e stop automatico a 45 MB.
+     ================================================================ */
+  const REG_MAX_SEC  = 180;
+  const REG_MAX_BYTE = 45*1024*1024;
+  let regStream=null, regRec=null, regPezzi=[], regBlob=null, regTipo="",
+      regMomento="uscita", regDa=0, regTicchio=null, regFase="chiuso";
+
+  /* mp4 per primo: un webm girato su Android non si apre su un iPhone, e
+     il video serve proprio a farlo vedere a qualcun altro. */
+  function regFormato(){
+    if(typeof MediaRecorder==="undefined") return null;
+    const prove=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4",
+                 "video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
+    for(const t of prove){ try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(e){} }
+    return null;
+  }
+  function regTasti(){
+    const box=$("#reg-tasti"); if(!box) return;
+    const b=(azione,testo,forte)=>'<button type="button" class="nol-az'+(forte?" nol-az-apri":"")+
+      '" data-action="'+azione+'">'+testo+'</button>';
+    if(regFase==="pronto")    box.innerHTML=b("reg-avvia","&#9679; Registra",true)+b("reg-chiudi","Annulla");
+    else if(regFase==="gira") box.innerHTML=b("reg-ferma","&#9632; Ferma",true);
+    else if(regFase==="fatto")box.innerHTML=b("reg-usa","Usa questo video",true)+
+                                            b("reg-rifai","Rifai")+b("reg-chiudi","Annulla");
+    else box.innerHTML="";
+    /* ⚠️ in fondo alla scheda c'e' la barra «Chiudi» appiccicata: senza
+       questo, sul telefono il tasto «Ferma» finiva sotto la barra e non si
+       riusciva a fermare la registrazione. */
+    if(regFase!=="chiuso"){
+      try{ box.scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){}
+    }
+  }
+  function regDillo(t){ const e=$("#reg-stato"); if(e) e.innerHTML=t||""; }
+  function regPesoOra(){ return regPezzi.reduce((s,p)=>s+(p.size||0),0); }
+  function regOrologio(){
+    const sec=Math.floor((Date.now()-regDa)/1000);
+    const m=Math.floor(sec/60), s=sec%60;
+    regDillo('<b class="reg-pallino">&#9679;</b> '+m+":"+String(s).padStart(2,"0")+
+      " · circa "+mediaPeso(regPesoOra())+" · massimo "+Math.floor(REG_MAX_SEC/60)+" minuti");
+    if(sec>=REG_MAX_SEC){ toast("Tre minuti: ho fermato io"); regFerma(); return; }
+    if(regPesoOra()>=REG_MAX_BYTE){ toast("45 MB: ho fermato io, se no non si carica"); regFerma(); }
+  }
+
+  async function regApri(momento){
+    const box=$("#reg-box"); if(!box) return;
+    regMomento=momento||"uscita";
+    box.style.display="";
+    const tit=$("#reg-tit"); if(tit) tit.textContent=
+      momento==="rientro"?"Registra il video del rientro":"Registra il video della consegna";
+    regFase="pronto"; regTasti(); regDillo("");
+    if(!regFormato()){
+      regFase="chiuso"; regTasti();
+      regDillo('<span class="reg-male">Questo browser non sa registrare video. Usa «Carica un video».</span>');
+      return;
+    }
+    if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
+      regFase="chiuso"; regTasti();
+      regDillo('<span class="reg-male">Questo browser non dà accesso alla fotocamera. Usa «Carica un video».</span>');
+      return;
+    }
+    try{
+      regStream=await navigator.mediaDevices.getUserMedia({
+        video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},
+        audio:true});
+    }catch(e){
+      regFase="chiuso"; regTasti();
+      regDillo('<span class="reg-male">Fotocamera non disponibile: '+esc(e&&e.message?e.message:"permesso negato")+
+        '. Puoi sempre usare «Carica un video».</span>');
+      return;
+    }
+    const v=$("#reg-video");
+    if(v){ v.srcObject=regStream; v.muted=true; v.controls=false; try{ await v.play(); }catch(e){} }
+    regDillo("Inquadra il mezzo e premi «Registra».");
+    box.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  function regSpegni(){
+    if(regTicchio){ clearInterval(regTicchio); regTicchio=null; }
+    try{ if(regRec&&regRec.state!=="inactive") regRec.stop(); }catch(e){}
+    regRec=null;
+    try{ if(regStream) regStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+    regStream=null;
+  }
+  function regChiudi(){
+    regSpegni();
+    regPezzi=[]; regBlob=null; regFase="chiuso";
+    const v=$("#reg-video");
+    if(v){ try{ v.pause(); }catch(e){} v.srcObject=null; if(v.src){try{URL.revokeObjectURL(v.src);}catch(e){} v.removeAttribute("src");} v.controls=false; }
+    const box=$("#reg-box"); if(box) box.style.display="none";
+    regTasti(); regDillo("");
+  }
+  function regAvvia(){
+    if(!regStream){ toast("La fotocamera non è accesa"); return; }
+    const tipo=regFormato(); if(!tipo){ toast("Questo browser non sa registrare"); return; }
+    regPezzi=[]; regBlob=null; regTipo=tipo;
+    try{
+      regRec=new MediaRecorder(regStream,{mimeType:tipo,videoBitsPerSecond:1200000,audioBitsPerSecond:64000});
+    }catch(e){
+      try{ regRec=new MediaRecorder(regStream); }catch(e2){ toast("Non riesco a registrare"); return; }
+    }
+    regRec.ondataavailable=ev=>{ if(ev.data&&ev.data.size) regPezzi.push(ev.data); };
+    regRec.onstop=()=>{
+      if(regTicchio){ clearInterval(regTicchio); regTicchio=null; }
+      regBlob=new Blob(regPezzi,{type:regTipo||"video/webm"});
+      regFase="fatto"; regTasti();
+      const v=$("#reg-video");
+      if(v){ try{ v.pause(); }catch(e){} v.srcObject=null; v.muted=false; v.controls=true;
+             try{ v.src=URL.createObjectURL(regBlob); }catch(e){} }
+      regDillo("Fatto: "+mediaPeso(regBlob.size)+". Guardalo, poi «Usa questo video».");
+    };
+    /* un pezzo al secondo: cosi' il peso si vede crescere davvero e il
+       freno dei 45 MB puo' scattare in tempo */
+    regRec.start(1000);
+    regDa=Date.now(); regFase="gira"; regTasti(); regOrologio();
+    regTicchio=setInterval(regOrologio,1000);
+  }
+  function regFerma(){
+    if(regTicchio){ clearInterval(regTicchio); regTicchio=null; }
+    try{ if(regRec&&regRec.state!=="inactive") regRec.stop(); }catch(e){ regFase="pronto"; regTasti(); }
+  }
+  function regRifai(){
+    regPezzi=[]; regBlob=null;
+    const v=$("#reg-video");
+    if(v){ v.controls=false; v.muted=true; if(v.src){try{URL.revokeObjectURL(v.src);}catch(e){} v.removeAttribute("src");}
+           if(regStream){ v.srcObject=regStream; try{ v.play(); }catch(e){} } }
+    regFase=regStream?"pronto":"chiuso"; regTasti();
+    regDillo(regStream?"Inquadra il mezzo e premi «Registra».":"");
+  }
+  async function regUsa(){
+    if(!regBlob||!regBlob.size){ toast("Non c'è niente da salvare"); return; }
+    const est=(regTipo||"").indexOf("mp4")>=0?".mp4":".webm";
+    const nome="giro-"+(regMomento==="rientro"?"rientro":"consegna")+"-"+todayStr()+est;
+    let file;
+    try{ file=new File([regBlob],nome,{type:regTipo||"video/webm"}); }
+    catch(e){ file=regBlob; file.name=nome; }
+    mediaChiesto={momento:regMomento,genere:"video"};
+    const b=regBlob; regBlob=null;
+    regChiudi();
+    /* ⛔ «gia' ridotto»: questo video e' NATO a 720p qui dentro. Rifarlo da
+       capo vorrebbe dire aspettare un'altra volta la sua durata per non
+       guadagnare niente. */
+    await mediaCarica([file],true);
+    if(b&&b.size>REG_MAX_BYTE) toast("Attenzione: il file è grosso");
+  }
+
+  /* una porta per il banco: dice a che punto sta la videocamera senza
+     doverlo indovinare da quello che si vede */
+  window.__regStato=()=>({fase:regFase,acceso:!!regStream,
+    peso:regBlob?regBlob.size:0,tipo:regTipo||"",pezzi:regPezzi.length});
+
   function mediaChiedi(momento,genere){
     mediaChiesto={momento,genere};
     const inp=$("#media-file"); if(!inp) return;
@@ -4726,7 +4916,7 @@
   }
   function mediaDillo(t){ const e=$("#media-lavoro"); if(e) e.textContent=t||""; }
 
-  async function mediaCarica(files){
+  async function mediaCarica(files,giaRidotto){
     if(!files||!files.length||!mediaChiesto||!mediaApertoId) return;
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const {momento,genere}=mediaChiesto;
@@ -4743,10 +4933,15 @@
       }else{
         if(!f.type||!f.type.startsWith("video/")){toast("Questo non è un video");continue;}
         if(f.size>MEDIA_VIDEO_MAX){toast("Video troppo grande, massimo 200 MB");continue;}
-        mediaDillo("Sto riducendo il video… 0%");
-        const r=await mediaRiduciVideo(f,p=>mediaDillo("Sto riducendo il video… "+p+"%"));
-        dati=r.blob; ridotto=r.ridotto; perche=r.perche||"";
-        if(ridotto) nome=nome.replace(/\.[^.]+$/,"")+((r.tipo||"").indexOf("mp4")>=0?".mp4":".webm");
+        /* ⛔ un video girato dentro il gestionale e' gia' a 720p: rifarlo
+           vorrebbe dire aspettare un'altra volta la sua durata per niente. */
+        if(giaRidotto){ ridotto=true; }
+        else{
+          mediaDillo("Sto riducendo il video… 0%");
+          const r=await mediaRiduciVideo(f,p=>mediaDillo("Sto riducendo il video… "+p+"%"));
+          dati=r.blob; ridotto=r.ridotto; perche=r.perche||"";
+          if(ridotto) nome=nome.replace(/\.[^.]+$/,"")+((r.tipo||"").indexOf("mp4")>=0?".mp4":".webm");
+        }
         if(dati.size>MEDIA_VIDEO_DOPO_MAX){
           mediaDillo("");
           toast("Video troppo pesante anche dopo la riduzione ("+mediaPeso(dati.size)+"): fanne uno più corto");
@@ -5535,6 +5730,13 @@
     if(a==="doc-vedi")      return docVedi(t.dataset.id);
     if(a==="doc-elim")      return docElimina(t.dataset.id);
     if(a==="media-add")     return mediaChiedi(t.dataset.m,t.dataset.g);
+    /* la videocamera dentro il gestionale */
+    if(a==="media-reg")     return regApri(t.dataset.m);
+    if(a==="reg-avvia")     return regAvvia();
+    if(a==="reg-ferma")     return regFerma();
+    if(a==="reg-usa")       return regUsa();
+    if(a==="reg-rifai")     return regRifai();
+    if(a==="reg-chiudi")    return regChiudi();
     if(a==="media-vedi")    return mediaVedi(t.dataset.id);
     if(a==="media-elim")    return mediaElimina(t.dataset.id);
     if(a==="cest-apri")     return schedaCestino(+t.dataset.i);
