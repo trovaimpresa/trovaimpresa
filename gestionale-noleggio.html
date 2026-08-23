@@ -510,6 +510,18 @@
   padding:6px 8px;font-size:13px;color:#666}
 .media-x{border:none;background:none;color:#c62828;font-size:20px;line-height:1;
   cursor:pointer;font-family:inherit;padding:0 2px}
+/* i documenti allegati a una scheda */
+.doc-riga{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6ecf3;
+  border-radius:10px;padding:9px 12px;margin-bottom:8px}
+.doc-nome{flex:1;text-align:left;border:none;background:none;padding:0;cursor:pointer;
+  font-family:inherit;font-size:15px;font-weight:600;color:#0066ff;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-ic{margin-right:8px}
+.doc-peso{font-size:13px;color:#666;white-space:nowrap}
+/* la riga di chi usera' la macchina */
+.nol-op-riga{display:grid;grid-template-columns:1.3fr 1.1fr 1.1fr .9fr 38px;gap:8px;margin-bottom:8px}
+@media(max-width:700px){.nol-op-riga{grid-template-columns:1fr 1fr;}
+  .nol-op-riga button{grid-column:span 2}}
 /* il pallino sulla voce Cestino del menu */
 .tab-cnt{display:none;margin-left:7px;background:#fff;color:#0047b3;font-size:13px;
   font-weight:700;padding:1px 8px;border-radius:10px;vertical-align:middle}
@@ -1207,9 +1219,9 @@
       ["Tariffa a ora",soldi(d.tariffa_ora)],["Tariffa al giorno",soldi(d.tariffa_giorno)],
       ["Tariffa a settimana",soldi(d.tariffa_settimana)],["Tariffa al mese",soldi(d.tariffa_mese)],
       ["Ore comprese al giorno",d.ha_contaore?e(d.ore_incluse_giorno):null],
-      ["Ogni ora in piu'",d.ha_contaore?soldi(d.tariffa_ora_extra):null],
+      ["Ogni ora in più",d.ha_contaore?soldi(d.tariffa_ora_extra):null],
       ["Km compresi al giorno",d.ha_contakm?e(d.km_inclusi_giorno):null],
-      ["Ogni km in piu'",d.ha_contakm?soldi(d.tariffa_km):null],
+      ["Ogni km in più",d.ha_contakm?soldi(d.tariffa_km):null],
       ["Usura, quota fissa",soldi(d.usura_fissa)],
       ["Usura, % sul tempo",d.usura_percento?d.usura_percento+"%":null],
       ["Cauzione",soldi(d.cauzione)],["Note",e(d.note)]];
@@ -1229,18 +1241,24 @@
       r.push(["Cauzione (deposito, a parte)",soldi(d.cauzione)]);
       r.push(["Pagamento",d.stato_pagamento==="pagato"?"Pagato":"Da pagare"]);
       r.push(["Danni",e(d.danni)]);
+      r.push(["Tipo di noleggio",d.tipo_nolo==="caldo"?"A caldo (con operatore)":"A freddo (senza operatore)"]);
+      r.push(["Contratto",d.contratto_num?("n. "+d.contratto_num+(d.contratto_data?" del "+fdate(d.contratto_data):"")):null]);
+      (Array.isArray(d.operatori)?d.operatori:[]).forEach((o,i)=>
+        r.push(["Chi la usa "+(i+1),[o.nome,o.cf,o.abil,o.scad?"scade "+fdate(o.scad):""].filter(Boolean).join(" · ")]));
+      r.push(["Com'era alla consegna",e(d.stato_consegna)]);
+      r.push(["Com'è tornato",e(d.stato_rientro)]);
       r.push(["Note",e(d.note)]);
     }
     if(tipo==="prodotto") r=[
       ["Nome",e(d.nome)],["Codice",e(d.codice)],["Categoria",e(d.categoria)],
-      ["Unita' di misura",e(d.unita)],["Quantita' in magazzino",e(d.quantita)],
+      ["Unità di misura",e(d.unita)],["Quantità in magazzino",e(d.quantita)],
       ["Scorta minima",e(d.soglia_minima)],
       ["Prezzo di acquisto",soldi(d.prezzo_acquisto)],["Prezzo di vendita",soldi(d.prezzo)],
       ["IVA",d.iva_perc==null?null:d.iva_perc+"%"],["Note",e(d.note)]];
     if(tipo==="magazzino"){
       const q=+(d.quantita||0), s=+(d.soglia_minima||0), pz=+(d.prezzo||0);
-      r=[["Prodotto",e(d.nome)],["Codice",e(d.codice)],["Unita' di misura",e(d.unita)],
-         ["Quantita' in magazzino",String(d.quantita??0)],
+      r=[["Prodotto",e(d.nome)],["Codice",e(d.codice)],["Unità di misura",e(d.unita)],
+         ["Quantità in magazzino",String(d.quantita??0)],
          ["Scorta minima",String(d.soglia_minima??0)],
          ["Situazione",q<=s?"SOTTO SCORTA — da riordinare":"a posto"],
          ["Valore della giacenza",pz?_eur(q*pz):null]];
@@ -1278,7 +1296,7 @@
       ["Nome",e(d.nome)],["Telefono",e(d.telefono)],["Email",e(d.email)],
       ["Indirizzo",e(d.indirizzo)],["P.IVA",e(d.piva)],["Note",e(d.note)]];
     if(tipo==="movimento") r=[
-      ["Tipo",e(d.tipo)],["Prodotto",e(d.prodotto)],["Quantita'",e(d.quantita)],
+      ["Tipo",e(d.tipo)],["Prodotto",e(d.prodotto)],["Quantità",e(d.quantita)],
       ["Importo",soldi(d.importo)],["Cliente o fornitore",e(d.controparte)],
       ["Data",e(d.data_mov)],["Note",e(d.note)]];
     return r.filter(x=>x[1]!=null&&x[1]!=="");
@@ -1323,7 +1341,7 @@
 
   /* ---- PDF: la stessa scheda, ma da tenere ---- */
   function nolPdf(tipo,d){
-    if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non e' disponibile adesso");return;}
+    if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non è disponibile adesso");return;}
     const righe=nolRighe(tipo,d);
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
     const M=18, R=210-M; let y=22;
@@ -1381,7 +1399,7 @@
     const b=e.target.closest('[data-action^="nol-"]'); if(!b) return;
     const tipo=b.dataset.t, id=b.dataset.id, a=b.dataset.action;
     const d=await nolLeggi(tipo,id);
-    if(!d){toast("Questa scheda non si trova piu'");return;}
+    if(!d){toast("Questa scheda non si trova più");return;}
     if(a==="nol-mod")    return NOL_TIPI[tipo].scheda(d);
     if(a==="nol-copia")  return nolCopia(tipo,d);
     /* la fattura ha gia' il suo PDF vero — intestazione, numero, cliente,
@@ -1423,6 +1441,7 @@
         </div>
       </div>
       <div class="field"><label>Note</label><input id="np-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      ${nolDocBlocco("prodotto",p.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-prod" data-id="${p.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
     if(typeof mostraMargine==="function") mostraMargine();
@@ -1490,12 +1509,13 @@
         <h4>Valore</h4>
         <p style="margin:0;font-size:15px">${pz?esc(_eur(q*pz))+' &nbsp;<span style="color:#666">('+esc(String(q).replace(".",","))+' &times; '+esc(_eur(pz))+')</span>':'<span style="color:#666">Nessun prezzo di vendita sul prodotto.</span>'}</p>
       </div>
+      ${nolDocBlocco("magazzino",p.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-mag" data-id="${p.id||""}">Salva</button></div>`);
   }
 
   async function salvaMagazzino(id){
-    if(!id){toast("Questa giacenza non si trova piu'");return;}
+    if(!id){toast("Questa giacenza non si trova più");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={quantita:_numIt($("#ng-quantita").value),
                 soglia_minima:_numIt($("#ng-soglia").value)};
@@ -1522,6 +1542,7 @@
       <div class="field"><label>Indirizzo</label><input id="nf-indirizzo" value="${v('indirizzo')}" placeholder="Via, numero, città"></div>
       <div class="field"><label>P.IVA</label><input id="nf-piva" value="${v('piva')}" placeholder="Per la fattura"></div>
       <div class="field"><label>Note</label><input id="nf-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      ${nolDocBlocco("fornitore",f.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-forn" data-id="${f.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
@@ -1562,6 +1583,7 @@
         <div class="field"><label>Data</label><input id="nm-data" type="date" value="${v('data_mov')}"></div>
       </div>
       <div class="field"><label>Note</label><input id="nm-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      ${nolDocBlocco("movimento",m.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-mov" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
     if(m.tipo) $("#nm-tipo").value=m.tipo;
@@ -1638,6 +1660,7 @@
       </div>
 
       <div class="field"><label>Note</label><input id="nz-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      ${nolDocBlocco("mezzo",m.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
     if(m.stato) $("#nz-stato").value=m.stato;
@@ -1686,6 +1709,7 @@
       <div class="field"><label>Indirizzo</label><input id="ncl-indirizzo" value="${v('indirizzo')}" placeholder="Via, numero, città"></div>
       <div class="field"><label>P.IVA / Codice Fiscale</label><input id="ncl-piva" value="${v('piva')}" placeholder="Per la fattura"></div>
       <div class="field"><label>Note</label><input id="ncl-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      ${nolDocBlocco("cliente",c.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-clinol" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
@@ -1754,6 +1778,32 @@
         <p style="margin:8px 0 0;font-size:13px;color:#666">Gasolio, dischi, catene: quello che si addebita a parte.</p>
       </div>
 
+      <div class="nol-riq nol-cam">
+        <h4>Il contratto</h4>
+        <div style="margin-bottom:12px"><label style="display:block;font-size:14px;color:#666;margin-bottom:5px">Che tipo di noleggio &egrave;</label><div class="seg" id="nn-nolo">
+          <button type="button" data-v="freddo">A freddo — senza operatore</button>
+          <button type="button" data-v="caldo">A caldo — con un nostro operatore</button></div></div>
+        <div class="nol-due">
+          <div><label>Numero del contratto</label><input id="nn-cnum" value="${v('contratto_num')}" placeholder="Es. 2026/014"></div>
+          <div><label>Data del contratto</label><input id="nn-cdata" type="date" value="${v('contratto_data')}"></div>
+        </div>
+        <div id="nn-op-box" style="margin-top:14px">
+          <label style="display:block;font-size:14px;color:#26415f;font-weight:600;margin-bottom:4px">⛔ Chi user&agrave; la macchina</label>
+          <p style="margin:0 0 10px;font-size:14px;color:#666">Per legge (D.Lgs 81/08, art. 72 comma 2) devi <b>farti dare e conservare</b> i nominativi di chi user&agrave; il mezzo, con la conferma che sono formati e — dove serve il patentino — abilitati. Nel noleggio <b>a caldo</b> non serve: l'operatore &egrave; tuo.</p>
+          <div id="nn-operatori"></div>
+          <button type="button" class="nol-agg" id="nn-op-add">+ Aggiungi una persona</button>
+        </div>
+        <div class="nol-due" style="margin-top:14px">
+          <div><label>Com'era alla consegna</label><input id="nn-stato-cons" value="${v('stato_consegna')}" placeholder="Es. carrozzeria integra, pieno di gasolio"></div>
+          <div><label>Com'&egrave; tornato</label><input id="nn-stato-rie" value="${v('stato_rientro')}" placeholder="Si compila al rientro"></div>
+        </div>
+        <div class="nol-azioni" style="margin-top:16px">
+          <button type="button" class="nol-az nol-az-apri" data-action="nol-contr-stampa" data-id="${n.id||""}">Stampa il contratto</button>
+          <button type="button" class="nol-az" data-action="nol-contr-pdf" data-id="${n.id||""}">Contratto in PDF</button>
+        </div>
+        <p style="margin:10px 0 0;font-size:13px;color:#666">Il contratto si stampa da quello che hai scritto qui sopra: salva prima, poi stampa.</p>
+      </div>
+
       <div class="nol-conto" id="nn-conto"><h4>Il conto</h4>
         <p style="margin:0;color:#666;font-size:14px">Scegli il mezzo e le date: il conto si fa da solo.</p></div>
 
@@ -1771,6 +1821,7 @@
         <option value="pagato">Pagato</option></select></div>
       <div class="field"><label>Danni al rientro</label><input id="nn-danni" value="${v('danni')}" placeholder="Se il mezzo è tornato con qualcosa di rotto"></div>
       <div class="field"><label>Note</label><input id="nn-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      ${nolDocBlocco("noleggio",n.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-noleggio" data-id="${n.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
 
@@ -1782,8 +1833,338 @@
     if(n.stato_pagamento) $("#nn-pagamento").value=n.stato_pagamento;
     nolConsumi = Array.isArray(n.consumi) ? n.consumi.slice() : [];
     nolDisegnaConsumi();
+    nolOperatori = Array.isArray(n.operatori) ? n.operatori.slice() : [];
+    bindSeg("nn-nolo");
+    const segNolo=$('#nn-nolo button[data-v="'+(n.tipo_nolo||"freddo")+'"]');
+    if(segNolo){$$("#nn-nolo button").forEach(x=>x.classList.remove("on"));segNolo.classList.add("on");}
+    nolDisegnaOperatori();
+    nolMostraOperatori();
     nolAggiornaConto();
   }
+
+  /* ---- chi usera' la macchina: le righe della dichiarazione ---- */
+  let nolOperatori=[];
+  function nolDisegnaOperatori(){
+    const box=$("#nn-operatori"); if(!box) return;
+    if(!nolOperatori.length){
+      box.innerHTML='<p style="color:#c62828;font-size:14px;margin:0 0 10px">Nessun nominativo: senza, il contratto non &egrave; a posto.</p>';
+      return;
+    }
+    box.innerHTML=nolOperatori.map((o,i)=>`<div class="nol-op-riga">
+      <input data-op="nome" data-i="${i}" placeholder="Cognome e nome" value="${esc(o.nome==null?"":o.nome)}">
+      <input data-op="cf"   data-i="${i}" placeholder="Codice fiscale" value="${esc(o.cf==null?"":o.cf)}">
+      <input data-op="abil" data-i="${i}" placeholder="Abilitazione (es. escavatore)" value="${esc(o.abil==null?"":o.abil)}">
+      <input data-op="scad" data-i="${i}" type="date" title="Quando scade il patentino" value="${esc(o.scad==null?"":o.scad)}">
+      <button type="button" class="nol-cons-via" data-opvia="${i}" title="Togli">✕</button></div>`).join("");
+  }
+  /* nel nolo a caldo la dichiarazione non si chiede: l'art. 72 c.2 parla di
+     «senza operatore». Il riquadro sparisce invece di restare li' a chiedere
+     una cosa che non serve. */
+  function nolMostraOperatori(){
+    const box=$("#nn-op-box"); if(!box) return;
+    box.style.display = (segVal("nn-nolo")==="caldo") ? "none" : "";
+  }
+  function nolLeggiOperatori(){
+    return nolOperatori
+      .filter(o=>String(o.nome||"").trim()||String(o.cf||"").trim())
+      .map(o=>({nome:String(o.nome||"").trim(),cf:String(o.cf||"").trim().toUpperCase(),
+                abil:String(o.abil||"").trim(),scad:o.scad||null}));
+  }
+  document.addEventListener("click",e=>{
+    if(e.target.closest("#nn-op-add")){
+      nolOperatori.push({nome:"",cf:"",abil:"",scad:""}); nolDisegnaOperatori(); return;
+    }
+    const via=e.target.closest("#nn-operatori [data-opvia]");
+    if(via){ nolOperatori.splice(+via.dataset.opvia,1); nolDisegnaOperatori(); return; }
+    if(e.target.closest("#nn-nolo button")) setTimeout(nolMostraOperatori,0);
+  });
+  document.addEventListener("input",e=>{
+    const c=e.target.closest("#nn-operatori [data-op]"); if(!c) return;
+    const i=+c.dataset.i; if(!nolOperatori[i]) return;
+    nolOperatori[i][c.dataset.op]=c.value;
+  });
+
+
+  /* ================================================================
+     IL CONTRATTO DI NOLEGGIO — 23 agosto 2026
+     ⛔ D.Lgs 81/2008 art. 72:
+       comma 1 — chi noleggia ATTESTA che la macchina e' conforme;
+       comma 2 — chi noleggia SENZA OPERATORE deve attestare il buono
+                 stato di conservazione, manutenzione ed efficienza al
+                 momento della consegna, e deve ACQUISIRE E CONSERVARE
+                 per tutta la durata del noleggio la dichiarazione del
+                 datore di lavoro con i nominativi di chi la usera',
+                 formati e — per le macchine dell'art. 73 c.5 —
+                 abilitati.
+     E' l'unico documento davvero obbligatorio del noleggio a freddo.
+
+     ⚠️ NEL NOLO A CALDO il comma 2 NON si applica (parla di «senza
+     operatore»): la dichiarazione non si chiede, e il contratto lo dice.
+
+     UN MOTORE SOLO: i dati si preparano una volta (nolContrattoDati) e
+     due disegnatori li mettono su carta (stampa) e su PDF. Se domani si
+     aggiunge una clausola, si aggiunge in un punto e compare in tutti e
+     due, senza che si scollino.
+     ================================================================ */
+
+  /* le condizioni. Sono il minimo onesto: i modelli veri, scritti con
+     ANCE, li ha Assodimi nell'area soci. Le due segnate ⚠️ sono clausole
+     vessatorie ex art. 1341 c.2 c.c.: senza la SECONDA firma non valgono. */
+  const NOL_CONDIZIONI=[
+    ["Consegna","Il Conduttore dichiara di ricevere l'attrezzatura in buono stato di conservazione, manutenzione ed efficienza, completa degli accessori indicati e corredata del manuale d'uso e delle certificazioni."],
+    ["Uso","L'attrezzatura va usata solo per l'impiego a cui è destinata, nel luogo indicato, da personale formato e — dove previsto — abilitato. È vietato modificarla o manometterne i dispositivi di sicurezza."],
+    ["Custodia","La custodia è a carico del Conduttore per tutta la durata del noleggio, compresi i giorni di fermo e di non utilizzo."],
+    ["Manutenzione","Sono a carico del Conduttore i controlli giornalieri, i rabbocchi e i materiali di consumo. La manutenzione programmata resta a carico del Locatore."],
+    ["Guasti","Il Conduttore avvisa subito il Locatore e sospende l'uso. Il guasto da normale usura non si addebita; quello da uso improprio si."],
+    ["Danni e smarrimento","⚠️ Al rientro si confronta lo stato con quello della consegna. I danni eccedenti la normale usura, e lo smarrimento, sono a carico del Conduttore al valore di riparazione o di sostituzione."],
+    ["Cauzione","La cauzione viene restituita al rientro, dopo il controllo, al netto di eventuali danni e importi non pagati."],
+    ["Ritardo nella riconsegna","⚠️ Oltre la data di rientro concordata il noleggio continua alla stessa tariffa, senza bisogno di ulteriore accordo, salvo il maggior danno."],
+    ["Subnoleggio","È vietato cedere o subnoleggiare l'attrezzatura a terzi senza il consenso scritto del Locatore."],
+    ["Trasporto","Salvo diverso accordo scritto, il trasporto di andata e ritorno è a carico del Conduttore."],
+    ["Foro competente","Per ogni controversia è competente il foro del luogo in cui ha sede il Locatore."]
+  ];
+
+  async function nolContrattoDati(n){
+    const [{data:az},{data:mz},{data:cl}]=await Promise.all([
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
+      n.cliente_id ? sb.from("nol_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
+    ]);
+    const A=az||{}, M=mz||{}, C=cl||{};
+    const caldo=(n.tipo_nolo==="caldo");
+    const ops=Array.isArray(n.operatori)?n.operatori:[];
+    const dp=n.dettaglio_prezzo;
+    const righeConto=(dp&&Array.isArray(dp.righe))?dp.righe.map(x=>[x.voce+(x.dettaglio?"  ("+x.dettaglio+")":""),_eur(x.importo)]):[];
+
+    const blocchi=[];
+    blocchi.push({t:"testata",
+      azienda:A.nome||"(compila i Dati azienda)",
+      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+             [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
+      titolo:"CONTRATTO DI NOLEGGIO",
+      dettaglio:(caldo?"a caldo (con operatore)":"a freddo (senza operatore)")+
+        (n.contratto_num?"   ·   N. "+n.contratto_num:"")+
+        "   ·   del "+fdate(n.contratto_data||n.data_uscita||todayStr())});
+
+    blocchi.push({t:"coppie",titolo:"Le parti",righe:[
+      ["LOCATORE",A.nome||"—"],
+      ["CONDUTTORE",C.nome||n.cliente||"—"],
+      ["Indirizzo",C.indirizzo||null],
+      ["P.IVA / Cod. Fiscale",C.piva||null],
+      ["Telefono",C.telefono||null],
+      ["Email",C.email||null]
+    ]});
+
+    blocchi.push({t:"coppie",titolo:"L'attrezzatura",righe:[
+      ["Descrizione",M.nome||n.mezzo||"—"],
+      ["Codice / matricola",M.codice||null],
+      ["Categoria",M.categoria||null],
+      ["Contaore alla consegna",n.contaore_uscita!=null?String(n.contaore_uscita):null],
+      ["Chilometri alla consegna",n.km_uscita!=null?String(n.km_uscita):null]
+    ]});
+
+    blocchi.push({t:"coppie",titolo:"Durata",righe:[
+      ["Consegna",fdate(n.data_uscita)+(n.ora_uscita?" alle "+String(n.ora_uscita).slice(0,5):"")],
+      ["Riconsegna prevista",n.data_rientro_prevista?fdate(n.data_rientro_prevista):"da concordare"],
+      ["Luogo di impiego",n.luogo||null]
+    ]});
+
+    blocchi.push({t:"coppie",titolo:"Corrispettivo",
+      righe:righeConto.concat([
+        ["TOTALE",_eur(n.importo)],
+        ["Cauzione (in deposito, non entra nel totale)",n.cauzione?_eur(n.cauzione):"nessuna"],
+        ["Pagamento",n.stato_pagamento==="pagato"?"Pagato":"Da pagare"]
+      ])});
+
+    /* ⛔ il pezzo che vale piu' di tutto il contratto */
+    blocchi.push({t:"testo",titolo:"Attestazione del Locatore — art. 72 D.Lgs 81/2008",
+      corpo:[
+        "Il Locatore attesta, sotto la propria responsabilità, che l'attrezzatura sopra indicata è conforme ai requisiti di sicurezza previsti dalla normativa vigente (art. 72 comma 1).",
+        caldo
+          ? "Il noleggio è con operatore messo a disposizione dal Locatore: l'obbligo di cui all'art. 72 comma 2 non trova applicazione. L'operatore resta dipendente del Locatore, che ne conserva la posizione di garanzia; il Committente inserisce mezzo e operatore nella propria organizzazione e provvede al coordinamento e allo scambio di informazioni ai sensi dell'art. 26."
+          : "Il Locatore attesta inoltre, ai sensi dell'art. 72 comma 2, il buono stato di conservazione, manutenzione ed efficienza dell'attrezzatura a fini di sicurezza al momento della consegna.",
+        "Sono consegnati al Conduttore: manuale d'uso e manutenzione, dichiarazione di conformità e, dove previsto, copia del verbale dell'ultima verifica periodica."
+      ]});
+
+    if(!caldo){
+      blocchi.push({t:"tabella",titolo:"Dichiarazione del datore di lavoro — art. 72 comma 2",
+        intro:"Il sottoscritto datore di lavoro dichiara che l'attrezzatura sarà usata esclusivamente dai lavoratori qui indicati, formati ai sensi del Titolo III e — ove si tratti di attrezzature di cui all'art. 73 comma 5 — in possesso della specifica abilitazione.",
+        colonne:["Cognome e nome","Codice fiscale","Abilitazione","Scade il"],
+        righe:(ops.length?ops:[{}]).map(o=>[o.nome||"", o.cf||"", o.abil||"", o.scad?fdate(o.scad):""]),
+        nota:"Questa dichiarazione va conservata dal Locatore per tutta la durata del noleggio."});
+    }
+
+    blocchi.push({t:"numerato",titolo:"Condizioni di noleggio",righe:NOL_CONDIZIONI});
+
+    blocchi.push({t:"firme",
+      vessatorie:"Ai sensi e per gli effetti degli artt. 1341 e 1342 c.c. il Conduttore approva espressamente le clausole: 6 (Danni e smarrimento) e 8 (Ritardo nella riconsegna).",
+      colonne:[["Il Locatore",A.nome||""],["Il Conduttore",C.nome||n.cliente||""]]});
+
+    return {blocchi, titolo:"Contratto di noleggio — "+(M.nome||n.mezzo||"mezzo")+
+            (C.nome||n.cliente?" · "+(C.nome||n.cliente):"")};
+  }
+
+  /* ---- su carta ---- */
+  async function nolContrattoStampa(n){
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const {blocchi,titolo}=await nolContrattoDati(n);
+    let h="";
+    blocchi.forEach(b=>{
+      if(b.t==="testata"){
+        h+='<div class="tst"><div><h1>'+esc(b.azienda)+'</h1>'
+          + b.sotto.map(x=>'<div class="pic">'+esc(x)+'</div>').join("")
+          + '</div><div class="dx"><div class="tit">'+esc(b.titolo)+'</div>'
+          + '<div class="pic">'+esc(b.dettaglio)+'</div></div></div>';
+      }
+      if(b.t==="coppie"){
+        const r=b.righe.filter(x=>x[1]!=null&&x[1]!=="");
+        if(!r.length) return;
+        h+='<h2>'+esc(b.titolo)+'</h2><table>'
+          + r.map(x=>'<tr><td class="l">'+esc(x[0])+'</td><td class="v">'+esc(x[1])+'</td></tr>').join("")
+          + '</table>';
+      }
+      if(b.t==="testo"){
+        h+='<h2>'+esc(b.titolo)+'</h2>'+b.corpo.map(x=>'<p>'+esc(x)+'</p>').join("");
+      }
+      if(b.t==="tabella"){
+        h+='<h2>'+esc(b.titolo)+'</h2><p>'+esc(b.intro)+'</p><table class="griglia"><tr>'
+          + b.colonne.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr>'
+          + b.righe.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c||"&nbsp;")+'</td>').join("")+'</tr>').join("")
+          + '</table><p class="pic">'+esc(b.nota)+'</p>';
+      }
+      if(b.t==="numerato"){
+        h+='<h2>'+esc(b.titolo)+'</h2><ol>'
+          + b.righe.map(x=>'<li><b>'+esc(x[0])+'.</b> '+esc(x[1].replace("⚠️ ",""))+'</li>').join("")
+          + '</ol>';
+      }
+      if(b.t==="firme"){
+        h+='<p class="pic">'+esc(b.vessatorie)+'</p><div class="firme">'
+          + b.colonne.map(c=>'<div><div class="riga"></div>'+esc(c[0])+(c[1]?'<div class="pic">'+esc(c[1])+'</div>':'')+'</div>').join("")
+          + '</div><div class="firme"><div><div class="riga"></div>Il Conduttore, per approvazione specifica delle clausole 6 e 8</div><div></div></div>';
+      }
+    });
+    const w=window.open("","_blank","width=980,height=1100");
+    if(!w){toast("Il browser ha bloccato la finestra di stampa");return;}
+    w.document.write('<!doctype html><html lang="it"><head><meta charset="utf-8"><title>'+esc(titolo)+'</title><style>'
+      + 'body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#222;margin:28px;font-size:14px;line-height:1.5}'
+      + '.tst{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #222;padding-bottom:12px;margin-bottom:18px}'
+      + 'h1{font-size:20px;margin:0 0 4px}.dx{text-align:right}.tit{font-size:20px;font-weight:700}'
+      + '.pic{color:#666;font-size:13px}'
+      + 'h2{font-size:15px;margin:20px 0 6px;text-transform:uppercase;letter-spacing:.4px}'
+      + 'table{width:100%;border-collapse:collapse}'
+      + 'td{padding:5px 0;border-bottom:1px solid #eee;vertical-align:top}'
+      + 'td.l{color:#666;width:42%}td.v{font-weight:600}'
+      + 'table.griglia td,table.griglia th{border:1px solid #bbb;padding:7px 8px;text-align:left;font-size:13px}'
+      + 'ol{padding-left:20px}ol li{margin-bottom:7px}'
+      + '.firme{display:flex;gap:40px;margin-top:34px}.firme>div{flex:1;font-size:13px}'
+      + '.riga{border-top:1px solid #222;margin-bottom:5px;height:34px}'
+      + '@media print{body{margin:14mm}}'
+      + '</style></head><body>'+h+'</body></html>');
+    w.document.close();
+    w.onload=()=>{w.focus();w.print();};
+    setTimeout(()=>{try{w.focus();w.print();}catch(e){}},400);
+  }
+
+  /* ---- in PDF ---- */
+  async function nolContrattoPdf(n){
+    if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non è disponibile adesso");return;}
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const {blocchi,titolo}=await nolContrattoDati(n);
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=16, R=210-M, L=R-M; let y=20;
+    const salta=(h)=>{ if(y+h>282){doc.addPage();y=20;} };
+    const testo=(t,x,larg,size,stile,col)=>{
+      doc.setFont("helvetica",stile||"normal");doc.setFontSize(size||10);
+      doc.setTextColor(col==null?30:col);
+      const linee=doc.splitTextToSize(String(t),larg);
+      linee.forEach(l=>{ salta(6); doc.text(l,x,y); y+=size>=13?6.5:5; });
+    };
+    blocchi.forEach(b=>{
+      if(b.t==="testata"){
+        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(b.azienda,M,y);
+        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(b.titolo,R,y,{align:"right"});
+        y+=6;
+        doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(110);
+        const n1=b.sotto.length;
+        b.sotto.forEach((x,i)=>doc.text(x,M,y+i*4.2));
+        doc.text(b.dettaglio,R,y,{align:"right"});
+        y+=Math.max(n1*4.2,5)+4;
+        doc.setDrawColor(60);doc.setLineWidth(.5);doc.line(M,y,R,y);doc.setLineWidth(.2);y+=7;
+        doc.setTextColor(30);
+        return;
+      }
+      if(b.t==="coppie"){
+        const r=b.righe.filter(x=>x[1]!=null&&x[1]!=="");
+        if(!r.length) return;
+        salta(14); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+        r.forEach(x=>{
+          salta(8);
+          doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(110);
+          doc.text(String(x[0]),M,y);
+          doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(30);
+          const linee=doc.splitTextToSize(String(x[1]),L-74);
+          doc.text(linee,M+74,y);
+          y+=Math.max(6,linee.length*5);
+          doc.setDrawColor(225);doc.line(M,y-2.5,R,y-2.5);
+        });
+        y+=4; return;
+      }
+      if(b.t==="testo"){
+        salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+        b.corpo.forEach(p=>{ testo(p,M,L,9.5,"normal",60); y+=2.5; });
+        y+=3; return;
+      }
+      if(b.t==="tabella"){
+        salta(30); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+        testo(b.intro,M,L,9.5,"normal",60); y+=3;
+        const larg=[L*0.32,L*0.28,L*0.24,L*0.16];
+        const riga=(cel,grassetto)=>{
+          salta(10);
+          doc.setFont("helvetica",grassetto?"bold":"normal");doc.setFontSize(9);doc.setTextColor(30);
+          let x=M;
+          cel.forEach((c,i)=>{ doc.rect(x,y-4,larg[i],8);
+            doc.text(doc.splitTextToSize(String(c||""),larg[i]-3)[0]||"",x+1.5,y+1); x+=larg[i]; });
+          y+=8;
+        };
+        doc.setDrawColor(150);
+        riga(b.colonne,true);
+        b.righe.forEach(r=>riga(r,false));
+        y+=3; testo(b.nota,M,L,9,"normal",110); y+=3; return;
+      }
+      if(b.t==="numerato"){
+        salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+        b.righe.forEach((x,i)=>{
+          salta(10);
+          doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(30);
+          doc.text((i+1)+". "+x[0],M,y); y+=4.6;
+          testo(x[1].replace("⚠️ ",""),M+4,L-4,9,"normal",60); y+=2.5;
+        });
+        y+=2; return;
+      }
+      if(b.t==="firme"){
+        salta(48);
+        testo(b.vessatorie,M,L,9,"normal",110); y+=8;
+        const meta=(L-10)/2;
+        doc.setDrawColor(60);
+        doc.line(M,y,M+meta,y); doc.line(M+meta+10,y,R,y); y+=4.5;
+        doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(30);
+        doc.text(b.colonne[0][0],M,y); doc.text(b.colonne[1][0],M+meta+10,y); y+=14;
+        salta(20);
+        doc.line(M,y,M+meta,y); y+=4.5;
+        doc.setFontSize(8.5);doc.setTextColor(110);
+        doc.text("Il Conduttore, per approvazione delle clausole 6 e 8",M,y);
+        return;
+      }
+    });
+    doc.save(titolo.replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g,"-")+".pdf");
+    toast("Contratto scaricato ✔");
+  }
+
+  /* due porte per il banco di prova: servono a controllare il TESTO del
+     contratto senza aprire una finestra di stampa. Non le usa nessun altro. */
+  window.__nolLeggiPerProva=(id)=>nolLeggi("noleggio",id);
+  window.__nolContrattoPerProva=(n)=>nolContrattoDati(n);
+  window.nolContrattoStampaProva=(n)=>nolContrattoStampa(n);
 
   async function salvaNoleggio(id){
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
@@ -1811,28 +2192,35 @@
       cauzione:_numIt($("#nn-cauzione").value),
       stato_pagamento:$("#nn-pagamento").value,
       danni:$("#nn-danni").value.trim()||null,
-      note:$("#nn-note").value.trim()||null};
-    const {error}=id
-      ? await sb.from("nol_noleggi").update(dati).eq("id",id).eq("user_id",sbUid)
-      : await sb.from("nol_noleggi").insert({user_id:sbUid,...dati});
+      note:$("#nn-note").value.trim()||null,
+      /* il contratto: chi usera' la macchina e come e' uscita */
+      tipo_nolo:segVal("nn-nolo")||"freddo",
+      contratto_num:$("#nn-cnum")?($("#nn-cnum").value.trim()||null):null,
+      contratto_data:$("#nn-cdata")?($("#nn-cdata").value||null):null,
+      operatori:nolLeggiOperatori(),
+      stato_consegna:$("#nn-stato-cons")?($("#nn-stato-cons").value.trim()||null):null,
+      stato_rientro:$("#nn-stato-rie")?($("#nn-stato-rie").value.trim()||null):null};
+    const scrivi=(d)=>id
+      ? sb.from("nol_noleggi").update(d).eq("id",id).eq("user_id",sbUid)
+      : sb.from("nol_noleggi").insert({user_id:sbUid,...d});
+    let {error}=await scrivi(dati);
+    /* rete di salvataggio: se sql/noleggio-contratto.sql non e' ancora
+       passato, il noleggio si salva lo stesso senza le colonne nuove
+       invece di andare perso */
+    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro/i.test(error.message||"")
+            &&/column|schema cache/i.test(error.message||"")){
+      const senza={...dati};
+      ["tipo_nolo","contratto_num","contratto_data","operatori","stato_consegna","stato_rientro"].forEach(k=>delete senza[k]);
+      ({error}=await scrivi(senza));
+      if(!error) toast("Salvato, ma il contratto no: manca sql/noleggio-contratto.sql");
+    }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet(); loadNoleggi(); renderRiepilogoNegozio(); toast(id?"Noleggio aggiornato ✔":"Noleggio aggiunto ✔");
   }
 
   $('[data-tab="mezzi"]')?.addEventListener("click",loadMezzi);
-  $("#mezzi-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".mezzo-edit"), del=e.target.closest(".mezzo-del");
-    if(del){
-      if(!confirm("Eliminare questo mezzo?"))return;
-      const {error}=await sb.from("nol_mezzi").delete().eq("id",del.dataset.id);
-      if(error){alert("Errore: "+error.message);return;}
-      loadMezzi();return;
-    }
-    if(ed){
-      const {data}=await sb.from("nol_mezzi").select("*").eq("id",ed.dataset.id).single();
-      if(data) schedaMezzo(data);
-    }
-  });
+  /* ⛔ tolto il quinto ascoltatore morto (.mezzo-edit): cercava pulsanti che
+     sulla riga non ci sono piu' e cancellava senza controllare user_id. */
 
   async function loadClientiNol(){
     if(!(sb&&sbUid)) return;
@@ -2089,7 +2477,7 @@
     const pdf=fatturaPdfCache[l.id];
     openSheet(`<h3>${esc(nolTitolo("fattura",l))}</h3>${nolPulsantiScheda("fattura",l.id||"")}
       <div class="field"><label>Oggetto *</label>
-        <textarea id="nfa-desc" placeholder="Cosa e' stato fatto o noleggiato">${v('descrizione')}</textarea></div>
+        <textarea id="nfa-desc" placeholder="Cosa è stato fatto o noleggiato">${v('descrizione')}</textarea></div>
       <div class="field"><label>Dove</label><input id="nfa-dove" value="${v('dove')}" placeholder="Cantiere, indirizzo"></div>
       <div class="nol-riq nol-cam">
         <h4>Soldi</h4>
@@ -2116,13 +2504,14 @@
           <button class="nol-az" data-action="upload-fattura" data-id="${l.id||""}">📎 ${pdf?"Sostituisci":"Allega"} il PDF</button>
         </div></div>
       <div class="field"><label>Note</label><textarea id="nfa-note" placeholder="Quello che serve ricordare">${v('note')}</textarea></div>
+      ${nolDocBlocco("fattura",l.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-fatt" data-id="${l.id||""}">Salva</button></div>`);
     bindSeg("nfa-stato"); bindSeg("nfa-lav");
   }
 
   async function salvaFattura(id){
-    if(!id){toast("Questa fattura non si trova piu'");return;}
+    if(!id){toast("Questa fattura non si trova più");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const desc=$("#nfa-desc").value.trim();
     if(!desc){toast("Scrivi l'oggetto della fattura");return;}
@@ -2341,7 +2730,7 @@
          prima di partire. Dove il browser non sa farlo (succede su certi
          iPhone) si carica l'originale e lo si dice, invece di far finta.
      ================================================================ */
-  const MEDIA_BUCKET={foto:"gestionale-foto",video:"gestionale-video"};
+  const MEDIA_BUCKET={foto:"gestionale-foto",video:"gestionale-video",documento:"gestionale-foto"};
   const MEDIA_FOTO_MAX = 15*1024*1024;   /* prima di rimpicciolire */
   const MEDIA_VIDEO_MAX= 200*1024*1024;  /* prima di ridurre */
   const MEDIA_VIDEO_DOPO_MAX = 50*1024*1024; /* dopo aver ridotto: se supera, no */
@@ -2393,12 +2782,12 @@
         url=URL.createObjectURL(file);
         const v=document.createElement("video");
         v.muted=true; v.playsInline=true; v.preload="auto"; v.src=url;
-        v.onerror=()=>fine({blob:file,ridotto:false,perche:"il video non si e' aperto"});
+        v.onerror=()=>fine({blob:file,ridotto:false,perche:"il video non si è aperto"});
         v.onloadedmetadata=()=>{
           const dur=v.duration||0;
           /* oltre due minuti rifarlo vorrebbe dire due minuti di attesa:
              si carica com'e' e si dice perche' */
-          if(!isFinite(dur)||dur>120) return fine({blob:file,ridotto:false,perche:"il video e' piu' lungo di due minuti"});
+          if(!isFinite(dur)||dur>120) return fine({blob:file,ridotto:false,perche:"il video è più lungo di due minuti"});
           const max=1280; let w=v.videoWidth||1280, h=v.videoHeight||720;
           if(w>h){ if(w>max){h=Math.round(h*max/w);w=max;} } else { if(h>max){w=Math.round(w*max/h);h=max;} }
           w-=w%2; h-=h%2;
@@ -2426,12 +2815,12 @@
             requestAnimationFrame(disegna);
           };
           v.onended=()=>{ try{reg.stop();}catch(e){} };
-          try{ reg.start(1000); }catch(e){ return fine({blob:file,ridotto:false,perche:"la registrazione non e' partita"}); }
-          v.play().then(disegna).catch(()=>fine({blob:file,ridotto:false,perche:"il video non e' partito"}));
+          try{ reg.start(1000); }catch(e){ return fine({blob:file,ridotto:false,perche:"la registrazione non è partita"}); }
+          v.play().then(disegna).catch(()=>fine({blob:file,ridotto:false,perche:"il video non è partito"}));
           /* rete di sicurezza: mai piu' del doppio della durata */
           setTimeout(()=>{ if(!chiuso){ try{reg.stop();}catch(e){} } },(dur*1000)+15000);
         };
-      }catch(e){ fine({blob:file,ridotto:false,perche:"non e' stato possibile ridurlo"}); }
+      }catch(e){ fine({blob:file,ridotto:false,perche:"non è stato possibile ridurlo"}); }
     });
   }
 
@@ -2485,9 +2874,138 @@
   });
   $("#media-search")?.addEventListener("input",e=>{mediaQ=e.target.value;loadMedia();});
 
+
+  /* ================================================================
+     «CARICA PDF» SU TUTTE LE SCHEDE — 23 agosto 2026
+     Chiesto da Alessio: stampa PDF e carica PDF su tutti i documenti di
+     tutto il gestionale noleggio.
+
+     Un blocco solo, uguale dappertutto: si scrive qui e compare su mezzo,
+     cliente, noleggio, prodotto, fornitore, movimento. Se domani nasce una
+     scheda nuova, le basta una riga.
+
+     ⛔ SUL MEZZO NON E' UN VEZZO, E' LA LEGGE. Dichiarazione CE, libretto
+     d'uso, verbali di verifica periodica e registro manutenzioni devono
+     stare attaccati al mezzo e andare col mezzo (D.Lgs 81/08 art. 71 e 72).
+     ================================================================ */
+  const DOC_AIUTO={
+    mezzo:"Dichiarazione CE, libretto d'uso e manutenzione, verbali di verifica periodica, registro manutenzioni, assicurazione. Vanno col mezzo: qui restano attaccati e non si perdono.",
+    cliente:"Visura, documento d'identità, dichiarazione degli operatori firmata, corrispondenza.",
+    noleggio:"Il contratto firmato, il verbale di consegna, il DDT, la ricevuta della cauzione.",
+    prodotto:"Scheda tecnica, scheda di sicurezza, certificati.",
+    fornitore:"Listini, contratti, DDT, fatture.",
+    movimento:"Bolla, ricevuta, documento di trasporto.",
+    magazzino:"Scheda tecnica, scheda di sicurezza, certificati."
+  };
+  const DOC_MAX = 20*1024*1024;
+  let docCache=[], docTipo=null, docId=null;
+
+  /* il riquadro. Si mette in fondo a una scheda, prima di Annulla/Salva. */
+  function nolDocBlocco(tipo,id){
+    if(!id) return `<div class="nol-riq nol-cam"><h4>Documenti</h4>
+      <p style="margin:0;font-size:14px;color:#666">Salva prima la scheda: poi qui puoi attaccare i PDF.</p></div>`;
+    /* la lista si chiede dopo che la scheda e' a schermo */
+    setTimeout(()=>caricaDocumenti(tipo,id),0);
+    return `<div class="nol-riq nol-cam">
+      <h4>Documenti (PDF)</h4>
+      <p style="margin:0 0 10px;font-size:14px;color:#666">${esc(DOC_AIUTO[tipo]||"Qui restano attaccati e non si perdono.")}</p>
+      <div class="nol-azioni">
+        <button type="button" class="nol-az nol-az-apri" data-action="doc-add" data-t="${tipo}" data-id="${id}">📎 Carica PDF</button>
+      </div>
+      <div id="nol-doc-lista" style="margin-top:10px"></div>
+      <input type="file" id="nol-doc-file" style="display:none">
+    </div>`;
+  }
+
+  async function caricaDocumenti(tipo,id){
+    docTipo=tipo; docId=id; docCache=[];
+    const box=$("#nol-doc-lista"); if(!box||!(sb&&sbUid)) return;
+    const {data,error}=await sb.from("nol_media").select("*")
+      .eq("user_id",sbUid).eq("attaccato_a",tipo).eq("attaccato_id",id)
+      .order("created_at",{ascending:false});
+    if(error){
+      box.innerHTML='<p class="gior-vuoto">I documenti non sono ancora accesi: esegui <b>sql/noleggio-contratto.sql</b> su Supabase e ricarica la pagina.</p>';
+      return;
+    }
+    docCache=data||[];
+    disegnaDocumenti();
+  }
+
+  function disegnaDocumenti(){
+    const box=$("#nol-doc-lista"); if(!box) return;
+    if(!docCache.length){box.innerHTML='<p class="gior-vuoto">Ancora nessun documento.</p>';return;}
+    box.innerHTML=docCache.map(d=>`
+      <div class="doc-riga">
+        <button type="button" class="doc-nome" data-action="doc-vedi" data-id="${d.id}">
+          <span class="doc-ic">${d.genere==="documento"?"📄":"🖼️"}</span>${esc(d.nome_file||"documento")}</button>
+        <span class="doc-peso">${esc(mediaPeso(d.byte))}</span>
+        <button type="button" class="media-x" data-action="doc-elim" data-id="${d.id}" title="Butta">×</button>
+      </div>`).join("");
+  }
+
+  function docChiedi(tipo,id){
+    docTipo=tipo; docId=id;
+    const inp=$("#nol-doc-file"); if(!inp) return;
+    inp.value=""; inp.accept="application/pdf,image/*"; inp.multiple=true;
+    /* niente «capture»: qui si allega un file che c'e' gia', non si scatta */
+    try{ inp.removeAttribute("capture"); }catch(e){}
+    inp.click();
+  }
+
+  async function docCarica(files){
+    if(!files||!files.length||!docTipo||!docId) return;
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    let fatti=0;
+    for(const f of Array.from(files)){
+      const pdf=(f.type||"").indexOf("pdf")>=0;
+      if(!pdf&&!(f.type||"").startsWith("image/")){toast("Si possono allegare PDF o foto");continue;}
+      if(f.size>DOC_MAX){toast("File troppo grande, massimo 20 MB");continue;}
+      let dati=f, nome=f.name||("documento-"+Date.now());
+      /* una foto di un documento si rimpicciolisce come tutte le altre;
+         un PDF non si tocca, se no si rovina */
+      if(!pdf){ try{ dati=await mediaRiduciFoto(f); nome=nome.replace(/\.[^.]+$/,"")+".jpg"; }catch(e){ dati=f; } }
+      const safe=nome.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=sbUid+"/noleggio/doc/"+docTipo+"-"+docId+"/"+Date.now()+"_"+safe;
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,dati,{contentType:dati.type||undefined});
+      if(up){toast("Non caricato: "+up.message);continue;}
+      const riga={user_id:sbUid,attaccato_a:docTipo,attaccato_id:docId,
+                  genere:pdf?"documento":"foto",storage_path:path,nome_file:safe,byte:dati.size};
+      const {data:ins,error:eIns}=await sb.from("nol_media").insert(riga).select("*").single();
+      if(eIns){
+        try{ await sb.storage.from("gestionale-foto").remove([path]); }catch(e){}
+        toast("Non salvato: "+eIns.message); continue;
+      }
+      docCache.unshift(ins); fatti++;
+    }
+    if(fatti){ disegnaDocumenti(); toast(fatti===1?"Documento allegato ✔":fatti+" documenti allegati ✔"); }
+  }
+
+  async function docVedi(id){
+    const d=docCache.find(x=>String(x.id)===String(id)); if(!d) return;
+    const u=await mediaLink(d);
+    if(!u){toast("Il file non si apre");return;}
+    window.open(u,"_blank");
+  }
+
+  async function docElimina(id){
+    const d=docCache.find(x=>String(x.id)===String(id)); if(!d) return;
+    if(!confirm("Buttare «"+(d.nome_file||"questo documento")+"»?\n"+cestFrase())) return;
+    const {error}=await sb.from("nol_media").delete().eq("id",d.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!cestAcceso()){ try{ await sb.storage.from(MEDIA_BUCKET[d.genere]||"gestionale-foto").remove([d.storage_path]); }catch(e){} }
+    docCache=docCache.filter(x=>String(x.id)!==String(id));
+    delete mediaUrl[id];
+    disegnaDocumenti(); toast("Documento buttato");
+  }
+
+  /* la casella nasce dentro la scheda: l'ascoltatore sta sul documento */
+  document.addEventListener("change",e=>{
+    if(e.target&&e.target.id==="nol-doc-file"){ const f=e.target.files; e.target.value=""; docCarica(f); }
+  });
+
   /* ---- la scheda: com'e' uscito, com'e' tornato ---- */
   async function schedaMedia(n){
-    if(!n){toast("Questo noleggio non si trova piu'");return;}
+    if(!n){toast("Questo noleggio non si trova più");return;}
     mediaApertoId=n.id;
     openSheet(`<h3>Foto e video — ${esc(n.mezzo||"mezzo")}${n.cliente?" · "+esc(n.cliente):""}</h3>
       ${nolPulsantiScheda("noleggio",n.id,["nol-pdf","nol-stampa"])}
@@ -2510,6 +3028,7 @@
         <div class="media-griglia" id="media-rientro"></div>
       </div>
       <div id="media-lavoro" style="font-size:15px;color:#0066ff;font-weight:600;min-height:22px"></div>
+      ${nolDocBlocco("noleggio",n.id||"")}
       <input type="file" id="media-file" style="display:none">
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Chiudi</button></div>`);
     disegnaMedia();
@@ -2568,13 +3087,13 @@
     for(const f of Array.from(files)){
       let dati=f, nome=f.name||("file-"+Date.now()), ridotto=false, perche="";
       if(genere==="foto"){
-        if(!f.type||!f.type.startsWith("image/")){toast("Questo non e' una foto");continue;}
+        if(!f.type||!f.type.startsWith("image/")){toast("Questo non è una foto");continue;}
         if(f.size>MEDIA_FOTO_MAX){toast("Foto troppo grande, massimo 15 MB");continue;}
         mediaDillo("Sto rimpicciolendo la foto…");
         try{ dati=await mediaRiduciFoto(f); ridotto=true; nome=nome.replace(/\.[^.]+$/,"")+".jpg"; }
         catch(e){ dati=f; }
       }else{
-        if(!f.type||!f.type.startsWith("video/")){toast("Questo non e' un video");continue;}
+        if(!f.type||!f.type.startsWith("video/")){toast("Questo non è un video");continue;}
         if(f.size>MEDIA_VIDEO_MAX){toast("Video troppo grande, massimo 200 MB");continue;}
         mediaDillo("Sto riducendo il video… 0%");
         const r=await mediaRiduciVideo(f,p=>mediaDillo("Sto riducendo il video… "+p+"%"));
@@ -2582,7 +3101,7 @@
         if(ridotto) nome=nome.replace(/\.[^.]+$/,"")+((r.tipo||"").indexOf("mp4")>=0?".mp4":".webm");
         if(dati.size>MEDIA_VIDEO_DOPO_MAX){
           mediaDillo("");
-          toast("Video troppo pesante anche dopo la riduzione ("+mediaPeso(dati.size)+"): fanne uno piu' corto");
+          toast("Video troppo pesante anche dopo la riduzione ("+mediaPeso(dati.size)+"): fanne uno più corto");
           continue;
         }
       }
@@ -3336,6 +3855,14 @@
     if(a==="save-mov")      return salvaMovimento(id);
     if(a==="save-mag")      return salvaMagazzino(id);
     if(a==="save-fatt")     return salvaFattura(id);
+    if(a==="nol-contr-stampa"||a==="nol-contr-pdf"){
+      const d=await nolLeggi("noleggio",t.dataset.id);
+      if(!d){toast("Salva prima il noleggio, poi stampa il contratto");return;}
+      return a==="nol-contr-pdf"?nolContrattoPdf(d):nolContrattoStampa(d);
+    }
+    if(a==="doc-add")       return docChiedi(t.dataset.t,t.dataset.id);
+    if(a==="doc-vedi")      return docVedi(t.dataset.id);
+    if(a==="doc-elim")      return docElimina(t.dataset.id);
     if(a==="media-add")     return mediaChiedi(t.dataset.m,t.dataset.g);
     if(a==="media-vedi")    return mediaVedi(t.dataset.id);
     if(a==="media-elim")    return mediaElimina(t.dataset.id);
