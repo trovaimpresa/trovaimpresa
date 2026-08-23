@@ -250,6 +250,7 @@
       <button data-tab="calendario">Calendario</button>
       <button data-tab="lavori" style="display:none">Lavori</button>
       <button data-tab="fatture">Fatture</button>
+      <button data-tab="cauzioni">Cauzioni<span class="tab-cnt" id="cnt-cauzioni"></span></button>
       <button data-tab="rendimento">Rendimento</button>
       <button data-tab="documenti">Contratti e documenti</button>
       <button data-tab="media">Foto e video</button>
@@ -277,6 +278,7 @@
       <div class="money-row">
         <div class="money in"><div class="n" id="kn-incasso">€ 0</div><div class="l">Incassato dai noleggi</div><div class="sub">Questo mese, già pagati</div></div>
         <div class="money out"><div class="n" id="kn-daincassare">€ 0</div><div class="l">Da incassare</div><div class="sub">Noleggi ancora da pagare</div></div>
+        <div class="money out"><div class="n" id="kn-cauzioni">€ 0</div><div class="l">Cauzioni in deposito</div><div class="sub">Soldi dei clienti, da restituire</div></div>
         <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
       </div>
       <div class="mini-title">Mezzi in ritardo</div>
@@ -372,6 +374,28 @@
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
+    </section>
+
+    <!-- ⛔ LE CAUZIONI — 23 agosto 2026.
+         Sono soldi di altri fermi sul tuo conto. Finche' erano un numero
+         scritto sul noleggio non si sapeva ne' quanti fossero in tutto, ne'
+         quali andassero restituiti. Qui si vede tutto in una schermata. -->
+    <section id="cauzioni">
+      <div class="sec-head"><h2>Cauzioni</h2></div>
+      <div class="gal-intro">I soldi che tieni in deposito per conto dei clienti. <b>Non sono tuoi</b>: al rientro tornano indietro, meno i danni che il verbale di riconsegna ha messo nero su bianco. Qui vedi quanti ne hai in mano e quali devi ancora rendere.</div>
+      <div class="money-row">
+        <div class="money out"><div class="n" id="kc-mano">€ 0</div><div class="l">In deposito adesso</div><div class="sub">Soldi che devi restituire</div></div>
+        <div class="money in"><div class="n" id="kc-svincolate">€ 0</div><div class="l">Restituite</div><div class="sub">Gi&agrave; tornate al cliente</div></div>
+        <div class="money out"><div class="n" id="kc-trattenute">€ 0</div><div class="l">Trattenute per danni</div><div class="sub">Rimaste a te</div></div>
+      </div>
+      <div class="filt-label">Mostra</div>
+      <div class="chiprow" id="cau-filtro">
+        <button class="chip" data-action="cau-filtro" data-v="dasvincolare">Da svincolare</button>
+        <button class="chip on" data-action="cau-filtro" data-v="aperte">In deposito</button>
+        <button class="chip" data-action="cau-filtro" data-v="chiuse">Svincolate</button>
+        <button class="chip" data-action="cau-filtro" data-v="tutte">Tutte</button>
+      </div>
+      <div id="cauzioni-body" class="nol-elenco" style="margin-top:14px"></div>
     </section>
 
     <section id="rendimento">
@@ -484,6 +508,11 @@
 .nol-due{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .nol-cam label{display:block;font-size:13px;color:#555;margin-bottom:3px}
 .nol-cam input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:15px}
+/* ⚠️ 23 agosto: la casellina «in che forma» era l'unico menu a tendina
+   dentro un riquadro, ed era rimasta grigia e minuscola come la fa il
+   browser. Adesso e' uguale alle altre caselle. */
+.nol-cam select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;
+  font-size:15px;font-family:inherit;background:#fff;color:#222;height:auto}
 .nol-spunta{display:flex;align-items:center;gap:8px;font-size:15px;margin:6px 0;cursor:pointer}
 .nol-spunta input{width:18px;height:18px}
 .nol-conto{background:#fff;border:2px solid #2e537d;border-radius:12px;padding:14px;margin-bottom:12px}
@@ -961,7 +990,7 @@
     const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
     if(!(sb&&sbUid)){
       ["k-dafare","k-incorso","k-fatti","kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati"].forEach(i=>scrivi(i,0));
-      ["k-lavori","k-daincassare","k-incassato","kn-incasso","kn-daincassare"].forEach(i=>scrivi(i,_eur(0)));
+      ["k-lavori","k-daincassare","k-incassato","kn-incasso","kn-daincassare","kn-cauzioni"].forEach(i=>scrivi(i,_eur(0)));
       if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
       if($("#rie-ritardi"))$("#rie-ritardi").innerHTML='<p style="color:#666;padding:8px">Nessun mezzo in ritardo.</p>';
       if($("#rie-scadenze"))$("#rie-scadenze").innerHTML='<p style="color:#666;padding:8px">Nessuna scadenza.</p>';
@@ -997,7 +1026,7 @@
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
     const {data:nol}=await sb.from("nol_noleggi")
-      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase")
+      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase,cauzione,cauzione_stato")
       .eq("user_id",sbUid);
     const N=nol||[], oggiN=todayStr();
     /* ⚠️ «fuori adesso» vuol dire dal cliente. Un mezzo PRENOTATO e' ancora
@@ -1022,6 +1051,10 @@
       .reduce((s,x)=>s+(+x.importo||0),0)));
     scrivi("kn-daincassare",_eur(N.filter(x=>x.stato_pagamento!=="pagato")
       .reduce((s,x)=>s+(+x.importo||0),0)));
+    /* ⛔ le cauzioni NON sono un incasso: stanno in una casella a parte
+       apposta, se no il riepilogo racconta di avere soldi che deve rendere. */
+    scrivi("kn-cauzioni",_eur(N.filter(x=>(+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito")
+      .reduce((s,x)=>s+(+x.cauzione||0),0)));
     if($("#rie-ritardi"))$("#rie-ritardi").innerHTML=ritardo.length?ritardo.map(x=>{
       const gg=Math.round((new Date(oggiN)-new Date(x.data_rientro_prevista))/86400000);
       return `<div class="nol-card" style="border-top-color:#c62828">
@@ -1423,6 +1456,12 @@
        la sua scheda non ha ne' Copia ne' Elimina, quindi da qui non si
        puo' cancellare un noleggio per sbaglio. */
     media:{tab:"nol_noleggi",che:"Foto e video",ricarica:()=>loadMedia(),scheda:d=>schedaMedia(d)},
+    /* La cauzione e' un pezzo del noleggio, non una riga a parte: si apre la
+       scheda del noleggio, dove c'e' il riquadro. Il foglio che si stampa da
+       qui, pero', parla solo di soldi in deposito. */
+    cauzione:{tab:"nol_noleggi",che:"Cauzione",femm:true,ricarica:()=>loadCauzioni(),
+              scheda:d=>schedaNoleggio(d),
+              avviso:"Sparisce tutto il noleggio, non solo la cauzione."},
     documenti:{tab:"nol_noleggi",che:"Documenti",ricarica:()=>loadDocumenti(),scheda:d=>schedaDocumenti(d)},
     /* La giornata non e' una riga del database: e' quello che succede in un
        giorno. Ha un suo lettore, e si stampa come tutto il resto. */
@@ -1436,6 +1475,25 @@
     if(!sb) return null;
     const {data}=await sb.from(t.tab).select("*").eq("id",id).single();
     return data||null;
+  }
+
+  /* ── le cauzioni, le parole ── (23 agosto 2026)
+     Scritte una volta sola: le usano la scheda, l'elenco, la ricevuta e la
+     quietanza. Se domani si aggiunge una forma, si aggiunge qui e compare
+     in tutti e quattro. */
+  const CAU_FORMA={contanti:"Contanti",assegno:"Assegno",bonifico:"Bonifico",
+                   carta:"Preautorizzazione su carta",fideiussione:"Fideiussione"};
+  const CAU_STATO={nessuna:"Nessuna cauzione",in_deposito:"In deposito",svincolata:"Svincolata"};
+  /* lo stato vero di una cauzione: quello scritto, o quello che si capisce
+     dai numeri per i noleggi salvati prima che questa parte esistesse */
+  function cauStatoDi(n){
+    if(n.cauzione_stato&&CAU_STATO[n.cauzione_stato]) return n.cauzione_stato;
+    return (+n.cauzione||0)>0 ? "in_deposito" : "nessuna";
+  }
+  /* ⛔ da svincolare = il mezzo e' tornato ma i soldi no. E' la lista di
+     lavoro: sono le telefonate che il cliente ti fa se te ne dimentichi. */
+  function cauDaSvincolare(n){
+    return cauStatoDi(n)==="in_deposito" && !!n.data_rientro_effettivo;
   }
 
   /* le righe da mettere sul foglio: etichetta e valore, niente colonne vuote */
@@ -1469,6 +1527,8 @@
       if(dp&&Array.isArray(dp.righe)) dp.righe.forEach(x=>r.push([x.voce+"  ("+x.dettaglio+")",_eur(x.importo)]));
       r.push(["IMPORTO",soldi(d.importo)]);
       r.push(["Cauzione (deposito, a parte)",soldi(d.cauzione)]);
+      r.push(["Cauzione, in che forma",CAU_FORMA[d.cauzione_forma]||null]);
+      r.push(["Cauzione, stato",(+d.cauzione||0)>0?CAU_STATO[cauStatoDi(d)]:null]);
       r.push(["Pagamento",d.stato_pagamento==="pagato"?"Pagato":"Da pagare"]);
       r.push(["Danni",e(d.danni)]);
       r.push(["Tipo di noleggio",d.tipo_nolo==="caldo"?"A caldo (con operatore)":"A freddo (senza operatore)"]);
@@ -1515,6 +1575,25 @@
       gruppo("Lavori",d.lavori,x=>(x.descrizione||"(senza descrizione)")+
         "  ["+(statoLabel[x.stato]||x.stato||"")+"]");
       if(d.nota) r.push(["Nota del giorno",e(d.nota)]);
+    }
+    if(tipo==="cauzione"){
+      const st=cauStatoDi(d);
+      r=[["Cliente",e(d.cliente)],["Mezzo",e(d.mezzo)],
+         ["Contratto",d.contratto_num?("n. "+d.contratto_num):null],
+         ["Importo della cauzione",soldi(d.cauzione)],
+         ["In che forma",CAU_FORMA[d.cauzione_forma]||null],
+         ["Riferimento",e(d.cauzione_rif)],
+         ["Ricevuta il",d.cauzione_ricevuta_il?fdate(d.cauzione_ricevuta_il):null],
+         ["Stato",CAU_STATO[st]],
+         ["Mezzo rientrato il",d.data_rientro_effettivo?fdate(d.data_rientro_effettivo):null]];
+      if(st==="svincolata"){
+        r.push(["Svincolata il",d.cauzione_svincolata_il?fdate(d.cauzione_svincolata_il):null]);
+        r.push(["Trattenuto per danni",soldi(d.cauzione_trattenuta)]);
+        r.push(["Restituito al cliente",soldi(d.cauzione_restituita)]);
+        r.push(["Perché è stato trattenuto",e(d.cauzione_motivo)]);
+      } else if(cauDaSvincolare(d)){
+        r.push(["Da fare","Il mezzo è rientrato: questa cauzione va svincolata."]);
+      }
     }
     if(tipo==="media") r=[
       ["Tipo",d.genere==="video"?"Video":"Foto"],
@@ -2131,9 +2210,57 @@
         <h4>Quanto si fa pagare</h4>
         <div class="nol-due">
           <div><label>Importo €</label><input id="nn-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00"></div>
-          <div><label>Cauzione €</label><input id="nn-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00"></div>
+          <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">La cauzione sta nel riquadro qui sotto: &egrave; un deposito, non un incasso.</p></div>
         </div>
         <p style="margin:8px 0 0;font-size:13px;color:#666">L'importo lo puoi sempre correggere a mano: quello che scrivi qui è quello che si fa pagare.</p>
+      </div>
+
+      <!-- ⛔ LA CAUZIONE — 23 agosto 2026.
+           Non e' un incasso: sono soldi del cliente fermi da te. Percio' qui
+           si scrive anche IN CHE FORMA li hai presi e QUANDO, e al rientro si
+           chiude la partita davanti a un foglio firmato. -->
+      <div class="nol-riq nol-cam" id="nn-box-cauzione">
+        <h4>La cauzione</h4>
+        <div class="nol-due">
+          <div><label>Cauzione €</label><input id="nn-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00"></div>
+          <div><label>In che forma l'hai presa</label>
+            <select id="nn-cau-forma">
+              <option value="">— non indicata —</option>
+              <option value="contanti">Contanti</option>
+              <option value="assegno">Assegno</option>
+              <option value="bonifico">Bonifico</option>
+              <option value="carta">Preautorizzazione su carta</option>
+              <option value="fideiussione">Fideiussione</option>
+            </select></div>
+        </div>
+        <div class="nol-due" style="margin-top:8px">
+          <div><label>Riferimento</label><input id="nn-cau-rif" value="${v('cauzione_rif')}" placeholder="N. assegno, CRO del bonifico, ultime 4 cifre"></div>
+          <div><label>Ricevuta il</label><input id="nn-cau-data" type="date" value="${v('cauzione_ricevuta_il')}"></div>
+        </div>
+        <div id="nn-cau-riga" style="margin-top:10px"></div>
+
+        <div class="nol-riq" id="nn-cau-svin" style="background:#fff;border-color:#cfd9e6;margin:12px 0 0;display:none">
+          <h4>Lo svincolo</h4>
+          <div id="nn-cau-danni"></div>
+          <div class="nol-due">
+            <div><label>Trattenuto per danni €</label><input id="nn-cau-tratt" inputmode="decimal" value="${v('cauzione_trattenuta')}" placeholder="0,00"></div>
+            <div><label>Restituito al cliente €</label><input id="nn-cau-rest" inputmode="decimal" value="${v('cauzione_restituita')}" placeholder="0,00"></div>
+          </div>
+          <div class="nol-due" style="margin-top:8px">
+            <div><label>Perch&eacute; hai trattenuto</label><input id="nn-cau-motivo" value="${v('cauzione_motivo')}" placeholder="Es. vetro laterale da sostituire"></div>
+            <div><label>Svincolata il</label><input id="nn-cau-svin-data" type="date" value="${v('cauzione_svincolata_il')}"></div>
+          </div>
+          <label class="nol-spunta" style="margin-top:10px"><input type="checkbox" id="nn-cau-chiusa"${cauStatoDi(n)==="svincolata"?" checked":""}> Cauzione chiusa: al cliente non devo pi&ugrave; niente</label>
+          <p style="margin:6px 0 0;font-size:13px;color:#666">Scrivi quanto trattieni: il resto da restituire si calcola da solo. La quietanza qui sotto &egrave; la carta che chiude la discussione.</p>
+        </div>
+
+        <div class="nol-azioni">
+          <button type="button" class="nol-az nol-az-apri" data-action="nol-cauz-stampa" data-m="ricevuta" data-id="${n.id||""}">Stampa la ricevuta</button>
+          <button type="button" class="nol-az" data-action="nol-cauz-pdf" data-m="ricevuta" data-id="${n.id||""}">Ricevuta in PDF</button>
+          <button type="button" class="nol-az" data-action="nol-cauz-stampa" data-m="svincolo" data-id="${n.id||""}">Stampa la quietanza</button>
+          <button type="button" class="nol-az" data-action="nol-cauz-pdf" data-m="svincolo" data-id="${n.id||""}">Quietanza in PDF</button>
+        </div>
+        <p style="margin:10px 0 0;font-size:13px;color:#666">La ricevuta si d&agrave; al cliente quando prendi i soldi; la quietanza quando glieli rendi. Salva prima, poi stampa.</p>
       </div>
 
       <div class="field"><label>Pagamento</label><select id="nn-pagamento">
@@ -2164,8 +2291,71 @@
     if(segNolo){$$("#nn-nolo button").forEach(x=>x.classList.remove("on"));segNolo.classList.add("on");}
     nolDisegnaOperatori();
     nolMostraOperatori();
+    nolCauApert=n;
+    if(n.cauzione_forma&&$("#nn-cau-forma")) $("#nn-cau-forma").value=n.cauzione_forma;
+    nolMostraCauzione();
     nolAggiornaConto();
   }
+
+  /* ---- la cauzione dentro la scheda ---- (23 agosto 2026)
+     Il riquadro dello svincolo compare quando c'e' una data di rientro
+     effettivo: prima di allora non c'e' niente da svincolare, e una casella
+     che non serve e' una casella che qualcuno riempie per sbaglio. */
+  let nolCauApert=null;
+  function nolMostraCauzione(){
+    const box=$("#nn-cau-svin"); if(!box) return;
+    const n=nolCauApert||{};
+    const imp=_numIt($("#nn-cauzione")?$("#nn-cauzione").value:0);
+    const rientrato=!!($("#nn-effettivo")&&$("#nn-effettivo").value);
+    const chiusa=$("#nn-cau-chiusa")&&$("#nn-cau-chiusa").checked;
+    box.style.display=(imp>0&&(rientrato||chiusa))?"":"none";
+
+    /* la riga che dice come sta messa: e' la prima cosa che si guarda */
+    const riga=$("#nn-cau-riga");
+    if(riga){
+      if(imp<=0){ riga.innerHTML=""; }
+      else{
+        const st=chiusa?"svincolata":(rientrato?"in_deposito":"in_deposito");
+        const dasv=(st==="in_deposito"&&rientrato);
+        const col=st==="svincolata"?"#2e7d32":(dasv?"#c62828":"#e65100");
+        const eti=st==="svincolata"?"SVINCOLATA":(dasv?"DA SVINCOLARE":"IN DEPOSITO");
+        riga.innerHTML='<div class="nol-avviso" style="background:#fff;border-color:'+col+
+          ';color:#333"><b style="color:'+col+'">'+eti+'</b> — '+esc(_eur(imp))+
+          (st==="svincolata"?", gi&agrave; chiusa."
+            :(dasv?". Il mezzo &egrave; rientrato: questi soldi vanno resi al cliente."
+                  :". Sono soldi del cliente: non entrano nel totale del noleggio."))+'</div>';
+      }
+    }
+    /* i danni che il verbale di riconsegna ha gia' scritto: qui servono a
+       ricordare PERCHE' si trattiene, non a inventare un importo */
+    const dbox=$("#nn-cau-danni");
+    if(dbox){
+      const danni=(Array.isArray(n.check_rientro)?n.check_rientro:[]).filter(x=>x&&x.stato==="danno");
+      dbox.innerHTML=danni.length
+        ? '<div class="nol-avviso">Il verbale di riconsegna segna un danno a: <b>'+
+          esc(danni.map(x=>x.voce+(x.nota?" ("+x.nota+")":"")).join(", "))+
+          '</b>. Quello che trattieni deve corrispondere a questo.</div>'
+        : '<p style="margin:0 0 8px;font-size:13px;color:#666">Il verbale di riconsegna non segna danni: la cauzione torna indietro tutta.</p>';
+    }
+  }
+  /* scrivi quanto trattieni, il resto si calcola: e' l'unico conto che
+     serve, e farlo a mente davanti al cliente e' come si sbaglia */
+  document.addEventListener("input",e=>{
+    if(e.target.id==="nn-cau-tratt"){
+      const imp=_numIt($("#nn-cauzione").value), tr=_numIt(e.target.value);
+      const rest=Math.max(0,imp-tr);
+      if($("#nn-cau-rest")) $("#nn-cau-rest").value=String(rest.toFixed(2)).replace(".",",");
+      return;
+    }
+    if(e.target.id==="nn-cauzione"||e.target.id==="nn-effettivo") nolMostraCauzione();
+  });
+  document.addEventListener("change",e=>{
+    if(e.target.id==="nn-cau-chiusa"||e.target.id==="nn-effettivo"){
+      if(e.target.id==="nn-cau-chiusa"&&e.target.checked&&$("#nn-cau-svin-data")&&!$("#nn-cau-svin-data").value)
+        $("#nn-cau-svin-data").value=todayStr();
+      nolMostraCauzione();
+    }
+  });
 
   /* ---- chi usera' la macchina: le righe della dichiarazione ---- */
   let nolOperatori=[];
@@ -2819,6 +3009,77 @@
     {k:"dr", lab:"DDT rientro",      ce:n=>!!n.ddt_rientro_num,    solo:n=>!!n.data_rientro_effettivo}
   ];
 
+  /* ================================================================
+     LE CAUZIONI — 23 agosto 2026
+     Una schermata sola per rispondere a tre domande che oggi non avevano
+     risposta: quanto ho in mano, di chi sono, quali devo rendere subito.
+     ⛔ «Da svincolare» viene per primo apposta: e' l'unica di queste tre
+     che e' un lavoro da fare, non un numero da guardare.
+     ================================================================ */
+  let cauFiltro="aperte";
+  const CAU_VUOTO={
+    dasvincolare:"Nessuna cauzione da svincolare. Tutti i mezzi rientrati hanno la loro partita chiusa.",
+    aperte:"Nessuna cauzione in deposito: non stai tenendo soldi di nessuno.",
+    chiuse:"Nessuna cauzione ancora svincolata.",
+    tutte:"Nessun noleggio con cauzione. La cauzione si scrive nella scheda del noleggio."};
+
+  async function loadCauzioni(){
+    if(!(sb&&sbUid)) return;
+    const box=$("#cauzioni-body"); if(!box) return;
+    const {data}=await sb.from("nol_noleggi").select("*").eq("user_id",sbUid)
+      .order("data_uscita",{ascending:false});
+    /* ⚠️ un noleggio senza cauzione qui non c'entra niente: sparisce, invece
+       di allungare l'elenco con righe da zero euro. */
+    const N=(data||[]).filter(x=>(+x.cauzione||0)>0);
+    const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
+    const inMano=N.filter(x=>cauStatoDi(x)==="in_deposito");
+    const chiuse=N.filter(x=>cauStatoDi(x)==="svincolata");
+    scrivi("kc-mano",_eur(inMano.reduce((s,x)=>s+(+x.cauzione||0),0)));
+    scrivi("kc-svincolate",_eur(chiuse.reduce((s,x)=>s+(+x.cauzione_restituita||0),0)));
+    scrivi("kc-trattenute",_eur(chiuse.reduce((s,x)=>s+(+x.cauzione_trattenuta||0),0)));
+    const daSv=N.filter(cauDaSvincolare);
+    const pall=$("#cnt-cauzioni");
+    if(pall){pall.textContent=daSv.length?String(daSv.length):"";
+             pall.style.display=daSv.length?"inline-block":"none";}
+
+    let lista=N;
+    if(cauFiltro==="dasvincolare") lista=daSv;
+    if(cauFiltro==="aperte")       lista=inMano;
+    if(cauFiltro==="chiuse")       lista=chiuse;
+    if(!lista.length){
+      box.innerHTML='<p style="color:#666;padding:8px">'+esc(CAU_VUOTO[cauFiltro]||CAU_VUOTO.tutte)+'</p>';
+      return;
+    }
+    /* prima quelle da rendere: sono le uniche su cui c'e' da muoversi */
+    lista=lista.slice().sort((a,b)=>(cauDaSvincolare(b)?1:0)-(cauDaSvincolare(a)?1:0));
+    box.innerHTML=lista.map(x=>{
+      const st=cauStatoDi(x), dasv=cauDaSvincolare(x);
+      const col=st==="svincolata"?"#2e7d32":(dasv?"#c62828":"#e65100");
+      const eti=st==="svincolata"?"SVINCOLATA":(dasv?"DA SVINCOLARE":"IN DEPOSITO");
+      const gg=dasv&&x.data_rientro_effettivo
+        ? Math.round((new Date(todayStr())-new Date(x.data_rientro_effettivo))/86400000) : 0;
+      const sotto=[CAU_FORMA[x.cauzione_forma]||"forma non indicata",
+                   x.cauzione_rif?"rif. "+x.cauzione_rif:"",
+                   x.cauzione_ricevuta_il?"presa il "+fdate(x.cauzione_ricevuta_il):""]
+                  .filter(Boolean).join(" · ");
+      const chiusura=st==="svincolata"
+        ? "Svincolata il "+fdate(x.cauzione_svincolata_il)+
+          " · restituiti "+_eur(x.cauzione_restituita||0)+
+          ((+x.cauzione_trattenuta||0)?" · trattenuti "+_eur(x.cauzione_trattenuta):"")
+        : (dasv?"Mezzo rientrato il "+fdate(x.data_rientro_effettivo)+
+                (gg>0?" — sono passati "+gg+(gg===1?" giorno":" giorni"):"")
+              :"Mezzo ancora fuori: la cauzione resta in deposito.");
+      return `<div class="nol-card" style="border-top-color:${col}">
+        <div class="tit"><strong>${esc(_eur(x.cauzione))}</strong>
+          <span class="nol-eti" style="background:${col}">${esc(eti)}</span></div>
+        <div class="sub">${x.cliente?esc(x.cliente):"Cliente non indicato"}${x.mezzo?esc(" · "+x.mezzo):""}</div>
+        <div class="sub2">${esc(sotto)}</div>
+        <div class="sub2">${esc(chiusura)}</div>
+        ${nolPulsanti("cauzione",x.id)}</div>`;
+    }).join("");
+  }
+  $('[data-tab="cauzioni"]')?.addEventListener("click",loadCauzioni);
+
   async function loadDocumenti(){
     if(!(sb&&sbUid)) return;
     const box=$("#documenti-body"); if(!box) return;
@@ -2903,9 +3164,33 @@
       ${rientrato?docsRiquadro(n,"rientro")
         :`<div class="nol-riq nol-cam"><h4>Al rientro</h4>
            <p style="margin:0;font-size:14px;color:#666">Il mezzo &egrave; ancora fuori. Il verbale di riconsegna e il DDT di rientro compaiono qui appena scrivi la data di rientro effettivo nella scheda del noleggio.</p></div>`}
+      ${docsCauzione(n)}
       ${nolDocBlocco("noleggio",n.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-docs" data-id="${n.id}">Salva</button></div>`);
+  }
+
+  /* le due carte della cauzione, dentro i Documenti: ⛔ la regola di Alessio
+     e' che ogni documento del noleggio si stampa e si porta in PDF. Queste
+     due non fanno eccezione. */
+  function docsCauzione(n){
+    const imp=+n.cauzione||0;
+    if(imp<=0) return `<div class="nol-riq nol-cam"><h4>La cauzione</h4>
+      <p style="margin:0;font-size:14px;color:#666">Questo noleggio non ha cauzione. Se la prendi, scrivila nella scheda del noleggio: la ricevuta e la quietanza compaiono qui.</p></div>`;
+    const st=cauStatoDi(n), dasv=cauDaSvincolare(n);
+    const stato=st==="svincolata"
+      ? "Svincolata il "+fdate(n.cauzione_svincolata_il)+": restituiti "+_eur(n.cauzione_restituita||0)+
+        ((+n.cauzione_trattenuta||0)?", trattenuti "+_eur(n.cauzione_trattenuta):"")+"."
+      : (dasv?"⛔ Il mezzo è rientrato: questa cauzione va svincolata."
+             :"In deposito: "+_eur(imp)+(CAU_FORMA[n.cauzione_forma]?" · "+CAU_FORMA[n.cauzione_forma]:"")+".");
+    return `<div class="nol-riq nol-cam"><h4>La cauzione — ${esc(_eur(imp))}</h4>
+      <p style="margin:0 0 10px;font-size:14px;color:${dasv?"#c62828":"#666"}">${esc(stato)}</p>
+      <div class="nol-azioni">
+        <button type="button" class="nol-az nol-az-apri" data-action="nol-cauz-stampa" data-m="ricevuta" data-id="${n.id}">Stampa la ricevuta</button>
+        <button type="button" class="nol-az" data-action="nol-cauz-pdf" data-m="ricevuta" data-id="${n.id}">Ricevuta in PDF</button>
+        <button type="button" class="nol-az" data-action="nol-cauz-stampa" data-m="svincolo" data-id="${n.id}">Stampa la quietanza</button>
+        <button type="button" class="nol-az" data-action="nol-cauz-pdf" data-m="svincolo" data-id="${n.id}">Quietanza in PDF</button>
+      </div></div>`;
   }
 
   /* i clic sulla lista di controllo: delegati, come tutto il resto */
@@ -2959,6 +3244,114 @@
     loadDocumenti();
   }
 
+  /* ================================================================
+     LA RICEVUTA DELLA CAUZIONE E LA QUIETANZA DI SVINCOLO — 23 ago 2026
+
+     Due fogli, un motore solo: gli stessi mattoni del contratto, del
+     verbale e del DDT (nolDocStampa / nolDocPdf).
+
+     ⛔ PERCHE' CONTANO. La cauzione e' l'unico pezzo del noleggio in cui
+     tieni in mano soldi di un altro. Senza una carta firmata:
+       · alla consegna il cliente puo' dire di averti dato di piu';
+       · al rientro puo' dire di non aver mai ricevuto indietro niente.
+     La quietanza chiude tutte e due le discussioni con una riga sola:
+     «dichiara di non avere null'altro a pretendere».
+
+     ⚠️ La cauzione NON e' un acconto e NON e' un corrispettivo: non va in
+     fattura e non entra nel totale del noleggio. Sul foglio c'e' scritto.
+     ================================================================ */
+  async function nolCauzioneDati(n,momento){
+    const svincolo=(momento==="svincolo");
+    const [{data:az},{data:mz},{data:cl}]=await Promise.all([
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()      : Promise.resolve({data:null}),
+      n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
+    ]);
+    const A=az||{}, M=mz||{}, C=cl||{};
+    const imp=+n.cauzione||0;
+    const tratt=+n.cauzione_trattenuta||0;
+    const rest=(n.cauzione_restituita==null||n.cauzione_restituita==="")?Math.max(0,imp-tratt):(+n.cauzione_restituita||0);
+    const quando=svincolo?(n.cauzione_svincolata_il||n.data_rientro_effettivo||todayStr())
+                         :(n.cauzione_ricevuta_il||n.data_uscita||todayStr());
+    const danni=(Array.isArray(n.check_rientro)?n.check_rientro:[]).filter(x=>x&&x.stato==="danno");
+
+    const blocchi=[];
+    blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
+      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+             [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
+      titolo:svincolo?"QUIETANZA DI SVINCOLO CAUZIONE":"RICEVUTA DI DEPOSITO CAUZIONALE",
+      dettaglio:"del "+fdate(quando)+(n.contratto_num?"   ·   contratto n. "+n.contratto_num:"")});
+
+    blocchi.push({t:"coppie",titolo:"Le parti e il noleggio",righe:[
+      ["Locatore",A.nome||"—"],
+      ["Conduttore",C.nome||n.cliente||"—"],
+      ["P.IVA / Cod. Fiscale",C.piva||null],
+      ["Attrezzatura",M.nome||n.mezzo||"—"],
+      ["Codice / matricola",M.codice||null],
+      ["Consegna",n.data_uscita?fdate(n.data_uscita):null],
+      ["Riconsegna",n.data_rientro_effettivo?fdate(n.data_rientro_effettivo):null]
+    ]});
+
+    if(!svincolo){
+      blocchi.push({t:"coppie",titolo:"Il deposito",righe:[
+        ["Importo ricevuto",_eur(imp)],
+        ["Forma",CAU_FORMA[n.cauzione_forma]||"non indicata"],
+        ["Riferimento",n.cauzione_rif||null],
+        ["Ricevuto il",fdate(quando)]
+      ]});
+      blocchi.push({t:"testo",titolo:"Dichiarazione",corpo:[
+        "Il Locatore dichiara di aver ricevuto dal Conduttore la somma sopra indicata a titolo di deposito cauzionale, a garanzia dell'esatto adempimento degli obblighi derivanti dal contratto di noleggio.",
+        "Il deposito non costituisce acconto né corrispettivo del noleggio e non è soggetto a fatturazione. Salvo diverso accordo scritto, non produce interessi.",
+        "La somma sarà restituita alla riconsegna dell'attrezzatura, effettuato il controllo in contraddittorio, al netto degli eventuali danni eccedenti la normale usura, dei costi di reintegro e degli importi contrattuali non ancora pagati."
+      ]});
+    } else {
+      blocchi.push({t:"coppie",titolo:"Il conto del deposito",righe:[
+        ["Cauzione ricevuta",_eur(imp)],
+        ["Trattenuto",tratt?("− "+_eur(tratt)):"nessuna trattenuta"],
+        ["RESTITUITO AL CONDUTTORE",_eur(rest)],
+        ["Svincolata il",fdate(quando)],
+        ["Motivo della trattenuta",tratt?(n.cauzione_motivo||"(da specificare)"):null]
+      ]});
+      if(danni.length){
+        blocchi.push({t:"tabella",titolo:"I danni rilevati alla riconsegna",
+          intro:"Voci segnate come danno nel verbale di riconsegna sottoscritto dalle parti.",
+          colonne:["Che cosa","Nota"],
+          righe:danni.map(x=>[x.voce,x.nota||""]),
+          nota:"La trattenuta sopra indicata si riferisce a queste voci."});
+      }
+      blocchi.push({t:"testo",titolo:"Dichiarazione",corpo:[
+        tratt
+          ? "Le parti danno atto che alla riconsegna sono state rilevate le difformità sopra indicate, eccedenti la normale usura, e concordano la trattenuta dell'importo indicato a copertura dei relativi costi."
+          : "Le parti danno atto che alla riconsegna non sono state rilevate difformità eccedenti la normale usura.",
+        "Il Locatore restituisce al Conduttore la somma di "+_eur(rest)+" a saldo del deposito cauzionale.",
+        "Il Conduttore, ricevuta tale somma, dichiara di non avere null'altro a pretendere in relazione al deposito cauzionale e al contratto di noleggio sopra richiamato."
+      ]});
+    }
+
+    blocchi.push({t:"firme",
+      vessatorie:svincolo
+        ? "La presente quietanza è rilasciata in duplice originale, uno per ciascuna delle parti."
+        : "La presente ricevuta è rilasciata in duplice originale, uno per ciascuna delle parti.",
+      colonne:svincolo
+        ? [["Il Locatore",A.nome||""],["Il Conduttore, per quietanza",C.nome||n.cliente||""]]
+        : [["Il Locatore, per ricevuta",A.nome||""],["Il Conduttore",C.nome||n.cliente||""]]});
+
+    return {blocchi,titolo:(svincolo?"Quietanza di svincolo cauzione — ":"Ricevuta di cauzione — ")+
+            (C.nome||n.cliente||"cliente")};
+  }
+
+  async function cauzioneFoglio(id,momento,inPdf){
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const n=await nolLeggi("noleggio",id);
+    if(!n){toast("Salva prima il noleggio, poi stampa la ricevuta");return;}
+    if(!(+n.cauzione>0)){toast("Questo noleggio non ha una cauzione");return;}
+    if(momento==="svincolo"&&cauStatoDi(n)!=="svincolata"&&!n.data_rientro_effettivo){
+      toast("Il mezzo non è ancora rientrato: la quietanza si stampa allo svincolo");return;
+    }
+    const dati=await nolCauzioneDati(n,momento);
+    if(inPdf) nolDocPdf(dati); else nolDocStampa(dati);
+  }
+
   /* due porte per il banco di prova: servono a controllare il TESTO del
      contratto senza aprire una finestra di stampa. Non le usa nessun altro. */
   window.__nolLeggiPerProva=(id)=>nolLeggi("noleggio",id);
@@ -2968,6 +3361,8 @@
   window.__nolDdtPerProva=(n,m)=>nolDdtDati(n,m);
   window.nolVerbaleStampaProva=async(n,m)=>nolDocStampa(await nolVerbaleDati(n,m));
   window.nolDdtStampaProva=async(n,m)=>nolDocStampa(await nolDdtDati(n,m));
+  window.__nolCauzionePerProva=(n,m)=>nolCauzioneDati(n,m);
+  window.nolCauzioneStampaProva=async(n,m)=>nolDocStampa(await nolCauzioneDati(n,m));
 
   async function salvaNoleggio(id){
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
@@ -3036,6 +3431,26 @@
       operatori:nolLeggiOperatori(),
       stato_consegna:$("#nn-stato-cons")?($("#nn-stato-cons").value.trim()||null):null,
       stato_rientro:$("#nn-stato-rie")?($("#nn-stato-rie").value.trim()||null):null};
+    /* ── la cauzione ── (23 agosto 2026)
+       Lo stato non si chiede: si ricava. Zero euro = nessuna cauzione;
+       spuntata «chiusa» = svincolata; tutto il resto = ce l'hai in mano. */
+    const cauImp=_numIt($("#nn-cauzione").value);
+    const cauChiusa=$("#nn-cau-chiusa")&&$("#nn-cau-chiusa").checked;
+    Object.assign(dati,{
+      cauzione_forma:$("#nn-cau-forma")?($("#nn-cau-forma").value||null):null,
+      cauzione_rif:$("#nn-cau-rif")?($("#nn-cau-rif").value.trim()||null):null,
+      cauzione_ricevuta_il:$("#nn-cau-data")?($("#nn-cau-data").value||null):null,
+      cauzione_stato:cauImp<=0?"nessuna":(cauChiusa?"svincolata":"in_deposito"),
+      cauzione_svincolata_il:cauChiusa&&$("#nn-cau-svin-data")?($("#nn-cau-svin-data").value||todayStr()):null,
+      cauzione_trattenuta:$("#nn-cau-tratt")&&$("#nn-cau-tratt").value!==""?_numIt($("#nn-cau-tratt").value):null,
+      cauzione_restituita:$("#nn-cau-rest")&&$("#nn-cau-rest").value!==""?_numIt($("#nn-cau-rest").value):null,
+      cauzione_motivo:$("#nn-cau-motivo")?($("#nn-cau-motivo").value.trim()||null):null});
+    /* ⚠️ chiudere una cauzione senza dire quanto e' tornato indietro vuol
+       dire non poter rispondere, fra un anno, a chi te lo chiede. */
+    if(cauChiusa&&($("#nn-cau-rest")&&$("#nn-cau-rest").value==="")&&
+       ($("#nn-cau-tratt")&&$("#nn-cau-tratt").value==="")){
+      if(!confirm("Stai chiudendo la cauzione senza scrivere quanto hai restituito.\n\nSalvare lo stesso?")) return;
+    }
     const scrivi=(d)=>id
       ? sb.from("nol_noleggi").update(d).eq("id",id).eq("user_id",sbUid)
       : sb.from("nol_noleggi").insert({user_id:sbUid,...d});
@@ -3043,16 +3458,19 @@
     /* rete di salvataggio: se sql/noleggio-contratto.sql non e' ancora
        passato, il noleggio si salva lo stesso senza le colonne nuove
        invece di andare perso */
-    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro|fase|prenotazione_nota/i.test(error.message||"")
+    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro|fase|prenotazione_nota|cauzione_/i.test(error.message||"")
             &&/column|schema cache/i.test(error.message||"")){
       const senza={...dati};
       ["tipo_nolo","contratto_num","contratto_data","operatori","stato_consegna","stato_rientro",
-       "fase","prenotazione_nota"].forEach(k=>delete senza[k]);
+       "fase","prenotazione_nota",
+       "cauzione_forma","cauzione_rif","cauzione_ricevuta_il","cauzione_stato",
+       "cauzione_svincolata_il","cauzione_trattenuta","cauzione_restituita","cauzione_motivo"
+      ].forEach(k=>delete senza[k]);
       ({error}=await scrivi(senza));
-      if(!error) toast("Salvato, ma il contratto no: manca sql/noleggio-contratto.sql");
+      if(!error) toast("Salvato, ma non tutto: mancano le query SQL del contratto o delle cauzioni");
     }
     if(error){toast("Errore: "+error.message);return;}
-    closeSheet(); loadNoleggi(); renderRiepilogoNegozio(); toast(id?"Noleggio aggiornato ✔":"Noleggio aggiunto ✔");
+    closeSheet(); loadNoleggi(); loadCauzioni(); renderRiepilogoNegozio(); toast(id?"Noleggio aggiornato ✔":"Noleggio aggiunto ✔");
   }
 
   $('[data-tab="mezzi"]')?.addEventListener("click",loadMezzi);
@@ -3123,7 +3541,9 @@
           <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}${manca>0?esc(" · fra "+manca+(manca===1?" giorno":" giorni")):""}</span></div>
         <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
         <div class="sub2">${esc("Uscita "+fdate(x.data_uscita)+" · rientro previsto "+fdate(x.data_rientro_prevista)+(x.data_rientro_effettivo?" · rientrato il "+fdate(x.data_rientro_effettivo):""))}</div>
-        <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione):"")+" · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>
+        <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione)+
+          (cauStatoDi(x)==="svincolata"?" (svincolata)":(cauDaSvincolare(x)?" DA SVINCOLARE":"")):"")+
+          " · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>
         ${nolPulsanti("noleggio",x.id)}</div>`;
     }).join("");
   }
@@ -4702,6 +5122,14 @@
       const d=await nolLeggi("noleggio",t.dataset.id);
       if(!d){toast("Salva prima il noleggio, poi stampa il contratto");return;}
       return a==="nol-contr-pdf"?nolContrattoPdf(d):nolContrattoStampa(d);
+    }
+    /* la ricevuta della cauzione e la quietanza di svincolo */
+    if(a==="nol-cauz-stampa") return cauzioneFoglio(t.dataset.id,t.dataset.m,false);
+    if(a==="nol-cauz-pdf")    return cauzioneFoglio(t.dataset.id,t.dataset.m,true);
+    if(a==="cau-filtro"){
+      cauFiltro=t.dataset.v;
+      $$("#cau-filtro .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===cauFiltro));
+      return loadCauzioni();
     }
     if(a==="rend-esporta")  return rendEsporta();
     if(a==="save-docs")     return salvaDocumenti(id);
