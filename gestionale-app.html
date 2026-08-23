@@ -1902,8 +1902,18 @@
     if(_nuovo)_nuovo.style.display=_landingGuasta?"none":"";
   }
 
+  /* ⛔ 23 agosto 2026 — SI RIENTRA DOVE SI ERA.
+     Alessio: «quando esco dal noleggio mi fa uscire completamente». Usciva
+     dal noleggio, tornava qui e trovava la schermata «scegli il reparto»
+     invece del reparto in cui stava lavorando: un clic in piu' ogni volta,
+     e la sensazione di essere stato buttato fuori. Adesso l'ultimo reparto
+     aperto si ricorda, come fa gia' il noleggio dal 22 agosto.
+     La schermata dei reparti non e' sparita: ci si torna con la freccia. */
+  const GEST_ULTIMO="gest_ultimo_reparto";
+
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
+    try{localStorage.setItem(GEST_ULTIMO,id);}catch(e){}
     /* colore primario fisso (blu professionale): il colore del reparto resta solo come pallino accanto al nome */
     const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
     const tdot=$("#tb-rep-dot");if(tdot)tdot.style.background=p.a;
@@ -1933,7 +1943,27 @@
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
     renderAll();window.scrollTo(0,0);
     _applyDeepTab(); /* link diretto tipo #preventivi: apre subito la scheda richiesta */
+    _riapriUltimaSezione();
   }
+
+  /* ⛔ 23 agosto 2026 — e si rientra anche nella SEZIONE dove si era.
+     Non basta rientrare nel reparto: se stavi guardando «Lavori e interventi»
+     e torni dal noleggio, ti aspetti «Lavori e interventi», non il Riepilogo.
+     Il link diretto (#preventivi) vince: se c'e' quello, comanda lui. */
+  const GEST_ULTIMA_SEZ="gest_ultima_sezione";
+  function _riapriUltimaSezione(){
+    if(_deepTab) return;
+    let t=null; try{t=localStorage.getItem(GEST_ULTIMA_SEZ);}catch(e){}
+    if(!t||t==="riepilogo") return;
+    const b=document.querySelector('nav.tabs button[data-tab="'+t+'"]');
+    /* una sezione nascosta (ruolo professionista, permessi) non si riapre */
+    if(b&&b.offsetParent!==null) b.click();
+  }
+  document.addEventListener("click",function(e){
+    const b=e.target.closest&&e.target.closest('nav.tabs button[data-tab]');
+    if(!b) return;
+    try{localStorage.setItem(GEST_ULTIMA_SEZ,b.dataset.tab);}catch(e2){}
+  });
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
   if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza"].includes(_deepTab))_deepTab=null;
@@ -1945,7 +1975,12 @@
     _deepTab=null;
     if(b)b.click();
   }
-  function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();aiStrisciaCarica();window.scrollTo(0,0);}
+  function goHome(){
+    cur=null;
+    /* chi torna alla schermata dei reparti CI VUOLE STARE: si dimentica
+       l'ultimo, se no al prossimo giro lo si rispedisce dentro da solo. */
+    try{localStorage.removeItem(GEST_ULTIMO);}catch(e){}
+    $("#appview").style.display="none";$("#landing").style.display="block";renderLanding();aiStrisciaCarica();window.scrollTo(0,0);}
 
   /* ============================================================
      LA STRISCIA DELL'AI SULLA HOME — 16 agosto 2026
@@ -16074,7 +16109,15 @@ ${vecchi?`
   if($("#forn-doc-file"))$("#forn-doc-file").onchange=e=>{uploadDocFornitore(e.target.files);e.target.value="";};
   if($("#lav-doc-file"))$("#lav-doc-file").onchange=e=>{uploadDocLavoro(e.target.files);e.target.value="";};
 
-  load().then(()=>{if(!cur)renderLanding();});
+  load().then(()=>{
+    if(cur) return;
+    renderLanding();
+    /* e poi, se si sa dove si era, si entra dritti: la landing resta
+       disegnata sotto, cosi' la freccia trova gia' tutto pronto. */
+    const ps=state.panels||[];
+    let id=null; try{id=localStorage.getItem(GEST_ULTIMO);}catch(e){}
+    if(id&&ps.some(p=>p.id===id)) enterPanel(id);
+  });
 </script>
 
 <!-- ===== GATE GESTIONALE (in manutenzione — agosto 2026) ===== -->
