@@ -114,7 +114,12 @@
        prova di com'era il mezzo alla consegna: se si cancellano per sbaglio
        la discussione sui danni e' persa. La colonna «eliminato_il» e' stata
        creata con sql/noleggio-foto-video.sql (risposta: tabella 1, regole 4). */
-    "nol_media"
+    "nol_media",
+    /* 23 agosto 2026 — le fatture del noleggio (nol_fatture), create con
+       sql/noleggio-fatture.sql. Una fattura buttata per sbaglio non e' una
+       riga qualsiasi: si porta dietro il numero, e un numero saltato in
+       mezzo alla numerazione e' una domanda del commercialista. */
+    "nol_fatture"
   ];
 
   var COL = "eliminato_il";
