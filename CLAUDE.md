@@ -15185,3 +15185,93 @@ account cancellati (15 righe buttate, adesso zero orfani).
 5. Quando Alessio avrà i modelli **Assodimi/ANCE**, sostituire il contratto e
    le condizioni scritte da noi con quelli ufficiali.
 6. Un solo orfano rimasto in `nol_clienti`: già ripulito il 23 agosto.
+
+
+---
+
+# 23 AGOSTO 2026, SERA — SI ENTRA NEL GESTIONALE CON UN TOCCO
+
+## ⭐ L'INDIRIZZO DIRETTO — quello che serve sapere
+
+    https://trovaimpresa.com/gestionale-app.html
+
+Questo apre **il gestionale**, senza passare dalla home, senza cercare il
+pulsante, senza attraversare il sito. È l'indirizzo da mettere nelle mail,
+nei QR, nei messaggi alle imprese.
+
+⚠️ **`/gestionale` NON è quello giusto.** In `netlify.toml` c'è un rinvio che
+manda `/gestionale` a `gestionale-invito.html`, che è la pagina degli inviti,
+non il pannello. Se domani serve un indirizzo corto (tipo `/g`), va aggiunto
+un rinvio nuovo: quello esistente NON va toccato, serve agli inviti.
+
+## L'ICONA SULLA SCHERMATA DEL TELEFONO
+
+Da oggi il gestionale si può **aggiungere alla schermata Home** e si apre
+come un'app: a tutto schermo, senza la barra dell'indirizzo, un tocco e si
+è dentro.
+
+**Cosa è stato messo** (prima non c'era niente di tutto questo):
+
+- **`manifest.json`** in cartella principale — è il foglietto che dice al
+  telefono come si chiama l'app, di che colore è, dove si apre
+  (`start_url: /gestionale-app.html`) e con quali disegni.
+- **`img/app/`** — quattro icone col simbolo del logo:
+  `gestionale-192.png` · `gestionale-512.png` ·
+  `gestionale-512-maskable.png` (Android la ritaglia a cerchio: il simbolo
+  sta nel 60% centrale) · `apple-touch-icon.png` (180x180, iPhone).
+- Nel `<head>` di **`gestionale-app.html`**: `<link rel="manifest">`,
+  `theme-color`, `apple-touch-icon`, `apple-mobile-web-app-capable`,
+  `apple-mobile-web-app-title`.
+
+⚠️ **`manifest.json` è un `.json` in cartella principale, e il controllo
+prima del push voleva chiuderlo con un 404** (i `.json` lì sono roba da
+tenere fuori). Ma questo DEVE stare online, se no l'icona non si può
+aggiungere. È stato messo nell'elenco delle eccezioni dentro
+`tools/controllo-push.js`, accanto a `robots.txt` e `llms.txt`.
+
+## COME SI SPIEGA A UN'IMPRESA
+
+**iPhone (Safari):** apri l'indirizzo → entra col tuo account → tocca il
+quadratino con la freccia in su (Condividi) in basso → scorri e tocca
+**"Aggiungi a Home"** → Aggiungi.
+
+**Android (Chrome):** stesso indirizzo → i tre puntini in alto a destra →
+**"Aggiungi a schermata Home"** (o "Installa app").
+
+## LA PASSWORD NON SI RIMETTE OGNI VOLTA
+
+`createClient` in `gestionale-app.html` è chiamato senza opzioni, quindi
+Supabase usa i suoi valori normali: **`persistSession: true`** e
+**`autoRefreshToken: true`**. In parole povere: al primo accesso il telefono
+si tiene un biglietto, e ogni ora circa lo rinnova da solo.
+
+La password torna a servire solo in quattro casi:
+- preme **Esci** (il biglietto viene strappato apposta);
+- **non apre il gestionale per parecchio tempo** (il biglietto non si è più
+  rinnovato);
+- **cambia la password** (tutti i biglietti muoiono, anche su altri telefoni);
+- **usa un altro telefono** (il biglietto sta su un apparecchio solo).
+
+⚠️ Da dire alle imprese: **chi ha in mano il telefono sbloccato entra nel
+gestionale**, come per WhatsApp o l'home banking. Se lo perdono, la mossa
+giusta è **cambiare la password**: così il biglietto su quel telefono muore
+subito.
+
+## COSA RESTA DA FARE SU QUESTO
+
+1. **Il QR code** — deciso di farlo, non ancora fatto. Va puntato
+   sull'indirizzo diretto qui sopra. ⛔ Il QR porta alla porta, **non fa
+   entrare senza password**: se no chiunque veda quel quadratino entra nei
+   conti dell'impresa.
+2. **Una paginetta "porta il gestionale sul telefono"** con le due immagini
+   (iPhone e Android sono diversi) e queste spiegazioni, da mandare a chi si
+   iscrive. È il posto dove far puntare il QR.
+3. **L'icona per gli altri profili** — oggi il manifest riguarda solo
+   `gestionale-app.html` (il titolare). Il dipendente
+   (`gestionale-operatore.html`), il negozio e il noleggio non ce l'hanno
+   ancora. Quello dell'operatore è il più utile: sta sempre fuori.
+4. **Non è stato provato su un telefono vero.** L'aggiunta alla schermata
+   Home ha bisogno di un iPhone o un Android in mano: il browser di prova non
+   ha quel menu. Manifest, icone e tag sono stati verificati (JSON valido,
+   misure giuste, tutte e quattro le icone si scaricano, 0 errori JS), ma il
+   giro completo tocca ad Alessio.
