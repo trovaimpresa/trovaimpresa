@@ -794,6 +794,17 @@
      d'occhio, non nascosto tra i link di testo. */
   .nav-login{ display:inline-flex; align-items:center; gap:7px; color:var(--ti-blu); background:#fff; border:2px solid var(--ti-blu); text-decoration:none; font-size:14px; font-weight:700; padding:8px 15px; border-radius:8px; white-space:nowrap; }
   .nav-login:hover{ background:#eaf2ff; }
+  /* 23 agosto 2026 — IL PULSANTE CHE MANCAVA.
+     Chi arriva dall'inserzione non ha ancora un account: in cima trovava
+     solo «Accedi al tuo pannello», che a lui non serve. Le quattro tessere
+     stavano a due terzi di pagina, e su telefono non le vedeva nessuno.
+     Pieno e verde (lo stesso verde della sezione «registrati»), cosi' si
+     capisce a colpo d'occhio che il primo passo e' questo. */
+  .nav-iscriviti{ display:inline-flex; align-items:center; gap:7px; color:#fff;
+    background:#15803d; border:2px solid #15803d; text-decoration:none;
+    font-size:14px; font-weight:700; padding:8px 15px; border-radius:8px;
+    white-space:nowrap; }
+  .nav-iscriviti:hover{ background:#116632; border-color:#116632; }
   .nav-login::before{ content:''; width:15px; height:15px; flex-shrink:0; background:currentColor; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center/contain no-repeat; }
 
 
@@ -926,9 +937,24 @@
     .navbar{ padding:10px 14px !important; }
     .nav-a{ font-size:13px; padding:7px 8px; }
     .nav-links{ gap:4px; }
-    .nav-sinistra{ gap:10px; }
-    .nav-login{ font-size:12px; padding:6px 9px; }
+    /* 23 agosto 2026: sul telefono logo + «Accedi» + «Iscriviti gratis» non
+       ci stanno in fila e il secondo pulsante finiva mezzo fuori schermo.
+       Con flex-wrap il logo resta in alto e i due pulsanti scendono sotto,
+       affiancati: nessuno dei due esce dal bordo. */
+    /* ⚠️ il «!important» serve: piu' su, dentro @media 768, c'e'
+       «.navbar{ flex-wrap:nowrap !important }», e senza questo i pulsanti
+       restano incollati in fila e il secondo esce dal bordo destro. */
+    .nav-sinistra{ gap:8px 10px; flex-wrap:wrap !important; flex-shrink:1 !important; min-width:0; }
+    /* 23 agosto 2026: era 12px, sotto il minimo del progetto. Portato a 13. */
+    .nav-login{ font-size:13px; padding:6px 9px; }
     .nav-login::before{ width:13px; height:13px; }
+    .nav-iscriviti{ font-size:13px; padding:6px 10px; }
+    /* Sul telefono i due pulsanti scendono sotto il logo: davanti va
+       «Iscriviti gratis», perche' chi arriva dall'inserzione un pannello
+       da aprire ancora non ce l'ha. */
+    .nav-sinistra .logo{ order:0; }
+    .nav-iscriviti{ order:1; }
+    .nav-login{ order:2; }
     .hero{ padding:34px 16px 30px !important; }
     .hero-h1{ font-size:25px; }
     .hero .hero-sub{ font-size:15px; margin-bottom:20px; }
@@ -983,6 +1009,7 @@
         <div class="nav-sinistra">
           <a href="/" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="height:44px;width:auto;display:block;"></a>
           <a href="/login-impresa.html" class="nav-login">Accedi al tuo pannello</a>
+          <a href="/#registrati" class="nav-iscriviti">Iscriviti gratis</a>
         </div>
         <div class="nav-links">
           <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
