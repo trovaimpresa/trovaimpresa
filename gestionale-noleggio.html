@@ -250,6 +250,7 @@
       <button data-tab="calendario">Calendario</button>
       <button data-tab="lavori" style="display:none">Lavori</button>
       <button data-tab="fatture">Fatture</button>
+      <button data-tab="rendimento">Rendimento</button>
       <button data-tab="documenti">Contratti e documenti</button>
       <button data-tab="media">Foto e video</button>
       <button data-tab="cestino">Cestino<span class="tab-cnt" id="cnt-cestino"></span></button>
@@ -371,6 +372,19 @@
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
+    </section>
+
+    <section id="rendimento">
+      <div class="sec-head"><h2>Rendimento</h2>
+        <button class="btn add" data-action="rend-esporta">⤓ Esporta in Excel</button></div>
+      <div class="gal-intro">Quanto rende ogni mezzo, e quanto sta fermo. Un mezzo che non esce non &egrave; un mezzo che non rende: &egrave; un mezzo che <b>costa</b> — bollo, assicurazione, posto, verifiche. Per questo qui i fermi si vedono in rosso, non spariscono in fondo.</div>
+      <div class="chiprow" id="rend-periodo">
+        <button class="chip" data-v="mese">Questo mese</button>
+        <button class="chip on" data-v="anno">Quest'anno</button>
+        <button class="chip" data-v="tutto">Da sempre</button>
+      </div>
+      <div id="rend-testa" style="margin:14px 0 18px"></div>
+      <div id="rendimento-body" class="nol-elenco"></div>
     </section>
 
     <section id="documenti">
@@ -534,6 +548,10 @@
 /* la riga di chi usera' la macchina */
 .nol-op-riga{display:grid;grid-template-columns:1.3fr 1.1fr 1.1fr .9fr 38px;gap:8px;margin-bottom:8px}
 /* i bollini delle carte, nell'elenco dei documenti */
+/* la barretta di quanto e' stato usato un mezzo */
+.rend-barra{height:8px;border-radius:5px;background:#e6ecf3;overflow:hidden;margin:8px 0 6px}
+.rend-barra i{display:block;height:100%}
+.rend-fermi{color:#c62828}
 .doc-bollini{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .doc-bollino{font-size:13px;font-weight:600;padding:3px 9px;border-radius:10px}
 .doc-bollino.si{background:#e6f4ea;color:#1b6b33}
@@ -2660,6 +2678,128 @@
   }
 
 
+
+  /* ================================================================
+     RENDIMENTO — quanto rende ogni mezzo, 23 agosto 2026
+     E' l'ultima delle otto cose che hanno tutti i gestionali noleggio
+     (14 su 19 nello studio del mercato) e che a noi mancava.
+
+     La domanda a cui risponde e' una sola, e se la fa ogni noleggiatore:
+     «quell'escavatore me lo sono ripagato o sta fermo in piazzale?»
+
+     ⛔ Un mezzo che non esce mai non e' un mezzo che non rende: e' un mezzo
+     che COSTA (bollo, assicurazione, posto, verifiche). Percio' qui i mezzi
+     fermi non spariscono in fondo alla lista: si vedono in rosso.
+     ================================================================ */
+  let rendPeriodo="anno", rendDati=null;
+
+  function rendIntervallo(){
+    const oggi=todayStr(), a=oggi.slice(0,4), m=oggi.slice(0,7);
+    if(rendPeriodo==="mese")  return {dal:m+"-01",   al:oggi, eti:"questo mese",  gg:Number(oggi.slice(8,10))};
+    if(rendPeriodo==="anno")  return {dal:a+"-01-01",al:oggi, eti:"quest'anno",
+                                      gg:Math.round((new Date(oggi)-new Date(a+"-01-01"))/86400000)+1};
+    return {dal:"1900-01-01",al:oggi,eti:"da sempre",gg:null};
+  }
+  /* quanti giorni di quel noleggio cadono dentro il periodo */
+  function _giorniDentro(n,dal,al){
+    const d1=n.data_uscita, d2=n.data_rientro_effettivo||n.data_rientro_prevista||al;
+    if(!d1) return 0;
+    const a=d1>dal?d1:dal, b=d2<al?d2:al;
+    if(a>b) return 0;
+    return Math.round((new Date(b)-new Date(a))/86400000)+1;
+  }
+
+  async function loadRendimento(){
+    if(!(sb&&sbUid)) return;
+    const box=$("#rendimento-body"); if(!box) return;
+    const {dal,al,eti,gg}=rendIntervallo();
+    const [{data:mezzi},{data:nol}]=await Promise.all([
+      sb.from("nol_mezzi").select("*").eq("user_id",sbUid).order("nome"),
+      sb.from("nol_noleggi").select("*").eq("user_id",sbUid)
+    ]);
+    const MZ=mezzi||[], N=(nol||[]).filter(x=>x.data_uscita&&x.data_uscita<=al&&
+      ((x.data_rientro_effettivo||x.data_rientro_prevista||al)>=dal));
+    const perMezzo={};
+    MZ.forEach(m=>perMezzo[m.id]={m,volte:0,giorni:0,reso:0,incassato:0,daPagare:0,cauzioni:0});
+    /* ⚠️ i noleggi senza collegamento al mezzo (quelli vecchi, scritti col
+       nome) non si buttano via: si contano a parte e si dice quanti sono. */
+    let orfani=0, resoOrfani=0;
+    N.forEach(x=>{
+      const r=perMezzo[x.mezzo_id];
+      const imp=+x.importo||0;
+      if(!r){ orfani++; resoOrfani+=imp; return; }
+      r.volte++; r.giorni+=_giorniDentro(x,dal,al); r.reso+=imp;
+      if(x.stato_pagamento==="pagato") r.incassato+=imp; else r.daPagare+=imp;
+      if(!x.data_rientro_effettivo) r.cauzioni+=(+x.cauzione||0);
+    });
+    const righe=Object.values(perMezzo).sort((a,b)=>b.reso-a.reso);
+    rendDati={righe,dal,al,eti,gg,orfani,resoOrfani};
+
+    const totReso=righe.reduce((s,r)=>s+r.reso,0);
+    const totInc =righe.reduce((s,r)=>s+r.incassato,0);
+    const totDa  =righe.reduce((s,r)=>s+r.daPagare,0);
+    const totCau =righe.reduce((s,r)=>s+r.cauzioni,0);
+    const fermi  =righe.filter(r=>!r.volte).length;
+    if($("#rend-testa")) $("#rend-testa").innerHTML=`
+      <div class="money-row">
+        <div class="money in"><div class="n">${esc(_eur(totReso+resoOrfani))}</div><div class="l">Reso dal noleggio</div><div class="sub">${esc(eti)}</div></div>
+        <div class="money out"><div class="n">${esc(_eur(totDa))}</div><div class="l">Ancora da incassare</div><div class="sub">Di questi noleggi</div></div>
+      </div>
+      <div style="font-size:14px;color:#666;margin:12px 0 0">
+        Incassato ${esc(_eur(totInc))} · cauzioni ancora in deposito ${esc(_eur(totCau))}${
+          fermi?' · <b class="rend-fermi">'+fermi+(fermi===1?" mezzo fermo":" mezzi fermi")+"</b>":""}${
+          orfani?" · "+orfani+(orfani===1?" noleggio":" noleggi")+" senza mezzo collegato ("+esc(_eur(resoOrfani))+")":""}
+      </div>`;
+
+    if(!righe.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun mezzo.</p>';return;}
+    box.innerHTML=righe.map(r=>{
+      /* ⚠️ un mezzo uscito un giorno su duecento non e' «usato lo 0% del
+         tempo»: e' poco, ma non zero. Zero lo si scrive solo se e' fermo. */
+      const uso=(gg&&gg>0)?(r.giorni>0?Math.max(1,Math.min(100,Math.round(r.giorni/gg*100))):0):null;
+      const fermo=!r.volte;
+      const col=fermo?"#c62828":(uso!=null&&uso>=50?"#2e7d32":"#e65100");
+      return `<div class="nol-card" style="border-top-color:${col}">
+        <div class="tit"><strong>${esc(r.m.nome||"—")}</strong>
+          <span class="nol-eti" style="background:${col}">${fermo?"MAI USCITO":esc(_eur(r.reso))}</span></div>
+        <div class="sub">${fermo
+          ? "In piazzale per tutto il periodo: non ha reso niente, ma è costato lo stesso."
+          : esc(r.volte+(r.volte===1?" noleggio":" noleggi")+" · "+r.giorni+(r.giorni===1?" giorno":" giorni")+" fuori"+
+                (uso!=null?" · usato il "+uso+"% del tempo":""))}</div>
+        ${fermo?"":`<div class="rend-barra"><i style="width:${uso||0}%;background:${col}"></i></div>`}
+        ${fermo?"":`<div class="sub2">${esc("Incassato "+_eur(r.incassato)+
+            (r.daPagare?" · da incassare "+_eur(r.daPagare):"")+
+            (r.cauzioni?" · cauzioni in deposito "+_eur(r.cauzioni):""))}</div>`}
+        ${nolPulsanti("mezzo",r.m.id)}</div>`;
+    }).join("");
+  }
+  $('[data-tab="rendimento"]')?.addEventListener("click",loadRendimento);
+  $$("#rend-periodo .chip").forEach(c=>c.addEventListener("click",()=>{
+    $$("#rend-periodo .chip").forEach(x=>x.classList.remove("on"));
+    c.classList.add("on"); rendPeriodo=c.dataset.v; loadRendimento();
+  }));
+
+  /* ---- portarselo via: un CSV che Excel apre con un doppio clic ---- */
+  function rendEsporta(){
+    if(!rendDati||!rendDati.righe.length){toast("Non c'è niente da esportare");return;}
+    const {righe,eti,gg}=rendDati;
+    /* ⚠️ il punto e virgola, non la virgola: Excel italiano apre cosi'.
+       E il BOM davanti, se no gli accenti diventano geroglifici. */
+    const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+    const num=v=>String(Math.round((+v||0)*100)/100).replace(".",",");
+    const testa=["Mezzo","Codice","Noleggi","Giorni fuori","Uso %","Reso €","Incassato €","Da incassare €","Cauzioni in deposito €"];
+    const corpo=righe.map(r=>[r.m.nome||"",r.m.codice||"",r.volte,r.giorni,
+      (gg&&gg>0)?Math.min(100,Math.round(r.giorni/gg*100)):"",
+      num(r.reso),num(r.incassato),num(r.daPagare),num(r.cauzioni)]);
+    const csv="﻿"+[testa].concat(corpo).map(r=>r.map(q).join(";")).join("\r\n");
+    const b=new Blob([csv],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(b);
+    a.download="rendimento-"+eti.replace(/[^a-z0-9]+/gi,"-")+"-"+todayStr()+".csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove();}catch(e){}},1000);
+    toast("Scaricato ✔");
+  }
+
   /* ================================================================
      CONTRATTI E DOCUMENTI — 23 agosto 2026
      Alessio: «non vedo la sezione contratti». Aveva ragione: il contratto
@@ -4560,6 +4700,7 @@
       if(!d){toast("Salva prima il noleggio, poi stampa il contratto");return;}
       return a==="nol-contr-pdf"?nolContrattoPdf(d):nolContrattoStampa(d);
     }
+    if(a==="rend-esporta")  return rendEsporta();
     if(a==="save-docs")     return salvaDocumenti(id);
     if(a==="verb-stampa")   return verbaleFoglio(t.dataset.m,false);
     if(a==="verb-pdf")      return verbaleFoglio(t.dataset.m,true);
