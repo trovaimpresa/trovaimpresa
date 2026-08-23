@@ -279,6 +279,8 @@
       </div>
       <div class="mini-title">Mezzi in ritardo</div>
       <div id="rie-ritardi" class="nol-elenco"></div>
+      <div class="mini-title">Scadenze dei mezzi</div>
+      <div id="rie-scadenze" class="nol-elenco"></div>
       <div style="font-size:14px;font-weight:700;color:#666;text-transform:uppercase;margin:24px 0 10px">Magazzino e negozio</div>
       <div class="kpis">
         <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Prodotti</div><div class="sub">A catalogo</div></div>
@@ -942,6 +944,7 @@
       ["k-lavori","k-daincassare","k-incassato","kn-incasso","kn-daincassare"].forEach(i=>scrivi(i,_eur(0)));
       if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
       if($("#rie-ritardi"))$("#rie-ritardi").innerHTML='<p style="color:#666;padding:8px">Nessun mezzo in ritardo.</p>';
+      if($("#rie-scadenze"))$("#rie-scadenze").innerHTML='<p style="color:#666;padding:8px">Nessuna scadenza.</p>';
       return;
     }
     const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid);
@@ -970,7 +973,7 @@
       </div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
 
     /* ── i numeri del noleggio ── */
-    const {data:mezzi}=await sb.from("nol_mezzi").select("id,nome,stato").eq("user_id",sbUid);
+    const {data:mezzi}=await sb.from("nol_mezzi").select("*").eq("user_id",sbUid);
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
     const {data:nol}=await sb.from("nol_noleggi")
@@ -1003,6 +1006,30 @@
         <div class="sub2">Doveva rientrare il ${esc(fdate(x.data_rientro_prevista))}</div>
         ${nolPulsanti("noleggio",x.id)}</div>`;}).join("")
       :'<p style="color:#666;padding:8px">Nessun mezzo in ritardo. Tutto sotto controllo.</p>';
+
+    /* ── le scadenze: prima quelle che fermano il mezzo, poi quelle vicine ── */
+    if($("#rie-scadenze")){
+      const righe=[];
+      MZ.forEach(m=>{
+        const bl=mezzoBloccato(m);
+        if(bl){ righe.push({m,col:"#c62828",eti:m.fuori_servizio?"FUORI SERVIZIO":"NON SI PUÒ DARE",
+                            testo:(m.nome||"Questo mezzo")+" "+bl,ord:-1}); return; }
+        mezzoScadenze(m).forEach(x=>{
+          if(x.gg==null||x.gg<0||x.gg>SCAD_AVVISO_GG) return;
+          righe.push({m,col:"#e65100",eti:"FRA "+x.gg+(x.gg===1?" GIORNO":" GIORNI"),
+                      testo:x.cosa+": "+(x.data?fdate(x.data):"")+
+                        (m.verifica_ente&&x.cosa==="Verifica periodica"?" · "+m.verifica_ente:""),ord:x.gg});
+        });
+      });
+      righe.sort((a,b)=>a.ord-b.ord);
+      $("#rie-scadenze").innerHTML=righe.length?righe.slice(0,12).map(r=>`
+        <div class="nol-card" style="border-top-color:${r.col}">
+          <div class="tit"><strong>${esc(r.m.nome||"—")}</strong>
+            <span class="nol-eti" style="background:${r.col}">${esc(r.eti)}</span></div>
+          <div class="sub2">${esc(r.testo)}</div>
+          ${nolPulsanti("mezzo",r.m.id)}</div>`).join("")
+        :'<p style="color:#666;padding:8px">Nessuna scadenza vicina. Verifiche, assicurazioni e revisioni sono a posto.</p>';
+    }
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
 
@@ -1100,7 +1127,28 @@
     });
   }
 
+  /* ⛔ il mezzo che non si puo' dare lo si dice SUBITO, mentre si sceglie,
+     non al momento di salvare: chi ha gia' scritto tutto e si sente dire di
+     no alla fine, la seconda volta il controllo lo salta. */
+  function nolAvvisaMezzo(){
+    const box=$("#nn-mezzo-avviso"); if(!box) return;
+    const m=nolMezzoScelto();
+    if(!m){box.innerHTML="";return;}
+    const bl=mezzoBloccato(m);
+    if(bl){
+      box.innerHTML='<div class="nol-avviso" style="border-color:#c62828;color:#b3261e;margin-top:8px">'
+        +'<b>Questo mezzo non si può noleggiare:</b> '+esc(bl)+'. Sistemalo nella scheda del mezzo.</div>';
+      return;
+    }
+    const s=mezzoScadenze(m).filter(x=>x.gg!=null&&x.gg>=0&&x.gg<=SCAD_AVVISO_GG&&x.data);
+    box.innerHTML=s.length
+      ? '<div class="nol-avviso" style="margin-top:8px">'+esc(s[0].cosa)+' scade fra '+s[0].gg
+        +(s[0].gg===1?" giorno":" giorni")+' ('+esc(fdate(s[0].data))+').</div>'
+      : "";
+  }
+
   function nolAggiornaConto(){
+    nolAvvisaMezzo();
     const box=$("#nn-conto"); if(!box) return;
     const m=nolMezzoScelto();
     /* le letture si chiedono solo ai mezzi che le hanno */
@@ -1140,6 +1188,82 @@
      mentre parla al telefono, non dopo aver premuto Salva. Gli ascoltatori
      stanno qui sopra, delegati al documento. */
 
+
+  /* ================================================================
+     LE SCADENZE DEL MEZZO — 23 agosto 2026
+     ⛔ Noleggiare un mezzo con la verifica periodica scaduta e' il rischio
+     piu' grosso che corre un noleggiatore (art. 71 c.11 e allegato VII del
+     D.Lgs 81/08), e finora il gestionale non lo sapeva nemmeno.
+
+     ⚠️ LA PERIODICITA' NON STA NEL CODICE. Le due fonti ufficiali lette il
+     23 agosto (BibLus e ARPA Veneto) si contraddicono su PLE e carrelli
+     telescopici, e comunque dipende da tipo, eta' e severita' d'uso. E'
+     una casella per mezzo, che parte da 12 mesi. Chi la sa la cambia.
+     ================================================================ */
+  const SCAD_AVVISO_GG=30;   /* da quanti giorni prima si diventa gialli */
+
+  function _piuMesi(d,mesi){
+    if(!d||!mesi) return null;
+    const [y,m,g]=String(d).slice(0,10).split("-").map(Number);
+    if(!y) return null;
+    const dt=new Date(y,(m-1)+Number(mesi),g);
+    const mm=String(dt.getMonth()+1).padStart(2,"0"), gg=String(dt.getDate()).padStart(2,"0");
+    return dt.getFullYear()+"-"+mm+"-"+gg;
+  }
+  function _fraQuanti(d){
+    if(!d) return null;
+    return Math.round((new Date(String(d).slice(0,10))-new Date(todayStr()))/86400000);
+  }
+  function mezzoProssimaVerifica(m){
+    if(!m||!+m.verifica_mesi) return null;      /* 0 = non soggetto */
+    return _piuMesi(m.verifica_ultima,+m.verifica_mesi);
+  }
+  /* tutte le scadenze di un mezzo, gia' ordinate dalla piu' urgente */
+  function mezzoScadenze(m){
+    const r=[];
+    const v=mezzoProssimaVerifica(m);
+    if(+m.verifica_mesi){
+      r.push({cosa:"Verifica periodica",data:v,gg:_fraQuanti(v),blocca:true,
+              manca:!m.verifica_ultima});
+    }
+    if(m.assicurazione_scad) r.push({cosa:"Assicurazione",data:m.assicurazione_scad,gg:_fraQuanti(m.assicurazione_scad),blocca:true});
+    if(m.revisione_scad)     r.push({cosa:"Revisione",     data:m.revisione_scad,    gg:_fraQuanti(m.revisione_scad),    blocca:false});
+    if(m.collaudo_scad)      r.push({cosa:"Collaudo",      data:m.collaudo_scad,     gg:_fraQuanti(m.collaudo_scad),     blocca:false});
+    /* il tagliando non ha una data: ha le ore */
+    if(+m.tagliando_ogni_ore>0){
+      const fatte=(+m.contaore_attuale||0)-(+m.tagliando_ultimo_ore||0);
+      const restano=(+m.tagliando_ogni_ore)-fatte;
+      r.push({cosa:"Tagliando",ore:Math.round(restano),blocca:false,
+              gg:restano<=0?-1:(restano<=(+m.tagliando_ogni_ore)*0.1?0:999)});
+    }
+    return r.sort((a,b)=>(a.gg==null?9999:a.gg)-(b.gg==null?9999:b.gg));
+  }
+  /* ⛔ il mezzo si puo' dare o no? Una risposta sola, usata dall'elenco,
+     dal Riepilogo e dal salvataggio del noleggio: se stessero in tre posti
+     diversi, un giorno direbbero tre cose diverse. */
+  function mezzoBloccato(m){
+    if(!m) return null;
+    if(m.fuori_servizio) return "è segnato FUORI SERVIZIO"+(m.fuori_servizio_perche?": "+m.fuori_servizio_perche:"");
+    if(+m.verifica_mesi){
+      if(!m.verifica_ultima) return "non ha la data dell'ultima verifica periodica";
+      const gg=_fraQuanti(mezzoProssimaVerifica(m));
+      if(gg!=null&&gg<0) return "ha la verifica periodica scaduta da "+Math.abs(gg)+(Math.abs(gg)===1?" giorno":" giorni");
+    }
+    if(m.assicurazione_scad){
+      const gg=_fraQuanti(m.assicurazione_scad);
+      if(gg!=null&&gg<0) return "ha l'assicurazione scaduta da "+Math.abs(gg)+(Math.abs(gg)===1?" giorno":" giorni");
+    }
+    return null;
+  }
+  /* l'etichetta rossa o gialla da mettere sulla card del mezzo */
+  function mezzoEtichettaScad(m){
+    const bl=mezzoBloccato(m);
+    if(bl) return {col:"#c62828",testo:m.fuori_servizio?"FUORI SERVIZIO":"NON SI PUÒ DARE"};
+    const s=mezzoScadenze(m).filter(x=>x.gg!=null&&x.gg>=0&&x.gg<=SCAD_AVVISO_GG);
+    if(s.length) return {col:"#e65100",testo:s[0].cosa.toUpperCase()+" FRA "+s[0].gg+" GG"};
+    return null;
+  }
+
   async function loadMezzi(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("nol_mezzi")
@@ -1149,10 +1273,12 @@
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun mezzo. Aggiungine uno.</p>';return;}
     const col={disponibile:"#2e7d32",noleggiato:"#e65100",manutenzione:"#757575"};
     box.innerHTML=m.map(x=>{
-      const c=col[x.stato]||"#757575";
+      const sc=mezzoEtichettaScad(x);
+      const c=sc?sc.col:(col[x.stato]||"#757575");
       return `<div class="nol-card" style="border-top-color:${c}">
         <div class="tit"><strong>${esc(x.nome||"—")}</strong>
-          <span class="nol-eti" style="background:${c}">${esc((x.stato||"").toUpperCase())}</span></div>
+          <span class="nol-eti" style="background:${c}">${esc(sc?sc.testo:(x.stato||"").toUpperCase())}</span></div>
+        ${sc?`<div class="sub2" style="color:${sc.col};font-weight:600">${esc(mezzoBloccato(x)?("Non si può noleggiare: "+mezzoBloccato(x)):"")}</div>`:""}
         <div class="sub">${esc([x.categoria,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
         <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>
         ${nolPulsanti("mezzo",x.id)}</div>`;
@@ -1685,11 +1811,59 @@
         <p style="margin:8px 0 0;font-size:13px;color:#666">La cauzione non entra nel totale del noleggio: è un deposito che torna indietro.</p>
       </div>
 
+      <div class="nol-riq nol-cam">
+        <h4>⛔ Scadenze di legge</h4>
+        <p style="margin:0 0 10px;font-size:14px;color:#666">Un mezzo con la <b>verifica periodica scaduta</b> o l'<b>assicurazione scaduta</b> il gestionale non te lo fa noleggiare. Le altre scadenze avvisano e basta.</p>
+        <div class="nol-due">
+          <div><label>Ultima verifica periodica</label><input id="nz-vdata" type="date" value="${v('verifica_ultima')}"></div>
+          <div><label>Ogni quanti mesi</label><input id="nz-vmesi" inputmode="numeric" value="${m.verifica_mesi==null?12:esc(m.verifica_mesi)}" placeholder="12"></div>
+        </div>
+        <p style="margin:8px 0 0;font-size:13px;color:#666">12, 24 o 36 mesi secondo il tipo di macchina, l'età e quanto si usa. <b>Metti 0</b> se questo mezzo non è soggetto a verifica (art. 71 c.11 e allegato VII del D.Lgs 81/08).</p>
+        <div class="field" style="margin-top:10px"><label>Chi l'ha fatta</label><input id="nz-vente" value="${v('verifica_ente')}" placeholder="INAIL, ASL, oppure il nome del soggetto abilitato"></div>
+        <div class="nol-due">
+          <div><label>Assicurazione, scade il</label><input id="nz-assic" type="date" value="${v('assicurazione_scad')}"></div>
+          <div><label>Revisione, scade il</label><input id="nz-revis" type="date" value="${v('revisione_scad')}"></div>
+        </div>
+        <div class="field"><label>Collaudo, scade il</label><input id="nz-collaudo" type="date" value="${v('collaudo_scad')}"></div>
+        <div id="nz-scad-avviso" style="margin-top:10px"></div>
+      </div>
+
+      <div class="nol-riq nol-cam">
+        <h4>Manutenzione</h4>
+        <div class="nol-due">
+          <div><label>Tagliando ogni quante ore</label><input id="nz-tagogni" inputmode="decimal" value="${v('tagliando_ogni_ore')}" placeholder="0 = non si usa"></div>
+          <div><label>Ultimo tagliando, a che ora</label><input id="nz-tagultimo" inputmode="decimal" value="${v('tagliando_ultimo_ore')}" placeholder="0"></div>
+        </div>
+        <div class="field"><label>Contaore adesso</label><input id="nz-oreora" inputmode="decimal" value="${v('contaore_attuale')}" placeholder="0"></div>
+        <label class="nol-spunta"><input type="checkbox" id="nz-fuori" ${m.fuori_servizio?"checked":""}> ⛔ Fuori servizio: questo mezzo non si può dare</label>
+        <div class="field"><label>Perché è fuori servizio</label><input id="nz-fuoriperche" value="${v('fuori_servizio_perche')}" placeholder="Es. in officina per la pompa idraulica"></div>
+        <div class="field"><label>Note di manutenzione</label><input id="nz-manut" value="${v('manutenzione_note')}" placeholder="Quello che serve ricordare"></div>
+      </div>
+
       <div class="field"><label>Note</label><input id="nz-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
       ${nolDocBlocco("mezzo",m.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
     if(m.stato) $("#nz-stato").value=m.stato;
+    mezzoDisegnaAvviso(m);
+  }
+
+  /* l'avviso dentro la scheda: dice quando scade la prossima verifica,
+     e se il mezzo in questo momento non si puo' dare */
+  function mezzoDisegnaAvviso(m){
+    const box=$("#nz-scad-avviso"); if(!box) return;
+    const bl=mezzoBloccato(m);
+    const s=mezzoScadenze(m).filter(x=>x.data);
+    let h="";
+    if(bl) h+='<div class="nol-avviso" style="border-color:#c62828;color:#b3261e"><b>Questo mezzo non si può noleggiare:</b> '+esc(bl)+'.</div>';
+    s.forEach(x=>{
+      if(x.gg==null) return;
+      const col=x.gg<0?"#c62828":(x.gg<=SCAD_AVVISO_GG?"#e65100":"#2e7d32");
+      const q=x.gg<0?("scaduta da "+Math.abs(x.gg)+" giorni"):(x.gg===0?"scade oggi":"fra "+x.gg+" giorni");
+      h+='<div style="font-size:14px;color:'+col+';font-weight:600;margin-top:4px">'
+        + esc(x.cosa)+': '+esc(fdate(x.data))+' — '+esc(q)+'</div>';
+    });
+    box.innerHTML=h;
   }
 
   async function salvaMezzo(id){
@@ -1715,10 +1889,35 @@
       usura_fissa:_numIt($("#nz-usurafissa").value),
       usura_percento:_numIt($("#nz-usuraperc").value),
       cauzione:_numIt($("#nz-cauzione").value),
-      note:$("#nz-note").value.trim()||null};
-    const {error}=id
-      ? await sb.from("nol_mezzi").update(dati).eq("id",id).eq("user_id",sbUid)
-      : await sb.from("nol_mezzi").insert({user_id:sbUid,...dati});
+      note:$("#nz-note").value.trim()||null,
+      /* le scadenze di legge e la manutenzione */
+      verifica_ultima:$("#nz-vdata")?($("#nz-vdata").value||null):null,
+      verifica_mesi:$("#nz-vmesi")?Math.max(0,Math.round(_numIt($("#nz-vmesi").value))):12,
+      verifica_ente:$("#nz-vente")?($("#nz-vente").value.trim()||null):null,
+      assicurazione_scad:$("#nz-assic")?($("#nz-assic").value||null):null,
+      revisione_scad:$("#nz-revis")?($("#nz-revis").value||null):null,
+      collaudo_scad:$("#nz-collaudo")?($("#nz-collaudo").value||null):null,
+      tagliando_ogni_ore:$("#nz-tagogni")?_numIt($("#nz-tagogni").value):0,
+      tagliando_ultimo_ore:($("#nz-tagultimo")&&$("#nz-tagultimo").value!=="")?_numIt($("#nz-tagultimo").value):null,
+      contaore_attuale:($("#nz-oreora")&&$("#nz-oreora").value!=="")?_numIt($("#nz-oreora").value):null,
+      fuori_servizio:$("#nz-fuori")?$("#nz-fuori").checked:false,
+      fuori_servizio_perche:$("#nz-fuoriperche")?($("#nz-fuoriperche").value.trim()||null):null,
+      manutenzione_note:$("#nz-manut")?($("#nz-manut").value.trim()||null):null};
+    const scrivi=(d)=>id
+      ? sb.from("nol_mezzi").update(d).eq("id",id).eq("user_id",sbUid)
+      : sb.from("nol_mezzi").insert({user_id:sbUid,...d});
+    let {error}=await scrivi(dati);
+    /* rete di salvataggio: se sql/noleggio-scadenze-mezzo.sql non e' ancora
+       passato, il mezzo si salva lo stesso senza le colonne nuove */
+    if(error&&/verifica_|assicurazione_scad|revisione_scad|collaudo_scad|tagliando_|contaore_attuale|fuori_servizio|manutenzione_note/i.test(error.message||"")
+            &&/column|schema cache/i.test(error.message||"")){
+      const senza={...dati};
+      ["verifica_ultima","verifica_mesi","verifica_ente","assicurazione_scad","revisione_scad",
+       "collaudo_scad","tagliando_ogni_ore","tagliando_ultimo_ore","contaore_attuale",
+       "fuori_servizio","fuori_servizio_perche","manutenzione_note"].forEach(k=>delete senza[k]);
+      ({error}=await scrivi(senza));
+      if(!error) toast("Salvato, ma le scadenze no: manca sql/noleggio-scadenze-mezzo.sql");
+    }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet(); loadMezzi(); renderRiepilogoNegozio(); toast(id?"Mezzo aggiornato ✔":"Mezzo aggiunto ✔");
   }
@@ -1762,7 +1961,8 @@
     const v=(k)=>esc(n[k]==null?"":n[k]);
     openSheet(`<h3>${isNew?"Nuovo noleggio":"Modifica noleggio"}</h3>${nolPulsantiScheda("noleggio",n.id||"")}
       <div class="row2">
-        <div class="field"><label>Mezzo *</label><select id="nn-mezzo"></select></div>
+        <div class="field"><label>Mezzo *</label><select id="nn-mezzo"></select>
+          <div id="nn-mezzo-avviso"></div></div>
         <div class="field"><label>Cliente</label><select id="nn-cliente"></select></div>
       </div>
 
@@ -2552,6 +2752,26 @@
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
     if(!selM.value){toast("Scegli un mezzo");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    /* ⛔ IL CONTROLLO CHE VALE. Un mezzo con la verifica periodica o
+       l'assicurazione scaduta non esce di qui. Vale solo sui noleggi ancora
+       aperti: uno gia' rientrato lo si deve poter correggere anche dopo. */
+    const mSel=nolMezzoScelto();
+    const bloccato=mSel?mezzoBloccato(mSel):null;
+    const gia=$("#nn-effettivo")&&$("#nn-effettivo").value;
+    if(bloccato&&!gia){
+      toast("Non si può: "+(mSel.nome||"questo mezzo")+" "+bloccato);
+      alert("Questo mezzo non si può noleggiare.\n\n"+(mSel.nome||"Il mezzo")+" "+bloccato+".\n\n"
+           +"Apri la scheda del mezzo e mettila a posto: la data dell'ultima verifica periodica, "
+           +"l'assicurazione, oppure togli la spunta «Fuori servizio».");
+      return;
+    }
+    /* ⚠️ i patentini: qui si AVVISA e basta. La dichiarazione la firma il
+       cliente, e il noleggiatore non puo' rifiutarsi di scriverla. */
+    const scaduti=(nolOperatori||[]).filter(o=>o.scad&&o.nome&&
+      new Date(o.scad)<new Date($("#nn-uscita").value||todayStr()));
+    if(scaduti.length&&segVal("nn-nolo")!=="caldo"){
+      toast("Attenzione: "+scaduti.map(o=>o.nome).join(", ")+" ha il patentino scaduto");
+    }
     const nomeM=selM.selectedOptions[0]?selM.selectedOptions[0].dataset.nome:"";
     const nomeC=selC.selectedOptions[0]?selC.selectedOptions[0].dataset.nome:"";
     const conto=nolCalcolaOra();
