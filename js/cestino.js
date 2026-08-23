@@ -102,7 +102,14 @@
     /* 19 agosto 2026 — gli stati di avanzamento (SAL). Le loro RIGHE non
        ci vanno: sono pezzi del SAL e se ne vanno con lui, come le righe di
        una fattura (vedi la nota 3 in sql/gest-computo-metrico.sql). */
-    "gest_sal"
+    "gest_sal",
+    /* 23 agosto 2026 — le tre tabelle del noleggio e le tre del magazzino.
+       La colonna «eliminato_il» e' stata aggiunta su Supabase con
+       sql/noleggio-cestino.sql (risposta: 6 colonne). Prima di oggi qui
+       dentro non c'erano, e tutto quello che si cancellava dal gestionale
+       noleggio spariva davvero. */
+    "nol_mezzi", "nol_clienti", "nol_noleggi",
+    "neg_prodotti", "neg_fornitori", "neg_movimenti"
   ];
 
   var COL = "eliminato_il";

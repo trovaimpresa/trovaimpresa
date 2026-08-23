@@ -244,6 +244,7 @@
       <button data-tab="calendario">Calendario</button>
       <button data-tab="lavori" style="display:none">Lavori</button>
       <button data-tab="fatture">Fatture</button>
+      <button data-tab="cestino">Cestino<span class="tab-cnt" id="cnt-cestino"></span></button>
       <button data-tab="galleria" style="display:none">Galleria</button>
       <button data-tab="clienti" style="display:none">Condomini</button>
       <button data-tab="squadra" style="display:none">Squadra</button>
@@ -255,63 +256,69 @@
     <section id="riepilogo" class="active">
       <div class="rie-intro">
         <h2 id="rie-title">Riepilogo</h2>
-        <p>A colpo d'occhio la situazione del negozio: prodotti a catalogo, scorte da riordinare, vendite e acquisti del mese.</p>
+        <p>A colpo d'occhio: quanti mezzi sono fuori, chi doveva rientrare e non è tornato, quanto ha reso il noleggio questo mese. Sotto, il magazzino.</p>
       </div>
+      <div class="kpis">
+        <div class="kpi df"><div class="n" id="kn-mezzi">0</div><div class="l">Mezzi</div><div class="sub">A parco</div></div>
+        <div class="kpi ic"><div class="n" id="kn-fuori">0</div><div class="l">Fuori adesso</div><div class="sub">Ancora dal cliente</div></div>
+        <div class="kpi ft"><div class="n" id="kn-ritardo">0</div><div class="l">In ritardo</div><div class="sub">Doveva già rientrare</div></div>
+        <div class="kpi eu"><div class="n" id="kn-liberi">0</div><div class="l">Liberi</div><div class="sub">Pronti da dare</div></div>
+      </div>
+      <div class="money-row">
+        <div class="money in"><div class="n" id="kn-incasso">€ 0</div><div class="l">Incassato dai noleggi</div><div class="sub">Questo mese, già pagati</div></div>
+        <div class="money out"><div class="n" id="kn-daincassare">€ 0</div><div class="l">Da incassare</div><div class="sub">Noleggi ancora da pagare</div></div>
+        <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
+      </div>
+      <div class="mini-title">Mezzi in ritardo</div>
+      <div id="rie-ritardi" class="nol-elenco"></div>
+      <div style="font-size:14px;font-weight:700;color:#666;text-transform:uppercase;margin:24px 0 10px">Magazzino e negozio</div>
       <div class="kpis">
         <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Prodotti</div><div class="sub">A catalogo</div></div>
         <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">Sotto scorta</div><div class="sub">Da riordinare</div></div>
         <div class="kpi ft"><div class="n" id="k-fatti">0</div><div class="l">Movimenti</div><div class="sub">Operazioni questo mese</div></div>
-        <div class="kpi eu"><div class="n" id="k-lavori">0</div><div class="l">Valore magazzino</div><div class="sub">Prezzo x quantita</div></div>
+        <div class="kpi eu"><div class="n" id="k-lavori">€ 0</div><div class="l">Valore magazzino</div><div class="sub">Prezzo per quantità</div></div>
       </div>
       <div class="money-row">
         <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Venduto</div><div class="sub">Questo mese</div></div>
         <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Acquistato</div><div class="sub">Ordini questo mese</div></div>
-        <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
-      </div>
-      <div style="font-size:13px;font-weight:700;color:#666;text-transform:uppercase;margin:20px 0 10px">Noleggio</div>
-      <div class="kpis">
-        <div class="kpi df"><div class="n" id="kn-mezzi">0</div><div class="l">Mezzi</div><div class="sub">Totali</div></div>
-        <div class="kpi ic"><div class="n" id="kn-fuori">0</div><div class="l">Fuori adesso</div><div class="sub">Noleggiati</div></div>
-        <div class="kpi ft"><div class="n" id="kn-ritardo">0</div><div class="l">In ritardo</div><div class="sub">Da rientrare</div></div>
-        <div class="kpi eu"><div class="n" id="kn-incasso">€ 0</div><div class="l">Incassato noleggi</div><div class="sub">Questo mese</div></div>
       </div>
       <div class="mini-title">Prodotti sotto scorta</div>
-      <div id="prossimi"></div>
+      <div id="prossimi" class="nol-elenco"></div>
     </section>
 
     <section id="mezzi">
       <div class="sec-head"><h2>Mezzi</h2><button class="btn add" data-action="new-mezzo">+ Nuovo mezzo</button></div>
-      <div id="mezzi-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="mezzi-body" class="nol-elenco"></div>
     </section>
 
     <section id="clienti-nol">
       <div class="sec-head"><h2>Clienti</h2><button class="btn add" data-action="new-clinol">+ Nuovo cliente</button></div>
-      <div id="clienti-nol-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="clienti-nol-body" class="nol-elenco"></div>
     </section>
 
     <section id="noleggi">
       <div class="sec-head"><h2>Noleggi</h2><button class="btn add" data-action="new-noleggio">+ Nuovo noleggio</button></div>
-      <div id="noleggi-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="noleggi-body" class="nol-elenco"></div>
     </section>
 
     <section id="prodotti">
       <div class="sec-head"><h2>Prodotti</h2><button class="btn add" data-action="new-prod">+ Nuovo prodotto</button></div>
-      <div id="prodotti-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="prodotti-body" class="nol-elenco"></div>
     </section>
 
     <section id="magazzino">
-      <h2 style="margin:0 0 16px">Magazzino</h2>
-      <div id="magazzino-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div class="sec-head"><h2>Magazzino</h2><button class="btn add" data-action="new-prod">+ Nuovo prodotto</button></div>
+      <div id="magazzino-body" class="nol-elenco"></div>
     </section>
 
     <section id="fornitori">
       <div class="sec-head"><h2>Fornitori</h2><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button></div>
-      <div id="fornitori-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="fornitori-body" class="nol-elenco"></div>
     </section>
 
     <section id="movimenti">
       <div class="sec-head"><h2>Movimenti</h2><button class="btn add" data-action="new-mov">+ Nuovo movimento</button></div>
-      <div id="movimenti-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="movimenti-body" class="nol-elenco"></div>
     </section>
 
     <section id="agenda">
@@ -330,8 +337,9 @@
     <section id="calendario">
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">•</button><button data-action="cal-next">›</button></div></div>
+      <div class="cal-oggi" id="cal-oggi"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot todo"></i>Da fare</span><span><i class="dot done"></i>Fatto</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span>📌 Nota</span></div>
     </section>
 
     <section id="lavori">
@@ -352,6 +360,14 @@
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
+    </section>
+
+    <section id="cestino">
+      <div class="sec-head"><h2>Cestino</h2></div>
+      <div class="gal-intro">Tutto quello che elimini dal gestionale passa di qui e resta a disposizione: finché è nel cestino non è perso. Apri una riga per rimetterla a posto.</div>
+      <input type="text" id="cest-search" placeholder="Cerca nel cestino: nome o tipo" autocomplete="off" spellcheck="false"
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+      <div id="cest-body" class="nol-elenco"></div>
     </section>
 
     <section id="galleria">
@@ -446,6 +462,53 @@
 .nol-az-apri:hover{background:#0052cc}
 .nol-azioni-scheda{margin:0 0 20px;padding-bottom:16px;border-bottom:1px solid #e6ecf3}
 .nol-az-rosso:hover{background:#fdecec}
+/* ── LA CARD DEGLI ELENCHI — una sola, per tutte le sezioni ──
+   22 agosto 2026: prima ogni elenco si scriveva i suoi colori dentro
+   l'attributo style, riga per riga. Cambiare l'aspetto voleva dire cambiare
+   sei punti diversi e dimenticarne uno. Adesso e' scritto qui. */
+/* gli elenchi: colonne larghe abbastanza da non spezzare «rientro previsto»
+   in tre righe. Sotto i 700 px diventa una colonna sola, sul telefono. */
+.nol-elenco{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
+@media(max-width:700px){.nol-elenco{grid-template-columns:1fr}}
+.nol-card{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);
+  border-top:4px solid #2e537d;padding:14px;margin-bottom:12px}
+.nol-card .tit{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.nol-card .tit strong{font-size:16px}
+.nol-card .sub{color:#666;font-size:14px;margin-top:4px}
+.nol-card .sub2{color:#666;font-size:13px;margin-top:2px}
+/* ⛔ 13 px il minimo, mai meno: Alessio ha la dislessia. Le etichette
+   stavano a 11 px in sei punti diversi. */
+.nol-eti{color:#fff;font-size:13px;font-weight:600;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.nol-card.esce{border-top-color:#e65100} .nol-card.rientra{border-top-color:#1565c0}
+.nol-card.ritardo{border-top-color:#c62828} .nol-card.lavoro{border-top-color:#757575}
+.gior-vuoto{color:#666;font-size:14px;margin:0 0 14px}
+/* il pallino sulla voce Cestino del menu */
+.tab-cnt{display:none;margin-left:7px;background:#fff;color:#0047b3;font-size:13px;
+  font-weight:700;padding:1px 8px;border-radius:10px;vertical-align:middle}
+/* quello che c'era scritto, dentro la scheda del cestino */
+.cest-righe{width:100%;border-collapse:collapse;font-size:15px}
+.cest-righe td{padding:7px 0;border-bottom:1px solid #e6ecf3;vertical-align:top}
+.cest-righe td:first-child{color:#666;width:42%}
+.cest-righe td:last-child{font-weight:600}
+/* la riga di oggi sopra il mese */
+.cal-oggi{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.cal-oggi-b{flex:1 1 160px;text-align:left;padding:12px 14px;border:none;border-left:5px solid #999;
+  border-radius:10px;background:#fff;box-shadow:0 3px 12px rgba(0,0,0,.07);
+  font-family:inherit;font-size:14px;color:#26415f;cursor:pointer}
+.cal-oggi-b b{display:block;font-size:26px;line-height:1.1}
+.cal-oggi-b.esce{border-left-color:#e65100} .cal-oggi-b.rientra{border-left-color:#1565c0}
+.cal-oggi-b.ritardo{border-left-color:#c62828}
+/* ⚠️ i lavori nel calendario avevano lo stesso arancione di «esce»:
+   due cose diverse dello stesso colore, sulla stessa casella. */
+.dot.esce{background:#e65100} .dot.rientra{background:#1565c0}
+.cal-grid .dot.todo,.cal-legend .dot.todo{background:#7C3AED}
+.cal-grid .dot.done,.cal-legend .dot.done{background:#2e7d32}
+/* il meno e il piu' della giacenza, dentro la scheda: grossi da premere */
+.mag-btn{width:52px;height:52px;border:none;border-radius:12px;background:#e6ecf3;
+  font-size:26px;font-weight:700;line-height:1;cursor:pointer;font-family:inherit;color:#26415f}
+.mag-btn:hover{background:#d6e2ef}
+.mag-piu{background:#0066ff;color:#fff}
+.mag-piu:hover{background:#0052cc}
 .nol-cons-riga input{padding:9px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:15px;width:100%}
 .nol-cons-via{border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;padding:0 12px;cursor:pointer;font-size:15px}
 .nol-agg{border:1px solid #2e537d;color:#2e537d;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px}
@@ -479,6 +542,10 @@
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
   const ymd=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
   const statoLabel={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto"};
+  /* le tre parole della fattura, scritte in un posto solo: elenco, scheda,
+     stampa e PDF devono dire la stessa cosa */
+  const FATT_ETICHETTA={none:"Da fatturare",emessa:"Emessa, da incassare",pagata:"Pagata"};
+  const FATT_COLORE={none:"#e65100",emessa:"#1565c0",pagata:"#2e7d32"};
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
   const db=()=>state[cur];
@@ -804,44 +871,73 @@
   }
 
   async function renderRiepilogoNegozio(){
+    const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
     if(!(sb&&sbUid)){
-      ["k-dafare","k-incorso","k-fatti"].forEach(i=>{const e=$("#"+i);if(e)e.textContent=0;});
-      ["k-lavori","k-daincassare","k-incassato"].forEach(i=>{const e=$("#"+i);if(e)e.textContent="€ 0";});
-      ["kn-mezzi","kn-fuori","kn-ritardo"].forEach(i=>{const e=$("#"+i);if(e)e.textContent=0;});
-      if($("#kn-incasso"))$("#kn-incasso").textContent="€ 0";
-      if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
+      ["k-dafare","k-incorso","k-fatti","kn-mezzi","kn-fuori","kn-ritardo","kn-liberi"].forEach(i=>scrivi(i,0));
+      ["k-lavori","k-daincassare","k-incassato","kn-incasso","kn-daincassare"].forEach(i=>scrivi(i,_eur(0)));
       if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+      if($("#rie-ritardi"))$("#rie-ritardi").innerHTML='<p style="color:#666;padding:8px">Nessun mezzo in ritardo.</p>';
       return;
     }
-    if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
     const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid);
     const P=prod||[];
     const sotto=P.filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
     const valore=P.reduce((s,p)=>s+((+p.prezzo||0)*(+p.quantita||0)),0);
-    if($("#k-dafare"))$("#k-dafare").textContent=P.length;
-    if($("#k-incorso"))$("#k-incorso").textContent=sotto.length;
-    if($("#k-lavori"))$("#k-lavori").textContent="€ "+(Math.round(valore*100)/100);
+    scrivi("k-dafare",P.length);
+    scrivi("k-incorso",sotto.length);
+    scrivi("k-lavori",_eur(valore));
     const {data:mov}=await sb.from("neg_movimenti").select("tipo,importo,data_mov").eq("user_id",sbUid);
     const M=mov||[];
     const mese=M.filter(m=>thisMonth(m.data_mov));
-    if($("#k-fatti"))$("#k-fatti").textContent=mese.length;
+    scrivi("k-fatti",mese.length);
     const venduto=mese.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
-    const acquistato=mese.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
-    if($("#k-daincassare"))$("#k-daincassare").textContent="€ "+(Math.round(venduto*100)/100);
-    if($("#k-incassato"))$("#k-incassato").textContent="€ "+(Math.round(acquistato*100)/100);
-    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #c62828;padding:12px;margin-bottom:10px"><strong>${p.nome||"—"}</strong><div style="color:#666;font-size:13px">Q.tà ${p.quantita??0} · soglia ${p.soglia_minima??0}</div></div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
-    // KPI noleggio
-    const {data:mezzi}=await sb.from("nol_mezzi").select("stato").eq("user_id",sbUid);
+    /* ⚠️ il tipo scritto dal modulo e' «acquisto», non «ordine»: con la parola
+       sbagliata la casella «Acquistato» restava a zero anche con gli ordini
+       dentro. Si tengono buone tutte e due, per i movimenti gia' salvati. */
+    const acquistato=mese.filter(m=>m.tipo==="acquisto"||m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
+    scrivi("k-daincassare",_eur(venduto));
+    scrivi("k-incassato",_eur(acquistato));
+    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`
+      <div class="nol-card" style="border-top-color:#c62828">
+        <div class="tit"><strong>${esc(p.nome||"—")}</strong>
+          <span class="nol-eti" style="background:#c62828">${esc(String(p.quantita??0))}</span></div>
+        <div class="sub2">Scorta minima ${esc(String(p.soglia_minima??0))}</div>
+      </div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+
+    /* ── i numeri del noleggio ── */
+    const {data:mezzi}=await sb.from("nol_mezzi").select("id,nome,stato").eq("user_id",sbUid);
     const MZ=mezzi||[];
-    if($("#kn-mezzi"))$("#kn-mezzi").textContent=MZ.length;
-    const {data:nol}=await sb.from("nol_noleggi").select("data_rientro_prevista,data_rientro_effettivo,importo,data_uscita").eq("user_id",sbUid);
-    const N=nol||[], oggiN=new Date().toISOString().slice(0,10);
+    scrivi("kn-mezzi",MZ.length);
+    const {data:nol}=await sb.from("nol_noleggi")
+      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento")
+      .eq("user_id",sbUid);
+    const N=nol||[], oggiN=todayStr();
     const fuori=N.filter(x=>!x.data_rientro_effettivo);
     const ritardo=fuori.filter(x=>x.data_rientro_prevista&&x.data_rientro_prevista<oggiN);
-    if($("#kn-fuori"))$("#kn-fuori").textContent=fuori.length;
-    if($("#kn-ritardo"))$("#kn-ritardo").textContent=ritardo.length;
-    const incassoNol=N.filter(x=>thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
-    if($("#kn-incasso"))$("#kn-incasso").textContent="€ "+(Math.round(incassoNol*100)/100);
+    scrivi("kn-fuori",fuori.length);
+    scrivi("kn-ritardo",ritardo.length);
+    /* liberi = i mezzi che non sono fuori in questo momento */
+    /* ⚠️ liberi NON e' «mezzi meno noleggi aperti»: un noleggio vecchio puo'
+       non avere il collegamento al mezzo, e il conto andava sotto zero.
+       Libero e' il mezzo che non risulta fuori e non e' in officina. */
+    const fuoriIds={}; fuori.forEach(x=>{if(x.mezzo_id)fuoriIds[x.mezzo_id]=1;});
+    scrivi("kn-liberi",MZ.filter(m=>!fuoriIds[m.id]&&m.stato!=="manutenzione"&&m.stato!=="noleggiato").length);
+    /* ⚠️ «incassato» vuol dire incassato davvero: i noleggi ancora da pagare
+       stanno nella casella accanto, non dentro questa. */
+    const delMese=N.filter(x=>thisMonth(x.data_uscita));
+    scrivi("kn-incasso",_eur(delMese.filter(x=>x.stato_pagamento==="pagato")
+      .reduce((s,x)=>s+(+x.importo||0),0)));
+    scrivi("kn-daincassare",_eur(N.filter(x=>x.stato_pagamento!=="pagato")
+      .reduce((s,x)=>s+(+x.importo||0),0)));
+    if($("#rie-ritardi"))$("#rie-ritardi").innerHTML=ritardo.length?ritardo.map(x=>{
+      const gg=Math.round((new Date(oggiN)-new Date(x.data_rientro_prevista))/86400000);
+      return `<div class="nol-card" style="border-top-color:#c62828">
+        <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
+          <span class="nol-eti" style="background:#c62828">${esc(gg+(gg===1?" giorno":" giorni"))}</span></div>
+        <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+        <div class="sub2">Doveva rientrare il ${esc(fdate(x.data_rientro_prevista))}</div>
+        ${nolPulsanti("noleggio",x.id)}</div>`;}).join("")
+      :'<p style="color:#666;padding:8px">Nessun mezzo in ritardo. Tutto sotto controllo.</p>';
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
 
@@ -986,14 +1082,15 @@
     const m=data||[], box=$("#mezzi-body");
     if(!box) return;
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun mezzo. Aggiungine uno.</p>';return;}
-    const col={disponibile:"#2e537d",noleggiato:"#e65100",manutenzione:"#757575"};
+    const col={disponibile:"#2e7d32",noleggiato:"#e65100",manutenzione:"#757575"};
     box.innerHTML=m.map(x=>{
       const c=col[x.stato]||"#757575";
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${c};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center"><strong>${x.nome||"—"}</strong><span style="background:${c};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${(x.stato||"").toUpperCase()}</span></div>
-        <div style="color:#666;font-size:14px;margin-top:4px">${x.categoria?x.categoria+" · ":""}${x.codice?"cod. "+x.codice:""}</div>
-        <div style="color:#666;font-size:13px;margin-top:2px">€/g ${x.tariffa_giorno??0} · €/sett ${x.tariffa_settimana??0} · €/mese ${x.tariffa_mese??0}${x.cauzione?" · cauz. €"+x.cauzione:""}</div>
-        ${nolPulsanti("mezzo",x.id)}</div></div>`;
+      return `<div class="nol-card" style="border-top-color:${c}">
+        <div class="tit"><strong>${esc(x.nome||"—")}</strong>
+          <span class="nol-eti" style="background:${c}">${esc((x.stato||"").toUpperCase())}</span></div>
+        <div class="sub">${esc([x.categoria,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>
+        ${nolPulsanti("mezzo",x.id)}</div>`;
     }).join("");
   }
 
@@ -1024,14 +1121,16 @@
      mezzo o un noleggio deve poterlo stampare, farne il PDF, copiarlo o
      buttarlo da li', senza chiuderlo e ritrovare la riga nell'elenco.
      "Modifica" qui non c'e': ci sei gia' dentro. */
-  function nolPulsantiScheda(tipo,id){
+  /* «quali» serve per la Giornata del calendario: un giorno non si copia e
+     non si elimina, ma si stampa e si porta in PDF come tutto il resto. */
+  function nolPulsantiScheda(tipo,id,quali){
     if(!id) return "";
-    return `<div class="nol-azioni nol-azioni-scheda">
-      <button class="nol-az" data-action="nol-copia"  data-t="${tipo}" data-id="${id}">Copia</button>
-      <button class="nol-az" data-action="nol-pdf"    data-t="${tipo}" data-id="${id}">PDF</button>
-      <button class="nol-az" data-action="nol-stampa" data-t="${tipo}" data-id="${id}">Stampa</button>
-      <button class="nol-az nol-az-rosso" data-action="nol-elim" data-t="${tipo}" data-id="${id}">Elimina</button>
-    </div>`;
+    const tutti=[["nol-copia","Copia",""],["nol-pdf","PDF",""],
+                 ["nol-stampa","Stampa",""],["nol-elim","Elimina"," nol-az-rosso"]];
+    const usa=quali&&quali.length?tutti.filter(x=>quali.indexOf(x[0])>=0):tutti;
+    return `<div class="nol-azioni nol-azioni-scheda">${usa.map(x=>
+      `<button class="nol-az${x[2]}" data-action="${x[0]}" data-t="${tipo}" data-id="${id}">${x[1]}</button>`
+    ).join("")}</div>`;
   }
 
   const NOL_TIPI={
@@ -1040,11 +1139,27 @@
     noleggio:{tab:"nol_noleggi",che:"Noleggio",ricarica:()=>loadNoleggi(),    scheda:d=>schedaNoleggio(d)},
     prodotto:{tab:"neg_prodotti", che:"Prodotto", ricarica:()=>loadProdotti(),  scheda:d=>schedaProdotto(d)},
     fornitore:{tab:"neg_fornitori",che:"Fornitore",ricarica:()=>loadFornitori(),scheda:d=>schedaFornitore(d)},
-    movimento:{tab:"neg_movimenti",che:"Movimento",ricarica:()=>loadMovimenti(),scheda:d=>schedaMovimento(d)}
+    movimento:{tab:"neg_movimenti",che:"Movimento",ricarica:()=>loadMovimenti(),scheda:d=>schedaMovimento(d)},
+    /* Magazzino guarda la stessa tabella dei Prodotti, ma da un'altra
+       finestra: qui interessa solo quanto ce n'e' e quando riordinare. */
+    magazzino:{tab:"neg_prodotti",che:"Giacenza",femm:true,ricarica:()=>loadMagazzino(),scheda:d=>schedaMagazzino(d),
+               avviso:"Sparisce il prodotto dal catalogo, non solo la giacenza."},
+    /* La fattura e' la stessa riga del lavoro: qui si guarda il lato soldi.
+       «avviso» esce nella domanda prima di eliminare, perche' buttare la
+       fattura vuol dire buttare anche il lavoro che c'e' sotto. */
+    fattura:{tab:"gest_lavori",che:"Fattura",femm:true,ricarica:()=>{renderFatture();renderCal();},
+             scheda:d=>schedaFattura(d),
+             avviso:"Sparisce anche il lavoro collegato."},
+    /* La giornata non e' una riga del database: e' quello che succede in un
+       giorno. Ha un suo lettore, e si stampa come tutto il resto. */
+    giornata:{che:"Giornata", ricarica:()=>renderCal(), scheda:d=>apriGiornata(d.id),
+              leggi:ds=>leggiGiornata(ds)}
   };
 
   async function nolLeggi(tipo,id){
-    const t=NOL_TIPI[tipo]; if(!t||!sb) return null;
+    const t=NOL_TIPI[tipo]; if(!t) return null;
+    if(t.leggi) return await t.leggi(id);
+    if(!sb) return null;
     const {data}=await sb.from(t.tab).select("*").eq("id",id).single();
     return data||null;
   }
@@ -1090,6 +1205,37 @@
       ["Scorta minima",e(d.soglia_minima)],
       ["Prezzo di acquisto",soldi(d.prezzo_acquisto)],["Prezzo di vendita",soldi(d.prezzo)],
       ["IVA",d.iva_perc==null?null:d.iva_perc+"%"],["Note",e(d.note)]];
+    if(tipo==="magazzino"){
+      const q=+(d.quantita||0), s=+(d.soglia_minima||0), pz=+(d.prezzo||0);
+      r=[["Prodotto",e(d.nome)],["Codice",e(d.codice)],["Unita' di misura",e(d.unita)],
+         ["Quantita' in magazzino",String(d.quantita??0)],
+         ["Scorta minima",String(d.soglia_minima??0)],
+         ["Situazione",q<=s?"SOTTO SCORTA — da riordinare":"a posto"],
+         ["Valore della giacenza",pz?_eur(q*pz):null]];
+    }
+    if(tipo==="fattura"){
+      r=[["Oggetto",e(d.descrizione)],["Dove",e(d.dove)],
+         ["Data del lavoro",d.data_fatto||d.data_prevista?fdate(d.data_fatto||d.data_prevista):null],
+         ["Stato del lavoro",statoLabel[d.stato]||e(d.stato)],
+         ["Stato della fattura",FATT_ETICHETTA[d.fatt_stato||"none"]],
+         ["Importo",soldi(d.importo)],["Ore lavorate",e(d.ore)],["Note",e(d.note)]];
+    }
+    if(tipo==="giornata"){
+      r=[["Giorno",fdate(d.id)]];
+      const gruppo=(et,lista,come)=>{
+        if(!lista||!lista.length){r.push([et,"nessuno"]);return;}
+        r.push([et,String(lista.length)]);
+        lista.forEach(x=>r.push(["   ·",come(x)]));
+      };
+      gruppo("Escono oggi",d.escono,x=>(x.mezzo||"mezzo")+" → "+(x.cliente||"cliente")+
+        (x.data_rientro_prevista?"  (rientro previsto "+fdate(x.data_rientro_prevista)+")":""));
+      gruppo("Rientri previsti oggi",d.rientrano,x=>(x.mezzo||"mezzo")+" da "+(x.cliente||"cliente"));
+      gruppo("Ancora fuori, in ritardo",d.ritardi,x=>(x.mezzo||"mezzo")+" da "+(x.cliente||"cliente")+
+        "  (doveva rientrare il "+fdate(x.data_rientro_prevista)+")");
+      gruppo("Lavori",d.lavori,x=>(x.descrizione||"(senza descrizione)")+
+        "  ["+(statoLabel[x.stato]||x.stato||"")+"]");
+      if(d.nota) r.push(["Nota del giorno",e(d.nota)]);
+    }
     if(tipo==="fornitore") r=[
       ["Nome",e(d.nome)],["Telefono",e(d.telefono)],["Email",e(d.email)],
       ["Indirizzo",e(d.indirizzo)],["P.IVA",e(d.piva)],["Note",e(d.note)]];
@@ -1101,6 +1247,11 @@
   }
 
   function nolTitolo(tipo,d){
+    if(tipo==="giornata") return "Giornata — "+fdate(d.id);
+    /* la stessa riga e' un lavoro finche' non ha un importo: chiamarla
+       «fattura» quando non c'e' niente da incassare confonde e basta */
+    if(tipo==="fattura")  return (+d.importo>0?"Fattura — ":"Lavoro — ")+(d.descrizione||"senza oggetto");
+    if(tipo==="magazzino")return "Magazzino — "+(d.nome||"prodotto");
     return (NOL_TIPI[tipo]?NOL_TIPI[tipo].che:"Scheda")+" — "+
            (d.nome||[d.mezzo,d.cliente].filter(Boolean).join(" · ")||"senza nome");
   }
@@ -1160,7 +1311,7 @@
 
   /* ---- COPIA: lo stesso, con "(copia)" nel nome ---- */
   async function nolCopia(tipo,d){
-    const t=NOL_TIPI[tipo]; if(!t||!sbUid) return;
+    const t=NOL_TIPI[tipo]; if(!t||!t.tab||!sbUid) return;
     const nuovo=Object.assign({},d);
     /* ⚠️ via l'id e la data di creazione: se restassero, il database
        rifiuterebbe la riga nuova perche' quell'id esiste gia'. */
@@ -1168,18 +1319,23 @@
     nuovo.user_id=sbUid;
     if(nuovo.nome) nuovo.nome=nuovo.nome+" (copia)";
     if(tipo==="noleggio"){ nuovo.data_rientro_effettivo=null; nuovo.stato_pagamento="da_pagare"; }
+    /* la copia di una fattura nasce da fatturare, se no si incassa due volte */
+    if(tipo==="fattura"){ nuovo.descrizione=(nuovo.descrizione||"Lavoro")+" (copia)";
+                          nuovo.fatt_stato="none"; }
     const {error}=await sb.from(t.tab).insert(nuovo);
     if(error){toast("Errore: "+error.message);return;}
-    t.ricarica(); toast(t.che+" copiato ✔");
+    t.ricarica(); renderRiepilogoNegozio(); toast(t.che+(t.femm?" copiata ✔":" copiato ✔"));
   }
 
   /* ---- ELIMINA ---- */
   async function nolElimina(tipo,d){
-    const t=NOL_TIPI[tipo]; if(!t) return;
-    if(!confirm("Eliminare "+t.che.toLowerCase()+" «"+(d.nome||d.mezzo||"questa scheda")+"»?\nNon si torna indietro.")) return;
+    const t=NOL_TIPI[tipo]; if(!t||!t.tab) return;
+    const come=d.nome||d.descrizione||d.mezzo||"questa scheda";
+    if(!confirm("Eliminare "+t.che.toLowerCase()+" «"+come+"»?\n"+
+                (t.avviso?t.avviso+"\n":"")+cestFrase())) return;
     const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
-    t.ricarica(); renderRiepilogoNegozio(); toast(t.che+" eliminato");
+    t.ricarica(); renderRiepilogoNegozio(); toast(t.che+(t.femm?" eliminata":" eliminato"));
   }
 
   /* un gestore solo per tutti e cinque i pulsanti, di tutte e tre le schede */
@@ -1190,7 +1346,9 @@
     if(!d){toast("Questa scheda non si trova piu'");return;}
     if(a==="nol-mod")    return NOL_TIPI[tipo].scheda(d);
     if(a==="nol-copia")  return nolCopia(tipo,d);
-    if(a==="nol-pdf")    return nolPdf(tipo,d);
+    /* la fattura ha gia' il suo PDF vero — intestazione, numero, cliente,
+       IBAN — e non va sostituito con l'elenco etichetta/valore */
+    if(a==="nol-pdf")    return tipo==="fattura"?generaPdf(d.id):nolPdf(tipo,d);
     if(a==="nol-stampa") return nolStampa(tipo,d);
     if(a==="nol-elim")   return nolElimina(tipo,d);
   });
@@ -1259,6 +1417,59 @@
     }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet(); loadProdotti(); renderRiepilogoNegozio(); toast(id?"Prodotto aggiornato ✔":"Prodotto aggiunto ✔");
+  }
+
+  /* ── MAGAZZINO — la scheda della giacenza ──
+     Non e' la scheda del prodotto: qui si guarda una cosa sola, quanto ce
+     n'e' in magazzino e quando bisogna riordinare. Il meno e il piu' stanno
+     DENTRO la scheda, non sulla riga dell'elenco: sulla riga c'e' «Apri». */
+  function schedaMagazzino(p){
+    p=p||{};
+    const v=(k)=>esc(p[k]==null?"":p[k]);
+    const q=+(p.quantita||0), s=+(p.soglia_minima||0), sotto=q<=s;
+    const pz=+(p.prezzo||0);
+    openSheet(`<h3>Magazzino — ${esc(p.nome||"prodotto")}</h3>${nolPulsantiScheda("magazzino",p.id||"")}
+      ${sotto?'<div class="nol-avviso">Sotto la scorta minima: da riordinare.</div>':''}
+      <div class="nol-riq nol-cam">
+        <h4>Quanto ce n'&egrave;</h4>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <button type="button" class="mag-btn" data-action="mag-meno" title="Uno in meno">&minus;</button>
+          <input id="ng-quantita" inputmode="decimal" value="${v('quantita')}" placeholder="0"
+                 style="width:130px;font-size:26px;font-weight:700;text-align:center">
+          <button type="button" class="mag-btn mag-piu" data-action="mag-piu" title="Uno in pi&ugrave;">+</button>
+          <span style="font-size:15px;color:#666">${esc(p.unita||"pz")}</span>
+        </div>
+      </div>
+      <div class="nol-riq nol-cam">
+        <h4>Quando riordinare</h4>
+        <div class="nol-due">
+          <div><label>Scorta minima</label><input id="ng-soglia" inputmode="decimal" value="${v('soglia_minima')}" placeholder="0"></div>
+          <div><label>Unit&agrave; di misura</label><input id="ng-unita" value="${esc(p.unita||"pz")}" placeholder="pz, mq, kg"></div>
+        </div>
+        <p style="margin:10px 0 0;font-size:14px;color:#666">Sotto questa quantit&agrave; il prodotto compare nel Riepilogo fra quelli da riordinare.</p>
+      </div>
+      <div class="nol-riq nol-cam">
+        <h4>Valore</h4>
+        <p style="margin:0;font-size:15px">${pz?esc(_eur(q*pz))+' &nbsp;<span style="color:#666">('+esc(String(q).replace(".",","))+' &times; '+esc(_eur(pz))+')</span>':'<span style="color:#666">Nessun prezzo di vendita sul prodotto.</span>'}</p>
+      </div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-mag" data-id="${p.id||""}">Salva</button></div>`);
+  }
+
+  async function salvaMagazzino(id){
+    if(!id){toast("Questa giacenza non si trova piu'");return;}
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const dati={quantita:_numIt($("#ng-quantita").value),
+                soglia_minima:_numIt($("#ng-soglia").value)};
+    const unita=$("#ng-unita").value.trim();
+    let {error}=await sb.from("neg_prodotti").update({...dati,unita:unita||"pz"}).eq("id",id).eq("user_id",sbUid);
+    /* se la colonna «unita» non c'e' ancora su Supabase, la giacenza si salva
+       lo stesso invece di andare persa (stessa rete di salvataggio dei Prodotti) */
+    if(error&&/unita/i.test(error.message||"")&&/column|schema cache/i.test(error.message||"")){
+      ({error}=await sb.from("neg_prodotti").update(dati).eq("id",id).eq("user_id",sbUid));
+    }
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet(); loadMagazzino(); loadProdotti(); renderRiepilogoNegozio(); toast("Magazzino aggiornato ✔");
   }
 
   function schedaFornitore(f){
@@ -1593,11 +1804,11 @@
     if(!box) return;
     if(!c.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun cliente. Aggiungine uno.</p>';return;}
     box.innerHTML=c.map(x=>`
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
-        <strong>${x.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
-        ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
-        ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
+      <div class="nol-card" style="border-top-color:#1565c0">
+        <div class="tit"><strong>${esc(x.nome||"—")}</strong></div>
+        <div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
+        ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}
         ${nolPulsanti("cliente",x.id)}
       </div>`).join("");
   }
@@ -1624,30 +1835,21 @@
     if(!n.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun noleggio.</p>';return;}
     box.innerHTML=n.map(x=>{
       let col,et;
-      if(x.data_rientro_effettivo){col="#2e537d";et="RIENTRATO";}
+      if(x.data_rientro_effettivo){col="#2e7d32";et="RIENTRATO";}
       else if(x.data_rientro_prevista&&x.data_rientro_prevista<oggi){col="#c62828";et="IN RITARDO";}
-      else {col="#e65100";et="IN CORSO";}
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${col};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center"><strong>${x.mezzo||"—"}</strong><span style="background:${col};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${et}</span></div>
-        <div style="color:#666;font-size:14px;margin-top:4px">${x.cliente?"Cliente: "+x.cliente:""}</div>
-        <div style="color:#666;font-size:13px;margin-top:2px">Uscita ${x.data_uscita||"—"} · prev. ${x.data_rientro_prevista||"—"}${x.data_rientro_effettivo?" · rientro "+x.data_rientro_effettivo:""}</div>
-        <div style="color:#666;font-size:13px;margin-top:2px">€ ${x.importo??0}${x.cauzione?" · cauz. €"+x.cauzione:""} · ${x.stato_pagamento==="pagato"?"PAGATO":"DA PAGARE"}${x.danni?" · danni: "+x.danni:""}</div>
-        ${nolPulsanti("noleggio",x.id)}</div></div>`;
+      else {col="#e65100";et="FUORI";}
+      /* i giorni di ritardo scritti in chiaro: e' la prima cosa che guarda
+         chi noleggia, e non deve contarli a mente sul calendario */
+      const rit=(et==="IN RITARDO")?Math.round((new Date(oggi)-new Date(x.data_rientro_prevista))/86400000):0;
+      return `<div class="nol-card" style="border-top-color:${col}">
+        <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
+          <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}</span></div>
+        <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+        <div class="sub2">${esc("Uscita "+fdate(x.data_uscita)+" · rientro previsto "+fdate(x.data_rientro_prevista)+(x.data_rientro_effettivo?" · rientrato il "+fdate(x.data_rientro_effettivo):""))}</div>
+        <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione):"")+" · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>
+        ${nolPulsanti("noleggio",x.id)}</div>`;
     }).join("");
   }
-  $("#noleggi-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".nol-edit"), del=e.target.closest(".nol-del");
-    if(del){
-      if(!confirm("Eliminare questo noleggio?"))return;
-      const {error}=await sb.from("nol_noleggi").delete().eq("id",del.dataset.id);
-      if(error){alert("Errore: "+error.message);return;}
-      loadNoleggi();return;
-    }
-    if(ed){
-      const {data}=await sb.from("nol_noleggi").select("*").eq("id",ed.dataset.id).single();
-      if(data) schedaNoleggio(data);
-    }
-  });
   $('[data-tab="noleggi"]')?.addEventListener("click",()=>{loadNoleggi().then(nolAggiornaConto);});
   $("#clienti-nol-body")?.addEventListener("click",async e=>{
     const ed=e.target.closest(".clinol-edit"), del=e.target.closest(".clinol-del");
@@ -1823,15 +2025,82 @@
     if(su&&su.signedUrl)window.open(su.signedUrl,"_blank");
     else toast("Non riesco ad aprire la fattura");
   }
-  function fattRow(l,btn){
-    const fatturaPdf=fatturaPdfCache[l.id];
-    const fatturaBtns=(fatturaPdf?`<button class="ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
-      +`<button class="ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
-    return `<div class="fatt-row">
-      <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
-        <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
-      <div class="fatt-imp">${eur(l.importo)}</div>
-      <button class="ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
+  /* ⛔ 22 agosto 2026 — sulla riga solo «Apri».
+     Prima ogni fattura si portava dietro quattro pulsanti: PDF, carica PDF,
+     apri PDF e il cambio di stato. Con venti fatture erano ottanta pulsanti
+     e non si trovava piu' niente. Adesso stanno tutti dentro la scheda. */
+  function fattRow(l){
+    const st=l.fatt_stato||"none";
+    const pdf=fatturaPdfCache[l.id];
+    return `<div class="nol-card" style="border-top-color:${FATT_COLORE[st]}">
+      <div class="tit"><strong>${esc(l.descrizione||"Lavoro")}</strong>
+        <span class="nol-eti" style="background:${FATT_COLORE[st]}">${esc(FATT_ETICHETTA[st].toUpperCase())}</span></div>
+      <div class="sub">${eur(l.importo)}${l.ore?" · "+esc(String(l.ore))+" ore":""}</div>
+      <div class="sub2">📅 ${fdate(l.data_fatto||l.data_prevista)}${pdf?" · 📄 fattura allegata":""}</div>
+      ${nolPulsanti("fattura",l.id)}</div>`;
+  }
+
+  /* ── LA SCHEDA DELLA FATTURA — a tutta pagina ──
+     ⚠️ Non e' il fatturatore vero (niente righe, IVA, ritenuta, bollo,
+     numerazione): quello sta nel gestionale imprese. Qui si tiene il conto
+     di cosa e' stato fatto, quanto, e se e' stato incassato. */
+  function schedaFattura(l){
+    l=l||{};
+    const v=(k)=>esc(l[k]==null?"":l[k]);
+    const st=l.fatt_stato||"none";
+    const pdf=fatturaPdfCache[l.id];
+    openSheet(`<h3>${esc(nolTitolo("fattura",l))}</h3>${nolPulsantiScheda("fattura",l.id||"")}
+      <div class="field"><label>Oggetto *</label>
+        <textarea id="nfa-desc" placeholder="Cosa e' stato fatto o noleggiato">${v('descrizione')}</textarea></div>
+      <div class="field"><label>Dove</label><input id="nfa-dove" value="${v('dove')}" placeholder="Cantiere, indirizzo"></div>
+      <div class="nol-riq nol-cam">
+        <h4>Soldi</h4>
+        <div class="nol-due">
+          <div><label>Importo €</label><input id="nfa-imp" inputmode="decimal" value="${l.importo==null?"":String(l.importo).replace(".",",")}" placeholder="0,00"></div>
+          <div><label>Ore lavorate</label><input id="nfa-ore" inputmode="decimal" value="${v('ore')}" placeholder="0"></div>
+        </div>
+        <p style="margin:10px 0 0;font-size:14px;color:#666">L'importo va scritto anche con la virgola: 1.250,50 si salva intero.</p>
+      </div>
+      <div class="nol-riq nol-cam">
+        <h4>Date</h4>
+        <div class="nol-due">
+          <div><label>Data prevista</label><input type="date" id="nfa-dataprev" value="${v('data_prevista')}"></div>
+          <div><label>Data del fatto</label><input type="date" id="nfa-datafatto" value="${v('data_fatto')}"></div>
+        </div>
+      </div>
+      <div class="field"><label>Stato del lavoro</label><div class="seg" id="nfa-lav">
+        ${["da_fare","in_corso","fatto"].map(x=>`<button type="button" data-v="${x}" class="${(l.stato||"da_fare")===x?"on":""}">${esc(statoLabel[x])}</button>`).join("")}</div></div>
+      <div class="field"><label>Stato della fattura</label><div class="seg" id="nfa-stato">
+        ${["none","emessa","pagata"].map(s=>`<button type="button" data-v="${s}" class="${st===s?"on":""}">${esc(FATT_ETICHETTA[s])}</button>`).join("")}</div></div>
+      <div class="field"><label>Fattura in PDF</label>
+        <div class="nol-azioni">
+          ${pdf?`<button class="nol-az" data-action="open-fattura" data-id="${esc(pdf.id)}">📄 Apri il PDF allegato</button>`:""}
+          <button class="nol-az" data-action="upload-fattura" data-id="${l.id||""}">📎 ${pdf?"Sostituisci":"Allega"} il PDF</button>
+        </div></div>
+      <div class="field"><label>Note</label><textarea id="nfa-note" placeholder="Quello che serve ricordare">${v('note')}</textarea></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-fatt" data-id="${l.id||""}">Salva</button></div>`);
+    bindSeg("nfa-stato"); bindSeg("nfa-lav");
+  }
+
+  async function salvaFattura(id){
+    if(!id){toast("Questa fattura non si trova piu'");return;}
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const desc=$("#nfa-desc").value.trim();
+    if(!desc){toast("Scrivi l'oggetto della fattura");return;}
+    const dati={descrizione:desc,
+      dove:$("#nfa-dove").value.trim()||null,
+      /* ⚠️ _numIt e non +valore: con «1250,50» il vecchio codice salvava 0 */
+      importo:_numIt($("#nfa-imp").value),
+      ore:$("#nfa-ore").value===""?null:_numIt($("#nfa-ore").value),
+      data_prevista:$("#nfa-dataprev").value||null,
+      data_fatto:$("#nfa-datafatto").value||null,
+      stato:segVal("nfa-lav")||"da_fare",
+      fatt_stato:segVal("nfa-stato")||"none",
+      note:$("#nfa-note").value.trim()||null};
+    const {error}=await sb.from("gest_lavori").update(dati).eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet(); renderFatture(); renderJobs(); toast("Fattura aggiornata ✔");
   }
   let fatturaPdfCache={};
   async function renderFatture(){
@@ -1855,47 +2124,277 @@
       <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
     let h="";
     h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
-    h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
+    h+=daFatt.length?daFatt.map(fattRow).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
     h+=`<div class="mini-title">💶 Emesse · da incassare</div>`;
-    h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
+    h+=daInc.length?daInc.map(fattRow).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
     h+=`<div class="mini-title">✅ Pagate</div>`;
-    h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
+    h+=pagate.length?pagate.map(fattRow).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
     $("#fatt-body").innerHTML=h;
   }
+  $('[data-tab="fatture"]')?.addEventListener("click",renderFatture);
 
-  let calJobs=[];
+  /* ================================================================
+     IL CESTINO DEL NOLEGGIO — 23 agosto 2026
+     `js/cestino.js` era caricato in questa pagina dal primo giorno, ma il
+     suo elenco di tabelle conteneva solo le `gest_*`: tutto quello che si
+     cancellava da qui spariva davvero. Il 23 agosto Alessio ha eseguito
+     `sql/noleggio-cestino.sql` (risposta: 6 colonne) e sono state aggiunte
+     le tre tabelle del noleggio e le tre del magazzino.
+
+     ⛔ Lo stampo e' quello di tutte le altre sezioni: sulla riga solo
+     «Apri». «Butta per sempre» sta DENTRO la scheda, dietro un clic in
+     piu': e' l'unico pulsante di tutto il gestionale da cui non si torna
+     indietro, e non deve stare su un elenco dove si scorre col pollice.
+     ================================================================ */
+  const CEST_COSE=[
+    {t:"nol_mezzi",     lab:"Mezzo",           tipo:"mezzo",     col:"#2e7d32"},
+    {t:"nol_clienti",   lab:"Cliente",         tipo:"cliente",   col:"#1565c0"},
+    {t:"nol_noleggi",   lab:"Noleggio",        tipo:"noleggio",  col:"#e65100"},
+    {t:"neg_prodotti",  lab:"Prodotto",        tipo:"prodotto",  col:"#1565c0"},
+    {t:"neg_fornitori", lab:"Fornitore",       tipo:"fornitore", col:"#1565c0"},
+    {t:"neg_movimenti", lab:"Movimento",       tipo:"movimento", col:"#757575"},
+    {t:"gest_lavori",   lab:"Lavoro / fattura",tipo:"fattura",   col:"#7C3AED"}
+  ];
+  let cestCache=[], cestQ="";
+
+  function cestAcceso(){return !!(window.cestinoAttivo&&window.cestinoAttivo()&&sb&&sb.raw);}
+  /* la frase da mettere nella domanda prima di eliminare: col cestino acceso
+     «non si torna indietro» sarebbe una bugia, e spaventa per niente */
+  function cestFrase(){return cestAcceso()
+    ? "Finisce nel Cestino: da lì lo rimetti a posto quando vuoi."
+    : "Non si torna indietro.";}
+  function cestNome(r){
+    return [r.nome,r.descrizione,r.mezzo,r.prodotto,r.titolo]
+      .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")||"(senza nome)";
+  }
+  function cestQuando(iso){
+    if(!iso) return "";
+    const d=String(iso).slice(0,10), o=String(iso).slice(11,16);
+    return fdate(d)+(o?" alle "+o:"");
+  }
+  function cestSegnaPallino(n){
+    const e=$("#cnt-cestino"); if(!e) return;
+    /* ⚠️ display="" NON riaccende niente: il foglio di stile dice
+       display:none, e la casella vuota ci ricasca. Ci vuole il valore vero. */
+    e.textContent=n>0?String(n):""; e.style.display=n>0?"inline-block":"none";
+  }
+
+  async function renderCestinoNol(soloDisegno){
+    const box=$("#cest-body"); if(!box) return;
+    if(!(sb&&sbUid)){box.innerHTML='<p style="color:#666;padding:8px">Devi essere collegato.</p>';return;}
+    const st=(window.cestinoStato&&window.cestinoStato())||null;
+    if(st&&st.attesa>0){
+      box.innerHTML='<p style="color:#666;padding:8px">Sto controllando il cestino. Ci vuole un attimo: finché non ho una risposta chiara dal database non lascio eliminare niente. Riprova fra qualche secondo.</p>';
+      return;
+    }
+    if(!cestAcceso()){
+      box.innerHTML='<p style="color:#666;padding:8px">Il cestino non è ancora acceso su questa parte. Esegui <b>sql/noleggio-cestino.sql</b> su Supabase e ricarica la pagina.</p>';
+      return;
+    }
+    if(!soloDisegno){
+      /* una domanda piccola per tabella, tutte insieme: un solo giro di rete */
+      const risposte=await Promise.all(CEST_COSE.map(async c=>{
+        let r=null;
+        try{
+          r=await sb.raw(c.t).select("*").eq("user_id",sbUid)
+              .not("eliminato_il","is",null)
+              .order("eliminato_il",{ascending:false}).limit(200);
+        }catch(e){ r=null; }
+        return {c:c, righe:(r&&!r.error&&r.data)||[], ko:!!(!r||r.error)};
+      }));
+      cestCache=[];
+      risposte.forEach(x=>x.righe.forEach(r=>cestCache.push({
+        tab:x.c.t, tipo:x.c.tipo, lab:x.c.lab, col:x.c.col,
+        nome:cestNome(r).slice(0,80), quando:r.eliminato_il, id:r.id, riga:r
+      })));
+      cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
+      /* ⚠️ se una tabella non ha risposto, «non lo so» non e' «zero»: il
+         pallino non si riscrive, se no direbbe meno del vero. */
+      if(!risposte.some(x=>x.ko)) cestSegnaPallino(cestCache.length);
+    }
+    const q=(cestQ||"").trim().toLowerCase();
+    const vis=cestCache.map((x,i)=>({x:x,i:i}))
+      .filter(v=>!q||(v.x.nome+" "+v.x.lab).toLowerCase().includes(q));
+    if(!cestCache.length){
+      box.innerHTML='<p style="color:#666;padding:8px">Il cestino è vuoto. Quello che elimini finisce qui.</p>';return;
+    }
+    if(!vis.length){
+      box.innerHTML='<p style="color:#666;padding:8px">Niente che si chiami così, fra le '+cestCache.length+' cose nel cestino.</p>';return;
+    }
+    box.innerHTML=vis.map(v=>`
+      <div class="nol-card" style="border-top-color:${v.x.col}">
+        <div class="tit"><strong>${esc(v.x.nome)}</strong>
+          <span class="nol-eti" style="background:${v.x.col}">${esc(v.x.lab.toUpperCase())}</span></div>
+        <div class="sub2">Buttato il ${esc(cestQuando(v.x.quando))}</div>
+        <div class="nol-azioni">
+          <button class="nol-az nol-az-apri" data-action="cest-apri" data-i="${v.i}">Apri</button>
+        </div>
+      </div>`).join("");
+  }
+
+  /* la scheda di una cosa nel cestino: a tutta pagina come tutte le altre,
+     con dentro quello che c'era scritto, cosi' si riconosce prima di
+     decidere. Le stesse righe della stampa: `nolRighe`. */
+  function schedaCestino(i){
+    const v=cestCache[i]; if(!v){toast("Questa riga non c'è più");return;}
+    let righe=[];
+    try{ righe=nolRighe(v.tipo,v.riga)||[]; }catch(e){ righe=[]; }
+    openSheet(`<h3>Nel cestino — ${esc(v.nome)}</h3>
+      <div class="nol-azioni nol-azioni-scheda">
+        <button class="nol-az nol-az-apri" data-action="cest-su" data-i="${i}">Rimetti a posto</button>
+        <button class="nol-az nol-az-rosso" data-action="cest-mai" data-i="${i}">Butta per sempre</button>
+      </div>
+      <div class="nol-riq nol-cam"><h4>${esc(v.lab)} — buttato il ${esc(cestQuando(v.quando))}</h4>
+        <table class="cest-righe">${righe.map(r=>
+          `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")
+          ||'<tr><td colspan="2">Niente da mostrare.</td></tr>'}</table>
+      </div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button></div>`);
+  }
+
+  async function cestRimetti(i){
+    const v=cestCache[i]; if(!v||!cestAcceso()) return;
+    const {error}=await sb.raw(v.tab).update({eliminato_il:null})
+      .eq("id",v.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet();
+    cestCache.splice(i,1); cestSegnaPallino(cestCache.length);
+    await renderCestinoNol();
+    const t=NOL_TIPI[v.tipo]; if(t&&t.ricarica) t.ricarica();
+    renderRiepilogoNegozio();
+    toast(v.lab+" rimesso a posto ✔");
+  }
+
+  async function cestPerSempre(i){
+    const v=cestCache[i]; if(!v||!cestAcceso()) return;
+    if(!confirm("Buttare per sempre «"+v.nome+"»?\nQuesta volta non si torna indietro davvero.")) return;
+    /* sb.raw e non sb.from: qui la cancellazione deve essere vera */
+    const {error}=await sb.raw(v.tab).delete().eq("id",v.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet();
+    cestCache.splice(i,1); cestSegnaPallino(cestCache.length);
+    await renderCestinoNol();
+    toast(v.lab+" buttato per sempre");
+  }
+
+  /* js/cestino.js chiama questa quando qualcosa entra nel cestino: e' l'unico
+     punto da cui passano TUTTE le cancellazioni, cosi' non se ne dimentica
+     nessuna e il pallino non resta indietro. */
+  window.segnaCestinoDaRifare=function(){
+    if($("#cestino")&&$("#cestino").classList.contains("active")) renderCestinoNol();
+    else cestSegnaPallino((parseInt($("#cnt-cestino")?$("#cnt-cestino").textContent:"0")||0)+1);
+  };
+
+  $('[data-tab="cestino"]')?.addEventListener("click",()=>renderCestinoNol());
+  $("#cest-search")?.addEventListener("input",e=>{cestQ=e.target.value;renderCestinoNol(true);});
+
+  $('[data-tab="calendario"]')?.addEventListener("click",renderCal);
+
+  /* ================================================================
+     CALENDARIO — 22 agosto 2026
+     Per un noleggiatore il calendario non e' l'agenda dei lavori: e'
+     «chi esce oggi, chi rientra oggi, chi doveva rientrare e non e'
+     tornato». Percio' il mese mostra i noleggi, e il giorno si apre a
+     tutta pagina come tutte le altre schede.
+     ================================================================ */
+  let calJobs=[], calNol=[];
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
-    if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];}
-    else calJobs=[];
+    if(sb&&sbUid){
+      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      calJobs=data||[];
+      const {data:nn}=await sb.from("nol_noleggi")
+        .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento")
+        .eq("user_id",sbUid);
+      calNol=nn||[];
+    } else { calJobs=[]; calNol=[]; }
+    const oggi=todayStr();
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
     for(let i=0;i<lead;i++)html+=`<div class="cal-cell empty"></div>`;
     for(let d=1;d<=days;d++){
-      const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
-      const dots=jobs.slice(0,6).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`).join("");
+      const ds=ymd(y,m,d), g=giornoDi(ds,oggi);
+      const dots=[]
+        .concat(g.escono.slice(0,4).map(()=>'<i class="dot esce" title="esce"></i>'))
+        .concat(g.rientrano.slice(0,4).map(()=>'<i class="dot rientra" title="rientra"></i>'))
+        .concat(g.ritardi.slice(0,3).map(()=>'<i class="dot ritardo" title="in ritardo"></i>'))
+        .concat(g.lavori.slice(0,3).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`))
+        .slice(0,8).join("");
       const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
-      html+=`<div class="cal-cell ${ds===todayStr()?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
+      html+=`<div class="cal-cell ${ds===oggi?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
+    /* la riga di oggi sopra il mese: quello che serve sapere appena entri */
+    const o=giornoDi(oggi,oggi), box=$("#cal-oggi");
+    if(box) box.innerHTML=
+      `<button class="cal-oggi-b esce"   data-action="open-day" data-d="${oggi}"><b>${o.escono.length}</b> escono oggi</button>`+
+      `<button class="cal-oggi-b rientra" data-action="open-day" data-d="${oggi}"><b>${o.rientrano.length}</b> rientri previsti</button>`+
+      `<button class="cal-oggi-b ritardo" data-action="open-day" data-d="${oggi}"><b>${o.ritardi.length}</b> in ritardo</button>`;
   }
 
-  function openDay(ds){
-    const jobs=calJobs.filter(l=>l.data_prevista===ds);
-    const list=jobs.length?jobs.map(j=>{const sf=j.stato==="fatto";
-      return `<div class="day-job"><i class="dot ${sf?'done':'todo'}"></i>
-        <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
-        <span class="stato ${sf?'fatto':'da_fare'}">${sf?'Fatto':'Da fare'}</span></div>`;}).join("")
-      :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
-    openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
-      <div class="field"><label>📌 Nota / promemoria del giorno</label>
-        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(db().note[ds]||"")}</textarea></div>
+  /* cosa succede in un giorno: la stessa risposta serve al mese, alla
+     scheda della giornata, alla stampa e al PDF. Sta scritta una volta. */
+  function giornoDi(ds,oggi){
+    oggi=oggi||todayStr();
+    return {
+      escono:    calNol.filter(x=>x.data_uscita===ds),
+      rientrano: calNol.filter(x=>x.data_rientro_prevista===ds&&!x.data_rientro_effettivo),
+      /* «in ritardo» si conta solo sui giorni gia' passati: nel futuro
+         nessuno e' ancora in ritardo */
+      ritardi:   ds<=oggi?calNol.filter(x=>!x.data_rientro_effettivo&&x.data_rientro_prevista&&
+                                           x.data_rientro_prevista<ds):[],
+      lavori:    calJobs.filter(l=>l.data_prevista===ds)
+    };
+  }
+
+  function leggiGiornata(ds){
+    const g=giornoDi(ds);
+    return Object.assign({id:ds,nota:db().note[ds]||""},g);
+  }
+
+  /* la scheda della giornata, a tutta pagina come tutte le altre */
+  function apriGiornata(ds){
+    const g=leggiGiornata(ds);
+    const riga=(x,tipo,sotto)=>`<div class="nol-card riga-gior ${tipo}">
+      <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
+        <span class="nol-eti" style="background:${tipo==='ritardo'?'#c62828':tipo==='esce'?'#e65100':'#1565c0'}">${tipo==='ritardo'?'IN RITARDO':tipo==='esce'?'ESCE':'RIENTRA'}</span></div>
+      <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+      <div class="sub2">${sotto}</div>
+      ${nolPulsanti("noleggio",x.id)}</div>`;
+    const vuoto=t=>`<p class="gior-vuoto">${t}</p>`;
+    let h="";
+    h+=`<div class="mini-title">Escono oggi (${g.escono.length})</div>`;
+    h+=g.escono.length?g.escono.map(x=>riga(x,"esce",
+        "Rientro previsto: "+(x.data_rientro_prevista?fdate(x.data_rientro_prevista):"non indicato"))).join("")
+      :vuoto("Nessun mezzo esce in questa data.");
+    h+=`<div class="mini-title">Rientri previsti (${g.rientrano.length})</div>`;
+    h+=g.rientrano.length?g.rientrano.map(x=>riga(x,"rientra",
+        "Uscito il "+(x.data_uscita?fdate(x.data_uscita):"—")+
+        " · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare"))).join("")
+      :vuoto("Nessun rientro previsto in questa data.");
+    if(g.ritardi.length){
+      h+=`<div class="mini-title">Ancora fuori, in ritardo (${g.ritardi.length})</div>`;
+      h+=g.ritardi.map(x=>riga(x,"ritardo",
+        "Doveva rientrare il "+fdate(x.data_rientro_prevista))).join("");
+    }
+    h+=`<div class="mini-title">Lavori (${g.lavori.length})</div>`;
+    h+=g.lavori.length?g.lavori.map(j=>`<div class="nol-card riga-gior lavoro">
+        <div class="tit"><strong>${esc(j.descrizione||"(senza descrizione)")}</strong>
+          <span class="nol-eti" style="background:${j.stato==='fatto'?'#2e7d32':'#757575'}">${(statoLabel[j.stato]||j.stato||"").toUpperCase()}</span></div>
+        ${nolPulsanti("fattura",j.id)}
+      </div>`).join("")
+      :vuoto("Nessun lavoro in questa data.");
+    openSheet(`<h3>${esc(nolTitolo("giornata",g))}</h3>${nolPulsantiScheda("giornata",ds,["nol-pdf","nol-stampa"])}
+      ${h}
+      <div class="field" style="margin-top:18px"><label>📌 Nota / promemoria del giorno</label>
+        <textarea id="day-note" placeholder="Es. chiamare il cliente, portare la ricarica del gasolio...">${esc(g.nota)}</textarea></div>
       <div class="sheet-actions">
         <button class="b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
         <button class="b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
   }
+  function openDay(ds){ return apriGiornata(ds); }
 
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
@@ -2071,7 +2570,7 @@
           <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input id="j-imp" inputmode="decimal" value="${job.importo==null?"":String(job.importo).replace(".",",")}" placeholder="0,00"></div>
         <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
           <button class="b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
@@ -2131,7 +2630,10 @@
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
       if(!descrizione||!data_prevista){toast("Compila Descrizione e Data");return;}
-      const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
+      /* ⚠️ 22 agosto 2026 — qui «1250,50» diventava ZERO, senza un avviso:
+         la casella era type="number" (che con la virgola torna vuota) e si
+         leggeva con +valore. Adesso e' una casella normale letta da _numIt. */
+      const importo=_numIt($("#j-imp")?$("#j-imp").value:"");
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
@@ -2487,6 +2989,19 @@
     if(a==="save-prod")     return salvaProdotto(id);
     if(a==="save-forn")     return salvaFornitore(id);
     if(a==="save-mov")      return salvaMovimento(id);
+    if(a==="save-mag")      return salvaMagazzino(id);
+    if(a==="save-fatt")     return salvaFattura(id);
+    if(a==="cest-apri")     return schedaCestino(+t.dataset.i);
+    if(a==="cest-su")       return cestRimetti(+t.dataset.i);
+    if(a==="cest-mai")      return cestPerSempre(+t.dataset.i);
+    /* il meno e il piu' della giacenza: cambiano solo la casella, si scrive
+       sul database quando si preme Salva. Cosi' «Annulla» annulla davvero. */
+    if(a==="mag-meno"||a==="mag-piu"){
+      const c=$("#ng-quantita"); if(!c) return;
+      const n=_numIt(c.value)+(a==="mag-piu"?1:-1);
+      c.value=String(Math.max(0,n)).replace(".",",");
+      return;
+    }
     if(a==="reparti")return goHome();
     if(a==="azienda")return aziendaForm();
     if(a==="save-azienda")return saveAzienda();
@@ -2584,35 +3099,29 @@
     nolScriviFreccia();
   });
 
+  /* ⛔ 22 agosto 2026 — tolti quattro ascoltatori morti (.nol-edit, .prod-edit,
+     .forn-edit, .mov-edit): cercavano pulsanti che sulla riga non ci sono piu'.
+     Peggio, cancellavano senza controllare user_id. Adesso tutto passa da
+     nolElimina, che il controllo ce l'ha. */
   async function loadProdotti(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_prodotti")
-      .select("id,nome,prezzo,quantita,categoria,soglia_minima,codice,note")
+      .select("*")
       .eq("user_id",sbUid).order("nome");
     const prods=data||[], box=$("#prodotti-body");
     if(!box) return;
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto. Aggiungine uno.</p>';return;}
-    box.innerHTML=prods.map(p=>`
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
-        <strong>${p.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${p.prezzo??0} · Q.tà ${p.quantita??0}${p.codice?" · cod. "+p.codice:""}</div>
+    box.innerHTML=prods.map(p=>{
+      const sotto=(p.quantita??0)<=(p.soglia_minima??0);
+      return `<div class="nol-card" style="border-top-color:${sotto?"#c62828":"#1565c0"}">
+        <div class="tit"><strong>${esc(p.nome||"—")}</strong>
+          ${sotto?'<span class="nol-eti" style="background:#c62828">SOTTO SCORTA</span>':""}</div>
+        <div class="sub">${esc([p.categoria||"",_eur(p.prezzo)+" / "+(p.unita||"pz"),"in magazzino "+(p.quantita??0)+" "+(p.unita||"pz")].filter(Boolean).join(" · "))}</div>
+        ${p.codice?`<div class="sub2">cod. ${esc(p.codice)}</div>`:""}
         ${nolPulsanti("prodotto",p.id)}
-      </div>`).join("");
+      </div>`;}).join("");
   }
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
-  $("#prodotti-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".prod-edit"), del=e.target.closest(".prod-del");
-    if(del){
-      if(!confirm("Eliminare questo prodotto?"))return;
-      const {error}=await sb.from("neg_prodotti").delete().eq("id",del.dataset.id);
-      if(error){alert("Errore: "+error.message);return;}
-      loadProdotti();return;
-    }
-    if(ed){
-      const {data}=await sb.from("neg_prodotti").select("*").eq("id",ed.dataset.id).single();
-      if(data) schedaProdotto(data);
-    }
-  });
   async function loadMagazzino(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_prodotti")
@@ -2622,24 +3131,18 @@
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto in magazzino.</p>';return;}
     box.innerHTML=prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${sotto?'#c62828':'#2e537d'};padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div><strong>${p.nome||"—"}</strong>${sotto?' <span style="background:#c62828;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;margin-left:6px">SOTTO SCORTA</span>':''}<div style="color:#666;font-size:13px;margin-top:2px">Soglia min: ${s}</div></div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <button class="mag-btn" data-id="${p.id}" data-d="-1" style="width:36px;height:36px;border:none;border-radius:8px;background:#e0e0e0;font-size:20px;cursor:pointer">−</button>
-          <span style="font-size:22px;font-weight:700;min-width:32px;text-align:center">${q}</span>
-          <button class="mag-btn" data-id="${p.id}" data-d="1" style="width:36px;height:36px;border:none;border-radius:8px;background:#0066ff;color:#fff;font-size:20px;cursor:pointer">+</button>
-        </div></div>`;
+      return `<div class="nol-card" style="border-top-color:${sotto?"#c62828":"#2e7d32"}">
+        <div class="tit">
+          <div><strong>${esc(p.nome||"—")}</strong>
+            <div class="sub2">Scorta minima: ${esc(String(s))}</div></div>
+          <div style="text-align:right">
+            <span style="font-size:26px;font-weight:700;line-height:1">${esc(String(q))}</span>
+            ${sotto?'<div><span class="nol-eti" style="background:#c62828">SOTTO SCORTA</span></div>':""}
+          </div>
+        </div>
+        ${nolPulsanti("magazzino",p.id)}</div>`;
     }).join("");
   }
-  $("#magazzino-body")?.addEventListener("click",async e=>{
-    const b=e.target.closest(".mag-btn"); if(!b) return;
-    const id=b.dataset.id, d=parseInt(b.dataset.d);
-    const cur=parseInt(b.parentElement.querySelector("span").textContent)||0;
-    const nuova=Math.max(0,cur+d);
-    const {error}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",id);
-    if(error){alert("Errore: "+error.message);return;}
-    loadMagazzino();
-  });
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
   async function loadFornitori(){
     if(!(sb&&sbUid)) return;
@@ -2649,28 +3152,15 @@
     if(!box) return;
     if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
     box.innerHTML=f.map(x=>`
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
-        <strong>${x.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
-        ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
-        ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
+      <div class="nol-card" style="border-top-color:#1565c0">
+        <div class="tit"><strong>${esc(x.nome||"—")}</strong></div>
+        <div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
+        ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}
         ${nolPulsanti("fornitore",x.id)}
       </div>`).join("");
   }
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
-  $("#fornitori-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".forn-edit"), del=e.target.closest(".forn-del");
-    if(del){
-      if(!confirm("Eliminare questo fornitore?"))return;
-      const {error}=await sb.from("neg_fornitori").delete().eq("id",del.dataset.id);
-      if(error){alert("Errore: "+error.message);return;}
-      loadFornitori();return;
-    }
-    if(ed){
-      const {data}=await sb.from("neg_fornitori").select("*").eq("id",ed.dataset.id).single();
-      if(data) schedaFornitore(data);
-    }
-  });
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_movimenti")
@@ -2679,29 +3169,19 @@
     if(!box) return;
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun movimento.</p>';return;}
     box.innerHTML=m.map(x=>{
-      const vend=x.tipo==="vendita", col=vend?"#2e537d":"#e65100", fre=vend?"↑":"↓", et=vend?"VENDITA":"ORDINE";
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${col};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center"><strong>${fre} ${x.prodotto||"—"}</strong><span style="background:${col};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${et}</span></div>
-        <div style="color:#666;font-size:14px;margin-top:4px">Q.tà ${x.quantita??0} · € ${x.importo??0}${x.controparte?" · "+x.controparte:""}</div>
-        <div style="color:#888;font-size:13px;margin-top:2px">${x.data_mov||""}${x.note?" · "+x.note:""}</div>
+      const ETI={vendita:["#2e7d32","↑","VENDITA"],acquisto:["#e65100","↓","ACQUISTO"],
+                 reso:["#757575","↩","RESO"],rettifica:["#1565c0","≈","RETTIFICA"]};
+      const [col,fre,et]=ETI[x.tipo]||ETI.acquisto;
+      return `<div class="nol-card" style="border-top-color:${col}">
+        <div class="tit"><strong>${fre} ${esc(x.prodotto||"—")}</strong>
+          <span class="nol-eti" style="background:${col}">${et}</span></div>
+        <div class="sub">${esc("Q.tà "+(x.quantita??0)+" · "+_eur(x.importo)+(x.controparte?" · "+x.controparte:""))}</div>
+        <div class="sub2">${esc(fdate(x.data_mov)+(x.note?" · "+x.note:""))}</div>
         ${nolPulsanti("movimento",x.id)}
       </div>`;
     }).join("");
   }
   $('[data-tab="movimenti"]')?.addEventListener("click",loadMovimenti);
-  $("#movimenti-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".mov-edit"), del=e.target.closest(".mov-del");
-    if(del){
-      if(!confirm("Eliminare questo movimento?"))return;
-      const {error}=await sb.from("neg_movimenti").delete().eq("id",del.dataset.id);
-      if(error){alert("Errore: "+error.message);return;}
-      loadMovimenti();return;
-    }
-    if(ed){
-      const {data}=await sb.from("neg_movimenti").select("*").eq("id",ed.dataset.id).single();
-      if(data) schedaMovimento(data);
-    }
-  });
 
   /* 6 agosto 2026 — Margine dal vivo: quanto ci guadagni su ogni pezzo.
      Si aggiorna mentre scrivi il prezzo di acquisto o quello di vendita. */
