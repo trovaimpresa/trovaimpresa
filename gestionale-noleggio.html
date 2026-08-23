@@ -1404,7 +1404,7 @@
 
   const NOL_TIPI={
     mezzo:  {tab:"nol_mezzi",   che:"Mezzo",   ricarica:()=>loadMezzi(),      scheda:d=>schedaMezzo(d)},
-    cliente:{tab:"nol_clienti", che:"Cliente", ricarica:()=>loadClientiNol(), scheda:d=>schedaClienteNol(d)},
+    cliente:{tab:"gest_clienti",che:"Cliente", ricarica:()=>loadClientiNol(), scheda:d=>schedaClienteNol(d)},
     noleggio:{tab:"nol_noleggi",che:"Noleggio",ricarica:()=>loadNoleggi(),    scheda:d=>schedaNoleggio(d)},
     prodotto:{tab:"neg_prodotti", che:"Prodotto", ricarica:()=>loadProdotti(),  scheda:d=>schedaProdotto(d)},
     fornitore:{tab:"neg_fornitori",che:"Fornitore",ricarica:()=>loadFornitori(),scheda:d=>schedaFornitore(d)},
@@ -2027,9 +2027,11 @@
       indirizzo:$("#ncl-indirizzo").value.trim()||null,
       piva:$("#ncl-piva").value.trim()||null,
       note:$("#ncl-note").value.trim()||null};
+    /* un cliente nuovo nasce nel reparto in cui stai, cosi' lo vede anche
+       il gestionale imprese; modificandone uno il reparto non si tocca */
     const {error}=id
-      ? await sb.from("nol_clienti").update(dati).eq("id",id).eq("user_id",sbUid)
-      : await sb.from("nol_clienti").insert({user_id:sbUid,...dati});
+      ? await sb.from("gest_clienti").update(dati).eq("id",id).eq("user_id",sbUid)
+      : await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),...dati});
     if(error){toast("Errore: "+error.message);return;}
     closeSheet(); loadClientiNol(); toast(id?"Cliente aggiornato ✔":"Cliente aggiunto ✔");
   }
@@ -2251,7 +2253,7 @@
     const [{data:az},{data:mz},{data:cl}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
       n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
-      n.cliente_id ? sb.from("nol_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
+      n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
     ]);
     const A=az||{}, M=mz||{}, C=cl||{};
     const caldo=(n.tipo_nolo==="caldo");
@@ -2543,7 +2545,7 @@
     const [{data:az},{data:mz},{data:cl},{data:med}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
       n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
-      n.cliente_id ? sb.from("nol_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null}),
+      n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null}),
       sb.from("nol_media").select("genere,momento").eq("user_id",sbUid).eq("noleggio_id",n.id)
     ]);
     const A=az||{}, M=mz||{}, C=cl||{};
@@ -2612,7 +2614,7 @@
     const [{data:az},{data:mz},{data:cl}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
       n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
-      n.cliente_id ? sb.from("nol_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
+      n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
     ]);
     const A=az||{}, M=mz||{}, C=cl||{};
     const num =rientro?n.ddt_rientro_num :n.ddt_uscita_num;
@@ -3057,9 +3059,20 @@
   /* ⛔ tolto il quinto ascoltatore morto (.mezzo-edit): cercava pulsanti che
      sulla riga non ci sono piu' e cancellava senza controllare user_id. */
 
+  /* ⛔ 23 agosto 2026 — UN SOLO ELENCO CLIENTI.
+     Fino a oggi il noleggio aveva i suoi clienti in «nol_clienti» e il
+     gestionale imprese i suoi in «gest_clienti»: chi noleggiava a Rossi ce
+     l'aveva scritto due volte, e cambiandogli il telefono lo cambiava in un
+     posto solo. Deciso da Alessio: si uniscono. Adesso il noleggio legge e
+     scrive «gest_clienti», come tutto il resto (sql/clienti-uno-solo.sql).
+
+     ⚠️ QUI NON SI FILTRA PER REPARTO, e non e' una dimenticanza: il
+     gestionale imprese tiene i clienti divisi per reparto apposta, ma per
+     chi noleggia un cliente e' un cliente, di qualunque reparto sia. Un
+     cliente nuovo creato da qui nasce nel reparto in cui stai. */
   async function loadClientiNol(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("nol_clienti")
+    const {data}=await sb.from("gest_clienti")
       .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
     const c=data||[], box=$("#clienti-nol-body");
     if(!box) return;
@@ -3081,7 +3094,7 @@
        collegamento — e senza collegamento il conto non si puo' piu' rifare.
        Il nome si porta dietro lo stesso, per le schermate e per lo storico. */
     const {data:mz}=await sb.from("nol_mezzi").select("*").eq("user_id",sbUid).order("nome");
-    const {data:cl}=await sb.from("nol_clienti").select("id,nome").eq("user_id",sbUid).order("nome");
+    const {data:cl}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).order("nome");
     nolMezzi=mz||[];
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
     if(selM)selM.innerHTML='<option value="">— Seleziona mezzo —</option>'+nolMezzi.map(x=>`<option value="${x.id}" data-nome="${esc(x.nome||"")}">${esc(x.nome||"")}</option>`).join("");
@@ -3115,19 +3128,9 @@
     }).join("");
   }
   $('[data-tab="noleggi"]')?.addEventListener("click",()=>{loadNoleggi().then(nolAggiornaConto);});
-  $("#clienti-nol-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".clinol-edit"), del=e.target.closest(".clinol-del");
-    if(del){
-      if(!confirm("Eliminare questo cliente?"))return;
-      const {error}=await sb.from("nol_clienti").delete().eq("id",del.dataset.id);
-      if(error){alert("Errore: "+error.message);return;}
-      loadClientiNol();return;
-    }
-    if(ed){
-      const {data}=await sb.from("nol_clienti").select("*").eq("id",ed.dataset.id).single();
-      if(data) schedaClienteNol(data);
-    }
-  });
+  /* ⛔ tolto il sesto ascoltatore morto (.clinol-edit): cercava pulsanti che
+     non ci sono piu', cancellava senza controllare user_id, e dal 23 agosto
+     avrebbe pure guardato nella tabella sbagliata. */
 
   function jobCard(l){
     const c=cliById(l.clienteId), d=dipById(l.assegnatoId), dove=l.dove||(c&&c.indirizzo)||"";
@@ -3413,7 +3416,7 @@
      ================================================================ */
   const CEST_COSE=[
     {t:"nol_mezzi",     lab:"Mezzo",           tipo:"mezzo",     col:"#2e7d32"},
-    {t:"nol_clienti",   lab:"Cliente",         tipo:"cliente",   col:"#1565c0"},
+    {t:"gest_clienti",  lab:"Cliente",         tipo:"cliente",   col:"#1565c0"},
     {t:"nol_noleggi",   lab:"Noleggio",        tipo:"noleggio",  col:"#e65100"},
     {t:"neg_prodotti",  lab:"Prodotto",        tipo:"prodotto",  col:"#1565c0"},
     {t:"neg_fornitori", lab:"Fornitore",       tipo:"fornitore", col:"#1565c0"},
