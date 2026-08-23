@@ -944,7 +944,16 @@
     /* ⚠️ il «!important» serve: piu' su, dentro @media 768, c'e'
        «.navbar{ flex-wrap:nowrap !important }», e senza questo i pulsanti
        restano incollati in fila e il secondo esce dal bordo destro. */
-    .nav-sinistra{ gap:8px 10px; flex-wrap:wrap !important; flex-shrink:1 !important; min-width:0; }
+    /* ⚠️ 23 agosto 2026, sera — «Accedi al tuo pannello» USCIVA DAL SUO RIQUADRO.
+       La colonna di sinistra si stringeva fino a 146 px, perche' i link di
+       destra si prendevano lo spazio, e il pulsante veniva schiacciato con
+       dentro una scritta che non va a capo (white-space:nowrap): la «o» finale
+       finiva oltre il bordo azzurro. Misurato: gli servivano 167 px, ne aveva
+       142. Adesso la colonna NON si stringe: tiene la larghezza dei due
+       pulsanti, e sono i link di destra ad andare a capo — cosa che sanno gia'
+       fare da soli, perche' hanno flex-wrap:wrap. */
+    .nav-sinistra{ gap:8px 10px; flex-wrap:wrap !important; flex-shrink:0 !important; }
+    .nav-login, .nav-iscriviti{ flex-shrink:0 !important; }
     /* 23 agosto 2026: era 12px, sotto il minimo del progetto. Portato a 13. */
     .nav-login{ font-size:13px; padding:6px 9px; }
     .nav-login::before{ width:13px; height:13px; }
