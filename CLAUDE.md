@@ -15047,3 +15047,141 @@ lucchetto del piano).
 ⚠️ `prove/porta-gestionale` e `prove/dati-che-si-perdono` sono **lenti**:
 aspettano davvero la rete che non risponde e accendono Postgres. Un giro
 completo di sabotaggi è una ventina di minuti.
+
+
+---
+
+# 23 AGOSTO 2026 — IL GESTIONALE NOLEGGIO, LA GIORNATA INTERA
+
+Undici lavori, tutti su `gestionale-noleggio.html` (da 182 KB a ~360 KB) più
+`js/cestino.js`, `js/gate-gestionale.js` e otto query SQL. Il banco è passato
+da **152 prove a 827**, più un **banco del PDF** nuovo (25 prove).
+
+## Quello che c'è adesso, in ordine di giornata
+
+1. **Le sei sezioni mancanti** finite con lo stesso stampo (Prodotti,
+   Magazzino, Fornitori, Movimenti, Calendario, Fatture): la sezione si apre
+   con l'ELENCO, sulla riga solo «Apri», la scheda è a tutta pagina con
+   «← Indietro» in cima e Copia · PDF · Stampa · Elimina sotto il titolo.
+2. **Il cancello** (`js/gate-gestionale.js`): il noleggio non ne aveva
+   nessuno — chiunque apriva l'indirizzo entrava. Estratto da
+   `gestionale-app.html` e usato da tutti e due, così non si scollano.
+3. **Il lucchetto del piano** sulle sette tabelle `nol_*` / `neg_*`
+   (`sql/noleggio-lucchetto-piano.sql`): avevano RLS ma nessuna regola
+   guardava il piano. Riusa `gest_blocco_piano()`, non ne scrive un secondo.
+4. **Le scadenze del mezzo** (verifica periodica, assicurazione, revisione,
+   collaudo, tagliando a ore, fuori servizio). ⛔ Verifica o assicurazione
+   scadute **bloccano** il salvataggio di un noleggio aperto. Patentini
+   scaduti e mezzi promessi due volte: **avvisano**, non bloccano.
+5. **Le prenotazioni** (`fase`: prenotato · fuori · rientrato) e il controllo
+   delle sovrapposizioni.
+6. **Il contratto, i due verbali e i due DDT**, con un motore solo
+   (`nolDocStampa` / `nolDocPdf`, blocchi `testata|coppie|testo|tabella|
+   numerato|firme`). Art. 72 c.1 e c.2 D.Lgs 81/08, clausole vessatorie
+   1341-1342 c.c. con la seconda firma, DDT «a titolo di noleggio» ex DPR
+   472/1996.
+7. **Foto e video** (`nol_media`), con riduzione lato browser.
+8. **Un solo elenco clienti**: `nol_clienti` è stata svuotata dentro
+   `gest_clienti` (`sql/clienti-uno-solo.sql`). ⚠️ Il noleggio NON filtra per
+   reparto, e non è una dimenticanza: per chi noleggia un cliente è un
+   cliente.
+9. **Le cauzioni** (`sql/noleggio-cauzioni.sql`): registro di quanto hai in
+   mano, forma (contanti/assegno/bonifico/carta/fideiussione), svincolo al
+   rientro coi danni scalati, **ricevuta di deposito** e **quietanza di
+   svincolo** in stampa e PDF. ⛔ Nel Riepilogo stanno in una casella a
+   parte: non sono incassi, sono un debito verso il cliente.
+10. **Cerca ed esporta in Excel** su nove elenchi. Scritta una volta sola:
+    una sezione nuova la eredita. La ricerca guarda il testo della riga;
+    l'esportazione esporta **quello che vedi**, con le colonne del foglio
+    stampato (`nolRighe`).
+11. **Le fatture del noleggio** (`sql/noleggio-fatture.sql`): differita
+    riepilogativa ex art. 21 c.4 lett. a DPR 633/72, coi **ratei** per i
+    noleggi a cavallo di due mesi. Il numero si prende dal contatore
+    dell'azienda **solo quando esce dalla bozza**. Un noleggio fatturato si
+    porta scritto su quale fattura è finito.
+12. **La videocamera dentro il gestionale** e **la firma col dito** (sotto).
+
+## ⛔ TRE COSE DA NON DIMENTICARE MAI PIÙ
+
+### 1. Il tetto del deposito è 50 MB per file — e un iPhone ne fa 150
+`storage.buckets`: `gestionale-video` accetta **50 MB**, `gestionale-foto` 15.
+Un minuto girato con l'app Fotocamera di un iPhone pesa 100–150 MB: **non si
+carica proprio**. E Safari non sa rimpicciolire un video dopo
+(`captureStream` su un `<video>` non ce l'ha).
+
+Perciò il video si gira **dentro il gestionale** («● Registra qui il video»,
+720p, 1,2 Mbps, audio 64 kbps mono → ~10 MB al minuto). Freni: tre minuti e
+45 MB, poi ferma da solo. La fotocamera si spegne appena si chiude.
+
+⚠️ **La compressione lato server è stata valutata e messa da parte**: con i
+video che nascono piccoli servirebbe solo per quelli presi dalla galleria
+sotto i 50 MB, in cambio di ffmpeg (30 MB) dentro le funzioni Netlify e di
+una cosa provabile solo online. Se un giorno serve, la strada è una
+`*-background.js` (15 minuti di tetto) con `external_node_modules =
+["ffmpeg-static"]`.
+
+### 2. Il PDF non era MAI stato provato — e aveva due difetti
+Il banco dello schermo **blocca cdnjs apposta** (per controllare che la
+pagina si apra senza internet), e jsPDF viene da lì: quindi ogni prova sui
+documenti guardava la **stampa su carta**, mai il PDF. La prima volta che è
+stato scaricato per davvero, su fogli che il cliente firma:
+
+- «⚠️ Nessuna foto allegata» diventava **«& þ Nessuna foto allegata»** — le
+  font standard del PDF non sanno scrivere le faccine;
+- «Documenti a bordo: libretto, dichiarazione CE» usciva **tagliato**, perché
+  le celle si scrivevano su una riga sola;
+- le colonne erano fisse per quattro: una tabella da tre finiva all'84%;
+- sotto la riga della firma **mancava il nome**, che sulla carta c'era.
+
+Tutti sistemati. Adesso c'è `prove/noleggio-prezzo/pdf.js` (25 prove): serve
+jsPDF da `banco/vendor/`, scarica i cinque documenti veri e li rilegge con
+`pdftotext`. Fra le prove c'è «nessun carattere storpiato».
+
+⛔ **La regola che ne esce: se un foglio si può scaricare, il banco lo deve
+scaricare.** Guardare l'anteprima non basta.
+
+### 3. Un nome scritto non è una firma
+Sul verbale c'era scritto un nome. Chi contesta i danni dice «io non ho
+firmato niente», e ha ragione: il verbale vale perché è redatto in
+contraddittorio e **sottoscritto**. Adesso si firma col dito in quattro
+punti (verbale consegna, verbale rientro, contratto, **seconda firma delle
+clausole vessatorie**), e il disegno finisce dentro il foglio sopra la riga,
+in stampa e in PDF, col nome sotto.
+
+⚠️ La firma si **ritaglia intorno al segno** prima di salvarla: la tela
+intera pesava 250 KB e faceva PDF da tre quarti di mega. Ritagliata: poche
+decine di KB. E `touch-action:none` sulla tela, se no sul telefono il dito
+scorre la pagina invece di disegnare.
+
+## Le query eseguite oggi (tutte confermate da Alessio)
+`noleggio-cestino` · `noleggio-foto-video` · `noleggio-contratto` ·
+`noleggio-fotografia-lucchetti` · `noleggio-lucchetto-piano` ·
+`noleggio-verbale-ddt` · `noleggio-scadenze-mezzo` · `noleggio-prenotazioni` ·
+`clienti-fotografia` · `clienti-uno-solo` · `noleggio-cauzioni` ·
+`noleggio-fatture` · `noleggio-firme` · più la pulizia delle righe degli
+account cancellati (15 righe buttate, adesso zero orfani).
+
+## ⚠️ INCIAMPI DELLA GIORNATA — da non ripetere
+- **I file non arrivavano in cartella.** Per un'ora si è girato a vuoto
+  perché il download dalla chat non veniva mai fatto. ⛔ **Da adesso i file
+  si scrivono direttamente nella cartella** con `device_commit_files`, e si
+  verifica l'md5 sul posto con `device_bash`. Non si chiede ad Alessio di
+  scaricare niente.
+- **Una migrazione si è fermata due volte**, e tutte e due le volte aveva
+  ragione: una riga di un account cancellato, e un noleggio che puntava a un
+  cliente non spostato. Ogni blocco stava in una transazione ed è tornato
+  indietro da solo.
+- **`display=""` non riaccende niente** se il foglio di stile dice
+  `display:none`: ci vuole il valore vero (`inline-block`).
+
+## Cosa resta sul noleggio, in ordine
+1. **Il collaudo vero**, sui dati di Alessio: un giro completo — contratto →
+   firma → DDT → video → rientro → verbale firmato → svincolo cauzione →
+   fattura del mese. Non è ancora stato fatto.
+2. **Avviso quando lo spazio si riempie**, e cosa fare delle foto vecchie.
+3. **Portale cliente**: un link dove il cliente vede i suoi noleggi e le sue
+   carte.
+4. **Modulo ponteggi** (PiMUS, libretto), **telematica dei mezzi**.
+5. Quando Alessio avrà i modelli **Assodimi/ANCE**, sostituire il contratto e
+   le condizioni scritte da noi con quelli ufficiali.
+6. Un solo orfano rimasto in `nol_clienti`: già ripulito il 23 agosto.
