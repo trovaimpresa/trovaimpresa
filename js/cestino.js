@@ -109,7 +109,12 @@
        dentro non c'erano, e tutto quello che si cancellava dal gestionale
        noleggio spariva davvero. */
     "nol_mezzi", "nol_clienti", "nol_noleggi",
-    "neg_prodotti", "neg_fornitori", "neg_movimenti"
+    "neg_prodotti", "neg_fornitori", "neg_movimenti",
+    /* 23 agosto 2026 — le foto e i video del noleggio (nol_media). Sono la
+       prova di com'era il mezzo alla consegna: se si cancellano per sbaglio
+       la discussione sui danni e' persa. La colonna «eliminato_il» e' stata
+       creata con sql/noleggio-foto-video.sql (risposta: tabella 1, regole 4). */
+    "nol_media"
   ];
 
   var COL = "eliminato_il";

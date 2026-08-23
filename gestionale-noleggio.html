@@ -52,7 +52,13 @@
   .brand small{display:block;font-size:11px;font-weight:500;opacity:.85;letter-spacing:.3px;text-transform:uppercase}
   .btn-new{background:#fff;color:var(--accent-d);border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12)}
   .btn-new:active{transform:translateY(1px)}
-  nav.tabs{display:flex;gap:2px;max-width:none;margin:12px auto 0;padding:0 16px;overflow-x:auto}
+  /* ⚠️ 23 agosto 2026 — con «Foto e video» le voci sono diventate dodici e
+     l'ultima finiva TAGLIATA fuori dallo schermo: c'era lo scorrimento di
+     lato, ma su un computer nessuno pensa di trascinare una barra di menu.
+     Sopra i 900 px le voci vanno a capo; sotto, sul telefono, restano su
+     una riga sola che scorre, come prima. */
+  nav.tabs{display:flex;flex-wrap:wrap;gap:2px 0;max-width:none;margin:12px auto 0;padding:0 16px;overflow-x:auto}
+  @media(max-width:900px){nav.tabs{flex-wrap:nowrap}}
   nav.tabs button{flex:0 0 auto;background:none;border:none;color:rgba(255,255,255,.78);font-size:14px;font-weight:600;padding:8px 13px 12px;cursor:pointer;border-bottom:3px solid transparent}
   nav.tabs button.active{color:#fff;border-bottom-color:#fff}
 
@@ -244,6 +250,7 @@
       <button data-tab="calendario">Calendario</button>
       <button data-tab="lavori" style="display:none">Lavori</button>
       <button data-tab="fatture">Fatture</button>
+      <button data-tab="media">Foto e video</button>
       <button data-tab="cestino">Cestino<span class="tab-cnt" id="cnt-cestino"></span></button>
       <button data-tab="galleria" style="display:none">Galleria</button>
       <button data-tab="clienti" style="display:none">Condomini</button>
@@ -360,6 +367,15 @@
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
+    </section>
+
+    <section id="media">
+      <div class="sec-head"><h2>Foto e video</h2></div>
+      <div class="gal-intro">Com'è uscito e com'è tornato. Si fotografa e si filma il mezzo alla consegna, e di nuovo al rientro: se al rientro c'è un danno che prima non c'era, la prova sta qui. Le foto vengono rimpicciolite da sole e i video ridotti, per non riempire lo spazio.</div>
+      <input type="text" id="media-search" placeholder="Cerca: mezzo o cliente" autocomplete="off" spellcheck="false"
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+      <div id="media-peso" style="font-size:14px;color:#666;margin-bottom:14px"></div>
+      <div id="media-body" class="nol-elenco"></div>
     </section>
 
     <section id="cestino">
@@ -482,6 +498,18 @@
 .nol-card.esce{border-top-color:#e65100} .nol-card.rientra{border-top-color:#1565c0}
 .nol-card.ritardo{border-top-color:#c62828} .nol-card.lavoro{border-top-color:#757575}
 .gior-vuoto{color:#666;font-size:14px;margin:0 0 14px}
+/* le anteprime di foto e video */
+.media-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+.media-cella{background:#fff;border:1px solid #e6ecf3;border-radius:10px;overflow:hidden}
+.media-apri{display:block;width:100%;height:110px;border:none;padding:0;cursor:pointer;
+  background:#e6ecf3;overflow:hidden}
+.media-apri img{width:100%;height:110px;object-fit:cover;display:block}
+.media-play{display:flex;align-items:center;justify-content:center;width:100%;height:110px;
+  font-size:32px;color:#26415f;background:#dbe6f1}
+.media-sotto{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  padding:6px 8px;font-size:13px;color:#666}
+.media-x{border:none;background:none;color:#c62828;font-size:20px;line-height:1;
+  cursor:pointer;font-family:inherit;padding:0 2px}
 /* il pallino sulla voce Cestino del menu */
 .tab-cnt{display:none;margin-left:7px;background:#fff;color:#0047b3;font-size:13px;
   font-weight:700;padding:1px 8px;border-radius:10px;vertical-align:middle}
@@ -1150,6 +1178,10 @@
     fattura:{tab:"gest_lavori",che:"Fattura",femm:true,ricarica:()=>{renderFatture();renderCal();},
              scheda:d=>schedaFattura(d),
              avviso:"Sparisce anche il lavoro collegato."},
+    /* «media» serve solo a far funzionare «Apri» sull'elenco delle foto:
+       la sua scheda non ha ne' Copia ne' Elimina, quindi da qui non si
+       puo' cancellare un noleggio per sbaglio. */
+    media:{tab:"nol_noleggi",che:"Foto e video",ricarica:()=>loadMedia(),scheda:d=>schedaMedia(d)},
     /* La giornata non e' una riga del database: e' quello che succede in un
        giorno. Ha un suo lettore, e si stampa come tutto il resto. */
     giornata:{che:"Giornata", ricarica:()=>renderCal(), scheda:d=>apriGiornata(d.id),
@@ -1236,6 +1268,12 @@
         "  ["+(statoLabel[x.stato]||x.stato||"")+"]");
       if(d.nota) r.push(["Nota del giorno",e(d.nota)]);
     }
+    if(tipo==="media") r=[
+      ["Tipo",d.genere==="video"?"Video":"Foto"],
+      ["Momento",d.momento==="rientro"?"Al rientro":"Alla consegna"],
+      ["Nome del file",e(d.nome_file)],
+      ["Peso",d.byte?mediaPeso(d.byte):null],
+      ["Nota",e(d.nota)]];
     if(tipo==="fornitore") r=[
       ["Nome",e(d.nome)],["Telefono",e(d.telefono)],["Email",e(d.email)],
       ["Indirizzo",e(d.indirizzo)],["P.IVA",e(d.piva)],["Note",e(d.note)]];
@@ -2153,7 +2191,8 @@
     {t:"neg_prodotti",  lab:"Prodotto",        tipo:"prodotto",  col:"#1565c0"},
     {t:"neg_fornitori", lab:"Fornitore",       tipo:"fornitore", col:"#1565c0"},
     {t:"neg_movimenti", lab:"Movimento",       tipo:"movimento", col:"#757575"},
-    {t:"gest_lavori",   lab:"Lavoro / fattura",tipo:"fattura",   col:"#7C3AED"}
+    {t:"gest_lavori",   lab:"Lavoro / fattura",tipo:"fattura",   col:"#7C3AED"},
+    {t:"nol_media",     lab:"Foto o video",    tipo:"media",     col:"#00838f"}
   ];
   let cestCache=[], cestQ="";
 
@@ -2164,7 +2203,7 @@
     ? "Finisce nel Cestino: da lì lo rimetti a posto quando vuoi."
     : "Non si torna indietro.";}
   function cestNome(r){
-    return [r.nome,r.descrizione,r.mezzo,r.prodotto,r.titolo]
+    return [r.nome,r.descrizione,r.mezzo,r.prodotto,r.titolo,r.nome_file]
       .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")||"(senza nome)";
   }
   function cestQuando(iso){
@@ -2284,6 +2323,312 @@
     if($("#cestino")&&$("#cestino").classList.contains("active")) renderCestinoNol();
     else cestSegnaPallino((parseInt($("#cnt-cestino")?$("#cnt-cestino").textContent:"0")||0)+1);
   };
+
+
+  /* ================================================================
+     FOTO E VIDEO DEL NOLEGGIO — 23 agosto 2026
+     Chiesto da Alessio: «si fotografa un mezzo e si fa sempre un video
+     del mezzo, per assicurarsi che quando rientra non presenti danni non
+     dichiarati».
+
+     Due momenti, mai mescolati: COM'E' USCITO e COM'E' TORNATO. E' il
+     confronto fra i due che vale: una foto sola non dimostra niente.
+
+     ⛔ LO SPAZIO. Un video da telefono e' 60-150 MB al minuto: dieci
+     noleggi e il magazzino e' pieno. Percio' qui dentro:
+       · le foto si rimpiccioliscono sempre (1600 px, JPEG 0,7);
+       · i video si RIFANNO piu' piccoli nel browser, 720p senza audio,
+         prima di partire. Dove il browser non sa farlo (succede su certi
+         iPhone) si carica l'originale e lo si dice, invece di far finta.
+     ================================================================ */
+  const MEDIA_BUCKET={foto:"gestionale-foto",video:"gestionale-video"};
+  const MEDIA_FOTO_MAX = 15*1024*1024;   /* prima di rimpicciolire */
+  const MEDIA_VIDEO_MAX= 200*1024*1024;  /* prima di ridurre */
+  const MEDIA_VIDEO_DOPO_MAX = 50*1024*1024; /* dopo aver ridotto: se supera, no */
+  let mediaCache=[], mediaQ="", mediaApertoId=null, mediaUrl={};
+
+  function mediaPeso(b){
+    b=+b||0;
+    /* all'italiana: 3,9 MB e non 3.9 MB */
+    return b>=1048576 ? (b/1048576).toFixed(1).replace(".",",")+" MB"
+                      : Math.max(1,Math.round(b/1024))+" KB";
+  }
+
+  /* ---- le foto: 1600 px e JPEG 0,7, gli stessi numeri del gestionale ---- */
+  function mediaRiduciFoto(file){
+    return new Promise((res,rej)=>{
+      const img=new Image(), rd=new FileReader();
+      rd.onerror=rej;
+      rd.onload=()=>{img.onerror=rej;img.onload=()=>{
+        const max=1600; let w=img.width,h=img.height;
+        if(w>h){if(w>max){h=Math.round(h*max/w);w=max;}}else{if(h>max){w=Math.round(w*max/h);h=max;}}
+        const cv=document.createElement("canvas");cv.width=w;cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        cv.toBlob(b=>b?res(b):rej(new Error("no blob")),"image/jpeg",0.7);
+      };img.src=rd.result;};
+      rd.readAsDataURL(file);
+    });
+  }
+
+  /* ---- i video: si rifanno a 720p senza audio ----
+     Si guarda il video da capo a fondo e si registra quello che passa sul
+     canvas: e' l'unico modo di rimpicciolire un video dentro il browser,
+     e vuol dire che ci mette quanto dura il video. Si avvisa mentre va.
+     Se il browser non sa fare una delle tre cose che servono
+     (captureStream, MediaRecorder, il formato) si torna indietro
+     all'originale senza rompere niente. */
+  function mediaFormatoVideo(){
+    if(typeof MediaRecorder==="undefined") return null;
+    const prove=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
+    for(const t of prove){ try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(e){} }
+    return null;
+  }
+  function mediaRiduciVideo(file,avvisa){
+    return new Promise(res=>{
+      const tipo=mediaFormatoVideo();
+      if(!tipo) return res({blob:file,ridotto:false,perche:"questo browser non sa rimpicciolire i video"});
+      let url=null, chiuso=false;
+      const fine=(r)=>{ if(chiuso) return; chiuso=true; if(url)try{URL.revokeObjectURL(url);}catch(e){} res(r); };
+      try{
+        url=URL.createObjectURL(file);
+        const v=document.createElement("video");
+        v.muted=true; v.playsInline=true; v.preload="auto"; v.src=url;
+        v.onerror=()=>fine({blob:file,ridotto:false,perche:"il video non si e' aperto"});
+        v.onloadedmetadata=()=>{
+          const dur=v.duration||0;
+          /* oltre due minuti rifarlo vorrebbe dire due minuti di attesa:
+             si carica com'e' e si dice perche' */
+          if(!isFinite(dur)||dur>120) return fine({blob:file,ridotto:false,perche:"il video e' piu' lungo di due minuti"});
+          const max=1280; let w=v.videoWidth||1280, h=v.videoHeight||720;
+          if(w>h){ if(w>max){h=Math.round(h*max/w);w=max;} } else { if(h>max){w=Math.round(w*max/h);h=max;} }
+          w-=w%2; h-=h%2;
+          const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+          const cx=cv.getContext("2d");
+          let flusso=null;
+          try{ flusso=cv.captureStream(24); }catch(e){ return fine({blob:file,ridotto:false,perche:"questo browser non sa registrare dal canvas"}); }
+          if(!flusso) return fine({blob:file,ridotto:false,perche:"questo browser non sa registrare dal canvas"});
+          let reg=null;
+          try{ reg=new MediaRecorder(flusso,{mimeType:tipo,videoBitsPerSecond:1200000}); }
+          catch(e){ return fine({blob:file,ridotto:false,perche:"il browser ha rifiutato il formato"}); }
+          const pezzi=[];
+          reg.ondataavailable=e=>{ if(e.data&&e.data.size) pezzi.push(e.data); };
+          reg.onerror=()=>fine({blob:file,ridotto:false,perche:"la riduzione si e' fermata"});
+          reg.onstop=()=>{
+            const nuovo=new Blob(pezzi,{type:tipo.split(";")[0]});
+            /* se per qualche motivo e' venuto piu' grosso, si tiene l'originale */
+            if(!nuovo.size||nuovo.size>=file.size) return fine({blob:file,ridotto:false,perche:"ridotto non pesava meno"});
+            fine({blob:nuovo,ridotto:true,tipo:tipo.split(";")[0]});
+          };
+          const disegna=()=>{
+            if(v.ended||v.paused){ try{reg.stop();}catch(e){} return; }
+            try{ cx.drawImage(v,0,0,w,h); }catch(e){}
+            if(avvisa&&dur) avvisa(Math.min(99,Math.round(v.currentTime/dur*100)));
+            requestAnimationFrame(disegna);
+          };
+          v.onended=()=>{ try{reg.stop();}catch(e){} };
+          try{ reg.start(1000); }catch(e){ return fine({blob:file,ridotto:false,perche:"la registrazione non e' partita"}); }
+          v.play().then(disegna).catch(()=>fine({blob:file,ridotto:false,perche:"il video non e' partito"}));
+          /* rete di sicurezza: mai piu' del doppio della durata */
+          setTimeout(()=>{ if(!chiuso){ try{reg.stop();}catch(e){} } },(dur*1000)+15000);
+        };
+      }catch(e){ fine({blob:file,ridotto:false,perche:"non e' stato possibile ridurlo"}); }
+    });
+  }
+
+  /* ---- l'elenco: un noleggio per riga, con quante foto e video ha ---- */
+  async function loadMedia(){
+    if(!(sb&&sbUid)) return;
+    const box=$("#media-body"); if(!box) return;
+    const {data:nol}=await sb.from("nol_noleggi")
+      .select("id,mezzo,mezzo_id,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo")
+      .eq("user_id",sbUid).order("data_uscita",{ascending:false});
+    const N=nol||[];
+    let M=[];
+    const {data:med,error}=await sb.from("nol_media").select("*").eq("user_id",sbUid);
+    if(error){
+      box.innerHTML='<p style="color:#666;padding:8px">Le foto del noleggio non sono ancora accese: esegui <b>sql/noleggio-foto-video.sql</b> su Supabase e ricarica la pagina.</p>';
+      if($("#media-peso"))$("#media-peso").textContent="";
+      return;
+    }
+    M=med||[]; mediaCache=M;
+    const perNol={};
+    M.forEach(m=>{ (perNol[m.noleggio_id]=perNol[m.noleggio_id]||[]).push(m); });
+    const totale=M.reduce((s,m)=>s+(+m.byte||0),0);
+    if($("#media-peso"))$("#media-peso").textContent=M.length
+      ? M.length+(M.length===1?" file":" file")+" in tutto, "+mediaPeso(totale)+" di spazio."
+      : "Ancora nessuna foto e nessun video.";
+    if(!N.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun noleggio. Le foto si attaccano a un noleggio.</p>';return;}
+    const q=(mediaQ||"").trim().toLowerCase();
+    const vis=N.filter(x=>!q||((x.mezzo||"")+" "+(x.cliente||"")).toLowerCase().includes(q));
+    if(!vis.length){box.innerHTML='<p style="color:#666;padding:8px">Niente che si chiami cos&igrave;.</p>';return;}
+    box.innerHTML=vis.map(x=>{
+      const mm=perNol[x.id]||[];
+      const c=(mo,ge)=>mm.filter(m=>m.momento===mo&&m.genere===ge).length;
+      const conta=(mo)=>{const f=c(mo,"foto"),v=c(mo,"video");
+        return (f?f+(f===1?" foto":" foto"):"nessuna foto")+" · "+(v?v+(v===1?" video":" video"):"nessun video");};
+      const senza=!mm.length, peso=mm.reduce((s,m)=>s+(+m.byte||0),0);
+      return `<div class="nol-card" style="border-top-color:${senza?"#c62828":"#2e7d32"}">
+        <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
+          ${senza?'<span class="nol-eti" style="background:#c62828">NESSUNA PROVA</span>'
+                 :'<span class="nol-eti" style="background:#2e7d32">'+esc(mediaPeso(peso))+'</span>'}</div>
+        <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+        <div class="sub2">Alla consegna: ${esc(conta("uscita"))}</div>
+        <div class="sub2">Al rientro: ${esc(conta("rientro"))}</div>
+        ${nolPulsanti("media",x.id)}</div>`;
+    }).join("");
+  }
+  $('[data-tab="media"]')?.addEventListener("click",loadMedia);
+  /* la casella del file nasce e muore con la scheda: l'ascoltatore sta sul
+     documento, se no dalla seconda apertura non risponde piu' */
+  document.addEventListener("change",e=>{
+    if(e.target&&e.target.id==="media-file"){ const f=e.target.files; e.target.value=""; mediaCarica(f); }
+  });
+  $("#media-search")?.addEventListener("input",e=>{mediaQ=e.target.value;loadMedia();});
+
+  /* ---- la scheda: com'e' uscito, com'e' tornato ---- */
+  async function schedaMedia(n){
+    if(!n){toast("Questo noleggio non si trova piu'");return;}
+    mediaApertoId=n.id;
+    openSheet(`<h3>Foto e video — ${esc(n.mezzo||"mezzo")}${n.cliente?" · "+esc(n.cliente):""}</h3>
+      ${nolPulsantiScheda("noleggio",n.id,["nol-pdf","nol-stampa"])}
+      <div class="nol-riq nol-cam">
+        <h4>Com'&egrave; uscito — ${esc(fdate(n.data_uscita))}</h4>
+        <p style="margin:0 0 10px;font-size:14px;color:#666">Fotografa il mezzo da tutti i lati e fai un giro in video. &Egrave; questa la prova che al rientro vale.</p>
+        <div class="nol-azioni">
+          <button type="button" class="nol-az nol-az-apri" data-action="media-add" data-m="uscita" data-g="foto">+ Foto</button>
+          <button type="button" class="nol-az" data-action="media-add" data-m="uscita" data-g="video">+ Video</button>
+        </div>
+        <div class="media-griglia" id="media-uscita"></div>
+      </div>
+      <div class="nol-riq nol-cam">
+        <h4>Com'&egrave; tornato${n.data_rientro_effettivo?" — "+esc(fdate(n.data_rientro_effettivo)):""}</h4>
+        <p style="margin:0 0 10px;font-size:14px;color:#666">Le stesse inquadrature di prima: cos&igrave; il confronto si vede a colpo d'occhio.</p>
+        <div class="nol-azioni">
+          <button type="button" class="nol-az nol-az-apri" data-action="media-add" data-m="rientro" data-g="foto">+ Foto</button>
+          <button type="button" class="nol-az" data-action="media-add" data-m="rientro" data-g="video">+ Video</button>
+        </div>
+        <div class="media-griglia" id="media-rientro"></div>
+      </div>
+      <div id="media-lavoro" style="font-size:15px;color:#0066ff;font-weight:600;min-height:22px"></div>
+      <input type="file" id="media-file" style="display:none">
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Chiudi</button></div>`);
+    disegnaMedia();
+  }
+
+  async function disegnaMedia(){
+    for(const mo of ["uscita","rientro"]){
+      const box=$("#media-"+mo); if(!box) continue;
+      const righe=mediaCache.filter(m=>String(m.noleggio_id)===String(mediaApertoId)&&m.momento===mo);
+      if(!righe.length){box.innerHTML='<p class="gior-vuoto">Ancora niente.</p>';continue;}
+      box.innerHTML=righe.map(m=>`
+        <div class="media-cella">
+          <button type="button" class="media-apri" data-action="media-vedi" data-id="${m.id}">
+            ${m.genere==="video"?'<span class="media-play">▶</span>':`<img id="media-img-${m.id}" alt="">`}
+          </button>
+          <div class="media-sotto">${esc(mediaPeso(m.byte))}
+            <button type="button" class="media-x" data-action="media-elim" data-id="${m.id}" title="Butta">×</button></div>
+        </div>`).join("");
+      /* le anteprime arrivano una per volta: sono link firmati, non file */
+      righe.filter(m=>m.genere==="foto").forEach(async m=>{
+        const u=await mediaLink(m); const im=$("#media-img-"+m.id); if(im&&u) im.src=u;
+      });
+    }
+  }
+
+  async function mediaLink(m){
+    if(mediaUrl[m.id]) return mediaUrl[m.id];
+    try{
+      const {data}=await sb.storage.from(MEDIA_BUCKET[m.genere]||"gestionale-foto")
+        .createSignedUrl(m.storage_path,3600);
+      if(data&&data.signedUrl){ mediaUrl[m.id]=data.signedUrl; return data.signedUrl; }
+    }catch(e){}
+    return null;
+  }
+
+  /* ---- caricare ---- */
+  let mediaChiesto=null;
+  function mediaChiedi(momento,genere){
+    mediaChiesto={momento,genere};
+    const inp=$("#media-file"); if(!inp) return;
+    inp.value="";
+    inp.accept = genere==="video" ? "video/*" : "image/*";
+    inp.multiple = genere!=="video";
+    /* sul telefono apre la fotocamera invece della galleria */
+    try{ inp.setAttribute("capture","environment"); }catch(e){}
+    inp.click();
+  }
+  function mediaDillo(t){ const e=$("#media-lavoro"); if(e) e.textContent=t||""; }
+
+  async function mediaCarica(files){
+    if(!files||!files.length||!mediaChiesto||!mediaApertoId) return;
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const {momento,genere}=mediaChiesto;
+    const nol=mediaCache.length?null:null;
+    let fatti=0;
+    for(const f of Array.from(files)){
+      let dati=f, nome=f.name||("file-"+Date.now()), ridotto=false, perche="";
+      if(genere==="foto"){
+        if(!f.type||!f.type.startsWith("image/")){toast("Questo non e' una foto");continue;}
+        if(f.size>MEDIA_FOTO_MAX){toast("Foto troppo grande, massimo 15 MB");continue;}
+        mediaDillo("Sto rimpicciolendo la foto…");
+        try{ dati=await mediaRiduciFoto(f); ridotto=true; nome=nome.replace(/\.[^.]+$/,"")+".jpg"; }
+        catch(e){ dati=f; }
+      }else{
+        if(!f.type||!f.type.startsWith("video/")){toast("Questo non e' un video");continue;}
+        if(f.size>MEDIA_VIDEO_MAX){toast("Video troppo grande, massimo 200 MB");continue;}
+        mediaDillo("Sto riducendo il video… 0%");
+        const r=await mediaRiduciVideo(f,p=>mediaDillo("Sto riducendo il video… "+p+"%"));
+        dati=r.blob; ridotto=r.ridotto; perche=r.perche||"";
+        if(ridotto) nome=nome.replace(/\.[^.]+$/,"")+((r.tipo||"").indexOf("mp4")>=0?".mp4":".webm");
+        if(dati.size>MEDIA_VIDEO_DOPO_MAX){
+          mediaDillo("");
+          toast("Video troppo pesante anche dopo la riduzione ("+mediaPeso(dati.size)+"): fanne uno piu' corto");
+          continue;
+        }
+      }
+      mediaDillo("Sto caricando…");
+      const safe=nome.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=sbUid+"/noleggio/"+mediaApertoId+"/"+Date.now()+"_"+safe;
+      const bucket=MEDIA_BUCKET[genere];
+      const {error:up}=await sb.storage.from(bucket).upload(path,dati,{contentType:dati.type||undefined});
+      if(up){mediaDillo("");toast("Non caricato: "+up.message);continue;}
+      const riga={user_id:sbUid,noleggio_id:mediaApertoId,momento,genere,
+                  storage_path:path,nome_file:safe,byte:dati.size};
+      const {data:ins,error:eIns}=await sb.from("nol_media").insert(riga).select("*").single();
+      if(eIns){
+        /* il file c'e' ma la riga no: si toglie il file, se no resta orfano
+           e occupa spazio per sempre senza che nessuno lo veda */
+        try{ await sb.storage.from(bucket).remove([path]); }catch(e){}
+        mediaDillo(""); toast("Non salvato: "+eIns.message); continue;
+      }
+      mediaCache.push(ins); fatti++;
+      if(genere==="video"&&!ridotto&&perche) toast("Caricato senza ridurlo: "+perche);
+    }
+    mediaDillo("");
+    mediaChiesto=null;
+    if(fatti){ await disegnaMedia(); toast(fatti===1?"Aggiunto ✔":fatti+" aggiunti ✔"); }
+  }
+
+  async function mediaVedi(id){
+    const m=mediaCache.find(x=>String(x.id)===String(id)); if(!m) return;
+    const u=await mediaLink(m);
+    if(!u){toast("Il file non si apre");return;}
+    window.open(u,"_blank");
+  }
+
+  async function mediaElimina(id){
+    const m=mediaCache.find(x=>String(x.id)===String(id)); if(!m) return;
+    if(!confirm("Buttare "+(m.genere==="video"?"questo video":"questa foto")+"?\n"+cestFrase())) return;
+    const {error}=await sb.from("nol_media").delete().eq("id",m.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    /* ⚠️ col cestino acceso il FILE non si tocca: se no, rimettendo a posto
+       la riga si ritroverebbe un'anteprima rotta. */
+    if(!cestAcceso()){ try{ await sb.storage.from(MEDIA_BUCKET[m.genere]).remove([m.storage_path]); }catch(e){} }
+    mediaCache=mediaCache.filter(x=>String(x.id)!==String(id));
+    delete mediaUrl[id];
+    await disegnaMedia();
+    toast(m.genere==="video"?"Video buttato":"Foto buttata");
+  }
 
   $('[data-tab="cestino"]')?.addEventListener("click",()=>renderCestinoNol());
   $("#cest-search")?.addEventListener("input",e=>{cestQ=e.target.value;renderCestinoNol(true);});
@@ -2991,6 +3336,9 @@
     if(a==="save-mov")      return salvaMovimento(id);
     if(a==="save-mag")      return salvaMagazzino(id);
     if(a==="save-fatt")     return salvaFattura(id);
+    if(a==="media-add")     return mediaChiedi(t.dataset.m,t.dataset.g);
+    if(a==="media-vedi")    return mediaVedi(t.dataset.id);
+    if(a==="media-elim")    return mediaElimina(t.dataset.id);
     if(a==="cest-apri")     return schedaCestino(+t.dataset.i);
     if(a==="cest-su")       return cestRimetti(+t.dataset.i);
     if(a==="cest-mai")      return cestPerSempre(+t.dataset.i);
