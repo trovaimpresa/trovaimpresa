@@ -10,6 +10,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/gestionale.css">
+
+<!-- 23 agosto 2026 — IL GESTIONALE COME APP SUL TELEFONO.
+     Da qui il telefono capisce che questa pagina puo' diventare un'icona
+     sulla schermata Home: si apre a tutto schermo, senza la barra
+     dell'indirizzo, e ci si entra con un tocco solo.
+     ⚠️ Non salta l'accesso: la prima volta la password si mette, poi il
+     telefono si ricorda la sessione (e' Supabase che la tiene). -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0066FF">
+<link rel="apple-touch-icon" href="/img/app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gestionale">
+<meta name="application-name" content="Gestionale">
 </head>
 <body>
 <div id="app-root">

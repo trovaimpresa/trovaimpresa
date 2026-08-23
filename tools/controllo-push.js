@@ -175,7 +175,13 @@ const CARTELLE_PRIVATE = ['sql', 'tools', 'netlify', 'supabase', 'docs', 'backup
 const CODE_PRIVATE     = ['.md', '.sql', '.csv', '.py', '.txt', '.json'];
 /* Questi hanno un'estensione da tenere fuori ma sono fatti apposta per
    stare online: sono i file che leggono Google e i motori. */
-const PUBBLICI_APPOSTA = new Set(['robots.txt', 'llms.txt']);
+/* ⚠️ 23 agosto 2026 — manifest.json e' entrato in questo elenco.
+   E' un .json, e i .json qui sono roba da tenere fuori; ma questo e'
+   proprio il file che il telefono legge per trasformare il gestionale in
+   un'icona sulla schermata Home. Se lo chiudiamo con un 404, l'icona non
+   si puo' piu' aggiungere. Dentro non c'e' niente di riservato: nome,
+   colori e i disegni delle icone. */
+const PUBBLICI_APPOSTA = new Set(['robots.txt', 'llms.txt', 'manifest.json']);
 /* Attrezzi da riga di comando: non li carica nessuna pagina, ma hanno
    l'estensione .js come i file veri del sito, quindi vanno detti a mano. */
 const ATTREZZI_PRIVATI = ['genera-imprese-citta.js', 'genera-seo-pagine.js'];
