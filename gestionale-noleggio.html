@@ -271,6 +271,7 @@
         <div class="kpi ic"><div class="n" id="kn-fuori">0</div><div class="l">Fuori adesso</div><div class="sub">Ancora dal cliente</div></div>
         <div class="kpi ft"><div class="n" id="kn-ritardo">0</div><div class="l">In ritardo</div><div class="sub">Doveva già rientrare</div></div>
         <div class="kpi eu"><div class="n" id="kn-liberi">0</div><div class="l">Liberi</div><div class="sub">Pronti da dare</div></div>
+        <div class="kpi df"><div class="n" id="kn-prenotati">0</div><div class="l">Prenotati</div><div class="sub">Gi&agrave; impegnati</div></div>
       </div>
       <div class="money-row">
         <div class="money in"><div class="n" id="kn-incasso">€ 0</div><div class="l">Incassato dai noleggi</div><div class="sub">Questo mese, già pagati</div></div>
@@ -349,7 +350,7 @@
         <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">•</button><button data-action="cal-next">›</button></div></div>
       <div class="cal-oggi" id="cal-oggi"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot prenot"></i>Prenotato</span><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span>📌 Nota</span></div>
     </section>
 
     <section id="lavori">
@@ -508,6 +509,7 @@
 .nol-eti{color:#fff;font-size:13px;font-weight:600;padding:3px 9px;border-radius:10px;white-space:nowrap}
 .nol-card.esce{border-top-color:#e65100} .nol-card.rientra{border-top-color:#1565c0}
 .nol-card.ritardo{border-top-color:#c62828} .nol-card.lavoro{border-top-color:#757575}
+.nol-card.prenot{border-top-color:#7C3AED}
 .gior-vuoto{color:#666;font-size:14px;margin:0 0 14px}
 /* le anteprime di foto e video */
 .media-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
@@ -567,7 +569,7 @@
 .cal-oggi-b.ritardo{border-left-color:#c62828}
 /* ⚠️ i lavori nel calendario avevano lo stesso arancione di «esce»:
    due cose diverse dello stesso colore, sulla stessa casella. */
-.dot.esce{background:#e65100} .dot.rientra{background:#1565c0}
+.dot.esce{background:#e65100} .dot.rientra{background:#1565c0} .dot.prenot{background:#7C3AED}
 .cal-grid .dot.todo,.cal-legend .dot.todo{background:#7C3AED}
 .cal-grid .dot.done,.cal-legend .dot.done{background:#2e7d32}
 /* il meno e il piu' della giacenza, dentro la scheda: grossi da premere */
@@ -940,7 +942,7 @@
   async function renderRiepilogoNegozio(){
     const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
     if(!(sb&&sbUid)){
-      ["k-dafare","k-incorso","k-fatti","kn-mezzi","kn-fuori","kn-ritardo","kn-liberi"].forEach(i=>scrivi(i,0));
+      ["k-dafare","k-incorso","k-fatti","kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati"].forEach(i=>scrivi(i,0));
       ["k-lavori","k-daincassare","k-incassato","kn-incasso","kn-daincassare"].forEach(i=>scrivi(i,_eur(0)));
       if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
       if($("#rie-ritardi"))$("#rie-ritardi").innerHTML='<p style="color:#666;padding:8px">Nessun mezzo in ritardo.</p>';
@@ -977,18 +979,23 @@
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
     const {data:nol}=await sb.from("nol_noleggi")
-      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento")
+      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase")
       .eq("user_id",sbUid);
     const N=nol||[], oggiN=todayStr();
-    const fuori=N.filter(x=>!x.data_rientro_effettivo);
+    /* ⚠️ «fuori adesso» vuol dire dal cliente. Un mezzo PRENOTATO e' ancora
+       in piazzale: contarlo fra quelli fuori direbbe una bugia. */
+    const prenotati=N.filter(x=>nolFaseDi(x)==="prenotato");
+    const fuori=N.filter(x=>nolFaseDi(x)==="fuori");
     const ritardo=fuori.filter(x=>x.data_rientro_prevista&&x.data_rientro_prevista<oggiN);
     scrivi("kn-fuori",fuori.length);
     scrivi("kn-ritardo",ritardo.length);
+    scrivi("kn-prenotati",prenotati.length);
     /* liberi = i mezzi che non sono fuori in questo momento */
     /* ⚠️ liberi NON e' «mezzi meno noleggi aperti»: un noleggio vecchio puo'
        non avere il collegamento al mezzo, e il conto andava sotto zero.
        Libero e' il mezzo che non risulta fuori e non e' in officina. */
-    const fuoriIds={}; fuori.forEach(x=>{if(x.mezzo_id)fuoriIds[x.mezzo_id]=1;});
+    /* un mezzo gia' promesso non e' libero, anche se e' ancora in piazzale */
+    const fuoriIds={}; fuori.concat(prenotati).forEach(x=>{if(x.mezzo_id)fuoriIds[x.mezzo_id]=1;});
     scrivi("kn-liberi",MZ.filter(m=>!fuoriIds[m.id]&&m.stato!=="manutenzione"&&m.stato!=="noleggiato").length);
     /* ⚠️ «incassato» vuol dire incassato davvero: i noleggi ancora da pagare
        stanno nella casella accanto, non dentro questa. */
@@ -1127,6 +1134,58 @@
     });
   }
 
+
+  /* ================================================================
+     LO STESSO MEZZO PROMESSO DUE VOLTE — 23 agosto 2026
+     ⛔ Fino a oggi due noleggi dello stesso mezzo sugli stessi giorni si
+     salvavano tutti e due, in silenzio. Poi lunedi' mattina arrivano in
+     due a prendere lo stesso escavatore.
+
+     Due periodi si accavallano se ognuno comincia prima che l'altro
+     finisca. Un noleggio senza data di rientro prevista si considera
+     aperto: e' il caso peggiore, e nel dubbio si avvisa.
+     ================================================================ */
+  const FASE_ETI={prenotato:{t:"PRENOTATO",c:"#7C3AED"},
+                  fuori:{t:"FUORI",c:"#e65100"},
+                  rientrato:{t:"RIENTRATO",c:"#2e7d32"}};
+  function nolFaseDi(x){
+    if(x.fase) return x.fase;
+    if(x.data_rientro_effettivo) return "rientrato";
+    if(x.data_uscita&&x.data_uscita>todayStr()) return "prenotato";
+    return "fuori";
+  }
+  function _siAccavallano(a1,a2,b1,b2){
+    /* senza la fine, il periodo e' aperto: si guarda solo l'inizio */
+    const fineA=a2||"9999-12-31", fineB=b2||"9999-12-31";
+    if(!a1||!b1) return false;
+    return a1<=fineB && b1<=fineA;
+  }
+  async function nolSovrapposti(mezzoId,dal,al,escludiId){
+    if(!(sb&&sbUid)||!mezzoId||!dal) return [];
+    const {data}=await sb.from("nol_noleggi")
+      .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,fase")
+      .eq("user_id",sbUid).eq("mezzo_id",mezzoId);
+    return (data||[])
+      .filter(x=>String(x.id)!==String(escludiId||""))
+      .filter(x=>nolFaseDi(x)!=="rientrato")
+      .filter(x=>_siAccavallano(dal,al,x.data_uscita,x.data_rientro_prevista));
+  }
+  /* l'avviso mentre si sceglie, non al momento di salvare */
+  async function nolAvvisaConflitto(id){
+    const box=$("#nn-conflitto"); if(!box) return;
+    const sel=$("#nn-mezzo"), dal=$("#nn-uscita")?$("#nn-uscita").value:"";
+    if(!sel||!sel.value||!dal){box.innerHTML="";return;}
+    const al=$("#nn-prevista")?$("#nn-prevista").value:"";
+    const altri=await nolSovrapposti(sel.value,dal,al,id);
+    box.innerHTML=altri.length
+      ? '<div class="nol-avviso" style="border-color:#c62828;color:#b3261e;margin-top:10px">'
+        +'<b>Questo mezzo è già impegnato in quei giorni:</b> '
+        + altri.map(x=>esc((x.cliente||"un altro cliente")+" dal "+fdate(x.data_uscita)+
+            (x.data_rientro_prevista?" al "+fdate(x.data_rientro_prevista):" (senza rientro previsto)"))).join(" &middot; ")
+        +'.</div>'
+      : "";
+  }
+
   /* ⛔ il mezzo che non si puo' dare lo si dice SUBITO, mentre si sceglie,
      non al momento di salvare: chi ha gia' scritto tutto e si sente dire di
      no alla fine, la seconda volta il controllo lo salta. */
@@ -1149,6 +1208,7 @@
 
   function nolAggiornaConto(){
     nolAvvisaMezzo();
+    nolAvvisaConflitto(nolIdApertoNoleggio);
     const box=$("#nn-conto"); if(!box) return;
     const m=nolMezzoScelto();
     /* le letture si chiedono solo ai mezzi che le hanno */
@@ -1429,7 +1489,7 @@
         r.push([et,String(lista.length)]);
         lista.forEach(x=>r.push(["   ·",come(x)]));
       };
-      gruppo("Escono oggi",d.escono,x=>(x.mezzo||"mezzo")+" → "+(x.cliente||"cliente")+
+      gruppo("Escono oggi",d.escono,x=>(nolFaseDi(x)==="prenotato"?"[prenotato] ":"")+(x.mezzo||"mezzo")+" → "+(x.cliente||"cliente")+
         (x.data_rientro_prevista?"  (rientro previsto "+fdate(x.data_rientro_prevista)+")":""));
       gruppo("Rientri previsti oggi",d.rientrano,x=>(x.mezzo||"mezzo")+" da "+(x.cliente||"cliente"));
       gruppo("Ancora fuori, in ritardo",d.ritardi,x=>(x.mezzo||"mezzo")+" da "+(x.cliente||"cliente")+
@@ -1956,14 +2016,28 @@
     closeSheet(); loadClientiNol(); toast(id?"Cliente aggiornato ✔":"Cliente aggiunto ✔");
   }
 
+  let nolIdApertoNoleggio=null;
   async function schedaNoleggio(n){
     const isNew=!n; n=n||{};
+    nolIdApertoNoleggio=n.id||null;
     const v=(k)=>esc(n[k]==null?"":n[k]);
     openSheet(`<h3>${isNew?"Nuovo noleggio":"Modifica noleggio"}</h3>${nolPulsantiScheda("noleggio",n.id||"")}
       <div class="row2">
         <div class="field"><label>Mezzo *</label><select id="nn-mezzo"></select>
           <div id="nn-mezzo-avviso"></div></div>
         <div class="field"><label>Cliente</label><select id="nn-cliente"></select></div>
+      </div>
+
+      <div class="nol-riq nol-cam">
+        <h4>A che punto &egrave;</h4>
+        <div class="seg" id="nn-fase">
+          <button type="button" data-v="prenotato">Prenotato</button>
+          <button type="button" data-v="fuori">Fuori, dal cliente</button>
+          <button type="button" data-v="rientrato">Rientrato</button>
+        </div>
+        <div class="field" style="margin-top:10px"><label>Nota sulla prenotazione</label>
+          <input id="nn-prenota-nota" value="${v('prenotazione_nota')}" placeholder="Es. da confermare, il cliente richiama venerd&igrave;"></div>
+        <div id="nn-conflitto"></div>
       </div>
 
       <div class="nol-riq nol-cam">
@@ -2060,7 +2134,12 @@
     nolConsumi = Array.isArray(n.consumi) ? n.consumi.slice() : [];
     nolDisegnaConsumi();
     nolOperatori = Array.isArray(n.operatori) ? n.operatori.slice() : [];
-    bindSeg("nn-nolo");
+    bindSeg("nn-nolo"); bindSeg("nn-fase");
+    /* la fase di partenza: quella salvata, o quella che dicono le date */
+    const faseIniziale = n.fase || (n.data_rientro_effettivo ? "rientrato"
+      : (n.data_uscita && n.data_uscita > todayStr() ? "prenotato" : "fuori"));
+    const segF=$('#nn-fase button[data-v="'+faseIniziale+'"]');
+    if(segF){$$("#nn-fase button").forEach(x=>x.classList.remove("on"));segF.classList.add("on");}
     const segNolo=$('#nn-nolo button[data-v="'+(n.tipo_nolo||"freddo")+'"]');
     if(segNolo){$$("#nn-nolo button").forEach(x=>x.classList.remove("on"));segNolo.classList.add("on");}
     nolDisegnaOperatori();
@@ -2772,6 +2851,17 @@
     if(scaduti.length&&segVal("nn-nolo")!=="caldo"){
       toast("Attenzione: "+scaduti.map(o=>o.nome).join(", ")+" ha il patentino scaduto");
     }
+    /* ⛔ lo stesso mezzo promesso due volte: qui si CHIEDE invece di
+       vietare. Capita di rientrare in anticipo, e chi noleggia lo sa lui
+       se il mezzo fa in tempo. Ma non deve succedere per distrazione. */
+    const dalQ=$("#nn-uscita").value, alQ=$("#nn-prevista").value;
+    const altri=await nolSovrapposti(selM.value,dalQ,alQ,id);
+    if(altri.length){
+      const elenco=altri.map(x=>"· "+(x.cliente||"un altro cliente")+", dal "+fdate(x.data_uscita)+
+        (x.data_rientro_prevista?" al "+fdate(x.data_rientro_prevista):" (senza rientro previsto)")).join("\n");
+      if(!confirm("Questo mezzo è già impegnato in quei giorni:\n\n"+elenco+
+                  "\n\nSalvare lo stesso?")) return;
+    }
     const nomeM=selM.selectedOptions[0]?selM.selectedOptions[0].dataset.nome:"";
     const nomeC=selC.selectedOptions[0]?selC.selectedOptions[0].dataset.nome:"";
     const conto=nolCalcolaOra();
@@ -2796,6 +2886,8 @@
       danni:$("#nn-danni").value.trim()||null,
       note:$("#nn-note").value.trim()||null,
       /* il contratto: chi usera' la macchina e come e' uscita */
+      fase:segVal("nn-fase")||"fuori",
+      prenotazione_nota:$("#nn-prenota-nota")?($("#nn-prenota-nota").value.trim()||null):null,
       tipo_nolo:segVal("nn-nolo")||"freddo",
       contratto_num:$("#nn-cnum")?($("#nn-cnum").value.trim()||null):null,
       contratto_data:$("#nn-cdata")?($("#nn-cdata").value||null):null,
@@ -2809,10 +2901,11 @@
     /* rete di salvataggio: se sql/noleggio-contratto.sql non e' ancora
        passato, il noleggio si salva lo stesso senza le colonne nuove
        invece di andare perso */
-    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro/i.test(error.message||"")
+    if(error&&/tipo_nolo|contratto_num|contratto_data|operatori|stato_consegna|stato_rientro|fase|prenotazione_nota/i.test(error.message||"")
             &&/column|schema cache/i.test(error.message||"")){
       const senza={...dati};
-      ["tipo_nolo","contratto_num","contratto_data","operatori","stato_consegna","stato_rientro"].forEach(k=>delete senza[k]);
+      ["tipo_nolo","contratto_num","contratto_data","operatori","stato_consegna","stato_rientro",
+       "fase","prenotazione_nota"].forEach(k=>delete senza[k]);
       ({error}=await scrivi(senza));
       if(!error) toast("Salvato, ma il contratto no: manca sql/noleggio-contratto.sql");
     }
@@ -2863,15 +2956,18 @@
     if(!n.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun noleggio.</p>';return;}
     box.innerHTML=n.map(x=>{
       let col,et;
-      if(x.data_rientro_effettivo){col="#2e7d32";et="RIENTRATO";}
+      const fase=nolFaseDi(x);
+      if(fase==="rientrato"){col="#2e7d32";et="RIENTRATO";}
+      else if(fase==="prenotato"){col=FASE_ETI.prenotato.c;et="PRENOTATO";}
       else if(x.data_rientro_prevista&&x.data_rientro_prevista<oggi){col="#c62828";et="IN RITARDO";}
       else {col="#e65100";et="FUORI";}
       /* i giorni di ritardo scritti in chiaro: e' la prima cosa che guarda
          chi noleggia, e non deve contarli a mente sul calendario */
       const rit=(et==="IN RITARDO")?Math.round((new Date(oggi)-new Date(x.data_rientro_prevista))/86400000):0;
+      const manca=(fase==="prenotato"&&x.data_uscita)?Math.round((new Date(x.data_uscita)-new Date(oggi))/86400000):0;
       return `<div class="nol-card" style="border-top-color:${col}">
         <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-          <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}</span></div>
+          <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}${manca>0?esc(" · fra "+manca+(manca===1?" giorno":" giorni")):""}</span></div>
         <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
         <div class="sub2">${esc("Uscita "+fdate(x.data_uscita)+" · rientro previsto "+fdate(x.data_rientro_prevista)+(x.data_rientro_effettivo?" · rientrato il "+fdate(x.data_rientro_effettivo):""))}</div>
         <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione):"")+" · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>
@@ -3771,7 +3867,7 @@
       const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       calJobs=data||[];
       const {data:nn}=await sb.from("nol_noleggi")
-        .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento")
+        .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento,fase")
         .eq("user_id",sbUid);
       calNol=nn||[];
     } else { calJobs=[]; calNol=[]; }
@@ -3783,7 +3879,7 @@
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d), g=giornoDi(ds,oggi);
       const dots=[]
-        .concat(g.escono.slice(0,4).map(()=>'<i class="dot esce" title="esce"></i>'))
+        .concat(g.escono.slice(0,4).map(x=>'<i class="dot '+(nolFaseDi(x)==="prenotato"?"prenot":"esce")+'" title="'+(nolFaseDi(x)==="prenotato"?"prenotato":"esce")+'"></i>'))
         .concat(g.rientrano.slice(0,4).map(()=>'<i class="dot rientra" title="rientra"></i>'))
         .concat(g.ritardi.slice(0,3).map(()=>'<i class="dot ritardo" title="in ritardo"></i>'))
         .concat(g.lavori.slice(0,3).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`))
@@ -3823,16 +3919,18 @@
   /* la scheda della giornata, a tutta pagina come tutte le altre */
   function apriGiornata(ds){
     const g=leggiGiornata(ds);
+    const COL_GIOR={ritardo:["#c62828","IN RITARDO"],esce:["#e65100","ESCE"],
+                    prenot:["#7C3AED","PRENOTATO"],rientra:["#1565c0","RIENTRA"]};
     const riga=(x,tipo,sotto)=>`<div class="nol-card riga-gior ${tipo}">
       <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-        <span class="nol-eti" style="background:${tipo==='ritardo'?'#c62828':tipo==='esce'?'#e65100':'#1565c0'}">${tipo==='ritardo'?'IN RITARDO':tipo==='esce'?'ESCE':'RIENTRA'}</span></div>
+        <span class="nol-eti" style="background:${(COL_GIOR[tipo]||COL_GIOR.rientra)[0]}">${(COL_GIOR[tipo]||COL_GIOR.rientra)[1]}</span></div>
       <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
       <div class="sub2">${sotto}</div>
       ${nolPulsanti("noleggio",x.id)}</div>`;
     const vuoto=t=>`<p class="gior-vuoto">${t}</p>`;
     let h="";
     h+=`<div class="mini-title">Escono oggi (${g.escono.length})</div>`;
-    h+=g.escono.length?g.escono.map(x=>riga(x,"esce",
+    h+=g.escono.length?g.escono.map(x=>riga(x,nolFaseDi(x)==="prenotato"?"prenot":"esce",
         "Rientro previsto: "+(x.data_rientro_prevista?fdate(x.data_rientro_prevista):"non indicato"))).join("")
       :vuoto("Nessun mezzo esce in questa data.");
     h+=`<div class="mini-title">Rientri previsti (${g.rientrano.length})</div>`;
