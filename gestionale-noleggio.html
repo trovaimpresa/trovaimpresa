@@ -250,6 +250,7 @@
       <button data-tab="calendario">Calendario</button>
       <button data-tab="lavori" style="display:none">Lavori</button>
       <button data-tab="fatture">Fatture</button>
+      <button data-tab="documenti">Contratti e documenti</button>
       <button data-tab="media">Foto e video</button>
       <button data-tab="cestino">Cestino<span class="tab-cnt" id="cnt-cestino"></span></button>
       <button data-tab="galleria" style="display:none">Galleria</button>
@@ -367,6 +368,14 @@
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
+    </section>
+
+    <section id="documenti">
+      <div class="sec-head"><h2>Contratti e documenti</h2></div>
+      <div class="gal-intro">Le cinque carte di ogni noleggio: il contratto, il verbale di consegna e quello di riconsegna, e i due DDT. Qui si vede a colpo d'occhio a quale noleggio manca quale foglio.</div>
+      <input type="text" id="documenti-search" placeholder="Cerca: mezzo, cliente o numero di contratto" autocomplete="off" spellcheck="false"
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+      <div id="documenti-body" class="nol-elenco"></div>
     </section>
 
     <section id="media">
@@ -520,6 +529,22 @@
 .doc-peso{font-size:13px;color:#666;white-space:nowrap}
 /* la riga di chi usera' la macchina */
 .nol-op-riga{display:grid;grid-template-columns:1.3fr 1.1fr 1.1fr .9fr 38px;gap:8px;margin-bottom:8px}
+/* i bollini delle carte, nell'elenco dei documenti */
+.doc-bollini{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.doc-bollino{font-size:13px;font-weight:600;padding:3px 9px;border-radius:10px}
+.doc-bollino.si{background:#e6f4ea;color:#1b6b33}
+.doc-bollino.no{background:#fdecec;color:#b3261e}
+/* la lista di controllo del verbale */
+.verb-riga{display:grid;grid-template-columns:1.3fr 260px 1fr;gap:10px;align-items:center;
+  padding:6px 0;border-bottom:1px solid #e6ecf3}
+.verb-voce{font-size:15px;font-weight:600;color:#26415f}
+.verb-seg{display:flex;gap:0}
+/* ⚠️ i pulsanti della lista sono trentasei: con la misura normale delle
+   schede riempivano mezzo schermo e le parole andavano a capo. */
+#documenti .verb-seg button,#overlay .verb-seg button{font-size:14px;padding:8px 6px;
+  white-space:nowrap;font-weight:600;min-height:0;line-height:1.2}
+.verb-nota{font-size:14px;padding:8px 10px}
+@media(max-width:800px){.verb-riga{grid-template-columns:1fr}}
 @media(max-width:700px){.nol-op-riga{grid-template-columns:1fr 1fr;}
   .nol-op-riga button{grid-column:span 2}}
 /* il pallino sulla voce Cestino del menu */
@@ -1194,6 +1219,7 @@
        la sua scheda non ha ne' Copia ne' Elimina, quindi da qui non si
        puo' cancellare un noleggio per sbaglio. */
     media:{tab:"nol_noleggi",che:"Foto e video",ricarica:()=>loadMedia(),scheda:d=>schedaMedia(d)},
+    documenti:{tab:"nol_noleggi",che:"Documenti",ricarica:()=>loadDocumenti(),scheda:d=>schedaDocumenti(d)},
     /* La giornata non e' una riga del database: e' quello che succede in un
        giorno. Ha un suo lettore, e si stampa come tutto il resto. */
     giornata:{che:"Giornata", ricarica:()=>renderCal(), scheda:d=>apriGiornata(d.id),
@@ -1998,16 +2024,28 @@
 
     blocchi.push({t:"firme",
       vessatorie:"Ai sensi e per gli effetti degli artt. 1341 e 1342 c.c. il Conduttore approva espressamente le clausole: 6 (Danni e smarrimento) e 8 (Ritardo nella riconsegna).",
+      /* ⛔ la SECONDA firma: senza, le clausole 6 e 8 non sono opponibili.
+         Va solo sul contratto — sul verbale e sul DDT non c'entra niente. */
+      secondaFirma:"Il Conduttore, per approvazione specifica delle clausole 6 e 8",
       colonne:[["Il Locatore",A.nome||""],["Il Conduttore",C.nome||n.cliente||""]]});
 
     return {blocchi, titolo:"Contratto di noleggio — "+(M.nome||n.mezzo||"mezzo")+
             (C.nome||n.cliente?" · "+(C.nome||n.cliente):"")};
   }
 
-  /* ---- su carta ---- */
+  /* ---- su carta ----
+     ⛔ UN DISEGNATORE SOLO. Il contratto, il verbale di consegna, quello di
+     rientro e i due DDT sono quattro fogli diversi fatti degli stessi
+     mattoni: testata, coppie etichetta/valore, testo, tabella, elenco
+     numerato, firme. Chi prepara i dati cambia; chi li mette su carta e'
+     sempre questo, e quello del PDF qui sotto. Cosi' i cinque fogli non si
+     scollano fra loro e non si scollano fra carta e PDF. */
   async function nolContrattoStampa(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
-    const {blocchi,titolo}=await nolContrattoDati(n);
+    return nolDocStampa(await nolContrattoDati(n));
+  }
+  function nolDocStampa(dati){
+    const {blocchi,titolo}=dati;
     let h="";
     blocchi.forEach(b=>{
       if(b.t==="testata"){
@@ -2029,7 +2067,7 @@
       if(b.t==="tabella"){
         h+='<h2>'+esc(b.titolo)+'</h2><p>'+esc(b.intro)+'</p><table class="griglia"><tr>'
           + b.colonne.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr>'
-          + b.righe.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c||"&nbsp;")+'</td>').join("")+'</tr>').join("")
+          + b.righe.map(r=>'<tr>'+r.map(c=>'<td>'+(String(c||"").trim()?esc(c):'&nbsp;')+'</td>').join("")+'</tr>').join("")
           + '</table><p class="pic">'+esc(b.nota)+'</p>';
       }
       if(b.t==="numerato"){
@@ -2038,9 +2076,10 @@
           + '</ol>';
       }
       if(b.t==="firme"){
-        h+='<p class="pic">'+esc(b.vessatorie)+'</p><div class="firme">'
+        h+=(b.vessatorie?'<p class="pic">'+esc(b.vessatorie)+'</p>':'')+'<div class="firme">'
           + b.colonne.map(c=>'<div><div class="riga"></div>'+esc(c[0])+(c[1]?'<div class="pic">'+esc(c[1])+'</div>':'')+'</div>').join("")
-          + '</div><div class="firme"><div><div class="riga"></div>Il Conduttore, per approvazione specifica delle clausole 6 e 8</div><div></div></div>';
+          + '</div>'
+          + (b.secondaFirma?'<div class="firme"><div><div class="riga"></div>'+esc(b.secondaFirma)+'</div><div></div></div>':'');
       }
     });
     const w=window.open("","_blank","width=980,height=1100");
@@ -2067,9 +2106,12 @@
 
   /* ---- in PDF ---- */
   async function nolContrattoPdf(n){
-    if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non è disponibile adesso");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
-    const {blocchi,titolo}=await nolContrattoDati(n);
+    return nolDocPdf(await nolContrattoDati(n));
+  }
+  function nolDocPdf(dati){
+    if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non è disponibile adesso");return;}
+    const {blocchi,titolo}=dati;
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
     const M=16, R=210-M, L=R-M; let y=20;
     const salta=(h)=>{ if(y+h>282){doc.addPage();y=20;} };
@@ -2143,16 +2185,18 @@
       }
       if(b.t==="firme"){
         salta(48);
-        testo(b.vessatorie,M,L,9,"normal",110); y+=8;
+        if(b.vessatorie){ testo(b.vessatorie,M,L,9,"normal",110); y+=8; }
         const meta=(L-10)/2;
         doc.setDrawColor(60);
         doc.line(M,y,M+meta,y); doc.line(M+meta+10,y,R,y); y+=4.5;
         doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(30);
         doc.text(b.colonne[0][0],M,y); doc.text(b.colonne[1][0],M+meta+10,y); y+=14;
-        salta(20);
-        doc.line(M,y,M+meta,y); y+=4.5;
-        doc.setFontSize(8.5);doc.setTextColor(110);
-        doc.text("Il Conduttore, per approvazione delle clausole 6 e 8",M,y);
+        if(b.secondaFirma){
+          salta(20);
+          doc.line(M,y,M+meta,y); y+=4.5;
+          doc.setFontSize(8.5);doc.setTextColor(110);
+          doc.text(b.secondaFirma,M,y);
+        }
         return;
       }
     });
@@ -2160,11 +2204,349 @@
     toast("Contratto scaricato ✔");
   }
 
+
+  /* ================================================================
+     IL VERBALE DI CONSEGNA E RICONSEGNA, E IL DDT — 23 agosto 2026
+
+     ⛔ LA STESSA LISTA NEI DUE MOMENTI. E' tutto qui il senso del verbale:
+     se alla consegna e al rientro si guardano cose diverse, al rientro non
+     si dimostra niente. Percio' le voci sono le stesse, scritte una volta
+     sola, e i due verbali le ripetono identiche.
+
+     Il DDT serve a non far scattare la presunzione di cessione: sopra c'e'
+     scritto che i beni viaggiano «a titolo di noleggio» (art. 53 DPR
+     633/72). Ne va uno all'andata e uno al ritorno.
+     ================================================================ */
+  const VERBALE_VOCI=[
+    "Carrozzeria e struttura","Vetri, specchi, cabina","Pneumatici o cingoli",
+    "Luci e segnalatori","Livelli: olio, refrigerante","Carburante",
+    "Batteria e avviamento","Comandi e dispositivi di sicurezza",
+    "Accessori e attrezzi in dotazione","Chiavi",
+    "Documenti a bordo: libretto, dichiarazione CE","Pulizia"
+  ];
+  const VERBALE_STATI={ok:"A posto",usura:"Usura normale",danno:"DANNO"};
+  /* sui pulsanti servono parole corte: dodici voci per tre pulsanti sono
+     trentasei pulsanti, e con «Usura normale» andavano a capo tutti */
+  const VERBALE_BREVI={ok:"A posto",usura:"Usura",danno:"Danno"};
+
+  /* la lista di partenza: tutte le voci a posto, da correggere a mano */
+  function verbaleVuoto(){
+    return VERBALE_VOCI.map(v=>({voce:v,stato:"ok",nota:""}));
+  }
+  /* ⚠️ se un domani si aggiunge una voce, i verbali gia' scritti non la
+     hanno: si mette in coda invece di far sparire quello che c'era. */
+  function verbaleNormalizza(lista){
+    const dentro=Array.isArray(lista)?lista.slice():[];
+    VERBALE_VOCI.forEach(v=>{ if(!dentro.some(x=>x.voce===v)) dentro.push({voce:v,stato:"ok",nota:""}); });
+    return dentro;
+  }
+
+  async function nolVerbaleDati(n,momento){
+    const rientro=(momento==="rientro");
+    const [{data:az},{data:mz},{data:cl},{data:med}]=await Promise.all([
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
+      n.cliente_id ? sb.from("nol_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null}),
+      sb.from("nol_media").select("genere,momento").eq("user_id",sbUid).eq("noleggio_id",n.id)
+    ]);
+    const A=az||{}, M=mz||{}, C=cl||{};
+    const mm=(med||[]).filter(x=>x.momento===momento);
+    const lista=verbaleNormalizza(rientro?n.check_rientro:n.check_uscita);
+    const quando=rientro?(n.data_rientro_effettivo||n.data_rientro_prevista):n.data_uscita;
+    const ora=rientro?n.ora_rientro:n.ora_uscita;
+    const danni=lista.filter(x=>x.stato==="danno");
+
+    const blocchi=[];
+    blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
+      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||""].filter(Boolean),
+      titolo:rientro?"VERBALE DI RICONSEGNA":"VERBALE DI CONSEGNA",
+      dettaglio:fdate(quando)+(ora?" alle "+String(ora).slice(0,5):"")+
+        (n.contratto_num?"   ·   contratto n. "+n.contratto_num:"")});
+
+    blocchi.push({t:"coppie",titolo:"Le parti e l'attrezzatura",righe:[
+      ["Locatore",A.nome||"—"],
+      ["Conduttore",C.nome||n.cliente||"—"],
+      ["Attrezzatura",M.nome||n.mezzo||"—"],
+      ["Codice / matricola",M.codice||null],
+      ["Luogo",n.luogo||null],
+      ["Contaore",rientro?(n.contaore_rientro!=null?String(n.contaore_rientro):null)
+                         :(n.contaore_uscita!=null?String(n.contaore_uscita):null)],
+      ["Chilometri",rientro?(n.km_rientro!=null?String(n.km_rientro):null)
+                           :(n.km_uscita!=null?String(n.km_uscita):null)]
+    ]});
+
+    blocchi.push({t:"tabella",titolo:"Stato dell'attrezzatura",
+      intro:rientro
+        ? "Le stesse voci controllate alla consegna, ricontrollate una per una alla riconsegna."
+        : "Controllo eseguito in contraddittorio al momento della consegna.",
+      colonne:["Che cosa","Come sta","Note"],
+      righe:lista.map(x=>[x.voce,VERBALE_STATI[x.stato]||x.stato,x.nota||""]),
+      nota:mm.length
+        ? "Allegate "+mm.filter(x=>x.genere==="foto").length+" foto e "+
+          mm.filter(x=>x.genere==="video").length+" video, scattati in questo momento."
+        : "⚠️ Nessuna foto allegata a questo momento."});
+
+    blocchi.push({t:"testo",titolo:rientro?"Dichiarazioni":"Dichiarazioni",
+      corpo: rientro
+        ? [ danni.length
+              ? "Alla riconsegna sono state rilevate difformità rispetto allo stato di consegna alle voci: "+
+                danni.map(x=>x.voce).join(", ")+". Sono danni eccedenti la normale usura e restano a carico del Conduttore, al valore di riparazione o di sostituzione."
+              : "Alla riconsegna non sono state rilevate difformità eccedenti la normale usura rispetto allo stato di consegna.",
+            "La cauzione viene restituita al netto di quanto sopra e degli importi non ancora pagati.",
+            (n.stato_rientro?("Note sullo stato: "+n.stato_rientro):null)
+          ].filter(Boolean)
+        : [ "Il Locatore attesta, ai sensi dell'art. 72 comma 2 del D.Lgs 81/2008, il buono stato di conservazione, manutenzione ed efficienza dell'attrezzatura a fini di sicurezza al momento della consegna.",
+            "Il Conduttore dichiara di ricevere l'attrezzatura nello stato sopra descritto, completa degli accessori indicati e corredata del manuale d'uso e delle certificazioni.",
+            (n.stato_consegna?("Note sullo stato: "+n.stato_consegna):null)
+          ].filter(Boolean)});
+
+    blocchi.push({t:"firme",
+      vessatorie:"Il presente verbale è redatto in contraddittorio e sottoscritto da entrambe le parti. Fa fede dello stato dell'attrezzatura al momento indicato.",
+      colonne:[["Il Locatore",A.nome||""],
+               ["Il Conduttore",(rientro?n.firma_rientro:n.firma_uscita)||C.nome||n.cliente||""]]});
+
+    return {blocchi,titolo:(rientro?"Verbale di riconsegna — ":"Verbale di consegna — ")+
+            (M.nome||n.mezzo||"mezzo")};
+  }
+
+  /* ---- il DDT ---- */
+  async function nolDdtDati(n,momento){
+    const rientro=(momento==="rientro");
+    const [{data:az},{data:mz},{data:cl}]=await Promise.all([
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
+      n.cliente_id ? sb.from("nol_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
+    ]);
+    const A=az||{}, M=mz||{}, C=cl||{};
+    const num =rientro?n.ddt_rientro_num :n.ddt_uscita_num;
+    const data=rientro?(n.ddt_rientro_data||n.data_rientro_effettivo)
+                      :(n.ddt_uscita_data||n.data_uscita);
+    const mitt=rientro?(C.nome||n.cliente||"—"):(A.nome||"—");
+    const dest=rientro?(A.nome||"—"):(C.nome||n.cliente||"—");
+
+    const blocchi=[];
+    blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
+      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+             [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
+      titolo:"DOCUMENTO DI TRASPORTO",
+      dettaglio:(num?"N. "+num:"N. da assegnare")+"   ·   del "+fdate(data||todayStr())+
+        "   ·   "+(rientro?"rientro":"consegna")});
+
+    blocchi.push({t:"coppie",titolo:"Mittente e destinatario",righe:[
+      ["Mittente",mitt],
+      ["Destinatario",dest],
+      ["Indirizzo di destinazione",rientro?(A.indirizzo||null):(n.luogo||C.indirizzo||null)],
+      ["P.IVA / Cod. Fiscale del cliente",C.piva||null]
+    ]});
+
+    blocchi.push({t:"tabella",titolo:"Beni trasportati",
+      intro:"",
+      colonne:["Descrizione","Codice / matricola","Q.tà"],
+      righe:[[M.nome||n.mezzo||"—", M.codice||"", "1"]],
+      nota:""});
+
+    blocchi.push({t:"coppie",titolo:"Trasporto",righe:[
+      /* ⛔ la riga che fa esistere questo foglio */
+      ["Causale del trasporto","NOLEGGIO — beni ceduti a titolo non traslativo"],
+      ["Aspetto esteriore dei beni","A vista"],
+      ["Trasporto a cura di",n.trasporto||"Conduttore"],
+      ["Data e ora di inizio trasporto",fdate(data||todayStr())+
+        ((rientro?n.ora_rientro:n.ora_uscita)?" alle "+String(rientro?n.ora_rientro:n.ora_uscita).slice(0,5):"")]
+    ]});
+
+    blocchi.push({t:"testo",titolo:"",corpo:[
+      "Documento di trasporto emesso ai sensi del D.P.R. 472/1996. I beni sono ceduti a titolo di noleggio e restano di proprietà del mittente: la consegna non costituisce cessione."
+    ]});
+
+    blocchi.push({t:"firme",vessatorie:"",
+      colonne:[["Firma del conducente",""],["Firma del destinatario",""]]});
+
+    return {blocchi,titolo:"DDT "+(num?num:"")+" — "+(M.nome||n.mezzo||"mezzo")};
+  }
+
+  /* il numero del DDT: si prende dal contatore dell'azienda e si consuma,
+     come fa gia' la fattura. Una volta assegnato non cambia piu'. */
+  async function nolDdtNumero(n,momento){
+    const rientro=(momento==="rientro");
+    if(rientro?n.ddt_rientro_num:n.ddt_uscita_num) return n;
+    const {data:az}=await sb.from("gest_azienda").select("num_ddt").eq("user_id",sbUid).maybeSingle();
+    const num=(az&&az.num_ddt)||1;
+    const patch=rientro
+      ? {ddt_rientro_num:String(num),ddt_rientro_data:n.data_rientro_effettivo||todayStr()}
+      : {ddt_uscita_num:String(num), ddt_uscita_data:n.data_uscita||todayStr()};
+    const {error}=await sb.from("nol_noleggi").update(patch).eq("id",n.id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return n;}
+    await sb.from("gest_azienda").update({num_ddt:num+1}).eq("user_id",sbUid);
+    return Object.assign({},n,patch);
+  }
+
+
+  /* ================================================================
+     CONTRATTI E DOCUMENTI — 23 agosto 2026
+     Alessio: «non vedo la sezione contratti». Aveva ragione: il contratto
+     stava DENTRO il noleggio e basta. Adesso le carte sono cinque
+     (contratto, due verbali, due DDT) e vogliono una casa loro, dove si
+     veda a colpo d'occhio a quale noleggio manca quale foglio.
+     ================================================================ */
+  let docsCache=[], docsQ="", docsApertoId=null, docsCheck={uscita:[],rientro:[]};
+
+  const DOCS_FOGLI=[
+    {k:"contratto", lab:"Contratto", ce:n=>!!n.contratto_num},
+    {k:"vu", lab:"Verbale consegna", ce:n=>!!n.verbale_uscita_il},
+    {k:"du", lab:"DDT consegna",     ce:n=>!!n.ddt_uscita_num},
+    {k:"vr", lab:"Verbale rientro",  ce:n=>!!n.verbale_rientro_il, solo:n=>!!n.data_rientro_effettivo},
+    {k:"dr", lab:"DDT rientro",      ce:n=>!!n.ddt_rientro_num,    solo:n=>!!n.data_rientro_effettivo}
+  ];
+
+  async function loadDocumenti(){
+    if(!(sb&&sbUid)) return;
+    const box=$("#documenti-body"); if(!box) return;
+    const {data,error}=await sb.from("nol_noleggi").select("*")
+      .eq("user_id",sbUid).order("data_uscita",{ascending:false});
+    if(error){box.innerHTML='<p style="color:#666;padding:8px">'+esc(error.message)+'</p>';return;}
+    docsCache=data||[];
+    const q=(docsQ||"").trim().toLowerCase();
+    const vis=docsCache.filter(x=>!q||((x.mezzo||"")+" "+(x.cliente||"")+" "+(x.contratto_num||"")).toLowerCase().includes(q));
+    if(!docsCache.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun noleggio: le carte si attaccano a un noleggio.</p>';return;}
+    if(!vis.length){box.innerHTML='<p style="color:#666;padding:8px">Niente che si chiami cos&igrave;.</p>';return;}
+    box.innerHTML=vis.map(n=>{
+      const fogli=DOCS_FOGLI.filter(f=>!f.solo||f.solo(n));
+      const mancano=fogli.filter(f=>!f.ce(n));
+      return `<div class="nol-card" style="border-top-color:${mancano.length?"#c62828":"#2e7d32"}">
+        <div class="tit"><strong>${esc(n.mezzo||"—")}</strong>
+          <span class="nol-eti" style="background:${mancano.length?"#c62828":"#2e7d32"}">${
+            mancano.length?esc("MANCANO "+mancano.length):"COMPLETO"}</span></div>
+        <div class="sub">${n.cliente?"Cliente: "+esc(n.cliente):"Cliente non indicato"}${
+          n.contratto_num?" · contratto n. "+esc(n.contratto_num):""}</div>
+        <div class="doc-bollini">${fogli.map(f=>
+          `<span class="doc-bollino ${f.ce(n)?"si":"no"}">${f.ce(n)?"✓":"✗"} ${esc(f.lab)}</span>`).join("")}</div>
+        ${nolPulsanti("documenti",n.id)}</div>`;
+    }).join("");
+  }
+  $('[data-tab="documenti"]')?.addEventListener("click",loadDocumenti);
+  $("#documenti-search")?.addEventListener("input",e=>{docsQ=e.target.value;loadDocumenti();});
+
+  function docsRiquadro(n,momento){
+    const rientro=(momento==="rientro");
+    const lista=docsCheck[momento];
+    const fatto=rientro?n.verbale_rientro_il:n.verbale_uscita_il;
+    const ddt  =rientro?n.ddt_rientro_num  :n.ddt_uscita_num;
+    return `<div class="nol-riq nol-cam">
+      <h4>${rientro?"Al rientro":"Alla consegna"}${fatto?" — verbale chiuso il "+esc(cestQuando(fatto)):""}</h4>
+      <p style="margin:0 0 10px;font-size:14px;color:#666">${rientro
+        ? "Le stesse voci della consegna, ricontrollate una per una. Quello che qui &egrave; segnato DANNO e alla consegna no, &egrave; un danno del cliente."
+        : "Si controlla insieme al cliente, voce per voce. &Egrave; questa la carta che al rientro vale."}</p>
+      <div class="verb-lista">${lista.map((x,i)=>`
+        <div class="verb-riga">
+          <div class="verb-voce">${esc(x.voce)}</div>
+          <div class="seg verb-seg" data-mom="${momento}" data-i="${i}">
+            ${["ok","usura","danno"].map(st=>`<button type="button" data-v="${st}" class="${x.stato===st?"on":""}">${esc(VERBALE_BREVI[st])}</button>`).join("")}
+          </div>
+          <input class="verb-nota" data-mom="${momento}" data-i="${i}" placeholder="Nota" value="${esc(x.nota||"")}">
+        </div>`).join("")}</div>
+      <div class="nol-due" style="margin-top:12px">
+        <div><label>Chi firma per il cliente</label>
+          <input id="verb-firma-${momento}" value="${esc((rientro?n.firma_rientro:n.firma_uscita)||"")}" placeholder="Cognome e nome"></div>
+        <div><label>Numero del DDT</label>
+          <input value="${esc(ddt||"")}" placeholder="Si assegna da solo" readonly style="background:#f2f5f8"></div>
+      </div>
+      <div class="nol-azioni" style="margin-top:14px">
+        <button type="button" class="nol-az nol-az-apri" data-action="verb-stampa" data-m="${momento}">Stampa il verbale</button>
+        <button type="button" class="nol-az" data-action="verb-pdf" data-m="${momento}">Verbale in PDF</button>
+        <button type="button" class="nol-az" data-action="ddt-stampa" data-m="${momento}">Stampa il DDT</button>
+        <button type="button" class="nol-az" data-action="ddt-pdf" data-m="${momento}">DDT in PDF</button>
+      </div>
+      <p style="margin:10px 0 0;font-size:13px;color:#666">Il numero del DDT si prende da solo dal contatore dell'azienda la prima volta che lo stampi, e poi non cambia pi&ugrave;.</p>
+    </div>`;
+  }
+
+  async function schedaDocumenti(n){
+    if(!n){toast("Questo noleggio non si trova pi&ugrave;");return;}
+    docsApertoId=n.id;
+    docsCheck={uscita:verbaleNormalizza(n.check_uscita),
+               rientro:verbaleNormalizza(n.check_rientro)};
+    const rientrato=!!n.data_rientro_effettivo;
+    openSheet(`<h3>Documenti — ${esc(n.mezzo||"mezzo")}${n.cliente?" · "+esc(n.cliente):""}</h3>
+      <div class="nol-riq nol-cam">
+        <h4>Il contratto${n.contratto_num?" — n. "+esc(n.contratto_num):""}</h4>
+        <p style="margin:0 0 10px;font-size:14px;color:#666">${n.contratto_num
+          ? "Tipo di noleggio: "+(n.tipo_nolo==="caldo"?"a caldo, con un nostro operatore":"a freddo, senza operatore")+"."
+          : "Il numero del contratto si scrive nella scheda del noleggio, insieme a chi user&agrave; la macchina."}</p>
+        <div class="nol-azioni">
+          <button type="button" class="nol-az nol-az-apri" data-action="nol-contr-stampa" data-id="${n.id}">Stampa il contratto</button>
+          <button type="button" class="nol-az" data-action="nol-contr-pdf" data-id="${n.id}">Contratto in PDF</button>
+          <button type="button" class="nol-az" data-action="nol-mod" data-t="noleggio" data-id="${n.id}">Apri il noleggio</button>
+        </div>
+      </div>
+      ${docsRiquadro(n,"uscita")}
+      ${rientrato?docsRiquadro(n,"rientro")
+        :`<div class="nol-riq nol-cam"><h4>Al rientro</h4>
+           <p style="margin:0;font-size:14px;color:#666">Il mezzo &egrave; ancora fuori. Il verbale di riconsegna e il DDT di rientro compaiono qui appena scrivi la data di rientro effettivo nella scheda del noleggio.</p></div>`}
+      ${nolDocBlocco("noleggio",n.id||"")}
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-docs" data-id="${n.id}">Salva</button></div>`);
+  }
+
+  /* i clic sulla lista di controllo: delegati, come tutto il resto */
+  document.addEventListener("click",e=>{
+    const b=e.target.closest(".verb-seg button"); if(!b) return;
+    const sg=b.closest(".verb-seg"), mom=sg.dataset.mom, i=+sg.dataset.i;
+    sg.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    if(docsCheck[mom]&&docsCheck[mom][i]) docsCheck[mom][i].stato=b.dataset.v;
+  });
+  document.addEventListener("input",e=>{
+    const c=e.target.closest(".verb-nota"); if(!c) return;
+    const mom=c.dataset.mom, i=+c.dataset.i;
+    if(docsCheck[mom]&&docsCheck[mom][i]) docsCheck[mom][i].nota=c.value;
+  });
+
+  async function salvaDocumenti(id){
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const dati={check_uscita:docsCheck.uscita};
+    const fu=$("#verb-firma-uscita"); if(fu) dati.firma_uscita=fu.value.trim()||null;
+    if($("#verb-firma-rientro")){
+      dati.check_rientro=docsCheck.rientro;
+      dati.firma_rientro=$("#verb-firma-rientro").value.trim()||null;
+    }
+    const {error}=await sb.from("nol_noleggi").update(dati).eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet(); loadDocumenti(); toast("Verbale salvato ✔");
+  }
+
+  /* stampare il verbale lo CHIUDE: da quel momento c'e' una data, e
+     nell'elenco quel foglio smette di essere rosso */
+  async function verbaleFoglio(momento,inPdf){
+    const n=await nolLeggi("noleggio",docsApertoId);
+    if(!n){toast("Questo noleggio non si trova più");return;}
+    const patch={};
+    patch[momento==="rientro"?"check_rientro":"check_uscita"]=docsCheck[momento];
+    const f=$("#verb-firma-"+momento); if(f) patch[momento==="rientro"?"firma_rientro":"firma_uscita"]=f.value.trim()||null;
+    patch[momento==="rientro"?"verbale_rientro_il":"verbale_uscita_il"]=new Date().toISOString();
+    await sb.from("nol_noleggi").update(patch).eq("id",n.id).eq("user_id",sbUid);
+    const agg=Object.assign({},n,patch);
+    const dati=await nolVerbaleDati(agg,momento);
+    if(inPdf) nolDocPdf(dati); else nolDocStampa(dati);
+    loadDocumenti();
+  }
+  async function ddtFoglio(momento,inPdf){
+    let n=await nolLeggi("noleggio",docsApertoId);
+    if(!n){toast("Questo noleggio non si trova più");return;}
+    n=await nolDdtNumero(n,momento);
+    const dati=await nolDdtDati(n,momento);
+    if(inPdf) nolDocPdf(dati); else nolDocStampa(dati);
+    loadDocumenti();
+  }
+
   /* due porte per il banco di prova: servono a controllare il TESTO del
      contratto senza aprire una finestra di stampa. Non le usa nessun altro. */
   window.__nolLeggiPerProva=(id)=>nolLeggi("noleggio",id);
   window.__nolContrattoPerProva=(n)=>nolContrattoDati(n);
   window.nolContrattoStampaProva=(n)=>nolContrattoStampa(n);
+  window.__nolVerbalePerProva=(n,m)=>nolVerbaleDati(n,m);
+  window.__nolDdtPerProva=(n,m)=>nolDdtDati(n,m);
+  window.nolVerbaleStampaProva=async(n,m)=>nolDocStampa(await nolVerbaleDati(n,m));
+  window.nolDdtStampaProva=async(n,m)=>nolDocStampa(await nolDdtDati(n,m));
 
   async function salvaNoleggio(id){
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
@@ -3860,6 +4242,11 @@
       if(!d){toast("Salva prima il noleggio, poi stampa il contratto");return;}
       return a==="nol-contr-pdf"?nolContrattoPdf(d):nolContrattoStampa(d);
     }
+    if(a==="save-docs")     return salvaDocumenti(id);
+    if(a==="verb-stampa")   return verbaleFoglio(t.dataset.m,false);
+    if(a==="verb-pdf")      return verbaleFoglio(t.dataset.m,true);
+    if(a==="ddt-stampa")    return ddtFoglio(t.dataset.m,false);
+    if(a==="ddt-pdf")       return ddtFoglio(t.dataset.m,true);
     if(a==="doc-add")       return docChiedi(t.dataset.t,t.dataset.id);
     if(a==="doc-vedi")      return docVedi(t.dataset.id);
     if(a==="doc-elim")      return docElimina(t.dataset.id);
