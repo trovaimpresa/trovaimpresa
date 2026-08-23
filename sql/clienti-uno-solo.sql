@@ -36,6 +36,19 @@
 --    nuova. In mezzo, per qualche minuto, il gestionale noleggio vecchio
 --    non vedrebbe i clienti spostati.
 --
+-- ⛔ CORRETTO IL 23 AGOSTO, secondo tentativo.
+--    Il primo giro si e' fermato con questo errore:
+--      insert on gest_clienti violates gest_clienti_user_id_fkey
+--      Key (user_id)=(cdf73d83-…) is not present in table "users"
+--    Cioe': in nol_clienti c'e' almeno una riga che appartiene a un
+--    account CHE NON ESISTE PIU'. La tabella nol_clienti non ha il vincolo
+--    verso gli utenti, gest_clienti si': quindi quella riga di la' non ci
+--    puo' entrare, ed e' giusto cosi' — e' di nessuno.
+--    Adesso quelle righe si SALTANO invece di far fallire tutto, e la riga
+--    di risposta dice quante sono. Niente si e' rotto al primo giro: il
+--    blocco e' tutto dentro una transazione, quindi e' tornato indietro
+--    da solo.
+--
 -- Si esegue nell'SQL Editor di Supabase. Risponde con UNA RIGA.
 -- ============================================================
 
@@ -59,11 +72,14 @@ declare
   v_rep    uuid;
 begin
   for r in
-    select * from public.nol_clienti
-     where migrato_in is null
-       and coalesce(nome,'') <> ''
-       and eliminato_il is null
-     order by nome
+    select c.* from public.nol_clienti c
+     where c.migrato_in is null
+       and coalesce(c.nome,'') <> ''
+       and c.eliminato_il is null
+       -- ⛔ solo le righe di un account che esiste ancora: gest_clienti ha
+       --    il vincolo verso gli utenti, e una riga orfana non ci entra
+       and exists (select 1 from auth.users u where u.id = c.user_id)
+     order by c.nome
   loop
     -- c'e' gia' un cliente con lo stesso nome? allora si riusa quello.
     -- Il confronto e' senza maiuscole e senza spazi ai bordi.
@@ -98,6 +114,28 @@ begin
 end
 $blocco$;
 
+-- 4-bis. ⛔ AGGIUNTO AL TERZO GIRO.
+-- Il secondo tentativo si e' fermato qui sotto, mettendo il vincolo:
+--   insert on nol_noleggi violates nol_noleggi_cliente_gest_fk
+--   Key (cliente_id)=(01b1bfd9-…) is not present in table "gest_clienti"
+-- Cioe': c'e' un noleggio che punta a un cliente che NON e' stato
+-- spostato — perche' era di un account sparito, oppure stava nel cestino,
+-- oppure non aveva nome. Il vincolo non si puo' mettere finche' resta li'.
+--
+-- ⛔ Quel collegamento si toglie, ma IL NOME NO: sul noleggio la colonna
+--    «cliente» tiene il nome scritto, ed e' quella che serve allo storico e
+--    al contratto. Non si perde niente di leggibile: si perde solo una
+--    freccia che puntava nel vuoto — la stessa cosa che avrebbe fatto da
+--    solo il vincolo con «on delete set null».
+--
+-- ⚠️ I clienti spostati al giro prima NON si rifanno: hanno gia' il loro
+--    «migrato_in» e il ciclo qui sopra li salta.
+update public.nol_noleggi n
+   set cliente_id = null
+ where n.cliente_id is not null
+   and not exists (select 1 from public.gest_clienti g where g.id = n.cliente_id);
+
+
 -- 5. il vincolo nuovo: adesso il cliente di un noleggio sta in gest_clienti.
 --    «on delete set null»: se il cliente sparisce, il noleggio resta —
 --    col nome ancora scritto sopra, che e' quello che serve allo storico.
@@ -118,9 +156,21 @@ end $$;
 select
   (select count(*) from public.nol_clienti
     where eliminato_il is null and coalesce(nome,'') <> '' and migrato_in is not null) as clienti_spostati,
-  (select count(*) from public.nol_clienti
-    where eliminato_il is null and coalesce(nome,'') <> '' and migrato_in is null)     as rimasti_indietro,
+  -- ⛔ deve essere 0: sono quelli di un account vivo che NON sono passati
+  (select count(*) from public.nol_clienti c
+    where c.eliminato_il is null and coalesce(c.nome,'') <> '' and c.migrato_in is null
+      and exists (select 1 from auth.users u where u.id = c.user_id))                  as rimasti_indietro,
+  -- questi invece sono saltati apposta: appartengono a un account sparito
+  (select count(*) from public.nol_clienti c
+    where c.eliminato_il is null and coalesce(c.nome,'') <> ''
+      and not exists (select 1 from auth.users u where u.id = c.user_id))              as di_account_spariti,
   (select count(*) from public.gest_clienti)                                           as clienti_in_tutto,
   (select count(*) from public.nol_noleggi n
      where n.cliente_id is not null
-       and not exists (select 1 from public.gest_clienti g where g.id = n.cliente_id))  as noleggi_scollegati;
+       and not exists (select 1 from public.gest_clienti g where g.id = n.cliente_id)) as noleggi_scollegati,
+  -- quanti noleggi hanno perso la freccia ma tengono il nome scritto
+  (select count(*) from public.nol_noleggi
+     where cliente_id is null and coalesce(cliente,'') <> '')                          as noleggi_col_solo_nome,
+  -- il vincolo nuovo c'e'? deve dire 1
+  (select count(*) from pg_constraint
+     where conname = 'nol_noleggi_cliente_gest_fk')                                    as vincolo_messo;
