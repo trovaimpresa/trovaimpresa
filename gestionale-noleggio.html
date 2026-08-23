@@ -503,6 +503,11 @@
   box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .sheet-back:hover{background:#eef5ff}
 #overlay .sheet-actions{border-radius:0;max-width:900px}
+/* la barra «cerca ed esporta», uguale in tutte le sezioni (23 agosto 2026) */
+.nol-barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.nol-cerca{flex:1 1 240px;min-width:200px;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;
+  border-radius:10px;font-size:15px;font-family:inherit;box-sizing:border-box}
+.nol-conta{font-size:14px;color:#666;white-space:nowrap}
 .nol-riq{background:#f7f9fc;border:1px solid #dbe4f0;border-radius:12px;padding:12px;margin-bottom:10px}
 .nol-riq h4{margin:0 0 8px;font-size:15px;color:#2e537d}
 .nol-due{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -5132,6 +5137,7 @@
       return loadCauzioni();
     }
     if(a==="rend-esporta")  return rendEsporta();
+    if(a==="nol-esporta")   return nolEsporta(t.dataset.s);
     if(a==="save-docs")     return salvaDocumenti(id);
     if(a==="verb-stampa")   return verbaleFoglio(t.dataset.m,false);
     if(a==="verb-pdf")      return verbaleFoglio(t.dataset.m,true);
@@ -5334,6 +5340,122 @@
     }).join("");
   }
   $('[data-tab="movimenti"]')?.addEventListener("click",loadMovimenti);
+
+  /* ================================================================
+     CERCA ED ESPORTA — 23 agosto 2026
+     Chiesto da Alessio insieme alla fatturazione. Nel gestionale imprese
+     c'erano gia'; qui no, e con dieci mezzi non si sentiva. Con duecento
+     si': trovare «quel Bobcat» scorrendo una griglia non e' lavoro.
+
+     ⛔ SI SCRIVE UNA VOLTA SOLA, per tutte le sezioni. La barra non si
+     mette a mano sezione per sezione: si costruisce da questa tabella e
+     si infila sotto il titolo. Cosi' una sezione nuova che nasce domani
+     ce l'ha gratis, e non ci si dimentica di una.
+
+     ⚠️ LA RICERCA GUARDA QUELLO CHE SI VEDE. Cerca dentro il testo della
+     card, non dentro colonne scelte da me: se una cosa e' scritta sulla
+     riga, si trova. E' anche l'unico modo che non mente — non capita di
+     cercare una parola che si legge sullo schermo e non trovare niente.
+
+     ⛔ L'ESPORTAZIONE ESPORTA QUELLO CHE VEDI: se hai cercato, escono
+     solo le righe rimaste. Le colonne sono le stesse identiche del foglio
+     stampato (nolRighe): un posto solo da cambiare, e carta, PDF ed Excel
+     restano uguali fra loro.
+     ================================================================ */
+  const NOL_BARRE=[
+    ["mezzi",      "mezzo",    "Cerca un mezzo: nome, codice, categoria"],
+    ["clienti-nol","cliente",  "Cerca un cliente: nome, telefono, P.IVA"],
+    ["noleggi",    "noleggio", "Cerca: mezzo, cliente, numero di contratto"],
+    ["prodotti",   "prodotto", "Cerca un prodotto: nome, codice, categoria"],
+    ["magazzino",  "magazzino","Cerca un prodotto in magazzino"],
+    ["fornitori",  "fornitore","Cerca un fornitore: nome, telefono, P.IVA"],
+    ["movimenti",  "movimento","Cerca: prodotto, cliente o fornitore"],
+    ["cauzioni",   "cauzione", "Cerca: cliente o mezzo"]
+  ];
+  const NOL_BARRA_DI={};
+  NOL_BARRE.forEach(b=>{NOL_BARRA_DI[b[0]]=b;});
+
+  function nolMettiBarre(){
+    NOL_BARRE.forEach(([sez,tipo,invito])=>{
+      const sezione=document.getElementById(sez), box=$("#"+sez+"-body");
+      if(!sezione||!box||document.getElementById("barra-"+sez)) return;
+      const testa=sezione.querySelector(".sec-head");
+      const barra=document.createElement("div");
+      barra.className="nol-barra"; barra.id="barra-"+sez;
+      barra.innerHTML='<input type="search" class="nol-cerca" data-cerca="'+sez+'" '+
+        'autocomplete="off" spellcheck="false" placeholder="'+esc(invito)+'">'+
+        '<button type="button" class="btn add" data-action="nol-esporta" data-s="'+sez+'">&#10515; Esporta in Excel</button>'+
+        '<span class="nol-conta" id="conta-'+sez+'"></span>';
+      if(testa&&testa.nextSibling) sezione.insertBefore(barra,testa.nextSibling);
+      else sezione.insertBefore(barra,box);
+      /* ⛔ ogni elenco si ridisegna per conto suo quando ricarica: invece di
+         ricordarsi di richiamare il filtro alla fine di otto funzioni (e
+         dimenticarne una), lo si riapplica da solo appena la lista cambia. */
+      try{ new MutationObserver(()=>nolCerca(sez)).observe(box,{childList:true}); }catch(e){}
+    });
+  }
+
+  function nolCerca(sez){
+    const casella=document.querySelector('[data-cerca="'+sez+'"]');
+    const t=(casella?casella.value:"").trim().toLowerCase();
+    const box=$("#"+sez+"-body"); if(!box) return;
+    const carte=Array.prototype.slice.call(box.querySelectorAll(".nol-card"));
+    let visti=0;
+    carte.forEach(c=>{
+      const ok=!t||(c.textContent||"").toLowerCase().indexOf(t)>=0;
+      c.style.display=ok?"":"none";
+      if(ok) visti++;
+    });
+    const cnt=$("#conta-"+sez);
+    if(cnt) cnt.textContent = !carte.length ? ""
+      : (!t ? carte.length+(carte.length===1?" riga":" righe")
+            : (visti?visti+" su "+carte.length:"nessuna riga con «"+(casella?casella.value.trim():"")+"»"));
+  }
+  document.addEventListener("input",e=>{
+    const c=e.target.closest("[data-cerca]"); if(c) nolCerca(c.dataset.cerca);
+  });
+
+  /* gli id delle righe rimaste a video, nell'ordine in cui si vedono */
+  function nolIdVisibili(sez){
+    const box=$("#"+sez+"-body"); if(!box) return [];
+    return Array.prototype.slice.call(box.querySelectorAll(".nol-card"))
+      .filter(c=>c.style.display!=="none")
+      .map(c=>{const b=c.querySelector('[data-action="nol-mod"]'); return b?b.dataset.id:null;})
+      .filter(Boolean);
+  }
+
+  async function nolEsporta(sez){
+    const b=NOL_BARRA_DI[sez]; if(!b) return;
+    const tipo=b[1], t=NOL_TIPI[tipo];
+    if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const ids=nolIdVisibili(sez);
+    if(!ids.length){toast("Non c'è niente da esportare");return;}
+    const {data,error}=await sb.from(t.tab).select("*").eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    const per={}; (data||[]).forEach(r=>{per[r.id]=r;});
+    const righe=ids.map(i=>per[i]).filter(Boolean);
+    if(!righe.length){toast("Non c'è niente da esportare");return;}
+    /* le colonne: le stesse del foglio stampato, nell'ordine in cui
+       compaiono. Una riga che non ha una voce lascia la cella vuota. */
+    const cols=[], tab=righe.map(r=>{
+      const m={};
+      nolRighe(tipo,r).forEach(([k,v])=>{ if(cols.indexOf(k)<0) cols.push(k); m[k]=v; });
+      return m;
+    });
+    /* ⚠️ il punto e virgola, non la virgola: Excel italiano apre cosi'.
+       E il BOM davanti, se no gli accenti diventano geroglifici. */
+    const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+    const csv="﻿"+[cols].concat(tab.map(m=>cols.map(c=>m[c]==null?"":m[c])))
+      .map(r=>r.map(q).join(";")).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=sez+"-"+todayStr()+".csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove();}catch(e){}},1000);
+    toast(righe.length+(righe.length===1?" riga scaricata ✔":" righe scaricate ✔"));
+  }
+  nolMettiBarre();
 
   /* 6 agosto 2026 — Margine dal vivo: quanto ci guadagni su ogni pezzo.
      Si aggiorna mentre scrivi il prezzo di acquisto o quello di vendita. */
