@@ -71,27 +71,42 @@
 
   .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:8px}
   @media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
-  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
-  .kpi .n{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}
-  .kpi .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;text-transform:uppercase;letter-spacing:.4px}
-  .kpi.df .n{color:var(--dafare)} .kpi.ic .n{color:var(--incorso)} .kpi.ft .n{color:var(--fatto)} .kpi.eu .n{color:var(--accent-d)}
+  /* ⛔ 24 agosto 2026 — LO STILE DEL RIEPILOGO DEL GESTIONALE IMPRESE, ANCHE QUI.
+     Alessio: "voglio tutte le card del noleggio con questo stile". Le card
+     colorate col numero rosso/blu/verde e l'ombra pesante diventano bianche,
+     bordate leggere, arrotondate — come le schede di gestionale-app.html.
+     Il numero resta sempre nero: il colore lo fa apparire "un allarme" anche
+     quando non lo è (e' la stessa scelta che Alessio ha gia' fatto per le
+     schede del gestionale imprese il 20 agosto).
+     ⚠️ SCOPERTO PROVANDO: css/gestionale.css (il foglio condiviso con l'altra
+     pagina) ha ANCHE LUI delle regole .kpi/.money/.df/.ic/.ft/.eu, scritte per
+     tutt'altre schede, e si carica DOPO questo <style> — quindi vincerebbe
+     lui. Stessa storia del colore --accent di stamattina. Le regole qui sotto
+     sono scritte "#app-root .kpi" apposta, per pesare di più e vincere sempre,
+     qualunque cosa cambi domani nel foglio condiviso. */
+  #app-root .kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:none;transition:box-shadow .15s,transform .15s,border-color .15s}
+  #app-root .kpi:hover{box-shadow:0 6px 20px rgba(15,23,42,.08);transform:translateY(-2px);border-color:#CBD5E1}
+  #app-root .kpi .n{font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.05;color:var(--ink)}
+  #app-root .kpi .l{font-size:14px;color:var(--muted);font-weight:700;margin-top:8px}
   .money-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
   @media(max-width:520px){.money-row{grid-template-columns:1fr 1fr}.money.ore{grid-column:span 2}}
-  .money{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
-  .money .n{font-size:22px;font-weight:800;letter-spacing:-.5px}
-  .money.in .n{color:var(--fatto)} .money.out .n{color:var(--danger)} .money.ore .n{color:var(--accent-d)}
-  .money .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+  #app-root .money{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:none;transition:box-shadow .15s,transform .15s,border-color .15s}
+  #app-root .money:hover{box-shadow:0 6px 20px rgba(15,23,42,.08);transform:translateY(-2px);border-color:#CBD5E1}
+  #app-root .money .n{font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--ink)}
+  #app-root .money .l{font-size:14px;color:var(--muted);font-weight:700;margin-top:6px}
   .mini-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 10px}
   .rie-intro{margin-bottom:16px}
   .rie-intro h2{font-size:20px;font-weight:700;letter-spacing:-.3px}
   .rie-intro p{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.45;max-width:640px}
-  .kpi .sub,.money .sub{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;line-height:1.25}
+  #app-root .kpi .sub,#app-root .money .sub{font-size:13px;color:var(--muted);font-weight:500;margin-top:4px;line-height:1.3}
   .fatt-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-  .fatt-tot{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow);border-top:4px solid var(--danger)}
-  .fatt-tot.alt{border-top-color:var(--warn)}
-  .fatt-tot .n{font-size:22px;font-weight:800;color:var(--danger);letter-spacing:-.5px}
-  .fatt-tot.alt .n{color:var(--warn)}
-  .fatt-tot .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+  /* stesso stile delle card statistica: bianca, bordo leggero, niente ombra
+     di base — vedi la nota grande piu' sopra */
+  #app-root .fatt-tot{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:none;border-top:4px solid var(--danger);transition:box-shadow .15s,transform .15s,border-color .15s}
+  #app-root .fatt-tot:hover{box-shadow:0 6px 20px rgba(15,23,42,.08);transform:translateY(-2px)}
+  #app-root .fatt-tot.alt{border-top-color:var(--warn)}
+  #app-root .fatt-tot .n{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.5px}
+  #app-root .fatt-tot .l{font-size:14px;color:var(--muted);font-weight:700;margin-top:6px}
   .fatt-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow)}
   .fatt-info{flex:1;min-width:0}
   .fatt-info b{font-size:14px;font-weight:700}
@@ -105,7 +120,8 @@
   .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
   .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
 
-  .job{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:5px solid var(--accent)}
+  #app-root .job{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:10px;box-shadow:none;border-left:5px solid var(--accent);transition:box-shadow .15s,transform .15s,border-color .15s}
+  #app-root .job:hover{box-shadow:0 6px 20px rgba(15,23,42,.08);transform:translateY(-2px)}
   .job-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
   .job-cli{font-size:15px;font-weight:700;letter-spacing:-.2px}
   .job-desc{font-size:14px;color:#34403a;margin-top:3px;line-height:1.35}
@@ -509,12 +525,18 @@
    in tre righe. Sotto i 700 px diventa una colonna sola, sul telefono. */
 .nol-elenco{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
 @media(max-width:700px){.nol-elenco{grid-template-columns:1fr}}
-.nol-card{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);
-  border-top:4px solid #2e537d;padding:14px;margin-bottom:12px}
+/* ⛔ 24 agosto 2026 — LO STESSO STILE DEL RIEPILOGO. Ombra pesante via, bordo
+   leggero e angoli piu' arrotondati come le schede di gestionale-app.html;
+   il colore di stato resta com'era (sopra, sottile) ma la card si solleva
+   solo al passaggio del mouse, non sta gia' "accesa" da ferma. */
+.nol-card{background:#fff;border:1px solid #e6ecf3;border-radius:16px;box-shadow:none;
+  border-top:4px solid #2e537d;padding:18px 20px;margin-bottom:12px;
+  transition:box-shadow .15s,transform .15s,border-color .15s}
+.nol-card:hover{box-shadow:0 6px 20px rgba(15,23,42,.10);transform:translateY(-2px)}
 .nol-card .tit{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.nol-card .tit strong{font-size:16px}
-.nol-card .sub{color:#666;font-size:14px;margin-top:4px}
-.nol-card .sub2{color:#666;font-size:13px;margin-top:2px}
+.nol-card .tit strong{font-size:17px;font-weight:700;letter-spacing:-.2px}
+.nol-card .sub{color:#666;font-size:14px;margin-top:6px}
+.nol-card .sub2{color:#666;font-size:13px;margin-top:3px}
 /* ⛔ 13 px il minimo, mai meno: Alessio ha la dislessia. Le etichette
    stavano a 11 px in sei punti diversi. */
 .nol-eti{color:#fff;font-size:13px;font-weight:600;padding:3px 9px;border-radius:10px;white-space:nowrap}
