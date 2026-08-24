@@ -541,6 +541,8 @@
 .nol-conto .tot td{font-weight:700;font-size:18px;border-bottom:none;padding-top:10px}
 .nol-conto .cauz{color:#666;font-size:14px;margin-top:6px}
 .nol-avviso{background:#fff8e1;border:1px solid #ffe0a3;border-radius:8px;padding:9px 12px;margin-top:8px;font-size:14px;color:#5d4200}
+/* 24 agosto 2026: l'avviso che parla di soldi sbagliati si vede da lontano */
+.nol-avviso-caro{background:#fdecec;border-color:#f3b8b8;color:#8e1c1c}
 .nol-cons-riga{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:6px}
 /* le righe della fattura del noleggio (23 agosto 2026) */
 .nf-riga{display:grid;grid-template-columns:1.3fr 1.7fr 120px auto;gap:6px;margin-bottom:6px}
@@ -1201,6 +1203,16 @@
   document.addEventListener("change",nolAscolta);
 
   /* ---- il conto ---- */
+  /* ⛔ 24 agosto 2026 — le due memorie che servono all'importo.
+     nolImportoAMano: l'ha scritto lui adesso, non si tocca piu' da soli.
+     nolImportoSalvato: quanto diceva il conto all'ultimo salvataggio. Se
+     l'importo salvato e' uguale a quello, vuol dire che era agganciato al
+     conto, e quando il conto cambia si puo' riallineare senza fare danni. */
+  let nolImportoAMano=false, nolImportoSalvato=null;
+  document.addEventListener("input",e=>{
+    if(e.target&&e.target.id==="nn-importo") nolImportoAMano=true;
+  });
+
   function nolCalcolaOra(){
     if(!window.NoleggioPrezzo) return null;
     const m=nolMezzoScelto(); if(!m) return null;
@@ -1321,13 +1333,56 @@
       h+='<button type="button" class="nol-agg" id="nn-usa" style="margin-top:10px">Usa questo importo</button>';
     }
     (c.avvisi||[]).forEach(a=>{h+='<div class="nol-avviso">'+esc(a)+'</div>';});
+
+    /* ⛔ 24 agosto 2026 — L'IMPORTO SEGUE IL CONTO, MA NON DI NASCOSTO.
+       Al collaudo del 24 agosto sono venute fuori due cose, tutte e due
+       care: la casella «Importo» restava a 0 anche col conto pieno (e un
+       noleggio a zero non finisce mai in fattura), e quando il mezzo
+       rientrava prima il riquadro qui sopra si rifaceva sui giorni veri
+       ma la casella no — 630 € fatturati al posto di 480.
+       Adesso:
+       · casella vuota o a zero -> si riempie da sola col totale;
+       · importo agganciato al conto (uguale a quello dell'ultimo
+         salvataggio) -> si riallinea da solo e lo scrive;
+       · importo scritto a mano -> NON si tocca, ma si avvisa della
+         differenza e si offre il bottone per allinearlo.
+       I soldi che ha scritto lui non si cambiano mai in silenzio. */
+    const totC=Math.round((c.totaleEuro||0)*100)/100;
+    const cIn=$("#nn-importo");
+    const impOra=cIn?_numIt(cIn.value):0;
+    const impVuoto=!cIn||String(cIn.value).trim()===""||impOra===0;
+    const agganciato=!nolImportoAMano && nolImportoSalvato!=null &&
+      Math.abs(impOra-Math.round(nolImportoSalvato*100)/100)<0.005;
+    if(cIn&&totC>0&&(impVuoto||agganciato)&&Math.abs(impOra-totC)>=0.005){
+      cIn.value=String(totC).replace(".",",");
+      nolImportoSalvato=totC;
+      h+='<div class="nol-avviso" id="nn-imp-nota">L\'importo da fare pagare &egrave; stato messo a '
+        +esc(_eur(totC))+', come il conto qui sopra. Se vuoi un altro numero, scrivilo a mano.</div>';
+    } else if(cIn&&totC>0&&Math.abs(impOra-totC)>=0.005){
+      const d=Math.round((impOra-totC)*100)/100;
+      h+='<div class="nol-avviso nol-avviso-caro" id="nn-imp-nota"><b>Attenzione:</b> stai facendo pagare '
+        +esc(_eur(impOra))+', ma il conto dice '+esc(_eur(totC))+' &mdash; '
+        +esc(_eur(Math.abs(d)))+(d>0?' in pi&ugrave;.':' in meno.')
+        +' <button type="button" class="nol-agg" id="nn-imp-fix" style="margin-top:8px">Metti '
+        +esc(_eur(totC))+'</button></div>';
+    }
     box.innerHTML=h;
 
+    /* «Usa questo importo» e «Metti X» riagganciano l'importo al conto:
+       da li' in poi torna a seguirlo da solo. */
+    const aggancia=()=>{
+      $("#nn-importo").value=String(c.totaleEuro).replace(".",",");
+      nolImportoAMano=false; nolImportoSalvato=totC;
+      nolAggiornaConto();
+    };
     const b=$("#nn-usa");
     if(b) b.addEventListener("click",()=>{
-      $("#nn-importo").value=String(c.totaleEuro).replace(".",",");
-      if(c.cauzione>0&&!$("#nn-cauzione").value) $("#nn-cauzione").value=String(c.cauzione).replace(".",",");
+      if(c.cauzione>0&&$("#nn-cauzione")&&!$("#nn-cauzione").value)
+        $("#nn-cauzione").value=String(c.cauzione).replace(".",",");
+      aggancia();
     });
+    const bf=$("#nn-imp-fix");
+    if(bf) bf.addEventListener("click",aggancia);
   }
 
   /* il conto si rifa' a ogni tasto: chi noleggia deve vedere il numero
@@ -2260,7 +2315,11 @@
         </div>
         ${firmaBlocco("contr","Firma del Conduttore",
           "Dai il telefono al cliente e fallo firmare qui.")}
-        ${firmaBlocco("contr2","&#9888; Seconda firma — clausole 6 e 8 (artt. 1341-1342 c.c.)",
+        ${/* ⛔ 24 agosto 2026: qui c'era scritto «&#9888;» e si leggeva cosi'
+              com'e', codice compreso: firmaBlocco passa l'etichetta dentro
+              esc(), che trasforma la & in &amp;. Il segnale di pericolo si
+              scrive con il carattere vero. */
+          firmaBlocco("contr2","⚠ Seconda firma — clausole 6 e 8 (artt. 1341-1342 c.c.)",
           "Senza questa seconda firma le clausole sui danni e sul ritardo NON valgono.")}
         <div class="nol-azioni" style="margin-top:16px">
           <button type="button" class="nol-az nol-az-apri" data-action="nol-contr-stampa" data-id="${n.id||""}">Stampa il contratto</button>
@@ -2358,6 +2417,10 @@
     nolDisegnaOperatori();
     nolMostraOperatori();
     nolCauApert=n;
+    /* 24 agosto 2026: si riparte puliti. L'importo torna «agganciato» solo
+       se all'ultimo salvataggio era uguale al conto di allora. */
+    nolImportoAMano=false;
+    nolImportoSalvato=(n.importo_calcolato==null?null:Number(n.importo_calcolato));
     firmaSveglia(["contr","contr2"]);
     if(n.cauzione_forma&&$("#nn-cau-forma")) $("#nn-cau-forma").value=n.cauzione_forma;
     nolMostraCauzione();
@@ -3994,6 +4057,22 @@
            +"l'assicurazione, oppure togli la spunta «Fuori servizio».");
       return;
     }
+    /* ⛔ 24 agosto 2026 — SENZA LA DATA DI USCITA NON SI SALVA.
+       Al collaudo si e' creato un noleggio segnato FUORI con «Uscita — ·
+       rientro previsto —» e 0,00 €: il contratto e il DDT sarebbero usciti
+       senza data, e il conto non si puo' nemmeno fare. Su una prenotazione
+       ancora da confermare invece la data puo' mancare: e' proprio il caso
+       del «il cliente richiama venerdi». */
+    if((segVal("nn-fase")||"fuori")!=="prenotato" && !$("#nn-uscita").value){
+      toast("Manca la data di uscita");
+      alert("Manca la data di uscita.\n\n"
+        +"Un noleggio già fuori o già rientrato senza data di uscita fa uscire "
+        +"il contratto e il DDT senza data, e il conto non si può fare.\n\n"
+        +"Se il mezzo non è ancora partito, mettilo su «Prenotato».");
+      const du=$("#nn-uscita"); if(du) du.focus();
+      return;
+    }
+
     /* ⚠️ i patentini: qui si AVVISA e basta. La dichiarazione la firma il
        cliente, e il noleggiatore non puo' rifiutarsi di scriverla. */
     const scaduti=(nolOperatori||[]).filter(o=>o.scad&&o.nome&&
@@ -4015,6 +4094,21 @@
     const nomeM=selM.selectedOptions[0]?selM.selectedOptions[0].dataset.nome:"";
     const nomeC=selC.selectedOptions[0]?selC.selectedOptions[0].dataset.nome:"";
     const conto=nolCalcolaOra();
+
+    /* ⛔ 24 agosto 2026 — l'ultimo controllo, quello sui soldi.
+       Se quello che si fa pagare non e' quello che dice il conto, si chiede
+       prima di salvare. Al collaudo un escavatore rientrato due giorni
+       prima stava andando in fattura a 630 € invece di 480. */
+    if(conto&&conto.totaleEuro>0){
+      const impS=_numIt($("#nn-importo").value);
+      const totS=Math.round(conto.totaleEuro*100)/100;
+      if(Math.abs(impS-totS)>=0.005){
+        const d=Math.round((impS-totS)*100)/100;
+        if(!confirm("Stai facendo pagare "+_eur(impS)+", ma il conto dice "+_eur(totS)+".\n\n"
+          +"Sono "+_eur(Math.abs(d))+(d>0?" in più":" in meno")+".\n\nVa bene così?")) return;
+      }
+    }
+
     const vuoto=id2=>$(id2).value===""?null:_numIt($(id2).value);
     const dati={mezzo:nomeM||null, mezzo_id:selM.value||null,
       cliente:nomeC||null, cliente_id:selC.value||null,

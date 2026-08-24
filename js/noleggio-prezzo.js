@@ -43,6 +43,20 @@
   function cent(v) { return Math.round(numIt(v) * 100); }
   function euro(c) { return c / 100; }
 
+  /* ⛔ 24 agosto 2026 — I PREZZI SI SCRIVONO ALL'ITALIANA.
+     Al collaudo del 24 agosto, dentro il dettaglio delle righe usciva
+     «1 × 600.00 €» col punto americano, e da li' finiva pari pari sul
+     contratto in PDF che firma il cliente. Il totale era gia' giusto: a
+     sbagliare erano solo le scritte piccole sotto la voce, che nascevano da
+     .toFixed(2). Adesso passano tutte da qui. */
+  function scriviEuro(c) {
+    var n = c / 100;
+    var neg = n < 0;
+    var s = Math.abs(n).toFixed(2).split('.');
+    var interi = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return (neg ? '-' : '') + interi + ',' + s[1];
+  }
+
   /* ---------------------------------------------------------------- */
   /* Le date                                                          */
   /* ---------------------------------------------------------------- */
@@ -134,7 +148,7 @@
       var prezzo = cent(mezzo['tariffa_' + p.chiave]);
       righe.push({
         voce: n + ' ' + (n === 1 ? p.uno : p.tanti),
-        dettaglio: n + ' × ' + euro(prezzo).toFixed(2) + ' €',
+        dettaglio: n + ' × ' + scriviEuro(prezzo) + ' €',
         centesimi: n * prezzo
       });
     });
@@ -144,7 +158,7 @@
     var tg = cent(mezzo.tariffa_giorno);
     if (tg > 0 && costo[g] < g * tg) {
       avviso = 'Conviene il pacchetto: ' + g + ' giorni sciolti costerebbero ' +
-               euro(g * tg).toFixed(2) + ' €.';
+               scriviEuro(g * tg) + ' €.';
     }
     return { righe: righe, totale: costo[g], avviso: avviso };
   }
@@ -159,13 +173,13 @@
     var aOre = ore * to;
     if (tg > 0 && tg <= aOre) {
       return {
-        righe: [{ voce: '1 giorno', dettaglio: '1 × ' + euro(tg).toFixed(2) + ' €', centesimi: tg }],
+        righe: [{ voce: '1 giorno', dettaglio: '1 × ' + scriviEuro(tg) + ' €', centesimi: tg }],
         totale: tg,
-        avviso: 'Conviene la giornata: ' + ore + ' ore costerebbero ' + euro(aOre).toFixed(2) + ' €.'
+        avviso: 'Conviene la giornata: ' + ore + ' ore costerebbero ' + scriviEuro(aOre) + ' €.'
       };
     }
     return {
-      righe: [{ voce: ore + (ore === 1 ? ' ora' : ' ore'), dettaglio: ore + ' × ' + euro(to).toFixed(2) + ' €', centesimi: aOre }],
+      righe: [{ voce: ore + (ore === 1 ? ' ora' : ' ore'), dettaglio: ore + ' × ' + scriviEuro(to) + ' €', centesimi: aOre }],
       totale: aOre,
       avviso: null
     };
@@ -197,13 +211,16 @@
     }
     return {
       voce: cfg.nome,
-      dettaglio: fatte + ' ' + cfg.unita + ' − ' + incluse + ' comprese = ' + arrotonda(extra) +
-                 ' × ' + euro(tariffa).toFixed(2) + ' €',
+      dettaglio: scriviNum(fatte) + ' ' + cfg.unita + ' − ' + scriviNum(incluse) +
+                 ' comprese = ' + scriviNum(extra) + ' × ' + scriviEuro(tariffa) + ' €',
       centesimi: Math.round(extra * tariffa)
     };
   }
 
   function arrotonda(n) { return Math.round(n * 100) / 100; }
+  /* 24 agosto 2026: anche le quantita' vogliono la virgola. «2.5 × 1,80 €»
+     era mezzo italiano e mezzo americano nella stessa riga. */
+  function scriviNum(n) { return String(arrotonda(n)).replace('.', ','); }
 
   /* ---------------------------------------------------------------- */
   /* Il conto                                                         */
@@ -281,7 +298,7 @@
       if (!q || !p) return;
       righe.push({
         voce: String(c.descrizione || 'Materiale'),
-        dettaglio: arrotonda(q) + ' × ' + euro(p).toFixed(2) + ' €',
+        dettaglio: scriviNum(q) + ' × ' + scriviEuro(p) + ' €',
         centesimi: Math.round(q * p)
       });
     });
@@ -291,7 +308,7 @@
     if (uf > 0) righe.push({ voce: 'Usura', dettaglio: 'quota fissa per noleggio', centesimi: uf });
     var up = numIt(mezzo.usura_percento);
     if (up > 0) {
-      righe.push({ voce: 'Usura', dettaglio: up + '% sul tempo (' + euro(centTempo).toFixed(2) + ' €)',
+      righe.push({ voce: 'Usura', dettaglio: scriviNum(up) + '% sul tempo (' + scriviEuro(centTempo) + ' €)',
                    centesimi: Math.round(centTempo * up / 100) });
     }
 
