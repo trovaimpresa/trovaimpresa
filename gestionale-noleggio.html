@@ -2661,8 +2661,28 @@
      numerato, firme. Chi prepara i dati cambia; chi li mette su carta e'
      sempre questo, e quello del PDF qui sotto. Cosi' i cinque fogli non si
      scollano fra loro e non si scollano fra carta e PDF. */
+  /* ⛔ 24 agosto 2026 — IL CONTRATTO SENZA NOMINATIVI NON ESCE IN SILENZIO.
+     La tabella «chi userà la macchina» è la dichiarazione del datore di
+     lavoro dell'art. 72 comma 2 del D.Lgs 81/08: senza quella il contratto
+     non è a posto. Al collaudo il modulo lo scriveva in rosso e poi
+     stampava lo stesso. Adesso chiede, come già fa per un mezzo promesso
+     due volte: si può stampare uguale — capita di riempirla a mano davanti
+     al cliente — ma sapendo cosa manca. */
+  function nolContrattoPronto(n){
+    const chi=(Array.isArray(n&&n.operatori)?n.operatori:[])
+      .filter(o=>o&&o.nome&&String(o.nome).trim());
+    const manca=[];
+    if(!chi.length) manca.push("· i nominativi di chi userà la macchina (art. 72 comma 2 D.Lgs 81/08)");
+    if(!(n&&n.contratto_num&&String(n.contratto_num).trim()))
+      manca.push("· il numero del contratto");
+    if(!manca.length) return true;
+    return confirm("Il contratto non è completo. Manca:\n\n"+manca.join("\n")+
+      "\n\nStamparlo lo stesso?");
+  }
+
   async function nolContrattoStampa(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    if(!nolContrattoPronto(n)) return;
     return nolDocStampa(await nolContrattoDati(n));
   }
   function nolDocStampa(dati){
@@ -2704,8 +2724,13 @@
           + b.colonne.map(c=>'<div>'+dis(c[2])+'<div class="riga"></div>'+esc(c[0])
               +(c[1]?'<div class="pic">'+esc(c[1])+'</div>':'')+'</div>').join("")
           + '</div>'
-          + (b.secondaFirma?'<div class="firme"><div>'+dis(b.secondaFirmaImg)+'<div class="riga"></div>'
-              +esc(b.secondaFirma)+'</div><div></div></div>':'');
+          /* ⛔ 24 agosto 2026 — LA SECONDA FIRMA STA DALLA PARTE DEL CONDUTTORE.
+             Al collaudo era disegnata nella colonna di SINISTRA, sotto «Il
+             Locatore»: chi legge pensa che l'abbia firmata il locatore. E'
+             la firma del Conduttore sulle clausole 6 e 8, e se sta dalla
+             parte sbagliata l'approvazione specifica si contesta. */
+          + (b.secondaFirma?'<div class="firme"><div></div><div>'+dis(b.secondaFirmaImg)
+              +'<div class="riga"></div>'+esc(b.secondaFirma)+'</div></div>':'');
       }
     });
     const w=window.open("","_blank","width=980,height=1100");
@@ -2735,6 +2760,7 @@
   /* ---- in PDF ---- */
   async function nolContrattoPdf(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    if(!nolContrattoPronto(n)) return;
     return nolDocPdf(await nolContrattoDati(n));
   }
   function nolDocPdf(dati){
@@ -2860,11 +2886,16 @@
         if(b.colonne[1][1]) doc.text(pulisci(b.colonne[1][1]),M+meta+10,y);
         y+=10;
         if(b.secondaFirma){
-          salta(26);
-          y+=17; segno(b.secondaFirmaImg,M);
-          doc.line(M,y,M+meta,y); y+=4.5;
-          doc.setFontSize(8.5);doc.setTextColor(110);
-          doc.text(pulisci(b.secondaFirma),M,y);
+          /* ⛔ 24 agosto 2026: stessa correzione della carta. La seconda
+             firma va nella colonna DESTRA, quella del Conduttore. E
+             l'etichetta va a capo da sola: in mezza pagina non ci sta su
+             una riga sola, e prima finiva tagliata. */
+          salta(30);
+          const x2=M+meta+10;
+          y+=17; segno(b.secondaFirmaImg,x2);
+          doc.line(x2,y,R,y); y+=4.5;
+          doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(110);
+          doc.splitTextToSize(pulisci(b.secondaFirma),meta).forEach(l=>{ doc.text(l,x2,y); y+=4; });
         }
         return;
       }
