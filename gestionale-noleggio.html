@@ -2314,7 +2314,7 @@
           <button type="button" data-v="freddo">A freddo — senza operatore</button>
           <button type="button" data-v="caldo">A caldo — con un nostro operatore</button></div></div>
         <div class="nol-due">
-          <div><label>Numero del contratto</label><input id="nn-cnum" value="${v('contratto_num')}" placeholder="Es. 2026/014"></div>
+          <div><label>Numero del contratto</label><input id="nn-cnum" value="${v('contratto_num')}" placeholder="Si assegna da solo alla prima stampa"></div>
           <div><label>Data del contratto</label><input id="nn-cdata" type="date" value="${v('contratto_data')}"></div>
         </div>
         <div id="nn-op-box" style="margin-top:14px">
@@ -2723,6 +2723,7 @@
 
   async function nolContrattoStampa(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    n=await nolContrattoNumero(n);
     if(!nolContrattoPronto(n)) return;
     return nolDocStampa(await nolContrattoDati(n));
   }
@@ -2801,6 +2802,7 @@
   /* ---- in PDF ---- */
   async function nolContrattoPdf(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    n=await nolContrattoNumero(n);
     if(!nolContrattoPronto(n)) return;
     return nolDocPdf(await nolContrattoDati(n));
   }
@@ -3116,6 +3118,34 @@
         : [["Firma del conducente",A.nome||"",null],["Firma del destinatario",nomeCli,firmaCli]]});
 
     return {blocchi,titolo:"DDT "+(num?num:"")+" — "+(M.nome||n.mezzo||"mezzo")};
+  }
+
+  /* ⛔ 24 agosto 2026 — IL NUMERO DEL CONTRATTO SE LO PRENDE DA SOLO.
+     Al collaudo il DDT il numero se lo prendeva e il contratto no: quello
+     andava scritto a mano, e nessuno lo diceva. Cosi' un contratto
+     stampato, firmato in due punti e scaricato in PDF risultava
+     «mancante» nella schermata dei documenti, con la scritta rossa
+     MANCANO 4. Stessa identica regola del DDT: si prende alla PRIMA
+     stampa, dal contatore dell'azienda, e poi non cambia piu'.
+     ⚠️ Se il numero l'hai scritto tu a mano, resta il tuo: qui si entra
+     solo quando la casella e' vuota. */
+  async function nolContrattoNumero(n){
+    if(n&&n.contratto_num&&String(n.contratto_num).trim()) return n;
+    if(!(n&&n.id)) return n;
+    const {data:az,error:e1}=await sb.from("gest_azienda")
+      .select("num_contratto").eq("user_id",sbUid).maybeSingle();
+    /* se la colonna non c'e' ancora (query non lanciata) non si inventa
+       niente: si lascia il contratto come sta, com'era prima di oggi */
+    if(e1||!az||az.num_contratto==null) return n;
+    const num=az.num_contratto||1;
+    const patch={contratto_num:String(num),
+                 contratto_data:n.contratto_data||n.data_uscita||todayStr()};
+    const {error}=await sb.from("nol_noleggi").update(patch)
+      .eq("id",n.id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return n;}
+    await sb.from("gest_azienda").update({num_contratto:num+1}).eq("user_id",sbUid);
+    toast("Contratto n. "+num);
+    return Object.assign({},n,patch);
   }
 
   /* il numero del DDT: si prende dal contatore dell'azienda e si consuma,
