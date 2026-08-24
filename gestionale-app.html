@@ -4471,7 +4471,7 @@
          c'erano gia' rifornimenti o fatture fornitori. Il noleggio interno
          va nella riga "Spese", sempre visibile, come lavori e carte. */
       righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese)},
-             {t:"Spese: lavori "+eur(speseLav)+" · carte"+(speseNol?" · noleggio interno "+eur(speseNol):""),v:eur(speseCarte)}]
+             {t:"Spese: lavori "+eur(speseLav)+" · carte"+(speseNol?" · noleggio "+eur(speseNol):""),v:eur(speseCarte)}]
         .concat(speseRif?[{t:"Rifornimenti in contanti",v:eur(speseRif)}]:[])
         .concat(speseForn?[{t:"Fatture dei fornitori",v:eur(speseForn)}]:[])
     }));
