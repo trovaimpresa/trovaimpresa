@@ -1,117 +1,166 @@
-# Prompt per la sessione nuova — dopo la notte del 21 agosto 2026
+# Prompt per la sessione nuova — il Noleggio fuori dal reparto
+(Scritto la sera del 24 agosto 2026. Da incollare in una sessione Cowork nuova.)
 
-Copia e incolla tutto quello che sta sotto la riga.
+Ciao. Sono Alessio, TrovaImpresa. Si continua sul gestionale noleggio.
 
----
+Prima di tutto: leggi `CLAUDE.md` nella cartella del progetto
+(`C:\Users\Utente\Downloads\trovaimpresa`, che in Cowork si apre come
+`$HOME/mnt/trovaimpresa`). In fondo ci sono due sezioni che ti servono tutte
+e due:
 
-Ciao. Riprendiamo il lavoro su TrovaImpresa.
+- **«24 AGOSTO 2026 — IL COLLAUDO DEL NOLEGGIO, E I TREDICI DIFETTI»**
+- **«LA DECISIONE DI FINE GIORNATA — IL NOLEGGIO VA FUORI DAL REPARTO»**
 
-⛔ La cartella del progetto è `C:\Users\Utente\Downloads\trovaimpresa` (in Cowork si apre come `$HOME/mnt/trovaimpresa`). Se non risulta già collegata, chiedimi l'accesso a quella cartella lì: non startene a cercare in giro nel computer.
-
-Prima di rispondermi leggi `CLAUDE.md`, che sta nella cartella del progetto: è la memoria di tutto. In particolare la testa del file (le regole fisse) e **le quattro sezioni in fondo, tutte del 21 agosto**: il controllo totale del gestionale, il resoconto della sera, quella della tarda serata (il timeout del preventivo e i nomi dei gestionali), e quelle della **notte fonda** — via gli Strumenti dai pannelli, la coda della chat rimessa, il campo indirizzo nella barra laterale, e **l'ordine dei prossimi tre lavori**. Dentro ci sono le lezioni che sono costate la giornata.
-
-## Come si lavora con me — le regole che non si sgarrano
-
-* Parlami in italiano semplice, e scrivi CORTO. Ho la dislessia: massimo una decina di righe per messaggio, **una domanda per volta**. I dettagli mettili nei file, non in chat. Se devo scegliere fra due cose, spiegamele in parole mie; se non so rispondere, decidi tu e dimmi perché.
-* ⚠️ **Quando ti chiedo una cosa piccola, fai quella piccola.** Il 21 sera ti avevo chiesto un campo per scrivere un indirizzo: è arrivato un campo, una finestra che si apriva, un'intestazione e tre pulsanti. Tutta roba che non avevo chiesto — e ogni pezzo in più è un pezzo da mantenere.
-* ⛔ NIENTE comandi git dalla mia cartella, nemmeno `git status`: crea un `.git/index.lock` fantasma che mi blocca i commit per ore. Per sapere cosa è cambiato, guarda i file.
-* Il push lo faccio io. Dammi un blocco solo, su UNA RIGA, pronto da incollare in Git Bash. ⛔ La riga del git dammela DA SOLA, e rileggila carattere per carattere prima di mandarmela. La scheda di collaudo scrivimela come testo normale, fuori dal riquadro.
-* ⛔ Per tornare indietro su un file usa il numero del commit, non `HEAD~1`: il 21 agosto avevo fatto due commit e `HEAD~1` ha riportato indietro niente. Il numero si legge nella riga del push precedente (`5e5f63e..6da3e57`).
-* ⛔ PRIMA di darmi il blocco git, esegui `node tools/controllo-push.js` sulla mia cartella. Gira in 5 secondi e dice cosa fermerebbe la pubblicazione. La consegna è quattro cose: **banchi verdi · controllo verde · md5 uguale · blocco git**.
-* ⚠️ Raggruppa le modifiche in UN push solo. Netlify: 300 crediti al mese e ogni push ne costa 15 — cioè venti push al mese. Quello che sta in `sql/` e in `tools/` non va online; un push di soli file `.md` e `.sql` non fa ripartire la pubblicazione, quindi non costa crediti.
-* Le chiavi Stripe e Supabase stanno nelle variabili di Netlify: non scriverle mai nel codice e non chiedermele in chat.
-* Le query per Supabase scrivimele per l'SQL Editor, dove sono collegato come postgres. UNA query alla volta. Se una query deve dirmi qualcosa, me lo dice con una RIGA DI RISULTATO, mai con `raise notice`.
-* Non mostrarmi mai una riga di codice da sola in chat: io incollo quella. Dammi sempre il blocco intero, o meglio il file.
-* ⛔ NON aprire `gestionale-negozio.html` e `gestionale-noleggio.html`. **Se ti serve guardarci dentro, chiedimelo prima.**
-* Io non sono in grado di collaudare il codice: la verifica è tua, sempre, anche quando non te la chiedo. Posso aprire una pagina e dirti cosa vedo, quello sì — ed è così che il 21 agosto sono usciti i difetti più grossi.
-* Una prova che non diventa rossa sul file rotto non prova niente: i banchi si controllano nei due versi, sempre col loro file di sabotaggi. E una prova che gira a vuoto senza finire deve diventare rossa, non restare zitta.
-* Prima di toccare qualsiasi file, spiegami cosa hai capito e quali file tocchi, e aspetta la mia conferma.
-* Consegna così: scrivi nella mia cartella, mandami il file in chat, controlla l'md5 da tutte e due le parti, e dimmi cosa cliccare.
-* Se hai sbagliato, dimmelo subito e per primo.
-* Il sito pubblico non parla mai di me: il mio nome resta solo nel footer.
-* ⛔ Per un modulo nuovo mai `openSheet()`: sempre `openSheetGrande()`.
-* I banchi di prova stanno nel tuo contenitore, in `prove/`, non nella mia cartella. Se non te lo dico io, non spostarli.
-* ⛔ Quando costruisci una schermata, i pulsanti devono sembrare pulsanti: usa la classe `.quick-add` di `css/gestionale.css`. Sul telefono nessun pulsante sotto i **44 px** di altezza: il dito lo sbaglia.
-* ⛔ I prezzi sono i MIEI, non si inventano. Se per un pezzo non hai un mio numero, si scrive che dipende e da cosa — non si tappa il buco con una cifra presa da internet.
-
-## ⚠️⚠️ LE LEZIONI, prima di scrivere una riga
-
-1. ⛔ **PRIMA DI COSTRUIRE, GUARDA SE C'È GIÀ.** Il 21 agosto due voci della mia lista erano già fatte da giorni, e la sera mi hai offerto di costruire una porta d'ingresso al gestionale che esisteva già (`AMMESSI` e `?chiave=apri`). La notte è successo di nuovo: stavi per «portare il Preventivo AI dentro il gestionale», e nel gestionale c'era già («✨ Genera con AI»). Trenta secondi di lettura del file risparmiano una giornata. Quando una cosa si chiude, va tolta dalla lista lo stesso giorno.
-2. ⛔ **UN ELENCO NON SI CONTA, SI LEGGE RIGA PER RIGA.** Search Console diceva «683 pagine non indicizzate»: 574 non erano un difetto e i difetti veri erano uno.
-3. ⛔ **CONTARE NON È CONTROLLARE.** Un banco che conta le righe non vede il difetto: deve guardarle una per una.
-4. ⛔ **UN SABOTAGGIO NON ACCUSATO VA CAPITO, NON AGGIRATO** — e un sabotaggio che non può fare danno non prova niente: va riscritto sul punto giusto. Il 21 notte ne sono usciti tre: uno appeso in fondo al file (fuori dai tag `<script>` è testo, non codice), uno che colpiva la prima di due `.subscribe()` invece di quella giusta, e uno che riduceva un pulsante a 43 px quando la prova ne chiedeva 40.
-5. ⛔ **LO SCHEMA DI PROVA SI COPIA DA QUELLO VERO, NON SI IMMAGINA.** `imprese.id` è un NUMERO, non un uuid come le altre tabelle.
-6. ⛔ **QUANDO UNA COSA VA IN TIMEOUT, GUARDA IL REGISTRO DI NETLIFY PRIMA DI TOCCARE IL CODICE.**
-7. ⛔ **UN DIFETTO VECCHIO CHE RESTA LÌ FA DA SCUDO A QUELLI NUOVI.** Una prova scritta come «non peggio di prima» non diventa rossa se il file era già rotto. Dove si può, la misura va assoluta.
-8. ⛔ **CERCARE UNA SCRITTA NEL FILE NON È CONTROLLARE.** Il nome di una funzione resta scritto anche quando la funzione è sparita e solo la chiamata è rimasta — cioè proprio quando il file è rotto.
-9. ⛔ **UN `addEventListener` SCRITTO A MANO NON È «CHIAMATO DA NESSUNO»: GIRA DA SOLO.** Una pulizia che guarda solo «chi mi chiama» non lo vede, e quello tiene in vita mezzo file.
-10. ⛔ **IL CODICE GIÀ MORTO PRIMA NON SI TOCCA.** Non è il lavoro di stasera.
-11. ⛔ **LE EMOJI LE DISEGNA WINDOWS, NON NOI.** Niente emoji del blocco U+1FA70–U+1FAFF: escono come quadratini bianchi.
-12. ⛔ **UNA REGOLA CHE STA IN DUE POSTI NON SI SISTEMA A METÀ.** Vale per il codice e per le liste.
-13. ⚠️ **NON METTERMI DAVANTI DUE MONDI COME SE FOSSERO LO STESSO.** Il prezzario della Regione serve per i lavori pubblici; i prezzi delle guide sono quelli di mercato.
-
-## Dove siamo
-
-Il gestionale è finito ed è chiuso (`MANUTENZIONE = true`, riga ~15272): «prima si costruisce la casa poi si vende». Per entrarci io: `trovaimpresa.com/gestionale-app?chiave=apri`. Prezzo, clienti e incassi non sono il discorso.
-
-Online e provato, la notte del 21 agosto:
-
-* la falla di `ai-claude.js` richiusa — l'impresa si ricava dall'accesso, con la scadenza del Premium e un tetto di 4 secondi sui controlli;
-* il preventivo AI non va più in timeout: lavora in background fino a 15 minuti;
-* ogni gestionale ha il nome del suo mestiere: Gestionale impresa · artigiano · studio · negozio;
-* **via il riquadro «🛠️ Strumenti» dai 4 pannelli** (7 caselle, ~4.400 righe in meno). Deciso da me: presi uno per uno non facevano abbonare nessuno;
-* **rimessa la coda di `pannello-impresa.html`**: il file finiva a metà frase e **tutta la chat del pannello impresa era morta**, in silenzio, senza un errore in console;
-* **campo indirizzo nella barra laterale** (`js/vai-dal-cliente.js`, un file solo per tutti e 4): scrivi la via con la città, la mappa che sta già lì si sposta col segnalino, e un pulsante apre il navigatore del telefono.
-
-## ⛔ DA DOVE SI RIPARTE — l'ordine l'ho deciso io
-
-**1. IL GESTIONALE ARTIGIANO — si costruisce e si collauda. È tutto già deciso: non chiedermi niente, parti.**
-
-⛔ NON è un file suo: è la terza faccia di `gestionale-app.html`, come lo studio tecnico. Confermato da me dopo aver visto i numeri. Non ridiscuterlo.
-
-* **Restano 15 voci**: Riepilogo · Lavori · Clienti · Preventivi · Fatture · Scadenzario · Calendario · Richieste dal sito · Galleria · Cestino **+ Fornitori · Mezzi · Attrezzature · Report · Mappa**.
-* **Se ne spengono 7**: Computo metrico · Prezzario · Stati di avanzamento · Crediti formativi · Squadra · Agenda operatore · Carte.
-* **Le parole**: «Lavori» diventa **«Lavori e interventi»** — tutte e due, non una sola.
-* ⚠️ Attrezzature resta ma Squadra si spegne: «chi ce l'ha in mano» va cambiato in una nota scritta a mano, se no è una tendina vuota.
-* Nasce `adattaMenuArtigiano()` accanto a `adattaMenuProfessionista()`. Oggi l'artigiano cade dentro `adattaMenuImpresa()`, ed è da lì che gli arrivano computo, prezzario e SAL. Si **nasconde soltanto**: i dati restano.
-
-**2. IL GESTIONALE NEGOZIO — un lavoro iniziato e mai finito.** È rimasto molto indietro, come i professionisti. È un file davvero separato, e con ragione (magazzino, giacenze, scarico merce), ma le correzioni fatte sul gestionale principale lì non arrivano mai. Aperti dal 7 agosto: `esc()` sui dati nelle card `neg_*` · il banner errore-lettura sul riepilogo · la numerazione dei preventivi fatta dal browser (due dispositivi = due preventivi con lo stesso numero).
-
-**3. IL GESTIONALE NOLEGGIO — farlo entrare dentro impresa e negozio.** Nelle imprese ci possono stare noleggiatori, e nei negozi il noleggio di attrezzature. È **2.233 righe** — non un gestionale, un modulo — e usa tre sole tabelle sue (`nol_mezzi`, `nol_clienti`, `nol_noleggi`) mentre per il resto pesca già da `gest_*` e `neg_*`. Oggi **non è collegato a niente**: ci si arriva solo da un link in `admin.html`. Diventerà una sezione «Noleggio» che si accende solo per chi noleggia. ⚠️ Prima di attaccarlo a qualcuno: le tre tabelle `nol_*` non hanno un file SQL nel progetto, quindi nessuno sa com'è fatto il loro lucchetto. Va guardato con una query.
-
-## Il resto che resta aperto, dopo i tre
-
-4. **I prezzi del preventivo AI.** Su un bagno da 15 mq ha scritto 14.600 € + IVA: è il doppio del vero. Il mio numero: un bagno completo di 6 mq a Rieti, tutto compreso, sta fra 6.000 e 7.000 €. Le istruzioni di `generaPreventivoDash` non nominano nemmeno la zona. E l'IVA: mette 10% su tutto, ma sanitari e rubinetteria sono beni significativi — da chiedere al commercialista.
-5. **Il paywall del gestionale vive solo nel browser**: nel database nessuna regola nomina il piano. Un account free userebbe il gestionale intero. Da chiudere prima di aprire a chiunque.
-6. **`sql/gest-computo-metrico.sql` è una mina**: rilanciato, riporta indietro la vista e i prezzi dell'analisi tornano in silenzio a quelli scritti a mano. E il gestionale, in 14 messaggi, invita a eseguirlo. Serve una guardia (stesso innesco in `gest-computo-quantita-3-decimali.sql`).
-7. **Il totale del preventivo non è la somma di quello che si stampa** (tre centesimi su un preventivo vero, e poi la fattura non torna).
-8. **I dati che si perdono senza dirlo**: le ore del lavoro, e il collaboratore che segna «fatto» dal telefono senza che arrivi al titolare.
-9. **Per il geometra**: la ricerca in alto riscrive i nomi dei clienti («Edilcantiere» → «Edilpratica»), sul telefono il menù resta «Lavori», quattro frasi escono sgrammaticate, e `js/aiuti-gestionale.js` non è caricato da nessuna pagina.
-10. **Le 5 pagine «duplicata senza URL canonico»** in Search Console — chiedimi la schermata, quella tabella non passa dal collegamento che usi tu.
-11. **Piccole**: il cancelletto `#` e gli asterischi che restano nel testo dell'AI · «Vedi gli artigiani di roma» in minuscolo nella home · la striscia arancione «Non ho trovato la risposta» che sembra un secondo modo di chiedere all'AI.
-
-**Legge, non interfaccia — non cominciare senza dirmelo**: la fattura alla Pubblica Amministrazione (formato FPA12, codice a 6 caratteri, scissione dei pagamenti) e il reverse charge del subappalto edile (natura N6.7). Prima serve una risposta del commercialista.
-
-**Grandi, da non cominciare senza dirmelo**: il POS (serve un consulente vero), la contabilità dei lavori pubblici, i formati di scambio, il computo da una foto.
-
-## ⛔ LE DECISIONI CHE RESTANO MIE — non ripropormele
-
-* **La mappa nella barra laterale dei pannelli resta.** Sta in tutti e quattro perché è una scelta mia, non un residuo. Non si toglie: le si è dato uno scopo col campo dell'indirizzo, e basta così. ⛔ E niente finestre che si aprono sopra il pannello.
-* L'avviso del prezzo nuovo alle imprese di luglio (Premium da 49 €/anno a 29 €/mese o 249 €/anno). Fermo lì: «è un lavoro che ancora io devo decidere».
-* I prezzi della pagina del muratore. Restano quelli che ci sono.
-* L'indirizzo nel blocco facoltativo della registrazione: non è un difetto, è una scelta del modulo.
-* `.bak-riepiva-123811.html`, che sta nella cartella principale ed è quindi pubblicato. Segnalato, non toccato: decido io se chiuderlo.
-* Il passaggio dalla home città prima della ricerca: costa un clic, ma è lì che vive la pubblicità venduta. Scelta mia, non è un difetto.
-* Email e telefono delle imprese sono pubblici per scelta (il pulsante «Chiama»). Non è una falla. ⚠️ Quello che resta vero è che un concorrente scarica tutta la lista in un colpo: per chiuderlo serve una vista tipo `preventivi_safe` e toccare molte pagine pubbliche.
-* Gli **Strumenti** dei pannelli sono stati tolti e non tornano. Quello che serve va dentro il gestionale.
-
-## La pubblicità, i numeri veri
-
-* Il pixel di Meta sta dietro il banner dei cookie: Meta vede meno della metà di chi arriva. Su →50← clic pagati in tre giorni il sito ne ha visti →50←, Meta ne dichiarava →12←.
-* Un'impresa iscritta costa →2,97← €, non 5,47. →81← iscritte in 30 giorni con →240,66← € spesi. Prima della campagna il sito ne aveva →8← in tutto.
-* Le query si rileggono con `sql/leggi-visite.sql` e `sql/leggi-iscrizioni.sql`.
-* ⚠️ Con →8← € al giorno l'apprendimento di Meta non si chiuderà mai. Deciso: si tiene l'evento «Contatti» e non si tocca niente **fino al 26 agosto**, poi si rimisura confrontando `al_giorno_7` con `al_giorno_30`.
+Il referto completo del collaudo sta in
+`prove-claude/NOLEGGIO-collaudo-24-agosto.md`.
 
 ---
 
-**Oggi si parte dal punto 1: il gestionale artigiano.** È tutto deciso — dimmi solo cosa tocchi e aspetta il mio sì.
+## Come lavoriamo — le regole che valgono sempre
+
+* Rispondimi in italiano, semplice e pratico. Messaggi corti, massimo una
+  decina di righe: ho la dislessia. **Una cosa per volta, e una domanda per
+  volta.** Se mi dai tre istruzioni insieme mi perdo.
+* ⛔ **Nessun comando git dalla cartella collegata, nemmeno in sola lettura.**
+  Un `git status` una volta ha creato un `.git/index.lock` fantasma e mi ha
+  bloccato i commit per ore. Il push lo faccio io da Git Bash.
+* Il blocco git me lo dai su **una riga**, preceduto da
+  `node tools/controllo-push.js`. ⚠️ `prove-claude/` è nel `.gitignore`: se
+  lo metti nel `git add` la catena `&&` fallisce e il push non parte.
+* ⛔ **I file me li scrivi tu direttamente in cartella** (`device_commit_files`)
+  e mi confermi l'md5 verificato sul posto. Non farmi scaricare niente dalla
+  chat.
+* Le **query SQL una per volta**, e ognuna deve rispondere con **una riga
+  sola**: la lancio io nell'SQL Editor di Supabase e ti incollo la risposta.
+* I banchi di prova stanno nel tuo contenitore, in `prove/` — mai nella mia
+  cartella. **Ogni cosa che sistemi diventa una prova sul banco.**
+* Prima di consegnare: guarda il risultato in un browser e fai la fotografia.
+  **Se un foglio si può scaricare (PDF), scaricalo davvero.**
+* **Consegna = quattro cose:** banco verde · controllo verde · md5 uguale
+  dalle due parti · blocco git.
+* ⚠️ **Prima di costruire qualsiasi cosa nuova, chiedimi se mi serve** — non
+  come la voglio. Una funzione nuova solo quando me la chiede un'impresa che
+  paga. Un difetto invece si sistema e basta.
+
+---
+
+## Il banco di prova
+
+Il pacchetto è `prove-claude/banco-noleggio-24ago.zip`. Scompattalo in
+`prove/` nel tuo contenitore e mettici dentro anche `vendor/` e `foto/`.
+
+```
+prove/noleggio-prezzo/schermo.js ..... 563 prove   (apre la pagina in Chromium)
+prove/noleggio-prezzo/banco.js ........ 55 prove   (il conto, senza browser)
+prove/noleggio-prezzo/sabotaggi.js .... 14 sabotaggi
+prove/noleggio-scritte/banco.js ....... 21 prove   (i prezzi scritti all'italiana)
+prove/noleggio-importo/banco.js ....... 39 prove   (l'importo, le date, il cantiere)
+prove/noleggio-pdf/banco.js ........... 35 prove   (scarica i PDF VERI)
+prove/noleggio-menu/banco.js .......... 16 prove
+                                     ────────────
+                                       730 prove · tutte verdi
+```
+
+Come si fanno girare (il sito di prova è una copia dei miei file):
+
+```
+SITO=/root/lavoro/sito node prove/noleggio-importo/banco.js
+```
+
+Il finto Supabase sta dentro `prove/noleggio-importo/banco.js` e lo riusa
+anche il banco del PDF. ⚠️ L'email del finto utente deve essere
+`pintoalessio@icloud.com`: il cancello (`js/gate-gestionale.js`) è in
+manutenzione e fa entrare solo quella.
+
+---
+
+## ⛔ IL LAVORO DI QUESTA SESSIONE
+
+**Spostare il Noleggio fuori dal reparto, a livello azienda.**
+
+Oggi il pulsante «Noleggio» sta nel menù di sinistra **dentro un reparto**, e
+aprendo `gestionale-noleggio.html` la pagina mi chiede in quale reparto sono.
+Deve stare **fuori**, nella schermata dei reparti, accanto a «Dati azienda ·
+Commercialista · Backup (JSON) · Esporta dati».
+
+### Perché (non è un capriccio grafico)
+
+Il mezzo è **uno solo per tutta l'azienda**. Se il Noleggio sta dentro il
+reparto, lo stesso escavatore va messo due volte — una per reparto — e due
+reparti possono darlo allo stesso cliente nello stesso giorno. Il controllo
+delle sovrapposizioni scritto il 23 agosto smette di funzionare.
+
+### ✅ La buona notizia, già verificata
+
+**Nessuna tabella `nol_*` filtra per reparto.** Mezzi, noleggi, cauzioni,
+media e fatture del noleggio sono **già** a livello azienda. Le 40 occorrenze
+di `mestiere_id` in `gestionale-noleggio.html` servono tutte alle tabelle
+`gest_*` condivise col gestionale artigiano:
+
+```
+riga 1016, 4466, 4468, 4628, 5451  ->  gest_lavori
+riga 5550, 5681                    ->  gest_clienti
+riga 5565                          ->  gest_operatori
+riga 5654, 5655                    ->  gest_scadenze
+```
+
+**I dati sono già giusti.** Cambia solo da dove ci si arriva.
+
+### Cosa va fatto, in ordine
+
+1. In `gestionale-app.html`: togliere «Noleggio» dal menù del reparto e
+   metterlo nella **schermata dei reparti**, accanto a «Dati azienda».
+2. In `gestionale-noleggio.html`: togliere la **schermata della scelta del
+   reparto** all'ingresso, e la barra in alto che dice «casa · CATEGORIA
+   CASA» con «← Riepilogo».
+3. ⚠️ **Il punto delicato:** le sezioni del noleggio che oggi sono nascoste
+   ma presenti (Agenda operatore, Lavori, Condomini, Squadra, Scadenzario)
+   leggono `gest_*` filtrando per reparto. Senza reparto, `curMestiere()`
+   torna vuoto. **Dimmi cosa hai trovato e cosa proponi PRIMA di toccarle** —
+   probabilmente vanno tolte del tutto dalla pagina del noleggio, ma non
+   decidere da solo.
+4. Il banco del menù (`prove/noleggio-menu/banco.js`) oggi prova proprio il
+   comportamento vecchio («la prima volta si vede la scelta del reparto»):
+   va riscritto, non aggirato.
+
+---
+
+## Se avanza tempo, in ordine
+
+1. **Misurare lo spazio del deposito.** Una query sola che dica quanti MB
+   stanno adesso nei bucket `gestionale-foto` e `gestionale-video` e quanti
+   file. ⛔ Solo misurare: l'avviso «spazio quasi pieno» **non** va nel
+   gestionale delle imprese — lo spazio lo pago io, quindi semmai va nel
+   **pannello Admin**. E il caricamento **non** fallisce in silenzio, l'ho
+   già verificato: se lo spazio finisce te lo dice.
+2. **Portale cliente**: un link dove il cliente vede i suoi noleggi e le sue
+   carte. ⚠️ Chiedimi prima se mi serve.
+3. **Modulo ponteggi** (PiMUS, libretto). ⚠️ Chiedimi prima se mi serve.
+4. Quattro righe con l'accento scritto con l'apostrofo in
+   `gestionale-noleggio.html` (una sta nel messaggio delle fatture: «era
+   gia' su un'altra fattura»). Erano già lì da prima.
+
+## Una domanda mia rimasta in sospeso
+
+Volevo che un noleggio collegato a un reparto comparisse anche nel riepilogo
+di quel reparto. Tu mi hai chiesto una cosa a cui non ho ancora risposto, e
+la risposta serve prima di scrivere qualsiasi cosa:
+
+> Quando su un noleggio scrivo «reparto: progetto casa», è un **incasso** di
+> quel reparto (l'ho noleggiato a un cliente) o un **costo** (ho usato il mio
+> mezzo in un mio cantiere)?
+
+Rifammela quando arriviamo lì.
+
+---
+
+## Dove sono le cose
+
+* La pagina del noleggio: `gestionale-noleggio.html` (~400 KB, una sola).
+* Il gestionale artigiano: `gestionale-app.html` (~950 KB).
+* Il conto del noleggio: `js/noleggio-prezzo.js` (fuori dalla pagina apposta).
+* Il cestino: `js/cestino.js`. Il cancello: `js/gate-gestionale.js`.
+* Le query già eseguite: `sql/noleggio-*.sql`, `sql/clienti-uno-solo.sql`,
+  e l'ultima di oggi `sql/noleggio-numero-contratto.sql`.
+* I referti: `prove-claude/NOLEGGIO-referto-23-agosto.md` e
+  `prove-claude/NOLEGGIO-collaudo-24-agosto.md`.

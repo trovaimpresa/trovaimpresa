@@ -15432,3 +15432,76 @@ mano.
 ⚠️ Prima di costruire una qualsiasi di queste: chiedere ad Alessio se gli
 serve. La domanda è una sola — **un'impresa smetterebbe di pagare
 TrovaImpresa se questa cosa non ci fosse?**
+
+---
+
+## LA DECISIONE DI FINE GIORNATA — IL NOLEGGIO VA FUORI DAL REPARTO
+
+Alessio l'ha notato guardando il menù: il **Noleggio** sta dentro il reparto,
+ma dovrebbe stare **a livello azienda**, vicino a «Dati azienda» nella
+schermata dei reparti. Ha ragione, e per un motivo che si tocca con mano:
+
+⛔ **Il mezzo è uno solo per tutta l'azienda.** Se il Noleggio sta dentro il
+reparto, lo stesso escavatore va messo due volte — una in «giardiniere» e una
+in «progetto casa» — e a quel punto due reparti possono darlo allo stesso
+cliente nello stesso giorno. Il controllo delle sovrapposizioni scritto il 23
+agosto smette di funzionare.
+
+E il gestionale lo diceva già da solo in tre punti: i numeri di DDT,
+contratto e fattura vengono dal contatore dell'**azienda** (`gest_azienda`);
+i clienti del noleggio sono già un elenco solo dal 23 agosto; le scadenze
+sono del mezzo, non del reparto.
+
+### ✅ LA SCOPERTA CHE RENDE IL LAVORO PICCOLO
+
+Guardando il codice prima di toccarlo:
+
+**Nessuna tabella `nol_*` filtra per reparto. Zero.** Mezzi, noleggi,
+cauzioni, media e fatture del noleggio sono **già** a livello azienda.
+
+Le 40 occorrenze di `mestiere_id` in `gestionale-noleggio.html` servono tutte
+alle tabelle `gest_*` che la pagina condivide col gestionale artigiano:
+
+```
+riga 1016, 4466, 4468, 4628, 5451  ->  gest_lavori
+riga 5550, 5681                    ->  gest_clienti
+riga 5565                          ->  gest_operatori
+riga 5654, 5655                    ->  gest_scadenze
+```
+
+Quindi **i dati sono già giusti**. Quello che va cambiato è solo:
+1. **da dove ci si arriva** — il pulsante «Noleggio» va spostato dal menù del
+   reparto alla schermata dei reparti, accanto a «Dati azienda»;
+2. **la schermata della scelta del reparto** all'ingresso del noleggio, che
+   non ha più senso di esistere.
+
+⚠️ Da capire prima di toccare: le sezioni del noleggio nascoste ma presenti
+(Agenda operatore, Lavori, Condomini, Squadra, Scadenzario) leggono `gest_*`
+filtrando per reparto. Se il noleggio non ha più un reparto, `curMestiere()`
+torna vuoto e quelle vanno gestite — o tolte del tutto dalla pagina.
+
+### La casella «per quale reparto»: RIMANDATA
+
+L'idea di Alessio era: un noleggio collegato a un reparto compare anche nel
+riepilogo di quel reparto. Buona, ma è una **funzione nuova** e nessuno l'ha
+chiesta. Resta la domanda aperta a cui rispondere prima di scriverla:
+
+> Quando su un noleggio scrivi «reparto: progetto casa», è un **incasso** di
+> quel reparto (l'hai noleggiato a un cliente) o un **costo** (hai usato il
+> tuo mezzo in un tuo cantiere)? Perché nel riepilogo va in due caselle
+> diverse.
+
+### L'avviso dello spazio del deposito: RIDIMENSIONATO
+
+Verificato: **il caricamento non fallisce in silenzio.** In tutti e quattro i
+punti dove il gestionale carica un file (righe 4509, 4532, 5061, 5394) c'è il
+controllo dell'errore e il messaggio all'utente. Il caso brutto — fai il
+video del mezzo danneggiato, non si carica, non lo sai — non succede.
+
+Quindi l'avviso «spazio quasi pieno» non è un difetto: è una funzione nuova.
+E soprattutto **lo spazio lo paga Alessio, non l'impresa**: quell'avviso va
+nel **pannello Admin**, non nel gestionale delle imprese.
+
+⛔ Prima di costruirlo: **misurare.** Una query che dica quanti MB stanno
+adesso nei bucket `gestionale-foto` e `gestionale-video` e quanti file. Se è
+il 3% di 1 GB, si rimanda senza rimpianti.
