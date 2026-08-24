@@ -1812,9 +1812,20 @@
   }
 
   /* un gestore solo per tutti e cinque i pulsanti, di tutte e tre le schede */
+  /* ⛔ 24 agosto 2026 — QUESTO GESTORE PRENDEVA ANCHE ROBA NON SUA.
+     Cerca ogni bottone che comincia per «nol-», e sotto quel nome ci
+     stanno anche «nol-contr-pdf», «nol-contr-stampa», «nol-cauz-pdf» e
+     «nol-cauz-stampa», che sono di un altro gestore e non hanno il
+     data-t. Risultato: ogni volta che si stampava un contratto, una
+     ricevuta o una quietanza compariva il messaggio nero «Questa scheda
+     non si trova più» — un errore che non c'era. Il foglio usciva lo
+     stesso, ma chi legge quel messaggio non si fida più del gestionale.
+     Adesso il gestore prende SOLO i suoi cinque pulsanti. */
+  const NOL_PULSANTI_SCHEDA=["nol-mod","nol-copia","nol-pdf","nol-stampa","nol-elim"];
   document.addEventListener("click",async e=>{
     const b=e.target.closest('[data-action^="nol-"]'); if(!b) return;
     const tipo=b.dataset.t, id=b.dataset.id, a=b.dataset.action;
+    if(NOL_PULSANTI_SCHEDA.indexOf(a)<0) return;
     const d=await nolLeggi(tipo,id);
     if(!d){toast("Questa scheda non si trova più");return;}
     if(a==="nol-mod")    return NOL_TIPI[tipo].scheda(d);
@@ -2248,6 +2259,14 @@
         </div>
         <div class="field" style="margin-top:10px"><label>Nota sulla prenotazione</label>
           <input id="nn-prenota-nota" value="${v('prenotazione_nota')}" placeholder="Es. da confermare, il cliente richiama venerd&igrave;"></div>
+        <!-- ⛔ 24 agosto 2026 — DOVE VA IL MEZZO.
+             Il DDT lo chiedeva gia' (nolDdtDati legge n.luogo) e la colonna
+             c'era gia' nel database dal 23 agosto, ma la casella per
+             scriverlo non esisteva: cosi' come «indirizzo di destinazione»
+             finiva la SEDE del cliente, non il cantiere. Su un DDT il luogo
+             di consegna e' quello vero. -->
+        <div class="field" style="margin-top:10px"><label>Dove va il mezzo (va sul DDT)</label>
+          <input id="nn-luogo" value="${v('luogo')}" placeholder="Cantiere di via Roma 12, Rieti &mdash; se vuoto va la sede del cliente"></div>
         <div id="nn-conflitto"></div>
       </div>
 
@@ -2324,6 +2343,11 @@
         <div class="nol-azioni" style="margin-top:16px">
           <button type="button" class="nol-az nol-az-apri" data-action="nol-contr-stampa" data-id="${n.id||""}">Stampa il contratto</button>
           <button type="button" class="nol-az" data-action="nol-contr-pdf" data-id="${n.id||""}">Contratto in PDF</button>
+          ${/* ⛔ 24 agosto 2026: al collaudo il verbale e il DDT si sono
+                cercati QUI per dieci minuti, e stanno in un'altra sezione.
+                Chi ha appena compilato il noleggio li cerca dove sta
+                lavorando: adesso da qui ci si arriva. */
+            n.id?`<button type="button" class="nol-az" data-action="nol-mod" data-t="documenti" data-id="${n.id}">Verbale, DDT e foto &rarr;</button>`:""}
         </div>
         <p style="margin:10px 0 0;font-size:13px;color:#666">Il contratto si stampa da quello che hai scritto qui sopra: salva prima, poi stampa.</p>
       </div>
@@ -2478,6 +2502,23 @@
       return;
     }
     if(e.target.id==="nn-cauzione"||e.target.id==="nn-effettivo") nolMostraCauzione();
+  });
+
+  /* ⛔ 24 agosto 2026 — «RIENTRATO» SCRIVE ANCHE LA DATA.
+     Al collaudo si premeva «Rientrato» e la card diceva RIENTRATO, ma la
+     data di rientro effettivo restava vuota: per il gestionale il mezzo era
+     ancora fuori, il conto non si rifaceva sui giorni veri e il verbale di
+     riconsegna non compariva. Due verita' diverse nella stessa scheda.
+     Adesso il bottone mette la data di oggi e lo dice: se il mezzo e'
+     rientrato prima, la data si corregge a mano. */
+  document.addEventListener("click",e=>{
+    const b=e.target.closest('#nn-fase button[data-v]'); if(!b) return;
+    const d=$("#nn-effettivo"); if(!d) return;
+    if(b.dataset.v==="rientrato" && !d.value){
+      d.value=todayStr();
+      d.dispatchEvent(new Event("change",{bubbles:true}));
+      toast("Rientro segnato oggi. Se è rientrato prima, correggi la data.");
+    }
   });
   document.addEventListener("change",e=>{
     if(e.target.id==="nn-cau-chiusa"||e.target.id==="nn-effettivo"){
@@ -3059,8 +3100,20 @@
       "Documento di trasporto emesso ai sensi del D.P.R. 472/1996. I beni sono ceduti a titolo di noleggio e restano di proprietà del mittente: la consegna non costituisce cessione."
     ]});
 
+    /* ⛔ 24 agosto 2026 — LA FIRMA DEL CLIENTE FINISCE ANCHE SUL DDT.
+       Al collaudo la firma si raccoglieva col dito nel verbale e il DDT
+       usciva con le righe vuote da firmare a penna: due fogli della stessa
+       consegna, uno firmato e uno no. Il DDT e' la carta che prova che il
+       mezzo e' stato consegnato, quella che si tira fuori quando il cliente
+       dice «a me non e' mai arrivato».
+       ⚠️ Alla consegna il cliente RICEVE, e firma da destinatario; al
+       rientro e' lui che riporta il mezzo, e firma da conducente. */
+    const firmaCli=(rientro?n.firma_rientro_img:n.firma_uscita_img)||null;
+    const nomeCli =(rientro?n.firma_rientro:n.firma_uscita)||C.nome||n.cliente||"";
     blocchi.push({t:"firme",vessatorie:"",
-      colonne:[["Firma del conducente",""],["Firma del destinatario",""]]});
+      colonne: rientro
+        ? [["Firma del conducente",nomeCli,firmaCli],["Firma del destinatario",A.nome||"",null]]
+        : [["Firma del conducente",A.nome||"",null],["Firma del destinatario",nomeCli,firmaCli]]});
 
     return {blocchi,titolo:"DDT "+(num?num:"")+" — "+(M.nome||n.mezzo||"mezzo")};
   }
@@ -4143,6 +4196,7 @@
     const vuoto=id2=>$(id2).value===""?null:_numIt($(id2).value);
     const dati={mezzo:nomeM||null, mezzo_id:selM.value||null,
       cliente:nomeC||null, cliente_id:selC.value||null,
+      luogo:$("#nn-luogo")?($("#nn-luogo").value.trim()||null):null,
       data_uscita:$("#nn-uscita").value||null,
       data_rientro_prevista:$("#nn-prevista").value||null,
       data_rientro_effettivo:$("#nn-effettivo").value||null,
