@@ -272,7 +272,7 @@
     <section id="riepilogo" class="active">
       <div class="rie-intro">
         <h2 id="rie-title">Riepilogo</h2>
-        <p>A colpo d'occhio: quanti mezzi sono fuori, chi doveva rientrare e non è tornato, quanto ha reso il noleggio questo mese. Sotto, il magazzino.</p>
+        <p>A colpo d'occhio: quanti mezzi sono fuori, chi doveva rientrare e non è tornato, quanto ha reso il noleggio questo mese.</p>
       </div>
       <div class="kpis">
         <div class="kpi df"><div class="n" id="kn-mezzi">0</div><div class="l">Mezzi</div><div class="sub">A parco</div></div>
@@ -291,19 +291,6 @@
       <div id="rie-ritardi" class="nol-elenco"></div>
       <div class="mini-title">Scadenze dei mezzi</div>
       <div id="rie-scadenze" class="nol-elenco"></div>
-      <div style="font-size:14px;font-weight:700;color:#666;text-transform:uppercase;margin:24px 0 10px">Magazzino e negozio</div>
-      <div class="kpis">
-        <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Prodotti</div><div class="sub">A catalogo</div></div>
-        <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">Sotto scorta</div><div class="sub">Da riordinare</div></div>
-        <div class="kpi ft"><div class="n" id="k-fatti">0</div><div class="l">Movimenti</div><div class="sub">Operazioni questo mese</div></div>
-        <div class="kpi eu"><div class="n" id="k-lavori">€ 0</div><div class="l">Valore magazzino</div><div class="sub">Prezzo per quantità</div></div>
-      </div>
-      <div class="money-row">
-        <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Venduto</div><div class="sub">Questo mese</div></div>
-        <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Acquistato</div><div class="sub">Ordini questo mese</div></div>
-      </div>
-      <div class="mini-title">Prodotti sotto scorta</div>
-      <div id="prossimi" class="nol-elenco"></div>
     </section>
 
     <section id="mezzi">
@@ -1009,39 +996,17 @@
   async function renderRiepilogoNegozio(){
     const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
     if(!(sb&&sbUid)){
-      ["k-dafare","k-incorso","k-fatti","kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati"].forEach(i=>scrivi(i,0));
-      ["k-lavori","k-daincassare","k-incassato","kn-incasso","kn-daincassare","kn-cauzioni"].forEach(i=>scrivi(i,_eur(0)));
-      if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+      ["kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati"].forEach(i=>scrivi(i,0));
+      ["kn-incasso","kn-daincassare","kn-cauzioni"].forEach(i=>scrivi(i,_eur(0)));
       if($("#rie-ritardi"))$("#rie-ritardi").innerHTML='<p style="color:#666;padding:8px">Nessun mezzo in ritardo.</p>';
       if($("#rie-scadenze"))$("#rie-scadenze").innerHTML='<p style="color:#666;padding:8px">Nessuna scadenza.</p>';
       return;
     }
-    const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid);
-    const P=prod||[];
-    const sotto=P.filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
-    const valore=P.reduce((s,p)=>s+((+p.prezzo||0)*(+p.quantita||0)),0);
-    scrivi("k-dafare",P.length);
-    scrivi("k-incorso",sotto.length);
-    scrivi("k-lavori",_eur(valore));
-    const {data:mov}=await sb.from("neg_movimenti").select("tipo,importo,data_mov").eq("user_id",sbUid);
-    const M=mov||[];
-    const mese=M.filter(m=>thisMonth(m.data_mov));
-    scrivi("k-fatti",mese.length);
-    const venduto=mese.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
-    /* ⚠️ il tipo scritto dal modulo e' «acquisto», non «ordine»: con la parola
-       sbagliata la casella «Acquistato» restava a zero anche con gli ordini
-       dentro. Si tengono buone tutte e due, per i movimenti gia' salvati. */
-    const acquistato=mese.filter(m=>m.tipo==="acquisto"||m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
-    scrivi("k-daincassare",_eur(venduto));
-    scrivi("k-incassato",_eur(acquistato));
-    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`
-      <div class="nol-card" style="border-top-color:#c62828">
-        <div class="tit"><strong>${esc(p.nome||"—")}</strong>
-          <span class="nol-eti" style="background:#c62828">${esc(String(p.quantita??0))}</span></div>
-        <div class="sub2">Scorta minima ${esc(String(p.soglia_minima??0))}</div>
-      </div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
 
-    /* ── i numeri del noleggio ── */
+    /* ── i numeri del noleggio ──
+       ⛔ 24 agosto 2026 — tolto da qui il blocco "Magazzino e negozio"
+       (neg_prodotti/neg_movimenti): era roba del gestionale Negozio,
+       non del Noleggio, e qui non serviva a nessuno. */
     const {data:mezzi}=await sb.from("nol_mezzi").select("*").eq("user_id",sbUid);
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
