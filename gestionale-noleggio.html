@@ -1100,7 +1100,7 @@
     ? window.NoleggioPrezzo.numIt(v)
     : (parseFloat(String(v==null?"":v).replace(/[€\s]/g,"").replace(/\./g,"").replace(",","."))||0));
   const _eur=n=>Number(n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
-  let nolMezzi=[], nolConsumi=[];
+  let nolMezzi=[], nolConsumi=[], nolMestieri=[];
 
   /* le caselle del contaore e dei km si vedono solo se quel mezzo li ha:
      una casella che per quel mezzo non vuol dire niente e' una casella che
@@ -2230,6 +2230,15 @@
              di consegna e' quello vero. -->
         <div class="field" style="margin-top:10px"><label>Dove va il mezzo (va sul DDT)</label>
           <input id="nn-luogo" value="${v('luogo')}" placeholder="Cantiere di via Roma 12, Rieti &mdash; se vuoto va la sede del cliente"></div>
+        <!-- ⛔ 24 agosto 2026 — QUANDO IL CLIENTE SEI TU.
+             Facoltativa: serve solo quando il mezzo lo dai a un tuo reparto
+             (es. lo usi in un cantiere di "progetto casa") invece che a un
+             cliente vero. In quel caso l'importo del noleggio compare come
+             SPESA nel riepilogo di quel reparto, come se l'avessi noleggiato
+             da un fornitore esterno — perche' e' proprio quello che e'. -->
+        <div class="field" style="margin-top:10px"><label>Per un tuo reparto (facoltativo)</label>
+          <select id="nn-reparto"><option value="">— nessuno: e' un cliente esterno —</option></select>
+          <p style="margin:6px 0 0;font-size:13px;color:#666">Scegli un reparto solo se il mezzo lo usi tu, in un tuo cantiere: l'importo comparir&agrave; come spesa nel riepilogo di quel reparto.</p></div>
         <div id="nn-conflitto"></div>
       </div>
 
@@ -2389,6 +2398,7 @@
        ce l'ha, si ripiega sul nome scritto */
     $("#nn-mezzo").value   = n.mezzo_id   || nolIdDaNome("#nn-mezzo",   n.mezzo)   || "";
     $("#nn-cliente").value = n.cliente_id || nolIdDaNome("#nn-cliente", n.cliente) || "";
+    if($("#nn-reparto")) $("#nn-reparto").value = n.mestiere_id || "";
     if(n.stato_pagamento) $("#nn-pagamento").value=n.stato_pagamento;
     nolConsumi = Array.isArray(n.consumi) ? n.consumi.slice() : [];
     nolDisegnaConsumi();
@@ -4189,6 +4199,9 @@
     const vuoto=id2=>$(id2).value===""?null:_numIt($(id2).value);
     const dati={mezzo:nomeM||null, mezzo_id:selM.value||null,
       cliente:nomeC||null, cliente_id:selC.value||null,
+      /* ⛔ 24 agosto 2026 — reparto facoltativo: vuoto = cliente esterno,
+         scelto = noleggio interno, conta come spesa nel riepilogo di quel reparto */
+      mestiere_id:($("#nn-reparto")&&$("#nn-reparto").value)||null,
       luogo:$("#nn-luogo")?($("#nn-luogo").value.trim()||null):null,
       data_uscita:$("#nn-uscita").value||null,
       data_rientro_prevista:$("#nn-prevista").value||null,
@@ -4307,10 +4320,15 @@
        Il nome si porta dietro lo stesso, per le schermate e per lo storico. */
     const {data:mz}=await sb.from("nol_mezzi").select("*").eq("user_id",sbUid).order("nome");
     const {data:cl}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).order("nome");
-    nolMezzi=mz||[];
-    const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
+    /* 24 agosto 2026 — i reparti veri, per la casella "Per un tuo reparto":
+       gli stessi che vede il gestionale imprese (gest_mestieri), nessuno
+       escluso. Chi non ne ha (un solo mestiere) non vede mai la scelta. */
+    const {data:mestieri}=await sb.from("gest_mestieri").select("id,nome").eq("user_id",sbUid).is("eliminato_il",null).order("ordine");
+    nolMezzi=mz||[]; nolMestieri=mestieri||[];
+    const selM=$("#nn-mezzo"), selC=$("#nn-cliente"), selR=$("#nn-reparto");
     if(selM)selM.innerHTML='<option value="">— Seleziona mezzo —</option>'+nolMezzi.map(x=>`<option value="${x.id}" data-nome="${esc(x.nome||"")}">${esc(x.nome||"")}</option>`).join("");
     if(selC)selC.innerHTML='<option value="">— Seleziona cliente —</option>'+(cl||[]).map(x=>`<option value="${x.id}" data-nome="${esc(x.nome||"")}">${esc(x.nome||"")}</option>`).join("");
+    if(selR)selR.innerHTML='<option value="">— nessuno: e\' un cliente esterno —</option>'+(mestieri||[]).map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join("");
   }
   async function loadNoleggi(){
     if(!(sb&&sbUid)) return;
@@ -4330,9 +4348,13 @@
          chi noleggia, e non deve contarli a mente sul calendario */
       const rit=(et==="IN RITARDO")?Math.round((new Date(oggi)-new Date(x.data_rientro_prevista))/86400000):0;
       const manca=(fase==="prenotato"&&x.data_uscita)?Math.round((new Date(x.data_uscita)-new Date(oggi))/86400000):0;
+      /* ⛔ 24 agosto 2026 — noleggio interno: se e' taggato a un reparto,
+         una piccola etichetta lo dice subito, senza aprire la scheda */
+      const repNome=x.mestiere_id?((nolMestieri.find(m=>m.id===x.mestiere_id)||{}).nome||""):"";
       return `<div class="nol-card" style="border-top-color:${col}">
         <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-          <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}${manca>0?esc(" · fra "+manca+(manca===1?" giorno":" giorni")):""}</span></div>
+          <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}${manca>0?esc(" · fra "+manca+(manca===1?" giorno":" giorni")):""}</span>
+          ${repNome?`<span class="nol-eti" style="background:#546e7a">🏷 ${esc(repNome)}</span>`:""}</div>
         <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
         <div class="sub2">${esc("Uscita "+fdate(x.data_uscita)+" · rientro previsto "+fdate(x.data_rientro_prevista)+(x.data_rientro_effettivo?" · rientrato il "+fdate(x.data_rientro_effettivo):""))}</div>
         <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione)+

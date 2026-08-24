@@ -3889,7 +3889,7 @@
     /* se una lettura fallisce NON si fa finta di niente: prima il Riepilogo
        mostrava "Tutto in ordine" con tutti zeri, come se i dati fossero spariti */
     let erroreLettura=false, erroreLettura2=false;
-    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[],FL=[],RIFR=[],FFO=[];
+    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[],FL=[],RIFR=[],FFO=[],NOLR=[];
     try{
       const r=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -3920,13 +3920,18 @@
            restano contati in tutti i reparti finche' non gli si da' un reparto. */
         sb.from("gest_rifornimenti").select("importo,data,movimento_id")
           .eq("user_id",sbUid).or("mestiere_id.eq."+mid+",mestiere_id.is.null"),
-        sb.from("gest_fatture_fornitori").select("importo,data,lavoro_id").eq("user_id",sbUid).eq("mestiere_id",mid)
+        sb.from("gest_fatture_fornitori").select("importo,data,lavoro_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        /* ⛔ 24 agosto 2026 — il noleggio e' uscito dal reparto, ma un mezzo
+           taggato a QUESTO reparto e' un noleggio interno vero: conta come
+           spesa qui, come se l'avessi preso da un fornitore esterno. */
+        sb.from("nol_noleggi").select("importo,data_uscita").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
       AZ=r[9].data||null;FT=r[10].data||[];FL=(r[11]&&r[11].data)||[];
       RIFR=(((r[12]&&r[12].data)||[])).filter(x=>!x.movimento_id);   /* quelli con carta sono già in CM */
       FFO=((r[13]&&r[13].data)||[]);
+      NOLR=((r[14]&&r[14].data)||[]);
       const conErrore=r.find(x=>x&&x.error);
       if(conErrore)erroreLettura=true;
     }catch(e){erroreLettura=true;}
@@ -4039,7 +4044,10 @@
        (quelli con carta stanno già in CM), FFO = fatture dei fornitori. */
     const speseRif  = RIFR.filter(r=>thisMonth(r.data)).reduce((s,r)=>s+(+r.importo||0),0);
     const speseForn = FFO.filter(f=>thisMonth(f.data)).reduce((s,f)=>s+(+f.importo||0),0);
-    const speseMese = speseLav+speseCarte+speseRif+speseForn;
+    /* ⛔ 24 agosto 2026 — noleggio interno di questo reparto: la data che conta
+       e' l'uscita del mezzo, come per i lavori */
+    const speseNol  = NOLR.filter(x=>thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
+    const speseMese = speseLav+speseCarte+speseRif+speseForn+speseNol;
     const utile     = incMese-speseMese;
     /* la scheda Report compare quando c'e' stato ALMENO UN movimento di soldi,
        anche di mesi passati: una fattura pagata, una spesa, un movimento di
@@ -4047,7 +4055,7 @@
        un'impresa che ha incassato a maggio e a giugno niente deve continuare a
        vedere la sua scheda Report. */
     const _ciSonoSoldi = FT.some(f=>f.stato==="pagata") || SP.length>0 || CM.length>0
-                       || RIFR.length>0 || FFO.length>0;
+                       || RIFR.length>0 || FFO.length>0 || NOLR.length>0;
 
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
        (ora è una riga dentro "Da sistemare oggi", più in basso) */
@@ -4458,8 +4466,12 @@
       lab:"utile di questo mese (incassato − spese)",
       tono: utile<0?"err":(utile>0?"ok":"neutro"),
       vuoto:"Nessun movimento questo mese",
+      /* ⛔ 24 agosto 2026 — rieCard mostra solo le PRIME DUE righe (slice(0,2)):
+         una terza voce come riga a se' non si sarebbe mai vista quando
+         c'erano gia' rifornimenti o fatture fornitori. Il noleggio interno
+         va nella riga "Spese", sempre visibile, come lavori e carte. */
       righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese)},
-             {t:"Spese: lavori "+eur(speseLav)+" · carte",v:eur(speseCarte)}]
+             {t:"Spese: lavori "+eur(speseLav)+" · carte"+(speseNol?" · noleggio interno "+eur(speseNol):""),v:eur(speseCarte)}]
         .concat(speseRif?[{t:"Rifornimenti in contanti",v:eur(speseRif)}]:[])
         .concat(speseForn?[{t:"Fatture dei fornitori",v:eur(speseForn)}]:[])
     }));
