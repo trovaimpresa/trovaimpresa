@@ -211,31 +211,26 @@
   body{zoom:1.2}
 </style>
 
-<!-- LANDING -->
-<div id="landing">
-  <div class="landing-top"><div class="mk">🛠️</div><h1>Gestionale Noleggio</h1><small>Scegli il reparto</small></div>
-  <div class="wrap">
-    <p class="landing-sub">Ogni reparto è separato: lavori, clienti, squadra e calendario non si mischiano.</p>
-    <div class="panels" id="panels"></div>
-    <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
-    <div style="text-align:center;margin-top:28px"><button class="az-btn" data-action="azienda">⚙ Dati azienda (per le fatture)</button></div>
-    <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid #e0e0e0">
-      <p style="color:#666;font-size:14px;margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
-      <a href="gestionale-invito.html" style="display:inline-block;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:13px 24px;font-weight:600">Entra qui →</a>
-    </div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="appview" style="display:none">
+<!-- 24 agosto 2026 — IL NOLEGGIO ESCE DAL REPARTO.
+     Prima qui c'era «Scegli il reparto»: si entrava in un reparto e tutto
+     (mezzi, noleggi, clienti, fatture) restava filtrato per quel reparto.
+     Ma il mezzo e' uno solo per tutta l'azienda — non ha senso che esista
+     "due volte", una per reparto — e nessuna tabella nol_* ha mai filtrato
+     per reparto: i dati erano gia' di tutta l'azienda, mancava solo entrare
+     dritti. La schermata di scelta e' sparita, e con lei la barra che diceva
+     il nome del reparto in alto. Si entra sempre e solo qui dentro. -->
+<div id="appview">
   <header class="top">
     <div class="top-in">
       <div class="brand">
         <button class="back" data-action="home">← Indietro</button>
-        <div style="cursor:pointer" data-action="reparti" title="Cambia reparto"><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
+        <h1>Noleggio</h1>
       </div>
-      <!-- 6 agosto 2026: in un noleggio non si creano "lavori": si registrano noleggi. -->
-      <button class="btn-new" data-action="new-nol">+ Nuovo noleggio</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="az-btn" data-action="azienda" title="Dati azienda, per le fatture">⚙ Dati azienda</button>
+        <!-- 6 agosto 2026: in un noleggio non si creano "lavori": si registrano noleggi. -->
+        <button class="btn-new" data-action="new-nol">+ Nuovo noleggio</button>
+      </div>
     </div>
     <nav class="tabs">
       <button data-tab="riepilogo" class="active">Riepilogo</button>
@@ -246,9 +241,7 @@
       <button data-tab="magazzino">Magazzino</button>
       <button data-tab="fornitori">Fornitori</button>
       <button data-tab="movimenti">Movimenti</button>
-      <button data-tab="agenda" style="display:none">Agenda operatore</button>
       <button data-tab="calendario">Calendario</button>
-      <button data-tab="lavori" style="display:none">Lavori</button>
       <button data-tab="fatture">Fatture</button>
       <button data-tab="cauzioni">Cauzioni<span class="tab-cnt" id="cnt-cauzioni"></span></button>
       <button data-tab="rendimento">Rendimento</button>
@@ -256,9 +249,6 @@
       <button data-tab="media">Foto e video</button>
       <button data-tab="cestino">Cestino<span class="tab-cnt" id="cnt-cestino"></span></button>
       <button data-tab="galleria" style="display:none">Galleria</button>
-      <button data-tab="clienti" style="display:none">Condomini</button>
-      <button data-tab="squadra" style="display:none">Squadra</button>
-      <button data-tab="scadenzario" id="tab-scadenzario" style="display:none">Scadenzario</button>
     </nav>
   </header>
 
@@ -335,38 +325,12 @@
       <div id="movimenti-body" class="nol-elenco"></div>
     </section>
 
-    <section id="agenda">
-      <div class="sec-head"><h2>Agenda operatore</h2></div>
-      <div class="gal-intro">Il quadro completo di cosa c'è da fare, persona per persona. Scegli un operatore: vedi tutti i suoi lavori con indirizzo, mappa, foto del capo e note — tutto in un colpo solo, pronto per andare in cantiere.</div>
-      <div class="filt-label">Operatore</div>
-      <div class="chiprow" id="ag-op"></div>
-      <div class="filt-label">Mostra</div>
-      <div class="chiprow" id="ag-stato">
-        <button class="chip on" data-action="ag-stato" data-v="aperti">Da fare</button>
-        <button class="chip" data-action="ag-stato" data-v="tutti">Tutti</button>
-      </div>
-      <div id="ag-body"></div>
-    </section>
-
     <section id="calendario">
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">•</button><button data-action="cal-next">›</button></div></div>
       <div class="cal-oggi" id="cal-oggi"></div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-legend"><span><i class="dot prenot"></i>Prenotato</span><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span>📌 Nota</span></div>
-    </section>
-
-    <section id="lavori">
-      <div class="sec-head"><h2>Lavori</h2><button class="add" data-action="new-job">+ Nuovo</button></div>
-      <div class="chiprow" id="stato-chips">
-        <button class="chip on" data-stato="tutti">Tutti</button>
-        <button class="chip" data-stato="da_fare">Da fare</button>
-        <button class="chip" data-stato="in_corso">In corso</button>
-        <button class="chip" data-stato="fatto">Fatti</button>
-        <button class="chip" data-stato="da_incassare">Da incassare</button>
-      </div>
-      <div class="filters"><input type="text" id="f-search" placeholder="Cerca condominio o lavoro..."></div>
-      <div id="jobs-list"></div>
     </section>
 
     <section id="fatture">
@@ -460,25 +424,6 @@
       <div class="filt-label">Filtra per operatore</div>
       <div class="chiprow" id="gal-op"></div>
       <div id="gal-body"></div>
-    </section>
-
-    <section id="clienti">
-      <div class="sec-head"><h2>Condomini / Clienti</h2><button class="add" data-action="new-cli">+ Nuovo</button></div>
-      <div class="grid" id="cli-list"></div>
-    </section>
-
-    <section id="squadra">
-      <div class="sec-head"><h2>Squadra</h2><button class="add" data-action="new-dip">+ Persona</button></div>
-      <div style="background:#e8f4ff;border:1px solid #b3d9ff;border-radius:12px;padding:14px 18px;margin-bottom:16px">
-        <p style="margin:0;color:#0066ff;font-weight:600;font-size:15px">💡 Come entrano i collaboratori</p>
-        <p style="margin:6px 0 0;color:#444;font-size:14px">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
-      </div>
-      <div class="grid" id="dip-list"></div>
-    </section>
-
-    <section id="scadenzario">
-      <div class="sec-head"><h2>Scadenzario</h2><button class="add" data-action="new-scad">+ Nuova</button></div>
-      <div class="grid" id="scad-list"></div>
     </section>
 
     <section id="lavoro-foto">
@@ -684,7 +629,14 @@
   ];
   let nuovoSel={icon:"🛠️",col:0};
   let state={};
-  let cur=null, filter={stato:"tutti",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
+  /* 24 agosto 2026 — "cur" era l'id del reparto in cui si era entrati:
+     adesso il Noleggio non ha piu' un reparto, e' sempre e solo questo,
+     quindi "cur" resta sempre acceso da subito (niente piu' schermata
+     di scelta che lo lascia a null finche' non si clicca una card). */
+  /* ⚠️ "azienda" no: e' gia' una chiave di state (i dati dell'azienda per
+     le fatture, state.azienda={num:1}). Con lo stesso nome db() trovava
+     quell'oggetto — senza .note — e il calendario si rompeva. */
+  let cur="_unico", filter={stato:"tutti",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
   const fotoCache={};
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -701,7 +653,11 @@
   const FATT_COLORE={none:"#e65100",emessa:"#1565c0",pagata:"#2e7d32"};
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
-  const db=()=>state[cur];
+  /* 24 agosto 2026 — "cur" non e' piu' l'id di un reparto scelto da una
+     card (che esisteva gia' in "state"): e' il valore fisso "azienda", che
+     in "state" non c'era ancora. Senza questa riga db().note (le note sul
+     calendario) restava undefined e il calendario si rompeva appena aperto. */
+  const db=()=>state[cur]||(state[cur]={clienti:[],dipendenti:[],lavori:[],note:{}});
   const cliById=id=>db().clienti.find(c=>c.id===id);
   const dipById=id=>db().dipendenti.find(d=>d.id===id);
   const curMestiere=()=>{const p=(state.panels||[]).find(x=>x.id===cur);return p?p.mestiere_id:null;};
@@ -901,8 +857,8 @@
     localizzaPratiche();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();renderGalleria();renderRiepilogo();renderCal();renderFatture();});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();renderGalleria();renderRiepilogo();renderCal();renderFatture();});
   }
 
   /* LANDING */
@@ -997,7 +953,12 @@
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
-  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderScadenze();}
+  /* 24 agosto 2026 — tolte le 5 sezioni morte del reparto (Agenda operatore,
+     Lavori, Condomini, Squadra, Scadenzario): non si vedevano piu' da un
+     pezzo, ma questa funzione le ricaricava lo stesso a ogni apertura,
+     chiedendo dati "del reparto in cui sono" — una domanda che col reparto
+     sparito non ha piu' risposta. */
+  function renderAll(){if(!cur)return;renderRiepilogo();renderCal();renderFatture();renderGalleria();}
 
   async function renderRiepilogo(){
     return renderRiepilogoNegozio();
@@ -2225,11 +2186,13 @@
       indirizzo:$("#ncl-indirizzo").value.trim()||null,
       piva:$("#ncl-piva").value.trim()||null,
       note:$("#ncl-note").value.trim()||null};
-    /* un cliente nuovo nasce nel reparto in cui stai, cosi' lo vede anche
-       il gestionale imprese; modificandone uno il reparto non si tocca */
+    /* 24 agosto 2026 — prima un cliente nuovo nasceva "nel reparto in cui
+       stai", cosi' lo vedeva anche il gestionale imprese. Il Noleggio non
+       ha piu' un reparto: nasce senza, e lo vede comunque tutta l'azienda,
+       in ogni reparto del gestionale imprese. */
     const {error}=id
       ? await sb.from("gest_clienti").update(dati).eq("id",id).eq("user_id",sbUid)
-      : await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),...dati});
+      : await sb.from("gest_clienti").insert({user_id:sbUid,...dati});
     if(error){toast("Errore: "+error.message);return;}
     closeSheet(); loadClientiNol(); toast(id?"Cliente aggiornato ✔":"Cliente aggiunto ✔");
   }
@@ -4625,7 +4588,11 @@
   async function renderFatture(){
     let L=[];
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      /* 24 agosto 2026 — prima filtrava "solo i lavori del reparto in cui
+         sono": col Noleggio senza piu' reparto, mostra i lavori di TUTTA
+         l'azienda, di qualunque reparto — niente sparisce, si allarga solo
+         lo sguardo. */
+      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid);
       L=(data||[]).filter(l=>+l.importo>0);
       const ids=L.map(l=>l.id);
       fatturaPdfCache={};
@@ -5448,7 +5415,9 @@
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      /* 24 agosto 2026 — anche qui, niente piu' filtro per reparto: tutti i
+         lavori dell'azienda sul calendario, come le fatture. */
+      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid);
       calJobs=data||[];
       const {data:nn}=await sb.from("nol_noleggi")
         .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento,fase")
@@ -5762,12 +5731,14 @@
   }
   async function fillOperai(){
     const sel=$("#j-operaio");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    /* 24 agosto 2026 — tutti gli operai dell'azienda, non solo quelli di un reparto */
+    const {data}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid);
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("");
   }
   async function fillClienti(selId){
     const sel=$("#j-cliente");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    /* 24 agosto 2026 — tutti i clienti dell'azienda, non solo quelli di un reparto */
+    const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).order("nome");
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(c=>`<option value="${esc(c.id)}" ${c.id===selId?"selected":""}>${esc(c.nome)}</option>`).join("");
   }
   function bindSeg(id){$$("#"+id+" button").forEach(b=>b.onclick=()=>{$$("#"+id+" button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});}
@@ -5784,7 +5755,9 @@
       const importo=_numIt($("#j-imp")?$("#j-imp").value:"");
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
-      const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
+      /* 24 agosto 2026 — nasce senza reparto, come i clienti nuovi: il
+         Noleggio non ne ha piu' uno da scrivere qui sopra. */
+      const obj={user_id:sbUid,stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
       if(editing.fattura)obj.fatt_stato="emessa";
       const {error}=await sb.from("gest_lavori").insert(obj);
@@ -6027,9 +6000,10 @@
     if(!cur)return;
     const box=$("#gal-body");if(!box)return;
     if(!sb||!sbUid){if($("#gal-op"))$("#gal-op").innerHTML="";box.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;return;}
+    /* 24 agosto 2026 — niente piu' filtro per reparto, come le fatture e il calendario */
     const [{data:foto},{data:lavori}]=await Promise.all([
       sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
-      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid)
     ]);
     const lavName=Object.fromEntries((lavori||[]).map(l=>[l.id,l.descrizione||"Lavoro"]));
     const lavIds=new Set((lavori||[]).map(l=>l.id));
@@ -6510,27 +6484,26 @@
     if(el){el.addEventListener("input",mostraMargine);el.addEventListener("change",mostraMargine);}
   });
 
-  $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
-  $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
+  /* 24 agosto 2026 — «Lavori» e' sparito col reparto: qui c'erano i due
+     collegamenti a #stato-chips/#f-search, che non esistono piu'. */
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
 
-  /* ⛔ 22 agosto 2026 — IL NOLEGGIO SI APRE GIA' DENTRO.
-     Prima la prima cosa che si vedeva era «Scegli il reparto», e per chi
-     arriva dal menu del gestionale era un clic in piu' che non serviva a
-     niente. Adesso si entra dritti nell'ultimo reparto usato — o nel primo,
-     la prima volta. La schermata dei reparti non e' sparita: ci si torna con
-     la freccia «← Indietro», e serve a chi di reparti ne ha piu' d'uno. */
+  /* ⛔ 24 agosto 2026 — IL NOLEGGIO SI APRE GIA' DENTRO, SEMPRE.
+     Fino a ieri si entrava dritti nell'ultimo reparto usato (22 agosto).
+     Oggi il reparto e' sparito del tutto: non c'e' piu' niente da scegliere,
+     si entra e basta. */
+  /* ⛔ 22 agosto 2026 — IL NOLEGGIO E' SEMPRE BLU (invariato: lo faceva
+     enterPanel() a ogni ingresso in un reparto, e serve ancora — il CSS di
+     :root da solo non basta, css/gestionale.css lo sovrascrive col suo blu
+     di marchio, che e' lo stesso colore ma non vince i confronti esatti). */
+  (function(){
+    const r=document.documentElement.style;
+    r.setProperty("--accent","#0066ff");r.setProperty("--accent-d","#0047b3");r.setProperty("--accent-soft","#e8f1ff");
+  })();
   (async()=>{
     await load();
-    renderLanding();
-    const ps=state.panels||[];
-    if(ps.length){
-      let id=null;
-      try{id=localStorage.getItem(NOL_ULTIMO);}catch(e){}
-      if(!ps.some(p=>p.id===id)) id=ps[0].id;
-      enterPanel(id);
-    }
+    renderAll();renderRiepilogoNegozio();nolScriviFreccia();
   })();
 })();
 </script>
