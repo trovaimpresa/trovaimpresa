@@ -15275,3 +15275,160 @@ subito.
    ha quel menu. Manifest, icone e tag sono stati verificati (JSON valido,
    misure giuste, tutte e quattro le icone si scaricano, 0 errori JS), ma il
    giro completo tocca ad Alessio.
+
+
+# 24 AGOSTO 2026 — IL COLLAUDO DEL NOLEGGIO, E I TREDICI DIFETTI
+
+Ieri sono entrate cinque cose grosse nel gestionale noleggio e nessuna era
+stata usata sui dati veri. Oggi si è fatto il giro completo, guidato passo
+per passo su un noleggio finto ma con i dati di Alessio: escavatore E-01,
+rossi costruzioni srl, uscita 24/08, rientro previsto 28/08, rientro vero
+26/08, cauzione 500 € in assegno, danno al vetro laterale al rientro.
+
+**Il giro arriva in fondo.** Nessuna pagina bianca, nessun errore, nessun
+carattere storpiato nei PDF. Ma sono usciti **tredici difetti**, e tre di
+questi facevano perdere soldi a ogni fattura.
+
+Il referto completo sta in `prove-claude/NOLEGGIO-collaudo-24-agosto.md`.
+
+## ⛔ LA LEZIONE PIÙ CARA DELLA GIORNATA
+
+**645 prove verdi non avevano visto nessuno dei tredici difetti.**
+
+Non perché fossero poche: perché provavano che *la pagina funziona*, non che
+*il lavoro torna*. Il banco non sapeva che un mezzo rientrato prima deve
+costare meno, né che una firma nella colonna sbagliata si contesta, né che
+«1 × 600.00 €» col punto americano finisce sul foglio che firma il cliente.
+
+Il banco è passato da **645 a 730 prove**, e le 85 nuove guardano proprio
+queste cose. Ogni difetto sistemato è diventato una prova.
+
+## I TRE CHE COSTAVANO SOLDI
+
+1. **L'importo non si rifaceva quando il mezzo rientrava prima.** Il riquadro
+   del conto si aggiornava (da 630 a 480), la casella no, e **la fattura
+   prendeva 630**. La riga della fattura si contraddiceva da sola: «dal 24/08
+   al 26/08 — 3 giorni» accanto a 630 €, che sono cinque giorni. Sul giro di
+   prova: **150 € di troppo**, senza nessun avviso.
+2. **L'importo non si riempiva da solo.** Il conto diceva 630 e la casella
+   restava a 0 finché non premevi un bottone che nessuno sapeva che c'era. Un
+   noleggio a zero non finisce mai in fattura.
+3. **Un noleggio si salvava senza data di uscita**, segnato FUORI.
+
+**Come sono stati chiusi.** L'importo adesso segue il conto, ma **mai di
+nascosto**: si riempie da solo se è vuoto, si riallinea da solo se era
+agganciato al conto, e se l'hai scritto tu a mano **non si tocca** — compare
+un avviso rosso con la differenza e il bottone «Metti 480,00 €». Prima di
+salvare, se i due numeri non coincidono, chiede conferma. Serve
+`importo_calcolato`, che c'era già: è il conto al momento dell'ultimo
+salvataggio, ed è quello che dice se l'importo era «agganciato» o scritto a
+mano.
+
+## I DUE CHE RENDEVANO CONTESTABILE UNA CARTA FIRMATA
+
+4. **La seconda firma stava nella colonna sbagliata.** Sul contratto in PDF
+   la firma delle clausole vessatorie (artt. 1341-1342 c.c.) era disegnata
+   sotto «Il Locatore — Alessio». È la firma del *Conduttore*: dalla parte
+   sbagliata, l'approvazione specifica si contesta. Adesso sta a destra, e il
+   banco **misura dove sta sul foglio** (xMin in punti, con `pdftotext
+   -bbox-layout`): deve essere oltre la metà della pagina.
+5. **Il contratto usciva senza numero e con i nominativi vuoti.** La tabella
+   dell'art. 72 comma 2 è obbligatoria, il modulo lo scriveva in rosso e poi
+   stampava lo stesso. Adesso chiede, come già fa per un mezzo promesso due
+   volte.
+
+## GLI ALTRI OTTO
+
+6. **Il punto americano nei prezzi.** `1 × 600.00 €` e `costerebbero 750.00 €`
+   — otto punti in `js/noleggio-prezzo.js` che usavano `.toFixed(2)` dentro
+   `dettaglio` e `avviso`. **Arrivava fino al contratto in PDF.** Adesso c'è
+   `scriviEuro()` (col punto delle migliaia) e `scriviNum()` per le quantità.
+   Il totale era sempre stato giusto: sbagliavano solo le scritte piccole.
+7. **`&#9888;` scoperto** sopra la seconda firma: `firmaBlocco` passa
+   l'etichetta dentro `esc()`, che trasforma la `&`. Ci vuole il carattere
+   vero.
+8. **«Rientrato» non scriveva la data.** La card diceva RIENTRATO ma per il
+   gestionale il mezzo era ancora fuori: il conto non si rifaceva e il
+   verbale di riconsegna non compariva. Due verità nella stessa scheda.
+9. **Il contratto risultava «mancante» anche quando c'era**, perché la spunta
+   guarda `contratto_num` e il numero non se lo prendeva da solo. Adesso sì,
+   dal contatore dell'azienda, come il DDT
+   (`sql/noleggio-numero-contratto.sql`).
+10. **La firma del cliente non finiva sul DDT.** Raccolta col dito nel
+    verbale, e il DDT usciva con le righe vuote: due fogli della stessa
+    consegna, uno firmato e uno no.
+11. **Il DDT scriveva la sede del cliente, non il cantiere.** ⚠️ La colonna
+    `luogo` c'era già dal 23 agosto e `nolDdtDati` la leggeva: **mancava solo
+    la casella per riempirla**. Un difetto che sembrava richiedere una
+    migrazione e invece era mezza riga di HTML.
+12. **Il verbale e il DDT non stavano dove uno li cerca**: sono in «Contratti
+    e documenti», e al collaudo si sono cercati per dieci minuti dentro la
+    scheda del noleggio. Adesso dal riquadro del contratto c'è il pulsante
+    «Verbale, DDT e foto →».
+13. **Un messaggio d'errore falso.** Premendo «Contratto in PDF» compariva
+    «Questa scheda non si trova più»: il gestore dei cinque pulsanti cerca
+    `[data-action^="nol-"]` e si prendeva anche `nol-contr-pdf` e
+    `nol-cauz-*`, che non hanno `data-t`. Il foglio usciva lo stesso, ma chi
+    legge un errore che non c'è smette di fidarsi.
+
+## ✅ QUELLO CHE HA RETTO
+
+- **La firma col dito**: si disegna, si ritaglia, sta sopra la riga col nome
+  sotto, in tutti e quattro i punti. Le correzioni del 23 agosto tengono.
+- **Il verbale di riconsegna** è il documento migliore: rileva il danno e
+  scrive da solo la clausola sui danni eccedenti la normale usura, più la
+  frase del contraddittorio.
+- **Le cauzioni**: 500 − 150 = 350 calcolato da solo, avviso giallo che
+  richiama il danno del verbale, e i tre numeri in cima che tornano.
+- **La videocamera dentro il gestionale**: 5 secondi = 921 KB, cioè ~10 MB al
+  minuto. Il freno è tarato giusto.
+- **Il blocco del mezzo con la verifica scaduta**: ha funzionato al primo
+  colpo, sui dati veri.
+
+## IL BANCO — quello che è cambiato
+
+- **`prove/noleggio-importo/`** (39 prove): l'importo, la data di uscita
+  obbligatoria, «Rientrato» che scrive la data, la casella del cantiere.
+- **`prove/noleggio-scritte/`** (21 prove): ogni prezzo e ogni quantità che
+  finisce sotto gli occhi di un cliente, scritti all'italiana. Guarda le
+  *parole*, non i numeri.
+- **`prove/noleggio-pdf/`** (35 prove): ⛔ **rifatto da zero, il vecchio non
+  era nel pacchetto.** jsPDF si serve da `vendor/` (locale) dirottando
+  cdnjs, si preme il bottone per davvero, si prende il file che scende e lo
+  si rilegge con `pdftotext`. Misura anche **dove stanno le firme sul
+  foglio**, e confronta il PDF con la stampa su carta.
+- Il pacchetto sta in `prove-claude/banco-noleggio-24ago.zip`.
+
+## ⚠️ INCIAMPI DELLA GIORNATA — da non ripetere
+
+- **Il pacchetto del banco di ieri era incompleto**: 561 prove invece di 827,
+  senza `pdf.js` e senza `vendor/`. Ricontrollare cosa c'è dentro uno zip
+  prima di dire che il banco è verde.
+- **`prove-claude/` è nel `.gitignore`**: un `git add prove-claude/` fa
+  fallire tutta la catena `&&` e il push non parte. Nel blocco git vanno solo
+  i file veri.
+- **Una prova scritta da me era sempre verde** (`dialoghi.length>=0`): non
+  provava niente. Trovata rileggendo, buttata e rifatta. Una prova che non
+  può diventare rossa è peggio di una prova che manca.
+- **La query sul Postgres vero si è fermata a metà**: un numero di contratto
+  lunghissimo faceva `out of range for bigint`. Trovato provandola, non
+  leggendola. Adesso il limite è nove cifre e quei numeri si segnalano.
+- **`expectedMtimeMs` vuole i millisecondi esatti**, non arrotondati al
+  secondo: `stat -c %Y` non basta.
+
+## COSA RESTA SUL NOLEGGIO, IN ORDINE
+
+1. **Avviso quando lo spazio del deposito si riempie**, e cosa fare delle
+   foto vecchie.
+2. **Portale cliente**: un link dove il cliente vede i suoi noleggi e le sue
+   carte.
+3. **Modulo ponteggi** (PiMUS, libretto), **telematica dei mezzi**.
+4. Quando Alessio avrà i modelli **Assodimi/ANCE**, sostituire il contratto e
+   le condizioni scritte da noi con quelli ufficiali.
+5. Quattro righe con l'accento scritto con l'apostrofo in
+   `gestionale-noleggio.html` (una sta nel messaggio delle fatture: «era gia'
+   su un'altra fattura»). Erano già lì, non sono state introdotte oggi.
+
+⚠️ Prima di costruire una qualsiasi di queste: chiedere ad Alessio se gli
+serve. La domanda è una sola — **un'impresa smetterebbe di pagare
+TrovaImpresa se questa cosa non ci fosse?**
