@@ -102,11 +102,101 @@
   .fatt-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
   /* stesso stile delle card statistica: bianca, bordo leggero, niente ombra
      di base — vedi la nota grande piu' sopra */
-  #app-root .fatt-tot{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:none;border-top:4px solid var(--danger);transition:box-shadow .15s,transform .15s,border-color .15s}
-  #app-root .fatt-tot:hover{box-shadow:0 6px 20px rgba(15,23,42,.08);transform:translateY(-2px)}
-  #app-root .fatt-tot.alt{border-top-color:var(--warn)}
-  #app-root .fatt-tot .n{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.5px}
-  #app-root .fatt-tot .l{font-size:14px;color:var(--muted);font-weight:700;margin-top:6px}
+  /* ⛔ 24 agosto 2026 (sera) — anche questi due riquadri (in fondo alle
+     Fatture, sopra i lavori del gestionale imprese) erano rimasti con la
+     barra colorata sopra: rossa uno, ambra l'altro. Erano gli ultimi due
+     colori senza parola della pagina. Adesso prendono la stessa forma
+     `.num-c` delle altre schede dei numeri — la definizione sta piu' sotto,
+     qui restano solo le due righe di testo. */
+  #app-root .fatt-tot .n{font-size:27px;font-weight:800;color:var(--ink);line-height:1.25}
+  #app-root .fatt-tot .l{font-size:15px;color:#475569;font-weight:600;line-height:1.4}
+  /* ============================================================
+     ⛔ 24 agosto 2026 (sera) — LE SCHEDE DEI NUMERI
+     ============================================================
+     Regola di Alessio, detta con parole sue: «il riepilogo del gestionale
+     noleggio deve essere come il riepilogo del gestionale impresa; i reparti
+     del noleggio come i reparti dell'impresa». Quindi DUE forme, e ognuna
+     copiata dal posto che le corrisponde in gestionale-app.html:
+
+       · IL RIEPILOGO  → `.nrc`, copia di `.rie-card` (css/gestionale.css
+         1137-1300) e di rieCard(): icona colorata nel riquadrino, titolo,
+         pallino da 13px, numerone, etichetta, una riga di separazione e
+         sotto fino a DUE righe di dettaglio.
+       · LE SEZIONI (Fatture, Cauzioni) → `.num-c`, copia della card in cima
+         a Preventivi e Lavori (css/gestionale.css 3651-3678, numCard()):
+         domanda, numerone, riga di sotto. Niente icona, niente pallino.
+
+     ⛔ IL COLORE FA DUE LAVORI SOLI (scelta di Alessio del 20 agosto,
+     scritta anche in css/gestionale.css): l'ICONA dice QUALE sezione, il
+     PALLINO dice se li' dentro qualcosa va male. Il numerone resta NERO
+     sempre: se si colorasse anche lui, otto schede accese insieme farebbero
+     una pagina a scacchi e il colore non direbbe piu' niente.
+     ⚠️ Tutto col prefisso `#app-root`: css/gestionale.css e' condiviso con
+     gestionale-app.html, si carica DOPO questo <style> e usa gli stessi nomi
+     generici per widget che qui sono altra cosa. A parita' di peso vince
+     lui. Ha gia' fatto perdere tempo due volte.
+     ⚠️ I valori grigi sono copiati verbatim dal foglio condiviso (bordo
+     #E2E8F0, bordo forte #CBD5E1, testo #475569): se cambiano la', vanno
+     cambiati anche qui, se no le due pagine si scollano.
+     ============================================================ */
+
+  /* ---- IL RIEPILOGO: la scheda del Riepilogo del gestionale imprese ---- */
+  .nrc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;
+    align-items:start;margin-bottom:12px}
+  @media(max-width:1180px){.nrc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:760px){.nrc-grid{grid-template-columns:minmax(0,1fr);gap:16px}}
+  #app-root .nrc{background:#FFFFFF;border:1px solid #E2E8F0;
+    border-left:5px solid #CBD5E1;border-radius:16px;padding:22px 22px 18px;
+    box-shadow:none;display:flex;flex-direction:column;
+    transition:box-shadow .15s,transform .15s,border-color .15s}
+  #app-root .nrc:hover{box-shadow:0 6px 20px rgba(15,23,42,.10);transform:translateY(-2px);border-color:#CBD5E1}
+  #app-root .nrc .nrc-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+  #app-root .nrc .nrc-head svg{width:24px;height:24px;flex:0 0 24px;color:#6b7a8d;
+    box-sizing:content-box;padding:6px;border-radius:9px;background:#f1f3f6}
+  #app-root .nrc .nrc-tit{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.2px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  /* il pallino: rosso se li' dentro c'e' un problema, verde se e' a posto.
+     ⚠️ 13 px e non 8: piu' piccolo Alessio non lo vede. */
+  #app-root .nrc .nrc-pall{margin-left:auto;flex:0 0 13px;width:13px;height:13px;
+    border-radius:50%;box-shadow:0 0 0 3px #FFFFFF}
+  #app-root .nrc .nrc-pall.male{background:#c62828}
+  #app-root .nrc .nrc-pall.bene{background:#2e7d32}
+  #app-root .nrc .nrc-n{font-size:44px;font-weight:800;line-height:1.05;letter-spacing:-1.5px;color:var(--ink)}
+  #app-root .nrc .nrc-l{font-size:16px;color:#475569;margin-top:6px;line-height:1.4}
+  #app-root .nrc .nrc-list{margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;
+    display:flex;flex-direction:column;gap:2px}
+  #app-root .nrc .nrc-r{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+    padding:9px 8px;margin:0 -8px;border-radius:8px;font-size:16px}
+  #app-root .nrc .nrc-rt{color:var(--ink);font-weight:600;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  #app-root .nrc .nrc-rv{color:#475569;font-weight:600;white-space:nowrap;flex:0 0 auto}
+  #app-root .nrc .nrc-vuoto{margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;
+    font-size:16px;color:#8a94a0}
+  /* ⚠️ il colore dell'icona dice QUALE scheda e', e basta. Una scheda nuova
+     va aggiunta anche qui, se no la sua icona resta grigia fra le altre. */
+  #app-root .nrc[data-ic="mezzi"]       .nrc-head svg{color:#3f8fbf;background:#e9f2f8}
+  #app-root .nrc[data-ic="fuori"]       .nrc-head svg{color:#e8833a;background:#fdf1e6}
+  #app-root .nrc[data-ic="ritardo"]     .nrc-head svg{color:#c0392b;background:#fbeceb}
+  #app-root .nrc[data-ic="liberi"]      .nrc-head svg{color:#2fa46a;background:#e8f6ef}
+  #app-root .nrc[data-ic="prenotati"]   .nrc-head svg{color:#7b5cd6;background:#f0ecfb}
+  #app-root .nrc[data-ic="incassato"]   .nrc-head svg{color:#2fa46a;background:#e8f6ef}
+  #app-root .nrc[data-ic="daincassare"] .nrc-head svg{color:#b8631f;background:#fbeee4}
+  #app-root .nrc[data-ic="cauzioni"]    .nrc-head svg{color:#5b73d6;background:#eceffb}
+
+  /* ---- LE SEZIONI: la card in cima a Preventivi e Lavori ---- */
+  .num-fila{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:12px;margin-bottom:6px;align-items:start}
+  #app-root .num-c{display:flex;flex-direction:column;gap:2px;text-align:left;
+    background:#FFFFFF;border:1px solid #E2E8F0;border-left:5px solid #CBD5E1;
+    border-radius:14px;padding:14px 16px;font-family:inherit;width:100%;box-shadow:none}
+  #app-root .num-d{font-size:15px;font-weight:600;color:#475569;line-height:1.4}
+  #app-root .num-n{font-size:27px;font-weight:800;color:var(--ink);line-height:1.25}
+  #app-root .num-s{font-size:15px;color:#475569;line-height:1.45;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:560px){
+    .num-fila{grid-template-columns:minmax(0,1fr)}
+    #app-root .num-n{font-size:25px}
+  }
   .fatt-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow)}
   .fatt-info{flex:1;min-width:0}
   .fatt-info b{font-size:14px;font-weight:700}
@@ -274,17 +364,54 @@
         <h2 id="rie-title">Riepilogo</h2>
         <p>A colpo d'occhio: quanti mezzi sono fuori, chi doveva rientrare e non è tornato, quanto ha reso il noleggio questo mese.</p>
       </div>
-      <div class="kpis">
-        <div class="kpi df"><div class="n" id="kn-mezzi">0</div><div class="l">Mezzi</div><div class="sub">A parco</div></div>
-        <div class="kpi ic"><div class="n" id="kn-fuori">0</div><div class="l">Fuori adesso</div><div class="sub">Ancora dal cliente</div></div>
-        <div class="kpi ft"><div class="n" id="kn-ritardo">0</div><div class="l">In ritardo</div><div class="sub">Doveva già rientrare</div></div>
-        <div class="kpi eu"><div class="n" id="kn-liberi">0</div><div class="l">Liberi</div><div class="sub">Pronti da dare</div></div>
-        <div class="kpi df"><div class="n" id="kn-prenotati">0</div><div class="l">Prenotati</div><div class="sub">Gi&agrave; impegnati</div></div>
+      <!-- ⛔ 24 agosto 2026 (sera) — le schede del Riepilogo hanno la forma di
+           quelle del Riepilogo del gestionale imprese (`.rie-card`): la forma sta
+           nel <style> qui sopra, le due righette e il pallino li riempie nolDett().
+           ⚠️ Gli id sui numeroni NON si toccano: li scrive scrivi(id,...) e li cerca
+           il banco di prova prove/noleggio-prezzo/schermo.js. -->
+      <div class="nrc-grid">
+        <div class="nrc" data-ic="mezzi">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span class="nrc-tit">Mezzi</span><i class="nrc-pall bene" id="p-kn-mezzi"></i></div>
+          <div class="nrc-n" id="kn-mezzi">0</div><div class="nrc-l">A parco</div>
+          <div class="nrc-vuoto" id="d-kn-mezzi"></div>
+        </div>
+        <div class="nrc" data-ic="fuori">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg><span class="nrc-tit">Fuori adesso</span><i class="nrc-pall bene" id="p-kn-fuori"></i></div>
+          <div class="nrc-n" id="kn-fuori">0</div><div class="nrc-l">Ancora dal cliente</div>
+          <div class="nrc-vuoto" id="d-kn-fuori"></div>
+        </div>
+        <div class="nrc" data-ic="ritardo">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="nrc-tit">In ritardo</span><i class="nrc-pall bene" id="p-kn-ritardo"></i></div>
+          <div class="nrc-n" id="kn-ritardo">0</div><div class="nrc-l">Doveva gi&agrave; rientrare</div>
+          <div class="nrc-vuoto" id="d-kn-ritardo"></div>
+        </div>
+        <div class="nrc" data-ic="liberi">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.8 11.1V12a9 9 0 1 1-5.3-8.2"/><path d="m9 11 3 3L22 4"/></svg><span class="nrc-tit">Liberi</span><i class="nrc-pall bene" id="p-kn-liberi"></i></div>
+          <div class="nrc-n" id="kn-liberi">0</div><div class="nrc-l">Pronti da dare</div>
+          <div class="nrc-vuoto" id="d-kn-liberi"></div>
+        </div>
+        <div class="nrc" data-ic="prenotati">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span class="nrc-tit">Prenotati</span><i class="nrc-pall bene" id="p-kn-prenotati"></i></div>
+          <div class="nrc-n" id="kn-prenotati">0</div><div class="nrc-l">Gi&agrave; impegnati</div>
+          <div class="nrc-vuoto" id="d-kn-prenotati"></div>
+        </div>
       </div>
-      <div class="money-row">
-        <div class="money in"><div class="n" id="kn-incasso">€ 0</div><div class="l">Incassato dai noleggi</div><div class="sub">Questo mese, già pagati</div></div>
-        <div class="money out"><div class="n" id="kn-daincassare">€ 0</div><div class="l">Da incassare</div><div class="sub">Noleggi ancora da pagare</div></div>
-        <div class="money out"><div class="n" id="kn-cauzioni">€ 0</div><div class="l">Cauzioni in deposito</div><div class="sub">Soldi dei clienti, da restituire</div></div>
+      <div class="nrc-grid">
+        <div class="nrc" data-ic="incassato">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg><span class="nrc-tit">Incassato dai noleggi</span><i class="nrc-pall bene" id="p-kn-incasso"></i></div>
+          <div class="nrc-n" id="kn-incasso">€ 0</div><div class="nrc-l">Questo mese, gi&agrave; pagati</div>
+          <div class="nrc-vuoto" id="d-kn-incasso"></div>
+        </div>
+        <div class="nrc" data-ic="daincassare">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 6A7.5 7.5 0 0 0 7 12a7.5 7.5 0 0 0 11.5 6"/><path d="M4 10h8M4 14h8"/></svg><span class="nrc-tit">Da incassare</span><i class="nrc-pall bene" id="p-kn-daincassare"></i></div>
+          <div class="nrc-n" id="kn-daincassare">€ 0</div><div class="nrc-l">Noleggi ancora da pagare</div>
+          <div class="nrc-vuoto" id="d-kn-daincassare"></div>
+        </div>
+        <div class="nrc" data-ic="cauzioni">
+          <div class="nrc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="nrc-tit">Cauzioni in deposito</span><i class="nrc-pall bene" id="p-kn-cauzioni"></i></div>
+          <div class="nrc-n" id="kn-cauzioni">€ 0</div><div class="nrc-l">Soldi dei clienti, da restituire</div>
+          <div class="nrc-vuoto" id="d-kn-cauzioni"></div>
+        </div>
         <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
       </div>
       <div class="mini-title">Mezzi in ritardo</div>
@@ -340,10 +467,10 @@
       <div class="sec-head" id="fattnol-testa"><h2>Fatture</h2>
         <button class="btn add" data-action="new-fattnol">+ Nuova fattura</button></div>
       <div class="gal-intro">Scegli il cliente e il mese: il gestionale mette dentro <b>tutti i suoi noleggi</b> di quel periodo, coi ratei per quelli a cavallo di due mesi. &Egrave; la <b>fattura differita riepilogativa</b> che i DDT ti permettono di fare — una al mese per cliente, entro il 15 del mese dopo, invece di una per ogni uscita.</div>
-      <div class="money-row">
-        <div class="money out"><div class="n" id="kf-dafatturare">0</div><div class="l">Noleggi da fatturare</div><div class="sub">Non ancora su nessuna fattura</div></div>
-        <div class="money out"><div class="n" id="kf-daincassare">€ 0</div><div class="l">Emesse, da incassare</div><div class="sub">Fatture con un numero</div></div>
-        <div class="money in"><div class="n" id="kf-incassate">€ 0</div><div class="l">Incassate</div><div class="sub">Gi&agrave; pagate</div></div>
+      <div class="num-fila">
+        <div class="num-c"><span class="num-d">Noleggi da fatturare</span><span class="num-n" id="kf-dafatturare">0</span><span class="num-s">Non ancora su nessuna fattura</span></div>
+        <div class="num-c"><span class="num-d">Emesse, da incassare</span><span class="num-n" id="kf-daincassare">€ 0</span><span class="num-s">Fatture con un numero</span></div>
+        <div class="num-c"><span class="num-d">Incassate</span><span class="num-n" id="kf-incassate">€ 0</span><span class="num-s">Gi&agrave; pagate</span></div>
       </div>
       <div id="fattnol-body" class="nol-elenco"></div>
 
@@ -362,10 +489,10 @@
     <section id="cauzioni">
       <div class="sec-head"><h2>Cauzioni</h2></div>
       <div class="gal-intro">I soldi che tieni in deposito per conto dei clienti. <b>Non sono tuoi</b>: al rientro tornano indietro, meno i danni che il verbale di riconsegna ha messo nero su bianco. Qui vedi quanti ne hai in mano e quali devi ancora rendere.</div>
-      <div class="money-row">
-        <div class="money out"><div class="n" id="kc-mano">€ 0</div><div class="l">In deposito adesso</div><div class="sub">Soldi che devi restituire</div></div>
-        <div class="money in"><div class="n" id="kc-svincolate">€ 0</div><div class="l">Restituite</div><div class="sub">Gi&agrave; tornate al cliente</div></div>
-        <div class="money out"><div class="n" id="kc-trattenute">€ 0</div><div class="l">Trattenute per danni</div><div class="sub">Rimaste a te</div></div>
+      <div class="num-fila">
+        <div class="num-c"><span class="num-d">In deposito adesso</span><span class="num-n" id="kc-mano">€ 0</span><span class="num-s">Soldi che devi restituire</span></div>
+        <div class="num-c"><span class="num-d">Restituite</span><span class="num-n" id="kc-svincolate">€ 0</span><span class="num-s">Gi&agrave; tornate al cliente</span></div>
+        <div class="num-c"><span class="num-d">Trattenute per danni</span><span class="num-n" id="kc-trattenute">€ 0</span><span class="num-s">Rimaste a te</span></div>
       </div>
       <div class="filt-label">Mostra</div>
       <div class="chiprow" id="cau-filtro">
@@ -508,28 +635,67 @@
    22 agosto 2026: prima ogni elenco si scriveva i suoi colori dentro
    l'attributo style, riga per riga. Cambiare l'aspetto voleva dire cambiare
    sei punti diversi e dimenticarne uno. Adesso e' scritto qui. */
-/* gli elenchi: colonne larghe abbastanza da non spezzare «rientro previsto»
-   in tre righe. Sotto i 700 px diventa una colonna sola, sul telefono. */
-.nol-elenco{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
-@media(max-width:700px){.nol-elenco{grid-template-columns:1fr}}
-/* ⛔ 24 agosto 2026 — LO STESSO STILE DEL RIEPILOGO. Ombra pesante via, bordo
-   leggero e angoli piu' arrotondati come le schede di gestionale-app.html;
-   il colore di stato resta com'era (sopra, sottile) ma la card si solleva
-   solo al passaggio del mouse, non sta gia' "accesa" da ferma. */
-.nol-card{background:#fff;border:1px solid #e6ecf3;border-radius:16px;box-shadow:none;
-  border-top:4px solid #2e537d;padding:18px 20px;margin-bottom:12px;
+/* ============================================================
+   ⛔ 24 agosto 2026 (sera) — LE SCHEDE DEGLI ELENCHI, FORMA DEL
+   GESTIONALE IMPRESE
+   ============================================================
+   Alessio: «i reparti del gestionale noleggio devono essere come i reparti
+   del gestionale impresa». Il modello e' `.wrap section .job` in
+   css/gestionale.css (righe 2231-2302), la scheda di un lavoro, di un
+   preventivo, di una fattura. Copiata riga per riga:
+     griglia a tre colonne (due sotto 1180 px, una sotto 760)
+     fondo bianco, angoli 16px, bordo sinistro 5px GRIGIO
+     titolo 21px, righe 17 e 16 px, i pulsanti in fondo dopo una riga
+     si solleva al passaggio del mouse
+
+   ⛔ LA BARRA COLORATA SOPRA E' SPARITA, ed e' il punto di tutto il lavoro.
+   La regola e' quella che Alessio ha gia' scelto il 21 agosto per il
+   gestionale imprese («LE STRISCE DELLE SEZIONI DIVENTANO NEUTRE»):
+   IL COLORE STA SOLO DOVE C'E' ANCHE LA PAROLA. La pastiglia resta colorata
+   («IN RITARDO», «PAGATA», «SOTTO SCORTA»): li' il colore accompagna un
+   testo, e chi non distingue rosso e verde legge comunque. La barra invece
+   era colore senza parola, e con dodici sezioni accese faceva una pagina a
+   scacchi.
+   ⚠️ Il colore non si e' buttato via: e' passato dalla barra alla pastiglia
+   (vedi nolCard piu' sotto).
+   ⚠️ Tutto col prefisso `#app-root`: css/gestionale.css e' condiviso con
+   gestionale-app.html e si carica DOPO questo <style>. Oggi non ha regole
+   `.nol-card`, ma domani basterebbe che qualcuno ne scrivesse una.
+   ============================================================ */
+.nol-elenco{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch}
+@media(max-width:1180px){.nol-elenco{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.nol-elenco{grid-template-columns:minmax(0,1fr);gap:16px}}
+#app-root .nol-card{display:flex;flex-direction:column;
+  background:#FFFFFF;border:1px solid #E2E8F0;border-left:5px solid #CBD5E1;
+  border-radius:16px;box-shadow:none;padding:22px 22px 18px;margin-bottom:12px;
   transition:box-shadow .15s,transform .15s,border-color .15s}
-.nol-card:hover{box-shadow:0 6px 20px rgba(15,23,42,.10);transform:translateY(-2px)}
-.nol-card .tit{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.nol-card .tit strong{font-size:17px;font-weight:700;letter-spacing:-.2px}
-.nol-card .sub{color:#666;font-size:14px;margin-top:6px}
-.nol-card .sub2{color:#666;font-size:13px;margin-top:3px}
+#app-root .nol-card:hover{box-shadow:0 6px 20px rgba(15,23,42,.10);transform:translateY(-2px);border-color:#CBD5E1}
+#app-root .nol-card .tit{display:flex;justify-content:space-between;align-items:baseline;
+  gap:14px;margin-bottom:12px;flex-wrap:wrap}
+#app-root .nol-card .tit strong{font-size:21px;font-weight:700;letter-spacing:-.2px;
+  color:var(--ink);line-height:1.3;min-width:0}
+#app-root .nol-card .sub{color:#475569;font-size:17px;margin-top:0;margin-bottom:10px;line-height:1.5}
+#app-root .nol-card .sub2{color:#475569;font-size:16px;margin-top:8px;line-height:1.45}
+/* i pulsanti si agganciano in fondo, cosi' le schede restano allineate
+   anche quando una ha una riga in piu' della vicina */
+#app-root .nol-card .nol-azioni{margin-top:auto;padding-top:16px;border-top:1px solid #E2E8F0;gap:10px}
+#app-root .nol-card .nol-az{height:42px;padding:0 16px;font-size:15px;font-weight:600;border-radius:10px}
+#app-root .nol-card .nol-az-apri{padding:0 22px}
 /* ⛔ 13 px il minimo, mai meno: Alessio ha la dislessia. Le etichette
-   stavano a 11 px in sei punti diversi. */
-.nol-eti{color:#fff;font-size:13px;font-weight:600;padding:3px 9px;border-radius:10px;white-space:nowrap}
-.nol-card.esce{border-top-color:#e65100} .nol-card.rientra{border-top-color:#1565c0}
-.nol-card.ritardo{border-top-color:#c62828} .nol-card.lavoro{border-top-color:#757575}
-.nol-card.prenot{border-top-color:#7C3AED}
+   stavano a 11 px in sei punti diversi.
+   ⚠️ Fondo tenue e scritta colorata, come le pastiglie del gestionale
+   imprese («Bozza», «Accettato»). Il colore arriva da nolCard nella
+   variabile --c. Su un browser che non sa fare color-mix resta il fondo
+   grigio chiaro qui sotto: la scritta si legge lo stesso. */
+#app-root .nol-eti{color:var(--c,#475569);background:#F1F5F9;font-size:13px;font-weight:700;
+  padding:4px 10px;border-radius:999px;white-space:nowrap}
+@supports (background:color-mix(in srgb,red 10%,white)){
+  #app-root .nol-eti{background:color-mix(in srgb,var(--c,#475569) 13%,#fff)}
+}
+/* ⚠️ le righe della giornata del calendario: le classi restano (le usa il
+   codice), ma non colorano piu' la barra — il colore sta nella pastiglia. */
+#app-root .nol-card.esce,#app-root .nol-card.rientra,#app-root .nol-card.ritardo,
+#app-root .nol-card.lavoro,#app-root .nol-card.prenot{border-left-color:#CBD5E1}
 .gior-vuoto{color:#666;font-size:14px;margin:0 0 14px}
 /* le anteprime di foto e video */
 .media-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
@@ -662,6 +828,51 @@
   const FATT_COLORE={none:"#e65100",emessa:"#1565c0",pagata:"#2e7d32"};
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+  /* ================================================================
+     ⛔ 24 agosto 2026 (sera) — LE DUE RIGHETTE IN FONDO ALLE SCHEDE
+     ================================================================
+     Le otto schede del Riepilogo hanno la forma di `.rie-card` del
+     gestionale imprese: sotto il numerone una riga di separazione, e sotto
+     fino a DUE righe di dettaglio, piu' il pallino in alto a destra.
+
+     Il numerone continua a scriverlo chi lo scriveva prima (scrivi(id,...)):
+     qui si riempiono solo le righette e si accende il pallino.
+
+     ⛔ DUE RIGHE, NON TRE. La terza sparirebbe senza dire niente, e sembra
+     che il dato non arrivi: e' successo con rieCard() in gestionale-app.html,
+     che ha lo stesso slice(0,2). Se un domani ne servono tre, si cambia
+     anche il CSS, non solo questo numero.
+
+     ⚠️ IL ROSSO NON SI ACCENDE PERCHE' LA SCHEDA HA ROBA DENTRO. Cinque
+     mezzi prenotati non sono un problema, e nemmeno mille euro incassati.
+     E' rosso solo dove c'e' davvero un lavoro da fare: mezzi in ritardo,
+     cauzioni da svincolare, noleggi vecchi non pagati. Se si accendesse
+     "perche' c'e' qualcosa" sarebbero rossi quasi tutti e non direbbe piu'
+     niente. Stessa regola del 20 agosto sul gestionale imprese.
+     ================================================================ */
+  function nolDett(id,righe,male){
+    const box=document.getElementById("d-"+id);
+    if(box){
+      const r=(righe||[]).filter(Boolean).slice(0,2);   /* ⛔ due, vedi sopra */
+      box.className=r.length?"nrc-list":"nrc-vuoto";
+      box.innerHTML=r.length
+        ? r.map(x=>'<div class="nrc-r"><span class="nrc-rt">'+esc(x.t)+'</span>'
+                 + '<span class="nrc-rv">'+esc(x.v)+'</span></div>').join("")
+        : esc("Niente da segnalare");
+    }
+    const p=document.getElementById("p-"+id);
+    if(p){
+      p.className="nrc-pall "+(male?"male":"bene");
+      /* chi non distingue bene rosso e verde deve poterlo leggere lo stesso */
+      p.title=male?"Qui c'\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto";
+      p.setAttribute("aria-label",male?"qualcosa che va male":"tutto a posto");
+    }
+  }
+  /* quanti giorni sono passati da una data scritta come 2026-08-24 */
+  const _ggDa=d=>{if(!d)return null;
+    const a=Date.parse(String(d).slice(0,10)+"T00:00:00"), b=Date.parse(todayStr()+"T00:00:00");
+    return (isNaN(a)||isNaN(b))?null:Math.round((b-a)/86400000);};
   /* 24 agosto 2026 — "cur" non e' piu' l'id di un reparto scelto da una
      card (che esisteva gia' in "state"): e' il valore fisso "azienda", che
      in "state" non c'era ancora. Senza questa riga db().note (le note sul
@@ -998,6 +1209,8 @@
     if(!(sb&&sbUid)){
       ["kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati"].forEach(i=>scrivi(i,0));
       ["kn-incasso","kn-daincassare","kn-cauzioni"].forEach(i=>scrivi(i,_eur(0)));
+      ["kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati",
+       "kn-incasso","kn-daincassare","kn-cauzioni"].forEach(i=>nolDett(i,[],false));
       if($("#rie-ritardi"))$("#rie-ritardi").innerHTML='<p style="color:#666;padding:8px">Nessun mezzo in ritardo.</p>';
       if($("#rie-scadenze"))$("#rie-scadenze").innerHTML='<p style="color:#666;padding:8px">Nessuna scadenza.</p>';
       return;
@@ -1038,16 +1251,76 @@
       .reduce((s,x)=>s+(+x.importo||0),0)));
     /* ⛔ le cauzioni NON sono un incasso: stanno in una casella a parte
        apposta, se no il riepilogo racconta di avere soldi che deve rendere. */
-    scrivi("kn-cauzioni",_eur(N.filter(x=>(+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito")
-      .reduce((s,x)=>s+(+x.cauzione||0),0)));
+    const cauApert=N.filter(x=>(+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito");
+    scrivi("kn-cauzioni",_eur(cauApert.reduce((s,x)=>s+(+x.cauzione||0),0)));
+
+    /* ── le due righette e il pallino di ogni scheda (vedi nolDett) ── */
+    const inOfficina=MZ.filter(m=>m.stato==="manutenzione"||m.fuori_servizio);
+    const bloccati=MZ.filter(m=>mezzoBloccato(m));
+    const liberi=MZ.filter(m=>!fuoriIds[m.id]&&m.stato!=="manutenzione"&&m.stato!=="noleggiato");
+    const nomeMezzo=x=>x.mezzo||"Mezzo senza nome";
+    const ggRit=x=>{const g=_ggDa(x.data_rientro_prevista);return g+(g===1?" giorno":" giorni");};
+
+    nolDett("kn-mezzi",[
+      {t:"Liberi adesso",     v:String(liberi.length)},
+      {t:"Fermi in officina", v:String(inOfficina.length)}
+    ],bloccati.length>0);
+
+    /* prima quelli che rientrano per primi: sono quelli su cui c'e' da muoversi */
+    const fuoriOrd=fuori.slice().sort((a,b)=>
+      String(a.data_rientro_prevista||"9999").localeCompare(String(b.data_rientro_prevista||"9999")));
+    nolDett("kn-fuori",fuoriOrd.map(x=>({t:nomeMezzo(x),
+      v:(x.data_rientro_prevista&&x.data_rientro_prevista<oggiN)
+        ?"in ritardo di "+ggRit(x)
+        :(x.data_rientro_prevista?"rientra il "+fdate(x.data_rientro_prevista):"senza data")})),
+      ritardo.length>0);
+
+    nolDett("kn-ritardo",ritardo.slice()
+      .sort((a,b)=>String(a.data_rientro_prevista).localeCompare(String(b.data_rientro_prevista)))
+      .map(x=>({t:nomeMezzo(x),v:"da "+ggRit(x)})),
+      ritardo.length>0);
+
+    nolDett("kn-liberi",[
+      {t:"Fermi in officina",v:String(inOfficina.length)},
+      {t:"Gi\u00e0 promessi",  v:String(prenotati.length)}
+    ],false);
+
+    nolDett("kn-prenotati",prenotati.slice()
+      .sort((a,b)=>String(a.data_uscita||"9999").localeCompare(String(b.data_uscita||"9999")))
+      .map(x=>({t:nomeMezzo(x),v:x.data_uscita?"esce il "+fdate(x.data_uscita):"senza data"})),
+      false);
+
+    const pagatiMese=delMese.filter(x=>x.stato_pagamento==="pagato");
+    nolDett("kn-incasso",[
+      {t:"Noleggi pagati",v:String(pagatiMese.length)},
+      {t:"Nel mese di",   v:mesi[new Date(oggiN+"T00:00:00").getMonth()]}
+    ],false);
+
+    const daPagare=N.filter(x=>x.stato_pagamento!=="pagato"&&(+x.importo||0)>0);
+    const vecchioNol=daPagare.slice()
+      .sort((a,b)=>String(a.data_uscita||"9999").localeCompare(String(b.data_uscita||"9999")))[0];
+    /* rosso solo se un noleggio non pagato e' uscito da piu' di 30 giorni:
+       uno di ieri non e' un problema, uno di due mesi fa si'. */
+    const nonPagatiVecchi=daPagare.filter(x=>{const g=_ggDa(x.data_uscita);return g!=null&&g>30;});
+    nolDett("kn-daincassare",[
+      {t:"Noleggi da pagare",v:String(daPagare.length)},
+      vecchioNol?{t:"Il pi\u00f9 vecchio",
+                  v:vecchioNol.data_uscita?fdate(vecchioNol.data_uscita):"senza data"}:null
+    ],nonPagatiVecchi.length>0);
+
+    const daSvincolare=cauApert.filter(cauDaSvincolare);
+    nolDett("kn-cauzioni",[
+      {t:"Noleggi con cauzione",v:String(cauApert.length)},
+      {t:"Da svincolare subito",v:String(daSvincolare.length)}
+    ],daSvincolare.length>0);
     if($("#rie-ritardi"))$("#rie-ritardi").innerHTML=ritardo.length?ritardo.map(x=>{
       const gg=Math.round((new Date(oggiN)-new Date(x.data_rientro_prevista))/86400000);
-      return `<div class="nol-card" style="border-top-color:#c62828">
-        <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-          <span class="nol-eti" style="background:#c62828">${esc(gg+(gg===1?" giorno":" giorni"))}</span></div>
-        <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
-        <div class="sub2">Doveva rientrare il ${esc(fdate(x.data_rientro_prevista))}</div>
-        ${nolPulsanti("noleggio",x.id)}</div>`;}).join("")
+      return nolCard({col:"#c62828",
+        titolo:esc(x.mezzo||"—"),
+        eti:[{t:esc(gg+(gg===1?" giorno":" giorni"))}],
+        corpo:`<div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+        <div class="sub2">Doveva rientrare il ${esc(fdate(x.data_rientro_prevista))}</div>`,
+        pulsanti:nolPulsanti("noleggio",x.id)});}).join("")
       :'<p style="color:#666;padding:8px">Nessun mezzo in ritardo. Tutto sotto controllo.</p>';
 
     /* ── le scadenze: prima quelle che fermano il mezzo, poi quelle vicine ── */
@@ -1065,12 +1338,11 @@
         });
       });
       righe.sort((a,b)=>a.ord-b.ord);
-      $("#rie-scadenze").innerHTML=righe.length?righe.slice(0,12).map(r=>`
-        <div class="nol-card" style="border-top-color:${r.col}">
-          <div class="tit"><strong>${esc(r.m.nome||"—")}</strong>
-            <span class="nol-eti" style="background:${r.col}">${esc(r.eti)}</span></div>
-          <div class="sub2">${esc(r.testo)}</div>
-          ${nolPulsanti("mezzo",r.m.id)}</div>`).join("")
+      $("#rie-scadenze").innerHTML=righe.length?righe.slice(0,12).map(r=>nolCard({col:r.col,
+          titolo:esc(r.m.nome||"—"),
+          eti:[{t:esc(r.eti)}],
+          corpo:`<div class="sub2">${esc(r.testo)}</div>`,
+          pulsanti:nolPulsanti("mezzo",r.m.id)})).join("")
         :'<p style="color:#666;padding:8px">Nessuna scadenza vicina. Verifiche, assicurazioni e revisioni sono a posto.</p>';
     }
   }
@@ -1424,13 +1696,13 @@
     box.innerHTML=m.map(x=>{
       const sc=mezzoEtichettaScad(x);
       const c=sc?sc.col:(col[x.stato]||"#757575");
-      return `<div class="nol-card" style="border-top-color:${c}">
-        <div class="tit"><strong>${esc(x.nome||"—")}</strong>
-          <span class="nol-eti" style="background:${c}">${esc(sc?sc.testo:(x.stato||"").toUpperCase())}</span></div>
-        ${sc?`<div class="sub2" style="color:${sc.col};font-weight:600">${esc(mezzoBloccato(x)?("Non si può noleggiare: "+mezzoBloccato(x)):"")}</div>`:""}
+      return nolCard({col:c,
+        titolo:esc(x.nome||"—"),
+        eti:[{t:esc(sc?sc.testo:(x.stato||"").toUpperCase())}],
+        corpo:`${sc?`<div class="sub2" style="color:${sc.col};font-weight:600">${esc(mezzoBloccato(x)?("Non si può noleggiare: "+mezzoBloccato(x)):"")}</div>`:""}
         <div class="sub">${esc([x.categoria,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
-        <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>
-        ${nolPulsanti("mezzo",x.id)}</div>`;
+        <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>`,
+        pulsanti:nolPulsanti("mezzo",x.id)});
     }).join("");
   }
 
@@ -1451,6 +1723,54 @@
      Le cinque funzioni stanno DENTRO la scheda, non sparse sull'elenco: un
      elenco con cinque pulsanti per riga, con dieci mezzi, sono cinquanta
      pulsanti su una schermata e non si trova piu' niente. */
+  /* ================================================================
+     ⛔ 24 agosto 2026 (sera) — UNA SOLA FUNZIONE PER TUTTE LE SCHEDE
+     ================================================================
+     Le schede degli elenchi (Clienti, Mezzi, Noleggi, Prodotti, Magazzino,
+     Fornitori, Movimenti, Calendario, Fatture, Cauzioni, Contratti e
+     documenti, Foto e video, Cestino, Rendimento, e le due fasce del
+     Riepilogo) erano scritte a mano in DICIOTTO punti diversi del file,
+     ognuna col colore della barra scritto a mano dentro l'attributo style.
+     Cambiare la forma voleva dire trovarli tutti e diciotto e non
+     dimenticarne nessuno.
+
+     Adesso il disegno sta QUI, in un posto solo. Chi disegna un elenco dice
+     COSA c'e' nella scheda; COM'E' FATTA lo decide questa funzione.
+
+     o = {
+       titolo    il nome in grassetto in cima
+       eti       le pastiglie di stato: [{t:"IN RITARDO", col:"#c62828"}]
+       testa     al posto di titolo+eti, quando la riga in cima e' fatta a
+                 modo suo (il Magazzino ha il numerone a destra)
+       corpo     le righe sotto, gia' pronte in HTML
+       pulsanti  di solito nolPulsanti("mezzo", id)
+       cls       classi in piu' sulla scheda (le righe del Calendario)
+     }
+
+     ⛔ IL COLORE STA SOLO DOVE C'E' ANCHE LA PAROLA. La pastiglia resta
+     colorata («IN RITARDO», «PAGATA»): li' il colore accompagna un testo, e
+     chi non distingue rosso e verde legge comunque. La barra sopra la scheda
+     invece e' sparita: era colore senza parola, e con dodici sezioni accese
+     faceva una pagina a scacchi. E' la stessa regola che Alessio ha gia'
+     scelto il 21 agosto per il gestionale imprese («LE STRISCE DELLE SEZIONI
+     DIVENTANO NEUTRE», in css/gestionale.css).
+     ⚠️ `col` si continua a passare e si continua a usare: e' il colore della
+     pastiglia, non piu' quello della barra.
+     ================================================================ */
+  function nolCard(o){
+    o=o||{};
+    const testa = (o.testa!=null)
+      ? o.testa
+      : '<strong>'+(o.titolo!=null?o.titolo:"")+'</strong>'
+        +(o.eti||[]).filter(Boolean).map(e=>
+            '<span class="nol-eti" style="--c:'+(e.col||o.col||"#475569")+'">'+e.t+'</span>').join("");
+    return '<div class="nol-card'+(o.cls?" "+o.cls:"")+'">'
+         +   '<div class="tit">'+testa+'</div>'
+         +   (o.corpo||"")
+         +   (o.pulsanti||"")
+         + '</div>';
+  }
+
   function nolPulsanti(tipo,id){
     return `<div class="nol-azioni">
       <button class="nol-az nol-az-apri" data-action="nol-mod" data-t="${tipo}" data-id="${id}">Apri</button>
@@ -3205,18 +3525,18 @@
       const uso=(gg&&gg>0)?(r.giorni>0?Math.max(1,Math.min(100,Math.round(r.giorni/gg*100))):0):null;
       const fermo=!r.volte;
       const col=fermo?"#c62828":(uso!=null&&uso>=50?"#2e7d32":"#e65100");
-      return `<div class="nol-card" style="border-top-color:${col}">
-        <div class="tit"><strong>${esc(r.m.nome||"—")}</strong>
-          <span class="nol-eti" style="background:${col}">${fermo?"MAI USCITO":esc(_eur(r.reso))}</span></div>
-        <div class="sub">${fermo
+      return nolCard({col:col,
+        titolo:esc(r.m.nome||"—"),
+        eti:[{t:fermo?"MAI USCITO":esc(_eur(r.reso))}],
+        corpo:`<div class="sub">${fermo
           ? "In piazzale per tutto il periodo: non ha reso niente, ma è costato lo stesso."
           : esc(r.volte+(r.volte===1?" noleggio":" noleggi")+" · "+r.giorni+(r.giorni===1?" giorno":" giorni")+" fuori"+
                 (uso!=null?" · usato il "+uso+"% del tempo":""))}</div>
         ${fermo?"":`<div class="rend-barra"><i style="width:${uso||0}%;background:${col}"></i></div>`}
         ${fermo?"":`<div class="sub2">${esc("Incassato "+_eur(r.incassato)+
             (r.daPagare?" · da incassare "+_eur(r.daPagare):"")+
-            (r.cauzioni?" · cauzioni in deposito "+_eur(r.cauzioni):""))}</div>`}
-        ${nolPulsanti("mezzo",r.m.id)}</div>`;
+            (r.cauzioni?" · cauzioni in deposito "+_eur(r.cauzioni):""))}</div>`}`,
+        pulsanti:nolPulsanti("mezzo",r.m.id)});
     }).join("");
   }
   $('[data-tab="rendimento"]')?.addEventListener("click",loadRendimento);
@@ -3324,13 +3644,13 @@
         : (dasv?"Mezzo rientrato il "+fdate(x.data_rientro_effettivo)+
                 (gg>0?" — sono passati "+gg+(gg===1?" giorno":" giorni"):"")
               :"Mezzo ancora fuori: la cauzione resta in deposito.");
-      return `<div class="nol-card" style="border-top-color:${col}">
-        <div class="tit"><strong>${esc(_eur(x.cauzione))}</strong>
-          <span class="nol-eti" style="background:${col}">${esc(eti)}</span></div>
-        <div class="sub">${x.cliente?esc(x.cliente):"Cliente non indicato"}${x.mezzo?esc(" · "+x.mezzo):""}</div>
+      return nolCard({col:col,
+        titolo:esc(_eur(x.cauzione)),
+        eti:[{t:esc(eti)}],
+        corpo:`<div class="sub">${x.cliente?esc(x.cliente):"Cliente non indicato"}${x.mezzo?esc(" · "+x.mezzo):""}</div>
         <div class="sub2">${esc(sotto)}</div>
-        <div class="sub2">${esc(chiusura)}</div>
-        ${nolPulsanti("cauzione",x.id)}</div>`;
+        <div class="sub2">${esc(chiusura)}</div>`,
+        pulsanti:nolPulsanti("cauzione",x.id)});
     }).join("");
   }
   $('[data-tab="cauzioni"]')?.addEventListener("click",loadCauzioni);
@@ -3413,15 +3733,15 @@
     box.innerHTML=F.map(f=>{
       const st=f.stato||"bozza", col=FATTNOL_COL[st]||"#757575";
       const quante=(Array.isArray(f.righe)?f.righe:[]).length;
-      return `<div class="nol-card" style="border-top-color:${col}">
-        <div class="tit"><strong>${esc(f.numero?"n. "+f.numero:"(senza numero)")}</strong>
-          <span class="nol-eti" style="background:${col}">${esc((FATTNOL_ETI[st]||st).toUpperCase())}</span></div>
-        <div class="sub">${esc(f.cliente||"Cliente non indicato")}</div>
+      return nolCard({col:col,
+        titolo:esc(f.numero?"n. "+f.numero:"(senza numero)"),
+        eti:[{t:esc((FATTNOL_ETI[st]||st).toUpperCase())}],
+        corpo:`<div class="sub">${esc(f.cliente||"Cliente non indicato")}</div>
         <div class="sub2">${esc((f.periodo_dal&&f.periodo_al?fdate(f.periodo_dal)+" — "+fdate(f.periodo_al):"periodo non indicato")+
           " · "+quante+(quante===1?" riga":" righe"))}</div>
         <div class="sub2"><b>${esc(_eur(f.totale))}</b>${esc(" (imponibile "+_eur(f.imponibile)+")")}${
-          f.pagata_il?esc(" · pagata il "+fdate(f.pagata_il)):""}</div>
-        ${nolPulsanti("fattnol",f.id)}</div>`;
+          f.pagata_il?esc(" · pagata il "+fdate(f.pagata_il)):""}</div>`,
+        pulsanti:nolPulsanti("fattnol",f.id)});
     }).join("");
   }
   $('[data-tab="fatture"]')?.addEventListener("click",loadFattureNol);
@@ -3697,15 +4017,14 @@
     box.innerHTML=vis.map(n=>{
       const fogli=DOCS_FOGLI.filter(f=>!f.solo||f.solo(n));
       const mancano=fogli.filter(f=>!f.ce(n));
-      return `<div class="nol-card" style="border-top-color:${mancano.length?"#c62828":"#2e7d32"}">
-        <div class="tit"><strong>${esc(n.mezzo||"—")}</strong>
-          <span class="nol-eti" style="background:${mancano.length?"#c62828":"#2e7d32"}">${
-            mancano.length?esc("MANCANO "+mancano.length):"COMPLETO"}</span></div>
-        <div class="sub">${n.cliente?"Cliente: "+esc(n.cliente):"Cliente non indicato"}${
+      return nolCard({col:mancano.length?"#c62828":"#2e7d32",
+        titolo:esc(n.mezzo||"—"),
+        eti:[{t:mancano.length?esc("MANCANO "+mancano.length):"COMPLETO"}],
+        corpo:`<div class="sub">${n.cliente?"Cliente: "+esc(n.cliente):"Cliente non indicato"}${
           n.contratto_num?" · contratto n. "+esc(n.contratto_num):""}</div>
         <div class="doc-bollini">${fogli.map(f=>
-          `<span class="doc-bollino ${f.ce(n)?"si":"no"}">${f.ce(n)?"✓":"✗"} ${esc(f.lab)}</span>`).join("")}</div>
-        ${nolPulsanti("documenti",n.id)}</div>`;
+          `<span class="doc-bollino ${f.ce(n)?"si":"no"}">${f.ce(n)?"✓":"✗"} ${esc(f.lab)}</span>`).join("")}</div>`,
+        pulsanti:nolPulsanti("documenti",n.id)});
     }).join("");
   }
   $('[data-tab="documenti"]')?.addEventListener("click",loadDocumenti);
@@ -4289,14 +4608,13 @@
     const c=data||[], box=$("#clienti-nol-body");
     if(!box) return;
     if(!c.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun cliente. Aggiungine uno.</p>';return;}
-    box.innerHTML=c.map(x=>`
-      <div class="nol-card" style="border-top-color:#1565c0">
-        <div class="tit"><strong>${esc(x.nome||"—")}</strong></div>
-        <div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+    box.innerHTML=c.map(x=>
+      nolCard({col:"#1565c0",
+        titolo:esc(x.nome||"—"),
+        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
         ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
-        ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}
-        ${nolPulsanti("cliente",x.id)}
-      </div>`).join("");
+        ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}`,
+        pulsanti:nolPulsanti("cliente",x.id)})).join("");
   }
   $('[data-tab="clienti-nol"]')?.addEventListener("click",loadClientiNol);
   async function popolaSelectNoleggi(){
@@ -4338,16 +4656,16 @@
       /* ⛔ 24 agosto 2026 — noleggio interno: se e' taggato a un reparto,
          una piccola etichetta lo dice subito, senza aprire la scheda */
       const repNome=x.mestiere_id?((nolMestieri.find(m=>m.id===x.mestiere_id)||{}).nome||""):"";
-      return `<div class="nol-card" style="border-top-color:${col}">
-        <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-          <span class="nol-eti" style="background:${col}">${esc(et)}${rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):""}${manca>0?esc(" · fra "+manca+(manca===1?" giorno":" giorni")):""}</span>
-          ${repNome?`<span class="nol-eti" style="background:#546e7a">🏷 ${esc(repNome)}</span>`:""}</div>
-        <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+      return nolCard({col:col,
+        titolo:esc(x.mezzo||"—"),
+        eti:[{t:esc(et)+(rit?esc(" · "+rit+(rit===1?" giorno":" giorni")):"")+(manca>0?esc(" · fra "+manca+(manca===1?" giorno":" giorni")):"")},
+             repNome?{t:"🏷 "+esc(repNome),col:"#546e7a"}:null],
+        corpo:`<div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
         <div class="sub2">${esc("Uscita "+fdate(x.data_uscita)+" · rientro previsto "+fdate(x.data_rientro_prevista)+(x.data_rientro_effettivo?" · rientrato il "+fdate(x.data_rientro_effettivo):""))}</div>
         <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione)+
           (cauStatoDi(x)==="svincolata"?" (svincolata)":(cauDaSvincolare(x)?" DA SVINCOLARE":"")):"")+
-          " · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>
-        ${nolPulsanti("noleggio",x.id)}</div>`;
+          " · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>`,
+        pulsanti:nolPulsanti("noleggio",x.id)});
     }).join("");
   }
   $('[data-tab="noleggi"]')?.addEventListener("click",()=>{loadNoleggi().then(nolAggiornaConto);});
@@ -4522,12 +4840,12 @@
   function fattRow(l){
     const st=l.fatt_stato||"none";
     const pdf=fatturaPdfCache[l.id];
-    return `<div class="nol-card" style="border-top-color:${FATT_COLORE[st]}">
-      <div class="tit"><strong>${esc(l.descrizione||"Lavoro")}</strong>
-        <span class="nol-eti" style="background:${FATT_COLORE[st]}">${esc(FATT_ETICHETTA[st].toUpperCase())}</span></div>
-      <div class="sub">${eur(l.importo)}${l.ore?" · "+esc(String(l.ore))+" ore":""}</div>
-      <div class="sub2">📅 ${fdate(l.data_fatto||l.data_prevista)}${pdf?" · 📄 fattura allegata":""}</div>
-      ${nolPulsanti("fattura",l.id)}</div>`;
+    return nolCard({col:FATT_COLORE[st],
+      titolo:esc(l.descrizione||"Lavoro"),
+      eti:[{t:esc(FATT_ETICHETTA[st].toUpperCase())}],
+      corpo:`<div class="sub">${eur(l.importo)}${l.ore?" · "+esc(String(l.ore))+" ore":""}</div>
+      <div class="sub2">📅 ${fdate(l.data_fatto||l.data_prevista)}${pdf?" · 📄 fattura allegata":""}</div>`,
+      pulsanti:nolPulsanti("fattura",l.id)});
   }
 
   /* ── LA SCHEDA DELLA FATTURA — a tutta pagina ──
@@ -4615,8 +4933,8 @@
     const pagate=L.filter(l=>l.fatt_stato==="pagata");
     const tInc=daInc.reduce((s,l)=>s+(+l.importo||0),0);
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
-    $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
-      <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
+    $("#fatt-summary").innerHTML=`<div class="num-c fatt-tot"><div class="l num-d">Da incassare (fatture emesse)</div><div class="n num-n">${eur(tInc)}</div></div>
+      <div class="num-c fatt-tot alt"><div class="l num-d">Lavori finiti da fatturare</div><div class="n num-n">${eur(tFatt)}</div></div>`;
     let h="";
     h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
     h+=daFatt.length?daFatt.map(fattRow).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
@@ -4717,15 +5035,14 @@
     if(!vis.length){
       box.innerHTML='<p style="color:#666;padding:8px">Niente che si chiami così, fra le '+cestCache.length+' cose nel cestino.</p>';return;
     }
-    box.innerHTML=vis.map(v=>`
-      <div class="nol-card" style="border-top-color:${v.x.col}">
-        <div class="tit"><strong>${esc(v.x.nome)}</strong>
-          <span class="nol-eti" style="background:${v.x.col}">${esc(v.x.lab.toUpperCase())}</span></div>
-        <div class="sub2">Buttato il ${esc(cestQuando(v.x.quando))}</div>
-        <div class="nol-azioni">
+    box.innerHTML=vis.map(v=>
+      nolCard({col:v.x.col,
+        titolo:esc(v.x.nome),
+        eti:[{t:esc(v.x.lab.toUpperCase())}],
+        corpo:`<div class="sub2">Buttato il ${esc(cestQuando(v.x.quando))}</div>`,
+        pulsanti:`<div class="nol-azioni">
           <button class="nol-az nol-az-apri" data-action="cest-apri" data-i="${v.i}">Apri</button>
-        </div>
-      </div>`).join("");
+        </div>`})).join("");
   }
 
   /* la scheda di una cosa nel cestino: a tutta pagina come tutte le altre,
@@ -4924,14 +5241,13 @@
       const conta=(mo)=>{const f=c(mo,"foto"),v=c(mo,"video");
         return (f?f+(f===1?" foto":" foto"):"nessuna foto")+" · "+(v?v+(v===1?" video":" video"):"nessun video");};
       const senza=!mm.length, peso=mm.reduce((s,m)=>s+(+m.byte||0),0);
-      return `<div class="nol-card" style="border-top-color:${senza?"#c62828":"#2e7d32"}">
-        <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-          ${senza?'<span class="nol-eti" style="background:#c62828">NESSUNA PROVA</span>'
-                 :'<span class="nol-eti" style="background:#2e7d32">'+esc(mediaPeso(peso))+'</span>'}</div>
-        <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+      return nolCard({col:senza?"#c62828":"#2e7d32",
+        titolo:esc(x.mezzo||"—"),
+        eti:[senza?{t:"NESSUNA PROVA"}:{t:esc(mediaPeso(peso))}],
+        corpo:`<div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
         <div class="sub2">Alla consegna: ${esc(conta("uscita"))}</div>
-        <div class="sub2">Al rientro: ${esc(conta("rientro"))}</div>
-        ${nolPulsanti("media",x.id)}</div>`;
+        <div class="sub2">Al rientro: ${esc(conta("rientro"))}</div>`,
+        pulsanti:nolPulsanti("media",x.id)});
     }).join("");
   }
   $('[data-tab="media"]')?.addEventListener("click",loadMedia);
@@ -5483,12 +5799,12 @@
     const g=leggiGiornata(ds);
     const COL_GIOR={ritardo:["#c62828","IN RITARDO"],esce:["#e65100","ESCE"],
                     prenot:["#7C3AED","PRENOTATO"],rientra:["#1565c0","RIENTRA"]};
-    const riga=(x,tipo,sotto)=>`<div class="nol-card riga-gior ${tipo}">
-      <div class="tit"><strong>${esc(x.mezzo||"—")}</strong>
-        <span class="nol-eti" style="background:${(COL_GIOR[tipo]||COL_GIOR.rientra)[0]}">${(COL_GIOR[tipo]||COL_GIOR.rientra)[1]}</span></div>
-      <div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
-      <div class="sub2">${sotto}</div>
-      ${nolPulsanti("noleggio",x.id)}</div>`;
+    const riga=(x,tipo,sotto)=>nolCard({cls:"riga-gior "+tipo,
+      titolo:esc(x.mezzo||"—"),
+      eti:[{t:(COL_GIOR[tipo]||COL_GIOR.rientra)[1],col:(COL_GIOR[tipo]||COL_GIOR.rientra)[0]}],
+      corpo:`<div class="sub">${x.cliente?"Cliente: "+esc(x.cliente):"Cliente non indicato"}</div>
+      <div class="sub2">${sotto}</div>`,
+      pulsanti:nolPulsanti("noleggio",x.id)});
     const vuoto=t=>`<p class="gior-vuoto">${t}</p>`;
     let h="";
     h+=`<div class="mini-title">Escono oggi (${g.escono.length})</div>`;
@@ -5506,11 +5822,10 @@
         "Doveva rientrare il "+fdate(x.data_rientro_prevista))).join("");
     }
     h+=`<div class="mini-title">Lavori (${g.lavori.length})</div>`;
-    h+=g.lavori.length?g.lavori.map(j=>`<div class="nol-card riga-gior lavoro">
-        <div class="tit"><strong>${esc(j.descrizione||"(senza descrizione)")}</strong>
-          <span class="nol-eti" style="background:${j.stato==='fatto'?'#2e7d32':'#757575'}">${(statoLabel[j.stato]||j.stato||"").toUpperCase()}</span></div>
-        ${nolPulsanti("fattura",j.id)}
-      </div>`).join("")
+    h+=g.lavori.length?g.lavori.map(j=>nolCard({cls:"riga-gior lavoro",
+        titolo:esc(j.descrizione||"(senza descrizione)"),
+        eti:[{t:(statoLabel[j.stato]||j.stato||"").toUpperCase(),col:j.stato==='fatto'?'#2e7d32':'#757575'}],
+        pulsanti:nolPulsanti("fattura",j.id)})).join("")
       :vuoto("Nessun lavoro in questa data.");
     openSheet(`<h3>${esc(nolTitolo("giornata",g))}</h3>${nolPulsantiScheda("giornata",ds,["nol-pdf","nol-stampa"])}
       ${h}
@@ -6283,13 +6598,12 @@
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto. Aggiungine uno.</p>';return;}
     box.innerHTML=prods.map(p=>{
       const sotto=(p.quantita??0)<=(p.soglia_minima??0);
-      return `<div class="nol-card" style="border-top-color:${sotto?"#c62828":"#1565c0"}">
-        <div class="tit"><strong>${esc(p.nome||"—")}</strong>
-          ${sotto?'<span class="nol-eti" style="background:#c62828">SOTTO SCORTA</span>':""}</div>
-        <div class="sub">${esc([p.categoria||"",_eur(p.prezzo)+" / "+(p.unita||"pz"),"in magazzino "+(p.quantita??0)+" "+(p.unita||"pz")].filter(Boolean).join(" · "))}</div>
-        ${p.codice?`<div class="sub2">cod. ${esc(p.codice)}</div>`:""}
-        ${nolPulsanti("prodotto",p.id)}
-      </div>`;}).join("");
+      return nolCard({col:sotto?"#c62828":"#1565c0",
+        titolo:esc(p.nome||"—"),
+        eti:[sotto?{t:"SOTTO SCORTA",col:"#c62828"}:null],
+        corpo:`<div class="sub">${esc([p.categoria||"",_eur(p.prezzo)+" / "+(p.unita||"pz"),"in magazzino "+(p.quantita??0)+" "+(p.unita||"pz")].filter(Boolean).join(" · "))}</div>
+        ${p.codice?`<div class="sub2">cod. ${esc(p.codice)}</div>`:""}`,
+        pulsanti:nolPulsanti("prodotto",p.id)});}).join("");
   }
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
   async function loadMagazzino(){
@@ -6301,16 +6615,14 @@
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto in magazzino.</p>';return;}
     box.innerHTML=prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
-      return `<div class="nol-card" style="border-top-color:${sotto?"#c62828":"#2e7d32"}">
-        <div class="tit">
-          <div><strong>${esc(p.nome||"—")}</strong>
+      return nolCard({col:sotto?"#c62828":"#2e7d32",
+        testa:`<div><strong>${esc(p.nome||"—")}</strong>
             <div class="sub2">Scorta minima: ${esc(String(s))}</div></div>
           <div style="text-align:right">
             <span style="font-size:26px;font-weight:700;line-height:1">${esc(String(q))}</span>
             ${sotto?'<div><span class="nol-eti" style="background:#c62828">SOTTO SCORTA</span></div>':""}
-          </div>
-        </div>
-        ${nolPulsanti("magazzino",p.id)}</div>`;
+          </div>`,
+        pulsanti:nolPulsanti("magazzino",p.id)});
     }).join("");
   }
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
@@ -6321,14 +6633,13 @@
     const f=data||[], box=$("#fornitori-body");
     if(!box) return;
     if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
-    box.innerHTML=f.map(x=>`
-      <div class="nol-card" style="border-top-color:#1565c0">
-        <div class="tit"><strong>${esc(x.nome||"—")}</strong></div>
-        <div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+    box.innerHTML=f.map(x=>
+      nolCard({col:"#1565c0",
+        titolo:esc(x.nome||"—"),
+        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
         ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
-        ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}
-        ${nolPulsanti("fornitore",x.id)}
-      </div>`).join("");
+        ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}`,
+        pulsanti:nolPulsanti("fornitore",x.id)})).join("");
   }
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
   async function loadMovimenti(){
@@ -6342,13 +6653,12 @@
       const ETI={vendita:["#2e7d32","↑","VENDITA"],acquisto:["#e65100","↓","ACQUISTO"],
                  reso:["#757575","↩","RESO"],rettifica:["#1565c0","≈","RETTIFICA"]};
       const [col,fre,et]=ETI[x.tipo]||ETI.acquisto;
-      return `<div class="nol-card" style="border-top-color:${col}">
-        <div class="tit"><strong>${fre} ${esc(x.prodotto||"—")}</strong>
-          <span class="nol-eti" style="background:${col}">${et}</span></div>
-        <div class="sub">${esc("Q.tà "+(x.quantita??0)+" · "+_eur(x.importo)+(x.controparte?" · "+x.controparte:""))}</div>
-        <div class="sub2">${esc(fdate(x.data_mov)+(x.note?" · "+x.note:""))}</div>
-        ${nolPulsanti("movimento",x.id)}
-      </div>`;
+      return nolCard({col:col,
+        titolo:`${fre} ${esc(x.prodotto||"—")}`,
+        eti:[{t:et}],
+        corpo:`<div class="sub">${esc("Q.tà "+(x.quantita??0)+" · "+_eur(x.importo)+(x.controparte?" · "+x.controparte:""))}</div>
+        <div class="sub2">${esc(fdate(x.data_mov)+(x.note?" · "+x.note:""))}</div>`,
+        pulsanti:nolPulsanti("movimento",x.id)});
     }).join("");
   }
   $('[data-tab="movimenti"]')?.addEventListener("click",loadMovimenti);
