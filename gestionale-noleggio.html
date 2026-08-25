@@ -301,15 +301,22 @@
   .day-jobs{margin-bottom:14px}
   .day-job{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
   .day-job .dot{flex:0 0 auto}
-  .stato{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
+  /* ⛔ 25 agosto 2026 (mattina) — QUESTE TRE NON BASTAVA CAMBIARLE.
+     .stato, .thumb .thop e .thumb .thtag stanno ANCHE in css/gestionale.css
+     (righe 333, 341, 342) a 11, 10 e 9 px. Quel foglio si carica DOPO questo
+     <style> e a parita' di peso vince lui: le avevo portate a 13 px e a
+     schermo restavano piccole lo stesso. Col prefisso #app-root pesano di
+     piu' e vincono sempre. E' la stessa trappola del colore --accent e delle
+     schede .kpi: terza volta. */
+  #app-root .stato{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
   .stato.da_fare{background:#fdeae1;color:var(--dafare)} .stato.in_corso{background:#e4ecfd;color:var(--incorso)} .stato.fatto{background:#e3f3e8;color:var(--fatto)}
 
   .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
   .thumb{position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;background:#eef1ef;border:1px solid var(--line)}
   .thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
   .thumb .thdel{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;cursor:pointer}
-  .thumb .thop{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;font-weight:700;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .thumb .thtag{position:absolute;top:3px;left:3px;font-size:13px;font-weight:800;padding:3px 7px;border-radius:5px;text-transform:uppercase}
+  #app-root .thumb .thop{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;font-weight:700;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #app-root .thumb .thtag{position:absolute;top:3px;left:3px;font-size:13px;font-weight:800;padding:3px 7px;border-radius:5px;text-transform:uppercase}
   .thumb .thtag.prima{background:#fdeae1;color:var(--dafare)} .thumb .thtag.dopo{background:#e3f3e8;color:var(--fatto)}
   .up-btn{display:inline-block;background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer}
   .gal-group{margin-bottom:18px}
