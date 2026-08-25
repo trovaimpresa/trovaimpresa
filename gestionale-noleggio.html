@@ -2544,7 +2544,7 @@
              SPESA nel riepilogo di quel reparto, come se l'avessi noleggiato
              da un fornitore esterno — perche' e' proprio quello che e'. -->
         <div class="field" style="margin-top:10px"><label>Per un tuo reparto (facoltativo)</label>
-          <select id="nn-reparto"><option value="">— nessuno: e' un cliente esterno —</option></select>
+          <select id="nn-reparto"><option value="">— nessuno: è un cliente esterno —</option></select>
           <p style="margin:6px 0 0;font-size:13px;color:#666">Scegli un reparto solo se il mezzo lo usi tu, in un tuo cantiere: l'importo comparir&agrave; come spesa nel riepilogo di quel reparto.</p></div>
         <div id="nn-conflitto"></div>
       </div>
@@ -3886,8 +3886,8 @@
     if(av) av.innerHTML=!dentro.length
       ? '<div class="nol-avviso">Nessun noleggio di questo cliente in quei giorni.</div>'
       : '<div class="nol-avviso">Trovati '+dentro.length+(dentro.length===1?" noleggio":" noleggi")+
-        (presi?', ma '+presi+(presi===1?" era gia' su un'altra fattura e non l'ho preso."
-                                       :" erano gia' su altre fatture e non li ho presi."):". Presi tutti.")+'</div>';
+        (presi?', ma '+presi+(presi===1?" era già su un'altra fattura e non l'ho preso."
+                                       :" erano già su altre fatture e non li ho presi."):". Presi tutti.")+'</div>';
     toast(fattnolRighe.length+(fattnolRighe.length===1?" riga trovata":" righe trovate"));
   }
 
@@ -5186,7 +5186,7 @@
           catch(e){ return fine({blob:file,ridotto:false,perche:"il browser ha rifiutato il formato"}); }
           const pezzi=[];
           reg.ondataavailable=e=>{ if(e.data&&e.data.size) pezzi.push(e.data); };
-          reg.onerror=()=>fine({blob:file,ridotto:false,perche:"la riduzione si e' fermata"});
+          reg.onerror=()=>fine({blob:file,ridotto:false,perche:"la riduzione si è fermata"});
           reg.onstop=()=>{
             const nuovo=new Blob(pezzi,{type:tipo.split(";")[0]});
             /* se per qualche motivo e' venuto piu' grosso, si tiene l'originale */
