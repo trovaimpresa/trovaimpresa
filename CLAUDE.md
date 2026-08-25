@@ -15505,3 +15505,164 @@ nel **pannello Admin**, non nel gestionale delle imprese.
 ⛔ Prima di costruirlo: **misurare.** Una query che dica quanti MB stanno
 adesso nei bucket `gestionale-foto` e `gestionale-video` e quanti file. Se è
 il 3% di 1 GB, si rimanda senza rimpianti.
+
+---
+
+# 25 AGOSTO 2026 — LE SCHEDE DEL NOLEGGIO, E I TESTI PICCOLI DAPPERTUTTO
+
+Giornata di forma, non di funzioni: nessun dato nuovo, nessuna tabella nuova.
+Sono cambiati **come si vedono** le cose e **chi se ne accorge se cambiano**.
+
+## LA REGOLA DETTA DA ALESSIO, IN PAROLE SUE
+
+> «Il riepilogo del gestionale noleggio deve essere come il riepilogo del
+> gestionale impresa. Invece i reparti del gestionale noleggio devono essere
+> come i reparti del gestionale impresa.»
+
+E subito dopo, che è la cosa che chiude il discorso:
+
+> «Gestionale artigiano, gestionale impresa e gestionale professionisti sono
+> tutti uguali. Anche il gestionale noleggio sarà uguale.»
+
+⚠️ **Sono DUE forme diverse, non una.** Chi legge «come il gestionale
+imprese» e ne copia una sola sbaglia metà del lavoro. È già successo oggi:
+prima è stata fatta solo la scheda del Riepilogo, poi solo quella dei
+Preventivi, e nessuna delle due era la risposta.
+
+## TAPPA 1 — LE OTTO SCHEDE DEL RIEPILOGO + LE SEI DELLE SEZIONI
+
+- **Riepilogo del noleggio → `.nrc`**, copia di `.rie-card`
+  (`css/gestionale.css` 1137-1300) e di `rieCard()`: icona colorata nel
+  riquadrino, titolo, pallino da 13px, numerone da 44px NERO, etichetta, riga
+  di separazione e sotto fino a DUE righe di dettaglio.
+- **Fatture e Cauzioni → `.num-c`**, copia della card in cima a Preventivi
+  (`css/gestionale.css` 3651-3678, `numCard()`): domanda, numerone, riga di
+  sotto. Niente icona, niente pallino.
+
+Le icone SVG sono state disegnate nuove: `rieIco()` del gestionale imprese
+clona l'icona dal bottone del menu, ma i bottoni del menu del noleggio sono
+solo testo e l'SVG non ce l'hanno.
+
+⛔ **Il pallino è rosso solo dove c'è un lavoro da fare** — mezzi in ritardo,
+cauzioni da svincolare, noleggi non pagati da più di 30 giorni. NON perché la
+sezione ha roba dentro: cinque prenotazioni non sono un problema.
+
+## TAPPA 2 — DICIOTTO SCHEDE SCRITTE A MANO, ADESSO UNA FUNZIONE SOLA
+
+`nolCard()` disegna tutte le schede degli elenchi. Prima erano scritte a mano
+in **diciotto** punti, ognuna col colore della barra dentro l'attributo
+`style`.
+
+Il lavoro è stato fatto in **due passi separati, ed è il motivo per cui non
+ha rotto niente**:
+
+1. **Prima raccogliere, senza cambiare una virgola di quello che si vede.**
+   `banco/impronta.js` fotografa l'HTML esatto di 15 sezioni prima e dopo, e
+   il confronto ha detto **identico**.
+2. **Poi cambiare solo la funzione.** Un punto solo da toccare.
+
+⛔ **La barra colorata sopra le schede è sparita.** Il colore è passato nella
+pastiglia («IN RITARDO», «PAGATA», «SOTTO SCORTA»), che adesso ha il fondo
+tenue e la scritta colorata. È la regola del 21 agosto: **IL COLORE STA SOLO
+DOVE C'È ANCHE LA PAROLA.**
+
+## ⛔ LA LEZIONE PIÙ CARA DELLA GIORNATA — LA TERZA VOLTA
+
+Diciotto misure di testo sotto i 13px sono state portate a 13 in
+`gestionale-noleggio.html`. **Tre a schermo sono rimaste piccole lo stesso**:
+`.stato` a 11, `.thumb .thop` a 10, `.thumb .thtag` a 9.
+
+Perché: quelle tre stanno **anche in `css/gestionale.css`**, che si carica
+DOPO lo `<style>` della pagina. A parità di peso vince lui.
+
+**È la terza volta che questo foglio frega qualcuno** (prima il colore
+`--accent`, poi le schede `.kpi`). La regola, che ormai non ha scuse:
+
+> ⛔ Ogni regola scritta nello `<style>` di `gestionale-noleggio.html` che ha
+> un nome di classe generico va scritta **`#app-root .nome`**. Sempre.
+
+⚠️ E la lezione sotto la lezione: **il banco aveva DUE prove sui 13px e
+nessuna delle due l'ha visto.** Una guardava quello che si vede (e quelle
+regole a schermo non comparivano), l'altra guardava il foglio (e diceva 13,
+senza sapere chi vince). Ne è servita una terza, che costruisce elementi
+finti e **misura il font vero che il browser decide alla fine**.
+
+## I TESTI SOTTO I 13 PX — DA 28 A ZERO
+
+Sistemate anche le **28** del gestionale imprese: 25 in `css/gestionale.css`
+e 3 in `gestionale-app.html`. Le dieci che si vedevano davvero: il cartellino
+sopra le foto a 9px, il nome dell'operatore a 10, la pastiglia di stato a 11,
+l'etichetta della barra dei reparti a 11, il contatore delle viste a 11, le
+etichette dentro il grafico a 11, le intestazioni delle tabelle a 12.
+
+**`TETTO_PICCOLI` in `tools/controllo-push.js` è passato da 28 a ZERO**, e
+`gestionale-noleggio.html` è entrato nella lista `FILE_GESTIONALE` (è entrato
+il giorno in cui era a zero, così non ha alzato il tetto). Da oggi la prima
+misura sotto i 13px che entra **ferma la pubblicazione**.
+
+⚠️ `css/gestionale.css` lo usano DUE pagine: dopo averlo toccato è stato
+rilanciato tutto il banco del noleggio, e le fotografie del noleggio sono
+state confrontate con quelle di prima.
+
+## ALTRO CHIUSO OGGI
+
+- **Quattro accenti scritti con l'apostrofo** nei punti che vede il cliente:
+  la tendina «nessuno: e' un cliente esterno» e il messaggio delle fatture
+  «era gia' su un'altra fattura».
+- **`netlify.toml`**: `prompt-nuova-sessione.md` stava in root e sarebbe
+  finito online scaricabile da chiunque. Aggiunto il rinvio 404 accanto a
+  quello del gemello `PROMPT-sessione-nuova.md` — **sono due file diversi,
+  servono tutti e due i rinvii.**
+- **`prove/noleggio-menu/banco.js` riscritto.** Provava che il Noleggio fosse
+  una voce del menu del reparto: il 24 agosto è stato spostato apposta nella
+  schermata dei reparti. Adesso prova che stia lì, accanto a «Dati azienda»,
+  **e anche che NON sia tornato dentro il menu** — se qualcuno ce lo rimette,
+  la prova diventa rossa prima che il danno arrivi ai mezzi doppi.
+
+## IL BANCO ALLA FINE DELLA GIORNATA
+
+```
+noleggio-prezzo/schermo.js ... 561 prove
+noleggio-card/banco.js ........ 76 prove   NUOVO
+noleggio-prezzo/banco.js ...... 55 prove
+noleggio-importo/banco.js ..... 39 prove
+noleggio-pdf/banco.js ......... 35 prove
+noleggio-scritte/banco.js ..... 21 prove
+noleggio-menu/banco.js ........ 21 prove   (riscritto)
+                             ─────────────
+                              808 prove · 808 verdi · 0 rosse
+                    più 14 sabotaggi, tutti diventati rossi
+```
+
+⚠️ **`schermo.js` era rotto e nessuno se n'era accorto**: cercava la sezione
+`clienti`, che nel noleggio si chiama `clienti-nol`. Moriva alla riga 225 e
+le 500 prove dopo non partivano nemmeno. Adesso un clic su un pulsante che
+non c'è fa diventare la prova ROSSA, non uccide il banco.
+
+## ⚠️ INCIAMPI DELLA GIORNATA — da non ripetere
+
+1. **I banchi non si mettono nel blocco git.** `prove-claude/` sta nel
+   `.gitignore` apposta: `git add` si è fermato lì e, con la catena `&&`,
+   commit e push non sono partiti.
+2. **Chiedere a parole una cosa che si può far vedere.** Due domande a scelta
+   multipla sulla forma delle schede non si capivano. Quello che ha sbloccato
+   tutto è stata **una fotografia**. Prima di chiedere: costruire, fotografare,
+   mostrare.
+3. **`.fatt-tot`**: due riquadri in fondo alle Fatture erano rimasti con la
+   barra colorata sopra. Erano gli ultimi due colori senza parola della pagina.
+
+## COSA RESTA, IN ORDINE
+
+1. **`gestionale-negozio.html`: 43 testi sotto i 13px**, e **non è nella lista
+   del controllo**. È il gemello del noleggio: stesso lavoro, stesso metodo.
+   Va messo dentro `FILE_GESTIONALE` il giorno in cui arriva a zero.
+2. **`admin.html`: 87 testi sotto i 13px.** Non lo vede nessun cliente: lo
+   legge Alessio.
+3. **Gli accenti con l'apostrofo** in `gestionale-operatore.html` (6 righe,
+   le vede il dipendente sul telefono), `admin.html`,
+   `registrazione-artigiano.html`, `tools/riempi-mappa.html`.
+4. **Misurare lo spazio del deposito** prima di costruire l'avviso: una query
+   sui MB e i file nei bucket `gestionale-foto` e `gestionale-video`.
+5. **Portale cliente** e **modulo ponteggi (PiMUS, libretto)** — grossi, e la
+   domanda da fare prima resta una sola: *un'impresa smetterebbe di pagare
+   TrovaImpresa se questa cosa non ci fosse?*
