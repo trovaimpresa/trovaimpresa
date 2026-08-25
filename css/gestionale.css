@@ -1,3 +1,18 @@
+/* ============================================================
+   ⛔ 25 agosto 2026 — NIENTE SOTTO I 13 PX, NEMMENO QUI DENTRO
+   ============================================================
+   Regola fissa di Alessio, scritta per la sua dislessia: sotto i 13 px non
+   legge. In questo foglio erano rimaste VENTICINQUE misure sotto soglia, e
+   dieci di quelle si vedevano davvero a schermo: la pastiglia di stato
+   («Bozza», «Pagata») a 11 px, il cartellino sopra le foto a 9 px, la
+   scritta col nome dell'operatore a 10 px, le intestazioni delle tabelle e
+   la legenda dei reparti a 12.
+   ⚠️ Questo foglio lo usano DUE pagine, gestionale-app.html e
+   gestionale-noleggio.html: alzare un numero qui si vede in tutte e due.
+   E' voluto — la regola vale per tutte e due.
+   ⚠️ Dove il testo e' cresciuto e' cresciuto anche il contorno (i cartellini
+   sopra le miniature), se no la scritta piu' grande sbatteva sui bordi.
+   ============================================================ */
   :root{
     /* marchio */
     --blu:        #0066FF;   /* azioni principali */
@@ -301,8 +316,8 @@
   .cal-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
   .dot{width:8px;height:8px;border-radius:50%}
   .dot.todo{background:var(--attesa)} .dot.done{background:var(--ok)} .dot.ritardo{background:var(--err)}
-  .cal-note-mark{position:absolute;top:4px;right:5px;font-size:10px}
-  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted);font-weight:600}
+  .cal-note-mark{position:absolute;top:4px;right:5px;font-size:13px}
+  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600}
   .cal-legend span{display:inline-flex;align-items:center;gap:5px}
 
   .empty{text-align:center;padding:46px 20px;color:var(--muted)}
@@ -330,7 +345,7 @@
   .day-jobs{margin-bottom:14px}
   .day-job{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
   .day-job .dot{flex:0 0 auto}
-  .stato{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
+  .stato{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
   .stato.ritardo{background:var(--err-bg);color:var(--err)}
   .stato.da_fare{background:var(--attesa-bg);color:var(--dafare)} .stato.in_corso{background:var(--info-bg);color:var(--incorso)} .stato.fatto{background:var(--ok-bg);color:var(--fatto)}
 
@@ -338,16 +353,16 @@
   .thumb{position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;background:var(--sfondo);border:1px solid var(--line)}
   .thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
   .thumb .thdel{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;cursor:pointer}
-  .thumb .thop{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .thumb .thtag{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;padding:2px 5px;border-radius:5px;text-transform:uppercase}
+  .thumb .thop{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;font-weight:700;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thumb .thtag{position:absolute;top:3px;left:3px;font-size:13px;font-weight:800;padding:3px 7px;border-radius:5px;text-transform:uppercase}
   .thumb .thtag.prima{background:var(--attesa-bg);color:var(--dafare)} .thumb .thtag.dopo{background:var(--ok-bg);color:var(--fatto)}
   .up-btn{margin-top:2px}
   .gal-group{margin-bottom:18px}
   .gal-cantiere{font-size:14px;font-weight:700;margin-bottom:8px}
   .gal-intro{font-size:14px;color:var(--muted);line-height:1.45;margin-bottom:16px}
   .gal-intro b{color:var(--testo-2)}
-  .filt-label{font-size:12px;font-weight:700;color:var(--testo-2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
-  .ag-foto-label{font-size:12px;font-weight:700;color:var(--testo-2);margin-top:10px}
+  .filt-label{font-size:13px;font-weight:700;color:var(--testo-2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+  .ag-foto-label{font-size:13px;font-weight:700;color:var(--testo-2);margin-top:10px}
   #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:80;display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
   #lightbox.open{display:flex}
   #lightbox img{max-width:100%;max-height:100%;border-radius:8px}
@@ -415,8 +430,8 @@
   .rep-bar{width:16px;border-radius:4px 4px 0 0;min-height:2px}
   /* grafici: nessun colore di stato. Incassi = blu marchio, spese = grigio */
   .rep-bar.inc{background:var(--blu)} .rep-bar.sp{background:var(--testo-3)}
-  .rep-bar-lab{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase}
-  .rep-legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);font-weight:600}
+  .rep-bar-lab{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .rep-legend{display:flex;gap:14px;margin-top:10px;font-size:13px;color:var(--muted);font-weight:600}
   .rep-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
 
   /* ================= RESTYLING PRO 2026 ================= */
@@ -599,7 +614,7 @@
   .mlav:last-child{border-bottom:none}
   .mlav-top{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13.5px;margin-bottom:6px}
   .mlav-top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mbadge{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .mbadge{font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px;white-space:nowrap}
   .mbadge.pos{background:var(--ok-bg);color:var(--ok)}
   .mbadge.neg{background:var(--err-bg);color:var(--err)}
   .mbadge.zero{background:var(--sfondo);color:var(--testo-2)}
@@ -607,7 +622,7 @@
   .mlav-bar{height:7px;border-radius:4px}
   .mlav-bar.inc{background:var(--blu)}
   .mlav-bar.sp{background:var(--testo-3)}
-  .mlav-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px}
+  .mlav-sub{font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
 
   /* mobile: sidebar diventa barra in alto */
   @media(max-width:880px){
@@ -798,12 +813,12 @@
     cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
   .viste .vista:hover{color:var(--testo)}
   .viste .vista.on{border-bottom-color:var(--blu);font-weight:600;color:var(--testo)}
-  .v-cnt{font-size:11px;font-weight:500;color:var(--testo-3)}
+  .v-cnt{font-size:13px;font-weight:500;color:var(--testo-3)}
   .v-cnt.err{font-weight:700;background:var(--err-bg);color:var(--err);border-radius:20px;padding:1px 6px}
 
   /* tabella */
   .ltab{width:100%;table-layout:fixed;border-collapse:collapse;font-size:var(--f-base)}
-  .ltab th{text-align:left;font-size:12px;font-weight:400;color:var(--testo-3);
+  .ltab th{text-align:left;font-size:13px;font-weight:400;color:var(--testo-3);
     padding:12px;border-bottom:.5px solid var(--bordo);white-space:nowrap}
   /* niente color qui: lo eredita da #app-root e lascia vincere le classi .q-* (0,1,0) */
   .ltab td{padding:12px;border-top:.5px solid var(--bordo);vertical-align:middle;
@@ -817,7 +832,7 @@
   .ltab .c-cli .cli-nome,.ltab .c-cli .cli-dove{
     display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ltab .c-cli .cli-nome.vuoto{color:var(--testo-3)}
-  .ltab .c-cli .cli-dove{font-size:12px;color:var(--testo-3);margin-top:2px}
+  .ltab .c-cli .cli-dove{font-size:13px;color:var(--testo-3);margin-top:2px}
   /* stato: barretta, non badge */
   .lav-bar{display:inline-block;width:3px;height:15px;border-radius:2px;margin-right:10px;vertical-align:-2px}
   .lav-bar.ritardo{background:var(--err)}
@@ -955,17 +970,17 @@
      con i lavori. Prima sul calendario non comparivano affatto. */
   .cal-lav-bar.scad{background:#7C3AED}
   .cal-lav-bar.fatto{background:var(--ok)}
-  .cal-lav-t{flex:1;min-width:0;font-size:12px;color:var(--testo-2);line-height:1.25;
+  .cal-lav-t{flex:1;min-width:0;font-size:13px;color:var(--testo-2);line-height:1.25;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .cal-piu{font-size:11px;font-weight:600;color:var(--testo-3);padding-left:8px}
-  .cal-legend{font-size:12px;color:var(--testo-3);font-weight:500;gap:16px}
+  .cal-piu{font-size:13px;font-weight:600;color:var(--testo-3);padding-left:8px}
+  .cal-legend{font-size:13px;color:var(--testo-3);font-weight:500;gap:16px}
   .cal-legend .dot{width:7px;height:7px}
   .dot.corso{background:var(--info)}
   .dot.scad{background:#7C3AED}
   @media(max-width:880px){
     .cal-cell{min-height:74px;padding:4px}
-    .cal-lav-t{font-size:10.5px}
-    .cal-cell .dn{font-size:12px}
+    .cal-lav-t{font-size:13px}
+    .cal-cell .dn{font-size:13px}
   }
 
   /* ---------- Report ---------- */
@@ -982,12 +997,12 @@
   .rep-bar-col{flex:1 1 0;min-width:0;justify-content:flex-end}
   .rep-bars{height:160px;gap:3px;justify-content:center;width:100%}
   .rep-bar{width:14px;max-width:40%;border-radius:3px 3px 0 0;min-height:0}
-  .rep-bar-lab{font-size:11px;font-weight:500;color:var(--testo-3);text-transform:none;letter-spacing:0}
+  .rep-bar-lab{font-size:13px;font-weight:500;color:var(--testo-3);text-transform:none;letter-spacing:0}
   @media(max-width:880px){
     .rep-bar-wrap{gap:2px}
     .rep-bar{width:7px}
     .rep-bars{gap:2px}
-    .rep-bar-lab{font-size:10px}
+    .rep-bar-lab{font-size:13px}
   }
 
   /* ================================================================
@@ -1638,8 +1653,8 @@
 
 #galleria .thumbs{ gap:12px; margin-top:0; }
 #galleria .thumb{ width:150px; height:150px; border-radius:12px; }
-#galleria .thumb .thtag{ font-size:11px; padding:3px 7px; border-radius:6px; top:6px; left:6px; }
-#galleria .thumb .thop{ font-size:12px; padding:4px 6px; }
+#galleria .thumb .thtag{ font-size:13px; padding:3px 7px; border-radius:6px; top:6px; left:6px; }
+#galleria .thumb .thop{ font-size:13px; padding:4px 6px; }
 #galleria .thumb .thdel{ width:28px; height:28px; font-size:17px; top:6px; right:6px; }
 #galleria .thumb .thdel:hover{ background:var(--err); }
 
@@ -1697,7 +1712,7 @@
 .spesa-add.ore-add{ grid-template-columns:auto 90px 1fr auto; }
 @media(max-width:700px){ .spesa-add.ore-add{ grid-template-columns:1fr 1fr; } }
 
-.c-imp .prev-iva{ display:block; font-size:12px; font-weight:600; color:var(--testo-3); margin-top:1px; }
+.c-imp .prev-iva{ display:block; font-size:13px; font-weight:600; color:var(--testo-3); margin-top:1px; }
 
 /* la pastiglia col tipo di pratica accanto al nome, nell'elenco Pratiche
    (9 agosto 2026): CILA, SCIA, Permesso di Costruire... */
@@ -2722,7 +2737,7 @@
 .tipo-btn:hover{border-color:#0066ff;background:#f5f9ff}
 .tipo-btn.on{background:#0066ff;border-color:#0066ff;color:#fff}
 .tipo-btn.on small{opacity:.92}
-.tipo-tag{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;
+.tipo-tag{display:inline-block;font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px;
           background:#eef2f7;color:#4a5b70;margin-left:8px;vertical-align:middle}
 @media(max-width:560px){
   .tipo-btn{flex:1 1 100%;padding:14px 12px}

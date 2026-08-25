@@ -306,7 +306,15 @@ function controllaSchema(){
    elencano fra gli avvisi, ma se il numero SALE la pubblicazione si ferma.
    Il difetto non si allarga mentre nessuno guarda, e il numero si abbassa
    a mano ogni volta che se ne sistema una. */
-const TETTO_PICCOLI = 28;
+/* ⛔ 25 agosto 2026 — DA 28 A ZERO.
+   Le ventotto erano venticinque in css/gestionale.css e tre in
+   gestionale-app.html: la pastiglia di stato a 11 px, il cartellino sopra le
+   foto a 9, il nome dell'operatore a 10, le intestazioni delle tabelle e la
+   legenda dei reparti a 12, le etichette dentro il grafico a 11.
+   Sono state sistemate tutte, quindi il soffitto adesso e' ZERO: da oggi la
+   prima misura sotto i 13 px che entra nel gestionale FERMA la pubblicazione,
+   invece di nascondersi in mezzo a ventisette gia' note. */
+const TETTO_PICCOLI = 0;
 
 function controllaMisure(){
   const trovati = [];

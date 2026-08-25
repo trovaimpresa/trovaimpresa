@@ -6565,7 +6565,7 @@ ${vecchi?`
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
         <div>
           <div style="font-weight:600;color:#0a2a4d">${esc(m.causale||(m.tipo==="spesa"?"Spesa":"Ricarica"))}</div>
-          <div style="font-size:0.78rem;color:#999">${fmtData(m.data)}${m.inserito_da?" · "+esc(m.inserito_da):""}</div>
+          <div style="font-size:13px;color:#999">${fmtData(m.data)}${m.inserito_da?" · "+esc(m.inserito_da):""}</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="font-weight:700;color:${colore}">${segno} ${eur(m.importo)}</div>
@@ -9942,7 +9942,7 @@ ${vecchi?`
     const p=$("#th-vid-prima"),d=$("#th-vid-dopo");if(!p&&!d)return;
     const lav=editing&&editing.realId;
     if(!lav){
-      if(p)p.innerHTML='<div style="font-size:12px;color:var(--testo-3)">Salva prima il lavoro, poi potrai aggiungere il video.</div>';
+      if(p)p.innerHTML='<div style="font-size:13px;color:var(--testo-3)">Salva prima il lavoro, poi potrai aggiungere il video.</div>';
       if(d)d.innerHTML="";
       return;
     }
@@ -10956,7 +10956,10 @@ ${vecchi?`
     const yMax=Math.max(tot,imp||0)*1.08||1;          /* un po' d'aria sopra la linea più alta */
     const X=d=>x0+(x1-x0)*(_diffGG(t0,d)/span);
     const Y=v=>y1-(y1-y0)*(v/yMax);
-    const LAB='style="fill:var(--testo-3);font-size:11px"';
+    /* ⛔ 25 agosto 2026 — 11 px anche qui dentro: le etichette del grafico
+   sono testo come tutto il resto, e la regola dei 13 px non fa
+   eccezioni per i disegni. */
+  const LAB='style="fill:var(--testo-3);font-size:13px"';
     let griglia="";
     [0,.5,1].forEach(f=>{
       const y=y1-(y1-y0)*f;
