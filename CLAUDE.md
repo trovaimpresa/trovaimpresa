@@ -15666,3 +15666,111 @@ non c'è fa diventare la prova ROSSA, non uccide il banco.
 5. **Portale cliente** e **modulo ponteggi (PiMUS, libretto)** — grossi, e la
    domanda da fare prima resta una sola: *un'impresa smetterebbe di pagare
    TrovaImpresa se questa cosa non ci fosse?*
+
+# 26 AGOSTO 2026 — IL NEGOZIO SCENDE A ZERO TESTI PICCOLI
+
+Giornata di forma, non di funzioni: nessun dato nuovo, nessuna tabella
+nuova, nessun conto toccato. È cambiato **quanto sono grandi le scritte**
+di `gestionale-negozio.html` e **chi se ne accorge se qualcuno le
+rimpicciolisce di nuovo**.
+
+## LE 43 MISURE
+
+Tutte e 43 le misure sotto i 13 px sono state portate a **13 px**. Solo il
+numero dentro `font-size`: padding, colori e margini non sono stati
+toccati. Le più piccole erano il cartellino sopra le foto a **9 px**, il
+nome dell'operatore a **10**, il segnetto della nota sul calendario a
+**10**, il nome della categoria nella barra a sinistra e l'etichetta della
+barra dei reparti a **10,5**.
+
+⚠️ **Il negozio NON carica `css/gestionale.css`.** La trappola numero 1 del
+noleggio qui non c'è: l'unico foglio condiviso è `css/mobile.css`, che però
+è anche del sito pubblico e agisce solo sotto i 768 px. Per questo il banco
+gira anche a 390 px, e per questo non è servito nessun `#app-root .nome`.
+
+## ⛔ LA COSA NUOVA IMPARATA OGGI — INGRANDIRE PUÒ TAGLIARE
+
+Portando `.side-brand small` da 10,5 a 13 px, nella barra a sinistra
+**«CATEGORIA FERRAMENTA» è diventato «CATEGORIA FERRAM...»**: la riga aveva
+`white-space:nowrap` e `text-overflow:ellipsis`, e a 13 px non ci stava più.
+
+Una scritta tagliata è peggio di una scritta piccola: la parola non c'è
+proprio. Adesso quella riga **va a capo** invece di essere ritagliata
+(`line-height:1.25; overflow-wrap:anywhere`, niente più nowrap).
+
+> ⚠️ Ogni volta che si ingrandisce un testo, va guardato anche se **esce dal
+> suo riquadro**. È la quarta prova del banco, ed è nata qui.
+
+## IL BANCO — QUATTRO PROVE, PERCHÉ TRE NON BASTAVANO
+
+`prove-claude/banco-negozio-26ago.zip` · **17 prove · 17 verdi · 0 rosse**
+più **4 sabotaggi, tutti diventati rossi**.
+
+1. **Il foglio** — legge il sorgente, cerca ogni misura sotto 13.
+2. **Chi vince fra i fogli** — costruisce un elemento finto per **ogni**
+   selettore che dichiara un font-size in **tutti** i fogli della pagina e
+   misura il font vero. Non più una lista scritta a mano: 89 selettori
+   misurati, e quelli che non si possono provare vengono **elencati**
+   invece che saltati di nascosto.
+3. **Quello che si vede** — apre tutte e undici le sezioni con dei dati
+   dentro e misura ogni scritta a schermo. È la prova che vede gli stili
+   scritti a mano dentro il JavaScript: la pastiglia rossa «SOTTO SCORTA»
+   stava a 11 px dentro una stringa, nel foglio non c'era.
+4. **Niente scritte tagliate** — vedi sopra.
+
+Tutto su due misure: computer 1440×900 e telefono 390×844.
+
+⚠️ **Una trappola che ha reso muta la prova 2 al primo giro.** Da quando
+Chrome capisce il CSS annidato, **anche una regola normale ha un `cssRules`
+vuoto**. Con un «se ha `cssRules` allora è un `@media`» si saltavano TUTTE
+le regole: il banco diceva «0 selettori» e restava verde per niente. Per
+questo adesso **stampa quanti selettori ha misurato**: un banco che dice
+zero non è un banco verde.
+
+## IL CONTROLLO
+
+`gestionale-negozio.html` è entrato nella lista `FILE_GESTIONALE` di
+`tools/controllo-push.js` — come il noleggio, **il giorno in cui è arrivato
+a zero**, così `TETTO_PICCOLI` resta a **0** e non si alza.
+`node tools/controllo-push.js` → verde, restano solo i 4 avvisi già noti
+degli accenti con l'apostrofo.
+
+## ⚠️ TROVATO E NON TOCCATO
+
+**I nove moduli del negozio usano `openSheet()`, la finestrella piccola**
+(righe 1270, 1320, 1418, 1449, 1464, 1540, 1561, 1574, 1622). La regola del
+progetto dice `openSheetGrande()` a due colonne. Non è stato toccato: è un
+lavoro suo, da fare apposta e da provare apposta.
+
+## ⛔ L'INCIAMPO DELLA GIORNATA
+
+**Il lavoro sul negozio è partito senza chiederlo.** Era il punto 1 della
+lista del prompt, ma la lista non è un ordine: Alessio non l'aveva chiesto,
+e la regola «chiedimi prima di costruire cose che non ti ho chiesto» vale
+anche quando la cosa sta scritta in un elenco. La prossima volta si chiede
+prima di partire, non a metà.
+
+E la sua osservazione resta aperta e va tenuta in cima:
+
+> «Il gestionale negozio è difficile da fare, bisogna anche guardare come i
+> gestionali sono fatti e cosa hanno bisogno i negozianti.»
+
+I 13 px sono forma, e la forma era dovuta. **Il negozio vero — le schede
+del riepilogo come quelle dell'impresa, i reparti come quelli dell'impresa,
+e prima ancora capire cosa serve davvero a chi sta dietro un banco — non è
+stato fatto e non va improvvisato.**
+
+## COSA RESTA, IN ORDINE
+
+1. **`admin.html`: 87 testi sotto i 13 px.** Non lo vede nessun cliente: lo
+   legge Alessio.
+2. **Gli accenti con l'apostrofo** in `gestionale-operatore.html` (6 righe,
+   le vede il dipendente sul telefono), `admin.html`,
+   `registrazione-artigiano.html`, `tools/riempi-mappa.html`.
+3. **Il negozio, quello vero** — vedi sopra: prima si guarda, poi si
+   costruisce.
+4. **Misurare lo spazio del deposito** prima di costruire l'avviso: una
+   query sui MB e i file nei bucket `gestionale-foto` e `gestionale-video`.
+5. **Portale cliente** e **modulo ponteggi (PiMUS, libretto)** — grossi, e
+   la domanda da fare prima resta una sola: *un'impresa smetterebbe di
+   pagare TrovaImpresa se questa cosa non ci fosse?*

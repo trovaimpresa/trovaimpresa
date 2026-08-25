@@ -44,6 +44,15 @@ const FILE_GESTIONALE = [
      e metterlo dentro adesso vorrebbe dire alzare il tetto — cioe' il
      contrario di quello che serve. Entrera' quando saranno sistemate. */
   'gestionale-noleggio.html',
+  /* ⛔ 26 agosto 2026 — e adesso entra anche il NEGOZIO, alla stessa
+     condizione del noleggio: le sue 43 misure sotto i 13 px sono state
+     portate tutte a 13, quindi entra a ZERO e il tetto qui sotto resta
+     dov'e'. Provate in tre modi (il foglio, gli elementi finti per sapere
+     chi vince fra i fogli, e quello che si vede davvero a schermo) piu'
+     una quarta prova che nessuna scritta finisca tagliata dal suo
+     riquadro: ingrandire un testo puo' farlo uscire, ed e' successo con
+     «CATEGORIA FERRAMENTA» nella barra a sinistra. */
+  'gestionale-negozio.html',
   'ricarica-crediti.html',
   'css/gestionale.css',
   'js/ai-integrazione.js',
