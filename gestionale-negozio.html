@@ -994,21 +994,25 @@
       return;
     }
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
+    /* 26 agosto 2026 — i tre numeri qui sotto uscivano all'americana
+       ("€ 741.8", "€ 98"): punto al posto della virgola e centesimi
+       spariti. Adesso si scrivono come tutti gli altri euro della pagina. */
+    const eurRie=n=>"€ "+(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
     const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid);
     const P=prod||[];
     const sotto=P.filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
     const valore=P.reduce((s,p)=>s+((+p.prezzo||0)*(+p.quantita||0)),0);
     if($("#k-dafare"))$("#k-dafare").textContent=P.length;
     if($("#k-incorso"))$("#k-incorso").textContent=sotto.length;
-    if($("#k-lavori"))$("#k-lavori").textContent="€ "+(Math.round(valore*100)/100);
+    if($("#k-lavori"))$("#k-lavori").textContent=eurRie(valore);
     const {data:mov}=await sb.from("neg_movimenti").select("tipo,importo,data_mov").eq("user_id",sbUid);
     const M=mov||[];
     const mese=M.filter(m=>thisMonth(m.data_mov));
     if($("#k-fatti"))$("#k-fatti").textContent=mese.length;
     const venduto=mese.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
     const acquistato=mese.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
-    if($("#k-daincassare"))$("#k-daincassare").textContent="€ "+(Math.round(venduto*100)/100);
-    if($("#k-incassato"))$("#k-incassato").textContent="€ "+(Math.round(acquistato*100)/100);
+    if($("#k-daincassare"))$("#k-daincassare").textContent=eurRie(venduto);
+    if($("#k-incassato"))$("#k-incassato").textContent=eurRie(acquistato);
     if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #c62828;padding:12px;margin-bottom:10px"><strong>${p.nome||"—"}</strong><div style="color:#666;font-size:13px">Q.tà ${p.quantita??0} · soglia ${p.soglia_minima??0}</div></div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
@@ -2426,7 +2430,7 @@
         const nuova=(+prod.quantita||0)-(+r.qta||0);
         const {data:okQ,error:eQ}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",r.prodotto_id).eq("user_id",sbUid).select("id");
         if(eQ||!okQ||!okQ.length){falliti.push(r.descrizione);continue;}
-        const {error:eM}=await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"uscita",prodotto:r.descrizione,
+        const {error:eM}=await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"vendita",prodotto:r.descrizione,
           quantita:+r.qta||0, importo:(+r.qta||0)*(+r.prezzo||0),
           controparte:p.cliente_nome||null, data_mov:new Date().toISOString().slice(0,10),
           note:"Da preventivo N. "+(p.numero||"")});
