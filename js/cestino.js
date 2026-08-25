@@ -110,6 +110,17 @@
        noleggio spariva davvero. */
     "nol_mezzi", "nol_clienti", "nol_noleggi",
     "neg_prodotti", "neg_fornitori", "neg_movimenti",
+    /* 26 agosto 2026 — i preventivi del negozio. Erano rimasti fuori il 23:
+       «Elimina» li cancellava davvero. E un preventivo ha un NUMERO, e un
+       numero saltato in mezzo alla numerazione e' una domanda del
+       commercialista — lo stesso motivo per cui c'e' nol_fatture.
+       La colonna «eliminato_il» e' stata creata con
+       sql/neg-preventivi-cestino.sql (risposta: 1).
+       ⛔ neg_preventivo_righe NON ci va, per la stessa regola dei SAL: le
+       righe sono pezzi del preventivo e se ne vanno con lui. E se ci
+       fossero, ogni modifica di un preventivo lascerebbe dietro una copia
+       di tutte le righe vecchie, per sempre. */
+    "neg_preventivi",
     /* 23 agosto 2026 — le foto e i video del noleggio (nol_media). Sono la
        prova di com'era il mezzo alla consegna: se si cancellano per sbaglio
        la discussione sui danni e' persa. La colonna «eliminato_il» e' stata
