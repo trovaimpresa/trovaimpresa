@@ -35,6 +35,15 @@ const RADI = process.env.CONTROLLO_RADI || path.resolve(__dirname, '..');
 const FILE_GESTIONALE = [
   'gestionale-app.html',
   'gestionale-operatore.html',
+  /* ⛔ 25 agosto 2026 — il noleggio entra nella lista OGGI, che e' il giorno
+     giusto: le sue diciotto misure sotto i 13 px sono state sistemate tutte,
+     quindi entra a ZERO e il tetto qui sotto non si muove. Da domani, se
+     qualcuno ci riscrive dentro un font piccolo, la pubblicazione si ferma
+     invece di lasciarlo passare.
+     ⚠️ gestionale-negozio.html NON e' entrato: ne ha ancora una quarantina,
+     e metterlo dentro adesso vorrebbe dire alzare il tetto — cioe' il
+     contrario di quello che serve. Entrera' quando saranno sistemate. */
+  'gestionale-noleggio.html',
   'ricarica-crediti.html',
   'css/gestionale.css',
   'js/ai-integrazione.js',
