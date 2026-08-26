@@ -406,7 +406,7 @@
             <input id="np-acquisto" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
           </div>
           <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi</label>
+            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi al banco</label>
             <input id="np-prezzo" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
           </div>
           <div>
@@ -418,6 +418,16 @@
               <option value="0">0%</option>
             </select>
           </div>
+        </div>
+        <!-- 26 agosto 2026 — IL SECONDO PREZZO (sql/neg-listini.sql).
+             Un ferramenta ha il prezzo del banco e il prezzo dell'impresa.
+             Vuoto = questo prodotto costa uguale a tutti. -->
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-bottom:8px;align-items:end">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi all’impresa</label>
+            <input id="np-impresa" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div style="font-size:13px;color:#8a949e;padding-bottom:11px">Lascialo vuoto se a questo prodotto fai lo stesso prezzo a tutti.</div>
         </div>
         <div id="np-margine" style="font-size:14px;color:#5b6672;margin-bottom:10px;min-height:20px"></div>
         <input id="np-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -441,6 +451,19 @@
         <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
           <input id="pv-cliente" placeholder="Cliente (impresa, geometra, privato) *" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
           <input id="pv-data" type="date" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        </div>
+        <!-- 26 agosto 2026 — I LISTINI (sql/neg-listini.sql).
+             A sinistra si pesca il cliente dall'anagrafica: nome, listino e
+             sconto arrivano da soli. A destra l'interruttore, per cambiare
+             listino SOLO su questo preventivo senza toccare la sua scheda. -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
+          <select id="pv-scegli-cliente" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+            <option value="">Oppure prendilo dai tuoi clienti…</option>
+          </select>
+          <div id="pv-listino" style="display:flex;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff">
+            <button type="button" class="pv-lst on" data-l="banco" style="flex:1;padding:11px 6px;border:none;background:#2e537d;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Banco</button>
+            <button type="button" class="pv-lst" data-l="impresa" style="flex:1;padding:11px 6px;border:none;background:#fff;color:#5b6672;font-size:14px;font-weight:700;cursor:pointer">Impresa</button>
+          </div>
         </div>
         <input id="pv-titolo" placeholder="Oggetto (es. Fornitura materiale per villetta via Roma)" style="width:100%;padding:11px;margin-bottom:14px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
 
@@ -1282,7 +1305,10 @@
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Accedi per gestire i clienti</small></div>`;return;}
-    const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,referente,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    /* 26 agosto 2026 — listino e sconto_perc servono al modulo cliente e al
+       preventivo (sql/neg-listini.sql). "*" invece dell'elenco fisso: se la
+       migrazione non e' stata fatta non si rompe niente, arrivano undefined. */
+    const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
     box.innerHTML=cliCache.length?cliCache.map(c=>{
       return `<div class="card"><div><h3>${esc(c.nome)}</h3>
@@ -1546,6 +1572,18 @@
       <div class="field"><label>Indirizzo</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Via, numero, città"></div>
       <div class="row2"><div class="field"><label>Referente / Amministratore</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
       <div class="field"><label>Telefono</label><input id="c-tel" value="${esc(c.telefono||"")}" placeholder="Numero"></div></div>
+      <!-- 26 agosto 2026 — I LISTINI. Lo decide il negoziante, una volta sola:
+           da qui in poi ogni preventivo per questo cliente esce gia' coi
+           prezzi e con lo sconto giusti. Vedi sql/neg-listini.sql. -->
+      <div class="row2">
+        <div class="field"><label>Che prezzi gli faccio</label>
+          <select id="c-listino">
+            <option value="banco"${(c.listino||"banco")!=="impresa"?" selected":""}>Prezzi del banco</option>
+            <option value="impresa"${(c.listino||"")==="impresa"?" selected":""}>Prezzi impresa</option>
+          </select></div>
+        <div class="field"><label>Sconto fisso suo (%)</label>
+          <input id="c-sconto" type="number" step="0.5" min="0" max="100" value="${c.sconto_perc??0}" placeholder="0"></div>
+      </div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
@@ -1553,9 +1591,22 @@
     const nome=$("#c-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const indirizzo=$("#c-ind").value.trim(),referente=$("#c-ref").value.trim(),telefono=$("#c-tel").value.trim();
-    const {data:okCli,error}=id
-      ?await sb.from("gest_clienti").update({nome,indirizzo,referente,telefono}).eq("id",id).eq("user_id",sbUid).select("id")
-      :await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,indirizzo,referente,telefono}).select("id");
+    /* 26 agosto 2026 — listino e sconto del cliente. Stessa rete usata per il
+       prodotto: se le colonne non ci sono ancora, il cliente si salva lo
+       stesso senza di esse invece di andare perso. */
+    const dati={nome,indirizzo,referente,telefono,
+      listino:$("#c-listino")?$("#c-listino").value:"banco",
+      sconto_perc:$("#c-sconto")?(parseFloat($("#c-sconto").value)||0):0};
+    const senzaListino=o=>{const c2={...o};["listino","sconto_perc"].forEach(k=>delete c2[k]);return c2;};
+    const eColonnaListino=e=>/listino|sconto_perc/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
+    const scrivi=async d=>id
+      ?await sb.from("gest_clienti").update(d).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),...d}).select("id");
+    let {data:okCli,error}=await scrivi(dati);
+    if(error&&eColonnaListino(error)){
+      ({data:okCli,error}=await scrivi(senzaListino(dati)));
+      if(!error)toast("Cliente salvato, ma listino e sconto no: manca la migrazione SQL (sql/neg-listini.sql).");
+    }
     if(error){toast("Errore: "+error.message);return;}
     if(!okCli||!okCli.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     closeSheet();renderClienti();toast(id?"Aggiornato":"Cliente aggiunto ✔");
@@ -1988,10 +2039,12 @@
       const um=p.unita||"pz";
       const marg=(p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0)?(+p.prezzo||0)-(+p.prezzo_acquisto):null;
       const soglia=(p.quantita??0)<=(p.soglia_minima??0);
+      /* 26 agosto 2026 — il secondo prezzo. Se c'e', si vede accanto al primo. */
+      const haImp=p.prezzo_impresa!=null&&p.prezzo_impresa!=="";
       return `
       <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${soglia?"#c62828":"#1565c0"};padding:14px;margin-bottom:12px">
         <strong>${p.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${eu(p.prezzo)}/${um} · <strong style="color:${soglia?"#c62828":"#333"}">${p.quantita??0} ${um}</strong>${soglia?" ⚠️ sotto scorta":""}${p.codice?" · cod. "+p.codice:""}</div>
+        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${eu(p.prezzo)}/${um}${haImp?' <span style="color:#1565c0;font-weight:700">· impresa € '+eu(p.prezzo_impresa)+"/"+um+"</span>":""} · <strong style="color:${soglia?"#c62828":"#333"}">${p.quantita??0} ${um}</strong>${soglia?" ⚠️ sotto scorta":""}${p.codice?" · cod. "+p.codice:""}</div>
         ${marg!=null?`<div style="color:${marg>0?"#1e8e3e":"#c0392b"};font-size:13px;margin-top:3px;font-weight:600">Guadagno € ${eu(marg)}/${um}</div>`:""}
         <div style="margin-top:10px;display:flex;gap:8px">
           <button class="prod-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
@@ -2007,6 +2060,39 @@
      Tabelle: sql/neg-preventivi.sql
      ============================================================ */
   let pvRighe=[], pvEditId=null, pvProdCache=[];
+  /* 26 agosto 2026 — I LISTINI. pvListino dice quale dei due prezzi si usa in
+     QUESTO preventivo; pvClienteId e' il cliente scelto dall'anagrafica (null
+     se il nome e' stato scritto a mano). */
+  let pvListino="banco", pvClienteId=null, pvCliCache=[];
+  /* Il prezzo giusto per questo prodotto, con questo listino.
+     ⛔ prezzo_impresa vuoto NON vuol dire zero: vuol dire «su questo prodotto
+     non c'e' un secondo prezzo», quindi si torna a quello del banco. */
+  function pvPrezzoDi(p){
+    if(!p)return 0;
+    if(pvListino==="impresa" && p.prezzo_impresa!=null && p.prezzo_impresa!=="")
+      return +p.prezzo_impresa||0;
+    return +p.prezzo||0;
+  }
+  function pvDisegnaListino(){
+    $$("#pv-listino .pv-lst").forEach(b=>{
+      const on=b.dataset.l===pvListino;
+      b.classList.toggle("on",on);
+      b.style.background=on?"#2e537d":"#fff";
+      b.style.color=on?"#fff":"#5b6672";
+    });
+  }
+  /* Cambiato listino: si riscrivono i prezzi delle righe prese dal magazzino.
+     ⚠️ Le righe libere (trasporto, scarico col camion gru) NON si toccano:
+     non hanno un prodotto dietro, il loro prezzo l'hai scritto tu. */
+  function pvApplicaListino(){
+    const righe=pvLeggiRighe();
+    pvRighe=righe.map(r=>{
+      if(!r.prodotto_id)return r;
+      const p=pvProdCache.find(x=>String(x.id)===String(r.prodotto_id));
+      return p?{...r,prezzo:pvPrezzoDi(p)}:r;
+    });
+    pvRenderRighe();
+  }
   const pvEur=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
 
   function pvRigaHtml(r,i){
@@ -2074,11 +2160,31 @@
     const {data}=await sb.from("neg_prodotti").select("*").eq("user_id",sbUid).order("nome");
     pvProdCache=data||[];
     const sel=$("#pv-scegli-prod"); if(!sel)return;
+    pvDisegnaProdotti();
+  }
+  /* il prezzo scritto nel menu e' quello del listino in uso, se no scegli
+     «4,90» e nella riga ti compare «4,10» senza capire perche' */
+  function pvDisegnaProdotti(){
+    const sel=$("#pv-scegli-prod"); if(!sel)return;
     sel.innerHTML='<option value="">— prendi un prodotto dal magazzino —</option>'+
-      pvProdCache.map(p=>`<option value="${p.id}">${p.nome}${p.codice?" ("+p.codice+")":""} — ${pvEur(p.prezzo)}/${p.unita||"pz"}</option>`).join("");
+      pvProdCache.map(p=>`<option value="${p.id}">${p.nome}${p.codice?" ("+p.codice+")":""} — ${pvEur(pvPrezzoDi(p))}/${p.unita||"pz"}</option>`).join("");
+  }
+  /* 26 agosto 2026 — i clienti dell'anagrafica, per pescarli nel preventivo */
+  async function pvCaricaClienti(){
+    if(!(sb&&sbUid))return;
+    const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    pvCliCache=data||[];
+    const sel=$("#pv-scegli-cliente"); if(!sel)return;
+    sel.innerHTML='<option value="">Oppure prendilo dai tuoi clienti…</option>'+
+      pvCliCache.map(c=>`<option value="${c.id}">${esc(c.nome)}${c.listino==="impresa"?" · impresa":""}${+c.sconto_perc?" · -"+c.sconto_perc+"%":""}</option>`).join("");
   }
   function pvNuovo(){
     pvRighe=[];pvEditId=null;
+    /* 26 agosto 2026 — un preventivo nuovo riparte sempre dai prezzi del
+       banco: il listino del preventivo precedente non si porta dietro. */
+    pvListino="banco"; pvClienteId=null;
+    if($("#pv-scegli-cliente"))$("#pv-scegli-cliente").value="";
+    pvDisegnaListino(); pvDisegnaProdotti();
     ["pv-cliente","pv-titolo","pv-note"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
     if($("#pv-sconto"))$("#pv-sconto").value=0;
     if($("#pv-iva"))$("#pv-iva").value="22";
@@ -2111,6 +2217,7 @@
       if($("#np-unita"))    $("#np-unita").value=data.unita||"pz";
       if($("#np-acquisto")) $("#np-acquisto").value=data.prezzo_acquisto??"";
       if($("#np-iva"))      $("#np-iva").value=(data.iva_perc??22);
+      if($("#np-impresa"))$("#np-impresa").value=data.prezzo_impresa??"";
       mostraMargine();
       editProdId=data.id; $("#np-save").textContent="Salva modifica";
       window.scrollTo({top:0,behavior:"smooth"});
@@ -2272,12 +2379,42 @@
     }
   });
   /* --- eventi della sezione Preventivi --- */
-  $('[data-tab="preventivi"]')?.addEventListener("click",()=>{pvCaricaProdotti();pvCarica();if(!pvRighe.length&&!pvEditId)pvNuovo();});
+  $('[data-tab="preventivi"]')?.addEventListener("click",()=>{pvCaricaProdotti();pvCaricaClienti();pvCarica();if(!pvRighe.length&&!pvEditId)pvNuovo();});
+
+  /* 26 agosto 2026 — L'INTERRUTTORE BANCO / IMPRESA.
+     Cambia i prezzi SOLO di questo preventivo: la scheda del cliente non si
+     tocca. Le righe gia' prese dal magazzino si riscrivono da sole. */
+  $("#pv-listino")?.addEventListener("click",e=>{
+    const b=e.target.closest(".pv-lst"); if(!b)return;
+    if(pvListino===b.dataset.l)return;
+    pvListino=b.dataset.l;
+    pvDisegnaListino(); pvDisegnaProdotti(); pvApplicaListino();
+  });
+
+  /* Pescare il cliente dall'anagrafica: nome, listino e sconto arrivano da
+     soli, e i prezzi delle righe gia' scritte si adeguano. */
+  $("#pv-scegli-cliente")?.addEventListener("change",e=>{
+    const c=pvCliCache.find(x=>String(x.id)===String(e.target.value));
+    if(!c){pvClienteId=null;return;}
+    pvClienteId=c.id;
+    if($("#pv-cliente"))$("#pv-cliente").value=c.nome||"";
+    pvListino=(c.listino==="impresa")?"impresa":"banco";
+    if($("#pv-sconto"))$("#pv-sconto").value=+c.sconto_perc||0;
+    pvDisegnaListino(); pvDisegnaProdotti(); pvApplicaListino();
+  });
+
+  /* Se il nome lo riscrivi a mano, quel preventivo non e' piu «di» quel
+     cliente dell'anagrafica: il collegamento si stacca. Il listino invece
+     resta come l'hai lasciato — l'hai scelto tu. */
+  $("#pv-cliente")?.addEventListener("input",()=>{
+    pvClienteId=null;
+    if($("#pv-scegli-cliente"))$("#pv-scegli-cliente").value="";
+  });
   $("#pv-scegli-prod")?.addEventListener("change",e=>{
     const p=pvProdCache.find(x=>String(x.id)===String(e.target.value));
     if(!p)return;
     pvRighe=pvLeggiRighe();
-    pvRighe.push({descrizione:p.nome,qta:1,unita:p.unita||"pz",prezzo:+p.prezzo||0,sconto_perc:0,prodotto_id:p.id});
+    pvRighe.push({descrizione:p.nome,qta:1,unita:p.unita||"pz",prezzo:pvPrezzoDi(p),sconto_perc:0,prodotto_id:p.id});
     pvRenderRighe(); e.target.value="";
   });
   $("#pv-add-libera")?.addEventListener("click",()=>{
@@ -2305,15 +2442,29 @@
     const testata={user_id:sbUid,
       titolo:$("#pv-titolo").value.trim()||null,
       cliente_nome:cliente,
+      /* 26 agosto 2026 — chi e' il cliente (se preso dall'anagrafica) e con
+         quale listino e' stato scritto QUESTO preventivo. Il listino si
+         salva perche' riaprendolo domani i prezzi devono restare quelli,
+         anche se intanto la scheda del cliente e' cambiata. */
+      cliente_id:pvClienteId||null,
+      listino:pvListino||"banco",
       data:$("#pv-data").value||new Date().toISOString().slice(0,10),
       validita_giorni:parseInt($("#pv-validita").value)||30,
       note:$("#pv-note").value.trim()||null,
       iva_perc:parseFloat($("#pv-iva").value)||0,
       sconto_perc:parseFloat($("#pv-sconto").value)||0};
+    /* la solita rete: se la colonna listino non c'e' ancora, il preventivo
+       si salva lo stesso invece di andare perso */
+    const senzaListino=o=>{const c2={...o};delete c2.listino;return c2;};
+    const eColonnaListino=e=>/listino/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     let pid=pvEditId, error;
     if(pvEditId){
       let okT;
       ({data:okT,error}=await sb.from("neg_preventivi").update(testata).eq("id",pvEditId).eq("user_id",sbUid).select("id"));
+      if(error&&eColonnaListino(error)){
+        ({data:okT,error}=await sb.from("neg_preventivi").update(senzaListino(testata)).eq("id",pvEditId).eq("user_id",sbUid).select("id"));
+        if(!error)alert("Preventivo salvato, ma il listino no: manca la migrazione SQL (sql/neg-listini.sql).");
+      }
       if(!error&&(!okT||!okT.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
       if(!error){
         /* rete anti-doppioni: se le vecchie voci non si cancellano davvero,
@@ -2326,7 +2477,11 @@
     }else{
       const {data:esistenti}=await sb.from("neg_preventivi").select("numero").eq("user_id",sbUid);
       testata.numero=(esistenti||[]).reduce((m,x)=>Math.max(m,+x.numero||0),0)+1;
-      const r=await sb.from("neg_preventivi").insert(testata).select("id").single();
+      let r=await sb.from("neg_preventivi").insert(testata).select("id").single();
+      if(r.error&&eColonnaListino(r.error)){
+        r=await sb.from("neg_preventivi").insert(senzaListino(testata)).select("id").single();
+        if(!r.error)alert("Preventivo salvato, ma il listino no: manca la migrazione SQL (sql/neg-listini.sql).");
+      }
       error=r.error; if(r.data)pid=r.data.id;
     }
     if(error){alert("Errore: "+error.message);return;}
@@ -2357,7 +2512,7 @@
           <span style="color:${st[1]};font-weight:700;font-size:13px">${st[0]}${scaduto?" · scaduto":""}</span>
         </div>
         ${p.titolo?`<div style="color:#5b6672;font-size:14px;margin-top:3px">${p.titolo}</div>`:""}
-        <div style="color:#8a949e;font-size:13px;margin-top:4px">${rr.length} ${rr.length===1?"riga":"righe"} · valido ${p.validita_giorni||30} giorni</div>
+        <div style="color:#8a949e;font-size:13px;margin-top:4px">${rr.length} ${rr.length===1?"riga":"righe"} · valido ${p.validita_giorni||30} giorni${p.listino==="impresa"?' · <span style="color:#1565c0;font-weight:700">prezzi impresa</span>':""}</div>
         <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:6px">${pvEur(c.totale)}</div>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="pv-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
@@ -2384,6 +2539,13 @@
       if(!p)return;
       const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");
       pvEditId=p.id; pvRighe=rr||[];
+      /* 26 agosto 2026 — si riapre com'era: stesso listino, stesso cliente.
+         ⛔ E NON si ricalcolano i prezzi: quelli sono i prezzi di quel
+         preventivo, non i prezzi di oggi. */
+      pvListino=(p.listino==="impresa")?"impresa":"banco";
+      pvClienteId=p.cliente_id||null;
+      if($("#pv-scegli-cliente"))$("#pv-scegli-cliente").value=p.cliente_id||"";
+      pvDisegnaListino(); pvDisegnaProdotti();
       $("#pv-cliente").value=p.cliente_nome||""; $("#pv-titolo").value=p.titolo||"";
       $("#pv-data").value=p.data||""; $("#pv-note").value=p.note||"";
       $("#pv-sconto").value=p.sconto_perc??0; $("#pv-iva").value=String(p.iva_perc??22);
@@ -2523,16 +2685,24 @@
     const box=$("#np-margine"); if(!box)return;
     const acq=parseFloat($("#np-acquisto")?$("#np-acquisto").value:"")||0;
     const ven=parseFloat($("#np-prezzo")?$("#np-prezzo").value:"")||0;
+    const imp=parseFloat($("#np-impresa")?$("#np-impresa").value:"")||0;
     const um=$("#np-unita")?$("#np-unita").value:"pz";
     if(!acq||!ven){box.textContent="";return;}
-    const marg=ven-acq, perc=acq>0?(marg/acq*100):0;
-    const col=marg>0?"#1e8e3e":(marg<0?"#c0392b":"#5b6672");
     const eur=n=>n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
-    box.innerHTML='<span style="color:'+col+';font-weight:700">Guadagno: '+eur(marg)+' al '+um+
-      ' ('+(perc>=0?"+":"")+perc.toFixed(0)+'%)</span>'+
-      (marg<0?' <span style="color:#c0392b">— attenzione: lo vendi sotto costo</span>':"");
+    /* 26 agosto 2026 — due prezzi, due guadagni. Quello dell'impresa si
+       vede solo se il secondo prezzo e' stato scritto. */
+    const pezzo=(etichetta,prezzo)=>{
+      const marg=prezzo-acq, perc=acq>0?(marg/acq*100):0;
+      const col=marg>0?"#1e8e3e":(marg<0?"#c0392b":"#5b6672");
+      return '<span style="color:'+col+';font-weight:700">'+etichetta+': '+eur(marg)+' al '+um+
+        ' ('+(perc>=0?"+":"")+perc.toFixed(0)+'%)</span>'+
+        (marg<0?' <span style="color:#c0392b">— sotto costo</span>':"");
+    };
+    box.innerHTML = imp
+      ? pezzo("Guadagno al banco",ven)+'<br>'+pezzo("Guadagno con l’impresa",imp)
+      : pezzo("Guadagno",ven);
   }
-  ["np-acquisto","np-prezzo","np-unita"].forEach(function(id){
+  ["np-acquisto","np-prezzo","np-impresa","np-unita"].forEach(function(id){
     const el=$("#"+id);
     if(el){el.addEventListener("input",mostraMargine);el.addEventListener("change",mostraMargine);}
   });
@@ -2551,12 +2721,16 @@
       note:$("#np-note").value.trim()||null,
       unita:$("#np-unita")?$("#np-unita").value:"pz",
       prezzo_acquisto:$("#np-acquisto")&&$("#np-acquisto").value!==""?parseFloat($("#np-acquisto").value):null,
-      iva_perc:$("#np-iva")?parseFloat($("#np-iva").value):22};
+      iva_perc:$("#np-iva")?parseFloat($("#np-iva").value):22,
+      /* 26 agosto 2026 — il prezzo per le imprese. Vuoto = null, cioe'
+         «per questo prodotto non c'e' un secondo prezzo», che NON e' la
+         stessa cosa di zero. */
+      prezzo_impresa:$("#np-impresa")&&$("#np-impresa").value!==""?parseFloat($("#np-impresa").value):null};
     /* Se le colonne nuove non sono ancora state create su Supabase, il prodotto
        si salva lo stesso senza di esse invece di andare perso (stessa regola
        usata per le pratiche e per la parcella). */
-    const senzaNuovi=o=>{const c={...o};["unita","prezzo_acquisto","iva_perc"].forEach(k=>delete c[k]);return c;};
-    const eColonnaNuova=e=>/unita|prezzo_acquisto|iva_perc/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
+    const senzaNuovi=o=>{const c={...o};["unita","prezzo_acquisto","iva_perc","prezzo_impresa"].forEach(k=>delete c[k]);return c;};
+    const eColonnaNuova=e=>/unita|prezzo_acquisto|iva_perc|prezzo_impresa/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     let error,okPr;
     if(editProdId){({data:okPr,error}=await sb.from("neg_prodotti").update(dati).eq("id",editProdId).eq("user_id",sbUid).select("id"));}
     else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...dati}));}
@@ -2567,7 +2741,7 @@
     }
     if(error){alert("Errore: "+error.message);return;}
     if(editProdId&&(!okPr||!okPr.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
-    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note","np-acquisto"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note","np-acquisto","np-impresa"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
     if($("#np-unita"))$("#np-unita").value="pz";
     if($("#np-iva"))$("#np-iva").value="22";
     mostraMargine();
