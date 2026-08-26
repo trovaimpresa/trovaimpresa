@@ -15774,3 +15774,262 @@ stato fatto e non va improvvisato.**
 5. **Portale cliente** e **modulo ponteggi (PiMUS, libretto)** — grossi, e
    la domanda da fare prima resta una sola: *un'impresa smetterebbe di
    pagare TrovaImpresa se questa cosa non ci fosse?*
+
+# 26 AGOSTO 2026 — IL NEGOZIO CHE FUNZIONA, E IL BANCO CHE MANCAVA A DUE GESTIONALI SU TRE
+
+Giornata di **funzioni**, non di forma. E soprattutto: il giorno in cui si è
+scoperto che il negozio e le imprese **non erano provati da nessuno**.
+
+Il noleggio aveva 808 prove. Il negozio ne aveva solo sul **quanto sono
+grandi le scritte** — non una che dicesse se *funziona*. Le imprese, il
+gestionale più grande dei tre, **zero**.
+
+Il primo banco del funzionamento del negozio, appena acceso, era **96 verdi
+e 5 rosse**. E le 5 rosse erano **3 difetti veri**.
+
+## ⛔ I TRE DIFETTI VERI CHE IL BANCO HA TROVATO
+
+### 1. Una vendita registrata come acquisto dal fornitore
+
+Nei movimenti del negozio ci sono **due parole sole**: `vendita` e `ordine`.
+Ma accettando un preventivo il movimento nasceva con una **terza parola**:
+`uscita` (riga 2429). Nessuno la riconosce, e succedevano quattro cose:
+
+| dove | cosa succedeva |
+|---|---|
+| elenco Movimenti | etichetta arancione **ORDINE**, freccia in giù: una vendita mostrata come acquisto |
+| Riepilogo, venduto del mese | conta solo `vendita` → **quella vendita non c'era** |
+| Riepilogo, ordinato del mese | conta solo `ordine` → **non c'era neanche lì**. Spariva da tutti e due |
+| Report | usa `tipo!=="vendita"` → **finiva fra gli acquisti**. Un incasso contato come spesa |
+| Export Excel e CSV | usciva scritto «Ordine fornitore» |
+
+**✅ Sistemato** — una parola: `tipo:"uscita"` → `tipo:"vendita"`.
+
+I movimenti già scritti sono stati controllati con una query
+(`update neg_movimenti set tipo='vendita' where tipo='uscita'`): risposta
+**0**. Nessun preventivo era mai stato accettato: il problema esisteva solo
+per il futuro.
+
+### 2. Un preventivo eliminato spariva per sempre
+
+`js/cestino.js` protegge le tabelle elencate in `TABELLE`. `neg_prodotti`,
+`neg_fornitori` e `neg_movimenti` c'erano dal 23 agosto. **`neg_preventivi`
+no**: «Elimina» lo cancellava davvero. E un preventivo ha un **numero** — un
+numero saltato in mezzo alla numerazione è una domanda del commercialista.
+
+**✅ Sistemato** — `sql/neg-preventivi-cestino.sql` (lanciata, risposta **1**)
+aggiunge `eliminato_il`, e `neg_preventivi` è entrata in `TABELLE`.
+File: `js/cestino.js`, md5 `20fbce9af3b0f167d9eb81c3d7a7bf41`.
+
+⛔ **`neg_preventivo_righe` NON ci è entrata, ed è voluto.** Stessa regola dei
+SAL: le righe sono pezzi del documento e se ne vanno con lui. E c'è una
+ragione pratica: risalvando un preventivo il gestionale cancella le vecchie
+righe e riscrive le nuove — se fossero protette, **ogni modifica lascerebbe
+dietro una copia di tutte le righe vecchie, per sempre**.
+
+### 3. Tre numeri del Riepilogo scritti all'americana
+
+`€ 741.8` invece di `741,80 €`. Il conto era giusto, era **come era scritto**
+a essere sbagliato: punto americano e centesimi spariti. Adesso passano da
+`toLocaleString("it-IT")` come tutto il resto.
+
+## I LISTINI DEL NEGOZIO — `sql/neg-listini.sql` (risposta 4)
+
+Una rivendita fa **due prezzi**: quello del banco e quello all'impresa. Non
+c'erano.
+
+Quattro colonne nuove: `neg_prodotti.prezzo_impresa`, `gest_clienti.listino`,
+`gest_clienti.sconto_perc`, `neg_preventivi.listino`.
+
+- Il prezzo impresa **lo decide il negoziante**, non il cliente. Si scrive una
+  volta sul prodotto, e da lì in poi ogni preventivo per un cliente «impresa»
+  esce già coi prezzi giusti.
+- ⛔ **`prezzo_impresa` vuoto NON vuol dire zero**: vuol dire «su questo
+  prodotto il secondo prezzo non c'è», e si torna a quello del banco. Si salva
+  come `null`, mai come 0.
+- Il preventivo si riapre **com'era**: stesso listino, stesso cliente, e **i
+  prezzi NON si ricalcolano**. Quelli sono i prezzi di quel preventivo, non i
+  prezzi di oggi.
+- Le righe libere (trasporto, scarico col camion gru) il listino non le tocca.
+
+## IL CESTINO DEL NEGOZIO
+
+Da oggi c'è anche nel negozio la **pagina** per riprendere quello che si butta.
+Prima la roba nel cestino ci finiva davvero, ma **da dentro il negozio non
+c'era modo di andarla a riprendere**: salva e irraggiungibile allo stesso
+tempo.
+
+Legge con `sb.raw()`, la porta di servizio aperta da `js/cestino.js`.
+⛔ «Butta per sempre» **deve** usare `sb.raw`, se no il cestino se la riprende.
+
+## LA BARRA A SINISTRA, RIFATTA
+
+Tre gruppi invece di un elenco unico: **Il banco** (riepilogo, prodotti,
+magazzino, movimenti) · **I clienti** (preventivi, clienti, fatture,
+calendario) · **La bottega** (fornitori, report, galleria, cestino).
+Più i numeri sulle voci e la barra in alto con Dati azienda · Backup · Esporta.
+
+⚠️ **Le classi sono state riscritte DENTRO la pagina.** `gestionale-negozio.html`
+**non carica `css/gestionale.css`** (carica solo `css/mobile.css`, che è anche
+quello del sito pubblico e agisce sotto i 768 px). Copiare una classe da lì e
+sperare che funzioni è un errore che si ripete: qui va riscritta in pagina.
+
+## «DA SISTEMARE OGGI» — la scheda in cima al riepilogo
+
+Cosa chiede attenzione stamattina: prodotti **sotto scorta**, roba **venduta
+sotto costo**, preventivi **scaduti**, preventivi **fermi**, e «completa i
+dati del negozio».
+
+⚠️ Scaduti e fermi sono **due cose diverse** e non si contano due volte.
+
+## LE PAROLE DEL NEGOZIO
+
+Il negozio è nato dal gestionale imprese e si portava dietro le sue parole. La
+scheda di un reparto contava i **lavori**; adesso conta i **clienti** — perché
+i prodotti sono in comune fra i reparti e ogni reparto direbbe lo stesso
+numero. Il sottotitolo adesso dice la verità: cosa è separato **e cosa è in
+comune**. Via «cantiere» da tutte le sezioni.
+
+⛔ **Fatture è rimasta fuori APPOSTA**: dice ancora «Lavori finiti da
+fatturare». Non è una parola da cambiare, è una **decisione** — in un negozio
+si fattura un preventivo accettato, non un lavoro finito. Finché non è presa,
+il banco tiene una prova che verifica che quella scritta ci sia ancora: **il
+giorno che si decide, diventa rossa e nessuno se ne dimentica**.
+
+## LA RICERCA UNICA IN CIMA AL NEGOZIO
+
+Una casella sola sotto la barra: due lettere ed escono insieme **prodotto
+(anche per codice), cliente, fornitore e preventivo**, e cliccando ti porta
+dove sta col modulo già aperto.
+
+Regole da non perdere:
+
+- **Dove si cerca non è uguale per tutti.** Prodotti, fornitori e preventivi
+  sono del **negozio intero**; i clienti sono del **reparto in cui stai**.
+- **Cercando un cliente escono anche i suoi preventivi**: il testo del cliente
+  si **attacca** alla riga, e poi si chiedono **tutte** le parole. Se fosse «o
+  l'una o l'altra», con due parole uscirebbe mezzo negozio.
+- **La roba nel cestino non esce**, e non c'è una riga apposta: ci pensa
+  `js/cestino.js` che si mette in mezzo a ogni `sb.from()`.
+- I moduli di prodotto, fornitore e preventivo adesso si riempiono da **tre
+  funzioni** (`prodApriModulo`, `fornApriModulo`, `pvApriModulo`) invece che
+  da dentro il clic su «Modifica»: ci arriva anche la ricerca, e la stessa
+  cosa scritta in due posti il giorno che cambia si aggiorna in uno solo.
+  E leggono **dal database**, non dalla lista a schermo: la ricerca può
+  aprirti un preventivo di una sezione in cui non sei mai entrato.
+
+`gestionale-negozio.html` a fine giornata: md5 **`5d741102108cb657564b4ef625374375`**.
+
+## ⛔ IL BUCO VERO DEL NEGOZIO, TROVATO A FINE GIORNATA
+
+Alessio ha chiesto: «stiamo seguendo un filo logico o ci siamo persi?». La
+risposta onesta è: il filo c'è — **portare il negozio alla pari degli altri
+due e provarlo** — ma è finito quello che si poteva **copiare** dall'impresa.
+
+E guardando il codice per rispondergli è saltato fuori questo:
+
+**Nel negozio la merce che entra ed esce sono TRE COSE SCOLLEGATE.**
+
+| dove | cosa fa | cosa NON fa |
+|---|---|---|
+| Preventivo accettato | scarica il magazzino ✔ e scrive il movimento ✔ | — |
+| **Movimenti → «Vendita»** (riga 2504) | scrive una riga | ⛔ **non scala il magazzino**, e `nm-prodotto` è **testo scritto a mano**, non collegato a `neg_prodotti` |
+| **Magazzino → + / −** | aggiorna `neg_prodotti.quantita` | ⛔ **non scrive nessun movimento**: la giacenza cambia e non si sa perché |
+
+Per un negozio quello è **il giro principale della giornata**. Solo la strada
+del preventivo lo fa bene; le altre due no. **Questo, non la grafica, è il
+prossimo lavoro vero del negozio.**
+
+## IL BANCO DELLE IMPRESE — il terzo, quello che mancava
+
+Primo pezzo, fatto oggi: **89 prove · 89 verdi**, **25 sabotaggi · 25 visti**.
+Sei famiglie: il cliente · il lavoro · il conto del preventivo · risalvare un
+preventivo · la fattura · la pagina regge (23 sezioni).
+
+⛔ **Cosa NON prova ancora, ed è scritto nel documento del banco**: il PDF e
+l'XML per lo SDI, la parcella dello studio tecnico (cassa e ritenuta), il
+forfettario, la fattura fatta da un lavoro o da un preventivo, il ruolo
+artigiano. Di cestino, ricerca, calendario, computi, SAL, mezzi e carte prova
+solo che **si aprono**.
+
+⚠️ **Tre trappole del banco, tutte e tre verdi per finta**, da ricordare:
+
+1. I pulsanti non stanno dove sembra. Le schede hanno **un pulsante solo**,
+   «Apri»: «Modifica» del cliente, «Segna fatto» del lavoro e «Emetti» della
+   fattura stanno **dentro** la finestra. Una prova che cerca il pulsante
+   nell'elenco non fallisce: **non fa niente**, e resta verde.
+2. Col campo `imprese.tipo` vuoto il gestionale apre «Che lavoro fai?» davanti
+   a tutto, e metà delle prove morivano lì dietro. Il finto dice
+   `tipo:'impresa'`.
+3. `innerText` non va a capo fra i due pezzi di una riga di risultato.
+
+## ⛔ LA LEZIONE PIÙ CARA DELLA GIORNATA — il finto restituiva le righe VERE
+
+Trovata coi sabotaggi delle imprese. È stata tolta la riga che scrive il
+numero sulla fattura, e **il numero compariva lo stesso nel database**.
+
+Il motivo non era il gestionale. Un Supabase vero manda dei **dati** attraverso
+la rete; il finto mandava **gli oggetti stessi** della tabella. Così ogni volta
+che la pagina scriveva su una riga che aveva in memoria (`f.numero = ...`), la
+scriveva **dritta nel database** senza passare da nessun salvataggio.
+
+**Metà delle prove «è stato salvato davvero?» erano verdi per finta — in tutti
+e due i banchi**, anche in quello del negozio, che aveva già detto 245 verdi.
+
+**✅ Sistemato**: il finto restituisce copie. Rifatti da capo tutti e due:
+negozio **245/245 e 84/84**, imprese **89/89 e 25/25**. Quindi i gestionali
+salvavano sul serio — era il banco a non saperlo verificare.
+
+**La regola che resta**: un finto database che condivide gli oggetti con la
+pagina non prova niente sul salvataggio. Deve restituire copie, sempre.
+
+## ⚠️ INCIAMPI DELLA GIORNATA — da non ripetere
+
+- **Il blocco git mandato con un pezzo di tag attaccato in fondo**: `bash:
+  syntax error near unexpected token 'newline'`. Non è stato committato
+  niente; rimandato pulito e detto chiaramente.
+- **Due volte un giro di sabotaggi ammazzato a metà ha lasciato
+  `gestionale-negozio.html` ROTTO** nel container, e il giro dopo leggeva il
+  file rotto come se fosse quello sano. Adesso i sabotaggi tengono una copia
+  `.sano` da parte, la rimettono anche se il processo viene ucciso, e se
+  all'avvio la copia c'è ancora vuol dire che il giro prima è morto.
+  **Niente di rotto è mai arrivato nella cartella di Alessio.**
+- **Una figura con l'etichetta «A — lo decide il cliente»** ha fatto capire ad
+  Alessio che il prezzo impresa lo sceglie il cliente. Colpa della didascalia,
+  non sua: rifatta con «lo decidi UNA VOLTA / OGNI VOLTA».
+- **Il finto del negozio, al primo giro, filtrava troppo presto**: in Postgres
+  il WHERE si legge quando il comando parte, non mentre si scrive la catena.
+  Il finto filtrava subito e il lucchetto sul doppio clic **sembrava** rotto:
+  il banco urlava per un difetto che non c'era.
+
+## LO STATO DEI TRE BANCHI, A FINE GIORNATA
+
+| gestionale | prove | sabotaggi |
+|---|---|---|
+| **Noleggio** | 808 | (dai giorni scorsi) |
+| **Negozio** — funzionamento | **245 verdi / 0 rosse** | **84 / 84 visti** |
+| **Negozio** — scritte (13 px) | 17 verdi / 0 rosse | 4 |
+| **Imprese** — funzionamento | **89 verdi / 0 rosse** | **25 / 25 visti** |
+
+Gli zip stanno in `prove-claude/` (che è **gitignorata**: restano sul PC):
+`banco-negozio-funziona-26ago.zip` e `banco-imprese-funziona-26ago.zip`.
+Dentro ci sono il finto database, il banco, i sabotaggi e il COME-SI-USA.
+
+## COSA RESTA, IN ORDINE
+
+1. **Il giro della merce nel negozio** (vedi sopra): la vendita al banco che
+   scala il magazzino, e la rettifica di magazzino che lascia una traccia.
+   È il buco vero, ed è il primo lavoro del negozio.
+2. **Il collaudo a mano del negozio**, rimandato da Alessio a mente fresca:
+   listini, cestino, barra, «Da sistemare oggi», ricerca — 31 passi numerati.
+3. **Il banco delle imprese, il resto**: PDF e XML della fattura (la fine
+   della strada dei soldi), la parcella dello studio tecnico, il cestino, la
+   ricerca in alto, calendario, agenda, squadra, ore e spese.
+4. **Fatture del negozio** — la decisione, non la parola: in un negozio si
+   fattura un preventivo accettato.
+5. **La grafica dentro il negozio**: prodotti, preventivi e fornitori hanno
+   ancora schede fatte a mano invece delle carte del gestionale.
+6. **I nove `openSheet()` del negozio** → `openSheetGrande()`.
+7. **`admin.html`: 87 testi sotto i 13 px** e **gli accenti con l'apostrofo**
+   (`gestionale-operatore.html`, 6 righe).
+8. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
