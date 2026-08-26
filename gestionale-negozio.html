@@ -241,6 +241,31 @@
   .side nav.tabs button.active .tab-cnt.rosso{background:#c62828;color:#fff}
   /* la barra in alto: gli stessi pulsanti che stavano in fondo alla colonna,
      portati dove li cerca chi arriva dal gestionale imprese */
+  /* ===== 26 agosto 2026 — «DA SISTEMARE OGGI» =====
+     Stessa forma di quella del gestionale imprese. ⚠️ Anche questo stile,
+     nelle imprese, sta in css/gestionale.css: qui va riscritta.
+     ⛔ Le righe restano NERE: quello che dicono lo dicono le parole
+     («sotto scorta», «scaduto»), non il colore. */
+  #riepilogo .rie-oggi{background:#fff;border:1px solid var(--line);border-left:6px solid #c62828;
+    border-radius:16px;padding:20px 22px 14px;margin-bottom:26px}
+  #riepilogo .rie-oggi.tutto-ok{border-left-color:#1e8e3e;padding-bottom:20px}
+  #riepilogo .ro-tit{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;
+    letter-spacing:-.3px;color:var(--ink);margin-bottom:4px}
+  #riepilogo .ro-tit .ro-pallino{width:12px;height:12px;border-radius:50%;background:#c62828;flex:0 0 12px}
+  #riepilogo .rie-oggi.tutto-ok .ro-pallino{background:#1e8e3e}
+  #riepilogo .ro-sotto{font-size:16px;color:var(--muted);margin-bottom:8px}
+  #riepilogo .ro-riga{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:15px 10px;margin:0 -10px;border-top:1px solid var(--line);border-radius:10px;cursor:pointer}
+  #riepilogo .ro-riga:hover{background:var(--accent-soft)}
+  #riepilogo .ro-testo{font-size:18px;font-weight:700;color:var(--ink);line-height:1.4}
+  #riepilogo .ro-testo .ro-dett{display:block;font-size:16px;font-weight:500;color:var(--muted);margin-top:3px}
+  #riepilogo .ro-freccia{flex:0 0 auto;font-size:22px;color:#98a2ac;font-weight:700}
+  @media(max-width:760px){
+    #riepilogo .rie-oggi{padding:18px 18px 12px;margin-bottom:20px}
+    #riepilogo .ro-tit{font-size:19px}
+    #riepilogo .ro-riga{padding:14px 8px;margin:0 -8px;gap:12px}
+    #riepilogo .ro-testo{font-size:17px}
+  }
   .topbar-neg{position:sticky;top:0;z-index:25;height:54px;display:flex;align-items:center;
     justify-content:flex-end;gap:8px;padding:0 18px;background:var(--accent-d);
     box-shadow:0 1px 3px rgba(16,24,32,.18)}
@@ -400,6 +425,8 @@
         <h2 id="rie-title">Riepilogo</h2>
         <p>A colpo d'occhio la situazione del negozio: prodotti a catalogo, scorte da riordinare, vendite e acquisti del mese.</p>
       </div>
+      <!-- 26 agosto 2026 — «Da sistemare oggi»: la scorciatoia in cima -->
+      <div id="rie-alert"></div>
       <div class="kpis">
         <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Prodotti</div><div class="sub">A catalogo</div></div>
         <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">Sotto scorta</div><div class="sub">Da riordinare</div></div>
@@ -1085,7 +1112,7 @@
        ("€ 741.8", "€ 98"): punto al posto della virgola e centesimi
        spariti. Adesso si scrivono come tutti gli altri euro della pagina. */
     const eurRie=n=>"€ "+(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
-    const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid);
+    const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,prezzo_acquisto,quantita,soglia_minima").eq("user_id",sbUid);
     const P=prod||[];
     const sotto=P.filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
     const valore=P.reduce((s,p)=>s+((+p.prezzo||0)*(+p.quantita||0)),0);
@@ -1100,6 +1127,8 @@
     const acquistato=mese.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
     if($("#k-daincassare"))$("#k-daincassare").textContent=eurRie(venduto);
     if($("#k-incassato"))$("#k-incassato").textContent=eurRie(acquistato);
+    /* 26 agosto 2026 — le cose che chiedono attenzione, in cima */
+    await rieDaSistemare(P,M);
     if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #c62828;padding:12px;margin-bottom:10px"><strong>${p.nome||"—"}</strong><div style="color:#666;font-size:13px">Q.tà ${p.quantita??0} · soglia ${p.soglia_minima??0}</div></div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
@@ -3071,6 +3100,77 @@
   $$("nav.tabs button[data-tab]").forEach(b=>b.addEventListener("click",()=>{
     setTimeout(aggiornaContatori,400);
   }));
+
+  /* ================================================================
+     «DA SISTEMARE OGGI» — 26 agosto 2026
+
+     Stessa forma di quella del gestionale imprese, ma le cose che chiedono
+     attenzione a un NEGOZIANTE sono altre: non lavori in ritardo, ma merce
+     finita, roba venduta sottocosto e preventivi che nessuno ha risposto.
+
+     ⛔ Non calcola niente di nuovo dove puo' evitarlo: i prodotti li ha gia'
+     in mano chi disegna il riepilogo. Le righe sono in ordine di urgenza,
+     e se non c'e' niente lo dice e basta invece di lasciare un vuoto.
+     ================================================================ */
+  function rieGiorniDopo(iso,n){
+    const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n);
+    return d.toISOString().slice(0,10);
+  }
+  async function rieDaSistemare(P,M){
+    const box=$("#rie-alert"); if(!box) return;
+    const oggi=new Date().toISOString().slice(0,10);
+    const chiedi=async f=>{ try{ const r=await f(); return (r&&!r.error)?r.data:null; }catch(e){ return null; } };
+
+    const sotto=(P||[]).filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
+    /* ⛔ sotto costo: lo vendi a meno di quanto lo paghi. Non e' un avviso
+       di forma, sono soldi che escono a ogni pezzo venduto. */
+    const perdita=(P||[]).filter(p=>p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0&&(+p.prezzo||0)<+p.prezzo_acquisto);
+
+    const PV=await chiedi(()=>sb.from("neg_preventivi").select("numero,cliente_nome,data,validita_giorni,stato").eq("user_id",sbUid))||[];
+    const aperti=PV.filter(p=>!p.stato||p.stato==="bozza"||p.stato==="inviato");
+    const scaduti=aperti.filter(p=>p.data&&rieGiorniDopo(String(p.data),+p.validita_giorni||30)<oggi);
+    const limite=rieGiorniDopo(oggi,-7);
+    /* ⚠️ «fermo» e «scaduto» non sono la stessa cosa: uno e' vecchio, l'altro
+       non vale piu'. Un preventivo scaduto sta solo fra gli scaduti. */
+    const fermi=aperti.filter(p=>p.data&&String(p.data)<limite&&scaduti.indexOf(p)<0);
+
+    const AZ=await chiedi(()=>sb.from("gest_azienda").select("nome,piva").eq("user_id",sbUid).maybeSingle());
+
+    const DA=[];
+    const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
+    if(sotto.length)   DA.push({grave:1,t:nn(sotto.length,"prodotto sotto scorta","prodotti sotto scorta"),
+      d:(sotto[0].nome||"Prodotto")+(sotto.length>1?" e altri":"")+" — da riordinare",go:"magazzino"});
+    if(perdita.length) DA.push({grave:1,t:nn(perdita.length,"prodotto venduto sotto costo","prodotti venduti sotto costo"),
+      d:(perdita[0].nome||"Prodotto")+(perdita.length>1?" e altri":"")+" — lo paghi più di quanto lo vendi",go:"prodotti"});
+    if(scaduti.length) DA.push({grave:1,t:nn(scaduti.length,"preventivo scaduto","preventivi scaduti"),
+      d:"La validità è passata: "+(scaduti[0].cliente_nome||"cliente")+(scaduti.length>1?" e altri":""),go:"preventivi"});
+    if(fermi.length)   DA.push({t:nn(fermi.length,"preventivo fermo da più di una settimana","preventivi fermi da più di una settimana"),
+      d:fermi.length===1?"Forse va sollecitato":"Forse vanno sollecitati",go:"preventivi"});
+    if(!AZ||!(AZ.nome||"").trim()||!(AZ.piva||"").trim())
+      DA.unshift({t:"Completa i dati del negozio",
+        d:"Nome e partita IVA compaiono in cima a ogni preventivo",act:"azienda"});
+
+    if(!DA.length){
+      box.innerHTML='<div class="rie-oggi tutto-ok">'
+        +'<div class="ro-tit"><span class="ro-pallino"></span>Tutto in ordine</div>'
+        +'<div class="ro-sotto">Niente sotto scorta e niente scaduto. Buon lavoro.</div></div>';
+      return;
+    }
+    box.innerHTML='<div class="rie-oggi">'
+      +'<div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
+      +'<div class="ro-sotto">'+(DA.length===1?"Una cosa che chiede attenzione.":DA.length+" cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
+      +DA.slice(0,5).map(r=>
+         '<div class="ro-riga'+(r.grave?" grave":"")+'" '
+         +(r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
+         +'<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
+         +'<span class="ro-freccia">›</span></div>').join("")
+      +'</div>';
+  }
+  /* cliccare una riga porta nella sezione giusta */
+  document.addEventListener("click",e=>{
+    const t=e.target.closest('[data-action="rie-go"]'); if(!t) return;
+    const b=document.querySelector('[data-tab="'+t.dataset.go+'"]'); if(b) b.click();
+  });
 
   /* ===== RESTYLING + STRUMENTI 2026: icone SVG, export dati, report negozio ===== */
   const _NICONS={
