@@ -661,9 +661,25 @@
         <select id="nm-tipo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
           <option value="vendita">Vendita (merce che esce)</option>
           <option value="ordine">Ordine a fornitore (merce che entra)</option>
+          <option value="rettifica">Rettifica di magazzino (correzione)</option>
         </select>
+        <!-- 26 agosto 2026 - IL GIRO DELLA MERCE. Il prodotto arriva dal
+             magazzino (e allora la giacenza si muove) oppure scritto a mano
+             (trasporto, manodopera: quello non tocca niente, ed e' voluto). -->
+        <select id="nm-prod-sel" style="width:100%;padding:10px;margin-bottom:6px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:15px">
+          <option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option>
+        </select>
+        <div id="nm-giac" style="font-size:13px;color:#2e7d32;margin:0 0 8px;display:none"></div>
+        <div style="font-size:13px;color:#8a949e;text-align:center;margin-bottom:6px">&mdash; oppure scrivilo a mano, se non lo tieni a magazzino &mdash;</div>
         <input id="nm-prodotto" placeholder="Prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <select id="nm-motivo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;display:none">
+          <option value="rotti">Perch&eacute;: rotti</option>
+          <option value="inventario">Perch&eacute;: inventario</option>
+          <option value="calo">Perch&eacute;: calo</option>
+          <option value="omaggio">Perch&eacute;: omaggio</option>
+        </select>
         <input id="nm-quantita" type="number" step="0.01" placeholder="Quantità (anche con la virgola)" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <div id="nm-hint-q" style="font-size:13px;color:#6a1b9a;margin:-4px 0 8px;display:none">Nella rettifica la quantit&agrave; va col segno: <b>&minus;2</b> se la merce cala, <b>2</b> se cresce.</div>
         <input id="nm-importo" type="number" step="0.01" placeholder="Importo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-controparte" placeholder="Cliente o fornitore" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-data" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -1182,6 +1198,8 @@
     const M=mov||[];
     const mese=M.filter(m=>thisMonth(m.data_mov));
     if($("#k-fatti"))$("#k-fatti").textContent=mese.length;
+    /* ⛔ 1 dei 5 posti che leggono "tipo". Le rettifiche NON sono soldi:
+       non entrano ne' nel venduto ne' nell'ordinato, e va bene cosi'. */
     const venduto=mese.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
     const acquistato=mese.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
     if($("#k-daincassare"))$("#k-daincassare").textContent=eurRie(venduto);
@@ -2166,6 +2184,9 @@
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
+    /* 26 agosto 2026 - la rettifica di magazzino */
+    if(a==="mag-mot"){magRett.motivo=t.dataset.v;$$("#mag-mot .chip").forEach(c=>c.classList.toggle("on",c.dataset.v===magRett.motivo));return;}
+    if(a==="mag-rett-salva")return magSalvaRettifica();
   });
 
   $$("nav.tabs button").forEach(b=>b.onclick=()=>{
@@ -2402,21 +2423,58 @@
         </div></div>`;
     }).join("");
   }
+  /* ==================================================================
+     IL + / - DEL MAGAZZINO - 26 agosto 2026
+     Prima cambiava la giacenza di nascosto: il giorno dopo il numero era
+     diverso e non si sapeva perche'. Adesso chiede QUANTE e PERCHE', e
+     lascia una RETTIFICA nei Movimenti.
+     ⛔ Prima la traccia, poi la giacenza: se la traccia non si scrive, il
+        numero non si muove. Mai una giacenza cambiata senza il perche'.
+     ================================================================== */
+  let magRett={id:null,nome:"",verso:1,motivo:"inventario",unita:"pz",ora:0};
   $("#magazzino-body")?.addEventListener("click",async e=>{
     const b=e.target.closest(".mag-btn"); if(!b) return;
     if(!sb||!sbUid)return;
-    const id=b.dataset.id, d=parseFloat(b.dataset.d)||0;
-    /* la giacenza si rilegge dal database, non dal numero a schermo:
-       prima parseInt troncava i decimali (12,5 mq + un clic = 13) e il
-       valore a schermo poteva essere vecchio */
-    const {data:prod}=await sb.from("neg_prodotti").select("quantita").eq("id",id).maybeSingle();
+    /* la giacenza si rilegge dal database, non dal numero a schermo */
+    const {data:prod}=await sb.from("neg_prodotti").select("id,nome,quantita,unita").eq("id",b.dataset.id).maybeSingle();
     if(!prod){alert("Prodotto non trovato, ricarico la lista");loadMagazzino();return;}
-    const nuova=Math.max(0,(parseFloat(prod.quantita)||0)+d);
-    const {data:okM,error}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",id).eq("user_id",sbUid).select("id");
-    if(error){alert("Errore: "+error.message);return;}
-    if(!okM||!okM.length){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
-    loadMagazzino();
+    magRett={id:prod.id,nome:prod.nome||"—",verso:((parseFloat(b.dataset.d)||0)<0?-1:1),
+             motivo:"inventario",unita:prod.unita||"pz",ora:parseFloat(prod.quantita)||0};
+    magApriRettifica();
   });
+  function magApriRettifica(){
+    const su=magRett.verso>0;
+    const MOT=[["rotti","Rotti"],["inventario","Inventario"],["calo","Calo"],["omaggio","Omaggio"]];
+    openSheet(`<h3 style="margin:0 0 6px;font-size:20px">${su?"Carico":"Scarico"} di magazzino</h3>
+      <p style="margin:0 0 18px;font-size:15px;color:#5a6672">${esc(magRett.nome)} — adesso ne risultano <b>${magRett.ora} ${esc(magRett.unita)}</b>.</p>
+      <label style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">Quante ne ${su?"entrano":"escono"}?</label>
+      <input id="mag-q" type="number" step="0.01" min="0" value="1" style="width:100%;padding:12px;font-size:16px;border:1px solid #d7dde3;border-radius:9px;box-sizing:border-box;margin-bottom:18px">
+      <label style="display:block;font-size:15px;font-weight:700;margin-bottom:8px">Perché?</label>
+      <div id="mag-mot" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        ${MOT.map(([v,t])=>`<button type="button" class="chip ${v===magRett.motivo?"on":""}" data-action="mag-mot" data-v="${v}" style="font-size:15px;padding:9px 16px">${t}</button>`).join("")}
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#5a6672">Resta scritto nei Movimenti come <b>Rettifica</b>: fra un mese si saprà perché la giacenza è cambiata. Non entra nei conti dei soldi.</p>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+        <button class="b-save" data-action="mag-rett-salva">${su?"Carica":"Scarica"}</button></div>`);
+  }
+  async function magSalvaRettifica(){
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const q=Math.abs(parseFloat($("#mag-q")?$("#mag-q").value:0)||0);
+    if(!q){alert("Scrivi quante ne entrano o ne escono.");return;}
+    const delta=(magRett.verso>0)?q:-q;
+    if(magRett.ora+delta<0&&!confirm("Ne risultano "+magRett.ora+" e ne stai togliendo "+q+
+       ".\n\nIl magazzino andrà a "+(magRett.ora+delta)+".\n\nProcedo?"))return;
+    const {data:okM,error}=await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"rettifica",
+      prodotto:magRett.nome, prodotto_id:magRett.id, quantita:delta, importo:0,
+      controparte:null, data_mov:todayStr(), motivo:magRett.motivo, note:"dal Magazzino"}).select("id");
+    if(error){alert("Errore: "+error.message);return;}
+    if(!okM||!okM.length){alert("Non salvato: nessuna riga scritta. Riprova.");return;}
+    const r=await magApplica(magRett.id,delta);
+    if(!r.ok)alert("La rettifica è stata scritta nei Movimenti, ma la giacenza NON è cambiata ("+r.err+").\nControllala a mano.");
+    closeSheet(); loadMagazzino();
+    if(typeof nmCaricaProdotti==="function")nmCaricaProdotti();
+    if(typeof loadMovimenti==="function")loadMovimenti();
+  }
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
   let editFornId=null;
   async function loadFornitori(){
@@ -2481,20 +2539,116 @@
     window.scrollTo({top:0,behavior:"smooth"});
   }
   let editMovId=null;
+
+  /* ==================================================================
+     IL GIRO DELLA MERCE NEL NEGOZIO - 26 agosto 2026
+     Fino a stamattina merce che entra, merce che esce e giacenza erano
+     tre cose scollegate. Adesso passano tutte di qui.
+
+     movEffetto()  dice quanto un movimento pesa sul magazzino, COL SEGNO.
+     magApplica()  e' l'UNICO posto che tocca neg_prodotti.quantita.
+     Cosi' modifica ed eliminazione sanno sempre cosa restituire, e non
+     esistono scarichi doppi ne' scarichi finti.
+
+     Le tre parole di neg_movimenti.tipo sono: vendita | ordine | rettifica.
+     ⛔ Se ne nasce una quarta va aggiornata QUI e nei cinque posti che
+     leggono "tipo": elenco, riepilogo, report, export Excel, export CSV.
+     E' la lezione di "uscita", trovata dal banco stamattina.
+     ================================================================== */
+  function movEffetto(m){
+    if(!m||!m.prodotto_id) return 0;            /* riga a mano: non tocca niente */
+    const q=parseFloat(m.quantita)||0;
+    if(m.tipo==="vendita")   return -Math.abs(q);
+    if(m.tipo==="ordine")    return m.arrivato_il?Math.abs(q):0;  /* in arrivo = ancora niente */
+    if(m.tipo==="rettifica") return q;          /* la quantita' ha gia' il segno */
+    return 0;
+  }
+  /* delta positivo = merce che entra. La giacenza si rilegge SEMPRE dal
+     database: il numero a schermo puo' essere vecchio, e i decimali non
+     si devono perdere (12,5 mq). */
+  async function magApplica(prodottoId,delta){
+    if(!prodottoId||!delta) return {ok:true,nuova:null};
+    const {data:p}=await sb.from("neg_prodotti").select("quantita").eq("id",prodottoId).maybeSingle();
+    if(!p) return {ok:false,err:"il prodotto non c'e' piu' (forse e' nel Cestino)"};
+    const nuova=Math.round(((parseFloat(p.quantita)||0)+delta)*1000)/1000;
+    const {data:okQ,error}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",prodottoId).eq("user_id",sbUid).select("id");
+    if(error)          return {ok:false,err:error.message};
+    if(!okQ||!okQ.length) return {ok:false,err:"nessuna riga aggiornata"};
+    return {ok:true,nuova};
+  }
+  async function magGiacenzaOra(prodottoId){
+    const {data:p}=await sb.from("neg_prodotti").select("quantita").eq("id",prodottoId).maybeSingle();
+    return p?(parseFloat(p.quantita)||0):0;
+  }
+
+  /* i prodotti del magazzino nella tendina dei Movimenti */
+  let nmProdCache=[], nmImportoAuto="";
+  async function nmCaricaProdotti(){
+    if(!(sb&&sbUid))return;
+    const {data}=await sb.from("neg_prodotti").select("id,nome,codice,quantita,unita,prezzo,prezzo_acquisto").eq("user_id",sbUid).order("nome");
+    nmProdCache=data||[];
+    const sel=$("#nm-prod-sel"); if(!sel)return;
+    const tenuto=sel.value;
+    sel.innerHTML='<option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option>'+
+      nmProdCache.map(p=>`<option value="${p.id}">${esc(p.nome||"—")}${p.codice?" ("+esc(p.codice)+")":""} — ne restano ${p.quantita??0} ${esc(p.unita||"pz")}</option>`).join("");
+    if(tenuto)sel.value=tenuto;
+  }
+  function nmProdScelto(){
+    const sel=$("#nm-prod-sel"); if(!sel||!sel.value)return null;
+    return nmProdCache.find(p=>p.id===sel.value)||null;
+  }
+  /* il modulo si adatta da solo: il nome scritto arriva dalla tendina
+     (una lettera sbagliata e per il gestionale e' un altro prodotto), il
+     prezzo pure, e il "perche'" compare solo per le rettifiche. */
+  function nmAggiornaModulo(){
+    const tipo=$("#nm-tipo")?$("#nm-tipo").value:"vendita";
+    const p=nmProdScelto();
+    if(p&&$("#nm-prodotto"))$("#nm-prodotto").value=p.nome||"";
+    const g=$("#nm-giac");
+    if(g){
+      if(p){g.style.display="block";g.textContent="A magazzino ne risultano "+(p.quantita??0)+" "+(p.unita||"pz")+".";}
+      else  g.style.display="none";
+    }
+    const mot=$("#nm-motivo");  if(mot) mot.style.display =(tipo==="rettifica")?"block":"none";
+    const hin=$("#nm-hint-q");  if(hin) hin.style.display =(tipo==="rettifica")?"block":"none";
+    if(p&&tipo!=="rettifica"){
+      const q=Math.abs(parseFloat($("#nm-quantita").value)||0);
+      const unit=(tipo==="vendita")?(+p.prezzo||0):(+p.prezzo_acquisto|| +p.prezzo||0);
+      const imp=$("#nm-importo");
+      if(q&&unit&&imp&&(!imp.value||imp.value===nmImportoAuto)){
+        nmImportoAuto=String(Math.round(unit*q*100)/100);
+        imp.value=nmImportoAuto;
+      }
+    }
+  }
+  $("#nm-prod-sel")?.addEventListener("change",nmAggiornaModulo);
+  $("#nm-tipo")?.addEventListener("change",nmAggiornaModulo);
+  $("#nm-quantita")?.addEventListener("input",nmAggiornaModulo);
+
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_movimenti")
-      .select("id,tipo,prodotto,quantita,importo,controparte,data_mov,note").eq("user_id",sbUid).order("data_mov",{ascending:false});
+      .select("id,tipo,prodotto,prodotto_id,quantita,importo,controparte,data_mov,note,motivo,arrivato_il").eq("user_id",sbUid).order("data_mov",{ascending:false});
     const m=data||[], box=$("#movimenti-body");
     if(!box) return;
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun movimento.</p>';return;}
     box.innerHTML=m.map(x=>{
-      const vend=x.tipo==="vendita", col=vend?"#2e537d":"#e65100", fre=vend?"↑":"↓", et=vend?"VENDITA":"ORDINE";
+      /* ⛔ TRE parole, non due */
+      const rett=x.tipo==="rettifica", vend=x.tipo==="vendita";
+      const inArrivo=(x.tipo==="ordine"&&!x.arrivato_il);
+      const col=rett?"#6a1b9a":(vend?"#2e537d":"#e65100");
+      const fre=rett?"⇄":(vend?"↑":"↓");
+      const et =rett?"RETTIFICA":(vend?"VENDITA":"ORDINE");
+      const nq =parseFloat(x.quantita)||0;
+      const qta=rett?((nq>0?"+":"")+(x.quantita??0)):(x.quantita??0);
       return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${col};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center"><strong>${fre} ${x.prodotto||"—"}</strong><span style="background:${col};color:#fff;font-size:13px;padding:2px 8px;border-radius:10px">${et}</span></div>
-        <div style="color:#666;font-size:14px;margin-top:4px">Q.tà ${x.quantita??0} · € ${x.importo??0}${x.controparte?" · "+x.controparte:""}</div>
-        <div style="color:#888;font-size:13px;margin-top:2px">${x.data_mov||""}${x.note?" · "+x.note:""}</div>
-        <div style="margin-top:10px;display:flex;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>${fre} ${esc(x.prodotto||"—")}</strong><span style="background:${col};color:#fff;font-size:13px;padding:2px 8px;border-radius:10px">${et}</span></div>
+        ${inArrivo?'<div style="display:inline-block;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;font-size:13px;padding:2px 8px;border-radius:10px;margin-top:6px">IN ARRIVO — magazzino non ancora caricato</div>':""}
+        <div style="color:#666;font-size:14px;margin-top:4px">Q.tà ${qta}${rett?"":" · € "+(x.importo??0)}${x.controparte?" · "+esc(x.controparte):""}</div>
+        <div style="color:#888;font-size:13px;margin-top:2px">${x.data_mov||""}${x.motivo?" · "+esc(x.motivo):""}${x.arrivato_il?" · arrivata il "+x.arrivato_il:""}${x.note?" · "+esc(x.note):""}</div>
+        <div style="font-size:13px;margin-top:2px;color:${x.prodotto_id?"#2e7d32":"#8a949e"}">${x.prodotto_id?"✔ collegato al magazzino":"riga a mano — fuori magazzino"}</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          ${inArrivo?`<button class="mov-arr" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:none;background:#2e7d32;color:#fff;border-radius:8px;cursor:pointer">✔ Merce arrivata</button>`:""}
           <button class="mov-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
           <button class="mov-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
         </div>
@@ -2505,40 +2659,102 @@
     const prodotto=$("#nm-prodotto").value.trim();
     if(!prodotto){alert("Inserisci il prodotto");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const dati={tipo:$("#nm-tipo").value, prodotto,
-      /* decimali anche qui: si scaricano 12,5 mq o mezzo bancale */
-      quantita:parseFloat($("#nm-quantita").value)||0,
+    const tipo=$("#nm-tipo").value;
+    const prodId=($("#nm-prod-sel")&&$("#nm-prod-sel").value)||null;
+    /* decimali anche qui: si scaricano 12,5 mq o mezzo bancale */
+    let q=parseFloat($("#nm-quantita").value)||0;
+    if(tipo!=="rettifica")q=Math.abs(q);
+    if(tipo==="rettifica"&&!q){alert("La rettifica ha bisogno di una quantità, col segno − se la merce cala.");return;}
+    const dati={tipo, prodotto,
+      prodotto_id:prodId||null,
+      quantita:q,
       importo:parseFloat($("#nm-importo").value)||0,
       controparte:$("#nm-controparte").value.trim()||null,
       data_mov:$("#nm-data").value||null,
-      note:$("#nm-note").value.trim()||null};
+      note:$("#nm-note").value.trim()||null,
+      motivo:(tipo==="rettifica")?(($("#nm-motivo")&&$("#nm-motivo").value)||"inventario"):null};
+    /* ⛔ l'ordine nasce IN ARRIVO: il magazzino si carica il giorno che si
+       spunta «Merce arrivata», non prima. Modificandolo la data d'arrivo
+       gia' messa non si perde. */
+    let vecchio=null;
+    if(editMovId){
+      const {data:v}=await sb.from("neg_movimenti").select("id,tipo,quantita,prodotto_id,arrivato_il").eq("id",editMovId).eq("user_id",sbUid).maybeSingle();
+      vecchio=v||null;
+      dati.arrivato_il=(tipo==="ordine")?((vecchio&&vecchio.arrivato_il)||null):null;
+    } else dati.arrivato_il=null;
+    const delta=movEffetto(dati)-movEffetto(vecchio);
+    /* se il magazzino non basta lo dice, e va sotto zero: un numero rosso
+       vuol dire che manca un carico, e non ti blocca il banco */
+    if(delta<0&&dati.prodotto_id){
+      const ora=await magGiacenzaOra(dati.prodotto_id);
+      if(ora+delta<0&&!confirm("A magazzino ne risultano "+ora+", ne stai facendo uscire "+Math.abs(delta)+".\n\nIl magazzino andrà a "+(ora+delta)+": vuol dire che manca un carico.\n\nRegistro lo stesso?"))return;
+    }
     let error,okMv;
     if(editMovId){({data:okMv,error}=await sb.from("neg_movimenti").update(dati).eq("id",editMovId).eq("user_id",sbUid).select("id"));}
-    else {({error}=await sb.from("neg_movimenti").insert({user_id:sbUid,...dati}));}
+    else {({data:okMv,error}=await sb.from("neg_movimenti").insert({user_id:sbUid,...dati}).select("id"));}
     if(error){alert("Errore: "+error.message);return;}
-    if(editMovId&&(!okMv||!okMv.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
+    if(!okMv||!okMv.length){alert("Non salvato: nessuna riga scritta. Riprova.");return;}
+    /* la giacenza si tocca SOLO dopo che il movimento e' salvato davvero */
+    if(delta){
+      const r=await magApplica(dati.prodotto_id,delta);
+      if(!r.ok)alert("Movimento salvato, ma ATTENZIONE: la giacenza NON è stata aggiornata ("+r.err+").\nControllala a mano dal Magazzino.");
+    }
     ["nm-prodotto","nm-quantita","nm-importo","nm-controparte","nm-data","nm-note"].forEach(id=>$("#"+id).value="");
-    editMovId=null; $("#nm-save").textContent="Aggiungi movimento";
-    loadMovimenti();
+    if($("#nm-prod-sel"))$("#nm-prod-sel").value="";
+    nmImportoAuto=""; editMovId=null; $("#nm-save").textContent="Aggiungi movimento";
+    nmAggiornaModulo(); loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino();
   });
-  $('[data-tab="movimenti"]')?.addEventListener("click",loadMovimenti);
+  $('[data-tab="movimenti"]')?.addEventListener("click",()=>{loadMovimenti();nmCaricaProdotti();});
   $("#movimenti-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".mov-edit"), del=e.target.closest(".mov-del");
+    const ed=e.target.closest(".mov-edit"), del=e.target.closest(".mov-del"), arr=e.target.closest(".mov-arr");
+    /* LA MERCE E' ARRIVATA: carica il magazzino UNA VOLTA SOLA */
+    if(arr){
+      const {data:v}=await sb.from("neg_movimenti").select("id,tipo,quantita,prodotto_id,arrivato_il,prodotto").eq("id",arr.dataset.id).eq("user_id",sbUid).maybeSingle();
+      if(!v){alert("Questo movimento non c'è più.");loadMovimenti();return;}
+      if(v.arrivato_il){alert("Questa merce era già segnata come arrivata: il magazzino era già stato caricato.");loadMovimenti();return;}
+      const qte=Math.abs(parseFloat(v.quantita)||0);
+      if(!confirm("Segno la merce come arrivata oggi"+(v.prodotto_id&&qte?" e carico il magazzino di "+qte+"."
+        :". (Riga scritta a mano: il magazzino non si tocca.)")+"\n\nProcedo?"))return;
+      /* ⛔ IL LUCCHETTO: si scrive solo se la riga era ANCORA in arrivo.
+         Due clic di fila non caricano due volte. Stessa rete del
+         preventivo accettato. */
+      const {data:okA,error}=await sb.from("neg_movimenti").update({arrivato_il:todayStr()}).eq("id",v.id).eq("user_id",sbUid).is("arrivato_il",null).select("id");
+      if(error){alert("Errore: "+error.message);return;}
+      if(!okA||!okA.length){alert("Non fatto: forse era già segnata come arrivata. Ricarico l'elenco.");loadMovimenti();return;}
+      if(v.prodotto_id&&qte){
+        const r=await magApplica(v.prodotto_id,qte);
+        if(!r.ok)alert("Segnata come arrivata, ma la giacenza NON è salita ("+r.err+"). Controllala a mano.");
+      }
+      loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino(); return;
+    }
     if(del){
-      if(!confirm("Eliminare questo movimento?"))return;
+      const {data:v}=await sb.from("neg_movimenti").select("id,tipo,quantita,prodotto_id,arrivato_il,prodotto").eq("id",del.dataset.id).eq("user_id",sbUid).maybeSingle();
+      const eff=movEffetto(v);
+      /* eliminando si RESTITUISCE quello che il movimento aveva mosso */
+      const avviso=eff?("\n\nLa giacenza di «"+(v.prodotto||"")+"» torna indietro di "+Math.abs(eff)+
+        ".\n⚠️ Se poi lo riprendi dal Cestino la giacenza NON riscende da sola: rifalla a mano."):"";
+      if(!confirm("Eliminare questo movimento?"+avviso))return;
       const {data:okDm2,error}=await sb.from("neg_movimenti").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
       if(error){alert("Errore: "+error.message);return;}
       if(!okDm2||!okDm2.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      loadMovimenti();return;
+      if(eff){
+        const r=await magApplica(v.prodotto_id,-eff);
+        if(!r.ok)alert("Movimento eliminato, ma la giacenza NON è tornata indietro ("+r.err+"). Controllala a mano.");
+      }
+      loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino(); return;
     }
     if(ed){
       const {data}=await sb.from("neg_movimenti").select("*").eq("id",ed.dataset.id).single();
       if(!data)return;
+      await nmCaricaProdotti();
       $("#nm-tipo").value=data.tipo||"vendita"; $("#nm-prodotto").value=data.prodotto||"";
+      if($("#nm-prod-sel"))$("#nm-prod-sel").value=data.prodotto_id||"";
+      if($("#nm-motivo")&&data.motivo)$("#nm-motivo").value=data.motivo;
       $("#nm-quantita").value=data.quantita??""; $("#nm-importo").value=data.importo??"";
       $("#nm-controparte").value=data.controparte||""; $("#nm-data").value=data.data_mov||"";
       $("#nm-note").value=data.note||"";
-      editMovId=data.id; $("#nm-save").textContent="Salva modifica";
+      nmImportoAuto=""; editMovId=data.id; $("#nm-save").textContent="Salva modifica";
+      nmAggiornaModulo();
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
@@ -2761,7 +2977,11 @@
         const nuova=(+prod.quantita||0)-(+r.qta||0);
         const {data:okQ,error:eQ}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",r.prodotto_id).eq("user_id",sbUid).select("id");
         if(eQ||!okQ||!okQ.length){falliti.push(r.descrizione);continue;}
+        /* 26 agosto 2026 - il movimento sa da QUALE prodotto arriva: cosi'
+           se lo elimini la giacenza torna indietro da sola. Qui il
+           magazzino e' gia' stato scaricato dalla riga sopra. */
         const {error:eM}=await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"vendita",prodotto:r.descrizione,
+          prodotto_id:r.prodotto_id||null,
           quantita:+r.qta||0, importo:(+r.qta||0)*(+r.prezzo||0),
           controparte:p.cliente_nome||null, data_mov:new Date().toISOString().slice(0,10),
           note:"Da preventivo N. "+(p.numero||"")});
@@ -3181,7 +3401,10 @@
       agg("Telefono",r.telefono); agg("Email",r.email);
       agg("P.IVA",r.piva); agg("Indirizzo",r.indirizzo); agg("Note",r.note);
     } else if(tipo==="movimento"){
-      agg("Tipo",r.tipo==="vendita"?"Vendita":"Ordine a fornitore");
+      /* ⛔ 2 dei 5 posti che leggono "tipo" */
+      agg("Tipo",r.tipo==="vendita"?"Vendita":(r.tipo==="rettifica"?"Rettifica di magazzino":"Ordine a fornitore"));
+      agg("Perché",r.motivo);
+      if(r.tipo==="ordine")agg("Merce arrivata",r.arrivato_il?fdate(r.arrivato_il):"non ancora — in arrivo");
       agg("Prodotto",r.prodotto); agg("Quantità",r.quantita);
       agg("Importo",cestEur(r.importo)); agg("Cliente / fornitore",r.controparte);
       agg("Data",r.data_mov?fdate(r.data_mov):""); agg("Note",r.note);
@@ -3543,7 +3766,8 @@
     const add=(nome,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{Vuoto:"—"}]),nome);
     add("Prodotti",D.prod.map(p=>({Nome:p.nome||"",Categoria:p.categoria||"",Codice:p.codice||"","Prezzo €":+p.prezzo||0,Quantità:+p.quantita||0,"Soglia minima":+p.soglia_minima||0,"Valore €":(+p.prezzo||0)*(+p.quantita||0),Note:p.note||""})));
     add("Fornitori",D.forn.map(f=>({Nome:f.nome||"",Telefono:f.telefono||"",Email:f.email||"",Indirizzo:f.indirizzo||"","P.IVA":f.piva||"",Note:f.note||""})));
-    add("Movimenti",D.mov.map(m=>({Tipo:m.tipo==="vendita"?"Vendita":"Ordine fornitore",Prodotto:m.prodotto||"",Quantità:+m.quantita||0,"Importo €":+m.importo||0,"Cliente/Fornitore":m.controparte||"",Data:m.data_mov||"",Note:m.note||""})));
+    /* ⛔ 3 dei 5 posti che leggono "tipo" */
+    add("Movimenti",D.mov.map(m=>({Tipo:m.tipo==="vendita"?"Vendita":(m.tipo==="rettifica"?"Rettifica magazzino":"Ordine fornitore"),Prodotto:m.prodotto||"",Quantità:+m.quantita||0,"Importo €":+m.importo||0,"Cliente/Fornitore":m.controparte||"",Data:m.data_mov||"","Perché":m.motivo||"","Merce arrivata il":m.arrivato_il||"",Note:m.note||""})));
     add("Fatture",D.lav.map(l=>({Descrizione:l.descrizione||"","Importo €":+l.importo||0,Stato:l.fatt_stato||"none",Data:l.data_fatto||l.data_prevista||""})));
     if(D.az)add("Dati azienda",[{Nome:D.az.nome||"","P.IVA":D.az.piva||"",Indirizzo:D.az.indirizzo||"",Telefono:D.az.tel||"",Email:D.az.email||"",IBAN:D.az.iban||""}]);
     XLSX.writeFile(wb,"gestionale-negozio-trovaimpresa-"+todayStr()+".xlsx");
@@ -3564,7 +3788,7 @@
     const box=$("#rep-body");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📊</div><p>Nessun dato</p><small>Accedi per vedere i report</small></div>`;return;}
     const [{data:mov},{data:prod}]=await Promise.all([
-      sb.from("neg_movimenti").select("tipo,prodotto,quantita,importo,data_mov").eq("user_id",sbUid),
+      sb.from("neg_movimenti").select("tipo,prodotto,quantita,importo,data_mov,motivo,controparte,arrivato_il").eq("user_id",sbUid),
       sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid)
     ]);
     const M=mov||[],P=prod||[];
@@ -3572,7 +3796,10 @@
     const now=new Date(),mkeys=[];
     for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
     const vend=mkeys.map(k=>M.filter(m=>m.tipo==="vendita"&&(m.data_mov||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
-    const acq=mkeys.map(k=>M.filter(m=>m.tipo!=="vendita"&&(m.data_mov||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
+    /* ⛔ 4 dei 5 posti che leggono "tipo". PRIMA diceva tipo!=="vendita":
+       con la parola nuova una rettifica sarebbe finita fra gli acquisti,
+       esattamente l'errore di "uscita". Adesso si nominano gli ordini. */
+    const acq=mkeys.map(k=>M.filter(m=>m.tipo==="ordine"&&(m.data_mov||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
     const mx=Math.max(...vend,...acq,1);
     const bars=mkeys.map((k,i)=>`<div class="rep-bar-col"><div class="rep-bars">
       <div class="rep-bar inc" style="height:${Math.round(vend[i]/mx*118)}px" title="Venduto ${eur(vend[i])}"></div>
@@ -3582,7 +3809,7 @@
     M.filter(m=>m.tipo==="vendita").forEach(m=>{const k=(m.prodotto||"—").trim();perProd[k]=(perProd[k]||0)+(+m.importo||0);});
     const top=Object.entries(perProd).sort((a,b)=>b[1]-a[1]).slice(0,5);
     const totV=M.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
-    const totA=M.filter(m=>m.tipo!=="vendita").reduce((s,m)=>s+(+m.importo||0),0);
+    const totA=M.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
     const valMag=P.reduce((s,p)=>s+(+p.prezzo||0)*(+p.quantita||0),0);
     const sotto=P.filter(p=>+p.quantita<=+p.soglia_minima&&p.soglia_minima!=null);
     box.innerHTML=`<div class="rep-grid">
@@ -3603,8 +3830,9 @@
   function reportCsvNeg(){
     if(!repNegData||!repNegData.M.length){toast("Nessun movimento da esportare");return;}
     const num=n=>String(+n||0).replace(".",",");
-    const rows=[["Tipo","Prodotto","Quantità","Importo","Cliente/Fornitore","Data"]];
-    repNegData.M.forEach(m=>rows.push([m.tipo==="vendita"?"Vendita":"Ordine",m.prodotto||"",num(m.quantita),num(m.importo),m.controparte||"",m.data_mov||""]));
+    /* ⛔ 5 dei 5 posti che leggono "tipo" */
+    const rows=[["Tipo","Prodotto","Quantità","Importo","Cliente/Fornitore","Data","Perché","Merce arrivata il"]];
+    repNegData.M.forEach(m=>rows.push([m.tipo==="vendita"?"Vendita":(m.tipo==="rettifica"?"Rettifica magazzino":"Ordine"),m.prodotto||"",num(m.quantita),num(m.importo),m.controparte||"",m.data_mov||"",m.motivo||"",m.arrivato_il||""]));
     const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));

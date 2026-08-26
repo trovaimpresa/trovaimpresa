@@ -16033,3 +16033,123 @@ Dentro ci sono il finto database, il banco, i sabotaggi e il COME-SI-USA.
 7. **`admin.html`: 87 testi sotto i 13 px** e **gli accenti con l'apostrofo**
    (`gestionale-operatore.html`, 6 righe).
 8. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+
+# 26 AGOSTO 2026, SERA — IL GIRO DELLA MERCE NEL NEGOZIO
+
+Il buco trovato a fine giornata è chiuso. Merce che entra, merce che esce e
+giacenza non sono più tre cose scollegate: adesso **tutte e quattro le strade
+finiscono nel magazzino**.
+
+## LE QUATTRO DECISIONI DI ALESSIO
+
+Chieste una per volta, con una figura per ognuna, prima di scrivere una riga.
+⛔ Non sono decisioni tecniche: se cambiano, cambia il codice, non il contrario.
+
+| | la domanda | la risposta |
+|---|---|---|
+| **1** | il prodotto della vendita: dalla tendina o a mano? | **tutte e due** — tendina per la merce a magazzino, riga a mano per trasporto, manodopera, roba sfusa |
+| **2** | se il magazzino non basta? | **avvisa e va sotto zero** — un numero rosso vuol dire che manca un carico, e non ti blocca il banco |
+| **3** | il + / − del Magazzino lascia una traccia? | **sì, una parola nuova: `rettifica`**, col perché (rotti · inventario · calo · omaggio) |
+| **4** | l'ordine al fornitore carica il magazzino? | **sì, ma quando arriva** — nasce «in arrivo», carica il giorno che si spunta «Merce arrivata» |
+
+## LA QUERY — `sql/neg-giro-merce.sql` (ESEGUITA, risposta 3 e 0)
+
+⚠️ Lanciata **dal connettore Supabase**, non a mano: da stasera Claude arriva
+al database da solo. Il connettore è acceso su questa chat.
+
+Tre colonne su `neg_movimenti`:
+
+* **`prodotto_id`** (uuid → `neg_prodotti.id`) — quale prodotto tocca il
+  movimento. ⛔ **Vuoto NON è un errore**: vuol dire «riga a mano, fuori
+  magazzino», e quella non scala niente.
+* **`motivo`** (text) — il perché di una rettifica.
+* **`arrivato_il`** (date) — ⛔ **vuoto = ordine ancora IN ARRIVO**, magazzino
+  non ancora caricato.
+
+Più il permesso per la terza parola: il blocco `DO` toglie ogni `CHECK` che
+elencasse i valori di `tipo`.
+
+## COME È FATTO DENTRO — due funzioni sole
+
+⛔ **Chi tocca la giacenza è UNO SOLO.** Prima erano tre posti diversi.
+
+* **`movEffetto(m)`** dice quanto un movimento pesa sul magazzino, **col
+  segno**: vendita `−q` · ordine `+q` **solo se arrivato** · rettifica `q`
+  (che il segno ce l'ha già) · riga a mano **0**.
+* **`magApplica(prodotto_id, delta)`** è l'unico che scrive
+  `neg_prodotti.quantita`. Rilegge sempre dal database, mai dallo schermo.
+
+Da lì viene tutto il resto, senza casi speciali:
+
+| cosa succede | quanto si muove il magazzino |
+|---|---|
+| salvo un movimento nuovo | `effetto(nuovo)` |
+| **modifico** un movimento | `effetto(nuovo) − effetto(vecchio)` — la **differenza**, mai due volte |
+| **elimino** un movimento | `− effetto(vecchio)` — la merce **torna indietro** |
+
+⚠️ **Il buco che resta, ed è scritto apposta:** ripescando dal Cestino un
+movimento eliminato, la giacenza **non** riscende da sola. Il gestionale lo
+dice nel messaggio prima di eliminare. Sistemarlo vuol dire mettere le mani in
+`js/cestino.js`, che è di tutti e tre i gestionali.
+
+## I CINQUE POSTI CHE LEGGONO «TIPO» — aggiornati tutti
+
+È la lezione di `uscita` del mattino, e stavolta è stata seguita prima, non
+dopo:
+
+1. **Riepilogo** (venduto / ordinato del mese) — le rettifiche non sono soldi;
+2. **scheda del movimento** (ricerca e cestino) — dice «Rettifica di magazzino»
+   e il perché;
+3. **export Excel** — più le colonne «Perché» e «Merce arrivata il»;
+4. **Report** — ⛔ **qui c'era la trappola**: diceva `tipo!=="vendita"`, cioè
+   *tutto quello che non è una vendita è una spesa*. Una rettifica sarebbe
+   finita fra gli acquisti. Adesso dice `tipo==="ordine"`, e nomina;
+5. **export CSV** — stesse due colonne nuove.
+
+## ⛔ UNA REGOLA VECCHIA CHE È SALTATA, ED È VOLUTO
+
+Fino a stamattina il banco teneva fermo che **«il magazzino non va sotto zero»**
+col + / −. Adesso avvisa e ci va sotto. Non è comodità: fermandosi a zero, la
+traccia direbbe «−3» mentre la giacenza ne ha tolti 2 — **due numeri che
+litigano sullo stesso schermo**. La traccia deve dire quanta merce è uscita
+davvero.
+
+## IL BANCO
+
+| | prima | adesso |
+|---|---|---|
+| prove | 245 | **283 · 283 verdi · 0 rosse** |
+| sabotaggi | 84 | **97 · 97 visti** |
+
+* **famiglia B rifatta** — il + / − non cambia più il numero di nascosto: apre
+  il foglio, chiede quante e perché, e la traccia deve esserci;
+* **famiglia N nuova, «il giro della merce»** — 23 prove.
+
+⚠️ **Due prove erano verdi per finta, e me l'hanno detto i sabotaggi:**
+
+1. **il doppio clic velocissimo NON prova il lucchetto.** Le due chiamate si
+   accavallano, leggono la stessa giacenza e l'ultima copre l'altra: il
+   magazzino sale una volta sola **anche senza lucchetto**. Adesso il pulsante
+   si rimette a mano **dopo** che il primo giro è finito.
+2. **cercare un numero nella pagina non prova che non ci sia.** «La rettifica
+   non finisce fra gli acquisti» cercava «777» nel report, ma quel totale somma
+   anche gli altri ordini e 777 non compare mai tale e quale. Adesso si guarda
+   se il totale **cambia**.
+
+⛔ E il lucchetto di «Merce arrivata» è **doppio** — la domanda «era già
+arrivata?» più `.is("arrivato_il", null)` sulla scrittura. Il sabotaggio deve
+toglierli **tutti e due**: rompendone uno solo, l'altro regge e il banco resta
+verde a ragione.
+
+Zip: `prove-claude/banco-negozio-funziona-26ago-sera.zip`.
+`gestionale-negozio.html` a fine serata: md5 **`36bb78c50425fd338d6e846267d42a2e`**.
+
+## COSA RESTA, IN ORDINE
+
+1. **Il collaudo a mano del negozio** — 31 passi numerati, ancora da fare.
+2. **Il resto del banco delle imprese** — PDF e XML della fattura, parcella
+   dello studio tecnico, cestino, ricerca, calendario, squadra, ore e spese.
+3. **Fatture del negozio** — la decisione, non la parola.
+4. **La grafica dentro il negozio** e i nove `openSheet()` → `openSheetGrande()`.
+5. **`admin.html`: 87 testi sotto i 13 px** e gli accenti con l'apostrofo.
+6. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
