@@ -331,6 +331,9 @@
       <button data-tab="fatture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg><span>Fatture</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg><span>Clienti</span></button>
+      <!-- 26 agosto 2026 — IL CESTINO. C'era nel Noleggio e nelle Imprese, qui no:
+           la roba cancellata ci finiva ma non c'era la pagina per riprenderla. -->
+      <button data-tab="cestino"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg><span>Cestino</span><span id="cnt-cestino" style="display:none;margin-left:auto;background:#c62828;color:#fff;font-size:13px;font-weight:700;padding:1px 8px;border-radius:10px"></span></button>
       <button data-tab="squadra" style="display:none"><span>Squadra</span></button>
       <button data-tab="scadenzario" id="tab-scadenzario" style="display:none"><span>Scadenzario</span></button>
     </nav>
@@ -598,6 +601,15 @@
     <section id="clienti">
       <div class="sec-head"><h2>Clienti</h2><button class="add" data-action="new-cli">+ Nuovo</button></div>
       <div class="grid" id="cli-list"></div>
+    </section>
+
+    <!-- ===== CESTINO — 26 agosto 2026 ===== -->
+    <section id="cestino">
+      <div class="sec-head"><h2>Cestino</h2></div>
+      <p style="color:#5b6672;font-size:15px;margin:0 0 14px;max-width:640px">Tutto quello che elimini dal negozio passa di qui e resta a disposizione: finché è nel cestino non è perso. Apri una riga per rimetterla a posto.</p>
+      <input type="text" id="cest-search" placeholder="Cerca nel cestino: nome o tipo" autocomplete="off" spellcheck="false"
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+      <div id="cest-body"></div>
     </section>
 
     <section id="squadra">
@@ -2752,6 +2764,211 @@
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
+
+  /* ================================================================
+     IL CESTINO DEL NEGOZIO — 26 agosto 2026
+
+     Stessa forma di quello del noleggio (gestionale-noleggio.html):
+     si legge con sb.raw(), che e' la porta di servizio aperta da
+     js/cestino.js e vede anche le righe messe da parte.
+
+     ⛔ PERCHE' SERVIVA. Da oggi anche i preventivi finiscono nel cestino
+     (sql/neg-preventivi-cestino.sql). Prodotti, fornitori e movimenti ci
+     finivano dal 23 agosto. Ma nel Negozio la pagina per riprenderli non
+     c'era: la roba era salva e irraggiungibile allo stesso tempo.
+     ================================================================ */
+  const CEST_COSE=[
+    {t:"neg_prodotti",   lab:"Prodotto",   tipo:"prodotto",   col:"#1565c0", reparto:false},
+    {t:"neg_fornitori",  lab:"Fornitore",  tipo:"fornitore",  col:"#1565c0", reparto:false},
+    {t:"neg_movimenti",  lab:"Movimento",  tipo:"movimento",  col:"#757575", reparto:false},
+    {t:"neg_preventivi", lab:"Preventivo", tipo:"preventivo", col:"#2e537d", reparto:false},
+    /* ⚠️ clienti e lavori sono di QUESTO reparto: si filtrano, se no si
+       vedrebbe (e si rimetterebbe a posto) roba di un altro reparto. */
+    {t:"gest_clienti",   lab:"Cliente",    tipo:"cliente",    col:"#1e8e3e", reparto:true},
+    {t:"gest_lavori",    lab:"Lavoro",     tipo:"lavoro",     col:"#7C3AED", reparto:true}
+  ];
+  let cestCache=[], cestQ="";
+
+  function cestAcceso(){return !!(window.cestinoAttivo&&window.cestinoAttivo()&&sb&&sb.raw);}
+  function cestNome(tipo,r){
+    if(tipo==="preventivo") return "N. "+(r.numero||"—")+" · "+(r.cliente_nome||"senza cliente");
+    if(tipo==="movimento")  return (r.prodotto||"movimento")+" · "+(r.quantita??0);
+    return [r.nome,r.descrizione,r.prodotto,r.titolo]
+      .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")||"(senza nome)";
+  }
+  function cestQuando(iso){
+    if(!iso) return "";
+    const d=String(iso).slice(0,10), o=String(iso).slice(11,16);
+    return fdate(d)+(o?" alle "+o:"");
+  }
+  const cestEur=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+  /* cosa c'era scritto dentro: si vede prima di decidere se ripescarlo */
+  function cestRighe(tipo,r){
+    const f=[];
+    const agg=(et,v)=>{ if(v!==null&&v!==undefined&&String(v).trim()!=="") f.push([et,String(v)]); };
+    if(tipo==="prodotto"){
+      agg("Codice",r.codice); agg("Categoria",r.categoria);
+      agg("Prezzo al banco",cestEur(r.prezzo));
+      if(r.prezzo_impresa!=null&&r.prezzo_impresa!=="") agg("Prezzo impresa",cestEur(r.prezzo_impresa));
+      if(r.prezzo_acquisto!=null) agg("Lo pagavi",cestEur(r.prezzo_acquisto));
+      agg("Quantità",(r.quantita??0)+" "+(r.unita||"pz"));
+      agg("Scorta minima",r.soglia_minima); agg("Note",r.note);
+    } else if(tipo==="fornitore"){
+      agg("Telefono",r.telefono); agg("Email",r.email);
+      agg("P.IVA",r.piva); agg("Indirizzo",r.indirizzo); agg("Note",r.note);
+    } else if(tipo==="movimento"){
+      agg("Tipo",r.tipo==="vendita"?"Vendita":"Ordine a fornitore");
+      agg("Prodotto",r.prodotto); agg("Quantità",r.quantita);
+      agg("Importo",cestEur(r.importo)); agg("Cliente / fornitore",r.controparte);
+      agg("Data",r.data_mov?fdate(r.data_mov):""); agg("Note",r.note);
+    } else if(tipo==="preventivo"){
+      agg("Numero",r.numero); agg("Cliente",r.cliente_nome); agg("Oggetto",r.titolo);
+      agg("Data",r.data?fdate(r.data):""); agg("Valido",(r.validita_giorni||30)+" giorni");
+      agg("Stato",r.stato); agg("Listino",r.listino==="impresa"?"Prezzi impresa":"Prezzi del banco");
+      agg("IVA",(r.iva_perc??22)+"%"); agg("Sconto sul totale",(r.sconto_perc??0)+"%");
+      agg("Note",r.note);
+    } else if(tipo==="cliente"){
+      agg("Telefono",r.telefono); agg("Referente",r.referente);
+      agg("Indirizzo",r.indirizzo); agg("Email",r.email); agg("P.IVA",r.piva);
+      if(r.listino) agg("Listino",r.listino==="impresa"?"Prezzi impresa":"Prezzi del banco");
+      if(+r.sconto_perc) agg("Sconto fisso",r.sconto_perc+"%");
+    } else if(tipo==="lavoro"){
+      agg("Cliente",r.cliente); agg("Titolo",r.titolo); agg("Stato",r.stato);
+      agg("Prezzo",cestEur(r.prezzo));
+    }
+    return f;
+  }
+  /* ⚠️ display="" NON riaccende niente se il foglio dice display:none:
+     ci vuole il valore vero. (Trappola gia' presa nel noleggio.) */
+  function cestSegnaPallino(n){
+    const e=$("#cnt-cestino"); if(!e) return;
+    e.textContent=n>0?String(n):""; e.style.display=n>0?"inline-block":"none";
+  }
+  /* chi va ricaricato quando una cosa torna al suo posto */
+  const CEST_RICARICA={
+    prodotto:()=>{loadProdotti();loadMagazzino();renderRiepilogoNegozio();},
+    fornitore:()=>loadFornitori(),
+    movimento:()=>{loadMovimenti();renderRiepilogoNegozio();},
+    preventivo:()=>pvCarica(),
+    cliente:()=>renderClienti(),
+    lavoro:()=>renderJobs()
+  };
+
+  async function renderCestinoNeg(soloDisegno){
+    const box=$("#cest-body"); if(!box) return;
+    if(!(sb&&sbUid)){box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Devi essere collegato.</p>';return;}
+    const st=(window.cestinoStato&&window.cestinoStato())||null;
+    if(st&&st.attesa>0){
+      box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Sto controllando il cestino. Ci vuole un attimo: finché non ho una risposta chiara dal database non lascio eliminare niente. Riprova fra qualche secondo.</p>';
+      return;
+    }
+    if(!cestAcceso()){
+      box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Il cestino non è ancora acceso su questa parte. Esegui <b>sql/noleggio-cestino.sql</b> e <b>sql/neg-preventivi-cestino.sql</b> su Supabase, poi ricarica la pagina.</p>';
+      return;
+    }
+    if(!soloDisegno){
+      const mid=curMestiere();
+      /* una domanda piccola per tabella, tutte insieme: un solo giro di rete */
+      const risposte=await Promise.all(CEST_COSE.map(async c=>{
+        let r=null;
+        try{
+          let q=sb.raw(c.t).select("*").eq("user_id",sbUid).not("eliminato_il","is",null);
+          if(c.reparto&&mid) q=q.eq("mestiere_id",mid);
+          r=await q.order("eliminato_il",{ascending:false}).limit(200);
+        }catch(e){ r=null; }
+        return {c:c, righe:(r&&!r.error&&r.data)||[], ko:!!(!r||r.error)};
+      }));
+      cestCache=[];
+      risposte.forEach(x=>x.righe.forEach(r=>cestCache.push({
+        tab:x.c.t, tipo:x.c.tipo, lab:x.c.lab, col:x.c.col,
+        nome:cestNome(x.c.tipo,r).slice(0,80), quando:r.eliminato_il, id:r.id, riga:r
+      })));
+      cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
+      /* ⚠️ se una tabella non ha risposto, «non lo so» non e' «zero»: il
+         pallino non si riscrive, se no direbbe meno del vero. */
+      if(!risposte.some(x=>x.ko)) cestSegnaPallino(cestCache.length);
+    }
+    const q=(cestQ||"").trim().toLowerCase();
+    const vis=cestCache.map((x,i)=>({x:x,i:i}))
+      .filter(v=>!q||(v.x.nome+" "+v.x.lab).toLowerCase().includes(q));
+    if(!cestCache.length){
+      box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Il cestino è vuoto. Quello che elimini finisce qui.</p>';return;
+    }
+    if(!vis.length){
+      box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Niente che si chiami così, fra le '+cestCache.length+' cose nel cestino.</p>';return;
+    }
+    box.innerHTML=vis.map(v=>`
+      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${v.x.col};padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <strong>${esc(v.x.nome)}</strong>
+          <span style="background:${v.x.col};color:#fff;font-size:13px;font-weight:700;padding:2px 9px;border-radius:10px">${esc(v.x.lab.toUpperCase())}</span>
+        </div>
+        <div style="color:#666;font-size:14px;margin-top:4px">Buttato il ${esc(cestQuando(v.x.quando))}</div>
+        <div style="margin-top:10px">
+          <button class="cest-apri" data-action="cest-apri" data-i="${v.i}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Apri</button>
+        </div>
+      </div>`).join("");
+  }
+
+  function schedaCestino(i){
+    const v=cestCache[i]; if(!v){toast("Questa riga non c'è più");return;}
+    let righe=[];
+    try{ righe=cestRighe(v.tipo,v.riga)||[]; }catch(e){ righe=[]; }
+    openSheet(`<h3>Nel cestino — ${esc(v.nome)}</h3>
+      <p style="color:#5b6672;font-size:14px;margin:0 0 12px">${esc(v.lab)} · buttato il ${esc(cestQuando(v.quando))}</p>
+      <table style="width:100%;border-collapse:collapse;font-size:15px;margin-bottom:14px">${
+        righe.map(r=>`<tr><td style="padding:6px 8px;color:#5b6672;border-bottom:1px solid #eef2f6;white-space:nowrap">${esc(r[0])}</td><td style="padding:6px 8px;border-bottom:1px solid #eef2f6;font-weight:600">${esc(r[1])}</td></tr>`).join("")
+        ||'<tr><td style="padding:6px 8px">Niente da mostrare.</td></tr>'}</table>
+      <div class="sheet-actions">
+        <button class="b-cancel" data-action="close">Annulla</button>
+        <button data-action="cest-mai" data-i="${i}" style="background:#fff;border:1px solid #e0b4b4;color:#c62828;border-radius:8px;padding:11px 16px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">Butta per sempre</button>
+        <button class="b-save" data-action="cest-su" data-i="${i}">Rimetti a posto</button>
+      </div>`);
+  }
+
+  async function cestRimetti(i){
+    const v=cestCache[i]; if(!v||!cestAcceso()) return;
+    const {data:ok,error}=await sb.raw(v.tab).update({eliminato_il:null})
+      .eq("id",v.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!ok||!ok.length){toast("Non rimesso a posto: nessuna riga modificata. Riprova.");return;}
+    closeSheet();
+    cestCache.splice(i,1); cestSegnaPallino(cestCache.length);
+    await renderCestinoNeg();
+    const f=CEST_RICARICA[v.tipo]; if(f) try{ f(); }catch(e){}
+    toast(v.lab+" rimesso a posto ✔");
+  }
+
+  async function cestPerSempre(i){
+    const v=cestCache[i]; if(!v||!cestAcceso()) return;
+    if(!confirm("Buttare per sempre «"+v.nome+"»?\nQuesta volta non si torna indietro davvero.")) return;
+    /* sb.raw e non sb.from: qui la cancellazione deve essere vera */
+    const {data:ok,error}=await sb.raw(v.tab).delete().eq("id",v.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!ok||!ok.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+    closeSheet();
+    cestCache.splice(i,1); cestSegnaPallino(cestCache.length);
+    await renderCestinoNeg();
+    toast(v.lab+" buttato per sempre");
+  }
+
+  /* js/cestino.js chiama questa quando qualcosa entra nel cestino: e' l'unico
+     punto da cui passano TUTTE le cancellazioni, cosi' non se ne dimentica
+     nessuna e il pallino non resta indietro. */
+  window.segnaCestinoDaRifare=function(){
+    if($("#cestino")&&$("#cestino").classList.contains("active")) renderCestinoNeg();
+    else cestSegnaPallino((parseInt($("#cnt-cestino")?$("#cnt-cestino").textContent:"0")||0)+1);
+  };
+
+  $('[data-tab="cestino"]')?.addEventListener("click",()=>renderCestinoNeg());
+  $("#cest-search")?.addEventListener("input",e=>{cestQ=e.target.value;renderCestinoNeg(true);});
+  document.addEventListener("click",e=>{
+    const t=e.target.closest("[data-action]"); if(!t) return;
+    const a=t.dataset.action, i=parseInt(t.dataset.i);
+    if(a==="cest-apri") return schedaCestino(i);
+    if(a==="cest-su")   return cestRimetti(i);
+    if(a==="cest-mai")  return cestPerSempre(i);
+  });
 
   /* ===== RESTYLING + STRUMENTI 2026: icone SVG, export dati, report negozio ===== */
   const _NICONS={
