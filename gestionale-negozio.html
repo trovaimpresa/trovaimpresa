@@ -351,7 +351,7 @@
     <div class="mk">🏪</div><h1>Gestionale Negozio</h1><small>Scegli il reparto</small>
   </div>
   <div class="wrap">
-    <p class="landing-sub">Ogni reparto è separato: lavori, clienti, squadra e calendario non si mischiano.</p>
+    <p class="landing-sub">Ogni reparto ha i suoi clienti e il suo calendario. Prodotti, magazzino, fornitori e preventivi sono in comune a tutti.</p>
     <div class="panels" id="panels"></div>
     <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
     <p style="text-align:center;font-size:13px;color:#8a949e;margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
@@ -650,7 +650,7 @@
         <button class="chip" data-stato="fatto">Fatti</button>
         <button class="chip" data-stato="da_incassare">Da incassare</button>
       </div>
-      <div class="filters"><input type="text" id="f-search" placeholder="Cerca cliente o lavoro..."></div>
+      <div class="filters"><input type="text" id="f-search" placeholder="Cerca cliente..."></div>
       <div id="jobs-list"></div>
     </section>
 
@@ -663,7 +663,7 @@
 
     <section id="galleria">
       <div class="sec-head"><h2>Galleria foto</h2></div>
-      <div class="gal-intro">Tutte le foto del reparto, divise per cantiere. Le foto <b>Da fare</b> le mette il capo per mostrarti il lavoro; le foto <b>Fatto</b> le caricate voi a lavoro finito. Usa i filtri qui sotto per trovarle.</div>
+      <div class="gal-intro">Tutte le foto di questo reparto: prodotti, bancali arrivati, danni alla merce. Usa i filtri qui sotto per trovarle.</div>
       <div class="filt-label">Filtra per tipo di foto</div>
       <div class="chiprow" id="gal-tipo">
         <button class="chip on" data-action="gal-tipo" data-v="">Tutte</button>
@@ -1020,7 +1020,14 @@
     let ps=state.panels||[];
     let rows=[];
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_lavori").select("mestiere_id,stato").eq("user_id",sbUid);
+      /* 26 agosto 2026 — LE PAROLE DEL NEGOZIO.
+         Qui si contavano i LAVORI (gest_lavori): dati dell'impresa, dentro il
+         negozio, in una sezione che qui e' pure spenta. Un ferramenta non ha
+         lavori «da fare», ha clienti.
+         ⛔ E non si possono contare i prodotti: quelli NON sono divisi per
+         reparto (li vedono tutti i reparti uguali), quindi ogni scheda
+         direbbe lo stesso numero e sembrerebbe un errore. I clienti si. */
+      const {data}=await sb.from("gest_clienti").select("mestiere_id").eq("user_id",sbUid);
       rows=data||[];
       /* FONTE PRIMARIA dei reparti = gest_mestieri su Supabase (visibili da qualsiasi browser/account).
          state.panels resta come cache/fallback locale: lo idratiamo dai mestieri così entrata (cur/curMestiere)
@@ -1046,11 +1053,11 @@
     }
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
-      const tot=mine.length, df=mine.filter(l=>l.stato!=="fatto").length;
+      const nCli=mine.length;
       return `<div class="panel-card" data-action="enter" data-p="${p.id}" style="border-top:4px solid ${p.a}">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
-        <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
+        <span class="pc-meta">${nCli?nCli+(nCli===1?" cliente":" clienti"):"Nessun cliente ancora"}</span></div>`;
     }).join(""):`<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`;
   }
 
@@ -1058,7 +1065,7 @@
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
     /* colore primario fisso: il colore del reparto resta solo come pallino accanto al nome */
     const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
-    $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Categoria "+p.nome;
+    $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Reparto "+p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
     filter={stato:"tutti",q:""};$("#f-search").value="";cal=new Date();
@@ -1720,7 +1727,7 @@
   function panelForm(){
     nuovoSel={icon:"🛠️",col:0};
     openSheet(`<h3>Nuovo reparto</h3>
-      <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Muratura, Idraulica, Giardini'}"></div>
+      <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Ferramenta, Colorificio, Edilizia, Giardinaggio'}"></div>
       <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
       <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
@@ -1912,7 +1919,7 @@
   async function renderGalleria(){
     if(!cur)return;
     const box=$("#gal-body");if(!box)return;
-    if(!sb||!sbUid){if($("#gal-op"))$("#gal-op").innerHTML="";box.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;return;}
+    if(!sb||!sbUid){if($("#gal-op"))$("#gal-op").innerHTML="";box.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Le foto si caricano dalla scheda del prodotto</small></div>`;return;}
     const [{data:foto},{data:lavori}]=await Promise.all([
       sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
       sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
@@ -1935,7 +1942,7 @@
         html+=`<div class="thumb"><img data-gfoto="${esc(f.id)}" data-action="view-foto" data-id="${esc(f.id)}">
           <span class="thtag ${tcls}">${tip}</span>${opName?`<span class="thop">${esc(opName)}</span>`:""}</div>`;});
       html+=`</div></div>`;});
-    box.innerHTML=any?html:`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;
+    box.innerHTML=any?html:`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Le foto si caricano dalla scheda del prodotto</small></div>`;
     for(const f of fs){
       try{const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
         if(su&&su.signedUrl){fotoCache[f.id]=su.signedUrl;const im=box.querySelector(`img[data-gfoto="${f.id}"]`);if(im)im.src=su.signedUrl;}
