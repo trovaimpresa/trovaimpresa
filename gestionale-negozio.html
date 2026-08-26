@@ -282,6 +282,45 @@
     .tb-btn span{display:none}
     .tb-btn.oro span{display:inline}
   }
+  /* ===== 26 agosto 2026 — LA RICERCA UNICA =====
+     Le classi stanno scritte qui dentro e non in css/gestionale.css: quel
+     foglio il negozio non lo carica (carica solo css/mobile.css). Misure
+     come nel resto della pagina: niente sotto i 13 px. */
+  .nc-barra{position:sticky;top:54px;z-index:24;background:#fff;
+    border-bottom:1px solid var(--line);padding:10px 18px}
+  .nc-box{position:relative;max-width:1040px;margin:0 auto}
+  .nc-lente{position:absolute;left:15px;top:50%;transform:translateY(-50%);
+    width:21px;height:21px;color:#8a949e;pointer-events:none}
+  #nc-q{width:100%;height:50px;padding:0 46px;border:2px solid #ccd4dd;border-radius:12px;
+    background:#fff;color:var(--ink);font-family:inherit;font-size:16px;font-weight:500;line-height:50px}
+  #nc-q::placeholder{color:#8a949e;font-weight:500}
+  #nc-q:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .nc-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;
+    border:none;border-radius:9px;background:transparent;color:var(--muted);
+    font-size:24px;line-height:1;cursor:pointer}
+  .nc-x:hover{background:var(--bg);color:var(--ink)}
+  .nc-pop{display:none;position:absolute;left:0;right:0;top:calc(100% + 8px);background:#fff;
+    border:1px solid #ccd4dd;border-radius:14px;box-shadow:0 12px 32px rgba(15,23,42,.18);
+    max-height:min(70vh,540px);overflow-y:auto;z-index:26;padding:6px 0}
+  .nc-pop.aperta{display:block}
+  .nc-gruppo + .nc-gruppo{border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+  .nc-cap{padding:10px 18px 6px;font-size:14px;font-weight:800;color:var(--muted);letter-spacing:.3px}
+  .nc-cap b{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:20px;
+    background:var(--bg);color:var(--muted);font-size:14px;font-weight:800}
+  .nc-riga{display:block;width:100%;text-align:left;border:none;background:transparent;
+    padding:11px 18px;font-family:inherit;cursor:pointer}
+  .nc-riga:hover,.nc-riga:focus{background:var(--accent-soft);outline:none}
+  .nc-t{display:block;font-size:16px;font-weight:700;color:var(--ink);line-height:1.45}
+  .nc-s{display:block;font-size:14px;color:var(--muted);line-height:1.5;margin-top:2px}
+  .nc-s span + span::before{content:" · ";color:#98a2ac}
+  .nc-vuoto,.nc-piu{padding:14px 18px;font-size:15px;color:var(--muted);line-height:1.5}
+  .nc-piu{padding-top:4px}
+  /* sul telefono la barra in alto non e' piu' appiccicata, quindi non lo e'
+     nemmeno la ricerca: se no resterebbe sospesa a meta' schermo */
+  @media(max-width:760px){
+    .nc-barra{position:static;padding:10px 12px}
+    .nc-pop{max-height:min(64vh,460px)}
+  }
   .main{flex:1;min-width:0;background:var(--bg)}
   .main .wrap{padding-top:26px;max-width:1080px}
   .kpi,.money,.card,.job,.fatt-row,.fatt-tot{border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,32,.04)}
@@ -418,6 +457,19 @@
     <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button>
     <button class="tb-btn" data-action="export-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/></svg><span>Backup</span></button>
     <button class="tb-btn oro" data-action="export-excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 6"/><path d="m15 13-6 6"/></svg><span>Esporta i miei dati</span></button>
+  </div>
+  <!-- ===== 26 agosto 2026 — LA RICERCA UNICA DEL NEGOZIO =====
+       Una casella sola: si scrivono due lettere ed escono insieme il
+       prodotto (anche per codice), il cliente, il fornitore e il
+       preventivo. Sta qui, sotto la barra, perche' vale per tutte le
+       sezioni e non per una sola. -->
+  <div class="nc-barra" id="nc-barra">
+    <div class="nc-box">
+      <svg class="nc-lente" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="text" id="nc-q" autocomplete="off" spellcheck="false" placeholder="Cerca: prodotto, codice, cliente, fornitore, preventivo">
+      <button type="button" class="nc-x" id="nc-x" title="Cancella la ricerca" aria-label="Cancella la ricerca">&times;</button>
+      <div class="nc-pop" id="nc-pop"></div>
+    </div>
   </div>
   <div class="wrap">
     <section id="riepilogo" class="active">
@@ -2306,9 +2358,18 @@
       if(!okDpr||!okDpr.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
       loadProdotti();return;
     }
-    if(ed){
-      const {data}=await sb.from("neg_prodotti").select("*").eq("id",ed.dataset.id).single();
-      if(!data)return;
+    if(ed) return prodApriModulo(ed.dataset.id);
+  });
+  /* ⚠️ 26 agosto 2026 — IL MODULO DEL PRODOTTO SI RIEMPIE QUI, e non piu'
+     dentro il clic su «Modifica»: da oggi ci arriva anche la ricerca in alto.
+     La riga si rilegge dal database e non dalla lista a schermo: la ricerca
+     puo' chiamarla senza che tu sia mai entrato nella sezione, e li' la
+     lista e' vuota. */
+  async function prodApriModulo(id){
+    if(!(sb&&sbUid))return;
+    {
+      const {data}=await sb.from("neg_prodotti").select("*").eq("id",id).maybeSingle();
+      if(!data){alert("Questo prodotto non c'è più: forse è nel Cestino.");return;}
       $("#np-nome").value=data.nome||""; $("#np-prezzo").value=data.prezzo??"";
       $("#np-quantita").value=data.quantita??""; $("#np-categoria").value=data.categoria||"";
       $("#np-soglia").value=data.soglia_minima??""; $("#np-codice").value=data.codice||"";
@@ -2322,7 +2383,7 @@
       editProdId=data.id; $("#np-save").textContent="Salva modifica";
       window.scrollTo({top:0,behavior:"smooth"});
     }
-  });
+  }
   async function loadMagazzino(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_prodotti")
@@ -2406,16 +2467,19 @@
       if(!okDf||!okDf.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
       loadFornitori();return;
     }
-    if(ed){
-      const {data}=await sb.from("neg_fornitori").select("*").eq("id",ed.dataset.id).single();
-      if(!data)return;
-      $("#nf-nome").value=data.nome||""; $("#nf-telefono").value=data.telefono||"";
-      $("#nf-email").value=data.email||""; $("#nf-indirizzo").value=data.indirizzo||"";
-      $("#nf-piva").value=data.piva||""; $("#nf-note").value=data.note||"";
-      editFornId=data.id; $("#nf-save").textContent="Salva modifica";
-      window.scrollTo({top:0,behavior:"smooth"});
-    }
+    if(ed) return fornApriModulo(ed.dataset.id);
   });
+  /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
+  async function fornApriModulo(id){
+    if(!(sb&&sbUid))return;
+    const {data}=await sb.from("neg_fornitori").select("*").eq("id",id).maybeSingle();
+    if(!data){alert("Questo fornitore non c'è più: forse è nel Cestino.");return;}
+    $("#nf-nome").value=data.nome||""; $("#nf-telefono").value=data.telefono||"";
+    $("#nf-email").value=data.email||""; $("#nf-indirizzo").value=data.indirizzo||"";
+    $("#nf-piva").value=data.piva||""; $("#nf-note").value=data.note||"";
+    editFornId=data.id; $("#nf-save").textContent="Salva modifica";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
   let editMovId=null;
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
@@ -2634,9 +2698,16 @@
       if(pvEditId===del.dataset.id)pvNuovo();
       pvCarica();return;
     }
-    if(ed){
-      const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",ed.dataset.id).maybeSingle();
-      if(!p)return;
+    if(ed) return pvApriModulo(ed.dataset.id);
+    if(acc)  return pvAccetta(acc.dataset.id);
+    if(pdf)  return pvPdf(pdf.dataset.id);
+  });
+  /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
+  async function pvApriModulo(id){
+    if(!(sb&&sbUid))return;
+    {
+      const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",id).maybeSingle();
+      if(!p){alert("Questo preventivo non c'è più: forse è nel Cestino.");return;}
       const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");
       pvEditId=p.id; pvRighe=rr||[];
       /* 26 agosto 2026 — si riapre com'era: stesso listino, stesso cliente.
@@ -2655,9 +2726,7 @@
       $("#pv-annulla").style.display="";
       pvRenderRighe(); window.scrollTo({top:0,behavior:"smooth"});return;
     }
-    if(acc)  return pvAccetta(acc.dataset.id);
-    if(pdf)  return pvPdf(pdf.dataset.id);
-  });
+  }
 
   /* Il cliente ha detto di sì: il preventivo diventa vendita e la merce
      esce dal magazzino. Si scaricano SOLO le righe prese dai prodotti:
@@ -2852,6 +2921,213 @@
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
+
+  /* ================================================================
+     LA RICERCA UNICA DEL NEGOZIO — 26 agosto 2026
+
+     Una casella sola in cima: due lettere ed escono insieme il prodotto
+     (anche per codice), il cliente, il fornitore e il preventivo. Si
+     clicca e ci si arriva sopra, col modulo gia' aperto.
+
+     ⚠️ DOVE SI CERCA NON E' UGUALE PER TUTTI. Prodotti, fornitori e
+        preventivi sono del NEGOZIO INTERO (come li tratta il Cestino:
+        reparto:false). I clienti sono del REPARTO in cui stai
+        (mestiere_id), come ogni altra lettura dei clienti. Sbagliare
+        questo vuol dire far uscire i clienti del Colorificio mentre stai
+        dentro la Ferramenta.
+     ⚠️ CERCANDO UN CLIENTE ESCONO ANCHE I SUOI PREVENTIVI. Il preventivo
+        si porta dentro il cliente_nome, ma non il telefono ne' la citta'
+        del cliente. Il testo del cliente si ATTACCA a quello del
+        preventivo, e poi si chiede che ci siano TUTTE le parole: cosi'
+        «rossi» tira fuori tutto di Rossi, «rossi villetta» solo quello.
+        Se fosse «o l'uno o l'altro», con due parole uscirebbe tutto.
+     ⚠️ LE RIGHE NEL CESTINO NON ESCONO: ci pensa js/cestino.js, che si
+        mette in mezzo a ogni sb.from(). Qui non si fa niente di speciale
+        apposta, per non avere la stessa regola in due posti.
+     ⚠️ I DATI SI LEGGONO QUANDO SI ENTRA NELLA CASELLA, non a ogni
+        lettera: se no ogni tasto sarebbero quattro interrogazioni al
+        database. Si rileggono ogni volta che ci si rientra, cosi' un
+        prodotto creato due minuti fa c'e' gia'.
+     ⚠️ UNA TABELLA CHE NON SI APRE NON SPEGNE TUTTA LA RICERCA: esce
+        quello che si riesce a leggere, e quello che manca SI DICE.
+     ================================================================ */
+  const NC_TETTO=2000;   /* righe per tabella al massimo */
+  const NC_QUANTE=6;     /* quante se ne mostrano per gruppo */
+  let ncDati=null, ncTimer=null, ncCaricando=false, ncTroncato=false, ncMancanti=[];
+  const NC_CAMPI={
+    prodotti:["nome","codice","categoria","unita","note"],
+    clienti:["nome","referente","telefono","email","citta","indirizzo","piva","cf","note"],
+    fornitori:["nome","telefono","email","indirizzo","piva","note"],
+    preventivi:["numero","cliente_nome","titolo","note"]
+  };
+  const NC_ST_PV={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
+  function ncPiatto(t){
+    return String(t==null?"":t).toLowerCase()
+      .replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
+      .replace(/[òóôö]/g,"o").replace(/[ùúûü]/g,"u");
+  }
+  /* si mettono insieme solo i campi che la riga ha davvero: «codice» c'e' su
+     un prodotto e non su un fornitore, e chiedere un campo che non c'e' non
+     deve far saltare niente */
+  function ncTesto(riga,campi){
+    let s="";
+    for(let i=0;i<campi.length;i++){
+      const v=riga[campi[i]];
+      if(v!=null&&v!=="")s+=" "+v;
+    }
+    return ncPiatto(s);
+  }
+  async function ncCarica(){
+    if(!sb||!sbUid)return "Non risulti collegato.";
+    const mid=curMestiere();
+    if(mid==null)return "Entra prima in un reparto.";
+    const delNegozio=t=>sb.from(t).select("*").eq("user_id",sbUid).limit(NC_TETTO);
+    const [rp,rf,rv,rc]=await Promise.all([
+      delNegozio("neg_prodotti"), delNegozio("neg_fornitori"), delNegozio("neg_preventivi"),
+      sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).limit(NC_TETTO)
+    ]);
+    ncMancanti=[];
+    const prendi=(r,come)=>{ if(r.error){ncMancanti.push(come);return [];} return r.data||[]; };
+    ncDati={
+      prodotti:prendi(rp,"prodotti"), fornitori:prendi(rf,"fornitori"),
+      preventivi:prendi(rv,"preventivi"), clienti:prendi(rc,"clienti")
+    };
+    ncTroncato=[rp,rf,rv,rc].some(r=>(r.data||[]).length>=NC_TETTO);
+    if(ncMancanti.length===4)return "Non riesco a leggere i dati: "+(rp.error||rf.error||rv.error||rc.error).message;
+    return null;
+  }
+  function ncTrova(q){
+    if(!ncDati)return null;
+    const parole=ncPiatto(q).split(/\s+/).filter(Boolean);
+    if(!parole.length)return null;
+    const dentro=testo=>parole.every(w=>testo.indexOf(w)>=0);
+    const testoCli={};
+    ncDati.clienti.forEach(c=>{ testoCli[String(c.id)]=ncTesto(c,NC_CAMPI.clienti); });
+    /* il preventivo scritto a mano non ha cliente_id: li' si cerca solo
+       dentro la riga, se no pescherebbe il testo di un cliente a caso */
+    const suo=r=>(r.cliente_id!=null&&testoCli[String(r.cliente_id)])?(" "+testoCli[String(r.cliente_id)]):"";
+    return {
+      prodotti:ncDati.prodotti.filter(p=>dentro(ncTesto(p,NC_CAMPI.prodotti))),
+      clienti:ncDati.clienti.filter(c=>dentro(ncTesto(c,NC_CAMPI.clienti))),
+      fornitori:ncDati.fornitori.filter(f=>dentro(ncTesto(f,NC_CAMPI.fornitori))),
+      preventivi:ncDati.preventivi.filter(v=>dentro(ncTesto(v,NC_CAMPI.preventivi)+suo(v)))
+    };
+  }
+  function ncMeta(){
+    const v=[];
+    for(let i=0;i<arguments.length;i++){ const x=arguments[i]; if(x)v.push('<span>'+esc(x)+'</span>'); }
+    return v.join("");
+  }
+  function ncRiga(tipo,id,titolo,sotto){
+    return '<button type="button" class="nc-riga" data-nc="'+esc(tipo)+'" data-id="'+esc(String(id))+'">'
+      +'<span class="nc-t">'+esc(titolo)+'</span>'
+      +(sotto?'<span class="nc-s">'+sotto+'</span>':'')+'</button>';
+  }
+  function ncBlocco(titolo,righe){
+    if(!righe.length)return "";
+    const piu=(righe.length>NC_QUANTE)
+      ? '<div class="nc-piu">Ce ne sono '+righe.length+': scrivi una parola in più per restringere.</div>' : "";
+    return '<div class="nc-gruppo"><div class="nc-cap">'+esc(titolo)+' <b>'+righe.length+'</b></div>'
+      +righe.slice(0,NC_QUANTE).join("")+piu+'</div>';
+  }
+  function ncDisegna(q){
+    const box=$("#nc-pop"); if(!box)return;
+    const r=ncTrova(q);
+    if(!r){box.innerHTML="";return;}
+    const eu=n=>"€ "+(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+    let h="";
+    h+=ncBlocco("Prodotti", r.prodotti.map(p=>{
+      const um=p.unita||"pz", sotto=(+p.quantita||0)<=(+p.soglia_minima||0);
+      return ncRiga("prod",p.id,p.nome||"(prodotto senza nome)",
+        ncMeta(p.codice?("cod. "+p.codice):"", eu(p.prezzo)+"/"+um,
+               (p.quantita==null?0:p.quantita)+" "+um+(sotto?" ⚠️ sotto scorta":"")));
+    }));
+    h+=ncBlocco("Clienti", r.clienti.map(c=>
+      ncRiga("cli",c.id,c.nome||"(cliente senza nome)",ncMeta(c.indirizzo||"",c.telefono||""))));
+    h+=ncBlocco("Fornitori", r.fornitori.map(f=>
+      ncRiga("forn",f.id,f.nome||"(fornitore senza nome)",ncMeta(f.telefono||"",f.email||""))));
+    h+=ncBlocco("Preventivi", r.preventivi.map(v=>
+      ncRiga("prev",v.id,"N. "+(v.numero||"—")+" · "+(v.cliente_nome||"—"),
+        ncMeta(v.titolo||"",NC_ST_PV[v.stato]||v.stato||""))));
+    if(!h)h='<div class="nc-vuoto">Nessun risultato per «'+esc(q)+'».</div>';
+    /* niente tagli silenziosi: se il conto e' arrivato al tetto, si dice */
+    if(ncTroncato)h+='<div class="nc-piu">Hai più di '+NC_TETTO+' righe in una sezione: cerco dentro le prime '+NC_TETTO+'.</div>';
+    if(ncMancanti.length)h+='<div class="nc-piu">Non riesco a leggere: '+esc(ncMancanti.join(", "))+'. Quello che c\'è lì dentro non esce.</div>';
+    box.innerHTML=h;
+  }
+  function ncApri(){ const b=$("#nc-pop"); if(b)b.classList.add("aperta"); }
+  function ncChiudi(){ const b=$("#nc-pop"); if(b){b.classList.remove("aperta");b.innerHTML="";} }
+  function ncAzzera(){ const i=$("#nc-q"); if(i)i.value=""; ncChiudi(); }
+  /* si va nella sezione col CLIC vero sul pulsante della barra a sinistra:
+     su quel pulsante e' attaccato anche il caricamento della sezione, e
+     cambiare le classi a mano lascerebbe la sezione vuota */
+  function ncVai(tab){
+    const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"]');
+    if(b)b.click();
+  }
+  async function ncPorta(tipo,id){
+    ncChiudi();
+    if(tipo==="prod"){ ncVai("prodotti");   return prodApriModulo(id); }
+    if(tipo==="forn"){ ncVai("fornitori");  return fornApriModulo(id); }
+    if(tipo==="prev"){ ncVai("preventivi"); return pvApriModulo(id); }
+    if(tipo==="cli"){
+      ncVai("clienti"); renderClienti();
+      /* ⛔ il cliente NON si prende da cliCache: se nella sezione Clienti non
+         ci sei mai entrato quella lista e' vuota e il clic non farebbe
+         niente, in silenzio. */
+      const {data,error}=await sb.from("gest_clienti").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      if(error){toast("Non riesco ad aprire il cliente: "+error.message);return;}
+      if(!data){toast("Questo cliente non c'è più: forse è nel Cestino");return;}
+      cliForm(data);
+    }
+  }
+  async function ncRicarica(){
+    if(ncCaricando)return null;
+    ncCaricando=true;
+    const err=await ncCarica();
+    ncCaricando=false;
+    if(err)ncDati=null;
+    return err;
+  }
+  function ncMostraErrore(msg){
+    const b=$("#nc-pop"); if(!b)return;
+    b.innerHTML='<div class="nc-vuoto">'+esc(msg)+'</div>';
+    ncApri();
+  }
+  function ncInit(){
+    const inp=$("#nc-q"); if(!inp)return;
+    inp.addEventListener("focus",async function(){
+      const err=await ncRicarica();
+      const v=inp.value.trim();
+      if(err){ if(v.length>=2)ncMostraErrore(err); return; }
+      if(v.length>=2){ ncDisegna(v); ncApri(); }
+    });
+    inp.addEventListener("input",function(){
+      clearTimeout(ncTimer);
+      const v=inp.value.trim();
+      if(v.length<2){ ncChiudi(); return; }
+      ncTimer=setTimeout(async function(){
+        if(!ncDati){ const err=await ncRicarica(); if(err){ncMostraErrore(err);return;} }
+        const q=inp.value.trim();
+        if(q.length<2){ ncChiudi(); return; }
+        ncDisegna(q); ncApri();
+      },220);
+    });
+    inp.addEventListener("keydown",function(e){
+      if(e.key==="Escape"){ ncAzzera(); inp.blur(); }
+    });
+    const x=$("#nc-x"); if(x)x.addEventListener("click",function(){ ncAzzera(); inp.focus(); });
+    /* fuori dalla casella si chiude; dentro no, se no il clic sul risultato
+       la chiuderebbe prima di arrivarci */
+    document.addEventListener("click",function(e){
+      if(!e.target.closest("#nc-barra"))ncChiudi();
+    });
+    document.addEventListener("click",function(e){
+      const r=e.target.closest(".nc-riga"); if(!r)return;
+      ncPorta(r.dataset.nc,r.dataset.id);
+    });
+  }
+  ncInit();
 
   /* ================================================================
      IL CESTINO DEL NEGOZIO — 26 agosto 2026
