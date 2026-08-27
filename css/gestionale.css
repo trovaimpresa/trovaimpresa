@@ -3291,12 +3291,27 @@ body:has(#ti-fondatore) .sheet--grande.sh-lunga{
    funzione» tagliata. Stesso rimedio della finestra: quando la barra c'e',
    il menu parte da sotto ed e' alto quel tanto in meno.
    Per chiunque non sia io la barra non esiste e non cambia niente. */
-body:has(#ti-fondatore) .side{
-  top:46px;
-  height:calc(100vh - 46px);
-}
-@supports (height:100dvh){
-  body:has(#ti-fondatore) .side{ height:calc(100dvh - 46px); }
+/* ⛔ 27 agosto 2026 (sera) — SOLO DA SCRIVANIA (min-width:881px).
+   Senza quel vincolo la regola valeva anche sul telefono, dove il menu di
+   sinistra NON e' una colonna alta 100vh: e' una barra in cima, alta una
+   cinquantina di pixel. Con «height:calc(100vh - 46px)» quella barra
+   diventava alta quanto tutto lo schermo, e la barra blu piu' tutto il
+   contenuto finivano sotto la prima schermata: si apriva il gestionale e
+   si vedeva una pagina bianca da scorrere.
+   ⚠️ E' una questione di specificita': «body:has(...) .side» batte il
+   «.side{height:auto}» della media query del telefono, che nel foglio sta
+   piu' in alto. Riordinare le righe non sarebbe bastato.
+   Valeva per TUTTI E QUATTRO i gestionali (imprese, negozio, noleggio,
+   operatore), perche' la regola sta nel foglio in comune. Si vedeva solo
+   con la barra FONDATORE accesa, cioe' solo da me. */
+@media(min-width:881px){
+  body:has(#ti-fondatore) .side{
+    top:46px;
+    height:calc(100vh - 46px);
+  }
+  @supports (height:100dvh){
+    body:has(#ti-fondatore) .side{ height:calc(100dvh - 46px); }
+  }
 }
 
 /* ============================================================

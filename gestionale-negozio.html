@@ -39,12 +39,15 @@
   #app-root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--ink);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-  /* LANDING */
-  .landing-top{background:linear-gradient(135deg,#1f446f,#143f33);color:#fff;padding:30px 16px 26px;text-align:center}
-  .landing-top small{display:block;font-size:13px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-top:4px}
+  /* LANDING
+     ⛔ 27 agosto 2026 (sera) — .landing-top, .landing-top small e
+     .new-rep-btn stavano scritte qui con dei colori loro: un fondo a
+     sfumatura blu-verde invece del --blu-scuro del gestionale, e il
+     tratteggio verdino #c3d3cb. Tolte: le stesse classi stanno in
+     css/gestionale.css (righe ~59-62 e ~202) ed e' quello che vale.
+     Restano qui sotto solo le due cose diverse davvero del negozio. */
   @media(min-width:640px){.panels{grid-template-columns:repeat(3,1fr)}}
   .panel-card .pc-meta{font-size:13px;font-weight:600;opacity:.95;margin-top:auto}
-  .new-rep-btn{display:block;width:100%;max-width:560px;margin:16px auto 0;background:#fff;border:2px dashed #c3d3cb;color:var(--accent-d);border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:var(--shadow)}
 
   /* HEADER pannello */
   header.top{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;
@@ -198,15 +201,16 @@
   .overlay{background:rgba(15,22,30,.5);backdrop-filter:blur(2px)}
   .sheet{max-width:640px;min-height:0;margin:38px auto;border-radius:14px;padding:26px 26px 16px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
   .field input,.field select,.field textarea{border-radius:9px}
-  .landing-top{background:linear-gradient(135deg,#14324e,#1a3f7d);position:relative}
-  .lt-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-  .lt-btn.gold{background:#f5b301;border-color:#f5b301;color:#3d2e00;font-weight:800}
-  @media(max-width:640px){.lt-actions{position:static;justify-content:center;margin-bottom:12px}}
+  /* ⛔ 27 agosto 2026 (sera) — LA BARRA DELLA SCHERMATA DEI REPARTI.
+     Qui c'erano .landing-top (sfumatura blu sua), .lt-btn, .lt-btn.gold
+     (il pulsante giallo «Esporta dati») e la media query di .lt-actions.
+     Tolte tutte: sono le stesse classi di css/gestionale.css (righe
+     ~558 e ~602-606), che la pagina carica. Il giallo nel gestionale
+     non esiste: nelle imprese i cinque pulsanti sono tutti uguali. */
   .panel-card{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,32,.06);padding:18px;min-height:132px}
   .panel-card h2{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#161e26}
   .panel-card .pc-ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:21px;margin-bottom:2px}
   .pc-del{background:#f1f4f7;color:#8a949e;width:30px;height:30px;border-radius:8px;font-size:13px}
-  .new-rep-btn{border:1.5px dashed #c6cfd8;color:var(--accent-d);background:#fff}
   .burger{display:none;margin-left:auto;background:#f1f4f7;border:none;border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:#3c4854;flex:0 0 auto}
   @media(min-width:760px){.rep-grid{grid-template-columns:1fr 1fr}}
   .rep-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(16,24,32,.04)}
@@ -311,9 +315,13 @@
 <div id="landing">
   <div class="landing-top">
     <div class="lt-actions">
+      <!-- 27 agosto 2026 (sera) — stessi pulsanti della landing delle
+           imprese (gestionale-app.html righe 36-46), tolto «Noleggio»
+           che li' porta al gestionale dei mezzi. Nessuno e' giallo. -->
       <button class="lt-btn" data-action="azienda">⚙ Dati azienda</button>
+      <button class="lt-btn" data-action="commercialista">📄 Commercialista</button>
       <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
-      <button class="lt-btn gold" data-action="export-excel">⬇ Esporta dati</button>
+      <button class="lt-btn" data-action="export-excel">⬇ Esporta dati</button>
     </div>
     <div class="mk">🏪</div><h1>Gestionale Negozio</h1><small>Scegli il reparto</small>
   </div>
