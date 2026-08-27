@@ -132,9 +132,9 @@ Fammi vedere le alternative con una figura, non con un elenco a parole.
 3. **Fatture del negozio**: dice ancora «Lavori finiti da fatturare». Non è
    una parola da cambiare, è una decisione mia — in un negozio si fattura un
    preventivo accettato. Fammi vedere come sarebbe, poi decido.
-4. **La grafica dentro il negozio**: prodotti, preventivi e fornitori hanno
-   ancora schede fatte a mano invece delle carte del gestionale. E i nove
-   `openSheet()` che dovrebbero essere `openSheetGrande()`.
+4. **LA GRAFICA DEL NEGOZIO — vedi in fondo a questo file.** Le schede e le
+   finestre grandi sono fatte, ma il negozio **sembra ancora un altro
+   programma**. E' il lavoro piu' grosso che resta.
 
 ## Le due decisioni mie ancora ferme
 
@@ -147,17 +147,127 @@ Non decidere tu: ricordamele quando arriviamo lì.
 
 ## Dove sono le cose
 
-* Il negozio: `gestionale-negozio.html` — md5 al 26 agosto
-  `5d741102108cb657564b4ef625374375`.
+* Il negozio: `gestionale-negozio.html` — md5 al 27 agosto sera
+  `d9c9462d12067ab75c2ea6b0f3ab3f9a`.
 * Le imprese: `gestionale-app.html` (~950 KB). Il conto della fattura sta
   **fuori**, in `js/gest-fatture.js`: se cerchi il codice della fattura nella
   pagina non lo trovi.
 * Il noleggio: `gestionale-noleggio.html`. Il suo conto: `js/noleggio-prezzo.js`.
 * Il cestino: `js/cestino.js` (md5 `20fbce9af3b0f167d9eb81c3d7a7bf41`).
   Il cancello: `js/gate-gestionale.js`.
-* ⚠️ `gestionale-negozio.html` **non carica `css/gestionale.css`**: carica
-  solo `css/mobile.css`. Le classi copiate dall'impresa vanno **riscritte
-  dentro la pagina**.
+* ✅ Dal 27 agosto `gestionale-negozio.html` **carica `css/gestionale.css`**
+  (oltre a `css/mobile.css`). Le classi buone del gestionale ci sono gia':
+  **si usano, non si riscrivono.** Il 27 agosto sera sono state tolte 169
+  righe di stile doppie proprio per questo.
 * Le query già eseguite oggi: `sql/neg-preventivi-cestino.sql` (risposta 1) e
   `sql/neg-listini.sql` (risposta 4).
 * Il controllo prima di pubblicare: `node tools/controllo-push.js`.
+
+
+---
+
+# ⛔ IL LAVORO CHE MI PREME DI PIU': LA GRAFICA DEL NEGOZIO
+
+
+## IL LAVORO
+
+**`gestionale-negozio.html` ha una grafica tutta sua. Va rifatta uguale a
+`gestionale-app.html` (il gestionale imprese).**
+
+Non «somigliante»: **uguale**. Il negozio deve sembrare la stessa applicazione,
+con dentro le parole del negozio.
+
+Il file da cui si copia è **`gestionale-app.html`** + **`css/gestionale.css`**.
+Da ieri il negozio carica già `css/gestionale.css`: **le classi buone ci sono
+già, basta usarle** invece di riscriverne di nuove.
+
+Usa la skill **`stessa-forma`**: si apre il file di riferimento e si copia riga
+per riga. Non si inventa un colore, non si inventa una misura.
+
+---
+
+## QUELLO CHE HO GIÀ TROVATO (non ripartire da zero)
+
+### 1. La barra in alto — la più visibile
+
+| | IMPRESE | NEGOZIO oggi |
+|---|---|---|
+| classe | `.topbar` (sta in `css/gestionale.css`, riga ~733) | `.topbar-neg`, **scritta a mano dentro la pagina** |
+| a sinistra | freccia indietro + pallino colorato + **nome del reparto** + «Reparto attivo» (`.tb-left` / `.tb-id`) | **niente** — il reparto sta nella colonna |
+| pulsanti | 5: Dati azienda · **Commercialista** · Backup · Esporta · **Aiuto** (bianco, `.tb-help`) | 3: Dati azienda · Backup · **Esporta i miei dati** (giallo) |
+| colore | blu del gestionale | blu scuro diverso |
+
+⛔ **Mancano «Commercialista» e «Aiuto».** «Esporta i miei dati» giallo non
+esiste nel gestionale: nelle imprese è «Esporta», uguale agli altri.
+
+**Da fare:** buttare `.topbar-neg` (markup + CSS locale) e mettere lo **stesso
+identico blocco `<header class="topbar">`** delle imprese (`gestionale-app.html`
+righe ~174-190), con il nome del reparto dentro. Se un pulsante nel negozio non
+ha senso, **chiedimelo prima di toglierlo** — non deciderlo da solo.
+
+### 2. Il Riepilogo — la differenza più grossa
+
+- **Imprese**: una **griglia di carte**. Ogni carta = icona colorata in un
+  quadratino, titolo, pallino verde/rosso a destra, **numerone**, una riga di
+  spiegazione, e **due righe di elenco** sotto una linea.
+  Le funzioni sono `rieCard()` e `numCard()`; lo stile sta in
+  `css/gestionale.css` (~1137-1300 e ~3651-3678).
+- **Negozio**: sei **riquadri piatti** (PRODOTTI · SOTTO SCORTA · MOVIMENTI ·
+  VALORE MAGAZZINO · Venduto · Acquistato) e poi un elenco a parte. Nessuna carta.
+
+**Da fare:** il Riepilogo del negozio diventa una griglia di carte come le
+imprese — una carta per sezione (Prodotti, Magazzino, Movimenti, Preventivi,
+Clienti, Fatture, Fornitori, Report, Calendario, Galleria), con dentro le due
+righe più utili.
+
+### 3. La colonna di sinistra
+
+- **Imprese**: in cima **subito le due card** («Chiedi una funzione»,
+  «Assistenza diretta»), poi i gruppi. Nessun pulsante grande.
+- **Negozio**: in cima il nome del reparto, poi **«+ Nuovo prodotto»** blu, poi
+  le due card.
+
+### 4. E TUTTO IL RESTO
+
+⚠️ **Quello sopra è solo quello che si vede dal Riepilogo.** Alessio ha detto:
+**«non è solo il riepilogo, è tutto il gestionale negozio, tutte le sue
+funzioni»**. Quindi:
+
+**Prima cosa da fare, prima di toccare il codice:**
+apri le stesse sezioni nei due gestionali, **fotografale una accanto all'altra**
+(Playwright + Chromium sono già nel contenitore, il finto del negozio è
+`finto-negozio.js`, quello delle imprese `finto-impresa.js`), e fai **l'elenco
+completo** delle differenze, sezione per sezione:
+
+Riepilogo · Prodotti · Magazzino · Movimenti · Preventivi · Clienti · Fatture ·
+Fornitori · Report · Calendario · Galleria · Cestino · e le finestre che si aprono.
+
+Poi **mostra le foto affiancate ad Alessio** e fatti dire da dove partire.
+
+---
+
+## COME SI LAVORA (le regole che valgono sempre)
+
+- **Una cosa per volta**, finita e consegnata, prima della prossima.
+- ⛔ **Mai testo sotto i 13 px.**
+- ⛔ **Nessun comando git dalla cartella collegata.** Il push lo fa Alessio.
+  Il blocco git su **una riga**, preceduto da `node tools/controllo-push.js`,
+  e nel `git add` **solo i file toccati** (`prove-claude/` è nel `.gitignore`).
+- ⛔ **I file li scrive Claude direttamente in cartella** (`device_commit_files`),
+  con l'**md5 verificato sul posto**. Alessio non scarica niente dalla chat.
+- **Consegna = quattro cose:** banco verde · controllo verde · md5 uguale dalle
+  due parti · blocco git. Più i passi numerati da cliccare.
+- I banchi del negozio: **298 prove** (funzionamento) + **17** (scritte).
+  Devono restare verdi.
+- ⚠️ Se Alessio non capisce, **non rispiegare a parole: costruisci la figura,
+  fotografala, fagliela vedere.**
+
+---
+
+## LA COSA PIÙ IMPORTANTE
+
+Alessio ha dovuto dire **cinque volte** che la grafica del negozio è diversa,
+e ogni volta gli è stato risposto che era a posto. **Non è a posto.**
+
+Prima di dire «fatto», **metti le due foto una accanto all'altra e guardale**.
+Se non sembrano la stessa applicazione, non è fatto.
