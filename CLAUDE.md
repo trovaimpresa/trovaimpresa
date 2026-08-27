@@ -16372,3 +16372,84 @@ Zip: `prove-claude/banco-imprese-funziona-27ago.zip`.
    spese, e la fattura fatta da un lavoro o da un preventivo.
 4. **Fatture del negozio** — la decisione.
 5. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+
+# 27 AGOSTO 2026 (3) — LA PARCELLA DELLO STUDIO TECNICO
+
+**La matematica più delicata di tutto il gestionale**, e fino a oggi il banco
+non la toccava nemmeno: girava come **impresa edile**, e per un'impresa edile
+cassa, ritenuta e spese art. 15 **non esistono — le caselle non ci sono proprio
+nella pagina**. Una prova che le cercava col ruolo sbagliato sarebbe restata
+verde senza provare niente.
+
+⚠️ Adesso il finto sa fare **tre ruoli**: `impresa`, `professionista`, e
+`professionista` in `RF19` (forfettario).
+
+Banco imprese: **198 prove · 198 verdi · 0 rosse** · **56 sabotaggi · 56 visti**.
+⛔ **Nessun file del sito toccato** (`49d89af5c29f541538b83dbc64c416cf` e
+`ead9aeedb462a3631901c645023fc301`).
+
+## Il caso, e i numeri
+
+2.000 € di compenso · cassa geometri 4% · 200 € di rimborso spese · 100 € di
+spese anticipate art. 15 · ritenuta 20%.
+
+| | |
+|---|---|
+| Compenso | 2.000,00 |
+| Cassa 4% | **80,00** |
+| Rimborso spese | 200,00 |
+| Spese anticipate (fuori IVA) | 100,00 |
+| Totale imponibile | 2.380,00 |
+| IVA | **501,60** |
+| Ritenuta 20% | **− 440,00** |
+| **Totale fattura** | **2.881,60** |
+| **Netto a pagare** | **2.441,60** |
+
+## Le tre regole che valgono soldi veri
+
+1. ⛔ **La cassa sta SOLO sul compenso.** 4% di 2.000 = 80. Non di 2.200, non
+   di 2.300: i rimborsi di spese vive restano fuori.
+2. ⛔ **Le spese anticipate art. 15 non pagano l'IVA.** L'IVA sta su 2.280, non
+   su 2.380. Su 150 € di bolli e visure sono **33 € di IVA in meno**.
+3. ⛔ **La ritenuta sta sul compenso AL NETTO DELLO SCONTO**, più il rimborso
+   spese. Con 500 € di sconto diventa **340,00, non 440,00** — è il difetto
+   corretto il 13 agosto, e valeva **400 € su una parcella da 10.000**.
+
+Più il **forfettario** (niente IVA anche se la riga dice 22%) e ⛔ **la cassa
+senza il suo codice**, che blocca il file per lo SDI: prima dichiarava INPS
+anche a un geometra.
+
+## ⛔ QUELLO CHE I SABOTAGGI HANNO TROVATO — DUE COPIE DELLA STESSA FORMULA
+
+Rompendo apposta la formula della ritenuta dentro **`fattConti`**, il riquadro
+**«Il conto» restava GIUSTO**. Il motivo: quel riquadro la ritenuta **se la
+ricalcola per conto suo**, dentro **`fattDisegnaSomma`** (js/gest-fatture.js,
+riga ~761). È una **seconda copia**.
+
+⚠️ **Oggi le due copie dicono lo stesso numero, quindi non è un difetto.** Ma è
+**esattamente la forma del difetto del 13 agosto**: due posti che calcolano la
+stessa cosa, e un giorno uno cambia e l'altro no. Il cliente legge un numero
+sullo schermo, ne bonifica un altro, e all'Agenzia ne arriva un terzo.
+
+⛔ **Il gestionale NON è stato cambiato** — non c'era niente di rotto da
+sistemare, e unire le due copie è una decisione, non una riparazione. È stata
+aggiunta una prova (**S-E**) che **lega i tre posti**: schermo, PDF e file per
+lo SDI devono dire lo stesso numero. Il giorno che si scollano, diventa rossa.
+
+**Se un giorno si vuole unirle**, il posto è `fattDisegnaSomma`: farle chiamare
+`fattConti` invece di rifare il conto. È una riga, ma tocca il numero che si
+vede tutti i giorni, quindi va deciso e collaudato a mano.
+
+⛔ **LA REGOLA CHE RESTA:** quando un sabotaggio non si vede, la domanda giusta
+non è «la prova è debole?» ma **«quante copie ci sono di questa formula?»**.
+
+Zip: `prove-claude/banco-imprese-parcella-27ago.zip`.
+
+## COSA RESTA, IN ORDINE
+
+1. **Il collaudo a mano del negozio** — sabato mattina.
+2. **Il resto del banco imprese**: cestino, ricerca, calendario, squadra, ore,
+   spese, e la fattura fatta da un lavoro o da un preventivo.
+3. **Fatture del negozio** — la decisione.
+4. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+5. Da valutare: **unire le due copie della ritenuta** (vedi sopra).
