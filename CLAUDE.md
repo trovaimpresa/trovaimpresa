@@ -16304,3 +16304,71 @@ Zip: `prove-claude/banco-imprese-funziona-27ago.zip`.
 ⛔ `admin.html` (le 87 scritte piccole) resta fuori: Alessio ha detto che per
 adesso non interessa. **La priorità è finire il gestionale e aprirlo agli
 iscritti.**
+
+# 27 AGOSTO 2026 (2) — IL FILE PER LO SDI: LA STRADA DEI SOLDI È COPERTA
+
+L'ultimo metro, e l'unico che finisce **davvero all'Agenzia delle Entrate**.
+Il PDF lo legge un cliente e se sbaglia una virgola te lo dice; questo lo legge
+una macchina, e se sbaglia **lo scarta** senza spiegare troppo.
+
+Banco imprese: **154 prove · 154 verdi · 0 rosse** · **47 sabotaggi · 47 visti**
+(stanotte erano 89 e 25).
+
+⛔ **Nessun file del sito toccato**, di nuovo: `gestionale-app.html`
+(`49d89af5c29f541538b83dbc64c416cf`) e `js/gest-fatture.js`
+(`ead9aeedb462a3631901c645023fc301`) sono quelli di ieri.
+
+## ⛔ COME SI PRENDE UN FILE CHE VIENE SCARICATO
+
+Il gestionale non manda niente a nessun server: costruisce il testo XML, ne fa
+un `Blob` e lo fa scaricare al browser. Il banco si mette in mezzo con un finto
+`URL.createObjectURL` che il testo se lo legge, e un finto click che **non
+scarica niente** — se no il browser di prova apre finestre e si impunta.
+
+⚠️ **È la stessa strada del PDF**, con un aggancio diverso: là si sostituisce
+`window.jspdf`, qui `URL.createObjectURL`. Vale anche per l'export Excel e per
+ogni altro file che il gestionale fa scaricare.
+
+## Cosa tiene fermo la famiglia X
+
+La busta **FPR12** · il **codice destinatario `0000000`** del condominio (chi
+non ha un canale: la fattura gli arriva nel cassetto fiscale) · la **PEC che
+NON c'è** quando c'è già il codice — messe insieme lo SDI scarta · la P.IVA
+senza punti · ⛔ il **regime col codice `RF01`, non a parole** · `TD01` · `EUR`
+· il numero · ⛔ **i numeri col PUNTO, mai con la virgola** (c'è una prova che
+pretende che *nessun* numero ce l'abbia) · la riga con linea, descrizione,
+totale e aliquota · il **riepilogo per aliquota** (imponibile 950, imposta 209)
+· l'**IBAN senza spazi** · e che il file **si scarica una volta sola**.
+
+**E i tre casi in cui il file NON si deve fare:** P.IVA che non torna · cliente
+senza codice destinatario né PEC (e il messaggio dice cosa scrivere: `0000000`)
+· ⛔ **una bozza**, dove il pulsante **non c'è proprio**, mentre «Crea il PDF»
+c'è lo stesso.
+
+## ⛔ DUE COSE SBAGLIATE NEL FINTO, non nel gestionale
+
+Nessuna delle due era un difetto della pagina. Erano **dati di prova sbagliati**
+che facevano sembrare verde un banco che misurava sopra una bugia.
+
+1. La **P.IVA `01122334455` non passava la cifra di controllo** (l'ultima cifra
+   si calcola dalle altre dieci). Il gestionale se ne accorgeva e si fermava:
+   **aveva ragione lui**. Adesso il finto dice `01122334459`.
+2. Il **regime fiscale era scritto `ordinario`**, a parole. Lo SDI vuole il
+   **codice**, ed è quello che il menu dei Dati azienda salva davvero (`RF01`).
+
+⛔ **LA REGOLA CHE RESTA:** quando il gestionale si ferma e dice «non posso», la
+prima cosa da guardare non è il gestionale — è **se i dati di prova sono veri**.
+Un finto con dati impossibili prova cose impossibili.
+
+Zip: `prove-claude/banco-imprese-funziona-27ago.zip`.
+
+## COSA RESTA, IN ORDINE
+
+1. **Il collaudo a mano del negozio** — sabato mattina.
+2. **La parcella dello studio tecnico** (cassa e ritenuta) e il **forfettario**:
+   è la matematica più delicata del gestionale, e il banco gira come impresa
+   edile, quindi non la tocca nemmeno.
+3. **Il resto del banco imprese**: cestino, ricerca, calendario, squadra, ore,
+   spese, e la fattura fatta da un lavoro o da un preventivo.
+4. **Fatture del negozio** — la decisione.
+5. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
