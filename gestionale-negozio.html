@@ -495,6 +495,19 @@
            ⚠️ Le classi .side-group e .tab-cnt nelle imprese stanno in
            css/gestionale.css, che il negozio NON carica: lo stile e' stato
            riscritto nello <style> di questa pagina. -->
+      <!-- ===== 27 agosto 2026 — LE DUE CARD, ANCHE NEL NEGOZIO =====
+           Alessio: «mancano le due card al negozio». Vero: c'erano solo nel
+           gestionale imprese.
+           ⛔ MA LE DUE SEZIONI NON SONO STATE COPIATE QUI DENTRO, ed e' voluto.
+              «Chiedi una funzione» e «Assistenza diretta» hanno il loro
+              codice, la loro tabella e una chat in tempo reale: copiarle qui
+              vorrebbe dire tenerne DUE COPIE — e stamattina abbiamo visto
+              cosa costano due copie della stessa cosa (la ritenuta, che il
+              riquadro «Il conto» si ricalcolava per conto suo).
+              Sono cose dell'ACCOUNT, non del negozio: qui ci sono le due
+              card, e portano dove quelle cose vivono gia'. -->
+      <button class="tab-cta" data-action="vai-gest" data-v="richieste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><span class="cta-txt"><b>Chiedi una funzione</b><small>Ti manca qualcosa? La costruiamo</small></span></button>
+      <button class="tab-cta" data-action="vai-gest" data-v="assistenza"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="cta-txt"><b>Assistenza diretta</b><small>Ti rispondo io, di persona</small></span></button>
       <div class="side-group">Il banco</div>
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
       <button data-tab="prodotti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg><span>Prodotti</span><span class="tab-cnt" id="cnt-prodotti"></span></button>
@@ -2306,6 +2319,8 @@
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
+    /* le due card della barra: portano dove quelle cose vivono davvero */
+    if(a==="vai-gest"){location.href="/gestionale-app.html#"+(t.dataset.v||"riepilogo");return;}
     /* 26 agosto 2026 (sera) — le azioni che stanno DENTRO le schede */
     if(a==="prod-modifica"){closeSheet();return prodApriModulo(id);}
     if(a==="prod-elimina"){
