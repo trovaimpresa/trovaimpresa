@@ -16447,6 +16447,53 @@ Zip: `prove-claude/banco-imprese-parcella-27ago.zip`.
 
 ---
 
+---
+
+# 27 AGOSTO 2026 (4) — LA GRAFICA DEL NEGOZIO: IL FOGLIO CHE NON CARICAVA
+
+## Alessio l'ha dovuto dire tre volte
+
+«a me sembra tutto uguale» · «la grafica è diversa» · «è tutta da costruire».
+
+Le prime due volte la risposta è stata sbagliata: si andava a sistemare **una
+scheda per volta**. Solo alla terza si è guardato in cima al file, ed era lì:
+
+⛔ **`gestionale-negozio.html` non caricava `css/gestionale.css`.**
+Caricava solo `css/mobile.css`. Il foglio con cui sono disegnati gli altri due
+gestionali — 2.754 righe — nel negozio non entrava proprio. Per mesi ogni pezzo
+di grafica del negozio è stato **riscritto a mano dentro la pagina**, e ogni
+volta veniva un po' diverso.
+
+**La riparazione è una riga**, alla riga 9:
+
+```html
+<link rel="stylesheet" href="/css/gestionale.css">
+```
+
+## Le due cose venute dietro
+
+1. ⚠️ **`gestionale.css` spegne `.side-top`** (`display:none`): nelle imprese il
+   reparto in cui sei si legge altrove, nel negozio quella riga è **l'unica che
+   lo dice**. Senza, non sai in che reparto stai. Rimessa con
+   `.side .side-top{display:flex!important}`.
+   ⛔ **Trovato A OCCHIO.** I due banchi erano verdi tutti e due: non è un
+   errore e non è una scritta piccola, è **una cosa che sparisce** — e quello
+   si vede solo guardando.
+
+2. **Le due card nella barra** («Chiedi una funzione» e «Assistenza diretta»),
+   che c'erano solo nelle imprese. ⛔ Le due sezioni **non** sono state copiate
+   nel negozio: le card portano al gestionale imprese
+   (`data-action="vai-gest"`), dove quelle sezioni vivono già.
+
+## La regola che resta
+
+⛔ **Quando Alessio dice «è tutta da costruire», non sta esagerando: sta
+descrivendo una causa sola.** Se la risposta è «sistemo questa scheda», si sta
+curando il sintomo. La domanda giusta è **«questa pagina carica gli stessi
+fogli delle altre?»** — e si guarda in cima al file, non in mezzo.
+
+---
+
 # 27 AGOSTO 2026 (sera) — LE 169 RIGHE DI STILE DOPPIE, TOLTE
 
 ## Il problema
@@ -16522,11 +16569,26 @@ Il rumore misurato è ~20 pixel: la soglia è fissata a **200**. Un difetto da
 Un confronto a foto senza spegnere le animazioni misura *quando* hai scattato,
 non *cosa* c'è nella pagina.
 
-## COSA RESTA, IN ORDINE
+## COSA RESTA, IN ORDINE — aggiornato la sera del 27 agosto 2026
 
-1. **Il collaudo a mano del negozio** — sabato mattina.
+**Fatto oggi:** il giro della merce · le schede col solo «Apri» e la finestra
+grande · il PDF della fattura · il file per lo SDI · la parcella dello studio
+tecnico · la grafica del negozio (il foglio condiviso + le due card) · le 169
+righe di stile doppie tolte.
+
+1. **Il collaudo a mano del negozio** — sabato mattina, a mente fresca.
+   Sono ~31 passi numerati più il giro della merce e le due card nuove.
 2. **Il resto del banco imprese**: cestino, ricerca, calendario, squadra, ore,
    spese, e la fattura fatta da un lavoro o da un preventivo.
-3. **Fatture del negozio** — la decisione.
-4. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
-5. Da valutare: **unire le due copie della ritenuta** (vedi sopra).
+3. **Fatture del negozio** — la decisione, non un lavoro: oggi la sezione dice
+   «Lavori finiti da fatturare», ma in un negozio si fattura un **preventivo
+   accettato**. Serve solo che Alessio guardi una figura e dica sì o no.
+4. **Le scritte piccole di `admin.html`** — 87 sotto i 13 px, più 6 accenti
+   scritti con l'apostrofo. Alessio: «non è un lavoro che per adesso mi
+   interessa». Resta lì finché non lo chiede.
+5. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+6. Da valutare: **unire le due copie della ritenuta** (`fattDisegnaSomma` →
+   `fattConti`). Tocca un numero che si vede tutti i giorni: va deciso.
+
+⛔ **La priorità dichiarata da Alessio resta una sola:**
+**finire il gestionale e aprirlo agli iscritti.**
