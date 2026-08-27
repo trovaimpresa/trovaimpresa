@@ -421,9 +421,27 @@
     .sh-riga{flex-direction:column;gap:2px}
     .sh-riga .k{flex:none}
   }
-  /* il pulsante «Apri» delle schede: uno solo, fuori. Tutto il resto sta dentro. */
-  .carta-apri{font-size:15px;font-weight:700;padding:9px 20px;border:none;border-radius:9px;
-    background:#0066ff;color:#fff;cursor:pointer;font-family:inherit}
+  /* ================================================================
+     27 agosto 2026 — LA CARTA DEL GESTIONALE, anche nel negozio.
+     Alessio: «e' completamente differente dal resto del gestionale».
+     Aveva ragione: ogni sezione del negozio si disegnava le SUE schede
+     a mano, coi colori scritti dentro il tag — riquadri bianchi con la
+     riga colorata IN CIMA. Il resto del gestionale (lavori, clienti,
+     fatture, agenda) usa una carta sola, «.job», con la riga colorata
+     a SINISTRA e i pulsanti in fondo, staccati da una riga.
+     Adesso e' la stessa carta, e sta scritta in UN POSTO SOLO.
+     ⛔ Le classi (.job, .job-top, .job-cli, .job-meta, .job-actions,
+        .ja, .st, .pall) c'erano GIA' in questa pagina: non arrivano da
+        css/gestionale.css, che il negozio non carica.
+     ================================================================ */
+  .grid .job{margin-bottom:0}
+  .tag-c{font-size:13px;font-weight:700;color:#fff;border-radius:10px;padding:3px 10px;white-space:nowrap}
+  .tag-attesa{font-size:13px;font-weight:700;border-radius:10px;padding:3px 10px;background:#fff3e0;
+    color:#e65100;border:1px solid #ffcc80;display:inline-block;margin-top:8px}
+  .job-num{font-size:19px;font-weight:800;color:#0a2a4d;margin-top:8px;letter-spacing:-.3px}
+  .mag-passo{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .mag-passo button{min-width:42px;height:38px;font-size:20px;font-weight:700;line-height:1}
+  .mag-passo .n{font-size:23px;font-weight:800;min-width:46px;text-align:center}
 </style>
 
 <!-- LANDING -->
@@ -612,12 +630,12 @@
         <input id="np-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <button id="np-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi prodotto</button>
       </div>
-      <div id="prodotti-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="prodotti-body" class="grid"></div>
     </section>
 
     <section id="magazzino">
       <h2 style="margin:0 0 16px">Magazzino</h2>
-      <div id="magazzino-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="magazzino-body" class="grid"></div>
     </section>
 
     <!-- ===== PREVENTIVI — 6 agosto 2026 ===== -->
@@ -683,7 +701,7 @@
         </div>
       </div>
 
-      <div id="preventivi-body"></div>
+      <div id="preventivi-body" class="grid"></div>
     </section>
 
     <section id="fornitori">
@@ -698,7 +716,7 @@
         <input id="nf-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <button id="nf-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi fornitore</button>
       </div>
-      <div id="fornitori-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="fornitori-body" class="grid"></div>
     </section>
 
     <section id="movimenti">
@@ -733,7 +751,7 @@
         <input id="nm-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <button id="nm-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi movimento</button>
       </div>
-      <div id="movimenti-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="movimenti-body" class="grid"></div>
     </section>
 
     <section id="agenda">
@@ -801,7 +819,7 @@
       <p style="color:#5b6672;font-size:15px;margin:0 0 14px;max-width:640px">Tutto quello che elimini dal negozio passa di qui e resta a disposizione: finché è nel cestino non è perso. Apri una riga per rimetterla a posto.</p>
       <input type="text" id="cest-search" placeholder="Cerca nel cestino: nome o tipo" autocomplete="off" spellcheck="false"
              style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
-      <div id="cest-body"></div>
+      <div id="cest-body" class="grid"></div>
     </section>
 
     <section id="squadra">
@@ -1253,7 +1271,10 @@
     if($("#k-incassato"))$("#k-incassato").textContent=eurRie(acquistato);
     /* 26 agosto 2026 — le cose che chiedono attenzione, in cima */
     await rieDaSistemare(P,M);
-    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #c62828;padding:12px;margin-bottom:10px"><strong>${p.nome||"—"}</strong><div style="color:#666;font-size:13px">Q.tà ${p.quantita??0} · soglia ${p.soglia_minima??0}</div></div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>carta({
+        colore:"#c62828", titolo:esc(p.nome||"—"),
+        meta:["Q.tà "+(p.quantita??0),"soglia "+(p.soglia_minima??0)]
+      })).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
 
@@ -2113,6 +2134,21 @@
     if(body)body.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
   }
 
+  /* 27 agosto 2026 — LA CARTA, in un posto solo.
+     titolo · destra (la pastiglia) · sotto (roba libera) · stati ·
+     meta (le righette grigie) · azioni (i pulsanti in fondo).
+     ⛔ Il colore non e' piu' una riga in cima: e' il bordo a sinistra,
+        come in tutto il resto del gestionale. */
+  function carta(o){
+    const meta=(o.meta||[]).filter(Boolean).map(m=>"<span>"+m+"</span>").join("");
+    return '<div class="job"'+(o.colore?' style="border-left-color:'+o.colore+'"':'')+'>'
+      + '<div class="job-top"><div class="job-cli">'+(o.titolo||"—")+'</div>'+(o.destra||"")+'</div>'
+      + (o.sotto||"")
+      + (meta?'<div class="job-meta">'+meta+'</div>':"")
+      + (o.numero?'<div class="job-num">'+o.numero+'</div>':"")
+      + (o.azioni?'<div class="job-actions">'+o.azioni+'</div>':"")
+      + '</div>';
+  }
   function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
   /* 26 agosto 2026 — LA FINESTRA GRANDE.
      ⚠️ Prende lo STESSO html di openSheet e se lo divide da sola: il primo
@@ -2316,13 +2352,20 @@
       const soglia=(p.quantita??0)<=(p.soglia_minima??0);
       /* 26 agosto 2026 — il secondo prezzo. Se c'e', si vede accanto al primo. */
       const haImp=p.prezzo_impresa!=null&&p.prezzo_impresa!=="";
-      return `
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${soglia?"#c62828":"#1565c0"};padding:14px;margin-bottom:12px">
-        <strong>${p.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${eu(p.prezzo)}/${um}${haImp?' <span style="color:#1565c0;font-weight:700">· impresa € '+eu(p.prezzo_impresa)+"/"+um+"</span>":""} · <strong style="color:${soglia?"#c62828":"#333"}">${p.quantita??0} ${um}</strong>${soglia?" ⚠️ sotto scorta":""}${p.codice?" · cod. "+p.codice:""}</div>
-        ${marg!=null?`<div style="color:${marg>0?"#1e8e3e":"#c0392b"};font-size:13px;margin-top:3px;font-weight:600">Guadagno € ${eu(marg)}/${um}</div>`:""}
-        <div style="margin-top:12px"><button class="carta-apri" data-id="${p.id}">Apri</button></div>
-      </div>`;}).join("");
+      return carta({
+        colore: soglia?"#c62828":"#1565c0",
+        titolo: esc(p.nome||"—"),
+        destra: soglia?'<span class="tag-c" style="background:#c62828">SOTTO SCORTA</span>':"",
+        meta:[
+          p.categoria?esc(p.categoria):"",
+          "€ "+eu(p.prezzo)+"/"+esc(um),
+          haImp?'<b style="color:#1565c0">impresa € '+eu(p.prezzo_impresa)+"/"+esc(um)+"</b>":"",
+          '<b style="color:'+(soglia?"#c62828":"#2b3a33")+'">'+(p.quantita??0)+" "+esc(um)+"</b>",
+          p.codice?"cod. "+esc(p.codice):"",
+          marg!=null?'<b style="color:'+(marg>0?"#1e8e3e":"#c0392b")+'">Guadagno € '+eu(marg)+"/"+esc(um)+"</b>":""
+        ],
+        azioni:'<button class="ja go carta-apri" data-id="'+p.id+'">Apri</button>'
+      });}).join("");
   }
   /* ============================================================
      PREVENTIVI DEL NEGOZIO — 6 agosto 2026
@@ -2543,13 +2586,17 @@
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto in magazzino.</p>';return;}
     box.innerHTML=prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${sotto?'#c62828':'#2e537d'};padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div><strong>${p.nome||"—"}</strong>${sotto?' <span style="background:#c62828;color:#fff;font-size:13px;padding:2px 8px;border-radius:10px;margin-left:6px">SOTTO SCORTA</span>':''}<div style="color:#666;font-size:13px;margin-top:2px">Soglia min: ${s}</div></div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <button class="mag-btn" data-id="${p.id}" data-d="-1" style="width:36px;height:36px;border:none;border-radius:8px;background:#e0e0e0;font-size:20px;cursor:pointer">−</button>
-          <span style="font-size:22px;font-weight:700;min-width:32px;text-align:center">${q}</span>
-          <button class="mag-btn" data-id="${p.id}" data-d="1" style="width:36px;height:36px;border:none;border-radius:8px;background:#0066ff;color:#fff;font-size:20px;cursor:pointer">+</button>
-        </div></div>`;
+      return carta({
+        colore: sotto?"#c62828":"#2e537d",
+        titolo: esc(p.nome||"—"),
+        destra: sotto?'<span class="tag-c" style="background:#c62828">SOTTO SCORTA</span>':"",
+        meta:["Soglia minima "+s],
+        sotto:'<div class="mag-passo">'
+          + '<button class="ja mag-btn" data-id="'+p.id+'" data-d="-1" title="Scarico">−</button>'
+          + '<span class="n" style="color:'+(sotto?"#c62828":"inherit")+'">'+q+'</span>'
+          + '<button class="ja go mag-btn" data-id="'+p.id+'" data-d="1" title="Carico">+</button>'
+          + '</div>'
+      });
     }).join("");
   }
   /* ==================================================================
@@ -2613,14 +2660,18 @@
     const f=data||[], box=$("#fornitori-body");
     if(!box) return;
     if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
-    box.innerHTML=f.map(x=>`
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
-        <strong>${x.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
-        ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
-        ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
-        <div style="margin-top:12px"><button class="carta-apri" data-id="${x.id}">Apri</button></div>
-      </div>`).join("");
+    box.innerHTML=f.map(x=>carta({
+      colore:"#1565c0",
+      titolo:esc(x.nome||"—"),
+      meta:[
+        x.telefono?"☎ "+esc(x.telefono):"",
+        x.email?esc(x.email):"",
+        x.piva?"P.IVA "+esc(x.piva):"",
+        x.indirizzo?esc(x.indirizzo):"",
+        x.note?esc(x.note):""
+      ],
+      azioni:'<button class="ja go carta-apri" data-id="'+x.id+'">Apri</button>'
+    })).join("");
   }
   $("#nf-save")?.addEventListener("click",async()=>{
     const nome=$("#nf-nome").value.trim();
@@ -2775,18 +2826,26 @@
       const et =rett?"RETTIFICA":(vend?"VENDITA":"ORDINE");
       const nq =parseFloat(x.quantita)||0;
       const qta=rett?((nq>0?"+":"")+(x.quantita??0)):(x.quantita??0);
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${col};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>${fre} ${esc(x.prodotto||"—")}</strong><span style="background:${col};color:#fff;font-size:13px;padding:2px 8px;border-radius:10px">${et}</span></div>
-        ${inArrivo?'<div style="display:inline-block;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;font-size:13px;padding:2px 8px;border-radius:10px;margin-top:6px">IN ARRIVO — magazzino non ancora caricato</div>':""}
-        <div style="color:#666;font-size:14px;margin-top:4px">Q.tà ${qta}${rett?"":" · € "+(x.importo??0)}${x.controparte?" · "+esc(x.controparte):""}</div>
-        <div style="color:#888;font-size:13px;margin-top:2px">${x.data_mov||""}${x.motivo?" · "+esc(x.motivo):""}${x.arrivato_il?" · arrivata il "+x.arrivato_il:""}${x.note?" · "+esc(x.note):""}</div>
-        <div style="font-size:13px;margin-top:2px;color:${x.prodotto_id?"#2e7d32":"#8a949e"}">${x.prodotto_id?"✔ collegato al magazzino":"riga a mano — fuori magazzino"}</div>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          ${inArrivo?`<button class="mov-arr" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:none;background:#2e7d32;color:#fff;border-radius:8px;cursor:pointer">✔ Merce arrivata</button>`:""}
-          <button class="mov-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="mov-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div>
-      </div>`;
+      return carta({
+        colore: col,
+        titolo: fre+" "+esc(x.prodotto||"—"),
+        destra: '<span class="tag-c" style="background:'+col+'">'+et+'</span>',
+        sotto: inArrivo?'<div class="tag-attesa">IN ARRIVO — magazzino non ancora caricato</div>':"",
+        meta:[
+          "Q.tà "+qta,
+          rett?"":"€ "+(x.importo??0),
+          x.controparte?esc(x.controparte):"",
+          x.data_mov||"",
+          x.motivo?esc(x.motivo):"",
+          x.arrivato_il?"arrivata il "+x.arrivato_il:"",
+          x.note?esc(x.note):"",
+          '<b style="color:'+(x.prodotto_id?"#2e7d32":"#8a949e")+'">'
+            +(x.prodotto_id?"✔ collegato al magazzino":"riga a mano — fuori magazzino")+'</b>'
+        ],
+        azioni:(inArrivo?'<button class="ja pay mov-arr" data-id="'+x.id+'">✔ Merce arrivata</button>':"")
+          + '<button class="ja mov-edit" data-id="'+x.id+'">Modifica</button>'
+          + '<button class="ja del mov-del" data-id="'+x.id+'">Elimina</button>'
+      });
     }).join("");
   }
   $("#nm-save")?.addEventListener("click",async()=>{
@@ -3020,16 +3079,20 @@
       const st=etichetta[p.stato||"bozza"]||etichetta.bozza;
       const scad=p.data?new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000):null;
       const scaduto=scad&&scad<new Date()&&p.stato!=="accettato";
-      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${st[1]};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline">
-          <strong>N. ${p.numero||"—"} · ${p.cliente_nome||"—"}</strong>
-          <span style="color:${st[1]};font-weight:700;font-size:13px">${st[0]}${scaduto?" · scaduto":""}</span>
-        </div>
-        ${p.titolo?`<div style="color:#5b6672;font-size:14px;margin-top:3px">${p.titolo}</div>`:""}
-        <div style="color:#8a949e;font-size:13px;margin-top:4px">${rr.length} ${rr.length===1?"riga":"righe"} · valido ${p.validita_giorni||30} giorni${p.listino==="impresa"?' · <span style="color:#1565c0;font-weight:700">prezzi impresa</span>':""}</div>
-        <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:6px">${pvEur(c.totale)}</div>
-        <div style="margin-top:12px"><button class="carta-apri" data-id="${p.id}">Apri</button></div>
-      </div>`;}).join("");
+      return carta({
+        colore: st[1],
+        titolo: "N. "+(p.numero||"—")+" · "+esc(p.cliente_nome||"—"),
+        destra: '<span class="tag-c" style="background:'+st[1]+'">'+st[0]+'</span>'
+          + (scaduto?' <span class="tag-c" style="background:#c62828">SCADUTO</span>':""),
+        sotto: p.titolo?'<div class="job-desc">'+esc(p.titolo)+'</div>':"",
+        meta:[
+          rr.length+" "+(rr.length===1?"riga":"righe"),
+          "valido "+(p.validita_giorni||30)+" giorni",
+          p.listino==="impresa"?'<b style="color:#1565c0">prezzi impresa</b>':""
+        ],
+        numero: pvEur(c.totale),
+        azioni:'<button class="ja go carta-apri" data-id="'+p.id+'">Apri</button>'
+      });}).join("");
   }
 
   $("#preventivi-body")?.addEventListener("click",async e=>{
@@ -3638,17 +3701,13 @@
     if(!vis.length){
       box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Niente che si chiami così, fra le '+cestCache.length+' cose nel cestino.</p>';return;
     }
-    box.innerHTML=vis.map(v=>`
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${v.x.col};padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-          <strong>${esc(v.x.nome)}</strong>
-          <span style="background:${v.x.col};color:#fff;font-size:13px;font-weight:700;padding:2px 9px;border-radius:10px">${esc(v.x.lab.toUpperCase())}</span>
-        </div>
-        <div style="color:#666;font-size:14px;margin-top:4px">Buttato il ${esc(cestQuando(v.x.quando))}</div>
-        <div style="margin-top:10px">
-          <button class="cest-apri" data-action="cest-apri" data-i="${v.i}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Apri</button>
-        </div>
-      </div>`).join("");
+    box.innerHTML=vis.map(v=>carta({
+      colore: v.x.col,
+      titolo: esc(v.x.nome),
+      destra: '<span class="tag-c" style="background:'+v.x.col+'">'+esc(v.x.lab.toUpperCase())+'</span>',
+      meta:["Buttato il "+esc(cestQuando(v.x.quando))],
+      azioni:'<button class="ja go cest-apri" data-action="cest-apri" data-i="'+v.i+'">Apri</button>'
+    })).join("");
   }
 
   function schedaCestino(i){
