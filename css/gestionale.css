@@ -1214,6 +1214,13 @@
 .rie-card[data-go="dalsito"]     .rc-head svg,.side nav.tabs button[data-tab="dalsito"]     svg{ color:#0066ff; background:#e9f0ff; }
 .rie-card[data-go="riepilogo"]   .rc-head svg,.side nav.tabs button[data-tab="riepilogo"]   svg{ color:#0066ff; background:#e9f0ff; }
 .rie-card[data-go="cestino"]     .rc-head svg,.side nav.tabs button[data-tab="cestino"]     svg{ color:#8a94a0; background:#f0f2f5; }
+/* 27 agosto 2026 (sera) — le tre voci che esistono solo nel gestionale
+   negozio. Senza queste righe la loro icona resta grigia mentre tutte le
+   altre hanno un colore, e il Riepilogo a carte del negozio si scollega
+   dal menu di sinistra. Colori presi dalla stessa famiglia degli altri. */
+.rie-card[data-go="prodotti"]    .rc-head svg,.side nav.tabs button[data-tab="prodotti"]    svg{ color:#e8833a; background:#fdf1e6; }
+.rie-card[data-go="magazzino"]   .rc-head svg,.side nav.tabs button[data-tab="magazzino"]   svg{ color:#0f8f8f; background:#e6f4f4; }
+.rie-card[data-go="movimenti"]   .rc-head svg,.side nav.tabs button[data-tab="movimenti"]   svg{ color:#5b73d6; background:#eceffb; }
 /* la voce accesa: il fondo azzurro della riga si mangerebbe il colore
    dell'icona, quindi li' l'icona resta col suo colore e perde solo il
    riquadrino, se no sono due sfondi uno dentro l'altro */
@@ -1245,9 +1252,19 @@
 }
 .rie-card .rc-r.cliccabile{ cursor:pointer; }
 .rie-card .rc-r.cliccabile:hover{ background:var(--blu-tenue); }
+/* ⛔ 27 agosto 2026 (sera) — QUI NON SI TAGLIA PIU' CON I PUNTINI.
+   Prima era «white-space:nowrap; text-overflow:ellipsis»: un nome lungo
+   diventava «Silicone neutro traspar…» e l'ultima parola non si leggeva.
+   La regola di Alessio e' che una scritta non si taglia: se non ci sta,
+   va a capo. Il banco delle scritte del negozio lo misura davvero
+   (famiglia 4, «nessuna scritta viene tagliata dal suo riquadro») ed e'
+   li' che e' venuto fuori, su quattro righe di quattro carte diverse.
+   ⚠️ Vale anche per le imprese: e' la stessa classe del foglio in comune.
+      La carta diventa un filo piu' alta quando il nome e' lungo, e si
+      legge tutto. */
 .rie-card .rc-rt{
   color:var(--testo); font-weight:600;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+  min-width:0; overflow-wrap:anywhere;
 }
 .rie-card .rc-rv{ color:var(--testo-2); font-weight:600; white-space:nowrap; flex:0 0 auto; }
 .rie-card .rc-rv.q-passato{ color:var(--err); }

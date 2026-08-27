@@ -54,10 +54,10 @@
     padding:16px 16px 14px;position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(0,0,0,.12)}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
   .sec-head .add{background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:700;cursor:pointer}
-  @media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
-  .kpi .n{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}
-  @media(max-width:520px){.money-row{grid-template-columns:1fr 1fr}.money.ore{grid-column:span 2}}
-  .money .n{font-size:22px;font-weight:800;letter-spacing:-.5px}
+  /* ⛔ 27 agosto 2026 (sera) — tolte le righe di .kpis / .kpi .n /
+     .money-row / .money .n: erano i sei riquadri piatti del vecchio
+     Riepilogo, che adesso e' una griglia di carte come nelle imprese.
+     Le classi restano nel foglio in comune per gli altri gestionali. */
   .mini-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 10px}
 
   .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -192,9 +192,7 @@
     .nc-pop{max-height:min(64vh,460px)}
   }
   .main .wrap{padding-top:26px;max-width:1080px}
-  .kpi,.money,.card,.job,.fatt-row,.fatt-tot{border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,32,.04)}
-  .kpi .n{font-size:26px}
-  .money .n{font-size:20px}
+  .card,.job,.fatt-row,.fatt-tot{border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,32,.04)}
   .chip{border-radius:8px;font-size:13px;padding:6px 12px;background:#fff}
   .chip.on{background:var(--accent-d);border-color:var(--accent-d)}
   .ja{border-radius:7px;font-size:13px;display:inline-flex;align-items:center;gap:5px}
@@ -441,23 +439,22 @@
     <section id="riepilogo" class="active">
       <div class="rie-intro">
         <h2 id="rie-title">Riepilogo</h2>
-        <p>A colpo d'occhio la situazione del negozio: prodotti a catalogo, scorte da riordinare, vendite e acquisti del mese.</p>
+        <p>Tutto il negozio in un colpo d'occhio. Le schede compaiono man mano che inserisci i dati: clicca una scheda per entrare.</p>
       </div>
       <!-- 26 agosto 2026 — «Da sistemare oggi»: la scorciatoia in cima -->
       <div id="rie-alert"></div>
-      <div class="kpis">
-        <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Prodotti</div><div class="sub">A catalogo</div></div>
-        <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">Sotto scorta</div><div class="sub">Da riordinare</div></div>
-        <div class="kpi ft"><div class="n" id="k-fatti">0</div><div class="l">Movimenti</div><div class="sub">Operazioni questo mese</div></div>
-        <div class="kpi eu"><div class="n" id="k-lavori">0</div><div class="l">Valore magazzino</div><div class="sub">Prezzo x quantita</div></div>
-      </div>
-      <div class="money-row">
-        <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Venduto</div><div class="sub">Questo mese</div></div>
-        <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Acquistato</div><div class="sub">Ordini questo mese</div></div>
-        <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
-      </div>
-      <div class="mini-title">Prodotti sotto scorta</div>
-      <div id="prossimi"></div>
+      <!-- ================================================================
+           27 agosto 2026 (sera) — IL RIEPILOGO A CARTE.
+           Copiato da gestionale-app.html (riga 214): stessa griglia
+           «rie-grid», stesse carte «rie-card» disegnate da rieCard().
+           Prima qui c'erano sei riquadri piatti (.kpi e .money) col numero
+           sopra e l'etichetta MAIUSCOLA sotto, e in fondo un elenco a parte
+           dei prodotti sotto scorta. Non era una carta, non si cliccava, e
+           non somigliava a niente del gestionale.
+           ⛔ Le classi .rie-grid, .rie-card, .rc-* stanno in
+              css/gestionale.css (righe ~1114-1300): si usano, non si copiano.
+           ================================================================ -->
+      <div class="rie-grid" id="rie-grid"></div>
     </section>
 
     <section id="prodotti">
@@ -1144,42 +1141,185 @@
     $("#prossimi").innerHTML=pross.length?pross.map(l=>jobCardSupa(l)).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
   }
 
+  /* ================================================================
+     IL RIEPILOGO A CARTE — 27 agosto 2026 (sera)
+
+     Copiato riga per riga da gestionale-app.html: rieIco() (riga 3730),
+     _plur() (3742), _rieMale (3760) e rieCard() (3778). Non e' un
+     «adattamento»: e' la stessa funzione, con dentro le parole del negozio.
+
+     ⛔ LE REGOLE CHE VENGONO DALLE IMPRESE, e che qui valgono uguali:
+       · una scheda con «dati:false» NON si disegna. Chi apre un reparto
+         nuovo non deve vedere dieci caselle vuote.
+       · il PALLINO e' rosso solo quando qualcosa va DAVVERO male, e la
+         regola sta in un posto solo: la fascia «Da sistemare oggi» qui
+         sopra. Se la fascia nomina una sezione, quella scheda ha il
+         pallino rosso. Se il rosso si accendesse solo perche' una sezione
+         ha roba dentro, sarebbero rosse quasi tutte e non direbbe niente.
+       · il COLORE dell'icona dice QUALE sezione, e basta: e' lo stesso
+         colore della voce nel menu di sinistra (css/gestionale.css).
+       · l'etichetta sotto il numero va al singolare quando il numero e' 1.
+     ================================================================ */
+  const MESI_BREVI=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+  function _giorniA(ds){if(!ds)return null;const[y,m,d]=ds.split("-").map(Number);const a=new Date(y,m-1,d);const o=new Date();o.setHours(0,0,0,0);return Math.round((a-o)/86400000);}
+  function quando(ds,opt){
+    if(!ds)return{testo:"—",classe:"q-vuoto"};
+    const g=_giorniA(ds);                       /* positivo = nel futuro */
+    if(g===null)return{testo:"—",classe:"q-vuoto"};
+    if(g<0){const n=-g;return{testo:n===1?"ieri":n+" giorni fa",classe:(opt&&opt.neutro)?"q-neutro":"q-passato"};}
+    if(g===0)return{testo:"oggi",classe:"q-oggi"};
+    if(g===1)return{testo:"domani",classe:"q-futuro"};
+    if(g<14)return{testo:"fra "+g+" giorni",classe:"q-futuro"};
+    if(g<=30){const w=Math.round(g/7);return{testo:"fra "+w+" settimane",classe:"q-futuro"};}
+    const mm=+ds.split("-")[1], dd=+ds.split("-")[2];
+    return{testo:dd+" "+MESI_BREVI[mm-1],classe:"q-futuro"};
+  }
+  function _plur(n,uno,tanti){ return (+n===1)?uno:tanti; }
+  /* l'icona e' la STESSA del menu: si copia da li', non si ridisegna */
+  function rieIco(tab){
+    const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"] svg');
+    return b?b.outerHTML:"";
+  }
+  let _rieMale=new Set();
+  /* o = {tab, titolo, n, lab, tono, righe:[{t,v,cls,action,id}], vuoto, dati, male} */
+  function rieCard(o){
+    if(o.dati===false)return "";
+    const righe=(o.righe||[]).filter(Boolean).slice(0,2);
+    const corpo=righe.length
+      ? '<div class="rc-list">'+righe.map(r=>{
+          const cli=r.action?' data-action="'+r.action+'" data-id="'+esc(r.id)+'"':"";
+          return '<div class="rc-r'+(r.action?" cliccabile":"")+'"'+cli+'>'
+               +   '<span class="rc-rt">'+esc(r.t||"")+'</span>'
+               +   '<span class="rc-rv'+(r.cls?" "+r.cls:"")+'">'+esc(r.v||"")+'</span>'
+               + '</div>';
+        }).join("")+'</div>'
+      : '<div class="rc-vuoto">'+esc(o.vuoto||"Niente da segnalare")+'</div>';
+    const male=(o.male!=null)?!!o.male:(o.tono==="err"||_rieMale.has(o.tab));
+    return '<div class="rie-card t-'+(o.tono||"neutro")+(righe.length?"":" vuota")+'" data-action="rie-go" data-go="'+o.tab+'">'
+         +   '<div class="rc-head">'+rieIco(o.tab)+'<span class="rc-tit">'+esc(o.titolo)+'</span>'
+         +     '<i class="rc-pall '+(male?"male":"bene")+'"'
+         +       ' title="'+(male?"Qui c’è qualcosa che va male":"Qui è tutto a posto")+'"'
+         +       ' aria-label="'+(male?"qualcosa che va male":"tutto a posto")+'"></i></div>'
+         +   '<div class="rc-n">'+esc(String(o.n))+'</div>'
+         +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
+         +   corpo
+         + '</div>';
+  }
+
   async function renderRiepilogoNegozio(){
+    const G=$("#rie-grid");
+    if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
     if(!(sb&&sbUid)){
-      ["k-dafare","k-incorso","k-fatti"].forEach(i=>{const e=$("#"+i);if(e)e.textContent=0;});
-      ["k-lavori","k-daincassare","k-incassato"].forEach(i=>{const e=$("#"+i);if(e)e.textContent="€ 0";});
-      if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
-      if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+      if(G)G.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';
       return;
     }
-    if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
-    /* 26 agosto 2026 — i tre numeri qui sotto uscivano all'americana
-       ("€ 741.8", "€ 98"): punto al posto della virgola e centesimi
-       spariti. Adesso si scrivono come tutti gli altri euro della pagina. */
+    if(G&&!G.innerHTML)G.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';
+    /* 26 agosto 2026 — i numeri in euro uscivano all'americana ("€ 741.8"):
+       punto al posto della virgola e centesimi spariti. Si scrivono come
+       tutti gli altri euro della pagina. */
     const eurRie=n=>"€ "+(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
-    const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,prezzo_acquisto,quantita,soglia_minima").eq("user_id",sbUid);
-    const P=prod||[];
+    const chiedi=async f=>{ try{ const r=await f(); return (r&&!r.error)?(r.data||[]):[]; }catch(e){ return []; } };
+    const mid=curMestiere(), oggi=todayStr();
+
+    /* ⚠️ UNA SOLA ONDATA. Nelle imprese il Riepilogo faceva sei giri di
+       «chiedo, aspetto, chiedo il prossimo», e su una linea lenta ogni
+       attesa e' un pezzo di secondo di pagina vuota. Qui partono tutte
+       insieme: sono letture piccole e non dipendono l'una dall'altra. */
+    const [P,M,PV,FO,CLI,LAV,SCAD,FOTO]=await Promise.all([
+      chiedi(()=>sb.from("neg_prodotti").select("id,nome,prezzo,prezzo_acquisto,quantita,soglia_minima,unita").eq("user_id",sbUid)),
+      chiedi(()=>sb.from("neg_movimenti").select("tipo,prodotto,quantita,importo,controparte,data_mov").eq("user_id",sbUid)),
+      chiedi(()=>sb.from("neg_preventivi").select("id,numero,titolo,cliente_nome,data,stato,validita_giorni").eq("user_id",sbUid)),
+      chiedi(()=>sb.from("neg_fornitori").select("id,nome,telefono").eq("user_id",sbUid)),
+      mid?chiedi(()=>sb.from("gest_clienti").select("id,nome,citta,indirizzo").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
+      mid?chiedi(()=>sb.from("gest_lavori").select("id,descrizione,importo,stato,fatt_stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
+      mid?chiedi(()=>sb.from("gest_scadenze").select("id,titolo,data,fatta").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
+      chiedi(()=>sb.from("gest_foto").select("id,lavoro_id,tipo").eq("user_id",sbUid))
+    ]);
+
+    /* --- i conti, una volta sola --- */
     const sotto=P.filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
     const valore=P.reduce((s,p)=>s+((+p.prezzo||0)*(+p.quantita||0)),0);
-    if($("#k-dafare"))$("#k-dafare").textContent=P.length;
-    if($("#k-incorso"))$("#k-incorso").textContent=sotto.length;
-    if($("#k-lavori"))$("#k-lavori").textContent=eurRie(valore);
-    const {data:mov}=await sb.from("neg_movimenti").select("tipo,importo,data_mov").eq("user_id",sbUid);
-    const M=mov||[];
-    const mese=M.filter(m=>thisMonth(m.data_mov));
-    if($("#k-fatti"))$("#k-fatti").textContent=mese.length;
     /* ⛔ 1 dei 5 posti che leggono "tipo". Le rettifiche NON sono soldi:
        non entrano ne' nel venduto ne' nell'ordinato, e va bene cosi'. */
+    const mese=M.filter(m=>thisMonth(m.data_mov));
     const venduto=mese.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
     const acquistato=mese.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
-    if($("#k-daincassare"))$("#k-daincassare").textContent=eurRie(venduto);
-    if($("#k-incassato"))$("#k-incassato").textContent=eurRie(acquistato);
-    /* 26 agosto 2026 — le cose che chiedono attenzione, in cima */
+    const ultimiMov=M.slice().sort((a,b)=>String(b.data_mov||"").localeCompare(String(a.data_mov||""))).slice(0,2);
+    const pvAperti=PV.filter(p=>!p.stato||p.stato==="bozza"||p.stato==="inviato")
+      .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
+    const lavImp=LAV.filter(l=>+l.importo>0);
+    const daFatt=lavImp.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
+    const daInc=lavImp.filter(l=>l.fatt_stato==="emessa");
+    const impegni=LAV.filter(l=>l.data_prevista&&l.data_prevista>=oggi&&l.stato!=="fatto")
+      .sort((a,b)=>String(a.data_prevista).localeCompare(String(b.data_prevista)));
+    const scadAperte=SCAD.filter(s=>!s.fatta&&s.data).sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+    const lavIds=new Set(LAV.map(l=>l.id));
+    const foto=FOTO.filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
+
+    /* «Da sistemare oggi» PRIMA delle carte: e' lui che decide quali
+       pallini sono rossi (vedi _rieMale). */
     await rieDaSistemare(P,M);
-    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>carta({
-        colore:"#c62828", titolo:esc(p.nome||"—"),
-        meta:["Q.tà "+(p.quantita??0),"soglia "+(p.soglia_minima??0)]
-      })).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+
+    if(!G)return;
+    G.innerHTML=[
+      rieCard({tab:"prodotti",titolo:"Prodotti",dati:P.length>0,
+        n:P.length,lab:_plur(P.length,"prodotto a catalogo","prodotti a catalogo"),
+        vuoto:"Nessun prodotto ancora",
+        righe:P.slice().sort((a,b)=>((+b.prezzo||0)*(+b.quantita||0))-((+a.prezzo||0)*(+a.quantita||0))).slice(0,2)
+               .map(p=>({t:p.nome||"—",v:eurRie((+p.prezzo||0)*(+p.quantita||0))}))}),
+
+      rieCard({tab:"magazzino",titolo:"Magazzino",dati:P.length>0,
+        n:eurRie(valore),lab:"vale la merce che hai in casa",
+        vuoto:"Nessuna scorta sotto la soglia",
+        righe:sotto.slice().sort((a,b)=>(a.quantita??0)-(b.quantita??0)).slice(0,2)
+               .map(p=>({t:p.nome||"—",v:"ne restano "+(p.quantita??0)+(p.unita?" "+p.unita:""),cls:"q-passato"}))}),
+
+      rieCard({tab:"movimenti",titolo:"Movimenti",dati:M.length>0,
+        n:mese.length,lab:_plur(mese.length,"operazione questo mese","operazioni questo mese"),
+        vuoto:"Nessun movimento registrato",
+        righe:ultimiMov.map(m=>({t:(m.tipo==="vendita"?"Venduto ":m.tipo==="ordine"?"Ordinato ":"Rettifica ")+(m.prodotto||"—"),
+                                 v:quando(m.data_mov,{neutro:true}).testo,cls:quando(m.data_mov,{neutro:true}).classe}))}),
+
+      rieCard({tab:"preventivi",titolo:"Preventivi",dati:PV.length>0,
+        n:pvAperti.length,lab:_plur(pvAperti.length,"in attesa di risposta","in attesa di risposta"),
+        vuoto:"Nessun preventivo in attesa",
+        righe:pvAperti.slice(0,2).map(p=>({t:p.cliente_nome||p.titolo||("N. "+(p.numero??"—")),
+                                           v:quando(p.data).testo,cls:quando(p.data).classe}))}),
+
+      rieCard({tab:"clienti",titolo:"Clienti",dati:CLI.length>0,
+        n:CLI.length,lab:_plur(CLI.length,"cliente in questo reparto","clienti in questo reparto"),
+        vuoto:"Nessun cliente ancora",
+        righe:CLI.slice(-2).reverse().map(c=>({t:c.nome||"—",v:c.citta||c.indirizzo||""}))}),
+
+      rieCard({tab:"fatture",titolo:"Fatture",dati:lavImp.length>0,
+        n:eurRie(daInc.reduce((s,l)=>s+(+l.importo||0),0)),lab:"da incassare",
+        vuoto:"Niente in attesa",
+        righe:[daFatt.length?{t:"Da fatturare",v:eurRie(daFatt.reduce((s,l)=>s+(+l.importo||0),0))}:null,
+               daInc.length?{t:_plur(daInc.length,"1 fattura emessa",daInc.length+" fatture emesse"),
+                             v:eurRie(daInc.reduce((s,l)=>s+(+l.importo||0),0))}:null]}),
+
+      rieCard({tab:"fornitori",titolo:"Fornitori",dati:FO.length>0,
+        n:FO.length,lab:_plur(FO.length,"fornitore","fornitori"),
+        vuoto:"Nessun fornitore ancora",
+        righe:FO.slice(0,2).map(f=>({t:f.nome||"—",v:f.telefono||""}))}),
+
+      rieCard({tab:"report",titolo:"Report",dati:M.length>0,
+        n:eurRie(venduto),lab:"venduto questo mese",
+        vuoto:"Ancora nessun movimento",
+        righe:[{t:"Acquistato questo mese",v:eurRie(acquistato)},
+               {t:"Valore del magazzino",v:eurRie(valore)}]}),
+
+      rieCard({tab:"calendario",titolo:"Calendario",dati:(impegni.length+scadAperte.length)>0,
+        n:impegni.length,lab:_plur(impegni.length,"cosa in programma","cose in programma"),
+        vuoto:"Niente in programma",
+        righe:impegni.slice(0,2).map(l=>({t:l.descrizione||"—",
+                                          v:quando(l.data_prevista).testo,cls:quando(l.data_prevista).classe}))}),
+
+      rieCard({tab:"galleria",titolo:"Galleria",dati:foto.length>0,
+        n:foto.length,lab:_plur(foto.length,"foto in questo reparto","foto in questo reparto"),
+        vuoto:"Nessuna foto ancora",
+        righe:[]})
+    ].join("");
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
 
@@ -3847,6 +3987,14 @@
     if(!AZ||!(AZ.nome||"").trim()||!(AZ.piva||"").trim())
       DA.unshift({t:"Completa i dati del negozio",
         d:"Nome e partita IVA compaiono in cima a ogni preventivo",act:"azienda"});
+
+    /* ⛔ 27 agosto 2026 — DA QUI ESCONO I PALLINI ROSSI DELLE CARTE.
+       La regola sta in un posto solo, e il posto e' questo: una carta ha
+       il pallino rosso quando la fascia qui sopra nomina la sua sezione.
+       Cosi' le due cose non si possono scollare — se la fascia dice
+       «1 prodotto sotto scorta», la carta Magazzino e' rossa, sempre.
+       Stessa idea delle imprese (gestionale-app.html, _rieMale). */
+    _rieMale=new Set(DA.map(r=>r.go).filter(Boolean));
 
     if(!DA.length){
       box.innerHTML='<div class="rie-oggi tutto-ok">'
