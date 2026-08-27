@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Gestionale Negozio — TrovaImpresa</title>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<link rel="stylesheet" href="/css/gestionale.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -442,6 +443,17 @@
   .mag-passo{display:flex;align-items:center;gap:12px;margin-top:10px}
   .mag-passo button{min-width:42px;height:38px;font-size:20px;font-weight:700;line-height:1}
   .mag-passo .n{font-size:23px;font-weight:800;min-width:46px;text-align:center}
+  /* ================================================================
+     27 agosto 2026 — DA QUANDO IL NEGOZIO CARICA css/gestionale.css.
+     ⛔ Quel foglio spegne .side-top ({display:none}): nelle imprese il
+        reparto in cui sei si legge altrove. Nel negozio quella riga e'
+        l'unica che lo dice — senza, non sai in che reparto stai.
+        ⚠️ Trovato A OCCHIO: i due banchi (298 prove e 17 sulle scritte)
+        erano verdi tutti e due, perche' non e' un errore e non e' una
+        scritta piccola. E' una cosa che sparisce, e quello si vede solo
+        guardando.
+     ================================================================ */
+  .side .side-top{display:flex!important}
 </style>
 
 <!-- LANDING -->
