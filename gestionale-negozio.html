@@ -138,24 +138,22 @@
     #riepilogo .ro-riga{padding:14px 8px;margin:0 -8px;gap:12px}
     #riepilogo .ro-testo{font-size:17px}
   }
-  .topbar-neg{position:sticky;top:0;z-index:25;height:54px;display:flex;align-items:center;
-    justify-content:flex-end;gap:8px;padding:0 18px;background:var(--accent-d);
-    box-shadow:0 1px 3px rgba(16,24,32,.18)}
-  .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
-    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;
-    border-radius:9px;padding:8px 13px;font-family:inherit;font-size:13.5px;font-weight:700;
-    cursor:pointer;white-space:nowrap}
-  .tb-btn.oro{background:#f5b301;border-color:#f5b301;color:#3d2e00;font-weight:800}
-  .tb-btn.oro:hover{background:#ffc21f}
-  @media(max-width:760px){
-    .topbar-neg{justify-content:center;flex-wrap:wrap;height:auto;padding:8px 12px}
-    .tb-btn span{display:none}
-    .tb-btn.oro span{display:inline}
-  }
+  /* ================================================================
+     27 agosto 2026 — LA BARRA IN ALTO E' QUELLA DELLE IMPRESE.
+     Qui dentro non c'e' piu' niente: .topbar, .tb-left, .tb-back,
+     .tb-id, .tb-actions, .tb-btn e .tb-help stanno tutte in
+     css/gestionale.css (righe ~733-780), che questa pagina carica.
+     Il negozio aveva una .topbar-neg scritta a mano — alta 54 px, blu
+     scuro suo, tre pulsanti e uno giallo: sembrava un altro programma.
+     ⛔ Non riscriverle qui: le classi buone si usano, non si copiano.
+     ================================================================ */
   /* ===== 26 agosto 2026 — LA RICERCA UNICA =====
      Le classi .nc-* vivono solo qui: nel foglio condiviso non ci sono.
-     Misure come nel resto della pagina: niente sotto i 13 px. */
-  .nc-barra{position:sticky;top:54px;z-index:24;background:#fff;
+     Misure come nel resto della pagina: niente sotto i 13 px.
+     ⚠️ 27 agosto: il «top» era 54px, l'altezza della vecchia barra.
+     La .topbar delle imprese e' alta 56px (css/gestionale.css riga 733)
+     e la .ct-barra delle imprese sta appunto a top:56px. */
+  .nc-barra{position:sticky;top:56px;z-index:24;background:#fff;
     border-bottom:1px solid var(--line);padding:10px 18px}
   .nc-box{position:relative;max-width:1040px;margin:0 auto}
   .nc-lente{position:absolute;left:15px;top:50%;transform:translateY(-50%);
@@ -297,16 +295,16 @@
   .mag-passo button{min-width:42px;height:38px;font-size:20px;font-weight:700;line-height:1}
   .mag-passo .n{font-size:23px;font-weight:800;min-width:46px;text-align:center}
   /* ================================================================
-     27 agosto 2026 — DA QUANDO IL NEGOZIO CARICA css/gestionale.css.
-     ⛔ Quel foglio spegne .side-top ({display:none}): nelle imprese il
-        reparto in cui sei si legge altrove. Nel negozio quella riga e'
-        l'unica che lo dice — senza, non sai in che reparto stai.
-        ⚠️ Trovato A OCCHIO: i due banchi (298 prove e 17 sulle scritte)
-        erano verdi tutti e due, perche' non e' un errore e non e' una
-        scritta piccola. E' una cosa che sparisce, e quello si vede solo
-        guardando.
+     27 agosto 2026 (sera) — LA RIGA DEL REPARTO NELLA COLONNA.
+     Prima qui c'era «.side .side-top{display:flex!important}», messo
+     perche' css/gestionale.css spegne .side-top da 881px in su e nel
+     negozio quella riga era l'UNICA che diceva in che reparto stai.
+     Adesso il reparto sta nella barra in alto, come nelle imprese:
+     l'!important e' stato tolto e vale di nuovo la regola del foglio
+     condiviso (riga ~773) — da scrivania la riga sparisce, da telefono
+     (dove la barra non mostra il .tb-left) resta.
+     ⛔ Non rimettere l'!important: farebbe scrivere il reparto DUE volte.
      ================================================================ */
-  .side .side-top{display:flex!important}
 </style>
 
 <!-- LANDING -->
@@ -392,15 +390,32 @@
   </aside>
 
   <div class="main">
-  <!-- ===== 26 agosto 2026 — LA BARRA IN ALTO =====
-       Gli stessi tre pulsanti che stavano in fondo alla colonna di sinistra,
-       portati dove li cerca chi arriva dal gestionale imprese. Non sono
-       pulsanti nuovi: fanno le stesse cose di prima. -->
-  <div class="topbar-neg">
-    <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button>
-    <button class="tb-btn" data-action="export-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/></svg><span>Backup</span></button>
-    <button class="tb-btn oro" data-action="export-excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 6"/><path d="m15 13-6 6"/></svg><span>Esporta i miei dati</span></button>
-  </div>
+  <!-- ================================================================
+       27 agosto 2026 — LA BARRA IN ALTO, COPIATA DALLE IMPRESE.
+       Blocco preso riga per riga da gestionale-app.html (righe 175-189):
+       stessa classe .topbar, stesso colore (--blu-scuro del foglio
+       condiviso), stessa altezza 56px, stessi cinque pulsanti.
+       A sinistra la freccia per cambiare reparto, il pallino del colore
+       del reparto e il suo nome: prima quella roba stava solo nella
+       colonna, e la barra del negozio partiva vuota.
+       ⛔ Non e' «somigliante»: e' lo stesso blocco. Se cambia nelle
+          imprese, cambia qui uguale.
+       ================================================================ -->
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="tb-back" data-action="home" title="Cambia reparto" aria-label="Cambia reparto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></button>
+      <div class="tb-id">
+        <strong><span class="rep-dot" id="tb-rep-dot"></span><span id="tb-panel-name">—</span></strong>
+        <span class="tb-sub">Reparto attivo</span>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button><button class="tb-btn" data-action="commercialista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg><span>Commercialista</span></button>
+      <button class="tb-btn" data-action="export-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span>Backup</span></button>
+      <button class="tb-btn" data-action="export-excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Esporta</span></button>
+      <button class="tb-btn tb-help" data-action="aiuto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span>Aiuto</span></button>
+    </div>
+  </header>
   <!-- ===== 26 agosto 2026 — LA RICERCA UNICA DEL NEGOZIO =====
        Una casella sola: si scrivono due lettere ed escono insieme il
        prodotto (anche per codice), il cliente, il fornitore e il
@@ -991,7 +1006,7 @@
   /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
      (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
      Restano traducibili le etichette fisse (tab "Lavori", "+ Nuovo lavoro", contatori, messaggi vuoti…). */
-  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,#panel-name,#panel-sub,#rie-title,#lf-title,#gal-op,#ag-op,#d-ruolo,textarea';
+  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op,#ag-op,#d-ruolo,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -1076,7 +1091,11 @@
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
     /* colore primario fisso: il colore del reparto resta solo come pallino accanto al nome */
     const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
+    /* 27 agosto 2026 — anche il pallino e il nome nella barra in alto,
+       come fa enterPanel() delle imprese (gestionale-app.html riga 1942). */
+    const tdot=$("#tb-rep-dot");if(tdot)tdot.style.background=p.a;
     $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Reparto "+p.nome;
+    if($("#tb-panel-name"))$("#tb-panel-name").textContent=p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
     filter={stato:"tutti",q:""};$("#f-search").value="";cal=new Date();
@@ -1812,6 +1831,75 @@
     closeSheet();toast("Dati azienda salvati ✔");
   }
 
+  /* ================================================================
+     27 agosto 2026 — IL COMMERCIALISTA.
+     Copiato da gestionale-app.html (commForm/saveComm, righe ~8798-8853):
+     stesse etichette, stessi campi, stessa riga gest_azienda con le
+     colonne comm_*. Il commercialista e' uno solo, non serve una
+     tabella a parte.
+     ⛔ UNICA COSA TOLTA: il riquadro «Documenti per lui». Nelle imprese
+        appoggia sulla tabella gest_documenti e sul deposito dei file,
+        che nel negozio oggi non esistono. Scelta di Alessio, 27 agosto.
+     ================================================================ */
+  async function commForm(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    const a=az||{};
+    openSheetGrande(`<h3>Il tuo commercialista</h3>
+      <p style="font-size:13px;color:var(--muted);margin:-8px 0 14px">Chi &egrave; e come lo raggiungi. Resta scritto qui, cos&igrave; non lo cerchi ogni volta.</p>
+      <div class="field"><label>Studio</label><input id="cm-studio" value="${esc(a.comm_studio||"")}" placeholder="Es. Studio Rossi &amp; Associati"></div>
+      <div class="field"><label>Nome della persona</label><input id="cm-nome" value="${esc(a.comm_nome||"")}" placeholder="Con chi parli di solito"></div>
+      <div class="row2"><div class="field"><label>Telefono</label><input id="cm-tel" type="tel" value="${esc(a.comm_tel||"")}" placeholder="Es. 320 1234567"></div>
+      <div class="field"><label>Email</label><input id="cm-email" type="email" value="${esc(a.comm_email||"")}" placeholder="studio@email.it"></div></div>
+      <div class="field"><label>PEC</label><input id="cm-pec" type="email" value="${esc(a.comm_pec||"")}" placeholder="studio@pec.it"></div>
+      <div class="field"><label>Note</label><textarea id="cm-note" rows="6" placeholder="Quello che ti serve ricordare: scadenze, come preferisce ricevere le cose, cosa ti chiede ogni volta">${esc(a.comm_note||"")}</textarea></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-comm">Salva</button></div>`);
+  }
+  async function saveComm(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const v=q=>{const e=$(q);return e?String(e.value||"").trim():"";};
+    const row={user_id:sbUid,
+      comm_studio:v("#cm-studio")||null, comm_nome:v("#cm-nome")||null,
+      comm_tel:v("#cm-tel")||null, comm_email:v("#cm-email")||null,
+      comm_pec:v("#cm-pec")||null, comm_note:v("#cm-note")||null};
+    const {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
+    /* se le colonne non ci sono ancora, lo dico chiaro invece di fallire in silenzio */
+    if(error){
+      const manca=/comm_/.test(error.message||"");
+      toast(manca?"Serve prima l'aggiornamento del database (sql/aggiungi-commercialista.sql)":"Errore: "+error.message);
+      return;
+    }
+    closeSheet();toast("Commercialista salvato ✔");
+  }
+
+  /* ================================================================
+     27 agosto 2026 — AIUTO.
+     Nelle imprese questo pulsante apre l'assistente AI (js/ai-integrazione.js,
+     domande a consumo). Il negozio quel file non lo carica e non ha i
+     crediti: qui l'Aiuto e' la guida del negozio, scritta con le sue
+     parole. Stesso pulsante, stesso posto, stessa finestra grande.
+     ================================================================ */
+  function aiutoNegozio(){
+    const voci=[
+      ["Prodotti","Il catalogo di quello che vendi. Nome, codice, categoria, quanto lo paghi e a quanto lo vendi. Il prezzo all'impresa e' facoltativo: se lo lasci vuoto, a tutti fai lo stesso prezzo."],
+      ["Magazzino","Quante ne hai. Il + e il &minus; chiedono quante e perche', e la ragione resta scritta nei Movimenti. Sotto la soglia minima il prodotto si accende in rosso."],
+      ["Movimenti","Il giro della giornata: la merce che esce (vendita) e quella che entra (ordine al fornitore). Se prendi il prodotto dal magazzino, la giacenza si aggiorna da sola."],
+      ["Preventivi","Le righe le prendi dal magazzino o le scrivi a mano. Sconto di riga, sconto sul totale e IVA. Quando il cliente accetta, la merce esce dal magazzino una volta sola."],
+      ["Clienti","Chi compra da te: imprese, geometri, privati. Al cliente puoi dare il prezzo banco o il prezzo impresa."],
+      ["Fatture","Si fatturano i preventivi accettati."],
+      ["Fornitori","Da chi compri. Contatti e ordini in arrivo."],
+      ["Report","Come va il negozio: venduto e acquistato mese per mese, i prodotti che vendono di piu', il valore del magazzino."],
+      ["Cestino","Quello che elimini non sparisce: resta qui finche' non lo rimetti a posto o non lo butti per sempre."]
+    ];
+    openSheetGrande(`<h3>Come si usa il gestionale negozio</h3>
+      <p style="font-size:13px;color:var(--muted);margin:-8px 0 16px">Una riga per sezione. Se non trovi quello che cerchi, scrivimi dal riquadro &laquo;Assistenza diretta&raquo; nella colonna a sinistra.</p>
+      ${voci.map(v=>`<div style="padding:13px 0;border-top:1px solid var(--line)">
+        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px">${v[0]}</div>
+        <div style="font-size:15px;line-height:1.6;color:var(--muted)">${v[1]}</div></div>`).join("")}
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Chiudi</button></div>`);
+  }
+
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
   async function generaPdf(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
@@ -2068,6 +2156,9 @@
     if(a==="home")return goHome();
     if(a==="azienda")return aziendaForm();
     if(a==="save-azienda")return saveAzienda();
+    if(a==="commercialista")return commForm();
+    if(a==="save-comm")return saveComm();
+    if(a==="aiuto")return aiutoNegozio();
     if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
