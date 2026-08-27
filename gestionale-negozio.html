@@ -53,7 +53,9 @@
   header.top{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;
     padding:16px 16px 14px;position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(0,0,0,.12)}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-  .sec-head .add{background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:700;cursor:pointer}
+  /* ⛔ 27 agosto 2026 (notte) — tolto «.sec-head .add»: era un pulsantino
+     azzurro chiaro da 13px, e nelle imprese il pulsante di aggiunta e'
+     un «.btn add» normale del foglio in comune. Adesso e' quello. */
   /* ⛔ 27 agosto 2026 (sera) — tolte le righe di .kpis / .kpi .n /
      .money-row / .money .n: erano i sei riquadri piatti del vecchio
      Riepilogo, che adesso e' una griglia di carte come nelle imprese.
@@ -89,7 +91,10 @@
   .up-btn{display:inline-block;background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer}
   .gal-intro{font-size:14px;color:var(--muted);line-height:1.45;max-width:660px;margin-bottom:16px}
   .gal-intro b{color:#46524b}
-  .filt-label{font-size:13px;font-weight:700;color:#46524b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+  /* ⛔ 27 agosto 2026 (notte) — tolta «.filt-label»: era l'etichetta
+     MAIUSCOLA sopra i filtri della Galleria e dell'Agenda. Adesso quei
+     filtri usano «filtro-lab» del foglio in comune, minuscola e a
+     sinistra dei pulsanti, come nelle imprese. */
   .wrap{max-width:1140px}
   /* zoom rimosso: rendeva sfocati testi e click su alcuni browser */
 
@@ -100,7 +105,6 @@
   .side .back{background:#f1f4f7;color:#3c4854;border:none;border-radius:8px;width:34px;height:34px;padding:0;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto}
   .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:#141c24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side-brand small{display:block;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;line-height:1.25;overflow-wrap:anywhere}
-  .side .btn-new{width:100%;margin:0 0 14px;background:var(--accent);color:#fff;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;box-shadow:none}
   .side nav.tabs{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;max-width:none;overflow:visible}
   .side nav.tabs button{display:flex;align-items:center;gap:10px;width:100%;color:#5b6672;font-size:13.5px;font-weight:600;padding:9px 11px;border-radius:8px;border-bottom:none;text-align:left}
   .side nav.tabs button svg{width:17px;height:17px;flex:0 0 auto;opacity:.85}
@@ -224,8 +228,7 @@
     .side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:30;padding:10px 12px 8px;border-right:none;border-bottom:1px solid var(--line)}
     .side-top{margin-bottom:0}
     .burger{display:flex}
-    .side .btn-new,.side nav.tabs{display:none}
-    .side.open .btn-new{display:block;margin:8px 0}
+    .side nav.tabs{display:none}
     .side.open nav.tabs{display:flex;flex-direction:column}
     .side.open .side-top{margin-bottom:10px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
@@ -343,8 +346,15 @@
       <div class="side-brand"><h1><span class="rep-dot" id="rep-dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#9aa7b2"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
       <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
-    <!-- 6 agosto 2026: in una rivendita non si creano "lavori": si aggiungono prodotti. -->
-    <button class="btn-new" data-action="new-prod">+ Nuovo prodotto</button>
+    <!-- ⛔ 27 agosto 2026 (notte) — QUI NON C'E' PIU' IL PULSANTONE.
+         C'era «+ Nuovo prodotto» blu, largo quanto la colonna, sopra le due
+         card. Nelle imprese la colonna parte SUBITO dalle due card e il
+         pulsante di aggiunta sta nella testata della sua sezione, dove
+         serve. Adesso «+ Nuovo prodotto» sta in cima alla sezione Prodotti
+         (e fa esattamente quello che faceva qui: porta il cursore nel
+         primo campo del modulo).
+         ⚠️ L'azione «new-prod» non e' stata toccata: la usa anche la
+         scheda «Da sistemare oggi» del Riepilogo. -->
     <nav class="tabs">
       <!-- ===== 26 agosto 2026 — LA BARRA A GRUPPI =====
            Come nel gestionale imprese, ma con le parole del negozio: qui non
@@ -458,7 +468,14 @@
     </section>
 
     <section id="prodotti">
-      <h2 style="margin:0 0 16px">Prodotti</h2>
+      <!-- ================================================================
+           27 agosto 2026 (notte) — LA TESTATA DI SEZIONE, COME LE IMPRESE.
+           Blocco copiato da gestionale-app.html: «sec-head» col titolo e i
+           pulsanti a destra, e sotto la riga di spiegazione «gal-intro».
+           Prima qui c'era un <h2> nudo con lo stile scritto a mano.
+           ================================================================ -->
+      <div class="sec-head"><h2>Prodotti</h2><button class="btn add" data-action="new-prod">+ Nuovo prodotto</button></div>
+      <div class="gal-intro">Il catalogo di quello che vendi: nome, codice, unit&agrave; di misura, quanto lo paghi e a quanto lo vendi. Il prezzo all&rsquo;impresa &egrave; facoltativo: lasciandolo vuoto fai lo stesso prezzo a tutti.</div>
       <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
         <h3 style="margin:0 0 12px">Nuovo prodotto</h3>
         <input id="np-nome" placeholder="Nome prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -532,13 +549,15 @@
     </section>
 
     <section id="magazzino">
-      <h2 style="margin:0 0 16px">Magazzino</h2>
+      <div class="sec-head"><h2>Magazzino</h2></div>
+      <div class="gal-intro">Quante ne hai. Il <b>+</b> e il <b>&minus;</b> chiedono quante e perch&eacute;, e la ragione resta scritta nei Movimenti: la giacenza non cambia mai senza che si sappia da dove viene. Sotto la soglia minima il prodotto si accende.</div>
       <div id="magazzino-body" class="grid"></div>
     </section>
 
     <!-- ===== PREVENTIVI — 6 agosto 2026 ===== -->
     <section id="preventivi">
-      <h2 style="margin:0 0 16px">Preventivi</h2>
+      <div class="sec-head"><h2>Preventivi</h2><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button></div>
+      <div class="gal-intro">Le righe le prendi dal magazzino o le scrivi a mano. Sconto di riga, sconto sul totale e IVA. Quando il cliente accetta, la merce esce dal magazzino <b>una volta sola</b>.</div>
 
       <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
         <h3 id="pv-titolo-sez" style="margin:0 0 14px">Nuovo preventivo</h3>
@@ -603,7 +622,8 @@
     </section>
 
     <section id="fornitori">
-      <h2 style="margin:0 0 16px">Fornitori</h2>
+      <div class="sec-head"><h2>Fornitori</h2><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button></div>
+      <div class="gal-intro">Da chi compri la merce: contatti sempre a portata di mano e ordini in arrivo, cos&igrave; sai sempre cosa aspetti e da chi.</div>
       <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
         <h3 style="margin:0 0 12px">Nuovo fornitore</h3>
         <input id="nf-nome" placeholder="Nome fornitore *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -618,7 +638,8 @@
     </section>
 
     <section id="movimenti">
-      <h2 style="margin:0 0 16px">Movimenti</h2>
+      <div class="sec-head"><h2>Movimenti</h2><button class="btn add" data-action="new-mov">+ Nuovo movimento</button></div>
+      <div class="gal-intro">Il giro della giornata: la merce che <b>esce</b> (una vendita) e quella che <b>entra</b> (un ordine al fornitore). Se prendi il prodotto dal magazzino la giacenza si aggiorna da sola.</div>
       <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
         <h3 style="margin:0 0 12px">Nuovo movimento</h3>
         <select id="nm-tipo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -655,12 +676,16 @@
     <section id="agenda">
       <div class="sec-head"><h2>Agenda operatore</h2></div>
       <div class="gal-intro">Il quadro completo di cosa c'è da fare, persona per persona. Scegli un operatore: vedi tutti i suoi lavori con indirizzo, mappa, foto del capo e note — tutto in un colpo solo, pronto per andare in cantiere.</div>
-      <div class="filt-label">Operatore</div>
-      <div class="chiprow" id="ag-op"></div>
-      <div class="filt-label">Mostra</div>
-      <div class="chiprow" id="ag-stato">
-        <button class="chip on" data-action="ag-stato" data-v="aperti">Da fare</button>
-        <button class="chip" data-action="ag-stato" data-v="tutti">Tutti</button>
+      <div class="filtri">
+        <div class="filtro"><span class="filtro-lab">Operatore</span>
+          <div class="segm" id="ag-op"></div>
+        </div>
+        <div class="filtro"><span class="filtro-lab">Mostra</span>
+          <div class="segm" id="ag-stato">
+            <button class="on" data-action="ag-stato" data-v="aperti">Da fare</button>
+            <button data-action="ag-stato" data-v="tutti">Tutti</button>
+          </div>
+        </div>
       </div>
       <div id="ag-body"></div>
     </section>
@@ -673,7 +698,7 @@
     </section>
 
     <section id="lavori">
-      <div class="sec-head"><h2>Lavori</h2><button class="add" data-action="new-job">+ Nuovo</button></div>
+      <div class="sec-head"><h2>Lavori</h2><button class="btn add" data-action="new-job">+ Nuovo lavoro</button></div>
       <div class="chiprow" id="stato-chips">
         <button class="chip on" data-stato="tutti">Tutti</button>
         <button class="chip" data-stato="da_fare">Da fare</button>
@@ -686,7 +711,8 @@
     </section>
 
     <section id="fatture">
-      <div class="sec-head"><h2>Fatture</h2><button class="add" data-action="new-fattura">+ Nuova</button></div>
+      <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div>
+      <div class="gal-intro">Quanto hai gi&agrave; fatturato e quanto devi ancora incassare, con il PDF di cortesia da allegare.</div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
@@ -695,33 +721,43 @@
     <section id="galleria">
       <div class="sec-head"><h2>Galleria foto</h2></div>
       <div class="gal-intro">Tutte le foto di questo reparto: prodotti, bancali arrivati, danni alla merce. Usa i filtri qui sotto per trovarle.</div>
-      <div class="filt-label">Filtra per tipo di foto</div>
-      <div class="chiprow" id="gal-tipo">
-        <button class="chip on" data-action="gal-tipo" data-v="">Tutte</button>
-        <button class="chip" data-action="gal-tipo" data-v="prima">Da fare</button>
-        <button class="chip" data-action="gal-tipo" data-v="dopo">Fatto</button>
+      <!-- ⛔ 27 agosto 2026 (notte) — I FILTRI, COME NELLE IMPRESE.
+           Prima erano etichette MAIUSCOLE («FILTRA PER TIPO DI FOTO») con
+           sotto dei pulsanti blu scuro pieni, uno per riga di etichetta.
+           Adesso e' il blocco «filtri / filtro / filtro-lab / segm» di
+           gestionale-app.html: etichetta minuscola a sinistra e i pulsanti
+           dentro un segmento chiaro, tutto su una riga sola. -->
+      <div class="filtri">
+        <div class="filtro"><span class="filtro-lab">Mostra</span>
+          <div class="segm" id="gal-tipo">
+            <button class="on" data-action="gal-tipo" data-v="">Tutte</button>
+            <button data-action="gal-tipo" data-v="prima">Da fare</button>
+            <button data-action="gal-tipo" data-v="dopo">Fatto</button>
+          </div>
+        </div>
+        <div class="filtro"><span class="filtro-lab">Chi l&rsquo;ha caricata</span>
+          <div class="segm" id="gal-op"></div>
+        </div>
       </div>
-      <div class="filt-label">Filtra per operatore</div>
-      <div class="chiprow" id="gal-op"></div>
       <div id="gal-body"></div>
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Clienti</h2><button class="add" data-action="new-cli">+ Nuovo</button></div>
+      <div class="sec-head"><h2>Clienti</h2><button class="btn add" data-action="new-cli">+ Nuovo cliente</button></div>
+      <div class="gal-intro">Chi compra da te: imprese, geometri, privati. A ogni cliente puoi dare il <b>prezzo banco</b> o il <b>prezzo impresa</b>, e il preventivo lo prende da qui.</div>
       <div class="grid" id="cli-list"></div>
     </section>
 
     <!-- ===== CESTINO — 26 agosto 2026 ===== -->
     <section id="cestino">
       <div class="sec-head"><h2>Cestino</h2></div>
-      <p style="color:#5b6672;font-size:15px;margin:0 0 14px;max-width:640px">Tutto quello che elimini dal negozio passa di qui e resta a disposizione: finché è nel cestino non è perso. Apri una riga per rimetterla a posto.</p>
-      <input type="text" id="cest-search" placeholder="Cerca nel cestino: nome o tipo" autocomplete="off" spellcheck="false"
-             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+      <div class="gal-intro">Tutto quello che elimini dal negozio passa di qui e resta a disposizione: finch&eacute; &egrave; nel cestino non &egrave; perso. Apri una riga per rimetterla a posto.</div>
+      <input type="text" id="cest-search" class="lav-search" placeholder="Cerca nel cestino: nome o tipo" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div id="cest-body" class="grid"></div>
     </section>
 
     <section id="squadra">
-      <div class="sec-head"><h2>Squadra</h2><button class="add" data-action="new-dip">+ Persona</button></div>
+      <div class="sec-head"><h2>Squadra</h2><button class="btn add" data-action="new-dip">+ Persona</button></div>
       <div style="background:#e8f4ff;border:1px solid #b3d9ff;border-radius:12px;padding:14px 18px;margin-bottom:16px">
         <p style="margin:0;color:#0066ff;font-weight:600;font-size:15px">💡 Come entrano i collaboratori</p>
         <p style="margin:6px 0 0;color:#444;font-size:14px">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
@@ -730,12 +766,13 @@
     </section>
 
     <section id="scadenzario">
-      <div class="sec-head"><h2>Scadenzario</h2><button class="add" data-action="new-scad">+ Nuova</button></div>
+      <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova scadenza</button></div>
+      <div class="gal-intro">Le date da non perdere: pagamenti, rinnovi, verifiche. Il Riepilogo ti avvisa prima che scadano.</div>
       <div class="grid" id="scad-list"></div>
     </section>
 
     <section id="lavoro-foto">
-      <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="add" data-action="lf-back">‹ Indietro</button></div>
+      <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="btn add" data-action="lf-back">‹ Indietro</button></div>
       <div class="gal-intro">Carica qui le foto di <b>cosa c'è da fare</b> per questo lavoro: le vedrà l'operaio nella sua agenda.</div>
       <div class="field"><label>📷 Foto "cosa fare"</label>
         <input type="file" id="lf-file" accept="image/*" multiple style="display:none">
@@ -744,7 +781,7 @@
     </section>
 
     <section id="report">
-      <div class="sec-head"><h2>Report</h2><button class="add" data-action="report-csv">⬇ Esporta CSV</button></div>
+      <div class="sec-head"><h2>Report</h2><button class="btn add" data-action="report-csv">⬇ Esporta CSV</button></div>
       <div class="gal-intro">L'andamento del negozio: vendite e acquisti mese per mese, i prodotti che vendono di più e lo stato del magazzino.</div>
       <div id="rep-body"></div>
     </section>
@@ -1104,8 +1141,8 @@
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
     filter={stato:"tutti",q:""};$("#f-search").value="";cal=new Date();
-    galFilter={op:"",tipo:""};$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
-    agFilter={op:"",stato:"aperti"};$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
+    galFilter={op:"",tipo:""};$$("#gal-tipo button").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
+    agFilter={op:"",stato:"aperti"};$$("#ag-stato button").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
     $$("#stato-chips .chip").forEach(c=>c.classList.toggle("on",c.dataset.stato==="tutti"));
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
@@ -2180,8 +2217,8 @@
     const lavIds=new Set((lavori||[]).map(l=>l.id));
     const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
     const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
-    const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</button>`]
-      .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
+    const opChips=[`<button class="${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</button>`]
+      .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
     if($("#gal-op"))$("#gal-op").innerHTML=opChips;
     const matchTipo=f=>galFilter.tipo==="prima"?f.tipo==="da_fare":galFilter.tipo==="dopo"?f.tipo!=="da_fare":true;
     const fs=all.filter(f=>(!galFilter.op||f.operatore===galFilter.op)&&matchTipo(f));
@@ -2228,7 +2265,7 @@
     if(!cur)return;
     const body=$("#ag-body");
     if(!sb||!sbUid){
-      if($("#ag-op"))$("#ag-op").innerHTML=`<button class="chip on" data-action="ag-op" data-v="">Tutti</button>`;
+      if($("#ag-op"))$("#ag-op").innerHTML=`<button class="on" data-action="ag-op" data-v="">Tutti</button>`;
       if(body)body.innerHTML=`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>Assegna i lavori a una persona dalla scheda del lavoro, voce "Chi ci va"</small></div>`;
       return;
     }
@@ -2236,8 +2273,8 @@
     const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     const OPS=ops||[];
     const telMap=Object.fromEntries(OPS.map(o=>[o.id,o.telefono||""]));
-    const opChips=[`<button class="chip ${agFilter.op===""?"on":""}" data-action="ag-op" data-v="">Tutti</button>`]
-      .concat(OPS.map(d=>`<button class="chip ${agFilter.op===d.id?"on":""}" data-action="ag-op" data-v="${d.id}">${esc(d.nome)}</button>`)).join("");
+    const opChips=[`<button class="${agFilter.op===""?"on":""}" data-action="ag-op" data-v="">Tutti</button>`]
+      .concat(OPS.map(d=>`<button class="${agFilter.op===d.id?"on":""}" data-action="ag-op" data-v="${d.id}">${esc(d.nome)}</button>`)).join("");
     if($("#ag-op"))$("#ag-op").innerHTML=opChips;
     /* lavori del reparto (Supabase) */
     const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
@@ -2310,15 +2347,30 @@
     if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
-    /* 6 agosto 2026: il pulsante grande della barra porta alla scheda Prodotti,
-       con il cursore già nel campo del nome. */
-    if(a==="new-prod"){
-      $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="prodotti"));
-      $$("section").forEach(s=>s.classList.toggle("active",s.id==="prodotti"));
+    /* ================================================================
+       I QUATTRO «+ Nuovo …» DELLE TESTATE — 27 agosto 2026 (notte)
+
+       Prima ce n'era uno solo: il pulsantone blu in cima alla colonna,
+       che portava alla sezione Prodotti col cursore gia' nel campo del
+       nome. Adesso ogni sezione che ha un modulo ha il suo pulsante nella
+       testata, come nelle imprese, e fanno tutti la stessa cosa: portano
+       nella sezione e mettono il cursore nel primo campo.
+
+       ⚠️ NON aprono ancora una finestra: nel negozio quei quattro moduli
+       stanno tuttora aperti in cima alla sezione. Quando entreranno nella
+       finestra grande (il passo dopo), saranno questi stessi pulsanti ad
+       aprirla, e il resto della pagina non se ne accorgera'.
+       ================================================================ */
+    const _vaiE=(sez,campo)=>{
+      $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab===sez));
+      $$("section").forEach(s=>s.classList.toggle("active",s.id===sez));
       window.scrollTo({top:0,behavior:"smooth"});
-      const n=$("#np-nome"); if(n)setTimeout(function(){n.focus();},150);
-      return;
-    }
+      const n=$(campo); if(n)setTimeout(function(){n.focus();},150);
+    };
+    if(a==="new-prod"){ _vaiE("prodotti","#np-nome");  return; }
+    if(a==="new-mov"){  _vaiE("movimenti","#nm-prodotto"); return; }
+    if(a==="new-prev"){ _vaiE("preventivi","#pv-cliente"); return; }
+    if(a==="new-forn"){ _vaiE("fornitori","#nf-nome"); return; }
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
@@ -2328,10 +2380,10 @@
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
     if(a==="del-foto"){if(confirm("Eliminare questa foto?"))deleteFoto(t.dataset.id);return;}
-    if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderGalleria();return;}
+    if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;$$("#gal-tipo button").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderGalleria();return;}
     if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
-    if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
+    if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato button").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){
