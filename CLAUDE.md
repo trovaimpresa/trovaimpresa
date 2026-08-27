@@ -16216,3 +16216,91 @@ pulsante dentro la finestra non c'è. E c'è una prova apposta che pretende
 
 Zip: `prove-claude/banco-negozio-funziona-26ago-sera.zip`.
 `gestionale-negozio.html`: md5 **`270bef22b7c96ea260d5d820d2869600`**.
+
+# 27 AGOSTO 2026 — IL PDF DELLA FATTURA: LA FINE DELLA STRADA DEI SOLDI
+
+Il pezzo che il documento di ieri elencava come **«non provato»**. Adesso è
+provato: **33 prove** e **11 sabotaggi**.
+
+Il banco delle imprese passa da **89 a 122 prove** (122 verdi, 0 rosse) e da
+**25 a 36 sabotaggi** (36 visti).
+
+⛔ **Nessun file del sito è stato toccato.** `gestionale-app.html` e
+`js/gest-fatture.js` sono identici a ieri (md5 `49d89af5c29f541538b83dbc64c416cf`
+e `ead9aeedb462a3631901c645023fc301`): il PDF funzionava già, mancava solo chi
+lo controllasse.
+
+## ⛔ COME SI PROVA UN PDF CON LA RETE CHIUSA
+
+Era **questo** il motivo per cui il PDF era rimasto fuori dal banco: **jsPDF
+arriva da un CDN**, e il banco gira apposta senza rete.
+
+Ma `caricaJsPDF()`, prima di chiedere niente a internet, guarda se
+`window.jspdf` c'è già (`gestionale-app.html`, riga 795). Quindi gliene mettiamo
+uno **finto che non disegna: SCRIVE UN VERBALE** — di ogni scritta si segna il
+testo, la posizione e su quale pagina è finita.
+
+Così non si prova «il file esiste». Si prova **cosa c'è scritto dentro**, che è
+l'unica cosa che conta. ⚠️ **La stessa strada vale per l'export Excel**
+(SheetJS, stesso `if(window.XLSX)`) e per il PDF del preventivo.
+
+## Cosa tiene fermo la famiglia P
+
+Chi emette (nome, P.IVA, indirizzo) · il numero con l'anno · il cliente ⛔ **col
+codice fiscale se è un privato, non con una P.IVA** · la voce col prezzo e la
+sua aliquota per riga · ⛔ il **riepilogo IVA che chiede lo SDI** (950 al 22% =
+**209,00**) · imponibile, IVA e TOTALE · IBAN e causale · lo stato · ⛔ la
+dicitura **«copia di cortesia … Sistema di Interscambio»** · il nome del file ·
+e che una fattura **senza voci non produce un foglio vuoto**.
+
+⛔ **Una bozza non si inventa un numero**: scrive «Bozza — non ancora emessa» e
+il file si chiama `fattura-bozza-…`. È la regola della numerazione vista
+dall'altra parte: se il PDF scrivesse «N. 2», il numero sarebbe bruciato su un
+foglio e non nel database.
+
+## ⚠️ LA LEZIONE DI OGGI — una prova verde che non provava niente
+
+La prima versione diceva: **«con trenta voci il TOTALE non finisce fuori
+pagina»**. Verde.
+
+Poi il sabotaggio ha tolto apposta il salto pagina — quello del difetto del
+**12 agosto**, quando il riquadro TOTALE finiva 8 mm oltre il bordo dell'A4 e
+la fattura usciva **senza totale** — e la prova è **restata verde lo stesso**.
+
+Il motivo: con trenta voci l'elenco va a pagina due e in fondo resta posto, il
+totale ci sta comunque. **Il guaio succede quando l'ultima voce finisce vicino
+al fondo del foglio.**
+
+Adesso la prova le fa **tutte, da 16 a 26 voci**, e dice **quali** non tengono.
+
+⛔ **LA REGOLA CHE RESTA:** una prova che dipende da «quanto è lungo» non si fa
+con un numero solo. Si fa con **l'intervallo** dove il guaio può succedere.
+
+## ⚠️ Due inciampi da non ripetere
+
+- **La finestra di prima resta aperta.** Facendo due PDF di fila nella stessa
+  pagina, il secondo si ritrovava dentro la fattura sbagliata e il banco
+  misurava due volte lo stesso foglio. Adesso si chiude la finestra, si esce e
+  si rientra nella sezione (l'elenco si rilegge dal database).
+- **`toLocaleString` fuori dal browser non mette i punti delle migliaia.** Il
+  banco diceva rosso per un difetto suo: «1.760,00 invece di 1760,00». I punti
+  adesso se li scrive a mano.
+
+Zip: `prove-claude/banco-imprese-funziona-27ago.zip`.
+
+## COSA RESTA, IN ORDINE
+
+1. **Il collaudo a mano del negozio** — sabato mattina, 31 passi, più le
+   schede nuove col solo «Apri».
+2. **L'XML per lo SDI** — è quello che arriva davvero all'Agenzia delle
+   Entrate, e non lo prova ancora nessuno. È il prossimo pezzo della fattura.
+3. **La parcella dello studio tecnico** (cassa e ritenuta) e il **forfettario**.
+4. **Il resto del banco imprese**: cestino, ricerca, calendario, squadra, ore,
+   spese, la fattura fatta da un lavoro o da un preventivo.
+5. **Fatture del negozio** — la decisione: in un negozio si fattura un
+   preventivo accettato.
+6. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+
+⛔ `admin.html` (le 87 scritte piccole) resta fuori: Alessio ha detto che per
+adesso non interessa. **La priorità è finire il gestionale e aprirlo agli
+iscritti.**
