@@ -16153,3 +16153,66 @@ Zip: `prove-claude/banco-negozio-funziona-26ago-sera.zip`.
 4. **La grafica dentro il negozio** e i nove `openSheet()` → `openSheetGrande()`.
 5. **`admin.html`: 87 testi sotto i 13 px** e gli accenti con l'apostrofo.
 6. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+
+## 26 AGOSTO, TARDA SERA — LE SCHEDE COL SOLO «APRI», E LA FINESTRA GRANDE
+
+Deciso da Alessio: **«voglio che le schede abbiano solo il pulsante Apri al suo
+esterno, tutto il resto resta dentro»**.
+
+⛔ **E la priorità che ha detto, e vale da qui in avanti: finire il gestionale e
+aprirlo agli iscritti.** L'ordine dei prossimi lavori è **A → B → D**;
+`admin.html` (le scritte piccole) **non interessa per adesso**.
+
+### A1 — la finestra grande
+
+Sette finestre lunghe — cliente, lavoro, scadenza, persona, la giornata del
+calendario, dati azienda, cestino — hanno adesso **intestazione ferma in cima,
+piede fermo in fondo, e solo il corpo che scorre**. In cima a sinistra la
+freccia **«Indietro»**, uguale in tutte: si esce sempre allo stesso modo.
+
+⚠️ **`openSheetGrande` si divide l'html DA SOLA**: primo `<h3>` →
+intestazione, `<div class="sheet-actions">` → piede, il resto → corpo. Le
+finestre già scritte non sono state rifatte una per una; il giorno che la forma
+cambia, cambia in **un posto solo**.
+
+⛔ **Le corte sono rimaste piccole, ed è voluto**: «Nuovo reparto», «Rinomina
+persona» e la rettifica di magazzino sono tre righe in croce — a tutto schermo
+diventerebbero un lenzuolo bianco.
+
+⛔ **Le classi sono riscritte DENTRO la pagina** (`.sheet--grande`, `.sh-head`,
+`.sh-body`, `.sh-foot`, `.sh-back`, `.sh-riga`): `gestionale-negozio.html`
+carica solo `css/mobile.css`. È l'errore che si ripete: qui va riscritta.
+
+### A2 — un pulsante solo fuori
+
+Prodotti, fornitori e preventivi: nell'elenco c'è **«Apri»** e basta. Dentro la
+finestra ci sono tutti i dati e, in fondo, **Modifica · Elimina** — e per il
+preventivo anche **PDF** e **«Il cliente ha accettato»**.
+
+La scheda del preventivo mostra anche **le righe e il totale**, che prima non
+si vedevano da nessuna parte senza aprire il modulo.
+
+⚠️ **I Movimenti sono rimasti come sono**, apposta: hanno il pulsante «Merce
+arrivata» costruito e provato la stessa sera, e rifarli voleva dire rifare
+anche le prove. Se domani vanno uniformati, va rifatta la famiglia N.
+
+⛔ **Le schede si rileggono dal DATABASE, non dalla lista a schermo**: la
+ricerca in cima può aprire un prodotto di una sezione in cui non sei mai
+entrato, e lì la lista è vuota.
+
+### Il banco
+
+| | prima | adesso |
+|---|---|---|
+| prove | 283 | **298 · 298 verdi · 0 rosse** |
+| sabotaggi | 97 | **106 · 106 visti** |
+
+⛔ **La trappola, ed è la numero 1 del banco delle imprese:** una prova che
+cerca «Modifica» o «Elimina» **nell'elenco** non fallisce — non trova niente,
+non fa niente, e **resta verde**. Per questo il banco ha due aiutanti nuovi:
+`apriCarta()` che batte «Apri», e `bottoneScheda()` che **torna `false`** se il
+pulsante dentro la finestra non c'è. E c'è una prova apposta che pretende
+**zero** pulsanti pericolosi nell'elenco.
+
+Zip: `prove-claude/banco-negozio-funziona-26ago-sera.zip`.
+`gestionale-negozio.html`: md5 **`270bef22b7c96ea260d5d820d2869600`**.

@@ -377,6 +377,53 @@
     .side.open .side-top{margin-bottom:10px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
   }
+  /* ================================================================
+     26 agosto 2026 — LA FINESTRA GRANDE nel negozio.
+     Fin qui i moduli lunghi (cliente, lavoro, scadenza, dati azienda)
+     si aprivano in una finestrella da 640 px con dentro una barretta di
+     scorrimento lunga un dito, e per salvare bisognava arrivare in fondo
+     a una colonna di dieci campi.
+     Adesso: intestazione ferma in cima, piede fermo in fondo, e scorre
+     solo il corpo. Come nelle imprese.
+     ⛔ Le classi sono RISCRITTE QUI perche' questa pagina non carica
+        css/gestionale.css: carica solo css/mobile.css.
+     ================================================================ */
+  .sheet--grande{max-width:1080px;width:min(1080px,96vw);margin:26px auto;padding:0;
+    display:flex;flex-direction:column;max-height:calc(100vh - 52px);overflow:hidden}
+  .sheet--grande .sh-head{display:flex;align-items:center;gap:12px;padding:15px 22px;
+    border-bottom:1px solid var(--line);background:#fff;flex:0 0 auto}
+  .sheet--grande .sh-head h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px;flex:1;min-width:0}
+  .sheet--grande .sh-body{padding:20px 22px;overflow-y:auto;flex:1 1 auto;-webkit-overflow-scrolling:touch}
+  .sheet--grande .sh-foot{display:flex;gap:10px;flex-wrap:wrap;padding:13px 22px;
+    border-top:1px solid var(--line);background:#fff;flex:0 0 auto}
+  .sheet--grande .sh-foot button{flex:1 1 150px;padding:13px;border-radius:11px;font-family:inherit;
+    font-size:15px;font-weight:700;cursor:pointer;border:none}
+  /* dentro la finestra grande il piede e' gia' fermo: la vecchia barra
+     appiccicata in fondo al corpo non serve piu' */
+  .sheet--grande .sh-body .sheet-actions{position:static;border-top:none;padding-top:0}
+  /* ⛔ SI ESCE SEMPRE ALLO STESSO MODO: una freccia grande in cima a
+     sinistra, uguale in tutte le finestre grandi. */
+  .sh-back{display:inline-flex;align-items:center;gap:6px;background:#eef1ef;border:none;
+    border-radius:10px;padding:9px 14px;font-family:inherit;font-size:15px;font-weight:700;
+    color:#48544d;cursor:pointer;flex:0 0 auto}
+  .sh-back svg{width:18px;height:18px}
+  /* le righe di dettaglio dentro la scheda aperta */
+  .sh-riga{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .sh-riga:last-child{border-bottom:none}
+  .sh-riga .k{flex:0 0 190px;color:var(--muted);font-weight:700;font-size:14px}
+  .sh-riga .v{flex:1;min-width:0;word-break:break-word}
+  .sh-titolone{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
+  @media(max-width:880px){
+    .sheet--grande{width:100%;max-width:none;margin:0;border-radius:0;
+      max-height:100vh;min-height:100vh}
+    .sheet--grande .sh-head,.sheet--grande .sh-foot{padding:13px 16px}
+    .sheet--grande .sh-body{padding:16px}
+    .sh-riga{flex-direction:column;gap:2px}
+    .sh-riga .k{flex:none}
+  }
+  /* il pulsante «Apri» delle schede: uno solo, fuori. Tutto il resto sta dentro. */
+  .carta-apri{font-size:15px;font-weight:700;padding:9px 20px;border:none;border-radius:9px;
+    background:#0066ff;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 
 <!-- LANDING -->
@@ -1464,7 +1511,7 @@
         <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
         <span class="stato ${sf?'fatto':'da_fare'}">${sf?'Fatto':'Da fare'}</span></div>`;}).join("")
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
-    openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
+    openSheetGrande(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
         <textarea id="day-note" placeholder="Es. chiamare il fornitore, preparare la consegna...">${esc(noteCache[ds]||"")}</textarea></div>
       <div class="sheet-actions">
@@ -1517,7 +1564,7 @@
   }
   function squadraForm(op){
     const isNew=!op;op=op||{};
-    openSheet(`<h3>${isNew?"Nuova persona":"Modifica persona"}</h3>
+    openSheetGrande(`<h3>${isNew?"Nuova persona":"Modifica persona"}</h3>
       <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
       <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567 (facoltativo)"></div>
       <div class="field"><label>Ruolo</label><select id="d-ruolo">
@@ -1615,7 +1662,7 @@
     if(sb&&sbUid){const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome");cl=data||[];}
     const tipoOpts=TIPI_PRATICA.map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuova scadenza":"Modifica scadenza"}</h3>
+    openSheetGrande(`<h3>${isNew?"Nuova scadenza":"Modifica scadenza"}</h3>
       <div class="field"><label>Titolo</label><input id="s-tit" value="${esc(s.titolo||"")}" placeholder="Es. Presentazione SCIA"></div>
       <div class="field"><label>Tipo</label><select id="s-tipo">${tipoOpts}</select></div>
       <div class="field"><label>Cliente</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
@@ -1661,7 +1708,7 @@
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
     const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
+    openSheetGrande(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
       <div class="field"><label>Cliente / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
         <button class="quick-add" data-action="quick-cli">+ Aggiungi nuovo cliente</button></div>
@@ -1737,7 +1784,7 @@
 
   function cliForm(c){
     const isNew=!c;c=c||{};
-    openSheet(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>
+    openSheetGrande(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>
       <div class="field"><label>Nome cliente</label><input id="c-nome" value="${esc(c.nome||"")}" placeholder="${ruoloUtente==='professionista'?'Es. Mario Rossi':'Es. Condominio Via Roma 12'}"></div>
       <div class="field"><label>Indirizzo</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Via, numero, città"></div>
       <div class="row2"><div class="field"><label>Referente / Amministratore</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
@@ -1844,7 +1891,7 @@
     aziendaRow=null;
     if(sb&&sbUid){const {data}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();aziendaRow=data||null;}
     const a=aziendaRow||{};
-    openSheet(`<h3>Dati azienda</h3>
+    openSheetGrande(`<h3>Dati azienda</h3>
       <p style="font-size:13px;color:var(--muted);margin:-8px 0 14px">Compaiono in cima a ogni PDF fattura. Sono i dati dell'azienda multiservizi.</p>
       <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
       <div class="field"><label>P.IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="01234567890"></div>
@@ -2066,7 +2113,34 @@
     if(body)body.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
   }
 
-  function openSheet(html){$("#sheet").innerHTML=html;$("#overlay").classList.add("open");}
+  function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
+  /* 26 agosto 2026 — LA FINESTRA GRANDE.
+     ⚠️ Prende lo STESSO html di openSheet e se lo divide da sola: il primo
+     <h3> diventa l'intestazione ferma, il <div class="sheet-actions"> il
+     piede fermo, e in mezzo resta il corpo che scorre. Cosi' le finestre
+     gia' scritte non vanno rifatte una per una — e il giorno che una cambia,
+     cambia in un posto solo. */
+  const _ICO_INDIETRO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
+  const _BTN_INDIETRO='<button class="sh-back" data-action="close" title="Torna indietro" aria-label="Torna indietro">'+_ICO_INDIETRO+'<span>Indietro</span></button>';
+  function openSheetGrande(html){
+    const s=$("#sheet"), tmp=document.createElement("div");
+    tmp.innerHTML=html;
+    const h3=tmp.querySelector("h3");
+    const titolo=h3?h3.innerHTML:"";
+    if(h3)h3.parentNode.removeChild(h3);
+    const foot=tmp.querySelector(".sheet-actions");
+    const azioni=foot?foot.innerHTML:"";
+    if(foot)foot.parentNode.removeChild(foot);
+    s.className="sheet sheet--grande";
+    s.innerHTML='<div class="sh-head">'+_BTN_INDIETRO+'<h3>'+titolo+'</h3></div>'+
+      '<div class="sh-body">'+tmp.innerHTML+'</div>'+
+      (azioni?'<div class="sh-foot">'+azioni+'</div>':'');
+    $("#overlay").classList.add("open");
+    /* senza questo il modulo si apre gia' scorso di qualche riga (resta la
+       posizione della volta prima) e la prima etichetta sparisce */
+    const b=s.querySelector(".sh-body");
+    if(b){b.scrollTop=0;requestAnimationFrame(function(){b.scrollTop=0;});setTimeout(function(){b.scrollTop=0;},80);}
+  }
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
 
@@ -2184,6 +2258,34 @@
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
+    /* 26 agosto 2026 (sera) — le azioni che stanno DENTRO le schede */
+    if(a==="prod-modifica"){closeSheet();return prodApriModulo(id);}
+    if(a==="prod-elimina"){
+      if(!confirm("Eliminare questo prodotto?"))return;
+      const {data:okDpr,error}=await sb.from("neg_prodotti").delete().eq("id",id).eq("user_id",sbUid).select("id");
+      if(error){alert("Errore: "+error.message);return;}
+      if(!okDpr||!okDpr.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
+      closeSheet();loadProdotti();return;
+    }
+    if(a==="forn-modifica"){closeSheet();return fornApriModulo(id);}
+    if(a==="forn-elimina"){
+      if(!confirm("Eliminare questo fornitore?"))return;
+      const {data:okDf,error}=await sb.from("neg_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
+      if(error){alert("Errore: "+error.message);return;}
+      if(!okDf||!okDf.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
+      closeSheet();loadFornitori();return;
+    }
+    if(a==="pv-scheda-modifica"){closeSheet();return pvApriModulo(id);}
+    if(a==="pv-scheda-pdf")     return pvPdf(id);
+    if(a==="pv-scheda-acc"){closeSheet();return pvAccetta(id);}
+    if(a==="pv-scheda-elimina"){
+      if(!confirm("Eliminare questo preventivo?"))return;
+      const {data:okDpv,error:eDpv}=await sb.from("neg_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id");
+      if(eDpv){alert("Errore: "+eDpv.message);return;}
+      if(!okDpv||!okDpv.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
+      if(pvEditId===id)pvNuovo();
+      closeSheet();pvCarica();return;
+    }
     /* 26 agosto 2026 - la rettifica di magazzino */
     if(a==="mag-mot"){magRett.motivo=t.dataset.v;$$("#mag-mot .chip").forEach(c=>c.classList.toggle("on",c.dataset.v===magRett.motivo));return;}
     if(a==="mag-rett-salva")return magSalvaRettifica();
@@ -2219,10 +2321,7 @@
         <strong>${p.nome||"—"}</strong>
         <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${eu(p.prezzo)}/${um}${haImp?' <span style="color:#1565c0;font-weight:700">· impresa € '+eu(p.prezzo_impresa)+"/"+um+"</span>":""} · <strong style="color:${soglia?"#c62828":"#333"}">${p.quantita??0} ${um}</strong>${soglia?" ⚠️ sotto scorta":""}${p.codice?" · cod. "+p.codice:""}</div>
         ${marg!=null?`<div style="color:${marg>0?"#1e8e3e":"#c0392b"};font-size:13px;margin-top:3px;font-weight:600">Guadagno € ${eu(marg)}/${um}</div>`:""}
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="prod-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="prod-del" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div>
+        <div style="margin-top:12px"><button class="carta-apri" data-id="${p.id}">Apri</button></div>
       </div>`;}).join("");
   }
   /* ============================================================
@@ -2371,16 +2470,46 @@
 
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
   $("#prodotti-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".prod-edit"), del=e.target.closest(".prod-del");
-    if(del){
-      if(!confirm("Eliminare questo prodotto?"))return;
-      const {data:okDpr,error}=await sb.from("neg_prodotti").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
-      if(error){alert("Errore: "+error.message);return;}
-      if(!okDpr||!okDpr.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      loadProdotti();return;
-    }
-    if(ed) return prodApriModulo(ed.dataset.id);
+    const ap=e.target.closest(".carta-apri"); if(ap) return prodApriScheda(ap.dataset.id);
   });
+  /* ================================================================
+     26 agosto 2026 (sera) — LE SCHEDE CON UN PULSANTE SOLO.
+     Deciso da Alessio: fuori dalla scheda c'e' «Apri» e basta; Modifica,
+     Elimina e tutto il resto stanno DENTRO la finestra.
+     Cosi' l'elenco torna a essere un elenco, e «Elimina» non e' piu' a un
+     dito di distanza mentre si scorre col pollice.
+     ⚠️ Le schede si rileggono dal DATABASE, non dalla lista a schermo: la
+     ricerca in cima puo' aprirti un prodotto di una sezione in cui non sei
+     mai entrato, e li' la lista e' vuota.
+     ================================================================ */
+  const shRiga=(k,v)=>(v===null||v===undefined||v==="")?"":
+    '<div class="sh-riga"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';
+  async function prodApriScheda(id){
+    if(!(sb&&sbUid))return;
+    const {data:p}=await sb.from("neg_prodotti").select("*").eq("id",id).maybeSingle();
+    if(!p){alert("Questo prodotto non c'è più: forse è nel Cestino.");loadProdotti();return;}
+    const eu=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const um=p.unita||"pz";
+    const marg=(p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0)?(+p.prezzo||0)-(+p.prezzo_acquisto):null;
+    const sotto=(p.quantita??0)<=(p.soglia_minima??0);
+    const haImp=(p.prezzo_impresa!=null&&p.prezzo_impresa!=="");
+    openSheetGrande(`<h3>${esc(p.nome||"—")}</h3>
+      <div style="color:#5a6672;font-size:15px;margin-bottom:12px">${p.categoria?esc(p.categoria)+" · ":""}€ ${eu(p.prezzo)}/${esc(um)}</div>
+      ${shRiga("Quantità a magazzino",`<b style="color:${sotto?"#c62828":"inherit"}">${p.quantita??0} ${esc(um)}</b>${sotto?' <span style="background:#c62828;color:#fff;font-size:13px;padding:2px 8px;border-radius:10px;margin-left:6px">SOTTO SCORTA</span>':""}`)}
+      ${shRiga("Scorta minima",(p.soglia_minima??0)+" "+esc(um))}
+      ${shRiga("Codice",p.codice?esc(p.codice):"")}
+      ${shRiga("Prezzo al banco","€ "+eu(p.prezzo)+"/"+esc(um))}
+      ${shRiga("Prezzo impresa",haImp?"€ "+eu(p.prezzo_impresa)+"/"+esc(um):'<span style="color:#8a949e">non c\'è: a tutti il prezzo del banco</span>')}
+      ${shRiga("Prezzo di acquisto",(p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0)?"€ "+eu(p.prezzo_acquisto)+"/"+esc(um):"")}
+      ${shRiga("Guadagno",marg!=null?`<b style="color:${marg>0?"#1e8e3e":"#c0392b"}">€ ${eu(marg)}/${esc(um)}</b>`:"")}
+      ${shRiga("IVA",p.iva_perc!=null&&p.iva_perc!==""?p.iva_perc+"%":"")}
+      ${shRiga("Note",p.note?esc(p.note):"")}
+      <div class="sheet-actions">
+        <button class="b-cancel" data-action="close">Chiudi</button>
+        <button class="b-cancel" data-action="prod-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="b-save" data-action="prod-modifica" data-id="${p.id}">Modifica</button>
+      </div>`);
+  }
   /* ⚠️ 26 agosto 2026 — IL MODULO DEL PRODOTTO SI RIEMPIE QUI, e non piu'
      dentro il clic su «Modifica»: da oggi ci arriva anche la ricerca in alto.
      La riga si rilegge dal database e non dalla lista a schermo: la ricerca
@@ -2490,10 +2619,7 @@
         <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
         ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
         ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="forn-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="forn-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div>
+        <div style="margin-top:12px"><button class="carta-apri" data-id="${x.id}">Apri</button></div>
       </div>`).join("");
   }
   $("#nf-save")?.addEventListener("click",async()=>{
@@ -2517,16 +2643,24 @@
   });
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
   $("#fornitori-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".forn-edit"), del=e.target.closest(".forn-del");
-    if(del){
-      if(!confirm("Eliminare questo fornitore?"))return;
-      const {data:okDf,error}=await sb.from("neg_fornitori").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
-      if(error){alert("Errore: "+error.message);return;}
-      if(!okDf||!okDf.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      loadFornitori();return;
-    }
-    if(ed) return fornApriModulo(ed.dataset.id);
+    const ap=e.target.closest(".carta-apri"); if(ap) return fornApriScheda(ap.dataset.id);
   });
+  async function fornApriScheda(id){
+    if(!(sb&&sbUid))return;
+    const {data:f}=await sb.from("neg_fornitori").select("*").eq("id",id).maybeSingle();
+    if(!f){alert("Questo fornitore non c'è più: forse è nel Cestino.");loadFornitori();return;}
+    openSheetGrande(`<h3>${esc(f.nome||"—")}</h3>
+      ${shRiga("Telefono",f.telefono?`<a href="tel:${esc(f.telefono)}" style="color:#0066ff;font-weight:700;text-decoration:none">${esc(f.telefono)}</a>`:"")}
+      ${shRiga("Email",f.email?`<a href="mailto:${esc(f.email)}" style="color:#0066ff;font-weight:700;text-decoration:none">${esc(f.email)}</a>`:"")}
+      ${shRiga("Indirizzo",f.indirizzo?esc(f.indirizzo):"")}
+      ${shRiga("P.IVA",f.piva?esc(f.piva):"")}
+      ${shRiga("Note",f.note?esc(f.note):"")}
+      <div class="sheet-actions">
+        <button class="b-cancel" data-action="close">Chiudi</button>
+        <button class="b-cancel" data-action="forn-elimina" data-id="${f.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="b-save" data-action="forn-modifica" data-id="${f.id}">Modifica</button>
+      </div>`);
+  }
   /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
   async function fornApriModulo(id){
     if(!(sb&&sbUid))return;
@@ -2894,30 +3028,50 @@
         ${p.titolo?`<div style="color:#5b6672;font-size:14px;margin-top:3px">${p.titolo}</div>`:""}
         <div style="color:#8a949e;font-size:13px;margin-top:4px">${rr.length} ${rr.length===1?"riga":"righe"} · valido ${p.validita_giorni||30} giorni${p.listino==="impresa"?' · <span style="color:#1565c0;font-weight:700">prezzi impresa</span>':""}</div>
         <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:6px">${pvEur(c.totale)}</div>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="pv-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
-          <button class="pv-pdf" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #2e537d;color:#2e537d;background:#fff;border-radius:8px;cursor:pointer">PDF</button>
-          ${p.stato!=="accettato"?`<button class="pv-acc" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1e8e3e;color:#1e8e3e;background:#fff;border-radius:8px;cursor:pointer">Il cliente ha accettato</button>`:""}
-          <button class="pv-del-prev" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
-        </div>
+        <div style="margin-top:12px"><button class="carta-apri" data-id="${p.id}">Apri</button></div>
       </div>`;}).join("");
   }
 
   $("#preventivi-body")?.addEventListener("click",async e=>{
-    const ed=e.target.closest(".pv-edit"), pdf=e.target.closest(".pv-pdf"),
-          acc=e.target.closest(".pv-acc"), del=e.target.closest(".pv-del-prev");
-    if(del){
-      if(!confirm("Eliminare questo preventivo?"))return;
-      const {data:okDpv,error:eDpv}=await sb.from("neg_preventivi").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
-      if(eDpv){alert("Errore: "+eDpv.message);return;}
-      if(!okDpv||!okDpv.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      if(pvEditId===del.dataset.id)pvNuovo();
-      pvCarica();return;
-    }
-    if(ed) return pvApriModulo(ed.dataset.id);
-    if(acc)  return pvAccetta(acc.dataset.id);
-    if(pdf)  return pvPdf(pdf.dataset.id);
+    const ap=e.target.closest(".carta-apri"); if(ap) return pvApriScheda(ap.dataset.id);
   });
+  async function pvApriScheda(id){
+    if(!(sb&&sbUid))return;
+    const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",id).maybeSingle();
+    if(!p){alert("Questo preventivo non c'è più: forse è nel Cestino.");pvCarica();return;}
+    const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",id).eq("user_id",sbUid);
+    const righe=rr||[], c=pvCalcola(righe,p.sconto_perc,p.iva_perc);
+    const et={bozza:["Bozza","#8a949e"],inviato:["Inviato","#0066ff"],accettato:["Accettato","#1e8e3e"],rifiutato:["Rifiutato","#c62828"]}[p.stato||"bozza"]||["Bozza","#8a949e"];
+    const scad=p.data?new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000):null;
+    const scaduto=scad&&scad<new Date()&&p.stato!=="accettato";
+    const elenco=righe.length?righe.map(r=>`<div class="sh-riga"><div class="k" style="flex:1">${esc(r.descrizione||"—")}</div><div class="v" style="flex:0 0 210px;text-align:right">${(+r.quantita||0)} ${esc(r.unita||"pz")} × ${pvEur(r.prezzo)}${+r.sconto_perc?" − "+r.sconto_perc+"%":""}</div></div>`).join("")
+      :'<div style="color:#8a949e;font-size:15px">Nessuna riga.</div>';
+    openSheetGrande(`<h3>Preventivo N. ${esc(String(p.numero||"—"))} · ${esc(p.cliente_nome||"—")}</h3>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <span style="background:${et[1]};color:#fff;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">${et[0]}</span>
+        ${scaduto?'<span style="background:#fdecea;color:#b3261e;border:1px solid #f3b7b1;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">SCADUTO</span>':""}
+        ${p.listino==="impresa"?'<span style="background:#e8f1fb;color:#1565c0;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">prezzi impresa</span>':""}
+      </div>
+      ${shRiga("Oggetto",p.titolo?esc(p.titolo):"")}
+      ${shRiga("Data",p.data?fdate(p.data):"")}
+      ${shRiga("Validità",(p.validita_giorni||30)+" giorni")}
+      ${shRiga("Note",p.note?esc(p.note):"")}
+      <div style="font-size:15px;font-weight:800;margin:18px 0 4px">Le righe</div>
+      ${elenco}
+      <div style="margin-top:16px;border-top:2px solid #e6ebf0;padding-top:12px">
+        ${shRiga("Imponibile",pvEur(c.imponibile))}
+        ${shRiga("Sconto sul totale",+p.sconto_perc?p.sconto_perc+"% · − "+pvEur(c.scontoTot):"")}
+        ${shRiga("IVA",(p.iva_perc??22)+"% · "+pvEur(c.iva))}
+        <div class="sh-riga"><div class="k" style="font-size:17px;color:#1c2733">Totale</div><div class="v" style="font-size:22px;font-weight:800;color:#0a2a4d">${pvEur(c.totale)}</div></div>
+      </div>
+      <div class="sheet-actions">
+        <button class="b-cancel" data-action="close">Chiudi</button>
+        <button class="b-cancel" data-action="pv-scheda-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="b-cancel" data-action="pv-scheda-pdf" data-id="${p.id}">PDF</button>
+        ${p.stato!=="accettato"?`<button class="b-cancel" data-action="pv-scheda-acc" data-id="${p.id}" style="background:#e8f5e9;color:#1e8e3e">Il cliente ha accettato</button>`:""}
+        <button class="b-save" data-action="pv-scheda-modifica" data-id="${p.id}">Modifica</button>
+      </div>`);
+  }
   /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
   async function pvApriModulo(id){
     if(!(sb&&sbUid))return;
@@ -3501,7 +3655,7 @@
     const v=cestCache[i]; if(!v){toast("Questa riga non c'è più");return;}
     let righe=[];
     try{ righe=cestRighe(v.tipo,v.riga)||[]; }catch(e){ righe=[]; }
-    openSheet(`<h3>Nel cestino — ${esc(v.nome)}</h3>
+    openSheetGrande(`<h3>Nel cestino — ${esc(v.nome)}</h3>
       <p style="color:#5b6672;font-size:14px;margin:0 0 12px">${esc(v.lab)} · buttato il ${esc(cestQuando(v.quando))}</p>
       <table style="width:100%;border-collapse:collapse;font-size:15px;margin-bottom:14px">${
         righe.map(r=>`<tr><td style="padding:6px 8px;color:#5b6672;border-bottom:1px solid #eef2f6;white-space:nowrap">${esc(r[0])}</td><td style="padding:6px 8px;border-bottom:1px solid #eef2f6;font-weight:600">${esc(r[1])}</td></tr>`).join("")
