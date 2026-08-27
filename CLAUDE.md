@@ -16445,6 +16445,83 @@ non è «la prova è debole?» ma **«quante copie ci sono di questa formula?»*
 
 Zip: `prove-claude/banco-imprese-parcella-27ago.zip`.
 
+---
+
+# 27 AGOSTO 2026 (sera) — LE 169 RIGHE DI STILE DOPPIE, TOLTE
+
+## Il problema
+
+Da ieri `gestionale-negozio.html` carica `css/gestionale.css`, il foglio
+condiviso con le imprese. Ma dentro la pagina erano rimaste **441 righe di
+stile scritte a mano**, molte delle quali erano la **copia** di righe che
+stanno già nel foglio condiviso.
+
+Doppione = **due posti da cambiare invece di uno**. Ed è esattamente il motivo
+per cui il negozio si era allontanato dal resto del gestionale: si cambiava il
+foglio condiviso e il negozio non se ne accorgeva, perché la sua copia locale
+vinceva.
+
+## Come sono state trovate (e perché non bastavano le foto)
+
+Il primo metro era **confrontare le foto pixel per pixel**. Non ha funzionato:
+rifacendo **due volte le stesse identiche foto** venivano fuori lo stesso
+**20 pixel di differenza** nel titolo in alto — è lo sfarfallio del testo
+(antialiasing). Un metro che dice «è cambiato» quando non è cambiato niente
+non serve a niente.
+
+⛔ **E c'era un secondo inganno, più grosso:** la finestra grande, fotografata
+subito dopo l'apertura, veniva colta **mentre stava ancora entrando**
+(l'animazione `up`, 0,18 secondi). Sembrava una differenza da **655.000
+pixel** — sembrava un disastro — e non era cambiato assolutamente niente.
+Da qui in avanti **le foto si fanno con le animazioni spente**.
+
+Il metro buono è un altro: invece della foto, si misurano **posizione, misura
+e colore veri di ogni pezzo della pagina** (`getBoundingClientRect` +
+`getComputedStyle`, anche `::before` e `::after`). O cambia o non cambia,
+senza sfarfallii.
+
+Il setaccio, per ognuna delle 322 regole:
+
+1. la toglie **da sola**,
+2. rimisura **tutto**, in **13 schermate** (i reparti, le 12 sezioni, e una
+   scheda aperta),
+3. su **computer** (1440) e su **telefono** (390),
+4. e la tiene solo se **non cambia niente da nessuna parte**.
+
+⚠️ **Una regola per volta non basta.** Due righe che dicono la stessa cosa si
+coprono a vicenda: tolte una per volta non si vede niente, tolte insieme
+cambia tutto. Perciò alla fine c'è un secondo giro che le rimette **tutte
+insieme** e ricontrolla.
+
+## Il risultato
+
+- **169 regole tolte** su 322 (441 righe di stile → 280).
+- Le **28 foto** delle schermate sono **identiche** prima e dopo.
+- **298 prove** del banco del funzionamento: verdi. **17** sulle scritte: verdi.
+
+**È rimasto solo quello che nel negozio è DAVVERO diverso** dal foglio
+condiviso: la ricerca in cima (`.nc-*`), la barra scura (`.topbar-neg`), il
+riquadro «da sistemare oggi», la finestra grande (`.sheet--grande`), le
+etichette del negozio (`.tag-c`, `.tag-attesa`, `.mag-passo`) e la riga
+`.side .side-top{display:flex!important}`.
+
+## I sabotaggi (la prova che il metro non è cieco)
+
+| Cosa ho rotto | Foto diverse |
+|---|---|
+| tolta la riga che tiene acceso il nome del reparto | **13** |
+| tolta la finestra grande `.sheet--grande` | **2** (le due schede) |
+| il conteggio rosso della barra fatto verde | **12** (solo 391 pixel: si vede lo stesso) |
+
+Il rumore misurato è ~20 pixel: la soglia è fissata a **200**. Un difetto da
+391 pixel — una pastiglia piccola che cambia colore — si vede eccome.
+
+## La regola che resta
+
+⛔ **Quando due foto uguali risultano diverse, prima si dubita del metro.**
+Un confronto a foto senza spegnere le animazioni misura *quando* hai scattato,
+non *cosa* c'è nella pagina.
+
 ## COSA RESTA, IN ORDINE
 
 1. **Il collaudo a mano del negozio** — sabato mattina.
