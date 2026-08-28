@@ -782,7 +782,9 @@
       <div class="gal-intro">Quanto hai gi&agrave; fatturato e quanto devi ancora incassare, con il PDF di cortesia da allegare.</div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div class="viste" id="fatt-viste"></div>
-      <div id="fatt-body"></div>
+      <!-- ⚠️ 28 agosto 2026 — «grid» come #prodotti-body, #preventivi-body
+           e #movimenti-body: le carte vanno a due per riga, non una. -->
+      <div id="fatt-body" class="grid"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
     </section>
 
@@ -1585,7 +1587,10 @@
     if(up){toast("Fattura non caricata: "+up.message);return;}
     const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:"Capo",storage_path:path});
     if(ins){toast("File su, ma non salvato: "+ins.message);return;}
-    toast("Fattura PDF caricata ✔");renderFatture();
+    toast("Fattura PDF caricata ✔");
+    const riapri=_fattSchedaId;
+    await renderFatture();                 /* rifa' anche fatturaPdfCache */
+    if(riapri) fattApriScheda(riapri);     /* la scheda torna su, col PDF dentro */
   }
   async function apriFatturaPdf(fotoId){
     const all=Object.values(fatturaPdfCache);
@@ -1595,15 +1600,82 @@
     if(su&&su.signedUrl)window.open(su.signedUrl,"_blank");
     else toast("Non riesco ad aprire la fattura");
   }
-  function fattRow(l,btn){
-    const fatturaPdf=fatturaPdfCache[l.id];
-    const fatturaBtns=(fatturaPdf?`<button class="btn btn-sm ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
-      +`<button class="btn btn-sm ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
-    return `<div class="fatt-row">
-      <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
-        <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
-      <div class="fatt-imp">${eur(l.importo)}</div>
-      <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
+  /* ================================================================
+     LE FATTURE: LA CARTA E LA SCHEDA — 28 agosto 2026
+
+     ⛔ Qui c'era .fatt-row: una riga stretta con QUATTRO pulsanti in
+     fila (PDF · Carica fattura PDF · Apri fattura PDF · Emessa). Era
+     l'ultimo posto del negozio con la forma vecchia: dappertutto
+     altrove la carta ha UN pulsante solo, «Apri», e il resto sta
+     dentro la scheda.
+
+     Copiata riga per riga dalla carta dei Preventivi (pvCarica) e
+     dalla scheda del fornitore (fornApriScheda): stessa pastiglia,
+     stesso job-num per i soldi, stesso openSheetGrande, stessi
+     .sheet-actions in fondo.
+
+     La pastiglia dice a che punto e' la fattura, con le stesse
+     variabili di colore dei preventivi:
+       da fatturare  → attesa   (il lavoro e' finito, la fattura no)
+       emessa        → blu      (e' partita, aspetta i soldi)
+       pagata        → ok       (chiusa)
+     ================================================================ */
+  const FATT_STATO={
+    none:   ["Da fatturare",["var(--attesa-bg)","var(--attesa)"],"t-attesa"],
+    emessa: ["Emessa",      ["var(--blu-tenue)","var(--blu)"],   "t-neutro"],
+    pagata: ["Pagata",      ["var(--ok-bg)","var(--ok)"],        "t-ok"]};
+
+  function fattCarta(l){
+    const st=FATT_STATO[l.fatt_stato||"none"]||FATT_STATO.none;
+    const pdf=fatturaPdfCache[l.id];
+    const quando=l.data_fatto||l.data_prevista;
+    return carta({
+      titolo: esc(l.descrizione||"Lavoro"),
+      tono: st[2],
+      destra: '<span class="stato" style="background:'+st[1][0]+';color:'+st[1][1]+'">'+st[0]+'</span>',
+      meta:[
+        quando?"📅 "+fdate(quando):"",
+        l.stato==="fatto"?"lavoro finito":"lavoro non ancora finito",
+        pdf?'<b style="color:#2e7d32">📄 fattura PDF allegata</b>'
+           :'<span style="color:#8a949e">nessun PDF allegato</span>'
+      ],
+      numero: eur(l.importo),
+      /* ⛔ FUORI SI APRE E BASTA: un pulsante solo, come i Preventivi. */
+      azioni:'<button class="btn btn-sm ja carta-apri" data-id="'+l.id+'">Apri</button>'
+    });
+  }
+
+  /* la scheda resta aperta sul suo id: dopo aver caricato un PDF o
+     cambiato stato si riapre da sola, aggiornata */
+  let _fattSchedaId=null;
+  async function fattApriScheda(id){
+    if(!(sb&&sbUid))return;
+    const {data:l}=await sb.from("gest_lavori")
+      .select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto")
+      .eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(!l){alert("Questo lavoro non c'è più: forse è nel Cestino.");renderFatture();return;}
+    _fattSchedaId=String(l.id);
+    const st=FATT_STATO[l.fatt_stato||"none"]||FATT_STATO.none;
+    const pdf=fatturaPdfCache[l.id];
+    const quando=l.data_fatto||l.data_prevista;
+    const fs=l.fatt_stato||"none";
+    openSheetGrande(`<h3>${esc(l.descrizione||"Lavoro")}</h3>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <span class="stato" style="background:${st[1][0]};color:${st[1][1]}">${st[0]}</span>
+      </div>
+      ${shRiga("Importo",eur(l.importo))}
+      ${shRiga(l.data_fatto?"Finito il":"Previsto per",quando?fdate(quando):"")}
+      ${shRiga("Il lavoro",l.stato==="fatto"?"finito":"non ancora finito")}
+      ${shRiga("Fattura PDF",pdf?"allegata":"nessun PDF allegato")}
+      <div class="sheet-actions">
+        <button class="btn" data-action="close">Chiudi</button>
+        <button class="btn" data-action="pdf" data-id="${l.id}">PDF di cortesia</button>
+        ${pdf?`<button class="btn" data-action="open-fattura" data-id="${esc(pdf.id)}">Apri fattura PDF</button>`:""}
+        <button class="btn" data-action="upload-fattura" data-id="${l.id}">Carica fattura PDF</button>
+        ${fs==="none"  ?`<button class="btn-primary" data-action="fatt" data-id="${l.id}" data-v="emessa">Fattura emessa</button>`:""}
+        ${fs==="emessa"?`<button class="btn-primary" data-action="fatt" data-id="${l.id}" data-v="pagata">Segna pagata</button>`:""}
+        ${fs==="pagata"?`<button class="btn" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
+      </div>`);
   }
   let fatturaPdfCache={};
   async function renderFatture(){
@@ -1639,19 +1711,15 @@
     negViste("#fatt-viste",[{k:"tutte",lab:"Tutte"},{k:"dafatt",lab:"Da fatturare",err:1},
                             {k:"incassare",lab:"Da incassare",err:1},{k:"pagate",lab:"Pagate"}],
              fattVista,conta,"fatt-vista");
-    const bottone=l=>{
-      const st=l.fatt_stato||"none";
-      if(st==="pagata")  return `<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`;
-      if(st==="emessa")  return `<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`;
-      return `<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`;
-    };
     const elenco=fattVista==="dafatt"?daFatt:fattVista==="incassare"?daInc:fattVista==="pagate"?pagate:L;
     const vuoto={tutte:"Ancora nessuna fattura.",
                  dafatt:"Nessun lavoro finito in attesa di fattura.",
                  incassare:"Nessuna fattura da incassare.",
                  pagate:"Ancora nessuna fattura pagata."}[fattVista];
     $("#fatt-body").innerHTML=elenco.length
-      ? elenco.map(l=>fattRow(l,bottone(l))).join("")
+      ? negTotale(_plurale(elenco.length,"fattura","fatture"),
+                  eur(elenco.reduce((s,l)=>s+(+l.importo||0),0)))
+        + elenco.map(fattCarta).join("")
       : `<p class="fatt-empty">${vuoto}</p>`;
   }
 
@@ -2681,6 +2749,7 @@
       const {data:okS2,error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okS2||!okS2.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+      _fattSchedaId=null; closeSheet();
       renderFatture();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
     }
     if(a==="upload-fattura")return chiediFatturaPdf(id);
@@ -3775,6 +3844,15 @@
         azioni:'<button class="btn btn-sm ja carta-apri" data-id="'+p.id+'">Apri</button>'
       });}).join("");
   }
+
+  $("#fatt-body")?.addEventListener("click",async e=>{
+    const ap=e.target.closest(".carta-apri"); if(ap) return fattApriScheda(ap.dataset.id);
+  });
+  /* ⚠️ 28 agosto 2026 — le Fatture erano l'unica sezione che NON si
+     rifaceva entrandoci: il suo elenco restava quello disegnato
+     entrando nel reparto. Adesso fa come Prodotti, Magazzino,
+     Movimenti, Preventivi e Clienti. */
+  $('[data-tab="fatture"]')?.addEventListener("click",renderFatture);
 
   $("#preventivi-body")?.addEventListener("click",async e=>{
     const ap=e.target.closest(".carta-apri"); if(ap) return pvApriScheda(ap.dataset.id);
