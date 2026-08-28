@@ -64,12 +64,12 @@
 
   .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
   .filters input{font-family:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:500;flex:1;min-width:140px}
-  .ja{font-size:13px;font-weight:600;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#3a463f;cursor:pointer}
-  .ja.go{background:var(--accent-soft);border-color:rgba(0,0,0,.06);color:var(--accent-d)}
-  .ja.map{background:#eef2f0;border-color:var(--line);color:#3a463f}
-  .ja.pay{background:#e3f3e8;border-color:#bfd0e3;color:var(--fatto)}
-  .ja.unpay{background:#fcf0e0;border-color:#f0d9b8;color:var(--warn)}
-  .ja.del{color:var(--danger);border-color:#f0d2cd;margin-left:auto}
+  /* ⛔ 27 agosto 2026 (notte) — i pulsanti delle carte non si colorano piu'
+     qui. Erano cinque tinte scritte a mano: «go» azzurrino, «map» grigino,
+     «pay» verdino, «unpay» arancione, «del» rosso. Nelle imprese il
+     pulsante di una carta e' «btn btn-sm ja»: la geometria la da' «.ja»,
+     il colore lo da' il set «.btn» del foglio in comune, e quello che
+     elimina e' «btn-danger». Adesso e' cosi' anche qui. */
 
   .grid{display:grid;grid-template-columns:1fr;gap:10px}
   @media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
@@ -298,7 +298,10 @@
         che nel negozio e' diverso.
      ================================================================ */
   .grid .job{margin-bottom:0}
-  .tag-c{font-size:13px;font-weight:700;color:#fff;border-radius:10px;padding:3px 10px;white-space:nowrap}
+  /* ⛔ 27 agosto 2026 (notte) — «.tag-c» non c'e' piu': era la pastiglia
+     MAIUSCOLA e piena (SOTTO SCORTA, VENDITA, ORDINE) che il negozio si
+     era scritta da solo. Nelle imprese la pastiglia e' «.stato» del
+     foglio in comune: chiara, minuscola, e si legge. */
   .tag-attesa{font-size:13px;font-weight:700;border-radius:10px;padding:3px 10px;background:#fff3e0;
     color:#e65100;border:1px solid #ffcc80;display:inline-block;margin-top:8px}
   .job-num{font-size:19px;font-weight:800;color:#0a2a4d;margin-top:8px;letter-spacing:-.3px}
@@ -1445,14 +1448,14 @@
         ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${eur(l.importo)}</span>`:""}
       </div>
       <div class="job-actions">
-        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${l.stato==="da_fare"?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
-        ${!fatto?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        ${fatto&&fs==="none"?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">📄 Fattura emessa</button>`:""}
-        ${fs==="emessa"?`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Segna pagata</button>`:""}
-        ${fs==="pagata"?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
-        <button class="ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
-        <button class="ja del" data-action="del-job" data-id="${l.id}">🗑</button>
+        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
+        ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
+        ${fatto&&fs==="none"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">📄 Fattura emessa</button>`:""}
+        ${fs==="emessa"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Segna pagata</button>`:""}
+        ${fs==="pagata"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
+        <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
+        <button class="btn btn-sm ja del btn-danger" data-action="del-job" data-id="${l.id}">🗑</button>
       </div></div>`;
   }
 
@@ -1491,12 +1494,12 @@
         <span>📅 ${fdate(l.data_prevista)}</span>
       </div>
       <div class="job-actions">
-        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${withFoto&&l.stato==="da_fare"?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
-        ${withFoto&&!fatto?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
-        ${withFoto&&fatto?`<button class="ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
-        ${withFoto?`<button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
-        ${withFoto?`<button class="ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
+        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${withFoto&&l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
+        ${withFoto&&!fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
+        ${withFoto&&fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
+        ${withFoto?`<button class="btn btn-sm ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
+        ${withFoto?`<button class="btn btn-sm ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
       </div></div>`;
   }
   async function renderJobs(){
@@ -1584,13 +1587,13 @@
   }
   function fattRow(l,btn){
     const fatturaPdf=fatturaPdfCache[l.id];
-    const fatturaBtns=(fatturaPdf?`<button class="ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
-      +`<button class="ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
+    const fatturaBtns=(fatturaPdf?`<button class="btn btn-sm ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
+      +`<button class="btn btn-sm ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
     return `<div class="fatt-row">
       <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
         <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
       <div class="fatt-imp">${eur(l.importo)}</div>
-      <button class="ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
+      <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
   }
   let fatturaPdfCache={};
   async function renderFatture(){
@@ -1623,9 +1626,9 @@
              fattVista,conta,"fatt-vista");
     const bottone=l=>{
       const st=l.fatt_stato||"none";
-      if(st==="pagata")  return `<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`;
-      if(st==="emessa")  return `<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`;
-      return `<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`;
+      if(st==="pagata")  return `<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`;
+      if(st==="emessa")  return `<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`;
+      return `<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`;
     };
     const elenco=fattVista==="dafatt"?daFatt:fattVista==="incassare"?daInc:fattVista==="pagate"?pagate:L;
     const vuoto={tutte:"Ancora nessuna fattura.",
@@ -1707,13 +1710,26 @@
        migrazione non e' stata fatta non si rompe niente, arrivano undefined. */
     const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
-    box.innerHTML=cliCache.length?cliCache.map(c=>{
-      return `<div class="card"><div><h3>${esc(c.nome)}</h3>
-        <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p></div>
-        <div class="card-acts"><button data-action="map" data-q="${esc(c.indirizzo||c.nome)}">🗺 Mappa</button>
-        <button data-action="edit-cli" data-id="${c.id}">Modifica</button>
-        <button class="del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
-    }).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Aggiungi i clienti di questo reparto</small></div>`;
+    /* ⛔ 27 agosto 2026 (notte) — i Clienti usavano «.card», una scheda
+       tutta loro: titolo, un paragrafo solo con dentro tre cose separate
+       da un puntino, e i pulsanti in un «.card-acts». Tutto il resto del
+       negozio — e tutte le imprese — usano la carta «.job». Adesso pure
+       loro. ⚠️ Il puntino orfano davanti al telefono («· 📞 …») veniva
+       da quel paragrafo: con le righe separate non c'e' piu'. */
+    box.innerHTML=cliCache.length?cliCache.map(c=>carta({
+      titolo: esc(c.nome),
+      destra: c.listino==="impresa"
+        ? '<span class="stato" style="background:var(--blu-tenue);color:var(--blu)">Prezzi impresa</span>' : "",
+      meta:[
+        c.indirizzo?"📍 "+esc(c.indirizzo):"",
+        c.referente?"👤 "+esc(c.referente):"",
+        c.telefono?"📞 "+esc(c.telefono):"",
+        (+c.sconto_perc)?"sconto "+c.sconto_perc+"%":""
+      ],
+      azioni:'<button class="btn btn-sm ja" data-action="map" data-q="'+esc(c.indirizzo||c.nome)+'">🗺 Mappa</button>'
+        + '<button class="btn btn-sm ja" data-action="edit-cli" data-id="'+c.id+'">Modifica</button>'
+        + '<button class="btn btn-sm ja del btn-danger" data-action="del-cli" data-id="'+c.id+'">Elimina</button>'
+    })).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Aggiungi i clienti di questo reparto</small></div>`;
   }
   async function renderDip(){
     const box=$("#dip-list");if(!box)return;
@@ -2332,10 +2348,10 @@
       ${prima.length?`<div class="ag-foto-label">📷 Foto dal capo — cosa fare</div><div class="thumbs">${prima.map(f=>fotoThumb(f,false)).join("")}</div>`:""}
       ${l.note?`<div class="job-note">📝 ${esc(l.note)}</div>`:""}
       <div class="job-actions">
-        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${l.stato==="da_fare"?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
-        ${!fatto?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        <button class="ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
+        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
+        ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
+        <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
       </div></div>`;
   }
   async function renderAgenda(){
@@ -2367,9 +2383,25 @@
      meta (le righette grigie) · azioni (i pulsanti in fondo).
      ⛔ Il colore non e' piu' una riga in cima: e' il bordo a sinistra,
         come in tutto il resto del gestionale. */
+  /* ================================================================
+     LA CARTA DELL'ELENCO — 27 agosto 2026 (notte)
+
+     ⛔ QUI NON SI SCEGLIE PIU' UN COLORE. Ogni sezione del negozio si
+     passava il suo: #c62828 per il sotto scorta, #1565c0 per i prodotti,
+     #2e537d per il magazzino, #e65100 per gli ordini, #6a1b9a per le
+     rettifiche. Il 20 agosto le imprese hanno fatto la scelta opposta —
+     sta scritta in css/gestionale.css (~2385): la barretta a sinistra e'
+     GRIGIA in tutte le carte, perche' otto carte accese insieme fanno una
+     pagina a scacchi e il colore non si nota piu'. Come sta la riga lo
+     dice la pastiglia in alto a destra, che si legge anche a parole.
+
+     «tono» resta, e vale quanto vale nelle imprese: t-neutro, t-err,
+     t-attesa, t-ok, t-info. Non colora la barretta: e' il nome dello
+     stato, e serve al resto del foglio.
+     ================================================================ */
   function carta(o){
     const meta=(o.meta||[]).filter(Boolean).map(m=>"<span>"+m+"</span>").join("");
-    return '<div class="job"'+(o.colore?' style="border-left-color:'+o.colore+'"':'')+'>'
+    return '<div class="job '+(o.tono||"t-neutro")+'">'
       + '<div class="job-top"><div class="job-cli">'+(o.titolo||"—")+'</div>'+(o.destra||"")+'</div>'
       + (o.sotto||"")
       + (meta?'<div class="job-meta">'+meta+'</div>':"")
@@ -2719,9 +2751,9 @@
       /* 26 agosto 2026 — il secondo prezzo. Se c'e', si vede accanto al primo. */
       const haImp=p.prezzo_impresa!=null&&p.prezzo_impresa!=="";
       return carta({
-        colore: soglia?"#c62828":"#1565c0",
         titolo: esc(p.nome||"—"),
-        destra: soglia?'<span class="tag-c" style="background:#c62828">SOTTO SCORTA</span>':"",
+        tono: soglia?"t-err":"t-neutro",
+        destra: soglia?'<span class="stato" style="background:var(--err-bg);color:var(--err)">Sotto scorta</span>':"",
         meta:[
           p.categoria?esc(p.categoria):"",
           "€ "+eu(p.prezzo)+"/"+esc(um),
@@ -2730,7 +2762,7 @@
           p.codice?"cod. "+esc(p.codice):"",
           marg!=null?'<b style="color:'+(marg>0?"#1e8e3e":"#c0392b")+'">Guadagno € '+eu(marg)+"/"+esc(um)+"</b>":""
         ],
-        azioni:'<button class="ja go carta-apri" data-id="'+p.id+'">Apri</button>'
+        azioni:'<button class="btn btn-sm ja carta-apri" data-id="'+p.id+'">Apri</button>'
       });}).join("");
   }
   /* ============================================================
@@ -2997,14 +3029,14 @@
     box.innerHTML=prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
       return carta({
-        colore: sotto?"#c62828":"#2e537d",
         titolo: esc(p.nome||"—"),
-        destra: sotto?'<span class="tag-c" style="background:#c62828">SOTTO SCORTA</span>':"",
+        tono: sotto?"t-err":"t-neutro",
+        destra: sotto?'<span class="stato" style="background:var(--err-bg);color:var(--err)">Da riordinare</span>':"",
         meta:["Soglia minima "+s],
         sotto:'<div class="mag-passo">'
-          + '<button class="ja mag-btn" data-id="'+p.id+'" data-d="-1" title="Scarico">−</button>'
+          + '<button class="btn btn-sm ja mag-btn" data-id="'+p.id+'" data-d="-1" title="Scarico">−</button>'
           + '<span class="n" style="color:'+(sotto?"#c62828":"inherit")+'">'+q+'</span>'
-          + '<button class="ja go mag-btn" data-id="'+p.id+'" data-d="1" title="Carico">+</button>'
+          + '<button class="btn btn-sm ja mag-btn" data-id="'+p.id+'" data-d="1" title="Carico">+</button>'
           + '</div>'
       });
     }).join("");
@@ -3071,16 +3103,15 @@
     if(!box) return;
     if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
     box.innerHTML=f.map(x=>carta({
-      colore:"#1565c0",
       titolo:esc(x.nome||"—"),
       meta:[
-        x.telefono?"☎ "+esc(x.telefono):"",
+        x.telefono?"📞 "+esc(x.telefono):"",
         x.email?esc(x.email):"",
         x.piva?"P.IVA "+esc(x.piva):"",
         x.indirizzo?esc(x.indirizzo):"",
         x.note?esc(x.note):""
       ],
-      azioni:'<button class="ja go carta-apri" data-id="'+x.id+'">Apri</button>'
+      azioni:'<button class="btn btn-sm ja carta-apri" data-id="'+x.id+'">Apri</button>'
     })).join("");
   }
   $("#nf-save")?.addEventListener("click",async()=>{
@@ -3249,30 +3280,36 @@
       /* ⛔ TRE parole, non due */
       const rett=x.tipo==="rettifica", vend=x.tipo==="vendita";
       const inArrivo=(x.tipo==="ordine"&&!x.arrivato_il);
-      const col=rett?"#6a1b9a":(vend?"#2e537d":"#e65100");
+      /* fondo e testo della pastiglia, presi dalle variabili del gestionale */
+      const col=rett?["var(--sfondo)","var(--testo-2)"]
+                    :(vend?["var(--blu-tenue)","var(--blu)"]
+                          :["var(--attesa-bg)","var(--attesa)"]);
       const fre=rett?"⇄":(vend?"↑":"↓");
-      const et =rett?"RETTIFICA":(vend?"VENDITA":"ORDINE");
+      const et =rett?"Rettifica":(vend?"Vendita":"Ordine");
       const nq =parseFloat(x.quantita)||0;
       const qta=rett?((nq>0?"+":"")+(x.quantita??0)):(x.quantita??0);
       return carta({
-        colore: col,
         titolo: fre+" "+esc(x.prodotto||"—"),
-        destra: '<span class="tag-c" style="background:'+col+'">'+et+'</span>',
-        sotto: inArrivo?'<div class="tag-attesa">IN ARRIVO — magazzino non ancora caricato</div>':"",
+        tono: inArrivo?"t-attesa":"t-neutro",
+        destra: '<span class="stato" style="background:'+col[0]+';color:'+col[1]+'">'+et+'</span>',
+        sotto: inArrivo?'<div class="job-note">In arrivo: il magazzino non &egrave; ancora caricato.</div>':"",
         meta:[
           "Q.tà "+qta,
-          rett?"":"€ "+(x.importo??0),
-          x.controparte?esc(x.controparte):"",
-          x.data_mov||"",
+          /* ⛔ 27 agosto 2026 (notte) — la data usciva grezza dal database
+             ("2026-08-27"): all'americana e senza icona, in mezzo a righe
+             che nel resto del gestionale hanno tutte la loro. */
+          rett?"":"💶 € "+(x.importo??0),
+          x.controparte?"👤 "+esc(x.controparte):"",
+          x.data_mov?"📅 "+fdate(x.data_mov):"",
           x.motivo?esc(x.motivo):"",
           x.arrivato_il?"arrivata il "+x.arrivato_il:"",
           x.note?esc(x.note):"",
           '<b style="color:'+(x.prodotto_id?"#2e7d32":"#8a949e")+'">'
             +(x.prodotto_id?"✔ collegato al magazzino":"riga a mano — fuori magazzino")+'</b>'
         ],
-        azioni:(inArrivo?'<button class="ja pay mov-arr" data-id="'+x.id+'">✔ Merce arrivata</button>':"")
-          + '<button class="ja mov-edit" data-id="'+x.id+'">Modifica</button>'
-          + '<button class="ja del mov-del" data-id="'+x.id+'">Elimina</button>'
+        azioni:(inArrivo?'<button class="btn btn-sm ja mov-arr" data-id="'+x.id+'">✔ Merce arrivata</button>':"")
+          + '<button class="btn btn-sm ja mov-edit" data-id="'+x.id+'">Modifica</button>'
+          + '<button class="btn btn-sm ja del btn-danger mov-del" data-id="'+x.id+'">Elimina</button>'
       });
     }).join("");
   }
@@ -3521,7 +3558,11 @@
     if(!P.length){box.innerHTML='<p style="color:#8a949e;padding:8px">'+(tutti.length?"Nessun preventivo in questa vista.":"Nessun preventivo. Il primo lo fai col pulsante qui sopra.")+'</p>';return;}
     const {data:tutteRighe}=await sb.from("neg_preventivo_righe").select("*").eq("user_id",sbUid);
     const perPrev={}; (tutteRighe||[]).forEach(r=>{(perPrev[r.preventivo_id]=perPrev[r.preventivo_id]||[]).push(r);});
-    const etichetta={bozza:["Bozza","#8a949e"],inviato:["Inviato","#0066ff"],accettato:["Accettato","#1e8e3e"],rifiutato:["Rifiutato","#c62828"]};
+    const etichetta={
+      bozza:    ["Bozza",    ["var(--sfondo)","var(--testo-2)"],  "t-neutro"],
+      inviato:  ["Inviato",  ["var(--blu-tenue)","var(--blu)"],   "t-info"],
+      accettato:["Accettato",["var(--ok-bg)","var(--ok)"],        "t-ok"],
+      rifiutato:["Rifiutato",["var(--err-bg)","var(--err)"],      "t-err"]};
     box.innerHTML=P.map(p=>{
       const rr=perPrev[p.id]||[];
       const c=pvCalcola(rr,p.sconto_perc,p.iva_perc);
@@ -3529,10 +3570,10 @@
       const scad=p.data?new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000):null;
       const scaduto=scad&&scad<new Date()&&p.stato!=="accettato";
       return carta({
-        colore: st[1],
         titolo: "N. "+(p.numero||"—")+" · "+esc(p.cliente_nome||"—"),
-        destra: '<span class="tag-c" style="background:'+st[1]+'">'+st[0]+'</span>'
-          + (scaduto?' <span class="tag-c" style="background:#c62828">SCADUTO</span>':""),
+        tono: scaduto?"t-err":st[2],
+        destra: '<span class="stato" style="background:'+st[1][0]+';color:'+st[1][1]+'">'+st[0]+'</span>'
+          + (scaduto?' <span class="stato" style="background:var(--err-bg);color:var(--err)">Scaduto</span>':""),
         sotto: p.titolo?'<div class="job-desc">'+esc(p.titolo)+'</div>':"",
         meta:[
           rr.length+" "+(rr.length===1?"riga":"righe"),
@@ -3540,7 +3581,7 @@
           p.listino==="impresa"?'<b style="color:#1565c0">prezzi impresa</b>':""
         ],
         numero: pvEur(c.totale),
-        azioni:'<button class="ja go carta-apri" data-id="'+p.id+'">Apri</button>'
+        azioni:'<button class="btn btn-sm ja carta-apri" data-id="'+p.id+'">Apri</button>'
       });}).join("");
   }
 
@@ -3553,14 +3594,19 @@
     if(!p){alert("Questo preventivo non c'è più: forse è nel Cestino.");pvCarica();return;}
     const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",id).eq("user_id",sbUid);
     const righe=rr||[], c=pvCalcola(righe,p.sconto_perc,p.iva_perc);
-    const et={bozza:["Bozza","#8a949e"],inviato:["Inviato","#0066ff"],accettato:["Accettato","#1e8e3e"],rifiutato:["Rifiutato","#c62828"]}[p.stato||"bozza"]||["Bozza","#8a949e"];
+    /* la stessa pastiglia chiara dell'elenco, anche dentro la scheda */
+    const _ET={bozza:["Bozza","var(--sfondo)","var(--testo-2)"],
+               inviato:["Inviato","var(--blu-tenue)","var(--blu)"],
+               accettato:["Accettato","var(--ok-bg)","var(--ok)"],
+               rifiutato:["Rifiutato","var(--err-bg)","var(--err)"]};
+    const et=_ET[p.stato||"bozza"]||_ET.bozza;
     const scad=p.data?new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000):null;
     const scaduto=scad&&scad<new Date()&&p.stato!=="accettato";
     const elenco=righe.length?righe.map(r=>`<div class="sh-riga"><div class="k" style="flex:1">${esc(r.descrizione||"—")}</div><div class="v" style="flex:0 0 210px;text-align:right">${(+r.quantita||0)} ${esc(r.unita||"pz")} × ${pvEur(r.prezzo)}${+r.sconto_perc?" − "+r.sconto_perc+"%":""}</div></div>`).join("")
       :'<div style="color:#8a949e;font-size:15px">Nessuna riga.</div>';
     openSheetGrande(`<h3>Preventivo N. ${esc(String(p.numero||"—"))} · ${esc(p.cliente_nome||"—")}</h3>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <span style="background:${et[1]};color:#fff;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">${et[0]}</span>
+        <span class="stato" style="background:${et[1]};color:${et[2]}">${et[0]}</span>
         ${scaduto?'<span style="background:#fdecea;color:#b3261e;border:1px solid #f3b7b1;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">SCADUTO</span>':""}
         ${p.listino==="impresa"?'<span style="background:#e8f1fb;color:#1565c0;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">prezzi impresa</span>':""}
       </div>
@@ -4153,11 +4199,10 @@
       box.innerHTML='<p style="color:#666;padding:8px;font-size:15px">Niente che si chiami così, fra le '+cestCache.length+' cose nel cestino.</p>';return;
     }
     box.innerHTML=vis.map(v=>carta({
-      colore: v.x.col,
       titolo: esc(v.x.nome),
-      destra: '<span class="tag-c" style="background:'+v.x.col+'">'+esc(v.x.lab.toUpperCase())+'</span>',
+      destra: '<span class="stato" style="background:var(--sfondo);color:var(--testo-2)">'+esc(v.x.lab)+'</span>',
       meta:["Buttato il "+esc(cestQuando(v.x.quando))],
-      azioni:'<button class="ja go cest-apri" data-action="cest-apri" data-i="'+v.i+'">Apri</button>'
+      azioni:'<button class="btn btn-sm ja cest-apri" data-action="cest-apri" data-i="'+v.i+'">Apri</button>'
     })).join("");
   }
 
