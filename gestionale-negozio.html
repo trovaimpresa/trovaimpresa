@@ -87,7 +87,32 @@
   @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
   .field label{display:block;font-size:13px;font-weight:700;color:#46524b;margin-bottom:5px}
   .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc;color:var(--ink)}
-  .b-save{background:var(--accent);color:#fff} .b-cancel{background:#eef1ef;color:#48544d}
+  /* ⛔ 27 agosto 2026 (notte) — tolte «.b-save» e «.b-cancel»: erano i
+     due pulsanti che il negozio si era scritto da solo in fondo alle
+     finestre. Nelle imprese quei due sono «btn-primary» e «btn» del
+     foglio in comune, ed e' quello che usa adesso anche il negozio. */
+  /* ================================================================
+     27 agosto 2026 (notte) — LE TRE COSE DEI MODULI CHE NEL FOGLIO IN
+     COMUNE NON CI SONO. Tutto il resto (field, row2, sh-cols, sh-b,
+     sh-tit, sh-nota, segm, sheet-actions) arriva da css/gestionale.css.
+     ================================================================ */
+  /* la riga «prendi un prodotto dal magazzino  +  Riga libera» */
+  .pv-scegli{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .pv-scegli select{flex:1;min-width:200px;height:40px;padding:0 12px;font-family:inherit;
+    font-size:15px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  .pv-scegli .btn{flex:0 0 auto;height:40px;padding:0 16px;border-radius:10px;
+    border:1.5px dashed var(--accent-d);background:var(--card);color:var(--accent-d);
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  /* il riquadro dei totali del preventivo */
+  .pv-totali{background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;margin-top:10px;font-size:15px;line-height:2}
+  /* il modulo, quando e' parcheggiato nella sua sezione, non si vede */
+  .mod-negozio[hidden]{display:none}
+  /* ⛔ dentro il piede fermo della finestra la barra dei pulsanti non deve
+     rifarsi il fondo, il bordo e i margini: il piede ce li ha gia' lui.
+     Senza questo si vede una seconda riga di separazione sopra Salva. */
+  .sh-foot .sheet-actions{position:static;margin:0;padding:0;border-top:none;
+    background:none;flex:1 1 auto;justify-content:flex-end}
   .up-btn{display:inline-block;background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer}
   .gal-intro{font-size:14px;color:var(--muted);line-height:1.45;max-width:660px;margin-bottom:16px}
   .gal-intro b{color:#46524b}
@@ -201,7 +226,12 @@
   .chip.on{background:var(--accent-d);border-color:var(--accent-d)}
   .ja{border-radius:7px;font-size:13px;display:inline-flex;align-items:center;gap:5px}
   .overlay{background:rgba(15,22,30,.5);backdrop-filter:blur(2px)}
-  .sheet{max-width:640px;min-height:0;margin:38px auto;border-radius:14px;padding:26px 26px 16px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+  /* ⛔ 27 agosto 2026 (notte) — tolto il «.sheet» locale: era riga per
+     riga identico a quello di css/gestionale.css (~551), e stando qui
+     DOPO il foglio vinceva anche su «.sheet--grande» del foglio, che ha
+     la stessa specificita'. Ecco perche' la finestra grande del negozio
+     era larga 1080 e alta quanto il contenuto, mentre quella delle
+     imprese e' 1600 e alta 94vh. Adesso e' la stessa. */
   .field input,.field select,.field textarea{border-radius:9px}
   /* ⛔ 27 agosto 2026 (sera) — LA BARRA DELLA SCHERMATA DEI REPARTI.
      Qui c'erano .landing-top (sfumatura blu sua), .lt-btn, .lt-btn.gold
@@ -231,38 +261,18 @@
     .side nav.tabs{display:none}
     .side.open nav.tabs{display:flex;flex-direction:column}
     .side.open .side-top{margin-bottom:10px}
-    .sheet{margin:0;min-height:100vh;border-radius:0}
   }
   /* ================================================================
-     26 agosto 2026 — LA FINESTRA GRANDE nel negozio.
-     Fin qui i moduli lunghi (cliente, lavoro, scadenza, dati azienda)
-     si aprivano in una finestrella da 640 px con dentro una barretta di
-     scorrimento lunga un dito, e per salvare bisognava arrivare in fondo
-     a una colonna di dieci campi.
-     Adesso: intestazione ferma in cima, piede fermo in fondo, e scorre
-     solo il corpo. Come nelle imprese.
-     ⛔ Queste classi restano scritte qui: nel foglio condiviso la
-        finestra grande e' fatta con misure diverse.
+     LA FINESTRA GRANDE — 27 agosto 2026 (notte)
+     Il 26 agosto queste classi erano state riscritte qui dentro perche'
+     «nel foglio condiviso la finestra grande e' fatta con misure
+     diverse». Oggi le misure diverse sono proprio il problema: la
+     finestra del negozio era larga 1080 px e alta quanto il contenuto,
+     quella delle imprese e' larga fino a 1600 e alta 94vh, con il piede
+     fermo in fondo. Tolte tutte: valgono quelle di css/gestionale.css
+     (~1020-1100), che questa pagina carica.
+     Qui sotto restano solo le due che nel foglio in comune non ci sono.
      ================================================================ */
-  .sheet--grande{max-width:1080px;width:min(1080px,96vw);margin:26px auto;padding:0;
-    display:flex;flex-direction:column;max-height:calc(100vh - 52px);overflow:hidden}
-  .sheet--grande .sh-head{display:flex;align-items:center;gap:12px;padding:15px 22px;
-    border-bottom:1px solid var(--line);background:#fff;flex:0 0 auto}
-  .sheet--grande .sh-head h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px;flex:1;min-width:0}
-  .sheet--grande .sh-body{padding:20px 22px;overflow-y:auto;flex:1 1 auto;-webkit-overflow-scrolling:touch}
-  .sheet--grande .sh-foot{display:flex;gap:10px;flex-wrap:wrap;padding:13px 22px;
-    border-top:1px solid var(--line);background:#fff;flex:0 0 auto}
-  .sheet--grande .sh-foot button{flex:1 1 150px;padding:13px;border-radius:11px;font-family:inherit;
-    font-size:15px;font-weight:700;cursor:pointer;border:none}
-  /* dentro la finestra grande il piede e' gia' fermo: la vecchia barra
-     appiccicata in fondo al corpo non serve piu' */
-  .sheet--grande .sh-body .sheet-actions{position:static;border-top:none;padding-top:0}
-  /* ⛔ SI ESCE SEMPRE ALLO STESSO MODO: una freccia grande in cima a
-     sinistra, uguale in tutte le finestre grandi. */
-  .sh-back{display:inline-flex;align-items:center;gap:6px;background:#eef1ef;border:none;
-    border-radius:10px;padding:9px 14px;font-family:inherit;font-size:15px;font-weight:700;
-    color:#48544d;cursor:pointer;flex:0 0 auto}
-  .sh-back svg{width:18px;height:18px}
   /* le righe di dettaglio dentro la scheda aperta */
   .sh-riga{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
   .sh-riga:last-child{border-bottom:none}
@@ -270,10 +280,6 @@
   .sh-riga .v{flex:1;min-width:0;word-break:break-word}
   .sh-titolone{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
   @media(max-width:880px){
-    .sheet--grande{width:100%;max-width:none;margin:0;border-radius:0;
-      max-height:100vh;min-height:100vh}
-    .sheet--grande .sh-head,.sheet--grande .sh-foot{padding:13px 16px}
-    .sheet--grande .sh-body{padding:16px}
     .sh-riga{flex-direction:column;gap:2px}
     .sh-riga .k{flex:none}
   }
@@ -476,74 +482,76 @@
            ================================================================ -->
       <div class="sec-head"><h2>Prodotti</h2><button class="btn add" data-action="new-prod">+ Nuovo prodotto</button></div>
       <div class="gal-intro">Il catalogo di quello che vendi: nome, codice, unit&agrave; di misura, quanto lo paghi e a quanto lo vendi. Il prezzo all&rsquo;impresa &egrave; facoltativo: lasciandolo vuoto fai lo stesso prezzo a tutti.</div>
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px">Nuovo prodotto</h3>
-        <input id="np-nome" placeholder="Nome prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <input id="np-codice" placeholder="Codice" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          <input id="np-categoria" placeholder="Categoria" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+      <div class="mod-negozio" id="np-modulo" hidden>
+        <h3 id="np-titolo-sez">Nuovo prodotto</h3>
+        <div class="sh-cols">
+          <div class="sh-b">
+            <div class="sh-tit">Che cos&rsquo;&egrave;</div>
+            <div class="field"><label>Nome prodotto *</label>
+              <input id="np-nome" placeholder="Es. Cemento 32.5 R sacco 25 kg"></div>
+            <div class="row2">
+              <div class="field"><label>Codice</label><input id="np-codice" placeholder="Es. CEM325"></div>
+              <div class="field"><label>Categoria</label><input id="np-categoria" placeholder="Es. leganti"></div>
+            </div>
+            <div class="field"><label>Si vende a</label>
+              <select id="np-unita">
+                <option value="pz">pezzo</option>
+                <option value="mq">metro quadro (mq)</option>
+                <option value="ml">metro lineare (ml)</option>
+                <option value="mc">metro cubo (mc)</option>
+                <option value="kg">chilo (kg)</option>
+                <option value="q">quintale (q)</option>
+                <option value="t">tonnellata (t)</option>
+                <option value="sacco">sacco</option>
+                <option value="bancale">bancale</option>
+                <option value="conf">confezione</option>
+                <option value="lt">litro (lt)</option>
+              </select></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Quante ne hai</div>
+            <div class="row2">
+              <div class="field"><label>Quantit&agrave;</label>
+                <input id="np-quantita" type="number" step="0.01" placeholder="0"></div>
+              <div class="field"><label>Scorta minima</label>
+                <input id="np-soglia" type="number" step="0.01" placeholder="0"></div>
+            </div>
+            <p class="sh-nota">Sotto la scorta minima il prodotto si accende nel Magazzino e finisce in &laquo;Da sistemare oggi&raquo;.</p>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Quanto costa</div>
+            <div class="row2">
+              <div class="field"><label>Lo paghi</label>
+                <input id="np-acquisto" type="number" step="0.01" placeholder="&euro;"></div>
+              <div class="field"><label>Lo vendi al banco</label>
+                <input id="np-prezzo" type="number" step="0.01" placeholder="&euro;"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>IVA</label>
+                <select id="np-iva">
+                  <option value="22">22%</option>
+                  <option value="10">10%</option>
+                  <option value="4">4%</option>
+                  <option value="0">0%</option>
+                </select></div>
+              <!-- 26 agosto 2026 — IL SECONDO PREZZO (sql/neg-listini.sql).
+                   Un ferramenta ha il prezzo del banco e il prezzo dell'impresa.
+                   Vuoto = questo prodotto costa uguale a tutti. -->
+              <div class="field"><label>Lo vendi all&rsquo;impresa</label>
+                <input id="np-impresa" type="number" step="0.01" placeholder="&euro;"></div>
+            </div>
+            <p class="sh-nota">Il prezzo all&rsquo;impresa &egrave; facoltativo: lascialo vuoto se a questo prodotto fai lo stesso prezzo a tutti.</p>
+            <div id="np-margine" class="sh-nota"></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Appunti</div>
+            <div class="field"><label>Note</label><input id="np-note" placeholder="Quello che ti serve ricordare"></div>
+          </div>
         </div>
-        <!-- 6 agosto 2026: unita di misura, prezzo di acquisto e IVA.
-             Senza unita "quantita 40" non dice niente (40 pezzi? 40 mq? 40 sacchi?),
-             e senza prezzo di acquisto non si vede il margine. -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Si vende a</label>
-            <select id="np-unita" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-              <option value="pz">pezzo</option>
-              <option value="mq">metro quadro (mq)</option>
-              <option value="ml">metro lineare (ml)</option>
-              <option value="mc">metro cubo (mc)</option>
-              <option value="kg">chilo (kg)</option>
-              <option value="q">quintale (q)</option>
-              <option value="t">tonnellata (t)</option>
-              <option value="sacco">sacco</option>
-              <option value="bancale">bancale</option>
-              <option value="conf">confezione</option>
-              <option value="lt">litro (lt)</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Quantità</label>
-            <input id="np-quantita" type="number" step="0.01" placeholder="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Scorta minima</label>
-            <input id="np-soglia" type="number" step="0.01" placeholder="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          </div>
+        <div class="sheet-actions">
+          <button class="btn" data-action="close">Annulla</button>
+          <button class="btn-primary" id="np-save">Aggiungi prodotto</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo paghi</label>
-            <input id="np-acquisto" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi al banco</label>
-            <input id="np-prezzo" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">IVA</label>
-            <select id="np-iva" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-              <option value="22">22%</option>
-              <option value="10">10%</option>
-              <option value="4">4%</option>
-              <option value="0">0%</option>
-            </select>
-          </div>
-        </div>
-        <!-- 26 agosto 2026 — IL SECONDO PREZZO (sql/neg-listini.sql).
-             Un ferramenta ha il prezzo del banco e il prezzo dell'impresa.
-             Vuoto = questo prodotto costa uguale a tutti. -->
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-bottom:8px;align-items:end">
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi all’impresa</label>
-            <input id="np-impresa" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          </div>
-          <div style="font-size:13px;color:#8a949e;padding-bottom:11px">Lascialo vuoto se a questo prodotto fai lo stesso prezzo a tutti.</div>
-        </div>
-        <div id="np-margine" style="font-size:14px;color:#5b6672;margin-bottom:10px;min-height:20px"></div>
-        <input id="np-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button id="np-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi prodotto</button>
       </div>
       <div id="prodotti-body" class="grid"></div>
     </section>
@@ -559,62 +567,68 @@
       <div class="sec-head"><h2>Preventivi</h2><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button></div>
       <div class="gal-intro">Le righe le prendi dal magazzino o le scrivi a mano. Sconto di riga, sconto sul totale e IVA. Quando il cliente accetta, la merce esce dal magazzino <b>una volta sola</b>.</div>
 
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 id="pv-titolo-sez" style="margin:0 0 14px">Nuovo preventivo</h3>
-
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
-          <input id="pv-cliente" placeholder="Cliente (impresa, geometra, privato) *" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          <input id="pv-data" type="date" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        </div>
-        <!-- 26 agosto 2026 — I LISTINI (sql/neg-listini.sql).
-             A sinistra si pesca il cliente dall'anagrafica: nome, listino e
-             sconto arrivano da soli. A destra l'interruttore, per cambiare
-             listino SOLO su questo preventivo senza toccare la sua scheda. -->
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
-          <select id="pv-scegli-cliente" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-            <option value="">Oppure prendilo dai tuoi clienti…</option>
-          </select>
-          <div id="pv-listino" style="display:flex;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff">
-            <button type="button" class="pv-lst on" data-l="banco" style="flex:1;padding:11px 6px;border:none;background:#2e537d;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Banco</button>
-            <button type="button" class="pv-lst" data-l="impresa" style="flex:1;padding:11px 6px;border:none;background:#fff;color:#5b6672;font-size:14px;font-weight:700;cursor:pointer">Impresa</button>
+      <div class="mod-negozio" id="pv-modulo" hidden>
+        <h3 id="pv-titolo-sez">Nuovo preventivo</h3>
+        <div class="sh-cols">
+          <div class="sh-b">
+            <div class="sh-tit">A chi</div>
+            <div class="row2">
+              <div class="field"><label>Cliente *</label>
+                <input id="pv-cliente" placeholder="Impresa, geometra, privato"></div>
+              <div class="field"><label>Data</label><input id="pv-data" type="date"></div>
+            </div>
+            <!-- 26 agosto 2026 — I LISTINI (sql/neg-listini.sql).
+                 Sopra si pesca il cliente dall'anagrafica: nome, listino e
+                 sconto arrivano da soli. Sotto l'interruttore, per cambiare
+                 listino SOLO su questo preventivo senza toccare la sua scheda. -->
+            <div class="field"><label>Oppure prendilo dai tuoi clienti</label>
+              <select id="pv-scegli-cliente">
+                <option value="">Oppure prendilo dai tuoi clienti&hellip;</option>
+              </select></div>
+            <div class="field"><label>Che prezzi gli fai</label>
+              <div class="segm" id="pv-listino">
+                <button type="button" class="pv-lst on" data-l="banco">Banco</button>
+                <button type="button" class="pv-lst" data-l="impresa">Impresa</button>
+              </div></div>
+            <div class="field"><label>Oggetto</label>
+              <input id="pv-titolo" placeholder="Es. Fornitura materiale per villetta via Roma"></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Cosa gli vendi</div>
+            <div class="pv-scegli">
+              <select id="pv-scegli-prod">
+                <option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option>
+              </select>
+              <button type="button" class="btn" id="pv-add-libera">+ Riga libera</button>
+            </div>
+            <div id="pv-righe"></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Sconto, IVA e validit&agrave;</div>
+            <div class="row2">
+              <div class="field"><label>Sconto sul totale</label>
+                <input id="pv-sconto" type="number" step="0.5" value="0"></div>
+              <div class="field"><label>IVA</label>
+                <select id="pv-iva">
+                  <option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option>
+                </select></div>
+            </div>
+            <div class="field"><label>Offerta valida</label>
+              <select id="pv-validita">
+                <option value="15">15 giorni</option><option value="30" selected>30 giorni</option><option value="60">60 giorni</option><option value="90">90 giorni</option>
+              </select></div>
+            <div id="pv-totali" class="pv-totali"></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Appunti</div>
+            <div class="field"><label>Note</label>
+              <textarea id="pv-note" rows="4" placeholder="Tempi di consegna, trasporto compreso o escluso, condizioni di pagamento&hellip;"></textarea></div>
           </div>
         </div>
-        <input id="pv-titolo" placeholder="Oggetto (es. Fornitura materiale per villetta via Roma)" style="width:100%;padding:11px;margin-bottom:14px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-
-        <div style="font-weight:700;font-size:14px;color:#5b6672;margin-bottom:8px">Cosa gli vendi</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-          <select id="pv-scegli-prod" style="flex:1;min-width:200px;padding:11px;border:1px solid #ddd;border-radius:8px">
-            <option value="">— prendi un prodotto dal magazzino —</option>
-          </select>
-          <button type="button" id="pv-add-libera" style="padding:11px 16px;background:#fff;border:1.5px dashed #2e537d;color:#2e537d;border-radius:8px;font-weight:700;cursor:pointer">+ Riga libera</button>
-        </div>
-        <div id="pv-righe"></div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0 8px">
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Sconto sul totale</label>
-            <input id="pv-sconto" type="number" step="0.5" value="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">IVA</label>
-            <select id="pv-iva" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-              <option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:#5b6672;margin-bottom:4px">Offerta valida</label>
-            <select id="pv-validita" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-              <option value="15">15 giorni</option><option value="30" selected>30 giorni</option><option value="60">60 giorni</option><option value="90">90 giorni</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="pv-totali" style="background:#f7f9fb;border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:15px;line-height:2"></div>
-        <textarea id="pv-note" placeholder="Note: tempi di consegna, trasporto compreso o escluso, condizioni di pagamento..." style="width:100%;padding:11px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;min-height:70px;font-family:inherit"></textarea>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button id="pv-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer;font-weight:700">Salva preventivo</button>
-          <button id="pv-annulla" style="display:none;background:#fff;color:#5b6672;border:1px solid #ddd;border-radius:8px;padding:13px 20px;cursor:pointer">Annulla modifica</button>
+        <div class="sheet-actions">
+          <button class="btn" data-action="close">Annulla</button>
+          <button class="btn" id="pv-annulla" style="display:none">Annulla modifica</button>
+          <button class="btn-primary" id="pv-save">Salva preventivo</button>
         </div>
       </div>
 
@@ -624,15 +638,32 @@
     <section id="fornitori">
       <div class="sec-head"><h2>Fornitori</h2><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button></div>
       <div class="gal-intro">Da chi compri la merce: contatti sempre a portata di mano e ordini in arrivo, cos&igrave; sai sempre cosa aspetti e da chi.</div>
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px">Nuovo fornitore</h3>
-        <input id="nf-nome" placeholder="Nome fornitore *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nf-telefono" placeholder="Telefono" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nf-email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nf-indirizzo" placeholder="Indirizzo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nf-piva" placeholder="P.IVA" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nf-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button id="nf-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi fornitore</button>
+      <div class="mod-negozio" id="nf-modulo" hidden>
+        <h3 id="nf-titolo-sez">Nuovo fornitore</h3>
+        <div class="sh-cols">
+          <div class="sh-b">
+            <div class="sh-tit">Chi &egrave;</div>
+            <div class="field"><label>Nome fornitore *</label>
+              <input id="nf-nome" placeholder="Es. Ferramenta Centro"></div>
+            <div class="field"><label>P.IVA</label><input id="nf-piva" placeholder="01234567890"></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Come lo raggiungi</div>
+            <div class="row2">
+              <div class="field"><label>Telefono</label><input id="nf-telefono" type="tel" placeholder="Es. 06 1122334"></div>
+              <div class="field"><label>Email</label><input id="nf-email" type="email" placeholder="ordini@fornitore.it"></div>
+            </div>
+            <div class="field"><label>Indirizzo</label><input id="nf-indirizzo" placeholder="Via, numero, citt&agrave;"></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Appunti</div>
+            <div class="field"><label>Note</label><input id="nf-note" placeholder="Es. consegna il marted&igrave;"></div>
+          </div>
+        </div>
+        <div class="sheet-actions">
+          <button class="btn" data-action="close">Annulla</button>
+          <button class="btn-primary" id="nf-save">Aggiungi fornitore</button>
+        </div>
       </div>
       <div id="fornitori-body" class="grid"></div>
     </section>
@@ -640,35 +671,61 @@
     <section id="movimenti">
       <div class="sec-head"><h2>Movimenti</h2><button class="btn add" data-action="new-mov">+ Nuovo movimento</button></div>
       <div class="gal-intro">Il giro della giornata: la merce che <b>esce</b> (una vendita) e quella che <b>entra</b> (un ordine al fornitore). Se prendi il prodotto dal magazzino la giacenza si aggiorna da sola.</div>
-      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px">Nuovo movimento</h3>
-        <select id="nm-tipo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-          <option value="vendita">Vendita (merce che esce)</option>
-          <option value="ordine">Ordine a fornitore (merce che entra)</option>
-          <option value="rettifica">Rettifica di magazzino (correzione)</option>
-        </select>
-        <!-- 26 agosto 2026 - IL GIRO DELLA MERCE. Il prodotto arriva dal
-             magazzino (e allora la giacenza si muove) oppure scritto a mano
-             (trasporto, manodopera: quello non tocca niente, ed e' voluto). -->
-        <select id="nm-prod-sel" style="width:100%;padding:10px;margin-bottom:6px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:15px">
-          <option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option>
-        </select>
-        <div id="nm-giac" style="font-size:13px;color:#2e7d32;margin:0 0 8px;display:none"></div>
-        <div style="font-size:13px;color:#8a949e;text-align:center;margin-bottom:6px">&mdash; oppure scrivilo a mano, se non lo tieni a magazzino &mdash;</div>
-        <input id="nm-prodotto" placeholder="Prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <select id="nm-motivo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;display:none">
-          <option value="rotti">Perch&eacute;: rotti</option>
-          <option value="inventario">Perch&eacute;: inventario</option>
-          <option value="calo">Perch&eacute;: calo</option>
-          <option value="omaggio">Perch&eacute;: omaggio</option>
-        </select>
-        <input id="nm-quantita" type="number" step="0.01" placeholder="Quantità (anche con la virgola)" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <div id="nm-hint-q" style="font-size:13px;color:#6a1b9a;margin:-4px 0 8px;display:none">Nella rettifica la quantit&agrave; va col segno: <b>&minus;2</b> se la merce cala, <b>2</b> se cresce.</div>
-        <input id="nm-importo" type="number" step="0.01" placeholder="Importo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nm-controparte" placeholder="Cliente o fornitore" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nm-data" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nm-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button id="nm-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi movimento</button>
+      <div class="mod-negozio" id="nm-modulo" hidden>
+        <h3 id="nm-titolo-sez">Nuovo movimento</h3>
+        <div class="sh-cols">
+          <div class="sh-b">
+            <div class="sh-tit">Che movimento &egrave;</div>
+            <div class="field"><label>Tipo</label>
+              <select id="nm-tipo">
+                <option value="vendita">Vendita (merce che esce)</option>
+                <option value="ordine">Ordine a fornitore (merce che entra)</option>
+                <option value="rettifica">Rettifica di magazzino (correzione)</option>
+              </select></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Quale merce</div>
+            <!-- 26 agosto 2026 - IL GIRO DELLA MERCE. Il prodotto arriva dal
+                 magazzino (e allora la giacenza si muove) oppure scritto a mano
+                 (trasporto, manodopera: quello non tocca niente, ed e' voluto). -->
+            <div class="field"><label>Prendilo dal magazzino</label>
+              <select id="nm-prod-sel">
+                <option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option>
+              </select></div>
+            <div id="nm-giac" class="sh-nota" style="display:none"></div>
+            <div class="field"><label>Oppure scrivilo a mano, se non lo tieni a magazzino</label>
+              <input id="nm-prodotto" placeholder="Prodotto *"></div>
+            <div class="field" id="nm-motivo-campo" style="display:none"><label>Perch&eacute;</label>
+              <select id="nm-motivo">
+                <option value="rotti">Perch&eacute;: rotti</option>
+                <option value="inventario">Perch&eacute;: inventario</option>
+                <option value="calo">Perch&eacute;: calo</option>
+                <option value="omaggio">Perch&eacute;: omaggio</option>
+              </select></div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Quanta e quanto</div>
+            <div class="row2">
+              <div class="field"><label>Quantit&agrave; (anche con la virgola)</label>
+                <input id="nm-quantita" type="number" step="0.01" placeholder="0"></div>
+              <div class="field"><label>Importo &euro;</label>
+                <input id="nm-importo" type="number" step="0.01" placeholder="&euro;"></div>
+            </div>
+            <div id="nm-hint-q" class="sh-nota" style="display:none">Nella rettifica la quantit&agrave; va col segno: <b>&minus;2</b> se la merce cala, <b>2</b> se cresce.</div>
+          </div>
+          <div class="sh-b">
+            <div class="sh-tit">Con chi e quando</div>
+            <div class="row2">
+              <div class="field"><label>Cliente o fornitore</label><input id="nm-controparte" placeholder="Es. Rossi Costruzioni"></div>
+              <div class="field"><label>Data</label><input id="nm-data" type="date"></div>
+            </div>
+            <div class="field"><label>Note</label><input id="nm-note" placeholder="Quello che ti serve ricordare"></div>
+          </div>
+        </div>
+        <div class="sheet-actions">
+          <button class="btn" data-action="close">Annulla</button>
+          <button class="btn-primary" id="nm-save">Aggiungi movimento</button>
+        </div>
       </div>
       <div id="movimenti-body" class="grid"></div>
     </section>
@@ -1618,8 +1675,8 @@
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
         <textarea id="day-note" placeholder="Es. chiamare il fornitore, preparare la consegna...">${esc(noteCache[ds]||"")}</textarea></div>
       <div class="sheet-actions">
-        <button class="b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
-        <button class="b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
+        <button class="btn" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
+        <button class="btn-primary" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
   }
 
   async function renderClienti(){
@@ -1676,8 +1733,8 @@
         <option value="segretaria">Segretaria</option></select></div>
       <div class="field"><label>Permessi</label><div id="d-perms">
         ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
     $("#d-ruolo").onchange=applyRuoloPreset;
     if(isNew){applyRuoloPreset();}
     else{
@@ -1771,8 +1828,8 @@
       <div class="field"><label>Cliente</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
       <div class="field"><label>Data scadenza</label><input type="date" id="s-data" value="${s.data_scadenza||""}"></div>
       <div class="field"><label>Note</label><textarea id="s-note" placeholder="Dettagli, riferimenti...">${esc(s.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveScad(id){
     const titolo=$("#s-tit").value.trim();if(!titolo){toast("Scrivi il titolo");return;}
@@ -1804,8 +1861,8 @@
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
-        <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-          <button class="b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
+        <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+          <button class="btn-primary" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
     }
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
@@ -1838,8 +1895,8 @@
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-        <button class="b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+        <button class="btn-primary" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button></div>`);
     bindSeg("j-stato");bindSeg("j-fatt");
     $("#up-prima").onchange=e=>{addFoto(e.target.files,"prima","Capo");e.target.value="";};
     $("#up-dopo").onchange=e=>{addFoto(e.target.files,"dopo",$("#op-dopo").value);e.target.value="";};
@@ -1904,8 +1961,8 @@
         <div class="field"><label>Sconto fisso suo (%)</label>
           <input id="c-sconto" type="number" step="0.5" min="0" max="100" value="${c.sconto_perc??0}" placeholder="0"></div>
       </div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveCli(id){
     const nome=$("#c-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
@@ -1935,8 +1992,8 @@
     const isNew=!d;d=d||{};
     openSheet(`<h3>${isNew?"Nuova persona":"Rinomina persona"}</h3>
       <div class="field"><label>Nome</label><input id="d-nome" value="${esc(d.nome||"")}" placeholder="Es. Wahid"></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
   }
   async function saveDip(id){
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
@@ -1950,8 +2007,8 @@
       <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Ferramenta, Colorificio, Edilizia, Giardinaggio'}"></div>
       <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
       <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-panel">Crea reparto</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="save-panel">Crea reparto</button></div>`);
     $("#p-ic").onclick=e=>{const b=e.target.closest("[data-ic]");if(!b)return;nuovoSel.icon=b.dataset.ic;[...$("#p-ic").children].forEach(x=>x.classList.toggle("on",x===b));};
     $("#p-col").onclick=e=>{const b=e.target.closest("[data-col]");if(!b)return;nuovoSel.col=+b.dataset.col;[...$("#p-col").children].forEach(x=>x.classList.toggle("on",x===b));};
   }
@@ -2002,8 +2059,8 @@
       <div class="row2"><div class="field"><label>Telefono</label><input id="a-tel" value="${esc(a.tel||"")}"></div>
       <div class="field"><label>Email</label><input id="a-email" value="${esc(a.email||"")}"></div></div>
       <div class="field"><label>IBAN (per i bonifici)</label><input id="a-iban" value="${esc(a.iban||"")}" placeholder="IT.."></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-azienda">Salva</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="save-azienda">Salva</button></div>`);
   }
   async function saveAzienda(){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -2038,8 +2095,8 @@
       <div class="field"><label>Email</label><input id="cm-email" type="email" value="${esc(a.comm_email||"")}" placeholder="studio@email.it"></div></div>
       <div class="field"><label>PEC</label><input id="cm-pec" type="email" value="${esc(a.comm_pec||"")}" placeholder="studio@pec.it"></div>
       <div class="field"><label>Note</label><textarea id="cm-note" rows="6" placeholder="Quello che ti serve ricordare: scadenze, come preferisce ricevere le cose, cosa ti chiede ogni volta">${esc(a.comm_note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-comm">Salva</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+      <button class="btn-primary" data-action="save-comm">Salva</button></div>`);
   }
   async function saveComm(){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -2082,7 +2139,7 @@
       ${voci.map(v=>`<div style="padding:13px 0;border-top:1px solid var(--line)">
         <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px">${v[0]}</div>
         <div style="font-size:15px;line-height:1.6;color:var(--muted)">${v[1]}</div></div>`).join("")}
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Chiudi</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Chiudi</button></div>`);
   }
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
@@ -2328,7 +2385,85 @@
     const b=s.querySelector(".sh-body");
     if(b){b.scrollTop=0;requestAnimationFrame(function(){b.scrollTop=0;});setTimeout(function(){b.scrollTop=0;},80);}
   }
-  function closeSheet(){$("#overlay").classList.remove("open");}
+  /* ================================================================
+     27 agosto 2026 (notte) — I MODULI DENTRO LA FINESTRA
+
+     Nel negozio i moduli di Prodotti, Movimenti, Preventivi e Fornitori
+     stavano APERTI in cima alla loro sezione: si entrava in Prodotti e
+     la prima cosa era un modulo vuoto di dodici caselle, l'elenco dei
+     prodotti cominciava sotto. Nelle imprese un modulo cosi' sta dentro
+     la finestra grande e si apre col pulsante della testata.
+
+     ⛔ IL MODULO NON SI RIDISEGNA: SI SPOSTA.
+     Se la finestra si costruisse con una stringa nuova, tutti gli
+     ascoltatori attaccati una volta sola al caricamento (#np-save,
+     #nm-save, #pv-save, #nf-save, l'interruttore banco/impresa, il menu
+     dei prodotti…) resterebbero attaccati a nodi buttati via, e il
+     pulsante Salva non salverebbe piu' niente.
+     Qui il nodo e' sempre lo stesso: si stacca dalla sezione, si mette
+     dentro la finestra, e quando la finestra si chiude torna al suo
+     posto. Il segnaposto e' un commento, cosi' l'ordine non cambia.
+
+     ⚠️ Ne resta aperto UNO SOLO per volta: aprire il secondo chiude il
+        primo e lo rimette a posto, se no il nodo resterebbe orfano.
+     ================================================================ */
+  let _modNodo=null, _modSegno=null, _modAzioni=null;
+  function apriModuloFinestra(idModulo){
+    const m=$("#"+idModulo); if(!m) return;
+    if(_modNodo) chiudiModuloFinestra();
+    const s=$("#sheet");
+    /* il titolo della finestra e' il titolo del modulo: cosi' «Modifica
+       preventivo N. 3» ci arriva da solo, senza scriverlo due volte */
+    const h3=m.querySelector("h3");
+    const titolo=h3?h3.innerHTML:"";
+    if(h3){h3.dataset.nascosto="1";h3.style.display="none";}
+    s.className="sheet sheet--grande";
+    /* ⛔ LA FINESTRA LUNGA. Le imprese decidono cosi' (gestionale-app.html
+       riga ~15668): se dentro c'e' «sh-cols», cioe' un modulo a colonne,
+       la finestra prende tutto lo schermo; se no resta una finestrella
+       centrata. Stessa riga, stesso nome di classe. */
+    if(m.querySelector(".sh-cols")) s.classList.add("sh-lunga");
+    s.innerHTML='<div class="sh-head">'+_BTN_INDIETRO+'<h3>'+titolo+'</h3></div>'+
+      '<div class="sh-body" id="sh-corpo"></div><div class="sh-foot" id="sh-piede"></div>';
+    _modSegno=document.createComment(" il posto di "+idModulo+" ");
+    m.parentNode.insertBefore(_modSegno,m);
+    _modNodo=m;
+    m.hidden=false;
+    $("#sh-corpo").appendChild(m);
+    /* i pulsanti vanno nel piede fermo in fondo: nelle imprese Salva si
+       vede sempre, senza scorrere fino in fondo a dodici caselle.
+       ⛔ Nel piede vanno i PULSANTI, non la loro scatola: «.sheet-actions»
+       e' la barra appiccicata in fondo al corpo, e dentro il piede si
+       porterebbe dietro un secondo bordo e i pulsanti larghi tutta la
+       riga. Le imprese fanno lo stesso (openSheetGrande prende
+       l'innerHTML di .sheet-actions, non il nodo). */
+    _modAzioni=m.querySelector(".sheet-actions");
+    if(_modAzioni){
+      const piede=$("#sh-piede");
+      while(_modAzioni.firstChild) piede.appendChild(_modAzioni.firstChild);
+    } else $("#sh-piede").remove();
+    $("#overlay").classList.add("open");
+    const b=s.querySelector(".sh-body");
+    if(b){b.scrollTop=0;requestAnimationFrame(function(){b.scrollTop=0;});setTimeout(function(){b.scrollTop=0;},80);}
+  }
+  function chiudiModuloFinestra(){
+    if(!_modNodo) return;
+    /* i pulsanti tornano dentro il modulo prima del modulo stesso, se no
+       resterebbero nel piede della finestra e sparirebbero al prossimo
+       innerHTML — insieme ai loro ascoltatori */
+    const piede=$("#sh-piede");
+    if(_modAzioni&&piede){ while(piede.firstChild) _modAzioni.appendChild(piede.firstChild); }
+    _modAzioni=null;
+    const h3=_modNodo.querySelector('h3[data-nascosto]');
+    if(h3){h3.style.display="";h3.removeAttribute("data-nascosto");}
+    _modNodo.hidden=true;
+    if(_modSegno&&_modSegno.parentNode){
+      _modSegno.parentNode.insertBefore(_modNodo,_modSegno);
+      _modSegno.parentNode.removeChild(_modSegno);
+    }
+    _modNodo=null;_modSegno=null;
+  }
+  function closeSheet(){chiudiModuloFinestra();$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
 
   document.addEventListener("click",async e=>{
@@ -2361,16 +2496,17 @@
        finestra grande (il passo dopo), saranno questi stessi pulsanti ad
        aprirla, e il resto della pagina non se ne accorgera'.
        ================================================================ */
-    const _vaiE=(sez,campo)=>{
+    const _vaiE=(sez,modulo,campo,svuota)=>{
       $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab===sez));
       $$("section").forEach(s=>s.classList.toggle("active",s.id===sez));
-      window.scrollTo({top:0,behavior:"smooth"});
-      const n=$(campo); if(n)setTimeout(function(){n.focus();},150);
+      if(typeof svuota==="function")svuota();
+      apriModuloFinestra(modulo);
+      const n=$(campo); if(n)setTimeout(function(){n.focus();},180);
     };
-    if(a==="new-prod"){ _vaiE("prodotti","#np-nome");  return; }
-    if(a==="new-mov"){  _vaiE("movimenti","#nm-prodotto"); return; }
-    if(a==="new-prev"){ _vaiE("preventivi","#pv-cliente"); return; }
-    if(a==="new-forn"){ _vaiE("fornitori","#nf-nome"); return; }
+    if(a==="new-prod"){ _vaiE("prodotti","np-modulo","#np-nome",npNuovo);  return; }
+    if(a==="new-mov"){  _vaiE("movimenti","nm-modulo","#nm-prodotto",nmNuovo); return; }
+    if(a==="new-prev"){ _vaiE("preventivi","pv-modulo","#pv-cliente",pvNuovo); return; }
+    if(a==="new-forn"){ _vaiE("fornitori","nf-modulo","#nf-nome",nfNuovo); return; }
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
@@ -2559,12 +2695,13 @@
       return +p.prezzo_impresa||0;
     return +p.prezzo||0;
   }
+  /* ⛔ 27 agosto 2026 (notte) — niente piu' colori scritti a mano qui.
+     L'interruttore banco/impresa e' diventato un «segm» del gestionale
+     (lo stesso dei filtri della Galleria): l'acceso lo dice la classe
+     «on», il colore lo decide css/gestionale.css. */
   function pvDisegnaListino(){
     $$("#pv-listino .pv-lst").forEach(b=>{
-      const on=b.dataset.l===pvListino;
-      b.classList.toggle("on",on);
-      b.style.background=on?"#2e537d":"#fff";
-      b.style.color=on?"#fff":"#5b6672";
+      b.classList.toggle("on",b.dataset.l===pvListino);
     });
   }
   /* Cambiato listino: si riscrivono i prezzi delle righe prese dal magazzino.
@@ -2664,6 +2801,43 @@
     sel.innerHTML='<option value="">Oppure prendilo dai tuoi clienti…</option>'+
       pvCliCache.map(c=>`<option value="${c.id}">${esc(c.nome)}${c.listino==="impresa"?" · impresa":""}${+c.sconto_perc?" · -"+c.sconto_perc+"%":""}</option>`).join("");
   }
+  /* ================================================================
+     LE TRE «SVUOTA» — 27 agosto 2026 (notte)
+     Da quando il modulo sta nella finestra, «+ Nuovo …» deve trovarlo
+     pulito anche se un attimo prima ci si stava modificando qualcosa:
+     senza questo, «+ Nuovo prodotto» riaprirebbe il prodotto di prima
+     e il pulsante direbbe ancora «Salva modifica».
+     ⚠️ Svuotano le stesse caselle che il pulsante Salva gia' svuotava a
+        salvataggio riuscito: e' la stessa lista, in un posto solo.
+     I preventivi la avevano gia' ed e' pvNuovo(), qui sotto.
+     ================================================================ */
+  function npNuovo(){
+    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note","np-acquisto","np-impresa"]
+      .forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    if($("#np-unita"))$("#np-unita").value="pz";
+    if($("#np-iva"))$("#np-iva").value="22";
+    if(typeof mostraMargine==="function")mostraMargine();
+    editProdId=null;
+    if($("#np-save"))$("#np-save").textContent="Aggiungi prodotto";
+    if($("#np-titolo-sez"))$("#np-titolo-sez").textContent="Nuovo prodotto";
+  }
+  function nfNuovo(){
+    ["nf-nome","nf-telefono","nf-email","nf-indirizzo","nf-piva","nf-note"]
+      .forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    editFornId=null;
+    if($("#nf-save"))$("#nf-save").textContent="Aggiungi fornitore";
+    if($("#nf-titolo-sez"))$("#nf-titolo-sez").textContent="Nuovo fornitore";
+  }
+  function nmNuovo(){
+    ["nm-prodotto","nm-quantita","nm-importo","nm-controparte","nm-data","nm-note"]
+      .forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    if($("#nm-prod-sel"))$("#nm-prod-sel").value="";
+    if($("#nm-tipo"))$("#nm-tipo").value="vendita";
+    nmImportoAuto=""; editMovId=null;
+    if($("#nm-save"))$("#nm-save").textContent="Aggiungi movimento";
+    if($("#nm-titolo-sez"))$("#nm-titolo-sez").textContent="Nuovo movimento";
+    if(typeof nmAggiornaModulo==="function")nmAggiornaModulo();
+  }
   function pvNuovo(){
     pvRighe=[];pvEditId=null;
     /* 26 agosto 2026 — un preventivo nuovo riparte sempre dai prezzi del
@@ -2719,9 +2893,9 @@
       ${shRiga("IVA",p.iva_perc!=null&&p.iva_perc!==""?p.iva_perc+"%":"")}
       ${shRiga("Note",p.note?esc(p.note):"")}
       <div class="sheet-actions">
-        <button class="b-cancel" data-action="close">Chiudi</button>
-        <button class="b-cancel" data-action="prod-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
-        <button class="b-save" data-action="prod-modifica" data-id="${p.id}">Modifica</button>
+        <button class="btn" data-action="close">Chiudi</button>
+        <button class="btn" data-action="prod-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="btn-primary" data-action="prod-modifica" data-id="${p.id}">Modifica</button>
       </div>`);
   }
   /* ⚠️ 26 agosto 2026 — IL MODULO DEL PRODOTTO SI RIEMPIE QUI, e non piu'
@@ -2745,7 +2919,8 @@
       if($("#np-impresa"))$("#np-impresa").value=data.prezzo_impresa??"";
       mostraMargine();
       editProdId=data.id; $("#np-save").textContent="Salva modifica";
-      window.scrollTo({top:0,behavior:"smooth"});
+      if($("#np-titolo-sez"))$("#np-titolo-sez").textContent="Modifica prodotto";
+      apriModuloFinestra("np-modulo");
     }
   }
   async function loadMagazzino(){
@@ -2801,8 +2976,8 @@
         ${MOT.map(([v,t])=>`<button type="button" class="chip ${v===magRett.motivo?"on":""}" data-action="mag-mot" data-v="${v}" style="font-size:15px;padding:9px 16px">${t}</button>`).join("")}
       </div>
       <p style="margin:0;font-size:14px;line-height:1.5;color:#5a6672">Resta scritto nei Movimenti come <b>Rettifica</b>: fra un mese si saprà perché la giacenza è cambiata. Non entra nei conti dei soldi.</p>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-        <button class="b-save" data-action="mag-rett-salva">${su?"Carica":"Scarica"}</button></div>`);
+      <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+        <button class="btn-primary" data-action="mag-rett-salva">${su?"Carica":"Scarica"}</button></div>`);
   }
   async function magSalvaRettifica(){
     if(!(sb&&sbUid)){alert("Non connesso");return;}
@@ -2861,6 +3036,8 @@
     if(editFornId&&(!okF||!okF.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
     ["nf-nome","nf-telefono","nf-email","nf-indirizzo","nf-piva","nf-note"].forEach(id=>$("#"+id).value="");
     editFornId=null; $("#nf-save").textContent="Aggiungi fornitore";
+    if($("#nf-titolo-sez"))$("#nf-titolo-sez").textContent="Nuovo fornitore";
+    closeSheet();
     loadFornitori();
   });
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
@@ -2878,9 +3055,9 @@
       ${shRiga("P.IVA",f.piva?esc(f.piva):"")}
       ${shRiga("Note",f.note?esc(f.note):"")}
       <div class="sheet-actions">
-        <button class="b-cancel" data-action="close">Chiudi</button>
-        <button class="b-cancel" data-action="forn-elimina" data-id="${f.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
-        <button class="b-save" data-action="forn-modifica" data-id="${f.id}">Modifica</button>
+        <button class="btn" data-action="close">Chiudi</button>
+        <button class="btn" data-action="forn-elimina" data-id="${f.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="btn-primary" data-action="forn-modifica" data-id="${f.id}">Modifica</button>
       </div>`);
   }
   /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
@@ -2892,7 +3069,8 @@
     $("#nf-email").value=data.email||""; $("#nf-indirizzo").value=data.indirizzo||"";
     $("#nf-piva").value=data.piva||""; $("#nf-note").value=data.note||"";
     editFornId=data.id; $("#nf-save").textContent="Salva modifica";
-    window.scrollTo({top:0,behavior:"smooth"});
+    if($("#nf-titolo-sez"))$("#nf-titolo-sez").textContent="Modifica fornitore";
+    apriModuloFinestra("nf-modulo");
   }
   let editMovId=null;
 
@@ -2965,7 +3143,10 @@
       if(p){g.style.display="block";g.textContent="A magazzino ne risultano "+(p.quantita??0)+" "+(p.unita||"pz")+".";}
       else  g.style.display="none";
     }
-    const mot=$("#nm-motivo");  if(mot) mot.style.display =(tipo==="rettifica")?"block":"none";
+    /* ⚠️ 27 agosto 2026 — si accende il CAMPO, non solo la tendina: adesso
+       la tendina ha la sua etichetta sopra, e nascondendo solo la tendina
+       resterebbe a schermo un «Perche'» appeso al nulla. */
+    const mot=$("#nm-motivo-campo"); if(mot) mot.style.display=(tipo==="rettifica")?"":"none";
     const hin=$("#nm-hint-q");  if(hin) hin.style.display =(tipo==="rettifica")?"block":"none";
     if(p&&tipo!=="rettifica"){
       const q=Math.abs(parseFloat($("#nm-quantita").value)||0);
@@ -3066,7 +3247,8 @@
     ["nm-prodotto","nm-quantita","nm-importo","nm-controparte","nm-data","nm-note"].forEach(id=>$("#"+id).value="");
     if($("#nm-prod-sel"))$("#nm-prod-sel").value="";
     nmImportoAuto=""; editMovId=null; $("#nm-save").textContent="Aggiungi movimento";
-    nmAggiornaModulo(); loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino();
+    if($("#nm-titolo-sez"))$("#nm-titolo-sez").textContent="Nuovo movimento";
+    nmAggiornaModulo(); closeSheet(); loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino();
   });
   $('[data-tab="movimenti"]')?.addEventListener("click",()=>{loadMovimenti();nmCaricaProdotti();});
   $("#movimenti-body")?.addEventListener("click",async e=>{
@@ -3118,8 +3300,9 @@
       $("#nm-controparte").value=data.controparte||""; $("#nm-data").value=data.data_mov||"";
       $("#nm-note").value=data.note||"";
       nmImportoAuto=""; editMovId=data.id; $("#nm-save").textContent="Salva modifica";
+      if($("#nm-titolo-sez"))$("#nm-titolo-sez").textContent="Modifica movimento";
       nmAggiornaModulo();
-      window.scrollTo({top:0,behavior:"smooth"});
+      apriModuloFinestra("nm-modulo");
     }
   });
   /* --- eventi della sezione Preventivi --- */
@@ -3175,7 +3358,7 @@
     pvRenderRighe();
   });
   ["pv-sconto","pv-iva"].forEach(id=>{const el=$("#"+id);if(el){el.addEventListener("input",pvTotali);el.addEventListener("change",pvTotali);}});
-  $("#pv-annulla")?.addEventListener("click",pvNuovo);
+  $("#pv-annulla")?.addEventListener("click",function(){pvNuovo();closeSheet();});
 
   $("#pv-save")?.addEventListener("click",async()=>{
     if(!(sb&&sbUid)){alert("Non connesso");return;}
@@ -3231,7 +3414,7 @@
     if(error){alert("Errore: "+error.message);return;}
     const {error:e2}=await sb.from("neg_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
     if(e2){alert("Errore nelle righe: "+e2.message);return;}
-    pvNuovo(); pvCarica();
+    pvNuovo(); closeSheet(); pvCarica();
     alert("Preventivo salvato ✔");
   });
 
@@ -3299,11 +3482,11 @@
         <div class="sh-riga"><div class="k" style="font-size:17px;color:#1c2733">Totale</div><div class="v" style="font-size:22px;font-weight:800;color:#0a2a4d">${pvEur(c.totale)}</div></div>
       </div>
       <div class="sheet-actions">
-        <button class="b-cancel" data-action="close">Chiudi</button>
-        <button class="b-cancel" data-action="pv-scheda-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
-        <button class="b-cancel" data-action="pv-scheda-pdf" data-id="${p.id}">PDF</button>
-        ${p.stato!=="accettato"?`<button class="b-cancel" data-action="pv-scheda-acc" data-id="${p.id}" style="background:#e8f5e9;color:#1e8e3e">Il cliente ha accettato</button>`:""}
-        <button class="b-save" data-action="pv-scheda-modifica" data-id="${p.id}">Modifica</button>
+        <button class="btn" data-action="close">Chiudi</button>
+        <button class="btn" data-action="pv-scheda-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="btn" data-action="pv-scheda-pdf" data-id="${p.id}">PDF</button>
+        ${p.stato!=="accettato"?`<button class="btn" data-action="pv-scheda-acc" data-id="${p.id}" style="background:#e8f5e9;color:#1e8e3e">Il cliente ha accettato</button>`:""}
+        <button class="btn-primary" data-action="pv-scheda-modifica" data-id="${p.id}">Modifica</button>
       </div>`);
   }
   /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
@@ -3328,7 +3511,7 @@
       $("#pv-titolo-sez").textContent="Modifica preventivo N. "+(p.numero||"");
       $("#pv-save").textContent="Salva modifica";
       $("#pv-annulla").style.display="";
-      pvRenderRighe(); window.scrollTo({top:0,behavior:"smooth"});return;
+      pvRenderRighe(); apriModuloFinestra("pv-modulo"); return;
     }
   }
 
@@ -3523,6 +3706,8 @@
     if($("#np-iva"))$("#np-iva").value="22";
     mostraMargine();
     editProdId=null; $("#np-save").textContent="Aggiungi prodotto";
+    if($("#np-titolo-sez"))$("#np-titolo-sez").textContent="Nuovo prodotto";
+    closeSheet();
     loadProdotti();
   });
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
@@ -3891,9 +4076,9 @@
         righe.map(r=>`<tr><td style="padding:6px 8px;color:#5b6672;border-bottom:1px solid #eef2f6;white-space:nowrap">${esc(r[0])}</td><td style="padding:6px 8px;border-bottom:1px solid #eef2f6;font-weight:600">${esc(r[1])}</td></tr>`).join("")
         ||'<tr><td style="padding:6px 8px">Niente da mostrare.</td></tr>'}</table>
       <div class="sheet-actions">
-        <button class="b-cancel" data-action="close">Annulla</button>
+        <button class="btn" data-action="close">Annulla</button>
         <button data-action="cest-mai" data-i="${i}" style="background:#fff;border:1px solid #e0b4b4;color:#c62828;border-radius:8px;padding:11px 16px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">Butta per sempre</button>
-        <button class="b-save" data-action="cest-su" data-i="${i}">Rimetti a posto</button>
+        <button class="btn-primary" data-action="cest-su" data-i="${i}">Rimetti a posto</button>
       </div>`);
   }
 
