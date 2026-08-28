@@ -553,12 +553,14 @@
           <button class="btn-primary" id="np-save">Aggiungi prodotto</button>
         </div>
       </div>
+      <div class="viste" id="prod-viste"></div>
       <div id="prodotti-body" class="grid"></div>
     </section>
 
     <section id="magazzino">
       <div class="sec-head"><h2>Magazzino</h2></div>
       <div class="gal-intro">Quante ne hai. Il <b>+</b> e il <b>&minus;</b> chiedono quante e perch&eacute;, e la ragione resta scritta nei Movimenti: la giacenza non cambia mai senza che si sappia da dove viene. Sotto la soglia minima il prodotto si accende.</div>
+      <div class="viste" id="mag-viste"></div>
       <div id="magazzino-body" class="grid"></div>
     </section>
 
@@ -632,6 +634,7 @@
         </div>
       </div>
 
+      <div class="viste" id="prev-viste"></div>
       <div id="preventivi-body" class="grid"></div>
     </section>
 
@@ -727,6 +730,7 @@
           <button class="btn-primary" id="nm-save">Aggiungi movimento</button>
         </div>
       </div>
+      <div class="viste" id="mov-viste"></div>
       <div id="movimenti-body" class="grid"></div>
     </section>
 
@@ -771,6 +775,7 @@
       <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div>
       <div class="gal-intro">Quanto hai gi&agrave; fatturato e quanto devi ancora incassare, con il PDF di cortesia da allegare.</div>
       <div class="fatt-summary" id="fatt-summary"></div>
+      <div class="viste" id="fatt-viste"></div>
       <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
     </section>
@@ -1607,14 +1612,29 @@
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
       <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
-    let h="";
-    h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
-    h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
-    h+=`<div class="mini-title">💶 Emesse · da incassare</div>`;
-    h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
-    h+=`<div class="mini-title">✅ Pagate</div>`;
-    h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
-    $("#fatt-body").innerHTML=h;
+    /* ⛔ 27 agosto 2026 (notte) — LE LINGUETTE AL POSTO DEI TITOLINI.
+       Qui c'erano tre titolini MAIUSCOLI («DA FATTURARE», «EMESSE · DA
+       INCASSARE», «PAGATE») uno sotto l'altro, con dentro i loro elenchi
+       e tre frasi di «Nessuna...». Nelle imprese e' una riga di linguette
+       col numero accanto, e sotto l'elenco della linguetta accesa. */
+    const conta={tutte:L.length,dafatt:daFatt.length,incassare:daInc.length,pagate:pagate.length};
+    negViste("#fatt-viste",[{k:"tutte",lab:"Tutte"},{k:"dafatt",lab:"Da fatturare",err:1},
+                            {k:"incassare",lab:"Da incassare",err:1},{k:"pagate",lab:"Pagate"}],
+             fattVista,conta,"fatt-vista");
+    const bottone=l=>{
+      const st=l.fatt_stato||"none";
+      if(st==="pagata")  return `<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`;
+      if(st==="emessa")  return `<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`;
+      return `<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`;
+    };
+    const elenco=fattVista==="dafatt"?daFatt:fattVista==="incassare"?daInc:fattVista==="pagate"?pagate:L;
+    const vuoto={tutte:"Ancora nessuna fattura.",
+                 dafatt:"Nessun lavoro finito in attesa di fattura.",
+                 incassare:"Nessuna fattura da incassare.",
+                 pagate:"Ancora nessuna fattura pagata."}[fattVista];
+    $("#fatt-body").innerHTML=elenco.length
+      ? elenco.map(l=>fattRow(l,bottone(l))).join("")
+      : `<p class="fatt-empty">${vuoto}</p>`;
   }
 
   let calJobs=[];
@@ -2407,6 +2427,32 @@
      ⚠️ Ne resta aperto UNO SOLO per volta: aprire il secondo chiude il
         primo e lo rimette a posto, se no il nodo resterebbe orfano.
      ================================================================ */
+  /* ================================================================
+     LE LINGUETTE CON I CONTATORI — 27 agosto 2026 (notte)
+
+     Nelle imprese sopra ogni elenco c'e' una riga di linguette col
+     numero accanto: «Tutti 5 · In ritardo 1 · Oggi 1». Nel negozio non
+     c'era in nessuna sezione: l'elenco era sempre tutto, e per sapere
+     quanti prodotti erano sotto scorta bisognava contarli a occhio.
+
+     Il pezzo qui sotto e' copiato riga per riga da renderTabella() di
+     gestionale-app.html (~4927): stesse classi «viste / vista / v-cnt»,
+     stesso «on» sull'attiva, stesso pallino rosso («v-cnt err») solo
+     dove il numero e' un problema.
+     ⛔ Il numero NON si scrive quando e' zero: «Rifiutati 0» non serve a
+        nessuno e riempie la riga di zeri. Cosi' fanno le imprese.
+     ================================================================ */
+  function negViste(sel,def,attiva,conta,azione){
+    const vb=$(sel); if(!vb)return;
+    vb.innerHTML=(def||[]).map(v=>{
+      const n=(conta||{})[v.k]||0;
+      const badge=n?'<span class="v-cnt'+(v.err?" err":"")+'">'+n+'</span>':"";
+      return '<button class="vista'+(attiva===v.k?" on":"")+'" data-action="'+azione+'" data-v="'+v.k+'">'+v.lab+badge+'</button>';
+    }).join("");
+  }
+  /* quale linguetta e' accesa, sezione per sezione */
+  let prodVista="tutti", magVista="tutti", movVista="tutti", pvVista="tutti", fattVista="tutte";
+
   let _modNodo=null, _modSegno=null, _modAzioni=null;
   function apriModuloFinestra(idModulo){
     const m=$("#"+idModulo); if(!m) return;
@@ -2503,6 +2549,11 @@
       apriModuloFinestra(modulo);
       const n=$(campo); if(n)setTimeout(function(){n.focus();},180);
     };
+    if(a==="prod-vista"){ prodVista=t.dataset.v; loadProdotti(); return; }
+    if(a==="mag-vista"){  magVista=t.dataset.v;  loadMagazzino(); return; }
+    if(a==="mov-vista"){  movVista=t.dataset.v;  loadMovimenti(); return; }
+    if(a==="prev-vista"){ pvVista=t.dataset.v;   pvCarica(); return; }
+    if(a==="fatt-vista"){ fattVista=t.dataset.v; renderFatture(); return; }
     if(a==="new-prod"){ _vaiE("prodotti","np-modulo","#np-nome",npNuovo);  return; }
     if(a==="new-mov"){  _vaiE("movimenti","nm-modulo","#nm-prodotto",nmNuovo); return; }
     if(a==="new-prev"){ _vaiE("preventivi","pv-modulo","#pv-cliente",pvNuovo); return; }
@@ -2649,9 +2700,17 @@
     const {data}=await sb.from("neg_prodotti")
       .select("*")
       .eq("user_id",sbUid).order("nome");
-    const prods=data||[], box=$("#prodotti-body");
+    const tutti=data||[], box=$("#prodotti-body");
     if(!box) return;
-    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto. Aggiungine uno.</p>';return;}
+    /* le tre linguette: tutto il catalogo, quello che sta finendo, e
+       quello che vendi a meno di quanto lo paghi (soldi che escono) */
+    const _sotto=p=>(p.quantita??0)<=(p.soglia_minima??0);
+    const _perdita=p=>p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0&&(+p.prezzo||0)<+p.prezzo_acquisto;
+    const conta={tutti:tutti.length,scorta:tutti.filter(_sotto).length,perdita:tutti.filter(_perdita).length};
+    negViste("#prod-viste",[{k:"tutti",lab:"Tutti"},{k:"scorta",lab:"Sotto scorta",err:1},
+                            {k:"perdita",lab:"Sotto costo",err:1}],prodVista,conta,"prod-vista");
+    const prods=prodVista==="scorta"?tutti.filter(_sotto):prodVista==="perdita"?tutti.filter(_perdita):tutti;
+    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">'+(tutti.length?"Nessun prodotto in questa vista.":"Nessun prodotto. Aggiungine uno col pulsante qui sopra.")+'</p>';return;}
     const eu=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
     box.innerHTML=prods.map(p=>{
       const um=p.unita||"pz";
@@ -2927,9 +2986,14 @@
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_prodotti")
       .select("id,nome,quantita,soglia_minima").eq("user_id",sbUid).order("nome");
-    const prods=data||[], box=$("#magazzino-body");
+    const tutti=data||[], box=$("#magazzino-body");
     if(!box) return;
-    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto in magazzino.</p>';return;}
+    const _sotto=p=>(p.quantita??0)<=(p.soglia_minima??0);
+    const conta={tutti:tutti.length,scorta:tutti.filter(_sotto).length};
+    negViste("#mag-viste",[{k:"tutti",lab:"Tutto il magazzino"},
+                           {k:"scorta",lab:"Da riordinare",err:1}],magVista,conta,"mag-vista");
+    const prods=magVista==="scorta"?tutti.filter(_sotto):tutti;
+    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">'+(tutti.length?"Niente da riordinare: le scorte sono a posto.":"Nessun prodotto in magazzino.")+'</p>';return;}
     box.innerHTML=prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
       return carta({
@@ -3166,9 +3230,21 @@
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_movimenti")
       .select("id,tipo,prodotto,prodotto_id,quantita,importo,controparte,data_mov,note,motivo,arrivato_il").eq("user_id",sbUid).order("data_mov",{ascending:false});
-    const m=data||[], box=$("#movimenti-body");
+    const tutti=data||[], box=$("#movimenti-body");
     if(!box) return;
-    if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun movimento.</p>';return;}
+    /* ⛔ le TRE parole di «tipo», piu' «in arrivo» che non e' un tipo ma
+       un ordine non ancora consegnato: e' quello che devi ancora ricevere */
+    const _arr=x=>x.tipo==="ordine"&&!x.arrivato_il;
+    const conta={tutti:tutti.length,
+      vendita:tutti.filter(x=>x.tipo==="vendita").length,
+      ordine:tutti.filter(x=>x.tipo==="ordine").length,
+      arrivo:tutti.filter(_arr).length,
+      rettifica:tutti.filter(x=>x.tipo==="rettifica").length};
+    negViste("#mov-viste",[{k:"tutti",lab:"Tutti"},{k:"vendita",lab:"Vendite"},
+                           {k:"ordine",lab:"Ordini"},{k:"arrivo",lab:"In arrivo",err:1},
+                           {k:"rettifica",lab:"Rettifiche"}],movVista,conta,"mov-vista");
+    const m=movVista==="tutti"?tutti:movVista==="arrivo"?tutti.filter(_arr):tutti.filter(x=>x.tipo===movVista);
+    if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">'+(tutti.length?"Nessun movimento in questa vista.":"Nessun movimento.")+'</p>';return;}
     box.innerHTML=m.map(x=>{
       /* ⛔ TRE parole, non due */
       const rett=x.tipo==="rettifica", vend=x.tipo==="vendita";
@@ -3422,8 +3498,27 @@
     if(!(sb&&sbUid))return;
     const box=$("#preventivi-body"); if(!box)return;
     const {data}=await sb.from("neg_preventivi").select("*").eq("user_id",sbUid).order("created_at",{ascending:false});
-    const P=data||[];
-    if(!P.length){box.innerHTML='<p style="color:#8a949e;padding:8px">Nessun preventivo. Il primo lo scrivi qui sopra.</p>';return;}
+    const tutti=data||[];
+    /* ⚠️ «scaduto» non e' uno stato salvato: e' un conto sulla data e sui
+       giorni di validita'. Sta fra le linguette perche' e' la domanda che
+       ci si fa davvero («quali non valgono piu'?»), ma nel database la
+       riga resta una bozza o un inviato. */
+    const _scaduto=p=>{
+      if(!p.data||p.stato==="accettato"||p.stato==="rifiutato")return false;
+      const d=new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000);
+      return d<new Date();
+    };
+    const _st=p=>p.stato||"bozza";
+    const conta={tutti:tutti.length,
+      bozza:tutti.filter(p=>_st(p)==="bozza").length,
+      inviato:tutti.filter(p=>_st(p)==="inviato").length,
+      accettato:tutti.filter(p=>_st(p)==="accettato").length,
+      scaduto:tutti.filter(_scaduto).length};
+    negViste("#prev-viste",[{k:"tutti",lab:"Tutti"},{k:"bozza",lab:"Bozze"},
+                            {k:"inviato",lab:"Inviati"},{k:"accettato",lab:"Accettati"},
+                            {k:"scaduto",lab:"Scaduti",err:1}],pvVista,conta,"prev-vista");
+    const P=pvVista==="tutti"?tutti:pvVista==="scaduto"?tutti.filter(_scaduto):tutti.filter(p=>_st(p)===pvVista);
+    if(!P.length){box.innerHTML='<p style="color:#8a949e;padding:8px">'+(tutti.length?"Nessun preventivo in questa vista.":"Nessun preventivo. Il primo lo fai col pulsante qui sopra.")+'</p>';return;}
     const {data:tutteRighe}=await sb.from("neg_preventivo_righe").select("*").eq("user_id",sbUid);
     const perPrev={}; (tutteRighe||[]).forEach(r=>{(perPrev[r.preventivo_id]=perPrev[r.preventivo_id]||[]).push(r);});
     const etichetta={bozza:["Bozza","#8a949e"],inviato:["Inviato","#0066ff"],accettato:["Accettato","#1e8e3e"],rifiutato:["Rifiutato","#c62828"]};
