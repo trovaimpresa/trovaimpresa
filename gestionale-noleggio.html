@@ -1482,10 +1482,15 @@
      che ormai non preme piu' nessuno, perche' l'importo si mette da solo.
      Adesso si propone da sola, come l'importo, e lo scrive. Si propone una
      volta sola per apertura: se lui la cancella, resta cancellata. */
-  let nolCauzioneProposta=false;
+  /* nolCauzioneMessa: quanto ci abbiamo messo noi. Serve a tenere l'avviso
+     sotto gli occhi finche' quel numero e' ancora quello proposto: il conto
+     si rifa' a ogni tasto, e senza questo l'avviso compariva un istante e
+     spariva — la cauzione sarebbe finita nella casella SENZA dirlo. */
+  let nolCauzioneProposta=false, nolCauzioneMessa=null;
   document.addEventListener("input",e=>{
     if(e.target&&e.target.id==="nn-importo") nolImportoAMano=true;
-    if(e.target&&e.target.id==="nn-cauzione") nolCauzioneProposta=true;
+    /* l'ha scritta lui: da qui in poi non si propone piu' e l'avviso va via */
+    if(e.target&&e.target.id==="nn-cauzione"){ nolCauzioneProposta=true; nolCauzioneMessa=null; }
   });
 
   function nolCalcolaOra(){
@@ -1615,9 +1620,16 @@
     if(cauIn&&c.cauzione>0&&!nolCauzioneProposta&&String(cauIn.value).trim()===""){
       cauIn.value=String(c.cauzione).replace(".",",");
       nolCauzioneProposta=true;
+      nolCauzioneMessa=Math.round(c.cauzione*100)/100;
       if(typeof nolMostraCauzione==="function") nolMostraCauzione();
+    }
+    /* l'avviso RESTA finche' in casella c'e' ancora il numero che ci abbiamo
+       messo noi: il conto si rifa' a ogni tasto, e un avviso che sparisce
+       subito e' come non averlo mai scritto. */
+    if(cauIn&&nolCauzioneMessa!=null&&
+       Math.abs(_numIt(cauIn.value)-nolCauzioneMessa)<0.005){
       avvisoCauzione='<div class="nol-avviso" id="nn-cau-nota">La cauzione &egrave; stata messa a '
-        +esc(_eur(c.cauzione))+', quella del mezzo. Se ne prendi un\'altra, scrivila a mano.</div>';
+        +esc(_eur(nolCauzioneMessa))+', quella del mezzo. Se ne prendi un\'altra, scrivila a mano.</div>';
     }
     (c.avvisi||[]).forEach(a=>{h+='<div class="nol-avviso">'+esc(a)+'</div>';});
     h+=avvisoCauzione;
@@ -2582,7 +2594,7 @@
     nolIdApertoNoleggio=n.id||null;
     /* 28 agosto 2026: si riparte puliti anche sulla cauzione, se no la
        seconda scheda che apri non se la propone piu'. */
-    nolCauzioneProposta=false;
+    nolCauzioneProposta=false; nolCauzioneMessa=null;
     /* ⚠️ PRIMA di disegnare la scheda: firmaBlocco legge le firme mentre
        costruisce l'HTML, e se si caricassero dopo resterebbero quelle
        della scheda di prima. */
