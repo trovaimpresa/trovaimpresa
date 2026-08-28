@@ -1103,7 +1103,17 @@
       .sheet--grande{height:100dvh; max-height:100dvh}
     }
     .sheet--grande .sh-head,.sheet--grande .sh-body,.sheet--grande .sh-foot{padding-left:16px; padding-right:16px}
-    .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{flex:1; min-width:0}
+    /* ⛔ 28 agosto 2026 (sera) — I PULSANTI CHE SI ACCAVALLANO SUL TELEFONO.
+       Visto in foto a 390 px in TUTTI e quattro i gestionali: con «min-width:0»
+       cinque pulsanti si dividono lo schermo in cinque fettine da 70 px e le
+       parole escono una sopra l'altra («Chiudi Elimina PDF Il cliente ha
+       accettato Modifica» diventava una macchia). Il «flex-wrap:wrap» c'era
+       gia' (riga ~1068) ma non poteva servire a niente: senza una larghezza
+       minima non si va mai a capo, ci si stringe e basta.
+       Adesso il pulsante non scende sotto i 132 px e la riga va a capo, come
+       dice il commento del 20 agosto: meglio due righe che due scritte
+       incastrate. */
+    .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{flex:1 1 auto; min-width:132px}
   }
 
 /* =========================================================================
