@@ -1716,7 +1716,8 @@
        negozio — e tutte le imprese — usano la carta «.job». Adesso pure
        loro. ⚠️ Il puntino orfano davanti al telefono («· 📞 …») veniva
        da quel paragrafo: con le righe separate non c'e' piu'. */
-    box.innerHTML=cliCache.length?cliCache.map(c=>carta({
+    box.innerHTML=(cliCache.length?negTotale(_plurale(cliCache.length,"cliente","clienti"),""):"")
+      +(cliCache.length?cliCache.map(c=>carta({
       titolo: esc(c.nome),
       destra: c.listino==="impresa"
         ? '<span class="stato" style="background:var(--blu-tenue);color:var(--blu)">Prezzi impresa</span>' : "",
@@ -1726,10 +1727,12 @@
         c.telefono?"📞 "+esc(c.telefono):"",
         (+c.sconto_perc)?"sconto "+c.sconto_perc+"%":""
       ],
-      azioni:'<button class="btn btn-sm ja" data-action="map" data-q="'+esc(c.indirizzo||c.nome)+'">🗺 Mappa</button>'
-        + '<button class="btn btn-sm ja" data-action="edit-cli" data-id="'+c.id+'">Modifica</button>'
-        + '<button class="btn btn-sm ja del btn-danger" data-action="del-cli" data-id="'+c.id+'">Elimina</button>'
-    })).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Aggiungi i clienti di questo reparto</small></div>`;
+      /* ⛔ 28 agosto 2026 — FUORI SI APRE E BASTA.
+         Sulla carta dell'elenco resta UN pulsante solo. Mappa, Modifica ed
+         Elimina stanno dentro la scheda: si entra, si guarda, si decide.
+         E' la regola delle imprese (gestionale-app.html, 16 agosto). */
+      azioni:'<button class="btn btn-sm ja" data-action="cli-scheda" data-id="'+c.id+'">Apri</button>'
+    })).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Aggiungi i clienti di questo reparto</small></div>`);
   }
   async function renderDip(){
     const box=$("#dip-list");if(!box)return;
@@ -1839,10 +1842,12 @@
   function scadCard(s,cliMap,oggi,lim){
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
-    let bg="#eef2f7",fg="#555",lab="Aperta";
-    if(fatta){bg="#e3f3e8";fg="var(--fatto)";lab="Fatta";}
-    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="#fdecea";fg="#c0392b";lab="Scaduta";}
-    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="#fff4e5";fg="#c2410c";lab="In scadenza";}
+    /* 28 agosto 2026 — anche qui i colori del gestionale, non quattro
+       tinte scritte a mano */
+    let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta";
+    if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";}
+    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";}
+    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="var(--attesa-bg)";fg="var(--attesa)";lab="In scadenza";}
     return `<div class="card"><div>
       <h3>${esc(s.titolo||"Scadenza")}</h3>
       <p>${s.tipo_pratica?"📄 "+esc(s.tipo_pratica)+"<br>":""}${cliNome?"👤 "+esc(cliNome)+"<br>":""}📅 ${fdate(s.data_scadenza)} <span class="stato" style="background:${bg};color:${fg}">${lab}</span>${s.note?"<br>📝 "+esc(s.note):""}</p></div>
@@ -2482,6 +2487,47 @@
       return '<button class="vista'+(attiva===v.k?" on":"")+'" data-action="'+azione+'" data-v="'+v.k+'">'+v.lab+badge+'</button>';
     }).join("");
   }
+  /* ================================================================
+     I RIQUADRI DEI NUMERI E LA BARRA DEL TOTALE — 28 agosto 2026
+
+     Nelle imprese sopra ogni elenco, sotto le linguette, ci sono due o
+     tre riquadri che rispondono a una domanda («In ritardo: 1 — 1 lavoro
+     oltre la data») e poi una fascia larga quanto la pagina col conto di
+     quello che stai guardando («5 lavori — 13.650 €»). Nel negozio non
+     c'erano: si contava a occhio.
+
+     numCard() e numFila() sono copiate da gestionale-app.html (~4727) e
+     usano le stesse classi del foglio in comune: num-fila, num-c, num-d,
+     num-n, num-s, e tab-tot per la fascia.
+     ⛔ La fascia dice il conto della VISTA, non di tutto: se guardi «Da
+        riordinare», il totale e' di quelli da riordinare. Come nelle
+        imprese, se no dice una cosa e ne mostra un'altra.
+     ================================================================ */
+  function negNumCard(o){
+    if(!o)return "";
+    const cliccabile=!!o.action;
+    const tag=cliccabile?"button":"div";
+    const az=cliccabile
+      ? ' type="button" data-action="'+esc(o.action)+'"'
+        +(o.v!=null?' data-v="'+esc(String(o.v))+'"':"")
+        +(o.id!=null?' data-id="'+esc(String(o.id))+'"':"")
+      : "";
+    return '<'+tag+' class="num-c'+(o.tono?" num-c--"+o.tono:"")+(cliccabile?" num-c--vai":"")+'"'+az+'>'
+      +'<span class="num-d">'+esc(o.domanda)+'</span>'
+      +'<span class="num-n">'+esc(o.numero)+'</span>'
+      +(o.sotto?'<span class="num-s">'+esc(o.sotto)+'</span>':"")
+      +'</'+tag+'>';
+  }
+  function negNumFila(cards){
+    const v=(cards||[]).filter(Boolean);
+    return v.length?('<div class="num-fila">'+v.join("")+'</div>'):"";
+  }
+  function negTotale(testo,valore){
+    if(!testo)return "";
+    return '<div class="tab-tot"><span>'+esc(testo)+'</span>'+(valore?('<b>'+esc(valore)+'</b>'):'')+'</div>';
+  }
+  const _plurale=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
+
   /* quale linguetta e' accesa, sezione per sezione */
   let prodVista="tutti", magVista="tutti", movVista="tutti", pvVista="tutti", fattVista="tutte";
 
@@ -2648,9 +2694,10 @@
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null);
+    if(a==="cli-scheda")return cliApriScheda(id);
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo cliente ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo cliente?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}renderClienti();toast("Cliente eliminato");}return;}
+    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo cliente ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo cliente?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}closeSheet();renderClienti();toast("Cliente eliminato");}return;}
     if(a==="new-scad")return scadForm(null);
     if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
     if(a==="save-scad")return saveScad(id);
@@ -2742,9 +2789,19 @@
     negViste("#prod-viste",[{k:"tutti",lab:"Tutti"},{k:"scorta",lab:"Sotto scorta",err:1},
                             {k:"perdita",lab:"Sotto costo",err:1}],prodVista,conta,"prod-vista");
     const prods=prodVista==="scorta"?tutti.filter(_sotto):prodVista==="perdita"?tutti.filter(_perdita):tutti;
-    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">'+(tutti.length?"Nessun prodotto in questa vista.":"Nessun prodotto. Aggiungine uno col pulsante qui sopra.")+'</p>';return;}
     const eu=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
-    box.innerHTML=prods.map(p=>{
+    /* i riquadri e la fascia: il conto e' quello della vista che guardi */
+    const _val=l=>l.reduce((t,x)=>t+((+x.prezzo||0)*(+x.quantita||0)),0);
+    const testa=negNumFila([
+      conta.scorta?negNumCard({domanda:"Sotto scorta",numero:String(conta.scorta),
+        sotto:"da riordinare",tono:"err",action:"prod-vista",v:"scorta"}):null,
+      conta.perdita?negNumCard({domanda:"Venduti sotto costo",numero:String(conta.perdita),
+        sotto:"li paghi più di quanto li vendi",tono:"err",action:"prod-vista",v:"perdita"}):null,
+      negNumCard({domanda:"Valore del magazzino",numero:"€ "+eu(_val(tutti)),
+        sotto:"prezzo per quantità"})
+    ]) + negTotale(_plurale(prods.length,"prodotto","prodotti"),"€ "+eu(_val(prods)));
+    if(!prods.length){box.innerHTML=testa+'<p style="color:#666;padding:8px">'+(tutti.length?"Nessun prodotto in questa vista.":"Nessun prodotto. Aggiungine uno col pulsante qui sopra.")+'</p>';return;}
+    box.innerHTML=testa+prods.map(p=>{
       const um=p.unita||"pz";
       const marg=(p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0)?(+p.prezzo||0)-(+p.prezzo_acquisto):null;
       const soglia=(p.quantita??0)<=(p.soglia_minima??0);
@@ -2985,7 +3042,7 @@
       ${shRiga("Note",p.note?esc(p.note):"")}
       <div class="sheet-actions">
         <button class="btn" data-action="close">Chiudi</button>
-        <button class="btn" data-action="prod-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="btn btn-danger" data-action="prod-elimina" data-id="${p.id}">Elimina</button>
         <button class="btn-primary" data-action="prod-modifica" data-id="${p.id}">Modifica</button>
       </div>`);
   }
@@ -3025,8 +3082,18 @@
     negViste("#mag-viste",[{k:"tutti",lab:"Tutto il magazzino"},
                            {k:"scorta",lab:"Da riordinare",err:1}],magVista,conta,"mag-vista");
     const prods=magVista==="scorta"?tutti.filter(_sotto):tutti;
-    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">'+(tutti.length?"Niente da riordinare: le scorte sono a posto.":"Nessun prodotto in magazzino.")+'</p>';return;}
-    box.innerHTML=prods.map(p=>{
+    /* il piu' vicino a finire: quello che manca di piu' rispetto alla sua
+       soglia, non semplicemente quello col numero piu' basso */
+    const _giu=tutti.slice().filter(_sotto).sort((a,b)=>
+      ((a.quantita??0)-(a.soglia_minima??0))-((b.quantita??0)-(b.soglia_minima??0)))[0];
+    const testa=negNumFila([
+      conta.scorta?negNumCard({domanda:"Da riordinare",numero:String(conta.scorta),
+        sotto:"sotto la scorta minima",tono:"err",action:"mag-vista",v:"scorta"}):null,
+      _giu?negNumCard({domanda:"Il più vicino a finire",numero:String(_giu.quantita??0),
+        sotto:(_giu.nome||"Senza nome"),tono:"err"}):null
+    ]) + negTotale(_plurale(prods.length,"prodotto","prodotti"),"");
+    if(!prods.length){box.innerHTML=testa+'<p style="color:#666;padding:8px">'+(tutti.length?"Niente da riordinare: le scorte sono a posto.":"Nessun prodotto in magazzino.")+'</p>';return;}
+    box.innerHTML=testa+prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
       return carta({
         titolo: esc(p.nome||"—"),
@@ -3101,8 +3168,8 @@
       .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
     const f=data||[], box=$("#fornitori-body");
     if(!box) return;
-    if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
-    box.innerHTML=f.map(x=>carta({
+    if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno col pulsante qui sopra.</p>';return;}
+    box.innerHTML=negTotale(_plurale(f.length,"fornitore","fornitori"),"")+f.map(x=>carta({
       titolo:esc(x.nome||"—"),
       meta:[
         x.telefono?"📞 "+esc(x.telefono):"",
@@ -3151,10 +3218,69 @@
       ${shRiga("Note",f.note?esc(f.note):"")}
       <div class="sheet-actions">
         <button class="btn" data-action="close">Chiudi</button>
-        <button class="btn" data-action="forn-elimina" data-id="${f.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="btn btn-danger" data-action="forn-elimina" data-id="${f.id}">Elimina</button>
         <button class="btn-primary" data-action="forn-modifica" data-id="${f.id}">Modifica</button>
       </div>`);
   }
+  /* ================================================================
+     LA SCHEDA DEL MOVIMENTO — 28 agosto 2026
+     Come quella del cliente e del fornitore. In fondo ci sono i tre
+     pulsanti che prima stavano sulla carta, «Merce arrivata» compreso —
+     e quello si vede solo se la merce non e' ancora arrivata.
+     ================================================================ */
+  async function movApriScheda(id){
+    if(!(sb&&sbUid))return;
+    const {data:x}=await sb.from("neg_movimenti").select("*").eq("id",id).maybeSingle();
+    if(!x){alert("Questo movimento non c'è più: forse è nel Cestino.");loadMovimenti();return;}
+    const rett=x.tipo==="rettifica", vend=x.tipo==="vendita";
+    const inArrivo=(x.tipo==="ordine"&&!x.arrivato_il);
+    const et=rett?"Rettifica":(vend?"Vendita":"Ordine");
+    const nq=parseFloat(x.quantita)||0;
+    const qta=rett?((nq>0?"+":"")+(x.quantita??0)):(x.quantita??0);
+    openSheetGrande(`<h3>${esc(x.prodotto||"—")}</h3>
+      ${inArrivo?'<div class="job-note">In arrivo: il magazzino non &egrave; ancora caricato.</div>':""}
+      ${shRiga("Che movimento &egrave;",et)}
+      ${shRiga("Quantit&agrave;",String(qta))}
+      ${rett?"":shRiga("Importo","€ "+(x.importo??0))}
+      ${shRiga("Cliente o fornitore",x.controparte?esc(x.controparte):"")}
+      ${shRiga("Data",x.data_mov?fdate(x.data_mov):"")}
+      ${shRiga("Perch&eacute;",x.motivo?esc(x.motivo):"")}
+      ${shRiga("Merce arrivata il",x.arrivato_il?fdate(x.arrivato_il):"")}
+      ${shRiga("Note",x.note?esc(x.note):"")}
+      ${shRiga("Magazzino",x.prodotto_id?"collegato: la giacenza si muove":"riga scritta a mano: la giacenza non si tocca")}
+      <div class="sheet-actions">
+        <button class="btn" data-action="close">Chiudi</button>
+        ${inArrivo?`<button class="btn mov-arr" data-id="${x.id}">✔ Merce arrivata</button>`:""}
+        <button class="btn btn-danger mov-del" data-id="${x.id}">Elimina</button>
+        <button class="btn-primary mov-edit" data-id="${x.id}">Modifica</button>
+      </div>`);
+  }
+
+  /* ================================================================
+     LA SCHEDA DEL CLIENTE — 28 agosto 2026
+     Stessa forma della scheda del fornitore qui sopra: le righe in
+     chiaro, e in fondo i tre pulsanti che prima stavano sulla carta.
+     ================================================================ */
+  async function cliApriScheda(id){
+    if(!(sb&&sbUid))return;
+    const {data:c}=await sb.from("gest_clienti").select("*").eq("id",id).maybeSingle();
+    if(!c){alert("Questo cliente non c'è più: forse è nel Cestino.");renderClienti();return;}
+    const dove=c.indirizzo||"";
+    openSheetGrande(`<h3>${esc(c.nome||"—")}</h3>
+      ${shRiga("Indirizzo",dove?esc(dove):"")}
+      ${shRiga("Referente",c.referente?esc(c.referente):"")}
+      ${shRiga("Telefono",c.telefono?`<a href="tel:${esc(c.telefono)}" style="color:var(--blu);font-weight:700;text-decoration:none">${esc(c.telefono)}</a>`:"")}
+      ${shRiga("Email",c.email?`<a href="mailto:${esc(c.email)}" style="color:var(--blu);font-weight:700;text-decoration:none">${esc(c.email)}</a>`:"")}
+      ${shRiga("Che prezzi gli fai",c.listino==="impresa"?"Prezzi impresa":"Prezzi banco")}
+      ${shRiga("Sconto",(+c.sconto_perc)?c.sconto_perc+"%":"")}
+      <div class="sheet-actions">
+        <button class="btn" data-action="close">Chiudi</button>
+        ${dove?`<button class="btn" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        <button class="btn btn-danger" data-action="del-cli" data-id="${c.id}">Elimina</button>
+        <button class="btn-primary" data-action="edit-cli" data-id="${c.id}">Modifica</button>
+      </div>`);
+  }
+
   /* stessa ragione del prodotto: ci arriva anche la ricerca in alto */
   async function fornApriModulo(id){
     if(!(sb&&sbUid))return;
@@ -3275,8 +3401,19 @@
                            {k:"ordine",lab:"Ordini"},{k:"arrivo",lab:"In arrivo",err:1},
                            {k:"rettifica",lab:"Rettifiche"}],movVista,conta,"mov-vista");
     const m=movVista==="tutti"?tutti:movVista==="arrivo"?tutti.filter(_arr):tutti.filter(x=>x.tipo===movVista);
-    if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">'+(tutti.length?"Nessun movimento in questa vista.":"Nessun movimento.")+'</p>';return;}
-    box.innerHTML=m.map(x=>{
+    const _eu=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const _mese=tutti.filter(x=>thisMonth(x.data_mov));
+    const _somma=(l,t)=>l.filter(x=>x.tipo===t).reduce((s,x)=>s+(+x.importo||0),0);
+    const testa=negNumFila([
+      negNumCard({domanda:"Venduto questo mese",numero:"€ "+_eu(_somma(_mese,"vendita")),
+        sotto:_plurale(_mese.filter(x=>x.tipo==="vendita").length,"vendita","vendite")}),
+      negNumCard({domanda:"Acquistato questo mese",numero:"€ "+_eu(_somma(_mese,"ordine")),
+        sotto:_plurale(_mese.filter(x=>x.tipo==="ordine").length,"ordine","ordini")}),
+      conta.arrivo?negNumCard({domanda:"Merce che devi ancora ricevere",numero:String(conta.arrivo),
+        sotto:"ordini non ancora arrivati",tono:"attesa",action:"mov-vista",v:"arrivo"}):null
+    ]) + negTotale(_plurale(m.length,"movimento","movimenti"),"");
+    if(!m.length){box.innerHTML=testa+'<p style="color:#666;padding:8px">'+(tutti.length?"Nessun movimento in questa vista.":"Nessun movimento.")+'</p>';return;}
+    box.innerHTML=testa+m.map(x=>{
       /* ⛔ TRE parole, non due */
       const rett=x.tipo==="rettifica", vend=x.tipo==="vendita";
       const inArrivo=(x.tipo==="ordine"&&!x.arrivato_il);
@@ -3307,9 +3444,8 @@
           '<b style="color:'+(x.prodotto_id?"#2e7d32":"#8a949e")+'">'
             +(x.prodotto_id?"✔ collegato al magazzino":"riga a mano — fuori magazzino")+'</b>'
         ],
-        azioni:(inArrivo?'<button class="btn btn-sm ja mov-arr" data-id="'+x.id+'">✔ Merce arrivata</button>':"")
-          + '<button class="btn btn-sm ja mov-edit" data-id="'+x.id+'">Modifica</button>'
-          + '<button class="btn btn-sm ja del btn-danger mov-del" data-id="'+x.id+'">Elimina</button>'
+        /* ⛔ 28 agosto 2026 — FUORI SI APRE E BASTA: vedi i Clienti. */
+        azioni:'<button class="btn btn-sm ja mov-apri" data-id="'+x.id+'">Apri</button>'
       });
     }).join("");
   }
@@ -3364,8 +3500,14 @@
     nmAggiornaModulo(); closeSheet(); loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino();
   });
   $('[data-tab="movimenti"]')?.addEventListener("click",()=>{loadMovimenti();nmCaricaProdotti();});
-  $("#movimenti-body")?.addEventListener("click",async e=>{
+  /* ⚠️ 28 agosto 2026 — l'ascolto era attaccato a «#movimenti-body».
+     Da quando Modifica, Elimina e «Merce arrivata» stanno dentro la
+     finestra — che nel documento sta FUORI dall'elenco — quei clic non
+     arrivavano piu'. Adesso si ascolta il documento intero. */
+  document.addEventListener("click",async e=>{
+    const ap=e.target.closest(".mov-apri"); if(ap) return movApriScheda(ap.dataset.id);
     const ed=e.target.closest(".mov-edit"), del=e.target.closest(".mov-del"), arr=e.target.closest(".mov-arr");
+    if(!ed&&!del&&!arr) return;
     /* LA MERCE E' ARRIVATA: carica il magazzino UNA VOLTA SOLA */
     if(arr){
       const {data:v}=await sb.from("neg_movimenti").select("id,tipo,quantita,prodotto_id,arrivato_il,prodotto").eq("id",arr.dataset.id).eq("user_id",sbUid).maybeSingle();
@@ -3384,6 +3526,7 @@
         const r=await magApplica(v.prodotto_id,qte);
         if(!r.ok)alert("Segnata come arrivata, ma la giacenza NON è salita ("+r.err+"). Controllala a mano.");
       }
+      closeSheet();
       loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino(); return;
     }
     if(del){
@@ -3400,6 +3543,7 @@
         const r=await magApplica(v.prodotto_id,-eff);
         if(!r.ok)alert("Movimento eliminato, ma la giacenza NON è tornata indietro ("+r.err+"). Controllala a mano.");
       }
+      closeSheet();
       loadMovimenti(); nmCaricaProdotti(); if(typeof loadMagazzino==="function")loadMagazzino(); return;
     }
     if(ed){
@@ -3555,15 +3699,31 @@
                             {k:"inviato",lab:"Inviati"},{k:"accettato",lab:"Accettati"},
                             {k:"scaduto",lab:"Scaduti",err:1}],pvVista,conta,"prev-vista");
     const P=pvVista==="tutti"?tutti:pvVista==="scaduto"?tutti.filter(_scaduto):tutti.filter(p=>_st(p)===pvVista);
-    if(!P.length){box.innerHTML='<p style="color:#8a949e;padding:8px">'+(tutti.length?"Nessun preventivo in questa vista.":"Nessun preventivo. Il primo lo fai col pulsante qui sopra.")+'</p>';return;}
+    /* il piu' vecchio ancora senza risposta: e' la domanda che ci si fa,
+       e da li' si va dritti dentro */
+    const _attesa=tutti.filter(p=>_st(p)==="bozza"||_st(p)==="inviato")
+      .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
+    const _gg=_attesa[0]&&_attesa[0].data?Math.max(0,-_giorniA(_attesa[0].data)):null;
+    const testa=negNumFila([
+      _attesa.length?negNumCard({domanda:"In attesa di risposta",numero:String(_attesa.length),
+        sotto:"bozze e inviati",tono:"attesa"}):null,
+      _attesa[0]?negNumCard({domanda:"Il più vecchio senza risposta",
+        numero:(_gg===0?"oggi":_plurale(_gg,"giorno","giorni")),
+        sotto:(_attesa[0].cliente_nome||_attesa[0].titolo||"Senza nome"),
+        tono:(_gg!=null&&_gg>=14)?"err":"attesa"}):null,
+      conta.scaduto?negNumCard({domanda:"Scaduti",numero:String(conta.scaduto),
+        sotto:"la validità è passata",tono:"err",action:"prev-vista",v:"scaduto"}):null
+    ]);
+    if(!P.length){box.innerHTML=testa+'<p style="color:#8a949e;padding:8px">'+(tutti.length?"Nessun preventivo in questa vista.":"Nessun preventivo. Il primo lo fai col pulsante qui sopra.")+'</p>';return;}
     const {data:tutteRighe}=await sb.from("neg_preventivo_righe").select("*").eq("user_id",sbUid);
     const perPrev={}; (tutteRighe||[]).forEach(r=>{(perPrev[r.preventivo_id]=perPrev[r.preventivo_id]||[]).push(r);});
+    const _tot=P.reduce((t,p)=>t+pvCalcola(perPrev[p.id]||[],p.sconto_perc,p.iva_perc).totale,0);
     const etichetta={
       bozza:    ["Bozza",    ["var(--sfondo)","var(--testo-2)"],  "t-neutro"],
       inviato:  ["Inviato",  ["var(--blu-tenue)","var(--blu)"],   "t-info"],
       accettato:["Accettato",["var(--ok-bg)","var(--ok)"],        "t-ok"],
       rifiutato:["Rifiutato",["var(--err-bg)","var(--err)"],      "t-err"]};
-    box.innerHTML=P.map(p=>{
+    box.innerHTML=testa+negTotale(_plurale(P.length,"preventivo","preventivi"),pvEur(_tot))+P.map(p=>{
       const rr=perPrev[p.id]||[];
       const c=pvCalcola(rr,p.sconto_perc,p.iva_perc);
       const st=etichetta[p.stato||"bozza"]||etichetta.bozza;
@@ -3607,7 +3767,7 @@
     openSheetGrande(`<h3>Preventivo N. ${esc(String(p.numero||"—"))} · ${esc(p.cliente_nome||"—")}</h3>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
         <span class="stato" style="background:${et[1]};color:${et[2]}">${et[0]}</span>
-        ${scaduto?'<span style="background:#fdecea;color:#b3261e;border:1px solid #f3b7b1;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">SCADUTO</span>':""}
+        ${scaduto?'<span class="stato" style="background:var(--err-bg);color:var(--err)">Scaduto</span>':""}
         ${p.listino==="impresa"?'<span style="background:#e8f1fb;color:#1565c0;font-size:14px;font-weight:700;padding:3px 12px;border-radius:11px">prezzi impresa</span>':""}
       </div>
       ${shRiga("Oggetto",p.titolo?esc(p.titolo):"")}
@@ -3624,7 +3784,7 @@
       </div>
       <div class="sheet-actions">
         <button class="btn" data-action="close">Chiudi</button>
-        <button class="btn" data-action="pv-scheda-elimina" data-id="${p.id}" style="background:#fdecea;color:#b3261e">Elimina</button>
+        <button class="btn btn-danger" data-action="pv-scheda-elimina" data-id="${p.id}">Elimina</button>
         <button class="btn" data-action="pv-scheda-pdf" data-id="${p.id}">PDF</button>
         ${p.stato!=="accettato"?`<button class="btn" data-action="pv-scheda-acc" data-id="${p.id}" style="background:#e8f5e9;color:#1e8e3e">Il cliente ha accettato</button>`:""}
         <button class="btn-primary" data-action="pv-scheda-modifica" data-id="${p.id}">Modifica</button>
