@@ -523,7 +523,10 @@
       titolo:esc(f.cli_nome||(cli&&cli.nome)||"Fattura")+" — "+esc(statoLab),
       /* col meno davanti: una nota di credito che mostra "2.000 €" come una
          fattura normale e' il modo piu' facile per sbagliare i conti a occhio */
-      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur(c.daPagare)+'</span>',
+      /* ⚠️ 28 agosto 2026 — eur2 e non eur: l'importo di una fattura si
+         scrive coi centesimi (860,50 € usciva «861 €»). eur2 e' lo stesso
+         che questa scheda usa gia' piu' sotto per il dettaglio. */
+      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare)+'</span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az
@@ -627,8 +630,8 @@
       +(azione?'" '+azione+' style="cursor:pointer':'')+'"><div class="n">'+n+'</div>'
       +'<div class="l">'+l+'</div>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';
     if(sum)sum.innerHTML=
-        box(eur(tInc),"Da incassare",emesse.length+(emesse.length===1?" fattura emessa":" fatture emesse"),scadute.length?"err":"attesa")
-      + box(eur(tFatt),"Da fatturare",
+        box(eur2(tInc),"Da incassare",emesse.length+(emesse.length===1?" fattura emessa":" fatture emesse"),scadute.length?"err":"attesa")
+      + box(eur2(tFatt),"Da fatturare",
             fattLavLiberi.length?(fattLavLiberi.length+(fattLavLiberi.length===1?" lavoro finito · clicca per fatturarlo":" lavori finiti · clicca per fatturarli")):"niente in attesa",
             "info", fattLavLiberi.length?'data-action="fatt-da-lavori"':"")
       /* 13 agosto 2026 — questo riquadro e quello del Report si chiamavano
@@ -637,7 +640,7 @@
          due sbagliato — qui sono i soldi entrati davvero (IVA compresa,
          ritenuta tolta), là è l'imponibile su cui si fa l'utile. Adesso si
          chiamano con parole diverse, così non si confondono più. */
-      + box(eur(incAnno),"Entrato in cassa "+anno,"IVA compresa, ritenuta tolta","ok")
+      + box(eur2(incAnno),"Entrato in cassa "+anno,"IVA compresa, ritenuta tolta","ok")
       + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
             piuVecchio==null?"nessuna fattura in attesa":"dalla data della fattura",
             (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
@@ -1169,7 +1172,7 @@
               '<label class="fl-riga"><input type="checkbox" class="fl-ck" value="'+esc(l.id)+'" data-cli="'+esc(k)+'">'
               + '<span class="fl-t">'+esc(l.descrizione||"Lavoro")
               +   (l.dove?'<span class="fl-d">'+esc(l.dove)+'</span>':"")
-              + '</span><span class="fl-i">'+eur(l.importo)+'</span></label>').join("")
+              + '</span><span class="fl-i">'+eur2(l.importo)+'</span></label>').join("")
           + '</div>').join("")
       + '</div></div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'

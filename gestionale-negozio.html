@@ -887,6 +887,12 @@
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
   const uid=()=>"id"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n||0);
+  /* ⚠️ 28 agosto 2026 — I SOLDI DI UN DOCUMENTO SI SCRIVONO COI CENTESIMI.
+     eur() arrotonda all'euro: va bene per un riepilogo ("hai venduto 1.240 €"),
+     NON per l'importo di una fattura, dove 860,50 € usciva «861 €».
+     eur2 e' copiato riga per riga da gestionale-app.html (const eur2), che lo
+     usa gia' per il dettaglio delle fatture e per i totali dei preventivi. */
+  const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(+n||0);
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
   const todayStr=()=>new Date().toISOString().slice(0,10);
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
@@ -1235,8 +1241,8 @@
     return renderRiepilogoNegozio();
     /* soldi e ore: invariati per ora (dipendono dalle fatture, su localStorage) */
     const L=db().lavori;
-    $("#k-daincassare").textContent=eur(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
-    $("#k-incassato").textContent=eur(L.filter(l=>l.fattStato==="pagata"&&thisMonth(l.dataFatto)).reduce((s,l)=>s+(+l.importo||0),0));
+    $("#k-daincassare").textContent=eur2(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
+    $("#k-incassato").textContent=eur2(L.filter(l=>l.fattStato==="pagata"&&thisMonth(l.dataFatto)).reduce((s,l)=>s+(+l.importo||0),0));
     const ore=L.filter(l=>thisMonth(l.dataFatto)||thisMonth(l.dataPrevista)).reduce((s,l)=>s+(+l.ore||0),0);
     $("#k-ore").textContent=(Math.round(ore*10)/10)+" h";
     /* contatori e prossimi: da gest_lavori su Supabase */
@@ -1457,7 +1463,7 @@
         <span>📅 ${fdate(l.dataPrevista)}</span>
         ${d?`<span>👷 ${esc(d.nome)}</span>`:""}
         ${l.ore?`<span>⏱ ${l.ore} h</span>`:""}
-        ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${eur(l.importo)}</span>`:""}
+        ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${eur2(l.importo)}</span>`:""}
       </div>
       <div class="job-actions">
         ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
@@ -1639,7 +1645,7 @@
         pdf?'<b style="color:#2e7d32">📄 fattura PDF allegata</b>'
            :'<span style="color:#8a949e">nessun PDF allegato</span>'
       ],
-      numero: eur(l.importo),
+      numero: eur2(l.importo),
       /* ⛔ FUORI SI APRE E BASTA: un pulsante solo, come i Preventivi. */
       azioni:'<button class="btn btn-sm ja carta-apri" data-id="'+l.id+'">Apri</button>'
     });
@@ -1663,7 +1669,7 @@
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
         <span class="stato" style="background:${st[1][0]};color:${st[1][1]}">${st[0]}</span>
       </div>
-      ${shRiga("Importo",eur(l.importo))}
+      ${shRiga("Importo",eur2(l.importo))}
       ${shRiga(l.data_fatto?"Finito il":"Previsto per",quando?fdate(quando):"")}
       ${shRiga("Il lavoro",l.stato==="fatto"?"finito":"non ancora finito")}
       ${shRiga("Fattura PDF",pdf?"allegata":"nessun PDF allegato")}
@@ -1700,8 +1706,8 @@
        non cinque: restavano schiacciati a sinistra con mezzo schermo vuoto.
        La riga adesso si adatta al numero di riquadri (foglio in comune).
        Sotto il totale c'e' scritto QUANTE sono, come nelle imprese. */
-    $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div><div class="s">${_plurale(daInc.length,"fattura emessa","fatture emesse")}</div></div>
-      <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div><div class="s">${_plurale(daFatt.length,"lavoro finito","lavori finiti")}</div></div>`;
+    $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur2(tInc)}</div><div class="l">Da incassare (fatture emesse)</div><div class="s">${_plurale(daInc.length,"fattura emessa","fatture emesse")}</div></div>
+      <div class="fatt-tot alt"><div class="n">${eur2(tFatt)}</div><div class="l">Lavori finiti da fatturare</div><div class="s">${_plurale(daFatt.length,"lavoro finito","lavori finiti")}</div></div>`;
     /* ⛔ 27 agosto 2026 (notte) — LE LINGUETTE AL POSTO DEI TITOLINI.
        Qui c'erano tre titolini MAIUSCOLI («DA FATTURARE», «EMESSE · DA
        INCASSARE», «PAGATE») uno sotto l'altro, con dentro i loro elenchi
@@ -1718,7 +1724,7 @@
                  pagate:"Ancora nessuna fattura pagata."}[fattVista];
     $("#fatt-body").innerHTML=elenco.length
       ? negTotale(_plurale(elenco.length,"fattura","fatture"),
-                  eur(elenco.reduce((s,l)=>s+(+l.importo||0),0)))
+                  eur2(elenco.reduce((s,l)=>s+(+l.importo||0),0)))
         + elenco.map(fattCarta).join("")
       : `<p class="fatt-empty">${vuoto}</p>`;
   }
