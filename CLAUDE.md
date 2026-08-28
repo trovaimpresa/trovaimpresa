@@ -16592,3 +16592,257 @@ righe di stile doppie tolte.
 
 ⛔ **La priorità dichiarata da Alessio resta una sola:**
 **finire il gestionale e aprirlo agli iscritti.**
+
+# 28 AGOSTO 2026 — IL COLLAUDO A MANO DEL NEGOZIO: TRE DIFETTI CHE NESSUN ERRORE SEGNALAVA
+
+Alessio: «fai tutti i 31 passi senza chiedermi ogni volta, vai avanti da solo».
+
+Fatti tutti e 31 con Playwright — clic veri, testo scritto davvero — con una foto
+a ogni passo: 40 foto, guardate una per una. **Zero errori JavaScript in tutto il
+giro.** E tre difetti veri.
+
+Questa è la lezione della giornata: **la console pulita non vuol dire niente.**
+Tutti e tre i difetti stavano nelle foto, non nei log.
+
+## 1. Il numero nella colonna a sinistra restava indietro
+
+Salvi un prodotto nuovo: l'elenco dice «5 prodotti», la linguetta dice «Tutti 5»,
+e la colonna a sinistra continua a dire «Prodotti 4». Tornava giusto solo cambiando
+sezione.
+
+`aggiornaContatori()` girava in due soli momenti: entrando nel reparto, e al clic
+su una linguetta della barra. Dopo un salvataggio, mai.
+
+Adesso c'è `rifaiNumeri()`, con un freno da 350 ms, chiamato in testa a ogni elenco
+che si ridisegna: `loadProdotti`, `loadMagazzino`, `loadFornitori`, `loadMovimenti`,
+`renderClienti`, `pvCarica`. Ogni salvataggio passa per uno di quelli, quindi li
+copre tutti senza andare a cercare i singoli punti di salvataggio.
+
+⚠️ `var _frenoNumeri` e non `let`: le funzioni che lo usano stanno **sopra** nel
+file, e con `let` la zona morta temporale avrebbe potuto farlo esplodere.
+
+## 2. La scheda del preventivo diceva tre numeri sbagliati su quattro
+
+Il difetto peggiore, perché è **quello che si vede il cliente**:
+
+    Cemento 32.5 R sacco 25 kg          0 sacco × 4,90 €
+    Imponibile                          0,00 €
+    Sconto sul totale        10% · −    0,00 €
+    Totale                              5,38 €
+
+Un totale che non torna con nessuna delle righe sopra.
+
+Due errori di nome, tutti e due silenziosi perché in JavaScript un campo che non
+esiste vale `undefined`, non un errore:
+
+- la quantità la leggeva in `r.quantita`, ma la colonna si chiama **`r.qta`**
+  (tutto il resto del file — `pvCalcola`, `pvLeggiRighe`, `pvRigaHtml`, il PDF —
+  usava già `qta`: solo la scheda no);
+- l'imponibile e lo sconto li leggeva in `c.imponibile` e `c.scontoTot`, che
+  `pvCalcola()` non restituisce: si chiamano **`netto`** e **`scontoGen`**.
+
+Adesso la scheda mostra le stesse cinque righe del modulo — Totale merce, Sconti
+sulle righe, Sconto sul totale, Imponibile, IVA — così i due posti dove si legge
+lo stesso preventivo dicono per forza la stessa cosa.
+
+## 3. I riquadri delle Fatture stavano stretti a sinistra
+
+`#fatture .fatt-summary` era una griglia a **cinque** colonne fisse: le imprese ne
+hanno cinque, il negozio due. I due riquadri restavano schiacciati a sinistra con
+mezzo schermo bianco.
+
+Cambiata in `repeat(auto-fit,minmax(200px,1fr))` nel foglio in comune. Le imprese a
+1440 px restano identiche — rifotografate per esserne sicuri — e il negozio riempie
+la riga. Sotto il totale adesso c'è scritto anche **quante** sono.
+
+## Le prove
+
+Nate tre prove nuove (famiglia **K** del banco negozio), e tutte e tre viste
+diventare rosse rompendo apposta la correzione: 2 rosse, 2 rosse, 1 rossa.
+Il banco del negozio passa da 391 a 399.
+
+---
+
+# 28 AGOSTO 2026 (2) — LE FATTURE DEL NEGOZIO: L'ULTIMO POSTO CON LA FORMA VECCHIA
+
+Alessio ha detto sì: si rifanno.
+
+Erano rimaste una riga stretta (`.fatt-row`) con **quattro pulsanti in fila** —
+PDF · Carica fattura PDF · Apri fattura PDF · Emessa. Dappertutto altrove nel
+negozio la carta ha **un pulsante solo**, «Apri», e il resto sta dentro la scheda.
+
+Copiato riga per riga: la carta da `pvCarica()` (i Preventivi), la scheda da
+`fornApriScheda()` (il fornitore). Nessun colore e nessuna misura inventati.
+
+**La carta**: nome del lavoro, pastiglia di stato a destra, data · «lavoro finito» ·
+se c'è un PDF allegato, l'importo in `job-num`, e «Apri».
+
+La pastiglia usa le stesse variabili di colore dei preventivi:
+
+| Situazione | Pastiglia | Tono |
+|---|---|---|
+| lavoro finito, fattura non fatta | Da fatturare | `t-attesa` |
+| fattura partita | Emessa | `t-neutro` |
+| incassata | Pagata | `t-ok` |
+
+**La scheda** (`fattApriScheda`): a tutta pagina, con Importo · Finito il · Il lavoro
+· Fattura PDF, e in fondo Chiudi · PDF di cortesia · Apri fattura PDF (solo se c'è) ·
+Carica fattura PDF · il pulsante di stato. Caricato un PDF, la scheda si riapre da
+sola col PDF dentro (`_fattSchedaId`).
+
+## Due difetti trovati mentre si faceva
+
+1. **Le carte stavano una per riga**: a `#fatt-body` mancava `class="grid"`, che
+   hanno `#prodotti-body`, `#preventivi-body` e `#movimenti-body`.
+2. **Le Fatture erano l'unica sezione che non si rifaceva entrandoci**: l'elenco
+   restava quello disegnato entrando nel reparto. Aggiunto il listener
+   `$('[data-tab="fatture"]')`, come le altre cinque.
+
+Famiglia **L** del banco: 20 prove nuove, tre sabotaggi visti rossi (14, 8 e 2).
+Il banco negozio passa a 419.
+
+---
+
+# 28 AGOSTO 2026 (3) — I SOLDI DI UNA FATTURA SI SCRIVONO COI CENTESIMI
+
+Alessio l'ha chiesto dopo aver visto «861 €» al posto di 860,50 €.
+
+**Non c'era niente da inventare.** Il gestionale imprese ha da sempre due funzioni:
+
+| Funzione | Dove | Esempio |
+|---|---|---|
+| `eur()` | riepiloghi, KPI, «quanto in totale» | 1.240 € |
+| `eur2()` | l'importo esatto di un documento | 1.240,00 € |
+
+Il dettaglio della scheda fattura delle imprese usava **già** `eur2` (righe 766-779
+di `js/gest-fatture.js`). Erano rimaste indietro la carta e i riquadri; nel negozio
+`eur2` non esisteva proprio; il noleggio aveva già `_eur` e lo usava in 74 punti.
+
+Cambiati 12 punti in tre file:
+
+- `js/gest-fatture.js` — l'importo sulla carta, i tre riquadri coi soldi, l'importo
+  dei lavori nella finestra «fattura da lavori»;
+- `gestionale-negozio.html` — aggiunto `eur2` copiato da `gestionale-app.html`, e
+  usato su carta, scheda, fascia del totale, i due riquadri, i due numeri del
+  riepilogo;
+- `gestionale-noleggio.html` — i 6 punti della sotto-sezione «Lavori del gestionale
+  imprese», l'unica che usava ancora `eur()`.
+
+**Lasciati arrotondati** i totali del Report e i KPI del riepilogo: lì la domanda è
+«quanto in tutto», non «quanto esatto». È la convenzione che le imprese hanno sempre
+avuto e non si rompe per comodità.
+
+Due prove del banco imprese aggiornate: chiedevano «8.000 €», adesso chiedono
+«8.000,00 €». Non indebolite — chiedono di più.
+
+---
+
+# 28 AGOSTO 2026 (4) — ⚠️ LE 14 ROSSE DEL NOLEGGIO CHE NON ESISTEVANO
+
+Questa va scritta perché **non deve succedere di nuovo**.
+
+Fatto girare il banco `noleggio-importo`: **25 verdi, 14 rosse**. Sembrava che la
+casella «Importo» che si riempie dal conto — la funzione nata dal collaudo del 24
+agosto — si fosse rotta.
+
+Prima di dirlo ad Alessio, tre controlli:
+
+1. rifatto girare sul file **originale**, prima delle modifiche del giorno: 14 rosse
+   uguali → **non le avevo causate io**;
+2. sospettato il paywall (il finto aveva `premium_scadenza:null`): messa una data
+   futura → 14 rosse uguali;
+3. aperta la pagina e letto il riquadro: **«Il conto non si riesce a fare.»**
+
+`nolCalcolaOra()` comincia con `if(!window.NoleggioPrezzo) return null;`.
+`NoleggioPrezzo` sta in **`js/noleggio-prezzo.js`** — e nella mia cartella di lavoro
+quel file **non c'era**. Avevo copiato 12 dei 30 file `js/` di Alessio.
+
+Copiati i mancanti: **39 su 39 verdi.** Il noleggio non aveva niente.
+
+⛔ **LA REGOLA:** chi si copia il sito in una cartella di lavoro si copia **tutti i
+file che le pagine caricano davvero**, non quelli che sembrano bastare. Si controlla
+così:
+
+    grep -ho 'src="/js/[^"]*"' *.html | sort -u
+
+e si verifica che ci siano tutti. Nel dubbio, una prova rossa si rifà girare sul file
+originale **prima** di chiamarla difetto.
+
+## Lo stato vero dei sei banchi del noleggio
+
+| Banco | Prove |
+|---|---|
+| `noleggio-importo` | 39 verdi |
+| `noleggio-card` | 56 verdi |
+| `noleggio-prezzo` | 55 verdi |
+| `noleggio-pdf` | 35 verdi (vuole `vendor/jspdf.umd.min.js`) |
+| `noleggio-scritte` | 21 verdi |
+| `noleggio-menu` | **vecchio, non gira più** |
+
+`noleggio-menu` cerca la voce «Noleggio» dentro `nav.tabs` del gestionale imprese.
+Il 24 agosto è stata spostata **apposta** sulla schermata dei reparti — «il Noleggio
+è di tutta l'azienda, non di un reparto» — ed è diventata
+`<button class="lt-btn" data-action="noleggio">`. La voce c'è e funziona: **è il
+banco da aggiornare, non il codice da correggere.**
+
+---
+
+# 28 AGOSTO 2026 (5) — DOVE SIAMO, E COSA RESTA
+
+## Il gestionale negozio è finito
+
+Otto consegne di grafica — barra in alto · Riepilogo a carte · testate di sezione ·
+moduli dentro la finestra · linguette coi numerini · carte con un solo «Apri» ·
+riquadri e fascia del totale · Fatture — più il collaudo dei 31 passi e i tre
+difetti sistemati.
+
+| Banco | Prove |
+|---|---|
+| `negozio-funziona` | 421 verdi |
+| `negozio-scritte` | 17 verdi |
+| `impresa-funziona` | 154 verdi |
+| i sei del noleggio | 206 verdi (uno vecchio) |
+
+Consegnata ad Alessio la scheda **`prove-claude/TEST-VERO-negozio.html`**: 32 passi
+da spuntare sul sito vero, coi suoi dati veri. I passi segnati ⚠️ sono i sei
+sistemati oggi.
+
+## L'ordine dei lavori, deciso da Alessio
+
+1. **Il test del gestionale noleggio** — prompt pronto in
+   `prove-claude/PROMPT-test-noleggio.md`
+2. **Si sistemano tutti i problemi che escono**
+3. Se il gestionale funziona → **la chat AI dentro il gestionale**
+4. **Si attiva e si crea il piano Pro**
+
+## Sulla chat AI: non si parte da zero
+
+Esiste già l'assistente «Come si fa» (gratuito, 30 domande al mese) in
+`js/ai-integrazione.js`, e sotto c'è già tutto il motore a crediti: tabella
+`ai_accounts`, funzione SQL `consume_ai_credit()` con `SELECT … FOR UPDATE`, Edge
+Function `ai-generate` che scala il credito **prima** di chiamare l'AI e lo
+**rimborsa se fallisce**.
+
+La regola d'oro resta: **l'AI non scrive mai nel database.** Riempie il modulo,
+Alessio controlla, Alessio salva col codice che c'è già.
+
+⚠️ Il gestionale negozio **non carica** `ai-integrazione.js`: il suo «Aiuto» è una
+guida scritta a mano. Se la chat deve stare anche lì, va deciso.
+
+## Cosa resta aperto
+
+1. **Il test vero del negozio** — lo fa Alessio, con la scheda dei 32 passi.
+2. **Il test del noleggio** — prossima sessione.
+3. **Fatture del negozio: la decisione, non un lavoro.** Oggi la sezione dice
+   «Lavori finiti da fatturare» e legge `gest_lavori`. In un negozio si fattura un
+   **preventivo accettato**. La grafica è a posto, il significato no: serve che
+   Alessio guardi una figura e dica sì o no. **Ancora da decidere.**
+4. **Il movimento «Venduto italcemento» è senza data** — dato suo, la mette lui.
+5. `.gitignore` modificato, `prompt-nuova-sessione.md` e `tools/backup.js` non
+   tracciati: da decidere se `tools/backup.js` entra nel repo.
+6. **Le scritte piccole di `admin.html`** — 87 sotto i 13 px. Alessio: «non mi
+   interessa per adesso».
+7. **Le due decisioni ferme**: il nodo dei 49 € e quanto vale un credito chat.
+
+⛔ **La priorità dichiarata da Alessio resta una sola:**
+**finire il gestionale e aprirlo agli iscritti.**
