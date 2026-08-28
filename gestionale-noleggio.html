@@ -1206,8 +1206,8 @@
     return renderRiepilogoNegozio();
     /* soldi e ore: invariati per ora (dipendono dalle fatture, su localStorage) */
     const L=db().lavori;
-    $("#k-daincassare").textContent=eur(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
-    $("#k-incassato").textContent=eur(L.filter(l=>l.fattStato==="pagata"&&thisMonth(l.dataFatto)).reduce((s,l)=>s+(+l.importo||0),0));
+    $("#k-daincassare").textContent=_eur(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
+    $("#k-incassato").textContent=_eur(L.filter(l=>l.fattStato==="pagata"&&thisMonth(l.dataFatto)).reduce((s,l)=>s+(+l.importo||0),0));
     const ore=L.filter(l=>thisMonth(l.dataFatto)||thisMonth(l.dataPrevista)).reduce((s,l)=>s+(+l.ore||0),0);
     $("#k-ore").textContent=(Math.round(ore*10)/10)+" h";
     /* contatori e prossimi: da gest_lavori su Supabase */
@@ -1380,6 +1380,11 @@
   const _numIt=v=>(window.NoleggioPrezzo
     ? window.NoleggioPrezzo.numIt(v)
     : (parseFloat(String(v==null?"":v).replace(/[€\s]/g,"").replace(/\./g,"").replace(",","."))||0));
+  /* ⚠️ 28 agosto 2026 — I SOLDI DI UN DOCUMENTO SI SCRIVONO COI CENTESIMI.
+     _eur li scrive gia' cosi' e il noleggio lo usa dappertutto. Restava
+     fuori solo la sotto-sezione «Lavori del gestionale imprese» dentro
+     Fatture, che usava eur(): arrotonda all'euro, e 860,50 usciva «861 €».
+     Adesso anche quella passa di qui. eur() resta per i riepiloghi. */
   const _eur=n=>Number(n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
   let nolMezzi=[], nolConsumi=[], nolMestieri=[];
 
@@ -4715,7 +4720,7 @@
         <span>📅 ${fdate(l.dataPrevista)}</span>
         ${d?`<span>👷 ${esc(d.nome)}</span>`:""}
         ${l.ore?`<span>⏱ ${l.ore} h</span>`:""}
-        ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${eur(l.importo)}</span>`:""}
+        ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${_eur(l.importo)}</span>`:""}
       </div>
       <div class="job-actions">
         ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
@@ -4865,7 +4870,7 @@
     return nolCard({col:FATT_COLORE[st],
       titolo:esc(l.descrizione||"Lavoro"),
       eti:[{t:esc(FATT_ETICHETTA[st].toUpperCase())}],
-      corpo:`<div class="sub">${eur(l.importo)}${l.ore?" · "+esc(String(l.ore))+" ore":""}</div>
+      corpo:`<div class="sub">${_eur(l.importo)}${l.ore?" · "+esc(String(l.ore))+" ore":""}</div>
       <div class="sub2">📅 ${fdate(l.data_fatto||l.data_prevista)}${pdf?" · 📄 fattura allegata":""}</div>`,
       pulsanti:nolPulsanti("fattura",l.id)});
   }
@@ -4955,8 +4960,8 @@
     const pagate=L.filter(l=>l.fatt_stato==="pagata");
     const tInc=daInc.reduce((s,l)=>s+(+l.importo||0),0);
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
-    $("#fatt-summary").innerHTML=`<div class="num-c fatt-tot"><div class="l num-d">Da incassare (fatture emesse)</div><div class="n num-n">${eur(tInc)}</div></div>
-      <div class="num-c fatt-tot alt"><div class="l num-d">Lavori finiti da fatturare</div><div class="n num-n">${eur(tFatt)}</div></div>`;
+    $("#fatt-summary").innerHTML=`<div class="num-c fatt-tot"><div class="l num-d">Da incassare (fatture emesse)</div><div class="n num-n">${_eur(tInc)}</div></div>
+      <div class="num-c fatt-tot alt"><div class="l num-d">Lavori finiti da fatturare</div><div class="n num-n">${_eur(tFatt)}</div></div>`;
     let h="";
     h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
     h+=daFatt.length?daFatt.map(fattRow).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
