@@ -131,21 +131,24 @@
   .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:#141c24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side-brand small{display:block;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;line-height:1.25;overflow-wrap:anywhere}
   .side nav.tabs{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;max-width:none;overflow:visible}
-  .side nav.tabs button{display:flex;align-items:center;gap:10px;width:100%;color:#5b6672;font-size:13.5px;font-weight:600;padding:9px 11px;border-radius:8px;border-bottom:none;text-align:left}
-  .side nav.tabs button svg{width:17px;height:17px;flex:0 0 auto;opacity:.85}
-  .side nav.tabs button.active{background:var(--accent-soft);color:var(--accent-d);border-bottom:none}
+  /* ⛔ 28 agosto 2026 — LE SCRITTE SBIADITE DELLA COLONNA, viste da
+     Alessio mettendo le due foto una accanto all'altra. Qui c'erano tre
+     righe scritte a mano che riscrivevano il menu: grigio #5b6672 invece
+     del testo pieno, 13,5 px invece della misura del gestionale, icone
+     a opacita' 0.85 invece che piene, e l'acceso azzurrino invece del
+     riquadro blu delle imprese. Tolte: valgono quelle di
+     css/gestionale.css (~456-464), che questa pagina carica. */
   /* ===== 26 agosto 2026 — LA BARRA COME QUELLA DELLE IMPRESE =====
      ⚠️ Nelle imprese queste classi stanno in css/gestionale.css. Da ieri
      il negozio quel foglio lo carica: quello che resta scritto qui sotto
      e' solo cio' che nel negozio e' DIVERSO (i conteggi rossi, la parola
      di gruppo). Il resto arriva dal foglio condiviso.
      Le misure restano sopra i 13 px, come tutto il resto della pagina. */
-  .side-group{font-size:13.5px;font-weight:700;color:var(--muted);margin:14px 0 6px;padding:0 2px}
-  .tab-cnt{flex:0 0 auto;margin-left:auto;font-size:13px;font-weight:700;line-height:16px;
-    border-radius:20px;padding:2px 8px;background:#eef2f6;color:#5b6672}
-  .side nav.tabs button.active .tab-cnt{background:#fff;color:var(--accent-d)}
-  .tab-cnt.rosso{background:#c62828;color:#fff}
-  .side nav.tabs button.active .tab-cnt.rosso{background:#c62828;color:#fff}
+  /* ⛔ 28 agosto 2026 — anche i numerini sulle voci erano riscritti qui:
+     pastiglia grigia #eef2f6 e, quando il numero era un problema, un
+     PALLINO ROSSO PIENO col bianco dentro. Nelle imprese il numero che
+     chiede attenzione e' rosso su rosa chiaro («tab-cnt err»), non un
+     bollino. Tolti: valgono .side-group e .tab-cnt di css/gestionale.css. */
   /* la barra in alto: gli stessi pulsanti che stavano in fondo alla colonna,
      portati dove li cerca chi arriva dal gestionale imprese */
   /* ===== 26 agosto 2026 — «DA SISTEMARE OGGI» =====
@@ -1209,7 +1212,14 @@
     galFilter={op:"",tipo:""};$$("#gal-tipo button").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
     agFilter={op:"",stato:"aperti"};$$("#ag-stato button").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
     $$("#stato-chips .chip").forEach(c=>c.classList.toggle("on",c.dataset.stato==="tutti"));
-    $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
+    /* ⛔ 28 agosto 2026 — LA CARD AZZURRA IN CIMA, trovata da Alessio.
+       Qui c'era «i===0»: si accendeva il PRIMO pulsante della colonna,
+       dando per scontato che fosse Riepilogo. Ma da quando la colonna
+       parte dalle due card («Chiedi una funzione», «Assistenza diretta»)
+       il primo pulsante e' una card: si accendeva quella, azzurra, e
+       Riepilogo restava spento pur essendo la sezione aperta.
+       Adesso si accende chi ha DAVVERO quel data-tab. */
+    $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="riepilogo"));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
     renderAll();window.scrollTo(0,0); /* renderRiepilogoNegozio è già dentro renderAll */
   }
@@ -2981,6 +2991,14 @@
       .forEach(id=>{if($("#"+id))$("#"+id).value="";});
     if($("#nm-prod-sel"))$("#nm-prod-sel").value="";
     if($("#nm-tipo"))$("#nm-tipo").value="vendita";
+    /* ⛔ 28 agosto 2026 — LA DATA PARTE DA OGGI.
+       Prima la casella era vuota, e chi non la compilava salvava un
+       movimento SENZA data. Un movimento senza data non entra in nessun
+       mese: sparisce dal venduto, dall'acquistato, dal Report e dal
+       conto in cima. Registrato, e per il gestionale inesistente.
+       Trovato il 28 agosto nel collaudo, sui dati veri di Alessio.
+       ⚠️ Il preventivo lo faceva gia' cosi' (pvNuovo). */
+    if($("#nm-data"))$("#nm-data").value=todayStr();
     nmImportoAuto=""; editMovId=null;
     if($("#nm-save"))$("#nm-save").textContent="Aggiungi movimento";
     if($("#nm-titolo-sez"))$("#nm-titolo-sez").textContent="Nuovo movimento";
@@ -3464,7 +3482,9 @@
       quantita:q,
       importo:parseFloat($("#nm-importo").value)||0,
       controparte:$("#nm-controparte").value.trim()||null,
-      data_mov:$("#nm-data").value||null,
+      /* ⛔ la rete: anche svuotando la casella a mano, un movimento senza
+         data non si salva. Meglio la data di oggi che un buco. */
+      data_mov:$("#nm-data").value||todayStr(),
       note:$("#nm-note").value.trim()||null,
       motivo:(tipo==="rettifica")?(($("#nm-motivo")&&$("#nm-motivo").value)||"inventario"):null};
     /* ⛔ l'ordine nasce IN ARRIVO: il magazzino si carica il giorno che si
@@ -4442,7 +4462,9 @@
     if(n===null||n===undefined) return;          /* non lo so: non lo scrivo */
     e.textContent=n>0?String(n):"";
     e.style.display=n>0?"inline-block":"none";
-    e.classList.toggle("rosso",!!rosso&&n>0);
+    /* ⚠️ 28 agosto 2026 — si chiamava «rosso», e nel foglio in comune
+       quella classe non esiste: e' «err», come nelle imprese. */
+    e.classList.toggle("err",!!rosso&&n>0);
   }
   async function aggiornaContatori(){
     if(!(sb&&sbUid)) return;
