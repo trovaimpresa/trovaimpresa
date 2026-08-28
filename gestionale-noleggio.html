@@ -337,6 +337,21 @@
   .wrap{max-width:none;padding-left:28px;padding-right:28px}
   header .top-in, nav.tabs{max-width:none}
   body{zoom:1.2}
+
+  /* ⛔ 28 agosto 2026 — LA TESTATA SUL TELEFONO.
+     Al collaudo del 28 agosto, su uno schermo da 390 px, «⚙ Dati azienda»
+     finiva da 258 a 408 px e «+ Nuovo noleggio» fino a 438: fuori dallo
+     schermo, e senza modo di raggiungerli — la testata non scorre di lato
+     come fa la fila delle linguette. «Dati azienda» sta solo li': dal
+     telefono non si poteva proprio aprire, e li' dentro ci sono i numeri
+     dei contratti e l'intestazione dei PDF.
+     Adesso la testata va a capo e i due pulsanti si mettono in fila sotto
+     il titolo, larghi uguali. Niente colori nuovi: solo il posto cambia. */
+  @media(max-width:560px){
+    header .top-in{flex-wrap:wrap}
+    header .top-in > div:last-child{width:100%;display:flex;gap:10px}
+    header .top-in > div:last-child > button{flex:1;min-width:0;white-space:nowrap}
+  }
 </style>
 
 <!-- 24 agosto 2026 — IL NOLEGGIO ESCE DAL REPARTO.
@@ -1456,8 +1471,21 @@
      l'importo salvato e' uguale a quello, vuol dire che era agganciato al
      conto, e quando il conto cambia si puo' riallineare senza fare danni. */
   let nolImportoAMano=false, nolImportoSalvato=null;
+  /* ⛔ 28 agosto 2026 — LA CAUZIONE SI PROPONE DA SOLA.
+     Al collaudo del 28 agosto: fai un noleggio nuovo, il riquadro del conto
+     dice «Cauzione 100,00 € — in deposito», l'importo si riempie da solo, e
+     la casella Cauzione resta VUOTA. Premi Crea e il noleggio si salva con
+     cauzione zero: non compare in Cauzioni, il Riepilogo conta 900 invece di
+     1.000, e la ricevuta della cauzione esce a zero. Sono soldi veri del
+     cliente che il gestionale non sa piu' di avere in mano.
+     La cauzione si copiava dal mezzo SOLO premendo «Usa questo importo» —
+     che ormai non preme piu' nessuno, perche' l'importo si mette da solo.
+     Adesso si propone da sola, come l'importo, e lo scrive. Si propone una
+     volta sola per apertura: se lui la cancella, resta cancellata. */
+  let nolCauzioneProposta=false;
   document.addEventListener("input",e=>{
     if(e.target&&e.target.id==="nn-importo") nolImportoAMano=true;
+    if(e.target&&e.target.id==="nn-cauzione") nolCauzioneProposta=true;
   });
 
   function nolCalcolaOra(){
@@ -1579,7 +1607,20 @@
       if(c.cauzione>0) h+='<div class="cauz">Cauzione '+_eur(c.cauzione)+' — in deposito, non entra nel totale.</div>';
       h+='<button type="button" class="nol-agg" id="nn-usa" style="margin-top:10px">Usa questo importo</button>';
     }
+    /* ⛔ 28 agosto 2026 — la cauzione del mezzo finisce nella sua casella.
+       Solo se la casella e' vuota e solo la prima volta: quello che scrive
+       lui non si tocca mai, e se la cancella resta cancellata. */
+    let avvisoCauzione="";
+    const cauIn=$("#nn-cauzione");
+    if(cauIn&&c.cauzione>0&&!nolCauzioneProposta&&String(cauIn.value).trim()===""){
+      cauIn.value=String(c.cauzione).replace(".",",");
+      nolCauzioneProposta=true;
+      if(typeof nolMostraCauzione==="function") nolMostraCauzione();
+      avvisoCauzione='<div class="nol-avviso" id="nn-cau-nota">La cauzione &egrave; stata messa a '
+        +esc(_eur(c.cauzione))+', quella del mezzo. Se ne prendi un\'altra, scrivila a mano.</div>';
+    }
     (c.avvisi||[]).forEach(a=>{h+='<div class="nol-avviso">'+esc(a)+'</div>';});
+    h+=avvisoCauzione;
 
     /* ⛔ 24 agosto 2026 — L'IMPORTO SEGUE IL CONTO, MA NON DI NASCOSTO.
        Al collaudo del 24 agosto sono venute fuori due cose, tutte e due
@@ -1906,10 +1947,14 @@
       ["Nome",e(d.nome)],["Telefono",e(d.telefono)],["Email",e(d.email)],
       ["Indirizzo",e(d.indirizzo)],["P.IVA / Cod. Fiscale",e(d.piva)],["Note",e(d.note)]];
     if(tipo==="noleggio"){
+      /* ⛔ 28 agosto 2026 — le date si scrivono all'italiana anche qui.
+         Nel Cestino uscivano grezze («2026-08-08») mentre due righe sopra,
+         sullo stesso foglio, c'era scritto «buttato il 28/08/2026». */
+      const dat=(x)=>x==null||x===""?null:fdate(x);
       r=[["Mezzo",e(d.mezzo)],["Cliente",e(d.cliente)],
-         ["Uscita",e(d.data_uscita)+(d.ora_uscita?" alle "+String(d.ora_uscita).slice(0,5):"")],
-         ["Rientro previsto",e(d.data_rientro_prevista)],
-         ["Rientro effettivo",e(d.data_rientro_effettivo)],
+         ["Uscita",dat(d.data_uscita)==null?null:dat(d.data_uscita)+(d.ora_uscita?" alle "+String(d.ora_uscita).slice(0,5):"")],
+         ["Rientro previsto",dat(d.data_rientro_prevista)],
+         ["Rientro effettivo",dat(d.data_rientro_effettivo)],
          ["Contaore uscita",e(d.contaore_uscita)],["Contaore rientro",e(d.contaore_rientro)],
          ["Km uscita",e(d.km_uscita)],["Km rientro",e(d.km_rientro)]];
       const dp=d.dettaglio_prezzo;
@@ -2535,6 +2580,9 @@
   async function schedaNoleggio(n){
     const isNew=!n; n=n||{};
     nolIdApertoNoleggio=n.id||null;
+    /* 28 agosto 2026: si riparte puliti anche sulla cauzione, se no la
+       seconda scheda che apri non se la propone piu'. */
+    nolCauzioneProposta=false;
     /* ⚠️ PRIMA di disegnare la scheda: firmaBlocco legge le firme mentre
        costruisce l'HTML, e se si caricassero dopo resterebbero quelle
        della scheda di prima. */
