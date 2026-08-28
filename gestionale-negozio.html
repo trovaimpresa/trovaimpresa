@@ -1623,8 +1623,13 @@
     const pagate=L.filter(l=>l.fatt_stato==="pagata");
     const tInc=daInc.reduce((s,l)=>s+(+l.importo||0),0);
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
-    $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
-      <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
+    /* ⚠️ 28 agosto 2026 — collaudo a mano, passo 28: i riquadri sono gli
+       stessi delle imprese (.fatt-tot dentro #fatture), ma qui sono due e
+       non cinque: restavano schiacciati a sinistra con mezzo schermo vuoto.
+       La riga adesso si adatta al numero di riquadri (foglio in comune).
+       Sotto il totale c'e' scritto QUANTE sono, come nelle imprese. */
+    $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div><div class="s">${_plurale(daInc.length,"fattura emessa","fatture emesse")}</div></div>
+      <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div><div class="s">${_plurale(daFatt.length,"lavoro finito","lavori finiti")}</div></div>`;
     /* ⛔ 27 agosto 2026 (notte) — LE LINGUETTE AL POSTO DEI TITOLINI.
        Qui c'erano tre titolini MAIUSCOLI («DA FATTURARE», «EMESSE · DA
        INCASSARE», «PAGATE») uno sotto l'altro, con dentro i loro elenchi
@@ -1714,6 +1719,7 @@
 
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
+    rifaiNumeri();
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Accedi per gestire i clienti</small></div>`;return;}
     /* 26 agosto 2026 — listino e sconto_perc servono al modulo cliente e al
        preventivo (sql/neg-listini.sql). "*" invece dell'elenco fisso: se la
@@ -2784,6 +2790,7 @@
   let editProdId=null;
   async function loadProdotti(){
     if(!(sb&&sbUid)) return;
+    rifaiNumeri();
     /* "*" invece dell'elenco fisso: servono anche unita, prezzo_acquisto e iva_perc,
        e con "*" non si rischia l'errore se la migrazione SQL non è stata fatta. */
     const {data}=await sb.from("neg_prodotti")
@@ -3091,6 +3098,7 @@
   }
   async function loadMagazzino(){
     if(!(sb&&sbUid)) return;
+    rifaiNumeri();
     const {data}=await sb.from("neg_prodotti")
       .select("id,nome,quantita,soglia_minima").eq("user_id",sbUid).order("nome");
     const tutti=data||[], box=$("#magazzino-body");
@@ -3182,6 +3190,7 @@
   let editFornId=null;
   async function loadFornitori(){
     if(!(sb&&sbUid)) return;
+    rifaiNumeri();
     const {data}=await sb.from("neg_fornitori")
       .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
     const f=data||[], box=$("#fornitori-body");
@@ -3403,6 +3412,7 @@
 
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
+    rifaiNumeri();
     const {data}=await sb.from("neg_movimenti")
       .select("id,tipo,prodotto,prodotto_id,quantita,importo,controparte,data_mov,note,motivo,arrivato_il").eq("user_id",sbUid).order("data_mov",{ascending:false});
     const tutti=data||[], box=$("#movimenti-body");
@@ -3696,6 +3706,7 @@
   });
 
   async function pvCarica(){
+    rifaiNumeri();
     if(!(sb&&sbUid))return;
     const box=$("#preventivi-body"); if(!box)return;
     const {data}=await sb.from("neg_preventivi").select("*").eq("user_id",sbUid).order("created_at",{ascending:false});
@@ -3782,7 +3793,7 @@
     const et=_ET[p.stato||"bozza"]||_ET.bozza;
     const scad=p.data?new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000):null;
     const scaduto=scad&&scad<new Date()&&p.stato!=="accettato";
-    const elenco=righe.length?righe.map(r=>`<div class="sh-riga"><div class="k" style="flex:1">${esc(r.descrizione||"—")}</div><div class="v" style="flex:0 0 210px;text-align:right">${(+r.quantita||0)} ${esc(r.unita||"pz")} × ${pvEur(r.prezzo)}${+r.sconto_perc?" − "+r.sconto_perc+"%":""}</div></div>`).join("")
+    const elenco=righe.length?righe.map(r=>`<div class="sh-riga"><div class="k" style="flex:1">${esc(r.descrizione||"—")}</div><div class="v" style="flex:0 0 210px;text-align:right">${(+r.qta||0)} ${esc(r.unita||"pz")} × ${pvEur(r.prezzo)}${+r.sconto_perc?" − "+r.sconto_perc+"%":""}</div></div>`).join("")
       :'<div style="color:#8a949e;font-size:15px">Nessuna riga.</div>';
     openSheetGrande(`<h3>Preventivo N. ${esc(String(p.numero||"—"))} · ${esc(p.cliente_nome||"—")}</h3>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -3797,8 +3808,10 @@
       <div style="font-size:15px;font-weight:800;margin:18px 0 4px">Le righe</div>
       ${elenco}
       <div style="margin-top:16px;border-top:2px solid #e6ebf0;padding-top:12px">
-        ${shRiga("Imponibile",pvEur(c.imponibile))}
-        ${shRiga("Sconto sul totale",+p.sconto_perc?p.sconto_perc+"% · − "+pvEur(c.scontoTot):"")}
+        ${shRiga("Totale merce",pvEur(c.lordo))}
+        ${shRiga("Sconti sulle righe",c.scontoRighe?"− "+pvEur(c.scontoRighe):"")}
+        ${shRiga("Sconto sul totale",+p.sconto_perc?p.sconto_perc+"% · − "+pvEur(c.scontoGen):"")}
+        ${shRiga("Imponibile",pvEur(c.netto))}
         ${shRiga("IVA",(p.iva_perc??22)+"% · "+pvEur(c.iva))}
         <div class="sh-riga"><div class="k" style="font-size:17px;color:#1c2733">Totale</div><div class="v" style="font-size:22px;font-weight:800;color:#0a2a4d">${pvEur(c.totale)}</div></div>
       </div>
@@ -4497,6 +4510,16 @@
   $$("nav.tabs button[data-tab]").forEach(b=>b.addEventListener("click",()=>{
     setTimeout(aggiornaContatori,400);
   }));
+  /* ⚠️ 28 agosto 2026 — collaudo a mano, passo 9: salvato un prodotto nuovo,
+     l'elenco diceva 5 e il numero nella colonna a sinistra restava 4.
+     I numeri si rifanno anche dopo ogni salvataggio: ogni elenco che si
+     ridisegna chiama rifaiNumeri(), e il freno evita di chiederlo due volte. */
+  var _frenoNumeri=null;   /* var e non let: le funzioni sopra lo usano prima */
+  function rifaiNumeri(){
+    clearTimeout(_frenoNumeri);
+    _frenoNumeri=setTimeout(()=>{ try{ aggiornaContatori(); }catch(e){} },350);
+  }
+  window.rifaiNumeri=rifaiNumeri;
 
   /* ================================================================
      «DA SISTEMARE OGGI» — 26 agosto 2026
