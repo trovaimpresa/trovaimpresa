@@ -352,7 +352,12 @@
      Due cose, e nessun colore nuovo:
        · il contenuto si raccoglie in una colonna, non arriva ai bordi;
        · le righe passano da 15 a 18 px e l'etichetta da 14 a 16. */
-  .sheet--grande .sh-body > *{max-width:1080px;margin-left:auto;margin-right:auto}
+  /* ⛔ 28 agosto 2026 (sera, terzo giro) — il limite di 1080 px vale
+     per i MODULI (le caselle da riempire), non per le schede: le schede
+     adesso hanno i riquadri a due colonne come le imprese, e le imprese
+     la finestra la usano tutta. Se il limite restasse anche a loro, la
+     stessa scheda sarebbe larga 1440 nelle imprese e 1080 nel negozio. */
+  .sheet--grande.sh-modulo .sh-body > *{max-width:1080px;margin-left:auto;margin-right:auto}
   .sheet--grande .sh-head{max-width:none}
   #overlay .sh-riga{font-size:18px;padding:14px 0}
   #overlay .sh-riga .k{font-size:16px;flex:0 0 260px}
@@ -2686,7 +2691,7 @@
     const h3=m.querySelector("h3");
     const titolo=h3?h3.innerHTML:"";
     if(h3){h3.dataset.nascosto="1";h3.style.display="none";}
-    s.className="sheet sheet--grande";
+    s.className="sheet sheet--grande sh-modulo";
     /* ⛔ LA FINESTRA LUNGA. Le imprese decidono cosi' (gestionale-app.html
        riga ~15668): se dentro c'e' «sh-cols», cioe' un modulo a colonne,
        la finestra prende tutto lo schermo; se no resta una finestrella
@@ -4022,8 +4027,9 @@
         <div class="sh-b">
           <div class="sh-tit">I conti</div>
           ${_rigaDato("Totale merce",pvEur(c.lordo))}
-          ${_rigaDato("Sconti sulle righe",c.scontoRighe?"− "+pvEur(c.scontoRighe):"")}
-          ${_rigaDato("Sconto sul totale",+p.sconto_perc?p.sconto_perc+"% · − "+pvEur(c.scontoGen):"")}
+          ${/* qui zero e' un numero vero, non un dato che manca: «non indicato» direbbe una bugia */""}
+          ${_rigaDato("Sconti sulle righe",c.scontoRighe?"− "+pvEur(c.scontoRighe):pvEur(0))}
+          ${_rigaDato("Sconto sul totale",+p.sconto_perc?p.sconto_perc+"% · − "+pvEur(c.scontoGen):pvEur(0))}
           ${_rigaDato("Imponibile",pvEur(c.netto))}
           ${_rigaDato("IVA",(p.iva_perc??22)+"% · "+pvEur(c.iva))}
           ${_rigaHtml("Totale",`<b style="font-size:20px;color:var(--blu-scuro)">${pvEur(c.totale)}</b>`)}
