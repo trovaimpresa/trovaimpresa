@@ -322,6 +322,26 @@
      (dove la barra non mostra il .tb-left) resta.
      ⛔ Non rimettere l'!important: farebbe scrivere il reparto DUE volte.
      ================================================================ */
+
+  /* ================================================================
+     ⛔ 28 agosto 2026 (sera) — LE SCHEDE VANNO A TUTTA PAGINA.
+     Alessio, aprendo un prodotto e un fornitore durante il test vero:
+     «perché queste pagine si aprono così? le voglio a pagina piena».
+     Ha ragione, ed era rimasto indietro solo qui: css/gestionale.css
+     sullo schermo grande stringe .sheet a 640 px e la mette in mezzo
+     come una finestrella (riga 551). Il Noleggio quella regola la
+     ribalta gia' dal 22 agosto; il Negozio no, e le schede «leggi»
+     (prodotto, cliente, fornitore, movimento) uscivano piccole.
+     Copiata riga per riga da gestionale-noleggio.html: nessuna misura
+     e nessun colore inventati.
+     ⚠️ .sheet--grande NON si tocca: i moduli grandi del negozio hanno
+     gia' la loro forma, con testa e piede fissi.
+     ================================================================ */
+  #overlay{background:var(--sfondo,#f3f5f2);backdrop-filter:none}
+  #overlay .sheet:not(.sheet--grande){max-width:none;min-height:100vh;margin:0;border-radius:0;
+    padding:26px 5vw 40px;box-shadow:none}
+  #overlay .sheet:not(.sheet--grande) h3{font-size:24px;margin-bottom:20px}
+  #overlay .sheet:not(.sheet--grande) .sheet-actions{border-radius:0;max-width:900px}
 </style>
 
 <!-- LANDING -->

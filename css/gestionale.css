@@ -1017,17 +1017,26 @@
      Nota: .sheet--grande ha la stessa specificita' di .sheet, quindi
      questo blocco deve restare DOPO le regole di .sheet (riga ~333).
      ================================================================ */
+  /* ⛔ 28 agosto 2026 (sera) — A TUTTA PAGINA, deciso da Alessio.
+     Durante il test vero del negozio, aprendo un prodotto e un fornitore:
+     «perche' queste pagine si aprono cosi'? le voglio a pagina piena, su
+     OGNI pagina che si apre dal gestionale».
+     Prima era una finestrona centrata — 96% di larghezza, 94vh di altezza,
+     coi margini attorno e la pagina che si vedeva dietro. Adesso riempie
+     lo schermo, come fanno gia' le schede del Noleggio dal 22 agosto.
+     ⚠️ Testa e piede fermi con dentro Salva NON si toccano: sono il motivo
+     per cui .sheet--grande esiste, e restano com'erano. */
   .sheet--grande{
-    width:96%; max-width:1600px;
-    height:94vh; max-height:94vh; min-height:0;
-    margin:3vh auto; padding:0;
+    width:100%; max-width:none;
+    height:100vh; max-height:100vh; min-height:100vh;
+    margin:0; padding:0; border-radius:0;
     display:flex; flex-direction:column; overflow:hidden;
   }
   /* dvh dove c'e': su mobile 100vh comprende la barra degli indirizzi, quindi
      il piede — con dentro Salva — finirebbe sotto il bordo dello schermo,
      che e' esattamente il problema che questa modale doveva risolvere. */
-  @supports (height:94dvh){
-    .sheet--grande{height:94dvh; max-height:94dvh; margin:3dvh auto}
+  @supports (height:100dvh){
+    .sheet--grande{height:100dvh; max-height:100dvh; min-height:100dvh; margin:0}
   }
   /* intestazione fissa */
   .sheet--grande .sh-head{
@@ -2845,14 +2854,22 @@
   .sheet--grande.sh-lunga{ height:100dvh; max-height:100dvh; margin:0; }
 }
 
-/* ---- le finestre CORTE: finestrella centrata, alta quanto serve ---- */
+/* ---- le finestre CORTE ---- */
+/* ⛔ 28 agosto 2026 (sera) — ANCHE QUESTE A TUTTA PAGINA, deciso da Alessio.
+   Qui stava la vera differenza: le finestre lunghe riempivano lo schermo,
+   le corte (prodotto, cliente, fornitore, movimento) restavano una
+   finestrella centrata da 880 px con la pagina che si vedeva dietro.
+   Durante il test vero del negozio: «le voglio a pagina piena, su OGNI
+   pagina che si apre dal gestionale». Adesso corte e lunghe sono uguali,
+   come sono sempre state le schede del Noleggio.
+   ⚠️ Testa e piede fermi restano: quelli non c'entravano col problema. */
 .sheet--grande:not(.sh-lunga){
-  width:94%; max-width:880px;
-  height:auto; max-height:88vh;
-  margin:6vh auto; border-radius:16px;
+  width:100%; max-width:none;
+  height:100vh; max-height:100vh;
+  margin:0; border-radius:0;
 }
-@supports (height:88dvh){
-  .sheet--grande:not(.sh-lunga){ max-height:88dvh; margin:6dvh auto; }
+@supports (height:100dvh){
+  .sheet--grande:not(.sh-lunga){ height:100dvh; max-height:100dvh; margin:0; }
 }
 
 .sheet--grande .sh-head{ padding:16px 28px; }
@@ -2922,12 +2939,15 @@
    Quando quella barra c'e', la finestra parte da sotto. Se non c'e'
    (cioe' per chiunque non sia io) non cambia niente. */
 body:has(#ti-fondatore) .overlay{ top:46px; }
-body:has(#ti-fondatore) .sheet--grande.sh-lunga{
-  height:calc(100vh - 46px); max-height:calc(100vh - 46px);
+/* ⛔ 28 agosto 2026 (sera): non piu' solo .sh-lunga. Da quando le finestre
+   sono a tutta pagina (100vh), TUTTE sforano di 46px sotto il bordo quando
+   c'e' la barra viola — e sotto il bordo ci finisce il piede col Salva. */
+body:has(#ti-fondatore) .sheet--grande{
+  height:calc(100vh - 46px); max-height:calc(100vh - 46px); min-height:calc(100vh - 46px);
 }
 @supports (height:100dvh){
-  body:has(#ti-fondatore) .sheet--grande.sh-lunga{
-    height:calc(100dvh - 46px); max-height:calc(100dvh - 46px);
+  body:has(#ti-fondatore) .sheet--grande{
+    height:calc(100dvh - 46px); max-height:calc(100dvh - 46px); min-height:calc(100dvh - 46px);
   }
 }
 
