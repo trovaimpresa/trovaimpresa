@@ -51,7 +51,11 @@
   .cal-day.sel .dot{background:#fff;}
 
   /* LISTA LAVORI */
-  .day-title{font-weight:bold;font-size:15px;margin:0 4px 10px;color:var(--green-d);text-transform:capitalize;}
+  /* ⛔ 29 agosto 2026 - LE MAIUSCOLE SBAGLIATE. «capitalize» mette la
+     maiuscola a OGNI parola: si leggeva «Lavori Di Oggi» e «Lavori Del
+     14/08/2026». La scritta e' gia' scritta giusta nel testo, qui basta
+     non rovinarla. (Su .cal-mese capitalize serve: fa «Agosto 2026».) */
+  .day-title{font-weight:bold;font-size:15px;margin:0 4px 10px;color:var(--green-d);}
   .job{background:var(--card);border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.07);border-left:5px solid var(--green);padding:14px;margin-bottom:10px;cursor:pointer;}
   .job h3{font-size:16px;margin-bottom:4px;}
   .job .where{font-size:15px;color:var(--muted);margin-bottom:8px;}
