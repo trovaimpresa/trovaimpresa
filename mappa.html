@@ -279,7 +279,10 @@ function buildPopup(d) {
   if (d.posizione_da === 'citta' && d.citta) {
     citta = 'zona di ' + d.citta + (d.provincia ? ' (' + d.provincia + ')' : '');
   } else {
-    citta = [d.indirizzo || d.via, d.citta, d.provincia].filter(Boolean).join(', ');
+    /* 29 agosto 2026 - niente parole ripetute: la provincia si scrive solo
+       se dice qualcosa in piu' della citta'. */
+    const _c=(d.citta||'').trim(), _p=(d.provincia||'').trim();
+    citta = [d.indirizzo || d.via, _c, (_p&&_p.toLowerCase()!==_c.toLowerCase())?_p:''].filter(Boolean).join(', ');
   }
 
   return `<div>

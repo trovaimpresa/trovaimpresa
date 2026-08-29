@@ -212,7 +212,11 @@
   }
 
   function disegna(o) {
-    const luogo = [o.citta, o.provincia].filter(Boolean).join(' (') + (o.provincia ? ')' : '');
+    /* 29 agosto 2026 - niente «Rieti (Rieti)»: la provincia si scrive solo
+       se dice qualcosa in piu' della citta'. */
+    const _c=(o.citta||'').trim(), _p=(o.provincia||'').trim();
+    const _pv=(_p&&_p.toLowerCase()!==_c.toLowerCase())?_p:'';
+    const luogo = [_c, _pv].filter(Boolean).join(' (') + (_pv ? ')' : '');
     const extra = [];
     if (o.auto_propria) extra.push('Auto propria richiesta');
     if (o.disponibilita_trasferte) extra.push('Disponibilità a trasferte');

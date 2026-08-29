@@ -808,7 +808,11 @@ async function caricaProfilo(id){
       const preComune=document.getElementById('inc-comune'); if(preComune&&d.citta) preComune.value=d.citta;
       const st=document.getElementById('scrivi-title'); if(st) st.textContent='💬 Scrivi al professionista';
     }
-    const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
+    /* ⛔ 29 agosto 2026 - «Rieti, Rieti». Quando la provincia e' scritta per
+       esteso ed e' uguale alla citta', si leggeva due volte la stessa parola.
+       La sigla («Rieti (RI)») invece resta: quella serve. */
+    const _cit=(d.citta||"").trim(), _pro=(d.provincia||"").trim();
+    const luogo=[_cit,(_pro&&_pro.toLowerCase()!==_cit.toLowerCase())?_pro:""].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
     // La pubblicita' e' venduta per citta': qui non c'e' ?citta= nell'URL,
     // quindi passiamo agli spazi laterali la citta' dell'impresa mostrata.
