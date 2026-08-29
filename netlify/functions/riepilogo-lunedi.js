@@ -89,6 +89,122 @@ function fra(n) {
 }
 function plurale(n, uno, tanti) { return n + ' ' + (n === 1 ? uno : tanti); }
 
+// ===========================================================================
+// ⛔ IL GRADINO 4 — L'AI SCRIVE LA SETTIMANA. 29 agosto 2026.
+//
+// L'elenco qui sotto c'era gia' e non si tocca. Quello che si aggiunge sono
+// QUATTRO O CINQUE RIGHE in cima: cosa guardare per primo, e perche'.
+// L'elenco dice COSA c'e'; queste righe dicono DA DOVE COMINCIARE.
+//
+// ⛔ SE L'AI NON RISPONDE, L'EMAIL PARTE LO STESSO, senza il cappello.
+//    Un avviso che non arriva e' molto peggio di un avviso senza commento: il
+//    lunedi' e' l'unico momento in cui uno guarda queste cose. Percio' qui non
+//    si lancia mai un errore, e il tetto del tempo e' CORTO apposta — la
+//    function ha il suo limite, e non deve saltare tutta per un commento.
+//
+// ⛔ E NON INVENTA NUMERI: a Claude si passano solo i numeri gia' calcolati
+//    qui sopra, e gli si dice di non tirarne fuori altri. I conti li fa il
+//    gestionale, lui li racconta.
+//
+// ⚠️ PRIMA DI APRIRLA A TUTTI (SOLO_A = null) vanno decise due cose:
+//    1. se scrivere da qualche parte che quel pezzo l'ha scritto un'AI —
+//       sulla propria email si sa, sull'email di un altro e' un'altra cosa;
+//    2. chi paga: adesso e' una chiamata a settimana per una persona sola.
+// ===========================================================================
+const AI_MODELLO = 'claude-sonnet-4-5';
+const AI_TEMPO   = 9000;   // ms — corto apposta, vedi sopra
+
+// Quello che l'AI puo' guardare: solo roba gia' calcolata qui. E' una funzione
+// pura, cosi' il banco puo' leggerla senza chiamare nessuno.
+function cosaDire(d) {
+  const r = [];
+  r.push('Oggi e\' ' + nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi) + '.');
+  r.push('Chi legge fa questo mestiere: ' + (d.pro ? 'studio tecnico' : 'impresa o artigiano') + '.');
+  r.push('');
+
+  r.push('SCADENZE DEI PROSSIMI 7 GIORNI: ' + d.scadenze.length);
+  d.scadenze.forEach(function (x) {
+    r.push('- ' + (x.titolo || 'senza titolo')
+      + ' | ' + nomeGiorno(x.data_scadenza) + ' ' + dataIt(x.data_scadenza)
+      + ' | ' + fra(x.giorni)
+      + (x.reparto ? ' | reparto ' + x.reparto : ''));
+  });
+  r.push('');
+
+  r.push('FATTURE EMESSE E NON PAGATE: ' + d.fatture.length);
+  d.fatture.forEach(function (x) {
+    r.push('- fattura ' + (x.numero || 'senza numero')
+      + (x.cliente ? ' | ' + x.cliente : '')
+      + ' | ' + euro(x.totale)
+      + ' | in ritardo di ' + plurale(x.giorniRitardo, 'giorno', 'giorni'));
+  });
+  if (d.fatture.length) r.push('In tutto devono avere: ' + euro(d.totaleScaduto));
+  r.push('');
+
+  r.push((d.pro ? 'PRATICHE' : 'LAVORI') + ' CON LA DATA GIA\' PASSATA: ' + d.lavori.length);
+  d.lavori.forEach(function (x) {
+    r.push('- ' + (x.titolo || 'senza titolo')
+      + (x.cliente ? ' | ' + x.cliente : '')
+      + ' | doveva finire il ' + dataIt(x.data_prevista)
+      + ' | ' + plurale(x.giorniRitardo, 'giorno fa', 'giorni fa'));
+  });
+
+  return r.join('\n');
+}
+
+function istruzioniSettimana() {
+  return [
+    'Scrivi il cappello dell\'email del lunedì mattina del gestionale TrovaImpresa. Chi la legge è un artigiano o un\'impresa edile, e la apre dal telefono, in piedi, prima di uscire.',
+    '',
+    'Scrivi da QUATTRO a CINQUE righe, non di più. Italiano semplice e concreto, come un collega che ti dice da dove cominciare.',
+    'Dì COSA GUARDARE PER PRIMO e PERCHÉ. Sotto queste righe c\'è già l\'elenco completo di tutto: non rifarlo.',
+    '',
+    '⛔ Usa SOLO i numeri, le date e i nomi che ti do qui sotto. Non inventarne altri, non stimare e non fare somme che non ti ho già dato: i conti li ha fatti il gestionale.',
+    'Scrivi i soldi come te li do, all\'italiana: 8.000,00 €.',
+    '',
+    'NON scrivere: saluti, firme, titoli, elenchi puntati, e niente frasi di incoraggiamento. Comincia dalla cosa più importante.',
+    'NON dare consigli su tasse, aliquote, norme di sicurezza o contratti: non è il posto.',
+    'Non dire che sei un\'intelligenza artificiale e non parlare di te.'
+  ].join('\n');
+}
+
+// Ritorna il testo, oppure null. NON lancia mai: vedi la nota in cima.
+async function frasiDellaSettimana(d) {
+  const chiave = process.env.ANTHROPIC_API_KEY;
+  if (!chiave) return null;
+  let scaduta;
+  try {
+    const controllore = new AbortController();
+    scaduta = setTimeout(function () { controllore.abort(); }, AI_TEMPO);
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: controllore.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': chiave,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: AI_MODELLO,
+        max_tokens: 400,
+        system: istruzioniSettimana(),
+        messages: [{ role: 'user', content: cosaDire(d) }]
+      })
+    });
+    if (!res.ok) { console.error('[lunedi] AI HTTP ' + res.status); return null; }
+    const b = await res.json();
+    const testo = (b.content || [])
+      .filter(function (x) { return x.type === 'text'; })
+      .map(function (x) { return x.text; }).join('\n').trim();
+    return testo || null;
+  } catch (e) {
+    console.error('[lunedi] AI:', (e && e.message) || e);
+    return null;
+  } finally {
+    clearTimeout(scaduta);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // L'email. Testo grande e righe distanziate: si legge dal telefono, in piedi.
 // ---------------------------------------------------------------------------
@@ -112,6 +228,23 @@ function riga(titolo, sotto, evidenza, colore) {
     ${sotto ? `<div style="font-size:15px;color:#5b6b7d;margin-top:5px">${esc(sotto)}</div>` : ''}
     ${evidenza ? `<div style="font-size:16px;font-weight:700;color:${colore};margin-top:7px">${evidenza}</div>` : ''}
   </td></tr>`;
+}
+
+/* Il cappello in cima all'email.
+   ⚠️ IL TESTO ARRIVA DA FUORI: esc() PRIMA, e solo dopo gli a capo diventano
+      <br>. Mai mettere in una pagina testo grezzo, nemmeno se l'ha scritto
+      Claude — e' la stessa regola di mdInline in js/ai-integrazione.js.
+   ⛔ Se l'AI non ha risposto resta ESATTAMENTE la riga di prima: l'email non
+      cambia forma solo perche' e' saltata una chiamata. */
+function cappelloHTML(d) {
+  if (!d.cappello) {
+    return `<div style="padding:26px 26px 8px">
+    <p style="font-size:17px;line-height:1.7;margin:0">Buongiorno. Ecco cosa ti aspetta questa settimana, preso dal tuo gestionale.</p>
+  </div>`;
+  }
+  return `<div style="padding:26px 26px 6px">
+    <div style="background:#f2f7ff;border-left:5px solid #0066ff;border-radius:10px;padding:18px 20px;font-size:17px;line-height:1.7;color:#22303f">${esc(d.cappello).replace(/\n+/g, '<br>')}</div>
+  </div>`;
 }
 
 function costruisciEmail(d) {
@@ -147,9 +280,7 @@ function costruisciEmail(d) {
     <div style="color:#ffffff;font-size:24px;font-weight:800;line-height:1.3;margin:0">La tua settimana</div>
     <div style="color:#c9dcff;font-size:16px;margin-top:8px">${esc(nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi))}${d.azienda ? ' &middot; ' + esc(d.azienda) : ''}</div>
   </div>
-  <div style="padding:26px 26px 8px">
-    <p style="font-size:17px;line-height:1.7;margin:0">Buongiorno. Ecco cosa ti aspetta questa settimana, preso dal tuo gestionale.</p>
-  </div>
+  ${cappelloHTML(d)}
   ${sezione('#0066ff', 'Scadenze di questa settimana', rScad, 'Apri lo scadenzario', SITO + '#scadenzario')}
   ${sezione('#c62828', 'Non ti hanno ancora pagato', rFatt, 'Apri le fatture', SITO + '#fatture', codaFatt)}
   ${sezione('#e65100', parole.lavori, rLav, parole.apri, SITO + '#lavori')}
@@ -235,8 +366,17 @@ const handler = async function () {
       senzaCestino(f => vivi(sb.from('gest_fatture')
         .select('id, user_id, numero, data, stato, sconto, bollo, ritenuta_perc, cliente_id')
         .in('user_id', utenti).eq('stato', 'emessa'), f)),
+      /* ⛔ 29 agosto 2026 — QUI C'ERA SCRITTO `titolo`, E QUELLA COLONNA NON
+         ESISTE: in `gest_lavori` si chiama `descrizione`. PostgREST rispondeva
+         «column does not exist», l'errore usciva dal try e la function
+         restituiva 500. Cioe': il lunedi' non partiva NESSUNA email, a
+         nessuno, e non se ne accorgeva nessuno — una scheduled function che
+         fallisce non avvisa, si vede solo nei log di Netlify.
+         ⚠️ E' lo stesso errore dei →5← nomi di colonna sbagliati trovati il
+         29 agosto in chat-gestionale.js: i nomi si LEGGONO DAL DATABASE, non
+         si scrivono a memoria. Questi sono stati riletti uno per uno. */
       senzaCestino(f => vivi(sb.from('gest_lavori')
-        .select('user_id, titolo, stato, data_prevista, cliente_id')
+        .select('user_id, descrizione, stato, data_prevista, cliente_id')
         .in('user_id', utenti).neq('stato', 'fatto').lt('data_prevista', oggi), f)),
       // i clienti si leggono TUTTI, cestino compreso: se hai buttato la scheda
       // del cliente ma la sua fattura è ancora da incassare, il nome ti serve
@@ -278,7 +418,7 @@ const handler = async function () {
     // -----------------------------------------------------------------------
     // 3. Una busta per persona
     // -----------------------------------------------------------------------
-    let inviate = 0, saltateVuote = 0, senzaEmail = 0;
+    let inviate = 0, saltateVuote = 0, senzaEmail = 0, conCappello = 0;
     const errori = [];
 
     for (const a of aziende) {
@@ -300,7 +440,7 @@ const handler = async function () {
 
       const lavori = (qLav.data || [])
         .filter(l => l.user_id === uid && l.data_prevista)
-        .map(l => ({ titolo: l.titolo, cliente: nomeCli[String(l.cliente_id)] || '',
+        .map(l => ({ titolo: l.descrizione, cliente: nomeCli[String(l.cliente_id)] || '',
                      data_prevista: l.data_prevista,
                      giorniRitardo: quantiGiorni(l.data_prevista, oggi) }))
         .sort((x, y) => y.giorniRitardo - x.giorniRitardo);
@@ -324,6 +464,12 @@ const handler = async function () {
         totaleScaduto: fatture.reduce((s, f) => s + f.totale, 0)
       };
 
+      /* ⛔ QUI, e non prima: sta DOPO il filtro SOLO_A, quindi in questo
+         periodo di prova la chiamata si paga per una persona sola. E se
+         torna null l'email parte lo stesso, senza cappello. */
+      d.cappello = await frasiDellaSettimana(d);
+      if (d.cappello) conCappello++;
+
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
@@ -340,7 +486,7 @@ const handler = async function () {
     }
 
     return { statusCode: 200, body: JSON.stringify({
-      ok: true, emailInviate: inviate, settimanePulite: saltateVuote,
+      ok: true, emailInviate: inviate, conCappello, settimanePulite: saltateVuote,
       senzaEmail, interruttore: colonnaInterruttore ? 'attivo' : 'colonna mancante, tutti accesi',
       errori
     }) };
@@ -358,3 +504,10 @@ exports.handler = schedule('30 5 * * 1', handler);
 // Per provarla a mano senza aspettare lunedì:
 // exports.handler = handler;
 module.exports.eseguiOra = handler;
+
+// per il banco: le parti pure si provano da sole, senza rete e senza database
+module.exports.cosaDire = cosaDire;
+module.exports.istruzioniSettimana = istruzioniSettimana;
+module.exports.cappelloHTML = cappelloHTML;
+module.exports.costruisciEmail = costruisciEmail;
+module.exports.oggetto = oggetto;
