@@ -5446,13 +5446,18 @@
       return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'todo')}"></i>
         <div style="flex:1"><b style="font-size:14px">⏰ ${esc(x.titolo)}</b></div>
         <span class="stato ${x.fatta?'fatto':(late?'ritardo':'da_fare')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
-    openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}${listSc}</div>
+    /* ⛔ 29 agosto 2026 — Alessio: «la voglio come e' su tutti i gestionali».
+       Era l'ultima finestra rimasta con la sola freccia in cima invece della
+       testata col titolo e del piede fermo. Il contenuto e' lo stesso: cambia
+       solo la porta da cui passa — qui titolo, corpo e azioni vanno separati,
+       perche' e' cosi' che openSheetGrande li vuole nelle imprese. */
+    openSheetGrande(fdate(ds),
+      `<div class="day-jobs">${list}${listSc}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
-        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(noteCache[ds]||"")}</textarea></div>
-      <div class="sheet-actions">
-        <button class="btn b-cancel" data-action="close">Chiudi</button>
+        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(noteCache[ds]||"")}</textarea></div>`,
+      `<button class="btn b-cancel" data-action="close">Chiudi</button>
         <button class="btn b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
-        <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
+        <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button>`);
   }
 
   /* Condomini e Squadra sono rubriche: non hanno stati, quindi niente viste.

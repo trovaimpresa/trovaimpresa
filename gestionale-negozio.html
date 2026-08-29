@@ -2129,7 +2129,10 @@
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
     editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa,fattura:!!fattura};
     if(supa){
-      openSheet(`<h3>${fattura?"Nuova fattura":"Nuovo lavoro"}</h3>
+      /* ⛔ 29 agosto 2026 — anche questa passa dalla finestra grande:
+         testata col titolo e «Indietro», corpo che scorre, pulsanti nel
+         piede. Prima usciva nuda, senza testata, coi pulsanti in mezzo. */
+      openSheetGrande(`<h3>${fattura?"Nuova fattura":"Nuovo lavoro"}</h3>
         <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
         <div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
         <div class="row2">
@@ -2266,7 +2269,7 @@
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
-    openSheet(`<h3>${isNew?"Nuova persona":"Rinomina persona"}</h3>
+    openSheetGrande(`<h3>${isNew?"Nuova persona":"Rinomina persona"}</h3>
       <div class="field"><label>Nome</label><input id="d-nome" value="${esc(d.nome||"")}" placeholder="Es. Wahid"></div>
       <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
       <button class="btn-primary" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
@@ -2279,7 +2282,7 @@
 
   function panelForm(){
     nuovoSel={icon:"🛠️",col:0};
-    openSheet(`<h3>Nuovo reparto</h3>
+    openSheetGrande(`<h3>Nuovo reparto</h3>
       <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Ferramenta, Colorificio, Edilizia, Giardinaggio'}"></div>
       <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
       <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
@@ -3420,7 +3423,11 @@
   function magApriRettifica(){
     const su=magRett.verso>0;
     const MOT=[["rotti","Rotti"],["inventario","Inventario"],["calo","Calo"],["omaggio","Omaggio"]];
-    openSheet(`<h3 style="margin:0 0 6px;font-size:20px">${su?"Carico":"Scarico"} di magazzino</h3>
+    /* ⛔ 29 agosto 2026 — Alessio, dal test vero: «se premi il piu o meno
+       si apre la pagina successiva, questa in foto». Era l'ultima finestra
+       rimasta senza testata: il titolo era una scrittina in alto a sinistra
+       e i due pulsanti stavano in mezzo alla pagina. */
+    openSheetGrande(`<h3>${su?"Carico":"Scarico"} di magazzino</h3>
       <p style="margin:0 0 18px;font-size:15px;color:#5a6672">${esc(magRett.nome)} — adesso ne risultano <b>${magRett.ora} ${esc(magRett.unita)}</b>.</p>
       <label style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">Quante ne ${su?"entrano":"escono"}?</label>
       <input id="mag-q" type="text" inputmode="decimal" data-num min="0" value="1" style="width:100%;padding:12px;font-size:16px;border:1px solid #d7dde3;border-radius:9px;box-sizing:border-box;margin-bottom:18px">

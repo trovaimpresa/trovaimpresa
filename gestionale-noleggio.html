@@ -282,7 +282,11 @@
 
   .overlay{position:fixed;inset:0;background:#f3f5f2;z-index:50;display:none;overflow-y:auto}
   .overlay.open{display:block;animation:fade .15s ease}
-  .sheet{background:#fff;width:100%;max-width:none;min-height:100vh;margin:0;padding:24px 6vw 30px;animation:up .18s ease}
+  /* ⛔ 29 agosto 2026 — «:not(.sheet--grande)»: da oggi le finestre del
+     noleggio hanno la testata e il piede fermi come negli altri gestionali,
+     e quelle regole stanno nel foglio in comune. Se questa riga le toccasse
+     ancora, la testata si porterebbe dietro il padding di una pagina. */
+  .sheet:not(.sheet--grande){background:#fff;width:100%;max-width:none;min-height:100vh;margin:0;padding:24px 6vw 30px;animation:up .18s ease}
   @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
   .sheet h3{font-size:18px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
   .field{margin-bottom:13px}
@@ -618,15 +622,52 @@
    riporta a tutta pagina: si compila un noleggio guardando il conto che si
    fa da solo, e in una finestrella da 640 px non ci sta. */
 #overlay{background:var(--sfondo,#f3f5f2);backdrop-filter:none}
-#overlay .sheet{max-width:none;min-height:100vh;margin:0;border-radius:0;
+/* ⛔ 29 agosto 2026 — LA TESTATA FINIVA SOTTO LA BARRA VIOLA.
+   Il foglio in comune abbassa la finestra di 46 px quando c'e' la barra del
+   fondatore. Qui pero' la pagina e' ingrandita («zoom:1.2», scelta del
+   noleggio perche' i numeri si leggano da lontano): la barra diventa alta
+   quasi il doppio, va a capo, e il titolo con la freccia «Indietro» ci
+   finiva sotto. Adesso l'altezza la misura il gestionale e la scrive in
+   «--barra-h», cosi' vale anche se un domani la barra cambia. */
+body:has(#ti-fondatore) .overlay{ top:var(--barra-h,46px); }
+/* ⛔ E LO ZOOM CONTA ANCHE QUI. «100vh» non lo sa, di essere dentro una
+   pagina ingrandita del 20%: su uno schermo da 900 px la finestra veniva
+   alta 1080 px veri, e il piede col Salva finiva sotto il bordo — proprio
+   il piede, cioe' l'unica cosa che deve stare sempre a portata di dito.
+   Si divide per lo zoom, e i conti tornano. */
+.sheet--grande{
+  height:calc(100vh / 1.2); max-height:calc(100vh / 1.2); min-height:0;
+}
+body:has(#ti-fondatore) .sheet--grande{
+  height:calc(100vh / 1.2 - var(--barra-h,46px));
+  max-height:calc(100vh / 1.2 - var(--barra-h,46px));
+  min-height:0;
+}
+/* ⛔ I PULSANTI DEL PIEDE. Dentro «.sheet-actions» erano larghi mezza
+   riga («flex:1»); nel piede fermo quella scatola non c'e' piu' e si
+   stringevano fino a tagliare la parola: «Annulla» e «Crea» diventavano due
+   francobolli. Stessa larghezza minima del foglio in comune: 132 px, e la
+   riga va a capo invece di schiacciarli. */
+.sheet--grande .sh-foot{ flex-wrap:wrap; gap:10px; justify-content:flex-end; }
+.sheet--grande .sh-foot button{
+  flex:0 1 auto; min-width:132px; padding:0 20px; width:auto;
+}
+@supports (height:100dvh){
+  .sheet--grande{ height:calc(100dvh / 1.2); max-height:calc(100dvh / 1.2); }
+  body:has(#ti-fondatore) .sheet--grande{
+    height:calc(100dvh / 1.2 - var(--barra-h,46px));
+    max-height:calc(100dvh / 1.2 - var(--barra-h,46px));
+  }
+}
+#overlay .sheet:not(.sheet--grande){max-width:none;min-height:100vh;margin:0;border-radius:0;
   padding:26px 5vw 40px;box-shadow:none}
-#overlay .sheet h3{font-size:24px;margin-bottom:20px}
+#overlay .sheet:not(.sheet--grande) h3{font-size:24px;margin-bottom:20px}
 .sheet-back{position:sticky;top:0;z-index:5;display:inline-block;margin:-6px 0 14px;
   background:#fff;border:1px solid #cfd9e6;color:#0066ff;border-radius:10px;
   padding:11px 18px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;
   box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .sheet-back:hover{background:#eef5ff}
-#overlay .sheet-actions{border-radius:0;max-width:900px}
+#overlay .sheet:not(.sheet--grande) .sheet-actions{border-radius:0;max-width:900px}
 /* la barra «cerca ed esporta», uguale in tutte le sezioni (23 agosto 2026) */
 .nol-barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
 .nol-cerca{flex:1 1 240px;min-width:200px;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;
@@ -6549,10 +6590,51 @@
      l'hanno tutte, anche quelle che nasceranno domani, e non si puo'
      dimenticarla. Alessio l'ha dovuta chiedere piu' di una volta perche'
      "Annulla" sta in fondo e su una scheda lunga non si vede. */
+  /* ================================================================
+     ⛔ 29 agosto 2026 — LA FINESTRA UGUALE IN TUTTI I GESTIONALI.
+     Alessio, dal test vero del negozio: «non c'e' la freccia per tornare
+     indietro… la voglio come e' su tutti i gestionali».
+     Qui c'era solo una freccina appiccicata in cima: niente testata col
+     titolo, niente piede fermo, e i pulsanti in mezzo alla pagina.
+     Adesso questa funzione fa quello che fa openSheetGrande nel negozio
+     (copiata riga per riga da gestionale-negozio.html): prende lo STESSO
+     html di prima e se lo divide da sola — il primo <h3> diventa la
+     testata, il <div class="sheet-actions"> il piede, e in mezzo resta il
+     corpo che scorre. Cosi' tutte e ventitre le finestre del noleggio si
+     rivestono insieme, senza toccarle una per una.
+     ================================================================ */
+  const _ICO_INDIETRO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
+  const _BTN_INDIETRO='<button class="sh-back" data-action="close" title="Torna indietro" aria-label="Torna indietro">'+_ICO_INDIETRO+'<span>Indietro</span></button>';
+  /* l'altezza vera della barra del fondatore, misurata: con lo zoom del
+     noleggio non e' 46 px, e il piede col Salva finirebbe fuori schermo */
+  function _misuraBarra(){
+    const b=document.querySelector("#ti-fondatore");
+    if(!b)return;
+    const h=Math.round(b.getBoundingClientRect().height/(parseFloat(getComputedStyle(document.body).zoom)||1));
+    if(h>0)document.documentElement.style.setProperty("--barra-h",h+"px");
+  }
+  addEventListener("resize",_misuraBarra);
   function openSheet(html){
-    $("#sheet").innerHTML='<button class="sheet-back" data-action="close" title="Torna indietro">← Indietro</button>'+html;
+    _misuraBarra();
+    const s=$("#sheet"), tmp=document.createElement("div");
+    tmp.innerHTML=html;
+    const h3=tmp.querySelector("h3");
+    const titolo=h3?h3.innerHTML:"";
+    if(h3)h3.parentNode.removeChild(h3);
+    const foot=tmp.querySelector(".sheet-actions");
+    const azioni=foot?foot.innerHTML:"";
+    if(foot)foot.parentNode.removeChild(foot);
+    s.className="sheet sheet--grande";
+    /* se dentro c'e' un modulo a colonne, la finestra prende tutto lo schermo */
+    if(tmp.querySelector(".sh-cols,.nol-due,.nol-riq")) s.classList.add("sh-lunga");
+    s.innerHTML='<div class="sh-head">'+_BTN_INDIETRO+'<h3>'+titolo+'</h3></div>'+
+      '<div class="sh-body">'+tmp.innerHTML+'</div>'+
+      (azioni?'<div class="sh-foot">'+azioni+'</div>':'');
     $("#overlay").classList.add("open");
     $("#overlay").scrollTop=0;
+    if(typeof _sistemaNumeri==="function")_sistemaNumeri(s);
+    const b=s.querySelector(".sh-body");
+    if(b){b.scrollTop=0;requestAnimationFrame(function(){b.scrollTop=0;});setTimeout(function(){b.scrollTop=0;},80);}
   }
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
