@@ -42,7 +42,20 @@
 // =====================================================================
 const { createClient } = require('@supabase/supabase-js');
 
-const TEMPO_ACCESSO  = 4000;    // ms — tetto sui controlli d'accesso
+/* ⛔ 29 agosto 2026 (sera) — ERA 4000, E L'HO VISTO SCATTARE DAL VIVO.
+   Provando la chat sul gestionale vero, un messaggio su tre e' tornato
+   indietro con «Non riesco a verificare il reparto». Non era rotto niente:
+   la lettura di `gest_mestieri` misurata subito dopo ci mette 107 ms, ma la
+   function su Netlify parte a freddo e i primi secondi se li mangia
+   l'avvio. Quattro secondi erano troppo pochi.
+   ⚠️ Il tetto serve lo stesso — senza, un messaggio potrebbe restare
+   appeso — ma otto secondi sono ancora molto meno del tetto di Claude
+   (30 s) e non fanno aspettare nessuno piu' di prima: si aspetta solo
+   quando qualcosa e' davvero lento.
+   ⛔ E questo controllo sta PRIMA di dove si scala il messaggio: se
+   scatta, l'iscritto non paga niente. Verificato: il contatore non si e'
+   mosso. */
+const TEMPO_ACCESSO  = 8000;    // ms — tetto sui controlli d'accesso
 const TEMPO_CLAUDE   = 30000;   // ms — tetto su una risposta di Claude
 const GIRI_MAX       = 4;       // quante volte Claude puo' chiedere dati
 const RIGHE_MAX      = 25;      // righe per attrezzata: piu' di cosi' non serve
