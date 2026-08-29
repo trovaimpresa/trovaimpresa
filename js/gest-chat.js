@@ -122,11 +122,14 @@
     if (!sez || disegnata) return;
     disegnata = true;
     sez.innerHTML =
+      /* ⚠️ 29 agosto 2026 — NIENTE `.gal-intro` QUI.
+         Tutte le altre sezioni hanno la riga di spiegazione sotto il
+         titolo, ma qui Alessio l'ha fatta togliere: «questo non serve».
+         E ha ragione — la chat si spiega da sola, e quelle quattro righe
+         si mangiavano 84 px di altezza proprio dove serve lo spazio.
+         Quello che c'era da dire (cosa guarda, quando si ferma) sta nella
+         schermata vuota, dentro la chat, dove uno lo legge davvero. */
       '<div class="sec-head"><h2>Chat con AI</h2></div>'
-    + '<div class="gal-intro">Chiedi quello che vuoi sul gestionale: come si fa una fattura, '
-    + 'perch&eacute; il magazzino non scende, dov&rsquo;&egrave; finito un preventivo. '
-    + 'Guarda i <b>tuoi</b> dati del reparto in cui sei e ti risponde sul concreto. '
-    + 'Se non sa, te lo dice e ti manda all&rsquo;assistenza.</div>'
     + '<div class="asst-wrap">'
     +   '<div class="asst-msgs" id="chat-righe"></div>'
     +   '<div class="asst-scrivi">'

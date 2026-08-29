@@ -522,6 +522,51 @@
     .asst-scrivi .btn-primary{padding:14px 0}
   }
 
+  /* ============================================================
+     ✨ 29 agosto 2026 — LA CHAT CON AI A TUTTA PAGINA
+     ============================================================
+     Chiesto da Alessio: «al centro tutta pagina si scrive, ai lati resta
+     il gestionale». Cioe' il menu di sinistra non si tocca, e la chat
+     riempie il centro dall'alto in basso, con la casella in fondo — come
+     in una chat vera.
+
+     ⛔ QUI NON C'E' NIENTE DI NUOVO SE NON LA MISURA.
+     Colori, bordi, angoli, bolle e casella restano quelli di `.asst-*`
+     qui sopra, che sono gia' quelli dell'Assistenza diretta. Cambia solo
+     quanto spazio prendono.
+
+     ⚠️ Il 251 non e' inventato: e' misurato sulla pagina vera. La sezione
+     comincia a 195 px dall'alto (barra del reparto + riga della ricerca +
+     il respiro del `.wrap`) e sotto il `.wrap` lascia 56 px. 195+56=251.
+     Se un domani si cambia l'altezza della barra in alto, questo numero
+     va rifatto: si misura, non si indovina.
+
+     ⚠️ Tutto sotto `#chat`: `id="chat"` esiste SOLO in gestionale-app.html
+     (controllato), quindi negozio, noleggio e app operaio non si toccano
+     nemmeno per sbaglio.
+     ============================================================ */
+  #chat.active{
+    display:flex; flex-direction:column;
+    height:calc(100vh - 251px);
+    min-height:360px;
+  }
+  /* il titolo e la spiegazione restano alti quanto vogliono; a prendersi
+     tutto il resto e' la chat */
+  #chat .asst-wrap{
+    max-width:none;            /* tutta la larghezza, come le altre sezioni */
+    flex:1; display:flex; flex-direction:column; min-height:0;
+  }
+  #chat .asst-msgs{
+    flex:1; max-height:none; min-height:0;   /* si allunga e scorre dentro */
+  }
+  /* sul telefono la finestra e' corta e la barra in alto e' fatta
+     diversa: li' si lascia fare all'altezza naturale, se no la casella
+     per scrivere finisce fuori schermo */
+  @media(max-width:880px){
+    #chat.active{ height:auto; min-height:0; }
+    #chat .asst-msgs{ min-height:220px; max-height:52vh; }
+  }
+
   /* etichette dei due gruppi: sentence case, non maiuscolo */
   .side-group{font-size:13.5px;font-weight:700;color:var(--testo-2);
     margin:14px 0 6px;padding:0 2px;letter-spacing:0;text-transform:none}
