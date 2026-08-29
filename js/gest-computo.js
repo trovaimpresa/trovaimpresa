@@ -2071,7 +2071,13 @@
     const suaFonte=(fonti.indexOf(dich)>=0)?dich:_ppSceltaAuto(fonti,[dich,(comp.prezzario_anno||"")].join(" "));
     if(ppFonteScelta===null)ppFonteScelta=suaFonte||"";
     const n=ppFonteScelta?ppTutte.filter(x=>x.fonte===ppFonteScelta).length:ppTutte.length;
-    const _vc=k=>k+(k===1?" voce":" voci");
+    /* ⛔ 29 agosto 2026 - IL PREZZARIO SEMBRAVA PICCOLO. In memoria ne teniamo
+       500 (le piu' usate), ma il prezzario del Lazio ne ha piu' di 15.000 e la
+       ricerca ci arriva lo stesso. Scrivere «500 voci» faceva credere che il
+       prezzario fosse quello: adesso si dice come stanno le cose. */
+    const _vc=k=>(k>=PP_MAX
+      ? "le "+k+" che usi di piu', piu' tutte le altre cercando una parola"
+      : k+(k===1?" voce":" voci"));
     box.innerHTML='<div class="sh-nota" style="margin-bottom:10px">'
       +(ppFonteScelta
         ? 'Cerco dentro <b>'+esc(ppFonteScelta)+'</b> ('+_vc(n)+'), la tariffa di questo computo. '

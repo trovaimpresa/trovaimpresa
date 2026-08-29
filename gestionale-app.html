@@ -699,7 +699,13 @@
   const uid=()=>"id"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   /* useGrouping:true è esplicito apposta: senza, certi browser non mettono il
      punto delle migliaia e usciva "1000,00 €" invece di "1.000,00 €". */
-  const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,useGrouping:true}).format(n||0);
+  /* ⛔ 29 agosto 2026 - I CENTESIMI ANCHE QUI. eur() arrotondava all'euro:
+     nel Riepilogo, nei Lavori, nei Preventivi, nelle Carte e nel Report un
+     2.800,50 € si leggeva "2.800 €" e un 5,50 € diventava "6 €". Adesso ha
+     i centesimi come le fatture. eurTondo() resta per le tacche dell'asse
+     del grafico, dove i centesimi non ci starebbero. */
+  const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
+  const eurTondo=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,useGrouping:true}).format(n||0);
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
   /* 11 agosto 2026 — L'OROLOGIO DI GREENWICH FACEVA VIVERE IERI.
      Prima: new Date().toISOString().slice(0,10). toISOString dà l'ora di
@@ -10969,7 +10975,7 @@ ${vecchi?`
     [0,.5,1].forEach(f=>{
       const y=y1-(y1-y0)*f;
       griglia+=`<line x1="${x0}" y1="${y.toFixed(1)}" x2="${x1}" y2="${y.toFixed(1)}" style="stroke:var(--bordo)" stroke-width="1"/>`
-             +`<text x="${x0-6}" y="${(y+3.5).toFixed(1)}" text-anchor="end" ${LAB}>${eur(yMax*f)}</text>`;
+             +`<text x="${x0-6}" y="${(y+3.5).toFixed(1)}" text-anchor="end" ${LAB}>${eurTondo(yMax*f)}</text>`;
     });
     let prev="";
     if(imp>0){
