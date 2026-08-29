@@ -6129,8 +6129,8 @@
         <div class="thumbs" id="th-dopo"></div></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       <div class="row2">
-        <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
+        <div class="field"><label>Ore lavorate</label><input id="j-ore" inputmode="decimal" value="${job.ore==null||job.ore===""?"":String(job.ore).replace(".",",")}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input id="j-imp" inputmode="decimal" value="${job.importo==null||job.importo===""?"":String(job.importo).replace(".",",")}" placeholder="0"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
@@ -6180,7 +6180,14 @@
     const stato=segVal("j-stato"), fattStato=segVal("j-fatt")||"none";
     const obj={id,clienteId:cli,descrizione:$("#j-desc").value.trim(),dove:$("#j-dove").value.trim(),
       dataPrevista:$("#j-data").value,assegnatoId:$("#j-dip").value,stato,lavoroSvolto:$("#j-svolto").value.trim(),
-      note:$("#j-note").value.trim(),ore:$("#j-ore").value,importo:$("#j-imp").value,fattStato,pagato:fattStato==="pagata",
+      /* ⛔ 29 agosto 2026 — le ultime due caselle rimaste type="number".
+         Alessio, sul negozio: «se voglio mettere 5.5 non posso, mi mette 55».
+         Qui era lo stesso: il modulo grande del lavoro era rimasto indietro
+         rispetto a quello piccolo, sistemato il 22 agosto (riga ~6101).
+         La casella vuota resta vuota: «non ho segnato le ore» non è «zero ore». */
+      note:$("#j-note").value.trim(),
+      ore:$("#j-ore").value===""?"":_numIt($("#j-ore").value),
+      importo:$("#j-imp").value===""?"":_numIt($("#j-imp").value),fattStato,pagato:fattStato==="pagata",
       foto:editing.foto,numFatt:prev?prev.numFatt:undefined};
     obj.dataFatto=stato==="fatto"?(prev&&prev.dataFatto?prev.dataFatto:(obj.dataPrevista||todayStr())):"";
     if(exists)db().lavori=db().lavori.map(l=>l.id===id?obj:l);else db().lavori.push(obj);
