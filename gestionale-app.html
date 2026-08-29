@@ -15380,6 +15380,40 @@ ${vecchi?`
     if(ctMancanti.length)h+='<div class="ct-piu">Non riesco a leggere: '+esc(ctMancanti.join(", "))+'. Quello che c\'è lì dentro non esce.</div>';
     box.innerHTML=h;
   }
+  /* ============================================================
+     ⛔ 29 agosto 2026 — APRIRE UNA COSA DA FUORI (gradino 2 della chat)
+     ============================================================
+     La Chat con AI, quando nomina un lavoro o una fattura, mette sotto un
+     pulsante «Aprilo». Ma la chat sta fuori da questa closure e da li'
+     dentro non si vede niente.
+     ⛔ E NON SI RISCRIVE COME SI APRE UNA COSA. E' la stessa regola gia'
+     scritta venti righe piu' su per la ricerca in alto: cliente e lavoro
+     si aprono col loro `data-action` di sempre («apri-cli», «edit-job»),
+     preventivo e fattura con le due funzioni che la ricerca usa gia'.
+     Riscrivere qui come si apre un lavoro vorrebbe dire avere la stessa
+     cosa in tre posti.
+     ⚠️ Il pulsante finto si attacca al body prima di premerlo: un
+     elemento staccato non fa arrivare il clic al gestore che sta sul
+     document, e non succederebbe niente.
+     ⚠️ L'id arriva dalla chat, cioe' da una lettura gia' filtrata per
+     utente e reparto — e ctApriPrev/ctApriFatt lo rileggono comunque con
+     `.eq("user_id", sbUid)`. Due serrature, come sempre. */
+  window.apriCosa=function(tipo,id){
+    try{
+      if(!id)return false;
+      if(tipo==="prev"){ ctApriPrev(id); return true; }
+      if(tipo==="fatt"){ ctApriFatt(id); return true; }
+      const AZ={cli:"apri-cli",lav:"edit-job"};
+      const a=AZ[tipo]; if(!a)return false;
+      const b=document.createElement("button");
+      b.type="button"; b.setAttribute("data-action",a); b.setAttribute("data-id",String(id));
+      b.style.display="none";
+      document.body.appendChild(b);
+      b.click();
+      b.remove();
+      return true;
+    }catch(_){ return false; }
+  };
   function ctApri(){ const b=$("#ct-pop"); if(b)b.classList.add("aperta"); }
   function ctChiudi(){ const b=$("#ct-pop"); if(b){b.classList.remove("aperta");b.innerHTML="";} }
   function ctAzzera(){ const i=$("#ct-q"); if(i)i.value=""; ctChiudi(); }

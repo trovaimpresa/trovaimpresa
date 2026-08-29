@@ -91,7 +91,29 @@
      `white-space:pre-wrap`, quindi gli a capo li tiene da solo. Mettendoci
      anche i <br> le righe venivano doppie. Si converte solo il grassetto. */
   function testoRisposta(t) {
-    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri);
+  }
+
+  /* ============================================================
+     ⛔ 29 agosto 2026 — IL PULSANTE «APRILO» (gradino 2)
+     ============================================================
+     Quando la chat nomina una cosa che ha letto, ci mette dietro un
+     segnalino [apri:TIPO:ID]. Qui diventa un pulsante che apre davvero
+     quella cosa nel gestionale.
+     ⛔ Ad aprirla NON e' questa pagina: e' `window.apriCosa()` dentro
+     gestionale-app.html, che usa gli stessi `data-action` dei pulsanti
+     che ci sono gia'. Qui si preme un campanello, non si apre la porta.
+     ⚠️ L'ID deve essere un id vero (36 caratteri, la forma di sempre): se
+     Claude se lo inventasse, il segnalino resta scritto com'e' e non
+     diventa un pulsante che porta chissa' dove.
+     ⚠️ I tipi sono quattro e non di piu': sono quelli che il gestionale
+     sa gia' aprire da soli. */
+  var TIPI_APRIBILI = { lav:'Aprilo', prev:'Apri il preventivo', fatt:'Apri la fattura', cli:'Apri il cliente' };
+  var SEGNALINO = /\[apri:(lav|prev|fatt|cli):([0-9a-fA-F-]{36})\]/g;
+  function pulsanteApri(tutto, tipo, id) {
+    var lab = TIPI_APRIBILI[tipo];
+    if (!lab) return tutto;
+    return ' <button class="chip" type="button" data-apri="' + tipo + '" data-apri-id="' + id + '">' + lab + '</button>';
   }
 
   /* ------------------------------------------------------------------
@@ -134,6 +156,14 @@
     + '</div>';
 
     document.getElementById('chat-manda').addEventListener('click', manda);
+    /* un ascoltatore solo per tutti i pulsanti «Aprilo», anche quelli che
+       arriveranno dopo: sta sulla scatola dei messaggi, non sui pulsanti */
+    document.getElementById('chat-righe').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-apri]'); if (!b) return;
+      var ok = (typeof window.apriCosa === 'function')
+        && window.apriCosa(b.getAttribute('data-apri'), b.getAttribute('data-apri-id'));
+      if (!ok) scrivi('ai', 'Non riesco ad aprirtelo da qui: cercalo con la ricerca in alto.');
+    });
     document.getElementById('chat-domanda').addEventListener('keydown', function (e) {
       /* Invio manda, Maiuscolo+Invio va a capo: e' come funzionano tutte
          le chat, quindi non si scrive da nessuna parte — si sa. */

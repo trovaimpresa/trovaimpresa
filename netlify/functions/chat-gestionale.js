@@ -118,6 +118,29 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
   return q;
 }
 
+// ---------------------------------------------------------------------
+// ⛔ 29 agosto 2026 — PERCHE' ESISTE QUESTA FUNZIONCINA
+// Trovato da Alessio provando la chat vera: «dati.rpc(...).catch is not
+// a function». Quello che `rpc()` di Supabase restituisce NON e' una
+// promessa normale: e' un costruttore di richiesta che ha `.then` ma NON
+// ha `.catch`. Scrivere `.rpc(...).catch(...)` non protegge da niente —
+// fa esplodere la riga stessa, e la chat rispondeva «non sono riuscito».
+// ⚠️ Lo stesso errore l'avevo scritto anche dove si scala il CREDITO: li'
+// sarebbe stato peggio, perche' un credito non scalato e' un messaggio
+// regalato.
+// Adesso ogni chiamata passa da qui: si aspetta con `await` dentro un
+// try, che e' l'unico modo che funziona davvero.
+// ---------------------------------------------------------------------
+async function chiamaRpc(client, nome, argomenti) {
+  try {
+    const r = await client.rpc(nome, argomenti || {});
+    if (r && r.error) return { errore: String(r.error.message || r.error) };
+    return { dati: r ? r.data : null };
+  } catch (e) {
+    return { errore: (e && e.message) || String(e) };
+  }
+}
+
 // esegue una lettura gia' costruita, col client dell'ISCRITTO (RLS accesa)
 async function esegui(clientDati, q) {
   if (q.errore) return { errore: q.errore };
@@ -183,6 +206,10 @@ function istruzioni(sezione, nomeReparto) {
     '· sicurezza e leggi → «verifica, la norma cambia»;',
     '· contratti → «fallo vedere a chi di dovere».',
     'Puoi spiegare come si fa una cosa NEL GESTIONALE anche su questi argomenti: quello che non fai è dire cosa è giusto per legge.',
+    '',
+    'QUANDO NOMINI UNA COSA PRECISA che hai letto con un attrezzo (un lavoro, un preventivo, una fattura, un cliente), subito dopo il suo nome scrivi il segnalino [apri:TIPO:ID] con l\'id vero che hai letto. TIPO è uno fra: lav (lavoro), prev (preventivo), fatt (fattura), cli (cliente). Il gestionale lo trasforma in un pulsante «Aprilo» che porta l\'utente proprio li\'.',
+    'Esempio: «Sostituzione grondaia [apri:lav:1f2e...] vale 8.000,00 €». Il segnalino non si spiega e non si nomina: si scrive e basta.',
+    'Metti il segnalino SOLO su cose che hai davvero letto, con l\'id esatto. Non inventarlo mai: un pulsante che apre la cosa sbagliata è peggio di nessun pulsante.',
     '',
     'I SOLDI si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
     'Quando dici una cifra, dì SEMPRE tutte e due: il totale con l\'IVA (quello che il cliente bonifica) e, fra parentesi, l\'imponibile. Esempio: «9.760,00 € (8.000,00 € imponibile)». Scelta di Alessio, 29 agosto.',
@@ -268,10 +295,11 @@ exports.handler = async function(event) {
 
   // ---- 4. ha il Pro? e quanti messaggi gli restano? ------------------
   let stato = null;
-  try {
-    const r = await conTempo(server.rpc('chat_stato', { p_user: uid }), TEMPO_ACCESSO, 'chat_stato');
-    if (!r.error && r.data && r.data.length) stato = r.data[0];
-  } catch (e) { console.error('[chat] chat_stato:', e && e.message); }
+  {
+    const r = await chiamaRpc(server, 'chat_stato', { p_user: uid });
+    if (r.errore) console.error('[chat] chat_stato:', r.errore);
+    else if (r.dati && r.dati.length) stato = r.dati[0];
+  }
   if (!stato) return rispondi(503, { error: 'Non riesco a controllare il tuo piano. Riprova fra poco.' });
   if (!stato.ha_pro) {
     return rispondi(403, { error: 'La Chat con AI è nel piano Pro.', serve_pro: true });
@@ -288,9 +316,8 @@ exports.handler = async function(event) {
   let comePagato = 'compreso';
   let scontrino = null;   // il log_id, per rimborsare se Claude non risponde
   if (stato.restanti <= 0) {
-    const c = await dati.rpc('consume_ai_credit', { p_feature: 'chat', p_cost: 1 })
-                        .catch(function(e) { return { error: e }; });
-    const esito = (c && !c.error && c.data) || null;
+    const c = await chiamaRpc(dati, 'consume_ai_credit', { p_feature: 'chat', p_cost: 1 });
+    const esito = (c && !c.errore && c.dati) || null;
     if (!esito || esito.ok !== true) {
       const perche = (esito && esito.reason) || 'no_credits';
       return rispondi(402, {
@@ -368,10 +395,8 @@ exports.handler = async function(event) {
              posto solo. Qui non si somma niente.
              ⚠️ Va chiamata col client dell'ISCRITTO: dentro si prende chi
              chiede da auth.uid(), e col service role sarebbe vuoto. */
-          var rs = await dati.rpc('chat_soldi', { p_mestiere: mestiere_id })
-                             .catch(function (e) { return { error: e }; });
-          esito = (rs && rs.error) ? { errore: String(rs.error.message || rs.error) }
-                                   : (rs.data || { errore: 'nessun conto' });
+          var rs = await chiamaRpc(dati, 'chat_soldi', { p_mestiere: mestiere_id });
+          esito = rs.errore ? { errore: rs.errore } : (rs.dati || { errore: 'nessun conto' });
         } else {
           esito = { errore: 'attrezzo che non esiste' };
         }
@@ -397,8 +422,9 @@ exports.handler = async function(event) {
   //    messaggio che non e' mai arrivato e' il modo piu' veloce per farsi
   //    disdire il piano.
   if (errore && !risposta && scontrino) {
-    try { await dati.rpc('refund_ai_credit', { p_log_id: scontrino, p_error: String(errore).slice(0, 300) }); }
-    catch (e) { console.error('[chat] rimborso non riuscito:', e && e.message); }
+    const rimb = await chiamaRpc(dati, 'refund_ai_credit',
+      { p_log_id: scontrino, p_error: String(errore).slice(0, 300) });
+    if (rimb.errore) console.error('[chat] rimborso non riuscito:', rimb.errore);
   }
 
   // ---- 8. si scrive nel registro (solo il server puo') --------------
@@ -425,3 +451,5 @@ exports.STRUMENTI = STRUMENTI;
 exports.costruisciLettura = costruisciLettura;
 exports.esegui = esegui;
 exports.istruzioni = istruzioni;
+
+exports.chiamaRpc = chiamaRpc;
