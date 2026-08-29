@@ -31,6 +31,17 @@ exports.handler = async function(event) {
   }
 
   // ------------------------------------------------------------------
+  //  L'indirizzo arriva come lo ha scritto l'utente. Sul telefono la tastiera
+  //  mette da sola la maiuscola iniziale ("Ac.immobiliare@..."), mentre in
+  //  Supabase l'email viene salvata tutta minuscola. Il controllo "email gia'
+  //  mandata" qui sotto cerca con email=eq., che distingue maiuscole e
+  //  minuscole: non trovava la riga, non metteva la spunta benvenuto_inviato
+  //  e mandava l'email due volte (una dalla registrazione, una dal primo
+  //  accesso, che invece usa l'email minuscola della sessione).
+  // ------------------------------------------------------------------
+  email = String(email).trim().toLowerCase();
+
+  // ------------------------------------------------------------------
   //  UNA SOLA EMAIL PER ISCRITTO
   //  Prima questa funzione mandava tutte le volte che qualcuno la chiamava,
   //  e la chiamavano in due: la pagina di registrazione (sempre) e la pagina
