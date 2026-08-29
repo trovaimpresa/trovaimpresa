@@ -100,12 +100,6 @@
         --blu, --sfondo, --bordo, --card, --testo, --testo-2. Niente
         inventato, e niente sotto i 13 px (qui il piu' piccolo e' 14).
      ------------------------------------------------------------------ */
-  var ESEMPI = [
-    'Come faccio una fattura?',
-    'Perché il magazzino non scende?',
-    'Quanti lavori ho ancora da fatturare?'
-  ];
-
   /* ⛔ IL MODELLO E' LA SEZIONE «ASSISTENZA DIRETTA», copiata riga per riga.
      Prima qui c'erano stili scritti a mano dentro il js: bolle inventate,
      una casella di scrittura di una riga sola, e `.sh-b` che non e' una
@@ -141,11 +135,10 @@
 
     document.getElementById('chat-manda').addEventListener('click', manda);
     document.getElementById('chat-domanda').addEventListener('keydown', function (e) {
-      /* Invio manda, Maiuscolo+Invio va a capo: e' come funzionano tutte le
-         chat, e con la casella alta tre righe si vede quello che si scrive. */
+      /* Invio manda, Maiuscolo+Invio va a capo: e' come funzionano tutte
+         le chat, quindi non si scrive da nessuna parte — si sa. */
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); manda(); }
     });
-    benvenuto();
     aggiornaSotto();
   }
 
@@ -167,25 +160,12 @@
     return d;
   }
 
-  function benvenuto() {
-    var r = righe(); if (!r || r.children.length) return;
-    /* `.asst-vuoto` e' la schermata vuota che usa gia' l'Assistenza diretta */
-    var v = document.createElement('div');
-    v.className = 'asst-vuoto';
-    v.innerHTML = 'Chiedimi quello che vuoi su <b>questo reparto</b> del gestionale.<br>'
-      + 'Su tasse, sicurezza e contratti mi fermo e ti dico di far controllare.'
-      + '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
-      + ESEMPI.map(function (e) {
-          return '<button class="chip" type="button" data-chiedi="' + esc(e) + '">' + esc(e) + '</button>';
-        }).join('')
-      + '</div>';
-    v.addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-chiedi]'); if (!b) return;
-      document.getElementById('chat-domanda').value = b.getAttribute('data-chiedi');
-      manda();
-    });
-    r.appendChild(v);
-  }
+  /* ⛔ 29 agosto 2026 — LA CHAT VUOTA E' VUOTA.
+     Qui c'erano un saluto, la spiegazione di cosa guarda e tre domande di
+     esempio da cliccare. Alessio le ha fatte togliere tutte:
+     «non servono le spiegazioni, tutti sanno usare una chat».
+     Ha ragione: la casella dice gia' cosa fare, e il posto per spiegare
+     una cosa non e' la schermata di chi la sta gia' usando. */
 
   /* ------------------------------------------------------------------
      quanti messaggi gli restano.
