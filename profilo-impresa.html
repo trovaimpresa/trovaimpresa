@@ -768,6 +768,13 @@ async function caricaProfilo(id){
       _profiloKo('Questa scheda non è più disponibile');
       return;
     }
+    /* ⛔ 29 agosto 2026 - IL LOGO CHE NON COMPARIVA MAI. _esc nasceva
+       trenta righe piu' in basso, ma il logo dell'impresa (poco sotto) la
+       usava gia': con «const» quello e' un errore secco, e la pagina si
+       fermava li'. Si perdevano il logo, il colore dell'intestazione, la
+       foto di copertina e i bollini «Verificata», «Albo verificato», «RC
+       professionale». Adesso nasce prima di chi la usa. */
+    const _esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
@@ -807,7 +814,6 @@ async function caricaProfilo(id){
     // quindi passiamo agli spazi laterali la citta' dell'impresa mostrata.
     if(d.citta){ window.TI_CITTA = d.citta; }
     // ===== VISTA INFORMAZIONI UNIFICATA (solo campi compilati) =====
-    const _esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     let _infoHasContent=false;
     // Chi siamo
     if(d.descrizione){document.getElementById('profile-desc').textContent=d.descrizione;document.getElementById('info-desc-wrap').style.display='';_infoHasContent=true}
