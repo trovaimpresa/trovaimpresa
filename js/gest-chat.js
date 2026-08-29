@@ -129,17 +129,23 @@
      caselle, il modulo del lavoro starebbe scritto in due posti, e un
      campo aggiunto domani finirebbe in uno solo dei due.
      ⛔ E non si salva niente: il modulo si apre pieno, a salvare e' lui.
-     ⚠️ Per adesso l'unico modulo e' il lavoro. Un tipo che non conosco
-     non apre niente e lo dice, invece di aprire il modulo sbagliato.
+     ⚠️ I moduli sono DUE, il lavoro e il cliente: sono gli stessi che
+     conosce la function. Se un domani se ne aggiunge uno di la', va
+     aggiunto anche in questa riga qui sotto — se no arriva un modulo e
+     non lo apre nessuno. Un tipo che non conosco non apre niente e lo
+     dice, invece di aprire il modulo sbagliato.
      ============================================================ */
+  var MODULI_APRIBILI = { lavoro: 'compilaLavoroDaChat', cliente: 'compilaClienteDaChat' };
+
   function apriModulo(m) {
     if (!m || !m.campi) return false;
-    if (m.tipo !== 'lavoro') { scrivi('ai', 'Questo modulo non lo so ancora aprire da qui.'); return false; }
-    if (!window.AI || typeof window.AI.compilaLavoroDaChat !== 'function') {
+    var quale = MODULI_APRIBILI[m.tipo];
+    if (!quale) { scrivi('ai', 'Questo modulo non lo so ancora aprire da qui.'); return false; }
+    if (!window.AI || typeof window.AI[quale] !== 'function') {
       scrivi('ai', 'Il modulo non riesco ad aprirtelo: ricarica la pagina e riprova.');
       return false;
     }
-    return !!window.AI.compilaLavoroDaChat(m.campi);
+    return !!window.AI[quale](m.campi);
   }
 
   /* ------------------------------------------------------------------

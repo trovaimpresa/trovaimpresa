@@ -143,24 +143,95 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
 //    niente di piu' lungo, e una casella non e' il posto dove far entrare
 //    un romanzo.
 // ---------------------------------------------------------------------
-const CASELLE_LAVORO = ['descrizione', 'dove', 'data', 'importo', 'cliente', 'operatore'];
+// ⚠️ I MODULI CHE LA CHAT SA APRIRE. Uno per riga, con le sue caselle e
+//    la casella SENZA LA QUALE non ha senso aprire niente. Aggiungerne
+//    uno domani vuol dire aggiungere una riga qui, non un altro pezzo di
+//    codice: e il banco lo gira da solo su tutti quelli che trova.
+const MODULI = {
+  lavoro:  { caselle: ['descrizione', 'dove', 'data', 'importo', 'cliente', 'operatore'],
+             serve: 'descrizione', manca: 'manca cosa c\'e\' da fare' },
+  cliente: { caselle: ['nome', 'indirizzo', 'referente', 'telefono'],
+             serve: 'nome',        manca: 'manca il nome del cliente' }
+};
+const CASELLE_LAVORO = MODULI.lavoro.caselle;    // per chi lo chiedeva prima
 const LUNGHEZZA_MAX  = 300;
 const FORMA_DATA     = /^\d{4}-\d{2}-\d{2}$/;
 
 function costruisciModulo(tipo, dati) {
-  if (tipo !== 'lavoro') return { errore: 'modulo che non conosco: ' + String(tipo) };
+  const m = MODULI[tipo];
+  if (!m) return { errore: 'modulo che non conosco: ' + String(tipo) };
   const d = dati || {};
   const campi = {};
-  CASELLE_LAVORO.forEach(function (k) {
+  m.caselle.forEach(function (k) {
     if (d[k] === null || d[k] === undefined) return;
     const v = String(d[k]).trim().slice(0, LUNGHEZZA_MAX);
     if (!v) return;
     if (k === 'data' && !FORMA_DATA.test(v)) return;   // vedi la nota sopra
     campi[k] = v;
   });
-  // senza «cosa c'e' da fare» non e' un lavoro: meglio niente modulo
-  if (!campi.descrizione) return { errore: 'manca cosa c\'e\' da fare' };
-  return { tipo: 'lavoro', campi: campi };
+  if (!campi[m.serve]) return { errore: m.manca };
+  return { tipo: tipo, campi: campi };
+}
+
+// ---------------------------------------------------------------------
+// ⛔ 29 agosto 2026 (sera) — IL NOME VERO DEL CLIENTE LO DICE IL DATABASE,
+//    NON L'ORTOGRAFIA DI CLAUDE.
+//
+// Trovato provando la chat dal vivo, sui dati veri. Il cliente di Alessio
+// si chiama «condomio la firesta». Claude ha sistemato il nome e ha
+// scritto «Condominio La Firesta»: giusto in italiano, ma nella tendina
+// del modulo quella voce NON C'E'. Il gestionale cerca la voce identica,
+// non la trova, e lascia il cliente vuoto. Succede quasi sempre: uno
+// scrive il nome come se lo ricorda, il modello lo corregge, e il
+// collegamento si perde in silenzio.
+//
+// ⛔ La toppa NON si mette nel browser allentando il confronto: da li' non
+//    si sa quale sia il nome vero, e un confronto largo attacca il lavoro
+//    al cliente sbagliato. Il nome vero sta nel database, quindi si va a
+//    prenderlo li'.
+//
+// Come: si cerca con la PAROLA PIU' LUNGA del nome («firesta»), fra i
+// clienti DEL SUO REPARTO, e si tiene il nome esatto SOLO se ne esce
+// esattamente UNO. Zero o due o piu' e si lascia com'era: meglio la
+// tendina vuota che il lavoro sul cliente di un altro.
+//
+// ⚠️ La lettura passa da `costruisciLettura`, quindi si porta dietro i due
+//    filtri e il cestino fuori come tutte le altre. Nessuna scorciatoia.
+// ---------------------------------------------------------------------
+// ⛔ E QUI NON SI INDOVINA. Il primo tentativo cercava la PAROLA PIU'
+//    LUNGA del nome: su «Condominio La Firesta» avrebbe cercato
+//    «condominio», che dentro «condomio la firesta» non c'e' — la parola
+//    che identifica era «firesta», cioe' la piu' CORTA. E allentare il
+//    confronto per farcela stare vuol dire, il giorno che i clienti sono
+//    due, attaccare il lavoro a quello sbagliato. Un lavoro sul cliente
+//    di un altro non si vede: si vede quando arriva la fattura.
+//
+//    Quindi: o il nome c'e' IDENTICO fra i suoi, o il campo si toglie e
+//    si dice a Claude quali sono i nomi veri, che al giro dopo richiama
+//    l'attrezzo con quello giusto. La scelta la fa lui su nomi VERI, non
+//    una somiglianza inventata qui.
+//
+// ⚠️ minuscole, senza accenti, spazi normalizzati: e' lo stesso confronto
+//    che fa `impostaSelectQuando` nel browser sulla tendina. I due devono
+//    restare uguali, se no il server dice «va bene» e la tendina no.
+const senzaAccenti = function (x) {
+  return String(x == null ? '' : x).toLowerCase().normalize('NFD')
+    .replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+};
+
+function scegliNome(nomeDetto, nomiVeri) {
+  const cercato = senzaAccenti(nomeDetto);
+  if (!cercato) return null;
+  const trovato = (nomiVeri || []).filter(function (x) { return senzaAccenti(x) === cercato; });
+  return trovato.length ? trovato[0] : null;
+}
+
+// i nomi veri del reparto: passa da costruisciLettura, quindi si porta
+// dietro i due filtri e il cestino fuori come tutte le altre letture
+async function nomiDelReparto(clientDati, cosa, uid, reparto) {
+  const r = await esegui(clientDati, costruisciLettura(cosa, uid, reparto, { quanti: RIGHE_MAX }));
+  if (r.errore || !r.righe) return [];
+  return r.righe.map(function (x) { return x.nome; }).filter(Boolean);
 }
 
 // ---------------------------------------------------------------------
@@ -243,6 +314,21 @@ const STRUMENTI = [
       },
       required: ['descrizione']
     }
+  },
+  {
+    // ⛔ come compila_lavoro: non legge e non scrive niente
+    name: 'compila_cliente',
+    description: 'Apre nel gestionale il modulo del cliente nuovo GIA\' COMPILATO coi dati che hai capito. Usalo quando ti chiede di aggiungere o segnare un cliente nuovo. NON salva niente: l\'utente guarda le caselle e preme Salva lui. Mettici solo quello che ti ha detto davvero.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        nome:      { type:'string', description:'il nome del cliente, del condominio o della ditta' },
+        indirizzo: { type:'string', description:'via e numero' },
+        referente: { type:'string', description:'la persona con cui si parla' },
+        telefono:  { type:'string', description:'il numero di telefono' }
+      },
+      required: ['nome']
+    }
   }
 ];
 
@@ -285,7 +371,9 @@ function istruzioni(sezione, nomeReparto, oggi) {
     '⛔ Nel modulo ci metti SOLO quello che ti ha detto davvero. Quello che non sai si lascia vuoto, non si inventa: un modulo con dentro una data o un importo inventati è peggio di un modulo mezzo vuoto, perché uno lo salva senza guardare.',
     'La data va scritta AAAA-MM-GG, se no la casella la rifiuta senza dire niente. Se non sei sicuro di che giorno intende, lascia fuori la data e chiediglielo.',
     'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
-    'Per adesso sai aprire solo il modulo del LAVORO. Se ti chiede un cliente nuovo o un preventivo, mandalo al pulsante «Compila con AI» che sta in cima a quelle sezioni.',
+    'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
+    'Sai aprire questi due moduli e basta. Se ti chiede un preventivo, mandalo al pulsante «Genera con AI» che sta in cima ai Preventivi.',
+    'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
     'Nel database non scrivi e non cambi mai niente: tu leggi, spieghi, e al massimo gli apri un modulo già pieno. A salvare è sempre lui.'
   ].join('\n');
@@ -422,6 +510,9 @@ exports.handler = async function(event) {
      che sono solo domande: solo `compila_lavoro` lo riempie, e ne passa
      UNO SOLO — due moduli aperti insieme sono due finestre sovrapposte. */
   let modulo = null;
+  /* vero quando il modulo aperto ha un nome che non esiste: solo allora
+     Claude puo' rifarlo una volta, col nome giusto */
+  let daSistemare = false;
 
   /* ⚠️ L'OROLOGIO DEL SERVER E' A GREENWICH. Alle 00:30 di Roma li' e'
      ancora ieri: senza il fuso, «segnamelo domani» finirebbe un giorno
@@ -481,16 +572,44 @@ exports.handler = async function(event) {
              chiede da auth.uid(), e col service role sarebbe vuoto. */
           var rs = await chiamaRpc(dati, 'chat_soldi', { p_mestiere: mestiere_id });
           esito = rs.errore ? { errore: rs.errore } : (rs.dati || { errore: 'nessun conto' });
-        } else if (t.name === 'compila_lavoro') {
-          /* ⛔ QUI NON SI LEGGE E NON SI SCRIVE NIENTE. Non c'e' nessun
-             filtro da mettere perche' non si guarda nessun dato: si
-             prepara solo il modulo che aprira' il browser, e a salvarlo
-             sara' l'iscritto. Il controllo delle caselle sta tutto in
-             `costruisciModulo`, che il banco prova da sola. */
-          const m = costruisciModulo('lavoro', inp);
-          if (m.errore)    esito = { errore: m.errore };
-          else if (modulo) esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
-          else { modulo = m; esito = { ok: true, aperto: 'gli ho aperto il modulo del lavoro, gia\' compilato' }; }
+        } else if (t.name === 'compila_lavoro' || t.name === 'compila_cliente') {
+          /* ⛔ QUI NON SI SCRIVE NIENTE. Si prepara solo il modulo che
+             aprira' il browser, e a salvarlo sara' l'iscritto. Il
+             controllo delle caselle sta tutto in `costruisciModulo`, che
+             il banco prova da sola.
+             ⚠️ L'unica lettura e' quella del NOME VERO del cliente e della
+             persona della squadra: passa da `costruisciLettura`, quindi
+             si porta dietro i due filtri come tutte le altre. Vedi la
+             nota sopra `nomeVero`. */
+          const quale = (t.name === 'compila_cliente') ? 'cliente' : 'lavoro';
+          const m = costruisciModulo(quale, inp);
+          /* ⚠️ un modulo per volta, MA se il primo aveva un nome che non
+             esiste Claude puo' richiamare l'attrezzo una volta per
+             sistemarlo: quello e' il giro che serve, non un doppione. */
+          if (m.errore) esito = { errore: m.errore };
+          else if (modulo && !daSistemare) esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
+          else {
+            const avvisi = [];
+            if (quale === 'lavoro') {
+              for (const coppia of [['cliente', 'clienti'], ['operatore', 'operatori']]) {
+                const campo = coppia[0], tabella = coppia[1];
+                if (!m.campi[campo]) continue;
+                const nomi = await nomiDelReparto(dati, tabella, uid, mestiere_id);
+                const giusto = scegliNome(m.campi[campo], nomi);
+                if (giusto) { m.campi[campo] = giusto; continue; }
+                avvisi.push('«' + m.campi[campo] + '» fra i suoi non c\'e\', quindi l\'ho lasciato fuori. '
+                  + (nomi.length
+                      ? 'Nel reparto ci sono: ' + nomi.join(' · ') + '. Se e\' uno di questi richiama l\'attrezzo col nome scritto ESATTAMENTE cosi\'; se non e\' nessuno di questi lascialo fuori e dillo, lo sceglie lui.'
+                      : 'Nel reparto non ce n\'e\' nessuno: diglielo, lo aggiunge lui.'));
+                delete m.campi[campo];
+              }
+            }
+            modulo = m;
+            daSistemare = avvisi.length > 0;
+            esito = avvisi.length
+              ? { ok: true, aperto: 'modulo del ' + quale + ' aperto', da_sistemare: avvisi }
+              : { ok: true, aperto: 'gli ho aperto il modulo del ' + quale + ', gia\' compilato' };
+          }
         } else {
           esito = { errore: 'attrezzo che non esiste' };
         }
@@ -545,6 +664,9 @@ exports.STRUMENTI = STRUMENTI;
 exports.costruisciLettura = costruisciLettura;
 exports.costruisciModulo = costruisciModulo;
 exports.CASELLE_LAVORO = CASELLE_LAVORO;
+exports.MODULI = MODULI;
+exports.scegliNome = scegliNome;
+exports.nomiDelReparto = nomiDelReparto;
 exports.esegui = esegui;
 exports.istruzioni = istruzioni;
 

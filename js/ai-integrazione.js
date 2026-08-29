@@ -619,6 +619,38 @@
      gestionale-app.html e il ponte `gestApriModuloAI` non c'e' ancora.
      In quel caso l'AI continua a funzionare come prima invece di non
      fare niente. */
+  /* ⛔ 29 agosto 2026 (sera) — LA STESSA COSA PER IL CLIENTE.
+     Vale parola per parola quello che sta scritto sopra `riempiLavoro`:
+     le quattro righe stavano chiuse dentro `compilaCliente`, e adesso le
+     usano tutte e due le strade — il pulsante «Compila con AI» dei
+     Clienti e la chat. Una macchina sola. */
+  function riempiCliente(d) {
+    if (!d) return false;
+    const primo = { el: null };
+    riempiCampo('c-nome', d.nome, primo);
+    riempiCampo('c-ind', d.indirizzo, primo);
+    riempiCampo('c-ref', d.referente, primo);
+    riempiCampo('c-tel', d.telefono, primo);
+
+    avviso('Modulo compilato, controlla i dati e premi Salva');
+    if (primo.el) primo.el.focus();
+    return true;
+  }
+  AI.riempiCliente = riempiCliente;
+
+  /* la porta della chat per il cliente: vedi la nota su AI.compilaLavoroDaChat */
+  AI.compilaClienteDaChat = function (d) {
+    chiudiTutto();
+    if (typeof window.gestApriModuloAI === 'function') {
+      window.gestApriModuloAI('cliente', false);
+    } else {
+      const apri = document.querySelector('[data-action="new-cli"]');
+      if (!apri) return false;
+      apri.click();
+    }
+    return riempiCliente(d);
+  };
+
   function compilaCliente() {
     if (typeof window.gestApriModuloAI === 'function') { window.gestApriModuloAI('cliente'); return; }
     pannelloCompila(
@@ -631,18 +663,10 @@
         try { d = JSON.parse(risultato); } catch (e) { throw new Error('Non ho capito, prova a riscriverlo'); }
 
         chiudiTutto();                                    // chiudi il pannello AI
-        const apri = document.querySelector('[data-action="new-cli"]');
+        const apri = document.querySelector('[data-action=\"new-cli\"]');
         if (apri) apri.click();                           // apre il form Cliente (openSheet, sincrono)
 
-        const primo = { el: null };
-        riempiCampo('c-nome', d.nome, primo);
-        riempiCampo('c-ind', d.indirizzo, primo);
-        riempiCampo('c-ref', d.referente, primo);
-        riempiCampo('c-tel', d.telefono, primo);
-
-        avviso('Modulo compilato, controlla i dati e premi Salva');
-        if (primo.el) primo.el.focus();
-        return true;
+        return riempiCliente(d);
       }
     );
   }
