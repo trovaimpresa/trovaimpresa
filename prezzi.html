@@ -6,11 +6,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Piani e prezzi — TrovaImpresa</title>
-<meta name="description" content="Piani per imprese e artigiani su TrovaImpresa: 3 mesi di Premium in regalo senza carta di credito, piano Free per sempre o Premium a €5/mese o €49/anno. Dentro il Premium c'è il gestionale per imprese edili: preventivi, fatture e cantieri.">
+<meta name="description" content="Piani per imprese e artigiani su TrovaImpresa: 3 mesi di Premium in regalo senza carta di credito, piano Free per sempre, Premium a €29/mese o €249/anno e Premium AI a €39/mese o €349/anno. Dentro il Premium c'è il gestionale per imprese edili: preventivi, fatture e cantieri.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TrovaImpresa">
 <meta property="og:title" content="Piani e prezzi — TrovaImpresa">
-<meta property="og:description" content="3 mesi di Premium in regalo, senza carta di credito. Poi piano Free per sempre o Premium a €5/mese, prezzo finale.">
+<meta property="og:description" content="3 mesi di Premium in regalo, senza carta di credito. Poi piano Free per sempre, Premium a €29/mese o Premium AI a €39/mese. Prezzo finale.">
 <meta property="og:url" content="https://trovaimpresa.com/prezzi">
 <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
@@ -66,7 +66,9 @@
     gap:16px; padding:40px 24px 0; font-weight:600; font-size:1.1rem;
   }
   .toggle-wrap > span { font-weight:700; }
-  .toggle-wrap > span .risparmio { font-size:0.75rem; }
+  /* ⚠️ 13,1 px, non 12: sotto i 13 non si legge. 0.82rem e' la stessa
+     misura di .piano-sub, qui sotto. */
+  .toggle-wrap > span .risparmio { font-size:0.82rem; }
   .toggle-inner {
     display:flex; align-items:center; gap:16px;
     background:#f5f5f5; border-radius:50px; padding:12px 24px;
@@ -83,15 +85,19 @@
   .toggle.annuale .toggle-dot { left:27px; }
   .risparmio {
     background:var(--arancio3); color:var(--arancio2);
-    padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:800;
+    padding:3px 10px; border-radius:20px; font-size:0.82rem; font-weight:800;
   }
 
   /* PIANI */
+  /* ⚠️ 29 agosto 2026 — da DUE schede a TRE (Gratuito · Premium · Premium AI).
+     L'unica misura cambiata e' la larghezza massima, da 1100 a 1280: con tre
+     schede dentro 1100 le colonne restavano di 334 px e le voci andavano a
+     capo. Colori, angoli, ombre e spazi non sono stati toccati. */
   .piani-grid {
-    display:grid; grid-template-columns:repeat(2,1fr);
-    gap:24px; max-width:1100px; margin:32px auto; padding:0 24px 80px;
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:24px; max-width:1280px; margin:32px auto; padding:0 24px 80px;
   }
-  @media(max-width:900px){ .piani-grid { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:1040px){ .piani-grid { grid-template-columns:repeat(2,1fr); } }
   @media(max-width:600px){ .piani-grid { grid-template-columns:1fr; } }
 
   .piano-card.premium {
@@ -112,7 +118,7 @@
   .piano-badge {
     position:absolute; top:-14px; left:50%; transform:translateX(-50%);
     background:var(--arancio); color:white; padding:5px 18px;
-    border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap;
+    border-radius:20px; font-size:0.82rem; font-weight:800; white-space:nowrap;
   }
   .piano-icon { font-size:2.5rem; margin-bottom:12px; }
   .piano-nome { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:4px; }
@@ -242,7 +248,7 @@
     <div class="toggle" id="toggle" onclick="togglePiano()">
       <div class="toggle-dot"></div>
     </div>
-    <span>Annuale <span class="risparmio">Risparmi fino a €11!</span></span>
+    <span>Annuale <span class="risparmio">Risparmi fino a €119!</span></span>
   </div>
 </div>
 
@@ -279,9 +285,9 @@
     <div class="piano-nome">Premium</div>
     <div class="piano-sub">Per dominare il mercato</div>
     <div class="piano-prezzo">
-      <div class="prezzo-num" id="prezzo-display-premium">€5</div>
+      <div class="prezzo-num" id="prezzo-display-premium">€29</div>
       <div class="prezzo-periodo" id="prezzo-periodo-premium">al mese &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere</div>
-      <div class="prezzo-nota" id="prezzo-alt-premium">Oppure <strong>€49 all'anno</strong> — risparmi €11</div>
+      <div class="prezzo-nota" id="prezzo-alt-premium">Oppure <strong>€249 all'anno</strong> — risparmi €99</div>
       <div class="prezzo-nota">Si paga <strong>solo dopo</strong> i 3 mesi in regalo, e solo se lo scegli tu.</div>
     </div>
     <div class="piano-features">
@@ -306,6 +312,35 @@
     </div>
     <a href="info-premium.html">
       <button class="piano-btn premium-btn">💎 Scopri Premium</button>
+    </a>
+  </div>
+
+  <!-- PIANO PREMIUM AI — 29 agosto 2026.
+       ⚠️ Copiata dalla scheda del Premium qui sopra: stesse classi, stessi
+       colori, stesse misure. Cambia solo quello che c'è scritto.
+       Le voci non si ripetono tutte: dice «Tutto del Premium +», come la
+       scheda del Premium dice «Tutto del Gratuito +». -->
+  <div class="piano-card premium">
+    <div class="piano-badge" style="background:linear-gradient(135deg,#7b2fbe,#f4c02e);">🤖 CON L'AI</div>
+    <div class="piano-icon">🤖</div>
+    <div class="piano-nome">Premium AI</div>
+    <div class="piano-sub">Per chi vuole anche l'aiuto dell'AI</div>
+    <div class="piano-prezzo">
+      <div class="prezzo-num" id="prezzo-display-ai">€39</div>
+      <div class="prezzo-periodo" id="prezzo-periodo-ai">al mese &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere</div>
+      <div class="prezzo-nota" id="prezzo-alt-ai">Oppure <strong>€349 all'anno</strong> — risparmi €119</div>
+      <div class="prezzo-nota">Si paga <strong>solo dopo</strong> i 3 mesi in regalo, e solo se lo scegli tu.</div>
+    </div>
+    <div class="piano-features">
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del Premium +</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">La chat con AI dentro il gestionale</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Ti risponde coi conti dei tuoi lavori</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Ti compila i moduli: lavori e clienti</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Il riepilogo del lunedì per email</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">300 messaggi al mese</span></div>
+    </div>
+    <a href="info-premium.html">
+      <button class="piano-btn premium-btn">🤖 Scopri Premium AI</button>
     </a>
   </div>
 
@@ -359,7 +394,7 @@
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Ai prezzi va aggiunta l'IVA? <span>▼</span></div>
-    <div class="faq-a"><strong>No.</strong> €5 al mese e €49 all'anno sono i prezzi finali: alla cassa non si aggiunge niente. Operiamo in regime forfettario, quindi la fattura che ricevi è senza addebito di IVA (art. 1, commi 54-89, Legge 190/2014).</div>
+    <div class="faq-a"><strong>No.</strong> €29 e €39 al mese, €249 e €349 all'anno sono i prezzi finali: alla cassa non si aggiunge niente. Operiamo in regime forfettario, quindi la fattura che ricevi è senza addebito di IVA (art. 1, commi 54-89, Legge 190/2014).</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Quando inizia il pagamento? <span>▼</span></div>
@@ -383,25 +418,34 @@
 let pianoAnnuale = false;
 
 // TOGGLE PIANO — cambiano insieme numero, periodo e riga alternativa,
-// altrimenti sull'annuale si leggeva "€49 al mese".
+// altrimenti sull'annuale si leggeva "€249 al mese".
 function togglePiano() {
   pianoAnnuale = !pianoAnnuale;
   const toggle = document.getElementById('toggle');
   toggle.classList.toggle('annuale', pianoAnnuale);
 
-  const num     = document.getElementById('prezzo-display-premium');
-  const periodo = document.getElementById('prezzo-periodo-premium');
-  const alt     = document.getElementById('prezzo-alt-premium');
-
-  if (pianoAnnuale) {
-    num.textContent     = '€49';
-    periodo.innerHTML   = 'all\'anno &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere';
-    alt.innerHTML       = 'Sono <strong>€4,08 al mese</strong> — risparmi €11 rispetto al mensile';
-  } else {
-    num.textContent     = '€5';
-    periodo.innerHTML   = 'al mese &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere';
-    alt.innerHTML       = 'Oppure <strong>€49 all\'anno</strong> — risparmi €11';
-  }
+  /* ⚠️ 29 agosto 2026 — adesso le schede a prezzo sono DUE. I numeri stanno
+     scritti qui una volta sola: se se ne aggiunge una terza si aggiunge una
+     riga a questa lista, non un altro blocco di codice. */
+  const PIANI = [
+    { id: 'premium', mese: '€29', anno: '€249', alMese: '€20,75', risparmio: '€99'  },
+    { id: 'ai',      mese: '€39', anno: '€349', alMese: '€29,08', risparmio: '€119' }
+  ];
+  PIANI.forEach(function (p) {
+    const num     = document.getElementById('prezzo-display-' + p.id);
+    const periodo = document.getElementById('prezzo-periodo-' + p.id);
+    const alt     = document.getElementById('prezzo-alt-' + p.id);
+    if (!num || !periodo || !alt) return;
+    if (pianoAnnuale) {
+      num.textContent   = p.anno;
+      periodo.innerHTML = 'all\'anno &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere';
+      alt.innerHTML     = 'Sono <strong>' + p.alMese + ' al mese</strong> — risparmi ' + p.risparmio + ' rispetto al mensile';
+    } else {
+      num.textContent   = p.mese;
+      periodo.innerHTML = 'al mese &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere';
+      alt.innerHTML     = 'Oppure <strong>' + p.anno + ' all\'anno</strong> — risparmi ' + p.risparmio;
+    }
+  });
 }
 
 // FAQ
@@ -412,7 +456,7 @@ function toggleFaq(el) {
 }
 </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.82rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>
