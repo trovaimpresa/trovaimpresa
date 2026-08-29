@@ -63,7 +63,7 @@ const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
 //    Sarebbero stati cinque attrezzi che rispondono sempre «errore» senza
 //    che nessuno capisse perche'.
 const ATTREZZI = {
-  lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto', ordine:'data_prevista', nome:'i lavori' },
+  lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato', ordine:'data_prevista', nome:'i lavori' },
   preventivi:   { tabella:'gest_preventivi',        campi:'id,numero,titolo,stato,data',                        ordine:'data',          nome:'i preventivi' },
   fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome',                 ordine:'data',          nome:'le fatture' },
   clienti:      { tabella:'gest_clienti',           campi:'id,nome,tipo,citta',                                 ordine:'nome',          nome:'i clienti' },
@@ -150,6 +150,11 @@ const STRUMENTI = [
     input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE }, quanti: { type:'integer' } }, required:['cosa'] }
   },
   {
+    name: 'soldi_del_reparto',
+    description: 'Dà i conti in soldi del reparto aperto: fatture da incassare, fatture già incassate quest\'anno, fatture in bozza, lavori finiti e non ancora fatturati, e quanto c\'è da pagare ai fornitori. Ogni voce ha imponibile, IVA e totale. USALO SEMPRE per qualsiasi domanda che riguarda soldi, incassi, fatturato o quanto si deve: i numeri non si sommano a mano.',
+    input_schema: { type:'object', properties: {} }
+  },
+  {
     name: 'cerca_per_nome',
     description: 'Cerca una parola nel nome o nel titolo delle cose di un tipo, dentro il reparto aperto. Usalo quando l\'utente nomina un cliente, un lavoro o un documento.',
     input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE }, parola: { type:'string' } }, required:['cosa','parola'] }
@@ -178,6 +183,11 @@ function istruzioni(sezione, nomeReparto) {
     '· sicurezza e leggi → «verifica, la norma cambia»;',
     '· contratti → «fallo vedere a chi di dovere».',
     'Puoi spiegare come si fa una cosa NEL GESTIONALE anche su questi argomenti: quello che non fai è dire cosa è giusto per legge.',
+    '',
+    'I SOLDI si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
+    'Quando dici una cifra, dì SEMPRE tutte e due: il totale con l\'IVA (quello che il cliente bonifica) e, fra parentesi, l\'imponibile. Esempio: «9.760,00 € (8.000,00 € imponibile)». Scelta di Alessio, 29 agosto.',
+    'Scrivi i soldi all\'italiana, col punto delle migliaia e la virgola dei centesimi: 8.000,00 €.',
+    '⚠️ Una fattura in BOZZA non è un incasso: non contarla fra i soldi che deve avere, e se la nomini di\' che è ancora una bozza.',
     '',
     'Non scrivere e non cambiare mai niente nel gestionale: tu leggi e spieghi. Se una cosa va salvata, digli dove cliccare e la salva lui.'
   ].join('\n');
@@ -352,6 +362,16 @@ exports.handler = async function(event) {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { quanti: inp.quanti }));
         } else if (t.name === 'cerca_per_nome') {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { parola: inp.parola }));
+        } else if (t.name === 'soldi_del_reparto') {
+          /* ⛔ i conti li fa `chat_soldi` su Supabase, che a sua volta legge
+             la vista `gest_fatture_totali`: la formula dei soldi resta in un
+             posto solo. Qui non si somma niente.
+             ⚠️ Va chiamata col client dell'ISCRITTO: dentro si prende chi
+             chiede da auth.uid(), e col service role sarebbe vuoto. */
+          var rs = await dati.rpc('chat_soldi', { p_mestiere: mestiere_id })
+                             .catch(function (e) { return { error: e }; });
+          esito = (rs && rs.error) ? { errore: String(rs.error.message || rs.error) }
+                                   : (rs.data || { errore: 'nessun conto' });
         } else {
           esito = { errore: 'attrezzo che non esiste' };
         }
