@@ -274,6 +274,54 @@ async function esegui(clientDati, q) {
 }
 
 // ---------------------------------------------------------------------
+// ⛔ 29 agosto 2026 (sera) — IL CALENDARIO GIA' SCRITTO.
+//
+// Trovato dal vivo, alla seconda prova. Alessio ha scritto «giovedi'
+// prossimo» e nel modulo e' finito il 4 settembre, che e' VENERDI'.
+// Giovedi' era il 3.
+//
+// Il perche': nelle istruzioni gli passavo solo «2026-08-29», il numero.
+// Un modello NON SA CONTARE i giorni della settimana da una data: se li
+// immagina, e alla prima prova gli era andata bene per caso.
+//
+// ⛔ Una data sbagliata di un giorno e' il difetto peggiore di tutto il
+//    gradino 3: non si vede — il modulo e' pieno, la data c'e', sembra
+//    tutto giusto — e si scopre quando l'artigiano si presenta in
+//    cantiere il giorno dopo.
+//
+// Quindi qui il conto non lo fa piu' lui: la fila dei giorni gliela
+// scrivo io, nome per nome, e a lui resta da LEGGERE la riga giusta.
+//
+// ⚠️ COS'E' CHE TIENE, qui dentro: la fila si costruisce e si legge TUTTA
+//    in UTC — `getUTCDay`, `getUTCDate`, `toISOString`. Il fuso della
+//    macchina non entra mai, quindi il giorno non puo' slittare. Il
+//    mezzogiorno e' una cintura in piu' per il giorno che qualcuno
+//    passasse alle versioni locali (`getDay`, `toLocaleDateString`): li'
+//    partire da mezzanotte sposterebbe il giorno di uno. Il banco lo dice
+//    onestamente: quel mezzogiorno da solo non lo misura nessuna prova,
+//    perche' con tutto in UTC non cambia niente.
+// ⚠️ E i nomi sono scritti a mano invece che con Intl: una function su
+//    Netlify puo' girare senza le lingue installate, e uscirebbero i
+//    giorni in inglese.
+// ---------------------------------------------------------------------
+const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+const MESI   = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+                'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+
+function calendarioProssimo(oggiISO, quanti) {
+  const base = new Date(String(oggiISO) + 'T12:00:00Z');
+  if (isNaN(base.getTime())) return '';
+  const righe = [];
+  const fino = (typeof quanti === 'number' && quanti > 0) ? quanti : 14;
+  for (let i = 0; i <= fino; i++) {
+    const d = new Date(base.getTime() + i * 86400000);
+    righe.push(GIORNI[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MESI[d.getUTCMonth()]
+               + ' = ' + d.toISOString().slice(0, 10));
+  }
+  return righe.join(' · ');
+}
+
+// ---------------------------------------------------------------------
 // gli attrezzi come li vede Claude
 // ---------------------------------------------------------------------
 const ELENCO_COSE = Object.keys(ATTREZZI);
@@ -343,9 +391,10 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Sei la chat di aiuto dentro il gestionale di TrovaImpresa, usato da imprese edili, artigiani, studi tecnici, negozi di materiali e noleggi.',
     'Rispondi in italiano, corto e pratico, a passaggi numerati quando servono. Chi ti legge non è un tecnico di informatica.',
     'Stai guardando il reparto «' + (nomeReparto || 'quello aperto') + '»' + (sezione ? ', sezione «' + sezione + '»' : '') + '.',
-    // ⚠️ senza questa riga «giovedi' prossimo» non si sa cos'e': un
-    //    modello non sa che giorno e' oggi, e la data la inventerebbe.
-    'Oggi è ' + (oggi || 'oggi') + ', scritto come AAAA-MM-GG. Usalo per capire «domani», «giovedì prossimo», «la settimana scorsa».',
+    // ⛔ IL CALENDARIO GIA' SCRITTO: vedi la nota sopra calendarioProssimo.
+    //    Il primo della fila e' oggi. Il conto non lo fa lui: legge.
+    'IL CALENDARIO, così non devi contare. Oggi è il primo della fila: ' + calendarioProssimo(oggi, 14) + '.',
+    '⛔ La data del modulo PRENDILA DA QUESTA FILA, copiando il pezzo dopo l\'uguale. Non contarla a mente: sbaglieresti il giorno della settimana. Se ti chiede una data più in là della fila, conta di sette in sette partendo da una riga della fila.',
     '',
     'PUOI GUARDARE I SUOI DATI con gli attrezzi che hai. Usali quando la domanda riguarda le SUE cose («quante fatture ho», «quanto mi deve Rossi»): rispondere a memoria su dati che puoi leggere è un errore.',
     'Gli attrezzi vedono SOLO il reparto aperto. Se ti chiede di un altro reparto, dillo: deve cambiare reparto e richiedere.',
@@ -665,6 +714,7 @@ exports.costruisciLettura = costruisciLettura;
 exports.costruisciModulo = costruisciModulo;
 exports.CASELLE_LAVORO = CASELLE_LAVORO;
 exports.MODULI = MODULI;
+exports.calendarioProssimo = calendarioProssimo;
 exports.scegliNome = scegliNome;
 exports.nomiDelReparto = nomiDelReparto;
 exports.esegui = esegui;
