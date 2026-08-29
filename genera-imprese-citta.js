@@ -31,8 +31,12 @@ function slugFromFile(file) {
 }
 
 async function fetchImprese(citta) {
-  const filtro = `or=(citta.ilike.*${encodeURIComponent(citta)}*,provincia.ilike.*${encodeURIComponent(citta)}*)`;
-  const url = `${SUPABASE_URL}/rest/v1/imprese?select=id,nome,mestiere,tipo,citta,valutazione_media,piano,verificata,descrizione&${filtro}&is_test=eq.false&limit=40`;
+  // 29 ago 2026 — PRIMA cercava le citta' che CONTENGONO il nome: "Rav-enna"
+  // combaciava con "Enna", e sulla pagina di Enna finiva un'impresa di Ravenna.
+  // Adesso: citta' identica, provincia che INIZIA per quel nome (cosi' "Monza"
+  // prende ancora "Monza e della Brianza", ma "Enna" non prende "Ravenna").
+  const filtro = `or=(citta.ilike."${citta}",provincia.ilike."${citta}*")`;
+  const url = `${SUPABASE_URL}/rest/v1/imprese?select=id,nome,mestiere,tipo,citta,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&is_test=eq.false&limit=40`;
   const res = await fetch(url, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
   });
@@ -130,7 +134,12 @@ ${JSON.stringify(itemList, null, 2)}
     }
 
     // Inserisci prima della cta-box
-    const anchor = '<div class="cta-box">';
+    // 29 ago 2026 — la sezione delle guide prezzi sta subito prima della cta-box:
+    // ancorandosi a quella, le imprese locali restano SOPRA le guide su tutte
+    // le pagine. Se la sezione guide non c'e', si torna alla cta-box.
+    const anchor = html.includes('<div class="section" id="costi-lavori">')
+      ? '<div class="section" id="costi-lavori">'
+      : '<div class="cta-box">';
     if (!html.includes(anchor)) {
       console.error(`✗ ${file}: cta-box non trovata, salto`);
       errori++;
