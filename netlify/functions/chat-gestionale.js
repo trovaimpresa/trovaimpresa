@@ -338,7 +338,7 @@ const STRUMENTI = [
   },
   {
     name: 'soldi_del_reparto',
-    description: 'Dà i conti in soldi del reparto aperto: fatture da incassare, fatture già incassate quest\'anno, fatture in bozza, lavori finiti e non ancora fatturati, e quanto c\'è da pagare ai fornitori. Ogni voce ha imponibile, IVA e totale. USALO SEMPRE per qualsiasi domanda che riguarda soldi, incassi, fatturato o quanto si deve: i numeri non si sommano a mano.',
+    description: 'Dà i conti in soldi del reparto aperto: fatture da incassare, fatture già incassate quest\'anno, fatture in bozza, PREVENTIVI IN ATTESA di risposta e preventivi accettati, lavori finiti e non ancora fatturati, e quanto c\'è da pagare ai fornitori. Ogni voce ha imponibile, IVA e totale. USALO SEMPRE per qualsiasi domanda che riguarda soldi, incassi, fatturato, preventivi o quanto si deve: i numeri non si sommano a mano.',
     input_schema: { type:'object', properties: {} }
   },
   {
@@ -415,6 +415,7 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Quando dici una cifra, dì SEMPRE tutte e due: il totale con l\'IVA (quello che il cliente bonifica) e, fra parentesi, l\'imponibile. Esempio: «9.760,00 € (8.000,00 € imponibile)». Scelta di Alessio, 29 agosto.',
     'Scrivi i soldi all\'italiana, col punto delle migliaia e la virgola dei centesimi: 8.000,00 €.',
     '⚠️ Una fattura in BOZZA non è un incasso: non contarla fra i soldi che deve avere, e se la nomini di\' che è ancora una bozza.',
+    '⚠️ E un PREVENTIVO non è un incasso nemmeno se è accettato: è lavoro che deve ancora diventare fattura. Tienilo separato dai soldi che deve avere.',
     '',
     'PUOI APRIRGLI UN MODULO GIÀ PIENO. Se ti chiede di segnare, aggiungere o creare un LAVORO nuovo, usa `compila_lavoro`: il gestionale gli apre il modulo del Lavoro con dentro quello che hai capito, e a salvarlo è lui col pulsante Salva.',
     '⛔ Nel modulo ci metti SOLO quello che ti ha detto davvero. Quello che non sai si lascia vuoto, non si inventa: un modulo con dentro una data o un importo inventati è peggio di un modulo mezzo vuoto, perché uno lo salva senza guardare.',
