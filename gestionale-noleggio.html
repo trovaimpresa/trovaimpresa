@@ -1,5 +1,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionale Noleggio &mdash; TrovaImpresa</title>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <div id="app-root">
 <style>
@@ -1490,7 +1491,10 @@ body:has(#ti-fondatore) .sheet--grande{
      fuori solo la sotto-sezione «Lavori del gestionale imprese» dentro
      Fatture, che usava eur(): arrotonda all'euro, e 860,50 usciva «861 €».
      Adesso anche quella passa di qui. eur() resta per i riepiloghi. */
-  const _eur=n=>Number(n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+  /* ⛔ 29 agosto 2026 - IL PUNTO DELLE MIGLIAIA. Senza useGrouping certi
+     browser scrivono "1050,50 €" invece di "1.050,50 €": sopra il migliaio
+     il numero non si legge piu' a colpo d'occhio. Stessa riga delle imprese. */
+  const _eur=n=>Number(n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+" €";
   let nolMezzi=[], nolConsumi=[], nolMestieri=[];
 
   /* le caselle del contaore e dei km si vedono solo se quel mezzo li ha:
@@ -6720,12 +6724,16 @@ body:has(#ti-fondatore) .sheet--grande{
     if(a==="new-job")return jobForm(null,"",null,true);
     /* 6 agosto 2026: il pulsante grande porta al modulo del noleggio,
        con il mezzo già pronto da scegliere. */
+    /* ⛔ 29 agosto 2026 - IL PULSANTE IN ALTO NON APRIVA NIENTE. Cercava
+       #nn-mezzo in cima alla sezione, dov'era il modulo PRIMA che diventasse
+       una finestra: da allora non lo trovava piu' e il pulsante piu' in vista
+       del noleggio sembrava morto. Adesso apre la scheda, come quello dentro
+       la sezione Noleggi. */
     if(a==="new-nol"){
       $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="noleggi"));
       $$("section").forEach(s=>s.classList.toggle("active",s.id==="noleggi"));
       window.scrollTo({top:0,behavior:"smooth"});
-      const m=$("#nn-mezzo"); if(m)setTimeout(function(){m.focus();},150);
-      return;
+      return schedaNoleggio(null);
     }
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
