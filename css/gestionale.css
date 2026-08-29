@@ -552,12 +552,59 @@
   }
   /* il titolo e la spiegazione restano alti quanto vogliono; a prendersi
      tutto il resto e' la chat */
+  /* la chat a sinistra, l'archivio a destra */
   #chat .asst-wrap{
     max-width:none;            /* tutta la larghezza, come le altre sezioni */
-    flex:1; display:flex; flex-direction:column; min-height:0;
+    flex:1; display:flex; flex-direction:row; gap:16px; min-height:0;
   }
+  #chat .chat-col{ flex:1; display:flex; flex-direction:column; min-width:0; min-height:0; }
   #chat .asst-msgs{
     flex:1; max-height:none; min-height:0;   /* si allunga e scorre dentro */
+  }
+
+  /* ============================================================
+     ✨ 29 agosto 2026 — L'ARCHIVIO DELLE CHIACCHIERATE (colonna destra)
+     ============================================================
+     Chiesto da Alessio: «mettiamo nel lato destro le chat archiviate».
+     ⚠️ La larghezza NON e' inventata: sono i 244 px della colonna di
+     sinistra (`.side`), cosi' le due spalle del gestionale sono uguali.
+     ⚠️ Colori e bordi sono le variabili di sempre (--card, --bordo,
+     --sfondo, --testo-2, --r): niente di nuovo. Quello che non c'era e'
+     la RIGA di un elenco cliccabile in una colonna: quella si scrive qui,
+     perche' in questo gestionale non esisteva.
+     ============================================================ */
+  #chat .chat-archivio{
+    width:244px; flex:0 0 244px;
+    display:flex; flex-direction:column; gap:8px; min-height:0;
+  }
+  #chat .chat-elenco{ flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+  #chat .chat-giorno{ font-size:13.5px; font-weight:700; color:var(--testo-2); margin:6px 2px 0; }
+  #chat .chat-riga{
+    display:flex; align-items:flex-start; gap:8px;
+    background:var(--card); border:1px solid var(--bordo); border-radius:var(--r);
+    padding:10px 10px 10px 12px; cursor:pointer; text-align:left; width:100%;
+    font-family:inherit; color:var(--testo);
+  }
+  #chat .chat-riga:hover{ border-color:var(--bordo-forte); }
+  #chat .chat-riga.aperta{ border-color:var(--blu); background:var(--sfondo); }
+  #chat .chat-riga .ct{ flex:1; min-width:0; }
+  #chat .chat-riga .cn{ font-size:14px; line-height:1.4; display:block;
+    overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
+    -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  #chat .chat-riga .cq{ font-size:13px; color:var(--testo-2); margin-top:3px; display:block; }
+  #chat .chat-butta{
+    flex:0 0 auto; border:1px solid var(--bordo); background:var(--card);
+    color:var(--testo-2); border-radius:8px; width:26px; height:26px;
+    font-size:15px; line-height:1; cursor:pointer; font-family:inherit;
+  }
+  #chat .chat-butta:hover{ color:var(--err,#c62828); border-color:var(--err,#c62828); }
+  #chat .chat-vuoto{ font-size:13.5px; color:var(--testo-2); padding:8px 2px; line-height:1.5; }
+
+  /* sul telefono l'archivio va sotto, non di fianco: 244 px di colonna su
+     390 px di schermo lascerebbero la chat larga un dito */
+  @media(max-width:880px){
+    #chat .asst-wrap{ flex-direction:column; }
+    #chat .chat-archivio{ width:auto; flex:0 0 auto; max-height:40vh; }
   }
   /* sul telefono la finestra e' corta e la barra in alto e' fatta
      diversa: li' si lascia fare all'altezza naturale, se no la casella

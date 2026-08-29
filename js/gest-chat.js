@@ -147,12 +147,19 @@
          schermata vuota, dentro la chat, dove uno lo legge davvero. */
       '<div class="sec-head"><h2>Chat con AI</h2></div>'
     + '<div class="asst-wrap">'
-    +   '<div class="asst-msgs" id="chat-righe"></div>'
-    +   '<div class="asst-scrivi">'
-    +     '<textarea id="chat-domanda" rows="3" placeholder="Scrivi qui la tua domanda&hellip;"></textarea>'
-    +     '<button class="btn btn-primary" type="button" id="chat-manda">Manda</button>'
+    +   '<div class="chat-col">'
+    +     '<div class="asst-msgs" id="chat-righe"></div>'
+    +     '<div class="asst-scrivi">'
+    +       '<textarea id="chat-domanda" rows="3" placeholder="Scrivi qui la tua domanda&hellip;"></textarea>'
+    +       '<button class="btn btn-primary" type="button" id="chat-manda">Manda</button>'
+    +     '</div>'
+    +     '<div class="asst-nota" id="chat-sotto"></div>'
     +   '</div>'
-    +   '<div class="asst-nota" id="chat-sotto"></div>'
+    /* ✨ 29 agosto 2026 — le chat di prima, chieste da Alessio */
+    +   '<aside class="chat-archivio">'
+    +     '<button class="btn" type="button" id="chat-nuova">+ Nuova chat</button>'
+    +     '<div class="chat-elenco" id="chat-elenco"></div>'
+    +   '</aside>'
     + '</div>';
 
     document.getElementById('chat-manda').addEventListener('click', manda);
@@ -170,6 +177,15 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); manda(); }
     });
     aggiornaSotto();
+    document.getElementById('chat-nuova').addEventListener('click', nuovaChat);
+    document.getElementById('chat-elenco').addEventListener('click', function (e) {
+      var butta = e.target.closest('[data-butta]');
+      if (butta) { e.stopPropagation(); return svuotaUna(butta.getAttribute('data-butta')); }
+      var riga = e.target.closest('[data-conv]');
+      if (riga) return apriChiacchierata(riga.getAttribute('data-conv'));
+    });
+    caricaArchivio();
+    apriChiacchierata(chiacchierata(), true);
   }
 
   function righe() { return document.getElementById('chat-righe'); }
@@ -226,6 +242,90 @@
     } catch (e) { /* niente: e' un di piu' */ }
   }
 
+  /* ============================================================
+     ✨ L'ARCHIVIO — le chat di prima
+     ⛔ L'elenco e i titoli li fa `chat_elenco` su Supabase: il titolo e'
+     la PRIMA DOMANDA che hai scritto tu, tagliata. Non si chiede all'AI
+     di dare un nome alle chiacchierate: sarebbe un messaggio pagato per
+     ogni chat solo per intitolarla.
+     ⛔ E a buttare e' `chat_svuota`, che segna `eliminato_il` e basta: la
+     riga resta per il conto dei messaggi del mese, quindi svuotare la
+     chat non regala messaggi a nessuno.
+     ============================================================ */
+  function quandoInParole(iso) {
+    try {
+      var d = new Date(iso), o = new Date();
+      var g = Math.floor((new Date(o.getFullYear(), o.getMonth(), o.getDate())
+                        - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+      if (g <= 0) return 'Oggi ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      if (g === 1) return 'Ieri';
+      if (g < 7)   return g + ' giorni fa';
+      return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (e) { return ''; }
+  }
+
+  async function caricaArchivio() {
+    var box = document.getElementById('chat-elenco');
+    if (!box || !window._gc || !window._gc.rpc) return;
+    try {
+      var r = await window._gc.rpc('chat_elenco', { p_quante: 40 });
+      if (r && r.error) throw r.error;
+      var righe = r.data || [];
+      if (!righe.length) { box.innerHTML = '<div class="chat-vuoto">Qui compaiono le chat di prima.</div>'; return; }
+      var qui = chiacchierata();
+      box.innerHTML = righe.map(function (c) {
+        return '<div class="chat-riga' + (c.conversazione_id === qui ? ' aperta' : '') + '" data-conv="' + esc(c.conversazione_id) + '">'
+          + '<span class="ct"><span class="cn">' + esc(c.titolo) + '</span>'
+          + '<span class="cq">' + esc(quandoInParole(c.quando)) + ' &middot; ' + (c.messaggi || 0) + ' messaggi</span></span>'
+          + '<button class="chat-butta" type="button" title="Butta questa chat" data-butta="' + esc(c.conversazione_id) + '">&times;</button>'
+          + '</div>';
+      }).join('');
+    } catch (e) {
+      box.innerHTML = '<div class="chat-vuoto">Non riesco a leggere le chat di prima.</div>';
+    }
+  }
+
+  /* riapre una chiacchierata: i messaggi si rileggono dal database */
+  async function apriChiacchierata(conv, zitto) {
+    if (!conv) return;
+    conversazione = conv;
+    try { sessionStorage.setItem('ti_chat_conv', conv); } catch (e) {}
+    var r = righe(); if (r) r.innerHTML = '';
+    if (!window._gc) return;
+    try {
+      var res = await window._gc.from('gest_chat_messaggi')
+        .select('ruolo,testo,created_at')
+        .eq('conversazione_id', conv).is('eliminato_il', null)
+        .order('created_at', { ascending: true }).limit(200);
+      if (res && !res.error && res.data) {
+        res.data.forEach(function (m) {
+          if (!m.testo) return;
+          scrivi(m.ruolo === 'ai' ? 'ai' : 'utente',
+                 m.ruolo === 'ai' ? testoRisposta(m.testo) : esc(m.testo));
+        });
+      }
+    } catch (e) { if (!zitto) scrivi('ai', 'Non riesco a rileggere questa chat.'); }
+    caricaArchivio();
+  }
+
+  function nuovaChat() {
+    conversazione = null;
+    try { sessionStorage.removeItem('ti_chat_conv'); } catch (e) {}
+    chiacchierata();
+    var r = righe(); if (r) r.innerHTML = '';
+    caricaArchivio();
+    var c = document.getElementById('chat-domanda'); if (c) c.focus();
+  }
+
+  async function svuotaUna(conv) {
+    if (!conv || !window._gc) return;
+    try {
+      var r = await window._gc.rpc('chat_svuota', { p_conversazione: conv });
+      if (r && r.error) throw r.error;
+      if (conv === chiacchierata()) nuovaChat(); else caricaArchivio();
+    } catch (e) { scrivi('ai', 'Non sono riuscito a buttarla: riprova.'); }
+  }
+
   async function manda() {
     if (inCorso) return;
     var casella = document.getElementById('chat-domanda');
@@ -260,6 +360,7 @@
       if (r.ok && d.risposta) {
         scrivi('ai', testoRisposta(d.risposta));
         scriviRestanti(d.restanti);
+        caricaArchivio();   /* la chiacchierata nuova compare subito a destra */
       } else if (d.serve_pro) {
         scrivi('ai', 'La <b>Chat con AI</b> fa parte del piano <b>Pro</b>.');
       } else if (d.serve_crediti) {
