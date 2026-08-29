@@ -4166,7 +4166,7 @@
       if(ruoloUtente==='professionista'){
         totPrev[p.id]=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait).totale;
       }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        const iva=_cent2(base*(+p.iva_perc||0)/100);
+        const iva=_centPerc(base,+p.iva_perc||0);
         totPrev[p.id]=_cent2(base+iva);
       }
     });
@@ -9836,7 +9836,12 @@ ${vecchi?`
     closeSheet();toast("Dati azienda salvati ✔");
   }
 
-  const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0)+" EUR";
+  /* ⛔ 29 agosto 2026 (notte) — anche QUI si arrotonda coi centesimi esatti.
+     Intl arrotonda il numero in virgola mobile com'e', quindi 4.996,0485
+     poteva uscire scritto 4.996,04 mentre il database dice 4.996,05: il
+     conto giusto e la scritta sbagliata. Il numero si pulisce PRIMA di
+     scriverlo. */
+  const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(_cent2(n))+" EUR";
   /* ⚠️ L'UNITÀ DI MISURA NEI PDF — 11 agosto 2026.
      Il programma che scrive i PDF non sa disegnare il quadratino e il cubetto,
      e invece di sbagliare LI BUTTA VIA IN SILENZIO: «m²» usciva stampato «m»,
@@ -10778,7 +10783,7 @@ ${vecchi?`
   /* ============================================================
      UPGRADE 2026 — Spese/margine, Preventivi, Report
      ============================================================ */
-  const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(+n||0);
+  const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(_cent2(n));
 
   /* ---- SPESE / MARGINE per lavoro ---- */
   let speseLavoroId=null;
@@ -11521,7 +11526,7 @@ ${vecchi?`
         const c=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
         totCli[p.id]=c.totale;
       }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        const iva=_cent2(base*(+p.iva_perc||0)/100);
+        const iva=_centPerc(base,+p.iva_perc||0);
         totCli[p.id]=_cent2(base+iva);
       }else{
         totCli[p.id]=base;   /* aliquota non indicata: resta com'era */
@@ -11784,7 +11789,7 @@ ${vecchi?`
      ⚠️ `qta` vuota vale 1 (una voce «a corpo» non ha una quantita'), e il
      prezzo vuoto vale 0: erano gia' cosi', non si cambia. */
   function impRiga(qta,prezzo){
-    return _cent2((+qta||1)*(+prezzo||0));
+    return _centMult((+qta||1),(+prezzo||0));
   }
 
   function prevTotaleLive(){
@@ -11826,7 +11831,7 @@ ${vecchi?`
        ⚠️ Se un giorno si tocca fattBasi, va toccata anche questa: c'e' la
        prova `prove/banco_conti.js` che le confronta su 200.000 parcelle. */
     const r2=n=>_cent2(n);
-    const cassa      = r2(compenso*cassaPerc/100);
+    const cassa      = _centPerc(compenso,cassaPerc);
     /* ===== 13 agosto 2026 — ANCHE QUI LE SPESE ESCONO DALL'IVA =====
        La casella del preventivo dice "Spese (bolli, diritti, copie)": sono le
        spese anticipate in nome e per conto del cliente, escluse dalla base
@@ -11839,7 +11844,7 @@ ${vecchi?`
        si calcola su baseIva, che le spese non le contiene. */
     const baseIva    = r2(r2(compenso) + cassa);
     const imponibile = r2(baseIva + spese);
-    const iva        = r2(baseIva*ivaPerc/100);
+    const iva        = _centPerc(baseIva,ivaPerc);
     const ritenuta   = conRitenuta ? r2(compenso)*ritPerc/100 : 0;  /* solo sul compenso */
     const totale     = imponibile + iva - ritenuta;
     return {compenso:r2(compenso),cassa:r2(cassa),spese:r2(spese),baseIva:r2(baseIva),
@@ -12065,7 +12070,7 @@ ${vecchi?`
            questa parcella dira' lo stesso numero.
            Se un giorno si cambia il modo di arrotondare, si cambia LI', non
            qui: due arrotondamenti diversi sono due totali diversi. */
-        spese=_cent2(tot*perc/100);
+        spese=_centPerc(tot,perc);
       }
       if(nota)nota.innerHTML="Non oltre il <b>"+_numTesto(maxPerc)+"%</b>."+(avviso?" ⚠️"+esc(avviso):"");
     }else if(nota)nota.innerHTML="Scrivi prima l'importo dei lavori.";
@@ -12223,7 +12228,7 @@ ${vecchi?`
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
        1.100,05. Il cliente che rifa' la somma a mano trova l'errore. */
     const perc=+sel.value||0;
-    const iva=_cent2(imponibile*perc/100);
+    const iva=_centPerc(imponibile,perc);
     const tot=_cent2(imponibile+iva);
     const riga=(et,v)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+eur2(v)+'</strong></div>';
     box.innerHTML = riga("Imponibile",imponibile)
@@ -12730,7 +12735,7 @@ ${vecchi?`
       /* 9 agosto 2026 — impresa con l'aliquota indicata: il cliente vede il
          totale FINITO, non solo l'imponibile. È la cifra che gli interessa. */
       const perc=+p.iva_perc||0;
-      const ivaVal=_cent2(tot*perc/100);
+      const ivaVal=_centPerc(tot,perc);
       /* stessa regola del riquadro nel gestionale e della conferma d'ordine:
          si somma l'IVA già arrotondata, se no i tre documenti dello stesso
          lavoro escono con totali diversi di un centesimo */
@@ -13228,7 +13233,7 @@ ${vecchi?`
     const righe=rr||[];
     let imponibile=0; righe.forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    const ivaVal=perc?_cent2(imponibile*perc/100):0;
+    const ivaVal=perc?_centPerc(imponibile,perc):0;
     const totale=_cent2(imponibile+ivaVal);
     const mem=ordLeggiMem();
 
@@ -13297,7 +13302,7 @@ ${vecchi?`
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let imponibile=0;(rr||[]).forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    const ivaVal=perc?_cent2(imponibile*perc/100):0;
+    const ivaVal=perc?_centPerc(imponibile,perc):0;
     const totale=_cent2(imponibile+ivaVal);
 
     const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};

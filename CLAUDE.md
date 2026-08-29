@@ -17954,3 +17954,151 @@ file per lo SDI compresi.
   lavoro: se un giorno si toccano, il foglio da usare è `js/centesimi.js`.
 * Le percentuali, le ore e i crediti formativi **non** sono stati toccati: non
   sono soldi.
+
+# 29 AGOSTO 2026 (notte fonda, seconda parte) — IL COLLAUDO DAL VIVO, E QUELLO CHE HA TROVATO
+
+Alessio: *«fai tu il test»*. Il collaudo è stato fatto sul **sito vero**, coi
+**suoi dati veri**, dal pannello Browser. Ed è successo esattamente quello che
+dice la lezione →3← di questa giornata: **la prova dal vivo ha trovato quello
+che i banchi non potevano trovare**.
+
+## Quello che doveva provare: a posto
+
+* Sul sito vero `_cent2(2280.805)` fa **→2280,81←**, come il database.
+* `js/centesimi.js` si carica in posizione →3←, **prima** di `gest-fatture.js`.
+* I →5← preventivi veri: **schermo = database**, centesimo per centesimo.
+* Le →2← fatture del giardiniere (→982,10←€ e →1.100,00←€): schermo, browser e
+  database dicono lo stesso numero.
+* **Zero errori in console.**
+
+---
+
+## ⛔ 1. IL DIFETTO GROSSO: `gest_fatture_totali` non contava cassa e spese
+
+Controllando anche il reparto **progetto casa** (lo studio tecnico) è uscito
+questo, **misurato sul database, non supposto**:
+
+| | |
+|---|---|
+| quello che dice il gestionale | **→2.345,00← €** |
+| quello che diceva la vista | **→2.040,00← €** |
+| differenza | **→305,00← €** su un documento solo |
+
+La vista sommava **solo `qta × prezzo`**: niente cassa previdenziale, niente
+spese, nessun arrotondamento riga per riga, **cestino compreso**, e la **nota di
+credito sommata col PIÙ** come fosse un incasso.
+
+⛔ **E quella vista la legge `chat_soldi()`**: cioè **la chat** e **l'email del
+lunedì**. Su ogni parcella di uno studio tecnico dicevano una cifra sbagliata, e
+nessuno poteva accorgersene perché sembra un numero normale.
+
+⚠️ **Era la stessa cosa già sistemata il →9← agosto in Report ed Excel.** Nella
+vista non era mai stata sistemata.
+
+### Come è stata chiusa
+
+| pezzo | dove | cosa fa |
+|---|---|---|
+| `gest_fattura_parcella(...)` | Supabase, `immutable` | **il conto vero**: non legge nessuna tabella |
+| `gest_fattura_conti(uuid)` | Supabase, `stable` | il guscio: legge la fattura e le righe, chiama il conto |
+| `gest_fatture_totali` | vista rifatta | chiama il guscio. Cestino fuori, nota di credito col **meno** |
+| `gest_banco_fatture_finte(n)` | Supabase | genera le fatture del banco. **Non serve al sito** |
+
+⛔ **Spezzato in due apposta**: il conto vero non legge niente, così il banco può
+confrontarlo con `fattBasi` su →10.000← fatture inventate **senza scrivere una
+riga nel database vero**.
+
+### ⛔ E c'era una TERZA copia della formula
+
+`netlify/functions/riepilogo-lunedi.js` si rifaceva il conto per conto suo — di
+nuovo solo `qta × prezzo` — sotto un commento che diceva *«STESSA formula del
+Riepilogo del gestionale»*. **Non era vero.** Adesso legge la vista.
+
+---
+
+## ⛔ 2. IL BUCO NEL LAVORO DELLA SERA: erano TRE, non uno
+
+Il banco nuovo delle fatture ha trovato che `js/centesimi.js`, così com'era la
+sera, **chiudeva solo il primo dei tre modi in cui la virgola mobile sbaglia.**
+
+| il buco | quanto spesso | il rimedio |
+|---|---|---|
+| **1. l'arrotondamento** — `2280,805 × 100` fa `228080,49999999997` | uno ogni →794← | `_cent2` · `_centGiu` |
+| **2. la moltiplicazione** — `3,25 × 1747,62` fa `5679,764999999999` | **due ogni →100←** | `_centMult` · `_centPerc` · `_centMulDiv` |
+| **3. la polvere delle somme** — `729,34 + 19488,19 + 4450,37` fa `24667,899999999998`, e il →5←% di quello è un centesimo in meno | rara ma vera | si tengono **→15← cifre** e si butta la polvere |
+
+⛔ **Il buco →2← è più frequente del →1←, ed era invisibile al primo banco**: i
+suoi casi partivano da un compenso **già scritto** e non moltiplicavano mai
+quantità per prezzo. In fattura invece succede su ogni riga.
+
+⚠️ **Anche scrivere un numero è un arrotondamento.** `eur2` ed `eurPdf` usavano
+`Intl` sul numero sporco: potevi avere il conto giusto e la **scritta** sbagliata
+di un centesimo. Adesso puliscono prima di stampare.
+
+### Le quindici cifre
+
+Un numero in doppia precisione porta poco meno di **sedici** cifre buone: la
+sedicesima è polvere. Prendendone **quindici** (`toPrecision(15)`) resta il
+numero che l'utente ha scritto — «2280.805», non «2280.80499999999».
+
+⚠️ **Misurato:** con la pulizia delle quindici cifre, la moltiplicazione a numeri
+interi non cambia **mai** il risultato su →500.000← righe. Resta lo stesso, come
+cintura per quando un importo supera le quindici cifre buone — e il banco lo
+dichiara «cieco previsto», col numero scritto. **Il numero vero si scrive, non si
+nasconde.**
+
+---
+
+## ⛔ 3. DUE DIFETTI TROVATI DAL BANCO, NON DAI DATI VERI
+
+Nella funzione SQL, tutti e due sarebbero arrivati online senza farsi vedere:
+
+1. **`basi_nat := basi_nat || 'N1'`** faceva esplodere la funzione: *«malformed
+   array literal "N1"»*. Postgres, davanti a una scritta senza tipo, prova a
+   leggerla come un **array**. Serve `'N1'::text`. Sui dati veri non si vedeva:
+   nessuna delle tre fatture ha le spese in regime art. 15.
+2. **`SPESE` e `RIT`** si chiamavano come le colonne restituite, e in Postgres i
+   nomi **non distinguono maiuscole e minuscole**: la lista nascondeva la colonna
+   e il valore finiva nel posto sbagliato.
+
+---
+
+## ⛔ 4. LA FAMIGLIA B GUARDAVA SOLO IL TOTALE, ED ERA POCO
+
+Un pezzo sbagliato in mezzo — la cassa, l'IVA — può **sparire dentro gli
+arrotondamenti che vengono dopo** e lasciare il totale giusto. Se ne è accorto il
+banco dei sabotaggi: rompendo l'arrotondamento della cassa restava verde. Adesso
+si confrontano **tutti i pezzi**, uno per uno.
+
+---
+
+## I banchi a fine giornata
+
+| banco | prove | sabotaggi |
+|---|---|---|
+| `prove-claude/banco-conti-29ago.zip` | **→34← verdi · →0← rosse** | →8← su →8← visti, +→3← ciechi **dichiarati col perché misurato** |
+| `prove-claude/banco-vista-fatture-29ago.zip` | **→14← verdi · →0← rosse** | il confronto è con Supabase: →6← firme su →10.000← fatture |
+| `banco-imprese-centesimi-28ago.zip` (vecchio) | **→198← verdi · →0← rosse** | fatture e file per lo SDI compresi |
+
+⚠️ Il banco dei conti è stato fatto girare anche sulla versione **prima**: →5←
+rosse. Se restasse verde su tutte e due non misurerebbe niente.
+
+---
+
+## File toccati
+
+`js/centesimi.js` · `gestionale-app.html` · `js/gest-fatture.js` ·
+`netlify/functions/riepilogo-lunedi.js` · su Supabase:
+`gest_fattura_parcella` · `gest_fattura_conti` · `gest_fatture_totali` ·
+`gest_banco_fatture_finte`.
+
+## Cose viste e lasciate lì apposta
+
+* Il **forfettario** si legge dall'**azienda** (`fattForfettario`), mentre il file
+  per lo SDI usa `f.regime_fiscale || az.regime_fiscale`. **I due non sempre
+  coincidono.** Da guardare, non toccato: è scritto nel commento della funzione.
+* Il **negozio**, il **noleggio** e l'**app dell'operaio** contano ancora i soldi
+  con `Math.round(x*100)/100`. Sono documenti diversi: se un giorno si toccano,
+  il foglio da usare è `js/centesimi.js`.
+* Nel decreto parametri `perFase[...].imp` moltiplica **quattro** numeri in fila
+  e non è stato toccato: è una stima, non un documento.

@@ -190,7 +190,7 @@
          somma non arrotondata. Due numeri che devono combaciare, e potevano
          non combaciare. Stessa ragione per cui la cassa, tre righe sotto, si
          arrotonda subito. */
-      const imp=c2((+r.qta||0)*(+r.prezzo||0));
+      const imp=_centMult((+r.qta||0),(+r.prezzo||0));
       compenso+=imp;
       return {iva:forf?0:(+r.iva||0), pieno:imp, sconto:0, totale:imp};
     });
@@ -198,7 +198,7 @@
        SDI <ImportoContributoCassa> e' scritto a due decimali, e se qui dentro
        ne portasse cinque il riepilogo non tornerebbe con la somma delle righe
        piu' la cassa dichiarata — un centesimo fuori su 234 fatture su 60.000 */
-    const cassa=c2(compenso*(+f.cassa_perc||0)/100);
+    const cassa=_centPerc(compenso,(+f.cassa_perc||0));
     /* ===== 13 agosto 2026 — LE DUE SPESE =====
        Fino a ieri c'era una casella sola, "Spese", e finiva nell'imponibile con
        l'IVA della fattura. Il commercialista: le spese anticipate in nome e per
@@ -247,7 +247,7 @@
          prezzo totale usciva a -0,01 (qta 16,95 x 1.699,90 = 28.813,305).
          Per difetto invece lo sconto scritto nel file non supera mai la riga,
          qualunque cosa faccia l'arrotondamento. */
-      const q=(compenso>0)?c2(scRighe*l.pieno/compenso):0;
+      const q=(compenso>0)?_centMulDiv(scRighe,l.pieno,compenso):0;
       l.sconto=Math.max(0,Math.min(q,_giu2(l.pieno)));
     });
     /* Il resto dell'arrotondamento si mette sulle righe piu' capienti, non
@@ -315,7 +315,7 @@
       .sort((a,b)=>(b.al-a.al)||(a.nat<b.nat?-1:a.nat>b.nat?1:0))
       .map(function(b){
         const imponibile=Math.max(0,c2(b.imp));
-        return {aliquota:b.al, natura:b.nat, imponibile:imponibile, imposta:c2(imponibile*b.al/100)};
+        return {aliquota:b.al, natura:b.nat, imponibile:imponibile, imposta:_centPerc(imponibile,b.al)};
       });
     /* i totali sono la somma dei riepiloghi GIA' ARROTONDATI: cosi' il totale
        del documento non puo' discostarsi nemmeno di un centesimo da quello che
@@ -1428,7 +1428,7 @@
     R.forEach(r=>{
       /* arrotondato come in fattBasi: sul PDF e nel totale deve essere lo
          stesso numero, non due (22 agosto 2026) */
-      const imp=_cent2((+r.qta||0)*(+r.prezzo||0));
+      const imp=_centMult((+r.qta||0),(+r.prezzo||0));
       const al=forf?0:(+r.iva||0);
       const lines=doc.splitTextToSize(r.descrizione||"",colQ-M-8);
       const h=Math.max(lines.length*4.6+5, 9);
@@ -1884,7 +1884,7 @@
          rifa' il conto, se no le due copie prima o poi si scollano */
       /* la scialuppa, se le linee non ci fossero: arrotondata come tutto
          il resto (22 agosto 2026) */
-      const _impR=_cent2((+r.qta||0)*(+r.prezzo||0));
+      const _impR=_centMult((+r.qta||0),(+r.prezzo||0));
       const L=(c.linee&&c.linee[i])||{pieno:_impR,sconto:0,totale:_impR};
       x+='      <DettaglioLinee>\n';
       x+='        <NumeroLinea>'+(i+1)+'</NumeroLinea>\n';

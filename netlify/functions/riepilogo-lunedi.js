@@ -387,33 +387,32 @@ const handler = async function () {
     ]);
     for (const q of [qScad, qFatt, qLav, qCli, qImp, qMest]) if (q.error) throw q.error;
 
-    // le righe delle fatture servono per il totale: si leggono solo per le
-    // fatture emesse trovate sopra
+    /* ⛔ 29 agosto 2026 (notte) — IL TOTALE NON SI RIFA' PIU' QUI.
+       Qui c'era la TERZA copia della formula dei soldi, e sbagliava:
+       sommava solo qta * prezzo, quindi SENZA la cassa previdenziale e
+       SENZA le spese. Su una parcella vera del reparto «progetto casa»
+       erano 305 € di differenza — e il commento sopra diceva «STESSA
+       formula del Riepilogo del gestionale», che non era vero.
+       Adesso il totale lo chiede alla vista `gest_fatture_totali`, che a
+       sua volta chiede a `gest_fattura_conti()`: la formula dei soldi sta
+       in un posto solo, ed e' la regola 6 del gestionale.
+       ⚠️ La vista porta gia' il SEGNO: una nota di credito toglie soldi
+          invece di aggiungerli. */
     const idFatture = (qFatt.data || []).map(f => f.id);
-    let righeFatt = [];
+    const totali = {};
     if (idFatture.length) {
-      const q = await sb.from('gest_fattura_righe').select('fattura_id, qta, prezzo, iva')
+      const q = await sb.from('gest_fatture_totali').select('fattura_id, totale')
                         .in('fattura_id', idFatture);
       if (q.error) throw q.error;
-      righeFatt = q.data || [];
+      (q.data || []).forEach(t => { totali[String(t.fattura_id)] = +t.totale || 0; });
     }
 
     const nomeCli  = Object.fromEntries((qCli.data  || []).map(c => [String(c.id), c.nome || '']));
     const nomeMest = Object.fromEntries((qMest.data || []).map(m => [String(m.id), m.nome || '']));
     const tipoUte  = Object.fromEntries((qImp.data  || []).map(i => [String(i.user_id), i.tipo || '']));
 
-    // totale fattura: STESSA formula del Riepilogo del gestionale
-    const somme = {};
-    righeFatt.forEach(r => {
-      const imp = (+r.qta || 0) * (+r.prezzo || 0);
-      const t = somme[r.fattura_id] = somme[r.fattura_id] || { imp: 0, iva: 0 };
-      t.imp += imp;
-      t.iva += imp * (+r.iva || 0) / 100;
-    });
-    const totaleFattura = f => {
-      const t = somme[f.id] || { imp: 0, iva: 0 };
-      return t.imp + t.iva - (+f.sconto || 0) + (+f.bollo || 0) - t.imp * (+f.ritenuta_perc || 0) / 100;
-    };
+    // quanto ti bonifica il cliente: lo dice la vista, non si ricalcola
+    const totaleFattura = f => totali[String(f.id)] || 0;
 
     // -----------------------------------------------------------------------
     // 3. Una busta per persona

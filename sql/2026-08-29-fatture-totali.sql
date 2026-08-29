@@ -1,0 +1,85 @@
+-- =====================================================================
+-- I TOTALI DELLE FATTURE — 29 agosto 2026 (notte)
+-- TrovaImpresa · gestionale
+--
+-- ⛔ IL DIFETTO CHE E' STATO CHIUSO. La vista `gest_fatture_totali`
+--    sommava solo `qta * prezzo`:
+--      · NON contava la CASSA previdenziale
+--      · NON contava le SPESE
+--      · non arrotondava al centesimo riga per riga
+--      · teneva dentro anche le fatture nel CESTINO
+--      · e sommava la NOTA DI CREDITO col PIU', come fosse un incasso
+--    La legge `chat_soldi()`, quindi la CHAT e l'EMAIL DEL LUNEDI'
+--    dicevano numeri sbagliati. Misurato su una fattura vera del reparto
+--    «progetto casa»: 2.040 € invece di 2.345 €, cioe' 305 € su un
+--    documento solo.
+--
+-- ⛔ ADESSO la formula dei soldi sta in un posto solo (regola 6 del
+--    gestionale) ed e' lo specchio di `fattBasi` + `fattConti` in
+--    js/gest-fatture.js.
+--    Banco: prove-claude/banco-vista-fatture-29ago.zip — 14 verdi, e sei
+--    firme confrontate con Supabase su 10.000 fatture inventate.
+--
+-- ⚠️ ATTENZIONE, LEGGI QUESTA RIGA: questo file NON contiene il codice.
+--    E' una SCHEDA. Il codice vero vive nelle migrazioni di Supabase
+--    (sono versionate li'), e questo file serve a sapere che cosa esiste,
+--    perche' esiste, e come rileggerlo in un comando.
+--
+-- Le quattro migrazioni, nell'ordine:
+--   1. gest_fattura_parcella_nucleo_puro
+--   2. gest_fattura_parcella_natura_n1_come_testo
+--   3. gest_banco_fatture_finte_nomi_senza_scontro
+--   4. gest_fatture_totali_conta_come_la_fattura
+--
+-- I quattro pezzi:
+--   gest_fattura_parcella(...)     immutable — IL CONTO VERO. Non legge
+--                                  nessuna tabella: gli si passano i dati
+--                                  e risponde. Cosi' il banco lo puo'
+--                                  provare senza scrivere niente nel
+--                                  database vero.
+--   gest_fattura_conti(uuid)       stable — il guscio: legge la fattura,
+--                                  le sue righe e il regime, e chiama il
+--                                  conto.
+--   gest_fatture_totali            la vista: chiama il guscio. Cestino
+--                                  fuori, nota di credito col MENO.
+--   gest_banco_fatture_finte(n)    immutable — genera le fatture inventate
+--                                  del banco. NON SERVE AL SITO: si puo'
+--                                  cancellare senza rompere niente.
+--
+-- ⛔ PER RILEGGERE IL CODICE VERO, in un colpo solo:
+--
+--   select p.proname, pg_get_functiondef(p.oid)
+--     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--    where n.nspname = 'public'
+--      and p.proname in ('gest_fattura_parcella','gest_fattura_conti',
+--                        'gest_banco_fatture_finte')
+--   union all
+--   select 'gest_fatture_totali', pg_get_viewdef('gest_fatture_totali'::regclass, true);
+--
+-- ⛔ PER CONTROLLARE CHE SUL DATABASE CI SIA ANCORA QUELLO DI OGGI:
+--
+--   select md5(string_agg(d, '|' order by nome)) from (
+--     select p.proname as nome, pg_get_functiondef(p.oid) as d
+--       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--      where n.nspname = 'public'
+--        and p.proname in ('gest_fattura_parcella','gest_fattura_conti',
+--                          'gest_banco_fatture_finte')
+--     union all
+--     select 'vista', pg_get_viewdef('gest_fatture_totali'::regclass, true)) q;
+--
+--   Il 29 agosto 2026 rispondeva:  1ba197366f0f3ab80aad957d563c11a1
+--   Se risponde un altro numero, qualcuno ha toccato il conto dei soldi:
+--   rileggilo e rifai girare il banco.
+--
+-- ⛔ DUE DIFETTI TROVATI DAL BANCO, da non rifare:
+--   1. `basi_nat := basi_nat || 'N1'` esplode: «malformed array literal».
+--      Postgres legge una scritta senza tipo come un ARRAY. Serve 'N1'::text.
+--   2. Le liste locali NON si chiamano come le colonne restituite: in
+--      Postgres i nomi non distinguono maiuscole e minuscole, e
+--      `spese := SPESE[...]` scrive nella lista invece che nella colonna.
+--
+-- ⚠️ Il forfettario si legge dall'AZIENDA (come fa `fattForfettario`),
+--    mentre il file per lo SDI usa `f.regime_fiscale || az.regime_fiscale`:
+--    i due non sempre coincidono. E' una cosa da guardare, non e' stata
+--    cambiata qui.
+-- =====================================================================
