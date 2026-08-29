@@ -17647,3 +17647,202 @@ Oggi `chat_pro` è acceso su **→1← impresa su →103←**, quella di Alessio
   il terminale resta bloccato sul prompt `>`. Si sblocca con **Ctrl+C**.
 * **Le query e le migrazioni su Supabase le lancia Claude direttamente**, non si
   danno più da incollare a mano.
+
+
+---
+
+# 29 AGOSTO 2026 (notte) — IL GRADINO 3: «TI RIEMPIO IL MODULO, TU SALVI»
+
+Scrivi nella chat *«segnami giovedì prossimo il taglio della siepe da condomio
+la firesta, in via torino 7, 350 euro»* e **si apre il modulo del Lavoro già
+compilato**. Tu controlli e premi Salva.
+
+⛔ **L'AI non scrive mai nel database.** Riempie il modulo, salvi tu, col codice
+di sempre. È la regola che vale in tutto il gestionale, e qui non si è piegata.
+
+**Moduli fatti: →2←.** Il **Lavoro** e il **Cliente**. Il preventivo no: prima
+serve la vista dei totali (vedi in fondo).
+
+---
+
+## Le tre decisioni di Alessio, prese prima di costruire
+
+1. **Si parte dal Lavoro.** Lavoro e Cliente avevano già tutto pronto in
+   `js/ai-integrazione.js`; il preventivo no.
+2. **Modulo diretto**, non una finestrella in mezzo. Un clic solo.
+3. **Paga un messaggio dei →300←**, non un credito AI. Così è **→1← sola
+   chiamata a Claude** invece di →2←: costa meno ad Alessio e all'iscritto si
+   scala solo il messaggio che ha già scritto.
+
+## Com'è fatto il ponte — →4← file, e nessun motore nuovo
+
+Il gradino 3 era davvero **un ponte**, come previsto nel prompt del mattino.
+
+| pezzo | dove |
+|---|---|
+| l'attrezzo `compila_lavoro` / `compila_cliente` | `netlify/functions/chat-gestionale.js` |
+| la macchina che riempie: `AI.riempiLavoro()` · `AI.riempiCliente()` | `js/ai-integrazione.js` |
+| le due porte della chat: `AI.compilaLavoroDaChat()` · `AI.compilaClienteDaChat()` | `js/ai-integrazione.js` |
+| il campanello: `apriModulo()` + `MODULI_APRIBILI` | `js/gest-chat.js` |
+| il ponte del gestionale: `gestApriModuloAI(tipo, conRiga)` | `gestionale-app.html` |
+
+⛔ **La macchina che riempie sta in un posto solo.** Le righe che riempivano
+`j-desc`, `j-dove`, `j-data`, `j-imp` e le tendine erano **chiuse dentro
+`compilaLavoro()`**: sono state tirate fuori in `riempiLavoro()`, e adesso la
+usano **tutte e due le strade** — il pulsante «Compila con AI» e la chat. Se le
+avessi ricopiate nella chat, un campo aggiunto domani sarebbe finito in uno solo
+dei due moduli.
+
+⚠️ **Il secondo argomento di `gestApriModuloAI`.** `conRiga === false` apre il
+modulo **senza** la riga «Compila con AI» spalancata. Non è un vezzo: quella
+riga, aprendosi, **si prende il cursore dopo →60← millesimi** e lo toglie dalla
+prima casella appena riempita. Chi chiamava prima non passa niente e per lui non
+cambia nulla.
+
+⚠️ **La data va nel modulo solo se è AAAA-MM-GG.** `j-data` è un
+`<input type="date">`: **rifiuta in silenzio** tutto il resto. Una data scritta
+`03/09/2026` non dà nessun errore — la casella resta vuota. Stesso difetto degli
+importi del →16← agosto. Quindi una data storta si butta nella function, e il
+modulo si apre con la data vuota invece che con una data che non arriva mai.
+
+---
+
+## ⛔ I DUE DIFETTI CHE HA TROVATO SOLO LA PROVA DAL VIVO
+
+I banchi erano tutti verdi. Tutti e due questi difetti li ha trovati **il
+gestionale vero, sui dati veri di Alessio**, non il banco.
+
+### 1. Il cliente non si attaccava alla tendina
+
+Il cliente si chiama `condomio la firesta`. Claude ha **sistemato** il nome e ha
+scritto `Condominio La Firesta`: giusto in italiano, ma nella tendina quella
+voce **non c'è**. `impostaSelectQuando` cerca la voce identica, non la trova,
+lascia vuoto. **Succede quasi sempre**: uno scrive il nome come se lo ricorda,
+il modello lo corregge, e il collegamento si perde in silenzio.
+
+⛔ **La strada sbagliata, scartata dopo averla scritta.** Il primo tentativo
+cercava nel database la **parola più lunga** del nome. Su questo caso avrebbe
+cercato `condominio`, che dentro `condomio la firesta` **non c'è**: la parola
+che identificava era `firesta`, cioè **la più corta**. E allentare il confronto
+per farcela stare vuol dire, il giorno che i clienti sono due, attaccare il
+lavoro **a quello sbagliato** — e un lavoro sul cliente di un altro non si vede:
+si vede quando arriva la fattura.
+
+**La strada presa: non si indovina.** `nomiDelReparto()` legge i nomi veri (dai
+soliti due filtri, cestino fuori) e `scegliNome()` accetta **solo il nome
+identico** — minuscole, accenti e spazi a parte, con **lo stesso confronto che
+fa il browser sulla tendina**. Se non c'è, il campo **si toglie** e a Claude si
+dice quali sono i nomi veri: al giro dopo richiama l'attrezzo col nome giusto,
+oppure lo dice all'iscritto. **La scelta la fa su nomi veri, non su una
+somiglianza inventata.**
+
+⚠️ Per questo l'attrezzo si può richiamare **una volta sola** (`daSistemare`):
+quello è il giro che serve, non un doppione.
+
+### 2. La data sbagliata di un giorno
+
+Seconda prova: «giovedì prossimo» è finito nel modulo come **2026-09-04**, e la
+chat ha scritto «giovedì 4 settembre». Il →4← settembre 2026 è **venerdì**.
+
+Il perché: nelle istruzioni c'era solo `2026-08-29`, il numero. **Un modello non
+sa contare i giorni della settimana da una data**: se li immagina. Alla prima
+prova gli era andata bene per caso.
+
+⛔ **È il difetto peggiore del gradino 3, perché non si vede**: il modulo è
+pieno, la data c'è, sembra tutto giusto — e si scopre quando l'artigiano si
+presenta in cantiere il giorno dopo.
+
+**La correzione: il conto non lo fa più lui.** `calendarioProssimo()` gli passa
+la **fila dei prossimi →15← giorni già scritta** — *sabato 29 agosto =
+2026-08-29 · … · giovedì 3 settembre = 2026-09-03 · …* — e a lui resta da
+**leggere** la riga giusta.
+⚠️ Tutto in UTC (`getUTCDay`, `toISOString`), così il fuso non sposta il giorno,
+e i nomi dei giorni **scritti a mano** invece che con `Intl`: una function su
+Netlify può girare senza le lingue installate, e uscirebbero in inglese.
+
+---
+
+## ⛔ Il difetto trovato dal banco: il cursore tornava nella chat
+
+In fondo a `manda()`, dentro `js/gest-chat.js`, c'era `casella.focus()`: girava
+**dopo** che il modulo si era già aperto. Modulo pieno davanti, cursore che
+lampeggiava nella chat dietro. Non si vede leggendo il codice — le due righe
+stanno a quaranta righe di distanza. L'ha trovato la prova che guarda
+`document.activeElement`.
+
+## ⛔ E un sabotaggio del banco che era CIECO
+
+C'era una prova che diceva *«l'ora legale non sposta niente»* e, sabotando il
+mezzogiorno, **restava verde**. Giustamente: con tutta la fila costruita e letta
+in UTC l'ora del giorno non cambia niente. **La prova non misurava quello che
+diceva di misurare.**
+
+⛔ **Una prova che si autoassolve è peggio di nessuna prova**, perché fa credere
+coperto un pezzo che non lo è. È stata riscritta su quello che può davvero
+guardare, e al suo posto è entrato il sabotaggio che conta: **i nomi dei giorni
+sfasati di uno** (→8← rosse).
+
+---
+
+## I banchi
+
+`prove-claude/banco-chat-modulo-29ago.zip` — **→122← verdi · →0← rosse ·
+→8← sabotaggi visti su →8←.**
+
+| banco | dove gira | prove |
+|---|---|---|
+| `prove/chat-modulo/banco.js` | solo node, un secondo | **→86←** |
+| `prove/chat-modulo/banco-ponte.js` | browser vero + Playwright, un minuto | **→36←** |
+
+Il banco del ponte **non chiama la function**: la risposta è finta e arriva dal
+banco stesso, così prova il **ponte** e non Claude. Le tre prove che contano di
+più: dopo che il modulo si è aperto `window.__DB` ha **le stesse righe di
+prima** (l'AI non ha salvato niente); un cliente che nella tendina non c'è
+**lascia la tendina vuota**; e i pulsanti «Compila con AI» aprono ancora il
+modulo **con la riga dell'AI spalancata e le caselle vuote**, come prima.
+
+### ⚠️ Come si gira, e la trappola
+La copia del sito va **copiata, non collegata con un link**: la function fa
+`require('@supabase/supabase-js')`, e da fuori dalla cartella quel pacchetto non
+si trova. Per lo stesso motivo le copie sabotate si scrivono **accanto
+all'originale**, non in `/tmp`: da lì non partirebbero, e ogni sabotaggio
+sembrerebbe «visto» per il motivo sbagliato.
+
+---
+
+## Il collaudo dal vivo, sui dati veri
+
+Nel reparto *giardiniere*, con →3← messaggi veri dei →300←:
+
+* **Lavoro:** `taglio della siepe` · `via torino 7` · **Data prevista
+  03/09/2026** · Cliente **`condomio la firesta`** · `350,00`.
+* **Cliente:** «*aggiungimi un cliente nuovo: Ferramenta Belli, via Garibaldi 40
+  Rieti, referente Marco Belli, 0746 998877*» → le →4← caselle piene.
+* **Console pulita.** Niente salvato: Annulla su tutti e due.
+
+---
+
+## Cosa resta
+
+* **Il preventivo dalla chat**: manca `compila_preventivo`, e prima serve la
+  **vista dei totali** dei preventivi — non esiste niente come
+  `gest_fatture_totali`. ⛔ La strada giusta è **fare la vista anche per loro**,
+  non ricopiare il conto dentro la chat.
+* **Gradino →4←** (ti avvisa da solo il lunedì — il tubo c'è già in
+  `netlify/functions/riepilogo-lunedi.js`) · **→5←** (legge le carte) ·
+  **→6←** (si parla).
+* **Il piano Pro commerciale**: prezzo, `prezzi.html`, Stripe, e cosa succede a
+  chi ha già il Premium. `chat_pro` è acceso su **→1← impresa su →103←**.
+
+### Piccole cose viste e lasciate lì apposta
+* Il modulo del **cliente dalla chat si apre sempre su «Privato»**, anche per
+  una ferramenta. È lo stesso comportamento del pulsante «Compila con AI» di
+  prima, quindi non è una rottura del gradino 3. Non toccato perché Alessio non
+  l'ha chiesto.
+
+### ⚠️ La lezione della giornata
+**I banchi verdi non bastano.** →122← prove verdi e →8← sabotaggi visti non
+hanno trovato né il nome del cliente né la data sbagliata: li ha trovati la
+chat vera, con i dati veri, in →2← messaggi. Il banco protegge quello che
+qualcuno ha già capito; **quello che nessuno ha ancora capito lo trova solo la
+prova dal vivo.**
