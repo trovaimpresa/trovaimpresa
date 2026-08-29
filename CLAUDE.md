@@ -17357,3 +17357,293 @@ computo e un noleggio di prova.
 mandano **per email** a `pintoalessio@icloud.com`, con una scheduled task
 one-shot (`create_trigger`, `run_once_at` fra due minuti,
 `notifications: {email:true, push:true}`).
+
+---
+
+# 29 agosto 2026 (sera) — IL COMPUTO ALL'ARTIGIANO, LA SERRATURA DEL PRO, E LA CHAT CON AI
+
+Giornata lunga: si chiudono tutti e tre i lavori scritti nel prompt del mattino,
+e la chat arriva **viva e collaudata sui dati veri**.
+
+---
+
+## 1. «Computo da prezzare» anche all'artigiano
+
+Il 22 agosto l'artigiano era stato staccato dal ramo dell'impresa **proprio per
+togliergli** Computo, Prezzario e Stati di avanzamento. Alessio li ha rivoluti:
+anche a un artigiano il geometra manda il computo senza prezzi.
+
+**Fatto con due modifiche sole**, e nessuna delle due ricopia niente:
+
+* `TAB_APPALTI_ART` adesso contiene **solo `crediti`**. Togliere di lì le tre
+  voci le accende in **tre posti insieme** — il menu, la scheda del Riepilogo e
+  la lettura dei computi dal database — perché tutti e tre chiedono a
+  `tabNascosti()`.
+* `adattaMenuArtigiano()` chiama **`adattaMenuImpresa()`**, che esce da sola
+  solo per gli studi tecnici. ⛔ Le tre righe **non** sono state ricopiate: la
+  regola del computo sta in un posto solo, come la parola.
+
+**Le parole**: scelta di Alessio, uguali all'impresa. `_cm()` dà già `_CM.imp` a
+chiunque non sia studio tecnico, quindi **zero righe in più**.
+
+Il menu dell'artigiano passa da →17← a →20← voci.
+
+### ⚠️ Tre difetti vecchi trovati con la prova dal vivo
+Non erano nati quel giorno: c'erano **dal 20 agosto anche per l'impresa edile**.
+In tre punti «computo metrico» era scritto a mano invece di chiederlo a `_cm()`:
+
+1. la spiegazione della sezione **Prezzario**;
+2. la spiegazione della sezione **Preventivi**;
+3. la voce «📄 Scarica il computo metrico» in `js/gest-computo.js`.
+
+⛔ **La lezione che resta:** le parole che cambiano col ruolo **non si cercano
+una schermata per volta**. Il banco apre tutte le sezioni accese e legge **ogni
+nodo di testo** della pagina cercando la parola sbagliata (escludendo `script`,
+`style` e il velo `#gate-gestionale`). È così che sono usciti.
+
+**Banco:** `prove-claude/banco-artigiano-computo-29ago.zip` — →55← prove sui
+**tre ruoli**. Girato sulla versione di prima dà →15← rosse, e la famiglia A
+(*chi entra nel menu*) resta verde in tutte e due: è la prova che l'ingresso non
+è cambiato.
+
+---
+
+## 2. La serratura del piano Pro
+
+Alessio ha deciso la forma del piano, e l'ha detta meglio di come era stata
+proposta: **il Pro non sostituisce il Premium, ci si aggiunge sopra.**
+
+* **Premium** = la vetrina sul sito **+ il gestionale con tutte le sue funzioni**
+  (Compila con AI, Genera con AI, crediti compresi).
+* **Pro** = quello, **più la chat**. E basta: **nessuno perde niente**.
+
+### ⛔ E per questo il Pro NON sta nella colonna `piano`
+Nel progetto ci sono **→91← punti in →29← file** che confrontano il piano con la
+parola `'premium'`. Se `piano` diventasse `'pro'`, tutti e 91 direbbero «non è
+premium» e **a chi paga di più sparirebbe la vetrina**.
+
+Sta in **due colonne sue** su `imprese`: `chat_pro` e `chat_pro_scadenza` — la
+stessa identica forma di `gestionale_attivo` / `gestionale_scadenza`, l'add-on
+del gestionale del 22 agosto. Il cancello le legge nella **stessa query** che
+faceva già, quindi la chat non costa una lettura in più.
+
+### ⚠️ IL BUCO TROVATO E CHIUSO
+Le policy RLS di `imprese` lasciano che **ognuno aggiorni la propria riga**.
+Quello che impedisce a un iscritto di regalarsi il Premium dal browser **non è
+la RLS**: è il trigger `imprese_blocca_piano`, che rimette i valori vecchi.
+
+⛔ Quel trigger proteggeva `piano`, `premium_pagato`, `premium_scadenza`,
+`gestionale_attivo`, `gestionale_scadenza` — **ma non le due colonne nuove**.
+Chiunque avrebbe potuto scrivere `update imprese set chat_pro=true` dalla
+console e prendersi la chat gratis. Aggiunte, e **provato fingendosi un
+iscritto**: `chat_pro` torna falso, `piano` resta `premium`.
+
+### Il cancello
+`js/gate-gestionale.js` ha ora `haChatPro(row)` accanto a `haPremium(row)`, e
+accende la lampadina `window._chatPro`.
+⛔ **Il Pro non entra nella decisione di chi entra nel gestionale**: sbagliare
+lì deve poter costare al massimo una chat, mai il gestionale. `haChatPro()`
+chiede il Premium per prima cosa — un Pro col Premium scaduto non è un Pro.
+
+**Banco:** `prove-claude/banco-serratura-pro-29ago.zip` — →30← prove, →10←
+situazioni incrociate. La prova che vale più di tutte: *chi entra* e *chi ha il
+Premium* devono essere **sempre la stessa cosa**.
+
+⚠️ Oggi `MANUTENZIONE=true` con `AMMESSI=['pintoalessio@icloud.com']`, e il
+cancello **non è caricato** da `gestionale-negozio.html` né da
+`gestionale-operatore.html`.
+
+---
+
+## 3. La Chat con AI
+
+### Le decisioni, tutte di Alessio
+| | |
+|---|---|
+| si chiama | **✨ Chat con AI** — stessa famiglia di «Compila con AI» |
+| dove sta | **voce nella colonna di sinistra**, sotto Riepilogo, come una sezione |
+| cosa vede | **solo il reparto aperto** |
+| chi la usa | solo il **Pro** |
+| chi paga | →300← messaggi al mese compresi, poi i crediti |
+| le cifre | **sempre tutte e due**: totale con IVA e, fra parentesi, imponibile |
+
+Scartati: il bottone nella barra in alto (la finestra grande **copre** il
+gestionale) e quello accanto a «Compila con AI» (bello, ma quel posto esiste
+solo in **→2← sezioni su →20←**).
+⚠️ Il vantaggio «la chat sa in che sezione sei» **non dipende da dov'è il
+bottone**: la chat legge da sola la sezione aperta.
+
+### I pezzi
+| pezzo | dove |
+|---|---|
+| i messaggi | `gest_chat_messaggi` su Supabase |
+| il server | `netlify/functions/chat-gestionale.js` |
+| la sezione | `js/gest-chat.js` + `<section id="chat">` in `gestionale-app.html` |
+| la grafica | blocco `#chat` in fondo alle `.asst-*` di `css/gestionale.css` |
+
+### ⛔ LE REGOLE DELLA CHAT, IN ORDINE DI QUANTO COSTANO SE SI SBAGLIANO
+1. **Chi chiama si ricava dal gettone**, mai dal messaggio (lezione del 21
+   agosto, già scritta in `ai-claude.js`).
+2. **Ogni lettura porta due filtri**: `user_id` + `mestiere_id`. Mai uno solo.
+   Li mette una funzione sola, `costruisciLettura()`.
+3. ⚠️ **I dati si leggono col gettone dell'ISCRITTO, non col service role.**
+   Il service role passa sopra alla RLS: con quello un errore nel filtro non lo
+   ferma nessuno. Così invece la RLS resta accesa ed è la **seconda serratura**.
+   Il service role serve solo a scrivere in `gest_chat_messaggi` e a chiamare
+   `chat_stato`.
+4. **Il cestino resta sempre fuori**: tutte e →11← le tabelle hanno
+   `eliminato_il`.
+5. **Il nome della tabella non arriva mai da Claude**: elenco chiuso di →11←
+   parole.
+
+### Le tabelle che la chat sa guardare
+lavori · preventivi · fatture · clienti · fornitori · scadenze · computi · sal ·
+mezzi · operatori · fatture fornitori. Solo tabelle che hanno il **loro**
+`mestiere_id`: le tabelle figlie (righe di fattura, voci di computo) restano
+fuori, perché il reparto non lo saprebbero filtrare **sul database**.
+
+### ⚠️ Due cose trovate leggendo il database vero, non a memoria
+1. **→5← nomi di colonna erano sbagliati**: `gest_fatture.totale` e
+   `gest_preventivi.totale` **non esistono**, la scadenza è `data_scadenza`, il
+   fornitore non ha `citta`, la mansione è `mansione` e non `ruolo`. Sarebbero
+   stati cinque attrezzi che rispondono sempre «errore».
+2. **Il cestino**: senza escluderlo, «quante fatture ho» contava anche quelle
+   buttate — un numero che sullo schermo non c'è.
+
+### I soldi (gradino 1)
+⛔ **Non è stata scritta nessuna formula nuova.** La vista
+**`gest_fatture_totali`** esisteva già e calcola imponibile, IVA e totale
+tenendo dentro sconto, bollo e ritenuta — e ha anche `mestiere_id`.
+Ricalcolare sarebbe stato diventare la **terza copia** della formula dei soldi
+(le prime due, `fattConti` e `fattDisegnaSomma`, le aveva trovate il banco delle
+imprese il 27 agosto).
+⚠️ La vista però **non toglie il cestino**: quel filtro sta fuori, in
+`chat_soldi()`.
+
+`chat_soldi(p_mestiere)` risponde: fatture da incassare · incassate quest'anno ·
+in bozza · lavori finiti da fatturare · da pagare ai fornitori.
+⚠️ **Una bozza non è un incasso**, e la chat lo dice.
+
+**Resta fuori**: i totali dei **preventivi**. Non esiste nessuna vista, e la
+loro formula (cassa, IVA, ritenuta, spese forfait) andrebbe riscritta. La strada
+giusta è **fare la vista anche per loro**, non ricopiare il conto nella chat.
+
+### Il pulsante «Aprilo» (gradino 2)
+Quando la chat nomina una cosa che ha letto, ci mette dietro il segnalino
+`[apri:TIPO:ID]`, che diventa un pulsante.
+⛔ Ad aprirla **non è la chat**: è `window.apriCosa(tipo,id)` in
+`gestionale-app.html`, che usa **gli stessi `data-action`** dei pulsanti che ci
+sono già (`apri-cli`, `edit-job`) e le due funzioni della ricerca in alto
+(`ctApriPrev`, `ctApriFatt`). Era già scritto nel file: *«riscrivere qui come si
+apre un lavoro vorrebbe dire avere la stessa cosa in due posti»*.
+⚠️ Il segnalino diventa pulsante **solo** se l'id ha la forma di un id vero.
+
+### Il cestino e l'archivio
+* `gest_chat_messaggi` ha `eliminato_il` e la funzione `chat_svuota()`.
+  ⛔ **Svuotare non azzera il contatore**: la riga resta per il conto del mese,
+  quindi nessuno chatta gratis. Provato: →14← svuotati, contatore fermo a →7←.
+  Serve anche per il **GDPR**: un iscritto ha diritto di farsi cancellare quello
+  che ha scritto.
+* **Colonna a destra** con le chat di prima, larga **→244← px** come `.side`.
+  L'elenco lo fa `chat_elenco()`, e il **titolo è la prima domanda scritta
+  dall'utente**: non si fa intitolare le chat all'AI, sarebbe un messaggio
+  pagato per ogni chiacchierata.
+
+### ⚠️ IL DIFETTO CHE HA TROVATO ALESSIO PROVANDOLA
+**`rpc()` di Supabase non è una promessa normale: ha `.then` ma NON ha
+`.catch`.** Scrivere `.rpc(...).catch(...)` **fa esplodere la riga stessa**.
+Era in due punti, e uno era **quello che scala il credito** — un credito non
+scalato è un messaggio regalato.
+Adesso passa tutto da **`chiamaRpc()`**, e il banco ha →5← prove che leggono il
+codice (buttando via i commenti prima di guardare, se no trovano il difetto
+dentro la spiegazione) e girano un finto Supabase **senza `.catch`**.
+
+### Le funzioni su Supabase
+`chat_stato(p_user)` · `chat_soldi(p_mestiere)` · `chat_svuota(p_conversazione)`
+· `chat_elenco(p_quante)`. Tutte SECURITY DEFINER, tutte prendono chi chiede da
+`auth.uid()`, tutte **tolte ad `anon`** (il controllo di sicurezza di Supabase
+le segnalava: le concessioni predefinite gliele ridanno dopo la creazione,
+quindi la revoca va fatta dopo).
+⛔ **Il numero dei →300← messaggi compresi sta solo dentro `chat_stato()`**:
+lo chiedono sia il server sia la pagina, così non capita che la pagina dica «te
+ne restano 50» mentre il server scala un credito.
+⚠️ `consume_ai_credit(p_feature, p_cost)` si prende chi chiama da `auth.uid()`:
+va chiamata **col client dell'iscritto**, non col service role. E se l'AI non
+risponde, `refund_ai_credit()` rimborsa.
+
+### La grafica: due lezioni
+1. ⛔ **Le classi della chat esistevano già** in `css/gestionale.css` — sono
+   quelle dell'**Assistenza diretta**: `.asst-wrap`, `.asst-msgs`,
+   `.asst-msg mio/suo`, `.asst-vuoto`, `.asst-scrivi` (con una `<textarea>` alta
+   →78← px), `.asst-nota`. Erano state rifatte a mano: sbagliato.
+2. ⚠️ **`.sh-b` NON è una scatola**: nel foglio comune è solo
+   `margin-bottom:14px`, serve alle finestre. Usarla in una sezione lascia il
+   contenuto nudo.
+3. `.asst-msg` ha già `white-space:pre-wrap`: mettendoci anche i `<br>` le righe
+   vengono doppie.
+
+**A tutta pagina.** Chiesto da Alessio: «al centro tutta pagina si scrive, ai
+lati resta il gestionale». `#chat.active` è alto `calc(100vh - 251px)` —
+⚠️ **il 251 è misurato, non indovinato**: la sezione comincia a →195← px
+dall'alto e il `.wrap` lascia →56← px sotto. Se cambia la barra in alto, si
+rimisura.
+Tutto sotto `#chat`, e `id="chat"` esiste **solo** in `gestionale-app.html`:
+negozio, noleggio e app operaio non si toccano.
+
+### ⛔ NIENTE SPIEGAZIONI
+«Non servono le spiegazioni, tutti sanno usare una chat.» Tolti: la riga di
+spiegazione sotto il titolo, il messaggio di benvenuto, le tre domande di
+esempio e la scritta sui tasti. Resta la chat vuota e la casella.
+
+---
+
+## 4. I numeri veri
+
+**Costo misurato** sui primi messaggi veri: →$0,0101← (con la lettura dei dati),
+→$0,0064←, →$0,0074← — **media →$0,008← a messaggio**, cioè **un terzo** della
+stima prudente di →$0,022←. I →300← compresi costano ~**→€2,20← al mese**.
+
+| piano | resta in mano | costo chat | regge? |
+|---|---|---|---|
+| Premium →5←€/mese | ~→€3,80← | →€3,20← | ❌ →84%← |
+| Pro →29←€/mese | ~→€23← | →€3,20← | ✅ margine →86%← |
+
+⚠️ **Difetto segnalato e non ancora sistemato**: in
+`netlify/functions/ai-claude.js` il `costo_usd` si calcola sempre con le tariffe
+di Sonnet (→3←/→15←) anche quando gira **Haiku** (→1←/→5←). Il registro
+sovrastima l'assistenza di tre volte.
+
+---
+
+## 5. Dove si è arrivati, e cosa resta
+
+**Fatto oggi:** computo all'artigiano · →3← difetti vecchi sulle parole · la
+serratura del Pro · la chat intera · gradino →1← (i conti) · gradino →2← (il
+pulsante «Aprilo») · cestino e archivio.
+**→4← banchi, →121← prove verdi**, ognuno provato anche **rompendo il codice
+apposta**.
+
+**Restano i gradini** →3← (ti riempio il modulo, tu salvi) · →4← (ti avvisa da
+solo il lunedì — il tubo c'è già in `netlify/functions/riepilogo-lunedi.js`) ·
+→5← (legge le carte) · →6← (si parla).
+
+### ⚠️ Il gradino 3 è più corto di quanto sembra
+In `js/ai-integrazione.js` **esistono già** `compilaLavoro()` e
+`compilaCliente()`: chiamano l'AI, **aprono il modulo e lo riempiono**
+(`j-desc`, `j-dove`, `j-data`, `j-imp`, più le tendine con
+`impostaSelectQuando`) e dicono «Modulo compilato, controlla i dati e premi
+Salva». E `gestionale-app.html` ha già **`window.gestApriModuloAI(tipo)`**.
+👉 Il gradino 3 è **soprattutto un ponte**, non un motore nuovo.
+
+**Il prompt per la sessione nuova:** `prove-claude/PROMPT-gradino3-30ago.md`.
+
+**Il piano Pro commerciale** è ancora tutto da fare: prezzo (proposti →29←€/mese
+· →249←€/anno), `prezzi.html`, Stripe, e cosa succede a chi ha già il Premium.
+Oggi `chat_pro` è acceso su **→1← impresa su →103←**, quella di Alessio.
+
+### ⚠️ Due cose sul lavorare con Alessio, imparate oggi
+* **Niente parentesi tonde nei messaggi dei commit**: una virgoletta rimasta
+  aperta in Git Bash le trasforma in `syntax error near unexpected token '('` e
+  il terminale resta bloccato sul prompt `>`. Si sblocca con **Ctrl+C**.
+* **Le query e le migrazioni su Supabase le lancia Claude direttamente**, non si
+  danno più da incollare a mano.
