@@ -228,7 +228,7 @@ async function caricaImprese() {
       // lat/lng arrivano dal database: se ci sono, la mappa e' immediata e
       // non si chiede niente a OpenStreetMap (prima erano 1,1 secondi a impresa).
       // posizione_da dice se il pallino e' sull'indirizzo vero o solo sulla zona.
-      `${SUPA_URL}/rest/v1/imprese?select=id,nome,nome_attivita,nome_negozio,ragione_sociale,nome_impresa,tipo,categoria,citta,provincia,indirizzo,via,telefono,email,sito_web,lat,lng,posizione_da&is_test=not.is.true&order=id.asc&limit=${pageSize}&offset=${from}`,
+      `${SUPA_URL}/rest/v1/imprese?select=id,nome,nome_attivita,nome_negozio,ragione_sociale,nome_impresa,tipo,categoria,citta,provincia,indirizzo,via,telefono,email,sito_web,lat,lng,posizione_da&is_test=not.is.true&email_confermata=eq.true&order=id.asc&limit=${pageSize}&offset=${from}`,
       { headers: { 'apikey': SUPA_KEY, 'Accept': 'application/json' } }
     );
     if (!res.ok) throw new Error('Errore Supabase: ' + res.status);

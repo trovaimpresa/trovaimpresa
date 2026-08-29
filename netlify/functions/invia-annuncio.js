@@ -97,7 +97,8 @@ exports.handler = async function (event) {
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
     .select('id, nome, nome_attivita, email, citta, tipo, piano, premium_scadenza, is_test')
-    .eq('is_test', false);
+    .eq('is_test', false)
+    .eq('email_confermata', true);
   if (error) {
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura imprese: ' + error.message }) };
   }

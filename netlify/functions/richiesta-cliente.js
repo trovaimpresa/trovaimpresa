@@ -197,6 +197,9 @@ exports.handler = async function (event) {
         .from('imprese')
         .select('id,nome,nome_attivita,email,tipo,citta,provincia,regione,comuni_competenza,piano,piano_ordine')
         .eq('is_test', false)
+        // 29 ago 2026 — chi non ha mai confermato l'email non riceve le richieste:
+        // l'indirizzo non funziona, la mail rimbalza e il cliente resta senza risposta.
+        .eq('email_confermata', true)
         .eq('tipo', tipo)
         .or(ors.join(','))
         .limit(60);

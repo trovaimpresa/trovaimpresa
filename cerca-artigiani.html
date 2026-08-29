@@ -534,7 +534,7 @@
         aggiornaMappaRis([]);
         return;
       }
-      let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano').eq('is_test',false);
+      let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano').eq('is_test',false).eq('email_confermata',true);
       if (mestiereScelto !== 'tutti') q = q.contains('mestieri', [mestiereScelto]);
       if (citta) {
         if (regione) {
