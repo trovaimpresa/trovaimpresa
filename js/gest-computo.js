@@ -121,7 +121,10 @@
                E' l'inciampo del 21 agosto, quando ce n'erano tre tutti
                chiamati «Scarica il PDF»: il nome di un pulsante si guarda
                sulla schermata intera, non da solo. */
-            {lab:"📄 Scarica il computo metrico",action:"comp-pdf",data:{id:c.id}}]
+            /* ⚠️ 29 agosto 2026 — anche questo nome lo deve chiedere a _cm():
+               a un'impresa edile e a un artigiano quel foglio si chiama
+               «computo da prezzare». Era l'undicesimo posto. */
+            {lab:"📄 Scarica il "+(typeof _cm==="function"?_cm('uno'):"computo metrico"),action:"comp-pdf",data:{id:c.id}}]
            /* ⚠️ 20 agosto 2026 — LA LISTA C'E' ANCHE SUI LAVORI PRIVATI.
               Fino a ieri compariva solo sui «Lavori pubblici», con la nota che
               su un privato «non serve a niente». Non era vero, e l'ha detto

@@ -1279,6 +1279,30 @@
           +'e con un clic diventa un <b>preventivo</b> da mandare al cliente. '
           +'Puoi anche partire da zero e farti tu le metrature del cantiere.';
       }
+      /* ============================================================
+         ⛔ 29 agosto 2026 — DUE POSTI CHE NON CHIEDEVANO LA PAROLA A _cm()
+         ============================================================
+         Trovati nella prova dal vivo sul gestionale vero, aprendo la
+         pagina come artigiano e cercando la parola sbagliata in TUTTI i
+         testi (non guardando una schermata per volta):
+           - la sezione PREZZARIO diceva «Nel computo metrico le ritrovi»;
+           - la sezione PREVENTIVI diceva «da un computo metrico gia' fatto».
+         La parola del tecnico, due centimetri sotto una voce di menu che
+         dice «Computo da prezzare».
+         ⚠️ Non e' un difetto nato oggi: c'era gia' per l'impresa edile dal
+         20 agosto. E' lo stesso inciampo della striscia del filo, in altre
+         due stanze -- «una regola che sta in piu' posti non si sistema a
+         meta'». Oggi si vede anche all'artigiano, e si chiude qui.
+         Si riscrive SOLO il <b>, non tutta la frase: il resto della
+         spiegazione e' giusto per tutti e due i ruoli.
+         ============================================================ */
+      ['#preventivi','#prezzario'].forEach(function(sel){
+        var s=document.querySelector(sel); if(!s)return;
+        var i=s.querySelector('.gal-intro'); if(!i)return;
+        i.querySelectorAll('b').forEach(function(g){
+          if(g.textContent.trim()===_CM.pro.uno)g.textContent=_cm('uno');
+        });
+      });
     }catch(_){}
   }
 
