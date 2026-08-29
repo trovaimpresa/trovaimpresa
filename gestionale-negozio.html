@@ -562,9 +562,9 @@
             <div class="sh-tit">Quante ne hai</div>
             <div class="row2">
               <div class="field"><label>Quantit&agrave;</label>
-                <input id="np-quantita" type="number" step="0.01" placeholder="0"></div>
+                <input id="np-quantita" type="text" inputmode="decimal" placeholder="0"></div>
               <div class="field"><label>Scorta minima</label>
-                <input id="np-soglia" type="number" step="0.01" placeholder="0"></div>
+                <input id="np-soglia" type="text" inputmode="decimal" placeholder="0"></div>
             </div>
             <p class="sh-nota">Sotto la scorta minima il prodotto si accende nel Magazzino e finisce in &laquo;Da sistemare oggi&raquo;.</p>
           </div>
@@ -572,9 +572,9 @@
             <div class="sh-tit">Quanto costa</div>
             <div class="row2">
               <div class="field"><label>Lo paghi</label>
-                <input id="np-acquisto" type="number" step="0.01" placeholder="&euro;"></div>
+                <input id="np-acquisto" type="text" inputmode="decimal" placeholder="&euro;"></div>
               <div class="field"><label>Lo vendi al banco</label>
-                <input id="np-prezzo" type="number" step="0.01" placeholder="&euro;"></div>
+                <input id="np-prezzo" type="text" inputmode="decimal" placeholder="&euro;"></div>
             </div>
             <div class="row2">
               <div class="field"><label>IVA</label>
@@ -588,7 +588,7 @@
                    Un ferramenta ha il prezzo del banco e il prezzo dell'impresa.
                    Vuoto = questo prodotto costa uguale a tutti. -->
               <div class="field"><label>Lo vendi all&rsquo;impresa</label>
-                <input id="np-impresa" type="number" step="0.01" placeholder="&euro;"></div>
+                <input id="np-impresa" type="text" inputmode="decimal" placeholder="&euro;"></div>
             </div>
             <p class="sh-nota">Il prezzo all&rsquo;impresa &egrave; facoltativo: lascialo vuoto se a questo prodotto fai lo stesso prezzo a tutti.</p>
             <div id="np-margine" class="sh-nota"></div>
@@ -659,7 +659,7 @@
             <div class="sh-tit">Sconto, IVA e validit&agrave;</div>
             <div class="row2">
               <div class="field"><label>Sconto sul totale</label>
-                <input id="pv-sconto" type="number" step="0.5" value="0"></div>
+                <input id="pv-sconto" type="text" inputmode="decimal" value="0"></div>
               <div class="field"><label>IVA</label>
                 <select id="pv-iva">
                   <option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option>
@@ -760,9 +760,9 @@
             <div class="sh-tit">Quanta e quanto</div>
             <div class="row2">
               <div class="field"><label>Quantit&agrave; (anche con la virgola)</label>
-                <input id="nm-quantita" type="number" step="0.01" placeholder="0"></div>
+                <input id="nm-quantita" type="text" inputmode="decimal" placeholder="0"></div>
               <div class="field"><label>Importo &euro;</label>
-                <input id="nm-importo" type="number" step="0.01" placeholder="&euro;"></div>
+                <input id="nm-importo" type="text" inputmode="decimal" placeholder="&euro;"></div>
             </div>
             <div id="nm-hint-q" class="sh-nota" style="display:none">Nella rettifica la quantit&agrave; va col segno: <b>&minus;2</b> se la merce cala, <b>2</b> se cresce.</div>
           </div>
@@ -937,6 +937,64 @@
      eur2 e' copiato riga per riga da gestionale-app.html (const eur2), che lo
      usa gia' per il dettaglio delle fatture e per i totali dei preventivi. */
   const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(+n||0);
+
+  /* ================================================================
+     ⛔ 29 agosto 2026 — I NUMERI COL PUNTO E CON LA VIRGOLA.
+     Alessio, durante il test vero: «non c'è il punto nel prezzo o la
+     virgola: se voglio mettere 5.5 non posso, mi mette 55».
+     Aveva ragione, ed era grave: 5.5 che diventa 55 è DIECI VOLTE il
+     prezzo, dentro un preventivo, senza un messaggio.
+     La colpa erano le caselle numeriche del browser: su tastiera italiana
+     il punto lo buttano via. Le imprese l'hanno risolto il 12 agosto 2026:
+     caselle di testo col tastierino (inputmode="decimal") lette da _numIt,
+     dove 3,20 va bene come 3.20.
+     _numeroIt · _numIt · _numRiga · _numTesto sono copiate riga per riga
+     da js/gest-computo.js (~508), che il negozio non carica.
+     ⛔ E NIENTE «data-euro» qui. Nelle imprese quella marca mette il punto
+        delle migliaia, ma per farlo BUTTA VIA i punti mentre scrivi: chi
+        scrive «1.25» si ritrova «125». Sarebbe lo stesso difetto di prima
+        con un altro vestito. In un prezzo da banco le migliaia non servono.
+     ================================================================ */
+  function _numeroIt(testo){
+    /* via euro, spazi normali, spazi insecabili e apostrofi delle migliaia */
+    let t=String(testo==null?"":testo).replace(/[€\s '’]/g,"").trim();
+    if(t==="")return null;
+    const vir=t.lastIndexOf(","), pun=t.lastIndexOf(".");
+    if(vir>=0&&pun>=0){
+      if(vir>pun) t=t.replace(/\./g,"").replace(/,/g,".");   /* italiano */
+      else        t=t.replace(/,/g,"");                      /* inglese  */
+    }else if(vir>=0){
+      t=((t.split(",").length-1)>1) ? t.replace(/,/g,"") : t.replace(",",".");
+    }else if(pun>=0){
+      const punti=t.split(".").length-1;
+      const dopo=t.length-pun-1;
+      /* 0.500 è mezzo metro, non cinquecento */
+      const prima=t.slice(0,pun).replace(/\./g,"");
+      const zeroDavanti=prima==="0"||prima==="-0"||/^-?0/.test(prima);
+      if(punti>1||(dopo===3&&!zeroDavanti)) t=t.replace(/\./g,"");
+    }
+    const n=parseFloat(t);
+    return isFinite(n)?n:null;
+  }
+  /* i numeri si scrivono come al banco: 3,20 va bene come 3.20 */
+  function _numIt(sel){
+    const el=$(sel);
+    return _numeroIt((el&&el.value)||"");
+  }
+  /* come _numIt ma per una casella dentro una riga del preventivo */
+  function _numRiga(riga,cls,seVuoto){
+    const el=riga&&riga.querySelector(cls);
+    const n=_numeroIt((el&&el.value)||"");
+    return (n==null||!isFinite(n))?(seVuoto||0):n;
+  }
+  /* rimette il numero nella casella come lo scrive lui, con la virgola, e
+     senza la coda della virgola mobile (0,30000000000000004) */
+  function _numTesto(v){
+    if(v==null||v==="")return "";
+    const n=+v;
+    if(!isFinite(n))return "";
+    return String(Math.round(n*1e6)/1e6).replace(".",",");
+  }
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
   const todayStr=()=>new Date().toISOString().slice(0,10);
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
@@ -2044,7 +2102,7 @@
           <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div>
         <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
           <button class="btn-primary" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
@@ -2075,8 +2133,8 @@
         <div class="thumbs" id="th-dopo"></div></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       <div class="row2">
-        <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
+        <div class="field"><label>Ore lavorate</label><input type="text" id="j-ore" inputmode="decimal" value="${_numTesto(job.ore)}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
       <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
@@ -2104,7 +2162,7 @@
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
       if(!descrizione||!data_prevista){toast("Compila Descrizione e Data");return;}
-      const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
+      const importo=_numIt("#j-imp")||0;
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
@@ -2119,7 +2177,7 @@
     const stato=segVal("j-stato"), fattStato=segVal("j-fatt")||"none";
     const obj={id,clienteId:cli,descrizione:$("#j-desc").value.trim(),dove:$("#j-dove").value.trim(),
       dataPrevista:$("#j-data").value,assegnatoId:$("#j-dip").value,stato,lavoroSvolto:$("#j-svolto").value.trim(),
-      note:$("#j-note").value.trim(),ore:$("#j-ore").value,importo:$("#j-imp").value,fattStato,pagato:fattStato==="pagata",
+      note:$("#j-note").value.trim(),ore:_numIt("#j-ore"),importo:_numIt("#j-imp"),fattStato,pagato:fattStato==="pagata",
       foto:editing.foto,numFatt:prev?prev.numFatt:undefined};
     obj.dataFatto=stato==="fatto"?(prev&&prev.dataFatto?prev.dataFatto:(obj.dataPrevista||todayStr())):"";
     if(exists)db().lavori=db().lavori.map(l=>l.id===id?obj:l);else db().lavori.push(obj);
@@ -2143,7 +2201,7 @@
             <option value="impresa"${(c.listino||"")==="impresa"?" selected":""}>Prezzi impresa</option>
           </select></div>
         <div class="field"><label>Sconto fisso suo (%)</label>
-          <input id="c-sconto" type="number" step="0.5" min="0" max="100" value="${c.sconto_perc??0}" placeholder="0"></div>
+          <input id="c-sconto" type="text" inputmode="decimal" min="0" max="100" value="${_numTesto(c.sconto_perc??0)}" placeholder="0"></div>
       </div>
       <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
       <button class="btn-primary" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
@@ -2157,7 +2215,7 @@
        stesso senza di esse invece di andare perso. */
     const dati={nome,indirizzo,referente,telefono,
       listino:$("#c-listino")?$("#c-listino").value:"banco",
-      sconto_perc:$("#c-sconto")?(parseFloat($("#c-sconto").value)||0):0};
+      sconto_perc:_numIt("#c-sconto")||0};
     const senzaListino=o=>{const c2={...o};["listino","sconto_perc"].forEach(k=>delete c2[k]);return c2;};
     const eColonnaListino=e=>/listino|sconto_perc/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     const scrivi=async d=>id
@@ -3021,10 +3079,10 @@
   function pvRigaHtml(r,i){
     return `<div class="pv-riga" data-i="${i}" style="display:grid;grid-template-columns:2fr 80px 70px 90px 70px 34px;gap:6px;align-items:center;margin-bottom:6px">
       <input class="pv-desc" value="${(r.descrizione||"").replace(/"/g,"&quot;")}" placeholder="Descrizione" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
-      <input class="pv-qta" type="number" step="0.01" value="${r.qta??1}" placeholder="Q.tà" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-qta" type="text" inputmode="decimal" value="${_numTesto(r.qta??1)}" placeholder="Q.tà" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
       <input class="pv-um" value="${r.unita||"pz"}" placeholder="u.m." style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box;text-align:center">
-      <input class="pv-prezzo" type="number" step="0.01" value="${r.prezzo??0}" placeholder="€" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
-      <input class="pv-sc" type="number" step="1" value="${r.sconto_perc??0}" placeholder="sc.%" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-prezzo" type="text" inputmode="decimal" value="${_numTesto(r.prezzo??0)}" placeholder="€" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-sc" type="text" inputmode="decimal" value="${_numTesto(r.sconto_perc??0)}" placeholder="sc.%" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
       <button type="button" class="pv-del" title="Togli la riga" style="padding:9px;background:#fff;border:1px solid #e0b4b4;color:#c62828;border-radius:7px;cursor:pointer">×</button>
     </div>`;
   }
@@ -3043,10 +3101,10 @@
       const desc=d.querySelector(".pv-desc").value.trim();
       if(!desc)return;
       out.push({descrizione:desc,
-        qta:parseFloat(d.querySelector(".pv-qta").value)||0,
+        qta:_numRiga(d,".pv-qta",0),
         unita:d.querySelector(".pv-um").value.trim()||"pz",
-        prezzo:parseFloat(d.querySelector(".pv-prezzo").value)||0,
-        sconto_perc:parseFloat(d.querySelector(".pv-sc").value)||0,
+        prezzo:_numRiga(d,".pv-prezzo",0),
+        sconto_perc:_numRiga(d,".pv-sc",0),
         prodotto_id:pvRighe[i]?pvRighe[i].prodotto_id:null,
         ordine:i});
     });
@@ -3068,7 +3126,7 @@
   }
   function pvTotali(){
     const box=$("#pv-totali"); if(!box)return;
-    const c=pvCalcola(pvLeggiRighe(), $("#pv-sconto")?$("#pv-sconto").value:0, $("#pv-iva")?$("#pv-iva").value:22);
+    const c=pvCalcola(pvLeggiRighe(), _numIt("#pv-sconto")||0, $("#pv-iva")?$("#pv-iva").value:22);
     const riga=(et,v,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${pvEur(v)}</strong></div>`;
     box.innerHTML = riga("Totale merce",c.lordo)
       + (c.scontoRighe?riga("Sconti sulle righe",c.scontoRighe,true):"")
@@ -3250,15 +3308,15 @@
     {
       const {data}=await sb.from("neg_prodotti").select("*").eq("id",id).maybeSingle();
       if(!data){alert("Questo prodotto non c'è più: forse è nel Cestino.");return;}
-      $("#np-nome").value=data.nome||""; $("#np-prezzo").value=data.prezzo??"";
-      $("#np-quantita").value=data.quantita??""; $("#np-categoria").value=data.categoria||"";
-      $("#np-soglia").value=data.soglia_minima??""; $("#np-codice").value=data.codice||"";
+      $("#np-nome").value=data.nome||""; $("#np-prezzo").value=_numTesto(data.prezzo);
+      $("#np-quantita").value=_numTesto(data.quantita); $("#np-categoria").value=data.categoria||"";
+      $("#np-soglia").value=_numTesto(data.soglia_minima); $("#np-codice").value=data.codice||"";
       $("#np-note").value=data.note||"";
       /* campi aggiunti il 6 agosto 2026 — se il prodotto è vecchio restano ai valori di partenza */
       if($("#np-unita"))    $("#np-unita").value=data.unita||"pz";
-      if($("#np-acquisto")) $("#np-acquisto").value=data.prezzo_acquisto??"";
+      if($("#np-acquisto")) $("#np-acquisto").value=_numTesto(data.prezzo_acquisto);
       if($("#np-iva"))      $("#np-iva").value=(data.iva_perc??22);
-      if($("#np-impresa"))$("#np-impresa").value=data.prezzo_impresa??"";
+      if($("#np-impresa"))$("#np-impresa").value=_numTesto(data.prezzo_impresa);
       mostraMargine();
       editProdId=data.id; $("#np-save").textContent="Salva modifica";
       if($("#np-titolo-sez"))$("#np-titolo-sez").textContent="Modifica prodotto";
@@ -3328,7 +3386,7 @@
     openSheet(`<h3 style="margin:0 0 6px;font-size:20px">${su?"Carico":"Scarico"} di magazzino</h3>
       <p style="margin:0 0 18px;font-size:15px;color:#5a6672">${esc(magRett.nome)} — adesso ne risultano <b>${magRett.ora} ${esc(magRett.unita)}</b>.</p>
       <label style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">Quante ne ${su?"entrano":"escono"}?</label>
-      <input id="mag-q" type="number" step="0.01" min="0" value="1" style="width:100%;padding:12px;font-size:16px;border:1px solid #d7dde3;border-radius:9px;box-sizing:border-box;margin-bottom:18px">
+      <input id="mag-q" type="text" inputmode="decimal" min="0" value="1" style="width:100%;padding:12px;font-size:16px;border:1px solid #d7dde3;border-radius:9px;box-sizing:border-box;margin-bottom:18px">
       <label style="display:block;font-size:15px;font-weight:700;margin-bottom:8px">Perché?</label>
       <div id="mag-mot" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
         ${MOT.map(([v,t])=>`<button type="button" class="chip ${v===magRett.motivo?"on":""}" data-action="mag-mot" data-v="${v}" style="font-size:15px;padding:9px 16px">${t}</button>`).join("")}
@@ -3339,7 +3397,7 @@
   }
   async function magSalvaRettifica(){
     if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const q=Math.abs(parseFloat($("#mag-q")?$("#mag-q").value:0)||0);
+    const q=Math.abs(_numIt("#mag-q")||0);
     if(!q){alert("Scrivi quante ne entrano o ne escono.");return;}
     const delta=(magRett.verso>0)?q:-q;
     if(magRett.ora+delta<0&&!confirm("Ne risultano "+magRett.ora+" e ne stai togliendo "+q+
@@ -3452,7 +3510,7 @@
           <div class="sh-tit">Che movimento &egrave;</div>
           ${_rigaDato("Tipo",et)}
           ${_rigaDato("Quantit&agrave;",String(qta))}
-          ${rett?"":_rigaDato("Importo","€ "+(x.importo??0))}
+          ${rett?"":_rigaDato("Importo",eur2(x.importo))}
           ${_rigaDato("Data",x.data_mov?fdate(x.data_mov):"")}
         </div>
       </div><div class="sh-col">
@@ -3599,7 +3657,7 @@
     const mot=$("#nm-motivo-campo"); if(mot) mot.style.display=(tipo==="rettifica")?"":"none";
     const hin=$("#nm-hint-q");  if(hin) hin.style.display =(tipo==="rettifica")?"block":"none";
     if(p&&tipo!=="rettifica"){
-      const q=Math.abs(parseFloat($("#nm-quantita").value)||0);
+      const q=Math.abs(_numIt("#nm-quantita")||0);
       const unit=(tipo==="vendita")?(+p.prezzo||0):(+p.prezzo_acquisto|| +p.prezzo||0);
       const imp=$("#nm-importo");
       if(q&&unit&&imp&&(!imp.value||imp.value===nmImportoAuto)){
@@ -3665,7 +3723,10 @@
           /* ⛔ 27 agosto 2026 (notte) — la data usciva grezza dal database
              ("2026-08-27"): all'americana e senza icona, in mezzo a righe
              che nel resto del gestionale hanno tutte la loro. */
-          rett?"":"💶 € "+(x.importo??0),
+          /* ⛔ 29 agosto 2026 — l'importo usciva GREZZO dal database:
+             «€ 0», e con 4,90 sarebbe uscito «€ 4.9», col punto all'americana.
+             _eu e' gia' qui sopra ed e' lo stesso delle carte del Riepilogo. */
+          rett?"":"💶 € "+_eu(x.importo),
           x.controparte?"👤 "+esc(x.controparte):"",
           x.data_mov?"📅 "+fdate(x.data_mov):"",
           x.motivo?esc(x.motivo):"",
@@ -3686,13 +3747,13 @@
     const tipo=$("#nm-tipo").value;
     const prodId=($("#nm-prod-sel")&&$("#nm-prod-sel").value)||null;
     /* decimali anche qui: si scaricano 12,5 mq o mezzo bancale */
-    let q=parseFloat($("#nm-quantita").value)||0;
+    let q=_numIt("#nm-quantita")||0;
     if(tipo!=="rettifica")q=Math.abs(q);
     if(tipo==="rettifica"&&!q){alert("La rettifica ha bisogno di una quantità, col segno − se la merce cala.");return;}
     const dati={tipo, prodotto,
       prodotto_id:prodId||null,
       quantita:q,
-      importo:parseFloat($("#nm-importo").value)||0,
+      importo:_numIt("#nm-importo")||0,
       controparte:$("#nm-controparte").value.trim()||null,
       /* ⛔ la rete: anche svuotando la casella a mano, un movimento senza
          data non si salva. Meglio la data di oggi che un buco. */
@@ -3785,7 +3846,7 @@
       $("#nm-tipo").value=data.tipo||"vendita"; $("#nm-prodotto").value=data.prodotto||"";
       if($("#nm-prod-sel"))$("#nm-prod-sel").value=data.prodotto_id||"";
       if($("#nm-motivo")&&data.motivo)$("#nm-motivo").value=data.motivo;
-      $("#nm-quantita").value=data.quantita??""; $("#nm-importo").value=data.importo??"";
+      $("#nm-quantita").value=_numTesto(data.quantita); $("#nm-importo").value=_numTesto(data.importo);
       $("#nm-controparte").value=data.controparte||""; $("#nm-data").value=data.data_mov||"";
       $("#nm-note").value=data.note||"";
       nmImportoAuto=""; editMovId=data.id; $("#nm-save").textContent="Salva modifica";
@@ -3815,7 +3876,7 @@
     pvClienteId=c.id;
     if($("#pv-cliente"))$("#pv-cliente").value=c.nome||"";
     pvListino=(c.listino==="impresa")?"impresa":"banco";
-    if($("#pv-sconto"))$("#pv-sconto").value=+c.sconto_perc||0;
+    if($("#pv-sconto"))$("#pv-sconto").value=_numTesto(c.sconto_perc||0);
     pvDisegnaListino(); pvDisegnaProdotti(); pvApplicaListino();
   });
 
@@ -3868,7 +3929,7 @@
       validita_giorni:parseInt($("#pv-validita").value)||30,
       note:$("#pv-note").value.trim()||null,
       iva_perc:parseFloat($("#pv-iva").value)||0,
-      sconto_perc:parseFloat($("#pv-sconto").value)||0};
+      sconto_perc:_numIt("#pv-sconto")||0};
     /* la solita rete: se la colonna listino non c'e' ancora, il preventivo
        si salva lo stesso invece di andare perso */
     const senzaListino=o=>{const c2={...o};delete c2.listino;return c2;};
@@ -4064,7 +4125,7 @@
       pvDisegnaListino(); pvDisegnaProdotti();
       $("#pv-cliente").value=p.cliente_nome||""; $("#pv-titolo").value=p.titolo||"";
       $("#pv-data").value=p.data||""; $("#pv-note").value=p.note||"";
-      $("#pv-sconto").value=p.sconto_perc??0; $("#pv-iva").value=String(p.iva_perc??22);
+      $("#pv-sconto").value=_numTesto(p.sconto_perc??0); $("#pv-iva").value=String(p.iva_perc??22);
       $("#pv-validita").value=String(p.validita_giorni||30);
       $("#pv-titolo-sez").textContent="Modifica preventivo N. "+(p.numero||"");
       $("#pv-save").textContent="Salva modifica";
@@ -4201,9 +4262,9 @@
      Si aggiorna mentre scrivi il prezzo di acquisto o quello di vendita. */
   function mostraMargine(){
     const box=$("#np-margine"); if(!box)return;
-    const acq=parseFloat($("#np-acquisto")?$("#np-acquisto").value:"")||0;
-    const ven=parseFloat($("#np-prezzo")?$("#np-prezzo").value:"")||0;
-    const imp=parseFloat($("#np-impresa")?$("#np-impresa").value:"")||0;
+    const acq=_numIt("#np-acquisto")||0;
+    const ven=_numIt("#np-prezzo")||0;
+    const imp=_numIt("#np-impresa")||0;
     const um=$("#np-unita")?$("#np-unita").value:"pz";
     if(!acq||!ven){box.textContent="";return;}
     const eur=n=>n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
@@ -4231,19 +4292,21 @@
     if(!(sb&&sbUid)){alert("Non connesso");return;}
     /* quantita e scorta ora accettano i decimali: 12,5 mq o 0,5 bancali sono normali */
     const dati={nome,
-      prezzo:parseFloat($("#np-prezzo").value)||0,
-      quantita:parseFloat($("#np-quantita").value)||0,
+      prezzo:_numIt("#np-prezzo")||0,
+      quantita:_numIt("#np-quantita")||0,
       categoria:$("#np-categoria").value.trim()||null,
-      soglia_minima:parseFloat($("#np-soglia").value)||0,
+      soglia_minima:_numIt("#np-soglia")||0,
       codice:$("#np-codice").value.trim()||null,
       note:$("#np-note").value.trim()||null,
       unita:$("#np-unita")?$("#np-unita").value:"pz",
-      prezzo_acquisto:$("#np-acquisto")&&$("#np-acquisto").value!==""?parseFloat($("#np-acquisto").value):null,
+      /* _numIt torna null se la casella e' vuota: «non lo compro» resta
+         diverso da «lo pago zero» */
+      prezzo_acquisto:_numIt("#np-acquisto"),
       iva_perc:$("#np-iva")?parseFloat($("#np-iva").value):22,
       /* 26 agosto 2026 — il prezzo per le imprese. Vuoto = null, cioe'
          «per questo prodotto non c'e' un secondo prezzo», che NON e' la
          stessa cosa di zero. */
-      prezzo_impresa:$("#np-impresa")&&$("#np-impresa").value!==""?parseFloat($("#np-impresa").value):null};
+      prezzo_impresa:_numIt("#np-impresa")};
     /* Se le colonne nuove non sono ancora state create su Supabase, il prodotto
        si salva lo stesso senza di esse invece di andare perso (stessa regola
        usata per le pratiche e per la parcella). */
