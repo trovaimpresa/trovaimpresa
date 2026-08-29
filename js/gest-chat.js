@@ -87,11 +87,11 @@
     return String(t == null ? '' : t)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
-  /* la risposta arriva in testo semplice: si tengono a capo e grassetti */
+  /* ⚠️ NIENTE <br>: `.asst-msg` nel foglio comune ha gia'
+     `white-space:pre-wrap`, quindi gli a capo li tiene da solo. Mettendoci
+     anche i <br> le righe venivano doppie. Si converte solo il grassetto. */
   function testoRisposta(t) {
-    return esc(t)
-      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-      .replace(/\n/g, '<br>');
+    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
   }
 
   /* ------------------------------------------------------------------
@@ -106,6 +106,17 @@
     'Quanti lavori ho ancora da fatturare?'
   ];
 
+  /* ⛔ IL MODELLO E' LA SEZIONE «ASSISTENZA DIRETTA», copiata riga per riga.
+     Prima qui c'erano stili scritti a mano dentro il js: bolle inventate,
+     una casella di scrittura di una riga sola, e `.sh-b` che non e' una
+     scatola (nel foglio comune e' solo `margin-bottom:14px`, per le
+     finestre). Risultato: una sezione che non somigliava a niente del
+     gestionale, con un buco bianco in mezzo e la casella staccata in fondo.
+     Le classi della chat ESISTONO GIA' in css/gestionale.css — `.asst-wrap`,
+     `.asst-msgs`, `.asst-msg mio/suo`, `.asst-scrivi`, `.asst-nota`,
+     `.asst-vuoto` — e sono quelle dell'Assistenza diretta.
+     ⚠️ La casella di scrittura e' una `<textarea rows="3">`: alta 78 px e la
+     si puo' allargare tirandola giu'. */
   function disegna() {
     var sez = document.getElementById('chat');
     if (!sez || disegnata) return;
@@ -116,22 +127,20 @@
     + 'perch&eacute; il magazzino non scende, dov&rsquo;&egrave; finito un preventivo. '
     + 'Guarda i <b>tuoi</b> dati del reparto in cui sei e ti risponde sul concreto. '
     + 'Se non sa, te lo dice e ti manda all&rsquo;assistenza.</div>'
-    + '<div class="sh-b">'
-    +   '<div id="chat-righe" style="display:flex;flex-direction:column;gap:14px;padding:6px 0 4px;min-height:300px;"></div>'
-    + '</div>'
-    + '<div class="sh-b">'
-    +   '<div style="display:flex;gap:10px;align-items:flex-end;">'
-    +     '<input type="text" id="chat-domanda" autocomplete="off" placeholder="Scrivi la tua domanda&hellip;" '
-    +            'style="flex:1;font-size:16px;padding:13px 14px;border-radius:10px;'
-    +            'border:1px solid var(--bordo,#e2e6e1);background:var(--card,#fff);color:var(--testo,#16281c);">'
-    +     '<button class="btn" type="button" id="chat-manda" style="white-space:nowrap;">Manda</button>'
+    + '<div class="asst-wrap">'
+    +   '<div class="asst-msgs" id="chat-righe"></div>'
+    +   '<div class="asst-scrivi">'
+    +     '<textarea id="chat-domanda" rows="3" placeholder="Scrivi qui la tua domanda&hellip;"></textarea>'
+    +     '<button class="btn btn-primary" type="button" id="chat-manda">Manda</button>'
     +   '</div>'
-    +   '<div id="chat-sotto" style="margin-top:9px;font-size:14px;color:var(--testo-2,#5a6b5f);"></div>'
+    +   '<div class="asst-nota" id="chat-sotto"></div>'
     + '</div>';
 
     document.getElementById('chat-manda').addEventListener('click', manda);
     document.getElementById('chat-domanda').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); manda(); }
+      /* Invio manda, Maiuscolo+Invio va a capo: e' come funzionano tutte le
+         chat, e con la casella alta tre righe si vede quello che si scrive. */
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); manda(); }
     });
     benvenuto();
     aggiornaSotto();
@@ -141,40 +150,38 @@
 
   function scrivi(chi, html, id) {
     var r = righe(); if (!r) return null;
+    var vuoto = r.querySelector('.asst-vuoto');
+    if (vuoto) vuoto.remove();
     var d = document.createElement('div');
     if (id) d.id = id;
-    if (chi === 'utente') {
-      d.style.cssText = 'align-self:flex-end;max-width:74%;background:var(--blu,#0066ff);color:#fff;'
-        + 'padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:16px;line-height:1.55;';
-    } else if (chi === 'attesa') {
-      d.style.cssText = 'align-self:flex-start;font-size:15px;color:var(--testo-2,#5a6b5f);padding:4px 2px;';
-    } else {
-      d.style.cssText = 'align-self:flex-start;max-width:82%;background:var(--sfondo,#f3f5f2);'
-        + 'border:1px solid var(--bordo,#e2e6e1);color:var(--testo,#16281c);'
-        + 'padding:14px 16px;border-radius:14px 14px 14px 4px;font-size:16px;line-height:1.6;';
-    }
+    /* ⛔ nessuno stile scritto qui: le classi stanno in css/gestionale.css */
+    if (chi === 'utente')      d.className = 'asst-msg mio';
+    else if (chi === 'attesa') d.className = 'asst-giorno';
+    else                       d.className = 'asst-msg suo';
     d.innerHTML = html;
     r.appendChild(d);
-    d.scrollIntoView({ block: 'nearest' });
+    r.scrollTop = r.scrollHeight;
     return d;
   }
 
   function benvenuto() {
     var r = righe(); if (!r || r.children.length) return;
-    scrivi('ai', 'Ciao. Chiedimi quello che vuoi su questo reparto del gestionale.<br>'
-      + '<span style="font-size:14px;color:var(--testo-2,#5a6b5f)">Su tasse, sicurezza e contratti mi fermo '
-      + 'e ti dico di far controllare: la figura la faresti tu, non io.</span>');
-    var d = document.createElement('div');
-    d.style.cssText = 'align-self:flex-start;display:flex;gap:10px;flex-wrap:wrap;';
-    d.innerHTML = ESEMPI.map(function (e) {
-      return '<button class="btn b-cancel" type="button" data-chiedi="' + esc(e) + '">' + esc(e) + '</button>';
-    }).join('');
-    d.addEventListener('click', function (ev) {
+    /* `.asst-vuoto` e' la schermata vuota che usa gia' l'Assistenza diretta */
+    var v = document.createElement('div');
+    v.className = 'asst-vuoto';
+    v.innerHTML = 'Chiedimi quello che vuoi su <b>questo reparto</b> del gestionale.<br>'
+      + 'Su tasse, sicurezza e contratti mi fermo e ti dico di far controllare.'
+      + '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      + ESEMPI.map(function (e) {
+          return '<button class="chip" type="button" data-chiedi="' + esc(e) + '">' + esc(e) + '</button>';
+        }).join('')
+      + '</div>';
+    v.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-chiedi]'); if (!b) return;
       document.getElementById('chat-domanda').value = b.getAttribute('data-chiedi');
       manda();
     });
-    r.appendChild(d);
+    r.appendChild(v);
   }
 
   /* ------------------------------------------------------------------
@@ -249,7 +256,7 @@
            lo fa la function con refund_ai_credit. Qui si dice solo che
            non e' andata, e si manda dove c'e' una persona vera. */
         scrivi('ai', 'Non sono riuscito a risponderti: ' + esc(d.error || 'riprova fra poco') + '.<br>'
-          + '<span style="font-size:14px;color:var(--testo-2,#5a6b5f)">Se ricapita, usa «Assistenza diretta» qui a sinistra.</span>');
+          + '<span class="asst-nota">Se ricapita, usa «Assistenza diretta» qui a sinistra.</span>');
       }
     } catch (e) {
       if (attesa) attesa.remove();
