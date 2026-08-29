@@ -131,6 +131,43 @@
     return true;
   }
 
+  /* ============================================================
+     ===== IL PIANO PRO — 29 agosto 2026 =====
+     ============================================================
+     Deciso da Alessio: il Pro NON sostituisce il Premium, ci si aggiunge
+     sopra. Premium = la vetrina sul sito + il gestionale con tutte le sue
+     funzioni, AI comprese. Pro = quello, PIU' la chat. Chi passa al Pro non
+     perde niente, e chi resta Premium nemmeno: l'unica differenza e' la chat.
+
+     ⛔ E PER QUESTO IL PRO NON STA NELLA COLONNA `piano`.
+     Nel progetto ci sono 91 punti, in 29 file, che chiedono
+     «piano === 'premium'»: ricerche, badge, vetrina, pannelli, questo
+     cancello. Se `piano` diventasse 'pro', tutti e 91 direbbero «non e'
+     premium» e a chi paga di piu' spariva la vetrina.
+     Sta in due colonne sue, `chat_pro` e `chat_pro_scadenza` — la stessa
+     identica forma di `gestionale_attivo` / `gestionale_scadenza`, l'add-on
+     del gestionale del 22 agosto. Non e' una forma nuova.
+
+     ⛔ QUESTA FUNZIONE NON DECIDE CHI ENTRA NEL GESTIONALE.
+     Decide solo chi vede la chat. Il cancello resta quello del Premium:
+     sbagliare qui deve poter costare al massimo una chat, mai il gestionale.
+
+     ⚠️ Chiede il Premium per prima cosa, perche' il Pro si APPOGGIA sopra:
+     un Pro con il Premium scaduto non e' un Pro.
+     ============================================================ */
+  function haChatPro(row){
+    if(!haPremium(row)) return false;          /* il Pro sta SOPRA il Premium */
+    if(row.chat_pro !== true) return false;    /* solo true vale: null e undefined no */
+    /* se c'e' una scadenza ed e' passata, il Pro non vale piu' */
+    if(row.chat_pro_scadenza){
+      var sc = new Date(row.chat_pro_scadenza);
+      if(!isNaN(sc.getTime()) && sc.getTime() < Date.now()) return false;
+    }
+    return true;
+  }
+  /* il banco lo chiama da qui: e' l'unico punto che decide chi ha la chat */
+  window._haChatPro = haChatPro;
+
   /* ⛔ 22 agosto 2026 — le schermate si spengono a vicenda da un ELENCO SOLO.
      Prima ognuna spegneva le altre a mano: con la quarta (gate-lento)
      dimenticarne una avrebbe lasciato due schermate una sopra l'altra. */
@@ -245,7 +282,12 @@
         /* senza login non si entra: si vede la schermata del Premium col link per accedere */
         if(!s){clearTimeout(timer);decidi('','premium');return;}
         window._gestUid=s.user.id;
-        gc.from('imprese').select('email, piano, premium_scadenza').eq('user_id',s.user.id).maybeSingle().then(function(res){
+        /* ⚠️ 29 agosto 2026 — due colonne in piu' nella STESSA lettura: la
+           chat non costa una seconda richiesta. Provate con la chiave anon
+           sulla pagina vera prima di metterle qui: se PostgREST non le
+           conoscesse, la lettura andrebbe in errore e il cancello
+           chiuderebbe a TUTTI. */
+        gc.from('imprese').select('email, piano, premium_scadenza, chat_pro, chat_pro_scadenza').eq('user_id',s.user.id).maybeSingle().then(function(res){
           /* ⚠️ Supabase non lancia: l'errore torna DENTRO la risposta. Senza
              questa riga una lettura rifiutata passava per «nessuna riga»,
              cioe' per «non e' Premium»: colpa data al piano invece che alla
@@ -256,6 +298,9 @@
           window._gestEmail=(row&&row.email)||s.user.email||'';
           var ok=haPremium(row);
           window._gestPremium=ok;
+          /* ⛔ il Pro NON entra nella decisione qui sotto: e' solo una
+             lampadina che la chat guardera'. Il cancello resta il Premium. */
+          window._chatPro=haChatPro(row);
           registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
           decidi(window._gestEmail, ok?'ok':'premium');
         },function(){
