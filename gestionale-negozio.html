@@ -3033,6 +3033,15 @@
     }
     /* 26 agosto 2026 - la rettifica di magazzino */
     if(a==="mag-mot"){magRett.motivo=t.dataset.v;$$("#mag-mot .chip").forEach(c=>c.classList.toggle("on",c.dataset.v===magRett.motivo));return;}
+    if(a==="mag-q-giu"||a==="mag-q-su"){
+      /* il numero si muove di uno, e sotto 1 non si scende: «ne entrano
+         zero» non è un movimento, è un ripensamento */
+      const el=$("#mag-q"); if(!el)return;
+      const ora=_numeroIt(el.value)||0;
+      const nuovo=Math.max(1,ora+(a==="mag-q-su"?1:-1));
+      el.value=_numTesto(nuovo);
+      return;
+    }
     if(a==="mag-rett-salva")return magSalvaRettifica();
   });
 
@@ -3457,7 +3466,15 @@
         <p class="sh-nota" style="margin-top:0">${esc(magRett.nome)} — adesso ne risultano <b>${magRett.ora} ${esc(magRett.unita)}</b>.</p>
         <div class="field">
           <label>Quante ne ${su?"entrano":"escono"}?</label>
-          <input id="mag-q" type="text" inputmode="decimal" data-num min="0" value="1" style="max-width:220px">
+          <!-- ⛔ 29 agosto 2026 — Alessio: «mi vuoi mettere piu e meno qui?».
+               Sì: gli stessi due pulsanti della carta del magazzino, stessa
+               classe «mag-passo», così il numero si fa col dito senza
+               scrivere. La casella resta: chi ne carica 40 li scrive. -->
+          <div class="mag-passo">
+            <button type="button" class="btn btn-sm ja" data-action="mag-q-giu" title="Uno in meno">−</button>
+            <input id="mag-q" type="text" inputmode="decimal" data-num min="0" value="1" style="max-width:140px;text-align:center">
+            <button type="button" class="btn btn-sm ja" data-action="mag-q-su" title="Uno in più">+</button>
+          </div>
         </div>
         <div class="field">
           <label>Perché?</label>
