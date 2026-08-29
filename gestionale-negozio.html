@@ -4684,10 +4684,16 @@
     return [r.nome,r.descrizione,r.prodotto,r.titolo]
       .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")||"(senza nome)";
   }
+  /* ⛔ 29 agosto 2026 - L'ORA GIUSTA. Prima si tagliavano le lettere del
+     timestamp cosi' com'era (slice 11-16): quello e' l'orario di Londra,
+     e in Italia d'estate si leggeva DUE ORE indietro ("buttato alle 09:13"
+     quando erano le 11:13). Adesso l'ora viene dall'orologio del negozio. */
   function cestQuando(iso){
     if(!iso) return "";
-    const d=String(iso).slice(0,10), o=String(iso).slice(11,16);
-    return fdate(d)+(o?" alle "+o:"");
+    const t=new Date(iso);
+    if(isNaN(t)) return fdate(String(iso).slice(0,10));
+    const p=n=>String(n).padStart(2,"0");
+    return fdate(t.getFullYear()+"-"+p(t.getMonth()+1)+"-"+p(t.getDate()))+" alle "+p(t.getHours())+":"+p(t.getMinutes());
   }
   const cestEur=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
   /* cosa c'era scritto dentro: si vede prima di decidere se ripescarlo */
@@ -5121,8 +5127,8 @@
     const acq=mkeys.map(k=>M.filter(m=>m.tipo==="ordine"&&(m.data_mov||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
     const mx=Math.max(...vend,...acq,1);
     const bars=mkeys.map((k,i)=>`<div class="rep-bar-col"><div class="rep-bars">
-      <div class="rep-bar inc" style="height:${Math.round(vend[i]/mx*118)}px" title="Venduto ${eur(vend[i])}"></div>
-      <div class="rep-bar sp" style="height:${Math.round(acq[i]/mx*118)}px" title="Acquistato ${eur(acq[i])}"></div></div>
+      <div class="rep-bar inc" style="height:${Math.round(vend[i]/mx*118)}px" title="Venduto ${eur2(vend[i])}"></div>
+      <div class="rep-bar sp" style="height:${Math.round(acq[i]/mx*118)}px" title="Acquistato ${eur2(acq[i])}"></div></div>
       <span class="rep-bar-lab">${mesi[+k.slice(5,7)-1].slice(0,3)}</span></div>`).join("");
     const perProd={};
     M.filter(m=>m.tipo==="vendita").forEach(m=>{const k=(m.prodotto||"—").trim();perProd[k]=(perProd[k]||0)+(+m.importo||0);});
@@ -5138,12 +5144,12 @@
       <div class="rep-card"><h3>🏪 Situazione negozio</h3><table class="rep-table">
         <tr><td>Prodotti a catalogo</td><td>${P.length}</td></tr>
         <tr><td>Sotto scorta</td><td style="color:${sotto.length?'var(--danger)':'inherit'}">${sotto.length}</td></tr>
-        <tr><td>Valore magazzino</td><td>${eur(valMag)}</td></tr>
-        <tr><td>Venduto totale</td><td>${eur(totV)}</td></tr>
-        <tr><td>Acquistato totale</td><td style="color:var(--danger)">−${eur(totA)}</td></tr>
-        <tr><td><b>Saldo</b></td><td style="color:${totV-totA>=0?'var(--fatto)':'var(--danger)'}">${eur(totV-totA)}</td></tr></table></div>
+        <tr><td>Valore magazzino</td><td>${eur2(valMag)}</td></tr>
+        <tr><td>Venduto totale</td><td>${eur2(totV)}</td></tr>
+        <tr><td>Acquistato totale</td><td style="color:var(--danger)">−${eur2(totA)}</td></tr>
+        <tr><td><b>Saldo</b></td><td style="color:${totV-totA>=0?'var(--fatto)':'var(--danger)'}">${eur2(totV-totA)}</td></tr></table></div>
       <div class="rep-card"><h3>🏆 Prodotti più venduti</h3><table class="rep-table">
-        ${top.length?top.map(([n,v])=>`<tr><td>${esc(n)}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Registra le vendite nei Movimenti per vedere la classifica.</td></tr>`}</table></div>
+        ${top.length?top.map(([n,v])=>`<tr><td>${esc(n)}</td><td>${eur2(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Registra le vendite nei Movimenti per vedere la classifica.</td></tr>`}</table></div>
     </div>`;
   }
   function reportCsvNeg(){
