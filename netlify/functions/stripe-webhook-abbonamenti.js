@@ -184,9 +184,20 @@ exports.handler = async (event) => {
       });
     } else if (email) {
       // Pagamento ricevuto: Premium pagato, senza scadenza (azzero l'eventuale scadenza del regalo)
-      await supabase.from('imprese').update({ piano: 'premium', premium_scadenza: null, premium_pagato: true }).eq('email', email);
+      //
+      // 29 agosto 2026 — I DUE PIANI.
+      // `prodotto` arriva dal checkout. 'premium-ai' e' il piano da 39/349:
+      // l'unica cosa in piu' e' la chat con l'AI, che si accende con
+      // `chat_pro` — la stessa colonna che guardano il cancello del
+      // gestionale e la funzione `chat_stato` su Supabase.
+      // ⚠️ Chi compra il Premium liscio NON viene toccato su chat_pro: se
+      //    ce l'aveva acceso, non glielo spegniamo dentro un pagamento.
+      const conAI = (prodotto === 'premium-ai');
+      const campi = { piano: 'premium', premium_scadenza: null, premium_pagato: true };
+      if (conAI) { campi.chat_pro = true; campi.chat_pro_scadenza = null; }
+      await supabase.from('imprese').update(campi).eq('email', email);
       await segnaIncasso(supabase, {
-        prodotto: 'premium', centesimi: s.amount_total, riferimento: s.id,
+        prodotto: conAI ? 'premium-ai' : 'premium', centesimi: s.amount_total, riferimento: s.id,
         email, valuta: s.currency, tipo_evento: ev.type,
         quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
       });
@@ -243,7 +254,7 @@ exports.handler = async (event) => {
     const prodotto = (inv.metadata && inv.metadata.prodotto) || meta.prodotto || null;
     if (!primaFattura && inv.amount_paid != null && inv.amount_paid > 0) {
       await segnaIncasso(supabase, {
-        prodotto: prodotto === 'gestionale' ? 'gestionale' : 'premium',
+        prodotto: (prodotto === 'gestionale' || prodotto === 'premium-ai') ? prodotto : 'premium',
         centesimi: inv.amount_paid, riferimento: inv.id,
         email, valuta: inv.currency, tipo_evento: ev.type,
         quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
@@ -251,13 +262,41 @@ exports.handler = async (event) => {
     }
   }
 
-  // Disdetta abbonamento: se era il gestionale, revoca l'accesso.
+  // -------------------------------------------------------------------
+  // LA DISDETTA
+  //
+  // ⛔ 29 agosto 2026 — IL BUCO CHE C'ERA QUI.
+  // Prima questo pezzo spegneva SOLO l'add-on gestionale. Chi disdiceva il
+  // Premium restava Premium per sempre: Stripe smetteva di incassare e il
+  // sito continuava a dargli tutto. Adesso torna free davvero.
+  //
+  // ⚠️ Stripe manda questo avviso alla FINE del periodo gia' pagato, non
+  //    nel momento in cui la persona clicca «disdici»: fino a quel giorno
+  //    ha pagato, e fino a quel giorno tiene quello che ha pagato.
+  // ⚠️ Gli abbonamenti nati prima del 29 agosto non hanno `prodotto` nei
+  //    metadata: se manca, si considera un Premium.
+  // -------------------------------------------------------------------
   if (ev.type === 'customer.subscription.deleted') {
     const sub = ev.data.object;
     const email = sub.metadata && sub.metadata.email;
-    const prodotto = sub.metadata && sub.metadata.prodotto;
-    if (email && prodotto === 'gestionale') {
+    const prodotto = (sub.metadata && sub.metadata.prodotto) || 'premium';
+
+    if (!email) {
+      console.error('[disdetta] abbonamento disdetto SENZA email nei metadata:', sub.id);
+    } else if (prodotto === 'gestionale') {
       await supabase.from('imprese').update({ gestionale_attivo: false }).eq('email', email);
+      console.log('[disdetta] gestionale spento:', email);
+    } else {
+      // Premium e Premium AI: si torna al piano free e si spegne la chat AI.
+      const { error } = await supabase.from('imprese').update({
+        piano:             'free',
+        premium_pagato:    false,
+        chat_pro:          false,
+        chat_pro_scadenza: null,
+        disdetto_piano_il: new Date().toISOString()
+      }).eq('email', email);
+      if (error) console.error('[disdetta] NON riuscita per ' + email + ':', error.message);
+      else console.log('[disdetta] ' + prodotto + ' chiuso, tornato free:', email);
     }
   }
 
