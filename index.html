@@ -874,7 +874,9 @@
   .tile-pieno{ background:#fff !important; border:1px solid #e6ebf2 !important; border-top:1px solid #e6ebf2 !important; color:var(--ti-ink) !important; padding:22px 14px !important; gap:8px !important; box-shadow:0 2px 8px rgba(10,42,77,.06) !important; }
   .tile-pieno svg{ color:var(--tc); opacity:1; width:44px; height:44px; padding:9px; box-sizing:border-box; border-radius:12px; background:color-mix(in srgb, var(--tc) 12%, #ffffff); }
   .tile-n{ font-size:16px; font-weight:700; letter-spacing:-.2px; color:var(--ti-ink); }
-  .tile-d{ font-size:12.5px; font-weight:500; line-height:1.35; color:var(--ti-txt); opacity:1; }
+  /* ⛔ 29 agosto 2026 - MAI SOTTO I 13 px. Era 12,5: e' la riga che spiega
+     al cliente cos e ogni categoria, la prima cosa che legge sulla home. */
+  .tile-d{ font-size:13px; font-weight:500; line-height:1.35; color:var(--ti-txt); opacity:1; }
   .tile-pieno:hover{ box-shadow:0 10px 24px rgba(10,42,77,.12) !important; border-color:color-mix(in srgb, var(--tc) 40%, #e6ebf2) !important; }
   .hcard-grid{ display:grid; gap:12px; }
   .opzioni-chips{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:14px; }

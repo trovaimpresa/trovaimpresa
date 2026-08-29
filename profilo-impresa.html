@@ -66,7 +66,8 @@ nav img{height:36px}
   width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   transition:background 0.2s}
 #logo-lightbox-close:hover{background:rgba(255,255,255,0.2)}
-.hero-tipo{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+/* ⛔ 29 agosto 2026 - mai sotto i 13 px (era 12) */
+.hero-tipo{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
   color:rgba(255,255,255,0.65);margin-bottom:6px}
 .hero-nome{font-size:2.2rem;font-weight:800;margin-bottom:8px;line-height:1.1}
 .hero-loc{font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:12px}
@@ -87,7 +88,8 @@ nav img{height:36px}
 .sc-icon{font-size:28px}
 .sc-num{font-size:1.6rem;font-weight:800;color:#333;line-height:1}
 .sc-num.org{color:#FF6B35}
-.sc-lbl{font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+/* ⛔ 29 agosto 2026 - mai sotto i 13 px (era 11: VALUTAZIONE, RECENSIONI, ANNI ESP.) */
+.sc-lbl{font-size:13px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 
 /* SECTION CARDS - stile sezione-card homepage */
 .page-section{background-image:url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop');
@@ -380,7 +382,11 @@ nav img{height:36px}
 
 <div id="profilo-view">
 <!-- COVER FOTO -->
-<div id="cover-foto"><img id="cover-foto-img" src="" alt="Foto di copertina"></div>
+<!-- ⛔ 29 agosto 2026 - src="" NON e' vuoto per il browser: lo intende come
+     l'indirizzo di QUESTA pagina e si riscarica tutto l'HTML come se fosse
+     un'immagine. Su ogni profilo senza foto erano tre pagine scaricate per
+     niente. Adesso l'indirizzo si mette solo quando c'e' davvero. -->
+<div id="cover-foto"><img id="cover-foto-img" alt="Foto di copertina"></div>
 
 <!-- HERO -->
 <div class="hero" id="hero-section">
@@ -661,7 +667,7 @@ nav img{height:36px}
 <div class="lightbox" id="lightbox" onclick="chiudiLightbox()">
   <button class="lb-btn lb-close" onclick="event.stopPropagation();chiudiLightbox()">✕</button>
   <button class="lb-btn lb-prev" onclick="event.stopPropagation();cambiaFoto(-1)">‹</button>
-  <img id="lightbox-img" src="" alt="Foto" onclick="event.stopPropagation()">
+  <img id="lightbox-img" alt="Foto" onclick="event.stopPropagation()">
   <button class="lb-btn lb-next" onclick="event.stopPropagation();cambiaFoto(1)">›</button>
 </div>
 
@@ -1498,7 +1504,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- LOGO LIGHTBOX -->
 <div id="logo-lightbox" role="dialog" aria-modal="true">
   <button id="logo-lightbox-close" aria-label="Chiudi">✕</button>
-  <img id="logo-lightbox-img" src="" alt="Logo impresa">
+  <img id="logo-lightbox-img" alt="Logo impresa">
 </div>
 
 <script src="/js/modal-fullscreen.js" defer></script>

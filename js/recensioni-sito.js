@@ -56,7 +56,8 @@
     + '#ti-recensioni .tir-review{background:var(--tir-card);border:1px solid var(--tir-border);border-radius:12px;padding:16px}'
     + '#ti-recensioni .tir-review-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}'
     + '#ti-recensioni .tir-review-stars{color:var(--tir-star);font-size:15px;letter-spacing:1px}'
-    + '#ti-recensioni .tir-review-date{color:var(--tir-muted);font-size:12px}'
+    /* 29 agosto 2026 - mai sotto i 13 px (era 12) */
+    + '#ti-recensioni .tir-review-date{color:var(--tir-muted);font-size:13px}'
     + '#ti-recensioni .tir-review-name{font-weight:600;font-size:14px;margin-bottom:4px}'
     + '#ti-recensioni .tir-review-text{font-size:14px;line-height:1.45;color:#444;margin:0;white-space:pre-wrap;word-break:break-word}'
     + '@media(max-width:520px){#ti-recensioni .tir-head{justify-content:center;text-align:center}}';
