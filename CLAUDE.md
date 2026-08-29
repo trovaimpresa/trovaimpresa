@@ -17201,3 +17201,159 @@ raccoglie i clienti, ma aggiunge attrito.
 
 ⛔ **La priorità dichiarata da Alessio resta:
 finire il gestionale e aprirlo agli iscritti.**
+
+
+---
+
+# 29 AGOSTO 2026 (seconda sessione) — IL TEST VERO DI TUTTO: QUATTRO GESTIONALI E IL SITO
+
+*Sessione parallela a quella della pulizia SEO. Qui si è collaudato tutto quello
+che si usa, sui dati veri di Alessio, e si è riparato quello che non andava.*
+**→16← difetti trovati e riparati, più →3← migliorie chieste da lui.**
+
+## ⛔ IL MODO DI LAVORARE CHE HA CAMBIATO LA GIORNATA
+
+Alessio ha chiesto: *«questi test così lunghi non puoi farli tu?»*. Sì.
+Si apre `trovaimpresa.com` nel **pannello Browser di Claude**, lui fa il login
+**una volta sola** (la password non si tocca mai), e da lì i test li gira Claude
+sui **suoi dati veri**. Da otto passi al giorno a un gestionale intero all'ora.
+
+**Due cose imparate, che valgono per sempre:**
+
+1. ⛔ **Leggere SEMPRE la console** (`read_console_messages`). I due difetti più
+   gravi della giornata erano lì e **a schermo non si vedevano**: la pagina
+   sembrava solo «un po' vuota».
+2. Se il pannello Browser si disconnette, **la sessione del sito si perde**: il
+   gestionale torna a chiedere il login. Si rifà, disegnando i numeri rossi
+   sulla pagina con `javascript_tool` (div in `position:fixed`) invece di
+   spiegare a parole dove cliccare.
+
+## ⛔ LA LEZIONE TECNICA DELLA GIORNATA
+
+**Una variabile `const`/`let` usata PRIMA della riga che la dichiara è un
+errore secco che ferma tutta la funzione** — e a schermo non si vede niente di
+rotto, si vede solo qualcosa che manca. Cercarla sempre.
+
+Due casi veri, tutti e due sul sito pubblico:
+
+* **`profilo-impresa.html`** — `_esc` dichiarata trenta righe **sotto** il
+  primo uso (il logo). Risultato: sul profilo che vede il cliente non
+  comparivano **il logo dell'impresa**, il colore dell'intestazione, la foto di
+  copertina e i bollini **«✓ Verificata»**, **«🎓 Albo verificato»**,
+  **«🛡️ RC professionale»**, **«Dal <anno>»**. La città usciva `📍 —`.
+  È il biglietto da visita delle imprese che pagano.
+* **Le cinque pagine di ricerca** (`cerca-imprese`, `cerca-artigiani`,
+  `cerca-negozi`, `cerca-professionisti`, `professionisti`) — `cerca()`
+  chiamata prima che `mappaRis` esistesse. Chi arrivava **con la città già
+  nell'indirizzo** (da Google, o dal menu «Imprese a Roma») vedeva **la pagina
+  vuota** finché non schiacciava «Cerca» a mano.
+
+## I difetti dei gestionali
+
+| dove | difetto | perché succedeva |
+|---|---|---|
+| Negozio | **«Modifica» non apriva niente** | i pulsanti del modulo (Salva compreso) stavano nel piede della finestra; aprendo un'altra finestra `innerHTML` se li portava via per sempre. Ora `openSheet`/`openSheetGrande` chiamano `chiudiModuloFinestra()` per prime |
+| Negozio | Report senza centesimi | usava `eur` (arrotonda) invece di `eur2` |
+| Negozio | Ora del Cestino indietro di 2 ore | tagliava le lettere dell'ISO (`slice(11,16)` = ora di Londra) invece di leggere l'orologio |
+| Negozio | L'importo del movimento non si rifaceva | confronto fra **stringhe** (`17.5` contro `17,50`): appena la casella si riscriveva all'italiana non tornava più uguale. Ora si confrontano i **numeri** |
+| Imprese | Importi senza centesimi in Riepilogo, Lavori, Preventivi, Agenda, Carte, Report | `eur` con `maximumFractionDigits:0`. Ora ha i centesimi; resta `eurTondo` **solo** per le tacche dell'asse del grafico |
+| Imprese | «Cerco in tutte le tariffe (**500 voci**)» | erano solo quelle tenute in memoria: il prezzario ne ha **→15.311←**. Ora dice la verità |
+| Noleggio | **«+ Nuovo noleggio» in alto non apriva niente** | cercava `#nn-mezzo` in cima alla sezione, dov'era il modulo *prima* che diventasse una finestra |
+| Noleggio | `1050,50 €` invece di `1.050,50 €` | mancava `useGrouping:true` in `_eur` |
+| Noleggio | La linguetta del browser mostrava l'indirizzo | al file mancava il `<title>` |
+| App operaio | «Lavori **Di Oggi**» | `text-transform:capitalize` su `.day-title` rovinava una scritta già scritta bene |
+| Sito | Tre `<img src="">` sul profilo | `src=""` **non è vuoto**: il browser lo intende come l'indirizzo della pagina e **riscaricava tutta la pagina tre volte** a ogni profilo senza foto |
+| Sito | Scritte a 11 e 12,5 px | home (righe delle categorie), profilo (VALUTAZIONE / RECENSIONI / ANNI ESP.), data delle recensioni |
+| Sito | `Rieti, Rieti` | città e provincia scritte due volte quando coincidono (sistemato in `profilo-impresa`, `offerta-lavoro`, `mappa`) |
+
+## Le tre migliorie chieste da Alessio
+
+1. **Riepilogo negozio, carta Prodotti**: mostrava `275,00 €` (prezzo × quantità)
+   e sembrava il prezzo del prodotto. Ora mostra **`5,50 €/pz`**, il prezzo che
+   si dice al cliente. Il valore del magazzino ha già la sua carta accanto.
+2. **Pulsanti del menu del sito**: da 35-37 px a **44 px**, la misura giusta per
+   un dito in cantiere.
+3. **La fattura del negozio è rifatta.** Prima apriva il modulo dei cantieri e
+   chiedeva «Cosa c'è da fare», «Dove», «Operaio». Ora ha **le righe di merce
+   prese dal magazzino**, la riga libera, sconto e IVA — come il preventivo.
+
+### ⚠️ Il database è cambiato (tutto additivo, migration `fatture_negozio_righe_iva_sconto`)
+* nuova tabella **`neg_fattura_righe`** (con RLS `user_id = auth.uid()`, come
+  `neg_preventivo_righe`, da cui è copiata)
+* nuove colonne su `gest_lavori`: `fatt_data`, `fatt_iva_perc`, `fatt_sconto_perc`
+
+**Le fatture già dentro continuano a funzionare**: se non metti righe, l'importo
+si scrive a mano come prima. Le funzioni delle righe della fattura (`ftRighe`,
+`ftRenderRighe`, `ftLeggiRighe`, `ftTotali`) **riusano** `pvRigaHtml`, `pvCalcola`
+e `pvEur` del preventivo — stesse classi, stesso conto, un posto solo da
+sistemare il giorno che cambia.
+
+## Cose scoperte che vale la pena sapere
+
+* **Impresa, artigiano e professionista aprono lo STESSO file**,
+  `gestionale-app.html`: cambia solo la faccia secondo chi entra. Testarlo una
+  volta vale per tutti e tre.
+* Il **cemento** di Alessio aveva **prezzo →0←** e giacenza **−9**: era quello a
+  bloccare il test, non il gestionale. ⚠️ Con prezzo zero l'importo non si può
+  calcolare e sembra un difetto. Prima di dare la colpa al codice, guardare i dati.
+* I controlli del **noleggio** funzionano e valgono oro: *«Questo mezzo è già
+  impegnato in quei giorni»* (con nome e date) e *«Stai facendo pagare 1.050,50 €
+  ma il conto dice 780,00 €»*. Quel secondo controllo da solo evita una fattura
+  sbagliata.
+* L'**app operaio** è il pezzo messo meglio: un difetto solo, e i pulsanti delle
+  ore sono **52×52 px** — giusti per un dito col guanto.
+* Le **RLS reggono**: l'operatore *david* vede solo le scadenze della sua
+  impresa, verificato sul database.
+
+## Lo stato dei banchi a fine giornata
+
+| banco | prove | rosse |
+|---|---|---|
+| Negozio — funzionamento | **399** | 0 |
+| Imprese — funzionamento | **198** | 0 |
+| Noleggio (6 banchi) | **259** | 0 |
+| Prove nuove del giorno (numeri, virgola, + e −, euro-casella, pulsante noleggio, fattura negozio) | ~50 | 0 |
+
+I referti stanno in `prove-claude/`: `REFERTO-test-vero-29ago.html`,
+`REFERTO-imprese-29ago.html`, `REFERTO-noleggio-29ago.html`,
+`REFERTO-sito-29ago.html`.
+
+## ⛔ COSA RESTA APERTO DOPO QUESTA SESSIONE
+
+Il prompt pronto è **`prove-claude/PROMPT-chat-e-pro-30ago.md`**. L'ordine
+deciso da Alessio:
+
+1. **«Computo da prezzare» anche all'artigiano** — la prima cosa. Anche a un
+   artigiano il geometra manda un computo senza prezzi. Le tre voci (Computo ·
+   Prezzario · SAL) nascono spente e le accendono solo `adattaMenuImpresa()` e
+   `adattaMenuProfessionista()`; l'artigiano fu staccato apposta il 22 agosto
+   per togliergliele. Vanno accese **tutte e tre insieme, in un punto solo**.
+2. **La chat dentro il gestionale.** Deciso: **risponde l'AI da sola**, niente
+   coda di messaggi che aspetta Alessio; se l'AI non sa, lo dice e manda
+   all'assistenza che c'è già. Non si parte da zero: l'assistente «Come si fa» e
+   il motore a crediti stanno in `js/ai-integrazione.js`. ⚠️ Il sito è statico:
+   la chiave dell'API va in una Netlify Function o in una Edge Function, **mai
+   nel codice della pagina**.
+3. **Il piano Pro**, con la chat inclusa. ⚠️ Il velo `js/gate-gestionale.js` è
+   delicato: se si sbaglia la regola del piano, chi paga resta fuori. Prima di
+   toccarlo, un banco che prova free / premium / pro / scaduto.
+
+### Piccole cose viste e lasciate lì
+* Nel gestionale imprese, «Controlla prima di mandarlo» risponde con una
+  strisciolina che sparisce da sola: la risposta meriterebbe di restare.
+* Nel negozio, dalla ricerca in cima si finisce direttamente in «Modifica
+  prodotto» invece che nella scheda.
+* Nel negozio i movimenti dello stesso giorno non hanno un ordine prevedibile
+  (si ordina solo per `data_mov`).
+
+### ⚠️ Roba di prova lasciata dentro APPOSTA — non cancellarla
+Alessio ha detto di lasciarla: nel negozio (reparto *ferramenta*), nel
+gestionale artigiano (reparto *giardiniere*) e nel noleggio ci sono un prodotto,
+il cliente *Edilizia Bianchi srl*, due preventivi, due fatture, un lavoro, un
+computo e un noleggio di prova.
+
+### 📧 Come si avvisa Alessio
+**Le notifiche sul telefono non gli arrivano.** Gli avvisi di fine lavoro si
+mandano **per email** a `pintoalessio@icloud.com`, con una scheduled task
+one-shot (`create_trigger`, `run_once_at` fra due minuti,
+`notifications: {email:true, push:true}`).
