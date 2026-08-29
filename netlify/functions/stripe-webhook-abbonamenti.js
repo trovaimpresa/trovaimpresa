@@ -176,7 +176,9 @@ exports.handler = async (event) => {
 
     } else if (email && prodotto === 'gestionale') {
       // Add-on Gestionale attivato: NON tocca il piano Premium.
-      await supabase.from('imprese').update({ gestionale_attivo: true, gestionale_scadenza: null }).eq('email', email);
+      const campiGest = { gestionale_attivo: true, gestionale_scadenza: null };
+      if (typeof s.customer === 'string' && s.customer) campiGest.stripe_customer_id = s.customer;
+      await supabase.from('imprese').update(campiGest).eq('email', email);
       await segnaIncasso(supabase, {
         prodotto: 'gestionale', centesimi: s.amount_total, riferimento: s.id,
         email, valuta: s.currency, tipo_evento: ev.type,
@@ -195,6 +197,12 @@ exports.handler = async (event) => {
       const conAI = (prodotto === 'premium-ai');
       const campi = { piano: 'premium', premium_scadenza: null, premium_pagato: true };
       if (conAI) { campi.chat_pro = true; campi.chat_pro_scadenza = null; }
+      // ⚠️ il «cliente» di Stripe si prende NOTA QUI, che e' l'unico
+      // momento in cui ce l'abbiamo in mano. Serve al portale clienti
+      // (cambio piano e disdetta): senza, lo si dovrebbe cercare per
+      // email ogni volta, e due account con la stessa email sono un
+      // guaio che si paga in soldi.
+      if (typeof s.customer === 'string' && s.customer) campi.stripe_customer_id = s.customer;
       await supabase.from('imprese').update(campi).eq('email', email);
       await segnaIncasso(supabase, {
         prodotto: conAI ? 'premium-ai' : 'premium', centesimi: s.amount_total, riferimento: s.id,
