@@ -18102,3 +18102,173 @@ rosse. Se restasse verde su tutte e due non misurerebbe niente.
   il foglio da usare è `js/centesimi.js`.
 * Nel decreto parametri `perFase[...].imp` moltiplica **quattro** numeri in fila
   e non è stato toccato: è una stima, non un documento.
+
+# 29 AGOSTO 2026 (notte fonda, terza parte) — I PREZZI NUOVI E LE DUE PORTE
+
+Questa parte non è codice: è una **decisione commerciale**, presa da Alessio,
+scritta qui perché non si perda un'altra volta.
+
+⚠️ **Lezione della serata, prima di tutto.** Gli accordi sul prezzo del
+gestionale erano **già stati presi** in una sessione precedente e messi per
+iscritto in `IL-PREZZO-la-decisione.md`. Claude non li ha cercati e ha rifatto i
+conti da capo. Alessio: *«avevamo gia fatto i conti… cosi non e stato»*.
+⛔ **Prima di riaprire una decisione, si cerca se è già scritta.**
+
+---
+
+## I prezzi decisi
+
+| | mensile | annuale |
+|---|---|---|
+| **Premium** — vetrina + gestionale | →29←€ | →249←€ |
+| **Premium AI** — in più la chat con AI | →39←€ | →349←€ |
+
+I vecchi erano →5←€/→49←€. Il ragionamento di Alessio, secco: *«un gestionale
+italiano costa molto di più di →49←€ all'anno»*, e a →5←€ **la vetrina e il
+gestionale insieme valevano troppo poco**.
+
+Alessio lo ha detto anche in negativo, e va tenuto presente: *«con questi prezzi
+il Premium farò molta selezione, lo pagherà solo ed esclusivamente chi usa il
+gestionale»*. **È una scelta, non un effetto collaterale.**
+
+### Cose che NON cambiano
+
+* Nel database **non si rinomina niente**: `piano` resta `'premium'`, la colonna
+  resta `chat_pro`. Cambia solo quello che si legge a schermo.
+* Il gestionale del **negozio** a →12←€/→119←€ è **un altro prodotto**.
+* Gli **spazi pubblicitari per città** a →5←€/mese in `pubblicita.html`
+  **non c'entrano** e sono stati lasciati fermi apposta.
+
+### Dove sono già online
+
+→8← pagine: `prezzi.html` (con la **terza scheda «Premium AI»**, copiata da
+quella del Premium: stesse classi, stessi colori, stesse misure) ·
+`info-premium.html` · `software-gestionale-imprese-edili.html` (compreso
+`"price":"49"` → `"249"` nel JSON-LD, quello che **Google fa vedere**) ·
+`termini-condizioni.html` · i →4← pannelli. E nel velo `js/gate-gestionale.js`.
+
+⛔ **E qui c'è il buco aperto**: le pagine dicono →29←€, ma
+`crea-checkout-abbonamento.js` ha ancora dentro i codici Stripe da →5←€ e
+→49←€. **Servono →4← prezzi nuovi su Stripe**, e Stripe da Cowork è in **sola
+lettura**: li deve creare Alessio dal pannello.
+
+---
+
+## ⛔ LE DUE PORTE — la decisione di Alessio, contro quello che diceva Claude
+
+Claude aveva proposto: **una porta sola** per il gestionale, e dentro, nella
+sezione Chat, l'invito a passare al piano con l'AI.
+
+**Alessio ha detto di no, e aveva ragione:**
+
+> *«secondo me deve stare a monte del gestionale, perché se uno paga il Premium
+> e poi una volta dentro vede che c'è un altro piano non va bene: perché poi a
+> tratto spende due volte, oppure non lo compra.»*
+
+E prima ancora: *«dividiamo in due il gestionale, uno va al Premium l'altro al
+Pro… e non ti è piaciuta l'idea, ma è la soluzione migliore.»*
+
+### La regola che ne esce
+
+⛔ **La scelta del piano si fa PRIMA di pagare, mai dentro il prodotto già
+pagato.** Un secondo listino scoperto dopo il pagamento fa uno di due danni:
+o il cliente **si sente fregato**, o **non compra affatto**.
+
+### Come diventa il pannello
+
+| prima | dopo |
+|---|---|
+| scheda «🛠️ Gestionale» con **→1←** pulsante «Apri gestionale impresa» | **→2← porte affiancate**: **Gestionale Premium** · **Gestionale Premium AI** |
+| sezione «🏆 Il tuo piano» in fondo, con le schede Free e Premium | **sparisce tutta** |
+| la tendina «Mensile →29←€ / Annuale →249←€» stava lì dentro | **va sulla porta del Premium** — e la porta del Premium AI ha la sua, →39←€/→349←€ |
+| «Piano attuale: Premium» scritto nella sezione | **doppione**: lo dice già la barra in alto |
+
+* Chi il piano ce l'ha **entra**; chi non ce l'ha **compra da lì**.
+* ⛔ **Dentro il gestionale nessuna seconda offerta**: solo una riga che dice
+  quale piano hai.
+* ⛔ **I lucchetti del pannello si aprono con tutti e due i piani.**
+* Il link **«Disdetta abbonamento»** in fondo alla pagina **resta**: è quella la
+  strada giusta per disdire.
+* Lo stesso taglio va fatto in **artigiano** e **professionisti**. Il **negozio**
+  resta fuori: lì il gestionale è l'altro prodotto.
+
+### ⛔ Il difetto trovato smontando quella sezione
+
+Il pulsante «Passa a Free» faceva **solo** questo:
+
+```js
+await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
+```
+
+Scrive `free` nel database e **non disdice niente su Stripe**. Chi paga e lo
+clicca **perde il Premium e continua a pagare**. Togliendo la sezione, il buco
+si chiude da solo — ma è bene sapere che c'era.
+
+### ⛔ E la contraddizione a schermo
+
+Oggi la barra in alto del gestionale dice **«Piano: PREMIUM»** e la chat, sotto,
+dice **«Piano Pro · ti restano →285← messaggi»**. **Due nomi per lo stesso
+account.** La barra e la chat devono dire la stessa parola, e la chat deve
+limitarsi a «ti restano →N← messaggi».
+
+---
+
+## Il nome: «Premium AI», non «Pro»
+
+Alessio lo chiama «Pro» a voce, ed è giusto che resti scritto qui. Ma la parola
+**pubblicata** nelle →8← pagine dei prezzi è **«Premium AI»**, e **la porta e il
+listino devono dire la stessa parola**, se no il cliente crede che siano due
+prodotti diversi. Il giorno che si vuole cambiare nome, si cambia **in tutti e
+→9← i posti insieme**, non in uno solo.
+
+---
+
+## Il gestionale è ancora CHIUSO
+
+`js/gate-gestionale.js` ha `MANUTENZIONE = true` e `AMMESSI` col solo fondatore.
+Deciso il →20← agosto: *«prima si costruisce la casa poi si vende»*.
+Alessio, quella notte: *«non concentrarti sulle imprese registrate, non ci
+interessano: dobbiamo finire il gestionale e renderlo attivo»*.
+
+⛔ **Quindi non si ragiona su quante imprese lo usano: non possono entrarci.**
+
+---
+
+## Cosa resta rotto, in ordine di urgenza
+
+1. **Le pagine dicono →29←€ e la cassa batte →5←€** — servono i →4← prezzi
+   Stripe, poi il checkout va rifatto per →2← piani.
+2. ⛔ **Chi disdice il Premium resta Premium a vita**: in
+   `stripe-webhook-abbonamenti.js` il ramo `customer.subscription.deleted`
+   spegne solo l'add-on, e il checkout non scrive nemmeno `metadata.prodotto`.
+3. ⛔ **Dal pannello IMPRESA non si compra niente**: il pulsante fa
+   `location.href='info-premium.html'` e la scelta della tendina viene buttata.
+   Negli altri tre pannelli il checkout parte davvero.
+4. **Il Premium AI non si compra da nessuna parte.** ⛔ Chi ha già il Premium
+   **non deve fare un secondo abbonamento**: su Stripe si cambia il prezzo
+   dentro quello che ha già, col conguaglio.
+5. **I tre orologi non si parlano**: `premium_scadenza`, `chat_pro_scadenza` e
+   `ai_accounts.plan`. Chi paga il Premium AI e poi compra una ricarica rischia
+   di **pagare due volte**.
+6. **I «→300← messaggi» in realtà sono →400←**: finiti i →300←, la chat scala
+   dai →100← crediti mensili.
+
+## Il lavoro a metà da decidere
+
+Su Supabase ci sono `gest_prova_tetto`, `gest_prova_possibile`, `gest_prova_ok` e
+il guardiano `gest_blocco_piano` che le usa: servono a far **provare** il
+gestionale a chi non paga. ⚠️ **Oggi non toccano nessuno**: →0← imprese su →102←,
+perché sono scritte per «chi non ha mai avuto il Premium» e **tutte** le imprese
+ricevono →3← mesi di Premium alla registrazione. O si cambia chi ha diritto alla
+prova, o si tengono solo la **visita in sola lettura**.
+
+## La regola dell'agente immobiliare
+
+Claude aveva obiettato che un gestionale **vuoto** non si vende. Alessio:
+
+> *«certo che è vuoto: anche se compri casa la casa è vuota, ma poi la riempi.
+> Il gestionale non posso farlo comprare a scatola chiusa, perché io devo fare
+> come l'agente immobiliare: glielo devo far vedere e farlo anche provare.»*
+
+⛔ **Far vedere e far provare viene prima di far pagare.** L'obiezione di Claude
+era sbagliata.
