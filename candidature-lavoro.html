@@ -283,7 +283,12 @@
     document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
     document.getElementById('pagination').innerHTML = '';
     try {
-      const tabella = impresaLoggata ? 'candidati_lavoro' : 'candidati_lavoro_pubblici';
+      // 29 ago 2026 — l'elenco si sfoglia SEMPRE in forma ridotta (nome +
+      // iniziale del cognome). Prima un'impresa loggata leggeva la tabella
+      // piena: cognome, email, telefono e curriculum di chiunque cercasse
+      // lavoro, anche senza aver mai pubblicato un'offerta. I contatti
+      // adesso arrivano con la candidatura, non con lo sfoglio.
+      const tabella = 'candidati_lavoro_pubblici';
       let q = supabaseClient.from(tabella).select('*');
       if (mestiereScelto !== 'tutti') q = q.ilike('mestiere', `%${mestiereScelto}%`);
       if (citta) q = q.ilike('citta', `%${citta}%`);
@@ -328,8 +333,9 @@
     const totPagine = Math.ceil(totale / PER_PAGE);
     const slice = lista.slice((pagina-1)*PER_PAGE, pagina*PER_PAGE);
     conteggio.innerHTML = totale === 1 ? 'Trovato <strong>1</strong> candidato' : `Trovati <strong>${totale}</strong> candidati`;
-    const avviso = impresaLoggata ? '' :
-      '<div class="avviso-privacy">&#128274; Stai guardando da visitatore: per motivi di privacy vedi solo nome e iniziale. I contatti si vedono accedendo con un account impresa.</div>';
+    const avviso = impresaLoggata
+      ? '<div class="avviso-privacy">&#128274; Per motivi di privacy l\'elenco mostra nome e iniziale del cognome. Telefono, email e curriculum di una persona li ricevi quando si candida a una tua offerta di lavoro.</div>'
+      : '<div class="avviso-privacy">&#128274; Stai guardando da visitatore: per motivi di privacy vedi solo nome e iniziale del cognome.</div>';
     div.innerHTML = avviso + slice.map(cardHTML).join('');
 
     const pag = document.getElementById('pagination');
@@ -363,13 +369,12 @@
         ${c.eta ? `<span class="badge badge-eta">&#127874; ${esc(c.eta)} anni</span>` : ''}
       </div>
       ${c.competenze ? `<div class="candidato-bio">${esc(String(c.competenze).slice(0,220))}${String(c.competenze).length>220?'&hellip;':''}</div>` : ''}
-      ${impresaLoggata ? `<div class="contatti">
-        ${c.telefono ? `<a class="btn-contatto" href="tel:${esc(c.telefono)}">&#9742;&#65039; Chiama</a>` : ''}
-        ${c.email ? `<a class="btn-contatto" href="mailto:${esc(c.email)}">&#128231; Email</a>` : ''}
-        ${tel ? `<a class="btn-contatto btn-wa" target="_blank" rel="noopener" href="https://wa.me/${tel}">&#128172; WhatsApp</a>` : ''}
+      ${impresaLoggata ? `<div class="contatti-bloccati">
+        <span>&#128274; Telefono, email e curriculum li ricevi quando questa persona si candida a una tua offerta</span>
+        <a href="/offerte-lavoro.html">Pubblica un'offerta</a>
       </div>` : `<div class="contatti-bloccati">
-        <span>&#128274; Telefono ed email visibili alle imprese registrate</span>
-        <a href="/login-impresa.html">Accedi</a>
+        <span>&#128274; Telefono ed email non sono pubblici</span>
+        <a href="/login-impresa.html">Accedi come impresa</a>
       </div>`}
     </div>`;
   }
