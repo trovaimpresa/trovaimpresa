@@ -556,6 +556,9 @@ Sintomo: ci sono imprese in `imprese` con quella città, ma la pagina non ha la 
 Ad agosto 2026 era fermo da luglio: 46 imprese iscritte e **una sola** pagina città
 (Rieti) con contenuto. Rilanciato → **31 pagine città popolate** in un colpo.
 Rilanciato di nuovo il 6 agosto 2026 → **34 su 106** (72 ancora senza imprese).
+Rilanciato il 29 agosto 2026 → **43 su 106** (63 senza imprese, perché lì non c'è
+nessun iscritto). Da quella data lo script salta anche le schede senza email
+confermata, e cerca la città in modo esatto (vedi il bug di Enna, 29/8/2026).
 
 **Il numero da guardare non è quante città, ma quante imprese per città.** Al 6 agosto:
 Roma 6, Napoli 3, Torino 3, Sassari/Pavia/Venezia 2, **tutte le altre 1 sola**. Una pagina
@@ -563,10 +566,18 @@ con una sola impresa vale poco per Google e ancora meno per il cliente, che chie
 preventivo e non può confrontare niente. La soglia utile è **3-4 imprese per città**:
 meglio concentrarsi sulle città già avviate che spargersi su quelle vuote.
 
-Blocco pronto da dare ad Alex:
+Blocco pronto da dare ad Alex (⚠️ 29/8/2026: NIENTE `git add -A`, solo i file
+toccati — vedi le regole sulla cartella collegata):
 ```bash
-cd ~/Downloads/trovaimpresa && node genera-imprese-citta.js && git add -A && git commit -m "Aggiornate imprese citta" && git push
+cd /c/Users/Utente/Downloads/trovaimpresa && node genera-imprese-citta.js
 ```
+poi, se la riga finale dice `Errori: 0`:
+```bash
+node tools/controllo-push.js && git add imprese-*.html && git commit -m "Rigenerate le sezioni imprese locali" && git push
+```
+⚠️ **Il `cd` va messo davanti**: il 29/8/2026 Alessio ha detto «fatto» ma lo
+script non era mai partito, e i file risultavano non modificati dalle 06:35.
+Prima di credere a un «fatto», controllare l'ora di modifica dei file.
 
 **Correlazione osservata**: l'unica pagina città che compariva su Google era l'unica con
 imprese vere dentro. Le pagine città senza imprese non si posizionano: sono ~420 parole
@@ -16846,3 +16857,347 @@ guida scritta a mano. Se la chat deve stare anche lì, va deciso.
 
 ⛔ **La priorità dichiarata da Alessio resta una sola:**
 **finire il gestionale e aprirlo agli iscritti.**
+
+---
+
+# 28 agosto 2026, sera — IL COLLAUDO DEL NOLEGGIO E LE FINESTRE A TUTTA PAGINA
+
+## Cosa è successo, in due righe
+
+Sessione partita col prompt del collaudo noleggio (foglio scritto alle 17:46).
+Alessio nel frattempo stava facendo **il test vero del negozio** col foglio dei
+32 passi (`prove-claude/TEST-VERO-negozio.html`, delle 17:43). Ho seguito il
+foglio invece della persona: **~20 minuti buttati**. Lezione scritta qui sotto.
+
+## IL NOLEGGIO — chiuso, online, non toccarlo più
+
+Sei banchi verdi (246 prove), poi collaudo a mano con Playwright: 4 giri,
+60 foto guardate una per una, **0 errori JavaScript**. Sotto le 246 prove verdi
+c'erano **3 difetti veri**, tutti sistemati con una prova nuova ciascuno e tutte
+e tre le prove viste diventare rosse rompendo apposta la correzione.
+
+1. **La cauzione spariva.** Noleggio nuovo: il conto scriveva «Cauzione 500,00 €
+   — in deposito», l'importo si riempiva da solo, ma la casella Cauzione restava
+   **vuota**. Si salvava con cauzione zero: fuori da Cauzioni, fuori dal
+   Riepilogo, ricevuta a zero. Si copiava dal mezzo SOLO premendo «Usa questo
+   importo», che ormai non preme più nessuno. Adesso si propone da sola e lo
+   scrive (`nolCauzioneProposta` / `nolCauzioneMessa`), e l'avviso **resta**
+   finché in casella c'è il numero proposto — al primo tentativo spariva al
+   ricalcolo, ed era come non averlo mai scritto.
+2. **Date all'americana nel Cestino**: «Uscita 2026-08-08» mentre due righe
+   sopra c'era «buttato il 28/08/2026». `nolRighe()` usava `e()` invece di
+   `fdate()` per le tre date del noleggio.
+3. **Testata tagliata sul telefono**: a 390 px «⚙ Dati azienda» finiva a 408 e
+   «+ Nuovo noleggio» a 438, senza modo di raggiungerli (la testata non scorre
+   come le linguette). Media query a 560 px: la testata va a capo.
+
+Commit: `329a32d` e `5e06752`. Banco: **279 prove verdi**
+(`prove-claude/banco-noleggio-28ago-sera.zip`).
+
+⚠️ Il banco `noleggio-scritte` aveva un percorso incastrato `/root/lavoro/sito`
+e non partiva da solo: adesso legge `SITO` come gli altri cinque.
+
+## LE FINESTRE A TUTTA PAGINA — fatto, ma NON finito
+
+Alessio, durante il test del negozio, aprendo un prodotto:
+«perché queste cazzo di pagine si aprono così? le voglio a pagina piena, su
+OGNI pagina che si apre dal gestionale».
+
+**La radice era una riga sola in `css/gestionale.css`:** le finestre erano
+divise in due — `.sheet--grande.sh-lunga` a tutto schermo, e
+`.sheet--grande:not(.sh-lunga)` **finestrella centrata da 880 px**. Tolta la
+differenza: adesso tutte a tutta pagina. Aggiunta anche la compensazione dei
+46 px della barra FONDATORE per **tutte** le `.sheet--grande`, non solo le
+`.sh-lunga` (con 100vh sforavano sotto il bordo, e sotto ci va il piede col
+Salva).
+
+Controllati tutti e tre dopo aver toccato il foglio comune:
+negozio **399/399** · imprese **198/198** · noleggio **279/279**.
+
+⚠️ Le 2 rosse delle imprese erano del banco, non del codice: cercava
+`8.000 €` mentre dal 28 agosto si scrive `8.000,00 €` coi centesimi. Banco
+aggiornato.
+
+## ⛔ QUELLO CHE MANCA E CHE FA SCHIFO ADESSO
+
+Alessio, guardando la scheda a tutta pagina: **«fa schifo», «a chi presento un
+sito così»**. Ha ragione, ed è colpa della correzione di sopra: allargando la
+finestra non è stato allargato niente di quello che ci sta dentro.
+
+Misurate le due schede una accanto all'altra:
+
+| | Imprese (`gestionale-app.html`) | Negozio |
+|---|---|---|
+| Classe finestra | `sheet--grande` **`sh-lunga`** | `sheet--grande` |
+| Blocchi `.sh-b` | **4** | **0** |
+| Colonne `.sh-cols` | **1** | **0** |
+
+**Il negozio non impagina niente:** righe nude una sotto l'altra su tutta la
+larghezza, due terzi di pagina bianchi. Le imprese raccolgono i dati in 4
+riquadri dentro colonne.
+
+**Il CSS c'è già** nel foglio comune (`.sh-lunga`, `.sh-cols`, `.sh-b`,
+`.sh-tit`): non c'è da inventare, c'è da usarlo. Vanno rifatte tutte le schede
+del negozio: prodotto, cliente, fornitore, movimento, preventivo, fattura.
+
+Prompt pronto: `prove-claude/PROMPT-schede-negozio-29ago.md`.
+
+## ⛔ LEZIONI DI QUESTA SESSIONE — leggerle prima di ricominciare
+
+1. **Prima si consegna il file, poi si controlla.** Stasera sono girati 3
+   banchi interi (876 prove, ~15 minuti) prima di dare ad Alessio una modifica
+   di **una riga**. Lui è stato 50 minuti a guardare lo schermo. Si fa al
+   contrario: file nella cartella + blocco git subito, banchi mentre lui prova.
+2. **Un banco solo**, quello della pagina toccata. Gli altri dopo.
+3. **Se ci vuole più di 10 minuti, dirlo PRIMA** e mandare la notifica push
+   quando è pronto: la sessione gira nel cloud, Alessio può chiudere e uscire.
+   Lui non lo sapeva.
+4. **Le skill vanno APERTE, non guardate nell'elenco.** `grafica-uguale` e
+   `stessa-forma` esistono esattamente per il problema di stasera e non sono
+   state aperte finché Alessio non ha chiesto «a che cazzo servono le skill».
+   Quando è stata aperta, in un minuto ha detto cosa guardare e dove.
+   `recupera-lavoro` invece ha funzionato: ha ritrovato il filo in un minuto.
+5. **Guardare a cosa sta lavorando lui adesso, non il foglio che ha incollato.**
+   I prompt preparati prima invecchiano in poche ore.
+6. Alessio si era alzato alle 04:27 e alle 22:00 era ancora lì. Una giornata di
+   18 ore. Quando è a quel punto, servono risposte da tre righe, non tabelle.
+
+## Cosa resta aperto (aggiornato)
+
+1. **L'impaginazione delle schede del negozio** — la cosa più urgente: adesso
+   si vede peggio di prima.
+2. **Il test vero del negozio** — Alessio era al passo 3 dei 32.
+3. **Fatture del negozio: la decisione**, non un lavoro (invariato).
+4. Il movimento «Venduto italcemento» senza data — dato suo.
+5. `.gitignore` modificato, `prompt-nuova-sessione.md` e `tools/backup.js` non
+   tracciati.
+6. Le scritte piccole di `admin.html` — 87 sotto i 13 px, non prioritario.
+7. Le due decisioni ferme: il nodo dei 49 € e quanto vale un credito chat.
+
+⛔ **La priorità dichiarata da Alessio resta una sola:**
+**finire il gestionale e aprirlo agli iscritti.**
+
+---
+
+# 29 AGOSTO 2026 — LA GIORNATA DELLA PULIZIA: SEO, VETRINE VUOTE, DOPPIONI, CURRICULUM
+
+Partita da uno screenshot della Search Console («una pagina ha ricevuto il 97% di
+impressioni in meno»). Finita con 140 file toccati e quattro buchi chiusi.
+Nessuno dei quattro era quello che sembrava all'inizio.
+
+## 1. Il «crollo del 97%» non era un crollo
+
+`quanto-costa-rifare-impianto-idraulico` segnava −97% di impressioni,
+`...impianto-elettrico` +3014%. La pagina era sana: online, canonical giusto,
+3.500 parole, tabelle, FAQ, calcolatore.
+
+**Era il rientro dopo un picco.** Il grafico dei 3 mesi mostra un massimo
+intorno all'11/08 (quasi 1.200 impressioni in un giorno) e poi il ritorno alla
+normalità dopo il 20/08. Su numeri piccoli le percentuali mentono: da 300 a 10
+è un −97%.
+
+**I numeri veri di quel periodo (3 mesi):** 179 clic · 11,5K impressioni ·
+CTR 1,5% · **posizione media 14,3** — cioè metà della seconda pagina di Google.
+Davanti ci sono ProntoPro, Edilnet, Cronoshare, Homedeal, Bricoworld.
+
+⛔ **Regola:** prima di rincorrere una percentuale della Search Console,
+guardare i valori assoluti e la posizione media. Con questi numeri, una
+variazione del 3000% può essere tre clic.
+
+## 2. Lo schema c'era già, ma era quello sbagliato
+
+Tutte le 22 guide avevano un blocco JSON-LD di tipo **`FAQPage`**. Il Test dei
+risultati avanzati diceva «Nessun elemento rilevato», e aveva ragione:
+**dal 2023 Google non mostra più i risultati FAQ** tranne che a siti
+governativi e sanitari. Avere solo FAQPage = avere niente.
+
+**Aggiunto a tutte e 22** (dentro `<head>`, il FAQPage esistente lasciato dov'era):
+`Article` + `BreadcrumbList`. Il Breadcrumb è quello che si vede davvero: nei
+risultati compare «trovaimpresa.com › Costi › Quanto costa rifare il bagno»
+al posto dell'indirizzo nudo.
+
+⚠️ **Le date vogliono l'ora e il fuso orario.** Con `"datePublished": "2026-08-01"`
+il test dà 4 avvisi non critici («valore datetime non valido», «manca un fuso
+orario»). La forma giusta è `"2026-08-01T09:00:00+02:00"`. Corrette 42 date.
+
+⚠️ **Il Test dei risultati avanzati non si ricarica: si rifà.** Riaprire la
+pagina del test mostra la fotografia vecchia. Guardare sempre l'orario di
+«Ultima scansione» e il codice nell'indirizzo: se non cambiano, è la prova
+di prima.
+
+## 3. Le pagine città non linkavano nessuna guida
+
+Le guide mandavano già alle città (12 città + «tutte le 106» in fondo a ogni
+guida). **Il contrario no: zero link dalle 106 pagine città alle 22 guide.**
+
+Aggiunta a tutte e 106 una sezione `<div class="section" id="costi-lavori">`
+«Quanto costano i lavori a X» con 8 guide in griglia + «Vedi tutte le guide».
+Classi riusate dalla pagina stessa (`section`, `categorie`, `cat-card`,
+`cat-icon`, `cat-name`): nessun colore e nessuna misura nuovi.
+
+⛔ **SCARTATA l'idea delle 2.300 pagine guida×città.** Sarebbero pagine quasi
+identiche generate a macchina: è esattamente quello che Google chiama abuso di
+contenuti su larga scala, e da marzo 2024 declassa. Avrebbe fatto male anche
+alle 22 guide che funzionano.
+
+## 4. ⚠️ IL BUG DI ENNA — `genera-imprese-citta.js` cercava «che contiene»
+
+Il filtro era `citta.ilike.*Enna*`: e **«Rav-enna» contiene «Enna»**. Sulla
+pagina di Enna compariva Pagano Giuseppe, che sta a Ravenna.
+
+**Corretto in:** `citta.ilike."X"` (identica) + `provincia.ilike."X*"` (che
+inizia per). Così «Monza» prende ancora «Monza e della Brianza», ma «Enna» non
+prende più «Ravenna». Verificato sul database prima di scrivere il codice.
+
+**Cambiato anche l'ancoraggio:** lo script inseriva la sezione prima di
+`<div class="cta-box">`, che adesso è dopo il blocco guide. Ora si ancora a
+`id="costi-lavori"` se c'è. Ordine su tutte le pagine:
+**imprese della zona → guide prezzi → riquadro blu.**
+
+Trovata anche una scheda sparita dal database ancora mostrata su Torino (id 84).
+
+## 5. ⚠️ UN QUARTO DELLA VETRINA NON RISPONDEVA A NESSUNO
+
+**25 schede su 101 non avevano mai confermato l'email**, 21 da più di una
+settimana. Comparivano nelle ricerche, sulla mappa, nelle pagine città, e
+ricevevano le richieste dei clienti. Dietro non c'era nessuno raggiungibile.
+
+**Non è un problema di consegna delle mail:** chi conferma lo fa in media in
+25-100 secondi dall'iscrizione. Se finissero nello spam si vedrebbero ore o
+giorni. Sono abbandoni e indirizzi sbagliati.
+
+### Cosa è stato messo (database, già attivo, non serve push)
+- colonna `imprese.email_confermata` (boolean, default false)
+- riempita per il passato: 77 confermate, 25 no
+- **trigger `trg_segna_email_confermata` su `auth.users`**: quando qualcuno
+  clicca il link della mail, la sua scheda si segna da sola. Non serve
+  rilanciare niente, mai più.
+
+### Dove è stato messo il filtro (9 file)
+`cerca-imprese` · `cerca-artigiani` · `cerca-negozi` · `cerca-professionisti` ·
+`professionisti` · `mappa` · `genera-imprese-citta.js` ·
+`netlify/functions/richiesta-cliente.js` · `netlify/functions/invia-annuncio.js`
+e poi anche `profilo-impresa.html` (link diretto).
+
+⛔ **`admin.html` NON ha il filtro, di proposito**: Alessio deve continuare a
+vedere tutte le schede, comprese le non confermate.
+
+Le imprese visibili sono passate da 101 a 77. È un calo che fa impressione ma
+sono 24 vetrine vuote in meno. E chi conferma domani torna visibile da solo.
+
+## 6. I DOPPIONI: non era il sito che lasciava registrare due volte
+
+Con la **stessa** email il sito già blocca: Supabase restituisce
+`identities.length === 0` e la pagina porta al login. Quel pezzo funziona.
+
+**I due casi veri erano errori di battitura nella propria email:**
+- Welcome Clean (Varese, 26/08 22:38) → `...@gnail.com`, mai confermata, mai
+  un accesso. Alle 22:40 si riscrive con l'indirizzo giusto. Stesso telefono.
+- FAP GROUP (Siracusa, 28/08 12:06) → `fap**h**groupsrls@gmail.com`, dominio
+  giusto, una «h» di troppo nel nome. Alle 12:47 rifà tutto. Stessa P.IVA,
+  stesso telefono.
+
+### `js/controllo-doppioni.js` (nuovo, caricato dalle 4 pagine di registrazione)
+1. **Email scritta male**: confronta il dominio con quelli veri e misura quante
+   lettere di differenza ci sono (distanza di Levenshtein). `gnail`→`gmail` è 1.
+   Non è un elenco fisso: prende anche errori mai visti. Offre «Sì, correggi».
+2. **P.IVA o telefono già iscritti**: avvisa e offre login / recupero password.
+   Il telefono si confronta sulle **ultime 9 cifre** (nel database c'è sia
+   `+393349767316` sia `3925993632`).
+
+⛔ **NESSUNO DEI DUE BLOCCA, ed è una scelta.** Chi si è iscritto con l'email
+sbagliata non può entrare nel primo account: la conferma non gli è mai
+arrivata. Bloccarlo per «P.IVA già presente» lo chiuderebbe fuori per sempre.
+Un doppione si sistema, un cliente perso no.
+
+**Collaudo:** 15 prove sugli errori di battitura tutte verdi, e **0 falsi
+allarmi** sui 22 domini veri degli iscritti (compresi `aedificacostruzioni.eu`,
+`xmepowersolutions.it`, `parivedil.it`, `soluzionetapparelle.it`).
+
+⚠️ **Il campo Email della registrazione è al PASSO 3 (Contatti)**, non al
+passo 1. Alessio ha provato scrivendo l'email nel campo «Nome / Ragione
+sociale» e ovviamente non compariva niente.
+
+## 7. I CURRICULUM: la regola diceva «chi ha fatto l'accesso legge tutto»
+
+`candidati_lavoro` contiene nome, cognome, email, telefono, **età**, **sesso**,
+il file del **curriculum**. La regola `candidati_select_auth` era
+`SELECT ... USING (true)` per `authenticated`: **qualunque account** — anche un
+altro candidato, anche uno che si iscrive come artigiano in due minuti.
+
+**La tabella era vuota (0 candidati, 0 offerte, 0 candidature): non è uscito
+nessun dato di nessuno.** Sistemato prima che arrivi il primo curriculum.
+
+C'era già la cosa giusta a metà: la vista **`candidati_lavoro_pubblici`**
+(nome + iniziale del cognome, mestiere, città, età, esperienza, competenze —
+niente contatti), usata da `candidature-lavoro.html` per chi non è impresa.
+
+### Cosa è stato messo
+- tolta `candidati_select_auth`
+- funzione `public.candidato_si_e_candidato_da_me(bigint)` (security definer)
+- nuova regola `candidati_select_proprio_o_candidatura`:
+  **il candidato vede sé stesso; un'impresa vede la scheda completa SOLO di chi
+  si è candidato a una sua offerta.**
+- `candidature-lavoro.html`: l'elenco si sfoglia **sempre** in forma ridotta;
+  avviso e riquadro contatti riscritti per dire la verità nuova
+  («i contatti li ricevi quando si candida» + «Pubblica un'offerta»).
+
+**Conseguenza voluta:** per avere i contatti di chi cerca lavoro, un'impresa
+deve pubblicare un'offerta **sul sito**. È la regola di InfoJobs e Indeed, e
+tiene il valore dentro casa.
+
+**Collaudo:** 5 prove con tre identità simulate dentro il database
+(`set_config('request.jwt.claims', ...)` + `set_config('role','authenticated')`)
+in una transazione poi annullata. Tutte verdi, 0 righe di prova rimaste.
+
+⚠️ **Trappola nelle prove RLS:** le prime due prove davano rosso perché il
+fixture prendeva l'impresa da una query e l'utente da un'altra — due imprese
+diverse. **Prendere sempre id e user_id dalla STESSA riga**, o usare valori
+espliciti. Non era la regola a essere sbagliata, era la prova.
+
+## 8. DECISO DI NON FARE: la rubrica imprese scaricabile
+
+Con la chiave pubblica (che sta nel codice delle pagine, e deve starci)
+chiunque può chiedere l'elenco completo delle imprese con email e telefoni in
+una sola richiesta.
+
+**Non è una falla: quei contatti sono già pubblici.** `profilo-impresa.html`
+mostra telefono ed email a chiunque, senza accesso. Cambia solo la velocità:
+102 pagine una per una, oppure una richiesta sola.
+
+**E non si può chiudere senza cambiare il prodotto**: la pagina del profilo
+deve poter leggere quei contatti da anonimo. Chiuderla la rompe.
+
+**Deciso: si lascia così.** Con 77 imprese il problema è averne di più, non
+difendere la lista. Se ne riparla a mille imprese. L'alternativa sarebbe un
+pulsante «Mostra contatti» dietro registrazione gratuita: protegge la rubrica e
+raccoglie i clienti, ma aggiunge attrito.
+
+## Lo stato alla fine della giornata
+
+- 22 guide con `Article` + `BreadcrumbList`, date col fuso orario
+- 106 pagine città con il blocco guide prezzi
+- **43 pagine città su 106** con imprese vere (erano 34); 63 senza, perché lì
+  non c'è nessun iscritto
+- **75 schede mostrate**, controllate una per una: 0 inesistenti, 0 di prova,
+  0 senza email confermata
+- Roma 9 · Torino 6 · Napoli 4 · Sassari 4 · Milano 3 · Venezia 3 · Rieti 2
+- Enna senza sezione (giusto), Ravenna con la sua impresa
+- 140 file toccati, 0 errori
+
+## ⛔ COSA RESTA APERTO DOPO OGGI
+
+1. **63 città su 106 non hanno nemmeno un artigiano iscritto.** Pagine che si
+   aprono e non offrono niente. Questo non è un problema tecnico: è offerta.
+   Consiglio dato ad Alessio: **prendere artigiani in 2-3 città scelte bene**,
+   partendo dal Lazio dove può telefonare di persona. Meglio 3 città piene che
+   106 vuote.
+2. **I doppioni di Siracusa (FAP GROUP, id 157/158) e Varese (Welcome Clean,
+   id 151/152)**: Alessio deve chiedere ai clienti quale scheda tenere. Le
+   prime schede di entrambi sono NON confermate, quindi oggi sono già invisibili.
+3. La rubrica imprese scaricabile — decisione presa: si lascia (vedi punto 8).
+4. Tutto quello che restava aperto il 28 agosto (gestionale, impaginazione
+   schede negozio, i 49 €, il valore di un credito chat) è **invariato**.
+
+⛔ **La priorità dichiarata da Alessio resta:
+finire il gestionale e aprirlo agli iscritti.**
