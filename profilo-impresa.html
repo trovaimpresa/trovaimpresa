@@ -733,7 +733,13 @@ async function caricaProfilo(id){
     }
     let r,data;
     try{
-      r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK}});
+      /* 29 ago 2026 — anche col link diretto si aprono solo le schede vere e
+         confermate. Prima bastava conoscere l'indirizzo per vedere una scheda
+         di prova, o una di chi non ha mai confermato l'email: gente che non
+         risponde a nessuno. Se la scheda non passa il filtro la risposta e'
+         vuota, e sotto la pagina mostra gia' "non e' piu' disponibile" con il
+         noindex per Google. */
+      r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&is_test=eq.false&email_confermata=eq.true&select=*&limit=1`,{headers:{'apikey':SK}});
       if(!r.ok)throw new Error(r.status);
       data=await r.json();
     }catch(e){
