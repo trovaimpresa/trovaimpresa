@@ -1805,6 +1805,21 @@
     const pdf=fatturaPdfCache[l.id];
     const quando=l.data_fatto||l.data_prevista;
     const fs=l.fatt_stato||"none";
+    /* ⛔ 29 agosto 2026 — se la fattura ha le righe, qui si vedono: senza,
+       la scheda diceva solo un importo e non si capiva da cosa venisse. */
+    let righeHtml="";
+    {
+      const {data:rr}=await sb.from("neg_fattura_righe")
+        .select("descrizione,unita,qta,prezzo,sconto_perc,ordine")
+        .eq("lavoro_id",l.id).eq("user_id",sbUid).order("ordine");
+      if(rr&&rr.length){
+        righeHtml='<div class="sh-b"><div class="sh-tit">Le righe</div>'
+          + rr.map(r=>_rigaHtml(esc(r.descrizione||"—"),
+              _numTesto(r.qta)+" "+esc(r.unita||"pz")+" × "+pvEur(r.prezzo)
+              +(+r.sconto_perc?' <span style="color:#c62828">− '+_numTesto(r.sconto_perc)+"%</span>":""))).join("")
+          + "</div>";
+      }
+    }
     openSheetGrande(`<h3>${esc(l.descrizione||"Lavoro")}</h3>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
         <span class="stato" style="background:${st[1][0]};color:${st[1][1]}">${st[0]}</span>
@@ -1822,6 +1837,7 @@
           ${_rigaDato("Fattura PDF",pdf?"allegata":"nessun PDF allegato")}
         </div>
       </div></div>
+      ${righeHtml?`<div class="sh-cols"><div class="sh-col">${righeHtml}</div></div>`:""}
       <div class="sheet-actions">
         <button class="btn" data-action="close">Chiudi</button>
         <button class="btn" data-action="pdf" data-id="${l.id}">PDF di cortesia</button>
@@ -2136,7 +2152,49 @@
       /* ⛔ 29 agosto 2026 — anche questa passa dalla finestra grande:
          testata col titolo e «Indietro», corpo che scorre, pulsanti nel
          piede. Prima usciva nuda, senza testata, coi pulsanti in mezzo. */
-      openSheetGrande(`<h3>${fattura?"Nuova fattura":"Nuovo lavoro"}</h3>
+      /* ⛔ 29 agosto 2026 - LA FATTURA DEL NEGOZIO E' UNA FATTURA, NON UN
+         LAVORO. Prima si apriva il modulo dei cantieri: chiedeva «Cosa c'e' da
+         fare», «Dove» e «Operaio» — caselle che a chi vende sacchi al banco non
+         dicono niente. Adesso la fattura ha le sue righe di merce, prese dal
+         magazzino come nel preventivo, con sconto e IVA. Chi vuole fare presto
+         scrive solo l'importo, come prima: le righe sono in piu', non al posto. */
+      if(fattura){
+        openSheetGrande(`<h3>Nuova fattura</h3>
+          <div class="sh-cols"><div class="sh-col">
+            <div class="sh-b">
+              <div class="sh-tit">A chi e quando</div>
+              <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
+              <div class="field"><label>Data della fattura</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}" style="max-width:240px"></div>
+              <div class="field"><label>Cosa hai venduto *</label><textarea id="j-desc" placeholder="Es. Fornitura materiale per villetta via Roma">${esc(job.descrizione||"")}</textarea></div>
+            </div>
+            <div class="sh-b">
+              <div class="sh-tit">Sconto, IVA e totale</div>
+              <div class="row2">
+                <div class="field"><label>Sconto sul totale</label>
+                  <input id="ft-sconto" type="text" inputmode="decimal" value="0" data-num></div>
+                <div class="field"><label>IVA</label>
+                  <select id="ft-iva"><option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option></select></div>
+              </div>
+              <div id="ft-totali" class="pv-totali"></div>
+              <div class="field"><label>Oppure scrivi tu l'importo, senza righe</label>
+                <input type="text" id="j-imp" inputmode="decimal" data-eu value="${_numTesto(job.importo)}" placeholder="0" style="max-width:240px"></div>
+            </div>
+          </div><div class="sh-col">
+            <div class="sh-b">
+              <div class="sh-tit">Cosa gli hai venduto</div>
+              <div class="pv-scegli">
+                <select id="ft-prod"><option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option></select>
+                <button type="button" class="btn" id="ft-add-libera">+ Riga libera</button>
+              </div>
+              <div id="ft-righe"></div>
+            </div>
+          </div></div>
+          <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
+            <button class="btn-primary" data-action="save-job">Crea fattura</button></div>`);
+        ftRighe=[]; ftRenderRighe(); ftCaricaProdotti();
+        fillClienti(job.cliente_id); return;
+      }
+      openSheetGrande(`<h3>Nuovo lavoro</h3>
         <div class="sh-cols"><div class="sh-col">
           <div class="sh-b">
             <div class="sh-tit">Il lavoro</div>
@@ -2153,7 +2211,7 @@
           </div>
         </div></div>
         <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
-          <button class="btn-primary" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
+          <button class="btn-primary" data-action="save-job">Crea lavoro</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
     }
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
@@ -2210,15 +2268,35 @@
     if(editing&&editing.supa){
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
-      if(!descrizione||!data_prevista){toast("Compila Descrizione e Data");return;}
-      const importo=_numIt("#j-imp")||0;
-      if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
+      if(!descrizione||!data_prevista){toast(editing.fattura?"Compila «Cosa hai venduto» e la data":"Compila Descrizione e Data");return;}
+      /* ⛔ 29 agosto 2026 — nella fattura il totale lo fanno le righe, se ci
+         sono; se non ce ne sono vale l'importo scritto a mano, come prima. */
+      const righeFatt = editing.fattura ? ftLeggiRighe() : [];
+      const conto = righeFatt.length
+        ? pvCalcola(righeFatt, _numIt("#ft-sconto")||0, ($("#ft-iva")?$("#ft-iva").value:22))
+        : null;
+      const importo = conto ? conto.totale : (_numIt("#j-imp")||0);
+      if(editing.fattura&&!(importo>0)){toast("Metti le righe oppure scrivi l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
-      if(editing.fattura)obj.fatt_stato="emessa";
-      const {error}=await sb.from("gest_lavori").insert(obj);
+        descrizione,dove:($("#j-dove")?$("#j-dove").value.trim():""),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
+      if(editing.fattura){
+        obj.fatt_stato="emessa";
+        obj.fatt_data=data_prevista;
+        if(conto){ obj.fatt_iva_perc=+($("#ft-iva")?$("#ft-iva").value:22)||0;
+                   obj.fatt_sconto_perc=_numIt("#ft-sconto")||0; }
+      }
+      const {data:nato,error}=await sb.from("gest_lavori").insert(obj).select("id").maybeSingle();
       if(error){toast("Errore: "+error.message);return;}
+      if(righeFatt.length&&nato&&nato.id){
+        const {error:e2}=await sb.from("neg_fattura_righe").insert(
+          righeFatt.map(r=>({user_id:sbUid,lavoro_id:nato.id,prodotto_id:r.prodotto_id||null,
+            descrizione:r.descrizione,unita:r.unita,qta:r.qta,prezzo:r.prezzo,
+            sconto_perc:r.sconto_perc,ordine:r.ordine})));
+        /* la fattura e' gia' salvata: se le righe non passano si dice, non si
+           butta via tutto e non si fa finta di niente */
+        if(e2){toast("Fattura salvata, ma le righe no: "+e2.message);}
+      }
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un cliente");return;}
@@ -3221,6 +3299,90 @@
       + '<div style="border-top:2px solid #0066ff;margin:6px 0"></div>'
       + `<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale</strong></span><strong>${pvEur(c.totale)}</strong></div>`;
   }
+  /* ===================================================================
+     LE RIGHE DELLA FATTURA — 29 agosto 2026
+     Stesse righe del preventivo (stesse classi, stesso conto: pvCalcola e
+     pvRigaHtml si riusano tali e quali, come dice la regola «se una cosa
+     c'e' gia', si usa quella»). Cambia solo dove stanno: #ft-righe.
+     =================================================================== */
+  let ftRighe=[], ftProdCache=[];
+  function ftRenderRighe(){
+    const box=$("#ft-righe"); if(!box)return;
+    box.innerHTML = ftRighe.length
+      ? `<div style="display:grid;grid-template-columns:2fr 80px 70px 90px 70px 34px;gap:6px;font-size:13px;font-weight:700;color:#8a949e;margin-bottom:4px">
+           <span>Descrizione</span><span>Q.tà</span><span>U.m.</span><span>Prezzo</span><span>Sconto</span><span></span></div>`
+        + ftRighe.map(pvRigaHtml).join("")
+      : '<p style="color:#8a949e;font-size:14px;margin:4px 0 10px">Nessuna riga. Prendi un prodotto dal magazzino, aggiungi una riga libera, oppure scrivi solo l\'importo qui accanto.</p>';
+    _sistemaNumeri(box);
+    ftTotali();
+  }
+  function ftLeggiRighe(){
+    const out=[];
+    $$("#ft-righe .pv-riga").forEach((d,i)=>{
+      const desc=d.querySelector(".pv-desc").value.trim();
+      if(!desc)return;
+      out.push({descrizione:desc,
+        qta:_numRiga(d,".pv-qta",0),
+        unita:d.querySelector(".pv-um").value.trim()||"pz",
+        prezzo:_numRiga(d,".pv-prezzo",0),
+        sconto_perc:_numRiga(d,".pv-sc",0),
+        prodotto_id:ftRighe[i]?ftRighe[i].prodotto_id:null,
+        ordine:i});
+    });
+    return out;
+  }
+  function ftTotali(){
+    const box=$("#ft-totali"); if(!box)return;
+    const righe=ftLeggiRighe();
+    if(!righe.length){ box.innerHTML='<p style="color:#8a949e;font-size:14px;margin:2px 0 0">Il totale si fa da solo appena metti una riga.</p>'; return; }
+    const c=pvCalcola(righe, _numIt("#ft-sconto")||0, $("#ft-iva")?$("#ft-iva").value:22);
+    const riga=(et,v,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${pvEur(v)}</strong></div>`;
+    box.innerHTML = riga("Totale merce",c.lordo)
+      + (c.scontoRighe?riga("Sconti sulle righe",c.scontoRighe,true):"")
+      + (c.scontoGen?riga("Sconto sul totale",c.scontoGen,true):"")
+      + riga("Imponibile",c.netto)
+      + (c.iva?riga("IVA",c.iva):"")
+      + '<div style="border-top:2px solid #0066ff;margin:6px 0"></div>'
+      + `<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale</strong></span><strong>${pvEur(c.totale)}</strong></div>`;
+  }
+  async function ftCaricaProdotti(){
+    if(!(sb&&sbUid))return;
+    const {data}=await sb.from("neg_prodotti").select("*").eq("user_id",sbUid).is("eliminato_il",null).order("nome");
+    ftProdCache=data||[];
+    const sel=$("#ft-prod"); if(!sel)return;
+    sel.innerHTML='<option value="">&mdash; prendi un prodotto dal magazzino &mdash;</option>'+
+      ftProdCache.map(p=>`<option value="${p.id}">${esc(p.nome||"—")} — ${pvEur(+p.prezzo||0)}${p.unita?"/"+esc(p.unita):""}</option>`).join("");
+  }
+  /* i tre comandi delle righe: prendi dal magazzino, riga libera, togli riga */
+  document.addEventListener("change",e=>{
+    if(e.target&&e.target.id==="ft-prod"){
+      const p=ftProdCache.find(x=>String(x.id)===String(e.target.value));
+      if(p){ ftRighe=ftLeggiRighe();
+             ftRighe.push({descrizione:p.nome||"",unita:p.unita||"pz",qta:1,prezzo:+p.prezzo||0,sconto_perc:0,prodotto_id:p.id});
+             ftRenderRighe(); }
+      e.target.value="";
+    }
+    if(e.target&&e.target.id==="ft-iva") ftTotali();
+  });
+  document.addEventListener("click",e=>{
+    const t=e.target;
+    if(t&&t.id==="ft-add-libera"){
+      ftRighe=ftLeggiRighe();
+      ftRighe.push({descrizione:"",unita:"pz",qta:1,prezzo:0,sconto_perc:0,prodotto_id:null});
+      ftRenderRighe();
+      const u=$$("#ft-righe .pv-desc"); if(u.length)u[u.length-1].focus();
+      return;
+    }
+    if(t&&t.classList&&t.classList.contains("pv-del")&&t.closest("#ft-righe")){
+      const d=t.closest(".pv-riga"); const i=+d.dataset.i;
+      ftRighe=ftLeggiRighe().filter((_,k)=>k!==i);
+      ftRenderRighe();
+    }
+  });
+  document.addEventListener("input",e=>{
+    if(e.target&&(e.target.closest("#ft-righe")||e.target.id==="ft-sconto")) ftTotali();
+  });
+
   async function pvCaricaProdotti(){
     if(!(sb&&sbUid))return;
     const {data}=await sb.from("neg_prodotti").select("*").eq("user_id",sbUid).order("nome");
