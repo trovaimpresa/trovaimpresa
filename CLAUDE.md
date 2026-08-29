@@ -17846,3 +17846,111 @@ hanno trovato né il nome del cliente né la data sbagliata: li ha trovati la
 chat vera, con i dati veri, in →2← messaggi. Il banco protegge quello che
 qualcuno ha già capito; **quello che nessuno ha ancora capito lo trova solo la
 prova dal vivo.**
+
+# 29 AGOSTO 2026 (notte fonda) — L'ARROTONDAMENTO DEL BROWSER, E LA RETE CHE NON C'ERA PIÙ
+
+Il browser contava i centesimi **in virgola mobile**. `2280,805 × 100` lì fa
+`228080,49999999997`: mezzo centesimo esatto viene letto come «poco meno di
+mezzo», l'arrotondamento va **in giù**, e si perde un centesimo. Il database
+conta esatto e arrotonda **in su**, che è la regola giusta.
+
+⛔ **Non era il database a sbagliare: era il browser.** Il browser è stato
+portato a contare come il database, mai il contrario.
+
+| | prima | adesso |
+|---|---|---|
+| numeri diversi su →200.000← parcelle | **→252←** (uno ogni →794←) | **→0←** |
+| scarto massimo | →2← centesimi | →0← |
+| sui →5← preventivi veri | →0← | →0← (invariati) |
+
+**Deciso da Alessio prima di cominciare:** il conto nuovo vale **solo da adesso
+in poi**. I documenti già salvati non si ricalcolano, e le fatture già mandate
+allo SDI si portano dietro i loro numeri.
+
+---
+
+## ⛔ LA COSA PIÙ GROSSA TROVATA: `prove/banco_conti.js` NON ESISTEVA PIÙ
+
+Nel commento di `calcolaParcella` c'era scritto dal →16← agosto:
+
+> «⚠️ Se un giorno si tocca fattBasi, va toccata anche questa: c'è la prova
+> `prove/banco_conti.js` che le confronta su 200.000 parcelle.»
+
+**Quel file non c'era.** Cercato in tutta la cartella e dentro **tutti** gli
+zip di `prove-claude/`: sparito. Quindi da giorni **nessuno teneva allineati il
+preventivo e la fattura**, e il commento prometteva una rete che sotto non
+c'era.
+
+È la **lezione →2←** di questa giornata, di nuovo: *un lavoro «finito» che non
+fa più niente è peggio di un lavoro non fatto, perché occupa il posto.* Qui in
+più il commento faceva da bugia: chi toccava `fattBasi` credeva di essere
+coperto.
+
+**La rete è stata rifatta**, ed è la famiglia **E** del banco nuovo. Sul codice
+di prima era **verde** (i due erano allineati), quindi il lavoro è entrato senza
+scollare niente.
+
+---
+
+## Com'è fatto — un file nuovo e nessuna formula ricopiata
+
+| pezzo | dove |
+|---|---|
+| i centesimi esatti: `_cent2()` (mezzo in su) e `_centGiu()` (per difetto) | **`js/centesimi.js`** — nuovo |
+| il preventivo | `impRiga`, `calcolaParcella` e i →6← posti che sommano l'IVA, in `gestionale-app.html` |
+| la fattura | `c2`, `_giu2`, gli importi di riga e `xnum` (il file per lo SDI), in `js/gest-fatture.js` |
+
+⚠️ **Come fa `_cent2` a contare esatto.** Non indovina e **non guarda i bit**:
+guarda le **cifre** che il numero ha davvero, cioè `String(n)` — che in
+JavaScript è la scrittura decimale più corta che rimappa sullo stesso numero, e
+per quel numero è esattamente `2280.805`, le cifre che l'utente ha scritto e che
+il database vede. Da lì in poi si lavora con **numeri interi (BigInt)**, dove la
+virgola mobile non c'è e nessun errore è possibile.
+
+⚠️ **Sparisce anche il trucco dell'`1e-9`** che serviva a `_giu2`: non serve più
+nessun margine, perché non si moltiplica più per cento in virgola mobile.
+
+⛔ **La formula sta in un posto solo** (regola →6← del gestionale). Il foglio si
+carica **prima** di `gest-fatture.js`, e quell'ordine è una prova del banco, non
+una speranza.
+
+---
+
+## ⛔ IL SABOTAGGIO CHE MANCAVA: il conto giusto in un file che la pagina non carica
+
+Il primo banco era **cieco** sul difetto più stupido e più probabile di tutti:
+`js/centesimi.js` scritto bene, e il tag `<script>` dimenticato. Il banco fa
+`require` del file per conto suo, e non se ne sarebbe accorto **mai**.
+
+Da lì è nata la famiglia **G**: la pagina carica davvero il foglio, e lo carica
+**prima** di chi lo usa. Sono →4← prove e valgono più di venti altre.
+
+---
+
+## I banchi
+
+`prove-claude/banco-conti-29ago.zip` — **→29← verdi · →0← rosse ·
+→8← sabotaggi visti su →8←.**
+
+* `prove/conti/banco.js` — famiglie **A** (il caso vero) · **B** (browser contro
+  conto esatto, →200.000← parcelle) · **E** (⛔ preventivo contro fattura, la
+  rete rifatta) · **C** (i →5← preventivi veri) · **D** (le regole strane) ·
+  **F** (i centesimi da soli) · **G** (⛔ il foglio è attaccato alla pagina).
+* `prove/conti/sabotaggi.js` — →8← rotture apposta, tutte viste.
+* `prove/conti/prova-pagina.js` — la pagina vera aperta in Chromium.
+
+⚠️ Il banco è stato fatto girare **anche sulla versione di prima**: →5← rosse.
+Se fosse restato verde su tutte e due non misurerebbe niente.
+⚠️ Ha girato anche il banco vecchio del gestionale imprese
+(`banco-imprese-centesimi-28ago.zip`): **→198← verdi · →0← rosse**, fatture e
+file per lo SDI compresi.
+
+---
+
+## Cose viste e lasciate lì apposta
+
+* **Il negozio, il noleggio e l'app dell'operaio** contano anche loro dei soldi
+  con `Math.round(x*100)/100`. Sono documenti diversi e non erano in questo
+  lavoro: se un giorno si toccano, il foglio da usare è `js/centesimi.js`.
+* Le percentuali, le ore e i crediti formativi **non** sono stati toccati: non
+  sono soldi.

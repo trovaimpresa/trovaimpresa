@@ -544,6 +544,7 @@
         carattere. La prova sta in prove/banco-identico.js — rimette i
         pezzi al loro posto e confronta col file di prima, byte per byte.
      ============================================================ -->
+<script src="/js/centesimi.js"></script>
 <script src="/js/gest-fatture.js"></script>
 <script src="/js/gest-computo.js"></script>
 <script src="/js/gest-sal-prezzario.js"></script>
@@ -4165,8 +4166,8 @@
       if(ruoloUtente==='professionista'){
         totPrev[p.id]=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait).totale;
       }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        const iva=Math.round(base*(+p.iva_perc||0))/100;
-        totPrev[p.id]=Math.round((base+iva)*100)/100;
+        const iva=_cent2(base*(+p.iva_perc||0)/100);
+        totPrev[p.id]=_cent2(base+iva);
       }
     });
 
@@ -11520,8 +11521,8 @@ ${vecchi?`
         const c=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
         totCli[p.id]=c.totale;
       }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        const iva=Math.round(base*(+p.iva_perc||0))/100;
-        totCli[p.id]=Math.round((base+iva)*100)/100;
+        const iva=_cent2(base*(+p.iva_perc||0)/100);
+        totCli[p.id]=_cent2(base+iva);
       }else{
         totCli[p.id]=base;   /* aliquota non indicata: resta com'era */
       }
@@ -11783,7 +11784,7 @@ ${vecchi?`
      ⚠️ `qta` vuota vale 1 (una voce «a corpo» non ha una quantita'), e il
      prezzo vuoto vale 0: erano gia' cosi', non si cambia. */
   function impRiga(qta,prezzo){
-    return Math.round(((+qta||1)*(+prezzo||0))*100)/100;
+    return _cent2((+qta||1)*(+prezzo||0));
   }
 
   function prevTotaleLive(){
@@ -11824,7 +11825,7 @@ ${vecchi?`
        sotto e' lo STESSO di `fattBasi`, riga per riga.
        ⚠️ Se un giorno si tocca fattBasi, va toccata anche questa: c'e' la
        prova `prove/banco_conti.js` che le confronta su 200.000 parcelle. */
-    const r2=n=>Math.round(n*100)/100;
+    const r2=n=>_cent2(n);
     const cassa      = r2(compenso*cassaPerc/100);
     /* ===== 13 agosto 2026 — ANCHE QUI LE SPESE ESCONO DALL'IVA =====
        La casella del preventivo dice "Spese (bolli, diritti, copie)": sono le
@@ -12015,7 +12016,7 @@ ${vecchi?`
       const q=D.valoreQ(p.cod,cod,V);
       if(q===null||q===undefined)return;
       if(!perFase[p.fase]){perFase[p.fase]=[];fasi.push(p.fase);}
-      perFase[p.fase].push({p:p,q:q,imp:Math.round(V*c.G*q*P*100)/100});
+      perFase[p.fase].push({p:p,q:q,imp:_cent2(V*c.G*q*P)});
     });
     box.innerHTML=fasi.map(function(f){
       const voci=perFase[f], aperta=voci.some(function(x){return scelte[x.p.cod];});
@@ -12042,7 +12043,7 @@ ${vecchi?`
     $$("#dp-prest input[type=checkbox]").forEach(function(x){
       if(x.checked){ tot+=(+x.getAttribute("data-imp")||0); n++; }
     });
-    tot=Math.round(tot*100)/100;
+    tot=_cent2(tot);
     const V=_numIt("#dp-v")||0, maxFraz=D.speseMaxPerc(V);
     const spunta=$("#dp-spese"), campo=$("#dp-spese-perc"), nota=$("#dp-spese-nota");
     let spese=0, avviso="";
@@ -12058,12 +12059,13 @@ ${vecchi?`
           avviso=" Il massimo qui è "+_numTesto(maxPerc)+"%: l'ho riportata lì."; }
         if(perc<0)perc=0;
         /* ⚠️ si arrotonda al centesimo NELLA STESSA MANIERA del resto del
-           gestionale (Math.round(x*100)/100, come impRiga e calcolaParcella).
-           Su 4.270,98 al 25% il conto esatto fa 1.067,745: qui esce 1.067,74,
-           e la fattura che nascera' da questa parcella dira' lo stesso numero.
+           gestionale (_cent2, in js/centesimi.js, come impRiga e calcolaParcella).
+           Su 4.270,98 al 25% il conto esatto fa 1.067,745: dal 29 agosto 2026
+           qui esce 1.067,75 come sul database, e la fattura che nascera' da
+           questa parcella dira' lo stesso numero.
            Se un giorno si cambia il modo di arrotondare, si cambia LI', non
            qui: due arrotondamenti diversi sono due totali diversi. */
-        spese=Math.round((tot*perc/100)*100)/100;
+        spese=_cent2(tot*perc/100);
       }
       if(nota)nota.innerHTML="Non oltre il <b>"+_numTesto(maxPerc)+"%</b>."+(avviso?" ⚠️"+esc(avviso):"");
     }else if(nota)nota.innerHTML="Scrivi prima l'importo dei lavori.";
@@ -12221,8 +12223,8 @@ ${vecchi?`
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
        1.100,05. Il cliente che rifa' la somma a mano trova l'errore. */
     const perc=+sel.value||0;
-    const iva=Math.round(imponibile*perc)/100;
-    const tot=Math.round((imponibile+iva)*100)/100;
+    const iva=_cent2(imponibile*perc/100);
+    const tot=_cent2(imponibile+iva);
     const riga=(et,v)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+eur2(v)+'</strong></div>';
     box.innerHTML = riga("Imponibile",imponibile)
       + riga("IVA "+_pct(perc)+"%",iva)
@@ -12728,11 +12730,11 @@ ${vecchi?`
       /* 9 agosto 2026 — impresa con l'aliquota indicata: il cliente vede il
          totale FINITO, non solo l'imponibile. È la cifra che gli interessa. */
       const perc=+p.iva_perc||0;
-      const ivaVal=Math.round(tot*perc)/100;
+      const ivaVal=_cent2(tot*perc/100);
       /* stessa regola del riquadro nel gestionale e della conferma d'ordine:
          si somma l'IVA già arrotondata, se no i tre documenti dello stesso
          lavoro escono con totali diversi di un centesimo */
-      const finito=Math.round((tot+ivaVal)*100)/100;
+      const finito=_cent2(tot+ivaVal);
       const hBox=perc?30:18;
       if(y+hBox>272){doc.addPage();y=20;}
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
@@ -13226,8 +13228,8 @@ ${vecchi?`
     const righe=rr||[];
     let imponibile=0; righe.forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    const ivaVal=perc?Math.round(imponibile*perc)/100:0;
-    const totale=Math.round((imponibile+ivaVal)*100)/100;
+    const ivaVal=perc?_cent2(imponibile*perc/100):0;
+    const totale=_cent2(imponibile+ivaVal);
     const mem=ordLeggiMem();
 
     /* come nella lettera d'incarico: i titoli dei capitoli restano, senza il
@@ -13295,8 +13297,8 @@ ${vecchi?`
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let imponibile=0;(rr||[]).forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    const ivaVal=perc?Math.round(imponibile*perc)/100:0;
-    const totale=Math.round((imponibile+ivaVal)*100)/100;
+    const ivaVal=perc?_cent2(imponibile*perc/100):0;
+    const totale=_cent2(imponibile+ivaVal);
 
     const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};
     const dati={oggetto:V("or-ogg")||p.titolo||"Lavori", dove:V("or-dove"), opere:V("or-opere"),
@@ -15165,7 +15167,7 @@ ${vecchi?`
          errore invece che una nota di credito */
       add("Fatture",D.fatt.map(f=>({Numero:f.numero||"",Anno:f.anno||"",Data:f.data||"",
         Tipo:FATT_TIPO_LAB[f.tipo]||"Fattura",
-        Cliente:f.cli_nome||cN[f.cliente_id]||"",Stato:f.stato||"","Imponibile €":Math.round((impF[f.id]||0)*100)/100,
+        Cliente:f.cli_nome||cN[f.cliente_id]||"",Stato:f.stato||"","Imponibile €":_cent2(impF[f.id]||0),
         "Cassa %":+f.cassa_perc||0,"Spese €":+f.spese||0,"Ritenuta %":+f.ritenuta_perc||0,
         "Sconto €":+f.sconto||0,"Bollo €":+f.bollo||0,Note:f.note||""})));
     }

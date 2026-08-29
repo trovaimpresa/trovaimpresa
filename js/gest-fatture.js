@@ -166,7 +166,7 @@
      il totale: e' piu' chiaro da leggere e i numeri sono gli stessi. */
   function fattBasi(f,R,forf){
     if(forf===undefined)forf=fattForfettario();
-    const c2=n=>Math.round((+n||0)*100)/100;
+    const c2=n=>_cent2(n);
     /* arrotondamento al centesimo PER DIFETTO: serve dove un tetto non deve mai
        superare il valore vero (lo sconto di una riga).
        Quell'1e-9 non e' un vezzo: in virgola mobile 0,29 x 100 fa
@@ -175,7 +175,7 @@
        azzerata dallo sconto si portava via un centesimo: totale 0,01 € invece
        di zero. Un miliardesimo e' mille volte piu' piccolo di un millesimo di
        centesimo: non puo' far salire un tetto sopra il valore vero. */
-    const _giu2=n=>Math.floor((+n||0)*100+1e-9)/100;
+    const _giu2=n=>_centGiu(n);
     const RR=R||[];
     let compenso=0;
     const linee=RR.map(function(r){
@@ -1428,7 +1428,7 @@
     R.forEach(r=>{
       /* arrotondato come in fattBasi: sul PDF e nel totale deve essere lo
          stesso numero, non due (22 agosto 2026) */
-      const imp=Math.round(((+r.qta||0)*(+r.prezzo||0))*100)/100;
+      const imp=_cent2((+r.qta||0)*(+r.prezzo||0));
       const al=forf?0:(+r.iva||0);
       const lines=doc.splitTextToSize(r.descrizione||"",colQ-M-8);
       const h=Math.max(lines.length*4.6+5, 9);
@@ -1584,7 +1584,7 @@
       .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
   }
   /* lo SDI vuole il punto come separatore dei decimali e due cifre esatte */
-  const xnum=n=>(Math.round((+n||0)*100)/100).toFixed(2);
+  const xnum=n=>_cent2(n).toFixed(2);
   /* Le QUANTITA' non sono soldi: la colonna e' numeric(12,3) (metri quadri,
      metri cubi, ore) e lo schema dello SDI ne accetta fino a otto decimali.
      Scritte con xnum, cioe' arrotondate a due, il controllo che lo SDI fa su
@@ -1884,7 +1884,7 @@
          rifa' il conto, se no le due copie prima o poi si scollano */
       /* la scialuppa, se le linee non ci fossero: arrotondata come tutto
          il resto (22 agosto 2026) */
-      const _impR=Math.round(((+r.qta||0)*(+r.prezzo||0))*100)/100;
+      const _impR=_cent2((+r.qta||0)*(+r.prezzo||0));
       const L=(c.linee&&c.linee[i])||{pieno:_impR,sconto:0,totale:_impR};
       x+='      <DettaglioLinee>\n';
       x+='        <NumeroLinea>'+(i+1)+'</NumeroLinea>\n';
