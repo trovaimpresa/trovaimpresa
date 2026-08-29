@@ -562,9 +562,9 @@
             <div class="sh-tit">Quante ne hai</div>
             <div class="row2">
               <div class="field"><label>Quantit&agrave;</label>
-                <input id="np-quantita" type="text" inputmode="decimal" placeholder="0"></div>
+                <input id="np-quantita" type="text" inputmode="decimal" placeholder="0" data-num></div>
               <div class="field"><label>Scorta minima</label>
-                <input id="np-soglia" type="text" inputmode="decimal" placeholder="0"></div>
+                <input id="np-soglia" type="text" inputmode="decimal" placeholder="0" data-num></div>
             </div>
             <p class="sh-nota">Sotto la scorta minima il prodotto si accende nel Magazzino e finisce in &laquo;Da sistemare oggi&raquo;.</p>
           </div>
@@ -572,9 +572,9 @@
             <div class="sh-tit">Quanto costa</div>
             <div class="row2">
               <div class="field"><label>Lo paghi</label>
-                <input id="np-acquisto" type="text" inputmode="decimal" placeholder="&euro;"></div>
+                <input id="np-acquisto" type="text" inputmode="decimal" placeholder="&euro;" data-eu></div>
               <div class="field"><label>Lo vendi al banco</label>
-                <input id="np-prezzo" type="text" inputmode="decimal" placeholder="&euro;"></div>
+                <input id="np-prezzo" type="text" inputmode="decimal" placeholder="&euro;" data-eu></div>
             </div>
             <div class="row2">
               <div class="field"><label>IVA</label>
@@ -588,7 +588,7 @@
                    Un ferramenta ha il prezzo del banco e il prezzo dell'impresa.
                    Vuoto = questo prodotto costa uguale a tutti. -->
               <div class="field"><label>Lo vendi all&rsquo;impresa</label>
-                <input id="np-impresa" type="text" inputmode="decimal" placeholder="&euro;"></div>
+                <input id="np-impresa" type="text" inputmode="decimal" placeholder="&euro;" data-eu></div>
             </div>
             <p class="sh-nota">Il prezzo all&rsquo;impresa &egrave; facoltativo: lascialo vuoto se a questo prodotto fai lo stesso prezzo a tutti.</p>
             <div id="np-margine" class="sh-nota"></div>
@@ -659,7 +659,7 @@
             <div class="sh-tit">Sconto, IVA e validit&agrave;</div>
             <div class="row2">
               <div class="field"><label>Sconto sul totale</label>
-                <input id="pv-sconto" type="text" inputmode="decimal" value="0"></div>
+                <input id="pv-sconto" type="text" inputmode="decimal" value="0" data-num></div>
               <div class="field"><label>IVA</label>
                 <select id="pv-iva">
                   <option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option>
@@ -760,9 +760,9 @@
             <div class="sh-tit">Quanta e quanto</div>
             <div class="row2">
               <div class="field"><label>Quantit&agrave; (anche con la virgola)</label>
-                <input id="nm-quantita" type="text" inputmode="decimal" placeholder="0"></div>
+                <input id="nm-quantita" type="text" inputmode="decimal" placeholder="0" data-num></div>
               <div class="field"><label>Importo &euro;</label>
-                <input id="nm-importo" type="text" inputmode="decimal" placeholder="&euro;"></div>
+                <input id="nm-importo" type="text" inputmode="decimal" placeholder="&euro;" data-eu></div>
             </div>
             <div id="nm-hint-q" class="sh-nota" style="display:none">Nella rettifica la quantit&agrave; va col segno: <b>&minus;2</b> se la merce cala, <b>2</b> se cresce.</div>
           </div>
@@ -994,6 +994,40 @@
     const n=+v;
     if(!isFinite(n))return "";
     return String(Math.round(n*1e6)/1e6).replace(".",",");
+  }
+
+  /* ================================================================
+     ⛔ 29 agosto 2026 — LA VIRGOLA LA METTE IL GESTIONALE, NON LUI.
+     Alessio: «la devo sempre mettere io?». No.
+     Batti come ti viene — 5 · 5.5 · 5,5 — e appena ESCI dalla casella
+     la scritta si mette in ordine da sola: 5,00 · 5,50 · 5,50.
+     ⛔ Mentre scrivi non si tocca NIENTE. Se la virgola comparisse a
+        ogni tasto, come nel registratore di cassa, «100» diventerebbe
+        «1,00» invece di cento euro: il numero cambierebbe sotto le dita
+        di chi sta scrivendo, ed e' il modo piu' veloce per battere un
+        prezzo sbagliato senza accorgersene.
+     · «data-eu»  = soldi: sempre due cifre dopo la virgola, e il punto
+                    delle migliaia (1.250,00).
+     · «data-num» = quantita e percentuali: solo la virgola al posto del
+                    punto. 12,5 sacchi resta 12,5, non diventa 12,50.
+     ================================================================ */
+  function _sistemaCasella(el){
+    if(!el||el.tagName!=="INPUT")return;
+    /* ⛔ mai riscrivere la casella dove il dito sta scrivendo */
+    if(el===document.activeElement)return;
+    const soldi=el.hasAttribute("data-eu"), num=el.hasAttribute("data-num");
+    if(!soldi&&!num)return;
+    const n=_numeroIt(el.value);
+    if(n==null){ if(el.value.trim()!=="") el.value=""; return; }
+    el.value = soldi
+      ? n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})
+      : _numTesto(n);
+  }
+  /* focusout e non blur: blur non sale, e le caselle nascono dopo */
+  document.addEventListener("focusout",e=>_sistemaCasella(e.target));
+  /* quando un modulo si apre gia' pieno, i numeri sono in ordine subito */
+  function _sistemaNumeri(root){
+    (root||document).querySelectorAll("[data-eu],[data-num]").forEach(_sistemaCasella);
   }
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
   const todayStr=()=>new Date().toISOString().slice(0,10);
@@ -2102,7 +2136,7 @@
           <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
-        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" data-eu value="${_numTesto(job.importo)}" placeholder="0"></div>
         <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
           <button class="btn-primary" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
@@ -2133,8 +2167,8 @@
         <div class="thumbs" id="th-dopo"></div></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       <div class="row2">
-        <div class="field"><label>Ore lavorate</label><input type="text" id="j-ore" inputmode="decimal" value="${_numTesto(job.ore)}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
+        <div class="field"><label>Ore lavorate</label><input type="text" id="j-ore" inputmode="decimal" data-num value="${_numTesto(job.ore)}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" data-eu value="${job.importo||""}" placeholder="0"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
       <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
@@ -2201,7 +2235,7 @@
             <option value="impresa"${(c.listino||"")==="impresa"?" selected":""}>Prezzi impresa</option>
           </select></div>
         <div class="field"><label>Sconto fisso suo (%)</label>
-          <input id="c-sconto" type="text" inputmode="decimal" min="0" max="100" value="${_numTesto(c.sconto_perc??0)}" placeholder="0"></div>
+          <input id="c-sconto" type="text" inputmode="decimal" data-num min="0" max="100" value="${_numTesto(c.sconto_perc??0)}" placeholder="0"></div>
       </div>
       <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
       <button class="btn-primary" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
@@ -2615,7 +2649,7 @@
       + (o.azioni?'<div class="job-actions">'+o.azioni+'</div>':"")
       + '</div>';
   }
-  function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
+  function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");_sistemaNumeri(s);}
   /* 26 agosto 2026 — LA FINESTRA GRANDE.
      ⚠️ Prende lo STESSO html di openSheet e se lo divide da sola: il primo
      <h3> diventa l'intestazione ferma, il <div class="sheet-actions"> il
@@ -2645,6 +2679,7 @@
       '<div class="sh-body">'+tmp.innerHTML+'</div>'+
       (azioni?'<div class="sh-foot">'+azioni+'</div>':'');
     $("#overlay").classList.add("open");
+    _sistemaNumeri(s);
     /* senza questo il modulo si apre gia' scorso di qualche riga (resta la
        posizione della volta prima) e la prima etichetta sparisce */
     const b=s.querySelector(".sh-body");
@@ -2775,6 +2810,7 @@
       while(_modAzioni.firstChild) piede.appendChild(_modAzioni.firstChild);
     } else $("#sh-piede").remove();
     $("#overlay").classList.add("open");
+    _sistemaNumeri(s);
     const b=s.querySelector(".sh-body");
     if(b){b.scrollTop=0;requestAnimationFrame(function(){b.scrollTop=0;});setTimeout(function(){b.scrollTop=0;},80);}
   }
@@ -3079,10 +3115,10 @@
   function pvRigaHtml(r,i){
     return `<div class="pv-riga" data-i="${i}" style="display:grid;grid-template-columns:2fr 80px 70px 90px 70px 34px;gap:6px;align-items:center;margin-bottom:6px">
       <input class="pv-desc" value="${(r.descrizione||"").replace(/"/g,"&quot;")}" placeholder="Descrizione" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
-      <input class="pv-qta" type="text" inputmode="decimal" value="${_numTesto(r.qta??1)}" placeholder="Q.tà" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-qta" type="text" inputmode="decimal" data-num value="${_numTesto(r.qta??1)}" placeholder="Q.tà" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
       <input class="pv-um" value="${r.unita||"pz"}" placeholder="u.m." style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box;text-align:center">
-      <input class="pv-prezzo" type="text" inputmode="decimal" value="${_numTesto(r.prezzo??0)}" placeholder="€" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
-      <input class="pv-sc" type="text" inputmode="decimal" value="${_numTesto(r.sconto_perc??0)}" placeholder="sc.%" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-prezzo" type="text" inputmode="decimal" data-eu value="${_numTesto(r.prezzo??0)}" placeholder="€" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-sc" type="text" inputmode="decimal" data-num value="${_numTesto(r.sconto_perc??0)}" placeholder="sc.%" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
       <button type="button" class="pv-del" title="Togli la riga" style="padding:9px;background:#fff;border:1px solid #e0b4b4;color:#c62828;border-radius:7px;cursor:pointer">×</button>
     </div>`;
   }
@@ -3093,6 +3129,7 @@
            <span>Descrizione</span><span>Q.tà</span><span>U.m.</span><span>Prezzo</span><span>Sconto</span><span></span></div>`
         + pvRighe.map(pvRigaHtml).join("")
       : '<p style="color:#8a949e;font-size:14px;margin:4px 0 10px">Nessuna riga. Scegli un prodotto dal magazzino o aggiungi una riga libera.</p>';
+    _sistemaNumeri(box);
     pvTotali();
   }
   function pvLeggiRighe(){
@@ -3386,7 +3423,7 @@
     openSheet(`<h3 style="margin:0 0 6px;font-size:20px">${su?"Carico":"Scarico"} di magazzino</h3>
       <p style="margin:0 0 18px;font-size:15px;color:#5a6672">${esc(magRett.nome)} — adesso ne risultano <b>${magRett.ora} ${esc(magRett.unita)}</b>.</p>
       <label style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">Quante ne ${su?"entrano":"escono"}?</label>
-      <input id="mag-q" type="text" inputmode="decimal" min="0" value="1" style="width:100%;padding:12px;font-size:16px;border:1px solid #d7dde3;border-radius:9px;box-sizing:border-box;margin-bottom:18px">
+      <input id="mag-q" type="text" inputmode="decimal" data-num min="0" value="1" style="width:100%;padding:12px;font-size:16px;border:1px solid #d7dde3;border-radius:9px;box-sizing:border-box;margin-bottom:18px">
       <label style="display:block;font-size:15px;font-weight:700;margin-bottom:8px">Perché?</label>
       <div id="mag-mot" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
         ${MOT.map(([v,t])=>`<button type="button" class="chip ${v===magRett.motivo?"on":""}" data-action="mag-mot" data-v="${v}" style="font-size:15px;padding:9px 16px">${t}</button>`).join("")}

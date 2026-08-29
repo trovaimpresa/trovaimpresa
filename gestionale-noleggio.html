@@ -1395,6 +1395,55 @@
   const _numIt=v=>(window.NoleggioPrezzo
     ? window.NoleggioPrezzo.numIt(v)
     : (parseFloat(String(v==null?"":v).replace(/[€\s]/g,"").replace(/\./g,"").replace(",","."))||0));
+
+  /* ================================================================
+     ⛔ 29 agosto 2026 — LA VIRGOLA LA METTE IL GESTIONALE, NON LUI.
+     Alessio, sul negozio: «la devo sempre mettere io?». No.
+     Batti come ti viene — 35 · 35.5 · 35,5 — e appena ESCI dalla casella
+     la scritta si mette in ordine da sola: 35,00 · 35,50 · 35,50.
+     ⛔ Mentre scrivi non si tocca NIENTE: se la virgola comparisse a ogni
+        tasto, «100» diventerebbe «1,00» invece di cento euro.
+     · «data-eu»  = soldi: due cifre dopo la virgola e il punto delle
+                    migliaia (1.250,00).
+     · «data-num» = ore, km, contaore, quantita, percentuali: solo la
+                    virgola. 12,5 ore resta 12,5, non diventa 12,50.
+     Copiata riga per riga da gestionale-negozio.html.
+     ================================================================ */
+  function _numTestoNol(v){
+    if(v==null||v==="")return "";
+    const n=+v;
+    if(!isFinite(n))return "";
+    return String(Math.round(n*1e6)/1e6).replace(".",",");
+  }
+  function _sistemaCasella(el){
+    if(!el||el.tagName!=="INPUT")return;
+    /* ⛔ mai riscrivere la casella dove il dito sta scrivendo */
+    if(el===document.activeElement)return;
+    const soldi=el.hasAttribute("data-eu"), num=el.hasAttribute("data-num");
+    if(!soldi&&!num)return;
+    const t=String(el.value==null?"":el.value).trim();
+    if(t===""){ el.value=""; return; }
+    const n=_numIt(t);
+    if(!isFinite(n)){ el.value=""; return; }
+    el.value = soldi
+      ? n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})
+      : _numTestoNol(n);
+  }
+  document.addEventListener("focusout",e=>_sistemaCasella(e.target));
+  function _sistemaNumeri(root){
+    (root||document).querySelectorAll("[data-eu],[data-num]").forEach(_sistemaCasella);
+  }
+  /* I moduli nascono dopo, con innerHTML: si sistemano appena compaiono.
+     ⚠️ Col freno da 120 ms: il conto del noleggio ridisegna le righe a ogni
+     tasto, e senza freno si rifarebbe il giro di tutta la pagina ogni volta. */
+  let _tSist=null;
+  new MutationObserver(function(m){
+    for(const x of m) if(x.addedNodes.length){
+      clearTimeout(_tSist);
+      _tSist=setTimeout(function(){_sistemaNumeri(document);},120);
+      return;
+    }
+  }).observe(document.body,{childList:true,subtree:true});
   /* ⚠️ 28 agosto 2026 — I SOLDI DI UN DOCUMENTO SI SCRIVONO COI CENTESIMI.
      _eur li scrive gia' cosi' e il noleggio lo usa dappertutto. Restava
      fuori solo la sotto-sezione «Lavori del gestionale imprese» dentro
@@ -1430,8 +1479,8 @@
     const box=$("#nn-consumi"); if(!box) return;
     box.innerHTML=nolConsumi.map((c,i)=>`<div class="nol-cons-riga">
       <input data-cons="descrizione" data-i="${i}" placeholder="Cosa" value="${esc(c.descrizione==null?"":c.descrizione)}">
-      <input data-cons="quantita" data-i="${i}" inputmode="decimal" placeholder="Quanto" value="${esc(c.quantita==null?"":c.quantita)}">
-      <input data-cons="prezzo" data-i="${i}" inputmode="decimal" placeholder="€ l'uno" value="${esc(c.prezzo==null?"":c.prezzo)}">
+      <input data-cons="quantita" data-i="${i}" inputmode="decimal" data-num placeholder="Quanto" value="${esc(c.quantita==null?"":c.quantita)}">
+      <input data-cons="prezzo" data-i="${i}" inputmode="decimal" data-eu placeholder="€ l'uno" value="${esc(c.prezzo==null?"":c.prezzo)}">
       <button type="button" class="nol-cons-via" data-via="${i}" title="Togli questa riga">✕</button></div>`).join("");
   }
   function nolLeggiConsumi(){
@@ -2206,17 +2255,17 @@
         <h4>Magazzino</h4>
         <div class="nol-due">
           <div><label>Unità di misura</label><input id="np-unita" value="${p.unita||"pz"}" placeholder="pz, mq, kg"></div>
-          <div><label>Quantità in magazzino</label><input id="np-quantita" inputmode="decimal" value="${v('quantita')}" placeholder="0"></div>
-          <div><label>Scorta minima</label><input id="np-soglia" inputmode="decimal" value="${v('soglia_minima')}" placeholder="0"></div>
+          <div><label>Quantità in magazzino</label><input id="np-quantita" inputmode="decimal" value="${v('quantita')}" placeholder="0" data-num></div>
+          <div><label>Scorta minima</label><input id="np-soglia" inputmode="decimal" value="${v('soglia_minima')}" placeholder="0" data-num></div>
           <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">Sotto la scorta minima il prodotto compare nel Riepilogo.</p></div>
         </div>
       </div>
       <div class="nol-riq nol-cam">
         <h4>Prezzi</h4>
         <div class="nol-due">
-          <div><label>Prezzo di acquisto €</label><input id="np-acquisto" inputmode="decimal" value="${v('prezzo_acquisto')}" placeholder="0,00"></div>
-          <div><label>Prezzo di vendita €</label><input id="np-prezzo" inputmode="decimal" value="${v('prezzo')}" placeholder="0,00"></div>
-          <div><label>IVA %</label><input id="np-iva" inputmode="decimal" value="${p.iva_perc==null?22:p.iva_perc}" placeholder="22"></div>
+          <div><label>Prezzo di acquisto €</label><input id="np-acquisto" inputmode="decimal" value="${v('prezzo_acquisto')}" placeholder="0,00" data-eu></div>
+          <div><label>Prezzo di vendita €</label><input id="np-prezzo" inputmode="decimal" value="${v('prezzo')}" placeholder="0,00" data-eu></div>
+          <div><label>IVA %</label><input id="np-iva" inputmode="decimal" value="${p.iva_perc==null?22:p.iva_perc}" placeholder="22" data-num></div>
           <div><label>&nbsp;</label><div id="np-margine" style="padding-top:9px;font-size:14px;color:#0066ff;font-weight:700"></div></div>
         </div>
       </div>
@@ -2272,7 +2321,7 @@
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <button type="button" class="mag-btn" data-action="mag-meno" title="Uno in meno">&minus;</button>
           <input id="ng-quantita" inputmode="decimal" value="${v('quantita')}" placeholder="0"
-                 style="width:130px;font-size:26px;font-weight:700;text-align:center">
+                 style="width:130px;font-size:26px;font-weight:700;text-align:center" data-num>
           <button type="button" class="mag-btn mag-piu" data-action="mag-piu" title="Uno in pi&ugrave;">+</button>
           <span style="font-size:15px;color:#666">${esc(p.unita||"pz")}</span>
         </div>
@@ -2280,7 +2329,7 @@
       <div class="nol-riq nol-cam">
         <h4>Quando riordinare</h4>
         <div class="nol-due">
-          <div><label>Scorta minima</label><input id="ng-soglia" inputmode="decimal" value="${v('soglia_minima')}" placeholder="0"></div>
+          <div><label>Scorta minima</label><input id="ng-soglia" inputmode="decimal" value="${v('soglia_minima')}" placeholder="0" data-num></div>
           <div><label>Unit&agrave; di misura</label><input id="ng-unita" value="${esc(p.unita||"pz")}" placeholder="pz, mq, kg"></div>
         </div>
         <p style="margin:10px 0 0;font-size:14px;color:#666">Sotto questa quantit&agrave; il prodotto compare nel Riepilogo fra quelli da riordinare.</p>
@@ -2355,8 +2404,8 @@
         <option value="rettifica">Rettifica di magazzino</option></select></div>
       <div class="field"><label>Prodotto *</label><input id="nm-prodotto" value="${v('prodotto')}" placeholder="Nome del prodotto"></div>
       <div class="row2">
-        <div class="field"><label>Quantità</label><input id="nm-quantita" inputmode="decimal" value="${v('quantita')}" placeholder="Anche con la virgola"></div>
-        <div class="field"><label>Importo €</label><input id="nm-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00"></div>
+        <div class="field"><label>Quantità</label><input id="nm-quantita" inputmode="decimal" value="${v('quantita')}" placeholder="Anche con la virgola" data-num></div>
+        <div class="field"><label>Importo €</label><input id="nm-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00" data-eu></div>
       </div>
       <div class="row2">
         <div class="field"><label>Cliente o fornitore</label><input id="nm-controparte" value="${v('controparte')}" placeholder="Chi ha comprato o venduto"></div>
@@ -2403,10 +2452,10 @@
       <div class="nol-riq nol-cam">
         <h4>Quanto costa a tempo</h4>
         <div class="nol-due">
-          <div><label>A ora €</label><input id="nz-tora" inputmode="decimal" value="${v('tariffa_ora')}" placeholder="0,00"></div>
-          <div><label>Al giorno €</label><input id="nz-tgiorno" inputmode="decimal" value="${v('tariffa_giorno')}" placeholder="0,00"></div>
-          <div><label>A settimana €</label><input id="nz-tsett" inputmode="decimal" value="${v('tariffa_settimana')}" placeholder="0,00"></div>
-          <div><label>Al mese €</label><input id="nz-tmese" inputmode="decimal" value="${v('tariffa_mese')}" placeholder="0,00"></div>
+          <div><label>A ora €</label><input id="nz-tora" inputmode="decimal" value="${v('tariffa_ora')}" placeholder="0,00" data-eu></div>
+          <div><label>Al giorno €</label><input id="nz-tgiorno" inputmode="decimal" value="${v('tariffa_giorno')}" placeholder="0,00" data-eu></div>
+          <div><label>A settimana €</label><input id="nz-tsett" inputmode="decimal" value="${v('tariffa_settimana')}" placeholder="0,00" data-eu></div>
+          <div><label>Al mese €</label><input id="nz-tmese" inputmode="decimal" value="${v('tariffa_mese')}" placeholder="0,00" data-eu></div>
         </div>
         <p style="margin:8px 0 0;font-size:13px;color:#666">Quella che lasci a zero non viene usata. Il conto sceglie da solo la combinazione che costa meno al cliente.</p>
       </div>
@@ -2416,26 +2465,26 @@
         <label class="nol-spunta"><input type="checkbox" id="nz-contaore" ${m.ha_contaore?"checked":""}> Questo mezzo ha il contaore</label>
         <div id="nz-box-ore" style="display:${m.ha_contaore?"":"none"}">
           <div class="nol-due">
-            <div><label>Ore comprese in una giornata</label><input id="nz-oreincl" inputmode="decimal" value="${v('ore_incluse_giorno')}" placeholder="8"></div>
-            <div><label>Ogni ora in più €</label><input id="nz-toraextra" inputmode="decimal" value="${v('tariffa_ora_extra')}" placeholder="0,00"></div>
+            <div><label>Ore comprese in una giornata</label><input id="nz-oreincl" inputmode="decimal" value="${v('ore_incluse_giorno')}" placeholder="8" data-num></div>
+            <div><label>Ogni ora in più €</label><input id="nz-toraextra" inputmode="decimal" value="${v('tariffa_ora_extra')}" placeholder="0,00" data-eu></div>
           </div>
         </div>
         <label class="nol-spunta"><input type="checkbox" id="nz-contakm" ${m.ha_contakm?"checked":""}> Questo mezzo ha il contachilometri</label>
         <div id="nz-box-km" style="display:${m.ha_contakm?"":"none"}">
           <div class="nol-due">
-            <div><label>Km compresi in una giornata</label><input id="nz-kmincl" inputmode="decimal" value="${v('km_inclusi_giorno')}" placeholder="100"></div>
-            <div><label>Ogni km in più €</label><input id="nz-tkm" inputmode="decimal" value="${v('tariffa_km')}" placeholder="0,00"></div>
+            <div><label>Km compresi in una giornata</label><input id="nz-kmincl" inputmode="decimal" value="${v('km_inclusi_giorno')}" placeholder="100" data-num></div>
+            <div><label>Ogni km in più €</label><input id="nz-tkm" inputmode="decimal" value="${v('tariffa_km')}" placeholder="0,00" data-eu></div>
           </div>
         </div>
         <div class="nol-due" style="margin-top:8px">
-          <div><label>Usura, quota fissa €</label><input id="nz-usurafissa" inputmode="decimal" value="${v('usura_fissa')}" placeholder="0,00"></div>
-          <div><label>Usura, % sul tempo</label><input id="nz-usuraperc" inputmode="decimal" value="${v('usura_percento')}" placeholder="0"></div>
+          <div><label>Usura, quota fissa €</label><input id="nz-usurafissa" inputmode="decimal" value="${v('usura_fissa')}" placeholder="0,00" data-eu></div>
+          <div><label>Usura, % sul tempo</label><input id="nz-usuraperc" inputmode="decimal" value="${v('usura_percento')}" placeholder="0" data-num></div>
         </div>
       </div>
 
       <div class="nol-riq nol-cam">
         <h4>Cauzione</h4>
-        <div><label>Quanto si lascia in deposito €</label><input id="nz-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00"></div>
+        <div><label>Quanto si lascia in deposito €</label><input id="nz-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00" data-eu></div>
         <p style="margin:8px 0 0;font-size:13px;color:#666">La cauzione non entra nel totale del noleggio: è un deposito che torna indietro.</p>
       </div>
 
@@ -2459,10 +2508,10 @@
       <div class="nol-riq nol-cam">
         <h4>Manutenzione</h4>
         <div class="nol-due">
-          <div><label>Tagliando ogni quante ore</label><input id="nz-tagogni" inputmode="decimal" value="${v('tagliando_ogni_ore')}" placeholder="0 = non si usa"></div>
-          <div><label>Ultimo tagliando, a che ora</label><input id="nz-tagultimo" inputmode="decimal" value="${v('tagliando_ultimo_ore')}" placeholder="0"></div>
+          <div><label>Tagliando ogni quante ore</label><input id="nz-tagogni" inputmode="decimal" value="${v('tagliando_ogni_ore')}" placeholder="0 = non si usa" data-num></div>
+          <div><label>Ultimo tagliando, a che ora</label><input id="nz-tagultimo" inputmode="decimal" value="${v('tagliando_ultimo_ore')}" placeholder="0" data-num></div>
         </div>
-        <div class="field"><label>Contaore adesso</label><input id="nz-oreora" inputmode="decimal" value="${v('contaore_attuale')}" placeholder="0"></div>
+        <div class="field"><label>Contaore adesso</label><input id="nz-oreora" inputmode="decimal" value="${v('contaore_attuale')}" placeholder="0" data-num></div>
         <label class="nol-spunta"><input type="checkbox" id="nz-fuori" ${m.fuori_servizio?"checked":""}> ⛔ Fuori servizio: questo mezzo non si può dare</label>
         <div class="field"><label>Perché è fuori servizio</label><input id="nz-fuoriperche" value="${v('fuori_servizio_perche')}" placeholder="Es. in officina per la pompa idraulica"></div>
         <div class="field"><label>Note di manutenzione</label><input id="nz-manut" value="${v('manutenzione_note')}" placeholder="Quello che serve ricordare"></div>
@@ -2654,16 +2703,16 @@
       <div class="nol-riq nol-cam" id="nn-box-contaore" style="display:none">
         <h4>Contaore</h4>
         <div class="nol-due">
-          <div><label>Lettura all'uscita</label><input id="nn-contaore-usc" inputmode="decimal" value="${v('contaore_uscita')}" placeholder="0"></div>
-          <div><label>Lettura al rientro</label><input id="nn-contaore-rie" inputmode="decimal" value="${v('contaore_rientro')}" placeholder="0"></div>
+          <div><label>Lettura all'uscita</label><input id="nn-contaore-usc" inputmode="decimal" value="${v('contaore_uscita')}" placeholder="0" data-num></div>
+          <div><label>Lettura al rientro</label><input id="nn-contaore-rie" inputmode="decimal" value="${v('contaore_rientro')}" placeholder="0" data-num></div>
         </div>
       </div>
 
       <div class="nol-riq nol-cam" id="nn-box-km" style="display:none">
         <h4>Chilometri</h4>
         <div class="nol-due">
-          <div><label>Contakm all'uscita</label><input id="nn-km-usc" inputmode="decimal" value="${v('km_uscita')}" placeholder="0"></div>
-          <div><label>Contakm al rientro</label><input id="nn-km-rie" inputmode="decimal" value="${v('km_rientro')}" placeholder="0"></div>
+          <div><label>Contakm all'uscita</label><input id="nn-km-usc" inputmode="decimal" value="${v('km_uscita')}" placeholder="0" data-num></div>
+          <div><label>Contakm al rientro</label><input id="nn-km-rie" inputmode="decimal" value="${v('km_rientro')}" placeholder="0" data-num></div>
         </div>
       </div>
 
@@ -2724,7 +2773,7 @@
       <div class="nol-riq nol-cam">
         <h4>Quanto si fa pagare</h4>
         <div class="nol-due">
-          <div><label>Importo €</label><input id="nn-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00"></div>
+          <div><label>Importo €</label><input id="nn-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00" data-eu></div>
           <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">La cauzione sta nel riquadro qui sotto: &egrave; un deposito, non un incasso.</p></div>
         </div>
         <p style="margin:8px 0 0;font-size:13px;color:#666">L'importo lo puoi sempre correggere a mano: quello che scrivi qui è quello che si fa pagare.</p>
@@ -2737,7 +2786,7 @@
       <div class="nol-riq nol-cam" id="nn-box-cauzione">
         <h4>La cauzione</h4>
         <div class="nol-due">
-          <div><label>Cauzione €</label><input id="nn-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00"></div>
+          <div><label>Cauzione €</label><input id="nn-cauzione" inputmode="decimal" value="${v('cauzione')}" placeholder="0,00" data-eu></div>
           <div><label>In che forma l'hai presa</label>
             <select id="nn-cau-forma">
               <option value="">— non indicata —</option>
@@ -6098,7 +6147,7 @@
           <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
-        <div class="field"><label>Importo (€)</label><input id="j-imp" inputmode="decimal" value="${job.importo==null?"":String(job.importo).replace(".",",")}" placeholder="0,00"></div>
+        <div class="field"><label>Importo (€)</label><input id="j-imp" inputmode="decimal" value="${job.importo==null?"":String(job.importo).replace(".",",")}" placeholder="0,00" data-eu></div>
         <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
           <button class="b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
@@ -6129,8 +6178,8 @@
         <div class="thumbs" id="th-dopo"></div></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       <div class="row2">
-        <div class="field"><label>Ore lavorate</label><input id="j-ore" inputmode="decimal" value="${job.ore==null||job.ore===""?"":String(job.ore).replace(".",",")}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input id="j-imp" inputmode="decimal" value="${job.importo==null||job.importo===""?"":String(job.importo).replace(".",",")}" placeholder="0"></div></div>
+        <div class="field"><label>Ore lavorate</label><input id="j-ore" inputmode="decimal" value="${job.ore==null||job.ore===""?"":String(job.ore).replace(".",",")}" placeholder="0" data-num></div>
+        <div class="field"><label>Importo (€)</label><input id="j-imp" inputmode="decimal" value="${job.importo==null||job.importo===""?"":String(job.importo).replace(".",",")}" placeholder="0" data-eu></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>

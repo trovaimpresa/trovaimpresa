@@ -37,6 +37,23 @@
 (function(){
   'use strict';
 
+  /* ================================================================
+     ⛔ 29 agosto 2026 — DUE COSE, TROVATE DA ALESSIO SUL NEGOZIO.
+
+     1) «se voglio mettere 5.5 non posso, mi mette 55».
+        Qui succedeva lo stesso: mentre scrivi, il punto veniva buttato
+        via insieme ai punti delle migliaia, e «1.25» diventava «125» —
+        cento volte il prezzo. Adesso, finche' nella casella c'e' un
+        punto, MENTRE SCRIVI non si tocca niente: si aspetta che tu esca
+        dalla casella, e li' si capisce se quel punto sono le migliaia
+        (1.250) o i centesimi (1.25), con la stessa regola italiana del
+        resto del gestionale.
+
+     2) «la devo sempre mettere io [la virgola]?». No: uscendo dalla
+        casella i centesimi si scrivono da soli (5 -> 5,00).
+        ⛔ Ma solo AGGIUNGENDO zeri, mai tagliando: i prezzari regionali
+           hanno quattro decimali, e 12,3456 deve restare 12,3456.
+     ================================================================ */
   function formatta(el, forza){
     if(!el || el.tagName!=="INPUT") return;
     /* si riscrive solo se il cursore sta in fondo, cioe' mentre si scrive
@@ -47,15 +64,43 @@
 
     var grezzo = String(el.value==null?"":el.value);
     if(grezzo==="") return;
+    /* mentre si scrive, un punto non si tocca: potrebbe essere «1.25» */
+    if(!forza && grezzo.indexOf(".")>=0) return;
     var meno = /^\s*-/.test(grezzo);
-    var pulito = grezzo.replace(/[^\d,]/g,"");     /* via punti, euro, spazi; la virgola resta */
+
+    var pulito, parti, intero, dec;
+    if(forza && grezzo.indexOf(".")>=0){
+      /* uscita dalla casella con un punto dentro: regola italiana.
+         Un punto con tre cifre dietro e non dopo lo zero = migliaia. */
+      var t = grezzo.replace(/[^\d.,-]/g,"");
+      var vir = t.lastIndexOf(","), pun = t.lastIndexOf(".");
+      if(vir>=0 && pun>=0){
+        t = (vir>pun) ? t.replace(/\./g,"") : t.replace(/,/g,"").replace(/\.(?=[^.]*$)/,",");
+      }else{
+        var punti = t.split(".").length-1;
+        var dopo  = t.length-pun-1;
+        var prima = t.slice(0,pun).replace(/[.-]/g,"");
+        var zeroDavanti = (prima==="0"||/^0/.test(prima));
+        t = (punti>1 || (dopo===3 && !zeroDavanti)) ? t.replace(/\./g,"") : t.replace(".",",");
+      }
+      pulito = t.replace(/[^\d,]/g,"");
+    }else{
+      pulito = grezzo.replace(/[^\d,]/g,"");   /* via punti, euro, spazi; la virgola resta */
+    }
     if(pulito===""){ if(grezzo!=="") el.value=""; return; }
 
-    var parti  = pulito.split(",");
-    var intero = parti[0].replace(/^0+(?=\d)/,"");             /* via gli zeri davanti */
-    var dec    = (parti.length>1) ? ("," + parti.slice(1).join("")) : "";
+    parti  = pulito.split(",");
+    intero = parti[0].replace(/^0+(?=\d)/,"");             /* via gli zeri davanti */
+    dec    = (parti.length>1) ? parti.slice(1).join("") : "";
+    /* ⛔ la virgola appena battuta NON si cancella: chi scrive «5,» sta
+       per scrivere i centesimi, e togliergliela sotto le dita gli fa
+       diventare «5,5» un «55». */
+    var virgolaInCoda = (parti.length>1);
+    /* uscendo dalla casella i centesimi si scrivono da soli — solo
+       aggiungendo zeri, mai tagliando quello che c'e' gia' */
+    if(forza){ while(dec.length<2) dec += "0"; }
     var conPunti = (intero===""?"0":intero).replace(/\B(?=(\d{3})+(?!\d))/g,".");
-    var nuovo = (meno?"-":"") + conPunti + dec;
+    var nuovo = (meno?"-":"") + conPunti + (dec ? ("," + dec) : (virgolaInCoda ? "," : ""));
     if(nuovo===grezzo) return;
 
     el.value = nuovo;

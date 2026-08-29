@@ -2107,7 +2107,7 @@
           </div>
           <div class="form-group">
             <label>Prezzo</label>
-            <input type="text" id="prod-prezzo" inputmode="decimal" placeholder="Es. 499,00">
+            <input type="text" id="prod-prezzo" inputmode="decimal" placeholder="Es. 499,00" data-eu>
           </div>
         </div>
         <div class="form-group">
@@ -2924,28 +2924,45 @@ async function caricaFotoVetrina(file) {
 }
 
 // === I MIEI PRODOTTI — salva una riga in vetrina_negozio ===
+/* ⛔ 29 agosto 2026 — «499.00» e «499,00» sono lo stesso prezzo.
+   Era una casella type="number": su tastiera italiana il punto lo butta
+   via, e chi scriveva 5.5 salvava 55 — dieci volte il prezzo, in vetrina.
+   Stessa regola del gestionale negozio (js/gest-computo.js). */
+const _prezzoIt = t => {
+  if (t == null || String(t).trim() === '') return null;
+  let x = String(t).replace(/[€\s]/g, '');
+  const vir = x.lastIndexOf(','), pun = x.lastIndexOf('.');
+  if (vir >= 0 && pun >= 0) x = (vir > pun) ? x.replace(/\./g, '').replace(',', '.') : x.replace(/,/g, '');
+  else if (vir >= 0) x = x.replace(',', '.');
+  else if (pun >= 0) {
+    /* un punto con tre cifre dietro è il punto delle migliaia: 1.250 */
+    const dopo = x.length - pun - 1, primo = x.slice(0, pun);
+    if (dopo === 3 && !/^-?0/.test(primo)) x = x.replace(/\./g, '');
+  }
+  const n = parseFloat(x);
+  return isFinite(n) ? n : null;
+};
+
+/* ⛔ 29 agosto 2026 — LA VIRGOLA LA METTE IL PANNELLO, NON LUI.
+   Alessio, sul gestionale: «la devo sempre mettere io?». No: batti 5 o
+   5.5, esci dalla casella e diventa 5,00 e 5,50. Mentre scrivi non si
+   tocca niente, se no «100» diventerebbe «1,00» invece di cento euro. */
+document.addEventListener('focusout', function (e) {
+  const el = e.target;
+  if (!el || el.tagName !== 'INPUT' || !el.hasAttribute('data-eu')) return;
+  if (el === document.activeElement) return;
+  const n = _prezzoIt(el.value);
+  el.value = (n == null) ? '' : n.toLocaleString('it-IT', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: Math.max(2, (String(n).split('.')[1] || '').length)
+  });
+});
+
 async function salvaProdottoVetrina() {
   const titolo = document.getElementById('prod-titolo').value.trim();
   const categoria = document.getElementById('prod-categoria').value;
   const prezzoRaw = document.getElementById('prod-prezzo').value;
-  /* ⛔ 29 agosto 2026 — «499.00» e «499,00» sono lo stesso prezzo.
-     Era una casella type="number": su tastiera italiana il punto lo butta
-     via, e chi scriveva 5.5 salvava 55 — dieci volte il prezzo, in vetrina.
-     Stessa regola del gestionale negozio (js/gest-computo.js). */
-  const _prezzoIt = t => {
-    if (t == null || String(t).trim() === '') return null;
-    let x = String(t).replace(/[€\s]/g, '');
-    const vir = x.lastIndexOf(','), pun = x.lastIndexOf('.');
-    if (vir >= 0 && pun >= 0) x = (vir > pun) ? x.replace(/\./g, '').replace(',', '.') : x.replace(/,/g, '');
-    else if (vir >= 0) x = x.replace(',', '.');
-    else if (pun >= 0) {
-      /* un punto con tre cifre dietro è il punto delle migliaia: 1.250 */
-      const dopo = x.length - pun - 1, primo = x.slice(0, pun);
-      if (dopo === 3 && !/^-?0/.test(primo)) x = x.replace(/\./g, '');
-    }
-    const n = parseFloat(x);
-    return isFinite(n) ? n : null;
-  };
+
   const dettagli = document.getElementById('prod-dettagli').value.trim();
   const foto = document.getElementById('prod-foto').value.trim();
   const inVetrina = document.getElementById('prod-vetrina').checked;
