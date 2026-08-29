@@ -71,7 +71,7 @@
     <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
       <p id="gate-paywall-titolo" style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Il Gestionale &egrave; incluso nel piano Premium</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;">Cantieri, squadra, preventivi PDF, fatture, agenda, scadenze fiscali e mezzi: tutto in un unico posto.</p>
-      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Con il <strong>Premium</strong> lo sblocchi insieme a tutto il resto: <strong>5&euro; al mese</strong> oppure <strong>49&euro; l&rsquo;anno</strong>.</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Con il <strong>Premium</strong> lo sblocchi insieme a tutto il resto: <strong>29&euro; al mese</strong> oppure <strong>249&euro; l&rsquo;anno</strong>.</p>
       <div id="gate-btns">
         <a href="/info-premium.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;margin-bottom:10px;border-radius:10px;background:var(--blu,#0066ff);color:#fff;font-size:17px;font-weight:700;">Scopri il Premium</a>
         <a href="/prezzi.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;border-radius:10px;background:var(--sfondo,#f3f5f2);color:var(--testo,#1c2b36);font-size:16px;font-weight:700;">Vedi tutti i piani</a>
@@ -113,7 +113,9 @@
   var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
 
   /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====
-     Il gestionale è incluso nel piano Premium (5 euro/mese o 49 euro/anno).
+     Il gestionale è incluso nel piano Premium (29 euro/mese o 249 euro/anno,
+     prezzi del 29 agosto 2026; il Premium AI, che aggiunge la chat con AI,
+     costa 39 euro/mese o 349 euro/anno e NON cambia chi entra qui dentro).
      Chi è Free vede la schermata che spiega come sbloccarlo.
      Il blocco sulla card del pannello resta: questo chiude l'accesso diretto
      di chi si scrive l'indirizzo a mano.
