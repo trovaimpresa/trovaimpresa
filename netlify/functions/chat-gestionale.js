@@ -119,6 +119,51 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
 }
 
 // ---------------------------------------------------------------------
+// ⛔ IL GRADINO 3 — «TI RIEMPIO IL MODULO, TU SALVI». 29 agosto 2026.
+//
+// Questo NON e' un attrezzo che legge. Non tocca il database, non ha
+// filtri da mettere e non puo' sbagliare reparto, perche' non guarda
+// niente: prende quello che Claude ha capito e lo rimanda al browser,
+// che apre il modulo del Lavoro gia' pieno.
+//
+// ⛔ L'AI NON SCRIVE MAI NEL DATABASE. Vale qui come in tutto il resto
+//    del gestionale: l'AI riempie le caselle, l'iscritto guarda e salva
+//    lui, col codice di sempre.
+//
+// ⚠️ LE CASELLE SONO UN ELENCO CHIUSO, come le tabelle qui sopra: quello
+//    che Claude manda in piu' si butta via. Non si gira un oggetto
+//    arrivato da fuori dentro un modulo cosi' com'e'.
+// ⚠️ LA DATA. La casella `j-data` e' un `<input type="date">`, che
+//    accetta SOLO la forma AAAA-MM-GG. Una data scritta in un altro modo
+//    la casella la rifiuta IN SILENZIO: resta vuota e nessuno capisce
+//    perche'. E' lo stesso difetto degli importi del 16 agosto. Quindi
+//    una data che non ha quella forma si butta qui: meglio il modulo con
+//    la data vuota che con una data che non c'e' mai arrivata.
+// ⚠️ Ogni pezzo si taglia a 300 caratteri: nel modulo del lavoro non c'e'
+//    niente di piu' lungo, e una casella non e' il posto dove far entrare
+//    un romanzo.
+// ---------------------------------------------------------------------
+const CASELLE_LAVORO = ['descrizione', 'dove', 'data', 'importo', 'cliente', 'operatore'];
+const LUNGHEZZA_MAX  = 300;
+const FORMA_DATA     = /^\d{4}-\d{2}-\d{2}$/;
+
+function costruisciModulo(tipo, dati) {
+  if (tipo !== 'lavoro') return { errore: 'modulo che non conosco: ' + String(tipo) };
+  const d = dati || {};
+  const campi = {};
+  CASELLE_LAVORO.forEach(function (k) {
+    if (d[k] === null || d[k] === undefined) return;
+    const v = String(d[k]).trim().slice(0, LUNGHEZZA_MAX);
+    if (!v) return;
+    if (k === 'data' && !FORMA_DATA.test(v)) return;   // vedi la nota sopra
+    campi[k] = v;
+  });
+  // senza «cosa c'e' da fare» non e' un lavoro: meglio niente modulo
+  if (!campi.descrizione) return { errore: 'manca cosa c\'e\' da fare' };
+  return { tipo: 'lavoro', campi: campi };
+}
+
+// ---------------------------------------------------------------------
 // ⛔ 29 agosto 2026 — PERCHE' ESISTE QUESTA FUNZIONCINA
 // Trovato da Alessio provando la chat vera: «dati.rpc(...).catch is not
 // a function». Quello che `rpc()` di Supabase restituisce NON e' una
@@ -181,6 +226,23 @@ const STRUMENTI = [
     name: 'cerca_per_nome',
     description: 'Cerca una parola nel nome o nel titolo delle cose di un tipo, dentro il reparto aperto. Usalo quando l\'utente nomina un cliente, un lavoro o un documento.',
     input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE }, parola: { type:'string' } }, required:['cosa','parola'] }
+  },
+  {
+    // ⛔ l'unico attrezzo che NON legge niente: vedi costruisciModulo
+    name: 'compila_lavoro',
+    description: 'Apre nel gestionale il modulo «Nuovo lavoro» GIA\' COMPILATO coi dati che hai capito. Usalo quando ti chiede di segnare, aggiungere o creare un lavoro nuovo. NON salva niente e non scrive niente: l\'utente guarda le caselle e preme Salva lui. Mettici solo quello che ti ha detto davvero.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        descrizione: { type:'string', description:'cosa c\'è da fare' },
+        dove:        { type:'string', description:'l\'indirizzo o il cantiere' },
+        data:        { type:'string', description:'la data prevista, SOLO nella forma AAAA-MM-GG. Se non la sai con certezza, non metterla.' },
+        importo:     { type:'string', description:'l\'importo in euro, solo il numero' },
+        cliente:     { type:'string', description:'il nome del cliente, scritto come sta nel gestionale' },
+        operatore:   { type:'string', description:'il nome di chi ci va' }
+      },
+      required: ['descrizione']
+    }
   }
 ];
 
@@ -190,11 +252,14 @@ const STRUMENTI = [
 //    se Claude sbaglia un'aliquota o una regola di sicurezza, la figura
 //    la fa lui, non Claude.
 // ---------------------------------------------------------------------
-function istruzioni(sezione, nomeReparto) {
+function istruzioni(sezione, nomeReparto, oggi) {
   return [
     'Sei la chat di aiuto dentro il gestionale di TrovaImpresa, usato da imprese edili, artigiani, studi tecnici, negozi di materiali e noleggi.',
     'Rispondi in italiano, corto e pratico, a passaggi numerati quando servono. Chi ti legge non è un tecnico di informatica.',
     'Stai guardando il reparto «' + (nomeReparto || 'quello aperto') + '»' + (sezione ? ', sezione «' + sezione + '»' : '') + '.',
+    // ⚠️ senza questa riga «giovedi' prossimo» non si sa cos'e': un
+    //    modello non sa che giorno e' oggi, e la data la inventerebbe.
+    'Oggi è ' + (oggi || 'oggi') + ', scritto come AAAA-MM-GG. Usalo per capire «domani», «giovedì prossimo», «la settimana scorsa».',
     '',
     'PUOI GUARDARE I SUOI DATI con gli attrezzi che hai. Usali quando la domanda riguarda le SUE cose («quante fatture ho», «quanto mi deve Rossi»): rispondere a memoria su dati che puoi leggere è un errore.',
     'Gli attrezzi vedono SOLO il reparto aperto. Se ti chiede di un altro reparto, dillo: deve cambiare reparto e richiedere.',
@@ -216,7 +281,13 @@ function istruzioni(sezione, nomeReparto) {
     'Scrivi i soldi all\'italiana, col punto delle migliaia e la virgola dei centesimi: 8.000,00 €.',
     '⚠️ Una fattura in BOZZA non è un incasso: non contarla fra i soldi che deve avere, e se la nomini di\' che è ancora una bozza.',
     '',
-    'Non scrivere e non cambiare mai niente nel gestionale: tu leggi e spieghi. Se una cosa va salvata, digli dove cliccare e la salva lui.'
+    'PUOI APRIRGLI UN MODULO GIÀ PIENO. Se ti chiede di segnare, aggiungere o creare un LAVORO nuovo, usa `compila_lavoro`: il gestionale gli apre il modulo del Lavoro con dentro quello che hai capito, e a salvarlo è lui col pulsante Salva.',
+    '⛔ Nel modulo ci metti SOLO quello che ti ha detto davvero. Quello che non sai si lascia vuoto, non si inventa: un modulo con dentro una data o un importo inventati è peggio di un modulo mezzo vuoto, perché uno lo salva senza guardare.',
+    'La data va scritta AAAA-MM-GG, se no la casella la rifiuta senza dire niente. Se non sei sicuro di che giorno intende, lascia fuori la data e chiediglielo.',
+    'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
+    'Per adesso sai aprire solo il modulo del LAVORO. Se ti chiede un cliente nuovo o un preventivo, mandalo al pulsante «Compila con AI» che sta in cima a quelle sezioni.',
+    '',
+    'Nel database non scrivi e non cambi mai niente: tu leggi, spieghi, e al massimo gli apri un modulo già pieno. A salvare è sempre lui.'
   ].join('\n');
 }
 
@@ -347,6 +418,19 @@ exports.handler = async function(event) {
   const messaggi = storia.concat([{ role: 'user', content: domanda }]);
   let risposta = '', tin = 0, tout = 0, errore = null;
 
+  /* ⛔ IL MODULO DA APRIRE (gradino 3). Resta `null` per tutti i messaggi
+     che sono solo domande: solo `compila_lavoro` lo riempie, e ne passa
+     UNO SOLO — due moduli aperti insieme sono due finestre sovrapposte. */
+  let modulo = null;
+
+  /* ⚠️ L'OROLOGIO DEL SERVER E' A GREENWICH. Alle 00:30 di Roma li' e'
+     ancora ieri: senza il fuso, «segnamelo domani» finirebbe un giorno
+     prima. E 'sv-SE' e' la lingua che scrive le date proprio nella forma
+     che vuole la casella del gestionale: AAAA-MM-GG. */
+  let oggi = '';
+  try { oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); }
+  catch (e) { oggi = new Date().toISOString().slice(0, 10); }
+
   try {
     for (let giro = 0; giro < GIRI_MAX; giro++) {
       const r = await conTempo(fetch('https://api.anthropic.com/v1/messages', {
@@ -359,7 +443,7 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
           max_tokens: 1500,
-          system: istruzioni(sezione, nomeReparto),
+          system: istruzioni(sezione, nomeReparto, oggi),
           tools: STRUMENTI,
           messages: messaggi
         })
@@ -397,6 +481,16 @@ exports.handler = async function(event) {
              chiede da auth.uid(), e col service role sarebbe vuoto. */
           var rs = await chiamaRpc(dati, 'chat_soldi', { p_mestiere: mestiere_id });
           esito = rs.errore ? { errore: rs.errore } : (rs.dati || { errore: 'nessun conto' });
+        } else if (t.name === 'compila_lavoro') {
+          /* ⛔ QUI NON SI LEGGE E NON SI SCRIVE NIENTE. Non c'e' nessun
+             filtro da mettere perche' non si guarda nessun dato: si
+             prepara solo il modulo che aprira' il browser, e a salvarlo
+             sara' l'iscritto. Il controllo delle caselle sta tutto in
+             `costruisciModulo`, che il banco prova da sola. */
+          const m = costruisciModulo('lavoro', inp);
+          if (m.errore)    esito = { errore: m.errore };
+          else if (modulo) esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
+          else { modulo = m; esito = { ok: true, aperto: 'gli ho aperto il modulo del lavoro, gia\' compilato' }; }
         } else {
           esito = { errore: 'attrezzo che non esiste' };
         }
@@ -441,7 +535,7 @@ exports.handler = async function(event) {
   } catch (e) { console.error('[chat] registro:', e && e.message); }
 
   if (errore && !risposta) return rispondi(502, { error: errore });
-  return rispondi(200, { risposta: risposta, come_pagato: comePagato, restanti: Math.max((stato.restanti || 0) - (comePagato === 'compreso' ? 1 : 0), 0) });
+  return rispondi(200, { risposta: risposta, modulo: modulo, come_pagato: comePagato, restanti: Math.max((stato.restanti || 0) - (comePagato === 'compreso' ? 1 : 0), 0) });
 };
 
 // per il banco: le parti pure si provano da sole, senza database
@@ -449,6 +543,8 @@ exports.ATTREZZI = ATTREZZI;
 exports.DOVE_SI_CERCA = DOVE_SI_CERCA;
 exports.STRUMENTI = STRUMENTI;
 exports.costruisciLettura = costruisciLettura;
+exports.costruisciModulo = costruisciModulo;
+exports.CASELLE_LAVORO = CASELLE_LAVORO;
 exports.esegui = esegui;
 exports.istruzioni = istruzioni;
 

@@ -116,6 +116,32 @@
     return ' <button class="chip" type="button" data-apri="' + tipo + '" data-apri-id="' + id + '">' + lab + '</button>';
   }
 
+  /* ============================================================
+     ⛔ 29 agosto 2026 — IL MODULO GIA' PIENO (gradino 3)
+     ============================================================
+     Quando la chat capisce che gli stai dicendo di SEGNARE un lavoro,
+     la function risponde, oltre al testo, anche con un `modulo`. Qui si
+     apre.
+     ⛔ Ad aprirlo e a riempirlo NON e' questa pagina: e'
+     `AI.compilaLavoroDaChat` dentro js/ai-integrazione.js, che e' la
+     STESSA macchina del pulsante «Compila con AI». Qui si preme un
+     campanello, come per «Aprilo»: se ricopiassi qui i nomi delle
+     caselle, il modulo del lavoro starebbe scritto in due posti, e un
+     campo aggiunto domani finirebbe in uno solo dei due.
+     ⛔ E non si salva niente: il modulo si apre pieno, a salvare e' lui.
+     ⚠️ Per adesso l'unico modulo e' il lavoro. Un tipo che non conosco
+     non apre niente e lo dice, invece di aprire il modulo sbagliato.
+     ============================================================ */
+  function apriModulo(m) {
+    if (!m || !m.campi) return false;
+    if (m.tipo !== 'lavoro') { scrivi('ai', 'Questo modulo non lo so ancora aprire da qui.'); return false; }
+    if (!window.AI || typeof window.AI.compilaLavoroDaChat !== 'function') {
+      scrivi('ai', 'Il modulo non riesco ad aprirtelo: ricarica la pagina e riprova.');
+      return false;
+    }
+    return !!window.AI.compilaLavoroDaChat(m.campi);
+  }
+
   /* ------------------------------------------------------------------
      LA SEZIONE
      ⛔ Colori e misure vengono dalle variabili di css/gestionale.css:
@@ -338,6 +364,7 @@
     if (!t) { scrivi('ai', 'La sessione è scaduta. Rientra e riprova.'); return; }
 
     inCorso = true;
+    var apertoUnModulo = false;
     casella.value = '';
     document.getElementById('chat-manda').disabled = true;
     scrivi('utente', esc(domanda));
@@ -361,6 +388,9 @@
         scrivi('ai', testoRisposta(d.risposta));
         scriviRestanti(d.restanti);
         caricaArchivio();   /* la chiacchierata nuova compare subito a destra */
+        /* ⛔ il modulo si apre DOPO aver scritto la risposta: se si aprisse
+           prima, la finestra coprirebbe la riga che dice cosa ci ha messo. */
+        if (d.modulo) apertoUnModulo = apriModulo(d.modulo);
       } else if (d.serve_pro) {
         scrivi('ai', 'La <b>Chat con AI</b> fa parte del piano <b>Pro</b>.');
       } else if (d.serve_crediti) {
@@ -379,7 +409,13 @@
 
     inCorso = false;
     document.getElementById('chat-manda').disabled = false;
-    casella.focus();
+    /* ⛔ 29 agosto 2026 — IL CURSORE NON SI RIPRENDE IL MODULO.
+       Se la risposta ha aperto un modulo, il cursore adesso sta nella
+       prima casella da controllare: riportarlo qui vorrebbe dire
+       trovarsi il modulo aperto davanti e scrivere nella chat dietro.
+       Trovato dal banco del ponte, non a occhio: la riga stava in fondo
+       a `manda`, cioe' DOPO che il modulo si era gia' aperto. */
+    if (!apertoUnModulo) casella.focus();
   }
 
   /* ------------------------------------------------------------------

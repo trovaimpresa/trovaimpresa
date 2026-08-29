@@ -647,6 +647,69 @@
     );
   }
 
+  /* ==================================================================
+     ⛔ 29 agosto 2026 (gradino 3) — LA MACCHINA CHE RIEMPIE IL LAVORO
+     STA IN UN POSTO SOLO.
+     Prima queste otto righe erano chiuse dentro `compilaLavoro`, cioe'
+     raggiungibili solo da chi passava dalla finestrella. Adesso la chat
+     deve riempire lo stesso identico modulo: se ricopiassi le righe di
+     la', la stessa regola starebbe in due posti, e un campo aggiunto
+     domani finirebbe in uno solo dei due.
+     ⚠️ Il comportamento dei pulsanti «Compila con AI» NON cambia:
+     adesso chiamano questa, che fa quello che facevano prima, riga per
+     riga, nello stesso ordine.
+     ================================================================== */
+  function riempiLavoro(d) {
+    if (!d) return false;
+    const primo = { el: null };
+    riempiCampo('j-desc', d.descrizione, primo);
+    riempiCampo('j-dove', d.dove, primo);
+    riempiCampo('j-data', d.data, primo);
+    riempiCampo('j-imp', d.importo, primo);
+
+    // select popolati in modo asincrono: imposta il valore solo quando l'opzione compare
+    impostaSelectQuando(document.getElementById('j-cliente'), d.cliente, 3000);
+    impostaSelectQuando(document.getElementById('j-operaio'), d.operatore, 3000);
+
+    avviso('Modulo compilato, controlla i dati e premi Salva');
+    if (primo.el) primo.el.focus();
+    return true;
+  }
+  AI.riempiLavoro = riempiLavoro;
+
+  /* ==================================================================
+     ⛔ LA PORTA DELLA CHAT — gradino 3, 29 agosto 2026.
+
+     La chiama `js/gest-chat.js` quando la function della chat risponde
+     con un `modulo`. Qui NON si chiede niente all'AI e non si paga
+     niente: il testo l'ha gia' letto Claude dentro la chat, e quello che
+     arriva qui sono gia' le caselle pronte.
+
+     ⛔ E non si salva niente: si apre il modulo e basta. A salvare e'
+        sempre l'iscritto, col pulsante di sempre. E' la regola che vale
+        in tutto il gestionale.
+
+     ⚠️ Il modulo si apre col secondo argomento `false`, cioe' SENZA la
+        riga «Compila con AI» spalancata. Quella riga, quando si apre da
+        sola, si prende il cursore dopo 60 millesimi di secondo e lo
+        toglie dalla prima casella appena riempita. Dalla chat il testo
+        l'hai gia' scritto: una seconda casella dove riscriverlo sarebbe
+        solo una cosa in mezzo.
+     ⚠️ Il ripiego con `new-job` serve se il browser ha in memoria una
+        versione vecchia di gestionale-app.html, come per `compilaLavoro`.
+     ================================================================== */
+  AI.compilaLavoroDaChat = function (d) {
+    chiudiTutto();
+    if (typeof window.gestApriModuloAI === 'function') {
+      window.gestApriModuloAI('lavoro', false);
+    } else {
+      const apri = document.querySelector('[data-action="new-job"]');
+      if (!apri) return false;
+      apri.click();
+    }
+    return riempiLavoro(d);
+  };
+
   function compilaLavoro() {
     if (typeof window.gestApriModuloAI === 'function') { window.gestApriModuloAI('lavoro'); return; }
     pannelloCompila(
@@ -662,19 +725,7 @@
         const apri = document.querySelector('[data-action="new-job"]');
         if (apri) apri.click();                           // apre il form Lavoro (modalità semplice/supa)
 
-        const primo = { el: null };
-        riempiCampo('j-desc', d.descrizione, primo);
-        riempiCampo('j-dove', d.dove, primo);
-        riempiCampo('j-data', d.data, primo);
-        riempiCampo('j-imp', d.importo, primo);
-
-        // select popolati in modo asincrono: imposta il valore solo quando l'opzione compare
-        impostaSelectQuando(document.getElementById('j-cliente'), d.cliente, 3000);
-        impostaSelectQuando(document.getElementById('j-operaio'), d.operatore, 3000);
-
-        avviso('Modulo compilato, controlla i dati e premi Salva');
-        if (primo.el) primo.el.focus();
-        return true;
+        return riempiLavoro(d);
       }
     );
   }
