@@ -968,6 +968,12 @@
     .nav-sinistra .logo{ order:0; }
     .nav-iscriviti{ order:1; }
     .nav-login{ order:2; }
+    /* ⛔ 29 agosto 2026 - IL BERSAGLIO PER IL DITO. Le voci del menu erano
+       alte 35-37 px: sotto i 44 px un dito grosso, o una mano col guanto da
+       cantiere, sbaglia bersaglio. La scritta resta dov'e': cresce solo lo
+       spazio intorno, e i pulsanti restano in fila come prima. */
+    .nav-a, .nav-login, .nav-iscriviti{
+      min-height:44px; display:inline-flex; align-items:center; justify-content:center; }
     .hero{ padding:34px 16px 30px !important; }
     .hero-h1{ font-size:25px; }
     .hero .hero-sub{ font-size:15px; margin-bottom:20px; }

@@ -1521,8 +1521,12 @@
       rieCard({tab:"prodotti",titolo:"Prodotti",dati:P.length>0,
         n:P.length,lab:_plur(P.length,"prodotto a catalogo","prodotti a catalogo"),
         vuoto:"Nessun prodotto ancora",
-        righe:P.slice().sort((a,b)=>((+b.prezzo||0)*(+b.quantita||0))-((+a.prezzo||0)*(+a.quantita||0))).slice(0,2)
-               .map(p=>({t:p.nome||"—",v:eurRie((+p.prezzo||0)*(+p.quantita||0))}))}),
+        /* ⛔ 29 agosto 2026 - IL PREZZO, NON IL VALORE. Qui usciva prezzo per
+           quantita': il cemento da 5,50 € si leggeva "275,00 €" e sembrava il
+           suo prezzo. Il valore del magazzino ha gia' la sua carta qui accanto:
+           in «Prodotti» ci va il prezzo al banco, quello che dici al cliente. */
+        righe:P.slice().sort((a,b)=>(+b.prezzo||0)-(+a.prezzo||0)).slice(0,2)
+               .map(p=>({t:p.nome||"—",v:eurRie(+p.prezzo||0)+(p.unita?"/"+p.unita:"")}))}),
 
       rieCard({tab:"magazzino",titolo:"Magazzino",dati:P.length>0,
         n:eurRie(valore),lab:"vale la merce che hai in casa",
