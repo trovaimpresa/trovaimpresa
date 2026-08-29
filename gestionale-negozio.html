@@ -3752,9 +3752,19 @@
       const q=Math.abs(_numIt("#nm-quantita")||0);
       const unit=(tipo==="vendita")?(+p.prezzo||0):(+p.prezzo_acquisto|| +p.prezzo||0);
       const imp=$("#nm-importo");
-      if(q&&unit&&imp&&(!imp.value||imp.value===nmImportoAuto)){
-        nmImportoAuto=String(Math.round(unit*q*100)/100);
-        imp.value=nmImportoAuto;
+      /* 29 agosto 2026 - L'IMPORTO SI RIFA' AD OGNI QUANTITA'.
+         Prima si confrontavano le STRINGHE: appena la casella si riscriveva
+         all'italiana (17,50) non tornava piu' uguale al conto fatto col
+         punto (17.5), e l'importo restava fermo al primo numero. Adesso si
+         confrontano i NUMERI, e quello che scrive Alessio a mano non si
+         tocca mai. */
+      if(q&&unit&&imp){
+        const ora=_numeroIt(imp.value), mio=_numeroIt(nmImportoAuto);
+        if(ora==null||(mio!=null&&Math.abs(ora-mio)<0.005)){
+          const val=Math.round(unit*q*100)/100;
+          nmImportoAuto=val.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+          imp.value=nmImportoAuto;
+        }
       }
     }
   }
