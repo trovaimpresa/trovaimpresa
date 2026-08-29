@@ -4784,9 +4784,19 @@ function montaPorteGestionale() {
     const tuo = document.getElementById(porta.tuo);
     if (!box) return;
 
-    // il Premium AI comprende il Premium: chi ha l'AI entra da tutte e due
-    const aperta = porta.chiave === 'premium' ? haPremium : haAI;
-    const suo    = porta.chiave === 'premium' ? (haPremium && !haAI) : haAI;
+    // ⛔ OGNUNO ENTRA DALLA SUA PORTA, E QUELLA SBAGLIATA CHIEDE DI PAGARE.
+    // Regola di Alessio, 29 agosto: «se clicchi per sbaglio il gestionale
+    // opposto ti chiedera' di pagare, semplice». Chi non paga ancora vede
+    // il listino; chi paga gia' viene mandato al portale di Stripe, che
+    // cambia il piano dentro l'abbonamento che ha (mai un secondo).
+    //
+    // Sono due gestionali: a sinistra il Premium, a destra il Pro con la
+    // Chat con AI. Se la porta Premium si aprisse anche a chi ha il Pro,
+    // quello si troverebbe dentro un «gestionale Premium» che pero' la
+    // chat ce l'ha (la chat segue il piano, non la porta) — ed e'
+    // esattamente la confusione da evitare.
+    const aperta = porta.chiave === 'premium' ? (haPremium && !haAI) : haAI;
+    const suo    = aperta;
     if (tuo) tuo.style.display = suo ? '' : 'none';
 
     box.innerHTML = '';
