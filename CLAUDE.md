@@ -18579,3 +18579,154 @@ diversa dalla data del documento. Alla fine ha offerto di segnare il fornitore.
 *«Mi serve che i soldi spesi dal cliente siano spesi bene.»* — Alessio, →30←
 agosto. L'unica cosa che il cliente non trova gratis da un'altra parte sono
 **i suoi numeri**: il →39←€ non lo vende «l'AI», lo vende «sa le mie cose».
+
+---
+
+# 30 AGOSTO 2026 (pomeriggio) — I QUATTRO PANNELLI, CARD PER CARD
+
+⚠️ **Lezione della giornata.** →9← difetti chiusi, e i →3← peggiori **non li
+ha visti nessun banco**: sono usciti aprendo la pagina vera nel browser. I
+banchi (→348← prove) servono a non farli tornare, non a trovarli.
+
+⛔ **E una seconda, nuova:** un banco che prova una FINTA pagina non prova la
+pagina. Due volte oggi il banco era verde su un ramo morto.
+
+---
+
+## I →9← difetti chiusi
+
+| # | cosa succedeva | quanti |
+|---|---|---|
+| 1 | `js/completa-profilo.js` leggeva `lavori_foto.impresa_id`, colonna che non esiste → →400← a ogni apertura, foto sempre a zero | →33← imprese |
+| 2 | il banner del pannello si vedeva tagliato a metà (`cover`) | →4← pannelli |
+| 3 | «Carica logo» stampato **sopra** il banner | →67← senza logo |
+| 4 | «Salva» in Foto dei lavori creava schede vuote dicendo «✅ salvato» | →51← già in giro, →26← imprese |
+| 5 | ore del quaderno `type="number"`: «7,5» si salvava `null`, in silenzio | →3← pannelli |
+| 6 | →330← scritte sotto i →13← px | →4← pannelli + →3← file js |
+| 7 | importi del cantiere: «2.480,50» rifiutato, passava solo il punto | →3← pannelli |
+| 8 | la calcolatrice diceva →5← ÷ →0← = →0← | →4← pannelli |
+| 11 | il prezzo del preventivo: «1.500» partiva al cliente come →1←€ | →4← pannelli |
+| 9 | scadenza certificazione scritta «2027-12-31» | →3← pannelli |
+
+## La regola dei numeri, adesso in un posto solo
+
+`js/numero-italiano.js` — `window.numeroItaliano(testo)`. **Copia verbatim** di
+`_numeroIt` di `js/gest-computo.js`. Il tag va PRIMA di `strumenti-cantiere.js`.
+⛔ La regola sta in **due posti** (pannelli e gestionale): il banco
+`banco-numero-italiano.js` le fa girare fianco a fianco su →38← casi.
+
+⛔ **`type="number"` NON protegge i soldi.** Misurato nel browser vero:
+scrivendo «1500,50» la casella restituisce **stringa vuota** e
+`checkValidity()` dice `true` — il numero sparisce senza un avviso. E
+`parseInt("1.500")` fa →1←. La casella giusta è
+`type="text" inputmode="decimal"` letta da `numeroItaliano`.
+
+## ⛔ TRE TRAPPOLE DA NON RIPETERE
+
+**→1←. Le emoji scritte da JS spariscono dal testo.** In fondo ai pannelli c'è
+`iconizza()`: cammina su tutti i nodi di testo e trasforma le emoji in SVG,
+con un MutationObserver che rifà il giro a ogni modifica. Quindici millesimi
+dopo, `stato.textContent = '⏳ Caricamento...'` si legge « Caricamento...».
+**Nessun controllo deve decidere leggendo un'emoji dal testo: si usa una
+variabile.** (Non tutte spariscono: 🎧 resta, ⏳ e ✅ no.)
+
+**→2←. `contain` senza `no-repeat` va a piastrelle.** Il valore predefinito di
+`background-repeat` è `repeat`: con `cover` non si vede perché l'immagine
+copre tutto, con `contain` il banner si ripeterebbe.
+
+**→3←. Non bastano i →4← file HTML.** Alzate le misure nei pannelli, era
+rimasta una scritta a →12← px: il cartellino «Completato», scritto da
+`strumenti-cantiere.js`. **I file .js disegnano pezzi di schermata con lo
+stile dentro.** Il banco guarda →14← file, non 4.
+
+## Come si prova che il metro funziona
+
+Quando tutti i file sono a posto non c'è più un «prima» da confrontare: il
+conto darebbe zero anche col metro rotto. Allora il banco fa girare il
+rilevatore su una **finta pagina che contiene apposta le misure sbagliate**,
+e deve trovarle tutte.
+
+## I banchi (in `prove-claude/`, che è nel `.gitignore`)
+
+`banco-numero-italiano` →112← · `banco-calcolatrice-data` →62← ·
+`banco-banner` →54← · `banco-testo-13px` →39← · `banco-lavoro-vuoto` →35← ·
+`banco-ore-quaderno` →27← · `banco-foto-profilo` →19←. Tutti verdi, tutti
+senza rete e senza database, tutti girati **anche sulla versione prima**.
+
+---
+
+## ⛔ QUELLO CHE RESTA APERTO — trovato entrando nelle card, non ancora sistemato
+
+### Risoluzione problemi: le risposte mandano a pulsanti che non esistono
+
+Le →10← domande si aprono, ma dentro dicono:
+
+* «cerca la card **'Diventa Premium' o 'Abbonamento'**» → **non esistono più**,
+  tolte il 29-30 agosto. Adesso sono le due porte «Attiva Premium e gestionale»
+* «clicca sulla card **'Modifica profilo'**» → non è una card: è un pulsante
+  dentro «Il mio profilo pubblico»
+* «clicca **'Contatta assistenza'**» → il pulsante si chiama «Scrivi
+  all'assistenza»
+* «nel pannello trovi un **link diretto da condividere** con i clienti» per le
+  recensioni → **quel link non esiste da nessuna parte**
+
+⛔ **E l'AI ripete le stesse cose**: `chiediSupportoAI()` costruisce il prompt
+da `FAQS_LIST` e da nient'altro. Provato: alla domanda «Come faccio a passare
+al Premium?» ha risposto «cerca la card 'Diventa Premium'». **Una fonte sola,
+quindi un fix solo.**
+
+### Segnala un problema: la conferma dice l'indirizzo sbagliato
+
+Funziona (vuoto rifiutato, testo salvato in `segnalazioni` + email). Ma la
+schermata dice «**Ti risponderemo a info@trovaimpresa.com**» — che è
+l'indirizzo di TrovaImpresa, non dell'artigiano.
+
+### Anteprima del pannello pubblico
+
+* Il pulsante **«📱 Mobile» non fa niente.** Provato a →570← px e a →1280←:
+  la larghezza resta →903← px. Il pulsante si colora, quindi sembra funzionare.
+  `anteprimaDevice()` usa `max-width`, che su quell'elemento non ha effetto;
+  con `width` funziona (provato: diventa →390←).
+* **Il profilo pubblico mostra `nome`, mai `nome_attivita`** (riga 779 di
+  `profilo-impresa.html`). Sono →6← imprese su →102← dove i due differiscono —
+  la peggiore: pannello «VCO AUTOMAZIONE», ai clienti «Alessandro». E →1←
+  impresa senza nome ha il titolo del profilo vuoto.
+
+### Non verificabile dal mio browser
+
+«Scarica PNG» del QR Code: il download resta appeso nel pannello di Claude
+(i download sono bloccati lì) e il riquadro «fatto» non compare. **Va provato
+con un clic vero.**
+
+### Altre cose viste passando, non toccate
+
+* la calcolatrice scrive «2.5» col punto, e il tasto della virgola scrive un
+  punto: è l'ultimo posto del pannello che parla inglese
+* `.dash-welcome` («Pannello artigiano • Edilizia / Muratura») sta **al limite
+  esatto**: →216← px di scritta in →216← di casella. Un nome più lungo finisce
+  con i puntini
+* `fmtData` in `strumenti-cantiere.js` legge le date con `new Date(iso)`: in
+  Italia va sempre bene, ma è la trappola del fuso orario addormentata. Per la
+  scadenza della certificazione ho usato `_dataIt`, che **spezza la stringa**
+* sul telefono, nella coppia «Le mie offerte / Candidature ricevute», la metà
+  di sinistra si vede vuota
+* nel gestionale resta il →401← su `get_ai_status` a ogni apertura
+* in impresa, professionisti e negozio il blocco di stile
+  `.dash-hero-logo-col` è scritto **due volte**, identico
+
+## Cosa funziona, provato fino al database
+
+Nota · video (col controllo YouTube/Vimeo) · certificazione · nuovo cantiere e
+le sue →5← schede · messaggio al supporto · risposta al cliente in chat ·
+«Genera preventivo con AI» e l'invio · QR Code (il disegno) · Personalizza
+pannello (i →6← temi, l'anteprima dal vivo, il salvataggio che **non cancella
+logo e banner**) · le →4← pagine esterne (Pubblicità, Le tue inserzioni,
+Cerco/Sono Subappaltatore) rispondono →200←, con e senza `.html`.
+
+## Il gestionale
+
+⛔ **È ancora chiuso a tutti tranne il fondatore**: `MANUTENZIONE = true` in
+`js/gate-gestionale.js`. Il 30 agosto Alessio ha deciso di non aprirlo ancora.
+Misurato quel giorno: →102← imprese, **tutte** col Premium valido, ma **→99←
+non hanno nessun reparto** — entrerebbero a mani vuote, e quella schermata non
+l'ha mai aperta nessuno.
