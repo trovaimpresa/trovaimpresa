@@ -88,7 +88,7 @@ exports.handler = async (event) => {
     // nel database: piano 'premium' e, se c'e' una scadenza, non passata.
     const { data: impresa } = await supabase
       .from('imprese')
-      .select('piano, premium_scadenza, email')
+      .select('piano, premium_scadenza, email, chat_pro, chat_pro_scadenza')
       .eq('user_id', utente.id)
       .order('id', { ascending: true })
       .limit(1)
@@ -103,6 +103,25 @@ exports.handler = async (event) => {
       return rispondi(403, {
         error: 'senza_premium',
         messaggio: 'I crediti si usano con il Premium attivo. Attiva il Premium e poi ricarica quando vuoi.'
+      });
+    }
+
+    // ⛔ 30 agosto 2026 — E NON BASTA IL PREMIUM: SERVE IL PREMIUM AI.
+    // I crediti li spende SOLO la chat, e la chat e' del Premium AI:
+    // «quello da 29 non ha la chat, ha solamente un assistente AI».
+    // Chi ha solo il Premium ha il piano AI 'base', e `consume_ai_credit`
+    // si ferma li' prima ancora di guardare i gettoni: pagherebbe 19 euro
+    // per una cosa che non puo' usare.
+    // ⚠️ L'assistente AI (il pulsante «Aiuto», 30 al mese) non c'entra:
+    //    ha un contatore suo e non tocca questi crediti.
+    const scadAI = impresa && impresa.chat_pro_scadenza ? new Date(impresa.chat_pro_scadenza) : null;
+    const haPremiumAI = !!impresa && impresa.chat_pro === true
+      && (!scadAI || isNaN(scadAI.getTime()) || scadAI.getTime() > Date.now());
+
+    if (!haPremiumAI) {
+      return rispondi(403, {
+        error: 'senza_premium_ai',
+        messaggio: 'Le ricariche servono alla Chat con AI, che fa parte del Premium AI. Attiva il Premium AI dal tuo pannello e poi ricarica quando vuoi.'
       });
     }
 
