@@ -232,8 +232,14 @@ function renderPreventiviCantiere() {
 async function salvaPreventivoCantiere() {
   if (!cantiereAttivo) return;
   const importoRaw = document.getElementById('prev-cant-importo').value;
-  if (importoRaw === '' || isNaN(Number(importoRaw))) { alert('Inserisci un importo valido.'); return; }
-  const importo = Number(importoRaw);
+  /* 30 agosto 2026 — LA VIRGOLA NEI SOLDI, che qui veniva rifiutata.
+     La casella dice «0,00» e invita la virgola, ma Number("2.480,50") e
+     Number("1500,75") sono NaN: rispondeva «Inserisci un importo valido»
+     a chi scriveva l'importo come lo scrive un italiano. Passava solo il
+     punto all'inglese. Adesso legge numeroItaliano (js/numero-italiano.js,
+     stessa regola del gestionale). */
+  const importo = numeroItaliano(importoRaw);
+  if (importo == null) { alert('Inserisci un importo valido.'); return; }
   const descrizione = document.getElementById('prev-cant-descrizione').value.trim() || null;
   const accettato = document.getElementById('prev-cant-accettato').checked;
   const fileInput = document.getElementById('prev-cant-file');
@@ -323,8 +329,10 @@ function renderFattureCantiere() {
 async function salvaFatturaCantiere() {
   if (!cantiereAttivo) return;
   const importoRaw = document.getElementById('fatt-cant-importo').value;
-  if (importoRaw === '' || isNaN(Number(importoRaw))) { alert('Inserisci un importo valido.'); return; }
-  const importo = Number(importoRaw);
+  /* 30 agosto 2026 — stessa storia del preventivo qui sopra: «980,10»
+     veniva rifiutato e passava solo «980.10». Vedi js/numero-italiano.js. */
+  const importo = numeroItaliano(importoRaw);
+  if (importo == null) { alert('Inserisci un importo valido.'); return; }
   const numero = document.getElementById('fatt-cant-numero').value.trim() || null;
   const data_emissione = document.getElementById('fatt-cant-data-emissione').value || null;
   const data_scadenza  = document.getElementById('fatt-cant-data-scadenza').value || null;
