@@ -524,7 +524,18 @@ exports.handler = async function(event) {
   }
   if (!stato) return rispondi(503, { error: 'Non riesco a controllare il tuo piano. Riprova fra poco.' });
   if (!stato.ha_pro) {
-    return rispondi(403, { error: 'La Chat con AI è nel piano Pro.', serve_pro: true });
+    // ⛔ 30 agosto 2026 — L'ASSAGGIO FINITO NON E' «NON CE L'HAI».
+    // Chi non ha il Premium AI ha 10 messaggi in tutto per capire se gli
+    // serve. Quando finiscono la frase deve dirgli cosa ha appena usato e
+    // cosa comprerebbe, non un secco «non e' nel tuo piano».
+    return rispondi(403, {
+      error: stato.assaggio
+        ? 'Hai finito i ' + stato.compresi + ' messaggi di prova della Chat con AI. '
+          + 'Con il Premium AI ne hai 300 al mese.'
+        : 'La Chat con AI è nel piano Premium AI.',
+      serve_pro: true,
+      assaggio_finito: !!stato.assaggio
+    });
   }
 
   // ---- 5. chi paga questo messaggio ---------------------------------

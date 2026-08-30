@@ -403,6 +403,13 @@
              dire niente. Il piano non si tocca: si spegne solo la voce. */
           var daPortaPremium=(new URLSearchParams(location.search).get('piano')==='premium');
           window._chatPro=haChatPro(row) && !daPortaPremium;
+          /* ⛔ 30 agosto 2026 — L'ASSAGGIO.
+             Chi non ha il Premium AI vede lo stesso la voce «Chat con AI»
+             e puo' scrivere 10 messaggi in tutto: se non la vede, non
+             comprera' mai un piano che costa 100 euro l'anno in piu'.
+             ⚠️ Non dalla porta Premium: da li' si entra nel gestionale
+             senza AI, ed e' quello il senso di avere due porte. */
+          window._chatAssaggio=(!haChatPro(row)) && !daPortaPremium;
           registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
           decidi(window._gestEmail, ok?'ok':'premium');
         },function(){

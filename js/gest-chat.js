@@ -257,10 +257,18 @@
      ⚠️ Se non arriva, la chat funziona lo stesso: e' una scritta, non
      una serratura. Chi decide davvero e' sempre la function.
      ------------------------------------------------------------------ */
+  /* ⛔ 29 agosto: la barra in alto del gestionale e questa riga devono
+     dire la STESSA parola. Prima qui c'era scritto «Piano Pro» mentre la
+     barra diceva PREMIUM: due nomi per lo stesso account. Adesso qui il
+     nome del piano non si scrive proprio: si dicono solo i messaggi. */
+  var modoAssaggio = false;
   function scriviRestanti(n) {
     var sotto = document.getElementById('chat-sotto');
     if (!sotto || typeof n !== 'number') return;
-    sotto.innerHTML = 'Piano <b>Pro</b> &middot; ti restano <b>' + n + '</b> messaggi compresi questo mese';
+    sotto.innerHTML = modoAssaggio
+      ? 'Prova: ti ' + (n === 1 ? 'resta <b>1</b> messaggio' : 'restano <b>' + n + '</b> messaggi')
+        + ' &middot; con il <b>Premium AI</b> ne hai 300 al mese'
+      : 'Ti restano <b>' + n + '</b> messaggi compresi questo mese';
   }
 
   async function aggiornaSotto() {
@@ -269,7 +277,7 @@
       var r = await window._gc.rpc('chat_stato', {});
       if (r && !r.error && r.data) {
         var s = Array.isArray(r.data) ? r.data[0] : r.data;
-        if (s) scriviRestanti(s.restanti);
+        if (s) { modoAssaggio = !!s.assaggio; scriviRestanti(s.restanti); }
       }
     } catch (e) { /* niente: e' un di piu' */ }
   }
@@ -398,7 +406,11 @@
            prima, la finestra coprirebbe la riga che dice cosa ci ha messo. */
         if (d.modulo) apertoUnModulo = apriModulo(d.modulo);
       } else if (d.serve_pro) {
-        scrivi('ai', 'La <b>Chat con AI</b> fa parte del piano <b>Pro</b>.');
+        /* la frase la scrive il server: sa se e' un assaggio finito o
+           un piano che non c'e'. Qui si aggiunge solo la strada per
+           comprare, che e' il pannello: le porte stanno li'. */
+        scrivi('ai', esc(d.error || 'La Chat con AI fa parte del Premium AI.')
+          + (d.assaggio_finito ? '<br><a href="/pannello-impresa.html#dashboard">Attiva il Premium AI dal pannello</a>' : ''));
       } else if (d.serve_crediti) {
         scrivi('ai', esc(d.error) + '<br><a href="/ricarica-crediti.html">Vai alla ricarica dei crediti</a>');
       } else {
@@ -438,11 +450,13 @@
 
   var tentativi = 0;
   function aspettaIlPiano() {
-    if (window._chatPro === true) { accendi(); return; }
+    /* ⛔ 30 agosto: si accende anche per l'assaggio (10 messaggi in
+       tutto), se no chi non ha il piano non sa nemmeno che esiste. */
+    if (window._chatPro === true || window._chatAssaggio === true) { accendi(); return; }
     /* deciso: se non ha il Pro la voce resta spenta e non si dice niente.
        Il posto dove si offre il Pro e' la pagina dei prezzi, non il menu
        di chi sta lavorando. */
-    if (window._chatPro === false) return;
+    if (window._chatPro === false && window._chatAssaggio === false) return;
     if (++tentativi > 60) return;           /* ~30 secondi e poi basta */
     setTimeout(aspettaIlPiano, 500);
   }
