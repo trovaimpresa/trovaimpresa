@@ -53,6 +53,34 @@
     height: auto;
   }
 
+  /* ⛔ 30 agosto 2026 — LA MAPPA GRIGIA SUL TELEFONO.
+     Le due reti qui sopra prendono anche i pezzi interni di Leaflet. Le
+     piastrelle della mappa stanno dentro un contenitore largo ZERO (Leaflet
+     le posiziona una per una col transform), quindi «max-width:100%» per loro
+     vuol dire max-width:0. Misurate sul sito vero: →0← px sotto i →768← px,
+     →256← px sopra. Al posto della mappa restava un rettangolo grigio, senza
+     nemmeno il segnaposto — su →66← schede su →80← e su ogni altra pagina
+     del sito che mostra una mappa (→24← pagine).
+
+     ⚠️ PERCHE' NON BASTA `.leaflet-tile{max-width:none!important}`:
+     la rete qui sopra si scrive `body *:not(#cal-griglia):not(.calendar-header)`,
+     e in CSS un `:not()` pesa quanto quello che ha dentro. Quel `#cal-griglia`
+     le regala il peso di un ID, cioe' (1,1,1). Una regola di sole classi non
+     la batte mai — e infatti non la batte nemmeno la difesa che Leaflet ha
+     nel suo foglio (`.leaflet-container .leaflet-tile`, che vale (0,2,1)).
+     Il `:not(#nessuno)` qui sotto e' un id che NON esiste: sta li' solo per
+     pesare, e porta queste righe a (1,2,0), che vince.
+
+     Si esce dalla rete SOLO dentro la mappa, e solo per le piastrelle e i
+     segnaposti: i fumetti (`.leaflet-popup`) restano larghi al massimo quanto
+     lo schermo, come devono. */
+  .leaflet-container:not(#nessuno) .leaflet-tile,
+  .leaflet-container:not(#nessuno) .leaflet-tile-container,
+  .leaflet-container:not(#nessuno) .leaflet-marker-icon,
+  .leaflet-container:not(#nessuno) .leaflet-marker-shadow {
+    max-width: none !important;
+  }
+
   /* Tabelle larghe: scorrono invece di schiacciarsi */
   table {
     display: block;
