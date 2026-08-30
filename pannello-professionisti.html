@@ -4458,9 +4458,9 @@ async function eliminaNota(id) {
   var pendOp = null;
   var resetNext = false;
 
-  function show() {
+  function show(avviso) {
     var el = document.getElementById('wcalc-display');
-    if (el) el.textContent = cur;
+    if (el) el.textContent = (avviso === undefined) ? cur : avviso;
   }
 
   function compute() {
@@ -4472,7 +4472,14 @@ async function eliminaNota(id) {
       case '+': r = a + b; break;
       case '-': r = a - b; break;
       case '*': r = a * b; break;
-      case '/': r = b === 0 ? 0 : a / b; break;
+      case '/':
+        /* ⛔ 30 agosto 2026 — 5 ÷ 0 rispondeva 0.
+           Lo zero era stato messo per non far comparire «Infinity», ma e'
+           una RISPOSTA SBAGLIATA data con sicurezza, ed e' peggio di un
+           errore: uno divide un importo per zero per sbaglio, legge 0 e ci
+           crede. Adesso torna null e la calcolatrice lo dice. */
+        if (b === 0) return null;
+        r = a / b; break;
       default:  return b;
     }
     return Math.round(r * 1e10) / 1e10;
@@ -4496,9 +4503,18 @@ async function eliminaNota(id) {
     show();
   };
 
+  /* la divisione per zero azzera tutto e lo scrive sul display; il primo
+     tasto premuto dopo riparte da zero, come col tasto C */
+  function nonSiPuo() {
+    cur = '0'; prev = null; pendOp = null; resetNext = true;
+    show('non si può');
+  }
+
   window.wcalcSetOp = function (op) {
     if (pendOp !== null && !resetNext) {
-      cur = String(compute());
+      var r = compute();
+      if (r === null) { nonSiPuo(); return; }
+      cur = String(r);
       show();
     }
     prev = cur;
@@ -4508,7 +4524,9 @@ async function eliminaNota(id) {
 
   window.wcalcEq = function () {
     if (pendOp === null) return;
-    cur = String(compute());
+    var r = compute();
+    if (r === null) { nonSiPuo(); return; }
+    cur = String(r);
     prev = null;
     pendOp = null;
     resetNext = true;
@@ -5106,6 +5124,21 @@ async function caricaCertificazioni() {
   renderCertificazioni(certs);
 }
 
+/* ⛔ 30 agosto 2026 — LA SCADENZA SCRITTA ALL'AMERICANA.
+   Qui la data usciva com'e' scritta nel database: «2027-12-31». Un
+   artigiano legge 31/12/2027.
+   ⚠️ NON si usa `new Date(iso).toLocaleDateString`: una data senza ora
+   viene letta come mezzanotte di Greenwich, e in un fuso indietro
+   rispetto a Londra diventerebbe il giorno prima. Qui c'e' solo una
+   data, quindi si spezza la stringa e basta: non puo' sbagliare.
+   (`fmtData` in strumenti-cantiere.js usa l'altra strada: in Italia va
+   sempre bene, ma e' la stessa trappola addormentata.) */
+function _dataIt(iso) {
+  var p = String(iso || '').slice(0, 10).split('-');
+  if (p.length !== 3 || p[0].length !== 4) return iso || '';
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
 function renderCertificazioni(certs) {
   const container = document.getElementById('lista-certificazioni');
   if (!container) return;
@@ -5117,7 +5150,7 @@ function renderCertificazioni(certs) {
     <div class="cert-item">
       <div>
         <div class="cert-nome">${c.nome}</div>
-        <div class="cert-meta">${c.scadenza ? '📅 Scade: ' + c.scadenza : ''}${c.file_url ? (c.scadenza ? ' · ' : '') + '<a href="' + c.file_url + '" target="_blank" style="color:var(--verde);font-weight:700;">📎 Visualizza file</a>' : ''}</div>
+        <div class="cert-meta">${c.scadenza ? '📅 Scade: ' + _dataIt(c.scadenza) : ''}${c.file_url ? (c.scadenza ? ' · ' : '') + '<a href="' + c.file_url + '" target="_blank" style="color:var(--verde);font-weight:700;">📎 Visualizza file</a>' : ''}</div>
       </div>
       <button class="btn-az arancio" style="padding:10px 16px;font-size:0.82rem;" onclick="eliminaCertificazione(${i})">🗑️ Rimuovi</button>
     </div>

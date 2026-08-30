@@ -4447,9 +4447,9 @@ async function eliminaVideo(id) {
   var pendOp = null;
   var resetNext = false;
 
-  function show() {
+  function show(avviso) {
     var el = document.getElementById('wcalc-display');
-    if (el) el.textContent = cur;
+    if (el) el.textContent = (avviso === undefined) ? cur : avviso;
   }
 
   function compute() {
@@ -4461,7 +4461,14 @@ async function eliminaVideo(id) {
       case '+': r = a + b; break;
       case '-': r = a - b; break;
       case '*': r = a * b; break;
-      case '/': r = b === 0 ? 0 : a / b; break;
+      case '/':
+        /* ⛔ 30 agosto 2026 — 5 ÷ 0 rispondeva 0.
+           Lo zero era stato messo per non far comparire «Infinity», ma e'
+           una RISPOSTA SBAGLIATA data con sicurezza, ed e' peggio di un
+           errore: uno divide un importo per zero per sbaglio, legge 0 e ci
+           crede. Adesso torna null e la calcolatrice lo dice. */
+        if (b === 0) return null;
+        r = a / b; break;
       default:  return b;
     }
     return Math.round(r * 1e10) / 1e10;
@@ -4485,9 +4492,18 @@ async function eliminaVideo(id) {
     show();
   };
 
+  /* la divisione per zero azzera tutto e lo scrive sul display; il primo
+     tasto premuto dopo riparte da zero, come col tasto C */
+  function nonSiPuo() {
+    cur = '0'; prev = null; pendOp = null; resetNext = true;
+    show('non si può');
+  }
+
   window.wcalcSetOp = function (op) {
     if (pendOp !== null && !resetNext) {
-      cur = String(compute());
+      var r = compute();
+      if (r === null) { nonSiPuo(); return; }
+      cur = String(r);
       show();
     }
     prev = cur;
@@ -4497,7 +4513,9 @@ async function eliminaVideo(id) {
 
   window.wcalcEq = function () {
     if (pendOp === null) return;
-    cur = String(compute());
+    var r = compute();
+    if (r === null) { nonSiPuo(); return; }
+    cur = String(r);
     prev = null;
     pendOp = null;
     resetNext = true;
