@@ -18730,3 +18730,193 @@ Cerco/Sono Subappaltatore) rispondono →200←, con e senza `.html`.
 Misurato quel giorno: →102← imprese, **tutte** col Premium valido, ma **→99←
 non hanno nessun reparto** — entrerebbero a mani vuote, e quella schermata non
 l'ha mai aperta nessuno.
+
+---
+
+# 30 AGOSTO 2026 (sera) — LA COLONNA CHE NON C'ERA, E IL GESTIONALE APERTO
+
+⚠️ **Il filo di tutta la serata, in una riga.** Il codice diceva cose che il
+database non conferma: nomi di pulsanti tolti, una colonna che non esiste, due
+righe scritte con lo stesso orario. Non sono difetti diversi: è **una famiglia
+sola**, e adesso c'è un controllo che la chiude.
+
+⛔ **E la lezione che vale più di tutte le correzioni:** →4← difetti su →6← li
+ha trovati **la pagina aperta davvero o il database interrogato**. I banchi
+erano verdi su tutti e quattro.
+
+---
+
+## Le →10← consegne, tutte pubblicate e riguardate sul sito vero
+
+| # | cosa non andava | quanti |
+|---|---|---|
+| 1 | le FAQ di «Risoluzione problemi» mandavano a pulsanti tolti il 29-30 ago | →4← pannelli, →13← domande |
+| 2 | il testo che dice all'AI chi è diceva ancora →5←€ e →49←€ | tutti |
+| 3 | «Gestione abbonamento» scriveva una colonna morta, su Stripe non arrivava niente | →1← impresa l'aveva già cliccato |
+| 4 | quel pulsante spariva a chi paga (difetto mio, stessa sera) | — |
+| 5 | la chat AI dal secondo messaggio rispondeva anche alla domanda di prima | tutte le chat |
+| 6 | la scheda pubblica mostrava `nome` e mai `nome_attivita` | →6← imprese su →102← |
+| 7 | il salvataggio del PROFESSIONISTA era **rifiutato in blocco** | →4← professionisti |
+| 8 | i pannelli scrivevano «Nome undefined», anche dentro i preventivi | →4← imprese |
+| 9 | la card «Sponsorizzato» non è mai comparsa in →5← pagine di ricerca | lo spazio che vende |
+| 10 | le note del calendario non si salvavano **mai** | tutto il gestionale |
+
+## ⛔ LA COLONNA FANTASMA — la storia da non ripetere
+
+In `imprese` la colonna **`cognome` NON ESISTE**. Esiste in
+`candidati_lavoro`, `preventivi` e `preventivi_safe` — lì va bene — ma non in
+`imprese`. Chi la leggeva da un'impresa faceva due danni:
+
+* nei pannelli, `nome_attivita || nome + ' ' + cognome` scriveva
+  «Spazio Giardino **undefined**», e quella riga finiva anche nel PREVENTIVO
+  mandato al cliente;
+* in `modifica-profilo.html` il salvataggio del professionista mandava
+  `cognome` e Postgres **rifiutava tutto l'aggiornamento**.
+
+**Come si prova una colonna senza scrivere niente:**
+
+```js
+await sb.from('imprese').update({ cognome:'prova' }).eq('id', -1)
+// PGRST204 — Could not find the 'cognome' column of 'imprese'
+```
+
+Si manda l'aggiornamento su una riga che non esiste (`id = -1`). Se la colonna
+è valida risponde «nessuna riga»; se non esiste risponde errore.
+
+**Deciso da Alessio:** la casella «Cognome» del modulo professionista si
+**toglie** (niente colonna nuova). Quella sopra diventa «Nome e cognome».
+Nessun dato perso: non aveva mai salvato niente.
+
+## ⛔ DUE RIGHE SCRITTE INSIEME HANNO LO STESSO OROLOGIO
+
+Il difetto più nascosto della giornata. `gest_chat_messaggi` scriveva domanda
+e risposta con **un solo insert**, quindi le due righe prendevano lo stesso
+`created_at` **al millesimo**. A parità di orario Postgres le restituisce
+nell'ordine che gli pare — misurato, due coppie di fila:
+
+```
+ai      18:12:34.213081   Nel reparto giardiniere hai...
+utente  18:12:34.213081   Quanti clienti ho?          <- risposta PRIMA della domanda
+utente  18:12:07.922740   Quante fatture ho?
+ai      18:12:07.922740   Hai 2 fatture...
+```
+
+Claude riceveva **due domande di fila senza risposta in mezzo** e rispondeva a
+tutte e due. **Regola generale: un `order by` su una sola colonna di orario
+non decide niente.** Rimediato in due modi, e ognuno basterebbe: l'ordinamento
+porta anche `ruolo` (così si aggiustano anche le chat già salvate), e le due
+righe si scrivono con orari diversi.
+
+## Il controllo colonne-fantasma — `prove-claude/controllo-colonne.js`
+
+Legge ogni `from('tabella')` del sito (→1190← punti) e confronta con le
+colonne vere di →115← tabelle: `.select()`, i filtri, e le chiavi di
+`.update()` / `.insert()` / `.upsert()`.
+
+Ha trovato →3← famiglie di difetti al primo colpo, più quella del gestionale.
+**Oggi dice «Nessuna colonna fantasma».**
+
+⚠️ **Cosa NON vede**, da sapere prima di fidarsi del verde: le →10← funzioni
+chiamate con `rpc()`, le chiamate REST scritte a mano con `fetch`
+(es. `js/spazi-laterali.js`), e una colonna che **esiste ma è sempre vuota**
+(era il caso di `data_scadenza_piano`).
+
+⚠️ L'elenco delle colonne è una **fotografia** in `prove-claude/colonne-vere.txt`:
+da lì non si arriva a Supabase. Si rifà con la riga SQL scritta in cima al
+controllo. **Va rifatto ogni volta che si aggiunge o toglie una colonna.**
+
+⛔ **Ci sono ricascato:** buttare via solo le RIGHE di commento non basta — un
+commento in italiano ha righe che cominciano con una parola qualsiasi, e il
+controllo trovava `.eq('impresa_id')` **dentro il commento che raccontava quel
+difetto**. Adesso toglie i commenti interi, sostituiti con gli stessi a capo
+(se no saltano i numeri di riga), con la rete: se resta meno del →60%← del
+testo torna al modo prudente e avvisa.
+
+## ✅ IL GESTIONALE È APERTO
+
+`MANUTENZIONE = false` in `js/gate-gestionale.js`, dal 30 agosto sera.
+**Per richiuderlo basta rimettere `true`**: nessun dato si perde.
+
+Prima di aprire, il controllo colonne è stato allargato a tutte e →115← le
+tabelle: in tutto il gestionale ha trovato **una cosa sola**, le note del
+calendario. Sistemata.
+
+**Il primo minuto di chi entra a mani vuote, provato dal vivo** (reparto di
+prova creato e poi cancellato, conto prima/dopo):
+
+* il primo reparto **non lo deve creare l'iscritto**: se ne ha zero se lo crea
+  il gestionale, col nome della sua attività. Senza nome attività usa
+  «I miei lavori», o «Il mio studio» per i professionisti. Mai «Reparto 1»;
+* dentro non c'è una griglia vuota ma il riquadro «Questo reparto è ancora
+  vuoto», con **+ Il primo cliente** e **+ Il primo preventivo**;
+* zero errori di rete.
+
+Misurato quel giorno: →102← imprese, →3← con almeno un reparto, →1← con almeno
+un lavoro. Claude consigliava di aprire prima a →5←-→10← imprese conosciute
+(bastava aggiungere le email in `AMMESSI`); **Alessio ha scelto di aprire a
+tutti**, dopo aver sentito il numero.
+
+## ⛔ COME SI GUARDANO DAVVERO LE CHIAMATE DI RETE
+
+Avvolgere `window.fetch` **dopo** che la pagina è partita **non serve a
+niente**: supabase-js si tiene il suo riferimento a `fetch` preso al
+caricamento, e il guardiano vede →0← chiamate. Si usa invece:
+
+```js
+performance.getEntriesByType('resource')
+  .filter(e => e.responseStatus >= 400)
+```
+
+che vede tutto quello che è passato, anche prima di noi.
+
+⚠️ In quell'elenco lo stato →0← **non vuol dire fallita**: è una risorsa di un
+altro dominio che non manda `Timing-Allow-Origin` (Google Fonts, il CDN di
+supabase-js).
+
+Caricamento pulito del gestionale: →102← richieste, **tutte →200←**. E il
+→401← su `get_ai_status` a ogni apertura **non c'è più**: adesso risponde
+→200←. Quel difetto è chiuso.
+
+## I banchi nuovi (in `prove-claude/`, che è nel `.gitignore`)
+
+`controllo-colonne` (→1190← punti, →115← tabelle) · `banco-faq-30ago` →488← ·
+`banco-nome-impresa-30ago` →42← · `banco-disdetta-30ago` →24← ·
+`banco-nome-profilo-30ago` →22← · `banco-ordine-chat-30ago` →13←.
+
+Tutti hanno **la prova del metro dentro**: girano anche sulla versione di
+prima, o su una finta pagina scritta apposta, e se non vedono il difetto lo
+dicono. Il controllo colonne si ferma con «IL METRO È ROTTO» e avvisa che il
+referto non vale niente.
+
+## ⛔ QUELLO CHE RESTA APERTO
+
+* **Il pannello pubblico** (`profilo-impresa.html`) — è il prossimo lavoro:
+  grafica, codice, difetti, migliorie. È la pagina che vede il cliente.
+* Il pulsante «📱 Mobile» dell'Anteprima non fa niente: `anteprimaDevice()`
+  usa `max-width`, che su quell'elemento non ha effetto; con `width` funziona.
+* La conferma della segnalazione dice «Ti risponderemo a **info@trovaimpresa.com**»,
+  che è l'indirizzo di TrovaImpresa, non dell'artigiano.
+* Nel pannello IMPRESA manca il link «Hai dimenticato la password?» nella
+  casella di accesso: ce l'hanno gli altri tre e `login-impresa.html`.
+* In `login-impresa.html` i messaggi d'errore dicono «usa "Password
+  dimenticata"», ma il link si chiama «Hai dimenticato la password?».
+* Sulla scheda di un profilo vuoto ci sono →3← tag `<img>` con l'indirizzo
+  vuoto. Non danno errore, ma sono lì.
+* Su Stripe il prodotto «Gestionale TrovaImpresa» è ancora attivo ma senza
+  prezzi attivi (i →12←/→119←€ sono archiviati): scatola vuota da archiviare.
+* Il controllo colonne non è ancora dentro `tools/controllo-push.js`: va
+  lanciato a mano.
+* La storia che la chat legge non filtra `eliminato_il`: una chat cancellata
+  tornerebbe lo stesso a Claude se si riusasse lo stesso `conversazione_id`.
+
+## Le regole di lavoro, ribadite dai fatti di oggi
+
+* **Un blocco git nuovo si COPIA**, non si riprende con la freccia in su: due
+  push sono andati a vuoto perché era stata rilanciata la riga di stamattina.
+* **Netlify ci mette →1←-→2← minuti**: prima di dire «non è passato»,
+  riprovare dopo un minuto. E controllare col browser che non sia la cache:
+  `fetch(pagina, {cache:'no-store'})` e contare lì.
+* **Quello che un ramo spegne, l'altro lo riaccende**: uno stile scritto
+  sull'elemento (`display:none`) non se ne va da solo.
+* **Prima di dare la colpa al codice, guardare l'ORA dell'errore** nella
+  console: →4← errori →400← erano prove fatte apposta poco prima.
