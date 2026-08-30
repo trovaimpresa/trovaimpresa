@@ -548,7 +548,7 @@ nav img{height:36px}
       <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
     </div>
 
-    <a class="btn-prev" id="cta-principale" onclick="showPreventivo()">
+    <a class="btn-prev" id="cta-principale" onclick="apriRichiesta()">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span>📋 Richiedi preventivo gratuito</span>
     </a>
@@ -813,11 +813,13 @@ async function caricaProfilo(id){
     // Professionista: CTA dedicato "Affida un incarico" (flusso incarico/onorario con documenti)
     if(d.tipo==='professionista'){
       window._incaricoProf={id:d.id,nome:(nomeDaMostrare(d)||'Professionista')};
+      /* la stessa parola nei due posti che invitano a chiedere: il pulsante
+         della colonna e la barra in fondo. Dove si va lo decide apriRichiesta(). */
+      const _ETICHETTA_RICHIESTA='📋 Affida un incarico';
       const cta=document.getElementById('cta-principale');
-      if(cta){
-        cta.setAttribute('onclick','showIncarico()');
-        const sp=cta.querySelector('span'); if(sp) sp.textContent='📋 Affida un incarico';
-      }
+      if(cta){const sp=cta.querySelector('span'); if(sp) sp.textContent=_ETICHETTA_RICHIESTA;}
+      const barraRich=document.getElementById('cta-bar-prev');
+      if(barraRich) barraRich.textContent=_ETICHETTA_RICHIESTA;
       const tl=document.getElementById('cta-trust-label');
       if(tl) tl.innerHTML='<strong>Affida un incarico</strong><span>Ti risponde con un preventivo di onorario</span>';
       const preComune=document.getElementById('inc-comune'); if(preComune&&d.citta) preComune.value=d.citta;
@@ -1088,6 +1090,18 @@ async function inviaRecensione(){
 }
 
 function mostraMsg(t,tipo){const m=document.getElementById('rec-msg');m.textContent=t;m.className='rec-msg '+tipo;m.style.display='block'}
+/* CHI CHIEDE, CHIEDE LA COSA GIUSTA — la scelta sta in un posto solo.
+   ⛔ 30 agosto 2026. Il pulsante grande della colonna e la barra fissa in
+   fondo (che sul telefono e' il pulsante che si clicca davvero) decidevano
+   ognuno per conto suo: il primo veniva cambiato per i professionisti, la
+   seconda chiamava SEMPRE showPreventivo(). Cosi' il cliente di un architetto
+   si trovava il modulo del cantiere — «Tipo di lavoro: Cartongesso,
+   Idraulica...», senza il catalogo delle prestazioni e senza la casella per
+   allegare planimetrie e visure — e la richiesta finiva in `preventivi`
+   invece che in `incarichi_richieste`. Sul telefono era la strada normale.
+   ⚠️ Chi aggiunge un altro pulsante che invita a chiedere, gli fa chiamare
+   QUESTA funzione: non deve esistere un secondo posto che decide. */
+function apriRichiesta(){ if(window._incaricoProf) showIncarico(); else showPreventivo(); }
 function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0);try{precompilaCittaPreventivo();}catch(_){}var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
 function hidePreventivo(){document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
 
@@ -1579,7 +1593,7 @@ document.addEventListener('DOMContentLoaded',function(){
 }
 </style>
 <div class="cta-bar-mobile" id="cta-bar-mobile">
-  <a class="cbm-prev" onclick="showPreventivo()">📋 Preventivo gratuito</a>
+  <a class="cbm-prev" id="cta-bar-prev" onclick="apriRichiesta()">📋 Preventivo gratuito</a>
   <a class="cbm-call" id="cta-bar-tel" href="#">📞 Chiama</a>
 </div>
 </body>
