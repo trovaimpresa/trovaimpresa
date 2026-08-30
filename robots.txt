@@ -55,3 +55,4 @@ Disallow: /auth/
 Sitemap: https://trovaimpresa.com/sitemap.xml
 Sitemap: https://trovaimpresa.com/sitemap-seo.xml
 Sitemap: https://trovaimpresa.com/sitemap-offerte.xml
+Sitemap: https://trovaimpresa.com/sitemap-mestieri.xml

@@ -1,0 +1,40 @@
+{
+  "_cosa_e": "Fotografia delle imprese per citta, usata da genera-mestiere-citta.js quando la shell non arriva su internet. Filtro identico a quello di genera-imprese-citta.js: is_test=false ed email_confermata=true.",
+  "fotografia_del": "2026-08-30",
+  "citta": {
+    "Roma": [
+      {"id":67,"nome":"Ristrutturazioni di Voicu Gabriel","mestiere":"Ristrutturazione completa","mestieri":["Ristrutturazione completa","Pavimenti e piastrelle","Pittura e tinteggiatura"],"tipo":"artigiano","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Ditta specializzata in ristrutturazioni interni ed esterni a Roma e dintorni"},
+      {"id":59,"nome":"Spazio Giardino","mestiere":null,"mestieri":["Giardinaggio / Esterni","Altro"],"tipo":null,"citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Spazio Giardino è un'impresa specializzata nella manutenzione professionale del verde, che opera a Pomezia, Ardea, Torvaianica, Aprilia, Anzio, Nettuno, Roma Sud e zone limitrofe."},
+      {"id":71,"nome":"Tappezzeria M.A.M di Marco Adriano Mele","mestiere":"Altro","mestieri":null,"tipo":"artigiano","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":75,"nome":"Neagu Ghiorghita","mestiere":"Ristrutturazione","mestieri":null,"tipo":"impresa","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":79,"nome":"Mahmoud","mestiere":"Pittura e tinteggiatura","mestieri":["Ristrutturazione completa","Pittura e tinteggiatura","Cartongesso"],"tipo":"artigiano","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":""},
+      {"id":95,"nome":"Lares Srls","mestiere":"Ristrutturazione","mestieri":null,"tipo":"impresa","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":142,"nome":"Arcangeli Gian Luca","mestiere":"Serramenti / Infissi","mestieri":["Serramenti / Infissi","Fabbro / Cancelli / Recinzioni","Ristrutturazione completa"],"tipo":"artigiano","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Installiamo tutti i tipi di infissi per un grande risparmio energetico certificato di posa FQ3\nRISOLVIAMO PROBLEMATICHE DA CANTIERE"},
+      {"id":132,"nome":"Simone Bortolussi","mestiere":"Antennista / Allarmi","mestieri":["Antennista / Allarmi","Impianti elettrici","Fotovoltaico / Pannelli solari"],"tipo":"artigiano","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":""},
+      {"id":139,"nome":"Falegnameria artigiana snc di Santoni Marco","mestiere":"Falegnameria","mestieri":["Falegnameria","Serramenti / Infissi"],"tipo":"artigiano","citta":"Roma","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Falegnameria generale restauro infissi serramenti vecchi mobili su misura librerie serramenti scale cucine porte"}
+    ],
+    "Milano": [
+      {"id":49,"nome":"NK elettrici","mestiere":"Impianti elettrici","mestieri":["Impianti elettrici","Antennista / Allarmi","Serramenti / Infissi"],"tipo":"artigiano","citta":"Milano","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"buongiorno \nsono elettricista impianti elettrici e citofoni \nistallazione di ventilatore \nmanutenzione \nSalve a tutti sono un elettricista e mi occupo con passione e massima serietà di interventi"},
+      {"id":111,"nome":"Rainbow Multiservizi","mestiere":"Ristrutturazione","mestieri":null,"tipo":"impresa","citta":"Milano","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":115,"nome":"Futuraservice","mestiere":"Giardinaggio / Esterni","mestieri":["Giardinaggio / Esterni","Ristrutturazione completa","Pittura e tinteggiatura"],"tipo":"artigiano","citta":"Milano","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Giardinaggio, abbattimenti e potature,manutenzione ordinaria e straordinaria, realizzo giardino e parchi impianti d irrigazione automatica, prato sintetico e prato a rotoli, agronomo.milano,pavia,brescia,monza,lodi"}
+    ],
+    "Torino": [
+      {"id":105,"nome":"EGY SRLS","mestiere":"Ristrutturazione","mestieri":["Ristrutturazione"],"tipo":"impresa","citta":"Torino","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":""},
+      {"id":60,"nome":"Idraulica a.d.l di Antonio dia","mestiere":null,"mestieri":["Idraulica"],"tipo":null,"citta":"Torino","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Riparazione urgenti idraulica condizionatori caldaia ristrutturazione bagni e appartamenti"},
+      {"id":99,"nome":"Xme PowerSolutions","mestiere":"Impianti elettrici","mestieri":null,"tipo":"artigiano","citta":"Torino","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":107,"nome":"Franco .via cesare battisti","mestiere":"Idraulica","mestieri":["Idraulica","Fotovoltaico / Pannelli solari","Climatizzazione / Caldaie"],"tipo":"artigiano","citta":"Torino","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":109,"nome":"Service House","mestiere":"Impianti elettrici","mestieri":["Impianti elettrici","Pittura e tinteggiatura"],"tipo":"artigiano","citta":"Torino","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":""},
+      {"id":118,"nome":"AS EDILSERVICE 14 DI ANTONIO BRUNO","mestiere":"Altro (scrivi quale)","mestieri":[],"tipo":"impresa","citta":"Torino","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Ci occupiamo di ogni tipo di lavoro edile voi abbiate bisogno. Dai piccoli lavori alle ristrutturazioni chiavi in mano. Siamo specializzati in isolamenti termici ed acustici, tetti, piastrelle, cartongesso, pavimentazioni e rivestimenti in resina, giardini, verande, barbecue e piscine. Eseguiamo sopralluoghi gratuiti previo appuntamento."}
+    ],
+    "Napoli": [
+      {"id":72,"nome":"G.M. RISTRUTTURAZIONI SRLS","mestiere":"Ristrutturazione","mestieri":null,"tipo":"impresa","citta":"Napoli","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":null},
+      {"id":127,"nome":"Aedifica Costruzioni srl","mestiere":"Ristrutturazione","mestieri":null,"tipo":"impresa","citta":"Napoli","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Siamo impresa edile che opera da oltre 20 anni"},
+      {"id":155,"nome":"Rosario Macor","mestiere":"Pavimenti e piastrelle","mestieri":["Pavimenti e piastrelle","Altro"],"tipo":"artigiano","citta":"Napoli","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Posa in opera parquet di tutti i tipi levigatura e lucidatura parquet già esistente"},
+      {"id":114,"nome":"Fra.mar","mestiere":"Ristrutturazione","mestieri":["Ristrutturazione"],"tipo":"impresa","citta":"Napoli","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Siamo un impresa che opera nel settore del edilizia civile con una vasta esperienza ed un team di professionisti sempre pronti ad accontentare ogni vostra esigenza"}
+    ],
+    "Rieti": [
+      {"id":36,"nome":"luigi","mestiere":"Idraulico","mestieri":["Edilizia / Muratura"],"tipo":"artigiano","citta":"Rieti","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"idraulico certificato"},
+      {"id":46,"nome":"Clarissa soc. Coop.soc","mestiere":"Ristrutturazione","mestieri":["Ristrutturazione"],"tipo":"impresa","citta":"Rieti","valutazione_media":0,"piano":"premium","verificata":false,"descrizione":"Multiservizi"}
+    ]
+  }
+}

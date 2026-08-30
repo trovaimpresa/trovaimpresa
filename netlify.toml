@@ -178,6 +178,22 @@
   status = 404
   force = true
 
+# 30 agosto 2026 — il generatore delle pagine mestiere+citta' e la
+# fotografia delle imprese che usa quando la shell non ha internet.
+# Il .json ha dentro nomi e descrizioni delle imprese iscritte: non
+# deve stare online. Il controllo prima di pubblicare lo pretende.
+[[redirects]]
+  from = "/genera-mestiere-citta.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/dati-imprese.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/aggiorna-pagine-citta.py"
   to = "/404.html"
