@@ -430,11 +430,30 @@ async function salvaLogCantiere() {
   if (!cantiereAttivo) return;
   const data = document.getElementById('log-cant-data').value || null;
   const oreRaw = document.getElementById('log-cant-ore').value;
-  const ore_lavorate = (oreRaw === '' || isNaN(Number(oreRaw))) ? null : Number(oreRaw);
+  /* ⛔ 30 agosto 2026 — LE ORE CHE SPARIVANO SENZA DIRE NIENTE.
+     La casella era type="number" e le ore si leggevano con Number(). Su
+     tastiera italiana si scrive «7,5»: una casella number con la virgola
+     dentro restituisce STRINGA VUOTA, quindi oreRaw era '' e ore_lavorate
+     finiva a null. La giornata si salvava lo stesso, senza le ore e senza
+     un avviso. E' lo stesso difetto che il 29 agosto era stato chiuso in
+     dieci caselle del gestionale: qui era rimasto.
+     Adesso la casella e' di testo col tastierino e si legge come tutti gli
+     altri soldi e numeri del sito (numeroItaliano). */
+  const ore_lavorate = numeroItaliano(oreRaw);
+  if (String(oreRaw).trim() !== '' && ore_lavorate == null) {
+    alert('Le ore non sono un numero: scrivile come 7 oppure 7,5.');
+    return;
+  }
   const materiali = document.getElementById('log-cant-materiali').value.trim() || null;
   const note = document.getElementById('log-cant-note').value.trim() || null;
-  if (!data && ore_lavorate == null && !materiali && !note) {
-    alert('Compila almeno un campo.');
+  /* ⛔ 30 agosto 2026 — LA GIORNATA VUOTA CHE SI SALVAVA LO STESSO.
+     Il controllo guardava anche `data`, ma la data e' gia' compilata da
+     sola con quella di oggi: la condizione non poteva mai essere vera, e
+     premendo Salva senza scrivere niente nasceva una giornata di cantiere
+     con dentro solo la data. Adesso la data non conta come contenuto:
+     serve almeno una fra ore, materiali e note. */
+  if (ore_lavorate == null && !materiali && !note) {
+    alert('Scrivi almeno una cosa: le ore, i materiali o una nota.');
     return;
   }
   const { data: nuovo, error } = await sb.from('cantiere_log').insert({
