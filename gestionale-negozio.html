@@ -1488,7 +1488,7 @@
       chiedi(()=>sb.from("neg_fornitori").select("id,nome,telefono").eq("user_id",sbUid)),
       mid?chiedi(()=>sb.from("gest_clienti").select("id,nome,citta,indirizzo").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
       mid?chiedi(()=>sb.from("gest_lavori").select("id,descrizione,importo,stato,fatt_stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
-      mid?chiedi(()=>sb.from("gest_scadenze").select("id,titolo,data,fatta").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
+      mid?chiedi(()=>sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid)):Promise.resolve([]),
       chiedi(()=>sb.from("gest_foto").select("id,lavoro_id,tipo").eq("user_id",sbUid))
     ]);
 
@@ -1508,7 +1508,12 @@
     const daInc=lavImp.filter(l=>l.fatt_stato==="emessa");
     const impegni=LAV.filter(l=>l.data_prevista&&l.data_prevista>=oggi&&l.stato!=="fatto")
       .sort((a,b)=>String(a.data_prevista).localeCompare(String(b.data_prevista)));
-    const scadAperte=SCAD.filter(s=>!s.fatta&&s.data).sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+    /* ⛔ 30 agosto 2026: qui si leggevano `s.data` e `s.fatta`, due colonne che
+   in `gest_scadenze` NON ESISTONO — si chiamano `data_scadenza` e `stato`.
+   La lettura rispondeva errore e il riquadro Calendario del riepilogo non
+   ha mai contato una scadenza. Lo Scadenzario vero (renderScadenze) le
+   colonne giuste le usava gia'. */
+    const scadAperte=SCAD.filter(s=>s.stato!=="fatta"&&s.data_scadenza).sort((a,b)=>String(a.data_scadenza).localeCompare(String(b.data_scadenza)));
     const lavIds=new Set(LAV.map(l=>l.id));
     const foto=FOTO.filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
 
