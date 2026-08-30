@@ -1046,6 +1046,13 @@
         const notaDisdetta = document.getElementById('info-disdetta');
         document.getElementById('card-disdetta').style.display = 'block';
         if (d.premium_pagato === true) {
+          /* ⛔ 30 agosto, difetto trovato solo aprendo la pagina vera: qui
+             mancava la riga che RIACCENDE il pulsante. Il ramo di sotto lo
+             spegne con `display = none`, e uno stile scritto sull'elemento
+             non se ne va da solo: se popolaCampi gira due volte (prima da
+             non pagante, poi da pagante) chi paga resta senza pulsante.
+             Regola: quello che un ramo spegne, l'altro lo riaccende. */
+          btnDisdici.style.display = '';
           notaDisdetta.textContent = 'Da qui disdici, cambi piano o cambi la carta. La disdetta vale da fine periodo: fino a quel giorno il piano resta attivo.';
         } else {
           btnDisdici.style.display = 'none';
