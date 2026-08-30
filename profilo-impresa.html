@@ -874,20 +874,19 @@ async function caricaProfilo(id){
       document.getElementById('info-spec-wrap').style.display='';_infoHasContent=true;
     }
     if(_infoHasContent)document.getElementById('card-info').style.display='';
-    // VALUTAZIONE + RECENSIONI: query live su feedback_clienti verificate
-    /* Le stelle sono un di piu'. Prima, se questa chiamata falliva (rete di
-       cantiere), saltava tutto quello che viene dopo: numero di telefono,
-       indirizzo e il pulsante "Chiama". Ora al massimo restano i trattini. */
-    let recs=[];
-    try{
-      const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
-      if(rRev.ok)recs=await rRev.json();
-    }catch(e){}
-    const stelle=(Array.isArray(recs)?recs:[]).flatMap(r=>[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita]).filter(s=>s!=null);
-    const nr=Array.isArray(recs)?recs.length:0;
-    const voto=stelle.length?stelle.reduce((a,b)=>a+b,0)/stelle.length:null;
-    document.getElementById('stat-rating').textContent=voto!=null?voto.toFixed(1):'—';
-    document.getElementById('stat-recensioni').textContent=nr;
+    /* ⛔ 30 agosto 2026 — LE DUE CASELLE IN CIMA CHE NON POTEVANO FUNZIONARE.
+       Qui la pagina leggeva `feedback_clienti` con una fetch diretta. Quella
+       tabella ha il lucchetto acceso e UNA sola regola di lettura: solo
+       l'impresa proprietaria, e solo da dentro il suo account. Il cliente che
+       apre la scheda non e' nessuno, quindi la risposta era SEMPRE vuota, e in
+       cima restavano «—» e «0» su ogni scheda, per sempre — anche con le
+       recensioni vere gia' pubblicate qui sotto. Misurato sull'impresa 121,
+       che una recensione ce l'ha: il database dice 1 riga, la pagina riceveva [].
+       Adesso il conto lo fa `caricaRecensioni`, dalla stessa chiamata
+       `recensioni_pubbliche()` che disegna l'elenco: una fonte sola, quindi il
+       numero in cima e l'elenco non possono piu' dire due cose diverse.
+       ⚠️ Non rimettere una lettura diretta di `feedback_clienti` da questa
+       pagina: dal browser del cliente risponde sempre vuoto. */
     if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+'}
     /* la statistica "Piano" e' stata tolta dalla pagina (al cliente non interessa
        quanto paga l'impresa): senza questo controllo la riga andava in errore e
@@ -1005,6 +1004,33 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
+
+/* IL CONTO DELLE RECENSIONI, IN UN POSTO SOLO.
+   Le tre cose che dicono un numero — la casella «RECENSIONI» in cima, la
+   media in «VALUTAZIONE» e il numero sulla linguetta «Recensioni (n)» —
+   escono tutte da queste righe, e queste righe leggono l'elenco vero che si
+   disegna sotto. Cosi' non possono litigare fra loro.
+   ⚠️ Scritte come `function` e non come `const`: cosi' si possono usare anche
+   sopra la riga in cui nascono, senza la trappola della zona morta. */
+function contaRecensioni(righe){
+  var arr=Array.isArray(righe)?righe:[];
+  var voti=[];
+  arr.forEach(function(r){
+    [r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].forEach(function(v){
+      var n=parseInt(v,10);
+      if(isFinite(n)&&n>0)voti.push(n);
+    });
+  });
+  var media=voti.length?voti.reduce(function(a,b){return a+b},0)/voti.length:null;
+  return {numero:arr.length,media:media};
+}
+function scriviConteggioRecensioni(righe){
+  var c=contaRecensioni(righe);
+  var n=document.getElementById('rec-count');       if(n)n.textContent=c.numero;
+  var s=document.getElementById('stat-recensioni'); if(s)s.textContent=c.numero;
+  var v=document.getElementById('stat-rating');     if(v)v.textContent=(c.media!=null?c.media.toFixed(1):'—');
+  return c;
+}
 async function caricaRecensioni(id){
   try{
     const r=await fetch(`${SU}/rest/v1/rpc/recensioni_pubbliche`,{
@@ -1013,7 +1039,7 @@ async function caricaRecensioni(id){
       body:JSON.stringify({p_impresa_id:parseInt(id)})
     });
     const rj=await r.json();const data=Array.isArray(rj)?rj:[];const div=document.getElementById('rec-lista');
-    const ce=document.getElementById('rec-count');if(ce)ce.textContent=data?.length||0;
+    scriviConteggioRecensioni(data);
     if(!data||!data.length){
       let nomeImpresa=(document.getElementById('profile-name')?.textContent||'').trim();
       if(!nomeImpresa||nomeImpresa==='Caricamento...')nomeImpresa='questa impresa';
