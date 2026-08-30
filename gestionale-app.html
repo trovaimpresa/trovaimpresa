@@ -3516,10 +3516,21 @@
      Lo passa `false` solo la CHAT: da li' il testo l'hai gia' scritto
      nella chat, e quella riga, aprendosi, si prende il cursore dopo 60
      millesimi e lo toglie dalla prima casella appena riempita. */
+  /* ⛔ 30 agosto 2026, DIFETTO TROVATO COL COLLAUDO DAL VIVO.
+     Questo ponte finiva con `jobForm(...)` senza chiedersi che tipo fosse:
+     qualunque parola che non era 'cliente' o 'preventivo' apriva il modulo
+     del LAVORO. Aggiunti la scadenza e il fornitore dalla chat, chiedere
+     «segnami la revisione del furgone» apriva «Nuovo lavoro», e la chat
+     diceva convinta «ti ho aperto il modulo»: dallo schermo sembrava tutto
+     giusto, ed era il modulo sbagliato.
+     ⚠️ Chi aggiunge un modulo alla chat AGGIUNGE UNA RIGA QUI. Il banco
+     prove-claude/banco-moduli-30ago.mjs adesso lo controlla. */
   window.gestApriModuloAI=function(tipo,conRiga){
     const riga = (conRiga===false) ? false : true;
     if(tipo==='cliente'){ cliForm(null,'privato',riga); return; }
     if(tipo==='preventivo'){ prevForm(null,null,riga); return; }
+    if(tipo==='scadenza'){ scadForm(null); return; }
+    if(tipo==='fornitore'){ fornForm(null); return; }
     jobForm(null,"",null,true,false,riga);
   };
 
