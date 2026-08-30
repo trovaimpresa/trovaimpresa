@@ -3130,6 +3130,24 @@ async function salvaLavoroFoto() {
   const descrizione = document.getElementById('lav-descrizione').value.trim();
   const pubblico = document.getElementById('lav-pubblico').checked;
 
+  /* ⛔ 30 agosto 2026 — IL SALVA CHE SALVAVA IL NIENTE.
+     Premendo «Salva» senza aver scelto la foto, questa funzione scriveva
+     comunque la riga e rispondeva «✅ Lavoro salvato!»: una scheda senza
+     immagine, senza titolo, e per giunta con «Mostra nel profilo pubblico»
+     acceso. Il 30 agosto in tabella ce n'erano gia' 51, di 26 imprese
+     diverse, su 134 righe: due su cinque erano vuote.
+     Chi le ha fatte non ha sbagliato: ha premuto Salva mentre la foto era
+     ancora in caricamento, oppure prima di sceglierla, e nessuno gliel'ha
+     detto. Adesso glielo si dice, e si distingue fra le due cose. */
+  if (!foto) {
+    const stato = document.getElementById('lav-foto-stato');
+    const inCaricamento = /⏳/.test((stato && stato.textContent) || '');
+    alert(inCaricamento
+      ? 'La foto si sta ancora caricando: aspetta il segno verde e poi premi Salva.'
+      : 'Manca la foto del lavoro: scegline una prima di salvare.');
+    return;
+  }
+
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
 
