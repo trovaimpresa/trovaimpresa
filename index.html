@@ -958,6 +958,35 @@
        fare da soli, perche' hanno flex-wrap:wrap. */
     .nav-sinistra{ gap:8px 10px; flex-wrap:wrap !important; flex-shrink:0 !important; }
     .nav-login, .nav-iscriviti{ flex-shrink:0 !important; }
+
+    /* ⛔ 30 agosto 2026 — LE 7 VOCI DEL MENU CHE DAL TELEFONO NON VEDEVA NESSUNO.
+       Misurato sul sito vero a →375← px: «Bandi e fondi», «Guide e costi», le
+       due Bacheche, «Subappalti», «Prezzi» e «Pubblicita'» cominciavano a
+       →367← px e finivano a →514← px — cioe' TUTTE fuori dallo schermo, a
+       destra. Poi `overflow-x:hidden` tagliava via l'eccedenza, quindi non si
+       vedevano e non ci si arrivava nemmeno scorrendo: restavano solo i →304←
+       px di bianco che occupavano, il →37←% della prima schermata.
+       →0← voci visibili su →7←.
+
+       Da dove nasce: la barra e' una riga sola (`flex-wrap:nowrap !important`,
+       piu' su nel @media 768) e dal 23 agosto la colonna di sinistra non si
+       stringe piu' (`flex-shrink:0`, messo perche' «Accedi al tuo pannello»
+       usciva dal suo bordo azzurro). Quella correzione era giusta, ma da
+       allora la colonna di sinistra si prende tutta la larghezza e ai link
+       non resta niente.
+
+       Rimedio scelto da Alessio il 30 agosto guardando la figura («A — il
+       menu va a capo»): la barra puo' andare a capo, la colonna di sinistra
+       si prende una riga tutta sua e i link scendono sotto, a tutta larghezza.
+       Misurato dopo: →7← voci su →7← visibili, barra alta →262← px.
+       ⚠️ `flex-basis:100%` sulla colonna di sinistra e' quello che la manda a
+       capo da sola: senza, resta in fila coi link e «Accedi» torna a uscire.
+       ⚠️ Questo blocco viene DOPO il `nowrap !important` del @media 768: a
+       parita' di peso vince l'ultimo, quindi non spostarlo piu' su. */
+    .navbar{ flex-wrap:wrap !important; }
+    .nav-sinistra{ flex-basis:100% !important; }
+    .nav-sinistra .logo{ flex-shrink:0 !important; }
+    .nav-links{ width:100% !important; justify-content:flex-start !important; }
     /* 23 agosto 2026: era 12px, sotto il minimo del progetto. Portato a 13. */
     .nav-login{ font-size:13px; padding:6px 9px; }
     .nav-login::before{ width:13px; height:13px; }
