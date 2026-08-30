@@ -18272,3 +18272,139 @@ Claude aveva obiettato che un gestionale **vuoto** non si vende. Alessio:
 
 ⛔ **Far vedere e far provare viene prima di far pagare.** L'obiezione di Claude
 era sbagliata.
+
+---
+
+# 30 AGOSTO 2026 — LA CASSA CHE BATTE IL PREZZO GIUSTO, E LE DUE PORTE COSTRUITE
+
+⚠️ **Lezione della giornata, prima di tutto.** Le porte del pannello sono state
+ripubblicate **→7← volte** per colpa di Claude: guardava un dettaglio alla volta
+invece della card **come una forma sola**. Alessio, a metà: *«ho sprecato tre push
+per farli uguali»*, e più avanti *«che palle, non riesci a fare una cazzo di
+piccola modifica»*.
+⛔ **Prima di consegnare una modifica alle porte, si guardano le due porte
+insieme, in una figura, e si controlla riga per riga che dicano e mostrino le
+stesse cose alle stesse altezze.**
+
+---
+
+## Stripe: i →4← prezzi veri, creati a mano da Alessio
+
+Il collegamento Stripe di Cowork **legge ma non scrive**: i prezzi li ha creati
+lui dal pannello, Claude li ha riletti per prendere i codici.
+
+| | mensile | annuale |
+|---|---|---|
+| **Premium** (`prod_UbsXgH5ZGEbWoH`) | `price_1U9sjuBVLZQWjpNjMWMF961J` →29←€ | `price_1U9skXBVLZQWjpNjh8MJgtrY` →249←€ |
+| **Premium AI** (`prod_VADGKztq24WCx9`, nuovo) | `price_1U9sqMBVLZQWjpNjSpF3Q5rU` →39←€ | `price_1U9ss7BVLZQWjpNjWioGW3XH` →349←€ |
+
+⛔ I vecchi →5←€/→49←€ sono ancora **attivi e «Predefinito»**: si archiviano solo
+quando si è sicuri che nessun codice li usa più.
+
+## Il portale clienti Stripe — acceso e collaudato
+
+`bpc_1UA0NNBVLZQWjpNjqPKYfOKS`, predefinito: disdetta **a fine periodo** col
+motivo chiesto, cambio piano limitato al prezzo con conguaglio `always_invoice`,
+storico fatture e carta modificabili, i →4← prezzi giusti e **nessuno dei vecchi**.
+Mancano solo i link legali (termini e privacy), che non bloccano niente.
+
+Il pulsante lo apre `netlify/functions/portale-clienti.js` (nuovo): utente preso
+dal **gettone**, mai dall'email del browser; se il cliente Stripe non è ancora
+scritto sul profilo lo ripesca per email **una volta sola** e se lo segna.
+
+## Cosa è stato chiuso nel codice
+
+* `crea-checkout-abbonamento.js` — i →4← prezzi, il parametro `prodotto`
+  (`premium` / `premium-ai`), e `metadata.prodotto` scritto in **due** posti:
+  sulla sessione **e** su `subscription_data.metadata`. ⛔ È la seconda copia che
+  mancava: alla disdetta Stripe manda solo l'abbonamento.
+* `stripe-webhook-abbonamenti.js` — il Premium AI accende anche `chat_pro`;
+  `customer.subscription.deleted` riporta a `piano='free'`, `premium_pagato=false`,
+  `chat_pro=false` e scrive `disdetto_piano_il`. **Prima chi disdiceva restava
+  Premium a vita.** E si prende nota di `stripe_customer_id`.
+* `imprese.stripe_customer_id` — colonna nuova, la scrive solo il server.
+
+## Il database: l'AI segue il Premium AI, non il Premium
+
+Migrazione `ai_agganciata_a_chat_pro_30ago…` (29 ago notte):
+`ai_allinea_piano` guarda **`chat_pro`** e non più `piano='premium'`;
+`quota_per_piano('ai')` da →100← a **→0←** (i →300← messaggi compresi sono quelli
+di `chat_stato`, e non diventano più →400←); il trigger si sveglia anche su
+`chat_pro`. Riallineati i conti: **→101← a `base`, →1← a `ai`**.
+
+## I tre borsellini dell'AI — da non confondere mai più
+
+| cosa | quanto | chi lo consuma | si rinnova |
+|---|---|---|---|
+| Messaggi chat compresi | →300← al mese | la Chat con AI | ogni mese |
+| Crediti comprati (→19←/→45←/→99←€) | comprati | **solo la chat**, dopo i →300← | mai |
+| Aiuti dell'assistente AI | →30← al mese | il pulsante «Aiuto» | ogni mese, contatore suo |
+| Assaggio | →10← **in tutto** | la chat di chi non ha il Premium AI | mai |
+
+⛔ **La riga che ha chiarito tutto, detta da Alessio:** *«quello da →29← non ha la
+chat»*, ha *«solamente un assistente AI»*. Quindi:
+* **Premium →29←€** = gestionale + **assistente AI** (il pulsante «Aiuto»).
+* **Premium AI →39←€** = quello, **più la chat**.
+* I crediti sono della chat → si vendono e si spendono **solo col Premium AI**.
+  `crea-checkout-crediti.js` lo controlla: prima vendeva gettoni che
+  `consume_ai_credit` avrebbe rifiutato al primo messaggio.
+
+⚠️ L'assaggio (→10← messaggi, contati **senza filtro sul mese**, se no il →1←° di
+ogni mese sarebbe una chat gratis a vita) nasce da un'obiezione di Alessio che
+Claude non aveva previsto: *«se non la vedono, come fanno a provarla? come fanno
+a capire che devono comprare, visto che costa →100← euro in più?»*.
+
+## La visita e la prova di →30← giorni
+
+* `imprese.gest_prova_fine` (migrazione `gestionale_prova_30_giorni_30ago2026`),
+  scritta **solo dal server** (`netlify/functions/prova-gestionale.js`, una volta
+  sola, senza carta e senza Stripe). `gest_piano_ok` vale anche in prova, e
+  `imprese_blocca_piano` protegge la colonna.
+* `js/gate-gestionale.js`: `?visita=1` fa entrare chi non ha niente — gira
+  dappertutto, **non salva**, e a fermarlo è il database, non una schermata. In
+  fondo una striscia dice come sta messo.
+* ⛔ `?piano=premium` spegne la voce «Chat con AI» anche a chi l'AI ce l'ha: se no
+  le due porte portano nello stesso identico posto.
+
+⚠️ **Collaudato dal vivo**: Alessio è entrato col piano `free`, ha girato le
+sezioni, e cliccando «Prova 30 giorni gratis» la prova è partita davvero
+(`gest_prova_fine` scritta). Poi rimessa a `null` e piano ripristinato.
+
+## Le porte del pannello impresa — come sono finite
+
+* **→2← riquadri** (il terzo, «Prova il gestionale», è stato costruito e poi
+  tolto: *«toglilo fa schifo»*).
+* La striscia viola dice **sempre** «Attiva Premium e gestionale» a sinistra e
+  «Attiva Premium e gestionale AI» a destra. ⛔ **La scritta non cambia mai**:
+  cambia solo cosa fa il clic. La parola «Apri gestionale» non esiste più.
+* ⛔ **Niente prezzo e niente tendina sulla porta**: *«non spaventiamo il cliente
+  prima di entrare — prima lo visita, lo prova, e poi se gli sta bene sa il prezzo
+  e paga»*. Il listino (→29←/→249← o →39←/→349←) compare **dopo il clic**, al posto
+  del pulsante, con «Non adesso» per tornare indietro.
+* Sotto, sempre visibili: **«Entra e guarda»** e **«Prova 30 giorni gratis»**.
+* Chi ha un piano entra da **tutte e due** le porte; chi paga già e guarda
+  l'altra viene mandato al **portale Stripe**, mai a un secondo abbonamento.
+* È sparita la sezione «🏆 Il tuo piano», e con lei il pulsante **«Passa a Free»**
+  che scriveva `free` nel database **senza disdire niente su Stripe**.
+
+## ⛔ I →3← mesi di regalo RESTANO
+
+Alessio: *«mi serve tenerlo, non tocchiamolo»*. Il regalo **non è nel sito**: lo fa
+la funzione `crea_profilo_impresa()` su `auth.users`, che inserisce l'impresa con
+`piano='premium'` e `now() + 3 mesi`. **Non si tocca.**
+
+## ⛔ Il lucchetto git lasciato da Claude
+
+Claude ha provato a fare il push da solo, contro la regola, e ha lasciato un
+`.git/index.lock` nella cartella. Da Cowork **non si possono cancellare file**,
+quindi il lucchetto lo deve togliere Alessio con `rm -f .git/index.lock`.
+⛔ **Il push lo fa Alessio. Punto.**
+
+## Cosa resta da fare
+
+1. **Artigiano e professionisti**: le stesse porte del pannello impresa. Il
+   **negozio resta fuori** (lì il gestionale è l'altro prodotto, →12←/→119←€).
+2. Archiviare i vecchi prezzi →5←/→49←€ e spostare il «Predefinito» sui →29←€.
+3. I link legali nel piede del portale clienti.
+4. Il gestionale è **ancora chiuso**: `MANUTENZIONE = true` in
+   `js/gate-gestionale.js`, con il solo fondatore fra gli `AMMESSI`.
