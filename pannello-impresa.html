@@ -1998,8 +1998,7 @@
             <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
             <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium</div>
             <div id="porta-premium-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
-            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 6px">Cantieri, preventivi, fatture, squadra e report</div>
-            <div style="font-size:0.85rem;color:#0a2a4d;font-weight:700;margin-bottom:12px">29 € al mese · 249 € all'anno</div>
+            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Cantieri, preventivi, fatture, squadra e report</div>
             <div id="porta-premium-azione" style="margin-top:auto"></div>
           </div>
 
@@ -2007,8 +2006,7 @@
             <div style="font-size:1.8rem;margin-bottom:8px">✨</div>
             <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium AI</div>
             <div id="porta-ai-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
-            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 6px">Tutto il Premium, più la Chat con AI</div>
-            <div style="font-size:0.85rem;color:#0a2a4d;font-weight:700;margin-bottom:12px">39 € al mese · 349 € all'anno</div>
+            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Tutto il Premium, più la Chat con AI</div>
             <div id="porta-ai-azione" style="margin-top:auto"></div>
           </div>
 
@@ -4759,8 +4757,8 @@ function chiudiModalPriorita() {
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 const PORTE_GESTIONALE = [
-  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '€29/mese', anno: '€249/anno', label: 'Premium'    },
-  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '€39/mese', anno: '€349/anno', label: 'Premium AI' }
+  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium'    },
+  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI' }
 ];
 
 function montaPorteGestionale() {
@@ -4805,46 +4803,62 @@ function montaPorteGestionale() {
 
     box.innerHTML = '';
 
+    // ⛔ NON SI SPAVENTA IL CLIENTE PRIMA DI FARLO ENTRARE.
+    // Regola di Alessio, 30 agosto: «prima lo visita, lo prova, e poi se
+    // gli sta bene sa il prezzo e paga». Sulla porta non c'e' ne' il
+    // prezzo ne' la tendina: solo il nome, cosa c'e' dentro, e un
+    // pulsante. Il listino compare DOPO, quando uno decide di attivare.
+    //
+    // ⚠️ E cosi' le due porte hanno per forza la stessa forma: un
+    //    pulsante e basta. Niente pezzi che ci sono da una parte e
+    //    dall'altra no.
+    const bottone = document.createElement('button');
+    bottone.style.cssText = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+    box.appendChild(bottone);
+
     // --- 1. ce l'ha: si entra -------------------------------------
     if (aperta) {
-      const entra = document.createElement('button');
-      entra.textContent = 'Apri gestionale';
-      entra.style.cssText = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-      entra.onclick = () => { location.href = '/gestionale-app.html'; };
-      box.appendChild(entra);
+      bottone.textContent = 'Apri gestionale';
+      bottone.onclick = () => { location.href = '/gestionale-app.html'; };
       return;
     }
 
     // --- 2. e' gia' abbonato ma guarda l'altra porta: si cambia ----
     if (abbonato) {
-      const cambia = document.createElement('button');
-      cambia.textContent = 'Passa a ' + porta.label;
-      cambia.style.cssText = 'width:100%;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-      cambia.onclick = () => apriPortaleClienti(cambia);
-      box.appendChild(cambia);
-
-      const nota = document.createElement('div');
-      nota.style.cssText = 'font-size:0.85rem;color:#888;margin-top:8px;line-height:1.4';
-      nota.textContent = 'Paghi solo la differenza: il conto lo fa Stripe.';
-      box.appendChild(nota);
+      bottone.textContent = 'Passa a ' + porta.label;
+      bottone.style.background = 'white';
+      bottone.style.color = '#7c3aed';
+      bottone.style.border = '1.5px solid #7c3aed';
+      bottone.onclick = () => apriPortaleClienti(bottone);
       return;
     }
 
-    // --- 3. non ce l'ha: si compra da qui --------------------------
-    const scelta = document.createElement('select');
-    scelta.style.cssText = 'width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer';
-    // ⚠️ il prezzo NON si ripete qui: sta gia' scritto sopra, uguale su
-    // tutte e due le porte, anche a chi il piano ce l'ha gia'.
-    scelta.innerHTML = '<option value="mensile" selected>Mensile</option>'
-                     + '<option value="annuale">Annuale</option>';
-    box.appendChild(scelta);
-
-    const compra = document.createElement('button');
-    compra.textContent = 'Attiva ' + porta.label;
-    compra.style.cssText = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-    compra.onclick = () => apriCassaGestionale(porta.chiave, scelta.value, compra);
-    box.appendChild(compra);
+    // --- 3. non ce l'ha: il prezzo si vede solo adesso -------------
+    bottone.textContent = 'Attiva ' + porta.label;
+    bottone.onclick = () => mostraListino(porta, box);
   });
+}
+
+// IL LISTINO, DOPO IL CLIC.
+// Prende il posto del pulsante dentro la stessa porta: due scelte, col
+// prezzo scritto per intero, e un modo per tornare indietro senza
+// impegno. Da qui si va alla cassa.
+function mostraListino(porta, box) {
+  box.innerHTML = '';
+
+  [['mensile', porta.mese], ['annuale', porta.anno]].forEach(function (v) {
+    const b = document.createElement('button');
+    b.textContent = v[1];
+    b.style.cssText = 'width:100%;padding:10px;margin-bottom:8px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+    b.onclick = () => apriCassaGestionale(porta.chiave, v[0], b);
+    box.appendChild(b);
+  });
+
+  const indietro = document.createElement('button');
+  indietro.textContent = 'Non adesso';
+  indietro.style.cssText = 'width:100%;padding:8px;background:none;color:#888;border:none;font-size:0.85rem;cursor:pointer';
+  indietro.onclick = () => montaPorteGestionale();
+  box.appendChild(indietro);
 }
 
 // il pagamento: chi non e' ancora abbonato
