@@ -100,7 +100,12 @@ const ATTREZZI = {
   //    ⚠️ Le quattro viste sono `security_invoker=true` — controllato il 30
   //    agosto — quindi si portano dietro le regole delle tabelle sotto: la
   //    seconda serratura c'e' anche li'.
-  ore:               { tabella:'gest_ore',               campi:'id,data,ore,operatore_id,lavoro_id',                                  ordine:'data',          nome:'le ore lavorate' },
+  /* ⛔ 30 agosto 2026, difetto trovato COL COLLAUDO DAL VIVO e non dai
+     banchi: alla domanda «quante ore ho segnato» la chat ha risposto
+     «3 ore». Le ore vere erano →15←, in →3← segnature. Aveva contato le
+     RIGHE. Il nome dell'attrezzo diceva «le ore lavorate» e quindi
+     contarle sembrava la cosa giusta: adesso dice cosa e' una riga. */
+  ore:               { tabella:'gest_ore',               campi:'id,data,ore,operatore_id,lavoro_id',                                  ordine:'data',          nome:'le segnature delle ore (ATTENZIONE: ogni riga e\' una segnatura, e la colonna `ore` dice quante ore sono. Contare le righe NON da\' le ore)' },
   rapportini:        { tabella:'gest_rapportini',        campi:'id,data,lavoro_id,materiali,note',                                    ordine:'data',          nome:'i rapportini di cantiere' },
   preventivi_totali: { tabella:'gest_preventivi_totali', campi:'preventivo_id,imponibile,iva,totale,n_righe',                          ordine:'totale',        nome:'quanto vale ogni preventivo', cestino:false },
   fatture_totali:    { tabella:'gest_fatture_totali',    campi:'fattura_id,imponibile,iva,totale,totale_documento,ritenuta,segno',     ordine:'totale',        nome:'quanto vale ogni fattura',    cestino:false },
@@ -108,6 +113,72 @@ const ATTREZZI = {
   rifornimenti:      { tabella:'gest_rifornimenti',      campi:'id,data,mezzo_id,importo,litri,km,distributore',                       ordine:'data',          nome:'i rifornimenti di carburante', cestino:false },
   carte_saldo:       { tabella:'gest_carte_saldo',       campi:'carta_id,nome,stato,saldo',                                           ordine:'saldo',         nome:'il saldo delle carte',        cestino:false }
 };
+// ---------------------------------------------------------------------
+// ⛔ 30 agosto 2026 — QUELLO CHE STA DENTRO UN DOCUMENTO.
+//
+// Le righe di una fattura, quelle di un preventivo, le spese di un lavoro
+// e le voci di un computo NON hanno la colonna `mestiere_id`: sono appese
+// al documento, e il reparto ce l'ha il documento. Per questo fino a oggi
+// la chat non le leggeva: senza il secondo filtro non si potevano dare.
+//
+// ⛔ COME SI TIENE IL REPARTO LO STESSO, ed e' la riga piu' importante di
+//    questo pezzo: PRIMA si va a prendere il PADRE con i due filtri di
+//    sempre (`user_id` + `mestiere_id`), e solo SE il padre esce fuori si
+//    leggono i figli. Se la fattura non e' sua, o e' di un altro reparto,
+//    il padre non esce e i figli non si leggono nemmeno.
+//    Cosi' il reparto non si allenta di un millimetro: si sposta il
+//    controllo sul documento, dove il reparto c'e' scritto davvero.
+//
+// ⚠️ `padre` e `chiave` NON arrivano mai da Claude: stanno qui dentro.
+//    Claude sceglie una parola dall'elenco, e basta.
+// ---------------------------------------------------------------------
+const FIGLI = {
+  righe_fattura: {
+    tabella: 'gest_fattura_righe',   padre: 'fatture',    chiave: 'fattura_id',
+    campi: 'id,ordine,descrizione,qta,prezzo,iva', ordine: 'ordine', crescente: true,
+    nome: 'le righe di una fattura'
+  },
+  righe_preventivo: {
+    tabella: 'gest_preventivo_righe', padre: 'preventivi', chiave: 'preventivo_id',
+    campi: 'id,ordine,sezione,descrizione,qta,prezzo', ordine: 'ordine', crescente: true,
+    nome: 'le righe di un preventivo'
+  },
+  spese_del_lavoro: {
+    tabella: 'gest_spese',           padre: 'lavori',     chiave: 'lavoro_id',
+    campi: 'id,data,descrizione,importo,fornitore_id', ordine: 'data', cestino: true,
+    nome: 'le spese di un lavoro'
+  },
+  voci_del_computo: {
+    tabella: 'gest_computo_voci_calc', padre: 'computi',  chiave: 'computo_id',
+    campi: 'id,ordine,codice,descrizione,unita,quantita,prezzo_unitario,importo', ordine: 'ordine', crescente: true,
+    nome: 'le voci di un computo'
+  }
+};
+
+/* ⛔ i figli: l'utente SEMPRE, e il documento padre — che a questo punto
+   e' gia' stato controllato col reparto. Funzione pura, cosi' il banco la
+   prova da sola. */
+function costruisciLetturaFiglio(cosa, uid, idPadre, opzioni) {
+  const o = opzioni || {};
+  const f = FIGLI[cosa];
+  if (!f) return { errore: 'non lo so guardare: ' + String(cosa) };
+  if (!uid) return { errore: 'manca chi sta chiedendo' };
+  if (!idPadre) return { errore: 'manca il documento di cui vuoi il dentro' };
+  const q = {
+    tabella: f.tabella,
+    campi: f.campi,
+    filtri: { user_id: uid },
+    padreChiave: f.chiave,
+    padreId: String(idPadre),
+    senzaCestino: f.cestino === true,
+    ordine: f.ordine,
+    crescente: !!f.crescente,
+    limite: Math.min(Math.max(parseInt(o.quanti, 10) || RIGHE_MAX, 1), RIGHE_MAX)
+  };
+  q.filtri[f.chiave] = String(idPadre);
+  return q;
+}
+
 // il campo su cui cerca «cerca_per_nome», per ogni cosa
 const DOVE_SI_CERCA = {
   lavori:'descrizione', preventivi:'titolo', fatture:'numero', clienti:'nome',
@@ -189,7 +260,18 @@ const MODULI = {
   lavoro:  { caselle: ['descrizione', 'dove', 'data', 'importo', 'cliente', 'operatore'],
              serve: 'descrizione', manca: 'manca cosa c\'e\' da fare' },
   cliente: { caselle: ['nome', 'indirizzo', 'referente', 'telefono'],
-             serve: 'nome',        manca: 'manca il nome del cliente' }
+             serve: 'nome',        manca: 'manca il nome del cliente' },
+  /* ⛔ 30 agosto 2026 — DUE MODULI IN PIU'.
+     Erano due su tanti, e i due che mancavano di piu' sono questi: una
+     scadenza da segnare («la revisione del furgone il 12 ottobre») e un
+     fornitore nuovo, che di solito arriva insieme alla foto della bolla.
+     ⚠️ Solo caselle di TESTO: le tendine del modulo (il tipo, il mezzo, il
+     cliente) restano da riempire a mano. Una tendina si riempie per id, e
+     un id inventato attaccherebbe la scadenza al mezzo sbagliato. */
+  scadenza:  { caselle: ['titolo', 'data', 'note'],
+               serve: 'titolo', manca: 'manca cosa scade' },
+  fornitore: { caselle: ['nome', 'categoria', 'telefono', 'email', 'indirizzo', 'piva'],
+               serve: 'nome',   manca: 'manca il nome del fornitore' }
 };
 const CASELLE_LAVORO = MODULI.lavoro.caselle;    // per chi lo chiedeva prima
 const LUNGHEZZA_MAX  = 300;
@@ -303,7 +385,10 @@ async function esegui(clientDati, q) {
   if (q.senzaCestino) sel = sel.is('eliminato_il', null);
   if (q.contiene) sel = sel.ilike(q.contiene.campo, '%' + q.contiene.valore + '%');
   if (!q.soloConta) {
-    if (q.ordine) sel = sel.order(q.ordine, { ascending: false, nullsFirst: false });
+    /* ⛔ 30 agosto 2026 — le righe di un documento vanno lette 1, 2, 3 e non
+       al contrario: un preventivo letto dal fondo non si capisce. Per tutto
+       il resto resta «prima le piu' recenti». */
+    if (q.ordine) sel = sel.order(q.ordine, { ascending: !!q.crescente, nullsFirst: false });
     sel = sel.limit(q.limite);
   }
   const r = await sel;
@@ -385,6 +470,19 @@ const STRUMENTI = [
     input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE }, parola: { type:'string' } }, required:['cosa','parola'] }
   },
   {
+    name: 'dentro_al_documento',
+    description: 'Dà quello che sta DENTRO un documento preciso: le righe di una fattura o di un preventivo, le spese di un lavoro, le voci di un computo. Serve l\'id del documento, che devi aver letto prima con elenco_cose o cerca_per_nome. Usalo per domande come «cosa c\'è dentro la fattura 14» o «quanto è costato quel cantiere».',
+    input_schema: {
+      type: 'object',
+      properties: {
+        cosa: { type: 'string', enum: Object.keys(FIGLI) },
+        id:   { type: 'string', description: 'l\'id del documento padre, quello vero letto con un altro attrezzo' },
+        quanti: { type: 'integer' }
+      },
+      required: ['cosa', 'id']
+    }
+  },
+  {
     // ⛔ l'unico attrezzo che NON legge niente: vedi costruisciModulo
     name: 'compila_lavoro',
     description: 'Apre nel gestionale il modulo «Nuovo lavoro» GIA\' COMPILATO coi dati che hai capito. Usalo quando ti chiede di segnare, aggiungere o creare un lavoro nuovo. NON salva niente e non scrive niente: l\'utente guarda le caselle e preme Salva lui. Mettici solo quello che ti ha detto davvero.',
@@ -399,6 +497,37 @@ const STRUMENTI = [
         operatore:   { type:'string', description:'il nome di chi ci va' }
       },
       required: ['descrizione']
+    }
+  },
+  {
+    // ⛔ come compila_lavoro: non legge e non scrive niente
+    name: 'compila_scadenza',
+    description: 'Apre nel gestionale il modulo della scadenza GIA\' COMPILATO. Usalo quando ti chiede di segnare qualcosa che scade: una revisione, un\'assicurazione, una pratica, un pagamento. NON salva niente: l\'utente guarda e preme Salva lui. Il tipo, il mezzo e il cliente li sceglie lui dalle tendine.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        titolo: { type:'string', description:'cosa scade' },
+        data:   { type:'string', description:'la data, SOLO nella forma AAAA-MM-GG. Se non la sai con certezza, non metterla.' },
+        note:   { type:'string', description:'due parole in piu\', se te le ha dette' }
+      },
+      required: ['titolo']
+    }
+  },
+  {
+    // ⛔ come compila_lavoro: non legge e non scrive niente
+    name: 'compila_fornitore',
+    description: 'Apre nel gestionale il modulo del fornitore nuovo GIA\' COMPILATO. Usalo quando ti chiede di aggiungere un fornitore, anche partendo dai dati letti su una bolla o una fattura che ti ha mandato. NON salva niente: l\'utente guarda e preme Salva lui.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        nome:      { type:'string', description:'il nome della ditta' },
+        categoria: { type:'string', description:'che roba vende' },
+        telefono:  { type:'string' },
+        email:     { type:'string' },
+        indirizzo: { type:'string', description:'via e numero' },
+        piva:      { type:'string', description:'la partita IVA, solo le cifre' }
+      },
+      required: ['nome']
     }
   },
   {
@@ -419,6 +548,42 @@ const STRUMENTI = [
 ];
 
 // ---------------------------------------------------------------------
+// ⛔ 30 agosto 2026 — L'ALLEGATO (il «+» della chat)
+//
+// Una foto della bolla o il PDF della fattura del fornitore, letti da
+// Claude invece che ribattuti a mano.
+//
+// ⛔ QUI NON CI SI FIDA DI NIENTE DI QUELLO CHE ARRIVA DAL BROWSER.
+//    Il tipo del file non si prende per buono: o e' uno dei cinque
+//    dell'elenco chiuso, o l'allegato si butta. E il peso si controlla
+//    qui, non solo di la': la pagina si puo' truccare in tre secondi dal
+//    menu degli sviluppatori, questa function no.
+// ⚠️ Non si salva da nessuna parte: vive il tempo di un messaggio. Nel
+//    registro resta scritto che c'era un allegato, non l'allegato.
+// ⚠️ Quanto costa: una foto a 1568 px sono circa 1.600 gettoni, mezzo
+//    centesimo. Il tetto vero e' che ne va UNA per messaggio.
+// ---------------------------------------------------------------------
+const FOTO_BUONE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const BASE64_MAX = 4400000;          // ~3 MB di file
+const SOLO_BASE64 = /^[A-Za-z0-9+/=\r\n]+$/;
+
+function ripulisciAllegato(a) {
+  if (!a || typeof a !== 'object') return null;
+  const tipo = String(a.media_type || '').toLowerCase().trim();
+  const dati = typeof a.dati === 'string' ? a.dati.replace(/\s+/g, '') : '';
+  if (!dati) return { errore: 'L\'allegato e\' arrivato vuoto.' };
+  if (dati.length > BASE64_MAX) return { errore: 'L\'allegato e\' troppo pesante: il massimo e\' 3 MB.' };
+  if (!SOLO_BASE64.test(dati)) return { errore: 'L\'allegato non e\' arrivato intero. Riprova.' };
+  if (FOTO_BUONE.indexOf(tipo) >= 0) {
+    return { blocco: { type: 'image', source: { type: 'base64', media_type: tipo, data: dati } }, che: 'una foto' };
+  }
+  if (tipo === 'application/pdf') {
+    return { blocco: { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: dati } }, che: 'un PDF' };
+  }
+  return { errore: 'Questo tipo di file non lo so leggere: vanno bene le foto JPG, PNG, WEBP e i PDF.' };
+}
+
+// ---------------------------------------------------------------------
 // le istruzioni della chat
 // ⚠️ Le tre materie su cui si ferma le ha decise Alessio il 26 agosto:
 //    se Claude sbaglia un'aliquota o una regola di sicurezza, la figura
@@ -434,8 +599,10 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'IL CALENDARIO, così non devi contare. Oggi è il primo della fila: ' + calendarioProssimo(oggi, 14) + '.',
     '⛔ La data del modulo PRENDILA DA QUESTA FILA, copiando il pezzo dopo l\'uguale. Non contarla a mente: sbaglieresti il giorno della settimana. Se ti chiede una data più in là della fila, conta di sette in sette partendo da una riga della fila.',
     '',
+    'SE TI MANDA UNA FOTO O UN PDF, leggilo e riportagli quello che c\'e\' scritto: numeri, date, importi, il nome del fornitore. Se e\' una bolla o una fattura, dopo avergliela letta offriti di segnargli quello che serve nel gestionale. ⛔ Quello che non si legge bene NON si indovina: dillo che non si legge e chiedi una foto migliore, perche\' un numero sbagliato in una fattura vale piu\' di dieci risposte giuste.',
     'PUOI GUARDARE I SUOI DATI con gli attrezzi che hai. Usali quando la domanda riguarda le SUE cose («quante fatture ho», «quanto mi deve Rossi»): rispondere a memoria su dati che puoi leggere è un errore.',
     'Gli attrezzi vedono SOLO il reparto aperto. Se ti chiede di un altro reparto, dillo: deve cambiare reparto e richiedere.',
+    'PER GUARDARE DENTRO UN DOCUMENTO servono due passi: prima lo trovi con `elenco_cose` o `cerca_per_nome` e ti segni il suo `id`, poi chiami `dentro_al_documento` con quell\'id. Non inventare mai un id: se non l\'hai letto, cercalo.',
     '',
     'QUANDO NON SAI, DILLO. Non inventare funzioni che non esistono e non inventare numeri. Se la domanda esce dal gestionale, o se ti serve un dato che non puoi leggere, dì che non lo sai e manda ai due riquadri in alto a sinistra: «Chiedi una funzione» e «Assistenza diretta».',
     '',
@@ -449,6 +616,7 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Esempio: «Sostituzione grondaia [apri:lav:1f2e...] vale 8.000,00 €». Il segnalino non si spiega e non si nomina: si scrive e basta.',
     'Metti il segnalino SOLO su cose che hai davvero letto, con l\'id esatto. Non inventarlo mai: un pulsante che apre la cosa sbagliata è peggio di nessun pulsante.',
     '',
+    '⛔ LE ORE NON SI CONTANO A RIGHE. `conta_cose` su `ore` dice quante SEGNATURE ci sono, non quante ore: una segnatura da 8 ore e una da 2 sono due righe e dieci ore. Per rispondere sulle ore prendi l\'elenco con `elenco_cose` e SOMMA la colonna `ore`, poi di\' anche su quante segnature hai fatto il conto. Se le segnature sono piu\' di 25 avvisalo che il conto e\' solo delle ultime 25.',
     'I SOLDI DEL REPARTO nel loro insieme si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
     'QUANTO VALE UN DOCUMENTO PRECISO invece sta in `fatture_totali` e `preventivi_totali`. Si legge la fattura (o il preventivo) e poi il suo totale, e si incrociano per id: `fatture_totali.fattura_id` e\' l\'`id` della fattura, `preventivi_totali.preventivo_id` e\' l\'`id` del preventivo. Lo stesso vale per le ore: `ore.operatore_id` e\' l\'`id` della persona della squadra, `ore.lavoro_id` e\' l\'`id` del lavoro. Gli importi di quelle tabelle NON si sommano a mano se la domanda riguarda tutto il reparto: per quello c\'e\' `soldi_del_reparto`.',
     'Quando dici una cifra, dì SEMPRE tutte e due: il totale con l\'IVA (quello che il cliente bonifica) e, fra parentesi, l\'imponibile. Esempio: «9.760,00 € (8.000,00 € imponibile)». Scelta di Alessio, 29 agosto.',
@@ -461,7 +629,8 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'La data va scritta AAAA-MM-GG, se no la casella la rifiuta senza dire niente. Se non sei sicuro di che giorno intende, lascia fuori la data e chiediglielo.',
     'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
     'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
-    'Sai aprire questi due moduli e basta. Se ti chiede un preventivo, mandalo al pulsante «Genera con AI» che sta in cima ai Preventivi.',
+    'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
+    'Sai aprire questi quattro moduli e basta. Se ti chiede un preventivo, mandalo al pulsante «Genera con AI» che sta in cima ai Preventivi.',
     'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
     'Nel database non scrivi e non cambi mai niente: tu leggi, spieghi, e al massimo gli apri un modulo già pieno. A salvare è sempre lui.'
@@ -593,13 +762,23 @@ export default async function (req) {
     return rispondi(500, { error: 'Configurazione server mancante.' });
   }
 
-  let domanda, conversazione_id, mestiere_id, sezione;
+  let domanda, conversazione_id, mestiere_id, sezione, allegato;
   try {
-    ({ domanda, conversazione_id, mestiere_id, sezione } = JSON.parse((await req.text()) || '{}'));
+    ({ domanda, conversazione_id, mestiere_id, sezione, allegato } = JSON.parse((await req.text()) || '{}'));
   } catch { return rispondi(400, { error: 'Body JSON non valido.' }); }
   if (!domanda || !String(domanda).trim()) return rispondi(400, { error: 'La domanda è vuota.' });
   if (!conversazione_id || !mestiere_id)   return rispondi(400, { error: 'Parametri mancanti.' });
   domanda = String(domanda).slice(0, 2000);
+
+  /* ⛔ l'allegato si controlla QUI, prima di tutto il resto: se e' sbagliato
+     l'iscritto non deve pagarlo. Piu' avanti il messaggio e' gia' scalato. */
+  let pezzoAllegato = null, cheAllegato = '';
+  if (allegato) {
+    const c = ripulisciAllegato(allegato);
+    if (!c || c.errore) return rispondi(400, { error: (c && c.errore) || 'Allegato non valido.' });
+    pezzoAllegato = c.blocco;
+    cheAllegato = c.che;
+  }
 
   const autorizzazione = req.headers.get('authorization') || '';
   const token = autorizzazione.startsWith('Bearer ') ? autorizzazione.slice(7).trim() : '';
@@ -696,7 +875,13 @@ export default async function (req) {
   } catch (e) { console.error('[chat] storia:', e && e.message); }
 
   // ---- 7. il giro con Claude ----------------------------------------
-  const messaggi = storia.concat([{ role: 'user', content: domanda }]);
+  /* ⛔ con l'allegato il messaggio non e' piu' una riga di testo ma un
+     elenco di pezzi: prima la foto, poi la domanda. L'ordine conta —
+     Claude legge meglio se guarda l'immagine e poi sente cosa gli chiedi. */
+  const messaggi = storia.concat([{
+    role: 'user',
+    content: pezzoAllegato ? [pezzoAllegato, { type: 'text', text: domanda }] : domanda
+  }]);
   let risposta = '', tin = 0, tout = 0, errore = null;
 
   /* ⛔ IL MODULO DA APRIRE (gradino 3). Resta `null` per tutti i messaggi
@@ -775,6 +960,26 @@ export default async function (req) {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { quanti: inp.quanti }));
         } else if (t.name === 'cerca_per_nome') {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { parola: inp.parola }));
+        } else if (t.name === 'dentro_al_documento') {
+          /* ⛔ PRIMA IL PADRE, COL REPARTO. Se la fattura non e' sua o e' di
+             un altro reparto, qui non esce niente e i figli non si toccano. */
+          const f = FIGLI[inp.cosa];
+          if (!f) {
+            esito = { errore: 'non lo so guardare: ' + String(inp.cosa) };
+          } else if (!inp.id) {
+            esito = { errore: 'mi serve l\'id del documento' };
+          } else {
+            const qPadre = costruisciLettura(f.padre, uid, mestiere_id, { quanti: 1 });
+            let padreOk = false;
+            if (!qPadre.errore) {
+              qPadre.filtri.id = String(inp.id);
+              const rp = await esegui(dati, qPadre);
+              padreOk = !rp.errore && rp.righe && rp.righe.length === 1;
+            }
+            esito = padreOk
+              ? await esegui(dati, costruisciLetturaFiglio(inp.cosa, uid, inp.id, { quanti: inp.quanti }))
+              : { errore: 'quel documento non e\' in questo reparto, oppure non esiste' };
+          }
         } else if (t.name === 'soldi_del_reparto') {
           /* ⛔ i conti li fa `chat_soldi` su Supabase, che a sua volta legge
              la vista `gest_fatture_totali`: la formula dei soldi resta in un
@@ -783,7 +988,7 @@ export default async function (req) {
              chiede da auth.uid(), e col service role sarebbe vuoto. */
           var rs = await chiamaRpc(dati, 'chat_soldi', { p_mestiere: mestiere_id });
           esito = rs.errore ? { errore: rs.errore } : (rs.dati || { errore: 'nessun conto' });
-        } else if (t.name === 'compila_lavoro' || t.name === 'compila_cliente') {
+        } else if (t.name.indexOf('compila_') === 0 && MODULI[t.name.slice(8)]) {
           /* ⛔ QUI NON SI SCRIVE NIENTE. Si prepara solo il modulo che
              aprira' il browser, e a salvarlo sara' l'iscritto. Il
              controllo delle caselle sta tutto in `costruisciModulo`, che
@@ -792,7 +997,10 @@ export default async function (req) {
              persona della squadra: passa da `costruisciLettura`, quindi
              si porta dietro i due filtri come tutte le altre. Vedi la
              nota sopra `nomeVero`. */
-          const quale = (t.name === 'compila_cliente') ? 'cliente' : 'lavoro';
+          /* ⛔ il nome del modulo esce dal nome dell'attrezzo, e vale solo
+             se sta in MODULI: cosi' aggiungerne uno domani e' una riga
+             sola, e uno inventato non passa. */
+          const quale = t.name.slice(8);
           const m = costruisciModulo(quale, inp);
           /* ⚠️ un modulo per volta, MA se il primo aveva un nome che non
              esiste Claude puo' richiamare l'attrezzo una volta per
@@ -856,7 +1064,11 @@ export default async function (req) {
       try {
         await server.from('gest_chat_messaggi').insert([
           { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
-            ruolo: 'utente', testo: domanda, sezione: sezione || null, come_pagato: comePagato },
+            /* ⚠️ l'allegato NON si salva: resta scritto solo che c'era, se no
+               riaprendo la chat domani uno vede la domanda e non capisce a
+               cosa si riferiva la risposta. */
+            ruolo: 'utente', testo: domanda + (cheAllegato ? '\n[con ' + cheAllegato + ']' : ''),
+            sezione: sezione || null, come_pagato: comePagato },
           { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
             ruolo: 'ai', testo: risposta || null, sezione: sezione || null,
             tokens_input: tin, tokens_output: tout, costo_usd: costo, errore: errore }
@@ -888,5 +1100,5 @@ export default async function (req) {
 }
 
 // per il banco: le parti pure si provano da sole, senza database
-export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura };
+export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
 export { costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };

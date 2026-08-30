@@ -49,6 +49,83 @@
      — e la riga che compare lo dice, se no uno ci conta sopra. */
   var annulla = null;
 
+  /* ⛔ 30 agosto 2026 — L'ALLEGATO.
+     Si tiene qui, gia' pronto da mandare, e si svuota appena e' partito:
+     una foto sola per messaggio. Non si salva da nessuna parte — riaprendo
+     la chat domani il testo c'e' e la foto no, ed e' scritto sotto la
+     casella cosi' nessuno ci resta male.
+     ⚠️ Le foto si rimpiccioliscono PRIMA di partire (1568 px, JPEG 0.8):
+     e' la misura oltre la quale Claude non guadagna niente e si paga di
+     piu'. Lo fa `preparaFileUpload` di js/foto-upload.js, la stessa che
+     usa il gestionale per le foto dei lavori: non se ne scrive un'altra. */
+  var allegato = null;
+  var LATO_FOTO = 1568, QUALITA_FOTO = 0.8;
+  var PESO_MAX  = 3 * 1024 * 1024;   /* dopo la cura: 3 MB, il tetto della function */
+  var TIPI_BUONI = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+
+  function rigaAllegato(testo, brutta) {
+    var d = document.getElementById('chat-allegato');
+    if (!d) return;
+    d.innerHTML = testo || '';
+    d.style.color = brutta ? '#b3261e' : '';
+  }
+
+  function scordaAllegato() {
+    allegato = null;
+    var c = document.getElementById('chat-file'); if (c) c.value = '';
+    rigaAllegato('');
+  }
+
+  function pesoScritto(n) {
+    return n > 1024 * 1024 ? ((n / 1048576).toFixed(1) + ' MB') : (Math.round(n / 1024) + ' KB');
+  }
+
+  /* il file diventa testo (base64), che e' la forma in cui viaggia */
+  function inBase64(blob) {
+    return new Promise(function (ok, no) {
+      var rd = new FileReader();
+      rd.onerror = function () { no(new Error('non riesco a leggere il file')); };
+      rd.onload = function () {
+        var s = String(rd.result || '');
+        var virgola = s.indexOf(',');
+        ok(virgola >= 0 ? s.slice(virgola + 1) : s);
+      };
+      rd.readAsDataURL(blob);
+    });
+  }
+
+  async function prendiAllegato(file) {
+    if (!file) return;
+    if (typeof window.preparaFileUpload !== 'function') {
+      rigaAllegato('Non riesco ad allegare da qui: ricarica la pagina.', true); return;
+    }
+    rigaAllegato('Preparo il file&hellip;');
+    var p = await window.preparaFileUpload(file, { lato: LATO_FOTO, qualita: QUALITA_FOTO, formato: 'jpeg' });
+    if (p.errore) { rigaAllegato(esc(p.errore), true); scordaAllegato(); return; }
+    var tipo = (p.file && p.file.type) || file.type || '';
+    if (TIPI_BUONI.indexOf(tipo) < 0) {
+      /* le foto dell'iPhone in HEIC arrivano qui: il telefono le sa aprire,
+         Claude no. Meglio dirlo con parole sue che far partire un messaggio
+         che torna indietro con un errore in inglese. */
+      rigaAllegato('Questo tipo di file non lo so leggere. Vanno bene le foto JPG, PNG, WEBP e i PDF.', true);
+      scordaAllegato(); return;
+    }
+    if (p.file.size > PESO_MAX) {
+      rigaAllegato('Il file pesa ' + pesoScritto(p.file.size) + ': il massimo &egrave; 3 MB. '
+        + (tipo === 'application/pdf' ? 'Prova a mandarne una parte sola.' : 'Rifai la foto pi&ugrave; piccola.'), true);
+      scordaAllegato(); return;
+    }
+    try {
+      var dati = await inBase64(p.file);
+      allegato = { tipo: (tipo === 'application/pdf' ? 'pdf' : 'immagine'), media_type: tipo, dati: dati, nome: p.nome || file.name };
+      rigaAllegato('Allegato: <b>' + esc(allegato.nome) + '</b> &middot; ' + pesoScritto(p.file.size)
+        + ' <button type="button" class="chip" data-scorda="1">Togli</button>');
+    } catch (e) {
+      rigaAllegato('Non riesco a preparare il file: riprova.', true);
+      scordaAllegato();
+    }
+  }
+
   /* il gettone di sessione: stesso modo di js/ai-integrazione.js —
      il gestionale il suo client Supabase non lo presta a nessuno */
   function gettone() {
@@ -142,7 +219,14 @@
      non lo apre nessuno. Un tipo che non conosco non apre niente e lo
      dice, invece di aprire il modulo sbagliato.
      ============================================================ */
-  var MODULI_APRIBILI = { lavoro: 'compilaLavoroDaChat', cliente: 'compilaClienteDaChat' };
+  var MODULI_APRIBILI = {
+    lavoro:    'compilaLavoroDaChat',
+    cliente:   'compilaClienteDaChat',
+    /* ⛔ 30 agosto 2026 — i due nuovi. Stanno in js/ai-integrazione.js
+       insieme agli altri: qui si preme il campanello, non si apre la porta. */
+    scadenza:  'compilaScadenzaDaChat',
+    fornitore: 'compilaFornitoreDaChat'
+  };
 
   function apriModulo(m) {
     if (!m || !m.campi) return false;
@@ -190,8 +274,16 @@
     +     '<div class="asst-msgs" id="chat-righe"></div>'
     +     '<div class="asst-scrivi">'
     +       '<textarea id="chat-domanda" rows="3" placeholder="Scrivi qui la tua domanda&hellip;"></textarea>'
+    /* ✨ 30 agosto 2026 — IL «+»: una foto della bolla o il PDF della
+       fattura del fornitore, cosi' non deve ribattere tutto a mano.
+       ⛔ La casella vera del file sta nascosta dentro la <label>: e' il
+       modo di sempre di far diventare pulsante un campo file, senza
+       inventare stili nuovi. */
+    +       '<label class="btn" id="chat-piu" for="chat-file" title="Allega una foto o un PDF" style="cursor:pointer">+</label>'
+    +       '<input type="file" id="chat-file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display:none">'
     +       '<button class="btn btn-primary" type="button" id="chat-manda">Manda</button>'
     +     '</div>'
+    +     '<div class="asst-nota" id="chat-allegato"></div>'
     +     '<div class="asst-nota" id="chat-sotto"></div>'
     +   '</div>'
     /* ✨ 29 agosto 2026 — le chat di prima, chieste da Alessio */
@@ -221,6 +313,12 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); manda(); }
     });
     aggiornaSotto();
+    document.getElementById('chat-file').addEventListener('change', function (e) {
+      prendiAllegato(e.target.files && e.target.files[0]);
+    });
+    document.getElementById('chat-allegato').addEventListener('click', function (e) {
+      if (e.target.closest('[data-scorda]')) scordaAllegato();
+    });
     document.getElementById('chat-nuova').addEventListener('click', nuovaChat);
     document.getElementById('chat-elenco').addEventListener('click', function (e) {
       var butta = e.target.closest('[data-butta]');
@@ -429,6 +527,10 @@
     if (inCorso) return;
     var casella = document.getElementById('chat-domanda');
     var domanda = (casella.value || '').trim();
+    /* ⛔ con una foto allegata basta la foto: «leggila» lo diciamo noi.
+       Chiedere di scrivere qualcosa quando ha gia' allegato la bolla e'
+       una porta chiusa in faccia per niente. */
+    if (!domanda && allegato) domanda = 'Guarda questo e dimmi cosa c\'è scritto.';
     if (!domanda) return;
 
     var mid = reparto();
@@ -445,7 +547,11 @@
     /* ⛔ NON si spegne piu': mentre risponde deve restare cliccabile,
        se no non c'e' niente da premere per fermarla. */
     bottoneManda.textContent = 'Ferma';
-    scrivi('utente', esc(domanda));
+    scrivi('utente', esc(domanda)
+      + (allegato ? '<br><span class="chip">' + esc(allegato.nome) + '</span>' : ''));
+    /* si svuota subito: una foto per messaggio, e se ne manda un secondo
+       senza accorgersene la pagherebbe due volte */
+    scordaAllegato();
     var attesa = scrivi('attesa', 'Sto guardando&hellip;');
 
     try {
@@ -457,7 +563,8 @@
           domanda: domanda,
           conversazione_id: chiacchierata(),
           mestiere_id: mid,
-          sezione: sezioneAperta()
+          sezione: sezioneAperta(),
+          allegato: allegato
         })
       });
       /* ============================================================

@@ -722,6 +722,61 @@
      ⚠️ Il ripiego con `new-job` serve se il browser ha in memoria una
         versione vecchia di gestionale-app.html, come per `compilaLavoro`.
      ================================================================== */
+  /* ⛔ 30 agosto 2026 — LA SCADENZA E IL FORNITORE DALLA CHAT.
+     Stessa forma delle due di sopra: si apre il modulo con il pulsante che
+     esiste gia' e si riempiono SOLO le caselle di testo.
+     ⚠️ Le tendine (tipo, cliente, mezzo, lavoro) non si toccano: si
+     riempiono per id, e un id sbagliato attacca la scadenza alla cosa
+     sbagliata senza che nessuno se ne accorga. Le sceglie lui. */
+  function riempiScadenza(d) {
+    if (!d) return false;
+    const primo = { el: null };
+    riempiCampo('s-tit', d.titolo, primo);
+    riempiCampo('s-data', d.data, primo);
+    riempiCampo('s-note', d.note, primo);
+    avviso('Modulo compilato, controlla i dati e premi Salva');
+    if (primo.el) primo.el.focus();
+    return true;
+  }
+
+  function riempiFornitore(d) {
+    if (!d) return false;
+    const primo = { el: null };
+    riempiCampo('fo-nome', d.nome, primo);
+    riempiCampo('fo-cat', d.categoria, primo);
+    riempiCampo('fo-tel', d.telefono, primo);
+    riempiCampo('fo-email', d.email, primo);
+    riempiCampo('fo-ind', d.indirizzo, primo);
+    riempiCampo('fo-piva', d.piva, primo);
+    avviso('Modulo compilato, controlla i dati e premi Salva');
+    if (primo.el) primo.el.focus();
+    return true;
+  }
+
+  AI.compilaScadenzaDaChat = function (d) {
+    chiudiTutto();
+    if (typeof window.gestApriModuloAI === 'function') {
+      window.gestApriModuloAI('scadenza', false);
+    } else {
+      const apri = document.querySelector('[data-action="new-scad"]');
+      if (!apri) return false;
+      apri.click();
+    }
+    return riempiScadenza(d);
+  };
+
+  AI.compilaFornitoreDaChat = function (d) {
+    chiudiTutto();
+    if (typeof window.gestApriModuloAI === 'function') {
+      window.gestApriModuloAI('fornitore', false);
+    } else {
+      const apri = document.querySelector('[data-action="new-forn"]');
+      if (!apri) return false;
+      apri.click();
+    }
+    return riempiFornitore(d);
+  };
+
   AI.compilaLavoroDaChat = function (d) {
     chiudiTutto();
     if (typeof window.gestApriModuloAI === 'function') {
