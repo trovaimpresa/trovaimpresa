@@ -737,6 +737,19 @@
     padding:24px 32px; transition:background 0.2s; pointer-events:none;
   }
   .dash-hero-logo-col:hover .dash-logo-upload-hint { background:rgba(0,0,0,0.55); }
+  /* ⛔ 30 agosto 2026 — «CARICA LOGO» STAMPATO SOPRA IL BANNER.
+     Il banner e il segnaposto del logo stanno nella STESSA casella: il primo
+     fa da sfondo, il secondo resta acceso finche' un logo non c'e'. Chi
+     caricava il banner senza logo si ritrovava la scritta «Carica logo» in
+     mezzo all'immagine.
+     La regola sta qui e non nel codice apposta: la casella viene ridisegnata
+     (innerHTML) piu' volte mentre il pannello si carica, e una riga di
+     JavaScript che spegne il segnaposto verrebbe cancellata al giro dopo.
+     La classe invece sta sul PADRE e sopravvive.
+     ⚠️ In questa pagina il blocco di stile della casella e' scritto DUE
+     volte, identico: questa regola sta dopo il primo, e vince comunque
+     perche' e' piu' specifica (tre classi contro una). */
+  .dash-hero-logo-col.ha-banner .dash-logo-upload-hint { display:none; }
 
   /* === CERTIFICAZIONI === */
   .cert-item {
@@ -2195,7 +2208,7 @@
                 <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">Rimuovi logo</button>
               </div>
               <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Banner copertina<span class="mpp-hint">Immagine a destra dell'header</span></label>
+                <label class="mpp-label">Banner copertina<span class="mpp-hint">Immagine a destra dell'header &mdash; meglio larga e bassa, tipo 1200&times;340. Se &egrave; pi&ugrave; alta si vede pi&ugrave; piccola, con lo sfondo ai lati.</span></label>
                 <div id="pers-pannello-banner-preview" style="margin:6px 0 8px;"></div>
                 <input type="file" id="pers-pannello-banner-file" accept="image/*">
               </div>
@@ -3583,12 +3596,25 @@ function applicaBannerHero(url) {
   if (!col) return;
   if (url) {
     col.style.backgroundImage = `url("${url}")`;
-    col.style.backgroundSize = 'cover';
+    /* ⛔ 30 agosto 2026 — IL BANNER TAGLIATO A META'.
+       Qui c'era 'cover': la casella e' larga 3,6 volte la sua altezza e le
+       immagini che si caricano sono piu' vicine a 1,8, quindi entrava solo
+       la fascia centrale — titolo in alto e riga in basso fuori. Misurato
+       sul banner vero: si vedeva il 49% dell'altezza.
+       Con 'contain' si vede tutto, piu' piccolo, col blu ai lati.
+       ⚠️ E SERVE ANCHE 'no-repeat': il valore predefinito e' 'repeat', e
+       un'immagine piu' stretta della casella si ripeterebbe a piastrelle.
+       Con 'cover' non si vedeva perche' l'immagine copriva tutto. */
+    col.style.backgroundSize = 'contain';
+    col.style.backgroundRepeat = 'no-repeat';
     col.style.backgroundPosition = 'center';
+    col.classList.add('ha-banner');
   } else {
     col.style.backgroundImage = '';
     col.style.backgroundSize = '';
+    col.style.backgroundRepeat = '';
     col.style.backgroundPosition = '';
+    col.classList.remove('ha-banner');
   }
 }
 // Applica la personalizzazione salvata al PANNELLO REALE (header, sfondo, logo, tema...)
