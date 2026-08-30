@@ -40,7 +40,7 @@
 //    il reparto non ce l'hanno scritto, quindi non si sanno filtrare e
 //    per adesso restano fuori.
 // =====================================================================
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 /* ⛔ 29 agosto 2026 (sera) — ERA 4000, E L'HO VISTO SCATTARE DAL VIVO.
    Provando la chat sul gestionale vero, un messaggio su tre e' tornato
@@ -443,10 +443,104 @@ function istruzioni(sezione, nomeReparto, oggi) {
 }
 
 // ---------------------------------------------------------------------
-const rispondi = (codice, corpo) => ({
-  statusCode: codice,
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(corpo)
+// =====================================================================
+// ⛔ 30 agosto 2026 — UN GIRO CON CLAUDE, ASCOLTATO MENTRE PARLA
+//
+// Prima si mandava la domanda e si aspettava il pacco intero: 5-10
+// secondi con lo schermo fermo, e sembrava bloccata. Adesso si chiede
+// `stream: true` e le parole arrivano una alla volta: ogni pezzo di
+// testo viene passato a `manda`, che lo spedisce subito al browser.
+//
+// ⚠️ Quello che NON cambia: gli attrezzi, i filtri, i crediti e il
+//    registro restano identici. Qui si cambia solo COME arriva il testo.
+// ⚠️ I pezzi di un attrezzo (`input_json_delta`) arrivano spezzettati e
+//    si rimettono insieme alla fine del blocco: prima di `content_block_stop`
+//    quel JSON e' monco e non si puo' leggere.
+// ⚠️ Il tetto di tempo vale SOLO sull'aggancio, non su tutto il flusso:
+//    se no una risposta lunga verrebbe tagliata a meta' dall'orologio.
+// =====================================================================
+async function unGiro(corpo, manda) {
+  const r = await conTempo(fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify(Object.assign({ stream: true }, corpo))
+  }), TEMPO_CLAUDE, 'claude');
+
+  if (!r.ok) {
+    let messaggio = 'Anthropic HTTP ' + r.status;
+    try { const d = await r.json(); if (d && d.error && d.error.message) messaggio = d.error.message; } catch (e) {}
+    return { errore: messaggio, blocchi: [], tin: 0, tout: 0, testo: '' };
+  }
+
+  const lettore = r.body.getReader();
+  const dec = new TextDecoder();
+  let resto = '', tin = 0, tout = 0, testo = '', errore = null;
+  const blocchi = [], mezziAttrezzi = {};
+
+  const evento = function (riga) {
+    let o; try { o = JSON.parse(riga); } catch (e) { return; }
+    if (o.type === 'message_start') {
+      tin += (o.message && o.message.usage && o.message.usage.input_tokens) || 0; return;
+    }
+    if (o.type === 'content_block_start') {
+      const b = o.content_block || {};
+      if (b.type === 'text') blocchi[o.index] = { type: 'text', text: '' };
+      else if (b.type === 'tool_use') { blocchi[o.index] = { type: 'tool_use', id: b.id, name: b.name, input: {} }; mezziAttrezzi[o.index] = ''; }
+      else blocchi[o.index] = b;
+      return;
+    }
+    if (o.type === 'content_block_delta') {
+      const d = o.delta || {};
+      if (d.type === 'text_delta') {
+        const b = blocchi[o.index]; if (b && typeof b.text === 'string') b.text += d.text;
+        testo += d.text;
+        manda({ pezzo: d.text });
+      } else if (d.type === 'input_json_delta') {
+        mezziAttrezzi[o.index] = (mezziAttrezzi[o.index] || '') + (d.partial_json || '');
+      }
+      return;
+    }
+    if (o.type === 'content_block_stop') {
+      const b = blocchi[o.index];
+      if (b && b.type === 'tool_use') {
+        try { b.input = mezziAttrezzi[o.index] ? JSON.parse(mezziAttrezzi[o.index]) : {}; }
+        catch (e) { b.input = {}; }
+      }
+      return;
+    }
+    if (o.type === 'message_delta') { tout += (o.usage && o.usage.output_tokens) || 0; return; }
+    if (o.type === 'error') { errore = (o.error && o.error.message) || 'Anthropic ha risposto con un errore.'; return; }
+  };
+
+  while (true) {
+    const p = await lettore.read();
+    if (p.done) break;
+    resto += dec.decode(p.value, { stream: true });
+    const righe = resto.split('\n');
+    resto = righe.pop();
+    for (const riga of righe) {
+      if (riga.indexOf('data:') !== 0) continue;
+      evento(riga.slice(5).trim());
+    }
+  }
+  return { errore: errore, blocchi: blocchi.filter(Boolean), tin: tin, tout: tout, testo: testo.trim() };
+}
+
+// ---------------------------------------------------------------------
+/* ⛔ 30 agosto 2026 — QUESTO FILE E' NEL FORMATO NUOVO DI NETLIFY (.mjs).
+   Il formato vecchio (`exports.handler`) NON sa mandare la risposta a
+   pezzi: puo' solo consegnare tutto insieme alla fine. Per far comparire
+   le parole mentre Claude le scrive serve questo, che risponde con un
+   flusso.
+   ⛔ IL FILE VECCHIO `chat-gestionale.js` VA CANCELLATO: due file con lo
+   stesso nome sullo stesso indirizzo e Netlify ne sceglie uno a caso. */
+const rispondi = (codice, corpo) => new Response(JSON.stringify(corpo), {
+  status: codice,
+  headers: { 'Content-Type': 'application/json' }
 });
 
 function conTempo(promessa, ms, etichetta) {
@@ -458,8 +552,8 @@ function conTempo(promessa, ms, etichetta) {
   return Promise.race([promessa, scaduta]).finally(() => clearTimeout(t));
 }
 
-exports.handler = async function(event) {
-  if (event.httpMethod !== 'POST') return rispondi(405, { error: 'Method Not Allowed' });
+export default async function (req) {
+  if (req.method !== 'POST') return rispondi(405, { error: 'Method Not Allowed' });
 
   const SUPABASE_URL  = process.env.SUPABASE_URL;
   const SERVICE_KEY   = process.env.SUPABASE_SERVICE_KEY;
@@ -475,14 +569,13 @@ exports.handler = async function(event) {
 
   let domanda, conversazione_id, mestiere_id, sezione;
   try {
-    ({ domanda, conversazione_id, mestiere_id, sezione } = JSON.parse(event.body || '{}'));
+    ({ domanda, conversazione_id, mestiere_id, sezione } = JSON.parse((await req.text()) || '{}'));
   } catch { return rispondi(400, { error: 'Body JSON non valido.' }); }
   if (!domanda || !String(domanda).trim()) return rispondi(400, { error: 'La domanda è vuota.' });
   if (!conversazione_id || !mestiere_id)   return rispondi(400, { error: 'Parametri mancanti.' });
   domanda = String(domanda).slice(0, 2000);
 
-  const intestazioni = event.headers || {};
-  const autorizzazione = intestazioni.authorization || intestazioni.Authorization || '';
+  const autorizzazione = req.headers.get('authorization') || '';
   const token = autorizzazione.startsWith('Bearer ') ? autorizzazione.slice(7).trim() : '';
   if (!token) return rispondi(401, { error: 'Devi essere collegato. Rientra e riprova.' });
 
@@ -596,39 +689,50 @@ exports.handler = async function(event) {
   try { oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); }
   catch (e) { oggi = new Date().toISOString().slice(0, 10); }
 
-  try {
-    for (let giro = 0; giro < GIRI_MAX; giro++) {
-      const r = await conTempo(fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          // ⛔ 30 agosto 2026 — LA RISPOSTA NON SI TAGLIA PIU' A META'.
-          //    Era 1500, cioe' poco piu' di una pagina: su una domanda
-          //    lunga (un elenco di fatture, una spiegazione a passaggi)
-          //    la risposta finiva a meta' frase senza dire niente.
-          //    ⚠️ Alzare il tetto NON costa di piu': si paga quello che
-          //    scrive davvero, non il tetto. Costa solo quando la
-          //    risposta e' lunga per davvero.
-          max_tokens: 4000,
-          system: istruzioni(sezione, nomeReparto, oggi),
-          tools: STRUMENTI,
-          messages: messaggi
-        })
-      }), TEMPO_CLAUDE, 'claude');
+  // ---- 7b. LA RISPOSTA ESCE MENTRE LA SCRIVE ------------------------
+  // ⛔ Da qui in poi si risponde con un FLUSSO, non con un pacco. Ogni riga
+  //    e' un pezzetto di JSON che finisce con un a capo:
+  //      {"pezzo":"...testo..."}      → una manciata di parole appena scritte
+  //      {"fine":true, ...}           → l'ultima riga: quanto resta, il modulo,
+  //                                     e l'errore se non e' andata
+  // ⚠️ I controlli d'accesso, il piano e i crediti sono TUTTI gia' passati
+  //    qui sopra, e rispondono ancora col codice giusto (401, 402, 403).
+  //    Il flusso parte solo quando e' tutto a posto: cosi' il browser vecchio
+  //    che non capisce il flusso vede comunque gli errori come prima.
+  const codifica = new TextEncoder();
+  const flusso = new ReadableStream({
+    async start(controller) {
+      let chiuso = false;
+      const manda = function (o) {
+        if (chiuso) return;
+        try { controller.enqueue(codifica.encode(JSON.stringify(o) + '\n')); }
+        catch (e) { chiuso = true; }   /* se ha chiuso la pagina, si smette e basta */
+      };
 
-      const d = await r.json();
-      if (!r.ok) { errore = (d.error && d.error.message) || ('Anthropic HTTP ' + r.status); break; }
-      tin  += (d.usage && d.usage.input_tokens)  || 0;
-      tout += (d.usage && d.usage.output_tokens) || 0;
+      try {
+        for (let giro = 0; giro < GIRI_MAX; giro++) {
+          const g = await unGiro({
+            model: 'claude-sonnet-4-5',
+            // ⛔ 30 agosto 2026 — LA RISPOSTA NON SI TAGLIA PIU' A META'.
+            //    Era 1500, cioe' poco piu' di una pagina. Alzare il tetto NON
+            //    costa di piu': si paga quello che scrive davvero.
+            max_tokens: 4000,
+            system: istruzioni(sezione, nomeReparto, oggi),
+            tools: STRUMENTI,
+            messages: messaggi
+          }, manda);
 
-      const blocchi = d.content || [];
-      risposta = blocchi.filter(function(b) { return b.type === 'text'; })
-                        .map(function(b) { return b.text; }).join('\n').trim();
+          tin  += g.tin;
+          tout += g.tout;
+          if (g.errore) { errore = g.errore; break; }
+
+          const blocchi = g.blocchi;
+          /* ⛔ SI TIENE TUTTO QUELLO CHE HA SCRITTO, non solo l'ultimo giro.
+             Prima `risposta` veniva sovrascritta a ogni giro e le frasi dei
+             giri di mezzo si buttavano. Adesso l'utente le ha gia' VISTE
+             comparire: se poi non le salvassimo, riaprendo la chat domani
+             troverebbe scritto meno di quello che aveva letto. */
+          if (g.testo) risposta = risposta ? (risposta + '\n\n' + g.testo) : g.testo;
 
       const chieste = blocchi.filter(function(b) { return b.type === 'tool_use'; });
       if (!chieste.length) break;
@@ -703,53 +807,60 @@ exports.handler = async function(event) {
       }
       messaggi.push({ role: 'assistant', content: blocchi });
       messaggi.push({ role: 'user', content: risultati });
+        }
+      } catch (e) {
+        errore = e && e.message;
+      }
+
+      if (!risposta && !errore) errore = 'Non sono riuscito a rispondere. Riprova.';
+
+      // ⛔ SE NON HA AVUTO LA RISPOSTA, IL CREDITO TORNA INDIETRO.
+      //    Stessa regola di prima: si scala prima di chiamare Claude e si
+      //    rimborsa se fallisce. Far pagare un messaggio mai arrivato e' il
+      //    modo piu' veloce per farsi disdire il piano.
+      if (errore && !risposta && scontrino) {
+        const rimb = await chiamaRpc(dati, 'refund_ai_credit',
+          { p_log_id: scontrino, p_error: String(errore).slice(0, 300) });
+        if (rimb.errore) console.error('[chat] rimborso non riuscito:', rimb.errore);
+      }
+
+      // ---- 8. si scrive nel registro (solo il server puo') ------------
+      // ⚠️ Sonnet 4.5: 3 $ per milione in ingresso, 15 in uscita.
+      const costo = (tin * 3 / 1e6) + (tout * 15 / 1e6);
+      try {
+        await server.from('gest_chat_messaggi').insert([
+          { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
+            ruolo: 'utente', testo: domanda, sezione: sezione || null, come_pagato: comePagato },
+          { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
+            ruolo: 'ai', testo: risposta || null, sezione: sezione || null,
+            tokens_input: tin, tokens_output: tout, costo_usd: costo, errore: errore }
+        ]);
+      } catch (e) { console.error('[chat] registro:', e && e.message); }
+
+      manda({
+        fine: true,
+        errore: (errore && !risposta) ? errore : null,
+        modulo: modulo,
+        come_pagato: comePagato,
+        restanti: Math.max((stato.restanti || 0) - (comePagato === 'compreso' ? 1 : 0), 0)
+      });
+      chiuso = true;
+      try { controller.close(); } catch (e) {}
     }
-  } catch (e) {
-    errore = e && e.message;
-  }
+  });
 
-  if (!risposta && !errore) errore = 'Non sono riuscito a rispondere. Riprova.';
-
-  // ⛔ SE NON HA AVUTO LA RISPOSTA, IL CREDITO TORNA INDIETRO.
-  //    E' la stessa regola gia' scritta per le altre funzioni AI: si scala
-  //    prima di chiamare Claude e si rimborsa se fallisce. Far pagare un
-  //    messaggio che non e' mai arrivato e' il modo piu' veloce per farsi
-  //    disdire il piano.
-  if (errore && !risposta && scontrino) {
-    const rimb = await chiamaRpc(dati, 'refund_ai_credit',
-      { p_log_id: scontrino, p_error: String(errore).slice(0, 300) });
-    if (rimb.errore) console.error('[chat] rimborso non riuscito:', rimb.errore);
-  }
-
-  // ---- 8. si scrive nel registro (solo il server puo') --------------
-  // ⚠️ Sonnet 4.5: 3 $ per milione in ingresso, 15 in uscita.
-  const costo = (tin * 3 / 1e6) + (tout * 15 / 1e6);
-  try {
-    await server.from('gest_chat_messaggi').insert([
-      { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
-        ruolo: 'utente', testo: domanda, sezione: sezione || null, come_pagato: comePagato },
-      { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
-        ruolo: 'ai', testo: risposta || null, sezione: sezione || null,
-        tokens_input: tin, tokens_output: tout, costo_usd: costo, errore: errore }
-    ]);
-  } catch (e) { console.error('[chat] registro:', e && e.message); }
-
-  if (errore && !risposta) return rispondi(502, { error: errore });
-  return rispondi(200, { risposta: risposta, modulo: modulo, come_pagato: comePagato, restanti: Math.max((stato.restanti || 0) - (comePagato === 'compreso' ? 1 : 0), 0) });
-};
+  return new Response(flusso, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-store',
+      /* ⚠️ dice a chi sta in mezzo di non mettere da parte la risposta e
+         consegnarla tutta insieme alla fine: sarebbe come non averla fatta */
+      'X-Accel-Buffering': 'no'
+    }
+  });
+}
 
 // per il banco: le parti pure si provano da sole, senza database
-exports.ATTREZZI = ATTREZZI;
-exports.DOVE_SI_CERCA = DOVE_SI_CERCA;
-exports.STRUMENTI = STRUMENTI;
-exports.costruisciLettura = costruisciLettura;
-exports.costruisciModulo = costruisciModulo;
-exports.CASELLE_LAVORO = CASELLE_LAVORO;
-exports.MODULI = MODULI;
-exports.calendarioProssimo = calendarioProssimo;
-exports.scegliNome = scegliNome;
-exports.nomiDelReparto = nomiDelReparto;
-exports.esegui = esegui;
-exports.istruzioni = istruzioni;
-
-exports.chiamaRpc = chiamaRpc;
+export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura };
+export { costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };

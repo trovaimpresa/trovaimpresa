@@ -460,6 +460,80 @@
           sezione: sezioneAperta()
         })
       });
+      /* ============================================================
+         ⛔ 30 agosto 2026 — LA RISPOSTA ARRIVA A PEZZI.
+         ============================================================
+         La function risponde con un flusso: una riga di JSON per volta,
+         separate da un a capo.
+             {"pezzo":"...")   una manciata di parole appena scritte
+             {"fine":true,...} l'ultima riga: quanti ne restano, il modulo,
+                               e l'errore se non e' andata
+         ⚠️ Il vecchio modo (la risposta tutta insieme) resta qui sotto e
+            funziona ancora: lo usano gli errori del piano e dei crediti,
+            che rispondono col loro codice PRIMA che il flusso parta. Cosi'
+            se un domani la function tornasse indietro, la chat non si
+            accorge di niente.
+         ⚠️ Fermare a meta' lascia scritto quello che era gia' arrivato: il
+            resto lo trovi riaprendo la chat, perche' il server la finisce
+            comunque e la salva intera.
+         ============================================================ */
+      var tipo = '';
+      try { tipo = r.headers.get('content-type') || ''; } catch (e) {}
+      var aPezzi = r.ok && tipo.indexOf('ndjson') >= 0 && r.body && typeof r.body.getReader === 'function';
+
+      if (aPezzi) {
+        if (attesa) attesa.remove();
+        var bolla = scrivi('ai', '');
+        var scatola = righe();
+        var lettore = r.body.getReader();
+        var dec = new TextDecoder();
+        var resto = '', testo = '', fine = null;
+        while (true) {
+          var p = await lettore.read();
+          if (p.done) break;
+          resto += dec.decode(p.value, { stream: true });
+          var lin = resto.split('\n');
+          resto = lin.pop();
+          for (var i = 0; i < lin.length; i++) {
+            if (!lin[i]) continue;
+            var o; try { o = JSON.parse(lin[i]); } catch (e) { continue; }
+            if (typeof o.pezzo === 'string') {
+              testo += o.pezzo;
+              /* si ridisegna tutta la bolla ogni volta: e' poco testo, e cosi'
+                 il grassetto e i pulsanti «Aprilo» si formano da soli appena
+                 la riga e' completa */
+              bolla.innerHTML = testoRisposta(testo);
+              if (scatola) scatola.scrollTop = scatola.scrollHeight;
+            }
+            if (o.fine) fine = o;
+          }
+        }
+        if (!testo) {
+          bolla.innerHTML = 'Non sono riuscito a risponderti: '
+            + esc((fine && fine.errore) || 'riprova fra poco') + '.<br>'
+            + '<span class="asst-nota">Se ricapita, usa «Assistenza diretta» qui a sinistra.</span>';
+        } else {
+          var cop = document.createElement('button');
+          cop.type = 'button'; cop.className = 'chip';
+          cop.setAttribute('data-copia', '1'); cop.textContent = 'Copia';
+          bolla.appendChild(document.createElement('br'));
+          bolla.appendChild(cop);
+        }
+        if (fine) {
+          scriviRestanti(fine.restanti);
+          caricaArchivio();
+          /* ⛔ il modulo si apre DOPO aver scritto la risposta: se si aprisse
+             prima, la finestra coprirebbe la riga che dice cosa ci ha messo. */
+          if (fine.modulo) apertoUnModulo = apriModulo(fine.modulo);
+        }
+        inCorso = false;
+        annulla = null;
+        bottoneManda.textContent = 'Manda';
+        bottoneManda.disabled = false;
+        if (!apertoUnModulo) casella.focus();
+        return;
+      }
+
       var d = await r.json().catch(function () { return {}; });
       if (attesa) attesa.remove();
 
