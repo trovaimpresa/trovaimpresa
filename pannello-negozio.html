@@ -3485,8 +3485,8 @@ function montaPorteGestionale() {
     guarda.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
     guarda.onclick = () => {
       location.href = porta.chiave === 'premium'
-        ? '/gestionale-app.html?visita=1&piano=premium'
-        : '/gestionale-app.html?visita=1';
+        ? '/gestionale-negozio.html?visita=1&piano=premium'
+        : '/gestionale-negozio.html?visita=1';
     };
 
     const prova = document.createElement('button');
@@ -3504,8 +3504,8 @@ function montaPorteGestionale() {
     if (aperta) {
       bottone.onclick = () => {
         location.href = porta.chiave === 'premium'
-          ? '/gestionale-app.html?piano=premium'
-          : '/gestionale-app.html';
+          ? '/gestionale-negozio.html?piano=premium'
+          : '/gestionale-negozio.html';
       };
       return;
     }
@@ -3588,8 +3588,8 @@ async function avviaProvaGestionale(bottone, porta) {
       if (dati && dati.ok) {
         // dentro subito, dalla porta da cui ha chiesto la prova
         location.href = porta.chiave === 'premium'
-          ? '/gestionale-app.html?piano=premium'
-          : '/gestionale-app.html';
+          ? '/gestionale-negozio.html?piano=premium'
+          : '/gestionale-negozio.html';
         return;
       }
       alert((dati && (dati.messaggio || dati.error)) || 'Non sono riuscito ad aprire la prova.');
