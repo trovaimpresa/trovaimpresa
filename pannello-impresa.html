@@ -4757,8 +4757,8 @@ function chiudiModalPriorita() {
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 const PORTE_GESTIONALE = [
-  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium'    },
-  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI' }
+  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium',    attiva: 'Attiva Premium e gestionale'    },
+  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI' }
 ];
 
 function montaPorteGestionale() {
@@ -4834,7 +4834,9 @@ function montaPorteGestionale() {
     }
 
     // --- 3. non ce l'ha: il prezzo si vede solo adesso -------------
-    bottone.textContent = 'Attiva ' + porta.label;
+    // ⚠️ il pulsante dice per intero cosa si attiva, e le due porte lo
+    //    dicono nello stesso modo: «...e gestionale» / «...e gestionale AI».
+    bottone.textContent = porta.attiva;
     bottone.onclick = () => mostraListino(porta, box);
   });
 }
