@@ -101,7 +101,7 @@
     s.id = 'vdc-stile';
     s.textContent =
       '#vdc { padding:0 16px 12px; }' +
-      '#vdc .vdc-tit { font-size:0.78rem; font-weight:700; color:#0a2a4d; margin:0 0 7px; }' +
+      '#vdc .vdc-tit { font-size:13px; font-weight:700; color:#0a2a4d; margin:0 0 7px; }' +
       '#vdc input { width:100%; box-sizing:border-box; padding:10px 11px;' +
       '  border:1.5px solid #d8dee7; border-radius:9px; font-size:0.85rem;' +
       '  font-family:inherit; color:#0a2a4d; background:#fff; }' +
@@ -118,7 +118,7 @@
       '#vdc .vdc-btn[disabled] { background:#9db8e8; cursor:default; }' +
       '#vdc .vdc-strada { background:#12874a; display:none; }' +
       '#vdc .vdc-strada:hover { background:#0d6b3a; }' +
-      '#vdc .vdc-esito { font-size:0.76rem; line-height:1.35; margin-top:7px;' +
+      '#vdc .vdc-esito { font-size:13px; line-height:1.35; margin-top:7px;' +
       '  color:#5a6b80; word-break:break-word; }' +
       '#vdc .vdc-esito.vdc-male { color:#c0392b; }';
     document.head.appendChild(s);

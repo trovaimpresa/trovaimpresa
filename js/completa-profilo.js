@@ -56,7 +56,7 @@
     '#ti-completa .ti-riemp{height:100%;border-radius:99px;background:#ffb300;transition:width .6s ease}',
     '#ti-completa .ti-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}',
     '#ti-completa .ti-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:99px;',
-    'padding:3px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}',
+    'padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}',
     '#ti-completa .ti-cta{background:#ff8800;color:#fff;text-decoration:none;font-weight:800;font-size:15px;',
     'padding:12px 22px;border-radius:10px;white-space:nowrap;flex:0 0 auto;box-shadow:0 2px 8px rgba(0,0,0,.18)}',
     '#ti-completa .ti-cta:hover{background:#e67a00}',

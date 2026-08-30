@@ -31,7 +31,7 @@ async function caricaCantieri() {
       <div style="font-weight:700;color:#0a2a4d;margin-bottom:6px">${esc(c.nome) || '—'}</div>
       ${c.cliente ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">👤 ${esc(c.cliente)}</div>` : ''}
       ${c.indirizzo ? `<div style="font-size:0.85rem;color:#555;margin-bottom:8px">📍 ${esc(c.indirizzo)}</div>` : ''}
-      <span style="display:inline-block;padding:4px 10px;background:${colore};color:white;border-radius:999px;font-size:0.75rem;font-weight:700">${label}</span>
+      <span style="display:inline-block;padding:4px 10px;background:${colore};color:white;border-radius:999px;font-size:13px;font-weight:700">${label}</span>
     </div>`;
   }).join('');
 }
@@ -213,8 +213,8 @@ function renderPreventiviCantiere() {
   lista.innerHTML = prev.map(p => {
     const fileUrlSafe = (p.file_url || '').replace(/'/g, "\\'");
     const badge = p.accettato
-      ? '<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">✓ Accettato</span>'
-      : '<span style="display:inline-block;padding:4px 10px;background:#e8733a;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">In attesa</span>';
+      ? '<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:13px;font-weight:700">✓ Accettato</span>'
+      : '<span style="display:inline-block;padding:4px 10px;background:#e8733a;color:white;border-radius:999px;font-size:13px;font-weight:700">In attesa</span>';
     return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
@@ -306,11 +306,11 @@ function renderFattureCantiere() {
   lista.innerHTML = fatt.map(f => {
     const fileUrlSafe = (f.file_url || '').replace(/'/g, "\\'");
     const badge = f.pagata
-      ? '<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">✓ Pagata</span>'
-      : '<span style="display:inline-block;padding:4px 10px;background:#e8733a;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">Da pagare</span>';
+      ? '<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:13px;font-weight:700">✓ Pagata</span>'
+      : '<span style="display:inline-block;padding:4px 10px;background:#e8733a;color:white;border-radius:999px;font-size:13px;font-weight:700">Da pagare</span>';
     return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between">
       <div style="flex:1;min-width:0">
-        ${f.numero ? `<div style="font-size:0.78rem;color:var(--mid);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Fattura nº ${esc(f.numero)}</div>` : ''}
+        ${f.numero ? `<div style="font-size:13px;color:var(--mid);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Fattura nº ${esc(f.numero)}</div>` : ''}
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
           <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#0a2a4d;font-weight:700">€ ${fmtImporto(f.importo)}</div>
           ${badge}
@@ -416,7 +416,7 @@ function renderLogCantiere() {
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
           <div style="font-family:'Playfair Display',serif;font-size:1.15rem;color:#0a2a4d;font-weight:700">${fmtData(l.data)}</div>
-          ${oreLbl ? `<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">⏱️ ${oreLbl}</span>` : ''}
+          ${oreLbl ? `<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:13px;font-weight:700">⏱️ ${oreLbl}</span>` : ''}
         </div>
         ${l.materiali ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap;margin-bottom:6px"><span style="margin-right:4px">📦</span>${esc(l.materiali)}</div>` : ''}
         ${l.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap">${esc(l.note)}</div>` : ''}
@@ -534,7 +534,7 @@ function renderScadenzeCantiere() {
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
           <div style="font-weight:700;color:#0a2a4d;font-size:1rem${s.completata ? ';text-decoration:line-through' : ''}">${esc(s.descrizione) || '—'}</div>
-          <span style="display:inline-block;padding:4px 10px;background:${badgeBg};color:white;border-radius:999px;font-size:0.72rem;font-weight:700">${badgeLbl}</span>
+          <span style="display:inline-block;padding:4px 10px;background:${badgeBg};color:white;border-radius:999px;font-size:13px;font-weight:700">${badgeLbl}</span>
         </div>
         <div style="font-size:0.82rem;color:#555;margin-bottom:6px">📅 ${fmtData(s.data_scadenza)}</div>
         ${s.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap">${esc(s.note)}</div>` : ''}
