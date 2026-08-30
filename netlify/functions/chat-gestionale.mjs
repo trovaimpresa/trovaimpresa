@@ -86,13 +86,34 @@ const ATTREZZI = {
   sal:          { tabella:'gest_sal',               campi:'id,numero,stato,data',                               ordine:'data',          nome:'gli stati di avanzamento' },
   mezzi:        { tabella:'gest_mezzi',             campi:'id,nome,targa,stato',                                ordine:'nome',          nome:'i mezzi' },
   operatori:    { tabella:'gest_operatori',         campi:'id,nome,mansione',                                   ordine:'nome',          nome:'le persone della squadra' },
-  fatture_fornitori: { tabella:'gest_fatture_fornitori', campi:'id,numero,importo,scadenza,stato',              ordine:'scadenza',      nome:'le fatture dei fornitori' }
+  fatture_fornitori: { tabella:'gest_fatture_fornitori', campi:'id,numero,importo,scadenza,stato',              ordine:'scadenza',      nome:'le fatture dei fornitori' },
+
+  // ⛔ 30 agosto 2026 — SETTE COSE CHE C'ERANO GIA' E NESSUNO LEGGEVA.
+  //    Un commento di questo file diceva che le tabelle figlie «il reparto
+  //    non ce l'hanno scritto». E' vero per le RIGHE dei documenti, ma NON
+  //    per queste sette: il `mestiere_id` ce l'hanno tutte, letto dal
+  //    database vero il 30 agosto una per una.
+  //    Il buco piu' assurdo era questo: la chat sapeva che avevi la fattura
+  //    2026/14, ma non quanto valeva.
+  //    ⚠️ `cestino:false` dove la colonna `eliminato_il` non esiste (le
+  //    quattro viste e i rifornimenti): chiederla la' fa rispondere errore.
+  //    ⚠️ Le quattro viste sono `security_invoker=true` — controllato il 30
+  //    agosto — quindi si portano dietro le regole delle tabelle sotto: la
+  //    seconda serratura c'e' anche li'.
+  ore:               { tabella:'gest_ore',               campi:'id,data,ore,operatore_id,lavoro_id',                                  ordine:'data',          nome:'le ore lavorate' },
+  rapportini:        { tabella:'gest_rapportini',        campi:'id,data,lavoro_id,materiali,note',                                    ordine:'data',          nome:'i rapportini di cantiere' },
+  preventivi_totali: { tabella:'gest_preventivi_totali', campi:'preventivo_id,imponibile,iva,totale,n_righe',                          ordine:'totale',        nome:'quanto vale ogni preventivo', cestino:false },
+  fatture_totali:    { tabella:'gest_fatture_totali',    campi:'fattura_id,imponibile,iva,totale,totale_documento,ritenuta,segno',     ordine:'totale',        nome:'quanto vale ogni fattura',    cestino:false },
+  mezzi_scadenze:    { tabella:'gest_mezzi_scadenze',    campi:'mezzo_id,nome,targa,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo', ordine:'prossima_data', nome:'le scadenze dei mezzi', cestino:false },
+  rifornimenti:      { tabella:'gest_rifornimenti',      campi:'id,data,mezzo_id,importo,litri,km,distributore',                       ordine:'data',          nome:'i rifornimenti di carburante', cestino:false },
+  carte_saldo:       { tabella:'gest_carte_saldo',       campi:'carta_id,nome,stato,saldo',                                           ordine:'saldo',         nome:'il saldo delle carte',        cestino:false }
 };
 // il campo su cui cerca «cerca_per_nome», per ogni cosa
 const DOVE_SI_CERCA = {
   lavori:'descrizione', preventivi:'titolo', fatture:'numero', clienti:'nome',
   fornitori:'nome', scadenze:'titolo', computi:'titolo', sal:'numero',
-  mezzi:'nome', operatori:'nome', fatture_fornitori:'numero'
+  mezzi:'nome', operatori:'nome', fatture_fornitori:'numero',
+  mezzi_scadenze:'nome', rifornimenti:'distributore', carte_saldo:'nome', rapportini:'note'
 };
 
 // ---------------------------------------------------------------------
@@ -119,7 +140,11 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
     //    alla domanda «quante fatture ho» la chat conterebbe anche quelle
     //    buttate e direbbe un numero che sullo schermo non c'e'. Due
     //    schermate, due numeri: il difetto delle fatture del 13 agosto.
-    senzaCestino: true,
+    // ⛔ 30 agosto 2026 — IL CESTINO SI TOGLIE SOLO DOVE C'E'.
+    //    Era `true` fisso: bastava aggiungere una vista senza `eliminato_il`
+    //    e ogni domanda su quella avrebbe risposto «errore». La scelta non
+    //    puo' arrivare da Claude ne' dal browser: sta nell'elenco chiuso.
+    senzaCestino: a.cestino !== false,
     ordine: a.ordine,
     limite: Math.min(Math.max(parseInt(o.quanti, 10) || RIGHE_MAX, 1), RIGHE_MAX),
     soloConta: !!o.soloConta
@@ -424,7 +449,8 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Esempio: «Sostituzione grondaia [apri:lav:1f2e...] vale 8.000,00 €». Il segnalino non si spiega e non si nomina: si scrive e basta.',
     'Metti il segnalino SOLO su cose che hai davvero letto, con l\'id esatto. Non inventarlo mai: un pulsante che apre la cosa sbagliata è peggio di nessun pulsante.',
     '',
-    'I SOLDI si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
+    'I SOLDI DEL REPARTO nel loro insieme si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
+    'QUANTO VALE UN DOCUMENTO PRECISO invece sta in `fatture_totali` e `preventivi_totali`. Si legge la fattura (o il preventivo) e poi il suo totale, e si incrociano per id: `fatture_totali.fattura_id` e\' l\'`id` della fattura, `preventivi_totali.preventivo_id` e\' l\'`id` del preventivo. Lo stesso vale per le ore: `ore.operatore_id` e\' l\'`id` della persona della squadra, `ore.lavoro_id` e\' l\'`id` del lavoro. Gli importi di quelle tabelle NON si sommano a mano se la domanda riguarda tutto il reparto: per quello c\'e\' `soldi_del_reparto`.',
     'Quando dici una cifra, dì SEMPRE tutte e due: il totale con l\'IVA (quello che il cliente bonifica) e, fra parentesi, l\'imponibile. Esempio: «9.760,00 € (8.000,00 € imponibile)». Scelta di Alessio, 29 agosto.',
     'Scrivi i soldi all\'italiana, col punto delle migliaia e la virgola dei centesimi: 8.000,00 €.',
     '⚠️ Una fattura in BOZZA non è un incasso: non contarla fra i soldi che deve avere, e se la nomini di\' che è ancora una bozza.',
