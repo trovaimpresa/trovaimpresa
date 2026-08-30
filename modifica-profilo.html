@@ -804,7 +804,7 @@
           <div class="azioni-discrete">
             <div id="card-disdetta" style="display:none;">
               <button type="button" id="btn-disdici" onclick="disdiciAbbonamento()" class="link-discreto">⚙️ Gestione abbonamento</button>
-              <p id="info-disdetta" style="font-size:12px;color:#888;margin-top:4px;margin-bottom:0;"></p>
+              <p id="info-disdetta" style="font-size:13px;color:#888;margin-top:4px;margin-bottom:0;line-height:1.5;"></p>
             </div>
             <button type="button" id="btn-elimina" onclick="eliminaAccount()" class="link-discreto pericolo">Elimina account</button>
           </div>
@@ -1025,16 +1025,34 @@
       }
       aggiornaDescCounter();
 
-      // Gestione abbonamento
+      /* ===== GESTIONE ABBONAMENTO — rifatta il 30 agosto 2026 =====
+         Prima qui c'era un pulsante che scriveva `rinnovo_auto_piano = false`
+         su Supabase e basta: nessuna riga del sito legge quella colonna e su
+         Stripe non arrivava niente. Il cliente leggeva «abbonamento disdetto»
+         e la carta continuava a essere addebitata. Una impresa l'aveva gia'
+         cliccato il 26 agosto credendo di aver disdetto.
+         Adesso il pulsante apre il PORTALE CLIENTI di Stripe, che disdice
+         davvero (a fine periodo), cambia la carta e cambia piano.
+
+         Leggeva anche `data_scadenza_piano`, che e' vuota su tutte e 102 le
+         imprese: la scadenza sta in `premium_scadenza`. Per questo scriveva
+         «Attivo fino al —».
+
+         Chi e' nei 3 mesi regalati NON ha nessun abbonamento su Stripe: a lui
+         il portale risponderebbe «nessun abbonamento a tuo nome». Il pulsante
+         non gli si mostra, gli si dice com'e'. */
       if (d.piano && d.piano !== 'free') {
+        const btnDisdici = document.getElementById('btn-disdici');
+        const notaDisdetta = document.getElementById('info-disdetta');
         document.getElementById('card-disdetta').style.display = 'block';
-        if (d.rinnovo_auto_piano === false) {
-          const btnDisdici = document.getElementById('btn-disdici');
-          btnDisdici.disabled = true;
-          btnDisdici.style.opacity = '0.5';
-          btnDisdici.style.cursor = 'not-allowed';
-          const scadenza = d.data_scadenza_piano ? new Date(d.data_scadenza_piano).toLocaleDateString('it-IT') : '—';
-          document.getElementById('info-disdetta').textContent = 'Attivo fino al ' + scadenza + '. Dopo tornerai al piano Free.';
+        if (d.premium_pagato === true) {
+          notaDisdetta.textContent = 'Da qui disdici, cambi piano o cambi la carta. La disdetta vale da fine periodo: fino a quel giorno il piano resta attivo.';
+        } else {
+          btnDisdici.style.display = 'none';
+          const scadenza = _dataScadenzaPiano(d.premium_scadenza);
+          notaDisdetta.textContent = 'Sei nei mesi di Premium in regalo'
+            + (scadenza ? ', fino al ' + scadenza : '')
+            + '. Non c\'è nessun abbonamento e non parte nessun addebito: alla scadenza torni al piano Free.';
         }
       }
 
@@ -1387,15 +1405,44 @@
       }
     }
 
+    /* premium_scadenza e' un istante (data + ora + fuso), non una data secca:
+       qui new Date() e' giusto, porta l'ora nel fuso di chi guarda. La
+       trappola del fuso vale per le date SENZA ora, che vanno spezzate. */
+    function _dataScadenzaPiano(valore) {
+      if (!valore) return '';
+      const d = new Date(valore);
+      return isNaN(d.getTime()) ? '' : d.toLocaleDateString('it-IT');
+    }
+
+    /* ⛔ 30 agosto 2026 — vedi la nota in popolaCampi. Questo pulsante NON
+       scrive piu' niente nel database: apre il portale clienti di Stripe,
+       l'unico posto dove la disdetta succede davvero. E' lo stesso codice di
+       apriPortaleClienti() dei 4 pannelli, copiato per non averne due diversi. */
     async function disdiciAbbonamento() {
-      if (!confirm('Sei sicuro di voler disdire l\'abbonamento? Il piano resterà attivo fino alla scadenza, poi tornerai al piano Free.')) return;
-      const { error } = await sb
-        .from('imprese')
-        .update({ rinnovo_auto_piano: false, disdetto_piano_il: new Date().toISOString() })
-        .eq('user_id', currentUser.id);
-      if (error) { alert('Errore: ' + error.message); return; }
-      alert('Abbonamento disdetto. Resterai sul piano attuale fino alla scadenza.');
-      location.reload();
+      const btn = document.getElementById('btn-disdici');
+      const nota = document.getElementById('info-disdetta');
+      if (!impresaData || impresaData.premium_pagato !== true) {
+        if (nota) nota.textContent = 'Non risulta nessun abbonamento a tuo nome: sei nei mesi di Premium in regalo e non parte nessun addebito.';
+        return;
+      }
+      const etichetta = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Apro...'; }
+      try {
+        const { data: ses } = await sb.auth.getSession();
+        const token = ses && ses.session && ses.session.access_token;
+        if (!token) { alert('La sessione è scaduta. Rientra e riprova.'); return; }
+        const res = await fetch('/.netlify/functions/portale-clienti', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ returnUrl: window.location.href })
+        });
+        const dati = await res.json();
+        if (dati && dati.url) { window.location.href = dati.url; return; }
+        alert((dati && dati.messaggio) || 'Non riesco ad aprire la gestione abbonamento. Riprova più tardi.');
+      } catch (e) {
+        alert('Errore: ' + e.message);
+      }
+      if (btn) { btn.disabled = false; btn.textContent = etichetta; }
     }
 
     function pannelloPerTipo() {
