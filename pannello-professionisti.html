@@ -3942,23 +3942,36 @@ function chiudiModalPreventivoDash() {
 // =====================
 // FOTO DEI LAVORI
 // =====================
+/* ⛔ 30 agosto 2026 — PERCHE' UN INTERRUTTORE E NON LA SCRITTA A SCHERMO.
+   Il primo tentativo guardava se la scritta qui sotto conteneva la clessidra
+   (⏳). Non puo' funzionare: piu' in basso in questa pagina c'e' `iconizza()`,
+   che gira per tutti i testi e TRASFORMA le emoji in disegni SVG. Quindici
+   millisecondi dopo, la clessidra non e' piu' testo e `textContent` legge
+   « Caricamento foto...» senza di lei. Il ramo non partiva mai.
+   Trovato aprendo la pagina vera: il banco, che usa una finta pagina, lo
+   dava verde. ⛔ Su questa pagina NESSUNO deve decidere leggendo un'emoji
+   dal testo: si usa una variabile. */
+let _fotoLavoroInCaricamento = false;
+
 // carica la foto nel bucket foto-lavori e mette l'URL pubblico in lav-foto
 async function caricaFotoLavoroFile(file) {
   const stato = document.getElementById('lav-foto-stato');
   const hidden = document.getElementById('lav-foto');
-  if (!file) { hidden.value = ''; stato.textContent = ''; return; }
-  if (file.size > 5 * 1024 * 1024) { hidden.value = ''; stato.textContent = '❌ La foto supera i 5 MB.'; return; }
+  if (!file) { hidden.value = ''; stato.textContent = ''; _fotoLavoroInCaricamento = false; return; }
+  if (file.size > 5 * 1024 * 1024) { hidden.value = ''; stato.textContent = '❌ La foto supera i 5 MB.'; _fotoLavoroInCaricamento = false; return; }
+  _fotoLavoroInCaricamento = true;
   stato.textContent = '⏳ Caricamento foto...';
   const prep = await preparaFileUpload(file);
-  if (prep.errore) { hidden.value = ''; stato.textContent = '❌ ' + prep.errore; return; }
+  if (prep.errore) { hidden.value = ''; stato.textContent = '❌ ' + prep.errore; _fotoLavoroInCaricamento = false; return; }
   const folder = String(impresaCorrente.id);
   const ext = prep.compressa ? 'jpg' : (file.name.split('.').pop() || 'jpg');
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
   const { error } = await sb.storage.from('foto-lavori').upload(path, prep.file, { upsert: false, contentType: prep.compressa ? 'image/jpeg' : file.type, cacheControl: '31536000' });
-  if (error) { hidden.value = ''; stato.textContent = '❌ Errore upload: ' + error.message; return; }
+  if (error) { hidden.value = ''; stato.textContent = '❌ Errore upload: ' + error.message; _fotoLavoroInCaricamento = false; return; }
   const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(path);
   hidden.value = publicUrl;
   stato.textContent = '✅ Foto caricata';
+  _fotoLavoroInCaricamento = false;
 }
 
 // INSERT di un lavoro in lavori_foto
@@ -3967,6 +3980,22 @@ async function salvaLavoroFoto() {
   const titolo = document.getElementById('lav-titolo').value.trim();
   const descrizione = document.getElementById('lav-descrizione').value.trim();
   const pubblico = document.getElementById('lav-pubblico').checked;
+
+  /* ⛔ 30 agosto 2026 — IL SALVA CHE SALVAVA IL NIENTE.
+     Premendo «Salva» senza aver scelto la foto, questa funzione scriveva
+     comunque la riga e rispondeva «✅ Lavoro salvato!»: una scheda senza
+     immagine, senza titolo, e per giunta con «Mostra nel profilo pubblico»
+     acceso. Il 30 agosto in tabella ce n'erano gia' 51, di 26 imprese
+     diverse, su 134 righe: due su cinque erano vuote.
+     Chi le ha fatte non ha sbagliato: ha premuto Salva mentre la foto era
+     ancora in caricamento, oppure prima di sceglierla, e nessuno gliel'ha
+     detto. Adesso glielo si dice, e si distingue fra le due cose. */
+  if (!foto) {
+    alert(_fotoLavoroInCaricamento
+      ? 'La foto si sta ancora caricando: aspetta il segno verde e poi premi Salva.'
+      : 'Manca la foto del lavoro: scegline una prima di salvare.');
+    return;
+  }
 
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
