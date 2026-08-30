@@ -2010,6 +2010,18 @@
             <div id="porta-ai-azione" style="margin-top:auto"></div>
           </div>
 
+          <!-- IL TERZO RIQUADRO: la prova. Non e' un accessorio degli
+               altri due, e' una cosa sua — e cosi' i due pulsanti non
+               si ripetono dentro tutte e due le porte. Lo vede solo chi
+               non ha nessun accesso: lo accende js piu' sotto. -->
+          <div id="porta-prova" style="display:none;flex:1;min-width:200px;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;flex-direction:column">
+            <div style="font-size:1.8rem;margin-bottom:8px">🔑</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Prova il gestionale</div>
+            <div style="visibility:hidden;font-size:0.85rem;font-weight:700;margin-top:4px">Il tuo piano</div>
+            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Entra, guardalo con i tuoi dati e decidi con calma</div>
+            <div id="porta-prova-azione" style="margin-top:auto"></div>
+          </div>
+
         </div>
         <div id="lista-cantieri" style="display:none"></div>
       </div>
@@ -4818,11 +4830,10 @@ function montaPorteGestionale() {
 
     box.innerHTML = '';
 
-    // ⛔ LA STRISCIA VIOLA DICE SEMPRE LA STESSA COSA.
-    // Detto da Alessio, 30 agosto: a sinistra «Attiva Premium e
-    // gestionale», a destra «Attiva Premium e gestionale AI». Sempre, a
-    // chiunque: le due porte devono leggersi uguali, cambia solo il nome
-    // del prodotto. Quello che cambia e' cosa fa il clic, non la scritta.
+    // ⛔ SEPARATE, non dentro una cornice sola. Deciso da Alessio il 30
+    // agosto dopo averle viste in tutti e due i modi: sono tre cose
+    // diverse (paghi / entri e guardi / provi 30 giorni) e devono
+    // leggersi come tre cose diverse.
     const bottone = document.createElement('button');
     bottone.style.cssText = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
     bottone.textContent = porta.attiva;
@@ -4830,8 +4841,8 @@ function montaPorteGestionale() {
 
     // --- 1. ce l'ha gia': il clic lo porta dentro ------------------
     // ⚠️ la porta Premium apre il gestionale SENZA la voce «Chat con AI»,
-    //    anche a chi l'AI ce l'ha: se no le due porte portano nello stesso
-    //    identico posto.
+    //    anche a chi l'AI ce l'ha: se no le due porte portano nello
+    //    stesso identico posto.
     if (aperta) {
       bottone.onclick = () => {
         location.href = porta.chiave === 'premium'
@@ -4847,35 +4858,39 @@ function montaPorteGestionale() {
       return;
     }
 
-    // --- 3. non ce l'ha: il prezzo si vede solo adesso -------------
+    // --- 3. non ce l'ha: il prezzo si vede solo dopo il clic -------
     bottone.onclick = () => mostraListino(porta, box);
 
-    // --- e il modo di entrare senza pagare niente ------------------
-    // ⛔ «prima lo visita, lo prova, e poi se gli sta bene sa il prezzo e
-    //    paga». Da qui entra davvero nel gestionale: gira dappertutto e
-    //    vede i suoi dati, ma non salva — a fermarlo e' il database, non
-    //    una schermata. Dentro, una striscia gli offre i 30 giorni pieni.
-    if (senzaAccesso) {
-      const guarda = document.createElement('button');
-      guarda.textContent = 'Entra e guarda';
-      guarda.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-      guarda.onclick = () => {
-        location.href = porta.chiave === 'premium'
-          ? '/gestionale-app.html?visita=1&piano=premium'
-          : '/gestionale-app.html?visita=1';
-      };
-      box.appendChild(guarda);
-
-      // ⛔ E il terzo: i 30 giorni pieni, senza carta e senza Stripe.
-      // Sta QUI sulla porta, non dentro il gestionale: la scelta si fa
-      // prima di entrare, come tutto il resto di questa card.
-      const prova = document.createElement('button');
-      prova.textContent = 'Prova 30 giorni gratis';
-      prova.style.cssText = 'width:100%;margin-top:8px;padding:8px;background:none;color:#0a2a4d;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;text-decoration:underline';
-      prova.onclick = () => avviaProvaGestionale(prova, porta);
-      box.appendChild(prova);
-    }
   });
+
+  // ============================================================
+  // IL TERZO RIQUADRO — LA PROVA
+  // ⛔ «prima lo visita, lo prova, e poi se gli sta bene sa il prezzo e
+  // paga». Lo vede solo chi non ha nessun accesso: a chi il gestionale
+  // ce l'ha gia' non si offre di provarlo, e il riquadro sparisce.
+  // ============================================================
+  const riquadro = document.getElementById('porta-prova');
+  const dove = document.getElementById('porta-prova-azione');
+  if (!riquadro || !dove) return;
+
+  if (!senzaAccesso) { riquadro.style.display = 'none'; return; }
+  riquadro.style.display = 'flex';
+  dove.innerHTML = '';
+
+  // entra e guarda: gira dappertutto, ma non salva. A fermarlo e' il
+  // database, non una schermata.
+  const guarda = document.createElement('button');
+  guarda.textContent = 'Entra e guarda';
+  guarda.style.cssText = 'width:100%;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+  guarda.onclick = () => { location.href = '/gestionale-app.html?visita=1'; };
+  dove.appendChild(guarda);
+
+  // i 30 giorni pieni: senza carta e senza Stripe, una volta sola.
+  const prova = document.createElement('button');
+  prova.textContent = 'Prova 30 giorni gratis';
+  prova.style.cssText = 'width:100%;margin-top:8px;padding:8px;background:none;color:#0a2a4d;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;text-decoration:underline';
+  prova.onclick = () => avviaProvaGestionale(prova, { chiave: 'premium-ai' });
+  dove.appendChild(prova);
 }
 
 // IL LISTINO, DOPO IL CLIC.
