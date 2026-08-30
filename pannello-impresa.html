@@ -4039,12 +4039,27 @@ async function eliminaNota(id) {
 }
 const PANNELLO_CORRENTE = 'impresa';
 
+/* ⛔ 30 agosto 2026 — IL NOME DELL'IMPRESA, IN UN POSTO SOLO.
+   Nella tabella `imprese` la colonna `cognome` NON ESISTE (controllato sul
+   database). Il pannello scriveva `nome_attivita || nome + ' ' + cognome`:
+   per chi non ha il nome dell'attivita' usciva «Spazio Giardino undefined».
+   Sono →4← imprese vere (→54←, →55←, →59←, →60←), e la stessa riga finiva
+   dentro il PREVENTIVO mandato al cliente.
+   La regola e' la stessa della scheda pubblica e delle pagine di ricerca:
+   prima il nome dell'attivita', se non c'e' quello della persona.
+   ⚠️ E' una `function` e non una `const` apposta: cosi' si puo' usare anche
+   sopra la riga in cui e' scritta, senza fermare tutta la pagina. */
+function _nomeImpresa(x) {
+  return String((x && x.nome_attivita) || '').trim()
+      || String((x && x.nome) || '').trim();
+}
+
 async function inizializza() {
   // mensile/annuale valgono come premium in tutto il pannello
   if (impresaCorrente && ['mensile','annuale'].includes((impresaCorrente.piano||'').toLowerCase())) {
     impresaCorrente.piano = 'premium';
   }
-  const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
+  const nome = _nomeImpresa(impresaCorrente) || 'La tua impresa';
   const piano = impresaCorrente.piano || 'free';
   const isPremium = piano === 'premium';
   const rating = impresaCorrente.rating || '—';
@@ -4304,7 +4319,7 @@ async function caricaRecensioni() {
 function caricaProfilo() {
   const i = impresaCorrente;
   if (!i) return;
-  const nome = i.nome_attivita || ((i.nome || '') + ' ' + (i.cognome || '')).trim() || '—';
+  const nome = _nomeImpresa(i) || '—';
   const iniziali = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
   const sottotitolo = [i.tipo, [i.citta, i.regione].filter(Boolean).join(', ')].filter(Boolean).join(' · ') || '—';
   const mestieriStr = (i.mestieri || []).join(', ') || '—';
@@ -4585,7 +4600,7 @@ async function generaConAI() {
 
   const p = preventivoCorrente;
   const imp = impresaCorrente;
-  const nomeImp = imp.nome_attivita || imp.nome + ' ' + imp.cognome;
+  const nomeImp = _nomeImpresa(imp) || 'La tua impresa';
 
   await new Promise(r => setTimeout(r, 2000));
 
