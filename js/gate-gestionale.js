@@ -302,7 +302,15 @@
           window._gestPremium=ok;
           /* ⛔ il Pro NON entra nella decisione qui sotto: e' solo una
              lampadina che la chat guardera'. Il cancello resta il Premium. */
-          window._chatPro=haChatPro(row);
+          /* ⛔ 30 agosto 2026 — LA PORTA DECIDE LA CHAT.
+             Dal pannello ci sono due porte: «Gestionale Premium» e
+             «Gestionale Premium AI». Chi ha l'AI le apre tutte e due, ma
+             entrando da quella Premium deve vedere il gestionale Premium,
+             cioe' SENZA la voce «Chat con AI» — se no le due porte portano
+             nello stesso identico posto e la parola «Premium» non vuol
+             dire niente. Il piano non si tocca: si spegne solo la voce. */
+          var daPortaPremium=(new URLSearchParams(location.search).get('piano')==='premium');
+          window._chatPro=haChatPro(row) && !daPortaPremium;
           registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
           decidi(window._gestEmail, ok?'ok':'premium');
         },function(){
