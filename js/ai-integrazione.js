@@ -728,6 +728,25 @@
      ⚠️ Le tendine (tipo, cliente, mezzo, lavoro) non si toccano: si
      riempiono per id, e un id sbagliato attacca la scadenza alla cosa
      sbagliata senza che nessuno se ne accorga. Le sceglie lui. */
+  /* ⛔ 30 agosto 2026, DIFETTO TROVATO AL SECONDO COLLAUDO DAL VIVO.
+     Il modulo giusto si apriva, ma arrivava VUOTO e nessuno diceva niente.
+     Il motivo: `scadForm` in gestionale-app.html e' `async` — le caselle le
+     costruisce DOPO aver letto clienti, mezzi e lavori per le tendine.
+     Riempire subito voleva dire scrivere in caselle che non esistevano
+     ancora, e `riempiCampo` su una casella che non c'e' non si lamenta:
+     torna indietro in silenzio.
+     ⚠️ Quindi non si riempie subito: si aspetta che la prima casella
+     compaia. Tre secondi al massimo, poi si lascia perdere — meglio un
+     modulo vuoto che una pagina che ci prova per sempre.
+     ⚠️ `cliForm` e `jobForm` non sono async e infatti hanno sempre
+     funzionato: non si toccano. */
+  function quandoCompare(id, poi, tentativi) {
+    var n = (tentativi == null) ? 50 : tentativi;      /* 50 x 60 ms = 3 secondi */
+    if (document.getElementById(id)) { poi(); return; }
+    if (n <= 0) return;
+    setTimeout(function () { quandoCompare(id, poi, n - 1); }, 60);
+  }
+
   function riempiScadenza(d) {
     if (!d) return false;
     const primo = { el: null };
@@ -762,7 +781,8 @@
       if (!apri) return false;
       apri.click();
     }
-    return riempiScadenza(d);
+    quandoCompare('s-tit', function () { riempiScadenza(d); });
+    return true;
   };
 
   AI.compilaFornitoreDaChat = function (d) {
@@ -774,7 +794,8 @@
       if (!apri) return false;
       apri.click();
     }
-    return riempiFornitore(d);
+    quandoCompare('fo-nome', function () { riempiFornitore(d); });
+    return true;
   };
 
   AI.compilaLavoroDaChat = function (d) {
