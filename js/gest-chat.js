@@ -492,7 +492,15 @@
       var res = await window._gc.from('gest_chat_messaggi')
         .select('ruolo,testo,created_at')
         .eq('conversazione_id', conv).is('eliminato_il', null)
-        .order('created_at', { ascending: true }).limit(200);
+        /* ⛔ 30 agosto 2026 (sera): le chat vecchie hanno domanda e risposta
+           con lo STESSO orario al millesimo, e a parita' di orario Postgres
+           le restituisce nell'ordine che gli pare: si riaprivano chat con la
+           risposta scritta sopra la domanda. A parita' di orario 'utente'
+           deve venire prima di 'ai', e in ordine decrescente sull'alfabeto
+           'utente' viene prima. */
+        .order('created_at', { ascending: true })
+        .order('ruolo', { ascending: false })
+        .limit(200);
       if (res && !res.error && res.data) {
         res.data.forEach(function (m) {
           if (!m.testo) return;

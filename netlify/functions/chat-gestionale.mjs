@@ -762,6 +762,11 @@ export default async function (req) {
     return rispondi(500, { error: 'Configurazione server mancante.' });
   }
 
+  /* l'ora in cui la domanda e' arrivata: si segna adesso e si scrive
+     tale e quale nel registro, cosi' la domanda risulta sempre PRIMA
+     della risposta (vedi la nota al punto 6). */
+  const oraDomanda = new Date().toISOString();
+
   let domanda, conversazione_id, mestiere_id, sezione, allegato;
   try {
     ({ domanda, conversazione_id, mestiere_id, sezione, allegato } = JSON.parse((await req.text()) || '{}'));
@@ -865,10 +870,25 @@ export default async function (req) {
   // ---- 6. la chiacchierata di prima ---------------------------------
   let storia = [];
   try {
+    /* ⛔ 30 agosto 2026 (sera) — IL DIFETTO PIU' GROSSO TROVATO DAL VIVO.
+       Domanda e risposta si scrivevano con UN SOLO insert, quindi tutte e
+       due le righe prendevano lo stesso `created_at` al millesimo. Con gli
+       orari uguali Postgres restituisce le due righe nell'ordine che gli
+       pare: meta' delle volte la storia arrivava con la RISPOSTA prima
+       della DOMANDA. Claude vedeva due domande di fila senza risposta in
+       mezzo e rispondeva anche a quella di prima — a schermo, dal secondo
+       messaggio in poi, ogni risposta si portava dietro quella vecchia.
+       Due rimedi, tutti e due necessari:
+       1) qui: a parita' di orario si mette 'ai' prima di 'utente' (siamo
+          in ordine decrescente, poi si gira), cosi' l'ordine e' sempre
+          domanda → risposta anche per le chat vecchie gia' salvate;
+       2) al momento di scrivere: due orari diversi (vedi punto 8). */
     const r = await server.from('gest_chat_messaggi')
       .select('ruolo,testo')
       .eq('user_id', uid).eq('conversazione_id', conversazione_id)
-      .order('created_at', { ascending: false }).limit(STORIA_MAX);
+      .order('created_at', { ascending: false })
+      .order('ruolo', { ascending: true })
+      .limit(STORIA_MAX);
     if (!r.error && r.data) storia = r.data.reverse()
       .filter(function(m) { return m.testo; })
       .map(function(m) { return { role: m.ruolo === 'ai' ? 'assistant' : 'user', content: m.testo }; });
@@ -1062,14 +1082,22 @@ export default async function (req) {
       // ⚠️ Sonnet 4.5: 3 $ per milione in ingresso, 15 in uscita.
       const costo = (tin * 3 / 1e6) + (tout * 15 / 1e6);
       try {
+        /* ⛔ 30 agosto 2026 (sera): i due orari devono essere DIVERSI, se no
+           l'ordine fra domanda e risposta non e' garantito (vedi il punto 6).
+           La domanda porta l'ora in cui e' arrivata, la risposta quella in cui
+           e' finita: sono anche piu' veri cosi'. La riga del massimo tiene
+           l'ordine anche nel caso impossibile di una risposta istantanea. */
+        const oraRisposta = new Date(Math.max(Date.now(), Date.parse(oraDomanda) + 1)).toISOString();
         await server.from('gest_chat_messaggi').insert([
-          { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
+          { created_at: oraDomanda,
+            user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
             /* ⚠️ l'allegato NON si salva: resta scritto solo che c'era, se no
                riaprendo la chat domani uno vede la domanda e non capisce a
                cosa si riferiva la risposta. */
             ruolo: 'utente', testo: domanda + (cheAllegato ? '\n[con ' + cheAllegato + ']' : ''),
             sezione: sezione || null, come_pagato: comePagato },
-          { user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
+          { created_at: oraRisposta,
+            user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
             ruolo: 'ai', testo: risposta || null, sezione: sezione || null,
             tokens_input: tin, tokens_output: tout, costo_usd: costo, errore: errore }
         ]);
