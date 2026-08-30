@@ -775,9 +775,24 @@ async function caricaProfilo(id){
        foto di copertina e i bollini «Verificata», «Albo verificato», «RC
        professionale». Adesso nasce prima di chi la usa. */
     const _esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    /* la regola del nome, in un posto solo: prima il nome dell'attivita',
+       poi quello della persona. Chi la cambia la cambia qui. */
+    const nomeDaMostrare=x=>String((x&&x.nome_attivita)||'').trim()||String((x&&x.nome)||'').trim();
     const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
-    const nome=d.nome||'';
-    if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
+    /* ⛔ 30 agosto 2026 — IL NOME CHE VEDE IL CLIENTE.
+       Questa scheda leggeva SOLO `d.nome`, mentre le pagine di ricerca e i
+       pannelli leggono `nome_attivita` per primo. Risultato misurato su
+       →102← imprese: →6← si presentavano ai clienti col nome della persona
+       invece che con quello dell'azienda — la peggiore ha «VCO AUTOMAZIONE»
+       nel pannello e «Alessandro» sulla scheda pubblica.
+       Qui non si decide niente di nuovo: si usa la stessa regola del resto
+       del sito. ⚠️ `cognome` e `nome_negozio` NON esistono come colonne di
+       `imprese` (controllato sul database): non si nominano.
+       E se non c'e' nessun nome, prima restava scritto «Caricamento...» per
+       sempre — →1← impresa era messa cosi'. Adesso c'e' una scritta neutra. */
+    const nome=nomeDaMostrare(d);
+    document.title=(nome||'Scheda impresa')+' — TrovaImpresa';
+    document.getElementById('profile-name').textContent=nome||'Scheda impresa';
     if(d.tipo){const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());const tipoFmt='🔧 '+categoria;const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.map(formattaMestiere).join(' · '):tipoFmt;}
     /* le foto e la vetrina non devono poter bloccare i contatti: partono da sole */
     if(d.tipo==='negozio'){
@@ -797,7 +812,7 @@ async function caricaProfilo(id){
     document.getElementById('profile-badges').innerHTML=b.join('');
     // Professionista: CTA dedicato "Affida un incarico" (flusso incarico/onorario con documenti)
     if(d.tipo==='professionista'){
-      window._incaricoProf={id:d.id,nome:(d.nome||d.nome_attivita||'Professionista')};
+      window._incaricoProf={id:d.id,nome:(nomeDaMostrare(d)||'Professionista')};
       const cta=document.getElementById('cta-principale');
       if(cta){
         cta.setAttribute('onclick','showIncarico()');
