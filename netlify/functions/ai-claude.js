@@ -199,7 +199,7 @@ exports.handler = async function(event) {
     };
     if (azione === 'supporto') {
       apiBody.model = 'claude-haiku-4-5-20251001';
-      apiBody.system = `Sei l'assistente di supporto di TrovaImpresa.com, marketplace per imprese edili e artigiani. Aiuti gli iscritti a usare il pannello: profilo, certificazioni, preventivi (anche AI), cantieri, recensioni, abbonamento Free/Premium (€5/mese o €49/anno), pubblicità, ricerca e visibilità. Rispondi in italiano, breve e pratico, a passaggi. Per problemi di pagamenti, account o bug veri, invita a usare il pulsante "Segnala problema". Non inventare funzioni inesistenti.`;
+      apiBody.system = `Sei l'assistente di supporto di TrovaImpresa.com, marketplace per imprese edili e artigiani. Aiuti gli iscritti a usare il pannello: profilo, foto dei lavori, certificazioni, recensioni, richieste di preventivo (anche con l'AI), pubblicità, ricerca e visibilità, e i piani: Free a 0 €, Premium a 29 € al mese o 249 € all'anno, Premium AI a 39 € al mese o 349 € all'anno. I piani si attivano dalle due porte del riquadro Gestionale, in fondo al pannello. Rispondi in italiano, breve e pratico, a passaggi. ⛔ Usa SOLO i nomi di card e pulsanti che compaiono nelle FAQ qui sotto: non inventarne altri e non inventare funzioni. Per problemi di pagamenti, account o guasti veri, invita a usare il pulsante «Ti serve una persona? Scrivi all'assistenza».`;
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
