@@ -4873,14 +4873,11 @@ function montaPorteGestionale() {
   const dove = document.getElementById('porta-prova-azione');
   if (!riquadro || !dove) return;
 
-  // ⚠️ LA CHIAVE PER CONTROLLARE. Aprendo il pannello con ?prova=1 il
-  // riquadro si accende anche a chi il piano ce l'ha: serve ad Alessio
-  // per guardarlo senza doversi mettere free ogni volta. Non regala
-  // niente — i pulsanti dentro fanno esattamente quello che farebbero,
-  // e la prova la apre comunque il server solo a chi ne ha diritto.
-  const forzaProva = new URLSearchParams(location.search).get('prova') === '1';
-
-  if (!senzaAccesso && !forzaProva) { riquadro.style.display = 'none'; return; }
+  // ⛔ SEMPRE VISIBILE. Deciso da Alessio il 30 agosto: il riquadro della
+  // prova si vede a chiunque, anche a chi il piano ce l'ha gia'. Non
+  // regala niente — i pulsanti fanno quello che devono, e la prova la
+  // apre comunque il server solo a chi ne ha diritto (a chi ha gia' il
+  // piano risponde «il gestionale ce l'hai gia' attivo»).
   riquadro.style.display = 'flex';
   dove.innerHTML = '';
 
