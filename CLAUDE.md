@@ -18408,3 +18408,174 @@ quindi il lucchetto lo deve togliere Alessio con `rm -f .git/index.lock`.
 3. I link legali nel piede del portale clienti.
 4. Il gestionale è **ancora chiuso**: `MANUTENZIONE = true` in
    `js/gate-gestionale.js`, con il solo fondatore fra gli `AMMESSI`.
+
+---
+
+# 30 AGOSTO 2026 (mattina) — LE PORTE OVUNQUE, E UNA CHAT CHE SA LE SUE COSE
+
+⚠️ **Lezione della giornata, prima di tutto.** →4← difetti trovati, e →3← non li
+ha visti nessuno dei →143← banchi: sono usciti solo aprendo il gestionale vero
+nel browser e guardando cosa succedeva. E tutte e tre le volte **la chat
+diceva con sicurezza che era andato tutto bene**.
+⛔ **I banchi provano il codice, non la pagina.** Una consegna non è finita
+finché non si è aperto davvero quello che si è costruito.
+
+---
+
+## Le due porte: adesso sono in tutti e →4← i pannelli
+
+Copiate da `pannello-impresa.html` senza inventare niente:
+`pannello-artigiano.html` (→2646f54a…←), `pannello-professionisti.html`
+(→b9c53076…←), `pannello-negozio.html` (→4dd3603a…←).
+
+* ⛔ In tutti e tre andava tolto **`data-premium="true"`** dal riquadro
+  Gestionale: c'era, e sui free il lucchetto 🔒 copriva tutte e due le porte.
+* Nei **professionisti** le porte parlano da studio — «Pratiche, clienti,
+  collaboratori, preventivi e report» — non da cantiere. Deciso da Alessio.
+* Sparita da tutto il sito la sezione «🏆 Il tuo piano» e con lei il pulsante
+  **«Passa a Free»**, che toglieva il Premium sul database **senza disdire
+  niente su Stripe**. Quel buco adesso è chiuso ovunque.
+
+## ⛔ DECISIONE CAMBIATA: il negozio NON resta più fuori
+
+Annulla la riga del capitolo precedente. Alessio: *«facciamo anche negozio»*,
+e poi *«togli tutto, deve essere uguale agli altri gestionali»*.
+
+* L'add-on **«Gestionale TrovaImpresa» a →12←/→119←€ è archiviato su Stripe**.
+  Il gestionale del negozio è **compreso nel Premium**.
+* `gestionale-negozio.html` non ha più il cancello scritto a mano che
+  guardava la casella dell'add-on: carica **lo stesso cancello degli altri**,
+  `js/gate-gestionale.js` con `window.GATE_PAGINA='gestionale-negozio'`.
+* Misurato prima di toccare: →0← negozianti iscritti, →1← sola riga con
+  l'add-on acceso (l'account del fondatore). Nessuno è rimasto chiuso fuori.
+
+## Stripe: adesso la cassa e le pagine dicono la stessa cifra
+
+Predefinito spostato sui →29←€ (`price_1U9sjuBVLZQWjpNjMWMF961J`), archiviati
+i vecchi →5←€ e →49←€ e i →12←/→119←€ del gestionale. Su Premium restano
+**→2←** prezzi attivi, quelli giusti. →0← abbonamenti in corso, quindi
+archiviare non ha spento l'incasso a nessuno.
+
+---
+
+## LA CHAT CON AI — le →6← cose che mancavano, tutte fatte
+
+`netlify/functions/chat-gestionale.js` **non esiste più**: è diventato
+**`chat-gestionale.mjs`**, il formato nuovo di Netlify. Il vecchio
+(`exports.handler`) non sa mandare una risposta a pezzi.
+
+1. **«Ferma»** — il pulsante «Manda» diventa «Ferma» mentre risponde.
+   ⚠️ Fermare **non** ridà il messaggio: è già partito e il server l'ha contato.
+2. **«Copia»** sotto le risposte vere (non sotto gli avvisi di errore).
+3. **La risposta non si taglia più**: `max_tokens` da →1500← a →4000←.
+   Non costa di più: si paga quello che scrive, non il tetto.
+4. **La risposta esce mentre la scrive.** Protocollo NDJSON: una riga
+   `{"pezzo":"…"}` per ogni pezzo, e una riga finale `{"fine":true,…}`.
+   ⚠️ Gli errori di piano e crediti restano JSON normale col loro codice
+   (→401←/→402←/→403←) e partono **prima** del flusso.
+5. **Il «+»** per allegare foto (JPG/PNG/WEBP/GIF) e PDF, una per messaggio.
+6. **I moduli da →2← a →4←**: aggiunti scadenza e fornitore.
+
+### Le →11← letture nuove
+
+Un commento di questo file diceva che le tabelle figlie «il reparto non ce
+l'hanno scritto». Vero per le righe, **falso** per le viste dei totali.
+
+* Dirette (hanno `mestiere_id`): `ore`, `rapportini`, `preventivi_totali`,
+  `fatture_totali`, `mezzi_scadenze`, `rifornimenti`, `carte_saldo`.
+* Dal padre, con `dentro_al_documento`: `righe_fattura`, `righe_preventivo`,
+  `spese_del_lavoro`, `voci_del_computo`.
+
+⛔ **Il buco più assurdo, chiuso**: la chat sapeva che avevi la fattura
+→2026/14← ma **non quanto valeva**.
+
+⛔ **Come si tiene il reparto sui figli** (le tabelle senza `mestiere_id`):
+PRIMA si legge il **padre** coi due filtri di sempre filtrando sull'id
+chiesto, e **solo se il padre esce** si leggono i figli. Il filtro non si
+allenta: il controllo si sposta sul documento, dove il reparto c'è scritto.
+
+### L'allegato, come si difende
+
+Il tipo del file **non si crede a quello che dice il browser**: o è uno dei
+→5← dell'elenco chiuso lato server, o si butta. Peso controllato in tutte e
+due le parti (→3← MB), base64 verificato con una regex, e il controllo sta
+**prima** della riga che scala il messaggio: un file sbagliato non si paga.
+Le foto si rimpiccioliscono a →1568← px riusando `preparaFileUpload` di
+`js/foto-upload.js`. L'allegato **non si salva**: nel registro resta scritto
+«[con una foto]».
+
+---
+
+## ⛔ I →4← DIFETTI TROVATI COL COLLAUDO DAL VIVO
+
+**→1←. «→3← ore» invece di →15←.** Alla domanda «quante ore ho segnato» la
+chat contava le **righe**. Le ore vere erano →15← in →3← segnature.
+L'attrezzo si chiamava «le ore lavorate», quindi contarlo sembrava giusto.
+→ Adesso si chiama «le segnature delle ore» e nelle istruzioni c'è scritto
+che le ore si **sommano**, non si contano.
+
+**→2←. Il modulo sbagliato.** `window.gestApriModuloAI` in
+`gestionale-app.html` conosceva solo `cliente` e `preventivo` e finiva con
+`jobForm(...)`: **qualunque altra parola apriva il modulo del Lavoro**, in
+silenzio, mentre la chat diceva «ti ho aperto il modulo».
+→ Aggiunte le righe per `scadenza` e `fornitore`.
+⛔ **CHI AGGIUNGE UN MODULO ALLA CHAT AGGIUNGE UNA RIGA LÌ.**
+
+**→3←. Il modulo giusto, ma vuoto.** `scadForm` è **`async`**: le caselle le
+costruisce dopo aver letto clienti, mezzi e lavori per le tendine. Riempire
+subito voleva dire scrivere in caselle che non esistevano, e `riempiCampo`
+su una casella che non c'è **torna indietro in silenzio**.
+→ `quandoCompare(id, poi)` in `js/ai-integrazione.js`: aspetta che la prima
+casella compaia, →3← secondi al massimo. `cliForm` e `jobForm` non sono
+async e infatti hanno sempre funzionato.
+
+**→4←. L'allegato si svuotava prima di partire.** Il nome del file si vedeva
+nella bolla, ma la chat rispondeva «non vedo nessuna foto». `scordaAllegato()`
+è attaccato alla riga che disegna la bolla, che viene **prima** della
+partenza: quando si costruiva il pacco, `allegato` era già `null`.
+→ Si mette da parte in `var allegatoDaMandare` all'inizio di `manda()`.
+
+## I banchi (in `prove-claude/`, che è nel `.gitignore`)
+
+`banco-flusso-30ago.mjs` →15← · `banco-attrezzi-30ago.mjs` →50← ·
+`banco-figli-30ago.mjs` →29← · `banco-allegato-30ago.mjs` →25← ·
+`banco-moduli-30ago.mjs` →36←. Tutti verdi, tutti senza rete e senza database.
+⚠️ Ognuno è stato girato **anche sulla versione prima della correzione**: se
+resta verde su tutte e due non misura niente.
+⛔ `prove/chat-attrezzi/banco.js`, citato in cima a `chat-gestionale`, **non
+esiste in cartella**. È la seconda volta che un commento promette un banco
+che non c'è.
+
+## Il collaudo del «+», riuscito
+
+Bolla fac-simile letta **senza un errore**: fornitore, DDT →1142/2026←, tutte
+e →5← le righe con quantità e prezzi, imponibile →883,00←€, IVA →194,26←€,
+totale →1.077,26←€, scadenza →30/09/2026←. Prese anche le due trappole messe
+apposta: il **trasporto** contato come riga, e la **scadenza del pagamento**
+diversa dalla data del documento. Alla fine ha offerto di segnare il fornitore.
+
+---
+
+## Cosa resta da fare
+
+1. ⛔ **Il gestionale è ancora chiuso a tutti tranne il fondatore**:
+   `MANUTENZIONE = true` in `js/gate-gestionale.js`. Finché sta così, tutto
+   quello di oggi non lo vede nessuno. **È qui la partita.**
+2. **Avvisare le →102← imprese del prezzo nuovo**, entro il →7← settembre:
+   sono entrate quando il Premium costava →5←€.
+3. **Le email prima della scadenza**, entro il →20← settembre: →27← prove
+   scadono il →19← ottobre.
+4. Far vedere **una volta sola**, fuori dalla chat (pagina Premium AI o prima
+   email), le →3← cose che la chat sa fare. Una casella bianca non si spiega
+   da sola, e la foto della bolla che diventa numeri vale dieci righe di elenco.
+5. I link legali nel piede del portale clienti Stripe.
+6. La chat nel **gestionale negozio**: parcheggiata finché il gestionale
+   negozio non è finito. Servono i →3← pezzi già scritti in memoria.
+7. Difetto da guardare, non toccato: nella console del gestionale c'è un
+   →401← su `get_ai_status` a ogni apertura.
+
+## La riga da ricordare
+
+*«Mi serve che i soldi spesi dal cliente siano spesi bene.»* — Alessio, →30←
+agosto. L'unica cosa che il cliente non trova gratis da un'altra parte sono
+**i suoi numeri**: il →39←€ non lo vende «l'AI», lo vende «sa le mie cose».
