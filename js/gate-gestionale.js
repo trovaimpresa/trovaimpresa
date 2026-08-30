@@ -170,6 +170,27 @@
   /* il banco lo chiama da qui: e' l'unico punto che decide chi ha la chat */
   window._haChatPro = haChatPro;
 
+  /* ============================================================
+     LA PROVA DI 30 GIORNI — 30 agosto 2026
+     Regola di Alessio: «prima lo visita, lo prova, e poi se gli sta bene
+     sa il prezzo e paga». Sono due cose diverse:
+       VISITA — entra e guarda, non salva. Non c'e' niente da scrivere qui:
+                il divieto di salvare sta gia' nel database.
+       PROVA  — 30 giorni pieni, salvataggi compresi, senza carta.
+                Sta in `gest_prova_fine`, e la scrive solo il server.
+     ⚠️ Qui la prova vale quanto il Premium: chi ce l'ha entra e basta.
+     ============================================================ */
+  function inProva(row){
+    if(!row||!row.gest_prova_fine)return false;
+    var f=new Date(row.gest_prova_fine);
+    return !isNaN(f.getTime()) && f.getTime()>Date.now();
+  }
+  function giorniProva(row){
+    if(!inProva(row))return 0;
+    return Math.max(1, Math.ceil((new Date(row.gest_prova_fine).getTime()-Date.now())/86400000));
+  }
+  window._inProva=inProva;
+
   /* ⛔ 22 agosto 2026 — le schermate si spengono a vicenda da un ELENCO SOLO.
      Prima ognuna spegneva le altre a mano: con la quarta (gate-lento)
      dimenticarne una avrebbe lasciato due schermate una sopra l'altra. */
@@ -207,6 +228,63 @@
       });
   };
   function hideGate(){q('gate-gestionale').style.display='none';document.body.style.overflow='';}
+
+  /* La striscia in basso: incollata al bordo della finestra, larga tutto
+     lo schermo, sempre visibile mentre si scorre.
+
+     ⛔ SUL TELEFONO NON DEVE COPRIRE LA BARRA DEI QUATTRO PULSANTI.
+     Sotto gli 880 px il gestionale ha `.barra-basso` incollata in fondo
+     (56 px di pulsante piu' 12 di aria, piu' il bordo del telefono). La
+     striscia si alza di quel tanto: se le si sedesse sopra, sul telefono
+     il gestionale diventerebbe inservibile proprio a chi lo sta provando. */
+  function strisciaBasso(){
+    if(!q('gest-striscia-stile')){
+      var st=document.createElement('style');
+      st.id='gest-striscia-stile';
+      st.textContent='#gest-striscia{position:fixed;left:0;right:0;bottom:0;z-index:9998;'
+        +'background:#0a2a4d;color:#fff;padding:12px 16px;font-size:14px;line-height:1.4;'
+        +'display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;'
+        +'box-shadow:0 -2px 12px rgba(0,0,0,0.25);'
+        +'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))}'
+        +'@media(max-width:880px){#gest-striscia{'
+        +'bottom:calc(68px + env(safe-area-inset-bottom, 0px));'
+        +'padding-bottom:12px}}';
+      document.head.appendChild(st);
+    }
+    var d=document.createElement('div');
+    d.id='gest-striscia';
+    document.body.appendChild(d);
+    return d;
+  }
+  function strisciaVisita(){
+    if(q('gest-striscia'))return;
+    var d=strisciaBasso();
+    var t=document.createElement('span');
+    t.textContent='Stai visitando il gestionale: puoi guardare tutto, ma per salvare serve il piano.';
+    d.appendChild(t);
+    /* ⛔ QUI NON SI VENDE NIENTE. La prova si chiede dalla porta, nel
+       pannello, prima di entrare: dentro resta solo la riga che dice
+       come stai, e il modo di tornare indietro. */
+    var a=document.createElement('a');
+    a.href='pannello-impresa.html#dashboard';
+    a.textContent='Torna al pannello';
+    a.style.cssText='color:#fff;font-size:14px;font-weight:700;text-decoration:underline';
+    d.appendChild(a);
+  }
+  function strisciaProva(giorni){
+    if(q('gest-striscia'))return;
+    var d=strisciaBasso();
+    var t=document.createElement('span');
+    t.textContent='Prova del gestionale: ti '+(giorni===1?'resta 1 giorno':('restano '+giorni+' giorni'))+'.';
+    d.appendChild(t);
+    var a=document.createElement('a');
+    a.href='pannello-impresa.html#dashboard';
+    a.textContent='Vedi i piani';
+    a.style.cssText='color:#fff;font-size:14px;font-weight:700;text-decoration:underline';
+    d.appendChild(a);
+  }
+
+;
   window.attivaGestionale=function(piano){
     var b=q('gate-btns');b.style.opacity='0.5';b.style.pointerEvents='none';
     fetch('/.netlify/functions/crea-checkout-gestionale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piano:piano,email:window._gestEmail||'',returnUrl:RETURN})})
@@ -254,8 +332,19 @@
       if(chiave){hideGate();return;}                       /* scorciatoia per Alessio */
       if(esito==='lento'){showLento();return;}             /* nel dubbio, FUORI */
       if(!ammesso(email)){showManutenzione();return;}
-      if(esito==='premium'){showPaywall();return;}
+      if(esito==='premium'){
+        /* ⛔ NON SI SPAVENTA IL CLIENTE PRIMA DI FARLO ENTRARE.
+           Se arriva dal pulsante «Entra e guarda» del pannello il paywall
+           non si mostra: entra, gira dappertutto, e quando prova a salvare
+           e' il database a dirgli che serve il piano. La striscia in basso
+           gli offre i 30 giorni pieni. */
+        if(new URLSearchParams(location.search).get('visita')==='1'){
+          hideGate(); strisciaVisita(); return;
+        }
+        showPaywall();return;
+      }
       hideGate();
+      if(window._gestProvaGiorni>0)strisciaProva(window._gestProvaGiorni);
     };
 
     /* ⛔ 22 agosto 2026 — LE DUE PORTE CHE SI APRIVANO DA SOLE.
@@ -289,7 +378,7 @@
            sulla pagina vera prima di metterle qui: se PostgREST non le
            conoscesse, la lettura andrebbe in errore e il cancello
            chiuderebbe a TUTTI. */
-        gc.from('imprese').select('email, piano, premium_scadenza, chat_pro, chat_pro_scadenza').eq('user_id',s.user.id).maybeSingle().then(function(res){
+        gc.from('imprese').select('email, piano, premium_scadenza, chat_pro, chat_pro_scadenza, gest_prova_fine').eq('user_id',s.user.id).maybeSingle().then(function(res){
           /* ⚠️ Supabase non lancia: l'errore torna DENTRO la risposta. Senza
              questa riga una lettura rifiutata passava per «nessuna riga»,
              cioe' per «non e' Premium»: colpa data al piano invece che alla
@@ -298,8 +387,11 @@
           clearTimeout(timer);
           var row=res && res.data;
           window._gestEmail=(row&&row.email)||s.user.email||'';
-          var ok=haPremium(row);
+          /* ⚠️ la prova apre quanto il Premium: se restasse fuori, uno che
+             ha chiesto i 30 giorni si vedrebbe ancora il paywall. */
+          var ok=haPremium(row)||inProva(row);
           window._gestPremium=ok;
+          window._gestProvaGiorni=giorniProva(row);
           /* ⛔ il Pro NON entra nella decisione qui sotto: e' solo una
              lampadina che la chat guardera'. Il cancello resta il Premium. */
           /* ⛔ 30 agosto 2026 — LA PORTA DECIDE LA CHAT.

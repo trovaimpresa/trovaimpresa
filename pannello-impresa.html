@@ -4779,6 +4779,16 @@ function montaPorteGestionale() {
   // cassa normale come tutti. Il portale e' solo per chi paga davvero.
   const abbonato = haPremium && impresaCorrente.premium_pagato === true;
 
+  // la prova di 30 giorni vale quanto il piano: chi ce l'ha entra
+  const fineProva = impresaCorrente.gest_prova_fine ? new Date(impresaCorrente.gest_prova_fine) : null;
+  const inProva = !!fineProva && !isNaN(fineProva.getTime()) && fineProva.getTime() > Date.now();
+
+  // ⛔ «Entra e guarda» si offre SOLO a chi non ha nessun accesso, e allora
+  // compare su TUTTE E DUE le porte: se lo mettessimo solo dove manca il
+  // piano, un Premium lo vedrebbe su una porta sola e le due porte
+  // tornerebbero ad avere forme diverse.
+  const senzaAccesso = !haPremium && !inProva;
+
   PORTE_GESTIONALE.forEach(porta => {
     const box = document.getElementById(porta.azione);
     const tuo = document.getElementById(porta.tuo);
@@ -4839,6 +4849,32 @@ function montaPorteGestionale() {
 
     // --- 3. non ce l'ha: il prezzo si vede solo adesso -------------
     bottone.onclick = () => mostraListino(porta, box);
+
+    // --- e il modo di entrare senza pagare niente ------------------
+    // ⛔ «prima lo visita, lo prova, e poi se gli sta bene sa il prezzo e
+    //    paga». Da qui entra davvero nel gestionale: gira dappertutto e
+    //    vede i suoi dati, ma non salva — a fermarlo e' il database, non
+    //    una schermata. Dentro, una striscia gli offre i 30 giorni pieni.
+    if (senzaAccesso) {
+      const guarda = document.createElement('button');
+      guarda.textContent = 'Entra e guarda';
+      guarda.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+      guarda.onclick = () => {
+        location.href = porta.chiave === 'premium'
+          ? '/gestionale-app.html?visita=1&piano=premium'
+          : '/gestionale-app.html?visita=1';
+      };
+      box.appendChild(guarda);
+
+      // ⛔ E il terzo: i 30 giorni pieni, senza carta e senza Stripe.
+      // Sta QUI sulla porta, non dentro il gestionale: la scelta si fa
+      // prima di entrare, come tutto il resto di questa card.
+      const prova = document.createElement('button');
+      prova.textContent = 'Prova 30 giorni gratis';
+      prova.style.cssText = 'width:100%;margin-top:8px;padding:8px;background:none;color:#0a2a4d;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;text-decoration:underline';
+      prova.onclick = () => avviaProvaGestionale(prova, porta);
+      box.appendChild(prova);
+    }
   });
 }
 
@@ -4884,6 +4920,40 @@ async function apriCassaGestionale(prodotto, piano, bottone) {
   }
   bottone.disabled = false;
   bottone.textContent = testoPrima;
+}
+
+// I 30 GIORNI DI PROVA — senza carta, senza Stripe.
+// ⛔ La data la scrive il SERVER, non questa pagina: le regole di accesso
+// lasciano che ognuno modifichi la propria riga, quindi dal browser uno se
+// la darebbe fino al 2050. Qui si chiede soltanto, col proprio gettone.
+async function avviaProvaGestionale(bottone, porta) {
+  const prima = bottone.textContent;
+  bottone.disabled = true;
+  bottone.textContent = 'Un attimo...';
+  try {
+    const { data: ses } = await sb.auth.getSession();
+    const token = ses && ses.session && ses.session.access_token;
+    if (!token) { alert('La sessione è scaduta. Rientra e riprova.'); }
+    else {
+      const res = await fetch('/.netlify/functions/prova-gestionale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+      });
+      const dati = await res.json();
+      if (dati && dati.ok) {
+        // dentro subito, dalla porta da cui ha chiesto la prova
+        location.href = porta.chiave === 'premium'
+          ? '/gestionale-app.html?piano=premium'
+          : '/gestionale-app.html';
+        return;
+      }
+      alert((dati && (dati.messaggio || dati.error)) || 'Non sono riuscito ad aprire la prova.');
+    }
+  } catch (e) {
+    alert('Errore: ' + e.message);
+  }
+  bottone.disabled = false;
+  bottone.textContent = prima;
 }
 
 // il cambio piano e la disdetta: chi e' gia' abbonato
