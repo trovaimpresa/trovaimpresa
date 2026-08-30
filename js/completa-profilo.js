@@ -22,7 +22,12 @@
   var SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 
-  // Cosa conta, e quanto pesa. Totale 100.
+  /* Cosa conta, e quanto pesa.
+     ⚠️ 30 agosto 2026: qui c'era scritto «Totale 100», e non e' vero —
+     i pesi sommano 123. Non e' un difetto (calcola() divide per la somma
+     delle voci presenti, quindi la percentuale esce comunque giusta), ma
+     il commento ingannava: «Foto dei lavori» pesa 15 su 123, cioe' vale
+     12 punti di percentuale, non 15. Numero misurato, non stimato. */
   // "chiavi" = come si chiama la colonna nel database (più di una se serve).
   var VOCI = [
     { peso: 25, etichetta: 'Indirizzo',        chiavi: ['indirizzo'] },
@@ -151,9 +156,23 @@
       return sb.from('imprese').select('*').eq('user_id', user.id).maybeSingle()
         .then(function (r) {
           if (r.error || !r.data) return;
-          // quante foto ha caricato: serve per la voce "Foto dei lavori"
+          /* ⛔ 30 agosto 2026 — LA LETTURA CHE SBAGLIAVA COLONNA.
+             Qui c'era `.eq('impresa_id', r.data.id)`, ma in `lavori_foto`
+             quella colonna NON ESISTE: si chiama `owner_id` ed e' l'utente,
+             non l'impresa. Risultato: un 400 rosso nella console a ogni
+             apertura di ogni pannello, il `.catch` qui sotto lo ingoiava, e
+             le foto contavano sempre ZERO. Valgono 15 punti su 100, quindi
+             36 imprese che le foto le avevano gia' caricate leggevano
+             «Manca: Foto dei lavori» e una percentuale piu' bassa del vero.
+
+             Si contano solo le foto VERE: premendo Salva con tutto vuoto si
+             creano schede senza immagine (51 in giro il 30 agosto), e il
+             profilo pubblico quelle le scarta gia'. Contarle qui vorrebbe
+             dire dire «hai le foto» a chi sul profilo non ne mostra nessuna. */
           return sb.from('lavori_foto').select('id', { count: 'exact', head: true })
-            .eq('impresa_id', r.data.id)
+            .eq('owner_id', user.id)
+            .not('foto', 'is', null)
+            .neq('foto', '')
             .then(function (f) { return { riga: r.data, foto: (f && f.count) || 0 }; })
             .catch(function () { return { riga: r.data, foto: 0 }; });
         })
