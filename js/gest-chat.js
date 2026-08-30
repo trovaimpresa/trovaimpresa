@@ -533,6 +533,17 @@
     if (!domanda && allegato) domanda = 'Guarda questo e dimmi cosa c\'è scritto.';
     if (!domanda) return;
 
+    /* ⛔ 30 agosto 2026, DIFETTO TROVATO DA ALESSIO AL PRIMO INVIO VERO.
+       L'allegato si vedeva nella bolla del messaggio, ma alla chat arrivava
+       un messaggio senza foto: «non vedo nessuna foto allegata».
+       Il motivo: `scordaAllegato()` sta attaccato alla riga che disegna la
+       bolla, e quella riga viene PRIMA della partenza. Quindi quando si
+       costruiva il pacco da mandare, `allegato` era gia' tornato a null.
+       Un attimo di troppo, e la foto non partiva mai.
+       ⚠️ Adesso l'allegato si mette da parte QUI, prima di qualunque cosa,
+       e si manda questa copia. Svuotare la casella resta dov'era. */
+    var allegatoDaMandare = allegato;
+
     var mid = reparto();
     if (!mid) { scrivi('ai', 'Prima entra in un reparto: la chat guarda i dati del reparto in cui sei.'); return; }
     var t = gettone();
@@ -548,7 +559,7 @@
        se no non c'e' niente da premere per fermarla. */
     bottoneManda.textContent = 'Ferma';
     scrivi('utente', esc(domanda)
-      + (allegato ? '<br><span class="chip">' + esc(allegato.nome) + '</span>' : ''));
+      + (allegatoDaMandare ? '<br><span class="chip">' + esc(allegatoDaMandare.nome) + '</span>' : ''));
     /* si svuota subito: una foto per messaggio, e se ne manda un secondo
        senza accorgersene la pagherebbe due volte */
     scordaAllegato();
@@ -564,7 +575,7 @@
           conversazione_id: chiacchierata(),
           mestiere_id: mid,
           sezione: sezioneAperta(),
-          allegato: allegato
+          allegato: allegatoDaMandare
         })
       });
       /* ============================================================
