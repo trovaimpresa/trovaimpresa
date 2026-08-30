@@ -1961,6 +1961,34 @@
         </div>
       </div>
 
+      <!-- LE DUE PORTE DEL GESTIONALE IMPRESE (il gestionale negozio, 12/119 euro, resta il riquadro qui sopra) -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="margin-bottom:16px">
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale</div>
+          <div style="font-size:0.78rem;color:#888;margin-top:4px">Cantieri, squadra, preventivi, spese e margini, report — tutto in un posto solo</div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+
+          <div id="porta-premium" style="flex:1;min-width:200px;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;display:flex;flex-direction:column">
+            <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium</div>
+            <div id="porta-premium-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
+            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Cantieri, preventivi, fatture, squadra e report</div>
+            <div id="porta-premium-azione" style="margin-top:auto"></div>
+          </div>
+
+          <div id="porta-premium-ai" style="flex:1;min-width:200px;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;display:flex;flex-direction:column">
+            <div style="font-size:1.8rem;margin-bottom:8px">✨</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium AI</div>
+            <div id="porta-ai-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
+            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Tutto il Premium, più la Chat con AI</div>
+            <div id="porta-ai-azione" style="margin-top:auto"></div>
+          </div>
+
+
+        </div>
+      </div>
+
       <!-- FOTO DEI LAVORI (dashboard) -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d">📷 Foto dei prodotti</div>
@@ -1968,37 +1996,6 @@
         <div class="foto-grid" id="foto-grid-dash"></div>
       </div>
 
-      <!-- GESTIONE PIANO -->
-      <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#0a2a4d">🏆 Il tuo piano</div>
-        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#0066ff">Free</strong></div>
-
-        <div id="piano-cards-grid" style="display:flex;gap:12px;flex-wrap:wrap;">
-          <!-- FREE -->
-          <div id="card-free" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
-            <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
-            <div style="font-weight:800;font-size:1rem;color:#0066ff;margin-bottom:6px">Free</div>
-            <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
-            <div style="margin-top:12px">
-              <button id="btn-piano-free" onclick="window.location.href='index.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Free</button>
-            </div>
-          </div>
-
-          <!-- PREMIUM -->
-          <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
-            <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
-            <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
-            <div style="font-size:0.8rem;color:#666;line-height:1.5">Passa a Premium per sbloccare tutte le funzioni</div>
-            <div style="margin-top:12px">
-              <select id="sceltaPiano" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer">
-                <option value="mensile" selected>Mensile – €29/mese</option>
-                <option value="annuale">Annuale – €249/anno</option>
-              </select>
-              <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Premium</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- PREVENTIVI -->
@@ -3087,11 +3084,8 @@ async function inizializza() {
   } else {
     pianoBadge.textContent = '🆓 Free';
   }
-  if (impresaCorrente.tipo === 'negozio') {
-    aggiornaPianoCards(piano);
-  } else {
-    document.getElementById('sezione-il-tuo-piano').style.display = 'none';
-  }
+  aggiornaCardVisibile(piano);
+  montaPorteGestionale();
   bloccaCardPremium();
 
   const cardOrd = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.card_ordine;
@@ -3395,54 +3389,237 @@ async function aggiornaStatoCandidatura(id, stato) {
   caricaCandidature();
 }
 
-function aggiornaPianoCards(piano) {
-  const piani = [
-    { id: 'free',    cardId: 'card-free',    btnId: 'btn-piano-free',    colore: '#0066ff', href: null,                label: 'Free' },
-    { id: 'premium', cardId: 'card-premium', btnId: 'btn-piano-premium', colore: '#7c3aed', href: 'info-premium.html', label: 'Premium' },
-  ];
-  piani.forEach(p => {
-    const card = document.getElementById(p.cardId);
-    const btn  = document.getElementById(p.btnId);
-    if (!card || !btn) return;
-    const attivo = piano === p.id;
-    card.style.border = attivo ? `2px solid ${p.colore}` : '2px solid #e0e0e0';
-    card.style.boxShadow = attivo ? `0 0 0 3px ${p.colore}22` : '';
-    btn.className = 'btn-az';
-    btn.style.width = '100%';
-    btn.style.justifyContent = 'center';
-    btn.style.borderTopColor = p.colore;
-    if (attivo) {
-      btn.textContent = '✅ Attivo';
-      btn.style.background = p.colore;
-      btn.style.color = 'white';
-      btn.style.cursor = 'default';
-      btn.disabled = true;
-      btn.onclick = null;
-    } else {
-      btn.textContent = `Passa a ${p.label}`;
-      btn.style.background = 'white';
-      btn.style.color = p.colore;
-      btn.style.cursor = 'pointer';
-      btn.disabled = false;
-      btn.onclick = p.id === 'premium' ? async () => {
-        btn.disabled = true;
-        try {
-          const res = await fetch('/.netlify/functions/crea-checkout-abbonamento', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ piano: document.getElementById('sceltaPiano').value, email: impresaCorrente.email, returnUrl: window.location.href })
-          });
-          const data = await res.json();
-          if (data.url) { window.location.href = data.url; }
-          else { alert('Errore Stripe: ' + (data.error || 'sconosciuto')); btn.disabled = false; }
-        } catch (e) {
-          alert('Errore: ' + e.message);
-          btn.disabled = false;
-        }
-      } : (p.href ? () => window.location.href = p.href : null);
+// =====================================================================
+// LE DUE PORTE DEL GESTIONALE — 29 agosto 2026
+//
+// ⛔ LA REGOLA, decisa da Alessio: la scelta del piano si fa PRIMA di
+// pagare, mai dentro il gestionale gia' pagato. «Se uno paga il Premium
+// e poi una volta dentro vede che c'e' un altro piano non va bene: o
+// spende due volte, o non compra.»
+//
+// Chi il piano ce l'ha ENTRA; chi non ce l'ha COMPRA da qui.
+// I lucchetti del pannello si aprono con tutti e due i piani: l'unica
+// differenza fra Premium e Premium AI e' la Chat con AI dentro il
+// gestionale.
+//
+// ⚠️ CHI E' GIA' ABBONATO NON RICOMPRA. Far ripartire il checkout a chi
+// ha gia' il Premium creerebbe un SECONDO abbonamento (29 + 39 al mese).
+// Per lui il pulsante apre il portale clienti di Stripe, che cambia il
+// prezzo dentro l'abbonamento che ha gia', col conguaglio.
+// =====================================================================
+const PORTE_GESTIONALE = [
+  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium',    attiva: 'Attiva Premium e gestionale'    },
+  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI' }
+];
+
+function montaPorteGestionale() {
+  if (!impresaCorrente) return;
+
+  const piano = String(impresaCorrente.piano || 'free').toLowerCase().trim();
+  const scad  = impresaCorrente.premium_scadenza ? new Date(impresaCorrente.premium_scadenza) : null;
+  const haPremium = piano === 'premium' && (!scad || isNaN(scad.getTime()) || scad.getTime() > Date.now());
+
+  const scadAI = impresaCorrente.chat_pro_scadenza ? new Date(impresaCorrente.chat_pro_scadenza) : null;
+  const haAI = haPremium && impresaCorrente.chat_pro === true
+               && (!scadAI || isNaN(scadAI.getTime()) || scadAI.getTime() > Date.now());
+
+  // ⛔ ABBONATO NON VUOL DIRE PREMIUM.
+  // Le imprese in prova hanno piano 'premium' regalato alla registrazione
+  // e non hanno mai pagato: su Stripe non esistono. A loro il portale
+  // risponderebbe «nessun abbonamento a tuo nome», quindi comprano dalla
+  // cassa normale come tutti. Il portale e' solo per chi paga davvero.
+  const abbonato = haPremium && impresaCorrente.premium_pagato === true;
+
+  // la prova di 30 giorni vale quanto il piano: chi ce l'ha entra
+  const fineProva = impresaCorrente.gest_prova_fine ? new Date(impresaCorrente.gest_prova_fine) : null;
+  const inProva = !!fineProva && !isNaN(fineProva.getTime()) && fineProva.getTime() > Date.now();
+
+  // ⛔ «Entra e guarda» si offre SOLO a chi non ha nessun accesso, e allora
+  // compare su TUTTE E DUE le porte: se lo mettessimo solo dove manca il
+  // piano, un Premium lo vedrebbe su una porta sola e le due porte
+  // tornerebbero ad avere forme diverse.
+  const senzaAccesso = !haPremium && !inProva;
+
+  PORTE_GESTIONALE.forEach(porta => {
+    const box = document.getElementById(porta.azione);
+    const tuo = document.getElementById(porta.tuo);
+    if (!box) return;
+
+    // ⛔ OGNUNO ENTRA DALLA SUA PORTA, E QUELLA SBAGLIATA CHIEDE DI PAGARE.
+    // Regola di Alessio, 29 agosto: «se clicchi per sbaglio il gestionale
+    // opposto ti chiedera' di pagare, semplice». Chi non paga ancora vede
+    // il listino; chi paga gia' viene mandato al portale di Stripe, che
+    // cambia il piano dentro l'abbonamento che ha (mai un secondo).
+    //
+    // Sono due gestionali: a sinistra il Premium, a destra il Pro con la
+    // Chat con AI. Se la porta Premium si aprisse anche a chi ha il Pro,
+    // quello si troverebbe dentro un «gestionale Premium» che pero' la
+    // chat ce l'ha (la chat segue il piano, non la porta) — ed e'
+    // esattamente la confusione da evitare.
+    // ⛔ 30 agosto — CHI HA UN PIANO ENTRA DA TUTTE E DUE LE PORTE.
+    // Prima la porta Premium restava chiusa a chi ha il Premium AI, e gli
+    // diceva «Attiva Premium»: gli stavamo offrendo una cosa che ha gia'
+    // pagato. Il Premium AI comprende il Premium, quindi apre tutte e due.
+    // A sinistra il gestionale senza chat, a destra quello con la chat.
+    const aperta = porta.chiave === 'premium' ? haPremium : haAI;
+    const suo    = porta.chiave === 'premium' ? (haPremium && !haAI) : haAI;
+    // ⚠️ visibility, non display: la riga sparisce ma tiene il posto,
+    //    cosi' prezzo e pulsante restano alla stessa altezza su tutte e due.
+    if (tuo) tuo.style.visibility = suo ? 'visible' : 'hidden';
+
+    box.innerHTML = '';
+
+    // ⛔ SEPARATE, non dentro una cornice sola. Deciso da Alessio il 30
+    // agosto dopo averle viste in tutti e due i modi: sono tre cose
+    // diverse (paghi / entri e guardi / provi 30 giorni) e devono
+    // leggersi come tre cose diverse.
+    const bottone = document.createElement('button');
+    bottone.style.cssText = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+    bottone.textContent = porta.attiva;
+    box.appendChild(bottone);
+
+    // ⛔ I DUE MODI DI ENTRARE SENZA PAGARE, DENTRO OGNI PORTA.
+    // Sempre visibili, a chiunque: «rendili visibili sempre».
+    const guarda = document.createElement('button');
+    guarda.textContent = 'Entra e guarda';
+    guarda.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+    guarda.onclick = () => {
+      location.href = porta.chiave === 'premium'
+        ? '/gestionale-app.html?visita=1&piano=premium'
+        : '/gestionale-app.html?visita=1';
+    };
+
+    const prova = document.createElement('button');
+    prova.textContent = 'Prova 30 giorni gratis';
+    prova.style.cssText = 'width:100%;margin-top:8px;padding:8px;background:none;color:#0a2a4d;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;text-decoration:underline';
+    prova.onclick = () => avviaProvaGestionale(prova, porta);
+
+    box.appendChild(guarda);
+    box.appendChild(prova);
+
+    // --- 1. ce l'ha gia': il clic lo porta dentro ------------------
+    // ⚠️ la porta Premium apre il gestionale SENZA la voce «Chat con AI»,
+    //    anche a chi l'AI ce l'ha: se no le due porte portano nello
+    //    stesso identico posto.
+    if (aperta) {
+      bottone.onclick = () => {
+        location.href = porta.chiave === 'premium'
+          ? '/gestionale-app.html?piano=premium'
+          : '/gestionale-app.html';
+      };
+      return;
     }
+
+    // --- 2. paga gia' ma questo piano non ce l'ha: si cambia -------
+    if (abbonato) {
+      bottone.onclick = () => apriPortaleClienti(bottone);
+      return;
+    }
+
+    // --- 3. non ce l'ha: il prezzo si vede solo dopo il clic -------
+    bottone.onclick = () => mostraListino(porta, box);
+
   });
-  aggiornaCardVisibile(piano);
+
+}
+
+// IL LISTINO, DOPO IL CLIC.
+// Prende il posto del pulsante dentro la stessa porta: due scelte, col
+// prezzo scritto per intero, e un modo per tornare indietro senza
+// impegno. Da qui si va alla cassa.
+function mostraListino(porta, box) {
+  box.innerHTML = '';
+
+  [['mensile', porta.mese], ['annuale', porta.anno]].forEach(function (v) {
+    const b = document.createElement('button');
+    b.textContent = v[1];
+    b.style.cssText = 'width:100%;padding:10px;margin-bottom:8px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+    b.onclick = () => apriCassaGestionale(porta.chiave, v[0], b);
+    box.appendChild(b);
+  });
+
+  const indietro = document.createElement('button');
+  indietro.textContent = 'Non adesso';
+  indietro.style.cssText = 'width:100%;padding:8px;background:none;color:#888;border:none;font-size:0.85rem;cursor:pointer';
+  indietro.onclick = () => montaPorteGestionale();
+  box.appendChild(indietro);
+}
+
+// il pagamento: chi non e' ancora abbonato
+async function apriCassaGestionale(prodotto, piano, bottone) {
+  if (!impresaCorrente || !impresaCorrente.email) { alert('Manca la tua email: rientra e riprova.'); return; }
+  bottone.disabled = true;
+  const testoPrima = bottone.textContent;
+  bottone.textContent = 'Apro il pagamento...';
+  try {
+    const res = await fetch('/.netlify/functions/crea-checkout-abbonamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ piano, prodotto, email: impresaCorrente.email, returnUrl: window.location.href })
+    });
+    const dati = await res.json();
+    if (dati && dati.url) { window.location.href = dati.url; return; }
+    alert('Errore: ' + ((dati && dati.error) || 'sconosciuto'));
+  } catch (e) {
+    alert('Errore: ' + e.message);
+  }
+  bottone.disabled = false;
+  bottone.textContent = testoPrima;
+}
+
+// I 30 GIORNI DI PROVA — senza carta, senza Stripe.
+// ⛔ La data la scrive il SERVER, non questa pagina: le regole di accesso
+// lasciano che ognuno modifichi la propria riga, quindi dal browser uno se
+// la darebbe fino al 2050. Qui si chiede soltanto, col proprio gettone.
+async function avviaProvaGestionale(bottone, porta) {
+  const prima = bottone.textContent;
+  bottone.disabled = true;
+  bottone.textContent = 'Un attimo...';
+  try {
+    const { data: ses } = await sb.auth.getSession();
+    const token = ses && ses.session && ses.session.access_token;
+    if (!token) { alert('La sessione è scaduta. Rientra e riprova.'); }
+    else {
+      const res = await fetch('/.netlify/functions/prova-gestionale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+      });
+      const dati = await res.json();
+      if (dati && dati.ok) {
+        // dentro subito, dalla porta da cui ha chiesto la prova
+        location.href = porta.chiave === 'premium'
+          ? '/gestionale-app.html?piano=premium'
+          : '/gestionale-app.html';
+        return;
+      }
+      alert((dati && (dati.messaggio || dati.error)) || 'Non sono riuscito ad aprire la prova.');
+    }
+  } catch (e) {
+    alert('Errore: ' + e.message);
+  }
+  bottone.disabled = false;
+  bottone.textContent = prima;
+}
+
+// il cambio piano e la disdetta: chi e' gia' abbonato
+async function apriPortaleClienti(bottone) {
+  if (bottone) { bottone.disabled = true; bottone.textContent = 'Apro...'; }
+  try {
+    const { data: ses } = await sb.auth.getSession();
+    const token = ses && ses.session && ses.session.access_token;
+    if (!token) { alert('La sessione è scaduta. Rientra e riprova.'); return; }
+    const res = await fetch('/.netlify/functions/portale-clienti', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ returnUrl: window.location.href })
+    });
+    const dati = await res.json();
+    if (dati && dati.url) { window.location.href = dati.url; return; }
+    alert((dati && dati.messaggio) || 'Non riesco ad aprire la gestione abbonamento. Riprova più tardi.');
+  } catch (e) {
+    alert('Errore: ' + e.message);
+  }
+  if (bottone) { bottone.disabled = false; montaPorteGestionale(); }
 }
 
 function bloccaCardPremium() {
