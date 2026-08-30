@@ -2505,11 +2505,11 @@
           <div class="prev-prezzo-row">
             <div class="prev-input-wrap">
               <label>💶 Prezzo minimo (€)</label>
-              <input type="number" class="prev-input" id="prev-min" placeholder="Es. 1500">
+              <input type="text" inputmode="decimal" class="prev-input" id="prev-min" placeholder="Es. 1500">
             </div>
             <div class="prev-input-wrap">
               <label>💶 Prezzo massimo (€)</label>
-              <input type="number" class="prev-input" id="prev-max" placeholder="Es. 2500">
+              <input type="text" inputmode="decimal" class="prev-input" id="prev-max" placeholder="Es. 2500">
             </div>
           </div>
         </div>
@@ -2526,6 +2526,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/foto-upload.js"></script>
+<script src="/js/numero-italiano.js"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -3916,14 +3917,29 @@ async function inviaPreventivo() {
 
   if (!testo) { alert('Il preventivo è vuoto!'); return; }
 
+  /* ⛔ 30 agosto 2026 — I PREZZI CHE PARTIVANO SBAGLIATI AL CLIENTE.
+     Le due caselle erano type="number" lette con parseInt:
+       scrivi 1.500   -> parseInt("1.500") = 1     -> al cliente 1,00 €
+       scrivi 1500,50 -> la casella number svuota   -> al cliente nessun prezzo
+     Provato dal vivo: un preventivo e' partito con minimo 1,00 € e massimo
+     2,00 € al posto di 1.500 € e 2.800 €, e nessuno se ne accorgeva.
+     Adesso sono caselle di testo col tastierino (inputmode="decimal") lette
+     da numeroItaliano, la stessa regola del gestionale. E se dentro c'e'
+     qualcosa che non e' un numero ci si ferma: uno zero silenzioso su un
+     prezzo che va al cliente e' peggio di un avviso. */
+  const prezzoMin = numeroItaliano(min);
+  const prezzoMax = numeroItaliano(max);
+  if (String(min).trim() !== '' && prezzoMin == null) { alert('Il prezzo minimo non è un numero: ricontrollalo.'); return; }
+  if (String(max).trim() !== '' && prezzoMax == null) { alert('Il prezzo massimo non è un numero: ricontrollalo.'); return; }
+
   const btn = document.getElementById('btn-invia-prev');
   btn.textContent = '⏳ Invio in corso...';
   btn.disabled = true;
 
   const { error } = await sb.from('preventivi').update({
     risposta: testo,
-    prezzo_min: min ? parseInt(min) : null,
-    prezzo_max: max ? parseInt(max) : null,
+    prezzo_min: prezzoMin,
+    prezzo_max: prezzoMax,
     risposta_at: new Date().toISOString()
   }).eq('id', preventivoCorrente.id);
 
@@ -3941,8 +3957,8 @@ async function inviaPreventivo() {
       nome_cliente: preventivoCorrente.nome,
       impresa_nome: impresaCorrente.nome_attivita,
       risposta: testo,
-      prezzo_min: min ? parseInt(min) : null,
-      prezzo_max: max ? parseInt(max) : null
+      prezzo_min: prezzoMin,
+      prezzo_max: prezzoMax
     })
   }).catch(() => {});
 
