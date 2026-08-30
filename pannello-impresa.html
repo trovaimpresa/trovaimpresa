@@ -3238,43 +3238,55 @@ let cantiereAttivo = null;
 const FAQS_LIST = [
   {
     domanda: "Non riesco ad accedere al mio account",
-    risposta: "Controlla email e password. Se hai dimenticato la password, clicca su 'Password dimenticata?' nella pagina di login: riceverai un'email per reimpostarla. Se l'email non arriva entro 5 minuti, controlla la cartella Spam."
+    risposta: "Se hai perso la password: nella pagina di accesso scrivi la tua email nella casella e poi clicca «Hai dimenticato la password?» — senza l'email scritta il link non parte. Ti arriva un messaggio per farne una nuova; se non arriva entro 5 minuti guarda nella cartella Spam. Se ti sei appena registrato, controlla di aver cliccato il link dell'email di conferma: finché non lo fai l'accesso non funziona."
   },
   {
     domanda: "Come modifico i miei dati (telefono, indirizzo, descrizione)?",
-    risposta: "Clicca sulla card 'Modifica profilo' del pannello. Lì puoi aggiornare tutti i tuoi dati: contatti, descrizione attività, città, foto lavori. Ricordati di salvare in fondo alla pagina."
+    risposta: "Apri la card «Il mio profilo pubblico» e in fondo clicca il pulsante verde «Modifica profilo»: si apre la pagina con tutti i tuoi dati (contatti, città, mestieri, descrizione). In fondo alla pagina clicca «Salva modifiche», altrimenti non resta niente. Le foto dei lavori invece si caricano dalla card «Foto dei lavori» del pannello, non da lì."
   },
   {
     domanda: "Ho caricato un nuovo logo ma non si vede",
-    risposta: "Il browser potrebbe mostrarti la versione vecchia in cache. Premi CTRL+F5 (Windows) o CMD+SHIFT+R (Mac) per ricaricare. Formati supportati: JPG, PNG, WEBP. Dimensione massima: 2 MB."
+    risposta: "Il logo si carica cliccando sul riquadro in alto a destra del pannello, quello che dice «Carica logo», oppure dalla card «Personalizza pannello». Il file tiene sempre lo stesso indirizzo, quindi il browser può continuare a mostrarti quello vecchio: premi CTRL+F5 (Windows) o CMD+MAIUSC+R (Mac). Va bene qualsiasi immagine — JPG, PNG, WEBP — fino a 15 MB: la rimpiccioliamo noi."
   },
   {
     domanda: "Non appaio nelle ricerche dei clienti",
-    risposta: "Verifica che: 1) Il profilo sia completo (categoria, città, descrizione, almeno una foto). 2) La città inserita sia scritta correttamente. 3) Se sei Free appari solo nella tua città; se sei Premium appari in tutta la regione."
+    risposta: "Tre cose, in quest'ordine. 1) L'email della registrazione deve essere confermata: finché non lo è la tua scheda non esce nelle ricerche. 2) Città e mestiere devono essere scritti nel profilo, perché il cliente cerca per quelli. 3) Col piano Free esci solo nella tua città, col Premium in tutta la regione e più in alto nell'elenco. Per vedere quello che vedono i clienti apri la card «Anteprima del tuo pannello pubblico»."
   },
   {
     domanda: "Qual è la differenza tra Free e Premium?",
-    risposta: "Free (€0): visibilità solo nella tua città, profilo base. Premium (€29/mese o €249/anno): visibilità in tutta la regione, badge verificato, statistiche profilo, personalizzazione pannello, priorità nei risultati di ricerca."
+    risposta: "Free (0 €): scheda visibile solo nella tua città, profilo base, recensioni, certificazioni, messaggi e richieste di preventivo. Premium (29 € al mese oppure 249 € all'anno): visibile in tutta la regione, priorità nei risultati, foto dei lavori, video, QR Code del profilo, «Personalizza pannello», lista d'attesa pubblicità e il gestionale. Le card col lucchetto sono quelle che si aprono col Premium."
+  },
+  {
+    domanda: "Che differenza c'è fra Premium e Premium AI?",
+    risposta: "Il Premium (29 € al mese, 249 € all'anno) ha la vetrina, il gestionale e l'assistente AI che ti aiuta a compilare. Il Premium AI (39 € al mese, 349 € all'anno) ha in più una cosa sola: la Chat con AI dentro il gestionale, 300 messaggi al mese, che risponde con i conti dei tuoi lavori e ti compila i moduli. Tutto il resto è identico. Se hai già il Premium non devi fare un secondo abbonamento: si cambia il piano dentro quello che hai già, con il conguaglio."
   },
   {
     domanda: "Come passo a Premium?",
-    risposta: "Clicca sulla card 'Diventa Premium' o 'Abbonamento' nel tuo pannello. Pagamento sicuro tramite Stripe (carta di credito o debito). Puoi annullare in qualsiasi momento dalla sezione 'Modifica profilo'."
+    risposta: "In fondo al pannello, nel riquadro «Gestionale», ci sono due porte: «Gestionale Premium» e «Gestionale Premium AI». Clicca il pulsante viola della porta che vuoi — «Attiva Premium e gestionale» oppure «Attiva Premium e gestionale AI» — e al posto del pulsante compaiono i due prezzi, al mese o all'anno. Si paga con carta tramite Stripe. Se un abbonamento ce l'hai già, lo stesso pulsante ti porta alla pagina Stripe dove cambi piano senza farne un secondo."
+  },
+  {
+    domanda: "Ho 3 mesi di Premium in regalo: cosa succede quando finiscono?",
+    risposta: "Alla registrazione il Premium è acceso per 3 mesi, senza carta e senza addebito. Alla scadenza non parte nessun pagamento: se non fai niente il profilo torna al piano Free, resta online e resta visibile nella tua città. Perdi solo le funzioni Premium (tutta la regione, priorità, foto dei lavori, video, QR Code, personalizzazione). Se vuoi continuare, il Premium si attiva dalle due porte del riquadro «Gestionale»."
   },
   {
     domanda: "Come ricevo recensioni dai miei clienti?",
-    risposta: "Nel pannello trovi un link diretto da condividere con i clienti (WhatsApp, email, SMS). Loro compileranno il modulo recensione con la propria email. La recensione apparirà nel tuo profilo pubblico dopo la verifica automatica."
+    risposta: "Le recensioni si scrivono dalla tua scheda pubblica, quindi al cliente va mandato il link della scheda. Lo prendi dalla card «Anteprima del tuo pannello pubblico», pulsante «Apri in nuova scheda»: l'indirizzo che vedi in alto è quello da mandare. Il cliente apre la scheda, clicca «Lascia recensione», scrive e mette la sua email; gli arriva un messaggio e la recensione va online quando clicca il link dentro l'email. Le trovi tutte nella card «Recensioni verificate»."
   },
   {
     domanda: "Come funzionano i preventivi?",
-    risposta: "I clienti ti contattano tramite il pulsante 'Richiedi preventivo' sulla tua scheda pubblica. Riceverai i dettagli del lavoro via email. Puoi rispondere direttamente al cliente con la tua proposta — TrovaImpresa non si trattiene commissioni."
+    risposta: "Il cliente clicca «Richiedi preventivo gratuito» sulla tua scheda pubblica. La richiesta arriva nella card «Richiesta di preventivo» del pannello — il numero rosso sulla card sono quelle a cui non hai ancora risposto — e ti avvisiamo anche per email. Da lì rispondi con un prezzo minimo e uno massimo, e se vuoi ti fai aiutare da «Genera preventivo con AI». La risposta arriva al cliente. TrovaImpresa non trattiene commissioni."
   },
   {
-    domanda: "Voglio cancellare il mio account",
-    risposta: "Vai su 'Modifica profilo' → scorri fino in fondo → clicca 'Elimina account'. Attenzione: l'operazione è irreversibile e cancellerà profilo, recensioni e tutti i dati associati. Se sei Premium, l'abbonamento verrà annullato automaticamente."
+    domanda: "Cos'è il gestionale e come ci entro?",
+    risposta: "È il programma per gestire il lavoro: cantieri, squadra e ore, preventivi, computo metrico, fatture, spese e margini, report. Sta in fondo al pannello, nel riquadro «Gestionale», con le due porte. Attenzione: in questo momento non è ancora aperto — cliccando compare la schermata «Il gestionale sta arrivando», con il pulsante «Avvisami quando è pronto». Lascialo cliccato: ti scriviamo una volta sola, alla mail del tuo profilo, il giorno che apre."
+  },
+  {
+    domanda: "Voglio disdire l'abbonamento o cancellare il mio account",
+    risposta: "Sono due cose diverse. Per disdire: card «Il mio profilo pubblico» → «Modifica profilo» → in fondo alla pagina → «Gestione abbonamento»; il piano resta attivo fino alla scadenza e poi torni al Free. Se sei nei 3 mesi in regalo non c'è niente da disdire, alla scadenza non parte nessun addebito. Per cancellare tutto: stessa pagina, in fondo, «Elimina account»; ti chiede di scrivere ELIMINA e poi un'ultima conferma. È irreversibile e cancella profilo, foto e recensioni."
   },
   {
     domanda: "Ho un problema non elencato qui",
-    risposta: "Clicca sul pulsante 'Contatta assistenza' qui sotto per inviarci una segnalazione. Ti risponderemo via email entro 24-48 ore. In alternativa scrivi direttamente a info@trovaimpresa.com."
+    risposta: "Qui sotto hai due strade. «Chiedi all'AI» risponde subito, anche di notte e nei festivi, ma sa solo quello che c'è scritto in queste domande. «Ti serve una persona? Scrivi all'assistenza» apre il modulo per segnalarci il problema: ti rispondiamo per email entro 24-48 ore. Se preferisci parlare a botta e risposta, usa la card «Parla subito con TrovaImpresa» del pannello."
   }
 ];
 
@@ -3360,7 +3372,7 @@ async function chiediSupportoAI() {
   btn.style.cursor = 'not-allowed';
   out.textContent = 'Sto pensando…';
   const faqTesto = FAQS_LIST.map(f => `D: ${f.domanda}\nR: ${f.risposta}`).join('\n\n');
-  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare "Contatta assistenza".\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
+  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare il pulsante «Ti serve una persona? Scrivi all'assistenza» qui sotto.\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
   try {
     const resp = await fetch('/.netlify/functions/ai-claude', {
       method: 'POST',
