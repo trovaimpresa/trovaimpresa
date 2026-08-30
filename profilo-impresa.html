@@ -830,7 +830,9 @@ async function caricaProfilo(id){
        La sigla («Rieti (RI)») invece resta: quella serve. */
     const _cit=(d.citta||"").trim(), _pro=(d.provincia||"").trim();
     const luogo=[_cit,(_pro&&_pro.toLowerCase()!==_cit.toLowerCase())?_pro:""].filter(Boolean).join(', ');
-    if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
+    const _cityEl=document.getElementById('profile-city');
+    if(luogo&&_cityEl)_cityEl.textContent='📍 '+luogo;
+    mostraRiga(_cityEl,luogo);
     // La pubblicita' e' venduta per citta': qui non c'e' ?citta= nell'URL,
     // quindi passiamo agli spazi laterali la citta' dell'impresa mostrata.
     if(d.citta){ window.TI_CITTA = d.citta; }
@@ -842,7 +844,12 @@ async function caricaProfilo(id){
     const _campi=[
       ['Partita IVA',d.partita_iva],
       ['Anni di esperienza',d.anni_esperienza?d.anni_esperienza+' anni':''],
-      ['Numero albo',d.numero_albo||d.albo],
+      /* ⛔ 30 agosto 2026: qui c'era `d.numero_albo||d.albo`. Nella tabella
+         `imprese` la colonna `albo` NON ESISTE (le vere sono `numero_albo`,
+         `iscritto_albo`, `albo_verificato`). Non dava errore solo perche' la
+         scheda si legge con `select=*`, quindi era una scritta morta che il
+         controllo colonne non poteva vedere. */
+      ['Numero albo',d.numero_albo],
       ['Ordine / Collegio',d.ordine_provinciale],
       ['Regione',d.regione],
       ['Provincia',d.provincia],
@@ -916,7 +923,9 @@ async function caricaProfilo(id){
       }
     }catch(_){}
     const ci=document.getElementById('contact-indirizzo');
-    if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="ci">📍</div><span>${_esc(lc)}</span>`}
+    const _luogoContatti=[d.indirizzo,d.citta].filter(Boolean).join(', ');
+    if(_luogoContatti&&ci)ci.innerHTML=`<div class="ci">📍</div><span>${_esc(_luogoContatti)}</span>`;
+    mostraRiga(ci,_luogoContatti);
     if(d.lat&&d.lng){
       document.getElementById('mappa-impresa').style.display='block';
       if(!(await caricaLeaflet())){document.getElementById('mappa-impresa').style.display='none';}else{
@@ -1005,6 +1014,20 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
 
+/* UNA RIGA SI VEDE SOLO SE HA QUALCOSA DENTRO.
+   ⛔ 30 agosto 2026. Sui profili senza citta' e senza indirizzo restava
+   scritto il trattino di partenza: «📍 —» sotto il nome, e un altro
+   «📍 —» nella cartolina dei contatti. Non e' un dato mancante detto
+   bene: e' una riga vuota che sembra un dato. Adesso la riga o ha qualcosa
+   dentro o non c'e'.
+   ⚠️ Tutti e due i rami scrivono `display`: quello che un ramo spegne,
+   l'altro lo riaccende. Uno stile scritto sull'elemento non se ne va da solo. */
+function mostraRiga(el,pieno){
+  if(!el)return false;
+  var c=!!(String(pieno==null?'':pieno).trim());
+  el.style.display = c ? '' : 'none';
+  return c;
+}
 function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
 
 /* IL CONTO DELLE RECENSIONI, IN UN POSTO SOLO.
@@ -1401,7 +1424,12 @@ document.addEventListener('DOMContentLoaded',function(){
   var lbImg=document.getElementById('logo-lightbox-img');
   var lbClose=document.getElementById('logo-lightbox-close');
   function openLb(src){if(!src||src==='')return;lbImg.src=src;lb.classList.add('open')}
-  function closeLb(){lb.classList.remove('open');lbImg.src=''}
+  /* ⛔ 30 agosto 2026: qui c'era `lbImg.src=''`. Per il browser un indirizzo
+     vuoto NON e' «niente»: e' l'indirizzo di QUESTA pagina, che viene
+     riscaricata tutta come se fosse un'immagine. E' lo stesso difetto gia'
+     scritto nel commento in cima a questa pagina, il 29 agosto, per la foto
+     di copertina. Si toglie l'attributo, non si svuota. */
+  function closeLb(){lb.classList.remove('open');lbImg.removeAttribute('src')}
   document.getElementById('avatar-wrap').addEventListener('click',function(){
     var img=this.querySelector('img');if(img)openLb(img.src);
   });
