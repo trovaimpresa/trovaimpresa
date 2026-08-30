@@ -566,15 +566,18 @@
         <div class="type-section" id="sec-professionista">
           <div class="form-card">
             <div class="card-header">👷 Dati professionista</div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nome <span class="required">*</span></label>
-                <input type="text" id="f-nome-professionista" placeholder="Mario">
-              </div>
-              <div class="form-group">
-                <label>Cognome <span class="required">*</span></label>
-                <input type="text" id="f-cognome" placeholder="Rossi">
-              </div>
+            <!-- ⛔ 30 agosto 2026 — LA CASELLA «COGNOME» E' STATA TOLTA.
+                 Nella tabella `imprese` la colonna `cognome` NON ESISTE, e il
+                 salvataggio la mandava lo stesso: il database rifiutava TUTTO
+                 l'aggiornamento con PGRST204 («Could not find the 'cognome'
+                 column»), quindi i professionisti non riuscivano a salvare
+                 niente. Provato dal vivo sul sito il 30 agosto.
+                 Nessun dato perso: quella casella non aveva mai salvato nulla.
+                 Il cognome si scrive nella casella qui sotto, come fanno
+                 artigiani, imprese e negozi. -->
+            <div class="form-group">
+              <label>Nome e cognome <span class="required">*</span></label>
+              <input type="text" id="f-nome-professionista" placeholder="Mario Rossi">
             </div>
             <div class="form-group">
               <label>Professione principale <span class="required">*</span></label>
@@ -966,7 +969,11 @@
         'amministratore di condominio', 'consulente energetico', 'tecnico del lavoro',
         'professionista'
       ];
-      if (profTypes.includes(t) || d.cognome) return 'professionista';
+      /* ⛔ 30 agosto 2026: qui c'era anche `|| d.cognome`, una colonna che
+         nella tabella non esiste — valeva sempre «vuoto», quindi non ha mai
+         riconosciuto nessuno. Tolta per non lasciare in giro un controllo
+         che sembra fare qualcosa e non fa niente. */
+      if (profTypes.includes(t)) return 'professionista';
 
       return 'artigiano'; // fallback
     }
@@ -1120,7 +1127,6 @@
 
       } else if (tipoCategoria === 'professionista') {
         document.getElementById('f-nome-professionista').value = d.nome || '';
-        document.getElementById('f-cognome').value = d.cognome || '';
         setSelectValue('f-mestiere-professionista', d.mestieri?.[0] || d.mestiere);
         setSelectValue('f-mestiere2-professionista', d.mestieri?.[1]);
         setSelectValue('f-mestiere3-professionista', d.mestieri?.[2]);
@@ -1304,7 +1310,6 @@
         } else if (tipoCategoria === 'professionista') {
           Object.assign(dati, {
             nome: document.getElementById('f-nome-professionista').value.trim(),
-            cognome: document.getElementById('f-cognome').value.trim(),
             mestiere: document.getElementById('f-mestiere-professionista').value || null,
             mestieri: [...new Set([
               document.getElementById('f-mestiere-professionista').value,
