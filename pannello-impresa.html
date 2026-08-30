@@ -4873,7 +4873,14 @@ function montaPorteGestionale() {
   const dove = document.getElementById('porta-prova-azione');
   if (!riquadro || !dove) return;
 
-  if (!senzaAccesso) { riquadro.style.display = 'none'; return; }
+  // ⚠️ LA CHIAVE PER CONTROLLARE. Aprendo il pannello con ?prova=1 il
+  // riquadro si accende anche a chi il piano ce l'ha: serve ad Alessio
+  // per guardarlo senza doversi mettere free ogni volta. Non regala
+  // niente — i pulsanti dentro fanno esattamente quello che farebbero,
+  // e la prova la apre comunque il server solo a chi ne ha diritto.
+  const forzaProva = new URLSearchParams(location.search).get('prova') === '1';
+
+  if (!senzaAccesso && !forzaProva) { riquadro.style.display = 'none'; return; }
   riquadro.style.display = 'flex';
   dove.innerHTML = '';
 
