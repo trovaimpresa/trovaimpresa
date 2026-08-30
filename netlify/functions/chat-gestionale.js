@@ -607,7 +607,14 @@ exports.handler = async function(event) {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
-          max_tokens: 1500,
+          // ⛔ 30 agosto 2026 — LA RISPOSTA NON SI TAGLIA PIU' A META'.
+          //    Era 1500, cioe' poco piu' di una pagina: su una domanda
+          //    lunga (un elenco di fatture, una spiegazione a passaggi)
+          //    la risposta finiva a meta' frase senza dire niente.
+          //    ⚠️ Alzare il tetto NON costa di piu': si paga quello che
+          //    scrive davvero, non il tetto. Costa solo quando la
+          //    risposta e' lunga per davvero.
+          max_tokens: 4000,
           system: istruzioni(sezione, nomeReparto, oggi),
           tools: STRUMENTI,
           messages: messaggi

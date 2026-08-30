@@ -41,6 +41,13 @@
   var conversazione = null;
   var inCorso = false;
   var disegnata = false;
+  /* ⛔ 30 agosto 2026 — IL «FERMA».
+     Mentre risponde, il pulsante «Manda» diventa «Ferma» e taglia
+     l'attesa. Non serve un pulsante in piu': il posto e' quello.
+     ⚠️ Fermare NON ti ridà il messaggio: la domanda e' gia' partita e
+     il conto l'ha gia' fatto il server. Si smette di aspettare, e basta
+     — e la riga che compare lo dice, se no uno ci conta sopra. */
+  var annulla = null;
 
   /* il gettone di sessione: stesso modo di js/ai-integrazione.js —
      il gestionale il suo client Supabase non lo presta a nessuno */
@@ -194,10 +201,15 @@
     +   '</aside>'
     + '</div>';
 
-    document.getElementById('chat-manda').addEventListener('click', manda);
+    document.getElementById('chat-manda').addEventListener('click', function () {
+      if (inCorso) { if (annulla) annulla.abort(); return; }
+      manda();
+    });
     /* un ascoltatore solo per tutti i pulsanti «Aprilo», anche quelli che
        arriveranno dopo: sta sulla scatola dei messaggi, non sui pulsanti */
     document.getElementById('chat-righe').addEventListener('click', function (e) {
+      var c = e.target.closest('[data-copia]');
+      if (c) return copiaRisposta(c);
       var b = e.target.closest('[data-apri]'); if (!b) return;
       var ok = (typeof window.apriCosa === 'function')
         && window.apriCosa(b.getAttribute('data-apri'), b.getAttribute('data-apri-id'));
@@ -222,7 +234,15 @@
 
   function righe() { return document.getElementById('chat-righe'); }
 
-  function scrivi(chi, html, id) {
+  /* ⛔ 30 agosto 2026 — IL «COPIA» SOTTO LE RISPOSTE.
+     Serviva a chi si fa scrivere due righe da mandare al cliente: prima
+     doveva selezionarle a mano col mouse, e sul telefono era peggio.
+     ⚠️ Si mette SOLO sotto le risposte vere (`conCopia`), non sotto gli
+     avvisi tipo «non sono riuscito a risponderti»: copiare un errore non
+     serve a niente.
+     ⚠️ Nessuno stile scritto qui: `chip` e' la stessa classe del pulsante
+     «Aprilo», che sta gia' in css/gestionale.css. */
+  function scrivi(chi, html, id, conCopia) {
     var r = righe(); if (!r) return null;
     var vuoto = r.querySelector('.asst-vuoto');
     if (vuoto) vuoto.remove();
@@ -233,9 +253,47 @@
     else if (chi === 'attesa') d.className = 'asst-giorno';
     else                       d.className = 'asst-msg suo';
     d.innerHTML = html;
+    if (conCopia) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('data-copia', '1');
+      b.textContent = 'Copia';
+      d.appendChild(document.createElement('br'));
+      d.appendChild(b);
+    }
     r.appendChild(d);
     r.scrollTop = r.scrollHeight;
     return d;
+  }
+
+  /* copia il testo della risposta, senza i pulsanti che ci stanno dentro.
+     ⚠️ Si lavora su una COPIA della bolla: togliere i pulsanti da quella
+     vera vorrebbe dire che dopo aver copiato sparisce «Aprilo». */
+  function copiaRisposta(bottone) {
+    var bolla = bottone.closest('.asst-msg');
+    if (!bolla) return;
+    var copia = bolla.cloneNode(true);
+    Array.prototype.slice.call(copia.querySelectorAll('button')).forEach(function (x) { x.remove(); });
+    var testo = (copia.innerText || copia.textContent || '').trim();
+    var fatto = function () {
+      bottone.textContent = 'Copiato';
+      setTimeout(function () { bottone.textContent = 'Copia'; }, 1500);
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(testo).then(fatto, function () { bottone.textContent = 'Non ci riesco'; });
+        return;
+      }
+    } catch (e) {}
+    /* ⚠️ la scorciatoia vecchia, per i browser che non hanno il blocco note
+       moderno: una casella nascosta, si seleziona e si copia. */
+    try {
+      var t = document.createElement('textarea');
+      t.value = testo; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+      fatto();
+    } catch (e) { bottone.textContent = 'Non ci riesco'; }
   }
 
   /* ⛔ 29 agosto 2026 — LA CHAT VUOTA E' VUOTA.
@@ -341,7 +399,8 @@
         res.data.forEach(function (m) {
           if (!m.testo) return;
           scrivi(m.ruolo === 'ai' ? 'ai' : 'utente',
-                 m.ruolo === 'ai' ? testoRisposta(m.testo) : esc(m.testo));
+                 m.ruolo === 'ai' ? testoRisposta(m.testo) : esc(m.testo),
+                 null, m.ruolo === 'ai');
         });
       }
     } catch (e) { if (!zitto) scrivi('ai', 'Non riesco a rileggere questa chat.'); }
@@ -379,8 +438,13 @@
 
     inCorso = true;
     var apertoUnModulo = false;
+    var fermato = false;
     casella.value = '';
-    document.getElementById('chat-manda').disabled = true;
+    annulla = (typeof AbortController === 'function') ? new AbortController() : null;
+    var bottoneManda = document.getElementById('chat-manda');
+    /* ⛔ NON si spegne piu': mentre risponde deve restare cliccabile,
+       se no non c'e' niente da premere per fermarla. */
+    bottoneManda.textContent = 'Ferma';
     scrivi('utente', esc(domanda));
     var attesa = scrivi('attesa', 'Sto guardando&hellip;');
 
@@ -388,6 +452,7 @@
       var r = await fetch(FUNZIONE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t },
+        signal: annulla ? annulla.signal : undefined,
         body: JSON.stringify({
           domanda: domanda,
           conversazione_id: chiacchierata(),
@@ -399,7 +464,7 @@
       if (attesa) attesa.remove();
 
       if (r.ok && d.risposta) {
-        scrivi('ai', testoRisposta(d.risposta));
+        scrivi('ai', testoRisposta(d.risposta), null, true);
         scriviRestanti(d.restanti);
         caricaArchivio();   /* la chiacchierata nuova compare subito a destra */
         /* ⛔ il modulo si apre DOPO aver scritto la risposta: se si aprisse
@@ -422,11 +487,19 @@
       }
     } catch (e) {
       if (attesa) attesa.remove();
-      scrivi('ai', 'Non sono riuscito a risponderti: la rete non ha risposto. Riprova.');
+      if (e && e.name === 'AbortError') {
+        fermato = true;
+        scrivi('ai', 'Va bene, ho lasciato perdere.<br>'
+          + '<span class="asst-nota">Il messaggio era gi&agrave; partito, quindi resta contato.</span>');
+      } else {
+        scrivi('ai', 'Non sono riuscito a risponderti: la rete non ha risposto. Riprova.');
+      }
     }
 
     inCorso = false;
-    document.getElementById('chat-manda').disabled = false;
+    annulla = null;
+    bottoneManda.textContent = 'Manda';
+    bottoneManda.disabled = false;
     /* ⛔ 29 agosto 2026 — IL CURSORE NON SI RIPRENDE IL MODULO.
        Se la risposta ha aperto un modulo, il cursore adesso sta nella
        prima casella da controllare: riportarlo qui vorrebbe dire
