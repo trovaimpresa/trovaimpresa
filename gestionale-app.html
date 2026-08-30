@@ -15945,10 +15945,14 @@ ${vecchi?`
         toast(noteSupaOk?"Nota salvata 📌":"Nota salvata solo su questo dispositivo (manca la migrazione SQL)");return;
       }
       if(v){
-        /* eliminato_il:null -> riscrivendo la nota di un giorno la si tira fuori dal
-           cestino. Senza, il salvataggio finiva sopra la riga eliminata: la nota
-           spariva alla ricarica e quel giorno non era più scrivibile. */
-        const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v,eliminato_il:null},{onConflict:"user_id,mestiere_id,data"}).select("id");
+        /* ⛔ 30 agosto 2026 — QUI LA NOTA NON SI SALVAVA MAI.
+           C'era `eliminato_il:null`, ma in `gest_note` quella colonna NON
+           ESISTE: e' l'avanzo del cestino delle note, tolto il 9/8/2026
+           poche ore dopo averlo messo (sta scritto in js/cestino.js).
+           Postgres rifiutava tutto l'upsert e a schermo usciva «Nota non
+           salvata». Le note del calendario non arrivavano al database.
+           Il cestino delle note non c'e': il ramo qui sotto cancella davvero. */
+        const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v},{onConflict:"user_id,mestiere_id,data"}).select("id");
         if(error){toast("Nota non salvata: "+error.message);return;}
         if(!okN||!okN.length){toast("Nota non salvata: nessuna riga modificata. Riprova.");return;}
         noteCache[ds]=v;

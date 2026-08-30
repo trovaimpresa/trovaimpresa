@@ -106,10 +106,15 @@
      Rimessa a false il 6 agosto 2026: aperto ai Premium.
      ⛔ RIMESSA A TRUE IL 20 AGOSTO 2026, deciso da Alessio:
         «prima si costruisce la casa poi si vende».
-        Il gestionale si finisce con calma e si apre quando vale i soldi
-        che si chiedono, non prima. Per riaprirlo: rimettere false —
-        ma prima ricontrollare il testo della schermata qui sotto. */
-  var MANUTENZIONE = true;
+     ✅ RIMESSA A FALSE IL 30 AGOSTO 2026, deciso da Alessio: il gestionale
+        si apre a tutti. Il controllo colonne-fantasma era stato allargato
+        a tutte e 115 le tabelle e in tutto il gestionale ha trovato UNA
+        cosa sola (le note del calendario, sistemata lo stesso giorno).
+        ⚠️ Da sapere: quel giorno 99 imprese su 102 non avevano nessun
+        reparto, quindi entrano in un gestionale vuoto.
+        PER RICHIUDERLO basta rimettere true: nessun dato si perde, e chi
+        e' dentro rivede la schermata «Il gestionale sta arrivando». */
+  var MANUTENZIONE = false;
   var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
 
   /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====
