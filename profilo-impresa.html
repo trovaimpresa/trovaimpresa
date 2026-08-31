@@ -61,24 +61,25 @@ nav img{height:36px}
 .hero-cover{display:none;position:relative;width:100%;overflow:hidden;
   aspect-ratio:2.5/1;min-height:180px;max-height:380px;
   background-color:rgba(255,255,255,0.10);
-  background-repeat:no-repeat;background-position:center;background-size:contain}
-/* ⛔ 31 agosto 2026 — I LATI DELLA COPERTINA, TERZO TENTATIVO E QUELLO BUONO.
-   1) `contain` e basta: immagine intera, ma due bande di sfondo vuote.
-   2) stessa immagine allargata e SFOCATA dietro: bene con una foto, ma su
-      un logo o una locandina diventa una macchia. Provato sul sito e
-      bocciato da Alessio: «e' peggio di prima».
-   3) questa: le bande prendono i colori del BORDO dell'immagine, sfumati
-      dall'alto in basso, e ne diventano la continuazione. Li calcola
-      `js/copertina-bande.js` leggendo dodici punti per lato.
-   ⚠️ Le bande sono larghe meta' fascia ciascuna e stanno SOTTO l'immagine
-   (z-index 0 contro 1): cosi' non serve ricalcolare niente quando la
-   finestra cambia larghezza.
-   ⚠️ Se l'immagine non si lascia leggere, le due variabili non vengono
-   scritte, le bande restano trasparenti e si vede il colore di prima. */
-.hero-cover::before,.hero-cover::after{content:'';position:absolute;top:0;bottom:0;width:50%;z-index:0;pointer-events:none}
-.hero-cover::before{left:0;background:var(--banda-sx,transparent)}
-.hero-cover::after{right:0;background:var(--banda-dx,transparent)}
-.hero-cover .cover-img{position:absolute;inset:0;z-index:1;background-image:inherit;background-repeat:no-repeat;background-position:center;background-size:contain}
+  background-repeat:no-repeat;background-position:center;background-size:cover}
+/* ⛔ 31 agosto 2026 — LA COPERTINA RIEMPIE, COME SU FACEBOOK.
+   La storia, per non rifarla una quarta volta:
+   1) `contain`: si vedeva tutta l'immagine, ma restavano due bande di sfondo.
+   2) bande riempite con la stessa immagine SFOCATA: bene con una foto, su una
+      locandina una macchia. Provata sul sito e bocciata: «e' peggio di prima».
+   3) bande coi colori del BORDO dell'immagine: pulite, ma bande restavano.
+   4) questa, chiesta da Alessio guardando Facebook: «lo voglio cosi', bello
+      pulito, a tutto schermo». L'immagine riempie la fascia da bordo a bordo
+      e quello che avanza viene tagliato, sopra e sotto.
+   ⛔ IL PREZZO, MISURATO: su un'immagine 1,79:1 (la locandina Enterprise,
+   1377x768) si perde il 28% dell'altezza — sopra il titolo, sotto la riga
+   con l'email. Con una FOTO non si nota; con una locandina piena di scritte
+   si', e chi la carica deve saperlo: per questo la scritta d'aiuto dice la
+   misura giusta, 1500x600, che riempie senza perdere niente.
+   ⚠️ Il taglio parte dal CENTRO (`background-position:center`). Se un giorno
+   serve scegliere quale parte tenere, e' li' che va messa una posizione
+   salvata, non altrove. */
+.hero-cover .cover-img{position:absolute;inset:0;background-image:inherit;background-repeat:no-repeat;background-position:center;background-size:cover}
 
 
 .hero-cover.ha-copertina{display:block}
@@ -760,7 +761,6 @@ function caricaLeaflet(){
   return _leafletProm;
 }
 </script>
-<script src="/js/copertina-bande.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SU='https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -892,8 +892,6 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
       if(hc){
         hc.style.backgroundImage=`url("${_esc(_copertina)}")`;
         hc.classList.add('ha-copertina');
-        /* i lati si riempiono coi colori del bordo dell'immagine */
-        if(window.bandeCopertina) window.bandeCopertina(hc, _copertina);
       }
     }
     const b=[];
