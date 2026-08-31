@@ -1034,7 +1034,15 @@
     .strip-servizi{ grid-template-columns:minmax(0,1fr); }
     .citta-go{ padding:15px; }
     .citta-box{ padding:16px; }
-    .hero-logo{ max-width:210px; }
+    /* ⛔ 31 agosto 2026 — IL MARCHIO DUE VOLTE NEI PRIMI 100 px.
+       Sul telefono il logo della barra sta a →10← px (88x44) e questo, il
+       logo grande dell'hero, a →98← px (156x78): due volte lo stesso
+       marchio prima ancora del titolo. Misurato togliendolo: la casella
+       della citta' sale da →386← a →290← px e la pagina si accorcia di
+       →96← px (78 di logo piu' 18 di margine sotto).
+       Sul computer resta dov'era: li' la barra e' alta 107 px e il logo
+       grande e' l'unica cosa che apre la pagina. */
+    .hero-logo{ max-width:210px; display:none; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
     .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
     .bi-links a{ padding:11px 14px; font-size:13px; }
