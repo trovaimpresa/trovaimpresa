@@ -1061,6 +1061,30 @@
     .features-grid .feature-card .feature-icon{ grid-column:1; grid-row:1 / span 2; margin-bottom:0; }
     .features-grid .feature-card h3{ grid-column:2; grid-row:1; margin-bottom:6px; }
     .features-grid .feature-card p{ grid-column:2; grid-row:2; }
+    /* ⛔ 31 agosto 2026 — LE SEI GUIDE DEI COSTI, 1257 px.
+       Stessa storia delle carte del «Perche'»: l'emoji stava sopra il
+       titolo e costava 40 px per carta (30 di emoji piu' 10 di margine).
+       Messa di fianco: griglia da →1257← a →951← px, carte da →194← a
+       →136-158←, →0← scritte tagliate.
+       ⚠️ QUI SERVE IL «!important», e non e' pigrizia: queste carte non
+       hanno una classe, hanno lo stile scritto dentro il tag
+       (`style="display:block;...padding:20px"`), e lo stile scritto nel tag
+       batte qualsiasi foglio a meno di un !important. Per lo stesso motivo
+       si punta all'indirizzo del link, `a[href^="/quanto-costa"]`: e' la
+       cosa piu' stabile che hanno.
+       ⚠️ La colonna dell'emoji e' 42 px, non 34: a 34 px l'emoji da 30 px
+       sbordava dal suo riquadro (misurate 6 scritte «tagliate», che erano
+       le sei emoji).
+       ⚠️ Perche' non due carte per riga: ci pensa gia' mobile.css, che con
+       `[style*="grid-template-columns"]{...1fr !important}` porta a una
+       colonna ogni griglia con lo stile nel tag. Non la combattiamo. */
+    .guide-costi-home a[href^="/quanto-costa"]{ display:grid !important;
+      grid-template-columns:42px 1fr; column-gap:12px; align-items:start;
+      padding:14px !important; }
+    .guide-costi-home a[href^="/quanto-costa"] > div{ grid-column:1; grid-row:1 / span 3; }
+    .guide-costi-home a[href^="/quanto-costa"] h3{ grid-column:2; grid-row:1; margin:0 0 4px !important; }
+    .guide-costi-home a[href^="/quanto-costa"] p{ grid-column:2; grid-row:2; margin:0 0 6px !important; }
+    .guide-costi-home a[href^="/quanto-costa"] span{ grid-column:2; grid-row:3; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
     .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
     .bi-links a{ padding:11px 14px; font-size:13px; }
