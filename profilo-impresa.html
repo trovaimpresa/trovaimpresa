@@ -43,16 +43,73 @@ nav img{height:36px}
 .nav-back:hover{background:#2863a7;color:white}
 
 /* HERO - stile homepage */
+/* ⛔ 31 agosto 2026 — COPERTINA E LOGO NON STANNO PIU' NELLA STESSA CASELLA.
+   Prima la copertina (`personalizzazione.banner_url`) andava come SFONDO
+   della colonna di destra e il logo ci finiva DENTRO: chi aveva tutti e due
+   se li ritrovava uno sopra l'altro. Misurato sulla scheda 36: casella
+   784x214, logo 120x120 stampato in mezzo alla scritta.
+   Adesso la forma e' quella del pannello (e di Facebook): copertina larga
+   sopra, logo tondo che sborda sotto a sinistra, nome accanto. Le misure
+   sono le stesse del pannello, copiate: se le cambi di la', cambiale anche
+   qui, se no le due pagine si allontanano.
+   ⚠️ `contain` e non `cover`: le copertine vere sono quasi quadrate (quella
+   di Alessio e' 1377x768, cioe' 1,79:1) e riempiendo si vedrebbe meta'
+   altezza — e' il difetto gia' misurato il 30 agosto (si vedeva il 49%).
+   ⚠️ Serve anche `no-repeat`: il valore predefinito e' `repeat`. */
 .hero{background-color:#0a2a4d;
-  padding:48px 32px 36px;text-align:left;color:#fff;
-  display:flex;flex-direction:row;align-items:stretch;gap:20px}
-.hero-left-col{flex:1;display:flex;flex-direction:column;justify-content:center}
-.hero-right-col{flex:2;display:flex;align-items:center;justify-content:center}
-.hero-avatar{width:100%;max-height:180px;border-radius:0;background:transparent;
-  border:none;box-shadow:none;
-  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  text-align:left;color:#fff;display:block;padding:0;overflow:hidden}
+.hero-cover{display:none;position:relative;width:100%;overflow:hidden;
+  aspect-ratio:2.5/1;min-height:180px;max-height:380px;
+  background-color:rgba(255,255,255,0.10);
+  background-repeat:no-repeat;background-position:center;background-size:contain}
+/* ⛔ 31 agosto 2026 — LO SPAZIO VUOTO AI LATI DELLA COPERTINA.
+ La fascia e' larga e bassa, ma le copertine vere sono quasi quadrate
+ (quella di Alessio e' 1377x768, cioe' 1,79:1): con `contain` si vedeva
+ tutta l'immagine ma restavano due bande di sfondo ai lati.
+ Riempirle allargando l'immagine (`cover`) avrebbe tagliato il 28%
+ dell'altezza — cioe' proprio il titolo in alto e la riga dell'email in
+ basso: e' il difetto gia' misurato il 30 agosto.
+ Rimedio scelto da Alessio guardando la figura: le bande si riempiono con
+ LA STESSA IMMAGINE, allargata e sfocata, e sopra ci va l'immagine intera.
+ Niente sfondo vuoto e niente tagliato.
+ ⚠️ Sono due strati finti (::before e ::after) proprio per non dover
+ aggiungere altri elementi: prendono l'indirizzo dell'immagine dal padre
+ con `background-image:inherit`, quindi basta cambiare lo sfondo della
+ casella e si aggiornano tutti e due.
+ ⚠️ `z-index` sui figli veri: senza, `::after` finirebbe SOPRA il bottone
+ della macchina fotografica e sopra la scritta «Aggiungi una copertina». */
+.hero-cover::before,
+.hero-cover::after{
+content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+background-image:inherit;background-repeat:no-repeat;background-position:center;
+}
+.hero-cover::before{background-size:cover;filter:blur(26px) brightness(0.82);transform:scale(1.18)}
+.hero-cover::after{background-size:contain}
+
+.hero-cover.ha-copertina{display:block}
+.hero-riga{display:flex;align-items:flex-end;gap:18px;padding:28px 32px 26px 32px}
+.hero-cover.ha-copertina + .hero-riga{padding-top:0}
+/* ⛔ 31 agosto 2026 — IL TONDO CHE NON SBORDAVA PIU'.
+   Misurato: sulla scheda pubblica il tondo scendeva SOTTO la copertina
+   invece di sborare (a 375 px stava 165 px piu' giu'). Il motivo: la riga e'
+   `align-items:flex-end`, e quando la colonna delle scritte e' piu' ALTA del
+   tondo (qui sono quattro righe: mestiere, nome, citta', bollini) l'altezza
+   della riga la decide il testo, e il `margin-top` negativo del tondo si
+   perde dentro quella riga alta.
+   ⚠️ Il tondo va ancorato IN CIMA (`align-self:flex-start`) e le scritte in
+   basso (`align-self:flex-end`): cosi' il margine negativo lo alza davvero
+   sopra la copertina, qualunque sia l'altezza del testo. */
+.hero-left-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;align-self:flex-end}
+/* il tondo: l'immagine riempie il cerchio restando centrata, qualunque
+   forma abbia il file caricato */
+.hero-avatar{position:relative;flex-shrink:0;align-self:flex-start;
+  width:150px;height:150px;border-radius:50%;
+  border:5px solid #fff;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,0.28);
+  display:flex;align-items:center;justify-content:center;font-size:2.6rem;
   overflow:hidden;cursor:pointer}
-.hero-avatar img{max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:transparent}
+.hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:-58px}
+.hero-avatar img{width:100%;height:100%;display:block;border-radius:50%;
+  object-fit:cover;object-position:center;background:#fff}
 
 /* LOGO LIGHTBOX */
 #logo-lightbox{display:none;position:fixed;inset:0;z-index:9999;
@@ -341,7 +398,11 @@ nav img{height:36px}
   .main-layout{grid-template-columns:1fr;padding:12px}
   .stats-row{gap:10px;padding:16px}
   .sc{min-width:calc(50% - 5px);max-width:none}
-  .hero{padding:32px 16px 24px}
+  .hero{padding:0}
+  .hero-cover{aspect-ratio:1.9/1;min-height:150px;max-height:260px}
+  .hero-riga{padding:20px 16px 18px 16px;gap:12px}
+  .hero-avatar{width:96px;height:96px;border-width:4px;font-size:2rem}
+  .hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:-38px}
   .hero-nome{font-size:1.6rem}
   nav{padding:10px 16px}
   .cal-grid-2x2{grid-template-columns:1fr}
@@ -401,15 +462,19 @@ nav img{height:36px}
 <div id="cover-foto"><img id="cover-foto-img" alt="Foto di copertina"></div>
 
 <!-- HERO -->
+<!-- INTESTAZIONE (31 agosto 2026): stessa forma del pannello — copertina
+     larga sopra, logo tondo che sborda sotto a sinistra, nome accanto.
+     Prima copertina e logo stavano nella STESSA casella e si sovrapponevano. -->
 <div class="hero" id="hero-section">
-  <div class="hero-left-col">
-    <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
-    <div class="hero-nome" id="profile-name">Caricamento...</div>
-    <div class="hero-loc" id="profile-city">📍 —</div>
-    <div class="hero-badges" id="profile-badges"></div>
-  </div>
-  <div class="hero-right-col">
+  <div class="hero-cover" id="hero-cover"></div>
+  <div class="hero-riga">
     <div class="hero-avatar" id="avatar-wrap">🏗️</div>
+    <div class="hero-left-col">
+      <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
+      <div class="hero-nome" id="profile-name">Caricamento...</div>
+      <div class="hero-loc" id="profile-city">📍 —</div>
+      <div class="hero-badges" id="profile-badges"></div>
+    </div>
   </div>
 </div>
 
@@ -813,9 +878,23 @@ async function caricaProfilo(id){
     }else{
       caricaFotoLavori(d.user_id);
     }
-    if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${_esc(d.logo_url)}" alt="logo" fetchpriority="high" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
+    /* il logo sta nel tondo: le misure le da' il CSS (.hero-avatar img), qui
+   non si scrivono piu' a mano — se no il cerchio si riempie male */
+if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${_esc(d.logo_url)}" alt="logo" fetchpriority="high">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
-    if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
+    /* ⛔ 31 agosto 2026 — LA COPERTINA, IN UN POSTO SOLO.
+       C'erano due copertine possibili: `foto_copertina_url` (la fascia sopra
+       l'intestazione, che nessuno usa: 0 imprese su 80) e
+       `personalizzazione.banner_url` (quella che si carica dal pannello).
+       Adesso ne comanda una sola, quella dell'intestazione: se c'e' il
+       banner del pannello si usa quello, se no la foto di copertina.
+       La vecchia fascia `#cover-foto` resta nel codice ma non si accende
+       piu': se un domani si decide di toglierla, e' li'. */
+    const _copertina = ((d.personalizzazione||{}).banner_url) || d.foto_copertina_url || '';
+    if(_copertina){
+      const hc=document.getElementById('hero-cover');
+      if(hc){hc.style.backgroundImage=`url("${_esc(_copertina)}")`;hc.classList.add('ha-copertina')}
+    }
     const b=[];
     if(d.verificata)b.push('<span class="hb hb-v">✓ Verificata</span>');
     if(d.albo_verificato)b.push('<span class="hb hb-v">🎓 Albo verificato</span>');
@@ -978,14 +1057,8 @@ async function caricaProfilo(id){
         if (cur) titleEl.style.fontSize = (cur * n) + 'px';
       }
     }
-    if (pers.banner_url) {
-      const rightCol = document.querySelector('#hero-section .hero-right-col');
-      if (rightCol) {
-        rightCol.style.backgroundImage = `url("${pers.banner_url}")`;
-        rightCol.style.backgroundSize = 'cover';
-        rightCol.style.backgroundPosition = 'center';
-      }
-    }
+    /* 31 agosto 2026: il banner non va piu' nella colonna del logo (era li'
+       che i due si sovrapponevano). Adesso lo mette la copertina, piu' su. */
     // CERTIFICAZIONI
     const certs = Array.isArray(d.certificazioni) ? d.certificazioni : [];
     if (certs.length) {
