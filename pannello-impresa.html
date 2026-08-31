@@ -3998,7 +3998,7 @@ async function salvaPersonalizzaPannello() {
     const file = bannerInput.files[0];
     const parts = file.name.split('.');
     const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
-    const path = `${impresaCorrente.id}/banner.${ext}`;
+    const path = `${impresaCorrente.user_id}/banner.${ext}`;
     const { error: bnErr } = await sb.storage.from('banner-personalizzati').upload(path, file, { upsert: true });
     if (bnErr) {
       alert('Errore caricamento banner: ' + bnErr.message);
@@ -4869,14 +4869,14 @@ async function inviaPreventivo() {
 // =====================
 /* La copertina si cambia dal bottone con la macchina fotografica, senza
    passare da «Personalizza». Stesso secchio e stesso percorso del banner
-   salvato di la' (`banner-personalizzati/<id>/banner.<ext>`), cosi' i due
+   salvato di la' (`banner-personalizzati/<user_id>/banner.<ext>`), cosi' i due
    posti restano d'accordo. */
 async function caricaCopertina(event) {
   const file = event.target.files[0];
   if (!file || !impresaCorrente) return;
   const prep = await preparaFileUpload(file, { lato: 1600, qualita: 0.85, formato: 'webp' });
   if (prep.errore) { alert(prep.errore); return; }
-  const path = `${impresaCorrente.id}/banner.${prep.compressa ? 'webp' : 'png'}`;
+  const path = `${impresaCorrente.user_id}/banner.${prep.compressa ? 'webp' : 'png'}`;
   const { error: upErr } = await sb.storage.from('banner-personalizzati')
     .upload(path, prep.file, { upsert: true, contentType: prep.compressa ? 'image/webp' : file.type, cacheControl: '31536000' });
   if (upErr) { alert('Errore caricamento copertina: ' + upErr.message); return; }
