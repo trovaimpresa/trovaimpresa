@@ -406,6 +406,11 @@ nav img{height:36px}
      cresceva oltre lo schermo: 69 pezzi fuori dal bordo a 320px. Con
      «minmax(0,1fr)» la colonna non puo' piu' superare lo spazio che c'e'. */
   .main-layout{grid-template-columns:minmax(0,1fr);padding:12px}
+  /* 31 agosto 2026: sul telefono la colonna con i contatti e il bottone del
+     preventivo veniva DOPO tutte le carte lunghe: il bottone principale
+     stava a 3905px dall'inizio, misurato sull'impresa 36. Adesso quella
+     colonna sale in cima, subito sotto i tre numeri. */
+  .main-layout > div:last-child{order:-1}
   .rec-tabs{flex-wrap:wrap}
   .rec-tab{flex:1 1 auto;min-width:0}
   .stats-row{gap:10px;padding:16px}
