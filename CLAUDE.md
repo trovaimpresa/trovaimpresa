@@ -19293,3 +19293,212 @@ correzione qui sopra.)
   `fetch(pagina,{cache:'no-store'})`.
 * **Una nota che dà per misurata una cosa che non si riproduce va corretta**,
   non lasciata lì perché «male non fa».
+
+# 31 AGOSTO 2026 — LA SCHEDA PUBBLICA SUL TELEFONO, NOVE CONSEGNE
+
+Giornata tutta su `profilo-impresa.html` (più una correzione al database e una
+a `pannello-impresa.html`). Il filo conduttore: **la scheda era stata disegnata
+guardandola sul computer**. Aperta stretta, si rompeva in nove punti diversi.
+Nessuno di questi difetti ha mai sporcato una console.
+
+## 1. La copertina non si poteva caricare — e non era colpa del bottone nuovo
+
+Alessio prova a caricare la copertina dal pannello e prende
+`new row violates row-level security policy`.
+
+* `storage.objects` ha l'RLS **acceso**.
+* Il secchio `loghi-imprese` ha →4← regole, e infatti il logo si carica.
+* I secchi `banner-personalizzati` e `loghi-personalizzati` avevano **zero
+  regole**. Con RLS acceso e nessuna regola, Postgres nega tutto.
+
+Quindi **il caricamento della copertina era rotto da sempre**, anche dalla
+strada vecchia «Personalizza → Banner copertina», e anche il «Logo
+personalizzato». Le due copertine che erano nel secchio sono del →10← e →11
+maggio←, prima che le regole venissero strette. Il bottone con la macchina
+fotografica non ha rotto niente: ha solo reso visibile una cosa già rotta.
+
+Secondo pezzo: il codice scriveva in `<numero impresa>/banner.png`, mentre la
+regola che funziona vuole la cartella con l'`user_id`, come fa il logo.
+
+**Fatto:** →8← regole nuove (4+4 sui due secchi): lettura pubblica, e
+scrittura/modifica/cancellazione solo dentro la propria cartella. E il percorso
+cambiato in →2← punti di `pannello-impresa.html`.
+
+**Provato sul database, non solo sul codice:** con i panni dell'utente 36 una
+scrittura nella sua cartella passa; una scrittura nella cartella `36/` che non
+è sua viene **bloccata**. Conteggio del secchio →2← → →3← durante la prova →
+→2← dopo aver cancellato la riga finta.
+
+⚠️ `storage.objects` ha un guardiano che vieta il DELETE diretto
+(`storage.protect_delete`). Per togliere la riga di prova serve
+`set_config('storage.allow_delete_query','true',true)` dentro la stessa
+transazione. Disabilitare il trigger non si può: non siamo proprietari della
+tabella.
+
+## 2. Il nome che usciva dalla casella
+
+Sul telefono il nome dell'impresa restava **mozzato**: misurati →288px← di
+scritta dentro →235px← di spazio, tagliata di →53px←.
+
+Il colpevole non era il CSS: era l'ingrandimento scelto in «Personalizza»
+(`size_testo_header`, per l'impresa 36 vale →1.5←), che moltiplicava la misura
+del testo **senza guardare quanto spazio c'era**.
+
+**Fatto:** `adattaNomeHero()`. Parte dalla misura giusta per la larghezza dello
+schermo, applica l'ingrandimento come fattore ricordato in
+`dataset.fattorePers`, poi scende di mezzo punto alla volta finché la scritta
+ci sta. Fondo a →17.6px←. Solo se anche lì non ci sta, manda a capo la parola.
+Si riadatta anche girando il telefono.
+
+Misure: telefono →38.4px← → →31.4px← in →14← passi. Computer →52.8px←, →0←
+passi: non cambia niente.
+
+## 3. Le carte che uscivano dallo schermo
+
+A 375px →21← pezzi oltre il bordo destro; a 320px →69←, il peggiore di →58px←.
+
+La causa non erano le carte: era la griglia. Sul telefono la colonna era `1fr`,
+e **in una griglia `1fr` vuol dire «almeno quanto il contenuto più largo»**.
+Bastava una carta che non si stringeva — le due linguette delle recensioni, che
+chiedevano →317.8px← dove ce n'erano →303← — e la colonna cresceva a →365.8px←
+invece di →351←, trascinandosi dietro tutte le altre.
+
+**Fatto:** `minmax(0,1fr)` (l'unica scrittura che impedisce alla colonna di
+superare lo spazio disponibile) + `.rec-tabs{flex-wrap:wrap}` e
+`.rec-tab{flex:1 1 auto;min-width:0}`. Dopo: →0← pezzi fuori a 375px e a 320px.
+
+## 4. I mestieri: da badge a pastiglie
+
+Caso peggiore del database, impresa →104←: il badge sopra il nome era alto
+→125px← su →6← righe, **più del nome**. E mescolava due separatori diversi:
+«•» fra categoria e mestieri, «·» fra un mestiere e l'altro.
+
+Su →80← imprese pubbliche, →33← hanno due o più mestieri: non è un caso raro.
+
+**Fatto:** nel badge resta la categoria (→1← riga, →21px←). I mestieri
+diventano pastiglie sotto il nome, larghe quanto la testata, con le stesse
+classi `.hb .hb-g` dei badge che c'erano già.
+
+⛔ **L'errore che ho fatto:** alla riga nuova avevo dato l'id
+`profile-mestieri` — **che era già usato** dalla riga «Mestieri / Servizi»
+dentro la carta Informazioni. `getElementById` restituisce il primo, quindi il
+codice vecchio scriveva nella riga nuova e quella vera restava vuota. Trovato
+**provando nel browser**, non leggendo il codice. Adesso si chiama
+`hero-mestieri` e il banco ha due prove apposta perché non ricapiti.
+
+## 5. Due mappe per lo stesso indirizzo
+
+La scheda costruiva →2← mappe Leaflet dello stesso punto: una piccola da
+→150px← senza zoom dentro i contatti, e una grande da →220px← con lo zoom nella
+carta «Dove siamo». Due strati di mattonelle, due spilli.
+
+**Fatto:** tolta la piccola (markup, stile e codice, →5← pezzi). E raddrizzato
+un pezzo scritto storto: prima accendeva la mappa piccola e poi la rispegneva
+se Leaflet non arrivava. Adesso è
+`if(d.lat&&d.lng&&await caricaLeaflet())`. Provato anche col CDN bloccato: la
+carta resta nascosta e tutto il resto funziona.
+
+## 6. La carta delle certificazioni che teneva il vuoto
+
+`min-height:341px` scritto a mano. Chi ha una certificazione sola si ritrovava
+→106px← di bianco. E il caso normale è proprio quello: delle →80← imprese
+pubbliche solo →3← hanno certificazioni (→2← ne hanno una, →1← ne ha due).
+
+**Fatto:** tolta l'altezza minima. Da →341px← a →235px←, →0← di bianco.
+
+## 7. Il bottone del preventivo a 3139px dall'inizio
+
+Sul telefono le due colonne si mettono una sotto l'altra, e quella con
+**contatti e bottone** veniva dopo tutte le carte lunghe. Misurato su →36← a
+375px: bottone a →3139px←, telefono a →3314px←, contatti a →3447px←, su una
+pagina alta →3782px←.
+
+**Fatto:** una riga, solo nel blocco del telefono:
+`.main-layout > div:last-child{order:-1}`. Bottone a →740px←, telefono a
+→915px←, contatti a →1048px←. **La pagina resta alta uguale**: non si aggiunge
+niente, si cambia solo l'ordine. Sul computer le colonne restano affiancate.
+
+## 8. Le carte che si alzavano anche senza mouse
+
+→7← regole facevano saltare su carte e bottoni (`-2px` o `-4px` più un'ombra
+più grande). Sul telefono il mouse non esiste: **il dito lascia acceso
+l'effetto** e la carta resta sollevata finché non si tocca altrove.
+
+**Fatto:** un blocco `@media (hover:none)` in fondo al foglio che spegne lo
+spostamento e riporta l'ombra normale (`0 8px 24px rgba(0,0,0,0.08)`, la stessa
+delle carte). Le →7← regole restano intatte per il computer.
+
+Provato con un browser vero due volte, una fingendosi telefono e una computer:
+
+| | telefono prima | telefono dopo | computer prima | computer dopo |
+|---|---|---|---|---|
+| `.rec-card` | -2px, ombra grande | 0, ombra normale | -2px | -2px |
+| `.sc` | -4px, ombra grande | 0, ombra normale | -4px | -4px |
+
+## 9. La terza carta dei numeri, larga da sola
+
+Le tre carte avevano `flex:1`, «cresci a riempire». Le prime due si dividevano
+la riga, la terza restava sola e si allargava: →167px←, →167px←, →343px←.
+
+**Fatto:** `flex:0 1 calc(50% - 5px)` solo sul telefono. La riga la centra da
+sola perché `.stats-row` ha già `justify-content:center`: centro della terza a
+→188px← su uno schermo di →375px←. Sul computer identico a prima (→160px←,
+centri →466←, →640←, →814←).
+
+⚠️ **Perché non si può usare `max-width`**: `css/mobile.css` ha
+`body *:not(#cal-griglia):not(.calendar-header){max-width:100%!important}`, che
+pesa (1,1,1). Il `flex-basis` invece passa liscio. È lo stesso trucco del
+`:not(#nessuno)` di ieri, ma girato: **invece di battere la rete, si è scelta
+una proprietà che la rete non guarda.**
+
+## 10. I sei colori fuori posto
+
+Contati sulla scheda vera: →29← colori diversi in una pagina, →37← con le
+recensioni aperte. Sei erano avanzi di un disegno vecchio, tutti dentro la
+carta delle recensioni: →#f0fff4← verdino, →#14273d← blu scuro su quel titolo
+(mentre tutte le altre carte usano →#0052cc←), →#4a235a← e →#3a1c52← viola,
+→#faf7fd← e →#ede3f5← lilla.
+
+**Fatto:** sostituiti con colori **già presenti nel foglio** (→#eef4fb←,
+→#0052cc←, →#f9f9f9←, →#eee←). Colori nuovi inventati: **nessuno**. Da →29← a
+→27← in pagina.
+
+Restano molti blu diversi (→#0066ff←, →#0052cc←, →#2863a7←, →#1a5276←,
+→#1a2f47←): quella è una scelta di disegno, non un avanzo, e va decisa insieme.
+
+## Cosa resta da fare sulla scheda pubblica
+
+* **I meta per Google e WhatsApp** — non c'è meta description, né og:title /
+  og:description, né JSON-LD. ⛔ **Non si tocca senza chiedere ad Alessio.**
+* Il **WhatsApp** di →25← imprese non viene mai mostrato.
+* La colonna **orari** è vuota: da riempire o da togliere.
+* Titolo e descrizione delle **foto dei lavori** stanno nel database e non si
+  vedono.
+* Serve un **negozio finto** per poter provare quel ramo (nel database non
+  esiste nessun `negozio`).
+* `recensioni_pubbliche()` ha un `limit 50`: il contatore si ferma a →50←.
+* I →4← pezzi di CSS sotto i 13px rimasti dai widget tolti (`.cdh` 9, `.cd` 12,
+  `.cd.oggi` 11, `.ms-l` 10): da buttare o no.
+* I **due comandi «logo» che litigano** sullo stesso `imprese.logo_url`
+  (quello della dashboard e quello di «Personalizza»), e il secondo cambia
+  anche il logo di TrovaImpresa nella barra della scheda pubblica. Mai deciso
+  se è voluto.
+* **La homepage più compatta sul telefono**: deciso da Alessio, viene dopo.
+
+## Le regole di lavoro, ribadite dai fatti di oggi
+
+* **Un id doppio non dà errore, svuota qualcosa.** `getElementById` prende il
+  primo e tace. Prima di dare un nome a un elemento nuovo, cercarlo nel file.
+* **La cache del browser mente dopo ogni push.** Quasi ogni verifica di oggi
+  ha mostrato prima la versione vecchia. Serve sempre un `?nc=`+adesso o un
+  `fetch(...,{cache:'no-store'})`.
+* **Il caso peggiore va cercato nel database, non immaginato.** L'impresa
+  →104← con tre mestieri lunghi, e le →3← imprese su →80← con certificazioni,
+  hanno detto quale fosse il caso normale — che non era quello che si vedeva
+  aprendo la propria scheda.
+* **Quando una modifica è «una cosa che smette di succedere», la figura non
+  serve**: due foto identiche non dimostrano niente. Servono i numeri presi
+  dal browser, prima e dopo, sullo stesso schermo.
+* **Le prove finte stanno nel browser di prova, non nel database.** Le due
+  recensioni della figura dei colori erano una risposta di rete inventata: nel
+  database non è stata scritta una riga.
