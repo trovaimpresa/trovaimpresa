@@ -1043,6 +1043,24 @@
        Sul computer resta dov'era: li' la barra e' alta 107 px e il logo
        grande e' l'unica cosa che apre la pagina. */
     .hero-logo{ max-width:210px; display:none; }
+    /* ⛔ 31 agosto 2026 — LE SEI CARTE DEL «PERCHE' SCEGLIERE», 1303 px.
+       Una per riga, alte 221 px l'una. Dentro ognuna: il quadratino con
+       l'icona (46 px) sopra il titolo, e sotto due o tre righe di testo.
+       Sul telefono quel quadratino sopra costa 58 px per carta (46 piu' 12
+       di margine) senza dire niente in piu': messo di fianco al titolo, la
+       carta si accorcia e il testo resta identico.
+       Misurato: griglia da →1303← a →874← px, carte da →221← a →115-166←,
+       →0← scritte tagliate, →0← pezzi fuori dal bordo. La pagina passa da
+       →7554← a →7125← px.
+       ⚠️ Provata prima la strada ovvia, due carte per riga: le carte si
+       alzavano a →398← px (il testo non si dimezza, raddoppia in altezza),
+       si risparmiava meno, e «Geolocalizzazione» restava tagliata.
+       Sul computer non si tocca niente: li' le carte sono tre per riga. */
+    .features-grid .feature-card{ display:grid; grid-template-columns:46px 1fr;
+      column-gap:14px; align-items:start; padding:16px; }
+    .features-grid .feature-card .feature-icon{ grid-column:1; grid-row:1 / span 2; margin-bottom:0; }
+    .features-grid .feature-card h3{ grid-column:2; grid-row:1; margin-bottom:6px; }
+    .features-grid .feature-card p{ grid-column:2; grid-row:2; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
     .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
     .bi-links a{ padding:11px 14px; font-size:13px; }
