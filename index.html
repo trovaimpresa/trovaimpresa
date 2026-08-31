@@ -1085,6 +1085,17 @@
     .guide-costi-home a[href^="/quanto-costa"] h3{ grid-column:2; grid-row:1; margin:0 0 4px !important; }
     .guide-costi-home a[href^="/quanto-costa"] p{ grid-column:2; grid-row:2; margin:0 0 6px !important; }
     .guide-costi-home a[href^="/quanto-costa"] span{ grid-column:2; grid-row:3; }
+    /* ⛔ 31 agosto 2026 — IL PIEDE, 1132 px in colonna singola.
+       Quattro blocchi uno sotto l'altro: il marchio (164), «Per chi cerca»
+       (266), «Per le imprese» (266), «Supporto» (346). Le liste di link
+       sono strette e alte: sprecano meta' larghezza.
+       Adesso il marchio tiene la riga tutta sua e le tre liste vanno a due
+       per riga. Misurato: piede da →1132← a →812← px, colonne da 335 a
+       →161← px, →0← scritte tagliate (il link piu' lungo e' «Informativa
+       sulla privacy» e ci sta), →0← pezzi fuori dal bordo.
+       Sul computer non cambia niente: li' e' gia' a quattro colonne. */
+    .footer-content{ grid-template-columns:1fr 1fr; gap:18px 14px; }
+    .footer-content > .footer-section:first-child{ grid-column:1 / -1; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
     .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
     .bi-links a{ padding:11px 14px; font-size:13px; }
