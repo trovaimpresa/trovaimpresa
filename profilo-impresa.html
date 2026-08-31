@@ -444,6 +444,19 @@ nav img{height:36px}
 .chat-msg-meta{font-size:13px;opacity:0.75;margin-top:6px}
 .chat-input-row{display:flex;gap:8px}
 .chat-input-row input{flex:1;padding:14px 16px;border:1px solid #ddd;border-radius:8px;font-size:16px}
+
+/* 31 agosto 2026 — LE CARTE CHE SI ALZAVANO ANCHE SENZA MOUSE
+   Sette regole facevano saltare su carte e bottoni al passaggio del mouse.
+   Su un telefono il mouse non c'e': il dito lascia acceso l'effetto dopo il
+   tocco, e la carta resta sollevata finche' non si tocca da un'altra parte.
+   Qui l'effetto si spegne dove il mouse non c'e'. Sul computer non cambia
+   niente. L'ombra tornata e' quella normale delle carte, 0 8px 24px. */
+@media (hover:none){
+  .sc:hover,.sezione-card:hover,.card:hover,.btn-prev:hover,.btn-call:hover{
+    transform:none;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+  .ms:hover{transform:none}
+  .fi:hover img{transform:none}
+}
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
