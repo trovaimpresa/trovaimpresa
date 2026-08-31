@@ -1753,6 +1753,7 @@
     <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
   </div>
 </div>
+<script src="/js/copertina-bande.js"></script>
 <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 <style>
 /* =========================================================================
@@ -1797,29 +1798,26 @@
   background-color:rgba(255,255,255,0.10);
   background-repeat:no-repeat; background-position:center; background-size:contain;
 }
-  /* ⛔ 31 agosto 2026 — LO SPAZIO VUOTO AI LATI DELLA COPERTINA.
-     La fascia e' larga e bassa, ma le copertine vere sono quasi quadrate
-     (quella di Alessio e' 1377x768, cioe' 1,79:1): con `contain` si vedeva
-     tutta l'immagine ma restavano due bande di sfondo ai lati.
-     Riempirle allargando l'immagine (`cover`) avrebbe tagliato il 28%
-     dell'altezza — cioe' proprio il titolo in alto e la riga dell'email in
-     basso: e' il difetto gia' misurato il 30 agosto.
-     Rimedio scelto da Alessio guardando la figura: le bande si riempiono con
-     LA STESSA IMMAGINE, allargata e sfocata, e sopra ci va l'immagine intera.
-     Niente sfondo vuoto e niente tagliato.
-     ⚠️ Sono due strati finti (::before e ::after) proprio per non dover
-     aggiungere altri elementi: prendono l'indirizzo dell'immagine dal padre
-     con `background-image:inherit`, quindi basta cambiare lo sfondo della
-     casella e si aggiornano tutti e due.
-     ⚠️ `z-index` sui figli veri: senza, `::after` finirebbe SOPRA il bottone
-     della macchina fotografica e sopra la scritta «Aggiungi una copertina». */
+  /* ⛔ 31 agosto 2026 — I LATI DELLA COPERTINA, TERZO TENTATIVO E QUELLO BUONO.
+     1) `contain` e basta: immagine intera, ma due bande di sfondo vuote.
+     2) stessa immagine allargata e SFOCATA dietro: bene con una foto, ma su
+        un logo o una locandina diventa una macchia. Provato sul sito e
+        bocciato da Alessio: «e' peggio di prima».
+     3) questa: le bande prendono i colori del BORDO dell'immagine, sfumati
+        dall'alto in basso, e ne diventano la continuazione. Li calcola
+        `js/copertina-bande.js` leggendo dodici punti per lato.
+     ⚠️ Le bande sono larghe meta' fascia ciascuna e stanno SOTTO l'immagine
+     (z-index 0 contro 1): cosi' non serve ricalcolare niente quando la
+     finestra cambia larghezza.
+     ⚠️ Se l'immagine non si lascia leggere, le due variabili non vengono
+     scritte, le bande restano trasparenti e si vede il colore di prima.
+     ⚠️ Le stesse misure e lo stesso meccanismo stanno in profilo-impresa.html:
+     il banco `banco-intestazione.js` le confronta una per una. */
   .dash-cover::before,
-  .dash-cover::after{
-    content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-    background-image:inherit;background-repeat:no-repeat;background-position:center;
-  }
-  .dash-cover::before{background-size:cover;filter:blur(26px) brightness(0.82);transform:scale(1.18)}
-  .dash-cover::after{background-size:contain}
+  .dash-cover::after{content:'';position:absolute;top:0;bottom:0;width:50%;z-index:0;pointer-events:none}
+  .dash-cover::before{left:0;background:var(--banda-sx,transparent)}
+  .dash-cover::after{right:0;background:var(--banda-dx,transparent)}
+  .dash-cover .cover-img{position:absolute;inset:0;z-index:1;background-image:inherit;background-repeat:no-repeat;background-position:center;background-size:contain}
 .dash-cover-vuota{
   position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:center;
   text-align:center; padding:0 16px;
@@ -1931,6 +1929,7 @@
            nella STESSA casella e si sovrapponevano: vedi il commento del CSS. -->
       <div class="dash-hero" id="dash-hero">
         <div class="dash-cover" id="dash-cover">
+          <div class="cover-img"></div>
           <div class="dash-cover-vuota" id="dash-cover-vuota">Aggiungi una copertina</div>
           <input type="file" id="input-copertina" accept="image/*" style="display:none" onchange="caricaCopertina(event)">
           <button type="button" class="dash-foto-btn dash-foto-copertina" id="btn-copertina"
@@ -3769,6 +3768,8 @@ function applicaBannerHero(url) {
   if (url) {
     cover.style.backgroundImage = `url("${url}")`;
     cover.classList.add('ha-banner');
+    /* i lati si riempiono coi colori del bordo dell'immagine */
+    if (window.bandeCopertina) window.bandeCopertina(cover, url);
   } else {
     cover.style.backgroundImage = '';
     cover.classList.remove('ha-banner');
