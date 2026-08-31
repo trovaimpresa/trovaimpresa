@@ -340,8 +340,10 @@ nav img{height:36px}
   display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .contacts a{color:#2863a7;font-weight:700;text-decoration:none}
 
-#mappa-impresa{height:150px;border-radius:12px;overflow:hidden;
-  border:1px solid #ddd;margin-bottom:14px;display:none}
+/* 31 agosto 2026: qui c'era una SECONDA mappa (#mappa-impresa, 150px, senza
+   i tastini dello zoom) che disegnava lo stesso identico punto della carta
+   «Dove siamo». Due mappe Leaflet per lo stesso indirizzo: tolta la piccola,
+   resta quella grande, che ha lo zoom. */
 
 /* MINI STATS SIDEBAR */
 .mini-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -654,8 +656,6 @@ nav img{height:36px}
       <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
       <!-- orario fisso rimosso: era uguale per tutte le imprese, cioe' inventato -->
     </ul>
-
-    <div id="mappa-impresa"></div>
   </div>
 </div>
 </div><!-- /profilo-view -->
@@ -1072,17 +1072,14 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
     const _luogoContatti=[d.indirizzo,d.citta].filter(Boolean).join(', ');
     if(_luogoContatti&&ci)ci.innerHTML=`<div class="ci">📍</div><span>${_esc(_luogoContatti)}</span>`;
     mostraRiga(ci,_luogoContatti);
-    if(d.lat&&d.lng){
-      document.getElementById('mappa-impresa').style.display='block';
-      if(!(await caricaLeaflet())){document.getElementById('mappa-impresa').style.display='none';}else{
-      const ms=L.map('mappa-impresa',{zoomControl:false,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(ms);
-      L.marker([d.lat,d.lng]).addTo(ms);setTimeout(()=>ms.invalidateSize(),200);
+    /* una mappa sola: quella della carta «Dove siamo», con i tastini dello
+       zoom. Se Leaflet non arriva, la carta resta nascosta e la pagina va
+       avanti lo stesso. */
+    if(d.lat&&d.lng&&await caricaLeaflet()){
       document.getElementById('card-mappa-profilo').style.display='';
       const mm=L.map('mappa-profilo',{zoomControl:true,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(mm);
       L.marker([d.lat,d.lng]).addTo(mm);setTimeout(()=>mm.invalidateSize(),300);
-      }
     }
     // Personalizzazione (JSONB) — applica solo le 5 chiavi header
     const pers = d.personalizzazione || {};
