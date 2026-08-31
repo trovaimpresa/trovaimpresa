@@ -798,6 +798,34 @@ function parseSpec(raw){
 const TIPO_NEGOZIO_LABEL={materiali_edili:'Materiali edili',ferramenta:'Ferramenta',termoidraulica:'Termoidraulica',elettrico:'Elettrico',ceramiche:'Ceramiche e bagno',pavimenti:'Pavimenti e rivestimenti',colorificio:'Colorificio',legname:'Legname',infissi_serramenti:'Infissi e serramenti',attrezzature_edili:'Attrezzature edili',noleggio_attrezzature:'Noleggio attrezzature',isolanti_impermeabilizzanti:'Isolanti e impermeabilizzanti',arredo_bagno:'Arredo bagno',climatizzazione_caldaie:'Climatizzazione / Caldaie',stufe_camini:'Stufe e camini',agenzia_immobiliare:'Agenzia immobiliare'};
 function formattaTipoNegozio(slug){if(!slug)return '';return TIPO_NEGOZIO_LABEL[slug]||slug;}
 
+/* 31 agosto 2026 — IL NOME CHE USCIVA DALLA CASELLA
+   Sul telefono il nome finiva oltre il bordo e restava mozzato: misurati 288px
+   di scritta dentro 235px di spazio. Il colpevole era l'ingrandimento scelto in
+   «Personalizza» (per l'impresa 36 vale 1.5), che moltiplicava la misura senza
+   guardare quanto spazio c'era.
+   Adesso: si parte dalla misura giusta per la larghezza dello schermo, si
+   applica l'ingrandimento, e poi si scende di mezzo punto alla volta finche' la
+   scritta ci sta. Mai sotto 17.6px. Solo se dopo tutto questo non ci sta
+   ancora, si manda a capo la parola. Sul computer non cambia niente. */
+function adattaNomeHero(){
+  var el = document.getElementById('profile-name');
+  if (!el) return;
+  el.style.overflowWrap = 'normal';
+  el.style.fontSize = '';
+  var base = parseFloat(window.getComputedStyle(el).fontSize) || 16;
+  var f = parseFloat(el.dataset.fattorePers || '1');
+  if (!(f > 0)) f = 1;
+  var p = base * f;
+  el.style.fontSize = p + 'px';
+  var giri = 0;
+  while (el.scrollWidth > el.clientWidth + 1 && p > 18 && giri < 80){
+    p -= 0.5;
+    el.style.fontSize = p + 'px';
+    giri++;
+  }
+  if (el.scrollWidth > el.clientWidth + 1) el.style.overflowWrap = 'anywhere';
+}
+
 async function caricaProfilo(id){
   try{
     /* prima, se la lettura falliva o l'id non esisteva, la pagina restava su
@@ -1051,10 +1079,12 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
     }
     if (pers.size_testo_header && titleEl) {
       const n = parseFloat(pers.size_testo_header);
-      if (n && n !== 1) {
-        const cur = parseFloat(window.getComputedStyle(titleEl).fontSize);
-        if (cur) titleEl.style.fontSize = (cur * n) + 'px';
-      }
+      if (n && n > 0 && n !== 1) titleEl.dataset.fattorePers = String(n);
+    }
+    adattaNomeHero();
+    if (!window._nomeHeroAgganciato) {
+      window._nomeHeroAgganciato = true;
+      window.addEventListener('resize', adattaNomeHero);
     }
     /* 31 agosto 2026: il banner non va piu' nella colonna del logo (era li'
        che i due si sovrapponevano). Adesso lo mette la copertina, piu' su. */
