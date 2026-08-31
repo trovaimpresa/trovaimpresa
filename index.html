@@ -870,6 +870,8 @@
   .hcard-h h2{ font-size:23px; font-weight:800; color:var(--ti-ink); margin:0; letter-spacing:-.3px; line-height:1.25; }
   .hcard-s{ font-size:17px; font-weight:500; color:#1a2f47; margin:9px auto 0; line-height:1.55; max-width:640px; }
   .hcard-s b{ color:var(--ti-ink); font-weight:700; }
+  /* 31 agosto 2026: il «leggi tutto» esiste solo sul telefono. */
+  .hcard-piu{ display:none; }
 
   /* Card a colore pieno: solo nel blocco "Scegli la categoria", cosi' non si
      confonde piu' con "Scegli il tuo profilo" che resta in tinta chiara. */
@@ -1096,6 +1098,26 @@
        Sul computer non cambia niente: li' e' gia' a quattro colonne. */
     .footer-content{ grid-template-columns:1fr 1fr; gap:18px 14px; }
     .footer-content > .footer-section:first-child{ grid-column:1 / -1; }
+    /* ⛔ 31 agosto 2026 — I DUE SOTTOTITOLI LUNGHI DELLE DUE SEZIONI.
+       Misurati sul telefono: quello di «Cerca in base alle tue esigenze»
+       e' alto →105← px (133 caratteri), quello di «Prendi il tuo spazio»
+       →211← px (297 caratteri).
+       Scelto da Alessio: due righe e «leggi tutto». Nessuna parola
+       tolta — il testo resta tutto nell'HTML, quindi Google lo legge
+       comunque, e chi vuole leggerlo tocca il bottone.
+       ⚠️ Si taglia SOLO quello lungo, di #registrati. Provato anche
+       sull'altro e misurato: il sottotitolo scendeva da 105 a 53 px, ma il
+       bottone ne costa 44 (il bersaglio minimo per un dito), quindi la
+       sezione si accorciava di →9← px. Un bottone in piu' per niente.
+       Su #registrati invece: da →211← a →53← px, sezione da →915← a
+       →801←, →114← px veri.
+       ⚠️ Per riaprirlo NON si scrive «-webkit-line-clamp:none»: si
+       toglie il display:-webkit-box, e il taglio smette di esistere. */
+    #registrati .hcard-s{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    #registrati .hcard-s.tutto{ display:block; overflow:visible; }
+    .hcard-piu{ display:inline-block; background:none; border:none; padding:8px 4px;
+      min-height:44px; font-family:inherit; font-size:15px; font-weight:700;
+      color:var(--ti-blu); text-decoration:underline; cursor:pointer; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
     .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
     .bi-links a{ padding:11px 14px; font-size:13px; }
@@ -1167,6 +1189,17 @@
       bottone.setAttribute('aria-expanded', aperto?'true':'false');
       bottone.innerHTML = aperto ? '&#10005; Chiudi' : '&#9776; Menu';
     }
+    /* 31 agosto 2026 — I DUE SOTTOTITOLI LUNGHI.
+       Sul telefono se ne vedono due righe, il resto si apre con «leggi
+       tutto». Nessuna parola tolta: il testo resta tutto nell'HTML, quindi
+       Google lo legge lo stesso. Sul computer il bottone non esiste. */
+    function apriTesto(bottone){
+      var testo = bottone.previousElementSibling;
+      if(!testo) return;
+      var aperto = testo.classList.toggle('tutto');
+      bottone.setAttribute('aria-expanded', aperto ? 'true' : 'false');
+      bottone.textContent = aperto ? 'mostra meno' : 'leggi tutto';
+    }
     </script>
 
     <!-- HERO -->
@@ -1230,7 +1263,7 @@
         </section>
 
         <section class="hcard" id="registrati" style="--hc:#15803d;--hb:#f2fbf4;">
-          <div class="hcard-h"><div style="text-align:center;margin-bottom:12px;"><span style="display:inline-block;background:#eaf6ee;color:#15803d;font-weight:700;font-size:13px;letter-spacing:.2px;padding:8px 16px;border-radius:999px;">✓ Per tutti, sempre gratis</span></div><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:10px;"><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Hai un'attività?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Una vetrina in più</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Sempre gratis</span></div><h2>Prendi il tuo spazio: profilo, recensioni e nuovi contatti</h2><p class="hcard-s">Porta online i lavori che hai già fatto e la reputazione che ti sei già costruito. I clienti della tua zona ti trovano qui, le richieste di preventivo ti arrivano dirette e i lavori li segui con gli strumenti dedicati. &Egrave; <b>gratis</b>, senza vincoli e ti cancelli quando vuoi. Scegli il tipo di attivit&agrave;:</p></div>
+          <div class="hcard-h"><div style="text-align:center;margin-bottom:12px;"><span style="display:inline-block;background:#eaf6ee;color:#15803d;font-weight:700;font-size:13px;letter-spacing:.2px;padding:8px 16px;border-radius:999px;">✓ Per tutti, sempre gratis</span></div><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:10px;"><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Hai un'attività?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Una vetrina in più</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Sempre gratis</span></div><h2>Prendi il tuo spazio: profilo, recensioni e nuovi contatti</h2><p class="hcard-s">Porta online i lavori che hai già fatto e la reputazione che ti sei già costruito. I clienti della tua zona ti trovano qui, le richieste di preventivo ti arrivano dirette e i lavori li segui con gli strumenti dedicati. &Egrave; <b>gratis</b>, senza vincoli e ti cancelli quando vuoi. Scegli il tipo di attivit&agrave;:</p><button type="button" class="hcard-piu" aria-expanded="false" onclick="apriTesto(this)">leggi tutto</button></div>
           <div class="hcard-grid c4">
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-artigiano.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="tile-n">Artigiano</span><small class="tile-d">Ricevi richieste dai clienti</small></a><select class="tile-sel" data-cat="artigiano" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-impresa.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg><span class="tile-n">Impresa edile</span><small class="tile-d">Cantieri e lavori completi</small></a><select class="tile-sel" data-cat="impresa" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
