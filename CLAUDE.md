@@ -18920,3 +18920,376 @@ referto non vale niente.
   sull'elemento (`display:none`) non se ne va da solo.
 * **Prima di dare la colpa al codice, guardare l'ORA dell'errore** nella
   console: →4← errori →400← erano prove fatte apposta poco prima.
+
+# 30 AGOSTO 2026 (notte) — IL PANNELLO PUBBLICO, SETTE DIFETTI A ZERO
+
+⚠️ **Il filo di tutta la nottata, in una riga.** Il codice c'era, ed era
+scritto bene: quello che mancava era il pezzo di strada fra il codice e
+l'occhio di chi guarda. Le stelle chiuse a chiave, le mappe schiacciate a
+zero, il menu spinto fuori dallo schermo, il professionista mandato al
+modulo di un altro. **Sei difetti su sette non si vedevano leggendo il
+codice: si vedevano solo aprendo la pagina e misurando.**
+
+⛔ **La lezione che vale più di tutte:** →3← difetti su →7← erano
+**invisibili per costruzione** — non davano errore, non sporcavano la
+console, non rompevano niente. Mostravano semplicemente meno di quello che
+c'era. Un banco verde non li avrebbe mai trovati; li ha trovati il righello.
+
+---
+
+## Le →6← consegne, tutte pubblicate e riguardate sul sito vero
+
+| # | cosa non andava | quanti |
+|---|---|---|
+| 1 | VALUTAZIONE e RECENSIONI in cima non potevano funzionare | →80← schede, per sempre |
+| 2 | la mappa era un rettangolo grigio sul telefono | →66← schede su →80←, →24← pagine |
+| 3 | al professionista arrivava il modulo del cantiere | →4← professionisti |
+| 4 | il menu della homepage finiva fuori dallo schermo | →7← voci su →7← |
+| 5 | i tre piccoli: righe vuote, colonna morta, finestra del logo | →2← schede |
+| 6 | →11← misure di testo sotto i →13← px | tutte le schede |
+
+**→115← prove di banco verdi**, ognuna girata anche sulla versione col
+difetto. Controllo colonne e `controllo-push.js` verdi a ogni consegna.
+
+## ⛔ IL LUCCHETTO CHE SPEGNEVA LE STELLE
+
+Le due caselle grandi in cima alla scheda pubblica — **VALUTAZIONE** e
+**RECENSIONI** — leggevano `feedback_clienti` con una fetch diretta.
+
+Quella tabella ha il lucchetto acceso (RLS) e **una sola regola di lettura**:
+
+```
+feedback_impresa_select [SELECT] roles=authenticated
+using = EXISTS (select 1 from imprese im
+                where im.id = feedback_clienti.impresa_id
+                  and im.user_id = auth.uid())
+```
+
+Il cliente che apre la scheda **non è nessuno**: non è `authenticated` e non
+è il proprietario. Risposta: sempre `[]`. Quindi «—» e «0», su ogni scheda,
+per sempre — anche con le recensioni vere pubblicate venti centimetri più
+sotto, perché **l'elenco passa da un'altra strada**: la funzione
+`recensioni_pubbliche()`, che è `SECURITY DEFINER` e il lucchetto lo salta.
+
+**Misurato dal vivo, prima di toccare:** →2← recensioni finte messe sulla
+scheda →36←. In cima: «— VALUTAZIONE», «0 RECENSIONI». Sotto: la linguetta
+diceva «Recensioni (2)» e le due recensioni c'erano tutte e due.
+
+**Rimedio:** il conto esce dalla stessa chiamata che disegna l'elenco.
+`contaRecensioni()` + `scriviConteggioRecensioni()`, e la fetch diretta è
+sparita. **Una fonte sola per tre numeri**, così non possono litigare.
+
+⚠️ **Non rimettere mai una lettura diretta di `feedback_clienti` da una
+pagina pubblica**: dal browser del cliente risponde vuoto e non lo dice.
+
+⚠️ `recensioni_pubbliche()` ha un `limit 50` dentro: sopra le →50←
+recensioni il numero in cima si fermerebbe a →50←. Oggi è lontanissimo.
+Alessio lo sa, è in coda.
+
+## ⛔ IL PESO DEL `:not(#qualcosa)` — LA LEZIONE CSS DELLA SERATA
+
+Due difetti diversi, **la stessa causa**, e una regola che non si dimentica.
+
+In `css/mobile.css`, sotto i →768← px, c'è la rete di sicurezza:
+
+```css
+body *:not(#cal-griglia):not(.calendar-header){ max-width:100% !important }
+```
+
+**In CSS un `:not()` pesa quanto quello che ha dentro.** Quel `#cal-griglia`
+regala alla riga il peso di un ID: →(1,1,1)←. Non è una regola «da classi»:
+è una regola **da ID**, e batte quasi tutto.
+
+**Cosa ci è finito sotto:** le piastrelle di Leaflet stanno dentro un
+contenitore largo ZERO (le posiziona una per una col `transform`), quindi
+per loro «max-width:100%» vuol dire **max-width:0**. Misurato sul sito vero:
+→0← px sotto i →768←, →256← px sopra. Rettangolo grigio al posto della
+mappa, segnaposto compreso.
+
+⛔ **E la correzione ovvia NON funzionava.** `.leaflet-tile{max-width:none
+!important}` vale →(0,1,0)← e perde. **Perde anche la difesa che Leaflet ha
+nel suo foglio** (`.leaflet-container .leaflet-tile`, →(0,2,0)←), che è
+scritta apposta per proteggersi da regole come questa.
+
+**Rimedio** (`css/mobile.css`, in fondo al blocco del telefono):
+
+```css
+.leaflet-container:not(#nessuno) .leaflet-tile,
+.leaflet-container:not(#nessuno) .leaflet-tile-container,
+.leaflet-container:not(#nessuno) .leaflet-marker-icon,
+.leaflet-container:not(#nessuno) .leaflet-marker-shadow{ max-width:none !important }
+```
+
+`#nessuno` **è un id che non esiste**: sta lì solo per pesare, e porta la
+riga a →(1,2,0)←, che vince. Chi lo toglie credendolo inutile fa tornare
+grigie tutte le mappe del sito, in silenzio. Il banco conta i pesi apposta.
+
+⚠️ Si esce dalla rete **solo dentro la mappa e solo per piastrelle e
+segnaposti**: i fumetti (`.leaflet-popup`) restano larghi al massimo quanto
+lo schermo, come devono.
+
+## ⛔ UN POSTO SOLO CHE DECIDE
+
+Sulla scheda di un **professionista** il pulsante grande della colonna
+diventava «Affida un incarico», ma la **barra fissa in fondo** — che sul
+telefono è il pulsante che si clicca davvero — restava «📋 Preventivo
+gratuito» e chiamava `showPreventivo()`.
+
+Il cliente di un architetto si trovava il modulo del cantiere: «Tipo di
+lavoro: Cartongesso, Idraulica…», senza il catalogo delle →39← prestazioni e
+senza la casella per allegare planimetrie e visure. E la richiesta finiva in
+`preventivi` invece che in `incarichi_richieste`.
+
+**Rimedio:** non si è corretta la scritta, si è tolto **il secondo posto che
+decideva**.
+
+```js
+function apriRichiesta(){ if(window._incaricoProf) showIncarico(); else showPreventivo(); }
+```
+
+Tutti e due i pulsanti chiamano questa, e la scritta esce da una parola sola
+(`_ETICHETTA_RICHIESTA`) scritta nei due posti insieme. Il banco pretende che
+`showIncarico()` e `showPreventivo()` siano **chiamate da un posto solo**:
+un terzo pulsante scritto male diventa rosso subito.
+
+## LE 7 VOCI DEL MENU CHE DAL TELEFONO NON VEDEVA NESSUNO
+
+Se n'è accorto Alessio, guardando la homepage dal suo iPhone: mancavano il
+blog e le altre voci che sul computer ci sono.
+
+Non era un difetto di caricamento: le →7← voci erano nel DOM, «visibili» per
+il browser, e **cominciavano a →367← px finendo a →514← px su uno schermo
+largo →375←**. Fuori. Poi `overflow-x:hidden` tagliava l'eccedenza: non si
+vedevano e non ci si arrivava nemmeno scorrendo. Restavano →304← px di
+bianco, **il →37←% della prima schermata**.
+
+**Da dove nasceva:** la barra è una riga sola (`flex-wrap:nowrap !important`)
+e dal →23← agosto la colonna di sinistra non si stringe più
+(`flex-shrink:0`, messo perché «Accedi al tuo pannello» usciva dal suo bordo
+azzurro). Quella correzione era giusta; da allora però la colonna di
+sinistra si prende tutta la larghezza e ai link non resta niente.
+
+**Rimedio scelto da Alessio guardando la figura** («A — il menu va a capo»):
+
+```css
+.navbar{ flex-wrap:wrap !important }
+.nav-sinistra{ flex-basis:100% !important }
+.nav-sinistra .logo{ flex-shrink:0 !important }
+.nav-links{ width:100% !important; justify-content:flex-start !important }
+```
+
+⚠️ `flex-basis:100%` è quello che manda a capo la colonna di sinistra da
+sola: **senza, resta in fila coi link e «Accedi» torna a uscire dal bordo**.
+⚠️ Quel blocco deve stare **dopo** il `nowrap !important`: a parità di peso
+vince l'ultimo scritto. Il banco controlla anche questo.
+
+**Regalo non previsto:** guadagnati →42← px in cima, il pulsante **«Cerca»
+adesso entra nella prima schermata** (finisce a →776← px su →812←). Prima
+restava sotto il bordo.
+
+Riguarda **solo `index.html`**: `pubblicita.html` e `le-mie-inserzioni.html`
+hanno lo stesso tipo di menu ma poche voci, e stanno bene (barra →64← px).
+
+## I TRE PICCOLI, E UNA NOTA VECCHIA DA CORREGGERE
+
+* **Le righe vuote col trattino.** Sui profili senza città restava scritto
+  «📍 —» due volte: sotto il nome e nella cartolina dei contatti. →2← schede
+  su →80← e →1← su →80←. Adesso decide `mostraRiga(el, pieno)`: la riga o ha
+  qualcosa dentro o non c'è. ⚠️ Tutti e due i rami scrivono `display`, se no
+  quello che un ramo spegne resta spento.
+  ⚠️ Da sapere: per `mostraRiga` lo **zero conta come pieno**
+  (`String(0).trim()` è `"0"`). Qui non capita — passa città e indirizzi — ma
+  è la stessa trappola di `pieno(0)` in `js/completa-profilo.js`.
+* **`d.albo`.** La riga «Numero albo» leggeva `d.numero_albo || d.albo`, e
+  `albo` **non è una colonna di `imprese`** (le vere sono `numero_albo`,
+  `iscritto_albo`, `albo_verificato`). Non dava errore perché la scheda legge
+  con `select=*`, quindi **il controllo colonne non poteva vederla**. Sono
+  →10← imprese a mostrare quella riga; la seconda metà non ha mai aggiunto
+  niente.
+* **La finestra del logo** faceva `lbImg.src=''` chiudendosi. Adesso
+  `removeAttribute('src')`.
+
+⛔ **CORREZIONE alla nota del 29 agosto.** In cima a `profilo-impresa.html` è
+scritto che `src=""` fa «riscaricare tutto l'HTML come se fosse
+un'immagine», e che su ogni profilo senza foto erano «tre pagine scaricate
+per niente». **Misurato il 30 agosto con un `PerformanceObserver` sulla
+pagina vera: →0← chiamate.** Provati tutti e due i casi — `img.src=''` da
+JavaScript e `<img src="">` scritto nel codice — e nessuno dei due
+riscarica niente su Chrome. Il guardiano funzionava (vedeva la chiamata di
+un'immagine vera). Su Safari non è stato possibile provarlo da qui.
+**Quindi: `removeAttribute` resta il modo giusto e non ambiguo, ma è
+pulizia, non un danno misurato.** Una nota che dà per misurata una cosa che
+non si riproduce è peggio di nessuna nota.
+
+## LA PASSATA DEI 13 PX
+
+La regola è «mai testo sotto i 13 px». Il →29← agosto su questa pagina erano
+state alzate **due** misure (`.hero-tipo`, `.sc-lbl`). Ne restavano **→11←**.
+
+Contate le scritte che si vedono davvero a schermo, non le righe di CSS: su
+una scheda vera a →375← px erano **→17← sotto i 13 px**; adesso **→0←**.
+Alzate: i bollini del titolo e i nomi dei dati (da →11←), i titoletti
+dell'elenco informazioni, il bollino «Verificata», l'ora della chat, la nota
+sui documenti dell'incarico, le tre scritte delle certificazioni e quella
+dei prodotti in vetrina (da →12←).
+
+Costo: la scheda cresce di →48← px in tutto, l'→1%←. Provato a →320←, →360←,
+→375←, →414←, →768← e →1280← px: **nessuna scritta tagliata**.
+
+⚠️ **Restano →4← misure sotto i 13 px, e sono volutamente lì**: `.cdh` →9←,
+`.cd` →12←, `.cd.oggi` →11←, `.ms-l` →10←. Sono i resti in CSS del
+calendario e delle mini-statistiche tolti il →7←/→8←/2026: **nessun elemento
+della pagina usa più quelle classi**. Il banco le riconosce come morte e le
+lascia stare, ma **se qualcuno rimette in pagina una di quelle classi
+diventa rosso da solo**. Da decidere se buttare via il foglio morto.
+
+## ⛔ IL COMMENTO CHE FA DIVENTARE ROSSO IL BANCO — TRE VOLTE IN UNA SERA
+
+È già scritto nel capitolo del 29 e in quello del 30, ed è successo di nuovo
+tre volte:
+
+1. un banco contava «`showPreventivo()` chiamata da un posto solo» e trovava
+   la chiamata **dentro il commento** che raccontava il difetto;
+2. lo stesso su `.src=''` e `d.albo`, sul file pubblicato;
+3. e il colpo migliore: **un commento di un banco si è chiuso da solo**,
+   perché dentro ci avevo scritto un chiudi-commento per spiegare come
+   funzionano i commenti. Errore di sintassi al caricamento.
+
+**La forma buona, ormai stabile:** si prendono i pezzi di vero javascript —
+quelli dentro i `<script>` — e si tolgono i commenti **solo lì**, tenendo gli
+a capo per non spostare i numeri di riga, con la rete «se resta meno del
+→60%← del testo non mi fido e lo dico». Sui file `.html` interi i commenti
+**non si tolgono a tappeto**: un apri-commento si accoppia con un chiudi
+lontanissimo e si mangia mezzo file. Per i controlli sul markup si usano
+invece stringhe che in un commento non possono capitare per caso
+(`/rest/v1/feedback_clienti`, `id="cta-bar-prev"`).
+
+## COME SI FA UNA FIGURA QUANDO IL SITO NON SI RAGGIUNGE
+
+Le figure di stanotte (menu prima/dopo, le tre strade, i testi piccoli) sono
+**fotografie vere**, non disegni. Il modo, quando serve rifarlo:
+
+* Chromium e Playwright stanno solo nell'ambiente di Claude, e da lì
+  `trovaimpresa.com` **non è raggiungibile**. Quindi si portano di là i file
+  veri (`index.html`, `profilo-impresa.html`, `css/mobile.css`, il logo), si
+  serve la cartella con `python3 -m http.server` e si apre da `127.0.0.1`.
+* I dati di Supabase non arrivano: si intercetta la chiamata con
+  `page.route('**/rest/v1/**')` e si risponde con **la riga vera**
+  dell'impresa, letta prima dal database. Così la pagina si disegna piena.
+  ⚠️ In Playwright, fra due `route` che combaciano **vince l'ultima
+  registrata**: la regola generica va messa per prima, o si fa un handler
+  solo con un `if` dentro.
+* Il «prima» non serve ricostruirlo da un altro file: basta rimettere le
+  misure vecchie con `addStyleTag`, sulla stessa pagina.
+* Le due fotografie si affiancano con PIL e si mandano con `SendUserFile`.
+
+## I banchi nuovi (in `prove-claude/`, che è nel `.gitignore`)
+
+`banco-conto-recensioni` →32← · `banco-tre-piccoli` →20← ·
+`banco-barra-professionista` →19← · `banco-menu-telefono` →17← ·
+`banco-mappa-mobile` →17← · `banco-testi-13px` →10←.
+
+Ognuno gira anche sulla versione PRIMA e pretende di trovarci il difetto; se
+resta verde su tutte e due si ferma con «IL METRO È ROTTO». Due meritano una
+riga a parte:
+
+* **`banco-mappa-mobile` non cerca una scritta: conta i pesi CSS.** Ha dentro
+  un calcolatore di specificità che si prova da solo su →8← selettori
+  conosciuti prima di dire qualsiasi cosa. È l'unico modo per accorgersi se
+  un domani sparisce il `:not(#nessuno)`.
+* **`banco-testi-13px` non tiene una lista di nomi**: cerca **ogni** misura
+  sotto i 13 px, nel foglio e negli `style=""` scritti a mano (anche dentro i
+  pezzi di HTML costruiti da JavaScript), e accetta solo quelle di classi che
+  la pagina non usa più.
+
+## Le prove sul database, e la pulizia
+
+Per far vedere il difetto delle recensioni sono state inserite →2← recensioni
+finte sulla scheda →36← (quella di Alessio), poi cancellate: **→1← riga prima,
+→3← durante, →1← dopo** — la riga rimasta è la →14← dell'impresa →121←, che
+c'era già. Sulla scheda: →0← recensioni, e in pagina non resta scritto
+«PROVA CLAUDE» da nessuna parte.
+
+⚠️ Imparato pulendo: su `feedback_clienti` c'è un vincolo
+`unique(email_cliente, impresa_id)` — **una recensione sola per email per
+impresa**. Il primo inserimento è stato rifiutato perché usava la stessa
+email per tutte e due le righe.
+
+## Numeri del database, misurati stanotte
+
+* →102← imprese in tutto, ma **solo →80← si aprono davvero** (le altre sono
+  di prova o non hanno mai confermato l'email).
+* **Nessun negozio**: →56← artigiani, →38← imprese, →4← professionisti, →4←
+  senza tipo. Tutto il ramo «negozio» della scheda pubblica (vetrina
+  prodotti, categorie) **non l'ha mai visto nessuno e non è mai stato
+  provato**.
+* →1← sola recensione in tutto il database, e non confermata. →0← vetrine.
+  →1← video. →3← imprese con certificazioni. →0← orari compilati.
+* →66← imprese su →80← hanno lat/lng (quindi la mappa), →35← un logo, →36←
+  una descrizione, →25← un numero WhatsApp **che sulla scheda non compare da
+  nessuna parte**, →23← un sito web, →10← un numero d'albo, →1← è
+  «verificata».
+
+## ⛔ QUELLO CHE RESTA APERTO
+
+**Chiuso rispetto al capitolo di ieri sera:** il pannello pubblico non è più
+«il prossimo lavoro» — i suoi →7← difetti sono a zero. Restano invece
+aperte, dallo stesso elenco: il pulsante «📱 Mobile» dell'Anteprima, la
+conferma della segnalazione che manda a `info@trovaimpresa.com`, il link
+«Hai dimenticato la password?» nel pannello IMPRESA, i messaggi d'errore di
+`login-impresa.html`, il prodotto vuoto su Stripe, il controllo colonne non
+ancora dentro `controllo-push.js`, e la storia della chat che non filtra
+`eliminato_il`. (I →3← `<img>` senza indirizzo sono innocui: vedi la
+correzione qui sopra.)
+
+**Nuovo, dal pannello pubblico:**
+
+* **L'intestazione: logo e banner si sovrappongono.** Stanno nella STESSA
+  casella — il banner ci va come sfondo, il logo ci va dentro. Misurato:
+  casella →784←×→214←, logo →120←×→120← **dentro**. Succede nel pannello
+  (`#dash-hero-logo-col`) e **anche sulla scheda pubblica**
+  (`.hero-right-col`). Alessio vuole l'intestazione stile Facebook:
+  copertina larga in alto, foto tonda che sborda in basso a sinistra, nome
+  accanto. Da fare con figura prima, e da decidere **dove** (pannello,
+  scheda pubblica, o tutti e due).
+* **Due «logo» diversi nel pannello, e si confondono:** quello che si carica
+  cliccando sul logo della dashboard è `imprese.logo_url` (il logo che vedono
+  i clienti); quello di «Personalizza → Logo personalizzato» è
+  `personalizzazione.logo_url` e **sostituisce il logo di TrovaImpresa in
+  cima al sito**. Oggi sulla scheda →36← al posto della margherita c'è
+  l'immagine «Enterprise Edition». Da decidere se è voluto.
+* **Le →8← cose di grafica della scheda**: le card escono di →3← px a destra
+  sul telefono (a →320← px sono →55← elementi, e c'erano già prima della
+  passata dei 13 px); il cartellino tipo+mestieri va a quattro righe in
+  maiuscolo e mescola «•» e «·»; lo stesso invito compare tre volte (fascia,
+  card, barra); due mappe della stessa posizione nella stessa schermata;
+  `#card-certificazioni` ha `min-height:341px` e con una sola certificazione
+  lascia un buco; troppi colori in una schermata; ogni card si solleva al
+  passaggio del mouse; la terza casella «ANNI ESP.» resta sola a tutta
+  larghezza.
+* **Le migliorie da decidere**: la scheda **non ha meta description, né
+  og:title/og:description, né JSON-LD** (ha solo canonical e un'immagine
+  fissa) — quindi su WhatsApp un link condiviso mostra «Profilo —
+  TrovaImpresa» e basta, perché il nome vero lo scrive JavaScript; il
+  WhatsApp di →25← imprese non compare; gli orari sono una colonna vuota da
+  riempire o da togliere; le foto dei lavori hanno titolo e descrizione nel
+  database e non li mostriamo; serve un negozio finto per poter provare quel
+  ramo.
+* **La homepage più compatta sul telefono** — deciso da Alessio: si fa
+  **dopo** il pannello pubblico. Punto di partenza già misurato: prima
+  schermata →812← px, la casella della città cominciava a →723← px (adesso
+  →681←), la pagina è alta →7890← px.
+
+## Le regole di lavoro, ribadite dai fatti di stanotte
+
+* **Un difetto che non dà errore è il più caro**: le stelle spente, la mappa
+  grigia e il menu fuori schermo non hanno mai sporcato una console. Si
+  trovano solo misurando quello che si vede, non leggendo quello che c'è.
+* **Quando la correzione ovvia non funziona, il difetto non era quello che
+  pensavi.** Due volte stanotte: il peso del `:not(#id)` e il secondo posto
+  che decideva.
+* **Netlify ci mette →1←-→2← minuti**, e il primo controllo dopo il push dà
+  quasi sempre ancora la versione vecchia. Riprovare, e sempre con
+  `fetch(pagina,{cache:'no-store'})`.
+* **Una nota che dà per misurata una cosa che non si riproduce va corretta**,
+  non lasciata lì perché «male non fa».
