@@ -781,6 +781,8 @@
   .navbar .logo{ display:block; text-decoration:none; }
   .nav-sinistra{ display:flex; align-items:center; gap:20px; flex-shrink:0; }
   .nav-links{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  /* 31 agosto 2026: il bottone del menu esiste solo sul telefono. */
+  .nav-menu-btn{ display:none; }
   .nav-a{ color:var(--ti-txt); text-decoration:none; font-size:14px; font-weight:600; padding:8px 12px; border-radius:8px; white-space:nowrap; }
   .nav-a:hover{ background:var(--ti-bg); color:var(--ti-ink); }
   /* Le due bacheche: due righe, cosi' "lavoro" resta attaccato a entrambe */
@@ -983,10 +985,31 @@
        capo da sola: senza, resta in fila coi link e «Accedi» torna a uscire.
        ⚠️ Questo blocco viene DOPO il `nowrap !important` del @media 768: a
        parita' di peso vince l'ultimo, quindi non spostarlo piu' su. */
+    /* ⛔ 31 agosto 2026 — I 190 px DI MENU SOPRA LA CASELLA DI RICERCA.
+       Il rimedio del 30 agosto (mandare i link a capo) ha reso visibili tutte
+       e 7 le voci, ma la barra e' diventata alta →262← px: su una prima
+       schermata da →812← px, la casella della citta' cominciava a →584← px e
+       il bottone «Non lo so, usa la mia posizione» restava mezzo fuori.
+       Scelto da Alessio il 31 agosto: le voci vanno dietro un bottone «Menu».
+       Sulla riga restano logo, «Iscriviti gratis» e il bottone — misurati
+       →88← + →107← + →74← px piu' i vuoti, dentro i →347← px disponibili.
+       «Accedi al tuo pannello» (→178← px) entra nel menu insieme alle voci:
+       chi ha gia' un pannello sa dove cercarlo, chi arriva la prima volta no.
+       ⚠️ Da aperto la colonna di sinistra deve poter andare a capo, se no
+       «Accedi» stringe il logo. */
     .navbar{ flex-wrap:wrap !important; }
-    .nav-sinistra{ flex-basis:100% !important; }
+    .nav-sinistra{ flex-basis:100% !important; flex-wrap:nowrap !important; align-items:center; }
     .nav-sinistra .logo{ flex-shrink:0 !important; }
-    .nav-links{ width:100% !important; justify-content:flex-start !important; }
+    .nav-menu-btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      min-height:44px; margin-left:auto; flex-shrink:0; cursor:pointer;
+      font-family:inherit; font-size:13px; font-weight:700; color:var(--ti-blu);
+      background:#fff; border:2px solid var(--ti-blu); border-radius:8px;
+      padding:6px 10px; white-space:nowrap; }
+    .nav-links{ width:100% !important; justify-content:flex-start !important; display:none !important; }
+    .nav-login{ display:none !important; }
+    .navbar.menu-aperto .nav-sinistra{ flex-wrap:wrap !important; }
+    .navbar.menu-aperto .nav-links{ display:flex !important; }
+    .navbar.menu-aperto .nav-login{ display:inline-flex !important; }
     /* 23 agosto 2026: era 12px, sotto il minimo del progetto. Portato a 13. */
     .nav-login{ font-size:13px; padding:6px 9px; }
     .nav-login::before{ width:13px; height:13px; }
@@ -1058,8 +1081,9 @@
           <a href="/" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="height:44px;width:auto;display:block;"></a>
           <a href="/login-impresa.html" class="nav-login">Accedi al tuo pannello</a>
           <a href="/#registrati" class="nav-iscriviti">Iscriviti gratis</a>
+          <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-expanded="false" aria-controls="nav-links" onclick="apriMenuHome()">&#9776; Menu</button>
         </div>
-        <div class="nav-links">
+        <div class="nav-links" id="nav-links">
           <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
           <a href="/blog.html" class="nav-a nav-guide">Guide e costi</a>
           <a href="/offerte-lavoro.html" class="nav-a nav-2righe">Bacheca offerte<br>lavoro</a>
@@ -1069,6 +1093,20 @@
           <a href="/pubblicita.html" class="nav-a nav-pub">Pubblicit&agrave;</a>
         </div>
     </nav>
+    <script>
+    /* 31 agosto 2026 — IL MENU DIETRO UN BOTTONE, SOLO SUL TELEFONO.
+       Le 7 voci occupavano 190px sopra la casella di ricerca. Adesso si
+       aprono toccando «Menu». Sul computer il bottone non esiste proprio
+       (display:none) e la barra resta identica a prima. */
+    function apriMenuHome(){
+      var barra=document.querySelector('.navbar');
+      var bottone=document.getElementById('nav-menu-btn');
+      if(!barra||!bottone)return;
+      var aperto=barra.classList.toggle('menu-aperto');
+      bottone.setAttribute('aria-expanded', aperto?'true':'false');
+      bottone.innerHTML = aperto ? '&#10005; Chiudi' : '&#9776; Menu';
+    }
+    </script>
 
     <!-- HERO -->
     <section class="hero">
