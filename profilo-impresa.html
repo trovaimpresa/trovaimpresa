@@ -137,6 +137,13 @@ nav img{height:36px}
 .hero-nome{font-size:2.2rem;font-weight:800;margin-bottom:8px;line-height:1.1}
 .hero-loc{font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:12px}
 .hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+/* 31 agosto 2026: i mestieri stavano dentro il badge sopra il nome e su un
+   telefono da 320px diventavano 6 righe alte 125px, piu' del nome. Adesso
+   sono pastiglie sotto, larghe quanto la testata: stesse pastiglie dei badge
+   (.hb .hb-g) e stessi passi laterali della riga del logo. */
+.hero-mestieri{display:flex;flex-wrap:wrap;gap:8px;padding:0 32px 26px 32px}
+.hero-mestieri:empty{display:none}
+.hero.ha-mestieri .hero-riga{padding-bottom:12px}
 .hb{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 .hb-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)}
 .hb-g{background:rgba(255,255,255,0.15);color:white}
@@ -404,6 +411,7 @@ nav img{height:36px}
   .hero{padding:0}
   .hero-cover{aspect-ratio:1.9/1;min-height:150px;max-height:260px}
   .hero-riga{padding:20px 16px 18px 16px;gap:12px}
+  .hero-mestieri{padding:0 16px 18px 16px}
   .hero-avatar{width:96px;height:96px;border-width:4px;font-size:2rem}
   .hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:-38px}
   .hero-nome{font-size:1.6rem}
@@ -479,6 +487,7 @@ nav img{height:36px}
       <div class="hero-badges" id="profile-badges"></div>
     </div>
   </div>
+  <div class="hero-mestieri" id="hero-mestieri"></div>
 </div>
 
 <!-- STATS -->
@@ -901,7 +910,19 @@ async function caricaProfilo(id){
     const nome=nomeDaMostrare(d);
     document.title=(nome||'Scheda impresa')+' — TrovaImpresa';
     document.getElementById('profile-name').textContent=nome||'Scheda impresa';
-    if(d.tipo){const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());const tipoFmt='🔧 '+categoria;const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.map(formattaMestiere).join(' · '):tipoFmt;}
+    if(d.tipo){
+      const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());
+      document.getElementById('profile-tipo-badge').textContent='🔧 '+categoria;
+    }
+    /* i mestieri sotto il nome, uno per pastiglia: niente piu' separatori
+       mescolati e niente piu' badge alto sei righe sul telefono */
+    const _mestieri=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];
+    const _rigaMest=document.getElementById('hero-mestieri');
+    if(_rigaMest){
+      _rigaMest.innerHTML=_mestieri.map(function(m){return '<span class="hb hb-g">'+_esc(formattaMestiere(m))+'</span>';}).join('');
+      const _testata=document.getElementById('hero-section');
+      if(_testata)_testata.classList.toggle('ha-mestieri',_mestieri.length>0);
+    }
     /* le foto e la vetrina non devono poter bloccare i contatti: partono da sole */
     if(d.tipo==='negozio'){
       Promise.resolve().then(()=>caricaVetrina(d.user_id)).catch(()=>{});
