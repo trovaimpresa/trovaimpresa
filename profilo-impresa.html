@@ -476,6 +476,17 @@ nav img{height:36px}
 /* CONTATTI */
 .contacts-card{background:white;border-radius:16px;border-top:6px solid #1a5276;
   box-shadow:0 8px 24px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:14px}
+/* ⛔ 1 settembre 2026 — la carta «Quanto costa».
+   ⚠️ Niente di inventato: 13px e' la misura minima del progetto, #FF6B35 e
+   #0047b3 sono gia' nel foglio, il fondo #f7f9fb e il bordo chiaro vengono
+   da `.prev-toggle`, il raggio 10px pure. */
+.gp-intro{font-size:13px;color:#7a8896;margin:0 0 12px}
+.gp-lista{list-style:none;display:flex;flex-direction:column;gap:8px}
+.gp-lista a{display:flex;align-items:center;gap:10px;text-decoration:none;
+  background:#f7f9fb;border:1px solid #eef2f7;border-radius:10px;padding:12px 14px;
+  font-size:15px;font-weight:700;color:#0047b3;line-height:1.35}
+.gp-lista a:hover{background:#eef4fb}
+.gp-lista .gp-freccia{margin-left:auto;color:#FF6B35;font-weight:800;flex-shrink:0}
 .contacts{list-style:none}
 .contacts li{display:flex;align-items:center;gap:10px;padding:11px 16px;
   border-bottom:1px solid #eee;font-size:13px;color:#333;transition:background 0.15s}
@@ -820,6 +831,21 @@ nav img{height:36px}
       </div>
     </div>
 
+    <!-- ⛔ 1 SETTEMBRE 2026 — QUANTO COSTA: LE GUIDE COLLEGATE AL MESTIERE.
+         La prima domanda di chi cerca un'impresa e' «quanto mi costa», e su
+         questa scheda non c'era niente: il cliente usciva dal sito e andava a
+         cercarlo su Google, dove trova un concorrente.
+         Le guide esistono gia' (19 pagine coi prezzi veri di cantiere) e
+         nessuna scheda ci puntava. Qui si accendono da sole in base ai
+         mestieri dell'impresa: vedi `GUIDE_PER_MESTIERE` nel codice.
+         ⚠️ Se nessun mestiere combacia resta la guida generale, che vale per
+         tutti: meglio una risposta larga che nessuna risposta. -->
+    <div class="card" id="card-guide-prezzi" style="display:none;border-top-color:#FF6B35">
+      <div class="card-title">💰 Quanto costa</div>
+      <p class="gp-intro">Prezzi veri di cantiere, aggiornati al 2026.</p>
+      <ul class="gp-lista" id="gp-lista"></ul>
+    </div>
+
     <!-- MAPPA -->
     <div class="card" id="card-mappa-profilo" style="display:none;border-top-color:#0066ff">
       <div class="card-title">📍 Dove siamo</div>
@@ -1155,6 +1181,79 @@ async function caricaProfilo(id){
       return {titolo:titolo,descrizione:descrizione,immagine:immagine,url:url,
               nome:nome,citta:citta,categoria:categoria,mestieri:mest};
     }
+
+    /* ============================================================
+       ⛔ 1 SETTEMBRE 2026 — QUALE GUIDA PER QUALE MESTIERE.
+       I mestieri qui a sinistra sono quelli VERI del database, contati l'1
+       settembre sulle 82 imprese pubbliche (28 voci diverse in tutto): non
+       sono inventati e non sono tutti quelli immaginabili.
+       Con questa mappa 67 imprese su 82 ricevono almeno una guida mirata;
+       alle altre 15 resta quella generale.
+       ⚠️ Le scritte dei collegamenti sono i titoli VERI delle pagine, letti
+       dal sito il 1 settembre. Se un giorno rinomini una guida, cambia anche
+       qui: il banco `banco-guide-prezzi.js` controlla che ogni indirizzo
+       nominato esista come file, e diventa rosso se ne sparisce uno.
+       ⚠️ Al massimo 3 collegamenti per scheda: una lista lunga non la legge
+       nessuno, e la carta diventerebbe piu' alta di quella accanto.
+       ============================================================ */
+    var GUIDE_PER_MESTIERE={
+      'ristrutturazione':['quanto-costa-ristrutturare-casa'],
+      'ristrutturazione completa':['quanto-costa-ristrutturare-casa'],
+      'impianti elettrici':['quanto-costa-rifare-impianto-elettrico'],
+      'pittura e tinteggiatura':['quanto-costa-imbiancare-casa'],
+      'serramenti / infissi':['quanto-costa-cambiare-gli-infissi'],
+      'climatizzazione / caldaie':['quanto-costa-sostituire-la-caldaia','quanto-costa-installare-un-condizionatore'],
+      'fotovoltaico / pannelli solari':['quanto-costa-impianto-fotovoltaico'],
+      'cartongesso':['quanto-costa-parete-cartongesso'],
+      'idraulica':['quanto-costa-un-idraulico','quanto-costa-rifare-impianto-idraulico'],
+      'edilizia / muratura':['quanto-costa-un-muratore-al-giorno','quanto-costa-abbattere-un-muro'],
+      'muratura e strutture':['quanto-costa-un-muratore-al-giorno'],
+      'pavimenti e piastrelle':['quanto-costa-posare-il-pavimento'],
+      'coperture e tetti':['quanto-costa-rifare-il-tetto']
+    };
+    var TITOLI_GUIDE={
+      'quanto-costa-ristrutturare-casa':'Quanto costa ristrutturare casa',
+      'quanto-costa-rifare-impianto-elettrico':"Quanto costa rifare l'impianto elettrico",
+      'quanto-costa-imbiancare-casa':'Quanto costa imbiancare casa',
+      'quanto-costa-cambiare-gli-infissi':'Quanto costa cambiare gli infissi',
+      'quanto-costa-sostituire-la-caldaia':'Quanto costa sostituire la caldaia',
+      'quanto-costa-installare-un-condizionatore':'Quanto costa installare un condizionatore',
+      'quanto-costa-impianto-fotovoltaico':'Quanto costa un impianto fotovoltaico',
+      'quanto-costa-parete-cartongesso':'Quanto costa una parete in cartongesso',
+      'quanto-costa-un-idraulico':'Quanto costa un idraulico',
+      'quanto-costa-rifare-impianto-idraulico':"Quanto costa rifare l'impianto idraulico",
+      'quanto-costa-un-muratore-al-giorno':'Quanto costa un muratore al giorno',
+      'quanto-costa-abbattere-un-muro':'Quanto costa abbattere un muro',
+      'quanto-costa-posare-il-pavimento':'Quanto costa posare il pavimento',
+      'quanto-costa-rifare-il-tetto':'Quanto costa rifare il tetto',
+      'costi-ristrutturazione':'Quanto costano i lavori in casa'
+    };
+    function guideDellImpresa(d){
+      var voci=(d&&Array.isArray(d.mestieri)&&d.mestieri.length)?d.mestieri.slice()
+              :(d&&d.mestiere?[d.mestiere]:[]);
+      var fuori=[],visti={};
+      voci.forEach(function(v){
+        var k=String(v||'').trim().toLowerCase();
+        (GUIDE_PER_MESTIERE[k]||[]).forEach(function(g){
+          if(!visti[g]){visti[g]=1;fuori.push(g);}
+        });
+      });
+      /* nessun mestiere riconosciuto: la guida generale vale per tutti */
+      if(!fuori.length)fuori.push('costi-ristrutturazione');
+      return fuori.slice(0,3);
+    }
+    (function(){
+      try{
+        var lista=document.getElementById('gp-lista');
+        var carta=document.getElementById('card-guide-prezzi');
+        if(!lista||!carta)return;
+        lista.innerHTML=guideDellImpresa(d).map(function(g){
+          return '<li><a href="/'+g+'.html">'+_esc(TITOLI_GUIDE[g]||g)+
+                 '<span class="gp-freccia">&rsaquo;</span></a></li>';
+        }).join('');
+        carta.style.display='';
+      }catch(_e){}
+    })();
 
     var _M=costruisciMeta(d);
     document.title=_M.titolo;
