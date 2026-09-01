@@ -58,8 +58,28 @@ nav img{height:36px}
    ⚠️ Serve anche `no-repeat`: il valore predefinito e' `repeat`. */
 .hero{background-color:#0a2a4d;
   text-align:left;color:#fff;display:block;padding:0;overflow:hidden}
+/* ⛔ 1 SETTEMBRE 2026 — LA COPERTINA TAGLIATA, E IL TONDO CHE LA COPRIVA.
+   Alessio, guardando il suo Facebook accanto alla sua scheda: «li' la foto si
+   vede completa, da me si vede tagliata». Aveva ragione, e non era la foto.
+   Misurato sul suo schermo (1904 px) con una copertina 1377x768 (1,79:1):
+     · `aspect-ratio:2.5/1` PIU' `max-height:380px` -> sopra i 950 px di
+       larghezza (2,5 x 380) vince il tetto, e da li' in poi piu' lo schermo
+       e' largo piu' la fascia si appiattisce, SENZA LIMITE.
+     · a 1904 px la fascia diventava 5,01:1 e della copertina si vedeva il
+       36% dell'altezza. A 1440 px: 3,79:1, il 47%. Sul telefono 1,90:1, il
+       94% — ecco perche' il difetto non si era mai visto.
+     · Facebook, misurato dalla sua schermata: 1176x441, cioe' 2,67:1.
+       La nostra fascia era larga il DOPPIO, in rapporto.
+   ⚠️ Anche Facebook taglia (circa un terzo). La differenza e' quanto.
+   FATTO: tetto alzato a 560 px -> a 1904 px la fascia e' 3,40:1 e si vede il
+   53% invece del 36%. Resta a tutto schermo, come aveva chiesto il 31 agosto.
+   ⚠️ Se un giorno la si vuole ancora piu' generosa, si alza questo numero e
+   basta: 762 px darebbero 2,50:1 e il 72%, ma la fascia si mangerebbe mezza
+   prima schermata.
+   ⚠️ Il numero sta in DUE posti, qui e nel pannello: il banco controlla che
+   siano uguali e diventa rosso se se ne cambia uno solo. */
 .hero-cover{display:none;position:relative;width:100%;overflow:hidden;
-  aspect-ratio:2.5/1;min-height:180px;max-height:380px;
+  aspect-ratio:2.5/1;min-height:180px;max-height:560px;
   background-color:rgba(255,255,255,0.10);
   background-repeat:no-repeat;background-position:center;background-size:cover}
 /* ⛔ 31 agosto 2026 — LA COPERTINA RIEMPIE, COME SU FACEBOOK.
@@ -84,7 +104,18 @@ nav img{height:36px}
 
 .hero-cover.ha-copertina{display:block}
 .hero-riga{display:flex;align-items:flex-end;gap:18px;padding:28px 32px 26px 32px}
-.hero-cover.ha-copertina + .hero-riga{padding-top:0}
+/* ⛔ 1 SETTEMBRE 2026 — IL TONDO NON SALE PIU' SULLA COPERTINA.
+   Il 31 agosto il tondo era stato messo a cavallo del bordo (margin-top
+   negativo). Guardando la schermata vera di Facebook si vede che li' la foto
+   tonda sta TUTTA SOTTO la copertina, staccata: non ne copre un pezzo.
+   Da noi copriva 58 px di foto sul computer e 38 px sul telefono, proprio
+   nella parte bassa dell'immagine, quella che il taglio non aveva gia'
+   portato via. Alessio: «il cerchio del logo va fuori dal riquadro come su
+   fb».
+   FATTO: margine negativo tolto, e la riga sotto la copertina si riprende il
+   suo spazio in cima. Il tondo copre 0 px di copertina.
+   ⚠️ Vale nei due posti insieme, scheda pubblica e pannello. */
+.hero-cover.ha-copertina + .hero-riga{padding-top:18px}
 /* ⛔ 31 agosto 2026 — IL TONDO CHE NON SBORDAVA PIU'.
    Misurato: sulla scheda pubblica il tondo scendeva SOTTO la copertina
    invece di sborare (a 375 px stava 165 px piu' giu'). Il motivo: la riga e'
@@ -103,7 +134,7 @@ nav img{height:36px}
   border:5px solid #fff;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,0.28);
   display:flex;align-items:center;justify-content:center;font-size:2.6rem;
   overflow:hidden;cursor:pointer}
-.hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:-58px}
+.hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:0}
 .hero-avatar img{width:100%;height:100%;display:block;border-radius:50%;
   object-fit:cover;object-position:center;background:#fff}
 
@@ -149,19 +180,27 @@ nav img{height:36px}
 .hb-g{background:rgba(255,255,255,0.15);color:white}
 
 /* STATS - stesso stile lavoro-btn homepage */
-.stats-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;
-  padding:20px 32px;background:#f5f5f5}
-.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  min-width:130px;flex:1;max-width:160px;padding:22px 16px;
-  background:white;color:#1a2f47;border-radius:16px;
-  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #0066ff;
-  transition:transform 0.3s,box-shadow 0.3s}
-.sc:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.12)}
-.sc-icon{font-size:28px}
-.sc-num{font-size:1.6rem;font-weight:800;color:#333;line-height:1}
-.sc-num.org{color:#FF6B35}
+/* ⛔ 1 SETTEMBRE 2026 — I NUMERI DENTRO LA FASCIA BLU.
+   Erano tre carte bianche (.stats-row + .sc + .sc-icon/.sc-num/.sc-lbl) fra
+   la fascia e il resto della pagina; Alessio le ha volute dentro la fascia.
+   Quelle regole sono state TOLTE, non lasciate morte nel foglio: altrimenti
+   finivano nell'elenco dei pezzi di CSS che nessuno usa piu', come i quattro
+   sotto i 13 px rimasti dai widget del 7 agosto.
+   ⚠️ Qui non c'e' NIENTE di inventato: 28px, 1.6rem, 13px, il grassetto, il
+   maiuscolo e il gap 8px vengono dalle carte; lo sfondo chiaro e il raggio
+   vengono da .hb-g e da .sc; il bianco all'80% e' quello di .hero-loc. */
+.hero-num{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+.hn{display:flex;align-items:center;gap:8px;padding:4px 12px;
+  background:rgba(255,255,255,0.15);border-radius:16px}
+.hn-i{font-size:28px;line-height:1}
+.hn-n{font-size:1.6rem;font-weight:800;color:#fff;line-height:1}
+.hn-l{font-size:13px;color:rgba(255,255,255,0.8);font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+
+
+
+
 /* ⛔ 29 agosto 2026 - mai sotto i 13 px (era 11: VALUTAZIONE, RECENSIONI, ANNI ESP.) */
-.sc-lbl{font-size:13px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+
 
 /* SECTION CARDS - stile sezione-card homepage */
 .page-section{background-image:url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop');
@@ -427,19 +466,19 @@ nav img{height:36px}
   .main-layout > div:last-child{order:-1}
   .rec-tabs{flex-wrap:wrap}
   .rec-tab{flex:1 1 auto;min-width:0}
-  .stats-row{gap:10px;padding:16px}
-  /* 31 agosto 2026: le carte avevano flex:1, cioe' «cresci a riempire».
-     Le prime due si dividevano la riga, la terza restava sola e si allargava
-     a tutta la riga: 343px contro 167px, il pezzo storto della fila. Con
-     «flex:0 1» non cresce piu': resta larga come le altre e la riga la
-     centra da sola, perche' .stats-row ha gia' justify-content:center. */
-  .sc{flex:0 1 calc(50% - 5px);min-width:calc(50% - 5px);max-width:none}
+  .hero-num{gap:10px}
+  /* ⛔ 1 settembre 2026: qui c'era la regola che teneva in riga la terza
+     carta dei numeri (31 agosto: aveva flex:1 e si allargava da sola a 343px
+     contro 167px). Le carte non ci sono piu' — i numeri stanno nella fascia
+     blu — e la regola e' stata tolta invece che lasciata morta nel foglio. */
+  .hn{padding:4px 10px;gap:6px}
+  .hn-i{font-size:22px}
   .hero{padding:0}
   .hero-cover{aspect-ratio:1.9/1;min-height:150px;max-height:260px}
   .hero-riga{padding:20px 16px 18px 16px;gap:12px}
   .hero-mestieri{padding:0 16px 18px 16px}
   .hero-avatar{width:96px;height:96px;border-width:4px;font-size:2rem}
-  .hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:-38px}
+  .hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:0}
   .hero-nome{font-size:1.6rem}
   nav{padding:10px 16px}
   .cal-grid-2x2{grid-template-columns:1fr}
@@ -471,7 +510,7 @@ nav img{height:36px}
    Qui l'effetto si spegne dove il mouse non c'e'. Sul computer non cambia
    niente. L'ombra tornata e' quella normale delle carte, 0 8px 24px. */
 @media (hover:none){
-  .sc:hover,.sezione-card:hover,.card:hover,.btn-prev:hover,.btn-call:hover{
+  .sezione-card:hover,.card:hover,.btn-prev:hover,.btn-call:hover{
     transform:none;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
   .ms:hover{transform:none}
   .fi:hover img{transform:none}
@@ -524,31 +563,27 @@ nav img{height:36px}
       <div class="hero-nome" id="profile-name">Caricamento...</div>
       <div class="hero-loc" id="profile-city">📍 —</div>
       <div class="hero-badges" id="profile-badges"></div>
+      <!-- I NUMERI (1 settembre 2026): erano le tre carte bianche sotto la
+           fascia. Misure e colori copiati da li' e dai bollini: niente di
+           nuovo inventato. Lo ZERO delle recensioni diventa un trattino,
+           come gia' faceva la valutazione: oggi 0 imprese su 82 hanno una
+           recensione, e uno «0» grande in fascia fa piu' male che bene. -->
+      <div class="hero-num" id="hero-num">
+        <div class="hn"><span class="hn-i">⭐</span><span class="hn-n" id="stat-rating">—</span><span class="hn-l">Valutazione</span></div>
+        <div class="hn"><span class="hn-i">💬</span><span class="hn-n" id="stat-recensioni">—</span><span class="hn-l">Recensioni</span></div>
+        <div class="hn"><span class="hn-i">🏆</span><span class="hn-n" id="stat-anni">—</span><span class="hn-l">Anni esp.</span></div>
+      </div>
     </div>
   </div>
   <div class="hero-mestieri" id="hero-mestieri"></div>
 </div>
 
-<!-- STATS -->
-<div class="stats-row">
-  <div class="sc">
-    <div class="sc-icon">⭐</div>
-    <div class="sc-num" id="stat-rating">—</div>
-    <div class="sc-lbl">Valutazione</div>
-  </div>
-  <div class="sc" style="border-top-color:#FF6B35">
-    <div class="sc-icon">💬</div>
-    <div class="sc-num" id="stat-recensioni">0</div>
-    <div class="sc-lbl">Recensioni</div>
-  </div>
-  <div class="sc" style="border-top-color:#1a5276">
-    <div class="sc-icon">🏆</div>
-    <div class="sc-num" id="stat-anni">—</div>
-    <div class="sc-lbl">Anni esp.</div>
-  </div>
-  <!-- Statistica "Piano" tolta il 7/8/2026: al cliente non interessa quanto paga
-       l'impresa, e la scritta "Free" in arancione la faceva sembrare di serie B. -->
-</div>
+<!-- ⛔ 1 SETTEMBRE 2026 — LE TRE CARTE DEI NUMERI SONO ANDATE VIA DA QUI.
+     Erano tre riquadri bianchi (.stats-row + .sc) fra la fascia blu e il
+     resto della pagina. Alessio le ha volute DENTRO la fascia blu: stesse
+     tre voci, stessi id (#stat-rating, #stat-recensioni, #stat-anni), quindi
+     il codice che le riempie non e' cambiato di una riga.
+     Il markup nuovo sta nella riga del logo, cerca `hero-num`. -->
 
 <!-- MAIN -->
 <div class="main-layout">
@@ -1228,7 +1263,9 @@ function contaRecensioni(righe){
 function scriviConteggioRecensioni(righe){
   var c=contaRecensioni(righe);
   var n=document.getElementById('rec-count');       if(n)n.textContent=c.numero;
-  var s=document.getElementById('stat-recensioni'); if(s)s.textContent=c.numero;
+  /* 1 set 2026: zero recensioni -> trattino, come la valutazione. Un «0»
+     grande nella fascia blu su ogni scheda fa piu' male che bene. */
+  var s=document.getElementById('stat-recensioni'); if(s)s.textContent=(c.numero>0?c.numero:'—');
   var v=document.getElementById('stat-rating');     if(v)v.textContent=(c.media!=null?c.media.toFixed(1):'—');
   return c;
 }
