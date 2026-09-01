@@ -1826,7 +1826,20 @@
   display:flex; align-items:flex-end; gap:18px;
   padding:0 32px 22px 32px;
 }
-.dash-hero-riga .dash-hero-info-col{ align-self:flex-end; }
+.dash-hero-riga .dash-hero-info-col{ align-self:flex-end; min-width:0; }
+/* ⛔ 1 settembre 2026 — `min-width:0`, misurato sul professionista.
+   Senza, la colonna delle scritte non puo' stringersi sotto la larghezza
+   della sua riga piu' lunga: «PANNELLO PROFESSIONISTA» chiede 213 px dove
+   ce ne sono 186, e a 390 px la testata sbordava di 35 px a destra.
+   ⚠️ `white-space:nowrap; overflow:hidden` su `.dash-welcome` NON basta:
+   quella scappatoia vale sull'asse principale del flex, e qui la larghezza
+   e' l'asse trasversale. E' la stessa lezione di `minmax(0,1fr)` del 31
+   agosto, girata: e' l'unica scrittura che impedisce alla colonna di
+   superare lo spazio che ha.
+   Misurato a 390 px: professionisti 221 -> 186 px, sbordo 35 -> 0.
+   Su impresa e artigiano non cambia NIENTE (186 prima, 186 dopo): il loro
+   titolo e' piu' corto. Ci sta lo stesso perche' «Personalizza» permette di
+   cambiare il nome del pannello, e domani puo' essere lungo su chiunque. */
 /* ⛔ 31 agosto 2026 — IL TONDO CHE NON SBORDAVA PIU'.
    Misurato: sulla scheda pubblica il tondo scendeva SOTTO la copertina
    invece di sborare (a 375 px stava 165 px piu' giu'). Il motivo: la riga e'
