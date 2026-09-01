@@ -220,6 +220,24 @@ nav img{height:36px}
 .main-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;
   padding:20px}
 
+/* ⛔ 1 SETTEMBRE 2026 — LA RIGA DELLE RECENSIONI, A META' E META'.
+   Misurato su uno schermo da 1904 px: la carta delle recensioni era larga
+   1544 px per dire una riga sola («Sii il primo a recensire»), mentre la
+   carta del preventivo — quella che deve far scattare la richiesta — stava
+   in una colonna di lato larga 300 px. Alessio: «recensioni ridurre a meta'
+   il suo spazio e l'altra meta' mettere richiedi un preventivo, per rendere
+   piu' importante la card dei preventivi».
+   Quindi solo QUELLA riga si divide in due: recensioni a sinistra, il
+   preventivo a destra. Le carte sotto restano larghe come prima, e nella
+   colonna di lato restano «Chiama ora» e i contatti.
+   ⚠️ `minmax(0,1fr)` e non `1fr`: in una griglia `1fr` vuol dire «almeno
+   quanto il contenuto piu' largo» — e' il difetto misurato il 31 agosto
+   sulle carte che uscivano dallo schermo.
+   ⚠️ `align-items:start`: se no la carta piu' corta si stira per pareggiare
+   quella piu' alta e resta piena di vuoto. */
+.riga-rec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.riga-rec > *{min-width:0}
+
 /* CARD CONTENUTO */
 .card{background:white;border-radius:16px;border-top:6px solid #0066ff;
   box-shadow:0 8px 24px rgba(0,0,0,0.08);padding:24px;margin-bottom:20px;
@@ -459,6 +477,26 @@ nav img{height:36px}
      cresceva oltre lo schermo: 69 pezzi fuori dal bordo a 320px. Con
      «minmax(0,1fr)» la colonna non puo' piu' superare lo spazio che c'e'. */
   .main-layout{grid-template-columns:minmax(0,1fr);padding:12px}
+  /* ⛔ 1 SETTEMBRE 2026 — SUL TELEFONO L'ORDINE DEL 31 AGOSTO NON SI PERDE.
+     Il 31 agosto il bottone del preventivo stava a 3139 px dall'inizio su una
+     pagina alta 3782, e con `.main-layout > div:last-child{order:-1}` era
+     stato portato a 740. Adesso quel bottone NON sta piu' in quella colonna:
+     sta accanto alle recensioni. Senza queste tre righe finirebbe di nuovo
+     sotto la carta delle recensioni, che e' alta 639 px (misurato: 986 px
+     invece di 661).
+     Come funziona: sul telefono la colonna di sinistra e la riga delle
+     recensioni «spariscono» come scatole (`display:contents`), cosi' le carte
+     che contengono diventano caselle della griglia di `.main-layout` e si
+     possono mettere in fila una per una. Al preventivo si da' `order:-2`,
+     alla colonna dei contatti resta `-1`, le recensioni restano dove sono.
+     ⚠️ `display:contents` si puo' usare qui solo perche' quei due div sono
+     scatole nude: niente sfondo, niente bordo, niente ombra. Se un giorno gli
+     si dà uno stile, questa riga glielo cancella.
+     Misurato a 390 px, prima e dopo: preventivo 661, «Chiama ora» 855,
+     contatti 988, recensioni 1181. Pezzi fuori dal bordo: 0. */
+  .main-layout > div:first-child{display:contents}
+  .riga-rec{display:contents}
+  .riga-rec > div:last-child{order:-2}
   /* 31 agosto 2026: sul telefono la colonna con i contatti e il bottone del
      preventivo veniva DOPO tutte le carte lunghe: il bottone principale
      stava a 3905px dall'inizio, misurato sull'impresa 36. Adesso quella
@@ -593,6 +631,8 @@ nav img{height:36px}
     <!-- Widget calendario/meteo rimosso il 7/8/2026: chiedeva la geolocalizzazione
          al cliente e occupava la prima schermata senza dire nulla sull'impresa. -->
 
+    <!-- RECENSIONI + PREVENTIVO, meta' e meta' (1 settembre 2026) -->
+    <div class="riga-rec">
     <!-- RECENSIONI -->
     <div class="card rec-card" style="border-top-color:#0066ff">
       <div class="card-title">⭐ Recensioni dei clienti</div>
@@ -621,6 +661,18 @@ nav img{height:36px}
         <div class="rec-msg" id="rec-msg"></div>
       </div>
     </div>
+    <div>
+<div class="sidebar-trust">
+      <div class="st-icon">🛡️</div>
+      <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
+    </div>
+
+    <a class="btn-prev" id="cta-principale" onclick="apriRichiesta()">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>📋 Richiedi preventivo gratuito</span>
+    </a>
+    </div>
+    </div><!-- fine .riga-rec -->
 
     <!-- CHAT CON L'IMPRESA -->
     <div class="card" id="card-chat-impresa">
@@ -706,15 +758,12 @@ nav img{height:36px}
 
   <!-- SIDEBAR -->
   <div>
-    <div class="sidebar-trust">
-      <div class="st-icon">🛡️</div>
-      <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
-    </div>
+    <!-- ⛔ 1 settembre 2026: la carta del preventivo (il riquadro scuro
+         «Preventivo gratuito» piu' il bottone «Richiedi preventivo gratuito»)
+         non sta piu' qui: e' passata accanto alle recensioni, nella riga
+         `.riga-rec`, per essere piu' grande e piu' in vista. Qui restano
+         «Chiama ora» e i contatti. -->
 
-    <a class="btn-prev" id="cta-principale" onclick="apriRichiesta()">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span>📋 Richiedi preventivo gratuito</span>
-    </a>
 
     <a class="btn-call" id="btn-tel" href="#">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2863a7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.67 3.44 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
