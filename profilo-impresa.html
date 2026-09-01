@@ -1396,6 +1396,18 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
       if(hc){
         hc.style.backgroundImage=`url("${_esc(_copertina)}")`;
         hc.classList.add('ha-copertina');
+        /* ⛔ 2 SETTEMBRE 2026 — DOVE TAGLIARE LA COPERTINA.
+           L'impresa lo sceglie dal suo pannello trascinando la foto, e qui si
+           rispetta: sarebbe assurdo scegliere l'inquadratura di la' e far
+           vedere al cliente un'altra parte della foto.
+           Chi non ha scelto niente resta al centro, com'e' sempre stato.
+           ⚠️ La posizione va scritta su TUTTI E DUE: la fascia disegna lo
+           sfondo e `.cover-img` gli sta sopra con la stessa immagine
+           ereditata. Scriverla su uno solo lascia l'altro tagliato dal centro. */
+        const _posCop=_posSicura((d.personalizzazione||{}).banner_pos);
+        hc.style.backgroundPosition=_posCop;
+        const _ci=hc.querySelector('.cover-img');
+        if(_ci)_ci.style.backgroundPosition=_posCop;
       }
     }
     const b=[];
@@ -1648,6 +1660,20 @@ function mostraRiga(el,pieno){
   var c=!!(String(pieno==null?'':pieno).trim());
   el.style.display = c ? '' : 'none';
   return c;
+}
+/* ⛔ _posSicura E' SCRITTA DUE VOLTE, qui e in pannello-artigiano.html, e
+   devono restare identiche carattere per carattere: se una accettasse un
+   valore che l'altra rifiuta, l'impresa vedrebbe un'inquadratura e il cliente
+   un'altra, e la pagina funzionerebbe lo stesso — nessuno se ne accorgerebbe.
+   banco-riposiziona.js confronta l'impronta md5 delle due copie.
+   ⚠️ Quello che entra qui finisce dentro uno STILE: si accettano solo due
+   numeri da 0 a 100 con la percentuale, tutto il resto diventa «50% 50%». */
+function _posSicura(p){
+  var m=/^(\d{1,3})% (\d{1,3})%$/.exec(String(p==null?'':p).trim());
+  if(!m)return '50% 50%';
+  var x=parseInt(m[1],10), y=parseInt(m[2],10);
+  if(!(x>=0&&x<=100&&y>=0&&y<=100))return '50% 50%';
+  return x+'% '+y+'%';
 }
 function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
 
