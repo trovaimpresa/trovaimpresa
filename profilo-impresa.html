@@ -209,7 +209,24 @@ nav img{height:36px}
    telefono da 320px diventavano 6 righe alte 125px, piu' del nome. Adesso
    sono pastiglie sotto, larghe quanto la testata: stesse pastiglie dei badge
    (.hb .hb-g) e stessi passi laterali della riga del logo. */
-.hero-mestieri{display:flex;flex-wrap:wrap;gap:8px;padding:0 32px 26px 32px}
+/* ⛔ 2 SETTEMBRE 2026 — LE PASTIGLIE INCOLONNATE COL NOME.
+   Partivano da 32px, cioe' sotto il cerchio del logo, mentre nome, citta' e i
+   tre numeri partono da 200px: misurato sul sito vero (impresa 104, il caso
+   peggiore coi tre mestieri lunghi), 168px di scarto, uguale a 1440 e a
+   1904px. Adesso il passo a sinistra e' 200px = 32 (il passo della riga) +
+   150 (il tondo) + 18 (lo spazio fra tondo e scritte): tre misure gia'
+   scritte qui sopra, nessun numero nuovo. La fascia resta alta uguale, 280px
+   prima e dopo, misurato nel browser: non si aggiunge niente, si sposta.
+   ⚠️ SUL TELEFONO NON CAMBIA NIENTE, ED E' VOLUTO: il blocco
+   @media (max-width:768px) qui sotto riscrive tutti e quattro i lati
+   (padding:0 16px 18px 16px) e si mangia questa riga. Misurato: a 390px la
+   colonna delle scritte e' larga 250px e la pastiglia piu' lunga ne chiede
+   249; a 320px scenderebbe a 172px e le tre pastiglie tornerebbero su due
+   righe ciascuna, cioe' il difetto chiuso il 31 agosto.
+   ⚠️ Il 200 non e' un numero a se': se cambia la misura del tondo o
+   il passo della riga va rifatta la somma. Il banco la ricalcola dal file e
+   diventa rosso se non torna. */
+.hero-mestieri{display:flex;flex-wrap:wrap;gap:8px;padding:0 32px 26px 200px}
 .hero-mestieri:empty{display:none}
 .hero.ha-mestieri .hero-riga{padding-bottom:12px}
 .hb{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
