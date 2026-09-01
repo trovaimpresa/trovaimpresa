@@ -1811,28 +1811,33 @@
    prima schermata.
    ⚠️ Il numero sta in DUE posti, qui e nel pannello: il banco controlla che
    siano uguali e diventa rosso se se ne cambia uno solo. */
-/* ⛔ 2 SETTEMBRE 2026 — LA FASCIA PIU' ALTA: DA 2,5:1 A 2:1.
+/* ⛔ 2 SETTEMBRE 2026 — LA FASCIA PIU' ALTA: IL TETTO DA 560 A 800.
    Alessio, guardando la sua copertina: «la foto inserita si vede solo a
    meta'... ma piu' di quello che c'e' adesso».
    Misurato sulla sua foto vera (3024x4032, cioe' IN PIEDI) e sul suo schermo
-   da 1904 px, dove la fascia e' larga 1889:
-     · com'era: tetto 560 px -> la fascia diventava 3,37:1 e della foto si
-       vedeva il 22% dell'altezza
-     · adesso: 2:1 col tetto a 950 -> fascia alta 944 px, si vede il 38%
-   ⚠️ Il tetto (950) sta SOPRA la meta' di 1889 apposta: cosi' fino a 1900 px
-   di larghezza comanda il rapporto 2:1 e la fascia ha sempre la stessa forma;
-   oltre, il tetto la ferma e non cresce all'infinito.
-   ⚠️ Scelta fatta coi numeri davanti, non a occhio: per vedere META' di una
-   foto in piedi servirebbe 1,5:1, cioe' 1260 px di fascia sul suo schermo —
-   nome, numeri e pulsante del preventivo finirebbero tutti sotto la prima
-   schermata. Facebook tiene 2,67:1.
+   da 1904 px, dove la fascia e' larga 1889 e la finestra e' alta 950:
+     · com'era: tetto 560 -> sopra i 1400 px di schermo comandava il tetto, la
+       fascia diventava 3,37:1 e della foto si vedeva il 22%
+     · adesso: tetto 800 -> comanda il rapporto 2,5:1 fino a 2000 px, la
+       fascia e' alta 756 e si vede il 30%
+   ⚠️ COSI' LA FASCIA HA UNA FORMA SOLA su tutti i computer: prima su uno
+   schermo largo si appiattiva e su un portatile no, e la stessa scheda si
+   vedeva diversa. Il tetto adesso serve solo a fermare gli schermi enormi.
+   ⛔ PROVATO A 2:1 (tetto 950) E TORNATO INDIETRO, per non rifarlo una terza
+   volta: si vedeva il 38% della foto, ma la fascia diventava alta 944 px su
+   una finestra di 950 — il nome dell'impresa finiva a 1057 px, cioe' sotto il
+   bordo dello schermo, e della scheda si vedeva solo la copertina. Misurato
+   dal vivo e bocciato da Alessio: «forse e' troppo?». Col tetto a 800 il nome
+   torna a 869 px, dentro la prima schermata.
+   ⚠️ Per vedere META' di una foto in piedi servirebbe 1,5:1, cioe' 1260 px di
+   fascia sul suo schermo. Non si puo'. Facebook tiene 2,67:1.
    ⚠️ SUL TELEFONO NON CAMBIA NIENTE, ed e' voluto: li' la fascia e' 1,9:1
    (blocco @media piu' sotto) e della stessa foto se ne vede gia' il 39%.
    ⚠️ Le misure vanno tenute UGUALI in tutti e quattro i file (i tre pannelli
    e la scheda pubblica): banco-intestazione le confronta una per una. */
 .dash-cover{
   position:relative; width:100%;
-  aspect-ratio:2/1; min-height:180px; max-height:950px; overflow:hidden;
+  aspect-ratio:2.5/1; min-height:180px; max-height:800px; overflow:hidden;
   background-color:rgba(255,255,255,0.10);
   background-repeat:no-repeat; background-position:center; background-size:cover;
 }
@@ -1849,7 +1854,7 @@
      1377x768) si perde il 28% dell'altezza — sopra il titolo, sotto la riga
      con l'email. Con una FOTO non si nota; con una locandina piena di scritte
      si', e chi la carica deve saperlo: per questo la scritta d'aiuto dice la
-     misura giusta, 1500x750, che riempie senza perdere niente.
+     misura giusta, 1500x600, che riempie senza perdere niente.
      ⚠️ Il taglio parte dal CENTRO (`background-position:center`). Se un giorno
      serve scegliere quale parte tenere, e' li' che va messa una posizione
      salvata, non altrove. */
@@ -1990,7 +1995,7 @@
       <div class="dash-hero" id="dash-hero">
         <div class="dash-cover" id="dash-cover">
           <div class="cover-img"></div>
-          <div class="dash-cover-vuota" id="dash-cover-vuota">Aggiungi una copertina &mdash; misura giusta 1500&times;750</div>
+          <div class="dash-cover-vuota" id="dash-cover-vuota">Aggiungi una copertina &mdash; misura giusta 1500&times;600</div>
           <input type="file" id="input-copertina" accept="image/*" style="display:none" onchange="caricaCopertina(event)">
           <button type="button" class="dash-foto-btn dash-foto-copertina" id="btn-copertina"
                   onclick="document.getElementById('input-copertina').click()">
@@ -2424,7 +2429,7 @@
                 <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">Rimuovi logo</button>
               </div>
               <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Banner copertina<span class="mpp-hint">La fascia in cima al pannello e alla tua scheda pubblica. Misura giusta: <b>1500&times;750</b>. Un'immagine di forma diversa riempie lo stesso, ma viene tagliata sopra e sotto.</span></label>
+                <label class="mpp-label">Banner copertina<span class="mpp-hint">La fascia in cima al pannello e alla tua scheda pubblica. Misura giusta: <b>1500&times;600</b>. Un'immagine di forma diversa riempie lo stesso, ma viene tagliata sopra e sotto.</span></label>
                 <div id="pers-pannello-banner-preview" style="margin:6px 0 8px;"></div>
                 <input type="file" id="pers-pannello-banner-file" accept="image/*">
               </div>
