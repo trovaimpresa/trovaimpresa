@@ -217,7 +217,10 @@ nav img{height:36px}
 .sezione-card h2{font-size:18px;font-weight:800;color:#0052cc;margin-bottom:16px}
 
 /* LAYOUT PRINCIPALE */
-.main-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;
+/* ⛔ 1 settembre 2026: la colonna di lato da 300 px non c'e' piu'. Dentro
+   c'erano il preventivo, «Chiama ora» (tolto) e i contatti: adesso stanno
+   tutti nella griglia. Resta una colonna sola, che dentro si divide in due. */
+.main-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;
   padding:20px}
 
 /* ⛔ 1 SETTEMBRE 2026 — LA RIGA DELLE RECENSIONI, A META' E META'.
@@ -233,8 +236,8 @@ nav img{height:36px}
    ⚠️ `minmax(0,1fr)` e non `1fr`: in una griglia `1fr` vuol dire «almeno
    quanto il contenuto piu' largo» — e' il difetto misurato il 31 agosto
    sulle carte che uscivano dallo schermo.
-   ⚠️ `align-items:start`: se no la carta piu' corta si stira per pareggiare
-   quella piu' alta e resta piena di vuoto. */
+   ⚠️ (1 set, secondo giro) `align-items:start` e' stato TOLTO: le carte di
+   una stessa riga adesso sono alte uguali. */
 /* ⛔ 1 SETTEMBRE 2026 (secondo giro) — TUTTE LE CARTE A META'.
    Prima era solo la riga delle recensioni; Alessio ha detto «tutte a meta'».
    Adesso la colonna di sinistra e' una griglia a DUE colonne uguali, e le
@@ -246,15 +249,33 @@ nav img{height:36px}
    ⚠️ `minmax(0,1fr)` e non `1fr` — «almeno quanto il contenuto piu' largo»
    e' il difetto misurato il 31 agosto sulle carte che uscivano dallo schermo,
    e qui dentro ci sono la chat e la mappa, che sono larghe per natura.
-   ⚠️ `align-items:start`: se no la carta corta si stira per pareggiare quella
-   alta accanto e resta piena di vuoto.
+   ⚠️ (1 set, secondo giro) `align-items:start` e' stato TOLTO: le carte di
+   una stessa riga adesso sono alte uguali.
    ⚠️ `margin-bottom:0` sulle carte: `.card` ne ha 20 px, e sommandosi al
    `gap` della griglia le righe si sarebbero staccate di 40 px invece di 20.
    Lo spazio adesso lo mette solo il gap, ed e' lo stesso di prima.
    ⚠️ `.riga-rec` non e' piu' una griglia sua: «sparisce» come scatola e i
    suoi due figli entrano in questa. Serve ancora perche' sul telefono e'
    quella che permette di rimettere il preventivo per primo. */
-.col-sinistra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+/* ⛔ 1 SETTEMBRE 2026 (secondo giro) — LE CARTE DI UNA RIGA SONO ALTE UGUALI.
+   Prima c'era `align-items:start`: ogni carta teneva la sua altezza, e nella
+   stessa riga «Dove siamo» finiva a meta' mentre «Galleria video» scendeva
+   molto piu' giu'. Alessio: «questa disomogeneita' non va bene».
+   Tolta quella riga, la griglia fa quello che fa di suo (`stretch`): le carte
+   della stessa riga arrivano tutte all'altezza della piu' alta e i bordi
+   finiscono allineati. */
+.col-sinistra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.cella-prev{display:flex;flex-direction:column;gap:14px}
+.btn-prev .sidebar-trust{width:100%;margin-bottom:0}
+/* ⛔ 1 settembre 2026 — LA RIGA CHE SI ERA COLORATA DI ARANCIONE.
+   Portando il riquadro scuro DENTRO la carta, «Risposta entro 24-48 ore» e'
+   finita dentro `.btn-prev span{color:#FF6B35;font-size:1.5rem}`, che serve
+   per la scritta grande arancione del bottone: stesso peso di `.st-text span`
+   ma scritta dopo nel foglio, quindi vinceva lei. La riga diventava arancione
+   e grande. Qui si rimettono i valori che aveva prima — copiati, non nuovi —
+   con due classi invece di una, cosi' vincono. */
+.btn-prev .st-text span{color:rgba(255,255,255,0.75);font-size:13px}
+.cella-prev .contacts-card{margin-bottom:0}
 .col-sinistra > *{min-width:0;margin-bottom:0}
 .riga-rec{display:contents}
 
@@ -411,13 +432,9 @@ nav img{height:36px}
   margin-bottom:10px;transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;text-align:center}
 .btn-prev:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.15)}
 .btn-prev span{color:#FF6B35;font-size:1.5rem}
-.btn-prev svg,.btn-call svg{width:2rem;height:2rem}
-.btn-call{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  width:100%;background:white;color:#1a2f47;border:none;border-radius:12px;
-  padding:20px 30px;font-family:inherit;font-weight:700;font-size:1.2rem;cursor:pointer;
-  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #2863a7;
-  margin-bottom:14px;transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;text-align:center}
-.btn-call:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.15)}
+.btn-prev svg{width:2rem;height:2rem}
+/* ⛔ 1 settembre 2026: il CSS di `.btn-call` e' stato tolto insieme alla
+   carta, non lasciato morto nel foglio. */
 
 /* CONTATTI */
 .contacts-card{background:white;border-radius:16px;border-top:6px solid #1a5276;
@@ -516,12 +533,20 @@ nav img{height:36px}
      contatti 988, recensioni 1181. Pezzi fuori dal bordo: 0. */
   .main-layout > div:first-child{display:contents}
   .riga-rec{display:contents}
-  .riga-rec > div:last-child{order:-2}
+  .cella-prev{display:contents}
+  /* ⛔ qui c'era la riga del 31 agosto che portava in cima la colonna di lato.
+     Quella colonna non esiste piu'; adesso si mettono in fila i due pezzi che
+     quella riga serviva a far salire: prima il preventivo, poi i contatti.
+     Se fosse rimasta com'era avrebbe preso l'ULTIMA CARTA della pagina e
+     l'avrebbe sparata in cima.
+     Misurato a 390 px il 31 agosto: bottone 740, contatti 1048. */
+  .btn-prev{order:-2}
+  .contacts-card{order:-1}
   /* 31 agosto 2026: sul telefono la colonna con i contatti e il bottone del
      preventivo veniva DOPO tutte le carte lunghe: il bottone principale
      stava a 3905px dall'inizio, misurato sull'impresa 36. Adesso quella
      colonna sale in cima, subito sotto i tre numeri. */
-  .main-layout > div:last-child{order:-1}
+  
   .rec-tabs{flex-wrap:wrap}
   .rec-tab{flex:1 1 auto;min-width:0}
   .hero-num{gap:10px}
@@ -568,7 +593,7 @@ nav img{height:36px}
    Qui l'effetto si spegne dove il mouse non c'e'. Sul computer non cambia
    niente. L'ombra tornata e' quella normale delle carte, 0 8px 24px. */
 @media (hover:none){
-  .sezione-card:hover,.card:hover,.btn-prev:hover,.btn-call:hover{
+  .sezione-card:hover,.card:hover,.btn-prev:hover{
     transform:none;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
   .ms:hover{transform:none}
   .fi:hover img{transform:none}
@@ -681,16 +706,33 @@ nav img{height:36px}
         <div class="rec-msg" id="rec-msg"></div>
       </div>
     </div>
-    <div>
-<div class="sidebar-trust">
-      <div class="st-icon">🛡️</div>
-      <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
-    </div>
-
+    <!-- ⛔ 1 SETTEMBRE 2026 — UNA CASELLA SOLA: PREVENTIVO + CONTATTI.
+         Erano tre scatole staccate — il riquadro scuro «Preventivo gratuito»,
+         il bottone bianco, e la lista dei contatti da sola in una colonna di
+         300 px («queste due card da sole li' che fanno?»). Adesso stanno tutte
+         nella stessa casella della griglia, una sotto l'altra.
+         ⚠️ I contatti NON possono stare DENTRO l'<a> del bottone: dentro ci
+         sono altri link (telefono, email, sito) e un <a> dentro un <a> non e'
+         HTML valido — cliccando un contatto si aprirebbe il modulo del
+         preventivo. Per questo la casella e' un <div> che li tiene insieme.
+         ⚠️ `gap:14px` non e' inventato: e' lo stesso spazio che avevano prima
+         (`margin-bottom:14px` di `.sidebar-trust` e di `.contacts-card`). -->
+    <div class="cella-prev">
     <a class="btn-prev" id="cta-principale" onclick="apriRichiesta()">
+      <div class="sidebar-trust">
+        <div class="st-icon">🛡️</div>
+        <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
+      </div>
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span>📋 Richiedi preventivo gratuito</span>
     </a>
+    <ul class="contacts contacts-card">
+      <li id="contact-indirizzo"><div class="ci">📍</div><span>—</span></li>
+      <li id="contact-tel"><div class="ci">📞</div><a href="#" id="tel-link">—</a></li>
+      <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
+      <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
+      <!-- orario fisso rimosso: era uguale per tutte le imprese, cioe' inventato -->
+    </ul>
     </div>
     </div><!-- fine .riga-rec -->
 
@@ -777,27 +819,7 @@ nav img{height:36px}
   </div>
 
   <!-- SIDEBAR -->
-  <div>
-    <!-- ⛔ 1 settembre 2026: la carta del preventivo (il riquadro scuro
-         «Preventivo gratuito» piu' il bottone «Richiedi preventivo gratuito»)
-         non sta piu' qui: e' passata accanto alle recensioni, nella riga
-         `.riga-rec`, per essere piu' grande e piu' in vista. Qui restano
-         «Chiama ora» e i contatti. -->
 
-
-    <a class="btn-call" id="btn-tel" href="#">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2863a7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.67 3.44 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      📞 Chiama ora
-    </a>
-
-    <ul class="contacts contacts-card">
-      <li id="contact-indirizzo"><div class="ci">📍</div><span>—</span></li>
-      <li id="contact-tel"><div class="ci">📞</div><a href="#" id="tel-link">—</a></li>
-      <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
-      <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
-      <!-- orario fisso rimosso: era uguale per tutte le imprese, cioe' inventato -->
-    </ul>
-  </div>
 </div>
 </div><!-- /profilo-view -->
 
