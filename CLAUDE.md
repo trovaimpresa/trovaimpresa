@@ -19694,3 +19694,431 @@ perche' la differenza e' voluta. La FAQ va corretta comunque.
 della cartella, non solo quelli delle consegne di quel giorno. Un banco di
 tre settimane fa e' l'unica cosa che si accorge di quello che hai rotto
 altrove.
+
+# 1 SETTEMBRE 2026 — LA SCHEDA PUBBLICA SI TROVA E SI CONDIVIDE, UNDICI CONSEGNE
+
+⚠️ **Il filo di tutta la giornata, in una riga.** La mattina si è chiusa la
+storia della testata sui pannelli; il pomeriggio si è rifatta la scheda
+pubblica pezzo per pezzo guardandola sullo schermo; la sera si è fatto il
+lavoro che nessuno vedeva ma che vale più di tutti gli altri: **far sì che le
+→80← schede esistano per Google e facciano bella figura su WhatsApp**.
+
+⛔ **La lezione che vale più di tutte, e costa di più:** tre volte oggi ho
+rotto qualcosa mentre sistemavo altro. Due le ho trovate io guardando le
+figure; **la terza — la peggiore — l'ha vista Alessio sul sito vero**, e i
+banchi erano tutti verdi. Da quella è nato un banco nuovo che adesso guarda
+→293← chiamate su →5← pagine.
+
+---
+
+## Le →11← consegne
+
+| # | cosa | file |
+|---|---|---|
+| 1 | la FAQ del logo mandava a un pulsante che non esiste più | `pannello-impresa.html` |
+| 2 | testata nuova + copertina finalmente caricabile | `pannello-artigiano.html` |
+| 3 | idem, più `min-width:0` che toglie →35← px di sbordo | `pannello-professionisti.html` |
+| 4 | copertina da →5,01←:1 a →3,40←:1, tondo fuori dalla foto | scheda + →3← pannelli |
+| 5 | i tre numeri dentro la fascia blu, lo zero diventa trattino | `profilo-impresa.html` |
+| 6 | recensioni a metà, preventivo nell'altra metà | `profilo-impresa.html` |
+| 7 | tutte le carte a metà, due per riga | `profilo-impresa.html` |
+| 8 | una casella sola per il preventivo, via «Chiama ora», carte alte uguali | `profilo-impresa.html` |
+| 9 | ⛔ contatti riparati (li avevo rotti io) + WhatsApp mostrato | `profilo-impresa.html` |
+| 10 | meta per Google e WhatsApp + le →80← schede in sitemap | scheda + →2← funzioni Netlify |
+| 11 | la carta «Quanto costa» collegata al mestiere | `profilo-impresa.html` |
+
+---
+
+## ⛔ «I BANCHI TORNANO VERDI DA SOLI»: NON ERA VERO
+
+Il capitolo del →31← agosto lasciava scritto che portando la testata nuova
+sugli altri tre pannelli i due banchi rossi sarebbero tornati verdi da soli.
+**È falso, e va detto per non farlo credere una terza volta.**
+
+`banco-banner.js` era nato per la VECCHIA testata: controllava `contain`, la
+scritta «Carica logo» spenta dal CSS e la misura consigliata →1200×340←. Con
+la testata nuova quelle cose non esistono più — portandola sugli altri tre il
+banco sarebbe diventato **più** rosso, non verde.
+
+**Riscritto perché guardi DUE MONDI** e sappia in quale sta ogni pannello:
+
+* vecchia testata → ha `<div id="dash-hero-logo-col">`
+* nuova testata → ha `<div id="dash-cover">`
+
+Su ognuno applica le regole del suo mondo, e dentro lo stesso mondo pretende
+che `applicaBannerHero` sia identica in tutti i pannelli. Così è rimasto verde
+a ogni passaggio, invece di essere rosso per tre consegne di fila.
+
+⚠️ **La regola generale:** quando un banco diventa rosso perché il mondo è
+cambiato, non si aggiorna «per farlo passare» — si riscrive per misurare il
+mondo nuovo, e in testa si scrive cosa misurava prima e perché è cambiato.
+
+---
+
+## ⛔ LA COPERTINA NON ERA TAGLIATA: ERA LA FASCIA CHE SI APPIATTIVA
+
+Alessio, con la sua pagina Facebook aperta accanto alla sua scheda:
+«**lì la foto si vede completa, da me si vede tagliata**».
+
+Aveva ragione, e non era la foto. Nel foglio c'era `aspect-ratio:2.5/1`
+**più** `max-height:380px`. Appena lo schermo supera i →950← px (2,5 × 380)
+**vince il tetto di altezza**, e da lì in poi più lo schermo è largo più la
+fascia si appiattisce, senza nessun limite.
+
+Misurato con una copertina di prova →1377×768← (la stessa forma della sua):
+
+| dove | fascia | rapporto | quanto se ne vede |
+|---|---|---|---|
+| schermo →1904← px | →1904←×→380← | **→5,01←:1** | **→36←%** |
+| schermo →1440← px | →1440←×→380← | →3,79←:1 | →47←% |
+| telefono →390← px | →390←×→205← | →1,90←:1 | →94←% |
+| **Facebook**, misurato dalla sua schermata | →1176←×→441← | **→2,67←:1** | ~→67←% |
+
+**La nostra fascia era larga il doppio, in rapporto, di quella di Facebook.**
+E sul telefono il difetto non si vedeva: ecco perché il →31← agosto è passato.
+
+⚠️ **Anche Facebook taglia**, circa un terzo. La differenza è quanto.
+
+**Fatto:** tetto alzato a →560← px. A →1904← px la fascia diventa →3,40←:1 e
+si vede il →53←% invece del →36←%. Resta a tutto schermo, come chiesto il
+→31← agosto. Alzarlo a →762← darebbe →2,50←:1 e il →72←%, ma la fascia si
+mangerebbe mezza prima schermata: il numero è uno solo e si cambia lì.
+
+### E il tondo che copriva quello che restava
+
+Guardando la schermata vera di Facebook si vede che lì la foto tonda sta
+**tutta sotto** la copertina, staccata. Da noi ci saliva sopra e ne copriva
+→58← px sul computer e →38← sul telefono — proprio la fascia bassa
+dell'immagine, quella che il taglio non aveva già portato via. Alessio: «il
+cerchio del logo va fuori dal riquadro come su fb».
+
+⚠️ **Due prove del banco sono state GIRATE**: prima pretendevano che il tondo
+*sbordasse*, adesso pretendono il contrario. In testa c'è scritto perché, coi
+numeri. E ne è stata aggiunta una che si accorge se qualcuno riabbassa il
+tetto dei →560← px.
+
+---
+
+## LA SCHEDA RIFATTA A META', PEZZO PER PEZZO
+
+Quattro richieste in fila, ognuna arrivata guardando il risultato della
+precedente. **Nessuna era nel piano della mattina.**
+
+1. «Recensioni ridurre a metà il suo spazio e l'altra metà mettere richiedi
+   un preventivo, **per rendere più importante la card dei preventivi**» — la
+   carta recensioni da →1544← a →762← px, il preventivo da →300← a →762←:
+   **→2,5← volte più grande**.
+2. «**Tutte a metà**» — la colonna di sinistra è diventata una griglia a due
+   colonne uguali, e le carte si accoppiano da sole nell'ordine del file.
+   Pagina intera da →3349← a →2778← px.
+3. «Invece di due card dei preventivi fai solo una» + «**mettili insieme alla
+   card del preventivo**» (i contatti) + «**chiama togliamolo tanto dal pc non
+   si può chiamare**» — la colonna di lato da →300← px è sparita del tutto.
+4. «**Questa disomogeneità non va bene**» — tolto `align-items:start`: le
+   carte di una stessa riga arrivano tutte all'altezza della più alta.
+   Misurato: «Scrivi all'impresa» e «Informazioni» da →337← e →656← px a
+   →576← e →576←.
+
+⛔ **Il primo tentativo era sbagliato e va detto:** avevo capito «dividi a
+metà tutta la pagina» e avevo cambiato `.main-layout`. Tornato indietro
+appena lui ha precisato. **Meglio una modifica buttata che una capita male
+portata avanti tre consegne.**
+
+⚠️ **`minmax(0,1fr)`, non `1fr`.** In una griglia `1fr` vuol dire «almeno
+quanto il contenuto più largo»: è il difetto misurato il →31← agosto sulle
+carte che uscivano dallo schermo, e lì dentro ci sono la chat e la mappa, che
+sono larghe per natura.
+
+⚠️ **`margin-bottom:0` sulle carte.** `.card` ne ha →20← px e, sommandosi al
+`gap` della griglia, le righe si sarebbero staccate di →40← invece di →20←.
+Lo spazio adesso lo mette solo il gap, ed è lo stesso di prima.
+
+### ⛔ La riga del 31 agosto che stava per fare un danno
+
+Il →31← agosto il bottone del preventivo stava a →3139← px dall'inizio ed era
+stato portato a →740← spostando in cima tutta la colonna di lato:
+`.main-layout > div:last-child{order:-1}`.
+
+Oggi quella colonna **non esiste più**. Se la riga fosse rimasta com'era,
+`div:last-child` avrebbe preso **l'ULTIMA CARTA della pagina** e l'avrebbe
+sparata in cima al telefono. Adesso salgono il preventivo e i contatti, uno
+per uno, e misurato a →390← px l'ordine è identico a ieri: preventivo →645←,
+«Chiama ora» →855←, contatti →988←, recensioni →1181←.
+
+⚠️ Come funziona, per chi ci torna: sul telefono la colonna di sinistra e la
+riga delle recensioni «spariscono» come scatole (`display:contents`), così le
+carte che contengono diventano caselle della griglia di `.main-layout` e si
+possono mettere in fila una per una. **Si può fare solo perché quei due div
+sono scatole nude**: niente sfondo, niente bordo, niente ombra. Se un giorno
+gli si dà uno stile, `display:contents` glielo cancella.
+
+---
+
+## ⛔ IL DIFETTO PIU' CARO DELLA GIORNATA: UN ID TOLTO SENZA CERCARLO
+
+Togliendo la carta «Chiama ora» è sparito anche il suo id, `btn-tel`. Ma nel
+codice c'era questa riga, **senza nessun controllo**:
+
+```js
+document.getElementById('btn-tel').href = th;
+```
+
+Su un elemento che non c'è più quella riga va in errore, e l'errore si porta
+dietro **tutto quello che viene dopo dentro la stessa funzione**: telefono,
+email, sito, indirizzo e la mappa. Sulla scheda vera restavano quattro
+trattini, e la pagina sembrava funzionare benissimo.
+
+⚠️ **L'avviso era già scritto nel file, due righe sopra, dal →30← agosto**:
+«senza questo controllo la riga andava in errore e si portava dietro TUTTO
+quello che viene dopo». Non è bastato leggerlo.
+
+**Provato sui due file nel browser, con la stessa impresa:**
+
+| | com'era | dopo |
+|---|---|---|
+| indirizzo | «📍—» | «📍via salaria 7, Rieti» |
+| telefono | «—» | «+39…», con il link `tel:` |
+| email | «—» | l'email vera |
+| sito | «—» | il sito vero |
+
+### Il banco che è nato da lì
+
+`banco-id-che-non-esistono.js`: cerca ogni `getElementById('x').` — cioè
+usato **senza rete** — e pretende che quell'id esista davvero nella pagina.
+`const x = getElementById('y'); if(x)…` non viene toccato: lì il controllo
+c'è. Gira su →5← pagine, **→293← prove verdi**, e sulla copia di stamattina
+trova esattamente `btn-tel`.
+
+⛔ **Scrivendolo sono cascato nella trappola dei commenti HTML** già scritta
+il →30← agosto: togliendoli a tappeto spariva il →28←% del file e uscivano
+**→211← falsi allarmi** su id che esistevano benissimo. Riscritto col metodo
+del progetto: gli id si contano sul file **intero** (un id nominato solo in un
+commento è un buco, non un falso allarme: sbaglia dalla parte prudente), e le
+chiamate si cercano **solo dentro i `<script>`**, dove i commenti si tolgono
+davvero.
+
+---
+
+## IL WHATSAPP, E IL PREFISSO CHE SI DECIDE DALLA LUNGHEZZA
+
+→26← imprese pubbliche hanno un numero WhatsApp e non compariva da nessuna
+parte. Adesso è una riga dei contatti, che si accende solo se c'è.
+
+⛔ **Contato nel database prima di scrivere una riga:**
+
+| come sono scritti | quanti |
+|---|---|
+| →10← cifre che iniziano per **39** | **→5←** |
+| →10← cifre, altri prefissi (32x…38x) | →19← |
+| →12← cifre che iniziano per 39 | →2← |
+
+I →5← numeri di →10← cifre che iniziano per «39» **sono cellulari** — i
+prefissi mobili italiani vanno da 32x a 39x — **non numeri col prefisso
+internazionale**. Se avessi scritto «inizia per 39 quindi è completo», →5←
+link su →26← avrebbero portato a un numero inesistente.
+
+**La regola giusta è sulla LUNGHEZZA:** →12← cifre che iniziano per 39 → già
+buono; →10← cifre → ci si mette davanti 39; qualsiasi altra lunghezza non si
+tocca e la riga non si mostra. **Meglio niente che un link sbagliato.**
+
+---
+
+## ⛔ I META PER GOOGLE E WHATSAPP: TRE STRATI
+
+Fino a stamattina la scheda non aveva **niente**: →0← description, →0← og:*,
+→0← JSON-LD, e **→0← schede in una sitemap** (contato: `profilo-impresa`
+compariva zero volte in tutte le sitemap del sito). Su WhatsApp un link
+condiviso mostrava «Profilo — TrovaImpresa» su tutte e →82← le schede.
+
+**Il motivo, ed è quello che decide l'architettura:** il nome vero lo scrive
+il JavaScript. **Google il JavaScript lo esegue; WhatsApp, Facebook e
+LinkedIn NO** — leggono l'HTML come arriva e si fermano lì.
+
+| strato | dove | a chi serve |
+|---|---|---|
+| 1 · rete di sicurezza | i meta scritti nel `<head>` | c'è sempre, anche se il resto non parte |
+| 2 · **Edge Function** | `netlify/edge-functions/scheda-meta.js` | **WhatsApp, Facebook, LinkedIn** |
+| 3 · JavaScript | nella pagina | Google, più il JSON-LD |
+
+⚠️ **`costruisciMeta` è scritta DUE volte, e devono restare identiche
+carattere per carattere.** Se una cambia e l'altra no, il cliente su WhatsApp
+legge una cosa e Google un'altra, la pagina funziona lo stesso e nessuno se ne
+accorge. `banco-meta-scheda.js` confronta l'impronta md5 delle due copie — è
+lo stesso controllo che `banco-banner.js` fa su `applicaBannerHero`.
+
+⚠️ **Nel dubbio la pagina passa intatta.** Id non valido, Supabase giù, riga
+che non esiste, segnaposto sparito, qualsiasi errore: la scheda esce com'è.
+**Una scheda senza meta è un peccato; una scheda rotta è un danno.**
+
+⚠️ **Costa.** L'Edge Function gira a ogni apertura di scheda e le funzioni sul
+bordo si pagano — e il →31← agosto i crediti Netlify erano finiti. La risposta
+si fa mettere in cache un'ora dalla rete (`netlify-cdn-cache-control`). Se un
+giorno desse fastidio si spegne togliendo `export const config` in fondo al
+file, e la pagina torna com'era.
+
+⛔ **NIENTE STELLE nel JSON-LD.** Oggi →0← imprese su →82← hanno una
+recensione: dichiarare a Google un voto che non esiste è la cosa che punisce
+più volentieri. Il banco lo controlla.
+
+⛔ **E la trappola del commento che si chiude da solo, ricapitata.** Nella
+nota dentro il `<head>` avevo scritto il segnaposto `META-SCHEDA` per intero,
+con le parentesi: il suo chiudi-commento ha chiuso **quel** commento a metà, e
+tutto il resto della spiegazione sarebbe finito **stampato in pagina**.
+Trovato dal banco. Adesso nella nota il segnaposto si scrive senza parentesi,
+e c'è scritto perché.
+
+### La sitemap
+
+`/sitemap-imprese.xml`, generata al volo dal database, **fatta uguale a
+`sitemap-offerte.js`** che funziona dal →21← agosto. Ci entrano **→80← schede
+su →82←**: le →2← senza città restano fuori, perché una pagina vuota in
+sitemap Google la segna come «contenuto povero» e il giudizio ricade su tutto
+il sito. Aggiunta in `netlify.toml` e in `robots.txt`.
+
+⚠️ **`/sitemap-offerte.xml` dice «1 errore» in Search Console e non è un
+difetto**: risponde →200← con XML valido ma **vuoto**, perché nel database ci
+sono →0← offerte di lavoro. Google una sitemap senza nemmeno un indirizzo la
+segna come errore. Se un giorno anche `sitemap-imprese.xml` risulta vuota per
+un giorno solo, è Supabase che non ha risposto nel momento del passaggio: si
+sistema da sola. **Se resta vuota per giorni, allora è un problema.**
+
+### Verificato dal vivo
+
+L'HTML servito da `trovaimpresa.com` contiene la firma «scritto dal bordo
+della rete», il titolo «Admin TrovaImpresa — Artigiano a Rieti |
+TrovaImpresa», la copertina vera come `og:image` e **un solo** `og:title`.
+`/sitemap-imprese.xml` risponde →200← con →80← indirizzi.
+**E l'anteprima su WhatsApp è arrivata.**
+
+---
+
+## LA CARTA «QUANTO COSTA»
+
+La prima domanda di chi cerca un'impresa è «quanto mi costa», e sulla scheda
+non c'era niente: il cliente usciva dal sito e andava a cercarlo su Google,
+dove trova un concorrente. Le →19← guide coi prezzi veri di cantiere
+esistevano già **e nessuna scheda ci puntava**.
+
+Contati i mestieri veri: **→28← voci diverse** sulle →82← imprese. La mappa ne
+copre →13←, e così **→67← imprese su →82←** ricevono almeno una guida mirata;
+alle altre →15← resta la guida generale. Massimo →3← collegamenti per scheda.
+
+⚠️ Le scritte dei collegamenti sono i **titoli veri** delle pagine, letti dal
+sito. Il banco controlla che ogni indirizzo nominato **esista come file**: se
+un giorno una guida viene rinominata, il collegamento porterebbe nel vuoto e
+la scheda continuerebbe a funzionare — nessuno se ne accorgerebbe.
+
+⛔ **Un falso allarme che vale la pena raccontare.** Al primo giro il banco ha
+detto che →5← guide non esistevano. Non era vero: sul sito rispondono tutte
+→200←. Era **l'ambiente di Claude** ad avere solo una fetta della cartella.
+Portate lì le →15← guide vere e rifatto girare. **Se avessi tolto quel
+controllo per farlo passare, avrei buttato via proprio la prova che serve.**
+
+---
+
+## I banchi (in `prove-claude/`, che è nel `.gitignore`)
+
+**Da →18← file a →21←.** Alla fine della giornata: **→21← verdi, →0← rossi**,
+e `controllo-colonne.js` verde.
+
+Nuovi oggi:
+
+* **`banco-id-che-non-esistono.js`** — →293← prove su →5← pagine. È quello che
+  avrebbe visto il difetto dei contatti.
+* **`banco-meta-scheda.js`** — →52← prove. Confronta l'md5 delle due copie di
+  `costruisciMeta`, sorveglia i segnaposto, pretende che non compaiano stelle.
+* **`banco-guide-prezzi.js`** — →85← prove su →7← casi diversi.
+
+Riscritti o girati oggi: `banco-banner.js` (due mondi), `banco-intestazione.js`
+(cresce da solo a ogni pannello spostato; due prove girate sul tondo),
+`banco-terza-carta.js` (le carte dei numeri non esistono più: adesso guarda la
+fascia blu), `banco-conto-recensioni.js` (lo zero è un trattino),
+`banco-niente-salti-al-tocco.js` (da →7← regole a →5←),
+`banco-colori-fuori-posto.js`, `banco-carte-dentro-schermo.js`,
+`banco-contatti-in-cima.js` (la riga del →31← agosto sostituita da due righe),
+`banco-faq-30ago.js`.
+
+---
+
+## Numeri del database, misurati oggi
+
+* →82← imprese pubbliche (`is_test=false AND email_confermata=true`), →80← con
+  città → sono quelle in sitemap
+* **→1← preventivo in tutto il database, →0← risposti. →0← recensioni
+  pubblicate su →82← imprese.**
+* →44← su →82← non hanno nemmeno una riga di descrizione; →34← non hanno la
+  zona servita; →0← hanno gli orari
+* →26← hanno il WhatsApp (adesso mostrato), →24← un sito, →33← i dipendenti,
+  →39← «risponde entro 24 ore», →18← «preventivo online»
+* →36← imprese hanno foto dei lavori, →134← foto in tutto, **→76← con un
+  titolo scritto che non mostriamo**
+* →1← impresa «verificata», →0← iscritte all'albo, →1← con SOA — **ma →82← su
+  →82← hanno la partita IVA**
+* →28← mestieri diversi; →67← imprese ricevono almeno una guida mirata
+
+---
+
+## ⛔ QUELLO CHE RESTA APERTO
+
+**Chiuso oggi:** i due banchi rossi del →31← agosto, la testata su →3← pannelli
+su →4←, la copertina tagliata, il WhatsApp mai mostrato, i meta e la sitemap.
+
+**Aperto, in ordine di quanto pesa:**
+
+* **`pannello-negozio.html`** è l'ultimo con la testata vecchia, e lì la
+  copertina **non si carica ancora** (scrive in `<id impresa>/banner.<ext>`
+  invece che nella cartella dell'`user_id`: le regole RLS lo bloccano).
+* **Il logo di TrovaImpresa nella barra della scheda** viene sostituito dal
+  «logo personalizzato» dell'impresa. Mai deciso se è voluto — per me non lo è.
+* **Le pastiglie dei mestieri fuori riga**: partono a →48← px mentre nome e
+  città partono a →200←. `#hero-mestieri` è fratello di `.hero-riga`, non
+  dentro la colonna delle scritte.
+* `recensioni_pubbliche()` ha un `limit 50`: il contatore si ferma a →50←.
+* I →4← pezzi di CSS sotto i 13px rimasti dai widget tolti (`.cdh` 9, `.cd`
+  12, `.cd.oggi` 11, `.ms-l` 10): da buttare o no.
+* Gli **orari** sono una colonna vuota su tutte: da riempire o da togliere.
+* **Titolo e descrizione delle foto dei lavori** stanno nel database (→76← su
+  →134← ce l'hanno) e non si vedono.
+* Serve un **negozio finto**: nel database non esiste nessun `negozio`.
+* La **linguetta «Recensioni (0)»** ha ancora lo zero: tolto solo dalla fascia.
+* Il pulsante «📱 Mobile» dell'Anteprima nei pannelli non funziona.
+
+**Le idee, discusse stasera e non ancora fatte** (in ordine di quanto
+costano):
+
+1. Il **bollino «Partita IVA verificata»** — →82← su →82← ce l'hanno nel
+   database, si può controllare davvero, ed è l'unica cosa di fiducia che
+   possiamo dare domani mattina.
+2. **Titolo e descrizione delle foto** — roba già scritta, si accende e basta.
+3. La **barra «profilo completo al x%»** nel pannello: →44← imprese su →82←
+   non hanno una descrizione e non lo sanno.
+4. ⚠️ **Le recensioni chieste dalle imprese ai loro clienti** — un pulsante
+   nel pannello. →82← × →5← clienti passati = →410← richieste possibili senza
+   spendere un euro. **Il rischio, detto prima: se le imprese non lo usano,
+   hai costruito una funzione per niente. Provarlo a mano su →5← imprese
+   conosciute di persona a Rieti PRIMA di scrivere il codice.**
+
+---
+
+## Le regole di lavoro, ribadite dai fatti di oggi
+
+* **Prima di togliere un elemento si cerca il suo id nel codice.** Un
+  `getElementById` senza rete su un elemento sparito non rompe solo sé stesso:
+  ferma tutta la funzione, in silenzio.
+* **Una nota nel file non basta a fermare un errore: serve una macchina.** Le
+  tre trappole in cui sono ricascato oggi erano tutte e tre già scritte in
+  questo file.
+* **Un falso allarme non si zittisce, si capisce.** Il banco che diceva «→5←
+  guide non esistono» aveva ragione sul suo mondo (l'ambiente di Claude) e
+  torto sul mondo vero. Togliere il controllo sarebbe stato il modo più veloce
+  per buttare via la prova.
+* **Quando un banco diventa rosso perché il mondo è cambiato, si riscrive per
+  misurare il mondo nuovo** — e in testa si scrive cosa misurava prima.
+* **Il caso peggiore si conta nel database, non si immagina.** I →5← numeri
+  WhatsApp di →10← cifre che iniziano per «39» avrebbero rotto →5← link su
+  →26←, e non si vedevano da nessuna parte se non contandoli.
+* **Meglio una modifica buttata che una capita male portata avanti.** «Dividi
+  a metà» capito su tutta la pagina invece che su una riga: tornato indietro
+  subito, è costato dieci minuti invece di tre consegne.
+* **La figura trova quello che il codice nasconde.** La riga diventata
+  arancione e il tondo che copriva la foto si vedono solo guardando.
