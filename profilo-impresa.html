@@ -235,8 +235,28 @@ nav img{height:36px}
    sulle carte che uscivano dallo schermo.
    ⚠️ `align-items:start`: se no la carta piu' corta si stira per pareggiare
    quella piu' alta e resta piena di vuoto. */
-.riga-rec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
-.riga-rec > *{min-width:0}
+/* ⛔ 1 SETTEMBRE 2026 (secondo giro) — TUTTE LE CARTE A META'.
+   Prima era solo la riga delle recensioni; Alessio ha detto «tutte a meta'».
+   Adesso la colonna di sinistra e' una griglia a DUE colonne uguali, e le
+   carte si mettono a due a due da sole, nell'ordine in cui stanno nel file:
+     recensioni | preventivo · scrivi all'impresa | informazioni
+     dove siamo | foto dei lavori · galleria video | certificazioni
+   Chi ha `display:none` (foto, video, prodotti, informazioni su un profilo
+   vuoto) non occupa nessuna casella: le altre si ricompattano da sole.
+   ⚠️ `minmax(0,1fr)` e non `1fr` — «almeno quanto il contenuto piu' largo»
+   e' il difetto misurato il 31 agosto sulle carte che uscivano dallo schermo,
+   e qui dentro ci sono la chat e la mappa, che sono larghe per natura.
+   ⚠️ `align-items:start`: se no la carta corta si stira per pareggiare quella
+   alta accanto e resta piena di vuoto.
+   ⚠️ `margin-bottom:0` sulle carte: `.card` ne ha 20 px, e sommandosi al
+   `gap` della griglia le righe si sarebbero staccate di 40 px invece di 20.
+   Lo spazio adesso lo mette solo il gap, ed e' lo stesso di prima.
+   ⚠️ `.riga-rec` non e' piu' una griglia sua: «sparisce» come scatola e i
+   suoi due figli entrano in questa. Serve ancora perche' sul telefono e'
+   quella che permette di rimettere il preventivo per primo. */
+.col-sinistra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.col-sinistra > *{min-width:0;margin-bottom:0}
+.riga-rec{display:contents}
 
 /* CARD CONTENUTO */
 .card{background:white;border-radius:16px;border-top:6px solid #0066ff;
@@ -625,7 +645,7 @@ nav img{height:36px}
 
 <!-- MAIN -->
 <div class="main-layout">
-  <div>
+  <div class="col-sinistra">
 
     <!-- CALENDARIO -->
     <!-- Widget calendario/meteo rimosso il 7/8/2026: chiedeva la geolocalizzazione
