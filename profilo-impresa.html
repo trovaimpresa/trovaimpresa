@@ -730,6 +730,10 @@ nav img{height:36px}
       <li id="contact-indirizzo"><div class="ci">📍</div><span>—</span></li>
       <li id="contact-tel"><div class="ci">📞</div><a href="#" id="tel-link">—</a></li>
       <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
+      <!-- ⛔ 1 settembre 2026: il WhatsApp di 26 imprese non si vedeva da
+           nessuna parte. Adesso c'e', e come le altre righe compare solo se
+           l'impresa ce l'ha. L'emoji e' la stessa del pannello (📱). -->
+      <li id="contact-whatsapp" style="display:none"><div class="ci">📱</div><a href="#" id="wa-link" target="_blank" rel="noopener">—</a></li>
       <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
       <!-- orario fisso rimosso: era uguale per tutte le imprese, cioe' inventato -->
     </ul>
@@ -1213,13 +1217,47 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
     const _sp=document.getElementById('stat-piano');
     if(_sp&&d.piano)_sp.textContent=d.piano.toUpperCase();
     const tel=d.telefono||'';
-    if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');document.getElementById('btn-tel').href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}const cb=document.getElementById('cta-bar-tel');if(cb)cb.href=th}
-    else{document.getElementById('btn-tel').style.display='none';document.getElementById('contact-tel').style.display='none';const cb=document.getElementById('cta-bar-tel');if(cb)cb.style.display='none'}
+    /* ⛔ 1 SETTEMBRE 2026 — QUESTA RIGA AVEVA SVUOTATO TUTTI I CONTATTI.
+       `#btn-tel` era l'id della carta «Chiama ora», tolta oggi. Qui veniva
+       usato SENZA controllo: `getElementById('btn-tel').href = ...` su un
+       elemento che non c'e' piu' va in errore, e l'errore si porta dietro
+       TUTTO quello che viene dopo — telefono, email, sito, indirizzo e la
+       mappa. Sulla scheda vera restavano quattro trattini.
+       E' esattamente la trappola scritta nel commento qui sopra, ricapitata:
+       ⚠️ prima di togliere un elemento si cerca il suo id nel codice.
+       Adesso lo guarda `banco-id-che-non-esistono.js`, che pretende che ogni
+       `getElementById('x')` usato senza controllo abbia il suo id in pagina. */
+    const _btnTel=document.getElementById('btn-tel');
+    if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');if(_btnTel)_btnTel.href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}const cb=document.getElementById('cta-bar-tel');if(cb)cb.href=th}
+    else{if(_btnTel)_btnTel.style.display='none';const ct=document.getElementById('contact-tel');if(ct)ct.style.display='none';const cb=document.getElementById('cta-bar-tel');if(cb)cb.style.display='none'}
     const el=document.getElementById('email-link');
     if(d.email&&el){el.href='mailto:'+d.email;el.textContent=d.email}else document.getElementById('contact-email').style.display='none';
     const sl=document.getElementById('sito-link');const cs=document.getElementById('contact-sito');
     const sito=d.sito_web||'';
     if(sito&&sl){sl.href=sito.startsWith('http')?sito:'https://'+sito;sl.textContent=sito.replace(/^https?:\/\//,'');if(cs)cs.style.display=''}
+    /* ⛔ 1 SETTEMBRE 2026 — IL WHATSAPP, FINALMENTE MOSTRATO.
+       Contati nel database: 26 imprese pubbliche ce l'hanno, e non compariva
+       da nessuna parte.
+       ⚠️ IL PREFISSO SI DECIDE DALLA LUNGHEZZA, NON DALL'INIZIO. Misurato:
+       5 imprese hanno un numero di 10 cifre che comincia per «39» — sono
+       cellulari italiani (i prefissi mobili sono 32x…39x), NON numeri col
+       prefisso internazionale. Solo 2 imprese hanno 12 cifre che cominciano
+       per 39, e quelli sono gia' completi. Se avessi scritto «comincia per 39
+       quindi e' completo», 5 link su 26 sarebbero finiti a un numero
+       inesistente.
+       Quindi: 12 cifre che iniziano per 39 -> gia' buono; 10 cifre -> ci
+       metto davanti 39. Qualsiasi altra lunghezza non la tocco e non mostro
+       la riga: meglio niente che un link sbagliato. */
+    const wl=document.getElementById('wa-link');const cw=document.getElementById('contact-whatsapp');
+    const _wa=String(d.whatsapp||'').trim();
+    if(_wa&&wl){
+      let n=_wa.replace(/[^0-9]/g,'');
+      if(n.slice(0,2)==='00')n=n.slice(2);
+      let buono='';
+      if(n.length===12&&n.slice(0,2)==='39')buono=n;
+      else if(n.length===10)buono='39'+n;
+      if(buono){wl.href='https://wa.me/'+buono;wl.textContent=_wa;if(cw)cw.style.display=''}
+    }
     /* il "torna ai risultati" punta alla ricerca giusta per questo tipo */
     try{
       const _nb=document.getElementById('nav-back');
