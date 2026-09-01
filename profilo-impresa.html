@@ -5,7 +5,44 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">Profilo — TrovaImpresa</title>
+<title id="page-title">Profilo impresa — TrovaImpresa</title>
+<!--META-SCHEDA-->
+<!-- ⛔ 1 SETTEMBRE 2026 — I META PER GOOGLE E PER WHATSAPP.
+     Fino a oggi questa pagina non aveva NIENTE: niente description, niente
+     og:*, niente JSON-LD. Su WhatsApp un link condiviso mostrava «Profilo —
+     TrovaImpresa» e basta, perche' il nome vero lo scrive JavaScript e
+     WhatsApp, Facebook e LinkedIn il JavaScript NON lo eseguono.
+     Adesso ci sono tre strati, in quest'ordine:
+     1) queste righe qui sotto: la rete di sicurezza. Valgono per tutti, non
+        dicono niente di falso, e ci sono anche se tutto il resto non parte.
+     2) l'Edge Function `netlify/edge-functions/scheda-meta.js`: legge l'id
+        dall'indirizzo, chiede la riga a Supabase e riscrive il pezzo qui
+        sopra PRIMA di spedire la pagina. E' l'unica cosa che WhatsApp vede.
+     3) il JavaScript della pagina: rifa' gli stessi meta e aggiunge il
+        JSON-LD. Serve a Google, che il JavaScript lo esegue.
+     ⚠️ I due segnaposto META-SCHEDA (quello sopra e quello in fondo al
+     blocco) sono quello che l'Edge Function cerca per sapere dove scrivere:
+     se li togli, i meta veri non arrivano piu' a WhatsApp e nessuno se ne
+     accorge, perche' la pagina continua a funzionare. Il banco
+     `banco-meta-scheda.js` li sorveglia.
+     ⚠️ E QUI NON SI SCRIVONO PER INTERO, col trattino e le parentesi: dentro
+     un commento HTML il chiudi-commento del segnaposto chiuderebbe QUESTO
+     commento, e tutto il resto della spiegazione finirebbe stampato in
+     pagina. E' successo scrivendo questa nota, l'1 settembre 2026. -->
+<meta name="description" content="Scheda di un'impresa edile o di un artigiano su TrovaImpresa: mestieri, zona di lavoro, foto dei lavori e richiesta di preventivo gratuito.">
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="TrovaImpresa">
+<meta property="og:title" content="Profilo impresa — TrovaImpresa">
+<meta property="og:description" content="Scheda di un'impresa edile o di un artigiano su TrovaImpresa: mestieri, zona di lavoro, foto dei lavori e richiesta di preventivo gratuito.">
+<meta property="og:url" content="https://trovaimpresa.com/profilo-impresa">
+<meta name="twitter:card" content="summary_large_image">
+<!-- ⚠️ logo.png e' davvero 1200x630 (controllato): queste righe non mentono.
+     L'Edge Function le sostituisce con la copertina o il logo dell'impresa
+     quando ci sono, e allora toglie larghezza e altezza, che non saprebbe. -->
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<!--/META-SCHEDA-->
 <script>
 /* Ogni scheda impresa deve valere come pagina a se' su Google.
    Prima tutte dicevano "la pagina buona e' /profilo-impresa" (quella vuota),
@@ -600,9 +637,6 @@ nav img{height:36px}
 }
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
-  <meta property="og:image" content="https://trovaimpresa.com/logo.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
 </head>
 <body>
 
@@ -1075,7 +1109,107 @@ async function caricaProfilo(id){
        E se non c'e' nessun nome, prima restava scritto «Caricamento...» per
        sempre — →1← impresa era messa cosi'. Adesso c'e' una scritta neutra. */
     const nome=nomeDaMostrare(d);
-    document.title=(nome||'Scheda impresa')+' — TrovaImpresa';
+
+    /* ============================================================
+       ⛔ 1 SETTEMBRE 2026 — I META DELLA SCHEDA, LA RICETTA.
+       Questa funzione dice COSA scrivere: titolo, descrizione, immagine e
+       indirizzo della scheda. Non tocca la pagina: restituisce solo le
+       parole. Serve cosi' perche' le stesse parole servono in due posti:
+         · qui, per Google (che il JavaScript lo esegue);
+         · nell'Edge Function `netlify/edge-functions/scheda-meta.js`, per
+           WhatsApp e Facebook (che il JavaScript NON lo eseguono).
+       ⚠️ LE DUE COPIE DEVONO ESSERE IDENTICHE, CARATTERE PER CARATTERE.
+       Se una cambia e l'altra no, il cliente su WhatsApp vede una cosa e
+       Google un'altra, e nessuno se ne accorge. Per questo il banco
+       `banco-meta-scheda.js` estrae questa funzione dai due file e confronta
+       l'impronta md5: se non combaciano diventa rosso.
+       ⚠️ NIENTE STELLE nel JSON-LD: oggi 0 imprese su 82 hanno una
+       recensione, e dichiarare a Google un voto che non esiste e' la cosa
+       che punisce piu' volentieri.
+       ============================================================ */
+    function costruisciMeta(d){
+      var nome=String((d&&d.nome_attivita)||'').trim()||String((d&&d.nome)||'').trim()||'Scheda impresa';
+      var citta=String((d&&d.citta)||'').trim();
+      var tipo=String((d&&d.tipo)||'').trim().toLowerCase();
+      var CAT={impresa:'Impresa edile',artigiano:'Artigiano',professionista:'Professionista',negozio:'Negozio'};
+      var categoria=CAT[tipo]||'Impresa';
+      var mest=(d&&Array.isArray(d.mestieri)&&d.mestieri.length)
+        ? d.mestieri.filter(Boolean).join(', ')
+        : String((d&&d.mestiere)||'').trim();
+      var titolo=nome+' — '+categoria+(citta?' a '+citta:'')+' | TrovaImpresa';
+      if(titolo.length>70) titolo=nome+(citta?' — '+categoria+' a '+citta:'')||titolo;
+      var pezzi=[];
+      pezzi.push(nome+': '+categoria.toLowerCase()+(citta?' a '+citta:'')+'.');
+      if(mest) pezzi.push('Si occupa di '+mest+'.');
+      var descr=String((d&&d.descrizione)||'').trim();
+      /* la descrizione la scrive l'impresa e spesso non finisce col punto:
+         senza, in Google si legge «...certificato Chiedi un preventivo» */
+      if(descr){descr=descr.replace(/\s+/g,' ');if(!/[.!?…]$/.test(descr))descr+='.';pezzi.push(descr);}
+      pezzi.push('Chiedi un preventivo gratuito su TrovaImpresa.');
+      var descrizione=pezzi.join(' ');
+      if(descrizione.length>300) descrizione=descrizione.slice(0,297).replace(/\s+\S*$/,'')+'…';
+      var pers=(d&&d.personalizzazione)||{};
+      var immagine=String(pers.banner_url||(d&&d.foto_copertina_url)||(d&&d.logo_url)||'').trim()
+        ||'https://trovaimpresa.com/logo.png';
+      var url='https://trovaimpresa.com/profilo-impresa?id='+String((d&&d.id)||'');
+      return {titolo:titolo,descrizione:descrizione,immagine:immagine,url:url,
+              nome:nome,citta:citta,categoria:categoria,mestieri:mest};
+    }
+
+    var _M=costruisciMeta(d);
+    document.title=_M.titolo;
+    /* i meta di riserva scritti nel file vengono riscritti con quelli veri.
+       ⚠️ si CAMBIA il tag che c'e' gia', non se ne aggiunge un altro: due
+       og:title diversi nella stessa pagina e chi legge sceglie a caso. */
+    (function(){
+      function scrivi(tipo,chiave,valore){
+        var e=document.head.querySelector('meta['+tipo+'="'+chiave+'"]');
+        if(!e){e=document.createElement('meta');e.setAttribute(tipo,chiave);document.head.appendChild(e);}
+        e.setAttribute('content',valore);
+      }
+      scrivi('name','description',_M.descrizione);
+      scrivi('property','og:title',_M.titolo);
+      scrivi('property','og:description',_M.descrizione);
+      scrivi('property','og:url',_M.url);
+      scrivi('property','og:image',_M.immagine);
+      scrivi('name','twitter:title',_M.titolo);
+      scrivi('name','twitter:description',_M.descrizione);
+      scrivi('name','twitter:image',_M.immagine);
+      /* larghezza e altezza valgono solo per il logo del sito: di una foto
+         caricata da un'impresa non sappiamo la misura, e dirla sbagliata e'
+         peggio che non dirla */
+      if(_M.immagine.indexOf('trovaimpresa.com/logo.png')<0){
+        ['og:image:width','og:image:height'].forEach(function(k){
+          var e=document.head.querySelector('meta[property="'+k+'"]'); if(e)e.remove();
+        });
+      }
+      /* JSON-LD: la carta d'identita' della scheda per Google. Solo cose
+         vere e verificabili sulla pagina. Niente stelle, niente prezzi. */
+      try{
+        var ld={'@context':'https://schema.org','@type':'LocalBusiness',
+          name:_M.nome, url:_M.url, image:_M.immagine, description:_M.descrizione};
+        var ind=[];
+        if(d.indirizzo) ind.push(d.indirizzo);
+        if(_M.citta||d.provincia||d.cap){
+          ld.address={'@type':'PostalAddress',
+            streetAddress:d.indirizzo||undefined, addressLocality:_M.citta||undefined,
+            addressRegion:d.provincia||undefined, postalCode:d.cap||undefined,
+            addressCountry:'IT'};
+        }
+        if(d.telefono) ld.telephone=String(d.telefono);
+        if(d.email) ld.email=String(d.email);
+        if(d.lat&&d.lng) ld.geo={'@type':'GeoCoordinates',latitude:d.lat,longitude:d.lng};
+        if(d.anno_fondazione) ld.foundingDate=String(d.anno_fondazione);
+        if(_M.citta) ld.areaServed=_M.citta;
+        if(_M.mestieri) ld.knowsAbout=_M.mestieri.split(', ');
+        if(d.partita_iva) ld.vatID='IT'+String(d.partita_iva).replace(/\D/g,'');
+        var vecchio=document.getElementById('ld-scheda'); if(vecchio)vecchio.remove();
+        var s=document.createElement('script');
+        s.type='application/ld+json'; s.id='ld-scheda';
+        s.textContent=JSON.stringify(ld);
+        document.head.appendChild(s);
+      }catch(_e){}
+    })();
     document.getElementById('profile-name').textContent=nome||'Scheda impresa';
     if(d.tipo){
       const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());

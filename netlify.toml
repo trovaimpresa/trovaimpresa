@@ -321,6 +321,14 @@
   to = "/.netlify/functions/sitemap-offerte"
   status = 200
 
+# ⛔ 1 settembre 2026 — Sitemap delle schede impresa, generata al volo dal
+# database. Prima di oggi «profilo-impresa» compariva 0 volte in tutte le
+# sitemap: le 82 schede pubbliche non erano in nessun elenco che Google legge.
+[[redirects]]
+  from = "/sitemap-imprese.xml"
+  to = "/.netlify/functions/sitemap-imprese"
+  status = 200
+
 # La bacheca candidature cambia indirizzo per essere coerente con /offerte-lavoro
 [[redirects]]
   from = "/ricerca-candidati"
