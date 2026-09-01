@@ -1644,7 +1644,26 @@ function contaRecensioni(righe){
     });
   });
   var media=voti.length?voti.reduce(function(a,b){return a+b},0)/voti.length:null;
-  return {numero:arr.length,media:media};
+  /* ⛔ 2 settembre 2026 — IL CONTATORE CHE SI FERMAVA A 50.
+     `recensioni_pubbliche()` ha un `limit 50`: serve a non spedire al browser
+     un elenco senza fine, ma il numero qui sotto contava le RIGHE ARRIVATE,
+     quindi un'impresa con 62 recensioni ne avrebbe dichiarate 50 — e nessuno
+     se ne sarebbe accorto. Da oggi la funzione manda anche `totale`, che e'
+     `count(*) over()`: in Postgres si calcola prima di `order by` e `limit`,
+     quindi dice quante sono davvero. Provato sul database: 50 righe spedite,
+     totale 62.
+     ⚠️ Se `totale` non c'e' (risposta vecchia, o una chiamata da un'altra
+     parte) si torna a contare le righe: la pagina non deve dipendere da una
+     colonna per funzionare. E un totale piu' PICCOLO delle righe arrivate e'
+     una risposta storta: si tiene il numero delle righe.
+     ⚠️ Il numero arriva da PostgREST come numero o come testo, secondo la
+     versione: passa da parseInt in tutti e due i casi. */
+  var numero=arr.length;
+  if(arr.length&&arr[0]&&arr[0].totale!=null){
+    var tot=parseInt(arr[0].totale,10);
+    if(isFinite(tot)&&tot>=arr.length)numero=tot;
+  }
+  return {numero:numero,media:media};
 }
 function scriviConteggioRecensioni(righe){
   var c=contaRecensioni(righe);
