@@ -744,7 +744,14 @@ nav img{height:36px}
     <div class="card rec-card" style="border-top-color:#0066ff">
       <div class="card-title">⭐ Recensioni dei clienti</div>
       <div class="rec-tabs">
-        <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni (<span id="rec-count">0</span>)</button>
+        <!-- 2 settembre 2026: le parentesi NON stanno piu' nel markup. Con zero
+             recensioni la linguetta diceva «Recensioni (0)» — l'unico posto della
+             scheda che dichiarava un vuoto invece di tacere, e lo diceva su tutte
+             e 82 le schede. Adesso il numero e le sue parentesi li scrive
+             `scriviConteggioRecensioni`, e quando e' zero non scrive niente.
+             ⚠️ Lo span parte VUOTO: prima diceva «0» finche' non arrivava la
+             risposta, quindi lo zero si vedeva comunque per un istante. -->
+        <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni<span id="rec-count"></span></button>
         <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia recensione</button>
       </div>
       <div id="rec-tab-lista"><div id="rec-lista"></div></div>
@@ -1641,7 +1648,10 @@ function contaRecensioni(righe){
 }
 function scriviConteggioRecensioni(righe){
   var c=contaRecensioni(righe);
-  var n=document.getElementById('rec-count');       if(n)n.textContent=c.numero;
+  /* 2 set 2026: la linguetta. Zero recensioni -> nessuna parentesi, resta
+     «⭐ Recensioni»; dalla prima in poi torna «⭐ Recensioni (1)». Le parentesi
+     e lo spazio davanti li scrive questa riga, non il markup. */
+  var n=document.getElementById('rec-count');       if(n)n.textContent=(c.numero>0?' ('+c.numero+')':'');
   /* 1 set 2026: zero recensioni -> trattino, come la valutazione. Un «0»
      grande nella fascia blu su ogni scheda fa piu' male che bene. */
   var s=document.getElementById('stat-recensioni'); if(s)s.textContent=(c.numero>0?c.numero:'—');
