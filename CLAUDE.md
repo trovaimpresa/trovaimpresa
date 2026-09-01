@@ -19502,3 +19502,195 @@ Restano molti blu diversi (→#0066ff←, →#0052cc←, →#2863a7←, →#1a52
 * **Le prove finte stanno nel browser di prova, non nel database.** Le due
   recensioni della figura dei colori erano una risposta di rete inventata: nel
   database non è stata scritta una riga.
+
+# 31 AGOSTO 2026 (sera) — LA HOMEPAGE SUL TELEFONO, DA 7848 A 6370 PIXEL
+
+Chiusa la scheda pubblica, Alessio ha scelto di riprendere la homepage
+compatta sul telefono, che era rimasta in sospeso dal 30 agosto.
+
+Prima cosa: **misurarla tutta**, invece di indovinare. Su un telefono da
+375px la pagina era alta →7848← px, quasi →10← schermate:
+
+| blocco | altezza |
+|---|---|
+| barra del menu | →262← px |
+| hero (logo, slogan, casella citta') | →617← px |
+| categorie + registrati | →1945← px |
+| guide sui costi | →1534← px |
+| perche' scegliere TrovaImpresa | →1478← px |
+| recensioni | →686← px |
+| piede | →1286← px |
+
+E la cosa piu' grave non era la lunghezza: era **cosa si vedeva nella prima
+schermata**. Su →812← px, la casella della citta' cominciava a →584← px, il
+bottone «Cerca» a →725← px e «Non lo so, usa la mia posizione» a →787←, gia'
+mezzo fuori. Chi apriva il sito dal telefono vedeva quasi solo menu e slogan.
+
+## 1. Il menu dietro un bottone
+
+Il rimedio del 30 agosto (mandare le 7 voci a capo) le aveva rese tutte
+visibili, ma aveva portato la barra a →262← px. Messe le tre strade in una
+figura, Alessio ha scelto il bottone «Menu».
+
+Sulla riga restano logo, «Menu» e «Iscriviti gratis»: →88← + →74← + →107← px
+piu' i vuoti, dentro i →347← disponibili. «Accedi al tuo pannello» (→178← px)
+e' entrato nel menu insieme alle voci: chi ha gia' un pannello sa dove
+cercarlo, chi arriva la prima volta no.
+
+Misurato: barra da →262← a →64← px chiusa, e →262← px riaperta con tutte e
+→7← le voci. Sul computer identico a prima (→107← px), perche' li' il bottone
+ha `display:none` e non esiste proprio.
+
+⚠️ Il banco del 30 agosto (`banco-menu-telefono.js`) e' diventato rosso: non
+per il codice, ma perche' cercava il riquadro dei link con
+`<div class="nav-links">` e adesso quel div ha anche un id. Le →4← regole CSS
+che controlla servono ancora tutte — sono quelle che fanno scendere le voci
+QUANDO IL MENU E' APERTO. Corretta quella riga e scritto in testa al banco
+perche', cosi' tra un mese si capisce.
+
+## 2. Il marchio due volte
+
+Nei primi 100 px il marchio compariva due volte: il logo della barra a →10←
+px (88x44) e il logo grande dell'hero a →98← px (156x78). Sul telefono
+spento il secondo: titolo da →194← a →98← px, casella citta' da →414← a
+→318←, →96← px risparmiati (78 di logo piu' 18 di margine).
+
+Sul computer resta: li' la barra e' alta 107 px e il logo grande e' l'unica
+cosa che apre la pagina.
+
+## 3 e 4. Le carte del «Perche'» e le guide dei costi
+
+Stessa scoperta due volte. **La strada ovvia — due carte per riga — non
+funziona**: provata e misurata, le carte si alzavano da →221← a →398← px,
+perche' il testo non si dimezza quando dimezzi la larghezza, raddoppia in
+altezza. Si risparmiava meno e «Geolocalizzazione» restava tagliata.
+
+Quello che funziona: **l'icona di fianco al titolo invece che sopra**.
+
+* «Perche' scegliere»: il quadratino da 46 px stava sopra il titolo e costava
+  58 px per carta (46 piu' 12 di margine). Griglia da →1303← a →874← px,
+  carte da →221← a →115-166←.
+* Guide dei costi: l'emoji costava 40 px per carta (30 piu' 10). Griglia da
+  →1254← a →951← px, carte da →194← a →136-158←.
+
+Nessun testo tolto, nessun testo rimpicciolito, →0← scritte tagliate. Sul
+computer non cambia niente: tre colonne per le prime, quattro per le seconde.
+
+⚠️ Sulle guide serve il `!important`, e non e' pigrizia: quelle carte non
+hanno una classe, hanno lo stile scritto DENTRO il tag
+(`style="display:block;...padding:20px"`), e lo stile nel tag batte qualsiasi
+foglio a meno di un !important. Per lo stesso motivo si punta all'indirizzo
+del link, `a[href^="/quanto-costa"]`: e' la cosa piu' stabile che hanno.
+
+⚠️ Sulle guide, al primo tentativo la colonna dell'emoji era di →34← px e il
+banco ha contato →6← «scritte tagliate»: erano le sei emoji da 30 px che
+sbordavano dal loro riquadro. Allargata a →42← px, zero.
+
+⚠️ Perche' non si prova nemmeno a metterne due per riga: ci pensa gia'
+`mobile.css`, che con `[style*="grid-template-columns"]{...1fr !important}`
+porta a una colonna ogni griglia con lo stile nel tag.
+
+## 5. Il piede a due colonne
+
+Era una colonna sola da →1132← px: quattro blocchi larghi →335← px ciascuno
+per contenere link corti come «Cerca imprese». Mezza larghezza sprecata, per
+tutta l'altezza.
+
+Adesso il marchio tiene la riga tutta sua e le tre liste vanno a due per
+riga: piede da →1132← a →812← px, colonne da →161← px. Il link piu' lungo e'
+«Informativa sulla privacy» e ci sta. Sul computer resta a quattro colonne.
+
+⚠️ Nel banco c'e' una prova sull'ORDINE: piu' su nel file c'e' gia' un
+`.footer-content{grid-template-columns:1fr}` dentro un @media piu' stretto, e
+a parita' di peso vince l'ultimo. Se qualcuno sposta il blocco piu' in alto,
+il piede torna a una colonna — e il banco lo dice.
+
+## 6. «Leggi tutto» sul sottotitolo lungo
+
+L'ultimo blocco, `#categorie` + `#registrati`, non aveva spazio sprecato:
+aveva **parole**. Le tessere erano gia' compatte (→13← px) e gia' due per
+riga. Il peso stava nelle due intestazioni, →812← px, di cui →316← px erano i
+due sottotitoli (→133← e →297← caratteri).
+
+Messo davanti alla scelta, Alessio ha scelto «due righe e leggi tutto»:
+nessuna parola tolta, il testo resta intero nell'HTML e Google lo legge
+comunque.
+
+⚠️ Applicato a UNO SOLO dei due. Provato anche sull'altro e misurato: il
+sottotitolo corto scendeva da →105← a →53← px, ma il bottone ne costa →44←
+(il bersaglio minimo per un dito), quindi la sezione si accorciava di →9← px.
+Un bottone in piu' per niente. Su `#registrati` invece: da →211← a →53← px,
+sezione da →915← a →801←.
+
+⚠️ Per riaprire il testo NON si scrive `-webkit-line-clamp:none`: si toglie
+il `display:-webkit-box`, e il taglio smette di esistere.
+
+## Dove siamo arrivati, misurato dal vivo
+
+| | 30 agosto | adesso |
+|---|---|---|
+| pagina intera | →7848← px | →6370← px |
+| barra del menu | →262← px | →64← px |
+| casella della citta' | →584← px | →290← px |
+| guide dei costi | →1534← px | →950← px |
+| perche' scegliere | →1478← px | →871← px |
+| piede | →1286← px | →812← px |
+| pezzi fuori dal bordo | — | →0← |
+| scorrimento laterale | — | →0← |
+
+→1478← px in meno, quasi due schermate. E la casella di ricerca, che era la
+cosa che serve davvero, adesso si vede senza scorrere.
+
+## Cosa resta sulla homepage
+
+* Le →4← tessere di `#categorie` (→512← px) e di `#registrati` (→441← px):
+  gia' compatte, gia' due per riga. Non c'e' niente da guadagnare senza
+  stringere le scritte, e sono gia' a 13 px.
+* Le tre domande sopra ogni titolo («Sei un privato? / Devi fare dei lavori?
+  / Vuoi dei preventivi?») valgono →130← e →84← px. Sono testo, non spazio.
+* Il blocco recensioni (→686← px) non e' mai stato guardato.
+
+## Le regole di lavoro, ribadite dai fatti di stasera
+
+* **La strada ovvia va misurata prima di prenderla.** Due volte «due carte
+  per riga» sembrava la risposta, e due volte i numeri hanno detto di no.
+* **Un banco puo' diventare rosso perche' il mondo e' cambiato, non perche'
+  il codice e' rotto.** Quando succede si aggiorna il banco e si scrive in
+  testa perche', non lo si cancella.
+* **Un banco puo' anche essere rosso per colpa sua**: la prima versione di
+  `banco-leggi-tutto.js` si accusava da sola per una espressione scritta
+  male. Riscritta contando i tagli invece di indovinarli.
+* **Netlify puo' fermarsi per una cosa che non c'entra col codice.** Stasera
+  erano finiti i crediti: il deploy fallito NON riparte da solo quando li
+  rimetti, va lanciato a mano con «Trigger deploy». Sintomo: il push dice
+  `main -> main`, e il sito continua a servire un file piu' piccolo.
+* **La cache del browser mente dopo ogni push**, e stasera l'ha fatto quattro
+  volte. Si controlla con `fetch(pagina,{cache:'no-store'})` e si confronta
+  il PESO del file, non l'aspetto della pagina.
+
+## ⛔ Due banchi lasciati rossi la sera del 31 agosto
+
+Facendo girare TUTTI i banchi della cartella alla chiusura (non solo quelli
+del giorno): →33← verdi e →2← rossi. Rossi per colpa delle modifiche alla
+testata di `pannello-impresa.html` del 31 agosto, non viste perche' si
+guardavano solo i banchi nuovi.
+
+* **`banco-banner.js`** (49 verdi, 5 rosse): `applicaBannerHero` non e' piu'
+  identica nei quattro pannelli — md5 →dd8168f85e76cb70f799a9b4f69c3e59← su
+  impresa contro →5153f040925bfe2ed625b8c33569be93← sugli altri tre. E i
+  controlli «contain», «niente piastrelle», «ha-banner» e «Personalizza dice
+  la forma giusta» erano della vecchia testata, sostituita su impresa da
+  `#dash-cover` con `background-size:cover`.
+* **`banco-faq-30ago.js`** (487 verdi, 1 rossa): la FAQ «Ho caricato un nuovo
+  logo ma non si vede» dice di premere «Carica logo», pulsante che il 31
+  agosto e' stato sostituito dalla macchina fotografica `#btn-logo`. La FAQ
+  manda i clienti a cercare una cosa che non esiste piu'.
+
+Da decidere con Alessio: portare la testata nuova anche sugli altri tre
+pannelli (e i banchi tornano verdi da soli), oppure aggiornare i due banchi
+perche' la differenza e' voluta. La FAQ va corretta comunque.
+
+**La regola che ne esce:** a fine giornata si fanno girare TUTTI i banchi
+della cartella, non solo quelli delle consegne di quel giorno. Un banco di
+tre settimane fa e' l'unica cosa che si accorge di quello che hai rotto
+altrove.
