@@ -354,7 +354,7 @@
     .gest-carte { grid-template-columns:minmax(0,230px); }
     .gest-mezzo { order:-1; }
   }
-  .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
     background:white; border-radius:16px; padding:20px;
     box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e537d;
@@ -362,6 +362,13 @@
   }
   .dash-stat-card:nth-child(2) { border-top-color:#e65100; }
   .dash-stat-card:nth-child(3) { border-top-color:#1565c0; }
+  /* verde: la stessa tinta del bollino «Verificata» piu' in basso in questa
+     pagina. Il viola #7c3aed e' del gestionale: usarlo qui faceva sembrare
+     questa casella un pezzo del gestionale. */
+  .dash-stat-card:nth-child(4) { border-top-color:#1b8a3f; }
+  /* la riga piccola sotto il numero delle richieste: stessa misura e stesso
+     grigio dell'etichetta qui sopra, senza le maiuscole */
+  .dash-stat-sub { font-size:13px; color:var(--light); font-weight:600; margin-top:6px; }
   .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
   .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
   .dash-stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
@@ -1270,7 +1277,17 @@
   }
   .btn-elimina-cert:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.13); }
 
-  .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+/* ⛔ 2 SETTEMBRE 2026 — LA QUARTA CARTA: LE RICHIESTE DI CONTATTO.
+   Da oggi la scheda pubblica conta quante persone chiedono i contatti di
+   un'impresa (tabella `contatti`). Quel numero deve vederlo l'impresa, se no
+   e' un dato che sa solo il database.
+   ⚠️ La griglia era `repeat(3,1fr)` fissa: con quattro carte la quarta
+   sarebbe andata a capo da sola, larga un terzo, storta. Adesso e'
+   «quante ce ne stanno», e il 150 non e' a caso: e' la misura che sul
+   telefono da 390 px fa entrare DUE carte per riga (150+150+14 di spazio =
+   314, dentro i 358 disponibili) e sul computer le mette tutte e quattro in
+   fila. Con 180 px sul telefono ne sarebbe entrata una sola per riga. */
+  .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
     background:white; border-radius:16px; padding:20px;
     box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e537d;
@@ -1278,6 +1295,13 @@
   }
   .dash-stat-card:nth-child(2) { border-top-color:#e65100; }
   .dash-stat-card:nth-child(3) { border-top-color:#1565c0; }
+  /* verde: la stessa tinta del bollino «Verificata» piu' in basso in questa
+     pagina. Il viola #7c3aed e' del gestionale: usarlo qui faceva sembrare
+     questa casella un pezzo del gestionale. */
+  .dash-stat-card:nth-child(4) { border-top-color:#1b8a3f; }
+  /* la riga piccola sotto il numero delle richieste: stessa misura e stesso
+     grigio dell'etichetta qui sopra, senza le maiuscole */
+  .dash-stat-sub { font-size:13px; color:var(--light); font-weight:600; margin-top:6px; }
   .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
   .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
   .dash-stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
@@ -2131,6 +2155,16 @@
           <div class="dash-stat-icon">📷</div>
           <div class="dash-stat-num" id="dash-stat-foto">0</div>
           <div class="dash-stat-lbl">Foto caricate</div>
+        </div>
+        <!-- ⛔ 2 settembre 2026: quante PERSONE hanno chiesto i tuoi contatti
+             dalla scheda pubblica (numero mostrato, WhatsApp, email, sito).
+             Quando sono zero non si scrive «0»: si scrive che ancora non e'
+             arrivato nessuno — stessa regola dello zero delle recensioni. -->
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">📞</div>
+          <div class="dash-stat-num" id="dash-stat-contatti">—</div>
+          <div class="dash-stat-lbl">Richieste di contatto</div>
+          <div class="dash-stat-sub" id="dash-stat-contatti-sub">questo mese</div>
         </div>
       </div>
 
@@ -4711,6 +4745,7 @@ async function inizializza() {
 
   await caricaPreventivi();
   await caricaRecensioni();
+  await caricaContatti();
   await caricaListaLavoriFoto();
   await caricaCertificazioni();
   await caricaCantieri();
@@ -5362,6 +5397,61 @@ async function caricaLogoImpresa(event) {
   if (placeholder) placeholder.style.display = 'none';   /* il tondo grigio col disegno */
   const prevLogoWrap = document.getElementById('prev-logo-wrap');
   if (prevLogoWrap) prevLogoWrap.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
+}
+
+/* ============================================================
+   QUANTE PERSONE HANNO CHIESTO I TUOI CONTATTI — 2 settembre 2026
+   Legge la tabella `contatti`, che la scheda pubblica riempie ogni volta che
+   un cliente chiede un contatto (mostra il numero, apre WhatsApp, scrive una
+   mail, apre il sito).
+   ⚠️ Si contano le PERSONE, non le righe: due richieste diverse dello stesso
+   browser (per esempio prima il numero e poi WhatsApp) sono UNA persona che
+   ti stava cercando. Il database gia' scarta le ripetizioni della stessa cosa
+   entro un'ora; qui si raggruppa per visitatore.
+   ⚠️ Chi non ha il numero del visitatore (browser che vietano la memoria)
+   conta come una persona a se': meglio contarla una volta in piu' che
+   buttarla via.
+   ⚠️ Il lucchetto della tabella fa gia' il lavoro: un'impresa collegata vede
+   solo le proprie righe. Qui non serve nessun altro filtro oltre all'id.
+   ⚠️ ZERO NON SI SCRIVE: un «0» grande nel pannello di un'impresa che ha
+   appena cominciato e' una brutta accoglienza. Si scrive il trattino e sotto
+   «Ancora nessuno questo mese» — stessa regola dello zero delle recensioni
+   sulla scheda pubblica (1 settembre). */
+function _quantePersone(righe) {
+  const visti = new Set();
+  let senzaNome = 0;
+  (righe || []).forEach(function (r) {
+    if (r && r.visitatore) visti.add(r.visitatore);
+    else senzaNome++;
+  });
+  return visti.size + senzaNome;
+}
+async function caricaContatti() {
+  const num = document.getElementById('dash-stat-contatti');
+  const sub = document.getElementById('dash-stat-contatti-sub');
+  if (!num || !impresaCorrente) return;
+  const { data, error } = await sb.from('contatti')
+    .select('visitatore, created_at')
+    .eq('impresa_id', impresaCorrente.id);
+  if (error) {
+    /* se il database non risponde non si inventa uno zero: si dice che il
+       numero non si sa */
+    num.textContent = '—';
+    if (sub) sub.textContent = 'non riesco a leggerlo';
+    console.error('contatti:', error.message);
+    return;
+  }
+  const righe = data || [];
+  const inizioMese = new Date(); inizioMese.setDate(1); inizioMese.setHours(0, 0, 0, 0);
+  const delMese = righe.filter(function (r) { return new Date(r.created_at) >= inizioMese; });
+  const personeMese = _quantePersone(delMese);
+  const personeTutte = _quantePersone(righe);
+  num.textContent = personeMese > 0 ? String(personeMese) : '—';
+  if (sub) {
+    sub.textContent = personeMese > 0
+      ? ('questo mese · ' + personeTutte + ' in tutto')
+      : 'Ancora nessuno questo mese';
+  }
 }
 
 
