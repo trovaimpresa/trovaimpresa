@@ -20269,6 +20269,25 @@ pezzo del gestionale. Alessio: «il viola adesso confonde». Sostituito con
 
 ---
 
+## LA LISTA DEI 10 — dove siamo arrivati
+
+| n | cosa | stato |
+|---|---|---|
+| 1 | Pastiglie dei mestieri fuori riga | ✅ |
+| 2 | Linguetta «Recensioni (0)» | ✅ |
+| 3 | `recensioni_pubbliche()` ferma a 50 | ✅ |
+| 4 | Logo TrovaImpresa sostituito dal logo impresa nella barra | ⬜ decisione di Alessio |
+| 5 | Bollino «P. IVA» | ✅ |
+| 6 | Titolo e descrizione delle foto dei lavori | ✅ |
+| 7 | Orari: colonna vuota su tutte | ⬜ decisione di Alessio |
+| 8 | I 4 pezzi di CSS sotto i 13px | ⬜ |
+| 9 | Pulsante «📱 Mobile» dell'Anteprima rotto | ⬜ |
+| 10 | `pannello-negozio.html`: testata vecchia e copertina | ⬜ |
+
+**Si riparte dal 7.**
+
+---
+
 ## Le regole di lavoro, ribadite dai fatti di oggi
 
 * **La consegna è cinque cose, non quattro**: banco verde · controllo verde ·
@@ -20285,3 +20304,254 @@ pezzo del gestionale. Alessio: «il viola adesso confonde». Sostituito con
   niente da fare, ci va comunque scritto perché.
 * **Il colore si misura sul reso.** `getComputedStyle(b).backgroundColor` su
   tutti gli otto bottoni: `rgb(0,102,255)` × 8. Guardare il CSS non basta.
+
+---
+
+# 2 SETTEMBRE 2026, SERA — LE QUATTRO CARTE SUGLI ALTRI PANNELLI, E LA FINESTRA CHE SPIEGA PRIMA DI FAR PAGARE
+
+Otto consegne, tutte pubblicate. Ultimo commit **bc9598e**.
+La lista dei dieci lavori del 2 settembre si chiude qui a metà: fatti i numeri
+**1, 2, 3, 5 e 6**; restano il **4, 7, 8, 9 e 10** (in fondo).
+
+---
+
+## LE CONSEGNE DELLA SERA
+
+1. **Le icone che non c'erano.** Nelle quattro carte, «Prova 30 giorni» ed
+   «Entra e vedi» restavano emoji colorate mentre le altre due erano icone a
+   tratto. Motivo: il traduttore emoji→SVG in fondo alla pagina ha un elenco
+   chiuso, e 🎁 e 👀 non c'erano. Aggiunte le due icone (regalo e occhio) con lo
+   stesso tratto delle altre. Misurato dal vivo: **8 icone a tratto su 8**.
+2. **Le scritte delle carte più leggibili**, chiesto da Alessio («sono
+   scolorite, si fa fatica a leggere»): titolo da 14 a **16 px**, testo da 13 a
+   **14 px**, nome del gestionale da 1.2 a **1.5rem**, tutto sul nero `#1a1a1a`
+   che è il `--dark` già in pagina. Nessun colore nuovo.
+3. **Titolo e descrizione delle foto dei lavori** sulla scheda pubblica
+   (`profilo-impresa.html`): erano nel database — 76 foto su 134 — e non si
+   vedevano da nessuna parte. Ora il titolo sta sotto la foto nella griglia
+   (14 px, `#333`), e titolo + descrizione dentro la foto grande (16 e 14 px,
+   bianchi); le frecce cambiano anche la didascalia. ⚠️ Una misura cambiata e
+   dichiarata: la foto grande passa da `90vh` a **`80vh`** per far posto alla
+   scritta. Banco `prove-claude/banco-titoli-foto.js`, **26 prove**.
+   Difetto trovato durante le prove: una foto **senza** titolo lasciava un
+   rettangolo grigio vuoto sotto — chiuso con `align-items:start` sulla griglia.
+4. **Le quattro carte del gestionale portate su `pannello-impresa.html` e
+   `pannello-professionisti.html`.** Non a mano: con un generatore
+   (`prove-claude/genera-4-carte.py`) che prende i **7 pezzi** cambiati fra
+   l'artigiano di prima e quello di oggi e li riscrive interi. Contati dopo:
+   `<div` 41 / `</div>` 41, **8 carte**, **0 id doppi** su tutti e due.
+5. **La casella «Richieste di contatto»** sugli stessi due pannelli, col
+   generatore generico `prove-claude/porta-pezzi.py` (5 pezzi).
+6. **L'elenco delle richieste**, su tutti e tre: si clicca la casella e si apre
+   una finestra — raggruppato per mese, il più recente in cima, una riga per
+   richiesta con **che cosa** («Numero mostrato», «WhatsApp», «Email», «Sito»)
+   e **quando**. Nessun dato del cliente: non ce l'abbiamo e non lo vogliamo.
+   Zero righe = «Ancora nessuno questo mese», non una tabella vuota.
+   Banco `prove-claude/banco-elenco-contatti.js`, **23 prove**.
+7. **«Attiva» adesso spiega prima di far pagare.** Vedi il capitolo qui sotto.
+8. **`prezzi.html`**: via la scheda «Gratuito» (Alessio: «gratuito non ci deve
+   essere più»), si torna a due colonne e alla larghezza di prima, 1100.
+
+---
+
+## ⛔ «L'UNICA INFORMAZIONE ERA IL PREZZO»
+
+### Il difetto, parole sue
+
+> «premi attiva? da lì si apre la pagina informativa e poi se vuoi paghi.
+> come lo hai fatto adesso l'unica informazione è il prezzo»
+
+Rifacendo le porte in quattro carte avevo **perso per strada** la riga che
+diceva cosa c'era dentro il gestionale. Le due porte vecchie ce l'avevano, le
+quattro carte no. Alessio se n'è accorto e me l'ha detto in un altro modo prima
+(«le card informative, almeno una lasciala», «prima erano due adesso 0»), e io
+ho rimesso solo la riga — non bastava.
+
+### Come è finita
+
+Premendo «Attiva» si apre una **finestra del piano**: il nome, la frase che dice
+cos'è, l'elenco di **cosa c'è dentro** (le stesse voci di `prezzi.html`), e in
+fondo i **due prezzi** che portano a Stripe. Poi si paga, se si vuole.
+
+> ⛔ **Quando si rifà la forma di una cosa, si conta che pezzi aveva prima.**
+> Le due porte avevano: icona, nome, **cosa c'è dentro**, un pulsante. Le carte
+> nuove avevano tutto tranne il terzo. Un pezzo perso non fa rumore.
+
+### Il bottone tagliato a metà
+
+Il primo tentativo teneva i prezzi in fondo con `position:sticky` dentro la
+parte che scorre: sullo schermo il bottone «29 € al mese» restava **tagliato a
+metà**. Rifatto con una fascia sua (`.pi-piede`), fuori dal `overflow-y:auto`,
+con la finestra a `display:flex; flex-direction:column; max-height:88vh`.
+
+> ⛔ **`sticky` dentro una scatola che scorre non basta a tenere un bottone
+> intero.** Quello che deve restare sempre visibile si mette fuori da quello che
+> scorre, non incollato dentro.
+
+---
+
+## ⛔ «SEMBRA PIÙ VANTAGGIOSO QUELLO DA 29»
+
+Guardando le due schede dei prezzi, Alessio:
+
+> «sembra più vantaggioso quello da 29»
+
+E aveva ragione, misurato: il **Premium 17 righe**, il **Premium AI 6** — perché
+diceva «Tutto del Premium +» e poi solo le cinque righe dell'AI. Sotto restava
+un buco bianco. Un piano che costa **10 € in più al mese** sembrava il più
+povero dei due.
+
+Rifatto in tutti e due i posti dove compare l'elenco:
+
+* `prezzi.html`: la scheda Premium AI ha **prima** le righe dell'AI, **poi**
+  tutto l'elenco del Premium → **22 righe contro 18**, stessa altezza, niente
+  buco.
+* la finestra del piano nei tre pannelli: stesso difetto, stessa cura
+  (`PIANI_INFO['premium-ai']` da 6 voci a 22).
+
+> ⛔ **Il confronto fra due piani si guarda a occhio, non a parole.** «Tutto del
+> Premium +» è corretto e inutile: chi guarda conta le righe. Il piano che costa
+> di più deve **sembrare** il più ricco, o non si vende.
+
+---
+
+## LA CATENA DEL PAGAMENTO, PROVATA DAL VIVO
+
+Sul sito vero, dal pannello:
+
+| prova | risultato |
+|---|---|
+| «Attiva Premium e gestionale» | apre la finestra: 17 righe, 29 €/249 € in fondo |
+| «Attiva Premium e gestionale AI» | apre: 39 €/349 € |
+| la ✕ chiude | sì |
+| la cassa risponde | **4 su 4** (29 · 249 · 39 · 349) → `checkout.stripe.com` |
+
+Nessun pagamento fatto: si è solo chiesto alla funzione se apriva Stripe.
+
+**Difetto chiuso lo stesso giorno**: chi ha il piano **regalato** (mai pagato)
+sulla carta «Attiva» leggeva «Vedi i piani e i prezzi» e finiva sulla pagina
+pubblica → «Scopri Premium» → «Registrati» → la home. Un giro a vuoto per uno
+che è già iscritto. Adesso la cassa si apre nel pannello, come per chi è free.
+
+---
+
+## ⛔ TRAPPOLE DELLA SERATA
+
+### 1. Il CSS scritto due volte
+
+In `pannello-impresa.html` e `pannello-professionisti.html` il blocco
+`.dash-stats` / `.dash-stat-card` è **scritto due volte**, identico e fuori da
+ogni `@media`: un doppione vecchio. Cambiando solo il primo, la quarta casella
+sarebbe andata a capo storta perché **vince il secondo**.
+
+> ⛔ Prima di cambiare una regola CSS in questi due pannelli, **contare quante
+> volte c'è**. Il generatore `porta-pezzi.py` adesso lo dice e le cambia tutte.
+
+### 2. «Non vedo differenze» era la cache — due volte
+
+Due volte Alessio ha detto che online non cambiava niente, e due volte il file
+pubblicato era già quello nuovo. Il modo per saperlo in dieci secondi:
+`fetch(pagina, {cache:'no-store'})` e cercare nel testo che torna. A lui si dice
+**Ctrl+Shift+R**, non F5.
+
+### 3. Un pezzo di markup con una frase diversa
+
+Il generatore cercava il blocco delle porte col contesto di due righe, ma il
+pannello professionisti ha il **suo** sottotitolo («Pratiche, clienti,
+collaboratori…»): il pezzo non si trovava. Rimediato prendendo il blocco per
+**ancore** (dal contenitore fino al `</div>` prima di `lista-cantieri`) e
+riscrivendolo intero, come dice la regola del 2 settembre mattina.
+
+---
+
+## COM'È FINITA LA GIORNATA
+
+**md5 alla chiusura:**
+`pannello-artigiano.html` 9542ff2e084d30d7f1c77080d1b22225 ·
+`pannello-impresa.html` 9849702d0f2b99ae435e5e69ae7f37f7 ·
+`pannello-professionisti.html` 8ffcd43888ae7892497943eec7d62d75 ·
+`profilo-impresa.html` ce4d00fc75e4e1ca40cd596c9cbac7d1 ·
+`prezzi.html` 3b2e632bb0f635129897fead58fffe3f
+
+**I banchi nuovi o allargati** (in `prove-claude/`, che è nel `.gitignore`):
+`banco-4-carte-gestionale.js` **227** prove — adesso gira su tutti e tre i
+pannelli passando il nome: `node prove-claude/banco-4-carte-gestionale.js
+impresa` · `banco-contatore-contatti.js` **25** (idem) ·
+`banco-elenco-contatti.js` **23** (nuovo) · `banco-titoli-foto.js` **26**
+(nuovo) · `banco-prezzi-senza-free.js` **13** (nuovo).
+Generatori: `genera-4-carte.py`, `porta-pezzi.py`.
+
+**Le figure** sono in `prove-claude/`: `figura-finestra-piano.png`,
+`figura-4-carte-tre-pannelli.png`, `figura-contatti-tre-pannelli.png`,
+`figura-elenco-contatti.png`, `figura-titoli-foto.png` (+ `-tel`),
+`figura-prezzi-ai-piena.png`, `figura-carte-scure.png`,
+`figura-info-e-prezzi.png`.
+
+---
+
+## ➡️ DA DOVE SI RIPARTE DOMANI — i cinque lavori rimasti
+
+Sono i numeri **4, 7, 8, 9, 10** della lista dei dieci, con i loro numeri.
+
+**4 — Il logo nella barra della scheda pubblica** ⚠️ *decisione di Alessio*
+In `profilo-impresa.html`, nella barra in alto, il logo di TrovaImpresa viene
+sostituito dal logo personalizzato dell'impresa. Mai deciso se è voluto; per
+Alessio no, «il visitatore perde il riferimento di dove si trova».
+**Non decidere.** Trovare il punto nel codice, fare **due foto affiancate** —
+com'è adesso e com'è col marchio TrovaImpresa fisso — e farsi dire da lui quale.
+
+**7 — Gli orari** ⚠️ *decisione di Alessio*
+La colonna degli orari è vuota su tutte le imprese: sulla scheda c'è un pezzo
+che non dice niente. **Prima** contare dal database quante imprese hanno un
+orario scritto (una query, una riga di risposta). Poi fargli vedere **con una
+figura** le due strade — riempirli (e come li scrive l'impresa dal pannello)
+oppure toglierli dalla scheda — e farsi dire da lui.
+
+**8 — I quattro pezzi di CSS sotto i 13px**
+In `profilo-impresa.html` sono rimaste quattro regole dai widget tolti:
+`.cdh` 9px, `.cd` 12px, `.cd.oggi` 11px, `.ms-l` 10px. **Prima di cancellarle,
+cercare se qualcosa in pagina usa ancora quelle classi** — il 1 settembre un id
+tolto senza cercarlo ha fermato in silenzio una funzione intera. Se non le usa
+nessuno si buttano; se le usa qualcosa, si portano a 13px.
+
+**9 — Il pulsante «📱 Mobile» dell'Anteprima**
+Nei pannelli non fa niente. Traccia: `anteprimaDevice()` usa `max-width` invece
+di `width`. Aggiustarlo e mostrargli **la foto dell'anteprima telefono che
+funziona**.
+
+**10 — `pannello-negozio.html`**
+È l'ultimo pannello rimasto indietro, e ha due problemi:
+* la **testata è quella vecchia**: gli altri tre hanno la testata nuova, il
+  «Riposiziona» di copertina e logo e le quattro carte del gestionale;
+* la **copertina non si carica**: scrive in `<id impresa>/banner.<ext>` invece
+  che nella cartella dell'`user_id`, e la RLS lo blocca.
+
+⚠️ **Copiare dai pannelli buoni, non reinventare** (skill `stessa-forma`), e non
+spostare blocchi di markup a pezzi con una regex: il 2 settembre così le carte
+sono finite annidate una dentro l'altra. Si riscrive il blocco intero e poi si
+contano i pezzi.
+
+### Trovato la sera del 2 settembre, non ancora in lista
+
+Provata dal vivo la **registrazione artigiano**, passi 1→3:
+
+1. **Le città sono una sola.** Lazio → Rieti → nella tendina c'è solo «Rieti».
+   Un artigiano di Amatrice o Poggio Mirteto non può scegliere il suo paese.
+2. **«Terzo mestiere» sta fuori dal riquadro chiuso**: il secondario è dentro
+   «Altri mestieri e dettagli», il terzo si vede sempre, da solo.
+3. **Dopo «Avanti» la pagina non torna in cima**: il passo nuovo compare con un
+   pezzo di vuoto sopra.
+
+Il passo 4 «Logo» e la conferma finale non sono stati provati: la password non
+la scrive Claude, quella parte la prova Alessio a mano.
+
+Altre cose viste e mai messe in lista: la **cancellazione della chat lato
+impresa** (oggi il suo «Elimina conversazione» cancella anche la copia del
+cliente — sta in `prove-claude/LAVORI-DA-FARE.md`), il **negozio finto** che
+manca nel database, la barra **«profilo completo al x%»** (44 imprese su 82
+senza descrizione e non lo sanno), e il **CSS doppio** delle caselle in alto.
+
+### La decisione ferma
+
+**Quanto vale un credito chat.** Non decidere: ricordargliela quando si arriva
+lì. «Il nodo dei 49 €» è **chiuso**: roba vecchia, quel prezzo non esiste più.
