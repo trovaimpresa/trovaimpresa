@@ -381,6 +381,33 @@
    telefono da 390 px fa entrare DUE carte per riga (150+150+14 di spazio =
    314, dentro i 358 disponibili) e sul computer le mette tutte e quattro in
    fila. Con 180 px sul telefono ne sarebbe entrata una sola per riga. */
+  /* ⛔ 2 SETTEMBRE — LE DUE PORTE DEL GESTIONALE, QUATTRO CARTE L'UNA.
+     Misure e colori copiati da quelli che c'erano gia' in questa pagina:
+     bordo 1.5px rgba(0,0,0,0.08), angoli 14px, sfondo #fafafa, viola
+     #7c3aed, verde #1b8a3f (quello del bollino «Verificata»).
+     Nessuna scritta sotto i 13px. */
+  .gest-porte { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:12px; }
+  .gest-porta {
+    border:1.5px solid rgba(0,0,0,0.08); border-radius:14px; padding:16px; background:#fafafa;
+    display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center;
+  }
+  .gest-col { display:flex; flex-direction:column; gap:12px; }
+  .gest-nome { text-align:center; font-weight:700; color:#0a2a4d; font-size:0.95rem; line-height:1.4; }
+  .gest-emoji { font-size:1.8rem; display:block; margin-bottom:6px; }
+  .gest-tuo { display:block; font-size:13px; color:#7c3aed; font-weight:700; margin-top:6px; visibility:hidden; }
+  .gest-carta {
+    border:1.5px solid rgba(0,0,0,0.08); border-radius:14px; padding:14px; background:white;
+    text-align:center; display:flex; flex-direction:column; min-height:150px;
+  }
+  .gest-carta-nome { font-weight:700; color:#0a2a4d; font-size:14px; }
+  .gest-carta-spiega { font-size:13px; color:#666; line-height:1.4; margin:6px 0 10px; }
+  .gest-carta-azione { margin-top:auto; }
+  /* sul telefono il nome va sopra e le carte sotto, due per riga: se restassero
+     tre colonne il nome si spezzerebbe a meta' e le carte non si leggerebbero */
+  @media (max-width:760px) {
+    .gest-porta { grid-template-columns:1fr 1fr; }
+    .gest-nome { grid-column:1 / -1; order:-1; }
+  }
   .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
     background:white; border-radius:16px; padding:20px;
@@ -1452,59 +1479,83 @@
           <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale</div>
           <div style="font-size:13px;color:#888;margin-top:4px">Cantieri, squadra, preventivi, spese e margini, report — tutto in un posto solo</div>
         </div>
-        <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE: DUE A SINISTRA, DUE A DESTRA.
-             Prima ogni gestionale era UNA carta con tre bottoni impilati, e il
-             viola «Attiva» faceva due mestieri: la cassa per chi non paga e la
-             porta per chi paga già. Alessio, 2 settembre: «non c'è il bottone
-             entra, ma si entra da attiva in viola», e poi «due card a destra e
-             due a sinistra per ogni gestionale: una sopra e una sotto».
-             Adesso: colonna sinistra = Gestionale Premium, colonna destra =
-             Gestionale Premium AI. In cima a ognuna la carta verde «Entra»,
-             che compare SOLO a chi quel gestionale ce l'ha davvero; sotto la
-             carta per comprarlo, guardarlo o provarlo.
-             Il verde è #1b8a3f, la stessa tinta del bollino «Verificata» già in
-             questa pagina: nessun colore nuovo.
-             minmax(240px,1fr): sul telefono le due colonne vanno a capo intere,
-             e ogni gestionale resta con le sue due carte attaccate. -->
-        <div id="porte-gestionale" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;align-items:start">
+        <!-- ⛔ 2 SETTEMBRE 2026 — DUE PORTE, QUATTRO CARTE PER PORTA.
+             Disegnato a mano da Alessio dopo tre giri a vuoto: due riquadri
+             affiancati (Gestionale e Gestionale AI); dentro ognuno il nome in
+             mezzo, due carte a sinistra (Entra · Attiva) e due a destra
+             (Prova 30 giorni · Entra e vedi).
+             Perche': prima il viola «Attiva» faceva due mestieri, la cassa e
+             la porta, e chi aveva gia' pagato non capiva da dove si entrasse.
+             La carta «Entra» compare solo a chi quel gestionale ce l'ha. -->
+        <div id="porte-gestionale" class="gest-porte">
 
-          <div style="display:flex;flex-direction:column;gap:12px">
-
-            <div id="carta-entra-premium" style="display:none;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;flex-direction:column">
-              <div style="font-size:1.8rem;margin-bottom:8px">🚪</div>
-              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Entra nel Gestionale Premium</div>
-              <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Ce l'hai già pagato. Da qui apri i cantieri, i preventivi e le fatture.</div>
-              <div id="carta-entra-premium-azione" style="margin-top:auto"></div>
+          <section class="gest-porta" id="porta-premium">
+            <div class="gest-col">
+              <div class="gest-carta" id="carta-entra-premium">
+                <div class="gest-carta-nome">Entra</div>
+                <div class="gest-carta-spiega">Ce l'hai già: si apre il tuo gestionale</div>
+                <div class="gest-carta-azione" id="carta-entra-premium-azione"></div>
+              </div>
+              <div class="gest-carta" id="carta-attiva-premium">
+                <div class="gest-carta-nome">Attiva</div>
+                <div class="gest-carta-spiega">Lo compri e resta tuo, al mese o all'anno</div>
+                <div class="gest-carta-azione" id="porta-premium-azione"></div>
+              </div>
             </div>
 
-            <div id="porta-premium" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;display:flex;flex-direction:column">
-              <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
-              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium</div>
-              <div id="porta-premium-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
-              <div id="porta-premium-spiega" style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Se non ce l'hai: lo compri, lo guardi dentro, o lo provi un mese.</div>
-              <div id="porta-premium-azione" style="margin-top:auto"></div>
+            <div class="gest-nome">
+              <span class="gest-emoji">🛠️</span>
+              Gestionale Premium
+              <span class="gest-tuo" id="porta-premium-tuo">Il tuo piano</span>
             </div>
 
-          </div>
+            <div class="gest-col">
+              <div class="gest-carta" id="carta-prova-premium">
+                <div class="gest-carta-nome">Prova 30 giorni</div>
+                <div class="gest-carta-spiega">Tutto acceso per un mese, senza carta</div>
+                <div class="gest-carta-azione" id="carta-prova-premium-azione"></div>
+              </div>
+              <div class="gest-carta" id="carta-vedi-premium">
+                <div class="gest-carta-nome">Entra e vedi</div>
+                <div class="gest-carta-spiega">Giri dentro e guardi, senza impegno</div>
+                <div class="gest-carta-azione" id="carta-vedi-premium-azione"></div>
+              </div>
+            </div>
+          </section>
 
-          <div style="display:flex;flex-direction:column;gap:12px">
-
-            <div id="carta-entra-ai" style="display:none;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;flex-direction:column">
-              <div style="font-size:1.8rem;margin-bottom:8px">🚪</div>
-              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Entra nel Gestionale Premium AI</div>
-              <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Ce l'hai già pagato. Come il Premium, più la Chat con AI che ti aiuta.</div>
-              <div id="carta-entra-ai-azione" style="margin-top:auto"></div>
+          <section class="gest-porta" id="porta-premium-ai">
+            <div class="gest-col">
+              <div class="gest-carta" id="carta-entra-ai">
+                <div class="gest-carta-nome">Entra</div>
+                <div class="gest-carta-spiega">Ce l'hai già: si apre con la Chat AI</div>
+                <div class="gest-carta-azione" id="carta-entra-ai-azione"></div>
+              </div>
+              <div class="gest-carta" id="carta-attiva-ai">
+                <div class="gest-carta-nome">Attiva</div>
+                <div class="gest-carta-spiega">Lo compri e resta tuo, al mese o all'anno</div>
+                <div class="gest-carta-azione" id="porta-ai-azione"></div>
+              </div>
             </div>
 
-            <div id="porta-premium-ai" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;display:flex;flex-direction:column">
-              <div style="font-size:1.8rem;margin-bottom:8px">✨</div>
-              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium AI</div>
-              <div id="porta-ai-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
-              <div id="porta-ai-spiega" style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Tutto il Premium più la Chat con AI: lo compri, lo guardi, o lo provi.</div>
-              <div id="porta-ai-azione" style="margin-top:auto"></div>
+            <div class="gest-nome">
+              <span class="gest-emoji">✨</span>
+              Gestionale Premium AI
+              <span class="gest-tuo" id="porta-ai-tuo">Il tuo piano</span>
             </div>
 
-          </div>
+            <div class="gest-col">
+              <div class="gest-carta" id="carta-prova-ai">
+                <div class="gest-carta-nome">Prova 30 giorni</div>
+                <div class="gest-carta-spiega">Tutto acceso per un mese, senza carta</div>
+                <div class="gest-carta-azione" id="carta-prova-ai-azione"></div>
+              </div>
+              <div class="gest-carta" id="carta-vedi-ai">
+                <div class="gest-carta-nome">Entra e vedi</div>
+                <div class="gest-carta-spiega">Giri dentro e guardi, senza impegno</div>
+                <div class="gest-carta-azione" id="carta-vedi-ai-azione"></div>
+              </div>
+            </div>
+          </section>
 
         </div>
         <div id="lista-cantieri" style="display:none"></div>
@@ -2821,10 +2872,18 @@ function bloccaCardPremium() {
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 const PORTE_GESTIONALE = [
-  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium',    attiva: 'Attiva Premium e gestionale',
-    carta: 'carta-entra-premium', cartaAzione: 'carta-entra-premium-azione', dentro: '/gestionale-app.html?piano=premium' },
-  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI',
-    carta: 'carta-entra-ai',      cartaAzione: 'carta-entra-ai-azione',      dentro: '/gestionale-app.html' }
+  { chiave: 'premium', label: 'Premium', attiva: 'Attiva Premium e gestionale',
+    mese: '29 \u20ac al mese', anno: '249 \u20ac all\'anno',
+    tuo: 'porta-premium-tuo', azione: 'porta-premium-azione',
+    entra: 'carta-entra-premium', entraAzione: 'carta-entra-premium-azione',
+    provaAzione: 'carta-prova-premium-azione', vediAzione: 'carta-vedi-premium-azione',
+    dentro: '/gestionale-app.html?piano=premium', guarda: '/gestionale-app.html?visita=1&piano=premium' },
+  { chiave: 'premium-ai', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI',
+    mese: '39 \u20ac al mese', anno: '349 \u20ac all\'anno',
+    tuo: 'porta-ai-tuo', azione: 'porta-ai-azione',
+    entra: 'carta-entra-ai', entraAzione: 'carta-entra-ai-azione',
+    provaAzione: 'carta-prova-ai-azione', vediAzione: 'carta-vedi-ai-azione',
+    dentro: '/gestionale-app.html', guarda: '/gestionale-app.html?visita=1' }
 ];
 
 function montaPorteGestionale() {
@@ -2838,140 +2897,94 @@ function montaPorteGestionale() {
   const haAI = haPremium && impresaCorrente.chat_pro === true
                && (!scadAI || isNaN(scadAI.getTime()) || scadAI.getTime() > Date.now());
 
-  // ⛔ ABBONATO NON VUOL DIRE PREMIUM.
-  // Le imprese in prova hanno piano 'premium' regalato alla registrazione
-  // e non hanno mai pagato: su Stripe non esistono. A loro il portale
-  // risponderebbe «nessun abbonamento a tuo nome», quindi comprano dalla
-  // cassa normale come tutti. Il portale e' solo per chi paga davvero.
+  // ⛔ ABBONATO NON VUOL DIRE PREMIUM. Le imprese in prova hanno piano
+  // 'premium' regalato alla registrazione e su Stripe non esistono: a loro
+  // il portale risponderebbe «nessun abbonamento a tuo nome».
   const abbonato = haPremium && impresaCorrente.premium_pagato === true;
 
-  // la prova di 30 giorni vale quanto il piano: chi ce l'ha entra
   const fineProva = impresaCorrente.gest_prova_fine ? new Date(impresaCorrente.gest_prova_fine) : null;
   const inProva = !!fineProva && !isNaN(fineProva.getTime()) && fineProva.getTime() > Date.now();
 
-  // ⛔ «Entra e guarda» si offre SOLO a chi non ha nessun accesso, e allora
-  // compare su TUTTE E DUE le porte: se lo mettessimo solo dove manca il
-  // piano, un Premium lo vedrebbe su una porta sola e le due porte
-  // tornerebbero ad avere forme diverse.
-  const senzaAccesso = !haPremium && !inProva;
+  // gli stili dei bottoni, scritti una volta sola
+  const VERDE  = 'width:100%;padding:10px;background:#1b8a3f;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px';
+  const VIOLA  = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px';
+  const VUOTO  = 'width:100%;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px';
+  const NOTA   = 'font-size:13px;color:#888;font-weight:700';
+
+  function metti(box, testo, stile, azione) {
+    const b = document.createElement('button');
+    b.textContent = testo;
+    b.style.cssText = stile;
+    b.onclick = azione;
+    box.appendChild(b);
+    return b;
+  }
+  // ⛔ nessuna delle otto carte puo' restare vuota: un riquadro col nulla
+  // dentro e' il difetto visto in pagina il 2 settembre.
+  function nota(box, testo) {
+    const d = document.createElement('div');
+    d.textContent = testo;
+    d.style.cssText = NOTA;
+    box.appendChild(d);
+  }
 
   PORTE_GESTIONALE.forEach(porta => {
     const box = document.getElementById(porta.azione);
-    const tuo = document.getElementById(porta.tuo);
     if (!box) return;
 
-    // ⛔ OGNUNO ENTRA DALLA SUA PORTA, E QUELLA SBAGLIATA CHIEDE DI PAGARE.
-    // Regola di Alessio, 29 agosto: «se clicchi per sbaglio il gestionale
-    // opposto ti chiedera' di pagare, semplice». Chi non paga ancora vede
-    // il listino; chi paga gia' viene mandato al portale di Stripe, che
-    // cambia il piano dentro l'abbonamento che ha (mai un secondo).
-    //
-    // Sono due gestionali: a sinistra il Premium, a destra il Pro con la
-    // Chat con AI. Se la porta Premium si aprisse anche a chi ha il Pro,
-    // quello si troverebbe dentro un «gestionale Premium» che pero' la
-    // chat ce l'ha (la chat segue il piano, non la porta) — ed e'
-    // esattamente la confusione da evitare.
-    // ⛔ 30 agosto — CHI HA UN PIANO ENTRA DA TUTTE E DUE LE PORTE.
-    // Prima la porta Premium restava chiusa a chi ha il Premium AI, e gli
-    // diceva «Attiva Premium»: gli stavamo offrendo una cosa che ha gia'
-    // pagato. Il Premium AI comprende il Premium, quindi apre tutte e due.
-    // A sinistra il gestionale senza chat, a destra quello con la chat.
+    // ⛔ 30 agosto — CHI HA UN PIANO ENTRA DA TUTTE E DUE LE PORTE: il
+    // Premium AI comprende il Premium. A sinistra il gestionale senza chat,
+    // a destra quello con la chat.
     const aperta = porta.chiave === 'premium' ? haPremium : haAI;
     const suo    = porta.chiave === 'premium' ? (haPremium && !haAI) : haAI;
-    // ⚠️ visibility, non display: la riga sparisce ma tiene il posto,
-    //    cosi' prezzo e pulsante restano alla stessa altezza su tutte e due.
+
+    const tuo = document.getElementById(porta.tuo);
     if (tuo) tuo.style.visibility = suo ? 'visible' : 'hidden';
 
-    // ⛔ 2 SETTEMBRE — LA PORTA E' UNA CARTA SUA, VERDE, SOPRA.
-    // Finche' il viola faceva sia la cassa sia la porta, chi aveva gia'
-    // pagato non capiva da dove si entrasse. Adesso: se questo gestionale
-    // e' aperto per lui, sopra compare la carta «Entra» col bottone verde,
-    // e nella carta di sotto il viola smette di essere la porta.
-    const carta = document.getElementById(porta.carta);
-    const cbox  = document.getElementById(porta.cartaAzione);
+    /* --- carta 1: ENTRA (in alto a sinistra) ------------------------
+       Compare solo a chi quel gestionale ce l'ha davvero. E' l'unica
+       porta: il viola non ci porta piu' dentro. */
+    const carta = document.getElementById(porta.entra);
+    const ebox  = document.getElementById(porta.entraAzione);
     if (carta) carta.style.display = aperta ? 'flex' : 'none';
-    if (cbox) {
-      cbox.innerHTML = '';
-      if (aperta) {
-        const entra = document.createElement('button');
-        entra.textContent = 'Entra';
-        entra.style.cssText = 'width:100%;padding:10px;background:#1b8a3f;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-        entra.onclick = () => { location.href = porta.dentro; };
-        cbox.appendChild(entra);
-      }
+    if (ebox) {
+      ebox.innerHTML = '';
+      if (aperta) metti(ebox, 'Entra', VERDE, () => { location.href = porta.dentro; });
     }
 
+    /* --- carta 2: ATTIVA (in basso a sinistra) ---------------------- */
     box.innerHTML = '';
+    if (aperta && abbonato) {
+      metti(box, 'Gestisci l\'abbonamento', VUOTO, () => apriPortaleClienti(box.firstChild));
+    } else if (aperta) {
+      // piano attivo ma mai pagato su Stripe (fondatore, premium regalato)
+      metti(box, 'Vedi i piani e i prezzi', VUOTO, () => { location.href = '/prezzi.html'; });
+    } else if (abbonato) {
+      // paga gia' ma questo piano non ce l'ha: si cambia dentro Stripe
+      metti(box, porta.attiva, VIOLA, function () { apriPortaleClienti(this); });
+    } else {
+      // il prezzo si vede solo dopo il clic
+      metti(box, porta.attiva, VIOLA, () => mostraListino(porta, box));
+    }
 
-    // ⛔ SEPARATE, non dentro una cornice sola. Deciso da Alessio il 30
-    // agosto dopo averle viste in tutti e due i modi: sono tre cose
-    // diverse (paghi / entri e guardi / provi 30 giorni) e devono
-    // leggersi come tre cose diverse.
-    const bottone = document.createElement('button');
-    bottone.style.cssText = 'width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-    bottone.textContent = porta.attiva;
-    box.appendChild(bottone);
-
-    // ⛔ I DUE MODI DI ENTRARE SENZA PAGARE, DENTRO OGNI PORTA.
-    // Sempre visibili, a chiunque: «rendili visibili sempre».
-    const guarda = document.createElement('button');
-    guarda.textContent = 'Entra e guarda';
-    guarda.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:white;color:#7c3aed;border:1.5px solid #7c3aed;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
-    guarda.onclick = () => {
-      location.href = porta.chiave === 'premium'
-        ? '/gestionale-app.html?visita=1&piano=premium'
-        : '/gestionale-app.html?visita=1';
-    };
-
-    const prova = document.createElement('button');
-    prova.textContent = 'Prova 30 giorni gratis';
-    prova.style.cssText = 'width:100%;margin-top:8px;padding:8px;background:none;color:#0a2a4d;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;text-decoration:underline';
-    prova.onclick = () => avviaProvaGestionale(prova, porta);
-
-    box.appendChild(guarda);
-    box.appendChild(prova);
-
-    // --- 1. ce l'ha gia': il clic lo porta dentro ------------------
-    // ⚠️ la porta Premium apre il gestionale SENZA la voce «Chat con AI»,
-    //    anche a chi l'AI ce l'ha: se no le due porte portano nello
-    //    stesso identico posto.
-    if (aperta) {
-      // ⛔ Chi ce l'ha gia' entra dalla carta verde qui sopra: qui sotto
-      // non si vende piu' niente, si gestisce e basta. «Entra e guarda» e
-      // «Prova 30 giorni» a un abbonato non vogliono dire nulla.
-      guarda.style.display = 'none';
-      prova.style.display = 'none';
-      const spiega = document.getElementById(porta.chiave === 'premium' ? 'porta-premium-spiega' : 'porta-ai-spiega');
-      if (spiega) spiega.textContent = 'Il tuo piano \u00e8 attivo. Si entra dalla carta qui sopra.';
-      if (abbonato) {
-        bottone.textContent = 'Gestisci l\'abbonamento';
-        bottone.style.background = 'white';
-        bottone.style.color = '#7c3aed';
-        bottone.style.border = '1.5px solid #7c3aed';
-        bottone.onclick = () => apriPortaleClienti(bottone);
-      } else {
-        // ⛔ 2 SETTEMBRE, difetto visto in pagina: chi ha il piano ma non
-        // paga su Stripe (i fondatori, i premium regalati) si trovava una
-        // carta con dentro il vuoto. Una carta vuota non e' una carta:
-        // qui almeno si va a vedere cosa costa e cosa cambia.
-        bottone.textContent = 'Vedi i piani e i prezzi';
-        bottone.style.background = 'white';
-        bottone.style.color = '#7c3aed';
-        bottone.style.border = '1.5px solid #7c3aed';
-        bottone.onclick = () => { location.href = '/prezzi.html'; };
+    /* --- carta 3: PROVA 30 GIORNI (in alto a destra) ---------------- */
+    const pbox = document.getElementById(porta.provaAzione);
+    if (pbox) {
+      pbox.innerHTML = '';
+      if (aperta) nota(pbox, 'Non ti serve: ce l\'hai gi\u00e0');
+      else if (inProva) nota(pbox, 'Prova gi\u00e0 in corso');
+      else {
+        const b = metti(pbox, 'Prova 30 giorni gratis', VUOTO, null);
+        b.onclick = () => avviaProvaGestionale(b, porta);
       }
-      return;
     }
 
-    // --- 2. paga gia' ma questo piano non ce l'ha: si cambia -------
-    if (abbonato) {
-      bottone.onclick = () => apriPortaleClienti(bottone);
-      return;
+    /* --- carta 4: ENTRA E VEDI (in basso a destra) ------------------ */
+    const vbox = document.getElementById(porta.vediAzione);
+    if (vbox) {
+      vbox.innerHTML = '';
+      metti(vbox, 'Entra e vedi', VUOTO, () => { location.href = porta.guarda; });
     }
-
-    // --- 3. non ce l'ha: il prezzo si vede solo dopo il clic -------
-    bottone.onclick = () => mostraListino(porta, box);
-
   });
 
 }
@@ -4096,7 +4109,7 @@ const FAQS_LIST = [
   },
   {
     domanda: "Come passo a Premium?",
-    risposta: "In fondo al pannello, nel riquadro «Gestionale», ci sono due porte: «Gestionale Premium» e «Gestionale Premium AI». Clicca il pulsante viola della porta che vuoi — «Attiva Premium e gestionale» oppure «Attiva Premium e gestionale AI» — e al posto del pulsante compaiono i due prezzi, al mese o all'anno. Si paga con carta tramite Stripe. Se un abbonamento ce l'hai già, lo stesso pulsante ti porta alla pagina Stripe dove cambi piano senza farne un secondo."
+    risposta: "In fondo al pannello, nel riquadro «Gestionale», ci sono due riquadri: «Gestionale Premium» e «Gestionale Premium AI». Dentro ognuno ci sono quattro carte: a sinistra «Entra» e «Attiva», a destra «Prova 30 giorni» e «Entra e vedi». Per comprarlo clicca il pulsante viola della carta «Attiva»: al posto del pulsante compaiono i due prezzi, al mese o all'anno, e si paga con carta tramite Stripe. Se ce l'hai già, la carta «Entra» compare col pulsante verde e da lì entri; la carta «Attiva» diventa «Gestisci l'abbonamento» e ti porta alla pagina Stripe dove cambi piano senza farne un secondo."
   },
   {
     domanda: "Ho 3 mesi di Premium in regalo: cosa succede quando finiscono?",
