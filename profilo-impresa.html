@@ -536,6 +536,24 @@ nav img{height:36px}
 .ci{width:28px;height:28px;border-radius:8px;background:#f5f5f5;border:1px solid #eee;
   display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .contacts a{color:#2863a7;font-weight:700;text-decoration:none}
+/* ⛔ 2 SETTEMBRE 2026 — «MOSTRA NUMERO».
+   Il telefono era scritto in chiaro: il cliente lo leggeva, chiudeva la
+   pagina e chiamava, e ne' l'impresa ne' TrovaImpresa sapevano che quella
+   telefonata era nata qui. Adesso il numero sta dietro un bottone: un clic e
+   compare — non si chiede niente al cliente, ne' nome ne' email — e quel clic
+   diventa una riga nella tabella `contatti`.
+   ⚠️ Si copre SOLO il telefono. WhatsApp, email e sito sono gia'
+   collegamenti: per usarli bisogna cliccare, e quel clic si conta senza
+   nascondere niente. Un velo di troppo fa perdere clienti.
+   ⚠️ Colori e misure presi da questa stessa pagina: il blu dei collegamenti
+   (#2863a7), lo sfondo azzurrino (#eef4fb), il bordo (#a9c9f5), 13px come
+   tutte le righe dei contatti. Niente di nuovo. */
+.mostra-tel{
+  font-family:inherit; font-size:13px; font-weight:700; color:#2863a7;
+  background:#eef4fb; border:1px solid #a9c9f5; border-radius:8px;
+  padding:6px 12px; cursor:pointer; transition:background 0.15s;
+}
+.mostra-tel:hover{ background:#dce9f7; }
 
 /* 31 agosto 2026: qui c'era una SECONDA mappa (#mappa-impresa, 150px, senza
    i tastini dello zoom) che disegnava lo stesso identico punto della carta
@@ -821,7 +839,7 @@ nav img{height:36px}
     </a>
     <ul class="contacts contacts-card">
       <li id="contact-indirizzo"><div class="ci">📍</div><span>—</span></li>
-      <li id="contact-tel"><div class="ci">📞</div><a href="#" id="tel-link">—</a></li>
+      <li id="contact-tel"><div class="ci">📞</div><button type="button" class="mostra-tel" id="btn-mostra-tel" onclick="mostraNumero()">Mostra numero</button><a href="#" id="tel-link" style="display:none">—</a></li>
       <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
       <!-- ⛔ 1 settembre 2026: il WhatsApp di 26 imprese non si vedeva da
            nessuna parte. Adesso c'e', e come le altre righe compare solo se
@@ -1589,6 +1607,14 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
        Quindi: 12 cifre che iniziano per 39 -> gia' buono; 10 cifre -> ci
        metto davanti 39. Qualsiasi altra lunghezza non la tocco e non mostro
        la riga: meglio niente che un link sbagliato. */
+    /* 2 set 2026: i clic sugli altri contatti si contano senza nascondere
+       niente. `segnaContatto` non blocca mai il collegamento. */
+    ['email-link','sito-link','wa-link','cta-bar-tel'].forEach(function(_id){
+      var _e=document.getElementById(_id);
+      if(_e)_e.addEventListener('click',function(){
+        segnaContatto(_id==='email-link'?'email':_id==='sito-link'?'sito':_id==='wa-link'?'whatsapp':'telefono');
+      });
+    });
     const wl=document.getElementById('wa-link');const cw=document.getElementById('contact-whatsapp');
     const _wa=String(d.whatsapp||'').trim();
     if(_wa&&wl){
@@ -1723,6 +1749,63 @@ function _posSicura(p){
   if(!(x>=0&&x<=100&&y>=0&&y<=100))return '50% 50%';
   return x+'% '+y+'%';
 }
+/* ============================================================
+   CHI HA CHIESTO UN CONTATTO — 2 settembre 2026
+   Ogni volta che un cliente chiede un contatto dell'impresa (mostra il
+   numero, apre WhatsApp, scrive una mail, apre il sito) si scrive una riga
+   nella tabella `contatti`. Serve a una cosa sola: poter dire all'impresa
+   «questo mese N persone hanno chiesto il tuo numero», che e' la prova che
+   TrovaImpresa le porta clienti.
+   ⚠️ NESSUN DATO DEL CLIENTE: non si chiede niente e non si salva niente di
+   suo. Si salva solo un numero casuale del suo browser, che serve a contare
+   le PERSONE e non i clic — se lo stesso browser richiede due volte lo stesso
+   contatto entro un'ora, la seconda non viene scritta (lo decide la funzione
+   `contatto_registra` nel database).
+   ⚠️ `keepalive` non e' un vezzo: cliccando su «tel:» o su WhatsApp il
+   telefono apre un'altra applicazione e la pagina viene abbandonata; senza
+   quello la chiamata al database verrebbe interrotta a meta' e il contatto
+   non si conterebbe mai.
+   ⚠️ Se questa chiamata fallisce non deve succedere NIENTE al cliente: il
+   numero si vede lo stesso, il collegamento funziona lo stesso. Contare e'
+   importante per noi, non per lui. */
+function _visitatore(){
+  try{
+    var k='ti_visitatore';
+    var v=localStorage.getItem(k);
+    if(!v){
+      v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(String(Date.now())+Math.random().toString(16).slice(2));
+      localStorage.setItem(k,v);
+    }
+    return v;
+  }catch(e){ return ''; }   /* browser che vietano la memoria: si conta lo stesso, senza distinguere le persone */
+}
+function segnaContatto(tipo){
+  try{
+    /* ⛔ 2 settembre 2026, difetto preso PRIMA di pubblicare: qui c'era
+       `getImpresaId()`, che pero' e' dichiarata dentro la scatola della chat
+       (la IIFE in fondo alla pagina) e da qui NON SI VEDE. La riga sarebbe
+       andata in errore, l'errore lo mangiava il `catch`, e i contatti non si
+       sarebbero contati mai: i numeri sarebbero rimasti a zero senza che
+       niente sembrasse rotto.
+       ⚠️ Regola: una funzione non chiama roba che vive dentro un'altra
+       scatola. L'id se lo legge da sola, e' una riga. */
+    var id=new URLSearchParams(window.location.search).get('id');
+    if(!id)return;
+    fetch(SU+'/rest/v1/rpc/contatto_registra',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+      body:JSON.stringify({p_impresa_id:Number(id),p_tipo:tipo,p_visitatore:_visitatore()}),
+      keepalive:true
+    }).catch(function(){});
+  }catch(e){}
+}
+window.mostraNumero=function(){
+  var a=document.getElementById('tel-link');
+  var b=document.getElementById('btn-mostra-tel');
+  if(a)a.style.display='';
+  if(b)b.style.display='none';
+  segnaContatto('telefono');
+};
 function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
 
 /* IL CONTO DELLE RECENSIONI, IN UN POSTO SOLO.
