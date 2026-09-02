@@ -362,6 +362,26 @@
   .gest-mezzo .gest-emoji { display:block; margin-bottom:8px; }
   .gest-mezzo .gest-nome { display:block; }
   .gest-mezzo .gest-tuo { display:block; margin:8px 0 0; visibility:hidden; }
+  /* 2 settembre 2026 sera, Alessio: «le card informative, prima erano due
+     adesso 0». Le due porte vecchie dicevano cosa c'e' dentro; le quattro
+     carte no. La riga torna qui, sotto il nome, in mezzo. 14px e #666: gia'
+     in pagina. */
+  /* 2 settembre 2026 sera, Alessio: «premi Attiva, da li' si apre la pagina
+     informativa e poi se vuoi paghi». La finestra del piano: cosa c'e' dentro
+     e in fondo i due prezzi. 14px, --dark, --light: gia' in pagina. */
+  .pi-sub { font-size:14px; color:var(--light); margin-bottom:14px; }
+  .pi-voce { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.08); font-size:14px; color:var(--dark); line-height:1.4; }
+  .pi-voce .g-ico { flex:0 0 18px; }
+  /* ⛔ i prezzi NON stanno dentro la parte che scorre: col «sticky» il bottone
+     restava tagliato a meta'. Sono una fascia sua, sotto l'elenco, sempre
+     intera e sempre visibile. */
+  #modal-piano .modal-ai { display:flex; flex-direction:column; max-height:88vh; }
+  #modal-piano-body { flex:1; overflow-y:auto; min-height:0; }
+  .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
+  .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
+  .pi-nota { font-size:13px; color:var(--light); text-align:center; margin-top:10px; }
+  .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
   /* quadrate davvero: stessa larghezza e stessa altezza */
   /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
      piastrella, se no dentro un pannello largo diventavano quadrati da 400px
@@ -2406,6 +2426,7 @@
               <div class="gest-mezzo">
                 <span class="gest-emoji">🛠️</span>
                 <span class="gest-nome">Gestionale Premium</span>
+                <span class="gest-desc">Pratiche, clienti, collaboratori, preventivi e report</span>
                 <span class="gest-tuo" id="porta-premium-tuo">Il tuo piano</span>
               </div>
 
@@ -2456,6 +2477,7 @@
               <div class="gest-mezzo">
                 <span class="gest-emoji">✨</span>
                 <span class="gest-nome">Gestionale Premium AI</span>
+                <span class="gest-desc">Tutto il Premium, più la Chat con AI</span>
                 <span class="gest-tuo" id="porta-ai-tuo">Il tuo piano</span>
               </div>
 
@@ -2917,6 +2939,22 @@
 </div>
 
 <!-- MODAL SEGNALAZIONE -->
+<!-- 2 settembre 2026 sera: la finestra del piano. «Attiva» apre QUESTA: cosa
+     c'e' dentro, e in fondo i due prezzi che portano a Stripe. -->
+<div class="modal-ai-overlay" id="modal-piano" onclick="if(event.target===this)chiudiModalPiano()">
+  <div class="modal-ai" style="max-width:560px">
+    <div class="modal-ai-header">
+      <div>
+        <h2 id="modal-piano-titolo">Gestionale Premium</h2>
+        <p id="modal-piano-sotto">Cosa c'è dentro</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalPiano()">✕</button>
+    </div>
+    <div class="modal-ai-body" id="modal-piano-body"></div>
+    <div class="pi-piede" id="modal-piano-piede"></div>
+  </div>
+</div>
+
 <!-- 3 settembre 2026: l'elenco delle richieste di contatto. Nessun dato del
      cliente: non ce l'abbiamo e non lo vogliamo. Solo quando e che cosa. -->
 <div class="modal-ai-overlay" id="modal-contatti" onclick="if(event.target===this)chiudiModalContatti()">
@@ -4308,22 +4346,44 @@ function montaPorteGestionale() {
 // Prende il posto del pulsante dentro la stessa porta: due scelte, col
 // prezzo scritto per intero, e un modo per tornare indietro senza
 // impegno. Da qui si va alla cassa.
+/* 2 settembre 2026 sera — «premi Attiva, da li' si apre la pagina informativa
+   e poi se vuoi paghi; l'unica informazione era il prezzo». Il listino non sta
+   piu' dentro la carta: «Attiva» apre la finestra del piano, con l'elenco di
+   cosa c'e' dentro (le stesse voci di prezzi.html) e in fondo i due prezzi. */
+const PIANI_INFO = {
+  'premium': { sotto: 'Il gestionale completo, dentro il tuo Premium', voci: [
+    'Gestionale: lavori, preventivi, fatture', 'Visibile oltre la città', 'Priorità nei risultati',
+    'Foto portfolio illimitate', 'Video dei lavori', 'Crea preventivi PDF', 'Storico preventivi',
+    'Preventivi con AI', 'Calcolatrice edile', 'Agenda', 'Scadenze fiscali', 'QR profilo',
+    'Descrizione estesa', 'Personalizzazione profilo', 'Badge Premium', 'Subappalti', 'Ricerca candidati' ] },
+  'premium-ai': { sotto: 'Tutto il Premium, più la Chat con AI', voci: [
+    'Tutto del Premium +', 'La chat con AI dentro il gestionale', 'Ti risponde coi conti dei tuoi lavori',
+    'Ti compila i moduli: lavori e clienti', 'Il riepilogo del lunedì per email', '300 messaggi al mese' ] }
+};
 function mostraListino(porta, box) {
-  box.innerHTML = '';
-
-  [['mensile', porta.mese], ['annuale', porta.anno]].forEach(function (v) {
-    const b = document.createElement('button');
-    b.textContent = v[1];
-    b.style.cssText = 'width:100%;padding:10px;margin-bottom:8px;background:#0066ff;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px';
-    b.onclick = () => apriCassaGestionale(porta.chiave, v[0], b);
-    box.appendChild(b);
-  });
-
-  const indietro = document.createElement('button');
-  indietro.textContent = 'Non adesso';
-  indietro.style.cssText = 'width:100%;padding:8px;background:none;color:#888;border:none;font-size:0.85rem;cursor:pointer';
-  indietro.onclick = () => montaPorteGestionale();
-  box.appendChild(indietro);
+  apriModalPiano(porta);
+}
+function apriModalPiano(porta) {
+  const info = PIANI_INFO[porta.chiave] || PIANI_INFO['premium'];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const tit = document.getElementById('modal-piano-titolo');
+  const sotto = document.getElementById('modal-piano-sotto');
+  const body = document.getElementById('modal-piano-body');
+  const piede = document.getElementById('modal-piano-piede');
+  if (!tit || !sotto || !body || !piede) return;
+  tit.textContent = 'Gestionale ' + porta.label;
+  sotto.textContent = info.sotto;
+  body.innerHTML = '<div class="pi-sub">Cosa c\'è dentro</div>' +
+    info.voci.map(v => '<div class="pi-voce"><span class="g-ico" style="color:#1b8a3f;background:#e8f6ef">✅</span><span>' + esc(v) + '</span></div>').join('') +
+    '';
+  piede.innerHTML = '<div class="pi-prezzi"><button id="pi-mese">' + esc(porta.mese) + '</button><button id="pi-anno">' + esc(porta.anno) + '</button></div>' +
+    '<div class="pi-nota">Si paga con carta su Stripe. Disdici quando vuoi.</div>';
+  piede.querySelector('#pi-mese').onclick = function () { apriCassaGestionale(porta.chiave, 'mensile', this); };
+  piede.querySelector('#pi-anno').onclick = function () { apriCassaGestionale(porta.chiave, 'annuale', this); };
+  document.getElementById('modal-piano').classList.add('show');
+}
+function chiudiModalPiano() {
+  document.getElementById('modal-piano').classList.remove('show');
 }
 
 // il pagamento: chi non e' ancora abbonato

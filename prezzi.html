@@ -93,9 +93,11 @@
      L'unica misura cambiata e' la larghezza massima, da 1100 a 1280: con tre
      schede dentro 1100 le colonne restavano di 334 px e le voci andavano a
      capo. Colori, angoli, ombre e spazi non sono stati toccati. */
+  /* 2 settembre 2026: tolta la scheda Gratuito, si torna a DUE schede e alla
+     larghezza di prima, 1100. */
   .piani-grid {
-    display:grid; grid-template-columns:repeat(3,1fr);
-    gap:24px; max-width:1280px; margin:32px auto; padding:0 24px 80px;
+    display:grid; grid-template-columns:repeat(2,1fr);
+    gap:24px; max-width:1100px; margin:32px auto; padding:0 24px 80px;
   }
   @media(max-width:1040px){ .piani-grid { grid-template-columns:repeat(2,1fr); } }
   @media(max-width:600px){ .piani-grid { grid-template-columns:1fr; } }
@@ -255,28 +257,9 @@
 <!-- PIANI -->
 <div class="piani-grid">
 
-  <!-- PIANO GRATUITO -->
-  <div class="piano-card">
-    <div class="piano-icon">🆓</div>
-    <div class="piano-nome">Gratuito</div>
-    <div class="piano-sub">Per iniziare senza rischi</div>
-    <div class="piano-prezzo">
-      <div class="prezzo-num gratis">€0</div>
-      <div class="prezzo-periodo">per sempre · anche dopo i 3 mesi</div>
-      <div class="prezzo-nota">Nessuna scadenza, nessuna carta, nessun addebito.</div>
-    </div>
-    <div class="piano-features">
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Profilo visibile nella tua città</span></div>
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Raccolta recensioni</span></div>
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Certificazioni</span></div>
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Profilo base</span></div>
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Visibilità standard</span></div>
-    </div>
-    <a href="/#registrati">
-      <button class="piano-btn free">🚀 Registrati gratis</button>
-    </a>
-    <a href="info-free.html" style="display:block;text-align:center;margin-top:10px;color:#0066ff;font-size:0.85rem;font-weight:600;text-decoration:none;">Scopri cosa include il piano Free</a>
-  </div>
+  <!-- ⛔ 2 SETTEMBRE 2026 — LA SCHEDA «GRATUITO» NON C'E' PIU' (Alessio:
+       «gratuito non ci deve essere piu'»). Restano Premium e Premium AI.
+       Chi si iscrive lo fa dalla home, gratis: qui si vendono i piani. -->
 
   <!-- PIANO PREMIUM -->
   <div class="piano-card premium">
