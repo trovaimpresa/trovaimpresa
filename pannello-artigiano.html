@@ -443,6 +443,14 @@
   /* la riga piccola sotto il numero delle richieste: stessa misura e stesso
      grigio dell'etichetta qui sopra, senza le maiuscole */
   .dash-stat-sub { font-size:13px; color:var(--light); font-weight:600; margin-top:6px; }
+  /* 3 settembre 2026: la casella delle richieste si clicca e apre l'elenco.
+     Colori e misure di questa pagina: 14px, --dark, --light, il bordo delle carte. */
+  .dash-stat-card.cliccabile { cursor:pointer; }
+  .ctt-mese { font-size:14px; font-weight:700; color:var(--dark); margin:18px 0 8px; }
+  .ctt-mese:first-child { margin-top:0; }
+  .ctt-riga { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.08); font-size:14px; color:var(--dark); }
+  .ctt-riga span:last-child { color:var(--light); font-weight:600; white-space:nowrap; }
+  .ctt-vuoto { font-size:14px; color:var(--light); text-align:center; padding:24px 0; }
   .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
   .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
   .dash-stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
@@ -1305,7 +1313,7 @@
              dalla scheda pubblica (numero mostrato, WhatsApp, email, sito).
              Quando sono zero non si scrive «0»: si scrive che ancora non e'
              arrivato nessuno — stessa regola dello zero delle recensioni. -->
-        <div class="dash-stat-card">
+        <div class="dash-stat-card cliccabile" onclick="apriModalContatti()" title="Vedi l'elenco">
           <div class="dash-stat-icon">📞</div>
           <div class="dash-stat-num" id="dash-stat-contatti">—</div>
           <div class="dash-stat-lbl">Richieste di contatto</div>
@@ -2005,6 +2013,21 @@
 </div>
 
 <!-- MODAL SEGNALAZIONE -->
+<!-- 3 settembre 2026: l'elenco delle richieste di contatto. Nessun dato del
+     cliente: non ce l'abbiamo e non lo vogliamo. Solo quando e che cosa. -->
+<div class="modal-ai-overlay" id="modal-contatti" onclick="if(event.target===this)chiudiModalContatti()">
+  <div class="modal-ai" style="max-width:560px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📞 Richieste di contatto</h2>
+        <p>Chi ha chiesto i tuoi contatti dalla scheda pubblica</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalContatti()">✕</button>
+    </div>
+    <div class="modal-ai-body" id="modal-contatti-body"></div>
+  </div>
+</div>
+
 <div class="modal-ai-overlay" id="modal-segnalazione" onclick="if(event.target===this)chiudiModalSegnalazione()">
   <div class="modal-ai" style="max-width:760px">
     <div class="modal-ai-header">
@@ -3205,8 +3228,9 @@ async function caricaContatti() {
   const sub = document.getElementById('dash-stat-contatti-sub');
   if (!num || !impresaCorrente) return;
   const { data, error } = await sb.from('contatti')
-    .select('visitatore, created_at')
-    .eq('impresa_id', impresaCorrente.id);
+    .select('visitatore, created_at, tipo')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
   if (error) {
     /* se il database non risponde non si inventa uno zero: si dice che il
        numero non si sa */
@@ -3216,6 +3240,7 @@ async function caricaContatti() {
     return;
   }
   const righe = data || [];
+  _contattiRighe = righe;
   const inizioMese = new Date(); inizioMese.setDate(1); inizioMese.setHours(0, 0, 0, 0);
   const delMese = righe.filter(function (r) { return new Date(r.created_at) >= inizioMese; });
   const personeMese = _quantePersone(delMese);
@@ -3226,6 +3251,47 @@ async function caricaContatti() {
       ? ('questo mese · ' + personeTutte + ' in tutto')
       : 'Ancora nessuno questo mese';
   }
+}
+
+/* L'ELENCO DELLE RICHIESTE — 3 settembre 2026.
+   Una riga per richiesta: il giorno e l'ora, e che cosa ha chiesto (numero
+   mostrato, WhatsApp, email, sito). Raggruppate per mese, le piu' recenti
+   in cima. Nessun nome, nessun numero del cliente: non li abbiamo.
+   Zero righe = «Ancora nessuno», non una tabella vuota. */
+let _contattiRighe = [];
+const _CTT_TIPO = { telefono: 'Numero mostrato', whatsapp: 'WhatsApp', email: 'Email', sito: 'Sito' };
+function _contattiHTML(righe) {
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const lista = (righe || []).filter(r => r && r.created_at).slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  if (!lista.length) return '<div class="ctt-vuoto">Ancora nessuno. Quando un cliente chiede il tuo numero dalla scheda, lo vedi qui.</div>';
+  const mesi = {}; const ordine = [];
+  lista.forEach(r => {
+    const d = new Date(r.created_at);
+    const k = d.getFullYear() + '-' + d.getMonth();
+    if (!mesi[k]) { mesi[k] = { nome: d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }), righe: [] }; ordine.push(k); }
+    mesi[k].righe.push(r);
+  });
+  return ordine.map(k => {
+    const m = mesi[k]; const persone = _quantePersone(m.righe);
+    const titolo = m.nome.charAt(0).toUpperCase() + m.nome.slice(1);
+    return '<div class="ctt-mese">' + esc(titolo) + ' — ' + persone + (persone === 1 ? ' persona' : ' persone') + '</div>' +
+      m.righe.map(r => {
+        const d = new Date(r.created_at);
+        const quando = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) + ', ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+        return '<div class="ctt-riga"><span>' + esc(_CTT_TIPO[r.tipo] || r.tipo || 'Contatto') + '</span><span>' + esc(quando) + '</span></div>';
+      }).join('');
+  }).join('');
+}
+async function apriModalContatti() {
+  const body = document.getElementById('modal-contatti-body');
+  if (!body) return;
+  body.innerHTML = _contattiHTML(_contattiRighe);
+  document.getElementById('modal-contatti').classList.add('show');
+  await caricaContatti();                 // numeri freschi, poi si ridisegna
+  body.innerHTML = _contattiHTML(_contattiRighe);
+}
+function chiudiModalContatti() {
+  document.getElementById('modal-contatti').classList.remove('show');
 }
 
 // CARICA PREVENTIVI
