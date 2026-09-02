@@ -2950,7 +2950,15 @@ function montaPorteGestionale() {
         bottone.style.border = '1.5px solid #7c3aed';
         bottone.onclick = () => apriPortaleClienti(bottone);
       } else {
-        bottone.style.display = 'none';
+        // ⛔ 2 SETTEMBRE, difetto visto in pagina: chi ha il piano ma non
+        // paga su Stripe (i fondatori, i premium regalati) si trovava una
+        // carta con dentro il vuoto. Una carta vuota non e' una carta:
+        // qui almeno si va a vedere cosa costa e cosa cambia.
+        bottone.textContent = 'Vedi i piani e i prezzi';
+        bottone.style.background = 'white';
+        bottone.style.color = '#7c3aed';
+        bottone.style.border = '1.5px solid #7c3aed';
+        bottone.onclick = () => { location.href = '/prezzi.html'; };
       }
       return;
     }
