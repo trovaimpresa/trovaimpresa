@@ -384,15 +384,20 @@ nav img{height:36px}
 .info-item .v{font-size:14px;color:#1a2f47;font-weight:600;margin-top:3px;word-break:break-word}
 
 /* FOTO */
-.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.fi{aspect-ratio:1;border-radius:10px;overflow:hidden;background:#f5f5f5;border:1px solid #ddd;cursor:pointer}
-.fi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;align-items:start}
+.fi{border-radius:10px;overflow:hidden;background:#f5f5f5;border:1px solid #ddd;cursor:pointer}
+.fi img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transition:transform 0.3s}
+.fi-tit{font-size:14px;font-weight:700;color:#333;line-height:1.3;padding:8px 10px;background:#fff}
 .fi:hover img{transform:scale(1.05)}
 
 /* LIGHTBOX */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:none;align-items:center;justify-content:center}
-.lightbox.open{display:flex}
-.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:6px}
+.lightbox.open{display:flex;flex-direction:column;gap:12px}
+.lightbox img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:6px}
+.lb-cap{max-width:90vw;text-align:center;color:#fff}
+.lb-cap b{display:block;font-size:16px;font-weight:800;line-height:1.3}
+.lb-cap span{display:block;font-size:14px;line-height:1.5;margin-top:4px}
+.lb-cap:empty{display:none}
 .lb-btn{position:absolute;background:rgba(255,255,255,0.15);color:#fff;border:none;cursor:pointer;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s;font-family:inherit}
 .lb-btn:hover{background:rgba(255,255,255,0.35)}
 .lb-close{top:20px;right:20px;font-size:24px}
@@ -1059,6 +1064,7 @@ nav img{height:36px}
   <button class="lb-btn lb-close" onclick="event.stopPropagation();chiudiLightbox()">✕</button>
   <button class="lb-btn lb-prev" onclick="event.stopPropagation();cambiaFoto(-1)">‹</button>
   <img id="lightbox-img" alt="Foto" onclick="event.stopPropagation()">
+  <div class="lb-cap" id="lightbox-cap" onclick="event.stopPropagation()"></div>
   <button class="lb-btn lb-next" onclick="event.stopPropagation();cambiaFoto(1)">›</button>
 </div>
 
@@ -2153,9 +2159,13 @@ async function caricaFotoLavori(ownerId){
   const {data,error}=await sc.from('lavori_foto').select('*').eq('owner_id',ownerId).eq('pubblico',true).order('created_at',{ascending:false});
   const lavori=Array.isArray(data)?data:[];
   if(error||!lavori.length){if(card)card.style.display='none';return}
-  window.fotoLavoriUrls=lavori.map(l=>{const f=l.foto||'';if(!f)return '';return /^https?:\/\//i.test(f)?f:sc.storage.from('foto-lavori').getPublicUrl(f).data.publicUrl}).filter(Boolean);
+  /* 2 settembre 2026: titolo e descrizione erano nel database (76 foto su 134) e
+     non si vedevano da nessuna parte. Il titolo sta sotto la foto, tutti e due nella lightbox. */
+  const escF=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  window.fotoLavori=lavori.map(l=>{const f=l.foto||'';if(!f)return null;const u=/^https?:\/\//i.test(f)?f:sc.storage.from('foto-lavori').getPublicUrl(f).data.publicUrl;return {u,titolo:(l.titolo||'').trim(),descrizione:(l.descrizione||'').trim()}}).filter(Boolean);
+  window.fotoLavoriUrls=window.fotoLavori.map(l=>l.u);
   if(!window.fotoLavoriUrls.length){if(card)card.style.display='none';return}
-  grid.innerHTML=window.fotoLavoriUrls.map((u,i)=>`<div class="fi" onclick="apriLightbox(${i})"><img src="${u}" alt="Foto" loading="lazy"></div>`).join('');
+  grid.innerHTML=window.fotoLavori.map((l,i)=>`<div class="fi" onclick="apriLightbox(${i})"><img src="${escF(l.u)}" alt="${escF(l.titolo||'Foto')}" loading="lazy">${l.titolo?`<div class="fi-tit">${escF(l.titolo)}</div>`:''}</div>`).join('');
   if(card)card.style.display='';
 }
 
@@ -2188,6 +2198,7 @@ function apriLightbox(i){
   if(!window.fotoLavoriUrls?.length)return;
   _lbIndex=i;
   document.getElementById('lightbox-img').src=window.fotoLavoriUrls[i];
+  _lbDidascalia(i);
   document.getElementById('lightbox').classList.add('open');
   document.addEventListener('keydown',_lbKey);
 }
@@ -2199,6 +2210,13 @@ function cambiaFoto(delta){
   const n=window.fotoLavoriUrls?.length||0;if(!n)return;
   _lbIndex=(_lbIndex+delta+n)%n;
   document.getElementById('lightbox-img').src=window.fotoLavoriUrls[_lbIndex];
+  _lbDidascalia(_lbIndex);
+}
+function _lbDidascalia(i){
+  const cap=document.getElementById('lightbox-cap');if(!cap)return;
+  const l=(window.fotoLavori||[])[i]||{};
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  cap.innerHTML=(l.titolo?`<b>${esc(l.titolo)}</b>`:'')+(l.descrizione?`<span>${esc(l.descrizione)}</span>`:'');
 }
 function _lbKey(e){
   if(e.key==='Escape')chiudiLightbox();
