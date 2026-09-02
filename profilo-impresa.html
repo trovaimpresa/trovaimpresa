@@ -1381,6 +1381,11 @@ async function caricaProfilo(id){
     /* il logo sta nel tondo: le misure le da' il CSS (.hero-avatar img), qui
    non si scrivono piu' a mano — se no il cerchio si riempie male */
 if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${_esc(d.logo_url)}" alt="logo" fetchpriority="high">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
+    /* 2 settembre 2026: anche il logo si taglia da dove ha scelto l'impresa.
+       Nel tondo l'immagine e' un <img> con object-fit:cover, quindi il punto
+       si scrive in `object-position`. Chi non ha scelto resta al centro. */
+    var _imgLogo=document.querySelector('#avatar-wrap img');
+    if(_imgLogo)_imgLogo.style.objectPosition=_posSicura((d.personalizzazione||{}).logo_pos);
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
     /* ⛔ 31 agosto 2026 — LA COPERTINA, IN UN POSTO SOLO.
        C'erano due copertine possibili: `foto_copertina_url` (la fascia sopra

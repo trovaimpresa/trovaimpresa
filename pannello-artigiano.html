@@ -1102,6 +1102,13 @@
    ⚠️ `touch-action:none` mentre si trascina: senza, sul telefono il dito fa
    scorrere la pagina invece di spostare la foto. */
 .dash-cover.in-riposizione{ cursor:grab; touch-action:none; user-select:none; }
+/* 2 settembre 2026, seconda parte: anche il LOGO dentro il cerchio si
+   riposiziona. Li' l'immagine e' un <img> con object-fit:cover, quindi il
+   punto del taglio e' `object-position` invece di `background-position`, ma
+   il conto e' lo stesso. Nel tondo si puo' muovere anche di LATO: una foto
+   piu' larga che alta sborda di la'. */
+.dash-avatar.in-riposizione{ cursor:grab; touch-action:none; user-select:none; }
+.dash-avatar.in-riposizione:active{ cursor:grabbing; }
 .dash-cover.in-riposizione:active{ cursor:grabbing; }
 .dash-foto-riposiziona{ right:16px; bottom:64px; }
 .dash-riposiziona-azioni{ position:absolute; right:16px; bottom:16px; z-index:3; display:flex; gap:8px; }
@@ -4251,56 +4258,109 @@ function applicaPosCopertina(pos){
   if(ci)ci.style.backgroundPosition=p;
 }
 var _rip=null;   /* null = non stiamo riposizionando */
+/* 2 settembre 2026, seconda parte — ANCHE IL LOGO.
+   Un solo modo «riposiziona» per tutte e due le immagini: si preme una volta
+   sola, si trascina la copertina E il tondo, e un solo Salva li scrive
+   tutti e due. Due bottoni separati avrebbero voluto dire due modi, due
+   salvataggi e il doppio delle cose che si possono lasciare accese.
+   ⚠️ Nel tondo l'immagine e' un <img> con object-fit:cover: il punto del
+   taglio si scrive in `object-position`, non in `background-position`. Il
+   conto di quanto sborda invece e' identico. */
+function applicaPosLogo(pos){
+  var img=document.getElementById('dash-logo-img');
+  if(!img)return;
+  img.style.objectPosition=_posSicura(pos);
+}
+/* carica un'immagine e ne aspetta le misure vere; null se non ce la fa */
+async function _ripCarica(url){
+  if(!url)return null;
+  var im=new Image(); im.src=url;
+  try{ await im.decode(); }catch(e){ return null; }
+  return im;
+}
 async function avviaRiposiziona(){
   var cover=document.getElementById('dash-cover');
+  var avatar=document.getElementById('dash-avatar');
   var pers=(impresaCorrente&&impresaCorrente.personalizzazione)||{};
   if(!cover||!pers.banner_url)return;
-  /* servono le misure VERE della foto per sapere quanto se ne puo' spostare */
-  var im=new Image();
-  im.src=pers.banner_url;
-  try{ await im.decode(); }catch(e){ alert('Non riesco a leggere la copertina. Riprova fra un momento.'); return; }
-  var p=_posSicura(pers.banner_pos).split(' ');
-  _rip={img:im, x:parseInt(p[0],10), y:parseInt(p[1],10), daX:0, daY:0, partenzaX:0, partenzaY:0, preso:false};
+  var imCop=await _ripCarica(pers.banner_url);
+  if(!imCop){ alert('Non riesco a leggere la copertina. Riprova fra un momento.'); return; }
+  /* il logo puo' non esserci: allora si riposiziona solo la copertina */
+  var imgLogo=document.getElementById('dash-logo-img');
+  var haLogo=!!(imgLogo && imgLogo.style.display!=='none' && impresaCorrente.logo_url);
+  var imLog=haLogo ? await _ripCarica(impresaCorrente.logo_url) : null;
+  var pc=_posSicura(pers.banner_pos).split(' ');
+  var pl=_posSicura(pers.logo_pos).split(' ');
+  _rip={
+    copertina:{img:imCop, x:parseInt(pc[0],10), y:parseInt(pc[1],10)},
+    logo: imLog ? {img:imLog, x:parseInt(pl[0],10), y:parseInt(pl[1],10)} : null,
+    quale:null, daX:0, daY:0, partenzaX:0, partenzaY:0
+  };
   cover.classList.add('in-riposizione');
+  if(_rip.logo && avatar) avatar.classList.add('in-riposizione');
   var b1=document.getElementById('btn-riposiziona'); if(b1)b1.style.display='none';
   var b2=document.getElementById('btn-copertina');   if(b2)b2.style.display='none';
+  var b3=document.getElementById('btn-logo');        if(b3)b3.style.display='none';
   var az=document.getElementById('riposiziona-azioni'); if(az)az.style.display='flex';
-  var ai=document.getElementById('riposiziona-aiuto');  if(ai)ai.style.display='block';
-  cover.addEventListener('pointerdown',_ripGiu);
+  var ai=document.getElementById('riposiziona-aiuto');
+  if(ai){
+    ai.textContent=_rip.logo ? 'Trascina la copertina e il logo' : 'Trascina la foto su e giù';
+    ai.style.display='block';
+  }
+  cover.addEventListener('pointerdown',_ripGiuCopertina);
+  if(avatar) avatar.addEventListener('pointerdown',_ripGiuLogo);
   window.addEventListener('pointermove',_ripMuovi);
   window.addEventListener('pointerup',_ripSu);
 }
-/* quanto sborda la foto dalla fascia, in pixel: e' quello che si puo' spostare */
-function _ripSbordo(){
-  var r=document.getElementById('dash-cover').getBoundingClientRect();
-  var iw=_rip.img.naturalWidth, ih=_rip.img.naturalHeight;
-  var scala=Math.max(r.width/iw, r.height/ih);
-  return {x: iw*scala-r.width, y: ih*scala-r.height};
+/* quanto sborda l'immagine dalla sua casella, in pixel: e' quello che si puo'
+   spostare. Vale uguale per la fascia (background cover) e per il tondo
+   (object-fit cover): cambia solo da quale elemento si prendono le misure. */
+function _ripSbordo(quale){
+  var el = quale==='logo' ? document.getElementById('dash-logo-img')
+                          : document.getElementById('dash-cover');
+  if(!el||!_rip||!_rip[quale])return {x:0,y:0};
+  var r=el.getBoundingClientRect();
+  var im=_rip[quale].img;
+  var scala=Math.max(r.width/im.naturalWidth, r.height/im.naturalHeight);
+  return {x: im.naturalWidth*scala-r.width, y: im.naturalHeight*scala-r.height};
 }
-function _ripGiu(e){
-  if(!_rip)return;
-  _rip.preso=true; _rip.partenzaX=e.clientX; _rip.partenzaY=e.clientY;
-  _rip.daX=_rip.x; _rip.daY=_rip.y;
+function _ripPrendi(quale,e){
+  if(!_rip||!_rip[quale])return;
+  _rip.quale=quale;
+  _rip.partenzaX=e.clientX; _rip.partenzaY=e.clientY;
+  _rip.daX=_rip[quale].x; _rip.daY=_rip[quale].y;
   e.preventDefault();
+  /* il tondo sta dentro la riga sotto la copertina: senza questo, un dito sul
+     tondo muoverebbe anche la copertina */
+  e.stopPropagation();
 }
+function _ripGiuCopertina(e){ _ripPrendi('copertina',e); }
+function _ripGiuLogo(e){ _ripPrendi('logo',e); }
 function _ripMuovi(e){
-  if(!_rip||!_rip.preso)return;
-  var sb2=_ripSbordo();
+  if(!_rip||!_rip.quale)return;
+  var quale=_rip.quale;
+  var sb2=_ripSbordo(quale);
   var nx=_rip.daX, ny=_rip.daY;
   /* trascinando in giu' la foto scende e si scopre la parte ALTA: la
      percentuale cala. Se da quel lato non sborda niente, non si muove. */
   if(sb2.y>0) ny=_rip.daY-((e.clientY-_rip.partenzaY)/sb2.y)*100;
   if(sb2.x>0) nx=_rip.daX-((e.clientX-_rip.partenzaX)/sb2.x)*100;
-  _rip.x=Math.max(0,Math.min(100,Math.round(nx)));
-  _rip.y=Math.max(0,Math.min(100,Math.round(ny)));
-  applicaPosCopertina(_rip.x+'% '+_rip.y+'%');
+  _rip[quale].x=Math.max(0,Math.min(100,Math.round(nx)));
+  _rip[quale].y=Math.max(0,Math.min(100,Math.round(ny)));
+  var p=_rip[quale].x+'% '+_rip[quale].y+'%';
+  if(quale==='logo') applicaPosLogo(p); else applicaPosCopertina(p);
 }
-function _ripSu(){ if(_rip)_rip.preso=false; }
+function _ripSu(){ if(_rip)_rip.quale=null; }
 function _ripChiudi(){
   var cover=document.getElementById('dash-cover');
+  var avatar=document.getElementById('dash-avatar');
   if(cover){
     cover.classList.remove('in-riposizione');
-    cover.removeEventListener('pointerdown',_ripGiu);
+    cover.removeEventListener('pointerdown',_ripGiuCopertina);
+  }
+  if(avatar){
+    avatar.classList.remove('in-riposizione');
+    avatar.removeEventListener('pointerdown',_ripGiuLogo);
   }
   window.removeEventListener('pointermove',_ripMuovi);
   window.removeEventListener('pointerup',_ripSu);
@@ -4310,11 +4370,13 @@ function _ripChiudi(){
      sull'elemento non se ne va da solo (lezione del 30 agosto). */
   var b1=document.getElementById('btn-riposiziona'); if(b1)b1.style.display='';
   var b2=document.getElementById('btn-copertina');   if(b2)b2.style.display='';
+  var b3=document.getElementById('btn-logo');        if(b3)b3.style.display='';
   _rip=null;
 }
 function annullaRiposiziona(){
   var pers=(impresaCorrente&&impresaCorrente.personalizzazione)||{};
-  applicaPosCopertina(pers.banner_pos);   /* torna a com'era salvata */
+  applicaPosCopertina(pers.banner_pos);   /* tornano tutte e due a com'erano */
+  applicaPosLogo(pers.logo_pos);
   _ripChiudi();
 }
 async function salvaRiposiziona(){
@@ -4322,13 +4384,17 @@ async function salvaRiposiziona(){
   var b=document.getElementById('btn-riposiziona-salva');
   var prima=b?b.textContent:'';
   if(b){ b.disabled=true; b.textContent='Salvo...'; }
-  var nuova=_rip.x+'% '+_rip.y+'%';
-  var pers=Object.assign({}, impresaCorrente.personalizzazione||{}, {banner_pos:nuova});
+  var nuovaCop=_rip.copertina.x+'% '+_rip.copertina.y+'%';
+  var nuovoLog=_rip.logo ? (_rip.logo.x+'% '+_rip.logo.y+'%') : null;
+  var cambi={banner_pos:nuovaCop};
+  if(nuovoLog) cambi.logo_pos=nuovoLog;   /* senza logo non si scrive la chiave */
+  var pers=Object.assign({}, impresaCorrente.personalizzazione||{}, cambi);
   var r=await sb.from('imprese').update({personalizzazione:pers}).eq('id',impresaCorrente.id);
   if(b){ b.disabled=false; b.textContent=prima; }
   if(r.error){ alert('Errore nel salvare la posizione: '+r.error.message); return; }
   impresaCorrente.personalizzazione=pers;
-  applicaPosCopertina(nuova);
+  applicaPosCopertina(nuovaCop);
+  if(nuovoLog) applicaPosLogo(nuovoLog);
   _ripChiudi();
 }
 // Applica la personalizzazione salvata al PANNELLO REALE (header, sfondo, logo, tema...)
@@ -4351,6 +4417,7 @@ function applicaPersonalizzazioneDashboard() {
   if (pers.size_testo_header) applicaSizeTestoHero(pers.size_testo_header);
   if (pers.banner_url) applicaBannerHero(pers.banner_url);
   applicaPosCopertina(pers.banner_pos);   /* 2 set 2026: dove tagliare */
+  applicaPosLogo(pers.logo_pos);          /* e dove tagliare il logo */
   const sidebarLogo = document.querySelector('.sidebar-logo');
   if (sidebarLogo) {
     const small = sidebarLogo.querySelector('small');
