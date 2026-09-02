@@ -848,7 +848,16 @@ nav img{height:36px}
             <input type="text" id="chat-testo" placeholder="Scrivi un messaggio...">
             <button class="chat-btn" onclick="inviaMessaggioChat()">Invia</button>
           </div>
-          <button onclick="eliminaConversazioneImpresa()" style="margin-top:10px;padding:8px 14px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🗑 Elimina conversazione</button>
+          <!-- ⛔ 2 SETTEMBRE 2026, deciso da Alessio: «cancella solo dalla mia
+               parte». Prima questo bottone diceva «Elimina conversazione» e
+               cancellava le righe dal database PER TUTTI E DUE: il cliente
+               poteva cancellare i messaggi anche all'impresa, che perdeva la
+               sua copia di quello che il cliente le aveva scritto.
+               Adesso toglie la conversazione da QUESTO dispositivo e basta:
+               nessuna riga viene cancellata, l'impresa tiene la sua copia.
+               ⚠️ Il nome del bottone e' cambiato apposta: «Elimina» prometteva
+               una cosa che adesso non fa piu'. -->
+          <button onclick="togliConversazioneDaQui()" style="margin-top:10px;padding:8px 14px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🗑 Togli da questo dispositivo</button>
           <div id="chat-bloccato-box" style="display:none;margin-top:10px;padding:12px 14px;background:#c0392b;color:white;border-radius:8px;font-size:14px;font-weight:700">🚫 Sei stato bloccato da questa impresa e non puoi più inviare messaggi.</div>
         </div>
       </div>
@@ -2237,21 +2246,30 @@ document.addEventListener('DOMContentLoaded',function(){
     }catch(e){console.error(e)}
   };
 
-  window.eliminaConversazioneImpresa=async function(){
-    if(!confirm('Vuoi eliminare questa conversazione? I messaggi verranno cancellati per entrambi.'))return;
+  /* ⛔ 2 SETTEMBRE 2026 — «CANCELLA SOLO DALLA MIA PARTE», deciso da Alessio.
+     Prima si chiamava `chat_elimina`, che fa `delete from chat_messaggi where
+     conversation_id = ...`: le righe sparivano per tutti e due, quindi un
+     cliente poteva cancellare all'impresa quello che le aveva scritto.
+     Adesso qui NON SI CANCELLA NIENTE nel database: si dimentica il codice
+     della conversazione, che sta solo nella memoria di questo browser. Senza
+     quel codice questo dispositivo non puo' piu' riaprire la conversazione —
+     e nessun altro l'ha mai potuta vedere. L'impresa tiene la sua copia.
+     ⚠️ E' irreversibile per il cliente: il codice contiene un numero casuale
+     e non si puo' ricostruire. Per questo l'avviso lo dice chiaro.
+     ⚠️ `chat_elimina` non la chiama piu' nessuna pagina; il permesso di
+     lanciarla dal browser e' stato tolto il 2 settembre. */
+  window.togliConversazioneDaQui=function(){
+    if(!confirm('La conversazione sparisce da questo dispositivo e non potrai piu\' riaprirla. I messaggi non vengono cancellati: l\'impresa conserva la sua copia. Vuoi continuare?'))return;
     const id=getImpresaId();
     const conv=localStorage.getItem('chat_'+id);
     if(!conv)return;
-    try{
-      await chatRpc('chat_elimina',{p_conv:conv});
-      if(chatTimer){clearInterval(chatTimer);chatTimer=null}
-      chatVisti=new Set();
-      localStorage.removeItem('chat_'+id);
-      localStorage.removeItem('chat_'+id+'_nome');
-      localStorage.removeItem('chat_'+id+'_email');
-      document.getElementById('chat-window').style.display='none';
-      document.getElementById('chat-start-form').style.display='';
-    }catch(e){console.error(e)}
+    if(chatTimer){clearInterval(chatTimer);chatTimer=null}
+    chatVisti=new Set();
+    localStorage.removeItem('chat_'+id);
+    localStorage.removeItem('chat_'+id+'_nome');
+    localStorage.removeItem('chat_'+id+'_email');
+    const w=document.getElementById('chat-window');     if(w)w.style.display='none';
+    const f=document.getElementById('chat-start-form'); if(f)f.style.display='';
   };
 
   document.addEventListener('DOMContentLoaded',function(){
