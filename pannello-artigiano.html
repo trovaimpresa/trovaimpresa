@@ -3025,11 +3025,15 @@ function montaPorteGestionale() {
     if (aperta) metti('azione-entra-' + k, 'Entra', VERDE, () => { location.href = porta.dentro; });
     else spento('azione-entra-' + k, "Non ce l'hai ancora");
 
-    /* 2. ATTIVA — la cassa, e per chi paga gia' il portale Stripe */
+    /* 2. ATTIVA — la cassa, e per chi paga gia' il portale Stripe.
+       ⛔ 3 settembre 2026: chi ha il piano REGALATO (mai pagato) trovava qui
+       «Vedi i piani e i prezzi» → pagina pubblica dei prezzi → «Scopri
+       Premium» → «Registrati» → la home. Un giro a vuoto per uno che e' gia'
+       dentro. Adesso la cassa si apre QUI, come per chi e' free: due prezzi,
+       mese o anno, e Stripe. Cosi' il regalo si trasforma in abbonamento
+       senza uscire dal pannello. */
     if (aperta && abbonato) {
       metti('azione-attiva-' + k, "Gestisci l'abbonamento", VUOTO, function () { apriPortaleClienti(this); });
-    } else if (aperta) {
-      metti('azione-attiva-' + k, 'Vedi i piani e i prezzi', VUOTO, () => { location.href = '/prezzi.html'; });
     } else if (abbonato) {
       metti('azione-attiva-' + k, porta.attiva, VIOLA, function () { apriPortaleClienti(this); });
     } else {
