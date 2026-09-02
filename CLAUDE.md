@@ -20122,3 +20122,166 @@ costano):
   subito, è costato dieci minuti invece di tre consegne.
 * **La figura trova quello che il codice nasconde.** La riga diventata
   arancione e il tondo che copriva la foto si vedono solo guardando.
+
+---
+
+# 2 SETTEMBRE 2026 — LA SCHEDA CHE SI FA CERCARE, E LE QUATTRO CARTE DEL GESTIONALE
+
+Giornata in due metà. La mattina e il pomeriggio: dieci consegne piccole,
+tutte finite e pubblicate. La sera: **un'ora e mezza bruciata su un blocco di
+quattro carte**, perché ho costruito tre volte la cosa sbagliata prima di
+guardare il disegno che Alessio aveva in testa.
+
+---
+
+## LE CONSEGNE DELLA GIORNATA
+
+1. **Le pastiglie dei mestieri in riga** — `.hero-mestieri` passa a
+   `padding:0 32px 26px 200px` (200 = 32 del bordo + 150 del logo + 18 di
+   stacco). Sul telefono non si tocca.
+2. **La linguetta «Recensioni»** non dice più «(0)»: lo zero compare solo se
+   c'è almeno una recensione.
+3. **`recensioni_pubbliche()`** rifatta col `totale`: il contatore non si
+   ferma più a 50.
+4. **La fascia della copertina**: `aspect-ratio:2.5/1`, `min-height:180px`,
+   `max-height:800px`. Il tentativo al 38% (tetto 950) è stato **buttato**:
+   misurato dal vivo, il nome finiva a 1057 px su una finestra da 950 e
+   spariva sotto la piega.
+5. **«Riposiziona»** su copertina e logo, in tutti e tre i pannelli buoni
+   (artigiano, impresa, professionisti): si trascina l'immagine e si sceglie
+   cosa far vedere. `pannello-negozio.html` è rimasto fuori: ha la testata
+   vecchia.
+6. **La chat si toglie dal proprio dispositivo** (`togliConversazioneDaQui`):
+   nessuna chiamata al database, si puliscono tre chiavi di `localStorage`.
+   L'altra parte continua a vedere tutto — ed è scritto sul bottone.
+7. **L'email della scadenza Premium** riscritta: prima si rassicura (restare
+   su TrovaImpresa è gratis, la vetrina resta), poi si spiega che i 29 €
+   comprano il **gestionale**, non la posizione in classifica. Dentro:
+   computo metrico, computo da prezzare, preventivi, fatture SDI, cantieri,
+   agenda, scadenze, e l'AI.
+8. **Il bollino «P. IVA»** sulla scheda pubblica, con il controllo vero della
+   cifra di controllo.
+9. **«Mostra numero»** sulla scheda: il telefono coperto finché non si chiede,
+   e ogni richiesta scrive una riga in `contatti`.
+10. **La quarta casella «Contatti»** nel pannello: quante **persone** ti hanno
+    cercato questo mese.
+
+---
+
+## ⛔ LE QUATTRO CARTE DEL GESTIONALE — E L'ORA BRUCIATA
+
+### Il difetto, parole sue
+
+> «questi due gestionali non c'è il bottone entra, ma si entra da attiva in
+> viola»
+
+Il bottone viola faceva **due mestieri**: la cassa per chi non ha pagato e la
+porta per chi ha pagato. Chi era già abbonato non capiva da dove si entrasse.
+
+### Come ho perso un'ora
+
+Alessio ha scritto la stessa cosa **cinque volte**. Io ho costruito:
+
+1. quattro carte in tutto (sbagliato: ne voleva quattro **per gestionale**);
+2. due carte per gestionale (sbagliato);
+3. quattro per gestionale ma col nome in cima (sbagliato: lo voleva in mezzo).
+
+Poi gli ho chiesto «A o B?» con una figura di due alternative. Lui ha
+risposto **ridettando la stessa frase**. Solo quando ha detto «ti devo fare un
+disegno?» e **ha fotografato un foglio a penna** la forma è stata chiara in
+dieci secondi.
+
+> ⛔ **LA LEZIONE: quando la stessa richiesta torna due volte, non si
+> ricostruisce e non si offrono alternative. Si chiede il disegno.**
+> Una figura fatta da lui vale più di dieci figure fatte da me, perché la mia
+> figura può essere sbagliata esattamente come il codice.
+
+E la seconda, più dura: **Alessio è dislessico**. Quando gli chiedo di
+scegliere fra due proposte scritte, gli sto chiedendo la cosa che gli costa di
+più. «cazzo sai leggere? io no, per questo mi faccio aiutare da te.»
+
+### La forma finale (dal suo disegno)
+
+Per **ogni** gestionale, quattro carte:
+
+```
+   ┌──────────┐                    ┌──────────────┐
+   │  ENTRA   │                    │ PROVA 30 GG  │
+   └──────────┘   🛠️ Gestionale    └──────────────┘
+   ┌──────────┐      Premium       ┌──────────────┐
+   │  ATTIVA  │                    │ ENTRA E VEDI │
+   └──────────┘                    └──────────────┘
+```
+
+Due gestionali affiancati (Premium e Premium AI), quindi **otto carte**.
+Il nome sta **in mezzo**, non in cima. La faccia delle carte è copiata da
+`.rie-card` di `css/gestionale.css`: icona nel quadratino colorato, titolo di
+fianco. I colori delle icone sono quelli già assegnati là alle sezioni.
+
+### Le regole che il banco fa rispettare
+
+* **Otto bottoni su otto.** «Tutti, non metà.» Prima dove l'azione non serviva
+  restava una scritta grigia e mezze carte finivano senza bottone.
+* **Tutti dello stesso blu del sito `#0066ff`**: niente verde, niente viola,
+  niente bianco. Il banco lo misura sul reso, non lo legge nel CSS.
+* Quello che non si può fare **c'è lo stesso**, blu pieno, ma non si clicca, e
+  dice perché: «Ce l'hai già», «Non ce l'hai ancora», «Prova già in corso».
+* Chi ha pagato entra **solo** dalla carta «Entra»; la carta «Attiva» diventa
+  «Gestisci l'abbonamento» (portale Stripe) o «Vedi i piani e i prezzi» per
+  chi il piano ce l'ha regalato.
+
+Banco: `prove-claude/banco-4-carte-gestionale.js` — **217 prove**, metro sulla
+copia di prima **4/121**.
+
+---
+
+## ⛔ TRE TRAPPOLE IN CUI SONO RICASCATO OGGI
+
+### 1. Togliere i commenti mangia mezza pagina
+
+Il banco diceva «verde» su un file in cui **le carte non c'erano**. Motivo:
+lo spogliatoio dei commenti in stile barra-stella, applicato a tutta la
+pagina, cancellava **92.000 caratteri su 296.000** — una barra dentro una
+stringa apre un finto commento che si richiude molto più avanti.
+
+> Nel banco si toglie **solo** il commento HTML `<!-- -->` (quello che
+> racconta il difetto e potrebbe far diventare verde una prova sulle scritte).
+> Il codice JS **non si legge: si fa girare.**
+
+Era già scritto in questo file. Non è bastato.
+
+### 2. Una sostituzione automatica che incastra il markup
+
+Per spostare le carte ho usato una regex non-golosa su `<div ...>…</div>`.
+Le carte hanno div dentro: il risultato è stato **carte annidate una dentro
+l'altra e i due gestionali mescolati**. La pagina era illeggibile.
+
+> ⛔ **Un blocco di markup non si sposta a pezzi: si riscrive intero da un
+> generatore, e poi si contano i pezzi** (`<div` contro `</div>`, quante carte,
+> quanti id doppi). Contati: 8 carte, 0 doppioni.
+
+### 3. Un colore nuovo messo senza chiedere
+
+La quarta casella «Contatti» l'avevo fatta viola `#7c3aed` — un colore nuovo,
+mai concordato, e per di più quello del gestionale: la casella sembrava un
+pezzo del gestionale. Alessio: «il viola adesso confonde». Sostituito con
+`#1b8a3f`, il verde del bollino «Verificata» già in pagina.
+
+---
+
+## Le regole di lavoro, ribadite dai fatti di oggi
+
+* **La consegna è cinque cose, non quattro**: banco verde · controllo verde ·
+  md5 uguale dalle due parti · blocco git · **e i passi numerati da cliccare**.
+  Più la **scheda di collaudo**. Oggi le prime due consegne sono partite senza
+  scheda e senza passi, e se ne è accorto lui.
+* **Le figure si scrivono in cartella, non si mandano in chat.** «Io non
+  scarico niente dalla chat» è scritto nel prompt di sessione. L'ho fatto lo
+  stesso.
+* **Quando la stessa richiesta torna due volte: chiedi il disegno.**
+* **Non offrire alternative scritte a chi è dislessico.** Costruisci, mostra,
+  e cambia una cosa per volta su quello che vede.
+* **Un riquadro vuoto è un difetto, non una scelta.** Se in una carta non c'è
+  niente da fare, ci va comunque scritto perché.
+* **Il colore si misura sul reso.** `getComputedStyle(b).backgroundColor` su
+  tutti gli otto bottoni: `rgb(0,102,255)` × 8. Guardare il CSS non basta.
