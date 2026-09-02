@@ -1452,24 +1452,59 @@
           <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale</div>
           <div style="font-size:13px;color:#888;margin-top:4px">Cantieri, squadra, preventivi, spese e margini, report — tutto in un posto solo</div>
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE: DUE A SINISTRA, DUE A DESTRA.
+             Prima ogni gestionale era UNA carta con tre bottoni impilati, e il
+             viola «Attiva» faceva due mestieri: la cassa per chi non paga e la
+             porta per chi paga già. Alessio, 2 settembre: «non c'è il bottone
+             entra, ma si entra da attiva in viola», e poi «due card a destra e
+             due a sinistra per ogni gestionale: una sopra e una sotto».
+             Adesso: colonna sinistra = Gestionale Premium, colonna destra =
+             Gestionale Premium AI. In cima a ognuna la carta verde «Entra»,
+             che compare SOLO a chi quel gestionale ce l'ha davvero; sotto la
+             carta per comprarlo, guardarlo o provarlo.
+             Il verde è #1b8a3f, la stessa tinta del bollino «Verificata» già in
+             questa pagina: nessun colore nuovo.
+             minmax(240px,1fr): sul telefono le due colonne vanno a capo intere,
+             e ogni gestionale resta con le sue due carte attaccate. -->
+        <div id="porte-gestionale" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;align-items:start">
 
-          <div id="porta-premium" style="flex:1;min-width:200px;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;display:flex;flex-direction:column">
-            <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
-            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium</div>
-            <div id="porta-premium-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
-            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Cantieri, preventivi, fatture, squadra e report</div>
-            <div id="porta-premium-azione" style="margin-top:auto"></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <div id="carta-entra-premium" style="display:none;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;flex-direction:column">
+              <div style="font-size:1.8rem;margin-bottom:8px">🚪</div>
+              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Entra nel Gestionale Premium</div>
+              <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Ce l'hai già pagato. Da qui apri i cantieri, i preventivi e le fatture.</div>
+              <div id="carta-entra-premium-azione" style="margin-top:auto"></div>
+            </div>
+
+            <div id="porta-premium" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;display:flex;flex-direction:column">
+              <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
+              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium</div>
+              <div id="porta-premium-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
+              <div id="porta-premium-spiega" style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Se non ce l'hai: lo compri, lo guardi dentro, o lo provi un mese.</div>
+              <div id="porta-premium-azione" style="margin-top:auto"></div>
+            </div>
+
           </div>
 
-          <div id="porta-premium-ai" style="flex:1;min-width:200px;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;display:flex;flex-direction:column">
-            <div style="font-size:1.8rem;margin-bottom:8px">✨</div>
-            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium AI</div>
-            <div id="porta-ai-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
-            <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Tutto il Premium, più la Chat con AI</div>
-            <div id="porta-ai-azione" style="margin-top:auto"></div>
-          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
 
+            <div id="carta-entra-ai" style="display:none;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;flex-direction:column">
+              <div style="font-size:1.8rem;margin-bottom:8px">🚪</div>
+              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Entra nel Gestionale Premium AI</div>
+              <div style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Ce l'hai già pagato. Come il Premium, più la Chat con AI che ti aiuta.</div>
+              <div id="carta-entra-ai-azione" style="margin-top:auto"></div>
+            </div>
+
+            <div id="porta-premium-ai" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:22px;text-align:center;background:#fafafa;min-height:200px;display:flex;flex-direction:column">
+              <div style="font-size:1.8rem;margin-bottom:8px">✨</div>
+              <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Gestionale Premium AI</div>
+              <div id="porta-ai-tuo" style="visibility:hidden;font-size:0.85rem;color:#7c3aed;font-weight:700;margin-top:4px">Il tuo piano</div>
+              <div id="porta-ai-spiega" style="font-size:0.85rem;color:#666;line-height:1.5;margin:8px 0 12px">Tutto il Premium più la Chat con AI: lo compri, lo guardi, o lo provi.</div>
+              <div id="porta-ai-azione" style="margin-top:auto"></div>
+            </div>
+
+          </div>
 
         </div>
         <div id="lista-cantieri" style="display:none"></div>
@@ -2786,8 +2821,10 @@ function bloccaCardPremium() {
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 const PORTE_GESTIONALE = [
-  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium',    attiva: 'Attiva Premium e gestionale'    },
-  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI' }
+  { chiave: 'premium',    azione: 'porta-premium-azione', tuo: 'porta-premium-tuo', mese: '29 € al mese', anno: '249 € all\'anno', label: 'Premium',    attiva: 'Attiva Premium e gestionale',
+    carta: 'carta-entra-premium', cartaAzione: 'carta-entra-premium-azione', dentro: '/gestionale-app.html?piano=premium' },
+  { chiave: 'premium-ai', azione: 'porta-ai-azione',      tuo: 'porta-ai-tuo',      mese: '39 € al mese', anno: '349 € all\'anno', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI',
+    carta: 'carta-entra-ai',      cartaAzione: 'carta-entra-ai-azione',      dentro: '/gestionale-app.html' }
 ];
 
 function montaPorteGestionale() {
@@ -2845,6 +2882,25 @@ function montaPorteGestionale() {
     //    cosi' prezzo e pulsante restano alla stessa altezza su tutte e due.
     if (tuo) tuo.style.visibility = suo ? 'visible' : 'hidden';
 
+    // ⛔ 2 SETTEMBRE — LA PORTA E' UNA CARTA SUA, VERDE, SOPRA.
+    // Finche' il viola faceva sia la cassa sia la porta, chi aveva gia'
+    // pagato non capiva da dove si entrasse. Adesso: se questo gestionale
+    // e' aperto per lui, sopra compare la carta «Entra» col bottone verde,
+    // e nella carta di sotto il viola smette di essere la porta.
+    const carta = document.getElementById(porta.carta);
+    const cbox  = document.getElementById(porta.cartaAzione);
+    if (carta) carta.style.display = aperta ? 'flex' : 'none';
+    if (cbox) {
+      cbox.innerHTML = '';
+      if (aperta) {
+        const entra = document.createElement('button');
+        entra.textContent = 'Entra';
+        entra.style.cssText = 'width:100%;padding:10px;background:#1b8a3f;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem';
+        entra.onclick = () => { location.href = porta.dentro; };
+        cbox.appendChild(entra);
+      }
+    }
+
     box.innerHTML = '';
 
     // ⛔ SEPARATE, non dentro una cornice sola. Deciso da Alessio il 30
@@ -2880,11 +2936,22 @@ function montaPorteGestionale() {
     //    anche a chi l'AI ce l'ha: se no le due porte portano nello
     //    stesso identico posto.
     if (aperta) {
-      bottone.onclick = () => {
-        location.href = porta.chiave === 'premium'
-          ? '/gestionale-app.html?piano=premium'
-          : '/gestionale-app.html';
-      };
+      // ⛔ Chi ce l'ha gia' entra dalla carta verde qui sopra: qui sotto
+      // non si vende piu' niente, si gestisce e basta. «Entra e guarda» e
+      // «Prova 30 giorni» a un abbonato non vogliono dire nulla.
+      guarda.style.display = 'none';
+      prova.style.display = 'none';
+      const spiega = document.getElementById(porta.chiave === 'premium' ? 'porta-premium-spiega' : 'porta-ai-spiega');
+      if (spiega) spiega.textContent = 'Il tuo piano \u00e8 attivo. Si entra dalla carta qui sopra.';
+      if (abbonato) {
+        bottone.textContent = 'Gestisci l\'abbonamento';
+        bottone.style.background = 'white';
+        bottone.style.color = '#7c3aed';
+        bottone.style.border = '1.5px solid #7c3aed';
+        bottone.onclick = () => apriPortaleClienti(bottone);
+      } else {
+        bottone.style.display = 'none';
+      }
       return;
     }
 
