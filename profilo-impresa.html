@@ -1424,8 +1424,42 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
         if(_ci)_ci.style.backgroundPosition=_posCop;
       }
     }
+    /* ⛔ 2 SETTEMBRE 2026 — IL BOLLINO DELLA PARTITA IVA.
+       Chiesto da Alessio come «segnale di fiducia gratis». Prima di scriverlo
+       ho contato sul database, e i numeri erano diversi da quelli che
+       giravano (la nota del 1 settembre diceva «82 su 82»: contava le righe
+       non nulle, comprese le caselle VUOTE).
+       Misurato il 2 settembre su 84 imprese pubbliche:
+         · 57 hanno la colonna non nulla, ma solo 40 hanno delle cifre dentro
+         · 39 hanno 11 cifre · 38 passano il calcolo di controllo
+         · 1 di quelle 38 e' 00000000000 — undici zeri, e il calcolo lo passa
+         · quindi il bollino tocca a 37 imprese su 84
+       ⛔ NON SI SCRIVE «VERIFICATA», ED E' UNA SCELTA, NON UNA DIMENTICANZA.
+       Qui si controlla solo che il numero sia FATTO BENE (lunghezza e cifra di
+       controllo). Che quella partita IVA esista davvero e sia attiva lo sa
+       solo l'Agenzia delle Entrate, e per chiederglielo serve un servizio a
+       pagamento. ⚠️ VIES non va bene: risponde solo per chi e' iscritto agli
+       scambi europei, e quasi nessun artigiano lo e' — direbbe «non valida»
+       su imprese oneste. Percio' il bollino mostra IL NUMERO: e' quello il
+       segnale, perche' chiunque puo' copiarlo e controllarlo, e un'impresa
+       finta un numero vero non lo pubblica.
+       ⚠️ Le undici cifre uguali si buttano: e' la riga vera trovata oggi. */
+    function _pivaValida(v){
+      var p=String(v==null?'':v).replace(/\D/g,'');
+      if(p.length!==11)return null;
+      if(/^(.)\1{10}$/.test(p))return null;   /* 00000000000 e simili */
+      var somma=0;
+      for(var i=0;i<10;i++){
+        var n=parseInt(p.charAt(i),10);
+        if(i%2===1){ n=n*2; if(n>9)n-=9; }
+        somma+=n;
+      }
+      return ((10-(somma%10))%10)===parseInt(p.charAt(10),10) ? p : null;
+    }
     const b=[];
     if(d.verificata)b.push('<span class="hb hb-v">✓ Verificata</span>');
+    const _piva=_pivaValida(d.partita_iva);
+    if(_piva)b.push('<span class="hb hb-g">🧾 P. IVA '+_piva+'</span>');
     if(d.albo_verificato)b.push('<span class="hb hb-v">🎓 Albo verificato</span>');
     if(d.rc_scadenza && new Date(d.rc_scadenza) > new Date())b.push('<span class="hb hb-g">🛡️ RC professionale</span>');
     if(d.anno_fondazione&&d.anno_fondazione>1900)b.push(`<span class="hb hb-g">Dal ${d.anno_fondazione}</span>`);
