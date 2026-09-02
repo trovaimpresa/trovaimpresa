@@ -4271,12 +4271,24 @@ function applicaPosLogo(pos){
   if(!img)return;
   img.style.objectPosition=_posSicura(pos);
 }
-/* carica un'immagine e ne aspetta le misure vere; null se non ce la fa */
+/* ⛔ 2 SETTEMBRE 2026 — IL BOTTONE CHE SI INCHIODAVA IN SILENZIO.
+   Trovato provando la pagina vera, non col banco: se l'immagine non arriva,
+   `decode()` NON FINISCE MAI — non risponde ne' bene ne' male — e
+   `avviaRiposiziona` restava lì ad aspettarla per sempre. A schermo: premi
+   «Riposiziona» e non succede niente, nessun errore, nessun avviso. Il caso
+   in cui e' successo era la rete bloccata, ma vale uguale per una rete lenta
+   o un file cancellato dal secchio.
+   RIMEDIO: si aspetta al massimo 4 secondi. Scaduti quelli si va avanti lo
+   stesso — senza il logo si riposiziona solo la copertina, e se a mancare e'
+   la copertina si dice all'impresa cosa e' successo invece di lasciarla li'.
+   ⚠️ E il logo, quando c'e' gia' nella pagina, non si riscarica per niente:
+   le misure vere stanno gia' nell'<img> (`naturalWidth`). */
+function _ripAttesa(ms){ return new Promise(function(r){ setTimeout(function(){ r(null); }, ms); }); }
 async function _ripCarica(url){
   if(!url)return null;
   var im=new Image(); im.src=url;
-  try{ await im.decode(); }catch(e){ return null; }
-  return im;
+  try{ return await Promise.race([im.decode().then(function(){ return im; }), _ripAttesa(4000)]); }
+  catch(e){ return null; }
 }
 async function avviaRiposiziona(){
   var cover=document.getElementById('dash-cover');
@@ -4284,19 +4296,25 @@ async function avviaRiposiziona(){
   var pers=(impresaCorrente&&impresaCorrente.personalizzazione)||{};
   if(!cover||!pers.banner_url)return;
   var imCop=await _ripCarica(pers.banner_url);
-  if(!imCop){ alert('Non riesco a leggere la copertina. Riprova fra un momento.'); return; }
   /* il logo puo' non esserci: allora si riposiziona solo la copertina */
   var imgLogo=document.getElementById('dash-logo-img');
   var haLogo=!!(imgLogo && imgLogo.style.display!=='none' && impresaCorrente.logo_url);
-  var imLog=haLogo ? await _ripCarica(impresaCorrente.logo_url) : null;
+  /* il logo e' gia' disegnato nella pagina: le sue misure vere sono li', non
+     serve riscaricarlo. Si riscarica solo se per qualche motivo non e' pronto. */
+  var imLog=null;
+  if(haLogo) imLog=(imgLogo.complete && imgLogo.naturalWidth) ? imgLogo : await _ripCarica(impresaCorrente.logo_url);
+  /* ⚠️ se una delle due immagini non si riesce a leggere, si riposiziona
+     l'altra invece di non fare niente. Si rinuncia solo se mancano tutte e
+     due, e in quel caso lo si dice. */
+  if(!imCop && !imLog){ alert('Non riesco a leggere le immagini: controlla la connessione e riprova.'); return; }
   var pc=_posSicura(pers.banner_pos).split(' ');
   var pl=_posSicura(pers.logo_pos).split(' ');
   _rip={
-    copertina:{img:imCop, x:parseInt(pc[0],10), y:parseInt(pc[1],10)},
+    copertina: imCop ? {img:imCop, x:parseInt(pc[0],10), y:parseInt(pc[1],10)} : null,
     logo: imLog ? {img:imLog, x:parseInt(pl[0],10), y:parseInt(pl[1],10)} : null,
     quale:null, daX:0, daY:0, partenzaX:0, partenzaY:0
   };
-  cover.classList.add('in-riposizione');
+  if(_rip.copertina) cover.classList.add('in-riposizione');
   if(_rip.logo && avatar) avatar.classList.add('in-riposizione');
   var b1=document.getElementById('btn-riposiziona'); if(b1)b1.style.display='none';
   var b2=document.getElementById('btn-copertina');   if(b2)b2.style.display='none';
@@ -4304,11 +4322,12 @@ async function avviaRiposiziona(){
   var az=document.getElementById('riposiziona-azioni'); if(az)az.style.display='flex';
   var ai=document.getElementById('riposiziona-aiuto');
   if(ai){
-    ai.textContent=_rip.logo ? 'Trascina la copertina e il logo' : 'Trascina la foto su e giù';
+    ai.textContent=(_rip.copertina&&_rip.logo) ? 'Trascina la copertina e il logo'
+                  : (_rip.copertina ? 'Trascina la foto su e giù' : 'Trascina il logo');
     ai.style.display='block';
   }
-  cover.addEventListener('pointerdown',_ripGiuCopertina);
-  if(avatar) avatar.addEventListener('pointerdown',_ripGiuLogo);
+  if(_rip.copertina) cover.addEventListener('pointerdown',_ripGiuCopertina);
+  if(_rip.logo && avatar) avatar.addEventListener('pointerdown',_ripGiuLogo);
   window.addEventListener('pointermove',_ripMuovi);
   window.addEventListener('pointerup',_ripSu);
 }
@@ -4384,16 +4403,17 @@ async function salvaRiposiziona(){
   var b=document.getElementById('btn-riposiziona-salva');
   var prima=b?b.textContent:'';
   if(b){ b.disabled=true; b.textContent='Salvo...'; }
-  var nuovaCop=_rip.copertina.x+'% '+_rip.copertina.y+'%';
+  var nuovaCop=_rip.copertina ? (_rip.copertina.x+'% '+_rip.copertina.y+'%') : null;
   var nuovoLog=_rip.logo ? (_rip.logo.x+'% '+_rip.logo.y+'%') : null;
-  var cambi={banner_pos:nuovaCop};
-  if(nuovoLog) cambi.logo_pos=nuovoLog;   /* senza logo non si scrive la chiave */
+  var cambi={};
+  if(nuovaCop) cambi.banner_pos=nuovaCop;  /* si scrive solo quello che si e' */
+  if(nuovoLog) cambi.logo_pos=nuovoLog;    /* davvero potuto riposizionare */
   var pers=Object.assign({}, impresaCorrente.personalizzazione||{}, cambi);
   var r=await sb.from('imprese').update({personalizzazione:pers}).eq('id',impresaCorrente.id);
   if(b){ b.disabled=false; b.textContent=prima; }
   if(r.error){ alert('Errore nel salvare la posizione: '+r.error.message); return; }
   impresaCorrente.personalizzazione=pers;
-  applicaPosCopertina(nuovaCop);
+  if(nuovaCop) applicaPosCopertina(nuovaCop);
   if(nuovoLog) applicaPosLogo(nuovoLog);
   _ripChiudi();
 }
