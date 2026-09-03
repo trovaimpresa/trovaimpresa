@@ -78,8 +78,8 @@ exports.handler = async function (event) {
   const ADMIN_PASS = process.env.ADMIN_PASS || '';
   const RESEND = (process.env.RESEND_API_KEY || '').trim();
 
-  let u, p, gruppo, oggetto, testo, solo_conteggio;
-  try { ({ u, p, gruppo, oggetto, testo, solo_conteggio } = JSON.parse(event.body || '{}')); }
+  let u, p, gruppo, oggetto, testo, solo_conteggio, azione;
+  try { ({ u, p, gruppo, oggetto, testo, solo_conteggio, azione } = JSON.parse(event.body || '{}')); }
   catch { return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Body JSON non valido.' }) }; }
 
   if (!ADMIN_USER || !ADMIN_PASS || u !== ADMIN_USER || p !== ADMIN_PASS) {
@@ -93,6 +93,16 @@ exports.handler = async function (event) {
   }
 
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  // ---- storico: le email gia' mandate (pannello "Email inviate") ----
+  if (azione === 'storico') {
+    const { data, error: e } = await sb.from('admin_email_inviate')
+      .select('id, created_at, modo, gruppo, oggetto, testo, quanti, destinatari')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (e) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura storico: ' + e.message }) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, email: data || [] }) };
+  }
 
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
@@ -175,6 +185,21 @@ exports.handler = async function (event) {
       };
     }
     const inviate = Array.isArray(risposta.data) ? risposta.data.length : destinatari.length;
+
+    // Archivio: ogni invio resta scritto, prova compresa, cosi' Alessio
+    // ritrova cosa ha mandato, a chi e quando. Un errore qui non deve
+    // far sembrare fallito un invio che invece e' partito.
+    try {
+      await sb.from('admin_email_inviate').insert({
+        modo: gruppo === 'prova' ? 'prova' : 'vero',
+        gruppo,
+        oggetto: String(oggetto),
+        testo: String(testo),
+        quanti: inviate,
+        destinatari: destinatari.map(i => i.email)
+      });
+    } catch (e) { console.error('[invia-annuncio] storico non salvato:', e.message); }
+
     return {
       statusCode: 200, headers: corsHeaders,
       body: JSON.stringify({

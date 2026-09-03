@@ -381,6 +381,17 @@
   #st-esito:not(:empty){margin-top:22px;padding:18px 20px;border-radius:12px;border:2px solid;font-size:15.5px;line-height:1.7}
   #st-esito.ok{background:#f2fbf5;border-color:#b5e2c5}
   #st-esito.ko{background:#fdecea;border-color:#f5c2bd;color:#b3261e}
+  /* Email inviate (storico) */
+  .ei-riga{background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .ei-testa{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+  .ei-data{font-size:14.5px;color:#5b6b80;min-width:150px}
+  .ei-ogg{font-size:16px;font-weight:800;color:#12233a;flex:1 1 260px}
+  .ei-tag{font-size:13.5px;font-weight:800;padding:5px 10px;border-radius:999px;background:#e7f0ff;color:#0052cc}
+  .ei-tag.prova{background:#fdf3e3;color:#b26a00}
+  .ei-azioni{display:flex;gap:8px;flex-wrap:wrap}
+  .ei-testo{display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0;white-space:pre-wrap;font-size:15px;line-height:1.7;color:#12233a}
+  .ei-riga.aperta .ei-testo{display:block}
+  .ei-vuoto{padding:24px;text-align:center;color:#5b6b80;font-size:15.5px}
   /* Email salvate */
   .st-salva-box{background:#f7f9fc;border:2px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:22px}
   .st-salva-riga{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -494,6 +505,9 @@
       </div>
       <div class="nav-item" onclick="showSection('scrivi-tutti',this)">
         <span class="nav-icon">✉️</span> Scrivi a tutti
+      </div>
+      <div class="nav-item" onclick="showSection('email-inviate',this)">
+        <span class="nav-icon">📬</span> Email inviate
       </div>
       <div class="nav-item" onclick="showSection('utilizzo',this)">
         <span class="nav-icon">📈</span> Chi usa il gestionale
@@ -1224,6 +1238,18 @@
       </div>
     </div>
 
+    <!-- EMAIL INVIATE -->
+    <div class="section" id="sec-email-inviate">
+      <div class="topbar">
+        <div class="topbar-title">📬 Email inviate</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px;max-width:900px">
+        <div class="st-nota" style="margin:0 0 18px">Tutte le email partite da «Scrivi a tutti», dalla più recente. Con «Riusa» la riporti nel foglio per mandarla di nuovo o modificarla.</div>
+        <div id="ei-lista"><div class="ei-vuoto">Carico…</div></div>
+      </div>
+    </div>
+
     <!-- CHI USA IL GESTIONALE -->
     <div class="section" id="sec-utilizzo">
       <div class="topbar">
@@ -1488,6 +1514,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
   if (id === 'scrivi-tutti') contaDestinatari();
+  if (id === 'email-inviate') caricaEmailInviate();
   if (!fromPopstate && (!history.state || history.state.section !== id)) history.pushState({section: id}, '');
 }
 
@@ -2136,6 +2163,45 @@ async function inviaAnnuncio(modo) {
   esito.innerHTML = modo === 'prova'
     ? '<b>Prova inviata.</b><br>Controlla la tua casella e guarda com\'è venuta prima di mandarla a tutti.'
     : '<b>Inviata a ' + j.inviate + ' ' + (j.inviate === 1 ? 'persona' : 'persone') + '.</b><br>Se qualcuno non la riceve, controlla che la sua email sia scritta bene.';
+}
+
+// ===== EMAIL INVIATE (storico) =====
+let _emailInviate = [];
+async function caricaEmailInviate() {
+  const box = document.getElementById('ei-lista');
+  if (!box) return;
+  box.innerHTML = '<div class="ei-vuoto">Carico…</div>';
+  const j = await annuncioFetch({ azione: 'storico' });
+  if (!j.success) { box.innerHTML = '<div class="ei-vuoto">Non riesco a leggere lo storico: ' + (j.error || '') + '</div>'; return; }
+  _emailInviate = j.email || [];
+  if (!_emailInviate.length) { box.innerHTML = '<div class="ei-vuoto">Nessuna email mandata finora. Le prossime che mandi da «Scrivi a tutti» compaiono qui.</div>'; return; }
+  const esc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const gruppoNome = { completi: 'profilo compilato', incompleti: 'profilo vuoto', tutti: 'tutti gli iscritti', prova: 'solo a me' };
+  box.innerHTML = _emailInviate.map((e, i) => {
+    const d = new Date(e.created_at);
+    const quando = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const tag = e.modo === 'prova'
+      ? '<span class="ei-tag prova">prova</span>'
+      : '<span class="ei-tag">' + e.quanti + ' ' + (e.quanti === 1 ? 'persona' : 'persone') + ' · ' + (gruppoNome[e.gruppo] || e.gruppo || '') + '</span>';
+    return '<div class="ei-riga" id="ei-' + i + '">'
+      + '<div class="ei-testa"><span class="ei-data">' + quando + '</span>'
+      + '<span class="ei-ogg">' + esc(e.oggetto) + '</span>' + tag
+      + '<span class="ei-azioni">'
+      + '<button type="button" class="st-mini" onclick="document.getElementById(\'ei-' + i + '\').classList.toggle(\'aperta\')">Leggi</button>'
+      + '<button type="button" class="st-mini pieno" onclick="riusaEmailInviata(' + i + ')">Riusa</button>'
+      + '</span></div>'
+      + '<div class="ei-testo">' + esc(e.testo) + '</div>'
+      + '</div>';
+  }).join('');
+}
+function riusaEmailInviata(i) {
+  const e = _emailInviate[i]; if (!e) return;
+  document.getElementById('st-oggetto').value = e.oggetto || '';
+  document.getElementById('st-testo').value = e.testo || '';
+  const nav = [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'scrivi-tutti'"));
+  if (nav) showSection('scrivi-tutti', nav);
+  const esito = document.getElementById('st-esito');
+  if (esito) { esito.className = 'ok'; esito.innerHTML = '<b>Email ripresa dallo storico.</b><br>Controllala, poi fai prima la prova su di te.'; }
 }
 
 // ===== SEMAFORO: il sito sta bene? =====
