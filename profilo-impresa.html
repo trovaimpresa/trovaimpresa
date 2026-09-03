@@ -219,10 +219,10 @@ nav img{height:36px}
    la nota sui documenti dell'incarico, e le tre scritte delle certificazioni
    piu' quella dei prodotti in vetrina, tutte a 12. Adesso il minimo di questa
    pagina e' 13 px, punto.
-   ⚠️ Restano 4 misure sotto i 13 px (.cdh 9, .cd 12, .cd.oggi 11, .ms-l 10):
-   sono i resti del calendario e delle mini-statistiche tolti il 7/8/2026 —
-   nessun elemento della pagina usa piu' quelle classi, quindi a schermo non
-   si vedono. Da decidere se buttare via il foglio morto. */
+   ⛔ 3 settembre 2026: le ultime 4 misure sotto i 13 px (.cdh 9, .cd 12,
+   .cd.oggi 11, .ms-l 10) sono state BUTTATE insieme al foglio morto che le
+   conteneva. Adesso in questa pagina non esiste piu' nessuna misura sotto i
+   13 px, nemmeno spenta. */
 /* ⛔ 29 agosto 2026 - mai sotto i 13 px (era 12) */
 .hero-tipo{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
   color:rgba(255,255,255,0.65);margin-bottom:6px}
@@ -407,26 +407,15 @@ nav img{height:36px}
 /* MAPPA */
 #mappa-profilo{height:220px;border-radius:10px;overflow:hidden;border:1px solid #ddd}
 
-/* CALENDARIO WIDGET */
-.cal-grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cw{background:#f5f5f5;border-radius:12px;padding:14px;border:1px solid #eee}
-.orologio{font-size:1.8rem;font-weight:800;color:#0066ff;letter-spacing:2px;
-  text-align:center;display:flex;align-items:center;justify-content:center;height:100%;min-height:60px}
-/* stili del vecchio widget meteo rimossi insieme al widget */
-.cal-head{display:flex;align-items:center;justify-content:space-between;
-  background:#0066ff;border-radius:8px;padding:7px 10px;margin-bottom:8px}
-.cal-head button{background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer}
-.cal-head button:hover{color:white}
-.cal-head span{color:white;font-weight:700;font-size:13px}
-.cal-days-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px}
-.cdh{text-align:center;font-size:9px;font-weight:700;color:#888;padding:2px 0}
-.cal-cells{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
-.cd{text-align:center;padding:4px 2px;font-size:12px;color:#555}
-.cd.oggi{background:#0066ff;color:white;border-radius:50%;
-  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
-  margin:0 auto;font-weight:700;font-size:11px}
-.note-ta{font-family:inherit;font-size:13px;color:#333;resize:none;
-  border:none;outline:none;width:100%;background:transparent;min-height:70px;line-height:1.5}
+/* ⛔ 3 SETTEMBRE 2026 — BUTTATO IL FOGLIO MORTO DEL CALENDARIO.
+   Erano gli stili del widget orologio/calendario/meteo tolto il 7 agosto 2026
+   (allora si tolse il widget ma non il suo CSS). Dentro c'erano le tre misure
+   sotto il minimo: .cdh 9px, .cd 12px, .cd.oggi 11px.
+   ⚠️ Prima di cancellare, cercato in tutta la cartella chi usa quelle classi
+   (class="...", classList, querySelector, stringhe): in questa pagina ZERO.
+   `cal-head` e `cal-grid` esistono nel gestionale, ma li' hanno il loro foglio
+   `css/gestionale.css` — questo blocco non li tocca.
+   Buttate anche .cal-grid-2x2, .cw, .orologio e .note-ta, morte con loro. */
 
 /* RECENSIONI */
 .rec-tabs{display:flex;gap:8px;margin-bottom:14px}
@@ -565,15 +554,10 @@ nav img{height:36px}
    «Dove siamo». Due mappe Leaflet per lo stesso indirizzo: tolta la piccola,
    resta quella grande, che ha lo zoom. */
 
-/* MINI STATS SIDEBAR */
-.mini-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ms{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  padding:18px 12px;background:white;border-radius:16px;text-align:center;
-  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #0066ff;
-  transition:transform 0.3s}
-.ms:hover{transform:translateY(-2px)}
-.ms-n{font-size:1.4rem;font-weight:800;color:#333;display:block}
-.ms-l{font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+/* ⛔ 3 SETTEMBRE 2026 — BUTTATE ANCHE LE MINI-STATISTICHE DELLA COLONNA.
+   La colonna di lato da 300px non esiste piu' dall'1 settembre: questi stili
+   non li usava piu' nessuno. Dentro c'era la quarta misura sotto il minimo,
+   .ms-l a 10px. Cercato in tutta la cartella: zero usi. */
 
 /* SEZIONE PREVENTIVO full-page (stile sec-foto-lavori) */
 .prev-section{display:none;padding:24px 32px 60px;background:#fff;min-height:60vh}
