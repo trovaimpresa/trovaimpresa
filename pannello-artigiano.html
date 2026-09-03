@@ -401,7 +401,17 @@
      la pagina scivolava di lato e nasceva la striscia bianca a sinistra.
      `min(340px,100%)` vuol dire: 340 se ci stanno, altrimenti quanto ce n'e'.
      Sul computer non cambia niente (340 ci stanno sempre). */
-  .gest-porte { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr)); gap:24px; }
+  /* ⛔ 3 SETTEMBRE 2026 — LE CARTE CHE SI STRINGEVANO SUL PORTATILE.
+     Misurato: su uno schermo da 1440 i due gestionali stavano affiancati e a
+     ogni carta restavano 103 px invece di 230 — «Prova 30 giorni» andava a
+     capo tre volte. Sul monitor grande di Alessio (1920) non si vedeva,
+     perche' li' lo spazio bastava.
+     Il 340 diceva «affiancali appena ci stanno in 340», ma 340 e' la misura
+     della PORTA vuota: dentro servono due carte da 230 piu' il nome in mezzo,
+     cioe' ~620. Adesso si affiancano solo se ce ne sono davvero 620 a testa,
+     se no vanno una sotto l'altra e le carte restano larghe.
+     A 1920 restano affiancate come prima; a 1440 si incolonnano. */
+  .gest-porte { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(620px,100%),1fr)); gap:24px; }
   .gest-porta { border:1.5px solid rgba(0,0,0,0.08); border-radius:20px; padding:24px; background:#f4f6f9; }
   .gest-emoji { font-size:1.5rem; line-height:1; }
   .gest-nome { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#1a1a1a; }
