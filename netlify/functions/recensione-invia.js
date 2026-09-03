@@ -19,8 +19,11 @@ function esc(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function inviaEmail(to, subject, html) {
-  return fetch('https://api.resend.com/emails', {
+/* 3 set 2026 — prima la risposta di Resend non si guardava: se rifiutava,
+   la pagina diceva «ti abbiamo mandato una email» e non era partito niente.
+   Adesso un rifiuto ferma tutto e finisce nel registro di Netlify. */
+async function inviaEmail(to, subject, html) {
+  const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
@@ -28,6 +31,25 @@ function inviaEmail(to, subject, html) {
     },
     body: JSON.stringify({ from: 'TrovaImpresa <info@trovaimpresa.com>', to: [to], subject, html })
   });
+  const testo = await r.text();
+  if (!r.ok) throw new Error('Resend ' + r.status + ': ' + testo);
+  console.log('[recensione-invia] email mandata a', to, testo);
+  return testo;
+}
+
+function emailConferma(nome, nomeImpresa, link) {
+  return `
+      <div style="font-family:system-ui,Arial,sans-serif;font-size:17px;line-height:1.6;color:#12233a;max-width:560px">
+        <p>Ciao ${esc(nome)},</p>
+        <p>hai scritto una recensione per <strong>${esc(nomeImpresa)}</strong> su TrovaImpresa.</p>
+        <p><strong>Manca un ultimo passo:</strong> clicca il bottone qui sotto e la recensione va online.</p>
+        <p style="margin:28px 0">
+          <a href="${link}" style="background:#0066ff;color:#fff;text-decoration:none;font-weight:700;padding:16px 28px;border-radius:10px;display:inline-block;font-size:17px">Pubblica la mia recensione</a>
+        </p>
+        <p style="font-size:15px;color:#5b6b80">Il link vale 14 giorni. Se non hai scritto tu questa recensione, ignora questa email: senza il tuo clic non verra pubblicata.</p>
+        <p style="font-size:15px;color:#5b6b80">Se il bottone non funziona, copia questo indirizzo nel browser:<br>${link}</p>
+      </div>
+    `;
 }
 
 const stella = v => {
@@ -90,16 +112,24 @@ exports.handler = async function (event) {
       .eq('impresa_id', impresa_id)
       .ilike('email_cliente', email)
       .maybeSingle();
-    if (gia) {
+    if (gia && gia.confermata) {
       return {
         statusCode: 200, headers: corsHeaders,
-        body: JSON.stringify({
-          ok: false, gia: true,
-          messaggio: gia.confermata
-            ? 'Hai gia lasciato una recensione per questa impresa.'
-            : 'Hai gia inviato una recensione: controlla la tua email e clicca il link di conferma.'
-        })
+        body: JSON.stringify({ ok: false, gia: true, messaggio: 'Hai gia lasciato una recensione per questa impresa.' })
       };
+    }
+    if (gia) {
+      /* 3 set 2026 — recensione scritta ma mai confermata (l'email non e'
+         arrivata, o e' finita nello spam): si RIMANDA l'email con un link
+         nuovo, invece di dire «controlla la casella» a chi l'ha gia' guardata */
+      const token2 = crypto.randomBytes(24).toString('hex');
+      const scade2 = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+      const { error: e2 } = await sb.from('feedback_clienti')
+        .update({ token: token2, token_scade: scade2 }).eq('id', gia.id);
+      if (e2) throw e2;
+      await inviaEmail(email, 'Conferma la tua recensione su ' + imp.nome,
+        emailConferma(nome, imp.nome, `${SITO}/conferma-recensione.html?t=${token2}`));
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, email, rimandata: true }) };
     }
 
     // freno anti-valanga: max 5 recensioni dalla stessa email in 24 ore
@@ -127,18 +157,7 @@ exports.handler = async function (event) {
     if (error) throw error;
 
     const link = `${SITO}/conferma-recensione.html?t=${token}`;
-    await inviaEmail(email, 'Conferma la tua recensione su ' + imp.nome, `
-      <div style="font-family:system-ui,Arial,sans-serif;font-size:17px;line-height:1.6;color:#12233a;max-width:560px">
-        <p>Ciao ${esc(nome)},</p>
-        <p>hai scritto una recensione per <strong>${esc(imp.nome)}</strong> su TrovaImpresa.</p>
-        <p><strong>Manca un ultimo passo:</strong> clicca il bottone qui sotto e la recensione va online.</p>
-        <p style="margin:28px 0">
-          <a href="${link}" style="background:#0066ff;color:#fff;text-decoration:none;font-weight:700;padding:16px 28px;border-radius:10px;display:inline-block;font-size:17px">Pubblica la mia recensione</a>
-        </p>
-        <p style="font-size:15px;color:#5b6b80">Il link vale 14 giorni. Se non hai scritto tu questa recensione, ignora questa email: senza il tuo clic non verra pubblicata.</p>
-        <p style="font-size:15px;color:#5b6b80">Se il bottone non funziona, copia questo indirizzo nel browser:<br>${link}</p>
-      </div>
-    `);
+    await inviaEmail(email, 'Conferma la tua recensione su ' + imp.nome, emailConferma(nome, imp.nome, link));
 
     return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, email }) };
   } catch (e) {

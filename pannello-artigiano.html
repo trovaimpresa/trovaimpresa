@@ -1413,12 +1413,12 @@
 
       <!-- STATISTICHE -->
       <div class="dash-stats">
-        <div class="dash-stat-card">
+        <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
           <div class="dash-stat-icon">⭐</div>
           <div class="dash-stat-num" id="stat-rating">—</div>
           <div class="dash-stat-lbl">Rating medio</div>
         </div>
-        <div class="dash-stat-card">
+        <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
           <div class="dash-stat-icon">💬</div>
           <div class="dash-stat-num" id="dash-stat-recensioni">0</div>
           <div class="dash-stat-lbl">Recensioni</div>
@@ -3034,7 +3034,7 @@ async function inizializza() {
   const isPremium = piano === 'premium';
   const { data: recsRating } = await sb.from('feedback_clienti')
     .select('stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita')
-    .eq('impresa_id', impresaCorrente.id);
+    .eq('impresa_id', impresaCorrente.id).eq('confermata', true);   /* 3 set 2026: solo quelle confermate dal cliente, come sulla scheda pubblica */
   const stelleRating = (recsRating || []).flatMap(r => [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita]).filter(s => s != null);
   const rating = stelleRating.length ? (stelleRating.reduce((a, b) => a + b, 0) / stelleRating.length).toFixed(1) : '—';
 
@@ -3900,7 +3900,7 @@ const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:
 // CONTATORE RECENSIONI (statistica dashboard)
 async function caricaRecensioni() {
   const { count } = await sb.from('feedback_clienti').select('id', { count: 'exact', head: true })
-    .eq('impresa_id', impresaCorrente.id);
+    .eq('impresa_id', impresaCorrente.id).eq('confermata', true);   /* 3 set 2026: il numero deve essere lo stesso della scheda pubblica */
   document.getElementById('dash-stat-recensioni').textContent = count || 0;
 }
 
