@@ -1664,10 +1664,22 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
       heroEl.style.backgroundImage = 'none';
       heroEl.style.background = `linear-gradient(135deg, ${pers.colore_header}, color-mix(in srgb, ${pers.colore_header} 60%, black))`;
     }
-    if (pers.logo_url) {
-      const navLogo = document.querySelector('nav img[alt="TrovaImpresa"]');
-      if (navLogo) navLogo.src = pers.logo_url;
-    }
+    /* ⛔ 3 SETTEMBRE 2026 — IL MARCHIO NELLA BARRA NON SI TOCCA PIU'.
+       Qui il logo personalizzato dell'impresa SOSTITUIVA il logo TrovaImpresa
+       nella barra in alto. Nessuno l'aveva mai deciso: era rimasto dalla
+       personalizzazione del pannello, dove ha senso. Su una pagina PUBBLICA no:
+       il cliente arriva da Google o da un link WhatsApp e la barra e' l'unica
+       cosa che gli dice DOVE SI TROVA. Con il logo dell'impresa al suo posto
+       sembra il sito dell'impresa, e TrovaImpresa sparisce.
+       Deciso da Alessio il 3 settembre, guardando le due barre affiancate
+       (`prove-claude/figura-logo-barra.png`): «la seconda», cioe' il marchio
+       fisso.
+       ⚠️ Il logo dell'impresa NON e' stato buttato: si vede grande nel tondo
+       della testata, dove il cliente lo cerca. Qui in barra non ci va.
+       Misurato prima di toccare: 1 impresa su 87 aveva un logo personalizzato
+       (l'account del fondatore), quindi nessun'altra scheda cambia aspetto.
+       Le altre quattro chiavi della personalizzazione (colore header, font,
+       colore e misura del testo) restano come sono. */
     if (pers.font_pannello) {
       if (titleEl) titleEl.style.setProperty('font-family', pers.font_pannello, 'important');
       if (subEl) subEl.style.setProperty('font-family', pers.font_pannello, 'important');
