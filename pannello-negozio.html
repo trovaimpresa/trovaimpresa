@@ -3623,11 +3623,23 @@ async function uploadFotoVetrina(file) {
 }
 
 // onchange del campo file: carica e salva l'URL nel campo nascosto prod-foto
+/* ⛔ 3 SETTEMBRE 2026 — IL PRODOTTO SENZA FOTO.
+   Lo stesso difetto chiuso il 30 agosto sui LAVORI degli altri pannelli, qui
+   era rimasto aperto: premendo «Salva» senza foto la riga si scriveva lo
+   stesso e rispondeva «Prodotto salvato», mettendolo pure in vetrina. Una
+   scheda prodotto senza immagine, nel negozio, non serve a niente.
+   ⚠️ Non si guarda il ⏳ scritto a schermo: `iconizza()` trasforma le emoji in
+   disegni e quel ramo non partirebbe mai (errore fatto il 30 agosto). Si usa
+   una spia, accesa quando parte il caricamento e spenta su TUTTE le uscite.
+   Misurato prima di toccare: 0 righe in `vetrina_negozio`, quindi non c'e'
+   niente da ripulire. */
+let _fotoProdottoInCaricamento = false;
 async function caricaFotoVetrina(file) {
   const stato = document.getElementById('prod-foto-stato');
   const hidden = document.getElementById('prod-foto');
-  if (!file) { hidden.value = ''; stato.textContent = ''; return; }
+  if (!file) { hidden.value = ''; stato.textContent = ''; _fotoProdottoInCaricamento = false; return; }
   stato.textContent = '⏳ Caricamento foto...';
+  _fotoProdottoInCaricamento = true;
   const url = await uploadFotoVetrina(file);
   if (url) {
     hidden.value = url;
@@ -3636,6 +3648,7 @@ async function caricaFotoVetrina(file) {
     hidden.value = '';
     stato.textContent = '❌ Caricamento non riuscito';
   }
+  _fotoProdottoInCaricamento = false;
 }
 
 // === I MIEI PRODOTTI — salva una riga in vetrina_negozio ===
@@ -3684,6 +3697,14 @@ async function salvaProdottoVetrina() {
 
   if (!titolo) { alert('Inserisci il titolo del prodotto.'); return; }
   if (!categoria) { alert('Scegli una categoria.'); return; }
+  /* 3 settembre 2026: si distingue fra «non l'ha scelta» e «la sta ancora
+     caricando»: sono due errori diversi e vanno detti in due modi diversi. */
+  if (!foto) {
+    alert(_fotoProdottoInCaricamento
+      ? 'La foto si sta ancora caricando: aspetta il segno verde e poi premi Salva.'
+      : 'Manca la foto del prodotto: scegline una prima di salvare.');
+    return;
+  }
 
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
@@ -3718,6 +3739,7 @@ async function salvaProdottoVetrina() {
   document.getElementById('prod-prezzo').value = '';
   document.getElementById('prod-dettagli').value = '';
   document.getElementById('prod-foto').value = '';
+  _fotoProdottoInCaricamento = false;
   document.getElementById('prod-foto-file').value = '';
   document.getElementById('prod-foto-stato').textContent = '';
   document.getElementById('prod-categoria').value = '';
