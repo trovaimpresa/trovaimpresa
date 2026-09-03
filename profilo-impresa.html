@@ -443,6 +443,16 @@ nav img{height:36px}
 .rec-data{font-size:13px;color:#888}
 .rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
 .rec-testo{font-size:13px;color:#555;line-height:1.6}
+.rec-vai{display:flex;align-items:center;gap:16px;padding:16px 18px;margin:4px 0 22px;background:#f4f7fb;border:2px solid #cfe0f7;border-radius:14px;text-decoration:none;color:#0a2a4d;transition:all .2s}
+.rec-vai:hover{border-color:#0066ff;background:#eaf2ff;transform:translateY(-1px)}
+.rec-vai-voto{font-size:1.9rem;font-weight:800;color:#0a2a4d;line-height:1;min-width:64px;text-align:center}
+.rec-vai-voto small{display:block;font-size:12px;color:#f4c02e;letter-spacing:1px;margin-top:2px}
+.rec-vai-testo{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.rec-vai-testo b{font-size:17px;font-weight:800;color:#0052cc}
+.rec-vai-testo small{font-size:13.5px;color:#5b6b80}
+.rec-vai-freccia{font-size:26px;font-weight:800;color:#0066ff}
+.rec-vai-tit{font-size:17px;font-weight:800;color:#0a2a4d;margin:0 0 12px}
+@media(max-width:560px){.rec-vai{flex-wrap:wrap}.rec-vai-freccia{display:none}}
 .rec-risposta{margin:10px 0 0 22px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
 .rec-risposta-tit{font-size:13px;font-weight:600;color:#0a2a4d;margin-bottom:4px}
 .rec-risposta-tit b{font-weight:800}
@@ -777,21 +787,23 @@ nav img{height:36px}
     <!-- RECENSIONI + PREVENTIVO, meta' e meta' (1 settembre 2026) -->
     <div class="riga-rec">
     <!-- RECENSIONI -->
-    <div class="card rec-card" style="border-top-color:#0066ff">
+    <div class="card rec-card" id="recensioni" style="border-top-color:#0066ff">
       <div class="card-title">⭐ Recensioni dei clienti</div>
-      <div class="rec-tabs">
-        <!-- 2 settembre 2026: le parentesi NON stanno piu' nel markup. Con zero
-             recensioni la linguetta diceva «Recensioni (0)» — l'unico posto della
-             scheda che dichiarava un vuoto invece di tacere, e lo diceva su tutte
-             e 82 le schede. Adesso il numero e le sue parentesi li scrive
-             `scriviConteggioRecensioni`, e quando e' zero non scrive niente.
-             ⚠️ Lo span parte VUOTO: prima diceva «0» finche' non arrivava la
-             risposta, quindi lo zero si vedeva comunque per un istante. -->
-        <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni<span id="rec-count"></span></button>
-        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia recensione</button>
-      </div>
-      <div id="rec-tab-lista"><div id="rec-lista"></div></div>
-      <div id="rec-tab-form" style="display:none">
+      <!-- 3 set 2026, Alessio: «una risposta lì da sola che senso ha? la devi
+           togliere. Io voglio quello spazio per le recensioni e uno spazio che
+           dice guarda le recensioni lasciate da altri clienti». Quindi qui NON si
+           mostrano piu' le recensioni scritte ne' le risposte: solo il voto, il
+           tasto che porta alla pagina delle recensioni (commenti + risposte
+           dell'impresa, dove il cliente vede anche COME risponde) e il modulo per
+           lasciarne una. Le vecchie linguette «Recensioni / Lascia recensione»
+           non ci sono piu'. -->
+      <a id="rec-vai" class="rec-vai" href="#">
+        <span class="rec-vai-voto" id="rec-vai-voto">—</span>
+        <span class="rec-vai-testo"><b>Guarda le recensioni lasciate dagli altri clienti</b><small id="rec-vai-sub">Commenti dei clienti e risposte dell'impresa</small></span>
+        <span class="rec-vai-freccia">→</span>
+      </a>
+      <div class="rec-vai-tit">✍️ Lascia la tua recensione</div>
+      <div id="rec-tab-form">
         <div class="st-grid">
           <div class="st-gruppo st-box"><label>⭐ Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
           <div class="st-gruppo st-box"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setSG('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('puntualita',5)">★</span></div></div>
@@ -1891,34 +1903,23 @@ async function caricaRecensioni(id){
       headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
       body:JSON.stringify({p_impresa_id:parseInt(id)})
     });
-    const rj=await r.json();const data=Array.isArray(rj)?rj:[];const div=document.getElementById('rec-lista');
-    scriviConteggioRecensioni(data);
-    if(!data||!data.length){
-      let nomeImpresa=(document.getElementById('profile-name')?.textContent||'').trim();
-      if(!nomeImpresa||nomeImpresa==='Caricamento...')nomeImpresa='questa impresa';
-      div.innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${recEsc(nomeImpresa)}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><button class="btn-rec rec-empty-btn" onclick="showRecTab('form',document.getElementById('tab-btn-form'))">✍️ Lascia una recensione</button></div>`;
-      return;
+    const rj=await r.json();const data=Array.isArray(rj)?rj:[];
+    const c=scriviConteggioRecensioni(data);
+    /* 3 set 2026: qui non si elencano piu' le recensioni (stanno in
+       recensioni-impresa.html, con le risposte). Il riquadro dice quante sono e
+       porta la'. Con zero recensioni il tasto invita a essere il primo. */
+    const vai=document.getElementById('rec-vai'); if(!vai)return;
+    vai.href='recensioni-impresa.html?id='+encodeURIComponent(id);
+    const voto=document.getElementById('rec-vai-voto'); const sub=document.getElementById('rec-vai-sub');
+    if(c.numero>0){
+      voto.innerHTML=recEsc(c.media!=null?c.media.toFixed(1):'—')+'<small>'+'★'.repeat(Math.round(c.media||0))+'</small>';
+      sub.textContent=c.numero+(c.numero===1?' recensione':' recensioni')+' · commenti dei clienti e risposte dell\'impresa';
+    }else{
+      voto.innerHTML='⭐';
+      vai.querySelector('.rec-vai-testo b').textContent='Nessuna recensione ancora: sii il primo';
+      sub.textContent='Hai lavorato con questa impresa? Racconta com\'è andata qui sotto.';
+      vai.removeAttribute('href'); vai.style.cursor='default';
     }
-    const piano=(window._pianoImpresa||'free').toLowerCase();
-    const isFree=piano==='free';
-    /* 3 set 2026: la scheda mostra le ULTIME 3 a tutti (come Booking); tutte le
-       altre stanno nella pagina dedicata recensioni-impresa.html, che ha un
-       indirizzo suo da mandare ai clienti. Il limite del piano Free resta la'. */
-    const visibili=data.slice(0,3);
-    div.innerHTML=visibili.map(r=>{
-      const media=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
-      const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
-      const st='★'.repeat(Math.round(parseFloat(avg)))+'☆'.repeat(5-Math.round(parseFloat(avg)));
-      const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
-      const voti=[['⭐ Qualità',r.stelle_qualita],['⏱️ Puntualità',r.stelle_puntualita],['💰 Prezzo',r.stelle_prezzo],['🤝 Professionalità',r.stelle_professionalita]];
-      const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
-      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p>${r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">↳ <b>${recEsc((document.getElementById('profile-name')||{}).textContent||'L\'impresa')}</b> ha risposto a <b>${recEsc(r.nome_cliente)||'questo cliente'}</b>${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:''}</div>`;
-    }).join('');
-    const totRec=(data[0]&&Number(data[0].totale))||data.length;
-    div.innerHTML+=`<div style="text-align:center;margin-top:16px"><a href="recensioni-impresa.html?id=${encodeURIComponent(id)}" style="display:inline-block;padding:12px 22px;border:2px solid #2863a7;border-radius:10px;color:#2863a7;font-weight:800;text-decoration:none;font-size:15px">Vedi tutte le recensioni (${totRec}) →</a></div>`;
-    /* al cliente non si dice che il sito gli nasconde delle recensioni: e' un segnale
-       che toglie fiducia proprio nel momento in cui sta decidendo. L'avviso resta
-       per l'impresa nel suo pannello. */
   }catch(e){console.error(e)}
 }
 
@@ -2251,9 +2252,9 @@ function _lbKey(e){
 }
 
 function showRecTab(id,btn){
-  document.querySelectorAll('.rec-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  document.getElementById('rec-tab-lista').style.display=id==='lista'?'':'none';
-  document.getElementById('rec-tab-form').style.display=id==='form'?'':'none';
+  /* 3 set 2026: le linguette non ci sono piu', il modulo e' sempre visibile.
+     Resta per chi la chiama ancora: porta al modulo. */
+  const f=document.getElementById('rec-tab-form'); if(f)f.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 /* widget orologio/meteo rimosso (7/8/2026): niente piu' richiesta di posizione al cliente */
