@@ -156,8 +156,9 @@ nav img{height:36px}
 .rec-data{font-size:13px;color:#888}
 .rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
 .rec-testo{font-size:13px;color:#555;line-height:1.6}
-.rec-risposta{margin-top:10px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
-.rec-risposta-tit{font-size:13px;font-weight:800;color:#0a2a4d;margin-bottom:4px}
+.rec-risposta{margin:10px 0 0 22px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
+.rec-risposta-tit{font-size:13px;font-weight:600;color:#0a2a4d;margin-bottom:4px}
+.rec-risposta-tit b{font-weight:800}
 .rec-risposta-testo{font-size:13px;color:#333;line-height:1.6;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .rec-card .rec-risposta-testo{font-size:15px}
 .st-gruppo{margin-bottom:12px}
@@ -341,7 +342,7 @@ nav img{height:36px}
 }
 
 /* solo di questa pagina */
-.rec-riepilogo{display:grid;grid-template-columns:auto 1fr;gap:18px 26px;align-items:center;padding:6px 0 18px;border-bottom:1px solid #eee;margin-bottom:14px}
+.rec-riepilogo{display:grid;grid-template-columns:auto minmax(0,520px);gap:18px 32px;align-items:center;padding:6px 0 18px;border-bottom:1px solid #eee;margin-bottom:14px}
 .rec-media{text-align:center;min-width:120px}
 .rec-media-n{font-size:2.6rem;font-weight:800;color:#0a2a4d;line-height:1}
 .rec-media-st{color:#f4c02e;font-size:18px;letter-spacing:1px;margin:4px 0}
@@ -364,9 +365,19 @@ nav img{height:36px}
 .rec-altre:disabled{opacity:.5;cursor:default}
 .rec-nessuna{padding:26px 10px;text-align:center;color:#666;font-size:15px}
 @media(max-width:560px){.rec-riepilogo{grid-template-columns:1fr}.rec-media{min-width:0}}
-.rec-pagina{max-width:900px;margin:24px auto;padding:0 16px}
+.rec-pagina{max-width:1400px;margin:24px auto;padding:0 20px}
 .rec-pagina .card{padding:24px 26px}
 .rec-item{padding:18px 0}
+/* 3 set 2026, Alessio: «messo così al centro, quando diventeranno tante come si fa?»
+   Le recensioni non stanno piu' in colonna: ogni recensione e' una carta, e le
+   carte si mettono una accanto all'altra (2-3 per riga a schermo largo). Stesse
+   carte della scheda: bianche, angoli 16, riga colorata sopra. */
+.rec-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;margin-top:18px}
+.rec-griglia .rec-item.compatta{background:#fff;border-radius:16px;border-top:6px solid #0066ff;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:20px 22px;border-bottom:none;display:flex;flex-direction:column}
+.rec-griglia .rec-item.compatta .rec-testo{flex:1}
+.rec-griglia .rec-item.compatta.critica{border-top-color:#e65100}
+.rec-griglia .rec-nessuna{grid-column:1/-1}
+@media(max-width:560px){.rec-griglia{grid-template-columns:1fr}}
 .rec-azioni-alto{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:8px}
 .rec-condividi{font-size:14px;color:#2863a7;font-weight:700;background:none;border:2px solid #2863a7;border-radius:8px;padding:9px 16px;cursor:pointer}
 .rec-condividi:hover{background:#2863a7;color:#fff}
@@ -414,9 +425,10 @@ nav img{height:36px}
       <button type="button" class="rec-filtro" data-f="critiche" onclick="cambiaFiltro('critiche',this)">Critiche (1-3 ★)</button>
       <button type="button" class="rec-filtro" data-f="risposta" onclick="cambiaFiltro('risposta',this)">Con risposta</button>
     </div>
-    <div id="rec-lista"><div class="rec-empty"><div class="rec-empty-icon">⏳</div><p class="rec-empty-sub">Carico le recensioni…</p></div></div>
-    <button type="button" class="rec-altre" id="rec-altre" style="display:none" onclick="caricaAltre()">Mostra altre 10</button>
+    <div id="rec-vuoto"></div>
   </div>
+  <div id="rec-lista" class="rec-griglia"><div class="rec-nessuna">Carico le recensioni…</div></div>
+  <button type="button" class="rec-altre" id="rec-altre" style="display:none;margin-top:18px" onclick="caricaAltre()">Mostra altre 10</button>
 </div>
 
 <footer style="background:#1a2f47;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a></footer>
@@ -472,7 +484,8 @@ async function caricaRecensioni(nomeImpresa){
   document.getElementById('stat-recensioni').textContent=_totale||'—';
   const div=document.getElementById('rec-lista');
   if(!_totale){
-    div.innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${recEsc(nomeImpresa)}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><a class="btn-rec rec-empty-btn" style="display:inline-block;width:auto;text-decoration:none" href="profilo-impresa.html?id=${ID}#recensioni">✍️ Lascia una recensione</a></div>`;
+    div.style.display='none';
+    document.getElementById('rec-vuoto').innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${recEsc(nomeImpresa)}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><a class="btn-rec rec-empty-btn" style="display:inline-block;width:auto;text-decoration:none" href="profilo-impresa.html?id=${ID}#recensioni">✍️ Lascia una recensione</a></div>`;
     return;
   }
   /* riepilogo */
@@ -508,8 +521,8 @@ async function caricaPagina(daCapo){
     const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
     const voti=[['Qualità',r.stelle_qualita],['Puntualità',r.stelle_puntualita],['Prezzo',r.stelle_prezzo],['Professionalità',r.stelle_professionalita]]
       .filter(([,v])=>v!=null).map(([l,v])=>`${l} <b>${v}</b>`).join(' · ');
-    const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">Risposta dell'impresa${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
-    return `<div class="rec-item compatta"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${stelleTxt(r.voto)} ${r.voto||'-'}/5</div><div class="rec-voti-riga">${voti}</div><p class="rec-testo">${recEsc(r.testo)}</p>${risp}</div>`;
+    const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">↳ <b>${recEsc(_nome)}</b> ha risposto a <b>${recEsc(r.nome_cliente)||'questo cliente'}</b>${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
+    return `<div class="rec-item compatta${(r.voto||5)<=3?' critica':''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${stelleTxt(r.voto)} ${r.voto||'-'}/5</div><div class="rec-voti-riga">${voti}</div><p class="rec-testo">${recEsc(r.testo)}</p>${risp}</div>`;
   }).join('');
   if(daCapo){
     div.innerHTML=html||'<div class="rec-nessuna">Nessuna recensione con questo filtro.</div>';

@@ -1073,7 +1073,7 @@
   #sec-recensioni .rec-bollo.attesa { background:#fff3e0; color:#b26a00; }
   #sec-recensioni .rec-stelle { color:#f5b50a; font-size:16px; letter-spacing:1px; margin-bottom:8px; font-family:Arial,'Segoe UI Symbol',sans-serif; }   /* DM Sans disegna la stella vuota: col carattere di sistema esce piena */
   #sec-recensioni .rec-testo { font-size:15.5px; color:#333; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; margin:0; }
-  #sec-recensioni .rec-risp { margin-top:14px; padding:14px 16px; background:#f4f7fb; border-left:4px solid #0066ff; border-radius:10px; }
+  #sec-recensioni .rec-risp { margin:14px 0 0 22px; padding:14px 16px; background:#f4f7fb; border-left:4px solid #0066ff; border-radius:10px; }
   #sec-recensioni .rec-risp-tit { font-size:13px; font-weight:800; color:#0a2a4d; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; display:flex; justify-content:space-between; gap:10px; }
   #sec-recensioni .rec-risp-tit small { font-weight:600; text-transform:none; letter-spacing:0; color:var(--light); }
   #sec-recensioni .rec-risp-testo { font-size:15px; color:#12233a; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
@@ -5126,7 +5126,7 @@ function disegnaRecensioniSezione() {
     if (r._modifica || !r.risposta_impresa) {
       const quando = r.risposta_impresa ? '' : '';
       risposta = '<div class="rec-risp">'
-        + '<div class="rec-risp-tit">' + (r.risposta_impresa ? 'Correggi la tua risposta' : 'Vuoi rispondere?') + '<small>facoltativo · la vedono tutti</small></div>'
+        + '<div class="rec-risp-tit">' + (r.risposta_impresa ? 'Correggi la tua risposta a ' : 'Vuoi rispondere a ') + (recEsc(r.nome_cliente) || 'questo cliente') + '?<small>facoltativo · la vedono tutti sotto la sua recensione</small></div>'
         + '<textarea class="rec-ta" id="rec-ta-' + r.id + '" maxlength="1000" placeholder="Es. Grazie Marco, è stato un piacere lavorare a casa tua.">' + recEsc(r.risposta_impresa || '') + '</textarea>'
         + '<div class="rec-azioni">'
         + '<button type="button" class="rec-btn blu" onclick="salvaRispostaRecensione(' + r.id + ')">Pubblica risposta</button>'
@@ -5136,7 +5136,7 @@ function disegnaRecensioniSezione() {
     } else {
       const q = r.risposta_il ? new Date(r.risposta_il).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
       risposta = '<div class="rec-risp">'
-        + '<div class="rec-risp-tit">La tua risposta' + (q ? '<small>' + q + '</small>' : '') + '</div>'
+        + '<div class="rec-risp-tit">↳ La tua risposta a ' + (recEsc(r.nome_cliente) || 'questo cliente') + (q ? '<small>' + q + '</small>' : '') + '</div>'
         + '<div class="rec-risp-testo">' + recEsc(r.risposta_impresa) + '</div>'
         + '<div class="rec-azioni">'
         + '<button type="button" class="rec-btn" onclick="modificaRispostaRecensione(' + r.id + ')">Correggi</button>'
