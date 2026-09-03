@@ -48,6 +48,19 @@ exports.handler = async function (event) {
           utenti[r.user_id] = { nome: r.nome_attivita || r.nome || r.email || 'Utente', email: r.email || '', tipo: r.tipo || '' };
         });
       }
+      // 3 settembre 2026 — allegati: il bucket e' privato, il pannello riceve
+      // un link firmato (vale un'ora). Se la firma fallisce il messaggio
+      // arriva lo stesso, senza foto.
+      const conAllegato = (msgs || []).filter(m => m.allegato);
+      if (conAllegato.length) {
+        try {
+          const paths = [...new Set(conAllegato.map(m => m.allegato))];
+          const { data: firmati } = await sb.storage.from('supporto-allegati').createSignedUrls(paths, 3600);
+          const mappa = {};
+          (firmati || []).forEach((r, i) => { if (r && r.signedUrl) mappa[r.path || paths[i]] = r.signedUrl; });
+          conAllegato.forEach(m => { m.allegato_url = mappa[m.allegato] || null; });
+        } catch (e) { console.error('[admin-supporto] firma allegati:', e.message); }
+      }
       return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, messaggi: msgs || [], utenti }) };
     }
 

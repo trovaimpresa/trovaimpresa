@@ -516,6 +516,20 @@
     background:var(--card);color:var(--testo);resize:vertical;min-height:78px}
   .asst-scrivi .btn-primary{align-self:stretch;padding:0 28px;font-size:15.5px;white-space:nowrap}
   .asst-nota{font-size:13.5px;color:var(--testo-2);margin-top:8px;line-height:1.5}
+  /* allegati nella chat (3 settembre 2026) */
+  .asst-scrivi .asst-allega{align-self:stretch;padding:0 14px;display:flex;align-items:center;justify-content:center;
+    background:var(--card);color:var(--testo-2);border:1px solid var(--bordo)}
+  .asst-scrivi .asst-allega svg{width:20px;height:20px}
+  .asst-scrivi .asst-allega:hover{color:var(--blu);border-color:var(--blu)}
+  .asst-chip{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:6px 8px 6px 12px;
+    font-size:13.5px;font-weight:600;color:var(--testo);background:var(--card);border:1px solid var(--bordo);border-radius:999px;max-width:100%}
+  .asst-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .asst-chip-x{font:inherit;font-size:18px;line-height:1;border:none;background:none;color:var(--testo-2);cursor:pointer;padding:0 4px}
+  .asst-img{display:block;margin-top:8px}
+  .asst-img img{display:block;max-width:100%;max-height:260px;border-radius:10px;border:1px solid rgba(0,0,0,.08);cursor:zoom-in}
+  .asst-file{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:600;
+    color:inherit;text-decoration:underline;overflow-wrap:anywhere}
+  .asst-file svg{width:16px;height:16px;flex:0 0 auto}
   @media(max-width:560px){
     .asst-msg{max-width:88%}
     .asst-scrivi{flex-direction:column}

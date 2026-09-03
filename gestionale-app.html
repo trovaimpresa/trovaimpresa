@@ -390,8 +390,11 @@
         <div class="asst-msgs" id="asst-msgs"></div>
         <div class="asst-scrivi">
           <textarea id="asst-testo" rows="3" placeholder="Scrivi qui il tuo messaggio…"></textarea>
+          <button class="btn asst-allega" data-action="asst-allega" title="Allega una foto, uno screenshot o un PDF" aria-label="Allega un file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <button class="btn btn-primary" data-action="asst-invia">Invia</button>
         </div>
+        <input type="file" id="asst-file" accept="image/*,application/pdf" hidden>
+        <div class="asst-chip" id="asst-chip" hidden></div>
         <div class="asst-nota" id="asst-nota"></div>
       </div>
     </section>
@@ -7734,15 +7737,62 @@ ${vecchi?`
       if(g&&g!==ultimoGiorno){ultimoGiorno=g;testa='<div class="asst-giorno">'+esc(_asstGiorno(m.created_at))+'</div>';}
       const mio=!m.da_admin;
       return testa+'<div class="asst-msg '+(mio?"mio":"suo")+'">'+esc(m.messaggio||"")
+        +_asstAllegatoHtml(m)
         +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_asstOra(m.created_at))+'</div></div>';
     }).join("");
     box.scrollTop=box.scrollHeight;
+    _asstRisolviAllegati();
   }
+
+  /* ---- ALLEGATI (3 settembre 2026) ----
+     Il file sta nel bucket privato «supporto-allegati», cartella <uid>/.
+     Il link per vederlo e' firmato e dura un'ora: si chiede al momento, e si
+     tiene in una mappa per non richiederlo a ogni ridisegno. */
+  const _asstUrl={};
+  let asstFileScelto=null;
+  function _asstEImg(m){return /^image\//.test(m.allegato_tipo||"")||/\.(jpe?g|png|webp|gif|heic)$/i.test(m.allegato||"");}
+  function _asstAllegatoHtml(m){
+    if(!m.allegato)return "";
+    const u=_asstUrl[m.allegato];
+    const nome=esc(m.allegato_nome||"allegato");
+    if(_asstEImg(m)){
+      return '<a class="asst-img" data-path="'+esc(m.allegato)+'" '+(u?'href="'+u+'" target="_blank" rel="noopener"':'')+'>'
+        +(u?'<img src="'+u+'" alt="'+nome+'" loading="lazy">':'<span class="asst-file">Carico la foto…</span>')+'</a>';
+    }
+    return '<a class="asst-file" data-path="'+esc(m.allegato)+'" '+(u?'href="'+u+'" target="_blank" rel="noopener"':'')+'>'
+      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> '+nome+'</a>';
+  }
+  async function _asstRisolviAllegati(){
+    if(!sb)return;
+    const mancanti=[...new Set(asstCache.filter(m=>m.allegato&&_asstUrl[m.allegato]===undefined).map(m=>m.allegato))];
+    if(!mancanti.length)return;
+    const {data,error}=await sb.storage.from("supporto-allegati").createSignedUrls(mancanti,3600);
+    /* chi non si risolve viene segnato con "" cosi' non si richiede all'infinito */
+    mancanti.forEach(pth=>{_asstUrl[pth]="";});
+    if(error||!data)return;
+    let nuovi=0;
+    data.forEach((r,i)=>{if(r&&r.signedUrl){_asstUrl[r.path||mancanti[i]]=r.signedUrl;nuovi++;}});
+    if(nuovi&&asstAperta)asstDisegna();
+  }
+  function asstScegliFile(){const i=$("#asst-file");if(i)i.click();}
+  function asstFileCambiato(){
+    const i=$("#asst-file");const f=i&&i.files&&i.files[0];
+    const chip=$("#asst-chip");
+    if(!f){asstFileScelto=null;if(chip){chip.hidden=true;chip.innerHTML="";}return;}
+    const ok=/^image\//.test(f.type)||f.type==="application/pdf";
+    if(!ok){toast("Puoi allegare solo foto, screenshot o PDF");i.value="";asstFileScelto=null;return;}
+    asstFileScelto=f;
+    if(chip){
+      chip.hidden=false;
+      chip.innerHTML='<span>'+esc(f.name)+'</span><button type="button" class="asst-chip-x" data-action="asst-togli-file" title="Togli">×</button>';
+    }
+  }
+  function asstTogliFile(){const i=$("#asst-file");if(i)i.value="";asstFileCambiato();}
 
   async function asstLeggi(segnaLetti){
     if(!sb||!sbUid)return false;
     const {data,error}=await sb.from("supporto_messaggi")
-      .select("id,messaggio,da_admin,letto,created_at")
+      .select("id,messaggio,da_admin,letto,created_at,allegato,allegato_nome,allegato_tipo")
       .eq("user_id",sbUid).order("created_at",{ascending:true});
     if(error||!data)return false;
     asstCache=data;
@@ -7766,6 +7816,8 @@ ${vecchi?`
   async function renderAssistenza(){
     const box=$("#asst-msgs");if(!box)return;
     asstAperta=true;
+    const fi=$("#asst-file");
+    if(fi&&!fi._agganciato){fi._agganciato=true;fi.addEventListener("change",asstFileCambiato);}
     if(!sb||!sbUid){box.innerHTML='<div class="asst-vuoto">Accedi per scrivere.</div>';return;}
     if(!asstCache.length)box.innerHTML='<div class="asst-vuoto">Leggo…</div>';
     const ok=await asstLeggi(true);
@@ -7808,14 +7860,30 @@ ${vecchi?`
     if(!sbUid){toast("Devi essere loggato");return;}
     if(asstInvio)return;               /* doppio clic: un messaggio solo */
     const ta=$("#asst-testo");
-    const testo=(ta?ta.value:"").trim();
-    if(!testo){toast("Scrivi il messaggio, poi premi Invia");return;}
+    let testo=(ta?ta.value:"").trim();
+    if(!testo&&!asstFileScelto){toast("Scrivi il messaggio o allega una foto, poi premi Invia");return;}
     if(testo.length>2000){toast("Troppo lungo: massimo 2000 caratteri");return;}
     asstInvio=true;
+    /* l'allegato si carica PRIMA di scrivere la riga: se il caricamento
+       fallisce non parte un messaggio che parla di una foto che non c'e' */
+    let allegato=null,allegatoNome=null,allegatoTipo=null;
+    if(asstFileScelto){
+      toast("Carico l'allegato…");
+      const prep=window.preparaFileUpload?await preparaFileUpload(asstFileScelto,{lato:1600,qualita:0.8}):{file:asstFileScelto,nome:asstFileScelto.name};
+      if(prep.errore){asstInvio=false;toast(prep.errore);return;}
+      const pulito=String(prep.nome||"allegato").replace(/[^a-zA-Z0-9._-]+/g,"_").slice(-80);
+      const path=sbUid+"/"+Date.now()+"-"+pulito;
+      const tipo=(prep.file&&prep.file.type)||asstFileScelto.type||"application/octet-stream";
+      const up=await sb.storage.from("supporto-allegati").upload(path,prep.file,{contentType:tipo,upsert:false});
+      if(up.error){asstInvio=false;toast("Allegato non caricato: "+(up.error.message||"errore"));return;}
+      allegato=path;allegatoNome=asstFileScelto.name;allegatoTipo=tipo;
+      if(!testo)testo=/^image\//.test(tipo)?"Ti mando una foto":"Ti mando un file";
+    }
     /* .select("id") non e' un vezzo: una scrittura fermata dai permessi NON
        da' errore, torna riuscita a vuoto. Senza, la pagina direbbe "mandato"
        e nel database non ci sarebbe niente. */
-    const riga={user_id:sbUid,da_admin:false,messaggio:testo,letto:false,origine:"gestionale"};
+    const riga={user_id:sbUid,da_admin:false,messaggio:testo,letto:false,origine:"gestionale",
+                allegato:allegato,allegato_nome:allegatoNome,allegato_tipo:allegatoTipo};
     let {data,error}=await sb.from("supporto_messaggi").insert(riga).select("id");
     /* 15 agosto 2026 (13) — «origine» dice al pannello admin che questo
        messaggio arriva dal gestionale e non dal sito. Se la colonna non c'e'
@@ -7830,6 +7898,7 @@ ${vecchi?`
     if(error){toast("Non mandato: "+(error.message||"errore"));return;}
     if(!data||!data.length){toast("Non mandato: il database non ha scritto niente. Riprova.");return;}
     if(ta)ta.value="";
+    asstTogliFile();
     await asstLeggi(false);
     asstDisegna();
     toast("Mandato ✔");
@@ -15548,6 +15617,8 @@ ${vecchi?`
     if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
     if(a==="rap-del")return rapCestina(id);   /* la domanda la fa lui: gli serve il numero delle ore */
     if(a==="asst-invia")return asstInvia();
+    if(a==="asst-allega")return asstScegliFile();
+    if(a==="asst-togli-file")return asstTogliFile();
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();

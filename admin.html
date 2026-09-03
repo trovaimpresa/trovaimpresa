@@ -1967,6 +1967,17 @@ function renderConvList(q) {
   }).join('');
 }
 
+// 3 settembre 2026 — foto, screenshot o PDF allegati dall'impresa (link firmato dal server)
+function _allegatoAdmin(m) {
+  if (!m.allegato) return '';
+  const nome = esc(m.allegato_nome || 'allegato');
+  if (!m.allegato_url) return '<div style="margin-top:8px;font-size:13px;color:#b26a00">Allegato «' + nome + '» non leggibile: ricarica la lista.</div>';
+  const img = /^image\//.test(m.allegato_tipo || '') || /\.(jpe?g|png|webp|gif|heic)$/i.test(m.allegato || '');
+  if (img) return '<a href="' + m.allegato_url + '" target="_blank" rel="noopener" style="display:block;margin-top:8px">'
+    + '<img src="' + m.allegato_url + '" alt="' + nome + '" loading="lazy" style="display:block;max-width:100%;max-height:320px;border-radius:10px;border:1px solid var(--border);cursor:zoom-in"></a>';
+  return '<a href="' + m.allegato_url + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-weight:700;color:#0052cc">\uD83D\uDCC4 ' + nome + '</a>';
+}
+
 async function apriConversazioneAdmin(uid, q) {
   q = q || 'sito';
   const cfg = SUPP[q];
@@ -1987,7 +1998,7 @@ async function apriConversazioneAdmin(uid, q) {
     // «Supporto gestionale» leggeresti frasi scritte dal sito senza saperlo
     const da = (!admin && _origine(m) !== q)
       ? '<div style="font-size:11px;color:#b26a00;font-weight:700;margin-top:5px">' + esc(SUPP[_origine(m)].etichetta) + '</div>' : '';
-    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + da + '</div>';
+    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + _allegatoAdmin(m) + da + '</div>';
     // ⚠️ 15 agosto 2026 — QUI LE PAROLE SI SPEZZAVANO A META' («alessi / o»).
     // La bolla diceva "largo al massimo il 75%", ma il 75% del contenitore —
     // che a sua volta era largo quanto il suo contenuto, cioe' quanto la
