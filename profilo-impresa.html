@@ -444,13 +444,13 @@ nav img{height:36px}
 .rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
 .rec-testo{font-size:13px;color:#555;line-height:1.6}
 .rec-altri{padding:0!important;overflow:hidden}
-.rec-altri-link{display:flex;align-items:center;gap:22px;padding:22px 28px;text-decoration:none;color:#0a2a4d;transition:background .2s}
+.rec-altri-link{display:flex;align-items:center;flex-wrap:wrap;gap:16px 22px;padding:20px 24px;text-decoration:none;color:#0a2a4d;transition:background .2s}
 .rec-altri-link:hover{background:#eaf2ff}
 .rec-altri-voto{display:flex;flex-direction:column;align-items:center;min-width:90px;color:#5b6b80;font-size:13px;font-weight:600}
 .rec-altri-voto b{font-size:2.2rem;color:#0a2a4d;font-weight:800;line-height:1}
 .rec-altri-voto .st{color:#f4c02e;letter-spacing:1px;font-size:15px}
-.rec-altri-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.rec-altri-txt b{font-size:22px;font-weight:800;color:#0052cc}
+.rec-altri-txt{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.rec-altri-txt b{font-size:19px;font-weight:800;color:#0052cc;line-height:1.25}
 .rec-altri-txt small{font-size:14.5px;color:#5b6b80}
 .rec-altri-vai{flex:none;background:#2863a7;color:#fff;font-weight:800;font-size:16px;padding:14px 26px;border-radius:10px}
 .rec-altri-link:hover .rec-altri-vai{background:#0052cc}
@@ -860,16 +860,13 @@ nav img{height:36px}
            imprese la scrivono. -->
       <li id="contact-orari" style="display:none"><div class="ci">🕐</div><span id="orari-testo">—</span></li>
     </ul>
-    </div>
-    </div><!-- fine .riga-rec -->
-
-    <!-- 3 set 2026 — LO SPAZIO DELLE RECENSIONI DEGLI ALTRI (Alessio: «voglio uno
+    <!-- 3 set 2026 — LO SPAZIO DELLE RECENSIONI DEGLI ALTRI — sta nella colonna del preventivo, sotto i contatti, cosi' riempie il vuoto («troppo spazio sotto preventivi, allinea», 3 set) (Alessio: «voglio uno
          spazio che dice guarda le recensioni lasciate da altri clienti, dove ci
          saranno i commenti dei clienti e le eventuali risposte dell'impresa»).
          E' una card SUA, separata dal modulo per pubblicare. Le recensioni sono
          carte affiancate come in recensioni-impresa.html; qui le ultime 6, il
          resto nella pagina dedicata. -->
-    <div class="card rec-altri" id="rec-altri" style="border-top-color:#0066ff;grid-column:1/-1">
+    <div class="card rec-altri" id="rec-altri" style="border-top-color:#0066ff">
       <!-- 3 set 2026, Alessio: qui la card dice SOLO «Guarda tutte le recensioni»
            e porta alla pagina recensioni-impresa.html (commenti + risposte).
            Niente elenco qui: le recensioni si leggono la'. -->
@@ -879,6 +876,9 @@ nav img{height:36px}
         <span class="rec-altri-vai">Apri →</span>
       </a>
     </div>
+    </div><!-- fine .cella-prev -->
+    </div><!-- fine .riga-rec -->
+
 
     <!-- CHAT CON L'IMPRESA -->
     <div class="card" id="card-chat-impresa">
