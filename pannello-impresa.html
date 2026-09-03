@@ -787,6 +787,37 @@
   #sec-personalizza .mpp-btn-save:hover { transform:translateY(-1px); }
   @media (max-width:600px){ #sec-personalizza .mpp-footer { flex-direction:column; } #sec-personalizza .mpp-footer button { min-width:0; } }
 
+  /* === Le tue recensioni — 3 settembre 2026 (sezione a tutta pagina, con la risposta) === */
+  #sec-recensioni .rec-wrap { max-width:900px; }
+  #sec-recensioni .rec-intro { font-size:15px; color:var(--mid); line-height:1.6; margin:0 0 18px; }
+  #sec-recensioni .rec-card { background:white; border-radius:16px; padding:22px 24px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:14px; }
+  #sec-recensioni .rec-testa { display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; margin-bottom:6px; }
+  #sec-recensioni .rec-nome { font-size:16px; font-weight:800; color:var(--dark); }
+  #sec-recensioni .rec-data { font-size:13.5px; color:var(--light); margin-left:auto; }
+  #sec-recensioni .rec-bollo { display:inline-block; font-weight:800; font-size:13px; padding:3px 10px; border-radius:999px; }
+  #sec-recensioni .rec-bollo.ok { background:#e6f6ec; color:#1b8a3f; }
+  #sec-recensioni .rec-bollo.attesa { background:#fff3e0; color:#b26a00; }
+  #sec-recensioni .rec-stelle { color:#f5b50a; font-size:16px; letter-spacing:1px; margin-bottom:8px; }
+  #sec-recensioni .rec-testo { font-size:15.5px; color:#333; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; margin:0; }
+  #sec-recensioni .rec-risp { margin-top:14px; padding:14px 16px; background:#f4f7fb; border-left:4px solid #0066ff; border-radius:10px; }
+  #sec-recensioni .rec-risp-tit { font-size:13px; font-weight:800; color:#0a2a4d; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; display:flex; justify-content:space-between; gap:10px; }
+  #sec-recensioni .rec-risp-tit small { font-weight:600; text-transform:none; letter-spacing:0; color:var(--light); }
+  #sec-recensioni .rec-risp-testo { font-size:15px; color:#12233a; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
+  #sec-recensioni textarea.rec-ta { width:100%; min-height:90px; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:15px; line-height:1.55; resize:vertical; box-sizing:border-box; background:white; }
+  #sec-recensioni textarea.rec-ta:focus { outline:none; border-color:#0066ff; box-shadow:0 0 0 3px rgba(0,102,255,0.12); }
+  #sec-recensioni .rec-azioni { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; align-items:center; }
+  #sec-recensioni .rec-btn { font-family:inherit; font-size:14.5px; font-weight:700; padding:11px 18px; border-radius:10px; cursor:pointer; border:1.5px solid var(--border); background:white; color:var(--mid); }
+  #sec-recensioni .rec-btn.blu { background:#0066ff; color:white; border-color:#0066ff; }
+  #sec-recensioni .rec-btn.blu:hover { background:#0052cc; }
+  #sec-recensioni .rec-btn.rosso { color:#c0392b; border-color:#e0b4b4; }
+  #sec-recensioni .rec-btn:disabled { opacity:.5; cursor:default; }
+  #sec-recensioni .rec-conta { font-size:13px; color:var(--light); margin-left:auto; }
+  #sec-recensioni .rec-vuoto { background:white; border-radius:16px; padding:36px 24px; text-align:center; color:var(--mid); font-size:15.5px; line-height:1.6; border:1px solid var(--border); }
+  body.theme-dark #sec-recensioni .rec-card, body.theme-dark #sec-recensioni .rec-vuoto { background:#2a2a2a; border-color:rgba(255,255,255,0.08); color:#e5e5e5; }
+  body.theme-dark #sec-recensioni .rec-testo { color:#ddd; }
+  body.theme-dark #sec-recensioni .rec-risp { background:#1f2a38; }
+  body.theme-dark #sec-recensioni .rec-risp-tit, body.theme-dark #sec-recensioni .rec-risp-testo { color:#e5e5e5; }
+
   /* === Fai conoscere la tua azienda (video) === */
   #sec-video .video-row { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #f0f0f0; }
   #sec-video .video-row:last-child { border-bottom:none; }
@@ -2204,10 +2235,10 @@
           <div class="dash-quick-label">Il mio profilo pubblico</div>
           <div class="dash-quick-sub">Vedi e modifica i tuoi dati</div>
         </div>
-        <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
+        <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('recensioni', this)">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Le tue recensioni</div>
-          <div class="dash-quick-sub">Leggi cosa dicono i clienti</div>
+          <div class="dash-quick-sub">Leggi e rispondi ai clienti</div>
         </div>
         <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
@@ -2692,6 +2723,25 @@
           <button class="mpp-btn-cancel" onclick="chiudiModalPersonalizzaPannello()">Annulla</button>
           <button class="mpp-btn-save" onclick="salvaPersonalizzaPannello()">💾 Salva modifiche</button>
         </div>
+      </div>
+    </div>
+
+    <!-- LE TUE RECENSIONI — 3 settembre 2026: era una finestrella di sola lettura,
+         ora e' una sezione a tutta pagina e l'impresa PUO' (non deve) rispondere.
+         La risposta si scrive con la funzione `rispondi_recensione` del database,
+         che controlla che la recensione sia dell'impresa loggata e non lascia
+         toccare stelle e testo del cliente. Sulla scheda pubblica compare sotto
+         la recensione come «Risposta dell'impresa». -->
+    <div class="section" id="sec-recensioni">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          ⭐ Le tue recensioni
+        </div>
+      </div>
+      <div class="rec-wrap">
+        <p class="rec-intro">Qui trovi quello che i clienti hanno scritto di te. Se vuoi, puoi rispondere: la risposta compare sulla tua scheda pubblica sotto la recensione. Non è obbligatorio, ma chi legge apprezza un'impresa che risponde — soprattutto con calma a chi si è lamentato.</p>
+        <div id="rec-lista"><div class="rec-vuoto">Carico…</div></div>
       </div>
     </div>
 
@@ -3532,6 +3582,7 @@ function showSection(id, el, fromPopstate) {
   document.body.classList.toggle('pers-aperta', id === 'personalizza');
   if (id === 'personalizza') apriModalPersonalizzaPannello();
   if (id === 'risoluzione') apriModalRisoluzione();
+  if (id === 'recensioni') caricaRecensioniSezione();
   if (id === 'mie-offerte') caricaMieOfferte();
   if (id === 'messaggi') caricaConversazioni();
   if (id === 'anteprima') caricaAnteprima();
@@ -4715,6 +4766,95 @@ async function salvaPersonalizzaPannello() {
 })();
 
 // === RECENSIONI (modale dinamico, come artigiano) ===
+// ===== LE TUE RECENSIONI (sezione) — 3 settembre 2026 =====
+let _recCache = [];
+async function caricaRecensioniSezione() {
+  const box = document.getElementById('rec-lista');
+  if (!box) return;
+  if (!impresaCorrente) { box.innerHTML = '<div class="rec-vuoto">Accedi per vedere le recensioni.</div>'; return; }
+  box.innerHTML = '<div class="rec-vuoto">Carico…</div>';
+  const { data, error } = await sb.from('feedback_clienti').select('*')
+    .eq('impresa_id', impresaCorrente.id).order('created_at', { ascending: false });
+  if (error) { box.innerHTML = '<div class="rec-vuoto">Non riesco a leggere le recensioni: ' + recEsc(error.message) + '</div>'; return; }
+  _recCache = data || [];
+  disegnaRecensioniSezione();
+}
+function disegnaRecensioniSezione() {
+  const box = document.getElementById('rec-lista');
+  if (!box) return;
+  if (!_recCache.length) {
+    box.innerHTML = '<div class="rec-vuoto">Nessuna recensione ancora.<br>Le recensioni le scrivono i clienti dalla tua scheda pubblica: mandagli il link della scheda (lo trovi in «Anteprima del tuo pannello pubblico»).</div>';
+    return;
+  }
+  box.innerHTML = _recCache.map(r => {
+    const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(x => x != null);
+    const voto = sub.length ? Math.round(sub.reduce((a, b) => a + b, 0) / sub.length) : 0;
+    const data = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const stelle = '★'.repeat(voto) + '☆'.repeat(5 - voto);
+    const bolli = (r.verificata ? '<span class="rec-bollo ok">✅ Verificata</span>' : '')
+      + (r.confermata === false ? '<span class="rec-bollo attesa">In attesa di conferma del cliente</span>' : '');
+    let risposta;
+    if (r._modifica || !r.risposta_impresa) {
+      const quando = r.risposta_impresa ? '' : '';
+      risposta = '<div class="rec-risp">'
+        + '<div class="rec-risp-tit">' + (r.risposta_impresa ? 'Correggi la tua risposta' : 'Vuoi rispondere?') + '<small>facoltativo · la vedono tutti</small></div>'
+        + '<textarea class="rec-ta" id="rec-ta-' + r.id + '" maxlength="1000" placeholder="Es. Grazie Marco, è stato un piacere lavorare a casa tua.">' + recEsc(r.risposta_impresa || '') + '</textarea>'
+        + '<div class="rec-azioni">'
+        + '<button type="button" class="rec-btn blu" onclick="salvaRispostaRecensione(' + r.id + ')">Pubblica risposta</button>'
+        + (r.risposta_impresa ? '<button type="button" class="rec-btn" onclick="annullaModificaRisposta(' + r.id + ')">Annulla</button>' : '')
+        + '<span class="rec-conta"><span id="rec-cnt-' + r.id + '">' + (r.risposta_impresa || '').length + '</span>/1000</span>'
+        + '</div></div>';
+    } else {
+      const q = r.risposta_il ? new Date(r.risposta_il).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      risposta = '<div class="rec-risp">'
+        + '<div class="rec-risp-tit">La tua risposta' + (q ? '<small>' + q + '</small>' : '') + '</div>'
+        + '<div class="rec-risp-testo">' + recEsc(r.risposta_impresa) + '</div>'
+        + '<div class="rec-azioni">'
+        + '<button type="button" class="rec-btn" onclick="modificaRispostaRecensione(' + r.id + ')">Correggi</button>'
+        + '<button type="button" class="rec-btn rosso" onclick="togliRispostaRecensione(' + r.id + ')">Togli la risposta</button>'
+        + '</div></div>';
+    }
+    return '<div class="rec-card" id="rec-card-' + r.id + '">'
+      + '<div class="rec-testa"><span class="rec-nome">' + (recEsc(r.nome_cliente) || 'Cliente') + '</span>' + bolli + '<span class="rec-data">' + data + '</span></div>'
+      + '<div class="rec-stelle">' + stelle + '</div>'
+      + '<p class="rec-testo">' + recEsc(r.testo) + '</p>'
+      + risposta + '</div>';
+  }).join('');
+  _recCache.forEach(r => {
+    const ta = document.getElementById('rec-ta-' + r.id);
+    if (ta) ta.addEventListener('input', () => { const c = document.getElementById('rec-cnt-' + r.id); if (c) c.textContent = ta.value.length; });
+  });
+}
+function _recTrova(id) { return _recCache.find(x => String(x.id) === String(id)); }
+function modificaRispostaRecensione(id) { const r = _recTrova(id); if (r) { r._modifica = true; disegnaRecensioniSezione(); } }
+function annullaModificaRisposta(id) { const r = _recTrova(id); if (r) { r._modifica = false; disegnaRecensioniSezione(); } }
+async function salvaRispostaRecensione(id) {
+  const ta = document.getElementById('rec-ta-' + id);
+  const testo = (ta ? ta.value : '').trim();
+  if (!testo) { alert('Scrivi la risposta prima di pubblicarla.'); return; }
+  await _recScrivi(id, testo, 'Risposta pubblicata: da adesso si vede sulla tua scheda.');
+}
+async function togliRispostaRecensione(id) {
+  if (!confirm('Togliere la tua risposta? La recensione del cliente resta.')) return;
+  await _recScrivi(id, '', 'Risposta tolta.');
+}
+async function _recScrivi(id, testo, msgOk) {
+  const card = document.getElementById('rec-card-' + id);
+  card && card.querySelectorAll('button').forEach(b => b.disabled = true);
+  /* la scrittura passa dalla funzione del database: controlla che la recensione
+     sia tua e non lascia toccare stelle e testo del cliente */
+  const { data, error } = await sb.rpc('rispondi_recensione', { p_id: Number(id), p_testo: testo });
+  if (error || !data || !data.length) {
+    card && card.querySelectorAll('button').forEach(b => b.disabled = false);
+    alert('Non salvata: ' + (error ? error.message : 'il database non ha scritto niente. Riprova.'));
+    return;
+  }
+  const r = _recTrova(id);
+  if (r) { r.risposta_impresa = data[0].risposta_impresa; r.risposta_il = data[0].risposta_il; r._modifica = false; }
+  disegnaRecensioniSezione();
+  if (typeof showToast === 'function') showToast(msgOk); else if (typeof toast === 'function') toast(msgOk);
+}
+
 async function apriModalRecensioni() {
   if(!impresaCorrente)return;
   const{data:recensioni}=await sb.from('feedback_clienti').select('*').eq('impresa_id',impresaCorrente.id).order('created_at',{ascending:false});
