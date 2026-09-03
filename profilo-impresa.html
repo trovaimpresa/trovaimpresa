@@ -343,7 +343,10 @@ nav img{height:36px}
    della stessa riga arrivano tutte all'altezza della piu' alta e i bordi
    finiscono allineati. */
 .col-sinistra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-.cella-prev{display:flex;flex-direction:column;gap:14px}
+.cella-prev{display:flex;flex-direction:column;gap:14px;height:100%}
+/* 3 set 2026: la colonna destra arriva al fondo della card di sinistra — la carta dei
+   contatti si allunga, cosi' la card delle recensioni resta allineata in basso */
+.cella-prev .contacts-card{flex:1}
 .btn-prev .sidebar-trust{width:100%;margin-bottom:0}
 /* ⛔ 1 settembre 2026 — LA RIGA CHE SI ERA COLORATA DI ARANCIONE.
    Portando il riquadro scuro DENTRO la carta, «Risposta entro 24-48 ore» e'
@@ -581,7 +584,10 @@ nav img{height:36px}
 /* SEZIONE PREVENTIVO full-page (stile sec-foto-lavori) */
 .prev-section{display:none;padding:24px 32px 60px;background:#fff;min-height:60vh}
 .prev-section.open{display:block}
-.prev-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+/* 3 set 2026, Alessio: «← Torna» a sinistra come nel gestionale, e la barra resta
+   incollata sotto la barra bianca mentre si scorre il modulo (prima spariva e lui
+   cliccava «Torna ai risultati», uscendo dalla scheda) */
+.prev-topbar{display:flex;align-items:center;justify-content:flex-start;gap:16px;flex-wrap:wrap;margin:0 -32px 20px;padding:12px 32px;position:sticky;top:60px;background:#fff;z-index:5;border-bottom:1px solid #eef0f4}
 .prev-topbar-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#0a2a4d}
 .prev-back{color:#0066ff;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;
   padding:8px 16px;border:2px solid #0066ff;border-radius:8px;transition:all 0.2s}
@@ -994,8 +1000,8 @@ nav img{height:36px}
 <!-- SEZIONE PREVENTIVO (full-page) -->
 <div class="prev-section" id="sec-preventivo">
   <div class="prev-topbar">
+    <a class="prev-back" onclick="hidePreventivo()">← Torna</a>
     <div class="prev-topbar-title">📋 Richiedi un sopralluogo per un preventivo</div>
-    <a class="prev-back" onclick="hidePreventivo()">← Torna al profilo</a>
   </div>
   <div class="prev-card">
     <div class="prev-rassicura">
@@ -1067,8 +1073,8 @@ nav img{height:36px}
 <!-- SEZIONE AFFIDA UN INCARICO (full-page, solo professionisti) -->
 <div class="prev-section" id="sec-incarico">
   <div class="prev-topbar">
+    <a class="prev-back" onclick="hideIncarico()">← Torna</a>
     <div class="prev-topbar-title">📋 Affida un incarico</div>
-    <a class="prev-back" onclick="hideIncarico()">← Torna al profilo</a>
   </div>
   <div class="prev-card">
     <p class="prev-sub">Nessun impegno: il professionista ti risponde con un preventivo di onorario.</p>
@@ -1974,8 +1980,9 @@ function mostraMsg(t,tipo){const m=document.getElementById('rec-msg');m.textCont
    ⚠️ Chi aggiunge un altro pulsante che invita a chiedere, gli fa chiamare
    QUESTA funzione: non deve esistere un secondo posto che decide. */
 function apriRichiesta(){ if(window._incaricoProf) showIncarico(); else showPreventivo(); }
-function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0);try{precompilaCittaPreventivo();}catch(_){}var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
-function hidePreventivo(){document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
+function _navTorna(aperto,chiudi){var nb=document.getElementById('nav-back');if(!nb)return;if(aperto){nb.dataset.hrefOrig=nb.dataset.hrefOrig||nb.getAttribute('href')||'';nb.dataset.testoOrig=nb.dataset.testoOrig||nb.textContent;nb.textContent='← Torna alla scheda';nb.removeAttribute('href');nb.onclick=function(e){e.preventDefault();chiudi();};}else{if(nb.dataset.hrefOrig)nb.setAttribute('href',nb.dataset.hrefOrig);if(nb.dataset.testoOrig)nb.textContent=nb.dataset.testoOrig;nb.onclick=null;}}
+function showPreventivo(){_navTorna(true,hidePreventivo);document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0);try{precompilaCittaPreventivo();}catch(_){}var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
+function hidePreventivo(){_navTorna(false);document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
 
 // === AFFIDA UN INCARICO (solo professionisti) ===
 const PRESTAZIONI_CATALOGO={
@@ -1985,8 +1992,8 @@ const PRESTAZIONI_CATALOGO={
   "Perito estimatore":["Stime e valutazioni immobiliari","Perizie di stima per mutuo","Perizie giurate / asseverate","Consulenza tecnica (CTU e CTP)","Stime per successioni e divisioni","Perizie danni e assicurative","Stime di aziende e macchinari","Perizie estimative agrarie"]
 };
 function popolaIncPrestazioni(){const sel=document.getElementById('inc-prestazione');if(!sel||sel.dataset.done)return;sel.insertAdjacentHTML('beforeend',Object.keys(PRESTAZIONI_CATALOGO).map(cat=>`<optgroup label="${cat}">${PRESTAZIONI_CATALOGO[cat].map(p=>`<option value="${p}">${p}</option>`).join('')}</optgroup>`).join(''));sel.dataset.done='1';}
-function showIncarico(){popolaIncPrestazioni();document.getElementById('profilo-view').style.display='none';document.getElementById('sec-incarico').classList.add('open');window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
-function hideIncarico(){document.getElementById('sec-incarico').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
+function showIncarico(){_navTorna(true,hideIncarico);popolaIncPrestazioni();document.getElementById('profilo-view').style.display='none';document.getElementById('sec-incarico').classList.add('open');window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
+function hideIncarico(){_navTorna(false);document.getElementById('sec-incarico').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
 async function submitIncarico(){
   const prof=window._incaricoProf;
   const me=document.getElementById('inc-msg');const btn=document.querySelector('#sec-incarico .btn-sub');
