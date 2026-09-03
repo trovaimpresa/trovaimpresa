@@ -101,9 +101,13 @@ exports.handler = async function (event) {
 
   try {
     // l'impresa esiste?
-    const { data: imp } = await sb.from('imprese').select('id, nome').eq('id', impresa_id).maybeSingle();
+    const { data: imp } = await sb.from('imprese').select('id, nome, email').eq('id', impresa_id).maybeSingle();
     if (!imp) {
       return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Impresa non trovata.' }) };
+    }
+    /* 3 set 2026, Alessio: un'impresa non puo' recensire se stessa */
+    if (imp.email && String(imp.email).trim().toLowerCase() === String(email).trim().toLowerCase()) {
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Non puoi recensire la tua impresa: le recensioni le scrivono i clienti.' }) };
     }
 
     // una recensione a testa per impresa

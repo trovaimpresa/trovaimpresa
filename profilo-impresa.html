@@ -1407,6 +1407,7 @@ async function caricaProfilo(id){
     }else{
       caricaFotoLavori(d.user_id);
     }
+    window._recImpUid=d.user_id;   /* 3 set 2026: serve al blocco «non puoi recensire la tua impresa» */
     /* il logo sta nel tondo: le misure le da' il CSS (.hero-avatar img), qui
    non si scrivono piu' a mano — se no il cerchio si riempie male */
 if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${_esc(d.logo_url)}" alt="logo" fetchpriority="high">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
@@ -1919,6 +1920,7 @@ async function inviaRecensione(){
   const btn=document.getElementById('btn-rec');
   const session=sessioneUtente;
   let nome,email;
+  if(session&&window._recImpUid&&session.user.id===window._recImpUid){mostraMsg('Non puoi recensire la tua impresa: le recensioni le scrivono i clienti.','err');return}
   if(session){email=session.user.email;nome=session.user.user_metadata?.nome||email.split('@')[0];document.getElementById('rec-nome-email-wrapper').style.display='none'}
   else{nome=document.getElementById('rec-nome').value.trim();email=document.getElementById('rec-email').value.trim();if(!nome||!email){mostraMsg('Inserisci nome e email!','err');return}}
   if(!vS.qualita){mostraMsg('Dai almeno una valutazione!','err');return}
