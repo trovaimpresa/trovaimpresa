@@ -424,7 +424,109 @@
     .gest-porta { padding:16px; }
     .gest-porte { gap:16px; }
   }
-  .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+/* ⛔ 2 SETTEMBRE 2026 — LA QUARTA CARTA: LE RICHIESTE DI CONTATTO.
+   Da oggi la scheda pubblica conta quante persone chiedono i contatti di
+   un'impresa (tabella `contatti`). Quel numero deve vederlo l'impresa, se no
+   e' un dato che sa solo il database.
+   ⚠️ La griglia era `repeat(3,1fr)` fissa: con quattro carte la quarta
+   sarebbe andata a capo da sola, larga un terzo, storta. Adesso e'
+   «quante ce ne stanno», e il 150 non e' a caso: e' la misura che sul
+   telefono da 390 px fa entrare DUE carte per riga (150+150+14 di spazio =
+   314, dentro i 358 disponibili) e sul computer le mette tutte e quattro in
+   fila. Con 180 px sul telefono ne sarebbe entrata una sola per riga. */
+  /* ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE QUADRATE PER OGNI GESTIONALE.
+     Chiesto da Alessio: «per ogni gestionale 4 card quadrate, due a destra e
+     due a sinistra, ognuna ha il suo scopo, come le card della foto».
+     La foto era il Riepilogo del gestionale: quindi la faccia delle carte e'
+     copiata da .rie-card di css/gestionale.css — icona nel quadratino
+     colorato, titolo di fianco.
+     I colori delle icone sono quelli gia' assegnati la' alle sezioni
+     (fatture, calendario, lavori, clienti): nessun colore inventato.
+     Perche' quattro: prima il viola «Attiva» faceva anche da porta e chi
+     aveva gia' pagato non capiva da dove si entrasse. Adesso ogni cosa ha la
+     sua carta e si entra solo dal verde.
+     Niente sotto i 13px. */
+  /* ⛔ 3 SETTEMBRE 2026 — I BORDI BIANCHI SUL TELEFONO.
+     Alessio, foto da iPhone: «i bordi bianchi non si devono vedere e poi e'
+     decentrato». Il 340 qui sotto era una misura buona sul computer e sbagliata
+     sul telefono: su uno schermo da 390px, tolti i 32 del riquadro e i 40 del
+     pannello, restano ~318px — meno di 340. Il riquadro non ci stava, sbordava,
+     la pagina scivolava di lato e nasceva la striscia bianca a sinistra.
+     `min(340px,100%)` vuol dire: 340 se ci stanno, altrimenti quanto ce n'e'.
+     Sul computer non cambia niente (340 ci stanno sempre). */
+  /* ⛔ 3 SETTEMBRE 2026 — LE CARTE CHE SI STRINGEVANO SUL PORTATILE.
+     Misurato: su uno schermo da 1440 i due gestionali stavano affiancati e a
+     ogni carta restavano 103 px invece di 230 — «Prova 30 giorni» andava a
+     capo tre volte. Sul monitor grande di Alessio (1920) non si vedeva,
+     perche' li' lo spazio bastava.
+     Il 340 diceva «affiancali appena ci stanno in 340», ma 340 e' la misura
+     della PORTA vuota: dentro servono due carte da 230 piu' il nome in mezzo,
+     cioe' ~620. Adesso si affiancano solo se ce ne sono davvero 620 a testa,
+     se no vanno una sotto l'altra e le carte restano larghe.
+     A 1920 restano affiancate come prima; a 1440 si incolonnano. */
+  .gest-porte { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(620px,100%),1fr)); gap:24px; }
+  .gest-porta { border:1.5px solid rgba(0,0,0,0.08); border-radius:20px; padding:24px; background:#f4f6f9; }
+  .gest-emoji { font-size:1.5rem; line-height:1; }
+  .gest-nome { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#1a1a1a; }
+  .gest-tuo { font-size:13px; color:#7c3aed; font-weight:700; }
+
+  /* il nome del gestionale sta IN MEZZO alle quattro carte, come nel disegno
+     a mano di Alessio: due carte a sinistra, il nome, due carte a destra */
+  .gest-carte { display:grid; grid-template-columns:minmax(0,230px) auto minmax(0,230px); gap:32px; justify-content:center; align-items:center; }
+  .gest-col { display:flex; flex-direction:column; gap:32px; }
+  .gest-mezzo { text-align:center; }
+  .gest-mezzo .gest-emoji { display:block; margin-bottom:8px; }
+  .gest-mezzo .gest-nome { display:block; }
+  .gest-mezzo .gest-tuo { display:block; margin:8px 0 0; visibility:hidden; }
+  /* 2 settembre 2026 sera, Alessio: «le card informative, prima erano due
+     adesso 0». Le due porte vecchie dicevano cosa c'e' dentro; le quattro
+     carte no. La riga torna qui, sotto il nome, in mezzo. 14px e #666: gia'
+     in pagina. */
+  /* 2 settembre 2026 sera, Alessio: «premi Attiva, da li' si apre la pagina
+     informativa e poi se vuoi paghi». La finestra del piano: cosa c'e' dentro
+     e in fondo i due prezzi. 14px, --dark, --light: gia' in pagina. */
+  .pi-sub { font-size:14px; color:var(--light); margin-bottom:14px; }
+  .pi-voce { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.08); font-size:14px; color:var(--dark); line-height:1.4; }
+  .pi-voce .g-ico { flex:0 0 18px; }
+  /* ⛔ i prezzi NON stanno dentro la parte che scorre: col «sticky» il bottone
+     restava tagliato a meta'. Sono una fascia sua, sotto l'elenco, sempre
+     intera e sempre visibile. */
+  #modal-piano .modal-ai { display:flex; flex-direction:column; max-height:88vh; }
+  #modal-piano-body { flex:1; overflow-y:auto; min-height:0; }
+  .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
+  .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
+  .pi-nota { font-size:13px; color:var(--light); text-align:center; margin-top:10px; }
+  .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
+  /* quadrate davvero: stessa larghezza e stessa altezza */
+  /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
+     piastrella, se no dentro un pannello largo diventavano quadrati da 400px
+     con dentro mezzo metro di bianco */
+  .g-carta {
+    aspect-ratio:auto; min-height:140px; max-width:230px; background:white; border:1px solid #e5e7eb;
+    border-radius:14px; padding:10px; display:flex; flex-direction:column;
+  }
+  .g-testa { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .g-ico { width:18px; height:18px; flex:0 0 18px; font-size:17px; line-height:18px; text-align:center;
+           box-sizing:content-box; padding:5px; border-radius:8px; }
+  .g-tit { font-weight:700; color:#1a1a1a; font-size:16px; }
+  .g-txt { font-size:14px; color:#1a1a1a; font-weight:500; line-height:1.3; }
+  .g-azione { margin-top:auto; padding-top:8px; border-top:1px solid #e5e7eb; }
+  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; border:none; }
+  /* sotto i 620px una carta per riga: due quadrati da 130px tagliano le parole */
+  /* stretto: il nome va in cima e le carte una sotto l'altra */
+  @media (max-width:820px) {
+    .gest-carte { grid-template-columns:minmax(0,230px); }
+    .gest-mezzo { order:-1; }
+  }
+  /* 3 settembre 2026: sul telefono il riquadro del gestionale si stringe come
+     tutti gli altri riquadri della pagina, invece di tenere i 24px di dentro
+     che lo facevano sbordare. */
+  @media (max-width:480px) {
+    .gest-porta { padding:16px; }
+    .gest-porte { gap:16px; }
+  }
+  .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
     background:white; border-radius:16px; padding:20px;
     box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e537d;
@@ -432,6 +534,21 @@
   }
   .dash-stat-card:nth-child(2) { border-top-color:#e65100; }
   .dash-stat-card:nth-child(3) { border-top-color:#1565c0; }
+  /* verde: la stessa tinta del bollino «Verificata» piu' in basso in questa
+     pagina. Il viola #7c3aed e' del gestionale: usarlo qui faceva sembrare
+     questa casella un pezzo del gestionale. */
+  .dash-stat-card:nth-child(4) { border-top-color:#1b8a3f; }
+  /* la riga piccola sotto il numero delle richieste: stessa misura e stesso
+     grigio dell'etichetta qui sopra, senza le maiuscole */
+  .dash-stat-sub { font-size:13px; color:var(--light); font-weight:600; margin-top:6px; }
+  /* 3 settembre 2026: la casella delle richieste si clicca e apre l'elenco.
+     Colori e misure di questa pagina: 14px, --dark, --light, il bordo delle carte. */
+  .dash-stat-card.cliccabile { cursor:pointer; }
+  .ctt-mese { font-size:14px; font-weight:700; color:var(--dark); margin:18px 0 8px; }
+  .ctt-mese:first-child { margin-top:0; }
+  .ctt-riga { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.08); font-size:14px; color:var(--dark); }
+  .ctt-riga span:last-child { color:var(--light); font-weight:600; white-space:nowrap; }
+  .ctt-vuoto { font-size:14px; color:var(--light); text-align:center; padding:24px 0; }
   .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
   .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
   .dash-stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
@@ -1281,7 +1398,109 @@
   }
   .btn-elimina-cert:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.13); }
 
-  .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+/* ⛔ 2 SETTEMBRE 2026 — LA QUARTA CARTA: LE RICHIESTE DI CONTATTO.
+   Da oggi la scheda pubblica conta quante persone chiedono i contatti di
+   un'impresa (tabella `contatti`). Quel numero deve vederlo l'impresa, se no
+   e' un dato che sa solo il database.
+   ⚠️ La griglia era `repeat(3,1fr)` fissa: con quattro carte la quarta
+   sarebbe andata a capo da sola, larga un terzo, storta. Adesso e'
+   «quante ce ne stanno», e il 150 non e' a caso: e' la misura che sul
+   telefono da 390 px fa entrare DUE carte per riga (150+150+14 di spazio =
+   314, dentro i 358 disponibili) e sul computer le mette tutte e quattro in
+   fila. Con 180 px sul telefono ne sarebbe entrata una sola per riga. */
+  /* ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE QUADRATE PER OGNI GESTIONALE.
+     Chiesto da Alessio: «per ogni gestionale 4 card quadrate, due a destra e
+     due a sinistra, ognuna ha il suo scopo, come le card della foto».
+     La foto era il Riepilogo del gestionale: quindi la faccia delle carte e'
+     copiata da .rie-card di css/gestionale.css — icona nel quadratino
+     colorato, titolo di fianco.
+     I colori delle icone sono quelli gia' assegnati la' alle sezioni
+     (fatture, calendario, lavori, clienti): nessun colore inventato.
+     Perche' quattro: prima il viola «Attiva» faceva anche da porta e chi
+     aveva gia' pagato non capiva da dove si entrasse. Adesso ogni cosa ha la
+     sua carta e si entra solo dal verde.
+     Niente sotto i 13px. */
+  /* ⛔ 3 SETTEMBRE 2026 — I BORDI BIANCHI SUL TELEFONO.
+     Alessio, foto da iPhone: «i bordi bianchi non si devono vedere e poi e'
+     decentrato». Il 340 qui sotto era una misura buona sul computer e sbagliata
+     sul telefono: su uno schermo da 390px, tolti i 32 del riquadro e i 40 del
+     pannello, restano ~318px — meno di 340. Il riquadro non ci stava, sbordava,
+     la pagina scivolava di lato e nasceva la striscia bianca a sinistra.
+     `min(340px,100%)` vuol dire: 340 se ci stanno, altrimenti quanto ce n'e'.
+     Sul computer non cambia niente (340 ci stanno sempre). */
+  /* ⛔ 3 SETTEMBRE 2026 — LE CARTE CHE SI STRINGEVANO SUL PORTATILE.
+     Misurato: su uno schermo da 1440 i due gestionali stavano affiancati e a
+     ogni carta restavano 103 px invece di 230 — «Prova 30 giorni» andava a
+     capo tre volte. Sul monitor grande di Alessio (1920) non si vedeva,
+     perche' li' lo spazio bastava.
+     Il 340 diceva «affiancali appena ci stanno in 340», ma 340 e' la misura
+     della PORTA vuota: dentro servono due carte da 230 piu' il nome in mezzo,
+     cioe' ~620. Adesso si affiancano solo se ce ne sono davvero 620 a testa,
+     se no vanno una sotto l'altra e le carte restano larghe.
+     A 1920 restano affiancate come prima; a 1440 si incolonnano. */
+  .gest-porte { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(620px,100%),1fr)); gap:24px; }
+  .gest-porta { border:1.5px solid rgba(0,0,0,0.08); border-radius:20px; padding:24px; background:#f4f6f9; }
+  .gest-emoji { font-size:1.5rem; line-height:1; }
+  .gest-nome { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#1a1a1a; }
+  .gest-tuo { font-size:13px; color:#7c3aed; font-weight:700; }
+
+  /* il nome del gestionale sta IN MEZZO alle quattro carte, come nel disegno
+     a mano di Alessio: due carte a sinistra, il nome, due carte a destra */
+  .gest-carte { display:grid; grid-template-columns:minmax(0,230px) auto minmax(0,230px); gap:32px; justify-content:center; align-items:center; }
+  .gest-col { display:flex; flex-direction:column; gap:32px; }
+  .gest-mezzo { text-align:center; }
+  .gest-mezzo .gest-emoji { display:block; margin-bottom:8px; }
+  .gest-mezzo .gest-nome { display:block; }
+  .gest-mezzo .gest-tuo { display:block; margin:8px 0 0; visibility:hidden; }
+  /* 2 settembre 2026 sera, Alessio: «le card informative, prima erano due
+     adesso 0». Le due porte vecchie dicevano cosa c'e' dentro; le quattro
+     carte no. La riga torna qui, sotto il nome, in mezzo. 14px e #666: gia'
+     in pagina. */
+  /* 2 settembre 2026 sera, Alessio: «premi Attiva, da li' si apre la pagina
+     informativa e poi se vuoi paghi». La finestra del piano: cosa c'e' dentro
+     e in fondo i due prezzi. 14px, --dark, --light: gia' in pagina. */
+  .pi-sub { font-size:14px; color:var(--light); margin-bottom:14px; }
+  .pi-voce { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.08); font-size:14px; color:var(--dark); line-height:1.4; }
+  .pi-voce .g-ico { flex:0 0 18px; }
+  /* ⛔ i prezzi NON stanno dentro la parte che scorre: col «sticky» il bottone
+     restava tagliato a meta'. Sono una fascia sua, sotto l'elenco, sempre
+     intera e sempre visibile. */
+  #modal-piano .modal-ai { display:flex; flex-direction:column; max-height:88vh; }
+  #modal-piano-body { flex:1; overflow-y:auto; min-height:0; }
+  .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
+  .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
+  .pi-nota { font-size:13px; color:var(--light); text-align:center; margin-top:10px; }
+  .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
+  /* quadrate davvero: stessa larghezza e stessa altezza */
+  /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
+     piastrella, se no dentro un pannello largo diventavano quadrati da 400px
+     con dentro mezzo metro di bianco */
+  .g-carta {
+    aspect-ratio:auto; min-height:140px; max-width:230px; background:white; border:1px solid #e5e7eb;
+    border-radius:14px; padding:10px; display:flex; flex-direction:column;
+  }
+  .g-testa { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .g-ico { width:18px; height:18px; flex:0 0 18px; font-size:17px; line-height:18px; text-align:center;
+           box-sizing:content-box; padding:5px; border-radius:8px; }
+  .g-tit { font-weight:700; color:#1a1a1a; font-size:16px; }
+  .g-txt { font-size:14px; color:#1a1a1a; font-weight:500; line-height:1.3; }
+  .g-azione { margin-top:auto; padding-top:8px; border-top:1px solid #e5e7eb; }
+  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; border:none; }
+  /* sotto i 620px una carta per riga: due quadrati da 130px tagliano le parole */
+  /* stretto: il nome va in cima e le carte una sotto l'altra */
+  @media (max-width:820px) {
+    .gest-carte { grid-template-columns:minmax(0,230px); }
+    .gest-mezzo { order:-1; }
+  }
+  /* 3 settembre 2026: sul telefono il riquadro del gestionale si stringe come
+     tutti gli altri riquadri della pagina, invece di tenere i 24px di dentro
+     che lo facevano sbordare. */
+  @media (max-width:480px) {
+    .gest-porta { padding:16px; }
+    .gest-porte { gap:16px; }
+  }
+  .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
     background:white; border-radius:16px; padding:20px;
     box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e537d;
@@ -2144,6 +2363,15 @@
           <div class="dash-stat-icon">📷</div>
           <div class="dash-stat-num" id="dash-stat-foto">0</div>
           <div class="dash-stat-lbl">Foto caricate</div>
+        </div>        <!-- ⛔ 2 settembre 2026: quante PERSONE hanno chiesto i tuoi contatti
+             dalla scheda pubblica (numero mostrato, WhatsApp, email, sito).
+             Quando sono zero non si scrive «0»: si scrive che ancora non e'
+             arrivato nessuno — stessa regola dello zero delle recensioni. -->
+        <div class="dash-stat-card cliccabile" onclick="apriModalContatti()" title="Vedi l'elenco">
+          <div class="dash-stat-icon">📞</div>
+          <div class="dash-stat-num" id="dash-stat-contatti">—</div>
+          <div class="dash-stat-lbl">Richieste di contatto</div>
+          <div class="dash-stat-sub" id="dash-stat-contatti-sub">questo mese</div>
         </div>
       </div>
 
@@ -2871,6 +3099,21 @@
     </div>
     <div class="modal-ai-body" id="modal-piano-body"></div>
     <div class="pi-piede" id="modal-piano-piede"></div>
+  </div>
+</div>
+
+<!-- 3 settembre 2026: l'elenco delle richieste di contatto. Nessun dato del
+     cliente: non ce l'abbiamo e non lo vogliamo. Solo quando e che cosa. -->
+<div class="modal-ai-overlay" id="modal-contatti" onclick="if(event.target===this)chiudiModalContatti()">
+  <div class="modal-ai" style="max-width:560px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📞 Richieste di contatto</h2>
+        <p>Chi ha chiesto i tuoi contatti dalla scheda pubblica</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalContatti()">✕</button>
+    </div>
+    <div class="modal-ai-body" id="modal-contatti-body"></div>
   </div>
 </div>
 
@@ -3641,6 +3884,7 @@ async function inizializza() {
   document.getElementById('stat-rating').textContent = rating;
 
   await caricaPreventivi();
+  await caricaContatti();
   await caricaFotoLavori();
   await caricaProdottiVetrina();
   await caricaNote();
@@ -3708,6 +3952,104 @@ function caricaProfilo() {
 }
 
 // CARICA PREVENTIVI
+/* ============================================================
+   QUANTE PERSONE HANNO CHIESTO I TUOI CONTATTI — 2 settembre 2026
+   Legge la tabella `contatti`, che la scheda pubblica riempie ogni volta che
+   un cliente chiede un contatto (mostra il numero, apre WhatsApp, scrive una
+   mail, apre il sito).
+   ⚠️ Si contano le PERSONE, non le righe: due richieste diverse dello stesso
+   browser (per esempio prima il numero e poi WhatsApp) sono UNA persona che
+   ti stava cercando. Il database gia' scarta le ripetizioni della stessa cosa
+   entro un'ora; qui si raggruppa per visitatore.
+   ⚠️ Chi non ha il numero del visitatore (browser che vietano la memoria)
+   conta come una persona a se': meglio contarla una volta in piu' che
+   buttarla via.
+   ⚠️ Il lucchetto della tabella fa gia' il lavoro: un'impresa collegata vede
+   solo le proprie righe. Qui non serve nessun altro filtro oltre all'id.
+   ⚠️ ZERO NON SI SCRIVE: un «0» grande nel pannello di un'impresa che ha
+   appena cominciato e' una brutta accoglienza. Si scrive il trattino e sotto
+   «Ancora nessuno questo mese» — stessa regola dello zero delle recensioni
+   sulla scheda pubblica (1 settembre). */
+function _quantePersone(righe) {
+  const visti = new Set();
+  let senzaNome = 0;
+  (righe || []).forEach(function (r) {
+    if (r && r.visitatore) visti.add(r.visitatore);
+    else senzaNome++;
+  });
+  return visti.size + senzaNome;
+}
+async function caricaContatti() {
+  const num = document.getElementById('dash-stat-contatti');
+  const sub = document.getElementById('dash-stat-contatti-sub');
+  if (!num || !impresaCorrente) return;
+  const { data, error } = await sb.from('contatti')
+    .select('visitatore, created_at, tipo')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+  if (error) {
+    /* se il database non risponde non si inventa uno zero: si dice che il
+       numero non si sa */
+    num.textContent = '—';
+    if (sub) sub.textContent = 'non riesco a leggerlo';
+    console.error('contatti:', error.message);
+    return;
+  }
+  const righe = data || [];
+  _contattiRighe = righe;
+  const inizioMese = new Date(); inizioMese.setDate(1); inizioMese.setHours(0, 0, 0, 0);
+  const delMese = righe.filter(function (r) { return new Date(r.created_at) >= inizioMese; });
+  const personeMese = _quantePersone(delMese);
+  const personeTutte = _quantePersone(righe);
+  num.textContent = personeMese > 0 ? String(personeMese) : '—';
+  if (sub) {
+    sub.textContent = personeMese > 0
+      ? ('questo mese · ' + personeTutte + ' in tutto')
+      : 'Ancora nessuno questo mese';
+  }
+}
+
+/* L'ELENCO DELLE RICHIESTE — 3 settembre 2026.
+   Una riga per richiesta: il giorno e l'ora, e che cosa ha chiesto (numero
+   mostrato, WhatsApp, email, sito). Raggruppate per mese, le piu' recenti
+   in cima. Nessun nome, nessun numero del cliente: non li abbiamo.
+   Zero righe = «Ancora nessuno», non una tabella vuota. */
+let _contattiRighe = [];
+const _CTT_TIPO = { telefono: 'Numero mostrato', whatsapp: 'WhatsApp', email: 'Email', sito: 'Sito' };
+function _contattiHTML(righe) {
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const lista = (righe || []).filter(r => r && r.created_at).slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  if (!lista.length) return '<div class="ctt-vuoto">Ancora nessuno. Quando un cliente chiede il tuo numero dalla scheda, lo vedi qui.</div>';
+  const mesi = {}; const ordine = [];
+  lista.forEach(r => {
+    const d = new Date(r.created_at);
+    const k = d.getFullYear() + '-' + d.getMonth();
+    if (!mesi[k]) { mesi[k] = { nome: d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }), righe: [] }; ordine.push(k); }
+    mesi[k].righe.push(r);
+  });
+  return ordine.map(k => {
+    const m = mesi[k]; const persone = _quantePersone(m.righe);
+    const titolo = m.nome.charAt(0).toUpperCase() + m.nome.slice(1);
+    return '<div class="ctt-mese">' + esc(titolo) + ' — ' + persone + (persone === 1 ? ' persona' : ' persone') + '</div>' +
+      m.righe.map(r => {
+        const d = new Date(r.created_at);
+        const quando = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) + ', ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+        return '<div class="ctt-riga"><span>' + esc(_CTT_TIPO[r.tipo] || r.tipo || 'Contatto') + '</span><span>' + esc(quando) + '</span></div>';
+      }).join('');
+  }).join('');
+}
+async function apriModalContatti() {
+  const body = document.getElementById('modal-contatti-body');
+  if (!body) return;
+  body.innerHTML = _contattiHTML(_contattiRighe);
+  document.getElementById('modal-contatti').classList.add('show');
+  await caricaContatti();                 // numeri freschi, poi si ridisegna
+  body.innerHTML = _contattiHTML(_contattiRighe);
+}
+function chiudiModalContatti() {
+  document.getElementById('modal-contatti').classList.remove('show');
+}
+
 async function caricaPreventivi() {
   const { data } = await sb.from('preventivi_safe').select('*')
     .eq('impresa_id', impresaCorrente.id)
