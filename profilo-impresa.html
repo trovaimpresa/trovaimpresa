@@ -851,7 +851,15 @@ nav img{height:36px}
            l'impresa ce l'ha. L'emoji e' la stessa del pannello (📱). -->
       <li id="contact-whatsapp" style="display:none"><div class="ci">📱</div><a href="#" id="wa-link" target="_blank" rel="noopener">—</a></li>
       <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
-      <!-- orario fisso rimosso: era uguale per tutte le imprese, cioe' inventato -->
+      <!-- ⛔ 3 SETTEMBRE 2026 — GLI ORARI TORNANO, MA VERI.
+           Il vecchio orario fisso era stato tolto perche' era scritto in pagina
+           uguale per tutte le imprese: inventato. Adesso questa riga legge la
+           colonna `orari` che l'impresa riempie da «Modifica profilo», e come
+           WhatsApp e sito COMPARE SOLO SE C'E' QUALCOSA SCRITTO.
+           Contato prima di accendere: 0 imprese su 87 l'hanno riempita, quindi
+           oggi la riga non si vede su nessuna scheda. Si vedra' man mano che le
+           imprese la scrivono. -->
+      <li id="contact-orari" style="display:none"><div class="ci">🕐</div><span id="orari-testo">—</span></li>
     </ul>
     </div>
     </div><!-- fine .riga-rec -->
@@ -1621,6 +1629,16 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
         segnaContatto(_id==='email-link'?'email':_id==='sito-link'?'sito':_id==='wa-link'?'whatsapp':'telefono');
       });
     });
+    /* 3 settembre 2026: gli orari, scritti dall'impresa in «Modifica profilo».
+       Si mostra quello che ha scritto lei, ripulito e senza a capo; se la
+       casella e' vuota (oggi: tutte) la riga resta spenta. Niente orari
+       inventati. */
+    const _or=String(d.orari||'').replace(/\s+/g,' ').trim();
+    if(_or){
+      const _ot=document.getElementById('orari-testo');
+      const _oc=document.getElementById('contact-orari');
+      if(_ot&&_oc){_ot.textContent=_or;_oc.style.display=''}
+    }
     const wl=document.getElementById('wa-link');const cw=document.getElementById('contact-whatsapp');
     const _wa=String(d.whatsapp||'').trim();
     if(_wa&&wl){
