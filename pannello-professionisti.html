@@ -2922,8 +2922,11 @@
         <div id="supporto-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
           <input id="supporto-input" type="text" placeholder="Scrivi un messaggio..." autocomplete="off" onkeydown="if(event.key==='Enter')inviaSupporto()" style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px">
+          <button type="button" onclick="document.getElementById('supporto-file').click()" title="Allega una foto, uno screenshot o un PDF" aria-label="Allega un file" style="padding:0 14px;background:#fff;color:#5b6b80;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <button onclick="inviaSupporto()" style="padding:12px 22px;background:#0066ff;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Invia</button>
         </div>
+        <input type="file" id="supporto-file" accept="image/*,application/pdf" hidden onchange="supportoFileCambiato()">
+        <div id="supporto-chip" hidden style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:6px 8px 6px 12px;font-size:13.5px;font-weight:600;background:#fff;border:1.5px solid var(--border);border-radius:999px;max-width:100%"></div>
       </div>
     </div>
 
@@ -3663,22 +3666,76 @@ function renderSupportoMsg(m) {
   div.style.cssText = 'max-width:78%;padding:9px 13px;border-radius:12px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word;'
     + (mine ? 'align-self:flex-end;background:#0066ff;color:#fff' : 'align-self:flex-start;background:#fff;color:#111;border:1px solid var(--border)');
   div.textContent = m.messaggio || '';
+  if (m.allegato) div.appendChild(supportoAllegatoEl(m));
   box.appendChild(div);
 }
+
+// 3 settembre 2026 — allegati: bucket privato «supporto-allegati», cartella <uid>/.
+// Il link per vederlo e' firmato (vale un'ora) e si chiede al momento.
+function supportoAllegatoEl(m) {
+  const a = document.createElement('a');
+  a.target = '_blank'; a.rel = 'noopener';
+  a.style.cssText = 'display:block;margin-top:8px;color:inherit;font-weight:700;text-decoration:underline;font-size:13.5px';
+  const img = /^image\//.test(m.allegato_tipo || '') || /\.(jpe?g|png|webp|gif|heic)$/i.test(m.allegato || '');
+  a.textContent = img ? 'Carico la foto…' : (m.allegato_nome || 'allegato');
+  sb.storage.from('supporto-allegati').createSignedUrl(m.allegato, 3600).then(function (r) {
+    if (!r || !r.data || !r.data.signedUrl) { a.textContent = 'Allegato non leggibile'; return; }
+    a.href = r.data.signedUrl;
+    if (img) {
+      a.textContent = '';
+      const im = document.createElement('img');
+      im.src = r.data.signedUrl; im.alt = m.allegato_nome || 'foto'; im.loading = 'lazy';
+      im.style.cssText = 'display:block;max-width:100%;max-height:260px;border-radius:10px;border:1px solid rgba(0,0,0,.08);cursor:zoom-in';
+      a.appendChild(im);
+    }
+  });
+  return a;
+}
+let _supportoFile = null;
+function supportoFileCambiato() {
+  const i = document.getElementById('supporto-file');
+  const f = i && i.files && i.files[0];
+  const chip = document.getElementById('supporto-chip');
+  if (!f) { _supportoFile = null; if (chip) { chip.hidden = true; chip.innerHTML = ''; } return; }
+  if (!(/^image\//.test(f.type) || f.type === 'application/pdf')) { alert('Puoi allegare solo foto, screenshot o PDF'); i.value = ''; _supportoFile = null; return; }
+  _supportoFile = f;
+  if (chip) {
+    chip.hidden = false;
+    chip.innerHTML = '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>'
+      + '<button type="button" onclick="supportoTogliFile()" title="Togli" style="font-size:18px;line-height:1;border:none;background:none;color:#5b6b80;cursor:pointer;padding:0 4px">×</button>';
+    chip.querySelector('span').textContent = f.name;
+  }
+}
+function supportoTogliFile() { const i = document.getElementById('supporto-file'); if (i) i.value = ''; supportoFileCambiato(); }
 function scrollSupporto() {
   const box = document.getElementById('supporto-msgs');
   if (box) box.scrollTop = box.scrollHeight;
 }
 async function inviaSupporto() {
   const inp = document.getElementById('supporto-input');
-  const txt = (inp && inp.value || '').trim();
-  if (!txt) return;
+  let txt = (inp && inp.value || '').trim();
+  if (!txt && !_supportoFile) return;
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta, accedi di nuovo.'); return; }
+  // l'allegato si carica PRIMA di scrivere la riga: se fallisce non parte niente
+  let allegato = null, allegatoNome = null, allegatoTipo = null;
+  if (_supportoFile) {
+    const prep = window.preparaFileUpload ? await preparaFileUpload(_supportoFile, { lato: 1600, qualita: 0.8 }) : { file: _supportoFile, nome: _supportoFile.name };
+    if (prep.errore) { alert(prep.errore); return; }
+    const pulito = String(prep.nome || 'allegato').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-80);
+    const path = user.id + '/' + Date.now() + '-' + pulito;
+    const tipo = (prep.file && prep.file.type) || _supportoFile.type || 'application/octet-stream';
+    const up = await sb.storage.from('supporto-allegati').upload(path, prep.file, { contentType: tipo, upsert: false });
+    if (up.error) { alert('Allegato non caricato: ' + up.error.message); return; }
+    allegato = path; allegatoNome = _supportoFile.name; allegatoTipo = tipo;
+    if (!txt) txt = /^image\//.test(tipo) ? 'Ti mando una foto' : 'Ti mando un file';
+  }
   inp.value = '';
   const { error } = await sb.from('supporto_messaggi')
-    .insert({ user_id: user.id, da_admin: false, messaggio: txt, letto: false });
-  if (error) { alert('Errore invio: ' + error.message); inp.value = txt; }
+    .insert({ user_id: user.id, da_admin: false, messaggio: txt, letto: false,
+              allegato: allegato, allegato_nome: allegatoNome, allegato_tipo: allegatoTipo });
+  if (error) { alert('Errore invio: ' + error.message); inp.value = txt; return; }
+  supportoTogliFile();
 }
 async function eliminaConversazioneSupporto() {
   if (!confirm('Vuoi eliminare tutta la conversazione? L\'operazione non è reversibile.')) return;
