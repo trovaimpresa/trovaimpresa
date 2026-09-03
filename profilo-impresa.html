@@ -443,19 +443,20 @@ nav img{height:36px}
 .rec-data{font-size:13px;color:#888}
 .rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
 .rec-testo{font-size:13px;color:#555;line-height:1.6}
-.rec-altri-testa{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;margin-bottom:14px}
-.rec-altri-voto{display:flex;align-items:center;gap:10px;font-size:15px;color:#5b6b80;font-weight:600}
-.rec-altri-voto b{font-size:1.5rem;color:#0a2a4d;font-weight:800}
-.rec-altri-voto .st{color:#f4c02e;letter-spacing:1px}
-.rec-altri-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-.rec-altri-griglia .rec-item{background:#f9fafc;border:1px solid #e6ebf2;border-radius:14px;padding:16px 18px;border-bottom:1px solid #e6ebf2;display:flex;flex-direction:column}
-.rec-altri-griglia .rec-item:first-child{padding-top:16px}
-.rec-altri-griglia .rec-item .rec-testo{flex:1;font-size:15px;color:#333}
-.rec-altri-griglia .rec-voti-riga{font-size:13.5px;color:#555;margin:2px 0 8px;line-height:1.7}
-.rec-altri-griglia .rec-voti-riga b{color:#0052cc}
-.rec-altri-vuoto{padding:22px 10px;text-align:center;color:#666;font-size:15px;grid-column:1/-1}
-.rec-altri-btn{display:inline-block;padding:13px 24px;border:2px solid #2863a7;border-radius:10px;color:#2863a7;font-weight:800;text-decoration:none;font-size:15px}
-.rec-altri-btn:hover{background:#2863a7;color:#fff}
+.rec-altri{padding:0!important;overflow:hidden}
+.rec-altri-link{display:flex;align-items:center;gap:22px;padding:22px 28px;text-decoration:none;color:#0a2a4d;transition:background .2s}
+.rec-altri-link:hover{background:#eaf2ff}
+.rec-altri-voto{display:flex;flex-direction:column;align-items:center;min-width:90px;color:#5b6b80;font-size:13px;font-weight:600}
+.rec-altri-voto b{font-size:2.2rem;color:#0a2a4d;font-weight:800;line-height:1}
+.rec-altri-voto .st{color:#f4c02e;letter-spacing:1px;font-size:15px}
+.rec-altri-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.rec-altri-txt b{font-size:22px;font-weight:800;color:#0052cc}
+.rec-altri-txt small{font-size:14.5px;color:#5b6b80}
+.rec-altri-vai{flex:none;background:#2863a7;color:#fff;font-weight:800;font-size:16px;padding:14px 26px;border-radius:10px}
+.rec-altri-link:hover .rec-altri-vai{background:#0052cc}
+.rec-altri-link.spento{pointer-events:none}
+.rec-altri-link.spento .rec-altri-vai{display:none}
+@media(max-width:560px){.rec-altri-link{flex-wrap:wrap;padding:18px}.rec-altri-vai{width:100%;text-align:center}}
 .rec-risposta{margin:10px 0 0 22px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
 .rec-risposta-tit{font-size:13px;font-weight:600;color:#0a2a4d;margin-bottom:4px}
 .rec-risposta-tit b{font-weight:800}
@@ -869,12 +870,14 @@ nav img{height:36px}
          carte affiancate come in recensioni-impresa.html; qui le ultime 6, il
          resto nella pagina dedicata. -->
     <div class="card rec-altri" id="rec-altri" style="border-top-color:#0066ff;grid-column:1/-1">
-      <div class="rec-altri-testa">
-        <div class="card-title" style="margin:0">💬 Guarda le recensioni lasciate da altri clienti</div>
-        <div class="rec-altri-voto" id="rec-altri-voto"></div>
-      </div>
-      <div class="rec-altri-griglia" id="rec-lista"></div>
-      <div id="rec-altri-piede" style="text-align:center;margin-top:18px"></div>
+      <!-- 3 set 2026, Alessio: qui la card dice SOLO «Guarda tutte le recensioni»
+           e porta alla pagina recensioni-impresa.html (commenti + risposte).
+           Niente elenco qui: le recensioni si leggono la'. -->
+      <a class="rec-altri-link" id="rec-altri-link" href="#">
+        <span class="rec-altri-voto" id="rec-altri-voto"><b>—</b></span>
+        <span class="rec-altri-txt"><b>💬 Guarda le recensioni lasciate da altri clienti</b><small id="rec-altri-sub">Commenti dei clienti e risposte dell'impresa</small></span>
+        <span class="rec-altri-vai">Apri →</span>
+      </a>
     </div>
 
     <!-- CHAT CON L'IMPRESA -->
@@ -1917,29 +1920,20 @@ async function caricaRecensioni(id){
     });
     const rj=await r.json();const data=Array.isArray(rj)?rj:[];
     const c=scriviConteggioRecensioni(data);
-    const div=document.getElementById('rec-lista'); const voto=document.getElementById('rec-altri-voto'); const piede=document.getElementById('rec-altri-piede');
-    if(!div)return;
-    const nomeImpresa=((document.getElementById('profile-name')||{}).textContent||'').trim()||'L\'impresa';
-    if(!data.length){
-      voto.innerHTML='';
-      div.innerHTML='<div class="rec-altri-vuoto">Ancora nessuna recensione. Hai lavorato con questa impresa? Lasciane una qui sopra: sarai il primo.</div>';
-      piede.innerHTML='';
-      return;
+    const link=document.getElementById('rec-altri-link'); if(!link)return;
+    const voto=document.getElementById('rec-altri-voto'); const sub=document.getElementById('rec-altri-sub'); const tit=link.querySelector('.rec-altri-txt b');
+    const tot=data.length?((Number(data[0].totale))||data.length):0;
+    if(tot>0){
+      link.href='recensioni-impresa.html?id='+encodeURIComponent(id); link.classList.remove('spento');
+      voto.innerHTML='<b>'+(c.media!=null?c.media.toFixed(1):'—')+'</b><span class="st">'+'★'.repeat(Math.round(c.media||0))+'</span>';
+      tit.textContent='💬 Guarda le recensioni lasciate da altri clienti';
+      sub.textContent=tot+(tot===1?' recensione':' recensioni')+' · commenti dei clienti e risposte dell\'impresa';
+    }else{
+      link.removeAttribute('href'); link.classList.add('spento');
+      voto.innerHTML='<b>⭐</b>';
+      tit.textContent='Ancora nessuna recensione';
+      sub.textContent='Hai lavorato con questa impresa? Sii il primo: lasciane una qui sopra.';
     }
-    const tot=(data[0]&&Number(data[0].totale))||data.length;
-    voto.innerHTML='<b>'+(c.media!=null?c.media.toFixed(1):'—')+'</b><span class="st">'+'★'.repeat(Math.round(c.media||0))+'</span><span>'+tot+(tot===1?' recensione':' recensioni')+'</span>';
-    /* ultime 6 qui, tutte nella pagina dedicata */
-    const visibili=data.slice(0,6);
-    div.innerHTML=visibili.map(r=>{
-      const m=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
-      const avg=m.length?(m.reduce((a,b)=>a+b,0)/m.length):0; const n=Math.round(avg)||0;
-      const st='★'.repeat(n)+'☆'.repeat(5-n);
-      const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
-      const voti=[['Qualità',r.stelle_qualita],['Puntualità',r.stelle_puntualita],['Prezzo',r.stelle_prezzo],['Professionalità',r.stelle_professionalita]].filter(([,v])=>v!=null).map(([l,v])=>`${l} <b>${v}</b>`).join(' · ');
-      const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit"><b>${recEsc(nomeImpresa)}</b> ha risposto a <b>${recEsc(r.nome_cliente)||'questo cliente'}</b>${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
-      return `<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg?avg.toFixed(1):'-'}/5</div><div class="rec-voti-riga">${voti}</div><p class="rec-testo">${recEsc(r.testo)}</p>${risp}</div>`;
-    }).join('');
-    piede.innerHTML=`<a class="rec-altri-btn" href="recensioni-impresa.html?id=${encodeURIComponent(id)}">${tot>6?'Vedi tutte le '+tot+' recensioni →':'Apri la pagina delle recensioni →'}</a>`;
   }catch(e){console.error(e)}
 }
 

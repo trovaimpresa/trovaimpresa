@@ -5359,7 +5359,7 @@ function disegnaRecensioniSezione() {
     } else {
       const q = r.risposta_il ? new Date(r.risposta_il).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
       risposta = '<div class="rec-risp">'
-        + '<div class="rec-risp-tit">↳ La tua risposta a ' + (recEsc(r.nome_cliente) || 'questo cliente') + (q ? '<small>' + q + '</small>' : '') + '</div>'
+        + '<div class="rec-risp-tit">La tua risposta a ' + (recEsc(r.nome_cliente) || 'questo cliente') + (q ? '<small>' + q + '</small>' : '') + '</div>'
         + '<div class="rec-risp-testo">' + recEsc(r.risposta_impresa) + '</div>'
         + '<div class="rec-azioni">'
         + '<button type="button" class="rec-btn" onclick="modificaRispostaRecensione(' + r.id + ')">Correggi</button>'

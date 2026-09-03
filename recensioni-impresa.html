@@ -521,7 +521,7 @@ async function caricaPagina(daCapo){
     const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
     const voti=[['Qualità',r.stelle_qualita],['Puntualità',r.stelle_puntualita],['Prezzo',r.stelle_prezzo],['Professionalità',r.stelle_professionalita]]
       .filter(([,v])=>v!=null).map(([l,v])=>`${l} <b>${v}</b>`).join(' · ');
-    const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">↳ <b>${recEsc(_nome)}</b> ha risposto a <b>${recEsc(r.nome_cliente)||'questo cliente'}</b>${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
+    const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit"><b>${recEsc(_nome)}</b> ha risposto a <b>${recEsc(r.nome_cliente)||'questo cliente'}</b>${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
     return `<div class="rec-item compatta${(r.voto||5)<=3?' critica':''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${stelleTxt(r.voto)} ${r.voto||'-'}/5</div><div class="rec-voti-riga">${voti}</div><p class="rec-testo">${recEsc(r.testo)}</p>${risp}</div>`;
   }).join('');
   if(daCapo){
