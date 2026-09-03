@@ -634,73 +634,94 @@
   body.theme-dark .profilo-row,
   body.theme-dark .profilo-title { border-bottom-color:rgba(255,255,255,0.08); }
 
-  /* === Personalizza pannello (redesign: 2 colonne + anteprima live) === */
-  #sec-personalizza .mpp-box { width:100%; max-width:1180px; margin:0 auto; }
+  /* === Personalizza pannello — 3 settembre 2026 ===
+     Alessio: «la finestra di lavoro cosi' stretta e lunga, la grafica cosi'
+     sempliciotta». Prima: tutto in UNA colonna da 480 px, l'anteprima con
+     quattro riquadri vuoti. Adesso: le opzioni su DUE colonne (tutta la
+     larghezza del pannello), l'anteprima a destra e' una copia in piccolo
+     della testata vera del pannello (copertina, tondo, fascia colorata, carte),
+     e le parole sono quelle di chi lo usa, non del programmatore.
+     Carte, angoli, ombre e colori: gli stessi di .dash-quick-card. */
+  body.pers-aperta .sidebar, body.pers-aperta .mob-menu-btn, body.pers-aperta .sidebar-overlay { display:none !important; }
+  body.pers-aperta .main { margin-left:0 !important; }
+  #sec-personalizza .mpp-box { width:100%; max-width:none; margin:0 auto; }
   #sec-personalizza .mpp-grid {
-    display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;
+    display:grid; grid-template-columns:minmax(0,1.25fr) minmax(420px,1fr); gap:32px; align-items:start;
   }
-  @media (max-width:900px){ #sec-personalizza .mpp-grid { grid-template-columns:1fr; } }
+  #sec-personalizza .mpp-options { display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+  #sec-personalizza .mpp-group.mpp-span2 { grid-column:1 / -1; }
+  @media (max-width:1180px){ #sec-personalizza .mpp-options { grid-template-columns:1fr; } }
+  @media (max-width:900px){ #sec-personalizza .mpp-grid { grid-template-columns:1fr; } #sec-personalizza .mpp-preview-col { position:static; } }
 
-  /* Colonna opzioni: card raggruppate */
+  /* Gruppi: stesse carte del pannello (dash-quick-card) */
   #sec-personalizza .mpp-group {
-    background:white; border:1px solid var(--border); border-radius:16px;
-    padding:18px 18px 16px; margin-bottom:16px; box-shadow:0 2px 10px rgba(0,0,0,0.04);
+    background:white; border-radius:16px; padding:24px 26px 22px; margin:0;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #7c3aed;
   }
+  #sec-personalizza .mpp-group.g-colori { border-top-color:#0066ff; }
+  #sec-personalizza .mpp-group.g-testo  { border-top-color:#e65100; }
+  #sec-personalizza .mpp-group.g-foto   { border-top-color:#1565c0; }
   #sec-personalizza .mpp-group-title {
-    font-size:13px; font-weight:800; color:var(--dark); margin:0 0 14px;
+    font-size:17px; font-weight:800; color:var(--dark); margin:0 0 4px;
     display:flex; align-items:center; gap:8px;
   }
+  #sec-personalizza .mpp-group-sub { font-size:14.5px; color:var(--light); margin:0 0 14px; line-height:1.45; }
   #sec-personalizza .mpp-row {
     display:flex; align-items:center; justify-content:space-between; gap:14px;
-    padding:9px 0; border-bottom:1px dashed #eef0f4;
+    padding:12px 0; border-bottom:1px solid #eef0f4;
   }
-  #sec-personalizza .mpp-row:last-child { border-bottom:none; }
+  #sec-personalizza .mpp-row:last-child { border-bottom:none; padding-bottom:2px; }
   #sec-personalizza .mpp-row-full { display:block; }
-  #sec-personalizza .mpp-label {
-    font-size:0.86rem; font-weight:600; color:var(--dark); margin:0;
-  }
-  #sec-personalizza .mpp-hint { display:block; font-size:13px; color:var(--light); margin-top:2px; font-weight:400; }
+  #sec-personalizza .mpp-label { font-size:16px; font-weight:700; color:var(--dark); margin:0; }
+  #sec-personalizza .mpp-hint { display:block; font-size:14px; color:var(--light); margin-top:2px; font-weight:400; line-height:1.4; }
   #sec-personalizza .mpp-row-full .mpp-label { display:block; margin-bottom:8px; }
 
+  /* Colore: il quadratino grande, con il codice accanto */
+  #sec-personalizza .mpp-colore { display:flex; align-items:center; gap:10px; flex:none; }
+  #sec-personalizza .mpp-colore code { font-size:13px; color:var(--light); font-family:ui-monospace,Consolas,monospace; }
   #sec-personalizza input[type="color"] {
-    width:52px; height:34px; border:2px solid white; border-radius:9px;
-    cursor:pointer; padding:0; box-shadow:0 0 0 1px #e5e7eb; flex:none;
+    width:64px; height:42px; border:2px solid white; border-radius:10px;
+    cursor:pointer; padding:0; box-shadow:0 0 0 1.5px #dfe3ea; flex:none; background:none;
   }
   #sec-personalizza input[type="text"],
   #sec-personalizza select {
-    width:100%; padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
-    font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
+    width:100%; padding:13px 16px; border:1.5px solid #e5e7eb; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:16px; outline:none;
     background:white; box-sizing:border-box; transition:border-color 0.15s;
   }
   #sec-personalizza input[type="text"]:focus,
-  #sec-personalizza select:focus { border-color:#7c3aed; }
-  #sec-personalizza input[type="file"] { font-family:'DM Sans',sans-serif; font-size:0.82rem; color:var(--mid); width:100%; }
+  #sec-personalizza select:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,0.12); }
+  #sec-personalizza input[type="file"] { font-family:'DM Sans',sans-serif; font-size:13.5px; color:var(--mid); width:100%; }
   #sec-personalizza input[type="file"]::file-selector-button {
-    padding:8px 14px; border:1.5px solid #7c3aed; border-radius:10px;
+    padding:10px 16px; border:1.5px solid #7c3aed; border-radius:10px;
     background:white; color:#7c3aed; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.82rem; cursor:pointer; margin-right:10px; transition:all 0.15s;
+    font-weight:700; font-size:14px; cursor:pointer; margin-right:10px; transition:all 0.15s;
   }
   #sec-personalizza input[type="file"]::file-selector-button:hover { background:#7c3aed; color:white; }
-  #sec-personalizza input[type="checkbox"] { width:20px; height:20px; accent-color:#7c3aed; cursor:pointer; flex:none; }
+  #sec-personalizza input[type="checkbox"] { width:22px; height:22px; accent-color:#7c3aed; cursor:pointer; flex:none; }
   #sec-personalizza input[type="range"] { width:100%; cursor:pointer; accent-color:#7c3aed; }
-  #sec-personalizza .mpp-size-val { font-weight:800; color:#7c3aed; font-size:0.82rem; }
+  #sec-personalizza .mpp-size-val { font-weight:800; color:#7c3aed; font-size:14px; }
+  #sec-personalizza .mpp-size-scala { display:flex; justify-content:space-between; font-size:13px; color:var(--light); margin-top:4px; }
 
-  /* Temi preset */
-  #sec-personalizza .mpp-presets { display:flex; flex-wrap:wrap; gap:9px; }
+  /* Temi rapidi: ogni tema e' una mini-anteprima (fascia + sfondo), non un pallino */
+  #sec-personalizza .mpp-presets { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
   #sec-personalizza .mpp-preset {
-    display:flex; align-items:center; gap:8px; padding:7px 12px; border:1.5px solid var(--border);
-    border-radius:999px; background:white; cursor:pointer; font-size:13px; font-weight:700;
-    color:var(--dark); transition:all 0.15s;
+    display:block; padding:0; border:2px solid var(--border); border-radius:14px; background:white;
+    cursor:pointer; overflow:hidden; text-align:left; font-family:'DM Sans',sans-serif; transition:all 0.15s;
   }
-  #sec-personalizza .mpp-preset:hover { border-color:#7c3aed; transform:translateY(-1px); }
-  #sec-personalizza .mpp-preset .sw { width:16px; height:16px; border-radius:5px; box-shadow:0 0 0 1px rgba(0,0,0,0.08); }
+  #sec-personalizza .mpp-preset:hover { border-color:#7c3aed; transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+  #sec-personalizza .mpp-preset.attivo { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,0.15); }
+  #sec-personalizza .mpp-preset .sw { display:block; height:44px; border-radius:0; box-shadow:none; }
+  #sec-personalizza .mpp-preset .sw-bg { display:block; height:26px; border-bottom:1px solid #eef0f4; }
+  #sec-personalizza .mpp-preset .sw-nome { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; font-size:15px; font-weight:700; color:var(--dark); }
+  #sec-personalizza .mpp-preset.attivo .sw-nome::after { content:'✓'; color:#7c3aed; font-weight:900; }
   #sec-personalizza .mpp-reset {
-    margin-top:12px; padding:8px 14px; border:1.5px solid #dc2626; background:white; color:#dc2626;
-    border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.82rem; cursor:pointer;
+    margin-top:14px; padding:10px 16px; border:1.5px solid var(--border); background:white; color:var(--mid);
+    border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:14px; cursor:pointer;
   }
-  #sec-personalizza .mpp-reset:hover { background:#dc2626; color:white; }
+  #sec-personalizza .mpp-reset:hover { border-color:#dc2626; color:#dc2626; }
 
-  /* Colonna anteprima live (sticky) */
+  /* Anteprima: la testata VERA del pannello, in piccolo */
   #sec-personalizza .mpp-preview-col { position:sticky; top:16px; }
   #sec-personalizza .mpp-preview-title {
     font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase;
@@ -708,34 +729,55 @@
   }
   #sec-personalizza .mpp-pv-frame {
     border:1px solid var(--border); border-radius:16px; overflow:hidden; background:#f5f5f5;
-    box-shadow:0 8px 28px rgba(0,0,0,0.10); display:flex; min-height:300px;
+    box-shadow:0 12px 34px rgba(0,0,0,0.12); display:flex; min-height:300px;
   }
   #sec-personalizza .mpp-pv-side {
-    width:74px; background:#0a2a4d; flex:none; padding:14px 8px; display:flex; flex-direction:column; gap:10px; align-items:center;
+    width:72px; background:#0a2a4d; flex:none; padding:14px 8px; display:flex; flex-direction:column; gap:10px; align-items:center;
   }
-  #sec-personalizza .mpp-pv-logo { width:46px; height:46px; border-radius:10px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #sec-personalizza .mpp-pv-logo img { max-width:100%; max-height:100%; }
+  #sec-personalizza .mpp-pv-side-logo { width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.14); }
   #sec-personalizza .mpp-pv-navdot { width:100%; height:9px; border-radius:5px; background:rgba(255,255,255,0.14); }
-  #sec-personalizza .mpp-pv-main { flex:1; display:flex; flex-direction:column; }
-  #sec-personalizza .mpp-pv-hero {
-    padding:20px 18px; color:#fff; display:flex; justify-content:space-between; align-items:center; gap:12px;
-    background:linear-gradient(135deg,#0066ff,#003a99); min-height:96px;
+  #sec-personalizza .mpp-pv-main { flex:1; min-width:0; display:flex; flex-direction:column; }
+  #sec-personalizza .mpp-pv-cover {
+    aspect-ratio:2.5/1; min-height:96px; background:linear-gradient(135deg,#c9d6e8,#8fa6c4);
+    background-size:cover; background-position:center; position:relative;
   }
-  #sec-personalizza .mpp-pv-welcome { font-size:13px; opacity:0.85; margin-bottom:3px; }
-  #sec-personalizza .mpp-pv-nome { font-size:1.15rem; font-weight:800; line-height:1.2; }
-  #sec-personalizza .mpp-pv-badge { width:60px; height:60px; border-radius:12px; background:rgba(255,255,255,0.18); background-size:cover; background-position:center; flex:none; }
-  #sec-personalizza .mpp-pv-cards { padding:16px 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  #sec-personalizza .mpp-pv-card { height:52px; border-radius:10px; background:#fff; border:1px solid #e6ebf2; }
-  #sec-personalizza .mpp-pv-frame.pv-dark { background:#12161c; }
-  #sec-personalizza .mpp-pv-frame.pv-dark .mpp-pv-card { background:#1c222b; border-color:#2a323d; }
+  #sec-personalizza .mpp-pv-cover-vuota {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.35);
+  }
+  #sec-personalizza .mpp-pv-cover.ha-banner .mpp-pv-cover-vuota { display:none; }
+  #sec-personalizza .mpp-pv-hero {
+    padding:12px 22px 18px; color:#fff; display:flex; align-items:flex-end; gap:16px;
+    background:#0066ff; min-height:96px; position:relative; z-index:2;   /* sopra la copertina: il tondo si vede intero */
+  }
+  #sec-personalizza .mpp-pv-logo {
+    width:84px; height:84px; border-radius:50%; border:4px solid #fff; background:#eef2f7; flex:none;
+    margin-top:-46px; box-shadow:0 3px 12px rgba(0,0,0,0.25); overflow:hidden; align-self:flex-start;
+    display:flex; align-items:center; justify-content:center; color:#7a8896;
+  }
+  #sec-personalizza .mpp-pv-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+  #sec-personalizza .mpp-pv-testo { min-width:0; }
+  #sec-personalizza .mpp-pv-welcome { font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:0.85; margin-bottom:2px; }
+  #sec-personalizza .mpp-pv-nome { font-size:1.35rem; font-weight:800; line-height:1.15; overflow-wrap:anywhere; }
+  #sec-personalizza .mpp-pv-cards { padding:18px 20px 20px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  #sec-personalizza .mpp-pv-card {
+    border-radius:12px; background:#fff; box-shadow:0 3px 10px rgba(0,0,0,0.07); border-top:3px solid #2e537d;
+    padding:14px 12px 15px; text-align:center; font-size:14.5px; font-weight:700; color:#0a2a4d; line-height:1.3;
+  }
+  #sec-personalizza .mpp-pv-card:nth-child(2) { border-top-color:#e65100; }
+  #sec-personalizza .mpp-pv-card:nth-child(3) { border-top-color:#1565c0; }
+  #sec-personalizza .mpp-pv-card:nth-child(4) { border-top-color:#7c3aed; }
+  #sec-personalizza .mpp-pv-card span { display:block; font-size:22px; margin-bottom:4px; }
+  #sec-personalizza .mpp-pv-frame.pv-dark .mpp-pv-card { background:#1c222b; color:#e8ecf2; box-shadow:none; border:1px solid #2a323d; border-top-width:3px; }
+  #sec-personalizza .mpp-pv-nota { font-size:13.5px; color:var(--light); margin-top:10px; line-height:1.5; }
 
-  /* Footer azioni */
+  /* Pulsanti in fondo */
   #sec-personalizza .mpp-footer {
-    display:flex; gap:12px; margin-top:8px; max-width:1180px; margin-left:auto; margin-right:auto;
+    display:flex; gap:12px; margin-top:26px; max-width:none; margin-left:auto; margin-right:auto; justify-content:flex-end;
   }
   #sec-personalizza .mpp-footer button {
-    flex:1; padding:14px; border-radius:12px;
-    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.92rem; cursor:pointer;
+    min-width:200px; padding:14px 22px; border-radius:12px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:15px; cursor:pointer;
   }
   #sec-personalizza .mpp-btn-cancel { border:1.5px solid var(--border); background:white; color:var(--mid); }
   #sec-personalizza .mpp-btn-save {
@@ -743,6 +785,7 @@
     box-shadow:0 4px 12px rgba(124,58,237,0.3); transition:transform 0.15s;
   }
   #sec-personalizza .mpp-btn-save:hover { transform:translateY(-1px); }
+  @media (max-width:600px){ #sec-personalizza .mpp-footer { flex-direction:column; } #sec-personalizza .mpp-footer button { min-width:0; } }
 
   /* === Fai conoscere la tua azienda (video) === */
   #sec-video .video-row { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #f0f0f0; }
@@ -1724,116 +1767,6 @@
   body.theme-dark .profilo-row,
   body.theme-dark .profilo-title { border-bottom-color:rgba(255,255,255,0.08); }
 
-  /* === Personalizza pannello (redesign: 2 colonne + anteprima live) === */
-  #sec-personalizza .mpp-box { width:100%; max-width:1180px; margin:0 auto; }
-  #sec-personalizza .mpp-grid {
-    display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;
-  }
-  @media (max-width:900px){ #sec-personalizza .mpp-grid { grid-template-columns:1fr; } }
-
-  /* Colonna opzioni: card raggruppate */
-  #sec-personalizza .mpp-group {
-    background:white; border:1px solid var(--border); border-radius:16px;
-    padding:18px 18px 16px; margin-bottom:16px; box-shadow:0 2px 10px rgba(0,0,0,0.04);
-  }
-  #sec-personalizza .mpp-group-title {
-    font-size:13px; font-weight:800; color:var(--dark); margin:0 0 14px;
-    display:flex; align-items:center; gap:8px;
-  }
-  #sec-personalizza .mpp-row {
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
-    padding:9px 0; border-bottom:1px dashed #eef0f4;
-  }
-  #sec-personalizza .mpp-row:last-child { border-bottom:none; }
-  #sec-personalizza .mpp-row-full { display:block; }
-  #sec-personalizza .mpp-label {
-    font-size:0.86rem; font-weight:600; color:var(--dark); margin:0;
-  }
-  #sec-personalizza .mpp-hint { display:block; font-size:13px; color:var(--light); margin-top:2px; font-weight:400; }
-  #sec-personalizza .mpp-row-full .mpp-label { display:block; margin-bottom:8px; }
-
-  #sec-personalizza input[type="color"] {
-    width:52px; height:34px; border:2px solid white; border-radius:9px;
-    cursor:pointer; padding:0; box-shadow:0 0 0 1px #e5e7eb; flex:none;
-  }
-  #sec-personalizza input[type="text"],
-  #sec-personalizza select {
-    width:100%; padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
-    font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
-    background:white; box-sizing:border-box; transition:border-color 0.15s;
-  }
-  #sec-personalizza input[type="text"]:focus,
-  #sec-personalizza select:focus { border-color:#7c3aed; }
-  #sec-personalizza input[type="file"] { font-family:'DM Sans',sans-serif; font-size:0.82rem; color:var(--mid); width:100%; }
-  #sec-personalizza input[type="file"]::file-selector-button {
-    padding:8px 14px; border:1.5px solid #7c3aed; border-radius:10px;
-    background:white; color:#7c3aed; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.82rem; cursor:pointer; margin-right:10px; transition:all 0.15s;
-  }
-  #sec-personalizza input[type="file"]::file-selector-button:hover { background:#7c3aed; color:white; }
-  #sec-personalizza input[type="checkbox"] { width:20px; height:20px; accent-color:#7c3aed; cursor:pointer; flex:none; }
-  #sec-personalizza input[type="range"] { width:100%; cursor:pointer; accent-color:#7c3aed; }
-  #sec-personalizza .mpp-size-val { font-weight:800; color:#7c3aed; font-size:0.82rem; }
-
-  /* Temi preset */
-  #sec-personalizza .mpp-presets { display:flex; flex-wrap:wrap; gap:9px; }
-  #sec-personalizza .mpp-preset {
-    display:flex; align-items:center; gap:8px; padding:7px 12px; border:1.5px solid var(--border);
-    border-radius:999px; background:white; cursor:pointer; font-size:13px; font-weight:700;
-    color:var(--dark); transition:all 0.15s;
-  }
-  #sec-personalizza .mpp-preset:hover { border-color:#7c3aed; transform:translateY(-1px); }
-  #sec-personalizza .mpp-preset .sw { width:16px; height:16px; border-radius:5px; box-shadow:0 0 0 1px rgba(0,0,0,0.08); }
-  #sec-personalizza .mpp-reset {
-    margin-top:12px; padding:8px 14px; border:1.5px solid #dc2626; background:white; color:#dc2626;
-    border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.82rem; cursor:pointer;
-  }
-  #sec-personalizza .mpp-reset:hover { background:#dc2626; color:white; }
-
-  /* Colonna anteprima live (sticky) */
-  #sec-personalizza .mpp-preview-col { position:sticky; top:16px; }
-  #sec-personalizza .mpp-preview-title {
-    font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase;
-    letter-spacing:1px; margin:0 0 10px; display:flex; align-items:center; gap:6px;
-  }
-  #sec-personalizza .mpp-pv-frame {
-    border:1px solid var(--border); border-radius:16px; overflow:hidden; background:#f5f5f5;
-    box-shadow:0 8px 28px rgba(0,0,0,0.10); display:flex; min-height:300px;
-  }
-  #sec-personalizza .mpp-pv-side {
-    width:74px; background:#0a2a4d; flex:none; padding:14px 8px; display:flex; flex-direction:column; gap:10px; align-items:center;
-  }
-  #sec-personalizza .mpp-pv-logo { width:46px; height:46px; border-radius:10px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #sec-personalizza .mpp-pv-logo img { max-width:100%; max-height:100%; }
-  #sec-personalizza .mpp-pv-navdot { width:100%; height:9px; border-radius:5px; background:rgba(255,255,255,0.14); }
-  #sec-personalizza .mpp-pv-main { flex:1; display:flex; flex-direction:column; }
-  #sec-personalizza .mpp-pv-hero {
-    padding:20px 18px; color:#fff; display:flex; justify-content:space-between; align-items:center; gap:12px;
-    background:linear-gradient(135deg,#0066ff,#003a99); min-height:96px;
-  }
-  #sec-personalizza .mpp-pv-welcome { font-size:13px; opacity:0.85; margin-bottom:3px; }
-  #sec-personalizza .mpp-pv-nome { font-size:1.15rem; font-weight:800; line-height:1.2; }
-  #sec-personalizza .mpp-pv-badge { width:60px; height:60px; border-radius:12px; background:rgba(255,255,255,0.18); background-size:cover; background-position:center; flex:none; }
-  #sec-personalizza .mpp-pv-cards { padding:16px 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  #sec-personalizza .mpp-pv-card { height:52px; border-radius:10px; background:#fff; border:1px solid #e6ebf2; }
-  #sec-personalizza .mpp-pv-frame.pv-dark { background:#12161c; }
-  #sec-personalizza .mpp-pv-frame.pv-dark .mpp-pv-card { background:#1c222b; border-color:#2a323d; }
-
-  /* Footer azioni */
-  #sec-personalizza .mpp-footer {
-    display:flex; gap:12px; margin-top:8px; max-width:1180px; margin-left:auto; margin-right:auto;
-  }
-  #sec-personalizza .mpp-footer button {
-    flex:1; padding:14px; border-radius:12px;
-    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.92rem; cursor:pointer;
-  }
-  #sec-personalizza .mpp-btn-cancel { border:1.5px solid var(--border); background:white; color:var(--mid); }
-  #sec-personalizza .mpp-btn-save {
-    border:none; background:linear-gradient(135deg,#7c3aed,#9333ea); color:white;
-    box-shadow:0 4px 12px rgba(124,58,237,0.3); transition:transform 0.15s;
-  }
-  #sec-personalizza .mpp-btn-save:hover { transform:translateY(-1px); }
-
   /* === Fai conoscere la tua azienda (video) === */
   #sec-video .video-row { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #f0f0f0; }
   #sec-video .video-row:last-child { border-bottom:none; }
@@ -2643,99 +2576,111 @@
       <div class="mpp-box">
         <div class="mpp-grid">
 
-          <!-- COLONNA OPZIONI -->
+          <!-- COLONNA OPZIONI (due colonne di carte) -->
           <div class="mpp-options">
 
-            <div class="mpp-group">
-              <div class="mpp-group-title">🎨 Temi rapidi</div>
+            <div class="mpp-group mpp-span2">
+              <div class="mpp-group-title">🎨 Scegli un tema in un clic</div>
+              <p class="mpp-group-sub">Cambia colori e sfondo tutti insieme. Poi, se vuoi, ritocchi i singoli colori qui sotto.</p>
               <div class="mpp-presets" id="pers-pannello-presets"></div>
-              <button type="button" class="mpp-reset" onclick="resetPersonalizzaPannello()">↺ Ripristina predefiniti</button>
+              <button type="button" class="mpp-reset" onclick="resetPersonalizzaPannello()">↺ Torna ai colori di TrovaImpresa</button>
             </div>
 
-            <div class="mpp-group">
+            <div class="mpp-group g-colori">
               <div class="mpp-group-title">🖌️ Colori</div>
+              <p class="mpp-group-sub">Tocca il quadratino per scegliere il colore.</p>
               <div class="mpp-row">
-                <span class="mpp-label">Colore header<span class="mpp-hint">La barra in alto del pannello</span></span>
-                <input type="color" id="pers-pannello-colore-header" value="#0066ff">
+                <span class="mpp-label">Fascia in alto<span class="mpp-hint">La striscia colorata sotto la copertina, con il tuo nome</span></span>
+                <span class="mpp-colore"><code id="pers-pannello-colore-header-cod">#0066ff</code><input type="color" id="pers-pannello-colore-header" value="#0066ff"></span>
               </div>
               <div class="mpp-row">
-                <span class="mpp-label">Sfondo pagina</span>
-                <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5">
+                <span class="mpp-label">Scritte sulla fascia<span class="mpp-hint">Il colore del tuo nome</span></span>
+                <span class="mpp-colore"><code id="pers-pannello-colore-testo-cod">#ffffff</code><input type="color" id="pers-pannello-colore-testo" value="#ffffff"></span>
               </div>
               <div class="mpp-row">
-                <span class="mpp-label">Colore testo header</span>
-                <input type="color" id="pers-pannello-colore-testo" value="#ffffff">
+                <span class="mpp-label">Sfondo della pagina<span class="mpp-hint">Dietro alle carte</span></span>
+                <span class="mpp-colore"><code id="pers-pannello-colore-sfondo-cod">#f5f5f5</code><input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5"></span>
               </div>
               <div class="mpp-row">
-                <span class="mpp-label">Tema scuro<span class="mpp-hint">Sfondo e card scure</span></span>
+                <span class="mpp-label">Modalità notte<span class="mpp-hint">Sfondo e carte scure, riposa gli occhi</span></span>
                 <input type="checkbox" id="pers-pannello-tema-scuro">
               </div>
             </div>
 
-            <div class="mpp-group">
-              <div class="mpp-group-title">✍️ Testo &amp; font</div>
+            <div class="mpp-group g-testo">
+              <div class="mpp-group-title">✍️ Nome e carattere</div>
+              <p class="mpp-group-sub">Quello che si legge sulla fascia in alto.</p>
               <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Nome pannello</label>
-                <input type="text" id="pers-pannello-nome" maxlength="30" placeholder="Es. Edilizia Rossi">
+                <label class="mpp-label" for="pers-pannello-nome">Nome del pannello</label>
+                <input type="text" id="pers-pannello-nome" maxlength="30" placeholder="Es. Muratura Rossi">
               </div>
               <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Font header</label>
+                <label class="mpp-label" for="pers-pannello-font">Carattere del nome</label>
                 <select id="pers-pannello-font">
-                  <option value="">Predefinito</option>
-                  <option value="'Inter', sans-serif">Inter (moderno, pulito)</option>
-                  <option value="'Poppins', sans-serif">Poppins (rotondo, friendly)</option>
-                  <option value="'Montserrat', sans-serif">Montserrat (elegante)</option>
-                  <option value="'Playfair Display', serif">Playfair Display (classico, serif)</option>
-                  <option value="'Bebas Neue', sans-serif">Bebas Neue (bold, titoli)</option>
+                  <option value="">Quello di TrovaImpresa</option>
+                  <option value="'Inter', sans-serif">Inter — moderno, pulito</option>
+                  <option value="'Poppins', sans-serif">Poppins — rotondo, amichevole</option>
+                  <option value="'Montserrat', sans-serif">Montserrat — elegante</option>
+                  <option value="'Playfair Display', serif">Playfair Display — classico</option>
+                  <option value="'Bebas Neue', sans-serif">Bebas Neue — grande, da insegna</option>
                 </select>
               </div>
               <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Grandezza testo <span class="mpp-size-val" id="pers-pannello-size-label">1.0x</span></label>
+                <label class="mpp-label" for="pers-pannello-size-testo">Grandezza del nome <span class="mpp-size-val" id="pers-pannello-size-label">1.0x</span></label>
                 <input type="range" id="pers-pannello-size-testo" min="0.7" max="1.5" step="0.05" value="1">
+                <div class="mpp-size-scala"><span>Più piccolo</span><span>Normale</span><span>Più grande</span></div>
               </div>
             </div>
 
-            <div class="mpp-group">
-              <div class="mpp-group-title">🖼️ Logo &amp; banner</div>
-              <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Logo personalizzato</label>
-                <div id="pers-pannello-logo-preview" style="margin:6px 0 8px;"></div>
-                <input type="file" id="pers-pannello-logo-file" accept="image/*">
-                <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">Rimuovi logo</button>
-              </div>
-              <div class="mpp-row mpp-row-full">
-                <label class="mpp-label">Banner copertina<span class="mpp-hint">La fascia in cima al pannello e alla tua scheda pubblica. Misura giusta: <b>1500&times;600</b>. Un'immagine di forma diversa riempie lo stesso, ma viene tagliata sopra e sotto.</span></label>
-                <div id="pers-pannello-banner-preview" style="margin:6px 0 8px;"></div>
-                <input type="file" id="pers-pannello-banner-file" accept="image/*">
+            <div class="mpp-group g-foto mpp-span2">
+              <div class="mpp-group-title">🖼️ Le tue immagini</div>
+              <p class="mpp-group-sub">La foto tonda e la copertina compaiono qui nel pannello e sulla tua scheda pubblica.</p>
+              <div class="form-row">
+                <div class="mpp-row mpp-row-full" style="border-bottom:none">
+                  <label class="mpp-label">Foto tonda (logo o foto tua)</label>
+                  <div id="pers-pannello-logo-preview" style="margin:6px 0 8px;"></div>
+                  <input type="file" id="pers-pannello-logo-file" accept="image/*">
+                  <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:9px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer">Togli la foto</button>
+                </div>
+                <div class="mpp-row mpp-row-full" style="border-bottom:none">
+                  <label class="mpp-label">Copertina<span class="mpp-hint">La fascia grande in cima. Misura giusta: <b>1500&times;600</b>. Una foto di forma diversa riempie lo stesso, ma viene tagliata sopra e sotto.</span></label>
+                  <div id="pers-pannello-banner-preview" style="margin:6px 0 8px;"></div>
+                  <input type="file" id="pers-pannello-banner-file" accept="image/*">
+                </div>
               </div>
             </div>
 
           </div>
 
-          <!-- COLONNA ANTEPRIMA LIVE -->
+          <!-- COLONNA ANTEPRIMA: la testata del pannello in piccolo -->
           <div class="mpp-preview-col">
-            <div class="mpp-preview-title">👁️ Anteprima dal vivo</div>
+            <div class="mpp-preview-title">👁️ Così lo vedrai tu</div>
             <div class="mpp-pv-frame" id="pv-frame">
               <div class="mpp-pv-side">
-                <div class="mpp-pv-logo" id="pv-logo"></div>
+                <div class="mpp-pv-side-logo"></div>
+                <div class="mpp-pv-navdot"></div>
                 <div class="mpp-pv-navdot"></div>
                 <div class="mpp-pv-navdot"></div>
                 <div class="mpp-pv-navdot"></div>
               </div>
               <div class="mpp-pv-main">
+                <div class="mpp-pv-cover" id="pv-banner"><div class="mpp-pv-cover-vuota">La tua copertina</div></div>
                 <div class="mpp-pv-hero" id="pv-hero">
-                  <div>
-                    <div class="mpp-pv-welcome" id="pv-welcome">Bentornato 👋</div>
-                    <div class="mpp-pv-nome" id="pv-nome">Pannello impresa</div>
+                  <div class="mpp-pv-logo" id="pv-logo"></div>
+                  <div class="mpp-pv-testo">
+                    <div class="mpp-pv-welcome" id="pv-welcome">Pannello impresa</div>
+                    <div class="mpp-pv-nome" id="pv-nome">La tua impresa</div>
                   </div>
-                  <div class="mpp-pv-badge" id="pv-banner"></div>
                 </div>
-                <div class="mpp-pv-cards">
-                  <div class="mpp-pv-card"></div><div class="mpp-pv-card"></div>
-                  <div class="mpp-pv-card"></div><div class="mpp-pv-card"></div>
+                <div class="mpp-pv-cards" id="pv-cards">
+                  <div class="mpp-pv-card"><span>👤</span>Modifica profilo</div>
+                  <div class="mpp-pv-card"><span>🛠️</span>Gestionale</div>
+                  <div class="mpp-pv-card"><span>📩</span>Richieste</div>
+                  <div class="mpp-pv-card"><span>⭐</span>Recensioni</div>
                 </div>
               </div>
             </div>
+            <p class="mpp-pv-nota">Cambia qualcosa a sinistra: qui si aggiorna subito. Il pannello vero cambia solo quando premi «Salva».</p>
           </div>
 
         </div>
@@ -3578,6 +3523,9 @@ function showSection(id, el, fromPopstate) {
   if (el) el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id === 'foto-lavori') caricaListaLavoriFoto();
+  /* 3 set 2026, Alessio: «mappa toglila e ingrandisci ancora di più» — dentro
+     Personalizza la colonna con la mappa sparisce e la sezione prende tutto lo schermo */
+  document.body.classList.toggle('pers-aperta', id === 'personalizza');
   if (id === 'personalizza') apriModalPersonalizzaPannello();
   if (id === 'risoluzione') apriModalRisoluzione();
   if (id === 'mie-offerte') caricaMieOfferte();
@@ -4448,9 +4396,22 @@ function renderPersPresets() {
   const box = document.getElementById('pers-pannello-presets');
   if (!box) return;
   box.innerHTML = PERS_PRESETS.map((p, idx) =>
-    `<button type="button" class="mpp-preset" onclick="applicaPresetPersonalizza(${idx})">`
-    + `<span class="sw" style="background:${p.header}"></span>${p.nome}</button>`
+    `<button type="button" class="mpp-preset" data-idx="${idx}" onclick="applicaPresetPersonalizza(${idx})" title="${p.nome}">`
+    + `<span class="sw" style="background:${p.header}"></span>`
+    + `<span class="sw-bg" style="background:${p.sfondo}"></span>`
+    + `<span class="sw-nome">${p.nome}</span></button>`
   ).join('');
+  segnaPresetAttivo();
+}
+/* il tema che combacia con i colori scelti si vede con la spunta */
+function segnaPresetAttivo() {
+  const g = id => (document.getElementById(id) || {}).value;
+  const scuro = !!(document.getElementById('pers-pannello-tema-scuro') || {}).checked;
+  document.querySelectorAll('#pers-pannello-presets .mpp-preset').forEach(b => {
+    const p = PERS_PRESETS[+b.dataset.idx];
+    b.classList.toggle('attivo', !!p && p.header === g('pers-pannello-colore-header')
+      && p.sfondo === g('pers-pannello-colore-sfondo') && p.testo === g('pers-pannello-colore-testo') && p.scuro === scuro);
+  });
 }
 
 function applicaPresetPersonalizza(idx) {
@@ -4491,24 +4452,37 @@ function aggiornaPreviewPersonalizza(opts) {
   const nomeEl = g('pv-nome');
   const welEl = g('pv-welcome');
   const banner = g('pv-banner');
-  if (frame) frame.style.background = sfondo;
+  if (frame) frame.style.background = scuro ? '#12161c' : sfondo;
   if (frame) frame.classList.toggle('pv-dark', scuro);
+  /* stessa sfumatura della fascia vera (applicaPersonalizzazionePannello) */
   if (hero) hero.style.background = `linear-gradient(135deg, ${header}, color-mix(in srgb, ${header} 60%, black))`;
   if (hero) hero.style.setProperty('color', testo, 'important');
+  /* nel pannello vero il «nome del pannello» e' la riga piccola sopra al nome
+     dell'impresa (dash-welcome): l'anteprima fa lo stesso, se no inganna */
+  const nomeImpresa = (impresaCorrente && (impresaCorrente.nome_attivita || impresaCorrente.nome)) || 'La tua impresa';
+  if (welEl) {
+    welEl.textContent = nome;
+    welEl.style.fontFamily = font || '';
+    welEl.style.fontSize = (12 * size) + 'px';
+    welEl.style.setProperty('color', testo, 'important');
+  }
   if (nomeEl) {
-    nomeEl.textContent = nome;
+    nomeEl.textContent = nomeImpresa;
     nomeEl.style.fontFamily = font || '';
-    nomeEl.style.fontSize = (1.15 * size) + 'rem';
+    nomeEl.style.fontSize = (1.35 * size) + 'rem';
     nomeEl.style.setProperty('color', testo, 'important');
   }
-  if (welEl) welEl.style.setProperty('color', testo, 'important');
+  ['header','sfondo','testo'].forEach(k => {
+    const c = g('pers-pannello-colore-' + k + '-cod'); if (c) c.textContent = g('pers-pannello-colore-' + k).value;
+  });
   const bannerUrl = opts.bannerUrl !== undefined ? opts.bannerUrl
     : ((impresaCorrente && impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.banner_url) || '');
-  if (banner) banner.style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
+  if (banner) { banner.style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; banner.classList.toggle('ha-banner', !!bannerUrl); }
   const logoEl = g('pv-logo');
   if (logoEl && opts.logoUrl !== undefined) {
-    logoEl.innerHTML = opts.logoUrl ? `<img src="${opts.logoUrl}">` : '';
+    logoEl.innerHTML = opts.logoUrl ? `<img src="${opts.logoUrl}" alt="">` : '';
   }
+  if (typeof segnaPresetAttivo === 'function') segnaPresetAttivo();
 }
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
