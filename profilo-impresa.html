@@ -443,16 +443,19 @@ nav img{height:36px}
 .rec-data{font-size:13px;color:#888}
 .rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
 .rec-testo{font-size:13px;color:#555;line-height:1.6}
-.rec-vai{display:flex;align-items:center;gap:16px;padding:16px 18px;margin:4px 0 22px;background:#f4f7fb;border:2px solid #cfe0f7;border-radius:14px;text-decoration:none;color:#0a2a4d;transition:all .2s}
-.rec-vai:hover{border-color:#0066ff;background:#eaf2ff;transform:translateY(-1px)}
-.rec-vai-voto{font-size:1.9rem;font-weight:800;color:#0a2a4d;line-height:1;min-width:64px;text-align:center}
-.rec-vai-voto small{display:block;font-size:12px;color:#f4c02e;letter-spacing:1px;margin-top:2px}
-.rec-vai-testo{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.rec-vai-testo b{font-size:17px;font-weight:800;color:#0052cc}
-.rec-vai-testo small{font-size:13.5px;color:#5b6b80}
-.rec-vai-freccia{font-size:26px;font-weight:800;color:#0066ff}
-.rec-vai-tit{font-size:17px;font-weight:800;color:#0a2a4d;margin:0 0 12px}
-@media(max-width:560px){.rec-vai{flex-wrap:wrap}.rec-vai-freccia{display:none}}
+.rec-altri-testa{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;margin-bottom:14px}
+.rec-altri-voto{display:flex;align-items:center;gap:10px;font-size:15px;color:#5b6b80;font-weight:600}
+.rec-altri-voto b{font-size:1.5rem;color:#0a2a4d;font-weight:800}
+.rec-altri-voto .st{color:#f4c02e;letter-spacing:1px}
+.rec-altri-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.rec-altri-griglia .rec-item{background:#f9fafc;border:1px solid #e6ebf2;border-radius:14px;padding:16px 18px;border-bottom:1px solid #e6ebf2;display:flex;flex-direction:column}
+.rec-altri-griglia .rec-item:first-child{padding-top:16px}
+.rec-altri-griglia .rec-item .rec-testo{flex:1;font-size:15px;color:#333}
+.rec-altri-griglia .rec-voti-riga{font-size:13.5px;color:#555;margin:2px 0 8px;line-height:1.7}
+.rec-altri-griglia .rec-voti-riga b{color:#0052cc}
+.rec-altri-vuoto{padding:22px 10px;text-align:center;color:#666;font-size:15px;grid-column:1/-1}
+.rec-altri-btn{display:inline-block;padding:13px 24px;border:2px solid #2863a7;border-radius:10px;color:#2863a7;font-weight:800;text-decoration:none;font-size:15px}
+.rec-altri-btn:hover{background:#2863a7;color:#fff}
 .rec-risposta{margin:10px 0 0 22px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
 .rec-risposta-tit{font-size:13px;font-weight:600;color:#0a2a4d;margin-bottom:4px}
 .rec-risposta-tit b{font-weight:800}
@@ -788,7 +791,7 @@ nav img{height:36px}
     <div class="riga-rec">
     <!-- RECENSIONI -->
     <div class="card rec-card" id="recensioni" style="border-top-color:#0066ff">
-      <div class="card-title">⭐ Recensioni dei clienti</div>
+      <div class="card-title">✍️ Lascia la tua recensione</div>
       <!-- 3 set 2026, Alessio: «una risposta lì da sola che senso ha? la devi
            togliere. Io voglio quello spazio per le recensioni e uno spazio che
            dice guarda le recensioni lasciate da altri clienti». Quindi qui NON si
@@ -797,12 +800,6 @@ nav img{height:36px}
            dell'impresa, dove il cliente vede anche COME risponde) e il modulo per
            lasciarne una. Le vecchie linguette «Recensioni / Lascia recensione»
            non ci sono piu'. -->
-      <a id="rec-vai" class="rec-vai" href="#">
-        <span class="rec-vai-voto" id="rec-vai-voto">—</span>
-        <span class="rec-vai-testo"><b>Guarda le recensioni lasciate dagli altri clienti</b><small id="rec-vai-sub">Commenti dei clienti e risposte dell'impresa</small></span>
-        <span class="rec-vai-freccia">→</span>
-      </a>
-      <div class="rec-vai-tit">✍️ Lascia la tua recensione</div>
       <div id="rec-tab-form">
         <div class="st-grid">
           <div class="st-gruppo st-box"><label>⭐ Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
@@ -864,6 +861,21 @@ nav img{height:36px}
     </ul>
     </div>
     </div><!-- fine .riga-rec -->
+
+    <!-- 3 set 2026 — LO SPAZIO DELLE RECENSIONI DEGLI ALTRI (Alessio: «voglio uno
+         spazio che dice guarda le recensioni lasciate da altri clienti, dove ci
+         saranno i commenti dei clienti e le eventuali risposte dell'impresa»).
+         E' una card SUA, separata dal modulo per pubblicare. Le recensioni sono
+         carte affiancate come in recensioni-impresa.html; qui le ultime 6, il
+         resto nella pagina dedicata. -->
+    <div class="card rec-altri" id="rec-altri" style="border-top-color:#0066ff;grid-column:1/-1">
+      <div class="rec-altri-testa">
+        <div class="card-title" style="margin:0">💬 Guarda le recensioni lasciate da altri clienti</div>
+        <div class="rec-altri-voto" id="rec-altri-voto"></div>
+      </div>
+      <div class="rec-altri-griglia" id="rec-lista"></div>
+      <div id="rec-altri-piede" style="text-align:center;margin-top:18px"></div>
+    </div>
 
     <!-- CHAT CON L'IMPRESA -->
     <div class="card" id="card-chat-impresa">
@@ -1905,21 +1917,29 @@ async function caricaRecensioni(id){
     });
     const rj=await r.json();const data=Array.isArray(rj)?rj:[];
     const c=scriviConteggioRecensioni(data);
-    /* 3 set 2026: qui non si elencano piu' le recensioni (stanno in
-       recensioni-impresa.html, con le risposte). Il riquadro dice quante sono e
-       porta la'. Con zero recensioni il tasto invita a essere il primo. */
-    const vai=document.getElementById('rec-vai'); if(!vai)return;
-    vai.href='recensioni-impresa.html?id='+encodeURIComponent(id);
-    const voto=document.getElementById('rec-vai-voto'); const sub=document.getElementById('rec-vai-sub');
-    if(c.numero>0){
-      voto.innerHTML=recEsc(c.media!=null?c.media.toFixed(1):'—')+'<small>'+'★'.repeat(Math.round(c.media||0))+'</small>';
-      sub.textContent=c.numero+(c.numero===1?' recensione':' recensioni')+' · commenti dei clienti e risposte dell\'impresa';
-    }else{
-      voto.innerHTML='⭐';
-      vai.querySelector('.rec-vai-testo b').textContent='Nessuna recensione ancora: sii il primo';
-      sub.textContent='Hai lavorato con questa impresa? Racconta com\'è andata qui sotto.';
-      vai.removeAttribute('href'); vai.style.cursor='default';
+    const div=document.getElementById('rec-lista'); const voto=document.getElementById('rec-altri-voto'); const piede=document.getElementById('rec-altri-piede');
+    if(!div)return;
+    const nomeImpresa=((document.getElementById('profile-name')||{}).textContent||'').trim()||'L\'impresa';
+    if(!data.length){
+      voto.innerHTML='';
+      div.innerHTML='<div class="rec-altri-vuoto">Ancora nessuna recensione. Hai lavorato con questa impresa? Lasciane una qui sopra: sarai il primo.</div>';
+      piede.innerHTML='';
+      return;
     }
+    const tot=(data[0]&&Number(data[0].totale))||data.length;
+    voto.innerHTML='<b>'+(c.media!=null?c.media.toFixed(1):'—')+'</b><span class="st">'+'★'.repeat(Math.round(c.media||0))+'</span><span>'+tot+(tot===1?' recensione':' recensioni')+'</span>';
+    /* ultime 6 qui, tutte nella pagina dedicata */
+    const visibili=data.slice(0,6);
+    div.innerHTML=visibili.map(r=>{
+      const m=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
+      const avg=m.length?(m.reduce((a,b)=>a+b,0)/m.length):0; const n=Math.round(avg)||0;
+      const st='★'.repeat(n)+'☆'.repeat(5-n);
+      const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
+      const voti=[['Qualità',r.stelle_qualita],['Puntualità',r.stelle_puntualita],['Prezzo',r.stelle_prezzo],['Professionalità',r.stelle_professionalita]].filter(([,v])=>v!=null).map(([l,v])=>`${l} <b>${v}</b>`).join(' · ');
+      const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit"><b>${recEsc(nomeImpresa)}</b> ha risposto a <b>${recEsc(r.nome_cliente)||'questo cliente'}</b>${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
+      return `<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg?avg.toFixed(1):'-'}/5</div><div class="rec-voti-riga">${voti}</div><p class="rec-testo">${recEsc(r.testo)}</p>${risp}</div>`;
+    }).join('');
+    piede.innerHTML=`<a class="rec-altri-btn" href="recensioni-impresa.html?id=${encodeURIComponent(id)}">${tot>6?'Vedi tutte le '+tot+' recensioni →':'Apri la pagina delle recensioni →'}</a>`;
   }catch(e){console.error(e)}
 }
 
