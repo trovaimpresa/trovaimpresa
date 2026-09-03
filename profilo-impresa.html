@@ -443,6 +443,10 @@ nav img{height:36px}
 .rec-data{font-size:13px;color:#888}
 .rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
 .rec-testo{font-size:13px;color:#555;line-height:1.6}
+.rec-risposta{margin-top:10px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
+.rec-risposta-tit{font-size:13px;font-weight:800;color:#0a2a4d;margin-bottom:4px}
+.rec-risposta-testo{font-size:13px;color:#333;line-height:1.6;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rec-card .rec-risposta-testo{font-size:15px}
 .st-gruppo{margin-bottom:12px}
 .st-gruppo label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:4px}
 .st-row{display:flex;gap:3px}
@@ -1903,7 +1907,7 @@ async function caricaRecensioni(id){
       const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
       const voti=[['⭐ Qualità',r.stelle_qualita],['⏱️ Puntualità',r.stelle_puntualita],['💰 Prezzo',r.stelle_prezzo],['🤝 Professionalità',r.stelle_professionalita]];
       const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
-      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p></div>`;
+      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p>${r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">Risposta dell'impresa${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:''}</div>`;
     }).join('');
     /* al cliente non si dice che il sito gli nasconde delle recensioni: e' un segnale
        che toglie fiducia proprio nel momento in cui sta decidendo. L'avviso resta
