@@ -1720,6 +1720,243 @@
   </div>
 </div>
 <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+<style>
+/* =========================================================================
+   INTESTAZIONE DELLA DASHBOARD — 31 agosto 2026
+
+   ⛔ IL DIFETTO CHE CHIUDE: copertina e logo stavano nella STESSA casella
+   (`#dash-hero-logo-col`): la copertina ci andava come SFONDO, il logo ci
+   andava DENTRO. Chi aveva tutti e due se li ritrovava uno sopra l'altro —
+   misurato: casella 784x214 px, logo 120x120 px stampato in mezzo. Succedeva
+   nel pannello e, con lo stesso schema, sulla scheda pubblica.
+   Il 30 agosto era stata nascosta la scritta «Carica logo» quando c'e' una
+   copertina; ma il logo VERO restava sopra. Adesso ognuno ha il suo posto.
+
+   La forma e' quella che Alessio ha chiesto guardando Facebook: copertina
+   larga in alto, foto tonda che sborda in basso a sinistra, nome accanto,
+   e due bottoni con la macchina fotografica per cambiarle.
+
+   ⚠️ QUESTO BLOCCO STA IN FONDO APPOSTA: il foglio della dashboard e'
+   scritto DUE volte, identico, piu' su nella pagina. A parita' di peso vince
+   l'ultimo, quindi da qui si riscrive senza dover toccare tutte e due le
+   copie. Se lo sposti piu' su, la vecchia intestazione torna.
+
+   ⚠️ `contain` E NON `cover`, e la casella e' PIU ALTA di prima: 2,5:1 sul
+   computer e 1,9:1 sul telefono. Il motivo e' misurato, non di gusto: la
+   copertina vera di Alessio e' 1377x768, cioe' 1,79:1 — come diceva gia' la
+   nota del 30 agosto, la gente carica immagini quasi quadrate, non fasce.
+   Con `cover` in una casella larga si vedrebbe meta' altezza e il titolo
+   dell'immagine finirebbe tagliato (misurato: 49%). Con `contain` si vede
+   tutta, e alzando la casella e' comunque MOLTO piu' grande di prima: da
+   214 px di altezza a 380 px sul computer.
+   ⚠️ Serve anche `no-repeat`: il valore predefinito e' `repeat`, e
+   un'immagine piu' stretta della casella si ripeterebbe a piastrelle.
+   ========================================================================= */
+.dash-hero{
+  display:block !important;      /* era una riga a due colonne */
+  padding:0 !important;
+  overflow:hidden;
+}
+/* ⛔ 1 SETTEMBRE 2026 — LA COPERTINA TAGLIATA, E IL TONDO CHE LA COPRIVA.
+   Alessio, guardando il suo Facebook accanto alla sua scheda: «li' la foto si
+   vede completa, da me si vede tagliata». Aveva ragione, e non era la foto.
+   Misurato sul suo schermo (1904 px) con una copertina 1377x768 (1,79:1):
+     · `aspect-ratio:2.5/1` PIU' `max-height:380px` -> sopra i 950 px di
+       larghezza (2,5 x 380) vince il tetto, e da li' in poi piu' lo schermo
+       e' largo piu' la fascia si appiattisce, SENZA LIMITE.
+     · a 1904 px la fascia diventava 5,01:1 e della copertina si vedeva il
+       36% dell'altezza. A 1440 px: 3,79:1, il 47%. Sul telefono 1,90:1, il
+       94% — ecco perche' il difetto non si era mai visto.
+     · Facebook, misurato dalla sua schermata: 1176x441, cioe' 2,67:1.
+       La nostra fascia era larga il DOPPIO, in rapporto.
+   ⚠️ Anche Facebook taglia (circa un terzo). La differenza e' quanto.
+   FATTO: tetto alzato a 560 px -> a 1904 px la fascia e' 3,40:1 e si vede il
+   53% invece del 36%. Resta a tutto schermo, come aveva chiesto il 31 agosto.
+   ⚠️ Se un giorno la si vuole ancora piu' generosa, si alza questo numero e
+   basta: 762 px darebbero 2,50:1 e il 72%, ma la fascia si mangerebbe mezza
+   prima schermata.
+   ⚠️ Il numero sta in DUE posti, qui e nel pannello: il banco controlla che
+   siano uguali e diventa rosso se se ne cambia uno solo. */
+/* ⛔ 2 SETTEMBRE 2026 — LA FASCIA PIU' ALTA: IL TETTO DA 560 A 800.
+   Alessio, guardando la sua copertina: «la foto inserita si vede solo a
+   meta'... ma piu' di quello che c'e' adesso».
+   Misurato sulla sua foto vera (3024x4032, cioe' IN PIEDI) e sul suo schermo
+   da 1904 px, dove la fascia e' larga 1889 e la finestra e' alta 950:
+     · com'era: tetto 560 -> sopra i 1400 px di schermo comandava il tetto, la
+       fascia diventava 3,37:1 e della foto si vedeva il 22%
+     · adesso: tetto 800 -> comanda il rapporto 2,5:1 fino a 2000 px, la
+       fascia e' alta 756 e si vede il 30%
+   ⚠️ COSI' LA FASCIA HA UNA FORMA SOLA su tutti i computer: prima su uno
+   schermo largo si appiattiva e su un portatile no, e la stessa scheda si
+   vedeva diversa. Il tetto adesso serve solo a fermare gli schermi enormi.
+   ⛔ PROVATO A 2:1 (tetto 950) E TORNATO INDIETRO, per non rifarlo una terza
+   volta: si vedeva il 38% della foto, ma la fascia diventava alta 944 px su
+   una finestra di 950 — il nome dell'impresa finiva a 1057 px, cioe' sotto il
+   bordo dello schermo, e della scheda si vedeva solo la copertina. Misurato
+   dal vivo e bocciato da Alessio: «forse e' troppo?». Col tetto a 800 il nome
+   torna a 869 px, dentro la prima schermata.
+   ⚠️ Per vedere META' di una foto in piedi servirebbe 1,5:1, cioe' 1260 px di
+   fascia sul suo schermo. Non si puo'. Facebook tiene 2,67:1.
+   ⚠️ SUL TELEFONO NON CAMBIA NIENTE, ed e' voluto: li' la fascia e' 1,9:1
+   (blocco @media piu' sotto) e della stessa foto se ne vede gia' il 39%.
+   ⚠️ Le misure vanno tenute UGUALI in tutti e quattro i file (i tre pannelli
+   e la scheda pubblica): banco-intestazione le confronta una per una. */
+.dash-cover{
+  position:relative; width:100%;
+  aspect-ratio:2.5/1; min-height:180px; max-height:800px; overflow:hidden;
+  background-color:rgba(255,255,255,0.10);
+  background-repeat:no-repeat; background-position:center; background-size:cover;
+}
+  /* ⛔ 31 agosto 2026 — LA COPERTINA RIEMPIE, COME SU FACEBOOK.
+     La storia, per non rifarla una quarta volta:
+     1) `contain`: si vedeva tutta l'immagine, ma restavano due bande di sfondo.
+     2) bande riempite con la stessa immagine SFOCATA: bene con una foto, su una
+        locandina una macchia. Provata sul sito e bocciata: «e' peggio di prima».
+     3) bande coi colori del BORDO dell'immagine: pulite, ma bande restavano.
+     4) questa, chiesta da Alessio guardando Facebook: «lo voglio cosi', bello
+        pulito, a tutto schermo». L'immagine riempie la fascia da bordo a bordo
+        e quello che avanza viene tagliato, sopra e sotto.
+     ⛔ IL PREZZO, MISURATO: su un'immagine 1,79:1 (la locandina Enterprise,
+     1377x768) si perde il 28% dell'altezza — sopra il titolo, sotto la riga
+     con l'email. Con una FOTO non si nota; con una locandina piena di scritte
+     si', e chi la carica deve saperlo: per questo la scritta d'aiuto dice la
+     misura giusta, 1500x600, che riempie senza perdere niente.
+     ⚠️ Il taglio parte dal CENTRO (`background-position:center`). Se un giorno
+     serve scegliere quale parte tenere, e' li' che va messa una posizione
+     salvata, non altrove. */
+  .dash-cover .cover-img{position:absolute;inset:0;background-image:inherit;background-repeat:no-repeat;background-position:center;background-size:cover}
+.dash-cover-vuota{
+  position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:center;
+  text-align:center; padding:0 16px;
+  font-size:13px; font-weight:700; color:rgba(255,255,255,0.85);
+}
+.dash-cover.ha-banner .dash-cover-vuota{ display:none; }
+
+/* ⛔ 1 SETTEMBRE 2026 — IL TONDO NON SALE PIU' SULLA COPERTINA.
+   Il 31 agosto il tondo era stato messo a cavallo del bordo (margin-top
+   negativo). Guardando la schermata vera di Facebook si vede che li' la foto
+   tonda sta TUTTA SOTTO la copertina, staccata: non ne copre un pezzo.
+   Da noi copriva 58 px di foto sul computer e 38 px sul telefono, proprio
+   nella parte bassa dell'immagine, quella che il taglio non aveva gia'
+   portato via. Alessio: «il cerchio del logo va fuori dal riquadro come su
+   fb».
+   FATTO: margine negativo tolto, e la riga sotto la copertina si riprende il
+   suo spazio in cima. Il tondo copre 0 px di copertina.
+   ⚠️ Vale nei due posti insieme, scheda pubblica e pannello. */
+.dash-hero-riga{
+  display:flex; align-items:flex-end; gap:18px;
+  padding:18px 32px 22px 32px;
+}
+.dash-hero-riga .dash-hero-info-col{ align-self:flex-end; min-width:0; }
+/* ⛔ 1 settembre 2026 — `min-width:0`, misurato sul professionista.
+   Senza, la colonna delle scritte non puo' stringersi sotto la larghezza
+   della sua riga piu' lunga: «PANNELLO PROFESSIONISTA» chiede 213 px dove
+   ce ne sono 186, e a 390 px la testata sbordava di 35 px a destra.
+   ⚠️ `white-space:nowrap; overflow:hidden` su `.dash-welcome` NON basta:
+   quella scappatoia vale sull'asse principale del flex, e qui la larghezza
+   e' l'asse trasversale. E' la stessa lezione di `minmax(0,1fr)` del 31
+   agosto, girata: e' l'unica scrittura che impedisce alla colonna di
+   superare lo spazio che ha.
+   Misurato a 390 px: professionisti 221 -> 186 px, sbordo 35 -> 0.
+   Su impresa e artigiano non cambia NIENTE (186 prima, 186 dopo): il loro
+   titolo e' piu' corto. Ci sta lo stesso perche' «Personalizza» permette di
+   cambiare il nome del pannello, e domani puo' essere lungo su chiunque. */
+/* ⛔ 31 agosto 2026 — IL TONDO CHE NON SBORDAVA PIU'.
+   Misurato: sulla scheda pubblica il tondo scendeva SOTTO la copertina
+   invece di sborare (a 375 px stava 165 px piu' giu'). Il motivo: la riga e'
+   `align-items:flex-end`, e quando la colonna delle scritte e' piu' ALTA del
+   tondo (qui sono quattro righe: mestiere, nome, citta', bollini) l'altezza
+   della riga la decide il testo, e il `margin-top` negativo del tondo si
+   perde dentro quella riga alta.
+   ⚠️ Il tondo va ancorato IN CIMA (`align-self:flex-start`) e le scritte in
+   basso (`align-self:flex-end`): cosi' il margine negativo lo alza davvero
+   sopra la copertina, qualunque sia l'altezza del testo. */
+.dash-avatar{
+  position:relative; flex-shrink:0; align-self:flex-start;
+  width:150px; height:150px; margin-top:0;
+  border-radius:50%; border:5px solid #fff; background:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,0.28);
+}
+/* ⚠️ il tondo taglia col cerchio, ma l'immagine dentro resta INTERA e
+   centrata: `cover` + `center` riempiono il cerchio senza schiacciare
+   niente, qualunque forma abbia il file caricato. */
+.dash-avatar img{
+  width:100%; height:100%; display:block; border-radius:50%;
+  object-fit:cover; object-position:center; background:#fff;
+}
+.dash-avatar-vuoto{
+  position:absolute; inset:0; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#eef2f7; color:#7a8896;
+}
+.dash-avatar-vuoto svg{ width:40px; height:40px; }
+
+/* i due bottoni con la macchina fotografica */
+.dash-foto-btn{
+  position:absolute; z-index:2; display:inline-flex; align-items:center; gap:8px;
+  background:#fff; color:#0a2a4d; border:none; border-radius:10px;
+  padding:10px 14px; font-family:inherit; font-size:13px; font-weight:800;
+  cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,0.28);
+  transition:background 0.2s;
+}
+.dash-foto-btn:hover{ background:#eef2f7; }
+.dash-foto-btn svg{ width:17px; height:17px; flex-shrink:0; }
+.dash-foto-copertina{ right:16px; bottom:16px; }
+.dash-foto-tondo{
+  right:2px; bottom:2px; width:40px; height:40px; min-height:40px;
+  border-radius:50%; padding:0; justify-content:center;
+}
+.dash-foto-tondo svg{ width:19px; height:19px; }
+
+/* ⛔ 2 SETTEMBRE 2026 — «RIPOSIZIONA»: SCEGLIERE QUALE PARTE DELLA FOTO SI VEDE.
+   Alessio, con la sua copertina 3024x4032 (una foto IN PIEDI dentro una fascia
+   sdraiata): «si puo' usare lo strumento che fa posizionare la foto in modo che
+   si sceglie quale e' la zona della foto che ti interessa far vedere».
+   Con `background-size:cover` la foto riempie sempre la fascia e quello che
+   avanza viene tagliato: finora si tagliava sempre dal CENTRO. Adesso il punto
+   del taglio si sceglie trascinando, e si salva in `personalizzazione.banner_pos`.
+   ⚠️ Chi non ha mai scelto niente resta al centro: `banner_pos` non c'e' e
+   `_posSicura` risponde «50% 50%», cioe' esattamente il taglio di prima.
+   ⚠️ `touch-action:none` mentre si trascina: senza, sul telefono il dito fa
+   scorrere la pagina invece di spostare la foto. */
+.dash-cover.in-riposizione{ cursor:grab; touch-action:none; user-select:none; }
+/* 2 settembre 2026, seconda parte: anche il LOGO dentro il cerchio si
+   riposiziona. Li' l'immagine e' un <img> con object-fit:cover, quindi il
+   punto del taglio e' `object-position` invece di `background-position`, ma
+   il conto e' lo stesso. Nel tondo si puo' muovere anche di LATO: una foto
+   piu' larga che alta sborda di la'. */
+.dash-avatar.in-riposizione{ cursor:grab; touch-action:none; user-select:none; }
+.dash-avatar.in-riposizione:active{ cursor:grabbing; }
+.dash-cover.in-riposizione:active{ cursor:grabbing; }
+.dash-foto-riposiziona{ right:16px; bottom:64px; }
+.dash-riposiziona-azioni{ position:absolute; right:16px; bottom:16px; z-index:3; display:flex; gap:8px; }
+.dash-riposiziona-azioni .dash-foto-btn{ position:static; }
+.dash-foto-btn.primario{ background:#0066ff; color:#fff; }
+.dash-foto-btn.primario:hover{ background:#0052cc; }
+.dash-riposiziona-aiuto{
+  position:absolute; left:50%; top:16px; transform:translateX(-50%); z-index:3;
+  background:rgba(0,0,0,0.55); color:#fff; border-radius:10px;
+  padding:8px 14px; font-size:13px; font-weight:700; pointer-events:none;
+}
+
+@media (max-width:768px){
+  .dash-cover{ aspect-ratio:1.9/1; min-height:150px; max-height:260px; }
+  .dash-hero-riga{ padding:14px 16px 16px 16px; gap:12px; align-items:flex-end; }
+  .dash-avatar{ width:96px; height:96px; margin-top:0; border-width:4px; }
+  .dash-avatar-vuoto svg{ width:28px; height:28px; }
+  .dash-foto-copertina{ right:10px; bottom:10px; padding:9px 12px; }
+  /* sul telefono la copertina e' bassa: del bottone resta la macchina
+     fotografica, la scritta toglierebbe spazio all'immagine */
+  .dash-foto-copertina span{ display:none; }
+  .dash-foto-copertina{ width:40px; height:40px; border-radius:50%; padding:0; justify-content:center; }
+  .dash-foto-riposiziona{ right:10px; bottom:58px; padding:9px 12px; }
+  .dash-foto-riposiziona span{ display:none; }
+  .dash-foto-riposiziona{ width:40px; height:40px; border-radius:50%; padding:0; justify-content:center; }
+  .dash-riposiziona-azioni{ right:10px; bottom:10px; }
+  .dash-foto-tondo{ width:34px; height:34px; min-height:34px; }
+  .dash-foto-tondo svg{ width:17px; height:17px; }
+}
+</style>
 
 <div class="login-screen" id="login-screen" style="display:none">
   <div class="login-box">
@@ -1758,16 +1995,45 @@
 
       <!-- HERO HEADER -->
       <div class="dash-hero" id="dash-hero">
-        <div>
-          <div class="dash-welcome" id="dash-welcome">Pannello negozio</div>
-          <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
-          <div class="dash-meta">
-            <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
-            <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
+        <div class="dash-cover" id="dash-cover">
+          <div class="cover-img"></div>
+          <div class="dash-cover-vuota" id="dash-cover-vuota">Aggiungi una copertina &mdash; misura giusta 1500&times;600</div>
+          <input type="file" id="input-copertina" accept="image/*" style="display:none" onchange="caricaCopertina(event)">
+          <button type="button" class="dash-foto-btn dash-foto-copertina" id="btn-copertina"
+                  onclick="document.getElementById('input-copertina').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Modifica copertina</span>
+          </button>
+          <!-- RIPOSIZIONA (2 settembre 2026): compare solo se una copertina c'e'
+               davvero. Il disegno e' la croce delle quattro frecce, quella che
+               vuol dire «sposta» dappertutto. -->
+          <button type="button" class="dash-foto-btn dash-foto-riposiziona" id="btn-riposiziona"
+                  onclick="avviaRiposiziona()" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg><span>Riposiziona</span>
+          </button>
+          <div class="dash-riposiziona-azioni" id="riposiziona-azioni" style="display:none">
+            <button type="button" class="dash-foto-btn" onclick="annullaRiposiziona()">Annulla</button>
+            <button type="button" class="dash-foto-btn primario" id="btn-riposiziona-salva" onclick="salvaRiposiziona()">Salva</button>
+          </div>
+          <div class="dash-riposiziona-aiuto" id="riposiziona-aiuto" style="display:none">Trascina la foto su e gi&ugrave;</div>
+        </div>
+        <div class="dash-hero-riga">
+          <div class="dash-avatar" id="dash-avatar">
+            <img id="dash-logo-img" src="" alt="Logo impresa" style="display:none">
+            <div class="dash-avatar-vuoto" id="dash-logo-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            <input type="file" id="input-logo-impresa" accept="image/*" style="display:none" onchange="caricaLogoImpresa(event)">
+            <button type="button" class="dash-foto-btn dash-foto-tondo" id="btn-logo"
+                    onclick="document.getElementById('input-logo-impresa').click()"
+                    title="Cambia il logo" aria-label="Cambia il logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+          </div>
+          <div class="dash-hero-info-col">
+            <div class="dash-welcome" id="dash-welcome">Pannello negozio</div>
+            <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
+            <div class="dash-meta">
+              <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
+              <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
+            </div>
           </div>
         </div>
-        <!-- DESTRA: area logo (visibile solo Premium) — contenuto impostato da JS -->
-        <div class="dash-hero-logo-col" id="dash-hero-logo-col" style="display:none"></div>
       </div>
 
       <!-- STATISTICHE -->
@@ -3148,34 +3414,33 @@ async function inizializza() {
   // Applica la personalizzazione salvata al pannello reale
   applicaPersonalizzazioneDashboard();
 
-  // Area logo: visibile solo per piano Premium
-  const logoCol = document.getElementById('dash-hero-logo-col');
-  if (logoCol) {
-    if (piano !== 'premium') {
-      logoCol.style.display = 'none';
-      logoCol.style.cursor = 'default';
-      logoCol.innerHTML = '';
-    } else {
-      logoCol.style.display = '';
-      logoCol.style.cursor = 'pointer';
-      logoCol.onclick = () => document.getElementById('input-logo-impresa').click();
-      logoCol.innerHTML = `
-        <input type="file" id="input-logo-impresa" accept="image/*" style="display:none" onchange="caricaLogoImpresa(event)">
-        <img id="dash-logo-img" src="" alt="Logo impresa" style="display:none;width:100%;height:160px;object-fit:contain;background:transparent;">
-        <div id="dash-logo-placeholder" class="dash-logo-upload-hint">
-          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-          <span style="color:white;font-size:0.88rem;font-weight:600;">Carica logo</span>
-        </div>`;
-      if (impresaCorrente.logo_url) {
-        setTimeout(() => {
-          const img = document.getElementById('dash-logo-img');
-          const ph = document.getElementById('dash-logo-placeholder');
-          if (img) { img.src = impresaCorrente.logo_url; img.style.display = 'block'; }
-          if (ph) ph.style.display = 'none';
-        }, 0);
-      }
+  /* Area logo (31 agosto 2026): adesso e' il tondo che sborda sulla
+     copertina. Il segnaposto, l'immagine e i due bottoni stanno nel markup
+     della pagina, non si ricostruiscono a ogni giro: qui si accendono e si
+     spengono soltanto.
+     ⚠️ Tutti e due i rami scrivono `display`: quello che un ramo spegne,
+     l'altro lo riaccende. */
+  const avatarEl = document.getElementById('dash-avatar');
+  if (avatarEl) {
+    const imgLogo = document.getElementById('dash-logo-img');
+    const phLogo  = document.getElementById('dash-logo-placeholder');
+    const btnLogo = document.getElementById('btn-logo');
+    const btnCop  = document.getElementById('btn-copertina');
+    const haLogo  = !!impresaCorrente.logo_url;
+    if (imgLogo) {
+      if (haLogo) imgLogo.src = impresaCorrente.logo_url;
+      imgLogo.style.display = haLogo ? 'block' : 'none';
     }
+    if (phLogo) phLogo.style.display = haLogo ? 'none' : 'flex';
+    /* cambiare copertina e logo resta come prima: solo Premium */
+    if (btnLogo) btnLogo.style.display = isPremium ? '' : 'none';
+    if (btnCop)  btnCop.style.display  = isPremium ? '' : 'none';
+    /* 2 set 2026: «Riposiziona» non ha senso finche' non c'e' una copertina */
+    const btnRip = document.getElementById('btn-riposiziona');
+    const _haCop = !!((impresaCorrente.personalizzazione||{}).banner_url);
+    if (btnRip) btnRip.style.display = (isPremium && _haCop) ? '' : 'none';
   }
+
 
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
@@ -3665,6 +3930,96 @@ function bloccaCardPremium() {
     };
     card.appendChild(overlay);
   });
+}
+
+async function caricaCopertina(event) {
+  const file = event.target.files[0];
+  if (!file || !impresaCorrente) return;
+  const prep = await preparaFileUpload(file, { lato: 1600, qualita: 0.85, formato: 'webp' });
+  if (prep.errore) { alert(prep.errore); return; }
+  const path = `${impresaCorrente.user_id}/banner.${prep.compressa ? 'webp' : 'png'}`;
+  const { error: upErr } = await sb.storage.from('banner-personalizzati')
+    .upload(path, prep.file, { upsert: true, contentType: prep.compressa ? 'image/webp' : file.type, cacheControl: '31536000' });
+  if (upErr) { alert('Errore caricamento copertina: ' + upErr.message); return; }
+  const { data: pub } = sb.storage.from('banner-personalizzati').getPublicUrl(path);
+  const url = pub.publicUrl + '?v=' + Date.now();
+  const pers = Object.assign({}, impresaCorrente.personalizzazione || {}, { banner_url: url });
+  const { error } = await sb.from('imprese').update({ personalizzazione: pers }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore salvataggio copertina: ' + error.message); return; }
+  impresaCorrente.personalizzazione = pers;
+  applicaBannerHero(url);
+  applicaPosCopertina(pers.banner_pos);
+  /* la copertina adesso c'e': si puo' riposizionare */
+  var _br=document.getElementById('btn-riposiziona'); if(_br)_br.style.display='';
+}
+
+async function avviaRiposiziona(){
+  var cover=document.getElementById('dash-cover');
+  var avatar=document.getElementById('dash-avatar');
+  var pers=(impresaCorrente&&impresaCorrente.personalizzazione)||{};
+  if(!cover||!pers.banner_url)return;
+  var imCop=await _ripCarica(pers.banner_url);
+  /* il logo puo' non esserci: allora si riposiziona solo la copertina */
+  var imgLogo=document.getElementById('dash-logo-img');
+  var haLogo=!!(imgLogo && imgLogo.style.display!=='none' && impresaCorrente.logo_url);
+  /* il logo e' gia' disegnato nella pagina: le sue misure vere sono li', non
+     serve riscaricarlo. Si riscarica solo se per qualche motivo non e' pronto. */
+  var imLog=null;
+  if(haLogo) imLog=(imgLogo.complete && imgLogo.naturalWidth) ? imgLogo : await _ripCarica(impresaCorrente.logo_url);
+  /* ⚠️ se una delle due immagini non si riesce a leggere, si riposiziona
+     l'altra invece di non fare niente. Si rinuncia solo se mancano tutte e
+     due, e in quel caso lo si dice. */
+  if(!imCop && !imLog){ alert('Non riesco a leggere le immagini: controlla la connessione e riprova.'); return; }
+  var pc=_posSicura(pers.banner_pos).split(' ');
+  var pl=_posSicura(pers.logo_pos).split(' ');
+  _rip={
+    copertina: imCop ? {img:imCop, x:parseInt(pc[0],10), y:parseInt(pc[1],10)} : null,
+    logo: imLog ? {img:imLog, x:parseInt(pl[0],10), y:parseInt(pl[1],10)} : null,
+    quale:null, daX:0, daY:0, partenzaX:0, partenzaY:0
+  };
+  if(_rip.copertina) cover.classList.add('in-riposizione');
+  if(_rip.logo && avatar) avatar.classList.add('in-riposizione');
+  var b1=document.getElementById('btn-riposiziona'); if(b1)b1.style.display='none';
+  var b2=document.getElementById('btn-copertina');   if(b2)b2.style.display='none';
+  var b3=document.getElementById('btn-logo');        if(b3)b3.style.display='none';
+  var az=document.getElementById('riposiziona-azioni'); if(az)az.style.display='flex';
+  var ai=document.getElementById('riposiziona-aiuto');
+  if(ai){
+    ai.textContent=(_rip.copertina&&_rip.logo) ? 'Trascina la copertina e il logo'
+                  : (_rip.copertina ? 'Trascina la foto su e giù' : 'Trascina il logo');
+    ai.style.display='block';
+  }
+  if(_rip.copertina) cover.addEventListener('pointerdown',_ripGiuCopertina);
+  if(_rip.logo && avatar) avatar.addEventListener('pointerdown',_ripGiuLogo);
+  window.addEventListener('pointermove',_ripMuovi);
+  window.addEventListener('pointerup',_ripSu);
+}
+
+function annullaRiposiziona(){
+  var pers=(impresaCorrente&&impresaCorrente.personalizzazione)||{};
+  applicaPosCopertina(pers.banner_pos);   /* tornano tutte e due a com'erano */
+  applicaPosLogo(pers.logo_pos);
+  _ripChiudi();
+}
+
+async function salvaRiposiziona(){
+  if(!_rip||!impresaCorrente)return;
+  var b=document.getElementById('btn-riposiziona-salva');
+  var prima=b?b.textContent:'';
+  if(b){ b.disabled=true; b.textContent='Salvo...'; }
+  var nuovaCop=_rip.copertina ? (_rip.copertina.x+'% '+_rip.copertina.y+'%') : null;
+  var nuovoLog=_rip.logo ? (_rip.logo.x+'% '+_rip.logo.y+'%') : null;
+  var cambi={};
+  if(nuovaCop) cambi.banner_pos=nuovaCop;  /* si scrive solo quello che si e' */
+  if(nuovoLog) cambi.logo_pos=nuovoLog;    /* davvero potuto riposizionare */
+  var pers=Object.assign({}, impresaCorrente.personalizzazione||{}, cambi);
+  var r=await sb.from('imprese').update({personalizzazione:pers}).eq('id',impresaCorrente.id);
+  if(b){ b.disabled=false; b.textContent=prima; }
+  if(r.error){ alert('Errore nel salvare la posizione: '+r.error.message); return; }
+  impresaCorrente.personalizzazione=pers;
+  if(nuovaCop) applicaPosCopertina(nuovaCop);
+  if(nuovoLog) applicaPosLogo(nuovoLog);
+  _ripChiudi();
 }
 
 async function caricaLogoImpresa(event) {
@@ -4641,29 +4996,17 @@ function applicaSizeTestoHero(size) {
   }
 }
 function applicaBannerHero(url) {
-  const col = document.getElementById('dash-hero-logo-col');
-  if (!col) return;
+  /* 31 agosto 2026: la copertina adesso ha una casella sua (#dash-cover),
+     larga e bassa come su Facebook. Il logo non ci sta piu' dentro: sta nel
+     tondo della riga sotto, quindi i due non possono piu' sovrapporsi. */
+  const cover = document.getElementById('dash-cover');
+  if (!cover) return;
   if (url) {
-    col.style.backgroundImage = `url("${url}")`;
-    /* ⛔ 30 agosto 2026 — IL BANNER TAGLIATO A META'.
-       Qui c'era 'cover': la casella e' larga 3,6 volte la sua altezza e le
-       immagini che si caricano sono piu' vicine a 1,8, quindi entrava solo
-       la fascia centrale — titolo in alto e riga in basso fuori. Misurato
-       sul banner vero: si vedeva il 49% dell'altezza.
-       Con 'contain' si vede tutto, piu' piccolo, col blu ai lati.
-       ⚠️ E SERVE ANCHE 'no-repeat': il valore predefinito e' 'repeat', e
-       un'immagine piu' stretta della casella si ripeterebbe a piastrelle.
-       Con 'cover' non si vedeva perche' l'immagine copriva tutto. */
-    col.style.backgroundSize = 'contain';
-    col.style.backgroundRepeat = 'no-repeat';
-    col.style.backgroundPosition = 'center';
-    col.classList.add('ha-banner');
+    cover.style.backgroundImage = `url("${url}")`;
+    cover.classList.add('ha-banner');
   } else {
-    col.style.backgroundImage = '';
-    col.style.backgroundSize = '';
-    col.style.backgroundRepeat = '';
-    col.style.backgroundPosition = '';
-    col.classList.remove('ha-banner');
+    cover.style.backgroundImage = '';
+    cover.classList.remove('ha-banner');
   }
 }
 // Applica la personalizzazione salvata al PANNELLO REALE (header, sfondo, logo, tema...)
@@ -4888,7 +5231,15 @@ async function salvaPersonalizzaPannello() {
     const file = bannerInput.files[0];
     const parts = file.name.split('.');
     const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
-    const path = `${impresaCorrente.id}/banner.${ext}`;
+    /* ⛔ 3 SETTEMBRE 2026 — LA COPERTINA CHE NON SI CARICAVA MAI.
+       Qui c'era `impresaCorrente.id` (il numero della riga nella tabella
+       imprese) invece di `impresaCorrente.user_id` (chi e' collegato).
+       Il lucchetto del deposito `banner-personalizzati` lascia scrivere solo
+       nella cartella che porta il TUO user_id: con il numero sbagliato
+       rispondeva «non ti e' permesso» e la copertina non saliva mai.
+       Il logo, due righe piu' su, usava gia' user_id: sbagliava solo questa.
+       Gli altri tre pannelli avevano gia' la riga giusta. */
+    const path = `${impresaCorrente.user_id}/banner.${ext}`;
     const { error: bnErr } = await sb.storage.from('banner-personalizzati').upload(path, file, { upsert: true });
     if (bnErr) {
       alert('Errore caricamento banner: ' + bnErr.message);
