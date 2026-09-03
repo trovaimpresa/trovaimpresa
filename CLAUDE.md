@@ -20555,3 +20555,164 @@ senza descrizione e non lo sanno), e il **CSS doppio** delle caselle in alto.
 
 **Quanto vale un credito chat.** Non decidere: ricordargliela quando si arriva
 lì. «Il nodo dei 49 €» è **chiuso**: roba vecchia, quel prezzo non esiste più.
+
+# 3 SETTEMBRE 2026, MATTINA — SEARCH CONSOLE LETTA BENE, E I PREZZI UFFICIALI NELLE GUIDE
+
+## COSA C'ERA DA CAPIRE
+
+**Le 781 pagine «non indicizzate» non sono un guasto.** 708 stanno in «Pagina
+alternativa con tag canonical appropriato»: sono gli URL con i filtri di ricerca
+(`cerca-artigiani?citta=X&mestiere=Y`, `cerca-professionisti?citta=X&tipo=Y`) e le
+copie `.html` delle pagine città (`imprese-ferrara.html`). Il canonical le accorpa
+apposta. Controllato: `https://trovaimpresa.com/imprese-ferrara` è indicizzata.
+**Niente da correggere, non cliccare «Convalida correzione».** Il salto di fine
+luglio coincide con la messa online di `cerca-professionisti`.
+
+**Posizione media 17 è un miglioramento** (il 4 agosto era 20): il numero basso
+vince. Il CTR è sceso all'1,5% perché le impressioni sono passate da 1.420 a
+12.400 in un mese: Google mostra il sito per migliaia di ricerche nuove in
+seconda pagina. Il numero da guardare sono i clic: 79 → 191 in 3 mesi.
+Il «12 la settimana scorsa» era un periodo diverso (7 o 28 giorni contro 3 mesi).
+
+**Query, 3 mesi:** `trovaimpresa` 75 clic/103 impr, `trova impresa` 6/77,
+`costo infissi casa 100 mq` **2/147** (l'occasione), `stipendio muratore *` 1/8 ×2,
+`quanto prende un muratore` 1/2. Il brand fa ~84 clic su 191.
+
+## COSA È STATO FATTO
+
+**Fonte prezzi scelta: Tariffa dei prezzi Regione Lazio 2023 – Parte A Opere
+edili** (DGR 101 del 14/04/2023, ultima in vigore). Alex l'ha scaricata dal sito
+della Regione e allegata in chat (da qui e dal VM locale il sito è bloccato).
+È il listino dei lavori pubblici: **sempre più alto del mercato** (spese generali
+e utile d'appalto). Nelle guide va messo **accanto** al prezzo di mercato, come
+termine di paragone, mai al posto suo.
+
+Quattro guide aggiornate, tutte con lo stesso schema: nuovo H2 con la «casa
+tipo», tabella a due colonne «Prezzo di mercato per un privato» / «Tariffa
+Regione Lazio 2023», paragrafo che spiega la differenza, riga grigia con fonte
+e codici voce. **Nient'altro toccato** (title, meta, JSON-LD, FAQ intatti).
+
+| Guida | H2 aggiunto | Voci Tariffa usate |
+|---|---|---|
+| `quanto-costa-cambiare-gli-infissi.html` | «Quanto costano gli infissi per una casa di 100 mq» (sostituisce il vecchio H2 + tabella) — 10 aperture ≈ 19 mq | A 16.02.1 PVC 2 camere 444–521 €/mq · A 16.02.2 PVC 5 camere 561–602 · A 17.03.1 alluminio t.t. 714–933 · A 16.01.9.1 legno lamellare 1.262–1.398 · A 3.02.27–29 smontaggio 17,61–24,82 €/mq · A 16.01.1 controtelaio 12,90–16,59 €/m |
+| `quanto-costa-posare-il-pavimento.html` | «Quanto costa rifare il pavimento di una casa di 80 mq» | A 3.01.15.c demolizione 15,21 · A 14.01.18 gres porcellanato 50,81–93,29 · A 14.01.23/25 parquet rovere 94,30–148,44 · A 14.02.13.a battiscopa 16,17 €/m |
+| `quanto-costa-imbiancare-casa.html` | «Quanto costa imbiancare un appartamento di 90 mq» (≈270 mq dipinti) | A 20.01.13.a.2 idropittura 12,17 · A 20.01.12.a tempera 6,33 · A 20.01.1 raschiatura 5,42 · A 20.01.9.a rasatura 10,83 · A 20.01.10 isolante 3,16 |
+| `quanto-costa-cappotto-termico.html` | «Quanto costa il cappotto per una villetta di 200 mq di facciata» (10 cm) | A 11.02.1.d XPS 128,67 · A 11.02.1.b lana di roccia 126,68 · A 11.02.1.a lana di vetro 131,09 · A 20.01.13.b.3 tinta esterna 11,69 |
+
+Backup degli originali: `prove-claude/{infissi,pavimento,imbiancare,cappotto}-prima-prezziario-3set.html`.
+Pubblicate da Alex (infissi commit `98d1c23`, le altre tre subito dopo), richiesta
+di indicizzazione fatta per tutte e quattro.
+
+**La Parte A NON contiene:** impianti (idraulico, elettrico, condizionatore,
+caldaia, fotovoltaico) e ponteggi. Per quelle guide serve la **Parte E – Impianti**.
+
+## ⛔ TRAPPOLE DI STAMATTINA
+
+1. **`git status` dalla cartella collegata lascia `.git/index.lock`** che dal VM
+   non si può cancellare → Alex ha dovuto fare `rm .git/index.lock`. **Mai più
+   comandi git dalla cartella collegata.** Commit e push li fa Alex:
+   `node tools/controllo-push.js && git add <file> && git commit -m "..." && git push`.
+2. **Richiesta di indicizzazione prima del push** = Google rilegge la pagina
+   vecchia. Ordine giusto: push → aspettare Netlify → controllare la pagina online
+   → richiesta.
+3. **La tendina della barra «Controlla qualsiasi URL»** propone anche una riga con
+   più URL attaccati: se la scegli, «URL non si trova su Google» e richiesta
+   rifiutata. Scrivere l'indirizzo **a mano e completo** (`https://trovaimpresa.com/...`);
+   con `/pagina` o `trovaimpresa.com/pagina` dice «URL non nella proprietà».
+4. Il PDF della Regione (195 pagine) non si legge dal pannello browser di Claude:
+   va allegato in chat. Dal cloud: `pdftotext -layout` e grep sulle voci
+   (`^ *A +16\.02\.`), le sezioni sono ai capitoli `A NN.NN. TITOLO`.
+
+## ➡️ PROSSIMO PASSO (attività programmata, 10 set 2026 ore 8:00)
+
+1. Search Console → Rendimento → 7 giorni → Query: `costo infissi casa 100 mq`
+   rispetto a posizione ~17 / 2 clic. Screenshot Query + Pagine delle 4 guide.
+2. Alex scarica la **Parte E – Impianti** della Tariffa Lazio 2023 e la allega;
+   stesso metodo su idraulico, elettrico, condizionatore, caldaia.
+3. Idea segnata, non ora: `quanto-guadagna-un-muratore.html` compare già per
+   «stipendio muratore» — da potenziare quando si torna sul blog.
+
+
+## 3 SETTEMBRE 2026 — Ispettore, email gestionale, allegati assistenza, Personalizza, recensioni con risposta
+
+### Fatto e pubblicato
+1. **Ispettore automatico (Cowork, attività programmata `trig_01GvyTZLYxW27QG5bVpZdqAZ`)**: ogni lunedì
+   8:00 controlla le pagine pubbliche (WebFetch), la sitemap, e su Supabase iscritti/orfani/email non
+   confermate/chat non lette/segnalazioni/incarichi/errori AI e **uso del gestionale per pannello**
+   (gest_azienda, gest_lavori, neg_prodotti, nol_noleggi). Rapporto in chat + push + email.
+   Fotografia del 3 set: 113 utenti, 112 imprese (60 artigiani, 44 imprese, 4 professionisti, 4 senza tipo),
+   tutte Premium regalato, **gestionale configurato da 3, usato da 1**. 24 utenti (21%) non hanno mai
+   confermato l'email.
+2. **Email «Il gestionale è pronto, provalo»** mandata da admin → Scrivi a tutti, gruppo Tutti, alle
+   18:27: **89 destinatari** (solo email confermate; i 23 esclusi non hanno mai cliccato il link di
+   conferma). Firmata «TrovaImpresa», cita il computo metrico. ⛔ `netlify/functions/avviso-gestionale.js`
+   NON serve (era un doppione di Scrivi a tutti): spostato in `prove-claude/`.
+3. **Admin → «📬 Email inviate»**: tabella nuova `admin_email_inviate` (RLS on, solo service role);
+   `invia-annuncio.js` salva ogni invio (prova compresa) e risponde all'azione `storico`; voce nel menu
+   sotto «Scrivi a tutti», con Leggi / Riusa. Le «email salvate» (bozze) restano in localStorage.
+4. **Assistenza diretta con allegati** (gestionale-app + 4 pannelli): graffetta SVG accanto a Invia,
+   foto/screenshot/PDF max 8 MB, bucket privato `supporto-allegati` (cartella `<uid>/`, policy insert+select
+   own), colonne `allegato/allegato_nome/allegato_tipo` su `supporto_messaggi`, link firmati 1h.
+   `admin-supporto.js` firma i link (`allegato_url`), admin.html li mostra nella bolla.
+5. **Personalizza pannello** rifatta nei 4 pannelli: dentro la sezione `body.pers-aperta` nasconde la
+   colonna con la mappa e `.main` va a margine 0 (tutta pagina, deciso da Alex dopo aver detto prima
+   «non toglierla»); opzioni su 2 colonne con carte stile dash-quick-card; temi rapidi come mini-anteprime
+   con spunta (`segnaPresetAttivo`); parole semplici («Fascia in alto», «Modalità notte»…); anteprima =
+   testata vera in piccolo (copertina, tondo, fascia con la stessa sfumatura, riga piccola = nome pannello,
+   riga grande = nome impresa, 4 carte). Nei 3 pannelli non-artigiano il CSS di Personalizza era DOPPIO:
+   tolto il doppione.
+6. **Card dashboard più chiare** (4 pannelli): «Le tue recensioni · Leggi e rispondi ai clienti»,
+   «Il mio profilo pubblico · Vedi e modifica i tuoi dati», «Visibile… · Quante persone ti trovano»,
+   «Priorità nei risultati · In che posizione compari». Rating/Recensioni in alto cliccabili e contano
+   SOLO le confermate (come la scheda pubblica).
+7. **Risposta alle recensioni** — decisione: l'impresa PUÒ, non DEVE. DB: colonna `risposta_il`,
+   funzione `rispondi_recensione(p_id, p_testo)` (security definer, solo authenticated, controlla che la
+   recensione sia dell'impresa loggata, max 1000 caratteri, vuoto = toglie); `recensioni_pubbliche` rifatta
+   con `risposta_impresa, risposta_il`; nuove `recensioni_riepilogo(id)` e
+   `recensioni_pubbliche_pag(id, filtro, limit, offset)`. Pannelli: sezione `#sec-recensioni` a tutta
+   pagina (la vecchia finestrella `apriModalRecensioni` resta ma scollegata), stelle in Arial (DM Sans le
+   disegna vuote).
+8. **Pagina pubblica `recensioni-impresa.html?id=N`**: testata copiata dalla scheda (stesso <style> senza
+   commenti), riassunto con barrette, filtri (Tutte / 5★ / Critiche / Con risposta, solo se >3), recensioni
+   come carte in griglia 2-3 per riga (arancione se voto ≤3), «Mostra altre 10», «Copia il link», JSON-LD
+   AggregateRating. Free: 3 visibili, e al cliente NON si dice che ne mancano (regola già scritta).
+9. **Scheda pubblica (`profilo-impresa.html`)**, dopo 4 giri in cui non capivo Alex: card
+   «✍️ Lascia la tua recensione» = solo il modulo (via le linguette); nella colonna del preventivo, sotto i
+   contatti, la card cliccabile `#rec-altri` «💬 Guarda le recensioni lasciate da altri clienti» (voto +
+   numero + Apri →) che porta alla pagina dedicata. **Nessun elenco di recensioni nella scheda.**
+   `.cella-prev{height:100%}` + `.contacts-card{flex:1}` → le due colonne finiscono alla stessa altezza.
+10. **Modulo preventivo**: «← Torna» a sinistra prima del titolo, `.prev-topbar` sticky sotto la nav;
+    mentre è aperto anche «Torna ai risultati» diventa «← Torna alla scheda» (`_navTorna`).
+11. `recensione-invia.js`: ora CONTROLLA la risposta di Resend (prima diceva «email mandata» anche se
+    rifiutata); se la recensione è già scritta ma non confermata, RIMANDA l'email con token nuovo;
+    blocco autorecensione (email impresa = email recensore → 400), anche in `profilo-impresa.html`
+    (`window._recImpUid`).
+
+### Collaudo dal vivo
+Recensione 19 scritta alla scheda 36 da Alex loggato (la scheda prende l'email dell'utente collegato),
+confermata dall'email (arrivata solo al secondo tentativo — vedi punto 11), risposta pubblicata dal
+pannello e vista sulla scheda e sulla pagina dedicata. È ancora nel database: Alex non ha deciso se
+cancellarla.
+
+### ⛔ TROVATO E NON ANCORA SISTEMATO
+- **La foto allegata al preventivo non arriva mai**: il cliente non è loggato e il bucket `foto-lavori`
+  accetta solo l'impresa → upload fallisce in silenzio, 0 richieste con foto. Serve un bucket per gli
+  allegati dei clienti (anon insert su `preventivi/<impresa_id>/…`, select owner) + colonna `allegati jsonb`.
+- Le pagine `recensioni-impresa.html` non sono in nessuna sitemap.
+
+### Prossimi lavori concordati (ordine di Alex)
+1. Preventivo: allegati veri e multipli (foto, computo PDF, progetto, DWG) visibili nel pannello.
+2. Preventivo: domande guidate per tipo di lavoro (bagno → mq/piano/ascensore, tetto → mq/copertura).
+3. Mail di riepilogo al cliente con link «stato della richiesta»; pulsante WhatsApp dopo l'invio.
+4. Nel pannello, sotto «Le tue recensioni», il «Copia il link» della pagina recensioni.
+5. Richiamo fra 7 giorni a chi non ha aperto il gestionale; richiamo «conferma la mail» ai 23.
+
+### Lezioni di oggi (per Claude)
+- Quando Alex ripete «non riesco a farmi capire», SMETTERE di interpretare e dargli 3-4 opzioni concrete
+  da scegliere (AskUserQuestion): ha sbloccato al primo colpo.
+- «Uno spazio» = una card SUA, non un riquadro dentro un'altra card.
+- Prima di consegnare una card in una colonna: i fondi delle due colonne devono coincidere.
+  «Farlo bene ci vuole lo stesso tempo di farlo male.»
+- Il glifo «↳» in Windows esce rotto: non usarlo.
+- Le foto di collaudo si fanno con Playwright nel cloud su una pagina estratta con dati finti
+  (Supabase non è raggiungibile dal contenitore): `shot*.mjs` in /home/claude.
