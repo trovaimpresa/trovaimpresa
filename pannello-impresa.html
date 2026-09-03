@@ -2166,12 +2166,12 @@
 
       <!-- STATISTICHE -->
       <div class="dash-stats">
-        <div class="dash-stat-card">
+        <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
           <div class="dash-stat-icon">⭐</div>
           <div class="dash-stat-num" id="stat-rating">—</div>
           <div class="dash-stat-lbl">Rating medio</div>
         </div>
-        <div class="dash-stat-card">
+        <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
           <div class="dash-stat-icon">💬</div>
           <div class="dash-stat-num" id="dash-stat-recensioni">0</div>
           <div class="dash-stat-lbl">Recensioni</div>
@@ -4953,7 +4953,14 @@ async function inizializza() {
   const nome = _nomeImpresa(impresaCorrente) || 'La tua impresa';
   const piano = impresaCorrente.piano || 'free';
   const isPremium = piano === 'premium';
-  const rating = impresaCorrente.rating || '—';
+  /* 3 set 2026: rating e numero calcolati dalle recensioni CONFERMATE, come nel
+     pannello artigiano e sulla scheda pubblica (prima: colonna `rating` vecchia) */
+  const { data: recsRating } = await sb.from('feedback_clienti')
+    .select('stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita')
+    .eq('impresa_id', impresaCorrente.id).eq('confermata', true);
+  const stelleRating = (recsRating || []).flatMap(r => [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita]).filter(s => s != null);
+  const rating = stelleRating.length ? (stelleRating.reduce((a, b) => a + b, 0) / stelleRating.length).toFixed(1) : '—';
+  { const nRec = document.getElementById('dash-stat-recensioni'); if (nRec) nRec.textContent = (recsRating || []).length; }
 
   // Header dashboard
   document.getElementById('dash-nome-impresa').textContent = nome;
@@ -5200,10 +5207,8 @@ async function eliminaOfferta(id) {
 
 // CARICA RECENSIONI
 async function caricaRecensioni() {
-  const { data } = await sb.from('feedback_clienti').select('*')
-    .eq('impresa_id', impresaCorrente.id)
-    .order('created_at', { ascending: false });
-
+  const { data } = await sb.from('feedback_clienti').select('id')
+    .eq('impresa_id', impresaCorrente.id).eq('confermata', true);
   document.getElementById('dash-stat-recensioni').textContent = data?.length || 0;
 }
 

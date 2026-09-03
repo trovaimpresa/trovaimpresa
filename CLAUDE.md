@@ -20664,7 +20664,8 @@ caldaia, fotovoltaico) e ponteggi. Per quelle guide serve la **Parte E – Impia
 6. **Card dashboard più chiare** (4 pannelli): «Le tue recensioni · Leggi e rispondi ai clienti»,
    «Il mio profilo pubblico · Vedi e modifica i tuoi dati», «Visibile… · Quante persone ti trovano»,
    «Priorità nei risultati · In che posizione compari». Rating/Recensioni in alto cliccabili e contano
-   SOLO le confermate (come la scheda pubblica).
+   SOLO le confermate (come la scheda pubblica) — replicato in tutti e 4 a fine serata; nei 3 non-artigiano
+   il rating veniva dalla vecchia colonna `imprese.rating` e nel negozio il contatore restava sempre 0.
 7. **Risposta alle recensioni** — decisione: l'impresa PUÒ, non DEVE. DB: colonna `risposta_il`,
    funzione `rispondi_recensione(p_id, p_testo)` (security definer, solo authenticated, controlla che la
    recensione sia dell'impresa loggata, max 1000 caratteri, vuoto = toglie); `recensioni_pubbliche` rifatta
