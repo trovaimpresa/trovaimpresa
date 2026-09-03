@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Recensioni — TrovaImpresa</title>
+<meta name="description" content="Tutte le recensioni dei clienti di un'impresa su TrovaImpresa, con le risposte dell'impresa.">
+<link rel="canonical" href="https://trovaimpresa.com/recensioni-impresa">
+<script>
+/* 3 settembre 2026 — LA PAGINA PUBBLICA DELLE RECENSIONI DI UN'IMPRESA.
+   Alessio: «la risposta e la recensione dovrebbero stare in un posto tutto
+   loro e pubblico». Come Booking, Airbnb e TripAdvisor: la scheda mostra il
+   voto e le ultime recensioni, «Vedi tutte» porta qui, e questo indirizzo
+   l'impresa lo puo' mandare ai clienti («leggi cosa dicono di me»).
+   Grafica: lo STILE e' copiato per intero da profilo-impresa.html (stessa
+   testata blu, stesse carte, stesse stelle). Se cambi la scheda, rigenera
+   anche questo <style>: e' lo stesso foglio senza i commenti.
+   Dati: solo la funzione `recensioni_pubbliche()` del database (confermate,
+   con `risposta_impresa`), come sulla scheda. */
+(function(){
+  try{
+    var id=(new URLSearchParams(location.search).get('id')||'').trim();
+    var lnk=document.querySelector('link[rel="canonical"]');
+    if(/^[0-9]{1,12}$/.test(id)){ if(lnk)lnk.setAttribute('href','https://trovaimpresa.com/recensioni-impresa?id='+id); }
+    else{ var m=document.createElement('meta');m.setAttribute('name','robots');m.setAttribute('content','noindex,follow');document.head.appendChild(m); }
+  }catch(e){}
+})();
+</script>
+<link rel="icon" type="image/svg+xml" href="/img/trovaimpresa-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#333;line-height:1.6}
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 32px;
+  background:white;box-shadow:0 2px 8px rgba(0,0,0,0.1);position:sticky;top:0;z-index:100}
+nav img{height:36px}
+.nav-back{padding:9px 20px;border:2px solid #2863a7;background:white;color:#2863a7;
+  border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;font-size:14px;transition:all 0.3s}
+.nav-back:hover{background:#2863a7;color:white}
+.hero{background-color:#0a2a4d;
+  text-align:left;color:#fff;display:block;padding:0;overflow:hidden}
+.hero-cover{display:none;position:relative;width:100%;overflow:hidden;
+  aspect-ratio:2.5/1;min-height:180px;max-height:800px;
+  background-color:rgba(255,255,255,0.10);
+  background-repeat:no-repeat;background-position:center;background-size:cover}
+.hero-cover .cover-img{position:absolute;inset:0;background-image:inherit;background-repeat:no-repeat;background-position:center;background-size:cover}
+.hero-cover.ha-copertina{display:block}
+.hero-riga{display:flex;align-items:flex-end;gap:18px;padding:28px 32px 26px 32px}
+.hero-cover.ha-copertina + .hero-riga{padding-top:18px}
+.hero-left-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;align-self:flex-end}
+.hero-avatar{position:relative;flex-shrink:0;align-self:flex-start;
+  width:150px;height:150px;border-radius:50%;
+  border:5px solid #fff;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,0.28);
+  display:flex;align-items:center;justify-content:center;font-size:2.6rem;
+  overflow:hidden;cursor:pointer}
+.hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:0}
+.hero-avatar img{width:100%;height:100%;display:block;border-radius:50%;
+  object-fit:cover;object-position:center;background:#fff}
+#logo-lightbox{display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0.82);align-items:center;justify-content:center}
+#logo-lightbox.open{display:flex}
+#logo-lightbox img{max-width:90vw;max-height:90vh;border-radius:12px;
+  box-shadow:0 8px 48px rgba(0,0,0,0.6);object-fit:contain}
+#logo-lightbox-close{position:fixed;top:20px;right:28px;color:#fff;
+  font-size:2.2rem;font-weight:700;cursor:pointer;line-height:1;
+  background:rgba(0,0,0,0.4);border:none;border-radius:50%;
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s}
+#logo-lightbox-close:hover{background:rgba(255,255,255,0.2)}
+.hero-tipo{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  color:rgba(255,255,255,0.65);margin-bottom:6px}
+.hero-nome{font-size:2.2rem;font-weight:800;margin-bottom:8px;line-height:1.1}
+.hero-loc{font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:12px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+.hero-mestieri{display:flex;flex-wrap:wrap;gap:8px;padding:0 32px 26px 200px}
+.hero-mestieri:empty{display:none}
+.hero.ha-mestieri .hero-riga{padding-bottom:12px}
+.hb{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.hb-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)}
+.hb-g{background:rgba(255,255,255,0.15);color:white}
+.hero-num{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+.hn{display:flex;align-items:center;gap:8px;padding:4px 12px;
+  background:rgba(255,255,255,0.15);border-radius:16px}
+.hn-i{font-size:28px;line-height:1}
+.hn-n{font-size:1.6rem;font-weight:800;color:#fff;line-height:1}
+.hn-l{font-size:13px;color:rgba(255,255,255,0.8);font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.page-section{background-image:url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop');
+  background-size:cover;background-position:center;
+  padding:20px;position:relative}
+.page-section::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.52);z-index:0}
+.page-section>.inner{position:relative;z-index:1}
+.sezione-card{background:white;border-radius:16px;
+  border-top:6px solid #0066ff;box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  padding:24px;
+  transition:transform 0.3s,box-shadow 0.3s}
+.sezione-card:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.12)}
+.sezione-card h2{font-size:18px;font-weight:800;color:#0052cc;margin-bottom:16px}
+.main-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;
+  padding:20px}
+.col-sinistra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.cella-prev{display:flex;flex-direction:column;gap:14px}
+.btn-prev .sidebar-trust{width:100%;margin-bottom:0}
+.btn-prev .st-text span{color:rgba(255,255,255,0.75);font-size:13px}
+.cella-prev .contacts-card{margin-bottom:0}
+.col-sinistra > *{min-width:0;margin-bottom:0}
+.riga-rec{display:contents}
+.card{background:white;border-radius:16px;border-top:6px solid #0066ff;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);padding:24px;margin-bottom:20px;
+  transition:transform 0.3s,box-shadow 0.3s}
+.card:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.12)}
+.card:last-child{margin-bottom:0}
+.card-title{font-size:26px;font-weight:800;color:#0052cc;margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid #eee}
+.desc{font-size:14px;color:#555;line-height:1.75}
+.cats{display:flex;flex-wrap:wrap;gap:10px}
+.cat{display:flex;align-items:center;gap:8px;background:#f5f5f5;
+  border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;
+  color:#1a2f47;border:1px solid #ddd;transition:all 0.2s}
+.cat:hover{background:#e8f5ee;border-color:#0066ff}
+.info-section{margin-top:22px}
+.info-section:first-child{margin-top:0}
+.info-label{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#0066ff;margin-bottom:10px}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.info-item{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:10px 14px}
+.info-item .k{font-size:13px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.info-item .v{font-size:14px;color:#1a2f47;font-weight:600;margin-top:3px;word-break:break-word}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;align-items:start}
+.fi{border-radius:10px;overflow:hidden;background:#f5f5f5;border:1px solid #ddd;cursor:pointer}
+.fi img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transition:transform 0.3s}
+.fi-tit{font-size:14px;font-weight:700;color:#333;line-height:1.3;padding:8px 10px;background:#fff}
+.fi:hover img{transform:scale(1.05)}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:none;align-items:center;justify-content:center}
+.lightbox.open{display:flex;flex-direction:column;gap:12px}
+.lightbox img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:6px}
+.lb-cap{max-width:90vw;text-align:center;color:#fff}
+.lb-cap b{display:block;font-size:16px;font-weight:800;line-height:1.3}
+.lb-cap span{display:block;font-size:14px;line-height:1.5;margin-top:4px}
+.lb-cap:empty{display:none}
+.lb-btn{position:absolute;background:rgba(255,255,255,0.15);color:#fff;border:none;cursor:pointer;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s;font-family:inherit}
+.lb-btn:hover{background:rgba(255,255,255,0.35)}
+.lb-close{top:20px;right:20px;font-size:24px}
+.lb-prev{left:20px;top:50%;transform:translateY(-50%);font-size:36px}
+.lb-next{right:20px;top:50%;transform:translateY(-50%);font-size:36px}
+#mappa-profilo{height:220px;border-radius:10px;overflow:hidden;border:1px solid #ddd}
+.rec-tabs{display:flex;gap:8px;margin-bottom:14px}
+.rec-tab{padding:8px 16px;border:2px solid #ddd;background:white;
+  cursor:pointer;font-weight:700;font-size:13px;color:#888;border-radius:8px;transition:all 0.2s}
+.rec-tab.active{color:#2863a7;border-color:#2863a7;background:#eef4fb}
+.rec-item{border-bottom:1px solid #eee;padding:14px 0}
+.rec-item:first-child{padding-top:0}
+.rec-item:last-child{border-bottom:none;padding-bottom:0}
+.rec-nome{font-weight:700;font-size:13px;color:#333}
+.rec-data{font-size:13px;color:#888}
+.rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
+.rec-testo{font-size:13px;color:#555;line-height:1.6}
+.rec-risposta{margin-top:10px;padding:10px 14px;background:#f4f7fb;border-left:3px solid #0066ff;border-radius:8px}
+.rec-risposta-tit{font-size:13px;font-weight:800;color:#0a2a4d;margin-bottom:4px}
+.rec-risposta-testo{font-size:13px;color:#333;line-height:1.6;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rec-card .rec-risposta-testo{font-size:15px}
+.st-gruppo{margin-bottom:12px}
+.st-gruppo label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:4px}
+.st-row{display:flex;gap:3px}
+.stella{font-size:22px;cursor:pointer;color:#ddd;user-select:none}
+.stella.attiva{color:#f4c02e}
+.ri{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;
+  font-size:13px;font-family:inherit;margin-bottom:10px;outline:none;transition:border 0.2s}
+.ri:focus{border-color:#2863a7}
+.rta{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;
+  font-size:13px;font-family:inherit;min-height:90px;resize:vertical;
+  margin-bottom:10px;outline:none;transition:border 0.2s}
+.rta:focus{border-color:#2863a7}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-rec{width:100%;background:#2863a7;color:white;border:none;border-radius:8px;
+  padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.3s}
+.btn-rec:hover{background:#215188}
+.rec-msg{text-align:center;font-size:13px;margin-top:8px;padding:8px;border-radius:8px;display:none}
+.rec-msg.ok{background:#e8f5e9;color:#0066ff}
+.rec-msg.err{background:#fdecea;color:#c0392b}
+.rec-msg.warn{background:#fff3cd;color:#856404}
+.rec-card .card-title{font-size:26px;color:#0052cc}
+.rec-card .rec-tab{font-size:17px;font-weight:800;padding:13px 24px;border-radius:10px}
+.rec-card .rta{font-size:16px;min-height:140px;padding:16px 18px;color:#222}
+.rec-card .ri{font-size:16px;padding:15px 16px;color:#222}
+.rec-card .btn-rec{font-size:18px;padding:16px}
+.rec-card .rec-nome{font-size:16px;color:#222}
+.rec-card .rec-data{font-size:13px;color:#666;font-weight:600}
+.rec-card .rec-stelle{font-size:17px;font-weight:700}
+.rec-card .rec-testo{font-size:15px;color:#444}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.st-box{background:#f9f9f9;border:2px solid #eee;border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:0}
+.st-box label{font-size:18px;font-weight:800;color:#0052cc;margin-bottom:12px}
+.st-box .st-row{justify-content:center;gap:6px}
+.st-box .stella{font-size:34px}
+.rec-voti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.rec-voto-box{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:10px 12px;text-align:center}
+.rec-voto-box .rv-lbl{font-size:14px;font-weight:800;color:#0052cc;margin-bottom:5px}
+.rec-voto-box .rv-st{font-size:22px;color:#f4c02e;letter-spacing:2px}
+.rec-empty{text-align:center;padding:32px 16px}
+.rec-empty-icon{font-size:54px;line-height:1;margin-bottom:12px}
+.rec-empty-title{font-size:22px;font-weight:800;color:#0052cc;margin-bottom:8px}
+.rec-empty-sub{font-size:16px;color:#555;margin-bottom:20px}
+.rec-empty-btn{width:auto;display:inline-block;padding:16px 34px;font-size:18px}
+.sidebar-trust{background:linear-gradient(135deg,#1a2f47,#2863a7);border-radius:16px;
+  padding:18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;
+  border-top:6px solid #FF6B35}
+.st-icon{font-size:1.8rem}
+.st-text strong{display:block;color:white;font-size:15px;font-weight:700}
+.st-text span{color:rgba(255,255,255,0.75);font-size:13px}
+.btn-prev{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  width:100%;background:white;color:#1a2f47;border:none;border-radius:12px;
+  padding:20px 30px;font-family:inherit;font-weight:700;font-size:1.2rem;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #FF6B35;
+  margin-bottom:10px;transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;text-align:center}
+.btn-prev:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.15)}
+.btn-prev span{color:#FF6B35;font-size:1.5rem}
+.btn-prev svg{width:2rem;height:2rem}
+.contacts-card{background:white;border-radius:16px;border-top:6px solid #1a5276;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:14px}
+.gp-intro{font-size:13px;color:#7a8896;margin:0 0 12px}
+.gp-lista{list-style:none;display:flex;flex-direction:column;gap:8px}
+.gp-lista a{display:flex;align-items:center;gap:10px;text-decoration:none;
+  background:#f7f9fb;border:1px solid #eef2f7;border-radius:10px;padding:12px 14px;
+  font-size:15px;font-weight:700;color:#0047b3;line-height:1.35}
+.gp-lista a:hover{background:#eef4fb}
+.gp-lista .gp-freccia{margin-left:auto;color:#FF6B35;font-weight:800;flex-shrink:0}
+.contacts{list-style:none}
+.contacts li{display:flex;align-items:center;gap:10px;padding:11px 16px;
+  border-bottom:1px solid #eee;font-size:13px;color:#333;transition:background 0.15s}
+.contacts li:last-child{border-bottom:none}
+.contacts li:hover{background:#fafafa}
+.ci{width:28px;height:28px;border-radius:8px;background:#f5f5f5;border:1px solid #eee;
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.contacts a{color:#2863a7;font-weight:700;text-decoration:none}
+.mostra-tel{
+  font-family:inherit; font-size:13px; font-weight:700; color:#2863a7;
+  background:#eef4fb; border:1px solid #a9c9f5; border-radius:8px;
+  padding:6px 12px; cursor:pointer; transition:background 0.15s;
+}
+.mostra-tel:hover{ background:#dce9f7; }
+.prev-section{display:none;padding:24px 32px 60px;background:#fff;min-height:60vh}
+.prev-section.open{display:block}
+.prev-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.prev-topbar-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#0a2a4d}
+.prev-back{color:#0066ff;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;
+  padding:8px 16px;border:2px solid #0066ff;border-radius:8px;transition:all 0.2s}
+.prev-back:hover{background:#0066ff;color:#fff}
+.prev-card{background:white;border:1px solid rgba(0,0,0,0.08);border-top:4px solid #0066ff;
+  border-radius:12px;padding:32px;box-shadow:0 2px 16px rgba(0,0,0,0.07)}
+.prev-sub{font-size:14px;color:#888;margin-bottom:24px}
+.prev-rassicura{background:#f0f7f3;border:1px solid #cfe3d6;border-radius:10px;padding:16px 18px;margin-bottom:26px}
+.prev-rassicura-riga{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.6;color:#2c3e50;margin-bottom:8px}
+.prev-rassicura-riga:last-child{margin-bottom:0}
+.prev-rassicura-riga>span:first-child{color:#1e8e3e;font-weight:800;flex-shrink:0}
+.prev-step{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:800;color:#0a2a4d;margin:30px 0 18px;padding-bottom:12px;border-bottom:2px solid #eef2f7}
+.prev-step:first-of-type{margin-top:6px}
+.prev-step-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#0066ff;color:#fff;font-size:16px;flex-shrink:0}
+.prev-aiuto{font-size:13.5px;line-height:1.6;color:#7a8896;margin:8px 0 0}
+.prev-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f7f9fb;border:1.5px dashed #c9d4e0;border-radius:10px;padding:15px 18px;font-family:inherit;font-size:15px;font-weight:700;color:#0047b3;cursor:pointer;text-align:left;margin-bottom:16px}
+.prev-toggle:hover{background:#eef4fb;border-color:#0066ff}
+.prev-toggle-nota{font-weight:400;color:#7a8896;font-size:13.5px}
+.prev-toggle-freccia{font-size:22px;line-height:1;color:#0066ff;flex-shrink:0}
+.fg{margin-bottom:14px}
+.fl{font-size:13.5px;font-weight:700;color:#3d4a57;margin-bottom:7px;display:block;
+  letter-spacing:0.2px}
+.fi2,.ft,.fs{width:100%;padding:14px 15px;border:1.5px solid #ddd;border-radius:8px;
+  font-family:inherit;font-size:16px;color:#333;outline:none;transition:border 0.2s}
+.fi2:focus,.ft:focus,.fs:focus{border-color:#0066ff;box-shadow:0 0 0 3px rgba(0,102,255,.12)}
+.fi2.errore,.ft.errore,.fs.errore{border-color:#c0392b;background:#fff6f5}
+.ft{resize:vertical;min-height:110px;line-height:1.6}
+.fg{margin-bottom:18px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.fr2{grid-template-columns:1fr}}
+.btn-sub{width:100%;background:#0066ff;color:white;border:none;border-radius:8px;
+  padding:17px;font-family:inherit;font-weight:700;font-size:17px;cursor:pointer;
+  margin-top:8px;transition:background 0.3s}
+.btn-sub:hover{background:#0052cc}
+#cover-foto{display:none;width:100%;max-height:280px;overflow:hidden;background:#111}
+#cover-foto img{width:100%;height:280px;object-fit:cover;display:block}
+@media(max-width:768px){
+  .main-layout{grid-template-columns:minmax(0,1fr);padding:12px}
+  .main-layout > div:first-child{display:contents}
+  .riga-rec{display:contents}
+  .cella-prev{display:contents}
+  .btn-prev{order:-2}
+  .contacts-card{order:-1}
+  .rec-tabs{flex-wrap:wrap}
+  .rec-tab{flex:1 1 auto;min-width:0}
+  .hero-num{gap:10px}
+  .hn{padding:4px 10px;gap:6px}
+  .hn-i{font-size:22px}
+  .hero{padding:0}
+  .hero-cover{aspect-ratio:1.9/1;min-height:150px;max-height:260px}
+  .hero-riga{padding:20px 16px 18px 16px;gap:12px}
+  .hero-mestieri{padding:0 16px 18px 16px}
+  .hero-avatar{width:96px;height:96px;border-width:4px;font-size:2rem}
+  .hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:0}
+  .hero-nome{font-size:1.6rem}
+  nav{padding:10px 16px}
+  .cal-grid-2x2{grid-template-columns:1fr}
+  .st-grid,.rec-voti-grid{grid-template-columns:1fr}
+  .mini-stats-grid{gap:8px}
+  #cover-foto img{height:160px}
+}
+.rec-verif{display:inline-block;background:#e6f6ec;color:#1b8a3f;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.chat-box{display:flex;flex-direction:column;gap:12px}
+.chat-field{display:flex;flex-direction:column;gap:4px}
+.chat-field label{font-size:15px;font-weight:600;color:#555}
+.chat-field input{padding:14px 16px;border:1px solid #ddd;border-radius:8px;font-size:16px}
+.chat-btn{padding:14px 24px;border:none;border-radius:8px;background:#2863a7;color:white;font-weight:700;cursor:pointer;font-size:16px}
+.chat-btn:hover{background:#215188}
+.chat-messages{display:flex;flex-direction:column;gap:10px;min-height:340px;max-height:520px;overflow-y:auto;padding:16px;background:#f5f5f5;border-radius:10px;border:1px solid #e3e3e3}
+.chat-msg{max-width:80%;padding:12px 16px;border-radius:12px;font-size:16px;line-height:1.55;word-wrap:break-word}
+.chat-msg-cliente{align-self:flex-end;background:#0066ff;color:white;border-bottom-right-radius:2px}
+.chat-msg-impresa{align-self:flex-start;background:#ff8800;color:white;border-bottom-left-radius:2px}
+.chat-msg-meta{font-size:13px;opacity:0.75;margin-top:6px}
+.chat-input-row{display:flex;gap:8px}
+.chat-input-row input{flex:1;padding:14px 16px;border:1px solid #ddd;border-radius:8px;font-size:16px}
+@media (hover:none){
+  .sezione-card:hover,.card:hover,.btn-prev:hover{
+    transform:none;box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+  .ms:hover{transform:none}
+  .fi:hover img{transform:none}
+}
+.cta-bar-mobile{display:none}
+@media(max-width:768px){
+  .cta-bar-mobile{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:900;gap:10px;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;
+    border-top:1px solid #e5e5e5;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+  .cta-bar-mobile a{display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:14px 6px;border-radius:12px;font-weight:800;font-size:15.5px;line-height:1.2;
+    white-space:nowrap;text-decoration:none;cursor:pointer}
+  .cta-bar-mobile .cbm-prev{flex:1.6}
+  .cta-bar-mobile .cbm-call{flex:1}
+  @media(max-width:360px){ .cta-bar-mobile a{font-size:14.5px} }
+  .cta-bar-mobile .cbm-prev{background:#FF6B35;color:#fff}
+  .cta-bar-mobile .cbm-call{background:#eaf2fb;color:#2863a7;border:1.5px solid #2863a7}
+  body{padding-bottom:78px}
+}
+
+/* solo di questa pagina */
+.rec-pagina{max-width:900px;margin:24px auto;padding:0 16px}
+.rec-pagina .card{padding:24px 26px}
+.rec-item{padding:18px 0}
+.rec-azioni-alto{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rec-condividi{font-size:14px;color:#2863a7;font-weight:700;background:none;border:2px solid #2863a7;border-radius:8px;padding:9px 16px;cursor:pointer}
+.rec-condividi:hover{background:#2863a7;color:#fff}
+.rec-nota-free{background:#fffaf0;border:1.5px solid #f0d9a8;border-radius:10px;padding:12px 16px;font-size:14px;color:#7a5a00;margin-top:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <a href="cerca-imprese.html" class="nav-back" id="nav-back">← Torna alla scheda</a>
+</nav>
+
+<div class="hero" id="hero-section">
+  <div class="hero-cover" id="hero-cover"><div class="cover-img"></div></div>
+  <div class="hero-riga">
+    <div class="hero-avatar" id="avatar-wrap">🏗️</div>
+    <div class="hero-left-col">
+      <div class="hero-tipo" id="profile-tipo-badge">Recensioni dei clienti</div>
+      <div class="hero-nome" id="profile-name">Caricamento...</div>
+      <div class="hero-loc" id="profile-city">📍 —</div>
+      <div class="hero-num" id="hero-num">
+        <div class="hn"><span class="hn-i">⭐</span><span class="hn-n" id="stat-rating">—</span><span class="hn-l">Valutazione</span></div>
+        <div class="hn"><span class="hn-i">💬</span><span class="hn-n" id="stat-recensioni">—</span><span class="hn-l">Recensioni</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rec-pagina">
+  <div class="card rec-card" style="border-top-color:#0066ff">
+    <div class="rec-azioni-alto">
+      <div class="card-title" style="margin:0">⭐ Tutte le recensioni</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" class="rec-condividi" onclick="condividiPagina()">🔗 Copia il link</button>
+        <a class="btn-rec" id="btn-lascia" href="#" style="width:auto;display:inline-block;padding:10px 18px;text-decoration:none;font-size:15px">✍️ Lascia una recensione</a>
+      </div>
+    </div>
+    <div id="rec-lista"><div class="rec-empty"><div class="rec-empty-icon">⏳</div><p class="rec-empty-sub">Carico le recensioni…</p></div></div>
+  </div>
+</div>
+
+<footer style="background:#1a2f47;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a></footer>
+
+<script>
+const SU='https://nacvrsgkyfavykxjxszu.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
+const ID=(new URLSearchParams(location.search).get('id')||'').trim();
+
+async function avvia(){
+  if(!/^[0-9]{1,12}$/.test(ID)){document.getElementById('rec-lista').innerHTML='<div class="rec-empty"><div class="rec-empty-icon">🔎</div><div class="rec-empty-title">Impresa non indicata</div><p class="rec-empty-sub">Apri questa pagina dalla scheda di un\'impresa.</p></div>';return;}
+  document.getElementById('nav-back').href='profilo-impresa.html?id='+ID;
+  document.getElementById('btn-lascia').href='profilo-impresa.html?id='+ID+'#recensioni';
+  /* la stessa lettura pubblica della scheda: solo imprese vere e confermate */
+  let d=null;
+  try{
+    const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${ID}&is_test=eq.false&email_confermata=eq.true&select=id,nome,nome_attivita,tipo,citta,logo_url,foto_copertina_url,personalizzazione,piano&limit=1`,{headers:{'apikey':SK}});
+    const j=await r.json(); d=Array.isArray(j)?j[0]:null;
+  }catch(e){}
+  if(!d){document.getElementById('profile-name').textContent='Impresa non trovata';document.getElementById('rec-lista').innerHTML='<div class="rec-empty"><div class="rec-empty-icon">🔎</div><div class="rec-empty-title">Impresa non trovata</div></div>';return;}
+  const nome=String(d.nome_attivita||'').trim()||String(d.nome||'').trim()||'Impresa';
+  document.title='Recensioni di '+nome+' — TrovaImpresa';
+  document.getElementById('profile-name').textContent=nome;
+  document.getElementById('profile-city').textContent='📍 '+(d.citta||'—');
+  const tipoL={impresa:'🏗️ Impresa',artigiano:'🔧 Artigiano',negozio:'🏪 Negozio',professionista:'📐 Professionista'}[d.tipo]||'';
+  document.getElementById('profile-tipo-badge').textContent=(tipoL?tipoL+' · ':'')+'Recensioni dei clienti';
+  if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${recEsc(d.logo_url)}" alt="logo">`;
+  const cop=((d.personalizzazione||{}).banner_url)||d.foto_copertina_url||'';
+  if(cop){const hc=document.getElementById('hero-cover');hc.style.backgroundImage=`url("${recEsc(cop)}")`;hc.classList.add('ha-copertina');}
+  window._pianoImpresa=(d.piano||'free').toLowerCase();
+  await caricaRecensioni(nome);
+}
+
+async function caricaRecensioni(nomeImpresa){
+  const div=document.getElementById('rec-lista');
+  let data=[];
+  try{
+    const r=await fetch(`${SU}/rest/v1/rpc/recensioni_pubbliche`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},body:JSON.stringify({p_impresa_id:parseInt(ID)})});
+    const rj=await r.json(); data=Array.isArray(rj)?rj:[];
+  }catch(e){}
+  const totale=data.length?(Number(data[0].totale)||data.length):0;
+  const tutteLeStelle=data.flatMap(r=>[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita]).filter(Boolean);
+  const media=tutteLeStelle.length?(tutteLeStelle.reduce((a,b)=>a+b,0)/tutteLeStelle.length):0;
+  document.getElementById('stat-rating').textContent=media?media.toFixed(1):'—';
+  document.getElementById('stat-recensioni').textContent=totale||'—';
+  if(!data.length){
+    div.innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${recEsc(nomeImpresa)}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><a class="btn-rec rec-empty-btn" style="display:inline-block;width:auto;text-decoration:none" href="profilo-impresa.html?id=${ID}#recensioni">✍️ Lascia una recensione</a></div>`;
+    return;
+  }
+  /* stessa regola della scheda: col piano Free si vedono le ultime 3 */
+  const isFree=(window._pianoImpresa||'free')==='free';
+  const visibili=isFree?data.slice(0,3):data;
+  div.innerHTML=visibili.map(r=>{
+    const m=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
+    const avg=m.length?(m.reduce((a,b)=>a+b,0)/m.length).toFixed(1):'-';
+    const n=Math.round(parseFloat(avg))||0;
+    const st='★'.repeat(n)+'☆'.repeat(5-n);
+    const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
+    const voti=[['⭐ Qualità',r.stelle_qualita],['⏱️ Puntualità',r.stelle_puntualita],['💰 Prezzo',r.stelle_prezzo],['🤝 Professionalità',r.stelle_professionalita]];
+    const votiHtml=voti.map(([lbl,v])=>{const k=parseInt(v)||0;const stars=k?'★'.repeat(k)+'☆'.repeat(5-k):'—';return `<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
+    const risp=r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">Risposta dell'impresa${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:'';
+    return `<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p>${risp}</div>`;
+  }).join('');
+  /* regola gia' scritta nella scheda: al cliente NON si dice che il sito gli
+     nasconde delle recensioni (toglie fiducia). L'avviso resta nel pannello. */
+  /* per Google: valutazione media dell'attivita' */
+  try{
+    const ld={"@context":"https://schema.org","@type":"LocalBusiness","name":nomeImpresa,"url":"https://trovaimpresa.com/profilo-impresa?id="+ID,
+      "aggregateRating":{"@type":"AggregateRating","ratingValue":media.toFixed(1),"reviewCount":totale,"bestRating":"5","worstRating":"1"}};
+    const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(ld);document.head.appendChild(s);
+  }catch(e){}
+}
+
+function condividiPagina(){
+  const url=location.origin+'/recensioni-impresa.html?id='+ID;
+  const fine=()=>{const b=document.querySelector('.rec-condividi');if(b){const t=b.textContent;b.textContent='✅ Link copiato';setTimeout(()=>b.textContent=t,2500);}};
+  if(navigator.share){navigator.share({title:document.title,url}).catch(()=>{});return;}
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(fine).catch(()=>prompt('Copia questo indirizzo:',url));}else prompt('Copia questo indirizzo:',url);
+}
+avvia();
+</script>
+</body>
+</html>

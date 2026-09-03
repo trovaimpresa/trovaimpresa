@@ -1900,7 +1900,10 @@ async function caricaRecensioni(id){
     }
     const piano=(window._pianoImpresa||'free').toLowerCase();
     const isFree=piano==='free';
-    const visibili=isFree?data.slice(0,3):data;
+    /* 3 set 2026: la scheda mostra le ULTIME 3 a tutti (come Booking); tutte le
+       altre stanno nella pagina dedicata recensioni-impresa.html, che ha un
+       indirizzo suo da mandare ai clienti. Il limite del piano Free resta la'. */
+    const visibili=data.slice(0,3);
     div.innerHTML=visibili.map(r=>{
       const media=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
       const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
@@ -1910,6 +1913,8 @@ async function caricaRecensioni(id){
       const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
       return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p>${r.risposta_impresa?`<div class="rec-risposta"><div class="rec-risposta-tit">Risposta dell'impresa${r.risposta_il?` · ${new Date(r.risposta_il).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`:''}</div><p class="rec-risposta-testo">${recEsc(r.risposta_impresa)}</p></div>`:''}</div>`;
     }).join('');
+    const totRec=(data[0]&&Number(data[0].totale))||data.length;
+    div.innerHTML+=`<div style="text-align:center;margin-top:16px"><a href="recensioni-impresa.html?id=${encodeURIComponent(id)}" style="display:inline-block;padding:12px 22px;border:2px solid #2863a7;border-radius:10px;color:#2863a7;font-weight:800;text-decoration:none;font-size:15px">Vedi tutte le recensioni (${totRec}) →</a></div>`;
     /* al cliente non si dice che il sito gli nasconde delle recensioni: e' un segnale
        che toglie fiducia proprio nel momento in cui sta decidendo. L'avviso resta
        per l'impresa nel suo pannello. */
