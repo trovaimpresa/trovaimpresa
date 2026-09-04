@@ -352,6 +352,40 @@
               <input type="text" id="f-zone-artigiano" placeholder="Es. Roma e provincia, Lazio">
             </div>
           </div>
+          <div class="form-card fc-blu">
+            <div class="card-header blu">🏠 Indirizzo e contatti</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Indirizzo</label>
+                <input type="text" id="f-indirizzo-artigiano" placeholder="Es. Via Roma 1">
+              </div>
+              <div class="form-group">
+                <label>CAP</label>
+                <input type="text" id="f-cap-artigiano" placeholder="Es. 00100">
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>WhatsApp</label>
+                <input type="tel" id="f-whatsapp-artigiano" placeholder="Es. +39 333 1234567">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Quanti siete</label>
+                <input type="text" id="f-dipendenti-artigiano" placeholder="Es. 3">
+              </div>
+            </div>
+          </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">🖼️ Logo e foto dei lavori</div>
+            <p style="margin:0 0 12px;font-size:15px;color:#334155;line-height:1.5;">
+              Il logo e le foto dei tuoi lavori non si caricano da qui: stanno nel pannello,
+              perche' sono immagini e hanno bisogno del caricamento file.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              <a href="pannello-artigiano.html" style="display:inline-block;padding:12px 16px;background:#0066ff;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Carica il logo</a>
+              <a href="pannello-artigiano.html#foto-lavori" style="display:inline-block;padding:12px 16px;background:#ff7a00;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Carica le foto dei lavori</a>
+            </div>
+          </div>
           <div class="form-card fc-arancio">
             <div class="card-header arancio">⚙️ Preferenze di contatto</div>
             <div class="form-group" style="margin-bottom:8px;">
@@ -1093,6 +1127,10 @@
         setSelectValue('f-mestiere3-artigiano', Array.isArray(d.mestieri) ? d.mestieri[2] : '');
         document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
         document.getElementById('f-zone-artigiano').value = d.zone || '';
+        document.getElementById('f-indirizzo-artigiano').value = d.indirizzo || '';
+        document.getElementById('f-cap-artigiano').value = d.cap || '';
+        document.getElementById('f-whatsapp-artigiano').value = d.whatsapp || '';
+        document.getElementById('f-dipendenti-artigiano').value = d.dipendenti || '';
         document.getElementById('risponde_24h').checked = !!d.risponde_24h;
         document.getElementById('preventivo_online').checked = !!d.preventivo_online;
 
@@ -1109,7 +1147,7 @@
         document.getElementById('soa_certificata-impresa').checked = !!d.soa_certificata;
 
       } else if (tipoCategoria === 'negozio') {
-        document.getElementById('f-nome_negozio').value = d.nome_negozio || d.nome || '';
+        document.getElementById('f-nome_negozio').value = d.nome_attivita || d.nome || '';   /* era d.nome_negozio: colonna inesistente */
         document.getElementById('f-cap-negozio').value = d.cap || '';
         document.getElementById('f-indirizzo-negozio').value = d.indirizzo || '';
         document.getElementById('f-prodotti').value = d.prodotti || '';
@@ -1270,6 +1308,10 @@
             ].filter(Boolean))],
             specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
             zone: document.getElementById('f-zone-artigiano').value.trim(),
+            indirizzo: document.getElementById('f-indirizzo-artigiano').value.trim(),
+            cap: document.getElementById('f-cap-artigiano').value.trim(),
+            whatsapp: document.getElementById('f-whatsapp-artigiano').value.trim(),
+            dipendenti: document.getElementById('f-dipendenti-artigiano').value.trim(),
             risponde_24h: document.getElementById('risponde_24h').checked,
             preventivo_online: document.getElementById('preventivo_online').checked
           });
@@ -1290,7 +1332,13 @@
 
         } else if (tipoCategoria === 'negozio') {
           Object.assign(dati, {
-            nome_negozio: document.getElementById('f-nome_negozio').value.trim(),
+            /* ⛔ 4 settembre 2026 — QUI SI ROMPEVA IL SALVATAGGIO DEI NEGOZI.
+               Scriveva `nome_negozio`, colonna che in `imprese` NON esiste (e'
+               della vecchia tabella `negozi`, non piu' usata): il database
+               rifiutava tutta la riga e al negozio non si salvava niente.
+               Il nome dell'attivita' sta in `nome_attivita`, come per tutte le
+               altre categorie. Stesso difetto dell'`albo` dei professionisti. */
+            nome_attivita: document.getElementById('f-nome_negozio').value.trim(),
             cap: document.getElementById('f-cap-negozio').value.trim(),
             indirizzo: document.getElementById('f-indirizzo-negozio').value.trim(),
             prodotti: document.getElementById('f-prodotti').value.trim(),
