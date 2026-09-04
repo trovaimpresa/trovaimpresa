@@ -116,6 +116,14 @@
   status = 404
   force = true
 
+# 4 settembre 2026 — stesso file, altro nome: anche questo racconta tutto
+# il progetto e finirebbe scaricabile da chiunque.
+[[redirects]]
+  from = "/PROMPT-prossima-sessione.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # ⚠️ 25 agosto 2026 — il gemello minuscolo del file qui sopra.
 # `prompt-nuova-sessione.md` sta in root e dentro c'e' il racconto di come
 # e' fatto il gestionale, cosa e' rotto e dove si lavora: il controllo prima

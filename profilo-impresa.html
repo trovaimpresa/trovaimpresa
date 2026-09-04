@@ -1027,12 +1027,17 @@ nav img{height:36px}
 
     <!-- ===== 2. DETTAGLI FACOLTATIVI ===== -->
     <button type="button" class="prev-toggle" id="prev-toggle-btn" onclick="togglePrevExtra()">
-      <span>Aggiungi altri dettagli <span class="prev-toggle-nota">(facoltativo: foto, quando, budget)</span></span>
+      <span>Aggiungi altri dettagli <span class="prev-toggle-nota">(facoltativo: foto e documenti, quando, budget)</span></span>
       <span class="prev-toggle-freccia" id="prev-toggle-freccia">+</span>
     </button>
 
     <div id="prev-extra" style="display:none">
-      <div class="fg"><label class="fl">Una foto aiuta molto</label><input type="file" class="fi2" id="prev-foto-file" accept="image/*"></div>
+      <div class="fg">
+        <label class="fl">Allega foto o documenti</label>
+        <input type="file" class="fi2" id="prev-allegati-file" multiple accept="image/*,.pdf,.dwg,.dxf,.xls,.xlsx,.csv,.doc,.docx" onchange="mostraAllegatiScelti()">
+        <p class="prev-aiuto">Foto, PDF, computo, planimetria DWG. Puoi allegarne pi&ugrave; di uno: massimo 10 MB l&rsquo;uno.</p>
+        <div id="prev-allegati-lista" style="display:none;margin-top:8px"></div>
+      </div>
       <div class="fr2">
         <div class="fg"><label class="fl">Quando vorresti il sopralluogo</label><input type="date" class="fi2" id="prev-data"></div>
         <div class="fg"><label class="fl">Quanto va di fretta</label><select class="fs" id="prev-urgenza"><option>Normale</option><option>Entro la settimana</option><option>Urgente</option></select></div>
@@ -2072,7 +2077,7 @@ async function submitPreventivo(){
   const dataPreferita=document.getElementById('prev-data').value;
   const urgenza=document.getElementById('prev-urgenza').value;
   const budget=document.getElementById('prev-budget').value.trim();
-  const fotoFile=document.getElementById('prev-foto-file').files[0];
+  const allegatiFiles=document.getElementById('prev-allegati-file').files;
   const me=document.getElementById('prev-msg');const btn=document.querySelector('.btn-sub');
   const telefonoV=document.getElementById('prev-telefono').value.trim();
 
@@ -2096,29 +2101,42 @@ async function submitPreventivo(){
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=parseInt(p.get('id'));
-    // Upload foto opzionale (best-effort, non blocca l'invio)
-    let fotoUrl=null;
-    if(fotoFile && fotoFile.size<=5*1024*1024){
-      try{
-        const ext=fotoFile.name.split('.').pop();
-        const path=`preventivi/${iid}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
-        const {error:upErr}=await sc.storage.from('foto-lavori').upload(path,fotoFile,{upsert:false});
-        if(!upErr) fotoUrl=sc.storage.from('foto-lavori').getPublicUrl(path).data.publicUrl;
-      }catch(_){}
+    /* ALLEGATI — 4 settembre 2026.
+       Prima finivano nel bucket "foto-lavori", che accetta solo l'impresa
+       loggata: il cliente non lo e', quindi l'upload falliva IN SILENZIO e la
+       foto non arrivava mai (zero richieste con foto in tre mesi).
+       Adesso vanno in "preventivi-allegati" (privato, scrittura anche da chi
+       non e' loggato dentro preventivi/<id impresa>/) e se un file non passa
+       il cliente lo LEGGE, invece di credere di averlo mandato. */
+    const allegati=[];
+    for(let i=0;i<allegatiFiles.length;i++){
+      const f=allegatiFiles[i];
+      const ext=_prevEstensione(f.name);
+      if(f.size>PREV_MAX_MB*1048576){ btn.disabled=false; btn.textContent='\uD83D\uDCCB Invia richiesta gratuita'; return stop('Il file "'+f.name+'" pesa '+_prevPeso(f.size)+': il massimo \u00e8 10 MB. Toglilo, oppure mandane uno pi\u00f9 leggero.','prev-allegati-file'); }
+      if(!PREV_TIPI[ext]){ btn.disabled=false; btn.textContent='\uD83D\uDCCB Invia richiesta gratuita'; return stop('Il file "'+f.name+'" non si pu\u00f2 allegare. Si possono mandare foto, PDF, DWG, DXF, Excel e Word.','prev-allegati-file'); }
+      const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-60);
+      const path='preventivi/'+iid+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'-'+safe;
+      const {error:upErr}=await sc.storage.from('preventivi-allegati').upload(path,f,{contentType:PREV_TIPI[ext],upsert:false});
+      if(upErr){ btn.disabled=false; btn.textContent='\uD83D\uDCCB Invia richiesta gratuita'; return stop('Il file "'+f.name+'" non \u00e8 stato caricato ('+(upErr.message||'errore')+'). Riprova, oppure toglilo e invia lo stesso.','prev-allegati-file'); }
+      allegati.push({path:path,nome:f.name,tipo:PREV_TIPI[ext],dim:f.size});
     }
     const telefono=document.getElementById('prev-telefono').value.trim();
     const descrizione=document.getElementById('prev-descrizione').value.trim();
     /* tipo_lavoro e categoria_lavoro sono due colonne diverse: il pannello mostra
        "Lavoro" leggendo tipo_lavoro, che il form non riempiva mai (restava "—"). */
-    const riga={impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,tipo_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,created_at:new Date().toISOString()};
+    const riga={impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,tipo_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:null,created_at:new Date().toISOString()};
     /* La colonna "condivisibile" potrebbe non esistere nel database: se manca,
        PostgREST risponde 400 e la richiesta andava persa. Ora si riprova senza,
        cosi' la richiesta del cliente arriva comunque. */
     const condivisibile=document.getElementById('prev-condivisibile').checked;
-    let {error}=await sc.from('preventivi').insert(Object.assign({condivisibile},riga));
-    if(error && /condivisibile/i.test(error.message||'')){
-      const rip=await sc.from('preventivi').insert(riga);
-      error=rip.error;
+    let {error}=await sc.from('preventivi').insert(Object.assign({condivisibile,allegati},riga));
+    if(error && /condivisibile|allegati/i.test(error.message||'')){
+      const rip2=await sc.from('preventivi').insert(Object.assign({condivisibile},riga));
+      error=rip2.error;
+      if(error && /condivisibile/i.test(error.message||'')){
+        const rip=await sc.from('preventivi').insert(riga);
+        error=rip.error;
+      }
     }
     if(error)throw error;
     /* AGOSTO 2026 — Doppio avviso: la richiesta resta nel pannello E arriva una mail all'impresa.
@@ -2140,13 +2158,37 @@ async function submitPreventivo(){
           data_preferita:dataPreferita||null,
           urgenza:urgenza||null,
           budget:budget||null,
-          foto:fotoUrl
+          allegati:allegati.length
         })
       }).catch(function(){});
     }catch(_){}
     me.textContent='✅ Richiesta inviata!';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#e8f5ee;color:#0066ff;';
     btn.textContent='✅ Inviato';setTimeout(()=>hidePreventivo(),2000);
   }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
+}
+
+/* ===== ALLEGATI DELLA RICHIESTA DI PREVENTIVO (4 settembre 2026) ===== */
+var PREV_MAX_MB=10;
+var PREV_TIPI={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',heic:'image/heic',heif:'image/heif',gif:'image/gif',pdf:'application/pdf',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',xls:'application/vnd.ms-excel',csv:'text/csv',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',dwg:'image/vnd.dwg',dxf:'image/vnd.dxf'};
+function _prevEstensione(n){var p=String(n||'').split('.');return p.length>1?p.pop().toLowerCase():''}
+function _prevPeso(b){var mb=b/1048576;return mb>=1?(mb.toFixed(1).replace('.',',')+' MB'):(Math.max(1,Math.round(b/1024))+' KB')}
+function _prevEsc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function mostraAllegatiScelti(){
+  var inp=document.getElementById('prev-allegati-file');
+  var box=document.getElementById('prev-allegati-lista');
+  if(!inp||!box)return;
+  var f=inp.files||[];
+  if(!f.length){box.style.display='none';box.innerHTML='';return}
+  var righe=[];
+  for(var i=0;i<f.length;i++){
+    var troppo=f[i].size>PREV_MAX_MB*1048576;
+    var tipoNo=!PREV_TIPI[_prevEstensione(f[i].name)];
+    var colore=(troppo||tipoNo)?'#c0392b':'#333';
+    var nota=troppo?' \u2014 troppo grande, il massimo \u00e8 10 MB':(tipoNo?' \u2014 questo tipo di file non si pu\u00f2 allegare':'');
+    righe.push('<div style="font-size:14px;line-height:1.6;color:'+colore+'">\uD83D\uDCCE '+_prevEsc(f[i].name)+' <span style="color:#777">('+_prevPeso(f[i].size)+')</span>'+_prevEsc(nota)+'</div>');
+  }
+  box.innerHTML=righe.join('');
+  box.style.display='block';
 }
 
 function estraiVideoEmbed(url){

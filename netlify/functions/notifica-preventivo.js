@@ -12,9 +12,9 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget, foto;
+  let impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget, foto, allegati;
   try {
-    ({ impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget, foto } = JSON.parse(event.body));
+    ({ impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget, foto, allegati } = JSON.parse(event.body));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
@@ -34,6 +34,11 @@ exports.handler = async function(event) {
   if (!SUPABASE_KEY) {
     return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
   }
+
+  // 4 settembre 2026 — quanti file ha allegato il cliente.
+  // Arriva come numero dal modulo; i file stanno nel bucket privato
+  // "preventivi-allegati" e si aprono dal pannello, non dall'email.
+  const nAllegati = Number.isFinite(Number(allegati)) ? Math.max(0, Math.trunc(Number(allegati))) : 0;
 
   const sbHeaders = {
     'apikey': SUPABASE_KEY,
@@ -104,6 +109,11 @@ exports.handler = async function(event) {
               <img src="${foto}" alt="Foto del lavoro" style="max-width:100%;border-radius:8px;border:1px solid #e5e5e5">
               <div style="font-size:13px;color:#0066ff;font-weight:700;margin-top:8px">📷 Apri la foto allegata</div>
             </a>
+          </div>` : ''}
+          ${nAllegati ? `
+          <div style="background:#fff8ec;border:1px solid #f0d9b0;border-radius:8px;padding:16px 20px;margin-bottom:14px;text-align:center">
+            <p style="font-size:15px;margin:0 0 4px;font-weight:700">\uD83D\uDCCE ${nAllegati === 1 ? 'Il cliente ha allegato 1 file' : `Il cliente ha allegato ${nAllegati} file`}</p>
+            <p style="font-size:14px;color:#666;margin:0">Foto, PDF o disegni: li apri dalla richiesta, dentro il tuo pannello.</p>
           </div>` : ''}
           <div style="background:#f0f7ff;border:1px solid #cfe0f5;border-radius:8px;padding:16px 20px;margin-bottom:14px;text-align:center">
             <p style="font-size:14px;margin:0 0 4px;font-weight:700">📇 Contatti del cliente disponibili nel tuo pannello</p>

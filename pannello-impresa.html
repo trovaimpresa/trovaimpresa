@@ -5442,9 +5442,11 @@ async function apriModal(prevId) {
     <div class="ric-row"><span class="ric-key">Budget:</span><span>${escHtml(data.budget || '—')}</span></div>
     ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${escHtml(String(data.superficie))} mq</span></div>` : ''}
     ${contattoHtml}
+    <div class="ric-row" id="ric-allegati" style="display:none"></div>
   `;
 
   caricaContattoSbloccato(data.id);
+  mostraAllegatiRichiesta(data.allegati);
 
   document.getElementById('prev-generato').classList.remove('show');
   document.getElementById('btn-invia-prev').style.display = 'none';
@@ -5468,6 +5470,36 @@ function chiudiModal() {
 }
 
 // ============ CONTATTO CLIENTE ============
+// ============ ALLEGATI DELLA RICHIESTA (4 settembre 2026) ============
+// Foto, PDF, computi e disegni che il cliente allega alla richiesta. Stanno
+// nel bucket privato "preventivi-allegati": si aprono con un link firmato
+// che vale un'ora, e lo puo' chiedere solo l'impresa proprietaria.
+async function mostraAllegatiRichiesta(allegati) {
+  const box = document.getElementById('ric-allegati');
+  if (!box) return;
+  let lista = [];
+  try { lista = (typeof allegati === 'string') ? JSON.parse(allegati) : (allegati || []); } catch (e) { lista = []; }
+  if (!Array.isArray(lista) || !lista.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = '';
+  box.innerHTML = `<span class="ric-key">Allegati:</span><span>\u23F3 caricamento\u2026</span>`;
+  const pezzi = [];
+  for (const a of lista) {
+    const nome = (a && (a.nome || a.path)) || 'allegato';
+    let url = '';
+    try {
+      const { data } = await sb.storage.from('preventivi-allegati').createSignedUrl(a.path, 3600);
+      url = (data && data.signedUrl) || '';
+    } catch (e) { }
+    const peso = (a && a.dim)
+      ? ` <span style="color:#888">(${a.dim >= 1048576 ? (a.dim / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(a.dim / 1024)) + ' KB'})</span>`
+      : '';
+    pezzi.push(url
+      ? `<a href="${escHtml(url)}" target="_blank" rel="noopener" style="display:inline-block;background:#eef4ff;border:1px solid #cfe0f5;color:#0052cc;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;margin:0 8px 8px 0">\uD83D\uDCCE ${escHtml(nome)}${peso}</a>`
+      : `<span style="display:inline-block;color:#c0392b;font-size:14px;margin:0 8px 8px 0">\uD83D\uDCCE ${escHtml(nome)} \u2014 non si apre, riprova fra poco</span>`);
+  }
+  box.innerHTML = `<span class="ric-key">Allegati:</span><span>${pezzi.join('')}</span>`;
+}
+
 async function caricaContattoSbloccato(prevId) {
   try {
     const { data: { session } } = await sb.auth.getSession();

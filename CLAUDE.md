@@ -20951,3 +20951,313 @@ dirlo»**, non far sembrare un successo un numero che non lo è.
   registrazione **in silenzio**.
 - Le foto di collaudo si fanno con Playwright nella nuvola, sul pacchetto
   `_pacchetto-pagine.zip`; dopo l'uso lo zip va in `prove-claude/_to_delete/`.
+
+---
+
+# 4 SETTEMBRE 2026 (pomeriggio e sera) — CONTROLLO GENERALE DEL GESTIONALE
+# →12← difetti chiusi · UNA SOLA lista di mezzi · i centesimi del Noleggio
+
+Filone parallelo a quello delle registrazioni: Alessio ha chiesto «un controllo
+generale ma ben dettagliato» partendo da gestionale impresa → artigiano →
+professionista → noleggio, con incroci e sabotaggi. Ne sono usciti →11← difetti
+in elenco, più uno trovato strada facendo (il →12←). Tutti chiusi, pubblicati e
+**provati dal vivo sul sito**, non solo sui banchi.
+
+## LA LISTA DEI DIFETTI, E COS'ERANO DAVVERO
+
+| n. | cosa | dove si vedeva |
+|----|------|----------------|
+| 1 | Riepilogo e Report davano **due utili diversi** sullo stesso mese | i soldi del mese |
+| 2 | il cliente nato dal Noleggio (senza reparto) **spariva** dagli altri reparti | Clienti |
+| 3 | il noleggio **interno** restava fra i soldi «da incassare» | Noleggio |
+| 4 | uscendo dal Noleggio si finiva sulla pagina del **codice invito** | Noleggio |
+| 5 | il confronto della **variante** rifaceva `quantità × prezzo` a mano | Computi |
+| 6 | tre accenti scritti con l'apostrofo | scritte a schermo |
+| 7 | i **numeri grandi si svuotavano** da soli (massimale polizza, km del pieno) | Dati azienda |
+| 8 | la riga «Spese» del Riepilogo **si leggeva al contrario** | Riepilogo |
+| 9 | la riga del **ribasso** nasceva senza la chiave `sezione` | preventivo dal computo |
+| 10 | un **reparto fantasma** (cestinato) restava aperto e non si apriva più niente | tutti |
+| 12 | il database **rifiutava il «Tipo»** del mezzo scritto a mano | Mezzi |
+
+Il →11← resta aperto.
+
+## ⛔ LA FAMIGLIA DEI DIFETTI DEI SOLDI: LE COPIE DELLA STESSA FORMULA
+
+Tre difetti su dodici (→1←, →5←, →8←) sono lo stesso difetto travestito:
+**una formula dei soldi scritta in due posti diversi che col tempo si scollano.**
+Non era mai sbagliata la formula: erano sbagliate le COPIE.
+
+- Il **Riepilogo** contava i rifornimenti di tutti i reparti, il **Report** solo
+  del suo → due utili diversi sullo stesso mese.
+- Il confronto della **variante** rifaceva `quantità × prezzo` invece di leggere
+  l'`importo` che la vista `gest_computo_voci_calc` ha già calcolato. Sul computo
+  vero di Alessio (→88← righe) faceva →43.495,58← invece di →43.495,59←.
+  Adesso c'è **una funzione sola**, `_impVoce(v)` in `js/gest-computo.js`: se la
+  vista dà l'importo si usa quello; se manca, il ripiego rifà il conto **come il
+  database** (quantità a →3← decimali e `_cent2`). Usata anche da
+  `js/gest-computo-pdf.js`.
+
+⚠️ **Regola 6 ribadita dai fatti: una formula dei soldi sta in UN posto solo.**
+Quando serve in due schermate, si estrae in una funzione e si chiama da tutte e
+due. Mai ricopiare, nemmeno «tanto sono due righe».
+
+## ⛔ IL DIFETTO 10: DUE VOLTE VERDE, DUE VOLTE ROTTO DAL VIVO
+
+Il reparto fantasma è passato **due volte** con il banco verde. Vale la pena
+saperlo a memoria, perché è la trappola più cara della giornata.
+
+1. La prima volta avevo messo la pulizia dentro `renderLanding()`: ma chi rientra
+   nel reparto di ieri **la schermata dei reparti non la vede mai**, quindi quel
+   codice non girava. Banco verde, sito rotto.
+2. La seconda volta usciva subito perché `state.panels` non era ancora caricato
+   quando l'auth rispondeva per prima. Banco verde, sito rotto.
+
+Sistemato con `pulisciRepartiSpariti()` chiamata da **DUE punti** (da
+`_authRefresh` e da `load().then()`), che non si segna «fatto» finché il database
+non ha risposto. E il banco adesso prova **tutti e due i tempi dell'auth**
+(→0← ms e →700← ms): con un tempo solo non provava niente.
+
+⚠️ **Un banco che gira con un solo tempo non misura l'ordine di arrivo.** Quando
+due cose devono incontrarsi (auth e dati del browser), il banco le fa arrivare in
+tutti e due gli ordini.
+
+## UNA SOLA LISTA DI MEZZI (SQL + le due pagine)
+
+Prima: `gest_mezzi` (parco mezzi del gestionale, per reparto, scadenze come righe
+dello Scadenzario) e `nol_mezzi` (mezzi del Noleggio, con tariffe, contaore e le
+scadenze scritte addosso al mezzo). **Lo stesso camion scritto due volte, e la
+revisione da aggiornare in due posti.**
+
+Adesso l'anagrafica è UNA: **`gest_mezzi`**. File: `sql/mezzi-una-lista-sola.sql`
+(già passato sul database il 4 set, si può rilanciare senza fare danni).
+
+- a `gest_mezzi` sono state aggiunte tutte le colonne del noleggio (tariffe,
+  contaore, contakm, usura, cauzione, scadenze, manutenzione) + **`noleggiabile`**
+- i mezzi del Noleggio sono entrati **con lo stesso id**: i noleggi già fatti
+  (`nol_noleggi.mezzo_id`) e le foto (`nol_media.mezzo_id`) non si sono staccati.
+  Le due chiavi esterne adesso puntano a `gest_mezzi`
+- `mestiere_id = NULL` = mezzo dell'**azienda**: si vede in tutti i reparti, come
+  i clienti nati dal Noleggio. Nel gestionale i mezzi si leggono con `_cliOr`
+- la **spunta «lo noleggio anche a terzi»** decide chi compare nel listino del
+  Noleggio: gli elenchi del Noleggio filtrano `.eq("noleggiabile",true)`, ma il
+  **singolo mezzo di un noleggio si cerca senza quel filtro** — se no togliere un
+  mezzo dal listino cancellerebbe lo storico
+- la parola libera del noleggio («movimento terra») è diventata il **`tipo`**:
+  nel gestionale `categoria` vale solo `mezzo` o `attrezzatura`, lo impone il DB
+- lo stato `noleggiato` del Noleggio è diventato `in_uso` (l'altro il DB lo rifiuta)
+- **le scadenze stanno sulla riga del mezzo** e si scrivono da tutte e due le
+  pagine. La vista `gest_mezzi_scadenze` adesso mette insieme le righe scritte a
+  mano in `gest_scadenze` **e** le quattro colonne del mezzo (assicurazione,
+  revisione, collaudo, verifica periodica): si scrivono una volta, si vedono
+  nella colonna «Prossima scadenza», sulla scheda e nel Riepilogo
+- ⚠️ **`nol_mezzi` NON è stata cancellata**: resta come copia di sicurezza.
+  Quando Alex è tranquillo si butta
+
+## ⛔ IL DIFETTO 12, TROVATO SCAVANDO NEL DATABASE
+
+Il vincolo `gest_mezzi_tipo_ok` obbligava la colonna **`tipo`** a valere `mezzo` o
+`attrezzatura`. Ma nella scheda del mezzo il campo «Tipo» **si scrive a mano**
+(«furgone», «escavatore»): appena ci si scriveva qualcosa il salvataggio veniva
+**rifiutato dal database**. Funzionava solo lasciandolo vuoto — infatti il fiat
+ducato di Alessio ce l'aveva vuoto. Quel vincolo andava su `categoria`, che il suo
+ce l'ha già. Tolto dentro `sql/mezzi-una-lista-sola.sql`.
+
+⚠️ **Lezione: i vincoli del database vanno guardati, non dati per buoni.** Un
+`CHECK` sbagliato non fa rumore: fa fallire un salvataggio ogni tanto, e sembra
+colpa della rete.
+
+## I CENTESIMI DEL NOLEGGIO (l'ultimo lavoro della giornata)
+
+Il Noleggio contava i soldi con la sua regola, il gestionale imprese con
+`js/centesimi.js`. Finché erano due mondi separati passava; ma da oggi un
+noleggio interno entra nei costi dell'impresa, e due regole diverse sullo stesso
+euro fanno **litigare Riepilogo e Report** — cioè il difetto →1← che avevamo
+appena chiuso.
+
+Il conto in centesimi interi c'era già in `js/noleggio-prezzo.js`. A sbagliare
+erano i passaggi che **entrano e escono** dagli interi:
+
+- ⛔ **il prezzo unitario veniva arrotondato al centesimo PRIMA di moltiplicare**:
+  il terzo decimale spariva. →250← km × →0,185← €/km facevano →47,50 €← invece
+  di →46,25 €← (la tariffa diventava →0,19←). Su →170,5← unità a →1.602,105 €←
+  l'errore era di →86← centesimi
+- su →20.000← conti a caso con prezzi a tre decimali: la vecchia strada sbagliava
+  →19.928← volte, la nuova →0←
+
+Adesso `gestionale-noleggio.html` carica `js/centesimi.js` **prima** del motore
+del prezzo, e passano di lì: quantità × tariffa, il materiale consumato, l'usura
+a percentuale, il rateo delle fatture (`_centMulDiv`), l'IVA (`_centPerc`) e
+anche la **scrittura** dei numeri (`_eur` → `_cent2`).
+`js/noleggio-prezzo.js` se la cava anche senza la libreria (torna al conto di
+prima invece di rompersi), perché i banchi lo caricano da solo.
+
+## ⛔ LE TRAPPOLE DELLA GIORNATA — tutte prese davvero
+
+- **Il banco ha fermato DUE errori miei** prima che arrivassero ad Alex:
+  il reparto fantasma (verde due volte su codice che dal vivo non funzionava) e i
+  centesimi del noleggio, dove **avevo introdotto io** l'arrotondamento del prezzo
+  unitario prima del prodotto (→1.140,41← invece di →1.140,40←). Se mi fossi
+  fidato degli occhi, li pubblicavo.
+- **Il tag `<script>` va CHIUSO.** Aggiungendo `<script src="/js/centesimi.js">`
+  senza `</script>` la pagina si mangiava il pezzo dopo e `NoleggioPrezzo` non
+  nasceva più. Il banco l'ha visto (una prova rossa), gli occhi no.
+- **La trappola della cache, di nuovo.** Cliccando «← Esci» si finiva sulla
+  pagina dell'invito perché il browser teneva la pagina VECCHIA mentre il mio
+  `fetch(...,{cache:'no-store'})` leggeva quella nuova. Regola: aprire con una
+  query che cambia (`?fresco=1`) **e verificare che il DOM contenga davvero la
+  modifica** prima di cliccare.
+- **`visibilityState:"hidden"`** nel riquadro del browser ferma
+  `requestAnimationFrame`: le caselle `data-euro` sembravano non formattate.
+  Serve una foto per portare la pagina davanti, poi si rilegge.
+- **Node senza ICU completo** scrive `1111,68` invece di `1.111,68`: un banco che
+  costruisce il numero atteso con `toLocaleString` diventa rosso per colpa sua.
+  Il numero all'italiana nei banchi si scrive a mano.
+- **`eur()` usa lo spazio unificatore** prima del simbolo €: cercare «250,00 €»
+  con lo spazio della tastiera non trova niente.
+- **La trappola del 26 agosto, di nuovo**: `createClient()` viene chiamato più di
+  una volta, e se le tabelle finte nascono dentro, il banco guarda l'elenco
+  sbagliato. Le tabelle del finto si fanno UNA volta sola, sulla finestra.
+- **Ho toccato dati veri di Alessio durante una prova** (spostata la data di
+  uscita di un noleggio a oggi) e il computer si è scollegato a metà. Rimessa a
+  posto subito. ⚠️ Sui dati veri si LEGGE; se si scrive per forza, si rimette
+  com'era **nello stesso momento**, non «dopo».
+
+## I BANCHI NUOVI (consegnati in `prove-claude/`)
+
+- `banco-noleggio-e-reparti-4set.zip` — difetti →1←, →2←, →3← · →21← verdi
+- `banco-computo-9-10-4set.zip` — difetti →9←, →10← · →33← verdi (auth a →0← e →700← ms)
+- `banco-4-6-7-4set.zip` — difetti →4←, →6←, →7← · →23← verdi
+- `banco-variante-5-4set.zip` — difetto →5← · →25← verdi
+- `banco-riepilogo-8-4set.zip` — difetto →8← · →15← verdi
+- `banco-mezzi-una-lista-4set.zip` — la lista unica · →44← verdi
+- `banco-centesimi-noleggio-4set.zip` — i centesimi · →26← verdi
+
+Ognuno gira anche sulla versione PUBBLICATA e lì diventa **rosso**: è la prova
+che misura qualcosa. In tutto →490← prove verdi, →134← nuove oggi.
+
+⚠️ **Due banchi vecchi erano SCADUTI**, non rotti dal lavoro di oggi (si
+rompevano uguale sulla versione pubblicata): uno cercava ancora `nol_mezzi`,
+l'altro guardava la scritta «630» quando la casella ormai scrive «630,00».
+Sistemati dentro `banco-centesimi-noleggio-4set.zip` (adesso guardano il NUMERO,
+non la scritta).
+⚠️ **Un terzo banco è scaduto e NON è stato sistemato**: `banco-preventivi` del
+→29← agosto cerca `_centPerc` dove non sta più. Si rompe uguale sulla versione
+originale intoccata: è il banco da aggiornare, non il sito.
+
+## LA PROVA DAL VIVO (regola fissa di Alessio)
+
+Alessio ha detto due cose che valgono da qui in avanti:
+1. «**ti avevo detto di entrare nel sito con il browser e fare un test**» — non
+   basta il finto: si entra su trovaimpresa.com e si guarda la cosa vera.
+2. «**fai sempre tu il test dopo il push**» — il collaudo dal vivo non si chiede
+   e non si aspetta: si fa da soli, subito dopo che Alex ha pubblicato, e si
+   riporta cosa si è visto.
+
+Fatto per ognuno dei →12←. Sul computo vero: →43.495,59← (database) contro
+→43.495,58← (vecchia strada). Sui mezzi: l'escavatore si vede in tutti i reparti,
+il fiat ducato NON compare nel listino del Noleggio, le scadenze sono le stesse
+da tutte e due le parti. Sui centesimi: →46,25 €← per →250← km a →0,185←.
+
+## ⛔ COSA RESTA APERTO DA QUESTO FILONE
+
+- il **difetto 11** dell'elenco originale
+- il noleggio **«prenotato»** già contato come spesa prima ancora di uscire
+- la **protezione password deboli spenta** su Supabase (→2← minuti sul pannello)
+- **`nol_mezzi`** ancora lì come copia di sicurezza: quando Alex è tranquillo si butta
+- il **banco dei preventivi** del 29 agosto da aggiornare (`_centPerc` spostato)
+- →23← finestrelle `openSheet` piccole rimaste nel Noleggio e codice morto della
+  vecchia schermata reparti
+
+## Lezioni di oggi (per Claude)
+
+- **I bug dei soldi non stanno nella formula: stanno nelle COPIE della formula.**
+  Quando due schermate devono dire lo stesso numero, la formula è una sola.
+- **Un banco verde non è una prova finché non l'hai sabotato**: farlo girare sulla
+  versione di PRIMA e pretendere che diventi rosso.
+- **Quando due cose arrivano in ordine variabile, il banco le prova in tutti e due
+  gli ordini.** Un tempo solo non misura niente.
+- **Prima di moltiplicare non si arrotonda.** Si arrotonda UNA volta, alla fine,
+  come fa il database.
+- I vincoli `CHECK` del database vanno letti: uno sbagliato fa fallire i
+  salvataggi in silenzio.
+- Sui dati veri si legge; se si scrive per prova, si rimette a posto subito.
+
+
+---
+
+# 4 SETTEMBRE 2026 (notte) — GLI ALLEGATI DELLA RICHIESTA DI PREVENTIVO
+
+## Il difetto, in una riga
+Il cliente **non è loggato**. La foto che allegava alla richiesta veniva
+caricata nel bucket `foto-lavori`, che ha una policy «owner»: accetta solo
+l'impresa proprietaria. L'upload finiva dentro un `try{}catch(_){}` vuoto,
+quindi **falliva in silenzio** e la richiesta partiva senza foto. In tre
+mesi: →0← richieste con foto, e nessuno se n'è mai accorto.
+
+## Come è fatta adesso
+- Bucket nuovo **`preventivi-allegati`**, privato, →10← MB per file.
+  - scrive anche `anon`, ma **solo** dentro `preventivi/<id impresa>/`, e
+    solo se quell'impresa **esiste davvero** (`exists (select 1 from imprese …)`)
+  - legge **solo** l'impresa proprietaria della cartella
+  - è la stessa forma delle policy già in piedi per `documenti-incarichi`:
+    prima di inventare, si è guardato cosa c'era
+- Colonna **`preventivi.allegati jsonb`** = `[{path, nome, tipo, dim}]`,
+  aggiunta anche alla vista **`preventivi_safe`** (è quella che leggono i
+  pannelli: senza toccarla, gli allegati non arrivavano lo stesso).
+- SQL: `sql/preventivi-allegati.sql` — già passato, si può rilanciare.
+- Modulo (`profilo-impresa.html`): una casella `multiple`, il tipo del file
+  deciso **dall'estensione** (così un `.dwg`, che il browser manda senza
+  tipo, non viene rifiutato dal bucket), l'elenco dei file scelti visibile
+  **prima** di inviare, il troppo grande già segnato in rosso lì.
+- Pannelli: riga «Allegati» dentro la richiesta, con **link firmati** da
+  un'ora (`createSignedUrl`). Blocco identico nei →4← (stesso md5
+  →80c6c6d446fb66150b39aa5b1372ffbb←).
+- Email (`notifica-preventivo.js`): un riquadro «il cliente ha allegato N
+  file». I file **non** si mandano per email: si aprono dal pannello, dove
+  il permesso c'è.
+
+## ⛔ LA REGOLA NUOVA: UN CARICAMENTO NON PUÒ FALLIRE ZITTO
+Prima il caricamento era «best effort» dentro un `catch` vuoto: se non
+passava, il cliente leggeva lo stesso «✅ Richiesta inviata». Adesso, se un
+file è troppo grande, è di un tipo che non si può mandare, o il server lo
+rifiuta, **si ferma tutto e lo si scrive**, col nome del file dentro il
+messaggio, e il bottone torna cliccabile.
+⚠️ Un `catch(_){}` vuoto attorno a una cosa che deve arrivare a
+destinazione è un difetto, non una rete di sicurezza.
+
+## I banchi (in `prove-claude/banchi-fissi/`, che è nel `.gitignore`)
+- `pagine/banco-allegati-preventivo.js` — browser vero, Supabase finto,
+  **→31← verdi**. Gira con `gira-pagine.sh` (è già nel lanciatore della nuvola).
+  Sabotato →3← volte (bucket sbagliato, misura non controllata, errore
+  ingoiato): →2←, →6← e →3← rosse. Se un sabotaggio resta verde, si ferma.
+- `allegati/banco-allegati-pannelli.js` + `gira-allegati.sh` — sul PC in
+  →1← secondo, niente browser. **→60← verdi** (→15← per pannello). Ritaglia
+  `mostraAllegatiRichiesta` **dal file vero**: se non la trova più dice
+  «BANCO CIECO». `--sabota 1|2|3` per la prova del metro.
+- `allegati/permessi-allegati.sql` — da incollare nell'editor SQL di
+  Supabase. →6← verdi sul database VERO, dentro una transazione annullata
+  (non scrive niente), più la prova del metro: la vecchia strada
+  (`foto-lavori` da un cliente non loggato) risulta **BLOCCATA**. È la prova
+  che il difetto era quello.
+
+## ⚠️ DA SAPERE
+- **Da Cowork non si arriva al database via HTTP** (né dal PC né dalla
+  nuvola: `curl` risponde →000←). Ma con il collegamento Supabase si
+  possono provare le policy in SQL, cambiando ruolo (`set local role anon`
+  / `authenticated` + `set_config('request.jwt.claims', …)`) dentro
+  `begin … rollback`. È così che i permessi sono stati provati per davvero.
+- **Il colore in un banco non si cerca come stringa**: il browser riscrive
+  `#c0392b` in `rgb(192, 57, 43)`. Il banco degli allegati ci è cascato:
+  →3← rosse finte, colpa del banco e non della pagina. Si legge
+  `getComputedStyle(...).color`.
+
+## ⛔ DUE COSE VISTE E NON TOCCATE (decide Alex)
+1. `preventivi.foto` **non era mostrata in nessun pannello**: anche se la
+   foto fosse arrivata, l'impresa non l'avrebbe vista. Oggi il posto c'è
+   (la riga «Allegati»), ma legge `allegati`, non `foto`. Righe vecchie con
+   `foto` piena: →0←, quindi non urge.
+2. Il bucket **`documenti-incarichi`** (incarichi ai professionisti)
+   accetta **solo `application/pdf`**, ma la casella dice «PDF/JPG/PNG/DWG»:
+   chi allega un JPG o un DWG viene **rifiutato dal server**. Lì l'errore si
+   vede (non è muto come era il preventivo), ma la scritta promette una cosa
+   che non si può fare.
