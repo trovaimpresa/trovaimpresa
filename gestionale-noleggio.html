@@ -1227,7 +1227,13 @@ body:has(#ti-fondatore) .sheet--grande{
       if(document.referrer && new URL(document.referrer).origin===location.origin
          && document.referrer.indexOf("gestionale-noleggio")<0){ history.back(); return; }
     }catch(e){}
-    location.href="/gestionale";
+    /* ⛔ 4 settembre 2026 — QUI C'ERA «/gestionale», E PORTAVA FUORI STRADA.
+       In netlify.toml «/gestionale» e' un rinvio a gestionale-invito.html, la
+       pagina dove un DIPENDENTE scrive il codice che gli ha dato il titolare.
+       Cosi' il titolare che usciva dal Noleggio senza sapere da dove era
+       arrivato (link salvato, pagina aperta da sola, prima visita) si
+       ritrovava a doversi far invitare nel gestionale suo. */
+    location.href="/gestionale-app.html";
   }
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
@@ -4829,7 +4835,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente"), selR=$("#nn-reparto");
     if(selM)selM.innerHTML='<option value="">— Seleziona mezzo —</option>'+nolMezzi.map(x=>`<option value="${x.id}" data-nome="${esc(x.nome||"")}">${esc(x.nome||"")}</option>`).join("");
     if(selC)selC.innerHTML='<option value="">— Seleziona cliente —</option>'+(cl||[]).map(x=>`<option value="${x.id}" data-nome="${esc(x.nome||"")}">${esc(x.nome||"")}</option>`).join("");
-    if(selR)selR.innerHTML='<option value="">— nessuno: e\' un cliente esterno —</option>'+(mestieri||[]).map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join("");
+    if(selR)selR.innerHTML='<option value="">— nessuno: è un cliente esterno —</option>'+(mestieri||[]).map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join("");
   }
   async function loadNoleggi(){
     if(!(sb&&sbUid)) return;

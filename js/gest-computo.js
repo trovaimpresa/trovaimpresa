@@ -2090,7 +2090,7 @@
        ricerca ci arriva lo stesso. Scrivere «500 voci» faceva credere che il
        prezzario fosse quello: adesso si dice come stanno le cose. */
     const _vc=k=>(k>=PP_MAX
-      ? "le "+k+" che usi di piu', piu' tutte le altre cercando una parola"
+      ? "le "+k+" che usi di più, più tutte le altre cercando una parola"
       : k+(k===1?" voce":" voci"));
     box.innerHTML='<div class="sh-nota" style="margin-bottom:10px">'
       +(ppFonteScelta
