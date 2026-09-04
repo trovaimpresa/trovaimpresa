@@ -870,6 +870,7 @@ body:has(#ti-fondatore) .sheet--grande{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/cestino.js"></script>
 <script src="/js/foto-upload.js"></script>
+<script src="/js/centesimi.js"></script>
 <script src="/js/noleggio-prezzo.js"></script>
 <script>
 (function(){
@@ -1519,7 +1520,12 @@ body:has(#ti-fondatore) .sheet--grande{
   /* ⛔ 29 agosto 2026 - IL PUNTO DELLE MIGLIAIA. Senza useGrouping certi
      browser scrivono "1050,50 €" invece di "1.050,50 €": sopra il migliaio
      il numero non si legge piu' a colpo d'occhio. Stessa riga delle imprese. */
-  const _eur=n=>Number(n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+" €";
+  /* ⛔ 4 settembre 2026 — anche SCRIVERE un numero e' un arrotondamento.
+     toLocaleString arrotonda in virgola mobile: 1,005 diventa «1,00»
+     mentre il database dice 1,01. Prima si passa da _cent2, la stessa
+     regola del gestionale imprese. */
+  const _cent=n=>(typeof _cent2==="function")?_cent2(n):(Math.round((+n||0)*100)/100);
+  const _eur=n=>Number(_cent(n)||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+" €";
   let nolMezzi=[], nolConsumi=[], nolMestieri=[];
 
   /* le caselle del contaore e dei km si vedono solo se quel mezzo li ha:
@@ -1739,7 +1745,7 @@ body:has(#ti-fondatore) .sheet--grande{
     if(cauIn&&c.cauzione>0&&!nolCauzioneProposta&&String(cauIn.value).trim()===""){
       cauIn.value=String(c.cauzione).replace(".",",");
       nolCauzioneProposta=true;
-      nolCauzioneMessa=Math.round(c.cauzione*100)/100;
+      nolCauzioneMessa=_cent(c.cauzione);
       if(typeof nolMostraCauzione==="function") nolMostraCauzione();
     }
     /* l'avviso RESTA finche' in casella c'e' ancora il numero che ci abbiamo
@@ -1766,19 +1772,19 @@ body:has(#ti-fondatore) .sheet--grande{
        · importo scritto a mano -> NON si tocca, ma si avvisa della
          differenza e si offre il bottone per allinearlo.
        I soldi che ha scritto lui non si cambiano mai in silenzio. */
-    const totC=Math.round((c.totaleEuro||0)*100)/100;
+    const totC=_cent(c.totaleEuro||0);
     const cIn=$("#nn-importo");
     const impOra=cIn?_numIt(cIn.value):0;
     const impVuoto=!cIn||String(cIn.value).trim()===""||impOra===0;
     const agganciato=!nolImportoAMano && nolImportoSalvato!=null &&
-      Math.abs(impOra-Math.round(nolImportoSalvato*100)/100)<0.005;
+      Math.abs(impOra-_cent(nolImportoSalvato))<0.005;
     if(cIn&&totC>0&&(impVuoto||agganciato)&&Math.abs(impOra-totC)>=0.005){
       cIn.value=String(totC).replace(".",",");
       nolImportoSalvato=totC;
       h+='<div class="nol-avviso" id="nn-imp-nota">L\'importo da fare pagare &egrave; stato messo a '
         +esc(_eur(totC))+', come il conto qui sopra. Se vuoi un altro numero, scrivilo a mano.</div>';
     } else if(cIn&&totC>0&&Math.abs(impOra-totC)>=0.005){
-      const d=Math.round((impOra-totC)*100)/100;
+      const d=_cent(impOra-totC);
       h+='<div class="nol-avviso nol-avviso-caro" id="nn-imp-nota"><b>Attenzione:</b> stai facendo pagare '
         +esc(_eur(impOra))+', ma il conto dice '+esc(_eur(totC))+' &mdash; '
         +esc(_eur(Math.abs(d)))+(d>0?' in pi&ugrave;.':' in meno.')
@@ -3771,7 +3777,8 @@ body:has(#ti-fondatore) .sheet--grande{
     /* ⚠️ il punto e virgola, non la virgola: Excel italiano apre cosi'.
        E il BOM davanti, se no gli accenti diventano geroglifici. */
     const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
-    const num=v=>String(Math.round((+v||0)*100)/100).replace(".",",");
+    /* anche il CSV e' una scrittura: stesso arrotondamento del resto */
+    const num=v=>String(_cent(v)).replace(".",",");
     const testa=["Mezzo","Codice","Noleggi","Giorni fuori","Uso %","Reso €","Incassato €","Da incassare €","Cauzioni in deposito €"];
     const corpo=righe.map(r=>[r.m.nome||"",r.m.codice||"",r.volte,r.giorni,
       (gg&&gg>0)?Math.min(100,Math.round(r.giorni/gg*100)):"",
@@ -3922,7 +3929,12 @@ body:has(#ti-fondatore) .sheet--grande{
     /* ⚠️ se il noleggio sta tutto dentro il periodo NON si divide: si
        prende l'importo intero. Dividere e rimoltiplicare per lo stesso
        numero lascia dei centesimi che poi non tornano col contratto. */
-    const quota=(gIn>=gTot||gTot<=0)?imp:Math.round(imp*gIn/gTot*100)/100;
+    /* ⛔ 4 settembre 2026 — il rateo passa da _centMulDiv: importo x giorni
+       dentro / giorni totali, contato con numeri interi. In virgola mobile
+       un rateo che casca su mezzo centesimo andava in giu' e la somma delle
+       righe non tornava piu' col contratto. */
+    const quota=(gIn>=gTot||gTot<=0)?imp
+      :((typeof _centMulDiv==="function")?_centMulDiv(imp,gIn,gTot):Math.round(imp*gIn/gTot*100)/100);
     return {noleggio_id:n.id,
       voce:"Noleggio "+(n.mezzo||"attrezzatura"),
       dettaglio:"dal "+fdate(a)+" al "+fdate(b)+" — "+gIn+(gIn===1?" giorno":" giorni")+
@@ -4061,7 +4073,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const box=$("#nf-totali"); if(!box) return;
     const imp=fattnolRighe.reduce((s,r)=>s+(+r.importo||0),0);
     const p=_numIt($("#nf-iva")?$("#nf-iva").value:"22");
-    const iva=Math.round(imp*p)/100;
+    const iva=(typeof _centPerc==="function")?_centPerc(imp,p):Math.round(imp*p)/100;
     box.innerHTML=`<table><tr><td>Imponibile</td><td class="n">${esc(_eur(imp))}</td></tr>
       <tr><td>IVA ${esc(String(p).replace(".",","))}%</td><td class="n">${esc(_eur(iva))}</td></tr>
       <tr class="tot"><td>TOTALE</td><td class="n">${esc(_eur(imp+iva))}</td></tr></table>
@@ -4120,9 +4132,12 @@ body:has(#ti-fondatore) .sheet--grande{
                 dettaglio:String(r.dettaglio||"").trim(),giorni:r.giorni==null?null:+r.giorni,
                 importo:+r.importo||0}));
     if(!righe.length){toast("La fattura non ha righe");return;}
-    const imponibile=Math.round(righe.reduce((s,r)=>s+r.importo,0)*100)/100;
+    /* ⛔ 4 settembre 2026 — gli stessi centesimi del gestionale imprese:
+       la somma si ripulisce con _cent2 (la polvere delle somme) e l'IVA
+       passa da _centPerc, che moltiplica con numeri interi. */
+    const imponibile=_cent(righe.reduce((s,r)=>s+r.importo,0));
     const perc=_numIt($("#nf-iva").value);
-    const iva=Math.round(imponibile*perc)/100;
+    const iva=(typeof _centPerc==="function")?_centPerc(imponibile,perc):Math.round(imponibile*perc)/100;
     let stato=segVal("nf-stato")||"bozza";
     let numero=$("#nf-numero").value.trim()||null;
     let data=$("#nf-data").value||null;
@@ -4140,7 +4155,7 @@ body:has(#ti-fondatore) .sheet--grande{
       cliente:sel.selectedOptions[0]?sel.selectedOptions[0].dataset.nome:null,
       numero,data,
       periodo_dal:$("#nf-dal").value||null, periodo_al:$("#nf-al").value||null,
-      righe, imponibile, iva_perc:perc, iva, totale:Math.round((imponibile+iva)*100)/100,
+      righe, imponibile, iva_perc:perc, iva, totale:_cent(imponibile+iva),
       stato, pagata_il:$("#nf-pagata").value||null,
       note:$("#nf-note").value.trim()||null};
     let fid=id;
@@ -4713,9 +4728,9 @@ body:has(#ti-fondatore) .sheet--grande{
        prima stava andando in fattura a 630 € invece di 480. */
     if(conto&&conto.totaleEuro>0){
       const impS=_numIt($("#nn-importo").value);
-      const totS=Math.round(conto.totaleEuro*100)/100;
+      const totS=_cent(conto.totaleEuro);
       if(Math.abs(impS-totS)>=0.005){
-        const d=Math.round((impS-totS)*100)/100;
+        const d=_cent(impS-totS);
         if(!confirm("Stai facendo pagare "+_eur(impS)+", ma il conto dice "+_eur(totS)+".\n\n"
           +"Sono "+_eur(Math.abs(d))+(d>0?" in più":" in meno")+".\n\nVa bene così?")) return;
       }

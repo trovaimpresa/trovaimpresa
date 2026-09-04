@@ -40,7 +40,39 @@
     return isFinite(n) ? n : 0;
   }
 
-  function cent(v) { return Math.round(numIt(v) * 100); }
+  /* ⛔ 4 settembre 2026 — I CENTESIMI CONTATI COME LI CONTA IL DATABASE.
+     Qui dentro si lavorava gia' in centesimi interi, ma i due passaggi che
+     ENTRANO e ESCONO dagli interi passavano per la virgola mobile:
+       · da euro a centesimi:  Math.round(150,555 x 100)
+         il browser fa 15055,499999999998 e arrotonda IN GIU': 150,55
+         invece di 150,56. Postgres, che conta cifra per cifra, dice 150,56.
+       · quantita x tariffa:   Math.round(12,5 x 1200)
+         stesso buco quando il prodotto casca esatto su mezzo centesimo.
+     Adesso questi conti passano da js/centesimi.js, la STESSA regola del
+     gestionale imprese (mezzo centesimo IN SU, come round() di Postgres).
+     Una formula dei soldi sta in un posto solo: e' la regola 6.
+     ⚠️ Se centesimi.js non c'e' (una pagina vecchia, un banco che carica
+        solo questo file) si torna al conto di prima invece di rompersi. */
+  var _C = (function () {
+    if (radice && typeof radice._centMulDiv === 'function') return radice;
+    if (typeof require === 'function') {
+      try {
+        var m = require('./centesimi.js');
+        return { _cent2: m.cent2, _centMult: m.centMult, _centPerc: m.centPerc, _centMulDiv: m.centMulDiv };
+      } catch (e) { /* non c'e': si tira avanti col conto di prima */ }
+    }
+    return null;
+  })();
+  function cent2(n)          { return _C ? _C._cent2(n)          : Math.round((+n || 0) * 100) / 100; }
+  function centMult(a, b)    { return _C ? _C._centMult(a, b)    : Math.round((+a || 0) * (+b || 0) * 100) / 100; }
+  function centPerc(a, p)    { return _C ? _C._centPerc(a, p)    : Math.round((+a || 0) * (+p || 0)) / 100; }
+
+  /* da euro a centesimi interi. L'euro si arrotonda PRIMA al centesimo con
+     la regola del database, poi si passa all'intero: cosi' «150,555» vale
+     15056 e non 15055. */
+  function cent(v) { return Math.round(cent2(numIt(v)) * 100); }
+  /* quantita' (con la virgola) per un prezzo in EURO → centesimi interi */
+  function centQta(q, euroUnit) { return Math.round(centMult(q, euroUnit) * 100); }
   function euro(c) { return c / 100; }
 
   /* ⛔ 24 agosto 2026 — I PREZZI SI SCRIVONO ALL'ITALIANA.
@@ -204,7 +236,13 @@
       avvisi.push(cfg.nome + ': ' + fatte + ' ' + cfg.unita + ' su ' + incluse + ' comprese. Niente da pagare.');
       return null;
     }
-    var tariffa = cent(mezzo[cfg.campoTariffa]);
+    /* ⛔ IL PREZZO UNITARIO NON SI ARROTONDA PRIMA DI MOLTIPLICARE.
+       Trovato dal banco il 4 settembre: arrotondando la tariffa al
+       centesimo PRIMA del prodotto, 0,5 ore x 2.280,805 €/h davano
+       1.140,41 € invece di 1.140,40 €. Il database moltiplica il numero
+       intero com'e' scritto e arrotonda UNA VOLTA SOLA, alla fine. */
+    var tariffaE = numIt(mezzo[cfg.campoTariffa]);            /* in EURO, com'e' scritta */
+    var tariffa  = cent(mezzo[cfg.campoTariffa]);             /* in centesimi, per le scritte */
     if (tariffa <= 0) {
       avvisi.push(cfg.nome + ': ' + extra + ' ' + cfg.unita + ' oltre il compreso, ma su questo mezzo non c\'e\' la tariffa. Non le ho contate.');
       return null;
@@ -213,7 +251,7 @@
       voce: cfg.nome,
       dettaglio: scriviNum(fatte) + ' ' + cfg.unita + ' − ' + scriviNum(incluse) +
                  ' comprese = ' + scriviNum(extra) + ' × ' + scriviEuro(tariffa) + ' €',
-      centesimi: Math.round(extra * tariffa)
+      centesimi: centQta(extra, tariffaE)
     };
   }
 
@@ -294,12 +332,12 @@
       try { consumi = JSON.parse(consumi); } catch (e) { consumi = []; avvisi.push('Le righe del materiale non si leggono: le ho saltate.'); }
     }
     (Array.isArray(consumi) ? consumi : []).forEach(function (c) {
-      var q = numIt(c.quantita), p = cent(c.prezzo);
+      var q = numIt(c.quantita), pE = numIt(c.prezzo), p = cent(c.prezzo);   /* pE non arrotondato: si arrotonda alla fine */
       if (!q || !p) return;
       righe.push({
         voce: String(c.descrizione || 'Materiale'),
         dettaglio: scriviNum(q) + ' × ' + scriviEuro(p) + ' €',
-        centesimi: Math.round(q * p)
+        centesimi: centQta(q, pE)
       });
     });
 
@@ -309,7 +347,7 @@
     var up = numIt(mezzo.usura_percento);
     if (up > 0) {
       righe.push({ voce: 'Usura', dettaglio: scriviNum(up) + '% sul tempo (' + scriviEuro(centTempo) + ' €)',
-                   centesimi: Math.round(centTempo * up / 100) });
+                   centesimi: Math.round(centPerc(euro(centTempo), up) * 100) });
     }
 
     var totale = 0;
