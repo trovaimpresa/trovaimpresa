@@ -124,89 +124,40 @@
       <p>Entra nella rete TrovaImpresa</p>
     </div>
 
-    <div class="steps">
-      <div class="step active" id="step-1-indicator"><div class="step-circle">1</div><div class="step-label">Anagrafica</div></div>
-      <div class="step" id="step-2-indicator"><div class="step-circle">2</div><div class="step-label">Mestieri</div></div>
-      <div class="step" id="step-3-indicator"><div class="step-circle">3</div><div class="step-label">Contatti</div></div>
-      <div class="step" id="step-4-indicator"><div class="step-circle">4</div><div class="step-label">Logo</div></div>
-    </div>
 
     <div class="content">
 
       <!-- STEP 1 -->
       <div class="form-section active" id="step-1">
-        <h2>La tua attività</h2>
+
+        <p style="font-size:16px;line-height:1.55;color:#14532d;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin:0 0 18px">
+          ✅ <b>Iscriversi e restare su TrovaImpresa è gratis.</b> Nessuna carta, nessun costo.
+          Ti servono un minuto e sei caselle: il resto (foto, logo, descrizione, orari) lo metti quando vuoi dal tuo pannello.
+        </p>
+
         <div class="form-group">
-          <label>Nome / Ragione sociale <span class="required">*</span></label>
+          <label>Nome della tua attività <span class="required">*</span></label>
           <input type="text" id="nome" placeholder="Es. Mario Rossi Imbianchino">
         </div>
-        <details class="extra">
-          <summary>Aggiungi altri dettagli<small>Partita IVA, indirizzo, descrizione… Facoltativi: puoi metterli anche dopo dal tuo pannello.</small></summary>
-        <div class="form-group">
-          <label>Partita IVA / Codice Fiscale</label>
-          <input type="text" id="partita_iva" placeholder="Es. 12345678901">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Indirizzo</label>
-            <input type="text" id="indirizzo" placeholder="Es. Via Roma 42">
-          </div>
-          <div class="form-group" style="max-width:100px;">
-            <label>Civico</label>
-            <input type="text" id="civico" placeholder="Es. 1">
-          </div>
-        </div>
-          <div class="form-group" style="max-width:110px;">
-            <label>CAP</label>
-            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
-          </div>
-        <div class="form-group">
-          <label>Descrizione breve</label>
-          <textarea id="descrizione" placeholder="Descrivi la tua attività e i servizi che offri..." maxlength="200" oninput="document.getElementById('desc-counter').textContent=this.value.length+'/200'"></textarea>
-          <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0/200</div>
-          <div style="font-size:11px;color:#888;margin-top:4px;">Max 200 caratteri (piano Free). Passa a Premium per descrizione illimitata.</div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Anno di fondazione</label>
-            <input type="number" id="anno_fondazione" placeholder="Es. 2005" min="1900" max="2100">
-          </div>
-          <div class="form-group">
-            <label>Numero dipendenti</label>
-            <input type="number" id="dipendenti" placeholder="Es. 5" min="0">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>WhatsApp</label>
-          <input type="tel" id="whatsapp" placeholder="Es. +39 333 1234567">
-        </div>
-        </details>
-        <div class="form-group">
-          <label>Regione <span class="required">*</span></label>
-          <select id="regione" required>
-            <option value="">-- Seleziona regione --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Provincia <span class="required">*</span></label>
-          <select id="provincia" disabled>
-            <option value="">-- Seleziona provincia --</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Città <span class="required">*</span></label>
-            <select id="citta" disabled required>
-              <option value="">-- Seleziona città --</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
-      <!-- STEP 2 -->
-      <div class="form-section" id="step-2">
-        <h2>Mestieri e specializzazioni</h2>
         <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" id="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="mario@artigiano.it">
+        </div>
+
+        <div class="form-group">
+          <label>Password <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Almeno 8 caratteri" oninput="checkPwStrength(this.value)">
+            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
+          <div id="pw-strength-label" style="font-size:13px;color:#666;margin-top:4px;">Usa almeno 8 caratteri, con maiuscole, numeri e simboli.</div>
+        </div>
+
+<div class="form-group">
           <label>Mestiere principale <span class="required">*</span></label>
           <select id="mestiere" required onchange="mostraAltroMestiere()">
             <option value="">— Seleziona —</option>
@@ -248,206 +199,45 @@
           <label>Scrivi qual e' il tuo mestiere <span class="required">*</span></label>
           <input type="text" id="mestiere_altro" placeholder="Es. Posatore resine, cartongesso curvo, restauro infissi...">
         </div>
-        <details class="extra">
-          <summary>Altri mestieri e dettagli<small>Secondo e terzo mestiere, zone in cui lavori, anni di esperienza. Facoltativi.</small></summary>
+
         <div class="form-group">
-          <label>Mestiere secondario</label>
-          <select id="mestiere2">
-            <option value="">— Seleziona —</option>
-            <option>Edilizia / Muratura</option>
-            <option>Ristrutturazione completa</option>
-            <option>Cartongesso</option>
-            <option>Pittura e tinteggiatura</option>
-            <option>Pavimenti e piastrelle</option>
-            <option>Falegnameria</option>
-            <option>Serramenti / Infissi</option>
-            <option>Idraulica</option>
-            <option>Impianti elettrici</option>
-            <option>Climatizzazione / Caldaie</option>
-            <option>Fotovoltaico / Pannelli solari</option>
-            <option>Antennista / Allarmi</option>
-            <option>Coperture / Tetti</option>
-            <option>Cappotti termici / Isolamento</option>
-            <option>Fabbro / Cancelli / Recinzioni</option>
-            <option>Marmi e pietre</option>
-            <option>Vetraio</option>
-            <option>Tende da sole / Zanzariere</option>
-            <option>Giardinaggio / Esterni</option>
-            <option>Spurghi / Spazzacamino</option>
-            <option>Pulizie / Disinfestazioni</option>
-            <option>Sgomberi / Traslochi</option>
-            <option>Stufe e camini</option>
-            <option>Frigorista / Celle frigorifere</option>
-            <option>Carpentiere</option>
-            <option>Impermeabilizzazione</option>
-            <option>Ponteggi</option>
-            <option>Demolizione</option>
-            <option>Movimento terra</option>
-            <option>Asfalti</option>
-            <option>Intonacatore</option>
-            <option>Altro</option>
+          <label>Regione <span class="required">*</span></label>
+          <select id="regione" required>
+            <option value="">-- Seleziona regione --</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Altri mestieri / specializzazioni</label>
-          <textarea id="specializzazioni" placeholder="Es. Posa pavimenti, tinteggiatura, cartongesso..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Zone di lavoro</label>
-          <input type="text" id="zone" placeholder="Es. Roma e provincia, Lazio">
-        </div>
-        <div class="form-group">
-          <label>Anni di esperienza</label>
-          <input type="number" id="anni_esperienza" placeholder="Es. 10" min="0" max="60">
-        </div>
-        </details>
-        <div class="form-group">
-          <label>Terzo mestiere</label>
-          <select id="mestiere3">
-            <option value="">— Seleziona —</option>
-            <option>Edilizia / Muratura</option>
-            <option>Ristrutturazione completa</option>
-            <option>Cartongesso</option>
-            <option>Pittura e tinteggiatura</option>
-            <option>Pavimenti e piastrelle</option>
-            <option>Falegnameria</option>
-            <option>Serramenti / Infissi</option>
-            <option>Idraulica</option>
-            <option>Impianti elettrici</option>
-            <option>Climatizzazione / Caldaie</option>
-            <option>Fotovoltaico / Pannelli solari</option>
-            <option>Antennista / Allarmi</option>
-            <option>Coperture / Tetti</option>
-            <option>Cappotti termici / Isolamento</option>
-            <option>Fabbro / Cancelli / Recinzioni</option>
-            <option>Marmi e pietre</option>
-            <option>Vetraio</option>
-            <option>Tende da sole / Zanzariere</option>
-            <option>Giardinaggio / Esterni</option>
-            <option>Spurghi / Spazzacamino</option>
-            <option>Pulizie / Disinfestazioni</option>
-            <option>Sgomberi / Traslochi</option>
-            <option>Stufe e camini</option>
-            <option>Frigorista / Celle frigorifere</option>
-            <option>Carpentiere</option>
-            <option>Impermeabilizzazione</option>
-            <option>Ponteggi</option>
-            <option>Demolizione</option>
-            <option>Movimento terra</option>
-            <option>Asfalti</option>
-            <option>Intonacatore</option>
-            <option>Altro</option>
+          <label>Provincia <span class="required">*</span></label>
+          <select id="provincia" disabled>
+            <option value="">-- Seleziona provincia --</option>
           </select>
         </div>
-      </div>
+        <div class="form-group">
+          <label>Città <span class="required">*</span></label>
+          <select id="citta" disabled required>
+            <option value="">-- Seleziona città --</option>
+          </select>
+        </div>
 
-      <!-- STEP 3 -->
-      <div class="form-section" id="step-3">
-        <h2>Contatti e accesso</h2>
-        <div class="form-group">
-          <label>Email <span class="required">*</span></label>
-          <input type="email" id="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="mario@artigiano.it">
-        </div>
-        <div class="form-group">
-          <label>Telefono <span class="required">*</span></label>
-          <input type="tel" id="telefono" placeholder="+39 06 1234567">
-        </div>
-        <details class="extra">
-          <summary>Hai un sito web?<small>Facoltativo. Comparirà sulla tua pagina pubblica.</small></summary>
-        <div class="form-group">
-          <label>Sito web</label>
-          <input type="url" id="sito_web" placeholder="https://www.miosito.it">
-        </div>
-        </details>
-        <div class="form-group">
-          <label>Password <span class="required">*</span></label>
-          <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Almeno 8 caratteri" oninput="checkPwStrength(this.value)">
-            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
-          <div id="pw-strength-label" style="font-size:11px;color:#888;margin-top:3px;">Usa almeno 8 caratteri, con maiuscole, numeri e simboli.</div>
-        </div>
-        <div class="form-group">
-          <label>Conferma password <span class="required">*</span></label>
-          <div class="password-wrapper">
-            <input type="password" id="password2" placeholder="Ripeti la password">
-            <button class="toggle-pw" type="button" onclick="togglePassword('password2', this)" tabindex="-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <!-- honeypot anti-bot: deve restare vuoto -->
-        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
-      </div>
-
-      <!-- STEP 4 -->
-      <div class="form-section" id="step-4">
-        <h2>Scegli il tuo piano</h2>
-        <div class="piano-grid">
-          <div class="piano-card selected" id="card-free" onclick="selezionaPiano('free')">
-            <div class="piano-icon">🆓</div>
-            <div class="piano-nome">Free</div>
-            <div class="piano-prezzo">Gratis</div>
-            <ul>
-              <li>Profilo visibile nella tua città</li>
-              <li>Richieste di preventivo con contatti inclusi</li>
-              <li>Raccolta recensioni</li>
-              <li>Fino a 10 foto</li>
-              <li>1 annuncio di lavoro</li>
-            </ul>
-          </div>
-          <div class="piano-card" id="card-premium" onclick="selezionaPiano('premium')">
-            <div class="piano-icon">💎</div>
-            <div class="piano-nome" style="color:#7b1fa2;">Premium</div>
-            <div class="piano-prezzo">€5/mese</div>
-            <ul>
-              <li>Posizione #1 assoluta</li>
-              <li>Foto e video illimitati</li>
-              <li>Preventivi PDF con AI</li>
-              <li>Badge Premium in evidenza</li>
-              <li>Visibile in tutta Italia</li>
-            </ul>
-          </div>
-        </div>
-        <input type="hidden" id="piano_scelto" value="free">
-        <p style="font-size:15.5px;line-height:1.55;color:#555;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;margin-top:10px">
-          ℹ️ <b>Ti iscrivi con il piano gratuito.</b> Il Premium lo attivi quando vuoi dal tuo pannello —
-          e ai nuovi iscritti lo regaliamo per i primi 3 mesi.
-        </p>
-
-                <h2 style="margin-top:20px;">Logo</h2>
-        <!-- Il caricamento del logo qui non funzionava: il file veniva scelto,
-             compariva la spunta verde e poi non partiva mai (uploadLogo non era
-             collegata a niente, e prima della conferma email non c'e' nemmeno
-             una sessione per caricarlo). Meglio dirlo che fingere. -->
-        <div class="form-group">
-          <div style="background:#f0f5ff;border:1.5px solid #cfe0ff;border-radius:12px;padding:16px 18px;font-size:16px;line-height:1.55;color:#0a2a4d">
-            <b>🏗️ Il logo lo carichi tra un minuto.</b><br>
-            Appena confermi la mail ed entri nel tuo pannello trovi
-            <b>Modifica profilo</b>: da lì carichi logo, foto dei lavori,
-            descrizione, orari e zone in cui lavori. Così finisci di iscriverti
-            adesso e il resto lo sistemi con calma.
-          </div>
-        </div>
-<div class="form-group">
-          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;">
+        <div class="form-group" style="margin-top:6px">
+          <label style="display:flex;gap:9px;align-items:center;cursor:pointer;font-size:15px">
             <input type="checkbox" id="termini" style="width:auto;">
-            <span>Accetto i Termini di Servizio <span class="required">*</span></span>
+            <span>Accetto i <a href="/termini-condizioni.html" target="_blank" style="color:#0066ff">Termini di Servizio</a> <span class="required">*</span></span>
           </label>
         </div>
+
+        <!-- honeypot anti-bot: deve restare vuoto -->
+        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+        <input type="hidden" id="piano_scelto" value="free">
       </div>
 
       <div id="form-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
 
       <div class="buttons">
-        <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
-        <button class="btn-next" id="btn-next">Avanti →</button>
+        <button class="btn-next" id="btn-next" style="width:100%">Crea il mio account — è gratis</button>
       </div>
       <div style="text-align:center;margin-top:12px;"><span style="font-size:0.9rem;color:#555;">Sei già registrato? </span><a href="login-impresa.html" style="display:inline-block;margin-left:8px;padding:9px 22px;background:#f5a800;color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;">Accedi</a></div>
-        <p style="text-align:center;font-size:12px;color:#888;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
+        <p style="text-align:center;font-size:13.5px;color:#666;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
     </div>
   </div>
 
@@ -519,24 +309,16 @@
     let currentStep = 1;
     /* il caricamento del logo non c'e' piu' in questo modulo: si fa dal pannello */
 
-    function goToStep(step, fromPopstate) {
-      document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-      document.getElementById('step-' + step).classList.add('active');
-      document.getElementById('step-' + step + '-indicator').classList.add('active');
-      document.getElementById('btn-back').style.display = step === 1 ? 'none' : 'block';
-      document.getElementById('btn-next').textContent = step === 4 ? '✓ Completa Registrazione' : 'Avanti →';
-      currentStep = step;
-      if (!fromPopstate) history.pushState({step: step}, '');
-    }
+    /* 4 settembre 2026 — UNA SOLA SCHERMATA.
+       Prima erano 4 passi (Anagrafica, Mestieri, Contatti, Logo) con 26 caselle:
+       email e password arrivavano solo al terzo passo, quindi chi mollava prima
+       non lasciava nemmeno un contatto. Adesso: nome, email, password, mestiere,
+       regione, provincia, citta'. Tutto il resto si mette dal pannello.
+       goToStep resta come guscio vuoto perche' la vecchia navigazione (e la
+       freccia "indietro" del telefono) la chiamava ancora. */
+    function goToStep(step, fromPopstate) { return; }
 
-    document.getElementById('btn-next').addEventListener('click', function() {
-      if (currentStep < 4) { if (validateStep(currentStep)) goToStep(currentStep + 1); }
-      else submitForm();
-    });
-    document.getElementById('btn-back').addEventListener('click', function() {
-      if (currentStep > 1) goToStep(currentStep - 1);
-    });
+    document.getElementById('btn-next').addEventListener('click', function() { submitForm(); });
 
     // ---- Helper UI: messaggi, validazione, robustezza password ----
     function showMsg(text, type) {
@@ -589,34 +371,25 @@
 
     function validateStep(step) {
       hideMsg();
-      const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
-      if (step === 1) {
-        if (!need('nome', 'Nome / Ragione sociale')) return false;
-        if (!need('regione', 'Regione')) return false;
-        if (!need('provincia', 'Provincia')) return false;
-        if (!need('citta', 'Città')) return false;
-      } else if (step === 2) {
-        if (!document.getElementById('mestiere').value) { markInvalid('mestiere'); showMsg('Seleziona il mestiere principale.', 'error'); return false; }
-        if ((document.getElementById('mestiere').value||'').toLowerCase().indexOf('altro') === 0 && !document.getElementById('mestiere_altro').value.trim()) {
-          markInvalid('mestiere_altro'); showMsg('Scrivi con parole tue di cosa ti occupi.', 'error'); return false;
-        }
-      } else if (step === 3) {
-        if (!need('email', 'Email')) return false;
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
-        if (!need('telefono', 'Telefono')) return false;
-        const pw = document.getElementById('password').value;
-        if (pw.length < 8) { markInvalid('password'); showMsg('La password deve avere almeno 8 caratteri.', 'error'); return false; }
-        if (pw !== document.getElementById('password2').value) { markInvalid('password2'); showMsg('Le due password non coincidono.', 'error'); return false; }
+      const el = (id) => document.getElementById(id);
+      const need = (id, lbl) => { const e = el(id); if (!e || !e.value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
+      if (!need('nome', 'Nome della tua attività')) return false;
+      if (!need('email', 'Email')) return false;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
+      const pw = el('password').value;
+      if (pw.length < 8) { markInvalid('password'); showMsg('La password deve avere almeno 8 caratteri.', 'error'); return false; }
+      if (!el('mestiere').value) { markInvalid('mestiere'); showMsg('Seleziona il tuo mestiere.', 'error'); return false; }
+      if ((el('mestiere').value||'').toLowerCase().indexOf('altro') === 0 && !el('mestiere_altro').value.trim()) {
+        markInvalid('mestiere_altro'); showMsg('Scrivi con parole tue di cosa ti occupi.', 'error'); return false;
       }
+      if (!need('regione', 'Regione')) return false;
+      if (!need('provincia', 'Provincia')) return false;
+      if (!need('citta', 'Città')) return false;
       return true;
     }
 
-    history.replaceState({step: 1}, '');
-    window.onpopstate = function(e) {
-      if (e.state && typeof e.state.step !== 'undefined') {
-        goToStep(e.state.step, true);
-      }
-    };
+    /* niente piu' passi: la freccia "indietro" del telefono esce dal modulo,
+       come si aspetta chi la preme. */
 
     /* Nome del file: UUID casuale dentro il prefisso "registrazioni/".
        Prima era "<email>_<timestamp>.<ext>" nella radice del bucket: l'email
@@ -635,10 +408,10 @@
       return 'registrazioni/' + id + '.' + ext;
     }
 
+    /* le due card dei piani non stanno piu' nel modulo: ci si iscrive sempre
+       col piano gratuito, il Premium si sceglie dal pannello. */
     function selezionaPiano(piano) {
-      document.getElementById('piano_scelto').value = piano;
-      document.getElementById('card-free').className = 'piano-card' + (piano === 'free' ? ' selected' : '');
-      document.getElementById('card-premium').className = 'piano-card' + (piano === 'premium' ? ' selected-premium' : '');
+      const h = document.getElementById('piano_scelto'); if (h) h.value = piano;
     }
 
     /* ------------------------------------------------------------------
@@ -705,24 +478,22 @@
       hideMsg();
       // Anti-bot: se il campo honeypot è pieno, è un bot → esci in silenzio.
       if (document.getElementById('website_hp').value) { return; }
-      if (!document.getElementById('termini').checked) { showMsg('Devi accettare i Termini di Servizio per completare la registrazione.', 'error'); return; }
-      if (!validateStep(1)) { goToStep(1); return; }
-      if (!validateStep(2)) { goToStep(2); return; }
-      if (!validateStep(3)) { goToStep(3); return; }
+      /* prima i campi, POI i termini: a modulo vuoto la prima cosa da dire e'
+         «scrivi il nome», non «accetta i termini». */
+      if (!validateStep()) return;
+      if (!document.getElementById('termini').checked) { markInvalid('termini'); showMsg('Metti la spunta sui Termini di Servizio per finire.', 'error'); return; }
       const nome = document.getElementById('nome').value.trim();
       const mestiere = document.getElementById('mestiere').value;
-      const mestiere2 = document.getElementById('mestiere2').value;
-      const mestiere3 = document.getElementById('mestiere3').value;
+      /* mestiere secondario/terzo e telefono non si chiedono piu' qui:
+         si mettono dal pannello. Letti in modo difensivo: se la casella
+         non c'e' piu', il modulo NON deve rompersi. */
+      const mestiere2 = (document.getElementById('mestiere2')||{}).value || '';
+      const mestiere3 = (document.getElementById('mestiere3')||{}).value || '';
       const email = document.getElementById('email').value.trim();
-      const telefono = document.getElementById('telefono').value.trim();
+      const telefono = ((document.getElementById('telefono')||{}).value || '').trim();
       const citta = document.getElementById('citta').value.trim();
       const regione = document.getElementById('regione').value;
       const password = document.getElementById('password').value.trim();
-      if ((mestiere2 && mestiere2 === mestiere) || (mestiere3 && (mestiere3 === mestiere || mestiere3 === mestiere2))) {
-        goToStep(2);
-        showMsg('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.', 'error');
-        return;
-      }
       const btn = document.getElementById('btn-next');
       btn.disabled = true;
       try {
@@ -770,7 +541,7 @@
 
               nome_attivita: nome,
               nome: nome,
-              telefono: telefono,
+              telefono: telefono || null,
               citta: citta,
               provincia: document.getElementById('provincia').value,
               regione: regione,
