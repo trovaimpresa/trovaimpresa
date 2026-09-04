@@ -4,7 +4,7 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: sabato 5 settembre 2026 (sera) — chiusi →4← lavori (→11←, B, →27←, →28←)
+Ultimo aggiornamento: sabato 5 settembre 2026 (notte) — chiusi →8← lavori (→5←, →8←, →11←, →13←, →27←, →28←, A, B)
 
 ---
 
@@ -19,13 +19,13 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - **2.** Cancellare una conversazione lato impresa cancella anche la copia del cliente · mezza giornata
 - **3.** `pannello-negozio.html` rimasto indietro (testata vecchia + copertina che non si carica)
 - **4.** Bandi & Opportunita' fermo su CORS da luglio (la Netlify Function non e' mai stata scritta)
-- **5.** Il tasto «📱 Mobile» dell'Anteprima non fa niente nei →4← pannelli
+- ✅ **5.** Il tasto «📱 Mobile» dell'Anteprima — FATTO il 5 set: la causa era un `!important` in `css/mobile.css`, non la funzione
 
 ### 🟠 Sbagliano un numero o nascondono qualcosa
 - **6.** Il noleggio «prenotato» e' gia' contato come spesa prima che il mezzo esca
 - **7.** Difetto →11← del controllo generale del gestionale
-- **8.** Prodotti e Marchi del negozio: colonne piene, nessuna pagina le legge
-- **A.** ⬅️ *dal primo prompt* — Le **prestazioni del professionista** non hanno una casella in `modifica-profilo.html` (la colonna `prestazioni` esiste)
+- ✅ **8.** Prodotti e Marchi del negozio — FATTO il 5 set: card «🧱 Cosa trovi qui» sulla scheda pubblica. ⚠️ Nel database ci sono →0← negozi: oggi non la vede nessuno
+- ✅ **A.** Le prestazioni del professionista — **FALSO ALLARME, chiusa il 5 set**: la casella ESISTE GIA', in `pannello-professionisti.html` → riquadro «🛠️ Prestazioni offerte» (`#profilo-prestazioni`), con le spunte, i comuni di competenza, albo e RC, e `salvaPrestazioniProfilo()` che scrive davvero la colonna. La voce diceva «nel pannello»: nel pannello c'e'
 - **9.** La visita non e' collegata all'iscrizione (`visite_sito.sessione` non si salva al signUp)
 
 ### 🟡 Due minuti a testa
@@ -35,7 +35,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - ✅ **B.** Le scritte sotto i →13← px — FATTO il 5 set: footer a →13←px su →19← pagine e in →16← email. Le →4← regole CSS erano gia' state buttate il →3← set (la voce era vecchia)
 
 ### 🔧 Attrezzi rotti — non li vede il cliente, ma ci fanno perdere difetti
-- ⏳ **13.** `gestionale-config.html` TRONCATO · **guardato il 5 set: e' PEGGIO del previsto — la pagina e' MORTA DEL TUTTO** (uno `<script>` senza chiusura fa fallire tutto il blocco: niente login, niente elenchi, schermo bianco sotto il titolo). Anche la versione ONLINE e' troncata allo stesso punto, quindi il pezzo buono sta solo nella storia di Git · **aspetta il recupero da Alex**
+- ✅ **13.** `gestionale-config.html` — RIPRESO dalla storia di Git il 5 set (`d465677`) e rimesso a posto. Vedi sotto. // vecchia nota: TRONCATO · **guardato il 5 set: e' PEGGIO del previsto — la pagina e' MORTA DEL TUTTO** (uno `<script>` senza chiusura fa fallire tutto il blocco: niente login, niente elenchi, schermo bianco sotto il titolo). Anche la versione ONLINE e' troncata allo stesso punto, quindi il pezzo buono sta solo nella storia di Git · **aspetta il recupero da Alex**
 - **14.** Il controllo colonne-fantasma non vede `.update(variabile)`
 - **15.** `prove-claude/colonne-vere.txt` e' del →30← agosto (→15← falsi allarmi)
 - **16.** Il banco dei preventivi del →29← agosto e' scaduto (cerca `_centPerc` dove non sta piu')
@@ -140,6 +140,12 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - Collaudo dal vivo di `assistenza-ai-e-computo` (3 domande alla chat + computo di prova con totale →937,99←): da fare la prima volta con Alex presente
 
 ## ✅ FATTO — ultimi 14 giorni (per chiudere il cerchio, poi si cancella)
+
+- [5 set] **→13← — `gestionale-config.html` RIMESSO A POSTO** · era troncato e la pagina era **morta del tutto** (schermo bianco: uno `<script>` senza chiusura fa fallire l'intero blocco, quindi `sb` non nasceva e non si disegnava niente). Anche la versione **online** era troncata allo stesso punto. ⛔ Non e' stato indovinato niente: il file e' stato ripreso dalla **storia di Git** (`d465677`, l'ultimo con →2← `</script>`). Confrontato riga per riga col rotto: le differenze erano **solo due** — la coda mancante (la cancellazione di un operatore + `</script></body></html>`) e un `?v=3` su `mobile.css` che era stato aggiunto DOPO: quello e' stato **rimesso**, se no tornando indietro si perdeva. Aggiunta anche la riga `js/freccia-indietro.js`, che mancava solo su questa pagina. Copia del rotto in `prove-claude/gestionale-config-ROTTO-5set.html`
+- [5 set] **→5← — il tasto «📱 Mobile» dell'Anteprima adesso funziona** (→4← pannelli) · ⛔ **la causa NON era la funzione**, che la sua riga la scriveva davvero: era `css/mobile.css`, dove `@media (max-width:768px) { body *{ max-width:100% !important } }` **batte anche lo stile scritto sull'elemento**. Quindi il tasto era morto solo sotto i →768← px di finestra. Sistemato usando `width` invece di `max-width` (quella regola non c'entra piu'; sul telefono vero resta comunque `max-width:100%` a impedire che esca dallo schermo). Misurato dal vivo prima di cambiare: →465← px con `max-width`, →390← px con `width`. Banco `prove-claude/banchi-fissi/pagine/banco-anteprima-mobile.js` (dentro `gira-pagine.sh`): **→32← verdi**, misura in un browser vero a →2← larghezze di finestra; rimettendo il codice di prima diventa **→8← rosse, tutte a finestra stretta** — che e' esattamente il difetto
+- [5 set] **→8← — Prodotti e Marchi del negozio si vedono sulla scheda pubblica** · card «🧱 Cosa trovi qui» in `profilo-impresa.html`, solo per i negozi, pastiglie come i mestieri, si spezza su virgole E a capo, il testo del negozio viene scappato, massimo →40← pastiglie, e se tutte e due sono vuote la card **non compare**. Banco `prove-claude/banchi-fissi/negozio/banco-prodotti-marchi.js` + `gira-negozio.sh`: →16← verdi, →3← sabotaggi. ⚠️ **Da sapere**: nel database ci sono **→0← negozi** e `prodotti`/`marchi` sono vuote su tutte e →116← le imprese. Oggi questa card non la vede nessuno: per provarla dal vivo servirebbe il «negozio finto» che sta fra le idee
+- [5 set] **A — le prestazioni del professionista: FALSO ALLARME** · la casella **esisteva gia'** in `pannello-professionisti.html` (riquadro «🛠️ Prestazioni offerte», con comuni di competenza, albo e RC, e il salvataggio che scrive davvero la colonna). Banco nuovo `prove-claude/banchi-fissi/professionista/banco-prestazioni.js`: →15← verdi. La cosa che sorveglia: `PRESTAZIONI_CATALOGO` e' scritto a mano in **→4← file** e oggi sono identici — se domani uno solo cambia, il professionista spunta una prestazione che **nessun cliente puo' cercare**. Cambiando una voce in un file solo, il banco diventa rosso
+
 
 - [5 set] **→11← — `recensioni-impresa.html` adesso e' in sitemap** · nuova `netlify/functions/sitemap-recensioni.js` + rinvio in `netlify.toml` + riga in `robots.txt` + funzione `imprese_con_recensioni()` sul database (`sql/imprese-con-recensioni.sql`). ⚠️ Non bastava scrivere una riga in `sitemap.xml`: quella pagina senza `?id` si dichiara da sola `noindex`, quindi serve una sitemap generata dal database, come per le schede. Ci vanno **solo** le imprese con almeno una recensione confermata: una pagina recensioni vuota e' «contenuto povero» e il giudizio ricade su tutto il sito. Banco `prove-claude/banchi-fissi/sitemap/banco-sitemap-recensioni.js` + `gira-sitemap.sh`: →16← verdi, →3← sabotaggi tutti rossi. La prova piu' importante: l'indirizzo in sitemap deve combaciare col **canonical letto dal file vero** della pagina. ⛔ **DA SAPERE**: oggi in quella sitemap c'e' →1← solo indirizzo, ed e' la scheda →36← con la **recensione di prova** (id →19←, scritta da Alessio a se stesso). Finche' non si decide su quella, non conviene mandarla a Search Console
 - [5 set] **B — niente piu' scritte sotto i →13← px** · il footer del sito era a `0.8rem` = →12,8← px in →19← pagine, portato a →13←px; nelle email erano →16← file con misure da →11←, →12← e →12,5← px, tutte a →13←px. ⚠️ Come si e' provato di non aver toccato altro: normalizzando OGNI `font-size` a un segnaposto, ogni file prima e dopo ha lo **stesso md5** (stessa regola del →30← agosto). Le →4← regole CSS `.cdh` `.cd` `.cd.oggi` `.ms-l` **erano gia' state buttate il →3← settembre**: la voce del quaderno era vecchia

@@ -21361,3 +21361,75 @@ finche' non lo si aggiunge a mano: e' successo →2← volte in →2← giorni
 (`PROMPT-prossima-sessione.md` il 4 set, `PROMPT-gestionale-operatore.md` il 5).
 Da proporre ad Alex: una regola sola `/*.md` piu' →3← righe nel controllo che
 la accettino.
+
+
+## →13← — `gestionale-config.html` RIPRESO DALLA STORIA DI GIT (5 set, sera)
+L'elenco dei commit del file (comando dato ad Alex, che il git lo fa lui):
+`307923f` →12.400← byte **→1←** chiusura ← il rotto · `d465677` →12.443← byte
+**→2←** chiusure ← l'ultimo buono · e cosi' via indietro, tutti a →2←.
+Confrontato riga per riga il buono col rotto: le differenze erano **DUE sole**
+- la **coda mancante**: `...d.dataset.delo);loadOp();}` + `};` + `</script>`
+  + `</body>` + `</html>`
+- un **`?v=3`** su `/css/mobile.css` che era stato aggiunto DOPO il commit buono
+⛔ **E' per questo che non si sostituisce e basta**: tornando indietro si
+perdeva il `?v=3`. Ripreso il buono, **rimesso** il `?v=3`, aggiunta la riga
+`js/freccia-indietro.js` che mancava solo qui. Copia del rotto in
+`prove-claude/gestionale-config-ROTTO-5set.html`.
+
+⚠️ **DA PROPORRE AD ALEX (non fatto, e' fuori da quello che ha chiesto)**:
+`tools/controllo-push.js` **non poteva accorgersene**. Il suo controllo degli
+script usa `/<script...>([\s\S]*?)<\/script>/`, che trova solo i blocchi
+CHIUSI: uno `<script>` aperto e mai chiuso e' invisibile. Ecco perche' il file
+rotto e' finito online. Servirebbero due controlli nuovi: «quanti `<script`
+aperti contro quanti `</script>` chiusi» e «manca `</html>`».
+
+## →5← — IL TASTO «📱 Mobile» DELL'ANTEPRIMA (5 set, sera)
+⛔ **La causa NON era la funzione.** `anteprimaDevice()` la sua riga la
+scriveva davvero (`style.maxWidth` diventava →390←px, controllato dal vivo).
+Era `css/mobile.css`:
+
+    @media (max-width: 768px) {
+      body *:not(#cal-griglia):not(.calendar-header) { max-width: 100% !important; }
+
+Un `!important` in un foglio batte anche lo stile scritto sull'elemento.
+Quindi il tasto era morto **solo sotto i →768← px di finestra**, e su un
+computer largo funzionava: per questo sembrava capriccioso.
+Sistemato con `width` invece di `max-width` (quella regola parla di
+`max-width`, non di `width`; e sul telefono vero, piu' stretto di →390←px,
+resta comunque il `max-width:100%` a impedire che esca dallo schermo).
+Cambiata anche la `transition` del riquadro da `max-width` a `width`.
+Misurato dal vivo prima di toccare: →465←px con `max-width`, →390←px con `width`.
+
+⚠️ **REGOLA**: quando uno stile scritto sull'elemento «non fa niente», la
+colpa e' quasi sempre di un `!important` in un foglio. Si guarda
+`getComputedStyle`, non `element.style`: il primo dice cosa vince davvero.
+⚠️ **E il banco va fatto girare a PIU' LARGHEZZE di finestra**: con una sola
+(larga) questo difetto non si sarebbe visto mai.
+
+## →8← — PRODOTTI E MARCHI DEL NEGOZIO (5 set, sera)
+Card «🧱 Cosa trovi qui» in `profilo-impresa.html`, accesa solo per i negozi.
+Testo libero spezzato su virgole **e a capo** (molti scrivono una riga per
+prodotto), pastiglie come i mestieri, testo scappato, massimo →40←.
+Se sono vuote tutte e due la card non compare: un riquadro vuoto sembra rotto.
+⚠️ `_esc` della pagina e' dichiarata DENTRO `caricaProfilo`: da fuori non si
+vede. Ne e' stata fatta una apposta, `_pmEsc`.
+⚠️ **Nel database ci sono →0← negozi** e `prodotti`/`marchi` sono vuote su
+tutte e →116← le imprese: oggi questa card non la vede nessuno.
+
+## A — LE PRESTAZIONI DEL PROFESSIONISTA: FALSO ALLARME
+La casella **esisteva gia'**, in `pannello-professionisti.html`: riquadro
+«🛠️ Prestazioni offerte» (`#profilo-prestazioni`), con spunte, comuni di
+competenza, numero albo, ordine, RC, e `salvaPrestazioniProfilo()` che scrive
+davvero `prestazioni`. Il quaderno diceva «non hanno una casella nel pannello»:
+nel pannello ce l'hanno.
+⚠️ Trovato cercando, non costruendo. **Terza volta in due giorni** che una
+voce del quaderno descrive un difetto che non c'e' piu' (le altre due: le →4←
+regole CSS gia' buttate il →3← set, e il rating che gia' funzionava).
+
+⛔ **QUELLO CHE INVECE E' UN RISCHIO VERO**: `PRESTAZIONI_CATALOGO` e' scritto
+a mano in **→4← file** (`pannello-professionisti`, `professionisti`,
+`profilo-impresa`, `registrazione-professionista`). Oggi sono identici, ma se
+domani se ne cambia uno solo il professionista spunta una prestazione che
+**nessun cliente puo' cercare**. Banco
+`prove-claude/banchi-fissi/professionista/banco-prestazioni.js` a guardia:
+cambiando una voce in un file solo, diventa rosso.

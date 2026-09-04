@@ -986,6 +986,22 @@ nav img{height:36px}
       <div id="lista-certificazioni-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
     </div>
 
+    <!-- COSA TROVI QUI: prodotti e marchi scritti dal negozio (solo negozi).
+         5 settembre 2026: le colonne `prodotti` e `marchi` esistevano dal 4 set
+         e il negozio le compilava da modifica-profilo.html, ma NESSUNA pagina
+         pubblica le leggeva: il cliente non le ha mai viste. -->
+    <div class="card" id="card-prodotti-marchi" style="display:none;border-top-color:#0066ff">
+      <div class="card-title">🧱 Cosa trovi qui</div>
+      <div id="pm-prodotti" style="display:none;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#61738a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Prodotti trattati</div>
+        <div id="pm-prodotti-lista" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+      <div id="pm-marchi" style="display:none">
+        <div style="font-size:14px;font-weight:700;color:#61738a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Marchi principali</div>
+        <div id="pm-marchi-lista" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+    </div>
+
     <!-- I NOSTRI PRODOTTI (solo negozi) -->
     <div class="card" id="card-vetrina-prodotti" style="display:none;border-top-color:#0066ff">
       <div class="card-title">🛒 I nostri prodotti</div>
@@ -1443,6 +1459,7 @@ async function caricaProfilo(id){
     }
     /* le foto e la vetrina non devono poter bloccare i contatti: partono da sole */
     if(d.tipo==='negozio'){
+      try{ mostraProdottiMarchi(d.prodotti,d.marchi); }catch(_){}
       Promise.resolve().then(()=>caricaVetrina(d.user_id)).catch(()=>{});
       const _fg=document.getElementById('foto-lavori-grid');const _fc=_fg&&_fg.closest('.card');if(_fc)_fc.style.display='none';
     }else{
@@ -2259,6 +2276,39 @@ async function caricaFotoLavori(ownerId){
   if(!window.fotoLavoriUrls.length){if(card)card.style.display='none';return}
   grid.innerHTML=window.fotoLavori.map((l,i)=>`<div class="fi" onclick="apriLightbox(${i})"><img src="${escF(l.u)}" alt="${escF(l.titolo||'Foto')}" loading="lazy">${l.titolo?`<div class="fi-tit">${escF(l.titolo)}</div>`:''}</div>`).join('');
   if(card)card.style.display='';
+}
+
+/* PRODOTTI E MARCHI DEL NEGOZIO (5 settembre 2026)
+   Sono due caselle di testo libero scritte dal negozio in «Modifica profilo».
+   Qui si spezzano sulle virgole (e sugli a capo, perche' molti scrivono un
+   prodotto per riga) e diventano pastiglie, come i mestieri.
+   ⚠️ Se tutte e due sono vuote la card non compare: una scheda con un
+   riquadro vuoto sembra rotta. */
+function _pmPezzi(t){
+  return String(t==null?'':t).split(/[,;\n\r]+/).map(function(x){return x.trim()}).filter(Boolean).slice(0,40);
+}
+/* ⚠️ `_esc` della pagina e' dichiarata DENTRO caricaProfilo: da qui non si
+   vede. Ne serve una qui, se no il testo del negozio finirebbe nella pagina
+   senza rete. */
+function _pmEsc(t){
+  return String(t==null?'':t).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+function mostraProdottiMarchi(prodotti,marchi){
+  const card=document.getElementById('card-prodotti-marchi');
+  if(!card)return;
+  const pezziP=_pmPezzi(prodotti), pezziM=_pmPezzi(marchi);
+  if(!pezziP.length && !pezziM.length){ card.style.display='none'; return; }
+  function riempi(idBlocco,idLista,pezzi){
+    const blocco=document.getElementById(idBlocco), lista=document.getElementById(idLista);
+    if(!blocco||!lista)return;
+    if(!pezzi.length){ blocco.style.display='none'; return; }
+    lista.innerHTML=pezzi.map(function(x){return '<span class="hb hb-g">'+_pmEsc(x)+'</span>';}).join('');
+    blocco.style.display='';
+  }
+  riempi('pm-prodotti','pm-prodotti-lista',pezziP);
+  riempi('pm-marchi','pm-marchi-lista',pezziM);
+  card.style.display='';
 }
 
 // VETRINA PRODOTTI (solo negozi): legge vetrina_negozio e mostra le card pubbliche
