@@ -1411,6 +1411,18 @@
         </div>
       </div>
 
+      <!-- BARRA «PROFILO COMPLETO» (4 set 2026) -->
+      <div id="barra-completo" style="display:none;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px;margin:0 0 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div style="font-size:17px;font-weight:800;color:#0a2a4d;">Il tuo profilo è completo al <span id="bc-perc">0</span>%</div>
+          <div id="bc-sotto" style="font-size:14.5px;color:#475569;"></div>
+        </div>
+        <div style="height:12px;background:#eef2f7;border-radius:999px;overflow:hidden;">
+          <div id="bc-riempi" style="height:100%;width:0%;background:#0066ff;border-radius:999px;transition:width .4s;"></div>
+        </div>
+        <div id="bc-manca" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;"></div>
+      </div>
+
       <!-- STATISTICHE -->
       <div class="dash-stats">
         <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
@@ -3024,6 +3036,85 @@ function _nomeImpresa(x) {
       || String((x && x.nome) || '').trim();
 }
 
+/* ⛔ 4 settembre 2026 — LA BARRA «PROFILO COMPLETO AL x%».
+   Da quando la registrazione e' corta (→7← caselle), il resto del profilo si
+   riempie QUI. Questa barra dice quanto manca e porta col dito nel posto giusto:
+   quasi tutto sta in «Modifica profilo», il logo sta sulla dashboard (il tondo),
+   le foto stanno nella sezione «Foto dei lavori».
+   Non inventa niente: legge `impresaCorrente` e conta le righe di `lavori_foto`. */
+async function aggiornaProfiloCompleto() {
+  const box = document.getElementById('barra-completo');
+  if (!box || !impresaCorrente) return;
+  const i = impresaCorrente;
+  const pieno = v => !!(v != null && String(v).trim() !== '');
+
+  let nFoto = 0;
+  try {
+    const { count } = await sb.from('lavori_foto')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', i.user_id);
+    nFoto = count || 0;
+  } catch (e) { nFoto = 0; }
+
+  const VOCI = [
+    { ok: pieno(i.telefono),                    et: 'Telefono',        dove: 'modifica-profilo.html' },
+    { ok: pieno(i.descrizione),                 et: 'Descrizione',     dove: 'modifica-profilo.html' },
+    { ok: Array.isArray(i.mestieri) ? i.mestieri.length > 0 : pieno(i.mestieri), et: 'Mestiere', dove: 'modifica-profilo.html' },
+    { ok: pieno(i.zone),                        et: 'Zone di lavoro',  dove: 'modifica-profilo.html' },
+    { ok: pieno(i.specializzazioni),            et: 'Specializzazioni',dove: 'modifica-profilo.html' },
+    { ok: pieno(i.partita_iva),                 et: 'Partita IVA',     dove: 'modifica-profilo.html' },
+    { ok: pieno(i.indirizzo),                   et: 'Indirizzo',       dove: 'modifica-profilo.html' },
+    { ok: pieno(i.cap),                         et: 'CAP',             dove: 'modifica-profilo.html' },
+    { ok: pieno(i.whatsapp),                    et: 'WhatsApp',        dove: 'modifica-profilo.html' },
+    { ok: pieno(i.anni_esperienza),             et: 'Anni di esperienza', dove: 'modifica-profilo.html' },
+    { ok: pieno(i.logo_url),                    et: 'Logo',            dove: '__logo' },
+    { ok: nFoto > 0,                            et: 'Foto dei lavori', dove: '__foto' }
+  ];
+
+  const fatte = VOCI.filter(v => v.ok).length;
+  const perc  = Math.round(fatte / VOCI.length * 100);
+  const mancano = VOCI.filter(v => !v.ok);
+
+  document.getElementById('bc-perc').textContent = perc;
+  const riempi = document.getElementById('bc-riempi');
+  riempi.style.width = perc + '%';
+  riempi.style.background = perc >= 90 ? '#16a34a' : (perc >= 50 ? '#0066ff' : '#ff7a00');
+
+  const sotto = document.getElementById('bc-sotto');
+  sotto.textContent = mancano.length
+    ? (mancano.length === 1 ? 'Manca 1 cosa' : 'Mancano ' + mancano.length + ' cose')
+    : 'Non manca niente 🎉';
+
+  const dentro = document.getElementById('bc-manca');
+  dentro.innerHTML = mancano.map(v => {
+    const stile = 'display:inline-block;padding:9px 14px;border:1.5px solid #ffb37a;background:#fff6ed;'
+                + 'color:#9a3412;border-radius:999px;font-size:14.5px;font-weight:700;'
+                + 'text-decoration:none;cursor:pointer;';
+    if (v.dove === '__logo') {
+      return '<a href="javascript:void(0)" onclick="_vaiAlLogo()" style="' + stile + '">+ ' + v.et + '</a>';
+    }
+    if (v.dove === '__foto') {
+      return '<a href="javascript:void(0)" onclick="showSection(\'foto-lavori\')" style="' + stile + '">+ ' + v.et + '</a>';
+    }
+    return '<a href="' + v.dove + '" style="' + stile + '">+ ' + v.et + '</a>';
+  }).join('');
+
+  box.style.display = '';
+}
+
+/* Il logo si carica dal tondo in cima alla dashboard. Se il bottone c'e' (Premium)
+   lo si apre; se non c'e', si dice perche' invece di far girare a vuoto. */
+function _vaiAlLogo() {
+  showSection('dashboard');
+  const b = document.getElementById('btn-logo');
+  if (b && b.style.display !== 'none') {
+    b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { b.click(); }, 350);
+  } else {
+    alert('Il logo si cambia dal tondo in cima al pannello: è una funzione del piano Premium.');
+  }
+}
+
 async function inizializza() {
   // mensile/annuale valgono come premium in tutto il pannello
   if (impresaCorrente && ['mensile','annuale'].includes((impresaCorrente.piano||'').toLowerCase())) {
@@ -3098,6 +3189,8 @@ async function inizializza() {
   }
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
+  /* 4 set 2026: la barra «profilo completo al x%» */
+  aggiornaProfiloCompleto().catch(function(e){ console.warn('barra profilo:', e); });
 
   await caricaPreventivi();
   await caricaRecensioni();
@@ -3454,6 +3547,7 @@ async function caricaLogoImpresa(event) {
   const logoUrl = urlData.publicUrl + '?v=' + Date.now();
   await sb.from('imprese').update({ logo_url: logoUrl }).eq('id', impresaCorrente.id);
   impresaCorrente.logo_url = logoUrl;
+  aggiornaProfiloCompleto().catch(function(){});
   const img = document.getElementById('dash-logo-img');
   const placeholder = document.getElementById('dash-logo-placeholder');
   if (img) { img.src = logoUrl; img.style.display = 'block'; }
@@ -4056,6 +4150,7 @@ async function caricaListaLavoriFoto() {
   const lavori = data || [];
   const statFoto = document.getElementById('dash-stat-foto');
   if (statFoto) statFoto.textContent = lavori.length;
+  aggiornaProfiloCompleto().catch(function(){});
   if (!lavori.length) {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessun lavoro ancora.</div>';
     return;
