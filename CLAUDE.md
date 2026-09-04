@@ -21261,3 +21261,19 @@ destinazione è un difetto, non una rete di sicurezza.
    chi allega un JPG o un DWG viene **rifiutato dal server**. Lì l'errore si
    vede (non è muto come era il preventivo), ma la scritta promette una cosa
    che non si può fare.
+
+## ✅ LA PROVA DAL VIVO (4 set, ore 21:13, sul sito pubblicato)
+Fatta subito dopo il push di Alex, come da regola sua («fai sempre tu il test
+dopo il push»), sulla scheda →36← (il suo account).
+- richiesta vera con →2← file: finiti davvero in `preventivi-allegati`
+  (→40← KB e →60← KB, tipo giusto), riga `preventivi` con `allegati` pieno
+- dal **pannello vero, loggato**: la riga «Allegati» mostra i →2← file e i
+  link firmati rispondono →200← con la misura giusta. Foto guardata.
+- file da →12← MB: messaggio rosso col nome del file, →0← caricamenti,
+  →0← righe scritte
+- ⚠️ pulizia fatta **nello stesso momento**: riga e file cancellati, il
+  database e' tornato a →1← preventivo (quello vero del →15← agosto)
+- ⚠️ per cancellare i file e' servita una policy DELETE **temporanea**,
+  creata e tolta subito: sul bucket non c'e' nessun permesso di
+  cancellazione. Vuol dire che **gli allegati di una richiesta cancellata
+  restano nel magazzino**: scritto nei lavori aperti, decide Alex
