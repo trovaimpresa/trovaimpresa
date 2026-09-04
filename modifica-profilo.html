@@ -1018,36 +1018,14 @@
           </div>
         </div>
 
-        <!-- VIDEO PROFILO (PREMIUM) -->
-        <div class="form-card fc-blu" style="position:relative;">
-          <div class="card-header blu">🎬 Video profilo <span style="font-size:13px;font-weight:700;background:#7b1fa2;color:white;padding:3px 10px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
-          <div class="form-group">
-            <div class="upload-area">
-              <p><strong>Clicca per caricare</strong> un video di presentazione</p>
-              <small>MP4, MOV — max 50MB — max 60 secondi</small>
-            </div>
-          </div>
-          <div id="overlay-video" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
-            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
-            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
-          </div>
-        </div>
-
-        <!-- AI INTEGRATA (PREMIUM) -->
-        <div class="form-card" style="position:relative;">
-          <div class="card-header">🤖 AI integrata nel profilo <span style="font-size:13px;font-weight:700;background:#7b1fa2;color:white;padding:3px 10px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
-          <div class="form-group">
-            <div style="background:#f9f5ff;border:1px solid #e0d0f0;border-radius:8px;padding:14px;font-size:15px;color:#3d4a5c;line-height:1.6;">
-              L'AI analizza il tuo profilo e risponde automaticamente alle domande dei clienti, suggerisce miglioramenti e genera descrizioni ottimizzate.
-            </div>
-          </div>
-          <div id="overlay-ai-profilo" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
-            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
-            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
-          </div>
-        </div>
+        <!-- ⛔ 4 settembre 2026 — TOLTE «Video profilo» e «AI integrata nel profilo».
+             Alex: «queste due diciture non servono a niente, togliamole».
+             Erano due riquadri che NON facevano niente: il riquadro del video non
+             aveva ne' un <input type="file"> ne' una funzione di caricamento
+             (cliccarlo non apriva nulla), e quello dell'AI era solo una frase di
+             spiegazione. Restavano li' a far scorrere la pagina per niente.
+             Se un giorno il video si potra' caricare davvero, si rimette il
+             riquadro INSIEME al codice che lo carica, non prima. -->
 
         </div><!-- /profilo-card-unica -->
 
@@ -1324,10 +1302,12 @@
         }
       }
 
-      // Campi Premium
+      /* i due riquadri Premium (video e AI) non ci sono piu': niente da coprire.
+         Il ciclo resta com'era, ma su una lista vuota, cosi' se domani si
+         rimette un riquadro Premium basta scriverne il nome qui. */
       const isPremium = d.piano === 'premium';
       if (!isPremium) {
-        ['overlay-video', 'overlay-ai-profilo'].forEach(id => {
+        [].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'flex';
         });
