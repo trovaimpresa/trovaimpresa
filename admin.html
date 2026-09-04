@@ -509,6 +509,9 @@
       <div class="nav-item" onclick="showSection('email-inviate',this)">
         <span class="nav-icon">📬</span> Email inviate
       </div>
+      <div class="nav-item" onclick="showSection('arrivi',this)">
+        <span class="nav-icon">🧭</span> Da dove arrivano
+      </div>
       <div class="nav-item" onclick="showSection('utilizzo',this)">
         <span class="nav-icon">📈</span> Chi usa il gestionale
       </div>
@@ -1250,6 +1253,30 @@
       </div>
     </div>
 
+    <!-- DA DOVE ARRIVANO — 4 settembre 2026.
+         I dati c'erano gia' dal 19 agosto (js/conta-visita.js -> visite_sito)
+         ma nessuno poteva rileggerli: la tabella aveva solo la regola di
+         scrittura. Adesso li legge netlify/functions/admin-arrivi.js con
+         service_role, sulla vista arrivi_per_canale. -->
+    <div class="section" id="sec-arrivi">
+      <div class="topbar">
+        <div class="topbar-title">🧭 Da dove arrivano</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="st-nota" style="margin:0 0 18px">
+          Chi arriva sul sito e da dove, contato senza cookie e senza pixel: qui ci sono
+          <b>tutti</b>, anche chi rifiuta il banner dei cookie (che per Meta e Google non esiste).
+          «Persone» sono visite diverse, «visite» sono le pagine aperte.
+        </div>
+        <div class="u-numeri" id="ar-numeri"></div>
+        <div style="margin:6px 0 14px">
+          <button class="u-btn" onclick="caricaArrivi()">Aggiorna</button>
+        </div>
+        <div id="ar-lista"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- CHI USA IL GESTIONALE -->
     <div class="section" id="sec-utilizzo">
       <div class="topbar">
@@ -1509,6 +1536,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'abbonamenti') renderAbbonamenti();
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (id === 'mappa-spazi') caricaMappaSpazi();
+  if (id === 'arrivi') caricaArrivi();
   if (id === 'utilizzo') caricaUtilizzo();
   if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'incassi') caricaPagamenti();
@@ -2174,6 +2202,98 @@ async function inviaAnnuncio(modo) {
   esito.innerHTML = modo === 'prova'
     ? '<b>Prova inviata.</b><br>Controlla la tua casella e guarda com\'è venuta prima di mandarla a tutti.'
     : '<b>Inviata a ' + j.inviate + ' ' + (j.inviate === 1 ? 'persona' : 'persone') + '.</b><br>Se qualcuno non la riceve, controlla che la sua email sia scritta bene.';
+}
+
+// ===== DA DOVE ARRIVANO (4 settembre 2026) =====
+// Legge la vista arrivi_per_canale attraverso la function admin-arrivi:
+// visite_sito non e' leggibile con la chiave anon (ha solo la regola di
+// scrittura), quindi serve il service_role lato server.
+function _arEsc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+const AR_ICONE = {
+  'Facebook':'📘', 'Instagram':'📸', 'Google':'🔍', 'LinkedIn':'💼', 'Threads':'🧵',
+  'Altri motori di ricerca':'🔎', 'Diretto o sconosciuto':'✉️',
+  'Giro dentro il sito':'🔁', 'Altro':'•'
+};
+
+async function caricaArrivi(){
+  const box = document.getElementById('ar-lista');
+  const num = document.getElementById('ar-numeri');
+  if (box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try{
+    const res = await fetch('/.netlify/functions/admin-arrivi', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(function(){ return {}; });
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    disegnaArrivi(j.data || []);
+  }catch(e){
+    if (num) num.innerHTML = '';
+    if (box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _arEsc(e.message) + '</div>';
+  }
+}
+
+function disegnaArrivi(righe){
+  const num = document.getElementById('ar-numeri');
+  const box = document.getElementById('ar-lista');
+  if (!righe.length){
+    if (num) num.innerHTML = '';
+    if (box) box.innerHTML = '<div class="ei-vuoto">Ancora nessun arrivo registrato.</div>';
+    return;
+  }
+  /* «Giro dentro il sito» non e' una fonte: e' chi si sposta da una pagina
+     all'altra. Va tolto dai conti, se no sembra il canale piu' grosso. */
+  const fonti = righe.filter(function(r){ return r.canale !== 'Giro dentro il sito'; });
+  const somma = function(campo){ return fonti.reduce(function(t,r){ return t + (+r[campo] || 0); }, 0); };
+  const tot30 = somma('persone_30gg');
+  const tot7  = somma('persone_7gg');
+  const daAnnunci = somma('persone_dagli_annunci');
+  const social = fonti.filter(function(r){ return ['Facebook','Instagram','Threads','LinkedIn'].indexOf(r.canale) >= 0; })
+                      .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
+  const google = fonti.filter(function(r){ return ['Google','Altri motori di ricerca'].indexOf(r.canale) >= 0; })
+                      .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
+
+  if (num) num.innerHTML =
+      '<div class="u-num"><div class="v">' + tot30 + '</div><div class="e">Persone arrivate negli ultimi 30 giorni</div></div>'
+    + '<div class="u-num verde"><div class="v">' + tot7 + '</div><div class="e">Negli ultimi 7 giorni</div></div>'
+    + '<div class="u-num viola"><div class="v">' + social + '</div><div class="e">Da Facebook e Instagram (30 gg)</div></div>'
+    + '<div class="u-num giallo"><div class="v">' + google + '</div><div class="e">Da Google e altri motori (30 gg)</div></div>';
+
+  let h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:15px;min-width:560px">'
+    + '<tr style="text-align:left;border-bottom:2px solid #e2e8f0">'
+    + '<th style="padding:10px 8px">Da dove</th>'
+    + '<th style="padding:10px 8px">Persone<br><span style="font-weight:500;color:#5b6b80">ultimi 30 gg</span></th>'
+    + '<th style="padding:10px 8px">Quanto pesa</th>'
+    + '<th style="padding:10px 8px">Ultimi 7 gg</th>'
+    + '<th style="padding:10px 8px">Dagli annunci<br><span style="font-weight:500;color:#5b6b80">a pagamento</span></th>'
+    + '</tr>';
+  fonti.forEach(function(r){
+    const p30 = +r.persone_30gg || 0;
+    const perc = tot30 ? Math.round(p30 * 100 / tot30) : 0;
+    const ic = AR_ICONE[r.canale] || '•';
+    h += '<tr style="border-bottom:1px solid #eef2f7">'
+      + '<td style="padding:11px 8px;font-weight:700">' + ic + ' ' + _arEsc(r.canale) + '</td>'
+      + '<td style="padding:11px 8px;font-weight:800;font-size:17px">' + p30 + '</td>'
+      + '<td style="padding:11px 8px">'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<div style="flex:1;min-width:70px;height:10px;background:#eef2f7;border-radius:6px;overflow:hidden">'
+        + '<div style="height:100%;width:' + perc + '%;background:#0066ff"></div></div>'
+        + '<span style="min-width:40px">' + perc + '%</span></div></td>'
+      + '<td style="padding:11px 8px">' + (+r.persone_7gg || 0) + '</td>'
+      + '<td style="padding:11px 8px">' + (+r.persone_dagli_annunci || 0) + '</td>'
+      + '</tr>';
+  });
+  h += '</table></div>';
+
+  const giro = righe.filter(function(r){ return r.canale === 'Giro dentro il sito'; })[0];
+  if (giro) h += '<div class="st-nota" style="margin-top:16px">🔁 Oltre a questi, '
+    + (+giro.persone_30gg || 0) + ' persone si sono spostate fra le pagine del sito: '
+    + 'non è una fonte, è chi era già dentro.</div>';
+  h += '<div class="st-nota" style="margin-top:12px">✉️ «Diretto o sconosciuto» = chi scrive l\'indirizzo a mano, '
+    + 'apre un segnalibro, o arriva da un\'app che non dice da dove viene (WhatsApp, email, alcune app di Facebook).</div>';
+  if (box) box.innerHTML = h;
 }
 
 // ===== EMAIL INVIATE (storico) =====
