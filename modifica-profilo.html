@@ -51,7 +51,6 @@
     /* campi che devono restare a tutta larghezza */
     .form-card .form-group:has(textarea),
     .form-card .form-group:has(.tag-input),
-    .form-card .form-group:has(.upload-area),
     .form-card .form-group:has(> div) { grid-column: 1 / -1; }
     .card-header {
       display: flex; align-items: center; gap: 8px;
@@ -103,15 +102,6 @@
     .alert-error { background: #ffeaea; color: #c0392b; border: 1px solid #f5c6c6; }
     .alert-success { background: #e8f5e9; color: #0066ff; border: 1px solid #a8bdd5; }
     .loading { text-align: center; padding: 48px 0; color: #666; font-size: 15px; }
-    .upload-area {
-      border: 2px dashed #ddd; border-radius: 8px; padding: 20px;
-      text-align: center; cursor: pointer; background: #fafafa; transition: border-color 0.2s;
-    }
-    .upload-area:hover { border-color: #0066ff; background: rgba(0,102,255,0.04); }
-    .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
-    .upload-area small { font-size: 12px; color: #aaa; }
-    #logo-input { display: none; }
-    .logo-preview { max-width: 90px; max-height: 90px; border-radius: 8px; object-fit: cover; display: block; margin-bottom: 8px; }
     .tag { background: #0066ff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
     .tag button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; line-height: 1; }
     .tag-input { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; min-height: 44px; }
@@ -193,11 +183,6 @@
     }
     .form-group input:disabled { background: #f1f5f9; color: #64748b; }
     .form-group textarea { min-height: 110px; line-height: 1.55; }
-
-    /* ---- riquadro per caricare (logo, video) ---- */
-    .upload-area { border: 2px dashed #c9d4e3; border-radius: 12px; padding: 24px; background: #f8fafc; }
-    .upload-area p { font-size: 15.5px; color: #0f2744; font-weight: 600; }
-    .upload-area small { font-size: 14px; color: #64748b; }
 
     /* ---- pastiglie e tendina della mappa ---- */
     .tag { font-size: 14.5px; padding: 5px 13px; }
