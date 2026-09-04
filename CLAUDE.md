@@ -21433,3 +21433,49 @@ domani se ne cambia uno solo il professionista spunta una prestazione che
 **nessun cliente puo' cercare**. Banco
 `prove-claude/banchi-fissi/professionista/banco-prestazioni.js` a guardia:
 cambiando una voce in un file solo, diventa rosso.
+
+
+## →12← — VIA `nol_mezzi`, MA NON DAL DATABASE E BASTA (5 set, sera)
+`drop table` fatto col «si» di Alex, dopo →4← controlli: →1← riga sola
+(l'escavatore) gia' in `gest_mezzi` **con lo stesso id**, nessuna chiave
+esterna, nessuna vista. Dopo: `gest_mezzi` →2←, `nol_noleggi` →3←,
+`nol_media` →1←, tutto intatto. Copia della riga in
+`prove-claude/nol_mezzi-ultima-copia-5set.txt`; SQL in `sql/butta-nol-mezzi.sql`.
+
+⛔ **La quinta cosa, quella che conta**: nel sito la tabella la nominava ancora
+`js/cestino.js`, nell'elenco delle tabelle che il cestino interroga. Cancellarla
+e basta avrebbe fatto chiedere al database **una tabella che non esiste, a ogni
+apertura del cestino**. Tolta di li' nello stesso momento.
+⚠️ **REGOLA: prima di buttare una tabella, cercarne il nome anche nel SITO,
+non solo fra chiavi esterne e viste.**
+
+## →10← — LA PROTEZIONE PASSWORD NON C'E' SUL PIANO FREE (5 set, sera)
+L'avviso di Supabase «Leaked Password Protection» **non e' un difetto da
+sistemare**: l'interruttore («Prevent use of leaked passwords», che confronta
+con l'archivio HaveIBeenPwned) sta sotto Authentication → Attack Protection →
+«Configure in email provider», ma dice **«Only available on Pro plan and
+above»** e il progetto e' **FREE**. Finche' il piano e' Free quell'avviso
+restera' li'. ⚠️ Non riaprirlo a ogni controllo di sicurezza come se fosse una
+cosa da fare: e' una funzione che non c'e'.
+
+Fatto invece cio' che il Free permette, **scelto da Alex fra →3← opzioni**:
+**lunghezza minima della password da →6← a →8←** caratteri (il consiglio di
+Supabase stesso). Chi e' gia' iscritto non viene toccato.
+⛔ **«Password requirements» (lettere+numeri) lasciato SPENTO apposta**: la
+registrazione e' stata accorciata il →4← settembre proprio per non far
+scappare nessuno, e una password piu' difficile e' attrito esattamente li'.
+Da riprendere quando ci saranno piu' iscritti.
+
+## ⛔ TRE VOCI SU TRE DESCRIVEVANO DIFETTI CHE NON C'ERANO PIU'
+In una sola sessione: le →4← regole CSS sotto i →13←px (gia' buttate il →3←
+set), il RATING MEDIO che «mostra —» (gia' a posto), le prestazioni del
+professionista «senza casella» (la casella c'era).
+⚠️ **REGOLA: una voce vecchia del quaderno si verifica PRIMA di lavorarci.**
+Tre volte su tre il lavoro vero era guardare, non scrivere codice.
+
+## ⚠️ E UNA COSA SULLE PASSWORD, DA RICORDARE
+Il →5← settembre Alex ha scritto →2← password vere in chat perche' una mia
+frase («serve la tua password admin per provarlo») si poteva leggere come una
+richiesta. **Non era.** Quando una prova richiede le sue credenziali, la frase
+giusta e': «questa prova la puoi fare solo tu, ecco i clic» — mai una che
+somigli a una richiesta. Claude non usa le sue password in nessun caso.
