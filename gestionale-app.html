@@ -4638,11 +4638,31 @@
       /* ⛔ 24 agosto 2026 — rieCard mostra solo le PRIME DUE righe (slice(0,2)):
          una terza voce come riga a se' non si sarebbe mai vista quando
          c'erano gia' rifornimenti o fatture fornitori. Il noleggio interno
-         va nella riga "Spese", sempre visibile, come lavori e carte. */
+         va nella riga "Spese", sempre visibile, come lavori e carte.
+
+         ⛔ 4 settembre 2026 — LA RIGA DELLE SPESE SI LEGGEVA AL CONTRARIO.
+         Diceva: «Spese: lavori 0,00 € · carte · noleggio 250,00 €   0,00 €».
+         Il numero a destra erano le CARTE, ma la scritta finiva con la parola
+         «noleggio» e il suo importo: chiunque legge crede che i 250 € siano
+         le carte e che a destra ci sia il noleggio. In piu' le due righe
+         «Rifornimenti» e «Fatture dei fornitori» non si vedevano MAI (la
+         terza e la quarta riga vengono tagliate), quindi la scheda mostrava
+         un utile che comprendeva spese che non nominava nemmeno.
+         Adesso: a sinistra tutte le voci con il loro importo, a destra il
+         TOTALE delle spese — quello che, tolto dall'incassato, fa l'utile
+         grande in cima alla scheda. Nessun conto nuovo: speseMese e' lo
+         stesso di sempre. */
       righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese)},
-             {t:"Spese: lavori "+eur(speseLav)+" · carte"+(speseNol?" · noleggio "+eur(speseNol):""),v:eur(speseCarte)}]
-        .concat(speseRif?[{t:"Rifornimenti in contanti",v:eur(speseRif)}]:[])
-        .concat(speseForn?[{t:"Fatture dei fornitori",v:eur(speseForn)}]:[])
+             (function(){
+               const voci=[];
+               if(speseLav)  voci.push("lavori "+eur(speseLav));
+               if(speseCarte)voci.push("carte "+eur(speseCarte));
+               if(speseNol)  voci.push("noleggio "+eur(speseNol));
+               if(speseRif)  voci.push("rifornimenti "+eur(speseRif));
+               if(speseForn) voci.push("fornitori "+eur(speseForn));
+               return {t: voci.length?("Spese: "+voci.join(" · ")):"Spese di questo mese",
+                       v: eur(speseMese)};
+             })()]
     }));
 
     C.push(rieCard({
