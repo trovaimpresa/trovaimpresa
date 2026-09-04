@@ -923,6 +923,38 @@
               <input type="text" id="f-indirizzo-professionista" placeholder="Es. Via Roma 1">
             </div>
           </div>
+          <div class="form-card fc-blu">
+            <div class="card-header blu">📍 Dove lavori e come ti contattano</div>
+            <div class="form-group">
+              <label>Zone di lavoro</label>
+              <input type="text" id="f-zone-professionista" placeholder="Es. Roma e provincia, Lazio">
+            </div>
+            <div class="form-group">
+              <label>Comuni di competenza</label>
+              <input type="text" id="f-comuni_competenza" placeholder="Es. Roma, Fiumicino, Tivoli (separati da virgola)">
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>WhatsApp</label>
+                <input type="tel" id="f-whatsapp-professionista" placeholder="Es. +39 333 1234567">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Quante persone nello studio</label>
+                <input type="text" id="f-dipendenti-professionista" placeholder="Es. 2">
+              </div>
+            </div>
+          </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">🖼️ Logo e foto dei lavori</div>
+            <p style="margin:0 0 12px;font-size:15px;color:#334155;line-height:1.5;">
+              Il logo e le foto dei tuoi lavori non si caricano da qui: stanno nel pannello,
+              perche' sono immagini e hanno bisogno del caricamento file.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              <a href="pannello-professionisti.html" style="display:inline-block;padding:12px 16px;background:#0066ff;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Carica il logo</a>
+              <a href="pannello-professionisti.html#foto-lavori" style="display:inline-block;padding:12px 16px;background:#ff7a00;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Carica le foto dei lavori</a>
+            </div>
+          </div>
           <div class="form-card fc-arancio">
             <div class="card-header arancio">📝 Specializzazioni</div>
             <div class="form-group" style="margin-bottom:0;">
@@ -1368,6 +1400,10 @@
         document.getElementById('f-anni_esperienza-professionista').value = d.anni_esperienza || '';
         document.getElementById('f-cap-professionista').value = d.cap || '';
         document.getElementById('f-indirizzo-professionista').value = d.indirizzo || '';
+        document.getElementById('f-zone-professionista').value = d.zone || '';
+        document.getElementById('f-comuni_competenza').value = d.comuni_competenza || '';
+        document.getElementById('f-whatsapp-professionista').value = d.whatsapp || '';
+        document.getElementById('f-dipendenti-professionista').value = d.dipendenti || '';
         document.getElementById('iscritto_albo-professionista').checked = !!d.iscritto_albo;
         document.getElementById('consulenza_online-professionista').checked = !!d.consulenza_online;
         document.getElementById('sopralluogo_gratuito-professionista').checked = !!d.sopralluogo_gratuito;
@@ -1577,6 +1613,10 @@
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-professionista').value) || null,
             cap: document.getElementById('f-cap-professionista').value.trim(),
             indirizzo: document.getElementById('f-indirizzo-professionista').value.trim(),
+            zone: document.getElementById('f-zone-professionista').value.trim(),
+            comuni_competenza: document.getElementById('f-comuni_competenza').value.trim(),
+            whatsapp: document.getElementById('f-whatsapp-professionista').value.trim(),
+            dipendenti: document.getElementById('f-dipendenti-professionista').value.trim(),
             specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null,
             iscritto_albo: document.getElementById('iscritto_albo-professionista').checked,
             consulenza_online: document.getElementById('consulenza_online-professionista').checked,
