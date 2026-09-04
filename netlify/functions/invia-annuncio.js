@@ -56,7 +56,7 @@ function testoInHtml(testo) {
     + '<span style="color:#0066ff">Trova</span><span style="color:#0a2a4d">Impresa</span></div>'
     + corpo
     + '</div>'
-    + '<div style="text-align:center;font-size:12.5px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
+    + '<div style="text-align:center;font-size:13px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
     + 'TrovaImpresa.com &middot; Alessio Pinto &middot; Rieti (RI)<br>'
     + 'Ricevi questa email perche&#39; sei iscritto a TrovaImpresa.com'
     + '</div></div></body></html>';

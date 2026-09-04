@@ -60,11 +60,11 @@ exports.handler = async function(event) {
               &#127760; Vai a TrovaImpresa &rarr;
             </a>
           </div>
-          <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+          <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
             Ricevi questa email perch&eacute; hai inviato una richiesta di incarico su TrovaImpresa.
           </p>
         </div>
-        <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
+        <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
           TrovaImpresa &mdash; <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
         </p>
       </div>

@@ -21277,3 +21277,87 @@ dopo il push»), sulla scheda →36← (il suo account).
   creata e tolta subito: sul bucket non c'e' nessun permesso di
   cancellazione. Vuol dire che **gli allegati di una richiesta cancellata
   restano nel magazzino**: scritto nei lavori aperti, decide Alex
+
+
+---
+
+# 5 SETTEMBRE 2026 — I DUE PROMPT FUSI, E →4← LAVORI CHIUSI
+
+## La fila unica
+Alex ha dato due prompt (4 e 5 set). Confrontati voce per voce: →11← lavori
+uguali, →17← nuovi nel secondo, e **→3← che il secondo aveva perso** —
+le prestazioni del professionista, le scritte sotto i →13← px, i →10← utenti
+mai contattati — piu' una decisione (il logo riservato ai Premium).
+Tutto rimesso in **UNA fila sola** in cima a `LAVORI-APERTI.md`: →31← aperti.
+⚠️ Regola: quando arriva un prompt nuovo, non sostituisce il vecchio — si
+confrontano e si fondono, se no i lavori sparisono senza che nessuno decida.
+
+## →11← — LA SITEMAP DELLE RECENSIONI
+`recensioni-impresa.html` non era in nessuna sitemap.
+⛔ Non bastava una riga in `sitemap.xml`: la pagina **senza `?id` si dichiara
+da sola `noindex`**, quindi va generata dal database, una riga per impresa.
+- `netlify/functions/sitemap-recensioni.js` (copia della forma di
+  `sitemap-imprese.js`) + rinvio in `netlify.toml` + riga in `robots.txt`
+- funzione `imprese_con_recensioni()` sul database
+  (`sql/imprese-con-recensioni.sql`, security definer come
+  `recensioni_pubbliche()`): `feedback_clienti` e' chiusa da RLS e da `anon`
+  si leggono **→0← righe**, provato
+- ci vanno **solo** le imprese con almeno una recensione confermata, non di
+  prova e con email confermata: una pagina recensioni vuota e' «contenuto
+  povero» e il giudizio ricade su tutto il sito
+- banco `prove-claude/banchi-fissi/sitemap/banco-sitemap-recensioni.js` +
+  `gira-sitemap.sh` — →16← verdi, →3← sabotaggi tutti rossi
+- ⛔ **DA DECIDERE**: oggi quella sitemap contiene **→1← solo indirizzo**, ed
+  e' la scheda →36← con la **recensione di prova** (id →19←, scritta da
+  Alessio a se stesso). Finche' non si decide su quella, non conviene mandarla
+  a Search Console
+
+⚠️ **Trappola del banco, presa davvero**: il primo sabotaggio («scrive un
+indirizzo diverso dal canonical») lasciava il banco **tutto verde**.
+`String.replace` con una **stringa** cambia solo la PRIMA occorrenza — e la
+prima era dentro il COMMENTO in cima al file, non nel codice. Rifatto con una
+regex `/g` sul pezzo di codice. *Un sabotaggio che non rompe il codice non
+prova niente.*
+
+## B — NIENTE PIU' SCRITTE SOTTO I →13← px
+- il footer del sito era `font-size:0.8rem` = →12,8← px in **→19← pagine**
+- nelle email: **→16← file** con misure da →11←, →12← e →12,5← px
+- tutte portate a →13←px
+- ⚠️ come si prova di non aver toccato altro: si normalizza OGNI `font-size` a
+  un segnaposto e si confronta l'md5 prima/dopo. Se combacia, ho toccato solo
+  le misure (stessa regola del →30← agosto). →2← file sono stati **saltati**
+  proprio perche' non passavano quel controllo
+- le →4← regole CSS `.cdh` `.cd` `.cd.oggi` `.ms-l` **erano gia' state buttate
+  il →3← settembre**: la voce nel quaderno era vecchia. *Prima di rifare una
+  cosa, guardare se e' gia' fatta.*
+
+## →27← e →28← — DUE VOCI CHIUSE SENZA SCRIVERE CODICE
+- **→27←** «RATING MEDIO mostra —»: sul pannello VERO, loggato, dice →5.0←.
+  Era gia' a posto dal →3← set
+- **→28←** «Bug piano free/pro binario» (dal →25← aprile): `piano` ha **un solo
+  valore su tutte e →116← le imprese** (`premium`), nei →4← pannelli non c'e'
+  nessun confronto con `'pro'`. Voce cancellata, `BACKLOG.md` svuotato
+
+## ⛔ →13← — `gestionale-config.html`: E' PEGGIO DI QUELLO CHE DICEVA IL QUADERNO
+Il quaderno diceva «l'ultimo blocco non gira». **Non e' vero: non gira
+NIENTE.** Uno `<script>` senza `</script>` fa fallire tutto il blocco, quindi
+`sb` non nasce, i bottoni delle icone e dei colori non vengono disegnati e
+sotto il titolo c'e' lo **schermo bianco**. Guardato dal vivo sul sito
+pubblicato: `typeof sb === "undefined"`, →0← bottoni disegnati, foto fatta.
+- ⚠️ **anche la versione ONLINE e' troncata** allo stesso identico punto
+  (`...eq("id",d.dataset`), →12.338← byte contro i →12.400← in cartella. Quindi
+  il file rotto e' stato pubblicato: il pezzo buono sta solo nella storia di Git
+- 🟢 **nessuno ci arriva**: cercato in tutto il sito, `gestionale-config.html`
+  compare solo dentro →3← COMMENTI (gestionale-app, -negozio, -noleggio), non
+  c'e' nessun link cliccabile. Ci si arriva solo scrivendo l'indirizzo a mano
+- ⛔ **non e' stato indovinato niente**: manca la coda di
+  `$("#op-list").onclick` (la cancellazione di un operatore), poi `</script>`,
+  `</body>`, `</html>`. Va ripreso dalla storia di Git da Alex
+
+## ⚠️ IL CONTROLLO PRIMA DI PUBBLICARE SI FERMA A OGNI PROMPT NUOVO
+`tools/controllo-push.js` vuole in `netlify.toml` un rinvio →404← **col nome
+esatto** di ogni `.md` in radice. Ogni file `PROMPT-*.md` nuovo blocca il push
+finche' non lo si aggiunge a mano: e' successo →2← volte in →2← giorni
+(`PROMPT-prossima-sessione.md` il 4 set, `PROMPT-gestionale-operatore.md` il 5).
+Da proporre ad Alex: una regola sola `/*.md` piu' →3← righe nel controllo che
+la accettino.

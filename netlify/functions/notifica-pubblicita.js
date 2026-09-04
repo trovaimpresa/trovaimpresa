@@ -51,7 +51,7 @@ exports.handler = async function(event) {
           </tr>
           <tr>
             <td style="padding:10px 0;color:#666">ID annuncio</td>
-            <td style="padding:10px 0;font-family:monospace;font-size:12px">${annuncio_id || '—'}</td>
+            <td style="padding:10px 0;font-family:monospace;font-size:13px">${annuncio_id || '—'}</td>
           </tr>
         </table>
         <div style="text-align:center;margin-top:28px">
@@ -61,7 +61,7 @@ exports.handler = async function(event) {
           </a>
         </div>
       </div>
-      <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
+      <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
         TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
       </p>
     </div>

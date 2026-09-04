@@ -163,12 +163,12 @@ const handler = async function () {
               Quando una scadenza &egrave; sistemata, segnala come <b>fatta</b> nel gestionale:
               cos&igrave; smette di ricordartela.
             </p>
-            <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+            <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
               Ricevi questa email perch&eacute; hai attivato il promemoria su queste scadenze.
               Puoi spegnerlo per ognuna dal modulo della scadenza.
             </p>
           </div>
-          <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
+          <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
             TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
           </p>
         </div>`;

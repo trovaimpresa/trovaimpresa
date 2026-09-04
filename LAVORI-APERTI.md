@@ -4,7 +4,64 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: venerdì 4 settembre 2026 (notte — allegati della richiesta di preventivo)
+Ultimo aggiornamento: sabato 5 settembre 2026 (sera) — chiusi →4← lavori (→11←, B, →27←, →28←)
+
+---
+
+## 📌 LA FILA — l'ordine di lavoro (5 settembre 2026)
+
+I due prompt di Alex (4 e 5 set) sono stati messi insieme in UNA lista sola.
+Le voci **A, B, C** stavano solo nel primo prompt e nel secondo erano sparite:
+sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set.
+
+### 🔴 Rompono qualcosa a un cliente vero
+- ✅ **1. Preventivo: gli allegati non arrivavano** — FATTO e provato dal vivo il 4 set (notte)
+- **2.** Cancellare una conversazione lato impresa cancella anche la copia del cliente · mezza giornata
+- **3.** `pannello-negozio.html` rimasto indietro (testata vecchia + copertina che non si carica)
+- **4.** Bandi & Opportunita' fermo su CORS da luglio (la Netlify Function non e' mai stata scritta)
+- **5.** Il tasto «📱 Mobile» dell'Anteprima non fa niente nei →4← pannelli
+
+### 🟠 Sbagliano un numero o nascondono qualcosa
+- **6.** Il noleggio «prenotato» e' gia' contato come spesa prima che il mezzo esca
+- **7.** Difetto →11← del controllo generale del gestionale
+- **8.** Prodotti e Marchi del negozio: colonne piene, nessuna pagina le legge
+- **A.** ⬅️ *dal primo prompt* — Le **prestazioni del professionista** non hanno una casella in `modifica-profilo.html` (la colonna `prestazioni` esiste)
+- **9.** La visita non e' collegata all'iscrizione (`visite_sito.sessione` non si salva al signUp)
+
+### 🟡 Due minuti a testa
+- ⏳ **10.** Protezione password deboli SPENTA su Supabase · confermato il 5 set: l'avviso «Leaked Password Protection» c'e' ancora · lo fa Alex, i clic sono nel riassunto del 5 set
+- ✅ **11.** `recensioni-impresa.html` in sitemap — FATTO il 5 set (`sitemap-recensioni.xml`)
+- **12.** `nol_mezzi` da buttare dal database (nessuna pagina la legge piu')
+- ✅ **B.** Le scritte sotto i →13← px — FATTO il 5 set: footer a →13←px su →19← pagine e in →16← email. Le →4← regole CSS erano gia' state buttate il →3← set (la voce era vecchia)
+
+### 🔧 Attrezzi rotti — non li vede il cliente, ma ci fanno perdere difetti
+- ⏳ **13.** `gestionale-config.html` TRONCATO · **guardato il 5 set: e' PEGGIO del previsto — la pagina e' MORTA DEL TUTTO** (uno `<script>` senza chiusura fa fallire tutto il blocco: niente login, niente elenchi, schermo bianco sotto il titolo). Anche la versione ONLINE e' troncata allo stesso punto, quindi il pezzo buono sta solo nella storia di Git · **aspetta il recupero da Alex**
+- **14.** Il controllo colonne-fantasma non vede `.update(variabile)`
+- **15.** `prove-claude/colonne-vere.txt` e' del →30← agosto (→15← falsi allarmi)
+- **16.** Il banco dei preventivi del →29← agosto e' scaduto (cerca `_centPerc` dove non sta piu')
+
+### 📋 Concordati, mai iniziati
+- **17.** Domande guidate per tipo di lavoro nel modulo preventivo
+- **18.** Mail di riepilogo al cliente + pulsante WhatsApp dopo l'invio
+- **19.** «Copia il link» della pagina recensioni nel pannello
+- **20.** Richiamo automatico a →7← giorni + «conferma la mail» ai →24←
+- **21.** Homepage piu' compatta sul telefono (dopo i difetti del pannello pubblico)
+- **22.** Guide impianti con la Parte E della Tariffa Lazio (Alex deve allegare la Parte E)
+- **23.** Allargare il banco delle pagine alle altre (prezzi, blog, guide, citta'…)
+- **24.** Un banco per il CONTO del computo
+- **25.** Collegare l'agente del lunedi' alle skill nuove
+- **C.** ⬅️ *dal primo prompt* — I **→10← utenti recuperati** da luglio, mai contattati · ⚠️ il testo dell'email lo approva Alex, si chiede PRIMA di scrivere
+
+### ⚠️ Da chiudere o cancellare — →10← minuti, fanno solo rumore
+- ⏳ **26.** «Elimina recensioni admin» — letto tutto il giro il 5 set (bottone → `admin-dati` → delete con la chiave di servizio): **non si vede nessun difetto**. Non provabile da Claude, serve la password admin: →4← clic di Alex e si chiude
+- ✅ **27.** «RATING MEDIO mostra —» — CHIUSA il 5 set: sul pannello VERO scrive →5.0←, non piu' «—». Era gia' a posto
+- ✅ **28.** «Bug piano free/pro binario» — CANCELLATA il 5 set: nessun confronto con `'pro'` nei →4← pannelli e tutte e →116← le imprese hanno `piano = premium`. `BACKLOG.md` svuotato
+
+### 🆕 Nato oggi
+- **D.** Cancellando una richiesta di preventivo, i suoi **allegati restano nel magazzino**: sul bucket non c'e' nessun permesso di cancellazione
+
+### L'ordine di oggi (5 set), scelto da Alex
+→13← · poi ~~→1←~~ (gia' fatto) · poi →10←+→11←+→12←+**B** insieme · poi →26←+→27←+→28←
 
 ---
 
@@ -67,6 +124,7 @@ Ultimo aggiornamento: venerdì 4 settembre 2026 (notte — allegati della richie
 - **Quanto vale un credito chat** · ricordarglielo quando si arriva lì. Il «nodo dei 49 €» è CHIUSO
 - **Il cliente che aspetta da →42← giorni** una risposta su una richiesta di incarico a un professionista (visto il 4 set) · rispondere a mano? avvisare il professionista? proporla ad altri?
 - **Deposito del marchio TrovaImpresa** (UIBM, classi 35/37/42, ~185 € via SPID) · disponibile, mai depositato
+- **Il bottone del logo e' solo Premium** ⬅️ *dal primo prompt, sparita dal secondo* · per un iscritto Free la voce «Logo» della fascia «profilo completo» non si potra' MAI spuntare, quindi il →100%← e' irraggiungibile · apriamo il logo a tutti e teniamo Premium solo la copertina?
 
 ## 💡 IDEE — parcheggiate, non promesse
 
@@ -82,6 +140,13 @@ Ultimo aggiornamento: venerdì 4 settembre 2026 (notte — allegati della richie
 - Collaudo dal vivo di `assistenza-ai-e-computo` (3 domande alla chat + computo di prova con totale →937,99←): da fare la prima volta con Alex presente
 
 ## ✅ FATTO — ultimi 14 giorni (per chiudere il cerchio, poi si cancella)
+
+- [5 set] **→11← — `recensioni-impresa.html` adesso e' in sitemap** · nuova `netlify/functions/sitemap-recensioni.js` + rinvio in `netlify.toml` + riga in `robots.txt` + funzione `imprese_con_recensioni()` sul database (`sql/imprese-con-recensioni.sql`). ⚠️ Non bastava scrivere una riga in `sitemap.xml`: quella pagina senza `?id` si dichiara da sola `noindex`, quindi serve una sitemap generata dal database, come per le schede. Ci vanno **solo** le imprese con almeno una recensione confermata: una pagina recensioni vuota e' «contenuto povero» e il giudizio ricade su tutto il sito. Banco `prove-claude/banchi-fissi/sitemap/banco-sitemap-recensioni.js` + `gira-sitemap.sh`: →16← verdi, →3← sabotaggi tutti rossi. La prova piu' importante: l'indirizzo in sitemap deve combaciare col **canonical letto dal file vero** della pagina. ⛔ **DA SAPERE**: oggi in quella sitemap c'e' →1← solo indirizzo, ed e' la scheda →36← con la **recensione di prova** (id →19←, scritta da Alessio a se stesso). Finche' non si decide su quella, non conviene mandarla a Search Console
+- [5 set] **B — niente piu' scritte sotto i →13← px** · il footer del sito era a `0.8rem` = →12,8← px in →19← pagine, portato a →13←px; nelle email erano →16← file con misure da →11←, →12← e →12,5← px, tutte a →13←px. ⚠️ Come si e' provato di non aver toccato altro: normalizzando OGNI `font-size` a un segnaposto, ogni file prima e dopo ha lo **stesso md5** (stessa regola del →30← agosto). Le →4← regole CSS `.cdh` `.cd` `.cd.oggi` `.ms-l` **erano gia' state buttate il →3← settembre**: la voce del quaderno era vecchia
+- [5 set] **→27← — il RATING MEDIO non dice piu' «—»** · controllato sul pannello VERO, loggato: badge in alto e card «Valutazione» dicono →5.0←, e la lettura al database torna →1← riga. Era gia' a posto dal →3← set, la voce e' stata solo chiusa
+- [5 set] **→28← — «Bug piano free/pro binario» CANCELLATA** · aperta il →25← aprile. Misurato: `piano` ha **un solo valore su tutte e →116← le imprese** (`premium`), nei →4← pannelli non esiste nessun confronto con `'pro'`, e `inizializza()` gia' porta `mensile`/`annuale` dentro `premium`. `BACKLOG.md` svuotato
+- [5 set] **I due prompt di Alex (4 e 5 set) fusi in UNA fila sola** — le →3← voci che il prompt del 5 set aveva perso (prestazioni professionista, scritte piccole, →10← utenti da contattare) piu' la decisione sul logo Premium sono rientrate
+
 
 - [4 set, notte] **PREVENTIVO: GLI ALLEGATI ADESSO ARRIVANO DAVVERO** · il difetto: il cliente NON è loggato e la foto veniva caricata nel bucket `foto-lavori`, che accetta solo l'impresa proprietaria — l'upload falliva **in silenzio** e in tre mesi non è mai arrivata una foto. Fatto: bucket nuovo `preventivi-allegati` (privato, scrittura anche da chi non è loggato ma SOLO dentro `preventivi/<id di un'impresa che esiste>/`, lettura solo dell'impresa proprietaria), colonna `preventivi.allegati jsonb` e la stessa colonna aggiunta alla vista `preventivi_safe` che leggono i pannelli. Nel modulo: **più file insieme** (foto, PDF, computo, DWG/DXF, Excel, Word), →10← MB l'uno, l'elenco dei file scelti si vede **prima** di inviare e il file troppo grande è segnato in rosso subito. ⛔ Se un file non passa (troppo grande, tipo sbagliato, errore del server) adesso **il cliente lo legge e la richiesta non parte a metà**: prima taceva. Nei →4← pannelli la richiesta mostra la riga «Allegati» con i link firmati (valgono →1← ora, li apre solo l'impresa proprietaria) — blocco con lo **stesso md5** in tutti e 4 (→80c6c6d446fb66150b39aa5b1372ffbb←). L'email di avviso dice quanti file ha allegato il cliente. File: `profilo-impresa.html`, i →4← `pannello-*.html`, `netlify/functions/notifica-preventivo.js`, `sql/preventivi-allegati.sql`. Banchi: `prove-claude/banchi-fissi/pagine/banco-allegati-preventivo.js` (browser vero, →31← verdi, →3← sabotaggi che diventano tutti rossi) · `prove-claude/banchi-fissi/allegati/banco-allegati-pannelli.js` + `gira-allegati.sh` (sul PC, →60← verdi, →3← sabotaggi) · `prove-claude/banchi-fissi/allegati/permessi-allegati.sql` (→6← verdi sul database vero, in transazione annullata, più la prova del metro: la vecchia strada risulta BLOCCATA). ✅ **PROVATO DAL VIVO sul sito pubblicato** (4 set, ore 21:13): richiesta vera con →2← file dalla scheda →36←, i file sono davvero finiti nel magazzino, e dal pannello si sono aperti tutti e due (→200←, →40← KB e →60← KB). Il file da →12← MB: messaggio rosso col nome del file, →0← file caricati, →0← righe scritte. Riga di prova e file **cancellati subito dopo**: il database e' tornato com'era (→1← preventivo, quello vero del →15← agosto)
 - [4 set, notte] ⚠️ **DUE COSE VISTE STRADA FACENDO, NON TOCCATE** (decide Alex): (1) la colonna `preventivi.foto` non era mostrata in nessun pannello — anche se la foto fosse arrivata, l'impresa non l'avrebbe vista; adesso il posto c'è, ma le vecchie righe con `foto` piena restano invisibili (sono →0←, quindi non urge); (2) il bucket `documenti-incarichi` degli **incarichi ai professionisti** accetta **solo PDF**: la casella dice «PDF/JPG/PNG/DWG» ma un JPG o un DWG viene rifiutato dal server. Stesso tipo di difetto, altro modulo

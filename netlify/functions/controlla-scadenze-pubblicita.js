@@ -70,11 +70,11 @@ function emailRinnovo(nome, spazio, citta, scadenza) {
           Rinnova il tuo spazio &rarr;
         </a>
       </div>
-      <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+      <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
         Ricevi questa email perché hai uno spazio pubblicitario attivo su TrovaImpresa.
       </p>
     </div>
-    <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
+    <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
       TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
     </p>
   </div>`;
@@ -85,9 +85,9 @@ function emailRiepilogoAdmin(righe) {
   const tr = righe.map(function (r) {
     return `<tr>
       <td style="padding:8px;border-bottom:1px solid #eee"><strong>${esc(r.nome)}</strong><br>
-        <span style="font-size:12px;color:#888">${esc(r.email || '—')}</span></td>
+        <span style="font-size:13px;color:#888">${esc(r.email || '—')}</span></td>
       <td style="padding:8px;border-bottom:1px solid #eee">${esc(r.spazio)}<br>
-        <span style="font-size:12px;color:#888">📍 ${esc(r.citta)}</span></td>
+        <span style="font-size:13px;color:#888">📍 ${esc(r.citta)}</span></td>
       <td style="padding:8px;border-bottom:1px solid #eee">${esc(r.durata)}</td>
       <td style="padding:8px;border-bottom:1px solid #eee">${esc(r.scadenza)}</td>
     </tr>`;

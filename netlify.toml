@@ -124,6 +124,16 @@
   status = 404
   force = true
 
+# 5 settembre 2026 — terzo file dello stesso tipo.
+# ⚠️ Ogni prompt nuovo in radice va aggiunto QUI, se no il controllo prima di
+# pubblicare ferma il push. Il controllo vuole il nome esatto: una regola
+# generica /*.md non gli basta (vedi tools/controllo-push.js).
+[[redirects]]
+  from = "/PROMPT-gestionale-operatore.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # ⚠️ 25 agosto 2026 — il gemello minuscolo del file qui sopra.
 # `prompt-nuova-sessione.md` sta in root e dentro c'e' il racconto di come
 # e' fatto il gestionale, cosa e' rotto e dove si lavora: il controllo prima
@@ -345,6 +355,15 @@
 [[redirects]]
   from = "/sitemap-imprese.xml"
   to = "/.netlify/functions/sitemap-imprese"
+  status = 200
+
+# ⛔ 5 settembre 2026 — Sitemap delle pagine RECENSIONI, generata al volo dal
+# database. `recensioni-impresa.html` non compariva in nessuna sitemap: per
+# Google non esisteva. Ci vanno solo le imprese con almeno una recensione
+# confermata (una pagina recensioni vuota e' "contenuto povero").
+[[redirects]]
+  from = "/sitemap-recensioni.xml"
+  to = "/.netlify/functions/sitemap-recensioni"
   status = 200
 
 # La bacheca candidature cambia indirizzo per essere coerente con /offerte-lavoro

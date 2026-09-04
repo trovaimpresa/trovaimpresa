@@ -165,7 +165,7 @@ exports.handler = async function (event) {
             <tr><td style="padding:10px 0;color:#666">Data</td><td style="padding:10px 0">${dataFmt}</td></tr>
           </table>
         </div>
-        <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+        <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
           Email automatica dal sistema richieste clienti di TrovaImpresa.
         </p>
       </div>
@@ -285,12 +285,12 @@ exports.handler = async function (event) {
                 Nome, telefono ed email del cliente compaiono solo se premi il pulsante.
                 Se il lavoro non ti interessa, non fare niente: i suoi dati restano dove sono.
               </p>
-              <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+              <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
                 Ricevi questa email perché sei iscritto a TrovaImpresa nella zona indicata dal cliente.
                 Il link vale 60 giorni ed è solo tuo.
               </p>
             </div>
-            <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a></p>
+            <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a></p>
           </div>
         `;
         try {

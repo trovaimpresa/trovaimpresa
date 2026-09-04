@@ -54,11 +54,11 @@ exports.handler = async function(event) {
             🛒 Prenota ora il tuo spazio →
           </a>
         </div>
-        <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+        <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
           Ricevi questa email perché eri in lista d'attesa per uno spazio pubblicitario su TrovaImpresa.
         </p>
       </div>
-      <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
+      <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
         TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
       </p>
     </div>

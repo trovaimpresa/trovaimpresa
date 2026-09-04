@@ -47,7 +47,7 @@ function corpoHtml(messaggio, nomeFile, mittenteNome) {
     +       'In allegato: <b>' + esc(nomeFile) + '</b>'
     +     '</div>'
     +   '</div>'
-    +   '<div style="text-align:center;font-size:12.5px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
+    +   '<div style="text-align:center;font-size:13px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
     +     esc(mittenteNome || 'TrovaImpresa') + ' &middot; inviato tramite TrovaImpresa.com'
     +   '</div>'
     + '</div></body></html>';
