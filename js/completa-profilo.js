@@ -33,12 +33,28 @@
     { peso: 25, etichetta: 'Indirizzo',        chiavi: ['indirizzo'] },
     { peso: 25, etichetta: 'Descrizione',      chiavi: ['descrizione'] },
     { peso: 12, etichetta: 'Telefono',         chiavi: ['telefono'] },
-    { peso: 10, etichetta: 'Mestiere',         chiavi: ['mestiere'] },
+    /* ⛔ 4 settembre 2026 — IL MESTIERE STA IN DUE COLONNE.
+       In `imprese` ci sono TUTTE E DUE: `mestiere` (una sola, la vecchia,
+       piena in →111← imprese su →115←) e `mestieri` (la lista, piena in
+       →65←). Qui si guardava solo la vecchia: →3← imprese che hanno solo
+       la lista si vedevano scritto «Manca: Mestiere» pur avendolo messo.
+       Adesso vale l'una O l'altra: si calcola in avvia() come `_mestiere`. */
+    { peso: 10, etichetta: 'Mestiere',         chiavi: ['_mestiere'] },
     { peso: 10, etichetta: 'Zone servite',     chiavi: ['zone'] },
     { peso:  8, etichetta: 'Specializzazioni', chiavi: ['specializzazioni'] },
     { peso:  8, etichetta: 'Prestazioni',      chiavi: ['prestazioni'] },
     { peso:  5, etichetta: 'Partita IVA',      chiavi: ['partita_iva'] },
     { peso:  5, etichetta: 'Sito web',         chiavi: ['sito_web'] },
+    /* 4 set 2026: aggiunte con Alex. Il WhatsApp e' il modo in cui un
+       cliente scrive davvero a un artigiano; il CAP serve per farsi
+       trovare nella zona giusta. */
+    { peso:  6, etichetta: 'WhatsApp',         chiavi: ['whatsapp'] },
+    { peso:  4, etichetta: 'CAP',              chiavi: ['cap'] },
+    /* Il logo: chiesto SOLO a chi lo puo' davvero caricare. Nei pannelli il
+       bottone del logo e' riservato al piano Premium, quindi a un iscritto
+       Free chiederlo sarebbe una pastiglia che non potra' mai togliere.
+       In avvia() la chiave `_logo` viene messa nella riga solo se e' Premium. */
+    { peso: 10, etichetta: 'Logo',             chiavi: ['_logo'] },
     // Le foto non sono una colonna di "imprese": le contiamo a parte (vedi avvia())
     // e le infiliamo nella riga come _foto. Per un'impresa edile sono la cosa che
     // convince di più chi apre il profilo, quindi pesano parecchio.
@@ -88,6 +104,29 @@
     });
     if (!totale) return null;
     return { perc: Math.round((fatto / totale) * 100), mancanti: mancanti };
+  }
+
+  /* Le tre voci che NON sono una colonna di `imprese`. Sta qui fuori, con un
+     nome suo, apposta: il banco di prova la legge da questo file invece di
+     ricopiarla. Un banco che ricopia la formula resta verde anche quando la
+     formula vera si rompe (successo il 4 set: sabotata la riga del mestiere,
+     il banco non se n'era accorto). */
+  function chiaviCalcolate(riga, nFoto) {
+    riga._foto = nFoto > 0 ? nFoto : '';   // vuoto = voce mancante
+
+    /* il mestiere vale se c'e' in UNA QUALSIASI delle due colonne */
+    var lista = riga.mestieri;
+    var haLista = Array.isArray(lista) ? lista.filter(Boolean).length > 0
+                : (lista !== null && lista !== undefined && String(lista).trim() !== '');
+    var haVecchia = !!(riga.mestiere && String(riga.mestiere).trim() !== '');
+    riga._mestiere = (haVecchia || haLista) ? 'si' : '';
+
+    /* il logo si chiede solo a chi lo puo' davvero caricare (Premium) */
+    var piano = String(riga.piano || 'free').toLowerCase();
+    if (['premium', 'mensile', 'annuale'].indexOf(piano) !== -1) riga._logo = riga.logo_url || '';
+    else delete riga._logo;   /* niente chiave = voce saltata da calcola() */
+
+    return riga;
   }
 
   function disegna(esito, nome) {
@@ -178,8 +217,7 @@
         })
         .then(function (x) {
           if (!x) return;
-          var riga = x.riga;
-          riga._foto = x.foto > 0 ? x.foto : '';   // vuoto = voce mancante
+          var riga = chiaviCalcolate(x.riga, x.foto);
           var esito = calcola(riga);
           if (!esito || esito.perc >= 100) return;
           disegna(esito, riga.nome_attivita || riga.nome || '');
