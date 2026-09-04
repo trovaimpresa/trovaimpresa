@@ -1573,7 +1573,13 @@
 
     const rp=compRiepilogo(voci,c);
     if(rp.perc&&rp.ribasso){
-      righe.push({user_id:sbUid, descrizione:"Ribasso "+_pct(rp.perc)+"% sul totale dei lavori"
+      /* ⛔ 4 settembre 2026 — «sezione:false» ANCHE QUI. Questa riga e' nata
+         dopo la regola del 19 agosto (tutte le righe con le stesse chiavi) e
+         non la rispettava: con un computo che ha capitoli E ribasso, la
+         riga del ribasso finiva a NULL su «sezione», il database rifiutava
+         tutto (23502) e il ripiego buttava via i capitoli dicendo «manca
+         l'aggiornamento del database». Visto dal vivo il 3 settembre. */
+      righe.push({user_id:sbUid, sezione:false, descrizione:"Ribasso "+_pct(rp.perc)+"% sul totale dei lavori"
         +(rp.sicurezza?" (oneri della sicurezza esclusi)":""),
         qta:1, prezzo:-rp.ribasso, ordine:righe.length});
     }

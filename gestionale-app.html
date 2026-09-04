@@ -1921,6 +1921,31 @@
         }
         return p;
       });
+      /* ⛔ 4 settembre 2026 — I REPARTI FANTASMA. Il browser ricordava un
+         reparto che nel database non c'era piu' (cancellato altrove), e
+         all'apertura ci entrava dritto: menu, riepilogo, tutto. Ogni
+         salvataggio pero' falliva (chiave esterna su un reparto inesistente)
+         e il messaggio dava la colpa a un aggiornamento del database.
+         Il database e' la fonte: un reparto col suo mestiere_id che il
+         database non conferma si toglie dalla memoria del browser, e se e'
+         quello aperto si torna alla scelta dei reparti dicendolo. I reparti
+         senza mestiere_id (vecchi, solo locali) non si toccano: ci pensa
+         backfillMestieri. */
+      const _vivi=new Set((mest||[]).map(m=>String(m.id)));
+      const _morti=(state.panels||[]).filter(p=>p.mestiere_id&&!_vivi.has(String(p.mestiere_id)));
+      if(_morti.length){
+        state.panels=(state.panels||[]).filter(p=>_morti.indexOf(p)<0);
+        _morti.forEach(p=>{delete state[p.id];});
+        changed=true;
+        if(cur&&_morti.some(p=>p.id===cur)){
+          const nomeMorto=(_morti.find(p=>p.id===cur)||{}).nome||"";
+          await save();
+          try{localStorage.removeItem(GEST_ULTIMO);}catch(e){}
+          toast("Il reparto «"+nomeMorto+"» non esiste più: scegli un altro reparto");
+          goHome();
+          return;
+        }
+      }
       if(changed)await save();
 
       /* ⚠️ IL PRIMO REPARTO SE LO CREA IL GESTIONALE — 14 agosto 2026.
@@ -11797,6 +11822,12 @@ ${vecchi?`
   function _eSezioneMancante(e){
     if(!e)return false;
     const t=(String(e.message||"")+" "+String(e.code||"")+" "+String(e.details||"")).toLowerCase();
+    /* ⛔ 4 settembre 2026 — un 23502 («null value in column sezione») NON e'
+       la colonna che manca: e' una riga scritta senza la chiave (il difetto
+       del ribasso). Se il ripiego lo inghiotte, i capitoli spariscono in
+       silenzio e la colpa va a una migrazione gia' fatta. Si lascia uscire
+       l'errore vero. */
+    if(t.indexOf("23502")>=0 || t.indexOf("null value")>=0) return false;
     return t.indexOf("sezione")>=0 || t.indexOf("42703")>=0;
   }
   /* ⚠️⚠️ 19 agosto 2026 — LE CHIAVI DEVONO COMBACIARE. Difetto vero, visto

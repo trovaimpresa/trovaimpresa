@@ -36,6 +36,17 @@
   /* la tabella non c'e' ancora: lo si dice, invece di restare a girare */
   function _compManca(err){
     const m=(err&&(err.message||err.details||""))||"";
+    /* ⛔ 4 settembre 2026 — NON OGNI ERRORE CHE NOMINA «gest_comput» E' UNA
+       TABELLA CHE MANCA. Un salvataggio rifiutato per una chiave esterna
+       («violates foreign key constraint "gest_computi_mestiere_id_fkey"»)
+       nomina la tabella nel nome del vincolo, e qui diventava «esegui
+       sql/gest-computo-metrico.sql»: Alessio avrebbe rieseguito una
+       migrazione gia' fatta, e il difetto vero (un reparto che non esiste
+       piu') restava invisibile. Un vincolo violato e' un errore SUI DATI,
+       non sullo schema: si dice com'e'. */
+    const codice=String((err&&err.code)||"");
+    if(/violates|foreign key|duplicate key|null value|check constraint/i.test(m)
+       || /^235\d\d$/.test(codice)) return false;
     return /gest_comput|gest_prezzi_propri/i.test(m) || /schema cache|does not exist|relation/i.test(m);
   }
 
