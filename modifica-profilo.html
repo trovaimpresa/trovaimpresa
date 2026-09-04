@@ -288,9 +288,9 @@
 
         <!-- Card 2: Posizione sulla mappa -->
         <div class="form-card fc-arancio">
-          <div class="card-header arancio">🗺️ Posizione sulla mappa <span style="font-weight:400;font-size:12px;color:#aaa;">(opzionale)</span></div>
+          <div class="card-header arancio">🗺️ Posizione sulla mappa <span style="font-weight:400;font-size:14px;color:#64748b;">(opzionale)</span></div>
           <div style="position:relative;">
-            <input type="text" id="map-search" placeholder="Cerca indirizzo o città..." autocomplete="off" oninput="nominatimSearch(this.value)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px 8px 0 0;font-size:14px;font-family:inherit;color:#333;outline:none;">
+            <input type="text" id="map-search" placeholder="Cerca indirizzo o città..." autocomplete="off" oninput="nominatimSearch(this.value)" style="width:100%;padding:13px 14px;border:1.5px solid #c9d4e3;border-radius:10px 10px 0 0;font-size:16.5px;font-family:inherit;color:#0a2a4d;outline:none;">
             <div id="map-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;z-index:1000;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
           </div>
           <div id="mappa" style="height:200px;width:100%;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;"></div>
@@ -685,11 +685,35 @@
               <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
             </div>
           </div>
+          <div class="form-card fc-blu">
+            <div class="card-header blu">📞 Contatti</div>
+            <div class="form-row" style="margin-bottom:0;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>WhatsApp</label>
+                <input type="tel" id="f-whatsapp-negozio" placeholder="Es. +39 333 1234567">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Quante persone lavorano in negozio</label>
+                <input type="text" id="f-dipendenti-negozio" placeholder="Es. 3">
+              </div>
+            </div>
+          </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">🖼️ Logo e foto</div>
+            <p style="margin:0 0 12px;font-size:15px;color:#334155;line-height:1.5;">
+              Il logo e le foto del negozio non si caricano da qui: stanno nel pannello,
+              perche' sono immagini e hanno bisogno del caricamento file.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              <a href="pannello-negozio.html" style="display:inline-block;padding:12px 16px;background:#0066ff;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Carica il logo</a>
+              <a href="pannello-negozio.html#foto" style="display:inline-block;padding:12px 16px;background:#ff7a00;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Carica le foto</a>
+            </div>
+          </div>
           <div class="form-card fc-arancio">
             <div class="card-header arancio">⚙️ Servizi e caratteristiche</div>
             <div class="form-group">
               <label>Tipo negozio</label>
-              <select id="f-tipo_negozio-negozio" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+              <select id="f-tipo_negozio-negozio">
                 <option value="">— Seleziona —</option>
                 <option value="materiali_edili">Materiali edili</option>
                 <option value="ferramenta">Ferramenta</option>
@@ -904,7 +928,7 @@
             <div class="form-group" style="margin-bottom:0;">
               <label>Specializzazioni</label>
               <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <select id="f-spec-select" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+                <select id="f-spec-select" style="flex:1;padding:13px 14px;border:1.5px solid #c9d4e3;border-radius:10px;font-size:16.5px;color:#0a2a4d;outline:none;">
                   <option value="">— Seleziona specializzazione —</option>
                   <optgroup label="Progettazione">
                     <option>Progettazione architettonica</option><option>Progettazione strutturale</option>
@@ -964,7 +988,7 @@
 
         <!-- VIDEO PROFILO (PREMIUM) -->
         <div class="form-card fc-blu" style="position:relative;">
-          <div class="card-header blu">🎬 Video profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
+          <div class="card-header blu">🎬 Video profilo <span style="font-size:13px;font-weight:700;background:#7b1fa2;color:white;padding:3px 10px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
           <div class="form-group">
             <div class="upload-area">
               <p><strong>Clicca per caricare</strong> un video di presentazione</p>
@@ -980,9 +1004,9 @@
 
         <!-- AI INTEGRATA (PREMIUM) -->
         <div class="form-card" style="position:relative;">
-          <div class="card-header">🤖 AI integrata nel profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
+          <div class="card-header">🤖 AI integrata nel profilo <span style="font-size:13px;font-weight:700;background:#7b1fa2;color:white;padding:3px 10px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
           <div class="form-group">
-            <div style="background:#f9f5ff;border:1px solid #e0d0f0;border-radius:8px;padding:14px;font-size:13px;color:#555;line-height:1.6;">
+            <div style="background:#f9f5ff;border:1px solid #e0d0f0;border-radius:8px;padding:14px;font-size:15px;color:#3d4a5c;line-height:1.6;">
               L'AI analizza il tuo profilo e risponde automaticamente alle domande dei clienti, suggerisce miglioramenti e genera descrizioni ottimizzate.
             </div>
           </div>
@@ -998,14 +1022,14 @@
         <div class="form-footer">
           <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
           <a href="pannello-impresa.html" class="btn-back-link" onclick="window.location.href = pannelloPerTipo(); return false;">← Torna al pannello</a>
-          <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
+          <p style="text-align:center;font-size:14.5px;color:#475569;margin-top:16px;">
             🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
             <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a>
           </p>
           <div class="azioni-discrete">
             <div id="card-disdetta" style="display:none;">
               <button type="button" id="btn-disdici" onclick="disdiciAbbonamento()" class="link-discreto">⚙️ Gestione abbonamento</button>
-              <p id="info-disdetta" style="font-size:13px;color:#888;margin-top:4px;margin-bottom:0;line-height:1.5;"></p>
+              <p id="info-disdetta" style="font-size:15px;color:#475569;margin-top:4px;margin-bottom:0;line-height:1.5;"></p>
             </div>
             <button type="button" id="btn-elimina" onclick="eliminaAccount()" class="link-discreto pericolo">Elimina account</button>
           </div>
@@ -1321,6 +1345,8 @@
         document.getElementById('f-prodotti').value = d.prodotti || '';
         document.getElementById('f-marchi').value = d.marchi || '';
         document.getElementById('f-orari').value = d.orari || '';
+        document.getElementById('f-whatsapp-negozio').value = d.whatsapp || '';
+        document.getElementById('f-dipendenti-negozio').value = d.dipendenti || '';
         setSelectValue('f-tipo_negozio-negozio', d.tipo_negozio);
         document.getElementById('consegna_domicilio-negozio').checked = !!d.consegna_domicilio;
         document.getElementById('ritiro_in_negozio-negozio').checked = !!d.ritiro_in_negozio;
@@ -1516,6 +1542,8 @@
             prodotti: document.getElementById('f-prodotti').value.trim(),
             marchi: document.getElementById('f-marchi').value.trim(),
             orari: document.getElementById('f-orari').value.trim(),
+            whatsapp: document.getElementById('f-whatsapp-negozio').value.trim(),
+            dipendenti: document.getElementById('f-dipendenti-negozio').value.trim(),
             tipo_negozio: document.getElementById('f-tipo_negozio-negozio').value || null,
             consegna_domicilio: document.getElementById('consegna_domicilio-negozio').checked,
             ritiro_in_negozio: document.getElementById('ritiro_in_negozio-negozio').checked,
