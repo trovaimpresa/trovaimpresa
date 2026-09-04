@@ -1878,7 +1878,11 @@
        somma di quelle stampate DEVE fare la differenza del riquadro. Se non
        la fa, o il confronto ha perso una riga o il riquadro dice un'altra
        cosa: in tutti e due i casi il foglio non si stampa. */
-    const _imp=v=>(+v.quantita||0)*(+v.prezzo_unitario||0);
+    /* ⛔ 4 settembre 2026 — lo stesso importo della schermata e del
+       database: _impVoce sta in js/gest-computo.js e lo chiede alla vista.
+       Qui c'era la terza copia di «quantita' x prezzo», e la prova del nove
+       qui sotto confrontava due conti fatti in modi diversi. */
+    const _imp=v=>_impVoce(v);
     const sommaStampata=
         r.cambiate.reduce((s,x)=>s+(x.impB-x.impA),0)
       + r.aggiunte.reduce((s,v)=>s+_imp(v),0)

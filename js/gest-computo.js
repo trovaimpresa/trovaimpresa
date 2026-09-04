@@ -937,6 +937,35 @@
      Le righe rimaste identiche non compaiono: in un elenco di ottantasette
      righe, le sei che sono cambiate devono saltare all'occhio.
      ============================================================ */
+  /* ============================================================
+     ⛔ 4 settembre 2026 — L'IMPORTO DI UNA RIGA SI CHIEDE, NON SI RIFA'
+     ============================================================
+     Il conto di una lavorazione lo fa il DATABASE, nella vista
+     gest_computo_voci_calc: quantita' arrotondata a tre decimali per il
+     prezzo, e il risultato arrotondato al centesimo. Il confronto della
+     variante e il suo PDF invece rifacevano «quantita' x prezzo» a mano,
+     senza arrotondare: la TERZA copia della stessa formula.
+
+     Su una riga sola non si vede. Su un computo lungo si', perche' i
+     prezzari regionali hanno QUATTRO decimali: 12,3456 x 7,25 fa 89,5056,
+     il database scrive 89,51, e su ottanta righe la differenza diventa un
+     numero che il cliente legge in fondo al foglio e non torna con quello
+     che ha letto nel computo.
+
+     Adesso l'importo lo chiede alla vista, che e' l'unico posto dove il
+     conto e' fatto. Il ripiego (voce che non viene dalla vista) usa
+     ESATTAMENTE la stessa regola: tre decimali sulla quantita' e mezzo
+     centesimo in su, come fa `round()` di Postgres — per quello passa da
+     `_cent2` di js/centesimi.js e non da Math.round, che sulla virgola
+     mobile perde un centesimo ogni tanto. */
+  function _impVoce(v){
+    if(!v) return 0;
+    if(v.importo!=null && v.importo!=="" && isFinite(+v.importo)) return +v.importo;
+    const q=Math.round((+v.quantita||0)*1000)/1000;
+    const grezzo=q*(+v.prezzo_unitario||0);
+    return (typeof _cent2==="function") ? _cent2(grezzo) : Math.round(grezzo*100)/100;
+  }
+
   function varConfronta(orig,nuove){
     const O=Array.from(orig||[]), N=Array.from(nuove||[]);
     const perId={}; O.forEach(function(v){ perId[String(v.id)]=v; });
@@ -955,7 +984,7 @@
          quelle cambiate. La quantita' ha tre decimali (vedi la vista). */
       const dQ=Math.abs(qA-qB)>0.0005, dP=Math.abs(pA-pB)>0.005;
       if(dQ||dP)cambiate.push({voce:v, prima:o, qA:qA, qB:qB, pA:pA, pB:pB,
-                               impA:qA*pA, impB:qB*pB, dQ:dQ, dP:dP});
+                               impA:_impVoce(o), impB:_impVoce(v), dQ:dQ, dP:dP});
     });
 
     const tolte=O.filter(function(o){ return !usate[String(o.id)]; });
@@ -964,8 +993,8 @@
        valgono adesso, e la differenza. Sono gli importi delle righe, senza
        ribasso: il ribasso lo aggiunge chi legge, ed e' lo stesso sui due. */
     const somma=function(a,f){ return a.reduce(function(s,x){ return s+(+f(x)||0); },0); };
-    const impOrig=somma(O,function(v){ return (+v.quantita||0)*(+v.prezzo_unitario||0); });
-    const impVar =somma(N,function(v){ return (+v.quantita||0)*(+v.prezzo_unitario||0); });
+    const impOrig=somma(O,_impVoce);
+    const impVar =somma(N,_impVoce);
 
     return { cambiate:cambiate, aggiunte:aggiunte, tolte:tolte,
              impOrig:impOrig, impVar:impVar, diff:impVar-impOrig,
@@ -1085,7 +1114,7 @@
     if(r.aggiunte.length){
       h+='<div class="var-tit">Aggiunte <span class="var-n">'+r.aggiunte.length+'</span></div>';
       r.aggiunte.forEach(function(v){
-        const imp=(+v.quantita||0)*(+v.prezzo_unitario||0);
+        const imp=_impVoce(v);
         h+=riga(nomeVoce(v),'+ '+eur2(imp),
                 _misTesto(v.quantita)+(v.unita?' '+esc(_umSchermo(v.unita)):'')+' × '+eur2(v.prezzo_unitario),
                 'var-piu');
@@ -1094,7 +1123,7 @@
     if(r.tolte.length){
       h+='<div class="var-tit">Tolte <span class="var-n">'+r.tolte.length+'</span></div>';
       r.tolte.forEach(function(v){
-        const imp=(+v.quantita||0)*(+v.prezzo_unitario||0);
+        const imp=_impVoce(v);
         h+=riga(nomeVoce(v),'− '+eur2(imp),
                 'era '+_misTesto(v.quantita)+(v.unita?' '+esc(_umSchermo(v.unita)):'')+' × '+eur2(v.prezzo_unitario),
                 'var-meno');
