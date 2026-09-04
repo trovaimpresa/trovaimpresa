@@ -1305,7 +1305,11 @@ body:has(#ti-fondatore) .sheet--grande{
        ⛔ 24 agosto 2026 — tolto da qui il blocco "Magazzino e negozio"
        (neg_prodotti/neg_movimenti): era roba del gestionale Negozio,
        non del Noleggio, e qui non serviva a nessuno. */
-    const {data:mezzi}=await sb.from("nol_mezzi").select("*").eq("user_id",sbUid);
+    /* ⛔ 4 settembre 2026 — UNA LISTA SOLA. I mezzi stanno tutti in
+       gest_mezzi, insieme a quelli del gestionale: qui si mostrano solo
+       quelli con la spunta «lo noleggio» (noleggiabile), se no nel listino
+       del Noleggio comparirebbe anche il furgone dell'impresa. */
+    const {data:mezzi}=await sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true);
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
     const {data:nol}=await sb.from("nol_noleggi")
@@ -1882,12 +1886,12 @@ body:has(#ti-fondatore) .sheet--grande{
 
   async function loadMezzi(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("nol_mezzi")
-      .select("*").eq("user_id",sbUid).order("nome");
+    const {data}=await sb.from("gest_mezzi")
+      .select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome");
     const m=data||[], box=$("#mezzi-body");
     if(!box) return;
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun mezzo. Aggiungine uno.</p>';return;}
-    const col={disponibile:"#2e7d32",noleggiato:"#e65100",manutenzione:"#757575"};
+    const col={disponibile:"#2e7d32",in_uso:"#e65100",noleggiato:"#e65100",manutenzione:"#757575",fuori_uso:"#757575"};
     box.innerHTML=m.map(x=>{
       const sc=mezzoEtichettaScad(x);
       const c=sc?sc.col:(col[x.stato]||"#757575");
@@ -1895,7 +1899,7 @@ body:has(#ti-fondatore) .sheet--grande{
         titolo:esc(x.nome||"—"),
         eti:[{t:esc(sc?sc.testo:(x.stato||"").toUpperCase())}],
         corpo:`${sc?`<div class="sub2" style="color:${sc.col};font-weight:600">${esc(mezzoBloccato(x)?("Non si può noleggiare: "+mezzoBloccato(x)):"")}</div>`:""}
-        <div class="sub">${esc([x.categoria,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        <div class="sub">${esc([x.tipo,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
         <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>`,
         pulsanti:nolPulsanti("mezzo",x.id)});
     }).join("");
@@ -1989,7 +1993,7 @@ body:has(#ti-fondatore) .sheet--grande{
   }
 
   const NOL_TIPI={
-    mezzo:  {tab:"nol_mezzi",   che:"Mezzo",   ricarica:()=>loadMezzi(),      scheda:d=>schedaMezzo(d)},
+    mezzo:  {tab:"gest_mezzi",  che:"Mezzo",   ricarica:()=>loadMezzi(),      scheda:d=>schedaMezzo(d)},
     cliente:{tab:"gest_clienti",che:"Cliente", ricarica:()=>loadClientiNol(), scheda:d=>schedaClienteNol(d)},
     noleggio:{tab:"nol_noleggi",che:"Noleggio",ricarica:()=>loadNoleggi(),    scheda:d=>schedaNoleggio(d)},
     prodotto:{tab:"neg_prodotti", che:"Prodotto", ricarica:()=>loadProdotti(),  scheda:d=>schedaProdotto(d)},
@@ -2059,7 +2063,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const soldi=(x)=>(x==null||x==="")?null:_eur(_numIt(x));
     let r=[];
     if(tipo==="mezzo") r=[
-      ["Nome",e(d.nome)],["Codice / matricola",e(d.codice)],["Categoria",e(d.categoria)],
+      ["Nome",e(d.nome)],["Codice / matricola",e(d.codice)],["Tipo",e(d.tipo)],
       ["Stato",e(d.stato)],
       ["Tariffa a ora",soldi(d.tariffa_ora)],["Tariffa al giorno",soldi(d.tariffa_giorno)],
       ["Tariffa a settimana",soldi(d.tariffa_settimana)],["Tariffa al mese",soldi(d.tariffa_mese)],
@@ -2508,11 +2512,11 @@ body:has(#ti-fondatore) .sheet--grande{
       <div class="field"><label>Nome del mezzo *</label><input id="nz-nome" value="${v('nome')}" placeholder="Es. Escavatore 3t"></div>
       <div class="row2">
         <div class="field"><label>Codice / matricola</label><input id="nz-codice" value="${v('codice')}" placeholder="Es. E-01"></div>
-        <div class="field"><label>Categoria</label><input id="nz-categoria" value="${v('categoria')}" placeholder="Es. movimento terra"></div>
+        <div class="field"><label>Tipo</label><input id="nz-categoria" value="${v('tipo')}" placeholder="Es. movimento terra"></div>
       </div>
       <div class="field"><label>Stato</label><select id="nz-stato">
         <option value="disponibile">Disponibile</option>
-        <option value="noleggiato">Noleggiato</option>
+        <option value="in_uso">Noleggiato / in uso</option>
         <option value="manutenzione">In manutenzione</option></select></div>
 
       <div class="nol-riq nol-cam">
@@ -2615,7 +2619,11 @@ body:has(#ti-fondatore) .sheet--grande{
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={nome,
       codice:$("#nz-codice").value.trim()||null,
-      categoria:$("#nz-categoria").value.trim()||null,
+      /* ⛔ 4 settembre 2026 — nel gestionale «categoria» vale solo
+         'mezzo' o 'attrezzatura' (lo impone il database): la parola
+         scritta a mano ("movimento terra") e' il «tipo». */
+      tipo:$("#nz-categoria").value.trim()||null,
+      categoria:"mezzo",
       stato:$("#nz-stato").value,
       /* ⚠️ _numIt e non parseFloat: parseFloat("1250,50") risponde 1250 e i
          centesimi spariscono senza dire niente. */
@@ -2647,11 +2655,20 @@ body:has(#ti-fondatore) .sheet--grande{
       fuori_servizio_perche:$("#nz-fuoriperche")?($("#nz-fuoriperche").value.trim()||null):null,
       manutenzione_note:$("#nz-manut")?($("#nz-manut").value.trim()||null):null};
     const scrivi=(d)=>id
-      ? sb.from("nol_mezzi").update(d).eq("id",id).eq("user_id",sbUid)
-      : sb.from("nol_mezzi").insert({user_id:sbUid,...d});
+      ? sb.from("gest_mezzi").update(d).eq("id",id).eq("user_id",sbUid)
+      : sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:null,noleggiabile:true,...d});
     let {error}=await scrivi(dati);
-    /* rete di salvataggio: se sql/noleggio-scadenze-mezzo.sql non e' ancora
-       passato, il mezzo si salva lo stesso senza le colonne nuove */
+    /* ⛔ 4 settembre 2026 — la lista dei mezzi e' una sola (gest_mezzi).
+       Se sql/mezzi-una-lista-sola.sql non e' ancora passato, alla tabella
+       mancano le colonne del noleggio: NON si prova a salvare a meta', si
+       dice cosa fare, se no il mezzo finirebbe in lista senza tariffe e
+       senza spunta «lo noleggio», cioe' invisibile. */
+    if(error&&/noleggiabile|tariffa_|ore_incluse|km_inclusi|usura_|ha_conta|cauzione|codice/i.test(error.message||"")
+            &&/column|schema cache/i.test(error.message||"")){
+      toast("Manca un pezzo del database: fai passare sql/mezzi-una-lista-sola.sql");
+      return;
+    }
+    /* rete di salvataggio piu' vecchia: le sole scadenze */
     if(error&&/verifica_|assicurazione_scad|revisione_scad|collaudo_scad|tagliando_|contaore_attuale|fuori_servizio|manutenzione_note/i.test(error.message||"")
             &&/column|schema cache/i.test(error.message||"")){
       const senza={...dati};
@@ -3095,7 +3112,7 @@ body:has(#ti-fondatore) .sheet--grande{
   async function nolContrattoDati(n){
     const [{data:az},{data:mz},{data:cl}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
+      n.mezzo_id   ? sb.from("gest_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
       n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
     ]);
     const A=az||{}, M=mz||{}, C=cl||{};
@@ -3126,7 +3143,7 @@ body:has(#ti-fondatore) .sheet--grande{
     blocchi.push({t:"coppie",titolo:"L'attrezzatura",righe:[
       ["Descrizione",M.nome||n.mezzo||"—"],
       ["Codice / matricola",M.codice||null],
-      ["Categoria",M.categoria||null],
+      ["Tipo",M.tipo||null],
       ["Contaore alla consegna",n.contaore_uscita!=null?String(n.contaore_uscita):null],
       ["Chilometri alla consegna",n.km_uscita!=null?String(n.km_uscita):null]
     ]});
@@ -3470,7 +3487,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const rientro=(momento==="rientro");
     const [{data:az},{data:mz},{data:cl},{data:med}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
+      n.mezzo_id   ? sb.from("gest_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
       n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null}),
       sb.from("nol_media").select("genere,momento").eq("user_id",sbUid).eq("noleggio_id",n.id)
     ]);
@@ -3540,7 +3557,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const rientro=(momento==="rientro");
     const [{data:az},{data:mz},{data:cl}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
+      n.mezzo_id   ? sb.from("gest_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()     : Promise.resolve({data:null}),
       n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
     ]);
     const A=az||{}, M=mz||{}, C=cl||{};
@@ -3683,7 +3700,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const box=$("#rendimento-body"); if(!box) return;
     const {dal,al,eti,gg}=rendIntervallo();
     const [{data:mezzi},{data:nol}]=await Promise.all([
-      sb.from("nol_mezzi").select("*").eq("user_id",sbUid).order("nome"),
+      sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome"),
       sb.from("nol_noleggi").select("*").eq("user_id",sbUid)
     ]);
     const MZ=mezzi||[], N=(nol||[]).filter(x=>x.data_uscita&&x.data_uscita<=al&&
@@ -4531,7 +4548,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const svincolo=(momento==="svincolo");
     const [{data:az},{data:mz},{data:cl}]=await Promise.all([
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-      n.mezzo_id   ? sb.from("nol_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()      : Promise.resolve({data:null}),
+      n.mezzo_id   ? sb.from("gest_mezzi").select("*").eq("id",n.mezzo_id).maybeSingle()      : Promise.resolve({data:null}),
       n.cliente_id ? sb.from("gest_clienti").select("*").eq("id",n.cliente_id).maybeSingle() : Promise.resolve({data:null})
     ]);
     const A=az||{}, M=mz||{}, C=cl||{};
@@ -4825,7 +4842,7 @@ body:has(#ti-fondatore) .sheet--grande{
        bastava rinominare un mezzo perche' i noleggi vecchi perdessero il
        collegamento — e senza collegamento il conto non si puo' piu' rifare.
        Il nome si porta dietro lo stesso, per le schermate e per lo storico. */
-    const {data:mz}=await sb.from("nol_mezzi").select("*").eq("user_id",sbUid).order("nome");
+    const {data:mz}=await sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome");
     const {data:cl}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).order("nome");
     /* 24 agosto 2026 — i reparti veri, per la casella "Per un tuo reparto":
        gli stessi che vede il gestionale imprese (gest_mestieri), nessuno
@@ -5162,7 +5179,7 @@ body:has(#ti-fondatore) .sheet--grande{
      indietro, e non deve stare su un elenco dove si scorre col pollice.
      ================================================================ */
   const CEST_COSE=[
-    {t:"nol_mezzi",     lab:"Mezzo",           tipo:"mezzo",     col:"#2e7d32"},
+    {t:"gest_mezzi",    lab:"Mezzo",           tipo:"mezzo",     col:"#2e7d32"},
     {t:"gest_clienti",  lab:"Cliente",         tipo:"cliente",   col:"#1565c0"},
     {t:"nol_noleggi",   lab:"Noleggio",        tipo:"noleggio",  col:"#e65100"},
     {t:"neg_prodotti",  lab:"Prodotto",        tipo:"prodotto",  col:"#1565c0"},
@@ -6939,7 +6956,7 @@ body:has(#ti-fondatore) .sheet--grande{
      restano uguali fra loro.
      ================================================================ */
   const NOL_BARRE=[
-    ["mezzi",      "mezzo",    "Cerca un mezzo: nome, codice, categoria"],
+    ["mezzi",      "mezzo",    "Cerca un mezzo: nome, codice, tipo"],
     ["clienti-nol","cliente",  "Cerca un cliente: nome, telefono, P.IVA"],
     ["noleggi",    "noleggio", "Cerca: mezzo, cliente, numero di contratto"],
     ["prodotti",   "prodotto", "Cerca un prodotto: nome, codice, categoria"],

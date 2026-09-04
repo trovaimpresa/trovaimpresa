@@ -3853,7 +3853,7 @@
       const [{data:lav},{data:pv},{data:mz},{data:vw},{data:sc},{data:ff}]=await Promise.all([
         sb.from("gest_lavori").select("stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_preventivi").select("stato").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_mezzi").select("id,categoria").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi").select("id,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,scadute,prossima_data").eq("user_id",sbUid),
         sb.from("gest_scadenze").select("stato,data_scadenza").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_fatture_fornitori").select("stato,scadenza").eq("user_id",sbUid).eq("mestiere_id",mid)
@@ -4065,7 +4065,7 @@
         sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
         sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -6420,13 +6420,26 @@ ${vecchi?`
      disegna solo la sua categoria. */
   async function caricaMezziCache(){
     const mid=curMestiere();
-    const [{data:mz},{data:vw},{data:cb}]=await Promise.all([
-      sb.from("gest_mezzi").select("id,nome,categoria,tipo,targa,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+    /* ⛔ 4 settembre 2026 — UNA LISTA SOLA DI MEZZI.
+       I mezzi del Noleggio e quelli del gestionale stanno nella stessa
+       tabella. Due conseguenze qui:
+       · si legge con _cliOr: un mezzo dell'azienda (senza reparto, come
+         quelli nati nel Noleggio) si vede in TUTTI i reparti, esattamente
+         come i clienti;
+       · si chiedono anche le colonne delle scadenze. Se sql/mezzi-una-lista-sola.sql
+         non e' ancora passato quelle colonne non ci sono e la lettura
+         fallirebbe TUTTA, lasciando la sezione Mezzi vuota: allora si
+         richiede la versione corta e si tira avanti. */
+    const _MZCOL="id,nome,categoria,tipo,targa,stato,note,noleggiabile,codice,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi,fuori_servizio";
+    const _MZCORTO="id,nome,categoria,tipo,targa,stato,note";
+    const _leggiMezzi=async col=>await sb.from("gest_mezzi").select(col).eq("user_id",sbUid).or(_cliOr(mid)).order("nome");
+    const [rmz,{data:vw},{data:cb}]=await Promise.all([
+      _leggiMezzi(_MZCOL).then(r=>(r.error&&/column|schema cache/i.test(r.error.message||""))?_leggiMezzi(_MZCORTO):r),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid)
     ]);
-    mezziCache=mz||[];
+    mezziCache=(rmz&&rmz.data)||[];
     carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
     return Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
   }
@@ -6586,8 +6599,21 @@ ${vecchi?`
           : `<label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
           <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
           <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>
-        <p class="sh-nota">Le scadenze (revisione, bollo, assicurazione, verifiche) si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>`}
+        <label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
+          <input type="checkbox" id="m-nolo" ${m.noleggiabile?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
+          <span>Lo noleggio anche a terzi — compare nel listino del <b>Noleggio</b>, dove gli metti le tariffe</span></label>`}
         </div>
+        ${STRU?"":`<div class="sh-b">
+        <div class="sh-tit">Le scadenze</div>
+        <p class="sh-nota" style="margin-top:0">Si scrivono qui <b>una volta sola</b>: le vede anche il Noleggio, e con l'assicurazione scaduta il mezzo non si può dare a nessuno. Le altre scadenze (bollo, tagliando, quello che vuoi) si aggiungono dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>
+        <div class="row2">
+          <div class="field"><label>Assicurazione, scade il</label><input type="date" id="m-assic" value="${esc(m.assicurazione_scad||"")}"></div>
+          <div class="field"><label>Revisione, scade il</label><input type="date" id="m-revis" value="${esc(m.revisione_scad||"")}"></div></div>
+        <div class="row2">
+          <div class="field"><label>Collaudo, scade il</label><input type="date" id="m-collaudo" value="${esc(m.collaudo_scad||"")}"></div>
+          <div class="field"><label>Ultima verifica periodica</label><input type="date" id="m-vdata" value="${esc(m.verifica_ultima||"")}"></div></div>
+        <div class="field"><label>La verifica si ripete ogni quanti mesi</label><input type="number" id="m-vmesi" min="0" max="120" value="${m.verifica_mesi==null?"":esc(m.verifica_mesi)}" placeholder="0 = non è soggetto"></div>
+        </div>`}
         <div class="sh-b">
         <div class="sh-tit">Note</div>
         <div class="field"><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
@@ -6608,9 +6634,29 @@ ${vecchi?`
                           :((catFissa&&catFissa.value)||"attrezzatura");
     const tipo=$("#m-tipo").value.trim()||null;
     const targa=$("#m-targa").value.trim(), stato=$("#m-stato").value, note=$("#m-note").value.trim();
-    const {data,error}=id
-      ?await sb.from("gest_mezzi").update({nome,categoria,tipo,targa,stato,note}).eq("id",id).eq("user_id",sbUid).select("id")
-      :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,categoria,tipo,targa,stato,note}).select("id");
+    /* ⛔ 4 settembre 2026 — le scadenze del mezzo si scrivono QUI e stanno
+       sulla riga del mezzo: sono le stesse identiche che vede il Noleggio.
+       Prima erano due schede diverse in due pagine diverse e la revisione
+       andava aggiornata due volte. Una data vuota vale null, non "". */
+    const _d=q=>{const e=$(q);return e&&e.value?e.value:null;};
+    const _extra=$("#m-assic")?{
+      noleggiabile:!!($("#m-nolo")&&$("#m-nolo").checked),
+      assicurazione_scad:_d("#m-assic"), revisione_scad:_d("#m-revis"),
+      collaudo_scad:_d("#m-collaudo"),  verifica_ultima:_d("#m-vdata"),
+      verifica_mesi:Math.max(0,Math.min(120,Math.round(+(($("#m-vmesi")||{}).value||0))||0))
+    }:{};
+    const _scrivi=async campi=>id
+      ?await sb.from("gest_mezzi").update(campi).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),...campi}).select("id");
+    const _base={nome,categoria,tipo,targa,stato,note};
+    let {data,error}=await _scrivi({..._base,..._extra});
+    /* se sql/mezzi-una-lista-sola.sql non e' ancora passato, quelle colonne
+       non ci sono: il mezzo si salva lo stesso, e si dice cosa manca */
+    if(error&&/column|schema cache/i.test(error.message||"")
+            &&/noleggiabile|assicurazione_scad|revisione_scad|collaudo_scad|verifica_/i.test(error.message||"")){
+      ({data,error}=await _scrivi(_base));
+      if(!error)toast("Salvato, ma le scadenze no: manca sql/mezzi-una-lista-sola.sql");
+    }
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderMezzi();renderAttrezzature();
@@ -8024,7 +8070,7 @@ ${vecchi?`
     wrap.style.display="block";
     const [{data:usati},{data:tutti}]=await Promise.all([
       sb.from("gest_lavoro_mezzi").select("id,mezzo_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId),
-      sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome")
+      sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome")
     ]);
     const U=usati||[], T=tutti||[];
     const etichetta=m=>esc(m.nome)+(m.targa?" ("+esc(m.targa)+")":"");
@@ -8137,7 +8183,7 @@ ${vecchi?`
          non si rompe (stessa scelta già fatta per le pratiche). */
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
-      sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
       /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache è piena
          solo se l'utente ha già aperto la sezione Pratiche, altrimenti ogni
          scadenza collegata sembrerebbe (ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)") pur esistendo. */
@@ -8260,7 +8306,7 @@ ${vecchi?`
     if(sb&&sbUid){
       const [{data:dc},{data:dm}]=await Promise.all([
         sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)).order("nome"),
-        sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome")
+        sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).or(_cliOr(mid)).order("nome")
       ]);
       cl=dc||[];mz=dm||[];
     }
