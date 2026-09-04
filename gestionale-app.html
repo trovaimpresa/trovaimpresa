@@ -868,6 +868,46 @@
     if(changed){await save();if(!cur)renderLanding();}
   }
 
+  /* ⛔ 4 settembre 2026 — I REPARTI FANTASMA.
+     Il browser ricordava un reparto che nel database non c'era piu' (era
+     stato cancellato, magari da un altro computer) e all'apertura ci entrava
+     dritto: menu, riepilogo, tutto normale. Ma ogni salvataggio falliva —
+     il database rifiuta una riga attaccata a un reparto che non esiste — e
+     il messaggio dava la colpa a un aggiornamento del database mai fatto.
+     Visto dal vivo il 3 settembre.
+
+     ⚠️ PERCHE' NON STA DENTRO renderLanding, dove l'avevo messo prima.
+     Chi rientra nel reparto di ieri non passa MAI da renderLanding con
+     l'utente gia' noto: `_authRefresh` fa «se sono dentro un reparto
+     ridisegna, se no disegna i reparti», e chi e' dentro non disegna i
+     reparti. Il controllo era li' e non partiva: il banco era verde e la
+     pagina vera no. Adesso sta qui, e lo chiama _authRefresh appena sa chi
+     e' l'utente — dentro o fuori da un reparto.
+
+     I reparti senza mestiere_id non si toccano: sono i vecchi, solo locali,
+     e ci pensa backfillMestieri. Se la rete non risponde non si tocca
+     niente e si riprova al giro dopo: meglio un reparto di troppo che un
+     reparto buono buttato via per una connessione storta. */
+  let _repartiPuliti=false;
+  async function pulisciRepartiSpariti(){
+    if(_repartiPuliti||!sb||!sbUid||!state.panels)return;
+    const {data:mest,error}=await sb.from("gest_mestieri").select("id").eq("user_id",sbUid);
+    if(error||!mest)return;
+    _repartiPuliti=true;
+    const vivi=new Set(mest.map(m=>String(m.id)));
+    const morti=state.panels.filter(p=>p.mestiere_id&&!vivi.has(String(p.mestiere_id)));
+    if(!morti.length)return;
+    const nomeAperto=(morti.find(p=>p.id===cur)||{}).nome||null;
+    state.panels=state.panels.filter(p=>morti.indexOf(p)<0);
+    morti.forEach(p=>{delete state[p.id];});
+    await save();
+    if(nomeAperto){
+      try{localStorage.removeItem(GEST_ULTIMO);}catch(e){}
+      toast("Il reparto «"+nomeAperto+"» non esiste più: scegli un altro reparto");
+      goHome();
+    }else if(!cur)renderLanding();
+  }
+
   /* SUPABASE — solo per il tab Squadra (riusa gestionale-config.html) */
   const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
   const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
@@ -1773,6 +1813,9 @@
     function _authRefresh(){
       if(_authUidVisto===String(sbUid))return;
       _authUidVisto=String(sbUid);
+      /* prima di disegnare: un reparto che il database non ha piu' non deve
+         restare aperto (vedi pulisciRepartiSpariti) */
+      if(sbUid)pulisciRepartiSpariti();
       if(cur){renderAll();}else{renderLanding();}
       /* 15 agosto 2026 (12) — i numerini partono da qui, non dall'apertura
          della sezione: devono salire mentre l'utente sta facendo tutt'altro.
@@ -1921,31 +1964,6 @@
         }
         return p;
       });
-      /* ⛔ 4 settembre 2026 — I REPARTI FANTASMA. Il browser ricordava un
-         reparto che nel database non c'era piu' (cancellato altrove), e
-         all'apertura ci entrava dritto: menu, riepilogo, tutto. Ogni
-         salvataggio pero' falliva (chiave esterna su un reparto inesistente)
-         e il messaggio dava la colpa a un aggiornamento del database.
-         Il database e' la fonte: un reparto col suo mestiere_id che il
-         database non conferma si toglie dalla memoria del browser, e se e'
-         quello aperto si torna alla scelta dei reparti dicendolo. I reparti
-         senza mestiere_id (vecchi, solo locali) non si toccano: ci pensa
-         backfillMestieri. */
-      const _vivi=new Set((mest||[]).map(m=>String(m.id)));
-      const _morti=(state.panels||[]).filter(p=>p.mestiere_id&&!_vivi.has(String(p.mestiere_id)));
-      if(_morti.length){
-        state.panels=(state.panels||[]).filter(p=>_morti.indexOf(p)<0);
-        _morti.forEach(p=>{delete state[p.id];});
-        changed=true;
-        if(cur&&_morti.some(p=>p.id===cur)){
-          const nomeMorto=(_morti.find(p=>p.id===cur)||{}).nome||"";
-          await save();
-          try{localStorage.removeItem(GEST_ULTIMO);}catch(e){}
-          toast("Il reparto «"+nomeMorto+"» non esiste più: scegli un altro reparto");
-          goHome();
-          return;
-        }
-      }
       if(changed)await save();
 
       /* ⚠️ IL PRIMO REPARTO SE LO CREA IL GESTIONALE — 14 agosto 2026.

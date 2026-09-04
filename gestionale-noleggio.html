@@ -1335,7 +1335,6 @@ body:has(#ti-fondatore) .sheet--grande{
     const _somma=a=>a.reduce((s,x)=>s+(+x.importo||0),0);
     scrivi("kn-incasso",_eur(_somma(delMese.filter(x=>x.stato_pagamento==="pagato"))));
     scrivi("kn-daincassare",_eur(_somma(esterni.filter(x=>x.stato_pagamento!=="pagato"))));
-    const interniMese=_somma(N.filter(x=>interno(x)&&thisMonth(x.data_uscita)));
     const interniAperti=_somma(N.filter(x=>interno(x)&&nolFaseDi(x)!=="rientrato"));
     /* ⛔ le cauzioni NON sono un incasso: stanno in una casella a parte
        apposta, se no il riepilogo racconta di avere soldi che deve rendere. */
@@ -1379,10 +1378,16 @@ body:has(#ti-fondatore) .sheet--grande{
       false);
 
     const pagatiMese=delMese.filter(x=>x.stato_pagamento==="pagato");
+    /* ⛔ 4 settembre 2026 — DOVE SI LEGGONO I NOLEGGI INTERNI. Tolti da «Da
+       incassare» (non sono soldi che arriveranno), il loro valore non doveva
+       sparire del tutto: sono i tuoi mezzi che stanno sui tuoi cantieri.
+       Vanno qui, dove la seconda riga diceva soltanto il nome del mese, e si
+       contano quelli ANCORA FUORI (non il mese): e' quello che serve sapere.
+       ⚠️ nolDett mostra solo DUE righe: una terza non si vedrebbe mai. */
     nolDett("kn-incasso",[
       {t:"Noleggi pagati",v:String(pagatiMese.length)},
-      interniMese?{t:"Ai tuoi reparti (non si incassano)",v:_eur(interniMese)}
-                 :{t:"Nel mese di",   v:mesi[new Date(oggiN+"T00:00:00").getMonth()]}
+      interniAperti?{t:"Ai tuoi reparti (non si incassano)",v:_eur(interniAperti)}
+                   :{t:"Nel mese di",   v:mesi[new Date(oggiN+"T00:00:00").getMonth()]}
     ],false);
 
     const daPagare=esterni.filter(x=>x.stato_pagamento!=="pagato"&&(+x.importo||0)>0);
@@ -1394,8 +1399,7 @@ body:has(#ti-fondatore) .sheet--grande{
     nolDett("kn-daincassare",[
       {t:"Noleggi da pagare",v:String(daPagare.length)},
       vecchioNol?{t:"Il pi\u00f9 vecchio",
-                  v:vecchioNol.data_uscita?fdate(vecchioNol.data_uscita):"senza data"}
-                :(interniAperti?{t:"Ai tuoi reparti (non si incassano)",v:_eur(interniAperti)}:null)
+                  v:vecchioNol.data_uscita?fdate(vecchioNol.data_uscita):"senza data"}:null
     ],nonPagatiVecchi.length>0);
 
     const daSvincolare=cauApert.filter(cauDaSvincolare);
