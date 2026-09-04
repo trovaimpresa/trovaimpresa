@@ -1,0 +1,25 @@
+-- =====================================================================
+-- VIA nol_mezzi  --  5 settembre 2026 (gia' passato sul database)
+-- =====================================================================
+-- Dopo l'unione delle liste mezzi (sql/mezzi-una-lista-sola.sql, 4 set)
+-- l'anagrafica dei mezzi e' UNA sola: `gest_mezzi`. `nol_mezzi` era
+-- rimasta solo come copia di sicurezza.
+--
+-- I QUATTRO CONTROLLI FATTI PRIMA DI CANCELLARE (in quest'ordine):
+--   1. quante righe?  -> 1 sola, l'escavatore
+--   2. quella riga c'e' gia' in gest_mezzi?  -> SI, con lo STESSO id
+--      (935b2281-...), quindi noleggi e foto non si staccano
+--   3. qualche chiave esterna ci punta ancora?  -> nessuna
+--      (il 4 set nol_noleggi.mezzo_id e nol_media.mezzo_id sono state
+--      spostate su gest_mezzi)
+--   4. qualche vista la legge?  -> nessuna
+--
+-- ⛔ E nel SITO: la nominava solo `js/cestino.js`, nell'elenco delle
+--    tabelle che il cestino guarda. Tolta di li' NELLO STESSO MOMENTO:
+--    se no il cestino avrebbe chiesto al database una tabella cancellata
+--    a ogni apertura.
+--
+-- Copia della riga: prove-claude/nol_mezzi-ultima-copia-5set.txt
+-- Dopo: gest_mezzi 2 righe, nol_noleggi 3, nol_media 1 — tutto intatto.
+-- =====================================================================
+drop table if exists public.nol_mezzi;

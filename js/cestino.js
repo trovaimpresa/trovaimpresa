@@ -108,7 +108,12 @@
        sql/noleggio-cestino.sql (risposta: 6 colonne). Prima di oggi qui
        dentro non c'erano, e tutto quello che si cancellava dal gestionale
        noleggio spariva davvero. */
-    "nol_mezzi", "nol_clienti", "nol_noleggi",
+    /* ⛔ 5 settembre 2026 — «nol_mezzi» TOLTA da questo elenco perche' la
+       tabella NON ESISTE PIU'. Dopo l'unione delle liste mezzi (4 set,
+       sql/mezzi-una-lista-sola.sql) l'anagrafica e' una sola, «gest_mezzi»,
+       che sta gia' qui sopra. Lasciandola, il cestino avrebbe chiesto al
+       database una tabella cancellata a ogni apertura. */
+    "nol_clienti", "nol_noleggi",
     "neg_prodotti", "neg_fornitori", "neg_movimenti",
     /* 26 agosto 2026 — i preventivi del negozio. Erano rimasti fuori il 23:
        «Elimina» li cancellava davvero. E un preventivo ha un NUMERO, e un
