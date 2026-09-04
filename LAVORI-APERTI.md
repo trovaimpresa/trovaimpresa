@@ -58,6 +58,9 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - ✅ **28.** «Bug piano free/pro binario» — CANCELLATA il 5 set: nessun confronto con `'pro'` nei →4← pannelli e tutte e →116← le imprese hanno `piano = premium`. `BACKLOG.md` svuotato
 
 ### 🆕 Nato oggi
+- **E.** ⛔ **Le →5← pagine di REGISTRAZIONE sono troncate**: finiscono a meta' tag (`...Contatti</a></foo`), senza `</footer></body></html>`. Anche ONLINE, ed era gia' cosi' prima del 5 set. Oggi non fanno danni (gli `<script>` sono tutti chiusi, quindi il codice gira e le iscrizioni funzionano; il browser chiude i tag da solo), ma e' un file tagliato e va rimesso a posto. Anche `registrazione-candidato.html`, `demo-arcade.html` e i →2← file di verifica di Google
+- **F.** ⚖️ **Il profilo finto «Admin TrovaImpresa» (impresa →36←) NON e' segnato come profilo di prova** (`is_test = false`): quindi finisce nella sitemap delle schede mandata a Google, in mezzo alle imprese vere, e adesso anche in quella delle recensioni con la recensione che Alex ha scritto a se stesso. Basta metterlo `is_test = true` e sparisce da ricerche, mappa, pagine citta' e sitemap. **Decide Alex**
+
 - **D.** Cancellando una richiesta di preventivo, i suoi **allegati restano nel magazzino**: sul bucket non c'e' nessun permesso di cancellazione
 
 ### L'ordine di oggi (5 set), scelto da Alex
@@ -140,6 +143,8 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - Collaudo dal vivo di `assistenza-ai-e-computo` (3 domande alla chat + computo di prova con totale →937,99←): da fare la prima volta con Alex presente
 
 ## ✅ FATTO — ultimi 14 giorni (per chiudere il cerchio, poi si cancella)
+
+- [5 set] **Il controllo prima di pubblicare adesso VEDE le pagine troncate** (`tools/controllo-push.js`, funzione `controllaPagineTroncate`) · ⛔ prima non poteva: il suo motivo `<script...>...</script>` trova solo i blocchi **chiusi**, e uno aperto e mai chiuso per lui non esisteva — e' per questo che `gestionale-config.html`, morta, e' finita ONLINE. Adesso toglie dal file tutti i blocchi completi e guarda se resta un `<script`: se resta, **ferma la pubblicazione**. ⚠️ Non conta le aperture contro le chiusure, che darebbe allarmi falsi: un `<script>` scritto dentro un commento (succede in `offerta-lavoro.html`) farebbe scattare l'allarme per niente. Secondo controllo, solo avviso: **manca `</html>`** — la pagina funziona lo stesso, ma e' il segno che il file e' stato tagliato. Provato col metro: con un file troncato finto la pubblicazione si ferma; su tutte le →299← pagine vere, **→0← allarmi falsi**
 
 - [5 set] **→10← — password: quello che si poteva fare sul piano Free** · l'interruttore vero («Prevent use of leaked passwords», che confronta con l'archivio HaveIBeenPwned) **e' riservato al piano Pro**: sul Free e' visibile ma bloccato, quindi l'avviso di sicurezza di Supabase non sparira'. Alex ha scelto l'opzione →2← di →3←: **lunghezza minima da →6← a →8←** caratteri, che e' il consiglio di Supabase stesso. Chi e' gia' iscritto non viene toccato: vale per le nuove iscrizioni e per i cambi password. ⚠️ **Le regole su lettere/numeri sono state lasciate spente apposta**: la registrazione e' stata accorciata il →4← settembre per non far scappare nessuno, e una password piu' difficile e' attrito esattamente in quel punto
 

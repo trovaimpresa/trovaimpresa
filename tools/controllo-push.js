@@ -284,6 +284,45 @@ function controllaScript(){
 }
 
 /* ------------------------------------------------------------------ */
+/* 2-bis. LE PAGINE TRONCATE                                           */
+/*    ⛔ 5 SETTEMBRE 2026 — PERCHE' ESISTE.                            */
+/*    `gestionale-config.html` e' finito ONLINE con uno <script> aperto */
+/*    e mai chiuso: il browser si mangia tutto il resto del file come   */
+/*    fosse codice, il blocco non gira, e sotto il titolo resta lo      */
+/*    SCHERMO BIANCO. Il controllo qui sopra non poteva vederlo: il suo */
+/*    motivo `<script...>...</script>` trova solo i blocchi CHIUSI, e   */
+/*    uno aperto e mai chiuso per lui non esiste proprio.               */
+/*                                                                      */
+/*    Il modo giusto: si tolgono dal file tutti i blocchi CHIUSI, e si  */
+/*    guarda se resta un `<script`. Se resta, quello e' aperto e basta. */
+/*    ⚠️ Non si contano e basta le aperture contro le chiusure: un      */
+/*    `<script>` scritto dentro un COMMENTO farebbe scattare un allarme */
+/*    falso (succede davvero in offerta-lavoro.html).                   */
+/* ------------------------------------------------------------------ */
+function controllaPagineTroncate(){
+  for (const f of tuttiIFile(['.html'])){
+    let t;
+    try { t = leggi(f); } catch(e){ continue; }
+
+    // via i blocchi <script>...</script> completi: quello che resta e' aperto
+    const resto = t.replace(/<script\b[\s\S]*?<\/script\s*>/gi, '');
+    if (/<script\b/i.test(resto)){
+      errore(f, 'c\'e\' uno <script> APERTO E MAI CHIUSO: il browser si mangia '
+              + 'il resto del file e la pagina resta bianca. Il file e\' troncato: '
+              + 'va ripreso dall\'ultima versione buona, non indovinato');
+    }
+
+    // e la chiusura della pagina. Solo un avviso: una pagina senza </html>
+    // il browser la chiude da sola e funziona lo stesso — ma e' il segno che
+    // qualcosa e' stato tagliato, ed e' cosi' che si nasconde un file troncato.
+    if (!/<\/html\s*>/i.test(t)){
+      avviso(f, 'manca la chiusura </html>: la pagina funziona lo stesso, ma '
+              + 'spesso vuol dire che il file e\' stato tagliato. Guardalo');
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* 3. LO SCHEMA PER GOOGLE                                             */
 /*    Un JSON rotto e Google butta via il riquadro senza dire niente.   */
 /* ------------------------------------------------------------------ */
@@ -391,6 +430,7 @@ function main(){
   controllaDoveVannoIRinvii();
   controllaRobaPrivata();
   controllaScript();
+  controllaPagineTroncate();
   controllaSchema();
   controllaMisure();
   controllaFinestre();
