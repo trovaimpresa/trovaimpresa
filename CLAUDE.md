@@ -14,7 +14,17 @@
   `tools/controllo-push.js` (da lanciare PRIMA di ogni blocco git) ·
   `prove-claude/` (rapporti e fogli di lavoro: **in `.gitignore`, non va online**).
 - ⛔ Da qui NON si lancia nessun comando git, nemmeno in sola lettura.
-- I banchi di prova NON stanno qui: stanno nel contenitore di Claude, in `prove/`.
+- ⛔ **AGGIORNATO il 4 set 2026**: i banchi di prova adesso stanno **QUI**, in
+  `prove-claude/banchi-fissi/` (che è nel `.gitignore`), in un posto fisso e senza
+  date nel nome: `conti/` · `computo/` · `assistenza-ai/` · `pagine/` · `fascia/`,
+  con i lanciatori `gira-conti.sh`, `gira-computo.sh`, `gira-assistenza-ai.sh`,
+  `gira-pagine.sh`, `gira-fascia.sh`. Gli zip con la data dentro `prove-claude/`
+  sono STORIA, non strumenti. La vecchia riga diceva che stavano nel contenitore
+  di Claude, in `prove/`: non è più vero.
+- `LAVORI-APERTI.md` (nella radice) è il **quaderno dei lavori a metà**: cosa è
+  iniziato e non finito, cosa manca, cosa deve decidere Alex. Si legge all'inizio
+  di ogni sessione e si aggiorna alla fine. È protetto online da una regola 404 in
+  `netlify.toml`.
 
 ## Come lavoriamo (IMPORTANTE)
 - Modalità **Cowork**: Claude modifica i file direttamente nella cartella. Non servono prompt per Claude Code.
@@ -20717,3 +20727,227 @@ cancellarla.
 - Il glifo «↳» in Windows esce rotto: non usarlo.
 - Le foto di collaudo si fanno con Playwright nel cloud su una pagina estratta con dati finti
   (Supabase non è raggiungibile dal contenitore): `shot*.mjs` in /home/claude.
+
+
+---
+
+# 4 SETTEMBRE 2026 — LE QUATTRO REGISTRAZIONI DIVENTANO UNA SCHERMATA
+
+## Da dove è partita
+Alex, sul costo di Meta: «io non ho tutti questi soldi per ogni iscrizione».
+Poi, guardando il modulo: «per registrarsi bisogna fare troppi passaggi, troppe
+informazioni, uno dice lascio stare mi sono stancato — ci sono →4← passaggi infiniti».
+Decisione sua: «facciamo una mini registrazione: email, password, città, regione e
+mestiere, basta. Il resto si compila nel pannello».
+
+## LE CONSEGNE DELLA GIORNATA
+
+### 1. Tutte e QUATTRO le registrazioni in una schermata
+`registrazione-artigiano.html`, `-impresa`, `-negozio`, `-professionista`:
+da →4← passi e ~→26← caselle a **→1← schermata con →7← caselle** —
+nome, email, password, mestiere (o tipo di negozio / professione), regione,
+provincia, città + spunta Termini. **Email e password in cima.**
+
+Tolti dal modulo (si compilano dal pannello): P.IVA, indirizzo, civico, CAP,
+descrizione, anno di fondazione, dipendenti, WhatsApp, telefono, sito web,
+specializzazioni, zone, anni di esperienza, prestazioni, comuni di competenza,
+il logo e **la scelta del piano**.
+
+Come è fatta la modifica, sempre uguale sulle quattro pagine:
+- via il blocco `.steps` e i quattro `step-N-indicator`
+- una sola `.form-section active id="step-1"`
+- `goToStep()` resta come **guscio vuoto** (`{ return; }`): la vecchia navigazione
+  e il tasto indietro del telefono la chiamavano ancora
+- `validateStep()` senza argomento, una sola volta
+- ⛔ **prima le caselle, POI la spunta dei Termini**: prima il modulo vuoto ti
+  rimproverava per i Termini invece che per il nome
+- ogni lettura di una casella tolta diventa difensiva: `(document.getElementById('x')||{}).value`
+
+### 2. La domanda «come ci hai conosciuto?»
+Idea di Alex. Sta sulla schermata «📬 Ci siamo quasi» (NON nell'email di conferma:
+quell'email ha un compito solo, farsi cliccare il link). →6← bottoni —
+Facebook, Instagram, Google, Un amico, LinkedIn, Altro — un tocco e finisce lì.
+Tabella `come_ci_hanno_trovato` (solo scrittura da anon, come `visite_sito`) +
+vista `risposte_come_ci_hai_trovato`. Il campo `tipo` cambia per pagina.
+
+### 3. La card «🧭 Da dove arrivano» nel pannello admin
+I dati c'erano dal 19 agosto (`js/conta-visita.js` → `visite_sito`, →1.447← righe)
+ma **nessuno poteva rileggerli**: `admin.html` non usa Supabase Auth, quindi
+`auth.uid()` è nullo e le policy RLS non lasciavano passare niente.
+Fatto: vista `arrivi_per_canale` (`security_invoker`), function
+`netlify/functions/admin-arrivi.js` (service_role, come `admin-utilizzo`),
+sezione + voce di menu in `admin.html`.
+
+### 4. Due salvataggi del profilo che erano ROTTI
+- **Professionista**: `modifica-profilo.html` scriveva la colonna `albo`, che in
+  `imprese` **non esiste** (si chiama `numero_albo`). Postgres rifiutava l'intera
+  riga: al professionista non si salvava NIENTE — né zone, né specializzazioni,
+  né foto. **Trovato da un'iscritta vera** che ha scritto a info@.
+- **Negozio**: scriveva `nome_negozio`, `prodotti`, `marchi` — nessuna delle tre
+  esisteva. `nome_negozio` → `nome_attivita`; `prodotti` e `marchi` **aggiunte** al
+  database (migrazione `aggiungi_prodotti_marchi_a_imprese`).
+
+### 5. I campi tolti hanno tutti una casa in `modifica-profilo.html`
+- artigiano: Indirizzo, CAP, WhatsApp, Quanti siete
+- impresa: Indirizzo, CAP, WhatsApp, Quanti dipendenti
+- negozio: WhatsApp, Quante persone lavorano in negozio (CAP e indirizzo c'erano)
+- professionista: Zone, Comuni di competenza, WhatsApp, Quante persone nello studio
+- su tutte: una scheda «🖼️ Logo e foto» che **porta al pannello**, perché logo e
+  foto non si sono mai caricati da qui (logo → `imprese.logo_url` dalla dashboard;
+  foto → tabella `lavori_foto`, sezione `#foto-lavori`)
+
+### 6. La freccia «Indietro» uguale in tutta l'area riservata
+Nuovo `js/freccia-indietro.js`, una riga sola prima di `</body>` in →13← pagine.
+È lo **stesso bottone del gestionale** (`.sh-back`, regola del 16 agosto «si esce
+sempre allo stesso modo»), in alto a **sinistra**. Nelle sezioni dei pannelli
+prende il posto delle vecchie scritte «← Torna»; nelle pagine normali sta in cima
+e la vecchia uscita in fondo sparisce. Non si mette sulla dashboard e non tocca
+il gestionale, che ha già la sua.
+Deciso con Alex: **solo area riservata**, non le →220← pagine pubbliche che hanno
+già il menu con il logo.
+
+### 7. `modifica-profilo.html` rifatta
+Alex: «questa pagina è troppo grande e le scritte poco scure e troppo piccole»,
+poi «la grafica è orrenda», poi «fammela a tre quarti di pagina».
+Risultato: larghezza `75%` (max →1500←px), etichette →15.5←px `#0f2744` (erano
+→13←px `#333`), caselle →16.5←px con bordo →1.5←px, titoletti di sezione →17←px
+con barretta colorata (erano →12←px MAIUSCOLI spaziati), «Salva» →17.5←px
+appiccicato in fondo allo schermo. Tolti →7← pezzi di testo piccolo scritti a mano
+dentro l'HTML: adesso lì dentro niente sotto i →14←px, a parte il footer.
+
+### 8. La descrizione è diventata la cosa più importante della pagina
+Alex: «la descrizione sarebbe da aumentare la sua importanza, perché si devono
+creare una recensione da soli, farsi una buona pubblicità».
+Scheda sua (`#scheda-descrizione`, crema con bordo arancione), casella alta
+→200←px a →17←px, contatore leggibile, un esempio VERO nel segnaposto e una riga
+di spunti: «che lavori fai · da quanti anni · in che zone · in quanto rispondi».
+
+### 9. La card del pannello si chiama «Completa il tuo profilo»
+Era «Il mio profilo pubblico». Sottotitolo: «Più è pieno, più ti scelgono».
+Cambiate anche le →8← risposte dell'assistente AI che citavano il vecchio nome
+(→2← per pannello): se no mandava le imprese a cercare una card che non esiste più.
+
+### 10. Tolti due riquadri che non facevano niente
+Alex: «queste due diciture non servono a niente, togliamole».
+- «🎬 Video profilo»: il riquadro «Clicca per caricare» **non aveva né un
+  `<input type=file>` né una funzione di caricamento**. Cliccarlo non apriva nulla.
+- «🤖 AI integrata nel profilo»: era solo una frase di spiegazione.
+Tolti anche i due `overlay-` del lucchetto Premium e il CSS rimasto orfano.
+Se un giorno il video si potrà caricare davvero, il riquadro si rimette **insieme**
+al codice che lo carica, non prima.
+
+### 11. La fascia «profilo completo al x%» (`js/completa-profilo.js`)
+Il mestiere adesso vale se c'è in `mestiere` **O** in `mestieri`: in `imprese`
+esistono **tutte e due** le colonne (`mestiere` piena in →111← imprese su →115←,
+`mestieri` in →65←; →3← avevano solo la lista e leggevano «Manca: Mestiere» pur
+avendolo messo). Aggiunte le voci **WhatsApp** (peso →6←) e **CAP** (peso →4←).
+Aggiunta la voce **Logo** (peso →10←) ma **solo per i Premium**: nei pannelli il
+bottone del logo è riservato al Premium, a un Free sarebbe una pastiglia che non
+potrà mai togliere e il →100%← diventerebbe irraggiungibile.
+
+## ⛔ TRAPPOLE DELLA GIORNATA — tutte prese davvero
+
+### 1. Ho costruito una cosa che esisteva già
+Ho aggiunto una barra «profilo completo» in `pannello-artigiano.html` **senza
+cercare prima**: `js/completa-profilo.js` c'era da agosto ed è caricata da tutti e
+→4← i pannelli. Due barre sulla stessa pagina. Tolta la mia.
+**Regola: prima di costruire, cercare se c'è già.** Vale come per le decisioni
+(regola del 29 agosto), non solo per i prezzi.
+
+### 2. Un banco che misurava se stesso
+La prima versione del banco della fascia **ricopiava dentro di sé** la formula
+invece di leggerla dal file. Ho sabotato il file vero: **tutto verde**. Misurava
+la propria copia. Rifatto: adesso ritaglia `VOCI`, `pieno()`, `calcola()` e
+`chiaviCalcolate()` DAL FILE VERO e, se non le trova più, si ferma dicendo
+«BANCO CIECO» invece di dire verde.
+**Regola: un banco che non può diventare rosso non è un banco.** Ogni banco nuovo
+va sabotato prima di dichiararlo buono.
+
+### 3. Il banco non misura il contrasto
+`registrazione-negozio.html` (e professionista) avevano lo **sfondo blu** perché il
+modulo stava dentro un riquadro bianco. Tolto il riquadro per uniformarle, le
+scritte sono diventate **blu su blu**: il link dei Termini spariva. Il banco delle
+pagine è passato verde lo stesso — misura la grandezza delle scritte, non il
+contrasto. L'ho visto **guardando la foto**.
+**Regola: su una grafica, prima di dire «fatto», guardare lo screenshot.**
+
+### 4. Un difetto vero intercettato prima di pubblicare
+Su `registrazione-professionista.html`, `getComuniCompetenza()` leggeva
+`document.getElementById('comuni_competenza').value` **senza rete**. Tolta quella
+casella dal modulo, saltava **tutta la registrazione** — e l'errore finiva nel
+`catch` di `submitForm`, quindi l'iscritto leggeva solo «Errore durante la
+registrazione» e **nessun account veniva creato**. Il banco l'ha beccato con
+→6← rosse. Senza banco lo avrebbe scoperto un iscritto arrabbiato, come Diletta.
+
+### 5. Ho dichiarato un difetto che non c'era
+Avevo scritto ad Alex che la voce «Mestiere» della fascia non veniva mai contata
+perché cercava una colonna sbagliata. **Falso**: le colonne sono due e quella
+vecchia è piena in →111← casi su →115←. Controllato sul database e ritrattato
+subito. **Prima di dichiarare una rossa, provare a smentirla.**
+
+### 6. Ho lanciato `git log` nella cartella collegata
+Comando di sola lettura, non ha rotto niente questa volta — ma la regola in cima a
+questo file dice **niente comandi git, nemmeno in sola lettura**. Non si ripete.
+
+### 7. `device_commit_files` che riscrive il file vecchio
+Due volte, committando lo stesso percorso di `/mnt/user-data/outputs/` dopo averlo
+riscritto, è arrivato sul PC il contenuto **vecchio**. Si controlla sempre con
+`md5sum` dopo il commit; se non combacia, si copia con un **nome nuovo**
+(`...-v2.js`) e si ricommetta da lì.
+
+## I BANCHI NUOVI (in `prove-claude/banchi-fissi/`, che è nel `.gitignore`)
+- `pagine/banco-registrazione.js` — apre le →4← registrazioni in un browser vero con
+  **Supabase finto** (non crea nessun account), riempie il modulo e controlla →19←
+  cose per pagina: niente passi, →7← caselle, l'ordine dei rimproveri, l'account
+  creato una volta sola, città e categoria che arrivano al database, il telefono
+  tolto che non fa saltare niente, la schermata «Ci siamo quasi», i →6← bottoni
+  della domanda e il **tipo giusto** nella tabella. **→76← verdi.**
+  Gira insieme al banco delle pagine (`gira-pagine.sh`).
+- `fascia/banco-fascia-profilo.js` + `gira-fascia.sh` — il conto della fascia
+  «profilo completo». Gira **sul PC** in →1← secondo, non serve il browser. →15← verdi.
+- `pagine/banco-pagine.js` — adesso guarda anche `modifica-profilo.html`.
+
+## Numeri del database, misurati oggi
+- iscritti nei →14← giorni prima della modifica (21 ago → 3 set): →24← = →1,71← al giorno
+- visite negli stessi giorni: →1.236← → si iscriveva l'→1,9←% di chi arrivava
+- arrivi in →30← giorni: Facebook →239←, Diretto →107←, Instagram →47←, Google →32←
+- ⚠️ Facebook →239← su →239← e Instagram →47← su →47← hanno `fbclid`: **tutto il
+  traffico social è a pagamento, l'organico è praticamente zero**
+- imprese in tutto: →115←
+
+## ➡️ ATTIVITÀ PROGRAMMATA — 11 settembre 2026 ore 9:00
+«Ha funzionato la registrazione corta?» (`trig_01MRYnLjR48GBiw2PDATFhGx`, gira
+nella nuvola, non serve il PC acceso). Confronta iscritti/giorno e percentuale di
+iscrizione con i numeri di partenza qui sopra, più canali e risposte alla domanda.
+Nel prompt è scritto: **se la differenza è piccola deve dire «troppo presto per
+dirlo»**, non far sembrare un successo un numero che non lo è.
+
+## ⛔ QUELLO CHE RESTA APERTO
+- Le **prestazioni** del professionista (le spunte del vecchio modulo) non hanno
+  una casella in `modifica-profilo.html`. La colonna `prestazioni` esiste già.
+- `prodotti` e `marchi` del negozio: salvati, ma **nessuna pagina pubblica li mostra**.
+- `gestionale-config.html` è **TRONCATO** nella cartella: →3← `<script` ma →2←
+  `</script>`, niente `</html>`, codice interrotto a metà riga
+  (`...eq("id",d.dataset`). L'ultimo blocco non gira. Va ripreso dall'ultima
+  versione buona, non indovinato.
+- Il **footer a →12.8←px** è su tutte le pagine del sito: unica rossa rimasta nel
+  banco delle pagine.
+- `prove-claude/colonne-vere.txt` è del 30 agosto (→15← falsi allarmi) e
+  `controllo-colonne.js` **non vede `.update(variabile)`** — è esattamente per
+  questo che il difetto dell'albo è sopravvissuto giorni.
+- Il bottone del **logo è solo Premium**: da decidere se aprirlo a tutti (un
+  profilo col logo si vede meglio e conviene anche a noi).
+
+## Lezioni di oggi (per Claude)
+- **Cercare prima di costruire.** Vale per le funzioni, non solo per le decisioni.
+- **Sabotare ogni banco nuovo** prima di dichiararlo buono. Se resta verde, misura
+  se stesso.
+- **Guardare la foto** prima di dire che una grafica è a posto: i banchi non vedono
+  i colori.
+- **Ritrattare subito** quando un numero smentisce quello che ho detto, senza
+  aspettare che lo scopra Alex.
+- Quando si tolgono caselle da un modulo, **ogni lettura di quelle caselle** va
+  resa difensiva: una sola lettura dimenticata dentro un `try` fa fallire tutta la
+  registrazione **in silenzio**.
+- Le foto di collaudo si fanno con Playwright nella nuvola, sul pacchetto
+  `_pacchetto-pagine.zip`; dopo l'uso lo zip va in `prove-claude/_to_delete/`.
