@@ -106,7 +106,21 @@ exports.handler = async function (event) {
       .select('*')
       .order('persone_30gg', { ascending: false });
     if (error) throw error;
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, data: data || [] }) };
+
+    /* Le risposte alla domanda «come ci hai conosciuto?» (schermata dopo la
+       registrazione). E' l'unica misura che sa dire «me l'ha detto un amico».
+       Se questa fallisce NON deve far fallire tutta la card: i canali sono
+       l'informazione principale. */
+    let dichiarate = [];
+    try {
+      const r2 = await supabaseAdmin
+        .from('risposte_come_ci_hai_trovato')
+        .select('*')
+        .order('quante_30gg', { ascending: false });
+      if (!r2.error) dichiarate = r2.data || [];
+    } catch (_) { /* la card si disegna lo stesso */ }
+
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, data: data || [], dichiarate }) };
   } catch (err) {
     console.error('[admin-arrivi] errore:', err.message, info);
     return {

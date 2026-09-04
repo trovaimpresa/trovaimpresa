@@ -2228,14 +2228,15 @@ async function caricaArrivi(){
     });
     const j = await res.json().catch(function(){ return {}; });
     if(!j.success) throw new Error(j.error || 'errore sconosciuto');
-    disegnaArrivi(j.data || []);
+    disegnaArrivi(j.data || [], j.dichiarate || []);
   }catch(e){
     if (num) num.innerHTML = '';
     if (box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _arEsc(e.message) + '</div>';
   }
 }
 
-function disegnaArrivi(righe){
+function disegnaArrivi(righe, dichiarate){
+  dichiarate = dichiarate || [];
   const num = document.getElementById('ar-numeri');
   const box = document.getElementById('ar-lista');
   if (!righe.length){
@@ -2293,6 +2294,37 @@ function disegnaArrivi(righe){
     + 'non è una fonte, è chi era già dentro.</div>';
   h += '<div class="st-nota" style="margin-top:12px">✉️ «Diretto o sconosciuto» = chi scrive l\'indirizzo a mano, '
     + 'apre un segnalibro, o arriva da un\'app che non dice da dove viene (WhatsApp, email, alcune app di Facebook).</div>';
+
+  /* Quello che dicono LORO. E' l'unica misura che sa dire «me l'ha detto un
+     amico»: nessun contatore automatico puo' saperlo. */
+  const NOMI_RISP = { facebook:'📘 Facebook', instagram:'📸 Instagram', google:'🔍 Google',
+                      passaparola:'🗣️ Un amico (passaparola)', linkedin:'💼 LinkedIn', altro:'• Altro' };
+  h += '<div style="margin-top:26px;padding-top:20px;border-top:2px solid #e2e8f0">'
+    + '<div style="font-size:17px;font-weight:800;color:#0a2a4d;margin-bottom:6px">🗣️ Cosa dicono loro</div>'
+    + '<div class="st-nota" style="margin:0 0 14px">Risposte alla domanda «come ci hai conosciuto?» che compare '
+    + 'subito dopo l\'iscrizione. È l\'unica che può dire «me l\'ha detto un amico».</div>';
+  if (!dichiarate.length){
+    h += '<div class="ei-vuoto">Ancora nessuna risposta: la domanda parte dalle iscrizioni di oggi in poi.</div>';
+  } else {
+    const totD = dichiarate.reduce(function(t,r){ return t + (+r.quante_30gg || 0); }, 0);
+    h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:15px;min-width:420px">'
+      + '<tr style="text-align:left;border-bottom:2px solid #e2e8f0">'
+      + '<th style="padding:10px 8px">Hanno risposto</th>'
+      + '<th style="padding:10px 8px">Ultimi 30 gg</th>'
+      + '<th style="padding:10px 8px">Ultimi 7 gg</th>'
+      + '<th style="padding:10px 8px">Da sempre</th></tr>';
+    dichiarate.forEach(function(r){
+      const q30 = +r.quante_30gg || 0;
+      const perc = totD ? Math.round(q30 * 100 / totD) : 0;
+      h += '<tr style="border-bottom:1px solid #eef2f7">'
+        + '<td style="padding:11px 8px;font-weight:700">' + _arEsc(NOMI_RISP[r.risposta] || r.risposta) + '</td>'
+        + '<td style="padding:11px 8px;font-weight:800">' + q30 + ' <span style="font-weight:500;color:#5b6b80">(' + perc + '%)</span></td>'
+        + '<td style="padding:11px 8px">' + (+r.quante_7gg || 0) + '</td>'
+        + '<td style="padding:11px 8px">' + (+r.quante_sempre || 0) + '</td></tr>';
+    });
+    h += '</table></div>';
+  }
+  h += '</div>';
   if (box) box.innerHTML = h;
 }
 
