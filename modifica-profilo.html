@@ -144,7 +144,9 @@
   <style id="ti-grafica-2026">
     /* ---- la pagina ---- */
     html, body { background: #eef2f7; padding: 0; }
-    .container { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+    /* «me lo fai piu' grande a tre quarti di pagina» (Alex, 4 set) */
+    .container { width: 75%; max-width: 1500px; margin: 0 auto; padding: 28px 20px 60px; }
+    @media (max-width: 1100px) { .container { width: auto; } }
     .content { padding: 0; }
 
     /* ---- titolo della pagina ---- */
@@ -226,6 +228,15 @@
     /* la freccia «Indietro» in cima fa gia' questo lavoro */
     .btn-back-link { display: none; }
 
+    /* ---- la scheda della descrizione: la piu' importante della pagina ---- */
+    #scheda-descrizione { background: #fffaf4; border: 1.5px solid #ffd9b0; border-radius: 14px; padding: 22px 24px; }
+    #scheda-descrizione .card-header { margin-bottom: 14px; }
+    #scheda-descrizione textarea { min-height: 200px; font-size: 17px; line-height: 1.6; background: #fff; }
+    #desc-counter { font-size: 14px; color: #64748b; font-weight: 600; }
+    #desc-spunti { margin-top: 12px; font-size: 15px; color: #7c4a17; line-height: 1.7; }
+    #desc-spunti span { font-weight: 700; }
+    #desc-spunti b { font-weight: 700; color: #9a3412; }
+
     /* ---- telefono ---- */
     @media (max-width: 768px) {
       .container { padding: 16px 12px 48px; }
@@ -298,10 +309,25 @@
             <label>Numero iscrizione albo</label>
             <input type="text" id="f-numero_albo" placeholder="Es. 12345">
           </div>
+        </div>
+
+        <!-- ⛔ 4 settembre 2026 — LA DESCRIZIONE HA UNA SCHEDA SUA.
+             Alex: «la descrizione sarebbe da aumentare la sua importanza,
+             perche' si devono creare una recensione da soli, farsi una buona
+             pubblicita'». Prima era l'ultima casella di «Presentazione», alta
+             100px, col contatore a 11px grigio chiaro: sembrava un dettaglio.
+             Adesso e' una scheda sua, la casella e' alta il doppio, e sotto
+             ci sono tre spunti per chi non sa da dove cominciare. -->
+        <div class="form-card fc-arancio" id="scheda-descrizione">
+          <div class="card-header arancio">✍️ La tua presentazione — è la tua pubblicità</div>
           <div class="form-group" style="margin-bottom:0;">
-            <label>Descrizione <span id="desc-limit-label" style="font-weight:400;color:#888;">(max 500 caratteri)</span></label>
-            <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="aggiornaDescCounter()"></textarea>
-            <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0 / 500</div>
+            <label>Descrizione <span id="desc-limit-label" style="font-weight:400;color:#64748b;">(max 500 caratteri)</span></label>
+            <textarea id="f-descrizione" placeholder="Es. Muratore a Rieti da 25 anni. Ristrutturazioni complete, bagni chiavi in mano, cappotti termici. Preventivo gratuito e sopralluogo in 48 ore." maxlength="500" oninput="aggiornaDescCounter()"></textarea>
+            <div id="desc-counter" style="text-align:right;margin-top:6px;">0 / 500</div>
+            <div id="desc-spunti">
+              <span>Da dove cominciare:</span>
+              <b>che lavori fai</b> · <b>da quanti anni</b> · <b>in che zone</b> · <b>in quanto rispondi</b>
+            </div>
           </div>
         </div>
 
