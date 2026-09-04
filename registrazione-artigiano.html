@@ -18,7 +18,10 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       padding: 20px;
     }
-    .container { max-width: none; margin: 40px auto; background: transparent; border-radius: 16px; overflow: hidden; box-shadow: none; padding: 0 24px; }
+    /* 4 set 2026 — la pagina era larga quanto lo schermo (max-width:none): su un
+   monitor grande il modulo si stirava da un bordo all'altro e le righe
+   diventavano lunghissime da leggere. Adesso sta in una colonna. */
+    .container { max-width: 680px; margin: 40px auto; background: transparent; border-radius: 16px; overflow: hidden; box-shadow: none; padding: 0 24px; }
     .header { background: #0066ff; color: white; padding: 32px 24px; text-align: center; }
     .header h1 { font-size: 24px; margin-bottom: 8px; }
     .header p { font-size: 14px; opacity: 0.9; }
@@ -31,17 +34,17 @@
     .content { padding: 32px; }
     .form-section { display: none; }
     .form-section.active { display: block; }
-    .form-section h2 { font-size: 20px; color: #111; margin-bottom: 24px; }
+    .form-section h2 { font-size: 22px; color: #0a2a4d; margin-bottom: 24px; }
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #111; margin-bottom: 7px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; }
+    .form-group label { display: block; font-size: 16px; font-weight: 700; color: #0a2a4d; margin-bottom: 8px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px 13px; border: 1.5px solid #c9d4e3; border-radius: 9px; font-size: 16.5px; font-family: inherit; color: #0a2a4d; background: #fff; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.1); }
     .form-group textarea { resize: vertical; min-height: 90px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .required { color: #ff6b6b; }
     .buttons { display: flex; gap: 12px; margin-top: 28px; }
     .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #111; }
-    .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #0066ff; color: white; }
+    .btn-next { flex: 1; padding: 17px 24px; border: none; border-radius: 10px; font-size: 18px; font-weight: 800; cursor: pointer; background: #0066ff; color: white; }
     .btn-next:hover { background: #0052cc; }
     .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
     .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; }
@@ -88,7 +91,8 @@
     details.extra > summary small { display:block; font-weight:500; color:#666;
       font-size:14.5px; margin-top:3px; }
     details.extra .form-group:last-child { margin-bottom:14px; }
-  </style>
+      .form-group input::placeholder, .form-group textarea::placeholder { color: #7c8ba1; }
+</style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   /* MOBILE */
@@ -102,10 +106,10 @@
     .steps { padding: 12px 16px !important; gap: 6px; flex-wrap: wrap; }
     .step  { font-size: 0.7rem !important; }
     .content { padding: 16px !important; }
-    .form-section h2 { font-size: 1.05rem !important; }
+    .form-section h2 { font-size: 19px !important; }
     .form-grid { grid-template-columns: 1fr !important; }
     .nav-buttons { gap: 8px !important; }
-    .btn-prev, .btn-next { padding: 10px 16px !important; font-size: 0.85rem !important; }
+    .btn-prev, .btn-next { padding: 15px 16px !important; font-size: 17px !important; }
   }
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
@@ -154,7 +158,7 @@
             </button>
           </div>
           <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
-          <div id="pw-strength-label" style="font-size:13px;color:#666;margin-top:4px;">Usa almeno 8 caratteri, con maiuscole, numeri e simboli.</div>
+          <div id="pw-strength-label" style="font-size:14px;color:#4a5a6e;margin-top:4px;">Usa almeno 8 caratteri, con maiuscole, numeri e simboli.</div>
         </div>
 
 <div class="form-group">
@@ -236,8 +240,8 @@
       <div class="buttons">
         <button class="btn-next" id="btn-next" style="width:100%">Crea il mio account — è gratis</button>
       </div>
-      <div style="text-align:center;margin-top:12px;"><span style="font-size:0.9rem;color:#555;">Sei già registrato? </span><a href="login-impresa.html" style="display:inline-block;margin-left:8px;padding:9px 22px;background:#f5a800;color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;">Accedi</a></div>
-        <p style="text-align:center;font-size:13.5px;color:#666;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
+      <div style="text-align:center;margin-top:12px;"><span style="font-size:16px;color:#3d4a5c;">Sei già registrato? </span><a href="login-impresa.html" style="display:inline-block;margin-left:8px;padding:9px 22px;background:#f5a800;color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;">Accedi</a></div>
+        <p style="text-align:center;font-size:14.5px;color:#4a5a6e;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
     </div>
   </div>
 
