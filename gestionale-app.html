@@ -760,6 +760,16 @@
      funzione, non lo stato: chi la chiama legge, non scrive. */
   window.curMestiere=curMestiere;
   let cliCache=[]; /* clienti del reparto corrente, da gest_clienti (Supabase) */
+  /* ⛔ 4 settembre 2026 — I CLIENTI SENZA REPARTO SI VEDONO OVUNQUE.
+     Dal 24 agosto il Noleggio scrive i clienti nuovi SENZA mestiere_id, col
+     commento «lo vede comunque tutta l'azienda, in ogni reparto». Non era
+     vero: qui ogni lettura chiedeva .eq("mestiere_id", reparto), e un vuoto
+     non e' mai uguale a un reparto. Un cliente nato dal Noleggio non
+     compariva ne' in Clienti ne' nelle tendine di lavori, preventivi e
+     fatture. Adesso un cliente senza reparto e' un cliente DELL'AZIENDA e
+     si vede in tutti i reparti. Un posto solo per la regola: chi legge i
+     clienti di un reparto passa di qui, non riscrive il filtro. */
+  const _cliOr=m=>"mestiere_id.eq."+m+",mestiere_id.is.null";
   let dipCache=[]; /* squadra del reparto corrente: id,nome,telefono,ruolo,permessi (gest_operatori + gest_membri) */
 
   if(!window.storage){window.storage={get:async k=>{const v=localStorage.getItem(k);return v===null?null:{value:v};},set:async(k,v)=>{localStorage.setItem(k,v);return{value:v};},delete:async k=>{localStorage.removeItem(k);return{deleted:true};}};}
@@ -3992,7 +4002,7 @@
     try{
       const r=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
         sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -5189,7 +5199,7 @@
          l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
       sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere()))
     ]);
     const TUTTI=lav||[];
     lavCache=TUTTI;
@@ -5635,7 +5645,7 @@
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
     if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun cliente","Accedi per gestire i clienti.");return;}
-    const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
     cliCache=data||[];
     let L=cliCache;
     if(cliQ){
@@ -7560,7 +7570,7 @@ ${vecchi?`
     const telSec=String(contatti.telefono||"").replace(/\D/g,"");
     if(telSec){
       const {data:gia}=await sb.from("gest_clienti")
-        .select("id,telefono").eq("user_id",sbUid).eq("mestiere_id",mid).is("eliminato_il",null);
+        .select("id,telefono").eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null);
       const trovato=(gia||[]).find(c=>String(c.telefono||"").replace(/\D/g,"")===telSec);
       if(trovato)cliId=trovato.id;
     }
@@ -8046,7 +8056,7 @@ ${vecchi?`
          stato eseguito, le colonne nuove semplicemente non arrivano e la sezione
          non si rompe (stessa scelta già fatta per le pratiche). */
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
       sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
       /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache è piena
          solo se l'utente ha già aperto la sezione Pratiche, altrimenti ogni
@@ -8169,7 +8179,7 @@ ${vecchi?`
     let cl=[],mz=[];
     if(sb&&sbUid){
       const [{data:dc},{data:dm}]=await Promise.all([
-        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)).order("nome"),
         sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome")
       ]);
       cl=dc||[];mz=dm||[];
@@ -8671,7 +8681,7 @@ ${vecchi?`
   }
   async function fillClienti(selId){
     const sel=$("#j-cliente");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(c=>`<option value="${esc(c.id)}" ${c.id===selId?"selected":""}>${esc(c.nome)}</option>`).join("");
   }
   function bindSeg(id){$$("#"+id+" button").forEach(b=>b.onclick=()=>{$$("#"+id+" button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});}
@@ -10521,7 +10531,7 @@ ${vecchi?`
         /* stessa storia dell'ufficio: senza CAP, citta' e provincia l'indirizzo
            del cliente e' mezzo indirizzo, e il pin finisce dall'altra parte
            d'Italia */
-        sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+        sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).or(_cliOr(curMestiere()))
       ]);
       const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
       /* ATTENZIONE: qui la lista dei lavori NON si può chiamare L.
@@ -11584,7 +11594,7 @@ ${vecchi?`
       ((window.cestinoAttivo&&window.cestinoAttivo())
         ? sb.raw("gest_clienti").select("id,nome,eliminato_il")
         : sb.from("gest_clienti").select("id,nome")
-      ).eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      ).eq("user_id",sbUid).or(_cliOr(curMestiere()))
     ]);
     prevCache=pv||[];
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,(c.nome||"")+(c.eliminato_il?" (nel cestino)":"")]));
@@ -12329,7 +12339,7 @@ ${vecchi?`
     if(isNew&&preset)p=Object.assign({},preset);
     let cl=[],righe=[];
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");cl=data||[];
+      const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");cl=data||[];
       /* 12 agosto 2026 (sera) — serve sapere il REGIME FISCALE: un forfettario
          non mette l'IVA e non subisce la ritenuta. Prima il preventivo non
          guardava i dati dell'azienda, proponeva il 22% a tutti, e chi e' in
@@ -14915,7 +14925,7 @@ ${vecchi?`
     const mid=curMestiere();
     const [{data:lav},{data:cl},{data:ops}]=await Promise.all([
       sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
       sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
     const L=lav||[];
@@ -14988,13 +14998,35 @@ ${vecchi?`
 
     let RIF=[];
     try{
+      /* ⛔ 4 settembre 2026 — LO STESSO FILTRO DEL RIEPILOGO. Il 13 agosto
+         il filtro sul reparto era stato messo nel Riepilogo e non qui: il
+         Report contava i pieni in contanti di TUTTI i reparti, il Riepilogo
+         solo quelli di questo. Misurato: un pieno da 100 € nel reparto
+         Giardinaggio abbassava l'utile del reparto Edilizia nel Report e non
+         nel Riepilogo. Come la', si prendono anche i pieni SENZA reparto
+         (quelli registrati prima che la colonna esistesse). */
       const {data:rf}=await sb.from("gest_rifornimenti").select("importo,data,movimento_id,mezzo_id")
-        .eq("user_id",sbUid);
+        .eq("user_id",sbUid).or("mestiere_id.eq."+mid+",mestiere_id.is.null");
       RIF=(rf||[]).filter(r=>!r.movimento_id);
     }catch(e){ RIF=[]; }
     const rifIn=(chiave,lung)=>RIF.filter(r=>String(r.data||"").slice(0,lung)===chiave)
                                   .reduce((s,r)=>s+(+r.importo||0),0);
     const totRif=RIF.reduce((s,r)=>s+(+r.importo||0),0);
+
+    /* ⛔ 4 settembre 2026 — IL NOLEGGIO INTERNO ANCHE QUI. Dal 24 agosto il
+       Riepilogo conta come spesa del reparto il mezzo del tuo Noleggio dato a
+       questo reparto (nol_noleggi con mestiere_id). Il Report non lo sapeva:
+       stesso mese, due utili diversi. Stessa lettura e stessa data che conta
+       (l'uscita del mezzo), cosi' i due numeri sono uno solo. */
+    let NOL=[];
+    try{
+      const {data:nl}=await sb.from("nol_noleggi").select("importo,data_uscita")
+        .eq("user_id",sbUid).eq("mestiere_id",mid);
+      NOL=nl||[];
+    }catch(e){ NOL=[]; }
+    const nolIn=(chiave,lung)=>NOL.filter(n=>String(n.data_uscita||"").slice(0,lung)===chiave)
+                                  .reduce((s,n)=>s+(+n.importo||0),0);
+    const totNol=NOL.reduce((s,n)=>s+(+n.importo||0),0);
 
     let CM=[], CARTE=[];
     try{
@@ -15022,7 +15054,7 @@ ${vecchi?`
     const spm=mkeys.map(k=>
       SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0)
       +CM.filter(m=>String(m.data||m.created_at||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0)
-      +rifIn(k,7)+ffIn(k,7));
+      +rifIn(k,7)+ffIn(k,7)+nolIn(k,7));
     const mx=Math.max(...inc,...spm,1);
     const hBar=v=>v>0?Math.max(Math.round(v/mx*H_BAR),2):0;
     const bars=mkeys.map((k,i)=>{
@@ -15102,8 +15134,9 @@ ${vecchi?`
         <tr><td>Spese con le carte</td><td style="color:var(--testo)">−${eur(totCarte)}</td></tr>
         ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
         ${totFF?`<tr><td>Fatture dei fornitori</td><td style="color:var(--testo)">−${eur(totFF)}</td></tr>`:""}
+        ${totNol?`<tr><td>Noleggio interno <span style="font-size:13px;color:var(--testo-3)">(mezzi del tuo Noleggio)</span></td><td style="color:var(--testo)">−${eur(totNol)}</td></tr>`:""}
         ${totMD?`<tr><td>Manodopera <span style="font-size:13px;color:var(--testo-3)">(ore × costo orario)</span></td><td style="color:var(--testo)">−${eur(totMD)}</td></tr>`:""}
-        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF-totMD>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte-totRif-totFF-totMD)}</td></tr></table></div>
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF-totNol-totMD>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte-totRif-totFF-totNol-totMD)}</td></tr></table></div>
       <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per fatturato)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
       ${ruoloUtente==='professionista'?"":`

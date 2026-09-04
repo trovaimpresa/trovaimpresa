@@ -1303,7 +1303,7 @@ body:has(#ti-fondatore) .sheet--grande{
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
     const {data:nol}=await sb.from("nol_noleggi")
-      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase,cauzione,cauzione_stato")
+      .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase,cauzione,cauzione_stato,mestiere_id")
       .eq("user_id",sbUid);
     const N=nol||[], oggiN=todayStr();
     /* ⚠️ «fuori adesso» vuol dire dal cliente. Un mezzo PRENOTATO e' ancora
@@ -1323,11 +1323,20 @@ body:has(#ti-fondatore) .sheet--grande{
     scrivi("kn-liberi",MZ.filter(m=>!fuoriIds[m.id]&&m.stato!=="manutenzione"&&m.stato!=="noleggiato").length);
     /* ⚠️ «incassato» vuol dire incassato davvero: i noleggi ancora da pagare
        stanno nella casella accanto, non dentro questa. */
-    const delMese=N.filter(x=>thisMonth(x.data_uscita));
-    scrivi("kn-incasso",_eur(delMese.filter(x=>x.stato_pagamento==="pagato")
-      .reduce((s,x)=>s+(+x.importo||0),0)));
-    scrivi("kn-daincassare",_eur(N.filter(x=>x.stato_pagamento!=="pagato")
-      .reduce((s,x)=>s+(+x.importo||0),0)));
+    /* ⛔ 4 settembre 2026 — IL NOLEGGIO INTERNO NON SI INCASSA. Un mezzo
+       dato a un TUO reparto (mestiere_id pieno) e' un costo di quel reparto,
+       e il gestionale imprese lo conta gia' come spesa. Qui finiva in «Da
+       incassare» come se un cliente dovesse pagarlo: soldi che non
+       arriveranno mai da nessuno, perche' sono i tuoi. Esterni = clienti
+       veri; interni = i tuoi reparti, contati a parte, solo per saperlo. */
+    const interno=x=>!!x.mestiere_id;
+    const esterni=N.filter(x=>!interno(x));
+    const delMese=esterni.filter(x=>thisMonth(x.data_uscita));
+    const _somma=a=>a.reduce((s,x)=>s+(+x.importo||0),0);
+    scrivi("kn-incasso",_eur(_somma(delMese.filter(x=>x.stato_pagamento==="pagato"))));
+    scrivi("kn-daincassare",_eur(_somma(esterni.filter(x=>x.stato_pagamento!=="pagato"))));
+    const interniMese=_somma(N.filter(x=>interno(x)&&thisMonth(x.data_uscita)));
+    const interniAperti=_somma(N.filter(x=>interno(x)&&nolFaseDi(x)!=="rientrato"));
     /* ⛔ le cauzioni NON sono un incasso: stanno in una casella a parte
        apposta, se no il riepilogo racconta di avere soldi che deve rendere. */
     const cauApert=N.filter(x=>(+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito");
@@ -1372,10 +1381,11 @@ body:has(#ti-fondatore) .sheet--grande{
     const pagatiMese=delMese.filter(x=>x.stato_pagamento==="pagato");
     nolDett("kn-incasso",[
       {t:"Noleggi pagati",v:String(pagatiMese.length)},
-      {t:"Nel mese di",   v:mesi[new Date(oggiN+"T00:00:00").getMonth()]}
+      interniMese?{t:"Ai tuoi reparti (non si incassano)",v:_eur(interniMese)}
+                 :{t:"Nel mese di",   v:mesi[new Date(oggiN+"T00:00:00").getMonth()]}
     ],false);
 
-    const daPagare=N.filter(x=>x.stato_pagamento!=="pagato"&&(+x.importo||0)>0);
+    const daPagare=esterni.filter(x=>x.stato_pagamento!=="pagato"&&(+x.importo||0)>0);
     const vecchioNol=daPagare.slice()
       .sort((a,b)=>String(a.data_uscita||"9999").localeCompare(String(b.data_uscita||"9999")))[0];
     /* rosso solo se un noleggio non pagato e' uscito da piu' di 30 giorni:
@@ -1384,7 +1394,8 @@ body:has(#ti-fondatore) .sheet--grande{
     nolDett("kn-daincassare",[
       {t:"Noleggi da pagare",v:String(daPagare.length)},
       vecchioNol?{t:"Il pi\u00f9 vecchio",
-                  v:vecchioNol.data_uscita?fdate(vecchioNol.data_uscita):"senza data"}:null
+                  v:vecchioNol.data_uscita?fdate(vecchioNol.data_uscita):"senza data"}
+                :(interniAperti?{t:"Ai tuoi reparti (non si incassano)",v:_eur(interniAperti)}:null)
     ],nonPagatiVecchi.length>0);
 
     const daSvincolare=cauApert.filter(cauDaSvincolare);
