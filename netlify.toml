@@ -100,6 +100,16 @@
   status = 404
   force = true
 
+# ⚠️ 4 settembre 2026 — il quaderno dei lavori a meta'. Nato oggi in root, e
+# il controllo prima di pubblicare l'ha visto subito e ha fermato il deploy.
+# Dentro c'e' cosa e' rotto, cosa manca e dove si sta lavorando: la mappa
+# esatta di dove bussare.
+[[redirects]]
+  from = "/LAVORI-APERTI.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/PROMPT-sessione-nuova.md"
   to = "/404.html"

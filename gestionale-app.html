@@ -890,8 +890,25 @@
      reparto buono buttato via per una connessione storta. */
   let _repartiPuliti=false;
   async function pulisciRepartiSpariti(){
+    /* ⛔ SI CHIAMA DA DUE PUNTI, e non e' una svista.
+       Servono due cose per lavorare: sapere CHI e' l'utente (l'auth) e avere
+       in mano i reparti del browser (load()). Arrivano in ordine diverso a
+       ogni apertura: Supabase spesso risponde per primo, leggendo il gettone
+       gia' salvato, e allora `state.panels` non c'e' ancora. La prima volta
+       che manca un pezzo si esce SENZA segnare niente, cosi' la chiamata
+       dell'altro punto rifa' il giro. Se si segnasse «fatto» qui, il
+       controllo non girerebbe mai — ed e' esattamente quello che e'
+       successo il 4 settembre sul sito vero, con il banco verde. */
     if(_repartiPuliti||!sb||!sbUid||!state.panels)return;
-    const {data:mest,error}=await sb.from("gest_mestieri").select("id").eq("user_id",sbUid);
+    /* ⛔ SI LEGGE COL CESTINO APERTO (_sbTutto), non con sb.from.
+       Un reparto BUTTATO NEL CESTINO non e' un reparto sparito: si recupera
+       quando si vuole, e finche' sta li' deve restare anche nella memoria del
+       browser. sb.from salta le righe eliminate, quindi avrebbe dato per
+       morto un reparto solo cestinato. Misurato il 4 settembre sull'account
+       di Alessio: «pulizia» ed «elettricista» sono nel cestino dal 21 agosto,
+       e devono restare dove sono. Qui muore solo quello che nel database non
+       c'e' proprio piu'. */
+    const {data:mest,error}=await _sbTutto("gest_mestieri").select("id").eq("user_id",sbUid);
     if(error||!mest)return;
     _repartiPuliti=true;
     const vivi=new Set(mest.map(m=>String(m.id)));
@@ -16456,6 +16473,9 @@ ${vecchi?`
     const ps=state.panels||[];
     let id=null; try{id=localStorage.getItem(GEST_ULTIMO);}catch(e){}
     if(id&&ps.some(p=>p.id===id)) enterPanel(id);
+    /* il secondo dei due punti: adesso i reparti del browser ci sono. Se
+       l'utente non si sa ancora, questa non fa niente e ci pensa _authRefresh. */
+    pulisciRepartiSpariti();
   });
 </script>
 
