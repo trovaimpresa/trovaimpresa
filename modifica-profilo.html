@@ -132,6 +132,110 @@
     }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+  <!-- ============================================================
+       GRAFICA NUOVA — 4 settembre 2026
+       Alex: «i caratteri sono troppo chiari e piccoli, la grafica e' orrenda».
+       Questo blocco sta DOPO tutti gli altri fogli di stile apposta: cambia
+       solo l'aspetto, non tocca una riga di codice che fa funzionare la pagina.
+       Regole seguite: niente testo sotto i 15px, niente grigio chiaro sulle
+       scritte che si devono leggere, stessa famiglia della registrazione
+       (riquadro stretto, etichette scure, caselle grandi).
+       ============================================================ -->
+  <style id="ti-grafica-2026">
+    /* ---- la pagina ---- */
+    html, body { background: #eef2f7; padding: 0; }
+    .container { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+    .content { padding: 0; }
+
+    /* ---- titolo della pagina ---- */
+    .form-title {
+      font-size: 27px; font-weight: 800; color: #0a2a4d;
+      margin: 0 0 6px; padding: 0; border-bottom: none; letter-spacing: -.3px;
+    }
+    .form-title + * { margin-top: 18px; }
+
+    /* ---- il foglio bianco ---- */
+    .profilo-card-unica {
+      background: #fff; border: 1px solid #dbe3ec; border-radius: 18px;
+      box-shadow: 0 6px 22px rgba(10,42,77,.07);
+      padding: 26px 30px 30px;
+    }
+
+    /* ---- una sezione (Dati di contatto, Dati artigiano, ...) ---- */
+    .form-card { margin: 0 0 30px; padding: 0 0 26px; border-bottom: 1px solid #eef2f7; gap: 20px 24px; }
+    .form-card:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+    /* ---- il titoletto della sezione: leggibile, non piu' minuscolo ---- */
+    .card-header {
+      font-size: 17px; font-weight: 800; letter-spacing: 0; text-transform: none;
+      color: #0a2a4d; margin: 0 0 4px; padding: 0 0 0 12px;
+      border-bottom: none; border-left: 4px solid #0066ff; line-height: 1.3;
+    }
+    .card-header.arancio { border-left-color: #ff7a00; }
+
+    /* ---- etichette: scure e grandi ---- */
+    .form-group label {
+      font-size: 15.5px; font-weight: 700; color: #0f2744; margin-bottom: 8px; line-height: 1.35;
+    }
+    .required { color: #d92d20; }
+
+    /* ---- caselle: grandi, bordo che si vede, testo scuro ---- */
+    .form-group input, .form-group select, .form-group textarea {
+      font-size: 16.5px; color: #0a2a4d; padding: 13px 14px;
+      border: 1.5px solid #c9d4e3; border-radius: 10px; background: #fff;
+    }
+    .form-group input::placeholder, .form-group textarea::placeholder { color: #7c8ba1; }
+    .form-group select { cursor: pointer; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #0066ff; box-shadow: 0 0 0 4px rgba(0,102,255,.13);
+    }
+    .form-group input:disabled { background: #f1f5f9; color: #64748b; }
+    .form-group textarea { min-height: 110px; line-height: 1.55; }
+
+    /* ---- riquadro per caricare (logo, video) ---- */
+    .upload-area { border: 2px dashed #c9d4e3; border-radius: 12px; padding: 24px; background: #f8fafc; }
+    .upload-area p { font-size: 15.5px; color: #0f2744; font-weight: 600; }
+    .upload-area small { font-size: 14px; color: #64748b; }
+
+    /* ---- pastiglie e tendina della mappa ---- */
+    .tag { font-size: 14.5px; padding: 5px 13px; }
+    .tag-input { border: 1.5px solid #c9d4e3; border-radius: 10px; padding: 9px; }
+    .tag-input input { font-size: 16px; color: #0a2a4d; }
+    .map-dd-item { font-size: 15.5px; color: #0f2744; padding: 12px 14px; }
+    .map-dd-item:hover { background: #eaf2ff; }
+
+    /* ---- avvisi ---- */
+    .alert { font-size: 15.5px; padding: 14px 18px; border-radius: 12px; font-weight: 600; }
+    .loading { font-size: 16.5px; color: #475569; }
+
+    /* ---- il bottone che salva: grande, e resta sotto gli occhi ---- */
+    .btn-save {
+      font-size: 17.5px; font-weight: 800; padding: 17px; border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,102,255,.28); letter-spacing: .2px;
+    }
+    .form-footer {
+      position: sticky; bottom: 0; z-index: 20; margin-top: 24px;
+      padding: 14px 0 16px; background: linear-gradient(to top, #eef2f7 72%, rgba(238,242,247,0));
+    }
+
+    /* ---- link di servizio in fondo ---- */
+    .link-discreto { font-size: 15px; color: #475569; }
+    .link-discreto:hover { color: #0a2a4d; }
+    .link-discreto.pericolo { color: #b42318; }
+    .azioni-discrete { gap: 12px; margin: 26px 0 10px; }
+    /* la freccia «Indietro» in cima fa gia' questo lavoro */
+    .btn-back-link { display: none; }
+
+    /* ---- telefono ---- */
+    @media (max-width: 768px) {
+      .container { padding: 16px 12px 48px; }
+      .profilo-card-unica { padding: 18px 16px 22px !important; border-radius: 14px; }
+      .form-title { font-size: 23px; }
+      .card-header { font-size: 16.5px; }
+      .form-card { margin-bottom: 24px; padding-bottom: 20px; }
+      .btn-save { font-size: 17px; padding: 16px; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -1527,5 +1631,6 @@
   <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
+<script src="/js/freccia-indietro.js"></script>
 </body>
 </html>
