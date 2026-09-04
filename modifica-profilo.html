@@ -1131,7 +1131,7 @@
         setSelectValue('f-mestiere2-professionista', d.mestieri?.[1]);
         setSelectValue('f-mestiere3-professionista', d.mestieri?.[2]);
         document.getElementById('f-nome_attivita').value = d.nome_attivita || '';
-        document.getElementById('f-albo').value = d.albo || '';
+        document.getElementById('f-albo').value = d.numero_albo || '';   /* era d.albo: colonna inesistente, la casella usciva sempre vuota */
         document.getElementById('f-partita_iva-professionista').value = d.partita_iva || '';
         document.getElementById('f-anni_esperienza-professionista').value = d.anni_esperienza || '';
         document.getElementById('f-cap-professionista').value = d.cap || '';
@@ -1317,7 +1317,14 @@
               document.getElementById('f-mestiere3-professionista').value
             ].filter(Boolean))],
             nome_attivita: document.getElementById('f-nome_attivita').value.trim(),
-            albo: document.getElementById('f-albo').value.trim(),
+            /* ⛔ 4 settembre 2026 — QUI SI ROMPEVA TUTTO IL SALVATAGGIO.
+               Scriveva la colonna `albo`, che in `imprese` NON ESISTE (si chiama
+               `numero_albo`). Postgres rifiutava l'intera riga con
+               «Could not find the 'albo' column of 'imprese' in the schema cache»,
+               quindi al professionista non si salvava NIENTE: ne' zone, ne'
+               specializzazioni, ne' foto. Trovato da un'iscritta vera (architetto)
+               che ha scritto a info@trovaimpresa.com. */
+            numero_albo: document.getElementById('f-albo').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-professionista').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-professionista').value) || null,
             cap: document.getElementById('f-cap-professionista').value.trim(),
