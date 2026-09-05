@@ -22085,6 +22085,18 @@ Cosa non funzionava, senza che si vedesse:
   (bonifico, addebito) **non riceve MAI i crediti**: il codice apposta non
   accredita al primo avviso e aspetta il secondo, che non arriva
 
+✅ **ACCESI TUTTI E →7← IL 5 SETTEMBRE**, letti dalla schermata di Stripe:
+`charge.refunded`, `checkout.session.async_payment_failed`,
+`checkout.session.async_payment_succeeded`, `checkout.session.completed`,
+`customer.subscription.deleted`, `invoice.paid`,
+`invoice.payment_succeeded`.
+⚠️ Lasciati SPENTI apposta: `checkout.session.expired`,
+`customer.subscription.updated`/`.created`, e gli altri →12← di Charge. Il
+codice non li gestisce, e riceverli senza gestirli riempie il registro di
+rumore: il giorno che si cerca un guasto vero non lo si trova piu'.
+⚠️ **Chi aggiunge un `ev.type` nuovo nel webhook deve accenderlo anche su
+Stripe**, se no scrive codice che non gira mai.
+
 ⚠️ **Oggi non ha ancora fatto danni, ed e' l'unica fortuna**: letto dal
 database, →0← imprese con `premium_pagato = true` e →0← con
 `stripe_customer_id`. **Nessuno ha ancora comprato un abbonamento.** L'unico

@@ -155,7 +155,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ## ⚖️ DA DECIDERE — tocca ad Alex, Claude non decide
 
-- [5 set] ⛔ **SU STRIPE E' ACCESO →1← AVVISO SU →7←** (solo `checkout.session.completed`): rinnovi, disdette, rimborsi e pagamenti lenti **non arrivano mai**. Non ha ancora fatto danni perche' →0← imprese hanno `premium_pagato=true` e →0← hanno `stripe_customer_id`: **nessuno ha ancora comprato un abbonamento**. Servono →6← clic di Alex sul pannello Stripe — vedi CLAUDE.md
+- ✅ [5 set] **SU STRIPE ERA ACCESO →1← AVVISO SU →7←** (solo `checkout.session.completed`): rinnovi, disdette, rimborsi e pagamenti lenti non arrivavano mai. **Accesi tutti e →7← il 5 set**, controllati uno per uno sulla schermata. Non aveva ancora fatto danni: →0← imprese con `premium_pagato=true`, nessuno aveva ancora comprato un abbonamento
 - [5 set] **`Welcome Clean` (impresa →152←) risulta aver disdetto il →26 agosto← ma ha ancora `piano = premium`.** Non costa niente (ha `premium_pagato = false`, come tutti: e' un piano regalato), ma e' una riga che dice due cose diverse. Da guardare
 
 - [5 set] **La cartella `Claude outputs/` dentro il progetto** — →29← file, →3,7← MB di schermate. Non e' in `.gitignore`: un `git add -A` e finiscono online. →2← righe da aggiungere, ma il file e' di Alex
