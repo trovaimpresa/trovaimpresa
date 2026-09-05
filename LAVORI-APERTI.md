@@ -4,7 +4,7 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: sabato 5 settembre 2026 (notte) — chiusi →8← lavori (→5←, →8←, →11←, →13←, →27←, →28←, A, B)
+Ultimo aggiornamento: sabato 5 settembre 2026 — PULIZIA DELLA FILA: ogni voce rimasta controllata una per una
 
 ---
 
@@ -16,17 +16,17 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ### 🔴 Rompono qualcosa a un cliente vero
 - ✅ **1. Preventivo: gli allegati non arrivavano** — FATTO e provato dal vivo il 4 set (notte)
-- **2.** Cancellare una conversazione lato impresa cancella anche la copia del cliente · mezza giornata
-- **3.** `pannello-negozio.html` rimasto indietro (testata vecchia + copertina che non si carica)
-- **4.** Bandi & Opportunita' fermo su CORS da luglio (la Netlify Function non e' mai stata scritta)
+- ✔️ **2.** Cancellare una conversazione lato impresa cancella anche la copia del cliente — **CONTROLLATA il 5 set: ANCORA VERA.** `eliminaConversazione()` fa una DELETE diretta su `chat_messaggi` per `conversation_id`, e di `chat_nascoste` non c'e' traccia. L'unica cosa buona: il messaggio avvisa «verranno cancellati per entrambi». Mezza giornata
+- ⚖️ **3.** `pannello-negozio.html` «rimasto indietro» — **CONTROLLATO il 5 set: tutte e due le cose descritte sono GIA' A POSTO nel codice.** (1) La testata: il blocco `dash-hero` del negozio ha lo **stesso md5** di quello dell'artigiano (→5b201db8f827←), «Riposiziona» compreso — la differenza di →2← occorrenze erano →2← righe di commento. (2) La copertina: tutti e →4← i pannelli scrivono in `${impresaCorrente.user_id}/banner...`, **identico**; nessuno usa piu' l'id dell'impresa, e la regola del bucket chiede proprio `auth.uid()`. (3) Le «→4← carte del gestionale»: il negozio ha il suo `PORTE_GESTIONALE` e porta a `gestionale-negozio.html`, che e' il SUO gestionale — non e' un pezzo mancante. Le uniche sezioni diverse sono volute: il negozio ha «I miei prodotti» e «Foto» al posto di «Certificazioni» e «Foto dei lavori». ⛔ **Quello che NON si puo' fare e' la prova dal vivo: nel database ci sono →0← negozi.** Decide Alex: si crea un negozio finto per provare quel ramo (idea gia' parcheggiata), oppure la voce si chiude cosi'
+- ✅ **4.** Bandi & Opportunita' — **CHIUSA il 5 set: era gia' risolta.** La Netlify Function c'e' (`netlify/functions/importa-bandi.js`) e `importa-bandi.html` la usa. E il CORS non c'entra piu': adesso Alex scarica il JSON a mano da incentivi.gov.it e lo carica con una casella file, quindi il browser non chiama nessun sito esterno
 - ✅ **5.** Il tasto «📱 Mobile» dell'Anteprima — FATTO il 5 set: la causa era un `!important` in `css/mobile.css`, non la funzione
 
 ### 🟠 Sbagliano un numero o nascondono qualcosa
-- **6.** Il noleggio «prenotato» e' gia' contato come spesa prima che il mezzo esca
-- **7.** Difetto →11← del controllo generale del gestionale
+- ✔️ **6.** Il noleggio «prenotato» contato come spesa — **CONTROLLATA il 5 set: ANCORA VERA, e piu' precisa di come era scritta.** `gestionale-app.html` riga →4218←: `NOLR.filter(x => thisMonth(x.data_uscita))`, e la lettura (riga →4096←) prende `importo,data_uscita` **senza filtrare la fase**. Quindi conta come spesa del mese ogni noleggio la cui uscita cade in questo mese, anche se il mezzo e' ancora in piazzale. Decide Alex se un mezzo promesso ma non uscito deve pesare sull'utile
+- ⛔ **7.** «Difetto →11←» — **NON SI PUO' LAVORARCI: nessuno sa cosa sia.** Nella tabella dei →12← difetti in `CLAUDE.md` la riga →11← **non c'e'** (ci sono 1-10 e 12), e sotto c'e' scritto solo «Il →11← resta aperto». Cercato in tutto il progetto: non e' descritto da nessuna parte. O Alex se lo ricorda, o la voce va cancellata
 - ✅ **8.** Prodotti e Marchi del negozio — FATTO il 5 set: card «🧱 Cosa trovi qui» sulla scheda pubblica. ⚠️ Nel database ci sono →0← negozi: oggi non la vede nessuno
 - ✅ **A.** Le prestazioni del professionista — **FALSO ALLARME, chiusa il 5 set**: la casella ESISTE GIA', in `pannello-professionisti.html` → riquadro «🛠️ Prestazioni offerte» (`#profilo-prestazioni`), con le spunte, i comuni di competenza, albo e RC, e `salvaPrestazioniProfilo()` che scrive davvero la colonna. La voce diceva «nel pannello»: nel pannello c'e'
-- **9.** La visita non e' collegata all'iscrizione (`visite_sito.sessione` non si salva al signUp)
+- ✔️ **9.** La visita non e' collegata all'iscrizione — **CONTROLLATA il 5 set: ANCORA VERA.** `js/conta-visita.js` mette l'id di sessione in `sessionStorage` come `ti_visita`, ma nelle →4← pagine di registrazione la parola «sessione» non compare mai: al `signUp` non viene salvata
 
 ### 🟡 Due minuti a testa
 - ⚖️ **10.** Protezione password deboli — **NON SI PUO' FARE sul piano FREE**: sotto l'interruttore Supabase scrive «Only available on Pro plan and above» (Pro ~→25←$ al mese). L'avviso di sicurezza **restera' li' finche' il piano e' Free**: non e' un difetto da sistemare, e' una funzione che non c'e'. ⚠️ Fatto invece quello che il Free permette: **lunghezza minima della password da →6← a →8←** (scelta di Alex il 5 set, opzione →2← su →3←). «Password requirements» lasciato vuoto apposta: la registrazione e' stata accorciata il →4← set per non far scappare nessuno, e chiedere lettere+numeri e' attrito proprio li'. Da riprendere quando ci saranno piu' iscritti
@@ -36,9 +36,9 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ### 🔧 Attrezzi rotti — non li vede il cliente, ma ci fanno perdere difetti
 - ✅ **13.** `gestionale-config.html` — RIPRESO dalla storia di Git il 5 set (`d465677`) e rimesso a posto. Vedi sotto. // vecchia nota: TRONCATO · **guardato il 5 set: e' PEGGIO del previsto — la pagina e' MORTA DEL TUTTO** (uno `<script>` senza chiusura fa fallire tutto il blocco: niente login, niente elenchi, schermo bianco sotto il titolo). Anche la versione ONLINE e' troncata allo stesso punto, quindi il pezzo buono sta solo nella storia di Git · **aspetta il recupero da Alex**
-- **14.** Il controllo colonne-fantasma non vede `.update(variabile)`
-- **15.** `prove-claude/colonne-vere.txt` e' del →30← agosto (→15← falsi allarmi)
-- **16.** Il banco dei preventivi del →29← agosto e' scaduto (cerca `_centPerc` dove non sta piu')
+- ✔️ **14.** Il controllo colonne-fantasma non vede `.update(variabile)` — **CONTROLLATA il 5 set: ANCORA VERA, e si vede il perche'.** `prove-claude/controllo-colonne.js` riga →189←: `/\.(update|insert|upsert)\(\s*(\{|\[\s*\{)/` — pretende una **graffa** subito dopo la parentesi. `.update(dati)`, dove `dati` e' una variabile riempita con `Object.assign`, per lui non esiste. E' esattamente cosi' che il difetto della colonna `albo` e' sopravvissuto giorni
+- ✅ **15.** `colonne-vere.txt` — **RIFATTO il 5 set.** Era fermo al →30← agosto e dava **→20←** falsi allarmi (non →15←: erano cresciuti). Aggiornate `gest_mezzi`, `supporto_messaggi`, `preventivi`, `preventivi_safe`, `imprese`; tolta `nol_mezzi`, che non esiste piu'. Adesso il controllo dice «**Nessuna colonna fantasma**»
+- ✔️ **16.** Il banco dei preventivi del →29← agosto — **CONTROLLATO il 5 set: ANCORA SCADUTO, e adesso si sa perche'.** Fatto girare: **si rompe subito**. Ritaglia `calcolaParcella` e `impRiga` da `gestionale-app.html` e le fa girare da sole, ma quelle funzioni adesso usano `_cent`, `_centMult` e `_centPerc`, che stanno in `js/centesimi.js` — e il banco quel file non lo carica. Si sistema caricando `js/centesimi.js` prima, e spostando il banco in `banchi-fissi/`
 
 ### 📋 Concordati, mai iniziati
 - **17.** Domande guidate per tipo di lavoro nel modulo preventivo
