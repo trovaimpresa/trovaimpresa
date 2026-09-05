@@ -57,7 +57,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - ✅ **28.** «Bug piano free/pro binario» — CANCELLATA il 5 set: nessun confronto con `'pro'` nei →4← pannelli e tutte e →116← le imprese hanno `piano = premium`. `BACKLOG.md` svuotato
 
 ### 🆕 Nato oggi
-- **E.** ⛔ **Le →5← pagine di REGISTRAZIONE sono troncate**: finiscono a meta' tag (`...Contatti</a></foo`), senza `</footer></body></html>`. Anche ONLINE, ed era gia' cosi' prima del 5 set. Oggi non fanno danni (gli `<script>` sono tutti chiusi, quindi il codice gira e le iscrizioni funzionano; il browser chiude i tag da solo), ma e' un file tagliato e va rimesso a posto. Anche `registrazione-candidato.html`, `demo-arcade.html` e i →2← file di verifica di Google
+- ✅ **E. Le →5← pagine di REGISTRAZIONE erano troncate — RIMESSE A POSTO il 5 set.** Erano tagliate dal **→15 luglio←** (→d7ee26e← e' l'ultima versione intera): →82← salvataggi di fila hanno riscritto il file gia' monco senza che nessuno se ne accorgesse, perche' il browser i tag li chiude da solo. Mancavano `</footer>`, `modal-fullscreen.js`, `</body>` e `</html>`. ⛔ **La coda vecchia NON e' stata incollata tale e quale**: dentro c'era anche `fb-browser-bar.js`, che oggi le pagine caricano gia' piu' su nella versione `?v=2` — rimetterla avrebbe caricato lo stesso file →2← volte. Copie di com'erano in `prove-claude/tagliate-5set/`. Attrezzo nuovo: `tools/cerca-coda-buona.js` (usa solo `git log` e `git show`, non tocca l'indice). Controllo nuovo in `controllo-push.js`: **un file che finisce a meta' tag FERMA la pubblicazione** — provato sulle →5← copie tagliate (→5← rossi) e sulle →5← rimesse a posto (→5← verdi)
 - **F.** ⚖️ **Il profilo finto «Admin TrovaImpresa» (impresa →36←) NON e' segnato come profilo di prova** (`is_test = false`): quindi finisce nella sitemap delle schede mandata a Google, in mezzo alle imprese vere, e adesso anche in quella delle recensioni con la recensione che Alex ha scritto a se stesso. Basta metterlo `is_test = true` e sparisce da ricerche, mappa, pagine citta' e sitemap. **Decide Alex**
 
 - **D.** Cancellando una richiesta di preventivo, i suoi **allegati restano nel magazzino**: sul bucket non c'e' nessun permesso di cancellazione
@@ -119,6 +119,8 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 9. [set] **Collegare l'agente del lunedì alle skill nuove** man mano che si aggiungono
 
 ## ⚖️ DA DECIDERE — tocca ad Alex, Claude non decide
+
+- [5 set] **`demo-arcade.html` non e' una pagina, e' un PEZZO di pagina** (una `<section>` con dentro la demo Arcade), e **nessuna pagina del sito la usa**. Non era troncata: era nata cosi'. Sta online da sola, e chi ci arriva vede una demo senza intestazione, senza menu e senza footer. Decide Alex: **si incolla dentro una pagina vera** (tipo `perche-registrarsi.html`), **oppure si butta**
 
 - **Il logo di TrovaImpresa nella barra della scheda pubblica** viene sostituito dal logo dell'impresa · per Alex «il visitatore perde il riferimento» · fare due foto affiancate e scegliere
 - **Gli orari**: colonna vuota su tutte le imprese · prima contare dal DB quante ne hanno uno, poi figura con le due strade (riempire / togliere)

@@ -21531,3 +21531,39 @@ aperture e →17← chiusure, `</html>` al suo posto. Il file era stato letto
 ⚠️ Prima di correre a «recuperare da Git» un file grosso, **rilanciare il
 controllo**. Un rosso che sparisce da solo era una lettura a meta', non un
 file rotto.
+
+## LE →5← PAGINE DI REGISTRAZIONE ERANO TAGLIATE DAL →15← LUGLIO (5 set)
+Finivano a meta' tag: `...Contatti</a></foo`. Mancavano `</footer>`,
+`<script src="/js/modal-fullscreen.js">`, `</body>` e `</html>`.
+L'ultima versione intera in Git e' **→d7ee26e←, del →15 luglio 2026←**: dopo
+di quella **→82← salvataggi** hanno riscritto il file gia' monco senza che
+nessuno se ne accorgesse.
+
+⛔ **Perche' nessuno se n'era accorto**: il browser i tag li chiude da solo.
+La pagina si vedeva bene, le iscrizioni funzionavano. Un file tagliato **non
+si presenta come rotto**: si presenta come funzionante finche' qualcuno non
+ci aggiunge uno `<script>` in fondo — e allora muore, come e' morta
+`gestionale-config.html`.
+
+⛔ **La coda vecchia NON si incolla tale e quale.** Dentro c'era anche
+`fb-browser-bar.js`, che oggi le pagine caricano gia' piu' su nella versione
+`?v=2`: rimetterla avrebbe caricato lo stesso file →2← volte. **Recuperare un
+pezzo dalla storia vuol dire confrontarlo con l'oggi, non copiarlo.**
+
+**L'attrezzo**: `node tools/cerca-coda-buona.js` — per ogni pagina monca
+cerca nella storia l'ultima versione che finisce con `</html>` e stampa il
+pezzo tagliato; scrive tutto in `prove-claude/coda-trovata.txt`.
+⚠️ Usa **solo `git log` e `git show`**, che leggono e basta: non toccano
+l'indice, non possono creare nessun `index.lock`. Nessun `git status`.
+
+**Il controllo perche' non ricapiti** (in `tools/controllo-push.js`): se
+l'ULTIMO `<` del file non ha il suo `>`, il file e' monco e **la
+pubblicazione si ferma**. Provato sulle →5← copie tagliate (`prove-claude/
+tagliate-5set/`): →5← rossi. Sulle →5← rimesse a posto: →5← verdi. Su
+`demo-arcade.html`, che e' un pezzo di pagina e finisce con un tag chiuso:
+nessun falso allarme.
+
+⚠️ **`demo-arcade.html` non era troncata: e' nata cosi'.** Non e' una pagina,
+e' una `<section>` da incollare dentro un'altra pagina — e nessuna pagina la
+usa. I →2← file `google*.html` sono verifiche di Google: una riga di testo,
+non HTML. Nessuno dei tre e' un difetto.

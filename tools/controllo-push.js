@@ -312,6 +312,21 @@ function controllaPagineTroncate(){
               + 'va ripreso dall\'ultima versione buona, non indovinato');
     }
 
+    // ⛔ IL FILE FINISCE A META' TAG. Questo non e' un avviso, e' un errore:
+    // un `<` senza il suo `>` vuol dire che la scrittura si e' interrotta a
+    // meta'. E' cosi' che le →5← pagine di registrazione sono rimaste
+    // tagliate dal →15← luglio al →5← settembre senza che nessuno se ne
+    // accorgesse: il browser chiude i tag da solo, quindi la pagina sembra
+    // sana. Guardo solo l'ULTIMO `<` del file: se dopo non c'e' un `>`,
+    // il file e' monco. Non da' falsi allarmi sui pezzi di pagina (tipo
+    // demo-arcade.html), che finiscono con un tag chiuso.
+    const ultimo = t.lastIndexOf('<');
+    if (ultimo > -1 && t.indexOf('>', ultimo) === -1){
+      errore(f, 'il file FINISCE A META\' TAG (...' + t.slice(ultimo).trim().slice(0, 30)
+              + '): la scrittura si e\' interrotta. Riprendilo dall\'ultima versione '
+              + 'buona con  node tools/cerca-coda-buona.js  — non indovinare la coda');
+    }
+
     // e la chiusura della pagina. Solo un avviso: una pagina senza </html>
     // il browser la chiude da sola e funziona lo stesso — ma e' il segno che
     // qualcosa e' stato tagliato, ed e' cosi' che si nasconde un file troncato.
