@@ -683,6 +683,9 @@ function renderNav(){
   $("#nav-scadenze").classList.toggle("active",curView==="scadenze");
   $("#nav-fatture").classList.toggle("active",curView==="fatture");
   applicaPermessi();
+  /* 5 set 2026 — le parole del mestiere: adesso `MIO.tipoStudio` si sa, quindi
+     si riscrivono le scritte gia' stampate nell'HTML (vedi PAROLE / _p()). */
+  adattaParole();
 }
 
 /* ===== avvio ===== */
@@ -718,6 +721,9 @@ async function boot(session){
     const {data:t}=await sb.rpc("gest_tipo_impresa",{_impresa:MIO.impresaId});
     MIO.tipoStudio=t||null;
   }catch(_){MIO.tipoStudio=null;}
+  /* appena si sa il mestiere, le scritte si adattano: qui e non piu' tardi,
+     se no la prima schermata si vede per un attimo con le parole sbagliate */
+  adattaParole();
   MIO.operatoreId=membri[0].operatore_id;
   MIO.ruolo=membri[0].ruolo;
   if(MIO.operatoreId){
@@ -939,6 +945,72 @@ function statoBadge(s){
   if(v.includes("fatt")||v.includes("complet"))return'<span class="badge b-fatto">Fatto</span>';
   if(v.includes("corso"))return'<span class="badge b-corso">In corso</span>';
   return'<span class="badge b-dafare">Da fare</span>';
+}
+/* ============================================================
+   ⛔ 5 SETTEMBRE 2026 — LE PAROLE CAMBIANO COL MESTIERE
+   ============================================================
+   Trovato facendo il giro sui →4← ruoli: il motore andava per tutti, ma le
+   SCRITTE erano da muratore. Un geometra che apre l'app per segnare →6← ore su
+   una CILA leggeva «Cosa avete usato — Es. 3 sacchi di premiscelato, 20 m di
+   tubo, mezzo bancale di laterizi», e un commesso di ferramenta pure.
+   Non si rompeva niente: ma la prima impressione era che l'app non fosse per lui.
+
+   ⚠️ LE PAROLE STANNO QUI DENTRO, E SOLO QUI. E' la stessa regola gia' scritta
+   per il gestionale del capo il →22← agosto («la parola del lavoro sta in un
+   posto solo»): chi la deve SCRIVERE la chiede a `_p()`, chi la deve
+   RISCRIVERE nell'HTML gia' stampato lo fa in `adattaParole()`.
+   Rincorrere le scritte una per una non funziona: la volta dopo se ne dimentica
+   una, ed e' esattamente come e' nato questo difetto.
+   ⚠️ Il ruolo si sa solo DOPO la lettura del database (`gest_tipo_impresa`),
+   quindi `adattaParole()` gira quando l'app si accende, non prima.
+   ============================================================ */
+const PAROLE={
+  _:{  cosaUsato:"Cosa avete usato",
+       subOre:"Le tue ore su questo lavoro",
+       esUsato:"Es. 3 sacchi di premiscelato, 20 m di tubo, mezzo bancale di laterizi…",
+       esUsatoCorto:"Es. 3 sacchi di premiscelato, 20 m di tubo",
+       subMateriale:"Cosa avete consumato (senza prezzi)",
+       subSpesa:"Soldi usciti per questo lavoro",
+       nessunLavoro:"Non hai nessun lavoro assegnato. Chiedi al capo di metterti su un lavoro.",
+       esDettato:"Es. oggi io e Marco otto ore, finito l’intonaco della scala. Comprati due sacchi di premiscelato, 42,50." },
+  professionista:{
+       cosaUsato:"Su cosa hai lavorato",
+       subOre:"Le tue ore su questa pratica",
+       esUsato:"Es. sopralluogo, rilievo dell’appartamento, deposito della pratica in Comune…",
+       esUsatoCorto:"Es. rilievo, deposito in Comune",
+       subMateriale:"Su cosa hai lavorato",
+       subSpesa:"Soldi usciti per questa pratica",
+       nessunLavoro:"Non hai nessuna pratica assegnata. Chiedi in studio di metterti su una pratica.",
+       esDettato:"Es. oggi quattro ore, rilievo dell’appartamento e deposito della CILA. Pagati 32 euro di diritti." },
+  negozio:{
+       cosaUsato:"Cosa hai fatto",
+       subOre:"Le tue ore di oggi",
+       esUsato:"Es. scarico bancali, riordino del magazzino, carico furgone del cliente…",
+       esUsatoCorto:"Es. scarico bancali, riordino magazzino",
+       subMateriale:"Cosa hai fatto in negozio",
+       subSpesa:"Soldi usciti per il negozio",
+       nessunLavoro:"Non hai nessun lavoro assegnato. Chiedi al titolare di assegnartene uno.",
+       esDettato:"Es. oggi sei ore, scaricato due bancali e riordinato il magazzino. Comprato nastro, 12,50." }
+};
+function _p(k){
+  const mio=PAROLE[MIO.tipoStudio];
+  return (mio && mio[k]) || PAROLE._[k];
+}
+/* riscrive quello che nell'HTML e' gia' stampato */
+function adattaParole(){
+  try{
+    document.querySelectorAll('#lv-rap-box .label').forEach(function(e){
+      if(e.textContent.trim()==="Cosa avete usato")e.textContent=_p('cosaUsato');
+    });
+    const ta=document.getElementById('rap-materiali');
+    if(ta)ta.setAttribute('placeholder',_p('esUsato'));
+    /* la nota sotto il riquadro parla di prezzi contati due volte: vale per
+       tutti, ma per lo studio «le cose» diventa «quello che hai fatto» */
+    if(MIO.tipoStudio==='professionista'){
+      const n=document.querySelector('#lv-rap-box .rap-nota');
+      if(n)n.innerHTML="Scrivi <b>quello che hai fatto</b>, non i costi. Quanto sono costati lo sa gi\u00e0 il gestionale dalle spese e dalle fatture: se li riscrivessi qui verrebbero contati due volte.";
+    }
+  }catch(_){}
 }
 function etic(s){
   if(MIO.tipoStudio!=='professionista')return s;
@@ -1225,11 +1297,19 @@ const RV={passo:0,tipo:null,lavoro:null,ore:8,testo:"",importo:"",
 const RV_TIPI=[
   {k:"voce",      lab:"🎙 Racconta la giornata",
                                    sub:"Parla e basta: ore, materiali e spese insieme", perm:"rapportini"},
-  {k:"ore",       lab:"Ore",       sub:"Le tue ore su questo lavoro",              perm:"rapportini"},
-  {k:"materiale", lab:"Materiale", sub:"Cosa avete consumato (senza prezzi)",      perm:"rapportini"},
+  {k:"ore",       lab:"Ore",       sub:null,                                       perm:"rapportini"},
+  /* ⚠️ 5 set 2026: le sub di «Materiale» e «Spesa» le decide il mestiere, e si
+     leggono al momento di disegnare (il ruolo si sa solo dopo il database). */
+  {k:"materiale", lab:"Materiale", sub:null,                                       perm:"rapportini"},
   {k:"nota",      lab:"Nota",      sub:"Un appunto sulla giornata",                perm:"rapportini"},
-  {k:"spesa",     lab:"Spesa",     sub:"Soldi usciti per questo cantiere",         perm:"pagamenti"}
+  {k:"spesa",     lab:"Spesa",     sub:null,                                       perm:"pagamenti"}
 ];
+function _rvSub(t){
+  if(t.k==="ore")return _p('subOre');
+  if(t.k==="materiale")return _p('subMateriale');
+  if(t.k==="spesa")return _p('subSpesa');
+  return t.sub;
+}
 
 function rvChiudi(){ $("#rv-ov").classList.add("hidden"); RV.passo=0; }
 function rvApri(){
@@ -1286,7 +1366,7 @@ function rvDisegna(){
       corpo.innerHTML='<div class="rv-nota">Il capo non ti ha dato nessun permesso per segnare le cose da qui. Servono «Rapportini» oppure «Pagamenti».</div>';
       return;
     }
-    corpo.innerHTML=usabili.map(t=>'<button type="button" class="rv-scelta" data-tipo="'+t.k+'">'+esc(t.lab)+'<small>'+esc(t.sub)+'</small></button>').join("");
+    corpo.innerHTML=usabili.map(t=>'<button type="button" class="rv-scelta" data-tipo="'+t.k+'">'+esc(t.lab)+'<small>'+esc(_rvSub(t))+'</small></button>').join("");
     return;
   }
 
@@ -1294,7 +1374,7 @@ function rvDisegna(){
     tit.textContent="Su quale lavoro?";
     const lv=rvLavori();
     if(!lv.length){
-      corpo.innerHTML='<div class="rv-nota">Non hai nessun lavoro assegnato. Chiedi al capo di metterti su un cantiere.</div>';
+      corpo.innerHTML='<div class="rv-nota">'+esc(_p('nessunLavoro'))+'</div>';
       return;
     }
     const bottone=function(l){
@@ -1326,7 +1406,7 @@ function rvDisegna(){
     corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' · oggi</div>'
       /* il testo si ritrova tornando indietro: chi ha appena dettato tre righe
          in piedi su un ponteggio non le ridetta perche' ha premuto la freccia */
-      +'<textarea class="rv-in" id="rv-detto" rows="5" placeholder="Es. oggi io e Marco otto ore, finito l’intonaco della scala. Comprati due sacchi di premiscelato, 42,50.">'+esc(RV.detto||"")+'</textarea>'
+      +'<textarea class="rv-in" id="rv-detto" rows="5" placeholder="'+esc(_p('esDettato'))+'">'+esc(RV.detto||"")+'</textarea>'
       +'<div class="rv-mic">🎙 <b>Non scrivere: parla.</b> Tocca qui sopra, poi sulla tastiera del telefono tieni premuto il tasto del <b>microfono</b> e racconta com’è andata. Le parole compaiono da sole.</div>'
       +'<button type="button" class="rv-ok" id="rv-pensa">Fammi vedere cosa hai capito</button>'
       +'<div class="rv-nota">Costa 1 credito AI dell’impresa. Dopo puoi correggere tutto: niente viene salvato finché non confermi tu.</div>';
@@ -1345,9 +1425,9 @@ function rvDisegna(){
   }
   if(RV.tipo==="materiale"||RV.tipo==="nota"){
     const m=RV.tipo==="materiale";
-    tit.textContent=m?"Cosa avete usato?":"Cosa scrivi?";
+    tit.textContent=m?(_p('cosaUsato')+"?"):"Cosa scrivi?";
     corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' \u00b7 oggi</div>'
-      +'<textarea class="rv-in" id="rv-testo" rows="3" placeholder="'+(m?"Es. 3 sacchi di premiscelato, 20 m di tubo":"Es. pioggia, fermi due ore")+'"></textarea>'
+      +'<textarea class="rv-in" id="rv-testo" rows="3" placeholder="'+esc(m?_p('esUsatoCorto'):"Es. pioggia, fermi due ore")+'"></textarea>'
       +'<button type="button" class="rv-ok" id="rv-ok">Conferma</button>'
       +(m?'<div class="rv-nota">Scrivi le cose, non i prezzi: quelli stanno nelle spese, se no vengono contati due volte.</div>':'');
     return;
