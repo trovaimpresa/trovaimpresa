@@ -1223,6 +1223,17 @@ body:has(#ti-fondatore) .sheet--grande{
       const r=document.querySelector('nav.tabs button[data-tab="riepilogo"]');
       if(r){r.click();return;}
     }
+    /* ⛔ 5 settembre 2026 — IL BIGLIETTINO DEL RIENTRO.
+       Da oggi gestionale-app.html, quando lo si APRE, mostra la schermata dei
+       reparti invece di rientrare nell'ultimo reparto (chiesto da Alessio con
+       due fotografie). Ma chi torna DA QUI ci vuole rientrare, dentro, dov'era:
+       e' la richiesta del →23← agosto («quando esco dal noleggio mi fa uscire
+       completamente»). Quindi si lascia un bigliettino con l'ora: gestionale-app
+       lo legge, e se e' fresco (meno di →10← secondi) rientra nel reparto.
+       ⚠️ Serve anche per la strada `history.back()` qui sotto: tornando
+       indietro nella storia il `document.referrer` NON e' questa pagina, quindi
+       senza il bigliettino il rientro non si riconoscerebbe. */
+    try{sessionStorage.setItem("gest_rientro",String(Date.now()));}catch(e){}
     /* si esce: si torna da dove si e' arrivati, se si sa. Se no, al gestionale. */
     try{
       if(document.referrer && new URL(document.referrer).origin===location.origin

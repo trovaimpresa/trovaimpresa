@@ -16557,6 +16557,46 @@ ${vecchi?`
   if($("#forn-doc-file"))$("#forn-doc-file").onchange=e=>{uploadDocFornitore(e.target.files);e.target.value="";};
   if($("#lav-doc-file"))$("#lav-doc-file").onchange=e=>{uploadDocLavoro(e.target.files);e.target.value="";};
 
+  /* ============================================================
+     ⛔ 5 SETTEMBRE 2026 — APRENDO IL GESTIONALE SI VEDE LA SCHERMATA
+        DEI REPARTI, NON L'ULTIMO REPARTO DI IERI
+     ============================================================
+     Alessio, con due fotografie: «ogni volta che apro il gestionale si apre
+     questa finestra (dentro il reparto «progetto casa», sezione Assistenza
+     diretta), invece si deve aprire quella dei reparti».
+     ⚠️ NON si toglie la memoria dell'ultimo reparto: il →23← agosto era
+     stata messa apposta, perche' uscendo dal NOLEGGIO si finiva sulla
+     schermata dei reparti e Alessio disse «mi fa uscire completamente».
+     Le due cose non litigano se si distingue COME si e' arrivati qui:
+       · si ARRIVA DA UN'ALTRA PAGINA DEL GESTIONALE (noleggio, negozio,
+         config, operatore) -> si rientra dritti dov'era: e' un rientro.
+       · si APRE il gestionale (dal pannello, da un preferito, scrivendo
+         l'indirizzo, dalla barra FONDATORE) -> schermata dei reparti.
+       · c'e' un link diretto con il cancelletto (#preventivi) -> comanda
+         quello, come prima, se no il link non aprirebbe piu' niente.
+     Cosi' l'ultimo reparto resta scritto (`gest_ultimo_reparto`) e la
+     freccia «Indietro» continua a funzionare come sempre. */
+  /* ⚠️ IL BIGLIETTINO HA UNA SCADENZA (→10← secondi), e non e' un vezzo.
+     Chi torna dal Noleggio ci arriva con `history.back()`: se il browser
+     ripesca la pagina dalla memoria (bfcache) questo codice non gira
+     nemmeno, e il bigliettino resterebbe scritto. Mezz'ora dopo, aprendo
+     il gestionale da zero nella stessa scheda, quel bigliettino vecchio lo
+     rispedirebbe dentro al reparto — cioe' esattamente il difetto che
+     stiamo togliendo. Con la scadenza un bigliettino vecchio non vale. */
+  function _rientroDaGestionale(){
+    try{
+      const t=parseInt(sessionStorage.getItem("gest_rientro")||"0",10);
+      sessionStorage.removeItem("gest_rientro");
+      if(t && (Date.now()-t) < 10000) return true;
+    }catch(e){}
+    try{
+      if(!document.referrer) return false;
+      const u=new URL(document.referrer);
+      if(u.origin!==location.origin) return false;
+      return /gestionale-(noleggio|negozio|config|operatore)/.test(u.pathname);
+    }catch(e){ return false; }
+  }
+
   load().then(()=>{
     if(cur) return;
     renderLanding();
@@ -16564,7 +16604,7 @@ ${vecchi?`
        disegnata sotto, cosi' la freccia trova gia' tutto pronto. */
     const ps=state.panels||[];
     let id=null; try{id=localStorage.getItem(GEST_ULTIMO);}catch(e){}
-    if(id&&ps.some(p=>p.id===id)) enterPanel(id);
+    if(id&&ps.some(p=>p.id===id)&&(_deepTab||_rientroDaGestionale())) enterPanel(id);
     /* il secondo dei due punti: adesso i reparti del browser ci sono. Se
        l'utente non si sa ancora, questa non fa niente e ci pensa _authRefresh. */
     pulisciRepartiSpariti();
