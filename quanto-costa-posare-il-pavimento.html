@@ -95,10 +95,11 @@
   .result .hint{font-size:14px;opacity:.9}
   .cta-group{display:flex;flex-direction:column;gap:10px;margin-top:18px}
   .cta{display:block;text-align:center;padding:15px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
-  .cta-primary{background:#fff;color:var(--primary-dark);border:2px solid #fff}
-  .cta-primary:hover{background:var(--primary-soft)}
-  .cta-secondary{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6)}
-  .cta-secondary:hover{border-color:#fff}
+  .cta-primary{background:var(--primary);color:#fff;border:2px solid var(--primary)}
+  .cta-primary:hover{background:var(--primary-dark)}
+  .cta-secondary{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+  .cta-secondary:hover{background:var(--primary-soft)}
+  .campo-citta-cta input{width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;color:var(--text);background:#fff}
   .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
   .cta-band h3{margin-top:0;color:var(--primary-dark)}
   .cta-band .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px}
@@ -610,5 +611,6 @@
      su una ricerca VUOTA che chiedeva di ridigitare la città: il lettore aveva
      appena letto il prezzo ed era il momento buono per farlo entrare. -->
 <script src="/js/citta-obbligatoria.js"></script>
+  <script src="/js/citta-calcolatore.js" defer></script>
 </body>
 </html>
