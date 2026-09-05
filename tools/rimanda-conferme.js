@@ -31,12 +31,30 @@
  *   node tools/rimanda-conferme.js --invia    → manda davvero
  *
  * Parte in modo innocuo apposta: si guarda la lista, poi si decide.
- * Fra una mail e l'altra aspetta 6 secondi, se no Supabase blocca per
- * troppe richieste.
+ * Fra una mail e l'altra aspetta 6 secondi.
+ *
+ * ⏳ IL TETTO DELLE MAIL ALL'ORA (aggiunto il 6 settembre 2026)
+ * Supabase ha un tetto di mail di conferma per ora. Prima, superato il
+ * tetto, il programma scriveva ERRORE accanto alla persona e passava
+ * oltre: quella persona restava fuori e nessuno se ne accorgeva. Adesso
+ * quando Supabase risponde 429 il programma NON lo conta come errore:
+ * aspetta 1, poi 5, 15, 30, 60 minuti e riprova con la stessa persona.
+ * Basta lasciare la finestra aperta.
+ *
+ * 📓 E si segna chi ha gia' ricevuto, in tools/conferme-mandate.txt: se il
+ * programma si ferma a meta' e lo rilanci, riparte da dove era rimasto e
+ * a nessuno arrivano due mail uguali. Il file resta sul PC (.gitignore).
+ *
+ * ALTRE DUE PAROLE CHE PUOI AGGIUNGERE
+ *   --quante 3   ne manda solo 3, per vedere se il tetto le lascia passare
+ *   --tutti      rimanda anche a chi risulta gia' servito nel quaderno
  *
  * ⚠️ La chiave si chiude quando chiudi la finestra di PowerShell. E'
  * voluto: cosi' non resta scritta da nessuna parte.
  */
+
+const fs = require('fs');
+const path = require('path');
 
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -97,6 +115,17 @@ const SPIEGAZIONE = [
 const INVIA = process.argv.includes('--invia');
 const PAUSA_MS = 6000;
 
+/* --tutti  = rimanda anche a chi ha gia' ricevuto in un giro precedente
+   --quante N = ne fa solo le prime N (per provare il tetto senza rischiare) */
+const DIMENTICA = process.argv.includes('--tutti');
+function quanteChieste(argv) {
+  const i = (argv || []).indexOf('--quante');
+  if (i < 0) return 0;
+  const n = parseInt(argv[i + 1], 10);
+  return (isFinite(n) && n > 0) ? n : 0;
+}
+const QUANTE = quanteChieste(process.argv);
+
 function cifre(s) { return String(s || '').replace(/\D/g, ''); }
 function coda9(s) { const c = cifre(s); return c.length >= 9 ? c.slice(-9) : ''; }
 function piva(s) { const c = cifre(s); return c.length === 11 ? c : ''; }
@@ -125,12 +154,59 @@ async function rimanda(email) {
     headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ type: 'signup', email })
   });
-  if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 160)}`);
-  return true;
+  if (r.ok) return { ok: true, stato: r.status, testo: '' };
+  return { ok: false, stato: r.status, testo: (await r.text()).slice(0, 160) };
 }
 
 function giorni(iso) {
   return Math.round((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+
+/* ---------- IL TETTO DELLE MAIL ALL'ORA (6 set 2026) ----------
+   Supabase non manda mail all'infinito: c'e' un tetto per ora, e quando lo
+   superi risponde 429. NON e' un errore nostro e NON e' una mail persa:
+   vuol dire «riprova piu' tardi». Quindi si aspetta e si riprova, invece
+   di scrivere ERRORE e passare oltre lasciando fuori la persona. */
+const ATTESE_MIN = [1, 5, 15, 30, 60];
+
+function eTetto(stato, testo) {
+  if (Number(stato) === 429) return true;
+  return /rate limit|too many|over_email_send/i.test(String(testo || ''));
+}
+
+function quantoAspettareMin(tentativo) {
+  const n = Math.max(1, Math.min(Number(tentativo) || 1, ATTESE_MIN.length));
+  return ATTESE_MIN[n - 1];
+}
+
+/* ---------- IL QUADERNO DI CHI HA GIA' RICEVUTO ----------
+   Il programma puo' fermarsi a meta' (tetto, corrente, finestra chiusa).
+   Al giro dopo, chi ha gia' ricevuto viene saltato: a nessuno arrivano due
+   mail uguali. Il file resta sul PC — dentro ci sono le email degli
+   iscritti e non deve finire su Git (sta in .gitignore). */
+const FILE_MANDATE = path.join(__dirname, 'conferme-mandate.txt');
+
+function leggiMandate(testo) {
+  const fatte = new Map();
+  for (const riga of String(testo || '').split('\n')) {
+    const p = riga.trim().split(/\s+/);
+    if (p.length >= 2 && p[1].indexOf('@') > 0) fatte.set(p[1].toLowerCase(), p[0]);
+  }
+  return fatte;
+}
+
+function rigaMandata(email, quando) {
+  return (quando || new Date().toISOString()) + ' ' + String(email).toLowerCase();
+}
+
+function mandateDalFile() {
+  try { return leggiMandate(fs.readFileSync(FILE_MANDATE, 'utf8')); }
+  catch (e) { return new Map(); }
+}
+
+function segnaMandata(email) {
+  try { fs.appendFileSync(FILE_MANDATE, rigaMandata(email) + '\n', 'utf8'); }
+  catch (e) { console.log('  (non sono riuscito a scrivere il quaderno: ' + e.message + ')'); }
 }
 
 // Parte solo se lo lanci tu con `node tools/rimanda-conferme.js`.
@@ -169,29 +245,69 @@ async function main() {
     console.log('');
   }
 
+  /* chi ha gia' ricevuto in un giro precedente non lo richiamo */
+  const mandate = DIMENTICA ? new Map() : mandateDalFile();
+  const gia = daFare.filter(x => mandate.has(String(x.email).toLowerCase()));
+  let restano = daFare.filter(x => !mandate.has(String(x.email).toLowerCase()));
+
+  if (gia.length) {
+    console.log('GIA\' RICEVUTA in un giro precedente (le salto):');
+    for (const x of gia) {
+      const quando = String(mandate.get(String(x.email).toLowerCase())).slice(0, 10);
+      console.log(`  - ${x.nome} · ${x.email} · mandata il ${quando}`);
+    }
+    console.log('');
+  }
+
+  if (QUANTE && QUANTE < restano.length) {
+    console.log(`⚠️  --quante ${QUANTE}: di ${restano.length} ne faccio solo le prime ${QUANTE}.\n`);
+    restano = restano.slice(0, QUANTE);
+  }
+
   console.log(INVIA ? 'INVIO IN CORSO:' : 'ELENCO (non sto mandando niente — aggiungi --invia per mandare davvero):');
-  let ok = 0, ko = 0;
-  for (const s of daFare) {
+  let ok = 0, ko = 0, minutiAspettati = 0;
+  for (const s of restano) {
     const riga = `  ${s.nome} · ${s.citta} · ${s.email} · iscritto ${giorni(s.created_at)} giorni fa`;
     if (!INVIA) { console.log(riga); continue; }
-    try {
-      await rimanda(s.email);
-      ok++;
-      console.log(`  OK    ${riga.trim()}`);
-    } catch (e) {
+
+    for (let tentativo = 1; tentativo <= ATTESE_MIN.length + 1; tentativo++) {
+      const esito = await rimanda(s.email);
+      if (esito.ok) {
+        ok++;
+        segnaMandata(s.email);
+        console.log(`  OK    ${riga.trim()}`);
+        break;
+      }
+      if (eTetto(esito.stato, esito.testo) && tentativo <= ATTESE_MIN.length) {
+        const min = quantoAspettareMin(tentativo);
+        minutiAspettati += min;
+        console.log(`  ⏳ Supabase dice: troppe mail in poco tempo (${esito.stato}). Non e' un errore e non e' una mail persa.`);
+        console.log(`     Aspetto ${min} minuti e riprovo con ${s.email} (tentativo ${tentativo} di ${ATTESE_MIN.length}). Lascia la finestra aperta.`);
+        await new Promise(r => setTimeout(r, min * 60000));
+        continue;
+      }
       ko++;
-      console.log(`  ERRORE ${s.email} → ${e.message}`);
+      console.log(`  ERRORE ${s.email} → ${esito.stato} ${esito.testo}`);
+      break;
     }
     await new Promise(r => setTimeout(r, PAUSA_MS));
   }
 
   if (INVIA) {
-    console.log(`\nFatto. Mandate: ${ok} · Errori: ${ko}`);
+    console.log(`\nFatto. Mandate: ${ok} · Errori: ${ko}`
+      + (minutiAspettati ? ` · minuti passati ad aspettare il tetto: ${minutiAspettati}` : ''));
+    const ancora = restano.length - ok;
+    if (ancora > 0) {
+      console.log(`⚠️  Ne restano ${ancora} senza mail: rilancia lo stesso comando quando vuoi.`);
+      console.log('   Chi ha gia\' ricevuto viene saltato da solo (quaderno: tools/conferme-mandate.txt).');
+    }
     console.log('Chi clicca il link torna visibile sul sito da solo, senza rilanciare niente.');
     console.log('Ricordati poi: node genera-imprese-citta.js per rimetterli nelle pagine citta.');
   } else {
-    console.log(`\nSarebbero ${daFare.length} mail. Per mandarle davvero:`);
+    console.log(`\nSarebbero ${restano.length} mail. Per mandarle davvero:`);
     console.log('  node tools/rimanda-conferme.js --invia');
+    console.log('Per provarne prima solo 3, e vedere se il tetto di Supabase le lascia passare:');
+    console.log('  node tools/rimanda-conferme.js --invia --quante 3');
   }
 }
 
@@ -199,4 +315,6 @@ if (require.main === module) {
   main().catch(e => { console.error('\nSi e\' fermato:', e.message); process.exit(1); });
 }
 
-module.exports = { gemellaConfermata, coda9, piva, chiaveDiServizio, ruoloDellaChiave, intestazioniLettura };
+module.exports = { gemellaConfermata, coda9, piva, chiaveDiServizio, ruoloDellaChiave, intestazioniLettura,
+                   eTetto, quantoAspettareMin, leggiMandate, rigaMandata, quanteChieste, ATTESE_MIN,
+                   rimanda };

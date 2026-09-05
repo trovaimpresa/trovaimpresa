@@ -55,3 +55,7 @@ _to_delete/
 tools/backup-chiavi.txt
 #     Le copie di sicurezza restano sul PC: sono i dati veri dei clienti.
 backup/backup-*/
+
+# --- Il quaderno di chi ha gia' ricevuto la mail di conferma (6 set 2026) ---
+#     Dentro ci sono le email degli iscritti: resta sul PC.
+tools/conferme-mandate.txt
