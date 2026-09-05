@@ -47,6 +47,77 @@ const { createClient } = require('@supabase/supabase-js');
 // prende nota dell'incasso. NON LANCIA MAI: qualunque cosa vada storta
 // qui dentro, chi ha pagato deve andare avanti lo stesso.
 // ---------------------------------------------------------------------
+// =====================================================================
+// L'ALLARME AD ALESSIO                              5 settembre 2026
+// =====================================================================
+// ⛔ Prima queste tre `update` non leggevano la risposta. Se una falliva,
+// il cliente aveva PAGATO e il gestionale (o il Premium) non gli si
+// accendeva — e non lo sapeva nessuno: ne' lui, ne' Alessio. Il log di
+// Netlify lo si guarda dopo, e «dopo» qui vuol dire un cliente che ha
+// pagato e aspetta.
+//
+// Adesso succedono due cose insieme:
+//   1. si risponde ERRORE a Stripe, che riprova da solo per ~3 giorni
+//      (e' il meccanismo `tuttoBene` che questo file gia' usava per i
+//      crediti: una regola sola, in un posto solo)
+//   2. parte questa mail, subito
+// Se una delle riprove va a buon fine, le mail smettono da sole.
+//
+// ⚠️ Non lancia MAI un'eccezione: un allarme che rompe il webhook e'
+// peggio del guasto che segnala.
+// =====================================================================
+// ⚠️ scritta IDENTICA a quella delle altre 21 email, a capo compresi: il
+// banco `banco-logo-email.js` calcola l'impronta del tag <img> e pretende
+// una sola impronta in tutte. Riscrivendola "a modo mio", tutta su una
+// riga, il banco e' diventato subito rosso — ed e' il suo mestiere.
+const LOGO_EMAIL = `<div style="text-align:center;padding:16px 0 20px">
+  <a href="https://trovaimpresa.com" style="text-decoration:none">
+    <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+         style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+  </a>
+</div>`;
+
+async function avvisaAlessio(oggetto, righe, cosaFare) {
+  try {
+    const chiave = (process.env.RESEND_API_KEY || '').trim();
+    if (!chiave) { console.error('[ALLARME] RESEND_API_KEY manca: mail non partita —', oggetto); return; }
+
+    const elenco = Object.keys(righe || {})
+      .map(function (k) {
+        return '<tr><td style="padding:6px 12px 6px 0;color:#6b7a8d;font-size:14px;white-space:nowrap">' + k
+             + '</td><td style="padding:6px 0;font-size:14px;color:#12233a"><b>'
+             + String(righe[k] == null ? '—' : righe[k]).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+             + '</b></td></tr>';
+      }).join('');
+
+    const html = '<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">'
+      + LOGO_EMAIL
+      + '<div style="background:#fdecec;border:1px solid #f5c6c6;border-radius:12px;padding:18px 20px">'
+      + '<div style="font-size:18px;font-weight:800;color:#c0392b;margin:0 0 6px">' + oggetto + '</div>'
+      + '<div style="font-size:14px;color:#7a3b34">Il pagamento &egrave; arrivato. Quello che doveva succedere dopo, no.</div>'
+      + '</div>'
+      + '<table style="margin:18px 0;border-collapse:collapse">' + elenco + '</table>'
+      + '<div style="background:#fff8ec;border:1px solid #f0d9b0;border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.6;color:#6b5330">'
+      + '<b>Cosa fare</b><br>' + cosaFare + '</div>'
+      + '<p style="font-size:13px;color:#7a8798;line-height:1.6;margin-top:18px">'
+      + 'Stripe riprova da solo per circa 3 giorni. Se una riprova riesce, questa mail smette di arrivare.'
+      + '</p></div>';
+
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + chiave, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'TrovaImpresa <info@trovaimpresa.com>',
+        to: ['info@trovaimpresa.com'],
+        subject: oggetto
+      , html })
+    });
+    if (!r.ok) console.error('[ALLARME] mail non partita, stato ' + r.status + ' —', oggetto);
+  } catch (e) {
+    console.error('[ALLARME] mail non partita:', e && e.message, '—', oggetto);
+  }
+}
+
 async function segnaIncasso(supabase, dati) {
   try {
     if (!dati || dati.centesimi == null || !dati.riferimento) {
@@ -160,6 +231,7 @@ exports.handler = async (event) => {
 
   // se resta false, a Stripe si risponde errore e lui riprova
   let tuttoBene = true;
+  let motivoErrore = 'crediti non accreditati';
 
   if (ev.type === 'checkout.session.completed' ||
       ev.type === 'checkout.session.async_payment_succeeded') {
@@ -178,7 +250,19 @@ exports.handler = async (event) => {
       // Add-on Gestionale attivato: NON tocca il piano Premium.
       const campiGest = { gestionale_attivo: true, gestionale_scadenza: null };
       if (typeof s.customer === 'string' && s.customer) campiGest.stripe_customer_id = s.customer;
-      await supabase.from('imprese').update(campiGest).eq('email', email);
+      const upGest = await supabase.from('imprese').update(campiGest).eq('email', email);
+      if (upGest.error) {
+        tuttoBene = false;
+        motivoErrore = 'gestionale non acceso';
+        console.error('[PAGATO MA NON ACCESO] gestionale, ' + email + ':', upGest.error.message);
+        await avvisaAlessio('Pagamento ricevuto, gestionale NON acceso', {
+          'Chi': email, 'Cosa aveva comprato': 'Add-on Gestionale',
+          'Quanto': (s.amount_total / 100).toFixed(2) + ' ' + String(s.currency || 'eur').toUpperCase(),
+          'Riferimento Stripe': s.id, 'Errore del database': upGest.error.message
+        }, 'Apri Supabase &rarr; tabella <b>imprese</b>, cerca questa email e metti a mano '
+         + '<b>gestionale_attivo = true</b> e <b>gestionale_scadenza = vuoto</b>. '
+         + 'Poi avvisa il cliente che &egrave; tutto a posto.');
+      }
       await segnaIncasso(supabase, {
         prodotto: 'gestionale', centesimi: s.amount_total, riferimento: s.id,
         email, valuta: s.currency, tipo_evento: ev.type,
@@ -203,7 +287,19 @@ exports.handler = async (event) => {
       // email ogni volta, e due account con la stessa email sono un
       // guaio che si paga in soldi.
       if (typeof s.customer === 'string' && s.customer) campi.stripe_customer_id = s.customer;
-      await supabase.from('imprese').update(campi).eq('email', email);
+      const upPrem = await supabase.from('imprese').update(campi).eq('email', email);
+      if (upPrem.error) {
+        tuttoBene = false;
+        motivoErrore = 'premium non acceso';
+        console.error('[PAGATO MA NON ACCESO] ' + (conAI ? 'premium-ai' : 'premium') + ', ' + email + ':', upPrem.error.message);
+        await avvisaAlessio('Pagamento ricevuto, Premium NON acceso', {
+          'Chi': email, 'Cosa aveva comprato': conAI ? 'Premium AI' : 'Premium',
+          'Quanto': (s.amount_total / 100).toFixed(2) + ' ' + String(s.currency || 'eur').toUpperCase(),
+          'Riferimento Stripe': s.id, 'Errore del database': upPrem.error.message
+        }, 'Apri Supabase &rarr; tabella <b>imprese</b>, cerca questa email e metti a mano '
+         + '<b>piano = premium</b>, <b>premium_pagato = true</b>, <b>premium_scadenza = vuoto</b>'
+         + (conAI ? ' e <b>chat_pro = true</b>' : '') + '. Poi avvisa il cliente.');
+      }
       await segnaIncasso(supabase, {
         prodotto: conAI ? 'premium-ai' : 'premium', centesimi: s.amount_total, riferimento: s.id,
         email, valuta: s.currency, tipo_evento: ev.type,
@@ -292,8 +388,17 @@ exports.handler = async (event) => {
     if (!email) {
       console.error('[disdetta] abbonamento disdetto SENZA email nei metadata:', sub.id);
     } else if (prodotto === 'gestionale') {
-      await supabase.from('imprese').update({ gestionale_attivo: false }).eq('email', email);
-      console.log('[disdetta] gestionale spento:', email);
+      // ⚠️ qui il verso e' l'opposto: se fallisce, uno che ha disdetto
+      // continua ad avere il gestionale gratis. Non lo vede nessuno
+      // guardando lo schermo, si vede solo sul conto a fine anno.
+      const upDis = await supabase.from('imprese').update({ gestionale_attivo: false }).eq('email', email);
+      if (upDis.error) {
+        tuttoBene = false;
+        motivoErrore = 'gestionale non spento';
+        console.error('[disdetta] gestionale NON spento per ' + email + ':', upDis.error.message);
+      } else {
+        console.log('[disdetta] gestionale spento:', email);
+      }
     } else {
       // Premium e Premium AI: si torna al piano free e si spegne la chat AI.
       const { error } = await supabase.from('imprese').update({
@@ -312,7 +417,7 @@ exports.handler = async (event) => {
     // ⚠️ APPOSTA. Stripe riprova per circa tre giorni, e ogni volta
     // `add_credits_pack` fa un tentativo pulito. Se non ce la fa nemmeno
     // dopo, Stripe ti manda un'email: e' il modo giusto di accorgersene.
-    return { statusCode: 500, body: 'crediti non accreditati' };
+    return { statusCode: 500, body: motivoErrore };
   }
   return { statusCode: 200, body: 'ok' };
 };

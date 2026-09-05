@@ -133,7 +133,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ## 🟡 DA FARE — concordati, non ancora iniziati (ordine di Alex, 3 set)
 
-0. [5 set] ⚠️ **LE →3← PIU' CARE, dal controllo muto**: `netlify/functions/stripe-webhook-abbonamenti.js` righe →181←, →206←, →295←. Se l'`update` fallisce dopo un pagamento, **il cliente ha pagato e il gestionale non gli si accende** — e non lo sa nessuno, ne' lui ne' Alex. Da fare per prime
+0. ✅ [5 set] **FATTE — le →3← di Stripe.** Adesso se l'`update` fallisce dopo un pagamento: →1← si risponde 500 a Stripe, che **riprova da solo per ~3 giorni**; →2← parte subito una **mail ad Alessio** con chi ha pagato, quanto, il riferimento Stripe, l'errore vero e **cosa mettere a mano su Supabase**. Banco `./gira-stripe.sh`: →13← verdi, sabotaggio compreso (database che rifiuta, e rete giu' mentre parte l'allarme)
 
 
 
@@ -178,7 +178,10 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ## ✅ FATTO — ultimi 14 giorni (per chiudere il cerchio, poi si cancella)
 
-- [5 set] ✅ **IL CONTROLLO MUTO** — `node tools/controllo-muto.js`. Elenca le chiamate a Supabase che buttano via la risposta. Primo giro: **→76← mute, →29← mezze mute**, →40← da guardare a mano, e **→30← dentro un try/catch che NON le protegge** (la libreria non lancia eccezioni sugli errori di permesso). Elenco in `prove-claude/ELENCO-MUTE-5set.txt`. Non ferma la pubblicazione di proposito: →76← rossi al primo giro si spengono, non si aggiustano
+- [5 set] ⛔ **Il meccanismo c'era gia' e non me n'ero accorto subito**: `tuttoBene` in quel file rispondeva 500 a Stripe per i crediti. Ho riusato quello invece di inventarne un altro — **una regola sola, in un posto solo**. La mail e' l'aggiunta, non la sostituzione
+- [5 set] ⛔ **Il banco del logo e' diventato rosso da solo** appena ho riscritto la fascia "a modo mio" nel webhook di Stripe: «ci sono →2← fasce diverse». Era il suo mestiere, ed e' la prova che serviva a qualcosa
+
+- [5 set] ✅ **IL CONTROLLO MUTO** — `node tools/controllo-muto.js`. Elenca le chiamate a Supabase che buttano via la risposta. Primo giro: **→71← mute, →29← mezze mute**, →40← da guardare a mano, e **→30← dentro un try/catch che NON le protegge** (la libreria non lancia eccezioni sugli errori di permesso). Elenco in `prove-claude/ELENCO-MUTE-5set.txt`. Non ferma la pubblicazione di proposito: →76← rossi al primo giro si spengono, non si aggiustano
 - [5 set] ⛔ **La prima versione dava →600+← allarmi quasi tutti FALSI** e l'ho buttata: un controllo che grida al lupo smette di essere letto, ed e' peggio di nessun controllo. Sbagliava a capire dove comincia una catena. Banco: `banchi-fissi/muto/banco-controllo-muto.js` (`./gira-muto.sh`), →22← verdi
 
 - [5 set] ✅ **PROVATO DAL VIVO, dal sito, col pannello di Alex gia' aperto** — non solo col banco. Cantiere →1← «via comotti», impresa →36←. Caricata una foto vera (disegnata al momento, →879← byte) in `cantieri-foto`: **arrivata**, e riscaricata dall'indirizzo pubblico per essere sicuri che ci fosse davvero. Poi caricato un PDF in `cantieri-preventivi` e uno in `cantieri-fatture`: arrivati tutti e due, riletti col link firmato (sono magazzini privati). Provato a caricare in un cantiere NON suo: **bloccato**. Tutti e →3← i file cancellati **nello stesso momento**, e ricontrollato che non si scaricassero piu'. Database dopo: **→0← file** in tutti e →4← i magazzini, come prima di cominciare

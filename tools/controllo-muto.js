@@ -36,8 +36,21 @@ const AZIONI = ['upload', 'remove', 'insert', 'update', 'upsert', 'delete',
                 'createSignedUrl', 'createSignedUrls', 'move', 'copy'];
 
 /* Perche' si capisca che e' una chiamata a Supabase e non un `.remove()`
-   di un pezzo di pagina o un `.delete()` di una mappa. */
-const SEGNI = /\b(sb|supabaseClient|supabase|_sb|client)\b|\.storage\b|\.from\s*\(/;
+   di un pezzo di pagina, un `.delete()` di una mappa o un
+   `window.storage.delete()` del magazzino del browser.
+
+   ⛔ 5 set: bastava che la catena contenesse `.storage` e
+   `window.storage.delete("gfoto_"+id)` finiva nell'elenco. Non e'
+   Supabase: e' il magazzino dentro al browser. Adesso il nome davanti
+   deve essere uno dei client VERI, oppure ci vuole `.storage.from(`.
+
+   ⚠️ I nomi qui sotto sono quelli usati davvero nel sito (contati:
+   `sb` 3923, `supabaseClient` 61, `sc` 26, `supabase` 15,
+   `supabaseAdmin` 2). Chi ne aggiunge uno nuovo lo aggiunge anche qui,
+   se no le sue chiamate non le guarda nessuno. */
+const CLIENT = /\b(?:sb|sc|supabase|supabaseClient|supabaseAdmin|_sb)\s*\./;
+const SEGNI_STORAGE = /\.storage\s*\.\s*from\s*\(/;
+function eSupabase(catena) { return CLIENT.test(catena) || SEGNI_STORAGE.test(catena); }
 
 /* ------------------------------------------------------------------ */
 /* Togliere i commenti, se no si contano righe spiegate e non scritte. */
@@ -181,7 +194,7 @@ function guarda(testo, nomeFile) {
     while ((m = re.exec(t)) !== null) {
       const pos = m.index;
       const catena = t.slice(Math.max(0, inizioCatena(t, pos) - 60), pos);
-      if (!SEGNI.test(catena)) continue;              // non e' Supabase
+      if (!eSupabase(catena)) continue;               // non e' Supabase
 
       // fine della chiamata: chiudo le parentesi
       let liv = 0, fine = pos + m[0].length - 1;

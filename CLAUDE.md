@@ -21813,7 +21813,7 @@ fuori →3← volte: allegati che non arrivavano, Cantieri che non allegavano
 niente, `remove()` che cancellava a vuoto. Sempre la stessa forma:
 **fallisce e non lo dice a nessuno.**
 
-Primo giro sul sito vero: **→76← mute**, **→29← mezze mute**, →40← da
+Primo giro sul sito vero: **→71← mute**, **→29← mezze mute**, →40← da
 guardare a mano. Elenco in `prove-claude/ELENCO-MUTE-5set.txt`.
 
 ⛔ **NON ferma la pubblicazione, di proposito.** →76← rossi al primo giro
@@ -21912,3 +21912,60 @@ la chiave di SERVIZIO. Scritto nel quaderno.
 - **Un difetto che non fa rumore puo' vivere per mesi**: la mappa rispondeva
   400 e nessuno se n'era accorto, perche' una pagina vuota sembra una pagina
   senza dati.
+
+## IL PAGAMENTO CHE NON ACCENDE NIENTE (5 set)
+Le →3← `update` di `netlify/functions/stripe-webhook-abbonamenti.js`
+(righe →181←, →206←, →295←) buttavano via la risposta. Se una falliva, **il
+cliente aveva pagato e il gestionale — o il Premium — non gli si accendeva**,
+e non lo sapeva nessuno.
+
+⛔ **Non ho inventato un meccanismo nuovo: quel file ne aveva gia' uno.**
+La variabile `tuttoBene`, nata per i crediti: se resta `false` si risponde
+**500** a Stripe, che **riprova da solo per ~3 giorni** e poi manda una mail
+di suo. Adesso la usano tutte e →3←. Aggiunto `motivoErrore`, cosi' la
+risposta dice quale delle tre e' andata storta invece del vecchio testo
+fisso «crediti non accreditati».
+
+**In piu' parte subito una mail ad Alessio** (`avvisaAlessio`): chi ha
+pagato, quanto, il riferimento Stripe, l'errore vero del database e **cosa
+mettere a mano su Supabase**. Se una riprova di Stripe riesce, le mail
+smettono da sole: non serve limitarle a mano.
+⚠️ `avvisaAlessio` non lancia MAI un'eccezione. **Un allarme che rompe
+quello che sorveglia e' peggio del guasto che segnala** — il banco lo prova
+staccando la rete: il webhook risponde 500 lo stesso.
+
+⚠️ La disdetta del gestionale (riga →295←) va nel verso opposto: se
+fallisce, chi ha disdetto **tiene il gestionale gratis**. Non si vede sullo
+schermo, si vede sul conto a fine anno. Li' c'e' la riprova di Stripe ma
+nessuna mail: non e' un cliente che aspetta.
+
+**Il banco**: `prove-claude/banchi-fissi/stripe/banco-stripe-pagato.js`
+(`./gira-stripe.sh`) — →13← verdi. Fa girare l'handler VERO con Stripe e
+database finti.
+⚠️ Il database finto ha **due catene diverse**, come quello vero:
+`select(...).eq(...).single()` per leggere, `update(...).eq(...)` per
+scrivere. La prima versione ne aveva una sola e sporcava il registro con un
+errore che sembrava del sito ed era mio: **un banco che stampa errori suoi
+insegna a non leggere i suoi errori.**
+
+## ⚠️ IL BANCO DEL LOGO HA FATTO IL SUO MESTIERE (5 set)
+Aggiungendo la mail d'allarme al webhook di Stripe ho riscritto la fascia
+del logo "a modo mio", tutta su una riga. Il banco e' diventato **rosso
+subito**: «ci sono →2← fasce diverse». Non era un capriccio — →22← copie
+scritte a mano sono →22← occasioni di scriverne una storta, e quella storta
+la vede solo il cliente. **La fascia si copia e si incolla, non si
+riscrive.**
+
+## ⛔ IL CONTROLLO MUTO SI E' PRESO UN FALSO ALLARME (5 set, sera)
+`try{await window.storage.delete("gfoto_"+id);}catch(e){}` finiva
+nell'elenco delle mute. **Non e' Supabase**: e' il magazzino dentro al
+browser. Bastava che la catena contenesse `.storage` per farlo scattare.
+Adesso il nome davanti deve essere un client vero (`sb`, `sc`,
+`supabase`, `supabaseClient`, `supabaseAdmin`, `_sb`) oppure ci vuole
+`.storage.from(`. Da →74← a **→71←**.
+⚠️ **Chi aggiunge un nome nuovo per il client lo aggiunge anche in
+`tools/controllo-muto.js`**, se no le sue chiamate non le guarda nessuno —
+ed e' il tipo di buco piu' brutto: un controllo che tace perche' non
+guarda, non perche' e' tutto a posto. Il banco tiene →3← righe apposta:
+`window.storage.delete()` che NON deve suonare, `sc.storage.from()` e
+`supabaseAdmin.from()` che devono suonare.
