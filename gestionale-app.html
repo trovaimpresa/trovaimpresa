@@ -41,6 +41,16 @@
            cliente lo stesso giorno. Sta qui, come Dati azienda: una scelta
            sola per tutta l'azienda, niente reparto da scegliere. -->
       <button class="lt-btn" data-action="noleggio">🚜 Noleggio</button>
+      <!-- ⛔ 5 SETTEMBRE 2026 — L'APP DELL'OPERAIO ENTRA NEL GESTIONALE.
+           Chiesto da Alessio: «si puo' inserire il gestionale operatore nel
+           gestionale impresa/professionista/artigiano come abbiamo fatto col
+           noleggio?». Sta qui per lo stesso motivo del Noleggio: la squadra e'
+           dell'AZIENDA, non del reparto — un operaio lavora in tutti i reparti.
+           ⚠️ Non e' un'altra faccia di questo gestionale: e' l'app che apre
+           un'ALTRA persona, con il SUO account. Se la apri tu vedi te stesso.
+           Per questo la pagina dell'operaio, a chi non e' in squadra, adesso
+           spiega che deve invitare qualcuno da Squadra. -->
+      <button class="lt-btn" data-action="appoperaio">📱 App operaio</button>
       <button class="lt-btn" data-action="commercialista">📄 Commercialista</button>
       <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
       <button class="lt-btn" data-action="export-excel">⬇ Esporta dati</button>
@@ -321,9 +331,20 @@
     <section id="squadra">
       <div class="sec-head"><h2>Squadra</h2><button class="btn add" data-action="new-dip">+ Persona</button></div>
       <input type="text" id="dip-search" class="lav-search" placeholder="Cerca nome, ruolo, telefono" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
-      <div style="background:var(--info-bg);border:1px solid rgba(37,99,235,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px">
-        <p style="margin:0;color:var(--info);font-weight:600;font-size:var(--f-md)">💡 Come entrano i collaboratori</p>
-        <p style="margin:6px 0 0;color:var(--testo);font-size:var(--f-base)">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
+      <!-- ⛔ 5 SETTEMBRE 2026 — LA CARD «L'APP DEI TUOI OPERAI».
+           Prima qui c'era una riga sola («entrano da trovaimpresa.com/gestionale
+           con la loro email e password») che non diceva la cosa piu' importante:
+           che ognuno ha un CODICE SUO, e che il link per entrare sta nascosto
+           dentro il menu dei tre puntini della sua scheda. Nessuno lo trovava.
+           Chiesto da Alessio il 5 settembre. -->
+      <div class="app-op-card">
+        <p class="app-op-tit">📱 L'app dei tuoi operai</p>
+        <p class="app-op-p">Ogni persona che aggiungi qui ha <b>la sua app sul telefono</b>: vede i lavori del giorno, segna le ore, i materiali, le foto e il rapportino. Puoi anche fargli raccontare la giornata <b>a voce</b>: l'AI ne tira fuori ore e materiali, e lui conferma.</p>
+        <p class="app-op-p">Quello che scrive finisce <b>qui dentro</b>, negli stessi lavori: le sue ore entrano nella manodopera del cantiere. Tu lo rileggi in <b>Agenda operatore</b>.</p>
+        <p class="app-op-p"><b>Ognuno ha il suo codice.</b> Dopo aver aggiunto la persona, apri il menu dei tre puntini sulla sua scheda: <b>Copia link</b>, <b>Invia su WhatsApp</b> oppure <b>Mostra il QR</b> da inquadrare col telefono.</p>
+        <div class="app-op-btns">
+          <button class="btn" data-action="appoperaio">📱 Guarda com'è fatta</button>
+        </div>
       </div>
       <div class="grid" id="dip-list"></div>
     </section>
@@ -959,6 +980,52 @@
     const fb=()=>{const a=document.createElement("textarea");a.value=txt;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.focus();a.select();let d=false;try{d=document.execCommand("copy");}catch(_){}document.body.removeChild(a);d?ok():prompt("Copia il link a mano:",txt);};
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
+
+  /* ============================================================
+     IL QR DELL'INVITO — 5 settembre 2026
+     ============================================================
+     In cantiere l'operaio non scrive un indirizzo a mano, e non sempre il capo
+     ha il suo numero di WhatsApp. Il QR si inquadra con la fotocamera e si e'
+     dentro. E' lo STESSO link di «Copia link»: non c'e' nessun secondo codice.
+
+     ⚠️ La libreria del QR si scarica SOLO quando si preme il pulsante, non a
+     ogni apertura del gestionale: e' un di piu', non deve pesare su chi non lo
+     usa. E se non si scarica (niente linea, CDN giu') non si lascia una
+     finestra vuota: si mostra il link scritto, che e' quello che serve davvero.
+     ============================================================ */
+  let _qrPronto=null;
+  function _caricaQr(){
+    if(window.QRCode)return Promise.resolve(true);
+    if(_qrPronto)return _qrPronto;
+    _qrPronto=new Promise(function(risolvi){
+      const sc=document.createElement("script");
+      sc.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+      sc.onload=function(){risolvi(!!window.QRCode);};
+      sc.onerror=function(){risolvi(false);};
+      document.head.appendChild(sc);
+    });
+    return _qrPronto;
+  }
+  async function mostraQrInvito(link,nome){
+    if(!link){toast("Questa persona non ha ancora un codice d'invito");return;}
+    openSheet('<h3 style="margin:6px 0 4px">Il QR di '+esc(nome||"questa persona")+'</h3>'
+      +'<p style="margin:0 0 14px;color:var(--muted);font-size:var(--f-base)">Faglielo inquadrare con la fotocamera del telefono: si apre la sua app e non deve scrivere niente.</p>'
+      +'<div id="qr-box" style="display:flex;justify-content:center;padding:14px;background:#fff;border:1px solid var(--linea,#e3e8ef);border-radius:12px;min-height:200px;align-items:center">Sto preparando il QR…</div>'
+      +'<p style="margin:12px 0 0;font-size:13px;color:var(--muted);word-break:break-all">'+esc(link)+'</p>'
+      +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
+      +'<button class="btn" data-action="sq-copy" data-link="'+esc(link)+'">🔗 Copia il link</button></div>');
+    const ok=await _caricaQr();
+    const box=document.getElementById("qr-box");
+    if(!box)return;               /* la finestra e' gia' stata chiusa */
+    box.innerHTML="";
+    if(!ok){
+      box.textContent="Il QR non si e' potuto disegnare (manca la linea). Usa il link qui sotto o «Invia su WhatsApp».";
+      return;
+    }
+    try{ new window.QRCode(box,{text:link,width:220,height:220,correctLevel:window.QRCode.CorrectLevel.M}); }
+    catch(_){ box.textContent="Il QR non si e' potuto disegnare. Usa il link qui sotto."; }
+  }
+
   let ruoloUtente=null;
 
   /* ⛔ 21 agosto 2026 — COME SI CHIAMA IL GESTIONALE.
@@ -5925,6 +5992,9 @@
     if(o.codice){
       v.push({lab:"🔗 Copia link",action:"sq-copy",data:{link:o.link}});
       v.push({lab:"💬 Invia su WhatsApp",action:"sq-wa",data:{wa:o.wa}});
+      /* 5 set 2026 — il QR: in cantiere non si scrive un indirizzo a mano e
+         non sempre si ha il numero. Si inquadra e si e' dentro. */
+      v.push({lab:"📷 Mostra il QR",action:"sq-qr",data:{link:o.link,nome:o.nome||""}});
       v.push({sep:true});
       v.push({lab:"🚫 Rimuovi accesso",action:"sq-revoca",data:{id:o.id,nome:o.nome},del:true});
     }
@@ -16098,6 +16168,11 @@ ${vecchi?`
     /* 24 agosto 2026 — il Noleggio e' di tutta l'azienda, non di un reparto:
        da qui si esce dritti verso la sua pagina, come "Dati azienda". */
     if(a==="noleggio"){location.href="/gestionale-noleggio";return;}
+    /* 5 set 2026 — si lascia il bigliettino del rientro, come fa il Noleggio
+       quando esce: tornando indietro si rientra nel reparto dov'eri. */
+    if(a==="appoperaio"){
+      try{sessionStorage.setItem("gest_rientro",String(Date.now()));}catch(e){}
+      location.href="/gestionale-operatore.html";return;}
     if(a==="save-azienda")return saveAzienda();
     if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
@@ -16397,6 +16472,7 @@ ${vecchi?`
     if(a==="sq-edit")return squadraApri(id);
     if(a==="sq-save")return squadraSave(id);
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
+    if(a==="sq-qr"){mostraQrInvito(t.dataset.link,t.dataset.nome||"");return;}
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="sq-revoca"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}

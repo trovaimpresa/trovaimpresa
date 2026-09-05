@@ -103,6 +103,9 @@
            background:var(--green);color:#fff;font:inherit;font-size:21px;font-weight:800;
            box-shadow:0 6px 18px rgba(0,102,255,.28);cursor:pointer;}
   .rv-apri:active{transform:translateY(1px);}
+  .rv-gruppo{font-size:14px;font-weight:800;color:var(--green-d);letter-spacing:.3px;
+             margin:6px 2px 8px;text-transform:uppercase;}
+  .rv-gruppo:not(:first-child){margin-top:16px;}
   .rv-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:flex;align-items:flex-end;}
   .rv-ov.hidden{display:none;}
   .rv-box{background:var(--card);width:100%;max-height:88vh;overflow-y:auto;
@@ -172,6 +175,18 @@
   .rap-v-del{width:52px;height:52px;flex:0 0 52px;border-radius:14px;border:1.5px solid #d9a3a3;
              background:var(--card);color:#b3261e;font-size:24px;font-weight:800;line-height:1;cursor:pointer;}
   .rap-v-del[disabled]{opacity:.35;}
+  /* le righe delle spese: stessa forma dei rapportini gia' scritti, cosi' non
+     si impara una schermata nuova. Il bottone e' da 52 px come tutti gli altri. */
+  .sp-riga{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);}
+  .sp-riga:last-child{border-bottom:none;}
+  .sp-testo{flex:1;min-width:0;font-size:15px;line-height:1.45;overflow-wrap:anywhere;}
+  .sp-imp{min-width:88px;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .sp-fix{min-width:52px;height:52px;border-radius:14px;border:1.5px solid var(--green);
+          background:#fff;color:var(--green-d);font:inherit;font-weight:800;font-size:15px;padding:0 12px;cursor:pointer;}
+  .sp-form{padding:12px 0;border-bottom:1px solid var(--line);}
+  .sp-form input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;
+                 margin-bottom:8px;font:inherit;font-size:16px;box-sizing:border-box;}
+  .sp-vuoto{font-size:15px;color:var(--muted);line-height:1.5;}
 
   /* TOAST */
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#17241d;color:#fff;padding:11px 18px;border-radius:10px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;}
@@ -230,9 +245,9 @@
 <!-- GATE: non collegato -->
 <div id="gate" class="hidden">
   <div class="ic">🔒</div>
-  <h2>Apri il tuo invito</h2>
+  <h2 id="gate-titolo">Apri il tuo invito</h2>
   <p id="gate-msg">Per entrare usa il link che ti ha mandato la tua impresa.</p>
-  <a class="btn" href="gestionale-invito.html">Vai al collegamento</a>
+  <a class="btn" id="gate-btn" href="gestionale-invito.html">Vai al collegamento</a>
 </div>
 
 <!-- APP -->
@@ -348,6 +363,19 @@
         <div class="label">Quelli che hai gi&agrave; scritto</div>
         <div id="rap-vecchi-list"></div>
       </div>
+    </div>
+
+    <!-- ⛔ LE SPESE CHE HAI SEGNATO TU — 5 settembre 2026
+         Prima l'operaio scriveva una spesa e da quel momento non la vedeva
+         piu': `gest_spese` aveva la regola per INSERIRE e nessuna per LEGGERE.
+         Se sbagliava una cifra non poteva accorgersene, e la correzione
+         tornava addosso al capo. Deciso da Alessio: vede e corregge SOLO
+         quelle scritte da lui. Quelle dei colleghi e quelle del capo non le
+         vede: non deve sapere quanto costa il materiale del cantiere.
+         Il permesso e' «Pagamenti». -->
+    <div class="panel hidden" id="lv-spese-box">
+      <div class="label">Le spese che hai segnato tu</div>
+      <div id="lv-spese-list"></div>
     </div>
 
     <div class="panel">
@@ -488,6 +516,36 @@ function show(v){
   if(v==="agenda"||v==="clienti"||v==="scadenze"||v==="fatture"){curView=v;renderNav();}
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
+
+/* ============================================================
+   ⛔ 5 SETTEMBRE 2026 — IL CAPO CHE APRE QUESTA PAGINA
+   ============================================================
+   Da oggi nel gestionale c'e' il pulsante «📱 App operaio», e da li' ci arriva
+   anche il TITOLARE. Prima si trovava un lucchetto che gli diceva «usa il link
+   che ti ha mandato la tua impresa»: a lui, che l'impresa e'. Sembrava un
+   difetto e invece era solo una frase scritta per un'altra persona.
+   Adesso, se chi apre non e' in squadra ma HA una squadra sua (o comunque un
+   account suo), gli si spiega di cosa si tratta e lo si rimanda al gestionale.
+   ⚠️ Non si cambia nessun permesso: cambia solo cosa c'e' scritto.
+   ============================================================ */
+function gateCapo(){
+  const t=document.getElementById("gate-titolo");
+  if(t)t.textContent="Questa è l'app di chi lavora con te";
+  $("#gate-msg").textContent="Non è la tua: qui entra il tuo operaio, con il suo account, e vede i lavori del giorno. Tu lo inviti dal gestionale: Squadra → «+ Persona» → menu dei tre puntini → «Copia link» o «Invia su WhatsApp».";
+  const b=document.getElementById("gate-btn");
+  if(b){ b.textContent="← Torna al gestionale"; b.setAttribute("href","gestionale-app.html"); }
+  show("gate");
+}
+/* si e' un titolare? lo si chiede al database: `gest_operatori` si legge solo
+   se `user_id` e' il proprio (regola `operatori_owner`), quindi una riga qui
+   vuol dire «questa e' la mia squadra». Se la lettura non riesce, si resta sul
+   messaggio di prima: meglio una frase generica che una sbagliata. */
+async function forseSonoIlCapo(){
+  try{
+    const {data,error}=await sb.from("gest_operatori").select("id").limit(1);
+    return !error && !!data && data.length>0;
+  }catch(_){ return false; }
+}
 
 /* ============================================================
    12 agosto 2026 (sera) — I PERMESSI ADESSO COMANDANO DAVVERO
@@ -643,7 +701,10 @@ async function boot(session){
   const {data:membri,error}=await sb.from("gest_membri")
     .select("impresa_id,operatore_id,ruolo,stato,permessi").eq("membro_id",MIO.uid).eq("stato","attivo");
   if(error){gate("Non riesco a caricare. Riprova tra poco.");return;}
-  if(!membri||!membri.length){gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;}
+  if(!membri||!membri.length){
+    if(await forseSonoIlCapo()){gateCapo();return;}
+    gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;
+  }
   MIO.impresaId=membri[0].impresa_id;
   try{
     const {data:imp}=await sb.from("imprese").select("tipo").eq("user_id",MIO.impresaId).maybeSingle();
@@ -910,8 +971,99 @@ async function openLavoro(id){
   $("#lv-foto").innerHTML="";
   show("lavoro");
   renderRapportino();
+  renderMieSpese();   /* 5 set 2026 — le spese che ha segnato lui su questo lavoro */
   caricaFoto(l.id);
   caricaVideo(l.id);
+}
+
+/* ============================================================
+   LE SPESE CHE HA SEGNATO LUI, E COME SI CORREGGONO — 5 set 2026
+
+   ⛔ Perche' qui e non nel pannello del capo: chi sbaglia la cifra e' chi la
+   scrive, e se ne accorge sul momento (24,50 diventato 2450, la virgola nel
+   posto sbagliato, il fornitore sbagliato). Prima non poteva ne' vederla ne'
+   correggerla, e la correzione diventava lavoro del capo.
+
+   ⚠️ Si vedono SOLO le sue: il database non gli fa leggere le altre
+   (`gest_spese_team_read` chiede che `creato_da` sia il suo). Non e' una
+   scelta della schermata: e' una regola del database. Anche chiamando
+   Supabase da fuori, le spese dei colleghi non escono.
+   ============================================================ */
+let SPESE_MIE=[];
+async function renderMieSpese(){
+  const box=document.getElementById("lv-spese-box");
+  const lista=document.getElementById("lv-spese-list");
+  if(!box||!lista)return;
+  SPESE_MIE=[];
+  if(!sb||!curLavoro||!MIO.impresaId||!MIO.operatoreId||!puo("pagamenti")){
+    box.classList.add("hidden");return;
+  }
+  const {data,error}=await sb.from("gest_spese")
+    .select("id,descrizione,importo,data,created_at")
+    .eq("user_id",MIO.impresaId).eq("lavoro_id",curLavoro.id)
+    .eq("creato_da",MIO.operatoreId).is("eliminato_il",null)
+    .order("created_at",{ascending:false}).limit(20);
+  /* se la lettura non riesce il riquadro sparisce in silenzio: e' un di piu',
+     non deve rompere la schermata del lavoro */
+  if(error){box.classList.add("hidden");return;}
+  SPESE_MIE=data||[];
+  box.classList.remove("hidden");
+  if(!SPESE_MIE.length){
+    lista.innerHTML='<div class="sp-vuoto">Qui compaiono le spese che segni tu su questo lavoro, cos&igrave; se sbagli una cifra la correggi da solo.</div>';
+    return;
+  }
+  lista.innerHTML=SPESE_MIE.map(x=>
+    '<div class="sp-riga" data-sp="'+esc(String(x.id))+'">'
+    +'<div class="sp-testo">'+esc(x.descrizione||"Spesa")
+    +(x.data?'<br><span style="color:var(--muted);font-size:13px">'+dataIt(x.data)+'</span>':'')
+    +'</div>'
+    +'<div class="sp-imp">'+eur(x.importo)+'</div>'
+    +'<button type="button" class="sp-fix" data-fix="'+esc(String(x.id))+'">Correggi</button>'
+    +'</div>').join("");
+}
+
+document.getElementById("lv-spese-list").addEventListener("click",async e=>{
+  const bFix=e.target.closest("[data-fix]");
+  if(bFix){ speseApriForm(bFix.getAttribute("data-fix")); return; }
+  const bAnn=e.target.closest("[data-sp-annulla]");
+  if(bAnn){ renderMieSpese(); return; }
+  const bSal=e.target.closest("[data-sp-salva]");
+  if(bSal){ await speseSalva(bSal.getAttribute("data-sp-salva"),bSal); return; }
+});
+
+function speseApriForm(id){
+  const riga=document.querySelector('.sp-riga[data-sp="'+id+'"]');
+  const x=SPESE_MIE.find(y=>String(y.id)===String(id));
+  if(!riga||!x)return;
+  riga.outerHTML='<div class="sp-form">'
+    +'<input type="text" id="sp-des" value="'+esc(x.descrizione||"")+'" placeholder="Per cosa hai speso">'
+    +'<input type="text" inputmode="decimal" id="sp-imp" value="'
+      +String(Number(x.importo)||0).replace(".",",")+'" placeholder="Quanto (es. 24,50)">'
+    +'<div class="row-btns">'
+    +'<button type="button" class="btn-line" data-sp-annulla="1" style="flex:1">Lascia stare</button>'
+    +'<button type="button" class="btn-fill" data-sp-salva="'+esc(String(id))+'" style="flex:1">Salva</button>'
+    +'</div></div>';
+}
+
+async function speseSalva(id,bottone){
+  const des=((document.getElementById("sp-des")||{}).value||"").trim();
+  const imp=_numIt((document.getElementById("sp-imp")||{}).value||"");
+  if(!des){toast("Scrivi per cosa hai speso");return;}
+  if(!(imp>0)){toast("Scrivi quanto hai speso, per esempio 24,50");return;}
+  if(imp>1000000){toast("Importo troppo alto: controlla quello che hai scritto");return;}
+  if(bottone)bottone.disabled=true;
+  /* ⚠️ `.select("id")` non e' un vezzo: una UPDATE fermata da una regola del
+     database NON da' errore, torna zero righe. Senza questo conto la schermata
+     direbbe «corretta» con il database intatto. E' lo stesso inciampo preso
+     con le ore il →15← agosto. */
+  const {data,error}=await sb.from("gest_spese")
+    .update({descrizione:des,importo:imp})
+    .eq("id",id).eq("creato_da",MIO.operatoreId).select("id");
+  if(bottone)bottone.disabled=false;
+  if(error){toast("Non corretta: "+(error.message||"il database non risponde"));return;}
+  if(!data||!data.length){toast("Non corretta: questa spesa non l'hai scritta tu.");await renderMieSpese();return;}
+  toast("Spesa corretta \u2714");
+  await renderMieSpese();
 }
 $("#btn-back").onclick=()=>{renderCal();renderDay();show("agenda");};
 
@@ -1073,7 +1225,7 @@ const RV_TIPI=[
 
 function rvChiudi(){ $("#rv-ov").classList.add("hidden"); RV.passo=0; }
 function rvApri(){
-  RV.passo=1; RV.tipo=null; RV.lavoro=null; RV.ore=8; RV.testo=""; RV.importo="";
+  RV.passo=1; RV.tipo=null; RV.lavoro=null; RV.ore=8; RV.testo=""; RV.importo=""; RV.autoLavoro=false;
   RV.detto=""; RV.capito=null; RV.vOre={}; RV.vScarti=[];
   $("#rv-ov").classList.remove("hidden");
   rvDisegna();
@@ -1088,6 +1240,28 @@ function rvLavori(){
       return String(b.data_prevista||"").localeCompare(String(a.data_prevista||""));
     })
     .slice(0,8);
+}
+/* ============================================================
+   ⛔ 5 SETTEMBRE 2026 — IL LAVORO DI OGGI IN CIMA, E GIA' SCELTO
+   ============================================================
+   La scelta del lavoro era una lista sola: con →3← lavori va bene, con →40←
+   diventa un elenco da scorrere col guanto. Fluida il cantiere lo indovina col
+   GPS; noi non abbiamo il GPS, ma sappiamo una cosa che basta quasi sempre:
+   QUALE LAVORO E' SEGNATO PER OGGI.
+   Deciso da Alessio il 5 settembre: «oggi in cima e preselezionato».
+     · un solo lavoro oggi  -> e' gia' scelto, un tocco in meno
+     · piu' d'uno           -> quelli di oggi in cima, sotto il titolino «Oggi»
+     · nessuno              -> la lista di prima, tale e quale
+   ⚠️ Preselezionato NON vuol dire obbligato: dal passo dopo si torna
+   indietro con la freccia e si sceglie un altro lavoro, come prima.
+   ============================================================ */
+function rvLavoriOggi(){
+  const oggi=ymd(new Date());
+  return (LAVORI||[]).filter(l=>l.data_prevista===oggi && l.stato!=="fatto");
+}
+function rvUnicoDiOggi(){
+  const o=rvLavoriOggi();
+  return (o.length===1)?o[0]:null;
 }
 function rvNomeLavoro(l){
   const c=CLIENTI[l.cliente_id];
@@ -1115,11 +1289,21 @@ function rvDisegna(){
       corpo.innerHTML='<div class="rv-nota">Non hai nessun lavoro assegnato. Chiedi al capo di metterti su un cantiere.</div>';
       return;
     }
-    corpo.innerHTML=lv.map(l=>{
+    const bottone=function(l){
       const dove=l.dove?" — "+l.dove:"";
       return '<button type="button" class="rv-scelta" data-lav="'+esc(l.id)+'">'+esc(rvNomeLavoro(l))
         +'<small>'+esc((l.data_prevista?dataIt(l.data_prevista):"senza data")+dove)+'</small></button>';
-    }).join("");
+    };
+    /* 5 set 2026 — quelli di oggi in cima, con il loro titolino. Gli altri
+       restano sotto nell'ordine di prima: nessun lavoro sparisce. */
+    const oggi=rvLavoriOggi();
+    const idOggi={}; oggi.forEach(l=>{idOggi[String(l.id)]=1;});
+    const altri=lv.filter(l=>!idOggi[String(l.id)]);
+    corpo.innerHTML=(oggi.length
+        ? '<div class="rv-gruppo">Oggi</div>'+oggi.map(bottone).join("")
+          +(altri.length?'<div class="rv-gruppo">Gli altri</div>':"")
+        : "")
+      +altri.map(bottone).join("");
     return;
   }
 
@@ -1173,9 +1357,18 @@ function rvDisegna(){
 /* un ascolto solo sul contenitore: il contenuto viene rifatto a ogni passo */
 $("#rv-corpo").addEventListener("click",async e=>{
   const t=e.target.closest("[data-tipo]");
-  if(t){ RV.tipo=t.dataset.tipo; RV.passo=2; rvDisegna(); return; }
+  if(t){
+    RV.tipo=t.dataset.tipo;
+    /* 5 set 2026 — un solo lavoro segnato per oggi: e' gia' scelto, si salta
+       la schermata della lista. Con la freccia «‹» si torna alla lista e si
+       cambia, quindi non si resta chiusi dentro una scelta sbagliata. */
+    const solo=rvUnicoDiOggi();
+    if(solo){ RV.lavoro=solo; RV.passo=3; RV.autoLavoro=true; }
+    else { RV.lavoro=null; RV.passo=2; RV.autoLavoro=false; }
+    rvDisegna(); return;
+  }
   const l=e.target.closest("[data-lav]");
-  if(l){ RV.lavoro=(LAVORI||[]).find(x=>String(x.id)===String(l.dataset.lav))||null; RV.passo=3; rvDisegna(); return; }
+  if(l){ RV.lavoro=(LAVORI||[]).find(x=>String(x.id)===String(l.dataset.lav))||null; RV.passo=3; RV.autoLavoro=false; rvDisegna(); return; }
   const pm=e.target.closest(".rv-pm");
   if(pm){
     let v=(+RV.ore||0)+(parseFloat(pm.dataset.d)||0);
@@ -1205,7 +1398,15 @@ $("#rv-corpo").addEventListener("click",async e=>{
 });
 $("#btn-rapido").onclick=rvApri;
 $("#rv-x").onclick=rvChiudi;
-$("#rv-indietro").onclick=()=>{ RV.passo=Math.max(1,RV.passo-1); rvDisegna(); };
+$("#rv-indietro").onclick=()=>{
+  /* ⚠️ 5 set 2026: quando il lavoro e' stato scelto DA SOLO, il passo →2←
+     non e' mai stato disegnato — ma tornando indietro ci si deve arrivare
+     lo stesso, se no dal passo →3← si finirebbe dritti al passo →1← e non
+     si potrebbe cambiare cantiere. */
+  RV.passo=Math.max(1,RV.passo-1);
+  if(RV.autoLavoro){ RV.autoLavoro=false; }
+  rvDisegna();
+};
 $("#rv-ov").onclick=e=>{ if(e.target===$("#rv-ov"))rvChiudi(); };
 
 /* ===================================================================
@@ -1457,7 +1658,12 @@ async function voceSalva(){
   if(vuoleSpesa){
     const {data,error}=await sb.from("gest_spese").insert({
       user_id:MIO.impresaId, lavoro_id:RV.lavoro.id,
-      descrizione:des, importo:imp, inserito_da:MIO.nome
+      descrizione:des, importo:imp, inserito_da:MIO.nome,
+      /* ⛔ 5 set 2026 — LA FIRMA. `inserito_da` e' solo un nome scritto a mano:
+         non vale come firma. `creato_da` punta alla riga di gest_operatori ed
+         e' quello su cui girano le regole del database. Senza, dal 5 settembre
+         la spesa NON viene scritta (regola gest_spese_team_insert). */
+      creato_da:MIO.operatoreId
     }).select("id");
     spesaOk=!(error||!data||!data.length);
   }
@@ -1543,7 +1749,8 @@ async function rvSalva(){
     if(!txt){toast("Scrivi per cosa hai speso");rimetti();return;}
     const {data,error}=await sb.from("gest_spese").insert({
       user_id:MIO.impresaId, lavoro_id:RV.lavoro.id,
-      descrizione:txt, importo:imp, inserito_da:MIO.nome
+      descrizione:txt, importo:imp, inserito_da:MIO.nome,
+      creato_da:MIO.operatoreId /* la firma: vedi l'altro insert qui sopra */
     }).select("id");
     if(error||!data||!data.length){
       rimetti();

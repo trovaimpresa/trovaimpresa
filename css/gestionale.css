@@ -4184,3 +4184,15 @@ body:has(#ti-fondatore) .sheet--grande{
   .dp-voce{ grid-template-columns:20px 1fr; }
   .dp-imp{ grid-column:2; }
 }
+
+/* ============================================================
+   LA CARD «L'APP DEI TUOI OPERAI» (sezione Squadra) — 5 set 2026
+   Stessa forma del riquadro azzurro che c'era prima, ma piu' alta: qui si
+   spiega una cosa che nessuno sapeva, non si da' un avviso.
+   ============================================================ */
+.app-op-card{background:var(--info-bg);border:1px solid rgba(37,99,235,.25);
+  border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.app-op-tit{margin:0 0 8px;color:var(--info);font-weight:800;font-size:17px}
+.app-op-p{margin:0 0 8px;color:var(--testo);font-size:15px;line-height:1.55}
+.app-op-p:last-of-type{margin-bottom:0}
+.app-op-btns{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
