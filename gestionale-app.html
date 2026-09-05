@@ -1170,8 +1170,9 @@
          basta NON passare da li'. Le rimetto comunque a `none` qui sotto,
          esplicitamente: se un domani qualcuno le accende in un terzo posto,
          l'artigiano non se le ritrova addosso in silenzio.
-       - `squadra`, `agenda`, `carte` sono accese per tutti nell'HTML:
-         quelle vanno spente a mano.
+       - `squadra`, `agenda`, `carte` sono accese per tutti nell'HTML.
+         ⚠️ Fino al 4 set venivano spente a mano qui sotto; dal 5 settembre
+         2026 restano ACCESE anche all'artigiano (vedi il riquadro sotto).
 
      ⚠️ Squadra si spegne ma Attrezzature resta. Guardato nel codice: nella
      scheda dell'attrezzatura NON c'e' nessuna tendina che pesca dalla
@@ -1180,8 +1181,22 @@
      La tendina «Chi ci va» nella scheda del LAVORO invece resta com'e':
      scelta di Alessio, 22 agosto — «per adesso lasciala».
      ============================================================ */
-  /* Le tre accese per tutti, che all'artigiano vanno spente */
-  const TAB_NASCOSTI_ART=['squadra','agenda','carte'];
+  /* ============================================================
+     5 SETTEMBRE 2026 -- SQUADRA, AGENDA E CARTE TORNANO ALL'ARTIGIANO
+     ============================================================
+     Fino a oggi qui c'era ['squadra','agenda','carte']: era una scelta VERA
+     di Alessio (21 agosto sera, foglio prove-claude/GESTIONALE-ARTIGIANO.md,
+     alla voce Squadra: «se lavora da solo non serve»). NON era una svista.
+     ⛔ Ma quella scelta e' di PRIMA che nascesse il gestionale operatore.
+     Con Squadra spenta l'artigiano non puo' invitare NESSUNO: la pagina
+     dell'invito non e' raggiungibile, quindi gest_membri resta vuota e
+     gestionale-operatore.html per lui non esiste. E gli artigiani sono gli
+     iscritti piu' numerosi (→62← contro →44← imprese).
+     Riacceso da Alessio il 5 settembre 2026: un idraulico con due ragazzi e'
+     esattamente il caso d'uso. Restano spente solo le →4← voci da appalti
+     (computo, prezzario, SAL nascoste nell'HTML + `crediti` qui sotto).
+     ============================================================ */
+  const TAB_NASCOSTI_ART=[];
   /* ============================================================
      29 agosto 2026 — IL COMPUTO TORNA ANCHE ALL'ARTIGIANO
      ============================================================

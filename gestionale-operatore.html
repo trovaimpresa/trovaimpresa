@@ -37,7 +37,7 @@
   .nav-btn.active{background:var(--green);color:#fff;}
 
   /* CALENDARIO */
-  .cal{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:14px;margin-bottom:16px;}
+  .cal{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:14px;margin:20px 0 16px;}
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
   .cal-mese{font-weight:bold;font-size:16px;text-transform:capitalize;}
   .cal-nav{background:var(--green-l);color:var(--green-d);border:none;width:34px;height:34px;border-radius:9px;font-size:18px;font-weight:bold;cursor:pointer;}
@@ -97,8 +97,10 @@
      Tutto e' tarato per un dito con il guanto: nessun pulsante sotto i 56px
      di altezza, la finestra sale dal basso (il pollice arriva li', non in
      cima allo schermo) e non c'e' niente da scrivere se non vuoi. */
-  .rv-apri{width:100%;padding:18px;margin-bottom:14px;border:none;border-radius:16px;
-           background:var(--green);color:#fff;font:inherit;font-size:18px;font-weight:800;
+  /* 5 set 2026: è il primo (e per metà degli operai l'unico) pulsante della
+     pagina, quindi è grande davvero: →76← px di altezza minima. */
+  .rv-apri{width:100%;min-height:76px;padding:22px 18px;margin:0 0 16px;border:none;border-radius:16px;
+           background:var(--green);color:#fff;font:inherit;font-size:21px;font-weight:800;
            box-shadow:0 6px 18px rgba(0,102,255,.28);cursor:pointer;}
   .rv-apri:active{transform:translateY(1px);}
   .rv-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:flex;align-items:flex-end;}
@@ -254,6 +256,21 @@
 
   <!-- VISTA AGENDA -->
   <div class="wrap" id="view-agenda">
+    <!-- ⛔ 5 SETTEMBRE 2026 — L'ORDINE DELLA PRIMA SCHERMATA
+         Prima si apriva sul CALENDARIO: un mese da →30← quadratini, e il
+         pulsante per segnare la giornata finiva in mezzo alla pagina.
+         Negli altri gestionali da cantiere (Fluida, Connecteam) la prima
+         schermata è UNA COSA SOLA, grande. Per un muratore con i guanti e lo
+         schermo sporco un calendario da →30← caselle è un campo minato.
+         Adesso l'ordine è: 1) il pulsante grosso, 2) i lavori di oggi,
+         3) il calendario più giù per chi lo cerca.
+         ⚠️ Il motore NON è stato toccato: è lo stesso `rvApri()` di prima,
+         stesso id `#btn-rapido`, stessi passi. È solo spostato l'HTML. -->
+    <button class="rv-apri hidden" id="btn-rapido">📝 Segna la giornata</button>
+
+    <div class="day-title" id="day-title">Lavori di oggi</div>
+    <div id="day-list"></div>
+
     <div class="cal">
       <div class="cal-head">
         <button class="cal-nav" id="cal-prev">‹</button>
@@ -262,11 +279,6 @@
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
-    <!-- + RAPIDO — 15 agosto 2026. Tre tocchi: cosa, quale lavoro, conferma. -->
-    <button class="rv-apri hidden" id="btn-rapido">+ Rapido</button>
-
-    <div class="day-title" id="day-title">Lavori di oggi</div>
-    <div id="day-list"></div>
 
     <div class="empty-state hidden" id="carta-nessuna">Il tuo capo non ti ha ancora assegnato una carta aziendale.<br>Appena te la assegna, qui vedrai il saldo.</div>
     <div class="panel" id="carta-panel" style="display:none">
@@ -498,11 +510,20 @@ function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
      fatture    -> vede le fatture.
      pagamenti  -> vede la sua carta aziendale e puo' registrare le spese.
 
-   ⚠️ DA DIRE CHIARO: questo decide cosa VEDE e cosa PUO' FARE DALL'APP.
-   Non e' un lucchetto sul database: chi sapesse scrivere codice potrebbe
-   comunque provare a chiamare Supabase da fuori. Il lucchetto vero sono le
-   regole RLS sul database, che vanno scritte in SQL. Per l'uso normale —
-   un operaio col telefono in mano — questo e' quello che serve.
+   ⚠️ CORRETTO IL 5 SETTEMBRE 2026 — QUI SOTTO C'ERA SCRITTO IL CONTRARIO.
+   Il commento vecchio diceva: «non e' un lucchetto sul database, il lucchetto
+   vero sono le regole RLS, che vanno scritte in SQL». NON E' PIU' VERO, ed
+   era gia' falso: le RLS ci sono. Sul database c'e' la funzione
+   `gest_puo_sezione(user_id, sezione)` e la chiamano le regole di
+   `gest_ore`, `gest_rapportini`, `gest_lavori`, `gest_spese`, `gest_foto`,
+   `gest_video`, `gest_fatture`, `gest_clienti`, `gest_scadenze` e
+   `gest_carte_movimenti` (controllato riga per riga in `pg_policies` il
+   5 set). Quindi le spunte comandano in due punti: qui, su cosa si VEDE, e
+   sul database, su cosa si PUO' SCRIVERE E LEGGERE davvero — anche
+   chiamando Supabase da fuori.
+   ⛔ L'UNICO BUCO RIMASTO: `gest_spese` ha la regola per INSERIRE
+   (`gest_spese_team_insert`) ma NESSUNA regola per LEGGERE. L'operaio
+   scrive una spesa e poi non la rivede piu'.
    ============================================================ */
 /* 13 agosto 2026 — LA CASELLA MAI TOCCATA
    Le persone create prima che i permessi esistessero hanno la casella vuota
@@ -1546,7 +1567,11 @@ let RAP_ORE={};            /* id operatore -> ore scelte con i pulsanti */
 
 async function caricaSquadra(){
   if(!puo("rapportini")){SQUADRA=[];return;}
-  /* gest_squadra_nomi e' una VISTA con dentro solo id, reparto e nome.
+  /* ⚠️ 5 set 2026: `gest_squadra_nomi` sembra vuota se la si guarda da
+     amministratore (→0← righe) — ma NON e' roba morta. E' una VISTA che
+     filtra su `auth.uid()`: chi la interroga senza essere loggato non vede
+     niente per costruzione. Serve, ed e' usata qui sotto.
+     gest_squadra_nomi e' una VISTA con dentro solo id, reparto e nome.
      Il costo orario e i documenti dei colleghi non escono da li'. */
   const {data,error}=await sb.from("gest_squadra_nomi")
     .select("id,nome,mestiere_id").eq("user_id",MIO.impresaId).order("nome");
