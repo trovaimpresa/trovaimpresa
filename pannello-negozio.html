@@ -2971,7 +2971,7 @@
       </div>
       <div id="chat-aperta" style="display:none">
         <a href="javascript:void(0)" onclick="tornaAConversazioni()" style="cursor:pointer;color:#7c3aed;font-size:0.95rem;font-weight:700;display:inline-block;margin-bottom:12px">← Torna alle conversazioni</a>
-        <button onclick="eliminaConversazione()" style="margin-left:12px;margin-bottom:12px;padding:6px 12px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">🗑 Elimina conversazione</button>
+        <button onclick="togliConversazioneDalMioElenco()" style="margin-left:12px;margin-bottom:12px;padding:6px 12px;background:#5b6b80;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">📥 Togli dal mio elenco</button>
         <button id="btn-blocco-cliente" onclick="toggleBloccoCliente()" style="margin-left:8px;margin-bottom:12px;padding:6px 12px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">🚫 Blocca cliente</button>
         <div class="msg-messages" id="msg-messages"></div>
         <div class="msg-input-row">
@@ -6378,11 +6378,30 @@ function msgEsc(s) {
 let msgConversazioneAperta = null;
 let msgRealtimeChannel = null;
 
+/* ⛔ 5 SETTEMBRE 2026 — LE CONVERSAZIONI TOLTE DALL'ELENCO.
+   Non si cancella piu' niente: quello che l'impresa toglie finisce in
+   `chat_nascoste` (impresa_id, conversation_id, quando) e da qui si salta.
+   ⚠️ Si salta SOLO se dopo `quando` non e' arrivato nient'altro: se il
+   cliente riscrive, la conversazione TORNA in elenco da sola. Se no
+   l'impresa perderebbe un messaggio nuovo senza accorgersene, che e' peggio
+   del problema che stiamo sistemando. */
+async function leggiConversazioniNascoste() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/chat_nascoste?impresa_id=eq.${impresaCorrente.id}&select=conversation_id,quando`, { headers: await chatHdr() });
+    if (!r.ok) return {};                       // la tabella non c'e' ancora: si mostra tutto
+    const righe = await r.json();
+    const mappa = {};
+    (Array.isArray(righe) ? righe : []).forEach(x => { mappa[x.conversation_id] = x.quando; });
+    return mappa;
+  } catch (e) { return {}; }                    // un errore non deve mai nascondere i messaggi
+}
+
 async function caricaListaConversazioniSilenziosa() {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/chat_messaggi?impresa_id=eq.${impresaCorrente.id}&order=created_at.desc`, { headers: await chatHdr() });
     const data = await r.json();
-    renderListaConversazioni(Array.isArray(data) ? data : []);
+    const nascoste = await leggiConversazioniNascoste();
+    renderListaConversazioni(Array.isArray(data) ? data : [], nascoste);
   } catch (e) { console.error(e); }
 }
 
@@ -6391,9 +6410,10 @@ async function caricaConversazioni() {
   sottoscriviRealtimeMessaggi();
 }
 
-function renderListaConversazioni(rows) {
+function renderListaConversazioni(rows, nascoste) {
   const lista = document.getElementById('lista-conversazioni');
   if (!lista) return;
+  nascoste = nascoste || {};
   const gruppi = {};
   rows.forEach(m => { (gruppi[m.conversation_id] = gruppi[m.conversation_id] || []).push(m); });
   const conv = Object.keys(gruppi).map(convId => {
@@ -6401,6 +6421,13 @@ function renderListaConversazioni(rows) {
     const ultimo = msgs[0];
     const nonLetti = msgs.some(m => m.mittente === 'cliente' && m.letto === false);
     return { convId, ultimo, nonLetti };
+  }).filter(c => {
+    /* tolta dall'elenco? si salta, ma solo se non e' arrivato niente dopo */
+    const quando = nascoste[c.convId];
+    if (!quando) return true;
+    const t = Date.parse(quando), u = Date.parse(c.ultimo && c.ultimo.created_at);
+    if (isNaN(t) || isNaN(u)) return true;      // date illeggibili: si mostra
+    return u > t;                               // il cliente ha riscritto: torna
   });
   if (!conv.length) {
     lista.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div>Nessun messaggio ricevuto</div>';
@@ -6445,18 +6472,35 @@ function tornaAConversazioni() {
   caricaConversazioni();
 }
 
-async function eliminaConversazione() {
+/* ⛔ 5 SETTEMBRE 2026 — PRIMA QUESTO BOTTONE CANCELLAVA ANCHE LA COPIA DEL
+   CLIENTE. Faceva `DELETE from chat_messaggi where conversation_id = ...`:
+   le righe sparivano per tutti e due, e il cliente si ritrovava la
+   conversazione vuota senza sapere perche'. Il 2 settembre il bottone del
+   CLIENTE era gia' stato sistemato allo stesso modo; questo era rimasto.
+   Adesso non si cancella niente: si scrive una riga in `chat_nascoste` e la
+   conversazione sparisce solo da QUESTO elenco. */
+async function togliConversazioneDalMioElenco() {
   if (!msgConversazioneAperta) return;
-  if (!confirm('Vuoi eliminare questa conversazione? I messaggi verranno cancellati per entrambi.')) return;
+  if (!confirm('La conversazione sparisce dal tuo elenco. I messaggi NON vengono cancellati: il cliente conserva la sua copia, e se ti riscrive la conversazione torna qui. Vuoi continuare?')) return;
   const convId = msgConversazioneAperta.convId;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/chat_messaggi?conversation_id=eq.${encodeURIComponent(convId)}`, {
-      method: 'DELETE',
-      headers: await chatHdr({ 'Prefer': 'return=minimal' })
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/chat_nascoste`, {
+      method: 'POST',
+      headers: await chatHdr({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ impresa_id: impresaCorrente.id, conversation_id: convId, quando: new Date().toISOString() })
     });
-    if (!res.ok) { console.error('Eliminazione conversazione fallita:', res.status, await res.text()); return; }
+    if (!res.ok) {
+      /* ⚠️ non si tace: prima un errore qui non si vedeva e la conversazione
+         restava li' senza spiegazione */
+      alert('Non sono riuscito a toglierla dall\'elenco. Riprova fra poco.');
+      console.error('chat_nascoste fallita:', res.status, await res.text());
+      return;
+    }
     tornaAConversazioni();
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    alert('Non sono riuscito a toglierla dall\'elenco. Riprova fra poco.');
+    console.error(e);
+  }
 }
 
 function setBloccoBtn(bloccato) {
