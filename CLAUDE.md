@@ -20979,7 +20979,13 @@ in elenco, più uno trovato strada facendo (il →12←). Tutti chiusi, pubblica
 | 10 | un **reparto fantasma** (cestinato) restava aperto e non si apriva più niente | tutti |
 | 12 | il database **rifiutava il «Tipo»** del mezzo scritto a mano | Mezzi |
 
-Il →11← resta aperto.
+Il →11← e' stato **CANCELLATO il 5 settembre 2026**, deciso da Alex.
+⛔ Perche': nella tabella qui sopra la riga →11← **non c'e'** (ci sono 1-10 e 12) e
+in nessun file del progetto e' scritto cosa fosse. Una voce che dice «resta
+aperto» senza dire di cosa parla non e' un lavoro: e' rumore.
+⚠️ **REGOLA: un difetto si scrive nel quaderno con COSA E' e DOVE SI VEDE, mai
+col solo numero.** Un numero da solo, fra due settimane, non lo capisce piu'
+nessuno — nemmeno chi l'ha scritto.
 
 ## ⛔ LA FAMIGLIA DEI DIFETTI DEI SOLDI: LE COPIE DELLA STESSA FORMULA
 
