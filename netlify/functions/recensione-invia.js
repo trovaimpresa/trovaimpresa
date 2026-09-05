@@ -40,6 +40,7 @@ async function inviaEmail(to, subject, html) {
 function emailConferma(nome, nomeImpresa, link) {
   return `
       <div style="font-family:system-ui,Arial,sans-serif;font-size:17px;line-height:1.6;color:#12233a;max-width:560px">
+        <div style="text-align:center;padding:0 0 20px"><a href="https://trovaimpresa.com" style="text-decoration:none"><img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto"></a></div>
         <p>Ciao ${esc(nome)},</p>
         <p>hai scritto una recensione per <strong>${esc(nomeImpresa)}</strong> su TrovaImpresa.</p>
         <p><strong>Manca un ultimo passo:</strong> clicca il bottone qui sotto e la recensione va online.</p>

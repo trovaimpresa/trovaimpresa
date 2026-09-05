@@ -39,6 +39,7 @@ function corpoHtml(messaggio, nomeFile, mittenteNome) {
     .join('');
   return '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f7fb">'
     + '<div style="max-width:600px;margin:0 auto;padding:28px 22px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">'
+    +   '<div style="text-align:center;padding:0 0 18px"><a href="https://trovaimpresa.com" style="text-decoration:none"><img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto"></a></div>'
     +   '<div style="background:#fff;border-radius:14px;padding:30px 28px">'
     +     '<div style="font-size:22px;font-weight:800;color:#0a2a4d;margin-bottom:22px">'
     +       '<span style="color:#0066ff">Trova</span><span style="color:#0a2a4d">Impresa</span></div>'

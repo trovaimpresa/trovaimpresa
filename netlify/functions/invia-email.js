@@ -10,6 +10,12 @@ exports.handler = async function(event) {
     to: ['info@trovaimpresa.com'],
     subject: '📩 Nuovo messaggio da ' + nome,
     html: `
+      <div style="text-align:center;padding:16px 0 20px">
+        <a href="https://trovaimpresa.com" style="text-decoration:none">
+          <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+               style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+        </a>
+      </div>
       <h2>Nuovo messaggio dal sito</h2>
       <p><strong>Nome:</strong> ${nome}</p>
       <p><strong>Email:</strong> ${email}</p>

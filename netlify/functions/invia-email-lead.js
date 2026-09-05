@@ -18,6 +18,12 @@ exports.handler = async function(event) {
 
   const html = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="text-align:center;padding:16px 0 20px">
+          <a href="https://trovaimpresa.com" style="text-decoration:none">
+            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+          </a>
+        </div>
       <div style="background:linear-gradient(135deg,#FF6B35,#b84a0a);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
         <h1 style="color:white;margin:0;font-size:22px">🚀 TrovaImpresa</h1>
       </div>

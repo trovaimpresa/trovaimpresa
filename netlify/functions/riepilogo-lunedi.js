@@ -276,6 +276,12 @@ function costruisciEmail(d) {
     : '';
 
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:640px;margin:0 auto;color:#22303f;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #dfe5ee">
+  <div style="text-align:center;padding:16px 0 20px">
+    <a href="https://trovaimpresa.com" style="text-decoration:none">
+      <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+           style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+    </a>
+  </div>
   <div style="background:linear-gradient(135deg,#0a2a4d,#0066ff);padding:30px 26px">
     <div style="color:#ffffff;font-size:24px;font-weight:800;line-height:1.3;margin:0">La tua settimana</div>
     <div style="color:#c9dcff;font-size:16px;margin-top:8px">${esc(nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi))}${d.azienda ? ' &middot; ' + esc(d.azienda) : ''}</div>

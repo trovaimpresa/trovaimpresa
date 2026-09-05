@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="it">
+<head><meta charset="utf-8"><title>Modello email — Conferma iscrizione</title></head>
+<body>
+<!--
+  ⛔ QUESTO FILE NON E' UNA PAGINA DEL SITO.
+  E' la COPIA di lavoro del modello dell'email di conferma iscrizione, che
+  vive dentro Supabase (Authentication → Emails → Confirm signup).
+  Sta in `docs/`, che netlify.toml chiude con un 404: non va online.
+  Sta qui solo perche' un modello che vive in un pannello, e da nessun'altra
+  parte, il giorno che qualcuno lo cancella per sbaglio non si ricostruisce.
+
+  ⚠️ 5 SETTEMBRE 2026 — COSA C'ERA CHE NON ANDAVA nel modello di prima:
+   1. l'intestazione diceva «Impresa» in arancione ANCHE a chi si iscriveva
+      come artigiano, negozio o professionista. Adesso non si scrive nessuna
+      categoria: l'email non ha bisogno di saperlo, e cosi' non puo' sbagliare.
+   2. il pulsante era VERDE. I colori del sito sono blu e arancione.
+   3. sotto il pulsante c'era stampato l'indirizzo intero
+      `https://nacvrsgkyfavykxjxszu.supabase.co/auth/v1/verify?token=...`:
+      chi legge vede un indirizzo che non e' trovaimpresa.com, e i filtri
+      antispam lo contano contro. Adesso lo stesso link c'e' ancora (serve, se
+      il pulsante non funziona) ma dietro una scritta, non a caratteri nudi.
+   4. in cima non c'era il LOGO ma solo la scritta «TrovaImpresa» in bianco su
+      barra blu. Adesso c'e' il logo vero, lo stesso di tutte le altre email:
+      https://trovaimpresa.com/img/logo-email.png
+      ⚠️ L'indirizzo RESTA di Supabase: cambiarlo vuol dire comprare il
+      dominio personalizzato per l'accesso, che sul piano Free non c'e'.
+
+  L'UNICA cosa che non si puo' togliere e' {{ .ConfirmationURL }}: e' il link
+  che attiva l'account. Se sparisce, nessuno riesce piu' a iscriversi.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e3e8ef">
+
+      <tr><td align="center" style="background:#ffffff;padding:26px 24px 18px">
+        <a href="https://trovaimpresa.com" style="text-decoration:none">
+          <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+               style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+        </a>
+      </td></tr>
+
+      <tr><td style="padding:30px 26px 8px">
+        <div style="font-size:21px;font-weight:800;color:#0f2744;line-height:1.35;margin-bottom:14px">
+          Benvenuto su TrovaImpresa
+        </div>
+        <div style="font-size:16px;line-height:1.6;color:#33404f">
+          Manca un passaggio solo: <strong>conferma che questo indirizzo è tuo</strong>.
+          Da quel momento il tuo profilo è attivo e i clienti possono trovarti.
+        </div>
+      </td></tr>
+
+      <tr><td align="center" style="padding:26px 26px 10px">
+        <a href="{{ .ConfirmationURL }}"
+           style="display:inline-block;background:#0066ff;color:#ffffff;text-decoration:none;
+                  font-size:17px;font-weight:700;padding:15px 34px;border-radius:10px">
+          Conferma la mia email
+        </a>
+      </td></tr>
+
+      <tr><td align="center" style="padding:6px 26px 26px">
+        <div style="font-size:14px;line-height:1.6;color:#61738a">
+          Il pulsante non funziona?
+          <a href="{{ .ConfirmationURL }}" style="color:#0066ff;font-weight:700">Apri il link di conferma</a>
+        </div>
+      </td></tr>
+
+      <tr><td style="padding:0 26px 26px">
+        <div style="background:#fff8ec;border:1px solid #f0d9b0;border-radius:10px;padding:14px 16px;
+                    font-size:14px;line-height:1.6;color:#6b5330">
+          Non trovi questa email fra le altre? Controlla nella cartella
+          <strong>Spam</strong> o <strong>Posta indesiderata</strong>: a volte finisce lì.
+        </div>
+      </td></tr>
+
+      <tr><td style="padding:0 26px 28px">
+        <div style="border-top:1px solid #e9edf3;padding-top:16px;font-size:14px;line-height:1.6;color:#61738a">
+          Non ti sei iscritto tu? Ignora questa email: senza il tuo clic non
+          viene attivato niente.
+        </div>
+      </td></tr>
+
+      <tr><td align="center" style="background:#0f2744;padding:16px 24px">
+        <div style="font-size:13px;line-height:1.6;color:#a9c9f5">
+          TrovaImpresa — trovaimpresa.com<br>
+          Scrivici a <a href="mailto:info@trovaimpresa.com" style="color:#ffffff">info@trovaimpresa.com</a>
+        </div>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

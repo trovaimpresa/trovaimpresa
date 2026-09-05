@@ -146,6 +146,12 @@ exports.handler = async function (event) {
   // ---------- 1) EMAIL DI AVVISO A TROVAIMPRESA (invariata) ----------
   const htmlAdmin = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="text-align:center;padding:16px 0 20px">
+          <a href="https://trovaimpresa.com" style="text-decoration:none">
+            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+          </a>
+        </div>
       <div style="background:linear-gradient(135deg,#0066ff,#0a2a4d);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
         <h1 style="color:white;margin:0;font-size:22px">📞 Nuova richiesta cliente</h1>
       </div>
@@ -262,6 +268,12 @@ exports.handler = async function (event) {
         const link = SITO + '/prendi-richiesta?t=' + encodeURIComponent(token);
         const htmlImp = `
           <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="text-align:center;padding:16px 0 20px">
+          <a href="https://trovaimpresa.com" style="text-decoration:none">
+            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+          </a>
+        </div>
             <div style="background:linear-gradient(135deg,#0066ff,#0a2a4d);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
               <h1 style="color:white;margin:0;font-size:22px">🔔 Nuova richiesta nella tua zona</h1>
             </div>

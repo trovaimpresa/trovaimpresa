@@ -65,6 +65,7 @@ function corpo(impresa, righe) {
 
   return `<!DOCTYPE html><html lang="it"><body style="margin:0;background:#f7f9fa;font-family:'Trebuchet MS',Arial,sans-serif;color:#1f2933">
   <div style="max-width:600px;margin:0 auto;padding:26px 20px">
+    <div style="text-align:center;padding:0 0 20px"><a href="https://trovaimpresa.com" style="text-decoration:none"><img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto"></a></div>
     <h1 style="font-size:23px;line-height:1.3;color:#0a2a4d;margin:0 0 14px">
       ${uno ? 'Hai una richiesta che ti aspetta' : 'Hai ' + righe.length + ' richieste che ti aspettano'}
     </h1>

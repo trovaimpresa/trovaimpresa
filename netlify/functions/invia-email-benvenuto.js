@@ -175,6 +175,9 @@ exports.handler = async function(event) {
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;margin:0;padding:24px 0;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,sans-serif;">' +
       '<tr><td align="center">' +
         '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(10,42,77,0.08);">' +
+          '<tr><td style="background:#ffffff;padding:20px 32px 4px;text-align:center;">' +
+            '<a href="https://trovaimpresa.com" style="text-decoration:none"><img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto"></a>' +
+          '</td></tr>' +
           '<tr><td style="background:#0066ff;padding:26px 32px;text-align:center;">' +
             '<div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">🏗️ TrovaImpresa</div>' +
             '<div style="font-size:13px;color:#dbe8ff;margin-top:4px;">Il portale delle imprese e degli artigiani</div>' +

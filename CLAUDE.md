@@ -21485,3 +21485,49 @@ frase («serve la tua password admin per provarlo») si poteva leggere come una
 richiesta. **Non era.** Quando una prova richiede le sue credenziali, la frase
 giusta e': «questa prova la puoi fare solo tu, ecco i clic» — mai una che
 somigli a una richiesta. Claude non usa le sue password in nessun caso.
+
+## IL LOGO IN CIMA A TUTTE LE EMAIL (5 set, mattina)
+Alex: «adesso mettiamo il logo di TrovaImpresa su TUTTE le email». Fatto in
+→21← funzioni di `netlify/functions/` piu' il modello di conferma di Supabase.
+
+**La fascia e' UNA, sempre uguale, e va incollata cosi' com'e':**
+```html
+<div style="text-align:center;padding:16px 0 20px">
+  <a href="https://trovaimpresa.com" style="text-decoration:none">
+    <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+         style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+  </a>
+</div>
+```
+⛔ **Chi aggiunge una email nuova aggiunge anche questa fascia.** Il banco
+`prove-claude/banchi-fissi/email/banco-logo-email.js` (`./gira-email.sh`)
+trova da solo le funzioni che mandano email e pretende che ce l'abbiano
+tutte, **identica**: calcola l'md5 del tag `<img>` e vuole **una sola**
+impronta in tutte quante. →21← copie scritte a mano sono →21← occasioni di
+scriverne una diversa, e quella diversa la vede solo il cliente.
+
+**Perche' un PNG e non l'SVG**: nelle email l'SVG non si vede quasi da
+nessuna parte (Gmail e Outlook lo buttano). `img/logo-email.png` e'
+→880×372← punti — il doppio di →440×186← — perche' sugli schermi fitti un
+logo alla misura giusta si vede sgranato. Sfondo bianco, quindi va messo su
+fondo chiaro: nell'email di conferma **la barra blu scura in cima e' stata
+sostituita** da una fascia bianca col logo.
+
+⚠️ **Il viewBox dell'SVG originale tagliava la «a» finale.** `img/trovaimpresa-logo.svg`
+ha `viewBox="-200 0 1200 600"`, ma il disegno vero sta in
+x →-166.045←, y →106.2←, largo →1188.81←, alto →473.8←. Chi rigenera il PNG
+usa quelle misure (piu' →24← di margine), non il viewBox scritto nel file.
+
+⛔ **Non si dice «c'e' il logo» perche' il codice contiene la riga giusta.**
+L'email e' stata anche DISEGNATA davvero (Chromium, schermata a →2←x) e
+guardata: logo intero, centrato, sopra il titolo. Un banco misura il testo,
+non come viene.
+
+## ⚠️ IL CONTROLLO PRIMA DEL PUSH PUO' DARE UN ROSSO FINTO
+Il →5← set `node tools/controllo-push.js` ha detto che `gestionale-app.html`
+(→1← MB) aveva «uno `<script>` aperto e mai chiuso». **Non era vero**: →17←
+aperture e →17← chiusure, `</html>` al suo posto. Il file era stato letto
+**mentre veniva salvato**, quindi a meta'. Rilanciato subito dopo: verde.
+⚠️ Prima di correre a «recuperare da Git» un file grosso, **rilanciare il
+controllo**. Un rosso che sparisce da solo era una lettura a meta', non un
+file rotto.

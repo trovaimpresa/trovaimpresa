@@ -54,6 +54,12 @@ async function inviaEmail(to, subject, html) {
 function emailRinnovo(nome, spazio, citta, scadenza) {
   return `
   <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="text-align:center;padding:16px 0 20px">
+          <a href="https://trovaimpresa.com" style="text-decoration:none">
+            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+          </a>
+        </div>
     <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
       <h1 style="color:white;margin:0;font-size:22px">Il tuo spazio scade fra una settimana</h1>
     </div>
