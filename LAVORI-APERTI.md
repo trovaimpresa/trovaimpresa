@@ -161,7 +161,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - ✅ [5 set] **SU STRIPE ERA ACCESO →1← AVVISO SU →7←** (solo `checkout.session.completed`): rinnovi, disdette, rimborsi e pagamenti lenti non arrivavano mai. **Accesi tutti e →7← il 5 set**, controllati uno per uno sulla schermata. Non aveva ancora fatto danni: →0← imprese con `premium_pagato=true`, nessuno aveva ancora comprato un abbonamento
 - [5 set] **`Welcome Clean` (impresa →152←) risulta aver disdetto il →26 agosto← ma ha ancora `piano = premium`.** Non costa niente (ha `premium_pagato = false`, come tutti: e' un piano regalato), ma e' una riga che dice due cose diverse. Da guardare
 
-- [5 set] **La cartella `Claude outputs/` dentro il progetto** — →29← file, →3,7← MB di schermate. Non e' in `.gitignore`: un `git add -A` e finiscono online. →2← righe da aggiungere, ma il file e' di Alex
+- ✅ [5 set] **La cartella `Claude outputs/` — CHIUSA.** In `.gitignore` e nella lista che `controllo-push.js` salta. Le due cose insieme: il gitignore ferma git, il controllo guarda il disco. Avvisi «da guardare» da →19← a →18←
 - [5 set] **`charge.dispute.created` (la contestazione della carta)**: non e' ascoltata. E' piu' rara di un rimborso ma piu' cara, perche' Stripe toglie i soldi E la commissione. Da decidere se tapparla adesso o quando capitera'
 
 - [5 set] **Il cestino dell'admin non porta via i file.** `admin.html` cancella un preventivo passando per `netlify/functions/admin-dati.js`, che lavora con la chiave di servizio sul database e basta: la riga sparisce, gli allegati restano. Il pannello dell'impresa adesso li porta via, l'admin no. Da decidere se sistemare anche quella strada (si fa dentro `admin-dati.js`, non e' lavoro grosso)

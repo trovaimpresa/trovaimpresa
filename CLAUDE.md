@@ -22170,3 +22170,13 @@ su Stripe e si aggiunge a mano con `registra_pagamento`.
 ⚠️ E anche qui **il rimborso non e' gestito**: se si rimborsa un annuncio,
 `stato` resta `pagato`, l'annuncio continua a girare e l'incasso resta
 scritto. Stesso buco tappato oggi per gli abbonamenti.
+
+## LA CARTELLA «Claude outputs» — CHIUSA (5 set)
+Messa in `.gitignore` (`Claude outputs/`) **e** nella lista di quelle che
+`tools/controllo-push.js` salta.
+⚠️ **Le due cose vanno insieme.** Il `.gitignore` ferma git; il controllo
+prima del push guarda i file sul disco, non quelli in git — e senza la
+seconda riga continuava a stampare un avviso su un file che non e' del
+sito. **Un avviso finto ripetuto insegna a saltare gli avvisi**, ed e' il
+modo piu' facile per far passare inosservato quello vero.
+Avvisi «DA GUARDARE» prima: →19←. Dopo: →18←.
