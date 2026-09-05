@@ -22180,3 +22180,123 @@ seconda riga continuava a stampare un avviso su un file che non e' del
 sito. **Un avviso finto ripetuto insegna a saltare gli avvisi**, ed e' il
 modo piu' facile per far passare inosservato quello vero.
 Avvisi «DA GUARDARE» prima: →19←. Dopo: →18←.
+
+## ⛔ IL COLLAUDO DAL VIVO DEL PAGAMENTO: NON SI FA (5 set, deciso da Alex)
+Avevo proposto un pagamento vero seguito da rimborso, per vedere
+l'ingranaggio girare in produzione. **Proposta fatta male, e Alex ha avuto
+ragione a fermarla.**
+
+Il conto vero: i →19 €← tornano indietro col rimborso, ma **la commissione
+di Stripe no**. Ogni giro costa ~→0,54 €← buttati, e lascia il saldo Stripe
+sotto zero — non «assorbe» il negativo di prima, come gli avevo scritto di
+fretta: dopo il rimborso il saldo torna negativo, e piu' grosso.
+⛔ **Su una cosa di soldi non si dice una mezza verita' detta di fretta.**
+
+E soprattutto: **i banchi provano gia' tutti quei casi** (`./gira-stripe.sh`,
+→37← verdi, rimborso intero, parziale, doppio avviso, crediti gia' spesi,
+rimborso senza sessione). Far spendere per provare una cosa gia' provata
+non e' collaudo, e' rumore.
+
+⚠️ **Non riproporlo.** Il giorno che arrivera' un pagamento vero di un
+cliente vero, quello sara' il collaudo — gratis, e con i →7← avvisi Stripe
+adesso accesi.
+
+---
+
+# 6 SETTEMBRE 2026 — I TRE ATTREZZI CIECHI
+
+Giornata corta e tutta di attrezzi: nessuna pagina del sito e' stata toccata.
+Tre cose che *sembravano* funzionare e non misuravano piu' niente.
+
+## 1. `tools/rimanda-conferme.js` — chiudere la porta ha spento la sveglia
+
+Il →5← settembre la tabella `imprese` e' stata chiusa: dalla vista pubblica
+`email` e `email_confermata` non escono piu', ed e' giusto cosi'. Ma
+`rimanda-conferme.js` leggeva con la **chiave pubblica**: da quel momento
+trovava →0← righe e usciva contento. Non un errore, non un avviso: sembrava
+soltanto che non ci fosse piu' nessuno da richiamare. Erano →24←.
+
+⛔ **LA COSA DA RICORDARE: quando si chiude una porta, si controlla chi ci
+passava.** Un programma che legge con la chiave pubblica una tabella appena
+chiusa non si rompe — dice zero. E zero e' la bugia piu' difficile da vedere.
+
+Adesso legge con la **chiave di servizio**, che sta SOLO in una variabile
+d'ambiente (`$env:SUPABASE_SERVICE_ROLE_KEY`) e non deve finire in nessun
+file, se no va su Git. Se manca, il programma non prova nemmeno: si ferma e
+scrive i →7← passi a clic per prenderla. Se al posto di quella giusta gli
+dai la chiave pubblica, se ne accorge (legge il `role` dentro la chiave) e
+si ferma lo stesso, invece di leggere zero righe e ricascarci.
+
+I numeri contati dal database il 6 set: →117← imprese vere · →93←
+confermate · **→24← non confermate** · →1← si salta (doppione, stesso
+telefono di una gia' dentro) → **→23← mail**.
+
+⚠️ Il testo dell'email **non e' nel sito**: `auth/v1/resend` fa rimandare il
+template «Confirm signup» che sta in Supabase → Authentication → Emails.
+Prima di mandare, lo legge e lo approva Alex.
+
+Banco: `prove-claude/banchi-fissi/conferme/banco-chiave-servizio.js`
+(`./gira-conferme.sh`) — →7← verdi. Col file di prima: →5← rossi.
+Non manda mai nessuna mail: `--invia` nel banco non si usa mai.
+
+## 2. Il controllo colonne-fantasma guardava meta' delle strade
+
+Il →5← settembre si e' scoperto che `mappa.html` chiedeva →5← colonne che
+non esistono e il database rispondeva →400←: la mappa era vuota da
+settimane. Il controllo colonne non l'aveva mai detto, perche' guardava
+**solo** i `.from('tabella')` della libreria Supabase. Mezzo sito pero'
+chiama il database scrivendo l'indirizzo a mano:
+
+    `${SUPA_URL}/rest/v1/imprese_pubbliche?select=id,nome,citta&order=id.asc`
+
+Per il controllo quella riga non esisteva. Adesso legge anche queste: le
+colonne del `select=`, quelle dell'`order=` e quelle usate come filtro
+(`citta=eq.Rieti`), comprese le tabelle legate `altra(col,col)`.
+
+⛔ **E IL PEZZO CHE VALE DI PIU': adesso il referto DICE QUANTE STRADE HA
+GUARDATO.** Prima scriveva «Nessuna colonna fantasma» e uno si fidava, senza
+sapere che stava guardando →1278← punti su →1322←. Un controllo che non
+dice quanto ha guardato non e' un controllo, e' un incoraggiamento.
+
+    file guardati: 407
+    strade guardate: 1322  (punti .from(...): 1278 · indirizzi REST scritti a mano: 44)
+
+Banco: `prove-claude/banchi-fissi/controllo/banco-indirizzi-rest.js`
+(`./gira-controllo.sh`) — →8← verdi. Col controllo di prima: →5← rossi.
+Il banco si costruisce una finta pagina con →3← colonne inventate e →3←
+vere, in una cartella finta fuori dal progetto: non tocca niente.
+
+### 2-bis. `colonne-vere.txt` era gia' vecchio dopo un giorno
+Rifatto il →5← set, il →6← dava gia' →4← falsi allarmi
+(`gest_spese.creato_da`, aggiunta il 5) e — peggio — **non aveva
+`imprese_pubbliche`**, la vista nuova, che il sito nomina in →98← punti.
+Cioe': la tabella piu' importante del sito non la controllava nessuno.
+Adesso →128← tabelle. Copia di prima: `colonne-vere-prima-6set.txt`.
+⚠️ Va rifatto **ogni volta che si aggiunge o si toglie una colonna o una
+vista**, non «ogni tanto»: la riga di SQL sta in fondo al file stesso.
+
+## 3. I rapportini dei colleghi
+
+`gest_rapportini_team_read` chiedeva solo `gest_puo_sezione(user_id,
+'rapportini')`, cioe' «hai la spunta». Chiunque in squadra con quella spunta
+leggeva note e materiali scritti da tutti gli altri. Le ORE erano gia'
+strette (`gest_ore_team_read` controlla che siano le sue): erano rimasti
+indietro solo i rapportini.
+
+Scelta di Alex il →6← set: **stretto, ma il capo vede tutti.**
+- titolare → li vede tutti (regola `gest_rapportini_own`, non toccata)
+- `preposto` e `segretaria` → li vedono tutti (il capo squadra che scrive le
+  ore per la squadra i rapportini della squadra li deve vedere davvero)
+- `operaio` → solo quelli firmati da lui (`creato_da` = il suo operatore)
+
+`sql/rapportini-solo-i-suoi.sql`, applicato al database il 6 set.
+
+⚠️ **A schermo non cambia niente**, ed e' il punto: `gestionale-operatore.html`
+filtrava gia' `.eq("creato_da", MIO.operatoreId)`. Il buco stava solo nel
+database, cioe' esattamente dove uno puo' chiedere i rapportini degli altri
+**senza passare dalla pagina**. Un filtro scritto nella pagina non e' un
+permesso.
+
+Banco: `prove-claude/banchi-fissi/operatore/permessi-rapportini.sql`
+(si incolla nell'SQL Editor, e' dentro `BEGIN … ROLLBACK`) — →9← verdi.
+Fatto girare col permesso di PRIMA: →3← rosse (le prove 2, 3 e 4).

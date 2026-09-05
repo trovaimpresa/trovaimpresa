@@ -4,16 +4,33 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: sabato 5 settembre 2026 (sera) — GESTIONALE OPERATORE per tutti e 4 i ruoli, primo operaio VERO, elenco iscritti chiuso
+Ultimo aggiornamento: domenica 6 settembre 2026 — rimanda-conferme con la chiave di servizio, il controllo colonne vede gli indirizzi REST, i rapportini si leggono solo i suoi
 
 ---
+
+## 🆕 IL 6 SETTEMBRE — i tre punti del prompt
+
+### ✅ Chiusi
+- **`tools/rimanda-conferme.js` legge di nuovo** · adesso vuole la **chiave di servizio**, passata da fuori (`$env:SUPABASE_SERVICE_ROLE_KEY`), MAI scritta in un file. Se manca si ferma e spiega a clic dove prenderla; se incolli per sbaglio quella pubblica se ne accorge e si ferma. Contati oggi dal database: →117← imprese vere, →93← confermate, **→24← non confermate**, di cui →1← si salta (doppione: «ms gruop», stesso telefono di una gia' dentro) → **→23← mail da mandare**. Banco: `prove-claude/banchi-fissi/conferme/banco-chiave-servizio.js` (→7← verdi; col file di prima →5← rossi). ⏳ **Manca solo**: Alex lancia il programma con la chiave, e prima approva il testo dell'email (sta in Supabase → Authentication → Emails → Confirm signup, NON nel sito)
+- **Il controllo colonne-fantasma adesso vede anche gli indirizzi REST scritti a mano** (voce →14←-bis, quella della mappa) · `prove-claude/controllo-colonne.js` guarda le stringhe `rest/v1/<tabella>?select=…&order=…&colonna=eq.…` e le confronta con `colonne-vere.txt`. Prima guardava →1278← punti; adesso ne guarda **→1322←**: →1278← `.from(...)` + **→44← indirizzi REST** che prima non vedeva nessuno. E lo SCRIVE nel referto, cosi' si sa quante strade ha guardato. Banco: `prove-claude/banchi-fissi/controllo/banco-indirizzi-rest.js` (→8← verdi; col controllo di prima →5← rossi)
+- **`colonne-vere.txt` rifatto** (era di ieri e gia' vecchio) · dava →4← falsi allarmi su `gest_spese.creato_da` e **non aveva `imprese_pubbliche`**, la vista nuova, usata in →98← punti: cioe' la tabella piu' importante del sito non era controllata da nessuno. Adesso →128← tabelle. Copia di prima in `colonne-vere-prima-6set.txt`
+- **L'operaio legge solo i rapportini SUOI** · `gest_rapportini_team_read` chiedeva solo «hai la spunta rapportini». Adesso: il **titolare** li vede tutti (regola sua, non toccata), **preposto e segretaria** li vedono tutti (il capo squadra che scrive le ore per la squadra deve vederli), l'**operaio** solo quelli firmati da lui. Scelta di Alex il 6 set. `sql/rapportini-solo-i-suoi.sql`, gia' applicato al database. Banco: `prove-claude/banchi-fissi/operatore/permessi-rapportini.sql` — →9← verdi; **col permesso di prima →3← rosse** (2, 3 e 4). ⚠️ A schermo non cambia niente: `gestionale-operatore.html` filtrava gia' `creato_da`; il buco era solo nel database, cioe' proprio dove uno poteva chiedere i rapportini degli altri senza passare dalla pagina
+
+### ⚖️ Ancora da decidere — il punto 4 (i gestionali da cantiere degli altri)
+Alex il 5 set aveva detto: **niente si costruisce senza avermelo chiesto prima.**
+Le →4← cose che agli altri (Fluida, busybusy, Connecteam, Raken) ci sono e qui no:
+timbratura entrata/uscita · funziona senza campo (offline) · GPS sulla timbratura ·
+ferie/permessi/malattia dall'app. La domanda e' sempre quella: *un'impresa
+smetterebbe di pagare TrovaImpresa se questa cosa non ci fosse?*
+⚠️ Se se ne fa uno, **timbratura e offline vanno insieme**: una timbratura che si
+perde senza campo e' peggio di non averla.
 
 ## 🆕 NATI IL 5 SETTEMBRE (sera) — dal collaudo con l'operaio vero
 
 ### 🔴 Da sistemare
-- **`tools/rimanda-conferme.js` non funziona piu'** · legge `imprese` con la **chiave pubblica** e vuole `email` e `email_confermata`, che dalla vista pubblica non escono. Da oggi trova →0← righe. ⛔ Va fatto girare con la **chiave di servizio** (ce l'ha solo Alex). E' il programmino che rimanda la conferma ai →24← iscritti che non l'hanno cliccata
-- **Il controllo colonne-fantasma non guarda gli indirizzi REST scritti a mano** · e' la voce →14←, ma peggio: `mappa.html` chiedeva →5← colonne che NON esistono (`nome_negozio`, `ragione_sociale`, `nome_impresa`, `categoria`, `via`), il database rispondeva **400** e **la mappa era vuota da chissa' quanto**. `controllo-colonne.js` guarda solo i `.select({...})`, non le stringhe `rest/v1/...?select=`. Sistemata la mappa (→75← spilli), NON sistemato il controllo
-- **L'operaio legge i rapportini dei colleghi** · `gest_rapportini_team_read` chiede solo il permesso «rapportini», non che il rapportino sia suo. Meno grave dei lavori (li' si poteva SCRIVERE), ma e' lo stesso tipo di buco · decide Alex
+- ✅ **`tools/rimanda-conferme.js` non funziona piu'** — CHIUSO il 6 set (vedi sopra) · legge `imprese` con la **chiave pubblica** e vuole `email` e `email_confermata`, che dalla vista pubblica non escono. Da oggi trova →0← righe. ⛔ Va fatto girare con la **chiave di servizio** (ce l'ha solo Alex). E' il programmino che rimanda la conferma ai →24← iscritti che non l'hanno cliccata
+- ✅ **Il controllo colonne-fantasma non guarda gli indirizzi REST scritti a mano** — CHIUSO il 6 set (vedi sopra) · e' la voce →14←, ma peggio: `mappa.html` chiedeva →5← colonne che NON esistono (`nome_negozio`, `ragione_sociale`, `nome_impresa`, `categoria`, `via`), il database rispondeva **400** e **la mappa era vuota da chissa' quanto**. `controllo-colonne.js` guarda solo i `.select({...})`, non le stringhe `rest/v1/...?select=`. Sistemata la mappa (→75← spilli), NON sistemato il controllo
+- ✅ **L'operaio legge i rapportini dei colleghi** — CHIUSO il 6 set (vedi sopra) · `gest_rapportini_team_read` chiede solo il permesso «rapportini», non che il rapportino sia suo. Meno grave dei lavori (li' si poteva SCRIVERE), ma e' lo stesso tipo di buco · decide Alex
 
 ### ⚖️ Decide Alex
 - ✅ **L'operaio finto RESTA** (deciso da Alex il 5 set) · nel database c'e' un secondo account vero (`prova.operaio@trovaimpresa.com`, codice PROVA1) + la persona «PROVA Operaio (finto, di Claude)» in Squadra + il lavoro «PROVA di Claude — potatura siepe» di oggi. **Serve**: senza, il collaudo dei permessi non si puo' rifare. Ma si vede nella tua Squadra. Tenere / buttare
@@ -66,7 +83,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ### 🔧 Attrezzi rotti — non li vede il cliente, ma ci fanno perdere difetti
 - ✅ **13.** `gestionale-config.html` — RIPRESO dalla storia di Git il 5 set (`d465677`) e rimesso a posto. Vedi sotto. // vecchia nota: TRONCATO · **guardato il 5 set: e' PEGGIO del previsto — la pagina e' MORTA DEL TUTTO** (uno `<script>` senza chiusura fa fallire tutto il blocco: niente login, niente elenchi, schermo bianco sotto il titolo). Anche la versione ONLINE e' troncata allo stesso punto, quindi il pezzo buono sta solo nella storia di Git · **aspetta il recupero da Alex**
-- ✔️ **14.** Il controllo colonne-fantasma non vede `.update(variabile)` — **CONTROLLATA il 5 set: ANCORA VERA, e si vede il perche'.** `prove-claude/controllo-colonne.js` riga →189←: `/\.(update|insert|upsert)\(\s*(\{|\[\s*\{)/` — pretende una **graffa** subito dopo la parentesi. `.update(dati)`, dove `dati` e' una variabile riempita con `Object.assign`, per lui non esiste. E' esattamente cosi' che il difetto della colonna `albo` e' sopravvissuto giorni
+- ✔️ **14.** Il controllo colonne-fantasma non vede `.update(variabile)` · ⚠️ la strada REST e' stata chiusa il 6 set, QUESTA (il `.update(variabile)`) e' ancora aperta — **CONTROLLATA il 5 set: ANCORA VERA, e si vede il perche'.** `prove-claude/controllo-colonne.js` riga →189←: `/\.(update|insert|upsert)\(\s*(\{|\[\s*\{)/` — pretende una **graffa** subito dopo la parentesi. `.update(dati)`, dove `dati` e' una variabile riempita con `Object.assign`, per lui non esiste. E' esattamente cosi' che il difetto della colonna `albo` e' sopravvissuto giorni
 - ✅ **15.** `colonne-vere.txt` — **RIFATTO il 5 set.** Era fermo al →30← agosto e dava **→20←** falsi allarmi (non →15←: erano cresciuti). Aggiornate `gest_mezzi`, `supporto_messaggi`, `preventivi`, `preventivi_safe`, `imprese`; tolta `nol_mezzi`, che non esiste piu'. Adesso il controllo dice «**Nessuna colonna fantasma**»
 - ✔️ **16.** Il banco dei preventivi del →29← agosto — **CONTROLLATO il 5 set: ANCORA SCADUTO, e adesso si sa perche'.** Fatto girare: **si rompe subito**. Ritaglia `calcolaParcella` e `impRiga` da `gestionale-app.html` e le fa girare da sole, ma quelle funzioni adesso usano `_cent`, `_centMult` e `_centPerc`, che stanno in `js/centesimi.js` — e il banco quel file non lo carica. Si sistema caricando `js/centesimi.js` prima, e spostando il banco in `banchi-fissi/`
 
@@ -154,6 +171,8 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 9. [set] **Collegare l'agente del lunedì alle skill nuove** man mano che si aggiungono
 
 ## ⚖️ DA DECIDERE — tocca ad Alex, Claude non decide
+
+- ❌ [5 set] **Collaudo dal vivo del pagamento: DECISO DI NO.** Ogni giro costa ~→0,54 €← di commissione buttata e lascia il saldo Stripe sotto zero. I banchi provano gia' tutti i casi. **Non riproporlo**: il collaudo sara' il primo pagamento vero di un cliente vero
 
 - [5 set] **L'annuncio pagato il →23 luglio← (impresa →67←) non e' nel registro incassi.** Non e' un difetto: la riga dell'incasso e' nata il →14 agosto←, dopo. Il numero si legge su Stripe e si mette a mano — →2← minuti, ma serve che Alex guardi quanto era
 - [5 set] **Il rimborso di un ANNUNCIO non e' gestito** (`stripe-webhook-pubblicita`): l'annuncio resterebbe `pagato` e continuerebbe a girare, e l'incasso resterebbe scritto. Stesso buco tappato oggi per gli abbonamenti. Da decidere se tapparlo anche qui

@@ -16,17 +16,83 @@
  * profilo. Farle confermare anche il primo vorrebbe dire creare il doppione
  * che abbiamo appena tolto di mezzo.
  *
- * USO
+ * ⛔ 6 SETTEMBRE 2026 — ADESSO VUOLE LA CHIAVE DI SERVIZIO
+ * Il 5 settembre la tabella `imprese` e' stata chiusa: dalla vista pubblica
+ * `email` e `email_confermata` non escono piu' (apposta). Con la chiave
+ * pubblica questo programma trovava 0 righe e sembrava che non ci fosse
+ * nessuno da richiamare. Adesso legge con la CHIAVE DI SERVIZIO, che
+ * NON sta scritta qui dentro e non deve finire su Git: si passa da fuori,
+ * in una variabile d'ambiente.
+ *
+ * USO — prima si mette la chiave, in PowerShell, UNA volta per finestra:
+ *   $env:SUPABASE_SERVICE_ROLE_KEY = "incolla-qui-la-chiave"
+ * poi:
  *   node tools/rimanda-conferme.js            → SOLO ELENCO, non manda niente
  *   node tools/rimanda-conferme.js --invia    → manda davvero
  *
  * Parte in modo innocuo apposta: si guarda la lista, poi si decide.
  * Fra una mail e l'altra aspetta 6 secondi, se no Supabase blocca per
  * troppe richieste.
+ *
+ * ⚠️ La chiave si chiude quando chiudi la finestra di PowerShell. E'
+ * voluto: cosi' non resta scritta da nessuna parte.
  */
 
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+
+
+/* ---------- LA CHIAVE DI SERVIZIO ----------
+   Sta SOLO nella variabile d'ambiente. Se non c'e', il programma si ferma
+   e spiega a clic dove prenderla: non prova nemmeno a leggere. */
+function chiaveDiServizio(ambiente) {
+  const env = ambiente || process.env;
+  return (env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+}
+
+/* e' davvero quella di servizio, o hai incollato per sbaglio quella pubblica? */
+function ruoloDellaChiave(chiave) {
+  if (!chiave) return 'niente';
+  if (chiave.indexOf('sb_secret_') === 0) return 'service_role';
+  if (chiave.indexOf('sb_publishable_') === 0) return 'anon';
+  const pezzi = chiave.split('.');
+  if (pezzi.length !== 3) return 'sconosciuta';
+  try {
+    const corpo = JSON.parse(Buffer.from(pezzi[1], 'base64').toString('utf8'));
+    return corpo.role || 'sconosciuta';
+  } catch (e) { return 'sconosciuta'; }
+}
+
+/* le intestazioni con cui si legge la tabella: la chiave arriva da fuori */
+function intestazioniLettura(chiave) {
+  return { apikey: chiave, Authorization: 'Bearer ' + chiave };
+}
+
+const SPIEGAZIONE = [
+  '',
+  '\u26d4 Manca la chiave di servizio. Non ho letto niente e non ho mandato niente.',
+  '',
+  'A CLIC, una volta sola per ogni finestra di PowerShell:',
+  '',
+  '  1. Apri https://supabase.com/dashboard nel browser (account pintoalessio@icloud.com)',
+  '  2. Clicca il progetto  nacvrsgkyfavykxjxszu',
+  '  3. In basso a sinistra: l\'ingranaggio  Project Settings',
+  '  4. Nella colonna di sinistra: API keys',
+  '  5. Riga  service_role  (c\'e\' scritto \u00absecret\u00bb): clicca Reveal, poi Copy',
+  '  6. Torna su PowerShell, nella cartella del sito, e incolla questa riga',
+  '     mettendo la chiave fra le virgolette:',
+  '',
+  '       $env:SUPABASE_SERVICE_ROLE_KEY = "qui-la-chiave"',
+  '',
+  '  7. Poi rilancia:  node tools/rimanda-conferme.js',
+  '',
+  '  Devi vedere: l\'elenco di chi non ha confermato. Niente mail: per mandarle',
+  '  davvero serve  --invia,  e prima si guarda l\'elenco.',
+  '',
+  '\u26a0\ufe0f La chiave NON va scritta dentro nessun file: finirebbe su Git.',
+  '   Chiudendo PowerShell sparisce da sola, ed e\' giusto cosi\'.',
+  ''
+].join('\n');
 
 const INVIA = process.argv.includes('--invia');
 const PAUSA_MS = 6000;
@@ -46,9 +112,9 @@ function gemellaConfermata(scheda, confermate) {
   return null;
 }
 
-async function leggiImprese() {
+async function leggiImprese(chiave) {
   const url = `${SUPABASE_URL}/rest/v1/imprese?select=id,nome,email,telefono,partita_iva,citta,created_at,email_confermata&is_test=eq.false&order=id.asc`;
-  const r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } });
+  const r = await fetch(url, { headers: intestazioniLettura(chiave) });
   if (!r.ok) throw new Error(`Supabase ${r.status}: ${await r.text()}`);
   return r.json();
 }
@@ -71,7 +137,17 @@ function giorni(iso) {
 // Se questo file viene solo importato (per collaudare le funzioni qui sopra)
 // non deve partire da solo, ne' provare a chiamare Supabase.
 async function main() {
-  const tutte = await leggiImprese();
+  const chiave = chiaveDiServizio();
+  const ruolo = ruoloDellaChiave(chiave);
+  if (!chiave) { console.log(SPIEGAZIONE); process.exit(1); }
+  if (ruolo !== 'service_role') {
+    console.log('\n\u26d4 Questa non e\' la chiave di servizio: e\' una chiave \u00ab' + ruolo + '\u00bb.');
+    console.log('   Con questa la tabella `imprese` risponde 0 righe ed e\' proprio il difetto');
+    console.log('   che stiamo chiudendo. Rifai il passo 5 e copia la riga  service_role.');
+    process.exit(1);
+  }
+
+  const tutte = await leggiImprese(chiave);
   const confermate = tutte.filter(x => x.email_confermata);
   const nonConfermate = tutte.filter(x => !x.email_confermata);
 
@@ -123,4 +199,4 @@ if (require.main === module) {
   main().catch(e => { console.error('\nSi e\' fermato:', e.message); process.exit(1); });
 }
 
-module.exports = { gemellaConfermata, coda9, piva };
+module.exports = { gemellaConfermata, coda9, piva, chiaveDiServizio, ruoloDellaChiave, intestazioniLettura };
