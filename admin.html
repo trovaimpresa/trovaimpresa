@@ -352,6 +352,8 @@
   .u-num .v{font-size:2.3rem;font-weight:800;line-height:1.1}
   .u-num .e{font-size:14.5px;color:#5b6b80;margin-top:4px;line-height:1.5}
   .u-num.verde .v{color:#1b8a3f} .u-num.giallo .v{color:#b26a00} .u-num.rosso .v{color:#b3261e} .u-num.viola .v{color:#7b1fa2}
+  /* 5 set 2026: il riquadro delle ISCRIZIONI, per distinguerlo dalle visite */
+  .u-num.arancio .v{color:#c2410c}
   .u-filtri{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
   .u-btn{font-family:inherit;font-size:14.5px;font-weight:700;padding:10px 16px;border-radius:10px;
          border:2px solid #0066ff;background:#fff;color:#0066ff;cursor:pointer}
@@ -2228,15 +2230,23 @@ async function caricaArrivi(){
     });
     const j = await res.json().catch(function(){ return {}; });
     if(!j.success) throw new Error(j.error || 'errore sconosciuto');
-    disegnaArrivi(j.data || [], j.dichiarate || []);
+    disegnaArrivi(j.data || [], j.dichiarate || [], j.iscrizioni || []);
   }catch(e){
     if (num) num.innerHTML = '';
     if (box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _arEsc(e.message) + '</div>';
   }
 }
 
-function disegnaArrivi(righe, dichiarate){
+function disegnaArrivi(righe, dichiarate, iscrizioni){
   dichiarate = dichiarate || [];
+  /* ⛔ 5 SETTEMBRE 2026 — LE ISCRIZIONI, non solo le visite.
+     Prima questa card diceva quante persone ARRIVAVANO da ogni canale, ma
+     non quante si ISCRIVEVANO. Adesso `iscrizioni_per_canale` lo dice, con
+     la stessa regola dei canali.
+     ⚠️ Conta solo dal 5 settembre 2026 in poi: chi si e' iscritto PRIMA non
+     ha nessuna sessione segnata, e non si puo' ricostruire. */
+  const iscPerCanale = {};
+  (iscrizioni || []).forEach(function(r){ iscPerCanale[r.canale] = r; });
   const num = document.getElementById('ar-numeri');
   const box = document.getElementById('ar-lista');
   if (!righe.length){
@@ -2255,12 +2265,14 @@ function disegnaArrivi(righe, dichiarate){
                       .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
   const google = fonti.filter(function(r){ return ['Google','Altri motori di ricerca'].indexOf(r.canale) >= 0; })
                       .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
+  const iscr30 = (iscrizioni || []).reduce(function(t,r){ return t + (+r.iscrizioni_30gg || 0); }, 0);
 
   if (num) num.innerHTML =
       '<div class="u-num"><div class="v">' + tot30 + '</div><div class="e">Persone arrivate negli ultimi 30 giorni</div></div>'
     + '<div class="u-num verde"><div class="v">' + tot7 + '</div><div class="e">Negli ultimi 7 giorni</div></div>'
     + '<div class="u-num viola"><div class="v">' + social + '</div><div class="e">Da Facebook e Instagram (30 gg)</div></div>'
-    + '<div class="u-num giallo"><div class="v">' + google + '</div><div class="e">Da Google e altri motori (30 gg)</div></div>';
+    + '<div class="u-num giallo"><div class="v">' + google + '</div><div class="e">Da Google e altri motori (30 gg)</div></div>'
+    + '<div class="u-num arancio"><div class="v">' + iscr30 + '</div><div class="e">Si sono ISCRITTI (30 gg)</div></div>';
 
   let h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:15px;min-width:560px">'
     + '<tr style="text-align:left;border-bottom:2px solid #e2e8f0">'
@@ -2269,11 +2281,16 @@ function disegnaArrivi(righe, dichiarate){
     + '<th style="padding:10px 8px">Quanto pesa</th>'
     + '<th style="padding:10px 8px">Ultimi 7 gg</th>'
     + '<th style="padding:10px 8px">Dagli annunci<br><span style="font-weight:500;color:#5b6b80">a pagamento</span></th>'
+    + '<th style="padding:10px 8px">Iscritti<br><span style="font-weight:500;color:#5b6b80">ultimi 30 gg</span></th>'
+    + '<th style="padding:10px 8px">Su 100 arrivati<br><span style="font-weight:500;color:#5b6b80">quanti si iscrivono</span></th>'
     + '</tr>';
   fonti.forEach(function(r){
     const p30 = +r.persone_30gg || 0;
     const perc = tot30 ? Math.round(p30 * 100 / tot30) : 0;
     const ic = AR_ICONE[r.canale] || '•';
+    const isc30 = +((iscPerCanale[r.canale] || {}).iscrizioni_30gg) || 0;
+    /* ⚠️ niente percentuale finta quando non c'e' ancora niente da dividere */
+    const resa = (!p30 || !isc30) ? '—' : (Math.round(isc30 * 1000 / p30) / 10).toString().replace('.', ',');
     h += '<tr style="border-bottom:1px solid #eef2f7">'
       + '<td style="padding:11px 8px;font-weight:700">' + ic + ' ' + _arEsc(r.canale) + '</td>'
       + '<td style="padding:11px 8px;font-weight:800;font-size:17px">' + p30 + '</td>'
@@ -2284,6 +2301,8 @@ function disegnaArrivi(righe, dichiarate){
         + '<span style="min-width:40px">' + perc + '%</span></div></td>'
       + '<td style="padding:11px 8px">' + (+r.persone_7gg || 0) + '</td>'
       + '<td style="padding:11px 8px">' + (+r.persone_dagli_annunci || 0) + '</td>'
+      + '<td style="padding:11px 8px;font-weight:800;font-size:17px;color:#c2410c">' + isc30 + '</td>'
+      + '<td style="padding:11px 8px">' + resa + '</td>'
       + '</tr>';
   });
   h += '</table></div>';
@@ -2292,6 +2311,9 @@ function disegnaArrivi(righe, dichiarate){
   if (giro) h += '<div class="st-nota" style="margin-top:16px">🔁 Oltre a questi, '
     + (+giro.persone_30gg || 0) + ' persone si sono spostate fra le pagine del sito: '
     + 'non è una fonte, è chi era già dentro.</div>';
+  h += '<div class="st-nota" style="margin-top:12px">🆕 La colonna «Iscritti» parte dal <b>5 settembre 2026</b>: '
+    + 'chi si è iscritto prima non ha nessuna traccia di dove fosse arrivato, e non si può ricostruire. '
+    + 'Nei primi giorni quella colonna sarà quasi tutta a zero: è normale, non è un errore.</div>';
   h += '<div class="st-nota" style="margin-top:12px">✉️ «Diretto o sconosciuto» = chi scrive l\'indirizzo a mano, '
     + 'apre un segnalibro, o arriva da un\'app che non dice da dove viene (WhatsApp, email, alcune app di Facebook).</div>';
 

@@ -120,7 +120,23 @@ exports.handler = async function (event) {
       if (!r2.error) dichiarate = r2.data || [];
     } catch (_) { /* la card si disegna lo stesso */ }
 
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, data: data || [], dichiarate }) };
+    /* ⛔ 5 SETTEMBRE 2026 — LE ISCRIZIONI, non solo le visite.
+       Fino a oggi questa card diceva quante PERSONE arrivavano da ogni
+       canale, ma non quante si ISCRIVEVANO: la domanda vera («Facebook mi
+       porta iscritti o solo curiosi?») non aveva risposta.
+       La vista `iscrizioni_per_canale` usa la STESSA regola dei canali
+       (`canale_da_provenienza`), quindi i due elenchi non si possono
+       scollare. Se questa fallisce, la card si disegna lo stesso. */
+    let iscrizioni = [];
+    try {
+      const r3 = await supabaseAdmin
+        .from('iscrizioni_per_canale')
+        .select('*')
+        .order('iscrizioni_30gg', { ascending: false });
+      if (!r3.error) iscrizioni = r3.data || [];
+    } catch (_) { /* la card si disegna lo stesso */ }
+
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, data: data || [], dichiarate, iscrizioni }) };
   } catch (err) {
     console.error('[admin-arrivi] errore:', err.message, info);
     return {

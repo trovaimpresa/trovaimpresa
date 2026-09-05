@@ -510,7 +510,30 @@
        sbattuto sul login dopo 4 secondi, dove senza conferma legge
        "Email not confirmed" in inglese e non ha nessun modo di uscirne.
        ------------------------------------------------------------------ */
+    /* ⛔ 5 SETTEMBRE 2026 — COLLEGARE LA VISITA ALL'ISCRIZIONE.
+       Prima si sapeva quante VISITE arrivavano da ogni canale, ma non quante
+       ISCRIZIONI: la card «Da dove arrivano» contava solo chi passava, e la
+       domanda vera — «Facebook mi porta iscritti o solo curiosi?» — non aveva
+       risposta.
+       `js/conta-visita.js` mette un id di sessione in `sessionStorage`
+       (`ti_visita`) e lo scrive su ogni riga di `visite_sito`. Qui si segna
+       quello stesso id accanto all'iscritto: da li' in poi le due cose si
+       possono incrociare.
+       ⚠️ Non deve MAI rompere la registrazione: se non parte, l'iscritto non
+       se ne accorge e il suo account resta valido lo stesso. */
+    function segnaProvenienzaIscrizione(userId) {
+      if (!userId) return;
+      var sess = null;
+      try { sess = sessionStorage.getItem('ti_visita'); } catch (e) { sess = null; }
+      try {
+        supabaseClient.from('iscrizioni_provenienza')
+          .insert({ user_id: userId, sessione: sess || null, tipo: 'professionista' })
+          .then(function () {}, function (e) { console.warn('provenienza non salvata:', e && e.message); });
+      } catch (e) { console.warn('provenienza non salvata:', e && e.message); }
+    }
+
     function mostraSchermataConferma(email, userId) {
+      try { segnaProvenienzaIscrizione(userId); } catch (e) {}
       const c = document.createElement('div');
       c.id = 'schermata-conferma';
       c.style.cssText = 'position:fixed;inset:0;z-index:100002;background:#fff;overflow-y:auto;' +
