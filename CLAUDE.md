@@ -21969,3 +21969,48 @@ ed e' il tipo di buco piu' brutto: un controllo che tace perche' non
 guarda, non perche' e' tutto a posto. Il banco tiene →3← righe apposta:
 `window.storage.delete()` che NON deve suonare, `sc.storage.from()` e
 `supabaseAdmin.from()` che devono suonare.
+
+## ⛔ 9. IL GIRO SUI 4 RUOLI — e i due punti dove si rompeva
+
+Fatto con **quattro operai veri**: l'artigiano (l'impresa di Alessio) piu' tre
+mondi finti creati apposta — «PROVA Impresa edile», «PROVA Studio tecnico»,
+«PROVA Ferramenta», ognuno con capo, persona in squadra, codice invito e un
+lavoro di oggi. Le tre finte hanno `is_test` acceso ed email non confermata:
+sul sito non si vedono (controllato: vista pubblica →93←, finte →0←).
+File: `prove-claude/banchi-fissi/operatore/giro-4-ruoli.sql`.
+
+**→48← prove**: entrata (invito riconosciuto, tipo impresa, lavoro di oggi, nomi
+dei colleghi, clienti chiusi) e giro completo (rapportino, ore, ore sciolte
+rifiutate, spesa, rilettura della spesa, lavoro segnato fatto, ore attaccate al
+rapportino). **Il motore regge su tutti e quattro.** Ma si e' rotto in due punti:
+
+**1. Il NEGOZIO non poteva scrivere il rapportino.**
+`gestionale-negozio.html` ha la sua lista di spunte e ne aveva **→7←**; il
+gestionale del capo dal →15← agosto ne ha **→8←**, e l'ottava e' `rapportini` —
+quella che accende «📝 Segna la giornata». Chi veniva invitato dal negozio
+nasceva senza quella chiave: poteva solo segnare una spesa, ore e materiali mai.
+⚠️ E non dava nessun errore: il pulsante semplicemente non c'era.
+⛔ **E' il prezzo del negozio in un file suo, e questa e' la SECONDA volta**
+(la prima e' scritta il →22← agosto). Ogni volta che si tocca una regola dei
+permessi nel gestionale principale, va guardato anche il negozio.
+Sistemato: spunta aggiunta, spiegazioni sotto ognuna (il negozio aveva solo le
+etichette), preset dei ruoli allineati, e portata li' anche la **protezione dai
+doppioni** del →14← agosto, che mancava.
+
+**2. Un difetto mio, di un'ora prima, che non faceva rumore.**
+Chiusa la tabella `imprese`, `gestionale-operatore.html` non riusciva piu' a
+leggere `imprese.tipo`: non e' la riga dell'operaio. E non dava errore — la
+lettura sta in un `try/catch` e tornava vuota. Conseguenza: al **collaboratore
+di studio** le pratiche si sarebbero chiamate «Lavori» invece che «Pratiche».
+Sistemato con `gest_tipo_impresa(id)`, che risponde solo a chi e' in squadra e
+da' SOLO il tipo.
+⚠️ **Un difetto che non fa rumore e' il peggiore: sembra che funzioni.** Si e'
+visto solo perche' il giro e' stato fatto ruolo per ruolo invece di fidarsi.
+
+**Resta aperto, decide Alex: LE PAROLE.** Il motore va per tutti e quattro, ma
+le scritte sono da muratore. `etic()` cambia «Lavori→Pratiche» in →4← punti
+soli; restano «Cosa avete usato» con l'esempio *«3 sacchi di premiscelato, 20 m
+di tubo, mezzo bancale di laterizi»*, «Soldi usciti per questo **cantiere**»,
+«Chiedi al capo di metterti su un **cantiere**» e l'esempio della dettatura
+*«finito l'intonaco della scala»*. Un geometra e un commesso di ferramenta
+leggono di premiscelato.

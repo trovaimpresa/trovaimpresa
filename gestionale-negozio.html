@@ -2015,8 +2015,33 @@
         <button data-action="sq-revoca" data-id="${o.id}" data-nome="${esc(o.nome)}" style="background:#fff0f0;color:#c0392b;border:1px solid #f0c0c0">Rimuovi accesso</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
   }
-  const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
-  const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
+  /* ⛔ 5 SETTEMBRE 2026 — QUI MANCAVA «RAPPORTINI», E IL GIRO SI ROMPEVA QUI.
+     Trovato facendo il giro completo sui →4← ruoli. Il gestionale del capo
+     (gestionale-app.html) da il →15← agosto ha OTTO spunte: la ottava e'
+     `rapportini`, ed e' quella che accende «📝 Segna la giornata» nell'app
+     dell'operaio. Qui ce n'erano SETTE: chi veniva invitato dal gestionale del
+     NEGOZIO nasceva senza quella chiave, quindi `gest_puo_sezione(...,
+     'rapportini')` rispondeva NO e il commesso non poteva scrivere ne' ore ne'
+     materiali. Poteva solo segnare una spesa.
+     ⚠️ Non dava nessun errore: il pulsante semplicemente non c'era. E' il
+     prezzo di avere il negozio in un file suo — le correzioni fatte sul
+     gestionale principale qui non arrivano mai (scritto in CLAUDE.md il →22←
+     agosto, e questa e' la seconda volta che succede).
+     Aggiunte anche le spiegazioni sotto ogni spunta, come nell'altro. */
+  const PERMS=[
+    {key:"lavori",    label:"Lavori",     d:"Vede l'agenda, apre i lavori e li segna fatti."},
+    {key:"clienti",   label:"Clienti",    d:"Vede l'elenco dei clienti con i recapiti."},
+    {key:"fatture",   label:"Fatture",    d:"Vede le fatture e può allegare la fattura in PDF."},
+    {key:"pagamenti", label:"Pagamenti",  d:"Vede la sua carta aziendale e registra le spese."},
+    {key:"calendario",label:"Calendario", d:"Può girare fra i giorni e i mesi. Senza, vede solo oggi."},
+    {key:"foto",      label:"Foto",       d:"Può aggiungere foto e video."},
+    {key:"note",      label:"Note",       d:"Può scrivere cosa ha fatto. Senza, le legge e basta."},
+    {key:"rapportini",label:"Rapportini", d:"Può scrivere il rapportino di fine giornata: le ore e quello che si è usato. Senza questa spunta il pulsante «Segna la giornata» non compare."}
+  ];
+  /* 5 set 2026 — allineato al gestionale del capo: «note» anche all'operaio e
+     «rapportini» al preposto, che e' chi tiene il conto delle ore. Prima qui
+     `rapportini` non compariva in nessun preset, perche' la spunta non c'era. */
+  const RUOLO_PRESET={operaio:["calendario","lavori","foto","note"],preposto:["calendario","lavori","foto","note","clienti","rapportini"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
@@ -2031,7 +2056,7 @@
         <option value="preposto">Preposto</option>
         <option value="segretaria">Segretaria</option></select></div>
       <div class="field"><label>Permessi</label><div id="d-perms">
-        ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
+        ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 2px"><span><b>${p.label}</b><small style="display:block;color:#667085;font-weight:400;line-height:1.4">${p.d}</small></span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px;flex:0 0 22px"></label>`).join("")}</div></div>
       <div class="sheet-actions"><button class="btn" data-action="close">Annulla</button>
       <button class="btn-primary" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
     $("#d-ruolo").onchange=applyRuoloPreset;
@@ -2049,6 +2074,8 @@
     if(error)throw error;
     return m.id;
   }
+  /* la persona creata al tentativo di prima: vedi il commento dentro squadraAdd */
+  let _sqOpAppenaCreato=null;
   async function squadraAdd(){
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -2057,11 +2084,30 @@
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
-    const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome,telefono:telefono||null}).select().single();
-    if(error){toast("Errore: "+error.message);return;}
+    /* ⚠️ I DOPPIONI QUANDO L'INVITO NON PARTE — sistemato nel gestionale del
+       capo il →14← agosto 2026, qui mancava ancora (5 set). Si scrive in due
+       tabelle: prima la persona, poi il suo invito. Se la seconda non riesce —
+       la rete che cade a meta' — la persona resta scritta e la funzione esce
+       con «Errore invito». Chi legge quel messaggio ripreme Aggiungi, ed ecco
+       il doppione: due «Mario Bianchi», uno senza accesso.
+       Adesso la persona appena creata si tiene da parte: al secondo tentativo
+       non se ne fa un'altra, si riprova solo l'invito. */
+    let opId=_sqOpAppenaCreato;
+    if(!opId){
+      const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome,telefono:telefono||null}).select().single();
+      if(error){toast("Errore: "+error.message);return;}
+      opId=op.id; _sqOpAppenaCreato=opId;
+    }else{
+      await sb.from("gest_operatori").update({nome,telefono:telefono||null}).eq("id",opId).eq("user_id",sbUid);
+    }
     const codice=sbRand();
-    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
-    if(e2){toast("Errore invito: "+e2.message);return;}
+    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:opId,codice,stato:"invitato",ruolo,permessi});
+    if(e2){
+      toast("«"+nome+"» è salvata, ma l'invito non è partito: "+e2.message
+        +". Premi di nuovo Aggiungi per riprovare solo l'invito — la persona non viene doppiata.");
+      return;
+    }
+    _sqOpAppenaCreato=null;
     closeSheet();renderDip();toast("Persona aggiunta, invito creato ✔");
   }
   async function squadraSave(id){

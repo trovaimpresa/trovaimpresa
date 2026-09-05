@@ -706,9 +706,17 @@ async function boot(session){
     gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;
   }
   MIO.impresaId=membri[0].impresa_id;
+  /* ⛔ 5 SETTEMBRE 2026 — QUI SI LEGGEVA LA TABELLA, E DA OGGI NON SI PUO'.
+     Chiusa `imprese` (l'elenco iscritti non si scarica piu' in blocco), questa
+     riga tornava VUOTA: l'operaio non e' il padrone di quella riga. E non dava
+     errore — sta dentro un try/catch — quindi al COLLABORATORE DI STUDIO le
+     pratiche si sarebbero chiamate «Lavori» invece che «Pratiche», in silenzio.
+     ⚠️ Un difetto che non fa rumore e' il peggiore: sembra che funzioni.
+     Adesso si chiede `gest_tipo_impresa(id)`, che risponde solo a chi e' in
+     squadra e da' SOLO il tipo: nessun'altra colonna esce. */
   try{
-    const {data:imp}=await sb.from("imprese").select("tipo").eq("user_id",MIO.impresaId).maybeSingle();
-    MIO.tipoStudio=imp?imp.tipo:null;
+    const {data:t}=await sb.rpc("gest_tipo_impresa",{_impresa:MIO.impresaId});
+    MIO.tipoStudio=t||null;
   }catch(_){MIO.tipoStudio=null;}
   MIO.operatoreId=membri[0].operatore_id;
   MIO.ruolo=membri[0].ruolo;
