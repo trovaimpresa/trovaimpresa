@@ -21805,3 +21805,110 @@ risposta**: falliva zitto, come gli allegati del preventivo del →4← set.
 ⚠️ **Terza volta in due giorni che il difetto e' «fallisce e non lo dice a
 nessuno».** Quando si scrive o si cancella un file, la risposta si legge
 SEMPRE e si dice a chi sta davanti allo schermo.
+
+## IL CONTROLLO MUTO (5 set) — chi non legge la risposta
+`node tools/controllo-muto.js` elenca le chiamate a Supabase che **buttano
+via la risposta**. Nasce perche' in due giorni lo stesso difetto e' saltato
+fuori →3← volte: allegati che non arrivavano, Cantieri che non allegavano
+niente, `remove()` che cancellava a vuoto. Sempre la stessa forma:
+**fallisce e non lo dice a nessuno.**
+
+Primo giro sul sito vero: **→76← mute**, **→29← mezze mute**, →40← da
+guardare a mano. Elenco in `prove-claude/ELENCO-MUTE-5set.txt`.
+
+⛔ **NON ferma la pubblicazione, di proposito.** →76← rossi al primo giro
+bloccherebbero tutto e finirebbe che si spegne il controllo. Fa l'elenco;
+si aggiusta una alla volta, cominciando da quelle che vede il cliente.
+
+⛔ **IL `try` INTORNO NON PROTEGGE.** La libreria di Supabase **non lancia
+eccezioni** sugli errori di permesso: restituisce `{ data, error }`. Un
+`try { … } catch (e) {}` intorno **non prende niente** — sembra prudenza,
+non lo e'. Sul sito ce ne sono **→30←** cosi'. Il controllo li segna a parte.
+
+⚠️ **Le tre peggiori sono in `stripe-webhook-abbonamenti.js`** (righe →181←,
+→206←, →295←): se l'`update` fallisce dopo un pagamento, **il cliente ha
+pagato e il gestionale non gli si accende**, e nessuno lo viene a sapere.
+
+## ⛔ UN CONTROLLO CHE GRIDA AL LUPO SMETTE DI ESSERE LETTO (5 set)
+La prima versione del controllo muto dava **→600+←** allarmi, quasi tutti
+falsi. Cercava l'inizio dell'istruzione tornando indietro fino a una graffa,
+e in `const {error:e}=await sb...` scambiava la graffa della
+destrutturazione per un fine-istruzione: non vedeva piu' che l'errore
+veniva letto. Sistemato tornando indietro lungo la CATENA vera (nomi,
+punti, parentesi e virgolette in coppia). Poi un secondo sbaglio: lo spazio
+contato come parte della catena si mangiava anche `return await`.
+⚠️ **Uno spazio fa parte della catena solo se sta intorno a un punto.**
+Da →600+← a **→76←**, e le →76← sono state guardate a mano una per una.
+Il banco `prove-claude/banchi-fissi/muto/banco-controllo-muto.js`
+(`./gira-muto.sh`) gli mette davanti →22← righe di cui si sa gia' la
+risposta: →9← scritte bene che NON devono dare allarme, →5← mute, →3← mezze
+mute, →3← che non sono Supabase (`element.remove()`, `mappa.delete()`,
+`classList.remove()`), il try inutile e i commenti.
+
+## ⛔ 8. L'ELENCO ISCRITTI NON SI SCARICA PIU' IN BLOCCO
+
+Trovato mentre si guardava cosa vede l'operaio: la vista `gest_accessi_riepilogo`
+gli usciva con dentro nome, **email**, piano e ultimo accesso di **tutte e →117←
+le imprese**. Tirando il filo, la causa non era li': `imprese` aveva
+`SELECT … using (true)` per `anon` e `authenticated`.
+
+**Misurato dal sito vero**, prendendo la chiave `anon` dalla pagina (sta in
+chiaro) e chiedendo `imprese?select=email,telefono,partita_iva`:
+→117← imprese · →117← email · →116← telefoni · →66← P.IVA · →117← date di
+scadenza del Premium · i →24← che non hanno confermato la mail.
+**La lista iscritti di TrovaImpresa, scaricabile senza nemmeno un account.**
+
+⚠️ **La lettura giusta**: email e telefono di un artigiano e' GIUSTO che siano
+pubblici — il cliente deve poterlo chiamare. Il buco erano due altre cose:
+(1) uscivano insieme le colonne dei CONTI (chi paga, quando scade, chi ha il
+gestionale, chi non ha confermato); (2) si portava via **tutto insieme**.
+
+**Come si e' chiuso, in tre pezzi e due push:**
+1. vista **`imprese_pubbliche`** (→62← colonne: solo quelle che le pagine
+   disegnano davvero, misurate una per una) + **`scheda_impresa(id)`** che da'
+   i contatti di UNA impresa + **`impresa_gia_iscritta(colonna,cifre)`** che
+   risponde si/no alle registrazioni senza far uscire nessuna riga (colonna su
+   lista chiusa: `partita_iva` e `telefono`, se no diventava una porta per
+   chiedere «esiste questa email?» una alla volta);
+2. **→15← strade spostate** dalla tabella alla vista: le →4← `cerca-*`,
+   `professionisti`, `mappa`, `recensioni-impresa`, `profilo-impresa` (che
+   adesso chiama la funzione), i →4← pannelli, `js/controllo-doppioni.js`,
+   `netlify/edge-functions/scheda-meta.js` e i →2← generatori delle pagine citta';
+3. **poi**, solo dopo aver provato tutte le pagine dal vivo, la tabella si e'
+   chiusa (`sql/imprese-vista-pubblica.sql`): ognuno la sua riga, e il
+   fondatore tutto — gli serve per l'admin (`public.sono_il_fondatore()`).
+
+**Chi vede cosa, misurato dopo:**
+
+| chi | tabella `imprese` | vista pubblica | vista admin |
+|---|---|---|---|
+| senza account | →0← (era →117←) | →93← | →0← (era →117←) |
+| un operaio con account | →0← | →93← | →0← |
+| un'altra impresa iscritta | →1← (la sua) | →93← | →1← |
+| il fondatore | →117← | →93← | →117← |
+
+⛔ **LA MAPPA ERA ROTTA E NON L'AVEVA MAI DETTO NESSUNO.** `mappa.html` chiedeva
+→5← colonne che **non esistono** (`nome_negozio`, `ragione_sociale`,
+`nome_impresa`, `categoria`, `via`): il database rispondeva **400** e la mappa
+restava vuota. Adesso mostra **→75← spilli**.
+⚠️ E' la voce →14← del quaderno, ma peggio: `controllo-colonne.js` guarda solo
+i `.select({...})` e non vede gli indirizzi `rest/v1/...?select=` scritti a mano.
+
+⚠️ **`tools/rimanda-conferme.js` da oggi non trova piu' niente**: legge `imprese`
+con la chiave pubblica e vuole `email` e `email_confermata`. Va fatto girare con
+la chiave di SERVIZIO. Scritto nel quaderno.
+
+**Banchi**: `prove-claude/banchi-fissi/imprese-pubbliche/banco-vista-pubblica.js`
+(→22← verdi sul PC, →14← rosse col codice di prima) e `permessi-imprese.sql`
+(→8← verdi sul database vero, in transazione annullata).
+
+## LEZIONE IN PIU'
+
+- **Un buco grosso si trova tirando il filo di uno piccolo.** Si cercava cosa
+  vede un operaio; e' uscita la lista iscritti di tutta l'azienda.
+- **Prima si misura, poi si tocca.** Le pagine chiedevano `select=*` per
+  abitudine: leggere quali colonne DISEGNANO ha trasformato «mezza giornata a
+  rischio» in tre passi, ognuno fermabile.
+- **Un difetto che non fa rumore puo' vivere per mesi**: la mappa rispondeva
+  400 e nessuno se n'era accorto, perche' una pagina vuota sembra una pagina
+  senza dati.

@@ -4,7 +4,32 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: sabato 5 settembre 2026 — PULIZIA DELLA FILA: ogni voce rimasta controllata una per una
+Ultimo aggiornamento: sabato 5 settembre 2026 (sera) — GESTIONALE OPERATORE per tutti e 4 i ruoli, primo operaio VERO, elenco iscritti chiuso
+
+---
+
+## 🆕 NATI IL 5 SETTEMBRE (sera) — dal collaudo con l'operaio vero
+
+### 🔴 Da sistemare
+- **`tools/rimanda-conferme.js` non funziona piu'** · legge `imprese` con la **chiave pubblica** e vuole `email` e `email_confermata`, che dalla vista pubblica non escono. Da oggi trova →0← righe. ⛔ Va fatto girare con la **chiave di servizio** (ce l'ha solo Alex). E' il programmino che rimanda la conferma ai →24← iscritti che non l'hanno cliccata
+- **Il controllo colonne-fantasma non guarda gli indirizzi REST scritti a mano** · e' la voce →14←, ma peggio: `mappa.html` chiedeva →5← colonne che NON esistono (`nome_negozio`, `ragione_sociale`, `nome_impresa`, `categoria`, `via`), il database rispondeva **400** e **la mappa era vuota da chissa' quanto**. `controllo-colonne.js` guarda solo i `.select({...})`, non le stringhe `rest/v1/...?select=`. Sistemata la mappa (→75← spilli), NON sistemato il controllo
+- **L'operaio legge i rapportini dei colleghi** · `gest_rapportini_team_read` chiede solo il permesso «rapportini», non che il rapportino sia suo. Meno grave dei lavori (li' si poteva SCRIVERE), ma e' lo stesso tipo di buco · decide Alex
+
+### ⚖️ Decide Alex
+- **L'operaio finto resta o si butta?** · nel database c'e' un secondo account vero (`prova.operaio@trovaimpresa.com`, codice PROVA1) + la persona «PROVA Operaio (finto, di Claude)» in Squadra + il lavoro «PROVA di Claude — potatura siepe» di oggi. **Serve**: senza, il collaudo dei permessi non si puo' rifare. Ma si vede nella tua Squadra. Tenere / buttare
+- **Controllare l'admin** · `admin.html` chiede la password e Claude non entra. Sul database l'eccezione del fondatore funziona (vede →117← imprese), ma il collaudo vero e' →4← clic di Alex: entrare e guardare che l'elenco imprese e la card «Da dove arrivano» ci siano
+
+### ✅ Chiusi il 5 set (sera)
+- **L'artigiano ha di nuovo Squadra, Agenda operatore e Carte** (da →21← a →24← voci di menu). Non era una svista: era la scelta del →21← ago, di prima che nascesse il gestionale operatore
+- **Il gestionale si apre sulla schermata dei reparti**, ma tornando dal Noleggio si rientra nel reparto (bigliettino con scadenza di →10← secondi)
+- **La prima schermata dell'operaio e' un bottone**: «📝 Segna la giornata» a →109← px dall'alto invece di →520←, calendario in fondo
+- **L'app operaio entra nel gestionale**: pulsante accanto al Noleggio, card in Squadra, QR sulla scheda della persona
+- **L'operaio rilegge e corregge le sue spese** (colonna firma `creato_da` + →3← regole RLS)
+- **Il lavoro di oggi in cima e gia' scelto** dentro «Segna la giornata»
+- **L'operaio tocca solo i lavori suoi, e solo lo stato** · prima poteva segnare fatto, cambiare il PREZZO e riscrivere QUALSIASI lavoro dell'azienda. `sql/operaio-solo-i-suoi-lavori.sql`
+- **Tolti all'operaio i mezzi e i reparti degli altri**
+- ⛔ **L'ELENCO ISCRITTI NON SI SCARICA PIU' IN BLOCCO** · prima chiunque, anche senza account, si portava via →117← imprese con →117← email, →116← telefoni, →66← P.IVA e →117← date di scadenza del Premium. Adesso: vista `imprese_pubbliche` (→62← colonne, niente contatti e niente conti), `scheda_impresa(id)` per una scheda alla volta, `impresa_gia_iscritta()` che risponde si/no. Misurato dal sito vero con la chiave pubblica: **da →117← a →0←**
+- **La mappa e' tornata a funzionare** (era un difetto vecchio, non di oggi)
 
 ---
 
@@ -108,6 +133,8 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ## 🟡 DA FARE — concordati, non ancora iniziati (ordine di Alex, 3 set)
 
+0. [5 set] ⚠️ **LE →3← PIU' CARE, dal controllo muto**: `netlify/functions/stripe-webhook-abbonamenti.js` righe →181←, →206←, →295←. Se l'`update` fallisce dopo un pagamento, **il cliente ha pagato e il gestionale non gli si accende** — e non lo sa nessuno, ne' lui ne' Alex. Da fare per prime
+
 
 
 1. [3 set] **Preventivo: domande guidate per tipo di lavoro** (bagno → mq, piano, ascensore; tetto → mq, copertura…) · `profilo-impresa.html`
@@ -150,6 +177,9 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - Collaudo dal vivo di `assistenza-ai-e-computo` (3 domande alla chat + computo di prova con totale →937,99←): da fare la prima volta con Alex presente
 
 ## ✅ FATTO — ultimi 14 giorni (per chiudere il cerchio, poi si cancella)
+
+- [5 set] ✅ **IL CONTROLLO MUTO** — `node tools/controllo-muto.js`. Elenca le chiamate a Supabase che buttano via la risposta. Primo giro: **→76← mute, →29← mezze mute**, →40← da guardare a mano, e **→30← dentro un try/catch che NON le protegge** (la libreria non lancia eccezioni sugli errori di permesso). Elenco in `prove-claude/ELENCO-MUTE-5set.txt`. Non ferma la pubblicazione di proposito: →76← rossi al primo giro si spengono, non si aggiustano
+- [5 set] ⛔ **La prima versione dava →600+← allarmi quasi tutti FALSI** e l'ho buttata: un controllo che grida al lupo smette di essere letto, ed e' peggio di nessun controllo. Sbagliava a capire dove comincia una catena. Banco: `banchi-fissi/muto/banco-controllo-muto.js` (`./gira-muto.sh`), →22← verdi
 
 - [5 set] ✅ **PROVATO DAL VIVO, dal sito, col pannello di Alex gia' aperto** — non solo col banco. Cantiere →1← «via comotti», impresa →36←. Caricata una foto vera (disegnata al momento, →879← byte) in `cantieri-foto`: **arrivata**, e riscaricata dall'indirizzo pubblico per essere sicuri che ci fosse davvero. Poi caricato un PDF in `cantieri-preventivi` e uno in `cantieri-fatture`: arrivati tutti e due, riletti col link firmato (sono magazzini privati). Provato a caricare in un cantiere NON suo: **bloccato**. Tutti e →3← i file cancellati **nello stesso momento**, e ricontrollato che non si scaricassero piu'. Database dopo: **→0← file** in tutti e →4← i magazzini, come prima di cominciare
 - [5 set] ⛔ **Prima di oggi nei Cantieri non era mai arrivato NIENTE**: →3← magazzini senza nessun permesso, e il pulsante «Allega» in →3← pannelli che non ha mai funzionato per nessuno. Non l'aveva mai detto nessuno perche' `remove()` e meta' degli `upload()` non leggevano la risposta
