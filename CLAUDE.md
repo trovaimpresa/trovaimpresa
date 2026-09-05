@@ -21567,3 +21567,241 @@ nessun falso allarme.
 e' una `<section>` da incollare dentro un'altra pagina — e nessuna pagina la
 usa. I →2← file `google*.html` sono verifiche di Google: una riga di testo,
 non HTML. Nessuno dei tre e' un difetto.
+
+---
+
+# 5 SETTEMBRE 2026 — IL GESTIONALE OPERATORE PER TUTTI E QUATTRO I RUOLI
+# e il primo operaio VERO: →7← buchi trovati, →6← chiusi
+
+Sessione lunga, tutta su `gestionale-operatore.html` e sul suo giro.
+Cinque push. Il pezzo che conta di piu' e' l'ultimo: **il primo collaudo fatto
+con un operaio vero**, che ha trovato cose che nessun banco aveva mai visto.
+
+## 1. L'ARTIGIANO RIAVEVA LA SQUADRA — e non era una svista
+
+`gestionale-app.html` aveva `const TAB_NASCOSTI_ART=['squadra','agenda','carte']`.
+⛔ **Cercato prima di toccare, come chiesto da Alex**: NON era una svista. Era
+una sua scelta del →21← agosto sera (`prove-claude/GESTIONALE-ARTIGIANO.md`,
+riga «Squadra | se lavora da solo non serve; con un operaio si' | ?»), scritta
+anche in `CLAUDE.md` riga →13594←.
+
+⚠️ Ma quella scelta e' di **prima** che nascesse il gestionale operatore, e con
+Squadra spenta un artigiano non puo' invitare NESSUNO: la pagina dell'invito non
+e' raggiungibile e `gest_membri` resta vuota. Gli artigiani sono gli iscritti
+piu' numerosi (→62← contro →44← imprese). Riacceso da Alex il 5 settembre:
+`TAB_NASCOSTI_ART=[]`, restano spente solo le →4← voci da appalti.
+Dal vivo dopo il push: →24← voci accese (erano →21←), spenta solo `crediti`.
+
+⚠️ **REGOLA CONFERMATA DAI FATTI**: una decisione vecchia va riaperta quando
+cambia il mondo intorno, non ridiscussa a caso. Ma prima si CERCA se era voluta.
+
+## 2. IL GESTIONALE SI APRE SULLA SCHERMATA DEI REPARTI
+
+Alex, con due fotografie: «ogni volta che apro il gestionale si apre questa
+finestra (dentro «progetto casa», sezione Assistenza diretta), invece si deve
+aprire quella dei reparti».
+
+⛔ **Non bastava togliere la memoria dell'ultimo reparto**: era stata messa
+apposta il →23← agosto, perche' uscendo dal NOLEGGIO si finiva sulla schermata
+dei reparti («mi fa uscire completamente»). Due richieste vere e opposte.
+
+Si convivono distinguendo **COME** si e' arrivati alla pagina (`_rientroDaGestionale`):
+- si ARRIVA da un'altra pagina del gestionale → si rientra dov'eri;
+- si APRE il gestionale (pannello, preferito, indirizzo) → schermata dei reparti;
+- c'e' un link col cancelletto (`#preventivi`) → comanda quello.
+
+⚠️ **IL BIGLIETTINO HA UNA SCADENZA (→10← s), e non e' un vezzo.** Chi torna dal
+Noleggio ci arriva con `history.back()`: se il browser ripesca la pagina dalla
+memoria (bfcache) il codice non gira e il bigliettino resterebbe scritto —
+mezz'ora dopo ti rispedirebbe dentro al reparto, cioe' il difetto appena tolto.
+⚠️ E il `document.referrer` da solo NON basta: tornando indietro nella storia il
+referrer non e' la pagina da cui torni.
+
+## 3. LA PRIMA SCHERMATA DELL'OPERAIO E' UN BOTTONE, NON UN CALENDARIO
+
+Misurato a larghezza telefono (→390← px), prima → dopo:
+
+| | prima | dopo |
+|---|---|---|
+| bottone per segnare | →520← px dall'alto, alto →57← | →109← px, alto →76← |
+| lavori di oggi | →618← px | →284← px |
+| calendario | →165← px (primo) | →518← px (ultimo) |
+
+Nessun codice nuovo: spostato l'HTML, ingrandito il bottone, cambiata la scritta
+da «+ Rapido» a «📝 Segna la giornata». `rvApri()` non e' stato toccato.
+
+## 4. L'APP OPERAIO ENTRA NEL GESTIONALE
+
+Domanda di Alex: «si puo' inserire il gestionale operatore nel gestionale
+impresa/professionista/artigiano come abbiamo fatto col noleggio?».
+
+⛔ **La differenza che cambia tutto**: il Noleggio e' TUO (stesso account),
+l'app dell'operaio e' di **un'altra persona**. Se la apri tu, vedi te stesso.
+Quindi «dentro» vuol dire tre cose, tutte fatte:
+- pulsante **📱 App operaio** nella schermata dei reparti, accanto a Noleggio
+  (la squadra e' dell'AZIENDA, non del reparto — stesso motivo del Noleggio);
+- card **«📱 L'app dei tuoi operai»** in Squadra, al posto della vecchia riga
+  «Come entrano i collaboratori» che non diceva la cosa importante: che ognuno
+  ha un CODICE SUO e che il link era nascosto;
+- voce **📷 Mostra il QR** sulla scheda della persona. La libreria del QR si
+  scarica SOLO quando si preme (non a ogni apertura), e se non si scarica
+  mostra il link scritto invece di una finestra vuota.
+
+⚠️ **DIFETTO MIO, PRESO DAL COLLAUDO DAL VIVO**: nella card avevo scritto «apri
+il menu dei tre puntini sulla sua scheda». Quei tre puntini **non esistono**:
+la scheda della persona ha UN pulsante solo, «Apri» (`schedaUnPulsante`), e le
+voci compaiono DENTRO la finestra. Avevo scritto la spiegazione **a memoria
+invece che guardando la schermata vera**. Corretta, e adesso due prove del banco
+la sorvegliano. **Una spiegazione che manda a cercare un pulsante che non c'e'
+e' peggio di nessuna spiegazione.**
+
+E la pagina dell'operaio, a chi non e' in squadra ma ha una squadra sua, adesso
+spiega di cosa si tratta invece di dirgli «usa il link che ti ha mandato la tua
+impresa» — a lui, che l'impresa e'.
+
+## 5. LE SPESE: L'OPERAIO RILEGGE E CORREGGE LE SUE
+
+`gest_spese` aveva la regola per INSERIRE e **nessuna per LEGGERE**.
+
+⛔ **`inserito_da` NON valeva come firma**: e' un nome scritto a mano
+(`MIO.nome`), chi sa scrivere codice ci mette il nome che vuole. Aggiunta la
+firma vera **`creato_da`** → `gest_operatori.id`, come fa gia' `gest_rapportini`.
+File `sql/spese-operaio-rilegge.sql`. Legge e corregge solo le sue, non puo'
+rifirmarle col nome di un collega, non puo' cancellare niente.
+
+⛔ **TRAPPOLA DEL BANCO SUL DATABASE**: la prima volta era rosso e non per colpa
+delle regole. C'e' un **guardiano del piano** (`gest_blocco_piano`) che blocca
+ogni scrittura del gestionale se l'impresa non e' Premium, e l'impresa finta non
+esisteva. Rispondeva «Il gestionale e' compreso nel Piano Premium…».
+⚠️ **Un banco che prova i permessi deve prima farsi un'impresa col piano in
+regola, se no misura il guardiano invece delle regole.**
+
+## 6. IL LAVORO DI OGGI IN CIMA E GIA' SCELTO
+
+Un solo lavoro segnato per oggi → e' gia' scelto (da →4← passaggi a →3←). Piu'
+d'uno → in cima sotto «OGGI». Nessuno → la lista di prima.
+⚠️ Con la freccia si torna comunque alla lista: il passo →2← non e' mai stato
+disegnato, ma ci si deve poter arrivare, se no si resta chiusi in una scelta.
+
+## ⛔ 7. IL PRIMO OPERAIO VERO — e i →7← buchi che ha trovato
+
+Fino a oggi in `gest_membri` c'era **una riga sola, e con `impresa_id` uguale a
+`membro_id`**: l'«operatore david» era Alessio stesso. Ma `gest_puo_sezione`
+dice «il titolare passa sempre»: entrando come david **si saltavano tutti i
+controlli**, e qualunque buco restava invisibile.
+
+Creato un **secondo account vero** (`prova.operaio@trovaimpresa.com`, codice
+PROVA1, permessi con «pagamenti» acceso) e fatte →13← domande al database vero
+mettendosi nei suoi panni (`set local role authenticated` + `request.jwt.claims`).
+File: `prove-claude/banchi-fissi/operatore/collaudo-operaio-vero.sql`.
+
+**→6← verdi**: clienti e fatture a →0← coi permessi spenti; non cancella lavori;
+non aggiunge gente in squadra; **non si alza i permessi da solo**; non tocca la
+scheda dell'impresa; non vede i lavori di altre imprese.
+
+**→7← rosse**:
+
+| n | cosa | dove |
+|---|---|---|
+| 1 | **chiunque, anche senza account, scarica l'elenco iscritti**: →117← imprese, →117← email, →116← telefoni, →66← P.IVA, →117← date di scadenza Premium | `imprese`, policy `SELECT … true` per `anon` |
+| 2 | segna FATTO un lavoro che non e' suo | `lavori_update` |
+| 3 | cambia il PREZZO di un lavoro del capo | `lavori_update` (nessun limite di colonne) |
+| 4 | riscrive la descrizione di un lavoro | idem |
+| 5 | vede i MEZZI dell'azienda (→2←) | `gest_mezzi_team_read` |
+| 6 | vede tutti e →5← i reparti | `mestieri_read` |
+| 7 | vede tutti e →7← i lavori dell'azienda | `lavori_read` |
+
+**Chiusi il 5 set** (→2←…→7←): `sql/operaio-solo-i-suoi-lavori.sql`.
+Rimisurato: lavori →7←→→1←, mezzi →2←→→0←, reparti →5←→→1←, i nomi dei colleghi
+restano (servono al rapportino), il prezzo del suo lavoro resta →180 €← anche
+provando a metterlo a →99.999←. **E il capo non ha perso niente: →7← verdi.**
+
+⛔ **IL GUARDIANO E' SCRITTO AL CONTRARIO, ED E' IL PUNTO.** Non elenca le
+colonne da proteggere: riparte dalla riga VECCHIA e ci rimette dentro solo le
+→3← consentite (`stato`, `data_fatto`, `lavoro_svolto`). Cosi' una colonna
+aggiunta domani e' protetta da sola. **Elencare le colonne da bloccare e' la
+strada che si dimentica sempre di una.**
+
+⚠️ **Due eccezioni volute**: `preposto` e `segretaria` continuano a vedere e
+toccare tutto il cantiere; chi ha il permesso «Fatture» continua a leggere i
+lavori, perche' la sua schermata li elenca.
+
+**→1← resta aperto, ed e' il piu' grave**: l'elenco iscritti pubblico. Misurato,
+non toccato — le →4← pagine pubbliche leggono `imprese` con `select=*` (→83←
+colonne), quindi si portano dietro anche piano, scadenze, gestionale attivo,
+`email_confermata`. Toccarlo male spegne le ricerche, la mappa e le pagine
+citta'. Decide Alex.
+
+## I BANCHI NUOVI — era l'unica parte del gestionale senza
+
+Cartella nuova `prove-claude/banchi-fissi/operatore/` + `gira-operatore.sh`:
+
+| banco | dove gira | verdi | col codice di prima |
+|---|---|---|---|
+| `banco-apertura-reparti.js` | sul PC | →17← | →7← rosse |
+| `banco-app-operaio.js` | sul PC | →31← | →3← rosse + BANCO CIECO sulla versione pubblicata |
+| `banco-prima-schermata.js` | nuvola (browser vero, →390← px) | →10← | →5← rosse |
+| `permessi-spese.sql` | database vero, transazione annullata | →11← | — |
+| `collaudo-operaio-vero.sql` | database vero, operaio vero | →6←+→9←+→7← | — |
+
+⚠️ I banchi sul PC **ritagliano le funzioni dal file vero** e le fanno girare:
+se domani spariscono, il banco si ferma dicendo **BANCO CIECO** invece di
+restare verde misurando se stesso.
+
+## LEZIONI DI OGGI (per Claude)
+
+- **Un banco con un finto non trova i buchi dei permessi.** Ci vuole un
+  SECONDO ACCOUNT vero: finche' l'operaio e' il titolare, passa tutto.
+- **La pagina non e' un lucchetto.** `gestionale-operatore.html` filtrava gia'
+  per operatore: il database no. Chi chiama Supabase da fuori salta la pagina.
+- **Le regole che limitano le colonne si scrivono al contrario**: si riparte
+  dalla riga vecchia e si consentono le poche, non si vietano le tante.
+- **Le spiegazioni si scrivono guardando la schermata, non a memoria.**
+- **Una decisione vecchia si riapre quando cambia il mondo intorno** — ma prima
+  si cerca se era voluta, e si porta la riga dove sta scritta.
+
+## ⛔ PER CANCELLARE UNA RIGA, IL DATABASE DEVE PRIMA POTERLA VEDERE (5 set)
+La regola che non si vede guardando il codice, e che il →5← settembre ha
+fatto sembrare sbagliati →3← permessi appena passati.
+
+Un `delete ... where` legge delle colonne per trovare la riga. Quindi
+Postgres chiede **anche il permesso di LEGGERE**. Su un magazzino senza
+policy di `select`, il file e' invisibile — **e un file invisibile non si
+cancella**, per quanto il permesso di cancellazione sia giusto.
+⚠️ **Una policy di `delete` senza la sua `select` non serve a niente.**
+
+E il rovescio, peggiore: **un permesso di cancellazione TROPPO APERTO non
+si vede finche' la lettura resta chiusa.** Il →5← set ho spalancato la sola
+`delete` sui preventivi di cantiere e il banco e' rimasto **verde**: la
+`select` chiusa lo copriva. **Il sabotaggio di un permesso va fatto
+spalancando LETTURA E CANCELLAZIONE INSIEME**, se no il banco misura la
+lettura e crede di aver misurato la cancellazione.
+
+## COME SI PROVA UN PERMESSO SU storage.objects (5 set)
+Supabase ha un trigger (`storage.protect_delete`) che vieta di cancellare a
+mano da `storage.objects`: «Direct deletion from storage tables is not
+allowed». Il banco lo aggira con
+`set local session_replication_role = 'replica';`, che spegne i trigger di
+servizio **ma non la RLS** — infatti le prove «di un ALTRO» restano
+bloccate, ed e' quello che dimostra che la RLS e' ancora accesa.
+
+⛔ **Niente `RETURNING` nel `delete` del banco**: con `RETURNING` il
+database chiede pure il permesso di leggere, e non si capisce piu' quale
+dei due ha detto no. Si conta con `get diagnostics n = row_count`.
+
+⛔ **Il banco non fa `rollback`: finisce con un `raise exception` apposta.**
+Il messaggio dell'errore E' il risultato, e l'errore butta via tutto da
+solo — cosi' non esiste il caso «il banco si e' interrotto a meta' e ha
+lasciato roba scritta sui dati veri». Dopo ogni giro si ricontano le righe
+vere (→1← cantiere, →117← imprese, →0← file finti) invece di fidarsi.
+
+## I CANTIERI NON HANNO MAI ALLEGATO NIENTE (5 set)
+I →3← magazzini `cantieri-preventivi`, `cantieri-foto`, `cantieri-fatture`
+non avevano **nessuna** policy: ne' leggere, ne' scrivere, ne' cancellare.
+Il pulsante «Allega» c'era in →3← pannelli e non ha mai funzionato per
+nessuno: →1← cantiere, →0← foto, →0← preventivi con file, →0← fatture con
+file. `strumenti-cantiere.js` chiamava `remove()` e **non leggeva la
+risposta**: falliva zitto, come gli allegati del preventivo del →4← set.
+⚠️ **Terza volta in due giorni che il difetto e' «fallisce e non lo dice a
+nessuno».** Quando si scrive o si cancella un file, la risposta si legge
+SEMPRE e si dice a chi sta davanti allo schermo.

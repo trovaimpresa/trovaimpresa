@@ -3770,8 +3770,37 @@ async function aggiornaStatoCandidatura(id, stato) {
 // ELIMINA PREVENTIVO
 async function eliminaPreventivo(preventivoId) {
   if (!confirm('Eliminare questo preventivo? L\'azione è irreversibile.')) return;
+
+  // 5 set 2026 — I FILE VANNO VIA INSIEME ALLA RIGA.
+  // Prima la riga spariva e gli allegati restavano nel magazzino per
+  // sempre, senza che nessuno lo sapesse. I nomi dei file si leggono
+  // ADESSO, finche' la riga c'e': dopo non si sa piu' quali erano.
+  let daButtare = [];
+  try {
+    const { data: pr } = await sb.from('preventivi_safe')
+      .select('allegati').eq('id', preventivoId).maybeSingle();
+    if (pr && Array.isArray(pr.allegati)) {
+      daButtare = pr.allegati.map(a => a && a.path).filter(Boolean);
+    }
+  } catch (e) { console.warn('allegati non letti:', e && e.message); }
+
+  // Prima la riga, poi i file: se togliessi prima i file e poi la riga
+  // non si cancellasse, resterebbe una richiesta con gli allegati morti.
   const { error } = await sb.from('preventivi').delete().eq('id', preventivoId);
   if (error) { alert('Errore eliminazione: ' + error.message); return; }
+
+  if (daButtare.length) {
+    const { error: errFile } = await sb.storage
+      .from('preventivi-allegati').remove(daButtare);
+    // ⛔ la risposta si LEGGE. Un file che resta senza dirlo e' il difetto
+    // che abbiamo gia' pagato una volta con gli allegati che non arrivavano.
+    if (errFile) {
+      console.error('Allegati non cancellati:', errFile);
+      alert('Il preventivo è stato eliminato, ma ' + daButtare.length +
+            (daButtare.length === 1 ? ' allegato è rimasto' : ' allegati sono rimasti') +
+            ' nel magazzino.\nScrivilo ad Alessio: ' + (errFile.message || 'errore sconosciuto'));
+    }
+  }
   await caricaPreventivi();
 }
 
@@ -5336,7 +5365,7 @@ async function apriModalPriorita() {
 async function calcolaPrioritaArtigiano() {
   if (!impresaCorrente || !impresaCorrente.citta) return null;
   const citta = impresaCorrente.citta;
-  const { data, error } = await sb.from('imprese').select('id,piano').eq('tipo','artigiano').eq('citta', citta);
+  const { data, error } = await sb./* 5 set 2026: conta i colleghi della stessa citta' -> vista pubblica, non la tabella */from('imprese_pubbliche').select('id,piano').eq('tipo','artigiano').eq('citta', citta);
   if (error) throw error;
   const lista = data || [];
   const ord = { premium: 0, pro: 1, free: 2 };
@@ -5374,8 +5403,8 @@ async function apriModalVisibile() {
   const citta=impresaCorrente.citta||'la tua città';
   const regione=impresaCorrente.regione||'la tua regione';
   const tipo=impresaCorrente.tipo||'artigiano';
-  const{count:nCitta}=await sb.from('imprese').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('citta',citta);
-  const{count:nRegione}=await sb.from('imprese').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('regione',regione);
+  const{count:nCitta}=await sb.from('imprese_pubbliche').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('citta',citta);
+  const{count:nRegione}=await sb.from('imprese_pubbliche').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('regione',regione);
   const cercaPageMap={impresa:'cerca-imprese.html',artigiano:'cerca-artigiani.html',negozio:'cerca-negozi.html',professionista:'cerca-professionisti.html'};
   const cercaPage=cercaPageMap[tipo]||'cerca-imprese.html';
   const isPremium=piano==='premium';

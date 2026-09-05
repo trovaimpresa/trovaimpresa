@@ -169,7 +169,16 @@ async function uploadFotoCantiere(files) {
 
 async function eliminaFotoCantiere(id, path) {
   if (!confirm('Eliminare questa foto?')) return;
-  if (path) await sb.storage.from('cantieri-foto').remove([path]);
+  // 5 set 2026 — la risposta si LEGGE. Prima questo remove() falliva
+  // zitto (sul magazzino non c'era il permesso di cancellare) e il
+  // file restava li' per sempre senza che nessuno lo sapesse.
+  if (path) {
+    const { error: errFile } = await sb.storage.from('cantieri-foto').remove([path]);
+    if (errFile) {
+      console.error('cantieri-foto non cancellato:', errFile);
+      alert('Riga eliminata, ma la foto è rimasta nel magazzino.\nScrivilo ad Alessio: ' + (errFile.message || 'errore sconosciuto'));
+    }
+  }
   const { error } = await sb.from('cantiere_foto').delete().eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
   fotoCantiereCache = fotoCantiereCache.filter(f => String(f.id) !== String(id));
@@ -273,7 +282,16 @@ async function eliminaPreventivoCantiere(id, file_url) {
   if (!confirm('Eliminare questo preventivo?')) return;
   if (file_url) {
     const path = file_url.split('/cantieri-preventivi/')[1];
-    if (path) await sb.storage.from('cantieri-preventivi').remove([path]);
+    // 5 set 2026 — la risposta si LEGGE. Prima questo remove() falliva
+    // zitto (sul magazzino non c'era il permesso di cancellare) e il
+    // file restava li' per sempre senza che nessuno lo sapesse.
+    if (path) {
+      const { error: errFile } = await sb.storage.from('cantieri-preventivi').remove([path]);
+      if (errFile) {
+        console.error('cantieri-preventivi non cancellato:', errFile);
+        alert('Riga eliminata, ma il file del preventivo è rimasto nel magazzino.\nScrivilo ad Alessio: ' + (errFile.message || 'errore sconosciuto'));
+      }
+    }
   }
   const { error } = await sb.from('cantiere_preventivi').delete().eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
@@ -372,7 +390,16 @@ async function eliminaFatturaCantiere(id, file_url) {
   if (!confirm('Eliminare questa fattura?')) return;
   if (file_url) {
     const path = file_url.split('/cantieri-fatture/')[1];
-    if (path) await sb.storage.from('cantieri-fatture').remove([path]);
+    // 5 set 2026 — la risposta si LEGGE. Prima questo remove() falliva
+    // zitto (sul magazzino non c'era il permesso di cancellare) e il
+    // file restava li' per sempre senza che nessuno lo sapesse.
+    if (path) {
+      const { error: errFile } = await sb.storage.from('cantieri-fatture').remove([path]);
+      if (errFile) {
+        console.error('cantieri-fatture non cancellato:', errFile);
+        alert('Riga eliminata, ma il file della fattura è rimasto nel magazzino.\nScrivilo ad Alessio: ' + (errFile.message || 'errore sconosciuto'));
+      }
+    }
   }
   const { error } = await sb.from('cantiere_fatture').delete().eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
