@@ -27,6 +27,14 @@ www/
 # --- File di appunti / screenshot ---
 mintty.*.png
 
+# --- Dove il computer salva i file che manda Claude (5 settembre 2026) ---
+#     Il desktop scrive qui dentro: al 5 set erano gia' 29 file per 3,7 MB
+#     di schermate, dal 3 settembre in poi. Non e' mai finita in un commit
+#     perche' i comandi git elencano i file uno per uno — ma basta UN
+#     `git add -A` fatto di fretta e 3,7 MB di schermate vanno online, e
+#     per questa cartella non c'e' nessun rinvio a 404 in netlify.toml.
+Claude outputs/
+
 # --- Copie di sicurezza: restano sul PC, non vanno pubblicate.
 #     Online sarebbero una seconda homepage identica, e Google la
 #     indicizzerebbe come contenuto duplicato. ---
@@ -40,3 +48,10 @@ mintty.*.png
 
 # --- Cestino: file tolti dal sito, restano sul PC finche' non li cancelli tu ---
 _to_delete/
+
+# --- Il backup fatto a mano (26 agosto 2026) ---
+#     ⛔ La chiave service_role vede e cancella TUTTO saltando ogni
+#     controllo: non deve MAI finire in git ne' in una pagina del sito.
+tools/backup-chiavi.txt
+#     Le copie di sicurezza restano sul PC: sono i dati veri dei clienti.
+backup/backup-*/

@@ -75,8 +75,13 @@ function esiste(p){ try { return fs.existsSync(path.join(RADI, p)); } catch(e){ 
 /* Tutti gli .html della radice piu' quelli nelle sottocartelle vere. */
 function tuttiIFile(ext){
   const fuori = [];
+  // 'Claude outputs' e' dove il computer salva i file che manda Claude:
+  // non e' roba del sito (dal 5 set e' anche in .gitignore), e lasciarla
+  // qui dentro voleva dire un avviso finto a ogni controllo. Un avviso
+  // finto ripetuto insegna a saltare gli avvisi.
   const salta = new Set(['node_modules', '.git', 'backup', '_to_delete', 'prove-claude',
-                         'www', 'android', 'docs', '__pycache__', 'Nuova cartella']);
+                         'www', 'android', 'docs', '__pycache__', 'Nuova cartella',
+                         'Claude outputs']);
   (function gira(dir, rel){
     let voci = [];
     try { voci = fs.readdirSync(dir, { withFileTypes: true }); } catch(e){ return; }
