@@ -375,7 +375,7 @@ function caricaScorta() {
 
 async function impreseCitta(citta) {
   const filtro = `or=(citta.ilike."${citta}",provincia.ilike."${citta}*")`;
-  const url = `${SUPABASE_URL}/rest/v1/imprese?select=id,nome,mestiere,mestieri,tipo,citta,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&is_test=eq.false&email_confermata=eq.true&limit=200`;
+  const url = `${SUPABASE_URL}/rest/v1/imprese_pubbliche?select=id,nome,mestiere,mestieri,tipo,citta,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&limit=200`;
   try {
     const res = await fetch(url, {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }

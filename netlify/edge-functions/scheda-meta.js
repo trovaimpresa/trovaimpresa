@@ -107,14 +107,16 @@ export default async (request, context) => {
     // senza un id valido la pagina non mostra nessuna impresa: si lascia stare
     if (!/^[0-9]{1,12}$/.test(id)) return risposta;
 
+    /* 5 set 2026 — dalla tabella alla vista `imprese_pubbliche`: le stesse
+       colonne, e i due filtri (profili di prova, email confermata) li fa gia'
+       la vista. Qui si usa la chiave PUBBLICA, quindi questa pagina era una
+       delle strade da cui si leggeva la tabella intera. */
     const q = new URLSearchParams({
       select: 'id,nome,nome_attivita,citta,provincia,cap,indirizzo,tipo,mestiere,mestieri,descrizione,logo_url,foto_copertina_url,personalizzazione',
       id: 'eq.' + id,
-      is_test: 'eq.false',
-      email_confermata: 'eq.true',
       limit: '1'
     });
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/imprese?${q}`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/imprese_pubbliche?${q}`, {
       headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
     });
     if (!r.ok) return risposta;

@@ -446,7 +446,7 @@ async function avvia(){
   /* la stessa lettura pubblica della scheda: solo imprese vere e confermate */
   let d=null;
   try{
-    const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${ID}&is_test=eq.false&email_confermata=eq.true&select=id,nome,nome_attivita,tipo,citta,logo_url,foto_copertina_url,personalizzazione,piano&limit=1`,{headers:{'apikey':SK}});
+    const r=await fetch(`${SU}/rest/v1/imprese_pubbliche?id=eq.${ID}&select=id,nome,nome_attivita,tipo,citta,logo_url,foto_copertina_url,personalizzazione,piano&limit=1`,{headers:{'apikey':SK}});
     const j=await r.json(); d=Array.isArray(j)?j[0]:null;
   }catch(e){}
   if(!d){document.getElementById('profile-name').textContent='Impresa non trovata';document.getElementById('rec-lista').innerHTML='<div class="rec-empty"><div class="rec-empty-icon">🔎</div><div class="rec-empty-title">Impresa non trovata</div></div>';return;}

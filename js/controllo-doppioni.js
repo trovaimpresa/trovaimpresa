@@ -157,12 +157,14 @@
     if (!sb) return false;
     // il database ha i numeri scritti in modi diversi ("+393349767316" e
     // "3925993632"): si cerca "che contiene", non "uguale a".
-    var res = await sb.from('imprese').select('id')
-      .eq('is_test', false)
-      .ilike(colonna, '%' + cifre + '%')
-      .limit(1);
+    /* ⛔ 5 SETTEMBRE 2026 — non si legge piu' la tabella, si fa la DOMANDA.
+       Prima questa riga leggeva `imprese` con la chiave pubblica: funzionava,
+       ma la stessa chiave permetteva di portarsi via l'elenco intero. Adesso
+       si chiama `impresa_gia_iscritta`, che risponde SI o NO e non fa uscire
+       nessuna riga. L'avviso a schermo e' identico a prima. */
+    var res = await sb.rpc('impresa_gia_iscritta', { _colonna: colonna, _cifre: cifre });
     if (res.error) return false;
-    return Array.isArray(res.data) && res.data.length > 0;
+    return res.data === true;
   }
 
   function avvisoGiaIscritto(campo, cosa) {

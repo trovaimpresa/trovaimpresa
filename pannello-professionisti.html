@@ -5193,7 +5193,7 @@ async function apriModalPriorita() {
 async function calcolaPrioritaProfessionista() {
   if (!impresaCorrente || !impresaCorrente.citta) return null;
   const citta = impresaCorrente.citta;
-  const { data, error } = await sb.from('imprese').select('id,piano').eq('tipo','professionista').eq('citta', citta);
+  const { data, error } = await sb./* 5 set 2026: conta i colleghi della stessa citta' -> vista pubblica, non la tabella */from('imprese_pubbliche').select('id,piano').eq('tipo','professionista').eq('citta', citta);
   if (error) throw error;
   const lista = data || [];
   const ord = { premium: 0, free: 1 };
@@ -5231,8 +5231,8 @@ async function apriModalVisibile() {
   const citta=impresaCorrente.citta||'la tua città';
   const regione=impresaCorrente.regione||'la tua regione';
   const tipo=impresaCorrente.tipo||'professionista';
-  const{count:nCitta}=await sb.from('imprese').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('citta',citta);
-  const{count:nRegione}=await sb.from('imprese').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('regione',regione);
+  const{count:nCitta}=await sb.from('imprese_pubbliche').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('citta',citta);
+  const{count:nRegione}=await sb.from('imprese_pubbliche').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('regione',regione);
   const cercaPageMap={impresa:'cerca-imprese.html',artigiano:'cerca-artigiani.html',negozio:'cerca-negozi.html',professionista:'cerca-professionisti.html'};
   const cercaPage=cercaPageMap[tipo]||'cerca-imprese.html';
   const isPremium=piano==='premium';
