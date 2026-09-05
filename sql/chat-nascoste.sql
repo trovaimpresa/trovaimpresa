@@ -38,3 +38,29 @@ with check (exists (select 1 from public.imprese im
                     where im.id = chat_nascoste.impresa_id and im.user_id = auth.uid()));
 
 grant select, insert, update, delete on public.chat_nascoste to authenticated;
+
+-- =====================================================================
+-- E LO STESSO PER LA CHAT CON L'ASSISTENZA (stesso giorno)
+-- =====================================================================
+-- Stesso difetto, altro tavolo: «Elimina conversazione» faceva
+--   delete from supporto_messaggi where user_id = ...
+-- e cancellava la conversazione ANCHE all'admin, che perdeva la richiesta
+-- e la risposta che aveva dato.
+-- Qui la conversazione e' una sola per iscritto, quindi basta segnare fino
+-- a quando non vuole piu' vedere. Se l'assistenza risponde dopo, la
+-- risposta si vede lo stesso.
+create table if not exists public.supporto_nascoste (
+  user_id uuid        not null primary key references auth.users(id) on delete cascade,
+  quando  timestamptz not null default now()
+);
+
+alter table public.supporto_nascoste enable row level security;
+
+drop policy if exists "supporto_nascoste_mio" on public.supporto_nascoste;
+create policy "supporto_nascoste_mio"
+on public.supporto_nascoste for all
+to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
+
+grant select, insert, update, delete on public.supporto_nascoste to authenticated;

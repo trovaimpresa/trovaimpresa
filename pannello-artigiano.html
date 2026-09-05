@@ -2122,7 +2122,7 @@
       <div class="profilo-card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px">
           <p style="margin:0;color:#555;font-size:0.9rem">Scrivici per assistenza: ti rispondiamo qui.</p>
-          <button onclick="eliminaConversazioneSupporto()" style="padding:7px 12px;border:1.5px solid #e0b4b4;border-radius:9px;background:#fff;color:#c0392b;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">🗑 Elimina conversazione</button>
+          <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">📥 Svuota la mia schermata</button>
         </div>
         <div id="supporto-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
@@ -2896,9 +2896,24 @@ async function caricaSupporto() {
   if (!user) return;
   const box = document.getElementById('supporto-msgs');
   if (box) box.innerHTML = '';
+  /* ⛔ 5 SETTEMBRE 2026 — quello che l'iscritto ha svuotato non si rivede
+     QUI, ma non e' stato cancellato: l'assistenza conserva tutto. E se
+     l'assistenza risponde dopo, la risposta si vede lo stesso. */
+  let _daQuando = null;
+  try {
+    const { data: nas } = await sb.from('supporto_nascoste')
+      .select('quando').eq('user_id', user.id).maybeSingle();
+    if (nas && nas.quando) _daQuando = Date.parse(nas.quando);
+  } catch (e) { _daQuando = null; }   /* un errore non deve nascondere niente */
   const { data } = await sb.from('supporto_messaggi')
     .select('*').eq('user_id', user.id).order('created_at', { ascending: true });
-  (data || []).forEach(renderSupportoMsg);
+  (data || [])
+    .filter(m => {
+      if (_daQuando == null || isNaN(_daQuando)) return true;
+      const t = Date.parse(m && m.created_at);
+      return isNaN(t) ? true : t > _daQuando;
+    })
+    .forEach(renderSupportoMsg);
   scrollSupporto();
   sb.from('supporto_messaggi').update({ letto: true })
     .eq('user_id', user.id).eq('da_admin', true).eq('letto', false).then(function () {});
@@ -2989,12 +3004,18 @@ async function inviaSupporto() {
   if (error) { alert('Errore invio: ' + error.message); inp.value = txt; return; }
   supportoTogliFile();
 }
-async function eliminaConversazioneSupporto() {
-  if (!confirm('Vuoi eliminare tutta la conversazione? L\'operazione non è reversibile.')) return;
+/* ⛔ 5 SETTEMBRE 2026 — PRIMA QUESTO BOTTONE CANCELLAVA ANCHE LA COPIA
+   DELL'ASSISTENZA. Faceva `delete from supporto_messaggi where user_id = ...`:
+   spariva tutto anche all'admin, che perdeva la richiesta E la risposta che
+   aveva dato. Stesso difetto della chat coi clienti, altro tavolo.
+   Adesso si segna solo fino a quando l'iscritto non vuole piu' vedere. */
+async function svuotaSchermataSupporto() {
+  if (!confirm('La schermata si svuota per te. I messaggi NON vengono cancellati: l\'assistenza conserva la sua copia, e se ti risponde la risposta la vedi lo stesso. Vuoi continuare?')) return;
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta, accedi di nuovo.'); return; }
-  const { error } = await sb.from('supporto_messaggi').delete().eq('user_id', user.id);
-  if (error) { alert('Errore eliminazione: ' + error.message); return; }
+  const { error } = await sb.from('supporto_nascoste')
+    .upsert({ user_id: user.id, quando: new Date().toISOString() }, { onConflict: 'user_id' });
+  if (error) { alert('Non sono riuscito a svuotarla. Riprova fra poco.'); return; }
   const box = document.getElementById('supporto-msgs');
   if (box) box.innerHTML = '';
 }
