@@ -22014,3 +22014,55 @@ di tubo, mezzo bancale di laterizi»*, «Soldi usciti per questo **cantiere**»,
 «Chiedi al capo di metterti su un **cantiere**» e l'esempio della dettatura
 *«finito l'intonaco della scala»*. Un geometra e un commesso di ferramenta
 leggono di premiscelato.
+
+## ⛔ IL RIMBORSO NON SI RIPRENDEVA NIENTE (5 set)
+Il webhook ascoltava →5← avvisi e **nessuno riguardava i rimborsi**: la
+parola «refund» nel sito non compariva. Si ridavano i soldi, il cliente si
+teneva quello che aveva comprato, e il registro incassi continuava a
+contare quell'incasso.
+
+Trovato **partendo da un saldo di −0,54 €** nel pannello Stripe: era la
+commissione rimasta dopo un rimborso di prova di Alessio. Il →16 agosto←
+aveva pagato →19,00 €← per →150← crediti AI e si era rimborsato; tre
+settimane dopo, nel database, i →150← crediti c'erano ancora e i →19,00 €←
+erano ancora segnati come incasso.
+⚠️ **Una domanda sul saldo di mezzo euro ha scoperto un buco nei soldi.**
+Quando un numero non torna, si guarda da dove viene, sempre.
+
+**Come funziona adesso** (`charge.refunded`):
+1. il rimborso si SEGNA nel registro, **in negativo**. La riga del
+   pagamento non si cancella: la storia deve restare leggibile
+2. si toglie quello che era stato dato — crediti, gestionale o Premium
+3. ad Alessio **arriva sempre la mail**: soldi che escono non si leggono
+   nel registro fra tre settimane
+
+⚠️ **IL RIMBORSO DA SOLO NON DICE NIENTE.** `charge.refunded` porta
+l'addebito, non la spesa: niente email, niente prodotto, niente crediti.
+Quei dati stanno nella SESSIONE di pagamento, che si ritrova da Stripe
+partendo dal `payment_intent`.
+
+⚠️ **Rimborso PARZIALE: non si toglie niente in automatico.** Uno che si fa
+ridare meta' non e' uno che rinuncia. Si segna e si avvisa, decide Alessio.
+
+⛔ **IL DIFETTO CHE HA TROVATO IL BANCO, e che avevo scritto io.** Se la
+sessione di partenza non si ritrova, `prodotto` resta vuoto ma l'email
+arriva lo stesso dall'addebito: il codice finiva nel ramo del Premium e
+**rimetteva la persona al piano free A INDOVINARE** — anche se il rimborso
+era di →19← euro di crediti e il Premium l'aveva pagato a parte.
+**Togliere per sbaglio quello che uno ha pagato e' peggio del buco che si
+sta tappando.** Adesso, senza sessione, non si tocca niente e si avvisa.
+
+**Il banco**: `./gira-stripe.sh` — →37← verdi. Prova rimborso intero,
+parziale, doppio avviso, crediti gia' spesi, rimborso senza sessione.
+
+⚠️ **`charge.refunded` va ACCESO anche dalla parte di Stripe** (Webhook →
+Select events). Se non lo si accende, il codice non fa danni: semplicemente
+non arriva mai niente — ed e' il modo in cui un buco resta aperto sembrando
+chiuso. Stessa trappola gia' segnata per `invoice.paid`.
+
+## LA CARTELLA «Claude outputs» DENTRO IL PROGETTO (5 set)
+Il desktop salva i file che Claude manda in `trovaimpresa/Claude outputs/`:
+→29← file, →3,7← MB di schermate dal →3← settembre. Non e' mai finita in un
+commit perche' i blocchi git elencano i file uno per uno, ma **non e' in
+`.gitignore`**: basta un `git add -A` e finisce online, senza nessuna regola
+che la nasconda.

@@ -77,7 +77,8 @@ const LOGO_EMAIL = `<div style="text-align:center;padding:16px 0 20px">
   </a>
 </div>`;
 
-async function avvisaAlessio(oggetto, righe, cosaFare) {
+async function avvisaAlessio(oggetto, righe, cosaFare, sottotitolo) {
+  sottotitolo = sottotitolo || 'Il pagamento &egrave; arrivato. Quello che doveva succedere dopo, no.';
   try {
     const chiave = (process.env.RESEND_API_KEY || '').trim();
     if (!chiave) { console.error('[ALLARME] RESEND_API_KEY manca: mail non partita —', oggetto); return; }
@@ -94,7 +95,7 @@ async function avvisaAlessio(oggetto, righe, cosaFare) {
       + LOGO_EMAIL
       + '<div style="background:#fdecec;border:1px solid #f5c6c6;border-radius:12px;padding:18px 20px">'
       + '<div style="font-size:18px;font-weight:800;color:#c0392b;margin:0 0 6px">' + oggetto + '</div>'
-      + '<div style="font-size:14px;color:#7a3b34">Il pagamento &egrave; arrivato. Quello che doveva succedere dopo, no.</div>'
+      + '<div style="font-size:14px;color:#7a3b34">' + sottotitolo + '</div>'
       + '</div>'
       + '<table style="margin:18px 0;border-collapse:collapse">' + elenco + '</table>'
       + '<div style="background:#fff8ec;border:1px solid #f0d9b0;border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.6;color:#6b5330">'
@@ -364,6 +365,143 @@ exports.handler = async (event) => {
         quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
       });
     }
+  }
+
+  // -------------------------------------------------------------------
+  // IL RIMBORSO
+  //
+  // ⛔ 5 settembre 2026 — IL BUCO CHE C'ERA QUI: non c'era niente.
+  // Il webhook ascoltava 5 avvisi e nessuno riguardava i rimborsi. La
+  // parola «refund» nel sito non compariva. Risultato: si ridavano i
+  // soldi, il cliente si teneva quello che aveva comprato, e il registro
+  // incassi continuava a contare quell'incasso. Lo si e' scoperto da un
+  // rimborso di prova di Alessio del 16 agosto: 19,00 euro segnati e 150
+  // crediti ancora sul suo account, tre settimane dopo.
+  //
+  // ⚠️ IL RIMBORSO DA SOLO NON DICE NIENTE. L'avviso `charge.refunded`
+  // porta l'addebito, non la spesa: niente email, niente prodotto,
+  // niente crediti. Quei dati stanno nella SESSIONE di pagamento, e la
+  // sessione si ritrova da Stripe partendo dal `payment_intent`.
+  //
+  // ⚠️ RIMBORSO PARZIALE: non si toglie NIENTE in automatico. Uno che si
+  // fa ridare meta' non e' uno che rinuncia: decide Alessio, e intanto
+  // gli arriva la mail.
+  // -------------------------------------------------------------------
+  if (ev.type === 'charge.refunded') {
+    const ch = ev.data.object;
+    const pi = typeof ch.payment_intent === 'string'
+      ? ch.payment_intent
+      : (ch.payment_intent && ch.payment_intent.id) || null;
+    const parziale = (ch.amount_refunded || 0) < (ch.amount || 0);
+
+    let ses = null;
+    if (pi) {
+      try {
+        const elenco = await stripe.checkout.sessions.list({ payment_intent: pi, limit: 1 });
+        ses = (elenco && elenco.data && elenco.data[0]) || null;
+      } catch (e) {
+        console.error('[rimborso] sessione di partenza non ritrovata:', e && e.message);
+      }
+    }
+    const meta     = (ses && ses.metadata) || {};
+    const email    = meta.email || (ch.billing_details && ch.billing_details.email) || ch.receipt_email || null;
+    const prodotto = meta.prodotto || null;
+    const quando   = ev.created ? new Date(ev.created * 1000).toISOString() : null;
+
+    // 1) I CONTI. Il rimborso si SEGNA, in negativo. La riga del
+    //    pagamento NON si cancella: la storia deve restare leggibile.
+    await segnaIncasso(supabase, {
+      prodotto: prodotto || 'sconosciuto',
+      centesimi: -(ch.amount_refunded || 0),
+      riferimento: 'rimborso-' + ch.id,
+      email, valuta: ch.currency, tipo_evento: ev.type, quando
+    });
+
+    // 2) SI TOGLIE QUELLO CHE ERA STATO DATO
+    let tolto = 'niente';
+    if (parziale) {
+      tolto = 'niente: il rimborso e\' parziale (' + ((ch.amount_refunded || 0) / 100).toFixed(2)
+            + ' su ' + ((ch.amount || 0) / 100).toFixed(2) + ')';
+
+    } else if (prodotto === 'crediti-ai') {
+      const crediti = parseInt(meta.crediti, 10);
+      const uid = meta.user_id || (ses && ses.client_reference_id) || null;
+      if (!uid || !(crediti > 0)) {
+        tolto = 'NIENTE: non so a chi togliere i crediti';
+        console.error('[rimborso] crediti senza destinatario, charge ' + ch.id);
+      } else {
+        const { data: esito, error: errCr } = await supabase.rpc('togli_crediti_rimborso', {
+          p_user_id: uid, p_credits: crediti,
+          p_amount_eur: (ch.amount_refunded || 0) / 100,
+          p_riferimento: 'rimborso-' + ch.id
+        });
+        if (errCr) {
+          tuttoBene = false; motivoErrore = 'crediti non tolti';
+          tolto = 'NON RIUSCITO: ' + errCr.message;
+          console.error('[rimborso] crediti NON tolti:', errCr.message);
+        } else if (esito && esito.ok === false) {
+          tolto = esito.reason === 'already_processed'
+            ? 'gia\' fatto con un avviso precedente'
+            : 'NON RIUSCITO: ' + esito.reason;
+          if (esito.reason !== 'already_processed') { tuttoBene = false; motivoErrore = 'crediti non tolti'; }
+        } else {
+          tolto = 'tolti ' + (esito && esito.tolti) + ' crediti su ' + crediti;
+          if (esito && esito.non_recuperati > 0) {
+            tolto += ' — ' + esito.non_recuperati + ' erano gia\' stati spesi e restano spesi';
+          }
+        }
+      }
+
+    } else if (prodotto === 'gestionale' && email) {
+      const up = await supabase.from('imprese')
+        .update({ gestionale_attivo: false }).eq('email', email);
+      if (up.error) {
+        tuttoBene = false; motivoErrore = 'gestionale non spento dopo il rimborso';
+        tolto = 'NON RIUSCITO: ' + up.error.message;
+      } else tolto = 'gestionale spento';
+
+    } else if (!ses) {
+      // ⛔ 5 set — IL DIFETTO CHE HA TROVATO IL BANCO.
+      // Se la sessione di partenza non si ritrova, `prodotto` e' vuoto ma
+      // l'email arriva lo stesso dall'addebito. Cosi' com'era, il codice
+      // finiva nel ramo qui sotto e rimetteva la persona al piano FREE
+      // A INDOVINARE — anche se il rimborso era di 19 euro di crediti e
+      // il Premium l'aveva pagato a parte. Togliere per sbaglio quello
+      // che uno ha pagato e' peggio del buco che stiamo tappando.
+      tolto = 'NIENTE: non ho ritrovato il pagamento di partenza, non tolgo a indovinare';
+
+    } else if (email) {
+      // premium e premium-ai (e i vecchi senza `prodotto` nei metadata,
+      // ma solo se la sessione l'ho ritrovata davvero)
+      const up = await supabase.from('imprese').update({
+        piano: 'free', premium_pagato: false, chat_pro: false, chat_pro_scadenza: null
+      }).eq('email', email);
+      if (up.error) {
+        tuttoBene = false; motivoErrore = 'premium non spento dopo il rimborso';
+        tolto = 'NON RIUSCITO: ' + up.error.message;
+      } else tolto = 'tornato al piano free';
+
+    } else {
+      tolto = 'NIENTE: non so di chi fosse questo pagamento';
+    }
+
+    // 3) ALESSIO LO DEVE SAPERE SEMPRE. Un rimborso e' soldi che escono:
+    //    non e' una cosa da leggere nel registro fra tre settimane.
+    console.log('[rimborso] ' + ch.id + ' — ' + tolto);
+    await avvisaAlessio('Rimborso: ' + ((ch.amount_refunded || 0) / 100).toFixed(2) + ' '
+      + String(ch.currency || 'eur').toUpperCase(), {
+      'Chi': email || 'non si sa',
+      'Cosa aveva comprato': prodotto || 'non si sa',
+      'Rimborsato': ((ch.amount_refunded || 0) / 100).toFixed(2) + ' su '
+                  + ((ch.amount || 0) / 100).toFixed(2),
+      'Cosa ha fatto il sito': tolto,
+      'Riferimento Stripe': ch.id
+    }, parziale
+      ? 'Il rimborso &egrave; <b>parziale</b>, quindi il sito non ha tolto niente apposta. '
+      + 'Se vuoi togliergli quello che aveva comprato, fallo a mano su Supabase.'
+      : 'Se sopra c\'&egrave; scritto NON RIUSCITO o NIENTE, tocca a te su Supabase. '
+      + 'Se invece dice cosa ha tolto, non devi fare nulla: &egrave; gi&agrave; a posto.',
+      'Soldi usciti. Qui sotto c\'&egrave; scritto che cosa ha fatto il sito da solo.');
   }
 
   // -------------------------------------------------------------------

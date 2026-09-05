@@ -155,6 +155,9 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ## ⚖️ DA DECIDERE — tocca ad Alex, Claude non decide
 
+- [5 set] **La cartella `Claude outputs/` dentro il progetto** — →29← file, →3,7← MB di schermate. Non e' in `.gitignore`: un `git add -A` e finiscono online. →2← righe da aggiungere, ma il file e' di Alex
+- [5 set] **`charge.dispute.created` (la contestazione della carta)**: non e' ascoltata. E' piu' rara di un rimborso ma piu' cara, perche' Stripe toglie i soldi E la commissione. Da decidere se tapparla adesso o quando capitera'
+
 - [5 set] **Il cestino dell'admin non porta via i file.** `admin.html` cancella un preventivo passando per `netlify/functions/admin-dati.js`, che lavora con la chiave di servizio sul database e basta: la riga sparisce, gli allegati restano. Il pannello dell'impresa adesso li porta via, l'admin no. Da decidere se sistemare anche quella strada (si fa dentro `admin-dati.js`, non e' lavoro grosso)
 - [5 set] **Il bottone «Elimina preventivo» c'e' solo in `pannello-artigiano.html`.** Impresa, negozio e professionisti non ce l'hanno: le loro richieste non si possono togliere. Da decidere se metterlo anche negli altri →3← (stessa forma, →10← minuti) oppure se e' voluto
 
@@ -183,6 +186,11 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - Collaudo dal vivo di `assistenza-ai-e-computo` (3 domande alla chat + computo di prova con totale →937,99←): da fare la prima volta con Alex presente
 
 ## ✅ FATTO — ultimi 14 giorni (per chiudere il cerchio, poi si cancella)
+
+- [5 set] ✅ **I RIMBORSI — il buco piu' caro trovato oggi, e non lo cercavo.** Il webhook non ascoltava `charge.refunded`: si ridavano i soldi, il cliente si teneva la roba, e il registro segnava lo stesso l'incasso. Adesso il rimborso si segna **in negativo**, si toglie quello che era stato dato (crediti / gestionale / Premium) e **arriva sempre la mail** ad Alessio. Rimborso **parziale**: non si tocca niente apposta. `sql/rimborsi.sql`, banco `./gira-stripe.sh` →37← verdi
+- [5 set] ⛔ **L'ho trovato da un saldo di −0,54 €** nel pannello Stripe di Alessio: era la commissione rimasta dopo un suo rimborso di prova. **Una domanda su mezzo euro ha scoperto un buco nei soldi.** Quando un numero non torna, si guarda da dove viene
+- [5 set] ✅ **Sistemato il suo dato vero del →16 agosto←**: crediti →150←→**→0←**, registro incassi →19,00 €←→**→0,00 €←**. Fatto con la STESSA funzione che usa il sito da oggi (se sbagliasse li', sbaglierebbe anche qui). ⛔ **Niente cancellato**: righe nuove in negativo accanto alle vecchie, la storia resta leggibile e si torna indietro
+- [5 set] ⛔ **Il banco ha trovato un difetto nel codice che avevo appena scritto**: senza la sessione di partenza, il rimborso rimetteva la persona al piano free **a indovinare**. **Togliere per sbaglio quello che uno ha pagato e' peggio del buco che si sta tappando**
 
 - [5 set] ⛔ **Il meccanismo c'era gia' e non me n'ero accorto subito**: `tuttoBene` in quel file rispondeva 500 a Stripe per i crediti. Ho riusato quello invece di inventarne un altro — **una regola sola, in un posto solo**. La mail e' l'aggiunta, non la sostituzione
 - [5 set] ⛔ **Il banco del logo e' diventato rosso da solo** appena ho riscritto la fascia "a modo mio" nel webhook di Stripe: «ci sono →2← fasce diverse». Era il suo mestiere, ed e' la prova che serviva a qualcosa
