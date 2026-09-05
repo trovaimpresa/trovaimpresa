@@ -155,6 +155,9 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ## ⚖️ DA DECIDERE — tocca ad Alex, Claude non decide
 
+- [5 set] **L'annuncio pagato il →23 luglio← (impresa →67←) non e' nel registro incassi.** Non e' un difetto: la riga dell'incasso e' nata il →14 agosto←, dopo. Il numero si legge su Stripe e si mette a mano — →2← minuti, ma serve che Alex guardi quanto era
+- [5 set] **Il rimborso di un ANNUNCIO non e' gestito** (`stripe-webhook-pubblicita`): l'annuncio resterebbe `pagato` e continuerebbe a girare, e l'incasso resterebbe scritto. Stesso buco tappato oggi per gli abbonamenti. Da decidere se tapparlo anche qui
+
 - ✅ [5 set] **SU STRIPE ERA ACCESO →1← AVVISO SU →7←** (solo `checkout.session.completed`): rinnovi, disdette, rimborsi e pagamenti lenti non arrivavano mai. **Accesi tutti e →7← il 5 set**, controllati uno per uno sulla schermata. Non aveva ancora fatto danni: →0← imprese con `premium_pagato=true`, nessuno aveva ancora comprato un abbonamento
 - [5 set] **`Welcome Clean` (impresa →152←) risulta aver disdetto il →26 agosto← ma ha ancora `piano = premium`.** Non costa niente (ha `premium_pagato = false`, come tutti: e' un piano regalato), ma e' una riga che dice due cose diverse. Da guardare
 

@@ -22108,3 +22108,65 @@ sta in un pannello di qualcun altro, **l'interruttore si guarda**. Nel file
 c'era scritto da mesi «l'avviso invoice.paid va acceso anche dalla parte di
 Stripe» — nero su bianco, e nessuno era andato a vedere se era acceso.
 **Un avvertimento scritto in un commento non e' un controllo.**
+
+## 10. L'ULTIMO DIFETTO DELLA GIORNATA — una riscrittura che valeva una volta sola
+
+Provando i mestieri **uno dopo l'altro** nella stessa pagina, il negozio si
+teneva l'etichetta dello studio. `adattaParole()` cercava l'etichetta **per
+testo** (`se dice "Cosa avete usato", riscrivila`): riscritta una volta, il
+testo non combaciava piu' e la seconda chiamata non trovava niente.
+⚠️ Dal vivo quasi non si vedeva — ognuno apre la pagina col suo mestiere e la
+riscrittura avviene una volta sola. Ma **una riscrittura che funziona solo la
+prima volta e' rotta**: e' la stessa famiglia dell'inciampo del →22← agosto.
+Adesso l'etichetta ha un id (`lv-lab-usato`) e la nota sotto il riquadro si
+rimette a posto **in tutti e due i versi** (prima tornava indietro solo verso lo
+studio, mai indietro).
+
+## COM'E' FINITA LA GIORNATA DEL 5 SETTEMBRE
+
+**→7← push.** Chiusi: il punto →1← (artigiano), il punto →2← (giro sui →4←
+ruoli), il punto →3← (operaio finto vero), il punto →4← (i difetti del →4← set),
+il punto →6← (prima schermata). **Il punto →5← (timbratura, offline, GPS, ferie)
+NON e' stato toccato**: Alessio aveva scritto «non costruire niente di questi
+→4← senza avermelo chiesto prima», e la domanda da fargli e' sempre la sua:
+*un'impresa smetterebbe di pagare TrovaImpresa se questa cosa non ci fosse?*
+
+**I banchi nuovi**, tutti in `prove-claude/banchi-fissi/`:
+
+| banco | dove gira | verdi |
+|---|---|---|
+| `operatore/banco-apertura-reparti.js` | PC | →17← |
+| `operatore/banco-app-operaio.js` | PC | →46← |
+| `operatore/banco-prima-schermata.js` | nuvola, browser vero a →390← px | →10← |
+| `operatore/permessi-spese.sql` | database vero | →11← |
+| `operatore/collaudo-operaio-vero.sql` | database vero, operaio vero | →6←+→9←+→7← |
+| `operatore/giro-4-ruoli.sql` | database vero, →4← operai veri | →48← |
+| `imprese-pubbliche/banco-vista-pubblica.js` | PC | →22← |
+| `imprese-pubbliche/permessi-imprese.sql` | database vero | →8← |
+
+**I mondi finti che restano nel database** (decisi da Alex il 5 set):
+`prova.operaio@trovaimpresa.com` (PROVA1, dentro l'impresa vera di Alessio) e le
+tre imprese `is_test` — PROVA Impresa edile (PROVA2), PROVA Studio tecnico
+(PROVA3), PROVA Ferramenta (PROVA4), ognuna col suo operaio vero. Password di
+tutti: `ProvaOperaio2026!`. Sul sito non si vedono: la vista pubblica resta a
+→93← e le finte sono →0←. **Servono a rifare il giro sui →4← ruoli ogni volta
+che si tocca un permesso.**
+
+## IL SECONDO WEBHOOK (pubblicita) — ERA GIUSTO (5 set)
+Avevo scommesso che avesse lo stesso problema dell'altro. **Sbagliato.**
+`stripe-webhook-pubblicita` gestisce **un solo** `ev.type`
+(`checkout.session.completed`) e su Stripe ne ha acceso **esattamente
+quello**. →1← su →1←: e' a posto. La pubblicita' e' un pagamento singolo,
+non un abbonamento: rinnovi e disdette non esistono, ed e' giusto cosi'.
+⚠️ **Una scommessa non e' una verifica.** L'avevo detto ad Alex come
+sospetto e sono andato a leggere prima di dargli un numero: il sospetto era
+sbagliato.
+
+⚠️ **Quello che invece manca davvero**: l'unico annuncio pagato
+(→23 luglio 2026←, impresa →67←, `cs_live_a1hDc2tr...`) **non e' nel
+registro incassi**. Non e' un difetto del codice: la riga dell'incasso e'
+nata il →14 agosto←, tre settimane DOPO quel pagamento. Il numero si legge
+su Stripe e si aggiunge a mano con `registra_pagamento`.
+⚠️ E anche qui **il rimborso non e' gestito**: se si rimborsa un annuncio,
+`stato` resta `pagato`, l'annuncio continua a girare e l'incasso resta
+scritto. Stesso buco tappato oggi per gli abbonamenti.
