@@ -26,6 +26,16 @@
       ⚠️ L'indirizzo RESTA di Supabase: cambiarlo vuol dire comprare il
       dominio personalizzato per l'accesso, che sul piano Free non c'e'.
 
+  ⚠️ 6 SETTEMBRE 2026 — cambiate DUE righe sole (il titolo e la frase sotto).
+   Prima diceva «Benvenuto su TrovaImpresa». Ma questo stesso modello lo usa
+   anche `auth/v1/resend`, cioe' il rimando della conferma a chi si e' iscritto
+   settimane fa: a uno di luglio «benvenuto» suona sbagliato, e chi legge una
+   cosa che non lo riguarda la butta. Adesso la frase vale per tutti e due:
+   per chi si iscrive oggi e per chi non ha mai confermato.
+   ⛔ REGOLA: questo modello e' UNO SOLO per iscritti nuovi e vecchi. Ogni
+   parola scritta qui dentro deve essere vera per tutti e due, se no una
+   delle due persone legge una bugia.
+
   L'UNICA cosa che non si puo' togliere e' {{ .ConfirmationURL }}: e' il link
   che attiva l'account. Se sparisce, nessuno riesce piu' a iscriversi.
 -->
@@ -42,11 +52,11 @@
 
       <tr><td style="padding:30px 26px 8px">
         <div style="font-size:21px;font-weight:800;color:#0f2744;line-height:1.35;margin-bottom:14px">
-          Benvenuto su TrovaImpresa
+          Manca un passaggio solo
         </div>
         <div style="font-size:16px;line-height:1.6;color:#33404f">
-          Manca un passaggio solo: <strong>conferma che questo indirizzo è tuo</strong>.
-          Da quel momento il tuo profilo è attivo e i clienti possono trovarti.
+          Il tuo profilo su TrovaImpresa <strong>non è ancora attivo</strong>: serve la
+          conferma di questo indirizzo. Un clic, e i clienti possono trovarti.
         </div>
       </td></tr>
 
