@@ -347,7 +347,11 @@
       <div class="rap-data" id="rap-data">—</div>
       <div id="rap-squadra"></div>
 
-      <div class="label" style="margin-top:16px">Cosa avete usato</div>
+      <!-- ⚠️ l'id serve a adattaParole(): cercare l'etichetta PER TESTO
+           funzionava solo la prima volta — riscritta una volta, il testo non
+           combaciava piu' e la seconda chiamata non trovava niente. Preso dal
+           collaudo dal vivo del 5 set, provando negozio dopo studio. -->
+      <div class="label" id="lv-lab-usato" style="margin-top:16px">Cosa avete usato</div>
       <textarea id="rap-materiali" placeholder="Es. 3 sacchi di premiscelato, 20 m di tubo, mezzo bancale di laterizi…"></textarea>
       <div class="rap-nota">Scrivi <b>le cose</b>, non i prezzi. Quanto sono costate lo sa già il gestionale dalle spese e dalle fatture: se le riscrivessi qui verrebbero contate due volte.</div>
 
@@ -999,17 +1003,16 @@ function _p(k){
 /* riscrive quello che nell'HTML e' gia' stampato */
 function adattaParole(){
   try{
-    document.querySelectorAll('#lv-rap-box .label').forEach(function(e){
-      if(e.textContent.trim()==="Cosa avete usato")e.textContent=_p('cosaUsato');
-    });
+    const lab=document.getElementById('lv-lab-usato');
+    if(lab)lab.textContent=_p('cosaUsato');
     const ta=document.getElementById('rap-materiali');
     if(ta)ta.setAttribute('placeholder',_p('esUsato'));
     /* la nota sotto il riquadro parla di prezzi contati due volte: vale per
        tutti, ma per lo studio «le cose» diventa «quello che hai fatto» */
-    if(MIO.tipoStudio==='professionista'){
-      const n=document.querySelector('#lv-rap-box .rap-nota');
-      if(n)n.innerHTML="Scrivi <b>quello che hai fatto</b>, non i costi. Quanto sono costati lo sa gi\u00e0 il gestionale dalle spese e dalle fatture: se li riscrivessi qui verrebbero contati due volte.";
-    }
+    const nota=document.querySelector('#lv-rap-box .rap-nota');
+    if(nota)nota.innerHTML = (MIO.tipoStudio==='professionista')
+      ? "Scrivi <b>quello che hai fatto</b>, non i costi. Quanto sono costati lo sa gi\u00e0 il gestionale dalle spese e dalle fatture: se li riscrivessi qui verrebbero contati due volte."
+      : "Scrivi <b>le cose</b>, non i prezzi. Quanto sono costate lo sa gi\u00e0 il gestionale dalle spese e dalle fatture: se le riscrivessi qui verrebbero contate due volte.";
   }catch(_){}
 }
 function etic(s){
