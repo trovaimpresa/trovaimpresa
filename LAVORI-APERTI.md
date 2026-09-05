@@ -16,14 +16,14 @@ Ultimo aggiornamento: sabato 5 settembre 2026 (sera) — GESTIONALE OPERATORE pe
 - **L'operaio legge i rapportini dei colleghi** · `gest_rapportini_team_read` chiede solo il permesso «rapportini», non che il rapportino sia suo. Meno grave dei lavori (li' si poteva SCRIVERE), ma e' lo stesso tipo di buco · decide Alex
 
 ### ⚖️ Decide Alex
-- **L'operaio finto resta o si butta?** · nel database c'e' un secondo account vero (`prova.operaio@trovaimpresa.com`, codice PROVA1) + la persona «PROVA Operaio (finto, di Claude)» in Squadra + il lavoro «PROVA di Claude — potatura siepe» di oggi. **Serve**: senza, il collaudo dei permessi non si puo' rifare. Ma si vede nella tua Squadra. Tenere / buttare
+- ✅ **L'operaio finto RESTA** (deciso da Alex il 5 set) · nel database c'e' un secondo account vero (`prova.operaio@trovaimpresa.com`, codice PROVA1) + la persona «PROVA Operaio (finto, di Claude)» in Squadra + il lavoro «PROVA di Claude — potatura siepe» di oggi. **Serve**: senza, il collaudo dei permessi non si puo' rifare. Ma si vede nella tua Squadra. Tenere / buttare
 - **Controllare l'admin** · `admin.html` chiede la password e Claude non entra. Sul database l'eccezione del fondatore funziona (vede →117← imprese), ma il collaudo vero e' →4← clic di Alex: entrare e guardare che l'elenco imprese e la card «Da dove arrivano» ci siano
 
 ### 🆕 Dal GIRO SUI 4 RUOLI (5 set, notte)
 - ✅ **Il NEGOZIO non poteva scrivere il rapportino** · `gestionale-negozio.html` aveva →7← spunte invece di →8←: mancava **`rapportini`**, quella che accende «Segna la giornata». Chi veniva invitato da li' poteva solo segnare una spesa. CHIUSO: spunta aggiunta, spiegazioni sotto ogni spunta, preset dei ruoli allineati, e portata li' anche la **protezione dai doppioni** del →14← agosto che mancava
 - ✅ **L'app dell'operaio non leggeva piu' il tipo dell'impresa** · l'avevo rotto io chiudendo `imprese`. Non dava errore (try/catch): al **collaboratore di studio** le pratiche si sarebbero chiamate «Lavori». CHIUSO con `gest_tipo_impresa(id)`
 - ✅ **LE PAROLE ADESSO CAMBIANO COL MESTIERE** (fatto il 5 set, notte) · vocabolario `PAROLE` + `_p()` in un posto solo, e `adattaParole()` riscrive quello che nell'HTML e' gia' stampato. Lo studio legge «Su cosa hai lavorato — Es. sopralluogo, rilievo, deposito in Comune» e «Soldi usciti per questa pratica»; il negozio «Cosa hai fatto — Es. scarico bancali, riordino magazzino». La parola «cantiere» a schermo non c'e' piu'. // vecchia nota: ⚖️ LE PAROLE DEL CANTIERE · il motore va per tutti e →4← i ruoli, ma le SCRITTE sono da muratore. `etic()` cambia solo «Lavori→Pratiche» in →4← punti; restano com'erano: «Cosa avete usato» con esempio *«3 sacchi di premiscelato, 20 m di tubo, mezzo bancale di laterizi»*, «Soldi usciti per questo **cantiere**», «Chiedi al capo di metterti su un **cantiere**», e l'esempio della dettatura *«finito l'intonaco della scala»*. Un geometra e un commesso di ferramenta leggono di premiscelato. **Decide Alex**: si cambiano le parole per ruolo (mezz'ora) o si lascia?
-- ⚖️ **Le →3← imprese finte restano?** · «PROVA Impresa edile», «PROVA Studio tecnico», «PROVA Ferramenta», ognuna col suo operaio vero. Hanno `is_test` acceso: sul sito non si vedono (controllato: vista pubblica →93←, finte →0←). Servono per rifare il giro sui →4← ruoli quando si tocca qualcosa
+- ✅ **Le →3← imprese finte RESTANO** (deciso da Alex il 5 set) · «PROVA Impresa edile», «PROVA Studio tecnico», «PROVA Ferramenta», ognuna col suo operaio vero. Hanno `is_test` acceso: sul sito non si vedono (controllato: vista pubblica →93←, finte →0←). Servono per rifare il giro sui →4← ruoli quando si tocca qualcosa
 
 ### ✅ Chiusi il 5 set (sera)
 - **L'artigiano ha di nuovo Squadra, Agenda operatore e Carte** (da →21← a →24← voci di menu). Non era una svista: era la scelta del →21← ago, di prima che nascesse il gestionale operatore
@@ -154,6 +154,9 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 9. [set] **Collegare l'agente del lunedì alle skill nuove** man mano che si aggiungono
 
 ## ⚖️ DA DECIDERE — tocca ad Alex, Claude non decide
+
+- [5 set] ⛔ **SU STRIPE E' ACCESO →1← AVVISO SU →7←** (solo `checkout.session.completed`): rinnovi, disdette, rimborsi e pagamenti lenti **non arrivano mai**. Non ha ancora fatto danni perche' →0← imprese hanno `premium_pagato=true` e →0← hanno `stripe_customer_id`: **nessuno ha ancora comprato un abbonamento**. Servono →6← clic di Alex sul pannello Stripe — vedi CLAUDE.md
+- [5 set] **`Welcome Clean` (impresa →152←) risulta aver disdetto il →26 agosto← ma ha ancora `piano = premium`.** Non costa niente (ha `premium_pagato = false`, come tutti: e' un piano regalato), ma e' una riga che dice due cose diverse. Da guardare
 
 - [5 set] **La cartella `Claude outputs/` dentro il progetto** — →29← file, →3,7← MB di schermate. Non e' in `.gitignore`: un `git add -A` e finiscono online. →2← righe da aggiungere, ma il file e' di Alex
 - [5 set] **`charge.dispute.created` (la contestazione della carta)**: non e' ascoltata. E' piu' rara di un rimborso ma piu' cara, perche' Stripe toglie i soldi E la commissione. Da decidere se tapparla adesso o quando capitera'

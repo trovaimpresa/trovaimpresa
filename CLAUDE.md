@@ -22066,3 +22066,33 @@ Il desktop salva i file che Claude manda in `trovaimpresa/Claude outputs/`:
 commit perche' i blocchi git elencano i file uno per uno, ma **non e' in
 `.gitignore`**: basta un `git add -A` e finisce online, senza nessuna regola
 che la nasconda.
+
+## ⛔ SU STRIPE ERA ACCESO →1← AVVISO SU →7← (5 set)
+L'endpoint `stripe-webhook-abbonamenti` ascoltava **soltanto**
+`checkout.session.completed`. Il codice ne gestisce →7←. Gli altri →6← non
+arrivavano mai — e il codice che li aspetta **non e' rotto: non viene mai
+chiamato**. E' il guasto piu' difficile da vedere leggendo il codice,
+perche' il codice e' giusto.
+
+Cosa non funzionava, senza che si vedesse:
+· `customer.subscription.deleted` → **chi disdice resta Premium per
+  sempre**. E' il buco tappato il →29 agosto←: il codice sistemato, l'avviso
+  mai acceso. Il lavoro c'era, l'effetto no.
+· `invoice.paid` → i **rinnovi** non finiscono nel registro incassi. Il
+  primo pagamento si', quelli dopo no
+· `charge.refunded` → il lavoro di oggi, senza questo, non riceve niente
+· `checkout.session.async_payment_succeeded` → chi paga con un metodo lento
+  (bonifico, addebito) **non riceve MAI i crediti**: il codice apposta non
+  accredita al primo avviso e aspetta il secondo, che non arriva
+
+⚠️ **Oggi non ha ancora fatto danni, ed e' l'unica fortuna**: letto dal
+database, →0← imprese con `premium_pagato = true` e →0← con
+`stripe_customer_id`. **Nessuno ha ancora comprato un abbonamento.** L'unico
+pagamento vero mai arrivato e' quello dei crediti del →16 agosto←. Si tappa
+adesso, prima del primo cliente che paga.
+
+⛔ **LA REGOLA**: quando un pezzo di codice dipende da un interruttore che
+sta in un pannello di qualcun altro, **l'interruttore si guarda**. Nel file
+c'era scritto da mesi «l'avviso invoice.paid va acceso anche dalla parte di
+Stripe» — nero su bianco, e nessuno era andato a vedere se era acceso.
+**Un avvertimento scritto in un commento non e' un controllo.**
