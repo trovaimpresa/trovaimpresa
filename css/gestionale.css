@@ -69,6 +69,11 @@
   .panel-card h2{font-size:22px;font-weight:800;letter-spacing:-.3px}
   .panel-card .pc-meta{font-size:13px;font-weight:600;opacity:.95;margin-top:auto}
   .panel-card:active{transform:translateY(1px)}
+  /* 6 settembre 2026 — l'anello del fuoco quando arrivi con TAB.
+     Senza questa riga Chrome ne disegna uno suo, arancione, che con il blu
+     del sito non c'entra niente. Solo :focus-visible, non :focus: col mouse
+     non si vede, come per tutti gli altri comandi del gestionale. */
+  .panel-card:focus-visible{outline:3px solid var(--blu,#0066FF);outline-offset:3px}
   .az-btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 16px;font-family:inherit;font-size:13px;font-weight:700;color:var(--testo-2);cursor:pointer;box-shadow:var(--shadow)}
   .panel-card{position:relative}
   .pc-del{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.2);border:none;color:#fff;width:32px;height:32px;border-radius:9px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}

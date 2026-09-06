@@ -2181,7 +2181,18 @@
          nessuna: e' la regola del Riepilogo del 20 agosto, portata anche qui.
          ⛔ Il colore del reparto NON si perde: resta sull'icona e sul pallino
             accanto al nome quando entri dentro (vedi enterPanel). */
-      return `<div class="panel-card" data-action="enter" data-p="${p.id}">
+      /* ⛔ 6 settembre 2026 — LA SCHEDA SI APRE ANCHE DA TASTIERA.
+         Era un <div> nudo: da tastiera non ci si arrivava. Il cestino qui
+         sotto invece e' un <button>, quindi da tastiera ci si arrivava
+         benissimo — su una schermata con una scheda sola si poteva
+         CANCELLARE un reparto ma non entrarci. Un danno che fa male una
+         volta e in modo definitivo.
+         ⚠️ Resta un <div> con role="button", NON diventa un <button> vero:
+         un <button> dentro un altro <button> non e' HTML valido e il
+         cestino sta dentro la scheda. Il tasto Invio e la barra spaziatrice
+         li fa funzionare l'ascoltatore unico piu' in basso (cerca
+         «INVIO E BARRA SPAZIATRICE»). */
+      return `<div class="panel-card" data-action="enter" data-p="${p.id}" role="button" tabindex="0">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${icoRep(p.icon)}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
@@ -11762,6 +11773,32 @@
     });
   }
   ctInit();
+
+  /* ============================================================
+     INVIO E BARRA SPAZIATRICE — 6 settembre 2026
+     ============================================================
+     Tutto il gestionale si comanda con data-action e un ascoltatore del
+     CLIC. Un <button> o un <a> risponde al tasto Invio da solo, perche' il
+     browser gli manda un clic finto: un <div> no, mai. Percio' una scheda
+     scritta come <div data-action=...> si puo' guardare ma non aprire.
+     Questo ascoltatore fa la stessa cosa che fa il browser coi bottoni:
+     su Invio o barra spaziatrice manda un clic vero all'elemento.
+     ⚠️ Salta i comandi VERI (button, a, input, select, textarea): li' ci
+     pensa gia' il browser, e chiamare click() li' vorrebbe dire farlo due
+     volte. E salta chi non e' raggiungibile da tastiera, che senza
+     tabindex non prende mai il fuoco: percio' accendere una scheda vuol
+     dire aggiungerle tabindex="0" e role="button", come per .panel-card.
+     ⛔ preventDefault sulla barra spaziatrice: se no la pagina scorre
+     mentre apri, e sembra che sia successo altro. */
+  document.addEventListener("keydown",e=>{
+    if(e.key!=="Enter"&&e.key!==" "&&e.key!=="Spacebar")return;
+    if(e.altKey||e.ctrlKey||e.metaKey)return;
+    const t=e.target&&e.target.closest?e.target.closest("[data-action]"):null;
+    if(!t)return;
+    if(/^(BUTTON|A|INPUT|SELECT|TEXTAREA)$/.test(t.tagName))return;
+    e.preventDefault();
+    t.click();
+  });
 
   document.addEventListener("click",e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
