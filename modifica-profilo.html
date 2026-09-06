@@ -150,6 +150,48 @@
     .btn-cert.rosso { color: #b42318; border-color: #f0c9c4; }
     .cert-aggiungi { background: #fafbfd; border: 1px solid #e2e7ee; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
     .cert-vuoto { text-align: center; padding: 22px; color: #5f6b7a; font-size: 15.5px; }
+
+    /* ===== 6 settembre 2026 — LA PAGINA SI COMPATTA =====
+       Ogni blocco (Specializzazioni, Zone di lavoro, Indirizzo...) era una
+       griglia per conto suo: finito un blocco la riga si chiudeva anche se
+       era mezza vuota, e sotto ne cominciava un'altra. Risultato: una
+       colonna sola lunghissima, con buchi bianchi ovunque.
+       Con `display: contents` i blocchi spariscono come scatole ma i loro
+       campi restano: entrano tutti nella STESSA griglia, uno dietro l'altro,
+       e i titoletti fanno da riga intera. Nessun campo cambia nome o
+       posizione nel codice: cambia solo come si dispongono a schermo. */
+    @media (min-width: 900px) {
+      .type-section.visible {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+        gap: 16px 22px;
+        align-items: start;
+      }
+      .type-section.visible > .form-card { display: contents; }
+      .type-section.visible .card-header { grid-column: 1 / -1; margin-top: 14px; }
+      .type-section.visible .card-header:first-child { margin-top: 0; }
+      /* i campi lunghi si prendono la riga intera, il resto sta in fila */
+      .type-section.visible .form-group:has(textarea),
+      .type-section.visible .form-group:has(.tag-input) { grid-column: 1 / -1; }
+    }
+
+    /* meno aria sprecata fra un blocco e l'altro */
+    .form-card { margin-bottom: 20px; }
+    .form-group textarea { min-height: 76px; }
+    .profilo-card-unica { padding: 24px 26px; }
+
+    /* ---- i titoletti: una barretta blu davanti, si vede dove comincia ---- */
+    .card-header {
+      border-left: 4px solid #0066ff; border-bottom: none;
+      padding: 2px 0 2px 12px; margin-bottom: 16px;
+    }
+    .card-header.arancio { border-left-color: #e8733a; }
+
+    /* ---- le caselle: bordo piu' morbido, testo piu' grande ---- */
+    .form-group input, .form-group select, .form-group textarea {
+      border: 1.5px solid #e2e7ee; border-radius: 10px; padding: 12px 13px; font-size: 16px;
+    }
+    .form-group label { font-size: 14.5px; font-weight: 700; color: #3f4652; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
