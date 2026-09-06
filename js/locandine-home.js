@@ -56,13 +56,13 @@
     precarica();
     slot.forEach(disegna);
 
-    setInterval(function () {
-      slot.forEach(function (s) {
-        s.i = (s.i + 1) % LOC.length;
-        s.img.style.opacity = '0';
-        setTimeout(function () { disegna(s); s.img.style.opacity = '1'; }, 450);
-      });
-    }, INTERVALLO);
+    // sfalsati: il lato destro cambia a meta' strada, cosi' i due lati
+    // non restano mai vuoti nello stesso momento
+    slot.forEach(function (s, k) {
+      setTimeout(function () {
+        setInterval(function () { avanza(s); }, INTERVALLO);
+      }, k * (INTERVALLO / 2));
+    });
 
     sistemaTelefono(sx, dx);
     window.addEventListener('resize', function () { sistemaTelefono(sx, dx); });
@@ -96,6 +96,12 @@
     });
 
     return { a: a, img: img, i: partenza % LOC.length };
+  }
+
+  function avanza(s) {
+    s.i = (s.i + 1) % LOC.length;
+    s.img.style.opacity = '0';
+    setTimeout(function () { disegna(s); s.img.style.opacity = '1'; }, 450);
   }
 
   function disegna(s) {
