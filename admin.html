@@ -19,15 +19,25 @@
     --rosso:   #e53e3e;
     --rosso3:  #fff5f5;
     --dark:    #1a1a1a;
-    --mid:     #555;
-    --light:   #999;
+    /* 6 settembre 2026 — i due grigi erano troppo chiari da leggere:
+       --mid da #555 a #3f4652, --light da #999 a #5f6b7a. Tutto il pannello
+       usa questi due, quindi cambiandoli qui si schiarisce ovunque. */
+    --mid:     #3f4652;
+    --light:   #5f6b7a;
     --bg:      #f4f6f9;
     --white:   #ffffff;
     --border:  rgba(0,0,0,0.08);
     --shadow:  0 2px 16px rgba(0,0,0,0.07);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+  /* 6 settembre 2026 — LA LEVA GENERALE DELLA GRANDEZZA.
+     Il browser parte da 16px: portandolo a 18px, TUTTO quello che nel
+     pannello e' scritto in "rem" cresce del 12,5% in un colpo solo, senza
+     dover toccare una per una le decine di regole qui sotto.
+     Se un giorno il pannello risultasse troppo grande o troppo piccolo,
+     si cambia SOLO questo numero. */
+  html { font-size:18px; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); font-size:16px; }
 
   /* LOGIN */
   .login-screen {
@@ -62,7 +72,7 @@
 
   /* SIDEBAR */
   .sidebar {
-    width:280px; background:white; border-right:1px solid var(--border);
+    width:310px; background:white; border-right:1px solid var(--border);
     position:fixed; top:0; left:0; bottom:0; z-index:100;
     display:flex; flex-direction:column;
     box-shadow:2px 0 12px rgba(0,0,0,0.04);
@@ -75,7 +85,7 @@
   }
   .sidebar-logo .trova { color:var(--verde); }
   .sidebar-logo .impresa { color:var(--arancio); }
-  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
 
   .sidebar-nav {
     flex:1 1 auto; min-height:0; padding:16px 12px;
@@ -116,19 +126,19 @@
   .logout-btn:hover { background:var(--rosso3); }
 
   /* MAIN */
-  .main { margin-left:280px; padding:32px; min-height:100vh; }
+  .main { margin-left:310px; padding:32px; min-height:100vh; }
 
   /* TOPBAR */
   .topbar {
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom:28px;
   }
-  .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
+  .topbar-title { font-family:'Playfair Display',serif; font-size:1.95rem; }
   .topbar-right { display:flex; align-items:center; gap:12px; }
   .admin-badge {
     background:var(--verde3); color:var(--verde2);
     /* 0.78rem faceva 12,48 px: sotto la soglia dei 13. */
-    padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;
+    padding:7px 15px; border-radius:20px; font-size:14px; font-weight:700;
   }
 
   /* STAT CARDS */
@@ -140,18 +150,20 @@
     display:flex; align-items:center; gap:16px;
   }
   .stat-icon {
-    width:48px; height:48px; border-radius:14px;
-    display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+    width:54px; height:54px; border-radius:15px; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem;
   }
   .stat-icon.g { background:var(--verde3); }
   .stat-icon.o { background:var(--arancio3); }
   .stat-icon.r { background:var(--rosso3); }
   .stat-icon.b { background:#e8f0ff; }
-  .stat-num { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; line-height:1; }
-  .stat-lbl { font-size:0.78rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+  .stat-num { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; line-height:1; }
+  /* Era 0.78rem MAIUSCOLO grigio chiaro: piccolo e faticoso. Adesso 0.98rem,
+     minuscolo e piu' scuro — le maiuscole strette si leggono peggio. */
+  .stat-lbl { font-size:0.98rem; color:var(--mid); font-weight:700; letter-spacing:0.1px; margin-top:5px; line-height:1.3; }
   /* 6 settembre 2026 — la rigatina sotto "ieri": verde se sopra la media,
      rossa se sotto. Il numero da solo non dice se il sito sta crescendo. */
-  .stat-conf { font-size:0.74rem; font-weight:700; margin-top:5px; line-height:1.35; }
+  .stat-conf { font-size:0.88rem; font-weight:700; margin-top:6px; line-height:1.4; }
   .stat-conf.su   { color:#137333; }
   .stat-conf.giu  { color:#b3261e; }
   .stat-conf.pari { color:var(--light); }
@@ -165,11 +177,11 @@
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom:16px; flex-wrap:wrap; gap:12px;
   }
-  .table-title { font-family:'Playfair Display',serif; font-size:1.2rem; }
+  .table-title { font-family:'Playfair Display',serif; font-size:1.4rem; }
   .table-actions { display:flex; gap:8px; }
   .search-input {
-    padding:9px 14px; border-radius:10px; border:1.5px solid var(--border);
-    font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none;
+    padding:10px 14px; border-radius:10px; border:1.5px solid var(--border);
+    font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none;
     transition:border 0.2s; min-width:220px;
   }
   .search-input:focus { border-color:var(--verde); }
@@ -181,16 +193,16 @@
   }
   table { width:100%; border-collapse:collapse; }
   th {
-    padding:12px 16px; text-align:left;
-    font-size:0.72rem; font-weight:800; color:var(--light);
-    text-transform:uppercase; letter-spacing:1px;
+    padding:13px 16px; text-align:left;
+    font-size:0.84rem; font-weight:800; color:var(--mid);
+    text-transform:uppercase; letter-spacing:0.6px;
     background:var(--bg); border-bottom:1px solid var(--border);
   }
-  td { padding:14px 16px; border-bottom:1px solid var(--border); font-size:0.88rem; }
+  td { padding:15px 16px; border-bottom:1px solid var(--border); font-size:0.98rem; }
   tr:last-child td { border-bottom:none; }
   tr:hover td { background:rgba(0,102,255,0.02); }
 
-  .badge { padding:4px 10px; border-radius:20px; font-size:0.72rem; font-weight:800; display:inline-block; }
+  .badge { padding:5px 11px; border-radius:20px; font-size:0.82rem; font-weight:800; display:inline-block; }
   .badge-v { background:var(--verde3); color:var(--verde2); }
   .badge-a { background:#e8f0ff; color:#3355cc; }
   .badge-att { background:#fff3cd; color:#856404; }
@@ -206,8 +218,8 @@
   .rc-nome { font-weight:700; }
   .rc-tel  { color:var(--verde); font-weight:700; white-space:nowrap; text-decoration:none; display:inline-block; }
   .rc-tel:hover { text-decoration:underline; }
-  .rc-piccolo { font-size:0.78rem; color:var(--light); }
-  .rc-data { white-space:nowrap; font-size:0.82rem; color:var(--mid); font-weight:600; }
+  .rc-piccolo { font-size:0.88rem; color:var(--light); }
+  .rc-data { white-space:nowrap; font-size:0.92rem; color:var(--mid); font-weight:600; }
   .rc-cerca { max-width:330px; line-height:1.45; }
   .rc-doppio { background:#fff3cd; color:#856404; padding:2px 7px; border-radius:20px;
                font-size:0.68rem; font-weight:800; margin-left:6px; white-space:nowrap; }
@@ -221,7 +233,7 @@
 
   .action-btn {
     padding:6px 12px; border-radius:8px; border:none; cursor:pointer;
-    font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700;
+    font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:700;
     transition:all 0.15s; margin-right:4px;
   }
   .btn-verifica { background:var(--verde3); color:var(--verde2); }
@@ -366,7 +378,7 @@
   .mv-link{display:block;padding:11px 13px;margin-bottom:8px;border-radius:9px;
            background:#f4f7fb;color:#0066ff;text-decoration:none;font-weight:600;font-size:15px}
   .mv-link:hover{background:#0066ff;color:#fff}
-  .mv-nota{font-size:13.5px;color:#5b6b80;line-height:1.6;margin-top:10px}
+  .mv-nota{font-size:15.5px;color:#5b6b80;line-height:1.6;margin-top:10px}
   /* Semaforo stato del sito */
   #stato-sistema.ok{background:#f2fbf5;border-color:#b5e2c5;color:#12233a}
   #stato-sistema.ko{background:#fdf3e3;border-color:#f0d9a8;color:#12233a}
@@ -395,7 +407,7 @@
   .u-stato.viva{background:#e6f6ec;color:#1b8a3f} .u-stato.ferma{background:#fdf3e3;color:#b26a00} .u-stato.mai{background:#fdecea;color:#b3261e} .u-stato.bussato{background:#f5e9fa;color:#7b1fa2}
   .u-det{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
   .u-det > div{background:#f4f7fb;border-radius:10px;padding:12px 14px}
-  .u-det .k{font-size:13px;color:#5b6b80} .u-det .v{font-size:16px;font-weight:700;margin-top:2px}
+  .u-det .k{font-size:15px;color:#5b6b80} .u-det .v{font-size:16px;font-weight:700;margin-top:2px}
   /* Scrivi a tutti */
   .st-lab{display:block;font-weight:800;font-size:16px;margin:20px 0 8px;color:#12233a}
   .st-campo{width:100%;padding:14px;font-size:16px;line-height:1.6;color:#12233a;
@@ -416,7 +428,7 @@
   .ei-testa{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
   .ei-data{font-size:14.5px;color:#5b6b80;min-width:150px}
   .ei-ogg{font-size:16px;font-weight:800;color:#12233a;flex:1 1 260px}
-  .ei-tag{font-size:13.5px;font-weight:800;padding:5px 10px;border-radius:999px;background:#e7f0ff;color:#0052cc}
+  .ei-tag{font-size:15.5px;font-weight:800;padding:5px 10px;border-radius:999px;background:#e7f0ff;color:#0052cc}
   .ei-tag.prova{background:#fdf3e3;color:#b26a00}
   .ei-azioni{display:flex;gap:8px;flex-wrap:wrap}
   .ei-testo{display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0;white-space:pre-wrap;font-size:15px;line-height:1.7;color:#12233a}
@@ -438,7 +450,7 @@
   .st-nome-riga.visibile{display:flex}
   .st-nome-riga input{flex:1 1 240px;min-width:0;padding:12px;font-size:15px;font-family:inherit;
                       border:2px solid #0066ff;border-radius:10px}
-  .u-badge{display:inline-block;background:#f3e5f5;color:#7b1fa2;font-weight:800;font-size:13px;
+  .u-badge{display:inline-block;background:#f3e5f5;color:#7b1fa2;font-weight:800;font-size:15px;
            padding:3px 10px;border-radius:999px;margin-left:8px}
 </style>
 </head>
@@ -814,90 +826,90 @@
           <div id="loc-card-1" class="loc-card">
             <div style="font-weight:700; color:#92400e; margin-bottom:4px;">🥇 Spazio 1 — In cima (€15/mese)</div>
             <div id="loc-preview-1" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-1" accept="image/*" style="display:none" onchange="uploadLocandina(1,this)">
-            <button onclick="document.getElementById('loc-input-1').click()" style="width:100%; padding:9px; background:#f59e0b; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(1)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-1" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-1').click()" style="width:100%; padding:9px; background:#f59e0b; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(1)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-1" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <div id="loc-card-2" class="loc-card">
             <div style="font-weight:700; color:#0066ff; margin-bottom:4px;">🥈 Spazio 2 — A metà (€10/mese)</div>
             <div id="loc-preview-2" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-2" accept="image/*" style="display:none" onchange="uploadLocandina(2,this)">
-            <button onclick="document.getElementById('loc-input-2').click()" style="width:100%; padding:9px; background:#0066ff; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(2)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-2" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-2').click()" style="width:100%; padding:9px; background:#0066ff; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(2)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-2" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <div id="loc-card-3" class="loc-card">
             <div style="font-weight:700; color:#4338ca; margin-bottom:4px;">🥉 Spazio 3 — In fondo (€8/mese)</div>
             <div id="loc-preview-3" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-3" accept="image/*" style="display:none" onchange="uploadLocandina(3,this)">
-            <button onclick="document.getElementById('loc-input-3').click()" style="width:100%; padding:9px; background:#4338ca; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(3)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-3" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-3').click()" style="width:100%; padding:9px; background:#4338ca; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(3)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-3" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <div id="loc-card-4" class="loc-card">
             <div style="font-weight:700; color:#FF6B35; margin-bottom:4px;">📌 Spazio 4 — Sidebar (€10/mese)</div>
             <div id="loc-preview-4" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-4" accept="image/*" style="display:none" onchange="uploadLocandina(4,this)">
-            <button onclick="document.getElementById('loc-input-4').click()" style="width:100%; padding:9px; background:#FF6B35; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(4)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-4" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-4').click()" style="width:100%; padding:9px; background:#FF6B35; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(4)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-4" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <!-- SPAZI PICCOLI -->
           <div id="loc-card-5" class="loc-card">
             <div style="font-weight:700; color:#666; margin-bottom:4px;">🔹 Spazio Piccolo 1 (€5/mese)</div>
             <div id="loc-preview-5" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-5" accept="image/*" style="display:none" onchange="uploadLocandina(5,this)">
-            <button onclick="document.getElementById('loc-input-5').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(5)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-5" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-5').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(5)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-5" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <div id="loc-card-6" class="loc-card">
             <div style="font-weight:700; color:#666; margin-bottom:4px;">🔹 Spazio Piccolo 2 (€5/mese)</div>
             <div id="loc-preview-6" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-6" accept="image/*" style="display:none" onchange="uploadLocandina(6,this)">
-            <button onclick="document.getElementById('loc-input-6').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(6)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-6" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-6').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(6)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-6" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <div id="loc-card-7" class="loc-card">
             <div style="font-weight:700; color:#666; margin-bottom:4px;">🔹 Spazio Piccolo 3 (€5/mese)</div>
             <div id="loc-preview-7" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-7" accept="image/*" style="display:none" onchange="uploadLocandina(7,this)">
-            <button onclick="document.getElementById('loc-input-7').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(7)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-7" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-7').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(7)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-7" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
           <div id="loc-card-8" class="loc-card">
             <div style="font-weight:700; color:#666; margin-bottom:4px;">🔹 Spazio Piccolo 4 (€5/mese)</div>
             <div id="loc-preview-8" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
-              <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
+              <span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-8" accept="image/*" style="display:none" onchange="uploadLocandina(8,this)">
-            <button onclick="document.getElementById('loc-input-8').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
-            <button onclick="eliminaLocandina(8)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
-            <div id="loc-status-8" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
+            <button onclick="document.getElementById('loc-input-8').click()" style="width:100%; padding:9px; background:#666; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:15px;">📤 Carica immagine</button>
+            <button onclick="eliminaLocandina(8)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:14.5px; margin-top:6px;">🗑️ Elimina immagine</button>
+            <div id="loc-status-8" style="font-size:14.5px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
 
         </div>
@@ -939,7 +951,7 @@
         <div style="background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;height:600px">
           <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px">
             <span id="supp-conv-nome">Seleziona una conversazione</span>
-            <button id="supp-del-btn" onclick="eliminaConvAdmin('sito')" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap">🗑 Elimina</button>
+            <button id="supp-del-btn" onclick="eliminaConvAdmin('sito')" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:15px;white-space:nowrap">🗑 Elimina</button>
           </div>
           <div id="supp-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f7f8fa"></div>
           <div style="padding:14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:stretch">
@@ -951,7 +963,7 @@
               style="padding:14px 26px;background:var(--verde);color:#fff;border:none;border-radius:12px;
                      font-weight:800;font-size:16px;cursor:pointer;white-space:nowrap">Invia</button>
           </div>
-          <div style="padding:0 14px 12px;font-size:13px;color:#5b6b80">Invio con <b>Invio</b> &middot; per andare a capo <b>Maiusc + Invio</b></div>
+          <div style="padding:0 14px 12px;font-size:15px;color:#5b6b80">Invio con <b>Invio</b> &middot; per andare a capo <b>Maiusc + Invio</b></div>
         </div>
       </div>
     </div>
@@ -968,7 +980,7 @@
         <div style="background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;height:600px">
           <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px">
             <span id="suppg-conv-nome">Seleziona una conversazione</span>
-            <button id="suppg-del-btn" onclick="eliminaConvAdmin('gestionale')" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap">🗑 Elimina</button>
+            <button id="suppg-del-btn" onclick="eliminaConvAdmin('gestionale')" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:15px;white-space:nowrap">🗑 Elimina</button>
           </div>
           <div id="suppg-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f7f8fa"></div>
           <div style="padding:14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:stretch">
@@ -980,7 +992,7 @@
               style="padding:14px 26px;background:var(--verde);color:#fff;border:none;border-radius:12px;
                      font-weight:800;font-size:16px;cursor:pointer;white-space:nowrap">Invia</button>
           </div>
-          <div style="padding:0 14px 12px;font-size:13px;color:#5b6b80">Invio con <b>Invio</b> &middot; per andare a capo <b>Maiusc + Invio</b></div>
+          <div style="padding:0 14px 12px;font-size:15px;color:#5b6b80">Invio con <b>Invio</b> &middot; per andare a capo <b>Maiusc + Invio</b></div>
         </div>
       </div>
     </div>
@@ -1049,9 +1061,9 @@
         <div id="map-riepilogo" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px"></div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
-          <label style="font-size:13px;font-weight:700;color:#555">Città:</label>
+          <label style="font-size:15px;font-weight:700;color:#555">Città:</label>
           <select id="map-citta" onchange="renderMappaSpazi()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;min-width:200px"></select>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#555;cursor:pointer">
+          <label style="display:flex;align-items:center;gap:6px;font-size:15px;color:#555;cursor:pointer">
             <input type="checkbox" id="map-solo-occupati" onchange="renderMappaSpazi()"> mostra solo gli spazi occupati
           </label>
         </div>
@@ -1796,18 +1808,18 @@ function renderPubblicitaClienti() {
     const contatti = [i.email, i.telefono].filter(Boolean).map(esc).join('<br>') || '—';
     const stato = pubStatoReale(a);
     const badge = stato === 'pagato'
-        ? '<span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">✅ Pagato</span>'
+        ? '<span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">✅ Pagato</span>'
       : stato === 'scaduto'
-        ? '<span style="background:#f1f1f1;color:#777;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⌛ Scaduto</span>'
-        : '<span style="background:#fff4e5;color:#b26a00;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⏳ Non pagato</span>';
+        ? '<span style="background:#f1f1f1;color:#777;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">⌛ Scaduto</span>'
+        : '<span style="background:#fff4e5;color:#b26a00;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">⏳ Non pagato</span>';
     const periodo = pubDataIt(a.data_inizio) + ' → ' + pubDataIt(a.data_fine);
 
     const mesi = pubMesi(a);
     const gTot = pubGiorniTotali(a);
     const durataCol = '<strong>' + pubDurataLabel(a) + '</strong>'
-      + (mesi === 12 ? '<div style="font-size:11px;color:#0066ff;font-weight:700">annuale</div>' : '')
-      + (gTot ? '<div style="font-size:11px;color:#888">' + gTot + ' giorni</div>' : '')
-      + (a.mesi == null ? '<div style="font-size:10px;color:#c92a2a" title="Riga creata prima della colonna mesi: durata stimata dalle date">~ stimata</div>' : '');
+      + (mesi === 12 ? '<div style="font-size:13.5px;color:#0066ff;font-weight:700">annuale</div>' : '')
+      + (gTot ? '<div style="font-size:13.5px;color:#888">' + gTot + ' giorni</div>' : '')
+      + (a.mesi == null ? '<div style="font-size:13px;color:#c92a2a" title="Riga creata prima della colonna mesi: durata stimata dalle date">~ stimata</div>' : '');
 
     // Scadenza: giorni residui, con avviso se manca poco
     const gg = pubGiorniResidui(a);
@@ -1820,7 +1832,7 @@ function renderPubblicitaClienti() {
         const col = gg <= 7 ? '#c92a2a' : gg <= 30 ? '#e67700' : '#1a7f43';
         const ico = gg <= 7 ? '🔴 ' : gg <= 30 ? '🟠 ' : '';
         scadCol = pubDataIt(a.data_fine)
-          + '<div style="font-size:11px;font-weight:700;color:' + col + '">' + ico
+          + '<div style="font-size:13.5px;font-weight:700;color:' + col + '">' + ico
           + (gg === 0 ? 'scade oggi' : 'fra ' + gg + ' giorn' + (gg === 1 ? 'o' : 'i')) + '</div>';
       }
     }
@@ -1829,15 +1841,15 @@ function renderPubblicitaClienti() {
       ? '<a href="' + esc(a.logo_url) + '" target="_blank"><img src="' + esc(a.logo_url) + '" style="height:38px;border-radius:6px;border:1px solid var(--border)"></a>'
       : '—';
     const link = a.link_url
-      ? '<div style="font-size:11px"><a href="' + esc(a.link_url) + '" target="_blank" style="color:#0066ff">' + esc(a.link_url) + '</a></div>'
+      ? '<div style="font-size:13.5px"><a href="' + esc(a.link_url) + '" target="_blank" style="color:#0066ff">' + esc(a.link_url) + '</a></div>'
       : '';
     return '<tr>'
-      + '<td><strong>' + nome + '</strong>' + (i.tipo ? '<div style="font-size:11px;color:#888">' + esc(i.tipo) + '</div>' : '') + '</td>'
-      + '<td style="font-size:12px">' + contatti + '</td>'
-      + '<td>' + esc(pubSpazioLabel(a.spazio_id)) + '<div style="font-size:12px;color:#888">📍 ' + esc(a.citta || '—') + '</div></td>'
-      + '<td style="font-size:12px">' + durataCol + '</td>'
-      + '<td style="font-size:12px">' + periodo + '</td>'
-      + '<td style="font-size:12px">' + scadCol + '</td>'
+      + '<td><strong>' + nome + '</strong>' + (i.tipo ? '<div style="font-size:13.5px;color:#888">' + esc(i.tipo) + '</div>' : '') + '</td>'
+      + '<td style="font-size:14.5px">' + contatti + '</td>'
+      + '<td>' + esc(pubSpazioLabel(a.spazio_id)) + '<div style="font-size:14.5px;color:#888">📍 ' + esc(a.citta || '—') + '</div></td>'
+      + '<td style="font-size:14.5px">' + durataCol + '</td>'
+      + '<td style="font-size:14.5px">' + periodo + '</td>'
+      + '<td style="font-size:14.5px">' + scadCol + '</td>'
       + '<td><strong>€' + (parseFloat(a.prezzo) || 0).toFixed(2) + '</strong></td>'
       + '<td>' + badge + '</td>'
       + '<td>' + banner + link + '</td>'
@@ -1920,10 +1932,10 @@ function renderMappaSpazi() {
       if (!a) {
         return '<tr>'
           + '<td><strong>' + r.sp.nome + '</strong></td>'
-          + '<td style="font-size:12px;color:#888">' + r.sp.dove + '</td>'
+          + '<td style="font-size:14.5px;color:#888">' + r.sp.dove + '</td>'
           + '<td>€' + r.sp.prezzo + '</td>'
-          + '<td><span style="background:#f1f3f5;color:#666;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⬜ Libero</span></td>'
-          + '<td colspan="3" style="color:#bbb;font-size:12px">—</td>'
+          + '<td><span style="background:#f1f3f5;color:#666;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">⬜ Libero</span></td>'
+          + '<td colspan="3" style="color:#bbb;font-size:14.5px">—</td>'
           + '</tr>';
       }
       const i = a._imp || {};
@@ -1934,14 +1946,14 @@ function renderMappaSpazi() {
         : gg === 0 ? 'scade oggi' : 'fra ' + gg + ' giorn' + (gg === 1 ? 'o' : 'i');
       return '<tr style="background:#f7fbf8">'
         + '<td><strong>' + r.sp.nome + '</strong></td>'
-        + '<td style="font-size:12px;color:#888">' + r.sp.dove + '</td>'
+        + '<td style="font-size:14.5px;color:#888">' + r.sp.dove + '</td>'
         + '<td>€' + r.sp.prezzo + '</td>'
-        + '<td><span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">✅ Occupato</span></td>'
+        + '<td><span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">✅ Occupato</span></td>'
         + '<td><strong>' + nome + '</strong>'
-        + (i.email ? '<div style="font-size:11px;color:#888">' + esc(i.email) + '</div>' : '') + '</td>'
+        + (i.email ? '<div style="font-size:13.5px;color:#888">' + esc(i.email) + '</div>' : '') + '</td>'
         + '<td><strong>' + pubDurataLabel(a) + '</strong></td>'
         + '<td>' + pubDataIt(a.data_fine)
-        + '<div style="font-size:11px;font-weight:700;color:' + col + '">' + nota + '</div></td>'
+        + '<div style="font-size:13.5px;font-weight:700;color:' + col + '">' + nota + '</div></td>'
         + '</tr>';
     }).join('');
   }
@@ -1953,10 +1965,10 @@ function renderMappaSpazi() {
           const n = attiviTot.filter(a => (a.citta || '').trim() === c).length;
           return '<button onclick="mapVaiA(\'' + c.replace(/'/g, "\\'") + '\')" '
             + 'style="background:#e7f0ff;border:1px solid #b9d4ff;color:#0052cc;border-radius:20px;'
-            + 'padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer">'
+            + 'padding:6px 14px;font-size:15px;font-weight:700;cursor:pointer">'
             + c + ' <span style="opacity:.7">(' + n + ')</span></button>';
         }).join('')
-      : '<span style="color:#999;font-size:13px">Nessuno spazio venduto al momento.</span>';
+      : '<span style="color:#999;font-size:15px">Nessuno spazio venduto al momento.</span>';
   }
 }
 
@@ -1968,7 +1980,7 @@ function mapVaiA(citta) {
 function pubCard(label, val, color) {
   return '<div style="background:#fff;border:1px solid var(--border);border-left:4px solid ' + color
     + ';border-radius:12px;padding:12px 18px;min-width:150px">'
-    + '<div style="font-size:12px;color:#888;font-weight:600">' + label + '</div>'
+    + '<div style="font-size:14.5px;color:#888;font-weight:600">' + label + '</div>'
     + '<div style="font-size:1.5rem;font-weight:800;color:' + color + '">' + val + '</div></div>';
 }
 
@@ -2055,12 +2067,12 @@ function renderConvList(q) {
     const u = _suppData.utenti[c.user_id] || {};
     const nome = esc(u.nome || 'Utente');
     const anteprima = esc((c.ultimo.messaggio || '').slice(0, 42));
-    const badge = c.nonLetti ? '<span style="background:#c0392b;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:6px">' + c.nonLetti + '</span>' : '';
-    const anche = c.anche ? '<div style="font-size:11px;color:#b26a00;font-weight:600;margin-top:2px">' + esc(cfg.altra) + '</div>' : '';
+    const badge = c.nonLetti ? '<span style="background:#c0392b;color:#fff;border-radius:10px;font-size:13.5px;font-weight:700;padding:1px 7px;margin-left:6px">' + c.nonLetti + '</span>' : '';
+    const anche = c.anche ? '<div style="font-size:13.5px;color:#b26a00;font-weight:600;margin-top:2px">' + esc(cfg.altra) + '</div>' : '';
     const active = (c.user_id === cfg.uid) ? 'background:var(--verde3)' : '';
     return '<div onclick="apriConversazioneAdmin(\'' + c.user_id + '\',\'' + q + '\')" style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;' + active + '">'
       + '<div style="font-weight:700;font-size:14px">' + nome + badge + '</div>'
-      + '<div style="font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + anteprima + '</div>'
+      + '<div style="font-size:14.5px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + anteprima + '</div>'
       + anche + '</div>';
   }).join('');
 }
@@ -2069,7 +2081,7 @@ function renderConvList(q) {
 function _allegatoAdmin(m) {
   if (!m.allegato) return '';
   const nome = esc(m.allegato_nome || 'allegato');
-  if (!m.allegato_url) return '<div style="margin-top:8px;font-size:13px;color:#b26a00">Allegato «' + nome + '» non leggibile: ricarica la lista.</div>';
+  if (!m.allegato_url) return '<div style="margin-top:8px;font-size:15px;color:#b26a00">Allegato «' + nome + '» non leggibile: ricarica la lista.</div>';
   const img = /^image\//.test(m.allegato_tipo || '') || /\.(jpe?g|png|webp|gif|heic)$/i.test(m.allegato || '');
   if (img) return '<a href="' + m.allegato_url + '" target="_blank" rel="noopener" style="display:block;margin-top:8px">'
     + '<img src="' + m.allegato_url + '" alt="' + nome + '" loading="lazy" style="display:block;max-width:100%;max-height:320px;border-radius:10px;border:1px solid var(--border);cursor:zoom-in"></a>';
@@ -2095,7 +2107,7 @@ async function apriConversazioneAdmin(uid, q) {
     // sui messaggi arrivati dall'ALTRA parte si scrive da dove: se no, dentro
     // «Supporto gestionale» leggeresti frasi scritte dal sito senza saperlo
     const da = (!admin && _origine(m) !== q)
-      ? '<div style="font-size:11px;color:#b26a00;font-weight:700;margin-top:5px">' + esc(SUPP[_origine(m)].etichetta) + '</div>' : '';
+      ? '<div style="font-size:13.5px;color:#b26a00;font-weight:700;margin-top:5px">' + esc(SUPP[_origine(m)].etichetta) + '</div>' : '';
     if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + _allegatoAdmin(m) + da + '</div>';
     // ⚠️ 15 agosto 2026 — QUI LE PAROLE SI SPEZZAVANO A META' («alessi / o»).
     // La bolla diceva "largo al massimo il 75%", ma il 75% del contenitore —
@@ -2174,7 +2186,7 @@ function renderAbbonamenti() {
     const scad = i.premium_scadenza ? new Date(i.premium_scadenza).toLocaleDateString('it-IT') : (premium ? 'nessuna (pagante)' : '–');
     const gest = i.gestionale_attivo === true;
     return '<tr>'
-      + '<td>' + esc(i.nome_attivita || i.nome || '–') + '<br><span style="font-size:12px;color:#888">' + esc(i.email || '') + '</span></td>'
+      + '<td>' + esc(i.nome_attivita || i.nome || '–') + '<br><span style="font-size:14.5px;color:#888">' + esc(i.email || '') + '</span></td>'
       + '<td>' + esc(i.tipo || '–') + '</td>'
       + '<td>' + (premium ? '<span style="color:#7b1fa2;font-weight:700">Premium</span>' : 'Free') + '</td>'
       + '<td>' + scad + '</td>'
@@ -2901,7 +2913,7 @@ async function caricaPreviewLocandine() {
       el.innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:100%;object-fit:cover;">';
     };
     img.onerror = function() {
-      el.innerHTML = '<span style="color:#bbb; font-size:12px;">Nessuna immagine</span>';
+      el.innerHTML = '<span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>';
     };
     img.src = url + '?t=' + Date.now();
   }
@@ -2918,7 +2930,7 @@ async function eliminaLocandina(slot) {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     if (!res.ok) throw new Error('il server ha rifiutato la cancellazione (codice ' + res.status + ')');
-    document.getElementById('loc-preview-' + slot).innerHTML = '<span style="color:#bbb; font-size:12px;">Nessuna immagine</span>';
+    document.getElementById('loc-preview-' + slot).innerHTML = '<span style="color:#bbb; font-size:14.5px;">Nessuna immagine</span>';
     status.textContent = '✅ Eliminata!';
     status.style.color = '#c0392b';
     setTimeout(() => { status.textContent = ''; }, 2000);
@@ -3546,7 +3558,7 @@ async function caricaRecensioni() {
   tbody.innerHTML = data.map(r => {
     const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(s => s != null);
     const voto = Math.max(0, Math.min(5, Math.round(r.stelle ?? (sub.length ? sub.reduce((a,b)=>a+b,0)/sub.length : 0))));
-    const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#0066ff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
+    const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#0066ff;font-size:13.5px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
     return `
     <tr>
       <td><strong>${esc(r.nome_cliente)}</strong>${badge}</td>
@@ -4278,7 +4290,7 @@ async function aggiungiLead() {
 }
 </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#0a2a4d;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:15px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 
 <!-- ============================================================
