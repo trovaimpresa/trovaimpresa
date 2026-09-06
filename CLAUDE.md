@@ -22703,3 +22703,205 @@ peggio del male.**
 Alla fetta F1 il file staccato rispondeva ancora →404← dopo →20← secondi. Non
 era un guasto: era Netlify che stava ancora pubblicando. **Prima di dire che
 qualcosa e' rotto, si riprova dopo un minuto e mezzo.**
+
+---
+
+# 🆕 IL 6 SETTEMBRE 2026 — NOTTE: I QUATTRO PROBLEMI RIMASTI
+
+Ripresa dopo lo smontaggio, sui quattro punti lasciati aperti dalla sessione
+della sera. Tre push, uno per lavoro, con collaudo dal vivo in mezzo a ognuno.
+
+| # | Cosa | Commit |
+|---|---|---|
+| 1 | Il banco delle gemelle (nessun file del sito toccato) | — (`prove-claude/` e' in .gitignore) |
+| 2 | Il prezzario non si riscarica a ogni salvataggio | →67f5355← |
+| 3 | Si entra nel reparto anche da tastiera | →0323ebc← |
+| 4 | Le spiegazioni: →690← → →307← parole | →0e1e1c9← |
+
+## 1. LE GEMELLE — un banco che confronta due formule facendole GIRARE
+
+`prove-claude/banchi-fissi/gemelle/banco-gemelle.js` — →46← verdi, →10← rosse
+col `--sabota`.
+
+Le due formule scritte in due posti erano:
+- **i costi della sicurezza** — `compRiepilogo()` in `js/gest-computo.js` e la
+  vista `gest_computo_totali`
+- **il filtro sulla fase del noleggio** — `js/gest-riepilogo.js` (riga ~→278←)
+  e `js/gest-report.js` (riga ~→130←)
+
+Sopra tutte e due c'era scritto «si cambiano insieme». **Un commento non e' una
+protezione**: e' la stessa lezione del ribasso che non entrava nel quadro
+economico (l'intenzione era scritta, il collegamento mancava).
+
+⛔ **L'IDEA DEL BANCO: non guarda le PAROLE delle due formule, le fa GIRARE.**
+- ritaglia `compRiepilogoDa` + `compRiepilogo` dal file vero
+- **TRADUCE la vista SQL** in un conto eseguibile: toglie i `::numeric`, gira
+  `case when … then … else … end` in una scelta, `coalesce` in «il primo che
+  non e' vuoto», e stacca il `sum()` in «conto di una riga» + «conto del
+  totale». Non riscrive la formula: la **compila**. Se la vista cambia, cambia
+  da sola anche la versione compilata.
+- le fa girare su →12← computi finti e confronta →36← numeri
+- per il noleggio: ritaglia i due filtri, li fa rispondere sulle stesse →10←
+  fasi (`prenotato`, `fuori`, `rientrato`, vuoto, null, maiuscolo, con lo
+  spazio davanti…) e confronta le risposte
+
+⛔ **E SE NON SA TRADURRE, NON DICE VERDE.** Se nella vista compare una
+funzione SQL che non conosce (`greatest`, un `case` annidato), o sparisce una
+colonna, il banco dice **BANCO CIECO** e si ferma. Provato apposta: →4←
+situazioni di cecita' simulate, →4← volte si e' fermato.
+
+**Il censimento** (prova 4): conta i posti dove quei conti esistono. Oggi il
+filtro della fase sta in →2← file, la formula in →1←. Se ne nasce un **terzo**,
+rosso. E' cosi' che le fatture sono finite in tre posti con tre numeri.
+
+⚠️ **IL BUCO CHE RESTA, ed e' scritto a lettere grosse dentro il banco.** La
+vista VERA sta dentro Supabase; nel progetto c'e' solo la **copia scritta**,
+`sql/capitolo-costi-sicurezza.sql`. Il banco legge la copia. Il →6 set← le due
+sono state trovate **identiche** (`pg_get_viewdef`), ma se un domani la vista
+si cambia dal pannello di Supabase e la copia non si aggiorna, **il banco
+continua a dire verde confrontando con una vista che non esiste piu'**.
+→ Chi cambia quella vista aggiorna anche il file, SEMPRE.
+
+⚠️ E il confronto dice che le due sono **d'accordo**, non che hanno **ragione**:
+se sbagliano insieme resta verde. Per questo dentro ci sono →3← chiodi piantati
+a mano (→917,88←, ribasso →157,44←, totale →2.019,92←).
+
+## 2. IL GESTIONALE LENTO — misurato prima di proporre, e la cura era una riga
+
+⛔ **PRIMA LA MISURA.** Misurato dal vivo nel browser sul computo da →88←
+lavorazioni, con una spia sulla rete. Dopo un salvataggio partivano **→14←
+query** e **→436 kB←**, per aver cambiato una riga:
+
+| Pezzo | Tempo | Scaricato |
+|---|---|---|
+| **scarica il PREZZARIO** | **→1.619 ms←** | **→354 kB←** |
+| disegna tutta la finestra (le 6 pagine, HTML) | →4 ms← | — |
+| rilegge e ridisegna le →88← lavorazioni | →503 ms← | →82 kB← |
+| rilegge gli acconti (SAL) — pagina →5← | →505 ms← | ~0 |
+| rilegge il cronoprogramma — pagina →6← | →315 ms← | ~0 |
+
+**Il colpevole era il prezzario: l'→84%←.** `compVoceSalva` chiama
+`compTornaAlComputo` → `computoForm`, e la PRIMA cosa che `computoForm` faceva
+era `await ppCarica()`: →500← voci, →354 kB←, per riempire **una tendina** che
+sta nella pagina →2← del modulo, oggi ha **una riga sola** («Tariffa Regione
+Lazio») e che in quel momento non stai guardando.
+Il database ci mette →9,6 ms← a tirarle fuori (Seq Scan su →15.312← righe): il
+server non c'entra. Il tempo e' tutto nel **viaggio**. Misurato →8← volte, quel
+solo scaricamento e' andato da →621← a **→5.831 ms←**: e' per questo che a
+volte e' un secondo e a volte sembra bloccato.
+
+⛔ **E DUE DELLE TRE IPOTESI ERANO SBAGLIATE, e solo il numero lo diceva.**
+«Ridisegno intero invece che della sola riga?» → rifare tutto l'HTML della
+finestra costa **→4 ms←**. Non era li'.
+
+**LA CURA, UNA RIGA:** `if(!ppTutte.length) await ppCarica();`
+⛔ **La memoria c'era gia'.** `ppTutte` e' la stessa che usa `ppCerca()` con
+questa identica condizione, e che `js/gest-sal-prezzario.js` svuota nei →4←
+punti in cui il prezzario cambia davvero (import, cancellazione).
+**`computoForm` era l'unico che la ignorava.**
+
+Misura dopo, sul sito vero: prima apertura →800 ms← (→354 kB←, **una volta
+sola**), poi →155← · →147← · →278← ms con **→0 kB←** e il prezzario chiesto
+**→0← volte**.
+
+Banco: `banchi-fissi/velocita/banco-prezzario-memoria.js` — →12← verdi.
+Non riscrive la condizione: **la ritaglia dal file** e la fa girare tre volte
+in un mondo finto contando quante letture partono (deve essere →1←). La prova
+→3← e' quella che tiene in piedi la cura: controlla che i →4← punti che
+svuotano la memoria ci siano ancora.
+
+⚠️ **RESTANO APERTE due cose piu' piccole**, misurate ma non fatte:
+- dopo aver salvato una lavorazione si rileggono anche **SAL** (→505 ms←) e
+  **cronoprogramma** (→315 ms←), che stanno nelle pagine →5← e →6←. Altri
+  ~→200 ms←. ⚠️ Da fare piano: il cronoprogramma si era **gia' rotto una
+  volta** perche' non si riallineava.
+- quando **crei** una lavorazione nuova il messaggio arriva **dopo** l'attesa
+  (`await compVoceForm(nuovoId)` e poi il toast), non prima.
+
+## 3. LE SCHEDE DEI REPARTI — e le altre →20← uguali
+
+La scheda del reparto era `<div class="panel-card" data-action="enter">`: da
+tastiera non ci si arrivava. Il cestino dentro e' un `<button>`: da tastiera ci
+si arrivava. **Su una schermata con una scheda sola si poteva cancellare un
+reparto ma non entrarci.**
+
+**La cura, due pezzi:**
+1. la scheda prende `role="button"` e `tabindex="0"`. ⛔ **Resta un `<div>`**:
+   un `<button>` dentro un altro `<button>` non e' HTML valido, e il cestino
+   sta dentro la scheda.
+2. **UN** ascoltatore, in un posto solo (cerca «INVIO E BARRA SPAZIATRICE» in
+   `gestionale-app.html`), che su Invio o barra spaziatrice manda un clic vero —
+   cioe' fa quello che il browser fa da solo coi bottoni. Salta i comandi veri
+   (button, a, input, select, textarea): li' chiamare `click()` vorrebbe dire
+   farlo due volte.
+3. `css/gestionale.css`: `.panel-card:focus-visible` con il blu del sito.
+   Senza, Chrome ne disegna uno suo **arancione**. Solo `:focus-visible`: col
+   mouse non si deve vedere.
+
+⛔ **IL CENSIMENTO: NON ERA SOLO QUELLA.** Lo stesso schema — un elemento che
+non e' un comando vero con dentro un `data-action` — sta in **→21← punti**.
+Ne e' stato acceso **uno** (quello chiesto); gli altri →20← sono elencati in
+`banchi-fissi/tastiera/ancora-da-fare.json`, e la prova →4← del banco diventa
+rossa **se ne nasce uno nuovo**. Adesso accenderne un altro costa due parole:
+la macchina per la tastiera c'e' gia'.
+
+Banco: `banchi-fissi/tastiera/banco-tastiera.js` — →18← verdi, →6← rosse col
+`--sabota`. Ritaglia l'ascoltatore vero dalla pagina e lo fa rispondere a →8←
+situazioni (Invio su un div, barra spaziatrice, una lettera qualsiasi, Invio su
+un `<button>`, dentro una casella di testo, dove non c'e' nessun comando,
+Ctrl+Invio).
+
+⚠️ **UN FALSO ALLARME PRESO AL PRIMO GIRO**, che vale la pena ricordare: il
+censimento contava «`todaystr · edit-scad`», che non esiste. Era il confronto
+`ds<todayStr()` scritto poco sopra, che a una ricerca fatta col «`<`» sembra
+l'inizio di un tag. **Un banco che conta cose che non esistono e' gia' mezzo
+cieco.** Riparato con due paletti: dentro il tag non ci puo' stare un altro
+«`<`», e il nome dev'essere un tag HTML vero.
+
+## 4. LE SPIEGAZIONI — →690← → →307← parole
+
+Giro completo di tutte le →26← sezioni, portato ad Alessio **prima** di toccare
+i file, come pagina pubblicata: per ognuna il testo di oggi, quello proposto e
+il perche'. Poi applicato tutto.
+
+- **Tolte del tutto — →3←**: *Agenda / Da fare*, *Fornitori*, *Report*. Dicono
+  a parole quello che si vede guardando. L'Agenda raccontava il gesto «scegli
+  un operatore» e la tendina «Operatore» sta due centimetri sotto.
+- **Accorciate — →15←**: dentro ognuna c'era **una cosa vera che a occhio non
+  si capisce**, sepolta sotto la descrizione di quello che si vede.
+- **Tenute intere — →2←**: *Richieste* e *Assistenza*. Non sono spiegazioni:
+  sono la voce di Alessio. «Non serve che sia ben scritta» e' **il permesso di
+  scrivere male** (e' quello che fa arrivare le richieste vere da chi non
+  scrive volentieri); «ci metto qualche ora, ma la risposta arriva sempre»
+  **governa l'attesa** (senza, chi non riceve risposta in dieci minuti pensa
+  che non risponda nessuno e non riscrive piu').
+- **Le →7← sezioni che non avevano niente restano nude.** La regola non e' «una
+  a testa»: e' «una solo dove serve». Riempirle per simmetria sarebbe rifare il
+  difetto al contrario.
+
+⛔ **IL PERICOLO DI UN TAGLIO NON E' TAGLIARE TROPPO POCO: E' TAGLIARE LA COSA
+GIUSTA INSIEME A QUELLA INUTILE.** Percio' la prova →2← del banco elenca le
+→15← frasi che devono restare e le controlla una per una: la distanza in linea
+d'aria (non di strada), la quantita' che la calcola il gestionale, le ore
+timbrate che non si sommano a quelle scritte a mano, il confine fra Mezzi e
+Attrezzature, il saldo della carta che si muove da solo. Se un domani un altro
+giro di pulizia ne cancella una, **rosso**.
+La prova →3← guarda dall'altra parte: **tetto di →35← parole** a spiegazione, e
+totale sotto le →340←. Contro il rigonfiamento.
+
+Banco: `banchi-fissi/spiegazioni/banco-spiegazioni.js` — →12← verdi, →2← rosse
+col `--sabota`.
+
+⚠️ **UNA COSA TROVATA E NON TOCCATA:** dentro i moduli ci sono altre **→108←
+note** (`sh-nota`), per **→2.675← parole** — quattro volte quelle delle
+sezioni. Lette tutte: sono quasi tutte **della specie buona** (perche' il costo
+del personale entra nel margine, cosa fa il ribasso, che le spese anticipate
+non prendono IVA, che sotto →15← crediti non si puo' operare in cantiere).
+Non ne e' stata toccata nessuna. Ma e' li' che c'e' il grosso del testo.
+
+## ⛔ IL METODO, CHE HA FUNZIONATO TRE VOLTE SU TRE
+Ogni lavoro: numeri scritti PRIMA · una cosa per volta · banco verde · banco
+`--sabota` rosso · `node tools/controllo-push.js` · push di Alessio · collaudo
+dal vivo ricontando gli STESSI numeri. Mai due lavori in un push solo.
+E `prove-claude/` e' in `.gitignore`: i banchi non vanno online, quindi il
+banco delle gemelle non ha avuto bisogno di nessun push.
