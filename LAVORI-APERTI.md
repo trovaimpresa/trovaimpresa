@@ -4,7 +4,64 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 6 settembre 2026 (notte) — i quattro problemi rimasti dopo lo smontaggio
+Ultimo aggiornamento: 6 settembre 2026 (notte) — il gestionale negozio e i negozi che non si iscrivono
+
+---
+
+## 🆕 IL 6 SETTEMBRE (notte) — IL GESTIONALE NEGOZIO E I NEGOZI CHE NON SI ISCRIVONO
+
+Alex: «il gestionale negozio l'ho sempre lasciato indietro e ho sbagliato». Misurato quanto indietro, e provata la registrazione dal vivo per capire perché di negozi non se ne iscrive nessuno. **Nessun file toccato**: questo è il referto e la lista.
+
+### 📏 QUANTO È INDIETRO, misurato
+| | Imprese | Negozio |
+|---|---|---|
+| Righe | →12.672← | →5.410← |
+| Sezioni | →26← | →16← |
+| File js caricati | →23← | →6← |
+| Commit negli ultimi →30← giorni | →228← | →47← |
+
+⛔ **L'ultimo lavoro VERO sul negozio è del →30 agosto←.** Da lì solo due tocchi di massa (la chiave Supabase in →64← file, la spunta rapportini). Otto giorni in cui l'app delle imprese ha avuto →228← commit.
+
+### ✅ LA REGISTRAZIONE NEGOZIO FUNZIONA — provata dal vivo il 6 set
+Percorso fatto tutto: `iscriviti.html` → `registrazione-negozio` → modulo riempito con dati finti → fino al pulsante (NON premuto: Claude non crea account).
+- pagina intera, →662← righe, →9← script aperti e →9← chiusi, `</html>` c'è
+- →6← caselle: nome · email · password · tipo negozio (→17← voci + «Altro») · regione/provincia/città
+- cascata provata: Lazio → →5← province → Rieti → →74← comuni ✅
+- trappola anti-robot nascosta bene (`left:-9999px`, `opacity:0`, `tabindex:-1`, `aria-hidden`) ✅
+- il trigger `completa_profilo_extra` copia `tipo_negozio` ✅ — e `errori_trigger` negli ultimi →30← giorni: **→0←**
+- i →3← mesi di Premium regalati arrivano: →122← imprese su →122← hanno `piano='premium'`, →119← con scadenza ✅
+
+⛔ **QUINDI I NEGOZI NON SI ISCRIVONO PERCHÉ LA PORTA È ROTTA: LA PORTA FUNZIONA.** Il problema è prima della porta.
+
+### 🔴 Aperti — LA VETRINA (è qui che sta lo zero)
+- ⛔ **Nella vetrina ogni negozio si chiamerebbe «Negozio»** · `cerca-negozi.html` riga →517← scrive il nome con `i.nome_negozio || 'Negozio'`, ma **la colonna `nome_negozio` NON ESISTE** in `imprese` (tolta il →19 ago←, il trigger lo dice nei commenti) e la riga →553← non la chiede nemmeno nel `select`. Quindi è sempre `undefined` → esce la parola «Negozio». Oggi invisibile perché i negozi veri sono →0←; si vedrebbe il giorno dopo il primo iscritto
+- ⛔ **«Negozi» non sta nel menu in alto** · `cerca-artigiani` è linkata da →163← pagine, `cerca-negozi` da **→43←**. Sulla pagina stessa dei negozi il menu dice «Artigiani · Imprese · Professionisti». **Un negozio che cerca sé stesso su TrovaImpresa non si trova.** È la spiegazione più probabile dello zero: non disinteresse, invisibilità
+- **Nessun `<form>` in nessuna delle →4← registrazioni** · il pulsante va col clic, ma **premere Invio non manda niente** — e sul telefono il tasto «Vai» della tastiera è quello che tutti premono
+- **La password promette regole che non esistono** · sotto la casella c'è scritto «con maiuscole, numeri e simboli», il controllo vero è solo →8← caratteri (scelta di Alex, per non aggiungere attrito). Chiedere più del necessario in una registrazione accorciata apposta è attrito gratis
+- **Altre →6← pagine nominano ancora `nome_negozio`**: `cerca-artigiani`, `cerca-imprese`, `cerca-professionisti`, `mappa`, `professionisti`, `profilo-impresa` (in `mappa` e `modifica-profilo` è già dietro un ripiego, negli altri va guardato)
+
+### 🔴 Aperti — DENTRO IL GESTIONALE NEGOZIO
+- ⛔ **Manca «Dal sito»** · un negozio ha una scheda pubblica e riceve richieste come tutti, e quelle richieste **non arrivano da nessuna parte**. È il collegamento marketplace → gestionale, l'unica cosa che questo gestionale ha e Fluida no
+- **Mancano «Assistenza» e «Richieste»** · un negoziante dentro il suo gestionale non ha nessun modo di scrivere ad Alex, né per un problema né per chiedere una funzione
+- **Manca la Chat con AI** (`js/gest-chat.js` non è caricato) · senza, **a un negozio il piano Pro non si può vendere**
+- **Manca «Controlla prima di mandarlo»** (non è AI: sono regole normali) e **«✨ Compila con AI»** (`ai-integrazione.js` è già caricato: manca l'aggancio)
+- **Gli elenchi sono ancora a carte** · `renderTabella()` compare →11← volte nell'app e →1← nel negozio
+- **Il lavoro del 6 set notte non l'ha toccato** · l'ascoltatore di Invio/barra spaziatrice sta solo in `gestionale-app.html`, e nel negozio ci sono →5← «comandi che non sono comandi»
+
+### ⛔ LA COSA STRUTTURALE — perché resta indietro
+Non è disattenzione: **niente lo dice**. L'app ha →228← commit in →30← giorni, il negozio →47←, e nessun campanello ha mai suonato. Serve un **banco «stessa forma»** che confronti i due file (sezioni, funzioni condivise, js caricati, protezioni) e diventi **rosso quando l'app prende una cosa che il negozio non ha**. Senza quello, qualunque cosa si sistemi si riallontana in due settimane.
+
+### 📋 LA FILA, nell'ordine consigliato
+1. **A1** il nome vero del negozio nella vetrina (`nome_attivita`) — →10← min
+2. **A2** «Negozi» nel menu in alto, da →43← a →163← pagine — ~→1← ora
+3. **C1** il banco «stessa forma» — →mezza giornata←
+4. **B1** la sezione «Dal sito» nel gestionale negozio — →mezza giornata←
+5. **A3** le →6← pagine che nominano `nome_negozio` — →30← min
+6. **A4** il `<form>` nelle →4← registrazioni — →30← min · **A5** il testo della password — →5← min
+7. **B2** Assistenza e Richieste — →2← ore · **B3** «Controlla prima di mandarlo» — →2← ore · **B4** «Compila con AI» — →2← ore
+8. **B5** Chat con AI — →mezza giornata← · **B6** `renderTabella()` — →3← ore · **B7** tastiera — →30← min
+
+⚖️ **La domanda che resta aperta, e la decide Alex**: i negozi sono una strada da percorrere o no? In cinque mesi: →64← artigiani, →45← imprese, →6← professionisti, **→0← negozi**. Se la risposta è no, meglio dirlo adesso e smettere di trascinare quel file — non è una bocciatura, è tempo liberato. Se è sì, si parte da A1 e A2, che sono un'ora in tutto.
 
 ---
 
