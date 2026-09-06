@@ -22459,3 +22459,138 @@ E' successo →3← volte, e la terza (6 set, 14:23) ha bloccato un commit suo.
 - Se il lock c'e' gia': non si insiste, si **sposta** (`mv .git/index.lock
   _to_delete/`), perche' cancellare non si puo'.
 - Alex, dal suo Git Bash, lo toglie con: `rm -f .git/index.lock`
+
+---
+
+# 🆕 IL 6 SETTEMBRE 2026 — POMERIGGIO: IL COMPUTO E LO SMONTAGGIO
+
+Giro dentro il gestionale fatto da Claude col browser (Alessio era gia' dentro
+col suo account, nessuna password toccata): →20← sezioni aperte una per una e
+il computo metrico provato riempiendo tutti i campi di tutti e →6← i passi.
+
+## I 3 DIFETTI TROVATI PROVANDO, E RIPARATI
+
+### 1. Il ribasso non entrava nel quadro economico
+`js/gest-computo.js`: c'era `addEventListener("input", qeAggiorna)` su
+`#co-qe-righe` ma **NON su `#co-rib`**. Scrivevi →12,5←% e il Quadro economico
+restava sul totale SENZA ribasso; compariva solo se toccavi per caso una riga
+della sezione B. Su una gara si stampava un Totale A sbagliato di →157←€ su
+→1.259←€ e niente lo diceva.
+⛔ Il commento sopra `qeBaseA()` diceva gia' che il quadro DEVE leggere il
+ribasso appena scritto: l'intenzione era scritta, il collegamento mancava.
+**L'intenzione nel commento non e' una protezione: la protezione e' il banco.**
+
+### 2. Il cronoprogramma non vedeva il capitolo appena creato
+`renderCrono()` girava solo all'apertura del computo. Aggiungevi un capitolo
+nelle Lavorazioni e il passo →6← diceva ancora «questo computo non ha ancora
+capitoli»: bisognava chiudere e riaprire. Adesso i tre punti che toccano i
+capitoli chiamano `cronoRiallinea()`.
+⚠️ Con una RETE: non si ridisegna se ci sono giorni scritti e non salvati
+(`cronoModifiche()`, la stessa che protegge il PDF). Prezzo da sapere: con
+giorni non salvati, un capitolo nuovo compare solo dopo il salvataggio. Scelto
+apposta — meglio un capitolo in ritardo che dei giorni persi in silenzio.
+
+Banco: `prove-claude/banchi-fissi/computo/banco-ribasso-crono.js` — →15← verdi,
+→5← rosse col sabotaggio.
+
+### 3. «Oneri della sicurezza (€)»: la casella era sbagliata due volte
+Stava dentro ogni lavorazione, accanto a «costo del personale (%)» che e' per
+unita', ma il conto la prendeva come cifra fissa. E il nome era sbagliato:
+diceva «oneri» mentre la nota sotto diceva «non soggetti a ribasso».
+
+⛔ **DUE PAROLE CHE SEMBRANO UGUALI E NON LO SONO:**
+- **COSTI** della sicurezza → li stima il committente nel PSC, NON si ribassano.
+- **ONERI AZIENDALI** → DPI, formazione, procedure tue; li dichiari
+  nell'offerta (art. 108 c.9). Non sono una voce fissa non ribassabile.
+
+E soprattutto: **i costi della sicurezza non sono un campo della lavorazione.**
+Sono un computo a parte, con voci proprie e unita' proprie — la **Parte S** del
+prezzario. Nel database di Alessio c'e' gia': →972← voci codice S, fonte
+«Tariffa Regione Lazio» (recinzione al m², ponteggio cad, mensa al mese).
+
+## LA SOLUZIONE: IL CAPITOLO DEI COSTI DELLA SICUREZZA
+
+Una colonna sola: `gest_computo_capitoli.sicurezza`. Un capitolo con la spunta
+tiene le voci della Parte S; il suo importo entra nel computo ma resta fuori
+dal ribasso. Tutto il resto — misure, prezzi, analisi, cronoprogramma —
+funziona com'era, non e' stato riscritto niente.
+
+- Migrazione `capitolo_costi_sicurezza_6set2026`, copia scritta in
+  `sql/capitolo-costi-sicurezza.sql`
+- Un capitolo di sicurezza si numera **«S»**, non col numero della fila
+- Il piede delle Lavorazioni ha quattro righe: lavori · costi della sicurezza
+  (non soggetti a ribasso) · ribasso (solo sui lavori) · totale
+- ⚠️ La vecchia casella per lavorazione **resta viva** e si somma: si vede solo
+  dove c'e' gia' un valore, con la scritta corretta «(€, in tutto)».
+  Toglierla avrebbe fatto sparire una cifra dai computi gia' scritti in
+  silenzio.
+- ⛔ **IL CONTO STA IN DUE POSTI**: `compRiepilogo()` in js/gest-computo.js e
+  la vista `gest_computo_totali`. Sono gemelle e si cambiano INSIEME. E' la
+  debolezza strutturale nota (era gia' successo con le fatture, tre posti tre
+  numeri). Il banco confronta i due.
+
+Banco: `banchi-fissi/computo/banco-capitolo-sicurezza.js` — →27← verdi, →4←
+rosse col sabotaggio. Ritaglia le funzioni vere dal file e le fa girare.
+Collaudo dal vivo: capitolo creato dall'interfaccia + voce `S01.01.002.16`
+(→20← m² × →17,63←) → schermo →1.454,96 €←, database →1.454,96 €←. Uguali.
+
+## LO SMONTAGGIO DI gestionale-app.html — COMINCIATO
+
+Misurato prima di parlare: →626← righe di HTML, **→16.422← di JavaScript**,
+ZERO CSS (era gia' tutto in `css/`, →4.555← righe). E →10.887← righe di JS
+erano gia' fuori in →14← file. Non si partiva da zero: si era a meta'.
+
+⛔ **PERCHE' E' FACILE, E PERCHE' E' PERICOLOSO.** I file staccati NON sono
+chiusi dentro una IIFE: vivono nello stesso spazio della pagina, quindi vedono
+`sb`, `esc`, `toast` senza che nessuno glieli passi. Staccare una fetta e':
+taglia, incolla, aggiungi un `<script src>`. Ma per la stessa ragione **un nome
+dichiarato due volte spegne TUTTA la pagina al caricamento**, schermo bianco.
+(→4← file SONO chiusi dentro — gest-chat, aiuti, fondatore, ai-integrazione:
+quelli non si scontrano con nessuno.)
+
+**Fatte oggi:**
+- **Fetta A** → `js/gest-documenti-pdf.js` (→1.093← righe): i →4← documenti in
+  PDF — preventivo, lettera d'incarico, conferma d'ordine, verbale.
+- **Fetta G** → `js/gest-galleria-mappa.js` (→607←) e `js/gest-report.js`
+  (→263←).
+
+**→17.048← → →15.089← righe** (−→1.959←).
+
+⚠️ Due aiuti comuni **salvati dal taglio sbagliato**: `_fileOrfano` (usato in
+→8← punti, non e' della Galleria) e `_fetchAllExport`/`esportaExcel` (il backup
+di tutto, non e' del Report). Restano nel nucleo.
+
+### ⛔ IL GUASTO MUTO CHE HA SPENTO GALLERIA E MAPPA
+La prima riga del file staccato era:
+
+    const GAL_VUOTO = _SVGV + '<path .../>';
+
+`_SVGV` sta dentro gestionale-app.html, che parte DOPO i file staccati. Quella
+riga si esegue quando il file nasce: cercava `_SVGV`, non lo trovava, e **il
+file moriva alla prima riga** — renderGalleria, renderMappa e il caricamento
+foto non nascevano proprio.
+⛔ **E a schermo non usciva nessun errore**: la Galleria diceva «nessuna foto»
+e la Mappa non metteva spilli, come se non ci fosse niente da vedere. Trovato
+solo perche' i numeri non tornavano con quelli letti prima del taglio
+(→4← foto, →5← cantieri).
+
+**LA REGOLA, per le fette che restano:** in un file staccato, al primo livello
+non si puo' USARE niente che stia nella pagina. Nominarlo dentro una funzione
+va bene: quando la funzione gira, la pagina e' partita da un pezzo.
+Riparato rendendo `GAL_VUOTO` una funzione.
+
+**LA REGOLA DI METODO:** prima di ogni fetta ci si SCRIVE i numeri delle
+sezioni toccate, e dopo si ricontano. Contro i guasti muti non c'e' altro.
+
+Banco: `banchi-fissi/smontaggio/banco-fette.js` — →18← verdi. Ha una tabella
+in cima: per la fetta nuova si aggiungono tre righe. Controlla i punti
+d'ingresso, l'ordine dei `<script>`, **i nomi doppi fra tutti i file aperti**,
+gli aiuti comuni, **l'uso della pagina al primo livello** (la prova nata dal
+guasto sopra) e la sintassi di tutto.
+
+## ⛔ REGOLA: CLAUDE NON LANCIA GIT SENZA `--no-optional-locks`
+Ogni git che tocca l'indice crea `.git/index.lock`. Dal collegamento di Cowork
+Claude non ha il permesso di cancellare: quel file resta a →0← byte e **ogni
+git di Alessio si ferma**. E' successo →3← volte. In sola lettura si usa
+sempre `git --no-optional-locks status/log`. Se il lock c'e' gia': si SPOSTA
+(`mv .git/index.lock _to_delete/`). Alessio lo toglie con `rm -f .git/index.lock`.

@@ -134,6 +134,16 @@
   status = 404
   force = true
 
+# ⚠️ 6 settembre 2026 — il prompt per finire di smontare gestionale-app.html.
+# Dentro c'e' la mappa di com'e' fatto il gestionale dietro le quinte: quali
+# file, quali funzioni, dove sta ancora la roba da spostare. Non deve stare
+# online.
+[[redirects]]
+  from = "/PROMPT-smontaggio-gestionale.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # ⚠️ 25 agosto 2026 — il gemello minuscolo del file qui sopra.
 # `prompt-nuova-sessione.md` sta in root e dentro c'e' il racconto di come
 # e' fatto il gestionale, cosa e' rotto e dove si lavora: il controllo prima
