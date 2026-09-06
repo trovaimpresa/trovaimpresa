@@ -1,183 +1,151 @@
-# Prompt per la sessione nuova — dopo il 4 settembre 2026
+# Prompt per la sessione nuova — dopo la sera del 6 settembre 2026
 
-Sono Alex, fondatore e unico sviluppatore di TrovaImpresa (trovaimpresa.com).
+Copia tutto quello che sta sotto la riga e incollalo in una sessione nuova di Cowork.
 
-## Prima di toccare qualsiasi cosa, leggi
-
-1. `CLAUDE.md` nella cartella del progetto — soprattutto la sezione
-   **«4 SETTEMBRE 2026 — LE QUATTRO REGISTRAZIONI DIVENTANO UNA SCHERMATA»**,
-   che è l'ultima, e la sezione **«DOVE SONO I FILE»** in cima.
-2. `LAVORI-APERTI.md` (radice del progetto) — il quaderno dei lavori a metà.
-   **Aggiornalo alla fine della sessione**: sposta in FATTO quello che chiudi.
-3. Le tue memorie: `/preferences.md`, `/areas/lavori-aperti.md`,
-   `/areas/profilo-pubblico.md`, `/areas/pannelli-imprese.md`.
-
-## Come lavoriamo — regole che non si discutono
-
-- La cartella è `C:\Users\Utente\Downloads\trovaimpresa`, in Cowork si apre come
-  `$HOME/mnt/trovaimpresa`. Non cercare altrove.
-- ⛔ **Niente comandi git dalla mia cartella, nemmeno in sola lettura.**
-  Un `git status` una volta ha creato un `index.lock` che mi ha bloccato i commit
-  per ore. Il `git push` lo faccio io: tu mi dai il blocco pronto da incollare.
-- Ho la **dislessia**: rispondi corto, frasi brevi, niente muri di testo.
-  I numeri isolali con i marcatori →così←. Niente gergo.
-- **Non spiegarmi le cose che si capiscono da sole** dentro le interfacce.
-- Se non mi capisci dopo →2← giri, dammi →3-4← opzioni da scegliere invece di
-  interpretare (AskUserQuestion).
-- **Prima di costruire una cosa, cerca se c'è già.** Il 4 settembre hai costruito
-  una barra «profilo completo» che esisteva già da agosto.
-- **Collaudo obbligatorio**: niente è «fatto» finché non è girato davvero.
-  I banchi stanno in `prove-claude/banchi-fissi/` (nel `.gitignore`):
-  `gira-conti.sh` · `gira-computo.sh` · `gira-assistenza-ai.sh` ·
-  `gira-pagine.sh` (che lancia anche il banco delle registrazioni) · `gira-fascia.sh`.
-- **Un banco nuovo va sabotato** prima di dichiararlo buono: se resta verde quando
-  rompi il codice vero, sta misurando se stesso.
-- **Su una grafica, guarda lo screenshot** prima di dire «fatto»: i banchi misurano
-  la grandezza delle scritte, non il contrasto (il 4 set una pagina è finita blu su blu).
-- Alla fine di ogni lavoro voglio **un riassunto** e **il passo che mi consigli**.
+⚠️ Gli altri file `PROMPT-*.md` e `prompt-nuova-sessione.md` in questa cartella
+sono VECCHI (4 e 5 settembre, noleggio, smontaggio). Questo e' quello buono.
 
 ---
 
-# I LAVORI, IN QUEST'ORDINE
+Ciao. Lavoriamo su TrovaImpresa, cartella `C:\Users\Utente\Downloads\trovaimpresa`
+(in Cowork si apre come `$HOME/mnt/trovaimpresa`).
 
-## 1. ⭐ Preventivo: la foto allegata non arriva mai — IL PRIMO
-**Dov'è**: `profilo-impresa.html` (sezione `#sec-preventivo`, funzione `inviaPreventivo`),
-`netlify/functions/notifica-preventivo.js`.
+Prima di toccare qualsiasi cosa leggi, in questo ordine:
 
-**Il problema**: il cliente allega una foto alla richiesta di preventivo, la foto non
-arriva mai. Il caricamento va sul bucket `foto-lavori`, che accetta solo l'impresa
-loggata — il cliente non è loggato, quindi fallisce **in silenzio**: nessuno se ne accorge.
+1. `CLAUDE.md`, le ultime due sezioni: «IL 6 SETTEMBRE 2026 — POMERIGGIO» e
+   «IL 6 SETTEMBRE 2026 — SERA: SEI FETTE IN UNA SESSIONE»
+2. `LAVORI-APERTI.md`, la sezione in cima
+3. `prove-claude/banchi-fissi/smontaggio/banco-fette.js`
 
-**Da fare**:
-- bucket nuovo `preventivi-allegati`, privato, con insert da `anon` su
-  `preventivi/<impresa_id>/…` e select per l'impresa proprietaria
-- colonna `preventivi.allegati` di tipo `jsonb`
-- più file insieme: foto, PDF, computo, DWG — max →10← MB l'uno
-- gli allegati devono vedersi in tutti e →4← i pannelli
-- il conteggio degli allegati nell'email di notifica
+## COME PARLARE AD ALESSIO
 
-**Collaudo**: una richiesta di prova con →2← file, controllando che l'impresa li apra
-davvero dal pannello. E che se il file è troppo grande lo dica, invece di fallire zitto.
+Non e' un tecnico di formazione: ogni operazione va spiegata **a clic**, con
+passaggi numerati (dove andare, quale pulsante, cosa incollare, cosa deve
+vedere dopo). Numeri e commit isolati coi marcatori →così←. Prima di toccare i
+file per qualcosa che si vede a schermo, gli fai vedere **l'anteprima**
+(computer E telefono) e aspetti il suo ok. A fine lavoro: riassunto e passo
+successivo consigliato. Se hai un'opinione diversa dalla sua, gliela dici —
+vuole il parere onesto, compreso cosa non funziona.
 
-## 2. Le prestazioni del professionista non hanno una casella nel pannello
-**Dov'è**: `modifica-profilo.html`, sezione `#sec-professionista`.
-Erano nel vecchio modulo di registrazione (spunte: «i clienti ti trovano cercando la
-singola prestazione»), il 4 settembre la registrazione è stata accorciata e quelle
-spunte sono sparite. La colonna `prestazioni` in `imprese` **esiste già**.
-Da fare: rimettere le spunte in Modifica profilo, leggerle e salvarle.
+## LE REGOLE DI FERRO
 
-## 3. Prodotti e Marchi del negozio non li mostra nessuno
-Le colonne `prodotti` e `marchi` sono state aggiunte a `imprese` il 4 settembre e il
-negozio le compila da `modifica-profilo.html`, ma **nessuna pagina pubblica le legge**.
-Da fare: mostrarle sulla scheda pubblica `profilo-impresa.html` quando il tipo è negozio.
+- ⛔ Claude non lancia git senza `--no-optional-locks`. In sola lettura sempre
+  `git --no-optional-locks status/log`. Se `.git/index.lock` c'e' gia', si
+  SPOSTA (`mv .git/index.lock _to_delete/`), non si insiste.
+- ⛔ Ogni blocco git per Alessio comincia con `rm -f .git/index.lock`.
+- ⛔ Una cosa per volta: push e collaudo dal vivo in mezzo. Mai due lavori in
+  un push solo.
+- ⛔ Prima di toccare una sezione, ci si SCRIVONO i numeri che mostra; dopo il
+  push si ricontano. E' l'unica difesa contro i guasti muti.
+- ⛔ Ogni lavoro ha un banco in `prove-claude/banchi-fissi/`, e il banco va
+  provato anche col `--sabota`: se sabotato non diventa rosso, non sta
+  misurando niente.
+- ⛔ Prima del push: `node tools/controllo-push.js`.
+- ⚠️ Netlify ci mette fino a un minuto e mezzo. Un →404← subito dopo il push
+  non e' un guasto: si riprova.
 
-## 4. `pannello-negozio.html` è rimasto indietro
-Due cose:
-- **testata vecchia**: gli altri →3← pannelli hanno la testata nuova, il «Riposiziona»
-  e le →4← carte del gestionale
-- **la copertina non si carica**: scrive in `<id impresa>/banner` invece che nella
-  cartella dell'`user_id`, e la regola RLS la blocca
-Da fare: copiare dai pannelli buoni (regola `stessa-forma`), **riscrivendo il blocco
-intero**, non con sostituzioni a pezzi.
+## DOVE SIAMO
 
-## 5. `gestionale-config.html` è TRONCATO
-Nel file ci sono →3← `<script` ma solo →2← `</script>`, non c'è `</html>`, e il codice
-si interrompe a metà riga (`...eq("id",d.dataset`). L'ultimo blocco non gira.
-**Non indovinare il pezzo mancante**: recuperalo dall'ultima versione buona (me lo dici
-e lo recupero io dal mio Git) e poi rimetti la riga
-`<script src="/js/freccia-indietro.js"></script>` prima di `</body>`, che oggi manca
-solo su questa pagina.
+Il →6← settembre `gestionale-app.html` e' passato da →17.048← a →12.638←
+righe (−→26%←) staccando →9← file `js/gest-*.js`. Il resto e' il nucleo: non
+si spezza oltre senza motivo.
 
-## 6. Il tasto «📱 Mobile» dell'Anteprima non fa niente
-Nei →4← pannelli: `anteprimaDevice()` usa `max-width` invece di `width`.
-Aggiustare e farmi vedere la foto dell'anteprima telefono.
-
-## 7. Cancellare una chat dal lato impresa cancella anche la copia del cliente
-Nei →4← pannelli, bottone «🗑 Elimina conversazione»: fa una DELETE diretta su
-`chat_messaggi`, quindi sparisce anche al cliente.
-Serve: tabella `chat_nascoste` con RLS, l'elenco che salta le nascoste, e il bottone
-che diventa «Togli dal mio elenco». Dettagli in `prove-claude/LAVORI-DA-FARE.md`.
-È mezza giornata: non iniziarlo se ne resta meno.
-
-## 8. Collegare la visita all'iscrizione
-`visite_sito` registra ogni arrivo con un campo `sessione`, ma quando uno crea
-l'account nessuno collega le due cose. Salvando la sessione (o direttamente la
-provenienza) al momento del `signUp` si saprebbe **quante iscrizioni** arrivano da
-ogni canale, non solo quante visite. Oggi la card «Da dove arrivano» in `admin.html`
-conta solo le visite.
-
-## 9. Le scritte troppo piccole rimaste
-- il **footer** del sito è a →12,8←px su **tutte** le pagine, e dentro le →5← email
-- →4← regole CSS in `profilo-impresa.html`: `.cdh` →9←px, `.cd` →12←px,
-  `.cd.oggi` →11←px, `.ms-l` →10←px — **prima controlla se qualcosa le usa ancora**:
-  se non le usa nessuno si buttano, se le usa qualcosa vanno portate a →13←px
-Sotto i →13←px non leggo.
-
-## 10. Il controllo colonne-fantasma è cieco e ha la lista vecchia
-`prove-claude/controllo-colonne.js`:
-- guarda solo le chiavi scritte dentro `.update({...})` e **non vede
-  `.update(variabile)`**. In `modifica-profilo.html` l'oggetto si chiama `dati` e si
-  riempie con `Object.assign`: per questo il difetto della colonna `albo` è
-  sopravvissuto giorni e l'ha trovato un'iscritta vera, non il controllo.
-- `prove-claude/colonne-vere.txt` è del 30 agosto e dà →15← falsi allarmi: va rifatto
-  con la query che sta scritta in cima allo stesso file.
-
-## 11. `recensioni-impresa.html` non è in nessuna sitemap
-Aggiungerle.
-
-## 12. Bandi & Opportunità, fermo su CORS da luglio
-La soluzione era già stata trovata (una Netlify Function che fa da ponte), mai scritta.
-
-## 13. I →10← utenti recuperati, mai contattati
-Da luglio: →10← iscritti recuperati a mano a cui non è mai stata mandata l'email per
-completare il profilo. Prima di scrivere, chiedimi il testo: le email agli iscritti le
-approvo io.
+Restano **quattro** problemi aperti, in ordine di importanza. Fanne **uno per
+volta**, e fermati dopo ognuno per il collaudo.
 
 ---
 
-# COSE CHE DEVO DECIDERE IO — non decidere al posto mio
+## PROBLEMA 1 — LA STESSA FORMULA IN DUE POSTI (il piu' grave)
 
-Portamele quando arriviamo lì, con due foto affiancate o due numeri, non con un parere:
+Il conto dei costi della sicurezza sta in `compRiepilogo()` dentro
+`js/gest-computo.js` **e** nella vista di database `gest_computo_totali`. Sono
+gemelli e devono dare lo stesso numero. Sopra c'e' scritto un commento che dice
+«si cambiano insieme» — **ma un commento non e' una protezione**. E' gia'
+successo con le fatture: la stessa formula in tre posti, tre numeri diversi.
 
-- **Il logo di TrovaImpresa nella barra della scheda pubblica** viene sostituito dal
-  logo dell'impresa: per me il visitatore perde il riferimento. Due foto e scelgo.
-- **Gli orari**: la colonna è vuota su tutte le imprese. Prima contami dal database
-  quante ne hanno uno, poi le due strade: riempirla o toglierla.
-- **La recensione di prova** (id →19←, scheda →36←): cancellarla o no.
-- **Quanto vale un credito chat.**
-- **Il cliente che aspetta da →42← giorni** una risposta a una richiesta di incarico a
-  un professionista: rispondo io a mano? avviso il professionista? la propongo ad altri?
-- **Il deposito del marchio** TrovaImpresa (UIBM, classi 35/37/42, ~→185←€ via SPID).
-- **Il bottone del logo è solo Premium**: per un iscritto Free la voce «Logo» della
-  fascia «profilo completo» non si potrà mai spuntare. Apriamo il logo a tutti e
-  teniamo Premium solo la copertina?
+E dal →6← settembre ce n'e' un secondo: il filtro sulla **FASE** del noleggio,
+`(fase||'fuori') !== 'prenotato'`, sta in `js/gest-riepilogo.js` (riga ~→278←)
+**e** in `js/gest-report.js` (riga ~→130←). Oggi sono allineati; prima si erano
+gia' scollati una volta, e adesso stanno in due file diversi.
 
----
-
-# ATTIVITÀ GIÀ PROGRAMMATA — non rifarla
-
-**11 settembre 2026, ore 9:00** gira da sola nella nuvola: «Ha funzionato la
-registrazione corta?». Confronta gli iscritti di adesso con i numeri di partenza
-fissati il 4 settembre (→24← iscritti in →14← giorni = →1,71← al giorno, su →1.236←
-visite, cioè l'→1,9←% di chi arrivava) e mi manda il rapporto per notifica ed email.
-Se stiamo lavorando insieme quel giorno, non rifare lo stesso conto a mano.
+Quello che serve non e' riscrivere le formule: e' **un banco che le confronta
+da solo e diventa rosso quando si scollano**, cosi' se ne accorge la macchina
+invece di Alessio davanti a una gara. Progettalo tu, spiegagli come funziona e
+fallo girare anche col `--sabota`.
 
 ---
 
-# COSA È STATO FATTO IL 4 SETTEMBRE — così non lo rifai
+## PROBLEMA 2 — IL GESTIONALE E' LENTO A RISPONDERE
 
-- Tutte e →4← le registrazioni portate da →4← passi a **→1← schermata con →7← caselle**
-- La domanda «come ci hai conosciuto?» sulla schermata finale di tutte e →4←
-- La card «🧭 Da dove arrivano» nel pannello admin (vista `arrivi_per_canale` +
-  `netlify/functions/admin-arrivi.js`)
-- Sistemati →2← salvataggi del profilo che erano rotti (professionista: scriveva
-  `albo` invece di `numero_albo`; negozio: `nome_negozio` invece di `nome_attivita`)
-- I campi tolti dalla registrazione hanno tutti una casa in `modifica-profilo.html`
-- Freccia «Indietro» uguale in tutta l'area riservata (`js/freccia-indietro.js`,
-  →13← pagine) — manca solo su `gestionale-config.html`, che è troncato (lavoro →5←)
-- `modifica-profilo.html` rifatta: tre quarti di pagina, scritte più grandi e scure,
-  la descrizione in una scheda sua
-- La card del pannello si chiama «Completa il tuo profilo»
-- Tolti →2← riquadri che non facevano niente (Video profilo, AI integrata)
-- La fascia «profilo completo» conta anche WhatsApp, CAP e il logo (solo ai Premium)
-- Banchi nuovi: `banco-registrazione.js` (→76← verdi) e `banco-fascia-profilo.js` (→15← verdi)
+Dopo ogni salvataggio la lista si ridisegna con →1-2← secondi di ritardo. Su un
+computo da sessanta voci si sente. **Il danno vero non e' l'attesa: e' che
+inganna.** Alessio ha creduto due volte che una riga non fosse stata salvata
+quando invece c'era.
+
+Prima misura, poi proponi: dove se ne vanno quei secondi (una lettura in piu'?
+un ridisegno intero invece che della sola riga? il «render pigro»?). Poi decidi
+con lui se la cura e' far tornare la risposta piu' in fretta o **far vedere
+subito che il salvataggio e' andato** — spesso la seconda vale piu' della prima.
+
+---
+
+## PROBLEMA 3 — LE SCHEDE DEI REPARTI NON SONO PULSANTI
+
+`gestionale-app.html`, riga ~→2184←:
+
+    <div class="panel-card" data-action="enter" data-p="${p.id}">
+      <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
+
+La scheda e' un `div`: da tastiera non ci si arriva. Il cestino e' un
+`<button>`: da tastiera ci si arriva. **Sull'unica scheda di una schermata si
+puo' cancellare un reparto ma non entrarci.** E' un danno che fa male una volta
+sola e in modo definitivo.
+
+Guarda anche se lo stesso schema (`div` con `data-action`) c'e' altrove nel
+gestionale: se si', dillo, non aggiustarne uno solo di nascosto.
+
+---
+
+## PROBLEMA 4 — LE SPIEGAZIONI A MACCHIA DI LEOPARDO
+
+La sezione **Ore** ha →4← righe di spiegazione addosso; il **computo** ha
+paragrafi lunghi in cima; altre sezioni non hanno niente.
+
+La regola di Alessio, del →29← agosto: **niente spiegazioni addosso alle cose
+che si capiscono da sole** — «tutti sanno usare una chat». Nella Chat con AI ha
+fatto togliere la riga sotto il titolo, il messaggio di benvenuto, le domande di
+esempio e la scritta sui tasti. La stessa regola non e' stata applicata
+dappertutto.
+
+⚠️ Non e' un taglio a tappeto: certe spiegazioni dicono cose che a occhio non si
+capiscono (perche' il costo orario entra nel margine, cosa fa il ribasso).
+Quelle restano. Fai prima un **giro completo** e portagli un elenco: sezione per
+sezione, cosa toglieresti e cosa terresti e perche'. **Fagli vedere l'anteprima
+prima di toccare i file.**
+
+---
+
+## SE AVANZA TEMPO — il resto dello smontaggio (facoltativo)
+
+Due blocchi non sono usciti, e non perche' siano difficili: sono i punti dove il
+gestionale si tiene insieme.
+
+- **C · Preventivi** — →1.112← righe contigue, ma dentro ci sono **sei** aiuti
+  che li chiamano altri file gia' staccati: `prevCache`, `impRiga`,
+  `calcolaParcella`, `_rigaSezione`, `_scriviRighePrev`, `AVVISO_SEZIONI`.
+  Vanno tagliati **intorno**, in sei punti.
+- **F3 · Clienti** — →3← pezzi lontani, `cliIndirizzo` e `_rigaDato` da
+  schivare, e in mezzo `commForm`/`saveComm`/`docCommApri`, che e' il
+  **commercialista** e coi clienti non c'entra.
+
+La tabella completa di chi chiama cosa sta in `CLAUDE.md`, sezione della sera
+del →6← settembre. Non rifare quel lavoro: leggilo.
+
+⛔ **E la lezione piu' importante del →6← settembre:** il banco
+`banco-fette.js` era andato **cieco** — saltava un intero file per via di un
+IIFE annidato — **e continuava a dire ✅ verde**. E' stato scoperto solo perche'
+un numero di passaggio era rimasto →8← invece di →9←. **Ogni prova che conta
+qualcosa deve stampare il numero, e quel numero va letto.** Se metti mano a un
+banco, controlla prima che stia ancora guardando quello che dice di guardare.
+
+Comincia dal Problema →1← e fermati dopo quello.
