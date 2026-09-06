@@ -1068,6 +1068,8 @@
   .sup-ling button.on { background:#0066ff; color:#fff; }
   .sup-pezzo { display:none; }
   .sup-pezzo.on { display:block; }
+  /* 6 set 2026 - il chip dell'allegato deve sparire davvero quando e' nascosto */
+  #supporto-chip[hidden] { display:none !important; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="/css/mobile.css?v=3">
@@ -2834,9 +2836,9 @@
           <button type="button" onclick="svuotaChatAI()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap">&#128229; Svuota la mia schermata</button>
         </div>
         <div id="ai-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
-        <div style="display:flex;gap:8px">
-          <input id="ai-supporto-prompt" type="text" placeholder="Scrivi la tua domanda..." autocomplete="off" onkeydown="if(event.key==='Enter')chiediSupportoAI()" style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px">
-          <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()" style="padding:12px 22px;background:#0066ff;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Invia</button>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <textarea id="ai-supporto-prompt" rows="3" placeholder="Scrivi la tua domanda..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chiediSupportoAI();}" style="flex:1;min-height:96px;padding:16px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+          <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()" style="padding:14px 26px;background:#0066ff;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer">Invia</button>
         </div>
       </div>
 
@@ -2846,10 +2848,10 @@
           <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap">📥 Svuota la mia schermata</button>
         </div>
         <div id="supporto-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
-        <div style="display:flex;gap:8px">
-          <input id="supporto-input" type="text" placeholder="Scrivi un messaggio..." autocomplete="off" onkeydown="if(event.key==='Enter')inviaSupporto()" style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px">
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <textarea id="supporto-input" rows="3" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();inviaSupporto();}" style="flex:1;min-height:96px;padding:16px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
           <button type="button" onclick="document.getElementById('supporto-file').click()" title="Allega una foto, uno screenshot o un PDF" aria-label="Allega un file" style="padding:0 14px;background:#fff;color:#5b6b80;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-          <button onclick="inviaSupporto()" style="padding:12px 22px;background:#0066ff;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Invia</button>
+          <button onclick="inviaSupporto()" style="padding:14px 26px;font-size:16px;background:#0066ff;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Invia</button>
         </div>
         <input type="file" id="supporto-file" accept="image/*,application/pdf" hidden onchange="supportoFileCambiato()">
         <div id="supporto-chip" hidden style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:6px 8px 6px 12px;font-size:15.5px;font-weight:600;background:#fff;border:1.5px solid var(--border);border-radius:999px;max-width:100%"></div>
