@@ -739,11 +739,28 @@
             sicurezza:S, manodopera:MO};
   }
   /* la stessa cosa partendo dalle voci gia' calcolate (vista gest_computo_voci_calc) */
-  function compRiepilogo(voci,comp){
+  /* ⚠️ 6 set 2026 — I COSTI DELLA SICUREZZA ARRIVANO DA DUE STRADE.
+     1. la VECCHIA: la casella «oneri della sicurezza» dentro ogni lavorazione.
+        Resta viva per i computi gia' scritti — toglierla farebbe sparire una
+        cifra senza dirlo a nessuno.
+     2. la NUOVA, quella giusta: un CAPITOLO marcato «costi della sicurezza»,
+        con dentro le voci vere della Parte S del prezzario (recinzione al m²,
+        ponteggio cad, mensa al mese). E' cosi' che si fa in una gara: i costi
+        della sicurezza sono un computo a parte, non un pezzetto spalmato
+        dentro l'intonaco.
+     Le due strade si SOMMANO, e il totale non si ribassa (ci pensa
+     compRiepilogoDa). La stessa somma sta anche nella vista
+     gest_computo_totali, che serve l'elenco e il PDF: se una delle due
+     cambia, cambiano tutte e due — sql/capitolo-costi-sicurezza.sql. */
+  function compRiepilogo(voci,comp,caps){
     const V=voci||[];
+    const CAPS=caps||compCapCache||[];
+    const capSic={};
+    CAPS.forEach(function(c){ if(c&&c.sicurezza)capSic[String(c.id)]=true; });
+    const inSic=function(v){ return !!(v&&v.capitolo_id&&capSic[String(v.capitolo_id)]); };
     return compRiepilogoDa(
       V.reduce((s,v)=>s+(+v.importo||0),0),
-      V.reduce((s,v)=>s+(+v.oneri_sicurezza||0),0),
+      V.reduce((s,v)=>s+(+v.oneri_sicurezza||0)+(inSic(v)?(+v.importo||0):0),0),
       V.reduce((s,v)=>s+(+v.importo||0)*(+v.incidenza_manodopera||0)/100,0),
       comp);
   }
@@ -1719,14 +1736,19 @@
             +'<div class="field"><label>Titolo del capitolo</label><input id="ce-tit"'+_noAuto()
             +' value="'+esc(g.cap.titolo||"")+'" placeholder="Es. Demolizioni e rimozioni"></div>'
             +'</div>'
+            +'<label style="display:flex;align-items:center;gap:9px;margin:10px 0 2px;cursor:pointer;font-size:.97rem"><input type="checkbox" id="ce-sic" style="width:19px;height:19px;flex:0 0 auto"'+(g.cap.sicurezza?' checked':'')+'><span>E&#39; il capitolo dei <b>costi della sicurezza</b><small class="sp-forn" style="margin-top:2px">Quello che ci metti dentro entra nel computo ma resta <b>fuori dal ribasso</b>. Le voci le trovi nel prezzario col codice <b>S</b> — Parte S: recinzioni, ponteggi, baraccamenti.</small></span></label>'
             +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
             +'<button type="button" class="btn-primary quick-add" data-action="comp-cap-rinomina" data-id="'+esc(String(g.cap.id))+'">Salva il capitolo</button>'
             +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-edit-annulla">Annulla</button>'
             +'</div></div>'
-          : '<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)">'
+          : '<div class="spesa-row" style="'+(g.cap.sicurezza
+              ? 'background:#ECFDF5;border-left:4px solid var(--ok,#059669)'
+              : 'background:var(--sfondo,#f5f6f8)')+'">'
             +'<span class="cm-testo" data-action="comp-cap-edit" data-id="'+esc(String(g.cap.id))+'" style="cursor:pointer" title="Clicca per rinominare il capitolo">'
             +  '<b>'+(g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")+'</b>'
-            +  '<small class="sp-forn">clicca per rinominare</small></span>'
+            +  '<small class="sp-forn">'+(g.cap.sicurezza
+                 ? "quello che c'è qui dentro NON si ribassa"
+                 : "clicca per rinominare")+'</small></span>'
             +'<b>'+eur2(sub)+'</b>'
             +'<button type="button" class="rdel" data-action="comp-cap-del" data-id="'+esc(String(g.cap.id))+'" title="Elimina il capitolo (le lavorazioni restano)">×</button></div>';
       }else if(compCapCache.length&&g.voci.length){
@@ -1738,17 +1760,32 @@
 
     /* il piede dei totali: col ribasso diventa tre righe, senza resta una sola.
        I numeri vengono da compRiepilogo, gli stessi che finiscono sul PDF. */
+    /* ⚠️ 6 set 2026 — la sicurezza adesso ha una RIGA SUA, non e' piu' un
+       «di cui». Con un «di cui» non si capiva su cosa mordeva il ribasso:
+       adesso si legge in fila — i lavori, la sicurezza che non si ribassa,
+       lo sconto sui soli lavori, il totale. Le tre righe di mezzo compaiono
+       solo quando servono: un computo privato senza sconto resta com'era,
+       una riga sola. */
+    const _sic=rp.sicurezza;
+    const _lav=Math.round((rp.lordo-_sic)*100)/100;
+    const _spezza=!!(rp.perc||_sic);
     let piede='<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>'
-      +(rp.perc?"Totale dei lavori":"Totale del computo")+'</b></span><b>'+eur2(rp.lordo)+'</b><span></span></div>';
+      +(_spezza?"Totale dei lavori":"Totale del computo")+'</b></span><b>'+eur2(_spezza?_lav:rp.lordo)+'</b><span></span></div>';
+    if(_sic){
+      piede+='<div class="spesa-row"><span>Costi della sicurezza'
+        +'<small class="sp-forn">non soggetti a ribasso</small>'
+        +'</span><b>'+eur2(_sic)+'</b><span></span></div>';
+    }
     if(rp.perc){
       piede+='<div class="spesa-row"><span>Ribasso '+_pct(rp.perc)+'%'
-        +(rp.sicurezza?'<small class="sp-forn">gli oneri della sicurezza non si ribassano</small>':'')
-        +'</span><b style="color:var(--err,#c0392b)">− '+eur2(rp.ribasso)+'</b><span></span></div>'
-        +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Totale del computo</b></span><b>'+eur2(rp.netto)+'</b><span></span></div>';
+        +(_sic?'<small class="sp-forn">solo sui lavori</small>':'')
+        +'</span><b style="color:var(--err,#c0392b)">− '+eur2(rp.ribasso)+'</b><span></span></div>';
     }
-    if(compQui.tipo==="pubblico"&&(rp.manodopera||rp.sicurezza)){
-      piede+='<div class="spesa-row"><span>di cui costo del personale</span><b>'+eur2(rp.manodopera)+'</b><span></span></div>'
-        +'<div class="spesa-row"><span>di cui oneri della sicurezza</span><b>'+eur2(rp.sicurezza)+'</b><span></span></div>';
+    if(_spezza){
+      piede+='<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Totale del computo</b></span><b>'+eur2(rp.netto)+'</b><span></span></div>';
+    }
+    if(compQui.tipo==="pubblico"&&rp.manodopera){
+      piede+='<div class="spesa-row"><span>di cui costo del personale</span><b>'+eur2(rp.manodopera)+'</b><span></span></div>';
     }
     /* ⚠️ 20 agosto 2026 — UN COMPUTO VUOTO NON È UNA PAGINA VUOTA.
        Detto da Alessio guardando lo schermo: «aggiungi lavorazione,
@@ -1835,6 +1872,7 @@
         ? '<div style="margin-top:12px;border-top:1px solid var(--bordo);padding-top:12px">'
           +'<div class="field"><label>Titolo del nuovo capitolo</label>'
           +'<input id="cc-tit"'+_noAuto()+' placeholder="Es. Demolizioni e rimozioni"></div>'
+          +'<label style="display:flex;align-items:center;gap:9px;margin:10px 0 2px;cursor:pointer;font-size:.97rem"><input type="checkbox" id="cc-sic" style="width:19px;height:19px;flex:0 0 auto"><span>E&#39; il capitolo dei <b>costi della sicurezza</b><small class="sp-forn" style="margin-top:2px">Quello che ci metti dentro entra nel computo ma resta <b>fuori dal ribasso</b>. Le voci le trovi nel prezzario col codice <b>S</b> — Parte S: recinzioni, ponteggi, baraccamenti.</small></span></label>'
           +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
           +'<button type="button" class="btn-primary quick-add" data-action="comp-cap-salva">Aggiungi il capitolo</button>'
           +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-annulla">Annulla</button>'
@@ -1900,8 +1938,11 @@
     const t=String(($("#ce-tit")&&$("#ce-tit").value)||"").trim();
     const n=String(($("#ce-num")&&$("#ce-num").value)||"").trim();
     if(!t){toast("Il capitolo ha bisogno di un titolo");return;}
+    const sic=$("#ce-sic")?!!$("#ce-sic").checked:undefined;
+    const cambio={titolo:t,numero:n||null};
+    if(sic!==undefined)cambio.sicurezza=sic;
     const {data,error}=await sb.from("gest_computo_capitoli")
-      .update({titolo:t,numero:n||null}).eq("id",id).eq("user_id",sbUid).select("id");
+      .update(cambio).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Capitolo non salvato: nessuna riga modificata. Riprova.");return;}
     compCapEdit=null;
@@ -1931,8 +1972,12 @@
     const t=String(($("#cc-tit")&&$("#cc-tit").value)||"").trim();
     if(!t){toast("Il capitolo ha bisogno di un titolo");return;}
     const ord=compCapCache.reduce((m,c)=>Math.max(m,+c.ordine||0),0)+1;
+    const sic=!!($("#cc-sic")&&$("#cc-sic").checked);
+    /* ⚠️ un capitolo di sicurezza si numera «S», non col numero della fila:
+       nei computi di gara la sicurezza non e' il capitolo 4, e' la Parte S */
     const {error}=await sb.from("gest_computo_capitoli").insert({
-      user_id:sbUid, computo_id:compVociCompId, ordine:ord, numero:String(ord), titolo:t});
+      user_id:sbUid, computo_id:compVociCompId, ordine:ord,
+      numero:(sic?"S":String(ord)), titolo:t, sicurezza:sic});
     if(error){toast("Errore: "+error.message);return;}
     compCapNuovo=false;
     await renderCompVoci(compVociCompId);
@@ -2034,9 +2079,19 @@
         ? '<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
           +'<div class="row2">'
           +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano"'+_noAuto()+' value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="35"></div>'
-          +  '<div class="field"><label>Oneri della sicurezza (€)</label><input type="text" inputmode="decimal" id="cv-sic"'+_noAuto()+' value="'+(v.oneri_sicurezza!=null?String(v.oneri_sicurezza).replace(".",","):"")+'" placeholder="0" data-euro></div>'
+          /* ⚠️ 6 set 2026 — LA VECCHIA CASELLA DELLA SICUREZZA SI VEDE SOLO SE
+             E' GIA' PIENA. Non si capiva se quel numero fosse al metro quadro o
+             in tutto (il conto lo prendeva in tutto), e soprattutto non e' li'
+             che va: i costi della sicurezza sono un CAPITOLO a parte, con le sue
+             voci della Parte S. Toglierla del tutto pero' farebbe sparire una
+             cifra dai computi gia' scritti senza dirlo a nessuno: quindi resta,
+             ma solo dove c'e' gia' un valore, e la scritta adesso dice in tutto. */
+          +  ((v.oneri_sicurezza!=null&&+v.oneri_sicurezza!==0)
+              ? '<div class="field"><label>Oneri della sicurezza (€, in tutto)</label><input type="text" inputmode="decimal" id="cv-sic"'+_noAuto()+' value="'+String(v.oneri_sicurezza).replace(".",",")+'" placeholder="0" data-euro>'
+                +'<div class="sh-nota" style="margin-top:6px">Modo vecchio. Svuota la casella e mettili in un <b>capitolo dei costi della sicurezza</b>: li' + "'" + ' li conti a quantita\u0300 \u00d7 prezzo come tutte le altre voci.</div></div>'
+              : '')
           +'</div>'
-          +'<div class="sh-nota">Sono le due cose che nelle gare vanno dichiarate. Gli oneri della sicurezza non sono soggetti a ribasso.</div>'
+          +'<div class="sh-nota">Il costo del personale nelle gare va dichiarato. I <b>costi della sicurezza</b> invece si mettono in un capitolo a parte, con la spunta: non si ribassano.</div>'
           +'</div>'
         : '')
 
