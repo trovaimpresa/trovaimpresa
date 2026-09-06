@@ -5,7 +5,7 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modifica Profilo - TrovaImpresa</title>
+  <title>Completa il tuo profilo - TrovaImpresa</title>
   <meta name="robots" content="noindex, nofollow">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -150,6 +150,26 @@
     .btn-cert.rosso { color: #b42318; border-color: #f0c9c4; }
     .cert-aggiungi { background: #fafbfd; border: 1px solid #e2e7ee; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
     .cert-vuoto { text-align: center; padding: 22px; color: #5f6b7a; font-size: 15.5px; }
+
+    /* ===== 6 settembre 2026 — SI APRE DA LEGGERE, NON DA SCRIVERE =====
+       Alessio: «mettiamo tutto a destra modifica cosi' si puo' avviare la
+       modifica». La pagina nasce con le caselle bloccate: si legge quello
+       che c'e' scritto senza rischiare di cancellare un dato per sbaglio.
+       Ogni titoletto ha a destra il tasto «Modifica»: sblocca SOLO i campi
+       che stanno sotto quel titolo, fino al titolo successivo. */
+    .campo-bloccato {
+      background: #f4f6f9 !important; border-color: #e6eaf0 !important;
+      color: #3f4652 !important; cursor: default;
+    }
+    .card-header { display: flex; align-items: center; gap: 10px; }
+    .btn-modifica {
+      margin-left: auto; padding: 7px 15px; border: 1.5px solid #cfe0ff;
+      background: #eaf1ff; color: #0052cc; border-radius: 9px;
+      font-family: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-modifica:hover { background: #dbe8ff; }
+    .btn-modifica.aperto { background: #e7f4ed; border-color: #bfe0cd; color: #14764a; cursor: default; }
 
     /* ===== 6 settembre 2026 — LA PAGINA SI COMPATTA =====
        Ogni blocco (Specializzazioni, Zone di lavoro, Indirizzo...) era una
@@ -349,7 +369,7 @@
 
         <div class="profilo-card-unica">
 
-        <div class="form-title">✏️ Modifica profilo</div>
+        <div class="form-title">✏️ Completa il tuo profilo</div>
 
         <!-- Card 1: Dati di contatto -->
         <div class="form-card">
@@ -1304,7 +1324,75 @@
       document.getElementById('form-wrapper').style.display = 'block';
       popolaCampi(data);
       mostraCertificazioni(data);
+      bloccaTuttiICampi();
+      metti_i_tasti_modifica();
     });
+
+    /* ===== LE CASELLE NASCONO BLOCCATE =====
+       Si tocca solo quello che si decide di toccare. I campi restano gli
+       stessi, con gli stessi nomi: cambia solo se si possono scrivere o no,
+       quindi il salvataggio non se ne accorge nemmeno.
+       Le certificazioni restano sempre aperte: hanno un salvataggio loro. */
+    function campiDaBloccare() {
+      const dentro = document.querySelector('.profilo-card-unica');
+      if (!dentro) return [];
+      return Array.prototype.filter.call(
+        dentro.querySelectorAll('input, select, textarea'),
+        function (el) { return !el.closest('#card-certificazioni'); }
+      );
+    }
+
+    function bloccaCampo(el, bloccato) {
+      /* l'email era gia' bloccata prima di questo lavoro: resta com'era */
+      if (el.disabled && el.id === 'f-email') return;
+      if (el.type === 'hidden') return;
+      if (el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio' || el.type === 'file') {
+        el.disabled = bloccato;
+      } else {
+        el.readOnly = bloccato;
+      }
+      el.classList.toggle('campo-bloccato', bloccato);
+    }
+
+    function bloccaTuttiICampi() {
+      campiDaBloccare().forEach(function (el) { bloccaCampo(el, true); });
+    }
+
+    /* Il tasto sblocca i campi che stanno DOPO il suo titolo e PRIMA del
+       titolo successivo: e' esattamente il gruppo che si vede a schermo. */
+    function metti_i_tasti_modifica() {
+      const dentro = document.querySelector('.profilo-card-unica');
+      if (!dentro) return;
+      const titoli = dentro.querySelectorAll('.card-header');
+      titoli.forEach(function (h) {
+        if (h.closest('#card-certificazioni')) return;
+        if (h.querySelector('.btn-modifica')) return;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn-modifica';
+        b.textContent = '✏️ Modifica';
+        b.onclick = function () { sbloccaGruppo(h, b); };
+        h.appendChild(b);
+      });
+    }
+
+    function sbloccaGruppo(titolo, bottone) {
+      const dentro = document.querySelector('.profilo-card-unica');
+      const tutti = dentro.querySelectorAll('.card-header, input, select, textarea');
+      let dentroIlGruppo = false;
+      Array.prototype.forEach.call(tutti, function (el) {
+        if (el.classList && el.classList.contains('card-header')) {
+          dentroIlGruppo = (el === titolo);
+          return;
+        }
+        if (!dentroIlGruppo) return;
+        if (el.closest('#card-certificazioni')) return;
+        bloccaCampo(el, false);
+      });
+      bottone.textContent = '✅ Puoi scrivere';
+      bottone.classList.add('aperto');
+      bottone.disabled = true;
+    }
 
     /* ===== CERTIFICAZIONI (arrivate dal pannello il 6 settembre 2026) =====
        Il negozio non le ha mai avute: per lui la scheda resta nascosta. */
