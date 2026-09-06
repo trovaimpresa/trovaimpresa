@@ -7,7 +7,7 @@
 // - Se uno spazio e' stato riempito da un annuncio pagato, non lo tocca.
 // - Le locandine sono FERME: ognuna sta sempre al suo posto, non ruotano.
 // - Tutte allineate sulla stessa colonna, a 20 px dal bordo dello schermo.
-// - Le due in alto sono grandi il doppio delle altre.
+// - Si scende a scalare: ogni fascia e' l'85% di quella sopra.
 
 (function () {
   'use strict';
@@ -15,7 +15,7 @@
   var BASE  = '/img/locandine/loc-';
   var BORDO = 20;                 // distanza dal bordo dello schermo
   var LARGA = 600;                // larghezza voluta per le due in alto
-  var PICCOLA = 300;              // larghezza voluta per le altre
+  var SCALINO = 0.85;             // ogni fascia e' l'85% di quella sopra
   var MINIMA = 170;               // sotto questa non si mostra: coprirebbe il testo
   var TELEFONO = '(max-width:1100px)';
 
@@ -25,10 +25,16 @@
     { spazio: 'hero-dx', file: '05-diretto', link: '/cerca-imprese' }
   ];
   var IN_COLONNA = [
-    { sez: '#categorie',  lato: 'sx', file: '02-gestionale', link: '/software-gestionale-imprese-edili' },
-    { sez: '#categorie',  lato: 'dx', file: '06-guide',      link: '/costi-ristrutturazione' },
-    { sez: '#registrati', lato: 'sx', file: '07-bandi',      link: '/bandi' },
-    { sez: '#registrati', lato: 'dx', file: '08-subappalti', link: '/subappalto' }
+    { sez: '#categorie',        lato: 'sx', passo: 1, file: '02-gestionale',  link: '/software-gestionale-imprese-edili' },
+    { sez: '#categorie',        lato: 'dx', passo: 1, file: '06-guide',       link: '/costi-ristrutturazione' },
+    { sez: '#registrati',       lato: 'sx', passo: 2, file: '07-bandi',       link: '/bandi' },
+    { sez: '#registrati',       lato: 'dx', passo: 2, file: '08-subappalti',  link: '/subappalto' },
+    { sez: '.guide-costi-home', lato: 'sx', passo: 3, file: '03-computo',     link: '/software-gestionale-imprese-edili' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '13-blog',        link: '/blog' },
+    { sez: '.why-section',      lato: 'sx', passo: 4, file: '09-offerte',     link: '/offerte-lavoro' },
+    { sez: '.why-section',      lato: 'dx', passo: 4, file: '14-recensioni',  link: '/cerca-imprese' },
+    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, file: '11-citta',       link: '/citta' },
+    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, file: '10-candidature', link: '/candidature-lavoro' }
   ];
 
   // --- solo home nazionale ------------------------------------------------
@@ -54,7 +60,7 @@
     creaColonna();
     sistema(alto);
     window.addEventListener('resize', function () { sistema(alto); }, { passive: true });
-      }
+  }
 
   // uno spazio e' libero se non ha dentro un annuncio pagato
   function libero(a) {
@@ -93,6 +99,7 @@
       a.className = 'ti-loc-col';
       a.setAttribute('data-sez', v.sez);
       a.setAttribute('data-lato', v.lato);
+      a.setAttribute('data-passo', v.passo);
       a.setAttribute('href', v.link);
       a.setAttribute('rel', 'noopener');
       a.setAttribute('data-locandina', v.file);
@@ -112,16 +119,31 @@
     });
   }
 
-  // quanto spazio c'e' davvero a sinistra e a destra di un elemento
+  function larghezzaSchermo() {
+    return document.documentElement.clientWidth || window.innerWidth;
+  }
+
+  // quanto spazio c'e' davvero ai lati: si guarda il contenuto piu' largo
+  // dentro la sezione, non la scatola esterna (certe sezioni sono larghe
+  // quanto tutta la pagina ma il testo dentro sta al centro)
   function spazioLibero(el) {
-    var r = el.getBoundingClientRect();
-    return Math.min(r.left, window.innerWidth - r.right) - BORDO * 2;
+    var largo = el.getBoundingClientRect().width;
+    var figli = el.children;
+    if (figli.length) {
+      largo = 0;
+      for (var i = 0; i < figli.length; i++) {
+        var w = figli[i].getBoundingClientRect().width;
+        if (w > largo) largo = w;
+      }
+      if (!largo) largo = el.getBoundingClientRect().width;
+    }
+    return (larghezzaSchermo() - largo) / 2 - BORDO * 2;
   }
 
   function sistema(alto) {
     var telefono = window.matchMedia(TELEFONO).matches;
 
-    // le due in alto: grandi il doppio delle altre, allineate al bordo
+    // le due in alto: le piu' grandi, allineate al bordo
     var hero = document.querySelector('.hero-inner');
     var largaOk = hero ? Math.min(LARGA, Math.round(spazioLibero(hero))) : 0;
     alto.forEach(function (o) {
@@ -133,15 +155,29 @@
       o.a.style.setProperty(o.lato === 'sx' ? 'left' : 'right', BORDO + 'px', 'important');
     });
 
-    // la colonna: tutte uguali, stessa distanza dal bordo, in vista solo
-    // mentre la loro sezione e' sullo schermo
+    // la colonna: ogni fascia piu' piccola di quella sopra (scala dolce),
+    // e comunque mai piu' larga dello spazio libero di quella zona
     var l = document.querySelectorAll('.ti-loc-col');
+    var precedente = largaOk;
+    var perPasso = {};
+    for (var p = 1; p <= 5; p++) {
+      var spazio = 99999;
+      for (var k = 0; k < l.length; k++) {
+        if (parseInt(l[k].getAttribute('data-passo'), 10) !== p) continue;
+        var sz = document.querySelector(l[k].getAttribute('data-sez'));
+        if (sz) spazio = Math.min(spazio, Math.round(spazioLibero(sz)));
+      }
+      if (spazio === 99999) { perPasso[p] = 0; continue; }
+      perPasso[p] = Math.max(0, Math.min(spazio, Math.round(precedente * SCALINO)));
+      if (perPasso[p] >= MINIMA) precedente = perPasso[p];
+    }
+
     for (var i = 0; i < l.length; i++) {
       var a = l[i];
       var sez = document.querySelector(a.getAttribute('data-sez'));
-      if (!sez || telefono) { a.style.display = 'none'; continue; }
-      var L = Math.min(PICCOLA, Math.round(spazioLibero(sez)));
-      if (L < MINIMA) { a.style.display = 'none'; continue; }
+      var passo = parseInt(a.getAttribute('data-passo'), 10) || 1;
+      var L = perPasso[passo] || 0;
+      if (!sez || telefono || L < MINIMA) { a.style.display = 'none'; continue; }
       var H = Math.round(L * 260 / 400);
       var r = sez.getBoundingClientRect();
       var centro = r.top + window.scrollY + r.height / 2;   // ferma nella pagina
