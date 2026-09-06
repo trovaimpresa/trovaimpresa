@@ -4187,7 +4187,7 @@
         /* ⛔ 24 agosto 2026 — il noleggio e' uscito dal reparto, ma un mezzo
            taggato a QUESTO reparto e' un noleggio interno vero: conta come
            spesa qui, come se l'avessi preso da un fornitore esterno. */
-        sb.from("nol_noleggi").select("importo,data_uscita").eq("user_id",sbUid).eq("mestiere_id",mid)
+        sb.from("nol_noleggi").select("importo,data_uscita,fase").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
@@ -4308,8 +4308,15 @@
     const speseRif  = RIFR.filter(r=>thisMonth(r.data)).reduce((s,r)=>s+(+r.importo||0),0);
     const speseForn = FFO.filter(f=>thisMonth(f.data)).reduce((s,f)=>s+(+f.importo||0),0);
     /* ⛔ 24 agosto 2026 — noleggio interno di questo reparto: la data che conta
-       e' l'uscita del mezzo, come per i lavori */
-    const speseNol  = NOLR.filter(x=>thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
+       e' l'uscita del mezzo, come per i lavori.
+       ⛔ 6 settembre 2026 — UN MEZZO PRENOTATO NON E' UNA SPESA. Prima il conto
+       prendeva ogni noleggio con l'uscita in questo mese, anche quelli in fase
+       «prenotato», cioe' mezzi promessi ma ancora fermi in piazzale: l'utile
+       del mese risultava piu' basso del vero per soldi mai usciti. Adesso
+       contano solo i mezzi usciti davvero («fuori») e quelli gia' rientrati.
+       Le fasi sono tre: prenotato · fuori · rientrato. */
+    const nolReale  = x => (x.fase || 'fuori') !== 'prenotato';
+    const speseNol  = NOLR.filter(x=>nolReale(x) && thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
     const speseMese = speseLav+speseCarte+speseRif+speseForn+speseNol;
     const utile     = incMese-speseMese;
     /* la scheda Report compare quando c'e' stato ALMENO UN movimento di soldi,
@@ -4318,7 +4325,7 @@
        un'impresa che ha incassato a maggio e a giugno niente deve continuare a
        vedere la sua scheda Report. */
     const _ciSonoSoldi = FT.some(f=>f.stato==="pagata") || SP.length>0 || CM.length>0
-                       || RIFR.length>0 || FFO.length>0 || NOLR.length>0;
+                       || RIFR.length>0 || FFO.length>0 || NOLR.some(nolReale);
 
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
        (ora è una riga dentro "Da sistemare oggi", più in basso) */
@@ -15260,9 +15267,12 @@ ${vecchi?`
        (l'uscita del mezzo), cosi' i due numeri sono uno solo. */
     let NOL=[];
     try{
-      const {data:nl}=await sb.from("nol_noleggi").select("importo,data_uscita")
+      const {data:nl}=await sb.from("nol_noleggi").select("importo,data_uscita,fase")
         .eq("user_id",sbUid).eq("mestiere_id",mid);
-      NOL=nl||[];
+      /* 6 settembre 2026 — stessa regola del Riepilogo: un mezzo ancora
+         prenotato non e' una spesa. Se i due filtri si scollano, il Riepilogo
+         e il Report tornano a dire due utili diversi. */
+      NOL=(nl||[]).filter(n=>(n.fase||'fuori')!=='prenotato');
     }catch(e){ NOL=[]; }
     const nolIn=(chiave,lung)=>NOL.filter(n=>String(n.data_uscita||"").slice(0,lung)===chiave)
                                   .reduce((s,n)=>s+(+n.importo||0),0);
