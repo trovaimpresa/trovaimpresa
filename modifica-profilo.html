@@ -151,6 +151,15 @@
     .cert-aggiungi { background: #fafbfd; border: 1px solid #e2e7ee; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
     .cert-vuoto { text-align: center; padding: 22px; color: #5f6b7a; font-size: 15.5px; }
 
+    /* le spunte di «Fiducia e disponibilita'»: grandi, si premono col dito */
+    .spunte-fiducia { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .spunta-f {
+      display: flex; align-items: center; gap: 11px;
+      border: 1.5px solid #e2e7ee; border-radius: 11px; padding: 13px 15px;
+      font-size: 16px; font-weight: 700; color: #2b323d; cursor: pointer;
+    }
+    .spunta-f input { width: 22px; height: 22px; accent-color: #0066ff; flex: 0 0 auto; }
+
     /* ===== 6 settembre 2026 — SI APRE DA LEGGERE, NON DA SCRIVERE =====
        Alessio: «mettiamo tutto a destra modifica cosi' si puo' avviare la
        modifica». La pagina nasce con le caselle bloccate: si legge quello
@@ -568,44 +577,6 @@
                 <option>Altro</option>
               </select>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Terzo mestiere</label>
-              <select id="f-mestiere3-artigiano">
-                <option value="">— Seleziona —</option>
-                <option>Edilizia / Muratura</option>
-                <option>Ristrutturazione completa</option>
-                <option>Cartongesso</option>
-                <option>Pittura e tinteggiatura</option>
-                <option>Pavimenti e piastrelle</option>
-                <option>Falegnameria</option>
-                <option>Serramenti / Infissi</option>
-                <option>Idraulica</option>
-                <option>Impianti elettrici</option>
-                <option>Climatizzazione / Caldaie</option>
-                <option>Fotovoltaico / Pannelli solari</option>
-                <option>Antennista / Allarmi</option>
-                <option>Coperture / Tetti</option>
-                <option>Cappotti termici / Isolamento</option>
-                <option>Fabbro / Cancelli / Recinzioni</option>
-                <option>Marmi e pietre</option>
-                <option>Vetraio</option>
-                <option>Tende da sole / Zanzariere</option>
-                <option>Giardinaggio / Esterni</option>
-                <option>Spurghi / Spazzacamino</option>
-                <option>Pulizie / Disinfestazioni</option>
-                <option>Sgomberi / Traslochi</option>
-                <option>Stufe e camini</option>
-                <option>Frigorista / Celle frigorifere</option>
-                <option>Carpentiere</option>
-                <option>Impermeabilizzazione</option>
-                <option>Ponteggi</option>
-                <option>Demolizione</option>
-                <option>Movimento terra</option>
-                <option>Asfalti</option>
-                <option>Intonacatore</option>
-                <option>Altro</option>
-              </select>
-            </div>
           </div>
           <div class="form-card fc-arancio">
             
@@ -818,13 +789,6 @@
             </div>
           </div>
           <div class="form-card fc-blu">
-            <div class="card-header blu">🕐 Orari di apertura</div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Orari di apertura</label>
-              <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
-            </div>
-          </div>
-          <div class="form-card fc-blu">
             <div class="card-header blu">📞 Contatti</div>
             <div class="form-row" style="margin-bottom:0;">
               <div class="form-group" style="margin-bottom:0;">
@@ -1003,37 +967,6 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Terza professione</label>
-              <select id="f-mestiere3-professionista">
-                <option value="">— Seleziona —</option>
-                <option value="architetto">Architetto</option>
-                <option value="ingegnere_civile">Ingegnere civile</option>
-                <option value="ingegnere_strutturale">Ingegnere strutturale</option>
-                <option value="ingegnere_impiantistico">Ingegnere impiantistico</option>
-                <option value="geometra">Geometra</option>
-                <option value="perito_industriale">Perito industriale</option>
-                <option value="topografo">Topografo</option>
-                <option value="geologo">Geologo</option>
-                <option value="interior_designer">Interior designer / Progettista d'interni</option>
-                <option value="arredatore">Arredatore e fornitore d'arredi</option>
-                <option value="home_stager">Home stager</option>
-                <option value="progettista_3d">Progettista 3D e rendering</option>
-                <option value="progettista_verde">Progettista di giardini e verde</option>
-                <option value="consulente_energetico">Consulente energetico</option>
-                <option value="consulente_sicurezza">Consulente sicurezza</option>
-                <option value="tecnico_acustico">Tecnico acustico</option>
-                <option value="tecnico_antincendio">Tecnico antincendio</option>
-                <option value="restauratore">Restauratore</option>
-                <option value="consulente_pratiche">Consulente pratiche edilizie e bonus</option>
-                <option value="termotecnico">Termotecnico</option>
-                <option value="direttore_lavori">Direttore lavori</option>
-                <option value="collaudatore_strutture">Collaudatore strutture</option>
-                <option value="project_manager">Project manager</option>
-                <option value="amministratore_condominio">Amministratore di condominio</option>
-                <option value="altro">Altro</option>
-              </select>
-            </div>
-            <div class="form-group">
               <label>Nome studio / attività</label>
               <input type="text" id="f-nome_attivita" placeholder="Es. Studio Rossi Ingegneria">
             </div>
@@ -1165,6 +1098,61 @@
              spiegazione. Restavano li' a far scorrere la pagina per niente.
              Se un giorno il video si potra' caricare davvero, si rimette il
              riquadro INSIEME al codice che lo carica, non prima. -->
+
+        <!-- ===== 6 settembre 2026 — LE PRESTAZIONI =====
+             La barra del pannello diceva «profilo all'84%, manca: Prestazioni»
+             ma da nessuna parte si potevano scrivere: il sito chiedeva una
+             cosa che non si poteva fare. Adesso si scrivono qui, una per riga,
+             e finiscono nella colonna `prestazioni` (elenco di testi). -->
+        <div class="form-card" id="card-prestazioni">
+          <div class="card-header">🧰 Cosa sai fare</div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Le tue prestazioni — una per riga</label>
+            <textarea id="f-prestazioni" placeholder="Rifacimento bagno chiavi in mano&#10;Massetto e sottofondi&#10;Cappotto termico&#10;Piccole riparazioni idrauliche"></textarea>
+            <div style="font-size:14.5px;color:#5f6b7a;margin-top:6px">
+              Scrivi i lavori che fai davvero, con le parole che userebbe un cliente.
+              Sono quelle che compaiono sulla tua scheda pubblica.
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 6 settembre 2026 — FIDUCIA E DISPONIBILITA' =====
+             Erano tutte colonne che il database aveva gia' e che nessuno
+             poteva riempire: orari, assicurazione RC, e tre preferenze di
+             contatto su cinque. Per chi deve far entrare qualcuno in casa,
+             l'assicurazione conta piu' di dieci righe di descrizione. -->
+        <div class="form-card" id="card-fiducia">
+          <div class="card-header">🛡️ Fiducia e disponibilità</div>
+          <div class="form-group">
+            <label>Quando sei reperibile</label>
+            <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
+          </div>
+          <div class="form-group">
+            <label>Assicurazione RC — compagnia</label>
+            <input type="text" id="f-rc_compagnia" placeholder="Es. Generali, UnipolSai...">
+          </div>
+          <div class="form-group">
+            <label>Assicurazione RC — scadenza</label>
+            <input type="date" id="f-rc_scadenza">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Cosa offri</label>
+            <div class="spunte-fiducia">
+              <label class="spunta-f"><input type="checkbox" id="sopralluogo_gratuito"> Sopralluogo gratuito</label>
+              <label class="spunta-f"><input type="checkbox" id="consulenza_online"> Consulenza online</label>
+              <label class="spunta-f"><input type="checkbox" id="aperto_sabato"> Aperto il sabato</label>
+            </div>
+          </div>
+          <!-- solo le imprese: contano per gli appalti pubblici -->
+          <div class="form-group" id="riga-certificazioni-impresa" style="grid-column:1/-1;display:none">
+            <label>Certificazioni dell'impresa</label>
+            <div class="spunte-fiducia">
+              <label class="spunta-f"><input type="checkbox" id="soa_certificata"> Attestazione SOA</label>
+              <label class="spunta-f"><input type="checkbox" id="iso_9001"> ISO 9001</label>
+              <label class="spunta-f"><input type="checkbox" id="white_list_antimafia"> White list antimafia</label>
+            </div>
+          </div>
+        </div>
 
         <!-- ===== 6 settembre 2026 — LE CERTIFICAZIONI ARRIVANO QUI =====
              Stavano nel pannello, in una pagina «Il mio profilo» che diceva
@@ -1348,10 +1336,43 @@
       impresaData = data;
       document.getElementById('form-wrapper').style.display = 'block';
       popolaCampi(data);
+      riempiCampiNuovi(data);
       mostraCertificazioni(data);
       bloccaTuttiICampi();
       metti_i_tasti_modifica();
     });
+
+    /* ===== I CAMPI AGGIUNTI IL 6 SETTEMBRE 2026 =====
+       Orari, assicurazione RC, prestazioni e le spunte: erano colonne che il
+       database aveva gia' e che nessuna pagina riempiva. */
+    function riempiCampiNuovi(d) {
+      const v = (id, val) => { const e = document.getElementById(id); if (e) e.value = val == null ? '' : val; };
+      const c = (id, val) => { const e = document.getElementById(id); if (e) e.checked = !!val; };
+      v('f-orari', d.orari);
+      v('f-rc_compagnia', d.rc_compagnia);
+      v('f-rc_scadenza', d.rc_scadenza ? String(d.rc_scadenza).slice(0, 10) : '');
+      v('f-prestazioni', Array.isArray(d.prestazioni) ? d.prestazioni.join('\n') : (d.prestazioni || ''));
+      c('sopralluogo_gratuito', d.sopralluogo_gratuito);
+      c('consulenza_online', d.consulenza_online);
+      c('aperto_sabato', d.aperto_sabato);
+      c('soa_certificata', d.soa_certificata);
+      c('iso_9001', d.iso_9001);
+      c('white_list_antimafia', d.white_list_antimafia);
+
+      /* SOA, ISO e white list valgono per le imprese: agli altri non servono */
+      const rigaImpresa = document.getElementById('riga-certificazioni-impresa');
+      if (rigaImpresa) rigaImpresa.style.display = (getRealTipo(d) === 'impresa') ? '' : 'none';
+
+      /* Il numero di iscrizione all'albo e' roba da professionista: a un
+         muratore stava in mezzo ai piedi senza servire a niente. Il campo
+         resta nella pagina (il salvataggio lo legge) ma si vede solo a chi
+         serve davvero. */
+      const albo = document.getElementById('f-numero_albo');
+      if (albo && albo.closest('.form-group')) {
+        albo.closest('.form-group').style.display =
+          (getRealTipo(d) === 'professionista') ? '' : 'none';
+      }
+    }
 
     /* ===== LE CASELLE NASCONO BLOCCATE =====
        Si tocca solo quello che si decide di toccare. I campi restano gli
@@ -1666,7 +1687,6 @@
         document.getElementById('f-anno_fondazione-artigiano').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         setSelectValue('f-mestiere2-artigiano', Array.isArray(d.mestieri) ? d.mestieri[1] : '');
-        setSelectValue('f-mestiere3-artigiano', Array.isArray(d.mestieri) ? d.mestieri[2] : '');
         document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
         document.getElementById('f-zone-artigiano').value = d.zone || '';
         document.getElementById('f-indirizzo-artigiano').value = d.indirizzo || '';
@@ -1698,7 +1718,7 @@
         document.getElementById('f-indirizzo-negozio').value = d.indirizzo || '';
         document.getElementById('f-prodotti').value = d.prodotti || '';
         document.getElementById('f-marchi').value = d.marchi || '';
-        document.getElementById('f-orari').value = d.orari || '';
+
         document.getElementById('f-whatsapp-negozio').value = d.whatsapp || '';
         document.getElementById('f-dipendenti-negozio').value = d.dipendenti || '';
         setSelectValue('f-tipo_negozio-negozio', d.tipo_negozio);
@@ -1715,7 +1735,6 @@
         document.getElementById('f-nome-professionista').value = d.nome || '';
         setSelectValue('f-mestiere-professionista', d.mestieri?.[0] || d.mestiere);
         setSelectValue('f-mestiere2-professionista', d.mestieri?.[1]);
-        setSelectValue('f-mestiere3-professionista', d.mestieri?.[2]);
         document.getElementById('f-nome_attivita').value = d.nome_attivita || '';
         document.getElementById('f-albo').value = d.numero_albo || '';   /* era d.albo: colonna inesistente, la casella usciva sempre vuota */
         document.getElementById('f-partita_iva-professionista').value = d.partita_iva || '';
@@ -1796,6 +1815,16 @@
     }
 
     // Salvataggio
+    /* 6 settembre 2026 — «terzo mestiere» tolto dalla pagina: fra mestiere
+       principale, secondario e la casella «altri mestieri» erano quattro modi
+       per dire la stessa cosa. Questa scorciatoia legge un campo se c'e' e
+       restituisce vuoto se non c'e' piu': cosi' il salvataggio non si spacca
+       ne' oggi ne' se un domani se ne toglie un altro. */
+    function valoreSeCe(id) {
+      const e = document.getElementById(id);
+      return e ? e.value : '';
+    }
+
     async function salvaProfilo() {
       // Validazione descrizione (limite 200 caratteri per piano Free)
       const _pianoSave = (impresaData.piano || 'free').toLowerCase();
@@ -1808,7 +1837,7 @@
       if (tipoCategoria === 'artigiano') {
         const _m1 = document.getElementById('f-mestiere-artigiano').value;
         const _m2 = document.getElementById('f-mestiere2-artigiano').value;
-        const _m3 = document.getElementById('f-mestiere3-artigiano').value;
+        const _m3 = valoreSeCe('f-mestiere3-artigiano');
         if (!_m1) { alert('Seleziona almeno il mestiere principale.'); return; }
         if ((_m2 && _m2 === _m1) || (_m3 && (_m3 === _m1 || _m3 === _m2))) {
           alert('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.');
@@ -1819,7 +1848,7 @@
       if (tipoCategoria === 'professionista') {
         const _m1 = document.getElementById('f-mestiere-professionista').value;
         const _m2 = document.getElementById('f-mestiere2-professionista').value;
-        const _m3 = document.getElementById('f-mestiere3-professionista').value;
+        const _m3 = valoreSeCe('f-mestiere3-professionista');
         if (!_m1) { alert('Seleziona almeno la professione principale.'); return; }
         if ((_m2 && _m2 === _m1) || (_m3 && (_m3 === _m1 || _m3 === _m2))) {
           alert('Professione secondaria e terza non possono coincidere con la principale né tra loro.');
@@ -1843,7 +1872,21 @@
           numero_albo: document.getElementById('f-numero_albo').value.trim(),
           descrizione: document.getElementById('f-descrizione').value.trim(),
           lat: parseFloat(document.getElementById('f-lat').value) || null,
-          lng: parseFloat(document.getElementById('f-lng').value) || null
+          lng: parseFloat(document.getElementById('f-lng').value) || null,
+
+          /* --- aggiunti il 6 settembre 2026, uguali per tutte le categorie --- */
+          orari: (document.getElementById('f-orari').value || '').trim() || null,
+          rc_compagnia: (document.getElementById('f-rc_compagnia').value || '').trim() || null,
+          rc_scadenza: document.getElementById('f-rc_scadenza').value || null,
+          /* una prestazione per riga: le righe vuote si buttano */
+          prestazioni: (document.getElementById('f-prestazioni').value || '')
+                         .split('\n').map(function(x){ return x.trim(); }).filter(Boolean),
+          sopralluogo_gratuito: document.getElementById('sopralluogo_gratuito').checked,
+          consulenza_online: document.getElementById('consulenza_online').checked,
+          aperto_sabato: document.getElementById('aperto_sabato').checked,
+          soa_certificata: document.getElementById('soa_certificata').checked,
+          iso_9001: document.getElementById('iso_9001').checked,
+          white_list_antimafia: document.getElementById('white_list_antimafia').checked
         };
 
         // Campi specifici per tipo
@@ -1856,7 +1899,7 @@
             mestieri: [...new Set([
               document.getElementById('f-mestiere-artigiano').value,
               document.getElementById('f-mestiere2-artigiano').value,
-              document.getElementById('f-mestiere3-artigiano').value
+              valoreSeCe('f-mestiere3-artigiano')
             ].filter(Boolean))],
             specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
             zone: document.getElementById('f-zone-artigiano').value.trim(),
@@ -1920,7 +1963,7 @@
             mestieri: [...new Set([
               document.getElementById('f-mestiere-professionista').value,
               document.getElementById('f-mestiere2-professionista').value,
-              document.getElementById('f-mestiere3-professionista').value
+              valoreSeCe('f-mestiere3-professionista')
             ].filter(Boolean))],
             nome_attivita: document.getElementById('f-nome_attivita').value.trim(),
             /* ⛔ 4 settembre 2026 — QUI SI ROMPEVA TUTTO IL SALVATAGGIO.
