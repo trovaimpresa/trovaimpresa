@@ -5,7 +5,19 @@ exports.handler = async function(event) {
 
   let impresa, email, telefono, formato, durata, citta, totale, annuncio_id;
   try {
-    ({ impresa, email, telefono, formato, durata, citta, totale, annuncio_id } = JSON.parse(event.body));
+    const d = JSON.parse(event.body);
+    impresa  = d.impresa;
+    email    = d.email;
+    telefono = d.telefono;
+    citta    = d.citta;
+    annuncio_id = d.annuncio_id || d.annuncioId;
+    // La pagina pubblicita.html manda spazio/periodo/prezzo: qui si chiamavano
+    // formato/durata/totale, e cosi' l'email arrivava con i campi vuoti e €0
+    // (difetto trovato il 6 set 2026). Ora si accettano tutti e due i nomi.
+    formato = d.formato || d.spazio || '';
+    durata  = d.durata  || d.periodo || '';
+    totale  = (d.totale !== undefined && d.totale !== null && d.totale !== '')
+              ? d.totale : (d.prezzo !== undefined ? d.prezzo : 0);
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
