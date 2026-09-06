@@ -1078,6 +1078,15 @@
   #sec-messaggi .msg-input-row input { flex:1; padding:14px 16px; border:1px solid var(--border); border-radius:8px; font-size:16px; font-family:inherit; }
   #sec-messaggi .msg-input-row button { padding:14px 24px; border:none; border-radius:8px; background:#7c3aed; color:white; font-weight:700; cursor:pointer; font-size:16px; }
   #sec-messaggi .msg-input-row button:hover { background:#5b21b6; }
+
+  /* 6 set 2026 - le tre linguette di «Parla con TrovaImpresa» */
+  .sup-ling { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 16px; }
+  .sup-ling button { font-family:inherit; font-size:15px; font-weight:700;
+    padding:11px 18px; border-radius:10px; border:2px solid #0066ff;
+    background:#fff; color:#0066ff; cursor:pointer; }
+  .sup-ling button.on { background:#0066ff; color:#fff; }
+  .sup-pezzo { display:none; }
+  .sup-pezzo.on { display:block; }
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1494,10 +1503,6 @@
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
           <div class="dash-quick-sub">Quante persone ti trovano</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('risoluzione', this)">
-          <div class="dash-quick-icon">🛠️</div>
-          <div class="dash-quick-label">Risoluzione problemi</div>
         </div>
         <div class="dash-quick-card" data-card-id="pubblicita" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='pubblicita.html'">
           <div class="dash-quick-icon">📢</div>
@@ -1931,36 +1936,10 @@
     </div>
 
     <!-- RISOLUZIONE PROBLEMI -->
-    <div class="section" id="sec-risoluzione">
-      <div class="topbar">
-        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
-          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          🛠️ Risoluzione problemi
-        </div>
-      </div>
-      <div class="profilo-card">
-        <div class="faq-list" id="faq-list"></div>
-        <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
-          <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
-          <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Chiedi all'assistente AI: risponde subito, di notte e nei festivi.</p>
-          <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
-          <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
-            style="margin-top:10px;padding:11px 18px;background:#0066ff;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
-            onmouseover="this.style.background='#0052cc'" onmouseout="this.style.background='#0066ff'">
-            ✨ Chiedi all'AI
-          </button>
-          <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#0a2a4d;"></div>
-        </div>
-        <div class="faq-cta-help">
-          <!-- ⛔ 22 agosto 2026 — segnalato da Alessio: questa striscia sembrava
-               un SECONDO modo di chiedere all'AI, perche' diceva quasi la stessa
-               frase del riquadro qui sopra («Non hai trovato la risposta?»).
-               Non e' la stessa cosa: sopra risponde una macchina, qui una
-               persona. Adesso lo dice. -->
-          <button onclick="apriModalSegnalazione();">✉️ Ti serve una persona? Scrivi all'assistenza</button>
-        </div>
-      </div>
-    </div>
+    <!-- «Risoluzione problemi» non e' piu' una sezione a se': il 6 settembre 2026
+         le sue due parti (le domande e l'assistente AI) sono entrate dentro
+         «Parla con TrovaImpresa», qui sotto, scelte con le tre linguette. -->
+
 
     <!-- CERTIFICAZIONI -->
 
@@ -2083,7 +2062,30 @@
           🎧 Parla con TrovaImpresa
         </div>
       </div>
-      <div class="profilo-card">
+            <div class="sup-ling">
+        <button type="button" data-sup="domande" class="on" onclick="mostraPezzoSupporto('domande', this)">Le domande di tutti</button>
+        <button type="button" data-sup="ai" onclick="mostraPezzoSupporto('ai', this)">&#10024; Chiedi all'AI</button>
+        <button type="button" data-sup="chat" onclick="mostraPezzoSupporto('chat', this)">Scrivi a noi</button>
+      </div>
+      <div class="profilo-card sup-pezzo on" id="sup-domande">
+        <div class="faq-list" id="faq-list"></div>
+      </div>
+
+      <div class="profilo-card sup-pezzo" id="sup-ai">
+<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
+          <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Chiedi all'assistente AI: risponde subito, di notte e nei festivi.</p>
+          <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
+          <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
+            style="margin-top:10px;padding:11px 18px;background:#0066ff;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
+            onmouseover="this.style.background='#0052cc'" onmouseout="this.style.background='#0066ff'">
+            ✨ Chiedi all'AI
+          </button>
+          <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#0a2a4d;"></div>
+        </div>
+      </div>
+
+      <div class="profilo-card sup-pezzo" id="sup-chat">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px">
           <p style="margin:0;color:#555;font-size:0.9rem">Scrivici per assistenza: ti rispondiamo qui.</p>
           <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap">📥 Svuota la mia schermata</button>
@@ -2805,12 +2807,11 @@ function showSection(id, el, fromPopstate) {
      Personalizza la colonna con la mappa sparisce e la sezione prende tutto lo schermo */
   document.body.classList.toggle('pers-aperta', id === 'personalizza');
   if (id === 'personalizza') apriModalPersonalizzaPannello();
-  if (id === 'risoluzione') apriModalRisoluzione();
   if (id === 'recensioni') caricaRecensioniSezione();
   if (id === 'preventivi') apriModalPreventivi();
   if (id === 'messaggi') caricaConversazioni();
   if (id === 'anteprima') caricaAnteprima();
-  if (id === 'supporto') caricaSupporto();
+  if (id === 'supporto') { caricaSupporto(); apriModalRisoluzione(); mostraPezzoSupporto('domande'); }
   if (!fromPopstate) history.pushState({ section: id }, '', '#' + id);
 }
 
@@ -4572,9 +4573,30 @@ const FAQS_LIST = [
   },
   {
     domanda: "Ho un problema non elencato qui",
-    risposta: "Qui sotto hai due strade. «Chiedi all'AI» risponde subito, anche di notte e nei festivi, ma sa solo quello che c'è scritto in queste domande. «Ti serve una persona? Scrivi all'assistenza» apre il modulo per segnalarci il problema: ti rispondiamo per email entro 24-48 ore. Se preferisci parlare a botta e risposta, usa la card «Parla subito con TrovaImpresa» del pannello."
+    risposta: "Qui in cima hai tre linguette. «Le domande di tutti» sono queste risposte già scritte. «Chiedi all'AI» risponde subito, anche di notte e nei festivi, ma sa solo quello che c'è scritto in queste domande. «Scrivi a noi» è la chat: ti rispondiamo noi, a botta e risposta, e puoi allegare una foto o un PDF."
   }
 ];
+
+/* 6 settembre 2026 - le tre linguette di «Parla con TrovaImpresa».
+   Prima erano due card separate nel pannello: «Risoluzione problemi» (le
+   domande + l'assistente AI) e «Parla subito con TrovaImpresa» (la chat).
+   Misurato prima di unirle: la chat l'avevano usata 3 imprese vere,
+   l'assistente AI 1 sola volta, e il modulo «Scrivi all'assistenza» MAI
+   nessuno. Adesso sono un posto solo, e si sceglie con un bottone. */
+function mostraPezzoSupporto(quale, el){
+  ['domande','ai','chat'].forEach(function(n){
+    var p = document.getElementById('sup-' + n);
+    if(p) p.classList.toggle('on', n === quale);
+  });
+  document.querySelectorAll('.sup-ling button').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-sup') === quale);
+  });
+  /* se non arriva il bottone (chiamata da codice) si accende quello giusto */
+  if(!el){
+    var b = document.querySelector('.sup-ling button[data-sup="' + quale + '"]');
+    if(b) b.classList.add('on');
+  }
+}
 
 function apriModalRisoluzione() {
   const lista = document.getElementById('faq-list');
@@ -4658,7 +4680,7 @@ async function chiediSupportoAI() {
   btn.style.cursor = 'not-allowed';
   out.textContent = 'Sto pensando…';
   const faqTesto = FAQS_LIST.map(f => `D: ${f.domanda}\nR: ${f.risposta}`).join('\n\n');
-  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare il pulsante «Ti serve una persona? Scrivi all'assistenza» qui sotto.\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
+  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare la linguetta «Scrivi a noi» qui sopra.\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
   try {
     const resp = await fetch('/.netlify/functions/ai-claude', {
       method: 'POST',
