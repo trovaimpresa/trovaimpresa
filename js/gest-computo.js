@@ -455,6 +455,15 @@
     $$("#co-tipo button").forEach(b=>b.addEventListener("click",qeMostra));
     const _qb=$("#co-qe-righe");
     if(_qb)_qb.addEventListener("input",qeAggiorna);
+    /* ⚠️ 6 set 2026 — IL RIBASSO DEVE RISVEGLIARE IL QUADRO ECONOMICO.
+       qeBaseA() legge #co-rib apposta per usare il numero appena scritto e non
+       quello salvato (vedi il commento sopra di lei), ma nessuno chiamava
+       qeAggiorna quando lo scrivi: il quadro restava sul totale SENZA ribasso.
+       Il ribasso compariva solo se toccavi per caso una riga di B, che l'altro
+       listener lo sente. Su una gara si stampava un quadro economico sbagliato
+       e niente lo diceva. Trovato provando dal vivo il 6 set 2026. */
+    const _rb=$("#co-rib");
+    if(_rb)_rb.addEventListener("input",qeAggiorna);
     qeAggiorna();
     const _ps=$("#co-prz-sel");
     if(_ps)_ps.onchange=function(){
@@ -1897,7 +1906,24 @@
     if(!data||!data.length){toast("Capitolo non salvato: nessuna riga modificata. Riprova.");return;}
     compCapEdit=null;
     await renderCompVoci(compVociCompId);
+    await cronoRiallinea();
     toast("Capitolo rinominato ✔");
+  }
+
+  /* ⚠️ 6 set 2026 — IL CRONOPROGRAMMA SI FA SUI CAPITOLI, ma la sua pagina
+     si disegnava una volta sola, all'apertura del computo. Aggiungevi un
+     capitolo nelle Lavorazioni, andavi al passo 6 e leggevi ancora «Questo
+     computo non ha ancora capitoli»: bisognava chiudere e riaprire il computo.
+     Adesso i tre punti che toccano i capitoli (aggiungi, rinomina, elimina)
+     lo riallineano.
+     ⚠️ Ma NON se ci sono giorni scritti e non ancora salvati: ridisegnare li
+     butterebbe via senza dire niente. cronoModifiche() e' la stessa rete che
+     protegge il PDF. */
+  async function cronoRiallinea(){
+    if(!compVociCompId)return;
+    if(!$("#co-crono"))return;                       /* la scheda non e' aperta */
+    if(cronoModifiche(compVociCompId))return;        /* c'e' roba non salvata */
+    await renderCrono(compVociCompId);
   }
 
   async function compCapSalva(){
@@ -1910,6 +1936,7 @@
     if(error){toast("Errore: "+error.message);return;}
     compCapNuovo=false;
     await renderCompVoci(compVociCompId);
+    await cronoRiallinea();
     toast("Capitolo aggiunto ✔");
   }
   async function compCapDel(id){
@@ -1917,6 +1944,7 @@
     const {error}=await sb.from("gest_computo_capitoli").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     await renderCompVoci(compVociCompId);
+    await cronoRiallinea();
     toast("Capitolo eliminato");
   }
   async function compVoceDel(id){
