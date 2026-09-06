@@ -62,7 +62,7 @@
 
   /* SIDEBAR */
   .sidebar {
-    width:240px; background:white; border-right:1px solid var(--border);
+    width:280px; background:white; border-right:1px solid var(--border);
     position:fixed; top:0; left:0; bottom:0; z-index:100;
     display:flex; flex-direction:column;
     box-shadow:2px 0 12px rgba(0,0,0,0.04);
@@ -89,17 +89,18 @@
   .sidebar-nav::-webkit-scrollbar-thumb { background:rgba(0,0,0,.18); border-radius:4px; }
   .sidebar-nav:hover::-webkit-scrollbar-thumb { background:rgba(0,0,0,.32); }
   .nav-item {
-    display:flex; align-items:center; gap:10px;
-    padding:11px 14px; border-radius:10px; cursor:pointer;
-    font-size:0.88rem; font-weight:600; color:var(--mid);
+    display:flex; align-items:center; gap:11px;
+    padding:12px 14px; border-radius:10px; cursor:pointer;
+    font-size:1.02rem; font-weight:700; color:#22262c;
+    letter-spacing:0.1px;
     transition:all 0.15s; margin-bottom:4px;
   }
   .nav-item:hover { background:var(--bg); color:var(--dark); }
   .nav-item.active { background:var(--verde3); color:var(--verde2); }
-  .nav-item .nav-icon { font-size:1.1rem; width:22px; text-align:center; }
+  .nav-item .nav-icon { font-size:1.3rem; width:26px; text-align:center; }
   .nav-badge {
     margin-left:auto; background:var(--arancio); color:white;
-    font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:20px;
+    font-size:0.78rem; font-weight:800; padding:3px 9px; border-radius:20px;
   }
 
   .sidebar-footer {
@@ -109,13 +110,13 @@
   .logout-btn {
     display:flex; align-items:center; gap:8px;
     padding:10px 14px; border-radius:10px; cursor:pointer;
-    font-size:0.85rem; font-weight:600; color:var(--rosso);
+    font-size:1rem; font-weight:700; color:var(--rosso);
     transition:all 0.15s;
   }
   .logout-btn:hover { background:var(--rosso3); }
 
   /* MAIN */
-  .main { margin-left:240px; padding:32px; min-height:100vh; }
+  .main { margin-left:280px; padding:32px; min-height:100vh; }
 
   /* TOPBAR */
   .topbar {
@@ -148,6 +149,12 @@
   .stat-icon.b { background:#e8f0ff; }
   .stat-num { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; line-height:1; }
   .stat-lbl { font-size:0.78rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+  /* 6 settembre 2026 — la rigatina sotto "ieri": verde se sopra la media,
+     rossa se sotto. Il numero da solo non dice se il sito sta crescendo. */
+  .stat-conf { font-size:0.74rem; font-weight:700; margin-top:5px; line-height:1.35; }
+  .stat-conf.su   { color:#137333; }
+  .stat-conf.giu  { color:#b3261e; }
+  .stat-conf.pari { color:var(--light); }
 
   /* SEZIONE */
   .section { display:none; }
@@ -547,9 +554,27 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card sceglibile" data-serie="imprese" onclick="creSerie('imprese')"
-             title="Mostra o nascondi questa linea sul grafico">
-          <span class="stat-spunta" aria-hidden="true"></span>
+        <!-- 6 settembre 2026 — le due caselle che dicono se il sito sta
+             CRESCENDO, non solo cosa c'e' dentro. I numeri arrivano da
+             `visite_sito` (js/conta-visita.js) passando per la funzione
+             /.netlify/functions/admin-visite. "Persone" = sessioni diverse. -->
+        <div class="stat-card">
+          <div class="stat-icon b">👀</div>
+          <div>
+            <div class="stat-num" id="stat-visite-ieri">–</div>
+            <div class="stat-lbl">Hanno aperto il sito ieri</div>
+            <div class="stat-conf" id="stat-visite-conf"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon g">🟢</div>
+          <div>
+            <div class="stat-num" id="stat-visite-oggi">–</div>
+            <div class="stat-lbl">Hanno aperto il sito oggi</div>
+            <div class="stat-conf pari">giornata in corso</div>
+          </div>
+        </div>
+        <div class="stat-card">
           <div class="stat-icon g">🏗️</div>
           <div><div class="stat-num" id="stat-totali">–</div><div class="stat-lbl">Totale imprese</div></div>
         </div>
@@ -557,15 +582,11 @@
           <div class="stat-icon o">📝</div>
           <div><div class="stat-num" id="stat-incompleti">–</div><div class="stat-lbl">Profili da completare</div></div>
         </div>
-        <div class="stat-card sceglibile" data-serie="citta" onclick="creSerie('citta')"
-             title="Mostra o nascondi questa linea sul grafico">
-          <span class="stat-spunta" aria-hidden="true"></span>
+        <div class="stat-card">
           <div class="stat-icon g">🗺️</div>
           <div><div class="stat-num" id="stat-citta">–</div><div class="stat-lbl">Città coperte</div></div>
         </div>
-        <div class="stat-card sceglibile" data-serie="prev" onclick="creSerie('prev')"
-             title="Mostra o nascondi questa linea sul grafico">
-          <span class="stat-spunta" aria-hidden="true"></span>
+        <div class="stat-card">
           <div class="stat-icon b">📋</div>
           <div><div class="stat-num" id="stat-preventivi">–</div><div class="stat-lbl">Preventivi ricevuti</div></div>
         </div>
@@ -587,41 +608,13 @@
         </div>
         <!-- 16 agosto 2026 — due caselle nuove: sono dati che una data ce
              l'hanno, quindi si possono mettere sul grafico. -->
-        <div class="stat-card sceglibile" data-serie="rec" onclick="creSerie('rec')"
-             title="Mostra o nascondi questa linea sul grafico">
-          <span class="stat-spunta" aria-hidden="true"></span>
+        <div class="stat-card">
           <div class="stat-icon b">⭐</div>
           <div><div class="stat-num" id="stat-recensioni">–</div><div class="stat-lbl">Recensioni</div></div>
         </div>
-        <div class="stat-card sceglibile" data-serie="segn" onclick="creSerie('segn')"
-             title="Mostra o nascondi questa linea sul grafico">
-          <span class="stat-spunta" aria-hidden="true"></span>
+        <div class="stat-card">
           <div class="stat-icon o">🚩</div>
           <div><div class="stat-num" id="stat-segnalazioni">–</div><div class="stat-lbl">Segnalazioni</div></div>
-        </div>
-      </div>
-
-      <div class="cre-card">
-        <div class="cre-head">
-          <div>
-            <div class="cre-tit">📈 Crescita iscritti</div>
-            <div class="cre-sub" id="cre-sub">Nuove imprese registrate, settimana per settimana</div>
-          </div>
-          <div class="cre-azioni">
-          <button class="cre-link" onclick="apriMestieriCitta()">Mestieri e città</button>
-          <div class="cre-range" id="cre-range">
-            <button data-r="30" onclick="creRange(30, this)">30 giorni</button>
-            <button data-r="90" class="on" onclick="creRange(90, this)">3 mesi</button>
-            <button data-r="0" onclick="creRange(0, this)">Tutto</button>
-          </div>
-          </div>
-        </div>
-        <!-- la SCELTA di cosa vedere sta nelle caselle in cima alla pagina:
-             qui resta solo il confronto col periodo prima. -->
-        <div class="cre-hero"><span class="cre-delta pari" id="cre-delta">–</span></div>
-        <div class="cre-box">
-          <div id="cre-svg"><div class="loading">Caricamento...</div></div>
-          <div class="cre-tip" id="cre-tip"></div>
         </div>
       </div>
 
@@ -2891,7 +2884,44 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite()]);
+}
+
+// QUANTE PERSONE HANNO APERTO IL SITO (caselle in cima alla dashboard)
+// La tabella delle visite non si legge con la chiave pubblica: passa dalla
+// funzione Netlify, come "Da dove arrivano". Se fallisce restano i trattini,
+// il resto della dashboard si carica lo stesso.
+async function caricaVisite() {
+  const nIeri = document.getElementById('stat-visite-ieri');
+  const nOggi = document.getElementById('stat-visite-oggi');
+  const conf  = document.getElementById('stat-visite-conf');
+  if (!nIeri) return;
+  try {
+    const res = await fetch('/.netlify/functions/admin-visite', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(function(){ return {}; });
+    if (!j.success) throw new Error(j.error || 'errore sconosciuto');
+    nIeri.textContent = j.ieri;
+    if (nOggi) nOggi.textContent = j.oggi;
+    if (conf) {
+      if (!j.media7) { conf.className = 'stat-conf pari'; conf.textContent = ''; }
+      else {
+        const diff = j.ieri - j.media7;
+        const perc = Math.round(Math.abs(diff) * 100 / j.media7);
+        conf.className = 'stat-conf ' + (diff > 0 ? 'su' : diff < 0 ? 'giu' : 'pari');
+        conf.textContent = (diff === 0 || perc === 0)
+          ? 'in linea con la media (' + j.media7 + ' al giorno)'
+          : (diff > 0 ? '▲ ' : '▼ ') + perc + '% ' + (diff > 0 ? 'sopra' : 'sotto')
+            + ' la media (' + j.media7 + ' al giorno)';
+      }
+    }
+  } catch (e) {
+    nIeri.textContent = '–';
+    if (nOggi) nOggi.textContent = '–';
+    if (conf) { conf.className = 'stat-conf pari'; conf.textContent = 'visite non leggibili'; }
+  }
 }
 
 // CARICA IMPRESE
