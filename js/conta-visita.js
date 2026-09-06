@@ -32,7 +32,7 @@
   var URL_DB = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   // Chiave pubblica "anon", la stessa che sta gia' in chiaro nelle pagine.
   // Su questa tabella puo' SOLO scrivere: non puo' rileggere niente.
-  var CHIAVE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  var CHIAVE = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 
   try {
     var ua = (navigator && navigator.userAgent) || '';
@@ -84,6 +84,34 @@
       sessione:     taglia(sessione, 60),
       agente:       taglia(ua, 200)
     };
+
+
+    /* ------------------------------------------------------------
+       5 set 2026 — DA DOVE ARRIVA CHI SI ISCRIVE.
+       Il conteggio delle visite qui sopra dice quanta gente arriva.
+       Questo pezzo serve a un'altra domanda: quando poi uno si
+       ISCRIVE, da dove era arrivato?
+       Al primo arrivo scriviamo l'etichetta in localStorage e non la
+       tocchiamo piu' (prima toccata vince): se uno arriva dalla
+       pubblicita' e si iscrive tre giorni dopo, il merito resta a chi
+       ce l'ha portato. Le pagine di registrazione la rileggono e la
+       mandano dentro il signUp.
+       Nessun dato personale: e' una sola parola tipo "meta".
+       ------------------------------------------------------------ */
+    try {
+      if (!localStorage.getItem('ti_provenienza')) {
+        var etichetta = null;
+        var src = par('src');                       // ?src=meta messo da noi
+        if (src) etichetta = String(src).toLowerCase();
+        else if (base.da_meta) etichetta = 'meta';  // fbclid o arrivo da FB/IG
+        else if (base.utm_source) etichetta = String(base.utm_source).toLowerCase();
+        else if (daDove && /google\./i.test(daDove)) etichetta = 'google';
+        else if (daDove) etichetta = String(daDove).toLowerCase();
+        else etichetta = 'diretto';
+        localStorage.setItem('ti_provenienza', etichetta.slice(0, 60));
+        localStorage.setItem('ti_provenienza_il', new Date().toISOString().slice(0, 10));
+      }
+    } catch (e) { /* navigazione privata: pazienza, si perde l'etichetta */ }
 
     function manda(fase, ms) {
       try {

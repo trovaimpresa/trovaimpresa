@@ -30,7 +30,7 @@
 // togliendo `path` qui in fondo e la pagina torna com'era.
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || 'https://nacvrsgkyfavykxjxszu.supabase.co';
-const SUPABASE_ANON = Deno.env.get('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const SUPABASE_ANON = Deno.env.get('SUPABASE_ANON_KEY') || 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 
 const APRE = '<!--META-SCHEDA-->';
 const CHIUDE = '<!--/META-SCHEDA-->';

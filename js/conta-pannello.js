@@ -27,7 +27,7 @@
   'use strict';
 
   var URL_DB  = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-  var CHIAVE  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  var CHIAVE  = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
   var TAVOLA  = URL_DB + '/rest/v1/accessi_pannello';
   var OGNI    = 20;   // ogni quanti secondi si riscrive la riga
 

@@ -26,7 +26,7 @@
   var AMMESSI = ["pintoalessio@icloud.com"];   /* aggiungi altre email fra apici, separate da virgola */
 
   var SU = "https://nacvrsgkyfavykxjxszu.supabase.co";
-  var SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
+  var SK = "sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R";
 
   var LINKS = [
     {t:"Gestionale",   u:"/gestionale-app.html"},

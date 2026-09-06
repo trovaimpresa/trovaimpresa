@@ -59,3 +59,7 @@ backup/backup-*/
 # --- Il quaderno di chi ha gia' ricevuto la mail di conferma (6 set 2026) ---
 #     Dentro ci sono le email degli iscritti: resta sul PC.
 tools/conferme-mandate.txt
+
+# --- La lista delle 23 mail di conferma (5 set 2026) ---
+#     Dentro ci sono gli indirizzi veri degli iscritti: resta sul PC.
+tools/manda-le-23.js
