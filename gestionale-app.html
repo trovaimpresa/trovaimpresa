@@ -2213,12 +2213,18 @@
      Il link diretto (#preventivi) vince: se c'e' quello, comanda lui. */
   const GEST_ULTIMA_SEZ="gest_ultima_sezione";
   function _riapriUltimaSezione(){
-    if(_deepTab) return;
-    let t=null; try{t=localStorage.getItem(GEST_ULTIMA_SEZ);}catch(e){}
-    if(!t||t==="riepilogo") return;
-    const b=document.querySelector('nav.tabs button[data-tab="'+t+'"]');
-    /* una sezione nascosta (ruolo professionista, permessi) non si riapre */
-    if(b&&b.offsetParent!==null) b.click();
+    /* ⛔ 6 settembre 2026, Alessio: «perche' mi apre su Squadra? mi deve aprire
+       su Riepilogo, tutti cosi' devono essere».
+       Il 23 agosto questa funzione riapriva l'ultima sezione visitata: se
+       chiudevi su Squadra, il giorno dopo ripartivi da Squadra. L'idea era
+       comoda tornando dal noleggio, ma nell'uso di tutti i giorni il
+       gestionale si apriva ogni volta su una schermata diversa, e il Riepilogo
+       — che e' la vista che serve per prima — non lo vedeva quasi mai nessuno.
+       Adesso si apre SEMPRE sul Riepilogo, come gli altri gestionali
+       (negozio, noleggio, operatore) che non hanno mai avuto questa memoria.
+       Resta valido il link diretto (gestionale-app.html#preventivi): quello
+       lo decide chi clicca, non il gestionale da solo. */
+    return;
   }
   document.addEventListener("click",function(e){
     const b=e.target.closest&&e.target.closest('nav.tabs button[data-tab]');
