@@ -226,7 +226,7 @@
     <section id="riepilogo" class="active">
       <div class="rie-intro">
         <h2 id="rie-title">Riepilogo</h2>
-        <p>Tutto il reparto in un colpo d'occhio. Le schede compaiono man mano che inserisci i dati: clicca una scheda per entrare.</p>
+        <p>Le schede compaiono man mano che inserisci i dati.</p>
       </div>
       <div id="rie-alert"></div>
       <div class="rie-grid" id="rie-grid"></div>
@@ -246,7 +246,6 @@
       </div>
 
       <div id="ag-parte-lavori">
-        <div class="gal-intro">Il quadro completo di cosa c'è da fare, persona per persona. Scegli un operatore: vedi tutti i suoi lavori con indirizzo, mappa, foto del capo e note — tutto in un colpo solo, pronto per andare in cantiere.</div>
         <div class="filtri">
           <div class="filtro"><label class="filtro-lab" for="ag-op-sel">Operatore</label>
             <select class="filtro-sel" id="ag-op-sel"></select></div>
@@ -260,7 +259,7 @@
       </div>
 
       <div id="ag-parte-ore" style="display:none">
-        <div class="gal-intro">Quante ore ha fatto ogni persona nel mese. A sinistra quelle <b>timbrate</b> col pulsante Entrata/Uscita dal telefono, a destra quelle <b>scritte a mano</b> in «Segna la giornata». Sono due conti separati: decidi tu quale vale. ⚠️ Qui si contano le ore di <b>tutta l'azienda</b>, non del solo reparto: la timbratura non chiede in che reparto sei.</div>
+        <div class="gal-intro">Le ore <b>timbrate</b> dal telefono e quelle <b>scritte a mano</b> non si sommano mai: sono due misure della stessa giornata. ⚠️ Qui si contano le ore di <b>tutta l'azienda</b>, non del solo reparto.</div>
         <div class="filtri">
           <div class="filtro"><span class="filtro-lab">Mese</span>
             <div class="ore-mese">
@@ -305,7 +304,7 @@
     <section id="galleria">
       <div class="sec-head"><h2>Galleria</h2>
         <button class="btn-primary" data-action="gal-nuovo">&#65291; Carica foto o video</button></div>
-      <div class="gal-intro">Tutte le foto e i video del reparto, raggruppati per cantiere. Le <b>foto prima</b> le metti tu per far vedere all'operatore cosa c'&egrave; da fare; quelle <b>a lavoro finito</b> le carica chi ha fatto il lavoro.</div>
+      <div class="gal-intro">Le foto di cosa c'&egrave; da fare le metti tu; quelle <b>a lavoro finito</b> le carica chi l'ha fatto.</div>
       <div class="filtri">
         <div class="filtro"><span class="filtro-lab">Mostra</span>
           <div class="segm" id="gal-media">
@@ -329,7 +328,7 @@
 
     <section id="mappa">
       <div class="sec-head"><h2>Mappa</h2></div>
-      <div class="gal-intro">Dove sono i tuoi cantieri e quanto distano dal tuo ufficio, dal pi&ugrave; vicino al pi&ugrave; lontano. La distanza &egrave; in linea d&#39;aria, come nella mappa del sito.</div>
+      <div class="gal-intro">La distanza &egrave; in linea d&#39;aria, non di strada.</div>
       <div id="mp-avviso"></div>
       <div class="filtri">
         <div class="filtro"><span class="filtro-lab">Mostra</span>
@@ -384,27 +383,26 @@
 
     <section id="mezzi">
       <div class="sec-head"><h2>Mezzi</h2><button class="btn add" data-action="new-mezzo">+ Nuovo mezzo</button></div>
-      <div class="gal-intro">Furgoni, escavatori, auto: quello che si guida e ha una targa. Con lo stato, le scadenze (revisione, bollo, tagliando, assicurazione) e i rifornimenti.</div>
+      <div class="gal-intro">Quello che si guida e ha una targa. Il resto sta in <b>Attrezzature</b>.</div>
       <div class="viste" id="mezzi-viste"></div>
       <div class="grid" id="mezzi-list"></div>
     </section>
 
     <section id="attrezzature">
       <div class="sec-head"><h2>Attrezzature</h2><button class="btn add" data-action="new-attrezzatura">+ Nuova attrezzatura</button></div>
-      <div class="gal-intro">Ponteggi, betoniere, trabattelli, trapani: quello che non si guida. Con lo stato e le scadenze delle verifiche periodiche.</div>
+      <div class="gal-intro">Quello che non si guida: ponteggi, betoniere, trabattelli. Il resto sta in <b>Mezzi</b>.</div>
       <div class="viste" id="attr-viste"></div>
       <div class="grid" id="attr-list"></div>
     </section>
 
     <section id="carte">
       <div class="sec-head"><h2>Carte aziendali</h2><button class="btn add" data-action="new-carta">+ Nuova carta</button></div>
-      <div class="gal-intro">Le carte prepagate (tipo bancomat) che dai ai tuoi dipendenti per le spese sul lavoro. Il saldo si aggiorna da solo con le ricariche e le spese che registrate.</div>
+      <div class="gal-intro">Il saldo si aggiorna da solo con le ricariche e le spese che registrate.</div>
       <div class="grid" id="carte-list"></div>
     </section>
 
     <section id="fornitori">
       <div class="sec-head"><h2>Fornitori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button><button class="btn add" data-action="new-fattf">+ Fattura da pagare</button></div></div>
-      <div class="gal-intro">Le rivendite e i negozi dove compri il materiale: contatti sempre a portata di mano e fatture da pagare con le loro scadenze, così sai sempre quanto devi e a chi.</div>
       <div id="fattf-riass"></div>
       <div class="grid" id="forn-list"></div>
       <h3 id="fattf-tit" style="margin:24px 0 12px;font-size:19px;display:none">Fatture da pagare</h3>
@@ -418,7 +416,7 @@
     <section id="chat"></section>
     <section id="dalsito">
       <div class="sec-head"><h2>Richieste dal sito</h2></div>
-      <div class="gal-intro">I clienti che ti scrivono dalla tua pagina su TrovaImpresa arrivano qui dentro. Apri la richiesta per vedere i suoi contatti, e con un clic gli fai il preventivo già compilato.</div>
+      <div class="gal-intro">Chi ti scrive dalla tua pagina su TrovaImpresa arriva qui. Aprendo la richiesta ci fai il preventivo già compilato.</div>
       <div class="viste" id="ds-viste"></div>
       <div id="ds-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </section>
@@ -461,7 +459,7 @@
 
     <section id="crediti">
       <div class="sec-head"><h2>Crediti formativi</h2><button class="btn add" data-action="new-cred">+ Nuovo corso</button></div>
-      <div class="gal-intro">I CFP che devi fare ogni anno per restare iscritto all'albo. Segna i corsi mano a mano che li fai: qui vedi a che punto sei e quanti te ne mancano, senza rifare i conti a dicembre.</div>
+      <div class="gal-intro">Segna i corsi mano a mano: qui vedi quanti te ne mancano.</div>
       <div id="cred-riass"></div>
       <div class="viste" id="cred-viste"></div>
       <div class="grid" id="cred-list"></div>
@@ -469,7 +467,7 @@
 
     <section id="cestino">
       <div class="sec-head"><h2>Cestino</h2></div>
-      <div class="gal-intro">Tutto quello che elimini dal gestionale passa di qui e resta a disposizione: finché è nel cestino non è perso. Clicca una riga per rimetterla a posto.</div>
+      <div class="gal-intro">Clicca una riga per rimetterla a posto: finché è qui non è persa.</div>
       <input type="text" id="cest-search" class="lav-search" placeholder="Cerca nel cestino: nome o tipo" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div id="cest-riass"></div>
       <div class="viste" id="cest-viste"></div>
@@ -478,7 +476,7 @@
 
     <section id="preventivi">
       <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn btn-ai" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai">✨ Genera con AI</button></div></div>
-      <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click. Puoi scriverlo a mano, dettarlo all'AI, o farlo nascere da un <b>computo metrico</b> già fatto.</div>
+      <div class="gal-intro">Puoi scriverlo a mano, dettarlo all'AI, o farlo nascere da un <b>computo metrico</b> già fatto.</div>
       <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </section>
@@ -489,7 +487,7 @@
          e' una riga, quando si decide. -->
     <section id="computi">
       <div class="sec-head"><h2>Computo metrico</h2><button class="btn add" data-action="new-computo">+ Nuovo computo</button></div>
-      <div class="gal-intro">Le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri. Le voci le peschi dal <b>prezzario</b>, così non le riscrivi ogni volta; quando è finito, con un clic diventa un <b>preventivo</b>.</div>
+      <div class="gal-intro">La quantità la calcola il gestionale: tu scrivi solo le misure.</div>
       <div class="viste" id="comp-viste"></div>
       <div class="grid" id="comp-list"></div>
     </section>
@@ -500,7 +498,7 @@
          aggiornano i prezzi tutti insieme, che una volta l'anno serve a tutti. -->
     <section id="prezzario">
       <div class="sec-head"><h2>Prezzario</h2><button class="btn add" data-action="new-prezzo">+ Nuova voce</button></div>
-      <div class="gal-intro">Le voci che usi sempre, scritte una volta sola. Nel <b>computo metrico</b> le ritrovi cercando una parola ed entrano già fatte, col loro prezzo — e dal computo finiscono nel <b>preventivo</b>. Quelle che usi di più stanno in cima.</div>
+      <div class="gal-intro">Le voci che usi sempre, scritte una volta sola. Quelle che usi di più stanno in cima.</div>
       <div class="field" style="max-width:620px"><label>Cerca una voce</label><input id="pz-cerca" placeholder="Scrivi una parola: tramezzo, intonaco, pavimento…"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
         <button type="button" class="btn" data-action="pz-importa">⬆ Importa da Excel o CSV</button>
@@ -516,20 +514,19 @@
          compRiepilogoDa(), le stesse dello schermo e del PDF. -->
     <section id="sal">
       <div class="sec-head"><h2>Stati di avanzamento</h2></div>
-      <div class="gal-intro">Tutti gli stati di avanzamento, di tutti i computi, in un elenco solo: quanto vale ognuno, quali hai <b>già fatturato</b> e quali no. Da qui scarichi il <b>foglio da consegnare</b> e crei la <b>fattura dell'acconto</b>. Ogni SAL resta attaccato al suo computo: lo apri e sei dentro quello.</div>
+      <div class="gal-intro">Ogni SAL resta attaccato al suo computo: lo apri e sei dentro quello.</div>
       <div class="viste" id="sal-viste"></div>
       <div class="grid" id="sal-list"></div>
     </section>
 
     <section id="report">
       <div class="sec-head"><h2>Report</h2><button class="btn add" data-action="report-csv">⬇ Esporta CSV</button></div>
-      <div class="gal-intro">L'andamento del reparto: incassi e spese mese per mese, i clienti migliori e le ore della squadra.</div>
       <div id="rep-body"></div>
     </section>
 
     <section id="lavoro-foto">
       <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="btn add" data-action="lf-back">‹ Indietro</button></div>
-      <div class="gal-intro">Carica qui le foto di <b>cosa c'è da fare</b> per questo lavoro: le vedrà l'operaio nella sua agenda.</div>
+      <div class="gal-intro">Le foto che carichi qui le vedrà l'operaio nella sua agenda.</div>
       <div class="field"><label>📷 Foto "cosa fare"</label>
         <input type="file" id="lf-file" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="lf-file">＋ Aggiungi foto</label></div>
