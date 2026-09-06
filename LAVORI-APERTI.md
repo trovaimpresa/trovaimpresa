@@ -4,7 +4,30 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 6 settembre 2026 (mattina) — giro sull'admin, sui 4 pannelli, sul profilo e sul modulo «cerca»
+Ultimo aggiornamento: 6 settembre 2026 (sera) — sei fette staccate da gestionale-app.html
+
+---
+
+## 🆕 IL 6 SETTEMBRE (sera) — lo smontaggio di gestionale-app.html
+
+### ✅ Chiusi
+- **Sei fette staccate, una per volta, con push e collaudo dal vivo in mezzo a ognuna.** →17.048← → →12.639← righe (−→4.409←, −→26%←):
+  - **B · il Riepilogo** → `js/gest-riepilogo.js` (→744← righe) · commit →89a5a5e←
+  - **D · la Squadra** → `js/gest-squadra.js` (→635←) · →c70688b←
+  - **F1 · i dati azienda** → `js/gest-azienda.js` (→256←) · →3324292←
+  - **F2 · i fornitori** → `js/gest-fornitori.js` (→323←) · →06acc79←
+  - **E1 · mezzi e attrezzature** → `js/gest-mezzi.js` (→262←) · →f09e3f8←
+  - **C1 · il decreto parametri** → `js/gest-decreto.js` (→236←) · →e51c443←
+- ⛔ **RIPARATO UN BANCO CHE ERA ANDATO CIECO E DICEVA VERDE** · `chiusoDentro()` in `banco-fette.js` guardava qualsiasi riga del file: un IIFE annidato alla colonna →13← dentro `gest-riepilogo.js` gli ha fatto credere che il file fosse «chiuso», e **l'ha saltato** — niente controllo dei nomi doppi, cioe' cieco proprio sulla prova che evita lo schermo bianco. Trovato solo perche' «file aperti guardati» era rimasto →8← invece di →9←. Adesso guarda solo la prima riga vera. Da →18← a →42← verdi
+- **Quattro aiuti comuni salvati dal taglio sbagliato** · `_giorniA` (la usano fatture e Riepilogo — le si e' tagliato intorno, due pezzi, con un cartello sopra), `cliIndirizzo`, `_rigaDato`, e i documenti del LAVORO che stavano in mezzo a quelli del fornitore
+- **Prova →4← del banco allargata** · l'elenco `SERVONO` degli aiuti comuni era fermo a →9← nomi: aggiunti `_giorniA`, `_rigaDato`, `cliIndirizzo`
+
+### ⏳ Aperti, nati oggi
+- ⛔ **La fetta C · PREVENTIVI non si e' fatta** · →1.112← righe contigue, sembra facile, ma dentro ci sono **sei aiuti** che li chiamano altri file gia' staccati: `prevCache`, `impRiga`, `calcolaParcella` (gest-documenti-pdf, gest-fatture, gest-riepilogo), `_rigaSezione`, `_scriviRighePrev`, `AVVISO_SEZIONI` (gest-sal-prezzario). Staccarla vuol dire tagliare intorno in **sei punti**: si fa, ma da soli, non come sesta fetta di fila. E' uscito solo il pezzo pulito (C1, il decreto)
+- ⛔ **La fetta F3 · CLIENTI non si e' fatta** · →3← pezzi lontani, →2← aiuti condivisi da schivare (`cliIndirizzo` per Riepilogo e Mappa, `_rigaDato` per i fornitori) e in mezzo `commForm`/`saveComm`/`docCommApri` — il **commercialista**, che coi clienti non c'entra. La fetta con piu' trappole per riga di tutte
+- **Il NOLEGGIO e' rimasto dentro** · e' uscito solo il «parco mezzi». Nel noleggio c'e' il filtro sulla **FASE** (`fuori`/`rientrato`) scritto in due posti, `gest-riepilogo.js` e `gest-report.js`, che si erano gia' scollati una volta: quando si stacca, si guardano quei due insieme
+- ⚠️ **Netlify ci mette piu' di prima** · alla fetta F1 il file nuovo rispondeva ancora →404← dopo →20← secondi. Non era rotto: stava ancora pubblicando. Prima di dire che qualcosa non va, riprovare dopo un minuto e mezzo
+- **Da qui in poi si e' vicini al nucleo** · le →12.639← righe che restano sono gli aiuti comuni, le tabelle, il menu, lo stato condiviso, piu' i due blocchi intrecciati qui sopra. Spezzare il nucleo sarebbe peggio del male
 
 ---
 

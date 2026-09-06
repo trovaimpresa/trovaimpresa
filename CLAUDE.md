@@ -22594,3 +22594,112 @@ Claude non ha il permesso di cancellare: quel file resta a →0← byte e **ogni
 git di Alessio si ferma**. E' successo →3← volte. In sola lettura si usa
 sempre `git --no-optional-locks status/log`. Se il lock c'e' gia': si SPOSTA
 (`mv .git/index.lock _to_delete/`). Alessio lo toglie con `rm -f .git/index.lock`.
+
+---
+
+# 🆕 IL 6 SETTEMBRE 2026 — SERA: SEI FETTE IN UNA SESSIONE
+
+Continuato lo smontaggio cominciato nel pomeriggio. **→17.048← → →12.639←
+righe (−→4.409←, cioe' −→26%←)**, in →9← file staccati.
+
+Ogni fetta: numeri presi dal vivo PRIMA, taglio, banco verde, banco `--sabota`
+rosso, `controllo-push.js`, push di Alessio, e collaudo dal vivo ricontando gli
+STESSI numeri. Mai due fette in un push solo.
+
+| Fetta | File | Righe | Commit |
+|---|---|---|---|
+| B · il Riepilogo | `js/gest-riepilogo.js` | →744← | →89a5a5e← |
+| D · la Squadra | `js/gest-squadra.js` | →635← | →c70688b← |
+| F1 · i dati azienda | `js/gest-azienda.js` | →256← | →3324292← |
+| F2 · i fornitori | `js/gest-fornitori.js` | →323← | →06acc79← |
+| E1 · mezzi e attrezzature | `js/gest-mezzi.js` | →262← | →f09e3f8← |
+| C1 · il decreto parametri | `js/gest-decreto.js` | →236← | →e51c443← |
+
+Banco `banchi-fissi/smontaggio/banco-fette.js`: da →18← a →42← verdi.
+
+## ⛔ IL BANCO ERA ANDATO CIECO E DICEVA VERDE
+
+Alla fetta B: `chiusoDentro()` guardava **qualsiasi riga** del file (regex con
+`/m`) per capire se un file e' chiuso in una IIFE. `js/gest-riepilogo.js` ha
+un IIFE **annidato in mezzo al codice**, alla colonna →13←:
+
+    righe:[{t:"Incassato questo mese…"},
+           (function(){ … })()]
+
+Il banco l'ha preso per un file chiuso e **l'ha saltato**: niente controllo dei
+nomi doppi, cioe' cieco proprio sulla prova che evita lo schermo bianco. E
+diceva ✅. Trovato solo perche' «file aperti guardati» era rimasto →8← invece
+di salire a →9←.
+
+**Riparato:** adesso guarda solo la PRIMA riga vera del file, tolti commenti e
+righe vuote — e' li' che un file chiuso davvero apre. Tutti gli altri →17← file
+restano classificati come prima.
+
+⛔ **LA LEZIONE:** un banco che smette di guardare e continua a dire verde e'
+peggio di nessun banco. **Ogni prova che conta qualcosa deve dire il numero, e
+il numero va letto.**
+
+## GLI AIUTI COMUNI SALVATI DAL TAGLIO SBAGLIATO
+
+Oltre a `_fileOrfano` e `_fetchAllExport` del pomeriggio, oggi:
+
+- ⛔ **`_giorniA`** (giorni da oggi a una data). Stava **in mezzo** ai mezzi e
+  sembrava loro. La chiamano anche il controllo delle date, i preventivi in
+  attesa, `js/gest-fatture.js` e `js/gest-riepilogo.js`. Alla fetta E1 le si e'
+  tagliato **intorno** (due pezzi) e le si e' scritto un cartello sopra.
+- **`cliIndirizzo`** — la usano `gest-galleria-mappa.js` e `gest-riepilogo.js`.
+- **`_rigaDato`** — la usa `gest-fornitori.js`, appena staccato.
+- **I documenti del LAVORO** (`renderDocLavoro`, `uploadDocLavoro`,
+  `lavDocElimina`) stanno **in mezzo** a quelli del fornitore, copiati riga per
+  riga da loro, e cambiano solo l'aggancio (`lavoro_id` invece di
+  `fornitore_id`). Alla fetta F2 si e' tagliato intorno anche a loro.
+
+I tre nomi nuovi (`_giorniA`, `_rigaDato`, `cliIndirizzo`) sono stati aggiunti
+all'elenco `SERVONO` della prova →4← del banco, che era fermo a →9← nomi.
+
+## ⛔ LE DUE FETTE CHE NON SI SONO FATTE, E PERCHE'
+
+Non sono «piu' difficili»: sono di un'altra natura. Sono i punti dove il
+gestionale si tiene insieme, e ogni taglio li' costa **sei** precauzioni
+invece di una.
+
+### C · I PREVENTIVI — →1.112← righe contigue, e SEI aiuti condivisi dentro
+Sembra la fetta piu' facile che resta: un blocco solo dalla riga di `prevCache`
+fino a `prevToLavoroConferma`. Contati i →41← nomi di primo livello del blocco
+e guardati i punti veri dove vengono chiamati (non le citazioni nei commenti):
+
+| Aiuto | Chi lo chiama da fuori |
+|---|---|
+| `prevCache` | `gest-documenti-pdf.js`, `gest-sal-prezzario.js` |
+| `impRiga` | `gest-documenti-pdf.js`, `gest-riepilogo.js` |
+| `calcolaParcella` | `gest-documenti-pdf.js`, `gest-fatture.js`, `gest-riepilogo.js` |
+| `_rigaSezione` | `gest-documenti-pdf.js`, `gest-fatture.js`, `gest-sal-prezzario.js` |
+| `_scriviRighePrev` | `gest-sal-prezzario.js` |
+| `AVVISO_SEZIONI` | `gest-sal-prezzario.js` |
+
+Staccarlo vuol dire tagliare intorno in **sei punti**. Si fa, ma da soli e a
+mente fresca. E' uscito solo il pezzo pulito: **C1, il decreto parametri**.
+
+### F3 · I CLIENTI — →3← pezzi lontani, →2← aiuti condivisi, e un intruso
+`cliIndirizzo` (la usano Riepilogo e Mappa) e `_rigaDato` (la usa il fornitore
+appena staccato) vanno schivate. E in mezzo al blocco dei clienti stanno
+`commForm`/`saveComm`/`docCommApri` — il **commercialista**, che coi clienti
+non c'entra niente. E' la fetta con piu' trappole per riga di tutte.
+
+### E il NOLEGGIO
+Uscita solo la parte «parco mezzi». I rifornimenti e il noleggio sono rimasti:
+li' c'e' il filtro sulla **FASE** (`fuori`/`rientrato`) scritto in due posti —
+`js/gest-riepilogo.js` e `js/gest-report.js` — che si erano gia' scollati una
+volta. Quando si staccano, si guardano quei due insieme.
+
+## DOVE SI E' ARRIVATI
+→12.639← righe. Il piano del pomeriggio ne prometteva →11.000← con →5← fette;
+ne sono uscite →6← e si e' arrivati a →12.639← perche' due delle cinque erano
+piu' intrecciate di come sembravano da fuori. **Le →12.639← che restano sono
+il nucleo piu' i due blocchi intrecciati qui sopra: spezzare il nucleo sarebbe
+peggio del male.**
+
+## NETLIFY CI METTE PIU' DI PRIMA
+Alla fetta F1 il file staccato rispondeva ancora →404← dopo →20← secondi. Non
+era un guasto: era Netlify che stava ancora pubblicando. **Prima di dire che
+qualcosa e' rotto, si riprova dopo un minuto e mezzo.**
