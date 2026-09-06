@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <link rel="canonical" id="sa-canonical" href="https://trovaimpresa.com/subappalto-annuncio">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="sa-title">Annuncio di subappalto | TrovaImpresa</title>
+  <meta name="description" id="sa-desc" content="Annuncio di subappalto edile su TrovaImpresa.">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f4f6f8; min-height:100vh; color:#1a1a1a; }
+
+    header { background:white; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100; flex-wrap: wrap; gap: 14px; }
+    header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; font-size: 17px; padding: 6px 4px; border-radius: 8px; }
+    header nav a:hover { text-decoration: underline; }
+    header nav a.attivo { background: #eaf2ff; color: #0047b3; padding: 6px 14px; }
+    header nav a.due-righe { text-align: center; line-height: 1.15; }
+    .btn-pannello { background: #0066ff; color: #fff !important; border-radius: 10px; padding: 10px 18px !important; font-weight: 700; white-space: nowrap; }
+    .btn-pannello:hover { background: #0052cc; text-decoration: none !important; }
+    @media (max-width: 900px) { header nav a { font-size: 15.5px; } header nav { gap: 4px 12px; } }
+    header a img { height:44px; }
+    header nav a { color:#0066ff; text-decoration:none; font-weight:600; margin-left:20px; font-size:15px; }
+    header nav a:hover { color:#1a3a5e; }
+
+    .top-bar {
+      background:linear-gradient(135deg,#0a2a4d,#0066ff);
+      padding:44px 32px 36px; text-align:center; color:white;
+    }
+    .top-bar h1 { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:800; margin-bottom:10px; }
+    .top-bar p { font-size:1rem; opacity:0.85; max-width:560px; margin:0 auto; }
+
+    .page-body { display:flex; gap:0; min-height:calc(100vh - 180px); }
+
+    /* COLONNE */
+    .col { flex:1; padding:28px 24px; }
+    .col-left { background:#f0f9f4; border-right:2px solid #e0eee8; }
+    .col-right { background:#fff8f0; }
+
+    .col-title {
+      font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:800;
+      margin-bottom:6px; display:flex; align-items:center; gap:8px;
+    }
+    .col-sub { font-size:0.85rem; color:#666; margin-bottom:18px; }
+
+    .btn-pubblica {
+      display:inline-flex; align-items:center; gap:8px;
+      background:#0066ff; color:white; border:none; border-radius:10px;
+      padding:11px 22px; font-family:'DM Sans',sans-serif; font-weight:700;
+      font-size:0.92rem; cursor:pointer; margin-bottom:20px; transition:background 0.2s,transform 0.15s;
+    }
+    .btn-pubblica:hover { background:#1a3a5e; transform:translateY(-1px); }
+    .col-right .btn-pubblica { background:#d4a017; }
+    .col-right .btn-pubblica:hover { background:#b8880f; }
+
+    /* CARD ANNUNCI */
+    .annuncio-card {
+      background:white; border-radius:14px; padding:18px 20px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.07); margin-bottom:12px;
+      border-left:4px solid #0066ff; transition:box-shadow 0.2s,transform 0.15s;
+    }
+    .annuncio-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.12); transform:translateY(-2px); }
+    .col-right .annuncio-card { border-left-color:#d4a017; }
+    .annuncio-nome { font-weight:800; font-size:1rem; color:#1a1a1a; margin-bottom:4px; }
+    .annuncio-desc { font-size:0.85rem; color:#555; margin-bottom:8px; line-height:1.5; }
+    .annuncio-meta { display:flex; flex-wrap:wrap; gap:10px; font-size:0.8rem; color:#777; }
+    .annuncio-meta span { display:flex; align-items:center; gap:4px; }
+
+    .loading-state, .empty-state {
+      text-align:center; padding:40px 20px; color:#888; font-size:0.92rem;
+    }
+    .empty-state-icon { font-size:2.5rem; margin-bottom:10px; }
+
+    /* MODAL */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+      z-index:200; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal {
+      background:white; border-radius:20px; width:100%; max-width:500px;
+      max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      background:linear-gradient(135deg,#0a2a4d,#0066ff);
+      padding:22px 26px; border-radius:20px 20px 0 0; color:white;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .modal-header.offre { background:linear-gradient(135deg,#7a5200,#d4a017); }
+    .modal-header h2 { font-family:'Playfair Display',serif; font-size:1.15rem; }
+    .modal-close { background:none; border:none; color:white; font-size:1.3rem; cursor:pointer; opacity:0.8; line-height:1; padding:0; }
+    .modal-close:hover { opacity:1; }
+    .modal-body { padding:24px 26px; }
+    .form-group { margin-bottom:16px; }
+    .form-label { font-size:0.82rem; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block; }
+    .form-input, .form-textarea {
+      width:100%; border:1.5px solid #ddd; border-radius:10px;
+      padding:11px 14px; font-family:'DM Sans',sans-serif; font-size:0.95rem;
+      outline:none; transition:border-color 0.2s; color:#1a1a1a;
+    }
+    .form-input:focus, .form-textarea:focus { border-color:#0066ff; }
+    .form-textarea { resize:vertical; min-height:90px; }
+    .btn-submit {
+      width:100%; background:#0066ff; color:white; border:none; border-radius:10px;
+      padding:13px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+      cursor:pointer; margin-top:8px; transition:background 0.2s;
+    }
+    .btn-submit:hover { background:#1a3a5e; }
+    .btn-submit.offre { background:#d4a017; }
+    .btn-submit.offre:hover { background:#b8880f; }
+    .form-msg { margin-top:10px; padding:10px 14px; border-radius:8px; font-size:0.88rem; font-weight:600; display:none; }
+    .form-msg.ok { background:#e8f5ec; color:#0066ff; }
+    .form-msg.err { background:#fdecea; color:#c0392b; }
+    .checkbox-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:6px; }
+    .checkbox-item { display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#333; cursor:pointer; }
+    .checkbox-item input[type=checkbox] { width:16px; height:16px; accent-color:#d4a017; cursor:pointer; flex-shrink:0; }
+    .annuncio-tag { display:inline-block; background:#e8f5ec; color:#1a3a5e; border-radius:6px; padding:2px 8px; font-size:0.78rem; font-weight:700; margin-bottom:6px; }
+    .col-right .annuncio-tag { background:#fff3cd; color:#7a5200; }
+
+    @media (max-width:768px) {
+      .page-body { flex-direction:column; }
+      .col-left { border-right:none; border-bottom:2px solid #e0eee8; }
+      .top-bar h1 { font-size:1.5rem; }
+    }
+  </style>
+<link rel="stylesheet" href="/css/mobile.css?v=3">
+  <meta property="og:type" content="website">
+  <meta property="og:url" id="sa-ogurl" content="https://trovaimpresa.com/subappalto-annuncio">
+  <meta property="og:title" id="sa-ogtitle" content="Annuncio di subappalto | TrovaImpresa">
+  <meta property="og:description" id="sa-ogdesc" content="Annuncio di subappalto edile su TrovaImpresa.">
+  <meta property="og:image" content="https://trovaimpresa.com/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+</head>
+<body>
+
+<header>
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="/bandi.html">Bandi e fondi</a>
+    <a href="/blog.html">Guide e costi</a>
+    <a href="/offerte-lavoro.html" class="due-righe">Bacheca offerte<br>lavoro</a>
+    <a href="/candidature-lavoro.html" class="due-righe">Bacheca candidature<br>lavoro</a>
+    <a href="/subappalto.html" class="attivo">Subappalti</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/pubblicita.html">Pubblicit&agrave;</a>
+    <a href="/login-impresa.html" class="btn-pannello">Accedi al tuo pannello</a>
+  </nav>
+</header>
+
+<!-- ⛔ 6 SETTEMBRE 2026 — PERCHE' ESISTE QUESTA PAGINA.
+     Fino a oggi i subappalti stavano tutti dentro `subappalto.html`, e nessun
+     annuncio aveva un indirizzo suo. Per Google esisteva una pagina sola:
+     l'elenco. Un annuncio come «Cerco carpentieri a Serino, budget 6.000 €»
+     e' esattamente cio' che un'impresa cerca su Google, ma non c'era nessuna
+     pagina da mostrarle.
+     Misurato lo stesso giorno: subappalti aveva 5 annunci veri nati da soli in
+     un mese, offerte_lavoro ne aveva 0. La sezione che funziona era l'unica
+     senza pagine proprie e senza sitemap.
+     ⚠️ Questa pagina NON tocca `subappalto.html`: l'elenco resta identico.
+     ⚠️ L'EMAIL NON SI SCRIVE NELL'HTML. Compare solo dopo un clic, montata a
+        pezzi dal JavaScript: i programmi che raccolgono indirizzi per lo spam
+        leggono la pagina ma non cliccano. Scelta di Alessio, 6 set 2026. -->
+
+<div class="sa-wrap">
+  <div class="sa-briciole"><a href="/index.html">Home</a> › <a href="/subappalto.html">Subappalti</a> <span id="sa-briciola"></span></div>
+  <div id="sa-contenuto"><div class="loading-state">⏳ Caricamento...</div></div>
+</div>
+
+<style>
+.sa-wrap{max-width:880px;margin:0 auto;padding:22px 18px 60px}
+.sa-briciole{font-size:.86rem;color:#5b6b7c;margin-bottom:16px}
+.sa-briciole a{color:#0066ff;text-decoration:none}
+.sa-briciole a:hover{text-decoration:underline}
+.sa-card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #0066ff;padding:26px 26px 24px;margin-bottom:18px}
+.sa-card.offre{border-top-color:#d4a017}
+.sa-tag{display:inline-block;background:#e8f2ff;color:#0047b3;border-radius:6px;padding:3px 10px;font-size:.78rem;font-weight:700;margin-bottom:12px}
+.sa-card.offre .sa-tag{background:#fff3cd;color:#7a5200}
+.sa-h1{font-size:1.72rem;line-height:1.22;color:#0a2a4d;margin-bottom:8px;font-weight:800}
+.sa-impresa{font-size:1.02rem;color:#1a1a1a;font-weight:700;margin-bottom:14px}
+.sa-corpo{font-size:1.02rem;line-height:1.62;color:#22303d;margin:18px 0 4px;white-space:pre-line}
+.sa-fatti{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.sa-fatto{background:#f6f9fc;border-radius:12px;padding:13px 15px}
+.sa-fatto b{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;color:#5b6b7c;margin-bottom:3px;font-weight:700}
+.sa-fatto span{font-size:1.06rem;font-weight:700;color:#0a2a4d}
+.sa-req{margin-top:18px}
+.sa-req b{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;color:#5b6b7c;margin-bottom:8px;font-weight:700}
+.sa-req ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0}
+.sa-req li{background:#eef7f0;color:#1e6b3a;border-radius:999px;padding:5px 13px;font-size:.87rem;font-weight:600}
+.sa-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.92rem;color:#5b6b7c;border-top:1px solid #eef1f4;padding-top:14px;margin-top:18px}
+.sa-contatti{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #ff8800;padding:22px 26px}
+.sa-contatti h2{font-size:1.06rem;color:#0a2a4d;margin-bottom:14px}
+.sa-btn{display:inline-flex;align-items:center;gap:9px;background:#0066ff;color:#fff;text-decoration:none;border-radius:10px;padding:13px 22px;font-weight:700;font-size:1rem;margin-right:10px;margin-bottom:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.sa-btn.sec{background:#fff;color:#0066ff;border:2px solid #0066ff;padding:11px 20px}
+.sa-fondo{text-align:center;margin-top:26px;font-size:.95rem;color:#5b6b7c}
+.sa-fondo a{color:#0066ff;font-weight:700;text-decoration:none}
+@media(max-width:700px){.sa-wrap{padding:16px 14px 50px}.sa-h1{font-size:1.34rem}.sa-card,.sa-contatti{padding:20px 17px}.sa-fatti{grid-template-columns:1fr}.sa-btn{display:flex;justify-content:center;margin-right:0;width:100%}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const sb = supabase.createClient(
+    'https://nacvrsgkyfavykxjxszu.supabase.co',
+    'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R'
+  );
+  const SITO = 'https://trovaimpresa.com';
+  const box  = document.getElementById('sa-contenuto');
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  /* Il testo dell'annuncio e' scritto a righe libere da chi pubblica.
+     La prima riga fa da titolo; le righe che cominciano con una di queste
+     etichette diventano riquadri o pastiglie; il resto resta descrizione. */
+  function separa(testo){
+    const righe = String(testo||'').split('\n').map(r=>r.trim()).filter(Boolean);
+    const out = {titolo:'', corpo:[], periodo:'', budget:'', elenco:[], etichettaElenco:''};
+    righe.forEach((r,idx)=>{
+      const m = r.match(/^(Periodo|Budget|Requisiti|Certificazioni)\s*:\s*(.*)$/i);
+      if(m){
+        const k = m[1].toLowerCase(), v = m[2].trim();
+        if(k==='periodo') out.periodo = v;
+        else if(k==='budget') out.budget = v;
+        else { out.elenco = v.split(',').map(x=>x.trim()).filter(Boolean);
+               out.etichettaElenco = (k==='requisiti') ? 'Requisiti richiesti' : 'Certificazioni'; }
+        return;
+      }
+      if(idx===0) out.titolo = r; else out.corpo.push(r);
+    });
+    return out;
+  }
+
+  function euro(v){
+    const n = String(v||'').replace(/[^0-9]/g,'');
+    return n ? Number(n).toLocaleString('it-IT') + ' €' : String(v||'');
+  }
+
+  function dataInParole(iso){
+    if(!iso) return '';
+    const d = new Date(iso); if(isNaN(d)) return '';
+    return d.toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});
+  }
+
+  function nonTrovato(msg){
+    box.innerHTML = '<div class="sa-card"><div class="sa-h1">Annuncio non disponibile</div>'
+      + '<div class="sa-corpo">' + esc(msg) + '</div>'
+      + '<div class="sa-meta"><a class="sa-btn" href="/subappalto.html">Vedi tutti i subappalti</a></div></div>';
+  }
+
+  async function carica(){
+    const id = new URLSearchParams(location.search).get('id');
+    if(!id || !/^[0-9]+$/.test(id)) return nonTrovato('Questo indirizzo non ha un numero di annuncio valido.');
+
+    let r;
+    try{
+      r = await sb.from('subappalti')
+            .select('id, tipo, nome_impresa, descrizione, lavoro, citta, regione, telefono, email, created_at')
+            .eq('id', id).maybeSingle();
+    }catch(e){ return nonTrovato('Non riesco a leggere l’annuncio in questo momento. Riprova fra poco.'); }
+    if(r.error || !r.data) return nonTrovato('Questo annuncio non c’è più, oppure è stato tolto da chi l’aveva pubblicato.');
+
+    const a = r.data;
+    const cerca = a.tipo === 'cerca';
+    const t = separa(cerca ? a.descrizione : a.lavoro);
+    const titolo = t.titolo || (cerca ? 'Cerco subappaltatori' : 'Disponibile per subappalti');
+    const luogo  = a.citta || a.regione || '';
+
+    /* I meta: Google esegue il JavaScript, quindi li vede. Li scriviamo qui e
+       non a mano nell'HTML perche' dipendono dall'annuncio. */
+    const titoloPagina = titolo + (luogo ? ' — Subappalto a ' + luogo : ' — Subappalto') + ' | TrovaImpresa';
+    let descr = (cerca ? 'Impresa cerca subappaltatori' : 'Impresa disponibile in subappalto')
+              + (luogo ? ' a ' + luogo : '') + '. ' + (t.corpo.join(' ') || titolo);
+    if(descr.length > 300) descr = descr.slice(0,297).replace(/\s+\S*$/,'') + '…';
+    document.title = titoloPagina;
+    const url = SITO + '/subappalto-annuncio?id=' + encodeURIComponent(a.id);
+    const set = (id2, attr, val) => { const el = document.getElementById(id2); if(el) el.setAttribute(attr, val); };
+    set('sa-desc','content',descr); set('sa-canonical','href',url);
+    set('sa-ogurl','content',url); set('sa-ogtitle','content',titoloPagina); set('sa-ogdesc','content',descr);
+    const br = document.getElementById('sa-briciola');
+    if(br) br.textContent = '› ' + titolo;
+
+    box.innerHTML =
+      '<div class="sa-card' + (cerca ? '' : ' offre') + '">'
+      + '<div class="sa-tag">' + (cerca ? '📋 Cerca subappaltatore' : '🙋 Disponibile per subappalti') + '</div>'
+      + '<h1 class="sa-h1">' + esc(titolo) + '</h1>'
+      + (a.nome_impresa ? '<div class="sa-impresa">' + esc(a.nome_impresa) + '</div>' : '')
+      + (t.corpo.length ? '<div class="sa-corpo">' + esc(t.corpo.join('\n')) + '</div>' : '')
+      + ((t.periodo || t.budget) ? '<div class="sa-fatti">'
+          + (t.periodo ? '<div class="sa-fatto"><b>Periodo</b><span>' + esc(t.periodo) + '</span></div>' : '')
+          + (t.budget  ? '<div class="sa-fatto"><b>Budget</b><span>' + esc(euro(t.budget)) + '</span></div>' : '')
+          + '</div>' : '')
+      + (t.elenco.length ? '<div class="sa-req"><b>' + esc(t.etichettaElenco) + '</b><ul>'
+          + t.elenco.map(x => '<li>✓ ' + esc(x) + '</li>').join('') + '</ul></div>' : '')
+      + '<div class="sa-meta">'
+          + (luogo ? '<span>📍 ' + esc(luogo) + '</span>' : '')
+          + (a.created_at ? '<span>🗓️ Pubblicato il ' + esc(dataInParole(a.created_at)) + '</span>' : '')
+        + '</div>'
+      + '</div>'
+      + ((a.telefono || a.email) ?
+          '<div class="sa-contatti"><h2>Contatta ' + esc(a.nome_impresa || 'l’impresa') + '</h2>'
+          + (a.telefono ? '<a class="sa-btn" href="tel:' + esc(a.telefono) + '">📞 ' + esc(a.telefono) + '</a>' : '')
+          + (a.email ? '<button class="sa-btn sec" id="sa-mostra-email" type="button">✉️ Mostra email</button><span id="sa-email"></span>' : '')
+          + '</div>' : '')
+      + '<div class="sa-fondo">Sei un’impresa e cerchi subappaltatori? <a href="/subappalto.html">Pubblica il tuo annuncio, è gratis</a></div>';
+
+    /* L'email si monta solo al clic, e non e' mai presente nell'HTML di
+       partenza: i raccoglitori di indirizzi leggono la pagina, non cliccano. */
+    const bott = document.getElementById('sa-mostra-email');
+    if(bott){
+      const pezzi = String(a.email).split('@');
+      bott.addEventListener('click', function(){
+        const indirizzo = pezzi.join('@');
+        const a2 = document.createElement('a');
+        a2.className = 'sa-btn sec'; a2.href = 'mailto:' + indirizzo;
+        a2.textContent = '✉️ ' + indirizzo;
+        bott.replaceWith(a2);
+      });
+    }
+  }
+
+  carica();
+})();
+</script>
+
+</body>
+</html>

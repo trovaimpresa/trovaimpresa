@@ -366,6 +366,15 @@
   to = "/.netlify/functions/sitemap-recensioni"
   status = 200
 
+# ⛔ 6 settembre 2026 — Sitemap degli annunci di SUBAPPALTO, generata al volo
+# dal database. Misurato quel giorno: 5 annunci veri nati da soli in un mese,
+# contro 0 offerte di lavoro — e la sitemap esisteva per le offerte (vuota) e
+# non per i subappalti. Ci vanno solo gli annunci con un testo e un luogo.
+[[redirects]]
+  from = "/sitemap-subappalti.xml"
+  to = "/.netlify/functions/sitemap-subappalti"
+  status = 200
+
 # La bacheca candidature cambia indirizzo per essere coerente con /offerte-lavoro
 [[redirects]]
   from = "/ricerca-candidati"

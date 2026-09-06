@@ -116,6 +116,11 @@
     .checkbox-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:6px; }
     .checkbox-item { display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#333; cursor:pointer; }
     .checkbox-item input[type=checkbox] { width:16px; height:16px; accent-color:#d4a017; cursor:pointer; flex-shrink:0; }
+    /* 6 set 2026 — i link alla pagina singola dell'annuncio */
+    .annuncio-titolo { text-decoration:none; }
+    .annuncio-titolo:hover { text-decoration:underline; }
+    .annuncio-vedi { color:#0066ff; text-decoration:none; font-weight:700; }
+    .annuncio-vedi:hover { text-decoration:underline; }
     .annuncio-tag { display:inline-block; background:#e8f5ec; color:#1a3a5e; border-radius:6px; padding:2px 8px; font-size:0.78rem; font-weight:700; margin-bottom:6px; }
     .col-right .annuncio-tag { background:#fff3cd; color:#7a5200; }
 
@@ -315,12 +320,13 @@
           return `<div class="annuncio-card">
             <div class="annuncio-tag">📋 Cerca subappaltatore</div>
             <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
-            ${tipoLavoro ? `<div class="annuncio-desc" style="font-weight:600;color:#0a2a4d;">${esc(tipoLavoro)}</div>` : ''}
+            ${tipoLavoro ? `<div class="annuncio-desc" style="font-weight:600;"><a class="annuncio-titolo" href="/subappalto-annuncio?id=${r.id}" style="color:#0a2a4d;">${esc(tipoLavoro)}</a></div>` : ''}
             ${resto ? `<div class="annuncio-desc">${esc(resto)}</div>` : ''}
             <div class="annuncio-meta">
               ${r.citta ? `<span>📍 ${esc(r.citta)}</span>` : ''}
               ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#0066ff;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
               ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#0066ff;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
+              <span><a class="annuncio-vedi" href="/subappalto-annuncio?id=${r.id}">Vedi l'annuncio →</a></span>
             </div>
           </div>`;
         }).join('');
@@ -332,12 +338,13 @@
           return `<div class="annuncio-card">
             <div class="annuncio-tag">🙋 Disponibile</div>
             <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
-            ${spec ? `<div class="annuncio-desc" style="font-weight:600;color:#7a5200;">${esc(spec)}</div>` : ''}
+            ${spec ? `<div class="annuncio-desc" style="font-weight:600;"><a class="annuncio-titolo" href="/subappalto-annuncio?id=${r.id}" style="color:#7a5200;">${esc(spec)}</a></div>` : ''}
             ${extra ? `<div class="annuncio-desc">${esc(extra)}</div>` : ''}
             <div class="annuncio-meta">
               ${r.citta ? `<span>🗺️ ${esc(r.citta)}</span>` : ''}
               ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#d4a017;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
               ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#d4a017;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
+              <span><a class="annuncio-vedi" href="/subappalto-annuncio?id=${r.id}">Vedi l'annuncio →</a></span>
             </div>
           </div>`;
         }).join('');
