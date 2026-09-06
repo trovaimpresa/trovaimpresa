@@ -175,6 +175,28 @@
       .type-section.visible .form-group:has(.tag-input) { grid-column: 1 / -1; }
     }
 
+    /* La stessa cosa vale per i blocchi in cima (Dati di contatto,
+       Presentazione): anche loro erano griglie separate, e dopo due campi
+       la riga si chiudeva lasciando mezzo schermo bianco. */
+    @media (min-width: 900px) {
+      .profilo-card-unica {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+        gap: 14px 22px;
+        align-items: start;
+      }
+      .profilo-card-unica > .form-card { display: contents; }
+      .profilo-card-unica > .form-title,
+      .profilo-card-unica > .type-section,
+      .profilo-card-unica .card-header,
+      .profilo-card-unica details.mappa-pieghevole,
+      .profilo-card-unica .form-group:has(textarea),
+      .profilo-card-unica .form-group:has(.tag-input) { grid-column: 1 / -1; }
+      /* la scheda delle certificazioni resta una scatola sua, a tutta riga */
+      .profilo-card-unica > #card-certificazioni { display: block; grid-column: 1 / -1; }
+      .type-section.visible { margin: 0; }
+    }
+
     /* meno aria sprecata fra un blocco e l'altro */
     .form-card { margin-bottom: 20px; }
     .form-group textarea { min-height: 76px; }
@@ -372,7 +394,7 @@
 
         <!-- Card 3: Presentazione -->
         <div class="form-card fc-blu">
-          <div class="card-header blu">📝 Presentazione</div>
+          
           <div class="form-group">
             <label>Sito web</label>
             <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
@@ -541,14 +563,14 @@
             </div>
           </div>
           <div class="form-card fc-arancio">
-            <div class="card-header arancio">📝 Specializzazioni</div>
+            
             <div class="form-group" style="margin-bottom:0;">
               <label>Altri mestieri / specializzazioni</label>
               <textarea id="f-specializzazioni-artigiano" placeholder="Es. Posa pavimenti, tinteggiatura, cartongesso..."></textarea>
             </div>
           </div>
           <div class="form-card fc-blu">
-            <div class="card-header blu">📍 Zone di lavoro</div>
+            
             <div class="form-group" style="margin-bottom:0;">
               <label>Zone di lavoro</label>
               <input type="text" id="f-zone-artigiano" placeholder="Es. Roma e provincia, Lazio">
@@ -650,14 +672,14 @@
             </div>
           </div>
           <div class="form-card fc-arancio">
-            <div class="card-header arancio">📝 Specializzazioni</div>
+            
             <div class="form-group" style="margin-bottom:0;">
               <label>Altre specializzazioni</label>
               <textarea id="f-specializzazioni-impresa" placeholder="Es. Ristrutturazioni complete, impianti, facciate..."></textarea>
             </div>
           </div>
           <div class="form-card fc-blu">
-            <div class="card-header blu">📍 Zone operative</div>
+            
             <div class="form-group" style="margin-bottom:0;">
               <label>Zone operative</label>
               <input type="text" id="f-zone-impresa" placeholder="Es. Roma e provincia, Lazio, Centro Italia">
@@ -1028,7 +1050,7 @@
             </div>
           </div>
           <div class="form-card fc-arancio">
-            <div class="card-header arancio">📝 Specializzazioni</div>
+            
             <div class="form-group" style="margin-bottom:0;">
               <label>Specializzazioni</label>
               <div style="display:flex;gap:8px;margin-bottom:8px;">
