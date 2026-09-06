@@ -563,6 +563,11 @@
       <div class="nav-item" onclick="showSection('abbandoni',this)">
         <span class="nav-icon">👋</span> Chi se n'è andato
       </div>
+      <!-- 6 settembre 2026 - chi usa il proprio PANNELLO. La voce sopra
+           («Chi usa il gestionale») guarda il gestionale, questa il pannello. -->
+      <div class="nav-item" onclick="showSection('chientra',this)">
+        <span class="nav-icon">🚶</span> Chi entra nel sito
+      </div>
       <div class="nav-item" onclick="showSection('mie-viste',this)">
         <span class="nav-icon">🧭</span> Le mie viste
       </div>
@@ -1426,6 +1431,33 @@
       </div>
     </div>
 
+    <!-- CHI ENTRA NEL SITO - 6 settembre 2026.
+         Del gestionale si sapeva gia' tutto (sezione qui sopra). Dei quattro
+         PANNELLI non si sapeva ne' quante volte ci entrano ne' quanto ci
+         restano: da oggi lo conta js/conta-pannello.js dentro
+         `accessi_pannello`, e lo rilegge netlify/functions/admin-chi-entra.js.
+         L'ultimo ingresso invece lo sapeva gia' Supabase (last_sign_in_at):
+         per questo lo STATO si decide da quello, non dal contatore nuovo. -->
+    <div class="section" id="sec-chientra">
+      <div class="topbar">
+        <div class="topbar-title">🚶 Chi entra nel sito</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="u-numeri" id="ce-numeri"></div>
+        <div class="u-filtri">
+          <button class="u-btn attivo" data-cf="tutti" onclick="filtraChiEntra('tutti',this)">Tutti</button>
+          <button class="u-btn" data-cf="viva" onclick="filtraChiEntra('viva',this)">Lo stanno usando</button>
+          <button class="u-btn" data-cf="ferma" onclick="filtraChiEntra('ferma',this)">Si sono fermati</button>
+          <button class="u-btn" data-cf="mai" onclick="filtraChiEntra('mai',this)">Mai entrati</button>
+          <button class="u-btn" data-cf="tempo" onclick="filtraChiEntra('tempo',this)">Chi resta di pi&ugrave;</button>
+          <button class="u-btn" onclick="caricaChiEntra()">Aggiorna</button>
+        </div>
+        <div id="ce-avviso"></div>
+        <div id="ce-lista"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- LE MIE VISTE — tutto quello che serve ad Alessio per provare il sito
          da un posto solo, senza account finti. -->
     <div class="section" id="sec-mie-viste">
@@ -1620,6 +1652,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'mappa-spazi') caricaMappaSpazi();
   if (id === 'arrivi') caricaArrivi();
   if (id === 'utilizzo') caricaUtilizzo();
+  if (id === 'chientra') caricaChiEntra();
   if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
@@ -2579,6 +2612,124 @@ function disegnaUtilizzo(){
             ? '<div><div class="k">Ha bussato senza entrare</div><div class="v">' + r.tentativi_totali + ' volte &middot; ' + _uQuando(r.ultimo_tentativo) + '</div></div>'
             : '')
       + '</div></div>';
+  }).join('');
+}
+
+/* ============================================================
+   CHI ENTRA NEL SITO - 6 settembre 2026
+
+   Chi apre il PROPRIO pannello, quante volte e per quanto tempo.
+
+   ⚠️ DUE SORGENTI, NON UNA, e vanno tenute distinte:
+   - «Ultima volta dentro» viene da auth.users.last_sign_in_at: lo segna
+     Supabase da sempre, quindi e' pieno anche per chi e' entrato mesi fa.
+   - «Volte» e «quanto resta» vengono da `accessi_pannello`, che esiste
+     dal 6 settembre 2026. Prima di quella data sono a ZERO perche' non li
+     contava nessuno, NON perche' nessuno sia entrato. Per questo lo stato
+     (usa / fermo / mai entrato) si decide dall'ultimo ingresso, e sopra
+     l'elenco c'e' la riga che dice da quando il contatore e' acceso.
+
+   ⚠️ I secondi contano solo il tempo in cui la pagina e' davvero davanti
+   agli occhi: chi lascia il pannello aperto e va a lavorare non risulta
+   «dentro otto ore». Il conto lo fa js/conta-pannello.js.
+   ============================================================ */
+let _chiEntra = [], _ceFiltro = 'tutti', _ceContaDa = null;
+
+/* Lo stato lo decide l'ULTIMO INGRESSO, non il contatore nuovo. */
+function _ceStato(r){
+  if(!r.ultimo_ingresso) return 'mai';
+  const giorni = (Date.now() - new Date(r.ultimo_ingresso).getTime()) / 86400000;
+  return giorni <= 7 ? 'viva' : 'ferma';
+}
+
+/* «2 minuti», «1 ora e 20 minuti». Zero non e' «0 secondi»: e' un trattino,
+   perche' zero qui vuol dire «non lo so ancora», non «e' stato zero». */
+function _ceTempo(sec){
+  const n = Number(sec) || 0;
+  if(n <= 0) return '—';
+  if(n < 60) return n + ' second' + (n === 1 ? 'o' : 'i');
+  const min = Math.round(n / 60);
+  if(min < 60) return min + ' minut' + (min === 1 ? 'o' : 'i');
+  const ore = Math.floor(min / 60), resto = min % 60;
+  return ore + ' or' + (ore === 1 ? 'a' : 'e') + (resto ? ' e ' + resto + ' minut' + (resto === 1 ? 'o' : 'i') : '');
+}
+
+async function caricaChiEntra(){
+  const box = document.getElementById('ce-lista');
+  if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try{
+    const res = await fetch('/.netlify/functions/admin-chi-entra', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    _chiEntra = j.data || [];
+    _ceContaDa = j.conta_da || null;
+    disegnaChiEntra();
+  }catch(e){
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _uEsc(e.message) + '</div>';
+  }
+}
+
+function filtraChiEntra(f, el){
+  _ceFiltro = f;
+  document.querySelectorAll('#sec-chientra .u-btn').forEach(b => b.classList.remove('attivo'));
+  if(el) el.classList.add('attivo');
+  disegnaChiEntra();
+}
+
+function disegnaChiEntra(){
+  const usano = _chiEntra.filter(r => _ceStato(r) === 'viva').length;
+  const fermi = _chiEntra.filter(r => _ceStato(r) === 'ferma').length;
+  const mai   = _chiEntra.filter(r => _ceStato(r) === 'mai').length;
+  const m30   = _chiEntra.filter(r => r.ultimo_ingresso &&
+                 (Date.now() - new Date(r.ultimo_ingresso).getTime()) / 86400000 <= 30).length;
+
+  const numeri = document.getElementById('ce-numeri');
+  if(numeri) numeri.innerHTML =
+      '<div class="u-num"><div class="v">' + _chiEntra.length + '</div><div class="e">Iscritti in tutto</div></div>'
+    + '<div class="u-num verde"><div class="v">' + usano + '</div><div class="e">Entrati negli ultimi 7 giorni</div></div>'
+    + '<div class="u-num"><div class="v">' + m30 + '</div><div class="e">Entrati negli ultimi 30 giorni</div></div>'
+    + '<div class="u-num giallo"><div class="v">' + fermi + '</div><div class="e">Entrati ma poi fermi</div></div>'
+    + '<div class="u-num rosso"><div class="v">' + mai + '</div><div class="e">Mai entrati nel loro pannello</div></div>';
+
+  /* La riga che impedisce di leggere uno zero come un fatto. */
+  const avv = document.getElementById('ce-avviso');
+  if(avv){
+    avv.innerHTML = _ceContaDa
+      ? '<div class="st-nota" style="margin:0 0 18px">«Ultima volta dentro» c\'era già da sempre. Le <b>volte</b> e il <b>tempo</b> si contano dal ' + new Date(_ceContaDa).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) + ': prima di allora sono a zero perché non li registrava nessuno, non perché non sia entrato nessuno.</div>'
+      : '<div class="st-nota" style="margin:0 0 18px">Il contatore delle <b>volte</b> e del <b>tempo</b> è appena stato acceso: i primi numeri compaiono quando un iscritto apre il suo pannello. «Ultima volta dentro» invece è già vero adesso.</div>';
+  }
+
+  let righe = _chiEntra.filter(r =>
+    _ceFiltro === 'tutti' || _ceFiltro === 'tempo' || _ceStato(r) === _ceFiltro);
+  if(_ceFiltro === 'tempo'){
+    righe = righe.slice().sort((a,b) => (Number(b.secondi_totali)||0) - (Number(a.secondi_totali)||0));
+  }
+
+  const box = document.getElementById('ce-lista');
+  if(!box) return;
+  if(!righe.length){ box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px">Nessun iscritto in questo gruppo.</div>'; return; }
+
+  box.innerHTML = righe.map(r => {
+    const st = _ceStato(r);
+    const et = st === 'viva' ? 'Lo sta usando'
+             : (st === 'ferma' ? 'E\' entrato ma poi si è fermato' : 'Mai entrato nel suo pannello');
+    const nome = r.nome_attivita || r.email || 'Senza nome';
+    const prem = String(r.piano || '').toLowerCase() === 'premium' ? '<span class="u-badge">Premium</span>' : '';
+    return '<div class="u-riga ' + st + '">'
+      + '<div class="n">' + _uEsc(nome) + prem + '</div>'
+      + '<div class="s">' + _uEsc(r.tipo || '—') + ' &middot; ' + _uEsc(r.citta || 'città non indicata') + ' &middot; ' + _uEsc(r.email || '') + '</div>'
+      + '<div class="u-stato ' + st + '">' + et + '</div>'
+      + '<div class="u-det">'
+        + '<div><div class="k">Ultima volta dentro</div><div class="v">' + (r.ultimo_ingresso ? _uQuando(r.ultimo_ingresso) : 'Mai entrato') + '</div></div>'
+        + '<div><div class="k">Volte entrato ultimi 7 giorni</div><div class="v">' + (r.volte_7 || 0) + '</div></div>'
+        + '<div><div class="k">Volte entrato ultimi 30 giorni</div><div class="v">' + (r.volte_30 || 0) + '</div></div>'
+        + '<div><div class="k">Volte entrato in tutto</div><div class="v">' + (r.volte_totali || 0) + '</div></div>'
+        + '<div><div class="k">Quanto resta ogni volta</div><div class="v">' + _ceTempo(r.secondi_medi) + '</div></div>'
+        + '<div><div class="k">Tempo passato dentro in tutto</div><div class="v">' + _ceTempo(r.secondi_totali) + '</div></div>'
+      + '</div></div>'
   }).join('');
 }
 
