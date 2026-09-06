@@ -2924,6 +2924,14 @@ async function caricaVisite() {
   }
 }
 
+// 6 settembre 2026 — SCORCIATOIA GLOBALE (prima era chiusa dentro caricaImprese).
+// Scrive un numero dentro una casella, e non si arrabbia se la casella non
+// c'e' piu'. Recensioni e Segnalazioni la usavano da fuori, dove non esisteva:
+// risultato, la tabella delle recensioni restava su "Caricamento..." per
+// sempre e le segnalazioni dicevano "Errore caricamento" pur non avendo
+// nessun errore. Sta qui fuori perche' la usano in tre punti diversi.
+const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+
 // CARICA IMPRESE
 async function caricaImprese() {
   const { data, error } = await sb.from('imprese').select('*').order('created_at', { ascending: false });
@@ -2944,7 +2952,6 @@ async function caricaImprese() {
   const verificate = impreseVere.filter(i => i.verificata).length;
   const attesa = impreseVere.filter(i => !i.verificata).length;
 
-  const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   _set('stat-totali', tot);
   // "Verificate" e "In attesa" non dicevano nulla di utile: nessuno verifica.
   // Al loro posto due numeri su cui si puo' agire davvero.
