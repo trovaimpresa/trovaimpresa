@@ -2201,10 +2201,6 @@
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
         </div>
-        <div onclick="showSection('certificazioni', this)" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
-          <div class="dash-quick-icon">📜</div>
-          <div class="dash-quick-label">Certificazioni</div>
-        </div>
         <div class="dash-quick-card" data-card-id="qr-profilo" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalQRCode()">
           <div class="dash-quick-icon">🔲</div>
           <div class="dash-quick-label">QR Code profilo</div>
@@ -2531,12 +2527,23 @@
     </div>
 
     <!-- CERTIFICAZIONI -->
-    <div class="section" id="sec-certificazioni">
+
+    <!-- PROFILO -->
+    <div class="section" id="sec-profilo">
       <div class="topbar">
-        <div class="topbar-title">📜 Certificazioni <span style="font-size:13px;background:#f0f0f0;color:#888;border-radius:10px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-weight:700;margin-left:8px;">Opzionale</span></div>
+        <div class="topbar-title">👤 Il mio profilo</div>
+      </div>
+      <div class="profilo-card" id="profilo-dati">
+        <div class="profilo-title">Dati impresa</div>
+        <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
       </div>
 
-      <div style="background:white;border-radius:16px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
+      <!-- 6 settembre 2026 — le CERTIFICAZIONI erano una casella a se' nella
+           Dashboard. Adesso stanno qui, attaccate ai dati del profilo: e' li'
+           che uno le va a cercare, non in mezzo alle scorciatoie. -->
+      <div class="profilo-card" id="profilo-certificazioni" style="margin-top:20px">
+        <div class="profilo-title">📋 Certificazioni</div>
+        <div style="background:white;border-radius:16px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
         <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:16px;">Aggiungi certificazione</div>
         <div class="form-group">
           <label>Nome certificazione *</label>
@@ -2556,16 +2563,6 @@
       </div>
 
       <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
-    </div>
-
-    <!-- PROFILO -->
-    <div class="section" id="sec-profilo">
-      <div class="topbar">
-        <div class="topbar-title">👤 Il mio profilo</div>
-      </div>
-      <div class="profilo-card" id="profilo-dati">
-        <div class="profilo-title">Dati impresa</div>
-        <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
       </div>
     </div>
 
@@ -3766,7 +3763,7 @@ function showSectionById(id, fromPopstate) {
 
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','profilo'];
   if (hash && sezioniValide.includes(hash)) {
     history.replaceState({ section: hash }, '', '#' + hash);
   } else {
@@ -5088,7 +5085,7 @@ async function inizializza() {
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','profilo'];
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
