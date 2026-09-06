@@ -195,8 +195,23 @@
     if(!compTabellaOk){toast("Prima serve l'aggiornamento del database: "+COMP_SQL_TESTO);return;}
     c=c||{};
     const isNew=!c.id;
-    /* le tariffe che hai davvero nel Prezzario: servono alla tendina qui sotto */
-    await ppCarica();
+    /* le tariffe che hai davvero nel Prezzario: servono alla tendina qui sotto.
+       ⛔ 6 settembre 2026 — QUESTA RIGA ERA L'84% DELL'ATTESA DOPO OGNI
+       SALVATAGGIO. computoForm() si riapre da capo ogni volta che salvi una
+       lavorazione (compTornaAlComputo), e ppCarica() riscaricava OGNI VOLTA
+       500 voci di prezzario — 354 kB — per riempire una tendina che sta nella
+       pagina 2, ha una riga sola, e che in quel momento non stai guardando.
+       Misurato dal vivo sul computo da 88 lavorazioni: 1.619 ms su 1.930 di
+       attesa, e fino a 5.831 ms quando la linea va piano.
+       La memoria c'era gia': ppTutte, la stessa che usa ppCerca() con questa
+       identica condizione, e che js/gest-sal-prezzario.js svuota nei 4 punti
+       in cui il prezzario cambia davvero (import, cancellazione, ripulitura).
+       Qui bastava usarla. Misura dopo: da 372 a 159 ms di mediana, 0 kB.
+       ⚠️ Chi un domani aggiunge un altro punto che cambia il prezzario deve
+       svuotare ppTutte come fanno gia' quei quattro, se no la tendina qui
+       resta indietro. Banco: prove-claude/banchi-fissi/velocita/
+       banco-prezzario-memoria.js */
+    if(!ppTutte.length) await ppCarica();
     const _fonti=ppFonti();
     const _scritto=(c.prezzario||"");
     const _daTendina=(_fonti.indexOf(_scritto)>=0);
