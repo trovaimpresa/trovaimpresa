@@ -492,13 +492,9 @@
               <input type="text" id="f-partita_iva-artigiano" placeholder="Es. 12345678901">
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Anni di esperienza</label>
-                <input type="number" id="f-anni_esperienza-artigiano" min="0" max="60" placeholder="Es. 10">
-              </div>
             </div>
             <div class="form-group">
-              <label>Anno di fondazione / inizio attività</label>
+              <label>Anno in cui hai iniziato</label>
               <input type="number" id="f-anno_fondazione-artigiano" min="1900" max="2026" placeholder="Es. 2005">
             </div>
             <div class="form-group">
@@ -656,10 +652,6 @@
               <input type="text" id="f-partita_iva-impresa" placeholder="Es. 12345678901">
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Anni di attività</label>
-                <input type="number" id="f-anni_esperienza-impresa" min="0" max="100" placeholder="Es. 15">
-              </div>
             </div>
             <div class="form-group">
               <label>Anno di fondazione</label>
@@ -1683,7 +1675,6 @@
       if (tipoCategoria === 'artigiano') {
         document.getElementById('f-nome-artigiano').value = d.nome || '';
         document.getElementById('f-partita_iva-artigiano').value = d.partita_iva || '';
-        document.getElementById('f-anni_esperienza-artigiano').value = d.anni_esperienza || '';
         document.getElementById('f-anno_fondazione-artigiano').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         setSelectValue('f-mestiere2-artigiano', Array.isArray(d.mestieri) ? d.mestieri[1] : '');
@@ -1699,7 +1690,6 @@
       } else if (tipoCategoria === 'impresa') {
         document.getElementById('f-nome-impresa').value = d.nome || '';
         document.getElementById('f-partita_iva-impresa').value = d.partita_iva || '';
-        document.getElementById('f-anni_esperienza-impresa').value = d.anni_esperienza || '';
         document.getElementById('f-anno_fondazione-impresa').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-impresa').value = d.specializzazioni || '';
@@ -1820,6 +1810,25 @@
        per dire la stessa cosa. Questa scorciatoia legge un campo se c'e' e
        restituisce vuoto se non c'e' piu': cosi' il salvataggio non si spacca
        ne' oggi ne' se un domani se ne toglie un altro. */
+    /* ===== 6 settembre 2026 — GLI ANNI SI CONTANO DA SOLI =====
+       C'erano due caselle che dicevano la stessa cosa: «Anni di esperienza» e
+       «Anno di fondazione». Nel profilo di Alessio erano gia' in contraddizione
+       (5 anni contro 2009, che fanno 17). Adesso si scrive solo l'ANNO, e gli
+       anni di esperienza li calcola il sito: cosi' non invecchiano mai e non
+       si possono contraddire.
+       ⚠️ La colonna `anni_esperienza` NON sparisce: la leggono la scheda
+       pubblica, i pannelli, l'admin e le pagine di registrazione. Continua a
+       essere riempita, solo che adesso il numero e' sempre giusto.
+       Se l'anno non c'e', si tiene il numero che era gia' scritto: meglio un
+       dato vecchio che nessun dato. */
+    function anniDaAnno(idAnno, valorePrecedente) {
+      const e = document.getElementById(idAnno);
+      const anno = e ? parseInt(e.value, 10) : NaN;
+      const oggi = new Date().getFullYear();
+      if (!anno || anno < 1900 || anno > oggi) return valorePrecedente || null;
+      return oggi - anno;
+    }
+
     function valoreSeCe(id) {
       const e = document.getElementById(id);
       return e ? e.value : '';
@@ -1894,7 +1903,7 @@
           Object.assign(dati, {
             nome: document.getElementById('f-nome-artigiano').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-artigiano').value.trim(),
-            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-artigiano').value) || null,
+            anni_esperienza: anniDaAnno('f-anno_fondazione-artigiano', impresaData.anni_esperienza),
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-artigiano').value) || null,
             mestieri: [...new Set([
               document.getElementById('f-mestiere-artigiano').value,
@@ -1915,7 +1924,7 @@
           Object.assign(dati, {
             nome: document.getElementById('f-nome-impresa').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-impresa').value.trim(),
-            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-impresa').value) || null,
+            anni_esperienza: anniDaAnno('f-anno_fondazione-impresa', impresaData.anni_esperienza),
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-impresa').value ? [document.getElementById('f-mestiere-impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-impresa').value.trim(),
