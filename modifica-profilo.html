@@ -200,7 +200,9 @@
       /* 40px come tutti gli altri: questa regola e' piu' forte di
          `.card-header` e prima si mangiava lo spazio della linea */
       .type-section.visible .card-header { grid-column: 1 / -1; margin-top: 40px; }
-      .type-section.visible .card-header:first-child { margin-top: 0; }
+      /* ⛔ stesso tranello di sotto: con `display: contents` OGNI titolo e'
+         il primo figlio del suo blocco, quindi questa riga schiacciava a
+         zero il margine di tutti e si mangiava lo spazio della linea. */
       /* i campi lunghi si prendono la riga intera, il resto sta in fila */
       .type-section.visible .form-group:has(textarea),
       .type-section.visible .form-group:has(.tag-input) { grid-column: 1 / -1; }
@@ -225,6 +227,9 @@
       .profilo-card-unica .form-group:has(.tag-input) { grid-column: 1 / -1; }
       /* la scheda delle certificazioni resta una scatola sua, a tutta riga */
       .profilo-card-unica > #card-certificazioni { display: block; grid-column: 1 / -1; }
+      /* stessa aria sopra la linea anche per i due blocchi in cima, che
+         non stanno dentro nessuna sezione di categoria */
+      .profilo-card-unica > .form-card > .card-header { margin-top: 38px; }
       .type-section.visible { margin: 0; }
     }
 
@@ -256,9 +261,14 @@
       border-top: 2px solid #b9c7db;
       padding-top: 15px;
     }
-    /* il primo gruppo non ha niente sopra da separare */
-    .form-title + .card-header,
-    .card-header:first-child { margin-top: 8px; border-top: none; padding-top: 13px; }
+    /* ⛔ 6 settembre 2026 — QUI C'ERA UN TRANELLO.
+       L'eccezione era scritta `.card-header:first-child`, per togliere la
+       linea solo al primo gruppo. Ma i blocchi hanno `display: contents`, e
+       ogni titolo e' il PRIMO FIGLIO del suo blocco: l'eccezione li prendeva
+       TUTTI e la linea non compariva da nessuna parte.
+       Adesso la linea ce l'hanno tutti, primo compreso: sotto il titolone
+       della pagina ci sta bene lo stesso, e non c'e' piu' niente che possa
+       spegnerla per sbaglio. */
     /* le scritte dei campi: piu' grandi e piu' marcate */
     .form-group label { font-size: 15.5px; font-weight: 700; color: #2b323d; }
     .form-group input, .form-group select, .form-group textarea { font-size: 16.5px; }
