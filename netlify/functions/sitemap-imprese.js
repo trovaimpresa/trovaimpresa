@@ -58,15 +58,26 @@ function costruisciXml(imprese) {
 
 exports.handler = async function () {
   try {
+    /* ⛔ 6 SETTEMBRE 2026 — PERCHE' SI LEGGE LA VISTA E NON LA TABELLA.
+       Questa sitemap usciva VUOTA: rispondeva 200 con zero indirizzi dentro.
+       La tabella `imprese` ha una sola regola di lettura, per chi ha fatto
+       l'accesso e solo sulla propria riga. Questa funzione legge da fuori,
+       senza nessun accesso: la risposta era sempre [] e le 95 schede
+       pubbliche non finivano in nessun elenco che Google legge.
+       La vista `imprese_pubbliche` e' la stessa porta che usano gia' le
+       pagine pubbliche del sito (cerca-artigiani legge da li'), e' leggibile
+       da chiunque e mostra solo le colonne pubbliche.
+       ⚠️ I due filtri `is_test` e `email_confermata` NON si ripetono qui: quelle
+          due colonne nella vista non esistono e la richiesta darebbe errore 400.
+          Il filtro lo fa gia' la vista — misurato lo stesso giorno: 95 righe,
+          esattamente le imprese con is_test=false e email_confermata=true. */
     const q = new URLSearchParams({
       select: 'id,citta,mestiere,mestieri,descrizione',
-      is_test: 'eq.false',
-      email_confermata: 'eq.true',
       order: 'id.asc',
       limit: String(MAX_URL)
     });
 
-    const risposta = await fetch(`${SUPABASE_URL}/rest/v1/imprese?${q}`, {
+    const risposta = await fetch(`${SUPABASE_URL}/rest/v1/imprese_pubbliche?${q}`, {
       headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
     });
 
