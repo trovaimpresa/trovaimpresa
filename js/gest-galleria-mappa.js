@@ -24,10 +24,23 @@
      Il banco lo controlla: prove-claude/banchi-fissi/smontaggio/banco-fette.js
      ============================================================ */
 
-  const GAL_VUOTO=_SVGV+'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
+  /* ⛔ 6 settembre 2026 — QUESTA RIGA HA SPENTO LA GALLERIA E LA MAPPA.
+     Prima era «const GAL_VUOTO=_SVGV+'...'», cioe' si costruiva NEL MOMENTO
+     in cui il file nasce. Ma _SVGV e' dichiarato dentro gestionale-app.html,
+     che parte DOPO questo file: alla prima riga il file moriva, e tutto
+     quello che veniva dopo — renderGalleria, renderMappa, il caricamento
+     delle foto — non nasceva proprio. A schermo non usciva nessun errore:
+     la Galleria mostrava zero foto e la Mappa zero spilli, come se non ci
+     fosse niente da vedere. La bugia piu' silenziosa che ci sia.
+     Adesso e' una FUNZIONE: si costruisce quando serve, e quando serve la
+     pagina e' gia' partita da un pezzo.
+     ⚠️ REGOLA GENERALE PER LE FETTE CHE VERRANNO: in un file staccato,
+     al primo livello non si puo' USARE niente che stia nella pagina —
+     lo si puo' solo nominare dentro una funzione. */
+  const GAL_VUOTO=()=>_SVGV+'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
   function galVuoto(box){
     box.style.display="block";
-    box.innerHTML=tabVuoto("Nessuna foto o video da mostrare","Usa il pulsante «Carica foto o video» qui sopra, oppure cambia i filtri.",GAL_VUOTO);
+    box.innerHTML=tabVuoto("Nessuna foto o video da mostrare","Usa il pulsante «Carica foto o video» qui sopra, oppure cambia i filtri.",GAL_VUOTO());
   }
   /* ================= GALLERIA =================
      Da qui si carica, si guarda e si elimina. Prima la Galleria sapeva solo
