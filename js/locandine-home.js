@@ -26,11 +26,11 @@
   ];
   var IN_COLONNA = [
     { sez: '#categorie',        lato: 'sx', passo: 1, file: '02-gestionale',  link: '/software-gestionale-imprese-edili' },
-    { sez: '#categorie',        lato: 'dx', passo: 1, file: '06-guide',       link: '/costi-ristrutturazione' },
+    { sez: '#categorie',        lato: 'dx', passo: 1, file: '03-computo',     link: '/software-gestionale-imprese-edili' },
     { sez: '#registrati',       lato: 'sx', passo: 2, file: '07-bandi',       link: '/bandi' },
     { sez: '#registrati',       lato: 'dx', passo: 2, file: '08-subappalti',  link: '/subappalto' },
     { sez: '.guide-costi-home', lato: 'sx', passo: 3, file: '13-blog',        link: '/blog' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '03-computo',     link: '/software-gestionale-imprese-edili' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '06-guide',       link: '/costi-ristrutturazione' },
     { sez: '.why-section',      lato: 'sx', passo: 4, file: '09-offerte',     link: '/offerte-lavoro' },
     { sez: '.why-section',      lato: 'dx', passo: 4, file: '14-recensioni',  link: '/cerca-imprese' },
     { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, file: '11-citta',       link: '/citta' },
