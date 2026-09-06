@@ -222,12 +222,24 @@
     .form-group textarea { min-height: 76px; }
     .profilo-card-unica { padding: 24px 26px; }
 
-    /* ---- i titoletti: una barretta blu davanti, si vede dove comincia ---- */
+    /* ---- 6 settembre 2026, Alessio: «e' tutto un ammucchio di cose, non si
+         distingue una cosa dall'altra». Compattando avevo tolto i bordi fra un
+         blocco e l'altro: i campi si erano avvicinati ma non si capiva piu'
+         dove finiva un gruppo. Adesso ogni titolo e' una fascia grigia a
+         tutta riga con la barretta colorata: si vede da lontano. ---- */
     .card-header {
-      border-left: 4px solid #0066ff; border-bottom: none;
-      padding: 2px 0 2px 12px; margin-bottom: 16px;
+      background: #f2f6fc;
+      border-left: 5px solid #0066ff; border-bottom: none;
+      border-radius: 0 10px 10px 0;
+      padding: 13px 16px; margin: 26px 0 16px;
+      font-size: 18.5px; font-weight: 800; color: #0a2a4d;
     }
-    .card-header.arancio { border-left-color: #e8733a; }
+    .card-header.arancio { border-left-color: #e8733a; background: #fdf4ef; }
+    .form-title + .card-header,
+    .card-header:first-child { margin-top: 6px; }
+    /* le scritte dei campi: piu' grandi e piu' marcate */
+    .form-group label { font-size: 15.5px; font-weight: 700; color: #2b323d; }
+    .form-group input, .form-group select, .form-group textarea { font-size: 16.5px; }
 
     /* ---- le caselle: bordo piu' morbido, testo piu' grande ---- */
     .form-group input, .form-group select, .form-group textarea {
@@ -1367,6 +1379,10 @@
       titoli.forEach(function (h) {
         if (h.closest('#card-certificazioni')) return;
         if (h.querySelector('.btn-modifica')) return;
+        /* i titoli delle altre categorie (impresa, negozio, professionista)
+           stanno nella pagina ma nascosti: se gli si attacca il tasto, quello
+           spunta fuori in fondo alla pagina come un bottone orfano */
+        if (h.offsetParent === null) return;
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'btn-modifica';

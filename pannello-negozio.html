@@ -21,13 +21,20 @@
     --rosso:   #e53e3e;
     --rosso3:  #fff5f5;
     --dark:    #1a1a1a;
-    --mid:     #555;
-    --light:   #999;
+    /* 6 settembre 2026 — erano troppo chiari da leggere */
+    --mid:     #3f4652;
+    --light:   #5f6b7a;
     --bg:      #f4f6f9;
     --border:  rgba(0,0,0,0.08);
     --shadow:  0 2px 16px rgba(0,0,0,0.07);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  /* 6 settembre 2026, Alessio: «in tutto il pannello voglio scritte piu'
+     grandi piu' marcate». LA LEVA GENERALE DELLA GRANDEZZA: il browser parte
+     da 16px, qui si parte da 18px e tutto quello che e' scritto in "rem"
+     cresce del 12,5% in un colpo solo. Per cambiare la misura del pannello
+     si tocca SOLO questo numero. */
+  html { font-size:18px; }
   body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
 
   .login-screen {
@@ -72,7 +79,7 @@
   }
   .sidebar-logo .trova { color:var(--verde); }
   .sidebar-logo .impresa { color:var(--arancio); }
-  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:15px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
   .sidebar-nav { flex:1; padding:16px 12px; overflow-y:auto; }
   .nav-item {
     display:flex; align-items:center; gap:10px;
@@ -92,7 +99,7 @@
   .nav-item.active { box-shadow:0 4px 14px rgba(0,0,0,0.13); color:var(--dark); opacity:1; font-weight:800; }
   .nav-badge {
     margin-left:auto; background:var(--arancio); color:white;
-    font-size:13px; font-weight:800; padding:2px 7px; border-radius:20px;
+    font-size:15px; font-weight:800; padding:2px 7px; border-radius:20px;
   }
   .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
   .logout-btn {
@@ -107,7 +114,7 @@
   .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
   .impresa-badge {
     background:var(--verde3); color:var(--verde2);
-    padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;
+    padding:6px 14px; border-radius:20px; font-size:15px; font-weight:700;
   }
 
   .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
@@ -121,7 +128,7 @@
   .stat-icon.o { background:var(--arancio3); }
   .stat-icon.b { background:#e8f0ff; }
   .stat-num { font-family:'Playfair Display',serif; font-size:1.8rem; line-height:1; }
-  .stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+  .stat-lbl { font-size:15px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
 
   .section { display:none; }
   .section.active { display:block; }
@@ -134,13 +141,13 @@
   .prev-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
   .prev-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .prev-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
-  .prev-badge { padding:4px 10px; border-radius:20px; font-size:13px; font-weight:800; }
+  .prev-badge { padding:4px 10px; border-radius:20px; font-size:15px; font-weight:800; }
   .badge-nuovo { background:#e8f0ff; color:#3355cc; }
   .badge-inviato { background:var(--verde3); color:var(--verde2); }
   .prev-info { display:flex; gap:16px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:10px; }
   .prev-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; }
   .prev-footer { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
-  .prev-data { font-size:13px; color:var(--light); }
+  .prev-data { font-size:15px; color:var(--light); }
   .btn-genera {
     padding:8px 18px; background:linear-gradient(135deg,var(--verde),var(--verde2));
     color:white; border:none; border-radius:10px; cursor:pointer;
@@ -170,7 +177,7 @@
   .richiesta-box {
     background:var(--bg); border-radius:14px; padding:18px; margin-bottom:20px;
   }
-  .ric-title { font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .ric-title { font-size:15px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
   .ric-row { display:flex; gap:8px; margin-bottom:6px; font-size:0.85rem; }
   .ric-key { color:var(--mid); font-weight:600; min-width:100px; }
 
@@ -194,7 +201,7 @@
 
   .prev-generato { display:none; }
   .prev-generato.show { display:block; }
-  .prev-gen-label { font-size:13px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .prev-gen-label { font-size:15px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
   .prev-textarea {
     width:100%; min-height:280px; padding:16px; border-radius:14px;
     border:1.5px solid var(--verde); background:var(--verde3);
@@ -202,7 +209,7 @@
     line-height:1.7; resize:vertical; outline:none;
   }
   .prev-prezzo-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-  .prev-input-wrap label { display:block; font-size:13px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .prev-input-wrap label { display:block; font-size:15px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
   .prev-input {
     width:100%; padding:10px 14px; border-radius:10px;
     border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
@@ -244,7 +251,7 @@
   .mfa-box p { font-size:0.85rem; color:var(--mid); margin-bottom:20px; line-height:1.5; }
   .mfa-qr { text-align:center; margin:16px 0; }
   .mfa-qr svg { max-width:180px; border:1px solid var(--border); border-radius:8px; padding:8px; }
-  .mfa-secret { font-size:13px; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
+  .mfa-secret { font-size:15px; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
   .mfa-input { width:100%; padding:13px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:1.1rem; font-family:inherit; text-align:center; letter-spacing:4px; outline:none; margin-bottom:14px; }
   .mfa-input:focus { border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,102,255,0.1); }
   .mfa-btn { width:100%; padding:13px; background:var(--verde); color:white; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
@@ -257,7 +264,7 @@
   .mfa-alert-success { background:var(--verde3); border:1px solid #a8bdd5; color:var(--verde2); }
 
   .form-group { margin-bottom:16px; }
-  .form-group label { display:block; font-size:13px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .form-group label { display:block; font-size:15px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .form-group input, .form-group select, .form-group textarea {
     width:100%; padding:11px 14px; border-radius:10px;
     border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
@@ -366,7 +373,7 @@
   .gest-porta { border:1.5px solid rgba(0,0,0,0.08); border-radius:20px; padding:24px; background:#f4f6f9; }
   .gest-emoji { font-size:1.5rem; line-height:1; }
   .gest-nome { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#1a1a1a; }
-  .gest-tuo { font-size:13px; color:#7c3aed; font-weight:700; }
+  .gest-tuo { font-size:15px; color:#7c3aed; font-weight:700; }
 
   /* il nome del gestionale sta IN MEZZO alle quattro carte, come nel disegno
      a mano di Alessio: due carte a sinistra, il nome, due carte a destra */
@@ -394,7 +401,7 @@
   .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
   .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
-  .pi-nota { font-size:13px; color:var(--light); text-align:center; margin-top:10px; }
+  .pi-nota { font-size:15px; color:var(--light); text-align:center; margin-top:10px; }
   .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
   /* quadrate davvero: stessa larghezza e stessa altezza */
   /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
@@ -410,7 +417,7 @@
   .g-tit { font-weight:700; color:#1a1a1a; font-size:16px; }
   .g-txt { font-size:14px; color:#1a1a1a; font-weight:500; line-height:1.3; }
   .g-azione { margin-top:auto; padding-top:8px; border-top:1px solid #e5e7eb; }
-  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; border:none; }
+  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:15px; cursor:pointer; border:none; }
   /* sotto i 620px una carta per riga: due quadrati da 130px tagliano le parole */
   /* stretto: il nome va in cima e le carte una sotto l'altra */
   @media (max-width:820px) {
@@ -468,7 +475,7 @@
   .gest-porta { border:1.5px solid rgba(0,0,0,0.08); border-radius:20px; padding:24px; background:#f4f6f9; }
   .gest-emoji { font-size:1.5rem; line-height:1; }
   .gest-nome { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#1a1a1a; }
-  .gest-tuo { font-size:13px; color:#7c3aed; font-weight:700; }
+  .gest-tuo { font-size:15px; color:#7c3aed; font-weight:700; }
 
   /* il nome del gestionale sta IN MEZZO alle quattro carte, come nel disegno
      a mano di Alessio: due carte a sinistra, il nome, due carte a destra */
@@ -496,7 +503,7 @@
   .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
   .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
-  .pi-nota { font-size:13px; color:var(--light); text-align:center; margin-top:10px; }
+  .pi-nota { font-size:15px; color:var(--light); text-align:center; margin-top:10px; }
   .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
   /* quadrate davvero: stessa larghezza e stessa altezza */
   /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
@@ -512,7 +519,7 @@
   .g-tit { font-weight:700; color:#1a1a1a; font-size:16px; }
   .g-txt { font-size:14px; color:#1a1a1a; font-weight:500; line-height:1.3; }
   .g-azione { margin-top:auto; padding-top:8px; border-top:1px solid #e5e7eb; }
-  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; border:none; }
+  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:15px; cursor:pointer; border:none; }
   /* sotto i 620px una carta per riga: due quadrati da 130px tagliano le parole */
   /* stretto: il nome va in cima e le carte una sotto l'altra */
   @media (max-width:820px) {
@@ -540,7 +547,7 @@
   .dash-stat-card:nth-child(4) { border-top-color:#1b8a3f; }
   /* la riga piccola sotto il numero delle richieste: stessa misura e stesso
      grigio dell'etichetta qui sopra, senza le maiuscole */
-  .dash-stat-sub { font-size:13px; color:var(--light); font-weight:600; margin-top:6px; }
+  .dash-stat-sub { font-size:15px; color:var(--light); font-weight:600; margin-top:6px; }
   /* 3 settembre 2026: la casella delle richieste si clicca e apre l'elenco.
      Colori e misure di questa pagina: 14px, --dark, --light, il bordo delle carte. */
   .dash-stat-card.cliccabile { cursor:pointer; }
@@ -551,9 +558,9 @@
   .ctt-vuoto { font-size:14px; color:var(--light); text-align:center; padding:24px 0; }
   .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
   .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
-  .dash-stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+  .dash-stat-lbl { font-size:15px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
 
-  .dash-quick-title { font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+  .dash-quick-title { font-size:15px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
   .dash-quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-quick-card {
     background:white; border-radius:16px; padding:20px;
@@ -565,7 +572,7 @@
   .dash-quick-card:hover { box-shadow:0 8px 24px rgba(0,102,255,0.12); transform:translateY(-2px); }
   .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
   .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
-  .dash-quick-sub { font-size:13px; color:var(--light); }
+  .dash-quick-sub { font-size:15px; color:var(--light); }
 
   .premium-lock-overlay {
     position:absolute; inset:0; z-index:5;
@@ -595,7 +602,7 @@
   .modal-ai-close:hover { opacity:1; }
   .modal-ai-body { padding:24px 28px; }
   .ai-form-group { margin-bottom:14px; }
-  .ai-form-group label { display:block; font-size:13px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .ai-form-group label { display:block; font-size:15px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .ai-form-group input, .ai-form-group select, .ai-form-group textarea {
     width:100%; padding:11px 14px; border-radius:10px;
     border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
@@ -615,11 +622,11 @@
   .btn-genera-ai-dash:disabled { opacity:0.6; cursor:not-allowed; }
   .ai-result-box { display:none; margin-top:20px; }
   .ai-result-box.show { display:block; }
-  .ai-result-label { font-size:13px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+  .ai-result-label { font-size:15px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
   .btn-copia {
     padding:5px 12px; background:var(--verde3); color:var(--verde2);
     border:1px solid #a8bdd5; border-radius:8px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:13px; cursor:pointer; transition:all 0.15s;
+    font-weight:700; font-size:15px; cursor:pointer; transition:all 0.15s;
   }
   .btn-copia:hover { background:var(--verde); color:white; }
   .ai-result-text {
@@ -654,7 +661,7 @@
   .foto-item-del {
     position:absolute; top:6px; right:6px; width:26px; height:26px;
     background:rgba(0,0,0,0.55); color:white; border:none; border-radius:50%;
-    cursor:pointer; font-size:13px; display:flex; align-items:center;
+    cursor:pointer; font-size:15px; display:flex; align-items:center;
     justify-content:center; opacity:0; transition:opacity 0.2s;
   }
   .foto-item:hover .foto-item-del { opacity:1; }
@@ -785,7 +792,7 @@
 
   /* === MODAL CREA PREVENTIVO === */
   .prev-section-label {
-    font-size:13px; font-weight:800; color:var(--verde2);
+    font-size:15px; font-weight:800; color:var(--verde2);
     text-transform:uppercase; letter-spacing:1px;
     margin:20px 0 10px; padding-top:14px; border-top:1.5px solid #f0f0f0;
   }
@@ -795,7 +802,7 @@
   .prev-table { width:100%; border-collapse:collapse; margin-bottom:10px; font-size:0.88rem; }
   .prev-table th {
     background:#f0f7f3; padding:9px 8px; text-align:left;
-    font-size:13px; font-weight:800; color:var(--mid);
+    font-size:15px; font-weight:800; color:var(--mid);
     text-transform:uppercase; letter-spacing:0.6px;
     border-bottom:1.5px solid var(--border);
   }
@@ -952,7 +959,7 @@
 
   /* Colore: il quadratino grande, con il codice accanto */
   #sec-personalizza .mpp-colore { display:flex; align-items:center; gap:10px; flex:none; }
-  #sec-personalizza .mpp-colore code { font-size:13px; color:var(--light); font-family:ui-monospace,Consolas,monospace; }
+  #sec-personalizza .mpp-colore code { font-size:15px; color:var(--light); font-family:ui-monospace,Consolas,monospace; }
   #sec-personalizza input[type="color"] {
     width:64px; height:42px; border:2px solid white; border-radius:10px;
     cursor:pointer; padding:0; box-shadow:0 0 0 1.5px #dfe3ea; flex:none; background:none;
@@ -965,7 +972,7 @@
   }
   #sec-personalizza input[type="text"]:focus,
   #sec-personalizza select:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,0.12); }
-  #sec-personalizza input[type="file"] { font-family:'DM Sans',sans-serif; font-size:13.5px; color:var(--mid); width:100%; }
+  #sec-personalizza input[type="file"] { font-family:'DM Sans',sans-serif; font-size:15.5px; color:var(--mid); width:100%; }
   #sec-personalizza input[type="file"]::file-selector-button {
     padding:10px 16px; border:1.5px solid #7c3aed; border-radius:10px;
     background:white; color:#7c3aed; font-family:'DM Sans',sans-serif;
@@ -975,7 +982,7 @@
   #sec-personalizza input[type="checkbox"] { width:22px; height:22px; accent-color:#7c3aed; cursor:pointer; flex:none; }
   #sec-personalizza input[type="range"] { width:100%; cursor:pointer; accent-color:#7c3aed; }
   #sec-personalizza .mpp-size-val { font-weight:800; color:#7c3aed; font-size:14px; }
-  #sec-personalizza .mpp-size-scala { display:flex; justify-content:space-between; font-size:13px; color:var(--light); margin-top:4px; }
+  #sec-personalizza .mpp-size-scala { display:flex; justify-content:space-between; font-size:15px; color:var(--light); margin-top:4px; }
 
   /* Temi rapidi: ogni tema e' una mini-anteprima (fascia + sfondo), non un pallino */
   #sec-personalizza .mpp-presets { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
@@ -998,7 +1005,7 @@
   /* Anteprima: la testata VERA del pannello, in piccolo */
   #sec-personalizza .mpp-preview-col { position:sticky; top:16px; }
   #sec-personalizza .mpp-preview-title {
-    font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase;
+    font-size:15px; font-weight:800; color:var(--light); text-transform:uppercase;
     letter-spacing:1px; margin:0 0 10px; display:flex; align-items:center; gap:6px;
   }
   #sec-personalizza .mpp-pv-frame {
@@ -1017,7 +1024,7 @@
   }
   #sec-personalizza .mpp-pv-cover-vuota {
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:13px; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.35);
+    font-size:15px; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.35);
   }
   #sec-personalizza .mpp-pv-cover.ha-banner .mpp-pv-cover-vuota { display:none; }
   #sec-personalizza .mpp-pv-hero {
@@ -1031,7 +1038,7 @@
   }
   #sec-personalizza .mpp-pv-logo img { width:100%; height:100%; object-fit:cover; display:block; }
   #sec-personalizza .mpp-pv-testo { min-width:0; }
-  #sec-personalizza .mpp-pv-welcome { font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:0.85; margin-bottom:2px; }
+  #sec-personalizza .mpp-pv-welcome { font-size:14.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:0.85; margin-bottom:2px; }
   #sec-personalizza .mpp-pv-nome { font-size:1.35rem; font-weight:800; line-height:1.15; overflow-wrap:anywhere; }
   #sec-personalizza .mpp-pv-cards { padding:18px 20px 20px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   #sec-personalizza .mpp-pv-card {
@@ -1043,7 +1050,7 @@
   #sec-personalizza .mpp-pv-card:nth-child(4) { border-top-color:#7c3aed; }
   #sec-personalizza .mpp-pv-card span { display:block; font-size:22px; margin-bottom:4px; }
   #sec-personalizza .mpp-pv-frame.pv-dark .mpp-pv-card { background:#1c222b; color:#e8ecf2; box-shadow:none; border:1px solid #2a323d; border-top-width:3px; }
-  #sec-personalizza .mpp-pv-nota { font-size:13.5px; color:var(--light); margin-top:10px; line-height:1.5; }
+  #sec-personalizza .mpp-pv-nota { font-size:15.5px; color:var(--light); margin-top:10px; line-height:1.5; }
 
   /* Pulsanti in fondo */
   #sec-personalizza .mpp-footer {
@@ -1067,14 +1074,14 @@
   #sec-recensioni .rec-card { background:white; border-radius:16px; padding:22px 24px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:14px; }
   #sec-recensioni .rec-testa { display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; margin-bottom:6px; }
   #sec-recensioni .rec-nome { font-size:16px; font-weight:800; color:var(--dark); }
-  #sec-recensioni .rec-data { font-size:13.5px; color:var(--light); margin-left:auto; }
-  #sec-recensioni .rec-bollo { display:inline-block; font-weight:800; font-size:13px; padding:3px 10px; border-radius:999px; }
+  #sec-recensioni .rec-data { font-size:15.5px; color:var(--light); margin-left:auto; }
+  #sec-recensioni .rec-bollo { display:inline-block; font-weight:800; font-size:15px; padding:3px 10px; border-radius:999px; }
   #sec-recensioni .rec-bollo.ok { background:#e6f6ec; color:#1b8a3f; }
   #sec-recensioni .rec-bollo.attesa { background:#fff3e0; color:#b26a00; }
   #sec-recensioni .rec-stelle { color:#f5b50a; font-size:16px; letter-spacing:1px; margin-bottom:8px; font-family:Arial,'Segoe UI Symbol',sans-serif; }   /* DM Sans disegna la stella vuota: col carattere di sistema esce piena */
   #sec-recensioni .rec-testo { font-size:15.5px; color:#333; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; margin:0; }
   #sec-recensioni .rec-risp { margin:14px 0 0 22px; padding:14px 16px; background:#f4f7fb; border-left:4px solid #0066ff; border-radius:10px; }
-  #sec-recensioni .rec-risp-tit { font-size:13px; font-weight:800; color:#0a2a4d; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; display:flex; justify-content:space-between; gap:10px; }
+  #sec-recensioni .rec-risp-tit { font-size:15px; font-weight:800; color:#0a2a4d; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; display:flex; justify-content:space-between; gap:10px; }
   #sec-recensioni .rec-risp-tit small { font-weight:600; text-transform:none; letter-spacing:0; color:var(--light); }
   #sec-recensioni .rec-risp-testo { font-size:15px; color:#12233a; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
   #sec-recensioni textarea.rec-ta { width:100%; min-height:90px; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:15px; line-height:1.55; resize:vertical; box-sizing:border-box; background:white; }
@@ -1085,7 +1092,7 @@
   #sec-recensioni .rec-btn.blu:hover { background:#0052cc; }
   #sec-recensioni .rec-btn.rosso { color:#c0392b; border-color:#e0b4b4; }
   #sec-recensioni .rec-btn:disabled { opacity:.5; cursor:default; }
-  #sec-recensioni .rec-conta { font-size:13px; color:var(--light); margin-left:auto; }
+  #sec-recensioni .rec-conta { font-size:15px; color:var(--light); margin-left:auto; }
   #sec-recensioni .rec-vuoto { background:white; border-radius:16px; padding:36px 24px; text-align:center; color:var(--mid); font-size:15.5px; line-height:1.6; border:1px solid var(--border); }
   body.theme-dark #sec-recensioni .rec-card, body.theme-dark #sec-recensioni .rec-vuoto { background:#2a2a2a; border-color:rgba(255,255,255,0.08); color:#e5e5e5; }
   body.theme-dark #sec-recensioni .rec-testo { color:#ddd; }
@@ -1099,7 +1106,7 @@
   #sec-video .video-iframe-wrap iframe { width:100%; height:100%; border:0; display:block; }
   #sec-video .video-info { flex:1; min-width:0; }
   #sec-video .video-info p { font-size:14px; color:#333; line-height:1.5; word-break:break-word; }
-  #sec-video .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; flex-shrink:0; }
+  #sec-video .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:15px; flex-shrink:0; }
   #sec-video .btn-del:hover { background:#ffe5e5; }
   @media (max-width:768px){ #sec-video .video-row{flex-direction:column} #sec-video .video-iframe-wrap{flex:0 0 auto;width:100%} #sec-video .btn-del{width:100%} }
 
@@ -1112,12 +1119,12 @@
   #sec-messaggi .msg-conv-sx { min-width:0; }
   #sec-messaggi .msg-conv-dx { display:flex; align-items:center; gap:12px; flex-shrink:0; }
   #sec-messaggi .msg-conv-apri { font-weight:800; color:#7c3aed; white-space:nowrap; font-size:0.98rem; }
-  #sec-messaggi .msg-badge { background:#c0392b; color:white; font-size:13px; font-weight:700; min-width:20px; height:20px; padding:0 6px; border-radius:10px; text-align:center; line-height:20px; box-sizing:border-box; flex-shrink:0; }
+  #sec-messaggi .msg-badge { background:#c0392b; color:white; font-size:15px; font-weight:700; min-width:20px; height:20px; padding:0 6px; border-radius:10px; text-align:center; line-height:20px; box-sizing:border-box; flex-shrink:0; }
   #sec-messaggi .msg-messages { display:flex; flex-direction:column; gap:10px; min-height:340px; max-height:520px; overflow-y:auto; padding:16px; background:#f5f5f5; border:1px solid #e3e3e3; border-radius:10px; margin-bottom:12px; }
   #sec-messaggi .msg-bubble { max-width:80%; padding:12px 16px; border-radius:12px; font-size:16px; line-height:1.55; word-wrap:break-word; }
   #sec-messaggi .msg-bubble-impresa { align-self:flex-end; background:#7c3aed; color:white; border-bottom-right-radius:2px; }
   #sec-messaggi .msg-bubble-cliente { align-self:flex-start; background:white; color:#333; border:1px solid #e5e7eb; border-bottom-left-radius:2px; }
-  #sec-messaggi .msg-bubble-meta { font-size:13px; opacity:0.75; margin-top:6px; }
+  #sec-messaggi .msg-bubble-meta { font-size:15px; opacity:0.75; margin-top:6px; }
   #sec-messaggi .msg-input-row { display:flex; gap:8px; }
   #sec-messaggi .msg-input-row input { flex:1; padding:14px 16px; border:1px solid var(--border); border-radius:8px; font-size:16px; font-family:inherit; }
   #sec-messaggi .msg-input-row button { padding:14px 24px; border:none; border-radius:8px; background:#7c3aed; color:white; font-weight:700; cursor:pointer; font-size:16px; }
@@ -1145,8 +1152,9 @@
     --rosso:   #e53e3e;
     --rosso3:  #fff5f5;
     --dark:    #1a1a1a;
-    --mid:     #555;
-    --light:   #999;
+    /* 6 settembre 2026 — erano troppo chiari da leggere */
+    --mid:     #3f4652;
+    --light:   #5f6b7a;
     --bg:      #f4f6f9;
     --border:  rgba(0,0,0,0.08);
     --shadow:  0 2px 16px rgba(0,0,0,0.07);
@@ -1195,7 +1203,7 @@
   }
   .sidebar-logo .trova { color:var(--verde); }
   .sidebar-logo .impresa { color:var(--arancio); }
-  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:15px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
   #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:0 0 16px; }
   .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
   .logout-btn {
@@ -1210,7 +1218,7 @@
   .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
   .impresa-badge {
     background:var(--verde3); color:var(--verde2);
-    padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;
+    padding:6px 14px; border-radius:20px; font-size:15px; font-weight:700;
   }
 
   .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
@@ -1224,7 +1232,7 @@
   .stat-icon.o { background:var(--arancio3); }
   .stat-icon.b { background:#e8f0ff; }
   .stat-num { font-family:'Playfair Display',serif; font-size:1.8rem; line-height:1; }
-  .stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+  .stat-lbl { font-size:15px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
 
   .section { display:none; }
   .section.active { display:block; }
@@ -1237,13 +1245,13 @@
   .prev-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
   .prev-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .prev-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
-  .prev-badge { padding:4px 10px; border-radius:20px; font-size:13px; font-weight:800; }
+  .prev-badge { padding:4px 10px; border-radius:20px; font-size:15px; font-weight:800; }
   .badge-nuovo { background:#e8f0ff; color:#3355cc; }
   .badge-inviato { background:var(--verde3); color:var(--verde2); }
   .prev-info { display:flex; gap:16px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:10px; }
   .prev-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; }
   .prev-footer { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
-  .prev-data { font-size:13px; color:var(--light); }
+  .prev-data { font-size:15px; color:var(--light); }
   .btn-genera {
     padding:8px 18px; background:linear-gradient(135deg,var(--verde),var(--verde2));
     color:white; border:none; border-radius:10px; cursor:pointer;
@@ -1273,7 +1281,7 @@
   .richiesta-box {
     background:var(--bg); border-radius:14px; padding:18px; margin-bottom:20px;
   }
-  .ric-title { font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .ric-title { font-size:15px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
   .ric-row { display:flex; gap:8px; margin-bottom:6px; font-size:0.85rem; }
   .ric-key { color:var(--mid); font-weight:600; min-width:100px; }
 
@@ -1297,7 +1305,7 @@
 
   .prev-generato { display:none; }
   .prev-generato.show { display:block; }
-  .prev-gen-label { font-size:13px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .prev-gen-label { font-size:15px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
   .prev-textarea {
     width:100%; min-height:280px; padding:16px; border-radius:14px;
     border:1.5px solid var(--verde); background:var(--verde3);
@@ -1305,7 +1313,7 @@
     line-height:1.7; resize:vertical; outline:none;
   }
   .prev-prezzo-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-  .prev-input-wrap label { display:block; font-size:13px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .prev-input-wrap label { display:block; font-size:15px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
   .prev-input {
     width:100%; padding:10px 14px; border-radius:10px;
     border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
@@ -1347,7 +1355,7 @@
   .mfa-box p { font-size:0.85rem; color:var(--mid); margin-bottom:20px; line-height:1.5; }
   .mfa-qr { text-align:center; margin:16px 0; }
   .mfa-qr svg { max-width:180px; border:1px solid var(--border); border-radius:8px; padding:8px; }
-  .mfa-secret { font-size:13px; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
+  .mfa-secret { font-size:15px; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
   .mfa-input { width:100%; padding:13px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:1.1rem; font-family:inherit; text-align:center; letter-spacing:4px; outline:none; margin-bottom:14px; }
   .mfa-input:focus { border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,102,255,0.1); }
   .mfa-btn { width:100%; padding:13px; background:var(--verde); color:white; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
@@ -1360,7 +1368,7 @@
   .mfa-alert-success { background:var(--verde3); border:1px solid #a8bdd5; color:var(--verde2); }
 
   .form-group { margin-bottom:16px; }
-  .form-group label { display:block; font-size:13px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .form-group label { display:block; font-size:15px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .form-group input, .form-group select, .form-group textarea {
     width:100%; padding:11px 14px; border-radius:10px;
     border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
@@ -1461,7 +1469,7 @@
     margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:12px;
   }
   .cert-nome { font-weight:700; font-size:0.92rem; color:var(--dark); }
-  .cert-meta { font-size:13px; color:var(--light); margin-top:3px; }
+  .cert-meta { font-size:15px; color:var(--light); margin-top:3px; }
   .btn-elimina-cert {
     background:white; border:1px solid rgba(0,0,0,0.08); border-top:4px solid #e65100;
     border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08);
@@ -1516,7 +1524,7 @@
   .gest-porta { border:1.5px solid rgba(0,0,0,0.08); border-radius:20px; padding:24px; background:#f4f6f9; }
   .gest-emoji { font-size:1.5rem; line-height:1; }
   .gest-nome { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#1a1a1a; }
-  .gest-tuo { font-size:13px; color:#7c3aed; font-weight:700; }
+  .gest-tuo { font-size:15px; color:#7c3aed; font-weight:700; }
 
   /* il nome del gestionale sta IN MEZZO alle quattro carte, come nel disegno
      a mano di Alessio: due carte a sinistra, il nome, due carte a destra */
@@ -1544,7 +1552,7 @@
   .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
   .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
-  .pi-nota { font-size:13px; color:var(--light); text-align:center; margin-top:10px; }
+  .pi-nota { font-size:15px; color:var(--light); text-align:center; margin-top:10px; }
   .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
   /* quadrate davvero: stessa larghezza e stessa altezza */
   /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
@@ -1560,7 +1568,7 @@
   .g-tit { font-weight:700; color:#1a1a1a; font-size:16px; }
   .g-txt { font-size:14px; color:#1a1a1a; font-weight:500; line-height:1.3; }
   .g-azione { margin-top:auto; padding-top:8px; border-top:1px solid #e5e7eb; }
-  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; border:none; }
+  .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:15px; cursor:pointer; border:none; }
   /* sotto i 620px una carta per riga: due quadrati da 130px tagliano le parole */
   /* stretto: il nome va in cima e le carte una sotto l'altra */
   @media (max-width:820px) {
@@ -1584,9 +1592,9 @@
   .dash-stat-card:nth-child(3) { border-top-color:#1565c0; }
   .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
   .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
-  .dash-stat-lbl { font-size:13px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+  .dash-stat-lbl { font-size:15px; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
 
-  .dash-quick-title { font-size:13px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+  .dash-quick-title { font-size:15px; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
   .dash-quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-quick-card {
     background:white; border-radius:16px; padding:20px;
@@ -1598,7 +1606,7 @@
   .dash-quick-card:hover { box-shadow:0 8px 24px rgba(0,102,255,0.12); transform:translateY(-2px); }
   .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
   .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
-  .dash-quick-sub { font-size:13px; color:var(--light); }
+  .dash-quick-sub { font-size:15px; color:var(--light); }
 
   .premium-lock-overlay {
     position:absolute; inset:0; z-index:5;
@@ -1651,7 +1659,7 @@
   }
   .modal-ai-body { padding:24px 28px; }
   .ai-form-group { margin-bottom:14px; }
-  .ai-form-group label { display:block; font-size:13px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .ai-form-group label { display:block; font-size:15px; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .ai-form-group input, .ai-form-group select, .ai-form-group textarea {
     width:100%; padding:11px 14px; border-radius:10px;
     border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
@@ -1671,11 +1679,11 @@
   .btn-genera-ai-dash:disabled { opacity:0.6; cursor:not-allowed; }
   .ai-result-box { display:none; margin-top:20px; }
   .ai-result-box.show { display:block; }
-  .ai-result-label { font-size:13px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+  .ai-result-label { font-size:15px; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
   .btn-copia {
     padding:5px 12px; background:var(--verde3); color:var(--verde2);
     border:1px solid #a8bdd5; border-radius:8px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:13px; cursor:pointer; transition:all 0.15s;
+    font-weight:700; font-size:15px; cursor:pointer; transition:all 0.15s;
   }
   .btn-copia:hover { background:var(--verde); color:white; }
   .ai-result-text {
@@ -1687,7 +1695,7 @@
 
   /* === MODAL CREA PREVENTIVO === */
   .prev-section-label {
-    font-size:13px; font-weight:800; color:var(--verde2);
+    font-size:15px; font-weight:800; color:var(--verde2);
     text-transform:uppercase; letter-spacing:1px;
     margin:20px 0 10px; padding-top:14px; border-top:1.5px solid #f0f0f0;
   }
@@ -1697,7 +1705,7 @@
   .prev-table { width:100%; border-collapse:collapse; margin-bottom:10px; font-size:0.88rem; }
   .prev-table th {
     background:#f0f7f3; padding:9px 8px; text-align:left;
-    font-size:13px; font-weight:800; color:var(--mid);
+    font-size:15px; font-weight:800; color:var(--mid);
     text-transform:uppercase; letter-spacing:0.6px;
     border-bottom:1.5px solid var(--border);
   }
@@ -1851,7 +1859,7 @@
     position:absolute; top:6px; right:6px;
     background:white; color:#e65100; border:none; border-top:3px solid #e65100;
     border-radius:8px; padding:3px 8px;
-    cursor:pointer; font-size:13px; font-weight:700;
+    cursor:pointer; font-size:15px; font-weight:700;
     display:flex; align-items:center; gap:3px;
     opacity:0; transition:all 0.2s;
     box-shadow:0 2px 6px rgba(0,0,0,0.15);
@@ -1950,7 +1958,7 @@
   #sec-video .video-iframe-wrap iframe { width:100%; height:100%; border:0; display:block; }
   #sec-video .video-info { flex:1; min-width:0; }
   #sec-video .video-info p { font-size:14px; color:#333; line-height:1.5; word-break:break-word; }
-  #sec-video .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; flex-shrink:0; }
+  #sec-video .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:15px; flex-shrink:0; }
   #sec-video .btn-del:hover { background:#ffe5e5; }
   @media (max-width:768px){ #sec-video .video-row{flex-direction:column} #sec-video .video-iframe-wrap{flex:0 0 auto;width:100%} #sec-video .btn-del{width:100%} }
 
@@ -1963,12 +1971,12 @@
   #sec-messaggi .msg-conv-sx { min-width:0; }
   #sec-messaggi .msg-conv-dx { display:flex; align-items:center; gap:12px; flex-shrink:0; }
   #sec-messaggi .msg-conv-apri { font-weight:800; color:#7c3aed; white-space:nowrap; font-size:0.98rem; }
-  #sec-messaggi .msg-badge { background:#c0392b; color:white; font-size:13px; font-weight:700; min-width:20px; height:20px; padding:0 6px; border-radius:10px; text-align:center; line-height:20px; box-sizing:border-box; flex-shrink:0; }
+  #sec-messaggi .msg-badge { background:#c0392b; color:white; font-size:15px; font-weight:700; min-width:20px; height:20px; padding:0 6px; border-radius:10px; text-align:center; line-height:20px; box-sizing:border-box; flex-shrink:0; }
   #sec-messaggi .msg-messages { display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; padding:14px; background:#f5f5f5; border-radius:10px; margin-bottom:12px; }
   #sec-messaggi .msg-bubble { max-width:75%; padding:8px 12px; border-radius:12px; font-size:14px; line-height:1.4; word-wrap:break-word; }
   #sec-messaggi .msg-bubble-impresa { align-self:flex-end; background:#7c3aed; color:white; border-bottom-right-radius:2px; }
   #sec-messaggi .msg-bubble-cliente { align-self:flex-start; background:white; color:#333; border:1px solid #e5e7eb; border-bottom-left-radius:2px; }
-  #sec-messaggi .msg-bubble-meta { font-size:13px; opacity:0.7; margin-top:4px; }
+  #sec-messaggi .msg-bubble-meta { font-size:15px; opacity:0.7; margin-top:4px; }
   #sec-messaggi .msg-input-row { display:flex; gap:8px; }
   #sec-messaggi .msg-input-row input { flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; }
   #sec-messaggi .msg-input-row button { padding:10px 18px; border:none; border-radius:8px; background:#7c3aed; color:white; font-weight:700; cursor:pointer; font-size:14px; }
@@ -2103,7 +2111,7 @@
 .dash-cover-vuota{
   position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:center;
   text-align:center; padding:0 16px;
-  font-size:13px; font-weight:700; color:rgba(255,255,255,0.85);
+  font-size:15px; font-weight:700; color:rgba(255,255,255,0.85);
 }
 .dash-cover.ha-banner .dash-cover-vuota{ display:none; }
 
@@ -2170,7 +2178,7 @@
 .dash-foto-btn{
   position:absolute; z-index:2; display:inline-flex; align-items:center; gap:8px;
   background:#fff; color:#0a2a4d; border:none; border-radius:10px;
-  padding:10px 14px; font-family:inherit; font-size:13px; font-weight:800;
+  padding:10px 14px; font-family:inherit; font-size:15px; font-weight:800;
   cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,0.28);
   transition:background 0.2s;
 }
@@ -2211,7 +2219,7 @@
 .dash-riposiziona-aiuto{
   position:absolute; left:50%; top:16px; transform:translateX(-50%); z-index:3;
   background:rgba(0,0,0,0.55); color:#fff; border-radius:10px;
-  padding:8px 14px; font-size:13px; font-weight:700; pointer-events:none;
+  padding:8px 14px; font-size:15px; font-weight:700; pointer-events:none;
 }
 
 @media (max-width:768px){
@@ -2343,7 +2351,7 @@
       <div class="dash-quick-title">Gestisci il tuo profilo pubblico</div>
       <div class="dash-quick-grid">
         <div class="dash-quick-card" data-card-id="preventivi-ricevuti" style="position:relative" onclick="showSection('preventivi', this)">
-          <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:13px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
+          <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:15px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📋</div>
           <div class="dash-quick-label">Preventivi ricevuti</div>
           <div class="dash-quick-sub">Richieste dai clienti</div>
@@ -2363,7 +2371,7 @@
           <div class="dash-quick-label">QR Code profilo</div>
         </div>
         <div class="dash-quick-card" data-card-id="messaggi" style="cursor:pointer;position:relative" onclick="showSection('messaggi', this)">
-          <span id="badge-msg-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:13px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
+          <span id="badge-msg-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:15px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">💬</div>
           <div class="dash-quick-label">Messaggi</div>
           <div class="dash-quick-sub">Messaggi dai clienti</div>
@@ -2456,7 +2464,7 @@
             <div>
               <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#0a2a4d">Rilevamento...</div>
               <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#0066ff;font-weight:700"></div>
-              <div id="meteo-condizione" style="font-size:13px;color:#999;margin-top:2px"></div>
+              <div id="meteo-condizione" style="font-size:15px;color:#999;margin-top:2px"></div>
             </div>
           </div>
 
@@ -2468,20 +2476,20 @@
               <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Lun</div>
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Mar</div>
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Mer</div>
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Gio</div>
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Ven</div>
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Sab</div>
-              <div style="text-align:center;font-size:13px;font-weight:700;color:#0066ff;padding:6px 0">Dom</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Lun</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Mar</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Mer</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Gio</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Ven</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Sab</div>
+              <div style="text-align:center;font-size:15px;font-weight:700;color:#0066ff;padding:6px 0">Dom</div>
             </div>
             <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
           </div>
 
           <!-- [D] Note (basso dx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
-            <div style="font-size:13px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
+            <div style="font-size:15px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
             <textarea id="widget-note" placeholder="Scrivi un appunto..." style="resize:none;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:60px;background:white"></textarea>
             <button onclick="aggiungiNota()" style="padding:8px 12px;background:#0066ff;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
             <div class="lista-note" id="lista-note" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
@@ -2489,7 +2497,7 @@
 
           <!-- [E] Calcolatrice (terza colonna, full height) -->
           <div class="widget-calc-card" style="grid-row:1 / span 2;grid-column:3;background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);padding:14px;display:flex;flex-direction:column;gap:10px">
-            <div style="font-size:13px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
+            <div style="font-size:15px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
             <div id="wcalc-display" style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;text-align:right;font-family:'Playfair Display',serif;font-size:1.4rem;color:#0a2a4d;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:42px;line-height:1.5">0</div>
             <div class="wcalc-keys" style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px;flex:1">
               <button type="button" onclick="wcalcClear()" class="wcalc-btn wcalc-clear">C</button>
@@ -2520,7 +2528,7 @@
       <div data-premium="true" style="flex:1 1 300px;background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08);display:flex;flex-direction:column">
         <div style="margin-bottom:16px">
           <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale lavori</div>
-          <div style="font-size:13px;color:#888;margin-top:4px">Organizza cantieri, squadra e lavori da fare</div>
+          <div style="font-size:15px;color:#888;margin-top:4px">Organizza cantieri, squadra e lavori da fare</div>
         </div>
         <div onclick="location.href='/gestionale-negozio.html'" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
           <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
@@ -2532,7 +2540,7 @@
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="margin-bottom:16px">
           <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale</div>
-          <div style="font-size:13px;color:#888;margin-top:4px">Cantieri, squadra, preventivi, spese e margini, report — tutto in un posto solo</div>
+          <div style="font-size:15px;color:#888;margin-top:4px">Cantieri, squadra, preventivi, spese e margini, report — tutto in un posto solo</div>
         </div>
         <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE PER GESTIONALE, IL NOME IN MEZZO
              (il perche' e le misure stanno nel commento del CSS) -->
@@ -2760,7 +2768,7 @@
           <label>Foto</label>
           <input type="file" id="prod-foto-file" accept="image/*" onchange="caricaFotoVetrina(this.files[0])">
           <input type="hidden" id="prod-foto">
-          <div id="prod-foto-stato" style="font-size:13px;color:var(--light);margin-top:6px"></div>
+          <div id="prod-foto-stato" style="font-size:15px;color:var(--light);margin-top:6px"></div>
         </div>
         <div class="form-group">
           <label style="display:flex;align-items:center;gap:14px;text-transform:none;letter-spacing:normal;font-size:1.05rem;font-weight:700;color:var(--verde2);cursor:pointer;background:var(--verde3);border:1.5px solid var(--verde);border-radius:12px;padding:16px 18px">
@@ -2982,16 +2990,16 @@
       </div>
       <div class="profilo-card">
         <div id="qr-code-container" style="display:flex;justify-content:center;align-items:center;min-height:280px;padding:16px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:14px;"></div>
-        <div id="qr-url-line" style="font-size:13px;color:#666;text-align:center;margin-bottom:16px;word-break:break-all;"></div>
+        <div id="qr-url-line" style="font-size:15px;color:#666;text-align:center;margin-bottom:16px;word-break:break-all;"></div>
         <div class="ai-form-group">
           <label>Colore QR Code</label>
           <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
         </div>
         <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
-        <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #0066ff;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#0a2a4d;">
+        <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #0066ff;border-radius:8px;padding:12px;font-size:15px;line-height:1.5;color:#0a2a4d;">
           <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
           <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
-          <div style="font-size:13px;color:#0066ff;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+          <div style="font-size:15px;color:#0066ff;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
         </div>
       </div>
     </div>
@@ -3029,7 +3037,7 @@
       <div class="profilo-card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px">
           <p style="margin:0;color:#555;font-size:0.9rem">Scrivici per assistenza: ti rispondiamo qui.</p>
-          <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">📥 Svuota la mia schermata</button>
+          <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap">📥 Svuota la mia schermata</button>
         </div>
         <div id="supporto-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
@@ -3038,7 +3046,7 @@
           <button onclick="inviaSupporto()" style="padding:12px 22px;background:#0066ff;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Invia</button>
         </div>
         <input type="file" id="supporto-file" accept="image/*,application/pdf" hidden onchange="supportoFileCambiato()">
-        <div id="supporto-chip" hidden style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:6px 8px 6px 12px;font-size:13.5px;font-weight:600;background:#fff;border:1.5px solid var(--border);border-radius:999px;max-width:100%"></div>
+        <div id="supporto-chip" hidden style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:6px 8px 6px 12px;font-size:15.5px;font-weight:600;background:#fff;border:1.5px solid var(--border);border-radius:999px;max-width:100%"></div>
       </div>
     </div>
 
@@ -3122,7 +3130,7 @@
     <div class="modal-ai-body">
       <div id="segnalazione-form">
         <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Descrivi il problema</label>
+          <label style="display:block;font-size:15px;font-weight:600;color:#333;margin-bottom:6px;">Descrivi il problema</label>
           <textarea id="segnalazione-testo" rows="5" placeholder="Descrivi il problema che hai riscontrato..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
         </div>
         <button id="btn-invia-segnalazione" onclick="inviaSegnalazione()" style="width:100%;padding:13px;background:var(--verde);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Invia</button>
@@ -3130,7 +3138,7 @@
       <div id="segnalazione-success" style="display:none;text-align:center;padding:20px 0;">
         <div style="font-size:48px;margin-bottom:12px;">✅</div>
         <p style="font-size:15px;font-weight:600;color:#0066ff;margin-bottom:6px;">Segnalazione inviata!</p>
-        <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
+        <p style="font-size:15px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
       </div>
     </div>
   </div>
@@ -3605,7 +3613,7 @@ function renderSupportoMsg(m) {
 function supportoAllegatoEl(m) {
   const a = document.createElement('a');
   a.target = '_blank'; a.rel = 'noopener';
-  a.style.cssText = 'display:block;margin-top:8px;color:inherit;font-weight:700;text-decoration:underline;font-size:13.5px';
+  a.style.cssText = 'display:block;margin-top:8px;color:inherit;font-weight:700;text-decoration:underline;font-size:15.5px';
   const img = /^image\//.test(m.allegato_tipo || '') || /\.(jpe?g|png|webp|gif|heic)$/i.test(m.allegato || '');
   a.textContent = img ? 'Carico la foto…' : (m.allegato_nome || 'allegato');
   sb.storage.from('supporto-allegati').createSignedUrl(m.allegato, 3600).then(function (r) {
@@ -3863,9 +3871,9 @@ async function caricaProdottiVetrina() {
       ${foto}
       <div style="padding:10px;display:flex;flex-direction:column;gap:4px">
         <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">${esc(p.titolo)}</div>
-        <div style="font-size:13px;color:var(--light)">${esc(p.categoria)}</div>
+        <div style="font-size:15px;color:var(--light)">${esc(p.categoria)}</div>
         <div style="font-weight:700;color:var(--verde2)">${prezzo}</div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mid);cursor:pointer;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:15px;color:var(--mid);cursor:pointer;margin-top:4px">
           <input type="checkbox" ${checked} style="width:18px;height:18px;accent-color:var(--verde);cursor:pointer" onchange="toggleVetrinaProdotto('${esc(p.id)}', this.checked)">
           Visibile nel profilo pubblico
         </label>
@@ -4027,7 +4035,7 @@ function caricaProfilo() {
        del bollino verde, invece dell'etichetta arancione. */
     : '';
   const riga = (k, v) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.9rem"><span style="color:var(--mid);font-weight:600">${k}</span><span style="text-align:right;color:var(--dark)">${v || '—'}</span></div>`;
-  const titoletto = (t) => `<div style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--verde2);margin-bottom:6px">${t}</div>`;
+  const titoletto = (t) => `<div style="font-size:15px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--verde2);margin-bottom:6px">${t}</div>`;
 
   document.getElementById('profilo-dati').innerHTML = `
     <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px">
@@ -4325,7 +4333,7 @@ async function caricaCandidature() {
       <div class="prev-card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <div style="font-weight:600">${nome}${cand.mestiere ? ' · ' + cand.mestiere : ''}</div>
-          <span style="background:${st.col};color:#fff;padding:3px 10px;border-radius:12px;font-size:13px;white-space:nowrap">${st.txt}</span>
+          <span style="background:${st.col};color:#fff;padding:3px 10px;border-radius:12px;font-size:15px;white-space:nowrap">${st.txt}</span>
         </div>
         ${off.titolo ? `<div style="color:#666;font-size:14px">Offerta: ${off.titolo}</div>` : ''}
         ${c.messaggio ? `<div style="margin-top:8px">${c.messaggio}</div>` : ''}
@@ -4914,7 +4922,7 @@ async function caricaContattoSbloccato(prevId) {
     const telPulito = (c.telefono || '').replace(/[\s\-+]/g, '').replace(/^39/, '');
     const waUrl = telPulito ? `https://wa.me/39${telPulito}` : '';
     const el = document.getElementById('ric-contatto');
-    if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>${c.email || '—'} · ${c.telefono || '—'}${waUrl ? ` &nbsp;<a href="${waUrl}" target="_blank" style="background:#25d366;color:white;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">📱 WhatsApp</a>` : ''}</span>`;
+    if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>${c.email || '—'} · ${c.telefono || '—'}${waUrl ? ` &nbsp;<a href="${waUrl}" target="_blank" style="background:#25d366;color:white;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">📱 WhatsApp</a>` : ''}</span>`;
   } catch (e) {
     const el = document.getElementById('ric-contatto');
     if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>⚠️ Errore nel caricamento, riprova</span>`;
@@ -5105,14 +5113,14 @@ async function apriModalPriorita() {
     const cittaUrl = encodeURIComponent(citta);
     content.innerHTML = `
       <div style="display:flex;justify-content:center;margin-bottom:18px;">
-        <span style="background:#226ec5;color:white;font-weight:800;font-size:13px;padding:6px 14px;border-radius:999px;letter-spacing:0.6px;">✓ ATTIVO</span>
+        <span style="background:#226ec5;color:white;font-weight:800;font-size:15px;padding:6px 14px;border-radius:999px;letter-spacing:0.6px;">✓ ATTIVO</span>
       </div>
       <div style="background:#f0fdf4;border:1.5px solid #226ec5;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;">
-        <div style="font-size:13px;color:#154780;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Posizione attuale</div>
+        <div style="font-size:15px;color:#154780;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Posizione attuale</div>
         <div style="font-size:1.05rem;font-weight:800;color:#154780;line-height:1.4;">Sei in posizione ${posUtente} su ${totale} negozi a ${citta}</div>
       </div>
       <div style="background:#fff7ed;border:1.5px solid #f59e0b;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px;">
-        <div style="font-size:13px;color:#92400e;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Senza Premium</div>
+        <div style="font-size:15px;color:#92400e;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Senza Premium</div>
         <div style="font-size:0.95rem;color:#78350f;">Saresti in posizione <strong>${posSenza}</strong></div>
       </div>
       <button onclick="window.location.href='cerca-negozi.html?citta=${cittaUrl}'" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">🔍 Vedi risultati live</button>
@@ -5276,10 +5284,10 @@ function renderModalRecensioni(recensioni) {
       const voto=sub.length?Math.round(sub.reduce((a,b)=>a+b,0)/sub.length):0;
       const data=r.created_at?new Date(r.created_at).toLocaleDateString('it-IT'):'';
       const stelle='★'.repeat(voto)+'☆'.repeat(5-voto);
-      const bollino = r.verificata ? '<span style="display:inline-block;background:#e6f6ec;color:#1b8a3f;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;margin-left:8px">✅ Verificata</span>' : '';
-      const attesa  = (r.confermata === false) ? '<span style="display:inline-block;background:#fff3e0;color:#b26a00;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;margin-left:8px">In attesa di conferma del cliente</span>' : '';
+      const bollino = r.verificata ? '<span style="display:inline-block;background:#e6f6ec;color:#1b8a3f;font-weight:800;font-size:15px;padding:3px 10px;border-radius:999px;margin-left:8px">✅ Verificata</span>' : '';
+      const attesa  = (r.confermata === false) ? '<span style="display:inline-block;background:#fff3e0;color:#b26a00;font-weight:800;font-size:15px;padding:3px 10px;border-radius:999px;margin-left:8px">In attesa di conferma del cliente</span>' : '';
       h+='<div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px">';
-      h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong>${recEsc(r.nome_cliente)||'Cliente'}</strong>${bollino}${attesa}<span style="font-size:13px;color:#888">${data}</span></div>`;
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong>${recEsc(r.nome_cliente)||'Cliente'}</strong>${bollino}${attesa}<span style="font-size:15px;color:#888">${data}</span></div>`;
       h+=`<div style="color:#f5b50a;font-size:14px;margin-bottom:6px">${stelle}</div>`;
       h+=`<div style="color:#444;font-size:14px">${recEsc(r.testo)}</div>`;
       h+='</div>';
@@ -5590,7 +5598,7 @@ async function caricaVideo() {
     const embed = estraiVideoEmbed(v.video_url);
     const iframe = embed
       ? '<iframe src="' + esc(embed) + '" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
-      : '<div style="padding:20px;color:#fff;font-size:13px">URL non valido</div>';
+      : '<div style="padding:20px;color:#fff;font-size:15px">URL non valido</div>';
     const desc = v.descrizione ? esc(v.descrizione) : '<em style="color:#888">Nessuna descrizione</em>';
     return '<div class="video-row"><div class="video-iframe-wrap">' + iframe + '</div><div class="video-info"><p>' + desc + '</p></div><button class="btn-del" onclick="eliminaVideo(' + v.id + ')">🗑️ Elimina</button></div>';
   }).join('');
@@ -5729,7 +5737,7 @@ async function caricaNote() {
   if (!container) return;
   const lista = data || [];
   if (!lista.length) {
-    container.innerHTML = '<div style="font-size:13px;color:#888;text-align:center;padding:6px">Nessuna nota</div>';
+    container.innerHTML = '<div style="font-size:15px;color:#888;text-align:center;padding:6px">Nessuna nota</div>';
     return;
   }
   container.innerHTML = lista.map(n => {
@@ -5739,7 +5747,7 @@ async function caricaNote() {
     <div style="background:#fffbea;border:1px solid #f0e3a0;border-radius:8px;padding:8px 10px;position:relative;font-size:0.82rem;color:#1a1a1a;line-height:1.4">
       <button onclick="eliminaNota('${n.id}')" title="Elimina nota" style="position:absolute;top:4px;right:4px;background:transparent;border:none;cursor:pointer;font-size:0.9rem;color:#c0392b;padding:2px 4px;line-height:1">🗑️</button>
       <div style="white-space:pre-wrap;word-break:break-word;margin-right:20px">${testoSafe}</div>
-      <div style="font-size:13px;color:#888;margin-top:4px">${dataFmt}</div>
+      <div style="font-size:15px;color:#888;margin-top:4px">${dataFmt}</div>
     </div>`;
   }).join('');
 }
@@ -5957,7 +5965,7 @@ function apriModalPersonalizzaPannello() {
   if (logoPreviewEl) {
     logoPreviewEl.innerHTML = haCustomLogo
       ? `<img src="${impresaCorrente.logo_url}" style="max-height:40px;width:auto;">`
-      : '<span style="font-size:13px;color:var(--light);">Nessun logo personalizzato</span>';
+      : '<span style="font-size:15px;color:var(--light);">Nessun logo personalizzato</span>';
   }
   document.getElementById('pers-pannello-logo-file').value = '';
   const logoRemoveBtn = document.getElementById('pers-pannello-logo-remove');
@@ -5966,7 +5974,7 @@ function apriModalPersonalizzaPannello() {
   if (bannerPreviewEl) {
     bannerPreviewEl.innerHTML = pers.banner_url
       ? `<img src="${pers.banner_url}" style="max-height:60px;max-width:100%;object-fit:cover;border-radius:6px;">`
-      : '<span style="font-size:13px;color:var(--light);">Nessun banner</span>';
+      : '<span style="font-size:15px;color:var(--light);">Nessun banner</span>';
   }
   document.getElementById('pers-pannello-banner-file').value = '';
 
@@ -6012,7 +6020,7 @@ async function rimuoviLogoPersonalizzato() {
   await sb.from('imprese').update({ logo_url: null }).eq('id', impresaCorrente.id);
   impresaCorrente.logo_url = null;
   const previewEl = document.getElementById('pers-pannello-logo-preview');
-  if (previewEl) previewEl.innerHTML = '<span style="font-size:13px;color:var(--light);">Nessun logo personalizzato</span>';
+  if (previewEl) previewEl.innerHTML = '<span style="font-size:15px;color:var(--light);">Nessun logo personalizzato</span>';
   document.getElementById('pers-pannello-logo-file').value = '';
   const removeBtn = document.getElementById('pers-pannello-logo-remove');
   if (removeBtn) removeBtn.style.display = 'none';
@@ -6117,7 +6125,7 @@ function renderModalVisibile(d) {
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
 </div>
-<footer style="background:#0a2a4d;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:15px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script>
 window.addEventListener('pageshow', function(event) {
   if (event.persisted) {
