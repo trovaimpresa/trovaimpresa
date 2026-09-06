@@ -69,7 +69,7 @@
     .fmt-price small{font-size:11px;font-weight:500;color:var(--mid);font-family:'DM Sans',sans-serif;}
     .fmt-card.taken .fmt-price{color:#aaa;}
     .fmt-desc{font-size:12px;color:var(--mid);line-height:1.4;}
-    #rit-cornice{position:relative;width:100%;max-width:460px;aspect-ratio:400/260;background:#eef1f6;
+    #rit-cornice{position:relative;width:100%;max-width:460px;aspect-ratio:400/260;background:#ffffff;
       border:2px solid #cbd5e6;border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;}
     #rit-cornice.trascino{cursor:grabbing;}
     #rit-cornice img{position:absolute;transform-origin:0 0;user-select:none;pointer-events:none;}
@@ -229,6 +229,9 @@
 <div class="step-page visible" id="page1">
   <h2 class="step-title">Scegli la posizione</h2>
   <p class="step-sub">Più in alto = più visibile = costa di più. Stesso prezzo sui due lati (sinistra/destra).</p>
+  <div class="guida-misura"><b>L'immagine da mandare è sempre la stessa forma:</b> 800 × 520 px (PNG o JPG).
+  Cambia solo quanto grande si vede il tuo annuncio: dai 340 px in cima ai 170 px del formato biglietto da visita in fondo.
+  Quando la carichi, la sistemi tu dentro il riquadro.</div>
   <div id="schema"></div>
   <div style="max-width:760px;margin:24px auto 0;">
     <button class="btn-avanti" id="btn1" disabled>Continua → Scegli la città</button>
@@ -306,7 +309,8 @@
           <div id="rit-cmd">
             <span style="font-size:13px;color:#555">Ingrandisci</span>
             <input type="range" id="rit-zoom" min="100" max="300" value="100">
-            <button type="button" class="rit-btn" id="rit-centra">Rimetti al centro</button>
+            <button type="button" class="rit-btn" id="rit-entra">Falla entrare tutta</button>
+            <button type="button" class="rit-btn" id="rit-riempi">Riempi il riquadro</button>
           </div>
         </div>
         <div class="avviso-piccolo" style="margin-top:8px"><b>Misura giusta: 800 × 520 px</b>
@@ -710,28 +714,42 @@ function ritAvvia(file) {
   im.onload = function () {
     RIT.nw = im.naturalWidth; RIT.nh = im.naturalHeight; RIT.pronto = true;
     box.style.display = 'block';
-    ritCentra(); ritDisegna();
+    RIT.base = 0;
+    if (ritCentra()) ritDisegna();
   };
   im.src = url;
 }
 
-function ritCentra() {
+function ritCentra(modo) {
   var c = document.getElementById('rit-cornice');
   var w = c.clientWidth, h = c.clientHeight;
-  RIT.base = Math.max(w / RIT.nw, h / RIT.nh);
+  if (!w || !h) return false;   // riquadro ancora nascosto: si rifa' dopo
+  // 'entra'  = si vede tutta l'immagine, con il bianco intorno (default)
+  // 'riempi' = riempie tutto il riquadro, tagliando quello che avanza
+  RIT.modo = modo || RIT.modo || 'entra';
+  RIT.base = (RIT.modo === 'riempi')
+    ? Math.max(w / RIT.nw, h / RIT.nh)
+    : Math.min(w / RIT.nw, h / RIT.nh);
   RIT.s = 1;
   document.getElementById('rit-zoom').value = 100;
   RIT.x = (w - RIT.nw * RIT.base) / 2;
   RIT.y = (h - RIT.nh * RIT.base) / 2;
+  return true;
 }
 
 function ritDisegna() {
   if (!RIT.pronto) return;
   var c = document.getElementById('rit-cornice');
   var im = document.getElementById('rit-img');
-  var w = c.clientWidth, h = c.clientHeight, sc = RIT.base * RIT.s;
-  RIT.x = Math.min(0, Math.max(w - RIT.nw * sc, RIT.x));
-  RIT.y = Math.min(0, Math.max(h - RIT.nh * sc, RIT.y));
+  var w = c.clientWidth, h = c.clientHeight;
+  if (!w || !h) return;                 // ancora nascosta
+  if (!RIT.base) { if (!ritCentra()) return; }
+  var sc = RIT.base * RIT.s;
+  var lw = RIT.nw * sc, lh = RIT.nh * sc;
+  // se l'immagine e' piu' larga del riquadro non deve lasciare buchi;
+  // se e' piu' stretta resta centrata, col bianco ai lati
+  RIT.x = (lw >= w) ? Math.min(0, Math.max(w - lw, RIT.x)) : (w - lw) / 2;
+  RIT.y = (lh >= h) ? Math.min(0, Math.max(h - lh, RIT.y)) : (h - lh) / 2;
   im.style.width = RIT.nw + 'px';
   im.style.height = RIT.nh + 'px';
   im.style.transform = 'translate(' + RIT.x + 'px,' + RIT.y + 'px) scale(' + sc + ')';
@@ -741,6 +759,8 @@ function ritDisegna() {
 function ritRitaglia() {
   return new Promise(function (risolvi, rifiuta) {
     if (!RIT.pronto) { rifiuta(new Error('immagine non pronta')); return; }
+    if (!RIT.base) ritCentra();
+    if (!RIT.base) { rifiuta(new Error('riquadro non ancora visibile')); return; }
     var c = document.getElementById('rit-cornice');
     var im = document.getElementById('rit-img');
     var w = c.clientWidth, h = c.clientHeight, sc = RIT.base * RIT.s;
@@ -790,7 +810,18 @@ document.addEventListener('DOMContentLoaded', function () {
     RIT.y = h / 2 - (h / 2 - RIT.y) * f;
     ritDisegna();
   });
-  document.getElementById('rit-centra').addEventListener('click', function () { ritCentra(); ritDisegna(); });
+  document.getElementById('rit-entra').addEventListener('click', function () { ritCentra('entra'); ritDisegna(); });
+  document.getElementById('rit-riempi').addEventListener('click', function () { ritCentra('riempi'); ritDisegna(); });
+
+  // Il riquadro nasce dentro il passo 3, che all'inizio e' nascosto: appena
+  // diventa visibile (larghezza > 0) si centra l'immagine per davvero.
+  try {
+    var ro = new ResizeObserver(function () {
+      var box = document.getElementById('rit-cornice');
+      if (RIT.pronto && box.clientWidth > 0 && !RIT.base) { ritCentra(); ritDisegna(); }
+    });
+    ro.observe(c);
+  } catch (e) { /* browser vecchio: si centra al primo trascinamento */ }
   window.addEventListener('resize', function () { if (RIT.pronto) { ritCentra(); ritDisegna(); } });
 });
 
