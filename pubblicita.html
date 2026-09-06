@@ -69,6 +69,21 @@
     .fmt-price small{font-size:11px;font-weight:500;color:var(--mid);font-family:'DM Sans',sans-serif;}
     .fmt-card.taken .fmt-price{color:#aaa;}
     .fmt-desc{font-size:12px;color:var(--mid);line-height:1.4;}
+    #rit-cornice{position:relative;width:100%;max-width:460px;aspect-ratio:400/260;background:#eef1f6;
+      border:2px solid #cbd5e6;border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;}
+    #rit-cornice.trascino{cursor:grabbing;}
+    #rit-cornice img{position:absolute;transform-origin:0 0;user-select:none;pointer-events:none;}
+    #rit-griglia{position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(to right,rgba(255,255,255,.5) 1px,transparent 1px) 33.33% 0/33.33% 100%,
+      linear-gradient(to bottom,rgba(255,255,255,.5) 1px,transparent 1px) 0 33.33%/100% 33.33%;}
+    #rit-cmd{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;}
+    #rit-cmd input[type=range]{flex:1;min-width:150px;}
+    .rit-btn{background:#eef3ff;color:#0047b3;border:0;border-radius:9px;padding:9px 14px;
+      font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+    .misura-card{margin-top:7px;font-size:12px;font-weight:700;color:#0b2c66;background:#eef3ff;border-radius:8px;padding:5px 8px;display:inline-block;}
+    .avviso-piccolo{background:#fff8e6;border:1.5px solid #ffd07a;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#5a4600;line-height:1.5;margin:0 0 8px;}
+    .guida-misura{background:#fff;border:2px dashed #cbd5e6;border-radius:12px;padding:14px 16px;margin:0 0 16px;font-size:13px;color:#333;line-height:1.6;}
+    .guida-misura b{color:#0b2c66;}
 
     /* STEP 2 */
     .step2-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
@@ -285,6 +300,19 @@
       <div class="form-group" style="margin-top:14px;">
         <label>Immagine del banner pubblicitario * — PNG/JPG (si ottimizza in automatico)</label>
         <input type="file" id="p-logo" accept="image/png, image/jpeg">
+        <div id="rit-box" style="display:none;margin-top:12px">
+          <label style="font-size:13px">Sistemala dentro il riquadro: trascina per spostare, la barra per ingrandire</label>
+          <div id="rit-cornice"><img id="rit-img" alt=""><div id="rit-griglia"></div></div>
+          <div id="rit-cmd">
+            <span style="font-size:13px;color:#555">Ingrandisci</span>
+            <input type="range" id="rit-zoom" min="100" max="300" value="100">
+            <button type="button" class="rit-btn" id="rit-centra">Rimetti al centro</button>
+          </div>
+        </div>
+        <div class="avviso-piccolo" style="margin-top:8px"><b>Misura giusta: 800 × 520 px</b>
+        (stessa forma di un biglietto da visita). Va bene per tutte le posizioni: nella fascia
+        scelta si vedrà più grande o più piccola. Se mandi un'immagine di forma diversa,
+        verrà ritagliata per entrare nel riquadro.</div>
       </div>
 
       <div class="form-group" style="margin-top:14px;">
@@ -354,6 +382,13 @@ const PREZZI_MENSILI = {
   'imprese-sx': 12, 'imprese-dx': 12,
   'inserzioni-sx': 8, 'inserzioni-dx': 8,
   'profilo-sx-1': 5, 'profilo-sx-2': 5, 'profilo-dx-1': 5, 'profilo-dx-2': 5
+};
+// Misura in cui si vede l'annuncio, per fascia (6 set 2026)
+const MISURE_FASCIA = {
+  'hero-sx': 340, 'hero-dx': 340,
+  'imprese-sx': 270, 'imprese-dx': 270,
+  'inserzioni-sx': 210, 'inserzioni-dx': 210,
+  'profilo-sx-1': 170, 'profilo-sx-2': 170, 'profilo-dx-1': 170, 'profilo-dx-2': 170
 };
 const PERIODI = {
   '1':  { mesi: 1,  sconto: 0,    label: '1 mese' },
@@ -448,7 +483,11 @@ function buildSchema() {
     var sez = document.createElement('div');
     sez.className = 'spazio-fascia';
     var prezzo = PREZZI_MENSILI[f.spazi[0]];
-    sez.innerHTML = '<div class="sezione-label">' + f.nome + ' · €' + prezzo + '/mese</div>';
+    var mis = MISURE_FASCIA[f.spazi[0]] || 260;
+    sez.innerHTML = '<div class="sezione-label">' + f.nome + ' · €' + prezzo + '/mese · '
+      + mis + ' px</div>'
+      + (mis <= 170 ? '<div class="avviso-piccolo">Spazio piccolo, formato biglietto da visita: '
+        + 'metti solo <b>logo, nome e telefono</b>. Un annuncio pieno di testo qui non si legge.</div>' : '');
     var grid = document.createElement('div');
     grid.className = 'spazio-cards';
     f.spazi.forEach(function(id) {
@@ -458,7 +497,8 @@ function buildSchema() {
       card.innerHTML =
         '<div class="fmt-head"><span class="fmt-nome">' + latoLabel(id) + '</span>' +
         '<span class="fmt-price">€' + PREZZI_MENSILI[id] + '<small>/mese</small></span></div>' +
-        '<div class="fmt-desc">' + f.desc + '</div>';
+        '<div class="fmt-desc">' + f.desc + '</div>' +
+        '<div class="misura-card">Si vede largo ' + (MISURE_FASCIA[id] || 260) + ' px</div>';
       card.addEventListener('click', function(){ selSpazio(id); });
       grid.appendChild(card);
     });
@@ -657,6 +697,103 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // Ridimensiona/comprimi immagine lato client (canvas → blob). PNG resta PNG (trasparenza), il resto → JPEG.
+// ===== RITAGLIO GUIDATO DELL'IMMAGINE (6 set 2026) =====
+// Il cliente sistema la sua immagine dentro un riquadro 400x260: quello che
+// sta dentro viene salvato a 800x520. Cosi' niente bande bianche e niente
+// tagli a sorpresa, e la stessa immagine va bene per tutte le fasce.
+var RIT = { x: 0, y: 0, s: 1, base: 1, nw: 0, nh: 0, pronto: false };
+
+function ritAvvia(file) {
+  var box = document.getElementById('rit-box');
+  var im  = document.getElementById('rit-img');
+  var url = URL.createObjectURL(file);
+  im.onload = function () {
+    RIT.nw = im.naturalWidth; RIT.nh = im.naturalHeight; RIT.pronto = true;
+    box.style.display = 'block';
+    ritCentra(); ritDisegna();
+  };
+  im.src = url;
+}
+
+function ritCentra() {
+  var c = document.getElementById('rit-cornice');
+  var w = c.clientWidth, h = c.clientHeight;
+  RIT.base = Math.max(w / RIT.nw, h / RIT.nh);
+  RIT.s = 1;
+  document.getElementById('rit-zoom').value = 100;
+  RIT.x = (w - RIT.nw * RIT.base) / 2;
+  RIT.y = (h - RIT.nh * RIT.base) / 2;
+}
+
+function ritDisegna() {
+  if (!RIT.pronto) return;
+  var c = document.getElementById('rit-cornice');
+  var im = document.getElementById('rit-img');
+  var w = c.clientWidth, h = c.clientHeight, sc = RIT.base * RIT.s;
+  RIT.x = Math.min(0, Math.max(w - RIT.nw * sc, RIT.x));
+  RIT.y = Math.min(0, Math.max(h - RIT.nh * sc, RIT.y));
+  im.style.width = RIT.nw + 'px';
+  im.style.height = RIT.nh + 'px';
+  im.style.transform = 'translate(' + RIT.x + 'px,' + RIT.y + 'px) scale(' + sc + ')';
+}
+
+// il pezzo scelto, salvato a 800x520
+function ritRitaglia() {
+  return new Promise(function (risolvi, rifiuta) {
+    if (!RIT.pronto) { rifiuta(new Error('immagine non pronta')); return; }
+    var c = document.getElementById('rit-cornice');
+    var im = document.getElementById('rit-img');
+    var w = c.clientWidth, h = c.clientHeight, sc = RIT.base * RIT.s;
+    var sx = -RIT.x / sc, sy = -RIT.y / sc, sw = w / sc, sh = h / sc;
+    var cv = document.createElement('canvas');
+    cv.width = 800; cv.height = 520;
+    var g = cv.getContext('2d');
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 800, 520);
+    g.drawImage(im, sx, sy, sw, sh, 0, 0, 800, 520);
+    cv.toBlob(function (b) {
+      if (b) risolvi({ blob: b, mime: 'image/jpeg', ext: 'jpg' });
+      else rifiuta(new Error('ritaglio non riuscito'));
+    }, 'image/jpeg', 0.9);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var inp = document.getElementById('p-logo');
+  var c   = document.getElementById('rit-cornice');
+  var z   = document.getElementById('rit-zoom');
+  if (!inp || !c) return;
+
+  inp.addEventListener('change', function () {
+    var f = inp.files[0];
+    if (f && /^image\/(png|jpe?g)$/.test(f.type)) ritAvvia(f);
+    else document.getElementById('rit-box').style.display = 'none';
+  });
+
+  var giu = false, px = 0, py = 0;
+  c.addEventListener('pointerdown', function (e) {
+    giu = true; px = e.clientX; py = e.clientY;
+    c.classList.add('trascino'); c.setPointerCapture(e.pointerId);
+  });
+  c.addEventListener('pointermove', function (e) {
+    if (!giu) return;
+    RIT.x += e.clientX - px; RIT.y += e.clientY - py;
+    px = e.clientX; py = e.clientY; ritDisegna();
+  });
+  c.addEventListener('pointerup', function () { giu = false; c.classList.remove('trascino'); });
+
+  z.addEventListener('input', function () {
+    var box = document.getElementById('rit-cornice');
+    var w = box.clientWidth, h = box.clientHeight;
+    var vecchia = RIT.s; RIT.s = z.value / 100;
+    var f = RIT.s / vecchia;
+    RIT.x = w / 2 - (w / 2 - RIT.x) * f;
+    RIT.y = h / 2 - (h / 2 - RIT.y) * f;
+    ritDisegna();
+  });
+  document.getElementById('rit-centra').addEventListener('click', function () { ritCentra(); ritDisegna(); });
+  window.addEventListener('resize', function () { if (RIT.pronto) { ritCentra(); ritDisegna(); } });
+});
+
 function ridimensionaImmagine(file, maxLato = 1200) {
   return new Promise(function (resolve, reject) {
     var isPng = file.type === 'image/png';
@@ -808,7 +945,9 @@ async function inviaOrdine() {
   }
   var img;
   try {
-    img = await ridimensionaImmagine(logoFile, 1200);
+    // il pezzo scelto dentro il riquadro; se per qualche motivo il ritaglio
+    // non e' disponibile, si torna al vecchio ridimensionamento
+    img = RIT.pronto ? await ritRitaglia() : await ridimensionaImmagine(logoFile, 1200);
   } catch (e) {
     alert('Errore elaborazione immagine: ' + e.message);
     btn.textContent = '💳 Conferma e vai al pagamento';
