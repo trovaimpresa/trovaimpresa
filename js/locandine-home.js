@@ -33,8 +33,10 @@
     { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '13-blog',        link: '/blog' },
     { sez: '.why-section',      lato: 'sx', passo: 4, file: '09-offerte',     link: '/offerte-lavoro' },
     { sez: '.why-section',      lato: 'dx', passo: 4, file: '14-recensioni',  link: '/cerca-imprese' },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, file: '11-citta',       link: '/citta' },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, file: '10-candidature', link: '/candidature-lavoro' }
+    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, file: '11-citta',       link: '/citta' },
+    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 1, file: '04-preventivi',  link: '/software-gestionale-imprese-edili' },
+    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 0, file: '10-candidature', link: '/candidature-lavoro' },
+    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 1, file: '12-chi-cerchi',  link: '/cerca-artigiani' }
   ];
 
   // --- solo home nazionale ------------------------------------------------
@@ -100,6 +102,7 @@
       a.setAttribute('data-sez', v.sez);
       a.setAttribute('data-lato', v.lato);
       a.setAttribute('data-passo', v.passo);
+      a.setAttribute('data-pila', v.pila === undefined ? -1 : v.pila);
       a.setAttribute('href', v.link);
       a.setAttribute('rel', 'noopener');
       a.setAttribute('data-locandina', v.file);
@@ -181,6 +184,9 @@
       var H = Math.round(L * 260 / 400);
       var r = sez.getBoundingClientRect();
       var centro = r.top + window.scrollY + r.height / 2;   // ferma nella pagina
+      var pila = parseInt(a.getAttribute('data-pila'), 10);
+      if (pila === 0) centro -= (H / 2 + 7);      // quella sopra
+      if (pila === 1) centro += (H / 2 + 7);      // quella sotto
       a.style.display = 'block';
       a.style.width = L + 'px';
       a.style.height = H + 'px';
