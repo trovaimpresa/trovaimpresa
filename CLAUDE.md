@@ -22300,3 +22300,162 @@ permesso.
 Banco: `prove-claude/banchi-fissi/operatore/permessi-rapportini.sql`
 (si incolla nell'SQL Editor, e' dentro `BEGIN … ROLLBACK`) — →9← verdi.
 Fatto girare col permesso di PRIMA: →3← rosse (le prove 2, 3 e 4).
+
+---
+
+# 🆕 IL 6 SETTEMBRE 2026 — IL RESTO DELLA GIORNATA
+
+Questo file si era fermato ai punti 1, 2 e 3 della mattina. Da lì in poi sono
+stati fatti →11← push, e nessuno era scritto qui. Ecco il resto, in ordine.
+Il diario giorno per giorno resta in `LAVORI-APERTI.md`: qui va solo quello che
+serve sapere fra sei mesi.
+
+## LE →23← MAIL DI CONFERMA SONO PARTITE — e il primo conto
+
+Le mail sono state mandate con `tools/manda-le-23.js` (i →23← indirizzi dentro,
+chiave pubblica, pausa di →6← secondi, riprova sul →429←, si segna chi ha già
+ricevuto in `tools/conferme-mandate.txt`): →23← OK, →0← errori.
+
+**Il conto del 6 set alle 14:30**, letto dal database:
+→119← imprese vere · →96← confermate · →23← non confermate.
+Dei →23← che hanno ricevuto la mail, **ne ha cliccato →1← solo**
+(`auth.users.email_confirmed_at` del 6 set, su chi si era iscritto prima del 5).
+
+⚠️ **Mandare non è cliccare.** Da ricontare fra →2-3← giorni con questa query:
+
+    select count(*) from auth.users
+    where email_confirmed_at >= '2026-09-05' and created_at < '2026-09-05';
+
+Se resta a →1-2←, il problema non è la spedizione: è l'email (oggetto, mittente,
+finisce in spam) oppure sono persone che a luglio si sono iscritte e basta.
+
+⛔ **LEZIONE**: il «Reset template» di Supabase azzera **anche l'OGGETTO**, non
+solo il corpo. Dopo un reset l'oggetto torna in inglese («Confirm your email
+address»). Controllare sempre tutti e due.
+
+⛔ **LIMITE DI CLAUDE**: il sistema non gli lascia mandare email a persone vere,
+nemmeno passando dal browser, e nei pannelli web (Supabase, Netlify, Stripe) non
+entra. Il lavoro giusto è **preparare UN comando solo che lancia Alex**.
+
+## LA TIMBRATURA DELL'OPERAIO (commit →d16d477←)
+
+Pulsante grosso Entrata/Uscita in cima a `gestionale-operatore.html`, striscia
+verde con le ore che salgono, elenco della giornata col totale.
+Tabella `gest_timbrature` (`sql/timbrature.sql`), permesso = quello dei
+rapportini. **Funziona senza campo**: coda in `localStorage` (`tmb_coda_v1`) +
+`client_id` generato dal telefono + indice unico `(user_id, client_id)` — un
+errore →23505← vuol dire «era già arrivata», non un errore.
+Banco `prove-claude/banchi-fissi/operatore/banco-timbratura.js` — →20← verdi.
+
+⛔ **NON scrive dentro `gest_ore`.** Se lo facesse, le ore si sommerebbero a
+quelle scritte a mano in «Segna la giornata» e la busta paga verrebbe doppia.
+Il travaso è una decisione separata, non ancora presa.
+
+## LE ORE NEL GESTIONALE DEL TITOLARE (commit →f6c58b5←)
+
+«Agenda operatore» ha due linguette: **Da fare** (quella di prima) e **Ore fatte**.
+Scelta di Alex: non una voce nuova nel menu, che sarebbe stata la →25ª←.
+
+Dentro: mese avanti/indietro · →4← caselle in cima (ore timbrate · ore scritte a
+mano · giornate aperte · chi ha timbrato) · una riga per persona che si apre sui
+giorni con gli orari (`07:12 → 12:30`) · «⬇️ Scarica per Excel» (CSV con `;` e
+BOM: Excel italiano apre le colonne giuste e legge gli accenti).
+
+⛔ **I DUE CONTI NON SI SOMMANO MAI.** «Ore timbrate» e «ore scritte a mano» sono
+due misure della stessa giornata: stanno affiancate con una colonna «Differenza»,
+così una busta paga sbagliata si vede **prima** di pagare.
+
+⚠️ **Niente filtro per reparto**: `gest_ore` ha `mestiere_id`, `gest_timbrature`
+no (il telefono non chiede il reparto). Filtrarne una sola darebbe due numeri non
+confrontabili in silenzio. Si contano le ore di tutta l'azienda, e la scritta in
+cima lo dice.
+
+**La giornata rimasta aperta** (entra e non timbra l'uscita: succederà spesso) si
+segnala in arancione e il titolare ci mette lui l'orario. Si **AGGIUNGE** una riga
+uscita con `corretta_da` = il suo uid: la riga dell'operaio non si tocca mai.
+Colonne nuove: `corretta_da`, `corretta_il`, `quando_originale`.
+Banco `prove-claude/banchi-fissi/ore/banco-ore.js` — →26← verdi.
+
+⏳ **DUE COSE RIMASTE INDIETRO QUI** (trovate il 6 set pomeriggio):
+1. `sql/timbrature.sql` descrive ancora →12← colonne; nel database ce ne sono
+   →15←. Chi legge quel file fra sei mesi crede che `corretta_da` non esista.
+2. `gest_timbrature` **non è in `colonne-vere.txt`**: su quella tabella il
+   controllo colonne-fantasma è cieco.
+
+## CHI ENTRA NEL SITO (commit →3534ec6←)
+
+`js/conta-pannello.js` conta gli accessi ai →4← pannelli,
+`netlify/functions/admin-chi-entra.js` li serve, e in `admin.html` c'è la sezione.
+Insieme alla vista `visite_giorno` (`sql/vista-visite-giorno.sql`) e a
+`admin-visite.js`: caselle «Hanno aperto il sito ieri / oggi».
+
+## PARLA CON TROVAIMPRESA (commit →c29d8c1←, poi →daef0cb← e →8bdbf5a←)
+
+Nei →4← pannelli: domande, AI e chat in un posto solo. «Chiedi all'AI» ha la
+stessa forma a bolle di «Scrivi a noi», caselle più grandi, e il chip
+dell'allegato non lascia più il guscio vuoto.
+
+## LA CHIAVE SUPABASE: PUBLISHABLE AL POSTO DELLA ANON LEGACY (commit →eef1b8f←)
+
+Sostituita in **→64← file**. La chiave `anon` vecchia non si usa più da nessuna
+parte del sito. Quando si crea una pagina nuova si copia la publishable da una
+pagina esistente, non da un file vecchio.
+
+## SITEMAP IMPRESE E SUBAPPALTI (commit →5e2c507← e →cdd5fbd←)
+
+- `netlify/functions/sitemap-imprese.js` legge la vista `imprese_pubbliche`
+  invece della tabella `imprese`. ⛔ **È la conseguenza di aver chiuso `imprese`
+  il 5 set**: la sitemap usciva **vuota** e nessuno se n'era accorto. Regola:
+  quando si chiude una porta si controlla chi ci passava — un programma che legge
+  con la chiave pubblica una tabella appena chiusa non si rompe, dice **ZERO**, e
+  zero è la bugia più difficile da vedere.
+- Subappalti: ogni annuncio ha la sua pagina (`subappalto-annuncio.html`) e la sua
+  sitemap (`sitemap-subappalti.js`), e l'email è dietro un clic.
+
+## IL NOLEGGIO PRENOTATO NON È UNA SPESA (commit →e5d54d7←)
+
+Il filtro senza `fase` c'era in **DUE** punti: Riepilogo (riga ~→4218←) e Report
+(riga ~→15263←). Contano solo `fuori` e `rientrato`. ⚠️ Se i due si scollano, i
+due utili tornano a dire numeri diversi. Banco `banchi-fissi/noleggio/prova-nol.js`
+— →5← verdi.
+
+## ADMIN, →4← PANNELLI, PROFILO, MODULO «CERCA»
+
+Il dettaglio sta in `LAVORI-APERTI.md`. Qui le →4← cose che servono dopo:
+
+- ⛔ **`_set` era chiusa dentro `caricaImprese()`** in `admin.html`: Recensioni
+  restava su «Caricamento...» per sempre e Segnalazioni scriveva «Errore» **senza
+  nessun errore** (il server rispondeva `{"success":true,"data":[]}`). Spostata
+  fuori: riparate →4← cose insieme.
+- ⛔ **`richieste_clienti` non la apriva NESSUNA pagina** dal →21 lug←. Su →14←
+  richieste vere, →8← erano artigiani che si proponevano, non clienti. Da qui il
+  bivio **🔍 Cerco / 🔧 Offro io** sui →5← moduli «cerca».
+- ⛔ **La leva delle scritte**: ingrandire un pezzo alla volta non basta. Si usa
+  `html { font-size: 18px }` (scala tutti i `rem`) **PIÙ** le scritte a misura
+  fissa in px, che la leva non tocca. Alex ha dovuto ripeterlo →4← volte.
+- ⛔ **Trappola di `display: contents`**: (1) `:first-child` matcha OGNI
+  intestazione, perché ogni header diventa primo figlio del suo blocco; (2) una
+  regola più specifica si mangia i margini. La linea di separazione fra sezioni è
+  sparita due volte per questo.
+
+## ⚠️ NOTA SU QUESTO FILE
+
+Al 6 set questo `CLAUDE.md` pesa **→1,18← MB su →22.400← righe**. Nessuna
+sessione lo legge davvero tutto: si legge l'inizio e si tira a indovinare il
+resto. Prima o poi va sfoltito — la storia giorno per giorno sta già in
+`LAVORI-APERTI.md`, qui dovrebbero restare solo le regole, le trappole e come è
+fatto il sito.
+
+## ⛔ REGOLA NUOVA (6 set): CLAUDE NON LANCIA GIT SENZA `--no-optional-locks`
+
+Ogni comando git che tocca l'indice crea `.git/index.lock` e lo cancella quando
+ha finito. Dal collegamento di Cowork Claude **non ha il permesso di cancellare**
+sul computer di Alex: quel file resta li' a →0← byte, e da quel momento **ogni
+git di Alex si ferma** con «Unable to create index.lock: File exists».
+E' successo →3← volte, e la terza (6 set, 14:23) ha bloccato un commit suo.
+
+- Dal lato di Claude, in sola lettura, si usa **sempre**:
+  `git --no-optional-locks status --short` · `git --no-optional-locks log --oneline`
+- Se il lock c'e' gia': non si insiste, si **sposta** (`mv .git/index.lock
+  _to_delete/`), perche' cancellare non si puo'.
+- Alex, dal suo Git Bash, lo toglie con: `rm -f .git/index.lock`
