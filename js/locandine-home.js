@@ -16,7 +16,7 @@
   var BORDO = 20;                 // distanza dal bordo dello schermo
   var LARGA = 600;                // larghezza voluta per le due in alto
   var SCALINO = 0.85;             // ogni fascia e' l'85% di quella sopra
-  var MINIMA = 170;               // sotto questa non si mostra: coprirebbe il testo
+  var MINIMA = 140;               // sotto questa non si mostra: coprirebbe il testo
   var TELEFONO = '(max-width:1100px)';
 
   // Chi sta dove. Ogni posto ha la sua locandina, sempre la stessa.
