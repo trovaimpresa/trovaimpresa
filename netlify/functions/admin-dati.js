@@ -22,7 +22,11 @@ const corsHeaders = {
 const TABELLE_CONSENTITE = [
   'feedback_clienti', 'segnalazioni', 'subappalti',
   'imprese', 'preventivi', 'lead_imprese', 'gest_richieste',
-  'offerte_lavoro', 'candidati_lavoro', 'candidature'
+  'offerte_lavoro', 'candidati_lavoro', 'candidature',
+  /* 6 settembre 2026 — le richieste che i clienti lasciano nei moduli
+     "cerca" del sito (nome, telefono, zona, cosa cercano). C'erano da
+     luglio ma nessuna pagina dell'admin le apriva. */
+  'richieste_clienti'
 ];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 
@@ -30,7 +34,8 @@ const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 // Non tutte le tabelle hanno "created_at": "candidature" usa data_candidatura.
 // Se la colonna non esiste PostgREST da' errore, quindi va indicata qui.
 const COLONNA_ORDINE = {
-  candidature: 'data_candidatura'
+  candidature: 'data_candidatura',
+  richieste_clienti: 'creato_il'
 };
 
 exports.handler = async function(event) {
