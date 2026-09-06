@@ -4196,3 +4196,82 @@ body:has(#ti-fondatore) .sheet--grande{
 .app-op-p{margin:0 0 8px;color:var(--testo);font-size:15px;line-height:1.55}
 .app-op-p:last-of-type{margin-bottom:0}
 .app-op-btns{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== ORE E TIMBRATURE — 6 settembre 2026 =====
+   La seconda linguetta di «Agenda operatore». Griglia a 6 colonne invece di
+   una <table>: sul telefono le stesse celle diventano una scheda, senza
+   riscrivere due volte il contenuto. */
+.ore-mese{display:flex;align-items:center;background:var(--card);border:1px solid var(--bordo);
+  border-radius:var(--r);overflow:hidden;height:32px}
+.ore-mese button{border:none;background:none;padding:0 11px;height:30px;font:inherit;font-size:16px;
+  color:var(--testo-2);cursor:pointer}
+.ore-mese button:hover{background:var(--sfondo);color:var(--testo)}
+.ore-mese span{padding:0 12px;font-size:13.5px;font-weight:700;min-width:132px;text-align:center}
+
+.ore-avviso{display:flex;gap:11px;align-items:flex-start;background:var(--attesa-bg);
+  border:1.5px solid #FCD9A0;border-radius:var(--r-card);padding:12px 14px;margin-bottom:14px}
+.ore-av-ic{font-size:19px;line-height:1.2;flex:0 0 auto}
+.ore-av-t{display:block;font-size:14.5px;font-weight:800;color:#8a5200}
+.ore-avviso p{font-size:13.5px;color:#8a5200;line-height:1.5;margin-top:2px}
+
+.ore-stat{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
+.ore-st{background:var(--card);border:1px solid var(--bordo);border-radius:var(--r-card);
+  padding:13px 15px;box-shadow:var(--shadow)}
+.ore-st .n{font-size:23px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.ore-st .l{font-size:13px;font-weight:700;color:var(--testo-3);text-transform:uppercase;
+  letter-spacing:.4px;margin-top:4px}
+.ore-st.ok .n{color:var(--ok)}
+.ore-st.att .n{color:var(--attesa)}
+
+.ore-tab{background:var(--card);border:1px solid var(--bordo);border-radius:var(--r-card);
+  overflow:hidden;box-shadow:var(--shadow)}
+.ore-cap,.ore-riga{display:grid;grid-template-columns:2.2fr .7fr 1.2fr 1.2fr 1.3fr .8fr;
+  align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--bordo)}
+.ore-cap{background:var(--sfondo);font-size:13px;font-weight:800;color:var(--testo-3);
+  text-transform:uppercase;letter-spacing:.7px}
+.ore-riga{font-size:14px;cursor:pointer}
+.ore-riga:hover{background:var(--sfondo)}
+.ore-riga.spenta{color:var(--testo-3)}
+.ore-riga.tot{background:var(--sfondo);font-weight:800;font-size:14.5px;cursor:default;border-bottom:none}
+.ore-riga.tot:hover{background:var(--sfondo)}
+.ore-riga .c1{font-weight:700;display:flex;align-items:center;gap:9px;min-width:0}
+.ore-riga .c6{text-align:right;font-size:13px;font-weight:700;color:var(--testo-2);white-space:nowrap}
+.ore-pall{width:30px;height:30px;border-radius:9px;background:var(--blu-tenue);color:var(--blu-scuro);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:0 0 auto}
+.ore-forte{font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.ore-riga .c2,.ore-riga .c3,.ore-riga .c4{font-variant-numeric:tabular-nums}
+.ore-diff{font-size:13px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block}
+.ore-diff.ok{background:var(--ok-bg);color:var(--ok)}
+.ore-diff.att{background:var(--attesa-bg);color:var(--attesa)}
+.ore-diff.no{background:var(--sfondo);color:var(--testo-3)}
+
+.ore-giorni{background:var(--sfondo);border-bottom:1px solid var(--bordo)}
+.ore-g{display:flex;align-items:center;gap:12px;padding:9px 15px 9px 54px;font-size:13.5px;
+  border-bottom:1px solid var(--bordo);flex-wrap:wrap}
+.ore-g:last-child{border-bottom:none}
+.ore-g .d{width:110px;color:var(--testo-2);font-weight:600;flex:0 0 auto}
+.ore-g .t{color:var(--testo-2);font-variant-numeric:tabular-nums}
+.ore-g .h{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums}
+.ore-g.buco{background:var(--attesa-bg)}
+.ore-g.buco .t b{color:var(--attesa)}
+.ore-g .fix{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ore-ora{height:32px;padding:0 8px;border:1px solid var(--bordo-forte);border-radius:8px;
+  font:inherit;font-size:13.5px;background:var(--card);color:var(--testo)}
+
+/* ---- telefono: la riga diventa una scheda ---- */
+@media (max-width:760px){
+  .ore-stat{grid-template-columns:1fr 1fr}
+  .ore-cap{display:none}
+  .ore-riga{grid-template-columns:1fr auto;gap:6px 10px;padding:13px 14px}
+  .ore-riga .c1{grid-column:1;font-size:15px}
+  .ore-riga .c3{grid-column:2;text-align:right;font-size:18px}
+  .ore-riga .c2::before{content:"Giorni: "}
+  .ore-riga .c4::before{content:"Scritte: "}
+  .ore-riga .c2,.ore-riga .c4{grid-column:1;font-size:13px;color:var(--testo-2)}
+  .ore-riga .c5{grid-column:2;text-align:right}
+  .ore-riga .c6{grid-column:2;text-align:right}
+  .ore-riga.tot .c2::before{content:"Giorni: "}
+  .ore-g{padding-left:14px}
+  .ore-g .d{width:auto}
+  .ore-g .fix{margin-left:0;width:100%}
+}
