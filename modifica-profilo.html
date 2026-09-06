@@ -109,6 +109,47 @@
     .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #333; border-bottom: 1px solid #f0f0f0; }
     .map-dd-item:hover { background: #e8f5e9; }
     .map-dd-item:last-child { border-bottom: none; }
+
+    /* ===== 6 settembre 2026 — UNA PAGINA SOLA, PIU' COMPATTA =====
+       I titoletti erano 12px MAIUSCOLI azzurrini: si leggevano male e non
+       facevano capire dove finiva un blocco e cominciava l'altro. */
+    .card-header {
+      font-size: 16px; letter-spacing: 0.2px; text-transform: none;
+      color: #0a2a4d; font-weight: 800; padding-bottom: 12px;
+      border-bottom: 1.5px solid #eef1f5;
+    }
+    .card-header.arancio, .card-header.blu { color: #0a2a4d; }
+
+    /* La mappa stava aperta sempre e si mangiava mezza schermata anche a
+       chi non la usa. Adesso e' una riga sola: si apre solo se serve. */
+    details.mappa-pieghevole { border: 1.5px dashed #c9d4e3; border-radius: 12px; }
+    details.mappa-pieghevole > summary {
+      cursor: pointer; padding: 14px 16px; font-weight: 700; font-size: 16px;
+      color: #0066ff; list-style: none;
+    }
+    details.mappa-pieghevole > summary::-webkit-details-marker { display: none; }
+    details.mappa-pieghevole[open] > summary { border-bottom: 1.5px dashed #c9d4e3; }
+    details.mappa-pieghevole .dentro { padding: 14px 16px; }
+
+    /* Le certificazioni, arrivate qui dal pannello */
+    .cert-riga {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border: 1px solid #e2e7ee; border-radius: 12px; margin-bottom: 10px;
+    }
+    .cert-ic {
+      width: 42px; height: 42px; border-radius: 11px; background: #eaf1ff;
+      display: flex; align-items: center; justify-content: center; font-size: 21px; flex: 0 0 auto;
+    }
+    .cert-riga b { display: block; font-size: 16px; color: #0a2a4d; }
+    .cert-riga small { font-size: 14px; color: #5f6b7a; }
+    .cert-riga .via { margin-left: auto; }
+    .btn-cert {
+      padding: 9px 15px; border: 1.5px solid #e2e7ee; background: white; border-radius: 9px;
+      font-family: inherit; font-weight: 700; font-size: 14px; color: #3f4652; cursor: pointer;
+    }
+    .btn-cert.rosso { color: #b42318; border-color: #f0c9c4; }
+    .cert-aggiungi { background: #fafbfd; border: 1px solid #e2e7ee; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+    .cert-vuoto { text-align: center; padding: 22px; color: #5f6b7a; font-size: 15.5px; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
@@ -271,9 +312,11 @@
           </div>
         </div>
 
-        <!-- Card 2: Posizione sulla mappa -->
+        <!-- Card 2: Posizione sulla mappa (richiudibile dal 6 settembre 2026) -->
         <div class="form-card fc-arancio">
-          <div class="card-header arancio">🗺️ Posizione sulla mappa <span style="font-weight:400;font-size:14px;color:#64748b;">(opzionale)</span></div>
+        <details class="mappa-pieghevole">
+          <summary>🗺️ Metti il punto sulla mappa <span style="font-weight:600;color:#5f6b7a">(facoltativo — clicca per aprire)</span></summary>
+          <div class="dentro">
           <div style="position:relative;">
             <input type="text" id="map-search" placeholder="Cerca indirizzo o città..." autocomplete="off" oninput="nominatimSearch(this.value)" style="width:100%;padding:13px 14px;border:1.5px solid #c9d4e3;border-radius:10px 10px 0 0;font-size:16.5px;font-family:inherit;color:#0a2a4d;outline:none;">
             <div id="map-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;z-index:1000;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
@@ -281,6 +324,8 @@
           <div id="mappa" style="height:200px;width:100%;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;"></div>
           <input type="hidden" id="f-lat">
           <input type="hidden" id="f-lng">
+          </div>
+        </details>
         </div>
 
         <!-- Card 3: Presentazione -->
@@ -1012,6 +1057,36 @@
              Se un giorno il video si potra' caricare davvero, si rimette il
              riquadro INSIEME al codice che lo carica, non prima. -->
 
+        <!-- ===== 6 settembre 2026 — LE CERTIFICAZIONI ARRIVANO QUI =====
+             Stavano nel pannello, in una pagina «Il mio profilo» che diceva
+             le stesse cose di questa senza poterle cambiare. Quella pagina
+             e' stata tolta: profilo e modifica profilo sono una cosa sola,
+             e le certificazioni stanno dove stanno tutti gli altri dati. -->
+        <div class="form-card" id="card-certificazioni" style="display:none">
+          <div class="card-header">📋 Certificazioni</div>
+          <div class="cert-aggiungi">
+            <div style="font-weight:800;font-size:15.5px;color:#0a2a4d;margin-bottom:14px">➕ Aggiungi certificazione</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nome certificazione <span class="required">*</span></label>
+                <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
+                <datalist id="cert-list"></datalist>
+              </div>
+              <div class="form-group">
+                <label>Scadenza (facoltativa)</label>
+                <input type="date" id="cert-scadenza-input">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>File (PDF o foto)</label>
+              <input type="file" id="cert-file-input" accept=".pdf,image/*">
+            </div>
+            <button type="button" class="btn-cert" style="background:#0066ff;color:white;border-color:#0066ff"
+                    onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
+          </div>
+          <div id="lista-certificazioni"><div class="cert-vuoto">Nessuna certificazione aggiunta.</div></div>
+        </div>
+
         </div><!-- /profilo-card-unica -->
 
         <div class="form-footer">
@@ -1164,7 +1239,108 @@
       impresaData = data;
       document.getElementById('form-wrapper').style.display = 'block';
       popolaCampi(data);
+      mostraCertificazioni(data);
     });
+
+    /* ===== CERTIFICAZIONI (arrivate dal pannello il 6 settembre 2026) =====
+       Il negozio non le ha mai avute: per lui la scheda resta nascosta. */
+    function mostraCertificazioni(d) {
+      const card = document.getElementById('card-certificazioni');
+      if (!card) return;
+      if (getRealTipo(d) === 'negozio') { card.style.display = 'none'; return; }
+      card.style.display = '';
+      riempiElencoCertificazioni();
+      renderCertificazioni(d.certificazioni || []);
+    }
+
+    /* l'elenco da cui si sceglie: arriva da js/certificazioni-edilizia.js */
+    let _certTentativi = 0;
+    function riempiElencoCertificazioni() {
+      const dl = document.getElementById('cert-list');
+      const elenco = window.CERTIFICAZIONI_EDILIZIA || [];
+      /* se il file dell'elenco non e' ancora arrivato, si riprova fra poco:
+         senza elenco il campo "Cerca certificazione" resterebbe muto */
+      if (!dl) return;
+      /* niente riprove all'infinito: se dopo 6 secondi l'elenco non c'e',
+         vuol dire che il file non arriva e insistere non serve a niente */
+      if (!elenco.length) {
+        _certTentativi++;
+        if (_certTentativi <= 15) setTimeout(riempiElencoCertificazioni, 400);
+        return;
+      }
+      dl.innerHTML = elenco.map(c => '<option value="' + c.nome + '"></option>').join('');
+    }
+
+    /* La data viene dal database scritta 2027-12-31 e un artigiano legge
+       31/12/2027. NON si passa da new Date(): una data senza ora, in un fuso
+       indietro rispetto a Londra, diventerebbe il giorno prima. */
+    function _dataIt(iso) {
+      const p = String(iso || '').slice(0, 10).split('-');
+      if (p.length !== 3 || p[0].length !== 4) return iso || '';
+      return p[2] + '/' + p[1] + '/' + p[0];
+    }
+
+    function renderCertificazioni(certs) {
+      const cont = document.getElementById('lista-certificazioni');
+      if (!cont) return;
+      if (!certs || !certs.length) {
+        cont.innerHTML = '<div class="cert-vuoto">Nessuna certificazione aggiunta.</div>';
+        return;
+      }
+      cont.innerHTML = certs.map(function(c, i){
+        const sc = c.scadenza ? 'Scade il ' + _dataIt(c.scadenza) : 'Senza scadenza';
+        const file = c.file_url
+          ? ' · <a href="' + c.file_url + '" target="_blank" rel="noopener" style="color:#0066ff;font-weight:700">📎 apri il file</a>'
+          : '';
+        return '<div class="cert-riga"><div class="cert-ic">📜</div>'
+             + '<div><b>' + (c.nome || 'Senza nome') + '</b><small>' + sc + file + '</small></div>'
+             + '<div class="via"><button type="button" class="btn-cert rosso" onclick="eliminaCertificazione(' + i + ')">🗑️ Rimuovi</button></div>'
+             + '</div>';
+      }).join('');
+    }
+
+    async function aggiungiCertificazione() {
+      const inputEl = document.getElementById('cert-search');
+      const nome = inputEl.value.trim();
+      const cert = (window.CERTIFICAZIONI_EDILIZIA || []).find(function(c){ return c.nome === nome; });
+      if (!cert) { alert("Scegli una certificazione dall'elenco che compare mentre scrivi."); return; }
+      const scadenza = document.getElementById('cert-scadenza-input').value || null;
+      const fileInput = document.getElementById('cert-file-input');
+      const file = fileInput.files[0];
+      let file_url = null;
+
+      if (file) {
+        const ext = file.name.split('.').pop();
+        const path = impresaData.user_id + '/' + Date.now() + '-'
+                   + cert.nome.replace(/\s+/g, '_').substring(0, 40) + '.' + ext;
+        const up = await sb.storage.from('certificazioni').upload(path, file, { upsert: false, contentType: file.type });
+        if (up.error) { alert('Non sono riuscito a caricare il file: ' + up.error.message); return; }
+        const pub = sb.storage.from('certificazioni').getPublicUrl(path);
+        file_url = pub.data.publicUrl;
+      }
+
+      const certs = (impresaData.certificazioni || []).concat([
+        { id: cert.id, nome: cert.nome, categoria: cert.categoria, scadenza: scadenza, file_url: file_url }
+      ]);
+      const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaData.id);
+      if (error) { alert('Non sono riuscito a salvare: ' + error.message); return; }
+
+      impresaData.certificazioni = certs;
+      renderCertificazioni(certs);
+      inputEl.value = '';
+      document.getElementById('cert-scadenza-input').value = '';
+      fileInput.value = '';
+    }
+
+    async function eliminaCertificazione(i) {
+      if (!confirm('Rimuovere questa certificazione?')) return;
+      const certs = (impresaData.certificazioni || []).slice();
+      certs.splice(i, 1);
+      const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaData.id);
+      if (error) { alert('Non sono riuscito a rimuoverla: ' + error.message); return; }
+      impresaData.certificazioni = certs;
+      renderCertificazioni(certs);
+    }
 
     // Determina la categoria in base al campo tipo
     function getRealTipo(d) {
@@ -1731,6 +1907,7 @@
   </script>
   <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
+<script src="/js/certificazioni-edilizia.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/freccia-indietro.js"></script>
 </body>

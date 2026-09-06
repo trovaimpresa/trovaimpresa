@@ -2229,7 +2229,7 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('profilo', this)">
+        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='modifica-profilo.html'">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Completa il tuo profilo</div>
           <div class="dash-quick-sub">Più è pieno, più ti scelgono</div>
@@ -2544,80 +2544,6 @@
     </div>
 
     <!-- PROFILO -->
-    <div class="section" id="sec-profilo">
-      <div class="topbar">
-        <div class="topbar-title">👤 Il mio profilo</div>
-      </div>
-      <div class="profilo-card" id="profilo-dati">
-        <div class="profilo-title">Dati impresa</div>
-        <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
-      </div>
-
-      <!-- Prestazioni offerte + dati albo/RC (editabile) -->
-      <div class="profilo-card" id="profilo-prestazioni" style="margin-top:20px">
-        <div class="profilo-title">🛠️ Prestazioni offerte</div>
-        <div style="font-size:0.85rem;color:var(--mid);margin-bottom:14px">Seleziona i servizi che offri: i clienti ti troveranno cercando la singola prestazione nella pagina Professionisti.</div>
-        <div id="prest-blocco"></div>
-
-        <div style="margin-top:18px">
-          <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Comuni di competenza</label>
-          <input type="text" id="prest-comuni" placeholder="Es. Roma, Fiumicino, Tivoli (separati da virgola)" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
-        </div>
-
-        <div class="profilo-title" style="margin-top:26px">🎓 Dati albo e assicurazione</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px">
-          <div>
-            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Numero iscrizione albo</label>
-            <input type="text" id="prof-numero-albo" placeholder="Es. 1234" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
-          </div>
-          <div>
-            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Ordine / Collegio provinciale</label>
-            <input type="text" id="prof-ordine" placeholder="Es. Ordine Ingegneri di Roma" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
-          </div>
-          <div>
-            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Compagnia RC professionale</label>
-            <input type="text" id="prof-rc-compagnia" placeholder="Es. Generali, UnipolSai..." style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
-          </div>
-          <div>
-            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Scadenza polizza RC</label>
-            <input type="date" id="prof-rc-scadenza" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
-          </div>
-        </div>
-        <div id="prof-albo-stato" style="margin-top:14px;font-size:0.85rem"></div>
-
-        <div style="margin-top:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <button onclick="salvaPrestazioniProfilo()" style="background:var(--verde);color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer">💾 Salva prestazioni e dati</button>
-          <span id="prest-msg" style="font-size:0.85rem;font-weight:600"></span>
-        </div>
-      </div>
-
-      <!-- 6 settembre 2026 — le CERTIFICAZIONI erano una casella a se' nella
-           Dashboard. Adesso stanno qui, attaccate ai dati del profilo: e' li'
-           che uno le va a cercare, non in mezzo alle scorciatoie. -->
-      <div class="profilo-card" id="profilo-certificazioni" style="margin-top:20px">
-        <div class="profilo-title">📋 Certificazioni</div>
-        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
-          <div class="form-group">
-            <label>Nome certificazione *</label>
-            <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
-            <datalist id="cert-list"></datalist>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Scadenza (opzionale)</label>
-              <input type="date" id="cert-scadenza-input">
-            </div>
-            <div class="form-group">
-              <label>File (PDF/immagine)</label>
-              <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
-            </div>
-          </div>
-          <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
-        </div>
-        <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
-      </div>
-    </div>
 
     <!-- FOTO DEI LAVORI -->
     <div class="section" id="sec-foto-lavori">
@@ -4270,6 +4196,10 @@ async function salvaPrestazioniProfilo() {
 }
 
 function caricaProfilo() {
+  /* 6 settembre 2026 — la pagina «Il mio profilo» non c'e' piu':
+     profilo e modifica profilo sono una cosa sola, in
+     modifica-profilo.html. Qui non c'e' piu' niente da riempire. */
+  if (!document.getElementById('profilo-dati')) return;
   const i = impresaCorrente;
   if (!i) return;
   const nome = _nomeImpresa(i) || '—';
@@ -4278,7 +4208,10 @@ function caricaProfilo() {
   const serviziStr = (i.mestieri || []).join(', ') || '—';
   const statoBadge = i.verificata
     ? '<span style="display:inline-block;background:var(--verde3);color:var(--verde2);font-weight:700;font-size:0.82rem;padding:6px 14px;border-radius:20px;white-space:nowrap">✅ Verificata</span>'
-    : '<span style="display:inline-block;background:var(--arancio3);color:var(--arancio2);font-weight:700;font-size:0.82rem;padding:6px 14px;border-radius:20px;white-space:nowrap">⏳ In attesa di verifica</span>';
+    /* 6 settembre 2026, Alessio: «in attesa di verifica togliamolo».
+       Chi non e' ancora verificato adesso non vede niente al posto
+       del bollino verde, invece dell'etichetta arancione. */
+    : '';
   const riga = (k, v) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.9rem"><span style="color:var(--mid);font-weight:600">${k}</span><span style="text-align:right;color:var(--dark)">${v || '—'}</span></div>`;
   const titoletto = (t) => `<div style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--verde2);margin-bottom:6px">${t}</div>`;
 

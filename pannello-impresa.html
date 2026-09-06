@@ -2226,7 +2226,7 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('profilo', this)">
+        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='modifica-profilo.html'">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Completa il tuo profilo</div>
           <div class="dash-quick-sub">Più è pieno, più ti scelgono</div>
@@ -2529,42 +2529,6 @@
     <!-- CERTIFICAZIONI -->
 
     <!-- PROFILO -->
-    <div class="section" id="sec-profilo">
-      <div class="topbar">
-        <div class="topbar-title">👤 Il mio profilo</div>
-      </div>
-      <div class="profilo-card" id="profilo-dati">
-        <div class="profilo-title">Dati impresa</div>
-        <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
-      </div>
-
-      <!-- 6 settembre 2026 — le CERTIFICAZIONI erano una casella a se' nella
-           Dashboard. Adesso stanno qui, attaccate ai dati del profilo: e' li'
-           che uno le va a cercare, non in mezzo alle scorciatoie. -->
-      <div class="profilo-card" id="profilo-certificazioni" style="margin-top:20px">
-        <div class="profilo-title">📋 Certificazioni</div>
-        <div style="background:white;border-radius:16px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:16px;">Aggiungi certificazione</div>
-        <div class="form-group">
-          <label>Nome certificazione *</label>
-          <input type="text" id="cert-nome-input" placeholder="Es. SOA, ISO 9001, Patentino gas…">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Scadenza (opzionale)</label>
-            <input type="date" id="cert-scadenza-input">
-          </div>
-          <div class="form-group">
-            <label>File (PDF/immagine)</label>
-            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
-          </div>
-        </div>
-        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
-      </div>
-
-      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
-      </div>
-    </div>
 
     <!-- FOTO DEI LAVORI -->
     <div class="section" id="sec-foto-lavori">
@@ -3763,7 +3727,7 @@ function showSectionById(id, fromPopstate) {
 
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','profilo'];
+  const sezioniValide = ['dashboard'];
   if (hash && sezioniValide.includes(hash)) {
     history.replaceState({ section: hash }, '', '#' + hash);
   } else {
@@ -5085,7 +5049,7 @@ async function inizializza() {
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','profilo'];
+  const sezioniValide = ['dashboard'];
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
@@ -5248,6 +5212,10 @@ async function caricaRecensioni() {
 
 // PROFILO
 function caricaProfilo() {
+  /* 6 settembre 2026 — la pagina «Il mio profilo» non c'e' piu':
+     profilo e modifica profilo sono una cosa sola, in
+     modifica-profilo.html. Qui non c'e' piu' niente da riempire. */
+  if (!document.getElementById('profilo-dati')) return;
   const i = impresaCorrente;
   if (!i) return;
   const nome = _nomeImpresa(i) || '—';
@@ -5256,7 +5224,10 @@ function caricaProfilo() {
   const mestieriStr = (i.mestieri || []).join(', ') || '—';
   const statoBadge = i.verificata
     ? '<span style="display:inline-block;background:var(--verde3);color:var(--verde2);font-weight:700;font-size:0.82rem;padding:6px 14px;border-radius:20px;white-space:nowrap">✅ Verificata</span>'
-    : '<span style="display:inline-block;background:var(--arancio3);color:var(--arancio2);font-weight:700;font-size:0.82rem;padding:6px 14px;border-radius:20px;white-space:nowrap">⏳ In attesa di verifica</span>';
+    /* 6 settembre 2026, Alessio: «in attesa di verifica togliamolo».
+       Chi non e' ancora verificato adesso non vede niente al posto
+       del bollino verde, invece dell'etichetta arancione. */
+    : '';
   const riga = (k, v) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.9rem"><span style="color:var(--mid);font-weight:600">${k}</span><span style="text-align:right;color:var(--dark)">${v || '—'}</span></div>`;
   const titoletto = (t) => `<div style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--verde2);margin-bottom:6px">${t}</div>`;
 
