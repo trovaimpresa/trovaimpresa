@@ -233,18 +233,45 @@
     </section>
 
     <section id="agenda">
-      <div class="sec-head"><h2>Agenda operatore</h2></div>
-      <div class="gal-intro">Il quadro completo di cosa c'è da fare, persona per persona. Scegli un operatore: vedi tutti i suoi lavori con indirizzo, mappa, foto del capo e note — tutto in un colpo solo, pronto per andare in cantiere.</div>
-      <div class="filtri">
-        <div class="filtro"><label class="filtro-lab" for="ag-op-sel">Operatore</label>
-          <select class="filtro-sel" id="ag-op-sel"></select></div>
-        <div class="filtro"><span class="filtro-lab">Mostra</span>
-          <div class="segm" id="ag-stato">
-            <button class="on" data-action="ag-stato" data-v="aperti">Da fare</button>
-            <button data-action="ag-stato" data-v="tutti">Tutti</button>
-          </div></div>
+      <!-- ===== 6 settembre 2026 — LE ORE ENTRANO QUI =====
+           Scelta di Alessio: NON una voce nuova nel menu (sarebbe la 25ª).
+           «Agenda operatore» è già la sezione che si legge persona per
+           persona: «Da fare» è quello che deve ancora fare, «Ore fatte» è
+           quello che ha fatto. Stessa sezione, due linguette. -->
+      <div class="sec-head"><h2>Agenda operatore</h2>
+        <div class="segm" id="ag-vista">
+          <button class="on" data-action="ag-vista" data-v="lavori">Da fare</button>
+          <button data-action="ag-vista" data-v="ore">Ore fatte</button>
+        </div>
       </div>
-      <div id="ag-body"></div>
+
+      <div id="ag-parte-lavori">
+        <div class="gal-intro">Il quadro completo di cosa c'è da fare, persona per persona. Scegli un operatore: vedi tutti i suoi lavori con indirizzo, mappa, foto del capo e note — tutto in un colpo solo, pronto per andare in cantiere.</div>
+        <div class="filtri">
+          <div class="filtro"><label class="filtro-lab" for="ag-op-sel">Operatore</label>
+            <select class="filtro-sel" id="ag-op-sel"></select></div>
+          <div class="filtro"><span class="filtro-lab">Mostra</span>
+            <div class="segm" id="ag-stato">
+              <button class="on" data-action="ag-stato" data-v="aperti">Da fare</button>
+              <button data-action="ag-stato" data-v="tutti">Tutti</button>
+            </div></div>
+        </div>
+        <div id="ag-body"></div>
+      </div>
+
+      <div id="ag-parte-ore" style="display:none">
+        <div class="gal-intro">Quante ore ha fatto ogni persona nel mese. A sinistra quelle <b>timbrate</b> col pulsante Entrata/Uscita dal telefono, a destra quelle <b>scritte a mano</b> in «Segna la giornata». Sono due conti separati: decidi tu quale vale. ⚠️ Qui si contano le ore di <b>tutta l'azienda</b>, non del solo reparto: la timbratura non chiede in che reparto sei.</div>
+        <div class="filtri">
+          <div class="filtro"><span class="filtro-lab">Mese</span>
+            <div class="ore-mese">
+              <button data-action="ore-mese" data-v="-1" title="Mese prima">‹</button>
+              <span id="ore-mese-lab">—</span>
+              <button data-action="ore-mese" data-v="1" title="Mese dopo">›</button>
+            </div></div>
+          <button class="btn" data-action="ore-csv" style="margin-left:auto">⬇️ Scarica per Excel</button>
+        </div>
+        <div id="ore-body"></div>
+      </div>
     </section>
 
     <section id="calendario">
@@ -2189,6 +2216,11 @@
     galFilter={op:"",tipo:"",media:"",lav:""};segmOn("#gal-tipo","");segmOn("#gal-media","");
     mpVista="aperti";segmOn("#mp-vista","aperti");if(mpLayer){try{mpLayer.remove();}catch(e){}mpLayer=null;}
     agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
+    /* 6 set 2026: cambiando reparto si riparte sempre da «Da fare», e il mese
+       delle ore si azzera: se no si restava su un mese vecchio di un altro reparto */
+    segmOn("#ag-vista","lavori"); oreMese=null; oreAperte={};
+    if($("#ag-parte-lavori"))$("#ag-parte-lavori").style.display="";
+    if($("#ag-parte-ore"))$("#ag-parte-ore").style.display="none";
     mezziFilter="tutti";attrezzFilter="tutti";
     /* ⚠️ 15 agosto 2026 (11) — QUI C'ERA «la prima voce in alto», cioe' i===0.
        Ha funzionato per mesi solo perche' il Riepilogo era il primo pulsante.
@@ -11111,6 +11143,282 @@ ${vecchi?`
     });
   }
 
+
+  /* ============================================================
+     ===== ORE E TIMBRATURE (6 settembre 2026) =====
+     La seconda linguetta di «Agenda operatore». Prima le timbrature si
+     vedevano SOLO dal database: servivano all'operaio e non al titolare.
+
+     ⚠️ DUE CONTI SEPARATI, MAI SOMMATI.
+     · «Ore timbrate» = le coppie entrata/uscita di gest_timbrature
+     · «Ore scritte»  = gest_ore, quelle di «Segna la giornata»
+     Sono due misure della stessa giornata, non due pezzi da sommare: se si
+     sommassero, la busta paga verrebbe doppia. Si mostrano affiancate
+     apposta, cosi' una differenza si vede PRIMA di pagare (scelta di
+     Alessio, 6 set).
+
+     ⚠️ NIENTE FILTRO PER REPARTO. gest_ore ha mestiere_id, gest_timbrature
+     no (il telefono non chiede in che reparto sei). Filtrare una sola delle
+     due darebbe due numeri non confrontabili, in silenzio. Quindi qui si
+     contano le ore di TUTTA l'azienda, e la scritta in cima lo dice.
+
+     ⚠️ LA GIORNATA APERTA. Chi entra e non timbra l'uscita lascia una
+     giornata che non conta ore. Il titolare puo' metterla lui: si aggiunge
+     una riga uscita con corretta_da = il suo uid, e resta scritto che l'ha
+     messa lui. La riga dell'operaio non si tocca mai.
+     ============================================================ */
+  let oreMese = null;                    /* {a, m} — si riempie al primo giro */
+  let oreAperte = {};                    /* id persona -> true se il dettaglio e' aperto */
+  let ORE_ULTIMO = null;                 /* l'ultimo calcolo, per il file Excel */
+
+  const _oreHM = ms => {
+    if(!(ms > 0)) return "0h 00m";
+    const m = Math.round(ms / 60000);
+    return Math.floor(m / 60) + "h " + String(m % 60).padStart(2, "0") + "m";
+  };
+  const _oreDec = ms => (ms > 0 ? Math.round(ms / 36000) / 100 : 0);   /* 9,42 per Excel */
+  const _oreHHMM = iso => { const d = new Date(iso);
+    return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); };
+  const _oreGiorno = iso => { const d = new Date(iso);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+  const _oreGiornoIt = g => { const [a,m,gg] = g.split("-");
+    const d = new Date(+a, +m-1, +gg);
+    return ["dom","lun","mar","mer","gio","ven","sab"][d.getDay()] + " " + (+gg) + " "
+         + ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"][+m-1]; };
+  const _oreIniz = n => (n||"?").trim().slice(0,2).toUpperCase();
+
+  function _oreMeseOra(){
+    if(!oreMese){ const n = new Date(); oreMese = { a:n.getFullYear(), m:n.getMonth() }; }
+    return oreMese;
+  }
+  function _oreSpostaMese(passo){
+    const q = _oreMeseOra();
+    let m = q.m + passo, a = q.a;
+    if(m < 0){ m = 11; a--; } else if(m > 11){ m = 0; a++; }
+    oreMese = { a:a, m:m };
+    oreAperte = {};
+    renderOre();
+  }
+
+  /* le coppie entrata/uscita di UNA persona in UN giorno.
+     Se l'ultima entrata non ha uscita, la giornata resta APERTA e vale 0. */
+  function _oreCoppie(righe){
+    const ord = righe.slice().sort((x,y) => new Date(x.quando) - new Date(y.quando));
+    let ms = 0, aperta = null, buchi = [], pezzi = [];
+    ord.forEach(r => {
+      if(r.tipo === "entrata"){
+        if(aperta === null) aperta = r;
+      }else if(aperta !== null){
+        ms += new Date(r.quando) - new Date(aperta.quando);
+        pezzi.push(_oreHHMM(aperta.quando) + " → " + _oreHHMM(r.quando));
+        aperta = null;
+      }
+    });
+    if(aperta !== null) buchi.push(aperta);      /* entrato e mai uscito */
+    return { ms:ms, pezzi:pezzi, buchi:buchi };
+  }
+
+  async function renderOre(){
+    const body = $("#ore-body");
+    if(!body) return;
+    if(!sb || !sbUid){ body.innerHTML = tabVuoto("Ore non disponibili","Serve il collegamento al database.",AG_VUOTO); return; }
+
+    const q = _oreMeseOra();
+    const MESI_L = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+    const dal = q.a + "-" + String(q.m+1).padStart(2,"0") + "-01";
+    const ultimo = new Date(q.a, q.m+1, 0).getDate();
+    const al  = q.a + "-" + String(q.m+1).padStart(2,"0") + "-" + String(ultimo).padStart(2,"0");
+    const lab = $("#ore-mese-lab"); if(lab) lab.textContent = MESI_L[q.m].charAt(0).toUpperCase()+MESI_L[q.m].slice(1) + " " + q.a;
+
+    body.innerHTML = '<p class="fatt-empty">Conto le ore…</p>';
+
+    /* tutta la squadra dell'azienda, non del solo reparto: vedi la nota in cima */
+    const [rOps, rTmb, rOre] = await Promise.all([
+      sb.from("gest_operatori").select("id,nome").eq("user_id", sbUid),
+      sb.from("gest_timbrature").select("id,tipo,quando,ora_telefono,creato_da,corretta_da")
+        .eq("user_id", sbUid).is("eliminato_il", null)
+        .gte("quando", dal + "T00:00:00").lte("quando", al + "T23:59:59.999"),
+      sb.from("gest_ore").select("ore,operatore_id,data")
+        .eq("user_id", sbUid).is("eliminato_il", null)
+        .gte("data", dal).lte("data", al)
+    ]);
+
+    if(rTmb && rTmb.error){
+      body.innerHTML = '<p class="fatt-empty">Le timbrature non riesco a leggerle: '+esc(rTmb.error.message||"errore")+'</p>';
+      return;
+    }
+    const OPS = rOps && rOps.data ? rOps.data : [];
+    const NOMI = Object.fromEntries(OPS.map(o => [o.id, o.nome || "senza nome"]));
+    const TMB = (rTmb && rTmb.data) || [];
+    const ORE = (rOre && !rOre.error && rOre.data) ? rOre.data : [];
+
+    /* timbrature: persona -> giorno -> righe */
+    const perPersona = {};
+    TMB.forEach(r => {
+      const p = r.creato_da; if(!p) return;
+      const g = _oreGiorno(r.ora_telefono || r.quando);
+      (perPersona[p] = perPersona[p] || {});
+      (perPersona[p][g] = perPersona[p][g] || []).push({ id:r.id, tipo:r.tipo, quando:r.ora_telefono || r.quando, capo:!!r.corretta_da });
+    });
+    /* ore scritte a mano: persona -> minuti */
+    const scritte = {};
+    ORE.forEach(r => { if(r.operatore_id) scritte[r.operatore_id] = (scritte[r.operatore_id]||0) + (+r.ore||0); });
+
+    /* chi far vedere: chi ha timbrato, chi ha ore scritte, e tutta la squadra */
+    const ids = Array.from(new Set(OPS.map(o=>o.id).concat(Object.keys(perPersona)).concat(Object.keys(scritte))));
+    const PERS = ids.map(id => {
+      const giorni = perPersona[id] || {};
+      let ms = 0, nGiorni = 0, buchi = [], det = [];
+      Object.keys(giorni).sort().forEach(g => {
+        const c = _oreCoppie(giorni[g]);
+        if(c.ms > 0) nGiorni++;
+        ms += c.ms;
+        c.buchi.forEach(b => buchi.push({ giorno:g, riga:b }));
+        det.push({ giorno:g, ms:c.ms, pezzi:c.pezzi, buco:c.buchi[0] || null });
+      });
+      const scrMs = (scritte[id] || 0) * 3600000;
+      return { id:id, nome:NOMI[id] || "Persona non in elenco", ms:ms, giorni:nGiorni,
+               scrMs:scrMs, det:det, buchi:buchi, niente:(ms === 0 && scrMs === 0 && buchi.length === 0) };
+    }).sort((a,b) => b.ms - a.ms || a.nome.localeCompare(b.nome));
+
+    ORE_ULTIMO = { mese: MESI_L[q.m] + " " + q.a, pers: PERS };
+
+    const totMs   = PERS.reduce((s,p) => s + p.ms, 0);
+    const totScr  = PERS.reduce((s,p) => s + p.scrMs, 0);
+    const totBuchi= PERS.reduce((s,p) => s + p.buchi.length, 0);
+    const quanti  = PERS.filter(p => p.ms > 0).length;
+
+    if(!TMB.length && !ORE.length){
+      body.innerHTML = tabVuoto("Nessuna ora in " + MESI_L[q.m],
+        "Qui arrivano le ore che la squadra timbra dal telefono e quelle scritte in «Segna la giornata». Se il mese è appena iniziato, è normale.", AG_VUOTO);
+      return;
+    }
+
+    /* ---- l'avviso delle giornate aperte ---- */
+    let H = "";
+    if(totBuchi){
+      const primo = PERS.find(p => p.buchi.length);
+      const b = primo.buchi[0];
+      H += '<div class="ore-avviso"><span class="ore-av-ic">⚠️</span><div>'
+        + '<span class="ore-av-t">' + totBuchi + (totBuchi===1 ? " giornata rimasta aperta" : " giornate rimaste aperte") + '</span>'
+        + '<p>' + esc(primo.nome) + ' è entrato <b>' + _oreGiornoIt(b.giorno) + '</b> alle ' + _oreHHMM(b.riga.quando)
+        + ' e non ha mai timbrato l\'uscita. Finché resta aperta, quella giornata non conta ore.'
+        + (totBuchi > 1 ? ' Le altre le trovi aprendo le persone qui sotto.' : '')
+        + ' Aprila e mettici tu l\'orario di uscita.</p></div></div>';
+    }
+
+    /* ---- le quattro caselle ---- */
+    H += '<div class="ore-stat">'
+      + '<div class="ore-st ok"><div class="n">'  + _oreHM(totMs)  + '</div><div class="l">Ore timbrate</div></div>'
+      + '<div class="ore-st"><div class="n">'     + _oreHM(totScr) + '</div><div class="l">Ore scritte a mano</div></div>'
+      + '<div class="ore-st' + (totBuchi ? ' att' : '') + '"><div class="n">' + totBuchi + '</div><div class="l">Giornate aperte</div></div>'
+      + '<div class="ore-st"><div class="n">' + quanti + ' / ' + PERS.length + '</div><div class="l">Chi ha timbrato</div></div>'
+      + '</div>';
+
+    /* ---- la tabella, persona per persona ---- */
+    H += '<div class="ore-tab">'
+      + '<div class="ore-cap"><span class="c1">Persona</span><span class="c2">Giorni</span>'
+      + '<span class="c3">Ore timbrate</span><span class="c4">Ore scritte</span><span class="c5">Differenza</span><span class="c6"></span></div>';
+
+    PERS.forEach(p => {
+      const aperto = !!oreAperte[p.id];
+      const diffMs = p.ms - p.scrMs;
+      let diff;
+      if(p.ms === 0 && p.scrMs === 0)      diff = '<span class="ore-diff no">non ha timbrato</span>';
+      else if(p.ms === 0)                  diff = '<span class="ore-diff no">solo scritte</span>';
+      else if(p.scrMs === 0)               diff = '<span class="ore-diff no">solo timbrate</span>';
+      else if(Math.abs(diffMs) < 900000)   diff = '<span class="ore-diff ok">uguali</span>';   /* meno di 15 minuti */
+      else diff = '<span class="ore-diff att">' + (diffMs < 0 ? "−" : "+") + _oreHM(Math.abs(diffMs)) + '</span>';
+
+      H += '<div class="ore-riga' + (p.niente ? ' spenta' : '') + '" data-action="ore-apri" data-id="' + esc(p.id) + '">'
+        + '<span class="c1"><span class="ore-pall">' + esc(_oreIniz(p.nome)) + '</span>' + esc(p.nome) + '</span>'
+        + '<span class="c2">' + (p.giorni || "0") + '</span>'
+        + '<span class="c3 ore-forte">' + (p.ms ? _oreHM(p.ms) : "—") + '</span>'
+        + '<span class="c4">' + (p.scrMs ? _oreHM(p.scrMs) : "—") + '</span>'
+        + '<span class="c5">' + diff + '</span>'
+        + '<span class="c6">' + (p.det.length ? (aperto ? "Chiudi ↑" : "Apri ↓") : "") + '</span>'
+        + '</div>';
+
+      if(aperto && p.det.length){
+        H += '<div class="ore-giorni">';
+        p.det.forEach(d => {
+          if(d.buco){
+            H += '<div class="ore-g buco"><span class="d">' + _oreGiornoIt(d.giorno) + '</span>'
+              + '<span class="t">' + _oreHHMM(d.buco.quando) + ' → <b>manca l\'uscita</b></span>'
+              + '<span class="fix" onclick="event.stopPropagation()">'
+              + '<input type="time" class="ore-ora" id="fix-' + esc(d.buco.id) + '" value="17:00">'
+              + '<button class="btn btn-sm" data-action="ore-fix" data-id="' + esc(d.buco.id) + '" data-op="' + esc(p.id) + '" data-g="' + d.giorno + '" data-e="' + _oreHHMM(d.buco.quando) + '">Metti l\'uscita</button>'
+              + '</span></div>';
+          }else{
+            H += '<div class="ore-g"><span class="d">' + _oreGiornoIt(d.giorno) + '</span>'
+              + '<span class="t">' + esc(d.pezzi.join(" · ")) + '</span>'
+              + '<span class="h">' + _oreHM(d.ms) + '</span></div>';
+          }
+        });
+        H += '</div>';
+      }
+    });
+
+    let diffTot = totMs - totScr, dt;
+    if(!totMs || !totScr) dt = '<span class="ore-diff no">—</span>';
+    else if(Math.abs(diffTot) < 900000) dt = '<span class="ore-diff ok">uguali</span>';
+    else dt = '<span class="ore-diff att">' + (diffTot < 0 ? "−" : "+") + _oreHM(Math.abs(diffTot)) + '</span>';
+
+    H += '<div class="ore-riga tot"><span class="c1">Totale squadra</span>'
+      + '<span class="c2">' + PERS.reduce((s,p)=>s+p.giorni,0) + '</span>'
+      + '<span class="c3">' + _oreHM(totMs) + '</span>'
+      + '<span class="c4">' + _oreHM(totScr) + '</span>'
+      + '<span class="c5">' + dt + '</span><span class="c6"></span></div>';
+    H += '</div>';
+
+    body.innerHTML = H;
+  }
+
+  /* mette l'uscita che l'operaio ha dimenticato.
+     ⚠️ NON si tocca la riga sua: si AGGIUNGE una riga uscita, firmata col
+     proprio uid in corretta_da. Cosi' fra sei mesi si sa chi l'ha messa. */
+  async function oreMettiUscita(t){
+    const idEnt = t.dataset.id, opId = t.dataset.op, g = t.dataset.g, entrata = t.dataset.e;
+    const inp = document.getElementById("fix-" + idEnt);
+    const ora = inp ? inp.value : "";
+    if(!/^\d{2}:\d{2}$/.test(ora)){ toast("Scrivi l'orario di uscita (per esempio 17:00)."); return; }
+    if(ora <= entrata){ toast("L'uscita deve essere dopo l'entrata delle " + entrata + "."); return; }
+    const quando = new Date(g + "T" + ora + ":00");
+    t.disabled = true;
+    const r = await sb.from("gest_timbrature").insert({
+      user_id:    sbUid,
+      creato_da:  opId,
+      tipo:       "uscita",
+      quando:     quando.toISOString(),
+      ora_telefono: null,                       /* non l'ha premuta lui: non c'e' ora del telefono */
+      client_id:  "capo-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      corretta_da:  sbUid,
+      corretta_il:  new Date().toISOString(),
+      nota:       "uscita messa dal titolare (mancava)"
+    });
+    t.disabled = false;
+    if(r && r.error){ toast("Non salvata: " + (r.error.message || "errore")); return; }
+    toast("Uscita messa alle " + ora + " ✔");
+    renderOre();
+  }
+
+  /* il file per Excel: una riga per persona, ore in numero (9,42) e in ore e minuti */
+  function oreScaricaCsv(){
+    if(!ORE_ULTIMO || !ORE_ULTIMO.pers.length){ toast("Non c'è ancora niente da scaricare."); return; }
+    const righe = [["Persona","Giorni timbrati","Ore timbrate","Ore timbrate (numero)","Ore scritte a mano","Ore scritte (numero)","Giornate aperte"]];
+    ORE_ULTIMO.pers.forEach(p => righe.push([
+      p.nome, p.giorni, _oreHM(p.ms), String(_oreDec(p.ms)).replace(".", ","),
+      _oreHM(p.scrMs), String(_oreDec(p.scrMs)).replace(".", ","), p.buchi.length
+    ]));
+    /* ";" e BOM: cosi' Excel italiano apre le colonne giuste e legge gli accenti */
+    const testo = "﻿" + righe.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(";")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([testo], { type:"text/csv;charset=utf-8" }));
+    a.download = "ore-" + ORE_ULTIMO.mese.replace(" ", "-") + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
   /* ============================================================
      UPGRADE 2026 — Spese/margine, Preventivi, Report
      ============================================================ */
@@ -16253,6 +16561,23 @@ ${vecchi?`
     if(a==="gal-del-video"){if(confirm("Eliminare questo video?"))galDelVideo(t.dataset.id);return;}
     if(a==="gal-play"){const u=galVideoCache[t.dataset.id];if(u)window.open(u,"_blank");else toast("Video non ancora pronto, riprova tra un attimo");return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
+    /* 6 set 2026 — le due linguette di Agenda operatore: «Da fare» e «Ore fatte» */
+    if(a==="ag-vista"){
+      const v=t.dataset.v; segmOn("#ag-vista",v);
+      $("#ag-parte-lavori").style.display = v==="ore" ? "none" : "";
+      $("#ag-parte-ore").style.display    = v==="ore" ? "" : "none";
+      if(v==="ore") renderOre();
+      return;
+    }
+    if(a==="ore-mese"){_oreSpostaMese(+t.dataset.v);return;}
+    if(a==="ore-csv"){oreScaricaCsv();return;}
+    if(a==="ore-fix"){oreMettiUscita(t);return;}
+    if(a==="ore-apri"){
+      const id=t.dataset.id;
+      oreAperte[id]=!oreAperte[id];
+      renderOre();
+      return;
+    }
     /* 12 agosto 2026 (sera) — "del-job" tolto: era l'eliminazione dell'archivio
        LOCALE, e l'unico pulsante che la chiamava stava dentro jobCard, che non
        si disegna piu' da mesi. Se per sbaglio fosse tornata raggiungibile
