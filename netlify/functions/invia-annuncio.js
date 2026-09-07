@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 // ============================================================
 // SCRIVI A TUTTI — TrovaImpresa (agosto 2026)
 //
@@ -44,7 +45,14 @@ function dataIta(iso) {
 
 // Il testo arriva scritto a mano, con le righe vuote fra i paragrafi.
 // Qui diventa HTML leggibile, senza che Alessio debba scrivere tag.
-function testoInHtml(testo) {
+// stesso calcolo della funzione SQL codice_disiscrizione()
+function codiceDisiscrizione(email) {
+  return crypto.createHash('sha256')
+    .update(String(email || '').trim().toLowerCase() + 'ti-niente-email-2026')
+    .digest('hex');
+}
+
+function testoInHtml(testo, emailDest) {
   const paragrafi = String(testo || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
   const corpo = paragrafi
     .map(p => '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#12233a">' + esc(p).replace(/\n/g, '<br>') + '</p>')
@@ -59,7 +67,10 @@ function testoInHtml(testo) {
     + '</div>'
     + '<div style="text-align:center;font-size:13px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
     + 'TrovaImpresa.com &middot; Alessio Pinto &middot; Rieti (RI)<br>'
-    + 'Ricevi questa email perche&#39; sei iscritto a TrovaImpresa.com'
+    + 'Ricevi questa email perche&#39; sei iscritto a TrovaImpresa.com<br>'
+    + '<a href="https://trovaimpresa.com/niente-email?e=' + encodeURIComponent(emailDest || '')
+    + '&c=' + codiceDisiscrizione(emailDest)
+    + '" style="color:#5b6b80">Non vuoi piu&#39; ricevere queste email? Togliti con un clic</a>'
     + '</div></div></body></html>';
 }
 
@@ -107,9 +118,12 @@ exports.handler = async function (event) {
 
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
-    .select('id, nome, nome_attivita, email, citta, tipo, piano, premium_scadenza, is_test')
+    .select('id, nome, nome_attivita, email, citta, tipo, piano, premium_scadenza, is_test, email_promo')
     .eq('is_test', false)
-    .eq('email_confermata', true);
+    .eq('email_confermata', true)
+    // chi si e' tolto dalle email promozionali non riceve piu' nulla da qui
+    // (7 set 2026). Le email di servizio partono da altre funzioni.
+    .neq('email_promo', false);
   if (error) {
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura imprese: ' + error.message }) };
   }
@@ -169,7 +183,7 @@ exports.handler = async function (event) {
     from: MITTENTE,
     to: [i.email],
     subject: riempi(oggetto, i),
-    html: testoInHtml(riempi(testo, i))
+    html: testoInHtml(riempi(testo, i), i.email)
   }));
 
   try {

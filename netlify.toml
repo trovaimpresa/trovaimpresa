@@ -1061,3 +1061,12 @@
   to = "/imprese-viterbo"
   status = 301
   force = true
+
+# ===== 7 settembre 2026 — TOGLIERSI DALLE EMAIL =====
+# Il link nel piedino delle email di «Scrivi a tutti» porta qui. Toglie solo
+# le email di novita'/offerte: la scheda dell'impresa non si tocca. La pagina
+# vera e' niente-email.html.
+[[redirects]]
+  from = "/niente-email"
+  to = "/niente-email.html"
+  status = 200

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Non ricevere più le email — TrovaImpresa</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://trovaimpresa.com/niente-email">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Trebuchet MS',system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+       background:#f4f7fb;color:#12233a;display:flex;align-items:center;
+       justify-content:center;min-height:100vh;padding:22px}
+  .scatola{background:#fff;border-radius:16px;box-shadow:0 6px 26px rgba(10,42,77,.10);
+           max-width:560px;width:100%;padding:34px 30px;text-align:center}
+  .logo{max-width:230px;width:70%;height:auto;margin:0 auto 22px;display:block}
+  h1{font-size:24px;margin-bottom:14px;color:#0a2a4d}
+  p{font-size:17px;line-height:1.65;color:#3d4b5c;margin-bottom:16px}
+  .mail{font-weight:700;color:#0a2a4d;word-break:break-all}
+  .avviso{background:#eaf6ee;border:2px solid #b7e0c6;border-radius:12px;
+          padding:14px 16px;font-size:16px;color:#1b5e35;line-height:1.6;margin:18px 0}
+  .btn{display:inline-block;width:100%;padding:16px;border:none;border-radius:12px;
+       font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;margin-top:6px}
+  .btn-togli{background:#0066ff;color:#fff}
+  .btn-togli:disabled{opacity:.55;cursor:default}
+  .btn-torna{background:#fff;color:#0066ff;border:2px solid #0066ff;margin-top:12px;text-decoration:none;line-height:1.2}
+  .esito{margin-top:20px;padding:16px 18px;border-radius:12px;font-size:17px;
+         line-height:1.6;display:none;text-align:left}
+  .esito.ok{background:#eaf6ee;border:2px solid #b7e0c6;color:#1b5e35;display:block}
+  .esito.ko{background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;display:block}
+  .piccolo{font-size:15px;color:#5b6b80;margin-top:20px}
+</style>
+</head>
+<body>
+  <div class="scatola">
+    <img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" class="logo">
+    <h1>Non ricevere più le nostre email</h1>
+
+    <div id="prima">
+      <p>Stai per togliere l'indirizzo <span class="mail" id="mostra-mail">—</span>
+         dalle email di novità e offerte di TrovaImpresa.</p>
+
+      <div class="avviso">
+        <b>La tua scheda resta dov'è.</b><br>
+        Non cancelliamo niente: profilo, recensioni, contatti e gestionale
+        continuano a funzionare come prima. Cambia solo che non ti scriviamo più
+        per novità e offerte.
+      </div>
+
+      <p style="font-size:15px;color:#5b6b80">Continuerai a ricevere solo le email
+         necessarie: risposte alle tue richieste, avvisi sul tuo account e scadenze.</p>
+
+      <button class="btn btn-togli" id="btn-togli" onclick="togli()">Sì, non scrivetemi più</button>
+      <a class="btn btn-torna" href="/">No, ho cambiato idea</a>
+    </div>
+
+    <div class="esito" id="esito"></div>
+    <div class="piccolo">TrovaImpresa.com · Alessio Pinto · Rieti (RI)</div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  var SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  var par = new URLSearchParams(location.search);
+  var email = (par.get('e') || '').trim();
+  var codice = (par.get('c') || '').trim();
+
+  document.getElementById('mostra-mail').textContent = email || '(indirizzo mancante)';
+  if (!email || !codice) {
+    document.getElementById('prima').style.display = 'none';
+    mostra('ko', '<b>Link incompleto.</b><br>Apri il collegamento direttamente dall\'email che hai ricevuto, oppure scrivici a info@trovaimpresa.com e ti togliamo noi.');
+  }
+
+  function mostra(tipo, html) {
+    var e = document.getElementById('esito');
+    e.className = 'esito ' + tipo;
+    e.innerHTML = html;
+  }
+
+  async function togli() {
+    var b = document.getElementById('btn-togli');
+    b.disabled = true; b.textContent = 'Un attimo...';
+    try {
+      var r = await sb.rpc('togli_email_promo', { p_email: email, p_codice: codice });
+      if (r.error) throw new Error(r.error.message);
+      var esito = r.data;
+      document.getElementById('prima').style.display = 'none';
+      if (esito === 'tolta') {
+        mostra('ok', '<b>Fatto.</b><br>Non ti manderemo più email di novità e offerte. La tua scheda su TrovaImpresa resta online come prima.<br><br>Se un domani cambi idea, scrivici a info@trovaimpresa.com.');
+      } else if (esito === 'non_trovata') {
+        mostra('ko', '<b>Non troviamo questo indirizzo.</b><br>Forse è già stato tolto. Se continui a ricevere email scrivici a info@trovaimpresa.com.');
+      } else {
+        mostra('ko', '<b>Link non valido.</b><br>Apri il collegamento direttamente dall\'email che hai ricevuto, oppure scrivici a info@trovaimpresa.com.');
+      }
+    } catch (err) {
+      b.disabled = false; b.textContent = 'Sì, non scrivetemi più';
+      mostra('ko', '<b>Qualcosa non ha funzionato.</b><br>' + err.message + '<br>Scrivici a info@trovaimpresa.com e ti togliamo noi.');
+    }
+  }
+</script>
+</body>
+</html>
