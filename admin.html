@@ -569,6 +569,12 @@
       <div class="nav-item" onclick="showSection('chientra',this)">
         <span class="nav-icon">🚶</span> Chi entra nel sito
       </div>
+      <!-- 7 settembre 2026 - che cosa fanno i CLIENTI sul sito pubblico.
+           La voce sopra guarda gli iscritti e il loro pannello; questa
+           guarda chi su TrovaImpresa non ha nessun account. -->
+      <div class="nav-item" onclick="showSection('ricerche',this)">
+        <span class="nav-icon">📊</span> Ricerche e visite
+      </div>
       <div class="nav-item" onclick="showSection('mie-viste',this)">
         <span class="nav-icon">🧭</span> Le mie viste
       </div>
@@ -1459,6 +1465,29 @@
       </div>
     </div>
 
+    <!-- RICERCHE E VISITE — 7 settembre 2026.
+         Che cosa fa il CLIENTE sul sito pubblico: quante schede impresa
+         apre, quante ricerche fa, che cosa cerca, dove, e quante volte
+         non trova nessuno. I dati li scrive js/conta-cliente.js dentro
+         `visite_clienti`; qui si rileggono con admin-ricerche.js. -->
+    <div class="section" id="sec-ricerche">
+      <div class="topbar">
+        <div class="topbar-title">📊 Ricerche e visite</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="u-numeri" id="rv-numeri"></div>
+        <div class="u-filtri">
+          <button class="u-btn attivo" onclick="filtraRicerche(7,this)">Ultimi 7 giorni</button>
+          <button class="u-btn" onclick="filtraRicerche(30,this)">Ultimi 30 giorni</button>
+          <button class="u-btn" onclick="filtraRicerche(0,this)">Sempre</button>
+          <button class="u-btn" onclick="caricaRicerche()">Aggiorna</button>
+        </div>
+        <div id="rv-avviso"></div>
+        <div id="rv-corpo"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- LE MIE VISTE — tutto quello che serve ad Alessio per provare il sito
          da un posto solo, senza account finti. -->
     <div class="section" id="sec-mie-viste">
@@ -1654,6 +1683,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'arrivi') caricaArrivi();
   if (id === 'utilizzo') caricaUtilizzo();
   if (id === 'chientra') caricaChiEntra();
+  if (id === 'ricerche') caricaRicerche();
   if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
@@ -2732,6 +2762,149 @@ function disegnaChiEntra(){
         + '<div><div class="k">Tempo passato dentro in tutto</div><div class="v">' + _ceTempo(r.secondi_totali) + '</div></div>'
       + '</div></div>'
   }).join('');
+}
+
+/* ============================================================
+   RICERCHE E VISITE - 7 settembre 2026
+
+   Che cosa fa il CLIENTE sul sito pubblico. Sono le persone che non
+   hanno nessun account: aprono la scheda di un'impresa e fanno ricerche.
+
+   ⚠️ I numeri partono da OGGI. Prima del 7 settembre 2026 nessuno
+   contava queste due cose, quindi «zero» in un giorno passato vuol dire
+   «non lo sapevamo», non «non e' venuto nessuno». La riga sopra le carte
+   dice da quando il contatore e' acceso.
+
+   ⚠️ «Persone» sono sessioni diverse del browser, non nomi: non c'e'
+   nessun cookie e nessun dato personale. Chi torna il giorno dopo conta
+   come una persona nuova.
+
+   Il riquadro rosso in fondo e' quello che vale di piu': una ricerca
+   finita a zero risultati e' un cliente che voleva pagare qualcuno e su
+   TrovaImpresa non ha trovato nessuno.
+   ============================================================ */
+let _rvDati = null, _rvGiorni = 7;
+
+function _rvNum(n){ return (Number(n) || 0).toLocaleString('it-IT'); }
+
+/* «lun 7» - il giorno come lo direbbe una persona */
+function _rvGiorno(s){
+  try{
+    const d = new Date(s + 'T12:00:00');
+    const gg = ['dom','lun','mar','mer','gio','ven','sab'][d.getDay()];
+    return gg + '<br>' + d.getDate();
+  }catch(e){ return s; }
+}
+
+/* Una classifica: titolo, righe gia' pronte, e cosa scrivere se e' vuota */
+function _rvClassifica(titolo, righe, vuota){
+  const dentro = righe.length
+    ? righe.map(r =>
+        '<div style="display:flex;justify-content:space-between;gap:10px">'
+        + '<span class="k">' + r.etichetta + '</span>'
+        + '<span class="v">' + r.numero + '</span></div>').join('')
+    : '<div style="color:#5b6b80;font-size:15px">' + vuota + '</div>';
+  return '<div class="mv-card">'
+    + '<div style="font-size:18px;font-weight:800;margin-bottom:14px">' + titolo + '</div>'
+    + '<div class="u-det" style="grid-template-columns:1fr">' + dentro + '</div></div>';
+}
+
+async function caricaRicerche(){
+  const box = document.getElementById('rv-corpo');
+  if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try{
+    const res = await fetch('/.netlify/functions/admin-ricerche', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP, giorni: _rvGiorni })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    _rvDati = j.data || {};
+    disegnaRicerche();
+  }catch(e){
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _uEsc(e.message) + '</div>';
+  }
+}
+
+function filtraRicerche(g, el){
+  _rvGiorni = g;
+  document.querySelectorAll('#sec-ricerche .u-btn').forEach(b => b.classList.remove('attivo'));
+  if(el) el.classList.add('attivo');
+  caricaRicerche();
+}
+
+function disegnaRicerche(){
+  const d = _rvDati || {};
+
+  const numeri = document.getElementById('rv-numeri');
+  if(numeri) numeri.innerHTML =
+      '<div class="u-num verde"><div class="v">' + _rvNum(d.oggi) + '</div><div class="e">Clienti oggi</div></div>'
+    + '<div class="u-num"><div class="v">' + _rvNum(d.ieri) + '</div><div class="e">Clienti ieri</div></div>'
+    + '<div class="u-num viola"><div class="v">' + _rvNum(d.ricerche) + '</div><div class="e">Ricerche nel periodo scelto</div></div>'
+    + '<div class="u-num arancio"><div class="v">' + _rvNum(d.schede) + '</div><div class="e">Schede impresa aperte</div></div>'
+    + '<div class="u-num rosso"><div class="v">' + _rvNum(d.vuote) + '</div><div class="e">Ricerche finite a vuoto</div></div>';
+
+  /* La riga che impedisce di leggere uno zero come un fatto. */
+  const avv = document.getElementById('rv-avviso');
+  if(avv){
+    avv.innerHTML = d.conta_da
+      ? '<div class="st-nota" style="margin:0 0 18px">Queste due cose (schede aperte e ricerche) si contano dal <b>' + new Date(d.conta_da).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) + '</b>: prima di allora non le registrava nessuno, quindi i giorni passati sono a zero perch\u00e9 non lo sapevamo.</div>'
+      : '<div class="st-nota" style="margin:0 0 18px">Il contatore \u00e8 appena stato acceso: i primi numeri compaiono appena un cliente apre la scheda di un\'impresa o fa una ricerca sul sito.</div>';
+  }
+
+  const box = document.getElementById('rv-corpo');
+  if(!box) return;
+
+  /* --- il grafico dei giorni: barre alte in proporzione al massimo --- */
+  const giorni = (d.giorni || []);
+  let grafico = '';
+  if(giorni.length){
+    const max = Math.max.apply(null, giorni.map(g => Number(g.persone) || 0)) || 1;
+    const oggiIso = new Date().toLocaleDateString('sv-SE');
+    grafico = '<div class="mv-card" style="margin-bottom:22px">'
+      + '<div style="font-size:18px;font-weight:800;margin-bottom:4px">Quanti entrano ogni giorno</div>'
+      + '<div style="color:#5b6b80;font-size:15px;margin-bottom:18px">Persone diverse che hanno aperto una scheda impresa o fatto una ricerca</div>'
+      + '<div style="display:flex;align-items:flex-end;gap:10px;height:170px">'
+      + giorni.map(g => {
+          const n = Number(g.persone) || 0;
+          const h = Math.max(6, Math.round(n / max * 120));
+          const colore = (String(g.g) === oggiIso) ? '#1b8a3f' : '#0066ff';
+          return '<div style="flex:1;text-align:center">'
+            + '<div style="background:' + colore + ';border-radius:6px 6px 0 0;height:' + h + 'px"></div>'
+            + '<div style="font-size:13px;color:#5b6b80;margin-top:6px">' + _rvGiorno(g.g)
+            + '<br><b style="color:#1a1a1a">' + n + '</b></div></div>';
+        }).join('')
+      + '</div></div>';
+  }
+
+  /* --- le tre classifiche --- */
+  const cosa = (d.cosa || []).map(r => ({ etichetta: _uEsc(r.v), numero: _rvNum(r.n) }));
+  const dove = (d.dove || []).map(r => ({ etichetta: '\ud83d\udccd ' + _uEsc(r.v), numero: _rvNum(r.n) }));
+  const imp  = (d.imprese || []).map(r => ({
+    etichetta: _uEsc(r.nome) + (r.citta ? ' \u00b7 ' + _uEsc(r.citta) : ''),
+    numero: _rvNum(r.n)
+  }));
+
+  const tre = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:22px">'
+    + _rvClassifica('Che cosa cercano', cosa, 'Ancora nessuna ricerca con un mestiere scelto.')
+    + _rvClassifica('Dove cercano', dove, 'Ancora nessuna ricerca.')
+    + _rvClassifica('Le schede pi\u00f9 aperte', imp, 'Ancora nessuna scheda impresa aperta.')
+    + '</div>';
+
+  /* --- le ricerche a vuoto --- */
+  const vuote = (d.vuote_elenco || []);
+  const rosso = '<div class="mv-card" style="border-left:9px solid #b3261e">'
+    + '<div style="font-size:18px;font-weight:800;margin-bottom:4px">Ricerche finite a vuoto</div>'
+    + '<div style="color:#5b6b80;font-size:15px;margin-bottom:16px">Un cliente ha cercato e non ha trovato nessuno: qui ti manca l\'impresa</div>'
+    + '<div class="u-det" style="grid-template-columns:1fr">'
+    + (vuote.length
+        ? vuote.map(r => '<div style="display:flex;justify-content:space-between;gap:10px">'
+            + '<span class="k">' + _uEsc(r.cosa) + ' \u00b7 ' + _uEsc(r.dove) + '</span>'
+            + '<span class="v">' + _rvNum(r.n) + (Number(r.n) === 1 ? ' volta' : ' volte') + '</span></div>').join('')
+        : '<div style="color:#5b6b80;font-size:15px">Nessuna ricerca a vuoto nel periodo scelto.</div>')
+    + '</div></div>';
+
+  box.innerHTML = grafico + tre + rosso;
 }
 
 /* ============================================================
