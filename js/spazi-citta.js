@@ -159,10 +159,8 @@
       if (telefono) { a.style.setProperty('display', 'flex', 'important'); return; }
       if (largaOk < MINIMA) { a.style.setProperty('display', 'none', 'important'); return; }
       a.style.setProperty('display', 'flex', 'important');
-      var LH = misuraDi(id);
-      if (largaOk < LH) { a.style.setProperty('display', 'none', 'important'); return; }
-      a.style.setProperty('width', LH + 'px', 'important');
-      a.style.setProperty('max-width', LH + 'px', 'important');
+      a.style.setProperty('width', largaOk + 'px', 'important');
+      a.style.setProperty('max-width', largaOk + 'px', 'important');
       a.style.setProperty(id.indexOf('sx') >= 0 ? 'left' : 'right', BORDO + 'px', 'important');
     });
 
@@ -185,9 +183,8 @@
       var a = l[i];
       var sez = document.querySelector(a.getAttribute('data-sez'));
       var passo = parseInt(a.getAttribute('data-passo'), 10) || 1;
-      var disponibile = perPasso[passo] || 0;
-      var L = misuraDi(a.getAttribute('data-spazio-id'));
-      if (!sez || telefono || disponibile < L) { a.style.display = 'none'; continue; }
+      var L = perPasso[passo] || 0;
+      if (!sez || telefono || L < MINIMA) { a.style.display = 'none'; continue; }
       var H = Math.round(L * 260 / 400);
       var r = sez.getBoundingClientRect();
       var centro = r.top + window.scrollY + r.height / 2;
