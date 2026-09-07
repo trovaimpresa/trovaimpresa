@@ -88,6 +88,64 @@
     return trovati;
   }
 
+  // ------------------------------------------------------------------ adatta
+  // Adatta la locandina o il logo del cliente allo spazio che gli diamo.
+  // Molti caricano un'immagine con il bordo vuoto intorno (il ritaglio guidato
+  // la fa "entrare tutta"): qui quel bordo lo togliamo e il disegno riempie il
+  // riquadro. Se per qualsiasi motivo non si riesce, resta l'immagine com'e'.
+  function adattaAlloSpazio(im, url) {
+    var prova = new Image();
+    prova.crossOrigin = 'anonymous';
+    prova.onload = function () {
+      try {
+        var W = prova.naturalWidth, H = prova.naturalHeight;
+        if (!W || !H) return;
+        var c = document.createElement('canvas');
+        c.width = W; c.height = H;
+        var x = c.getContext('2d');
+        x.drawImage(prova, 0, 0);
+        var d = x.getImageData(0, 0, W, H).data;
+
+        // il colore del bordo lo prendiamo dall'angolo in alto a sinistra
+        var r0 = d[0], g0 = d[1], b0 = d[2], T = 12;
+        function uguale(i) {
+          return Math.abs(d[i] - r0) < T && Math.abs(d[i+1] - g0) < T && Math.abs(d[i+2] - b0) < T;
+        }
+        function colonnaVuota(cx) {
+          for (var y = 0; y < H; y += 2) if (!uguale((y * W + cx) * 4)) return false;
+          return true;
+        }
+        function rigaVuota(cy) {
+          for (var xx = 0; xx < W; xx += 2) if (!uguale((cy * W + xx) * 4)) return false;
+          return true;
+        }
+        var sx = 0;      while (sx < W - 1 && colonnaVuota(sx)) sx++;
+        var dx = W - 1;  while (dx > sx && colonnaVuota(dx)) dx--;
+        var su = 0;      while (su < H - 1 && rigaVuota(su)) su++;
+        var giu = H - 1; while (giu > su && rigaVuota(giu)) giu--;
+
+        var lc = dx - sx + 1, hc = giu - su + 1;
+        if (lc < W * 0.2 || hc < H * 0.2) return;          // immagine quasi tutta vuota: non tocco
+        if (lc > W * 0.97 && hc > H * 0.97) return;        // gia' piena: non serve
+
+        // ritaglio il contenuto e lo rimetto nella forma dello spazio (800x520)
+        var FW = 800, FH = 520;
+        var out = document.createElement('canvas');
+        out.width = FW; out.height = FH;
+        var o = out.getContext('2d');
+        o.fillStyle = 'rgb(' + r0 + ',' + g0 + ',' + b0 + ')';
+        o.fillRect(0, 0, FW, FH);
+        // ingrandisce il piu' possibile SENZA tagliare: il nome del cliente
+        // non deve mai finire fuori dal riquadro
+        var scala = Math.min(FW / lc, FH / hc);
+        var nw = lc * scala, nh = hc * scala;
+        o.drawImage(prova, sx, su, lc, hc, (FW - nw) / 2, (FH - nh) / 2, nw, nh);
+        im.src = out.toDataURL('image/jpeg', 0.92);
+      } catch (e) { /* immagine di un altro sito o canvas bloccato: la lascio com'e' */ }
+    };
+    prova.src = url;
+  }
+
   function destinazione(ann) {
     return ann.link_url || (ann.impresa_id ? '/profilo-impresa.html?id=' + ann.impresa_id : '#');
   }
@@ -121,6 +179,7 @@
       a.setAttribute('data-stato', 'venduto');
       im.src = ann.logo_url;
       im.alt = 'Pubblicita';
+      adattaAlloSpazio(im, ann.logo_url);
       a.appendChild(im);
       document.body.appendChild(a);
     });
