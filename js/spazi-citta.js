@@ -16,6 +16,11 @@
   var SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 
+  // Le misure sono quelle del listino (pubblicita.html, MISURE_FASCIA):
+  // quello che il cliente compra e' quello che vede.
+  var MISURE = { 'hero': 340, 'imprese': 270, 'inserzioni': 210, 'profilo': 170 };
+  function misuraDi(sid) { return MISURE[String(sid).split('-')[0]] || 260; }
+
   var BORDO   = 20;                    // distanza dal bordo dello schermo
   var LARGA   = 600;                   // larghezza voluta per le due in alto
   var SCALINO = 0.85;                  // ogni fascia e' l'85% di quella sopra
@@ -24,18 +29,14 @@
 
   // I 12 posti in colonna: stessi ancoraggi della nazionale.
   var POSTI = [
-    { sez: '#categorie',        lato: 'sx', passo: 1, spazio: 'citta1-sx' },
-    { sez: '#categorie',        lato: 'dx', passo: 1, spazio: 'citta1-dx' },
-    { sez: '#registrati',       lato: 'sx', passo: 2, spazio: 'citta2-sx' },
-    { sez: '#registrati',       lato: 'dx', passo: 2, spazio: 'citta2-dx' },
-    { sez: '.guide-costi-home', lato: 'sx', passo: 3, spazio: 'citta3-sx' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, spazio: 'citta3-dx' },
-    { sez: '.why-section',      lato: 'sx', passo: 4, spazio: 'citta4-sx' },
-    { sez: '.why-section',      lato: 'dx', passo: 4, spazio: 'citta4-dx' },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, spazio: 'citta5-sx-1' },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 1, spazio: 'citta5-sx-2' },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 0, spazio: 'citta5-dx-1' },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 1, spazio: 'citta5-dx-2' }
+    { sez: '#categorie',     lato: 'sx', passo: 1, spazio: 'imprese-sx' },
+    { sez: '#categorie',     lato: 'dx', passo: 1, spazio: 'imprese-dx' },
+    { sez: '#registrati',    lato: 'sx', passo: 2, spazio: 'inserzioni-sx' },
+    { sez: '#registrati',    lato: 'dx', passo: 2, spazio: 'inserzioni-dx' },
+    { sez: '#ti-recensioni', lato: 'sx', passo: 5, pila: 0, spazio: 'profilo-sx-1' },
+    { sez: '#ti-recensioni', lato: 'sx', passo: 5, pila: 1, spazio: 'profilo-sx-2' },
+    { sez: '#ti-recensioni', lato: 'dx', passo: 5, pila: 0, spazio: 'profilo-dx-1' },
+    { sez: '#ti-recensioni', lato: 'dx', passo: 5, pila: 1, spazio: 'profilo-dx-2' }
   ];
 
   // --- solo pagina citta: serve ?citta= -----------------------------------
@@ -52,8 +53,12 @@
 
   var IN_ALTO = ['hero-sx', 'hero-dx'];
 
+
+  var VENDUTI_ALTO = {};
+
   async function avvia() {
     var venduti = await cercaVenduti();
+    IN_ALTO.forEach(function (id) { if (venduti[id]) VENDUTI_ALTO[id] = venduti[id]; });
     creaColonna(venduti);
     sistema();
     window.addEventListener('resize', sistema);
@@ -65,7 +70,8 @@
   // --- chi ha pagato questi spazi in questa citta' -------------------------
   async function cercaVenduti() {
     var oggi = new Date().toISOString().slice(0, 10);
-    var ids = POSTI.map(function (p) { return p.spazio; }).join(',');
+    var ids = POSTI.map(function (p) { return p.spazio; })
+                   .concat(IN_ALTO).join(',');
     var url = SUPABASE_URL + '/rest/v1/annunci_pubblicitari'
             + '?select=spazio_id,logo_url,link_url,impresa_id'
             + '&spazio_id=in.(' + ids + ')'
@@ -101,23 +107,20 @@
         + 'z-index:5;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12)';
 
       var ann = venduti[v.spazio];
+
+      // Niente segnaposti: lo spazio libero non si vede. Si vede solo
+      // quello comprato davvero.
+      if (!ann) return;
+
       var im = document.createElement('img');
       im.loading = 'lazy';
       im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
-
-      if (ann) {
-        a.setAttribute('href', destinazione(ann));
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer');
-        a.setAttribute('data-stato', 'venduto');
-        im.src = ann.logo_url;
-        im.alt = 'Pubblicita';
-      } else {
-        a.setAttribute('href', '/pubblicita?spazio=' + v.spazio + '&citta=' + encodeURIComponent(CITTA));
-        a.setAttribute('data-stato', 'libero');
-        im.src = v.lato === 'sx' ? '/img/hero-sx.svg' : '/img/hero-dx.svg';
-        im.alt = 'Spazio pubblicitario disponibile';
-      }
+      a.setAttribute('href', destinazione(ann));
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+      a.setAttribute('data-stato', 'venduto');
+      im.src = ann.logo_url;
+      im.alt = 'Pubblicita';
       a.appendChild(im);
       document.body.appendChild(a);
     });
@@ -151,11 +154,15 @@
     IN_ALTO.forEach(function (id) {
       var a = document.querySelector('a.pub-link[data-spazio-id="' + id + '"]');
       if (!a) return;
+      // niente segnaposto: se non l'ha comprato nessuno, sparisce
+      if (!VENDUTI_ALTO[id]) { a.style.setProperty('display', 'none', 'important'); return; }
       if (telefono) { a.style.setProperty('display', 'flex', 'important'); return; }
       if (largaOk < MINIMA) { a.style.setProperty('display', 'none', 'important'); return; }
       a.style.setProperty('display', 'flex', 'important');
-      a.style.setProperty('width', largaOk + 'px', 'important');
-      a.style.setProperty('max-width', largaOk + 'px', 'important');
+      var LH = misuraDi(id);
+      if (largaOk < LH) { a.style.setProperty('display', 'none', 'important'); return; }
+      a.style.setProperty('width', LH + 'px', 'important');
+      a.style.setProperty('max-width', LH + 'px', 'important');
       a.style.setProperty(id.indexOf('sx') >= 0 ? 'left' : 'right', BORDO + 'px', 'important');
     });
 
@@ -178,8 +185,9 @@
       var a = l[i];
       var sez = document.querySelector(a.getAttribute('data-sez'));
       var passo = parseInt(a.getAttribute('data-passo'), 10) || 1;
-      var L = perPasso[passo] || 0;
-      if (!sez || telefono || L < MINIMA) { a.style.display = 'none'; continue; }
+      var disponibile = perPasso[passo] || 0;
+      var L = misuraDi(a.getAttribute('data-spazio-id'));
+      if (!sez || telefono || disponibile < L) { a.style.display = 'none'; continue; }
       var H = Math.round(L * 260 / 400);
       var r = sez.getBoundingClientRect();
       var centro = r.top + window.scrollY + r.height / 2;
