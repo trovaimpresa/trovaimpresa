@@ -69,7 +69,7 @@
     try {
       var q = client
         .from('annunci_pubblicitari')
-        .select('spazio_id, logo_url, link_url')
+        .select('spazio_id, logo_url, link_url, impresa_id')
         .eq('stato', 'pagato')
         .gte('data_fine', oggi);
 
@@ -99,7 +99,7 @@
         continue;
       }
       venduti.add(ann.spazio_id);
-      a.href = ann.link_url || '#';
+      a.href = ann.link_url || (ann.impresa_id ? '/profilo-impresa.html?id=' + ann.impresa_id : '#');
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       a.style.setProperty('display', 'flex', 'important');

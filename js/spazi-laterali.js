@@ -94,7 +94,7 @@
     var a = document.createElement('a');
     a.className = 'ti-spazio-tel pub-link';
     a.setAttribute('data-spazio-tel', '1');
-    a.href = ann.link_url || '#';
+    a.href = ann.link_url || (ann.impresa_id ? '/profilo-impresa.html?id=' + ann.impresa_id : '#');
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     var im = document.createElement('img');
@@ -116,7 +116,7 @@
     }
     a.className = classiSlot(sid);
     a.style.width = misuraDi(sid) + 'px';
-    a.href = ann.link_url || '#';
+    a.href = ann.link_url || (ann.impresa_id ? '/profilo-impresa.html?id=' + ann.impresa_id : '#');
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     var _im = document.createElement('img');
@@ -132,7 +132,7 @@
     if (!c) { lista.forEach(rimuoviBox); return; }
     var oggi = new Date().toISOString().slice(0, 10);
     var url = SUPABASE_URL + '/rest/v1/annunci_pubblicitari'
-            + '?select=spazio_id,logo_url,link_url'
+            + '?select=spazio_id,logo_url,link_url,impresa_id'
             + '&spazio_id=in.(' + lista.join(',') + ')'
             + '&citta=ilike.' + encodeURIComponent(c)
             + '&stato=eq.pagato'
