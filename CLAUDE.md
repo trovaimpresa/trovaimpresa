@@ -22905,3 +22905,121 @@ Ogni lavoro: numeri scritti PRIMA · una cosa per volta · banco verde · banco
 dal vivo ricontando gli STESSI numeri. Mai due lavori in un push solo.
 E `prove-claude/` e' in `.gitignore`: i banchi non vanno online, quindi il
 banco delle gemelle non ha avuto bisogno di nessun push.
+
+---
+
+# 7 SETTEMBRE 2026 — LA PUBBLICITÀ CHE NON SI VEDEVA
+
+## Il fatto
+Alle →20:28← arriva l'ordine di **Service House** (Torino, artigiano, impianti
+elettrici, impresa →109←): spazio `imprese-dx`, →12←€, pagato. Alex apre
+`index.html?citta=torino` e **non lo vede**. Da lì è partito tutto.
+
+## ⛔ IL DIFETTO DI FONDO: NESSUN LEGAME FRA SPAZIO E PAGINA
+Un annuncio venduto ha nel database **solo** `spazio_id` + `citta`. **Non
+esiste nessun campo che dica in quale pagina va.** A deciderlo è una riga
+scritta a mano nell'HTML:
+
+    <script src="/js/spazi-laterali.js" data-spazi="imprese-sx,imprese-dx">
+
+Quella riga stava in **→161←** pagine (le →106← `imprese-<citta>.html` più →55←
+pagine mestiere+città, nate copiando la struttura delle pagine città) e **non
+era mai stata messa in `index.html?citta=X`**, cioè l'unica pagina che Alex
+considera "la pagina della città". Il banner era ovunque tranne dove serviva.
+
+**Tre verità che non si parlavano:**
+
+| | Cosa diceva |
+|---|---|
+| Il listino (quello che legge il cliente) | «Nella sezione di ricerca imprese» |
+| Il database | solo spazio + città, nessuna pagina |
+| Le pagine HTML | chi ha la riga incollata, mostra |
+
+⚠️ **Finché non esiste un elenco unico "questo spazio sta in questa pagina",
+letto sia dal listino sia dalle pagine, questo torna ogni volta che si generano
+pagine nuove copiandone una vecchia.** NON È ANCORA RISOLTO.
+
+## COSA È STATO FATTO (tutto pubblicato: →98a151b←, →9bfbd5c←)
+
+**1. Il banner era cieco.** `link_url` di Service House è vuoto (nel suo profilo
+il campo sito web è vuoto: non ha un sito). In `spazi-laterali.js` e
+`pubblicita-spazi.js` c'era `a.href = ann.link_url || '#'`: chi non aveva un
+sito comprava un cartello che non portava da nessuna parte. Ora:
+
+    a.href = ann.link_url || (ann.impresa_id ? '/profilo-impresa.html?id=' + ann.impresa_id : '#');
+
+Il dato `impresa_id` era già nella riga: nessun campo nuovo da chiedere.
+
+**2. Pubblicità tolta da tutte e →161← le pagine.** Regola di Alex: «la
+pubblicità deve stare SOLO qui», cioè in `index.html?citta=X`. Non toccate
+`profilo-impresa.html` (fascia profilo) e `offerte-lavoro.html` (fascia
+inserzioni): sono altre fasce del listino.
+
+**3. Nuovo `js/spazi-citta.js`.** Mette i →10← spazi del listino in
+`index.html?citta=X`, con **le posizioni e le misure del lavoro del 6 set sulla
+home nazionale**, riprese tali e quali (bordo →20← px, ogni fascia l'→85%← di
+quella sopra, minimo →140←, spenti sotto →1100←):
+
+| Posizione | Ancorata a | Spazi | Misura a 1920 |
+|---|---|---|---|
+| in alto | `.hero-inner` | `hero-sx` `hero-dx` | →533←×→346← |
+| passo 1 | `#categorie` | `imprese-sx` `imprese-dx` | →430←×→280← |
+| passo 2 | `#registrati` | `inserzioni-sx` `inserzioni-dx` | →366←×→238← |
+| passo 5 | `#ti-recensioni` | `profilo-sx-1/2` `profilo-dx-1/2` | →224←×→146← |
+
+`locandine-home.js` si spegne quando c'è `?citta=`, `spazi-citta.js` si accende
+solo allora: non si pestano i piedi, home nazionale invariata.
+
+**4. Spazi liberi invisibili.** Niente segnaposto: si vede solo quello comprato.
+
+**5. La misura la dà la POSIZIONE, non il listino.** Provato con la misura del
+listino (→270←): Alex l'ha bocciata, «troppo piccolo, non ha preso la misura
+dello spazio».
+
+**6. Il banner si adatta da solo allo spazio.** L'immagine di Service House
+aveva **→164← px di bianco in cima** (il →32%← dell'altezza): glielo aveva
+messo il ritaglio guidato, che di default fa "entrare tutta" l'immagine.
+Aggiunte due funzioni gemelle:
+- `adattaAlloSpazio()` in `spazi-citta.js` — sistema i banner **già caricati**
+- `adattaAlRiquadro()` in `pubblicita.html` — sistema quelli **nuovi, al
+  caricamento, prima di salvare** (così il file su Storage è già giusto)
+
+Prendono il colore del bordo dall'angolo, tolgono le bande vuote, ricentrano
+ingrandendo con `Math.min` — **senza tagliare**: il nome di un cliente pagante
+non deve mai finire fuori dal riquadro.
+
+## ⛔ ERRORI DI CLAUDE IN QUESTA SESSIONE, DA NON RIPETERE
+- **Inventati →12← spazi nuovi** (`citta1-sx`…`citta5-dx-2`) che nessuno aveva
+  chiesto. Alex: «chi ti ha detto di inserire dei nuovi? ce tutto, ce stripe ce,
+  non devi inventarti niente». **Il listino e Stripe esistono e funzionano: si
+  usano i →10← spazi che ci sono.**
+- **Guardato il database invece della pagina.** Alex ripeteva «non è visibile» e
+  Claude rispondeva parlando di quale pagina fosse giusta. Quando uno dice che
+  non vede niente, **si apre la pagina e si guarda**.
+- **Riaperta una decisione già presa** (la scala delle misure del 6 set).
+- **Dato `del .git\index.lock`** a chi lavora in Git Bash, dove il comando è `rm`.
+
+## NON RISOLTO — DA FARE
+1. **Il listino dice il falso**: «Nella sezione di ricerca imprese» va corretto.
+2. **Nessun elenco unico spazio↔pagina**: il difetto di fondo può risuccedere.
+3. **Nessun contatore viste/clic** per il cliente: senza, non rinnova.
+4. **Nessun promemoria di scadenza**, né al cliente né ad Alex.
+5. **La spia «in scadenza (30gg)»** nell'admin è sempre accesa: ogni annuncio
+   mensile nasce in allarme. Va portata a →7← giorni.
+6. **Gabriele** (Roma, hero-sx, →20←€) scaduto il →23/08← e mai richiamato.
+7. **La riga di prova non pagata** («Admin Trovaimpresa», Agrigento) sporca
+   l'admin.
+
+## LA DECISIONE PRESA A FINE SERATA — LE CATEGORIE
+Alex vuole che **la pubblicità segua la divisione in categorie che il sito ha
+già**: un artigiano non deve stare in mezzo ai professionisti.
+
+- Le →106← homepage città vanno divise in **tre**: →106← artigiani, →106←
+  imprese, →106← professionisti = **→318←**
+- **Il negozio è escluso: Alex lo sta eliminando come categoria**
+- Nel modulo di acquisto (`pubblicita.html`), oltre a **posizione** e **città**,
+  il cliente deve scegliere anche la **categoria** (artigiano / impresa /
+  professionista)
+- Oggi esistono solo le →106← `imprese-<citta>.html`; `artigiani-<citta>` e
+  `professionisti-<citta>` **non esistono** (→0← file)
+
