@@ -755,6 +755,48 @@ function ritDisegna() {
   im.style.transform = 'translate(' + RIT.x + 'px,' + RIT.y + 'px) scale(' + sc + ')';
 }
 
+// Adatta l'annuncio allo spazio prima di salvarlo.
+// Se intorno al disegno resta del vuoto (succede quando l'immagine "entra
+// tutta" e lascia le bande), quel vuoto lo togliamo e ingrandiamo il disegno
+// fino a riempire il riquadro, SENZA tagliare niente. Cosi' l'annuncio arriva
+// gia' della misura giusta e sul sito si vede pieno.
+function adattaAlRiquadro(cv, g) {
+  try {
+    var W = cv.width, H = cv.height;
+    var d = g.getImageData(0, 0, W, H).data;
+    var r0 = d[0], g0 = d[1], b0 = d[2], T = 12;
+    function uguale(i) {
+      return Math.abs(d[i] - r0) < T && Math.abs(d[i+1] - g0) < T && Math.abs(d[i+2] - b0) < T;
+    }
+    function colonnaVuota(cx) {
+      for (var y = 0; y < H; y += 2) if (!uguale((y * W + cx) * 4)) return false;
+      return true;
+    }
+    function rigaVuota(cy) {
+      for (var xx = 0; xx < W; xx += 2) if (!uguale((cy * W + xx) * 4)) return false;
+      return true;
+    }
+    var sx = 0;      while (sx < W - 1 && colonnaVuota(sx)) sx++;
+    var dx = W - 1;  while (dx > sx && colonnaVuota(dx)) dx--;
+    var su = 0;      while (su < H - 1 && rigaVuota(su)) su++;
+    var giu = H - 1; while (giu > su && rigaVuota(giu)) giu--;
+
+    var lc = dx - sx + 1, hc = giu - su + 1;
+    if (lc < W * 0.2 || hc < H * 0.2) return;          // quasi tutto vuoto: non tocco
+    if (lc > W * 0.97 && hc > H * 0.97) return;        // gia' pieno: non serve
+
+    var copia = document.createElement('canvas');
+    copia.width = W; copia.height = H;
+    copia.getContext('2d').drawImage(cv, 0, 0);
+
+    g.fillStyle = 'rgb(' + r0 + ',' + g0 + ',' + b0 + ')';
+    g.fillRect(0, 0, W, H);
+    var scala = Math.min(W / lc, H / hc);              // ingrandisce senza tagliare
+    var nw = lc * scala, nh = hc * scala;
+    g.drawImage(copia, sx, su, lc, hc, (W - nw) / 2, (H - nh) / 2, nw, nh);
+  } catch (e) { /* se non si riesce, resta com'era */ }
+}
+
 // il pezzo scelto, salvato a 800x520
 function ritRitaglia() {
   return new Promise(function (risolvi, rifiuta) {
@@ -770,6 +812,7 @@ function ritRitaglia() {
     var g = cv.getContext('2d');
     g.fillStyle = '#ffffff'; g.fillRect(0, 0, 800, 520);
     g.drawImage(im, sx, sy, sw, sh, 0, 0, 800, 520);
+    adattaAlRiquadro(cv, g);
     cv.toBlob(function (b) {
       if (b) risolvi({ blob: b, mime: 'image/jpeg', ext: 'jpg' });
       else rifiuta(new Error('ritaglio non riuscito'));
