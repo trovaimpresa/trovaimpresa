@@ -60,6 +60,14 @@
     + '#ti-recensioni .tir-review-date{color:var(--tir-muted);font-size:13px}'
     + '#ti-recensioni .tir-review-name{font-weight:600;font-size:14px;margin-bottom:4px}'
     + '#ti-recensioni .tir-review-text{font-size:14px;line-height:1.45;color:#444;margin:0;white-space:pre-wrap;word-break:break-word}'
+    /* 8 set 2026 — la riga dei voti senza commento. Prima la pagina scriveva
+       "5 recensioni" e ne faceva vedere una sola (le altre non avevano testo):
+       il numero non tornava e sembrava un sito che non usa nessuno. */
+    + '#ti-recensioni .tir-altri{margin-top:16px;border-top:1px solid var(--tir-border);'
+    +   'padding-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px;color:#555}'
+    + '#ti-recensioni .tir-altri b{color:#0a2a4d}'
+    + '#ti-recensioni .tir-altri .v{color:var(--tir-star);letter-spacing:1px}'
+    + '#ti-recensioni .tir-altri .q{color:var(--tir-muted)}'
     + '@media(max-width:520px){#ti-recensioni .tir-head{justify-content:center;text-align:center}}';
 
   // ---- HTML del blocco ----
@@ -84,7 +92,7 @@
     +       '<button type="button" class="tir-star" data-v="4" aria-label="4 stelle">★</button>'
     +       '<button type="button" class="tir-star" data-v="5" aria-label="5 stelle">★</button>'
     +     '</div>'
-    +     '<input class="tir-input" id="tir-name" type="text" maxlength="60" placeholder="Il tuo nome (facoltativo)" autocomplete="name">'
+    +     '<input class="tir-input" id="tir-name" type="text" maxlength="60" placeholder="Il tuo nome" autocomplete="name">'
     +     '<textarea class="tir-input" id="tir-comment" maxlength="600" rows="3" placeholder="Scrivi un commento (facoltativo)"></textarea>'
     +     '<input type="text" id="tir-website" class="tir-hp" tabindex="-1" autocomplete="off" aria-hidden="true">'
     +     '<div class="tir-actions">'
@@ -93,6 +101,7 @@
     +     '</div>'
     +   '</form>'
     +   '<div class="tir-list" id="tir-list"></div>'
+    +   '<div class="tir-altri" id="tir-altri" style="display:none"></div>'
     + '</div>';
 
   // ---- Inserisce stile + blocco nella pagina ----
@@ -177,14 +186,41 @@
               $("tir-avg").textContent = "–";
               $("tir-count").textContent = "Nessuna recensione, sii il primo!";
             }
-            $("tir-list").innerHTML = list.filter(function (r) {
-              return (r.comment || "").trim();
-            }).map(function (r) {
+            // 8 set 2026 — chi ha lasciato il nome o un commento ha il suo
+            // riquadro; gli altri voti valgono lo stesso e finiscono nella
+            // riga qui sotto, cosi' il numero scritto in alto torna sempre.
+            var conNome = list.filter(function (r) {
+              return (r.comment || "").trim() || (r.author_name || "").trim();
+            });
+            var senzaNome = list.filter(function (r) {
+              return !((r.comment || "").trim() || (r.author_name || "").trim());
+            });
+            var box = $("tir-altri");
+            if (box) {
+              if (senzaNome.length) {
+                var mesi = senzaNome.map(function (r) {
+                  var d = new Date(r.created_at);
+                  return d.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+                });
+                var unico = mesi.every(function (m) { return m === mesi[0]; }) ? mesi[0] : "";
+                box.innerHTML = '<b>Altri ' + senzaNome.length + ' vot' + (senzaNome.length === 1 ? 'o' : 'i') + ':</b>'
+                  + senzaNome.map(function (r) { return '<span class="v">' + stars(r.rating) + '</span>'; }).join("")
+                  + (unico ? '<span class="q">' + unico + '</span>' : '');
+                box.style.display = "flex";
+              } else {
+                box.innerHTML = "";
+                box.style.display = "none";
+              }
+            }
+            $("tir-list").innerHTML = conNome.map(function (r) {
               return '<div class="tir-review">'
                 + '<div class="tir-review-top"><span class="tir-review-stars">' + stars(r.rating) + '</span>'
                 + '<span class="tir-review-date">' + fmtDate(r.created_at) + '</span></div>'
                 + '<div class="tir-review-name">' + (esc(r.author_name) || "Anonimo") + '</div>'
-                + '<p class="tir-review-text">' + esc(r.comment) + '</p></div>';
+                + ((r.comment || "").trim()
+                    ? '<p class="tir-review-text">' + esc(r.comment) + '</p>'
+                    : '')
+                + '</div>';
             }).join("");
           });
       }
@@ -195,6 +231,15 @@
         msg.className = "tir-msg";
         if ($("tir-website").value) return;
         if (!selected) { msg.textContent = "Seleziona un voto con le stelle."; msg.classList.add("err"); return; }
+        // 8 set 2026 — il nome adesso serve: senza, la pagina si riempiva di
+        // "Anonimo". Il commento resta facoltativo: se si obbliga anche
+        // quello, la gente non vota piu'.
+        if (!$("tir-name").value.trim()) {
+          msg.textContent = "Scrivi il tuo nome per lasciare la valutazione.";
+          msg.classList.add("err");
+          $("tir-name").focus();
+          return;
+        }
         var last = +localStorage.getItem("tir_last") || 0;
         if (Date.now() - last < 60000) {
           msg.textContent = "Hai già inviato una valutazione da poco. Grazie!";
