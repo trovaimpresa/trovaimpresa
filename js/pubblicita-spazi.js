@@ -132,6 +132,14 @@
       var sid = slot.getAttribute('data-spazio-id');
 
       if (sid === 'hero-sx' || sid === 'hero-dx') {
+        // ⛔ 8 set 2026 — segnalato da Alex: nella pagina citta' le due
+        // locandine in alto erano quelle sbagliate. Qui sotto veniva rimesso
+        // il vecchio cartello "SPAZIO PUBBLICITARIO" SOPRA la locandina che
+        // js/spazi-citta.js aveva gia' messo (questo file gira dopo, perche'
+        // aspetta la risposta del database). Due file che decidevano la
+        // stessa cosa senza parlarsi: lo stesso difetto del 7 settembre.
+        // Adesso: se lo spazio ha gia' una locandina, non si tocca.
+        if (slot.getAttribute('data-locandina')) continue;
         slot.style.setProperty('padding', '0', 'important');
         slot.style.setProperty('border', 'none', 'important');
         slot.style.setProperty('overflow', 'hidden', 'important');

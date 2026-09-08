@@ -416,7 +416,10 @@
 
   // Mette la locandina in uno dei due spazi grossi in alto rimasti liberi.
   function vestiAlto(a, loc) {
-    if (a.getAttribute('data-locandina') === loc.file && a.querySelector('img')) return;
+    // Si controlla l'IMMAGINE vera, non l'etichetta: se qualcun altro l'ha
+    // sostituita (succedeva con pubblicita-spazi.js), qui la si rimette.
+    var giaMessa = a.querySelector('img[src$="' + loc.file + '.svg"]');
+    if (a.getAttribute('data-locandina') === loc.file && giaMessa) return;
     a.innerHTML = '';
     a.setAttribute('data-locandina', loc.file);
     a.setAttribute('data-stato', 'locandina');
