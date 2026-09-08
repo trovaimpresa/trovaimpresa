@@ -23123,7 +23123,12 @@ ne aveva →3←.
 - **→24← imprese su →127← (il →19%←) non hanno MAI confermato l'email.** Non
   possono entrare nel pannello, non ricevono richieste, ma risultano iscritte
 - Alex aveva già sollecitato il →5← set alle →22:36←-→22:38← a →22← di loro:
-  **→0← aperture, →0← clic, nessuno mai entrato.** Zero su ventidue
+  nessuno è mai entrato nel pannello.
+  ⚠️ **CORREZIONE dell'→8← set, guardando Resend dal connettore**: aperture e
+  clic **NON sono tracciati** su trovaimpresa.com (Open Tracking e Click
+  Tracking spenti dal →10 aprile←). Il famoso «→0← aperture, →0← clic» non era
+  una misura: era una casella vuota. **Che non abbiano aperto non è
+  dimostrato.** Non usare più quel numero come prova
 - **CAUSA**, dagli Insights di Resend: «Ensure link URLs match sending domain».
   La mail partiva da `info@trovaimpresa.com` ma il pulsante portava a
   `nacvrsgkyfavykxjxszu.supabase.co`. Per Gmail/Libero/Yahoo/Virgilio è la firma
@@ -23144,25 +23149,56 @@ il database. I modelli email li cambia Alex a mano.
 **PROVA**: la mail rimandata a Elhediny alle →20:43← ha «Insights →1←» invece di
 →2←: la segnalazione sul dominio del link è sparita.
 
-**Fatto poi**: rimandate **tutte e →24←** le conferme, una per una, con il link
-personale. →24← su →24← partite, zero errori.
+**Fatto poi**: rimandate le conferme una per una, con il link personale.
+⚠️ **CORREZIONE: partite →22←, non →24←.** Resend ne ha bloccate →2← in uscita
+(stato `suppressed`): `asicostruzion@hotmail.it`, in lista nera dal →28 lug←, e
+`dittaediledipusceddufrancesca@gmail.com`, dall'→8 ago←. Rimbalzano: quelle due
+imprese si recuperano **solo al telefono**.
+
+**LA LISTA NERA DI RESEND** — →5← indirizzi, tutti per rimbalzo. Oltre ai due
+sopra: `faphgroupsrls@gmail.com`, `dalila.crescinine86@`**`gnail`**`.com` (ha
+scritto *gnail* invece di gmail) e `luze.pina34@aefcm.nuevaescuela.mx`. Sono
+imprese iscritte con l'email sbagliata: **nessuna email le raggiungerà mai.**
+Da qui una cosa da fare: controllare l'email al momento dell'iscrizione.
 
 ---
 
-## ⛔ LA QUOTA EMAIL — perché il →7← set non partiva più niente
+## ✅ LA QUOTA EMAIL — falso allarme, era una diagnosi sbagliata
 
-Resend, piano **FREE: →100← email al giorno**.
-Il →7← set alle →07:02← è partita la campagna a **→96←** imprese + →2← prove =
-→98←. Per il resto della giornata **nessuna email del sito è partita**. Il →3←
-set stessa cosa con →89←.
+Il →7← set si era concluso che il piano FREE (→100←/giorno) avesse bloccato le
+email dopo la campagna del mattino. **Non è vero.** I numeri veri di Resend,
+letti dal connettore l'→8← set:
 
-**Da decidere**: piano a pagamento (~→20←$/mese, →50.000← email) oppure spezzare
-le campagne (→40← al giorno). Le email di servizio non devono mai essere
-sacrificate a una promozionale.
+| Giorno | Inviate | Consegnate | Fallite | Rimbalzi |
+|---|---|---|---|---|
+| →3← set | →102← | →102← | →0← | →0← |
+| →7← set | →103← | →103← | →0← | →0← |
+| →1←-→8← set | →278← | →278← | →0← | →0← |
+
+Il →7← set: →99← alle →07:00← (la campagna), poi **altre →3← alle →11:00← e →1←
+alle →20:00←**. Non è stato bloccato niente, mai, in nessun giorno. Consegna al
+→100%←, zero segnalazioni spam.
+
+⚠️ **Il difetto delle mail non arrivate era UNO SOLO: lo spam**, già riparato.
+Non esisteva nessun secondo problema di quota. Prima di spendere →20←$/mese,
+guardare i numeri veri dal connettore.
 
 ⚠️ La campagna del →7← set diceva a →96← imprese «Nella ricerca imprese — →12←€»,
 cioè la frase sbagliata corretta stasera. La prossima deve dire «Nella pagina
 della tua città, accanto a "Scegli la categoria"».
+
+### ⛔ NON ACCENDERE IL "CLICK TRACKING" DI RESEND
+
+Sembra la mossa ovvia per sapere chi clicca il link di conferma. **È una
+trappola**: per contare i clic Resend riscrive ogni link della mail su un
+proprio dominio. Il pulsante non porterebbe più a `trovaimpresa.com` ma a un
+indirizzo Resend — cioè **esattamente il difetto mittente≠link che ci ha
+mandati in spam** e che abbiamo appena riparato. Sul dominio non c'è nessun
+record DNS di tracciamento che eviterebbe il problema.
+
+Se un giorno servono i clic, si contano **in casa**: `conferma.html` sta su
+trovaimpresa.com ed è nostra, basta registrare chi ci arriva. Dato più preciso
+(si sa anche se l'attivazione riesce) e rischio spam zero.
 
 ---
 
@@ -23207,9 +23243,15 @@ difetti veri sono usciti da lì, non dal codice.
 ## NON RISOLTO — DA FARE
 
 1. **Richiamare Bolis Luigi** (→335 388989←): fermo sul pagamento
-2. **Contare quanti dei →24← si attivano** dopo le conferme rimandate stasera
-3. **Decidere sul piano Resend** (→100←/giorno non bastano più)
-4. **La seconda segnalazione di Resend**: «Don't use no-reply» — non guardata
+2. **Contare quanti dei →22← si attivano** dopo le conferme rimandate stasera
+3. ~~Decidere sul piano Resend~~ — **chiuso l'→8← set**: la quota non ha mai
+   bloccato niente, il piano attuale basta
+4. ~~«Don't use no-reply»~~ — **non ci riguarda**: TrovaImpresa scrive da
+   `info@trovaimpresa.com`, non da un no-reply. Quella segnalazione era su
+   altro
+4-bis. **Controllare l'email quando uno si iscrive**: →3← imprese su →127← si
+   sono registrate con un indirizzo inesistente (`gnail.com`, una scuola
+   messicana). Non le raggiungeremo mai e restano contate come iscritte
 5. **Casella «iscritti fermi a metà» nell'admin**: stasera il →19%← è saltato
    fuori per caso. Se fosse in dashboard, si vedrebbe salire
 6. **Promemoria per chi resta "non pagato"** su Stripe: →2← clienti in →2← giorni,
