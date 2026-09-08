@@ -94,6 +94,18 @@
   var CITTA = (new URLSearchParams(window.location.search).get('citta') || '').trim();
   if (!CITTA) return;
 
+  // ------------------------------------------------------------------------
+  // 8 set 2026 — UN PADRONE SOLO PER PAGINA.
+  // Nella pagina citta' gli spazi li riempie SOLO questo file. Con questa
+  // bandiera js/pubblicita-spazi.js (piu' vecchio) sa di doversi fare da
+  // parte: lui continua a scrivere "Visibile a chi cerca a ...", ma non
+  // mette e non toglie piu' nessuna immagine.
+  // Il perche': erano in due a decidere e arrivavano in ordine diverso ogni
+  // volta. Risultato visto da Alex l'8 set: le due locandine in alto erano
+  // il vecchio cartello "SPAZIO PUBBLICITARIO" al posto di quelle giuste.
+  // ------------------------------------------------------------------------
+  window.SPAZI_CITTA_COMANDA = true;
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () { setTimeout(avvia, 80); });
   } else {
@@ -442,6 +454,35 @@
     frecciaSu(a);
   }
 
+  // Il cartello di CHI HA PAGATO in uno dei due spazi grossi in alto.
+  // Prima lo faceva js/pubblicita-spazi.js; ora sta qui insieme a tutto il
+  // resto, cosi' il cliente pagante ha lo stesso trattamento ovunque:
+  // immagine adattata allo spazio, freccina, viste e clic contati.
+  function vestiAltoVenduto(a, ann) {
+    if (a.getAttribute('data-vestito') === String(ann.id)) return;
+    a.setAttribute('data-vestito', String(ann.id));
+    a.innerHTML = '';
+    a.setAttribute('data-stato', 'venduto');
+    a.setAttribute('data-annuncio', ann.id || '');
+    a.removeAttribute('data-locandina');
+    a.setAttribute('href', destinazione(ann));
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+    a.style.setProperty('padding', '0', 'important');
+    a.style.setProperty('border', 'none', 'important');
+    a.style.setProperty('overflow', 'hidden', 'important');
+    a.style.setProperty('border-radius', '12px', 'important');
+    var im = document.createElement('img');
+    im.alt = 'Pubblicita';
+    im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
+    im.src = ann.logo_url;
+    adattaAlloSpazio(im, ann.logo_url);
+    a.appendChild(im);
+    if (getComputedStyle(a).position === 'static') a.style.position = 'relative';
+    frecciaSu(a);
+    if (ann.id) guardaQuando(a, ann.id);
+  }
+
   // --- geometria: identica alla home nazionale ----------------------------
   function larghezzaSchermo() {
     return document.documentElement.clientWidth || window.innerWidth;
@@ -475,6 +516,8 @@
       if (!VENDUTI_ALTO[id]) {
         if (telefono || !LOC_ALTO[id]) { a.style.setProperty('display', 'none', 'important'); return; }
         vestiAlto(a, LOC_ALTO[id]);
+      } else {
+        vestiAltoVenduto(a, VENDUTI_ALTO[id]);
       }
       if (telefono) { a.style.setProperty('display', 'flex', 'important'); return; }
       if (largaOk < MINIMA) { a.style.setProperty('display', 'none', 'important'); return; }

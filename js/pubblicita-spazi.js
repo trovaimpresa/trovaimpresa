@@ -29,6 +29,22 @@
 
     aggiornaTestoCitta(citta);
 
+    // 8 set 2026 — UN PADRONE SOLO. Nella pagina citta' gli spazi li riempie
+    // js/spazi-citta.js: qui ci si ferma dopo aver scritto la citta'. Prima
+    // erano in due a mettere e togliere immagini negli stessi riquadri, e
+    // vinceva chi arrivava per ultimo: cosi' le locandine in alto finivano
+    // sostituite dal vecchio cartello "spazio disponibile".
+    // Non ci si puo' fidare solo della bandiera: questo file parte PRIMA di
+    // js/spazi-citta.js (l'ordine dei <script> in fondo a index.html), quindi
+    // in questo momento la bandiera potrebbe non essere ancora stata messa.
+    // Si guarda anche se la pagina carica quel file: quello e' li' dall'inizio.
+    var comandaAltro = window.SPAZI_CITTA_COMANDA
+      || !!document.querySelector('script[src*="spazi-citta.js"]');
+    if (comandaAltro) {
+      console.log('[pub-spazi] Pagina citta: comanda js/spazi-citta.js, qui non tocco niente.');
+      return;
+    }
+
     // 2. Home nazionale: nessuna pubblicità, spazi liberi e stop.
     if (!citta) {
       aggiornaHrefVuoti(TUTTI_SPAZI, new Set(), '');
