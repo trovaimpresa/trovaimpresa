@@ -1039,7 +1039,7 @@
           <select id="pub-filtro-stato" onchange="renderPubblicitaClienti()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px">
             <option value="">Tutti gli stati</option>
             <option value="pagato">Pagati (attivi)</option>
-            <option value="scadenza">In scadenza (30 giorni)</option>
+            <option value="scadenza">In scadenza (7 giorni)</option>
             <option value="scaduto">Scaduti</option>
             <option value="pending">Non pagati</option>
           </select>
@@ -1841,18 +1841,20 @@ function renderPubblicitaClienti() {
   // Riepilogo (su tutti i dati, non filtrati)
   const oggi = new Date().toISOString().slice(0, 10);
   const attivi = _pubData.filter(a => a.stato === 'pagato' && (!a.data_fine || a.data_fine >= oggi));
-  const inScad = attivi.filter(a => pubInScadenza(a, 30));
+  // 8 set 2026: era 30 giorni, ma ogni annuncio mensile nasceva gia' in
+  // allarme e la spia restava sempre accesa. A 7 giorni avverte davvero.
+  const inScad = attivi.filter(a => pubInScadenza(a, 7));
   const incasso = _pubData.filter(a => a.stato === 'pagato')
     .reduce((s, a) => s + (parseFloat(a.prezzo) || 0), 0);
   const annuali = attivi.filter(a => pubMesi(a) === 12).length;
   ril.innerHTML =
     pubCard('Annunci attivi', attivi.length, 'var(--verde)') +
-    pubCard('In scadenza (30gg)', inScad.length, inScad.length ? '#e67700' : '#999') +
+    pubCard('In scadenza (7gg)', inScad.length, inScad.length ? '#e67700' : '#999') +
     pubCard('Abbonamenti annuali', annuali, '#0066ff') +
     pubCard('Incasso pubblicità', '€' + incasso.toFixed(2), '#7b1fa2');
 
   let righe = _pubData.slice();
-  if (fs === 'scadenza') righe = righe.filter(a => pubInScadenza(a, 30));
+  if (fs === 'scadenza') righe = righe.filter(a => pubInScadenza(a, 7));
   else if (fs) righe = righe.filter(a => pubStatoReale(a) === fs);
   if (fd) righe = righe.filter(a => String(pubMesi(a)) === fd);
   if (q) righe = righe.filter(a => {
