@@ -375,25 +375,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/geo-italia.js"></script>
+<script src="/js/spazi-elenco.js"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// === LISTINO PUBBLICITÀ (prezzi €/mese netti, forfettario no IVA) ===
-const PREZZI_MENSILI = {
-  'hero-sx': 20, 'hero-dx': 20,
-  'imprese-sx': 12, 'imprese-dx': 12,
-  'inserzioni-sx': 8, 'inserzioni-dx': 8,
-  'profilo-sx-1': 5, 'profilo-sx-2': 5, 'profilo-dx-1': 5, 'profilo-dx-2': 5
-};
-// Misura in cui si vede l'annuncio, per fascia (6 set 2026)
-const MISURE_FASCIA = {
-  'hero-sx': 340, 'hero-dx': 340,
-  'imprese-sx': 270, 'imprese-dx': 270,
-  'inserzioni-sx': 210, 'inserzioni-dx': 210,
-  'profilo-sx-1': 170, 'profilo-sx-2': 170, 'profilo-dx-1': 170, 'profilo-dx-2': 170
-};
+// === LISTINO PUBBLICITÀ ===================================================
+// 8 set 2026: prezzi, misure e "dove si vede" NON sono più scritti qui.
+// Arrivano tutti da js/spazi-elenco.js, l'elenco unico. Così il listino non
+// può più dire una cosa diversa da quello che succede nelle pagine.
+// (prezzi €/mese netti, forfettario no IVA)
+const PREZZI_MENSILI = (function () {
+  var o = {};
+  SPAZI_TI.SPAZI.forEach(function (s) { o[s.id] = SPAZI_TI.prezzoDi(s.id); });
+  return o;
+})();
+const MISURE_FASCIA = (function () {
+  var o = {};
+  SPAZI_TI.SPAZI.forEach(function (s) { o[s.id] = SPAZI_TI.misuraDi(s.id); });
+  return o;
+})();
 const PERIODI = {
   '1':  { mesi: 1,  sconto: 0,    label: '1 mese' },
   '3':  { mesi: 3,  sconto: 0.10, label: '3 mesi' },
@@ -406,27 +408,13 @@ function calcolaPrezzo(spazioId, periodoKey) {
   return Math.round(mensile * p.mesi * (1 - p.sconto) * 100) / 100;
 }
 
-// Definizione 16 spazi raggruppati per fascia (ordine = gerarchia visiva; "pannello-sx/dx" rimossi a luglio 2026)
-const FASCE = [
-  { nome: 'Hero — banner in alto', desc: 'Massima visibilità, sopra ai risultati', spazi: ['hero-sx','hero-dx'] },
-  { nome: "Trova un'impresa", desc: 'Nella pagina della tua città, accanto a «Scegli la categoria»', spazi: ['imprese-sx','imprese-dx'] },
-  { nome: 'Inserzioni lavoro', desc: 'Accanto alle offerte di lavoro', spazi: ['inserzioni-sx','inserzioni-dx'] },
-  { nome: 'Profilo', desc: 'Nelle pagine profilo impresa', spazi: ['profilo-sx-1','profilo-sx-2','profilo-dx-1','profilo-dx-2'] }
-];
+// Le 4 fasce e la frase che il cliente legge: le da' l'elenco unico.
+const FASCE = SPAZI_TI.perIlListino().map(function (f) {
+  return { nome: f.nome, desc: f.desc, spazi: f.spazi };
+});
 // Etichetta lato leggibile per ogni spazio_id
-function latoLabel(id){
-  if (id.endsWith('-sx-1')) return 'Sinistra 1';
-  if (id.endsWith('-sx-2')) return 'Sinistra 2';
-  if (id.endsWith('-dx-1')) return 'Destra 1';
-  if (id.endsWith('-dx-2')) return 'Destra 2';
-  if (id.endsWith('-sx')) return 'Sinistra';
-  if (id.endsWith('-dx')) return 'Destra';
-  return id;
-}
-function fasciaDiSpazio(id){
-  for (const f of FASCE) if (f.spazi.indexOf(id) >= 0) return f.nome;
-  return id;
-}
+function latoLabel(id){ return SPAZI_TI.latoDi(id); }
+function fasciaDiSpazio(id){ return SPAZI_TI.nomeFascia(id); }
 
 let currentUser = null;
 let currentImpresa = null;

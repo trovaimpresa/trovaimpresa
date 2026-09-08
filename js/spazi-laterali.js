@@ -23,13 +23,28 @@
   // piu' in alto = piu' grande = piu' caro. L'ultima e' un biglietto da visita.
   var MISURE = { 'hero': 340, 'imprese': 270, 'inserzioni': 210, 'profilo': 170 };
   function misuraDi(sid) {
+    // la misura la da l'elenco unico; le righe qui sotto restano solo come
+    // rete di sicurezza se l'elenco non fosse stato caricato
+    if (window.SPAZI_TI && window.SPAZI_TI.misuraDi) return window.SPAZI_TI.misuraDi(sid);
     var fascia = String(sid).split('-')[0];
     return MISURE[fascia] || 260;
   }
 
   var script = document.currentScript;
-  var lista = ((script && script.dataset.spazi) || '').split(',')
-    .map(function (s) { return s.trim(); }).filter(Boolean);
+
+  // ------------------------------------------------------------------------
+  // 8 set 2026 — COMANDA L'ELENCO UNICO (js/spazi-elenco.js).
+  // Prima la lista degli spazi era scritta a mano dentro l'HTML di ogni
+  // pagina (data-spazi="..."). Bastava copiare una pagina vecchia per
+  // portarsi dietro il cartello dove non doveva stare: e' cosi' che il
+  // 7 settembre un cliente e' finito in 161 pagine sbagliate.
+  // Adesso e' l'elenco a dire cosa va in questa pagina. Il data-spazi viene
+  // ancora letto, ma solo se l'elenco non e' stato caricato.
+  // ------------------------------------------------------------------------
+  var lista = (window.SPAZI_TI && window.SPAZI_TI.idDiQuestaPagina)
+    ? window.SPAZI_TI.idDiQuestaPagina()
+    : ((script && script.dataset.spazi) || '').split(',')
+        .map(function (s) { return s.trim(); }).filter(Boolean);
   if (!lista.length) return;
 
   var cittaFissa = (script && script.dataset.citta || '').trim();

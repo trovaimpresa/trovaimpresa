@@ -61,8 +61,23 @@
   var MINIMA  = 140;                   // sotto questa non si mostra
   var TELEFONO = '(max-width:1100px)';
 
-  // I 12 posti in colonna: stessi ancoraggi della nazionale.
-  var POSTI = [
+  // I posti in colonna li detta l'ELENCO UNICO (js/spazi-elenco.js): questa
+  // pagina non decide piu' da sola quali cartelli mostrare. La lista qui
+  // sotto resta solo come rete di sicurezza se l'elenco non fosse caricato.
+  function postiDaElenco() {
+    if (!(window.SPAZI_TI && window.SPAZI_TI.diQuestaPagina)) return null;
+    var out = [];
+    window.SPAZI_TI.diQuestaPagina().forEach(function (v) {
+      if (!v.ancora || !v.passo) return;          // passo 0 = i due grossi in alto
+      var p = { sez: v.ancora, lato: v.id.indexOf('-sx') >= 0 ? 'sx' : 'dx',
+                passo: v.passo, spazio: v.id };
+      if (v.pila === 0 || v.pila === 1) p.pila = v.pila;
+      out.push(p);
+    });
+    return out.length ? out : null;
+  }
+
+  var POSTI = postiDaElenco() || [
     { sez: '#categorie',     lato: 'sx', passo: 1, spazio: 'imprese-sx' },
     { sez: '#categorie',     lato: 'dx', passo: 1, spazio: 'imprese-dx' },
     { sez: '#registrati',    lato: 'sx', passo: 2, spazio: 'inserzioni-sx' },
@@ -92,12 +107,49 @@
 
   // Il vestito del cartello sul telefono: largo quanto lo schermo (max 420),
   // stessa forma 400x260 del riquadro che il cliente ha ritagliato.
+  // -----------------------------------------------------------------------
+  // 8 set 2026 — FAR CAPIRE CHE SI PUO' CLICCARE.
+  // Il cartello non ha niente che dica "toccami": nemmeno Alex sapeva che si
+  // cliccava. Niente scritte sopra la grafica del cliente (l'ha pagata lui):
+  // si usa il movimento, che sul web vuol dire "questo si preme", piu' una
+  // freccina piccola nell'angolo.
+  // -----------------------------------------------------------------------
+  var cssCartelliMesso = false;
+  function stileCartelli() {
+    if (cssCartelliMesso) return;
+    cssCartelliMesso = true;
+    var s = document.createElement('style');
+    s.textContent =
+        '.ti-cliccabile{transition:transform .15s ease,box-shadow .15s ease}'
+      + '.ti-cliccabile:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.20)}'
+      + '.ti-cliccabile:active{transform:translateY(1px);box-shadow:0 1px 6px rgba(0,0,0,.14)}'
+      + '.ti-frec{position:absolute;right:8px;bottom:8px;width:26px;height:26px;'
+      + 'border-radius:50%;background:rgba(255,255,255,.92);'
+      + 'box-shadow:0 1px 4px rgba(0,0,0,.25);display:flex;align-items:center;'
+      + 'justify-content:center;pointer-events:none}'
+      + '.ti-frec svg{width:14px;height:14px;stroke:#0066ff;stroke-width:2.4;'
+      + 'fill:none;stroke-linecap:round;stroke-linejoin:round}';
+    document.head.appendChild(s);
+  }
+
+  // Mette la freccina in un cartello (una volta sola).
+  function frecciaSu(a) {
+    stileCartelli();
+    if (a.className.indexOf('ti-cliccabile') < 0) a.className += ' ti-cliccabile';
+    if (a.querySelector('.ti-frec')) return;
+    var d = document.createElement('span');
+    d.className = 'ti-frec';
+    d.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+                + '<path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>';
+    a.appendChild(d);
+  }
+
   var cssMesso = false;
   function cssTelefono() {
     if (cssMesso) return;
     cssMesso = true;
     var s = document.createElement('style');
-    s.textContent = '.ti-spazio-tel{display:block!important;position:static!important;'
+    s.textContent = '.ti-spazio-tel{display:block!important;position:relative!important;'
       + 'width:100%;max-width:420px;margin:16px auto;aspect-ratio:400/260;'
       + 'border-radius:12px;overflow:hidden;text-decoration:none;'
       + 'box-shadow:0 2px 12px rgba(0,0,0,.12)}';
@@ -242,6 +294,7 @@
       }
 
       a.appendChild(im);
+      frecciaSu(a);
       document.body.appendChild(a);
     });
   }
@@ -268,6 +321,7 @@
       im.src = BASE_LOC + v.file + '.svg';
       im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
       a.appendChild(im);
+      frecciaSu(a);
       document.body.appendChild(a);
     });
   }
@@ -290,6 +344,11 @@
     im.src = BASE_LOC + loc.file + '.svg';
     im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
     a.appendChild(im);
+    // La freccina si aggancia all'angolo del cartello: serve che il cartello
+    // abbia una posizione propria. Se ce l'ha gia' (e' il caso sul computer)
+    // non si tocca niente: non si sposta un cartello che sta gia' al posto giusto.
+    if (getComputedStyle(a).position === 'static') a.style.position = 'relative';
+    frecciaSu(a);
   }
 
   // --- geometria: identica alla home nazionale ----------------------------
@@ -356,8 +415,9 @@
         if (el.getAttribute('data-in-pagina') !== '1') {
           el.setAttribute('data-in-pagina', '1');
           el.removeAttribute('style');
-          el.className = 'ti-spazio-citta ti-spazio-tel pub-link';
+          el.className = 'ti-spazio-citta ti-spazio-tel pub-link ti-cliccabile';
           sz.insertAdjacentElement('afterend', el);
+          frecciaSu(el);
         }
       }
       return;
