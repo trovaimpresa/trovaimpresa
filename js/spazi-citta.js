@@ -39,6 +39,22 @@
     'profilo-dx-2':  { file: '12-chi-cerchi',  link: '/cerca-artigiani' }
   };
 
+  // I due spazi grossi in alto: se nessuno li ha comprati, ci va la locandina.
+  var LOC_ALTO = {
+    'hero-sx': { file: '01-vetrina', link: '/#registrati' },
+    'hero-dx': { file: '05-diretto', link: '/cerca-imprese' }
+  };
+
+  // Locandine SOLO informative: NON sono spazi in vendita e non entrano nel
+  // listino. Stanno nei due punti che la home nazionale usa e che la pagina
+  // citta' ha uguali. Servono a non lasciare la pagina spoglia.
+  var LOC_EXTRA = [
+    { sez: '.guide-costi-home', lato: 'sx', passo: 3, file: '13-blog',       link: '/blog' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '06-guide',      link: '/costi-ristrutturazione' },
+    { sez: '.why-section',      lato: 'sx', passo: 4, file: '09-offerte',    link: '/offerte-lavoro' },
+    { sez: '.why-section',      lato: 'dx', passo: 4, file: '14-recensioni', link: '/cerca-imprese' }
+  ];
+
   var BORDO   = 20;                    // distanza dal bordo dello schermo
   var LARGA   = 600;                   // larghezza voluta per le due in alto
   var SCALINO = 0.85;                  // ogni fascia e' l'85% di quella sopra
@@ -92,6 +108,7 @@
     var venduti = await cercaVenduti();
     IN_ALTO.forEach(function (id) { if (venduti[id]) VENDUTI_ALTO[id] = venduti[id]; });
     creaColonna(venduti);
+    creaExtra();
     sistema();
     window.addEventListener('resize', sistema);
     window.addEventListener('load', sistema);
@@ -229,6 +246,52 @@
     });
   }
 
+  // Le 4 locandine informative (non vendibili): stesso vestito delle altre.
+  function creaExtra() {
+    LOC_EXTRA.forEach(function (v) {
+      if (!document.querySelector(v.sez)) return;
+      var a = document.createElement('a');
+      a.className = 'ti-spazio-citta';
+      a.setAttribute('data-sez', v.sez);
+      a.setAttribute('data-lato', v.lato);
+      a.setAttribute('data-passo', v.passo);
+      a.setAttribute('data-pila', -1);
+      a.setAttribute('data-stato', 'locandina');
+      a.setAttribute('data-locandina', v.file);
+      a.setAttribute('href', v.link);
+      a.setAttribute('rel', 'noopener');
+      a.style.cssText = 'position:absolute;display:none;border-radius:12px;overflow:hidden;'
+        + 'z-index:5;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12)';
+      var im = document.createElement('img');
+      im.loading = 'lazy';
+      im.alt = 'TrovaImpresa';
+      im.src = BASE_LOC + v.file + '.svg';
+      im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
+      a.appendChild(im);
+      document.body.appendChild(a);
+    });
+  }
+
+  // Mette la locandina in uno dei due spazi grossi in alto rimasti liberi.
+  function vestiAlto(a, loc) {
+    if (a.getAttribute('data-locandina') === loc.file && a.querySelector('img')) return;
+    a.innerHTML = '';
+    a.setAttribute('data-locandina', loc.file);
+    a.setAttribute('data-stato', 'locandina');
+    a.setAttribute('href', loc.link);
+    a.setAttribute('rel', 'noopener');
+    a.removeAttribute('target');
+    a.style.setProperty('padding', '0', 'important');
+    a.style.setProperty('border', 'none', 'important');
+    a.style.setProperty('overflow', 'hidden', 'important');
+    a.style.setProperty('border-radius', '12px', 'important');
+    var im = document.createElement('img');
+    im.alt = 'TrovaImpresa';
+    im.src = BASE_LOC + loc.file + '.svg';
+    im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
+    a.appendChild(im);
+  }
+
   // --- geometria: identica alla home nazionale ----------------------------
   function larghezzaSchermo() {
     return document.documentElement.clientWidth || window.innerWidth;
@@ -257,8 +320,12 @@
     IN_ALTO.forEach(function (id) {
       var a = document.querySelector('a.pub-link[data-spazio-id="' + id + '"]');
       if (!a) return;
-      // niente segnaposto: se non l'ha comprato nessuno, sparisce
-      if (!VENDUTI_ALTO[id]) { a.style.setProperty('display', 'none', 'important'); return; }
+      // Spazio libero: sul computer ci va la locandina di TrovaImpresa,
+      // sul telefono resta vuoto (li' va solo chi ha pagato).
+      if (!VENDUTI_ALTO[id]) {
+        if (telefono || !LOC_ALTO[id]) { a.style.setProperty('display', 'none', 'important'); return; }
+        vestiAlto(a, LOC_ALTO[id]);
+      }
       if (telefono) { a.style.setProperty('display', 'flex', 'important'); return; }
       if (largaOk < MINIMA) { a.style.setProperty('display', 'none', 'important'); return; }
       a.style.setProperty('display', 'flex', 'important');
