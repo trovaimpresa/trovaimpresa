@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attiva il tuo profilo — TrovaImpresa</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.ico">
+  <!--
+    conferma.html — 8 settembre 2026
+
+    PERCHE' ESISTE
+    La mail di conferma partiva da info@trovaimpresa.com ma il pulsante
+    portava su nacvrsgkyfavykxjxszu.supabase.co. Per Gmail, Libero, Yahoo e
+    Virgilio quella differenza fra mittente e destinazione del link e' la
+    firma classica del phishing: consegnavano la mail e la mettevano nello
+    spam. Risultato misurato l'8 set 2026: 24 imprese su 127 (il 19%) non
+    hanno mai confermato, e del sollecito mandato il 5 settembre a 22 di
+    loro NESSUNO ha aperto la mail. Zero su ventidue.
+    Segnalato da Resend: "Ensure link URLs match sending domain".
+
+    COSA FA
+    Adesso il pulsante della mail porta QUI, che sta su trovaimpresa.com.
+    E' questa pagina a completare l'attivazione dietro le quinte, parlando
+    con Supabase. Per chi riceve la mail tutto resta dentro il sito.
+
+    SE IL LINK E' SCADUTO
+    I link di conferma scadono. Invece di lasciare l'impresa davanti a un
+    errore, qui si puo' chiedere un link nuovo scrivendo la propria email:
+    cosi' chi e' fermo da un mese si recupera da solo, senza doverti
+    scrivere e senza che tu debba fare niente.
+  -->
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:linear-gradient(135deg,#0066ff 0%,#0052cc 100%);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+    .container{
+      background:#fff;border-radius:16px;padding:48px 32px;max-width:520px;width:100%;
+      text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.15);
+    }
+    .logo{width:190px;max-width:70%;height:auto;margin:0 auto 26px;display:block}
+    .cerchio{
+      width:80px;height:80px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;margin:0 auto 24px;font-size:44px;color:#fff;
+    }
+    .cerchio.ok{background:#0066ff;animation:bounce .6s ease-out}
+    .cerchio.ko{background:#e8733a}
+    .cerchio.attesa{background:#eef2f7;color:#0066ff;font-size:34px}
+    @keyframes bounce{0%{transform:scale(0)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+    @keyframes gira{to{transform:rotate(360deg)}}
+    .rotella{
+      width:34px;height:34px;border:4px solid #dbe3ec;border-top-color:#0066ff;
+      border-radius:50%;animation:gira .9s linear infinite;
+    }
+    h1{font-size:25px;color:#0a2a4d;margin-bottom:12px;line-height:1.25}
+    p{font-size:15.5px;color:#555;line-height:1.65;margin-bottom:14px}
+    .btn{
+      display:inline-block;background:#0066ff;color:#fff;text-decoration:none;
+      border:none;border-radius:10px;padding:14px 30px;font-size:16px;font-weight:700;
+      cursor:pointer;font-family:inherit;margin-top:10px;
+    }
+    .btn:hover{background:#0052cc}
+    .btn[disabled]{opacity:.6;cursor:default}
+    .btn-arancio{background:#e8733a}
+    .btn-arancio:hover{background:#c45e28}
+    input[type=email]{
+      width:100%;padding:13px 14px;border:1.5px solid #dbe3ec;border-radius:10px;
+      font-size:15px;font-family:inherit;margin:6px 0 12px;
+    }
+    input[type=email]:focus{outline:none;border-color:#0066ff}
+    .msg{font-size:14.5px;font-weight:600;margin-top:12px;min-height:20px}
+    .msg.ok{color:#1a7f43}
+    .msg.err{color:#c0392b}
+    .piccolo{font-size:13.5px;color:#8a97a8;margin-top:22px}
+    .piccolo a{color:#0066ff}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="/logo.png" alt="TrovaImpresa">
+
+    <!-- 1. mentre attiva -->
+    <div id="attesa">
+      <div class="cerchio attesa"><div class="rotella"></div></div>
+      <h1>Sto attivando il tuo profilo…</h1>
+      <p>Un attimo solo.</p>
+    </div>
+
+    <!-- 2. fatto -->
+    <div id="fatto" hidden>
+      <div class="cerchio ok">✓</div>
+      <h1>Profilo attivato</h1>
+      <p>Da adesso la tua scheda è online e i clienti della tua zona possono trovarti.</p>
+      <a class="btn" href="/login-impresa.html">Entra nel tuo pannello</a>
+    </div>
+
+    <!-- 3. link vecchio o già usato -->
+    <div id="scaduto" hidden>
+      <div class="cerchio ko">!</div>
+      <h1>Questo link non vale più</h1>
+      <p>I link di conferma durano poco. Scrivi qui sotto la tua email e te ne mandiamo uno nuovo, valido adesso.</p>
+      <input type="email" id="email" placeholder="La tua email" autocomplete="email">
+      <button class="btn btn-arancio" id="rimanda">Mandami un nuovo link</button>
+      <div class="msg" id="msg"></div>
+      <p class="piccolo">Se hai già confermato, <a href="/login-impresa.html">entra direttamente</a>.</p>
+    </div>
+
+    <p class="piccolo">Problemi? Scrivici a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a></p>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function mostra(quale){
+  ['attesa','fatto','scaduto'].forEach(function(id){
+    document.getElementById(id).hidden = (id !== quale);
+  });
+}
+
+(async function(){
+  const p = new URLSearchParams(location.search);
+  const token_hash = p.get('token_hash');
+  // il tipo lo manda il modello della mail: 'email' per l'iscrizione,
+  // 'recovery' per il recupero password
+  const type = p.get('type') || 'email';
+
+  if (!token_hash) { mostra('scaduto'); return; }
+
+  try {
+    const { error } = await sb.auth.verifyOtp({ token_hash, type });
+    if (error) throw error;
+    mostra('fatto');
+  } catch (e) {
+    // link scaduto, già usato, o indirizzo storpiato dal programma di posta
+    mostra('scaduto');
+  }
+})();
+
+// --- rimanda un link nuovo -------------------------------------------------
+document.getElementById('rimanda').addEventListener('click', async function(){
+  const btn = this;
+  const msg = document.getElementById('msg');
+  const email = (document.getElementById('email').value || '').trim();
+  msg.className = 'msg';
+  if (!email || email.indexOf('@') < 0) {
+    msg.textContent = 'Scrivi la tua email.'; msg.classList.add('err'); return;
+  }
+  btn.disabled = true; btn.textContent = 'Invio…';
+  try {
+    const { error } = await sb.auth.resend({
+      type: 'signup',
+      email: email,
+      options: { emailRedirectTo: location.origin + '/login-impresa.html' }
+    });
+    if (error) throw error;
+    msg.textContent = 'Fatto: controlla la posta, il link nuovo è appena partito.';
+    msg.classList.add('ok');
+  } catch (e) {
+    // non si dice mai se l'indirizzo esiste o no: si risponde sempre uguale
+    msg.textContent = 'Se questo indirizzo è registrato, il link è appena partito.';
+    msg.classList.add('ok');
+  }
+  btn.disabled = false; btn.textContent = 'Mandami un nuovo link';
+});
+</script>
+</body>
+</html>
