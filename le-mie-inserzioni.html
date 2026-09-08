@@ -64,6 +64,19 @@
     .riga-azioni{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
     .msg{font-size:13px;font-weight:600;}
 
+    /* I numeri del cartello (8 set 2026): quante volte e' stato visto e
+       cliccato negli ultimi 30 giorni. Senza questi il cliente non ha modo
+       di sapere se ha speso bene, e non rinnova. */
+    .ins-numeri{display:flex;gap:10px;align-items:center;margin:0 0 16px;flex-wrap:wrap;}
+    .ins-numeri .num{background:#f4f7fb;border:1px solid #e3e9f0;border-radius:10px;padding:8px 16px;text-align:center;min-width:92px;}
+    .ins-numeri .num b{display:block;font-size:22px;color:#0a2a4d;line-height:1.15;}
+    .ins-numeri .num span{font-size:11px;color:#6b7a8d;font-weight:700;}
+    .ins-numeri .periodo{font-size:12px;color:#9aa7b8;}
+    @media(max-width:640px){
+      .ins-numeri .periodo{display:none;}
+      .ins-numeri .num{flex:1;min-width:0;padding:8px 6px;}
+    }
+
     .vuoto{background:#fff;border:1px dashed #cfd8e3;border-radius:14px;padding:40px 24px;text-align:center;}
     .vuoto h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:8px;}
     .vuoto p{color:var(--mid);font-size:14px;margin-bottom:18px;}
@@ -159,6 +172,7 @@ sb.auth.onAuthStateChange(async function(event, session){
 
 // ------------------------------------------------------------------ dati
 
+let _stat = {};   // viste e clic per annuncio, ultimi 30 giorni
 function oggiISO(){ return new Date().toISOString().slice(0,10); }
 
 function dataIt(iso){
@@ -194,6 +208,21 @@ async function carica(){
   }
   const tutti = res.data || [];
   _tutti = tutti;   // serve a elimina() per il messaggio di conferma
+
+  // Viste e clic degli ultimi 30 giorni. Se questa lettura fallisce non si
+  // blocca niente: le inserzioni si vedono lo stesso, coi numeri a zero.
+  _stat = {};
+  try {
+    const da = new Date(Date.now() - 29 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+    const st = await sb.from('annunci_statistiche')
+      .select('annuncio_id,viste,clic')
+      .gte('giorno', da);
+    (st.data || []).forEach(function (r) {
+      if (!_stat[r.annuncio_id]) _stat[r.annuncio_id] = { viste: 0, clic: 0 };
+      _stat[r.annuncio_id].viste += (r.viste || 0);
+      _stat[r.annuncio_id].clic  += (r.clic  || 0);
+    });
+  } catch (e) { /* niente numeri: si va avanti lo stesso */ }
   if (!tutti.length) {
     box.innerHTML = '<div class="vuoto"><h3>Non hai ancora inserzioni</h3>'
       + '<p>Scegli uno spazio nella tua città e la tua azienda comparirà a chi cerca lì.</p>'
@@ -257,11 +286,23 @@ function gestisciImmaginiRotte(){
 }
 
 // Inserzione attiva: modificabile
+// Quante volte il cartello e' stato visto e cliccato. Si mostra solo sulle
+// inserzioni attive: su una scaduta il numero non serve piu' a niente.
+function numeriHTML(a){
+  const n = _stat[a.id] || { viste: 0, clic: 0 };
+  return '<div class="ins-numeri">'
+    + '<div class="num"><b>'+n.viste+'</b><span>volte visto</span></div>'
+    + '<div class="num"><b>'+n.clic+'</b><span>clic</span></div>'
+    + '<div class="periodo">ultimi 30 giorni</div>'
+  + '</div>';
+}
+
 function cardAttiva(a){
   return '<div class="ins">'
     + imgHTML(a, 'prev-'+a.id)
     + '<div class="ins-body">'
       + intestazione(a)
+      + numeriHTML(a)
       + '<label class="f" for="file-'+a.id+'">Cambia immagine (PNG o JPG)</label>'
       + '<input type="file" id="file-'+a.id+'" accept="image/png,image/jpeg">'
       + '<label class="f" for="link-'+a.id+'">Link di destinazione</label>'

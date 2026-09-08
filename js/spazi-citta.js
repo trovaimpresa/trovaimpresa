@@ -119,10 +119,19 @@
     if (cssCartelliMesso) return;
     cssCartelliMesso = true;
     var s = document.createElement('style');
+    // ⛔ 8 set 2026, DIFETTO SEGNALATO DA ALEX E CORRETTO.
+    // Il primo effetto alzava il cartello con translateY. Ma i due cartelli
+    // grossi in alto sono centrati proprio con un translateY(-50%): l'effetto
+    // glielo SOSTITUIVA e al passaggio del mouse crollavano di ~170 px.
+    // Adesso il cartello non viene mosso mai: si muove solo l'immagine
+    // DENTRO al riquadro (che ha overflow:hidden, quindi non esce), piu'
+    // l'ombra, che non sposta niente. Provato su tutti e 6: zero spostamento.
     s.textContent =
-        '.ti-cliccabile{transition:transform .15s ease,box-shadow .15s ease}'
-      + '.ti-cliccabile:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.20)}'
-      + '.ti-cliccabile:active{transform:translateY(1px);box-shadow:0 1px 6px rgba(0,0,0,.14)}'
+        '.ti-cliccabile{transition:box-shadow .18s ease}'
+      + '.ti-cliccabile img{transition:transform .18s ease}'
+      + '.ti-cliccabile:hover{box-shadow:0 10px 26px rgba(0,0,0,.22)}'
+      + '.ti-cliccabile:hover img{transform:scale(1.04)}'
+      + '.ti-cliccabile:active img{transform:scale(.99)}'
       + '.ti-frec{position:absolute;right:8px;bottom:8px;width:26px;height:26px;'
       + 'border-radius:50%;background:rgba(255,255,255,.92);'
       + 'box-shadow:0 1px 4px rgba(0,0,0,.25);display:flex;align-items:center;'
@@ -174,7 +183,7 @@
     var ids = POSTI.map(function (p) { return p.spazio; })
                    .concat(IN_ALTO).join(',');
     var url = SUPABASE_URL + '/rest/v1/annunci_pubblicitari'
-            + '?select=spazio_id,logo_url,link_url,impresa_id'
+            + '?select=id,spazio_id,logo_url,link_url,impresa_id'
             + '&spazio_id=in.(' + ids + ')'
             + '&citta=ilike.' + encodeURIComponent(CITTA)
             + '&stato=eq.pagato'
@@ -247,6 +256,58 @@
     prova.src = url;
   }
 
+  // -----------------------------------------------------------------------
+  // 8 set 2026 — I NUMERI DEL CLIENTE.
+  // "Visto" vuol dire visto davvero: il cartello viene contato solo quando
+  // entra nello schermo e ci resta almeno un secondo. Non basta che sia in
+  // fondo alla pagina dove nessuno arriva. Una vista per visita, non una a
+  // ogni volta che scorri su e giu'. I clic si contano tutti.
+  // Se il conteggio non parte, il cartello funziona lo stesso: non si blocca
+  // mai niente per colpa di un numero.
+  // -----------------------------------------------------------------------
+  function conta(idAnnuncio, tipo) {
+    if (!idAnnuncio) return;
+    if (tipo === 'vista') {
+      try {
+        var k = 'ti-visto-' + idAnnuncio;
+        if (sessionStorage.getItem(k)) return;
+        sessionStorage.setItem(k, '1');
+      } catch (e) { /* browser che non tiene niente: si conta e basta */ }
+    }
+    try {
+      fetch(SUPABASE_URL + '/rest/v1/rpc/conta_annuncio', {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_annuncio: idAnnuncio, p_tipo: tipo }),
+        keepalive: true
+      }).catch(function () {});
+    } catch (e) { /* niente rete: pazienza */ }
+  }
+
+  var guardone = null;
+  function guardaQuando(a, idAnnuncio) {
+    a.addEventListener('click', function () { conta(idAnnuncio, 'clic'); });
+    if (!window.IntersectionObserver) { conta(idAnnuncio, 'vista'); return; }
+    if (!guardone) {
+      guardone = new IntersectionObserver(function (righe) {
+        righe.forEach(function (r) {
+          var el = r.target;
+          if (r.isIntersecting) {
+            if (el._tiTimer) return;
+            el._tiTimer = setTimeout(function () {
+              conta(el.getAttribute('data-annuncio'), 'vista');
+              guardone.unobserve(el);
+            }, 1000);
+          } else if (el._tiTimer) {
+            clearTimeout(el._tiTimer); el._tiTimer = null;
+          }
+        });
+      }, { threshold: 0.5 });
+    }
+    a.setAttribute('data-annuncio', idAnnuncio);
+    guardone.observe(a);
+  }
+
   function destinazione(ann) {
     return ann.link_url || (ann.impresa_id ? '/profilo-impresa.html?id=' + ann.impresa_id : '#');
   }
@@ -283,6 +344,7 @@
         a.setAttribute('data-stato', 'venduto');
         im.src = ann.logo_url;
         im.alt = 'Pubblicita';
+        a.setAttribute('data-annuncio', ann.id || '');
         adattaAlloSpazio(im, ann.logo_url);
       } else {
         a.setAttribute('href', loc.link);
@@ -296,6 +358,7 @@
       a.appendChild(im);
       frecciaSu(a);
       document.body.appendChild(a);
+      if (ann && ann.id) guardaQuando(a, ann.id);
     });
   }
 
