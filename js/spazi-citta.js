@@ -21,6 +21,24 @@
   var MISURE = { 'hero': 340, 'imprese': 270, 'inserzioni': 210, 'profilo': 170 };
   function misuraDi(sid) { return MISURE[String(sid).split('-')[0]] || 260; }
 
+  // Locandine di TrovaImpresa negli spazi ancora LIBERI (8 set 2026).
+  // Uno spazio vuoto non rende niente; una locandina almeno racconta il sito.
+  // Stesse immagini e stessi punti della home nazionale (js/locandine-home.js).
+  // Se qualcuno compra quello spazio, il suo cartello prende il posto: chi
+  // paga viene sempre prima. Sul TELEFONO le locandine non si mettono mai:
+  // li' ogni cartello occupa mezzo schermo e va solo a chi ha pagato.
+  var BASE_LOC = '/img/locandine/loc-';
+  var LOCANDINE = {
+    'imprese-sx':    { file: '02-gestionale',  link: '/software-gestionale-imprese-edili' },
+    'imprese-dx':    { file: '03-computo',     link: '/software-gestionale-imprese-edili' },
+    'inserzioni-sx': { file: '07-bandi',       link: '/bandi' },
+    'inserzioni-dx': { file: '08-subappalti',  link: '/subappalto' },
+    'profilo-sx-1':  { file: '11-citta',       link: '/citta' },
+    'profilo-sx-2':  { file: '04-preventivi',  link: '/software-gestionale-imprese-edili' },
+    'profilo-dx-1':  { file: '10-candidature', link: '/candidature-lavoro' },
+    'profilo-dx-2':  { file: '12-chi-cerchi',  link: '/cerca-artigiani' }
+  };
+
   var BORDO   = 20;                    // distanza dal bordo dello schermo
   var LARGA   = 600;                   // larghezza voluta per le due in alto
   var SCALINO = 0.85;                  // ogni fascia e' l'85% di quella sopra
@@ -55,6 +73,20 @@
 
 
   var VENDUTI_ALTO = {};
+
+  // Il vestito del cartello sul telefono: largo quanto lo schermo (max 420),
+  // stessa forma 400x260 del riquadro che il cliente ha ritagliato.
+  var cssMesso = false;
+  function cssTelefono() {
+    if (cssMesso) return;
+    cssMesso = true;
+    var s = document.createElement('style');
+    s.textContent = '.ti-spazio-tel{display:block!important;position:static!important;'
+      + 'width:100%;max-width:420px;margin:16px auto;aspect-ratio:400/260;'
+      + 'border-radius:12px;overflow:hidden;text-decoration:none;'
+      + 'box-shadow:0 2px 12px rgba(0,0,0,.12)}';
+    document.head.appendChild(s);
+  }
 
   async function avvia() {
     var venduti = await cercaVenduti();
@@ -165,21 +197,33 @@
         + 'z-index:5;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12)';
 
       var ann = venduti[v.spazio];
+      var loc = LOCANDINE[v.spazio];
 
-      // Niente segnaposti: lo spazio libero non si vede. Si vede solo
-      // quello comprato davvero.
-      if (!ann) return;
+      // Niente segnaposti "spazio disponibile": o c'e' un cartello pagato,
+      // o c'e' una locandina di TrovaImpresa. Mai un riquadro vuoto.
+      if (!ann && !loc) return;
 
       var im = document.createElement('img');
       im.loading = 'lazy';
       im.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
-      a.setAttribute('href', destinazione(ann));
-      a.setAttribute('target', '_blank');
-      a.setAttribute('rel', 'noopener noreferrer');
-      a.setAttribute('data-stato', 'venduto');
-      im.src = ann.logo_url;
-      im.alt = 'Pubblicita';
-      adattaAlloSpazio(im, ann.logo_url);
+
+      if (ann) {
+        a.setAttribute('href', destinazione(ann));
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        a.setAttribute('data-stato', 'venduto');
+        im.src = ann.logo_url;
+        im.alt = 'Pubblicita';
+        adattaAlloSpazio(im, ann.logo_url);
+      } else {
+        a.setAttribute('href', loc.link);
+        a.setAttribute('rel', 'noopener');
+        a.setAttribute('data-stato', 'locandina');
+        a.setAttribute('data-locandina', loc.file);
+        im.src = BASE_LOC + loc.file + '.svg';
+        im.alt = 'TrovaImpresa';
+      }
+
       a.appendChild(im);
       document.body.appendChild(a);
     });
@@ -224,6 +268,44 @@
     });
 
     var l = document.querySelectorAll('.ti-spazio-citta');
+
+    // --- TELEFONO (8 set 2026) ---------------------------------------------
+    // Sotto i 1100 px ai lati non avanza niente: prima il cartello di chi
+    // aveva pagato spariva del tutto. Ora scende DENTRO la pagina, largo
+    // quanto lo schermo, subito dopo la sezione a cui e' ancorato sul
+    // computer: chi compra all'altezza di "Scegli la categoria" si vede li'.
+    // Stessa soluzione gia' collaudata il 6 set in js/spazi-laterali.js.
+    if (telefono) {
+      cssTelefono();
+      for (var t = 0; t < l.length; t++) {
+        var el = l[t];
+        // sul telefono solo chi ha pagato: le locandine restano al computer
+        if (el.getAttribute('data-stato') !== 'venduto') {
+          el.style.setProperty('display', 'none', 'important');
+          continue;
+        }
+        var sz = document.querySelector(el.getAttribute('data-sez'));
+        if (!sz) { el.style.display = 'none'; continue; }
+        if (el.getAttribute('data-in-pagina') !== '1') {
+          el.setAttribute('data-in-pagina', '1');
+          el.removeAttribute('style');
+          el.className = 'ti-spazio-citta ti-spazio-tel pub-link';
+          sz.insertAdjacentElement('afterend', el);
+        }
+      }
+      return;
+    }
+    // Si torna al computer (o si allarga la finestra): i cartelli tornano ai lati.
+    for (var t2 = 0; t2 < l.length; t2++) {
+      if (l[t2].getAttribute('data-in-pagina') === '1') {
+        l[t2].removeAttribute('data-in-pagina');
+        l[t2].className = 'ti-spazio-citta pub-link';
+        l[t2].style.cssText = 'position:absolute;display:none;border-radius:12px;'
+          + 'overflow:hidden;z-index:5;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12)';
+        document.body.appendChild(l[t2]);
+      }
+    }
+
     var precedente = largaOk;
     var perPasso = {};
     for (var p = 1; p <= 5; p++) {
