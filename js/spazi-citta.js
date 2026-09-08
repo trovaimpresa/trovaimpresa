@@ -284,28 +284,53 @@
     } catch (e) { /* niente rete: pazienza */ }
   }
 
-  var guardone = null;
+  // ⛔ 8 set 2026 — trovato col collaudo dal vivo.
+  // Prima si usava IntersectionObserver, il modo automatico del browser per
+  // sapere quando una cosa entra nello schermo. Sulla pagina vera non
+  // rispondeva: il clic si contava, la vista no. Provato anche con un
+  // osservatore nuovo scritto sul momento: stesso silenzio. Quindi non ci si
+  // affida piu' a lui — si guarda direttamente dove sta il cartello, mezzo
+  // secondo alla volta. Costa niente (i cartelli sono al massimo 10) e
+  // funziona su qualunque browser.
+  //
+  // "Visto" = almeno meta' del cartello sullo schermo per almeno 1 secondo.
+  // Si smette di controllare quando sono stati contati tutti, o dopo 5 minuti.
+  function metaSulloSchermo(el) {
+    var r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return false;
+    if (getComputedStyle(el).display === 'none') return false;
+    var H = window.innerHeight || document.documentElement.clientHeight;
+    var W = window.innerWidth  || document.documentElement.clientWidth;
+    var alto  = Math.min(r.bottom, H) - Math.max(r.top, 0);
+    var largo = Math.min(r.right, W)  - Math.max(r.left, 0);
+    if (alto <= 0 || largo <= 0) return false;
+    return (alto * largo) / (r.height * r.width) >= 0.5;
+  }
+
+  var daGuardare = [];
+  var orologio = null;
+
   function guardaQuando(a, idAnnuncio) {
     a.addEventListener('click', function () { conta(idAnnuncio, 'clic'); });
-    if (!window.IntersectionObserver) { conta(idAnnuncio, 'vista'); return; }
-    if (!guardone) {
-      guardone = new IntersectionObserver(function (righe) {
-        righe.forEach(function (r) {
-          var el = r.target;
-          if (r.isIntersecting) {
-            if (el._tiTimer) return;
-            el._tiTimer = setTimeout(function () {
-              conta(el.getAttribute('data-annuncio'), 'vista');
-              guardone.unobserve(el);
-            }, 1000);
-          } else if (el._tiTimer) {
-            clearTimeout(el._tiTimer); el._tiTimer = null;
-          }
-        });
-      }, { threshold: 0.5 });
-    }
     a.setAttribute('data-annuncio', idAnnuncio);
-    guardone.observe(a);
+    daGuardare.push({ el: a, id: idAnnuncio, da: 0 });
+    if (orologio) return;
+    var giri = 0;
+    orologio = setInterval(function () {
+      var ora = Date.now();
+      for (var i = daGuardare.length - 1; i >= 0; i--) {
+        var v = daGuardare[i];
+        if (!metaSulloSchermo(v.el)) { v.da = 0; continue; }
+        if (!v.da) { v.da = ora; continue; }
+        if (ora - v.da >= 1000) {
+          conta(v.id, 'vista');
+          daGuardare.splice(i, 1);
+        }
+      }
+      if (!daGuardare.length || ++giri > 600) {
+        clearInterval(orologio); orologio = null;
+      }
+    }, 500);
   }
 
   function destinazione(ann) {
