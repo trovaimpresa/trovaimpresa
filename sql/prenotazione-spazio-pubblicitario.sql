@@ -160,3 +160,15 @@ create policy annunci_modifica_owner on public.annunci_pubblicitari
 create policy annunci_cancella_owner on public.annunci_pubblicitari
   for delete to authenticated
   using (impresa_id in (select id from public.imprese where user_id = auth.uid()));
+
+-- 6) 9 set 2026 — LA MAIL A CHI LASCIA IL CARRELLO A META'
+--    netlify/functions/recupera-carrelli-pubblicita.js gira ogni ora, pesca gli
+--    ordini fermi da 2-48 ore e manda UNA email sola. Qui si segna quando e'
+--    partita, cosi' non ne parte una seconda.
+alter table public.annunci_pubblicitari
+  add column if not exists promemoria_carrello timestamptz;
+comment on column public.annunci_pubblicitari.promemoria_carrello is
+  'Quando e'' partita la mail di recupero del carrello lasciato a meta''. Vuoto = mai mandata.';
+create index if not exists idx_annunci_promemoria_carrello
+  on public.annunci_pubblicitari (created_at)
+  where promemoria_carrello is null and stato in ('pending','annullato');
