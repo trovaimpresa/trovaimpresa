@@ -142,14 +142,21 @@ $$;
 
 revoke all on function public.conferma_annuncio_pagato(uuid,text) from public, anon, authenticated;
 
--- 5) LA PORTA VECCHIA SI CHIUDE — da lanciare SOLO dopo che il sito nuovo e' online
---    (il pubblicita.html vecchio scrive ancora la riga a mano: se la chiudi prima,
---     per qualche minuto nessuno riesce a comprare)
--- drop policy if exists annunci_write_owner on public.annunci_pubblicitari;
--- create policy annunci_gestisci_owner on public.annunci_pubblicitari
---   for select using (impresa_id in (select id from public.imprese where user_id = auth.uid()));
--- create policy annunci_modifica_owner on public.annunci_pubblicitari
---   for update using (impresa_id in (select id from public.imprese where user_id = auth.uid()))
---          with check (impresa_id in (select id from public.imprese where user_id = auth.uid()));
--- create policy annunci_cancella_owner on public.annunci_pubblicitari
---   for delete using (impresa_id in (select id from public.imprese where user_id = auth.uid()));
+-- 5) LA PORTA VECCHIA E' CHIUSA — applicato il 9 set 2026, dopo il deploy del
+--    pubblicita.html nuovo. Dal browser non si puo' piu' creare un annuncio a
+--    mano: l'unica strada e' prenota_spazio_pubblicitario(). L'impresa continua
+--    a vedere, modificare (locandina e link) e cancellare i suoi annunci.
+drop policy if exists annunci_write_owner on public.annunci_pubblicitari;
+
+create policy annunci_vedi_owner on public.annunci_pubblicitari
+  for select to authenticated
+  using (impresa_id in (select id from public.imprese where user_id = auth.uid()));
+
+create policy annunci_modifica_owner on public.annunci_pubblicitari
+  for update to authenticated
+  using (impresa_id in (select id from public.imprese where user_id = auth.uid()))
+  with check (impresa_id in (select id from public.imprese where user_id = auth.uid()));
+
+create policy annunci_cancella_owner on public.annunci_pubblicitari
+  for delete to authenticated
+  using (impresa_id in (select id from public.imprese where user_id = auth.uid()));
