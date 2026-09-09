@@ -23266,3 +23266,153 @@ difetti veri sono usciti da lì, non dal codice.
     veramente brutta»). Da regalargliela, ma proponendola, non cambiandola
 11. **Pacchetto "più città"**: →12←€ per la sola Torino sono pochi per lui e per
     il cliente
+
+
+# 9 SETTEMBRE 2026 — SERA: LA VISIBILITÀ DENTRO LE RISPOSTE DELLE AI
+
+Partito da una domanda di Alex: «Instapro ha →1500← articoli, io →19←. Devo
+scrivere di più?». La risposta, misurata, è **no** — e la sera è finita da
+tutt'altra parte.
+
+## I NUMERI VERI (Search Console, →28← giorni: 10 ago – 6 set)
+
+⚠️ **La proprietà giusta è `https://trovaimpresa.com/` sull'account
+`pintoluzemilia@gmail.com`.** Non è `sc-domain:` e non è l'account
+info@trovaimpresa.com: quello non ha nessuna proprietà. Segnarselo, si è perso
+tempo a cercarla.
+
+- Totali: →111← clic · →9,86K← impressioni · CTR →1,1%← · posizione →25,1←
+- `costo infissi casa 100 mq`: posizione **→9,2←** (era ~→17←). Il prezziario
+  Regione Lazio messo il →3← set ha spostato la guida di →8← posizioni in
+  →6← giorni. **Il metodo funziona.**
+
+Le pagine, ordinate per impressioni:
+
+| pagina | clic | impressioni | CTR | posizione |
+|---|---|---|---|---|
+| quanto-guadagna-un-muratore | →8← | →1.504← | →0,5%← | →10,2← |
+| quanto-costa-rifare-impianto-idraulico | →6← | →1.169← | →0,5%← | →8,6← |
+| quanto-costa-un-muratore-al-giorno | →10← | →1.147← | →0,9%← | →8,8← |
+| quanto-costa-cambiare-gli-infissi | →5← | →965← | →0,5%← | →13,9← |
+| quanto-costa-posare-il-pavimento | →5← | →653← | →0,8%← | →13,3← |
+| quanto-costa-cappotto-termico | →3← | →364← | →0,8%← | →12,0← |
+| / (home) | →45← | →371← | →12,1%← | →17,7← |
+| /subappalto | →13← | →132← | →9,8%← | →5,5← |
+| /registrazione-impresa | →4← | →39← | →10,3%← | →2,4← |
+
+**Il buco più grosso**: il gruppo `impianto elettrico` fa ~→960← impressioni in
+→28← giorni con →0← clic e posizione →70-90←. La guida esiste
+(`quanto-costa-rifare-impianto-elettrico.html`) ma per Google non risponde.
+
+## ✅ LA SCOPERTA: SIAMO GIÀ CITATI DENTRO LE RISPOSTE AI
+
+Controllate →7← domande su Google, guardando chi c'è DENTRO il riquadro
+«AI Overview»:
+
+| domanda | fonti citate dall'AI | noi? |
+|---|---|---|
+| quanto guadagna un muratore | Operai.it, Indeed, Talent, bsness, **TrovaImpresa** | ✅ e →1←° risultato |
+| quanto costa un muratore al giorno | Instapro, Edilnet, Cronoshare, **TrovaImpresa**, CantieriCloud | ✅ |
+| quanto costa posare il pavimento | Dakota, Instapro, Ristrutturazioni.com, Quotalo | ❌ |
+| costo infissi casa 100 mq | Alluminox, CercoPro, Homedeal, ScegliereInfissi | ❌ |
+| quanto costa rifare l'impianto idraulico | Idealista, BTicino, PreventiviFree, Quotalo | ❌ |
+| quanto costa cambiare gli infissi | Alluminox, EurofinestraPVC, BlogBisacchi | ❌ |
+| quanto costa il cappotto termico | Baumit, EdiliziAcrobatica, Dove.it, Isolconfort | ❌ |
+
+Su Perplexity, «quanto guadagna un muratore in Italia»: trovaimpresa.com è tra
+le →10← fonti.
+
+**LA REGOLA CHE ESCE DA QUI, ed è la cosa più importante della serata:**
+le →2← domande dove siamo citati sono **le uniche due dove ci sono i prezzi
+veri di cantiere di Alex**. Dove ci sono prezzi di mercato, no.
+
+- Il **prezziario Regione Lazio** (pubblico, copiabile) fa salire di POSIZIONE.
+- I **prezzi veri di cantiere** (non copiabili) fanno CITARE.
+
+Sono due cose diverse e servono tutte e due. Prima erano state confuse.
+
+## ⛔ IL BUCO VERO
+
+Chiesto a Perplexity: «migliori siti per trovare imprese edili e artigiani in
+Italia». Risposta: Edilnet, Kompass, Instapro, Archisio, Europages, SpaziBelli.
+**TrovaImpresa non nominata.**
+
+Eppure su Google, per la stessa domanda, **siamo il primo risultato**.
+
+Il motivo: la home è un motore di ricerca, non una pagina che ELENCA e
+CONFRONTA dei siti. L'AI cerca una risposta a quella domanda e va altrove.
+
+## ✅ FATTO: LA PAGINA DI CONFRONTO (→7ab2925←)
+
+Nuovo file `migliori-siti-per-trovare-imprese-edili.html`, grafica identica
+alle guide.
+
+- Riquadro-risposta in cima pensato per essere «ritagliato» da un'AI: i →6←
+  siti divisi in due famiglie (chi rivende il contatto, chi no) col costo
+  accanto
+- Dichiarazione di trasparenza in chiaro: «questa pagina è scritta da
+  TrovaImpresa, che è uno dei siti confrontati»
+- Tabella a →6← righe e schede con punti forti E punti deboli di ognuno,
+  **compresi i nostri** («è il più giovane della lista, la copertura in alcune
+  città è ancora sottile»). È quella riga che rende la pagina citabile invece
+  che pubblicitaria
+- In →3← casi su →6← si consiglia un concorrente
+- Habitissimo segnalato come chiuso (feb →2025←): chi lo cita ancora ha una
+  lista vecchia
+- Dati strutturati Article + ItemList + FAQPage, fonti con link, data
+- Aggiunta a `blog_articoli` (id →30←, categoria guide, mestiere imprese),
+  all'elenco di riserva di blog.html e alla sitemap (→159← url)
+- Indicizzazione richiesta su Search Console la sera stessa
+
+Backup: `CLAUDE.md.bak-prima-9set-sera`, `blog.html.bak-prima-confronto-9set`,
+`sitemap.xml.bak-prima-confronto-9set`.
+
+## ✅ FATTO: LA SCHEDA DEL GESTIONALE SU CAPTERRA
+
+Un solo modulo su `app.g2digitalmarkets.com/get-listed/start` vale per
+**Capterra + GetApp + Software Advice**.
+
+- Account su `info@trovaimpresa.com`, azienda TrovaImpresa, →1-10← dipendenti
+- Prodotto «TrovaImpresa Gestionale», categoria **Construction Management**
+- →24← funzioni spuntate; tolte Android e iPhone (l'app non è pubblicata:
+  il gestionale si usa dal browser, già coperto da Cloud/SaaS)
+- →3← schermate (riepilogo, preventivo, computo metrico) con didascalie in
+  inglese, logo convertito in PNG →512×512←
+- Prezzi verificati sul file `IL-PREZZO-la-decisione.md`: Premium →29←/→249←,
+  Premium AI →39←/→349←. L'AI di Capterra li aveva presi giusti dal sito
+- Esito atteso via email entro →1-2← giorni lavorativi
+
+## ⛔ ERRORI DI CLAUDE IN QUESTA SESSIONE, DA NON RIPETERE
+
+- **Proposto di riscrivere i titoli delle →6← guide** dando per scontato che
+  fossero deboli. Andati a leggerli: erano già ottimi (numero, forbice di
+  prezzo, anno). Mezza giornata di lavoro inutile evitata solo perché si è
+  andati a guardare il sito vero prima di toccarlo
+- **Proposta una lista di →10← blog a cui scrivere** senza averli aperti. Aperti
+  uno per uno: quasi tutti sono agenzie di marketing che vendono servizi alle
+  imprese edili, non giornali. Non avrebbero mai aggiunto un link
+- **Cercata la proprietà sbagliata su Search Console** (`sc-domain:`) e provati
+  →4← account prima di trovare quello giusto
+- La regola che ha funzionato, di nuovo: **aprire la pagina vera e guardarla**
+  prima di proporre il lavoro
+
+## NON RISOLTO — DA FARE
+
+1. **Impianto elettrico**: ~→960← impressioni, →0← clic, posizione →70-90←.
+   La guida c'è ma non risponde. È il buco più grosso delle guide
+2. **I prezzi veri di cantiere nelle altre →5← guide** (idraulico, pavimento,
+   cappotto, infissi, ristrutturazione): è la cosa che fa citare. I prezzi li
+   deve dare Alex, non si inventano
+3. **Le due pagine sul muratore** (→2.651← impressioni insieme) sono lette da
+   MURATORI, non da clienti, e in fondo non c'è l'invito a iscriversi come
+   artigiano. Occasione sprecata
+4. **Il calcolatore dentro le guide** con l'invito alla pagina della città:
+   deciso il →5← set, ancora da fare
+5. Restano da fare, per farsi nominare: Product Hunt (scartato: pubblico
+   sbagliato), Google Business Profile (rischio sospensione, è un sito non un
+   negozio), Wikidata (**da fare DOPO** un articolo di giornale, se no la
+   cancellano per mancanza di fonti)
+6. **RietiLife chiede →200←€ e l'articolo lo deve scrivere Alex**: strada
+   ferma. L'alternativa a costo zero è mandare la notizia («un muratore di
+   Rieti si è costruito da solo un sito su →106← città») a più testate locali
+   come cronaca, non come pubblicità
