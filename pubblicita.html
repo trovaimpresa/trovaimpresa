@@ -358,8 +358,8 @@
 <!-- DIALOG SPAZIO OCCUPATO -->
 <div class="dlg-overlay" id="dlg-occupato">
   <div class="dlg">
-    <div class="dlg-emoji">🚫</div>
-    <h3>Spazio già occupato</h3>
+    <div class="dlg-emoji" id="dlg-occupato-emoji">🚫</div>
+    <h3 id="dlg-occupato-titolo">Spazio già occupato</h3>
     <p id="dlg-occupato-msg"></p>
     <p id="dlg-esito" style="display:none;font-size:14px;line-height:1.6;color:var(--dark);margin-bottom:18px;"></p>
     <div class="dlg-actions">
@@ -885,8 +885,35 @@ function ridimensionaImmagine(file, maxLato = 1200) {
 }
 
 // === DIALOG SPAZIO OCCUPATO ===
-function mostraDialogOccupato() {
-  document.getElementById('dlg-occupato-msg').textContent = 'Questo spazio è già occupato a ' + cittaSel + ' nel periodo scelto';
+// 9 set 2026 — la finestra dice ADESSO qual e' dei due casi:
+//   venduto      = un'altra impresa l'ha gia' pagato (con la data in cui si libera)
+//   in_acquisto  = un'altra impresa e' alla pagina del pagamento in questo momento
+function escHtml(t) {
+  return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+function dataItaliana(iso, piuGiorni) {
+  var d = new Date(iso + 'T00:00:00');
+  if (isNaN(d)) return '';
+  if (piuGiorni) d.setDate(d.getDate() + piuGiorni);
+  return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+}
+function mostraDialogOccupato(info) {
+  info = info || {};
+  var emo = document.getElementById('dlg-occupato-emoji');
+  var tit = document.getElementById('dlg-occupato-titolo');
+  var msg = document.getElementById('dlg-occupato-msg');
+  if (info.motivo === 'in_acquisto') {
+    if (emo) emo.textContent = '⏳';
+    if (tit) tit.textContent = "Lo sta comprando un'altra impresa";
+    msg.innerHTML = "Un'altra impresa sta pagando questo spazio a <strong>" + escHtml(cittaSel) + "</strong> proprio in questo momento.<br>Se non completa il pagamento entro <strong>" + (info.minuti || 30) + " minuti</strong>, lo spazio torna libero e puoi riprovare.";
+  } else {
+    if (emo) emo.textContent = '🚫';
+    if (tit) tit.textContent = 'Spazio già occupato';
+    msg.innerHTML = 'Questo spazio a <strong>' + escHtml(cittaSel) + '</strong> è già venduto nel periodo che hai scelto.'
+      + (info.libero_dal ? '<br>Torna libero dal <strong>' + escHtml(info.libero_dal) + '</strong>.' : '');
+  }
   var esito = document.getElementById('dlg-esito');
   esito.style.display = 'none';
   esito.innerHTML = '';
@@ -981,13 +1008,21 @@ async function inviaOrdine() {
   var prezzo = calcolaPrezzo(spazioSel, periodoSel);
 
   // Disponibilità: blocca se esiste annuncio pagato sullo stesso spazio+città con periodo sovrapposto
+  // Controllo di cortesia PRIMA di far caricare l'immagine: se lo spazio e'
+  // gia' venduto si evita all'impresa tutto il lavoro per niente.
+  // ATTENZIONE: questa lettura NON e' la guardia. La guardia vera, quella che
+  // regge due imprese che comprano nello stesso secondo, e' la funzione
+  // prenota_spazio_pubblicitario qui sotto (serratura nel database).
   var occ = await supabaseClient.from('annunci_pubblicitari')
     .select('data_inizio,data_fine')
     .eq('spazio_id', spazioSel).ilike('citta', cittaSel).eq('stato', 'pagato');
-  if (occ.data && occ.data.some(function(o){ return o.data_inizio <= dataFine && o.data_fine >= dataInizio; })) {
+  var sovr = (occ.data || [])
+    .filter(function(o){ return o.data_inizio <= dataFine && o.data_fine >= dataInizio; })
+    .sort(function(a,b){ return a.data_fine < b.data_fine ? 1 : -1; })[0];
+  if (sovr) {
     btn.textContent = '💳 Conferma e vai al pagamento';
     btn.disabled = false;
-    mostraDialogOccupato();
+    mostraDialogOccupato({ motivo: 'venduto', libero_dal: dataItaliana(sovr.data_fine, 1) });
     return;
   }
 
@@ -1041,17 +1076,43 @@ async function inviaOrdine() {
     stato: 'pending'
   };
 
-  const { data: insertData, error: insertError } = await supabaseClient
-    .from('annunci_pubblicitari').insert(record).select('id').single();
+  // 9 set 2026 — LA PORTA UNICA. Non si scrive piu' la riga a mano: si chiede
+  // al database di prenotare lo spazio. Dentro c'e' una serratura: se due
+  // imprese chiedono lo stesso spazio nello stesso istante, una sola passa,
+  // l'altra riceve subito "occupato" e non arriva mai a pagare.
+  // Lo spazio resta impegnato 30 minuti, poi torna libero da solo.
+  const { data: pren, error: prenError } = await supabaseClient
+    .rpc('prenota_spazio_pubblicitario', {
+      p_spazio_id:   record.spazio_id,
+      p_citta:       record.citta,
+      p_impresa_id:  record.impresa_id,
+      p_logo_url:    record.logo_url,
+      p_link_url:    record.link_url,
+      p_prezzo:      record.prezzo,
+      p_data_inizio: record.data_inizio,
+      p_data_fine:   record.data_fine,
+      p_mesi:        record.mesi
+    });
 
-  if (insertError) {
-    alert('Errore durante l\'invio: ' + insertError.message);
+  if (prenError) {
+    alert('Errore durante l\'invio: ' + prenError.message);
     btn.textContent = '💳 Conferma e vai al pagamento';
     btn.disabled = false;
     return;
   }
 
-  const annuncioId = insertData.id;
+  if (!pren || pren.ok !== true) {
+    btn.textContent = '💳 Conferma e vai al pagamento';
+    btn.disabled = false;
+    if (pren && pren.motivo === 'non_autorizzato') {
+      alert('Non risulti il titolare di questa impresa. Esci e rientra nel tuo account, poi riprova.');
+      return;
+    }
+    mostraDialogOccupato(pren || {});
+    return;
+  }
+
+  const annuncioId = pren.id;
 
   // Notifica email staff (non blocca il flusso)
   fetch('/.netlify/functions/notifica-pubblicita', {
