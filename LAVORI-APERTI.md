@@ -4,11 +4,51 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 6 settembre 2026 (notte) — il gestionale negozio e i negozi che non si iscrivono
+Ultimo aggiornamento: 9 settembre 2026 (sera) — due imprese non comprano piu' lo stesso spazio, e i carrelli persi si vedono
 
 ---
 
-## 🆕 IL 6 SETTEMBRE (notte) — IL GESTIONALE NEGOZIO E I NEGOZI CHE NON SI ISCRIVONO
+## 🆕 IL 9 SETTEMBRE (sera) — DUE IMPRESE, UNO SPAZIO SOLO
+
+Alex: «due imprese possono comprare la pubblicita' nello stesso momento, una paga e ha la pubblicita', l'altra paga e non ce l'ha perche' la prima e' stata piu' veloce». Tutto chiuso e pubblicato la stessa sera, →4← push.
+
+### 🔍 LA CAUSA VERA, trovata guardando il database
+Il vincolo di sovrapposizione su `annunci_pubblicitari` **c'era gia'** — ma copriva solo `stato='pagato'`. Le righe `pending` no. Quindi:
+1. due imprese scrivevano due righe `pending` sullo stesso spazio+citta';
+2. tutte e due arrivavano a Stripe e pagavano;
+3. la prima diventava `pagato`; sulla seconda il database rifiutava l'update (→23P01←) e il webhook rispondeva →500←.
+
+⛔ **Il problema non era la mancanza del controllo: era che nessuno gestiva il "no" del secondo cliente.** Soldi presi, nessuna pubblicita', nessun avviso a nessuno.
+
+### ✅ FATTO E PUBBLICATO
+- **La serratura** (→724d37a←) · `sql/prenotazione-spazio-pubblicitario.sql`: `prenota_spazio_pubblicitario()` con `pg_advisory_xact_lock` su spazio+citta', colonna `blocco_fino` (prenotazione valida →30← minuti, poi lo spazio si libera da solo), stato nuovo `rimborsato`. `pubblicita.html` non fa piu' l'INSERT a mano. La finestra dice quale dei due casi e': **gia' venduto** (con la data in cui si libera) o **lo sta comprando un altro adesso** (coi minuti veri)
+- **Il rimborso automatico** (→724d37a←) · `conferma_annuncio_pagato()` decide al pagamento: o `pagato`, o `rimborsato`. Il webhook restituisce i soldi su Stripe, manda l'email al cliente, lo mette in lista d'attesa e avvisa info@. L'incasso si registra **solo** se l'annuncio e' attivo (prima un rimborso sarebbe finito nei conti come soldi incassati)
+- **La porta vecchia chiusa** (→a8a56a9←) · tolto il permesso di INSERT diretto dal browser: l'unica strada e' la funzione. Fatto **dopo** il deploy, se no per qualche minuto nessuno poteva comprare
+- **I carrelli persi si vedono** (→90f55ea←) · nell'admin: «Arrivano al pagamento» (%), «Lasciati a meta'» (quanti e quanti euro), «Rimborsati». In tabella tre stati veri: 🛒 Lasciato a meta', 🔁 Rimborsato, ⏳ **Sta pagando ora** (un `pending` dentro i →30← minuti e' un cliente in corso, non perso)
+- **La mail di recupero** (→ce65e76←) · `netlify/functions/recupera-carrelli-pubblicita.js`, ogni ora: pesca gli ordini fermi da →2←-→48← ore e manda **una** email con spazio, citta', durata, prezzo e il tasto per finire. Non tocca chi sta pagando in quel momento; se lo spazio e' stato venduto nel frattempo l'email non parte (ma la riga si segna, se no ci riproverebbe ogni ora); mai un secondo sollecito. Colonna `promemoria_carrello`
+- **Firenze chiuso** · l'ordine fermo dall'8 set (profilo-sx-1, impresa →131←, →13,50←€): Alex ha confermato «non ha piu' pagato» → `annullato`, spazio di nuovo libero
+
+### 🧪 I banchi
+- `prove-claude/banchi-fissi/carrelli/banco-carrelli.js` — fa girare il file VERO della mail su →8← situazioni con un finto Supabase e una finta Resend: →12← verdi. Togliendo il controllo «sta pagando adesso» ne diventano →3← rosse
+- Le due funzioni SQL provate sul database vero con →11← scenari (righe di prova su una citta' finta, poi cancellate), piu' →2← dopo la chiusura della porta: INSERT diretto respinto, funzione ancora aperta
+
+### ⏳ APERTI da qui
+- **Il cron della mail carrelli non e' mai partito davvero** · va guardato nei registri Netlify (Functions → `recupera-carrelli-pubblicita`) dopo il primo giro
+- **Il rimborso Stripe vero non e' mai stato provato** · serve un incrocio di pagamenti veri. La logica e' provata sul database; se il rimborso automatico fallisse, arriva a info@ un'email rossa che dice di farlo a mano
+- **La prova a clic di Alex** · arrivare a Stripe, chiudere senza pagare, riprovare lo stesso spazio: deve uscire la clessidra ⏳
+- **Numeri di oggi, troppo pochi per contare**: →3← ordini partiti in tutto, →2← pagati, →1← perso = →67%←. Il numero comincia a parlare dal decimo ordine
+
+### 💡 Consigli dati e non ancora decisi
+- Guardare **quali spazi vengono chiesti due volte**: se due imprese litigano per lo stesso cartello, quel cartello costa troppo poco (oggi hero →20←€/mese)
+- Se la mail dei carrelli non la apre nessuno, il problema non e' la mail: e' il prezzo o la fiducia. Con →1←-→2← persone al mese la telefonata a mano e' ancora possibile
+
+### ⚠️ Da ricordare
+- Da Cowork in nuvola **Claude non ha le credenziali GitHub**: fa i commit, il `git push` lo lancia Alex (`cd ~/Downloads/trovaimpresa && git push`). Dal 9 set la riga gliela si da' sempre da soli, a ogni lavoro
+- Git sul disco montato lascia `.git/index.lock` che l'app non puo' cancellare: serve il permesso di cancellazione nella cartella, se no il commit dopo si blocca
+
+---
+
+## IL 6 SETTEMBRE (notte) — IL GESTIONALE NEGOZIO E I NEGOZI CHE NON SI ISCRIVONO
 
 Alex: «il gestionale negozio l'ho sempre lasciato indietro e ho sbagliato». Misurato quanto indietro, e provata la registrazione dal vivo per capire perché di negozi non se ne iscrive nessuno. **Nessun file toccato**: questo è il referto e la lista.
 
