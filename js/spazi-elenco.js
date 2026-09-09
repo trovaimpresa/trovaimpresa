@@ -38,11 +38,17 @@
   var FASCE = {
     hero:       { nome: 'Hero — banner in alto', prezzo: 20, misura: 340,
                   dove: 'In cima alla pagina della tua città' },
-    imprese:    { nome: "Trova un'impresa",      prezzo: 12, misura: 270,
+    imprese:    { nome: "Trova un'impresa",      prezzo: 17, misura: 270,
                   dove: 'Nella pagina della tua città, accanto a «Scegli la categoria»' },
-    inserzioni: { nome: 'Inserzioni lavoro',     prezzo: 8,  misura: 210,
+    inserzioni: { nome: 'Inserzioni lavoro',     prezzo: 15, misura: 210,
                   dove: 'Accanto alle offerte di lavoro e nella pagina della tua città' },
-    profilo:    { nome: 'Profilo',               prezzo: 5,  misura: 170,
+    guide:      { nome: 'Guide e costi',         prezzo: 13, misura: 311,
+                  dove: 'Nella pagina della tua città, accanto alle guide «quanto costa»' },
+    perche:     { nome: 'Perché TrovaImpresa',    prezzo: 10, misura: 264,
+                  dove: 'Nella pagina della tua città, accanto a «Perché scegliere TrovaImpresa»' },
+    profiloAlto:  { nome: 'Recensioni — cartello alto',  prezzo: 7, misura: 170,
+                  dove: 'Nelle schede delle imprese e nella pagina della tua città' },
+    profiloBasso: { nome: 'Recensioni — cartello basso', prezzo: 5, misura: 170,
                   dove: 'Nelle schede delle imprese e nella pagina della tua città' }
   };
 
@@ -76,19 +82,38 @@
       { pagina: 'index.html', citta: true, dove: 'e nella pagina della tua città, accanto a «Prendi il tuo spazio»', ancora: '#registrati', passo: 2 }
     ]},
 
-    { id: 'profilo-sx-1', fascia: 'profilo', lato: 'Sinistra 1', pagine: [
+    // 9 set 2026 — I QUATTRO POSTI CHE C'ERANO GIA' E NESSUNO POTEVA COMPRARE.
+    // Erano disegnati in js/spazi-citta.js dentro LOC_EXTRA come locandine
+    // informative: si vedevano ma non avevano nome, quindi niente listino,
+    // niente prezzo, niente Stripe. Ora sono spazi veri come tutti gli altri.
+    // Se nessuno li compra ci resta la locandina, esattamente come prima.
+    { id: 'guide-sx', fascia: 'guide', lato: 'Sinistra', pagine: [
+      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto alle guide «quanto costa»', ancora: '.guide-costi-home', passo: 3 }
+    ]},
+    { id: 'guide-dx', fascia: 'guide', lato: 'Destra', pagine: [
+      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto alle guide «quanto costa»', ancora: '.guide-costi-home', passo: 3 }
+    ]},
+
+    { id: 'perche-sx', fascia: 'perche', lato: 'Sinistra', pagine: [
+      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto a «Perché scegliere TrovaImpresa»', ancora: '.why-section', passo: 4 }
+    ]},
+    { id: 'perche-dx', fascia: 'perche', lato: 'Destra', pagine: [
+      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto a «Perché scegliere TrovaImpresa»', ancora: '.why-section', passo: 4 }
+    ]},
+
+    { id: 'profilo-sx-1', fascia: 'profiloAlto', lato: 'Sinistra 1', pagine: [
       { pagina: 'profilo-impresa.html', dove: 'Nelle schede delle imprese della tua città' },
       { pagina: 'index.html', citta: true, dove: 'e nella pagina della tua città, accanto alle recensioni', ancora: '#ti-recensioni', passo: 5, pila: 0 }
     ]},
-    { id: 'profilo-sx-2', fascia: 'profilo', lato: 'Sinistra 2', pagine: [
+    { id: 'profilo-sx-2', fascia: 'profiloBasso', lato: 'Sinistra 2', pagine: [
       { pagina: 'profilo-impresa.html', dove: 'Nelle schede delle imprese della tua città' },
       { pagina: 'index.html', citta: true, dove: 'e nella pagina della tua città, accanto alle recensioni', ancora: '#ti-recensioni', passo: 5, pila: 1 }
     ]},
-    { id: 'profilo-dx-1', fascia: 'profilo', lato: 'Destra 1', pagine: [
+    { id: 'profilo-dx-1', fascia: 'profiloAlto', lato: 'Destra 1', pagine: [
       { pagina: 'profilo-impresa.html', dove: 'Nelle schede delle imprese della tua città' },
       { pagina: 'index.html', citta: true, dove: 'e nella pagina della tua città, accanto alle recensioni', ancora: '#ti-recensioni', passo: 5, pila: 0 }
     ]},
-    { id: 'profilo-dx-2', fascia: 'profilo', lato: 'Destra 2', pagine: [
+    { id: 'profilo-dx-2', fascia: 'profiloBasso', lato: 'Destra 2', pagine: [
       { pagina: 'profilo-impresa.html', dove: 'Nelle schede delle imprese della tua città' },
       { pagina: 'index.html', citta: true, dove: 'e nella pagina della tua città, accanto alle recensioni', ancora: '#ti-recensioni', passo: 5, pila: 1 }
     ]}
@@ -158,7 +183,7 @@
 
   // Le 4 fasce per il listino, ognuna coi suoi spazi.
   function perIlListino() {
-    var ordine = ['hero', 'imprese', 'inserzioni', 'profilo'], out = [];
+    var ordine = ['hero', 'imprese', 'inserzioni', 'guide', 'perche', 'profiloAlto', 'profiloBasso'], out = [];
     ordine.forEach(function (k) {
       var ids = SPAZI.filter(function (s) { return s.fascia === k; })
                      .map(function (s) { return s.id; });
@@ -172,7 +197,7 @@
   }
 
   window.SPAZI_TI = {
-    aggiornato: '2026-09-08',
+    aggiornato: '2026-09-09',
     FASCE: FASCE,
     SPAZI: SPAZI,
     diQuestaPagina: diQuestaPagina,

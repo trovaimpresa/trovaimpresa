@@ -4,16 +4,37 @@ const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // Listino server-side = unica fonte di verità per il prezzo (NON ci si fida del client)
+// 9 set 2026 — scala nuova, un prezzo per ogni altezza della pagina:
+// 20 - 17 - 15 - 13 - 10 - 7 - 5. Piu' in alto sta il cartello, piu' e' grande
+// e piu' costa. Deve restare uguale a js/spazi-elenco.js (il listino che vede
+// il cliente): se qui e li' non combaciano, comanda questo file.
 const PREZZI_MENSILI = {
   'hero-sx': 20, 'hero-dx': 20,
-  'imprese-sx': 12, 'imprese-dx': 12,
+  'imprese-sx': 17, 'imprese-dx': 17,
   /* 'pannello-sx' e 'pannello-dx' rimossi (luglio 2026): gli spazi nei pannelli non esistono più */
   'piano-sx': 9, 'piano-dx': 9,
-  'inserzioni-sx': 8, 'inserzioni-dx': 8,
+  'inserzioni-sx': 15, 'inserzioni-dx': 15,
+  'guide-sx': 13, 'guide-dx': 13,
+  'perche-sx': 10, 'perche-dx': 10,
   'subappalto-sx-1': 6, 'subappalto-sx-2': 6, 'subappalto-dx-1': 6, 'subappalto-dx-2': 6,
-  'profilo-sx-1': 5, 'profilo-sx-2': 5, 'profilo-dx-1': 5, 'profilo-dx-2': 5
+  'profilo-sx-1': 7, 'profilo-dx-1': 7,
+  'profilo-sx-2': 5, 'profilo-dx-2': 5
 };
-const SCONTI = { 1: 0, 3: 0.10, 12: 0.25 };
+const SCONTI = { 1: 0, 3: 0.10, 6: 0.13, 12: 0.15 };
+
+// 9 set 2026 — PREZZO BLOCCATO (deciso da Alex).
+// Chi aveva comprato col listino vecchio tiene il suo prezzo anche quando
+// rinnova, finche' non disdice. Si toglie la riga solo quando quel cliente
+// smette davvero.
+const PREZZI_BLOCCATI = [
+  { impresa_id: 109, spazio_id: 'imprese-dx', citta: 'Torino', mensile: 12 }  // Service House, dal 7 set 2026
+];
+function prezzoBloccato(ann) {
+  const b = PREZZI_BLOCCATI.find(function (x) {
+    return x.impresa_id === ann.impresa_id && x.spazio_id === ann.spazio_id && x.citta === ann.citta;
+  });
+  return b ? b.mensile : null;
+}
 
 function mesiTraDate(inizio, fine) {
   const a = new Date(inizio), b = new Date(fine);
@@ -38,7 +59,7 @@ exports.handler = async (event) => {
     }
 
     // Ricalcolo prezzo server-side
-    const mensile = PREZZI_MENSILI[ann.spazio_id];
+    const mensile = prezzoBloccato(ann) != null ? prezzoBloccato(ann) : PREZZI_MENSILI[ann.spazio_id];
     if (mensile == null) return { statusCode: 400, body: JSON.stringify({ error: 'Spazio non valido' }) };
     // Durata: la colonna "mesi" è la fonte di verità. Le righe vecchie (create
     // prima che la colonna esistesse) ricadono sul calcolo dalle date.

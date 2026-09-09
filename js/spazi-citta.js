@@ -18,7 +18,8 @@
 
   // Le misure sono quelle del listino (pubblicita.html, MISURE_FASCIA):
   // quello che il cliente compra e' quello che vede.
-  var MISURE = { 'hero': 340, 'imprese': 270, 'inserzioni': 210, 'profilo': 170 };
+  var MISURE = { 'hero': 340, 'imprese': 270, 'inserzioni': 210,
+                 'guide': 311, 'perche': 264, 'profilo': 170 };
   function misuraDi(sid) { return MISURE[String(sid).split('-')[0]] || 260; }
 
   // Locandine di TrovaImpresa negli spazi ancora LIBERI (8 set 2026).
@@ -36,7 +37,14 @@
     'profilo-sx-1':  { file: '11-citta',       link: '/citta' },
     'profilo-sx-2':  { file: '04-preventivi',  link: '/software-gestionale-imprese-edili' },
     'profilo-dx-1':  { file: '10-candidature', link: '/candidature-lavoro' },
-    'profilo-dx-2':  { file: '12-chi-cerchi',  link: '/cerca-artigiani' }
+    'profilo-dx-2':  { file: '12-chi-cerchi',  link: '/cerca-artigiani' },
+    // 9 set 2026: questi quattro erano in LOC_EXTRA (locandine e basta).
+    // Adesso sono spazi in vendita: la locandina resta come riserva per
+    // quando lo spazio e' libero, come per tutti gli altri.
+    'guide-sx':      { file: '13-blog',        link: '/blog' },
+    'guide-dx':      { file: '06-guide',       link: '/costi-ristrutturazione' },
+    'perche-sx':     { file: '09-offerte',     link: '/offerte-lavoro' },
+    'perche-dx':     { file: '14-recensioni',  link: '/cerca-imprese' }
   };
 
   // I due spazi grossi in alto: se nessuno li ha comprati, ci va la locandina.
@@ -48,12 +56,12 @@
   // Locandine SOLO informative: NON sono spazi in vendita e non entrano nel
   // listino. Stanno nei due punti che la home nazionale usa e che la pagina
   // citta' ha uguali. Servono a non lasciare la pagina spoglia.
-  var LOC_EXTRA = [
-    { sez: '.guide-costi-home', lato: 'sx', passo: 3, file: '13-blog',       link: '/blog' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '06-guide',      link: '/costi-ristrutturazione' },
-    { sez: '.why-section',      lato: 'sx', passo: 4, file: '09-offerte',    link: '/offerte-lavoro' },
-    { sez: '.why-section',      lato: 'dx', passo: 4, file: '14-recensioni', link: '/cerca-imprese' }
-  ];
+  // 9 set 2026 — VUOTO DI PROPOSITO.
+  // Qui stavano le quattro locandine non vendibili (guide-costi e why-section).
+  // Ora quei quattro posti sono spazi veri, con nome e prezzo, e stanno
+  // nell'elenco unico js/spazi-elenco.js insieme a tutti gli altri.
+  // La loro locandina e' passata dentro LOCANDINE, qui sopra.
+  var LOC_EXTRA = [];
 
   var BORDO   = 20;                    // distanza dal bordo dello schermo
   var LARGA   = 600;                   // larghezza voluta per le due in alto
@@ -82,6 +90,10 @@
     { sez: '#categorie',     lato: 'dx', passo: 1, spazio: 'imprese-dx' },
     { sez: '#registrati',    lato: 'sx', passo: 2, spazio: 'inserzioni-sx' },
     { sez: '#registrati',    lato: 'dx', passo: 2, spazio: 'inserzioni-dx' },
+    { sez: '.guide-costi-home', lato: 'sx', passo: 3, spazio: 'guide-sx' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, spazio: 'guide-dx' },
+    { sez: '.why-section',      lato: 'sx', passo: 4, spazio: 'perche-sx' },
+    { sez: '.why-section',      lato: 'dx', passo: 4, spazio: 'perche-dx' },
     { sez: '#ti-recensioni', lato: 'sx', passo: 5, pila: 0, spazio: 'profilo-sx-1' },
     { sez: '#ti-recensioni', lato: 'sx', passo: 5, pila: 1, spazio: 'profilo-sx-2' },
     { sez: '#ti-recensioni', lato: 'dx', passo: 5, pila: 0, spazio: 'profilo-dx-1' },

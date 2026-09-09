@@ -269,7 +269,8 @@
         <div class="toggle-col">
           <div class="tog-opt active" id="tog-1"><span>1 mese</span><span class="tog-prezzo" id="pz-1">—</span></div>
           <div class="tog-opt" id="tog-3"><span>3 mesi <span class="risparmio-badge">-10%</span></span><span class="tog-prezzo" id="pz-3">—</span></div>
-          <div class="tog-opt" id="tog-12"><span>1 anno <span class="risparmio-badge">-25%</span></span><span class="tog-prezzo" id="pz-12">—</span></div>
+          <div class="tog-opt" id="tog-6"><span>6 mesi <span class="risparmio-badge">-13%</span></span><span class="tog-prezzo" id="pz-6">—</span></div>
+          <div class="tog-opt" id="tog-12"><span>1 anno <span class="risparmio-badge">-15%</span></span><span class="tog-prezzo" id="pz-12">—</span></div>
         </div>
       </div>
       <div class="riepilogo-box">
@@ -399,10 +400,26 @@ const MISURE_FASCIA = (function () {
 const PERIODI = {
   '1':  { mesi: 1,  sconto: 0,    label: '1 mese' },
   '3':  { mesi: 3,  sconto: 0.10, label: '3 mesi' },
-  '12': { mesi: 12, sconto: 0.25, label: '1 anno' }
+  '6':  { mesi: 6,  sconto: 0.13, label: '6 mesi' },
+  '12': { mesi: 12, sconto: 0.15, label: '1 anno' }
 };
+// 9 set 2026 — PREZZO BLOCCATO.
+// Chi aveva comprato col listino vecchio tiene il suo prezzo anche al rinnovo,
+// finche' non disdice. La stessa lista sta in
+// netlify/functions/crea-checkout-pubblicita.js, che e' quella che comanda:
+// qui serve solo perche' il cliente veda la cifra giusta prima di pagare.
+const PREZZI_BLOCCATI = [
+  { impresa_id: 109, spazio_id: 'imprese-dx', citta: 'Torino', mensile: 12 }  // Service House, dal 7 set 2026
+];
+function mensileDi(spazioId) {
+  var imp = (typeof currentImpresa !== 'undefined' && currentImpresa) ? currentImpresa.id : null;
+  var b = PREZZI_BLOCCATI.find(function (x) {
+    return x.impresa_id === imp && x.spazio_id === spazioId && x.citta === cittaSel;
+  });
+  return b ? b.mensile : PREZZI_MENSILI[spazioId];
+}
 function calcolaPrezzo(spazioId, periodoKey) {
-  const mensile = PREZZI_MENSILI[spazioId];
+  const mensile = mensileDi(spazioId);
   const p = PERIODI[periodoKey];
   if (mensile == null || !p) return null;
   return Math.round(mensile * p.mesi * (1 - p.sconto) * 100) / 100;
@@ -598,14 +615,14 @@ function initFiltriGeo() {
 // === PERIODO ===
 function selPeriodo(k) {
   periodoSel = k;
-  ['1','3','12'].forEach(function(x){
+  ['1','3','6','12'].forEach(function(x){
     document.getElementById('tog-' + x).classList.toggle('active', x === k);
   });
   aggiornaRiepilogo();
 }
 
 function aggiornaPrezziPeriodo() {
-  ['1','3','12'].forEach(function(k){
+  ['1','3','6','12'].forEach(function(k){
     var el = document.getElementById('pz-' + k);
     var p = spazioSel ? calcolaPrezzo(spazioSel, k) : null;
     el.textContent = p != null ? '€' + p : '—';
@@ -666,6 +683,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('tog-1').addEventListener('click', function(){ selPeriodo('1'); });
   document.getElementById('tog-3').addEventListener('click', function(){ selPeriodo('3'); });
+  document.getElementById('tog-6').addEventListener('click', function(){ selPeriodo('6'); });
   document.getElementById('tog-12').addEventListener('click', function(){ selPeriodo('12'); });
 
   document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
