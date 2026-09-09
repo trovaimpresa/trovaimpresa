@@ -1042,6 +1042,8 @@
             <option value="scadenza">In scadenza (7 giorni)</option>
             <option value="scaduto">Scaduti</option>
             <option value="pending">Non pagati</option>
+            <option value="annullato">Lasciati a metà</option>
+            <option value="rimborsato">Rimborsati</option>
           </select>
           <select id="pub-filtro-durata" onchange="renderPubblicitaClienti()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px">
             <option value="">Tutte le durate</option>
@@ -1858,6 +1860,15 @@ async function caricaBadgePubblicita() {
 function pubStatoReale(a) {
   const oggi = new Date().toISOString().slice(0, 10);
   if (a.stato === 'pagato' && a.data_fine && a.data_fine < oggi) return 'scaduto';
+  // 9 set 2026: 'annullato', e un 'pending' con la prenotazione ormai scaduta,
+  // sono la stessa cosa vista dal cliente — e' arrivato al pagamento e non ha
+  // pagato. Un 'pending' ancora dentro i 30 minuti e' invece uno che sta
+  // pagando proprio adesso: quello NON e' un carrello perso.
+  if (a.stato === 'annullato') return 'lasciato';
+  if (a.stato === 'pending') {
+    const scaduta = !a.blocco_fino || new Date(a.blocco_fino) < new Date();
+    return scaduta ? 'lasciato' : 'pending';
+  }
   return a.stato || 'pending';
 }
 
@@ -1878,14 +1889,30 @@ function renderPubblicitaClienti() {
   const incasso = _pubData.filter(a => a.stato === 'pagato')
     .reduce((s, a) => s + (parseFloat(a.prezzo) || 0), 0);
   const annuali = attivi.filter(a => pubMesi(a) === 12).length;
+  // 9 set 2026 — I CARRELLI LASCIATI A META'.
+  // Ogni riga nasce quando qualcuno arriva alla pagina del pagamento. Se poi
+  // non paga, resta li'. Questi due numeri dicono quanti soldi si fermano
+  // sull'ultimo clic: e' l'unica perdita che non si vede da nessuna parte.
+  const partiti = _pubData.length;
+  const pagati  = _pubData.filter(a => a.stato === 'pagato').length;
+  const persi   = _pubData.filter(a => pubStatoReale(a) === 'lasciato').length;
+  const persiEuro = _pubData.filter(a => pubStatoReale(a) === 'lasciato')
+    .reduce((s, a) => s + (parseFloat(a.prezzo) || 0), 0);
+  const rimborsati = _pubData.filter(a => a.stato === 'rimborsato').length;
+  const percOk = partiti ? Math.round(pagati * 100 / partiti) : null;
+
   ril.innerHTML =
     pubCard('Annunci attivi', attivi.length, 'var(--verde)') +
     pubCard('In scadenza (7gg)', inScad.length, inScad.length ? '#e67700' : '#999') +
     pubCard('Abbonamenti annuali', annuali, '#0066ff') +
-    pubCard('Incasso pubblicità', '€' + incasso.toFixed(2), '#7b1fa2');
+    pubCard('Incasso pubblicità', '€' + incasso.toFixed(2), '#7b1fa2') +
+    pubCard('Arrivano al pagamento', (percOk === null ? '—' : percOk + '%'), '#1a7f43') +
+    pubCard('Lasciati a metà', persi + (persi ? ' · €' + persiEuro.toFixed(2) : ''), persi ? '#c92a2a' : '#999') +
+    (rimborsati ? pubCard('Rimborsati', rimborsati, '#7b1fa2') : '');
 
   let righe = _pubData.slice();
   if (fs === 'scadenza') righe = righe.filter(a => pubInScadenza(a, 7));
+  else if (fs === 'annullato') righe = righe.filter(a => pubStatoReale(a) === 'lasciato');
   else if (fs) righe = righe.filter(a => pubStatoReale(a) === fs);
   if (fd) righe = righe.filter(a => String(pubMesi(a)) === fd);
   if (q) righe = righe.filter(a => {
@@ -1908,7 +1935,11 @@ function renderPubblicitaClienti() {
         ? '<span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">✅ Pagato</span>'
       : stato === 'scaduto'
         ? '<span style="background:#f1f1f1;color:#777;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">⌛ Scaduto</span>'
-        : '<span style="background:#fff4e5;color:#b26a00;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">⏳ Non pagato</span>';
+      : stato === 'lasciato'
+        ? '<span style="background:#fdecec;color:#c92a2a;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">🛒 Lasciato a metà</span>'
+      : stato === 'rimborsato'
+        ? '<span style="background:#f3e8fb;color:#7b1fa2;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">🔁 Rimborsato</span>'
+        : '<span style="background:#fff4e5;color:#b26a00;padding:3px 9px;border-radius:20px;font-size:14.5px;font-weight:700">⏳ Sta pagando ora</span>';
     const periodo = pubDataIt(a.data_inizio) + ' → ' + pubDataIt(a.data_fine);
 
     const mesi = pubMesi(a);
