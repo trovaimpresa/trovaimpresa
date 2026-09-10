@@ -1008,6 +1008,9 @@ nav img{height:36px}
       <div id="vetrina-prodotti-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
     </div>
 
+    <!-- FORNITORI DI ZONA (js/convenzioni.js) -->
+    <div id="convenzioni-zona" data-max="1" data-titolo="Fornitori di zona"></div>
+
   </div>
 
   <!-- SIDEBAR -->
@@ -1584,6 +1587,8 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
     // La pubblicita' e' venduta per citta': qui non c'e' ?citta= nell'URL,
     // quindi passiamo agli spazi laterali la citta' dell'impresa mostrata.
     if(d.citta){ window.TI_CITTA = d.citta; }
+    // Le convenzioni di zona (js/convenzioni.js): stessa citta' dell'impresa mostrata.
+    window.convenzioniDati = { citta: d.citta || '', mestiere: d.mestiere || '' };
     // ===== VISTA INFORMAZIONI UNIFICATA (solo campi compilati) =====
     let _infoHasContent=false;
     // Chi siamo
@@ -2612,5 +2617,6 @@ document.addEventListener('DOMContentLoaded',function(){
   <a class="cbm-prev" id="cta-bar-prev" onclick="apriRichiesta()">📋 Preventivo gratuito</a>
   <a class="cbm-call" id="cta-bar-tel" href="#">📞 Chiama</a>
 </div>
+<script src="/js/convenzioni.js"></script>
 </body>
 </html>
