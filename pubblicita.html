@@ -191,7 +191,7 @@
 <section class="hero">
   <div class="hero-badge">📢 Spazi pubblicitari disponibili</div>
   <h1>Fai conoscere la tua azienda<br>nella <span>tua città</span></h1>
-  <p>Scegli lo spazio, la città e il periodo. Banner live entro 24 ore dal pagamento.</p>
+  <p>Scegli lo spazio e la città. Il tuo banner resta online e si rinnova da solo: disdici quando vuoi.</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
     <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Posizioni per città</div></div>
@@ -265,19 +265,23 @@
     </div>
     <div>
       <div class="periodo-box">
-        <div class="periodo-label">Durata abbonamento</div>
+        <div class="periodo-label">Ogni quanto paghi</div>
         <div class="toggle-col">
-          <div class="tog-opt active" id="tog-1"><span>1 mese</span><span class="tog-prezzo" id="pz-1">—</span></div>
-          <div class="tog-opt" id="tog-3"><span>3 mesi <span class="risparmio-badge">-10%</span></span><span class="tog-prezzo" id="pz-3">—</span></div>
-          <div class="tog-opt" id="tog-6"><span>6 mesi <span class="risparmio-badge">-13%</span></span><span class="tog-prezzo" id="pz-6">—</span></div>
-          <div class="tog-opt" id="tog-12"><span>1 anno <span class="risparmio-badge">-15%</span></span><span class="tog-prezzo" id="pz-12">—</span></div>
+          <div class="tog-opt active" id="tog-1"><span>Ogni mese</span><span class="tog-prezzo" id="pz-1">—</span></div>
+          <div class="tog-opt" id="tog-3"><span>Ogni 3 mesi <span class="risparmio-badge">-10%</span></span><span class="tog-prezzo" id="pz-3">—</span></div>
+          <div class="tog-opt" id="tog-6"><span>Ogni 6 mesi <span class="risparmio-badge">-13%</span></span><span class="tog-prezzo" id="pz-6">—</span></div>
+          <div class="tog-opt" id="tog-12"><span>Ogni anno <span class="risparmio-badge">-15%</span></span><span class="tog-prezzo" id="pz-12">—</span></div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;line-height:1.5;color:var(--mid)">
+          Il tuo spazio resta tuo e si rinnova da solo. Disdici quando vuoi da
+          <a href="le-mie-inserzioni.html" style="color:var(--verde);font-weight:600">Le mie inserzioni</a>.
         </div>
       </div>
       <div class="riepilogo-box">
         <div class="riepilogo-title">📋 Riepilogo</div>
         <div class="ric-row"><span>Posizione</span><span id="r-formato">—</span></div>
         <div class="ric-row"><span>Città</span><span id="r-citta">—</span></div>
-        <div class="ric-row"><span>Periodo</span><span id="r-periodo">1 mese</span></div>
+        <div class="ric-row"><span>Rinnovo</span><span id="r-periodo">ogni mese</span></div>
         <div class="ric-row"><span>Totale</span><span class="ric-total" id="r-totale">€0</span></div>
       </div>
       <button class="btn-avanti" id="btn2" disabled style="margin-top:14px">Continua → Dati e pagamento</button>
@@ -397,11 +401,13 @@ const MISURE_FASCIA = (function () {
   SPAZI_TI.SPAZI.forEach(function (s) { o[s.id] = SPAZI_TI.misuraDi(s.id); });
   return o;
 })();
+// 10 set 2026 — la pubblicita' e' diventata un abbonamento: la durata non e'
+// piu' "quanto tempo compro" ma "ogni quanto pago". Le etichette lo dicono.
 const PERIODI = {
-  '1':  { mesi: 1,  sconto: 0,    label: '1 mese' },
-  '3':  { mesi: 3,  sconto: 0.10, label: '3 mesi' },
-  '6':  { mesi: 6,  sconto: 0.13, label: '6 mesi' },
-  '12': { mesi: 12, sconto: 0.15, label: '1 anno' }
+  '1':  { mesi: 1,  sconto: 0,    label: 'ogni mese' },
+  '3':  { mesi: 3,  sconto: 0.10, label: 'ogni 3 mesi' },
+  '6':  { mesi: 6,  sconto: 0.13, label: 'ogni 6 mesi' },
+  '12': { mesi: 12, sconto: 0.15, label: 'ogni anno' }
 };
 // 9 set 2026 — PREZZO BLOCCATO.
 // Chi aveva comprato col listino vecchio tiene il suo prezzo anche al rinnovo,
@@ -645,7 +651,7 @@ function aggiornaOrdine() {
   rows += '<div class="ord-row"><span>Posizione</span><span>' + (spazioSel ? latoLabel(spazioSel) : '—') + '</span></div>';
   rows += '<div class="ord-row"><span>Sezione</span><span>' + (spazioSel ? fasciaDiSpazio(spazioSel) : '—') + '</span></div>';
   rows += '<div class="ord-row"><span>Città</span><span>' + (cittaSel || '—') + '</span></div>';
-  rows += '<div class="ord-row"><span>Periodo</span><span>' + PERIODI[periodoSel].label + '</span></div>';
+  rows += '<div class="ord-row"><span>Rinnovo</span><span>' + PERIODI[periodoSel].label + '</span></div>';
   document.getElementById('ord-rows').innerHTML = rows;
 }
 

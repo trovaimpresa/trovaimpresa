@@ -70,30 +70,64 @@ exports.handler = async (event) => {
 
     const periodoLabel = mesi === 12 ? '1 anno' : (mesi + (mesi === 1 ? ' mese' : ' mesi'));
 
-    // Email impresa (opzionale, per pre-compilare il checkout)
-    let email;
+    // 10 set 2026 — OGNI QUANTO SI RIPETE L'ADDEBITO.
+    // I mesi comprati diventano il giro dell'abbonamento: 1 mese = ogni mese,
+    // 12 mesi = ogni anno. L'importo e' quello del giro intero, sconto compreso.
+    const RICORRENZA = {
+      1:  { interval: 'month', interval_count: 1  },
+      3:  { interval: 'month', interval_count: 3  },
+      6:  { interval: 'month', interval_count: 6  },
+      12: { interval: 'year',  interval_count: 1  }
+    };
+    const ricorrenza = RICORRENZA[mesi];
+    if (!ricorrenza) return { statusCode: 400, body: JSON.stringify({ error: 'Durata non valida' }) };
+
+    // Il prodotto su Stripe e' UNO SOLO per tutta la pubblicita' (variabile
+    // Netlify STRIPE_PRODOTTO_PUBBLICITA). Senza, Stripe se ne creerebbe uno
+    // nuovo a ogni vendita e il catalogo si riempirebbe di doppioni.
+    const prodottoFisso = process.env.STRIPE_PRODOTTO_PUBBLICITA || null;
+    const descrizione = ann.spazio_id + ' - ' + ann.citta + ' - ogni ' + periodoLabel.replace('1 ', '');
+
+    // Email impresa (per pre-compilare il checkout) e, se ce l'ha gia', il
+    // suo cliente su Stripe.
+    //
+    // 10 set 2026 — PERCHE' SERVE IL CLIENTE E NON SOLO L'EMAIL.
+    // Con l'abbonamento il cliente deve poter disdire da solo dal portale
+    // Stripe. Il portale si apre per UN cliente: se la pubblicita' nascesse
+    // sotto un cliente nuovo, un'impresa che ha anche il Premium si
+    // ritroverebbe due clienti con la stessa email e il portale non saprebbe
+    // quale aprire. Quindi si riusa sempre quello che ha gia'.
+    let email, clienteStripe = null;
     if (ann.impresa_id) {
       const { data: imp } = await supabase
-        .from('imprese').select('email').eq('id', ann.impresa_id).single();
+        .from('imprese').select('email, stripe_customer_id').eq('id', ann.impresa_id).single();
       if (imp && imp.email) email = imp.email;
+      if (imp && imp.stripe_customer_id) clienteStripe = imp.stripe_customer_id;
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
+      mode: 'subscription',
       payment_method_types: ['card'],
-      customer_email: email || undefined,
+      ...(clienteStripe ? { customer: clienteStripe } : { customer_email: email || undefined }),
       line_items: [{
         price_data: {
           currency: 'eur',
-          product_data: {
-            name: 'Pubblicita TrovaImpresa',
-            description: ann.spazio_id + ' - ' + ann.citta + ' - ' + periodoLabel,
-          },
+          recurring: ricorrenza,
+          ...(prodottoFisso
+              ? { product: prodottoFisso }
+              : { product_data: { name: 'Spazio pubblicitario', description: descrizione } }),
           unit_amount: Math.round(prezzo * 100),
         },
         quantity: 1,
       }],
       metadata: { annuncio_id: String(ann.id) },
+      // Alla disdetta e ai rinnovi Stripe manda SOLO l'abbonamento, non la
+      // sessione: senza questa seconda copia il campanello non saprebbe di
+      // quale annuncio si parla. Stesso motivo per cui esiste in abbonamenti.
+      subscription_data: {
+        description: descrizione,
+        metadata: { annuncio_id: String(ann.id), spazio_id: ann.spazio_id, citta: ann.citta }
+      },
       success_url: 'https://trovaimpresa.com/pubblicita?pagamento=ok',
       cancel_url: 'https://trovaimpresa.com/pubblicita?pagamento=annullato',
     });

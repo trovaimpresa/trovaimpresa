@@ -153,6 +153,7 @@ document.addEventListener('click', function (e) {
   e.preventDefault();
   if (b.dataset.azione === 'salva') salva(id, b);
   else if (b.dataset.azione === 'elimina') elimina(id, b);
+  else if (b.dataset.azione === 'disdici') disdici(id, b);
 });
 
 sb.auth.onAuthStateChange(async function(event, session){
@@ -198,7 +199,7 @@ function statoDi(a){
 async function carica(){
   const box = document.getElementById('contenuto');
   const res = await sb.from('annunci_pubblicitari')
-    .select('id,spazio_id,citta,logo_url,link_url,data_inizio,data_fine,stato,prezzo')
+    .select('id,spazio_id,citta,logo_url,link_url,data_inizio,data_fine,stato,prezzo,rinnovo_auto,disdetto_il')
     .eq('impresa_id', currentImpresa.id)
     .order('data_fine', { ascending: false });
 
@@ -250,15 +251,27 @@ function intestazione(a){
   const st = statoDi(a);
   const gg = giorniResidui(a);
   let badge;
-  if (st === 'attivo')  badge = (gg !== null && gg <= 14)
+  // 10 set 2026: con l'abbonamento non c'e' piu' niente che "scade fra N
+  // giorni". Dire al cliente che sta per scadere quando invece si rinnova da
+  // solo lo farebbe ripagare per niente.
+  if (st === 'attivo' && a.rinnovo_auto)
+    badge = '<span class="stato st-attivo">si rinnova il '+dataIt(a.data_fine)+'</span>';
+  else if (st === 'attivo')  badge = (gg !== null && gg <= 14)
       ? '<span class="stato st-scad">scade fra '+gg+' giorn'+(gg===1?'o':'i')+'</span>'
       : '<span class="stato st-attivo">attiva</span>';
   else if (st === 'scaduto') badge = '<span class="stato st-scaduto">scaduta</span>';
   else badge = '<span class="stato st-attesa">pagamento non completato</span>';
 
+  let quando;
+  if (st === 'attivo' && a.rinnovo_auto)
+    quando = ' · attiva dal '+dataIt(a.data_inizio)+', prossimo rinnovo il '+dataIt(a.data_fine);
+  else if (st === 'attivo' && a.disdetto_il)
+    quando = ' · disdetta: resta online fino al '+dataIt(a.data_fine);
+  else
+    quando = ' · dal '+dataIt(a.data_inizio)+' al '+dataIt(a.data_fine);
+
   return '<div class="ins-nome">'+fasciaDiSpazio(a.spazio_id)+' · '+latoLabel(a.spazio_id)+badge+'</div>'
-       + '<div class="ins-meta">📍 '+(a.citta||'—')
-       + ' · dal '+dataIt(a.data_inizio)+' al '+dataIt(a.data_fine)+'</div>';
+       + '<div class="ins-meta">📍 '+(a.citta||'—')+quando+'</div>';
 }
 
 // Anteprima della locandina. Se non c'e' l'immagine, o se il file non si
@@ -309,10 +322,47 @@ function cardAttiva(a){
       + '<input type="url" id="link-'+a.id+'" value="'+(a.link_url||'')+'" placeholder="https://iltuosito.it">'
       + '<div class="riga-azioni">'
         + '<button class="btn" id="btn-'+a.id+'" data-azione="salva" data-id="'+a.id+'">Salva modifiche</button>'
+        + (a.rinnovo_auto
+            ? '<button class="btn btn-out" id="disd-'+a.id+'" data-azione="disdici" data-id="'+a.id+'">Disdici</button>'
+            : '')
         + '<span class="msg" id="msg-'+a.id+'"></span>'
       + '</div>'
     + '</div>'
   + '</div>';
+}
+
+// ---------------------------------------------------------------------------
+// DISDETTA — 10 settembre 2026
+//
+// La disdetta non si scrive nel database di qui: si manda il cliente sul
+// portale di Stripe, che e' l'unico posto dove l'addebito si ferma davvero.
+// Se la fermassimo solo da questa parte, Stripe continuerebbe a prendere i
+// soldi ogni mese. Quando lui disdice li', Stripe suona il campanello e il
+// nostro sito si segna la disdetta da solo.
+//
+// L'annuncio NON si spegne subito: resta fino alla fine del periodo gia'
+// pagato. Chi ha pagato deve apparire.
+// ---------------------------------------------------------------------------
+async function disdici(id, bottone){
+  if (!confirm('Vuoi disdire questo spazio?\n\nNon ti verra\' addebitato piu\' niente. '
+             + 'L\'annuncio resta online fino alla fine del periodo che hai gia\' pagato.')) return;
+  if (bottone) { bottone.disabled = true; bottone.textContent = 'Apro…'; }
+  try {
+    const { data: ses } = await sb.auth.getSession();
+    const token = ses && ses.session && ses.session.access_token;
+    if (!token) { alert('La sessione e\' scaduta. Rientra e riprova.'); return; }
+    const res = await fetch('/.netlify/functions/portale-clienti', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ returnUrl: window.location.href })
+    });
+    const dati = await res.json();
+    if (dati && dati.url) { window.location.href = dati.url; return; }
+    alert((dati && dati.messaggio) || 'Non riesco ad aprire la gestione dell\'abbonamento. Riprova piu\' tardi.');
+  } catch (e) {
+    alert('Errore: ' + e.message);
+  }
+  if (bottone) { bottone.disabled = false; bottone.textContent = 'Disdici'; }
 }
 
 // Scaduta o non pagata: sola lettura, con la via per riattivarla

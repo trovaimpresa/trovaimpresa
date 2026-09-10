@@ -51,6 +51,49 @@ async function inviaEmail(to, subject, html) {
   return res.ok;
 }
 
+// 10 SETTEMBRE 2026 — LA MAIL DI CHI HA L'ABBONAMENTO.
+// Non e' un avviso di scadenza, e' un avviso di addebito. Dire "stai per
+// scadere, rinnova" a chi si rinnova da solo lo farebbe pagare due volte.
+// Il tasto qui non e' "Rinnova": e' "Disdici", nel caso non gli serva piu'.
+function emailRinnovoAutomatico(nome, spazio, citta, quando, importo) {
+  return `
+  <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="text-align:center;padding:16px 0 20px">
+          <a href="https://trovaimpresa.com" style="text-decoration:none">
+            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+          </a>
+        </div>
+    <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+      <h1 style="color:white;margin:0;font-size:22px">Il tuo spazio si rinnova fra una settimana</h1>
+    </div>
+    <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
+      <p style="font-size:15px;margin:0 0 18px">Ciao <strong>${esc(nome)}</strong>,</p>
+      <p style="font-size:14px;line-height:1.6;margin:0 0 20px">
+        il tuo spazio pubblicitario <strong>${esc(spazio)}</strong> a <strong>${esc(citta)}</strong>
+        si rinnova il <strong>${esc(quando)}</strong>${importo ? ' e ti addebiteremo <strong>' + esc(importo) + '</strong>' : ''}.
+        <strong>Non devi fare niente:</strong> il tuo annuncio resta online.
+      </p>
+      <p style="font-size:14px;line-height:1.6;margin:0 0 20px">
+        Se non ti serve piu', puoi disdire in qualsiasi momento. Anche dopo la disdetta
+        l'annuncio resta online fino alla fine del periodo che hai gia' pagato.
+      </p>
+      <div style="text-align:center;margin:0 0 24px">
+        <a href="https://trovaimpresa.com/le-mie-inserzioni.html"
+           style="display:inline-block;background:#fff;color:#666;border:1px solid #ddd;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
+          Gestisci o disdici &rarr;
+        </a>
+      </div>
+      <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+        Ricevi questa email perche' hai uno spazio pubblicitario attivo su TrovaImpresa.
+      </p>
+    </div>
+    <p style="text-align:center;font-size:13px;color:#bbb;margin-top:12px">
+      TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
+    </p>
+  </div>`;
+}
+
 function emailRinnovo(nome, spazio, citta, scadenza) {
   return `
   <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
@@ -154,7 +197,7 @@ const handler = async function () {
     // ---------- 1. RINNOVI: annunci in scadenza fra 7 giorni ----------
     const { data: inScadenza, error: e1 } = await sb
       .from('annunci_pubblicitari')
-      .select('id, spazio_id, citta, impresa_id, data_inizio, data_fine, mesi')
+      .select('id, spazio_id, citta, impresa_id, data_inizio, data_fine, mesi, prezzo, rinnovo_auto')
       .eq('stato', 'pagato')
       .eq('data_fine', giorno(7));
     if (e1) throw e1;
@@ -177,17 +220,28 @@ const handler = async function () {
         spazio: ann.spazio_id,
         citta: ann.citta,
         durata: durataLabel(ann.data_inizio, ann.data_fine, ann.mesi),
-        scadenza: dataItaliana(ann.data_fine)
+        scadenza: dataItaliana(ann.data_fine) + (ann.rinnovo_auto ? ' (si rinnova)' : ' (scade)')
       });
 
       const email = imp && imp.email;
       if (!email) { risultato.errori.push('email mancante per annuncio ' + ann.id); continue; }
 
-      const ok = await inviaEmail(
-        email,
-        'Il tuo spazio pubblicitario scade fra una settimana',
-        emailRinnovo(nomeCliente, ann.spazio_id, ann.citta, dataItaliana(ann.data_fine))
-      );
+      // 10 set 2026: due mail diverse. Chi ha l'abbonamento non deve
+      // rinnovare niente: va solo avvisato dell'addebito in arrivo.
+      const importo = ann.prezzo != null
+        ? Number(ann.prezzo).toFixed(2).replace('.', ',') + ' \u20ac'
+        : '';
+      const ok = ann.rinnovo_auto
+        ? await inviaEmail(
+            email,
+            'Il tuo spazio pubblicitario si rinnova fra una settimana',
+            emailRinnovoAutomatico(nomeCliente, ann.spazio_id, ann.citta, dataItaliana(ann.data_fine), importo)
+          )
+        : await inviaEmail(
+            email,
+            'Il tuo spazio pubblicitario scade fra una settimana',
+            emailRinnovo(nomeCliente, ann.spazio_id, ann.citta, dataItaliana(ann.data_fine))
+          );
       if (ok) risultato.promemoria++;
     }
 
@@ -202,10 +256,14 @@ const handler = async function () {
     }
 
     // ---------- 2. LISTA D'ATTESA: spazi liberati ieri ----------
+    // 10 set 2026: chi ha l'abbonamento NON libera niente. La sua data di
+    // fine si sposta avanti a ogni rinnovo: offrire il suo spazio alla lista
+    // d'attesa vorrebbe dire venderlo due volte.
     const { data: scaduti, error: e2 } = await sb
       .from('annunci_pubblicitari')
       .select('spazio_id, citta')
       .eq('stato', 'pagato')
+      .eq('rinnovo_auto', false)
       .eq('data_fine', giorno(-1));
     if (e2) throw e2;
 

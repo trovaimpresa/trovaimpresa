@@ -46,6 +46,57 @@ function euro(cent) {
   return ((cent || 0) / 100).toFixed(2).replace('.', ',') + ' €';
 }
 
+// ===========================================================================
+// 10 SETTEMBRE 2026 — LA PUBBLICITA' E' DIVENTATA UN ABBONAMENTO
+//
+// Prima il cliente comprava un pezzo di tempo e alla scadenza si spegneva:
+// se si dimenticava di rinnovare, spariva (e' successo davvero, con
+// l'annuncio di Roma scaduto il 23 agosto). Adesso Stripe riaddebita da
+// solo finche' il cliente non disdice, e questo campanello deve saper
+// ascoltare tre cose in piu': il rinnovo pagato, il rinnovo fallito e la
+// disdetta.
+// ===========================================================================
+
+// La data fino a cui il cliente ha pagato, in formato aaaa-mm-gg.
+function fineDelPeriodo(sub) {
+  if (!sub || !sub.current_period_end) return null;
+  return new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
+}
+
+// L'id dell'annuncio viaggia in due posti: sulla sessione e sull'abbonamento.
+// Ai rinnovi e alla disdetta Stripe manda solo l'abbonamento.
+function annuncioDa(oggetto) {
+  return (oggetto && oggetto.metadata && oggetto.metadata.annuncio_id) || null;
+}
+
+// Chiude l'abbonamento senza far saltare tutto se Stripe risponde male.
+async function chiudiAbbonamento(subId) {
+  if (!subId) return 'nessun abbonamento';
+  try {
+    if (typeof stripe.subscriptions.cancel === 'function') await stripe.subscriptions.cancel(subId);
+    else await stripe.subscriptions.del(subId);
+    return 'chiuso';
+  } catch (e) {
+    return 'NON chiuso: ' + e.message;
+  }
+}
+
+// L'email dell'impresa a cui appartiene l'annuncio.
+async function emailDellAnnuncio(annuncioId) {
+  try {
+    const { data: a } = await supabase
+      .from('annunci_pubblicitari')
+      .select('impresa_id, spazio_id, citta')
+      .eq('id', annuncioId).single();
+    if (!a || !a.impresa_id) return { email: null, ann: a || null };
+    const { data: i } = await supabase
+      .from('imprese').select('email').eq('id', a.impresa_id).single();
+    return { email: (i && i.email) || null, ann: a };
+  } catch (e) {
+    return { email: null, ann: null };
+  }
+}
+
 exports.handler = async (event) => {
   const sig = event.headers['stripe-signature'];
   const rawBody = event.isBase64Encoded
@@ -104,6 +155,20 @@ exports.handler = async (event) => {
 
         // 1) I SOLDI TORNANO INDIETRO SUBITO
         let rimborso = 'non riuscito';
+        // 10 set 2026: in abbonamento la sessione non porta piu' il pagamento
+        // in chiaro, sta dentro la prima fattura. E soprattutto va CHIUSO
+        // l'abbonamento: se no il cliente continuerebbe a pagare ogni mese
+        // per uno spazio che non e' suo.
+        if (!session.payment_intent && session.invoice) {
+          try {
+            const inv = await stripe.invoices.retrieve(session.invoice);
+            if (inv && inv.payment_intent) session.payment_intent = inv.payment_intent;
+          } catch (e) {
+            console.error('[pubblicita] fattura non letta:', e.message);
+          }
+        }
+        const esitoChiusura = await chiudiAbbonamento(session.subscription);
+        console.log('[pubblicita] abbonamento del perdente:', esitoChiusura);
         try {
           if (session.payment_intent) {
             const r = await stripe.refunds.create({
@@ -198,6 +263,42 @@ exports.handler = async (event) => {
         return { statusCode: 200, body: JSON.stringify({ received: true, stato: stato }) };
       }
 
+      // ---- 10 set 2026: da qui in poi lo spazio e' suo E si rinnova ----
+
+      // Il cliente Stripe si scrive sul profilo dell'impresa, se non c'e'
+      // gia': e' quello che permette al portale (dove si disdice e si cambia
+      // la carta) di aprirsi sulla persona giusta.
+      if (session.customer) {
+        try {
+          const { data: a } = await supabase
+            .from('annunci_pubblicitari').select('impresa_id').eq('id', annuncioId).single();
+          if (a && a.impresa_id) {
+            const { data: i } = await supabase
+              .from('imprese').select('stripe_customer_id').eq('id', a.impresa_id).single();
+            if (i && !i.stripe_customer_id) {
+              await supabase.from('imprese')
+                .update({ stripe_customer_id: session.customer }).eq('id', a.impresa_id);
+            }
+          }
+        } catch (e) {
+          console.error('[pubblicita] cliente Stripe non scritto:', e.message);
+        }
+      }
+      if (session.subscription) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(session.subscription);
+          const { data: att, error: eAtt } = await supabase.rpc('attiva_abbonamento_annuncio', {
+            p_annuncio: annuncioId,
+            p_subscription: session.subscription,
+            p_fine_periodo: fineDelPeriodo(sub)
+          });
+          if (eAtt) console.error('[pubblicita] abbonamento non segnato:', eAtt.message);
+          else console.log('[pubblicita] abbonamento acceso:', session.subscription, att && att.ok);
+        } catch (e) {
+          console.error('[pubblicita] abbonamento non letto:', e.message);
+        }
+      }
+
       // -------------------------------------------------------------
       // LA RIGA DELL'INCASSO — 14 agosto 2026
       //
@@ -231,6 +332,171 @@ exports.handler = async (event) => {
         console.error('[pagamenti] eccezione:', e.message);
       }
     }
+  }
+
+  // =========================================================================
+  // IL RINNOVO E' STATO PAGATO
+  // Stripe dice fin quando ha incassato: quella data la scriviamo sull'annuncio,
+  // cosi' il cartello resta acceso senza che nessuno faccia niente.
+  // =========================================================================
+  if (stripeEvent.type === 'invoice.paid') {
+    const inv = stripeEvent.data.object;
+
+    // Il primo pagamento e' gia' gestito dalla sessione qui sopra: qui
+    // interessano solo i giri successivi.
+    if (inv.billing_reason !== 'subscription_cycle' || !inv.subscription) {
+      return { statusCode: 200, body: JSON.stringify({ received: true, saltato: inv.billing_reason }) };
+    }
+
+    let fine = null, annuncioId = null;
+    try {
+      const sub = await stripe.subscriptions.retrieve(inv.subscription);
+      fine = fineDelPeriodo(sub);
+      annuncioId = annuncioDa(sub);
+    } catch (e) {
+      console.error('[pubblicita] rinnovo, abbonamento non letto:', e.message);
+    }
+
+    const { data: esito, error: eRin } = await supabase.rpc('rinnova_annuncio_abbonamento', {
+      p_subscription: inv.subscription,
+      p_fine_periodo: fine
+    });
+    if (eRin) {
+      console.error('[pubblicita] rinnovo non scritto:', eRin.message);
+      return { statusCode: 500, body: 'Supabase Error: ' + eRin.message };
+    }
+    console.log('[pubblicita] rinnovo', inv.subscription, '->', esito && esito.motivo ? esito.motivo : 'ok', fine);
+
+    // Caso raro ma possibile: lo spazio si sovrappone a un altro annuncio
+    // gia' venduto per quel periodo. Non si tiene il posto a due persone:
+    // si chiude l'abbonamento, si restituiscono i soldi e si avvisa Alex.
+    if (esito && esito.ok === false) {
+      const chiuso = await chiudiAbbonamento(inv.subscription);
+      let reso = 'non riuscito';
+      try {
+        if (inv.payment_intent) {
+          const r = await stripe.refunds.create({ payment_intent: inv.payment_intent, reason: 'requested_by_customer' });
+          reso = 'fatto (' + r.id + ')';
+        }
+      } catch (e) { reso = 'NON RIUSCITO: ' + e.message; }
+      await mandaEmail('info@trovaimpresa.com',
+        'Rinnovo pubblicita bloccato: ' + (esito.motivo || 'errore'),
+        LOGO + '<p>Un rinnovo non e\' andato a buon fine.</p>'
+        + '<p>Abbonamento: <strong>' + inv.subscription + '</strong><br>'
+        + 'Motivo: <strong>' + (esito.motivo || '-') + '</strong><br>'
+        + 'Abbonamento chiuso: <strong>' + chiuso + '</strong><br>'
+        + 'Rimborso: <strong>' + reso + '</strong></p>');
+      return { statusCode: 200, body: JSON.stringify({ received: true, rinnovo: 'bloccato' }) };
+    }
+
+    // L'incasso del rinnovo entra nei conti come quello del primo mese.
+    try {
+      await supabase.rpc('registra_pagamento', {
+        p_prodotto:    'pubblicita',
+        p_centesimi:   inv.amount_paid,
+        p_riferimento: inv.id,
+        p_email:       inv.customer_email || null,
+        p_impresa_id:  null,
+        p_valuta:      inv.currency || 'eur',
+        p_tipo_evento: stripeEvent.type,
+        p_quando:      stripeEvent.created ? new Date(stripeEvent.created * 1000).toISOString() : null
+      });
+    } catch (e) {
+      console.error('[pagamenti] rinnovo non segnato:', e.message);
+    }
+
+    // Una riga al cliente, cosi' sa che e' tutto a posto e non si spaventa
+    // vedendo l'addebito sull'estratto conto.
+    if (annuncioId) {
+      const { email, ann } = await emailDellAnnuncio(annuncioId);
+      if (email) {
+        await mandaEmail(email, 'Il tuo spazio pubblicitario e\' stato rinnovato',
+          LOGO + '<p>Ciao,</p><p>il tuo spazio pubblicitario'
+          + (ann ? ' <strong>' + (NOMI_SPAZIO[ann.spazio_id] || ann.spazio_id) + '</strong> a <strong>' + ann.citta + '</strong>' : '')
+          + ' e\' stato rinnovato: resta online senza che tu debba fare niente.</p>'
+          + '<p>Importo: <strong>' + euro(inv.amount_paid) + '</strong><br>'
+          + 'Prossimo rinnovo: <strong>' + (fine || '-') + '</strong></p>'
+          + '<p>Se un giorno non ti servisse piu\', puoi disdire quando vuoi dalla tua area'
+          + ' <a href="https://trovaimpresa.com/le-mie-inserzioni.html">Le mie inserzioni</a>.</p>');
+      }
+    }
+
+    return { statusCode: 200, body: JSON.stringify({ received: true, rinnovato: true }) };
+  }
+
+  // =========================================================================
+  // IL RINNOVO NON E' RIUSCITO (carta scaduta, fondi, banca)
+  // Non si spegne niente: Stripe riprova da solo per giorni. Qui si avvisa
+  // e basta, cosi' nessuno lo scopre a cartello gia' spento.
+  // =========================================================================
+  if (stripeEvent.type === 'invoice.payment_failed') {
+    const inv = stripeEvent.data.object;
+    let annuncioId = null;
+    try {
+      if (inv.subscription) {
+        const sub = await stripe.subscriptions.retrieve(inv.subscription);
+        annuncioId = annuncioDa(sub);
+      }
+    } catch (e) { console.error('[pubblicita] fallito, abbonamento non letto:', e.message); }
+
+    console.log('[pubblicita] rinnovo NON pagato:', inv.subscription, inv.id);
+
+    await mandaEmail('info@trovaimpresa.com', 'Rinnovo pubblicita non pagato',
+      LOGO + '<p>Un rinnovo non e\' stato pagato. Stripe riprovera\' da solo nei prossimi giorni.</p>'
+      + '<p>Abbonamento: <strong>' + (inv.subscription || '-') + '</strong><br>'
+      + 'Importo: <strong>' + euro(inv.amount_due) + '</strong><br>'
+      + 'Cliente: <strong>' + (inv.customer_email || '-') + '</strong></p>');
+
+    if (annuncioId) {
+      const { email, ann } = await emailDellAnnuncio(annuncioId);
+      if (email) {
+        await mandaEmail(email, 'Non siamo riusciti a rinnovare il tuo spazio',
+          LOGO + '<p>Ciao,</p><p>il pagamento per rinnovare il tuo spazio'
+          + (ann ? ' a <strong>' + ann.citta + '</strong>' : '') + ' non e\' andato a buon fine.</p>'
+          + '<p>Non devi rifare l\'ordine: ci riproviamo da soli nei prossimi giorni.'
+          + ' Se la carta e\' scaduta o cambiata, puoi aggiornarla dalla tua area'
+          + ' <a href="https://trovaimpresa.com/le-mie-inserzioni.html">Le mie inserzioni</a>.</p>'
+          + '<p>Il tuo annuncio resta online nel frattempo.</p>');
+      }
+    }
+
+    return { statusCode: 200, body: JSON.stringify({ received: true, fallito: true }) };
+  }
+
+  // =========================================================================
+  // IL CLIENTE HA DISDETTO
+  // L'annuncio NON si spegne subito: resta fino alla fine del periodo che ha
+  // gia' pagato, poi scade da solo come uno normale. Regola del 7 settembre:
+  // chi ha pagato deve apparire.
+  // =========================================================================
+  if (stripeEvent.type === 'customer.subscription.deleted') {
+    const sub = stripeEvent.data.object;
+    const { data: esito, error: eDis } = await supabase.rpc('disdici_annuncio_abbonamento', {
+      p_subscription: sub.id
+    });
+    if (eDis) {
+      console.error('[pubblicita] disdetta non scritta:', eDis.message);
+      return { statusCode: 500, body: 'Supabase Error: ' + eDis.message };
+    }
+    console.log('[pubblicita] disdetta', sub.id, '->', esito && esito.ok);
+
+    const annuncioId = annuncioDa(sub);
+    const fine = fineDelPeriodo(sub);
+    if (annuncioId) {
+      const { email, ann } = await emailDellAnnuncio(annuncioId);
+      await mandaEmail('info@trovaimpresa.com', 'Disdetta spazio pubblicitario',
+        LOGO + '<p>Un cliente ha disdetto il suo spazio.</p>'
+        + '<p>Spazio: <strong>' + (ann ? (NOMI_SPAZIO[ann.spazio_id] || ann.spazio_id) + ' - ' + ann.citta : '-') + '</strong><br>'
+        + 'Resta online fino al: <strong>' + (fine || '-') + '</strong></p>');
+      if (email) {
+        await mandaEmail(email, 'Disdetta ricevuta',
+          LOGO + '<p>Ciao,</p><p>abbiamo ricevuto la tua disdetta: non ti addebiteremo piu\' niente.</p>'
+          + '<p>Il tuo annuncio resta online fino alla fine del periodo che hai gia\' pagato,'
+          + ' poi si spegne da solo. Se cambi idea puoi ricomprare lo spazio quando vuoi.</p>');
+      }
+    }
+
+    return { statusCode: 200, body: JSON.stringify({ received: true, disdetto: true }) };
   }
 
   return { statusCode: 200, body: JSON.stringify({ received: true }) };
