@@ -885,6 +885,18 @@
   .hcard-grid{ display:grid; gap:12px; }
   .opzioni-chips{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:14px; }
   .hcard-grid.c4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+  /* 10 set 2026 — le griglie della home sono passate da 4 a 3 caselle:
+     il negozio non e' piu' una categoria del sito, e' un inserzionista
+     e ha la sua fascia qui sotto. */
+  .hcard-grid.c3{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .posto-riga{ display:flex; align-items:center; gap:22px; }
+  .posto-icona{ font-size:42px; line-height:1; flex:none; }
+  .posto-testo{ flex:1; min-width:0; }
+  .posto-testo h2{ font-size:21px; line-height:1.35; margin:0 0 5px; color:var(--ti-ink); }
+  .posto-testo p{ margin:0; font-size:15px; color:#41505f; line-height:1.5; }
+  .posto-btn{ background:#e8733a; color:#fff; font-weight:700; font-size:15px;
+    border-radius:9px; padding:13px 22px; text-decoration:none; white-space:nowrap; flex:none; }
+  .posto-btn:hover{ background:#c45e28; }
   .tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 10px; background:linear-gradient(135deg,#ffffff 0%, color-mix(in srgb, var(--tc,var(--ti-blu)) 9%, #ffffff) 100%); border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 22%, #ffffff); border-top:4px solid var(--tc,var(--ti-blu)); border-radius:12px; text-decoration:none; color:var(--ti-ink); font-weight:700; font-size:15px; text-align:center; box-shadow:0 4px 14px rgba(10,42,77,.07); transition:box-shadow .25s cubic-bezier(.34,1.56,.64,1), transform .25s cubic-bezier(.34,1.56,.64,1); }
   .tile:hover{ box-shadow:0 12px 28px rgba(10,42,77,.16); transform:translateY(-5px); }
   .tile-wrap{ display:flex; flex-direction:column; gap:8px; min-width:0; }
@@ -1123,6 +1135,10 @@
     .bi-links a{ padding:11px 14px; font-size:13px; }
     .hcard{ padding:18px 16px 20px; }
     .hcard-grid.c4{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .hcard-grid.c3{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .hcard-grid.c3 .tile-wrap:last-child{ grid-column:1 / -1; }
+    .posto-riga{ flex-direction:column; text-align:center; gap:14px; }
+    .posto-btn{ width:100%; text-align:center; }
     .opzioni-chips{ grid-template-columns:repeat(2,1fr); }
   }
 </style>
@@ -1253,22 +1269,34 @@
       <main class="home-main">
 
         <section class="hcard" id="categorie" style="--hc:#0066ff;--hb:#f0f5ff;">
-          <div class="hcard-h"><div style="text-align:center;margin-bottom:12px;"><span style="display:inline-block;background:#eaf6ee;color:#15803d;font-weight:700;font-size:13px;letter-spacing:.2px;padding:8px 16px;border-radius:999px;">✓ Per i clienti è sempre gratis</span></div><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:10px;"><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Sei un privato?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Devi fare dei lavori?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Vuoi dei preventivi?</span></div><h2>Cerca in base alle tue esigenze</h2><p class="hcard-s">Cerchi un'impresa, un artigiano, un professionista o un negozio e non sai a chi rivolgerti? Scegli qui sotto in base a cosa ti serve.</p></div>
-          <div class="hcard-grid c4">
+          <div class="hcard-h"><div style="text-align:center;margin-bottom:12px;"><span style="display:inline-block;background:#eaf6ee;color:#15803d;font-weight:700;font-size:13px;letter-spacing:.2px;padding:8px 16px;border-radius:999px;">✓ Per i clienti è sempre gratis</span></div><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:10px;"><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Sei un privato?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Devi fare dei lavori?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Vuoi dei preventivi?</span></div><h2>Cerca in base alle tue esigenze</h2><p class="hcard-s">Cerchi un'impresa, un artigiano o un professionista e non sai a chi rivolgerti? Scegli qui sotto in base a cosa ti serve.</p></div>
+          <div class="hcard-grid c3">
             <div class="tile-wrap" style="--tc:#0066ff;"><a href="cerca-artigiani.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="tile-n">Artigiano</span><small class="tile-d">Un lavoro singolo: idraulico, elettricista, imbianchino</small></a><select class="tile-sel" data-cat="artigiano" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#0066ff;"><a href="cerca-imprese.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg><span class="tile-n">Impresa edile</span><small class="tile-d">Cantieri e ristrutturazioni complete</small></a><select class="tile-sel" data-cat="impresa" aria-label="Mestieri di questa categoria"></select></div>
-            <div class="tile-wrap" style="--tc:#0066ff;"><a href="cerca-negozi.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg><span class="tile-n">Negozio edile</span><small class="tile-d">Materiali, ferramenta, showroom e noleggio</small></a><select class="tile-sel" data-cat="negozio" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#0066ff;"><a href="professionisti.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="tile-n">Professionista</span><small class="tile-d">Architetto, geometra, ingegnere, perito</small></a><select class="tile-sel" data-cat="professionista" aria-label="Mestieri di questa categoria"></select></div>
           </div>
         </section>
 
         <section class="hcard" id="registrati" style="--hc:#15803d;--hb:#f2fbf4;">
           <div class="hcard-h"><div style="text-align:center;margin-bottom:12px;"><span style="display:inline-block;background:#eaf6ee;color:#15803d;font-weight:700;font-size:13px;letter-spacing:.2px;padding:8px 16px;border-radius:999px;">✓ Per tutti, sempre gratis</span></div><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:10px;"><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Hai un'attività?</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Una vetrina in più</span><span class="hcard-k" style="font-size:15px;padding:7px 14px;margin:0;">Sempre gratis</span></div><h2>Prendi il tuo spazio: profilo, recensioni e nuovi contatti</h2><p class="hcard-s">Porta online i lavori che hai già fatto e la reputazione che ti sei già costruito. I clienti della tua zona ti trovano qui, le richieste di preventivo ti arrivano dirette e i lavori li segui con gli strumenti dedicati. &Egrave; <b>gratis</b>, senza vincoli e ti cancelli quando vuoi. Scegli il tipo di attivit&agrave;:</p><button type="button" class="hcard-piu" aria-expanded="false" onclick="apriTesto(this)">leggi tutto</button></div>
-          <div class="hcard-grid c4">
+          <div class="hcard-grid c3">
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-artigiano.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="tile-n">Artigiano</span><small class="tile-d">Ricevi richieste dai clienti</small></a><select class="tile-sel" data-cat="artigiano" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-impresa.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg><span class="tile-n">Impresa edile</span><small class="tile-d">Cantieri e lavori completi</small></a><select class="tile-sel" data-cat="impresa" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
-            <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-negozio.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg><span class="tile-n">Negozio edile</span><small class="tile-d">Fatti trovare da chi costruisce</small></a><select class="tile-sel" data-cat="negozio" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-professionista.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="tile-n">Professionista</span><small class="tile-d">Progetti, pratiche e perizie</small></a><select class="tile-sel" data-cat="professionista" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
+          </div>
+        </section>
+
+        <!-- 10 set 2026 — IL POSTO: il negozio non e' una categoria gratis,
+             e' un inserzionista. Fuori dal riquadro verde apposta, perche'
+             quello dice «sempre gratis» e questo si paga. -->
+        <section class="hcard" id="il-posto" style="--hc:#e8733a;--hb:#fffaf3;">
+          <div class="posto-riga">
+            <div class="posto-icona">🏪</div>
+            <div class="posto-testo">
+              <h2>Hai un negozio o un magazzino edile?</h2>
+              <p>Sei l&rsquo;unico della tua merce davanti agli artigiani, alle imprese e ai professionisti della tua zona. <strong>Un posto solo per citt&agrave;.</strong></p>
+            </div>
+            <a class="posto-btn" href="/pubblicita.html">Scopri come funziona</a>
           </div>
         </section>
 
