@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fornitori convenzionati | TrovaImpresa</title>
+<meta name="description" content="I negozi, i magazzini e gli studi convenzionati con chi lavora in edilizia. Un solo fornitore per categoria in ogni citta.">
+<!-- 10 set 2026: finche' i fornitori veri sono pochi la pagina resta fuori da
+     Google. Quando ci sono convenzioni vere in piu' citta' si toglie questa
+     riga e si mette il canonical. -->
+<meta name="robots" content="noindex,follow">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{--verde:#0066ff;--arancio:#e8733a;--dark:#1a1a1a;--light:#5f6b7a;--border:rgba(0,0,0,.09)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;color:var(--dark);background:#fff}
+  .barra{border-bottom:1px solid var(--border);padding:12px 20px}
+  .barra a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;color:var(--dark)}
+  .barra img{height:34px}
+  .page{max-width:980px;margin:0 auto;padding:30px 20px 50px}
+
+  .testata{border-bottom:2px solid var(--border);padding-bottom:22px;margin-bottom:30px}
+  h1{font-family:'Playfair Display',serif;font-size:2.1rem;line-height:1.2;margin-bottom:8px}
+  .occhiello{display:inline-block;background:#fff3ec;color:#b8501c;font-weight:700;font-size:.8rem;
+    letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:12px}
+  .intro{color:var(--light);font-size:1.02rem;max-width:60ch;line-height:1.6}
+
+  .cerca{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .cerca input{flex:1;min-width:200px;padding:12px 14px;border:1.5px solid #d7dee8;border-radius:10px;
+    font-family:inherit;font-size:1rem}
+  .cerca button{background:var(--arancio);color:#fff;font-weight:700;font-size:1rem;border:0;
+    border-radius:10px;padding:12px 24px;cursor:pointer;font-family:inherit}
+
+  .sez{margin-bottom:34px}
+  .sez h2{font-size:1.05rem;font-weight:700;color:var(--verde);padding-bottom:9px;
+    border-bottom:2px solid #e6eef9;margin-bottom:16px}
+  .righe{display:flex;flex-direction:column;gap:12px}
+  .riga{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;background:#fff;text-decoration:none;color:inherit}
+  .logo{width:58px;height:58px;border-radius:12px;background:#f2f5f9;flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:1.6rem}
+  .testo{flex:1;min-width:0}
+  .nome{font-weight:700;font-size:1.05rem;line-height:1.3}
+  .sotto{color:var(--light);font-size:.92rem;margin-top:3px;line-height:1.45}
+  .offerta{display:inline-block;margin-top:7px;background:#fff3ec;color:#b8501c;font-weight:700;
+    font-size:.88rem;padding:5px 11px;border-radius:999px}
+  .btn{background:var(--arancio);color:#fff;font-weight:700;font-size:.95rem;border:0;border-radius:9px;
+    padding:11px 20px;white-space:nowrap;flex:none;text-decoration:none;display:inline-block}
+  .libero{border:2px dashed #d7dee8;border-radius:14px;padding:18px;text-align:center;
+    color:var(--light);font-size:.95rem}
+  .libero b{color:var(--dark)}
+  .libero a{color:var(--verde);font-weight:700;text-decoration:underline;display:block;margin-top:5px}
+  .vuoto{border:2px dashed #d7dee8;border-radius:14px;padding:30px 20px;text-align:center;color:var(--light)}
+  .vuoto b{display:block;color:var(--dark);font-size:1.1rem;margin-bottom:6px}
+  .fondo{margin-top:10px;border-top:2px solid var(--border);padding-top:22px;color:var(--light);font-size:.9rem}
+
+  @media (max-width:640px){
+    h1{font-size:1.6rem}
+    .riga{flex-wrap:wrap;gap:12px;padding:14px}
+    .logo{width:48px;height:48px;font-size:1.4rem}
+    .testo{flex:1 1 100%;order:2}
+    .logo{order:1}
+    .btn{order:3;width:100%;text-align:center}
+    .page{padding:22px 14px 36px}
+  }
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <a href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+<div class="page">
+
+  <div class="testata">
+    <span class="occhiello">Convenzioni</span>
+    <h1 id="titolo">I fornitori convenzionati</h1>
+    <p class="intro" id="intro">Chi lavora in edilizia ha uno sconto in questi negozi e studi. Basta dire che sei iscritto a TrovaImpresa.</p>
+    <form class="cerca" id="modulo-citta">
+      <input type="text" id="casella-citta" placeholder="In che citt&agrave;? Es. Rieti" autocomplete="address-level2">
+      <button type="submit">Cerca</button>
+    </form>
+  </div>
+
+  <div id="elenco"></div>
+
+  <div class="fondo">
+    Questi spazi sono a pagamento. Un solo fornitore per categoria in ogni citt&agrave;.
+  </div>
+
+</div>
+
+<script src="/js/convenzioni.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.Convenzioni;
+  if (!C) return;
+
+  function cittaDaIndirizzo() {
+    var m = /[?&]citta=([^&]*)/.exec(window.location.search);
+    return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')).trim() : '';
+  }
+
+  var citta = cittaDaIndirizzo();
+  var casella = document.getElementById('casella-citta');
+  if (citta) casella.value = citta;
+
+  document.getElementById('modulo-citta').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = casella.value.trim();
+    if (!v) return;
+    window.location.href = '/convenzioni.html?citta=' + encodeURIComponent(v)
+      + (/[?&]convenzioni=prova\b/.test(window.location.search) ? '&convenzioni=prova' : '');
+  });
+
+  var box = document.getElementById('elenco');
+
+  if (!citta) {
+    box.innerHTML = '<div class="vuoto"><b>Scegli la citt&agrave;</b>'
+      + 'Scrivila qui sopra per vedere i fornitori convenzionati della zona.</div>';
+    return;
+  }
+
+  document.getElementById('titolo').textContent = 'I fornitori convenzionati di ' + citta;
+  document.getElementById('intro').textContent =
+    'Chi lavora in edilizia a ' + citta + ' ha uno sconto in questi negozi e studi. '
+    + 'Basta dire che sei iscritto a TrovaImpresa.';
+  document.title = 'Fornitori convenzionati a ' + citta + ' | TrovaImpresa';
+
+  var qui = C.elenco().filter(function (x) { return C.pulita(x.citta) === C.pulita(citta); });
+  var posti = C.posti();
+  var html = '';
+
+  C.famiglie().forEach(function (fam) {
+    var suoi = posti.filter(function (p) { return p.famiglia === fam; });
+    var pezzi = '';
+    suoi.forEach(function (p) {
+      var chi = qui.filter(function (x) { return C.pulita(x.posto) === C.pulita(p.posto); })[0];
+      if (chi) {
+        var sotto = [chi.categoria, chi.indirizzo].filter(Boolean).map(C.scappa).join(' &middot; ');
+        var tag = chi.link ? 'a' : 'div';
+        var attr = chi.link ? ' href="' + C.scappa(chi.link) + '" target="_blank" rel="noopener nofollow sponsored"' : '';
+        pezzi += '<' + tag + ' class="riga"' + attr + '>'
+          + '<div class="logo">' + C.scappa(chi.icona || p.icona) + '</div>'
+          + '<div class="testo"><div class="nome">' + C.scappa(chi.nome) + '</div>'
+          + (sotto ? '<div class="sotto">' + sotto + '</div>' : '')
+          + (chi.offerta ? '<span class="offerta">' + C.scappa(chi.offerta) + '</span>' : '')
+          + '</div>'
+          + (chi.link ? '<span class="btn">Vedi la scheda</span>' : '')
+          + '</' + tag + '>';
+      }
+    });
+    // i posti liberi: uno solo per famiglia, per non riempire la pagina di tratteggi
+    var liberi = suoi.filter(function (p) {
+      return !qui.some(function (x) { return C.pulita(x.posto) === C.pulita(p.posto); });
+    });
+    if (pezzi && liberi.length) {
+      pezzi += '<div class="libero"><b>' + C.scappa(liberi[0].posto)
+        + ' &mdash; posto libero a ' + C.scappa(citta) + '</b>'
+        + '<a href="/pubblicita.html">Prendi il posto della tua citt&agrave; &rarr;</a></div>';
+    }
+    if (pezzi) html += '<div class="sez"><h2>' + C.scappa(fam) + '</h2><div class="righe">' + pezzi + '</div></div>';
+  });
+
+  if (!html) {
+    html = '<div class="vuoto"><b>A ' + C.scappa(citta) + ' non c&rsquo;&egrave; ancora nessun convenzionato</b>'
+      + 'I posti sono tutti liberi: uno per categoria. '
+      + '<a href="/pubblicita.html" style="color:#0066ff;font-weight:700">Prendi il posto della tua citt&agrave; &rarr;</a></div>';
+  }
+  box.innerHTML = html;
+})();
+</script>
+</body>
+</html>

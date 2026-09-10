@@ -25,11 +25,36 @@
 (function () {
   'use strict';
 
+  /* --- I POSTI CHE SI POSSONO COMPRARE, divisi per famiglia ---
+     In ogni citta' ogni posto e' di UNO SOLO. Se in una citta' nessuno lo
+     ha preso, sulla pagina delle convenzioni si vede «posto libero». --- */
+  var POSTI = [
+    { posto:'Ferramenta',              famiglia:'Materiali e ferramenta', icona:'\uD83D\uDD29' },
+    { posto:'Magazzino edile',         famiglia:'Materiali e ferramenta', icona:'\uD83E\uDDF1' },
+    { posto:'Colorificio',             famiglia:'Materiali e ferramenta', icona:'\uD83C\uDFA8' },
+    { posto:'Materiale idraulico',     famiglia:'Materiali e ferramenta', icona:'\uD83D\uDEBF' },
+    { posto:'Materiale elettrico',     famiglia:'Materiali e ferramenta', icona:'\uD83D\uDCA1' },
+    { posto:'Legname',                 famiglia:'Materiali e ferramenta', icona:'\uD83E\uDEB5' },
+    { posto:'Antinfortunistica',       famiglia:'Materiali e ferramenta', icona:'\uD83E\uDDE4' },
+    { posto:'Sicurezza e formazione',  famiglia:'Sicurezza e obblighi',   icona:'\uD83E\uDDBA' },
+    { posto:'Assicurazioni',           famiglia:'Sicurezza e obblighi',   icona:'\uD83D\uDEE1\uFE0F' },
+    { posto:'Commercialista',          famiglia:'Sicurezza e obblighi',   icona:'\uD83D\uDCCA' },
+    { posto:'Noleggio attrezzi',       famiglia:'Noleggio e mezzi',       icona:'\uD83D\uDEA7' },
+    { posto:'Noleggio mezzi',          famiglia:'Noleggio e mezzi',       icona:'\uD83D\uDE9C' },
+    { posto:'Ponteggi',                famiglia:'Noleggio e mezzi',       icona:'\uD83C\uDFD7\uFE0F' },
+    { posto:'Container e smaltimento', famiglia:'Noleggio e mezzi',       icona:'\uD83D\uDDD1\uFE0F' },
+    { posto:'Agenzia immobiliare',     famiglia:'Chi porta lavoro',       icona:'\uD83C\uDFE0' },
+    { posto:'Amministratore di condominio', famiglia:'Chi porta lavoro',  icona:'\uD83C\uDFE2' }
+  ];
+
+  var FAMIGLIE = ['Materiali e ferramenta','Sicurezza e obblighi','Noleggio e mezzi','Chi porta lavoro'];
+
   /* --- I FORNITORI VERI. Aggiungi qui. --- */
   var CONVENZIONI = [
     /* esempio di come si scrive una riga:
     {
       nome:      'Ferramenta Rossi',
+      posto:     'Ferramenta',        // uno dei POSTI qui sotto
       categoria: 'Ferramenta e utensileria',
       citta:     'Rieti',
       indirizzo: 'via Salaria 12',
@@ -43,13 +68,13 @@
 
   /* --- Gli esempi che si vedono solo con ?convenzioni=prova --- */
   var ESEMPI = [
-    { nome:'Ferramenta Rossi', categoria:'Ferramenta e utensileria', citta:'Rieti',
+    { nome:'Ferramenta Rossi', posto:'Ferramenta', categoria:'Ferramenta e utensileria', citta:'Rieti',
       indirizzo:'via Salaria 12', offerta:'-10% su tutta la merce',
       icona:'🔩', link:'', mestieri:[] },
-    { nome:'Sicura Formazione', categoria:'Corsi sicurezza, DVR e POS', citta:'Rieti',
+    { nome:'Sicura Formazione', posto:'Sicurezza e formazione', categoria:'Corsi sicurezza, DVR e POS', citta:'Rieti',
       indirizzo:'via Terminillo 8', offerta:'-15% sui corsi',
       icona:'🦺', link:'', mestieri:[] },
-    { nome:'Noleggio Velino', categoria:'Piattaforme, ponteggi e mezzi', citta:'Rieti',
+    { nome:'Noleggio Velino', posto:'Noleggio attrezzi', categoria:'Piattaforme, ponteggi e mezzi', citta:'Rieti',
       indirizzo:'via Salaria per l\'Aquila', offerta:'Mezza giornata al prezzo di 4 ore',
       icona:'🚜', link:'', mestieri:[] }
   ];
@@ -110,6 +135,9 @@
     + '.cnv-sotto{font-size:15px;color:#5f6b7a;line-height:1.4;margin-top:2px}'
     + '.cnv-chip{background:#fff3ec;color:#b8501c;font-weight:800;font-size:15px;'
     +   'padding:8px 14px;border-radius:999px;white-space:nowrap;flex:none}'
+    + '.cnv-tutte{margin:-8px 0 20px;font-size:15px}'
+    + '.cnv-tutte a{color:#0066ff;font-weight:700;text-decoration:none}'
+    + '.cnv-tutte a:hover{text-decoration:underline}'
     + '@media(max-width:640px){'
     +   '.cnv-riga{gap:12px;padding:14px 15px;flex-wrap:wrap}'
     +   '.cnv-logo{width:44px;height:44px;font-size:22px}'
@@ -149,6 +177,11 @@
         + '</' + tag + '>';
     });
     html += '</div>';
+    if (citta && el.getAttribute('data-tutte') !== 'no') {
+      html += '<div class="cnv-tutte"><a href="/convenzioni.html?citta='
+        + encodeURIComponent(citta) + '">Vedi tutte le convenzioni di '
+        + scappa(citta) + ' &rarr;</a></div>';
+    }
     el.innerHTML = html;
   }
 
@@ -178,6 +211,15 @@
       disegna(el, righe, d.citta, el.getAttribute('data-titolo'));
     }, 250);
   }
+
+  /* Quello che serve alla pagina /convenzioni.html: una sola fonte. */
+  window.Convenzioni = {
+    elenco:   elencoConvenzioni,
+    posti:    function () { return POSTI.slice(); },
+    famiglie: function () { return FAMIGLIE.slice(); },
+    scappa:   scappa,
+    pulita:   pulita
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', avvia);
