@@ -159,7 +159,7 @@
     if (pezzi && liberi.length) {
       pezzi += '<div class="libero"><b>' + C.scappa(liberi[0].posto)
         + ' &mdash; posto libero a ' + C.scappa(citta) + '</b>'
-        + '<a href="/pubblicita.html">Prendi il posto della tua citt&agrave; &rarr;</a></div>';
+        + '<a href="/il-posto.html">Prendi il posto della tua citt&agrave; &rarr;</a></div>';
     }
     if (pezzi) html += '<div class="sez"><h2>' + C.scappa(fam) + '</h2><div class="righe">' + pezzi + '</div></div>';
   });
@@ -167,7 +167,7 @@
   if (!html) {
     html = '<div class="vuoto"><b>A ' + C.scappa(citta) + ' non c&rsquo;&egrave; ancora nessun convenzionato</b>'
       + 'I posti sono tutti liberi: uno per categoria. '
-      + '<a href="/pubblicita.html" style="color:#0066ff;font-weight:700">Prendi il posto della tua citt&agrave; &rarr;</a></div>';
+      + '<a href="/il-posto.html" style="color:#0066ff;font-weight:700">Prendi il posto della tua citt&agrave; &rarr;</a></div>';
   }
   box.innerHTML = html;
 })();

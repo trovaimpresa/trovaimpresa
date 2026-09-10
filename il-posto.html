@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Il Posto — sei l'unico della tua categoria | TrovaImpresa</title>
+<meta name="description" content="Un solo negozio per categoria in ogni citta, davanti agli artigiani, alle imprese e ai professionisti iscritti a TrovaImpresa.">
+<link rel="canonical" href="https://trovaimpresa.com/il-posto.html">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{--verde:#0066ff;--arancio:#e8733a;--dark:#1a1a1a;--light:#5f6b7a;--border:rgba(0,0,0,.09)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;color:var(--dark);background:#fff;line-height:1.6}
+  .barra{border-bottom:1px solid var(--border);padding:12px 20px}
+  .barra img{height:34px;display:block}
+  .page{max-width:820px;margin:0 auto;padding:34px 20px 56px}
+
+  .occhiello{display:inline-block;background:#fff3ec;color:#b8501c;font-weight:700;font-size:.8rem;
+    letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:14px}
+  h1{font-family:'Playfair Display',serif;font-size:2.4rem;line-height:1.18;margin-bottom:12px}
+  .sommario{font-size:1.15rem;color:#41505f;max-width:56ch}
+  .hero{border-bottom:2px solid var(--border);padding-bottom:30px;margin-bottom:34px}
+  .hero .btn{margin-top:20px}
+
+  h2{font-size:1.35rem;margin:0 0 14px;line-height:1.3}
+  .sez{margin-bottom:38px}
+
+  .tre{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .box{border:1px solid var(--border);border-radius:14px;padding:18px;border-top:4px solid var(--verde)}
+  .box:nth-child(2){border-top-color:var(--arancio)}
+  .box:nth-child(3){border-top-color:#0e7a4f}
+  .box .ico{font-size:26px;line-height:1;margin-bottom:8px}
+  .box b{display:block;font-size:1.02rem;margin-bottom:4px}
+  .box span{font-size:.94rem;color:var(--light)}
+
+  .passi{list-style:none;display:flex;flex-direction:column;gap:14px}
+  .passi li{display:flex;gap:14px;align-items:flex-start}
+  .passi .n{background:var(--verde);color:#fff;font-weight:700;width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex:none;font-size:15px}
+  .passi b{display:block}
+  .passi span{color:var(--light);font-size:.96rem}
+
+  .fam{margin-bottom:16px}
+  .fam h3{font-size:1rem;color:var(--verde);margin-bottom:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#f2f5f9;border-radius:999px;padding:6px 13px;font-size:.92rem;color:#41505f}
+
+  .prezzo{background:#fffaf3;border:2px solid var(--arancio);border-radius:14px;padding:20px 22px}
+  .prezzo b{font-size:1.1rem}
+  .prezzo p{color:#41505f;margin-top:6px}
+
+  form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .campo{display:flex;flex-direction:column;gap:6px}
+  .campo.largo{grid-column:1 / -1}
+  label{font-weight:700;font-size:.92rem}
+  input,select,textarea{padding:12px 13px;border:1.5px solid #d7dee8;border-radius:10px;
+    font-family:inherit;font-size:1rem;background:#fff;color:var(--dark)}
+  textarea{min-height:90px;resize:vertical}
+  .btn{background:var(--arancio);color:#fff;font-weight:700;font-size:1.02rem;border:0;border-radius:10px;
+    padding:14px 26px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+  .btn:hover{background:#c45e28}
+  .btn[disabled]{opacity:.6;cursor:default}
+  .esito{grid-column:1 / -1;font-weight:700;padding:12px 14px;border-radius:10px;display:none}
+  .esito.ok{display:block;background:#e3f3eb;color:#0e7a4f}
+  .esito.no{display:block;background:#fff5f5;color:#c0392b}
+
+  .fondo{margin-top:36px;border-top:2px solid var(--border);padding-top:20px;color:var(--light);font-size:.9rem}
+  .fondo a{color:var(--verde)}
+
+  @media (max-width:640px){
+    h1{font-size:1.75rem}
+    .sommario{font-size:1.02rem}
+    .tre{grid-template-columns:1fr}
+    form{grid-template-columns:1fr}
+    .page{padding:24px 14px 40px}
+  }
+</style>
+</head>
+<body>
+
+<div class="barra"><a href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a></div>
+
+<div class="page">
+
+  <div class="hero">
+    <span class="occhiello">Il Posto</span>
+    <h1>Sei l&rsquo;unico della tua categoria davanti a chi costruisce</h1>
+    <p class="sommario">Un solo negozio per categoria in ogni citt&agrave;. Se il posto &egrave; tuo, il tuo concorrente l&igrave; non c&rsquo;&egrave;.</p>
+    <a class="btn" href="#chiedi">Chiedi il posto della tua citt&agrave;</a>
+  </div>
+
+  <div class="sez">
+    <h2>Dove ti vedono</h2>
+    <div class="tre">
+      <div class="box">
+        <div class="ico">&#128295;</div>
+        <b>Nel pannello di chi lavora</b>
+        <span>Artigiani, imprese e professionisti della tua zona ti trovano tra le loro convenzioni, ogni volta che entrano.</span>
+      </div>
+      <div class="box">
+        <div class="ico">&#128100;</div>
+        <b>Sulle schede pubbliche</b>
+        <span>Anche i clienti privati che guardano un&rsquo;impresa della tua citt&agrave; vedono te.</span>
+      </div>
+      <div class="box">
+        <div class="ico">&#128203;</div>
+        <b>Sulla pagina delle convenzioni</b>
+        <span>La lista dei fornitori convenzionati della tua citt&agrave;, con la tua offerta in chiaro.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sez">
+    <h2>Come funziona</h2>
+    <ol class="passi">
+      <li><span class="n">1</span><div><b>Scegli la categoria e la citt&agrave;</b><span>Ferramenta a Rieti, colorificio a Terni, sicurezza a Roma. Una categoria, una zona.</span></div></li>
+      <li><span class="n">2</span><div><b>Dici che vantaggio dai</b><span>Uno sconto, una consegna in cantiere, un prezzo bloccato. Serve a farti guardare: chi lavora legge quello.</span></div></li>
+      <li><span class="n">3</span><div><b>Il posto &egrave; tuo finch&eacute; lo tieni</b><span>Nessun altro della tua categoria pu&ograve; entrare in quella citt&agrave;. Quando lasci, entra chi &egrave; in lista.</span></div></li>
+    </ol>
+  </div>
+
+  <div class="sez">
+    <h2>Le categorie</h2>
+    <div id="categorie"></div>
+  </div>
+
+  <div class="sez">
+    <div class="prezzo">
+      <b>Quanto costa</b>
+      <p>Dipende da quante imprese e artigiani ci sono nella tua zona: a Roma il posto vale pi&ugrave; che in un paese. Scrivici la tua citt&agrave; e ti diciamo il prezzo, senza impegno.</p>
+    </div>
+  </div>
+
+  <div class="sez" id="chiedi">
+    <h2>Chiedi il posto della tua citt&agrave;</h2>
+    <form id="modulo">
+      <div class="campo"><label for="f-attivita">Nome dell&rsquo;attivit&agrave; *</label><input id="f-attivita" required maxlength="120" autocomplete="organization"></div>
+      <div class="campo"><label for="f-categoria">Categoria *</label><select id="f-categoria" required></select></div>
+      <div class="campo"><label for="f-citta">Citt&agrave; *</label><input id="f-citta" required maxlength="80" autocomplete="address-level2"></div>
+      <div class="campo"><label for="f-telefono">Telefono</label><input id="f-telefono" maxlength="40" inputmode="tel" autocomplete="tel"></div>
+      <div class="campo largo"><label for="f-email">Email *</label><input id="f-email" type="email" required maxlength="120" autocomplete="email"></div>
+      <div class="campo largo"><label for="f-note">Che vantaggio vorresti dare a chi arriva da TrovaImpresa?</label><textarea id="f-note" maxlength="1000" placeholder="Esempio: 10% di sconto su tutta la merce, oppure consegna gratis in cantiere"></textarea></div>
+      <div class="esito" id="esito"></div>
+      <div class="campo largo"><button class="btn" type="submit" id="invia">Invia la richiesta</button></div>
+    </form>
+  </div>
+
+  <div class="fondo">
+    Vuoi vedere com&rsquo;&egrave; fatta la pagina delle convenzioni? <a href="/convenzioni.html">Guardala qui</a>.
+  </div>
+
+</div>
+
+<script src="/js/convenzioni.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.Convenzioni;
+
+  // le categorie, prese dallo stesso file che disegna i riquadri
+  if (C) {
+    var box = document.getElementById('categorie');
+    var sel = document.getElementById('f-categoria');
+    var html = '';
+    sel.innerHTML = '<option value="">Scegli...</option>';
+    C.famiglie().forEach(function (fam) {
+      var suoi = C.posti().filter(function (p) { return p.famiglia === fam; });
+      if (!suoi.length) return;
+      html += '<div class="fam"><h3>' + C.scappa(fam) + '</h3><div class="chips">';
+      var gruppo = document.createElement('optgroup');
+      gruppo.label = fam;
+      suoi.forEach(function (p) {
+        html += '<span class="chip">' + C.scappa(p.icona) + ' ' + C.scappa(p.posto) + '</span>';
+        var o = document.createElement('option');
+        o.value = p.posto; o.textContent = p.posto;
+        gruppo.appendChild(o);
+      });
+      html += '</div></div>';
+      sel.appendChild(gruppo);
+    });
+    box.innerHTML = html;
+  }
+
+  // la citta' arriva gia' scritta se si viene da una pagina che la conosce
+  var m = /[?&]citta=([^&]*)/.exec(window.location.search);
+  if (m) document.getElementById('f-citta').value = decodeURIComponent(m[1].replace(/\+/g, ' ')).trim();
+
+  var esito = document.getElementById('esito');
+  var bottone = document.getElementById('invia');
+
+  document.getElementById('modulo').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    esito.className = 'esito';
+    bottone.disabled = true;
+    bottone.textContent = 'Invio...';
+    var dati = {
+      attivita:  document.getElementById('f-attivita').value.trim(),
+      categoria: document.getElementById('f-categoria').value.trim(),
+      citta:     document.getElementById('f-citta').value.trim(),
+      telefono:  document.getElementById('f-telefono').value.trim(),
+      email:     document.getElementById('f-email').value.trim(),
+      note:      document.getElementById('f-note').value.trim()
+    };
+    try {
+      var r = await fetch('/.netlify/functions/richiesta-posto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dati)
+      });
+      if (!r.ok) throw new Error(await r.text());
+      esito.className = 'esito ok';
+      esito.textContent = 'Richiesta arrivata. Ti rispondiamo col prezzo della tua zona.';
+      document.getElementById('modulo').reset();
+      bottone.textContent = 'Inviata';
+    } catch (err) {
+      esito.className = 'esito no';
+      esito.textContent = 'Non è partita. Riprova, oppure scrivi a info@trovaimpresa.com';
+      bottone.disabled = false;
+      bottone.textContent = 'Invia la richiesta';
+    }
+  });
+})();
+</script>
+</body>
+</html>
