@@ -152,27 +152,36 @@
     +   '.cnv-testo{flex:1 1 60%}'
     +   '.cnv-chip{margin-left:56px}'
     + '}'
-    /* --- formato COLONNA: le cartoline delle due fasce di lato --- */
-    + '.cnv-col{display:flex;flex-direction:column;gap:14px;'
-    +   'position:sticky;top:20px}'
+    /* --- formato COLONNA: le due fasce di lato ---
+       ⛔ 11 set 2026 (secondo giro), Alessio: «sono brutti, li volevo lunghi
+       per tutta la pagina, poi sono asimmetriche».
+       Quindi: la fascia e' alta quanto tutta la riga e le cartoline si
+       dividono lo spazio in parti uguali (flex:1). Destra e sinistra vengono
+       identiche perche' l'altezza non dipende piu' da quanto testo c'e'
+       dentro. Via anche il `position:sticky`: una cosa alta come la pagina
+       non ha senso che si appiccichi. --- */
+    + '.cnv-col{display:flex;flex-direction:column;gap:16px;height:100%}'
     + '.cnv-col-tit{font-size:11px;letter-spacing:1.2px;color:#8b97a8;'
-    +   'font-weight:800;text-transform:uppercase;line-height:1.4}'
-    + '.cnv-card{display:block;text-decoration:none;color:inherit;background:#fff;'
-    +   'border:1px solid #f0d9c8;border-top:4px solid #e8733a;border-radius:14px;'
-    +   'padding:14px;box-shadow:0 4px 16px rgba(0,0,0,.06)}'
-    + '.cnv-card-logo{width:40px;height:40px;border-radius:10px;background:#fdf1e9;'
-    +   'display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:9px}'
-    + '.cnv-card-nome{font-size:15px;font-weight:800;line-height:1.3;color:#1a1a1a}'
-    + '.cnv-card-sotto{font-size:13px;color:#5f6b7a;margin:4px 0 9px;line-height:1.4}'
+    +   'font-weight:800;text-transform:uppercase;line-height:1.4;flex:none}'
+    + '.cnv-card{flex:1;display:flex;flex-direction:column;justify-content:center;'
+    +   'align-items:center;text-align:center;text-decoration:none;color:inherit;'
+    +   'background:#fff;border:1px solid #f0d9c8;border-top:4px solid #e8733a;'
+    +   'border-radius:14px;padding:22px 18px;box-shadow:0 4px 16px rgba(0,0,0,.06)}'
+    + '.cnv-card-logo{width:56px;height:56px;border-radius:14px;background:#fdf1e9;'
+    +   'display:flex;align-items:center;justify-content:center;font-size:28px;'
+    +   'margin-bottom:14px;flex:none}'
+    + '.cnv-card-nome{font-size:18px;font-weight:800;line-height:1.25;color:#1a1a1a}'
+    + '.cnv-card-sotto{font-size:14px;color:#5f6b7a;margin:6px 0 14px;line-height:1.4}'
     + '.cnv-card-chip{display:inline-block;background:#fdece0;color:#b8501c;'
-    +   'font-size:13px;font-weight:800;border-radius:999px;padding:6px 11px;line-height:1.3}'
+    +   'font-size:14px;font-weight:800;border-radius:999px;padding:8px 14px;line-height:1.3}'
     + '.cnv-card.libero{border-style:dashed;border-top-style:solid;'
-    +   'border-color:#e6c9b4;border-top-color:#e8733a;background:#fffdfb;text-align:center}'
-    + '.cnv-card.libero .cnv-card-logo{margin:0 auto 9px;background:#fff5ee}'
+    +   'border-color:#e6c9b4;border-top-color:#e8733a;background:#fffdfb}'
+    + '.cnv-card.libero .cnv-card-logo{background:#fff5ee}'
     + '.cnv-card.libero .cnv-card-nome{color:#b07348}'
     + '.cnv-card.libero .cnv-card-sotto{margin-bottom:0}'
-    /* sul telefono le fasce di lato non stanno di lato: vanno sopra e sotto */
-    + '@media(max-width:900px){.cnv-col{position:static}}';
+    /* sul telefono le fasce non stanno di lato: vanno in fondo, e li' le
+       cartoline tornano alte quanto il loro contenuto */
+    + '@media(max-width:900px){.cnv-col{height:auto}.cnv-card{flex:none}}';
 
   function mettiStile() {
     if (document.getElementById('cnv-stile')) return;

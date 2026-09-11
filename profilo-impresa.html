@@ -299,7 +299,7 @@ nav img{height:36px}
    c'erano il preventivo, «Chiama ora» (tolto) e i contatti: adesso stanno
    tutti nella griglia. Resta una colonna sola, che dentro si divide in due. */
 .main-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;
-  padding:20px;align-items:start}
+  padding:20px}
 /* ⛔ 11 settembre 2026 — LE DUE FASCE DI LATO (fornitori di zona).
    Alessio ha tolto la pubblicita' dai pannelli privati («si devono sentire al
    sicuro, nessuno puo' entrare e pubblicare») e l'ha spostata qui, dove la
@@ -309,12 +309,18 @@ nav img{height:36px}
    stringerebbe di 440 px per due colonne vuote.
    Massimo →3← per lato, deciso l'11 set: si vende l'esclusiva, non lo spazio —
    una colonna piena di annunci vale meno di tre. */
-.main-layout.ha-convenzioni{grid-template-columns:210px minmax(0,1fr) 210px}
+.main-layout.ha-convenzioni{grid-template-columns:300px minmax(0,1fr) 300px}
 .cnv-fascia{display:none}
 .main-layout.ha-convenzioni .cnv-fascia{display:block}
+/* ⛔ 11 set 2026 (secondo giro), Alessio: «sono brutti, li volevo lunghi per
+   tutta la pagina, poi sono asimmetriche». Le fasce adesso sono larghe →300← px
+   e alte quanto la riga: dentro, le cartoline si dividono l'altezza in parti
+   uguali, cosi' destra e sinistra vengono identiche. */
 @media(max-width:900px){
   .main-layout.ha-convenzioni{grid-template-columns:minmax(0,1fr)}
-  .main-layout.ha-convenzioni .cnv-fascia-dx{order:9}
+  /* sul telefono tutte e due le fasce vanno IN FONDO, dopo il contenuto:
+     chi apre la scheda di un'impresa deve trovare l'impresa, non gli sponsor */
+  .main-layout.ha-convenzioni .cnv-fascia{order:9}
 }
 
 /* ⛔ 1 SETTEMBRE 2026 — LA RIGA DELLE RECENSIONI, A META' E META'.
