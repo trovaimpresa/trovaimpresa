@@ -2065,10 +2065,105 @@
       document.getElementById('alert-box').style.display = 'none';
     }
 
+    /* ⛔ 11 settembre 2026 — «COSA NON HA FUNZIONATO PER TE?»
+       Prima qui c'era solo un prompt() che chiedeva di scrivere ELIMINA, e
+       il motivo non veniva chiesto a nessuno: la funzione sul server era
+       gia' pronta a riceverlo, ma la pagina non glielo mandava mai. Per
+       questo in admin «Chi se n'e' andato» il campo era sempre vuoto.
+       Adesso, nello stesso momento, si chiede perche' — con caselle da
+       spuntare (anche piu' di una) e una riga libera.
+       ⚠️ REGOLA: rispondere e' FACOLTATIVO. Chi vuole solo andarsene scrive
+       ELIMINA e va. Non si trattiene nessuno e non si aggiungono passaggi:
+       il diritto di sparire viene prima della statistica. */
+    const MOTIVI_USCITA = [
+      { v: 'nessun-lavoro', t: 'Non mi sono arrivate richieste' },
+      { v: 'complicato',    t: 'Non ho capito come si usa' },
+      { v: 'no-tempo',      t: 'Non ho tempo di starci dietro' },
+      { v: 'troppe-email',  t: 'Ricevevo troppe email' },
+      { v: 'non-serve',     t: 'Ho già abbastanza lavoro' },
+      { v: 'diverso',       t: 'Mi aspettavo una cosa diversa' }
+    ];
+
+    /* Apre la finestra e restituisce {motivo, motivo_libero} se conferma,
+       oppure null se annulla. Tutto lo stile sta qui dentro: non tocca il
+       CSS della pagina. */
+    function chiediPerche() {
+      return new Promise(function (esci) {
+        var sfondo = document.createElement('div');
+        sfondo.setAttribute('style',
+          'position:fixed;inset:0;background:rgba(10,42,77,.55);z-index:99999;' +
+          'display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto');
+
+        var caselle = MOTIVI_USCITA.map(function (m) {
+          return '<label style="display:flex;align-items:flex-start;gap:11px;padding:11px 13px;' +
+            'border:1.5px solid #dbe3ec;border-radius:10px;margin-bottom:8px;cursor:pointer;' +
+            'font-size:15.5px;line-height:1.4;color:#0a2a4d">' +
+            '<input type="checkbox" value="' + m.v + '" class="mu-c" ' +
+            'style="width:19px;height:19px;flex:none;margin-top:1px;accent-color:#0066ff">' +
+            m.t + '</label>';
+        }).join('');
+
+        sfondo.innerHTML =
+          '<div style="background:#fff;border-radius:16px;max-width:520px;width:100%;padding:28px;' +
+            'box-shadow:0 20px 60px rgba(0,0,0,.25);font-family:inherit;color:#0a2a4d">' +
+            '<div style="font-size:21px;font-weight:800;margin-bottom:8px">Stai per chiudere il tuo profilo</div>' +
+            '<div style="font-size:15px;color:#5f6b7a;line-height:1.55;margin-bottom:20px">' +
+              'Il profilo, le foto e le recensioni verranno cancellati e non si possono recuperare.</div>' +
+            '<div style="font-size:16px;font-weight:800;margin-bottom:4px">Cosa non ha funzionato per te?</div>' +
+            '<div style="font-size:13.5px;color:#8a97a8;margin-bottom:12px">' +
+              'Puoi spuntare più di una risposta. È facoltativo, ma mi aiuta a sistemare il sito.</div>' +
+            caselle +
+            '<textarea id="mu-libero" placeholder="Vuoi aggiungere qualcosa? (facoltativo)" ' +
+              'style="width:100%;min-height:78px;padding:12px;border:1.5px solid #dbe3ec;' +
+              'border-radius:10px;font-size:15px;font-family:inherit;margin-top:6px;resize:vertical"></textarea>' +
+            '<div style="margin-top:20px;padding-top:18px;border-top:1.5px solid #eef2f7">' +
+              '<div style="font-size:14.5px;color:#b42318;line-height:1.5;margin-bottom:10px">' +
+                'Per confermare, scrivi <strong>ELIMINA</strong> qui sotto.</div>' +
+              '<input type="text" id="mu-conferma" placeholder="ELIMINA" autocomplete="off" ' +
+                'style="width:100%;padding:12px;border:1.5px solid #dbe3ec;border-radius:10px;' +
+                'font-size:16px;font-family:inherit;letter-spacing:1px">' +
+              '<div id="mu-err" style="font-size:14px;color:#b42318;font-weight:700;margin-top:8px;display:none">' +
+                'Scrivi ELIMINA per confermare.</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:10px;margin-top:18px">' +
+              '<button type="button" id="mu-annulla" style="flex:1;border:none;border-radius:11px;' +
+                'padding:14px;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;' +
+                'background:#eef2f7;color:#0a2a4d">Annulla</button>' +
+              '<button type="button" id="mu-ok" style="flex:1;border:none;border-radius:11px;' +
+                'padding:14px;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;' +
+                'background:#d92d20;color:#fff">Elimina il profilo</button>' +
+            '</div>' +
+          '</div>';
+
+        document.body.appendChild(sfondo);
+        var conferma = sfondo.querySelector('#mu-conferma');
+        conferma.focus();
+
+        function chiudi(ris) { sfondo.remove(); esci(ris); }
+
+        sfondo.querySelector('#mu-annulla').onclick = function () { chiudi(null); };
+        sfondo.onclick = function (e) { if (e.target === sfondo) chiudi(null); };
+
+        sfondo.querySelector('#mu-ok').onclick = function () {
+          if ((conferma.value || '').trim().toUpperCase() !== 'ELIMINA') {
+            sfondo.querySelector('#mu-err').style.display = 'block';
+            conferma.focus();
+            return;
+          }
+          var scelti = Array.prototype.slice.call(sfondo.querySelectorAll('.mu-c'))
+            .filter(function (c) { return c.checked; })
+            .map(function (c) { return c.value; });
+          chiudi({
+            motivo: scelti.join(','),
+            motivo_libero: (sfondo.querySelector('#mu-libero').value || '').trim()
+          });
+        };
+      });
+    }
+
     async function eliminaAccount() {
-      const input = prompt('Per confermare digita: ELIMINA');
-      if (input !== 'ELIMINA') return;
-      if (!confirm('ULTIMA CONFERMA: tutti i tuoi dati verranno persi per sempre. Procedere?')) return;
+      const risposte = await chiediPerche();
+      if (!risposte) return;
 
       const { data: { session } } = await sb.auth.getSession();
       if (!session) {
@@ -2079,7 +2174,11 @@
       const res = await fetch('/.netlify/functions/elimina-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: session.access_token })
+        body: JSON.stringify({
+          access_token: session.access_token,
+          motivo: risposte.motivo || null,
+          motivo_libero: risposte.motivo_libero || null
+        })
       });
 
       if (res.ok) {

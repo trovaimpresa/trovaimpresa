@@ -101,7 +101,10 @@ exports.handler = async function(event) {
         iscritto_il:   (imp && imp.created_at) || user.created_at || null,
         // il motivo e' facoltativo e arriva dalla pagina. Si accorcia:
         // una casella di testo libera puo' contenere qualsiasi cosa.
-        motivo:        motivo ? String(motivo).slice(0, 60) : null,
+        /* 11 set 2026: da 60 a 200 caratteri. Ora si possono spuntare piu'
+           caselle e arrivano tutte insieme separate da virgola: sei codici
+           non stavano in 60 caratteri e l'ultimo veniva tagliato a meta'. */
+        motivo:        motivo ? String(motivo).slice(0, 200) : null,
         motivo_libero: motivo_libero ? String(motivo_libero).slice(0, 1000) : null
       };
 

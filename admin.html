@@ -3167,14 +3167,34 @@ function _abDurata(g){
   return (a === 1 ? '1 anno' : a.toString().replace('.', ',') + ' anni');
 }
 
+/* ⛔ 11 settembre 2026 — le sei risposte della finestra «Cosa non ha
+   funzionato per te?» (modifica-profilo.html). Si possono spuntare piu'
+   caselle: nel database arrivano separate da virgola, e qui sotto vengono
+   tradotte una per una. I due codici vecchi (costo, chiuso) restano perche'
+   potrebbero esserci righe vecchie che li usano. */
 const _AB_MOTIVI = {
-  'non-serve':   'Non mi serviva',
-  'complicato':  'Troppo complicato',
-  'nessun-lavoro': 'Non mi è arrivato lavoro',
-  'costo':       'Costa troppo',
-  'chiuso':      'Ho chiuso l\'attività',
-  'altro':       'Altro'
+  'nessun-lavoro': 'Non mi sono arrivate richieste',
+  'complicato':    'Non ho capito come si usa',
+  'no-tempo':      'Non ho tempo di starci dietro',
+  'troppe-email':  'Ricevevo troppe email',
+  'non-serve':     'Ho già abbastanza lavoro',
+  'diverso':       'Mi aspettavo una cosa diversa',
+  'costo':         'Costa troppo',
+  'chiuso':        'Ho chiuso l\'attività',
+  'altro':         'Altro'
 };
+
+/* Da «nessun-lavoro,no-tempo» a «Non mi sono arrivate richieste · Non ho
+   tempo di starci dietro». Se un codice non si conosce si mostra com'e':
+   meglio una parola strana che una risposta persa. */
+function _abMotivi(motivo){
+  return String(motivo || '')
+    .split(',')
+    .map(function(c){ return c.trim(); })
+    .filter(Boolean)
+    .map(function(c){ return _AB_MOTIVI[c] || c; })
+    .join(' · ');
+}
 
 function disegnaAbbandoni(){
   const box = document.getElementById('ab-lista');
@@ -3229,7 +3249,7 @@ function disegnaAbbandoni(){
       ? '<span class="u-badge">Era Premium</span>' : '';
     const perche = r.motivo || r.motivo_libero
       ? '<div><div class="k">Perché se n\'è andato</div><div class="v">'
-        + _uEsc(_AB_MOTIVI[r.motivo] || r.motivo || '')
+        + _uEsc(_abMotivi(r.motivo))
         + (r.motivo_libero ? ' — «' + _uEsc(r.motivo_libero) + '»' : '')
         + '</div></div>'
       : '';
