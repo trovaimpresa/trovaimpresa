@@ -137,11 +137,39 @@ function mostra(quale){
     const { error } = await sb.auth.verifyOtp({ token_hash, type });
     if (error) throw error;
     mostra('fatto');
+    /* 11 settembre 2026 — il benvenuto parte DA QUI, non piu' dalla pagina di
+       registrazione: prima arrivava insieme alla conferma e diceva «completa
+       il tuo profilo» a uno che nel profilo non poteva ancora entrare.
+       Solo per l'iscrizione ('email'), mai per il recupero password. */
+    if (type === 'email') mandaBenvenuto();
   } catch (e) {
     // link scaduto, già usato, o indirizzo storpiato dal programma di posta
     mostra('scaduto');
   }
 })();
+
+// --- il benvenuto con i 3 mesi di Premium ----------------------------------
+// Non deve MAI bloccare l'attivazione: se qualcosa va storto si tace, e la
+// mail parte lo stesso al primo accesso (login-impresa.html). La funzione sul
+// server ha il blocco anti-doppione, quindi non puo' arrivare due volte.
+async function mandaBenvenuto(){
+  try {
+    const { data } = await sb.auth.getUser();
+    const u = data && data.user;
+    if (!u || !u.email) return;
+    const m = u.user_metadata || {};
+    await fetch('/.netlify/functions/invia-email-benvenuto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome:  m.nome || m.nome_attivita || '',
+        email: u.email,
+        tipo:  m.tipo || '',
+        premium: false
+      })
+    });
+  } catch (e) { /* silenzio: il profilo e' attivo lo stesso */ }
+}
 
 // --- rimanda un link nuovo -------------------------------------------------
 document.getElementById('rimanda').addEventListener('click', async function(){

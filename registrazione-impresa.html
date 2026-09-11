@@ -128,6 +128,8 @@
       <p>Entra nella rete TrovaImpresa</p>
     </div>
 
+    </div>
+
     <div class="content">
 
       <!-- ⛔ 4 settembre 2026 — UNA SCHERMATA SOLA.
@@ -616,7 +618,18 @@
           setTimeout(() => { window.location.href = 'login-impresa.html'; }, 2500);
           return;
         }
-        try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, email: email, tipo: 'impresa' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
+        /* ⛔ 11 settembre 2026 — IL BENVENUTO NON PARTE PIU' DA QUI.
+           Prima, al momento dell'iscrizione, partivano DUE email nello stesso
+           minuto: «Conferma la tua email» e «Benvenuto — 3 mesi di Premium».
+           La seconda diceva «completa il tuo profilo», ma nel profilo non si
+           poteva ancora entrare: non era confermato. Due richieste diverse
+           insieme confondono, e due mail nello stesso minuto aumentano il
+           rischio spam (l'8 set: →24← iscritti su →127← non avevano mai
+           confermato). Adesso il benvenuto lo manda `conferma.html`, DOPO il
+           clic di conferma — quando il link «completa il profilo» funziona
+           davvero. La rete di sicurezza resta: se salta, parte al primo
+           accesso da login-impresa.html, e la funzione sul server ha gia' il
+           blocco anti-doppione (`benvenuto_inviato`). */
         /* Meta: la stessa iscrizione viene segnalata due volte, dal browser
            (pixel) e dal server (API Conversions). Lo stesso event_id fa si'
            che Meta le unisca e ne conti una sola. Il pixel parte solo se il
