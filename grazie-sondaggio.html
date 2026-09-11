@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grazie — TrovaImpresa</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.ico">
+  <!--
+    grazie-sondaggio.html — 11 settembre 2026
+    Dove si finisce dopo aver cliccato una risposta di «Come ci hai conosciuto?»
+    dentro l'email di benvenuto. Una riga di grazie e il tasto per il pannello:
+    non si chiede altro, la persona ha gia' fatto quello che le avevamo chiesto.
+  -->
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:linear-gradient(135deg,#0066ff 0%,#0052cc 100%);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+    .container{
+      background:#fff;border-radius:16px;padding:48px 32px;max-width:520px;width:100%;
+      text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.15);
+    }
+    .logo{width:190px;max-width:70%;height:auto;margin:0 auto 26px;display:block}
+    .cerchio{
+      width:80px;height:80px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;margin:0 auto 24px;font-size:44px;color:#fff;background:#1e8e3e;
+      animation:bounce .6s ease-out;
+    }
+    @keyframes bounce{0%{transform:scale(0)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+    h1{font-size:25px;color:#0a2a4d;margin-bottom:12px;line-height:1.25}
+    p{font-size:15.5px;color:#555;line-height:1.65;margin-bottom:14px}
+    .btn{
+      display:inline-block;background:#0066ff;color:#fff;text-decoration:none;
+      border-radius:10px;padding:14px 30px;font-size:16px;font-weight:700;margin-top:10px;
+    }
+    .btn:hover{background:#0052cc}
+    .piccolo{font-size:13.5px;color:#8a97a8;margin-top:22px}
+    .piccolo a{color:#0066ff}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="/logo.png" alt="TrovaImpresa">
+    <div class="cerchio">✓</div>
+    <h1>Grazie!</h1>
+    <p>Sapere da dove arrivi mi aiuta a far conoscere TrovaImpresa alle persone giuste.</p>
+    <a class="btn" href="/login-impresa.html">Vai al tuo pannello</a>
+    <p class="piccolo">Serve una mano? Scrivimi a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a></p>
+  </div>
+</body>
+</html>

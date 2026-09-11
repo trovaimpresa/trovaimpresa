@@ -57,6 +57,7 @@ exports.handler = async function(event) {
   // ------------------------------------------------------------------
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  let userId = null;   // riempito qui sotto: serve ai bottoni del sondaggio
 
   if (!premium && SUPABASE_KEY) {
     const sbHeaders = {
@@ -70,7 +71,7 @@ exports.handler = async function(event) {
 
     async function provaAPrendere(tab) {
       const url = SUPABASE_URL + '/rest/v1/' + tab
-                + '?email=eq.' + emailEnc + '&benvenuto_inviato=is.false&select=id';
+                + '?email=eq.' + emailEnc + '&benvenuto_inviato=is.false&select=id,user_id';
       const r = await fetch(url, {
         method: 'PATCH',
         headers: sbHeaders,
@@ -78,6 +79,10 @@ exports.handler = async function(event) {
       });
       if (!r.ok) return null;              // tabella o colonna diversa: non blocco l'invio
       const righe = await r.json();
+      /* 11 set 2026: serve anche lo user_id, per i bottoni «come ci hai
+         conosciuto?» in fondo all'email. Se non si trova, quel blocco non
+         compare e basta: l'email parte lo stesso. */
+      if (Array.isArray(righe) && righe.length && righe[0].user_id) userId = righe[0].user_id;
       return Array.isArray(righe) ? righe.length : 0;
     }
     async function esiste(tab) {
@@ -167,6 +172,48 @@ exports.handler = async function(event) {
       bloccoProfilo;
   }
 
+  /* ⛔ 11 settembre 2026 — «COME CI HAI CONOSCIUTO?» DENTRO L'EMAIL.
+     La stessa domanda sta gia' nella schermata dopo l'iscrizione, ma li' ha
+     raccolto →4← risposte in due mesi: quella pagina la gente la chiude subito
+     per andare a leggere la mail. Qui l'iscritto e' gia' dentro e sta gia'
+     leggendo: un clic non costa niente e non rovina niente.
+     Sei bottoni, un tocco, finisce li'. Se manca lo user_id il blocco non
+     compare: meglio niente che un bottone che non scrive. */
+  const SONDAGGIO = [
+    { v: 'facebook',    t: 'Facebook' },
+    { v: 'instagram',   t: 'Instagram' },
+    { v: 'google',      t: 'Google' },
+    { v: 'passaparola', t: 'Un amico' },
+    { v: 'linkedin',    t: 'LinkedIn' },
+    { v: 'altro',       t: 'Altro' }
+  ];
+
+  function bottoneSondaggio(s) {
+    const url = 'https://trovaimpresa.com/.netlify/functions/sondaggio'
+              + '?u=' + encodeURIComponent(userId)
+              + '&r=' + encodeURIComponent(s.v)
+              + '&t=' + encodeURIComponent(tipo || '');
+    return '<td style="padding:0 5px 8px 0;">'
+      + '<a href="' + url + '" style="display:inline-block;padding:9px 15px;font-size:14px;'
+      + 'font-weight:700;color:#0a2a4d;background:#f0f3f7;border:1px solid #dbe3ec;'
+      + 'border-radius:999px;text-decoration:none;">' + s.t + '</a></td>';
+  }
+
+  const bloccoSondaggio = userId
+    ? '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 20px;border-top:1px solid #e5e7eb;">'
+      + '<tr><td style="padding-top:18px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#0a2a4d;margin-bottom:10px;">'
+          + 'Un&rsquo;ultima curiosit&agrave;: come ci hai conosciuto?</div>'
+        + '<div style="font-size:13.5px;color:#5a6b7b;margin-bottom:12px;line-height:1.55;">'
+          + 'Un tocco e basta. Mi serve per capire dove farmi trovare dalle persone come te.</div>'
+        + '<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+          + SONDAGGIO.slice(0, 3).map(bottoneSondaggio).join('')
+        + '</tr><tr>'
+          + SONDAGGIO.slice(3).map(bottoneSondaggio).join('')
+        + '</tr></table>'
+      + '</td></tr></table>'
+    : '';
+
   const fasciaRegalo = mostraRegalo
     ? '<tr><td style="background:#7b1fa2;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">🎁 In regalo per te: 3 mesi di Premium gratis</td></tr>'
     : '';
@@ -190,6 +237,7 @@ exports.handler = async function(event) {
                 '<a href="' + linkPannello + '" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:9px;">' + (ctaTesto || 'Vai al tuo pannello &rarr;') + '</a>' +
               '</td>' +
             '</tr></table>' +
+            bloccoSondaggio +
             '<p style="margin:0 0 16px;">Resto a disposizione per qualsiasi necessit&agrave; o chiarimento tramite questo indirizzo email.</p>' +
             '<p style="margin:0;">Un cordiale saluto,<br><strong>Il Team di TrovaImpresa.com</strong></p>' +
           '</td></tr>' +
