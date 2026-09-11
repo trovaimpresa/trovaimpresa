@@ -299,7 +299,23 @@ nav img{height:36px}
    c'erano il preventivo, «Chiama ora» (tolto) e i contatti: adesso stanno
    tutti nella griglia. Resta una colonna sola, che dentro si divide in due. */
 .main-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;
-  padding:20px}
+  padding:20px;align-items:start}
+/* ⛔ 11 settembre 2026 — LE DUE FASCE DI LATO (fornitori di zona).
+   Alessio ha tolto la pubblicita' dai pannelli privati («si devono sentire al
+   sicuro, nessuno puo' entrare e pubblicare») e l'ha spostata qui, dove la
+   pagina e' pubblica e di tutti.
+   Le colonne si aprono SOLO quando js/convenzioni.js ha davvero qualcosa da
+   metterci dentro (classe .ha-convenzioni): se no il contenuto centrale si
+   stringerebbe di 440 px per due colonne vuote.
+   Massimo →3← per lato, deciso l'11 set: si vende l'esclusiva, non lo spazio —
+   una colonna piena di annunci vale meno di tre. */
+.main-layout.ha-convenzioni{grid-template-columns:210px minmax(0,1fr) 210px}
+.cnv-fascia{display:none}
+.main-layout.ha-convenzioni .cnv-fascia{display:block}
+@media(max-width:900px){
+  .main-layout.ha-convenzioni{grid-template-columns:minmax(0,1fr)}
+  .main-layout.ha-convenzioni .cnv-fascia-dx{order:9}
+}
 
 /* ⛔ 1 SETTEMBRE 2026 — LA RIGA DELLE RECENSIONI, A META' E META'.
    Misurato su uno schermo da 1904 px: la carta delle recensioni era larga
@@ -789,7 +805,11 @@ nav img{height:36px}
      Il markup nuovo sta nella riga del logo, cerca `hero-num`. -->
 
 <!-- MAIN -->
-<div class="main-layout">
+<div class="main-layout" data-convenzioni-host>
+  <!-- FORNITORI DI ZONA — fascia di sinistra (js/convenzioni.js) -->
+  <aside class="cnv-fascia cnv-fascia-sx convenzioni-zona" data-max="3" data-da="0"
+         data-formato="colonna" data-titolo="Fornitori di zona"></aside>
+
   <div class="col-sinistra">
 
     <!-- CALENDARIO -->
@@ -1008,12 +1028,11 @@ nav img{height:36px}
       <div id="vetrina-prodotti-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
     </div>
 
-    <!-- FORNITORI DI ZONA (js/convenzioni.js) -->
-    <div id="convenzioni-zona" data-max="3" data-titolo="Fornitori di zona"></div>
-
   </div>
 
-  <!-- SIDEBAR -->
+  <!-- FORNITORI DI ZONA — fascia di destra (js/convenzioni.js) -->
+  <aside class="cnv-fascia cnv-fascia-dx convenzioni-zona" data-max="3" data-da="3"
+         data-formato="colonna" data-titolo="Fornitori di zona"></aside>
 
 </div>
 </div><!-- /profilo-view -->

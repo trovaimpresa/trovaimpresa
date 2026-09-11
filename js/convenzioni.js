@@ -4,9 +4,17 @@
    Il riquadro dei fornitori convenzionati di zona.
 
    DOVE SI VEDE
-   - in fondo alla dashboard dei 3 pannelli (artigiano, impresa,
-     professionisti): fino a 3 fornitori
-   - in fondo alla scheda pubblica profilo-impresa.html: 1 solo
+   ⛔ 11 settembre 2026 — VIA DAI PANNELLI PRIVATI.
+   Alessio: «il pannello privato si devono sentire al sicuro, nessuno puo'
+   entrare e pubblicare». Il pannello e' casa dell'iscritto: li' dentro non
+   entra piu' nessuna pubblicita'.
+   Adesso le convenzioni stanno SOLO sulla scheda pubblica
+   (profilo-impresa.html), nelle due colonne di lato: fino a 3 per lato.
+
+   I DUE FORMATI
+   - 'lista'   (com'era): righe larghe una sotto l'altra
+   - 'colonna' (nuovo):   cartoline strette, per le colonne di lato
+   Si sceglie con data-formato sul contenitore.
 
    COME SI AGGIUNGE UN FORNITORE
    Si scrive una riga dentro CONVENZIONI qui sotto. Niente altro.
@@ -143,7 +151,28 @@
     +   '.cnv-logo{width:44px;height:44px;font-size:22px}'
     +   '.cnv-testo{flex:1 1 60%}'
     +   '.cnv-chip{margin-left:56px}'
-    + '}';
+    + '}'
+    /* --- formato COLONNA: le cartoline delle due fasce di lato --- */
+    + '.cnv-col{display:flex;flex-direction:column;gap:14px;'
+    +   'position:sticky;top:20px}'
+    + '.cnv-col-tit{font-size:11px;letter-spacing:1.2px;color:#8b97a8;'
+    +   'font-weight:800;text-transform:uppercase;line-height:1.4}'
+    + '.cnv-card{display:block;text-decoration:none;color:inherit;background:#fff;'
+    +   'border:1px solid #f0d9c8;border-top:4px solid #e8733a;border-radius:14px;'
+    +   'padding:14px;box-shadow:0 4px 16px rgba(0,0,0,.06)}'
+    + '.cnv-card-logo{width:40px;height:40px;border-radius:10px;background:#fdf1e9;'
+    +   'display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:9px}'
+    + '.cnv-card-nome{font-size:15px;font-weight:800;line-height:1.3;color:#1a1a1a}'
+    + '.cnv-card-sotto{font-size:13px;color:#5f6b7a;margin:4px 0 9px;line-height:1.4}'
+    + '.cnv-card-chip{display:inline-block;background:#fdece0;color:#b8501c;'
+    +   'font-size:13px;font-weight:800;border-radius:999px;padding:6px 11px;line-height:1.3}'
+    + '.cnv-card.libero{border-style:dashed;border-top-style:solid;'
+    +   'border-color:#e6c9b4;border-top-color:#e8733a;background:#fffdfb;text-align:center}'
+    + '.cnv-card.libero .cnv-card-logo{margin:0 auto 9px;background:#fff5ee}'
+    + '.cnv-card.libero .cnv-card-nome{color:#b07348}'
+    + '.cnv-card.libero .cnv-card-sotto{margin-bottom:0}'
+    /* sul telefono le fasce di lato non stanno di lato: vanno sopra e sotto */
+    + '@media(max-width:900px){.cnv-col{position:static}}';
 
   function mettiStile() {
     if (document.getElementById('cnv-stile')) return;
@@ -151,6 +180,61 @@
     s.id = 'cnv-stile';
     s.textContent = STILE;
     document.head.appendChild(s);
+  }
+
+  /* I posti ancora liberi in questa citta', uno per famiglia: servono a
+     riempire la colonna quando i fornitori veri sono pochi, e si vendono da
+     soli («Colorificio — posto libero a Rieti»). */
+  function postiLiberi(tutte, citta, quanti) {
+    var c = pulita(citta);
+    if (!c || quanti <= 0) return [];
+    var presi = {};
+    tutte.forEach(function (x) {
+      if (pulita(x.citta) === c) presi[pulita(x.posto)] = true;
+    });
+    var fatte = {}, fuori = [];
+    POSTI.forEach(function (p) {
+      if (presi[pulita(p.posto)]) return;
+      if (fatte[p.famiglia]) return;       // uno per famiglia, non uno per categoria
+      fatte[p.famiglia] = true;
+      fuori.push(p);
+    });
+    return fuori.slice(0, quanti);
+  }
+
+  function disegnaColonna(el, righe, liberi, citta, titolo) {
+    if (!righe.length && !liberi.length) { el.innerHTML = ''; return false; }
+    mettiStile();
+    var html = '<div class="cnv-col">'
+      + '<div class="cnv-col-tit">' + scappa(titolo || 'Fornitori di zona')
+      + (citta ? ' · ' + scappa(citta) : '') + ' · Sponsor</div>';
+
+    righe.forEach(function (x) {
+      var tag = x.link ? 'a' : 'div';
+      var attr = x.link
+        ? ' href="' + scappa(x.link) + '" target="_blank" rel="noopener nofollow sponsored"'
+        : '';
+      var sotto = [x.categoria, x.indirizzo].filter(Boolean).map(scappa).join(' · ');
+      html += '<' + tag + ' class="cnv-card"' + attr + '>'
+        + '<div class="cnv-card-logo">' + scappa(x.icona || '🏪') + '</div>'
+        + '<div class="cnv-card-nome">' + scappa(x.nome) + '</div>'
+        + (sotto ? '<div class="cnv-card-sotto">' + sotto + '</div>' : '')
+        + (x.offerta ? '<span class="cnv-card-chip">' + scappa(x.offerta) + '</span>' : '')
+        + '</' + tag + '>';
+    });
+
+    liberi.forEach(function (p) {
+      html += '<a class="cnv-card libero" href="/il-posto.html?citta='
+        + encodeURIComponent(citta || '') + '" rel="nofollow">'
+        + '<div class="cnv-card-logo">' + scappa(p.icona) + '</div>'
+        + '<div class="cnv-card-nome">' + scappa(p.posto) + '</div>'
+        + '<div class="cnv-card-sotto">Posto libero a ' + scappa(citta) + ' &rarr;</div>'
+        + '</a>';
+    });
+
+    html += '</div>';
+    el.innerHTML = html;
+    return true;
   }
 
   function disegna(el, righe, citta, titolo) {
@@ -196,10 +280,37 @@
     return null;
   }
 
+  function riempi(el, d) {
+    var quanti  = parseInt(el.getAttribute('data-max'), 10) || 3;
+    var da      = parseInt(el.getAttribute('data-da'), 10) || 0;
+    var formato = el.getAttribute('data-formato') || 'lista';
+    var titolo  = el.getAttribute('data-titolo');
+    var tutte   = elencoConvenzioni();
+
+    if (formato !== 'colonna') {
+      disegna(el, scegli(tutte, d.citta, d.mestiere, quanti), d.citta, titolo);
+      return !!el.innerHTML;
+    }
+
+    /* In colonna: ogni fascia prende la sua fetta (data-da), e se restano
+       buchi li riempie con i posti ancora liberi di quella citta'. */
+    var ordinate = scegli(tutte, d.citta, d.mestiere, da + quanti);
+    var righe    = ordinate.slice(da, da + quanti);
+    var liberi   = [];
+    if (el.getAttribute('data-liberi') !== 'no' && righe.length < quanti) {
+      var saltaLiberi = Math.max(0, da - ordinate.length);
+      liberi = postiLiberi(tutte, d.citta, quanti - righe.length + saltaLiberi)
+                 .slice(saltaLiberi);
+    }
+    /* Se in questa citta' non c'e' nemmeno un fornitore vero, la fascia resta
+       vuota: i posti liberi da soli sarebbero una colonna di sole offerte. */
+    if (!ordinate.length) { el.innerHTML = ''; return false; }
+    return disegnaColonna(el, righe, liberi, d.citta, titolo);
+  }
+
   function avvia() {
-    var el = document.getElementById('convenzioni-zona');
-    if (!el) return;
-    var quanti = parseInt(el.getAttribute('data-max'), 10) || 3;
+    var elenchi = document.querySelectorAll('#convenzioni-zona, .convenzioni-zona');
+    if (!elenchi.length) return;
     var tentativi = 0;
     var timer = setInterval(function () {
       tentativi++;
@@ -207,8 +318,16 @@
       if (!d && tentativi < 40) return;      // aspetta al massimo 10 secondi
       clearInterval(timer);
       if (!d) return;
-      var righe = scegli(elencoConvenzioni(), d.citta, d.mestiere, quanti);
-      disegna(el, righe, d.citta, el.getAttribute('data-titolo'));
+      var qualcosa = false;
+      Array.prototype.forEach.call(elenchi, function (el) {
+        if (riempi(el, d)) qualcosa = true;
+      });
+      /* La pagina apre le due colonne di lato SOLO se c'e' davvero qualcosa
+         dentro: se no il contenuto centrale si stringerebbe per niente. */
+      if (qualcosa) {
+        var host = document.querySelector('[data-convenzioni-host]');
+        if (host) host.classList.add('ha-convenzioni');
+      }
     }, 250);
   }
 
