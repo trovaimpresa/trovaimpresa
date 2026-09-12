@@ -101,7 +101,49 @@ controllata.
 **⏳ DA PROVARE A CLIC (Alex)**: pubblicare un'offerta vera senza essere loggato,
 controllare che l'email col link arrivi, e chiudere l'annuncio dal link.
 
-**⬜ RESTANO**: passo 2 (candidarsi senza account), passo 3 (`offerta-lavoro.html`
+---
+
+**✅ PASSO 2 FATTO (12 set, notte): ci si candida senza account.**
+Il modulo sta dentro `offerta-lavoro.html`, aperto nella pagina dell'annuncio —
+prima c'erano due tasti che portavano alla registrazione.
+- `candidati_senza_account(jsonb)` — nome, telefono (obbligatorio: e' come ti
+  richiamano), email, mestiere, anni, citta', due righe, CV facoltativo
+- `netlify/functions/candidatura-avvisa.js` — manda all'impresa l'email coi dati
+  e **il CV allegato**; il `reply_to` e' il candidato, quindi l'impresa risponde
+  e la risposta va dritta a lui. Il CV finisce anche nel bucket `cv-candidati`
+  sotto `senza-account/<id>/`
+- ⚠️ **Per email e non nel pannello** perche' un annuncio pubblicato senza
+  account NON HA un pannello: non c'e' nessuna impresa iscritta a cui mostrarlo
+- Freni: non due volte allo stesso annuncio · max →10← candidature in →24← ore ·
+  CV solo PDF/foto fino a →3← MB · trappola anti-robot
+
+⛔ **DIFETTO TROVATO COL COLLAUDO** (e chiuso): `candidati_lavoro.email` ha un
+vincolo UNIQUE. La prima versione creava una riga nuova a ogni candidatura e
+alla SECONDA candidatura della stessa persona il database rifiutava (→23505←).
+Ora la riga si riusa e si aggiorna. E se quell'email appartiene a un candidato
+GIA' ISCRITTO non si tocca niente e si dice di accedere — se no un estraneo,
+scrivendo l'email di un altro, gli cambiava il profilo e lo candidava a sua
+insaputa. Provato: profilo intatto ✅
+
+**Collaudo passo 2**: →15← prove verdi + prova a clic sul sito vero (modulo
+compilato, tasto premuto, email consegnata col CV allegato, `reply_to` = il
+candidato). Righe di prova cancellate.
+
+⚠️ **SECONDO DIFETTO, visto solo aprendo l'email VERA**: nella tabella usciva
+`Citt&agrave;` invece di `Città`. L'etichetta era scritta come entity HTML e poi
+ripassava dentro `esc()`, che le trasformava la `&` in `&amp;`. Dal codice e dal
+sito non si vedeva. **Terza volta in due giorni che un difetto si vede solo
+leggendo la mail vera dal connettore Resend.** Corretto e riprovato dal vivo: ora
+dice «Città».
+
+⛔ **NOTA DI METODO, costata un giro a vuoto**: `device_commit_files` puo'
+rispondere «written» SENZA aver scritto davvero sul disco di Alex. E' successo
+con la correzione qui sopra: lui ha lanciato il commit e git ha detto «nothing to
+commit», perche' il file era ancora quello vecchio. **Dopo ogni scrittura sul suo
+computer, ricontrollare che il file sia cambiato davvero** (`device_list_dir` e
+confronto di dimensione/mtime) PRIMA di dargli la riga del push.
+
+**⬜ RESTANO**: passo 3 (`offerta-lavoro.html`
 esiste gia' e la sitemap `sitemap-offerte.js` si riempie da sola alla prima
 offerta — quindi anche l'→1 errore← di Search Console si chiude da solo), passo 4
 (collegare le guide sugli stipendi).
