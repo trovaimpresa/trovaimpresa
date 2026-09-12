@@ -79,6 +79,73 @@ const TABELLA_DIRETTORE_LAVORI = `
   <p>Su lavori piccoli la percentuale sale, su quelli grandi scende. È il motivo per cui una direzione lavori al 2% su un bagno non esiste, e una al 5% su una villa è fuori mercato.</p>
 `;
 
+const TAB_LAZIO_PIASTRELLISTA = `
+  <h2>Il listino ufficiale: la Tariffa della Regione Lazio</h2>
+  <p>Le Regioni pubblicano un <strong>prezziario ufficiale</strong> delle lavorazioni edili, quello che si usa negli appalti pubblici e nelle perizie. Non è un prezzo di mercato — di solito sta più in alto, perché comprende tutto quello che un preventivo privato a volte dimentica — ma è il metro per capire se una cifra è seria.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Lavorazione</th><th>Tariffa Regione Lazio 2023</th></tr>
+      <tr><td>Demolizione del vecchio pavimento</td><td>15,21 €/mq</td></tr>
+      <tr><td>Gres porcellanato 30×30 / 40×40</td><td>60,68 – 62,20 €/mq</td></tr>
+      <tr><td>Gres porcellanato 60×60</td><td>93,29 €/mq</td></tr>
+      <tr><td>Parquet in rovere</td><td>94,30 – 148,44 €/mq</td></tr>
+      <tr><td>Battiscopa in legno</td><td>16,17 €/m</td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Voci della Tariffa dei prezzi della Regione Lazio 2023 (DGR 101/2023), Parte A. Ogni Regione ha il suo prezziario e fra una e l'altra ci sono differenze: fuori dal Lazio prendi questi numeri come ordine di grandezza, non come listino della tua zona.</p>
+  <p><a href="/quanto-costa-posare-il-pavimento" style="color:#0066ff;font-weight:700;">Il conto completo su una casa tipo, voce per voce →</a></p>
+`;
+
+const TAB_LAZIO_IMBIANCHINO = `
+  <h2>Il listino ufficiale: la Tariffa della Regione Lazio</h2>
+  <p>Le Regioni pubblicano un <strong>prezziario ufficiale</strong> delle lavorazioni edili, quello che si usa negli appalti pubblici e nelle perizie. Non è un prezzo di mercato — di solito sta più in alto, perché comprende tutto quello che un preventivo privato a volte dimentica — ma è il metro per capire se una cifra è seria.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Lavorazione</th><th>Tariffa Regione Lazio 2023</th></tr>
+      <tr><td>Idropittura lavabile, 3 mani</td><td>12,17 €/mq</td></tr>
+      <tr><td>Tempera, 2 mani</td><td>6,33 €/mq</td></tr>
+      <tr><td>Raschiatura della vecchia tinta</td><td>5,42 €/mq</td></tr>
+      <tr><td>Rasatura delle pareti</td><td>10,83 €/mq</td></tr>
+      <tr><td>Fissativo di fondo</td><td>3,16 €/mq</td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Voci della Tariffa dei prezzi della Regione Lazio 2023 (DGR 101/2023), Parte A. Ogni Regione ha il suo prezziario e fra una e l'altra ci sono differenze: fuori dal Lazio prendi questi numeri come ordine di grandezza, non come listino della tua zona.</p>
+  <p><a href="/quanto-costa-imbiancare-casa" style="color:#0066ff;font-weight:700;">Il conto completo su una casa tipo, voce per voce →</a></p>
+`;
+
+const TAB_LAZIO_SERRAMENTISTA = `
+  <h2>Il listino ufficiale: la Tariffa della Regione Lazio</h2>
+  <p>Le Regioni pubblicano un <strong>prezziario ufficiale</strong> delle lavorazioni edili, quello che si usa negli appalti pubblici e nelle perizie. Non è un prezzo di mercato — di solito sta più in alto, perché comprende tutto quello che un preventivo privato a volte dimentica — ma è il metro per capire se una cifra è seria.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Lavorazione</th><th>Tariffa Regione Lazio 2023</th></tr>
+      <tr><td>Infisso in PVC, 2 camere</td><td>444 – 521 €/mq</td></tr>
+      <tr><td>Infisso in PVC, 5 camere</td><td>561 – 602 €/mq</td></tr>
+      <tr><td>Alluminio a taglio termico</td><td>714 – 933 €/mq</td></tr>
+      <tr><td>Legno lamellare</td><td>1.262 – 1.398 €/mq</td></tr>
+      <tr><td>Smontaggio del vecchio infisso</td><td>17,61 – 24,82 €/mq</td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Voci della Tariffa dei prezzi della Regione Lazio 2023 (DGR 101/2023), Parte A. Ogni Regione ha il suo prezziario e fra una e l'altra ci sono differenze: fuori dal Lazio prendi questi numeri come ordine di grandezza, non come listino della tua zona.</p>
+  <p><a href="/quanto-costa-cambiare-gli-infissi" style="color:#0066ff;font-weight:700;">Il conto completo su una casa tipo, voce per voce →</a></p>
+`;
+
+const TAB_LAZIO_IMPRESA_EDILE = `
+  <h2>Il listino ufficiale: la Tariffa della Regione Lazio</h2>
+  <p>Le Regioni pubblicano un <strong>prezziario ufficiale</strong> delle lavorazioni edili, quello che si usa negli appalti pubblici e nelle perizie. Non è un prezzo di mercato — di solito sta più in alto, perché comprende tutto quello che un preventivo privato a volte dimentica — ma è il metro per capire se una cifra è seria.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Lavorazione</th><th>Tariffa Regione Lazio 2023</th></tr>
+      <tr><td>Cappotto in polistirene (EPS)</td><td>128,67 €/mq</td></tr>
+      <tr><td>Cappotto in lana di roccia</td><td>126,68 €/mq</td></tr>
+      <tr><td>Cappotto in lana di vetro</td><td>131,09 €/mq</td></tr>
+      <tr><td>Tinteggiatura finale al quarzo</td><td>11,69 €/mq</td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Voci della Tariffa dei prezzi della Regione Lazio 2023 (DGR 101/2023), Parte A. Ogni Regione ha il suo prezziario e fra una e l'altra ci sono differenze: fuori dal Lazio prendi questi numeri come ordine di grandezza, non come listino della tua zona.</p>
+  <p><a href="/quanto-costa-cappotto-termico" style="color:#0066ff;font-weight:700;">Il conto completo su una casa tipo, voce per voce →</a></p>
+`;
+
 const MESTIERI = [
   {
     slug: 'impresa-edile', nome: 'Impresa edile', articolo: "un'",
@@ -86,6 +153,7 @@ const MESTIERI = [
     guida: '/quanto-costa-ristrutturare-casa', guidaNome: 'Quanto costa ristrutturare casa',
     prezzo: 'da 400 a 1.800 €/mq',
     prezzoDettaglio: 'Una ristrutturazione leggera (tinteggiature, pavimenti, qualche impianto) sta fra 350 e 600 €/mq. Una ristrutturazione completa, con impianti e bagni rifatti da zero, sale a 600–800 €/mq. Su un appartamento di 100 mq significa circa 60.000–80.000 € chiavi in mano.',
+    tabella: TAB_LAZIO_IMPRESA_EDILE,
     quando: [
       'Ristrutturazione completa di un appartamento o di una casa',
       'Lavori strutturali: abbattere muri, aprire vani, consolidare solai',
@@ -158,6 +226,7 @@ const MESTIERI = [
     guida: '/quanto-costa-imbiancare-casa', guidaNome: 'Quanto costa imbiancare casa',
     prezzo: '5–15 €/mq',
     prezzoDettaglio: 'Imbiancare costa da 5 a 15 €/mq di superficie dipinta. Una stanza singola sta fra 250 e 600 €, un appartamento intero fra 1.000 e 2.500 €.',
+    tabella: TAB_LAZIO_IMBIANCHINO,
     quando: [
       'Tinteggiatura di casa dopo un trasloco o una ristrutturazione',
       'Muri con muffa, macchie di umidità o crepe da stuccare',
@@ -206,6 +275,7 @@ const MESTIERI = [
     guida: '/quanto-costa-posare-il-pavimento', guidaNome: 'Quanto costa posare il pavimento',
     prezzo: '35–110 €/mq',
     prezzoDettaglio: 'La posa costa fra 35 e 110 €/mq, materiale escluso. Il gres in formato normale sta in basso; formati grandi, posa diagonale e spina ungherese salgono verso l\'alto.',
+    tabella: TAB_LAZIO_PIASTRELLISTA,
     quando: [
       'Nuovo pavimento in gres, ceramica, cotto o marmo',
       'Rivestimento di bagno e cucina',
@@ -254,6 +324,7 @@ const MESTIERI = [
     guida: '/quanto-costa-cambiare-gli-infissi', guidaNome: 'Quanto costa cambiare gli infissi',
     prezzo: '250–600 €/mq',
     prezzoDettaglio: 'Gli infissi nuovi costano da 250 a 600 €/mq secondo il materiale: PVC in basso, alluminio a taglio termico in mezzo, legno e legno-alluminio in alto. Il prezzo è posato, vecchio infisso rimosso.',
+    tabella: TAB_LAZIO_SERRAMENTISTA,
     quando: [
       'Finestre vecchie che disperdono calore o non chiudono bene',
       'Sostituzione per accedere alle detrazioni fiscali',
