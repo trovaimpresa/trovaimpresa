@@ -267,6 +267,29 @@
     }
     .toggle-pw:hover { color: #2e78cc; }
 
+
+    /* Pubblicare senza account: il riquadro che lo dice, e il link di gestione dopo */
+    .senza-account { background:#eaf7ee; border:1.5px solid #8fd4a6; border-left:6px solid #2e9e54;
+      border-radius:12px; padding:18px 22px; margin-bottom:22px; }
+    .senza-account h3 { font-size:1.15rem; font-weight:800; color:#1b6b39; margin-bottom:6px; }
+    .senza-account p { font-size:1rem; color:#2c4536; line-height:1.55; margin:0; }
+    .senza-account .piccolo { display:block; margin-top:8px; font-size:0.92rem; color:#4a6b56; }
+
+    .box-link { background:#fff; border:2px solid #0066ff; border-radius:14px; padding:22px 24px; margin-top:18px; text-align:left; }
+    .box-link h3 { font-size:1.1rem; color:#0047b3; margin-bottom:8px; font-weight:800; }
+    .box-link p { font-size:1rem; color:#333; line-height:1.6; margin-bottom:12px; }
+    .box-link .link-riga { background:#eaf2ff; border-radius:10px; padding:12px 14px; font-size:0.95rem;
+      word-break:break-all; color:#0047b3; font-weight:600; margin-bottom:12px; display:block; text-decoration:none; }
+    .box-link .avviso { background:#fff8e6; border:1px solid #f0d38a; border-radius:10px; padding:12px 14px; font-size:0.95rem; color:#6b5518; }
+    .box-link .riga-tasti { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .box-link .riga-tasti a, .box-link .riga-tasti button {
+      flex:1; min-width:180px; text-align:center; text-decoration:none; border:none; cursor:pointer;
+      border-radius:10px; padding:13px 16px; font-weight:700; font-size:1rem; font-family:inherit; }
+    .box-link .t-primario { background:#0066ff; color:#fff; }
+    .box-link .t-secondario { background:#eaf2ff; color:#0047b3; }
+    /* trappola anti-robot: invisibile a chi guarda, non a chi compila in automatico */
+    .campo-nascosto { position:absolute; left:-9999px; top:0; opacity:0; height:0; overflow:hidden; }
+
     .login-box {
       background: #f0faf4;
       border: 1.5px solid #a8bdd5;
@@ -396,8 +419,14 @@
             <div class="form-step active" id="step-1">
                 <div class="step-title">Dati Azienda</div>
 
+                <div class="senza-account">
+                  <h3>✅ Non serve iscriversi</h3>
+                  <p>Compila il modulo e pubblica. <strong>Gratis, senza account.</strong> Quando hai finito ti diamo un link per riaprire o chiudere il tuo annuncio quando vuoi — e te lo mandiamo anche per email.</p>
+                  <span class="piccolo">Se invece sei già iscritto, accedi qui sotto e i tuoi dati si compilano da soli.</span>
+                </div>
+
                 <div class="login-box">
-                    <h3>🔐 Sei già registrato su TrovaImpresa? Accedi per compilare automaticamente</h3>
+                    <h3>🔐 Sei già iscritto? Accedi e i campi si compilano da soli (facoltativo)</h3>
                     <div class="login-row">
                         <input type="email" id="login-email" placeholder="La tua email">
                         <div class="password-wrapper">
@@ -408,6 +437,11 @@
                     </div>
                     <div class="login-msg" id="login-msg"></div>
                     <div class="campi-compilati" id="campi-compilati">✅ Dati compilati automaticamente! Puoi procedere.</div>
+                </div>
+
+                <div class="campo-nascosto" aria-hidden="true">
+                    <label for="azienda-sito">Non compilare questo campo</label>
+                    <input type="text" id="azienda-sito" name="azienda-sito" tabindex="-1" autocomplete="off">
                 </div>
 
                 <div class="form-group">
@@ -1001,9 +1035,14 @@
             if (impresa) { impresaId = impresa.id; impresaPiano = (impresa.piano || 'free').toLowerCase(); }
         }
 
-        if (!user || !impresaId) {
-            alert('Per pubblicare un\'offerta devi prima accedere con il tuo account impresa.');
-            document.getElementById('login-email')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Dal 12 set 2026 NON si ferma piu' chi non ha l'account: chi non e' iscritto
+        // pubblica lo stesso, come nei subappalti. La riga qui sotto era il muro che
+        // teneva le offerte a zero mentre i subappalti crescevano da soli.
+        const senzaAccount = (!user || !impresaId);
+
+        // trappola anti-robot: un umano non vede quel campo, quindi non lo compila
+        if (document.getElementById('azienda-sito')?.value) {
+            document.getElementById('successMsg').classList.add('show');
             return;
         }
 
@@ -1053,6 +1092,26 @@
         };
 
         try {
+            if (senzaAccount) {
+                // Chi non e' iscritto passa da una funzione del database, non da un
+                // INSERT diretto: cosi' il codice segreto del link non e' leggibile
+                // da nessuno e nessuno puo' firmare un annuncio a nome di un'impresa iscritta.
+                const { impresa_id, ...campi } = formData;
+                const { data, error } = await supabaseClient
+                    .rpc('pubblica_offerta_anonima', { p: campi });
+                if (error) throw error;
+
+                mostraLinkGestione(data.id, data.token, campi.email);
+
+                // l'email col link: se non parte, l'annuncio resta comunque pubblicato
+                fetch('/.netlify/functions/offerta-link-gestione', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: data.id, token: data.token })
+                }).catch(() => {});
+                return;
+            }
+
             const { data, error } = await supabaseClient
                 .from('offerte_lavoro')
                 .insert([formData]);
@@ -1068,9 +1127,38 @@
             }
         } catch (error) {
             console.error('Errore:', error);
-            alert('❌ Errore sconosciuto. Riprova.');
+            alert('❌ ' + (error.message || 'Errore sconosciuto. Riprova.'));
         }
     });
+
+    // Dopo la pubblicazione senza account: il link per gestire l'annuncio.
+    // Va mostrato GRANDE e va anche mandato per email: nei subappalti appare solo
+    // qui, e chi chiude la finestra non puo' piu' chiudere il proprio annuncio.
+    function mostraLinkGestione(id, token, email) {
+        const link = location.origin + '/offerta-gestisci.html?id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(token);
+        const esc = t => String(t ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        const box = document.getElementById('successMsg');
+        box.innerHTML = '✅ Offerta pubblicata! È già online sulla bacheca.'
+          + '<div class="box-link">'
+          + '<h3>🔑 Il tuo link per gestire l\'annuncio</h3>'
+          + '<p>Con questo link puoi rivedere il tuo annuncio e chiuderlo quando hai trovato la persona. Non serve nessuna password.</p>'
+          + '<a class="link-riga" href="' + esc(link) + '">' + esc(link) + '</a>'
+          + '<div class="avviso">📧 Te l\'abbiamo mandato anche per email a <strong>' + esc(email) + '</strong>. Se non lo trovi, guarda nella posta indesiderata.</div>'
+          + '<div class="riga-tasti">'
+          + '<a class="t-primario" href="/offerta-lavoro.html?id=' + encodeURIComponent(id) + '">👀 Vedi il tuo annuncio</a>'
+          + '<button type="button" class="t-secondario" onclick="copiaLink(this, \'' + esc(link) + '\')">📋 Copia il link</button>'
+          + '</div></div>';
+        box.classList.add('show');
+        document.getElementById('offerteForm').style.display = 'none';
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function copiaLink(btn, link) {
+        navigator.clipboard.writeText(link).then(() => {
+            btn.textContent = '✅ Copiato';
+            setTimeout(() => { btn.textContent = '📋 Copia il link'; }, 2500);
+        }).catch(() => { btn.textContent = '⚠️ Copialo a mano'; });
+    }
 
     function aggiungiChip(inputId, chipsId, listId) {
         const input = document.getElementById(inputId);
