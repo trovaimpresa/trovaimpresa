@@ -311,6 +311,161 @@ const MESTIERI = [
       { d: 'Si può isolare il tetto senza rifarlo tutto?', r: 'Sì, isolando dall\'interno, sotto falda. Costa meno ma ruba altezza al sottotetto e non risolve i ponti termici come farebbe il cappotto sopra. Se il manto è comunque da rifare, conviene fare tutto insieme.' },
       { d: 'Cosa cambia se sul tetto c\'è l\'amianto?', r: 'Cambia parecchio: la rimozione va fatta da una ditta iscritta all\'albo gestori ambientali, con piano di lavoro presentato alla ASL. Non è un lavoro da fare in economia, e il costo dello smaltimento va sempre chiesto a parte.' }
     ]
+  },
+  /* ============================================================
+     I PROFESSIONISTI — aggiunti il 12 set 2026
+     Perche': su Google la gente cerca la PRATICA, non la categoria
+     («CILA Roma», «accatastamento», «quanto costa un APE»). C'e' chi
+     ha costruito un sito intero solo su «geometra + Roma».
+     `ruolo: 'professionista'` cambia le parole (incarico/onorario) e
+     manda la ricerca su cerca-professionisti invece che cerca-imprese.
+     `tipo` e' il valore del filtro sul sito; `db` e' cio' che sta
+     scritto nella colonna `mestiere` del database.
+     ⚠️ I prezzi marcati DA CONFERMARE aspettano i numeri di Alessio.
+     ============================================================ */
+  {
+    slug: 'geometra', nome: 'Geometra', articolo: 'un ', ruolo: 'professionista', tipo: 'geometra',
+    db: ['geometra'],
+    guida: '/come-leggere-un-preventivo-edile', guidaNome: 'Come leggere un preventivo edile',
+    prezzo: '300–800 € a pratica',
+    prezzoDettaglio: 'Una pratica edilizia semplice sta fra 300 e 800 €, secondo il tipo di pratica e il Comune. Accatastamenti, visure e rilievi si pagano a parte, e i diritti da versare al Catasto non sono compresi nell\'onorario.',
+    quando: [
+      'CILA e SCIA per una ristrutturazione',
+      'Accatastamenti, variazioni catastali e visure',
+      'Rilievi dello stato di fatto e computi metrici',
+      'Verifica della conformità prima di comprare o vendere casa'
+    ],
+    chiedere: [
+      'Se nell\'onorario sono compresi i diritti e i bolli da versare al Comune e al Catasto',
+      'Quanto tempo serve per la pratica, e da quando partono i lavori',
+      'Chi paga se la pratica va integrata perché mancava un documento',
+      'Se il sopralluogo è compreso o si paga a parte'
+    ],
+    faq: [
+      { d: 'Geometra o architetto: chi mi serve?', r: 'Per pratiche, catasto e ristrutturazioni senza opere strutturali il geometra basta e costa meno. L\'architetto serve quando c\'è un progetto da disegnare, un vincolo, o si cambia la distribuzione degli spazi.' },
+      { d: 'Cosa cambia fra CILA e SCIA?', r: 'La CILA copre la manutenzione straordinaria senza toccare le strutture: si presenta e si parte. La SCIA serve quando si interviene su parti strutturali o si cambia la sagoma: costa di più e richiede più documenti.' },
+      { d: 'La casa non è conforme al catasto: cosa succede?', r: 'Va sanata prima di vendere o di aprire un cantiere. Il geometra verifica lo scostamento e presenta la variazione. Scoprirlo dopo il compromesso è il modo più caro di accorgersene.' }
+    ]
+  },
+  {
+    slug: 'architetto', nome: 'Architetto', articolo: 'un ', ruolo: 'professionista', tipo: 'architetto',
+    db: ['architetto'],
+    guida: '/quanto-costa-ristrutturare-casa', guidaNome: 'Quanto costa ristrutturare casa',
+    prezzo: '6–12% del valore dei lavori',
+    prezzoDettaglio: 'La parcella si calcola in percentuale sull\'importo dei lavori: più il progetto è piccolo, più la percentuale sale. Progetto, pratiche e direzione lavori sono tre voci diverse e vanno chieste separate.',
+    quando: [
+      'Ristrutturazione con cambio di distribuzione degli spazi',
+      'Progetto d\'interni, arredo su misura, scelta dei materiali',
+      'Immobili sotto vincolo o in centro storico',
+      'Pratiche in Comune quando serve un progetto disegnato'
+    ],
+    chiedere: [
+      'Cosa comprende esattamente la parcella: progetto, pratiche, direzione lavori o tutto',
+      'Se le tavole di progetto restano tue e puoi usarle con un\'altra impresa',
+      'Quante revisioni del progetto sono comprese prima che si paghino a parte',
+      'Se segue anche il cantiere o solo il disegno'
+    ],
+    faq: [
+      { d: 'Serve davvero l\'architetto per ristrutturare?', r: 'Per rifare un bagno o imbiancare, no. Serve quando si spostano muri, si cambia la pianta, c\'è un vincolo, o quando il risultato estetico conta quanto quello tecnico.' },
+      { d: 'Quanto incide la parcella sul costo totale?', r: 'Su una ristrutturazione media la progettazione pesa attorno al 10%. Su lavori piccoli la percentuale sale, perché il lavoro del progettista non si dimezza col dimezzarsi del cantiere.' },
+      { d: 'Posso far fare il progetto a uno e i lavori a un altro?', r: 'Sì, ed è la situazione normale. Chiedi però per iscritto che le tavole siano tue: senza quella riga, cambiare impresa a metà strada diventa complicato.' }
+    ]
+  },
+  {
+    slug: 'ingegnere-strutturale', nome: 'Ingegnere strutturale', articolo: 'un ', ruolo: 'professionista', tipo: 'ingegnere_strutturale',
+    db: ['ingegnere_strutturale', 'ingegnere strutturale'],
+    guida: '/quanto-costa-abbattere-un-muro', guidaNome: 'Quanto costa abbattere un muro',
+    prezzo: 'DA CONFERMARE',
+    prezzoDettaglio: 'Si paga a corpo sulla singola pratica, e il prezzo dipende da quanto è complessa la struttura e dalla zona sismica. Il deposito in Genio Civile e i diritti non sono compresi nell\'onorario.',
+    quando: [
+      'Abbattimento di un muro portante e inserimento della trave',
+      'Ampliamenti, soppalchi, nuove aperture nei muri portanti',
+      'Verifiche sismiche e interventi di consolidamento',
+      'Sopraelevazioni e cambi di destinazione con aumento dei carichi'
+    ],
+    chiedere: [
+      'Se il deposito della pratica e i diritti sono compresi o si pagano a parte',
+      'Se servono saggi o prove sui materiali, e quanto costano',
+      'Chi firma il collaudo a fine lavori',
+      'Quanto tempo serve per l\'autorizzazione prima che il cantiere possa partire'
+    ],
+    faq: [
+      { d: 'Quando serve per forza l\'ingegnere strutturale?', r: 'Ogni volta che si tocca un elemento portante: muri, solai, travi, pilastri. Non è una scelta ma un obbligo, e senza la pratica depositata l\'impresa seria non comincia.' },
+      { d: 'Come faccio a sapere se un muro è portante?', r: 'Non si capisce a occhio né bussando. Serve il tecnico, che guarda i disegni depositati e fa le verifiche. Buttare giù un muro portante per sbaglio è il danno più caro che si possa fare in casa.' },
+      { d: 'Quanto tempo serve per la pratica sismica?', r: 'Dipende dal Comune e dalla zona sismica: da poche settimane a qualche mese. Vale la pena farla partire prima di fissare l\'inizio del cantiere.' }
+    ]
+  },
+  {
+    slug: 'certificato-energetico', nome: 'Certificato energetico (APE)', articolo: 'un ', ruolo: 'professionista', tipo: 'consulente_energetico',
+    db: ['consulente_energetico', 'certificatore energetico', 'termotecnico'],
+    guida: '/quanto-costa-cappotto-termico', guidaNome: 'Quanto costa il cappotto termico',
+    prezzo: '130–300 €',
+    prezzoDettaglio: 'Un APE per un appartamento costa fra 130 e 300 €, secondo la metratura e la città. Il sopralluogo è quasi sempre compreso: diffida di chi lo fa senza venire a vedere casa.',
+    quando: [
+      'Vendita o affitto di un immobile: senza APE il rogito non si fa',
+      'Fine lavori dopo una ristrutturazione importante',
+      'Accesso ai bonus e alle detrazioni energetiche',
+      'Capire quanto rendono davvero cappotto, infissi o pompa di calore'
+    ],
+    chiedere: [
+      'Se il sopralluogo è compreso — un APE fatto solo sulle carte è a rischio di nullità',
+      'In quanti giorni viene consegnato e registrato in Regione',
+      'Se la registrazione e i diritti regionali sono compresi',
+      'Se il tecnico è abilitato e iscritto all\'elenco regionale dei certificatori'
+    ],
+    faq: [
+      { d: 'Quanto dura l\'APE?', r: 'Dieci anni, ma decade prima se fai lavori che cambiano le prestazioni dell\'edificio: cappotto, infissi nuovi, caldaia sostituita.' },
+      { d: 'Un APE da 50 € conviene?', r: 'Quasi sempre è fatto senza sopralluogo, e un APE senza sopralluogo può essere annullato con sanzione. Il risparmio di oggi diventa il problema del rogito.' },
+      { d: 'Chi lo paga, chi vende o chi compra?', r: 'Per legge lo paga chi vende o chi affitta: è un documento che deve esserci prima di mettere l\'immobile sul mercato, non dopo.' }
+    ]
+  },
+  {
+    slug: 'direttore-lavori', nome: 'Direttore dei lavori', articolo: 'un ', ruolo: 'professionista', tipo: 'direttore_lavori',
+    db: ['direttore_lavori', 'direttore dei lavori'],
+    guida: '/come-leggere-un-preventivo-edile', guidaNome: 'Come leggere un preventivo edile',
+    prezzo: '2–5% dell\'importo dei lavori',
+    prezzoDettaglio: 'La direzione lavori si paga in percentuale sull\'importo del cantiere. È la voce che molti tagliano per risparmiare, ed è spesso quella che avrebbe fatto risparmiare di più.',
+    quando: [
+      'Ristrutturazioni importanti, dove le imprese in cantiere sono più di una',
+      'Lavori con pratiche edilizie o con detrazioni fiscali da rendicontare',
+      'Quando non puoi seguire il cantiere di persona',
+      'Ogni volta che servono stati di avanzamento prima di pagare'
+    ],
+    chiedere: [
+      'Quante visite in cantiere sono comprese, e ogni quanto',
+      'Se firma anche gli stati di avanzamento che autorizzano i pagamenti',
+      'Se è la stessa persona che ha fatto il progetto o è indipendente dall\'impresa',
+      'Cosa succede se trova un lavoro fatto male: chi paga il rifacimento'
+    ],
+    faq: [
+      { d: 'È obbligatorio il direttore dei lavori?', r: 'Lo è per legge quando c\'è una pratica edilizia con opere strutturali. Fuori da quei casi non è obbligatorio, ma è chi controlla che il lavoro pagato sia il lavoro fatto.' },
+      { d: 'Può essere l\'impresa a nominarlo?', r: 'Meglio di no. Il direttore dei lavori tutela chi paga: se lo sceglie l\'impresa, controlla sé stessa. Nominalo tu, anche quando te lo propone lei.' },
+      { d: 'Serve anche per lavori piccoli?', r: 'Per un bagno no. Da una ristrutturazione completa in su, la percentuale che costa si ripaga al primo errore che evita o al primo pagamento che blocca.' }
+    ]
+  },
+  {
+    slug: 'interior-designer', nome: 'Interior designer', articolo: 'un ', ruolo: 'professionista', tipo: 'interior_designer',
+    db: ['interior_designer', 'interior designer', 'arredatore'],
+    guida: '/quanto-costa-rifare-la-cucina', guidaNome: 'Quanto costa rifare la cucina',
+    prezzo: 'DA CONFERMARE',
+    prezzoDettaglio: 'Si paga a progetto oppure a metro quadro di casa. È un lavoro di progettazione degli spazi e delle finiture: non comprende i mobili né la posa, che si pagano a parte.',
+    quando: [
+      'Casa nuova o appena comprata da arredare da zero',
+      'Ristrutturazione dove conta come viene, non solo che funzioni',
+      'Cucine e bagni su misura, dove ogni centimetro va deciso prima',
+      'Scelta di colori, luci, materiali e arredi coordinati'
+    ],
+    chiedere: [
+      'Cosa consegna: disegni, render, elenco dei materiali, computo degli arredi',
+      'Quante revisioni sono comprese nel prezzo',
+      'Se prende provvigioni dai fornitori che consiglia — chiedilo, e chiedilo per iscritto',
+      'Se segue anche la posa e il coordinamento dei fornitori'
+    ],
+    faq: [
+      { d: 'Che differenza c\'è con l\'architetto?', r: 'L\'architetto è abilitato e può firmare pratiche e progetti strutturali. L\'interior designer lavora su spazi, arredi e finiture: se servono pratiche in Comune, serve comunque un tecnico abilitato.' },
+      { d: 'Conviene per una casa piccola?', r: 'Spesso proprio lì conviene di più: su pochi metri quadri un errore di distribuzione si paga tutti i giorni, e non si corregge senza rifare.' },
+      { d: 'Prende provvigioni dai negozi?', r: 'Alcuni sì. Non è di per sé un male, ma va detto prima: sapere come guadagna chi ti consiglia è il modo più semplice di capire quanto è libero il consiglio.' }
+    ]
   }
 ];
 
@@ -449,6 +604,40 @@ async function impreseCitta(citta) {
   }
 }
 
+
+/* ============================================================
+   LE PAROLE GIUSTE PER CHI LEGGE
+   12 set 2026. Un artigiano fa un PREVENTIVO, un tecnico accetta
+   un INCARICO e chiede un ONORARIO. Sul sito i professionisti
+   hanno gia' la loro terminologia: qui la rispettiamo, se no la
+   pagina suona sbagliata a chi quel mondo lo conosce.
+   Una voce senza `ruolo` resta un artigiano, come prima.
+   ============================================================ */
+function parole(m) {
+  if (m.ruolo === 'professionista') {
+    return {
+      preventivo: 'incarico',
+      preventivi: 'incarichi',
+      chiediUn: 'Chiedi un preventivo di onorario',
+      cercaUrl: (c) => `/cerca-professionisti.html?citta=${encodeURIComponent(c.nome)}${m.tipo ? '&tipo=' + m.tipo : ''}`,
+      cercaTutti: (c) => `Vedi tutti i professionisti a ${esc(c.nome)}`,
+      sonoQui: 'Questi professionisti della zona di',
+      siOccupano: 'si occupano di questo tipo di incarichi. Visita i profili per vedere le referenze e chiedere un preventivo di onorario.',
+      gratuiti: 'Primo contatto gratuito.'
+    };
+  }
+  return {
+    preventivo: 'preventivo',
+    preventivi: 'preventivi',
+    chiediUn: 'Chiedi un preventivo',
+    cercaUrl: (c) => `/cerca-imprese?citta=${encodeURIComponent(c.nome)}`,
+    cercaTutti: (c) => `Vedi tutte le imprese a ${esc(c.nome)}`,
+    sonoQui: 'Queste attività della zona di',
+    siOccupano: 'si occupano di questo tipo di lavori. Visita i profili per vedere foto dei lavori, recensioni e chiedere un preventivo gratuito.',
+    gratuiti: 'Preventivi gratuiti.'
+  };
+}
+
 function combacia(impresa, mestiere) {
   const voci = []
     .concat(Array.isArray(impresa.mestieri) ? impresa.mestieri : [])
@@ -478,11 +667,12 @@ function cartellino(i) {
    la richiesta. E' il motivo per cui queste pagine possono nascere
    prima che il database sia pieno. */
 function bloccoImprese(m, c, imprese) {
+  const P = parole(m);
   if (!imprese.length) {
     return `  <div class="section" id="imprese-locali">
     <h2>${esc(m.nome)} a ${esc(c.nome)}: lascia la tua richiesta</h2>
-    <p>Su TrovaImpresa non c'è ancora ${esc(m.articolo)}${esc(m.nome.toLowerCase())} iscritto a ${esc(c.nome)}. Lascia lo stesso la richiesta: la giriamo alle imprese della zona che si occupano di lavori simili e a quelle che si iscrivono nei giorni successivi.</p>
-    <p style="text-align:center;margin-top:20px;"><a href="/cerca-imprese?citta=${encodeURIComponent(c.nome)}" class="hero-btn" style="display:inline-block;">Vedi tutte le imprese a ${esc(c.nome)} →</a></p>
+    <p>Su TrovaImpresa non c'è ancora ${esc(m.articolo)}${esc(m.nome.toLowerCase())} iscritto a ${esc(c.nome)}. Lascia lo stesso la richiesta: la giriamo ${m.ruolo === 'professionista' ? 'ai professionisti della zona che si occupano di pratiche simili' : 'alle imprese della zona che si occupano di lavori simili'} e a chi si iscrive nei giorni successivi.</p>
+    <p style="text-align:center;margin-top:20px;"><a href="${P.cercaUrl(c)}" class="hero-btn" style="display:inline-block;">${P.cercaTutti(c)} →</a></p>
   </div>`;
   }
 
@@ -501,11 +691,11 @@ function bloccoImprese(m, c, imprese) {
   };
   return `  <div class="section" id="imprese-locali">
     <h2>${esc(m.nome)} a ${esc(c.nome)}: chi trovi su TrovaImpresa</h2>
-    <p>Queste attività della zona di ${esc(c.nome)} si occupano di questo tipo di lavori. Visita i profili per vedere foto dei lavori, recensioni e chiedere un preventivo gratuito.</p>
+    <p>${P.sonoQui} ${esc(c.nome)} ${P.siOccupano}</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0;">
 ${items}
     </div>
-    <p style="text-align:center;"><a href="/cerca-imprese?citta=${encodeURIComponent(c.nome)}" style="color:#0066ff;font-weight:700;">Vedi tutte le imprese a ${esc(c.nome)} →</a></p>
+    <p style="text-align:center;"><a href="${P.cercaUrl(c)}" style="color:#0066ff;font-weight:700;">${P.cercaTutti(c)} →</a></p>
   </div>
   <script type="application/ld+json">
 ${JSON.stringify(itemList, null, 2)}
@@ -558,9 +748,10 @@ const STILE = `<style>
 </style>`;
 
 function costruisciPagina(m, c, imprese) {
+  const P = parole(m);
   const url = urlPagina(m, c);
-  const titolo = `${m.nome} a ${c.nome}: prezzi ${TODAY.slice(0, 4)} e imprese | TrovaImpresa`;
-  const descr = `${m.nome} a ${c.nome}: prezzi ${m.prezzo}, quando serve e cosa chiedere nel preventivo. Confronta le imprese della zona e chiedi un preventivo gratuito.`;
+  const titolo = `${m.nome} a ${c.nome}: prezzi ${TODAY.slice(0, 4)} ${m.ruolo === 'professionista' ? 'e studi' : 'e imprese'} | TrovaImpresa`;
+  const descr = `${m.nome} a ${c.nome}: ${m.prezzo}, quando serve e cosa chiedere. Confronta i profili della zona e chiedi un ${P.preventivo}.`;
 
   const schemaLocal = {
     '@context': 'https://schema.org',
@@ -602,7 +793,7 @@ function costruisciPagina(m, c, imprese) {
   const vicine = CITTA.filter(x => x.slug !== c.slug)
     .map(x => `<a href="/${m.slug}-${x.slug}">${esc(x.nome)}</a>`)
     .join(' · ');
-  const altriMestieri = MESTIERI.filter(x => x.slug !== m.slug)
+  const altriMestieri = MESTIERI.filter(x => x.slug !== m.slug && (x.ruolo || '') === (m.ruolo || ''))
     .map(x => `<a href="/${x.slug}-${c.slug}">${x.nome}</a>`)
     .join(' · ');
 
@@ -645,8 +836,8 @@ ${JSON.stringify(schemaBc, null, 2)}
 
 <div class="hero">
   <h1>${esc(m.nome)} a ${esc(c.nome)}</h1>
-  <p>Prezzi ${esc(m.prezzo)}, cosa chiedere nel preventivo e le imprese della zona di ${esc(c.nome)}. Preventivi gratuiti.</p>
-  <a href="/cerca-imprese?citta=${encodeURIComponent(c.nome)}" class="hero-btn">🔍 Chiedi un preventivo a ${esc(c.nome)}</a>
+  <p>${esc(m.prezzo)}, cosa chiedere prima di firmare e chi trovi nella zona di ${esc(c.nome)}. ${P.gratuiti}</p>
+  <a href="${P.cercaUrl(c)}" class="hero-btn">🔍 ${P.chiediUn} a ${esc(c.nome)}</a>
 </div>
 
 <div class="section">
@@ -656,7 +847,9 @@ ${JSON.stringify(schemaBc, null, 2)}
     <p>${m.prezzoDettaglio}</p>
     <p style="margin-bottom:0;"><a href="${m.guida}" style="color:#0066ff;font-weight:700;">${esc(m.guidaNome)}: la guida completa →</a></p>
   </div>
-  <p>Queste cifre sono medie nazionali, prese dalle nostre guide prezzi scritte da chi i cantieri li ha fatti davvero. A ${esc(c.nome)} il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.</p>
+  <p>${m.ruolo === 'professionista'
+      ? `Queste cifre sono medie di mercato. A ${esc(c.nome)} l'onorario può stare un po' sopra o un po' sotto secondo la complessità della pratica, i tempi del Comune e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea: un onorario molto sotto il minimo di solito vuol dire che qualcosa non è compreso.`
+      : `Queste cifre sono medie nazionali, prese dalle nostre guide prezzi scritte da chi i cantieri li ha fatti davvero. A ${esc(c.nome)} il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.`}</p>
 ${sezioneLocale(m, c)}
 
   <h2>Quando serve ${esc(m.articolo)}${esc(m.nome.toLowerCase())}</h2>
@@ -664,8 +857,8 @@ ${sezioneLocale(m, c)}
 ${quando}
   </ul>
 
-  <h2>Cosa chiedere nel preventivo</h2>
-  <p>Il preventivo più basso non è quasi mai il più conveniente: è quasi sempre quello a cui manca qualcosa. Queste sono le domande da fare prima di firmare.</p>
+  <h2>Cosa chiedere prima di firmare</h2>
+  <p>Il ${P.preventivo} più basso non è quasi mai il più conveniente: è quasi sempre quello a cui manca qualcosa. Queste sono le domande da fare prima di firmare.</p>
   <ul>
 ${chiedere}
   </ul>
@@ -680,7 +873,7 @@ ${bloccoImprese(m, c, imprese)}
 
 <div class="section" style="padding-top:0;">
   <div class="section" id="altri-mestieri" style="padding:0;">
-    <h2>Altri mestieri a ${esc(c.nome)}</h2>
+    <h2>${m.ruolo === 'professionista' ? 'Altri professionisti' : 'Altri mestieri'} a ${esc(c.nome)}</h2>
     <p style="line-height:2.1;">${altriMestieri}</p>
     <p><a href="/imprese-${c.slug}">Tutte le imprese e gli artigiani a ${esc(c.nome)} →</a></p>
   </div>
