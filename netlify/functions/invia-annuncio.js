@@ -73,10 +73,31 @@ function codiceDisiscrizione(email) {
     .digest('hex');
 }
 
+/* ⚠️ 12 set 2026 — I LINK NON ERANO CLICCABILI.
+   Nella campagna del 12 set i due indirizzi ([PAGINA] e [VETRINA])
+   uscivano come testo semplice dentro il paragrafo. Alcuni programmi di
+   posta li rendono cliccabili da soli, altri NO: chi legge da li' vede
+   un indirizzo che non si puo' toccare e non apre niente. Su una mail
+   il cui scopo e' far aprire due pagine, e' il difetto peggiore possibile.
+   Qui ogni indirizzo che comincia per http diventa un vero <a href>,
+   blu e sottolineato, cliccabile ovunque.
+   ⚠️ Si linkifica DOPO esc(), quindi dentro l'href finisce il testo gia'
+   messo al sicuro (&amp; al posto di &): in HTML e' la forma giusta.
+   ⚠️ La punteggiatura finale (punto, virgola, parentesi) resta FUORI dal
+   link, se no il link si porta dietro il punto e la pagina non esiste. */
+function cliccabili(html) {
+  return html.replace(/https?:\/\/[^\s<]+/g, function (url) {
+    let coda = '';
+    const m = url.match(/[.,;:!?)\]]+$/);
+    if (m) { coda = m[0]; url = url.slice(0, -coda.length); }
+    return '<a href="' + url + '" style="color:#0066ff;text-decoration:underline;word-break:break-all">' + url + '</a>' + coda;
+  });
+}
+
 function testoInHtml(testo, emailDest) {
   const paragrafi = String(testo || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
   const corpo = paragrafi
-    .map(p => '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#12233a">' + esc(p).replace(/\n/g, '<br>') + '</p>')
+    .map(p => '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#12233a">' + cliccabili(esc(p).replace(/\n/g, '<br>')) + '</p>')
     .join('');
   return '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f7fb">'
     + '<div style="max-width:600px;margin:0 auto;padding:28px 22px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">'
