@@ -31,6 +31,14 @@
   .prezzo-box { background:white; border-radius:16px; border-top:4px solid var(--arancio); box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:24px; margin:8px 0 28px; }
   .prezzo-cifra { font-family:'Playfair Display',serif; font-size:2rem; color:#0a2a4d; margin-bottom:8px; }
   .prezzo-box p:last-child { margin-bottom:0; }
+  /* 12 set 2026 — la tabella del decreto Parametri.
+     Su telefono scorre di lato dentro .tab-wrap invece di rompere la pagina. */
+  .tab-wrap { overflow-x:auto; margin:8px 0 14px; }
+  table.prezzi { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); font-size:0.95rem; }
+  table.prezzi th { background:#0a2a4d; color:white; text-align:left; padding:12px 14px; font-size:0.88rem; white-space:nowrap; }
+  table.prezzi td { padding:12px 14px; border-top:1px solid #eef1f5; color:#444; white-space:nowrap; }
+  .nota-fonte { font-size:0.82rem; color:#888; line-height:1.55; }
+  .prezzo-box .nota-fonte { margin-top:10px; }
   .categorie { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin:32px 0; }
   .cat-card { background:white; border-radius:12px; padding:20px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-decoration:none; color:#1a1a1a; }
   .cat-icon { font-size:2rem; margin-bottom:8px; }
@@ -161,6 +169,21 @@
   <h2>Il settore edile a Genova</h2>
   <p>Perché Genova fa storia a sé, e cosa vuol dire per chi cerca un direttore dei lavori in zona.</p>
   <p>Il settore edile genovese è profondamente segnato dalla morfologia della città: i carruggi del centro storico medievale, tra i più estesi d'Europa, richiedono interventi di restauro conservativo e consolidamento strutturale di grande complessità, spesso da condurre in contesti di difficile accessibilità. I pendii ripidi e le valli dell'entroterra ligure impongono attenzione costante alla stabilità dei versanti e alla manutenzione del patrimonio costruito. La riqualificazione energetica degli edifici residenziali degli anni Sessanta e Settanta, diffusissimi nei quartieri di levante e ponente, rappresenta oggi una delle principali opportunità per le imprese locali, anche grazie agli incentivi nazionali. Il contesto sismico, classificato in zona 3, è tenuto in considerazione nei progetti di ristrutturazione più rilevanti. La rigenerazione del waterfront e di alcune aree portuali dismesse continua a stimolare investimenti misti pubblici e privati, mantenendo attivo un comparto che deve comunque fare i conti con una demografia cittadina in progressivo calo.</p>
+
+
+  <h2>Quanto dice la legge: il decreto Parametri</h2>
+  <p>La direzione lavori ha una tariffa ufficiale: il <strong>decreto Parametri</strong> (DM 17 giugno 2016). Non è obbligatoria fra privati, ma è il riferimento delle gare pubbliche e dei tribunali. Serve a capire se quello che ti chiedono è in linea.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Importo dei lavori</th><th>Direzione lavori</th><th>Incidenza</th></tr>
+      <tr><td>20.000 €</td><td><strong>1.340 €</strong></td><td><span style="color:#888">6,7% dei lavori</span></td></tr>
+      <tr><td>50.000 €</td><td><strong>2.462 €</strong></td><td><span style="color:#888">4,9% dei lavori</span></td></tr>
+      <tr><td>100.000 €</td><td><strong>3.952 €</strong></td><td><span style="color:#888">4,0% dei lavori</span></td></tr>
+      <tr><td>200.000 €</td><td><strong>6.432 €</strong></td><td><span style="color:#888">3,2% dei lavori</span></td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Calcolo secondo il DM 17 giugno 2016: compenso = V × G × Q × P, con P = 0,03 + 10/V<sup>0,4</sup>, G = 0,95 (categoria E.06) e Q = 0,320 (tavola Z-2, direzione lavori). Esclusi cassa previdenziale, IVA e spese.</p>
+  <p>Su lavori piccoli la percentuale sale, su quelli grandi scende. È il motivo per cui una direzione lavori al 2% su un bagno non esiste, e una al 5% su una villa è fuori mercato.</p>
 
 
   <h2>Quando serve un direttore dei lavori</h2>

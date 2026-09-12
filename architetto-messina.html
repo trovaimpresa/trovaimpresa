@@ -31,6 +31,14 @@
   .prezzo-box { background:white; border-radius:16px; border-top:4px solid var(--arancio); box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:24px; margin:8px 0 28px; }
   .prezzo-cifra { font-family:'Playfair Display',serif; font-size:2rem; color:#0a2a4d; margin-bottom:8px; }
   .prezzo-box p:last-child { margin-bottom:0; }
+  /* 12 set 2026 — la tabella del decreto Parametri.
+     Su telefono scorre di lato dentro .tab-wrap invece di rompere la pagina. */
+  .tab-wrap { overflow-x:auto; margin:8px 0 14px; }
+  table.prezzi { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); font-size:0.95rem; }
+  table.prezzi th { background:#0a2a4d; color:white; text-align:left; padding:12px 14px; font-size:0.88rem; white-space:nowrap; }
+  table.prezzi td { padding:12px 14px; border-top:1px solid #eef1f5; color:#444; white-space:nowrap; }
+  .nota-fonte { font-size:0.82rem; color:#888; line-height:1.55; }
+  .prezzo-box .nota-fonte { margin-top:10px; }
   .categorie { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin:32px 0; }
   .cat-card { background:white; border-radius:12px; padding:20px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-decoration:none; color:#1a1a1a; }
   .cat-icon { font-size:2rem; margin-bottom:8px; }
@@ -161,6 +169,21 @@
   <h2>Il settore edile a Messina</h2>
   <p>Perché Messina fa storia a sé, e cosa vuol dire per chi cerca un architetto in zona.</p>
   <p>Il settore edile a Messina è profondamente segnato dalla storia sismica della città, ricostruita dopo il devastante terremoto del 1908 e caratterizzata da un tessuto urbano con edifici di inizio Novecento che oggi richiedono interventi di adeguamento sismico e riqualificazione energetica. Il patrimonio residenziale presenta ampie zone di edilizia popolare che necessitano di manutenzione straordinaria, mentre lungo il waterfront e nelle aree periferiche si registrano occasionali interventi di nuova costruzione. Le imprese locali lavorano frequentemente su consolidamenti strutturali, rifacimenti di facciate e installazione di impianti ad alta efficienza energetica, spesso agevolati dagli incentivi fiscali nazionali.</p>
+
+
+  <h2>Quanto dice la legge: il decreto Parametri</h2>
+  <p>Esiste una tariffa ufficiale dello Stato per architetti e ingegneri: il <strong>decreto Parametri</strong> (DM 17 giugno 2016). Non è obbligatoria fra privati, ma è il riferimento che usano le gare pubbliche e i tribunali. Serve a capire se una parcella è in linea o fuori scala.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Importo dei lavori</th><th>Progetto</th><th>Direzione lavori</th><th>Totale</th></tr>
+      <tr><td>20.000 €</td><td>1.256 €</td><td>1.340 €</td><td><strong>2.596 €</strong> &nbsp;<span style="color:#888;font-weight:400">(13,0%)</span></td></tr>
+      <tr><td>50.000 €</td><td>2.308 €</td><td>2.462 €</td><td><strong>4.769 €</strong> &nbsp;<span style="color:#888;font-weight:400">(9,5%)</span></td></tr>
+      <tr><td>100.000 €</td><td>3.705 €</td><td>3.952 €</td><td><strong>7.657 €</strong> &nbsp;<span style="color:#888;font-weight:400">(7,7%)</span></td></tr>
+      <tr><td>200.000 €</td><td>6.030 €</td><td>6.432 €</td><td><strong>12.462 €</strong> &nbsp;<span style="color:#888;font-weight:400">(6,2%)</span></td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Calcolo secondo il DM 17 giugno 2016: compenso = V × G × Q × P, con P = 0,03 + 10/V<sup>0,4</sup>. Qui G = 0,95 (edilizia residenziale corrente, categoria E.06) e Q secondo la tavola Z-2: 0,230 progetto definitivo, 0,070 esecutivo, 0,320 direzione lavori. Esclusi cassa previdenziale, IVA e spese.</p>
+  <p>Nota che la percentuale <strong>scende</strong> man mano che i lavori crescono: su un cantiere piccolo il lavoro del progettista non si dimezza, e per questo incide di più.</p>
 
 
   <h2>Quando serve un architetto</h2>
