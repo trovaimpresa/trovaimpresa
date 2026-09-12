@@ -328,7 +328,25 @@ const CITTA = [
   { slug: 'milano', nome: 'Milano', regione: 'Lombardia' },
   { slug: 'torino', nome: 'Torino', regione: 'Piemonte' },
   { slug: 'napoli', nome: 'Napoli', regione: 'Campania' },
-  { slug: 'rieti', nome: 'Rieti', regione: 'Lazio' }
+  { slug: 'rieti', nome: 'Rieti', regione: 'Lazio' },
+  /* 12 set 2026 — secondo giro: si passa da 5 a 20 citta'.
+     Ogni riga qui sotto ha la sua imprese-<slug>.html gia' in cartella:
+     controllato prima di aggiungerla. */
+  { slug: 'palermo', nome: 'Palermo', regione: 'Sicilia' },
+  { slug: 'genova', nome: 'Genova', regione: 'Liguria' },
+  { slug: 'bologna', nome: 'Bologna', regione: 'Emilia-Romagna' },
+  { slug: 'firenze', nome: 'Firenze', regione: 'Toscana' },
+  { slug: 'bari', nome: 'Bari', regione: 'Puglia' },
+  { slug: 'catania', nome: 'Catania', regione: 'Sicilia' },
+  { slug: 'verona', nome: 'Verona', regione: 'Veneto' },
+  { slug: 'venezia', nome: 'Venezia', regione: 'Veneto' },
+  { slug: 'messina', nome: 'Messina', regione: 'Sicilia' },
+  { slug: 'padova', nome: 'Padova', regione: 'Veneto' },
+  { slug: 'trieste', nome: 'Trieste', regione: 'Friuli-Venezia Giulia' },
+  { slug: 'brescia', nome: 'Brescia', regione: 'Lombardia' },
+  { slug: 'parma', nome: 'Parma', regione: 'Emilia-Romagna' },
+  { slug: 'modena', nome: 'Modena', regione: 'Emilia-Romagna' },
+  { slug: 'reggio-emilia', nome: 'Reggio Emilia', regione: 'Emilia-Romagna' }
 ];
 
 /* ============================================================
@@ -342,6 +360,47 @@ function esc(s) {
 
 function nomeFile(m, c) { return `${m.slug}-${c.slug}.html`; }
 function urlPagina(m, c) { return `${BASE}/${m.slug}-${c.slug}`; }
+
+/* ============================================================
+   IL PEZZO SCRITTO SU MISURA PER OGNI CITTA'
+   12 set 2026. Le pagine mestiere avevano lo stesso identico testo
+   in ogni citta': cambiava solo il nome. Con 5 citta' passa, con 20
+   o con 106 diventa un muro di pagine gemelle e Google le scarta.
+   La cura era gia' in casa: dentro ogni imprese-<slug>.html c'e' il
+   riquadro id="settore-locale", un paragrafo diverso per ognuna delle
+   106 citta'. Da qui lo leggiamo e lo portiamo dentro la pagina mestiere.
+   Se il riquadro non c'e' (citta' nuova, file ancora da generare) la
+   funzione torna stringa vuota e la pagina esce come prima: niente si
+   rompe, si perde solo quel pezzo.
+   ============================================================ */
+const cacheLocale = {};
+function paragrafoLocale(c) {
+  if (cacheLocale[c.slug] !== undefined) return cacheLocale[c.slug];
+  let testo = '';
+  try {
+    const f = path.join(OUT, `imprese-${c.slug}.html`);
+    if (fs.existsSync(f)) {
+      const html = fs.readFileSync(f, 'utf8');
+      const blocco = html.match(/id="settore-locale"[\s\S]*?<\/div>/);
+      if (blocco) {
+        const paragrafi = blocco[0].match(/<p>[\s\S]*?<\/p>/g) || [];
+        testo = paragrafi.join('\n  ');
+      }
+    }
+  } catch (e) { testo = ''; }
+  cacheLocale[c.slug] = testo;
+  return testo;
+}
+
+function sezioneLocale(m, c) {
+  const testo = paragrafoLocale(c);
+  if (!testo) return '';
+  return `
+  <h2>Il settore edile a ${esc(c.nome)}</h2>
+  <p>Perché ${esc(c.nome)} fa storia a sé, e cosa vuol dire per chi cerca ${esc(m.articolo)}${esc(m.nome.toLowerCase())} in zona.</p>
+  ${testo}
+`;
+}
 
 /* Le imprese di quella citta', filtrate poi per mestiere qui in JS:
    il mestiere sta sia nella colonna `mestiere` sia dentro l'array
@@ -598,6 +657,7 @@ ${JSON.stringify(schemaBc, null, 2)}
     <p style="margin-bottom:0;"><a href="${m.guida}" style="color:#0066ff;font-weight:700;">${esc(m.guidaNome)}: la guida completa →</a></p>
   </div>
   <p>Queste cifre sono medie nazionali, prese dalle nostre guide prezzi scritte da chi i cantieri li ha fatti davvero. A ${esc(c.nome)} il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.</p>
+${sezioneLocale(m, c)}
 
   <h2>Quando serve ${esc(m.articolo)}${esc(m.nome.toLowerCase())}</h2>
   <ul>
