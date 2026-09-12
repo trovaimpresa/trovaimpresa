@@ -109,6 +109,12 @@
     .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
     .seg button{min-width:0}
   }
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -361,6 +367,28 @@
         <summary>Quanto tempo ci vuole?</summary>
         <p>Una stanza si fa in <strong>mezza giornata / un giorno</strong>; un appartamento di 90 mq in <strong>2–4 giorni</strong>, considerando i tempi di asciugatura tra una mano e l'altra.</p>
       </details>
+    </div>
+
+
+    <!-- ====== TROVA NELLA TUA CITTA ====== -->
+    <div class="cities">
+      <h2>Trova un imbianchino nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imbianchini e decoratori verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imbianchino-roma">Roma</a>
+        <a href="/imbianchino-milano">Milano</a>
+        <a href="/imbianchino-napoli">Napoli</a>
+        <a href="/imbianchino-torino">Torino</a>
+        <a href="/imbianchino-bologna">Bologna</a>
+        <a href="/imbianchino-firenze">Firenze</a>
+        <a href="/imbianchino-genova">Genova</a>
+        <a href="/imbianchino-palermo">Palermo</a>
+        <a href="/imbianchino-bari">Bari</a>
+        <a href="/imbianchino-verona">Verona</a>
+        <a href="/imbianchino-venezia">Venezia</a>
+        <a href="/imbianchino-rieti">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
     </div>
 
   </article>
