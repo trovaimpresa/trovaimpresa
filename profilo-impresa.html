@@ -2310,7 +2310,14 @@ async function caricaFotoLavori(ownerId){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
   const card=grid.closest('.card');
   if(!ownerId||!sc){if(card)card.style.display='none';return}
-  const {data,error}=await sc.from('lavori_foto').select('*').eq('owner_id',ownerId).eq('pubblico',true).order('created_at',{ascending:false});
+  /* ⭐ 12 set 2026 — l'ordine lo decide l'impresa dal suo pannello
+     («⭐ Metti per prima»): `ordine` piu' alto viene per primo. Tutte a 0
+     — cioe' chi non ha mai toccato la stella — significa che decide la
+     data di caricamento, esattamente come si e' sempre fatto.
+     ⚠️ Questo ordine deve restare UGUALE a quello di caricaListaLavoriFoto
+     nei pannelli, se no l'impresa mette la stella e sulla scheda non
+     cambia niente: e' proprio la cosa che ci hanno chiesto. */
+  const {data,error}=await sc.from('lavori_foto').select('*').eq('owner_id',ownerId).eq('pubblico',true).order('ordine',{ascending:false}).order('created_at',{ascending:false});
   const lavori=Array.isArray(data)?data:[];
   if(error||!lavori.length){if(card)card.style.display='none';return}
   /* 2 settembre 2026: titolo e descrizione erano nel database (76 foto su 134) e
