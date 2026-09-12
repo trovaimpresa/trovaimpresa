@@ -119,6 +119,12 @@
     .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
     .seg button{min-width:0}
   }
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -408,6 +414,28 @@
       Le disposizioni regionali e i regolamenti edilizi comunali possono prevedere regole diverse:
       verifica sempre con un tecnico abilitato prima di iniziare i lavori.
     </p>
+
+
+    <!-- ====== TROVA NELLA TUA CITTA ====== -->
+    <div class="cities">
+      <h2>Prima dei lavori serve il geometra</h2>
+      <p>CILA, SCIA, catasto: senza la pratica il cantiere non parte, e la pratica la fa un tecnico. Trova un geometra nella tua città:</p>
+      <div class="cities-grid">
+        <a href="/geometra-roma">Roma</a>
+        <a href="/geometra-milano">Milano</a>
+        <a href="/geometra-napoli">Napoli</a>
+        <a href="/geometra-torino">Torino</a>
+        <a href="/geometra-bologna">Bologna</a>
+        <a href="/geometra-firenze">Firenze</a>
+        <a href="/geometra-genova">Genova</a>
+        <a href="/geometra-palermo">Palermo</a>
+        <a href="/geometra-bari">Bari</a>
+        <a href="/geometra-verona">Verona</a>
+        <a href="/geometra-venezia">Venezia</a>
+        <a href="/geometra-rieti">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
+    </div>
 
   </article>
 </main>
