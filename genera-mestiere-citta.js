@@ -146,6 +146,22 @@ const TAB_LAZIO_IMPRESA_EDILE = `
   <p><a href="/quanto-costa-cappotto-termico" style="color:#0066ff;font-weight:700;">Il conto completo su una casa tipo, voce per voce →</a></p>
 `;
 
+const TAB_STRUTTURE = `
+  <h2>Quanto dice la legge: il decreto Parametri</h2>
+  <p>Anche per le strutture esiste una tariffa ufficiale dello Stato, il <strong>decreto Parametri</strong> (DM 17 giugno 2016). Il conto non si fa sul valore della casa ma sul valore delle <em>sole opere strutturali</em>: la trave, il rinforzo, il consolidamento. Ecco i casi più comuni in una casa.</p>
+  <div class="tab-wrap">
+  <table class="prezzi">
+    <tr><th>Intervento</th><th>Valore delle opere</th><th>Progetto e calcoli</th><th>Direzione lavori</th><th>Totale</th></tr>
+      <tr><td>Apertura di un muro portante, con trave</td><td>5.000 €</td><td>515 €</td><td>652 €</td><td><strong>1.167 €</strong></td></tr>
+      <tr><td>Rinforzo o rifacimento di un solaio</td><td>15.000 €</td><td>1.041 €</td><td>1.319 €</td><td><strong>2.360 €</strong></td></tr>
+      <tr><td>Ampliamento o soppalco</td><td>30.000 €</td><td>1.640 €</td><td>2.078 €</td><td><strong>3.718 €</strong></td></tr>
+      <tr><td>Sopraelevazione</td><td>80.000 €</td><td>3.177 €</td><td>4.024 €</td><td><strong>7.201 €</strong></td></tr>
+  </table>
+  </div>
+  <p class="nota-fonte">Calcolo secondo il DM 17 giugno 2016: compenso = V × G × Q × P, con P = 0,03 + 10/V<sup>0,4</sup>, G = 0,95 (categoria S.03, strutture in cemento armato con azioni sismiche) e Q della tavola Z-2 per le strutture: 0,180 progetto definitivo, 0,120 esecutivo, 0,380 direzione lavori. Esclusi cassa previdenziale, IVA, diritti di deposito e indagini sui materiali.</p>
+  <p>Le cifre della tabella sono il <strong>minimo di riferimento</strong>: sul mercato un tecnico può chiedere di più, soprattutto quando la struttura è vecchia e servono saggi per capire com'è fatta davvero.</p>
+`;
+
 const MESTIERI = [
   {
     slug: 'impresa-edile', nome: 'Impresa edile', articolo: "un'",
@@ -481,6 +497,7 @@ const MESTIERI = [
     guida: '/quanto-costa-abbattere-un-muro', guidaNome: 'Quanto costa abbattere un muro',
     prezzo: 'da 600 € a pratica',
     prezzoDettaglio: 'Una verifica semplice parte da circa 600 €. Una pratica per aprire un muro portante, con calcoli e deposito, sta di solito fra 1.000 e 2.500 €. I progetti complessi — solai da rinforzare, consolidamenti, sopraelevazioni — arrivano a 7.500 € e oltre. Il deposito in Genio Civile e i diritti non sono compresi nell\'onorario.',
+    tabella: TAB_STRUTTURE,
     fonte: 'Fasce rilevate a settembre 2026 sui preventivi pubblicati dai portali di settore per la progettazione strutturale (600–7.500 €).',
     quando: [
       'Abbattimento di un muro portante e inserimento della trave',
