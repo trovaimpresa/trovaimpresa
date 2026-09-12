@@ -23416,3 +23416,212 @@ Un solo modulo su `app.g2digitalmarkets.com/get-listed/start` vale per
    ferma. L'alternativa a costo zero è mandare la notizia («un muratore di
    Rieti si è costruito da solo un sito su →106← città») a più testate locali
    come cronaca, non come pubblicità
+
+---
+
+# 12 SETTEMBRE 2026 — DA 340 A 1.802 PAGINE, LA CAMPAGNA, E LE FOTO
+
+Sessione lunga, →7← push. Partita da una domanda di Alex («mi posiziono meglio su
+Google?») e finita su tre cose diverse: le pagine mestiere+città su tutta Italia,
+la prima campagna email vera, e la foto che l'impresa può scegliere.
+
+## LA REGOLA NUOVA DI ALEX (sostituisce «modifica solo quello che chiedo»)
+
+> «facciamo di tutto per favore anche se non te lo chiedo, perché se non lo
+> chiedo è perché non lo so come si fa, non perché non lo voglio fare»
+
+Quindi Claude porta a termine il lavoro **per intero** — i pezzi necessari, i
+controlli, le parti che Alex non sa di dover chiedere — senza aspettare il
+permesso pezzo per pezzo, restando dentro il lavoro in corso.
+
+⚠️ **Resta in piedi la regola del 5 set**: per qualunque cosa che si vede a
+schermo, prima l'anteprima in foto (computer E telefono), i file veri si toccano
+solo dopo il suo ok.
+
+## DA 20 A TUTTE E 106 LE CITTÀ
+
+**La prova che ha fatto decidere.** Simulato il link che ogni iscritto vero
+avrebbe ricevuto nella mail. Su →102← iscritti: solo →46← ricevevano la pagina
+del proprio mestiere, →3← la pagina città, e →53← — più della metà — solo la
+vetrina, perché la loro città non era fra le →20←. I professionisti stavano
+peggio di tutti: geometra a Sassari, geometra a Matera, architetto a La Spezia,
+nessuna delle tre coperta. Dopo il lavoro: →86← con la pagina giusta, →11← con
+la pagina città, →5← con la sola vetrina.
+
+**Le 106 città sono i capoluoghi di provincia**, e c'è già una
+`imprese-<slug>.html` per ognuno. Non servono pagine di provincia separate: le
+pagine mestiere pescano per città **O provincia**, quindi Portici finisce dentro
+`muratore-napoli`. Le province sono coperte attraverso il capoluogo.
+
+**Controllato prima di generare**: tutti e →106← i file città hanno il riquadro
+`settore-locale`, e tutti e →106← i paragrafi sono DIVERSI fra loro (da →577← a
+→1.168← caratteri, media →726←). Quindi le →1.802← pagine non sono gemelle.
+
+**Totale**: →1.802← pagine = →17← voci × →106← città. Testo visibile medio
+→12.160← caratteri. Titoli e H1 tutti diversi, zero doppioni, zero link rotti.
+
+### Tre script nuovi, che chiudono tre buchi
+- `aggiorna-categorie-citta.js` — riscrive la griglia «Categorie disponibili a X»
+  in TUTTE le pagine città (→12← artigiani + →6← tecnici verso le pagine vere).
+  Ha toccato →87← pagine, →19← erano già a posto. Ogni pagina città regala →17←
+  link interni: →1.802← link, nessuno rotto. **Senza questo le pagine nuove
+  nascevano orfane**, e una pagina orfana Google la ignora anche se sta in sitemap
+- `sincronizza-citta.js` — RISOLVE il problema delle tre copie dell'elenco città.
+  Legge solo da `genera-mestiere-citta.js` e riscrive l'elenco dentro
+  `netlify/functions/invia-annuncio.js` e `js/condividi-vetrina.js`. Era proprio
+  quel disallineamento a far ricevere il link sbagliato a →53← iscritti
+- `aggiorna-citta-guide.js` PATCHATO — ora prende solo le prime →20← città
+  (`MAX = 20`): →106← pulsanti in fondo a ogni guida sarebbero un muro illeggibile
+
+### La regola che dorme: 6 in evidenza + tutti gli altri
+Sopra le →12← imprese la pagina si divide in due: «In evidenza» →6← cartellini
+grandi ai Premium (`IN_EVIDENZA`) e «Tutti gli altri a <città>» un elenco
+compatto fino a →60← nomi (`MAX_ELENCO`), free compresi. Sotto le →12← non cambia
+NIENTE. Verificato: →0← pagine su →1.802← si dividono oggi.
+
+**La giostra** (`ordina()`): quando i Premium sono più di →6←, il punto di
+partenza gira ogni settimana e gira diverso su ogni pagina (seme = numero di
+settimana + hash del nome file). Se no in una città con →40← Premium ne
+pagherebbero →40← e se ne vedrebbero sempre gli stessi →6←. I free restano sotto
+ordinati per voto: quello è merito, non turno.
+
+**Il perché strategico**, detto ad Alex: oggi il Premium è un cartellino viola.
+Con questa regola diventa «stai in cima con la foto, o stai in una riga di
+elenco» — una differenza che si capisce in mezzo secondo, senza togliere niente
+a nessuno e senza rompere la promessa «resta gratis».
+
+## DIFETTI TROVATI E CHIUSI OGGI
+
+1. **La provincia che non si chiama come il capoluogo** — il generatore pesca con
+   `provincia ilike 'Monza%'`, quindi una ditta di Besana in Brianza sta DAVVERO
+   dentro `muratore-monza`; ma email e pannello cercavano la provincia identica
+   nell'elenco e mandavano alla scheda. Aggiunta `dallaProvincia()` in tutti e due
+   i file. Sistemate «Monza e della Brianza», «Forlì-Cesena», «Massa-Carrara».
+   Restano fuori «Verbano-Cusio-Ossola» e «Sud Sardegna»: quelle imprese non
+   compaiono nemmeno nelle pagine, quindi il link alla scheda è corretto
+2. **«Troppi destinatari in una volta (102). Il massimo è 100»** — `MAX_DESTINATARI`
+   era il limite di Resend usato per sbaglio come tetto nostro. Ora la lista si
+   spezza in gruppi da →100← (`PER_LOTTO`) con →600←ms di pausa; tetto nostro a
+   →1000←. ⚠️ Se un gruppo fallisce a metà NON si dice «non è partita»: si dice
+   quante sono partite e che non vanno rimandate
+3. **I link non cliccabili nelle email** — uscivano come testo semplice. Funzione
+   `cliccabili()` in `testoInHtml`: ogni indirizzo diventa un `<a href>` blu. Si
+   linkifica DOPO `esc()` e la punteggiatura finale resta fuori dal link
+4. **Il «37 persone» in `admin.html`** — numero scritto a mano e vecchio, tolto
+5. **Il generatore si piantava zitto** — `impreseCitta()` chiamava Supabase SENZA
+   scadenza: se la rete non risponde (non rifiuta: proprio non risponde) `fetch`
+   in Node aspetta per sempre. Aggiunto `SCADENZA_MS = 8000` +
+   `AbortSignal.timeout`. ⚠️ **REGOLA**: ogni chiamata di rete dentro uno script
+   che Alex lancia a mano deve avere una scadenza — lui vede solo una finestra
+   nera ferma e non sa se aspettare o fermare
+6. **Nessun modo di scegliere la foto principale** — vedi sotto
+
+## LA CAMPAGNA «LA TUA PAGINA È ONLINE»
+
+Partita alle →11:28← UTC al gruppo «completi»: →98← inviate, →98← consegnate,
+→0← rimbalzi, →0← spam. I →4← rimasti fuori (id →54, 55, 59, 60←, iscritti il
+→22 lug←) non hanno mai scritto il nome dell'attività.
+
+**Letta una mail VERA col connettore Resend** (al geometra di Livorno Ferraris):
+`[PAGINA]` → `/elettricista-vercelli`, `[VETRINA]` → `/profilo-impresa?id=199`,
+`[CITTA]` → «Livorno Ferraris». Quel link esisteva solo da quel giorno.
+⚠️ **LEZIONE: dopo ogni campagna, leggere una mail vera dal connettore.** Il
+difetto dei link non cliccabili non si vedeva né dal codice né dal pannello.
+
+### ⛔ LA QUOTA RESEND È FINITA SUL SERIO (annulla il «falso allarme» dell'8 set)
+Resend ha mandato «80%» e «100% of your daily quota» alle →13:28←. Misurato:
+→103← email il 12 set. Piano FREE = →100←/giorno, →3.000←/mese.
+Il rischio vero non è la campagna (è partita tutta): è che per il resto della
+giornata **non parte più niente, comprese le conferme iscrizione**.
+Prezzi verificati il 12 set: Free →0←$ (100/giorno) · Pro →20←$/mese (50.000/mese,
+nessun tetto giornaliero) · Scale →90←$/mese.
+[stated] Alex: «adesso non ho soldi per Resend, lo farò più avanti quando il sito
+vive di soldi suoi». **Finché resta il piano free: mandare le campagne la mattina
+presto**, così le conferme del pomeriggio passano.
+
+### ⚠️ DUE POSTE DIVERSE, da non confondere
+- **RESEND** manda le email AUTOMATICHE (conferme, benvenuto, campagne). È quella
+  col tetto giornaliero
+- **ARUBA** è la casella di Alex. Le risposte scritte a mano a un'impresa partono
+  da lì e NON toccano il tetto di Resend
+- ⛔ **«Scrivi a tutti» manda solo a GRUPPI, non a una persona sola.** Alex ha
+  provato a rispondere a Lares da lì, ha premuto «Mandala solo a me», e la
+  risposta è arrivata a lui. Per rispondere a UNA impresa: Aruba → Rispondi
+
+## LE FOTO DEI LAVORI, E UN ERRORE DI CLAUDE
+
+**La prima risposta vera alla campagna** (Lares Srls, Roma, id →95←, alle
+→14:29←): «Grazie, sembra tutto a posto. Come posso aggiungere le foto, perché
+trovo solo una e non è la migliore».
+
+⛔ **ERRORE DI CLAUDE, il secondo in due giorni**: ha detto ad Alex che «le foto
+dei lavori non si possono caricare». FALSO. Aveva cercato la colonna `foto_urls`,
+che su questo progetto non si usa. Le foto stanno nella TABELLA `lavori_foto`
+(id, owner_id, foto, titolo, descrizione, pubblico, created_at, ordine) e nel
+bucket `foto-lavori`. Il pannello ce l'ha completo: carta «📷 Foto dei lavori» →
+sezione `sec-foto-lavori`.
+**LEZIONE: prima di dire «questa cosa non esiste», cercare il NOME GIUSTO. Un
+grep a vuoto su un nome inventato non è una prova.** Si parte dalla pagina che la
+cosa la MOSTRA (qui `profilo-impresa.html`, che legge `lavori_foto`) e si risale.
+
+Numeri veri: `lavori_foto` ha →159← righe di →45← proprietari, →158← pubbliche.
+Su →102← imprese, →53← hanno il logo. Lares ha →1← sola foto.
+
+### ⭐ «METTI PER PRIMA» — fatto e pubblicato
+Il buco vero c'era: la galleria ordinava per `created_at` e **nessuno poteva
+decidere quale foto lo rappresenta**.
+- Migrazione `lavori_foto_ordine_12set2026`: colonna `ordine integer not null
+  default 0` + indice `(owner_id, ordine desc, created_at desc)`. Additiva: con
+  tutte a →0← l'ordine resta quello di prima (verificato su un'impresa con →14←
+  foto)
+- Il pulsante scrive `max(ordine)+1` sulla foto scelta: passa davanti a tutte
+  senza rinumerare le altre. Provato a secco in SQL senza scrivere niente
+- Fatto nei →3← pannelli (impresa, artigiano, professionisti) + `profilo-impresa.html`.
+  Il negozio resta fuori: lì la sezione non c'è
+- ⚠️ **I DUE ORDINI DEVONO RESTARE UGUALI** (pannelli e scheda pubblica), se no
+  l'impresa mette la stella e sulla scheda non cambia niente
+
+## COSA SI È CAPITO SU GOOGLE (ragionamento con Alex, niente codice)
+
+**Le tre porte**: (1) ti trovo? sitemap + link interni — aperta oggi; (2) vali la
+pena? paragrafo locale, prezzi veri — lavorata; (3) sei meglio degli altri? —
+quella dura.
+
+**La verità sulla porta 3**: per «muratore roma» davanti ci sono ProntoPro,
+Edilnet, Houzz, PagineGialle. Non si battono adesso. Ma «geometra sassari» non lo
+presidia nessuno. **Non combattere per Roma: vinci le città piccole.**
+
+**Le tre leve, in ordine di forza**: (1) i link da fuori — il più forte e il più
+lento, e Alex ha già deciso che le testate locali si contattano più avanti;
+(2) quello che solo lui può scrivere — è muratore da →25← anni, i concorrenti
+hanno pagine scritte da chi non ha mai tenuto una cazzuola; (3) le ricerche
+precise invece delle categorie.
+
+⛔ **Detto ad Alex e da tenere fermo**: NON riempire le pagine con imprese prese
+da elenchi pubblici senza che loro lo sappiano. Sono profili di gente che non ha
+chiesto niente, in Italia con le ditte individuali sono guai veri, e butta via
+l'unico vantaggio che ha (essere uno di loro).
+
+## IL DATO CHE APRE TROVALAVORO
+
+I **Subappalti** sono →6← annunci (uno il 12 set: LAKI COSTRUZIONI). **Nessuno
+dei →6← aveva un account**: tutti hanno pubblicato senza registrarsi. E →3← di
+quei →6← non sono iscritti al sito per niente.
+Le **Offerte di lavoro** sono a →0←. La differenza è UNA RIGA di permesso:
+`subappalti_insert_public` accetta `anon`, `offerte_insert_owner` pretende
+`authenticated` + una riga in `imprese`.
+⚠️ `offerte_lavoro` ha GIÀ le colonne `nome_azienda`, `email`, `telefono` e
+`impresa_id` può restare vuoto: **il database è già pronto** per l'annuncio
+anonimo.
+E le query vere di Search Console («stipendio muratore italia», «stipendio
+muratore 1 livello», «quanto prende un muratore») sono **lavoratori**, non
+clienti: il pubblico di TrovaLavoro arriva già sul sito e oggi se ne va.
+
+## NOTE DI METODO
+- Da Cowork in nuvola **Supabase non si raggiunge** (`nacvrsgkyfavykxjxszu.supabase.co`
+  fuori dall'allowlist): `node genera-mestiere-citta.js` usa sempre
+  `dati-imprese.json`. Per dati freschi si rifà la scorta con l'MCP Supabase
+- Da Cowork **`curl` verso trovaimpresa.com torna →000←** (bloccato dal proxy):
+  per collaudare dal vivo si usa WebFetch, non curl
+- Nei terminali Windows basta aver selezionato del testo col mouse e l'output si
+  ferma: si preme Invio e riparte. Dirlo PRIMA di ipotizzare guasti

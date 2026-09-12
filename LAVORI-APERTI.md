@@ -4,8 +4,60 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 9 settembre 2026 (sera) — due imprese non comprano piu' lo stesso spazio, e i carrelli persi si vedono
+Ultimo aggiornamento: 12 settembre 2026 (sera) — 1.802 pagine su 106 citta', campagna a 98 imprese, «Metti per prima»
 
+
+---
+
+## 🆕 IL 12 SETTEMBRE — COSA RESTA APERTO
+
+Giornata lunga, →7← push, tutto pubblicato e collaudato. Qui sotto SOLO quello
+che NON e' finito.
+
+### ⬜ 1. IL POTENZIAMENTO — aperto, se ne e' solo parlato
+Alex ha chiesto «questo lavoro si puo' potenziare?». Si e' ragionato, non si e'
+fatto niente. Le tre leve, in ordine di forza:
+- **Link da fuori** — il piu' forte e il piu' lento. ⛔ Alex ha gia' deciso il
+  →9← set che le testate locali si contattano PIU' AVANTI: non riproporlo
+- **Quello che solo lui puo' scrivere** — e' muratore da →25← anni. Prezzi veri,
+  errori veri, cosa ti nascondono. I concorrenti non ce l'hanno
+- **LE RICERCHE PRECISE — e' questo il prossimo lavoro concordato.** La gente non
+  cerca «quanto costa cambiare gli infissi», cerca «costo infissi casa 100 mq»
+  (→147← impressioni, →2← clic). Le guide ci sono ma sono scritte in generale.
+  Da fare: trovare le domande vere, vedere quali guide le coprono male, sistemarle
+- ⛔ DA NON FARE MAI: riempire le pagine con imprese prese da elenchi pubblici
+  senza il loro permesso
+
+### ⬜ 2. TROVALAVORO — piano concordato, non iniziato
+Il muro e' UNA riga: `offerte_insert_owner` pretende `authenticated` + una riga in
+`imprese`; `subappalti_insert_public` accetta `anon`. Per questo i subappalti sono
+→6← e le offerte →0←. `offerte_lavoro` ha GIA' `nome_azienda`, `email`, `telefono`
+e `impresa_id` puo' restare vuoto.
+I →4← passi, in ordine:
+1. **Aprire la porta** — pubblicare senza iscriversi, come il subappalto. Token
+   nel link per gestire/chiudere il proprio annuncio (stesso schema dei subappalti)
+2. **Candidarsi senza account** — nome, telefono, mestiere, anni, CV facoltativo.
+   L'impresa riceve tutto per email. Riga in `candidati_lavoro` con `user_id` nullo
+3. **Una pagina per ogni annuncio** — indirizzo proprio + sitemap, come
+   `subappalto-annuncio.html`
+4. **Collegare le guide stipendio** — «quanto guadagna un muratore» e simili sono
+   lette da LAVORATORI (query vere di Search Console): li' c'e' il pubblico
+
+### ⬜ 3. PICCOLE COSE RIMASTE
+- `sitemap-offerte.xml` da' →1 errore← su Search Console dall'→8 ago←: e' VUOTA
+  (→0← offerte nel database), non rotta. Si risolve da sola alla prima offerta.
+  Meglio: dichiararla solo se contiene qualcosa
+- **La seconda mail a tutti**, corta, sulla stellina «Metti per prima» — offerta,
+  non ancora scritta. ⚠️ Mandarla la mattina presto (tetto Resend)
+- **→3← ottobre**: guardare su Search Console se `sitemap-mestieri.xml` e' passata
+  da →55← a →1.802← pagine rilevate, e se arrivano impressioni
+- **A Roma non c'e' ne' un muratore ne' un idraulico** iscritto. →54← citta' su
+  →106← non hanno nessuna impresa. Non si risolve col codice
+- I →3← che hanno pubblicato un subappalto senza essere iscritti (LAKI
+  COSTRUZIONI, Russo, pnc natale umberto): contatti gia' in tabella.
+  [stated] 12 set, Alex: «di quelli adesso non mi importa»
+
+---
 ---
 
 ## 🆕 IL 9 SETTEMBRE (sera) — DUE IMPRESE, UNO SPAZIO SOLO
