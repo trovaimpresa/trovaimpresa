@@ -134,7 +134,7 @@ exports.handler = async function (event) {
             ${riga('Email', pers.email)}
             ${riga('Mestiere', pers.mestiere)}
             ${riga('Esperienza', pers.anni_esperienza)}
-            ${riga('Citt&agrave;', pers.citta)}
+            ${riga('Città', pers.citta)}
           </table>
         </div>
 
