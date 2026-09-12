@@ -603,14 +603,20 @@ const MESTIERI = [
    e il controllo prima di pubblicare si ferma.
    ============================================================ */
 const CITTA = [
+  /* ⚠️ 12 set 2026 — TERZO GIRO: da 20 a TUTTE E 106 LE CITTA'.
+     Perche': su 102 iscritti veri, 53 stavano in una citta' senza pagine
+     e nella mail ricevevano solo il link della vetrina. Ora ogni impresa
+     italiana, ovunque stia, ha la sua pagina mestiere+citta'.
+     Ogni riga qui sotto ha la sua imprese-<slug>.html in cartella e il suo
+     paragrafo «Il settore edile a ...» diverso da tutti gli altri:
+     controllati tutti e 106 uno per uno prima di scrivere questo elenco.
+     ⚠️ Se si aggiunge una citta' qui, va aggiunta anche in
+     netlify/functions/invia-annuncio.js e js/condividi-vetrina.js. */
   { slug: 'roma', nome: 'Roma', regione: 'Lazio' },
   { slug: 'milano', nome: 'Milano', regione: 'Lombardia' },
   { slug: 'torino', nome: 'Torino', regione: 'Piemonte' },
   { slug: 'napoli', nome: 'Napoli', regione: 'Campania' },
   { slug: 'rieti', nome: 'Rieti', regione: 'Lazio' },
-  /* 12 set 2026 — secondo giro: si passa da 5 a 20 citta'.
-     Ogni riga qui sotto ha la sua imprese-<slug>.html gia' in cartella:
-     controllato prima di aggiungerla. */
   { slug: 'palermo', nome: 'Palermo', regione: 'Sicilia' },
   { slug: 'genova', nome: 'Genova', regione: 'Liguria' },
   { slug: 'bologna', nome: 'Bologna', regione: 'Emilia-Romagna' },
@@ -625,7 +631,95 @@ const CITTA = [
   { slug: 'brescia', nome: 'Brescia', regione: 'Lombardia' },
   { slug: 'parma', nome: 'Parma', regione: 'Emilia-Romagna' },
   { slug: 'modena', nome: 'Modena', regione: 'Emilia-Romagna' },
-  { slug: 'reggio-emilia', nome: 'Reggio Emilia', regione: 'Emilia-Romagna' }
+  { slug: 'reggio-emilia', nome: 'Reggio Emilia', regione: 'Emilia-Romagna' },
+
+  /* le altre 86, in ordine alfabetico */
+  { slug: 'agrigento', nome: 'Agrigento', regione: 'Sicilia' },
+  { slug: 'alessandria', nome: 'Alessandria', regione: 'Piemonte' },
+  { slug: 'ancona', nome: 'Ancona', regione: 'Marche' },
+  { slug: 'aosta', nome: 'Aosta', regione: 'Valle d\'Aosta' },
+  { slug: 'arezzo', nome: 'Arezzo', regione: 'Toscana' },
+  { slug: 'ascoli-piceno', nome: 'Ascoli Piceno', regione: 'Marche' },
+  { slug: 'asti', nome: 'Asti', regione: 'Piemonte' },
+  { slug: 'avellino', nome: 'Avellino', regione: 'Campania' },
+  { slug: 'barletta', nome: 'Barletta', regione: 'Puglia' },
+  { slug: 'belluno', nome: 'Belluno', regione: 'Veneto' },
+  { slug: 'benevento', nome: 'Benevento', regione: 'Campania' },
+  { slug: 'bergamo', nome: 'Bergamo', regione: 'Lombardia' },
+  { slug: 'biella', nome: 'Biella', regione: 'Piemonte' },
+  { slug: 'bolzano', nome: 'Bolzano', regione: 'Trentino-Alto Adige' },
+  { slug: 'brindisi', nome: 'Brindisi', regione: 'Puglia' },
+  { slug: 'cagliari', nome: 'Cagliari', regione: 'Sardegna' },
+  { slug: 'caltanissetta', nome: 'Caltanissetta', regione: 'Sicilia' },
+  { slug: 'campobasso', nome: 'Campobasso', regione: 'Molise' },
+  { slug: 'caserta', nome: 'Caserta', regione: 'Campania' },
+  { slug: 'catanzaro', nome: 'Catanzaro', regione: 'Calabria' },
+  { slug: 'chieti', nome: 'Chieti', regione: 'Abruzzo' },
+  { slug: 'como', nome: 'Como', regione: 'Lombardia' },
+  { slug: 'cosenza', nome: 'Cosenza', regione: 'Calabria' },
+  { slug: 'cremona', nome: 'Cremona', regione: 'Lombardia' },
+  { slug: 'crotone', nome: 'Crotone', regione: 'Calabria' },
+  { slug: 'cuneo', nome: 'Cuneo', regione: 'Piemonte' },
+  { slug: 'enna', nome: 'Enna', regione: 'Sicilia' },
+  { slug: 'fermo', nome: 'Fermo', regione: 'Marche' },
+  { slug: 'ferrara', nome: 'Ferrara', regione: 'Emilia-Romagna' },
+  { slug: 'foggia', nome: 'Foggia', regione: 'Puglia' },
+  { slug: 'forlì', nome: 'Forlì', regione: 'Emilia-Romagna' },
+  { slug: 'frosinone', nome: 'Frosinone', regione: 'Lazio' },
+  { slug: 'gorizia', nome: 'Gorizia', regione: 'Friuli-Venezia Giulia' },
+  { slug: 'grosseto', nome: 'Grosseto', regione: 'Toscana' },
+  { slug: 'imperia', nome: 'Imperia', regione: 'Liguria' },
+  { slug: 'isernia', nome: 'Isernia', regione: 'Molise' },
+  { slug: 'l-aquila', nome: 'L\'Aquila', regione: 'Abruzzo' },
+  { slug: 'la-spezia', nome: 'La Spezia', regione: 'Liguria' },
+  { slug: 'latina', nome: 'Latina', regione: 'Lazio' },
+  { slug: 'lecce', nome: 'Lecce', regione: 'Puglia' },
+  { slug: 'lecco', nome: 'Lecco', regione: 'Lombardia' },
+  { slug: 'livorno', nome: 'Livorno', regione: 'Toscana' },
+  { slug: 'lodi', nome: 'Lodi', regione: 'Lombardia' },
+  { slug: 'lucca', nome: 'Lucca', regione: 'Toscana' },
+  { slug: 'macerata', nome: 'Macerata', regione: 'Marche' },
+  { slug: 'mantova', nome: 'Mantova', regione: 'Lombardia' },
+  { slug: 'massa', nome: 'Massa', regione: 'Toscana' },
+  { slug: 'matera', nome: 'Matera', regione: 'Basilicata' },
+  { slug: 'monza', nome: 'Monza', regione: 'Lombardia' },
+  { slug: 'novara', nome: 'Novara', regione: 'Piemonte' },
+  { slug: 'nuoro', nome: 'Nuoro', regione: 'Sardegna' },
+  { slug: 'oristano', nome: 'Oristano', regione: 'Sardegna' },
+  { slug: 'pavia', nome: 'Pavia', regione: 'Lombardia' },
+  { slug: 'perugia', nome: 'Perugia', regione: 'Umbria' },
+  { slug: 'pesaro', nome: 'Pesaro', regione: 'Marche' },
+  { slug: 'pescara', nome: 'Pescara', regione: 'Abruzzo' },
+  { slug: 'piacenza', nome: 'Piacenza', regione: 'Emilia-Romagna' },
+  { slug: 'pisa', nome: 'Pisa', regione: 'Toscana' },
+  { slug: 'pistoia', nome: 'Pistoia', regione: 'Toscana' },
+  { slug: 'pordenone', nome: 'Pordenone', regione: 'Friuli-Venezia Giulia' },
+  { slug: 'potenza', nome: 'Potenza', regione: 'Basilicata' },
+  { slug: 'prato', nome: 'Prato', regione: 'Toscana' },
+  { slug: 'ragusa', nome: 'Ragusa', regione: 'Sicilia' },
+  { slug: 'ravenna', nome: 'Ravenna', regione: 'Emilia-Romagna' },
+  { slug: 'reggio-calabria', nome: 'Reggio Calabria', regione: 'Calabria' },
+  { slug: 'rimini', nome: 'Rimini', regione: 'Emilia-Romagna' },
+  { slug: 'rovigo', nome: 'Rovigo', regione: 'Veneto' },
+  { slug: 'salerno', nome: 'Salerno', regione: 'Campania' },
+  { slug: 'sassari', nome: 'Sassari', regione: 'Sardegna' },
+  { slug: 'savona', nome: 'Savona', regione: 'Liguria' },
+  { slug: 'siena', nome: 'Siena', regione: 'Toscana' },
+  { slug: 'siracusa', nome: 'Siracusa', regione: 'Sicilia' },
+  { slug: 'sondrio', nome: 'Sondrio', regione: 'Lombardia' },
+  { slug: 'taranto', nome: 'Taranto', regione: 'Puglia' },
+  { slug: 'teramo', nome: 'Teramo', regione: 'Abruzzo' },
+  { slug: 'terni', nome: 'Terni', regione: 'Umbria' },
+  { slug: 'trapani', nome: 'Trapani', regione: 'Sicilia' },
+  { slug: 'trento', nome: 'Trento', regione: 'Trentino-Alto Adige' },
+  { slug: 'treviso', nome: 'Treviso', regione: 'Veneto' },
+  { slug: 'udine', nome: 'Udine', regione: 'Friuli-Venezia Giulia' },
+  { slug: 'varese', nome: 'Varese', regione: 'Lombardia' },
+  { slug: 'verbania', nome: 'Verbania', regione: 'Piemonte' },
+  { slug: 'vercelli', nome: 'Vercelli', regione: 'Piemonte' },
+  { slug: 'vibo-valentia', nome: 'Vibo Valentia', regione: 'Calabria' },
+  { slug: 'vicenza', nome: 'Vicenza', regione: 'Veneto' },
+  { slug: 'viterbo', nome: 'Viterbo', regione: 'Lazio' }
 ];
 
 /* ============================================================

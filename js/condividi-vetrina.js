@@ -33,11 +33,34 @@
      ⚠️ quando se ne aggiungono in genera-mestiere-citta.js, vanno
      aggiunte anche qui, se no il link torna alla scheda (che va bene
      lo stesso: meglio un link in meno che un link nel vuoto). */
-  var CITTA = {
-    'roma':'roma','milano':'milano','napoli':'napoli','torino':'torino','rieti':'rieti',
-    'palermo':'palermo','genova':'genova','bologna':'bologna','firenze':'firenze','bari':'bari',
-    'catania':'catania','verona':'verona','venezia':'venezia','messina':'messina','padova':'padova',
-    'trieste':'trieste','brescia':'brescia','parma':'parma','modena':'modena','reggio emilia':'reggio-emilia'
+    var CITTA = {
+    'roma': 'roma', 'milano': 'milano', 'torino': 'torino', 'napoli': 'napoli',
+    'rieti': 'rieti', 'palermo': 'palermo', 'genova': 'genova', 'bologna': 'bologna',
+    'firenze': 'firenze', 'bari': 'bari', 'catania': 'catania', 'verona': 'verona',
+    'venezia': 'venezia', 'messina': 'messina', 'padova': 'padova', 'trieste': 'trieste',
+    'brescia': 'brescia', 'parma': 'parma', 'modena': 'modena', 'reggio emilia': 'reggio-emilia',
+    'agrigento': 'agrigento', 'alessandria': 'alessandria', 'ancona': 'ancona', 'aosta': 'aosta',
+    'arezzo': 'arezzo', 'ascoli piceno': 'ascoli-piceno', 'asti': 'asti', 'avellino': 'avellino',
+    'barletta': 'barletta', 'belluno': 'belluno', 'benevento': 'benevento', 'bergamo': 'bergamo',
+    'biella': 'biella', 'bolzano': 'bolzano', 'brindisi': 'brindisi', 'cagliari': 'cagliari',
+    'caltanissetta': 'caltanissetta', 'campobasso': 'campobasso', 'caserta': 'caserta', 'catanzaro': 'catanzaro',
+    'chieti': 'chieti', 'como': 'como', 'cosenza': 'cosenza', 'cremona': 'cremona',
+    'crotone': 'crotone', 'cuneo': 'cuneo', 'enna': 'enna', 'fermo': 'fermo',
+    'ferrara': 'ferrara', 'foggia': 'foggia', 'forlì': 'forlì', 'frosinone': 'frosinone',
+    'gorizia': 'gorizia', 'grosseto': 'grosseto', 'imperia': 'imperia', 'isernia': 'isernia',
+    'l\'aquila': 'l-aquila', 'la spezia': 'la-spezia', 'latina': 'latina', 'lecce': 'lecce',
+    'lecco': 'lecco', 'livorno': 'livorno', 'lodi': 'lodi', 'lucca': 'lucca',
+    'macerata': 'macerata', 'mantova': 'mantova', 'massa': 'massa', 'matera': 'matera',
+    'monza': 'monza', 'novara': 'novara', 'nuoro': 'nuoro', 'oristano': 'oristano',
+    'pavia': 'pavia', 'perugia': 'perugia', 'pesaro': 'pesaro', 'pescara': 'pescara',
+    'piacenza': 'piacenza', 'pisa': 'pisa', 'pistoia': 'pistoia', 'pordenone': 'pordenone',
+    'potenza': 'potenza', 'prato': 'prato', 'ragusa': 'ragusa', 'ravenna': 'ravenna',
+    'reggio calabria': 'reggio-calabria', 'rimini': 'rimini', 'rovigo': 'rovigo', 'salerno': 'salerno',
+    'sassari': 'sassari', 'savona': 'savona', 'siena': 'siena', 'siracusa': 'siracusa',
+    'sondrio': 'sondrio', 'taranto': 'taranto', 'teramo': 'teramo', 'terni': 'terni',
+    'trapani': 'trapani', 'trento': 'trento', 'treviso': 'treviso', 'udine': 'udine',
+    'varese': 'varese', 'verbania': 'verbania', 'vercelli': 'vercelli', 'vibo valentia': 'vibo-valentia',
+    'vicenza': 'vicenza', 'viterbo': 'viterbo'
   };
 
   /* quello che l'impresa ha scritto nel profilo -> la pagina giusta.
@@ -66,12 +89,28 @@
 
   function linkScheda(imp) { return SITO + '/profilo-impresa?id=' + encodeURIComponent(imp.id); }
 
+  /* ⚠️ 12 set 2026 — vedi la stessa nota in netlify/functions/invia-annuncio.js:
+     una ditta di Besana in Brianza ha provincia «Monza e della Brianza» e sta
+     davvero dentro muratore-monza, quindi se la provincia non si trova identica
+     si cerca la citta' con cui la provincia comincia. */
+  function dallaProvincia(prov) {
+    if (!prov) return null;
+    for (var nome in CITTA) {
+      if (prov === nome || prov.indexOf(nome + ' ') === 0 || prov.indexOf(nome + '-') === 0) {
+        return CITTA[nome];
+      }
+    }
+    return null;
+  }
+
   function linkPagina(imp) {
     /* ⚠️ 12 set 2026 — anche la PROVINCIA: le pagine mestiere+citta'
        pescano per citta' O provincia, quindi una ditta di Portici sta
        dentro muratore-napoli e il suo link deve portarla li'. */
+    var prov = String(imp.provincia || '').trim().toLowerCase();
     var slug = CITTA[String(imp.citta || '').trim().toLowerCase()]
-            || CITTA[String(imp.provincia || '').trim().toLowerCase()];
+            || CITTA[prov]
+            || dallaProvincia(prov);
     if (!slug) return null;
     var voci = [].concat(Array.isArray(imp.mestieri) ? imp.mestieri : [])
                 .concat(imp.mestiere ? [imp.mestiere] : [])

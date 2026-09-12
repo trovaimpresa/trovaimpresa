@@ -93,11 +93,33 @@ function testoInHtml(testo, emailDest) {
    Quando genera-mestiere-citta.js aggiunge citta', aggiungerle qui.
    ============================================================ */
 const CITTA_CON_PAGINE = {
-  'roma': 'roma', 'milano': 'milano', 'napoli': 'napoli', 'torino': 'torino',
+  'roma': 'roma', 'milano': 'milano', 'torino': 'torino', 'napoli': 'napoli',
   'rieti': 'rieti', 'palermo': 'palermo', 'genova': 'genova', 'bologna': 'bologna',
   'firenze': 'firenze', 'bari': 'bari', 'catania': 'catania', 'verona': 'verona',
   'venezia': 'venezia', 'messina': 'messina', 'padova': 'padova', 'trieste': 'trieste',
-  'brescia': 'brescia', 'parma': 'parma', 'modena': 'modena', 'reggio emilia': 'reggio-emilia'
+  'brescia': 'brescia', 'parma': 'parma', 'modena': 'modena', 'reggio emilia': 'reggio-emilia',
+  'agrigento': 'agrigento', 'alessandria': 'alessandria', 'ancona': 'ancona', 'aosta': 'aosta',
+  'arezzo': 'arezzo', 'ascoli piceno': 'ascoli-piceno', 'asti': 'asti', 'avellino': 'avellino',
+  'barletta': 'barletta', 'belluno': 'belluno', 'benevento': 'benevento', 'bergamo': 'bergamo',
+  'biella': 'biella', 'bolzano': 'bolzano', 'brindisi': 'brindisi', 'cagliari': 'cagliari',
+  'caltanissetta': 'caltanissetta', 'campobasso': 'campobasso', 'caserta': 'caserta', 'catanzaro': 'catanzaro',
+  'chieti': 'chieti', 'como': 'como', 'cosenza': 'cosenza', 'cremona': 'cremona',
+  'crotone': 'crotone', 'cuneo': 'cuneo', 'enna': 'enna', 'fermo': 'fermo',
+  'ferrara': 'ferrara', 'foggia': 'foggia', 'forlì': 'forlì', 'frosinone': 'frosinone',
+  'gorizia': 'gorizia', 'grosseto': 'grosseto', 'imperia': 'imperia', 'isernia': 'isernia',
+  'l\'aquila': 'l-aquila', 'la spezia': 'la-spezia', 'latina': 'latina', 'lecce': 'lecce',
+  'lecco': 'lecco', 'livorno': 'livorno', 'lodi': 'lodi', 'lucca': 'lucca',
+  'macerata': 'macerata', 'mantova': 'mantova', 'massa': 'massa', 'matera': 'matera',
+  'monza': 'monza', 'novara': 'novara', 'nuoro': 'nuoro', 'oristano': 'oristano',
+  'pavia': 'pavia', 'perugia': 'perugia', 'pesaro': 'pesaro', 'pescara': 'pescara',
+  'piacenza': 'piacenza', 'pisa': 'pisa', 'pistoia': 'pistoia', 'pordenone': 'pordenone',
+  'potenza': 'potenza', 'prato': 'prato', 'ragusa': 'ragusa', 'ravenna': 'ravenna',
+  'reggio calabria': 'reggio-calabria', 'rimini': 'rimini', 'rovigo': 'rovigo', 'salerno': 'salerno',
+  'sassari': 'sassari', 'savona': 'savona', 'siena': 'siena', 'siracusa': 'siracusa',
+  'sondrio': 'sondrio', 'taranto': 'taranto', 'teramo': 'teramo', 'terni': 'terni',
+  'trapani': 'trapani', 'trento': 'trento', 'treviso': 'treviso', 'udine': 'udine',
+  'varese': 'varese', 'verbania': 'verbania', 'vercelli': 'vercelli', 'vibo valentia': 'vibo-valentia',
+  'vicenza': 'vicenza', 'viterbo': 'viterbo'
 };
 
 /* Quello che l'impresa ha scritto nel suo profilo -> la pagina giusta.
@@ -130,6 +152,30 @@ function linkVetrina(imp) {
   return 'https://trovaimpresa.com/profilo-impresa?id=' + encodeURIComponent(imp.id);
 }
 
+
+/* ⚠️ 12 set 2026 — LA PROVINCIA CHE NON SI CHIAMA COME IL CAPOLUOGO.
+   genera-mestiere-citta.js pesca le imprese con `provincia ilike 'Monza%'`:
+   quindi una ditta di Besana in Brianza (provincia «Monza e della Brianza»)
+   FINISCE DAVVERO dentro muratore-monza. Qui invece si cercava la provincia
+   tale e quale nell'elenco, «Monza e della Brianza» non c'era, e la stessa
+   impresa riceveva il link della scheda invece che quello della pagina dove
+   sta. Stessa storia per «Forli'-Cesena» e «Massa-Carrara».
+   La cura: se la provincia non si trova identica, si cerca una citta'
+   dell'elenco con cui la provincia COMINCIA — la stessa regola del
+   generatore, cosi' i due non possono piu' dire cose diverse.
+   ⚠️ Restano fuori le province che non cominciano col nome del capoluogo
+   («Verbano-Cusio-Ossola» per Verbania, «Sud Sardegna»): quelle imprese non
+   compaiono nemmeno nelle pagine, quindi il link alla scheda e' corretto. */
+function dallaProvincia(prov) {
+  if (!prov) return null;
+  for (const nome in CITTA_CON_PAGINE) {
+    if (prov === nome || prov.startsWith(nome + ' ') || prov.startsWith(nome + '-')) {
+      return CITTA_CON_PAGINE[nome];
+    }
+  }
+  return null;
+}
+
 function linkPagina(imp) {
   /* ⚠️ 12 set 2026 — LA PROVINCIA CONTA.
      Le pagine mestiere+citta' pescano le imprese per citta' O PROVINCIA:
@@ -138,7 +184,7 @@ function linkPagina(imp) {
      davvero. Quindi: prima la citta', e se non basta la provincia. */
   const citta = String(imp.citta || '').trim().toLowerCase();
   const prov  = String(imp.provincia || '').trim().toLowerCase();
-  const slugCitta = CITTA_CON_PAGINE[citta] || CITTA_CON_PAGINE[prov];
+  const slugCitta = CITTA_CON_PAGINE[citta] || CITTA_CON_PAGINE[prov] || dallaProvincia(prov);
   if (!slugCitta) return linkVetrina(imp);
 
   const voci = []

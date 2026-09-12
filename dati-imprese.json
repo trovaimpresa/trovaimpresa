@@ -2,6 +2,951 @@
  "_cosa_e": "Fotografia delle imprese per citta, usata da genera-mestiere-citta.js quando la shell non arriva su internet. Filtro identico a quello di genera-imprese-citta.js: is_test=false ed email_confermata=true.",
  "fotografia_del": "2026-09-12",
  "citta": {
+  "Agrigento": [],
+  "Alessandria": [],
+  "Ancona": [],
+  "Aosta": [],
+  "Arezzo": [
+   {
+    "id": 144,
+    "nome": "،Edil ELBA",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Arezzo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Sono una ditta edile seria che fa tutti tipi di lavori edile, tetti, facciata, imbiancatura, interno, esterno pavimentazione.,,, con prezzi giusti e moderati"
+   }
+  ],
+  "Ascoli Piceno": [],
+  "Asti": [],
+  "Avellino": [],
+  "Bari": [
+   {
+    "id": 170,
+    "nome": "Home star di colella veronica",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Bari",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "La Home Star offre ristrutturazione case chiavi in mano. Dai piccoli ai grandi lavori."
+   }
+  ],
+  "Barletta": [],
+  "Belluno": [],
+  "Benevento": [],
+  "Bergamo": [
+   {
+    "id": 103,
+    "nome": "HENRICH G",
+    "mestiere": "Pavimenti e piastrelle",
+    "mestieri": [
+     "Pavimenti e piastrelle",
+     "Pittura e tinteggiatura",
+     "Edilizia / Muratura"
+    ],
+    "tipo": "artigiano",
+    "citta": "Bergamo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Impresa HENRICH G, specializzata in lavori di pavimentazione, rivestimenti, tinteggiatura"
+   }
+  ],
+  "Biella": [],
+  "Bologna": [
+   {
+    "id": 173,
+    "nome": "Diletta Evangelisti",
+    "mestiere": "interior_designer",
+    "mestieri": null,
+    "tipo": "professionista",
+    "citta": "Bologna",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Architetto, opera nelle ristrutturazioni ed interior designer"
+   },
+   {
+    "id": 150,
+    "nome": "Longobardo Sacha",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici",
+     "Fotovoltaico / Pannelli solari",
+     "Climatizzazione / Caldaie"
+    ],
+    "tipo": "artigiano",
+    "citta": "Bologna",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Impianti elettrici, domotica, fotovoltaico, climatizzazione, interventi urgenti h24"
+   },
+   {
+    "id": 97,
+    "nome": "Bologna",
+    "mestiere": "Cartongesso",
+    "mestieri": [
+     "Cartongesso",
+     "Ristrutturazione completa",
+     "Pavimenti e piastrelle"
+    ],
+    "tipo": "artigiano",
+    "citta": "Bologna",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Ristrutturazione, cartongesso, rifiniture."
+   },
+   {
+    "id": 90,
+    "nome": "Multicolori di yameen muhammad",
+    "mestiere": "Pittura e tinteggiatura",
+    "mestieri": null,
+    "tipo": "artigiano",
+    "citta": "Bologna",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": true,
+    "descrizione": ""
+   }
+  ],
+  "Bolzano": [],
+  "Brescia": [
+   {
+    "id": 161,
+    "nome": "Technoelectric",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici"
+    ],
+    "tipo": "artigiano",
+    "citta": "Brescia",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   },
+   {
+    "id": 89,
+    "nome": "M.b.tinteggiatura",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Cazzago San Martino",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Attiva dal 2018, M.B. Tinteggiatura e' un'azienda artigiana specializzata in tinteggiatura, finiture e ristrutturazioni edili per ambienti residenziali e commerciali."
+   },
+   {
+    "id": 85,
+    "nome": "Raguig Younes",
+    "mestiere": "Impianti elettrici",
+    "mestieri": null,
+    "tipo": "artigiano",
+    "citta": "Brescia",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Brindisi": [],
+  "Cagliari": [
+   {
+    "id": 204,
+    "nome": "Impresa edile Marcis di Capra Vanessa",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Sestu",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "impresa edile esegue ogni tipo di lavoro ; restauro appartamenti , bagni tinteggiature , guaine , etc"
+   }
+  ],
+  "Caltanissetta": [],
+  "Campobasso": [],
+  "Caserta": [],
+  "Catania": [
+   {
+    "id": 159,
+    "nome": "PZ RISTRUTTURAZIONI",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Catania",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Catanzaro": [],
+  "Chieti": [
+   {
+    "id": 128,
+    "nome": "Vincenzo serramenti",
+    "mestiere": "Serramenti / Infissi",
+    "mestieri": [
+     "Serramenti / Infissi",
+     "Tende da sole / Zanzariere",
+     "Fabbro / Cancelli / Recinzioni"
+    ],
+    "tipo": "artigiano",
+    "citta": "Chieti",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Como": [
+   {
+    "id": 172,
+    "nome": "ART COLOR",
+    "mestiere": "Pittura e tinteggiatura",
+    "mestieri": [
+     "Pittura e tinteggiatura",
+     "Cappotti termici / Isolamento",
+     "Cartongesso"
+    ],
+    "tipo": "artigiano",
+    "citta": "Solbiate con Cagno",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Siamo una piccola realtà di imbiancatura che si evolve in continuazione per soddisfare il maggior numero di richieste che ci provengono ogni giorno.\nImbiancatura e cappotti interni/esterni sono le nostre priorità ma l'esigenza del cliente si allarga a cartongesso, verniciature, ripristino serramento il legno,\nsabbiature non invasive,ecc....siamo dei \"tuttofare\""
+   },
+   {
+    "id": 143,
+    "nome": "THE GREEN CONTROL DI GIUSEPPE GAGLIOTI",
+    "mestiere": "Giardinaggio / Esterni",
+    "mestieri": [
+     "Giardinaggio / Esterni"
+    ],
+    "tipo": "artigiano",
+    "citta": "Como",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Azienda individuale che si occupa della manutenzione dagli spazi verdi"
+   }
+  ],
+  "Cosenza": [],
+  "Cremona": [],
+  "Crotone": [],
+  "Cuneo": [
+   {
+    "id": 123,
+    "nome": "Mario Edile",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Cuneo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Ristrutturazione"
+   }
+  ],
+  "Enna": [],
+  "Fermo": [],
+  "Ferrara": [],
+  "Firenze": [
+   {
+    "id": 131,
+    "nome": "Bolis Luigi",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici",
+     "Antennista / Allarmi",
+     "Altro"
+    ],
+    "tipo": "artigiano",
+    "citta": "Firenze",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Foggia": [],
+  "Forlì": [
+   {
+    "id": 122,
+    "nome": "HUGO TECH FLASH DI H. D",
+    "mestiere": "Coperture e tetti",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Forlì",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   },
+   {
+    "id": 116,
+    "nome": "Abe",
+    "mestiere": "Fabbro / Cancelli / Recinzioni",
+    "mestieri": [
+     "Fabbro / Cancelli / Recinzioni"
+    ],
+    "tipo": "artigiano",
+    "citta": "Forlì",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Frosinone": [],
+  "Genova": [
+   {
+    "id": 54,
+    "nome": null,
+    "mestiere": null,
+    "mestieri": [
+     "Pittura e tinteggiatura",
+     "Cartongesso"
+    ],
+    "tipo": null,
+    "citta": "Genova",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Mi chiamo Claudio, faccio imbiancatura e cartongesso. E in caso lavoretti di muratura"
+   }
+  ],
+  "Gorizia": [],
+  "Grosseto": [],
+  "Imperia": [],
+  "Isernia": [],
+  "L'Aquila": [
+   {
+    "id": 163,
+    "nome": "ms gruop",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "L'Aquila",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "impresa edile multi servizi"
+   }
+  ],
+  "La Spezia": [
+   {
+    "id": 145,
+    "nome": "arch. raffaele barcellone",
+    "mestiere": "architetto",
+    "mestieri": null,
+    "tipo": "professionista",
+    "citta": "La Spezia",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Latina": [],
+  "Lecce": [
+   {
+    "id": 148,
+    "nome": "Sanapo daniela",
+    "mestiere": "Altro (scrivi quale)",
+    "mestieri": [],
+    "tipo": "impresa",
+    "citta": "Lecce",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Posa pavimenti e rivestimenti \nRifacimento bagni \nScale in gres"
+   },
+   {
+    "id": 165,
+    "nome": "S.A impianti di Schito Alberto",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici",
+     "Fotovoltaico / Pannelli solari",
+     "Antennista / Allarmi"
+    ],
+    "tipo": "artigiano",
+    "citta": "Lecce",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Installazione e manutenzione impianti elettrici civili e industriali,fotovoltaico, videosorveglianza e sicurezza,Domotica"
+   },
+   {
+    "id": 64,
+    "nome": "Ap Costruzioni",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Lecce",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Anche se di recente costituzione, l'impresa AP Costruzioni annovera nel suo organico personale con oltre 25 anni di esperienza nel settore delle costruzioni e del restauro. Questa solida base di competenze ci consente di garantire risultati eccellenti in ogni intervento.Siamo specializzati in bioedilizia, restauro conservativo e strutturale di immobili di pregio, oltre alla progettazione e installazione di impianti fotovoltaici e sistemi di climatizzazione ad alta efficienza.\nLa nostra competenza ci permette di affrontare ogni progetto con professionalità e attenzione ai dettagli."
+   }
+  ],
+  "Lecco": [],
+  "Livorno": [],
+  "Lodi": [],
+  "Lucca": [],
+  "Macerata": [
+   {
+    "id": 66,
+    "nome": "Maurizio Ciabocco",
+    "mestiere": "Falegnameria",
+    "mestieri": null,
+    "tipo": "artigiano",
+    "citta": "Macerata",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Mantova": [
+   {
+    "id": 102,
+    "nome": "Savarese Pasquale",
+    "mestiere": "Fabbro / Cancelli / Recinzioni",
+    "mestieri": [
+     "Fabbro / Cancelli / Recinzioni",
+     "Serramenti / Infissi",
+     "Pittura e tinteggiatura"
+    ],
+    "tipo": "artigiano",
+    "citta": "Mantova",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Ci occupiamo principalmente di cancelli , inferiate , Recinzioni"
+   }
+  ],
+  "Massa": [
+   {
+    "id": 93,
+    "nome": "Andrea sarti",
+    "mestiere": "Sgomberi / Traslochi",
+    "mestieri": [
+     "Sgomberi / Traslochi",
+     "Edilizia / Muratura",
+     "Giardinaggio / Esterni"
+    ],
+    "tipo": "artigiano",
+    "citta": "Massa",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Ci occupiamo di sgomberi fondi cantine appartenenti ecc pulizia terreni incolti sgombero terreni da qualsiasi cosa,trasporto materiale in. Discarica con formulario di legge,recupero materiale ferroso smontaggio e rimontaggio attività commerciali di qualsiasi genere"
+   }
+  ],
+  "Matera": [
+   {
+    "id": 136,
+    "nome": "Nicola Mario Fraccalvieri",
+    "mestiere": "geometra",
+    "mestieri": null,
+    "tipo": "professionista",
+    "citta": "Matera",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Messina": [
+   {
+    "id": 126,
+    "nome": "Scuderi service srls",
+    "mestiere": "Idraulica",
+    "mestieri": [
+     "Idraulica",
+     "Climatizzazione / Caldaie",
+     "Fotovoltaico / Pannelli solari"
+    ],
+    "tipo": "artigiano",
+    "citta": "Messina",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Milano": [
+   {
+    "id": 203,
+    "nome": "CO.E.CO SRL",
+    "mestiere": "Costruzione nuova",
+    "mestieri": [
+     "Costruzione nuova"
+    ],
+    "tipo": "impresa",
+    "citta": "Assago",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Eseguimo edilizia da 40 anni\nRealizzazione di strutture in cemento armato, ristrutturazione di qualsiasi genere edifici residenziali e commerciali"
+   },
+   {
+    "id": 115,
+    "nome": "Futuraservice",
+    "mestiere": "Giardinaggio / Esterni",
+    "mestieri": [
+     "Giardinaggio / Esterni",
+     "Ristrutturazione completa",
+     "Pittura e tinteggiatura"
+    ],
+    "tipo": "artigiano",
+    "citta": "Milano",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Giardinaggio, abbattimenti e potature, manutenzione ordinaria e straordinaria, realizzo giardino e parchi impianti d'irrigazione automatica, prato sintetico e prato a rotoli, agronomo."
+   },
+   {
+    "id": 111,
+    "nome": "Rainbow Multiservizi",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Milano",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   },
+   {
+    "id": 49,
+    "nome": "NK elettrici",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici",
+     "Antennista / Allarmi",
+     "Serramenti / Infissi"
+    ],
+    "tipo": "artigiano",
+    "citta": "Milano",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Sono elettricista: impianti elettrici e citofoni, installazione di ventilatori, manutenzione."
+   }
+  ],
+  "Modena": [],
+  "Monza": [
+   {
+    "id": 63,
+    "nome": "Rinnovo ambienti srl",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Brugherio",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Azienda specializzata in ristrutturazione di interni con 30 anni di esperienza per piccoli o grandi lavori\nSopralluoghi graruiti"
+   },
+   {
+    "id": 153,
+    "nome": "Rosa societa",
+    "mestiere": "Serramenti / Infissi",
+    "mestieri": [
+     "Serramenti / Infissi",
+     "Vetraio"
+    ],
+    "tipo": "artigiano",
+    "citta": "Monza",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Team nel montaggio e fornitura serramenti  vetri e opere di fabbro"
+   },
+   {
+    "id": 197,
+    "nome": "Md edilizia & idraulica di Davide mallamace",
+    "mestiere": "Edilizia / Muratura",
+    "mestieri": [
+     "Edilizia / Muratura"
+    ],
+    "tipo": "artigiano",
+    "citta": "Besana in Brianza",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   },
+   {
+    "id": 113,
+    "nome": "ALB Impianti Srl",
+    "mestiere": "Idraulica",
+    "mestieri": [
+     "Idraulica",
+     "Climatizzazione / Caldaie",
+     "Fotovoltaico / Pannelli solari"
+    ],
+    "tipo": "artigiano",
+    "citta": "Monza",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Napoli": [
+   {
+    "id": 174,
+    "nome": "Perna impianti Srl",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici"
+    ],
+    "tipo": "artigiano",
+    "citta": "Portici",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Siamo una societa' nata nel 2025, ma con anni di esperienza lavorativa alle spalle. Ci occupiamo di tutto quello che riguarda l'elettricita'"
+   },
+   {
+    "id": 155,
+    "nome": "Rosario Macor",
+    "mestiere": "Pavimenti e piastrelle",
+    "mestieri": [
+     "Pavimenti e piastrelle",
+     "Altro"
+    ],
+    "tipo": "artigiano",
+    "citta": "Napoli",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Posa in opera parquet di tutti i tipi, levigatura e lucidatura parquet gia' esistente"
+   },
+   {
+    "id": 127,
+    "nome": "Aedifica Costruzioni srl",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Napoli",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Siamo impresa edile che opera da oltre 20 anni"
+   },
+   {
+    "id": 114,
+    "nome": "Fra.mar",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Napoli",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Siamo un'impresa che opera nel settore dell'edilizia civile con una vasta esperienza ed un team di professionisti"
+   },
+   {
+    "id": 72,
+    "nome": "G.M. RISTRUTTURAZIONI SRLS",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Napoli",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Novara": [
+   {
+    "id": 154,
+    "nome": "Imbiancatura Mech",
+    "mestiere": "Pittura e tinteggiatura",
+    "mestieri": [
+     "Pittura e tinteggiatura",
+     "Cartongesso"
+    ],
+    "tipo": "artigiano",
+    "citta": "Novara",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Nuoro": [],
+  "Oristano": [],
+  "Padova": [
+   {
+    "id": 110,
+    "nome": "Bis-Mas di Battistella",
+    "mestiere": "Serramenti / Infissi",
+    "mestieri": [
+     "Serramenti / Infissi",
+     "Tende da sole / Zanzariere",
+     "Fabbro / Cancelli / Recinzioni"
+    ],
+    "tipo": "artigiano",
+    "citta": "Villa Estense",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "La ditta BIS-MAS si occupa di fornitura e posa di serramenti in alluminio e PVC. Offriamo assistenza e manutenzione anche sui prodotti non forniti da noi."
+   }
+  ],
+  "Palermo": [
+   {
+    "id": 169,
+    "nome": "Ad Maiora System",
+    "mestiere": "Tende da sole / Zanzariere",
+    "mestieri": [
+     "Tende da sole / Zanzariere",
+     "Altro"
+    ],
+    "tipo": "artigiano",
+    "citta": "Palermo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   },
+   {
+    "id": 141,
+    "nome": "Edil sve",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Palermo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Ristrutturazione completa e tanto altro"
+   },
+   {
+    "id": 101,
+    "nome": "Mcdomotic",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici",
+     "Fotovoltaico / Pannelli solari",
+     "Climatizzazione / Caldaie"
+    ],
+    "tipo": "artigiano",
+    "citta": "Palermo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Parma": [],
+  "Pavia": [
+   {
+    "id": 168,
+    "nome": "EdilLamthi",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Pavia",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   },
+   {
+    "id": 100,
+    "nome": "SN EDILIZIA DI SANDU NICUSOR",
+    "mestiere": "Muratura e strutture",
+    "mestieri": [
+     "Cottimisti"
+    ],
+    "tipo": "impresa",
+    "citta": "Pavia",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Siamo professionali e affidabili,curiamo nostri lavori con massima attenzione in tempi brevi e puntuali."
+   }
+  ],
+  "Perugia": [],
+  "Pesaro": [],
+  "Pescara": [],
+  "Piacenza": [],
+  "Pisa": [
+   {
+    "id": 68,
+    "nome": "Vdlcostruzionisrl",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Pisa",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Pistoia": [],
+  "Pordenone": [
+   {
+    "id": 78,
+    "nome": "Federico stefanin artigiano edile",
+    "mestiere": "Edilizia / Muratura",
+    "mestieri": null,
+    "tipo": "artigiano",
+    "citta": "Pordenone",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Potenza": [],
+  "Prato": [
+   {
+    "id": 125,
+    "nome": "BURZI DEMIS",
+    "mestiere": "Fabbro / Cancelli / Recinzioni",
+    "mestieri": [
+     "Fabbro / Cancelli / Recinzioni",
+     "Serramenti / Infissi",
+     "Sgomberi / Traslochi"
+    ],
+    "tipo": "artigiano",
+    "citta": "Prato",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Esperienza decennale in sostituzione e riparazione di;\nSerrature, avvolgibili, zanzariere, fornitura e montaggio di ringhiere e cancelli per esterno, opere di carpenteria metallica in genere"
+   }
+  ],
+  "Ragusa": [
+   {
+    "id": 69,
+    "nome": "Impresa Edile Falcone Andrea",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Ragusa",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Ravenna": [
+   {
+    "id": 83,
+    "nome": "Pagano Giuseppe",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Ravenna",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Reggio Calabria": [],
+  "Reggio Emilia": [],
+  "Rieti": [
+   {
+    "id": 46,
+    "nome": "Clarissa soc. Coop.soc",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Rieti",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Multiservizi"
+   },
+   {
+    "id": 36,
+    "nome": "Admin TrovaImpresa",
+    "mestiere": "Idraulico",
+    "mestieri": [
+     "Edilizia / Muratura"
+    ],
+    "tipo": "artigiano",
+    "citta": "Rieti",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "idraulico certificato"
+   }
+  ],
+  "Rimini": [
+   {
+    "id": 198,
+    "nome": "Igor Rudin",
+    "mestiere": "Pavimenti e piastrelle",
+    "mestieri": [
+     "Pavimenti e piastrelle"
+    ],
+    "tipo": "artigiano",
+    "citta": "Rimini",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   },
+   {
+    "id": 124,
+    "nome": "Edilmusa",
+    "mestiere": "Ristrutturazione completa",
+    "mestieri": [
+     "Ristrutturazione completa",
+     "Cartongesso",
+     "Pittura e tinteggiatura"
+    ],
+    "tipo": "artigiano",
+    "citta": "Rimini",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "EDILMUSA RISTRUTTURAZIONI\nRistrutturare casa non significa solo fare lavori. Significa trasformare uno spazio in qualcosa che senti davvero tuo.\nEdilmusa realizza ristrutturazioni complete di interni, occupandosi direttamente delle diverse fasi del lavoro per offrirti un unico referente, meno pensieri e un risultato curato nei dettagli."
+   }
+  ],
   "Roma": [
    {
     "id": 156,
@@ -150,66 +1095,156 @@
     "descrizione": "Spazio Giardino e' un'impresa specializzata nella manutenzione professionale del verde, che opera a Pomezia, Ardea, Torvaianica, Aprilia, Anzio, Nettuno, Roma Sud e zone limitrofe."
    }
   ],
-  "Milano": [
+  "Rovigo": [],
+  "Salerno": [
    {
-    "id": 203,
-    "nome": "CO.E.CO SRL",
-    "mestiere": "Costruzione nuova",
+    "id": 205,
+    "nome": "Bm impianti società coop",
+    "mestiere": "Impianti elettrici",
     "mestieri": [
-     "Costruzione nuova"
-    ],
-    "tipo": "impresa",
-    "citta": "Assago",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Eseguimo edilizia da 40 anni\nRealizzazione di strutture in cemento armato, ristrutturazione di qualsiasi genere edifici residenziali e commerciali"
-   },
-   {
-    "id": 115,
-    "nome": "Futuraservice",
-    "mestiere": "Giardinaggio / Esterni",
-    "mestieri": [
-     "Giardinaggio / Esterni",
-     "Ristrutturazione completa",
-     "Pittura e tinteggiatura"
+     "Impianti elettrici"
     ],
     "tipo": "artigiano",
-    "citta": "Milano",
+    "citta": "Giffoni Valle Piana",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
-    "descrizione": "Giardinaggio, abbattimenti e potature, manutenzione ordinaria e straordinaria, realizzo giardino e parchi impianti d'irrigazione automatica, prato sintetico e prato a rotoli, agronomo."
+    "descrizione": null
    },
    {
-    "id": 111,
-    "nome": "Rainbow Multiservizi",
-    "mestiere": "Ristrutturazione",
-    "mestieri": null,
-    "tipo": "impresa",
-    "citta": "Milano",
+    "id": 121,
+    "nome": "GRUPPO ALIBERTI",
+    "mestiere": "Impianti elettrici",
+    "mestieri": [
+     "Impianti elettrici",
+     "Ristrutturazione completa",
+     "Ponteggi"
+    ],
+    "tipo": "artigiano",
+    "citta": "Salerno",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
     "descrizione": ""
    },
    {
-    "id": 49,
-    "nome": "NK elettrici",
-    "mestiere": "Impianti elettrici",
+    "id": 104,
+    "nome": "General Service",
+    "mestiere": "Altro (scrivi quale)",
     "mestieri": [
-     "Impianti elettrici",
-     "Antennista / Allarmi",
-     "Serramenti / Infissi"
+     "Climatizzazione / Caldaie",
+     "Fabbro / Cancelli / Recinzioni",
+     "Spurghi / Spazzacamino"
     ],
     "tipo": "artigiano",
-    "citta": "Milano",
+    "citta": "Salerno",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
-    "descrizione": "Sono elettricista: impianti elettrici e citofoni, installazione di ventilatori, manutenzione."
+    "descrizione": "A.G.S. è presente sul territorio da molti anni, opera nel campo dell'idraulica, termoidraulica, spazzacamino, fabbri, elettricisti e edilizia in generale, con servizio di pronto intervento 24h/24h tutto l'anno compreso festivi con massimo 1h di attesa."
+   },
+   {
+    "id": 176,
+    "nome": "D'Urso costruzioni",
+    "mestiere": "Altro (scrivi quale)",
+    "mestieri": [],
+    "tipo": "impresa",
+    "citta": "Pontecagnano Faiano",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
    }
   ],
+  "Sassari": [
+   {
+    "id": 129,
+    "nome": "Tgsa Servizi Agricoli",
+    "mestiere": "Movimento terra",
+    "mestieri": [
+     "Movimento terra"
+    ],
+    "tipo": "artigiano",
+    "citta": "Sassari",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   },
+   {
+    "id": 92,
+    "nome": "GMC Costruzioni Srls",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Sassari",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   },
+   {
+    "id": 61,
+    "nome": "Luigi",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Sassari",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   },
+   {
+    "id": 135,
+    "nome": "Geom Walter Dedola",
+    "mestiere": "geometra",
+    "mestieri": null,
+    "tipo": "professionista",
+    "citta": "Sassari",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Savona": [],
+  "Siena": [],
+  "Siracusa": [
+   {
+    "id": 158,
+    "nome": "FAPGROUPSRLS",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Siracusa",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "FAP GROUP SRLS realtà specializzata nelle ristrutturazioni chiavi in mano , garantendo affidabilità nella qualità e tempistica basandosi sulle esigenze dei vostri clienti"
+   }
+  ],
+  "Sondrio": [],
+  "Taranto": [
+   {
+    "id": 94,
+    "nome": "Giorgio Colucci",
+    "mestiere": "Impianti elettrici",
+    "mestieri": null,
+    "tipo": "artigiano",
+    "citta": "Taranto",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": null
+   }
+  ],
+  "Teramo": [],
+  "Terni": [],
   "Torino": [
    {
     "id": 201,
@@ -310,285 +1345,82 @@
     "descrizione": "Riparazioni urgenti idraulica, condizionatori, caldaia, ristrutturazione bagni e appartamenti"
    }
   ],
-  "Napoli": [
+  "Trapani": [
    {
-    "id": 174,
-    "nome": "Perna impianti Srl",
+    "id": 98,
+    "nome": "Francesco",
+    "mestiere": "Costruzione nuova",
+    "mestieri": [
+     "Costruzione nuova"
+    ],
+    "tipo": "impresa",
+    "citta": "Trapani",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Trento": [],
+  "Treviso": [
+   {
+    "id": 202,
+    "nome": "Dorel salgau costruzioni/ristrutturazioni A-Z",
+    "mestiere": "Ristrutturazione completa",
+    "mestieri": [
+     "Ristrutturazione completa",
+     "Coperture / Tetti"
+    ],
+    "tipo": "artigiano",
+    "citta": "Mansuè",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "Specializzato nel rifacimento dei tetti in cotto/cemento/pannelli coibentati\nPitture e rasature"
+   }
+  ],
+  "Trieste": [],
+  "Udine": [],
+  "Varese": [
+   {
+    "id": 160,
+    "nome": "Vitalettrica di Vitale Claudio",
     "mestiere": "Impianti elettrici",
     "mestieri": [
      "Impianti elettrici"
     ],
     "tipo": "artigiano",
-    "citta": "Portici",
+    "citta": "Varese",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
-    "descrizione": "Siamo una societa' nata nel 2025, ma con anni di esperienza lavorativa alle spalle. Ci occupiamo di tutto quello che riguarda l'elettricita'"
+    "descrizione": "Impianti elettrici civili e industriali"
    },
    {
-    "id": 155,
-    "nome": "Rosario Macor",
-    "mestiere": "Pavimenti e piastrelle",
-    "mestieri": [
-     "Pavimenti e piastrelle",
-     "Altro"
-    ],
-    "tipo": "artigiano",
-    "citta": "Napoli",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Posa in opera parquet di tutti i tipi, levigatura e lucidatura parquet gia' esistente"
-   },
-   {
-    "id": 127,
-    "nome": "Aedifica Costruzioni srl",
+    "id": 164,
+    "nome": "S.b costruzioni Edili srls",
     "mestiere": "Ristrutturazione",
     "mestieri": null,
     "tipo": "impresa",
-    "citta": "Napoli",
+    "citta": "Varese",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
-    "descrizione": "Siamo impresa edile che opera da oltre 20 anni"
+    "descrizione": null
    },
    {
-    "id": 114,
-    "nome": "Fra.mar",
-    "mestiere": "Ristrutturazione",
+    "id": 152,
+    "nome": "Welcome Clean",
+    "mestiere": "Pulizie / Disinfestazioni",
     "mestieri": [
-     "Ristrutturazione"
-    ],
-    "tipo": "impresa",
-    "citta": "Napoli",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Siamo un'impresa che opera nel settore dell'edilizia civile con una vasta esperienza ed un team di professionisti"
-   },
-   {
-    "id": 72,
-    "nome": "G.M. RISTRUTTURAZIONI SRLS",
-    "mestiere": "Ristrutturazione",
-    "mestieri": null,
-    "tipo": "impresa",
-    "citta": "Napoli",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
-   }
-  ],
-  "Rieti": [
-   {
-    "id": 46,
-    "nome": "Clarissa soc. Coop.soc",
-    "mestiere": "Ristrutturazione",
-    "mestieri": [
-     "Ristrutturazione"
-    ],
-    "tipo": "impresa",
-    "citta": "Rieti",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Multiservizi"
-   },
-   {
-    "id": 36,
-    "nome": "Admin TrovaImpresa",
-    "mestiere": "Idraulico",
-    "mestieri": [
-     "Edilizia / Muratura"
+     "Pulizie / Disinfestazioni"
     ],
     "tipo": "artigiano",
-    "citta": "Rieti",
+    "citta": "Varese",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
-    "descrizione": "idraulico certificato"
-   }
-  ],
-  "Palermo": [
-   {
-    "id": 169,
-    "nome": "Ad Maiora System",
-    "mestiere": "Tende da sole / Zanzariere",
-    "mestieri": [
-     "Tende da sole / Zanzariere",
-     "Altro"
-    ],
-    "tipo": "artigiano",
-    "citta": "Palermo",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
-   },
-   {
-    "id": 141,
-    "nome": "Edil sve",
-    "mestiere": "Ristrutturazione",
-    "mestieri": [
-     "Ristrutturazione"
-    ],
-    "tipo": "impresa",
-    "citta": "Palermo",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Ristrutturazione completa e tanto altro"
-   },
-   {
-    "id": 101,
-    "nome": "Mcdomotic",
-    "mestiere": "Impianti elettrici",
-    "mestieri": [
-     "Impianti elettrici",
-     "Fotovoltaico / Pannelli solari",
-     "Climatizzazione / Caldaie"
-    ],
-    "tipo": "artigiano",
-    "citta": "Palermo",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
-   }
-  ],
-  "Genova": [
-   {
-    "id": 54,
-    "nome": null,
-    "mestiere": null,
-    "mestieri": [
-     "Pittura e tinteggiatura",
-     "Cartongesso"
-    ],
-    "tipo": null,
-    "citta": "Genova",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Mi chiamo Claudio, faccio imbiancatura e cartongesso. E in caso lavoretti di muratura"
-   }
-  ],
-  "Bologna": [
-   {
-    "id": 173,
-    "nome": "Diletta Evangelisti",
-    "mestiere": "interior_designer",
-    "mestieri": null,
-    "tipo": "professionista",
-    "citta": "Bologna",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Architetto, opera nelle ristrutturazioni ed interior designer"
-   },
-   {
-    "id": 150,
-    "nome": "Longobardo Sacha",
-    "mestiere": "Impianti elettrici",
-    "mestieri": [
-     "Impianti elettrici",
-     "Fotovoltaico / Pannelli solari",
-     "Climatizzazione / Caldaie"
-    ],
-    "tipo": "artigiano",
-    "citta": "Bologna",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Impianti elettrici, domotica, fotovoltaico, climatizzazione, interventi urgenti h24"
-   },
-   {
-    "id": 97,
-    "nome": "Bologna",
-    "mestiere": "Cartongesso",
-    "mestieri": [
-     "Cartongesso",
-     "Ristrutturazione completa",
-     "Pavimenti e piastrelle"
-    ],
-    "tipo": "artigiano",
-    "citta": "Bologna",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Ristrutturazione, cartongesso, rifiniture."
-   },
-   {
-    "id": 90,
-    "nome": "Multicolori di yameen muhammad",
-    "mestiere": "Pittura e tinteggiatura",
-    "mestieri": null,
-    "tipo": "artigiano",
-    "citta": "Bologna",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": true,
-    "descrizione": ""
-   }
-  ],
-  "Firenze": [
-   {
-    "id": 131,
-    "nome": "Bolis Luigi",
-    "mestiere": "Impianti elettrici",
-    "mestieri": [
-     "Impianti elettrici",
-     "Antennista / Allarmi",
-     "Altro"
-    ],
-    "tipo": "artigiano",
-    "citta": "Firenze",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
-   }
-  ],
-  "Bari": [
-   {
-    "id": 170,
-    "nome": "Home star di colella veronica",
-    "mestiere": "Ristrutturazione",
-    "mestieri": null,
-    "tipo": "impresa",
-    "citta": "Bari",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "La Home Star offre ristrutturazione case chiavi in mano. Dai piccoli ai grandi lavori."
-   }
-  ],
-  "Catania": [
-   {
-    "id": 159,
-    "nome": "PZ RISTRUTTURAZIONI",
-    "mestiere": "Ristrutturazione",
-    "mestieri": null,
-    "tipo": "impresa",
-    "citta": "Catania",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
-   }
-  ],
-  "Verona": [
-   {
-    "id": 96,
-    "nome": "Veneta Restauri srls",
-    "mestiere": "Ristrutturazione",
-    "mestieri": null,
-    "tipo": "impresa",
-    "citta": "Verona",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
+    "descrizione": "Siamo operativi da Varese fino a Malpensa.\nCi occupiamo di pulizie post ristrutturazione, pulizie per attività commerciali, uffici, aziende, pulizie per privati per i quali promo esclusive e dedicate per ogni esigenza\nServizio di pulizia vetri/vetrate"
    }
   ],
   "Venezia": [
@@ -638,87 +1470,70 @@
     "descrizione": ""
    }
   ],
-  "Messina": [
+  "Verbania": [
    {
-    "id": 126,
-    "nome": "Scuderi service srls",
-    "mestiere": "Idraulica",
+    "id": 149,
+    "nome": "Luca restauri",
+    "mestiere": "Falegnameria",
     "mestieri": [
-     "Idraulica",
-     "Climatizzazione / Caldaie",
-     "Fotovoltaico / Pannelli solari"
+     "Falegnameria",
+     "Altro"
     ],
     "tipo": "artigiano",
-    "citta": "Messina",
+    "citta": "Verbania",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
-    "descrizione": ""
+    "descrizione": "Buongiorno..\nRestauri e piccole riparazioni oggetti e manufatti legno,costruzione piccoli mobili di design.\nGrazie."
    }
   ],
-  "Padova": [
+  "Vercelli": [
    {
-    "id": 110,
-    "nome": "Bis-Mas di Battistella",
-    "mestiere": "Serramenti / Infissi",
-    "mestieri": [
-     "Serramenti / Infissi",
-     "Tende da sole / Zanzariere",
-     "Fabbro / Cancelli / Recinzioni"
-    ],
-    "tipo": "artigiano",
-    "citta": "Villa Estense",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "La ditta BIS-MAS si occupa di fornitura e posa di serramenti in alluminio e PVC. Offriamo assistenza e manutenzione anche sui prodotti non forniti da noi."
-   }
-  ],
-  "Trieste": [],
-  "Brescia": [
-   {
-    "id": 161,
-    "nome": "Technoelectric",
+    "id": 199,
+    "nome": "Empire global service di vamo geometra francesco",
     "mestiere": "Impianti elettrici",
     "mestieri": [
      "Impianti elettrici"
     ],
     "tipo": "artigiano",
-    "citta": "Brescia",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": ""
-   },
-   {
-    "id": 89,
-    "nome": "M.b.tinteggiatura",
-    "mestiere": "Ristrutturazione",
-    "mestieri": [
-     "Ristrutturazione"
-    ],
-    "tipo": "impresa",
-    "citta": "Cazzago San Martino",
-    "valutazione_media": 0,
-    "piano": "premium",
-    "verificata": false,
-    "descrizione": "Attiva dal 2018, M.B. Tinteggiatura e' un'azienda artigiana specializzata in tinteggiatura, finiture e ristrutturazioni edili per ambienti residenziali e commerciali."
-   },
-   {
-    "id": 85,
-    "nome": "Raguig Younes",
-    "mestiere": "Impianti elettrici",
-    "mestieri": null,
-    "tipo": "artigiano",
-    "citta": "Brescia",
+    "citta": "Livorno Ferraris",
     "valutazione_media": 0,
     "piano": "premium",
     "verificata": false,
     "descrizione": ""
    }
   ],
-  "Parma": [],
-  "Modena": [],
-  "Reggio Emilia": []
+  "Verona": [
+   {
+    "id": 96,
+    "nome": "Veneta Restauri srls",
+    "mestiere": "Ristrutturazione",
+    "mestieri": null,
+    "tipo": "impresa",
+    "citta": "Verona",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": ""
+   }
+  ],
+  "Vibo Valentia": [],
+  "Vicenza": [],
+  "Viterbo": [
+   {
+    "id": 167,
+    "nome": "CMRESTAURI SRL",
+    "mestiere": "Ristrutturazione",
+    "mestieri": [
+     "Ristrutturazione"
+    ],
+    "tipo": "impresa",
+    "citta": "Viterbo",
+    "valutazione_media": 0,
+    "piano": "premium",
+    "verificata": false,
+    "descrizione": "lavori di edilizia in genere"
+   }
+  ]
  }
 }

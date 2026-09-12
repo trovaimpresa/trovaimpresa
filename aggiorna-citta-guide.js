@@ -37,11 +37,19 @@ function leggiCitta() {
   const blocco = src.match(/const CITTA = \[([\s\S]*?)\];/);
   if (!blocco) throw new Error('Non trovo l\'elenco CITTA dentro genera-mestiere-citta.js');
   const citta = [];
-  for (const m of blocco[1].matchAll(/slug:\s*'([^']+)'\s*,\s*nome:\s*'([^']+)'/g)) {
-    citta.push({ slug: m[1], nome: m[2] });
+  for (const m of blocco[1].matchAll(/slug:\s*'((?:[^'\\\\]|\\\\.)+)'\s*,\s*nome:\s*'((?:[^'\\\\]|\\\\.)+)'/g)) {
+    citta.push({ slug: m[1].replace(/\\\\'/g, "'"), nome: m[2].replace(/\\\\'/g, "'") });
   }
   if (!citta.length) throw new Error('Elenco CITTA vuoto');
-  return citta;
+  /* ⚠️ 12 set 2026 — IL TETTO AI PULSANTI.
+     Da oggi le citta' in elenco sono 106. Stampare 106 pulsanti in fondo
+     a ogni guida farebbe un muro di nomi che nessuno legge, e i link
+     interni contano di piu' quando sono pochi e mirati. Nelle guide
+     restano quindi le prime MAX, che sono le citta' piu' grandi.
+     Tutte le altre ricevono i loro link dalle pagine imprese-<citta>.html
+     (vedi aggiorna-categorie-citta.js), che e' la strada giusta. */
+  const MAX = 20;
+  return citta.slice(0, MAX);
 }
 
 /* ---- 2. i riquadri dentro una guida ---- */
