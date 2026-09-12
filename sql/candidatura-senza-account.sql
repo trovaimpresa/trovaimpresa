@@ -1,0 +1,31 @@
+-- TrovaLavoro passo 2 — candidarsi a un'offerta SENZA account.
+-- Applicata il 12 settembre 2026 (migrazioni candidatura_senza_account_12set2026
+-- e candidatura_senza_account_riusa_candidato_12set2026).
+--
+-- IL PERCHE'. Per candidarsi bisognava creare un profilo candidato. Chi guarda
+-- un annuncio dal telefono, in cantiere, non lo fa: chiude e se ne va.
+--
+-- ⚠️ DIFETTO TROVATO COL COLLAUDO, e come e' stato chiuso.
+-- La prima versione creava una riga nuova in candidati_lavoro per ogni
+-- candidatura. Ma quella tabella ha un vincolo UNIQUE sull'email: alla SECONDA
+-- candidatura della stessa persona il database rifiutava (errore 23505).
+-- Ora: se l'email esiste gia' come candidato SENZA account si riusa la sua riga
+-- e si aggiornano i dati (l'ultima candidatura e' la piu' fresca).
+-- Se invece l'email appartiene a un candidato ISCRITTO non si tocca niente e si
+-- dice di accedere: se no un estraneo, scrivendo l'email di un altro, gli
+-- cambierebbe il profilo e lo candiderebbe a sua insaputa.
+--
+-- candidati_senza_account(p jsonb) -> jsonb {candidatura_id, candidato_id}
+--   SECURITY DEFINER. Controlla: annuncio esistente e ANCORA ATTIVO, nome,
+--   email valida, telefono obbligatorio (e' come l'impresa richiama).
+--   Freni: non due volte allo stesso annuncio, massimo 10 candidature in 24 ore.
+--   La riga in candidati_lavoro ha user_id NULL e benvenuto_inviato = true
+--   (non si e' iscritto a niente, non deve ricevere la mail di benvenuto).
+--
+-- grant execute on function public.candidati_senza_account(jsonb) to anon, authenticated;
+--
+-- Collaudo 12 set: 15 prove verdi (candidatura, doppione respinto, stessa
+-- persona su un altro annuncio, telefono mancante, email storta, annuncio
+-- inesistente, annuncio chiuso, email di un iscritto respinta e profilo intatto,
+-- freno 10/24h, anon non legge candidature ne' dati dei candidati).
+-- Righe di prova tutte cancellate.

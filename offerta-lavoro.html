@@ -48,6 +48,29 @@
   .dati li { background: #f7f9fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; font-size: 16.5px; }
   .dati b { display: block; color: #566; font-weight: 600; font-size: 15px; margin-bottom: 3px; }
 
+
+  /* Candidatura senza account (12 set 2026): prima qui c'erano due tasti che
+     portavano alla registrazione, e chi guarda dal telefono se ne andava. */
+  .cand-titolo { font-size:22px; font-weight:800; color:#14202e; margin-bottom:6px; }
+  .cand-sotto { font-size:16.5px; color:#40506b; margin-bottom:18px; }
+  .cand-modulo { text-align:left; background:#fff; border-radius:12px; padding:20px; }
+  .cand-riga { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .cand-riga > label { flex:1; min-width:190px; }
+  .cand-modulo label { display:block; font-size:15px; font-weight:700; color:#334; }
+  .cand-modulo .obb { color:#FF6B35; }
+  .cand-modulo input, .cand-modulo select, .cand-modulo textarea {
+    width:100%; margin-top:6px; padding:13px 14px; border:1.5px solid #d7dee8; border-radius:10px;
+    font-size:16px; font-family:inherit; color:#222; background:#fff; }
+  .cand-modulo input:focus, .cand-modulo select:focus, .cand-modulo textarea:focus { outline:none; border-color:#0066ff; }
+  .cand-largo { margin-bottom:14px; }
+  .cand-file { background:#f7f9fc; border:1.5px dashed #c3d2e6; border-radius:10px; padding:14px; font-weight:700; }
+  .cand-file input { border:none; background:none; padding:8px 0 0; }
+  .cand-invia { width:100%; border:none; cursor:pointer; font-family:inherit; margin-top:4px; }
+  .cand-privacy { font-size:13.5px; color:#78849a; margin:12px 0 0; line-height:1.5; }
+  .cand-account { font-size:15px; color:#40506b; margin:14px 0 0; padding-top:14px; border-top:1px solid #eef1f6; }
+  .cand-account a { color:#0066ff; font-weight:700; }
+  .cand-nascosto { position:absolute; left:-9999px; top:0; opacity:0; height:0; overflow:hidden; }
+  @media (max-width:640px){ .cand-riga { gap:0; } .cand-riga > label { min-width:100%; margin-bottom:14px; } .cand-modulo { padding:16px; } }
   .cta-box { margin-top: 30px; background: #eaf2ff; border: 2px solid #0066ff; border-radius: 14px; padding: 24px; text-align: center; }
   .cta-box p { font-size: 17px; color: #334; margin-bottom: 16px; }
   .btn-candidati { display: inline-block; background: #FF6B35; color: white; text-decoration: none; font-size: 19px; font-weight: 700; padding: 16px 34px; border-radius: 12px; }
@@ -290,10 +313,8 @@
     const url = encodeURIComponent('offerta-lavoro.html?id=' + o.id);
 
     if (!st.loggato) {
-      testo.textContent = 'Ti interessa questo lavoro? La candidatura è gratuita.';
-      azioni.innerHTML =
-        `<a class="btn-candidati" href="/registrazione-candidato.html?id=${encodeURIComponent(o.id)}">Iscriviti e candidati →</a>` +
-        `<a class="btn-secondario" href="/login-candidato.html?redirect=${url}">Ho già un account</a>`;
+      // Niente piu' «iscriviti per candidarti»: il modulo sta qui, aperto.
+      moduloSenzaAccount(o);
       return;
     }
     if (!st.candidato) {
@@ -314,6 +335,131 @@
     testo.textContent = 'Ti interessa questo lavoro? La candidatura è gratuita e arriva subito all\'impresa.';
     azioni.innerHTML = '<button class="btn-candidati" id="btn-cand">Candidati a questa offerta →</button>';
     document.getElementById('btn-cand').onclick = () => inviaCandidatura(o, st.candidato.id);
+  }
+
+
+  /* ---- CANDIDATURA SENZA ACCOUNT (12 set 2026) ----
+     Il modulo sta dentro la pagina dell'annuncio. I dati arrivano all'impresa
+     per email: un annuncio pubblicato senza account non ha un pannello dove
+     farli vedere. */
+
+  const MESTIERI_CAND = ['Muratore','Manovale','Carpentiere','Elettricista','Idraulico','Termoidraulico','Piastrellista','Cartongessista','Intonacatore','Pittore/Imbianchino','Falegname','Fabbro','Pavimentista','Ponteggiatore','Escavatorista','Giardiniere','Tecnico caldaie','Impianti solari','Climatizzazione','Altro'];
+  const MAX_CV = 3 * 1024 * 1024;
+
+  function moduloSenzaAccount(o) {
+    const testo = document.getElementById('cta-testo');
+    const azioni = document.getElementById('cta-azioni');
+    const url = encodeURIComponent('offerta-lavoro.html?id=' + o.id);
+    testo.className = 'cand-titolo';
+    testo.textContent = 'Candidati a questo lavoro';
+
+    const opzMestieri = MESTIERI_CAND.map(m => `<option>${esc(m)}</option>`).join('');
+    const preselezione = o.mestiere && MESTIERI_CAND.includes(o.mestiere) ? o.mestiere : null;
+
+    azioni.innerHTML = `
+      <p class="cand-sotto"><strong>Non serve iscriversi.</strong> Compila e invia: i tuoi dati arrivano subito all'impresa, che ti richiama.</p>
+      <div class="cand-modulo">
+        <div class="cand-nascosto" aria-hidden="true">
+          <label for="cand-sito">Non compilare</label>
+          <input type="text" id="cand-sito" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="cand-riga">
+          <label>Nome e cognome <span class="obb">*</span><input type="text" id="cand-nome" placeholder="Es. Mario Rossi" autocomplete="name"></label>
+          <label>Telefono <span class="obb">*</span><input type="tel" id="cand-tel" placeholder="Es. 333 1234567" autocomplete="tel"></label>
+        </div>
+        <div class="cand-riga">
+          <label>Email <span class="obb">*</span><input type="email" id="cand-email" placeholder="Es. mario@email.it" autocomplete="email"></label>
+          <label>Che lavoro fai <span class="obb">*</span><select id="cand-mestiere">${opzMestieri}</select></label>
+        </div>
+        <div class="cand-riga">
+          <label>Anni di esperienza<select id="cand-anni">
+            <option>Meno di 1 anno</option><option>1-3 anni</option><option>3-5 anni</option>
+            <option>5-10 anni</option><option>Più di 10 anni</option></select></label>
+          <label>Città dove abiti<input type="text" id="cand-citta" placeholder="Es. Rieti"></label>
+        </div>
+        <label class="cand-largo">Due righe su di te (facoltativo)
+          <textarea id="cand-desc" rows="3" placeholder="Es. Faccio il muratore da 8 anni, esperienza in intonaci e cartongesso. Ho la patente B e l'auto."></textarea>
+        </label>
+        <label class="cand-largo cand-file">📎 Curriculum (facoltativo — PDF o foto, massimo 3 MB)
+          <input type="file" id="cand-cv" accept=".pdf,image/jpeg,image/png,image/heic">
+        </label>
+        <button class="btn-candidati cand-invia" id="cand-invia">Invia la candidatura →</button>
+        <p class="cand-privacy">Inviando accetti che i tuoi dati vengano mandati a questa impresa. Niente pubblicità, niente altro.</p>
+        <p class="cand-account">Hai già un account TrovaImpresa? <a href="/login-candidato.html?redirect=${url}">Accedi e candidati con un clic</a></p>
+      </div>`;
+
+    if (preselezione) document.getElementById('cand-mestiere').value = preselezione;
+    document.getElementById('cand-invia').onclick = () => inviaSenzaAccount(o);
+  }
+
+  function leggiFile(file) {
+    return new Promise((risolvi, rifiuta) => {
+      const lettore = new FileReader();
+      lettore.onload = () => risolvi(String(lettore.result).split(',')[1]);
+      lettore.onerror = () => rifiuta(new Error('Non riesco a leggere il file.'));
+      lettore.readAsDataURL(file);
+    });
+  }
+
+  async function inviaSenzaAccount(o) {
+    const btn = document.getElementById('cand-invia');
+    const esito = document.getElementById('esito');
+    const val = id => (document.getElementById(id)?.value || '').trim();
+
+    if (document.getElementById('cand-sito')?.value) return; // trappola anti-robot
+
+    const nome = val('cand-nome'), tel = val('cand-tel'), email = val('cand-email');
+    if (!nome || !tel || !email) {
+      esito.className = 'esito ko';
+      esito.textContent = 'Servono almeno nome, telefono e email.';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = '⏳ Invio…';
+    esito.className = 'esito'; esito.textContent = '';
+
+    let cv = null;
+    const fileCv = document.getElementById('cand-cv')?.files?.[0];
+    if (fileCv) {
+      if (fileCv.size > MAX_CV) {
+        btn.disabled = false; btn.textContent = 'Invia la candidatura →';
+        esito.className = 'esito ko';
+        esito.textContent = 'Il curriculum è troppo pesante: massimo 3 MB.';
+        return;
+      }
+      try { cv = { nome: fileCv.name, tipo: fileCv.type, base64: await leggiFile(fileCv) }; }
+      catch { cv = null; }
+    }
+
+    try {
+      const { data, error } = await supabaseClient.rpc('candidati_senza_account', {
+        p: {
+          offerta_id: o.id, nome, telefono: tel, email,
+          mestiere: val('cand-mestiere'), anni_esperienza: val('cand-anni'),
+          citta: val('cand-citta'), descrizione: val('cand-desc')
+        }
+      });
+      if (error) throw error;
+
+      // l'avviso all'impresa: se non parte, la candidatura resta comunque salvata
+      fetch('/.netlify/functions/candidatura-avvisa', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidatura_id: data.candidatura_id, cv })
+      }).catch(() => {});
+
+      document.getElementById('cta-testo').className = 'cand-titolo';
+      document.getElementById('cta-testo').textContent = '✅ Candidatura inviata';
+      document.getElementById('cta-azioni').innerHTML =
+        '<p class="cand-sotto">I tuoi dati sono arrivati a <strong>' + esc(o.nome_azienda || "l'impresa") + '</strong>' +
+        (fileCv ? ', col curriculum allegato' : '') + '. Se gli interessi ti chiama al numero che hai lasciato.</p>' +
+        '<a class="btn-secondario" href="/offerte-lavoro.html">Guarda gli altri annunci →</a>';
+      document.getElementById('box-candidatura').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Invia la candidatura →';
+      esito.className = 'esito ko';
+      esito.textContent = e.message || 'Non è riuscito l\'invio. Riprova fra poco.';
+    }
   }
 
   async function inviaCandidatura(o, candidatoId) {

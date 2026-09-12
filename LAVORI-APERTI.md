@@ -58,7 +58,57 @@ pubblico e le guide NON le coprono. Servono sezioni nuove, scritte da Alex:
 - ⛔ DA NON FARE MAI: riempire le pagine con imprese prese da elenchi pubblici
   senza il loro permesso
 
-### ⬜ 2. TROVALAVORO — piano concordato, non iniziato
+### 🟡 2. TROVALAVORO — PASSO 1 FATTO il 12 set (notte), restano i passi 2-3-4
+
+**✅ FATTO: la porta e' aperta. Si pubblica un'offerta senza iscriversi.**
+⚠️ Scoperta: il muro era DOPPIO, non uno solo. Oltre al permesso c'era una riga
+di codice in `offerte-registrazione.html` (riga →1005←) che diceva «Per
+pubblicare devi prima accedere» e fermava tutti PRIMA ancora di provare. E il
+modulo era gia' completo: nome azienda, email, telefono, mestiere, citta',
+contratto, stipendio, patenti — tutto gia' li'.
+
+**Database** (migrazione `offerte_lavoro_pubblicazione_anonima_12set2026`,
+copia leggibile in `sql/offerte-pubblicazione-anonima.sql`):
+- `pubblica_offerta_anonima(jsonb)` — valida, taglia i campi lunghi, `impresa_id`
+  resta NULL, freno: max →5← annunci dalla stessa email in →24← ore
+- `verifica_token_offerta` e `chiudi_offerta_anonima` — chiudere NON cancella,
+  mette `attiva=false`
+- ⛔ **Il token NON sta su `offerte_lavoro`, sta nella tabella separata
+  `offerte_token`.** Motivo: su `subappalti` il permesso di lettura e' dato
+  colonna per colonna e il token e' escluso; su `offerte_lavoro` invece il
+  permesso e' su TUTTA la tabella e le pagine fanno `select('*')` — una colonna
+  nuova sarebbe stata leggibile da chiunque, cioe' chiunque avrebbe potuto
+  chiudere gli annunci altrui
+
+**Pagine e funzioni**
+- `offerte-registrazione.html` — riquadro verde «Non serve iscriversi», trappola
+  anti-robot nascosta, e dopo la pubblicazione il riquadro col link di gestione
+  (+ tasto «Copia il link» e «Vedi il tuo annuncio»)
+- `offerta-gestisci.html` (NUOVA) — mostra l'annuncio e il tasto per chiuderlo
+- `netlify/functions/offerta-link-gestione.js` (NUOVA) — manda l'email col link.
+  ⚠️ Riceve solo `id` e `token`: email e titolo li legge il SERVER dal database,
+  se no la funzione si poteva usare per mandare email a chiunque. Manda una sola
+  volta (`email_avvisata`), per via del tetto Resend di →100←/giorno
+- ⚠️ **DIFFERENZA VOLUTA dai subappalti**: li' il link di gestione appare SOLO in
+  pagina, chi chiude la finestra non puo' piu' chiudere il proprio annuncio. Per
+  le offerte il link arriva anche per email
+
+**Collaudo**: →14← prove sulle funzioni SQL + →6← col ruolo `anon` (pubblica,
+vede, NON ruba il token, NON firma a nome di un iscritto, chiude col proprio
+link), tutte verdi, righe di prova cancellate. Sintassi JS delle →3← pagine
+controllata.
+
+**⏳ DA PROVARE A CLIC (Alex)**: pubblicare un'offerta vera senza essere loggato,
+controllare che l'email col link arrivi, e chiudere l'annuncio dal link.
+
+**⬜ RESTANO**: passo 2 (candidarsi senza account), passo 3 (`offerta-lavoro.html`
+esiste gia' e la sitemap `sitemap-offerte.js` si riempie da sola alla prima
+offerta — quindi anche l'→1 errore← di Search Console si chiude da solo), passo 4
+(collegare le guide sugli stipendi).
+
+---
+
+### ⬜ 2-bis. TROVALAVORO — il piano originale, per riferimento
 Il muro e' UNA riga: `offerte_insert_owner` pretende `authenticated` + una riga in
 `imprese`; `subappalti_insert_public` accetta `anon`. Per questo i subappalti sono
 →6← e le offerte →0←. `offerte_lavoro` ha GIA' `nome_azienda`, `email`, `telefono`
