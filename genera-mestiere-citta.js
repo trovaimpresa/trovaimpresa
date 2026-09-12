@@ -375,8 +375,9 @@ const MESTIERI = [
     slug: 'ingegnere-strutturale', nome: 'Ingegnere strutturale', articolo: 'un ', ruolo: 'professionista', tipo: 'ingegnere_strutturale',
     db: ['ingegnere_strutturale', 'ingegnere strutturale'],
     guida: '/quanto-costa-abbattere-un-muro', guidaNome: 'Quanto costa abbattere un muro',
-    prezzo: 'DA CONFERMARE',
-    prezzoDettaglio: 'Si paga a corpo sulla singola pratica, e il prezzo dipende da quanto è complessa la struttura e dalla zona sismica. Il deposito in Genio Civile e i diritti non sono compresi nell\'onorario.',
+    prezzo: 'da 600 € a pratica',
+    prezzoDettaglio: 'Una verifica semplice parte da circa 600 €. Una pratica per aprire un muro portante, con calcoli e deposito, sta di solito fra 1.000 e 2.500 €. I progetti complessi — solai da rinforzare, consolidamenti, sopraelevazioni — arrivano a 7.500 € e oltre. Il deposito in Genio Civile e i diritti non sono compresi nell\'onorario.',
+    fonte: 'Fasce rilevate a settembre 2026 sui preventivi pubblicati dai portali di settore per la progettazione strutturale (600–7.500 €).',
     quando: [
       'Abbattimento di un muro portante e inserimento della trave',
       'Ampliamenti, soppalchi, nuove aperture nei muri portanti',
@@ -447,8 +448,9 @@ const MESTIERI = [
     slug: 'interior-designer', nome: 'Interior designer', articolo: 'un ', ruolo: 'professionista', tipo: 'interior_designer',
     db: ['interior_designer', 'interior designer', 'arredatore'],
     guida: '/quanto-costa-rifare-la-cucina', guidaNome: 'Quanto costa rifare la cucina',
-    prezzo: 'DA CONFERMARE',
-    prezzoDettaglio: 'Si paga a progetto oppure a metro quadro di casa. È un lavoro di progettazione degli spazi e delle finiture: non comprende i mobili né la posa, che si pagano a parte.',
+    prezzo: '375–1.450 € a progetto',
+    prezzoDettaglio: 'Una consulenza breve, con un paio di incontri e le indicazioni su colori e materiali, parte da circa 200 €. Un progetto completo di casa arriva a 5.000 €. È il lavoro di progettazione: mobili e posa si pagano a parte.',
+    fonte: 'Fasce rilevate a settembre 2026 sui preventivi pubblicati dai portali di settore per l\'interior design (200–5.000 €).',
     quando: [
       'Casa nuova o appena comprata da arredare da zero',
       'Ristrutturazione dove conta come viene, non solo che funzioni',
@@ -617,6 +619,8 @@ function parole(m) {
   if (m.ruolo === 'professionista') {
     return {
       preventivo: 'incarico',
+      ilPreventivo: "L'incarico",
+      unPreventivo: 'un incarico',
       preventivi: 'incarichi',
       chiediUn: 'Chiedi un preventivo di onorario',
       cercaUrl: (c) => `/cerca-professionisti.html?citta=${encodeURIComponent(c.nome)}${m.tipo ? '&tipo=' + m.tipo : ''}`,
@@ -628,6 +632,8 @@ function parole(m) {
   }
   return {
     preventivo: 'preventivo',
+    ilPreventivo: 'Il preventivo',
+    unPreventivo: 'un preventivo',
     preventivi: 'preventivi',
     chiediUn: 'Chiedi un preventivo',
     cercaUrl: (c) => `/cerca-imprese?citta=${encodeURIComponent(c.nome)}`,
@@ -751,7 +757,7 @@ function costruisciPagina(m, c, imprese) {
   const P = parole(m);
   const url = urlPagina(m, c);
   const titolo = `${m.nome} a ${c.nome}: prezzi ${TODAY.slice(0, 4)} ${m.ruolo === 'professionista' ? 'e studi' : 'e imprese'} | TrovaImpresa`;
-  const descr = `${m.nome} a ${c.nome}: ${m.prezzo}, quando serve e cosa chiedere. Confronta i profili della zona e chiedi un ${P.preventivo}.`;
+  const descr = `${m.nome} a ${c.nome}: ${m.prezzo}, quando serve e cosa chiedere. Confronta i profili della zona e chiedi ${P.unPreventivo}.`;
 
   const schemaLocal = {
     '@context': 'https://schema.org',
@@ -846,6 +852,7 @@ ${JSON.stringify(schemaBc, null, 2)}
     <div class="prezzo-cifra">${esc(m.prezzo)}</div>
     <p>${m.prezzoDettaglio}</p>
     <p style="margin-bottom:0;"><a href="${m.guida}" style="color:#0066ff;font-weight:700;">${esc(m.guidaNome)}: la guida completa →</a></p>
+    ${m.fonte ? `<p style="margin:10px 0 0;font-size:0.82rem;color:#888;">${esc(m.fonte)}</p>` : ''}
   </div>
   <p>${m.ruolo === 'professionista'
       ? `Queste cifre sono medie di mercato. A ${esc(c.nome)} l'onorario può stare un po' sopra o un po' sotto secondo la complessità della pratica, i tempi del Comune e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea: un onorario molto sotto il minimo di solito vuol dire che qualcosa non è compreso.`
@@ -858,7 +865,7 @@ ${quando}
   </ul>
 
   <h2>Cosa chiedere prima di firmare</h2>
-  <p>Il ${P.preventivo} più basso non è quasi mai il più conveniente: è quasi sempre quello a cui manca qualcosa. Queste sono le domande da fare prima di firmare.</p>
+  <p>${P.ilPreventivo} più basso non è quasi mai il più conveniente: è quasi sempre quello a cui manca qualcosa. Queste sono le domande da fare prima di firmare.</p>
   <ul>
 ${chiedere}
   </ul>
