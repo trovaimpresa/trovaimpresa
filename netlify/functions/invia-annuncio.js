@@ -16,9 +16,17 @@ const crypto = require('crypto');
 // 'prova' manda solo ad Alessio, per vedere com'e' venuta prima di
 // spedirla a tutti. Usare SEMPRE quello prima dell'invio vero.
 //
-// L'invio passa dall'endpoint "batch" di Resend: una sola chiamata per
-// un massimo di 100 email, cosi' non si sbatte contro i limiti di
-// velocita' e la funzione non va in timeout.
+// L'invio passa dall'endpoint "batch" di Resend, che accetta al massimo
+// 100 email per chiamata. Da 100 in su la lista viene SPEZZATA in gruppi
+// da 100 e mandata un gruppo alla volta, con una pausa fra uno e l'altro
+// per non sbattere contro il limite di velocita' di Resend.
+//
+// ⚠️ 12 set 2026 — PERCHE' E' STATO CAMBIATO.
+// Con →102← iscritti il primo invio a tutti si e' fermato con «Troppi
+// destinatari in una volta (102). Il massimo e' 100»: il limite di Resend
+// era stato usato come tetto nostro. Adesso il tetto nostro e'
+// MAX_DESTINATARI (alto, si ragiona per migliaia di iscritti) e il limite
+// di Resend lo gestisce lo spezzettamento, che da fuori non si vede.
 // ============================================================
 const { createClient } = require('@supabase/supabase-js');
 
@@ -31,7 +39,18 @@ const corsHeaders = {
 
 const MITTENTE = 'TrovaImpresa <info@trovaimpresa.com>';
 const EMAIL_PROVA = 'pintoalessio@icloud.com';
-const MAX_DESTINATARI = 100;
+/* Quanti ne accetta Resend in UNA chiamata batch: e' un limite loro. */
+const PER_LOTTO = 100;
+/* Quanti ne accettiamo NOI in un invio solo. Sta qui per non far partire
+   per sbaglio una campagna enorme, non perche' Resend non ce la faccia:
+   1000 email = 10 chiamate = pochi secondi, dentro il tempo massimo di
+   una funzione Netlify. Se un giorno gli iscritti saranno di piu', questo
+   numero va alzato E l'invio va spostato su una funzione «background»,
+   che di tempo ne ha 15 minuti invece di 10 secondi. */
+const MAX_DESTINATARI = 1000;
+const PAUSA_FRA_LOTTI_MS = 600;
+
+function aspetta(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function esc(s) {
   return String(s == null ? '' : s)
@@ -304,7 +323,7 @@ exports.handler = async function (event) {
     };
   }
 
-  // ---- invio in un colpo solo ----
+  // ---- invio, un gruppo da 100 alla volta ----
   const lotto = destinatari.map(i => ({
     from: MITTENTE,
     to: [i.email],
@@ -312,20 +331,45 @@ exports.handler = async function (event) {
     html: testoInHtml(riempi(testo, i), i.email)
   }));
 
+  const gruppi = [];
+  for (let i = 0; i < lotto.length; i += PER_LOTTO) gruppi.push(lotto.slice(i, i + PER_LOTTO));
+
+  let inviate = 0;
+  const partiti = [];
+
   try {
-    const r = await fetch('https://api.resend.com/emails/batch', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-      body: JSON.stringify(lotto)
-    });
-    const risposta = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      return {
-        statusCode: 502, headers: corsHeaders,
-        body: JSON.stringify({ error: 'Resend ha rifiutato l\'invio: ' + ((risposta && risposta.message) || r.status) })
-      };
+    for (let g = 0; g < gruppi.length; g++) {
+      if (g > 0) await aspetta(PAUSA_FRA_LOTTI_MS);
+      const r = await fetch('https://api.resend.com/emails/batch', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
+        body: JSON.stringify(gruppi[g])
+      });
+      const risposta = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        /* ⚠️ Se si rompe a meta' NON si puo' dire «non e' partita»: i gruppi
+           prima di questo sono gia' usciti davvero. Si dice quante sono
+           partite, se no si rimanda tutto due volte alle stesse persone. */
+        const motivo = (risposta && risposta.message) || ('errore ' + r.status);
+        const messaggio = inviate > 0
+          ? 'Partite ' + inviate + ' email su ' + lotto.length + ', poi Resend si e\' fermato: ' + motivo
+            + '. Le prime ' + inviate + ' NON vanno rimandate.'
+          : 'Resend ha rifiutato l\'invio: ' + motivo;
+        if (inviate > 0) {
+          try {
+            await sb.from('admin_email_inviate').insert({
+              modo: gruppo === 'prova' ? 'prova' : 'vero',
+              gruppo, oggetto: String(oggetto), testo: String(testo),
+              quanti: inviate, destinatari: partiti
+            });
+          } catch (e) { console.error('[invia-annuncio] storico non salvato:', e.message); }
+        }
+        return { statusCode: 502, headers: corsHeaders, body: JSON.stringify({ error: messaggio, inviate }) };
+      }
+      const quante = Array.isArray(risposta.data) ? risposta.data.length : gruppi[g].length;
+      inviate += quante;
+      for (const m of gruppi[g]) partiti.push(m.to[0]);
     }
-    const inviate = Array.isArray(risposta.data) ? risposta.data.length : destinatari.length;
 
     // Archivio: ogni invio resta scritto, prova compresa, cosi' Alessio
     // ritrova cosa ha mandato, a chi e quando. Un errore qui non deve
@@ -337,7 +381,7 @@ exports.handler = async function (event) {
         oggetto: String(oggetto),
         testo: String(testo),
         quanti: inviate,
-        destinatari: destinatari.map(i => i.email)
+        destinatari: partiti
       });
     } catch (e) { console.error('[invia-annuncio] storico non salvato:', e.message); }
 
@@ -346,10 +390,11 @@ exports.handler = async function (event) {
       body: JSON.stringify({
         success: true,
         inviate,
-        destinatari: destinatari.map(i => i.email)
+        gruppi: gruppi.length,
+        destinatari: partiti
       })
     };
   } catch (err) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Errore di rete verso Resend: ' + err.message }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Errore di rete verso Resend: ' + err.message + (inviate > 0 ? ' — ma ' + inviate + ' email erano gia\' partite, non rimandarle.' : ''), inviate }) };
   }
 };
