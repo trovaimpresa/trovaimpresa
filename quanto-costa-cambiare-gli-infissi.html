@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -225,6 +235,18 @@
       <span class="price-big">da 250 a 600 €/mq</span>
       secondo il materiale: il <strong>PVC</strong> sta sui 250–300 €/mq, l'<strong>alluminio</strong> a taglio termico sui 400–600, il <strong>legno</strong> sui 350–600. Per una casa di 100 mq con 8–10 aperture parli di <strong>6.000–10.000 € in PVC</strong>, fino a 20.000 € in legno. Sotto trovi i prezzi per materiale e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#casa-100-mq">Casa di 100 mq: quanto viene in tutto</a></li>
+        <li><a href="#quanto-costa-una-singola-finestra">Una finestra sola quanto costa</a></li>
+        <li><a href="#prezzi-degli-infissi-per-materiale">PVC, alluminio o legno: quanto cambia</a></li>
+        <li><a href="#detrazioni-il-2026-e-l">Bonus infissi 2026: quanto torna indietro</a></li>
+        <li><a href="#cosa-deve-esserci-scritto-nel">Cosa deve esserci nel preventivo</a></li>
+        <li><a href="#gli-errori-da-evitare">Gli errori da evitare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -240,7 +262,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Prezzi degli infissi per materiale</h2>
+    <h2 id="prezzi-degli-infissi-per-materiale">Prezzi degli infissi per materiale</h2>
     <table>
       <caption>Costi indicativi 2026 — finestra fornita e posata, €/mq, con vetrocamera</caption>
       <thead>
@@ -309,7 +331,7 @@
       <strong>Occhio al vetro:</strong> il <strong>doppio vetro</strong> è lo standard; il <strong>triplo vetro</strong> isola di più (utile al Nord o su strade rumorose) ma aggiunge 10–20% al prezzo. Fatti scrivere il valore di trasmittanza (Uw): più è basso, meglio isola.
     </div>
 
-    <h2>Quanto costa una singola finestra</h2>
+    <h2 id="quanto-costa-una-singola-finestra">Quanto costa una singola finestra</h2>
     <p>I prezzi al metro quadro servono per fare il conto di tutta la casa, ma quando si chiede
     un preventivo per due o tre finestre la domanda è un'altra: <strong>quanto costa questo
     pezzo qui</strong>. Ecco i prezzi per tipo di serramento, misure più comuni, fornito e posato.</p>
@@ -341,7 +363,7 @@
       il totale diviso i metri quadri: è il modo più rapido per prendere un abbaglio.</p>
     </div>
 
-    <h2>Le marche dei profili: quanto contano davvero</h2>
+    <h2 id="le-marche-dei-profili-quanto">Le marche dei profili: quanto contano davvero</h2>
     <p>Nei preventivi trovi nomi come Salamander, Rehau, Schüco, Finstral, Veka. Sono i produttori
     del <strong>profilo</strong>, cioè del telaio: non del serramento finito, che viene assemblato
     da un serramentista con quel profilo, il vetro che sceglie e la ferramenta che monta.</p>
@@ -358,7 +380,7 @@
     preventivo la trasmittanza dell'infisso finito (Uw)</strong> e confronta quella. È un numero
     solo, e vale più di qualsiasi nome.</p>
 
-    <h2>Cambiare gli infissi sporca casa? Oggi no, ed ecco perché</h2>
+    <h2 id="cambiare-gli-infissi-sporca-casa">Cambiare gli infissi sporca casa? Oggi no, ed ecco perché</h2>
     <p>È la paura numero uno di chi rimanda il lavoro da anni: "mi buttano giù i muri, mi riempiono la casa di polvere, poi devo rifare intonaci e pittura". Vent'anni fa era così. <strong>Oggi non più</strong>, e vale la pena spiegarlo bene perché cambia anche il conto.</p>
     <p>Il metodo normale ormai è la <strong>posa sul telaio esistente</strong>: il vecchio telaio <strong>non si smura</strong>. Resta al suo posto e fa da supporto al telaio nuovo, che è più grande e lo <strong>ingloba</strong>. Niente demolizioni, niente calcinacci, niente muratore.</p>
 
@@ -417,7 +439,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Il materiale.</strong> È la variabile principale: dal PVC al legno-alluminio si passa da 250 a 750 €/mq, a parità di tutto il resto.</li>
       <li><strong>Le finestre piccole.</strong> Su un'apertura piccola il prezzo al mq schizza, perché ferramenta, manodopera e trasporto sono quasi gli stessi di una grande.</li>
@@ -426,7 +448,7 @@
       <li><strong>Tapparelle motorizzate e accessori.</strong> Motori, zanzariere e persiane nuove sono voci a parte che si sommano in fretta.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Cambiare tutte le aperture in una volta.</strong> Un solo rilievo, un solo trasporto, una sola squadra: al pezzo costa molto meno che fare due finestre all'anno.</li>
       <li><strong>Tenere le dimensioni esistenti.</strong> Stessa forma e stessa misura significa posa sul telaio vecchio, nessuna opera muraria e nessuna pratica edilizia.</li>
@@ -435,7 +457,7 @@
       <li><strong>Le detrazioni.</strong> Su una spesa da 10.000 € il bonus vale migliaia di euro: è lo sconto più grosso disponibile, basta pagare con bonifico parlante.</li>
     </ul>
 
-    <h2>Cosa deve esserci scritto nel preventivo</h2>
+    <h2 id="cosa-deve-esserci-scritto-nel">Cosa deve esserci scritto nel preventivo</h2>
     <p>Sugli infissi il rischio non è tanto la voce dimenticata quanto la voce <strong>vaga</strong>. Queste devono essere nero su bianco:</p>
     <ul class="checklist forget-list">
       <li><strong>La trasmittanza (Uw) di ogni serramento</strong> — è il numero che dice quanto isola: più è basso meglio è. Senza quel dato non sai cosa stai comprando, e serve anche per le detrazioni.</li>
@@ -446,10 +468,10 @@
       <li><strong>Tempi di consegna e di posa</strong> — gli infissi si fanno su misura: tra ordine e montaggio passano settimane. Fattelo mettere per iscritto.</li>
     </ul>
 
-    <h2>Detrazioni: il 2026 è l'anno giusto</h2>
+    <h2 id="detrazioni-il-2026-e-l">Detrazioni: il 2026 è l'anno giusto</h2>
     <p>La sostituzione degli infissi è uno degli interventi che danno diritto a detrazioni fiscali (rientra sia nel bonus ristrutturazione sia, come efficientamento energetico, nell'ecobonus). Le percentuali per il 2026 sono confermate, ma <strong>dal 2027 sono destinate a scendere</strong>: se hai in programma di cambiarli, farlo entro il 2026 conviene. Le regole cambiano ogni anno: verifica sempre sul sito dell'Agenzia delle Entrate, paga con bonifico parlante e non dimenticare la comunicazione all'ENEA. Vedi la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Comprare le finestre da una parte e cercare chi le monta dall'altra.</strong> Sembra un risparmio, ma il serramentista vende fornitura e posa insieme proprio perché la garanzia è unica. Dividendo i due, se qualcosa non va nessuno si prende la responsabilità.</li>
       <li><strong>Rimandare per paura dei lavori.</strong> Con la posa sul telaio esistente non ci sono demolizioni né polvere: la casa resta vivibile e in un paio di giorni è fatta. La paura dei lavori è il motivo per cui la gente resta anni con gli spifferi.</li>
@@ -465,7 +487,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un serramentista →</a>
     </div>
 
-    <h2>Domande frequenti sugli infissi</h2>
+    <h2 id="domande-frequenti-sugli-infissi">Domande frequenti sugli infissi</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa cambiare gli infissi di una casa di 100 mq?</summary>
@@ -504,7 +526,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un serramentista nella tua città</h2>
+      <h2 id="trova-un-serramentista-nella-tua">Trova un serramentista nella tua città</h2>
       <p>Su TrovaImpresa ci sono serramentisti e posatori di infissi verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/serramentista-roma">Roma</a>
@@ -534,7 +556,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Ti serve anche il certificato energetico</h2>
+      <h2 id="ti-serve-anche-il-certificato">Ti serve anche il certificato energetico</h2>
       <p>Per le detrazioni e per vendere o affittare casa l'APE è obbligatorio, prima e dopo i lavori. Trova un tecnico certificatore nella tua città:</p>
       <div class="cities-grid">
         <a href="/certificato-energetico-roma">Roma</a>

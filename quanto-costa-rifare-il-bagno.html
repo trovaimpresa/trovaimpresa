@@ -34,6 +34,16 @@
     --maxw:760px;
     --font:'Trebuchet MS','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -237,6 +247,18 @@
       <span class="price-big">da 5.000 a 15.000 €</span>
       Per un bagno medio di 5–6 mq con finiture normali la spesa reale si aggira sui <strong>7.000–11.000 €</strong> chiavi in mano. Sotto trovi i prezzi divisi voce per voce e un calcolatore per la tua stima.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#quanto-costa-in-base-ai">Bagno di 4, 5 o 6 mq: quanto viene</a></li>
+        <li><a href="#prezzi-reali-del-bagno-voce">I prezzi voce per voce</a></li>
+        <li><a href="#come-capire-se-un-preventivo">Come capire se il preventivo è gonfiato</a></li>
+        <li><a href="#quanto-dura-davvero-il-cantiere">Quanti giorni ci vogliono</a></li>
+        <li><a href="#permessi-e-detrazioni">Permessi e bonus 50%</a></li>
+        <li><a href="#domande-frequenti-sul-costo-del">Posso spostare il water? Solo i sanitari?</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -254,7 +276,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Quanto costa in base ai metri quadri</h2>
+    <h2 id="quanto-costa-in-base-ai">Quanto costa in base ai metri quadri</h2>
     <p>La domanda più frequente è "il mio bagno è piccolo, spenderò poco?". Solo in parte: molte voci sono fisse (il ponteggio del cantiere non c'è, ma allestimento, viaggi e attrezzatura sì), quindi il prezzo <em>al metro quadro</em> di un bagno piccolo è più alto. Ecco le forchette reali.</p>
 
     <table>
@@ -273,7 +295,7 @@
 
     <p>Tradotto al metro quadro siamo tra <strong>1.000 e 1.300 €/mq</strong> per un lavoro completo di livello medio. E c'è la geografia: lo stesso bagno da 5 mq che a Milano viene preventivato intorno agli <strong>8.000 €</strong>, a Firenze sta sui <strong>6.500 €</strong> e in molte zone del Sud sui <strong>5.000 €</strong>. Non è che al Sud si lavora peggio: è il costo della manodopera che cambia.</p>
 
-    <h2>Prezzi reali del bagno, voce per voce</h2>
+    <h2 id="prezzi-reali-del-bagno-voce">Prezzi reali del bagno, voce per voce</h2>
     <p>Questa è la tabella che uso per far capire alla gente dove finiscono i soldi. I range sono per un bagno standard di circa 5–6 mq. Sono prezzi di lavoro fatto bene, non del cognato che "te lo sistema".</p>
 
     <table>
@@ -298,7 +320,7 @@
       <strong>Occhio:</strong> se sommi i minimi non ottieni per forza il preventivo più basso. Un'impresa seria ti dà un prezzo unico "chiavi in mano" e si prende lei il rischio degli imprevisti. Diffida da chi ti spacchetta tutto per farti sembrare basso il totale, e poi ti aggiunge gli extra a lavoro iniziato.
     </div>
 
-    <h2>I prezzi degli extra, quelli che decidi tu</h2>
+    <h2 id="i-prezzi-degli-extra-quelli">I prezzi degli extra, quelli che decidi tu</h2>
     <p>Queste voci non ci sono in tutti i bagni: sono le scelte che fai tu e che spostano il totale. Le metto separate perché è qui che due preventivi identici sulla carta diventano diversi di 2.000 €.</p>
 
     <table>
@@ -318,7 +340,7 @@
       </tbody>
     </table>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Spostare gli scarichi.</strong> È la voce numero uno: cambia la pendenza, spesso obbliga a rialzare il pavimento o a demolire più del previsto.</li>
       <li><strong>La doccia a filo pavimento.</strong> Bellissima, ma va incassata: più impermeabilizzazione, più manodopera, meno margine di errore.</li>
@@ -328,7 +350,7 @@
       <li><strong>Le sorprese sotto le piastrelle.</strong> Tubi in ferro arrugginiti, solai ammalorati, vecchie infiltrazioni: si scoprono solo demolendo.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Lasciare gli attacchi dove sono.</strong> È il risparmio più grosso possibile, e nessuno se ne accorge guardando il bagno finito.</li>
       <li><strong>Piastrelle di formato standard e in pronta consegna.</strong> Il gres 30x60 di fascia media costa poco e dura come quello caro.</li>
@@ -337,7 +359,7 @@
       <li><strong>Bagno in periodi tranquilli.</strong> A gennaio o settembre le squadre sono meno cariche di quanto lo siano prima dell'estate.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Controlla che ci siano scritte. Se mancano, non è detto che siano escluse — ma va chiarito <em>prima</em>:</p>
     <ul class="checklist forget-list">
       <li><strong>Lo smaltimento delle macerie in discarica</strong> — i calcinacci di un bagno pesano, e lo smaltimento è un costo vero.</li>
@@ -401,7 +423,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Come capire se un preventivo è gonfiato</h2>
+    <h2 id="come-capire-se-un-preventivo">Come capire se un preventivo è gonfiato</h2>
     <p>Qui ti do i segnali che guardo io per primo quando qualcuno mi chiede "secondo te è troppo?". Se ne trovi due o tre insieme, fai domande prima di firmare.</p>
 
     <ul class="checklist">
@@ -416,7 +438,7 @@
       <strong>Il mio consiglio pratico:</strong> chiedi sempre 3 preventivi e mettili in colonna sulle stesse voci. Non guardare solo il totale in fondo — guarda dove uno costa il doppio dell'altro. Lì c'è la storia vera.
     </div>
 
-    <h2>Quanto dura davvero il cantiere</h2>
+    <h2 id="quanto-dura-davvero-il-cantiere">Quanto dura davvero il cantiere</h2>
     <p>Il bagno è l'unica stanza che non puoi "usare a metà", quindi i tempi contano quanto i soldi. Questa è la scaletta reale di un bagno completo:</p>
 
     <table>
@@ -438,7 +460,7 @@
       <strong>I tempi morti non sono lentezza.</strong> Quasi metà del calendario è attesa: massetti, intonaci e colle hanno tempi di presa fisici. Chi ti promette il bagno "in una settimana" o salta l'asciugatura — e allora le piastrelle si staccano dopo un anno — oppure ha semplicemente contato solo i giorni in cui c'è qualcuno a lavorare.
     </div>
 
-    <h2>Permessi e detrazioni</h2>
+    <h2 id="permessi-e-detrazioni">Permessi e detrazioni</h2>
     <p>Se rifai il bagno <strong>senza toccare la posizione degli scarichi e senza spostare muri</strong>, sei in manutenzione ordinaria: nessuna pratica da presentare. Se invece <strong>sposti gli scarichi, apri o chiudi pareti, cambi la destinazione degli spazi</strong>, si passa alla manutenzione straordinaria e serve la <strong>CILA</strong>, presentata da un tecnico: mettine in conto <strong>500–700 €</strong> più circa 50 € di diritti di istruttoria del Comune. Vedi <a href="/permessi-ristrutturazione-cila-scia.html">quale pratica serve per i tuoi lavori</a>.</p>
     <p>Sul lato soldi ci sono due vantaggi da non perdere: l'<strong>IVA agevolata al 10%</strong> sui lavori di manutenzione in abitazioni private, e il <strong>bonus ristrutturazione</strong>, che ti fa detrarre una parte della spesa — manodopera compresa — se paghi con <strong>bonifico parlante</strong>. Le percentuali cambiano con ogni legge di bilancio: le trovi aggiornate nella guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a> e nella panoramica dei <a href="/bonus-edilizi-2026.html">bonus edilizi 2026</a>.</p>
 
@@ -446,7 +468,7 @@
       <strong>Se il bagno è in condominio:</strong> la colonna di scarico è parte comune. Puoi allacciarti, ma non spostarla né ridurne la sezione senza passare dall'assemblea. E i lavori rumorosi seguono gli orari del regolamento condominiale: informa i vicini prima, ti risparmi metà dei problemi.
     </div>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Scegliere l'impresa dal totale più basso.</strong> Nel bagno il preventivo più basso è quasi sempre quello a cui manca una voce, e quella voce te la ritrovi come extra a lavori iniziati.</li>
       <li><strong>Comprare i sanitari prima del sopralluogo.</strong> Misure e attacchi vanno verificati sul posto: un lavabo troppo largo o una cassetta incompatibile bloccano il cantiere.</li>
@@ -463,7 +485,7 @@
       <a href="/controlla-preventivo-bagno.html" class="cta-dark" id="ctaBand">Controlla il tuo preventivo →</a>
     </div>
 
-    <h2>Domande frequenti sul costo del bagno</h2>
+    <h2 id="domande-frequenti-sul-costo-del">Domande frequenti sul costo del bagno</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa rifare un bagno piccolo di 4 mq?</summary>
@@ -505,7 +527,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un'impresa edile nella tua città</h2>
+      <h2 id="trova-un-impresa-edile-nella">Trova un'impresa edile nella tua città</h2>
       <p>Su TrovaImpresa ci sono imprese edili verificate in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/impresa-edile-roma">Roma</a>
@@ -535,7 +557,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Ti serve anche chi progetta gli spazi</h2>
+      <h2 id="ti-serve-anche-chi-progetta">Ti serve anche chi progetta gli spazi</h2>
       <p>Su pochi metri quadri un errore di distribuzione si paga tutti i giorni e non si corregge senza rifare. Trova un interior designer nella tua città:</p>
       <div class="cities-grid">
         <a href="/interior-designer-roma">Roma</a>

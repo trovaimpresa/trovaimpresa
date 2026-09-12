@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -223,6 +233,17 @@
       <span class="price-big">da 1.800 a 2.500 €</span>
       per un appartamento tipo (24 kW), fino a 3.700 € per potenze grandi e marche top. Una <strong>pompa di calore</strong> che sostituisce del tutto la caldaia sta sui <strong>5.000–9.000 €</strong>, un <strong>sistema ibrido</strong> sui <strong>7.000–10.000 €</strong>. Attento al fisco: <strong>la caldaia solo a gas non è più detraibile</strong> — i bonus oggi vanno a ibridi e pompe di calore. Sotto trovi il confronto e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#caldaia-ibrido-o-pompa-di">Caldaia, ibrido o pompa di calore</a></li>
+        <li><a href="#detrazioni-2026-la-regola-nuova">Detrazioni 2026: la regola nuova</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Canna fumaria e scarico: le voci dimenticate</a></li>
+        <li><a href="#domande-frequenti-sulla-caldaia">Quanto dura, ogni quanto si cambia</a></li>
+        <li><a href="#cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -238,7 +259,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Caldaia, ibrido o pompa di calore: il confronto</h2>
+    <h2 id="caldaia-ibrido-o-pompa-di">Caldaia, ibrido o pompa di calore: il confronto</h2>
     <table>
       <caption>Costi indicativi 2026, chiavi in mano, appartamento tipo — con la situazione bonus di ciascuno</caption>
       <thead>
@@ -256,7 +277,7 @@
       <strong>Il conto vero, dopo i bonus:</strong> una pompa di calore da 7.000 € con Conto Termico al 65% ti costa davvero <strong>~2.500 €</strong> — quanto una caldaia, che però di bonus non ne ha. E in bolletta la pompa di calore può far risparmiare <strong>1.000–1.200 € l'anno</strong> rispetto al gas. Prima di firmare per la caldaia "perché costa meno", fai questo conto.
     </div>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>La potenza.</strong> Un 35 kW per una casa grande costa parecchio più di un 24 kW da appartamento.</li>
       <li><strong>Lo scarico fumi da adeguare.</strong> La condensazione vuole lo scarico giusto e lo scarico della condensa: se la canna fumaria non è a norma, il lavoro cresce.</li>
@@ -264,7 +285,7 @@
       <li><strong>Marca e accessori.</strong> Termoregolazione evoluta, cronotermostati smart, addolcitore: utili, ma ogni pezzo si paga.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Cambiarla d'estate.</strong> Bassa stagione: più scelta, più calma, spesso prezzi migliori.</li>
       <li><strong>Sostituzione 1:1 nella stessa posizione.</strong> Stessi attacchi, stesso scarico: la manodopera resta al minimo.</li>
@@ -272,7 +293,7 @@
       <li><strong>Più preventivi confrontabili.</strong> Chiedi a 2–3 termoidraulici la stessa configurazione (marca, potenza, accessori scritti): solo così i prezzi si confrontano.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Controlla che ci siano scritte:</p>
     <ul class="checklist forget-list">
       <li><strong>Smontaggio e smaltimento della vecchia caldaia</strong> — o è compreso o è quotato, non "poi vediamo".</li>
@@ -322,10 +343,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Detrazioni 2026: la regola nuova</h2>
+    <h2 id="detrazioni-2026-la-regola-nuova">Detrazioni 2026: la regola nuova</h2>
     <p>Dal 2025-2026 le <strong>caldaie alimentate solo a combustibili fossili</strong> (gas, gasolio) sono <strong>escluse da ogni detrazione</strong>, in linea con la direttiva europea sulle case green. Restano incentivati: <strong>pompe di calore</strong>, <strong>sistemi ibridi</strong>, generatori a biomassa e pompe di calore ad assorbimento a gas — con detrazione al <strong>50%</strong> (prima casa) oppure <strong>Conto Termico fino al 65%</strong> rimborsato direttamente dal GSE. Le regole cambiano ogni anno: verifica sul sito dell'Agenzia delle Entrate e del GSE, e paga con bonifico parlante. Vedi la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Scegliere la caldaia "perché costa meno" senza fare il conto coi bonus.</strong> Dopo Conto Termico o detrazione, ibrido e pompa di calore possono costare quanto la caldaia — e consumano meno per 15 anni.</li>
       <li><strong>Aspettare che muoia.</strong> La caldaia agonizzante consuma di più e ti costringe a decidere in emergenza. Dai 15 anni in su, programma la sostituzione.</li>
@@ -339,7 +360,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un termoidraulico →</a>
     </div>
 
-    <h2>Domande frequenti sulla caldaia</h2>
+    <h2 id="domande-frequenti-sulla-caldaia">Domande frequenti sulla caldaia</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa sostituire la caldaia?</summary>
@@ -365,7 +386,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un termoidraulico nella tua città</h2>
+      <h2 id="trova-un-termoidraulico-nella-tua">Trova un termoidraulico nella tua città</h2>
       <p>Su TrovaImpresa ci sono termoidraulici e installatori di caldaie verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/termoidraulico-roma">Roma</a>

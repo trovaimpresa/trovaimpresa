@@ -32,6 +32,16 @@
     --maxw:760px;
     --font:'Trebuchet MS','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -233,6 +243,18 @@
       <span class="price-big">da 800 a 1.500 € un monosplit</span>
       Un <strong>dual split</strong> (due stanze) sta sui <strong>2.000–3.500 €</strong>, un <strong>trial split</strong> (tre stanze) sui <strong>2.800–4.500 €</strong>. Questi prezzi valgono per il montaggio <strong>con canaline esterne a vista</strong>: se vuoi i tubi <strong>sottotraccia</strong> (nascosti nel muro) aggiungi <strong>1.200–2.000 €</strong>. Sotto trovi i BTU giusti per stanza e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#quanti-btu-servono-per-stanza">Quanti BTU servono per la mia stanza</a></li>
+        <li><a href="#cosa-comprende-il-prezzo-di">Cosa comprende l'installazione</a></li>
+        <li><a href="#canaline-esterne-o-tubazioni-sottotraccia">Canaline fuori o tubi sotto al muro</a></li>
+        <li><a href="#detrazioni-quando-si-puo-recuperare">Bonus 50%: quando spetta</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Le voci dimenticate nei preventivi</a></li>
+        <li><a href="#domande-frequenti-sul-condizionatore">Dual split, quanto dura il lavoro</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -248,7 +270,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Quanti BTU servono per stanza</h2>
+    <h2 id="quanti-btu-servono-per-stanza">Quanti BTU servono per stanza</h2>
     <table>
       <caption>Regola pratica: circa 340–400 BTU per mq (soffitti standard)</caption>
       <thead>
@@ -266,7 +288,7 @@
       <strong>Occhio:</strong> i prezzi qui sopra sono del solo apparecchio. Ci vanno aggiunti il <strong>montaggio</strong> (350–450 € a unità per un mono "spalla a spalla") e i materiali. Sotto il calcolatore fa già il conto completo.
     </div>
 
-    <h2>Canaline esterne o tubazioni sottotraccia?</h2>
+    <h2 id="canaline-esterne-o-tubazioni-sottotraccia">Canaline esterne o tubazioni sottotraccia?</h2>
     <p>È la scelta che cambia di più il conto finale, e quasi nessuno la spiega. I tubi che collegano l'unità interna a quella esterna possono passare in due modi:</p>
     <table>
       <caption>Differenza di costo tra i due tipi di montaggio, monosplit</caption>
@@ -280,7 +302,7 @@
     </table>
     <p>Il sottotraccia rende di più esteticamente, ma conviene farlo <strong>durante una ristrutturazione</strong>, quando muratore e imbianchino sono già in casa e le pareti vanno comunque rifatte. In una casa abitata e finita, le canaline esterne sono la scelta pratica: costi ridotti, lavoro più rapido e molto meno invasivo.</p>
 
-    <h2>Cosa comprende il prezzo di installazione</h2>
+    <h2 id="cosa-comprende-il-prezzo-di">Cosa comprende il prezzo di installazione</h2>
     <ul class="checklist">
       <li><strong>Montaggio unità interna ed esterna</strong> con staffe a norma.</li>
       <li><strong>Linea frigorifera</strong> (tubi in rame) fino a circa 3–5 metri, in canalina esterna; oltre si paga a metro.</li>
@@ -289,7 +311,7 @@
       <li><strong>Messa in funzione e collaudo.</strong></li>
     </ul>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Tubazioni sottotraccia.</strong> La voce più pesante: +1.200–2.000 € rispetto alle canaline, perché comprende demolizione delle tracce, chiusura, rasatura e tinteggiatura.</li>
       <li><strong>Linea frigorifera lunga.</strong> Oltre i 3–5 metri compresi, ogni metro in più di tubo, isolante e canalina si paga a parte.</li>
@@ -298,7 +320,7 @@
       <li><strong>Più unità interne.</strong> Ogni stanza in più aggiunge apparecchio, montaggio e metri di linea.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Canaline esterne a vista.</strong> Il modo più semplice per risparmiare: montaggio più rapido, meno invasivo e senza opere murarie.</li>
       <li><strong>Predisposizione già fatta.</strong> Se durante una ristrutturazione hai già fatto passare tubi e scarichi nei muri, l'installatore deve solo collegare e caricare: la posa costa molto meno.</li>
@@ -306,7 +328,7 @@
       <li><strong>Un preventivo con le voci scritte.</strong> Quando tutto è nero su bianco (BTU, metri di linea, tipo di montaggio) non ci sono extra a sorpresa: è lì che si risparmia davvero.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Sono le voci che fanno la differenza tra il preventivo e il conto finale. Controlla che ci siano scritte:</p>
     <ul class="checklist forget-list">
       <li><strong>Rasatura e tinteggiatura dopo le tracce</strong> — nel montaggio sottotraccia c'è chi quota solo demolizione e chiusura: la pittura delle pareti toccate resta fuori e la paghi dopo.</li>
@@ -368,10 +390,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Detrazioni: quando si può recuperare il 50%</h2>
+    <h2 id="detrazioni-quando-si-puo-recuperare">Detrazioni: quando si può recuperare il 50%</h2>
     <p>Il semplice acquisto di un condizionatore, da solo, in genere non basta per la detrazione. Rientra invece nelle agevolazioni quando è collegato a una <strong>ristrutturazione</strong> oppure quando installi una <strong>pompa di calore in sostituzione di un impianto a combustibile fossile</strong> (ecobonus). Le regole e le percentuali cambiano ogni anno: verifica sempre sul sito dell'Agenzia delle Entrate e paga con bonifico parlante. Vedi anche la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Confrontare un preventivo con canaline e uno sottotraccia.</strong> Non sono lo stesso lavoro: il secondo comprende (o dovrebbe comprendere) anche opere murarie e tinteggiatura. Prima decidi il tipo di montaggio, poi confronta.</li>
       <li><strong>Preventivo senza i BTU indicati.</strong> Devono essere scritti: sono la cosa che determina se il condizionatore è adatto alla stanza.</li>
@@ -386,7 +408,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un installatore →</a>
     </div>
 
-    <h2>Domande frequenti sul condizionatore</h2>
+    <h2 id="domande-frequenti-sul-condizionatore">Domande frequenti sul condizionatore</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa installare un condizionatore in una stanza?</summary>
@@ -416,7 +438,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un termoidraulico nella tua città</h2>
+      <h2 id="trova-un-termoidraulico-nella-tua">Trova un termoidraulico nella tua città</h2>
       <p>Su TrovaImpresa ci sono termoidraulici e installatori di caldaie verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/termoidraulico-roma">Roma</a>

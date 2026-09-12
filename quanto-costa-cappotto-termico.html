@@ -32,6 +32,16 @@
     --maxw:760px;
     --font:'Trebuchet MS','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -229,6 +239,18 @@
       <span class="price-big">da 60 a 120 €/mq</span>
       Il prezzo comprende isolante, posa, rasatura e finitura. Con isolante economico (EPS) si sta sui <strong>60–85 €/mq</strong>; con lana di roccia o fibra di legno si sale a <strong>90–145 €/mq</strong>. Attenzione: si misura sui <strong>metri quadri di parete</strong>, non di pavimento. Sotto trovi i prezzi per materiale e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#villetta-200-mq">Villetta: quanto viene il cappotto in tutto</a></li>
+        <li><a href="#prezzi-del-cappotto-termico-per">Quanto costa al mq, materiale per materiale</a></li>
+        <li><a href="#cappotto-interno-quando-e-l">Cappotto interno: quando è l'unica strada</a></li>
+        <li><a href="#il-cappotto-in-condominio-come">In condominio: chi decide e chi paga</a></li>
+        <li><a href="#conviene-davvero-risparmio-e-detrazioni">Quanto si risparmia in bolletta</a></li>
+        <li><a href="#l-insufflaggio-l-alternativa-da">L'insufflaggio: quando basta</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
@@ -241,7 +263,7 @@
 
     <p>Un dato pratico per farti un'idea: una villetta su due piani ha in genere <strong>150–250 mq di facciata</strong>, un appartamento in condominio molto meno (ma lì il cappotto si fa di solito su tutto l'edificio e la spesa si divide tra i condomini).</p>
 
-    <h2>Prezzi del cappotto termico per materiale</h2>
+    <h2 id="prezzi-del-cappotto-termico-per">Prezzi del cappotto termico per materiale</h2>
     <table>
       <caption>Costi indicativi 2026 — cappotto esterno chiavi in mano, €/mq di parete, IVA esclusa</caption>
       <thead>
@@ -287,7 +309,7 @@
     3.000–6.000 € per una villetta), la preparazione della facciata o la tinteggiatura.</p>
     <p style="font-size:14px;color:var(--muted)">Fonte dei valori ufficiali: Regione Lazio, <em>Tariffa dei prezzi 2023 – Parte A Opere edili</em> (DGR 101 del 14/04/2023), voce A 11.02.1 (isolamento termico a cappotto con intonaco sottile armato): A 11.02.1.d polistirene estruso 3 cm + 7 cm aggiuntivi, A 11.02.1.b lana di roccia 4 cm + 6 cm, A 11.02.1.a lana di vetro 4 cm + 6 cm; tinteggiatura esterna A 20.01.13.b.3. Totali calcolati su 200 mq di facciata.</p>
 
-    <h2>Cappotto interno: quando è l'unica strada</h2>
+    <h2 id="cappotto-interno-quando-e-l">Cappotto interno: quando è l'unica strada</h2>
     <p>A volte il cappotto esterno non si può fare: la facciata è vincolata, il condominio non
     delibera, oppure devi isolare una stanza sola. In quei casi si va dall'interno, e le regole
     cambiano parecchio.</p>
@@ -320,7 +342,7 @@
       <strong>non è un preventivo completo</strong>: chiedi che te lo riscrivano.</p>
     </div>
 
-    <h2>L'insufflaggio: l'alternativa da 20 € al metro quadro</h2>
+    <h2 id="l-insufflaggio-l-alternativa-da">L'insufflaggio: l'alternativa da 20 € al metro quadro</h2>
     <p>Se il muro è a cassa vuota — cioè due file di mattoni con un'intercapedine in mezzo, com'è
     tanta edilizia dagli anni Sessanta in poi — c'è una terza strada che quasi nessuno propone: si
     riempie quel vuoto con isolante soffiato da fuori, attraverso fori piccoli che poi si
@@ -342,7 +364,7 @@
     l'intercapedine ci sia davvero e sia vuota</strong>. Su un muro pieno non si può fare, e chi
     te lo propone senza aver guardato dentro ti sta vendendo aria.</p>
 
-    <h2>Il cappotto in condominio: come si decide e chi paga</h2>
+    <h2 id="il-cappotto-in-condominio-come">Il cappotto in condominio: come si decide e chi paga</h2>
     <p>Sulla villetta decidi tu. In condominio il cappotto è una cosa collettiva, e prima ancora
     del preventivo c'è da capire come si arriva alla firma.</p>
     <ul>
@@ -361,7 +383,7 @@
       Verifica che ci sia, prima di confrontare due offerte.</li>
     </ul>
 
-    <h2>Cosa deve comprendere il prezzo</h2>
+    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
     <p>Quando confronti i preventivi, controlla che ci siano tutte queste voci. Se ne manca una, il prezzo basso è finto.</p>
     <ul class="checklist">
       <li><strong>Ponteggio</strong>: montaggio, noleggio per la durata del cantiere e smontaggio. Da solo può pesare 8–15 €/mq.</li>
@@ -421,14 +443,14 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Conviene davvero? Risparmio e detrazioni</h2>
+    <h2 id="conviene-davvero-risparmio-e-detrazioni">Conviene davvero? Risparmio e detrazioni</h2>
     <p>Un buon cappotto taglia i consumi di riscaldamento di circa il <strong>25–40%</strong>: su una casa poco isolata il rientro dell'investimento è nell'ordine di diversi anni, ma nel frattempo la casa è più calda d'inverno e più fresca d'estate, e il valore dell'immobile sale (migliora la classe energetica).</p>
 
     <div class="note">
       <strong>Detrazioni:</strong> il cappotto termico rientra tra gli interventi di <strong>efficientamento energetico</strong> e dà diritto a detrazioni fiscali. Le percentuali e i massimali cambiano ogni anno con la legge di bilancio, quindi <strong>verifica sempre le regole aggiornate all'anno in cui fai i lavori</strong> prima di firmare, e paga con bonifico parlante. Vedi la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.
     </div>
 
-    <h2>Come non farsi fregare sul cappotto</h2>
+    <h2 id="come-non-farsi-fregare-sul">Come non farsi fregare sul cappotto</h2>
     <ul class="checklist">
       <li><strong>Prezzo al mq sospettosamente basso.</strong> Sotto i 50 €/mq esterno, o manca il ponteggio o l'isolante è sottile: controlla lo spessore e il materiale scritti in preventivo.</li>
       <li><strong>Spessore dell'isolante non indicato.</strong> È la voce che cambia tutto: fatti scrivere i centimetri (di solito 8–14 cm) e il tipo di pannello.</li>
@@ -442,7 +464,7 @@
       <a href="/cerca-imprese.html" class="cta-dark">Trova un'impresa →</a>
     </div>
 
-    <h2>Domande frequenti sul cappotto termico</h2>
+    <h2 id="domande-frequenti-sul-cappotto-termico">Domande frequenti sul cappotto termico</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa il cappotto termico per una villetta?</summary>
@@ -469,7 +491,7 @@
 
     <!-- ====== TROVA NELLA TUA CITTA ====== -->
     <div class="cities">
-      <h2>Trova un'impresa edile nella tua città</h2>
+      <h2 id="trova-un-impresa-edile-nella">Trova un'impresa edile nella tua città</h2>
       <p>Su TrovaImpresa ci sono imprese edili verificate in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/impresa-edile-roma">Roma</a>
@@ -499,7 +521,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Ti serve anche il certificato energetico</h2>
+      <h2 id="ti-serve-anche-il-certificato">Ti serve anche il certificato energetico</h2>
       <p>Per le detrazioni e per vendere o affittare casa l'APE è obbligatorio, prima e dopo i lavori. Trova un tecnico certificatore nella tua città:</p>
       <div class="cities-grid">
         <a href="/certificato-energetico-roma">Roma</a>

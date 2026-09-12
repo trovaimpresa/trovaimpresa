@@ -32,6 +32,16 @@
     --maxw:760px;
     --font:'Trebuchet MS','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -235,6 +245,18 @@
       <span class="price-big">da 50 a 130 €/mq</span>
       oppure, calcolando a punto luce, <strong>80–150 € per ogni presa o interruttore</strong>. Per un appartamento di 100 mq parli in genere di <strong>5.000–9.000 €</strong> chiavi in mano. Il prezzo dipende dal livello di dotazione (norma CEI 64-8) e da quanti punti vuoi. Sotto trovi i prezzi per livello e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#quanto-costa-rifare-l-impianto">Bilocale, trilocale o villa: quanto viene</a></li>
+        <li><a href="#prezzi-per-livello-norma-cei">I 3 livelli CEI 64-8: quanto cambia</a></li>
+        <li><a href="#si-puo-rifare-l-impianto">Si può fare senza rompere i muri?</a></li>
+        <li><a href="#chi-fa-le-tracce-tre">Chi fa le tracce: la voce che cambia tutto</a></li>
+        <li><a href="#un-cantiere-vero-5-giorni">Quanti giorni dura davvero</a></li>
+        <li><a href="#domande-frequenti-sull-impianto-elettrico">Appartamento di 100 mq: quanto costa</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -252,7 +274,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Prezzi per livello (norma CEI 64-8)</h2>
+    <h2 id="prezzi-per-livello-norma-cei">Prezzi per livello (norma CEI 64-8)</h2>
     <table>
       <caption>Costi indicativi 2026 — rifacimento completo, €/mq, IVA esclusa</caption>
       <thead>
@@ -269,7 +291,7 @@
       <strong>Metodo a punto luce:</strong> molti elettricisti preventivano "a punto". Ogni punto (una presa, un interruttore, un'uscita per il lampadario) costa <strong>80–150 €</strong> tutto compreso. Un appartamento di 100 mq ha in genere 60–90 punti: fai il conto e confrontalo col prezzo al mq.
     </div>
 
-    <h2>Quanto costa rifare l'impianto elettrico di un bilocale, un trilocale o una villa</h2>
+    <h2 id="quanto-costa-rifare-l-impianto">Quanto costa rifare l'impianto elettrico di un bilocale, un trilocale o una villa</h2>
     <p>Il prezzo al metro quadro e quello a punto luce servono a controllare un preventivo.
     Ma la prima domanda che si fa uno è più semplice: <strong>casa mia quanto viene?</strong>
     Ecco le cifre per taglio di appartamento, impianto completo rifatto da zero.</p>
@@ -289,7 +311,7 @@
     domotico secondo la norma CEI 64-8) e da <strong>chi fa le tracce</strong>, che è la voce
     che sposta di più — la trovi spiegata qui sotto.</p>
 
-    <h2>Si può rifare l'impianto senza rompere i muri?</h2>
+    <h2 id="si-puo-rifare-l-impianto">Si può rifare l'impianto senza rompere i muri?</h2>
     <p>È la domanda che fa chi abita già in casa e non ha dove andare per tre settimane.
     La risposta è sì, in tre modi, e tutti costano <strong>meno</strong> del rifacimento sotto traccia
     — ma nessuno dei tre è uguale.</p>
@@ -315,7 +337,7 @@
       e l'estetica di tutti i giorni. Deciderlo è una scelta vostra, non tecnica.</p>
     </div>
 
-    <h2>Cosa conviene aggiungere adesso, per non riaprire i muri fra cinque anni</h2>
+    <h2 id="cosa-conviene-aggiungere-adesso-per">Cosa conviene aggiungere adesso, per non riaprire i muri fra cinque anni</h2>
     <p>Quando si rifà l'impianto conviene passare i cavi anche per le cose che oggi non hai, perché
     farlo dopo significa riaprire i muri. Queste voci non sono comprese nel prezzo dell'impianto
     e vanno chieste a parte:</p>
@@ -336,7 +358,7 @@
     non metti niente</strong>. Una scatola e un tubo vuoto costano pochi euro adesso; fra cinque anni,
     per aggiungerli, si riapre il muro.</p>
 
-    <h2>Chi fa le tracce? Tre modi di preventivare lo stesso impianto</h2>
+    <h2 id="chi-fa-le-tracce-tre">Chi fa le tracce? Tre modi di preventivare lo stesso impianto</h2>
     <p>È il motivo per cui i preventivi elettrici sembrano incomparabili: lo stesso identico impianto si può organizzare in tre modi, con tre prezzi diversi dell'elettricista — ma il costo <strong>totale</strong> del lavoro finito resta simile.</p>
     <table>
       <caption>Appartamento di 100 mq, rifacimento completo — i tre modi di dividere il lavoro</caption>
@@ -351,7 +373,7 @@
     </table>
     <p>Attento però: nel secondo e terzo caso <strong>la cifra finale non cambia molto</strong>, perché muratore, materiali, rasature e tinteggiatura li paghi comunque — solo su fatture diverse. Il vantaggio vero c'è quando il muratore è <strong>già in cantiere</strong> per una ristrutturazione: lì l'assistenza muraria costa poco perché la squadra c'è già.</p>
 
-    <h2>Un cantiere vero: 5 giorni di muratore, 2 di elettricista</h2>
+    <h2 id="un-cantiere-vero-5-giorni">Un cantiere vero: 5 giorni di muratore, 2 di elettricista</h2>
     <p>Ti racconto un lavoro fatto davvero, così il conto smette di essere teoria. Appartamento di <strong>120 mq</strong>, impianto elettrico rifatto da zero. Ecco come si sono divise le giornate:</p>
     <table>
       <caption>Rifacimento impianto elettrico, appartamento di 120 mq — giornate reali di cantiere</caption>
@@ -366,7 +388,7 @@
     <p>Guarda bene quel rapporto: <strong>il muratore ha lavorato più del doppio dei giorni dell'elettricista.</strong> Eppure, quando si chiedono i preventivi, il cliente guarda solo quello dell'elettricista — ed è la parte più corta del lavoro.</p>
     <p>Fai il conto con le tariffe reali della manodopera (le trovi nella guida su <a href="/quanto-costa-un-muratore-al-giorno.html">quanto costa un muratore al giorno</a>): cinque giornate di muratore sono da sole <strong>circa 1.500 €</strong>, prima ancora che l'elettricista metta piede in casa. Se un preventivo elettrico ti sembra basso, la domanda non è "perché costa poco" ma <strong>"cosa non c'è dentro"</strong>.</p>
 
-    <h2>Cosa deve comprendere il prezzo</h2>
+    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
       <li><strong>Tracce e ripristini</strong>: aprire i muri per i nuovi corrugati e richiudere (poi vanno rasati/tinteggiati, spesso a parte).</li>
       <li><strong>Cavi, scatole, frutti e placche</strong>: il materiale visibile e quello dentro il muro.</li>
@@ -375,7 +397,7 @@
       <li><strong>Dichiarazione di conformità (DiCo)</strong>: il documento che certifica l'impianto a norma. Va <strong>consegnata a fine lavori, sempre</strong>: senza, l'impianto è fuorilegge e avrai problemi con vendita, affitto e assicurazione.</li>
     </ul>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Il livello e il numero di punti.</strong> È la variabile principale: dal livello base al domotico si passa da 50 a 140 €/mq, e ogni presa o comando in più è un punto che paghi.</li>
       <li><strong>Il chiavi in mano.</strong> Comodo, un solo referente — ma dentro ci sono anche tracce, chiusure e materiali al prezzo dell'elettricista.</li>
@@ -383,7 +405,7 @@
       <li><strong>Punti decisi in corso d'opera.</strong> Ogni "già che ci sei, aggiungi una presa qui" a muri chiusi costa molto più della stessa presa decisa prima.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Tracce e chiusure al muratore.</strong> Se il muratore è già in cantiere per la ristrutturazione, l'assistenza muraria costa poco e il preventivo dell'elettricista scende parecchio.</li>
       <li><strong>Materiali comprati da te.</strong> Fili, scatole e frutti li puoi comprare tu: con la sola manodopera un 100 mq si fa con circa 1.500 €. Funziona solo se sai cosa comprare (o ti fai fare la lista dall'elettricista) — e ricorda che il totale del lavoro finito non cambia molto.</li>
@@ -391,7 +413,7 @@
       <li><strong>Farlo dentro una ristrutturazione completa.</strong> Tracce, ripristini e tinteggiature si sommano agli altri lavori invece di essere pagati due volte.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Controlla che queste voci ci siano scritte, sono quelle che ritrovi come extra a fine lavori:</p>
     <ul class="checklist forget-list">
       <li><strong>Chi chiude le tracce</strong> — il preventivo dell'elettricista spesso apre e basta: chiusura, rasatura e tinteggiatura restano fuori.</li>
@@ -450,7 +472,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Confrontare preventivi che contengono cose diverse.</strong> Un "solo manodopera" da 1.500 € e un chiavi in mano da 8.000 non sono paragonabili: prima chiarisci chi fa le tracce, chi compra i materiali e chi ripristina, poi confronta.</li>
       <li><strong>Saldare senza la dichiarazione di conformità in mano.</strong> La DiCo va consegnata a fine lavori: è il momento in cui hai più forza per pretenderla.</li>
@@ -466,7 +488,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un elettricista →</a>
     </div>
 
-    <h2>Domande frequenti sull'impianto elettrico</h2>
+    <h2 id="domande-frequenti-sull-impianto-elettrico">Domande frequenti sull'impianto elettrico</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa rifare l'impianto elettrico di un appartamento di 100 mq?</summary>
@@ -496,7 +518,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un elettricista nella tua città</h2>
+      <h2 id="trova-un-elettricista-nella-tua">Trova un elettricista nella tua città</h2>
       <p>Su TrovaImpresa ci sono elettricisti abilitati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/elettricista-roma">Roma</a>

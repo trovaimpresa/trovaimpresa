@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -235,6 +245,18 @@
       <span class="price-big">da 70 a 150 €</span>
       Ma <strong>l'idraulico ha due prezzi, non uno</strong>. Lo stesso lavoro chiamato con calma costa <strong>70–95 €</strong>; chiamato d'urgenza, con l'acqua per terra, costa <strong>100–140 €</strong>. La differenza è la <strong>maggiorazione d'urgenza, circa +45%</strong>: è legittima, ma quasi nessuno te la dice al telefono. Qui sotto trovi tutti e due i prezzi, e il modo per pagarne il 40% in meno.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#i-due-prezzi-dell-idraulico">Quanto costa all'ora e quanto l'uscita</a></li>
+        <li><a href="#domande-frequenti-sul-costo-dell">Urgenza, notte e festivi: quanto costa</a></li>
+        <li><a href="#perche-mezz-ora-di-lavoro">Perché mezz'ora costa 100 €</a></li>
+        <li><a href="#dove-ti-fregano-davvero">Dove ti fregano davvero</a></li>
+        <li><a href="#le-5-domande-da-fare">Le 5 domande da fare al telefono</a></li>
+        <li><a href="#piu-il-lavoro-e-corto">Più il lavoro è corto, più l'ora costa</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>Questi sono prezzi medi nazionali. Quello vero dipende dal lavoro e dalla tua zona: se il lavoro puoi programmarlo, il modo più veloce per saperlo è farti fare due o tre preventivi dagli idraulici della tua città.</p>
@@ -244,7 +266,7 @@
 
     <p class="lead">Se sei qui probabilmente ti è successa una di queste due cose: o hai appena pagato mezz'ora di lavoro 100 € e ti stai chiedendo se ti hanno preso in giro, oppure devi chiamarlo e vuoi sapere a cosa vai incontro. In tutti e due i casi la risposta parte da un fatto che nessuno spiega: <strong>l'idraulico non ti vende ore, ti vende interventi</strong> — e su un lavoro corto quello cambia tutto.</p>
 
-    <h2>Perché mezz'ora di lavoro ti costa 100 €</h2>
+    <h2 id="perche-mezz-ora-di-lavoro">Perché mezz'ora di lavoro ti costa 100 €</h2>
     <p>È la domanda vera, quindi partiamo da lì. Immagina di chiamarlo per uno scarico otturato. Lui viene, in mezz'ora te lo libera, e ti lascia un conto da 100 €. Tu hai visto trenta minuti di lavoro. Ecco cosa hai pagato davvero:</p>
     <table>
       <caption>Uno scarico otturato, sturato in mezz'ora: com'è fatto il conto</caption>
@@ -261,7 +283,7 @@
     </table>
     <p>Tu hai visto <strong>mezz'ora di lavoro</strong>. Lui ti ha venduto <strong>un'ora e mezza della sua giornata</strong>, più il fatto di aver mollato quello che stava facendo per venire da te. Sono vere tutte e due le cose: semplicemente, nessuno te l'ha scritto.</p>
 
-    <h2>Più il lavoro è corto, più l'ora ti costa</h2>
+    <h2 id="piu-il-lavoro-e-corto">Più il lavoro è corto, più l'ora ti costa</h2>
     <p>Questa è la regola che spiega perché sui lavoretti gli idraulici sembrano cari e sulle giornate intere no. <strong>Il viaggio costa uguale</strong> che ti tengano trenta minuti o otto ore: su un lavoro breve quel costo fisso si spalma su niente.</p>
     <table>
       <caption>Stesso idraulico, stesso prezzo onesto: cambia solo la durata del lavoro</caption>
@@ -282,7 +304,7 @@
       💡 <strong>Il trucco che ti fa risparmiare il 40%.</strong> Fai la lista di tutto quello che perde, gocciola o scarica male in casa, e fallo fare <strong>in una chiamata sola</strong>. Tre lavoretti da mezz'ora chiamati in tre momenti diversi costano circa <strong>210 €</strong>. Gli stessi tre, fatti in una visita, costano circa <strong>120 €</strong>. Paghi il viaggio una volta invece di tre.
     </div>
 
-    <h2>I due prezzi dell'idraulico</h2>
+    <h2 id="i-due-prezzi-dell-idraulico">I due prezzi dell'idraulico</h2>
     <p>Questo è il motivo per cui i siti di prezzi si contraddicono tutti: chi scrive 20 €/ora, chi 70. Non sbagliano — <strong>stanno mescolando due mercati diversi</strong> e facendone la media. Tenuti separati, i conti tornano.</p>
 
     <div class="duebox">
@@ -316,7 +338,7 @@
     </table>
     <p>Il <strong>punto acqua</strong> non ha prezzo d'urgenza perché è un lavoro da impianto, non da riparazione: si fa a cantiere aperto, con preventivo. Se devi rifare l'impianto di tutta la casa il conto si fa in un altro modo — lo trovi in <a href="/quanto-costa-rifare-impianto-idraulico.html">quanto costa rifare l'impianto idraulico</a>.</p>
 
-    <h2>Da dove esce quel prezzo</h2>
+    <h2 id="da-dove-esce-quel-prezzo">Da dove esce quel prezzo</h2>
     <p>Non è una cifra buttata lì: si ricostruisce partendo dal contratto di lavoro, che è un documento pubblico. Un idraulico con abilitazione è inquadrato al <strong>3° livello del contratto Metalmeccanici artigiani</strong>, che dal 1° marzo 2026 prevede <strong>1.758 € al mese</strong> di minimo tabellare.</p>
     <table>
       <caption>Il conto di un'ora di idraulico, dal contratto al prezzo che paghi</caption>
@@ -334,7 +356,7 @@
       </tbody>
     </table>
 
-    <h2>Perché l'idraulico ha il diritto di chiamata e il muratore no</h2>
+    <h2 id="perche-l-idraulico-ha-il">Perché l'idraulico ha il diritto di chiamata e il muratore no</h2>
     <p>Se hai fatto lavori in casa te ne sarai accorto: il muratore ti fa un prezzo e basta, l'idraulico ti mette l'uscita. Non è un capriccio, è come è fatta la loro giornata.</p>
     <table>
       <caption>La giornata dei due mestieri, a confronto</caption>
@@ -352,7 +374,7 @@
       <strong>Il segnale dell'idraulico serio:</strong> l'uscita te la dice <strong>al telefono</strong>, prima di salire in macchina — e molto spesso <strong>te la scomputa dalla prima ora</strong> se poi il lavoro glielo fai fare. Chi si comporta così ti sta vendendo il lavoro, non la visita.
     </div>
 
-    <h2>Dove ti fregano davvero</h2>
+    <h2 id="dove-ti-fregano-davvero">Dove ti fregano davvero</h2>
     <p>Detto tutto questo, ci sono tre situazioni in cui il conto non torna più — e conviene riconoscerle.</p>
 
     <div class="allarme">
@@ -367,7 +389,7 @@
       <strong>3. La maggiorazione che scopri sulla fattura.</strong> Urgenza, sera, sabato e festivi si pagano, ed è giusto: quell'uomo ha mollato quello che stava facendo, o ha lasciato la famiglia a cena. Ma <strong>va detta al telefono</strong>. Una maggiorazione dichiarata prima è un prezzo; la stessa maggiorazione scoperta alla fine è un agguato.
     </div>
 
-    <h2>Le 5 domande da fare al telefono</h2>
+    <h2 id="le-5-domande-da-fare">Le 5 domande da fare al telefono</h2>
     <p>Trenta secondi di telefonata che ti evitano quasi tutte le sorprese. Valgono anche in emergenza, anzi: soprattutto in emergenza.</p>
     <ul class="checklist ask-list">
       <li><strong>"Quanto è l'uscita?"</strong> — deve saperti rispondere subito, con un numero.</li>
@@ -420,7 +442,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Chiamare d'urgenza quello che può aspettare.</strong> Un rubinetto che gocciola non è un'emergenza: chiamarlo per domani invece che per subito ti fa risparmiare il 45%.</li>
       <li><strong>Non chiudere il rubinetto generale.</strong> Se perde, chiudilo prima di chiamare: spesso ferma il danno e ti toglie la fretta, e senza fretta paghi meno.</li>
@@ -444,7 +466,7 @@
       </div>
     </div>
 
-    <h2>Domande frequenti sul costo dell'idraulico</h2>
+    <h2 id="domande-frequenti-sul-costo-dell">Domande frequenti sul costo dell'idraulico</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa un idraulico all'ora?</summary>
@@ -486,7 +508,7 @@
 
     <!-- ====== TROVA IDRAULICI NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un idraulico nella tua città</h2>
+      <h2 id="trova-un-idraulico-nella-tua">Trova un idraulico nella tua città</h2>
       <p>Su TrovaImpresa ci sono idraulici verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/idraulico-roma">Roma</a>

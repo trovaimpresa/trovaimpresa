@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -220,6 +230,17 @@
       <span class="price-big">circa 1.500 – 2.500 €/kW</span>
       Un impianto <strong>3 kW</strong> (famiglia piccola) sta sui <strong>5.000–7.000 €</strong>, un <strong>6 kW</strong> (famiglia media) sugli <strong>8.500–13.000 €</strong>. La <strong>batteria di accumulo</strong> aggiunge circa 800–1.300 € per ogni kWh (una da 10 kWh sono 8.000–13.000 € in più). Sotto trovi i prezzi e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#prezzi-del-fotovoltaico-per-taglia">3, 4,5 o 6 kW: quanto costa</a></li>
+        <li><a href="#domande-frequenti-sul-fotovoltaico">Quanti kW servono alla mia famiglia</a></li>
+        <li><a href="#cosa-comprende-il-prezzo-chiavi">Cosa c'è dentro il chiavi in mano</a></li>
+        <li><a href="#detrazioni-e-incentivi">Detrazioni e incentivi 2026</a></li>
+        <li><a href="#come-non-farsi-fregare-sul">Come non farsi fregare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -230,7 +251,7 @@
 
     <p class="lead">Nel fotovoltaico ci sono due decisioni che spostano il conto più di tutto: <strong>quanti kW</strong> di pannelli metti (più grande = costa di più ma scende il prezzo al kW) e se aggiungi o no la <strong>batteria di accumulo</strong>, che spesso vale quanto metà impianto. Il resto (staffe, inverter, allacci) è più standard.</p>
 
-    <h2>Prezzi del fotovoltaico per taglia</h2>
+    <h2 id="prezzi-del-fotovoltaico-per-taglia">Prezzi del fotovoltaico per taglia</h2>
     <table>
       <caption>Costi indicativi 2026 — chiavi in mano, IVA agevolata esclusa</caption>
       <thead>
@@ -248,7 +269,7 @@
       <strong>La batteria conviene?</strong> Dipende da quando consumi. Se sei fuori tutto il giorno e usi corrente soprattutto la sera, l'accumulo ti fa sfruttare l'energia prodotta di giorno invece di venderla a poco. Se invece sei molto in casa di giorno, può bastare un buon impianto senza batteria. È la scelta che cambia di più il prezzo, valutala bene.
     </div>
 
-    <h2>Cosa comprende il prezzo chiavi in mano</h2>
+    <h2 id="cosa-comprende-il-prezzo-chiavi">Cosa comprende il prezzo chiavi in mano</h2>
     <ul class="checklist">
       <li><strong>Pannelli e inverter</strong>: il cuore dell'impianto, di marca e con garanzia.</li>
       <li><strong>Struttura di fissaggio</strong> adatta al tuo tetto (tegole, lamiera, piano).</li>
@@ -305,10 +326,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Detrazioni e incentivi</h2>
+    <h2 id="detrazioni-e-incentivi">Detrazioni e incentivi</h2>
     <p>Sull'abitazione principale il fotovoltaico dà in genere diritto alla <strong>detrazione IRPEF del 50%</strong> della spesa, da recuperare in 10 rate annuali nella dichiarazione dei redditi (con percentuali ridotte sulle seconde case). Ci sono poi meccanismi che valorizzano l'energia che immetti in rete. Le regole e le percentuali cambiano ogni anno: verifica sempre sul sito dell'Agenzia delle Entrate e del GSE, e paga con bonifico tracciabile. Vedi anche la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Come non farsi fregare sul fotovoltaico</h2>
+    <h2 id="come-non-farsi-fregare-sul">Come non farsi fregare sul fotovoltaico</h2>
     <ul class="checklist">
       <li><strong>Prezzo solo "a impianto" senza i kW e i componenti.</strong> Fatti scrivere potenza, marca e modello di pannelli, inverter e batteria: è lì la differenza di qualità e prezzo.</li>
       <li><strong>Batteria buttata dentro senza spiegazioni.</strong> È la voce più cara: deve essere giustificata dai tuoi consumi, non venduta a tutti per gonfiare il totale.</li>
@@ -322,7 +343,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un installatore →</a>
     </div>
 
-    <h2>Domande frequenti sul fotovoltaico</h2>
+    <h2 id="domande-frequenti-sul-fotovoltaico">Domande frequenti sul fotovoltaico</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa un impianto fotovoltaico da 6 kW?</summary>
@@ -349,7 +370,7 @@
 
     <!-- ====== TROVA NELLA TUA CITTA ====== -->
     <div class="cities">
-      <h2>Trova un installatore fotovoltaico nella tua città</h2>
+      <h2 id="trova-un-installatore-fotovoltaico-nella">Trova un installatore fotovoltaico nella tua città</h2>
       <p>Su TrovaImpresa ci sono installatori di impianti fotovoltaici in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/installatore-fotovoltaico-roma">Roma</a>

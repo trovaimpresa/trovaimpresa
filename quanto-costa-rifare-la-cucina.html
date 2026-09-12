@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -223,6 +233,18 @@
       <span class="price-big">500 – 1.250 €/mq</span>
       Su una cucina reale di <strong>10–12 mq</strong> significa <strong>6.000 – 15.000 €</strong> chiavi in mano, mobile compreso. Senza il mobile — quindi solo demolizione, impianti, piastrelle, pavimento, cappa e tinteggiatura — siamo su <strong>3.500 – 8.000 €</strong>. Il mobile componibile viaggia a parte, da <strong>1.000 a 1.400 €/ml</strong>. Sotto trovi la tabella voce per voce e il calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#i-prezzi-voce-per-voce">I prezzi voce per voce</a></li>
+        <li><a href="#domande-frequenti">Spostare lo scarico, la cappa, il mobile</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Le voci dimenticate nei preventivi</a></li>
+        <li><a href="#permessi-e-detrazioni">Permessi e detrazioni</a></li>
+        <li><a href="#cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</a></li>
+        <li><a href="#gli-errori-da-evitare">Gli errori da evitare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
@@ -238,7 +260,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>I prezzi voce per voce</h2>
+    <h2 id="i-prezzi-voce-per-voce">I prezzi voce per voce</h2>
     <table>
       <caption>Costi indicativi 2026 per una cucina di 10–14 mq — fornitura e posa, IVA esclusa</caption>
       <thead>
@@ -262,7 +284,7 @@
       <strong>Attenzione al confronto tra preventivi:</strong> il negozio di cucine ti quota il <strong>mobile</strong>, l'impresa ti quota <strong>l'ambiente</strong>. Sono due preventivi diversi e non si sommano da soli: chi allaccia gli elettrodomestici, chi fora il top, chi porta via l'imballo? Mettilo per iscritto prima.
     </div>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Spostare il lavello o la lavastoviglie.</strong> È la voce numero uno: la colonna di scarico è dove è, e allontanarsi vuol dire aprire il pavimento per dare la pendenza. Da sola può far salire il conto del 30–50%.</li>
       <li><strong>L'isola centrale.</strong> Bellissima e carissima: acqua, scarico, corrente e spesso aspirazione devono attraversare il pavimento fino in mezzo alla stanza.</li>
@@ -272,7 +294,7 @@
       <li><strong>Cucina piccola.</strong> Sotto gli 8 mq i costi fissi (ponteggio interno, viaggi, allestimento, minimo dei fornitori) pesano tantissimo sul prezzo al mq.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Tenere lavello e piano cottura dove sono.</strong> È il risparmio più grosso e più facile: gli impianti restano dove passano già, niente demolizione del massetto.</li>
       <li><strong>Piastrellare solo il paraschizzi.</strong> Rivestire fino al soffitto è vecchio stile e costa: 60 cm tra top e pensili bastano, il resto si pittura con una lavabile.</li>
@@ -281,7 +303,7 @@
       <li><strong>Cucina lineare, modulare, misure standard.</strong> Il fuori misura si paga sempre: ogni pezzo su misura è un pezzo artigianale.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Controlla che ci siano scritte nero su bianco:</p>
     <ul class="checklist forget-list">
       <li><strong>Lo smaltimento delle macerie e della vecchia cucina</strong> — smontare i mobili vecchi e portarli in discarica è un costo, non un favore.</li>
@@ -339,11 +361,11 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Permessi e detrazioni</h2>
+    <h2 id="permessi-e-detrazioni">Permessi e detrazioni</h2>
     <p>Se rifai la cucina senza toccare i muri — nuovo pavimento, nuovo rivestimento, impianti rifatti dov'erano — sei in <strong>edilizia libera</strong> e non serve nessuna pratica. Appena sposti o rifai gli impianti in modo sostanziale, apri tracce, sposti una porta o abbatti un tramezzo per aprire la cucina sul soggiorno, diventa <strong>manutenzione straordinaria</strong>: serve la <strong>CILA</strong>, presentata da un tecnico. La canna fumaria nuova sulla facciata è un caso a parte: oltre alla pratica edilizia serve il via libera del condominio.</p>
     <p>La parte buona: con la pratica corretta i lavori rientrano nel <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione</a> e ne detrai una quota, manodopera compresa. Due regole da rispettare sempre: <strong>bonifico parlante</strong> (con causale della norma, codice fiscale tuo e partita IVA dell'impresa) e fatture intestate a chi detrae. Pagare in contanti significa perdere la detrazione, senza appello. Il <strong>bonus mobili</strong>, se ancora in vigore nell'anno in cui compri, è legato alla ristrutturazione in corso ed è quello che copre il mobile e gli elettrodomestici: verifica limiti e requisiti aggiornati prima di firmare. Vedi <a href="/permessi-ristrutturazione-cila-scia.html">quale pratica serve per i tuoi lavori</a>.</p>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Comprare la cucina prima di aver deciso gli impianti.</strong> Il mobile si adatta agli scarichi, non il contrario. Ordina i moduli solo dopo che idraulico ed elettricista hanno visto la stanza.</li>
       <li><strong>Innamorarsi dell'isola senza chiedere dov'è la colonna.</strong> Se lo scarico non ci arriva con la pendenza giusta, o si alza il pavimento o si mette una pompa: due soluzioni che nessuno ti ha preventivato.</li>
@@ -359,7 +381,7 @@
       <a href="/cerca-imprese.html" class="cta-dark">Trova un'impresa →</a>
     </div>
 
-    <h2>Domande frequenti</h2>
+    <h2 id="domande-frequenti">Domande frequenti</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa rifare la cucina al metro quadro?</summary>
@@ -385,7 +407,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un'impresa edile nella tua città</h2>
+      <h2 id="trova-un-impresa-edile-nella">Trova un'impresa edile nella tua città</h2>
       <p>Su TrovaImpresa ci sono imprese edili verificate in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/impresa-edile-roma">Roma</a>
@@ -415,7 +437,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Ti serve anche chi progetta gli spazi</h2>
+      <h2 id="ti-serve-anche-chi-progetta">Ti serve anche chi progetta gli spazi</h2>
       <p>Su pochi metri quadri un errore di distribuzione si paga tutti i giorni e non si corregge senza rifare. Trova un interior designer nella tua città:</p>
       <div class="cities-grid">
         <a href="/interior-designer-roma">Roma</a>

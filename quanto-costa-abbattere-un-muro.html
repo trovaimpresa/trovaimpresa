@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -223,6 +233,18 @@
       <span class="price-big">40 – 50 €/mq chiavi in mano</span>
       compresi carico, trasporto e discarica. La sola demolizione, senza smaltimento, sta sui <strong>6–10 €/mq</strong>. Se il muro è <strong>portante</strong> cambia tutto: la parte muraria va da <strong>500 a 4.500 €</strong>, e con tecnico, calcoli, pratica e catasto si arriva a <strong>2.000–7.000 €</strong>. Aprire una porta in un tramezzo, invece, costa circa <strong>200 €</strong> più l'architrave.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#la-domanda-che-vale-mille">Come capisco se il muro è portante</a></li>
+        <li><a href="#prezzi-2026-demolizione-apertura-porta">Aprire una porta: quanto costa</a></li>
+        <li><a href="#permessi-cosa-serve-davvero">Che permessi servono: CILA o SCIA</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Macerie, trave, ingegnere: le voci dimenticate</a></li>
+        <li><a href="#qui-serve-per-forza-l">Quando serve per forza l'ingegnere</a></li>
+        <li><a href="#gli-errori-da-evitare">Gli errori da evitare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
@@ -238,7 +260,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>La domanda che vale mille euro: il mio muro è portante?</h2>
+    <h2 id="la-domanda-che-vale-mille">La domanda che vale mille euro: il mio muro è portante?</h2>
     <p>Tutto il prezzo dipende da qui. Un muro <strong>non portante</strong> (tramezzo) divide e basta: si demolisce con una pratica leggera e in due giorni è finita. Un muro <strong>portante</strong> tiene su il solaio: toccarlo significa progetto strutturale, calcoli, pratica e responsabilità di un tecnico.</p>
     <p>Ecco come si riconosce, in ordine di affidabilità:</p>
     <ul class="checklist">
@@ -253,7 +275,7 @@
       <strong>Attenzione ai muri "a spina".</strong> In molti edifici anni '50–'70 ci sono setti che non sembrano portanti ma controventano la struttura, cioè le danno rigidezza contro il sisma. Non reggono peso in verticale, però se li togli l'edificio reagisce peggio al terremoto. Anche quelli non si toccano senza calcoli.
     </div>
 
-    <h2>Prezzi 2026: demolizione, apertura porta e voci collegate</h2>
+    <h2 id="prezzi-2026-demolizione-apertura-porta">Prezzi 2026: demolizione, apertura porta e voci collegate</h2>
     <table>
       <caption>Costi indicativi 2026 — manodopera e materiali, IVA esclusa. Le voci tecniche variano molto per zona e Comune.</caption>
       <thead>
@@ -281,7 +303,7 @@
       <strong>Il pavimento non si ricuce quasi mai.</strong> Sotto il muro il pavimento non c'è: resta una striscia larga quanto lo spessore del muro. Se hai le piastrelle di scorta sei fortunato; se non le hai, o trovi un fondo compatibile o si accetta una fascia diversa (spesso in legno o in resina). L'alternativa vera è rifare il pavimento della stanza: vedi <a href="/quanto-costa-posare-il-pavimento.html">quanto costa posare il pavimento</a>.
     </div>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Il muro è portante.</strong> È il moltiplicatore più grosso: da qualche centinaio di euro si passa a migliaia, perché entrano tecnico, calcoli, cerchiatura e pratica.</li>
       <li><strong>Gli impianti dentro il muro.</strong> Tubi dell'acqua, scarichi, corrente, riscaldamento: vanno deviati prima di demolire. Idraulico ed elettricista sono due mezze giornate che nessuno mette in conto.</li>
@@ -291,7 +313,7 @@
       <li><strong>Mattoni pieni e muri vecchi.</strong> Un muro dell'Ottocento in pietra o pieno non si tira giù col martelletto: serve un demolitore grosso e più ore.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Casa vuota.</strong> Demolire in un appartamento sgombro, magari prima del trasloco, taglia protezioni e tempi morti.</li>
       <li><strong>Fare tutto in un cantiere solo.</strong> Se stai già rifacendo pavimenti e impianti, la demolizione costa una frazione: le macerie viaggiano insieme e il ripristino è già previsto. Vedi <a href="/quanto-costa-ristrutturare-casa.html">quanto costa ristrutturare casa</a>.</li>
@@ -299,7 +321,7 @@
       <li><strong>Ricostruire in cartongesso invece che in muratura.</strong> Se dopo devi ridividere lo spazio, una <a href="/quanto-costa-parete-cartongesso.html">parete in cartongesso</a> è più veloce, più leggera e non serve intonacarla.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <ul class="checklist forget-list">
       <li><strong>Il trasporto e la discarica</strong> — "demolizione" e "smaltimento" sono due voci diverse. Se ne vedi solo una, chiedi dove finiscono le macerie: il formulario dei rifiuti deve esistere.</li>
       <li><strong>Le deviazioni degli impianti</strong> — quasi mai nel preventivo del muratore, perché sono lavoro di altri mestieri.</li>
@@ -357,13 +379,13 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Permessi: cosa serve davvero</h2>
+    <h2 id="permessi-cosa-serve-davvero">Permessi: cosa serve davvero</h2>
     <p>Su un <strong>muro non portante</strong> siamo nella manutenzione straordinaria: basta la <strong>CILA</strong>, una comunicazione asseverata che presenta un tecnico. Costa in genere <strong>800–1.000 €</strong> e si può iniziare subito dopo il deposito.</p>
     <p>Su un <strong>muro portante</strong> il quadro cambia: serve la <strong>SCIA</strong> (in molti Comuni SCIA alternativa al permesso di costruire), con relazione e <strong>calcoli strutturali</strong> firmati da un ingegnere o architetto strutturista, e la <strong>direzione lavori</strong>. In <strong>zona sismica</strong> — cioè praticamente ovunque in Italia — va aggiunto il <strong>deposito o l'autorizzazione al Genio Civile</strong>, con tempi che possono superare il mese. A fine lavori arriva il <strong>collaudo</strong> o certificato di regolare esecuzione e, se cambia la planimetria, l'<strong>aggiornamento catastale</strong> (circa 500 €).</p>
     <p>Se vivi in <strong>condominio</strong>, il muro portante non è solo tuo: le strutture portanti sono parti comuni. Va informato l'amministratore, e in molti regolamenti serve un passaggio in assemblea. Toccarle senza titolo espone a un ordine di ripristino a tue spese. Approfondisci su <a href="/permessi-ristrutturazione-cila-scia.html">CILA e SCIA</a>.</p>
     <p><strong>Detrazioni:</strong> demolizione, cerchiatura, pratiche e parcelle tecniche rientrano nel <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione</a>, spese professionali comprese. Serve la pratica regolare e il pagamento con bonifico parlante: senza titolo edilizio non detrai nulla.</p>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Demolire "tanto poi si vede".</strong> Un muro portante tolto senza calcoli si sente subito: porte che non chiudono, crepe sopra, pavimenti che cedono. E il danno lo paghi al piano di sopra, non solo a casa tua.</li>
       <li><strong>Farlo di nascosto.</strong> Le opere strutturali senza titolo sono un abuso: sanzione, ordine di ripristino e casa invendibile finché non sani. Nessun notaio chiude un rogito con una difformità strutturale.</li>
@@ -379,7 +401,7 @@
       <a href="/cerca-imprese.html" class="cta-dark">Trova un'impresa →</a>
     </div>
 
-    <h2>Domande frequenti</h2>
+    <h2 id="domande-frequenti">Domande frequenti</h2>
     <div class="faq">
       <details open>
         <summary>Come capisco se il muro è portante?</summary>
@@ -405,7 +427,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un muratore nella tua città</h2>
+      <h2 id="trova-un-muratore-nella-tua">Trova un muratore nella tua città</h2>
       <p>Su TrovaImpresa ci sono muratori e imprese di muratura verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/muratore-roma">Roma</a>
@@ -435,7 +457,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Qui serve per forza l'ingegnere strutturale</h2>
+      <h2 id="qui-serve-per-forza-l">Qui serve per forza l'ingegnere strutturale</h2>
       <p>Se si tocca un elemento portante non è una scelta ma un obbligo di legge: servono calcoli e pratica depositata. Trova un ingegnere strutturale nella tua città:</p>
       <div class="cities-grid">
         <a href="/ingegnere-strutturale-roma">Roma</a>

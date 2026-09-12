@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -218,6 +228,17 @@
       <span class="price-big">da 5 a 15 €/mq</span>
       di superficie dipinta (pareti + soffitti), manodopera e materiali compresi. In pratica una <strong>stanza</strong> viene 250–600 €, un <strong>appartamento intero</strong> 1.000–2.500 € (in media 1.300–1.800). Il conto sale se serve stuccare, rasare o mettere pittura antimuffa. Sotto trovi i prezzi e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#casa-90-mq">Appartamento di 90 mq: quanto viene</a></li>
+        <li><a href="#prezzi-dell-imbiancatura">Quanto costa al mq e a stanza</a></li>
+        <li><a href="#domande-frequenti-sull-imbiancatura">Quante mani, quanto tempo, casa vuota o no</a></li>
+        <li><a href="#cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</a></li>
+        <li><a href="#come-non-farsi-fregare-sull">Come non farsi fregare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -228,7 +249,7 @@
 
     <p class="lead">Imbiancare sembra il lavoro più semplice del mondo, ma il prezzo cambia per due motivi che spesso non si vedono: <strong>lo stato delle pareti</strong> (se sono da stuccare e rasare, metà del lavoro è lì) e <strong>quante volte l'imbianchino deve tornare</strong> (colori scuri, muri nuovi o macchie richiedono più mani). Chi ti fa un prezzo senza aver visto i muri sta tirando a indovinare.</p>
 
-    <h2>Prezzi dell'imbiancatura</h2>
+    <h2 id="prezzi-dell-imbiancatura">Prezzi dell'imbiancatura</h2>
     <table>
       <caption>Costi indicativi 2026 — interni, materiali e manodopera inclusi</caption>
       <thead>
@@ -272,7 +293,7 @@
     preparazione delle pareti, cioè la parte che fa durare il lavoro.</p>
     <p style="font-size:14px;color:var(--muted)">Fonte dei valori ufficiali: Regione Lazio, <em>Tariffa dei prezzi 2023 – Parte A Opere edili</em> (DGR 101 del 14/04/2023), voci A 20.01.13.a.2 (idropittura vinilacrilica a tre mani), A 20.01.12.a (tempera liscia a due mani), A 20.01.1 (raschiatura di vecchie tinteggiature), A 20.01.9.a (rasatura di vecchi intonaci), A 20.01.10 (isolante acrilico di fondo). Totali calcolati su 270 mq di superficie dipinta.</p>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist">
       <li><strong>Preparazione delle pareti</strong>: stuccatura di buchi e crepe, rasatura se il muro è rovinato. È la voce che pesa di più.</li>
       <li><strong>Trattamento antimuffa</strong> dove serve: prima si risolve l'umidità, poi si pittura.</li>
@@ -327,7 +348,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Come non farsi fregare sull'imbiancatura</h2>
+    <h2 id="come-non-farsi-fregare-sull">Come non farsi fregare sull'imbiancatura</h2>
     <ul class="checklist">
       <li><strong>Preventivo senza sopralluogo.</strong> Un prezzo dato al telefono senza vedere i muri è una scommessa: quasi sempre poi "salta fuori" la preparazione da pagare a parte.</li>
       <li><strong>Non dice quante mani.</strong> Due mani sono lo standard: se te ne fanno una sola per risparmiare, il colore resta disomogeneo.</li>
@@ -345,7 +366,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un imbianchino →</a>
     </div>
 
-    <h2>Domande frequenti sull'imbiancatura</h2>
+    <h2 id="domande-frequenti-sull-imbiancatura">Domande frequenti sull'imbiancatura</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa imbiancare una stanza?</summary>
@@ -372,7 +393,7 @@
 
     <!-- ====== TROVA NELLA TUA CITTA ====== -->
     <div class="cities">
-      <h2>Trova un imbianchino nella tua città</h2>
+      <h2 id="trova-un-imbianchino-nella-tua">Trova un imbianchino nella tua città</h2>
       <p>Su TrovaImpresa ci sono imbianchini e decoratori verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/imbianchino-roma">Roma</a>

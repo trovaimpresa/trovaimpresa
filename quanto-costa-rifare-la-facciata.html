@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -225,6 +235,18 @@
       <span class="price-big">da 60 a 120 €/mq</span>
       per un rifacimento completo (risanamento intonaco + tinteggiatura), <strong>ponteggio escluso</strong>. Se serve solo <strong>ritinteggiare</strong> si sta sui 15–30 €/mq. Il ponteggio aggiunge <strong>15–25 €/mq</strong> (più 2–3 €/mq al mese oltre il primo) e può pesare fino al 30–45% del totale. Sotto trovi i prezzi per tipo di lavoro e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#prezzi-della-facciata-per-tipo">Quanto costa al mq: tinteggiare o rifare</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Il ponteggio quanto pesa davvero</a></li>
+        <li><a href="#domande-frequenti-sulla-facciata">Condominio, permessi, quanto dura</a></li>
+        <li><a href="#detrazioni-per-la-facciata">Detrazioni per la facciata</a></li>
+        <li><a href="#cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</a></li>
+        <li><a href="#prima-dei-lavori-serve-il">Prima dei lavori serve il geometra</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
@@ -240,7 +262,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Prezzi della facciata per tipo di intervento</h2>
+    <h2 id="prezzi-della-facciata-per-tipo">Prezzi della facciata per tipo di intervento</h2>
     <table>
       <caption>Costi indicativi 2026 — €/mq di facciata, ponteggio a parte salvo dove indicato</caption>
       <thead>
@@ -260,7 +282,7 @@
       <strong>Facciata o cappotto?</strong> Se devi comunque montare il ponteggio e rifare l'intonaco, valuta di fare direttamente il <a href="/quanto-costa-cappotto-termico.html">cappotto termico</a>: spendi di più ma isoli la casa, tagli le bollette e accedi a detrazioni più alte. Rifare solo l'estetica quando la facciata è "fredda" è un'occasione persa.
     </div>
 
-    <h2>Cosa deve comprendere il prezzo</h2>
+    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
       <li><strong>Ponteggio e sicurezza</strong>: montaggio, noleggio per la durata e smontaggio.</li>
       <li><strong>Preparazione</strong>: lavaggio, spazzolatura, rimozione delle parti che si staccano.</li>
@@ -269,7 +291,7 @@
       <li><strong>Lattoneria e ripristini</strong>: scossaline, davanzali, frontalini dei balconi.</li>
     </ul>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>L'altezza dell'edificio.</strong> Più piani = più mq di ponteggio, e il ponteggio da solo può valere il 30–45% del totale.</li>
       <li><strong>Lo stato dell'intonaco.</strong> Tra ritinteggiare (15–30 €/mq) e risanare tutto (60–120 €/mq) c'è quattro volte tanto: lo decide quanto è ammalorata la facciata, non il pittore.</li>
@@ -278,7 +300,7 @@
       <li><strong>Il cantiere che si allunga.</strong> Ogni mese di ponteggio oltre il primo sono 2–3 €/mq in più: su 300 mq, 600–900 € al mese solo per l'impalcatura ferma.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Fare più lavori con lo stesso ponteggio.</strong> Facciata + frontalini + lattoneria (e magari il tetto) in un colpo solo: il ponteggio lo paghi una volta.</li>
       <li><strong>Intervenire quando l'intonaco è ancora sano.</strong> Una tinteggiatura fatta in tempo costa un quarto del risanamento fatto tardi.</li>
@@ -286,7 +308,7 @@
       <li><strong>In condominio, muoversi insieme.</strong> Una facciata grande costa meno al mq di una piccola: i costi fissi di cantiere e ponteggio si dividono su più metri (e su più millesimi).</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Sono quelle che trasformano il preventivo firmato in un conto più salato a fine cantiere:</p>
     <ul class="checklist forget-list">
       <li><strong>Il noleggio del ponteggio oltre il primo mese</strong> — molti preventivi quotano montaggio e smontaggio e tacciono sui 2–3 €/mq al mese se il cantiere si allunga. E i cantieri si allungano.</li>
@@ -344,10 +366,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Detrazioni per la facciata</h2>
+    <h2 id="detrazioni-per-la-facciata">Detrazioni per la facciata</h2>
     <p>Il rifacimento della facciata rientra tra gli interventi agevolabili con il <strong>bonus ristrutturazione</strong> (manutenzione straordinaria) e, se aggiungi l'isolamento a cappotto, nell'<strong>ecobonus</strong> con percentuali più alte. Attenzione: il vecchio "bonus facciate" non è più in vigore, quindi oggi si passa da queste agevolazioni. Le regole cambiano ogni anno: verifica sul sito dell'Agenzia delle Entrate e paga con bonifico parlante. Vedi la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Pagare il ponteggio due volte.</strong> Fare la facciata oggi e i frontalini tra due anni significa rimontare tutto: pianifica tutti i lavori "in quota" prima di montare.</li>
       <li><strong>Ponteggio non quotato a parte.</strong> È la voce che pesa di più: fatti scrivere montaggio, durata del noleggio compresa, costo mensile oltre il primo mese e smontaggio.</li>
@@ -362,7 +384,7 @@
       <a href="/cerca-imprese.html" class="cta-dark">Trova un'impresa →</a>
     </div>
 
-    <h2>Domande frequenti sulla facciata</h2>
+    <h2 id="domande-frequenti-sulla-facciata">Domande frequenti sulla facciata</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa tinteggiare una facciata?</summary>
@@ -392,7 +414,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un'impresa edile nella tua città</h2>
+      <h2 id="trova-un-impresa-edile-nella">Trova un'impresa edile nella tua città</h2>
       <p>Su TrovaImpresa ci sono imprese edili verificate in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/impresa-edile-roma">Roma</a>
@@ -422,7 +444,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Prima dei lavori serve il geometra</h2>
+      <h2 id="prima-dei-lavori-serve-il">Prima dei lavori serve il geometra</h2>
       <p>CILA, SCIA, catasto: senza la pratica il cantiere non parte, e la pratica la fa un tecnico. Trova un geometra nella tua città:</p>
       <div class="cities-grid">
         <a href="/geometra-roma">Roma</a>

@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -225,6 +235,18 @@
       <span class="price-big">da 35 a 110 €/mq</span>
       secondo il tipo: il <strong>gres porcellanato</strong> sta sui 35–70 €/mq, il <strong>parquet</strong> sui 50–110, il <strong>laminato</strong> sui 25–45. La sola <strong>posa</strong> (manodopera) vale 18–38 €/mq. Se il massetto è da rifare, aggiungi 12–25 €/mq. Sotto trovi i prezzi per tipo e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#casa-80-mq">Casa di 80 mq: quanto viene in tutto</a></li>
+        <li><a href="#quanto-costa-la-sola-posa">Solo la posa: prezzo per formato</a></li>
+        <li><a href="#sovrapposizione-o-demolizione-le-due">Sopra il vecchio o demolire tutto</a></li>
+        <li><a href="#prezzi-del-pavimento-per-tipo">Gres, parquet, laminato: quanto costano</a></li>
+        <li><a href="#e-se-sotto-c-e">Se sotto c'è il riscaldamento a pavimento</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Macerie e battiscopa: le voci dimenticate</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
@@ -240,7 +262,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Prezzi del pavimento per tipo (posa inclusa)</h2>
+    <h2 id="prezzi-del-pavimento-per-tipo">Prezzi del pavimento per tipo (posa inclusa)</h2>
     <table>
       <caption>Costi indicativi 2026 — materiale + posa, €/mq, IVA esclusa</caption>
       <thead>
@@ -285,7 +307,7 @@
     manca (di solito la demolizione, lo smaltimento o il battiscopa).</p>
     <p style="font-size:14px;color:var(--muted)">Fonte dei valori ufficiali: Regione Lazio, <em>Tariffa dei prezzi 2023 – Parte A Opere edili</em> (DGR 101 del 14/04/2023), voci A 3.01.15.c (demolizione di pavimento in cotto o grès), A 14.01.18 (pavimento in grès fine porcellanato), A 14.01.23 e A 14.01.25 (parquet e lamparquet in rovere), A 14.02.13.a (battiscopa in legno massello). Totali calcolati su 80 mq e 70 m di battiscopa.</p>
 
-    <h2>Sovrapposizione o demolizione: le due strade</h2>
+    <h2 id="sovrapposizione-o-demolizione-le-due">Sovrapposizione o demolizione: le due strade</h2>
     <p>In una ristrutturazione, davanti a un pavimento da cambiare, le strade sono due. Sceglierne una o l'altra cambia il conto più di qualsiasi piastrella.</p>
     <table>
       <caption>Le due strade a confronto, ristrutturazione completa</caption>
@@ -299,7 +321,7 @@
     </table>
     <p>La sovrapposizione ha una cattiva fama immeritata: fatta con i prodotti giusti tiene benissimo, e ti risparmia demolizione, smaltimento in discarica, polvere in tutta casa e — soprattutto — <strong>il rischio massetto</strong>. Il suo unico vero limite è l'altezza: alzando il piano di calpestio bisogna accorciare le porte e raccordare le soglie con gli altri ambienti. Se il pavimento vecchio invece si muove, suona a vuoto o è crepato, non c'è scelta: si demolisce, perché posare su un fondo instabile significa vedere il pavimento nuovo staccarsi entro un anno.</p>
 
-    <h2>Quanto costa la sola posa, formato per formato</h2>
+    <h2 id="quanto-costa-la-sola-posa">Quanto costa la sola posa, formato per formato</h2>
     <p>I prezzi qui sopra comprendono materiale e posa. Ma se le piastrelle le compri tu — e
     capita spesso, perché in offerta si risparmia — la domanda diventa una sola:
     <strong>quanto costa solo posarle al metro quadro?</strong> Dipende quasi tutto dal
@@ -323,7 +345,7 @@
     formato: si taglia molto di più e si spreca più materiale. Se il preventivo non lo specifica,
     chiedi come intendono posare: è una delle differenze che spiegano due prezzi lontani.</p>
 
-    <h2>I pavimenti sottili da mettere sopra al vecchio</h2>
+    <h2 id="i-pavimenti-sottili-da-mettere">I pavimenti sottili da mettere sopra al vecchio</h2>
     <p>Se scegli la sovrapposizione, il problema non è la colla: è <strong>quanto si alza il
     pavimento</strong>, perché da lì dipende se le porte si aprono ancora. Ecco cosa si usa,
     con lo spessore reale.</p>
@@ -351,7 +373,7 @@
       in cucina regge l'acqua senza problemi, cosa che il laminato non fa.</p>
     </div>
 
-    <h2>E se sotto c'è il riscaldamento a pavimento</h2>
+    <h2 id="e-se-sotto-c-e">E se sotto c'è il riscaldamento a pavimento</h2>
     <p>Cambia due cose, e vanno sapute prima di scegliere. La prima: <strong>non tutti i
     pavimenti vanno bene</strong>. Il gres è il migliore, perché trasmette il calore; il parquet
     va scelto adatto e posato incollato, mai flottante; il laminato spesso è da escludere.</p>
@@ -360,7 +382,7 @@
     per questo motivo su un pavimento riscaldato consigliano la sovrapposizione, e hanno ragione:
     il rischio non vale il risparmio.</p>
 
-    <h2>Cosa deve comprendere il prezzo</h2>
+    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
       <li><strong>Rimozione del vecchio pavimento</strong> e smaltimento (10–18 €/mq), se non posi sopra l'esistente.</li>
       <li><strong>Preparazione del sottofondo</strong>: rasatura autolivellante o rifacimento del massetto se serve.</li>
@@ -369,7 +391,7 @@
       <li><strong>Battiscopa</strong> e profili di raccordo tra ambienti.</li>
     </ul>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Il massetto da rifare.</strong> È di gran lunga la voce più pesante: si scopre solo dopo aver demolito e può cambiare il conto di migliaia di euro su una casa intera.</li>
       <li><strong>I grandi formati.</strong> Le lastre 120x120 o 80x240 vogliono attrezzature dedicate e due posatori: la manodopera passa da 18–25 a 30–38 €/mq.</li>
@@ -378,7 +400,7 @@
       <li><strong>Demolizione e discarica.</strong> Togliere il vecchio pavimento sono 10–18 €/mq tra manodopera e smaltimento delle macerie.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>La sovrapposizione, quando è possibile.</strong> Niente demolizione, niente discarica, nessun rischio massetto: è il risparmio più grosso disponibile su questo lavoro.</li>
       <li><strong>Il formato standard.</strong> Un 60x60 si posa veloce e senza attrezzature speciali. I formati giganti sono bellissimi ma li paghi due volte, in materiale e in manodopera.</li>
@@ -387,7 +409,7 @@
       <li><strong>Case vuote e ambienti sgombri.</strong> Se il posatore non deve spostare mobili e proteggere ogni cosa, lavora più in fretta.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Sui pavimenti la sorpresa arriva quasi sempre da sotto. Controlla che ci sia scritto:</p>
     <ul class="checklist forget-list">
       <li><strong>Cosa succede se il massetto è da rifare</strong> — la voce più importante di tutte. Fatti dare il prezzo al mq del rifacimento <em>prima</em> di iniziare, così se capita non sei in balia di nessuno.</li>
@@ -446,7 +468,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Firmare senza sapere cosa succede se il massetto è da rifare.</strong> È il rischio numero uno del lavoro e si scopre a demolizione fatta: il prezzo di quell'eventualità va concordato prima, non contrattato quando il pavimento è già a terra.</li>
       <li><strong>Demolire quando si poteva sovrapporre.</strong> Se il pavimento vecchio è sano e ben ancorato, buttarlo giù significa pagare demolizione, discarica e rischio massetto per niente. Fatti spiegare perché non si può posare sopra.</li>
@@ -467,7 +489,7 @@
       <a href="/cerca-artigiani.html" class="cta-dark">Trova un posatore →</a>
     </div>
 
-    <h2>Domande frequenti sulla posa del pavimento</h2>
+    <h2 id="domande-frequenti-sulla-posa-del">Domande frequenti sulla posa del pavimento</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa rifare il pavimento di casa di 80 mq?</summary>
@@ -502,7 +524,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un piastrellista nella tua città</h2>
+      <h2 id="trova-un-piastrellista-nella-tua">Trova un piastrellista nella tua città</h2>
       <p>Su TrovaImpresa ci sono piastrellisti e posatori verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/piastrellista-roma">Roma</a>

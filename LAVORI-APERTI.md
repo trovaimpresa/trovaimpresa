@@ -4,7 +4,7 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 12 settembre 2026 (sera) — 1.802 pagine su 106 citta', campagna a 98 imprese, «Metti per prima»
+Ultimo aggiornamento: 12 settembre 2026 (notte) — l'aggancio alle ricerche precise su tutte e 19 le guide
 
 
 ---
@@ -14,17 +14,47 @@ Ultimo aggiornamento: 12 settembre 2026 (sera) — 1.802 pagine su 106 citta', c
 Giornata lunga, →7← push, tutto pubblicato e collaudato. Qui sotto SOLO quello
 che NON e' finito.
 
-### ⬜ 1. IL POTENZIAMENTO — aperto, se ne e' solo parlato
-Alex ha chiesto «questo lavoro si puo' potenziare?». Si e' ragionato, non si e'
-fatto niente. Le tre leve, in ordine di forza:
+### 🟡 1. IL POTENZIAMENTO — primo pezzo FATTO il 12 set (notte), il resto aperto
+
+**✅ FATTO: l'aggancio alle ricerche precise, su tutte e →19← le guide.**
+⚠️ La scoperta che cambia l'inquadramento: **le guide NON erano scritte in
+generale.** Aperte tutte e 19 una per una: la guida infissi aveva GIA' la sezione
+«casa di 100 mq» con la tabella delle →10← aperture e la Tariffa Regione Lazio.
+Il contenuto c'era. Mancava il modo di ARRIVARCI.
+- Riquadro **«Vai dritto alla tua domanda»** sotto la Risposta rapida, prima
+  della CTA arancione: →5←-→6← righe per guida, →109← voci in tutto, scritte
+  come le scrive la gente («Bagno di 4, 5 o 6 mq: quanto viene», non «Quanto
+  costa in base ai metri quadri»)
+- **Ancore `id` su ogni H2**: prima ce l'avevano →4← guide su →19←, ora tutte
+- `scroll-margin-top:80px` perche' la navbar e' sticky e senza quello il titolo
+  finisce sotto al menu
+- Collaudo con browser vero su tutte e 19: →109←/→109← ancore puntano a un H2
+  esistente, il clic scrolla davvero, →0← id doppi, →0← errori JS
+
+⛔ **I TITOLI NON SONO STATI TOCCATI, di proposito.** Il →6← set era gia' stato
+proposto di riscriverli dando per scontato che fossero deboli, ed erano ottimi.
+In piu' il conto dice che il collo di bottiglia non e' il titolo: →2← clic su
+→147← impressioni e' ~→1,4%← di CTR, cioe' il CTR normale di chi sta in
+posizione →15←-→20←. Il problema e' la POSIZIONE, non la promessa del titolo.
+
+**⬜ RESTA APERTO — i buchi di contenuto.** Cercate le domande vere dei
+concorrenti (FAQ e H2 di instapro, cronoshare, edilnet, prontopro). Queste hanno
+pubblico e le guide NON le coprono. Servono sezioni nuove, scritte da Alex:
+- **Cucina** → «solo i lavori, senza i mobili». Nessun concorrente lo da'
+- **Facciata condominio** → «quanto pago IO coi miei millesimi»
+- **Muratore** → la squadra muratore+manovale a giornata
+- **Idraulico** → tabella maggiorazioni sera/sabato/notte/festivi
+- **Elettrico** → quante prese e punti luce per ogni stanza, per livello CEI
+- **Fotovoltaico** → dai kWh della bolletta ai kW da installare
+- **Muro portante** → il costo delle PRATICHE separato da quello del cantiere
+- **Vasca in doccia** → sovrapposizione in →1← giorno CONTRO demolizione vera
+- **Tetto** → lattoneria al metro lineare, e come si divide in condominio
+
+**Le altre due leve, invariate:**
 - **Link da fuori** — il piu' forte e il piu' lento. ⛔ Alex ha gia' deciso il
   →9← set che le testate locali si contattano PIU' AVANTI: non riproporlo
 - **Quello che solo lui puo' scrivere** — e' muratore da →25← anni. Prezzi veri,
   errori veri, cosa ti nascondono. I concorrenti non ce l'hanno
-- **LE RICERCHE PRECISE — e' questo il prossimo lavoro concordato.** La gente non
-  cerca «quanto costa cambiare gli infissi», cerca «costo infissi casa 100 mq»
-  (→147← impressioni, →2← clic). Le guide ci sono ma sono scritte in generale.
-  Da fare: trovare le domande vere, vedere quali guide le coprono male, sistemarle
 - ⛔ DA NON FARE MAI: riempire le pagine con imprese prese da elenchi pubblici
   senza il loro permesso
 

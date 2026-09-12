@@ -22,6 +22,16 @@
     --warn-bg:#fff8e6;--warn-line:#f0d38a;
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -221,6 +231,18 @@
       <span class="price-big">da 80 a 350 €/mq</span>
       secondo l'intervento: rimettere solo il <strong>manto con nuove tegole</strong> sta sugli 80–110 €/mq; un tetto <strong>isolato e ventilato</strong> arriva a 180–270 €/mq; con <strong>nuova struttura in legno lamellare</strong> si va fino a 350 €/mq. Per una copertura di 120 mq isolata parli di circa <strong>25.000–32.000 €</strong>. Sotto trovi i prezzi per tipo di lavoro e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#prezzi-del-tetto-per-tipo">Quanto costa al mq, intervento per intervento</a></li>
+        <li><a href="#domande-frequenti-sul-rifacimento-del">Tetto di 100 mq, amianto, permessi</a></li>
+        <li><a href="#cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</a></li>
+        <li><a href="#detrazioni-per-il-rifacimento-del">Detrazioni per il tetto</a></li>
+        <li><a href="#qui-serve-per-forza-l">Quando serve l'ingegnere</a></li>
+        <li><a href="#come-non-farsi-fregare-sul">Come non farsi fregare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
@@ -231,7 +253,7 @@
 
     <p class="lead">Il tetto è il lavoro dove sbagliare costa caro due volte: se lo fai a metà, tra pochi anni ci torni. Il prezzo lo decidono <strong>quanto scendi in profondità</strong> (solo tegole, oppure isolamento, oppure struttura nuova) e <strong>la difficoltà del cantiere</strong> (altezza, pendenza, accesso). E c'è una variabile che può cambiare tutto: se sotto c'è l'<strong>amianto</strong>.</p>
 
-    <h2>Prezzi del tetto per tipo di intervento</h2>
+    <h2 id="prezzi-del-tetto-per-tipo">Prezzi del tetto per tipo di intervento</h2>
     <table>
       <caption>Costi indicativi 2026 — €/mq di falda, ponteggio escluso salvo dove indicato</caption>
       <thead>
@@ -249,7 +271,7 @@
       <strong>Se c'è l'amianto (eternit), fermati.</strong> La vecchia copertura in cemento-amianto <strong>non si può rompere né smaltire da soli</strong>: serve una ditta specializzata e iscritta, con notifica alla ASL e smaltimento certificato. Costa in genere <strong>15–40 €/mq in più</strong>, ma è obbligatorio per legge e per la tua salute. Non farlo fare a chi "te lo butta via lui".
     </div>
 
-    <h2>Cosa deve comprendere il prezzo</h2>
+    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
       <li><strong>Ponteggio e sicurezza</strong>: obbligatori sopra i 2 metri. Da soli pesano 10–20 €/mq.</li>
       <li><strong>Rimozione della vecchia copertura</strong> e smaltimento in discarica.</li>
@@ -307,10 +329,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Detrazioni per il rifacimento del tetto</h2>
+    <h2 id="detrazioni-per-il-rifacimento-del">Detrazioni per il rifacimento del tetto</h2>
     <p>Rifare il tetto rientra tra gli interventi agevolabili: come <strong>manutenzione straordinaria</strong> nel bonus ristrutturazione, e se aggiungi l'isolamento termico anche nell'<strong>ecobonus</strong>, che sulla coibentazione ha percentuali più alte. Non si sommano sullo stesso lavoro: si sceglie l'agevolazione più conveniente. Le regole cambiano ogni anno: verifica sul sito dell'Agenzia delle Entrate, paga con bonifico parlante e, per la parte energetica, fai la comunicazione all'ENEA. Vedi la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Come non farsi fregare sul tetto</h2>
+    <h2 id="come-non-farsi-fregare-sul">Come non farsi fregare sul tetto</h2>
     <ul class="checklist">
       <li><strong>Preventivo che non dice cosa c'è nel "pacchetto".</strong> Isolamento sì o no? Guaina? Lattoneria nuova? Sono migliaia di euro di differenza.</li>
       <li><strong>Ponteggio non incluso e non quotato.</strong> Su un tetto è obbligatorio: se sparisce dal preventivo, ricompare come extra.</li>
@@ -324,7 +346,7 @@
       <a href="/cerca-imprese.html" class="cta-dark">Trova un'impresa →</a>
     </div>
 
-    <h2>Domande frequenti sul rifacimento del tetto</h2>
+    <h2 id="domande-frequenti-sul-rifacimento-del">Domande frequenti sul rifacimento del tetto</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa rifare un tetto di 100 mq?</summary>
@@ -351,7 +373,7 @@
 
     <!-- ====== TROVA NELLA TUA CITTA ====== -->
     <div class="cities">
-      <h2>Trova chi ti rifà il tetto nella tua città</h2>
+      <h2 id="trova-chi-ti-rifa-il">Trova chi ti rifà il tetto nella tua città</h2>
       <p>Su TrovaImpresa ci sono imprese specializzate in coperture e tetti in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/rifacimento-tetti-roma">Roma</a>
@@ -381,7 +403,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Qui serve per forza l'ingegnere strutturale</h2>
+      <h2 id="qui-serve-per-forza-l">Qui serve per forza l'ingegnere strutturale</h2>
       <p>Se si tocca un elemento portante non è una scelta ma un obbligo di legge: servono calcoli e pratica depositata. Trova un ingegnere strutturale nella tua città:</p>
       <div class="cities-grid">
         <a href="/ingegnere-strutturale-roma">Roma</a>

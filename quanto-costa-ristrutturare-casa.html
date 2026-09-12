@@ -34,6 +34,16 @@
     --maxw:760px;
     --font:'Trebuchet MS','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
+
+  .indice{background:#fff;border:1px solid #d7e4fb;border-left:5px solid var(--primary);border-radius:var(--radius);padding:16px 20px 18px;margin:18px 0}
+  .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
+  .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .indice li{margin:0}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
+  .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
+  @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
+  h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
   body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -239,6 +249,18 @@
       <span class="price-big">da 350 a 800 €/mq</span>
       Una ristrutturazione leggera (pavimenti, tinteggiatura, porte) sta sui <strong>350–600 €/mq</strong>; una completa con impianti nuovi e finiture medie sui <strong>600–800 €/mq</strong>, cioè <strong>60.000–80.000 €</strong> per un appartamento di 100 mq. Il conto vero però si fa in due pezzi: circa <strong>40.000 € di lavori d'impresa</strong> più i materiali di finitura che scegli tu. Con materiali di pregio si supera anche il doppio. Sotto trovi come si divide il conto e un calcolatore.
     </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#prezzi-al-mq-per-tipo">Quanto costa al mq: parziale o totale</a></li>
+        <li><a href="#domande-frequenti-sul-costo-di">Appartamento di 100 mq: quanto viene</a></li>
+        <li><a href="#dove-finiscono-i-soldi-lavori">Dove finiscono i soldi: lavori e materiali</a></li>
+        <li><a href="#le-voci-che-nei-preventivi">Le voci dimenticate nei preventivi</a></li>
+        <li><a href="#prima-dei-lavori-serve-il">Permessi: prima serve il geometra</a></li>
+        <li><a href="#gli-errori-da-evitare">Gli errori da evitare</a></li>
+      </ul>
+    </nav>
+
     <div class="answer-cta">
       <b>Quanto costa a casa tua?</b>
       <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
@@ -256,7 +278,7 @@
       <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
     </div>
 
-    <h2>Prezzi al mq per tipo di ristrutturazione</h2>
+    <h2 id="prezzi-al-mq-per-tipo">Prezzi al mq per tipo di ristrutturazione</h2>
     <table>
       <caption>Costi indicativi 2026 — chiavi in mano, IVA 10% esclusa</caption>
       <thead>
@@ -270,7 +292,7 @@
       </tbody>
     </table>
 
-    <h2>Dove finiscono i soldi: lavori da una parte, materiali dall'altra</h2>
+    <h2 id="dove-finiscono-i-soldi-lavori">Dove finiscono i soldi: lavori da una parte, materiali dall'altra</h2>
     <p>Le imprese serie il conto lo fanno così, in due pezzi. Ed è così che devi leggerlo anche tu, perché è l'unico modo per confrontare due preventivi senza farti confondere.</p>
 
     <table>
@@ -287,7 +309,7 @@
 
     <p>Perché ti conviene ragionare così? Perché i <strong>lavori d'impresa si possono confrontare</strong>: demolire, rifare gli impianti e posare costa più o meno uguale per tutti, e se un preventivo si stacca troppo dai 40.000 € (in su o in giù) c'è una ragione da farsi spiegare. I <strong>materiali invece sono gusto e budget tuoi</strong>: la stessa casa cambia di decine di migliaia di euro solo scegliendo un pavimento o un infisso diverso — a parità di lavori.</p>
 
-    <h2>Cosa fa salire il prezzo</h2>
+    <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
       <li><strong>Gli impianti.</strong> È lo scalino vero: finché tocchi le superfici resti in basso, quando apri le tracce per elettrico e idraulico il costo al mq raddoppia.</li>
       <li><strong>I materiali di finitura.</strong> Dai 20.000 € di una fascia media si può raddoppiare senza accorgersene: è la voce che fa ballare il totale più di tutte.</li>
@@ -295,7 +317,7 @@
       <li><strong>La casa piccola.</strong> Al mq costa di più: i costi fissi (cantiere, pratiche, un bagno comunque intero) si spalmano su meno superficie.</li>
     </ul>
 
-    <h2>Cosa fa scendere il prezzo</h2>
+    <h2 id="cosa-fa-scendere-il-prezzo">Cosa fa scendere il prezzo</h2>
     <ul class="checklist down-list">
       <li><strong>Decidere tutto prima.</strong> Progetto chiaro, materiali scelti prima di aprire il cantiere: niente varianti, niente fermi, niente sorprese.</li>
       <li><strong>Fare tutti i lavori in una volta.</strong> Aprire il cantiere una volta sola costa meno che ristrutturare a pezzi in anni diversi: demolizioni, ponteggi e pratiche si pagano una volta.</li>
@@ -303,7 +325,7 @@
       <li><strong>Confrontare 3 preventivi con lo stesso schema di voci.</strong> Non per prendere il più basso: per vedere chi ha dimenticato pezzi di lavoro.</li>
     </ul>
 
-    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <h2 id="le-voci-che-nei-preventivi">Le voci che nei preventivi vengono dimenticate</h2>
     <p>Su un lavoro da decine di migliaia di euro, queste sono le voci che spariscono dal preventivo e ricompaiono a metà cantiere:</p>
     <ul class="checklist forget-list">
       <li><strong>Smaltimento in discarica</strong> — le macerie di una ristrutturazione completa sono tante e la discarica si paga: la voce deve esserci, con la quantità.</li>
@@ -366,7 +388,7 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Gli errori da evitare</h2>
+    <h2 id="gli-errori-da-evitare">Gli errori da evitare</h2>
     <ul class="checklist err-list">
       <li><strong>Confrontare un preventivo "materiali compresi" con uno "materiali esclusi".</strong> È l'errore numero uno: sembrano lontani 30.000 € ma magari contengono le stesse cose. Prima separa lavori e materiali, poi confronta.</li>
       <li><strong>"Ristrutturazione a corpo" con un solo numero.</strong> Su decine di migliaia di euro pretendi il computo metrico: ogni voce con quantità e prezzo unitario. Il blocco unico serve a nascondere il margine.</li>
@@ -386,7 +408,7 @@
       <a href="/cerca-imprese.html" class="cta-dark">Trova un'impresa edile →</a>
     </div>
 
-    <h2>Domande frequenti sul costo di ristrutturare casa</h2>
+    <h2 id="domande-frequenti-sul-costo-di">Domande frequenti sul costo di ristrutturare casa</h2>
     <div class="faq">
       <details open>
         <summary>Quanto costa ristrutturare un appartamento di 100 mq?</summary>
@@ -416,7 +438,7 @@
 
     <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
     <div class="cities">
-      <h2>Trova un'impresa edile nella tua città</h2>
+      <h2 id="trova-un-impresa-edile-nella">Trova un'impresa edile nella tua città</h2>
       <p>Su TrovaImpresa ci sono imprese edili verificate in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
       <div class="cities-grid">
         <a href="/impresa-edile-roma">Roma</a>
@@ -446,7 +468,7 @@
 
     <!-- ====== IL TECNICO CHE SERVE PRIMA ====== -->
     <div class="cities">
-      <h2>Prima dei lavori serve il geometra</h2>
+      <h2 id="prima-dei-lavori-serve-il">Prima dei lavori serve il geometra</h2>
       <p>CILA, SCIA, catasto: senza la pratica il cantiere non parte, e la pratica la fa un tecnico. Trova un geometra nella tua città:</p>
       <div class="cities-grid">
         <a href="/geometra-roma">Roma</a>
