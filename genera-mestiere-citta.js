@@ -37,7 +37,22 @@ const TODAY = new Date().toISOString().slice(0, 10);
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 
-const MAX_IMPRESE = 12;
+/* ⚠️ 12 set 2026 — IL TETTO E CHI RESTA FUORI.
+   Una pagina mostra al massimo MAX_IMPRESE cartellini. Finche' in una
+   citta' ce ne sono meno di cosi', li mostra tutti e non cambia niente.
+   Quando saranno di piu' — e l'obiettivo sono migliaia di iscritti —
+   qualcuno deve restare fuori dai cartellini, e se restasse fuori DALLA
+   PAGINA sarebbe una promessa rotta: la mail del 12 set ha detto a tutti
+   «hai una pagina tua». Percio' la pagina si divide in due:
+     · IN EVIDENZA — fino a IN_EVIDENZA cartellini grandi, i Premium prima
+     · TUTTI GLI ALTRI — un elenco compatto di nomi cliccabili, dove
+       c'e' DAVVERO tutto il resto, free compresi
+   Cosi' nessuno sparisce, e il Premium ha una ragione visibile per
+   esistere invece di essere solo un cartellino viola. */
+const SCADENZA_MS = 8000;    // quanto si aspetta la rete, per citta'
+const MAX_IMPRESE = 12;      // quanti cartellini grandi al massimo
+const IN_EVIDENZA = 6;       // quanti cartellini quando la citta' e' piena
+const MAX_ELENCO = 60;       // quanti nomi nell'elenco compatto
 
 /* ============================================================
    I MESTIERI
@@ -808,9 +823,17 @@ function caricaScorta() {
 async function impreseCitta(citta) {
   const filtro = `or=(citta.ilike."${citta}",provincia.ilike."${citta}*")`;
   const url = `${SUPABASE_URL}/rest/v1/imprese_pubbliche?select=id,nome,mestiere,mestieri,tipo,citta,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&limit=200`;
+  /* ⚠️ 12 set 2026 — LO SCRIPT NON DEVE PIU' POTERSI PIANTARE.
+     Senza scadenza, se la rete non risponde (non rifiuta: proprio non
+     risponde) `fetch` aspetta per sempre e lo script resta fermo su una
+     citta' senza dire niente. E' successo davvero, sul PC di Alessio,
+     dopo la prima citta'. Con la scadenza qui sotto, dopo SCADENZA_MS
+     la chiamata muore da sola, si cade su dati-imprese.json e si va
+     avanti: peggio che va, le pagine escono con la scorta. */
   try {
     const res = await fetch(url, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      signal: AbortSignal.timeout(SCADENZA_MS)
     });
     if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
     return await res.json();
@@ -884,6 +907,34 @@ function cartellino(i) {
     </a>`;
 }
 
+/* ⚠️ 12 set 2026 — CHI STA IN CIMA, E LA GIOSTRA DEI PREMIUM.
+   I Premium vanno prima dei free: e' quello che il Premium compra.
+   Ma se la cima fosse SEMPRE la stessa, in una citta' con 40 Premium
+   ne pagherebbero 40 e se ne vedrebbero 6, sempre gli stessi sei.
+   Percio' fra i Premium il punto di partenza GIRA: cambia ogni
+   settimana e cambia da pagina a pagina, cosi' ognuno passa in cima
+   a turno e nessuno resta per sempre in fondo.
+   I free restano sotto, in ordine di voto: quello e' merito, non turno. */
+function settimana(d) {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+}
+const SETTIMANA = settimana(new Date());
+
+function ordina(lista, chiave) {
+  const perVoto = (a, b) => (b.valutazione_media || 0) - (a.valutazione_media || 0);
+  const premium = lista.filter(i => i.piano === 'premium').sort(perVoto);
+  const free = lista.filter(i => i.piano !== 'premium').sort(perVoto);
+  if (premium.length > 1) {
+    let n = 0;
+    for (let k = 0; k < chiave.length; k++) n = (n * 31 + chiave.charCodeAt(k)) % 100000;
+    const giro = (SETTIMANA + n) % premium.length;
+    premium.push(...premium.splice(0, giro));
+  }
+  return premium.concat(free);
+}
+
 /* Il blocco delle imprese. Se non ce n'e' nessuna la pagina NON
    resta con un buco: al posto dell'elenco va l'invito a lasciare
    la richiesta. E' il motivo per cui queste pagine possono nascere
@@ -898,13 +949,28 @@ function bloccoImprese(m, c, imprese) {
   </div>`;
   }
 
-  const items = imprese.map(cartellino).join('\n');
+  /* Sotto il tetto: tutti a cartellino, come prima.
+     Sopra: i primi IN_EVIDENZA a cartellino, il resto in elenco. */
+  const pieno = imprese.length > MAX_IMPRESE;
+  const grandi = pieno ? imprese.slice(0, IN_EVIDENZA) : imprese;
+  const altri  = pieno ? imprese.slice(IN_EVIDENZA, MAX_ELENCO) : [];
+  const avanzano = pieno ? Math.max(0, imprese.length - MAX_ELENCO) : 0;
+
+  const items = grandi.map(cartellino).join('\n');
+
+  const elenco = altri.length ? `
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:#0a2a4d;margin:30px 0 12px;">Tutti gli altri a ${esc(c.nome)}</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 18px;margin-bottom:18px;">
+${altri.map(i => `      <a href="/profilo-impresa?id=${esc(i.id)}" style="color:#12233a;text-decoration:none;padding:7px 0;border-bottom:1px solid #e7ecf3;font-size:0.95rem;">${esc(i.nome || 'Impresa')}${i.piano === 'premium' ? ' 💎' : ''}${i.verificata ? ' <span style="color:#0066ff;">✓</span>' : ''}</a>`).join('\n')}
+    </div>${avanzano ? `
+    <p style="font-size:0.9rem;color:#5b6b80;">…e altri ${avanzano} su TrovaImpresa a ${esc(c.nome)}.</p>` : ''}` : '';
+
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: `${m.nome} a ${c.nome}`,
-    numberOfItems: imprese.length,
-    itemListElement: imprese.map((i, idx) => ({
+    numberOfItems: grandi.length + altri.length,
+    itemListElement: grandi.concat(altri).map((i, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
       name: i.nome || 'Impresa',
@@ -913,10 +979,11 @@ function bloccoImprese(m, c, imprese) {
   };
   return `  <div class="section" id="imprese-locali">
     <h2>${esc(m.nome)} a ${esc(c.nome)}: chi trovi su TrovaImpresa</h2>
-    <p>${P.sonoQui} ${esc(c.nome)} ${P.siOccupano}</p>
+    <p>${P.sonoQui} ${esc(c.nome)} ${P.siOccupano}</p>${pieno ? `
+    <p style="font-size:0.9rem;color:#5b6b80;">In evidenza i profili Premium; sotto trovi tutti gli altri.</p>` : ''}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0;">
 ${items}
-    </div>
+    </div>${elenco}
     <p style="text-align:center;"><a href="${P.cercaUrl(c)}" style="color:#0066ff;font-weight:700;">${P.cercaTutti(c)} →</a></p>
   </div>
   <script type="application/ld+json">
@@ -1149,11 +1216,9 @@ ${bloccoImprese(m, c, imprese)}
     }
 
     for (const m of MESTIERI) {
-      const imprese = tutte.filter(i => combacia(i, m)).sort((a, b) => {
-        const p = x => (x.piano === 'premium' ? 1 : 0);
-        if (p(b) !== p(a)) return p(b) - p(a);
-        return (b.valutazione_media || 0) - (a.valutazione_media || 0);
-      }).slice(0, MAX_IMPRESE);
+      const imprese = ordina(tutte.filter(i => combacia(i, m)), nomeFile(m, c));
+      /* il taglio NON si fa piu' qui: lo decide bloccoImprese, che
+         sopra un certo numero divide fra cartellini ed elenco. */
 
       const file = nomeFile(m, c);
       fs.writeFileSync(path.join(OUT, file), costruisciPagina(m, c, imprese), 'utf8');
