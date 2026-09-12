@@ -67,7 +67,11 @@
   function linkScheda(imp) { return SITO + '/profilo-impresa?id=' + encodeURIComponent(imp.id); }
 
   function linkPagina(imp) {
-    var slug = CITTA[String(imp.citta || '').trim().toLowerCase()];
+    /* ⚠️ 12 set 2026 — anche la PROVINCIA: le pagine mestiere+citta'
+       pescano per citta' O provincia, quindi una ditta di Portici sta
+       dentro muratore-napoli e il suo link deve portarla li'. */
+    var slug = CITTA[String(imp.citta || '').trim().toLowerCase()]
+            || CITTA[String(imp.provincia || '').trim().toLowerCase()];
     if (!slug) return null;
     var voci = [].concat(Array.isArray(imp.mestieri) ? imp.mestieri : [])
                 .concat(imp.mestiere ? [imp.mestiere] : [])

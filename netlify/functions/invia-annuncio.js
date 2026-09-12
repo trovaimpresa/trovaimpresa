@@ -131,8 +131,14 @@ function linkVetrina(imp) {
 }
 
 function linkPagina(imp) {
+  /* ⚠️ 12 set 2026 — LA PROVINCIA CONTA.
+     Le pagine mestiere+citta' pescano le imprese per citta' O PROVINCIA:
+     una ditta di Portici compare dentro muratore-napoli. Guardando solo
+     la citta' la mandavamo alla scheda invece che alla pagina dove sta
+     davvero. Quindi: prima la citta', e se non basta la provincia. */
   const citta = String(imp.citta || '').trim().toLowerCase();
-  const slugCitta = CITTA_CON_PAGINE[citta];
+  const prov  = String(imp.provincia || '').trim().toLowerCase();
+  const slugCitta = CITTA_CON_PAGINE[citta] || CITTA_CON_PAGINE[prov];
   if (!slugCitta) return linkVetrina(imp);
 
   const voci = []
@@ -192,7 +198,7 @@ exports.handler = async function (event) {
 
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
-    .select('id, nome, nome_attivita, email, citta, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo')
+    .select('id, nome, nome_attivita, email, citta, provincia, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo')
     .eq('is_test', false)
     .eq('email_confermata', true)
     // chi si e' tolto dalle email promozionali non riceve piu' nulla da qui
