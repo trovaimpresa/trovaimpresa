@@ -9,6 +9,8 @@ const crypto = require('crypto');
 //   [NOME]      nome dell'attivita' (o "utente" se manca)
 //   [SCADENZA]  data di scadenza del Premium, scritta all'italiana
 //   [CITTA]     citta' dell'impresa
+//   [VETRINA]   link alla sua scheda pubblica (esiste sempre)
+//   [PAGINA]    link alla pagina mestiere+citta' dove compare
 //
 // Gruppi: 'completi' | 'incompleti' | 'tutti' | 'prova'
 // 'prova' manda solo ad Alessio, per vedere com'e' venuta prima di
@@ -74,12 +76,84 @@ function testoInHtml(testo, emailDest) {
     + '</div></div></body></html>';
 }
 
+
+/* ============================================================
+   IL LINK DELLA SUA VETRINA — 12 settembre 2026
+
+   Un'impresa iscritta non sa di stare su /muratore-roma: lo sa
+   solo chi guarda il sito da dentro. Questi due segnaposto le
+   mettono in mano il link, dritto, dentro l'email.
+
+     [VETRINA]  la sua scheda pubblica — esiste SEMPRE
+     [PAGINA]   la pagina mestiere+citta' dove compare
+
+   ⚠️ [PAGINA] si scrive solo se la citta' e' fra quelle che hanno
+   le pagine generate: per tutte le altre si torna alla scheda, che
+   non sbaglia mai. Meglio un link in meno che un link nel vuoto.
+   Quando genera-mestiere-citta.js aggiunge citta', aggiungerle qui.
+   ============================================================ */
+const CITTA_CON_PAGINE = {
+  'roma': 'roma', 'milano': 'milano', 'napoli': 'napoli', 'torino': 'torino',
+  'rieti': 'rieti', 'palermo': 'palermo', 'genova': 'genova', 'bologna': 'bologna',
+  'firenze': 'firenze', 'bari': 'bari', 'catania': 'catania', 'verona': 'verona',
+  'venezia': 'venezia', 'messina': 'messina', 'padova': 'padova', 'trieste': 'trieste',
+  'brescia': 'brescia', 'parma': 'parma', 'modena': 'modena', 'reggio emilia': 'reggio-emilia'
+};
+
+/* Quello che l'impresa ha scritto nel suo profilo -> la pagina giusta.
+   Copiato dal campo `db` di genera-mestiere-citta.js: se cambia li',
+   va cambiato anche qui. */
+const MESTIERE_PAGINA = {
+  'ristrutturazione': 'impresa-edile', 'ristrutturazione completa': 'impresa-edile',
+  'costruzione nuova': 'impresa-edile',
+  'edilizia / muratura': 'muratore', 'muratura e strutture': 'muratore',
+  'idraulica': 'idraulico',
+  'impianti elettrici': 'elettricista', 'antennista / allarmi': 'elettricista',
+  'pittura e tinteggiatura': 'imbianchino',
+  'pavimenti e piastrelle': 'piastrellista',
+  'cartongesso': 'cartongessista',
+  'serramenti / infissi': 'serramentista', 'tende da sole / zanzariere': 'serramentista',
+  'vetraio': 'serramentista',
+  'climatizzazione / caldaie': 'termoidraulico',
+  'fotovoltaico / pannelli solari': 'installatore-fotovoltaico',
+  'coperture e tetti': 'rifacimento-tetti', 'coperture / tetti': 'rifacimento-tetti',
+  'geometra': 'geometra', 'architetto': 'architetto',
+  'ingegnere_strutturale': 'ingegnere-strutturale', 'ingegnere strutturale': 'ingegnere-strutturale',
+  'consulente_energetico': 'certificato-energetico', 'certificatore energetico': 'certificato-energetico',
+  'termotecnico': 'certificato-energetico',
+  'direttore_lavori': 'direttore-lavori', 'direttore dei lavori': 'direttore-lavori',
+  'interior_designer': 'interior-designer', 'interior designer': 'interior-designer',
+  'arredatore': 'interior-designer'
+};
+
+function linkVetrina(imp) {
+  return 'https://trovaimpresa.com/profilo-impresa?id=' + encodeURIComponent(imp.id);
+}
+
+function linkPagina(imp) {
+  const citta = String(imp.citta || '').trim().toLowerCase();
+  const slugCitta = CITTA_CON_PAGINE[citta];
+  if (!slugCitta) return linkVetrina(imp);
+
+  const voci = []
+    .concat(Array.isArray(imp.mestieri) ? imp.mestieri : [])
+    .concat(imp.mestiere ? [imp.mestiere] : [])
+    .map(v => String(v).toLowerCase().trim());
+
+  for (const v of voci) {
+    if (MESTIERE_PAGINA[v]) return 'https://trovaimpresa.com/' + MESTIERE_PAGINA[v] + '-' + slugCitta;
+  }
+  return 'https://trovaimpresa.com/imprese-' + slugCitta;
+}
+
 function riempi(testo, imp) {
   const nome = (imp.nome_attivita || imp.nome || '').trim() || 'utente';
   return String(testo || '')
     .replace(/\[NOME\]/g, nome)
     .replace(/\[SCADENZA\]/g, dataIta(imp.premium_scadenza))
-    .replace(/\[CITTA\]/g, (imp.citta || '').trim());
+    .replace(/\[CITTA\]/g, (imp.citta || '').trim())
+    .replace(/\[VETRINA\]/g, linkVetrina(imp))
+    .replace(/\[PAGINA\]/g, linkPagina(imp));
 }
 
 exports.handler = async function (event) {
@@ -118,7 +192,7 @@ exports.handler = async function (event) {
 
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
-    .select('id, nome, nome_attivita, email, citta, tipo, piano, premium_scadenza, is_test, email_promo')
+    .select('id, nome, nome_attivita, email, citta, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo')
     .eq('is_test', false)
     .eq('email_confermata', true)
     // chi si e' tolto dalle email promozionali non riceve piu' nulla da qui
