@@ -106,6 +106,9 @@
     '.cv-b.pri{background:#e8733a;color:#fff}',
     '.cv-b.sec{background:#fff;color:#0052cc;border:1.5px solid #0052cc}',
     '.cv-ok{color:#15803d;font-weight:700;font-size:.9rem;margin:12px 0 0;display:none}',
+    '.cv-visite{margin:14px 0 0;font-size:.93rem;color:#0a2a4d;line-height:1.55;display:none}',
+    '.cv-visite b{color:#e8733a;font-size:1.05rem}',
+    '.cv-visite .cv-nota{display:block;color:#8a94a3;font-size:.82rem;margin-top:3px}',
     '@media(max-width:520px){.cv-btns{flex-direction:column}.cv-b{text-align:center}}'
   ].join('');
 
@@ -132,9 +135,11 @@
         '<a class="cv-b sec" href="' + linkScheda(imp) + '" target="_blank" rel="noopener">Apri la mia pagina</a>' +
         (pagina ? '<a class="cv-b sec" href="' + pagina + '" target="_blank" rel="noopener">Vedi dove compari</a>' : '') +
       '</div>' +
+      '<p class="cv-visite" id="cv-visite"></p>' +
       '<p class="cv-ok" id="cv-ok">Copiato. Ora incollalo su WhatsApp.</p>';
 
     dove.parentNode.insertBefore(card, dove);
+    quantiTiHannoAperto();
 
     document.getElementById('cv-copia').addEventListener('click', function () {
       var testo = messaggio(imp);
@@ -148,6 +153,51 @@
       }
       copiaEBasta(testo, ok);
     });
+  }
+
+
+  /* ============================================================
+     QUANTI TI HANNO APERTO
+     I numeri c'erano gia': `visite_clienti` conta le aperture delle
+     schede dal 7 settembre 2026. Ma quella tabella si puo' solo
+     SCRIVERE — nemmeno l'impresa loggata la rilegge — e cosi' il
+     dato restava fermo li' senza che nessuno lo vedesse.
+     La funzione `mie_visite_scheda()` sul database torna SOLO i
+     numeri di chi la chiama: dentro c'e' auth.uid().
+     Se qualcosa non va (funzione non ancora sul database, rete giu')
+     la riga resta nascosta e la carta funziona lo stesso.
+     ============================================================ */
+  function quantiTiHannoAperto() {
+    var riga = document.getElementById('cv-visite');
+    if (!riga) return;
+    if (typeof sb === 'undefined' || !sb || !sb.rpc) return;
+
+    sb.rpc('mie_visite_scheda').then(function (r) {
+      if (r.error || !r.data || !r.data.length) return;
+      var d = r.data[0] || {};
+      var m = Number(d.ultimi_30 || 0);
+
+      if (m > 0) {
+        riga.innerHTML = '<b>' + m + '</b> ' +
+          (m === 1 ? 'persona ha aperto' : 'persone hanno aperto') +
+          ' la tua pagina negli ultimi 30 giorni.' +
+          '<span class="cv-nota">Si conta da quando ' +
+          (d.conta_dal ? 'il sito ha iniziato a tenerne nota, il ' + dataIta(d.conta_dal) : 'il sito ha iniziato a tenerne nota') +
+          '.</span>';
+      } else {
+        riga.innerHTML = 'Ancora nessuno ha aperto la tua pagina.' +
+          '<span class="cv-nota">Mandala ai tuoi clienti: è il modo più veloce per cominciare.</span>';
+      }
+      riga.style.display = 'block';
+    }).catch(function () { /* zitto: la carta serve lo stesso */ });
+  }
+
+  function dataIta(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return String(iso);
+    var mesi = ['gennaio','febbraio','marzo','aprile','maggio','giugno',
+                'luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    return d.getDate() + ' ' + mesi[d.getMonth()] + ' ' + d.getFullYear();
   }
 
   function copiaEBasta(testo, ok) {
