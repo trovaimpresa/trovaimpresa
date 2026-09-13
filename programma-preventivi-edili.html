@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programma per fare preventivi edili in PDF</title>
+<meta name="description" content="Programma per preventivi edili: voci con quantita' e prezzo, IVA al 10% riga per riga, PDF pronto da mandare. Se il cliente accetta diventa lavoro.">
+<link rel="canonical" href="https://trovaimpresa.com/programma-preventivi-edili">
+<meta property="og:title" content="Programma per fare preventivi edili in PDF">
+<meta property="og:description" content="Programma per preventivi edili: voci con quantita' e prezzo, IVA al 10% riga per riga, PDF pronto da mandare. Se il cliente accetta diventa lavoro.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/programma-preventivi-edili">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Programma per preventivi edili</nav>
+
+  <article>
+    <h1>Programma per preventivi edili: dalla voce al PDF, e dal PDF al lavoro</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> un programma per fare <strong>preventivi edili</strong> con le voci, l'IVA giusta riga per riga
+    e il PDF pronto. Ogni preventivo ha uno stato, e <strong>quando il cliente accetta diventa un
+    lavoro</strong> senza riscriverlo.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Il preventivo è il documento che ti fa prendere o perdere il lavoro, ed è quello che
+        quasi sempre si fa di corsa, la sera, su un foglio Word copiato dall'ultimo.</p>
+
+    <p>Il problema non è scriverlo. Il problema è tutto quello che viene dopo: ritrovarlo fra due mesi,
+       sapere se il cliente ha risposto, e non doverlo ricopiare quando il lavoro parte davvero.</p>
+
+    <h2>Le voci, con la quantità e il prezzo</h2>
+
+    <p>Scrivi le voci una per una: descrizione, quantità, unità di misura, prezzo unitario. Il totale si
+       fa da solo mentre scrivi. Puoi mettere una <strong>riga libera</strong> quando serve dire una cosa
+       senza prezzo, e uno <strong>sconto</strong> in percentuale in fondo.</p>
+
+    <figure>
+      <img src="/img/gestionale-preventivi.webp" width="1440" height="1077" loading="lazy" alt="Preventivi edili numerati con stato inviato, accettato e rifiutato, e importo con IVA">
+      <figcaption>I preventivi numerati, con lo stato e l'importo IVA compresa.</figcaption>
+    </figure>
+
+    <p>I prezzi che usi restano nel tuo prezzario, quindi dal preventivo dopo li ritrovi già lì.</p>
+
+    <h2>L'IVA al 10%, riga per riga</h2>
+
+    <p>Questa è la cosa che i programmi di fatturazione generici sbagliano, ed è il motivo per cui un
+       gestionale edile non è un capriccio.</p>
+
+    <p>Sulle manutenzioni e sui recuperi edilizi l'IVA è agevolata al <strong>10%</strong>, non al 22%.
+       E nello stesso preventivo ci possono stare tutte e due: la manodopera al 10%, il bene significativo
+       al 22% per la parte che supera il limite.</p>
+
+    <ul class="checklist ok-list">
+      <li>L'IVA si sceglie <strong>riga per riga</strong>, non una sola per tutto il documento.</li>
+      <li>La <strong>ritenuta d'acconto</strong> quando il committente è un condominio.</li>
+      <li>Il <strong>bollo da 2 €</strong> sopra i 77,47 € per chi è in regime forfettario.</li>
+      <li>La <strong>cassa previdenziale</strong> per geometri, architetti e ingegneri.</li>
+    </ul>
+
+    <div class="note">Un programma che ti fa scegliere una sola IVA per tutto il documento non è fatto per
+        l'edilizia. Prima o poi ti costa una nota di credito, o una discussione col commercialista.</div>
+
+    <h2>Lo stato: la domanda «ha risposto?» sparisce</h2>
+
+    <p>Ogni preventivo ha uno stato: <strong>bozza</strong>, <strong>inviato</strong>,
+       <strong>accettato</strong>, <strong>rifiutato</strong>. Sembra poco, ed è la cosa che cambia di più
+       la settimana.</p>
+
+    <p>Perché la domanda vera non è «quanto ho preventivato». È <strong>«a chi devo richiamare»</strong>.
+       Con gli stati, i preventivi inviati e mai chiusi stanno tutti in un filtro, e li vedi in due secondi.</p>
+
+    <ul class="checklist err-list">
+      <li><strong>Il preventivo perso.</strong> Il cliente richiama dopo due mesi e chiede se quel prezzo vale ancora. Tu non sai più quale prezzo gli avevi fatto.</li>
+      <li><strong>Il preventivo mai richiamato.</strong> Il lavoro l'ha preso un altro solo perché tu non hai risentito il cliente.</li>
+      <li><strong>Il preventivo riscritto due volte.</strong> Accettato a voce, e poi ricopiato a mano dentro il lavoro.</li>
+    </ul>
+
+    <h2>Accettato, e diventa lavoro</h2>
+
+    <p>Quando il cliente dice di sì, <strong>con un click il preventivo diventa un lavoro</strong>: il
+       cliente, l'importo e le voci passano di là. Non riscrivi niente, e soprattutto non sbagli a
+       ricopiare l'importo.</p>
+
+    <p>Da quel momento il lavoro ha il suo stato, la sua data, le sue foto e le sue spese. E quando è
+       finito, <strong>il gestionale ti dice che è finito e non l'hai ancora fatturato</strong> — che è
+       il buco da cui, in edilizia, escono i soldi.</p>
+
+    <h2>Il preventivo scritto dall'AI</h2>
+
+    <p>Se scrivere non è il tuo mestiere, questa parte cambia la serata. Descrivi il lavoro come lo diresti
+       al telefono e l'assistente prepara le voci del preventivo. Poi <strong>controlli tu e salvi tu</strong>:
+       l'AI non salva mai niente da sola.</p>
+
+    <figure>
+      <img src="/img/gestionale-ai.webp" width="1440" height="785" loading="lazy" alt="L'assistente AI riempie le caselle del preventivo partendo da una frase scritta a mano">
+      <figcaption>Una frase scritta a mano, le caselle riempite. Il salvataggio resta tuo.</figcaption>
+    </figure>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il programma dei preventivi è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Il programma fa il PDF del preventivo?</summary>
+        <p>Sì. Scarichi il PDF con le tue voci, i totali, l'IVA e i dati della tua azienda, pronto da mandare
+         al cliente per email o su WhatsApp.</p>
+      </details>
+      <details>
+        <summary>Posso mettere l'IVA al 10% solo su alcune righe?</summary>
+        <p>Sì, l'IVA si sceglie riga per riga. Nello stesso preventivo possono convivere il 10% delle
+         manutenzioni e il 22% dove serve, come richiede l'edilizia.</p>
+      </details>
+      <details>
+        <summary>Il preventivo accettato diventa lavoro?</summary>
+        <p>Sì, con un click: cliente, importo e voci passano nel lavoro senza riscrivere niente. Da lì il
+         lavoro segue il suo stato fino alla fattura.</p>
+      </details>
+      <details>
+        <summary>Si può fare un preventivo dal telefono?</summary>
+        <p>Sì. Si apre dal browser sul telefono e sul computer, senza installare niente. Capita spesso di
+         chiudere il preventivo in macchina, appena usciti dal sopralluogo.</p>
+      </details>
+      <details>
+        <summary>Posso mettere uno sconto?</summary>
+        <p>Sì, uno sconto in percentuale che il conto applica prima dell'IVA, come si deve. E la ritenuta
+         d'acconto, quando c'è, si calcola sull'imponibile già scontato.</p>
+      </details>
+      <details>
+        <summary>I preventivi vecchi restano?</summary>
+        <p>Restano tutti, numerati e con il loro stato. Quando un cliente richiama dopo mesi, ritrovi il
+         preventivo che gli avevi fatto e sai esattamente cosa gli avevi detto.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-fatturazione-elettronica-edilizia.html">Fatturazione elettronica in edilizia</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Prova col prossimo preventivo che devi fare</h3>
+      <p>Non serve caricare lo storico. Prendi il preventivo che devi fare domani e fallo qui: ci metti dieci minuti e capisci subito.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Preventivi edili TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Programma per preventivi edili",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/programma-preventivi-edili",
+  "inLanguage": "it-IT",
+  "description": "Programma per preventivi edili: voci con quantita' e prezzo, IVA al 10% riga per riga, PDF pronto da mandare. Se il cliente accetta diventa lavoro.",
+  "featureList": [
+    "Preventivi con voci, quantità e prezzo unitario",
+    "IVA al 10 per cento scelta riga per riga",
+    "Sconto in percentuale sul preventivo",
+    "PDF del preventivo pronto da mandare",
+    "Stato bozza, inviato, accettato, rifiutato",
+    "Preventivo accettato che diventa lavoro con un click",
+    "Preventivo generato dall'AI a partire da una descrizione"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Il programma fa il PDF del preventivo?","acceptedAnswer":{"@type":"Answer","text":"Sì. Scarichi il PDF con le tue voci, i totali, l'IVA e i dati della tua azienda, pronto da mandare al cliente per email o su WhatsApp."}},
+    {"@type":"Question","name":"Posso mettere l'IVA al 10% solo su alcune righe?","acceptedAnswer":{"@type":"Answer","text":"Sì, l'IVA si sceglie riga per riga. Nello stesso preventivo possono convivere il 10% delle manutenzioni e il 22% dove serve, come richiede l'edilizia."}},
+    {"@type":"Question","name":"Il preventivo accettato diventa lavoro?","acceptedAnswer":{"@type":"Answer","text":"Sì, con un click: cliente, importo e voci passano nel lavoro senza riscrivere niente. Da lì il lavoro segue il suo stato fino alla fattura."}},
+    {"@type":"Question","name":"Si può fare un preventivo dal telefono?","acceptedAnswer":{"@type":"Answer","text":"Sì. Si apre dal browser sul telefono e sul computer, senza installare niente. Capita spesso di chiudere il preventivo in macchina, appena usciti dal sopralluogo."}},
+    {"@type":"Question","name":"Posso mettere uno sconto?","acceptedAnswer":{"@type":"Answer","text":"Sì, uno sconto in percentuale che il conto applica prima dell'IVA, come si deve. E la ritenuta d'acconto, quando c'è, si calcola sull'imponibile già scontato."}},
+    {"@type":"Question","name":"I preventivi vecchi restano?","acceptedAnswer":{"@type":"Answer","text":"Restano tutti, numerati e con il loro stato. Quando un cliente richiama dopo mesi, ritrovi il preventivo che gli avevi fatto e sai esattamente cosa gli avevi detto."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Programma per preventivi edili"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

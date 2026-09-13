@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software SAL: stati di avanzamento lavori per imprese edili</title>
+<meta name="description" content="Software per i SAL: quanto e' stato eseguito, quanto e' maturato, quanto resta e la fattura che ne esce. Per i lavori lunghi. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/software-sal-stati-avanzamento-lavori">
+<meta property="og:title" content="Software SAL: stati di avanzamento lavori per imprese edili">
+<meta property="og:description" content="Software per i SAL: quanto e' stato eseguito, quanto e' maturato, quanto resta e la fattura che ne esce. Per i lavori lunghi. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-sal-stati-avanzamento-lavori">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Software SAL</nav>
+
+  <article>
+    <h1>Software SAL: fatturare mentre il lavoro va avanti, non alla fine</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> un programma per gestire gli <strong>stati di avanzamento lavori</strong>: quante quantità
+    hai eseguito, quanto è <strong>maturato</strong>, quanto <strong>resta</strong>, e la fattura che
+    esce da lì. Per i lavori che durano mesi.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Sui lavori lunghi la regola è semplice: chi fattura solo alla fine, la fine la vede
+        con la banca alle costole.</p>
+
+    <p>Il SAL — stato di avanzamento lavori — serve esattamente a questo: certificare quanto è stato fatto
+       finora, e farsi pagare quella parte mentre il cantiere è ancora aperto.</p>
+
+    <p>Il problema è che farlo a mano è un lavoro da ragioniere: riprendere il computo, segnare le quantità
+       eseguite voce per voce, moltiplicare, sommare, sottrarre quello già fatturato. Su un computo di
+       duecento voci si perde una giornata.</p>
+
+    <h2>Le quantità eseguite, non i prezzi</h2>
+
+    <p>Un SAL non si scrive: si <strong>spunta</strong>. Le voci ci sono già, i prezzi anche — vengono dal
+       computo o dal preventivo. Quello che cambia ogni volta è una cosa sola:
+       <strong>quanto di quella voce hai eseguito finora</strong>.</p>
+
+    <ul class="checklist ok-list">
+      <li>Le voci arrivano dal computo, non le riscrivi.</li>
+      <li>Per ogni voce metti la <strong>quantità eseguita</strong> a oggi.</li>
+      <li>Il programma calcola l'<strong>importo maturato</strong> e quello <strong>residuo</strong>.</li>
+      <li>Il SAL nuovo tiene conto di quelli di prima: fatturi la differenza, non tutto da capo.</li>
+    </ul>
+
+    <div class="note">È qui che si fanno gli errori più cari: fatturare due volte la stessa quantità, o
+        dimenticarne una. Con i SAL in fila il conto lo tiene il programma.</div>
+
+    <h2>I tre numeri di un cantiere lungo</h2>
+
+    <table>
+      <thead>
+        <tr><th>Numero</th><th>Cosa ti dice</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Maturato</strong></td><td>Quanto lavoro hai già fatto, in euro. È quello che puoi chiedere.</td></tr>
+        <tr><td><strong>Fatturato</strong></td><td>Quanto di quel maturato hai già messo in fattura.</td></tr>
+        <tr><td><strong>Residuo</strong></td><td>Quanto manca alla fine del contratto.</td></tr>
+      </tbody>
+    </table>
+
+    <p>La differenza fra <strong>maturato</strong> e <strong>fatturato</strong> è la cosa più importante
+       che un'impresa possa guardare su un lavoro lungo: sono soldi già lavorati e non ancora chiesti.</p>
+
+    <h2>Dal SAL alla fattura</h2>
+
+    <figure>
+      <img src="/img/gestionale-fatture.webp" width="1440" height="1265" loading="lazy" alt="La fattura emessa da uno stato di avanzamento lavori, con il maturato">
+      <figcaption>La fattura nasce dal SAL: importo e riferimento non si ricopiano a mano.</figcaption>
+    </figure>
+
+    <p>Chiuso lo stato di avanzamento, la fattura esce da lì: importo, riferimento al SAL, IVA riga per
+       riga, ritenuta se il committente è un condominio. Non ricopi importi a mano, che è il posto dove
+       si sbaglia una cifra e ci si accorge dopo.</p>
+
+    <p>E il file elettronico per lo SDI si prepara come per qualsiasi altra fattura.</p>
+
+    <h2>A chi serve davvero</h2>
+
+    <p>Non a tutti, e vale la pena dirlo.</p>
+
+    <ul class="checklist ok-list">
+      <li><strong>Serve</strong> se lavori su cantieri che durano più di due o tre mesi.</li>
+      <li><strong>Serve</strong> se lavori con imprese generali, condomini o committenti pubblici, dove il SAL è previsto dal contratto.</li>
+      <li><strong>Serve</strong> se ti è già capitato di finire un lavoro lungo con la cassa a secco.</li>
+    </ul>
+
+    <ul class="checklist err-list">
+      <li><strong>Non serve</strong> se fai interventi da uno o due giorni: lì fatturi a lavoro finito e basta.</li>
+    </ul>
+
+    <p>Se sei nel secondo gruppo, il resto del gestionale ti serve lo stesso — questa sezione semplicemente
+       non la aprirai.</p>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">La gestione dei SAL è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Cosa sono i SAL, gli stati di avanzamento lavori?</summary>
+        <p>Sono i documenti che certificano quanta parte del lavoro è stata eseguita a una certa data. Servono
+         a farsi pagare a tranche mentre il cantiere è ancora aperto, invece di aspettare la fine.</p>
+      </details>
+      <details>
+        <summary>Il SAL prende le voci dal computo?</summary>
+        <p>Sì. Le voci e i prezzi arrivano dal computo o dal preventivo: nel SAL scrivi soltanto le quantità
+         eseguite a oggi, e gli importi si calcolano da soli.</p>
+      </details>
+      <details>
+        <summary>Il programma tiene conto dei SAL precedenti?</summary>
+        <p>Sì. Ogni nuovo stato di avanzamento considera quelli già emessi, così fatturi la differenza e non
+         due volte la stessa quantità.</p>
+      </details>
+      <details>
+        <summary>Dal SAL si può emettere la fattura?</summary>
+        <p>Sì, la fattura nasce dallo stato di avanzamento con il suo importo e il riferimento al SAL, e
+         segue le stesse regole delle altre fatture: IVA riga per riga, ritenuta e file XML per lo SDI.</p>
+      </details>
+      <details>
+        <summary>Serve anche a un artigiano che lavora da solo?</summary>
+        <p>Solo se fa lavori lunghi, per esempio in subappalto da un'impresa generale. Su interventi di uno o
+         due giorni questa sezione non serve e si può semplicemente non aprirla.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Prova sul lavoro lungo che hai adesso</h3>
+      <p>Se hai un cantiere che dura mesi, mettici dentro il primo stato di avanzamento e guarda che numeri ti restituisce.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "SAL e stati di avanzamento TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Software SAL",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/software-sal-stati-avanzamento-lavori",
+  "inLanguage": "it-IT",
+  "description": "Software per i SAL: quanto e' stato eseguito, quanto e' maturato, quanto resta e la fattura che ne esce. Per i lavori lunghi. 3 mesi gratis.",
+  "featureList": [
+    "Stati di avanzamento lavori (SAL)",
+    "Quantità eseguite per ogni voce",
+    "Importo maturato e importo residuo",
+    "SAL collegato al computo e al preventivo",
+    "Fattura emessa dallo stato di avanzamento"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Cosa sono i SAL, gli stati di avanzamento lavori?","acceptedAnswer":{"@type":"Answer","text":"Sono i documenti che certificano quanta parte del lavoro è stata eseguita a una certa data. Servono a farsi pagare a tranche mentre il cantiere è ancora aperto, invece di aspettare la fine."}},
+    {"@type":"Question","name":"Il SAL prende le voci dal computo?","acceptedAnswer":{"@type":"Answer","text":"Sì. Le voci e i prezzi arrivano dal computo o dal preventivo: nel SAL scrivi soltanto le quantità eseguite a oggi, e gli importi si calcolano da soli."}},
+    {"@type":"Question","name":"Il programma tiene conto dei SAL precedenti?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni nuovo stato di avanzamento considera quelli già emessi, così fatturi la differenza e non due volte la stessa quantità."}},
+    {"@type":"Question","name":"Dal SAL si può emettere la fattura?","acceptedAnswer":{"@type":"Answer","text":"Sì, la fattura nasce dallo stato di avanzamento con il suo importo e il riferimento al SAL, e segue le stesse regole delle altre fatture: IVA riga per riga, ritenuta e file XML per lo SDI."}},
+    {"@type":"Question","name":"Serve anche a un artigiano che lavora da solo?","acceptedAnswer":{"@type":"Answer","text":"Solo se fa lavori lunghi, per esempio in subappalto da un'impresa generale. Su interventi di uno o due giorni questa sezione non serve e si può semplicemente non aprirla."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Software SAL"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

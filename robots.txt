@@ -56,6 +56,7 @@ Sitemap: https://trovaimpresa.com/sitemap.xml
 Sitemap: https://trovaimpresa.com/sitemap-seo.xml
 Sitemap: https://trovaimpresa.com/sitemap-offerte.xml
 Sitemap: https://trovaimpresa.com/sitemap-mestieri.xml
+Sitemap: https://trovaimpresa.com/sitemap-gestionale.xml
 Sitemap: https://trovaimpresa.com/sitemap-imprese.xml
 Sitemap: https://trovaimpresa.com/sitemap-recensioni.xml
 Sitemap: https://trovaimpresa.com/sitemap-subappalti.xml

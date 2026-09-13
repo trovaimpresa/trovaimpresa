@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software computo metrico per imprese edili e artigiani</title>
+<meta name="description" content="Software per il computo metrico: capitoli, voci con le misure, analisi prezzi e prezzario tuo. Il computo diventa preventivo. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/software-computo-metrico">
+<meta property="og:title" content="Software computo metrico per imprese edili e artigiani">
+<meta property="og:description" content="Software per il computo metrico: capitoli, voci con le misure, analisi prezzi e prezzario tuo. Il computo diventa preventivo. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-computo-metrico">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Software computo metrico</nav>
+
+  <article>
+    <h1>Software computo metrico: le misure, i prezzi e il preventivo che ne esce</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 6 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> un programma per fare il <strong>computo metrico</strong> senza Excel: i capitoli, le voci
+    con le misure una sotto l'altra, l'analisi prezzi e il tuo prezzario. Quando hai finito,
+    <strong>il computo diventa un preventivo</strong> senza riscrivere niente.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Il computo metrico è la parte del lavoro che nessuno vede e che si porta via le serate.
+        Misuri, moltiplichi, sommi. Poi cambia una quota e ricominci. Poi il committente chiede uno sconto
+        del 5% e ricominci un'altra volta.</p>
+
+    <p>Quasi tutti lo fanno in Excel. Excel è bravo a fare i conti, ma non sa cos'è un computo: non sa che
+       una voce ha delle misure sotto, non conosce il tuo prezzario, non collega il computo al preventivo,
+       e soprattutto <strong>non ti dice mai se ci stai guadagnando</strong>.</p>
+
+    <h2>Le voci con le misure sotto, come si scrive a mano</h2>
+
+    <p>Un computo fatto bene non è un elenco di prezzi: è un elenco di <strong>misure</strong>. La voce
+       «intonaco civile» non vale 12 €/mq e basta — vale 12 € per le misure che hai preso in cantiere.</p>
+
+    <p>Qui ogni voce ha le sue righe di misura sotto: descrizione, quante volte, lunghezza, larghezza,
+       altezza. Il programma moltiplica e somma da solo, e la quantità della voce viene da lì.
+       <strong>Se sbagli una quota, cambi quella riga e tutto il computo si aggiorna</strong> — non
+       ricalcoli niente a mano.</p>
+
+    <ul class="checklist ok-list">
+      <li><strong>Capitoli</strong> per tenere separati scavi, strutture, murature, impianti, finiture.</li>
+      <li><strong>Voci</strong> con codice, descrizione, unità di misura e prezzo unitario.</li>
+      <li><strong>Misure</strong> riga per riga, con le tre dimensioni e il numero di volte.</li>
+      <li><strong>Totale per capitolo</strong> e totale generale, sempre in fondo mentre scrivi.</li>
+    </ul>
+
+    <div class="note"><strong>Perché conta:</strong> quando il committente contesta una quantità, non devi
+        rifare la misura. Apri la voce e gli fai vedere le righe da cui esce. Quella è la differenza fra
+        discutere e avere ragione.</div>
+
+    <h2>L'analisi prezzi: il numero che ti dice se ci guadagni</h2>
+
+    <p>Questa è la parte che i programmi economici non hanno e che cambia il mestiere.
+       L'analisi prezzi smonta una voce nei suoi pezzi: <strong>quanto materiale</strong>,
+       <strong>quante ore di manodopera</strong>, <strong>quanto nolo</strong> di macchina.</p>
+
+    <p>Da lì esce il costo vero di quella voce. Ci aggiungi le spese generali e l'utile, e il prezzo che
+       metti nel computo non è più una sensazione: è un conto.</p>
+
+    <table>
+      <thead>
+        <tr><th>Cosa scrivi</th><th>Cosa ti torna indietro</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Materiale, con quantità e prezzo</td><td class="num">Quanto pesa il materiale su quella voce</td></tr>
+        <tr><td>Ore di manodopera e costo orario</td><td class="num">Quante ore devi metterci per non perderci</td></tr>
+        <tr><td>Noli e attrezzatura</td><td class="num">Il costo della macchina spalmato sulla lavorazione</td></tr>
+        <tr><td>Spese generali e utile in percentuale</td><td class="num">Il prezzo finale da mettere a computo</td></tr>
+      </tbody>
+    </table>
+
+    <p>E il conto lo puoi fare al contrario: parti dal prezzo che il committente è disposto a pagare e
+       vedi <strong>quante ore ti restano</strong> per stare dentro. Quello è il momento in cui si decide
+       se un lavoro si prende o si lascia.</p>
+
+    <h2>Il prezzario che diventa tuo</h2>
+
+    <p>Il prezzario regionale è un punto di partenza, non la verità. La verità è quanto ti costa a te,
+       con la tua squadra, nella tua zona.</p>
+
+    <p>Ogni volta che chiudi un computo, i prezzi che hai usato restano nel tuo prezzario personale.
+       Dal computo dopo li ritrovi già lì, e non riscrivi «intonaco civile» per la centesima volta.
+       <strong>Dopo un anno hai un prezzario che vale più di quello della Regione</strong>, perché è
+       fatto sui tuoi lavori veri.</p>
+
+    <div class="esperienza">Questa non è un'idea presa da un manuale. Nasce da venticinque anni di cantiere:
+        i prezzi giusti sono quelli che hai già praticato e che ti hanno lasciato qualcosa in tasca.
+        Tutto il resto è teoria.</div>
+
+    <h2>Il computo che ti manda il geometra, già senza prezzi</h2>
+
+    <p>Succede spesso: il geometra o lo studio ti manda un computo con le voci e le quantità già scritte,
+       <strong>ma senza i prezzi</strong>, e ti chiede di fare l'offerta.</p>
+
+    <p>Nel gestionale c'è una sezione apposta, <strong>«Computo da prezzare»</strong>. Le voci le tieni
+       come stanno, tu ci metti solo i tuoi prezzi, e alla fine esce il preventivo. C'è anche il
+       <strong>ribasso</strong>, quello che nelle gare si applica in percentuale su tutto.</p>
+
+    <div class="note">Questa sezione c'è per le imprese edili, per gli artigiani e per gli studi tecnici.
+        Anche a un artigiano il geometra manda il computo e gli chiede il prezzo: non è roba solo da
+        imprese grandi.</div>
+
+    <h2>Da computo a preventivo, senza riscrivere</h2>
+
+    <figure>
+      <img src="/img/gestionale-preventivi.webp" width="1440" height="1077" loading="lazy" alt="Il computo metrico diventato preventivo, con le voci e gli importi">
+      <figcaption>Il computo diventato preventivo: le voci passano con le loro quantità.</figcaption>
+    </figure>
+
+    <p>È la parte che fa risparmiare più tempo di tutte, e nessuno la racconta perché sembra un dettaglio.</p>
+
+    <p>Quando il computo è finito, <strong>diventa un preventivo con un click</strong>: le voci passano
+       di là con le loro quantità e i loro prezzi, ci metti l'IVA giusta e lo sconto se lo fai, e scarichi
+       il PDF da mandare. Se il cliente lo accetta, <strong>il preventivo diventa un lavoro</strong>.
+       Una catena sola, dalla misura in cantiere alla fattura.</p>
+
+    <ul class="checklist ok-list">
+      <li>Il computo si scarica anche da solo, in PDF, se il committente lo vuole vedere.</li>
+      <li>Le quantità restano collegate: se correggi una misura, il preventivo lo sa.</li>
+      <li>L'IVA la scegli riga per riga, perché in edilizia nella stessa fattura ci stanno 10% e 22%.</li>
+    </ul>
+
+    <h2>Perché non basta Excel</h2>
+
+    <ul class="checklist err-list">
+      <li><strong>La formula rotta.</strong> Trascini una cella, e da lì in giù il totale è sbagliato. Te ne accorgi dopo aver mandato l'offerta.</li>
+      <li><strong>Il file che si moltiplica.</strong> computo_def.xlsx, computo_def2.xlsx, computo_DEFINITIVO_ok.xlsx. Poi non sai quale hai mandato.</li>
+      <li><strong>Nessun prezzario.</strong> Ogni computo riparte da zero, e i prezzi te li ricordi a memoria.</li>
+      <li><strong>Niente analisi prezzi.</strong> Excel ti dice quanto fa, non se ci guadagni.</li>
+      <li><strong>Il computo resta lì.</strong> Il preventivo lo riscrivi, la fattura anche.</li>
+    </ul>
+
+    <p>Excel va benissimo per un computo ogni tanto. Quando i computi diventano una cosa che fai tutte le
+       settimane, il tempo che perdi a rifarli vale molto più di 249 € l'anno.</p>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il computo metrico è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Il software fa il computo metrico estimativo?</summary>
+        <p>Sì. Ogni voce ha codice, descrizione, unità di misura, prezzo unitario e le righe di misura sotto,
+         e il totale si costruisce da lì. I capitoli tengono separate le lavorazioni e ognuno ha il suo
+         totale.</p>
+      </details>
+      <details>
+        <summary>Posso importare il prezzario della Regione?</summary>
+        <p>I prezzi li scrivi tu, e restano nel tuo prezzario personale per i computi dopo. Non c'è
+         l'importazione automatica di un prezzario regionale in formato ufficiale: si parte dai tuoi
+         prezzi veri, che nella pratica sono quelli che usi davvero.</p>
+      </details>
+      <details>
+        <summary>Serve per rispondere a una gara con il ribasso?</summary>
+        <p>C'è il computo da prezzare, cioè quello che ricevi già compilato nelle quantità, e c'è il ribasso
+         in percentuale da applicare sul totale. Sono le due cose che servono per fare un'offerta su un
+         computo di qualcun altro.</p>
+      </details>
+      <details>
+        <summary>Il computo metrico si scarica in PDF?</summary>
+        <p>Sì, il computo si scarica in PDF con i capitoli, le voci e i totali. E può diventare un preventivo
+         con un click, senza riscrivere le voci.</p>
+      </details>
+      <details>
+        <summary>Che differenza c'è fra computo metrico e preventivo?</summary>
+        <p>Il computo misura il lavoro voce per voce con le quantità; il preventivo è il documento che mandi
+         al cliente con l'IVA, l'eventuale sconto e le condizioni. Qui il primo diventa il secondo senza
+         ricopiare niente.</p>
+      </details>
+      <details>
+        <summary>Si può usare dal telefono in cantiere?</summary>
+        <p>Sì, si apre dal browser sul telefono e sul computer, senza installare niente. Le misure prese in
+         cantiere le scrivi sul posto, e la sera dal computer trovi tutto già dentro.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-fatturazione-elettronica-edilizia.html">Fatturazione elettronica in edilizia</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Prova col prossimo computo che ti arriva</h3>
+      <p>Prendi l'ultimo computo che hai ricevuto e mettilo dentro. In dieci minuti capisci se ti fa risparmiare tempo o no.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Computo metrico TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Software computo metrico",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/software-computo-metrico",
+  "inLanguage": "it-IT",
+  "description": "Software per il computo metrico: capitoli, voci con le misure, analisi prezzi e prezzario tuo. Il computo diventa preventivo. 3 mesi gratis.",
+  "featureList": [
+    "Computo metrico con capitoli e voci",
+    "Misure riga per riga con lunghezza, larghezza e altezza",
+    "Analisi prezzi con materiale, manodopera e noli",
+    "Prezzario personale che si riempie dai lavori fatti",
+    "Computo da prezzare ricevuto dal committente",
+    "Computo che diventa preventivo con un click",
+    "Esportazione del computo in PDF"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Il software fa il computo metrico estimativo?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni voce ha codice, descrizione, unità di misura, prezzo unitario e le righe di misura sotto, e il totale si costruisce da lì. I capitoli tengono separate le lavorazioni e ognuno ha il suo totale."}},
+    {"@type":"Question","name":"Posso importare il prezzario della Regione?","acceptedAnswer":{"@type":"Answer","text":"I prezzi li scrivi tu, e restano nel tuo prezzario personale per i computi dopo. Non c'è l'importazione automatica di un prezzario regionale in formato ufficiale: si parte dai tuoi prezzi veri, che nella pratica sono quelli che usi davvero."}},
+    {"@type":"Question","name":"Serve per rispondere a una gara con il ribasso?","acceptedAnswer":{"@type":"Answer","text":"C'è il computo da prezzare, cioè quello che ricevi già compilato nelle quantità, e c'è il ribasso in percentuale da applicare sul totale. Sono le due cose che servono per fare un'offerta su un computo di qualcun altro."}},
+    {"@type":"Question","name":"Il computo metrico si scarica in PDF?","acceptedAnswer":{"@type":"Answer","text":"Sì, il computo si scarica in PDF con i capitoli, le voci e i totali. E può diventare un preventivo con un click, senza riscrivere le voci."}},
+    {"@type":"Question","name":"Che differenza c'è fra computo metrico e preventivo?","acceptedAnswer":{"@type":"Answer","text":"Il computo misura il lavoro voce per voce con le quantità; il preventivo è il documento che mandi al cliente con l'IVA, l'eventuale sconto e le condizioni. Qui il primo diventa il secondo senza ricopiare niente."}},
+    {"@type":"Question","name":"Si può usare dal telefono in cantiere?","acceptedAnswer":{"@type":"Answer","text":"Sì, si apre dal browser sul telefono e sul computer, senza installare niente. Le misure prese in cantiere le scrivi sul posto, e la sera dal computer trovi tutto già dentro."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Software computo metrico"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

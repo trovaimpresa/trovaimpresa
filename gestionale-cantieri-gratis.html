@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionale cantieri gratis: dove regge e dove cede</title>
+<meta name="description" content="Gestionale per cantieri gratis: cosa si riesce a fare senza pagare, dove il gratuito cede e quando conviene passare a pagamento.">
+<link rel="canonical" href="https://trovaimpresa.com/gestionale-cantieri-gratis">
+<meta property="og:title" content="Gestionale cantieri gratis: dove regge e dove cede">
+<meta property="og:description" content="Gestionale per cantieri gratis: cosa si riesce a fare senza pagare, dove il gratuito cede e quando conviene passare a pagamento.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/gestionale-cantieri-gratis">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Gestionale cantieri gratis</nav>
+
+  <article>
+    <h1>Gestionale cantieri gratis: cosa regge davvero e cosa no</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> il gratis esiste e per certe cose basta. <strong>Fogli di calcolo, agenda del telefono e
+    gruppi WhatsApp</strong> reggono fino a due cantieri; poi cedono su tre cose precise: le
+    <strong>ore</strong>, il <strong>computo</strong> e la <strong>fattura elettronica</strong>.
+    <span class="price-big">Qui: 3 mesi interi, senza carta</span>
+    </div>
+
+    <p class="lead">Chi cerca un gestionale gratis quasi sempre non è tirchio: è prudente. Ha già provato
+        un programma che non ha usato, e non vuole rifare l'errore.</p>
+
+    <p>Quindi parliamo del gratis sul serio, senza fare finta che non funzioni.</p>
+
+    <h2>Cosa si riesce a fare senza pagare niente</h2>
+
+    <ul class="checklist ok-list">
+      <li><strong>Preventivi</strong> con un modello in un foglio di calcolo o in Word. Funziona.</li>
+      <li><strong>Fatture</strong> con i programmi gratuiti di fatturazione, o passandole al commercialista.</li>
+      <li><strong>Calendario</strong> dei cantieri, condiviso con la squadra.</li>
+      <li><strong>Foto</strong> dei lavori in cartelle sul cloud.</li>
+      <li><strong>Comunicazione</strong> col gruppo di messaggistica: immediata e gratis.</li>
+    </ul>
+
+    <p>Con uno o due cantieri aperti alla volta, questa combinazione regge. Chi dice il contrario vuole
+       venderti qualcosa.</p>
+
+    <h2>I tre punti dove il gratis cede</h2>
+
+    <p>Non cede all'improvviso. Cede quando i cantieri diventano tre o quattro insieme.</p>
+
+    <ul class="checklist err-list">
+      <li><strong>Le ore.</strong> Nessuno strumento gratuito somma le ore per cantiere e per persona. E le ore sono il costo più grande che hai: senza quel numero non sai se un lavoro ti ha reso.</li>
+      <li><strong>Il computo metrico.</strong> In un foglio di calcolo si fa, finché non si rompe una formula. E soprattutto il foglio non conosce il tuo prezzario e non diventa un preventivo.</li>
+      <li><strong>Il collegamento fra le cose.</strong> Il preventivo, il lavoro e la fattura restano tre file separati. Nessuno ti dirà mai quali lavori finiti non hai ancora fatturato — ed è il buco da cui escono più soldi.</li>
+    </ul>
+
+    <div class="note">Il problema del gratis non è che manca una funzione. È che <strong>le informazioni non
+        si parlano</strong>. Ogni pezzo funziona da solo, e la somma non esiste da nessuna parte se non
+        nella tua testa.</div>
+
+    <h2>Il conto onesto</h2>
+
+    <p>249 € all'anno fanno <strong>68 centesimi al giorno</strong>. La domanda giusta non è se te li puoi
+       permettere: è se ti fanno recuperare più di quello.</p>
+
+    <table>
+      <thead>
+        <tr><th>Cosa recuperi</th><th>Quanto vale</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Un lavoro finito e dimenticato, fatturato</td><td>Di solito qualche migliaio di euro. Una volta sola paga l'abbonamento per anni</td></tr>
+        <tr><td>Le ore vere di un cantiere</td><td>Il numero che ti dice quali lavori lasciar perdere o rialzare di prezzo</td></tr>
+        <tr><td>Un preventivo richiamato in tempo</td><td>Un lavoro che avresti perso solo per non aver risentito il cliente</td></tr>
+        <tr><td>Le serate a rifare i computi</td><td>Il tempo tuo, che non è gratis nemmeno quando non lo fatturi</td></tr>
+      </tbody>
+    </table>
+
+    <p>Se dopo tre mesi di prova nessuna di queste cose è successa, allora il gratis ti basta davvero — e
+       questa è una risposta buona, non una sconfitta.</p>
+
+    <h2>Come provare senza rischiare niente</h2>
+
+    <figure>
+      <img src="/img/gestionale-lavori.webp" width="1440" height="971" loading="lazy" alt="Il gestionale durante i tre mesi di prova, con i lavori e i loro stati">
+      <figcaption>Tre mesi con tutte le funzioni, non una versione ridotta.</figcaption>
+    </figure>
+
+    <p>Il modo più onesto di rispondere alla domanda «mi serve?» è provarlo con un lavoro vero, non
+       guardare una demo.</p>
+
+    <ul class="checklist ok-list">
+      <li><strong>Tre mesi interi</strong>, con tutte le funzioni, non una versione ridotta.</li>
+      <li><strong>Senza carta di credito.</strong> Non ti chiediamo il numero per farti provare.</li>
+      <li><strong>Senza rinnovo automatico.</strong> Finiti i tre mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito e il profilo resta online.</li>
+      <li><strong>I dati restano tuoi</strong> e si esportano in Excel o JSON anche se non continui.</li>
+    </ul>
+
+    <div class="esperienza">La regola che seguiamo è semplice: un gestionale non si può far comprare a scatola
+        chiusa. Va fatto vedere e va fatto provare, come farebbe un agente immobiliare con una casa. Se
+        dopo tre mesi non lo apri più, il problema è il prodotto, non il cliente.</div>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il gestionale è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Esiste un gestionale per cantieri completamente gratis?</summary>
+        <p>Esistono strumenti gratuiti che coprono pezzi del lavoro — fogli di calcolo per i preventivi,
+          programmi gratuiti di fatturazione, calendari condivisi. Quello che manca nel gratuito è il
+          collegamento fra le cose: le ore sommate per cantiere, il computo che diventa preventivo e il
+          preventivo che diventa fattura.</p>
+      </details>
+      <details>
+        <summary>Quanto dura la prova e serve la carta?</summary>
+        <p>Tre mesi, con tutte le funzioni, e la carta di credito non serve. Alla fine non c'è nessun
+          addebito automatico: se non fai nulla, torni al piano gratuito.</p>
+      </details>
+      <details>
+        <summary>Se non continuo, perdo i dati?</summary>
+        <p>No. I dati si esportano in Excel o in JSON quando vuoi, anche se non continui, e il profilo sul
+          marketplace resta online sul piano gratuito.</p>
+      </details>
+      <details>
+        <summary>Il profilo sul marketplace è gratuito?</summary>
+        <p>Sì, il profilo e la presenza nelle pagine di ricerca ci sono anche senza pagare. Con il Premium
+          il profilo esce più in alto ed è messo in evidenza.</p>
+      </details>
+      <details>
+        <summary>Il foglio di calcolo può bastarmi?</summary>
+        <p>Con uno o due cantieri alla volta, spesso sì. Comincia a non bastare quando i cantieri aperti
+          diventano tre o quattro e servono le ore per cantiere, il computo collegato al preventivo e
+          l'elenco dei lavori finiti e non fatturati.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/quanto-costa-un-gestionale-edile.html">Quanto costa un gestionale edile</a> &middot; <a href="/gestionale-piccola-impresa-edile.html">Gestionale per la piccola impresa</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Il gratis più utile: tre mesi interi</h3>
+      <p>Non una versione ridotta, ma il gestionale intero per tre mesi. Senza carta e senza rinnovo automatico: se non ti serve, non succede niente.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gestionale TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Gestionale cantieri gratis",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/gestionale-cantieri-gratis",
+  "inLanguage": "it-IT",
+  "description": "Gestionale per cantieri gratis: cosa si riesce a fare senza pagare, dove il gratuito cede e quando conviene passare a pagamento.",
+  "featureList": [
+    "Tre mesi di prova senza carta di credito",
+    "Profilo gratuito sul marketplace",
+    "Nessun rinnovo automatico",
+    "Esportazione dei dati sempre gratuita"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Esiste un gestionale per cantieri completamente gratis?","acceptedAnswer":{"@type":"Answer","text":"Esistono strumenti gratuiti che coprono pezzi del lavoro — fogli di calcolo per i preventivi, programmi gratuiti di fatturazione, calendari condivisi. Quello che manca nel gratuito è il collegamento fra le cose: le ore sommate per cantiere, il computo che diventa preventivo e il preventivo che diventa fattura."}},
+    {"@type":"Question","name":"Quanto dura la prova e serve la carta?","acceptedAnswer":{"@type":"Answer","text":"Tre mesi, con tutte le funzioni, e la carta di credito non serve. Alla fine non c'è nessun addebito automatico: se non fai nulla, torni al piano gratuito."}},
+    {"@type":"Question","name":"Se non continuo, perdo i dati?","acceptedAnswer":{"@type":"Answer","text":"No. I dati si esportano in Excel o in JSON quando vuoi, anche se non continui, e il profilo sul marketplace resta online sul piano gratuito."}},
+    {"@type":"Question","name":"Il profilo sul marketplace è gratuito?","acceptedAnswer":{"@type":"Answer","text":"Sì, il profilo e la presenza nelle pagine di ricerca ci sono anche senza pagare. Con il Premium il profilo esce più in alto ed è messo in evidenza."}},
+    {"@type":"Question","name":"Il foglio di calcolo può bastarmi?","acceptedAnswer":{"@type":"Answer","text":"Con uno o due cantieri alla volta, spesso sì. Comincia a non bastare quando i cantieri aperti diventano tre o quattro e servono le ore per cantiere, il computo collegato al preventivo e l'elenco dei lavori finiti e non fatturati."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Gestionale cantieri gratis"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

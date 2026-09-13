@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software gestione cantieri per imprese edili</title>
+<meta name="description" content="Software per la gestione dei cantieri: lavori con stato e colore, squadra e agenda, mappa dei cantieri aperti, spese e foto. Dal telefono in cantiere. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/software-gestione-cantieri">
+<meta property="og:title" content="Software gestione cantieri per imprese edili">
+<meta property="og:description" content="Software per la gestione dei cantieri: lavori con stato e colore, squadra e agenda, mappa dei cantieri aperti, spese e foto. Dal telefono in cantiere. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-gestione-cantieri">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Software gestione cantieri</nav>
+
+  <article>
+    <h1>Software gestione cantieri: tre cantieri aperti e la testa che regge</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 6 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> un programma per tenere in ordine i <strong>cantieri aperti</strong>: a che punto sono,
+    chi ci va, quanto hanno speso e cosa manca. Con la mappa, l'agenda della squadra e le foto,
+    dal telefono mentre sei sul posto.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Con un cantiere solo non serve niente: ce l'hai in testa. Il problema comincia al terzo,
+        quando la testa non basta più e cominci a rispondere «adesso controllo e ti richiamo».</p>
+
+    <p>E non è che non sai come va il cantiere. È che <strong>l'informazione sta in cinque posti</strong>:
+       le date sul calendario del telefono, le spese nelle bolle in macchina, le foto nella galleria, chi
+       ci va in un messaggio WhatsApp, e quanto hai già speso da nessuna parte.</p>
+
+    <h2>Lo stato a colpo d'occhio, senza leggere</h2>
+
+    <p>Ogni lavoro ha uno stato e un colore: <strong>da fare</strong>, <strong>in corso</strong>,
+       <strong>fatto</strong>. Il colore non è decorazione: dice lo stato, e si legge senza fermarsi.</p>
+
+    <figure>
+      <img src="/img/gestionale-lavori.webp" width="1440" height="971" loading="lazy" alt="Elenco dei lavori nel gestionale, con stato in corso, da fare e fatto">
+      <figcaption>I lavori del reparto, con il totale in alto e il filtro «da incassare».</figcaption>
+    </figure>
+
+    <p>Sopra c'è quanto valgono in tutto, e i filtri ti danno subito le tre risposte che servono davvero:
+       <strong>quali sono in ritardo</strong>, <strong>quali sono di oggi</strong>, e
+       <strong>quali sono finiti e non ancora fatturati</strong>.</p>
+
+    <h2>Chi va dove, senza la telefonata delle sette</h2>
+
+    <p>La chiamata dell'operaio alle sette di mattina per sapere in che cantiere andare non è colpa sua:
+       è che non c'è nessun posto dove guardare.</p>
+
+    <p>Nel gestionale ogni persona della squadra ha <strong>la sua agenda</strong>. L'operaio entra con il
+       suo accesso, vede <strong>solo i suoi lavori</strong>, e non gira per il resto del programma.
+       Tu la settimana la vedi tutta insieme sul calendario.</p>
+
+    <ul class="checklist ok-list">
+      <li><strong>Accesso separato</strong> per collaboratori e segretaria, con quello che possono vedere e quello che no.</li>
+      <li><strong>Calendario</strong> della squadra, per capire dove hai buchi e dove hai troppa gente.</li>
+      <li><strong>Mappa dei cantieri aperti</strong>, per non fare quaranta chilometri a vuoto.</li>
+      <li><strong>Rapportino giornaliero</strong> compilato dal telefono, sul posto, in mezzo minuto.</li>
+    </ul>
+
+    <h2>Quanto ha mangiato il cantiere</h2>
+
+    <p>Questa è la domanda che divide le imprese che campano da quelle che chiudono, e quasi nessuno se la
+       fa mentre il cantiere è aperto. Se la fa dopo, quando è tardi.</p>
+
+    <p>Ogni lavoro tiene le sue <strong>spese</strong> — materiale, fornitori, noli — e le sue
+       <strong>ore</strong>. Il conto lo fa il programma: quanto hai preventivato, quanto stai spendendo,
+       quanto resta.</p>
+
+    <table>
+      <thead>
+        <tr><th>La domanda</th><th>Dove sta la risposta</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Quanto ho speso su questo cantiere</td><td>Le spese del lavoro, con fornitore e importo</td></tr>
+        <tr><td>Quante ore ci ho messo</td><td>Le ore registrate per lavoro e per persona</td></tr>
+        <tr><td>Quanto ho ancora da incassare</td><td>Il filtro «da incassare» sulle fatture</td></tr>
+        <tr><td>Quali cantieri ho finito e non ho fatturato</td><td>Il filtro sui lavori finiti senza fattura</td></tr>
+      </tbody>
+    </table>
+
+    <div class="esperienza">In edilizia il lavoro finisce a giugno e la fattura parte a settembre. Non è
+        disorganizzazione, è come funziona il mestiere. Ma se nessuno tiene il conto di quali cantieri
+        finiti non sono stati fatturati, quei soldi restano fuori — e sono soldi già lavorati.</div>
+
+    <h2>Le foto, che servono due volte</h2>
+
+    <p>Le foto del prima e dopo servono a due cose, e la seconda vale più della prima.</p>
+
+    <p>La prima: quando il cliente contesta, hai la prova di com'era. La seconda, più importante:
+       <strong>le foto sono il modo più veloce per farsi dire di sì dal prossimo cliente</strong>. Un
+       lavoro fatto bene, fotografato bene, vende meglio di qualsiasi discorso.</p>
+
+    <p>Le foto stanno attaccate al cantiere, non sparse nella galleria del telefono fra i meme e le foto
+       di famiglia.</p>
+
+    <h2>Reparti separati, se fai più mestieri</h2>
+
+    <p>Molte imprese non fanno una cosa sola: edilizia e giardinaggio, oppure edilizia e una ferramenta.
+       Se i lavori si mischiano, i conti non tornano più e non capisci quale attività ti rende.</p>
+
+    <p>Qui i <strong>reparti sono separati</strong>: ognuno ha i suoi lavori, i suoi clienti, i suoi
+       preventivi e i suoi conti. Cambi reparto e cambia tutto quello che vedi.</p>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">La gestione dei cantieri è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Il software di gestione cantieri funziona dal telefono?</summary>
+        <p>Sì, ed è pensato per quello. Si apre dal browser sul telefono senza installare niente, con i
+         pulsanti grandi abbastanza da premerli con il guanto. La sera dal computer trovi tutto già dentro.</p>
+      </details>
+      <details>
+        <summary>Gli operai possono avere un accesso loro?</summary>
+        <p>Sì. C'è un accesso separato per collaboratori e segretaria: l'operaio entra nella propria agenda,
+         vede soltanto i lavori assegnati a lui e compila il rapportino, senza girare per il resto del
+         programma.</p>
+      </details>
+      <details>
+        <summary>Si vede quanto sta costando un cantiere?</summary>
+        <p>Sì. Ogni lavoro tiene le sue spese e le sue ore, e il programma confronta quello che hai
+         preventivato con quello che stai spendendo mentre il cantiere è ancora aperto.</p>
+      </details>
+      <details>
+        <summary>C'è la mappa dei cantieri?</summary>
+        <p>Sì, i cantieri aperti si vedono su una mappa. Serve soprattutto a organizzare i giri della
+         giornata senza fare chilometri a vuoto.</p>
+      </details>
+      <details>
+        <summary>Posso tenere separate due attività diverse?</summary>
+        <p>Sì, con i reparti. Se fai edilizia e giardinaggio, ogni reparto ha i suoi lavori, i suoi clienti e
+         i suoi conti, e non si mischiano.</p>
+      </details>
+      <details>
+        <summary>I dati dei cantieri si possono esportare?</summary>
+        <p>Sì, in Excel o in JSON, quando vuoi e senza costi. I dati sono tuoi: se un giorno cambi programma,
+         te li porti dietro.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-fatturazione-elettronica-edilizia.html">Fatturazione elettronica in edilizia</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Mettici dentro i cantieri che hai aperti adesso</h3>
+      <p>Bastano quelli aperti oggi. In un quarto d'ora vedi la settimana della squadra in una schermata sola.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gestione cantieri TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Software gestione cantieri",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/software-gestione-cantieri",
+  "inLanguage": "it-IT",
+  "description": "Software per la gestione dei cantieri: lavori con stato e colore, squadra e agenda, mappa dei cantieri aperti, spese e foto. Dal telefono in cantiere. 3 mesi gratis.",
+  "featureList": [
+    "Lavori con stato da fare, in corso, fatto",
+    "Calendario e agenda per ogni operaio",
+    "Mappa dei cantieri aperti",
+    "Foto prima e dopo per ogni cantiere",
+    "Spese del cantiere con fornitore e importo",
+    "Rapportini giornalieri dal telefono",
+    "Ore lavorate per cantiere e per persona"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Il software di gestione cantieri funziona dal telefono?","acceptedAnswer":{"@type":"Answer","text":"Sì, ed è pensato per quello. Si apre dal browser sul telefono senza installare niente, con i pulsanti grandi abbastanza da premerli con il guanto. La sera dal computer trovi tutto già dentro."}},
+    {"@type":"Question","name":"Gli operai possono avere un accesso loro?","acceptedAnswer":{"@type":"Answer","text":"Sì. C'è un accesso separato per collaboratori e segretaria: l'operaio entra nella propria agenda, vede soltanto i lavori assegnati a lui e compila il rapportino, senza girare per il resto del programma."}},
+    {"@type":"Question","name":"Si vede quanto sta costando un cantiere?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni lavoro tiene le sue spese e le sue ore, e il programma confronta quello che hai preventivato con quello che stai spendendo mentre il cantiere è ancora aperto."}},
+    {"@type":"Question","name":"C'è la mappa dei cantieri?","acceptedAnswer":{"@type":"Answer","text":"Sì, i cantieri aperti si vedono su una mappa. Serve soprattutto a organizzare i giri della giornata senza fare chilometri a vuoto."}},
+    {"@type":"Question","name":"Posso tenere separate due attività diverse?","acceptedAnswer":{"@type":"Answer","text":"Sì, con i reparti. Se fai edilizia e giardinaggio, ogni reparto ha i suoi lavori, i suoi clienti e i suoi conti, e non si mischiano."}},
+    {"@type":"Question","name":"I dati dei cantieri si possono esportare?","acceptedAnswer":{"@type":"Answer","text":"Sì, in Excel o in JSON, quando vuoi e senza costi. I dati sono tuoi: se un giorno cambi programma, te li porti dietro."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Software gestione cantieri"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

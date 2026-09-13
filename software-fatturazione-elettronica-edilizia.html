@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fatturazione elettronica per imprese edili: XML, IVA 10%</title>
+<meta name="description" content="Software di fatturazione elettronica per l'edilizia: file XML per lo SDI, IVA al 10% riga per riga, ritenuta d'acconto, bollo e cassa previdenziale. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/software-fatturazione-elettronica-edilizia">
+<meta property="og:title" content="Fatturazione elettronica per imprese edili: XML, IVA 10%">
+<meta property="og:description" content="Software di fatturazione elettronica per l'edilizia: file XML per lo SDI, IVA al 10% riga per riga, ritenuta d'acconto, bollo e cassa previdenziale. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-fatturazione-elettronica-edilizia">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Fatturazione elettronica in edilizia</nav>
+
+  <article>
+    <h1>Fatturazione elettronica in edilizia: le quattro cose che i programmi generici sbagliano</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 6 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> fatturazione elettronica pensata per l'edilizia: prepara il <strong>file XML per lo SDI</strong>
+    con l'<strong>IVA al 10% riga per riga</strong>, la ritenuta, il bollo e la cassa previdenziale.
+    Il file lo mandi tu o il commercialista.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">I programmi di fatturazione sono tanti e costano poco. Il problema è che quasi tutti
+        sono fatti per chi vende scarpe o consulenza, e in edilizia il fisco funziona in un altro modo.</p>
+
+    <p>Le differenze non sono dettagli da commercialista: sono <strong>errori che ti tornano indietro</strong>,
+       sotto forma di nota di credito, di fattura scartata dallo SDI o di telefonata a fine anno.</p>
+
+    <h2>Le quattro cose che cambiano</h2>
+
+    <table>
+      <thead>
+        <tr><th>La cosa</th><th>Perché in edilizia cambia</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>IVA al 10%</strong></td><td>Sulle manutenzioni e sui recuperi edilizi l'IVA è agevolata al 10%, non al 22%. E nella stessa fattura possono starci tutte e due, quindi va scelta riga per riga.</td></tr>
+        <tr><td><strong>Ritenuta d'acconto</strong></td><td>Il condominio trattiene la ritenuta, il committente privato no. E la base è l'imponibile già scontato, non quello pieno: è l'errore più comune.</td></tr>
+        <tr><td><strong>Forfettario e bollo</strong></td><td>In regime forfettario l'IVA non c'è, ma sopra i 77,47 € ci vuole il bollo da 2 €. Il programma te lo dice al momento giusto.</td></tr>
+        <tr><td><strong>Cassa previdenziale</strong></td><td>Per geometri, architetti e ingegneri la parcella ha il contributo cassa, e nel file elettronico ci vuole il codice giusto per quella cassa.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">Un programma che ti fa scegliere una sola aliquota per tutto il documento non è
+        adatto all'edilizia. Non è un difetto grave del programma: è che non è stato fatto per te.</div>
+
+    <h2>Il file XML, e chi lo manda</h2>
+
+    <p>Il gestionale prepara il <strong>file XML nel formato che vuole lo SDI</strong> e il PDF di cortesia
+       per il cliente.</p>
+
+    <div class="note"><strong>Una cosa che non fa, detta prima e non dopo:</strong> non manda la fattura allo
+        SDI al posto tuo e non fa da intermediario fiscale. Prepara il file corretto, tu lo carichi dove lo
+        carichi adesso, oppure lo giri al commercialista.</div>
+
+    <p>È una scelta, non una mancanza: fare da intermediario fiscale vuol dire prendersi responsabilità che
+       poi si pagano nel prezzo. Preferiamo che il file sia giusto e che il canale resti il tuo.</p>
+
+    <h2>I quattro numeri che di solito nessuno ti dice</h2>
+
+    <p>In cima alle fatture ci sono quattro numeri. Non sono statistiche: sono le domande che ti fai in
+       macchina.</p>
+
+    <figure>
+      <img src="/img/gestionale-fatture.webp" width="1440" height="1265" loading="lazy" alt="Fatture elettroniche nel gestionale edile: da incassare, da fatturare, entrato in cassa">
+      <figcaption>Le fatture, con i buchi nella numerazione segnalati da soli.</figcaption>
+    </figure>
+
+    <ul class="checklist ok-list">
+      <li><strong>Da incassare</strong>: quanto hai fatturato e non ti è ancora arrivato.</li>
+      <li><strong>Da fatturare</strong>: i lavori finiti che non hai ancora fatturato. Questo è il buco vero.</li>
+      <li><strong>Entrato in cassa</strong>: quanto è davvero arrivato quest'anno.</li>
+      <li><strong>Il credito più vecchio</strong>: da quanti giorni aspetti quello messo peggio.</li>
+    </ul>
+
+    <p>Gli importi sono scritti <strong>coi centesimi</strong>, non arrotondati all'euro. Su una fattura
+       gli arrotondamenti non sono un dettaglio grafico.</p>
+
+    <h2>I buchi nella numerazione, prima di dicembre</h2>
+
+    <p>Il buco nella numerazione si scopre sempre a fine anno, quando il commercialista chiede dov'è finita
+       la numero 7. A quel punto sistemarlo è una rogna.</p>
+
+    <p>Qui il buco <strong>si segnala da solo</strong>, il giorno stesso. Costa dieci secondi allora e
+       mezza giornata a dicembre.</p>
+
+    <h2>Il lavoro e la fattura sono due cose</h2>
+
+    <p>In edilizia il lavoro finisce a giugno e la fattura parte a settembre. È come funziona il mestiere,
+       e i programmi generici non lo capiscono: per loro la fattura nasce dal nulla.</p>
+
+    <p>Qui lavoro e fattura sono <strong>collegati ma separati</strong>. Il lavoro ha il suo stato, la
+       fattura il suo. E il programma ti dice quali lavori finiti non hai ancora fatturato — che è la
+       prima causa di soldi lasciati in giro.</p>
+
+    <div class="esperienza">La fattura si porta dietro i dati del cliente congelati al momento dell'emissione.
+        Se il cliente cambia indirizzo l'anno dopo, la fattura vecchia resta com'era — perché quella
+        l'ha già in mano lui.</div>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">La fatturazione è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Il programma manda la fattura allo SDI?</summary>
+        <p>No. Prepara il file XML nel formato richiesto dallo SDI, con l'IVA riga per riga, la ritenuta, il
+         bollo e la cassa previdenziale. La trasmissione resta a te o al tuo commercialista: il programma
+         non fa da intermediario fiscale.</p>
+      </details>
+      <details>
+        <summary>Gestisce l'IVA agevolata al 10% dell'edilizia?</summary>
+        <p>Sì, e la sceglie riga per riga. Nella stessa fattura possono convivere il 10% sulle manutenzioni e
+         il 22% dove serve, come richiede il lavoro edile.</p>
+      </details>
+      <details>
+        <summary>Calcola la ritenuta d'acconto per i condomini?</summary>
+        <p>Sì. La percentuale la scrivi tu e il calcolo toglie la ritenuta dal totale come si deve, con base
+         l'imponibile già scontato e non quello pieno.</p>
+      </details>
+      <details>
+        <summary>Va bene per il regime forfettario?</summary>
+        <p>Sì. In forfettario l'IVA non si applica e sopra i 77,47 € serve il bollo da 2 €: il programma lo
+         segnala al momento giusto, invece di lasciartelo scoprire dopo.</p>
+      </details>
+      <details>
+        <summary>Serve per geometri e architetti con la cassa?</summary>
+        <p>Sì, il contributo cassa previdenziale è previsto e nel file elettronico viene messo il codice
+         giusto per quella cassa.</p>
+      </details>
+      <details>
+        <summary>Mi dice quali lavori non ho ancora fatturato?</summary>
+        <p>Sì, è uno dei quattro numeri in cima alle fatture: i lavori finiti e mai fatturati. In edilizia è
+         il buco da cui escono più soldi di qualsiasi altro.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Prova con la prossima fattura</h3>
+      <p>Fai la prossima fattura qui e guarda il file XML che esce. Se il commercialista lo accetta senza dire niente, hai finito di cercare.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Fatturazione elettronica edile TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Fatturazione elettronica in edilizia",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/software-fatturazione-elettronica-edilizia",
+  "inLanguage": "it-IT",
+  "description": "Software di fatturazione elettronica per l'edilizia: file XML per lo SDI, IVA al 10% riga per riga, ritenuta d'acconto, bollo e cassa previdenziale. 3 mesi gratis.",
+  "featureList": [
+    "File XML per lo SDI",
+    "IVA al 10 per cento riga per riga",
+    "Ritenuta d'acconto calcolata sull'imponibile scontato",
+    "Bollo da 2 euro per il regime forfettario",
+    "Cassa previdenziale per i tecnici",
+    "Buchi nella numerazione segnalati",
+    "Da incassare, da fatturare ed entrato in cassa"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Il programma manda la fattura allo SDI?","acceptedAnswer":{"@type":"Answer","text":"No. Prepara il file XML nel formato richiesto dallo SDI, con l'IVA riga per riga, la ritenuta, il bollo e la cassa previdenziale. La trasmissione resta a te o al tuo commercialista: il programma non fa da intermediario fiscale."}},
+    {"@type":"Question","name":"Gestisce l'IVA agevolata al 10% dell'edilizia?","acceptedAnswer":{"@type":"Answer","text":"Sì, e la sceglie riga per riga. Nella stessa fattura possono convivere il 10% sulle manutenzioni e il 22% dove serve, come richiede il lavoro edile."}},
+    {"@type":"Question","name":"Calcola la ritenuta d'acconto per i condomini?","acceptedAnswer":{"@type":"Answer","text":"Sì. La percentuale la scrivi tu e il calcolo toglie la ritenuta dal totale come si deve, con base l'imponibile già scontato e non quello pieno."}},
+    {"@type":"Question","name":"Va bene per il regime forfettario?","acceptedAnswer":{"@type":"Answer","text":"Sì. In forfettario l'IVA non si applica e sopra i 77,47 € serve il bollo da 2 €: il programma lo segnala al momento giusto, invece di lasciartelo scoprire dopo."}},
+    {"@type":"Question","name":"Serve per geometri e architetti con la cassa?","acceptedAnswer":{"@type":"Answer","text":"Sì, il contributo cassa previdenziale è previsto e nel file elettronico viene messo il codice giusto per quella cassa."}},
+    {"@type":"Question","name":"Mi dice quali lavori non ho ancora fatturato?","acceptedAnswer":{"@type":"Answer","text":"Sì, è uno dei quattro numeri in cima alle fatture: i lavori finiti e mai fatturati. In edilizia è il buco da cui escono più soldi di qualsiasi altro."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Fatturazione elettronica in edilizia"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

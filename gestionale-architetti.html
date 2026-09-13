@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionale per architetti: incarichi, fasi e onorari</title>
+<meta name="description" content="Gestionale per studi di architettura: incarichi divisi in fasi, onorari e parcelle con Inarcassa, direzione lavori. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/gestionale-architetti">
+<meta property="og:title" content="Gestionale per architetti: incarichi, fasi e onorari">
+<meta property="og:description" content="Gestionale per studi di architettura: incarichi divisi in fasi, onorari e parcelle con Inarcassa, direzione lavori. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/gestionale-architetti">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Gestionale per architetti</nav>
+
+  <article>
+    <h1>Gestionale per architetti: l'incarico non è un lavoro, sono quattro fasi che si pagano a pezzi</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> il gestionale di TrovaImpresa visto dalla parte di un architetto: incarichi,
+      pratiche, fatture e scadenze, dal telefono e dal computer. Le stesse funzioni degli altri, ma
+      con le parole e i conti del tuo mestiere.
+      <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Un incarico di architettura non finisce in un giorno: preliminare, definitivo, esecutivo,
+    direzione lavori. Ogni fase ha il suo compenso e il suo momento di fatturazione, e tenere il filo di
+    dieci incarichi tutti a fasi diverse è un lavoro a sé.</p>
+
+    <h2>I quattro punti dove si perdono i soldi</h2>
+
+    <p>Non sono difetti di chi lavora male. Sono i punti dove il mestiere, fatto com'è fatto, lascia
+         scoperto il fianco.</p>
+
+    <ul class="checklist err-list">
+      <li><strong>La fase completata e non fatturata.</strong> Il definitivo è consegnato da due mesi, la parcella no.</li>
+      <li><strong>L'onorario stimato a sentimento.</strong> Una percentuale detta al volo, senza fare il conto sul valore delle opere.</li>
+      <li><strong>Le varianti in corso d'opera regalate.</strong> Il committente cambia idea tre volte e la revisione del progetto non la paga nessuno.</li>
+      <li><strong>La direzione lavori che si allunga.</strong> Il cantiere doveva durare sei mesi, ne dura dodici, e il compenso era a corpo.</li>
+    </ul>
+
+    <h2>Cosa cambia per un architetto</h2>
+
+    <table>
+      <thead>
+        <tr><th>Come lavora uno studio</th><th>Cosa fa il gestionale</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>L'incarico è diviso in fasi</td><td>Ogni fase è un passaggio con il suo stato: si vede subito quale è consegnata e non ancora fatturata</td></tr>
+        <tr><td>Il compenso si paga a tranche</td><td>Gli stati di avanzamento servono anche qui: fatturi la fase, non tutto alla fine</td></tr>
+        <tr><td>La parcella ha Inarcassa e ritenuta</td><td>Il contributo integrativo e la ritenuta sono nel calcolo, e nel file elettronico c'è il codice cassa</td></tr>
+        <tr><td>La direzione lavori dura mesi</td><td>Le ore e i sopralluoghi si registrano, così sai quanto è costata davvero</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">Per il compenso c'è un riferimento ufficiale: il <strong>Decreto Parametri</strong>
+    (DM 17 giugno 2016), che non è obbligatorio fra privati ma è il metro usato nelle gare pubbliche e nei
+    tribunali. Il calcolo parte dal valore delle opere e dai coefficienti della prestazione. Nella parcella
+    poi entrano il <strong>contributo integrativo Inarcassa</strong> e la ritenuta d'acconto.</div>
+
+    <h2>Quello che c'è dentro, comunque</h2>
+
+    <p>Sotto le differenze del mestiere, il gestionale è lo stesso per tutti — ed è quello che serve
+         perché il conto torni.</p>
+
+    <figure>
+      <img src="/img/gestionale-fatture.webp" width="1440" height="1265" loading="lazy" alt="Parcelle di uno studio di architettura con contributo cassa e ritenuta d'acconto">
+      <figcaption>Le parcelle, con da incassare e da fatturare in cima.</figcaption>
+    </figure>
+
+    <ul class="checklist ok-list">
+      <li><strong>Incarichi</strong> con le voci, il PDF pronto e lo stato: bozza, inviato, accettato, rifiutato.</li>
+      <li><strong>Fatture elettroniche</strong> con il file XML per lo SDI, il contributo cassa e la ritenuta.</li>
+      <li><strong>Pratiche</strong> con stato e colore, con le scadenze di ogni passaggio.</li>
+      <li><strong>Committenti</strong> con il loro storico: sai cosa hai fatto per chi, e quando.</li>
+      <li><strong>Scadenzario</strong> che avvisa prima, e <strong>documenti</strong> attaccati al lavoro giusto.</li>
+      <li><strong>Foto</strong> del prima e dopo, e <strong>report</strong> da mandare al commercialista.</li>
+      <li><strong>Esporta tutto</strong> in Excel o JSON quando vuoi. I dati sono tuoi.</li>
+    </ul>
+
+    <p>Si apre dal browser, sul telefono e sul computer, senza installare niente.</p>
+
+    <h2>L'aiuto AI, per chi scrivere non è il suo mestiere</h2>
+
+    <p>L'assistente sta dentro il modulo, mentre compili. Scrivi la frase come la diresti al telefono e
+         le caselle si riempiono da sole, illuminate, così vedi cosa ha scritto.</p>
+
+    <p><strong>Non salva niente da solo.</strong> Riempie, ti dice quante caselle ha toccato, e aspetta
+         che controlli tu.</p>
+
+    <figure>
+      <img src="/img/gestionale-ai.webp" width="1440" height="785" loading="lazy" alt="L'assistente AI del gestionale per architetti riempie le caselle da una frase scritta a mano">
+      <figcaption>Una frase scritta a mano, le caselle riempite. Il salvataggio resta tuo.</figcaption>
+    </figure>
+
+    <h2>Una cosa in più: i clienti</h2>
+
+    <p>Questa parte non ce l'ha nessun altro gestionale, e non perché siano fatti male: perché fanno un
+         mestiere diverso.</p>
+
+    <p>Il gestionale sta dentro <strong>TrovaImpresa</strong>, che è il posto dove i clienti cercano
+         architetti. Con lo stesso abbonamento hai il gestionale <em>e</em> il profilo in evidenza sul
+         marketplace. Un gestionale ti fa risparmiare tempo; il profilo ti porta lavoro. Al prezzo di uno.</p>
+
+    <div class="esperienza">La cosa che uno studio scopre appena comincia a registrare le ore è quasi sempre la stessa:
+    <strong>la direzione lavori costa più di quello che rende</strong>, perché i sopralluoghi non si
+    contano mai. Non è un motivo per rifiutarla: è un motivo per quotarla su quante volte andrai in
+    cantiere davvero, e non su quante volte si spera di andarci.</div>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il gestionale è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Posso dividere l'incarico in fasi?</summary>
+        <p>Sì. Ogni fase ha il suo stato e il suo importo, e gli stati di avanzamento permettono di fatturare
+         la fase consegnata senza aspettare la fine dell'incarico.</p>
+      </details>
+      <details>
+        <summary>Gestisce Inarcassa e la ritenuta?</summary>
+        <p>Sì, il contributo integrativo e la ritenuta d'acconto entrano nel calcolo della parcella, e nel
+         file elettronico per lo SDI viene messo il codice della cassa.</p>
+      </details>
+      <details>
+        <summary>Il gestionale va bene anche se lavoro da solo?</summary>
+        <p>Sì, ed è il caso più comune. Le parti che non ti servono si possono semplicemente non aprire:
+            il minimo utile sono pratiche, committenti e fatture.</p>
+      </details>
+      <details>
+        <summary>Si deve installare qualcosa?</summary>
+        <p>No. Si apre dal browser, sul telefono e sul computer. Niente da scaricare, nessun aggiornamento
+            da fare a mano, basta la connessione.</p>
+      </details>
+      <details>
+        <summary>Quanto costa il gestionale per architetti?</summary>
+        <p>È compreso nel Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, prezzo finale
+            senza IVA da aggiungere. I primi 3 mesi sono in regalo, non serve la carta di credito e non c'è
+            rinnovo automatico.</p>
+      </details>
+      <details>
+        <summary>I dati sono miei?</summary>
+        <p>Sì. Si esportano in Excel o in JSON quando vuoi, senza costi e senza chiedere permesso: se un
+            giorno vai da un'altra parte, te li porti dietro.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/gestionale-idraulici.html">Gestionale per idraulici</a> &middot; <a href="/gestionale-elettricisti.html">Gestionale per elettricisti</a> &middot; <a href="/gestionale-imbianchini.html">Gestionale per imbianchini</a> &middot; <a href="/gestionale-piastrellisti.html">Gestionale per piastrellisti</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Provalo con un incarico vero</h3>
+      <p>Non serve caricare lo storico. Prendi un incarico che devi fare questa settimana e fallo qui: in dieci minuti sai se ti serve.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gestionale TrovaImpresa per architetti",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Gestionale per architetti",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/gestionale-architetti",
+  "inLanguage": "it-IT",
+  "description": "Gestionale per studi di architettura: incarichi divisi in fasi, onorari e parcelle con Inarcassa, direzione lavori. 3 mesi gratis.",
+  "featureList": [
+    "Incarichi con voci, quantità e prezzo",
+    "Fatture elettroniche con file XML per lo SDI",
+    "Contributo cassa previdenziale e ritenuta",
+    "Pratiche con stato e scadenze",
+    "Scadenzario con avviso prima della scadenza",
+    "Documenti e foto attaccati al lavoro",
+    "Assistente AI che compila i moduli da una frase"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Posso dividere l'incarico in fasi?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni fase ha il suo stato e il suo importo, e gli stati di avanzamento permettono di fatturare la fase consegnata senza aspettare la fine dell'incarico."}},
+    {"@type":"Question","name":"Gestisce Inarcassa e la ritenuta?","acceptedAnswer":{"@type":"Answer","text":"Sì, il contributo integrativo e la ritenuta d'acconto entrano nel calcolo della parcella, e nel file elettronico per lo SDI viene messo il codice della cassa."}},
+    {"@type":"Question","name":"Il gestionale va bene anche se lavoro da solo?","acceptedAnswer":{"@type":"Answer","text":"Sì, ed è il caso più comune. Le parti che non ti servono si possono semplicemente non aprire: il minimo utile sono pratiche, committenti e fatture."}},
+    {"@type":"Question","name":"Si deve installare qualcosa?","acceptedAnswer":{"@type":"Answer","text":"No. Si apre dal browser, sul telefono e sul computer. Niente da scaricare, nessun aggiornamento da fare a mano, basta la connessione."}},
+    {"@type":"Question","name":"Quanto costa il gestionale per architetti?","acceptedAnswer":{"@type":"Answer","text":"È compreso nel Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, prezzo finale senza IVA da aggiungere. I primi 3 mesi sono in regalo, non serve la carta di credito e non c'è rinnovo automatico."}},
+    {"@type":"Question","name":"I dati sono miei?","acceptedAnswer":{"@type":"Answer","text":"Sì. Si esportano in Excel o in JSON quando vuoi, senza costi e senza chiedere permesso: se un giorno vai da un'altra parte, te li porti dietro."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Gestionale per architetti"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

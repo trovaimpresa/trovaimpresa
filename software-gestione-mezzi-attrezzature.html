@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software gestione mezzi e attrezzature di cantiere</title>
+<meta name="description" content="Software per i mezzi di cantiere: revisione, bollo, assicurazione e tagliando con l'avviso prima, rifornimenti e carte carburante. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/software-gestione-mezzi-attrezzature">
+<meta property="og:title" content="Software gestione mezzi e attrezzature di cantiere">
+<meta property="og:description" content="Software per i mezzi di cantiere: revisione, bollo, assicurazione e tagliando con l'avviso prima, rifornimenti e carte carburante. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-gestione-mezzi-attrezzature">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Gestione mezzi e attrezzature</nav>
+
+  <article>
+    <h1>Gestione mezzi e attrezzature: la revisione che non ti scade addosso</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> un posto solo per <strong>mezzi e attrezzature</strong>: revisione, bollo, assicurazione e
+    tagliando con l'<strong>avviso prima che scadano</strong>, i rifornimenti di carburante e il saldo
+    delle carte.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">La revisione scaduta la scopri sempre nello stesso modo: fermato al controllo, oppure
+        il giorno che devi caricare e il furgone non si può muovere.</p>
+
+    <p>Non è distrazione. È che le scadenze dei mezzi stanno su quattro fogli diversi, in quattro cassetti
+       diversi, e nessuno ha il compito di guardarle.</p>
+
+    <h2>Le quattro date, in un posto solo</h2>
+
+    <p>Ogni mezzo ha la sua scheda con le date che contano: <strong>revisione</strong>, <strong>bollo</strong>,
+       <strong>assicurazione</strong>, <strong>tagliando</strong>. Le scrivi una volta.</p>
+
+    <p>Da lì in poi il programma ti <strong>avvisa prima</strong>, non il giorno dopo. E le scadenze vicine
+       si vedono in ambra, quelle passate in rosso: il colore dice lo stato, non serve leggere.</p>
+
+    <ul class="checklist ok-list">
+      <li>Furgoni, autocarri e macchine operatrici.</li>
+      <li>Attrezzature: betoniere, ponteggi, martelli, gruppi elettrogeni.</li>
+      <li>Il mezzo collegato al cantiere dove sta lavorando in questo momento.</li>
+      <li>Le scadenze tutte insieme, in ordine di data, con quelle vicine in evidenza.</li>
+    </ul>
+
+    <h2>Il carburante, che è il secondo costo dopo la manodopera</h2>
+
+    <p>Sul carburante quasi nessuno tiene il conto, e intanto è la seconda voce di costo di un'impresa
+       edile dopo le persone.</p>
+
+    <table>
+      <thead>
+        <tr><th>Cosa registri</th><th>Cosa vieni a sapere</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Rifornimento con litri e importo</td><td>Quanto consuma davvero ogni mezzo</td></tr>
+        <tr><td>Chilometri o ore di lavoro</td><td>Il costo per chilometro o per ora del mezzo</td></tr>
+        <tr><td>Carta carburante usata</td><td>Il saldo che ti resta sulla carta</td></tr>
+        <tr><td>Il cantiere del giorno</td><td>Quanto carburante si è mangiato quel lavoro</td></tr>
+      </tbody>
+    </table>
+
+    <p>Il numero che salta fuori spesso sorprende: c'è quasi sempre un mezzo che consuma molto più degli
+       altri, e finché non lo scrivi da nessuna parte non lo sai.</p>
+
+    <h2>Le carte carburante, con il saldo che resta</h2>
+
+    <p>Le carte prepagate sono comode e sono anche il posto dove i soldi spariscono senza traccia.
+       Qui ogni carta ha il suo <strong>saldo</strong>: quanto c'era, quanto è stato usato, quanto resta.</p>
+
+    <div class="note">Quando il saldo di una carta scende più in fretta del solito, lo vedi mentre succede.
+        È una di quelle cose che non cerchi, ma che è meglio sapere.</div>
+
+    <h2>Il nolo, quando il mezzo lavora per il cantiere</h2>
+
+    <figure>
+      <img src="/img/gestionale-lavori.webp" width="1440" height="971" loading="lazy" alt="I lavori con i mezzi collegati al cantiere e il costo che ci finisce dentro">
+      <figcaption>Il mezzo collegato al cantiere: il suo costo entra nel conto del lavoro.</figcaption>
+    </figure>
+
+    <p>Se collega il mezzo al cantiere, il costo di quel mezzo entra nel conto del lavoro. È l'unico modo
+       per sapere quanto è costato davvero un cantiere: <strong>materiale, ore, e i mezzi</strong>.</p>
+
+    <p>Molte imprese il costo dei mezzi non lo mettono mai dentro. Poi il lavoro sembra andato bene, e a
+       fine anno i conti non tornano.</p>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">La gestione dei mezzi è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Mi avvisa prima che scada la revisione?</summary>
+        <p>Sì. Ogni mezzo ha le date di revisione, bollo, assicurazione e tagliando, e le scadenze vicine
+         vengono segnalate prima, non dopo. Quelle in avvicinamento si vedono in ambra e quelle passate in
+         rosso.</p>
+      </details>
+      <details>
+        <summary>Posso registrare anche le attrezzature, non solo i furgoni?</summary>
+        <p>Sì. Betoniere, ponteggi, martelli, gruppi elettrogeni: tutto quello che ha una scheda, una
+         manutenzione o un costo può stare lì dentro.</p>
+      </details>
+      <details>
+        <summary>Tiene il conto del carburante?</summary>
+        <p>Sì, ogni rifornimento con litri e importo, e il consumo per mezzo. Da lì si capisce quale mezzo
+         costa più degli altri.</p>
+      </details>
+      <details>
+        <summary>Gestisce le carte carburante prepagate?</summary>
+        <p>Sì. Ogni carta ha i suoi movimenti e il suo saldo, così sai in ogni momento quanto resta e quanto
+         è stato speso.</p>
+      </details>
+      <details>
+        <summary>Il costo del mezzo entra nel conto del cantiere?</summary>
+        <p>Sì, se colleghi il mezzo al lavoro. È l'unico modo per sapere quanto è costato davvero un cantiere,
+         mettendo insieme materiale, ore e mezzi.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Metti dentro i mezzi che hai</h3>
+      <p>Furgone, betoniera, ponteggio. Scrivi le quattro date delle scadenze una volta sola, e non ci pensi più.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gestione mezzi TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Gestione mezzi e attrezzature",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/software-gestione-mezzi-attrezzature",
+  "inLanguage": "it-IT",
+  "description": "Software per i mezzi di cantiere: revisione, bollo, assicurazione e tagliando con l'avviso prima, rifornimenti e carte carburante. 3 mesi gratis.",
+  "featureList": [
+    "Mezzi e attrezzature con la loro scheda",
+    "Revisione, bollo, assicurazione e tagliando con le scadenze",
+    "Avviso prima che una scadenza arrivi",
+    "Rifornimenti di carburante con litri e importo",
+    "Saldo delle carte carburante",
+    "Mezzi collegati al cantiere dove stanno lavorando"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Mi avvisa prima che scada la revisione?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni mezzo ha le date di revisione, bollo, assicurazione e tagliando, e le scadenze vicine vengono segnalate prima, non dopo. Quelle in avvicinamento si vedono in ambra e quelle passate in rosso."}},
+    {"@type":"Question","name":"Posso registrare anche le attrezzature, non solo i furgoni?","acceptedAnswer":{"@type":"Answer","text":"Sì. Betoniere, ponteggi, martelli, gruppi elettrogeni: tutto quello che ha una scheda, una manutenzione o un costo può stare lì dentro."}},
+    {"@type":"Question","name":"Tiene il conto del carburante?","acceptedAnswer":{"@type":"Answer","text":"Sì, ogni rifornimento con litri e importo, e il consumo per mezzo. Da lì si capisce quale mezzo costa più degli altri."}},
+    {"@type":"Question","name":"Gestisce le carte carburante prepagate?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni carta ha i suoi movimenti e il suo saldo, così sai in ogni momento quanto resta e quanto è stato speso."}},
+    {"@type":"Question","name":"Il costo del mezzo entra nel conto del cantiere?","acceptedAnswer":{"@type":"Answer","text":"Sì, se colleghi il mezzo al lavoro. È l'unico modo per sapere quanto è costato davvero un cantiere, mettendo insieme materiale, ore e mezzi."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Gestione mezzi e attrezzature"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

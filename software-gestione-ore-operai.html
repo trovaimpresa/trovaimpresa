@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software gestione ore operai per imprese edili</title>
+<meta name="description" content="Software per contare le ore degli operai: ore per persona e per cantiere, timbrature e il costo vero del lavoro. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/software-gestione-ore-operai">
+<meta property="og:title" content="Software gestione ore operai per imprese edili">
+<meta property="og:description" content="Software per contare le ore degli operai: ore per persona e per cantiere, timbrature e il costo vero del lavoro. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-gestione-ore-operai">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Gestione ore degli operai</nav>
+
+  <article>
+    <h1>Gestione ore degli operai: sapere quanto è costato il lavoro, non quanto sembrava</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> un programma per contare le <strong>ore degli operai</strong>: per persona e per cantiere,
+    con le timbrature e il rapportino dal telefono. Le ore poi entrano nel
+    <strong>costo vero del lavoro</strong>.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Quasi tutte le imprese sanno quanto hanno incassato da un lavoro. Molte meno sanno
+        quanto gli è costato. E la differenza fra le due cose è il mestiere.</p>
+
+    <p>Il materiale si conta facile: c'è la bolla. Le ore no: le ore sono la voce di costo più grande e
+       l'unica che nessuno scrive da nessuna parte.</p>
+
+    <h2>Tre modi di registrare, secondo come lavori</h2>
+
+    <table>
+      <thead>
+        <tr><th>Come</th><th>Quando conviene</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Rapportino giornaliero</strong></td><td>Il capo squadra scrive chi c'era e quante ore, dal telefono, a fine giornata. È il modo più veloce.</td></tr>
+        <tr><td><strong>Timbratura</strong></td><td>Entrata e uscita registrate all'orario vero. Serve quando l'orario preciso conta.</td></tr>
+        <tr><td><strong>Ore scritte a mano</strong></td><td>Tu inserisci le ore per lavoro e per persona, magari una volta a settimana.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Non c'è un modo giusto: c'è quello che la tua squadra fa davvero. Un sistema perfetto che nessuno
+       compila vale zero.</p>
+
+    <h2>Le due somme che servono</h2>
+
+    <ul class="checklist ok-list">
+      <li><strong>Ore per persona</strong>, sommate per mese. Servono per la busta paga e per il commercialista, e finiscono le discussioni di fine mese.</li>
+      <li><strong>Ore per cantiere</strong>, sommate per lavoro. Servono per sapere se quel lavoro ti ha reso.</li>
+    </ul>
+
+    <p>Sono due domande diverse e servono a due persone diverse: la prima al commercialista, la seconda a
+       te. Ma escono dallo stesso dato scritto una volta sola.</p>
+
+    <h2>Il conto che quasi nessuno fa</h2>
+
+    <figure class="tel">
+      <img src="/img/gestionale-telefono.webp" width="780" height="1688" loading="lazy" alt="Le ore della giornata registrate dal telefono a fine lavoro">
+      <figcaption>Le ore si registrano dal telefono, non si ricostruiscono la sera.</figcaption>
+    </figure>
+
+    <div class="esperienza">Preventivato, meno materiale, meno ore. Quello che resta è il guadagno vero di quel
+        cantiere. È un conto di tre righe, e la maggior parte delle imprese non lo fa mai su nessun lavoro.</div>
+
+    <p>Quando cominci a farlo, dopo tre o quattro cantieri esce sempre la stessa cosa: <strong>c'è un tipo
+       di lavoro che non ti rende</strong>, e lo stavi facendo da anni convinto del contrario. Di solito è
+       quello dove le ore sfuggono — i lavori piccoli, le chiamate, i ritocchi.</p>
+
+    <p>Non vuol dire smettere di farli. Vuol dire farli al prezzo giusto.</p>
+
+    <h2>Ore preventivate e ore fatte</h2>
+
+    <p>Se hai fatto l'analisi prezzi, in preventivo hai già scritto quante ore ci vogliono. Quando il
+       cantiere è finito, confronti quelle con le ore vere.</p>
+
+    <p>Da quel confronto viene fuori il numero più utile che un'impresa possa avere:
+       <strong>di quanto sbagli quando fai un preventivo</strong>. Se sbagli sempre del 20% in meno,
+       il prossimo preventivo lo fai con quel 20% dentro, e smetti di lavorare in perdita per abitudine.</p>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">La gestione delle ore è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Come si registrano le ore degli operai?</summary>
+        <p>In tre modi, secondo come lavori: col rapportino giornaliero compilato dal telefono, con la
+         timbratura di entrata e uscita, oppure scrivendo le ore a mano per lavoro e per persona.</p>
+      </details>
+      <details>
+        <summary>C'è la timbratura di entrata e uscita?</summary>
+        <p>Sì, quando serve l'orario preciso invece del totale della giornata. Resta registrato con il suo
+         orario.</p>
+      </details>
+      <details>
+        <summary>Le ore si vedono sommate per mese?</summary>
+        <p>Sì, per persona e per mese, che è quello che serve per le buste paga, e per cantiere, che è quello
+         che serve per capire se il lavoro è andato bene.</p>
+      </details>
+      <details>
+        <summary>Gli operai possono registrare le ore da soli?</summary>
+        <p>Sì. Ogni collaboratore ha il suo accesso e vede solo i propri lavori e la propria agenda, senza
+         girare per il resto del gestionale.</p>
+      </details>
+      <details>
+        <summary>Le ore entrano nel costo del lavoro?</summary>
+        <p>Sì. Insieme al materiale e ai mezzi formano il costo vero del cantiere, che il programma confronta
+         con quello che avevi preventivato.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/app-rapportini-cantiere.html">App rapportini di cantiere</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Prova per un mese e guarda il conto</h3>
+      <p>Registra le ore di un mese e poi guarda un cantiere chiuso: preventivato, meno materiale, meno ore. Quel numero è il tuo guadagno vero.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gestione ore TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Gestione ore degli operai",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/software-gestione-ore-operai",
+  "inLanguage": "it-IT",
+  "description": "Software per contare le ore degli operai: ore per persona e per cantiere, timbrature e il costo vero del lavoro. 3 mesi gratis.",
+  "featureList": [
+    "Ore lavorate per persona e per cantiere",
+    "Timbratura di entrata e uscita",
+    "Rapportino giornaliero con le ore",
+    "Riepilogo mensile per le buste paga",
+    "Ore che entrano nel costo del lavoro",
+    "Confronto fra ore preventivate e ore fatte"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Come si registrano le ore degli operai?","acceptedAnswer":{"@type":"Answer","text":"In tre modi, secondo come lavori: col rapportino giornaliero compilato dal telefono, con la timbratura di entrata e uscita, oppure scrivendo le ore a mano per lavoro e per persona."}},
+    {"@type":"Question","name":"C'è la timbratura di entrata e uscita?","acceptedAnswer":{"@type":"Answer","text":"Sì, quando serve l'orario preciso invece del totale della giornata. Resta registrato con il suo orario."}},
+    {"@type":"Question","name":"Le ore si vedono sommate per mese?","acceptedAnswer":{"@type":"Answer","text":"Sì, per persona e per mese, che è quello che serve per le buste paga, e per cantiere, che è quello che serve per capire se il lavoro è andato bene."}},
+    {"@type":"Question","name":"Gli operai possono registrare le ore da soli?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni collaboratore ha il suo accesso e vede solo i propri lavori e la propria agenda, senza girare per il resto del gestionale."}},
+    {"@type":"Question","name":"Le ore entrano nel costo del lavoro?","acceptedAnswer":{"@type":"Answer","text":"Sì. Insieme al materiale e ai mezzi formano il costo vero del cantiere, che il programma confronta con quello che avevi preventivato."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Gestione ore degli operai"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

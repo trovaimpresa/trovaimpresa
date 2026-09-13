@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionale per piccole imprese edili e artigiani</title>
+<meta name="description" content="Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/gestionale-piccola-impresa-edile">
+<meta property="og:title" content="Gestionale per piccole imprese edili e artigiani">
+<meta property="og:description" content="Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/gestionale-piccola-impresa-edile">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Gestionale per la piccola impresa edile</nav>
+
+  <article>
+    <h1>Gestionale per la piccola impresa edile: sei cose servono, il resto è peso</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> per un'impresa da <strong>una a dieci persone</strong> le funzioni che servono davvero sono
+    sei, e i gestionali fatti per le imprese grandi falliscono proprio perché ne hanno ottanta.
+    Qui c'è quello che serve, senza il peso.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Il motivo più comune per cui un'impresa piccola abbandona un gestionale dopo due mesi
+        non è il prezzo. È che <strong>chiede troppo per far entrare un dato</strong>: sedici caselle
+        obbligatorie, tre menu e un'anagrafica da compilare prima di poter salvare un lavoro da 400 euro.</p>
+
+    <p>Un programma fatto per un'impresa da cinquanta persone non è «più completo»: è
+       <strong>più lento</strong>. E la lentezza, quando sei tu a fare tutto, è il difetto che ammazza.</p>
+
+    <h2>Le sei cose che servono davvero</h2>
+
+    <ul class="checklist ok-list">
+      <li><strong>Preventivi</strong> con le voci e il PDF, e lo stato per sapere a chi richiamare.</li>
+      <li><strong>Lavori</strong> con stato e data, per sapere cosa è aperto e cosa è finito.</li>
+      <li><strong>Fatture</strong> con l'IVA edile giusta e il file per lo SDI.</li>
+      <li><strong>Clienti</strong> con lo storico: cosa gli hai fatto e quando.</li>
+      <li><strong>Ore e spese</strong> per cantiere, che è l'unico modo per sapere se ci guadagni.</li>
+      <li><strong>Scadenzario</strong>, perché le date sfuggono quando sei da solo.</li>
+    </ul>
+
+    <p>Sono sei. Se un gestionale copre bene queste, va bene. Se ne copre ottanta ma per fare un preventivo
+       ci vogliono venti minuti, non va bene.</p>
+
+    <h2>Quello che per un'impresa piccola è solo peso</h2>
+
+    <ul class="checklist err-list">
+      <li><strong>I livelli di approvazione.</strong> Servono dove c'è un ufficio acquisti. Se firmi tu, sono clic in più.</li>
+      <li><strong>Il magazzino a carichi e scarichi.</strong> Se il materiale lo compri per il cantiere e lo porti direttamente lì, non hai un magazzino da gestire.</li>
+      <li><strong>I ruoli e i permessi complessi.</strong> Con tre persone bastano due livelli: tu e chi lavora.</li>
+      <li><strong>La contabilità generale.</strong> Quella è il lavoro del commercialista, e va lasciata a lui.</li>
+    </ul>
+
+    <div class="note">Nel gestionale queste cose semplicemente non ci sono, e non è una mancanza: è una
+        scelta. Ogni funzione in più è una casella in più da guardare quando cerchi quella che ti serve.</div>
+
+    <h2>Come partire senza perdere una giornata</h2>
+
+    <figure>
+      <img src="/img/gestionale-lavori.webp" width="1440" height="971" loading="lazy" alt="I lavori aperti di una piccola impresa edile, con stato e totale">
+      <figcaption>Si parte dai lavori aperti. Lo storico chiuso non si carica.</figcaption>
+    </figure>
+
+    <p>Questo è il punto dove quasi tutti si arenano: pensano di dover caricare tutto prima di cominciare,
+       rimandano, e non cominciano mai.</p>
+
+    <table>
+      <thead>
+        <tr><th>Quando</th><th>Cosa fai</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Il primo giorno</strong></td><td>I dati della tua azienda, una volta sola. Dieci minuti.</td></tr>
+        <tr><td><strong>Il prossimo preventivo</strong></td><td>Lo fai qui invece che in Word. Il cliente lo crei mentre lo scrivi.</td></tr>
+        <tr><td><strong>La prima settimana</strong></td><td>Man mano che lavori, entrano i lavori aperti. Non tutti: quelli aperti.</td></tr>
+        <tr><td><strong>Il primo mese</strong></td><td>Le ore e le spese dei cantieri in corso. Da lì cominciano a uscire i conti veri.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Lo storico dei lavori chiusi <strong>non si carica</strong>. Non serve a niente, e caricarlo è la
+       giornata persa che fa mollare tutto.</p>
+
+    <h2>Quando sei solo, la squadra è un pezzo di carta</h2>
+
+    <p>Per chi lavora da solo la sezione squadra non serve. Ma serve una cosa che spesso si sottovaluta:
+       <strong>gli accessi per i collaboratori sono compresi</strong>, senza costo per utente.</p>
+
+    <p>Vuol dire che il giorno che prendi il primo dipendente o lavori con un socio, non devi cambiare
+       piano né rinegoziare niente. Cresci senza che il canone ti segua.</p>
+
+    <div class="esperienza">Il consiglio meno tecnico e più utile: non aprire tutte le sezioni il primo giorno.
+        Apri Preventivi, Lavori, Clienti e Fatture. Le altre le trovi quando ti serviranno. Un programma si
+        impara usandolo su un lavoro vero, non esplorandolo.</div>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il gestionale è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Va bene per un artigiano che lavora da solo?</summary>
+        <p>Sì, ed è il caso più comune. Le sezioni che non servono, come squadra, mezzi e reparti, si
+          possono semplicemente non aprire: il minimo utile sono lavori, clienti, preventivi e fatture.</p>
+      </details>
+      <details>
+        <summary>Gli accessi per i collaboratori costano di più?</summary>
+        <p>No, sono compresi nel prezzo. Non c'è un costo per utente aggiuntivo, quindi il canone non cresce
+          quando cresce la squadra.</p>
+      </details>
+      <details>
+        <summary>Devo caricare tutti i lavori vecchi per cominciare?</summary>
+        <p>No, ed è sconsigliato. Si parte dal prossimo preventivo e dai lavori aperti: lo storico chiuso
+          non serve e caricarlo è la giornata persa che fa abbandonare il programma.</p>
+      </details>
+      <details>
+        <summary>Quanto ci vuole per imparare a usarlo?</summary>
+        <p>Il primo preventivo si fa in dieci minuti. Il resto si impara usandolo: le parole sono quelle
+          normali del mestiere e c'è l'assistente che risponde alle domande su come si fa una cosa.</p>
+      </details>
+      <details>
+        <summary>C'è il magazzino?</summary>
+        <p>Per le imprese edili no, ed è una scelta: se il materiale si compra per il cantiere e si porta
+          direttamente lì, un magazzino a carichi e scarichi è peso inutile. Le spese si registrano sul
+          lavoro, che è quello che serve per sapere quanto è costato.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/quanto-costa-un-gestionale-edile.html">Quanto costa un gestionale edile</a> &middot; <a href="/gestionale-cantieri-gratis.html">Gestionale cantieri gratis</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Parti da un lavoro, non dallo storico</h3>
+      <p>Il modo che funziona è cominciare dal prossimo preventivo e basta. In una settimana i lavori aperti sono dentro, senza una giornata persa a caricare dati.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gestionale TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "Gestionale per la piccola impresa edile",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/gestionale-piccola-impresa-edile",
+  "inLanguage": "it-IT",
+  "description": "Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. 3 mesi gratis.",
+  "featureList": [
+    "Preventivi e fatture",
+    "Lavori con stato e scadenze",
+    "Ore e spese per cantiere",
+    "Clienti con il loro storico",
+    "Scadenzario",
+    "Accessi per i collaboratori compresi"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Va bene per un artigiano che lavora da solo?","acceptedAnswer":{"@type":"Answer","text":"Sì, ed è il caso più comune. Le sezioni che non servono, come squadra, mezzi e reparti, si possono semplicemente non aprire: il minimo utile sono lavori, clienti, preventivi e fatture."}},
+    {"@type":"Question","name":"Gli accessi per i collaboratori costano di più?","acceptedAnswer":{"@type":"Answer","text":"No, sono compresi nel prezzo. Non c'è un costo per utente aggiuntivo, quindi il canone non cresce quando cresce la squadra."}},
+    {"@type":"Question","name":"Devo caricare tutti i lavori vecchi per cominciare?","acceptedAnswer":{"@type":"Answer","text":"No, ed è sconsigliato. Si parte dal prossimo preventivo e dai lavori aperti: lo storico chiuso non serve e caricarlo è la giornata persa che fa abbandonare il programma."}},
+    {"@type":"Question","name":"Quanto ci vuole per imparare a usarlo?","acceptedAnswer":{"@type":"Answer","text":"Il primo preventivo si fa in dieci minuti. Il resto si impara usandolo: le parole sono quelle normali del mestiere e c'è l'assistente che risponde alle domande su come si fa una cosa."}},
+    {"@type":"Question","name":"C'è il magazzino?","acceptedAnswer":{"@type":"Answer","text":"Per le imprese edili no, ed è una scelta: se il materiale si compra per il cantiere e si porta direttamente lì, un magazzino a carichi e scarichi è peso inutile. Le spese si registrano sul lavoro, che è quello che serve per sapere quanto è costato."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Gestionale per la piccola impresa edile"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>

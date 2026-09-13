@@ -437,7 +437,15 @@
        l'ultimo clic. Adesso si va su /prezzi.html, che c'e'.
 
        I prezzi qui dentro devono restare uguali a quelli di prezzi.html e
-       di ricarica-crediti.html: se cambiano li', cambiano anche qui. */
+       di ricarica-crediti.html: se cambiano li', cambiano anche qui.
+
+       ⛔ 13 settembre 2026 — ERANO RIMASTI I PREZZI VECCHI. Qui dentro
+          c'era ancora «49€/anno» e «5€/mese»: i prezzi di prima del
+          29 agosto, archiviati su Stripe. Un cliente apriva «Compila
+          con AI» e leggeva un prezzo che alla cassa non esiste piu'.
+          Adesso 249€/anno e 29€/mese, come prezzi.html e i pannelli.
+          LEZIONE: i prezzi stanno in piu' di un posto, e questo file
+          non era nell'elenco degli 8 che furono cambiati il 29 ago. */
     const c = motivo === 'no_credits' ? {
       occhio: 'Crediti esauriti',
       tit:    'Hai finito i crediti di questo mese',
@@ -456,7 +464,7 @@
       cta:    'Vedi i piani',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Premium', p: '49€', u: '/anno', d: '100 crediti AI al mese', top: true },
+        { n: 'Premium', p: '249€', u: '/anno', d: '100 crediti AI al mese', top: true },
       ],
     } : {
       occhio: 'Assistente AI',
@@ -465,8 +473,8 @@
       cta:    'Vedi il Premium',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Premium', p: '49€', u: '/anno', d: '100 crediti AI al mese', top: true },
-        { n: 'Premium', p: '5€',  u: '/mese', d: 'stessa cosa, mese per mese' },
+        { n: 'Premium', p: '249€', u: '/anno', d: '100 crediti AI al mese', top: true },
+        { n: 'Premium', p: '29€', u: '/mese', d: 'stessa cosa, mese per mese' },
       ],
     };
 

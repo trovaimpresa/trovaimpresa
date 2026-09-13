@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App rapportini di cantiere: il giornaliero dal telefono</title>
+<meta name="description" content="App per il rapportino giornaliero di cantiere: chi c'era, cosa si e' fatto, ore e foto, compilato sul posto dal telefono. 3 mesi gratis.">
+<link rel="canonical" href="https://trovaimpresa.com/app-rapportini-cantiere">
+<meta property="og:title" content="App rapportini di cantiere: il giornaliero dal telefono">
+<meta property="og:description" content="App per il rapportino giornaliero di cantiere: chi c'era, cosa si e' fatto, ore e foto, compilato sul posto dal telefono. 3 mesi gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/app-rapportini-cantiere">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="971">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; App rapportini di cantiere</nav>
+
+  <article>
+    <h1>App rapportini di cantiere: mezzo minuto sul posto, non mezz'ora la sera</h1>
+    <p class="meta">Aggiornato settembre 2026 &middot; Lettura 5 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> il <strong>rapportino giornaliero</strong> compilato dal telefono, in cantiere, mentre te
+    lo ricordi: chi c'era, cosa si è fatto, quante ore e le foto. Le ore poi
+    <strong>entrano da sole nel costo del lavoro</strong>.
+    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>
+    </div>
+
+    <p class="lead">Il rapportino è la cosa più utile e più odiata del cantiere. Utile perché è l'unica
+        prova di cosa si è fatto e con chi. Odiata perché si compila la sera, a casa, quando non ti
+        ricordi più niente.</p>
+
+    <p>Il rapportino scritto tre giorni dopo è un rapportino inventato. Non serve a difenderti in una
+       contestazione e non serve a capire quante ore è costato il cantiere. Serve solo a far finta.</p>
+
+    <h2>Compilato sul posto, non a casa</h2>
+
+    <figure class="tel">
+      <img src="/img/gestionale-telefono.webp" width="780" height="1688" loading="lazy" alt="Il rapportino di cantiere compilato dal telefono, sul posto">
+      <figcaption>Il rapportino si compila dal telefono, in cantiere. Niente da installare.</figcaption>
+    </figure>
+
+    <p>L'unico rapportino che vale è quello scritto mentre sei ancora lì, con la polvere addosso. Per
+       questo la schermata è corta: <strong>chi c'era, quante ore, cosa si è fatto, la foto</strong>.
+       Niente sedici caselle obbligatorie.</p>
+
+    <ul class="checklist ok-list">
+      <li><strong>Chi c'era</strong>, scelto dalla squadra, con le ore di ognuno.</li>
+      <li><strong>Cosa si è fatto</strong>, due righe scritte come le diresti a voce.</li>
+      <li><strong>Le foto</strong> della giornata, attaccate al cantiere giusto.</li>
+      <li><strong>Mezzi e attrezzature</strong> usate quel giorno, se ti servono per i noli.</li>
+    </ul>
+
+    <div class="note">Se scrivere ti pesa, l'assistente AI trasforma una frase parlata in un rapportino
+        compilato. Tu controlli e salvi: il salvataggio resta sempre tuo.</div>
+
+    <h2>Le ore che diventano un numero, non un ricordo</h2>
+
+    <p>Questa è la parte che cambia i conti. Le ore scritte sul rapportino non restano su un foglio:
+       finiscono nelle <strong>ore del cantiere</strong> e nelle <strong>ore della persona</strong>.</p>
+
+    <table>
+      <thead>
+        <tr><th>Quello che ottieni</th><th>A cosa serve davvero</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Ore per cantiere</td><td>Sapere se quel lavoro ti è costato più di quanto l'hai preventivato</td></tr>
+        <tr><td>Ore per persona</td><td>Le buste paga e i conti di fine mese, senza rincorrere nessuno</td></tr>
+        <tr><td>Giornate lavorate</td><td>Rispondere al committente quando contesta i tempi</td></tr>
+        <tr><td>Timbratura entrata e uscita</td><td>Registrare l'orario vero quando serve, senza discussioni</td></tr>
+      </tbody>
+    </table>
+
+    <p>Il conto che ne esce è quello vero: <strong>preventivato meno materiale meno ore</strong>. Se il
+       numero è piccolo, quel tipo di lavoro non conviene più — ed è meglio scoprirlo adesso che fra un
+       anno.</p>
+
+    <h2>Quando il rapportino ti salva</h2>
+
+    <p>Non capita spesso, ma quando capita vale l'abbonamento di dieci anni.</p>
+
+    <ul class="checklist err-list">
+      <li><strong>«Avete perso una settimana».</strong> Tu apri i rapportini e fai vedere le giornate, chi c'era e cosa si è fatto.</li>
+      <li><strong>«Questo lavoro non era nel preventivo».</strong> C'è scritto il giorno che l'avete fatto, con la foto.</li>
+      <li><strong>«L'operaio non è venuto».</strong> C'è la giornata registrata, con le ore.</li>
+      <li><strong>Il commercialista che chiede le ore.</strong> Sono già sommate, per persona e per mese.</li>
+    </ul>
+
+    <h2>Perché non basta il gruppo WhatsApp</h2>
+
+    <p>Molte imprese il rapportino lo fanno su WhatsApp: una foto e due righe nel gruppo. Funziona per
+       comunicare, non funziona per tenere il conto.</p>
+
+    <p>Su WhatsApp le informazioni <strong>scorrono via</strong>: dopo un mese trovare la giornata giusta
+       vuol dire scorrere mille messaggi. E soprattutto <strong>i messaggi non si sommano</strong>: nessuno
+       ti dirà mai quante ore avete messo su quel cantiere.</p>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il rapportino di cantiere è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">249 € all'anno</div>
+      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Cos'è il rapportino giornaliero di cantiere?</summary>
+        <p>È il documento che registra la giornata di lavoro: chi era presente, quante ore, cosa è stato
+         fatto e con quali mezzi. Serve a tenere il conto delle ore e a dimostrare l'avanzamento del
+         lavoro in caso di contestazione.</p>
+      </details>
+      <details>
+        <summary>Gli operai possono compilarlo da soli?</summary>
+        <p>Sì. Ogni collaboratore ha il suo accesso, entra nella propria agenda e compila il rapportino della
+         giornata dal telefono, senza vedere il resto del gestionale.</p>
+      </details>
+      <details>
+        <summary>Serve installare un'app?</summary>
+        <p>No. Si apre dal browser del telefono e funziona come un'app, senza scaricare niente dagli store e
+         senza aggiornamenti da fare a mano.</p>
+      </details>
+      <details>
+        <summary>Le ore del rapportino si sommano da sole?</summary>
+        <p>Sì. Le ore scritte nel rapportino finiscono nelle ore del cantiere e in quelle della persona, e
+         si vedono già sommate per lavoro e per mese.</p>
+      </details>
+      <details>
+        <summary>C'è la timbratura di entrata e uscita?</summary>
+        <p>Sì, oltre al rapportino c'è la registrazione di entrata e uscita, per quando serve l'orario preciso
+         invece del totale della giornata.</p>
+      </details>
+      <details>
+        <summary>Posso allegare le foto al rapportino?</summary>
+        <p>Sì, le foto restano attaccate al cantiere giusto e al giorno giusto, invece di finire sparse nella
+         galleria del telefono.</p>
+      </details>
+    </div>
+
+    <div class="related">
+      <strong>Vedi anche:</strong> <a href="/software-computo-metrico.html">Software computo metrico</a> &middot; <a href="/programma-preventivi-edili.html">Programma per preventivi edili</a> &middot; <a href="/software-gestione-cantieri.html">Software gestione cantieri</a> &middot; <a href="/software-fatturazione-elettronica-edilizia.html">Fatturazione elettronica in edilizia</a> &middot; <a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili</a>
+    </div>
+
+    <div class="cta-band">
+      <h3>Provalo domani mattina in cantiere</h3>
+      <p>Apri il telefono a fine giornata e compila il rapportino sul posto. Se ci metti più di un minuto, non ti serve.</p>
+      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Rapportini di cantiere TrovaImpresa",
+  "applicationCategory": "BusinessApplication",
+  "applicationSubCategory": "App rapportini di cantiere",
+  "operatingSystem": "Web browser, Android, iOS",
+  "url": "https://trovaimpresa.com/app-rapportini-cantiere",
+  "inLanguage": "it-IT",
+  "description": "App per il rapportino giornaliero di cantiere: chi c'era, cosa si e' fatto, ore e foto, compilato sul posto dal telefono. 3 mesi gratis.",
+  "featureList": [
+    "Rapportino giornaliero compilato dal telefono",
+    "Chi era in cantiere e quante ore",
+    "Descrizione della giornata e foto",
+    "Ore per persona e per cantiere",
+    "Timbratura di entrata e uscita",
+    "Le ore che entrano nel costo del lavoro"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "249",
+    "priceCurrency": "EUR",
+    "url": "https://trovaimpresa.com/prezzi.html",
+    "availability": "https://schema.org/InStock",
+    "description": "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrovaImpresa",
+    "url": "https://trovaimpresa.com"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Cos'è il rapportino giornaliero di cantiere?","acceptedAnswer":{"@type":"Answer","text":"È il documento che registra la giornata di lavoro: chi era presente, quante ore, cosa è stato fatto e con quali mezzi. Serve a tenere il conto delle ore e a dimostrare l'avanzamento del lavoro in caso di contestazione."}},
+    {"@type":"Question","name":"Gli operai possono compilarlo da soli?","acceptedAnswer":{"@type":"Answer","text":"Sì. Ogni collaboratore ha il suo accesso, entra nella propria agenda e compila il rapportino della giornata dal telefono, senza vedere il resto del gestionale."}},
+    {"@type":"Question","name":"Serve installare un'app?","acceptedAnswer":{"@type":"Answer","text":"No. Si apre dal browser del telefono e funziona come un'app, senza scaricare niente dagli store e senza aggiornamenti da fare a mano."}},
+    {"@type":"Question","name":"Le ore del rapportino si sommano da sole?","acceptedAnswer":{"@type":"Answer","text":"Sì. Le ore scritte nel rapportino finiscono nelle ore del cantiere e in quelle della persona, e si vedono già sommate per lavoro e per mese."}},
+    {"@type":"Question","name":"C'è la timbratura di entrata e uscita?","acceptedAnswer":{"@type":"Answer","text":"Sì, oltre al rapportino c'è la registrazione di entrata e uscita, per quando serve l'orario preciso invece del totale della giornata."}},
+    {"@type":"Question","name":"Posso allegare le foto al rapportino?","acceptedAnswer":{"@type":"Answer","text":"Sì, le foto restano attaccate al cantiere giusto e al giorno giusto, invece di finire sparse nella galleria del telefono."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://trovaimpresa.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gestionale",
+      "item": "https://trovaimpresa.com/software-gestionale-imprese-edili"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "App rapportini di cantiere"
+    }
+  ]
+}
+</script>
+
+  <script src="/js/torna-indietro.js" defer></script>
+</body>
+</html>
