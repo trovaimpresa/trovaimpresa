@@ -4,8 +4,122 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 12 settembre 2026 (notte) — l'aggancio alle ricerche precise su tutte e 19 le guide
+Ultimo aggiornamento: 13 settembre 2026 — dove finiscono i crediti Netlify (il 99% in pubblicazioni), controllo-push da 38 a 4 secondi
 
+
+---
+
+## 🆕 IL 13 SETTEMBRE — DOVE FINISCONO I SOLDI DI NETLIFY
+
+Alex ha chiesto se gli conviene cambiare piano Netlify. Guardato il dato vero
+(Usage & billing → Credit usage breakdown), e la risposta e' un'altra.
+
+### 📊 IL DATO: il →99%← dei crediti se ne va in PUBBLICAZIONI
+| Voce | Crediti |
+|---|---|
+| **Production deploys (→473← deploy)** | **→7.095←** |
+| Web requests (→116.419←) | →23,3← |
+| Compute (tutte le funzioni) | →7← |
+| Bandwidth | →33,6← |
+| **Totale** | **→7.158,9←** |
+
+Il piano di Alex (vecchio, →$20←) da' →3.000← crediti: gli altri →4.159← li
+compra a →$10← alla volta. Ad agosto: →$20← di canone + →$40← di extra = →$60←.
+
+⛔ **IL PRO NON RISOLVE**: da' →5.000← crediti, lui ne consuma →7.159←.
+Comprerebbe extra lo stesso pagando →$13← in piu' di canone. Risparmio reale
+~→$5←/mese. **E il piano vecchio, se lo cambia, non torna piu'.**
+⛔ **Le →7← funzioni programmate NON sono il problema**: →7← crediti in tutto.
+(Restano comunque →720← giri/mese di `recupera-carrelli-pubblicita`, ogni ora,
+per →3← ordini in tutto: si puo' portare a ogni →4← ore quando capita.)
+
+### ✅ FATTO: il controllo prima di pubblicare da →38,5← a →4,4← secondi
+`tools/controllo-push.js` gira a OGNI deploy e **rileggeva tutte le pagine del
+sito →5← volte di fila**. Con →200← pagine non si sentiva; dal →12 set←, con le
+→1.802← pagine mestiere+citta', sono →2.000← e il controllo e' passato a →38←
+secondi.
+- Aggiunta una memoria di quello che ha gia' letto (`_giaLetti`, `_giaVisti`,
+  `_giaElenco`): si legge una volta sola
+- **Sicuro** perche' lo script non scrive NIENTE (→0← writeFileSync): il disco
+  non cambia mentre lui gira
+- **Misurato prima e dopo sul computer di Alex**: →38,5←s → →4,4←s, **→9← volte
+  piu' veloce**, stessi →17← avvisi, stesso «Tutto a posto»
+
+### ⚠️ LA REGOLA NUOVA DEI PUSH (da oggi)
+Ogni pubblicazione costa ~→15← crediti. Ieri sera Claude ha fatto fare →5← push
+separati, uno per lavoro: →75← crediti dove ne bastavano →15←.
+**Da oggi: UN SOLO push a fine lavoro**, non uno per pezzo.
+Per stare dentro i →3.000← crediti inclusi servono ~→200← deploy al mese invece
+di →473←: sono **→$40← al mese, quasi →€450← l'anno**.
+
+### ⬜ RESTA DA GUARDARE
+- Quanto scende il costo per deploy adesso che il controllo dura →4← secondi
+  invece di →38← (si vede fra qualche giorno su Usage & billing)
+- `package.json` porta `@capacitor/android`, `@capacitor/cli` e
+  `@capacitor/core`: servono all'app Android, non al sito, ma Netlify le
+  installa a ogni pubblicazione
+
+---
+
+## 🆕 IL 12 SETTEMBRE (notte) — LA SITEMAP CHE GOOGLE NON HA MAI LETTO
+
+⛔ **IL DIFETTO PIU' GROSSO DELLA GIORNATA, e non era nel piano.**
+Su Search Console la sitemap delle pagine mestiere+citta' era stata inviata come
+**`sitemap-mestieri.xm`** — senza la «l» finale. Stato: «Impossibile recuperare».
+Vuol dire che **le →1.802← pagine di ieri non erano MAI state dichiarate a
+Google**. Il controllo che avevamo messo in calendario per il →3 ottobre←
+(«e' passata da 55 a 1.802?») avrebbe trovato lo stesso errore, senza capirne
+il motivo.
+Trovato per caso, da una foto di Search Console che Alex ha mandato per un'altra
+ragione.
+
+**Insieme all'errore c'erano anche due PAGINE inviate come se fossero sitemap**
+(`quanto-costa-rifare-il-bagno.html` e `-roma.html`): quel campo accetta solo
+file `.xml`.
+
+✅ **RISOLTO la sera stessa.** Tolte le tre righe sbagliate, inviata
+`sitemap-mestieri.xml` giusta. Risultato immediato:
+
+| Sitemap | Stato | Pagine rilevate |
+|---|---|---|
+| `sitemap-mestieri.xml` | Riuscita | **→1.802←** |
+| `sitemap.xml` | Riuscita | →160← |
+| `sitemap-imprese.xml` | Riuscita | →100← |
+| `sitemap-seo.xml` | Riuscita | →29← |
+
+⚠️ **REGOLA**: dopo aver generato pagine nuove non basta metterle in sitemap —
+**bisogna guardare su Search Console che quella sitemap risulti «Riuscita» e con
+il numero giusto di pagine**. Un file che esiste e una sitemap che Google legge
+sono due cose diverse.
+
+---
+
+## 🆕 LA PAGINA DI PROVA «GUIDA + CITTA'» (12 set, notte)
+
+`quanto-costa-rifare-il-bagno-roma.html` — commit →5ab826c←. E' la prova che
+decide se fare le altre →2.000←.
+- **Non e' la guida col nome della citta' cambiato**: ha una sezione tutta sua,
+  «le →7← cose che a Roma rallentano il cantiere», scritta con le parole di Alex
+  — traffico, **lo smorzo lontano**, i mezzi vecchi che non entrano in certe
+  zone, ZTL e niente parcheggio, l'ascensore che non si puo' usare, i palazzi
+  vecchi, gli orari del condominio
+- Prezzi: →6.000-9.000← € per →5-6← mq, cioe' →15-20%← sopra la media (Alex ha
+  confermato: «su Roma e' giusto»)
+- Dalla guida madre parte un riquadro «📍 Abiti a Roma?» che punta qui: **senza
+  quel link la pagina nasceva orfana** e Google la ignorava (lezione dell'11 set)
+- Collaudo: →6←/→6← ancore, →3← schema (Article, BreadcrumbList, FAQPage),
+  →5← FAQ, →0← errori JS, →7.783← caratteri di testo
+
+**💡 L'INTUIZIONE DI ALEX, che vale piu' della pagina**: «cosi' sono le grandi
+citta'». Le stesse →7← cose valgono per Milano, Napoli, Torino, Firenze,
+Bologna, Genova, Palermo, Bari. E per le citta' piccole il discorso **si
+ribalta**: «qui il furgone lo parcheggi sotto casa, lo smorzo e' a cinque
+minuti, ecco perche' costa meno». Quindi servono **DUE modelli**, non uno.
+
+**⏳ DA GUARDARE FRA DUE SETTIMANE (→26 settembre←)**: su Search Console →
+Rendimento, cercare «bagno roma». Se arrivano impressioni si fanno le altre
+(→19← guide × le grandi citta'). Se non arriva niente, si cambia prima di
+moltiplicare.
 
 ---
 

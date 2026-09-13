@@ -69,11 +69,45 @@ const avvisi = [];
 function errore(file, cosa){ errori.push({ file, cosa }); }
 function avviso(file, cosa){ avvisi.push({ file, cosa }); }
 
-function leggi(p){ return fs.readFileSync(path.join(RADI, p), 'utf8'); }
-function esiste(p){ try { return fs.existsSync(path.join(RADI, p)); } catch(e){ return false; } }
+/* ---------------------------------------------------------------------
+   13 settembre 2026 — LA MEMORIA DI QUELLO CHE HO GIA' LETTO
+
+   Questo controllo gira a OGNI pubblicazione su Netlify, e le
+   pubblicazioni sono la voce che si mangia il 99% dei crediti del piano
+   (7.095 su 7.159 in un mese, 473 deploy).
+
+   Il file rileggeva da capo TUTTE le pagine del sito CINQUE volte di
+   fila, una per ogni controllo. Finche' le pagine erano 200 non si
+   sentiva. Dal 12 settembre, con le 1.802 pagine mestiere+citta', sono
+   diventate 2.000: 38 secondi a ogni pubblicazione.
+
+   Qui sotto: si legge una volta sola e ci si ricorda il risultato.
+   Nessun controllo e' stato tolto: si guardano esattamente gli stessi
+   file, con gli stessi occhi. E' sicuro perche' questo script NON scrive
+   niente (zero writeFileSync): il disco non cambia mentre lui gira.
+   --------------------------------------------------------------------- */
+const _giaLetti  = new Map();   // percorso -> contenuto
+const _giaVisti  = new Map();   // percorso -> c'e' / non c'e'
+const _giaElenco = new Map();   // estensioni -> elenco dei file
+
+function leggi(p){
+  if (_giaLetti.has(p)) return _giaLetti.get(p);
+  const testo = fs.readFileSync(path.join(RADI, p), 'utf8');
+  _giaLetti.set(p, testo);
+  return testo;
+}
+function esiste(p){
+  if (_giaVisti.has(p)) return _giaVisti.get(p);
+  let c;
+  try { c = fs.existsSync(path.join(RADI, p)); } catch(e){ c = false; }
+  _giaVisti.set(p, c);
+  return c;
+}
 
 /* Tutti gli .html della radice piu' quelli nelle sottocartelle vere. */
 function tuttiIFile(ext){
+  const chiave = ext.join('|');
+  if (_giaElenco.has(chiave)) return _giaElenco.get(chiave);
   const fuori = [];
   // 'Claude outputs' e' dove il computer salva i file che manda Claude:
   // non e' roba del sito (dal 5 set e' anche in .gitignore), e lasciarla
@@ -92,6 +126,7 @@ function tuttiIFile(ext){
       else if (ext.some(e => v.name.endsWith(e))) fuori.push(r);
     }
   })(RADI, '');
+  _giaElenco.set(chiave, fuori);
   return fuori;
 }
 
