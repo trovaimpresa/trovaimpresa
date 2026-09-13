@@ -659,28 +659,25 @@
               }
             }
           } catch (e3) { /* navigazione privata: si va avanti senza */ }
-          /* L'evento dal server parte SOLO se il visitatore ha accettato tutti
-             i cookie: manda a Meta l'email cifrata e l'IP, e per il Garante e'
-             marketing esattamente come il pixel, quindi vuole il consenso.
-             Serve lo stesso, perche' il pixel del browser lo perdono i
-             blocca-pubblicita', iPhone e Safari: il server no. */
-          var _consenso = '';
-          try { _consenso = localStorage.getItem('cookie_consent') || ''; } catch (e2) { _consenso = ''; }
-          if (_consenso === 'all') {
-            fetch('/.netlify/functions/meta-evento', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                event_id: _eid,
-                email: _mail,
-                tipo: 'impresa',
-                fbp: _fbp,
-                fbclid: _fbclid,
-                fbclid_t: _fbclid_t,
-                url: window.location.href
-              })
-            }).catch(function () {});
-          }
+          /* 13 set 2026 — ALLINEATA ALL'ARTIGIANO (prima era rimasta indietro).
+             L'evento dal server parte SEMPRE, anche se il visitatore non
+             accetta i cookie: e' l'unico modo perche' Meta riconosca chi si
+             iscrive davvero. Il pixel del browser invece lo perdono i
+             blocca-pubblicita', iPhone e Safari, e resta legato al consenso.
+             Scelta di Alex, gia' presa per la registrazione artigiano. */
+          fetch('/.netlify/functions/meta-evento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_id: _eid,
+              email: _mail,
+              tipo: 'impresa',
+              fbp: _fbp,
+              fbclid: _fbclid,
+              fbclid_t: _fbclid_t,
+              url: window.location.href
+            })
+          }).catch(function () {});
         } catch (e) { /* non deve mai bloccare la registrazione */ }
         btn.textContent = '✅ Account creato!';
         /* Prima dopo 4,5 secondi si finiva sul login, cioe' l'unico posto dove
