@@ -16,6 +16,14 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # 13 settembre 2026 — NON INSTALLARE QUELLO CHE AL SITO NON SERVE
+  # Le pubblicazioni sono il 99% dei crediti Netlify (7.095 su 7.159 in un mese).
+  # A ogni pubblicazione venivano installati anche @capacitor/android, /cli e
+  # /core: servono a costruire l'app Android sul computer di Alex, non al sito.
+  # Ora stanno in devDependencies e questa riga dice a Netlify di saltarle.
+  # ⚠️ REGOLA: se un giorno serve un pacchetto PER IL BUILD (non per l'app),
+  # va messo in "dependencies", se no con questa riga non viene installato.
+  NPM_FLAGS = "--omit=dev"
 
 [context.deploy-preview]
   command = "echo 'Deploy preview disabilitato per risparmiare crediti'"
