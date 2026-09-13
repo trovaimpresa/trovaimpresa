@@ -426,46 +426,65 @@
 
   /* il nome del gestionale sta IN MEZZO alle quattro carte, come nel disegno
      a mano di Alessio: due carte a sinistra, il nome, due carte a destra */
-  .gest-carte { display:grid; grid-template-columns:minmax(0,230px) auto minmax(0,230px); gap:32px; justify-content:center; align-items:center; }
-  .gest-col { display:flex; flex-direction:column; gap:32px; }
-  .gest-mezzo { text-align:center; }
-  .gest-mezzo .gest-emoji { display:block; margin-bottom:8px; }
-  .gest-mezzo .gest-nome { display:block; }
-  .gest-mezzo .gest-tuo { display:block; margin:8px 0 0; visibility:hidden; }
-  /* 2 settembre 2026 sera, Alessio: «le card informative, prima erano due
-     adesso 0». Le due porte vecchie dicevano cosa c'e' dentro; le quattro
-     carte no. La riga torna qui, sotto il nome, in mezzo. 14px e #666: gia'
-     in pagina. */
-  /* 2 settembre 2026 sera, Alessio: «premi Attiva, da li' si apre la pagina
-     informativa e poi se vuoi paghi». La finestra del piano: cosa c'e' dentro
-     e in fondo i due prezzi. 14px, --dark, --light: gia' in pagina. */
-  .pi-sub { font-size:14px; color:var(--light); margin-bottom:14px; }
-  .pi-voce { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.08); font-size:14px; color:var(--dark); line-height:1.4; }
-  .pi-voce .g-ico { flex:0 0 18px; }
-  /* ⛔ i prezzi NON stanno dentro la parte che scorre: col «sticky» il bottone
-     restava tagliato a meta'. Sono una fascia sua, sotto l'elenco, sempre
-     intera e sempre visibile. */
-  #modal-piano .modal-ai { display:flex; flex-direction:column; max-height:88vh; }
-  #modal-piano-body { flex:1; overflow-y:auto; min-height:0; }
-  .pi-piede { flex:0 0 auto; padding:16px 28px 20px; border-top:1px solid rgba(0,0,0,0.08); background:white; border-radius:0 0 24px 24px; }
-  .pi-prezzi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .pi-prezzi button { padding:12px; background:#0066ff; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; font-family:inherit; }
-  .pi-nota { font-size:15px; color:var(--light); text-align:center; margin-top:10px; }
-  .gest-mezzo .gest-desc { display:block; font-size:14px; color:#666; line-height:1.4; margin:6px auto 0; max-width:220px; }
-  /* quadrate davvero: stessa larghezza e stessa altezza */
-  /* quadrate ma piccole: il tetto di 230px in larghezza e i 140 di altezza le tengono della misura di una
-     piastrella, se no dentro un pannello largo diventavano quadrati da 400px
-     con dentro mezzo metro di bianco */
+  /* ============================================================
+     13 SETTEMBRE 2026 — LE CARTE DEL GESTIONALE, RIFATTE
+     Alex: «le 4 card per ogni gestionale facciamole piu grandi, si fa un
+     po' di fatica a leggere, e se bisogna cambiare alcune diciture per far
+     capire meglio cosa sono tutte quelle card».
+     Due cose cambiate, non una:
+     1) MISURE — titolo da 16 a 19 px, testo da 14 a 16, carte da 230 px
+        fisse a tutta la colonna.
+     2) ORDINE — prima erano quattro carte uguali, due per lato, e
+        sembravano quattro scelte alla pari. Non lo sono: tre servono per
+        ENTRARE (comprare, provare, guardare) e una e' per chi il
+        gestionale ce l'ha gia'. Adesso le tre stanno in fila sotto «Se non
+        ce l'hai ancora» e «Entra» e' una striscia verde in fondo, sotto
+        «Se ce l'hai gia'».
+     ⛔ La schermata e' UGUALE PER TUTTI, abbonato o no (scelta di Alex):
+        niente si nasconde, cambiano solo i bottoni.
+     ⛔ UN SOLO ARANCIONE nel riquadro, ed e' quello che si paga. Il regalo
+        della prova e' passato al viola: erano due arancioni vicini e si
+        confondevano.
+     ============================================================ */
+  .gest-carte { display:block; }
+  /* il nome del gestionale: in cima e al centro, come nell'anteprima.
+     Prima .gest-carte era una griglia a 3 colonne e questo era la colonna
+     di mezzo; adesso che e' un blocco, senza queste righe emoji, nome e
+     descrizione finirebbero tutti su una riga sola. */
+  .gest-mezzo { text-align:center; margin:0 0 6px; }
+  .gest-mezzo .gest-emoji,
+  .gest-mezzo .gest-nome,
+  .gest-mezzo .gest-desc,
+  .gest-mezzo .gest-tuo { display:block; }
+  .gest-mezzo .gest-emoji { font-size:1.7rem; margin-bottom:6px; }
+  .gest-mezzo .gest-nome { font-size:1.7rem; }
+  .gest-mezzo .gest-desc { font-size:15px; max-width:300px; margin:6px auto 0; }
+  .gest-gruppo { margin-top:18px; }
+  .gest-gruppo-tit { font-size:13px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+                     color:#5f6b7a; margin:0 0 10px; }
+  .gest-fila { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
   .g-carta {
-    aspect-ratio:auto; min-height:140px; max-width:230px; background:white; border:1px solid #e5e7eb;
-    border-radius:14px; padding:10px; display:flex; flex-direction:column;
+    min-height:165px; background:white; border:1px solid #e5e7eb;
+    border-radius:16px; padding:16px 18px; display:flex; flex-direction:column;
   }
-  .g-testa { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-  .g-ico { width:18px; height:18px; flex:0 0 18px; font-size:17px; line-height:18px; text-align:center;
-           box-sizing:content-box; padding:5px; border-radius:8px; }
-  .g-tit { font-weight:700; color:#1a1a1a; font-size:16px; }
-  .g-txt { font-size:14px; color:#1a1a1a; font-weight:500; line-height:1.3; }
-  .g-azione { margin-top:auto; padding-top:8px; border-top:1px solid #e5e7eb; }
+  .g-testa { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .g-ico { width:22px; height:22px; flex:0 0 22px; font-size:20px; line-height:22px; text-align:center;
+           box-sizing:content-box; padding:6px; border-radius:10px; }
+  .g-tit { font-weight:700; color:#1a1a1a; font-size:19px; }
+  .g-txt { font-size:16px; color:#1a1a1a; font-weight:500; line-height:1.4; }
+  .g-azione { margin-top:auto; padding-top:12px; border-top:1px solid #e5e7eb; }
+  /* la carta che si paga: l'arancione del sito */
+  .g-carta.g-compra { border:1.5px solid #e8733a; background:#fff8f3; }
+  /* la striscia di chi ce l'ha gia': bassa, verde, si legge di colpo */
+  .g-carta.g-striscia { min-height:0; border:1.5px solid #1e8e3e; background:#f6fcf8;
+                        display:grid; grid-template-columns:auto 1fr minmax(220px,320px);
+                        align-items:center; gap:20px; padding:18px 20px; }
+  .g-carta.g-striscia .g-testa { margin:0; }
+  .g-carta.g-striscia .g-azione { margin:0; padding:0; border:0; }
+  @media(max-width:760px){
+    .gest-fila { grid-template-columns:minmax(0,1fr); }
+    .g-carta.g-striscia { grid-template-columns:minmax(0,1fr); gap:12px; }
+  }
   .g-b { width:100%; padding:8px 4px; border-radius:8px; font-weight:700; font-size:15px; cursor:pointer; border:none; }
   /* sotto i 620px una carta per riga: due quadrati da 130px tagliano le parole */
   /* stretto: il nome va in cima e le carte una sotto l'altra */
@@ -1647,25 +1666,6 @@
           <section class="gest-porta" id="porta-premium">
             <div class="gest-carte">
 
-              <div class="gest-col">
-              <div class="g-carta" id="carta-entra-premium">
-                <div class="g-testa">
-                  <span class="g-ico" style="color:#2fa46a;background:#e8f6ef">🚪</span>
-                  <span class="g-tit">Entra</span>
-                </div>
-                <div class="g-txt">Si apre il gestionale che hai già</div>
-                <div class="g-azione" id="azione-entra-premium"></div>
-              </div>
-              <div class="g-carta" id="carta-attiva-premium">
-                <div class="g-testa">
-                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb">🛠️</span>
-                  <span class="g-tit">Attiva</span>
-                </div>
-                <div class="g-txt">Lo compri e resta tuo, al mese o all'anno</div>
-                <div class="g-azione" id="azione-attiva-premium"></div>
-              </div>
-              </div>
-
               <div class="gest-mezzo">
                 <span class="gest-emoji">🛠️</span>
                 <span class="gest-nome">Gestionale Premium</span>
@@ -1673,22 +1673,45 @@
                 <span class="gest-tuo" id="porta-premium-tuo">Il tuo piano</span>
               </div>
 
-              <div class="gest-col">
+              <div class="gest-gruppo">
+                <p class="gest-gruppo-tit">Se non ce l'hai ancora</p>
+                <div class="gest-fila">
+              <div class="g-carta g-compra" id="carta-attiva-premium">
+                <div class="g-testa">
+                  <span class="g-ico" style="color:#e8733a;background:#fdece1">🛠️</span>
+                  <span class="g-tit">Attiva</span>
+                </div>
+                <div class="g-txt">Lo compri e diventa tuo. Al mese o all'anno.</div>
+                <div class="g-azione" id="azione-attiva-premium"></div>
+              </div>
               <div class="g-carta" id="carta-prova-premium">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#e8833a;background:#fdf1e6">🎁</span>
+                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb">🎁</span>
                   <span class="g-tit">Prova 30 giorni</span>
                 </div>
-                <div class="g-txt">Tutto acceso per un mese, senza carta</div>
+                <div class="g-txt">Tutto acceso per un mese. Non serve la carta.</div>
                 <div class="g-azione" id="azione-prova-premium"></div>
               </div>
               <div class="g-carta" id="carta-vedi-premium">
                 <div class="g-testa">
                   <span class="g-ico" style="color:#3f6fd8;background:#eaf0fc">👀</span>
-                  <span class="g-tit">Entra e vedi</span>
+                  <span class="g-tit">Fai un giro</span>
                 </div>
-                <div class="g-txt">Giri dentro e guardi, senza impegno</div>
+                <div class="g-txt">Entri e guardi com'&egrave; fatto. Non scrivi niente.</div>
                 <div class="g-azione" id="azione-vedi-premium"></div>
+              </div>
+                </div>
+              </div>
+
+              <div class="gest-gruppo">
+                <p class="gest-gruppo-tit">Se ce l'hai gi&agrave;</p>
+              <div class="g-carta g-striscia" id="carta-entra-premium">
+                <div class="g-testa">
+                  <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef">🚪</span>
+                  <span class="g-tit">Entra</span>
+                </div>
+                <div class="g-txt">Il gestionale &egrave; gi&agrave; tuo: si apre e basta.</div>
+                <div class="g-azione" id="azione-entra-premium"></div>
               </div>
               </div>
 
@@ -1698,25 +1721,6 @@
           <section class="gest-porta" id="porta-ai">
             <div class="gest-carte">
 
-              <div class="gest-col">
-              <div class="g-carta" id="carta-entra-ai">
-                <div class="g-testa">
-                  <span class="g-ico" style="color:#2fa46a;background:#e8f6ef">🚪</span>
-                  <span class="g-tit">Entra</span>
-                </div>
-                <div class="g-txt">Si apre il gestionale che hai già</div>
-                <div class="g-azione" id="azione-entra-ai"></div>
-              </div>
-              <div class="g-carta" id="carta-attiva-ai">
-                <div class="g-testa">
-                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb">🛠️</span>
-                  <span class="g-tit">Attiva</span>
-                </div>
-                <div class="g-txt">Lo compri e resta tuo, al mese o all'anno</div>
-                <div class="g-azione" id="azione-attiva-ai"></div>
-              </div>
-              </div>
-
               <div class="gest-mezzo">
                 <span class="gest-emoji">✨</span>
                 <span class="gest-nome">Gestionale Premium AI</span>
@@ -1724,22 +1728,45 @@
                 <span class="gest-tuo" id="porta-ai-tuo">Il tuo piano</span>
               </div>
 
-              <div class="gest-col">
+              <div class="gest-gruppo">
+                <p class="gest-gruppo-tit">Se non ce l'hai ancora</p>
+                <div class="gest-fila">
+              <div class="g-carta g-compra" id="carta-attiva-ai">
+                <div class="g-testa">
+                  <span class="g-ico" style="color:#e8733a;background:#fdece1">🛠️</span>
+                  <span class="g-tit">Attiva</span>
+                </div>
+                <div class="g-txt">Lo compri e diventa tuo. Al mese o all'anno.</div>
+                <div class="g-azione" id="azione-attiva-ai"></div>
+              </div>
               <div class="g-carta" id="carta-prova-ai">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#e8833a;background:#fdf1e6">🎁</span>
+                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb">🎁</span>
                   <span class="g-tit">Prova 30 giorni</span>
                 </div>
-                <div class="g-txt">Tutto acceso per un mese, senza carta</div>
+                <div class="g-txt">Tutto acceso per un mese. Non serve la carta.</div>
                 <div class="g-azione" id="azione-prova-ai"></div>
               </div>
               <div class="g-carta" id="carta-vedi-ai">
                 <div class="g-testa">
                   <span class="g-ico" style="color:#3f6fd8;background:#eaf0fc">👀</span>
-                  <span class="g-tit">Entra e vedi</span>
+                  <span class="g-tit">Fai un giro</span>
                 </div>
-                <div class="g-txt">Giri dentro e guardi, senza impegno</div>
+                <div class="g-txt">Entri e guardi com'&egrave; fatto. Non scrivi niente.</div>
                 <div class="g-azione" id="azione-vedi-ai"></div>
+              </div>
+                </div>
+              </div>
+
+              <div class="gest-gruppo">
+                <p class="gest-gruppo-tit">Se ce l'hai gi&agrave;</p>
+              <div class="g-carta g-striscia" id="carta-entra-ai">
+                <div class="g-testa">
+                  <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef">🚪</span>
+                  <span class="g-tit">Entra</span>
+                </div>
+                <div class="g-txt">Il gestionale &egrave; gi&agrave; tuo: si apre e basta.</div>
+                <div class="g-azione" id="azione-entra-ai"></div>
               </div>
               </div>
 
@@ -3182,13 +3209,13 @@ function bloccaCardPremium() {
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 const PORTE_GESTIONALE = [
-  { chiave: 'premium', label: 'Premium', attiva: 'Attiva Premium e gestionale',
+  { chiave: 'premium', label: 'Premium', attiva: 'Attiva gestionale Premium',
     mese: '29 \u20ac al mese', anno: '249 \u20ac all\'anno',
     tuo: 'porta-premium-tuo', azione: 'porta-premium-azione',
     entra: 'carta-entra-premium', entraAzione: 'carta-entra-premium-azione',
     provaAzione: 'carta-prova-premium-azione', vediAzione: 'carta-vedi-premium-azione',
     dentro: '/gestionale-app.html?piano=premium', guarda: '/gestionale-app.html?visita=1&piano=premium' },
-  { chiave: 'premium-ai', label: 'Premium AI', attiva: 'Attiva Premium e gestionale AI',
+  { chiave: 'premium-ai', label: 'Premium AI', attiva: 'Attiva gestionale Premium AI',
     mese: '39 \u20ac al mese', anno: '349 \u20ac all\'anno',
     tuo: 'porta-ai-tuo', azione: 'porta-ai-azione',
     entra: 'carta-entra-ai', entraAzione: 'carta-entra-ai-azione',
@@ -3218,8 +3245,18 @@ function montaPorteGestionale() {
   // sito, non verde non viola non bianco». #0066ff e' il blu gia' usato in
   // questa pagina (il bottone «Vedi dove sta», l'uguale della calcolatrice).
   const BLU = 'background:#0066ff;color:white';
-  const VERDE = BLU;
-  const VIOLA = BLU;
+  /* ⛔ 13 SETTEMBRE 2026 — TORNANO DUE COLORI, E NON PER BELLEZZA.
+     Il 2 settembre erano stati fatti tutti blu («non verde non viola non
+     bianco»), ma allora le quattro carte erano tutte uguali. Adesso non lo
+     sono piu': la carta che si paga ha il bordo arancione e quella di chi
+     ce l'ha gia' e' una striscia verde. Con il bottone blu dentro una
+     cornice arancione il colore diceva una cosa e la cornice un'altra.
+     Adesso ogni colore vuol dire una cosa sola, in tutto il riquadro:
+       🟠 arancione = si paga    🔵 blu = si prova, gratis    🟢 verde = ce l'hai gia', entra
+     Restano blu la prova e «Fai un giro»: quelle sono gratis. */
+  const VERDE = 'background:#1e8e3e;color:white';
+  const ARANCIO = 'background:#e8733a;color:white';
+  const VIOLA = ARANCIO;   /* il nome vecchio resta per non toccare le chiamate */
   const VUOTO = BLU;
 
   function metti(id, testo, stile, azione) {
@@ -3248,7 +3285,15 @@ function montaPorteGestionale() {
     b.className = 'g-b';
     b.textContent = testo;
     b.disabled = true;
-    b.style.cssText = 'background:#0066ff;color:white;cursor:default';
+    /* ⛔ 13 SETTEMBRE 2026 — I BOTTONI SPENTI DIVENTANO GRIGI.
+       Cambia la regola del 2 settembre («tutti blu, non meta'»), che era
+       nata per un altro problema: allora meta' delle carte restavano SENZA
+       bottone e il riquadro sembrava rotto. Il bottone c'e' sempre, quello
+       resta. Ma tenerlo blu pieno anche quando non si puo' cliccare dice
+       una bugia con un colore: sembra un invito e non succede niente.
+       Adesso grigio, con la scritta grigia: si vede che c'e' e si vede che
+       adesso non tocca a lui. Deciso da Alex il 13 set. */
+    b.style.cssText = 'background:#eef1f6;color:#5f6b7a;border:1px solid #dfe4ec;cursor:default';
     box.appendChild(b);
   }
 
@@ -3264,7 +3309,28 @@ function montaPorteGestionale() {
 
     /* 1. ENTRA — l'unica porta, ed e' verde */
     if (aperta) metti('azione-entra-' + k, 'Entra', VERDE, () => { location.href = porta.dentro; });
-    else spento('azione-entra-' + k, "Non ce l'hai ancora");
+    else {
+      /* ⛔ 13 SETTEMBRE 2026, Alex: «Entra, se viene cliccato e non e'
+         abbonato, deve mandare ad Attiva».
+         Prima qui c'era un bottone SPENTO che diceva «Non ce l'hai ancora»:
+         un vicolo cieco. Uno arriva in fondo al riquadro, trova la striscia
+         piu' grande di tutte, la clicca e non succede niente.
+         Adesso porta dove serve: apre il listino della carta Attiva e ce la
+         porta davanti agli occhi. Arancione perche' porta a pagare — lo
+         stesso colore della carta dove finisce. */
+      const boxAttiva = document.getElementById('azione-attiva-' + k);
+      metti('azione-entra-' + k, 'Attivalo per entrare', ARANCIO, () => {
+        const carta = document.getElementById('carta-attiva-' + k);
+        if (carta) {
+          carta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          /* un lampo, se no uno non capisce dove l'hai portato */
+          carta.style.transition = 'box-shadow .25s';
+          carta.style.boxShadow = '0 0 0 4px rgba(232,115,58,.35)';
+          setTimeout(() => { carta.style.boxShadow = ''; }, 1400);
+        }
+        mostraListino(porta, boxAttiva);
+      });
+    }
 
     /* 2. ATTIVA — la cassa, e per chi paga gia' il portale Stripe.
        ⛔ 3 settembre 2026: chi ha il piano REGALATO (mai pagato) trovava qui
@@ -3274,7 +3340,7 @@ function montaPorteGestionale() {
        mese o anno, e Stripe. Cosi' il regalo si trasforma in abbonamento
        senza uscire dal pannello. */
     if (aperta && abbonato) {
-      metti('azione-attiva-' + k, "Gestisci l'abbonamento", VUOTO, function () { apriPortaleClienti(this); });
+      metti('azione-attiva-' + k, "Gestisci l'abbonamento", ARANCIO, function () { apriPortaleClienti(this); });
     } else if (abbonato) {
       metti('azione-attiva-' + k, porta.attiva, VIOLA, function () { apriPortaleClienti(this); });
     } else {
@@ -3286,12 +3352,12 @@ function montaPorteGestionale() {
     if (aperta) spento('azione-prova-' + k, "Ce l'hai già");
     else if (inProva) spento('azione-prova-' + k, 'Prova già in corso');
     else {
-      const b = metti('azione-prova-' + k, 'Prova 30 giorni gratis', VUOTO, null);
+      const b = metti('azione-prova-' + k, 'Comincia la prova', VUOTO, null);
       if (b) b.onclick = () => avviaProvaGestionale(b, porta);
     }
 
     /* 4. ENTRA E VEDI — sempre, a chiunque */
-    metti('azione-vedi-' + k, 'Entra e vedi', VUOTO, () => { location.href = porta.guarda; });
+    metti('azione-vedi-' + k, 'Fai un giro', VUOTO, () => { location.href = porta.guarda; });
   });
 
 }
