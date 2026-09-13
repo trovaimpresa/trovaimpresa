@@ -2931,6 +2931,63 @@
 <!-- MODAL SEGNALAZIONE -->
 <!-- 2 settembre 2026 sera: la finestra del piano. «Attiva» apre QUESTA: cosa
      c'e' dentro, e in fondo i due prezzi che portano a Stripe. -->
+<!-- ============================================================
+     13 settembre 2026 — LA FINESTRA DEL PIANO, RIFATTA
+     Alex: «questa finestra e' orribile, sistemiamola». Non era solo
+     brutta: dentro c'erano tre guasti veri.
+       1. .modal-ai-close era color:white sopra un'intestazione #f8f9fa:
+          la X era BIANCA SU BIANCO, non si vedeva.
+       2. .pi-sub .pi-voce .pi-prezzi .pi-nota .pi-piede non avevano
+          NESSUNA regola scritta da nessuna parte. Per questo i due
+          prezzi uscivano come due bottoncini grigi di sistema e la
+          nota di Stripe cadeva fuori dal riquadro bianco.
+       3. .modal-ai era una colonna sola che scorre tutta insieme:
+          scorrendo, il titolo passava sopra l'elenco e il piede usciva.
+     Adesso sono TRE PEZZI: il titolo sta fermo in cima, l'elenco
+     scorre in mezzo, i prezzi stanno fermi in fondo.
+
+     ⚠️ Tutto quanto e' scritto SOTTO #modal-piano, apposta.
+     .modal-ai e .modal-ai-header li usano anche le altre otto finestre
+     di questa pagina (nuovo cantiere, segnalazione, priorita', chat AI...):
+     cambiare quelle regole la' sopra le romperebbe tutte insieme.
+     ============================================================ -->
+<style>
+#modal-piano .modal-ai{display:flex;flex-direction:column;overflow:hidden;max-height:90vh}
+#modal-piano .modal-ai-header{flex:0 0 auto;padding:22px 26px;border-bottom:1px solid #e8ecf2;gap:14px}
+#modal-piano .modal-ai-header h2{font-size:1.45rem;margin:0 0 4px}
+#modal-piano .modal-ai-header p{font-size:.95rem;opacity:1;color:#5f6b7a;line-height:1.4;margin:0}
+#modal-piano .modal-ai-close{background:#fff;border:1.5px solid #dfe4ec;color:#5f6b7a;opacity:1;
+  width:34px;height:34px;border-radius:50%;flex:0 0 auto;font-size:1.05rem;
+  display:flex;align-items:center;justify-content:center}
+#modal-piano .modal-ai-close:hover{background:#f4f6f9;border-color:#c9d4e3;color:#1a1a1a;opacity:1}
+#modal-piano .modal-ai-body{padding:20px 26px;overflow-y:auto;flex:1 1 auto;-webkit-overflow-scrolling:touch}
+#modal-piano .pi-sub{font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:#5f6b7a;margin:0 0 12px}
+#modal-piano .pi-lista{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px}
+#modal-piano .pi-voce{display:flex;align-items:flex-start;gap:9px;font-size:15.5px;line-height:1.4}
+#modal-piano .pi-spunta{flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:#e8f6ef;
+  color:#1b8a3f;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:1px}
+#modal-piano .pi-piede{flex:0 0 auto;border-top:1px solid #e8ecf2;background:#fbfcfe;
+  padding:18px 26px 20px;border-radius:0 0 24px 24px}
+#modal-piano .pi-prezzi{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#modal-piano .pi-prezzi button{border:0;border-radius:12px;padding:15px 12px;font:inherit;
+  cursor:pointer;text-align:center;line-height:1.25}
+#modal-piano .pi-prezzi .pi-mese{background:#fff;border:1.5px solid #e8733a;color:#c45e28}
+#modal-piano .pi-prezzi .pi-mese:hover{background:#fff3ec}
+#modal-piano .pi-prezzi .pi-anno{background:#e8733a;color:#fff}
+#modal-piano .pi-prezzi .pi-anno:hover{background:#d4652e}
+#modal-piano .pi-prezzi button[disabled]{opacity:.6;cursor:default}
+#modal-piano .pi-cifra{display:block;font-size:17px;font-weight:700}
+#modal-piano .pi-quando{display:block;font-size:13px;opacity:.85;margin-top:2px}
+#modal-piano .pi-nota{font-size:13px;color:#5f6b7a;text-align:center;margin:12px 0 0;line-height:1.45}
+@media(max-width:560px){
+  #modal-piano .pi-lista{grid-template-columns:1fr}
+  #modal-piano .pi-prezzi{grid-template-columns:1fr}
+  #modal-piano .modal-ai-header{padding:18px 18px}
+  #modal-piano .modal-ai-body{padding:16px 18px}
+  #modal-piano .pi-piede{padding:14px 18px 16px}
+}
+</style>
 <div class="modal-ai-overlay" id="modal-piano" onclick="if(event.target===this)chiudiModalPiano()">
   <div class="modal-ai" style="max-width:560px">
     <div class="modal-ai-header">
@@ -4513,6 +4570,22 @@ const PIANI_INFO = {
 function mostraListino(porta, box) {
   apriModalPiano(porta);
 }
+/* «29 € al mese» diventa {cifra:'29 €', quando:'al mese'}: la cifra va
+   grande, il resto piccolo sotto. Se la scritta non ha quella forma si
+   tiene tutta com'e' e non si rompe niente. */
+function pezziPrezzo(testo) {
+  const t = String(testo == null ? '' : testo).trim();
+  const m = t.match(/^([\d.,]+\s*\u20ac)\s+(.+)$/);
+  return m ? { cifra: m[1], quando: m[2] } : { cifra: t, quando: '' };
+}
+/* Quanto si tiene in tasca pagando a anno. Conta da solo: 29 x 12 - 249. */
+function risparmioAnno(mese, anno) {
+  const n = s => { const m = String(s || '').match(/[\d.,]+/); return m ? parseFloat(m[0].replace(/\./g, '').replace(',', '.')) : NaN; };
+  const m = n(mese), a = n(anno);
+  if (!isFinite(m) || !isFinite(a)) return '';
+  const r = Math.round(m * 12 - a);
+  return r > 0 ? ' \u00b7 risparmi ' + r + ' \u20ac' : '';
+}
 function apriModalPiano(porta) {
   const info = PIANI_INFO[porta.chiave] || PIANI_INFO['premium'];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -4523,11 +4596,25 @@ function apriModalPiano(porta) {
   if (!tit || !sotto || !body || !piede) return;
   tit.textContent = 'Gestionale ' + porta.label;
   sotto.textContent = info.sotto;
-  body.innerHTML = '<div class="pi-sub">Cosa c\'è dentro</div>' +
-    info.voci.map(v => '<div class="pi-voce"><span class="g-ico" style="color:#1b8a3f;background:#e8f6ef">✅</span><span>' + esc(v) + '</span></div>').join('') +
-    '';
-  piede.innerHTML = '<div class="pi-prezzi"><button id="pi-mese">' + esc(porta.mese) + '</button><button id="pi-anno">' + esc(porta.anno) + '</button></div>' +
-    '<div class="pi-nota">Si paga con carta su Stripe. Disdici quando vuoi.</div>';
+  // L'elenco: due colonne sul computer, una sola sul telefono (lo decide
+  // il CSS di #modal-piano). La spunta e' un cerchietto verde, non
+  // l'emoji dentro il riquadro delle carte: li' dentro era enorme.
+  body.innerHTML = '<p class="pi-sub">Cosa c\'è dentro</p><div class="pi-lista">' +
+    info.voci.map(v => '<div class="pi-voce"><span class="pi-spunta">\u2713</span><span>' + esc(v) + '</span></div>').join('') +
+    '</div>';
+  // I due prezzi, scritti in due righe: la cifra grande, sotto il quando.
+  // Il risparmio dell'anno NON e' scritto a mano: si conta da mese e anno,
+  // cosi' il giorno che Alex cambia il listino in PORTE_GESTIONALE non
+  // resta qui sotto un numero vecchio a dare del bugiardo alla pagina.
+  const pm = pezziPrezzo(porta.mese), pa = pezziPrezzo(porta.anno);
+  const risp = risparmioAnno(porta.mese, porta.anno);
+  piede.innerHTML = '<div class="pi-prezzi">' +
+    '<button id="pi-mese" class="pi-mese"><span class="pi-cifra">' + esc(pm.cifra) + '</span>' +
+      '<span class="pi-quando">' + esc(pm.quando) + '</span></button>' +
+    '<button id="pi-anno" class="pi-anno"><span class="pi-cifra">' + esc(pa.cifra) + '</span>' +
+      '<span class="pi-quando">' + esc(pa.quando + risp) + '</span></button>' +
+    '</div>' +
+    '<p class="pi-nota">Si paga con carta su Stripe. Disdici quando vuoi.</p>';
   piede.querySelector('#pi-mese').onclick = function () { apriCassaGestionale(porta.chiave, 'mensile', this); };
   piede.querySelector('#pi-anno').onclick = function () { apriCassaGestionale(porta.chiave, 'annuale', this); };
   document.getElementById('modal-piano').classList.add('show');
@@ -4540,8 +4627,12 @@ function chiudiModalPiano() {
 async function apriCassaGestionale(prodotto, piano, bottone) {
   if (!impresaCorrente || !impresaCorrente.email) { alert('Manca la tua email: rientra e riprova.'); return; }
   bottone.disabled = true;
-  const testoPrima = bottone.textContent;
-  bottone.textContent = 'Apro il pagamento...';
+  /* 13 set 2026: era textContent. I bottoni del prezzo adesso hanno due
+     <span> dentro (cifra + quando): salvare il testo li avrebbe buttati
+     via, e dopo un pagamento annullato sarebbe rimasto «29 €al mese»
+     tutto attaccato. Si salva e si rimette il contenuto intero. */
+  const testoPrima = bottone.innerHTML;
+  bottone.innerHTML = 'Apro il pagamento...';
   try {
     const res = await fetch('/.netlify/functions/crea-checkout-abbonamento', {
       method: 'POST',
@@ -4555,7 +4646,7 @@ async function apriCassaGestionale(prodotto, piano, bottone) {
     alert('Errore: ' + e.message);
   }
   bottone.disabled = false;
-  bottone.textContent = testoPrima;
+  bottone.innerHTML = testoPrima;
 }
 
 // I 30 GIORNI DI PROVA — senza carta, senza Stripe.
