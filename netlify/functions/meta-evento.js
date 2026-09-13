@@ -1,4 +1,5 @@
-// Manda a Meta l'evento CompleteRegistration DAL SERVER (API Conversions).
+// Manda a Meta gli eventi DAL SERVER (API Conversions):
+//   CompleteRegistration (iscritto) e ViewContent (ha aperto il modulo).
 //
 // Perche': il pixel nel browser parte solo dopo che il visitatore accetta i
 // cookie, quindi Meta contava meno della meta' delle iscrizioni vere.
@@ -8,7 +9,7 @@
 // Meta li unisce e conta una sola iscrizione (deduplica).
 //
 // Chiamata dalle 4 pagine registrazione con:
-//   { event_id, email, tipo, fbp, fbclid, fbclid_t, url }
+//   { evento?, event_id, email?, tipo, fbp, fbclid, fbclid_t, url }
 //
 // Variabili Netlify richieste:
 //   META_CAPI_TOKEN  (secret)
@@ -61,12 +62,23 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ errore: 'JSON non valido' }) };
   }
 
-  const { event_id, email, tipo, fbp, fbclid, fbclid_t, url } = dati;
+  const { event_id, email, tipo, fbp, fbclid, fbclid_t, url, evento } = dati;
 
   if (!event_id) {
     return { statusCode: 400, body: JSON.stringify({ errore: 'event_id mancante' }) };
   }
-  if (!emailValida(email)) {
+
+  // 13 set 2026 — due eventi, non uno solo:
+  //   CompleteRegistration = si e' iscritto davvero (vuole l'email)
+  //   ViewContent          = ha APERTO il modulo di iscrizione (l'email non
+  //                          ce l'abbiamo ancora: si riconosce con fbp/fbc/IP)
+  // La lista e' CHIUSA apposta: il nome arriva dal browser, e senza lista
+  // chiunque potrebbe far scrivere a Meta eventi inventati col nostro pixel.
+  const AMMESSI = ['CompleteRegistration', 'ViewContent'];
+  const nomeEvento = AMMESSI.indexOf(evento) >= 0 ? evento : 'CompleteRegistration';
+
+  const vuoleEmail = nomeEvento === 'CompleteRegistration';
+  if (vuoleEmail && !emailValida(email)) {
     return { statusCode: 400, body: JSON.stringify({ errore: 'email non valida' }) };
   }
 
@@ -83,7 +95,8 @@ exports.handler = async function (event) {
 
   const adesso = Date.now();
 
-  const user_data = { em: [emailCifrata(email)] };
+  const user_data = {};
+  if (vuoleEmail) user_data.em = [emailCifrata(email)];
   if (fbp) user_data.fbp = fbp;
   const fbc = costruisciFbc(fbclid, adesso, fbclid_t);
   if (fbc) user_data.fbc = fbc;
@@ -93,7 +106,7 @@ exports.handler = async function (event) {
   const payload = {
     data: [
       {
-        event_name: 'CompleteRegistration',
+        event_name: nomeEvento,
         event_time: Math.floor(adesso / 1000),
         event_id: String(event_id),
         action_source: 'website',
@@ -103,6 +116,14 @@ exports.handler = async function (event) {
       }
     ]
   };
+
+  // Meta rifiuta un evento che non ha NESSUN modo di riconoscere la persona.
+  // Sul ViewContent l'email non c'e': se mancano anche fbp, fbc, IP e browser
+  // non si manda niente, invece di farsi rispondere un errore.
+  if (!Object.keys(user_data).length) {
+    console.error('meta-evento: nessun dato utente, evento non inviato', nomeEvento, event_id);
+    return { statusCode: 200, body: JSON.stringify({ ok: false, motivo: 'nessun dato utente' }) };
+  }
 
   const endpoint = 'https://graph.facebook.com/' + API_VERSION + '/' + PIXEL_ID + '/events';
 
@@ -121,7 +142,7 @@ exports.handler = async function (event) {
       return { statusCode: 502, body: JSON.stringify({ errore: 'Meta ha rifiutato l\'evento' }) };
     }
 
-    console.log('meta-evento: inviato', event_id, tipo || '');
+    console.log('meta-evento: inviato', nomeEvento, event_id, tipo || '');
     return { statusCode: 200, body: JSON.stringify({ ok: true, event_id: String(event_id) }) };
   } catch (e) {
     console.error('meta-evento: invio fallito', e && e.message, 'event_id', event_id);
