@@ -1753,7 +1753,17 @@ function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
-  el.classList.add('active');
+  /* 13 settembre 2026 — showSection regge anche SENZA l'elemento del menu.
+     Serviva per la freccia «Indietro»: js/freccia-indietro.js chiama
+     window.showSection('dashboard') con UN argomento solo, e qui dentro
+     `el.classList.add` su un undefined faceva saltare tutto.
+     Adesso se l'elemento non arriva, la voce del menu la cerchiamo noi. */
+  if (!el) {
+    el = Array.prototype.slice.call(document.querySelectorAll('.nav-item')).filter(function (n) {
+      return (n.getAttribute('onclick') || '').indexOf("showSection('" + id + "'") > -1;
+    })[0];
+  }
+  if (el) el.classList.add('active');
   if (id === 'locandine') caricaPreviewLocandine();
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
@@ -3578,13 +3588,31 @@ async function contaChiEntraDashboard() {
   } catch (e) { console.warn('[dashboard] chi entra:', e.message || e); }
 }
 
-/* quante volte i clienti hanno aperto una scheda impresa */
+/* quante volte i clienti hanno aperto una scheda impresa.
+   ⛔ 13 settembre 2026 — PRIMA QUESTA CASELLA DICEVA ZERO.
+   Il primo tentativo leggeva `visite_clienti` con la chiave pubblica. Ma
+   quella tabella ha RLS accesa e UNA SOLA regola, quella di SCRITTURA
+   («chiunque puo scrivere una visita»): di lettura non ce n'e' nessuna.
+   Quindi non dava errore — rispondeva ZERO. E uno zero non fa rumore:
+   sulla dashboard si leggeva «0 schede aperte» mentre la sezione
+   «Ricerche e visite» ne mostrava 59. E' la stessa trappola del
+   contatore dei pannelli, trovata lo stesso giorno.
+   Adesso il numero arriva dalla stessa porta della sezione Ricerche
+   (/.netlify/functions/admin-ricerche, che passa dal service role), con
+   giorni:0 = «Sempre». Cosi' i due numeri non possono piu' litigare. */
 async function contaSchedeAperte() {
   try {
-    const { count, error } = await sb.from('visite_clienti').select('*', { count: 'exact', head: true });
-    if (error) throw error;
-    _set('stat-schede-aperte', count == null ? '–' : count);
-    _set('stat-schede-conf', 'da inizio conteggio');
+    const res = await fetch('/.netlify/functions/admin-ricerche', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, giorni: 0 })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!j.success) throw new Error(j.error || 'errore sconosciuto');
+    const d = j.data || {};
+    _set('stat-schede-aperte', d.schede == null ? '–' : d.schede);
+    _set('stat-schede-conf', d.conta_da
+      ? 'si contano dal ' + new Date(d.conta_da).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })
+      : 'da inizio conteggio');
   } catch (e) { console.warn('[dashboard] schede aperte:', e.message || e); }
 }
 
@@ -5049,5 +5077,12 @@ async function aggiungiLead() {
   else disegnaLista();
 })();
 </script>
+<!-- 13 settembre 2026 — Alex: «a ogni pagina che si apre inseriamo la
+     freccia torna indietro stile gestionale».
+     Il file esiste gia' dal 4 settembre e fa proprio questo: se la pagina
+     ha le sezioni (.section#sec-...) mette la freccia in cima a OGNI
+     sezione tranne la dashboard, e riporta alla dashboard. Stessa forma
+     della .sh-back del gestionale. -->
+<script src="/js/freccia-indietro.js"></script>
 </body>
 </html>
