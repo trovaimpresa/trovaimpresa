@@ -428,7 +428,7 @@
     /* ===== 16 agosto 2026 — PREZZI VERI E PORTE CHE ESISTONO =====
        Qui c'erano due piani che non esistono piu' da nessuna parte:
        «AI 299€/anno» e «AI Pro 599€/anno». Non sono mai stati in vendita:
-       l'AI sta dentro il Premium (100 crediti al mese) e i crediti in piu'
+       l'AI sta dentro il Premium (40 crediti al mese; 100 col Premium AI) e i crediti in piu'
        si comprano a pacchetti da /ricarica-crediti.html.
 
        ⚠️ E soprattutto: due casi su tre mandavano su /abbonamento.html,
@@ -464,16 +464,16 @@
       cta:    'Vedi i piani',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Premium', p: '249€', u: '/anno', d: '100 crediti AI al mese', top: true },
+        { n: 'Premium', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
       ],
     } : {
       occhio: 'Assistente AI',
       tit:    'L\'assistente AI è dentro il Premium',
-      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel Premium ci sono 100 crediti al mese, che si rinnovano ogni mese.',
+      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel Gestionale Premium ci sono 40 crediti al mese, che si rinnovano ogni mese. Nel Premium AI sono 100.',
       cta:    'Vedi il Premium',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Premium', p: '249€', u: '/anno', d: '100 crediti AI al mese', top: true },
+        { n: 'Premium', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
         { n: 'Premium', p: '29€', u: '/mese', d: 'stessa cosa, mese per mese' },
       ],
     };
