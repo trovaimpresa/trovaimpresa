@@ -676,7 +676,20 @@ nav img{height:36px}
      si dà uno stile, questa riga glielo cancella.
      Misurato a 390 px, prima e dopo: preventivo 661, «Chiama ora» 855,
      contatti 988, recensioni 1181. Pezzi fuori dal bordo: 0. */
-  .main-layout > div:first-child{display:contents}
+  /* ⛔ 13 SETTEMBRE 2026 — QUESTA RIGA ERA SMESSA DI FUNZIONARE.
+     Era scritta `.main-layout > div:first-child{display:contents}`, cioe'
+     «il primo figlio», e il primo figlio ERA .col-sinistra.
+     Poi sono nate le due fasce delle convenzioni (<aside class="cnv-fascia">):
+     adesso i figli di .main-layout sono TRE — aside, .col-sinistra, aside —
+     e il primo non e' piu' un <div>. Quel selettore non prendeva piu' NIENTE.
+     Conseguenza, misurata a 375 px sulla scheda dell'impresa 36:
+     la colonna restava a due colonne da 166 px (44% dello schermo), con la
+     quinta stella e «Professionalita'» tagliati, e 26 PEZZI FUORI DAL BORDO.
+     Adesso si chiama per NOME, non per posizione: nessuno puo' piu'
+     spostarla infilandole davanti qualcosa.
+     Misurato dopo: modulo recensioni da 166 a 351 px, pezzi fuori 26 -> 0,
+     il bottone del preventivo resta dov'era (687 px). */
+  .col-sinistra{display:contents}
   .riga-rec{display:contents}
   .cella-prev{display:contents}
   /* ⛔ qui c'era la riga del 31 agosto che portava in cima la colonna di lato.
