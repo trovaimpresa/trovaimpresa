@@ -6232,21 +6232,30 @@ function montaPorteGestionale() {
    piu' dentro la carta: «Attiva» apre la finestra del piano, con l'elenco di
    cosa c'e' dentro (le stesse voci di prezzi.html) e in fondo i due prezzi. */
 const PIANI_INFO = {
-  'premium': { sotto: 'Il gestionale completo, dentro il tuo Premium', voci: [
-    'Gestionale: lavori, preventivi, fatture', 'Visibile oltre la città', 'Priorità nei risultati',
-    'Foto portfolio illimitate', 'Video dei lavori', 'Crea preventivi PDF', 'Storico preventivi',
-    'Preventivi con AI', 'Calcolatrice edile', 'Agenda', 'Scadenze fiscali', 'QR profilo',
-    'Descrizione estesa', 'Personalizzazione profilo', 'Badge Premium', 'Subappalti', 'Ricerca candidati' ] },
+  /* ⛔ 13 SETTEMBRE 2026 — QUESTO ELENCO VENDEVA ROBA GIA' REGALATA.
+     Fino a stamattina il Premium comprendeva anche la vetrina, quindi qui
+     dentro c'erano «Foto portfolio illimitate», «Video dei lavori», «QR
+     profilo», «Descrizione estesa», «Personalizzazione profilo».
+     Da oggi quelle cose ce le hanno TUTTI, gratis: erano diventate una
+     promessa falsa dentro la finestra dove uno tira fuori la carta.
+     Adesso qui c'e' solo quello che si paga davvero: il gestionale, piu'
+     le tre cose che restano legate all'abbonamento (regione, priorita',
+     badge). Chi cambia questo elenco controlli prima cos'e' gratis. */
+  'premium': { sotto: 'Tutto il gestionale, più la vetrina in evidenza', voci: [
+    'Cantieri e lavori, tutti in un posto', 'Preventivi in PDF, con lo storico', 'Preventivi con AI',
+    'Computo metrico', 'Fatture, spese e margini', 'Squadra, ore e rapportini',
+    'Agenda e scadenze fiscali', 'Calcolatrice edile', 'Report dei lavori',
+    'Visibile in tutta la regione', 'Priorità nei risultati', 'Badge Premium sulla tua scheda' ] },
   /* ⛔ 2 settembre 2026 sera, lo stesso difetto della pagina dei prezzi: qui
      l'AI aveva 6 righe e il Premium 17, e il piano che costa di piu' sembrava
      il piu' povero. Prima quello che si paga in piu', poi tutto il Premium. */
   'premium-ai': { sotto: 'Tutto il Premium, più la Chat con AI', voci: [
-    'La chat con AI dentro il gestionale', 'Ti risponde coi conti dei tuoi lavori',
-    'Ti compila i moduli: lavori e clienti', 'Il riepilogo del lunedì per email', '300 messaggi al mese',
-    'Gestionale: lavori, preventivi, fatture', 'Visibile oltre la città', 'Priorità nei risultati',
-    'Foto portfolio illimitate', 'Video dei lavori', 'Crea preventivi PDF', 'Storico preventivi',
-    'Preventivi con AI', 'Calcolatrice edile', 'Agenda', 'Scadenze fiscali', 'QR profilo',
-    'Descrizione estesa', 'Personalizzazione profilo', 'Badge Premium', 'Subappalti', 'Ricerca candidati' ] }
+    'La chat con AI dentro il gestionale', 'Ti risponde coi conti dei tuoi lavori', 'Ti compila i moduli: lavori e clienti',
+    'Il riepilogo del lunedì per email', '300 messaggi al mese', 'Cantieri e lavori, tutti in un posto',
+    'Preventivi in PDF, con lo storico', 'Preventivi con AI', 'Computo metrico',
+    'Fatture, spese e margini', 'Squadra, ore e rapportini', 'Agenda e scadenze fiscali',
+    'Calcolatrice edile', 'Report dei lavori', 'Visibile in tutta la regione',
+    'Priorità nei risultati', 'Badge Premium sulla tua scheda' ] }
 };
 function mostraListino(porta, box) {
   apriModalPiano(porta);

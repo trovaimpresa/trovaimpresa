@@ -1070,3 +1070,196 @@
   from = "/niente-email"
   to = "/niente-email.html"
   status = 200
+
+
+# ===== 13 SETTEMBRE 2026 — IL NEGOZIO NON E' PIU' UNA CATEGORIA =====
+# Alex: «togliamolo completamente il negozio». Il negozio adesso non si
+# iscrive al marketplace: compra «Il Posto» (js/convenzioni.js, il-posto.html).
+#
+# ⛔ PERCHE' RINVII E NON CANCELLAZIONI:
+# queste pagine sono su Google da mesi. Cancellarle e basta le trasforma in
+# errori 404 — ne abbiamo gia' 7 e Google li conta contro di noi per
+# settimane. Con il rinvio 301 chi ci arriva cercando «negozio di materiali
+# edili» finisce sulla pagina dove un negozio compra il suo posto: la persona
+# giusta nel posto giusto, e il valore accumulato su Google passa alla pagina
+# nuova invece di essere buttato.
+#
+# ⚠️ I file .html di queste pagine restano nella cartella finche' non si fa
+# `git rm`: il rinvio vince lo stesso, ma vanno tolti per non riaprirli per
+# sbaglio.
+[[redirects]]
+  from = "/negozio-arredo-bagno"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-arredo-bagno.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-attrezzature-edili"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-attrezzature-edili.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-ceramiche-bagno"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-ceramiche-bagno.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-climatizzazione-caldaie"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-climatizzazione-caldaie.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-infissi-serramenti"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-infissi-serramenti.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-isolanti-impermeabilizzanti"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-isolanti-impermeabilizzanti.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-legname"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-legname.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-materiale-elettrico"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-materiale-elettrico.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-materiali-edili"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-materiali-edili.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-pavimenti-rivestimenti"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-pavimenti-rivestimenti.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-stufe-camini"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-stufe-camini.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/negozio-termoidraulica"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/negozio-termoidraulica.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/cerca-negozi"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/cerca-negozi.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/registrazione-negozio"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/registrazione-negozio.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/pannello-negozio"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/pannello-negozio.html"
+  to = "/il-posto"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/gestionale-negozio"
+  to = "/il-posto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/gestionale-negozio.html"
+  to = "/il-posto"
+  status = 301
+  force = true
