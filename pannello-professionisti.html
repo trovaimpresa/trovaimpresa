@@ -2258,7 +2258,7 @@
           <div class="dash-quick-label">Le tue recensioni</div>
           <div class="dash-quick-sub">Leggi e rispondi ai clienti</div>
         </div>
-        <div class="dash-quick-card" data-card-id="qr-profilo" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalQRCode()">
+        <div class="dash-quick-card" data-card-id="qr-profilo" style="cursor:pointer" onclick="apriModalQRCode()">
           <div class="dash-quick-icon">🔲</div>
           <div class="dash-quick-label">QR Code profilo</div>
         </div>
@@ -2275,11 +2275,11 @@
           <div class="dash-quick-icon">🖼️</div>
           <div class="dash-quick-label">Le tue inserzioni</div>
         </div>
-        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
+        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" style="cursor:pointer" onclick="apriModalListaAttesaPub()">
           <div class="dash-quick-icon">⏳</div>
           <div class="dash-quick-label">Lista d'attesa pubblicità</div>
         </div>
-        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('personalizza', this)">
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" style="cursor:pointer" onclick="showSection('personalizza', this)">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
@@ -2293,7 +2293,7 @@
           <div class="dash-quick-icon">📁</div>
           <div class="dash-quick-label">Richieste di incarico</div>
         </div>
-        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriVideo()">
+        <div class="dash-quick-card" data-card-id="video-azienda" style="cursor:pointer" onclick="apriVideo()">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
@@ -5544,11 +5544,11 @@ const FAQS_LIST = [
   },
   {
     domanda: "Non appaio nelle ricerche dei clienti",
-    risposta: "Tre cose, in quest'ordine. 1) L'email della registrazione deve essere confermata: finché non lo è la tua scheda non esce nelle ricerche. 2) Città e mestiere devono essere scritti nel profilo, perché il cliente cerca per quelli. 3) Col piano Free esci solo nella tua città, col Premium in tutta la regione e più in alto nell'elenco. Per vedere quello che vedono i clienti apri la card «Anteprima del tuo pannello pubblico»."
+    risposta: "Tre cose, in quest'ordine. 1) L'email della registrazione deve essere confermata: finché non lo è la tua scheda non esce nelle ricerche. 2) Città e mestiere devono essere scritti nel profilo, perché il cliente cerca per quelli. 3) Chi ha il gestionale attivo esce in tutta la regione e più in alto nell'elenco; senza, esci nella tua città — la scheda resta comunque online e gratis. Per vedere quello che vedono i clienti apri la card «Anteprima del tuo pannello pubblico»."
   },
   {
-    domanda: "Qual è la differenza tra Free e Premium?",
-    risposta: "Free (0 €): scheda visibile solo nella tua città, profilo base, recensioni, certificazioni, messaggi e richieste di incarico. Premium (29 € al mese oppure 249 € all'anno): visibile in tutta la regione, priorità nei risultati, foto dei lavori, video, QR Code del profilo, «Personalizza pannello», lista d'attesa pubblicità e il gestionale. Le card col lucchetto sono quelle che si aprono col Premium."
+    domanda: "Cosa costa e cosa è gratis?",
+    risposta: "La vetrina è gratis, per sempre: la tua scheda, le foto dei lavori, i video, il QR Code, «Personalizza pannello», le recensioni, i messaggi e le richieste dei clienti. Non c'è nessuna scadenza e non serve la carta. L'unica cosa a pagamento è il gestionale — preventivi, fatture, cantieri, computo metrico — a 29 € al mese oppure 249 € all'anno (con la Chat AI 39 € o 349 €). Lo provi 30 giorni gratis dal riquadro «Gestionale», senza carta. Chi ha il gestionale attivo ha anche il badge e la priorità nei risultati."
   },
   {
     domanda: "Che differenza c'è fra Premium e Premium AI?",
@@ -5560,7 +5560,7 @@ const FAQS_LIST = [
   },
   {
     domanda: "Ho 3 mesi di Premium in regalo: cosa succede quando finiscono?",
-    risposta: "Alla registrazione il Premium è acceso per 3 mesi, senza carta e senza addebito. Alla scadenza non parte nessun pagamento: se non fai niente il profilo torna al piano Free, resta online e resta visibile nella tua città. Perdi solo le funzioni Premium (tutta la regione, priorità, foto dei lavori, video, QR Code, personalizzazione). Se vuoi continuare, il Premium si attiva dalle due porte del riquadro «Gestionale»."
+    risposta: "Il regalo dei 3 mesi valeva per chi si è iscritto entro il 13 settembre 2026 e resta valido fino alla sua scadenza. Alla scadenza non parte nessun pagamento: il profilo resta online, la vetrina resta gratis e non perdi né le foto, né i video, né le recensioni. L'unica cosa che si chiude è il gestionale. Se lo vuoi tenere lo attivi dal riquadro «Gestionale»."
   },
   {
     domanda: "Come ricevo recensioni dai miei clienti?",
@@ -6706,7 +6706,6 @@ else iconizza();
 <!-- 6 set 2026 — conta chi entra nel suo pannello e quanto ci resta (sezione «Chi entra nel sito» dell'admin) -->
 <script src="/js/conta-pannello.js" defer></script>
 <script src="/js/condividi-vetrina.js" defer></script>
-<script src="/js/chiedi-recensione.js" defer></script>
 </body>
 <script>
 function toggleSidebar() {

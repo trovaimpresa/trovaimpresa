@@ -1,10 +1,11 @@
 // Email di benvenuto inviata alla registrazione.
-// Ogni nuovo iscritto riceve 3 mesi di Premium in regalo (reverse trial):
-// il piano premium + scadenza 3 mesi viene impostato dal trigger DB
+// 13 set 2026: il regalo dei 3 mesi NON esiste piu'. Ogni nuovo iscritto
+// nasce sul piano 'free' (trigger crea_profilo_impresa): la vetrina e'
+// gratis per sempre, a pagamento c'e' solo il gestionale (30 giorni di prova)
 // crea_profilo_impresa; qui inviamo la mail che lo annuncia.
 // Body atteso: { nome, email, tipo, premium }
 //  - premium: true  -> email "grazie per il passaggio a Premium" (upgrade pagato)
-//  - premium: false/assente -> email di benvenuto con regalo 3 mesi Premium
+//  - premium: false/assente -> email di benvenuto (vetrina gratis, nessun regalo)
 
 const PANNELLI = {
   impresa: 'pannello-impresa.html',
@@ -159,17 +160,25 @@ exports.handler = async function(event) {
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
       '<p style="margin:0 0 16px;">Il tuo profilo &egrave; attivo, ma per farti trovare dalle imprese che cercano collaboratori nella tua zona deve essere <strong>completo</strong>: mestiere, esperienza, zona e curriculum. Un profilo a met&agrave; non viene notato.</p>';
   } else {
-    // Nuova iscrizione business: regalo 3 mesi Premium.
-    subject = '🎁 Benvenuto su TrovaImpresa – 3 mesi di Premium in regalo!';
+    /* ⛔ 13 SETTEMBRE 2026 — VIA IL REGALO DEI 3 MESI.
+       Alex: «togliere i tre mesi gratis a tutti i nuovi iscritti perche'
+       ormai il progetto e' cambiato — a pagamento e' solamente il gestionale
+       Premium e Pro, tutto il resto rimane attivo».
+       Prima questa email prometteva «3 mesi di Premium in regalo» e una
+       fascia viola col regalo. Adesso il trigger del database scrive
+       piano='free', quindi quella promessa sarebbe una bugia al primo
+       messaggio che l'iscritto riceve da noi.
+       La riga che deve restare in cima, sempre (regola di Alex del 2 set):
+       stare su TrovaImpresa e' gratis e non costa nulla. */
+    subject = '🎉 Benvenuto su TrovaImpresa — la tua vetrina &egrave; online';
     mostraRegalo = true;
     ctaTesto = 'Completa il tuo profilo &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
-      '<p style="margin:0 0 16px;">Per darti il benvenuto e ringraziarti della fiducia, ho deciso di attivare sul tuo account il <strong>Piano Premium per i primi 3 mesi, in modo del tutto gratuito</strong>.</p>' +
-      '<p style="margin:0 0 16px;">Con il Premium hai <strong>maggiore visibilit&agrave;</strong>, posizione prioritaria nei risultati di ricerca e pi&ugrave; possibilit&agrave; di essere contattato dai potenziali clienti. Il tuo account &egrave; gi&agrave; stato aggiornato e non &egrave; richiesta alcuna azione da parte tua.</p>' +
-      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Allo scadere dei 3 mesi il tuo profilo torner&agrave; automaticamente al piano Free, <strong>senza alcun addebito</strong>.</p>' +
-      bloccoProfilo;
+      '<p style="margin:0 0 16px;">La tua vetrina &egrave; attiva ed &egrave; <strong>gratis. E resta gratis</strong>: niente scadenze, niente carta, nessun addebito. Foto dei lavori, video, recensioni, messaggi dai clienti &mdash; &egrave; tutto tuo senza pagare niente.</p>' +
+      bloccoProfilo +
+      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">L&rsquo;unica cosa a pagamento &egrave; il <strong>gestionale</strong> &mdash; preventivi, fatture, cantieri, computo metrico. Quello lo puoi provare <strong>30 giorni</strong> dal tuo pannello, senza carta.</p>';
   }
 
   /* ⛔ 11 settembre 2026 — «COME CI HAI CONOSCIUTO?» DENTRO L'EMAIL.
@@ -215,7 +224,7 @@ exports.handler = async function(event) {
     : '';
 
   const fasciaRegalo = mostraRegalo
-    ? '<tr><td style="background:#7b1fa2;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">🎁 In regalo per te: 3 mesi di Premium gratis</td></tr>'
+    ? '<tr><td style="background:#1e8e3e;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">✓ La tua vetrina su TrovaImpresa &egrave; gratis, per sempre</td></tr>'
     : '';
 
   const html =
