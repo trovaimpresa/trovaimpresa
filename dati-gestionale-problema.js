@@ -18,7 +18,7 @@ module.exports = [
   riga: 'capitoli, misure, analisi prezzi e il computo da prezzare che ti manda il geometra',
   briciola: 'Software computo metrico',
   title: 'Software computo metrico per imprese edili e artigiani',
-  desc: 'Software per il computo metrico: capitoli, voci con le misure, analisi prezzi e prezzario tuo. Il computo diventa preventivo. 3 mesi gratis.',
+  desc: 'Software per il computo metrico: capitoli, voci con le misure, analisi prezzi e prezzario tuo. Il computo diventa preventivo. 30 giorni gratis.',
   h1: 'Software computo metrico: le misure, i prezzi e il preventivo che ne esce',
   minuti: 6,
   nomeApp: 'Computo metrico TrovaImpresa',
@@ -32,7 +32,7 @@ module.exports = [
   sommario: `un programma per fare il <strong>computo metrico</strong> senza Excel: i capitoli, le voci
     con le misure una sotto l'altra, l'analisi prezzi e il tuo prezzario. Quando hai finito,
     <strong>il computo diventa un preventivo</strong> senza riscrivere niente.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -179,7 +179,7 @@ module.exports = [
   sommario: `un programma per fare <strong>preventivi edili</strong> con le voci, l'IVA giusta riga per riga
     e il PDF pronto. Ogni preventivo ha uno stato, e <strong>quando il cliente accetta diventa un
     lavoro</strong> senza riscriverlo.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -277,7 +277,7 @@ module.exports = [
   riga: 'i cantieri aperti, chi ci va, a che punto sono e quanto hanno mangiato',
   briciola: 'Software gestione cantieri',
   title: 'Software gestione cantieri per imprese edili',
-  desc: 'Software per la gestione dei cantieri: lavori con stato e colore, squadra e agenda, mappa dei cantieri aperti, spese e foto. Dal telefono in cantiere. 3 mesi gratis.',
+  desc: 'Software per la gestione dei cantieri: lavori con stato e colore, squadra e agenda, mappa dei cantieri, spese e foto. Dal telefono. 30 giorni gratis.',
   h1: 'Software gestione cantieri: tre cantieri aperti e la testa che regge',
   minuti: 6,
   nomeApp: 'Gestione cantieri TrovaImpresa',
@@ -291,7 +291,7 @@ module.exports = [
   sommario: `un programma per tenere in ordine i <strong>cantieri aperti</strong>: a che punto sono,
     chi ci va, quanto hanno speso e cosa manca. Con la mappa, l'agenda della squadra e le foto,
     dal telefono mentre sei sul posto.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -392,7 +392,7 @@ module.exports = [
   riga: 'il rapportino compilato sul posto in mezzo minuto, ore comprese',
   briciola: 'App rapportini di cantiere',
   title: 'App rapportini di cantiere: il giornaliero dal telefono',
-  desc: 'App per il rapportino giornaliero di cantiere: chi c\'era, cosa si e\' fatto, ore e foto, compilato sul posto dal telefono. 3 mesi gratis.',
+  desc: 'App per il rapportino giornaliero di cantiere: chi c\'era, cosa si e\' fatto, ore e foto, compilato sul posto dal telefono. 30 giorni gratis.',
   h1: 'App rapportini di cantiere: mezzo minuto sul posto, non mezz\'ora la sera',
   minuti: 5,
   nomeApp: 'Rapportini di cantiere TrovaImpresa',
@@ -405,7 +405,7 @@ module.exports = [
   sommario: `il <strong>rapportino giornaliero</strong> compilato dal telefono, in cantiere, mentre te
     lo ricordi: chi c'era, cosa si è fatto, quante ore e le foto. Le ore poi
     <strong>entrano da sole nel costo del lavoro</strong>.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -497,7 +497,7 @@ module.exports = [
   riga: 'XML per lo SDI, IVA 10% riga per riga, ritenuta, bollo e cassa',
   briciola: 'Fatturazione elettronica in edilizia',
   title: 'Fatturazione elettronica per imprese edili: XML, IVA 10%',
-  desc: 'Software di fatturazione elettronica per l\'edilizia: file XML per lo SDI, IVA al 10% riga per riga, ritenuta d\'acconto, bollo e cassa previdenziale. 3 mesi gratis.',
+  desc: 'Fatturazione elettronica per l\'edilizia: file XML per lo SDI, IVA al 10% riga per riga, ritenuta, bollo e cassa previdenziale. 30 giorni gratis.',
   h1: 'Fatturazione elettronica in edilizia: le quattro cose che i programmi generici sbagliano',
   minuti: 6,
   nomeApp: 'Fatturazione elettronica edile TrovaImpresa',
@@ -511,7 +511,7 @@ module.exports = [
   sommario: `fatturazione elettronica pensata per l'edilizia: prepara il <strong>file XML per lo SDI</strong>
     con l'<strong>IVA al 10% riga per riga</strong>, la ritenuta, il bollo e la cassa previdenziale.
     Il file lo mandi tu o il commercialista.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -608,7 +608,7 @@ module.exports = [
   riga: 'gli stati di avanzamento, quanto è maturato e la fattura che ne esce',
   briciola: 'Software SAL',
   title: 'Software SAL: stati di avanzamento lavori per imprese edili',
-  desc: 'Software per i SAL: quanto e\' stato eseguito, quanto e\' maturato, quanto resta e la fattura che ne esce. Per i lavori lunghi. 3 mesi gratis.',
+  desc: 'Software per i SAL: quanto e\' stato eseguito, quanto e\' maturato, quanto resta e la fattura che ne esce. Per i lavori lunghi. 30 giorni gratis.',
   h1: 'Software SAL: fatturare mentre il lavoro va avanti, non alla fine',
   minuti: 5,
   nomeApp: 'SAL e stati di avanzamento TrovaImpresa',
@@ -621,7 +621,7 @@ module.exports = [
   sommario: `un programma per gestire gli <strong>stati di avanzamento lavori</strong>: quante quantità
     hai eseguito, quanto è <strong>maturato</strong>, quanto <strong>resta</strong>, e la fattura che
     esce da lì. Per i lavori che durano mesi.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -710,7 +710,7 @@ module.exports = [
   riga: 'revisione, bollo, assicurazione, carburante e le carte che si scaricano',
   briciola: 'Gestione mezzi e attrezzature',
   title: 'Software gestione mezzi e attrezzature di cantiere',
-  desc: 'Software per i mezzi di cantiere: revisione, bollo, assicurazione e tagliando con l\'avviso prima, rifornimenti e carte carburante. 3 mesi gratis.',
+  desc: 'Software per i mezzi di cantiere: revisione, bollo, assicurazione e tagliando con l\'avviso prima, rifornimenti e carte carburante. 30 giorni gratis.',
   h1: 'Gestione mezzi e attrezzature: la revisione che non ti scade addosso',
   minuti: 5,
   nomeApp: 'Gestione mezzi TrovaImpresa',
@@ -723,7 +723,7 @@ module.exports = [
   sommario: `un posto solo per <strong>mezzi e attrezzature</strong>: revisione, bollo, assicurazione e
     tagliando con l'<strong>avviso prima che scadano</strong>, i rifornimenti di carburante e il saldo
     delle carte.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [
@@ -805,7 +805,7 @@ module.exports = [
   riga: 'ore per persona e per cantiere, timbrature e il costo vero del lavoro',
   briciola: 'Gestione ore degli operai',
   title: 'Software gestione ore operai per imprese edili',
-  desc: 'Software per contare le ore degli operai: ore per persona e per cantiere, timbrature e il costo vero del lavoro. 3 mesi gratis.',
+  desc: 'Software per contare le ore degli operai: ore per persona e per cantiere, timbrature e il costo vero del lavoro. 30 giorni gratis.',
   h1: 'Gestione ore degli operai: sapere quanto è costato il lavoro, non quanto sembrava',
   minuti: 5,
   nomeApp: 'Gestione ore TrovaImpresa',
@@ -818,7 +818,7 @@ module.exports = [
   sommario: `un programma per contare le <strong>ore degli operai</strong>: per persona e per cantiere,
     con le timbrature e il rapportino dal telefono. Le ore poi entrano nel
     <strong>costo vero del lavoro</strong>.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [

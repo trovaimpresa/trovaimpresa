@@ -90,12 +90,12 @@ function riquadroPrezzo(cosa) {
       <div class="cifra">${PREZZO_ANNO} all'anno</div>
       <div class="sotto">oppure ${PREZZO_MESE} al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
       <ul class="checklist ok-list">
-        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
-        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li><strong>Lo provi 30 giorni gratis</strong>, e non serve la carta di credito.</li>
+        <li><strong>Alla fine della prova non parte nessun addebito.</strong> Se non fai nulla resti sul piano gratuito, e il profilo resta online.</li>
         <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
         <li>Ricevi regolare fattura per ogni pagamento.</li>
       </ul>
-      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 30 giorni gratis</a>
         <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
     </div>`;
 }
@@ -150,7 +150,7 @@ function costruisci(pag, tutte) {
     offers: {
       '@type': 'Offer', price: '249', priceCurrency: 'EUR',
       url: BASE + '/prezzi.html', availability: 'https://schema.org/InStock',
-      description: "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+      description: "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con 30 giorni di prova gratuita, senza carta di credito."
     },
     publisher: { '@type': 'Organization', name: 'TrovaImpresa', url: BASE }
   }, null, 2);
@@ -205,7 +205,7 @@ ${riquadroSorelle(pag, tutte)}
     <div class="cta-band">
       <h3>${pag.ctaTitolo}</h3>
       <p>${pag.ctaTesto}</p>
-      <a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+      <a href="/#registrati" class="cta-dark">Provalo 30 giorni gratis</a>
       <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
     </div>
 

@@ -23,10 +23,10 @@ module.exports = [
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
   funzioni: ['Prezzo annuale unico senza costo per utente', 'Nessun costo di attivazione',
-    'Tre mesi di prova senza carta di credito', 'Nessun rinnovo automatico',
+    'Trenta giorni di prova senza carta di credito', 'Nessun rinnovo automatico',
     'Marketplace compreso nello stesso prezzo'],
   ctaTitolo: 'Il modo più economico di decidere',
-  ctaTesto: 'Provane uno per tre mesi senza mettere la carta. Se dopo tre mesi non lo apri più, hai la risposta e non hai speso niente.',
+  ctaTesto: 'Provane uno per 30 giorni senza mettere la carta. Se in un mese non lo apri più, hai la risposta e non hai speso niente.',
   sommario: `un gestionale per l'edilizia in Italia costa in genere fra i <strong>200 e i 900 € l'anno</strong>,
     ma la cifra sul listino è solo metà del conto: le differenze vere stanno nel <strong>costo per
     utente</strong>, nell'<strong>attivazione</strong> e nei moduli venduti a parte.
@@ -71,7 +71,7 @@ module.exports = [
         ['Costo per utente in più', '0 € — gli accessi per collaboratori e segretaria sono compresi'],
         ['Attivazione', '0 €'],
         ['Moduli a parte', '0 € — computo, SAL, rapportini, mezzi e ore sono dentro'],
-        ['Prova', '3 mesi, senza carta di credito'],
+        ['Prova', '30 giorni, senza carta di credito'],
       ]},
       `Il prezzo è finale: non c'è IVA da aggiungere, e per ogni pagamento ricevi regolare fattura.`,
       { t:'espe', x:`Il motivo per cui costa meno non è che vale meno: è che il gestionale non è il
@@ -120,8 +120,7 @@ module.exports = [
     { d: "C'è l'IVA da aggiungere?",
       r: `No, 249 euro all'anno è il prezzo finale. Per ogni pagamento viene emessa regolare fattura.` },
     { d: 'Posso provarlo prima di pagare?',
-      r: `Sì, tre mesi, e non serve la carta di credito. Alla fine dei tre mesi non c'è addebito
-          automatico: se non fai nulla si torna al piano gratuito.` },
+      r: `Sì, 30 giorni, e non serve la carta di credito. Alla fine della prova non c'è addebito automatico: se non fai nulla si resta sul piano gratuito.` },
   ]
 },
 
@@ -138,14 +137,14 @@ module.exports = [
   minuti: 5,
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
-  funzioni: ['Tre mesi di prova senza carta di credito', 'Profilo gratuito sul marketplace',
+  funzioni: ['Trenta giorni di prova senza carta di credito', 'Profilo gratuito sul marketplace',
     'Nessun rinnovo automatico', 'Esportazione dei dati sempre gratuita'],
-  ctaTitolo: 'Il gratis più utile: tre mesi interi',
-  ctaTesto: "Non una versione ridotta, ma il gestionale intero per tre mesi. Senza carta e senza rinnovo automatico: se non ti serve, non succede niente.",
+  ctaTitolo: 'Il gratis più utile: 30 giorni interi',
+  ctaTesto: "Non una versione ridotta, ma il gestionale intero per 30 giorni. Senza carta e senza addebito alla fine: se non ti serve, non succede niente.",
   sommario: `il gratis esiste e per certe cose basta. <strong>Fogli di calcolo, agenda del telefono e
     gruppi WhatsApp</strong> reggono fino a due cantieri; poi cedono su tre cose precise: le
     <strong>ore</strong>, il <strong>computo</strong> e la <strong>fattura elettronica</strong>.
-    <span class="price-big">Qui: 3 mesi interi, senza carta</span>`,
+    <span class="price-big">Qui: 30 giorni interi, senza carta</span>`,
 
   sezioni: [
     { blocchi: [
@@ -187,25 +186,24 @@ module.exports = [
         ['Un preventivo richiamato in tempo', 'Un lavoro che avresti perso solo per non aver risentito il cliente'],
         ['Le serate a rifare i computi', 'Il tempo tuo, che non è gratis nemmeno quando non lo fatturi'],
       ]},
-      `Se dopo tre mesi di prova nessuna di queste cose è successa, allora il gratis ti basta davvero — e
+      `Se dopo 30 giorni di prova nessuna di queste cose è successa, allora il gratis ti basta davvero — e
        questa è una risposta buona, non una sconfitta.`
     ]},
 
     { h2: 'Come provare senza rischiare niente', blocchi: [
       { t:'fig', src:'/img/gestionale-lavori.webp', w:1440, h:971,
-        alt:'Il gestionale durante i tre mesi di prova, con i lavori e i loro stati',
-        cap:'Tre mesi con tutte le funzioni, non una versione ridotta.' },
+        alt:'Il gestionale durante i 30 giorni di prova, con i lavori e i loro stati',
+        cap:'Trenta giorni con tutte le funzioni, non una versione ridotta.' },
       `Il modo più onesto di rispondere alla domanda «mi serve?» è provarlo con un lavoro vero, non
        guardare una demo.`,
       { t:'ok', righe:[
-        `<strong>Tre mesi interi</strong>, con tutte le funzioni, non una versione ridotta.`,
+        `<strong>Trenta giorni interi</strong>, con tutte le funzioni, non una versione ridotta.`,
         `<strong>Senza carta di credito.</strong> Non ti chiediamo il numero per farti provare.`,
-        `<strong>Senza rinnovo automatico.</strong> Finiti i tre mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito e il profilo resta online.`,
+        `<strong>Senza addebito alla fine.</strong> Finiti i 30 giorni non ti addebitiamo niente: se non fai nulla resti sul piano gratuito e il profilo resta online.`,
         `<strong>I dati restano tuoi</strong> e si esportano in Excel o JSON anche se non continui.`,
       ]},
       { t:'espe', x:`La regola che seguiamo è semplice: un gestionale non si può far comprare a scatola
-        chiusa. Va fatto vedere e va fatto provare, come farebbe un agente immobiliare con una casa. Se
-        dopo tre mesi non lo apri più, il problema è il prodotto, non il cliente.` }
+        chiusa. Va fatto vedere e va fatto provare, come farebbe un agente immobiliare con una casa. Se dopo un mese non lo apri più, il problema è il prodotto, non il cliente.` }
     ]},
   ],
 
@@ -216,8 +214,7 @@ module.exports = [
           collegamento fra le cose: le ore sommate per cantiere, il computo che diventa preventivo e il
           preventivo che diventa fattura.` },
     { d: 'Quanto dura la prova e serve la carta?',
-      r: `Tre mesi, con tutte le funzioni, e la carta di credito non serve. Alla fine non c'è nessun
-          addebito automatico: se non fai nulla, torni al piano gratuito.` },
+      r: `Trenta giorni, con tutte le funzioni, e la carta di credito non serve. Alla fine non c'è nessun addebito automatico: se non fai nulla resti sul piano gratuito.` },
     { d: 'Se non continuo, perdo i dati?',
       r: `No. I dati si esportano in Excel o in JSON quando vuoi, anche se non continui, e il profilo sul
           marketplace resta online sul piano gratuito.` },
@@ -239,7 +236,7 @@ module.exports = [
   riga: 'da uno a dieci: quello che serve davvero e quello che è solo peso',
   briciola: 'Gestionale per la piccola impresa edile',
   title: 'Gestionale per piccole imprese edili e artigiani',
-  desc: 'Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. 3 mesi gratis.',
+  desc: 'Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. 30 giorni gratis.',
   h1: 'Gestionale per la piccola impresa edile: sei cose servono, il resto è peso',
   minuti: 5,
   nomeApp: 'Gestionale TrovaImpresa',
@@ -251,7 +248,7 @@ module.exports = [
   sommario: `per un'impresa da <strong>una a dieci persone</strong> le funzioni che servono davvero sono
     sei, e i gestionali fatti per le imprese grandi falliscono proprio perché ne hanno ottanta.
     Qui c'è quello che serve, senza il peso.
-    <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
   sezioni: [
     { blocchi: [

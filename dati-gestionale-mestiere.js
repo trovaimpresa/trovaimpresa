@@ -35,7 +35,7 @@ const MESTIERI = [
   link:'Gestionale per idraulici',
   riga:'interventi urgenti, ricambi e il preventivo fatto in macchina',
   title:'Gestionale per idraulici: preventivi, interventi e fatture',
-  desc: 'Gestionale per idraulici: interventi urgenti, preventivi fatti in macchina, ricambi e manutenzioni che tornano ogni anno. 3 mesi gratis.',
+  desc: 'Gestionale per idraulici: interventi urgenti, preventivi fatti in macchina, ricambi e manutenzioni che tornano ogni anno. 30 giorni gratis.',
   h1:'Gestionale per idraulici: dieci interventi al giorno e la sera non ti ricordi niente',
   apertura:`La giornata di un idraulico non è fatta di cantieri: è fatta di <strong>chiamate</strong>.
     Dieci fermate, tre urgenze, due preventivi promessi e un ricambio che manca. La sera, a casa, provi a
@@ -78,7 +78,7 @@ const MESTIERI = [
   link:'Gestionale per elettricisti',
   riga:'punti luce a preventivo, dichiarazioni di conformità e materiale',
   title:'Gestionale per elettricisti: preventivi, impianti e fatture',
-  desc: 'Gestionale per elettricisti: preventivi a punto luce, materiale riaddebitato, documenti di conformita\' sempre ritrovabili. 3 mesi gratis.',
+  desc: 'Gestionale per elettricisti: preventivi a punto luce, materiale riaddebitato, documenti di conformita\' sempre ritrovabili. 30 giorni gratis.',
   h1:'Gestionale per elettricisti: il preventivo a punti luce e il materiale che non si perde',
   apertura:`Un impianto elettrico si preventiva a punti: punti luce, prese, punti comandati, quadro.
     Sembra semplice, e poi il conto vero lo fa il materiale — che cambia prezzo ogni sei mesi e che
@@ -121,7 +121,7 @@ const MESTIERI = [
   link:'Gestionale per imbianchini',
   riga:'preventivi al metro quadro, mani di pittura e lavori corti',
   title:'Gestionale per imbianchini: preventivi al mq e fatture',
-  desc: 'Gestionale per imbianchini: preventivi al metro quadro, raschiatura e rasatura a voce separata, lavori corti e fatture. 3 mesi gratis.',
+  desc: 'Gestionale per imbianchini: preventivi al metro quadro, raschiatura e rasatura a voce separata, lavori corti e fatture. 30 giorni gratis.',
   h1:'Gestionale per imbianchini: il preventivo al metro quadro fatto sul posto',
   apertura:`Chi imbianca lavora al metro quadro, e il metro quadro è un prezzo che sembra semplice finché
     non ci metti dentro la raschiatura, il fissativo, la rasatura, le mani di pittura e i mobili da
@@ -163,7 +163,7 @@ const MESTIERI = [
   link:'Gestionale per piastrellisti',
   riga:'metri quadri, sfrido, formati diversi e la posa che cambia prezzo',
   title:'Gestionale per piastrellisti: preventivi al mq e sfrido',
-  desc:'Gestionale per piastrellisti: preventivi al metro quadro per formato, sfrido, demolizione e posa diagonale come voci separate, e fatture con IVA 10%. 3 mesi gratis.',
+  desc: 'Gestionale per piastrellisti: preventivi al mq per formato, sfrido, demolizione e posa diagonale come voci separate. 30 giorni gratis.',
   h1:'Gestionale per piastrellisti: il formato cambia il prezzo, e il preventivo deve dirlo',
   apertura:`Posare gres 30x30 e posare un 120x120 sono due mestieri diversi, e chi non è del ramo pensa
     che sia la stessa cosa. Il prezzo al metro quadro cambia col formato, con la posa, con lo stato del
@@ -206,7 +206,7 @@ const MESTIERI = [
   link:'Gestionale per cartongessisti',
   riga:'pareti e controsoffitti a mq, strutture, lastre e finitura',
   title:'Gestionale per cartongessisti: preventivi a mq e materiali',
-  desc: 'Gestionale per cartongessisti: pareti e controsoffitti al mq, struttura e lastre come voci separate, varianti in corso. 3 mesi gratis.',
+  desc: 'Gestionale per cartongessisti: pareti e controsoffitti al mq, struttura e lastre come voci separate, varianti in corso. 30 giorni gratis.',
   h1:'Gestionale per cartongessisti: la parete non è un metro quadro, sono quattro voci',
   apertura:`Una parete in cartongesso sembra una superficie e invece è una somma: la struttura metallica,
     le lastre da una parte, le lastre dall'altra, l'isolante dentro, la stuccatura sopra. Chi la
@@ -250,7 +250,7 @@ const MESTIERI = [
   link:'Gestionale per serramentisti',
   riga:'misure, acconti, ordini al fornitore e la posa mesi dopo',
   title:'Gestionale per serramentisti: preventivi, acconti e posa',
-  desc: 'Gestionale per serramentisti: preventivo pezzo per pezzo, acconto alla firma, ordine al fornitore e posa mesi dopo. 3 mesi gratis.',
+  desc: 'Gestionale per serramentisti: preventivo pezzo per pezzo, acconto alla firma, ordine al fornitore e posa mesi dopo. 30 giorni gratis.',
   h1:'Gestionale per serramentisti: fra la firma e la posa passano due mesi, e in mezzo va tenuto il filo',
   apertura:`Il lavoro del serramentista ha una forma che nessun altro mestiere edile ha: firmi a marzo,
     ordini ad aprile, posi a giugno. In mezzo ci sono un acconto incassato, un fornitore da pagare, una
@@ -292,7 +292,7 @@ const MESTIERI = [
   link:'Gestionale per termoidraulici',
   riga:'caldaie, libretti, manutenzioni annuali e interventi in garanzia',
   title:'Gestionale per termoidraulici: impianti e manutenzioni',
-  desc: 'Gestionale per termoidraulici: installazioni, manutenzioni annuali che tornano nello scadenzario e interventi in garanzia. 3 mesi gratis.',
+  desc: 'Gestionale per termoidraulici: installazioni, manutenzioni annuali che tornano nello scadenzario e interventi in garanzia. 30 giorni gratis.',
   h1:'Gestionale per termoidraulici: la manutenzione dell\'anno prossimo vale quanto il lavoro di oggi',
   apertura:`Chi installa caldaie e condizionatori ha una cosa che gli altri mestieri edili non hanno:
     <strong>il cliente torna</strong>. Ogni impianto messo è una manutenzione l'anno prossimo e per i
@@ -336,7 +336,7 @@ const MESTIERI = [
   link:'Gestionale per il rifacimento tetti',
   riga:'ponteggi, sicurezza, meteo e lavori che valgono decine di migliaia',
   title:'Gestionale per imprese di rifacimento tetti e coperture',
-  desc: 'Gestionale per chi rifa\' tetti: preventivi al mq di falda, ponteggio e sicurezza come voci vere, varianti quotate subito. 3 mesi gratis.',
+  desc: 'Gestionale per chi rifa\' tetti: preventivi al mq di falda, ponteggio e sicurezza come voci vere, varianti quotate subito. 30 giorni gratis.',
   h1:'Gestionale per il rifacimento tetti: il ponteggio è mezzo preventivo',
   apertura:`Il rifacimento di un tetto è uno dei lavori più cari che un privato commissiona nella vita, e
     uno dei più difficili da preventivare: la falda si misura in pendenza, il ponteggio costa quanto il
@@ -379,7 +379,7 @@ const MESTIERI = [
   link:'Gestionale per il fotovoltaico',
   riga:'pratiche, tempi lunghi, acconti e impianti da seguire negli anni',
   title:'Gestionale per installatori di impianti fotovoltaici',
-  desc: 'Gestionale per installatori di fotovoltaico: preventivi per componenti, pratiche e tempi lunghi nello scadenzario, acconti. 3 mesi gratis.',
+  desc: 'Gestionale per installatori di fotovoltaico: preventivi per componenti, pratiche e tempi lunghi nello scadenzario, acconti. 30 giorni gratis.',
   h1:'Gestionale per il fotovoltaico: l\'impianto si monta in due giorni, la pratica dura tre mesi',
   apertura:`Nel fotovoltaico il montaggio è la parte corta. La parte lunga sono le pratiche: la richiesta
     di connessione, il gestore di rete, la fine lavori, l'attivazione. Mesi in cui il cliente ha pagato
@@ -422,7 +422,7 @@ const MESTIERI = [
   link:'Gestionale per muratori',
   riga:'giornate, lavori a misura, materiale e il conto che deve tornare',
   title:'Gestionale per muratori: preventivi, lavori e fatture',
-  desc:'Gestionale per muratori: preventivi a misura o a giornata, materiale e ore che entrano nel costo del lavoro, e il conto di quanto è rimasto in tasca. 3 mesi gratis.',
+  desc: 'Gestionale per muratori: preventivi a misura o a giornata, materiale e ore nel costo del lavoro, e il conto di quanto resta. 30 giorni gratis.',
   h1:'Gestionale per muratori: preventivato meno materiale meno ore, quello che resta è tuo',
   apertura:`Il muratore è il mestiere dove il conto è più semplice da fare e dove quasi nessuno lo fa.
     Preventivato, meno materiale, meno ore: quello che resta è il guadagno. Tre numeri. Il problema è che
@@ -467,7 +467,7 @@ const MESTIERI = [
   link:'Gestionale per geometri',
   riga:'pratiche, scadenze, onorari con la cassa e computi da prezzare',
   title:'Gestionale per geometri: pratiche, scadenze e onorari',
-  desc: 'Gestionale per studi di geometra: pratiche con le loro scadenze, computi metrici, onorari con cassa e ritenuta. 3 mesi gratis.',
+  desc: 'Gestionale per studi di geometra: pratiche con le loro scadenze, computi metrici, onorari con cassa e ritenuta. 30 giorni gratis.',
   h1:'Gestionale per geometri: venti pratiche aperte e ognuna con la sua scadenza',
   apertura:`Uno studio di geometra non ha cantieri: ha <strong>pratiche</strong>. Venti, trenta aperte
     insieme, ognuna con un ente diverso, una scadenza diversa e un documento che manca. E ogni pratica
@@ -510,7 +510,7 @@ const MESTIERI = [
   link:'Gestionale per architetti',
   riga:'incarichi, fasi, onorari a percentuale e direzione lavori',
   title:'Gestionale per architetti: incarichi, fasi e onorari',
-  desc: 'Gestionale per studi di architettura: incarichi divisi in fasi, onorari e parcelle con Inarcassa, direzione lavori. 3 mesi gratis.',
+  desc: 'Gestionale per studi di architettura: incarichi divisi in fasi, onorari e parcelle con Inarcassa, direzione lavori. 30 giorni gratis.',
   h1:'Gestionale per architetti: l\'incarico non è un lavoro, sono quattro fasi che si pagano a pezzi',
   apertura:`Un incarico di architettura non finisce in un giorno: preliminare, definitivo, esecutivo,
     direzione lavori. Ogni fase ha il suo compenso e il suo momento di fatturazione, e tenere il filo di
@@ -553,7 +553,7 @@ const MESTIERI = [
   link:'Gestionale per ingegneri strutturali',
   riga:'pratiche al Genio Civile, depositi, collaudi e onorari sulle opere',
   title:'Gestionale per ingegneri strutturali: pratiche e onorari',
-  desc: 'Gestionale per ingegneri strutturali: pratiche di deposito, scadenze, collaudi e onorari sulle sole opere strutturali. 3 mesi gratis.',
+  desc: 'Gestionale per ingegneri strutturali: pratiche di deposito, scadenze, collaudi e onorari sulle sole opere strutturali. 30 giorni gratis.',
   h1:'Gestionale per ingegneri strutturali: l\'onorario si calcola sulle opere strutturali, non sulla casa',
   apertura:`L'errore più costoso che uno studio strutturale può fare in fase di offerta è calcolare
     l'onorario sul valore dell'intera ristrutturazione invece che sul valore delle <strong>sole opere
@@ -598,7 +598,7 @@ const MESTIERI = [
   link:'Gestionale per certificatori energetici',
   riga:'APE a volume, sopralluoghi, scadenze decennali e pratiche bonus',
   title:'Gestionale per certificatori energetici: APE e pratiche',
-  desc: 'Gestionale per chi redige APE: tante pratiche insieme, sopralluoghi, scadenza decennale dei certificati e rinnovi. 3 mesi gratis.',
+  desc: 'Gestionale per chi redige APE: tante pratiche insieme, sopralluoghi, scadenza decennale dei certificati e rinnovi. 30 giorni gratis.',
   h1:'Gestionale per certificatori energetici: tanti APE, piccoli, e nessuno che tenga il conto',
   apertura:`Chi fa certificazione energetica ha il problema opposto a quello di un progettista: non pochi
     incarichi grandi, ma <strong>tanti incarichi piccoli</strong>. Trenta APE al mese, ognuno con un
@@ -642,7 +642,7 @@ const MESTIERI = [
   link:'Gestionale per la direzione lavori',
   riga:'sopralluoghi, verbali, SAL da approvare e compensi a percentuale',
   title:'Gestionale per direttori dei lavori: sopralluoghi e SAL',
-  desc: 'Gestionale per la direzione lavori: sopralluoghi con foto e verbali, SAL da controllare, compensi a percentuale. 3 mesi gratis.',
+  desc: 'Gestionale per la direzione lavori: sopralluoghi con foto e verbali, SAL da controllare, compensi a percentuale. 30 giorni gratis.',
   h1:'Gestionale per la direzione lavori: il compenso è a percentuale, il lavoro è a sopralluoghi',
   apertura:`La direzione lavori si paga quasi sempre a percentuale sull'importo, e si lavora a
     <strong>sopralluoghi</strong>. Due unità di misura che non c'entrano niente l'una con l'altra: se il
@@ -685,7 +685,7 @@ const MESTIERI = [
   link:'Gestionale per interior designer',
   riga:'progetti, fornitori, capitolato arredi e le revisioni infinite',
   title:'Gestionale per interior designer: progetti e fornitori',
-  desc:'Gestionale per interior designer: progetti con le loro fasi, capitolato arredi e finiture, fornitori e ordini, revisioni contate e onorari. 3 mesi gratis.',
+  desc:'Gestionale per interior designer: progetti con le loro fasi, capitolato arredi e finiture, fornitori e ordini, revisioni contate e onorari. 30 giorni gratis.',
   h1:'Gestionale per interior designer: le revisioni sono il costo nascosto del progetto',
   apertura:`Nel progetto di interni il lavoro tecnico è la metà. L'altra metà è gestire il
     <strong>gusto</strong> del committente, che cambia idea — ed è normale che cambi idea, perché finché
@@ -752,7 +752,7 @@ module.exports = MESTIERI.map(m => {
     sommario: `il gestionale di TrovaImpresa visto dalla parte di ${m.articolo}: ${p.docPl},
       ${p.lavori}, fatture e scadenze, dal telefono e dal computer. Le stesse funzioni degli altri, ma
       con le parole e i conti del tuo mestiere.
-      <span class="price-big">3 mesi in regalo, poi 249 € l'anno</span>`,
+      <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
 
     sezioni: [
       { blocchi: [
@@ -816,8 +816,7 @@ module.exports = MESTIERI.map(m => {
             da fare a mano, basta la connessione.` },
       { d: `Quanto costa il gestionale per ${m.nome}?`,
         r: `È compreso nel Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, prezzo finale
-            senza IVA da aggiungere. I primi 3 mesi sono in regalo, non serve la carta di credito e non c'è
-            rinnovo automatico.` },
+            senza IVA da aggiungere. Lo provi 30 giorni gratis, non serve la carta di credito e alla fine non parte nessun addebito.` },
       { d: 'I dati sono miei?',
         r: `Sì. Si esportano in Excel o in JSON quando vuoi, senza costi e senza chiedere permesso: se un
             giorno vai da un'altra parte, te li porti dietro.` },
