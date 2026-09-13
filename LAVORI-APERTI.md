@@ -4,8 +4,98 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 13 settembre 2026 — dove finiscono i crediti Netlify (il 99% in pubblicazioni), controllo-push da 38 a 4 secondi
+Ultimo aggiornamento: 13 settembre 2026 (sera) — il gestionale e' entrato su Google con 27 pagine; via i «3 mesi in regalo»; crediti 40/100
 
+
+---
+
+## 🆕 IL 13 SETTEMBRE — IL GESTIONALE E' ENTRATO SU GOOGLE (→27← pagine, →4← push)
+
+Alex: «iniziamo con il gestionale dobbiamo promozionarlo in qualche modo».
+Il numero che ha deciso tutto: per il marketplace ci sono →1.802← pagine su
+Google, per il gestionale ce n'era **UNA**.
+
+### ✅ FATTO — →27← pagine nuove, in tre famiglie
+| Famiglia | Quante | Cosa sono |
+|---|---|---|
+| Il problema | →8← | computo metrico, preventivi, cantieri, rapportini, fatturazione, SAL, mezzi, ore |
+| Il mestiere | →16← | →10← artigiani (idraulici, elettricisti, imbianchini…) + →6← tecnici (geometri, architetti…) |
+| Il confronto | →3← | quanto costa, gratis, piccola impresa |
+
+Media →15.144← caratteri di testo vero per pagina. Nessuna pagina orfana:
+nella pagina madre c'e' il blocco «Cerchi una cosa precisa?» con tutti e →27←
+i link, piu' `sitemap-gestionale.xml` dichiarata in robots.txt.
+
+**I file**: `genera-pagine-gestionale.js` piu' i tre file di testo
+`dati-gestionale-problema.js` / `-mestiere.js` / `-confronto.js`.
+⛔ La grafica NON e' riscritta: il generatore LEGGE css, barra e piede da
+`software-gestionale-imprese-edili.html`. Se quel file manca, si ferma.
+⛔ I prezzi stanno in UN posto solo, la funzione `riquadroPrezzo`.
+
+### 🔴 IL DIFETTO PIU' GRAVE — robots.txt bloccava →16← pagine su →27←
+`Disallow: /gestionale-` serviva a tenere il PROGRAMMA fuori da Google, ma le
+pagine mestiere si chiamano `gestionale-idraulici`, `gestionale-geometri`…
+Erano pubblicate e invisibili. Adesso i →6← file del programma sono elencati
+uno per uno.
+⛔ **REGOLA**: prima di scegliere lo slug di una pagina nuova, guardare se
+robots.txt lo blocca. Vale anche per `/pannello-`, `/login-`, `/admin`.
+
+### ✅ VIA I «3 MESI IN REGALO» DA TUTTE LE SCRITTE
+Alex aveva gia' spento il regalo nel database (`crea_profilo_impresa` ora
+scrive `'free'`), quindi le scritte erano una promessa falsa. →304← occorrenze
+nelle pagine del gestionale, →13← in `prezzi.html`, piu' i termini.
+Al posto loro la **prova di →30← giorni**, che e' l'offerta vera e gia' viva.
+`prezzi.html`: da «Ti regaliamo i primi 3 mesi» a «Provalo 30 giorni, poi decidi tu».
+⛔ Nei →3← pannelli NON toccato: li' la frase spiega alle →129← imprese che i
+3 mesi ce li hanno davvero. Nei termini la clausola non e' cancellata ma
+**dichiarata chiusa il 13 settembre**, perche' e' la base scritta del loro regalo.
+
+### ✅ I CREDITI AI — 40 col Premium, 100 col Premium AI
+Deciso da Alex. Sta tutto in `quota_ai(plan, premium)` su Supabase: ⛔ la quota
+si cambia LI', in un posto solo. Verificato: →129← a 40, →1← a 100, →5← a 0.
+⚠️ TRABOCCHETTO: `ai_accounts.plan = 'base'` ce l'ha SIA chi paga il Premium SIA
+chi e' free. La quota si decide dal piano AI **piu'** il Premium attivo.
+
+### 🔴 ALTRI TRE DIFETTI MUTI, tutti chiusi
+1. In `js/ai-integrazione.js` la finestra dell'AI diceva ancora «Premium 49€/anno»
+   e «5€/mese»: prezzi archiviati su Stripe dal 29 agosto. Quel file non era negli
+   →8← in cui i prezzi furono cambiati.
+2. `consume_ai_credit` sul cambio di mese usava la vecchia `quota_per_piano` (0):
+   il →1 ottobre← un Premium AI si sarebbe trovato →0← crediti.
+3. Sempre li', un blocco secco «se il piano AI e' base, ferma tutto» impediva a
+   chi paga il Premium di spendere una ricarica comprata.
+
+### ⚖️ LA LEZIONE DELLA GIORNATA
+Alex: «il lavoro dei crediti era fatto e testato e funzionante». Aveva ragione.
+Nel registro `ai_richieste` l'ultima richiesta di tipo 'preventivo' e' del
+→21← agosto; la migrazione che ha azzerato la quota e' del →29←. Il collaudo
+era vero, si e' rotto otto giorni dopo, e nessuno ha piu' cliccato quel pulsante.
+⛔ Quando un collaudo passato e una misura di oggi si contraddicono, cercare la
+DATA in mezzo — non dare torto a qualcuno.
+
+### ⬜ RESTA APERTO
+- **La prova di →30← giorni non l'ha mai fatta una persona vera.** Provata solo
+  simulata sul database (→5← passi su →5←) perche' oggi **nessuna impresa e' sul
+  piano free**: tutti quelli iscritti prima del 13 set hanno il regalo. Il primo
+  iscritto nuovo e' il collaudo vero.
+- **I →40← crediti del Premium oggi sono soprattutto un cancello a schermo.**
+  `ai-claude.js` non li guarda (ha un tetto suo di →30← chiamate/giorno) e
+  `chat_stato` nemmeno. Se si vuole che 40 voglia dire davvero quaranta
+  operazioni, va cambiato `ai-claude.js` — lavoro a se'.
+- **`imposta_scadenza_premium()` regala ancora →3← mesi** a chi diventa premium
+  senza pagare: seconda porta sullo stesso cortile, non chiesta e non toccata.
+- **«Nessun rinnovo automatico»** nel riquadro prezzo: vero per la prova, falso
+  per un abbonamento. Oggi si capisce dal contesto.
+- **Il →3 ottobre← circa**: guardare su Search Console se le →27← pagine prendono
+  impressioni. Solo allora decidere se allargare la famiglia.
+
+### 🧭 LE SCELTE DI ALEX, per non riaprirle
+- Fra quattro strade ha scelto la **promozione fuori**, scartando: sistemare
+  l'entrata nel pannello, le email agli iscritti, chiedere alle imprese perche'
+  non lo aprono. Claude aveva consigliato di sistemare prima l'entrata.
+- Fra i canali: **Google senza pagare**, scartando Facebook, Meta a pagamento e i reel.
+- Ha fatto **togliere la pagina che nominava un concorrente**. ⛔ Oggi nessuna
+  pagina del sito nomina un concorrente.
 
 ---
 

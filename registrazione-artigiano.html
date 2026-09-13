@@ -667,7 +667,25 @@
           var _campoMail = document.querySelector('input[type=email]');
           var _mail = (_campoMail && _campoMail.value) || (typeof email !== 'undefined' ? email : '');
           var _fbp = (document.cookie.match(/(?:^|;\s*)_fbp=([^;]+)/) || [])[1] || '';
+          /* 13 set 2026 — IL CODICE DEL CLIC ARRIVA SULLA HOME, NON QUI.
+             Chi viene dalla pubblicita' atterra su / con ?fbclid=... e poi
+             clicca fin qui, dove quel codice non c'e' piu'. Se manca, si
+             riprende quello messo da parte da js/conta-visita.js insieme
+             all'ORA vera del clic (Meta vuole quella, non l'ora
+             dell'iscrizione). Si usa solo se il clic e' degli ultimi 30
+             giorni: piu' vecchio, Meta lo scarta comunque. */
           var _fbclid = new URLSearchParams(window.location.search).get('fbclid') || '';
+          var _fbclid_t = _fbclid ? Date.now() : 0;
+          try {
+            if (!_fbclid) {
+              var _clicMem = localStorage.getItem('ti_fbclid') || '';
+              var _clicQuando = parseInt(localStorage.getItem('ti_fbclid_t') || '0', 10);
+              if (_clicMem && _clicQuando && (Date.now() - _clicQuando) < 30 * 24 * 60 * 60 * 1000) {
+                _fbclid = _clicMem;
+                _fbclid_t = _clicQuando;
+              }
+            }
+          } catch (e3) { /* navigazione privata: si va avanti senza */ }
           fetch('/.netlify/functions/meta-evento', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -677,6 +695,7 @@
               tipo: 'artigiano',
               fbp: _fbp,
               fbclid: _fbclid,
+            fbclid_t: _fbclid_t,
               url: window.location.href
             })
           }).catch(function () {});

@@ -8,7 +8,7 @@
 // Meta li unisce e conta una sola iscrizione (deduplica).
 //
 // Chiamata dalle 4 pagine registrazione con:
-//   { event_id, email, tipo, fbp, fbclid, url }
+//   { event_id, email, tipo, fbp, fbclid, fbclid_t, url }
 //
 // Variabili Netlify richieste:
 //   META_CAPI_TOKEN  (secret)
@@ -35,9 +35,18 @@ function emailValida(email) {
 
 // Il click da Facebook arriva come ?fbclid=... nell'URL.
 // Meta lo vuole nel formato fbc: fb.1.<millisecondi>.<fbclid>
-function costruisciFbc(fbclid, adesso) {
+//
+// ⚠️ 13 set 2026 — quei millisecondi sono l'ora del CLIC, non quella
+// dell'iscrizione. Prima ci mettevamo sempre "adesso": per Meta il clic
+// risultava avvenuto nel momento stesso della registrazione, e
+// l'abbinamento con l'inserzione vera veniva peggio. Ora la pagina manda
+// anche `fbclid_t`, l'ora in cui il codice e' arrivato davvero (messa da
+// parte da js/conta-visita.js). Se non c'e', si ripiega su adesso.
+function costruisciFbc(fbclid, adesso, quandoClic) {
   if (!fbclid) return undefined;
-  return 'fb.1.' + adesso + '.' + fbclid;
+  var t = Number(quandoClic);
+  var valido = isFinite(t) && t > 1000000000000 && t <= adesso;
+  return 'fb.1.' + (valido ? Math.floor(t) : adesso) + '.' + fbclid;
 }
 
 exports.handler = async function (event) {
@@ -52,7 +61,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ errore: 'JSON non valido' }) };
   }
 
-  const { event_id, email, tipo, fbp, fbclid, url } = dati;
+  const { event_id, email, tipo, fbp, fbclid, fbclid_t, url } = dati;
 
   if (!event_id) {
     return { statusCode: 400, body: JSON.stringify({ errore: 'event_id mancante' }) };
@@ -76,7 +85,7 @@ exports.handler = async function (event) {
 
   const user_data = { em: [emailCifrata(email)] };
   if (fbp) user_data.fbp = fbp;
-  const fbc = costruisciFbc(fbclid, adesso);
+  const fbc = costruisciFbc(fbclid, adesso, fbclid_t);
   if (fbc) user_data.fbc = fbc;
   if (ip) user_data.client_ip_address = ip;
   if (userAgent) user_data.client_user_agent = userAgent;

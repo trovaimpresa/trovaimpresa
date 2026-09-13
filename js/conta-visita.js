@@ -113,6 +113,28 @@
       }
     } catch (e) { /* navigazione privata: pazienza, si perde l'etichetta */ }
 
+
+    /* ------------------------------------------------------------
+       13 set 2026 — LA MEMORIA DEL CLIC DI FACEBOOK.
+       Chi arriva dalla pubblicita' atterra sulla HOME con ?fbclid=...
+       nell'indirizzo. Poi clicca "Artigiano" e va sulla pagina di
+       registrazione, dove quel codice NON c'e' piu': quando avvisavamo
+       Meta dell'iscrizione non gli dicevamo da quale clic veniva, e
+       Meta non riusciva ad attribuirla (ne contava 3 su 8 vere).
+       Qui il codice del clic viene messo da parte con l'ORA in cui e'
+       arrivato — Meta vuole il momento del CLIC, non quello
+       dell'iscrizione. Vince l'ULTIMO clic: se uno torna dalla
+       pubblicita' una seconda volta, il merito e' del clic nuovo.
+       Non e' un dato personale: e' un codice che Facebook stesso ha
+       appena messo nell'indirizzo.
+       ------------------------------------------------------------ */
+    try {
+      if (fbclid) {
+        localStorage.setItem('ti_fbclid', String(fbclid).slice(0, 300));
+        localStorage.setItem('ti_fbclid_t', String(Date.now()));
+      }
+    } catch (e) { /* navigazione privata: pazienza */ }
+
     function manda(fase, ms) {
       try {
         var riga = {};
