@@ -143,6 +143,25 @@
 
   /* STAT CARDS */
   .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  /* ============================================================
+     13 settembre 2026 — LE CASELLE DIVENTANO BOTTONI
+     Alex: «nella dash vorrei che i bottoni fossero cliccabili ed
+     entrare per ricevere maggiori informazioni». La freccia a destra
+     e' li' apposta per far vedere che si clicca: senza, una casella
+     cliccabile non si distingue da un cartello.
+     ============================================================ */
+  .gruppo-stat { font-size:0.82rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+                 color:var(--light); margin:4px 0 12px; display:flex; align-items:center; gap:10px; }
+  .gruppo-stat::after { content:""; flex:1; height:1px; background:var(--border); }
+  .stat-card.apri { cursor:pointer; position:relative; padding-right:38px;
+                    transition:box-shadow .15s, transform .15s, border-color .15s; }
+  .stat-card.apri:hover { box-shadow:0 6px 22px rgba(0,0,0,.12); transform:translateY(-2px); border-color:#cdd8e6; }
+  .stat-card.apri:focus-visible { outline:3px solid var(--verde); outline-offset:2px; }
+  .stat-freccia { position:absolute; right:16px; top:50%; transform:translateY(-50%);
+                  color:#b6c0ce; font-size:1.5rem; line-height:1; }
+  .stat-card.apri:hover .stat-freccia { color:var(--verde); }
+  @media(max-width:1100px){ .stats-grid { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:620px){ .stats-grid { grid-template-columns:1fr; } }
   @media(max-width:900px){ .stats-grid { grid-template-columns:repeat(2,1fr); } }
   .stat-card {
     background:white; border-radius:16px; padding:20px 24px;
@@ -598,68 +617,132 @@
         </div>
       </div>
 
+      <!-- ============================================================
+           13 settembre 2026 — LA DASHBOARD DIVENTA UN INDICE.
+           Prima erano 12 cartelli che dicevano un numero e basta: per
+           vedere chi c'era dietro bisognava cercare la voce nel menu a
+           sinistra. Adesso OGNI casella si clicca e porta nella sua
+           sezione (attributo data-va, vedi apriSezione()).
+           E sono divise in tre gruppi, perche' 20 caselle in fila sono
+           un muro: come va il sito / chi c'e' dentro / da tenere d'occhio.
+           ============================================================ -->
+      <div class="gruppo-stat">Come va il sito</div>
       <div class="stats-grid">
         <!-- 6 settembre 2026 — le due caselle che dicono se il sito sta
              CRESCENDO, non solo cosa c'e' dentro. I numeri arrivano da
              `visite_sito` (js/conta-visita.js) passando per la funzione
              /.netlify/functions/admin-visite. "Persone" = sessioni diverse. -->
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="ricerche">
           <div class="stat-icon b">👀</div>
           <div>
             <div class="stat-num" id="stat-visite-ieri">–</div>
             <div class="stat-lbl">Hanno aperto il sito ieri</div>
             <div class="stat-conf" id="stat-visite-conf"></div>
           </div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="ricerche">
           <div class="stat-icon g">🟢</div>
-          <div>
-            <div class="stat-num" id="stat-visite-oggi">–</div>
-            <div class="stat-lbl">Hanno aperto il sito oggi</div>
-            <div class="stat-conf pari">giornata in corso</div>
-          </div>
+          <div><div class="stat-num" id="stat-visite-oggi">–</div><div class="stat-lbl">Hanno aperto il sito oggi</div><div class="stat-conf pari">giornata in corso</div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="ricerche">
+          <div class="stat-icon b">🔎</div>
+          <div><div class="stat-num" id="stat-schede-aperte">–</div><div class="stat-lbl">Schede aperte dai clienti</div><div class="stat-conf" id="stat-schede-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="chientra">
+          <div class="stat-icon g">🚶</div>
+          <div><div class="stat-num" id="stat-entrati7">–</div><div class="stat-lbl">Sono entrati nel pannello (7 gg)</div><div class="stat-conf" id="stat-entrati7-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+      </div>
+
+      <div class="gruppo-stat">Chi c'è dentro</div>
+      <div class="stats-grid">
+        <div class="stat-card apri" data-va="imprese">
           <div class="stat-icon g">🏗️</div>
           <div><div class="stat-num" id="stat-totali">–</div><div class="stat-lbl">Totale imprese</div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon o">📝</div>
-          <div><div class="stat-num" id="stat-incompleti">–</div><div class="stat-lbl">Profili da completare</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon g">🗺️</div>
-          <div><div class="stat-num" id="stat-citta">–</div><div class="stat-lbl">Città coperte</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon b">📋</div>
-          <div><div class="stat-num" id="stat-preventivi">–</div><div class="stat-lbl">Preventivi ricevuti</div></div>
-        </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="imprese">
           <div class="stat-icon g">🆕</div>
           <div><div class="stat-num" id="stat-oggi">–</div><div class="stat-lbl">Iscritti oggi</div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="imprese">
           <div class="stat-icon o">📅</div>
           <div><div class="stat-num" id="stat-settimana">–</div><div class="stat-lbl">Iscritti 7 giorni</div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="imprese">
+          <div class="stat-icon g">🗺️</div>
+          <div><div class="stat-num" id="stat-citta">–</div><div class="stat-lbl">Città coperte</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="abbonamenti">
           <div class="stat-icon b">💎</div>
-          <div><div class="stat-num" id="stat-premium">–</div><div class="stat-lbl">Premium attivi</div></div>
+          <div><div class="stat-num" id="stat-premium">–</div><div class="stat-lbl">Premium attivi</div><div class="stat-conf" id="stat-premium-conf"></div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="utilizzo">
           <div class="stat-icon r">🛠️</div>
           <div><div class="stat-num" id="stat-gestionali">–</div><div class="stat-lbl">Gestionali attivi</div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <!-- 16 agosto 2026 — due caselle nuove: sono dati che una data ce
-             l'hanno, quindi si possono mettere sul grafico. -->
-        <div class="stat-card">
-          <div class="stat-icon b">⭐</div>
-          <div><div class="stat-num" id="stat-recensioni">–</div><div class="stat-lbl">Recensioni</div></div>
+        <div class="stat-card apri" data-va="preventivi">
+          <div class="stat-icon b">📋</div>
+          <div><div class="stat-num" id="stat-preventivi">–</div><div class="stat-lbl">Preventivi ricevuti</div></div>
+          <span class="stat-freccia">›</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card apri" data-va="segnalazioni">
           <div class="stat-icon o">🚩</div>
           <div><div class="stat-num" id="stat-segnalazioni">–</div><div class="stat-lbl">Segnalazioni</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+      </div>
+
+      <div class="gruppo-stat">Da tenere d'occhio</div>
+      <div class="stats-grid">
+        <div class="stat-card apri" data-va="abbonamenti">
+          <div class="stat-icon r">⏳</div>
+          <div><div class="stat-num" id="stat-scadenze">–</div><div class="stat-lbl">Regali che scadono</div><div class="stat-conf" id="stat-scadenze-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="imprese">
+          <div class="stat-icon o">📷</div>
+          <div><div class="stat-num" id="stat-senza-foto">–</div><div class="stat-lbl">Schede senza nemmeno una foto</div><div class="stat-conf" id="stat-senza-foto-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="imprese">
+          <div class="stat-icon o">✍️</div>
+          <div><div class="stat-num" id="stat-senza-descr">–</div><div class="stat-lbl">Schede senza descrizione</div><div class="stat-conf" id="stat-senza-descr-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="imprese">
+          <div class="stat-icon r">✉️</div>
+          <div><div class="stat-num" id="stat-mail-nc">–</div><div class="stat-lbl">Email mai confermate</div><div class="stat-conf giu">non si vedono sul sito</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="chientra">
+          <div class="stat-icon r">🚪</div>
+          <div><div class="stat-num" id="stat-mai-entrati">–</div><div class="stat-lbl">Mai entrati nel pannello</div><div class="stat-conf giu">iscritti e spariti</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="recensioni">
+          <div class="stat-icon b">⭐</div>
+          <div><div class="stat-num" id="stat-recensioni">–</div><div class="stat-lbl">Recensioni</div><div class="stat-conf" id="stat-rec-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="supporto">
+          <div class="stat-icon o">🆘</div>
+          <div><div class="stat-num" id="stat-supporto">–</div><div class="stat-lbl">Messaggi di assistenza</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="imprese">
+          <div class="stat-icon o">📝</div>
+          <div><div class="stat-num" id="stat-incompleti">–</div><div class="stat-lbl">Profili da completare</div></div>
+          <span class="stat-freccia">›</span>
         </div>
       </div>
 
@@ -3429,6 +3512,91 @@ async function caricaVisite() {
 // nessun errore. Sta qui fuori perche' la usano in tre punti diversi.
 const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
 
+/* ============================================================
+   13 settembre 2026 — LE CASELLE DELLA DASHBOARD SI CLICCANO
+   Ogni casella ha `data-va="nomesezione"`. Un ascoltatore solo, qui
+   sotto, la porta dentro. showSection() vuole anche l'elemento del
+   menu da accendere: se per quella sezione il menu non ce l'ha
+   (succede con «supporto»), gli si passa un div finto invece di
+   lasciarlo crashare su null.
+   ============================================================ */
+function apriSezione(id) {
+  try {
+    if (!id || !document.getElementById('sec-' + id)) return;
+    var nav = Array.prototype.slice.call(document.querySelectorAll('.nav-item')).filter(function (n) {
+      return (n.getAttribute('onclick') || '').indexOf("showSection('" + id + "'") > -1;
+    })[0] || document.createElement('div');
+    showSection(id, nav);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) { console.warn('[dashboard] non riesco ad aprire la sezione', id, e); }
+}
+document.addEventListener('click', function (ev) {
+  var c = ev.target && ev.target.closest ? ev.target.closest('.stat-card.apri') : null;
+  if (c) apriSezione(c.getAttribute('data-va'));
+});
+
+/* ============================================================
+   13 settembre 2026 — I NUMERI NUOVI DELLA DASHBOARD
+   Alex: «tante informazioni che mi potrebbe dare non me le da».
+   Questi erano gia' tutti nel database, non li guardava nessuno.
+   Ognuno e' dentro il suo try: se uno non si puo' leggere resta il
+   trattino e gli altri arrivano lo stesso.
+   ============================================================ */
+function _plur(n, uno, tanti) { return n + ' ' + (n === 1 ? uno : tanti); }
+
+/* quante imprese non hanno NEMMENO UNA foto di lavoro.
+   ⚠️ le foto NON stanno in imprese.foto_urls (colonna morta): stanno
+   nella tabella lavori_foto, una riga per foto, legata a owner_id. */
+async function contaSchedeSenzaFoto(impreseVere) {
+  try {
+    const { data, error } = await sb.from('lavori_foto').select('owner_id');
+    if (error) throw error;
+    const conFoto = new Set((data || []).map(r => r.owner_id).filter(Boolean));
+    const senza = impreseVere.filter(i => !conFoto.has(i.user_id)).length;
+    _set('stat-senza-foto', senza);
+    _set('stat-senza-foto-conf', 'su ' + impreseVere.length);
+  } catch (e) { console.warn('[dashboard] foto:', e.message || e); }
+}
+
+/* chi e' entrato nel pannello negli ultimi 7 giorni, e chi non c'e'
+   mai entrato. Stessa funzione che riempie «Chi entra nel sito». */
+async function contaChiEntraDashboard() {
+  try {
+    const res = await fetch('/.netlify/functions/admin-chi-entra', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!j.success) throw new Error(j.error || 'errore sconosciuto');
+    const righe = j.data || [];
+    const setteFa = Date.now() - 7 * 86400000;
+    const entrati7 = righe.filter(r => r.ultimo_ingresso && new Date(r.ultimo_ingresso).getTime() >= setteFa).length;
+    const mai = righe.filter(r => !r.ultimo_ingresso).length;
+    _set('stat-entrati7', entrati7);
+    _set('stat-entrati7-conf', 'su ' + righe.length + ' iscritti');
+    _set('stat-mai-entrati', mai);
+  } catch (e) { console.warn('[dashboard] chi entra:', e.message || e); }
+}
+
+/* quante volte i clienti hanno aperto una scheda impresa */
+async function contaSchedeAperte() {
+  try {
+    const { count, error } = await sb.from('visite_clienti').select('*', { count: 'exact', head: true });
+    if (error) throw error;
+    _set('stat-schede-aperte', count == null ? '–' : count);
+    _set('stat-schede-conf', 'da inizio conteggio');
+  } catch (e) { console.warn('[dashboard] schede aperte:', e.message || e); }
+}
+
+/* i messaggi di assistenza arrivati dai pannelli e dal gestionale */
+async function contaSupportoDashboard() {
+  try {
+    const j = await suppFetch('list');
+    if (!j || !j.success) return;
+    _set('stat-supporto', (j.messaggi || []).length);
+  } catch (e) { console.warn('[dashboard] supporto:', e.message || e); }
+}
+
 // CARICA IMPRESE
 async function caricaImprese() {
   const { data, error } = await sb.from('imprese').select('*').order('created_at', { ascending: false });
@@ -3465,6 +3633,40 @@ async function caricaImprese() {
   _set('stat-settimana', impreseVere.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
   _set('stat-premium', impreseVere.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
   _set('stat-gestionali', impreseVere.filter(i => i.gestionale_attivo === true).length);
+
+  /* 13 settembre 2026 — i numeri «da tenere d'occhio».
+     Erano tutti gia' dentro `imprese`, nessuno li guardava. */
+  const _ora = Date.now();
+  const _scad = i => {
+    const d = i.premium_scadenza || i.data_scadenza_piano;
+    return d ? new Date(d).getTime() : null;
+  };
+  const sc60 = impreseVere.filter(i => { const d = _scad(i); return d && d > _ora && d <= _ora + 60 * 86400000; }).length;
+  const primaScad = impreseVere.map(_scad).filter(d => d && d > _ora).sort((a, b) => a - b)[0];
+  _set('stat-scadenze', sc60);
+  _set('stat-scadenze-conf', primaScad
+    ? 'nei prossimi 60 giorni · il primo il ' + new Date(primaScad).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })
+    : 'nessuna scadenza vicina');
+  const _cs = document.getElementById('stat-scadenze-conf');
+  if (_cs) _cs.className = 'stat-conf ' + (sc60 > 0 ? 'giu' : 'pari');
+
+  const senzaDescr = impreseVere.filter(i => !i.descrizione || !String(i.descrizione).trim()).length;
+  _set('stat-senza-descr', senzaDescr);
+  _set('stat-senza-descr-conf', 'su ' + tot);
+
+  _set('stat-mail-nc', impreseVere.filter(i => i.email_confermata !== true).length);
+
+  /* «Premium attivi» sono tutti regalati finche' nessuno ha pagato:
+     dirlo evita di leggere quel numero come se fossero incassi. */
+  const paganti = impreseVere.filter(i => i.premium_pagato === true).length;
+  _set('stat-premium-conf', paganti === 0 ? 'tutti regalati' : _plur(paganti, 'pagante', 'paganti'));
+  const _pc = document.getElementById('stat-premium-conf');
+  if (_pc) _pc.className = 'stat-conf pari';
+
+  contaSchedeSenzaFoto(impreseVere);
+  contaChiEntraDashboard();
+  contaSchedeAperte();
+  contaSupportoDashboard();
   // _set non si arrabbia se un elemento non c'e' piu' (es. il badge di
   // "Da verificare", rimosso dal menu): prima un solo id mancante bloccava
   // tutta la funzione e la tabella restava su "Caricamento...".
@@ -3958,7 +4160,20 @@ async function caricaRecensioni() {
   } catch { return; }
   /* 16 agosto 2026 — le recensioni servono anche al grafico e alla casella in cima */
   _creRec = data || [];
-  _set('stat-recensioni', _creRec.length);
+  /* ⛔ 13 settembre 2026 — QUESTA CASELLA DICEVA UNA BUGIA.
+     Contava TUTTE le righe di feedback_clienti, comprese quelle che il
+     cliente non ha mai confermato dall'email. Il 13 set la dashboard
+     diceva «1 Recensioni» mentre sul sito non se ne vedeva nessuna:
+     quell'unica riga era ferma dal 12 agosto, mai confermata.
+     Adesso il numero grosso conta SOLO le confermate — le stesse che
+     si vedono sulla scheda pubblica — e quelle in attesa stanno nella
+     riga piccola sotto, dove non si scambiano per recensioni vere. */
+  const _recOk = _creRec.filter(r => r.confermata === true).length;
+  const _recAtt = _creRec.length - _recOk;
+  _set('stat-recensioni', _recOk);
+  _set('stat-rec-conf', _recAtt ? _plur(_recAtt, 'in attesa di conferma', 'in attesa di conferma') : '');
+  const _rc = document.getElementById('stat-rec-conf');
+  if (_rc) _rc.className = 'stat-conf ' + (_recAtt ? 'giu' : 'pari');
   renderCrescita();
   const tbody = document.getElementById('table-recensioni');
   if (!data?.length) {
