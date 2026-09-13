@@ -1,44 +1,81 @@
+# ⛔ 13 settembre 2026 — «Disallow: /gestionale-» CHIUDEVA FUORI LE PAGINE NUOVE.
+#    La riga serviva a tenere il PROGRAMMA fuori da Google, e faceva bene.
+#    Ma il 13 set sono nate 16 pagine «gestionale-idraulici», «gestionale-geometri»…
+#    che su Google ci devono ANDARE: quella riga le bloccava tutte e 16.
+#    Adesso i 6 file del programma sono elencati uno per uno.
+#    ⚠️ SE NASCE UN GESTIONALE NUOVO - per esempio gestionale-magazzino.html -
+#       va aggiunto a mano in TUTTI i gruppi qui sotto, se no finisce su Google.
 User-agent: GPTBot
 Allow: /
 Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
-Disallow: /gestionale-
+Disallow: /gestionale-app
+Disallow: /gestionale-negozio
+Disallow: /gestionale-noleggio
+Disallow: /gestionale-operatore
+Disallow: /gestionale-config
+Disallow: /gestionale-invito
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
-Disallow: /gestionale-
+Disallow: /gestionale-app
+Disallow: /gestionale-negozio
+Disallow: /gestionale-noleggio
+Disallow: /gestionale-operatore
+Disallow: /gestionale-config
+Disallow: /gestionale-invito
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
-Disallow: /gestionale-
+Disallow: /gestionale-app
+Disallow: /gestionale-negozio
+Disallow: /gestionale-noleggio
+Disallow: /gestionale-operatore
+Disallow: /gestionale-config
+Disallow: /gestionale-invito
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
-Disallow: /gestionale-
+Disallow: /gestionale-app
+Disallow: /gestionale-negozio
+Disallow: /gestionale-noleggio
+Disallow: /gestionale-operatore
+Disallow: /gestionale-config
+Disallow: /gestionale-invito
 
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
-Disallow: /gestionale-
+Disallow: /gestionale-app
+Disallow: /gestionale-negozio
+Disallow: /gestionale-noleggio
+Disallow: /gestionale-operatore
+Disallow: /gestionale-config
+Disallow: /gestionale-invito
 
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
-Disallow: /gestionale-
+Disallow: /gestionale-app
+Disallow: /gestionale-negozio
+Disallow: /gestionale-noleggio
+Disallow: /gestionale-operatore
+Disallow: /gestionale-config
+Disallow: /gestionale-invito
 # ⚠️ 21 agosto 2026 — GLI INDIRIZZI TECNICI DI SUPABASE.
 # Google li trovava leggendo il codice delle pagine: dentro il JavaScript
 # ci sono scritte come '/rest/v1/candidati_lavoro?user_id=eq.' e
