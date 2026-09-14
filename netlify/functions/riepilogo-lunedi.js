@@ -42,7 +42,16 @@
 // - SUPABASE_SERVICE_KEY e RESEND_API_KEY su Netlify: ci sono gia', le usano
 //   promemoria-scadenze.js e invia-promemoria.js.
 
-const { schedule } = require('@netlify/functions');
+/* ⚠️ 14 settembre 2026 (sera) — QUI C'ERA:
+       const { schedule } = require('@netlify/functions');
+   Tolta insieme all'orologio, e NON per pulizia: Netlify si RIFIUTA di
+   pubblicare il sito se `schedule` viene importato e poi non usato —
+   «The schedule helper was imported but we couldn't find any usages».
+   E' l'errore che ha fatto fallire le pubblicazioni del 14 settembre alle
+   14:54 e alle 19:37: il push era andato a buon fine tutte e due le volte,
+   ma il sito online era rimasto fermo a quello di prima.
+   ⛔ PER TORNARE INDIETRO servono DUE righe, non una: questa qui sopra E
+      quella di `exports.handler = schedule(...)` in fondo al file. */
 const { createClient } = require('@supabase/supabase-js');
 
 // ---------------------------------------------------------------------------
