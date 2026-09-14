@@ -79,6 +79,13 @@
 
   .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
   .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+    /* 14 set 2026 — la riga del secondo gestionale, quello con l'AI.
+     Sta nel CSS del MODELLO e non nel generatore apposta: il generatore copia
+     il foglio di stile da qui, quindi una riga sola veste tutte e 28 le pagine. */
+  .prezzo-ai{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);
+             font-size:16px;line-height:1.6;color:var(--muted);text-align:left;
+             max-width:430px;margin-left:auto;margin-right:auto}
+  .prezzo-ai b{color:var(--primary-dark)}
   .prezzo-box .sotto{color:var(--muted);font-size:16px}
   .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
 
@@ -108,7 +115,7 @@
   <div class="menu">
     <a href="/index.html">Home</a>
     <a href="/prezzi.html">Prezzi</a>
-    <a href="/#registrati" class="menu-btn">Provalo 30 giorni gratis</a>
+    <a href="/prova-il-gestionale.html" class="menu-btn">Provalo 30 giorni gratis</a>
   </div>
 </nav>
 
@@ -189,13 +196,17 @@
       <div class="sotto">La gestione delle ore è dentro il Premium di TrovaImpresa</div>
       <div class="cifra">249 € all'anno</div>
       <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <div class="prezzo-ai">
+        <b>C'&egrave; anche il gestionale con l'AI</b> — 349 € all'anno oppure 39 € al mese.
+        Aggiunge la chat che ti risponde coi conti dei tuoi lavori e ti compila i moduli.
+      </div>
       <ul class="checklist ok-list">
         <li><strong>Lo provi 30 giorni gratis</strong>, e non serve la carta di credito.</li>
         <li><strong>Alla fine della prova non parte nessun addebito.</strong> Se non fai nulla resti sul piano gratuito, e il profilo resta online.</li>
         <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
         <li>Ricevi regolare fattura per ogni pagamento.</li>
       </ul>
-      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 30 giorni gratis</a>
+      <p style="margin-top:22px"><a href="/prova-il-gestionale.html" class="cta-dark">Provalo 30 giorni gratis</a>
         <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
     </div>
 
@@ -236,7 +247,7 @@
     <div class="cta-band">
       <h3>Prova per un mese e guarda il conto</h3>
       <p>Registra le ore di un mese e poi guarda un cantiere chiuso: preventivato, meno materiale, meno ore. Quel numero è il tuo guadagno vero.</p>
-      <a href="/#registrati" class="cta-dark">Provalo 30 giorni gratis</a>
+      <a href="/prova-il-gestionale.html" class="cta-dark">Provalo 30 giorni gratis</a>
       <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
     </div>
 

@@ -84,18 +84,30 @@ function blocco(b) {
       funzione, non 28 pagine. */
 const PREZZO_ANNO = '249 €';
 const PREZZO_MESE = '29 €';
+/* 14 settembre 2026 — I GESTIONALI SONO DUE.
+   Il secondo aggiunge la chat con AI dentro il gestionale. Le pagine
+   nominavano solo il primo, e chi cercava «gestionale con AI» non trovava
+   niente che glielo dicesse.
+   ⛔ I quattro numeri stanno SOLO qui: se cambiano i prezzi si toccano
+      queste righe e si rilancia il generatore, non 28 pagine a mano. */
+const PREZZO_AI_ANNO = '349 €';
+const PREZZO_AI_MESE = '39 €';
 function riquadroPrezzo(cosa) {
   return `    <div class="prezzo-box">
       <div class="sotto">${cosa} è dentro il Premium di TrovaImpresa</div>
       <div class="cifra">${PREZZO_ANNO} all'anno</div>
       <div class="sotto">oppure ${PREZZO_MESE} al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <div class="prezzo-ai">
+        <b>C'&egrave; anche il gestionale con l'AI</b> — ${PREZZO_AI_ANNO} all'anno oppure ${PREZZO_AI_MESE} al mese.
+        Aggiunge la chat che ti risponde coi conti dei tuoi lavori e ti compila i moduli.
+      </div>
       <ul class="checklist ok-list">
         <li><strong>Lo provi 30 giorni gratis</strong>, e non serve la carta di credito.</li>
         <li><strong>Alla fine della prova non parte nessun addebito.</strong> Se non fai nulla resti sul piano gratuito, e il profilo resta online.</li>
         <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
         <li>Ricevi regolare fattura per ogni pagamento.</li>
       </ul>
-      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 30 giorni gratis</a>
+      <p style="margin-top:22px"><a href="/prova-il-gestionale.html" class="cta-dark">Provalo 30 giorni gratis</a>
         <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
     </div>`;
 }
@@ -205,7 +217,7 @@ ${riquadroSorelle(pag, tutte)}
     <div class="cta-band">
       <h3>${pag.ctaTitolo}</h3>
       <p>${pag.ctaTesto}</p>
-      <a href="/#registrati" class="cta-dark">Provalo 30 giorni gratis</a>
+      <a href="/prova-il-gestionale.html" class="cta-dark">Provalo 30 giorni gratis</a>
       <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
     </div>
 
