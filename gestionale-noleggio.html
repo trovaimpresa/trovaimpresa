@@ -390,6 +390,13 @@
       <button data-tab="fornitori">Fornitori</button>
       <button data-tab="movimenti">Movimenti</button>
       <button data-tab="calendario">Calendario</button>
+      <!-- 14 settembre 2026 — I PROMEMORIA SUOI, anche qui.
+           Sta dopo «Calendario» perche' e' il gruppo delle cose che hanno una
+           data. ⚠️ I promemoria NON sono del noleggio ne' del reparto: sono
+           della PERSONA. Sono gli stessi che si vedono nel gestionale
+           principale, stessa tabella `promemoria`: quello che scrivi di qua lo
+           trovi di la'. -->
+      <button data-tab="promemoria">Promemoria<span class="tab-cnt" id="cnt-promemoria"></span></button>
       <button data-tab="fatture">Fatture</button>
       <button data-tab="cauzioni">Cauzioni<span class="tab-cnt" id="cnt-cauzioni"></span></button>
       <button data-tab="rendimento">Rendimento</button>
@@ -528,6 +535,17 @@
          Sono soldi di altri fermi sul tuo conto. Finche' erano un numero
          scritto sul noleggio non si sapeva ne' quanti fossero in tutto, ne'
          quali andassero restituiti. Qui si vede tutto in una schermata. -->
+    <!-- 14 settembre 2026 — la riempie renderPromemoria(), piu' sotto.
+         ⛔ CARTE, non la tabella del gestionale principale: qui tutte le altre
+            sezioni sono a carte, e una riga sola diversa dalle altre si vede. -->
+    <section id="promemoria">
+      <div class="sec-head"><h2>Promemoria</h2><button class="btn add" data-action="new-prom">+ Nuovo promemoria</button></div>
+      <div class="gal-intro">Le cose che non devi dimenticare. Quello che scrivi qui te lo ritrovi nell&rsquo;email del mattino.</div>
+      <div class="filt-label">Mostra</div>
+      <div class="viste" id="prom-viste"></div>
+      <div class="grid" id="prom-list"></div>
+    </section>
+
     <section id="cauzioni">
       <div class="sec-head"><h2>Cauzioni</h2></div>
       <div class="gal-intro">I soldi che tieni in deposito per conto dei clienti. <b>Non sono tuoi</b>: al rientro tornano indietro, meno i danni che il verbale di riconsegna ha messo nero su bianco. Qui vedi quanti ne hai in mano e quali devi ancora rendere.</div>
@@ -1275,7 +1293,7 @@ body:has(#ti-fondatore) .sheet--grande{
      pezzo, ma questa funzione le ricaricava lo stesso a ogni apertura,
      chiedendo dati "del reparto in cui sono" — una domanda che col reparto
      sparito non ha piu' risposta. */
-  function renderAll(){if(!cur)return;renderRiepilogo();renderCal();renderFatture();renderGalleria();}
+  function renderAll(){if(!cur)return;renderRiepilogo();renderCal();renderFatture();renderGalleria();renderPromemoria();}
 
   async function renderRiepilogo(){
     return renderRiepilogoNegozio();
@@ -5212,7 +5230,11 @@ body:has(#ti-fondatore) .sheet--grande{
     {t:"neg_fornitori", lab:"Fornitore",       tipo:"fornitore", col:"#1565c0"},
     {t:"neg_movimenti", lab:"Movimento",       tipo:"movimento", col:"#757575"},
     {t:"gest_lavori",   lab:"Lavoro / fattura",tipo:"fattura",   col:"#7C3AED"},
-    {t:"nol_media",     lab:"Foto o video",    tipo:"media",     col:"#00838f"}
+    {t:"nol_media",     lab:"Foto o video",    tipo:"media",     col:"#00838f"},
+    /* 14 settembre 2026 — senza questa riga un promemoria buttato spariva e
+       basta: la riga restava nel database con eliminato_il scritto, ma nel
+       Cestino non la vedeva nessuno e non si poteva rimettere a posto. */
+    {t:"promemoria",    lab:"Promemoria",      tipo:"promemoria",col:"#0066ff"}
   ];
   let cestCache=[], cestQ="";
 
@@ -5223,7 +5245,7 @@ body:has(#ti-fondatore) .sheet--grande{
     ? "Finisce nel Cestino: da lì lo rimetti a posto quando vuoi."
     : "Non si torna indietro.";}
   function cestNome(r){
-    return [r.nome,r.descrizione,r.mezzo,r.prodotto,r.titolo,r.nome_file]
+    return [r.nome,r.descrizione,r.mezzo,r.prodotto,r.titolo,r.nome_file,r.testo]
       .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")||"(senza nome)";
   }
   function cestQuando(iso){
@@ -6183,6 +6205,162 @@ body:has(#ti-fondatore) .sheet--grande{
   const TIPI_PRATICA=["SCIA","CILA","Permesso di Costruire","Agibilità","Altro"];
   let scadCache=[];
   function _giorniDopo(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);const mm=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");return dt.getFullYear()+"-"+mm+"-"+dd;}
+
+  /* ===================================================================
+     I PROMEMORIA — 14 settembre 2026
+     Gli stessi del gestionale principale (tabella `promemoria`), disegnati
+     con le CARTE del noleggio invece che con la tabella.
+     ⛔ Il codice sta QUI DENTRO e non in un file js/ a parte come
+        js/gest-promemoria.js: lo script del noleggio e' tutto chiuso dentro
+        un `(function(){`, quindi da fuori non si vedono ne' sb, ne' sbUid,
+        ne' $, ne' esc. Un file esterno non vedrebbe niente.
+     ⚠️ NON si filtra per reparto ne' per noleggio: i promemoria sono della
+        persona. Quelli scritti qui si vedono nel gestionale principale e
+        viceversa.
+     =================================================================== */
+  let promCache=[], promVista="aperti";
+  const PROM_AVVISI=[[0,"Il giorno stesso"],[1,"1 giorno prima"],[3,"3 giorni prima"],
+                     [7,"7 giorni prima"],[15,"15 giorni prima"],[30,"30 giorni prima"]];
+  const PROM_RIPETI=[["","Mai"],["1","Ogni mese"],["3","Ogni 3 mesi"],["6","Ogni 6 mesi"],["12","Ogni anno"]];
+  const promEt=(el,v)=>{const r=el.find(x=>String(x[0])===String(v==null?"":v));return r?r[1]:"";};
+  const promOra=o=>o?String(o).slice(0,5):"";
+
+  /* la data del giro dopo, quando si segna fatto uno che si ripete. Si parte
+     dalla SUA data e non da oggi: se lo spunti in ritardo, il giro dopo non
+     slitta. */
+  function promProssima(d,mesi){
+    const [y,m,g]=String(d).split("-").map(Number);
+    const dt=new Date(y,m-1+(+mesi||0),g);
+    return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+  }
+
+  async function renderPromemoria(){
+    const box=$("#prom-list"); if(!box) return;
+    if(!sb||!sbUid){box.innerHTML='<div class="empty"><div class="ic">🔔</div><p>Nessun promemoria</p><small>Accedi per scriverli</small></div>';return;}
+    /* ⛔ il cestino si toglie qui, non nel disegno: se no i contatori delle
+       viste contano anche la roba buttata e dicono un numero che a schermo
+       non c'e'. */
+    const {data,error}=await sb.from("promemoria").select("*")
+      .eq("user_id",sbUid).is("eliminato_il",null).order("data",{ascending:true});
+    if(error){toast("Promemoria non letti: "+error.message);return;}
+    promCache=data||[];
+
+    const filtra=(A,v)=>v==="aperti"?A.filter(p=>p.stato!=="fatto")
+                      :v==="fatti"?A.filter(p=>p.stato==="fatto"):A.slice();
+    const conta={aperti:filtra(promCache,"aperti").length,
+                 fatti:filtra(promCache,"fatti").length, tutti:promCache.length};
+    const viste=[["aperti","Da fare"],["fatti","Fatti"],["tutti","Tutti"]];
+    const vb=$("#prom-viste");
+    if(vb)vb.innerHTML=viste.map(v=>
+      `<button class="vista${promVista===v[0]?" on":""}" data-action="prom-vista" data-v="${v[0]}">${v[1]}`
+      +(conta[v[0]]?`<span class="v-cnt">${conta[v[0]]}</span>`:"")+`</button>`).join("");
+
+    const L=filtra(promCache,promVista);
+    const oggi=todayStr(), lim=_giorniDopo(oggi,7);
+    box.innerHTML=L.length
+      ? L.map(p=>promCard(p,oggi,lim)).join("")
+      : '<div class="empty"><div class="ic">🔔</div><p>Nessun promemoria</p><small>Pagare l’F24, rendere una cauzione, portare il rimorchio alla revisione: scrivilo qui e te lo ricordo per email</small></div>';
+
+    /* il pallino sulla voce del menu: quelli da fare entro 30 giorni, rosso se
+       almeno uno e' gia' passato */
+    const pall=$("#cnt-promemoria");
+    if(pall){
+      const vic=promCache.filter(p=>p.stato!=="fatto"&&p.data&&p.data<=_giorniDopo(oggi,30));
+      pall.className="tab-cnt";
+      if(!vic.length){pall.textContent="";}
+      else{pall.textContent=String(vic.length);
+           pall.classList.add(vic.some(p=>p.data<oggi)?"err":"attesa");}
+    }
+  }
+
+  function promCard(p,oggi,lim){
+    const fatto=p.stato==="fatto";
+    let bg="#eef2f7",fg="#555",lab="Da fare";
+    if(fatto){bg="#e3f3e8";fg="var(--fatto)";lab="Fatto";}
+    else if(p.data&&p.data<oggi){bg="#fdecea";fg="#c0392b";lab="Passato";}
+    else if(p.data&&p.data<=lim){bg="#fff4e5";fg="#c2410c";lab="In scadenza";}
+    const ora=promOra(p.ora);
+    return `<div class="card"><div>
+      <h3>${esc(p.testo||"Promemoria")}</h3>
+      <p>📅 ${fdate(p.data)}${ora?" alle "+esc(ora):""} <span class="stato" style="background:${bg};color:${fg}">${lab}</span>`
+      +`<br>⏰ ${esc(promEt(PROM_AVVISI,p.avvisa_giorni||0))}`
+      +(p.ripeti_mesi?`<br>🔁 ${esc(promEt(PROM_RIPETI,p.ripeti_mesi))}`:"")
+      +(p.note?`<br>📝 ${esc(p.note)}`:"")+`</p></div>
+      <div class="card-acts">
+        ${fatto?`<button data-action="prom-stato" data-id="${p.id}" data-v="aperto">↩ Riapri</button>`
+               :`<button data-action="prom-stato" data-id="${p.id}" data-v="fatto">✔ Segna fatto</button>`}
+        <button data-action="edit-prom" data-id="${p.id}">Modifica</button>
+        <button class="del" data-action="del-prom" data-id="${p.id}">Elimina</button></div></div>`;
+  }
+
+  function promForm(p){
+    const isNew=!p; p=p||{};
+    const opz=(el,sel)=>el.map(x=>`<option value="${x[0]}"${String(x[0])===String(sel==null?"":sel)?" selected":""}>${x[1]}</option>`).join("");
+    openSheet(`<h3>${isNew?"Nuovo promemoria":"Modifica promemoria"}</h3>
+      <div class="field"><label>Promemoria</label><input id="p-testo" value="${esc(p.testo||"")}" placeholder="Es. Revisione del rimorchio"></div>
+      <div class="field"><label>Note</label><textarea id="p-note" placeholder="Quello che ti serve avere sotto mano quando lo leggi">${esc(p.note||"")}</textarea></div>
+      <div class="field"><label>Giorno</label><input type="date" id="p-data" value="${esc(p.data||todayStr())}"></div>
+      <div class="field"><label>Ora</label><input type="time" id="p-ora" value="${esc(promOra(p.ora))}"></div>
+      <div class="field"><label>Avvisami</label><select id="p-avvisa">${opz(PROM_AVVISI,p.avvisa_giorni||0)}</select></div>
+      <div class="field"><label>Si ripete</label><select id="p-ripeti">${opz(PROM_RIPETI,p.ripeti_mesi||"")}</select></div>
+      <div class="sh-nota">L'email ti arriva la mattina alle <b>7:30</b> del giorno dell'avviso, e dentro c'&egrave; scritta l'ora che hai messo. Quando lo segni <b>fatto</b>, se si ripete torna da solo alla data dopo.</div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-prom" data-id="${p.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+  }
+
+  async function salvaPromemoria(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const v=s=>{const e=$(s);return e?String(e.value||"").trim():"";};
+    const testo=v("#p-testo"); if(!testo){toast("Scrivi cosa ti devo ricordare");return;}
+    const data=v("#p-data");   if(!data){toast("Metti il giorno");return;}
+    const row={user_id:sbUid,testo:testo,note:v("#p-note")||null,data:data,
+               ora:v("#p-ora")||null,
+               avvisa_giorni:parseInt(v("#p-avvisa"),10)||0,
+               ripeti_mesi:parseInt(v("#p-ripeti"),10)||null};
+    /* ⛔ se cambia la data, l'avviso riparte: `inviato` e' il segno che l'email
+       di questo promemoria e' gia' uscita. Senza azzerarlo, chi sposta un F24
+       di un mese non verrebbe piu' avvisato e resterebbe convinto del
+       contrario. */
+    const vecchio=promCache.find(x=>String(x.id)===String(id));
+    if(!id||String(vecchio&&vecchio.data||"")!==data) row.inviato=false;
+    /* ⚠️ ogni scrittura si verifica con .select("id"): Supabase non lancia su
+       errore, e zero righe toccate non e' un errore. */
+    const q=id
+      ? await sb.from("promemoria").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+      : await sb.from("promemoria").insert(row).select("id");
+    if(q.error||!q.data||!q.data.length){
+      toast("Non salvato: "+((q.error&&q.error.message)||"nessuna riga scritta"));return;}
+    closeSheet(); toast(id?"Promemoria aggiornato ✔":"Promemoria creato ✔");
+    renderPromemoria();
+  }
+
+  async function promStato(id,stato){
+    const p=promCache.find(x=>String(x.id)===String(id)); if(!p)return;
+    let row;
+    if(stato==="fatto"&&p.ripeti_mesi){
+      row={data:promProssima(p.data,p.ripeti_mesi),stato:"aperto",inviato:false};
+    }else{
+      row={stato:stato};
+      if(stato==="aperto")row.inviato=false;
+    }
+    const q=await sb.from("promemoria").update(row).eq("id",id).eq("user_id",sbUid).select("id");
+    if(q.error||!q.data||!q.data.length){
+      toast("Non salvato: "+((q.error&&q.error.message)||"nessuna riga scritta"));return;}
+    toast(stato==="fatto"&&p.ripeti_mesi ? "Fatto ✔ Torna il "+fdate(row.data)
+         : (stato==="fatto"?"Segnato fatto ✔":"Riaperto"));
+    renderPromemoria();
+  }
+
+  /* Buttare = scrivere la data in eliminato_il. La riga resta e si recupera
+     dal Cestino, come tutto il resto. */
+  async function promButta(id){
+    const q=await sb.from("promemoria").update({eliminato_il:new Date().toISOString()})
+      .eq("id",id).eq("user_id",sbUid).select("id");
+    if(q.error||!q.data||!q.data.length){
+      toast("Non buttato: "+((q.error&&q.error.message)||"nessuna riga scritta"));return;}
+    toast("Buttato nel cestino"); renderPromemoria();
+  }
+
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(ruoloUtente!=='professionista'||!cur){box.innerHTML="";return;}
@@ -6716,6 +6894,13 @@ body:has(#ti-fondatore) .sheet--grande{
     if(a==="del-panel")return delPanel(t.dataset.id);
     if(a==="home")return nolIndietro();
     /* 22 agosto 2026 — le schede del noleggio */
+    /* 14 settembre 2026 — i promemoria */
+    if(a==="new-prom")      return promForm(null);
+    if(a==="edit-prom")     return promForm(promCache.find(x=>String(x.id)===String(id)));
+    if(a==="save-prom")     return salvaPromemoria(id||null);
+    if(a==="prom-stato")    return promStato(id,t.dataset.v);
+    if(a==="del-prom")      return promButta(id);
+    if(a==="prom-vista"){promVista=t.dataset.v;return renderPromemoria();}
     if(a==="new-mezzo")     return schedaMezzo(null);
     if(a==="new-clinol")    return schedaClienteNol(null);
     if(a==="new-noleggio")  return schedaNoleggio(null);
