@@ -4006,7 +4006,7 @@
     el.title=tipo==="err"?"Ci sono elementi in ritardo o scaduti":"In attesa";
   }
   async function renderContatori(){
-    ["#cnt-lavori","#cnt-preventivi","#cnt-mezzi","#cnt-attrezzature","#cnt-scadenzario","#cnt-fornitori"].forEach(x=>setCnt(x,0));
+    ["#cnt-lavori","#cnt-preventivi","#cnt-mezzi","#cnt-attrezzature","#cnt-scadenzario","#cnt-fornitori","#cnt-promemoria"].forEach(x=>setCnt(x,0));
     if(!sb||!sbUid||!cur)return;
     const mid=curMestiere();if(!mid)return;
     const oggi=todayStr(), lim30=_giorniDopo(oggi,30);
@@ -4043,6 +4043,22 @@
          (se la tabella non esiste ancora, ff è undefined e il pallino resta spento) */
       const ffAp=(ff||[]).filter(x=>x.stato!=="pagata");
       setCnt("#cnt-fornitori",ffAp.length,ffAp.some(x=>x.scadenza&&x.scadenza<oggi)?"err":"attesa");
+      /* 14 settembre 2026 — Promemoria: quelli da fare entro 30 giorni, rosso
+         se almeno uno e' gia' passato.
+         ⚠️ NON si filtra per reparto: i promemoria sono della PERSONA, non del
+            pannello (vedi js/gest-promemoria.js). E' la stessa eccezione del
+            prezzario e dei crediti formativi.
+         ⚠️ La lettura sta FUORI dal Promise.all qui sopra apposta: se la
+            migrazione sql/promemoria-sezione.sql non e' ancora stata eseguita,
+            la colonna `eliminato_il` non esiste e la richiesta fallisce. Dentro
+            al Promise.all si porterebbe dietro TUTTI gli altri pallini. */
+      try{
+        const {data:pr}=await sb.from("promemoria")
+          .select("data,stato").eq("user_id",sbUid)
+          .is("eliminato_il",null).neq("stato","fatto").lte("data",lim30);
+        const prAp=pr||[];
+        setCnt("#cnt-promemoria",prAp.length,prAp.some(x=>x.data&&x.data<oggi)?"err":"attesa");
+      }catch(e){}
     }catch(e){}
     contaCestinoUnaVolta();   /* senza await: il pallino del Cestino arriva quando arriva */
   }
