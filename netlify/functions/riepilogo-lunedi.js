@@ -7,9 +7,15 @@
 // Il lunedi' mattina uno accende il telefono, non il gestionale. Questa
 // funzione gira una volta a settimana e manda UNA email con le tre cose che
 // fanno perdere soldi se sfuggono:
-//   1. le scadenze dei prossimi 7 giorni
-//   2. le fatture emesse che nessuno ha pagato
-//   3. i lavori (o le pratiche) con la data prevista gia' passata
+//   1. le scadenze GIA' PASSATE e ancora aperte  (aggiunta il 14 set 2026)
+//   2. le scadenze dei prossimi 7 giorni
+//   3. le fatture emesse che nessuno ha pagato
+//   4. i lavori (o le pratiche) con la data prevista gia' passata
+//
+// NON MANDA MAI LA STESSA EMAIL DUE VOLTE (dal 14 set 2026)
+// La tabella gest_riepilogo_inviati tiene una riga per persona per lunedi'.
+// Serve sql/riepilogo-lunedi-registro.sql. Se manca la tabella la function
+// parte lo stesso, ma nel risultato scrive «registro: TABELLA MANCANTE».
 //
 // I CONTI SONO GLI STESSI DEL RIEPILOGO
 // Le formule qui sotto sono copiate dal Riepilogo di gestionale-app.html, non
@@ -120,6 +126,17 @@ function cosaDire(d) {
   const r = [];
   r.push('Oggi e\' ' + nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi) + '.');
   r.push('Chi legge fa questo mestiere: ' + (d.pro ? 'studio tecnico' : 'impresa o artigiano') + '.');
+  r.push('');
+
+  // Le gia' scadute per prime anche qui: quello che l'AI legge per primo e'
+  // quello di cui parla per primo.
+  r.push('SCADENZE GIA\' PASSATE E ANCORA APERTE: ' + (d.scadute || []).length);
+  (d.scadute || []).forEach(function (x) {
+    r.push('- ' + (x.titolo || 'senza titolo')
+      + ' | era il ' + dataIt(x.data_scadenza)
+      + ' | scaduta da ' + plurale(-x.giorni, 'giorno', 'giorni')
+      + (x.reparto ? ' | reparto ' + x.reparto : ''));
+  });
   r.push('');
 
   r.push('SCADENZE DEI PROSSIMI 7 GIORNI: ' + d.scadenze.length);
@@ -252,6 +269,15 @@ function costruisciEmail(d) {
     ? { lavori: 'Pratiche in ritardo', lavoro: 'pratica', lavoriP: 'pratiche', apri: 'Apri le pratiche' }
     : { lavori: 'Lavori in ritardo', lavoro: 'lavoro', lavoriP: 'lavori', apri: 'Apri i lavori' };
 
+  /* 14 set 2026 — le gia' scadute stanno SOPRA a tutto, in rosso. Una data
+     passata e ancora aperta e' la cosa che costa di piu': una revisione
+     scaduta ferma il mezzo, una pratica scaduta la devi rifare. */
+  const rVecchie = (d.scadute || []).map(s => riga(
+    s.titolo || 'Scadenza',
+    s.tipo_pratica || s.reparto || '',
+    'Era il ' + dataIt(s.data_scadenza) + ' — scaduta da ' + plurale(-s.giorni, 'giorno', 'giorni'),
+    '#c62828'));
+
   const rScad = d.scadenze.map(s => riga(
     s.titolo || 'Scadenza',
     s.tipo_pratica || s.reparto || '',
@@ -287,6 +313,7 @@ function costruisciEmail(d) {
     <div style="color:#c9dcff;font-size:16px;margin-top:8px">${esc(nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi))}${d.azienda ? ' &middot; ' + esc(d.azienda) : ''}</div>
   </div>
   ${cappelloHTML(d)}
+  ${sezione('#c62828', 'Scadenze già passate', rVecchie, 'Apri lo scadenzario', SITO + '#scadenzario')}
   ${sezione('#0066ff', 'Scadenze di questa settimana', rScad, 'Apri lo scadenzario', SITO + '#scadenzario')}
   ${sezione('#c62828', 'Non ti hanno ancora pagato', rFatt, 'Apri le fatture', SITO + '#fatture', codaFatt)}
   ${sezione('#e65100', parole.lavori, rLav, parole.apri, SITO + '#lavori')}
@@ -303,6 +330,9 @@ function costruisciEmail(d) {
 
 function oggetto(d) {
   const pezzi = [];
+  // le gia' scadute per prime anche nell'oggetto: e' la riga che si legge
+  // nell'anteprima del telefono senza aprire niente
+  if ((d.scadute || []).length) pezzi.push(plurale(d.scadute.length, 'scadenza già passata', 'scadenze già passate'));
   if (d.scadenze.length) pezzi.push(plurale(d.scadenze.length, 'scadenza', 'scadenze'));
   if (d.fatture.length)  pezzi.push(plurale(d.fatture.length, 'fattura scaduta', 'fatture scadute'));
   if (d.lavori.length)   pezzi.push(plurale(d.lavori.length, d.pro ? 'pratica in ritardo' : 'lavoro in ritardo',
@@ -366,9 +396,18 @@ const handler = async function () {
     const vivi = (q, filtra) => filtra ? q.is('eliminato_il', null) : q;
 
     const [qScad, qFatt, qLav, qCli, qImp, qMest] = await Promise.all([
+      /* ⛔ 14 settembre 2026 — QUI C'ERA `.gte('data_scadenza', oggi)`: si
+         guardava SOLO AVANTI. Una scadenza gia' passata e ancora aperta
+         spariva dall'email per sempre — nel gestionale resta li' rossa, nella
+         posta non la nominava nessuno. Trovato su un caso vero: «revisione
+         ducato», scaduta il 31/07/2026, ancora aperta 45 giorni dopo, mai
+         comparsa in nessun lunedi'. Ed e' proprio la riga che costa una multa.
+         ⚠️ Il tetto in alto (fra7) resta: le scadenze oltre i 7 giorni non
+         sono affari di questa settimana. Si toglie il pavimento, non il
+         soffitto. */
       senzaCestino(f => vivi(sb.from('gest_scadenze')
         .select('user_id, mestiere_id, titolo, tipo_pratica, data_scadenza, stato')
-        .in('user_id', utenti).gte('data_scadenza', oggi).lte('data_scadenza', fra7), f)),
+        .in('user_id', utenti).lte('data_scadenza', fra7), f)),
       senzaCestino(f => vivi(sb.from('gest_fatture')
         .select('id, user_id, numero, data, stato, sconto, bollo, ritenuta_perc, cliente_id')
         .in('user_id', utenti).eq('stato', 'emessa'), f)),
@@ -424,17 +463,22 @@ const handler = async function () {
     // 3. Una busta per persona
     // -----------------------------------------------------------------------
     let inviate = 0, saltateVuote = 0, senzaEmail = 0, conCappello = 0;
+    let giaInviate = 0, senzaRegistro = false;
     const errori = [];
 
     for (const a of aziende) {
       const uid = a.user_id;
       const ggPag = (+a.giorni_pagamento) || 30;
 
-      const scadenze = (qScad.data || [])
+      const tutteScad = (qScad.data || [])
         .filter(s => s.user_id === uid && s.stato !== 'fatta' && s.data_scadenza)
         .map(s => ({ ...s, giorni: quantiGiorni(oggi, s.data_scadenza),
-                     reparto: nomeMest[String(s.mestiere_id)] || '' }))
-        .sort((x, y) => x.giorni - y.giorni);
+                     reparto: nomeMest[String(s.mestiere_id)] || '' }));
+
+      // giorni < 0 = il giorno e' gia' passato e la riga e' ancora aperta.
+      // La piu' vecchia per prima: e' quella che sta li' da piu' tempo.
+      const scadute  = tutteScad.filter(s => s.giorni < 0).sort((x, y) => x.giorni - y.giorni);
+      const scadenze = tutteScad.filter(s => s.giorni >= 0).sort((x, y) => x.giorni - y.giorni);
 
       const fatture = (qFatt.data || [])
         .filter(f => f.user_id === uid && f.data && giorniDopo(f.data, ggPag) < oggi)
@@ -451,7 +495,7 @@ const handler = async function () {
         .sort((x, y) => y.giorniRitardo - x.giorniRitardo);
 
       // settimana pulita = nessuna email. Il silenzio e' un'informazione.
-      if (!scadenze.length && !fatture.length && !lavori.length) { saltateVuote++; continue; }
+      if (!scadute.length && !scadenze.length && !fatture.length && !lavori.length) { saltateVuote++; continue; }
 
       let email = null;
       try {
@@ -465,9 +509,43 @@ const handler = async function () {
 
       const d = {
         oggi, azienda: a.nome || '', pro: tipoUte[String(uid)] === 'professionista',
-        scadenze, fatture, lavori,
+        scadute, scadenze, fatture, lavori,
         totaleScaduto: fatture.reduce((s, f) => s + f.totale, 0)
       };
+
+      /* ⛔ 14 settembre 2026 — IL REGISTRO, PRIMA DI TUTTO IL RESTO.
+         Il 14 set questa email e' partita DUE VOLTE allo stesso indirizzo,
+         alle 05:30:45 e alle 05:31:37. Una scheduled function di Netlify che
+         non finisce in tempo viene rilanciata, e il secondo giro rifaceva
+         tutto da capo: stessa persona, stessa email, due volte. Con una
+         persona e' una seccatura, con mille iscritti sono mille email doppie
+         e il tetto giornaliero di Resend bruciato per il resto della giornata
+         — comprese le conferme iscrizione.
+         E' la stessa difesa che hanno gia' promemoria-scadenze.js (colonna
+         "avvisi") e promemoria-dalsito.js (tabella gest_dalsito_avvisi):
+         qui mancava, ed era l'unica delle quattro a non averla.
+         ⛔ SI PRENDE IL POSTO PRIMA DI CHIAMARE L'AI, non dopo: se si
+         segnasse dopo l'invio, il secondo giro avrebbe gia' pagato la
+         chiamata e mandato l'email prima di accorgersene.
+         ⚠️ Se l'invio poi fallisce la riga viene TOLTA (vedi sotto), cosi' il
+         tentativo dopo puo' mandare davvero. */
+      {
+        const segno = await sb.from('gest_riepilogo_inviati')
+          .insert({ user_id: uid, settimana: oggi }).select('user_id');
+        if (segno.error) {
+          // 23505 = chiave gia' presente: a questa persona l'email di oggi
+          // e' gia' partita in un giro precedente. Si salta e basta.
+          if (segno.error.code === '23505') { giaInviate++; continue; }
+          // 42P01 = la tabella non c'e' (migrazione non eseguita). Si tira
+          // dritto come faceva prima: meglio un rischio di doppione che
+          // nessuna email a nessuno.
+          if (/42P01|does not exist/.test(segno.error.code + ' ' + (segno.error.message || ''))) {
+            senzaRegistro = true;
+          } else {
+            errori.push('registro ' + email + ': ' + segno.error.message); continue;
+          }
+        }
+      }
 
       /* ⛔ QUI, e non prima: sta DOPO il filtro SOLO_A, quindi in questo
          periodo di prova la chiamata si paga per una persona sola. E se
@@ -486,13 +564,22 @@ const handler = async function () {
           html: costruisciEmail(d)
         })
       });
-      if (!res.ok) { errori.push('Resend ' + email + ': ' + (await res.text())); continue; }
+      if (!res.ok) {
+        errori.push('Resend ' + email + ': ' + (await res.text()));
+        // l'email NON e' partita: si libera il posto, se no questa persona
+        // resterebbe senza riepilogo fino a lunedi' prossimo
+        await sb.from('gest_riepilogo_inviati').delete()
+          .eq('user_id', uid).eq('settimana', oggi);
+        continue;
+      }
       inviate++;
     }
 
     return { statusCode: 200, body: JSON.stringify({
       ok: true, emailInviate: inviate, conCappello, settimanePulite: saltateVuote,
-      senzaEmail, interruttore: colonnaInterruttore ? 'attivo' : 'colonna mancante, tutti accesi',
+      senzaEmail, giaInviate,
+      registro: senzaRegistro ? 'TABELLA MANCANTE — rischio doppioni' : 'attivo',
+      interruttore: colonnaInterruttore ? 'attivo' : 'colonna mancante, tutti accesi',
       errori
     }) };
   } catch (err) {
