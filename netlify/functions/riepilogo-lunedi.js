@@ -591,7 +591,22 @@ const handler = async function () {
 // Lunedì alle 5:30 UTC = le 7:30 in Italia con l'ora legale (adesso).
 // Da fine ottobre, con l'ora solare, diventerebbe le 6:30: quando cambia
 // l'ora basta mettere  '30 6 * * 1'  qui sotto e torna alle 7:30.
-exports.handler = schedule('30 5 * * 1', handler);
+/* ============================================================================
+   ⛔ 14 SETTEMBRE 2026 (sera) — QUESTO RIEPILOGO NON PARTE PIU' DA QUI.
+   E' stato assorbito da netlify/functions/promemoria-mattina.js, che gira ogni
+   mattina: il LUNEDI' manda esattamente questo quadro completo, gli altri
+   giorni scrive solo se e' cambiato qualcosa.
+   ⛔ LASCIARE L'OROLOGIO QUI SAREBBE STATO IL DANNO PEGGIORE DI TUTTI: il
+      lunedi' sarebbero partite DUE email, questa e quella nuova. E' la stessa
+      identica cosa che si e' passata la mattina del 14 settembre, quando ne
+      erano partite due per il rilancio di Netlify.
+   ⚠️ IL CODICE RESTA, TOLTO SOLO L'OROLOGIO: le due riparazioni di stamattina
+      (il registro anti-doppione e le scadenze gia' passate) sono dentro
+      promemoria-mattina.js, questo file serve solo per poter tornare indietro.
+   ============================================================================ */
+exports.handler = async function () {
+  return { statusCode: 410, body: 'Assorbito da promemoria-mattina.js il 14 set 2026' };
+};
 
 // Per provarla a mano senza aspettare lunedì:
 // exports.handler = handler;

@@ -183,4 +183,21 @@ const handler = async function () {
 // ogni mattina alle 7:20 italiane (6:20 UTC d'inverno, 5:20 d'estate:
 // si sceglie 6:20 UTC, che d'estate sono le 8:20 — va bene lo stesso,
 // l'impresa apre il gestionale la mattina presto)
-exports.handler = schedule('20 6 * * *', handler);
+/* ============================================================================
+   ⛔ 14 SETTEMBRE 2026 — QUESTA EMAIL NON PARTE PIU' DA QUI.
+   E' stata assorbita da netlify/functions/promemoria-mattina.js, che manda UNA
+   email sola al mattino invece di quattro fra le 6:00 e le 7:30.
+   Le richieste dal sito ci sono ancora, dentro la sezione «Richieste che ti
+   aspettano», e si segnano nella stessa tabella gest_dalsito_avvisi.
+   ⚠️ IL CODICE RESTA, TOLTO SOLO L'OROLOGIO. Se domani si volesse tornare
+      indietro basta rimettere la riga  exports.handler = schedule('20 6 * * *', handler);
+      al posto di quella qui sotto. Cancellare il file avrebbe buttato via anche
+      il modo di tornare indietro.
+   ⚠️ Il registro che usava questa funzione NON e' stato toccato: lo legge e lo
+      scrive adesso promemoria-mattina.js, cosi' chi era gia' stato avvisato
+      ieri non viene riavvisato oggi.
+   ============================================================================ */
+exports.handler = async function () {
+  return { statusCode: 410, body: 'Assorbita da promemoria-mattina.js il 14 set 2026' };
+};
+module.exports.eseguiOra = handler;

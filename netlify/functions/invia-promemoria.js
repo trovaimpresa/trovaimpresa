@@ -133,4 +133,24 @@ const handler = async function() {
   }
 };
 
-exports.handler = schedule('0 6 * * *', handler);
+/* ============================================================================
+   ⛔ 14 SETTEMBRE 2026 — QUESTA EMAIL NON PARTE PIU' DA QUI.
+   E' stata assorbita da netlify/functions/promemoria-mattina.js, che manda UNA
+   email sola al mattino invece di quattro fra le 6:00 e le 7:30.
+   ⚠️ QUESTA NON E' STATA NEMMENO ASSORBITA: la tabella `promemoria` e' VUOTA
+   (0 righe, 0 persone al 14 set 2026) e nel gestionale non c'e' nessun posto
+   dove scrivere un appunto con una data. Girava ogni mattina per niente.
+   Se un giorno si fa la schermata degli appunti, il posto dove attaccarli e'
+   promemoria-mattina.js, non questo file.
+   ⚠️ IL CODICE RESTA, TOLTO SOLO L'OROLOGIO. Se domani si volesse tornare
+      indietro basta rimettere la riga  exports.handler = schedule('0 6 * * *', handler);
+      al posto di quella qui sotto. Cancellare il file avrebbe buttato via anche
+      il modo di tornare indietro.
+   ⚠️ Il registro che usava questa funzione NON e' stato toccato: lo legge e lo
+      scrive adesso promemoria-mattina.js, cosi' chi era gia' stato avvisato
+      ieri non viene riavvisato oggi.
+   ============================================================================ */
+exports.handler = async function () {
+  return { statusCode: 410, body: 'Assorbita da promemoria-mattina.js il 14 set 2026' };
+};
+module.exports.eseguiOra = handler;
