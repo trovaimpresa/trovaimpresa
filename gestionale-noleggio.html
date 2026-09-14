@@ -1175,8 +1175,14 @@ body:has(#ti-fondatore) .sheet--grande{
     localizzaPratiche();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();renderGalleria();renderRiepilogo();renderCal();renderFatture();});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();renderGalleria();renderRiepilogo();renderCal();renderFatture();});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();renderGalleria();renderRiepilogo();renderCal();renderFatture();renderPromemoria();});
+    /* ⛔ 14 settembre 2026 — I PROMEMORIA VANNO RIDISEGNATI ANCHE QUI.
+       Le altre sezioni del noleggio leggono da `db()`, che c'e' gia' quando
+       parte renderAll(). I promemoria no: li legge da Supabase, e quando
+       renderAll() gira `sbUid` e' ancora null — usciva «Accedi per scriverli»
+       e la sezione restava vuota anche da loggati. Trovato provando dal vivo,
+       non leggendo il codice. */
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();renderGalleria();renderRiepilogo();renderCal();renderFatture();renderPromemoria();});
   }
 
   /* LANDING */
@@ -7063,6 +7069,10 @@ body:has(#ti-fondatore) .sheet--grande{
        arriva trova la testata tagliata a meta'. Si apre dall'alto e basta. */
     window.scrollTo(0,0);
     document.documentElement.scrollTop=0; document.body.scrollTop=0;
+    /* 14 set 2026: i promemoria si rileggono ogni volta che si apre la voce —
+       sono della persona, quindi possono essere cambiati dall'altro gestionale
+       mentre questa pagina era aperta. */
+    if(b.dataset.tab==="promemoria")renderPromemoria();
     nolScriviFreccia();
   });
 
