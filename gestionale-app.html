@@ -163,6 +163,13 @@
            reparti, accanto a «Dati azienda» (vedi #landing .lt-actions). -->
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computo metrico</span><span class="tab-cnt" id="cnt-computi"></span></button>
+      <!-- 14 settembre 2026 — I PROMEMORIA SUOI.
+           ⛔ Questa voce NON nasce spenta e non si accende a seconda del
+              ruolo: i promemoria li ha chiunque, impresa artigiano o studio.
+           ⚠️ E NON SONO DEL REPARTO: «chiamare il commercialista» non e' ne'
+              giardiniere ne' ferramenta. Si vedono tutti da qualunque reparto
+              si entri (vedi js/gest-promemoria.js). -->
+      <button data-tab="promemoria" id="tab-promemoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Promemoria</span><span class="tab-cnt" id="cnt-promemoria"></span></button>
       <button data-tab="prezzario" id="tab-prezzario" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Prezzario</span><span class="tab-cnt" id="cnt-prezzario"></span></button>
       <!-- 20 agosto 2026 — GLI STATI DI AVANZAMENTO, TUTTI IN UN POSTO SOLO.
            Prima per vedere un SAL bisognava entrare nel computo giusto: con
@@ -451,6 +458,15 @@
       </div>
     </section>
 
+    <!-- 14 settembre 2026 — la sezione la riempie js/gest-promemoria.js.
+         Qui resta vuota apposta: cosi' domani la stessa sezione entra anche
+         nel gestionale negozio e nel noleggio senza ricopiare il markup. -->
+    <section id="promemoria">
+      <div class="sec-head"><h2>Promemoria</h2><button class="btn add" data-action="new-prom">+ Nuovo promemoria</button></div>
+      <div class="viste" id="prom-viste"></div>
+      <div class="grid" id="prom-list"></div>
+    </section>
+
     <section id="scadenzario">
       <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova scadenza</button></div>
       <div class="viste" id="scad-viste"></div>
@@ -609,6 +625,7 @@
 <script src="/js/gest-riepilogo.js"></script>
 <script src="/js/gest-squadra.js"></script>
 <script src="/js/gest-azienda.js"></script>
+<script src="/js/gest-promemoria.js"></script>
 <script src="/js/gest-fornitori.js"></script>
 <script src="/js/gest-mezzi.js"></script>
 <!-- il punto delle migliaia nelle caselle in euro: basta `data-euro` sulla casella -->
@@ -2282,7 +2299,7 @@
   });
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza","promemoria"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -3853,7 +3870,8 @@
     carte:_rt("renderCarte"), clienti:_rt("renderClienti"), scadenzario:_rt("renderScadenze"), crediti:_rt("renderCrediti"), cestino:_rt("renderCestino"),
     report:_rt("renderReport"), galleria:_rt("renderGalleria"), mappa:_rt("renderMappa"),
     richieste:_rt("renderRichieste"), dalsito:_rt("renderDalSito"), fornitori:_rt("renderFornitori"),
-    assistenza:_rt("renderAssistenza")
+    assistenza:_rt("renderAssistenza"),
+    promemoria:_rt("renderPromemoria")
   };
   /* l'avviso in cima: si vede subito, senza aspettare che clicchi la scheda
      rotta. Scritto con il DOM nudo apposta — se manca un pezzo non e' il
@@ -10415,6 +10433,12 @@
        const q=CEST_LAV[String(r.lavoro_id||"")];
        return "Rapportino del "+fdate(r.data)+(q?(" — "+q):"");
      }},
+    /* 14 settembre 2026 — i promemoria. Senza questa riga, buttarne uno lo
+       faceva sparire e basta: la riga restava nel database con eliminato_il
+       scritto, ma nel Cestino non la vedeva nessuno e non si poteva rimettere
+       a posto. ⚠️ `promemoria` non ha mestiere_id: il Cestino se ne accorge da
+       solo dall'errore del database e la mostra senza filtro di reparto. */
+    {t:"promemoria",       lab:"Promemoria",        campo:"testo",          ic:"🔔", foglia:true},
     {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
     /* ⚠️ 20 agosto 2026 — «get lab», non «lab». Questa lista e' un const e si
        costruisce all'AVVIO, quando il ruolo dell'utente non si sa ancora:

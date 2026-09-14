@@ -134,6 +134,18 @@ function cosaDire(d) {
     : 'E\' un avviso in mezzo alla settimana: dentro ci sono SOLO le cose cambiate oggi.');
   r.push('');
 
+  /* I suoi promemoria per primi: quello che l'AI legge per primo e' quello di
+     cui parla per primo, e questi se li e' scritti lui di sua mano. */
+  r.push('PROMEMORIA CHE SI E\' SCRITTO LUI, DA DIRGLI OGGI: ' + (d.promemoria || []).length);
+  (d.promemoria || []).forEach(function (x) {
+    r.push('- ' + (x.testo || 'senza testo')
+      + ' | ' + (x.giorni < 0 ? 'era il ' + dataIt(x.data)
+               : x.giorni === 0 ? 'oggi' : x.giorni === 1 ? 'domani' : 'il ' + dataIt(x.data))
+      + (x.ora ? ' alle ' + String(x.ora).slice(0, 5) : '')
+      + (x.note ? ' | nota: ' + x.note : ''));
+  });
+  r.push('');
+
   r.push('APPENA SCADUTE: ' + d.appenaScadute.length);
   d.appenaScadute.forEach(x => r.push('- ' + (x.titolo || 'senza titolo') + ' | era il ' + dataIt(x.data_scadenza)));
   r.push('');
@@ -149,6 +161,10 @@ function cosaDire(d) {
 
   if (!d.completo) return r.join('\n');
 
+  r.push('');
+  r.push('SUOI PROMEMORIA GIA\' PASSATI E ANCORA DA FARE: ' + (d.promPassati || []).length);
+  (d.promPassati || []).forEach(x => r.push('- ' + (x.testo || 'senza testo')
+    + ' | era il ' + dataIt(x.data) + (x.ora ? ' alle ' + String(x.ora).slice(0, 5) : '')));
   r.push('');
   r.push('SCADENZE GIA\' PASSATE E ANCORA APERTE: ' + d.scadute.length);
   d.scadute.forEach(x => r.push('- ' + (x.titolo || 'senza titolo')
@@ -274,6 +290,25 @@ function costruisciEmail(d) {
     ? { lavori: 'Pratiche in ritardo', apri: 'Apri le pratiche' }
     : { lavori: 'Lavori in ritardo',   apri: 'Apri i lavori' };
 
+  /* I promemoria che ha scritto lui. L'ora sta DENTRO la riga, non decide
+     l'orario dell'email: si scrive «oggi alle 15:00» perche' l'email parte
+     comunque la mattina. */
+  const conOra = p => {
+    const o = p.ora ? String(p.ora).slice(0, 5) : '';
+    const g = p.giorni < 0 ? 'era il ' + dataIt(p.data)
+            : p.giorni === 0 ? 'oggi'
+            : p.giorni === 1 ? 'domani'
+            : nomeGiorno(p.data) + ' ' + dataIt(p.data);
+    return g + (o ? ' alle ' + o : '');
+  };
+  const rProm = (d.promemoria || []).map(p => riga(
+    p.testo || 'Promemoria', p.note || '',
+    conOra(p), p.giorni <= 0 ? '#c62828' : p.giorni <= 3 ? '#e65100' : '#0066ff'));
+
+  const rPromVecchi = (d.promPassati || []).map(p => riga(
+    p.testo || 'Promemoria', p.note || '',
+    conOra(p) + ' — ancora da fare', '#c62828'));
+
   const rAppena = d.appenaScadute.map(s => riga(
     s.titolo || 'Scadenza', s.tipo_pratica || s.reparto || '',
     'Era ieri, ' + dataIt(s.data_scadenza) + ' — ancora aperta', '#c62828'));
@@ -308,6 +343,8 @@ function costruisciEmail(d) {
      esiste davvero, cosi' il pulsante sta sempre in fondo al gruppo */
   const ultimaScad = rVecchie.length ? 'vecchie' : rArrivo.length ? 'arrivo'
                    : rAppena.length  ? 'appena'  : null;
+  // stessa cosa per i due riquadri dei promemoria: un pulsante solo, in fondo
+  const ultimoProm = rPromVecchi.length ? 'vecchi' : rProm.length ? 'oggi' : null;
 
   const codaFatt = d.fatture.length
     ? `<div style="background:#fdf0f0;border-radius:10px;padding:14px 16px;margin-top:16px;font-size:17px;font-weight:800;color:#0a2a4d">In tutto ti devono ${euro(d.totaleScaduto)}</div>`
@@ -327,6 +364,8 @@ function costruisciEmail(d) {
     <div style="color:#c9dcff;font-size:16px;margin-top:8px">${esc(nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi))}${d.azienda ? ' &middot; ' + esc(d.azienda) : ''}</div>
   </div>
   ${cappelloHTML(d)}
+  ${sezione('#0066ff', 'Te lo eri segnato', rProm, ultimoProm === 'oggi' ? 'Apri i promemoria' : null, SITO + '#promemoria')}
+  ${sezione('#c62828', 'Promemoria ancora da fare', rPromVecchi, ultimoProm === 'vecchi' ? 'Apri i promemoria' : null, SITO + '#promemoria')}
   ${sezione('#c62828', 'Scaduta ieri', rAppena, ultimaScad === 'appena' ? 'Apri lo scadenzario' : null, SITO + '#scadenzario')}
   ${sezione('#0066ff', 'Scadenze in arrivo', rArrivo, ultimaScad === 'arrivo' ? 'Apri lo scadenzario' : null, SITO + '#scadenzario')}
   ${sezione('#c62828', 'Scadenze già passate', rVecchie, ultimaScad === 'vecchie' ? 'Apri lo scadenzario' : null, SITO + '#scadenzario')}
@@ -348,10 +387,14 @@ function costruisciEmail(d) {
 
 function oggetto(d) {
   const pezzi = [];
+  /* i suoi promemoria per primi: se l'ha scritto lui di sua mano, e' la cosa
+     che si aspetta di leggere nell'anteprima del telefono */
+  if ((d.promemoria || []).length) pezzi.push(plurale(d.promemoria.length, 'promemoria', 'promemoria'));
   if (d.appenaScadute.length) pezzi.push(plurale(d.appenaScadute.length, 'scadenza passata ieri', 'scadenze passate ieri'));
   if (d.richieste.length)     pezzi.push(plurale(d.richieste.length, 'richiesta che ti aspetta', 'richieste che ti aspettano'));
   if (d.inArrivo.length)      pezzi.push(plurale(d.inArrivo.length, 'scadenza in arrivo', 'scadenze in arrivo'));
   if (d.completo) {
+    if ((d.promPassati || []).length) pezzi.push(plurale(d.promPassati.length, 'promemoria da fare', 'promemoria da fare'));
     if (d.scadute.length) pezzi.push(plurale(d.scadute.length, 'scadenza già passata', 'scadenze già passate'));
     if (d.fatture.length) pezzi.push(plurale(d.fatture.length, 'fattura scaduta', 'fatture scadute'));
     if (d.lavori.length)  pezzi.push(plurale(d.lavori.length,
@@ -448,7 +491,15 @@ const handler = async function () {
     const tappaPerData = {};
     TAPPE.forEach((t, i) => { tappaPerData[dateTappa[i]] = t; });
 
-    const [qScad, qCli, qMest] = await Promise.all([
+    /* I PROMEMORIA SUOI (tabella `promemoria`, sezione del gestionale dal
+       14 set 2026). Si legge fino a 30 giorni avanti perche' il massimo che si
+       puo' chiedere e' «avvisami 30 giorni prima»: piu' in la' di cosi' non
+       c'e' niente da mandare oggi.
+       ⛔ `inviato` e' il registro di questi: si scrive DOPO l'invio, come per
+          le scadenze. Un promemoria avvisato ieri non torna oggi. */
+    const fra30 = giorniDopo(oggi, 30);
+
+    const [qScad, qCli, qMest, qProm] = await Promise.all([
       /* Tutte le scadenze aperte che ci servono oggi: quelle delle tappe,
          quella di ieri, e — solo il lunedi' — tutte le passate piu' la
          settimana davanti. Si legge largo una volta e si divide dopo. */
@@ -456,9 +507,12 @@ const handler = async function () {
         .select('id, user_id, mestiere_id, titolo, tipo_pratica, data_scadenza, stato, avvisa, avvisi')
         .in('user_id', utenti).lte('data_scadenza', fra7).neq('stato', 'fatta'), f)),
       sb.from('gest_clienti').select('id, user_id, nome').in('user_id', utenti),
-      senzaCestino(f => vivi(sb.from('gest_mestieri').select('id, nome').in('user_id', utenti), f))
+      senzaCestino(f => vivi(sb.from('gest_mestieri').select('id, nome').in('user_id', utenti), f)),
+      senzaCestino(f => vivi(sb.from('promemoria')
+        .select('id, user_id, testo, note, data, ora, avvisa_giorni, ripeti_mesi, stato, inviato')
+        .in('user_id', utenti).lte('data', fra30).neq('stato', 'fatto'), f))
     ]);
-    for (const q of [qScad, qCli, qMest]) if (q.error) throw q.error;
+    for (const q of [qScad, qCli, qMest, qProm]) if (q.error) throw q.error;
 
     // il lunedi' servono anche i soldi e i lavori: negli altri giorni non si
     // leggono nemmeno, perche' nell'email non ci entrerebbero comunque
@@ -565,7 +619,20 @@ const handler = async function () {
       // c) la richiesta dal sito ferma da piu' di 24 ore
       const richieste = richiestePerUte[uid] || [];
 
-      const cambiato = inArrivo.length + appenaScadute.length + richieste.length;
+      /* d) il promemoria che ha scritto lui, arrivato al suo giorno di avviso.
+         Il giorno dell'avviso e' `data` meno `avvisa_giorni`: chi ha chiesto
+         «7 giorni prima» lo riceve una settimana avanti. Si usa `<=` e non
+         `===` apposta: se l'email di quel giorno non e' partita (Resend giu',
+         function caduta) domani parte lo stesso, invece di saltare il giro e
+         lasciarlo senza avviso per sempre. A non ripeterlo ci pensa
+         `inviato`. */
+      const miei = (qProm.data || []).filter(x => String(x.user_id) === uid && x.data);
+      const promemoria = miei
+        .filter(x => !x.inviato && giorniDopo(x.data, -(+x.avvisa_giorni || 0)) <= oggi)
+        .map(x => ({ ...x, giorni: quantiGiorni(oggi, x.data) }))
+        .sort((a, b) => a.giorni - b.giorni);
+
+      const cambiato = inArrivo.length + appenaScadute.length + richieste.length + promemoria.length;
 
       /* IL QUADRO COMPLETO — solo il lunedi'. Sono le cose vecchie: non
          interrompono mai in settimana, ma il lunedi' vanno viste. */
@@ -589,7 +656,15 @@ const handler = async function () {
             .sort((x, y) => y.giorniRitardo - x.giorniRitardo)
         : [];
 
-      const vecchio = scadute.length + fatture.length + lavori.length;
+      /* il lunedi' si vedono anche i promemoria gia' passati e ancora aperti,
+         pure quelli gia' avvisati: e' il quadro completo, non un avviso nuovo */
+      const promPassati = completo
+        ? miei.filter(x => x.data < oggi && !promemoria.some(p => String(p.id) === String(x.id)))
+              .map(x => ({ ...x, giorni: quantiGiorni(oggi, x.data) }))
+              .sort((a, b) => a.giorni - b.giorni)
+        : [];
+
+      const vecchio = scadute.length + fatture.length + lavori.length + promPassati.length;
 
       /* ⛔ LA REGOLA, IN UNA RIGA SOLA.
          In settimana si scrive solo se e' cambiato qualcosa. Il lunedi' basta
@@ -626,7 +701,8 @@ const handler = async function () {
       const d = {
         oggi, completo, pro,
         azienda: a.nome || imp.nome_attivita || '',
-        appenaScadute, inArrivo, richieste, scadute, fatture, lavori,
+        appenaScadute, inArrivo, richieste, promemoria, promPassati,
+        scadute, fatture, lavori,
         totaleScaduto: fatture.reduce((s, f) => s + f.totale, 0),
         cappello: null
       };
@@ -672,6 +748,15 @@ const handler = async function () {
         const e3 = await sb.from('gest_dalsito_avvisi')
           .upsert(richieste.map(r => ({ preventivo_id: r.id })), { ignoreDuplicates: true });
         if (e3.error) errori.push('dalsito_avvisi: ' + e3.error.message);
+      }
+      /* il registro dei suoi promemoria e' la colonna `inviato`, che c'era gia'
+         nella tabella dal primo giorno. ⚠️ La sezione la rimette a false ogni
+         volta che si cambia la data o si riapre un promemoria: se no, spostare
+         un F24 di un mese vorrebbe dire non essere piu' avvisati. */
+      if (promemoria.length) {
+        const e4 = await sb.from('promemoria').update({ inviato: true })
+          .in('id', promemoria.map(p => p.id));
+        if (e4.error) errori.push('promemoria inviato: ' + e4.error.message);
       }
     }
 
