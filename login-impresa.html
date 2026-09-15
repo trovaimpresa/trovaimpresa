@@ -181,7 +181,14 @@
         const { error } = await supabaseClient.auth.resend({
           type: 'signup',
           email: email,
-          options: { emailRedirectTo: window.location.origin + '/login-impresa.html' }
+          options: { emailRedirectTo: window.location.origin + '/login-impresa.html'
+                    /* 15 set 2026: se sono arrivato qui con ?redirect=gestionale,
+                       l'email rimandata deve riportarmi al gestionale, non al pannello. */
+                    + (function () {
+                        try { return new URLSearchParams(window.location.search).get('redirect') === 'gestionale'
+                                     ? '?redirect=gestionale' : ''; }
+                        catch (e) { return ''; }
+                      })() }
         });
         if (error) throw error;
         el.innerHTML = '';

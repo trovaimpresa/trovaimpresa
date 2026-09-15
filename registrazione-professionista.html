@@ -620,7 +620,11 @@
         try {
           const { error } = await supabaseClient.auth.resend({
             type: 'signup', email: email,
-            options: { emailRedirectTo: window.location.origin + '/login-impresa.html' }
+            options: { emailRedirectTo: window.location.origin + '/login-impresa.html'
+                      /* 15 set 2026: anche il RIMANDA deve riportare al gestionale.
+                         Senza questo pezzo, chi si perdeva la prima email e chiedeva
+                         di rimandarla finiva nel pannello invece che nel gestionale. */
+                      + (window.DA_GESTIONALE ? '?redirect=gestionale' : '') }
           });
           if (error) throw error;
           msg.innerHTML = '<span style="color:#15803d;font-weight:700">✅ Rimandata! Controlla la posta (e lo SPAM).</span>';
