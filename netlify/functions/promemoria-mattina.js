@@ -90,7 +90,12 @@ function giorniDopo(ds, n) {
 }
 function dataIt(iso) {
   if (!iso) return '';
-  const [a, m, g] = String(iso).split('-');
+  /* ⚠️ 15 set 2026: si taglia ai primi 10 caratteri. Le colonne `data` sono
+     date secche (2026-09-15) ma `created_at` e' un orario completo
+     (2026-09-14T17:30:00+00:00): senza il taglio usciva
+     «14T17:30:00+00:00/09/2026». Trovato mentre si passava all'AI la data in
+     cui il promemoria e' stato scritto. */
+  const [a, m, g] = String(iso).slice(0, 10).split('-');
   return g + '/' + m + '/' + a;
 }
 function quantiGiorni(da, a) {
@@ -136,13 +141,22 @@ function cosaDire(d) {
 
   /* I suoi promemoria per primi: quello che l'AI legge per primo e' quello di
      cui parla per primo, e questi se li e' scritti lui di sua mano. */
+  /* ⛔ 15 settembre 2026 — LA DATA VA ETICHETTATA, SE NO L'AI LA SCAMBIA.
+     Prima qui usciva «- il mio promemoria | oggi alle 07:30». L'AI ha letto
+     quell'«oggi alle 07:30» come il momento in cui lui l'aveva SCRITTO, e ha
+     aperto l'email con «Oggi alle 07:30 hai messo un promemoria di prova».
+     Invece era la data in cui la cosa VA FATTA, e lui l'aveva scritto il
+     giorno prima. Adesso ogni data porta la sua etichetta, e c'e' anche la
+     data in cui l'ha scritto: cosi' non c'e' piu' niente da indovinare.
+     ⚠️ Vale in generale: un elenco per l'AI non deve avere date senza nome. */
   r.push('PROMEMORIA CHE SI E\' SCRITTO LUI, DA DIRGLI OGGI: ' + (d.promemoria || []).length);
   (d.promemoria || []).forEach(function (x) {
     r.push('- ' + (x.testo || 'senza testo')
-      + ' | ' + (x.giorni < 0 ? 'era il ' + dataIt(x.data)
+      + ' | da fare: ' + (x.giorni < 0 ? 'era il ' + dataIt(x.data)
                : x.giorni === 0 ? 'oggi' : x.giorni === 1 ? 'domani' : 'il ' + dataIt(x.data))
       + (x.ora ? ' alle ' + String(x.ora).slice(0, 5) : '')
-      + (x.note ? ' | nota: ' + x.note : ''));
+      + (x.created_at ? ' | se l\'e\' scritto il ' + dataIt(x.created_at) : '')
+      + (x.note ? ' | nota sua: ' + x.note : ''));
   });
   r.push('');
 
@@ -164,7 +178,8 @@ function cosaDire(d) {
   r.push('');
   r.push('SUOI PROMEMORIA GIA\' PASSATI E ANCORA DA FARE: ' + (d.promPassati || []).length);
   (d.promPassati || []).forEach(x => r.push('- ' + (x.testo || 'senza testo')
-    + ' | era il ' + dataIt(x.data) + (x.ora ? ' alle ' + String(x.ora).slice(0, 5) : '')));
+    + ' | da fare: era il ' + dataIt(x.data) + (x.ora ? ' alle ' + String(x.ora).slice(0, 5) : '')
+    + (x.created_at ? ' | se l\'e\' scritto il ' + dataIt(x.created_at) : '')));
   r.push('');
   r.push('SCADENZE GIA\' PASSATE E ANCORA APERTE: ' + d.scadute.length);
   d.scadute.forEach(x => r.push('- ' + (x.titolo || 'senza titolo')
@@ -199,6 +214,7 @@ function istruzioni(completo) {
       : 'Non è lunedì: si scrive solo perché oggi è cambiato qualcosa. Dì subito qual è quella cosa.',
     '',
     '⛔ Usa SOLO i numeri, le date e i nomi che ti do qui sotto. Non inventarne altri, non stimare e non fare somme che non ti ho già dato: i conti li ha fatti il gestionale.',
+    '⛔ Ogni data qui sotto dice a cosa serve. «da fare: oggi alle 07:30» è QUANDO LA COSA VA FATTA, non quando lui l\'ha scritta. Non dire mai quando ha scritto un promemoria, a meno che non ti serva davvero e allora usa «se l\'è scritto il ...».',
     'Scrivi i soldi come te li do, all\'italiana: 8.000,00 €.',
     '',
     'NON scrivere: saluti, firme, titoli, elenchi puntati, e niente frasi di incoraggiamento. Comincia dalla cosa più importante.',
@@ -509,7 +525,7 @@ const handler = async function () {
       sb.from('gest_clienti').select('id, user_id, nome').in('user_id', utenti),
       senzaCestino(f => vivi(sb.from('gest_mestieri').select('id, nome').in('user_id', utenti), f)),
       senzaCestino(f => vivi(sb.from('promemoria')
-        .select('id, user_id, testo, note, data, ora, avvisa_giorni, ripeti_mesi, stato, inviato')
+        .select('id, user_id, testo, note, data, ora, avvisa_giorni, ripeti_mesi, stato, inviato, created_at')
         .in('user_id', utenti).lte('data', fra30).neq('stato', 'fatto'), f))
     ]);
     for (const q of [qScad, qCli, qMest, qProm]) if (q.error) throw q.error;

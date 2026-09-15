@@ -161,11 +161,19 @@ async function segnaIncasso(supabase, dati) {
 //    anche quando Stripe rimanda l'avviso, ed e' quello che impedisce il
 //    doppio accredito.
 // ---------------------------------------------------------------------
+// ⚠️ 14 SETTEMBRE 2026 — LA STESSA FUNZIONE SERVE DUE CASSE.
+//    `prodotto: 'crediti-ai'`    -> add_credits_pack -> credits_extra (assistenza)
+//    `prodotto: 'messaggi-chat'` -> add_chat_pack    -> chat_extra    (chat)
+//    Il numero arriva sempre da `meta.crediti`, scritto dal server in
+//    crea-checkout-crediti.js: cambia solo dove lo si mette.
 async function accreditaCrediti(supabase, s, ev) {
   const meta    = s.metadata || {};
   const email   = meta.email || s.customer_email || null;
   const userId  = meta.user_id || s.client_reference_id || null;
   const crediti = parseInt(meta.crediti, 10);
+  const perChat = (meta.prodotto === 'messaggi-chat');
+  const etich   = perChat ? '[messaggi]' : '[crediti]';
+  const parola  = perChat ? 'messaggi' : 'crediti';
 
   // ⚠️ IL CASO CHE NON DEVE ACCREDITARE NIENTE.
   // Con la carta `payment_status` e' 'paid' subito. Con i pagamenti che
@@ -174,13 +182,13 @@ async function accreditaCrediti(supabase, s, ev) {
   // pagato. Quando poi paga davvero arriva
   // `checkout.session.async_payment_succeeded`, e li' si accredita.
   if (s.payment_status !== 'paid') {
-    console.log('[crediti] avviso ricevuto ma non pagato (' + s.payment_status + '):', s.id);
+    console.log(etich + ' avviso ricevuto ma non pagato (' + s.payment_status + '):', s.id);
     return true;   // non e' un errore: non c'e' niente da fare
   }
 
   // l'incasso si segna comunque, anche se poi l'accredito va storto
   await segnaIncasso(supabase, {
-    prodotto: 'crediti-ai', centesimi: s.amount_total, riferimento: s.id,
+    prodotto: perChat ? 'messaggi-chat' : 'crediti-ai', centesimi: s.amount_total, riferimento: s.id,
     email, valuta: s.currency, tipo_evento: ev.type,
     quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
   });
@@ -188,35 +196,43 @@ async function accreditaCrediti(supabase, s, ev) {
   if (!userId || !(crediti > 0)) {
     // dato mancante: riprovare non servirebbe a niente, il dato non
     // arrivera' mai. Si risponde ok e si urla nel log.
-    console.error('[crediti] AVVISO SENZA DESTINATARIO — sessione ' + s.id +
-                  ' user_id=' + userId + ' crediti=' + meta.crediti +
-                  ' — questa persona ha pagato e NON ha ricevuto i crediti.');
+    console.error(etich + ' AVVISO SENZA DESTINATARIO — sessione ' + s.id +
+                  ' user_id=' + userId + ' quanti=' + meta.crediti +
+                  ' — questa persona ha pagato e NON ha ricevuto i ' + parola + '.');
     return true;
   }
 
-  const { data, error } = await supabase.rpc('add_credits_pack', {
-    p_user_id:           userId,
-    p_credits:           crediti,
-    p_amount_eur:        (s.amount_total || 0) / 100,
-    p_payment_provider:  'stripe',
-    p_payment_reference: s.id
-  });
+  const { data, error } = perChat
+    ? await supabase.rpc('add_chat_pack', {
+        p_user_id:           userId,
+        p_messaggi:          crediti,
+        p_amount_eur:        (s.amount_total || 0) / 100,
+        p_payment_provider:  'stripe',
+        p_payment_reference: s.id
+      })
+    : await supabase.rpc('add_credits_pack', {
+        p_user_id:           userId,
+        p_credits:           crediti,
+        p_amount_eur:        (s.amount_total || 0) / 100,
+        p_payment_provider:  'stripe',
+        p_payment_reference: s.id
+      });
 
   if (error) {
-    console.error('[crediti] accredito fallito, faccio riprovare Stripe:', error.message);
+    console.error(etich + ' accredito fallito, faccio riprovare Stripe:', error.message);
     return false;
   }
   if (data && data.ok === false) {
     if (data.reason === 'already_processed') {
-      // e' il caso normale del doppio avviso: i crediti ci sono gia'.
-      console.log('[crediti] gia accreditati:', s.id);
+      // e' il caso normale del doppio avviso: ci sono gia'.
+      console.log(etich + ' gia accreditati:', s.id);
       return true;
     }
-    console.error('[crediti] accredito rifiutato (' + data.reason + '), faccio riprovare Stripe:', s.id);
+    console.error(etich + ' accredito rifiutato (' + data.reason + '), faccio riprovare Stripe:', s.id);
     return false;
   }
 
-  console.log('[crediti] accreditati ' + crediti + ' crediti a ' + userId + ' (' + s.id + ')');
+  console.log(etich + ' accreditati ' + crediti + ' ' + parola + ' a ' + userId + ' (' + s.id + ')');
   return true;
 }
 
@@ -244,7 +260,7 @@ exports.handler = async (event) => {
     // Una ricarica di crediti porta con se' l'email, e senza questa riga
     // finirebbe nel ramo qui sotto: 19 euro di crediti diventerebbero un
     // Premium regalato.
-    if (prodotto === 'crediti-ai') {
+    if (prodotto === 'crediti-ai' || prodotto === 'messaggi-chat') {
       tuttoBene = await accreditaCrediti(supabase, s, ev);
 
     } else if (email && prodotto === 'gestionale') {
@@ -325,8 +341,9 @@ exports.handler = async (event) => {
   // niente. Sta qui solo per lasciarne traccia nel log.
   if (ev.type === 'checkout.session.async_payment_failed') {
     const s = ev.data.object;
-    if (s.metadata && s.metadata.prodotto === 'crediti-ai') {
-      console.log('[crediti] pagamento non riuscito, nessun accredito:', s.id);
+    const pr = s.metadata && s.metadata.prodotto;
+    if (pr === 'crediti-ai' || pr === 'messaggi-chat') {
+      console.log('[' + pr + '] pagamento non riuscito, nessun accredito:', s.id);
     }
   }
 

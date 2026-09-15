@@ -418,13 +418,25 @@
      barra diceva PREMIUM: due nomi per lo stesso account. Adesso qui il
      nome del piano non si scrive proprio: si dicono solo i messaggi. */
   var modoAssaggio = false;
+  var messaggiComprati = 0;   /* 14 set 2026: quelli del pacchetto, a parte */
   function scriviRestanti(n) {
     var sotto = document.getElementById('chat-sotto');
     if (!sotto || typeof n !== 'number') return;
-    sotto.innerHTML = modoAssaggio
-      ? 'Prova: ti ' + (n === 1 ? 'resta <b>1</b> messaggio' : 'restano <b>' + n + '</b> messaggi')
-        + ' &middot; con il <b>Premium AI</b> ne hai 300 al mese'
-      : 'Ti restano <b>' + n + '</b> messaggi compresi questo mese';
+    /* ⚠️ 14 set 2026: `n` e' il totale — i compresi del mese PIU' quelli
+       comprati. Tenerli separati a schermo serve: uno deve vedere che il
+       pacchetto che ha pagato c'e' ancora, e che il mese prossimo i
+       compresi tornano mentre i comprati restano quelli. */
+    var comprati = messaggiComprati > 0
+      ? ' &middot; piu\' <b>' + messaggiComprati + '</b> comprati'
+      : '';
+    if (modoAssaggio) {
+      sotto.innerHTML = 'Prova: ti '
+        + (n === 1 ? 'resta <b>1</b> messaggio' : 'restano <b>' + n + '</b> messaggi')
+        + ' &middot; con il <b>Premium AI</b> ne hai 300 al mese';
+      return;
+    }
+    var compresi = Math.max(n - messaggiComprati, 0);
+    sotto.innerHTML = 'Ti restano <b>' + compresi + '</b> messaggi compresi questo mese' + comprati;
   }
 
   async function aggiornaSotto() {
@@ -433,7 +445,7 @@
       var r = await window._gc.rpc('chat_stato', {});
       if (r && !r.error && r.data) {
         var s = Array.isArray(r.data) ? r.data[0] : r.data;
-        if (s) { modoAssaggio = !!s.assaggio; scriviRestanti(s.restanti); }
+        if (s) { modoAssaggio = !!s.assaggio; messaggiComprati = +s.extra || 0; scriviRestanti(s.restanti); }
       }
     } catch (e) { /* niente: e' un di piu' */ }
   }
@@ -646,6 +658,8 @@
           bolla.appendChild(cop);
         }
         if (fine) {
+          /* se l'ha pagato il pacchetto, il pacchetto e' sceso di uno */
+          if (fine.come_pagato === 'comprato' && messaggiComprati > 0) messaggiComprati--;
           scriviRestanti(fine.restanti);
           caricaArchivio();
           /* ⛔ il modulo si apre DOPO aver scritto la risposta: se si aprisse
@@ -665,6 +679,8 @@
 
       if (r.ok && d.risposta) {
         scrivi('ai', testoRisposta(d.risposta), null, true);
+        /* se questo messaggio l'ha pagato il pacchetto, il pacchetto e' sceso */
+        if (d.come_pagato === 'comprato' && messaggiComprati > 0) messaggiComprati--;
         scriviRestanti(d.restanti);
         caricaArchivio();   /* la chiacchierata nuova compare subito a destra */
         /* ⛔ il modulo si apre DOPO aver scritto la risposta: se si aprisse
@@ -676,11 +692,15 @@
            comprare, che e' il pannello: le porte stanno li'. */
         scrivi('ai', esc(d.error || 'La Chat con AI fa parte del Premium AI.')
           + (d.assaggio_finito ? '<br><a href="/pannello-impresa.html#dashboard">Attiva il Premium AI dal pannello</a>' : ''));
-      } else if (d.serve_crediti) {
-        scrivi('ai', esc(d.error) + '<br><a href="/ricarica-crediti.html">Vai alla ricarica dei crediti</a>');
+      } else if (d.serve_messaggi || d.serve_crediti) {
+        /* ⛔ 14 set 2026: `serve_crediti` e' il nome vecchio, di quando la
+           chat mangiava i crediti dell'assistenza. Resta riconosciuto solo
+           per il minuto in cui il sito e' pubblicato a meta'. */
+        scrivi('ai', esc(d.error)
+          + '<br><a href="/ricarica-crediti.html#messaggi">Compra altri messaggi</a>');
       } else {
-        /* ⚠️ se non ha risposto, il credito e' gia' tornato indietro:
-           lo fa la function con refund_ai_credit. Qui si dice solo che
+        /* ⚠️ se non ha risposto, il messaggio e' gia' tornato indietro:
+           lo fa la function con refund_chat_message. Qui si dice solo che
            non e' andata, e si manda dove c'e' una persona vera. */
         scrivi('ai', 'Non sono riuscito a risponderti: ' + esc(d.error || 'riprova fra poco') + '.<br>'
           + '<span class="asst-nota">Se ricapita, usa «Assistenza diretta» qui a sinistra.</span>');

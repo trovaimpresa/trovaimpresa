@@ -849,21 +849,34 @@ export default async function (req) {
   //    vuoto e risponde 'unauthenticated': il credito non si scalerebbe e
   //    la chat sarebbe gratis. Letto nella funzione vera su Supabase il
   //    29 agosto, non a memoria.
+  /* ⛔ 14 SETTEMBRE 2026 — LA CHAT NON MANGIA PIU' I CREDITI DELL'ASSISTENZA.
+     Prima qui c'era `consume_ai_credit('chat')`, che si prendeva i crediti
+     MENSILI (40 del Gestionale, 100 del Gestionale AI) e poi quelli comprati.
+     Ma quei crediti sono dell'ASSISTENZA — «Compila con AI» e «Genera con AI».
+     Uno chiacchierava, passava i 300 senza accorgersene, e poi trovava
+     l'assistenza a secco senza capire perche'. I «300 messaggi» del listino
+     in realta' erano 400.
+     Adesso sono due portafogli separati: `consume_chat_message` tocca SOLO
+     `ai_accounts.chat_extra`, i messaggi comprati a parte.
+     ⚠️ Il conto si fa su `compresi_restanti`, NON su `restanti`: `restanti`
+        comprende gia' i messaggi comprati, quindi guardando quello non si
+        scalerebbero mai e chi ha pagato un pacchetto chiacchiererebbe gratis. */
   let comePagato = 'compreso';
   let scontrino = null;   // il log_id, per rimborsare se Claude non risponde
-  if (stato.restanti <= 0) {
-    const c = await chiamaRpc(dati, 'consume_ai_credit', { p_feature: 'chat', p_cost: 1 });
+  if ((stato.compresi_restanti || 0) <= 0) {
+    const c = await chiamaRpc(dati, 'consume_chat_message', {});
     const esito = (c && !c.errore && c.dati) || null;
     if (!esito || esito.ok !== true) {
-      const perche = (esito && esito.reason) || 'no_credits';
       return rispondi(402, {
-        error: 'Hai finito i ' + stato.compresi + ' messaggi compresi di questo mese'
-             + (perche === 'no_credits' ? ' e non ti restano crediti.' : '.')
-             + ' Puoi ricaricare dalla pagina dei crediti.',
-        serve_crediti: true, motivo: perche
+        error: stato.assaggio
+          ? 'Hai finito i ' + stato.compresi + ' messaggi di prova della Chat con AI.'
+          : 'Hai finito i ' + stato.compresi + ' messaggi compresi di questo mese.'
+            + ' Il primo del mese tornano. Se ti servono adesso puoi comprarne altri.',
+        serve_messaggi: true,
+        motivo: (esito && esito.reason) || 'no_chat_messages'
       });
     }
-    comePagato = 'credito';
+    comePagato = 'comprato';
     scontrino = esito.log_id || null;
   }
 
@@ -1073,7 +1086,8 @@ export default async function (req) {
       //    rimborsa se fallisce. Far pagare un messaggio mai arrivato e' il
       //    modo piu' veloce per farsi disdire il piano.
       if (errore && !risposta && scontrino) {
-        const rimb = await chiamaRpc(dati, 'refund_ai_credit',
+        // ⚠️ 14 set 2026: il rimborso va su chat_extra, non sui crediti
+        const rimb = await chiamaRpc(dati, 'refund_chat_message',
           { p_log_id: scontrino, p_error: String(errore).slice(0, 300) });
         if (rimb.errore) console.error('[chat] rimborso non riuscito:', rimb.errore);
       }
@@ -1108,7 +1122,11 @@ export default async function (req) {
         errore: (errore && !risposta) ? errore : null,
         modulo: modulo,
         come_pagato: comePagato,
-        restanti: Math.max((stato.restanti || 0) - (comePagato === 'compreso' ? 1 : 0), 0)
+        /* ⚠️ 14 set 2026: si toglie 1 in tutti e due i casi. `restanti`
+           comprende sia i compresi sia i messaggi comprati, e questo
+           messaggio ha consumato uno dei due. Prima si toglieva solo per i
+           compresi perche' i crediti erano un contatore a parte. */
+        restanti: Math.max((stato.restanti || 0) - 1, 0)
       });
       chiuso = true;
       try { controller.close(); } catch (e) {}

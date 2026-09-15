@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Ricarica crediti AI - TrovaImpresa</title>
+<title>Ricarica AI - TrovaImpresa</title>
 <style>
   /* Stessi nomi e stessi colori di css/gestionale.css: se un domani cambi
      il blu del marchio, si cambia in tutti e due i posti nello stesso modo.
      ⚠️ Niente testo sotto i 13 px in nessun punto di questa pagina. */
   :root{
     --blu:#0066FF; --blu-scuro:#0B4BC4; --blu-hover:#0052D6; --blu-tenue:#E6F0FF;
+    --viola:#7b2fbe; --viola-scuro:#5B1F92; --viola-tenue:#F4ECFB;
     --testo:#0F172A; --testo-2:#475569; --testo-3:#64748B;
     --sfondo:#F8FAFC; --card:#FFFFFF; --bordo:#E2E8F0; --bordo-forte:#CBD5E1;
     --ok:#059669; --ok-bg:#ECFDF5;
@@ -36,10 +37,22 @@
   .foglio{max-width:880px;margin:0 auto;padding:24px 16px 80px}
 
   h1{font-size:26px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px}
-  .sotto{font-size:16px;color:var(--testo-2);margin-bottom:24px;max-width:620px}
+  .sotto{font-size:16px;color:var(--testo-2);margin-bottom:24px;max-width:640px}
 
   .riquadro{background:var(--card);border:1px solid var(--bordo);
     border-radius:var(--r-card);padding:20px;box-shadow:var(--ombra);margin-bottom:20px}
+
+  /* ---- 14 set 2026: LE DUE CASSE SONO DUE, E SI DEVE VEDERE ----
+     La chat e l'assistenza avevano lo stesso portafoglio: uno chiacchierava
+     e senza saperlo si mangiava i crediti di «Compila con AI». Adesso sono
+     separate anche a schermo, ognuna col suo blocco e il suo colore. */
+  .reparto{margin:0 0 40px}
+  .rep-cap{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .rep-pallino{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+  .rep-cap h2{font-size:20px;font-weight:800;letter-spacing:-.3px}
+  .rep-dice{font-size:15px;color:var(--testo-2);margin-bottom:18px;max-width:640px}
+  .reparto--crediti .rep-pallino{background:var(--blu)}
+  .reparto--chat    .rep-pallino{background:var(--viola)}
 
   /* ---- il conto: 100 del mese + 150 comprati = 250 da usare ----
      ⚠️ Il piu' e l'uguale non sono decorazione: sono l'unica cosa che dice
@@ -54,6 +67,7 @@
     padding-top:2px;flex:0 0 auto}
   .ct-voce--tot .ct-n{color:var(--blu-scuro)}
   .ct-voce--tot .ct-et{color:var(--testo)}
+  .reparto--chat .ct-voce--tot .ct-n{color:var(--viola-scuro)}
   .ct-tot{display:flex;gap:14px;align-items:flex-start}
   /* ⚠️ Sul telefono i tre numeri non ci stanno su una riga: l'uguale restava
      da solo in fondo alla prima riga e il totale finiva sotto, staccato da
@@ -85,8 +99,10 @@
     padding:22px 20px;display:flex;flex-direction:column;gap:6px;position:relative;
     box-shadow:var(--ombra)}
   .taglio.consigliato{border-color:var(--blu)}
+  .reparto--chat .taglio.consigliato{border-color:var(--viola)}
   .etichetta{position:absolute;top:-11px;left:20px;background:var(--blu);color:#fff;
     font-size:13px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.2px}
+  .reparto--chat .etichetta{background:var(--viola)}
   .taglio .crediti{font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1.1}
   .taglio .parola{font-size:15px;color:var(--testo-2);font-weight:600;margin-top:-4px}
   .taglio .prezzo{font-size:22px;font-weight:800;margin-top:10px}
@@ -96,6 +112,9 @@
     font-weight:800;cursor:pointer}
   .taglio button:hover{background:var(--blu-hover)}
   .taglio button:disabled{background:var(--bordo-forte);cursor:not-allowed}
+  .reparto--chat .taglio button{background:var(--viola)}
+  .reparto--chat .taglio button:hover{background:var(--viola-scuro)}
+  .reparto--chat .taglio button:disabled{background:var(--bordo-forte)}
 
   .spiega{margin-top:24px}
   .spiega h2{font-size:18px;font-weight:800;margin-bottom:12px}
@@ -117,86 +136,181 @@
 
 <div class="foglio">
 
-  <h1>Ricarica i crediti AI</h1>
+  <h1>Ricarica l&rsquo;AI</h1>
   <p class="sotto">
-    Ogni mese il tuo piano ti dà dei crediti — <strong>40</strong> con il Gestionale Premium, <strong>100</strong> con il Gestionale Premium AI — e il primo del mese ripartono da capo. Se ti servono prima, qui puoi comprarne altri: <strong>quelli comprati non scadono mai</strong> e si usano solo quando quelli del mese sono finiti.
+    Qui ci sono <strong>due cose separate</strong>, e non si toccano fra loro:
+    i <strong>crediti</strong> servono all&rsquo;assistenza &mdash; &laquo;Compila con AI&raquo; e
+    &laquo;Genera con AI&raquo; &mdash; e i <strong>messaggi</strong> servono alla Chat con AI.
+    Tutte e due si rinnovano il primo del mese; quello che compri qui invece
+    <strong>non scade mai</strong>.
   </p>
 
   <div id="avvisi"></div>
 
-  <!-- il contatore -->
-  <!-- ⚠️ 16 agosto 2026, il pomeriggio — I TRE NUMERI ADESSO SI LEGGONO COME UN CONTO.
-       Prima erano tre numeri grossi in fila: 250, 100, 150. Il primo era la somma
-       degli altri due, ma non c'era niente che lo dicesse, e chiunque li legge come
-       tre cose separate. Alessio, che ha appena comprato 150 crediti, ha chiesto
-       «non dovrebbero essere 350?». Non aveva capito male lui: erano scritti male io.
-       Adesso c'e' il piu' e c'e' l'uguale, come su una fattura, e si legge da solo. -->
-  <div class="riquadro nascosto" id="riquadro-conto">
-    <div class="conto">
-      <div class="ct-voce">
-        <div class="ct-n" id="n-mese">-</div>
-        <div class="ct-et">del mese</div>
-        <div class="ct-nota" id="nota-rinnovo"></div>
-      </div>
-      <div class="ct-segno" aria-hidden="true">+</div>
-      <div class="ct-voce">
-        <div class="ct-n" id="n-comprati">-</div>
-        <div class="ct-et">comprati</div>
-        <div class="ct-nota">non scadono mai</div>
-      </div>
-      <div class="ct-tot">
-        <div class="ct-segno" aria-hidden="true">=</div>
-        <div class="ct-voce ct-voce--tot">
-          <div class="ct-n" id="n-totale">-</div>
-          <div class="ct-et">da usare adesso</div>
+  <!-- =================================================================
+       REPARTO 1 — I CREDITI DELL'ASSISTENZA
+       ================================================================= -->
+  <div class="reparto reparto--crediti">
+
+    <div class="rep-cap">
+      <span class="rep-pallino" aria-hidden="true"></span>
+      <h2>I crediti dell&rsquo;assistenza</h2>
+    </div>
+    <p class="rep-dice">
+      Un credito &egrave; una richiesta all&rsquo;AI: un preventivo generato, una scheda
+      cliente compilata, un controllo. Ogni mese ne hai <strong>40</strong> con il
+      Gestionale e <strong>100</strong> con il Gestionale AI.
+    </p>
+
+    <!-- il contatore -->
+    <!-- ⚠️ 16 agosto 2026, il pomeriggio — I TRE NUMERI ADESSO SI LEGGONO COME UN CONTO.
+         Prima erano tre numeri grossi in fila: 250, 100, 150. Il primo era la somma
+         degli altri due, ma non c'era niente che lo dicesse, e chiunque li legge come
+         tre cose separate. Alessio, che ha appena comprato 150 crediti, ha chiesto
+         «non dovrebbero essere 350?». Non aveva capito male lui: erano scritti male io.
+         Adesso c'e' il piu' e c'e' l'uguale, come su una fattura, e si legge da solo. -->
+    <div class="riquadro nascosto" id="riquadro-conto">
+      <div class="conto">
+        <div class="ct-voce">
+          <div class="ct-n" id="n-mese">-</div>
+          <div class="ct-et">del mese</div>
+          <div class="ct-nota" id="nota-rinnovo"></div>
+        </div>
+        <div class="ct-segno" aria-hidden="true">+</div>
+        <div class="ct-voce">
+          <div class="ct-n" id="n-comprati">-</div>
+          <div class="ct-et">comprati</div>
+          <div class="ct-nota">non scadono mai</div>
+        </div>
+        <div class="ct-tot">
+          <div class="ct-segno" aria-hidden="true">=</div>
+          <div class="ct-voce ct-voce--tot">
+            <div class="ct-n" id="n-totale">-</div>
+            <div class="ct-et">da usare adesso</div>
+          </div>
         </div>
       </div>
     </div>
+
+    <div id="avvisi-crediti"></div>
+
+    <div class="tagli nascosto" id="tagli">
+
+      <div class="taglio">
+        <div class="crediti">150</div>
+        <div class="parola">crediti</div>
+        <div class="prezzo">19 &euro;</div>
+        <div class="unitario">circa 13 centesimi a credito</div>
+        <button type="button" data-cosa="crediti" data-taglio="150">Ricarica 150</button>
+      </div>
+
+      <div class="taglio consigliato">
+        <span class="etichetta">Il più scelto</span>
+        <div class="crediti">400</div>
+        <div class="parola">crediti</div>
+        <div class="prezzo">45 &euro;</div>
+        <div class="unitario">circa 11 centesimi a credito</div>
+        <button type="button" data-cosa="crediti" data-taglio="400">Ricarica 400</button>
+      </div>
+
+      <div class="taglio">
+        <div class="crediti">1.000</div>
+        <div class="parola">crediti</div>
+        <div class="prezzo">99 &euro;</div>
+        <div class="unitario">circa 10 centesimi a credito</div>
+        <button type="button" data-cosa="crediti" data-taglio="1000">Ricarica 1.000</button>
+      </div>
+
+    </div>
   </div>
 
-  <!-- i tre tagli -->
-  <div class="tagli nascosto" id="tagli">
+  <!-- =================================================================
+       REPARTO 2 — I MESSAGGI DELLA CHAT  (14 settembre 2026)
+       ⛔ Prima non esisteva: finiti i 300 compresi, la chat si mangiava i
+          crediti dell'assistenza qui sopra. Adesso ha la sua cassa.
+       ================================================================= -->
+  <div class="reparto reparto--chat" id="messaggi">
 
-    <div class="taglio">
-      <div class="crediti">150</div>
-      <div class="parola">crediti</div>
-      <div class="prezzo">19 &euro;</div>
-      <div class="unitario">circa 13 centesimi a credito</div>
-      <button type="button" data-taglio="150">Ricarica 150</button>
+    <div class="rep-cap">
+      <span class="rep-pallino" aria-hidden="true"></span>
+      <h2>I messaggi della chat</h2>
+    </div>
+    <p class="rep-dice">
+      Con il Gestionale AI hai <strong>300 messaggi al mese</strong>. Se li finisci,
+      la chat si ferma e da qui ne compri altri: <strong>i crediti
+      dell&rsquo;assistenza non si toccano</strong>.
+    </p>
+
+    <div class="riquadro nascosto" id="riquadro-conto-chat">
+      <div class="conto">
+        <div class="ct-voce">
+          <div class="ct-n" id="m-mese">-</div>
+          <div class="ct-et">del mese</div>
+          <div class="ct-nota" id="m-nota-rinnovo"></div>
+        </div>
+        <div class="ct-segno" aria-hidden="true">+</div>
+        <div class="ct-voce">
+          <div class="ct-n" id="m-comprati">-</div>
+          <div class="ct-et">comprati</div>
+          <div class="ct-nota">non scadono mai</div>
+        </div>
+        <div class="ct-tot">
+          <div class="ct-segno" aria-hidden="true">=</div>
+          <div class="ct-voce ct-voce--tot">
+            <div class="ct-n" id="m-totale">-</div>
+            <div class="ct-et">da usare adesso</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="taglio consigliato">
-      <span class="etichetta">Il più scelto</span>
-      <div class="crediti">400</div>
-      <div class="parola">crediti</div>
-      <div class="prezzo">45 &euro;</div>
-      <div class="unitario">circa 11 centesimi a credito</div>
-      <button type="button" data-taglio="400">Ricarica 400</button>
-    </div>
+    <div id="avvisi-chat"></div>
 
-    <div class="taglio">
-      <div class="crediti">1.000</div>
-      <div class="parola">crediti</div>
-      <div class="prezzo">99 &euro;</div>
-      <div class="unitario">circa 10 centesimi a credito</div>
-      <button type="button" data-taglio="1000">Ricarica 1.000</button>
-    </div>
+    <div class="tagli nascosto" id="tagli-chat">
 
+      <div class="taglio">
+        <div class="crediti">300</div>
+        <div class="parola">messaggi</div>
+        <div class="prezzo">9 &euro;</div>
+        <div class="unitario">3 centesimi a messaggio</div>
+        <button type="button" data-cosa="messaggi" data-taglio="300">Compra 300</button>
+      </div>
+
+      <div class="taglio consigliato">
+        <span class="etichetta">Il più conveniente</span>
+        <div class="crediti">1.000</div>
+        <div class="parola">messaggi</div>
+        <div class="prezzo">25 &euro;</div>
+        <div class="unitario">2,5 centesimi a messaggio</div>
+        <button type="button" data-cosa="messaggi" data-taglio="1000">Compra 1.000</button>
+      </div>
+
+      <div class="taglio">
+        <div class="crediti">3.000</div>
+        <div class="parola">messaggi</div>
+        <div class="prezzo">69 &euro;</div>
+        <div class="unitario">2,3 centesimi a messaggio</div>
+        <button type="button" data-cosa="messaggi" data-taglio="3000">Compra 3.000</button>
+      </div>
+
+    </div>
   </div>
 
   <div class="riquadro spiega">
     <h2>Come funzionano</h2>
     <ul>
-      <li>Un credito è <strong>una richiesta all'intelligenza artificiale</strong>: un
-          preventivo generato, una scheda cliente compilata, un controllo.</li>
-      <li>Si scala <strong>prima dai 100 del mese</strong>. I crediti comprati si toccano
-          solo quando i 100 sono finiti.</li>
-      <li>I 100 del mese <strong>non si accumulano</strong>: il primo del mese si torna a 100,
-          quelli avanzati non passano al mese dopo. I comprati invece restano.</li>
-      <li>Se un tuo operaio usa l'AI dall'app del cantiere, i crediti li mette l'impresa,
+      <li><strong>Crediti e messaggi sono due cose diverse.</strong> I crediti sono
+          dell&rsquo;assistenza, i messaggi sono della chat. Chiacchierare non ti
+          consuma i crediti, e viceversa.</li>
+      <li>Si scala <strong>prima da quelli del mese</strong>. Quelli comprati si toccano
+          solo quando quelli del mese sono finiti.</li>
+      <li>Quelli del mese <strong>non si accumulano</strong>: il primo del mese si torna
+          al numero pieno, quelli avanzati non passano al mese dopo. I comprati
+          invece restano.</li>
+      <li>Se un tuo operaio usa l&rsquo;AI dall&rsquo;app del cantiere, li mette l&rsquo;impresa,
           non lui.</li>
       <li>Il pagamento è una tantum, <strong>non è un abbonamento</strong>: non si rinnova
-          da solo e non c'è niente da disdire.</li>
+          da solo e non c&rsquo;è niente da disdire.</li>
     </ul>
     <a class="torna" href="/gestionale-app.html">Torna al gestionale</a>
   </div>
@@ -222,11 +336,19 @@
       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  function avviso(tipo, titolo, testo){
-    q('avvisi').innerHTML +=
+  function avvisoIn(dove, tipo, titolo, testo){
+    q(dove).innerHTML +=
       '<div class="avviso ' + tipo + '"><strong>' + esc(titolo) + '</strong>' + esc(testo) + '</div>';
   }
+  function avviso(tipo, titolo, testo){ avvisoIn('avvisi', tipo, titolo, testo); }
   function pulisciAvvisi(){ q('avvisi').innerHTML = ''; }
+
+  /* ⚠️ i numeri del conto vanno scritti come quelli sulle carte: 1.000,
+     non 1000. Senza, sotto le carte che dicono «1.000 messaggi» il conto
+     diceva «1300» e sembrava un altro modo di contare. */
+  function num(n){
+    try{ return Number(n || 0).toLocaleString('it-IT'); }catch(e){ return String(n || 0); }
+  }
 
   function mese(d){
     try{
@@ -240,10 +362,11 @@
   }
 
   // ------------------------------------------------------------------
-  // 1. chi sei e quanti crediti hai
+  // 1. chi sei, quanti crediti hai, quanti messaggi hai
   // ------------------------------------------------------------------
   var sessione = null;
-  var compratiUltimo = 0;   /* quanti crediti comprati risultano all'ultima lettura */
+  var compratiUltimo = 0;   /* crediti comprati all'ultima lettura */
+  var msgCompratiUltimo = 0; /* messaggi comprati all'ultima lettura */
 
   async function leggiStato(){
     var r = await sb.rpc('get_ai_status');
@@ -251,16 +374,38 @@
     return r.data;
   }
 
+  /* 14 set 2026: i numeri della chat vengono da chat_stato, che e' la
+     stessa funzione che li dice sotto la casella della chat. Un posto
+     solo, cosi' i due schermi non possono dire numeri diversi. */
+  async function leggiChat(){
+    var r = await sb.rpc('chat_stato', {});
+    if (r.error || !r.data) return null;
+    return Array.isArray(r.data) ? r.data[0] : r.data;
+  }
+
   function mostraConto(st){
     if (!st) return;
     var mensili  = Number(st.monthly_left  || 0);
     var comprati = Number(st.credits_extra || 0);
     compratiUltimo = comprati;
-    q('n-mese').textContent     = mensili;
-    q('n-comprati').textContent = comprati;
-    q('n-totale').textContent   = mensili + comprati;
+    q('n-mese').textContent     = num(mensili);
+    q('n-comprati').textContent = num(comprati);
+    q('n-totale').textContent   = num(mensili + comprati);
     q('nota-rinnovo').textContent = st.renews_at ? ('si rinnovano il ' + mese(st.renews_at)) : '';
     q('riquadro-conto').classList.remove('nascosto');
+  }
+
+  function mostraContoChat(ch, st){
+    if (!ch) return;
+    var mensili  = Number(ch.compresi_restanti || 0);
+    var comprati = Number(ch.extra || 0);
+    msgCompratiUltimo = comprati;
+    q('m-mese').textContent     = num(mensili);
+    q('m-comprati').textContent = num(comprati);
+    q('m-totale').textContent   = num(mensili + comprati);
+    q('m-nota-rinnovo').textContent =
+      (st && st.renews_at) ? ('si rinnovano il ' + mese(st.renews_at)) : '';
+    q('riquadro-conto-chat').classList.remove('nascosto');
   }
 
   async function avvia(){
@@ -276,30 +421,53 @@
     }
 
     var st = await leggiStato();
+    var ch = await leggiChat();
     mostraConto(st);
 
-    // ⚠️ chi non ha il Premium non deve poter comprare crediti che poi non
-    //    riuscirebbe a spendere: l'AI si ferma sul piano base PRIMA di
-    //    guardare i crediti comprati. Il pagamento e' bloccato anche dal
-    //    server (crea-checkout-crediti.js): questo qui e' solo la spiegazione.
-    if (!st || st.has_ai !== true) {
-      avviso('attesa', 'I crediti si usano con il Premium attivo',
-             'Senza Premium l\'assistente AI resta spento, e i crediti comprati ' +
-             'resterebbero fermi nel conto. Attiva il Premium e poi ricarica quando vuoi.');
-      q('avvisi').innerHTML +=
-        '<a class="torna" href="/prezzi.html">Vedi il Premium</a>';
-      return;
+    // ---- i crediti dell'assistenza --------------------------------
+    // ⛔ 14 set 2026, DIFETTO CHIUSO: qui c'era `st.has_ai !== true`, e
+    //    `has_ai` vuol dire «piano AI diverso da base». Ma dal 13 settembre
+    //    anche il Gestionale normale ha i suoi 40 crediti al mese, e il suo
+    //    piano AI resta 'base'. Quindi a chi paga 29 € e i crediti li ha
+    //    davvero, questa pagina rispondeva «attiva il Premium»: gli
+    //    impediva di ricaricare una cosa che stava gia' usando.
+    //    Adesso la domanda giusta e' una sola: hai crediti da spendere?
+    var puoiCrediti = !!st && (Number(st.monthly_quota || 0) > 0
+                            || Number(st.credits_extra || 0) > 0);
+    if (puoiCrediti) {
+      q('tagli').classList.remove('nascosto');
+    } else {
+      avvisoIn('avvisi-crediti', 'attesa', 'I crediti si usano con il gestionale attivo',
+               'Senza un piano attivo l\'assistente AI resta spento, e i crediti comprati ' +
+               'resterebbero fermi nel conto. Attiva il gestionale e poi ricarica quando vuoi.');
+      q('avvisi-crediti').innerHTML +=
+        '<a class="torna" href="/prezzi.html">Vedi i piani</a>';
     }
 
-    q('tagli').classList.remove('nascosto');
+    // ---- i messaggi della chat ------------------------------------
+    // Li compra chi ha il Gestionale AI: e' li' che stanno i 300 al mese.
+    // Chi sta facendo l'assaggio (10 messaggi in tutto) non compra un
+    // pacchetto: compra il piano, se no i 9 € gli sembrerebbero
+    // un'alternativa piu' conveniente dei 39 € al mese, e non lo sono.
+    var haChat = !!ch && ch.ha_pro === true && ch.assaggio !== true;
+    if (ch) mostraContoChat(ch, st);
+    if (haChat) {
+      q('tagli-chat').classList.remove('nascosto');
+    } else {
+      avvisoIn('avvisi-chat', 'attesa', 'I messaggi sono del Gestionale AI',
+               'La Chat con AI fa parte del Gestionale AI, che comprende 300 messaggi al mese. ' +
+               'Attivalo dal tuo pannello: da lì questi pacchetti si aprono da soli.');
+      q('avvisi-chat').innerHTML +=
+        '<a class="torna" href="/prezzi.html">Vedi i piani</a>';
+    }
   }
 
   // ------------------------------------------------------------------
   // 2. il ritorno dal pagamento
   // ------------------------------------------------------------------
-  // ⚠️ Stripe rimanda qui SUBITO, ma i crediti li accredita il webhook un
-  //    attimo dopo. Se leggessimo il conto una volta sola, uno che ha
-  //    appena pagato vedrebbe il numero vecchio e penserebbe di aver
+  // ⚠️ Stripe rimanda qui SUBITO, ma quello che hai comprato lo accredita il
+  //    webhook un attimo dopo. Se leggessimo il conto una volta sola, uno che
+  //    ha appena pagato vedrebbe il numero vecchio e penserebbe di aver
   //    buttato i soldi. Quindi si riguarda per una decina di secondi.
   //
   // ⚠️ E IL CONTO SI SEGNA PRIMA DI PARTIRE, NON AL RITORNO. 16 agosto, il
@@ -311,14 +479,18 @@
   //    gli arrivavano subito, e la pagina gli diceva «ci mettono piu' del
   //    solito» — cioe' gli faceva credere che ci fosse un problema proprio
   //    quando era andato tutto bene.
-  //    Adesso il numero di partenza viene segnato quando si preme «Ricarica»,
-  //    un attimo prima di andare su Stripe. Al ritorno si confronta con
-  //    quello, e la risposta e' giusta anche se l'accredito e' istantaneo.
+  //    Adesso il numero di partenza viene segnato quando si preme il
+  //    pulsante, un attimo prima di andare su Stripe.
   var CHIAVE_PRIMA = 'ti_crediti_prima';
+  var CHIAVE_COSA  = 'ti_crediti_cosa';
 
   async function dopoIlPagamento(){
+    var cosa = 'crediti';
+    try{ cosa = sessionStorage.getItem(CHIAVE_COSA) || 'crediti'; }catch(e){}
+    var parola = (cosa === 'messaggi') ? 'messaggi' : 'crediti';
+
     avviso('ok', 'Pagamento ricevuto, grazie',
-           'Sto aspettando che i crediti arrivino nel conto: ci vuole qualche secondo.');
+           'Sto aspettando che i ' + parola + ' arrivino nel conto: ci vuole qualche secondo.');
 
     var salvato = null;
     try{
@@ -329,13 +501,23 @@
     var partenza = salvato;
     for (var i = 0; i < 8; i++){
       var st = await leggiStato();
-      if (st){
-        mostraConto(st);
-        if (partenza === null) partenza = Number(st.credits_extra || 0);
-        if (Number(st.credits_extra || 0) > partenza){
-          try{ sessionStorage.removeItem(CHIAVE_PRIMA); }catch(e){}
+      var ch = await leggiChat();
+      if (st) mostraConto(st);
+      if (ch) mostraContoChat(ch, st);
+
+      var adesso = (cosa === 'messaggi')
+        ? Number((ch && ch.extra) || 0)
+        : Number((st && st.credits_extra) || 0);
+
+      if (st || ch){
+        if (partenza === null) partenza = adesso;
+        if (adesso > partenza){
+          try{
+            sessionStorage.removeItem(CHIAVE_PRIMA);
+            sessionStorage.removeItem(CHIAVE_COSA);
+          }catch(e){}
           pulisciAvvisi();
-          avviso('ok', 'Crediti aggiunti',
+          avviso('ok', (cosa === 'messaggi') ? 'Messaggi aggiunti' : 'Crediti aggiunti',
                  'Sono già nel tuo conto e non scadono. Puoi tornare al gestionale.');
           return;
         }
@@ -346,8 +528,8 @@
     pulisciAvvisi();
     if (salvato === null){
       // ⚠️ Nessun numero di partenza: sei tornato da un altro browser o da
-      //    un'altra scheda. Non posso dire con certezza se i crediti sono
-      //    appena arrivati, e allora NON lo dico: dire «c'è un problema»
+      //    un'altra scheda. Non posso dire con certezza se sono appena
+      //    arrivati, e allora NON lo dico: dire «c'è un problema»
       //    quando non lo so sarebbe la stessa bugia di prima, al contrario.
       avviso('attesa', 'Il pagamento è andato a buon fine',
              'Guarda il numero «comprati» qui sotto: se è quello che ti aspetti, ' +
@@ -355,18 +537,19 @@
              'indietro, scrivimi e li sistemo io.');
     } else {
       avviso('attesa', 'Il pagamento è andato a buon fine',
-             'I crediti stanno arrivando ma ci mettono più del solito. Ricarica questa ' +
+             'Stanno arrivando ma ci mettono più del solito. Ricarica questa ' +
              'pagina fra un minuto: se ancora non li vedi, scrivimi e li sistemo io.');
     }
   }
 
   // ------------------------------------------------------------------
-  // 3. il pulsante
+  // 3. i pulsanti
   // ------------------------------------------------------------------
   for (var i = 0; i < bottoni.length; i++){
     bottoni[i].addEventListener('click', async function(){
       var b = this;
       var taglio = b.getAttribute('data-taglio');
+      var cosa   = b.getAttribute('data-cosa') || 'crediti';
       var testoPrima = b.textContent;
       pulisciAvvisi();
       bloccaBottoni(true);
@@ -379,17 +562,21 @@
         var res = await fetch('/.netlify/functions/crea-checkout-crediti', {
           method: 'POST',
           headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + tok },
-          body: JSON.stringify({ taglio: taglio })
+          body: JSON.stringify({ taglio: taglio, cosa: cosa })
         });
         var dati = await res.json();
 
         if (res.ok && dati.url){
-          // ⚠️ QUI SI SEGNA QUANTI CREDITI COMPRATI CI SONO ADESSO, prima di
-          //    andare su Stripe. E' l'unico momento in cui questo numero e'
-          //    sicuramente quello di PRIMA del pagamento. Al ritorno serve a
-          //    capire se i crediti sono arrivati, anche quando arrivano cosi'
-          //    in fretta che ci sono gia' al primo sguardo.
-          try{ sessionStorage.setItem(CHIAVE_PRIMA, String(compratiUltimo)); }catch(e){}
+          // ⚠️ QUI SI SEGNA QUANTI CE NE SONO ADESSO, prima di andare su
+          //    Stripe. E' l'unico momento in cui questo numero e' sicuramente
+          //    quello di PRIMA del pagamento. Al ritorno serve a capire se
+          //    sono arrivati, anche quando arrivano cosi' in fretta che ci
+          //    sono gia' al primo sguardo.
+          try{
+            sessionStorage.setItem(CHIAVE_PRIMA,
+              String(cosa === 'messaggi' ? msgCompratiUltimo : compratiUltimo));
+            sessionStorage.setItem(CHIAVE_COSA, cosa);
+          }catch(e){}
           window.location.href = dati.url;
           return;
         }
@@ -398,8 +585,13 @@
           avviso('attesa', 'La sessione è scaduta',
                  'Rientra nel gestionale e riprova: non è stato addebitato niente.');
         } else if (res.status === 403){
-          avviso('attesa', 'Serve il Premium attivo',
-                 dati.messaggio || 'I crediti si usano con il Premium attivo.');
+          avviso('attesa', 'Serve un piano attivo',
+                 dati.messaggio || 'Attiva il piano dal tuo pannello e poi riprova.');
+        } else if (res.status === 503){
+          // il prezzo su Stripe non c'e' ancora: va detto com'e', non
+          // fatto passare per un guasto di rete
+          avviso('attesa', 'Questo pacchetto non è ancora in vendita',
+                 dati.error || 'Riprova fra poco. Non è stato addebitato niente.');
         } else {
           avviso('err', 'Non sono riuscito ad aprire il pagamento',
                  (dati.error || 'Riprova fra poco.') + ' Non è stato addebitato niente.');
@@ -419,7 +611,7 @@
   avvia().then(function(){
     if (dove === 'ok') return dopoIlPagamento();
     if (dove === 'annullato'){
-      avviso('attesa', 'Ricarica annullata',
+      avviso('attesa', 'Acquisto annullato',
              'Non è stato addebitato niente. Quando vuoi ricominci da qui.');
     }
   });

@@ -24,21 +24,40 @@
 //    senza poterli spendere. Quindi il Premium si controlla qui, prima
 //    di far partire il pagamento.
 //
+// ⚠️ 4. 14 SETTEMBRE 2026 — QUI SI VENDONO DUE COSE DIVERSE.
+//    `cosa: 'crediti'`  -> i crediti dell'ASSISTENZA (Compila/Genera con AI)
+//    `cosa: 'messaggi'` -> i messaggi della CHAT con AI
+//    Prima erano lo stesso portafoglio e la chat si mangiava i crediti
+//    dell'assistenza senza dirlo. Adesso sono due casse separate, e questa
+//    function apre il pagamento giusto per ognuna.
+//
 // VARIABILI DA CREARE SU NETLIFY (i prezzi si creano su Stripe):
-//   STRIPE_PRICE_CREDITI_150     150 crediti — 19 €
-//   STRIPE_PRICE_CREDITI_400     400 crediti — 45 €
-//   STRIPE_PRICE_CREDITI_1000   1000 crediti — 99 €
+//   STRIPE_PRICE_CREDITI_150      150 crediti  — 19 €
+//   STRIPE_PRICE_CREDITI_400      400 crediti  — 45 €
+//   STRIPE_PRICE_CREDITI_1000    1000 crediti  — 99 €
+//   STRIPE_PRICE_MESSAGGI_300     300 messaggi —  9 €
+//   STRIPE_PRICE_MESSAGGI_1000   1000 messaggi — 25 €
+//   STRIPE_PRICE_MESSAGGI_3000   3000 messaggi — 69 €
 // (STRIPE_SECRET_KEY, SUPABASE_URL e SUPABASE_SERVICE_KEY ci sono gia'.)
+//
+// ⚠️ Finche' una di queste variabili non c'e', quel pacchetto risponde 503 e
+//    la pagina lo dice chiaro. NON parte nessun pagamento a vuoto.
 // =====================================================================
 const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
-// Il listino sta QUI. Una riga sola per taglio: crediti, prezzo e nome
+// Il listino sta QUI. Una riga sola per taglio: quanti, prezzo e nome
 // della variabile Netlify che tiene il price id di Stripe.
 const TAGLI = {
   '150':  { crediti: 150,  euro: 19, price: 'STRIPE_PRICE_CREDITI_150'  },
   '400':  { crediti: 400,  euro: 45, price: 'STRIPE_PRICE_CREDITI_400'  },
   '1000': { crediti: 1000, euro: 99, price: 'STRIPE_PRICE_CREDITI_1000' }
+};
+
+const MESSAGGI = {
+  '300':  { messaggi: 300,  euro:  9, price: 'STRIPE_PRICE_MESSAGGI_300'  },
+  '1000': { messaggi: 1000, euro: 25, price: 'STRIPE_PRICE_MESSAGGI_1000' },
+  '3000': { messaggi: 3000, euro: 69, price: 'STRIPE_PRICE_MESSAGGI_3000' }
 };
 
 const rispondi = (codice, corpo) => ({
@@ -71,7 +90,8 @@ exports.handler = async (event) => {
     let corpo = {};
     try { corpo = JSON.parse(event.body || '{}'); } catch (e) { corpo = {}; }
     const taglio = String(corpo.taglio || '').trim();
-    const scelto = TAGLI[taglio];
+    const cosa   = String(corpo.cosa || 'crediti').trim() === 'messaggi' ? 'messaggi' : 'crediti';
+    const scelto = (cosa === 'messaggi') ? MESSAGGI[taglio] : TAGLI[taglio];
     if (!scelto) {
       return rispondi(400, { error: 'Taglio non valido.' });
     }
@@ -79,8 +99,12 @@ exports.handler = async (event) => {
     const priceId = process.env[scelto.price];
     if (!priceId) {
       // meglio dirlo chiaro adesso che scoprirlo da un pagamento a vuoto
-      console.error('[crediti] manca la variabile Netlify ' + scelto.price);
-      return rispondi(500, { error: 'Ricarica non ancora disponibile. Riprova più tardi.' });
+      console.error('[' + cosa + '] manca la variabile Netlify ' + scelto.price);
+      return rispondi(503, {
+        error: cosa === 'messaggi'
+          ? 'I pacchetti di messaggi non sono ancora in vendita. Riprova fra poco.'
+          : 'Ricarica non ancora disponibile. Riprova più tardi.'
+      });
     }
 
     // ---- 3. il Premium ---------------------------------------------
@@ -102,31 +126,38 @@ exports.handler = async (event) => {
     if (!haPremium) {
       return rispondi(403, {
         error: 'senza_premium',
-        messaggio: 'I crediti si usano con il Premium attivo. Attiva il Premium e poi ricarica quando vuoi.'
+        messaggio: 'I crediti e i messaggi si usano con il gestionale attivo. Attivalo e poi ricarica quando vuoi.'
       });
     }
 
-    // ⛔ 30 agosto 2026 — E NON BASTA IL PREMIUM: SERVE IL PREMIUM AI.
-    // I crediti li spende SOLO la chat, e la chat e' del Premium AI:
-    // «quello da 29 non ha la chat, ha solamente un assistente AI».
-    // Chi ha solo il Premium ha il piano AI 'base', e `consume_ai_credit`
-    // si ferma li' prima ancora di guardare i gettoni: pagherebbe 19 euro
-    // per una cosa che non puo' usare.
-    // ⚠️ L'assistente AI (il pulsante «Aiuto», 30 al mese) non c'entra:
-    //    ha un contatore suo e non tocca questi crediti.
+    /* ⛔ 14 SETTEMBRE 2026 — QUESTO CONTROLLO VALE SOLO PER I MESSAGGI.
+       Fino a oggi era su TUTTO, e bloccava i crediti a chi ha il gestionale
+       normale. Era giusto il 30 agosto, quando i crediti li spendeva solo
+       la chat; non lo e' piu' dal 13 settembre, da quando il Gestionale
+       normale ha i suoi 40 crediti al mese per l'assistenza. Cosi' com'era,
+       uno che paga 29 € e i crediti li usa davvero non poteva ricaricarli.
+
+       I MESSAGGI invece restano del Gestionale AI, e c'e' una ragione di
+       prezzo: 300 messaggi a 9 € una tantum, venduti a chi non ha il piano,
+       sarebbero piu' convenienti dei 10 € in piu' al mese del Gestionale AI
+       (che di messaggi ne da' 300 OGNI mese). Si venderebbe il piano a se'
+       stessi al ribasso. Chi sta facendo l'assaggio compra il piano, non il
+       pacchetto. */
     const scadAI = impresa && impresa.chat_pro_scadenza ? new Date(impresa.chat_pro_scadenza) : null;
-    const haPremiumAI = !!impresa && impresa.chat_pro === true
+    const haGestionaleAI = !!impresa && impresa.chat_pro === true
       && (!scadAI || isNaN(scadAI.getTime()) || scadAI.getTime() > Date.now());
 
-    if (!haPremiumAI) {
+    if (cosa === 'messaggi' && !haGestionaleAI) {
       return rispondi(403, {
-        error: 'senza_premium_ai',
-        messaggio: 'Le ricariche servono alla Chat con AI, che fa parte del Premium AI. Attiva il Premium AI dal tuo pannello e poi ricarica quando vuoi.'
+        error: 'senza_gestionale_ai',
+        messaggio: 'I pacchetti di messaggi servono alla Chat con AI, che fa parte del Gestionale AI. Attivalo dal tuo pannello e poi torna qui.'
       });
     }
 
     // ---- 4. il pagamento --------------------------------------------
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const prodotto = (cosa === 'messaggi') ? 'messaggi-chat' : 'crediti-ai';
+    const quanti   = (cosa === 'messaggi') ? scelto.messaggi : scelto.crediti;
     const base = 'https://trovaimpresa.com/ricarica-crediti.html';
     const email = utente.email || (impresa && impresa.email) || undefined;
 
@@ -136,18 +167,22 @@ exports.handler = async (event) => {
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: email,
       client_reference_id: utente.id,
+      /* ⚠️ `prodotto` e' quello che fa scegliere al webhook il portafoglio:
+         'crediti-ai' -> add_credits_pack (credits_extra, l'assistenza)
+         'messaggi-chat' -> add_chat_pack (chat_extra, la chat)
+         Il numero e' scritto DAL SERVER, mai dal browser. */
       metadata: {
-        prodotto: 'crediti-ai',
+        prodotto: prodotto,
         user_id:  utente.id,                 // ⚠️ e' questo che legge il webhook
-        crediti:  String(scelto.crediti),    // ⚠️ scritto dal server, non dal browser
+        crediti:  String(quanti),            // ⚠️ scritto dal server, non dal browser
         taglio:   taglio,
         email:    email || ''
       },
       payment_intent_data: {
-        metadata: { prodotto: 'crediti-ai', user_id: utente.id, crediti: String(scelto.crediti) }
+        metadata: { prodotto: prodotto, user_id: utente.id, crediti: String(quanti) }
       },
-      success_url: base + '?crediti=ok',
-      cancel_url:  base + '?crediti=annullato'
+      success_url: base + '?crediti=ok' + (cosa === 'messaggi' ? '#messaggi' : ''),
+      cancel_url:  base + '?crediti=annullato' + (cosa === 'messaggi' ? '#messaggi' : '')
     });
 
     return rispondi(200, { url: session.url });
