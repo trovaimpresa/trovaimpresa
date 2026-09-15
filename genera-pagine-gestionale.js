@@ -94,7 +94,7 @@ const PREZZO_AI_ANNO = '349 €';
 const PREZZO_AI_MESE = '39 €';
 function riquadroPrezzo(cosa) {
   return `    <div class="prezzo-box">
-      <div class="sotto">${cosa} è dentro il Premium di TrovaImpresa</div>
+      <div class="sotto">${cosa} fa parte del Gestionale TrovaImpresa</div>
       <div class="cifra">${PREZZO_ANNO} all'anno</div>
       <div class="sotto">oppure ${PREZZO_MESE} al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
       <div class="prezzo-ai">
@@ -162,7 +162,7 @@ function costruisci(pag, tutte) {
     offers: {
       '@type': 'Offer', price: '249', priceCurrency: 'EUR',
       url: BASE + '/prezzi.html', availability: 'https://schema.org/InStock',
-      description: "Compreso nel piano Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con 30 giorni di prova gratuita, senza carta di credito."
+      description: "Compreso nel Gestionale TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con 30 giorni di prova gratuita, senza carta di credito."
     },
     publisher: { '@type': 'Organization', name: 'TrovaImpresa', url: BASE }
   }, null, 2);

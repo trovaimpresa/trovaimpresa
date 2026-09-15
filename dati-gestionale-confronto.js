@@ -219,7 +219,7 @@ module.exports = [
       r: `No. I dati si esportano in Excel o in JSON quando vuoi, anche se non continui, e il profilo sul
           marketplace resta online sul piano gratuito.` },
     { d: 'Il profilo sul marketplace è gratuito?',
-      r: `Sì, il profilo e la presenza nelle pagine di ricerca ci sono anche senza pagare. Con il Premium
+      r: `Sì, il profilo e la presenza nelle pagine di ricerca ci sono anche senza pagare. Con il Gestionale
           il profilo esce più in alto ed è messo in evidenza.` },
     { d: 'Il foglio di calcolo può bastarmi?',
       r: `Con uno o due cantieri alla volta, spesso sì. Comincia a non bastare quando i cantieri aperti

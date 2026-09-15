@@ -815,7 +815,7 @@ module.exports = MESTIERI.map(m => {
         r: `No. Si apre dal browser, sul telefono e sul computer. Niente da scaricare, nessun aggiornamento
             da fare a mano, basta la connessione.` },
       { d: `Quanto costa il gestionale per ${m.nome}?`,
-        r: `È compreso nel Premium di TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, prezzo finale
+        r: `È compreso nel Gestionale TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, prezzo finale
             senza IVA da aggiungere. Lo provi 30 giorni gratis, non serve la carta di credito e alla fine non parte nessun addebito.` },
       { d: 'I dati sono miei?',
         r: `Sì. Si esportano in Excel o in JSON quando vuoi, senza costi e senza chiedere permesso: se un
