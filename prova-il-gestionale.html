@@ -110,6 +110,7 @@
   .piano li:last-child{border-bottom:0}
   .piano li:before{content:"\2713";position:absolute;left:0;color:var(--primary);font-weight:800}
   .sotto-piani{font-size:16.5px;color:var(--muted);line-height:1.6;margin:0 0 6px}
+  .sotto-scelte{font-size:16.5px;color:var(--muted);line-height:1.6;margin:0 0 6px}
   .scelte{display:grid;gap:14px;margin:26px 0 10px}
   @media(min-width:820px){.scelte{grid-template-columns:repeat(3,1fr)}}
   .scelta{display:block;border:2px solid var(--line);border-radius:16px;padding:20px;
@@ -138,6 +139,31 @@
   <h1>Il gestionale per chi lavora in cantiere</h1>
   <p class="sommario">Preventivi, lavori, fatture, computo metrico, mezzi e ore.
      Dal telefono in cantiere e dal computer la sera. Senza installare niente.</p>
+
+  <!-- ⛔ 15 set 2026 — «mettiamolo in alto in bella vista non in basso e
+       nascosto». Prima le tre porte stavano a 1211 px dall'alto, sotto i
+       prezzi: chi apriva la pagina vedeva quanto costa PRIMA di vedere come
+       si comincia. Adesso si vedono subito, e i prezzi stanno sotto. -->
+  <!-- «Comincia da qui» non diceva cosa si fa. Adesso c'e' il verbo
+       che la gente cerca: iscriversi. -->
+  <h2 id="scegli">Iscriviti</h2>
+  <p>Il gestionale cambia le parole secondo il mestiere che fai: un artigiano manda un
+     <b>preventivo</b> a un cliente, uno studio tecnico accetta un <b>incarico</b> e chiede un
+     <b>onorario</b>. Scegli come sei e ti apre quello giusto.</p>
+
+  <div class="scelte">
+    <a class="scelta" href="/registrazione-artigiano.html?da=gestionale">
+      <span class="s-t">Sono un artigiano</span>
+      <span class="s-d">Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</span></a>
+    <a class="scelta" href="/registrazione-impresa.html?da=gestionale">
+      <span class="s-t">Sono un&rsquo;impresa edile</span>
+      <span class="s-d">Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</span></a>
+    <a class="scelta" href="/registrazione-professionista.html?da=gestionale">
+      <span class="s-t">Sono uno studio tecnico</span>
+      <span class="s-d">Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</span></a>
+  </div>
+  <p class="sotto-scelte"><b>30 giorni gratis</b>, senza carta di credito.
+     Ti registri con la mail e basta.</p>
 
   <div class="due-piani">
 
@@ -173,23 +199,6 @@
      Prezzo finale, nessuna IVA da aggiungere. Finita la prova non parte nessun
      addebito: paghi solo se lo scegli tu.</p>
 
-  <h2 id="scegli">Comincia da qui</h2>
-  <p>Il gestionale cambia le parole secondo il mestiere che fai: un artigiano manda un
-     <b>preventivo</b> a un cliente, uno studio tecnico accetta un <b>incarico</b> e chiede un
-     <b>onorario</b>. Scegli come sei e ti apre quello giusto.</p>
-
-  <div class="scelte">
-    <a class="scelta" href="/registrazione-artigiano.html?da=gestionale">
-      <span class="s-t">Sono un artigiano</span>
-      <span class="s-d">Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</span></a>
-    <a class="scelta" href="/registrazione-impresa.html?da=gestionale">
-      <span class="s-t">Sono un&rsquo;impresa edile</span>
-      <span class="s-d">Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</span></a>
-    <a class="scelta" href="/registrazione-professionista.html?da=gestionale">
-      <span class="s-t">Sono uno studio tecnico</span>
-      <span class="s-d">Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</span></a>
-  </div>
-
   <h2>Cosa c&rsquo;&egrave; dentro</h2>
   <ul class="dentro">
     <li><b>Lavori e cantieri</b> — cosa c&rsquo;&egrave; da fare, chi ci va, quando &egrave; finito</li>
@@ -214,7 +223,7 @@
     <h3>Trenta giorni, poi decidi tu</h3>
     <p>Ti registri con la mail e basta. Nessuna carta, nessun addebito automatico,
        nessun vincolo.</p>
-    <a class="cta-dark" href="#scegli">Comincia adesso</a>
+    <a class="cta-dark" href="#scegli">Registrati</a>
   </div>
 
 </main>
