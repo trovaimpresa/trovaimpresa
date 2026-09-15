@@ -2261,8 +2261,8 @@
         </div>
       </div>
 
-      <!-- FUNZIONI PREMIUM -->
-      <div class="dash-quick-title">Funzioni Premium</div>
+      <!-- FUNZIONI INCLUSE  (15 set 2026: si chiamava «FUNZIONI PREMIUM») -->
+      <div class="dash-quick-title">Funzioni incluse</div>
       <div class="dash-quick-grid">
         <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='modifica-profilo.html'">
           <div class="dash-quick-icon">👤</div>
@@ -2409,7 +2409,11 @@
       <!-- GESTIONALE LAVORI (i cantieri si gestiscono qui dentro; card "I miei cantieri" rimossa: era un doppione) -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="margin-bottom:16px">
-          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale</div>
+          <!-- ⚠️ 15 set 2026: si chiamava «🛠️ Gestionale». Da quando le due porte
+                 sotto si chiamano «Gestionale» e «Gestionale AI», quel titolo
+                 faceva eco al nome della porta: tre volte la stessa parola,
+                 una dentro l'altra. -->
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ I due gestionali</div>
           <div style="font-size:15px;color:#888;margin-top:4px">Cantieri, squadra, preventivi, spese e margini, report — tutto in un posto solo</div>
         </div>
         <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE PER GESTIONALE, IL NOME IN MEZZO
@@ -2421,7 +2425,7 @@
 
               <div class="gest-mezzo">
                 <span class="gest-emoji">🛠️</span>
-                <span class="gest-nome">Gestionale Premium</span>
+                <span class="gest-nome">Gestionale</span>
                 <span class="gest-desc">Cantieri, preventivi, fatture, squadra e report</span>
                 <span class="gest-tuo" id="porta-premium-tuo">Il tuo piano</span>
               </div>
@@ -2476,8 +2480,8 @@
 
               <div class="gest-mezzo">
                 <span class="gest-emoji">✨</span>
-                <span class="gest-nome">Gestionale Premium AI</span>
-                <span class="gest-desc">Tutto il Premium, più la Chat con AI</span>
+                <span class="gest-nome">Gestionale AI</span>
+                <span class="gest-desc">Tutto il Gestionale, più la Chat con AI</span>
                 <span class="gest-tuo" id="porta-ai-tuo">Il tuo piano</span>
               </div>
 
@@ -2975,7 +2979,7 @@
   <div class="modal-ai" style="max-width:560px">
     <div class="modal-ai-header">
       <div>
-        <h2 id="modal-piano-titolo">Gestionale Premium</h2>
+        <h2 id="modal-piano-titolo">Gestionale</h2>
         <p id="modal-piano-sotto">Cosa c'è dentro</p>
       </div>
       <button class="modal-ai-close" onclick="chiudiModalPiano()">✕</button>
@@ -3849,7 +3853,7 @@ function aggiornaBadgeEOverlay() {
   if (pianoBadge) {
     pianoBadge.classList.remove('premium');
     if (piano === 'premium') {
-      pianoBadge.textContent = '💎 Premium';
+      pianoBadge.textContent = '💎 Gestionale';
       pianoBadge.classList.add('premium');
     } else {
       pianoBadge.textContent = '🆓 Free';
@@ -3863,7 +3867,7 @@ function aggiornaBadgeEOverlay() {
   }
   const lbl = document.getElementById('piano-dashboard-label');
   if (lbl) {
-    lbl.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
+    lbl.textContent = piano === 'premium' ? 'Gestionale 👑' : 'Free';
     lbl.style.color = piano === 'premium' ? '#7b1fa2' : '#0066ff';
   }
   aggiornaCardVisibile(piano);
@@ -3931,7 +3935,7 @@ const FAQS_LIST = [
   },
   {
     domanda: "Ho caricato un nuovo logo ma non si vede",
-    risposta: "Il logo si cambia dalla foto tonda in cima al pannello: sopra c'è il bottoncino con la macchina fotografica, «Cambia il logo». Si può fare anche dalla card «Personalizza pannello». Il logo nuovo si vede subito, senza ricaricare la pagina; se per caso vedessi ancora quello vecchio premi CTRL+F5 (Windows) o CMD+MAIUSC+R (Mac). Va bene qualsiasi immagine — JPG, PNG, WEBP — fino a 15 MB: la rimpiccioliamo noi. Il bottoncino compare col piano Premium."
+    risposta: "Il logo si cambia dalla foto tonda in cima al pannello: sopra c'è il bottoncino con la macchina fotografica, «Cambia il logo». Si può fare anche dalla card «Personalizza pannello». Il logo nuovo si vede subito, senza ricaricare la pagina; se per caso vedessi ancora quello vecchio premi CTRL+F5 (Windows) o CMD+MAIUSC+R (Mac). Va bene qualsiasi immagine — JPG, PNG, WEBP — fino a 15 MB: la rimpiccioliamo noi. Il bottoncino compare col Gestionale attivo."
   },
   {
     domanda: "Non appaio nelle ricerche dei clienti",
@@ -3942,15 +3946,15 @@ const FAQS_LIST = [
     risposta: "La vetrina è gratis, per sempre: la tua scheda, le foto dei lavori, i video, il QR Code, «Personalizza pannello», le recensioni, i messaggi e le richieste dei clienti. Non c'è nessuna scadenza e non serve la carta. L'unica cosa a pagamento è il gestionale — preventivi, fatture, cantieri, computo metrico — a 29 € al mese oppure 249 € all'anno (con la Chat AI 39 € o 349 €). Lo provi 30 giorni gratis dal riquadro «Gestionale», senza carta. Chi ha il gestionale attivo ha anche il badge e la priorità nei risultati."
   },
   {
-    domanda: "Che differenza c'è fra Premium e Premium AI?",
-    risposta: "Il Premium (29 € al mese, 249 € all'anno) ha la vetrina, il gestionale e l'assistente AI che ti aiuta a compilare. Il Premium AI (39 € al mese, 349 € all'anno) ha in più una cosa sola: la Chat con AI dentro il gestionale, 300 messaggi al mese, che risponde con i conti dei tuoi lavori e ti compila i moduli. Tutto il resto è identico. Se hai già il Premium non devi fare un secondo abbonamento: si cambia il piano dentro quello che hai già, con il conguaglio."
+    domanda: "Che differenza c'è fra Gestionale e Gestionale AI?",
+    risposta: "Il Gestionale (29 € al mese, 249 € all'anno) ha il gestionale, la vetrina e l'assistente AI che ti aiuta a compilare. Il Gestionale AI (39 € al mese, 349 € all'anno) ha in più una cosa sola: la Chat con AI dentro il gestionale, 300 messaggi al mese, che risponde con i conti dei tuoi lavori e ti compila i moduli. Tutto il resto è identico. Se hai già il Gestionale non devi fare un secondo abbonamento: si cambia il piano dentro quello che hai già, con il conguaglio."
   },
   {
-    domanda: "Come passo a Premium?",
-    risposta: "In fondo al pannello, nel riquadro «Gestionale», ci sono due riquadri: «Gestionale Premium» e «Gestionale Premium AI». Dentro ognuno ci sono quattro carte: a sinistra «Entra» e «Attiva», a destra «Prova 30 giorni» e «Entra e vedi». Per comprarlo clicca il pulsante blu della carta «Attiva»: al posto del pulsante compaiono i due prezzi, al mese o all'anno, e si paga con carta tramite Stripe. Se ce l'hai già, la carta «Entra» compare col pulsante blu e da lì entri; la carta «Attiva» diventa «Gestisci l'abbonamento» e ti porta alla pagina Stripe dove cambi piano senza farne un secondo."
+    domanda: "Come passo al Gestionale?",
+    risposta: "In fondo al pannello, nel riquadro «Gestionale», ci sono due riquadri: «Gestionale» e «Gestionale AI». Dentro ognuno ci sono quattro carte: a sinistra «Entra» e «Attiva», a destra «Prova 30 giorni» e «Entra e vedi». Per comprarlo clicca il pulsante blu della carta «Attiva»: al posto del pulsante compaiono i due prezzi, al mese o all'anno, e si paga con carta tramite Stripe. Se ce l'hai già, la carta «Entra» compare col pulsante blu e da lì entri; la carta «Attiva» diventa «Gestisci l'abbonamento» e ti porta alla pagina Stripe dove cambi piano senza farne un secondo."
   },
   {
-    domanda: "Ho 3 mesi di Premium in regalo: cosa succede quando finiscono?",
+    domanda: "Ho 3 mesi in regalo: cosa succede quando finiscono?",
     risposta: "Il regalo dei 3 mesi valeva per chi si è iscritto entro il 13 settembre 2026 e resta valido fino alla sua scadenza. Alla scadenza non parte nessun pagamento: il profilo resta online, la vetrina resta gratis e non perdi né le foto, né i video, né le recensioni. L'unica cosa che si chiude è il gestionale. Se lo vuoi tenere lo attivi dal riquadro «Gestionale»."
   },
   {
@@ -3963,7 +3967,7 @@ const FAQS_LIST = [
   },
   {
     domanda: "Cos'è il gestionale e come ci entro?",
-    risposta: "È il programma per gestire il lavoro: cantieri, squadra e ore, preventivi, computo metrico, fatture, spese e margini, report. Sta in fondo al pannello, nel riquadro «Gestionale». È aperto e lo puoi usare adesso, ed è compreso nel Premium senza pagare niente in più. Da lì scegli «Entra e vedi» per girarci dentro senza impegno, oppure «Prova 30 giorni» per averlo tutto acceso per un mese, senza carta."
+    risposta: "È il programma per gestire il lavoro: cantieri, squadra e ore, preventivi, computo metrico, fatture, spese e margini, report. Sta in fondo al pannello, nel riquadro «Gestionale». È aperto e lo puoi usare adesso, ed è compreso nell'abbonamento senza pagare niente in più. Da lì scegli «Entra e vedi» per girarci dentro senza impegno, oppure «Prova 30 giorni» per averlo tutto acceso per un mese, senza carta."
   },
   {
     domanda: "Voglio disdire l'abbonamento o cancellare il mio account",
@@ -4191,7 +4195,7 @@ async function apriModalQRCode() {
   if (!impresaCorrente) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
   if (piano !== 'premium') {
-    if (confirm('🔲 QR Code profilo è una funzione Premium. Vuoi scoprire di più?')) {
+    if (confirm('🔲 QR Code profilo è una funzione del Gestionale. Vuoi scoprire di più?')) {
       window.location.href = 'info-premium.html';
     }
     return;
@@ -4240,7 +4244,7 @@ function apriVideo() {
   if (!impresaCorrente) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
   if (piano !== 'premium') {
-    if (confirm('🎬 Fai conoscere la tua azienda è una funzione Premium. Vuoi scoprire di più?')) {
+    if (confirm('🎬 Fai conoscere la tua azienda è una funzione del Gestionale. Vuoi scoprire di più?')) {
       window.location.href = 'info-premium.html';
     }
     return;
@@ -4591,7 +4595,7 @@ const PERS_PRESETS = [
   { nome: 'Blu notte',    header: '#0a2a4d', sfondo: '#eef2f7', testo: '#ffffff', scuro: false },
   { nome: 'Verde cantiere',header:'#15803d', sfondo: '#f2f7f3', testo: '#ffffff', scuro: false },
   { nome: 'Arancio',      header: '#ea580c', sfondo: '#fdf6f1', testo: '#ffffff', scuro: false },
-  { nome: 'Viola Premium',header: '#7c3aed', sfondo: '#f6f3fc', testo: '#ffffff', scuro: false },
+  { nome: 'Viola intenso',header: '#7c3aed', sfondo: '#f6f3fc', testo: '#ffffff', scuro: false },
   { nome: 'Grafite',      header: '#111827', sfondo: '#0f141b', testo: '#ffffff', scuro: true  }
 ];
 
@@ -5115,7 +5119,7 @@ async function inizializza() {
   document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
   aggiornaBadgeEOverlay();
 
-  // Colore header (Premium)
+  // Colore header (chi ha il Gestionale)
   if (isPremium) {
     const ctrl = document.getElementById('header-color-controls');
     if (ctrl) ctrl.style.display = '';
@@ -5143,7 +5147,7 @@ async function inizializza() {
       imgLogo.style.display = haLogo ? 'block' : 'none';
     }
     if (phLogo) phLogo.style.display = haLogo ? 'none' : 'flex';
-    /* cambiare copertina e logo resta come prima: solo Premium */
+    /* cambiare copertina e logo resta come prima: solo col Gestionale */
     if (btnLogo) btnLogo.style.display = isPremium ? '' : 'none';
     if (btnCop)  btnCop.style.display  = isPremium ? '' : 'none';
     /* 2 set 2026: «Riposiziona» non ha senso finche' non c'e' una copertina */
@@ -5160,7 +5164,7 @@ async function inizializza() {
   const prevLogoWrap = document.getElementById('prev-logo-wrap');
   if (prevNome) prevNome.textContent = nome;
   if (prevCitta) prevCitta.textContent = impresaCorrente.citta ? '📍 ' + impresaCorrente.citta : '';
-  if (prevPiano) { prevPiano.textContent = isPremium ? '💎 Premium' : '🆓 Free'; }
+  if (prevPiano) { prevPiano.textContent = isPremium ? '💎 Gestionale' : '🆓 Free'; }
   if (prevLink) prevLink.href = 'profilo-impresa.html?id=' + impresaCorrente.id;
   if (prevLogoWrap && impresaCorrente.logo_url) prevLogoWrap.innerHTML = `<img src="${impresaCorrente.logo_url}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
 
@@ -5213,7 +5217,7 @@ async function caricaPreventivi() {
 
   const lista = data || [];
 
-  // Badge "non risposti" sulla card Funzioni Premium
+  // Badge "non risposti" sulla card Funzioni incluse
   const _nonRisposti = lista.filter(p => p.risposta == null).length;
   const _badgePrev = document.getElementById('badge-prev-card');
   if (_badgePrev) {
@@ -6112,28 +6116,28 @@ function chiudiModalPriorita() {
 // LE DUE PORTE DEL GESTIONALE — 29 agosto 2026
 //
 // ⛔ LA REGOLA, decisa da Alessio: la scelta del piano si fa PRIMA di
-// pagare, mai dentro il gestionale gia' pagato. «Se uno paga il Premium
+// pagare, mai dentro il gestionale gia' pagato. «Se uno paga il Gestionale
 // e poi una volta dentro vede che c'e' un altro piano non va bene: o
 // spende due volte, o non compra.»
 //
 // Chi il piano ce l'ha ENTRA; chi non ce l'ha COMPRA da qui.
 // I lucchetti del pannello si aprono con tutti e due i piani: l'unica
-// differenza fra Premium e Premium AI e' la Chat con AI dentro il
+// differenza fra Gestionale e Gestionale AI e' la Chat con AI dentro il
 // gestionale.
 //
 // ⚠️ CHI E' GIA' ABBONATO NON RICOMPRA. Far ripartire il checkout a chi
-// ha gia' il Premium creerebbe un SECONDO abbonamento (29 + 39 al mese).
+// ha gia' l'abbonamento creerebbe un SECONDO abbonamento (29 + 39 al mese).
 // Per lui il pulsante apre il portale clienti di Stripe, che cambia il
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 const PORTE_GESTIONALE = [
-  { chiave: 'premium', label: 'Premium', attiva: 'Attiva gestionale Premium',
+  { chiave: 'premium', label: 'Gestionale', attiva: 'Attiva il Gestionale',
     mese: '29 \u20ac al mese', anno: '249 \u20ac all\'anno',
     tuo: 'porta-premium-tuo', azione: 'porta-premium-azione',
     entra: 'carta-entra-premium', entraAzione: 'carta-entra-premium-azione',
     provaAzione: 'carta-prova-premium-azione', vediAzione: 'carta-vedi-premium-azione',
     dentro: '/gestionale-app.html?piano=premium', guarda: '/gestionale-app.html?visita=1&piano=premium' },
-  { chiave: 'premium-ai', label: 'Premium AI', attiva: 'Attiva gestionale Premium AI',
+  { chiave: 'premium-ai', label: 'Gestionale AI', attiva: 'Attiva il Gestionale AI',
     mese: '39 \u20ac al mese', anno: '349 \u20ac all\'anno',
     tuo: 'porta-ai-tuo', azione: 'porta-ai-azione',
     entra: 'carta-entra-ai', entraAzione: 'carta-entra-ai-azione',
@@ -6219,7 +6223,7 @@ function montaPorteGestionale() {
     const k = porta.chiave === 'premium' ? 'premium' : 'ai';
 
     // ⛔ 30 agosto — chi ha un piano entra da tutte e due le porte: il
-    // Premium AI comprende il Premium.
+    // Gestionale AI comprende il Gestionale.
     const aperta = porta.chiave === 'premium' ? haPremium : haAI;
     const suo    = porta.chiave === 'premium' ? (haPremium && !haAI) : haAI;
     const tuo = document.getElementById(porta.tuo);
@@ -6253,7 +6257,7 @@ function montaPorteGestionale() {
     /* 2. ATTIVA — la cassa, e per chi paga gia' il portale Stripe.
        ⛔ 3 settembre 2026: chi ha il piano REGALATO (mai pagato) trovava qui
        «Vedi i piani e i prezzi» → pagina pubblica dei prezzi → «Scopri
-       Premium» → «Registrati» → la home. Un giro a vuoto per uno che e' gia'
+       il Gestionale» → «Registrati» → la home. Un giro a vuoto per uno che e' gia'
        dentro. Adesso la cassa si apre QUI, come per chi e' free: due prezzi,
        mese o anno, e Stripe. Cosi' il regalo si trasforma in abbonamento
        senza uscire dal pannello. */
@@ -6290,7 +6294,7 @@ function montaPorteGestionale() {
    cosa c'e' dentro (le stesse voci di prezzi.html) e in fondo i due prezzi. */
 const PIANI_INFO = {
   /* ⛔ 13 SETTEMBRE 2026 — QUESTO ELENCO VENDEVA ROBA GIA' REGALATA.
-     Fino a stamattina il Premium comprendeva anche la vetrina, quindi qui
+     Fino a stamattina l'abbonamento comprendeva anche la vetrina, quindi qui
      dentro c'erano «Foto portfolio illimitate», «Video dei lavori», «QR
      profilo», «Descrizione estesa», «Personalizzazione profilo».
      Da oggi quelle cose ce le hanno TUTTI, gratis: erano diventate una
@@ -6301,18 +6305,18 @@ const PIANI_INFO = {
   'premium': { sotto: 'Tutto il gestionale, più la vetrina in evidenza', voci: [
     'Cantieri e lavori, tutti in un posto', 'Preventivi in PDF, con lo storico', 'Preventivi con AI',
     'Computo metrico', 'Fatture, spese e margini', 'Squadra, ore e rapportini',
-    'Agenda e scadenze fiscali', 'Calcolatrice edile', 'Report dei lavori',
-    'Visibile in tutta la regione', 'Priorità nei risultati', 'Badge Premium sulla tua scheda' ] },
+    'Agenda e scadenze fiscali', "L'email del mattino con le tue scadenze", 'Calcolatrice edile', 'Report dei lavori',
+    'Visibile in tutta la regione', 'Priorità nei risultati', 'Badge In evidenza sulla tua scheda' ] },
   /* ⛔ 2 settembre 2026 sera, lo stesso difetto della pagina dei prezzi: qui
-     l'AI aveva 6 righe e il Premium 17, e il piano che costa di piu' sembrava
-     il piu' povero. Prima quello che si paga in piu', poi tutto il Premium. */
-  'premium-ai': { sotto: 'Tutto il Premium, più la Chat con AI', voci: [
+     l'AI aveva 6 righe e il Gestionale 17, e il piano che costa di piu' sembrava
+     il piu' povero. Prima quello che si paga in piu', poi tutto il Gestionale. */
+  'premium-ai': { sotto: 'Tutto il Gestionale, più la Chat con AI', voci: [
     'La chat con AI dentro il gestionale', 'Ti risponde coi conti dei tuoi lavori', 'Ti compila i moduli: lavori e clienti',
-    'Il riepilogo del lunedì per email', '300 messaggi al mese', 'Cantieri e lavori, tutti in un posto',
+    '300 messaggi al mese', 'Cantieri e lavori, tutti in un posto',
     'Preventivi in PDF, con lo storico', 'Preventivi con AI', 'Computo metrico',
     'Fatture, spese e margini', 'Squadra, ore e rapportini', 'Agenda e scadenze fiscali',
-    'Calcolatrice edile', 'Report dei lavori', 'Visibile in tutta la regione',
-    'Priorità nei risultati', 'Badge Premium sulla tua scheda' ] }
+    "L'email del mattino con le tue scadenze", 'Calcolatrice edile', 'Report dei lavori', 'Visibile in tutta la regione',
+    'Priorità nei risultati', 'Badge In evidenza sulla tua scheda' ] }
 };
 function mostraListino(porta, box) {
   apriModalPiano(porta);
@@ -6488,7 +6492,7 @@ async function apriModalPriorita() {
         <div style="font-size:1.05rem;font-weight:800;color:#154780;line-height:1.4;">Sei in posizione ${posUtente} su ${totale} imprese a ${citta}</div>
       </div>
       <div style="background:#fff7ed;border:1.5px solid #f59e0b;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px;">
-        <div style="font-size:15px;color:#92400e;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Senza Premium</div>
+        <div style="font-size:15px;color:#92400e;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Senza il Gestionale</div>
         <div style="font-size:0.95rem;color:#78350f;">Saresti in posizione <strong>${posSenza}</strong></div>
       </div>
       <button onclick="window.location.href='cerca-imprese.html?citta=${cittaUrl}'" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">🔍 Vedi risultati live</button>
@@ -6511,10 +6515,10 @@ async function apriModalVisibile() {
   document.body.insertAdjacentHTML('beforeend',renderModalVisibile({isPremium,citta,regione,nCitta:nCitta||0,nRegione:nRegione||0,cercaPage}));
 }
 function ctaPremium(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Senza Premium saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> grazie al Premium.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
+  return `<p style="color:#666;font-size:14px">Senza il Gestionale saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> perché sei in evidenza.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
 }
 function ctaFree(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Con Premium saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#0066ff;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Passa a Premium</button>`;
+  return `<p style="color:#666;font-size:14px">Con il Gestionale saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#0066ff;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Attiva il Gestionale</button>`;
 }
 function renderModalVisibile(d) {
   const titolo=d.isPremium?'🌍 Visibile in tutta la regione':'📍 Visibile nella tua città';
