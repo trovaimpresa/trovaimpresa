@@ -427,8 +427,8 @@
 
     /* ===== 16 agosto 2026 — PREZZI VERI E PORTE CHE ESISTONO =====
        Qui c'erano due piani che non esistono piu' da nessuna parte:
-       «AI 299€/anno» e «AI Pro 599€/anno». Non sono mai stati in vendita:
-       l'AI sta dentro il Premium (40 crediti al mese; 100 col Premium AI) e i crediti in piu'
+       «AI 299€/anno» e «AI Pro 599€/anno» (nomi vecchi, mai in vendita). Non sono mai stati in vendita:
+       l'AI sta dentro il Gestionale (40 crediti al mese; 100 col Gestionale AI) e i crediti in piu'
        si comprano a pacchetti da /ricarica-crediti.html.
 
        ⚠️ E soprattutto: due casi su tre mandavano su /abbonamento.html,
@@ -458,23 +458,23 @@
         { n: '1.000 crediti', p: '99€', d: 'non scadono mai' },
       ],
     } : motivo === 'subscription_expired' ? {
-      occhio: 'Premium scaduto',
+      occhio: 'Abbonamento scaduto',
       tit:    'Rinnova per continuare',
-      sub:    'I tuoi dati sono al sicuro. Rinnova il Premium e riprendi da dove avevi lasciato.',
+      sub:    'I tuoi dati sono al sicuro. Rinnova il Gestionale e riprendi da dove avevi lasciato.',
       cta:    'Vedi i piani',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Premium', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
+        { n: 'Gestionale', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
       ],
     } : {
       occhio: 'Assistente AI',
-      tit:    'L\'assistente AI è dentro il Premium',
-      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel Gestionale Premium ci sono 40 crediti al mese, che si rinnovano ogni mese. Nel Premium AI sono 100.',
-      cta:    'Vedi il Premium',
+      tit:    'L\'assistente AI è dentro il Gestionale',
+      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel Gestionale ci sono 40 crediti al mese, che si rinnovano ogni mese. Nel Gestionale AI sono 100.',
+      cta:    'Vedi il Gestionale',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Premium', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
-        { n: 'Premium', p: '29€', u: '/mese', d: 'stessa cosa, mese per mese' },
+        { n: 'Gestionale', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
+        { n: 'Gestionale', p: '29€', u: '/mese', d: 'stessa cosa, mese per mese' },
       ],
     };
 

@@ -4,7 +4,7 @@
 // gratis per sempre, a pagamento c'e' solo il gestionale (30 giorni di prova)
 // crea_profilo_impresa; qui inviamo la mail che lo annuncia.
 // Body atteso: { nome, email, tipo, premium }
-//  - premium: true  -> email "grazie per il passaggio a Premium" (upgrade pagato)
+//  - premium: true  -> email "grazie per il Gestionale" (upgrade pagato)
 //  - premium: false/assente -> email di benvenuto (vetrina gratis, nessun regalo)
 
 const PANNELLI = {
@@ -53,7 +53,7 @@ exports.handler = async function(event) {
   //  vuol dire che qualcun altro l'ha gia' fatto, e non mando niente.
   //  Essendo una sola istruzione sul database, due chiamate contemporanee non
   //  possono passare entrambe.
-  //  L'email di passaggio a Premium (premium: true) e' un'altra cosa e non
+  //  L'email di chi attiva il Gestionale (premium: true) e' un'altra cosa e non
   //  passa da questo controllo.
   // ------------------------------------------------------------------
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -124,7 +124,7 @@ exports.handler = async function(event) {
 
   // Il pezzo piu' importante di tutta l'email: senza profilo completo
   // l'iscritto resta invisibile e il portale non puo' fare niente per lui.
-  // Va detto subito e chiaro, altrimenti legge "ti ho regalato il Premium",
+  // Va detto subito e chiaro, altrimenti legge "ti ho regalato l'abbonamento",
   // pensa di aver finito e non torna piu'.
   const bloccoProfilo =
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 20px;">' +
@@ -143,15 +143,15 @@ exports.handler = async function(event) {
 
   if (premium) {
     // Upgrade pagato (Stripe): niente scadenza, ringraziamento.
-    subject = '⭐ Grazie per essere passato a TrovaImpresa Premium!';
+    subject = '⭐ Grazie per aver scelto il Gestionale TrovaImpresa!';
     mostraRegalo = false;
     ctaTesto = 'Vai al tuo pannello &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
-      '<p style="margin:0 0 16px;">grazie per aver scelto <strong>TrovaImpresa Premium</strong>.</p>' +
+      '<p style="margin:0 0 16px;">grazie per aver scelto il <strong>Gestionale TrovaImpresa</strong>.</p>' +
       '<p style="margin:0 0 16px;">Da ora hai accesso a tutte le funzionalit&agrave; avanzate del portale: <strong>posizione prioritaria</strong> nei risultati, maggiore visibilit&agrave; e pi&ugrave; possibilit&agrave; di essere contattato dai clienti.</p>';
   } else if (isCandidato) {
-    // I candidati non hanno il piano Premium: benvenuto semplice.
+    // I candidati non hanno il Gestionale: benvenuto semplice.
     subject = '🎉 Benvenuto su TrovaImpresa!';
     mostraRegalo = false;
     ctaTesto = 'Completa il tuo profilo &rarr;';
@@ -162,9 +162,9 @@ exports.handler = async function(event) {
   } else {
     /* ⛔ 13 SETTEMBRE 2026 — VIA IL REGALO DEI 3 MESI.
        Alex: «togliere i tre mesi gratis a tutti i nuovi iscritti perche'
-       ormai il progetto e' cambiato — a pagamento e' solamente il gestionale
-       Premium e Pro, tutto il resto rimane attivo».
-       Prima questa email prometteva «3 mesi di Premium in regalo» e una
+       ormai il progetto e' cambiato — a pagamento e' solamente il
+       Gestionale e il Gestionale AI, tutto il resto rimane attivo».
+       Prima questa email prometteva «3 mesi in regalo» e una
        fascia viola col regalo. Adesso il trigger del database scrive
        piano='free', quindi quella promessa sarebbe una bugia al primo
        messaggio che l'iscritto riceve da noi.
@@ -290,13 +290,13 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           from: 'TrovaImpresa <info@trovaimpresa.com>',
           to: ['info@trovaimpresa.com'],
-          subject: (premium ? '⭐ Passaggio a Premium: ' : '🔔 Nuova iscrizione: ')
+          subject: (premium ? '⭐ Ha attivato il Gestionale: ' : '🔔 Nuova iscrizione: ')
                    + (nome || 'senza nome') + ' (' + (tipo || 'n/d') + ')',
-          html: '<h2>' + (premium ? 'Passaggio a Premium' : 'Nuova iscrizione') + ' su TrovaImpresa</h2>'
+          html: '<h2>' + (premium ? 'Ha attivato il Gestionale' : 'Nuova iscrizione') + ' su TrovaImpresa</h2>'
                 + '<p><strong>Nome:</strong> ' + (nome || '—') + '</p>'
                 + '<p><strong>Email:</strong> ' + email + '</p>'
                 + '<p><strong>Tipo:</strong> ' + (tipo || '—') + '</p>'
-                + (premium ? '<p><strong>Premium:</strong> sì</p>' : '')
+                + (premium ? '<p><strong>Gestionale:</strong> sì</p>' : '')
         })
       });
     } catch (e) {

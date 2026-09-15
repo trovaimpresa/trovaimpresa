@@ -415,7 +415,8 @@
      ------------------------------------------------------------------ */
   /* ⛔ 29 agosto: la barra in alto del gestionale e questa riga devono
      dire la STESSA parola. Prima qui c'era scritto «Piano Pro» mentre la
-     barra diceva PREMIUM: due nomi per lo stesso account. Adesso qui il
+     barra diceva PREMIUM (15 set 2026: adesso i piani si chiamano Gestionale
+     e Gestionale AI): due nomi per lo stesso account. Adesso qui il
      nome del piano non si scrive proprio: si dicono solo i messaggi. */
   var modoAssaggio = false;
   var messaggiComprati = 0;   /* 14 set 2026: quelli del pacchetto, a parte */
@@ -432,7 +433,7 @@
     if (modoAssaggio) {
       sotto.innerHTML = 'Prova: ti '
         + (n === 1 ? 'resta <b>1</b> messaggio' : 'restano <b>' + n + '</b> messaggi')
-        + ' &middot; con il <b>Premium AI</b> ne hai 300 al mese';
+        + ' &middot; con il <b>Gestionale AI</b> ne hai 300 al mese';
       return;
     }
     var compresi = Math.max(n - messaggiComprati, 0);
@@ -690,8 +691,8 @@
         /* la frase la scrive il server: sa se e' un assaggio finito o
            un piano che non c'e'. Qui si aggiunge solo la strada per
            comprare, che e' il pannello: le porte stanno li'. */
-        scrivi('ai', esc(d.error || 'La Chat con AI fa parte del Premium AI.')
-          + (d.assaggio_finito ? '<br><a href="/pannello-impresa.html#dashboard">Attiva il Premium AI dal pannello</a>' : ''));
+        scrivi('ai', esc(d.error || 'La Chat con AI fa parte del Gestionale AI.')
+          + (d.assaggio_finito ? '<br><a href="/pannello-impresa.html#dashboard">Attiva il Gestionale AI dal pannello</a>' : ''));
       } else if (d.serve_messaggi || d.serve_crediti) {
         /* ⛔ 14 set 2026: `serve_crediti` e' il nome vecchio, di quando la
            chat mangiava i crediti dell'assistenza. Resta riconosciuto solo
@@ -730,7 +731,7 @@
   }
 
   /* ------------------------------------------------------------------
-     ACCENDI LA VOCE — solo se il cancello ha detto che ha il Pro.
+     ACCENDI LA VOCE — solo se il cancello ha detto che ha il Gestionale AI.
      `window._chatPro` arriva dopo, quando il cancello ha finito di
      leggere la riga dell'impresa: si aspetta, senza fretta e senza
      restare ad aspettare per sempre.
@@ -746,8 +747,8 @@
     /* ⛔ 30 agosto: si accende anche per l'assaggio (10 messaggi in
        tutto), se no chi non ha il piano non sa nemmeno che esiste. */
     if (window._chatPro === true || window._chatAssaggio === true) { accendi(); return; }
-    /* deciso: se non ha il Pro la voce resta spenta e non si dice niente.
-       Il posto dove si offre il Pro e' la pagina dei prezzi, non il menu
+    /* deciso: se non ha il Gestionale AI la voce resta spenta e non si dice niente.
+       Il posto dove si offre il Gestionale AI e' la pagina dei prezzi, non il menu
        di chi sta lavorando. */
     if (window._chatPro === false && window._chatAssaggio === false) return;
     if (++tentativi > 60) return;           /* ~30 secondi e poi basta */

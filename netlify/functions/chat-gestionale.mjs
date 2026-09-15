@@ -818,7 +818,7 @@ export default async function (req) {
     else return rispondi(403, { error: 'Questo reparto non è tuo.' });
   } catch (e) { return rispondi(403, { error: 'Non riesco a verificare il reparto. Riprova.' }); }
 
-  // ---- 4. ha il Pro? e quanti messaggi gli restano? ------------------
+  // ---- 4. ha il Gestionale AI? e quanti messaggi gli restano? ------------------
   let stato = null;
   {
     const r = await chiamaRpc(server, 'chat_stato', { p_user: uid });
@@ -828,14 +828,14 @@ export default async function (req) {
   if (!stato) return rispondi(503, { error: 'Non riesco a controllare il tuo piano. Riprova fra poco.' });
   if (!stato.ha_pro) {
     // ⛔ 30 agosto 2026 — L'ASSAGGIO FINITO NON E' «NON CE L'HAI».
-    // Chi non ha il Premium AI ha 10 messaggi in tutto per capire se gli
+    // Chi non ha il Gestionale AI ha 10 messaggi in tutto per capire se gli
     // serve. Quando finiscono la frase deve dirgli cosa ha appena usato e
     // cosa comprerebbe, non un secco «non e' nel tuo piano».
     return rispondi(403, {
       error: stato.assaggio
         ? 'Hai finito i ' + stato.compresi + ' messaggi di prova della Chat con AI. '
-          + 'Con il Premium AI ne hai 300 al mese.'
-        : 'La Chat con AI è nel piano Premium AI.',
+          + 'Con il Gestionale AI ne hai 300 al mese.'
+        : 'La Chat con AI è nel Gestionale AI.',
       serve_pro: true,
       assaggio_finito: !!stato.assaggio
     });

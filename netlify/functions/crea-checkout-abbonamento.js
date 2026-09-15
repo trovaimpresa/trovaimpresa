@@ -1,5 +1,5 @@
 // =====================================================================
-// STRIPE — LA CASSA DEGLI ABBONAMENTI (Premium e Premium AI)
+// STRIPE — LA CASSA DEGLI ABBONAMENTI (Gestionale e Gestionale AI)
 //
 // 29 agosto 2026 (notte) — i prezzi nuovi e il secondo piano.
 //
@@ -9,9 +9,9 @@
 // veri creati su Stripe il 29 agosto.
 //
 // ⛔ E QUI SI SCEGLIE IL PIANO, PRIMA DI PAGARE.
-// La decisione di Alessio: la scelta fra Premium e Premium AI si fa sulla
+// La decisione di Alessio: la scelta fra Gestionale e Gestionale AI si fa sulla
 // soglia, non dentro il gestionale gia' pagato. Percio' questa funzione
-// accetta un `prodotto`, e chi non lo manda compra il Premium: i pannelli
+// accetta un `prodotto`, e chi non lo manda compra il Gestionale: i pannelli
 // vecchi continuano a funzionare senza toccarli.
 //
 // ⚠️ `metadata.prodotto` VA SCRITTO IN DUE POSTI.
@@ -19,7 +19,7 @@
 // (`subscription_data.metadata`) serve DOPO — ai rinnovi e soprattutto
 // alla disdetta, dove Stripe manda solo l'abbonamento e della sessione
 // non c'e' piu' traccia. Senza la seconda copia, chi disdice resta
-// Premium a vita: era esattamente il buco di prima.
+// abbonato a vita: era esattamente il buco di prima.
 // =====================================================================
 const Stripe = require('stripe');
 

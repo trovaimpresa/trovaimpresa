@@ -3,7 +3,7 @@
 //
 // 29 agosto 2026.
 // E' la pagina di Stripe dove chi paga fa da solo tre cose che prima
-// non poteva fare: cambiare piano (da Premium a Premium AI e viceversa,
+// non poteva fare: cambiare piano (da Gestionale a Gestionale AI e viceversa,
 // col conguaglio calcolato da Stripe), cambiare la carta, e disdire.
 //
 // ⛔ PERCHE' NON SI FA COL CHECKOUT.
@@ -19,7 +19,7 @@
 //
 // ⚠️ DA FARE UNA VOLTA SU STRIPE (Impostazioni > Fatturazione > Portale
 //    clienti): accendere il portale, permettere il cambio piano fra i
-//    prodotti «Premium» e «Premium AI» con i 4 prezzi, e la disdetta.
+//    prodotti «Gestionale» e «Gestionale AI» con i 4 prezzi, e la disdetta.
 //    Finche' non e' acceso, Stripe risponde un errore chiaro e qui sotto
 //    si trasforma in una frase leggibile.
 // =====================================================================

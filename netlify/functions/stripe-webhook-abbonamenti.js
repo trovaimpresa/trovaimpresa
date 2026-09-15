@@ -1,5 +1,5 @@
 // =====================================================================
-// STRIPE — ABBONAMENTI (Premium, add-on Gestionale) e RICARICHE DI CREDITI AI
+// STRIPE — ABBONAMENTI (Gestionale, add-on) e RICARICHE DI CREDITI AI
 //
 // 14 agosto 2026 (notte) — aggiunta la RIGA DELL'INCASSO, e basta.
 //
@@ -16,7 +16,7 @@
 // ⚠️ LA REGOLA CHE NON SI TOCCA
 // Se la riga non si riesce a scrivere, L'ATTIVAZIONE SI FA LO STESSO.
 // Uno ha pagato: deve avere quello che ha pagato, punto. Non gli si nega
-// il Premium perche' noi non siamo riusciti a prendere nota. E' la stessa
+// l'abbonamento perche' noi non siamo riusciti a prendere nota. E' la stessa
 // regola di elimina-account.js, vista dall'altra parte: la persona viene
 // prima della statistica.
 //
@@ -51,7 +51,7 @@ const { createClient } = require('@supabase/supabase-js');
 // L'ALLARME AD ALESSIO                              5 settembre 2026
 // =====================================================================
 // ⛔ Prima queste tre `update` non leggevano la risposta. Se una falliva,
-// il cliente aveva PAGATO e il gestionale (o il Premium) non gli si
+// il cliente aveva PAGATO e il gestionale (o l'abbonamento) non gli si
 // accendeva — e non lo sapeva nessuno: ne' lui, ne' Alessio. Il log di
 // Netlify lo si guarda dopo, e «dopo» qui vuol dire un cliente che ha
 // pagato e aspetta.
@@ -259,12 +259,12 @@ exports.handler = async (event) => {
     // ⚠️ QUESTO CONTROLLO VA PER PRIMO.
     // Una ricarica di crediti porta con se' l'email, e senza questa riga
     // finirebbe nel ramo qui sotto: 19 euro di crediti diventerebbero un
-    // Premium regalato.
+    // abbonamento regalato.
     if (prodotto === 'crediti-ai' || prodotto === 'messaggi-chat') {
       tuttoBene = await accreditaCrediti(supabase, s, ev);
 
     } else if (email && prodotto === 'gestionale') {
-      // Add-on Gestionale attivato: NON tocca il piano Premium.
+      // Add-on Gestionale attivato: NON tocca il piano pagato.
       const campiGest = { gestionale_attivo: true, gestionale_scadenza: null };
       if (typeof s.customer === 'string' && s.customer) campiGest.stripe_customer_id = s.customer;
       const upGest = await supabase.from('imprese').update(campiGest).eq('email', email);
@@ -286,14 +286,14 @@ exports.handler = async (event) => {
         quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
       });
     } else if (email) {
-      // Pagamento ricevuto: Premium pagato, senza scadenza (azzero l'eventuale scadenza del regalo)
+      // Pagamento ricevuto: abbonamento pagato, senza scadenza (azzero l'eventuale scadenza del regalo)
       //
       // 29 agosto 2026 — I DUE PIANI.
       // `prodotto` arriva dal checkout. 'premium-ai' e' il piano da 39/349:
       // l'unica cosa in piu' e' la chat con l'AI, che si accende con
       // `chat_pro` — la stessa colonna che guardano il cancello del
       // gestionale e la funzione `chat_stato` su Supabase.
-      // ⚠️ Chi compra il Premium liscio NON viene toccato su chat_pro: se
+      // ⚠️ Chi compra il Gestionale liscio NON viene toccato su chat_pro: se
       //    ce l'aveva acceso, non glielo spegniamo dentro un pagamento.
       const conAI = (prodotto === 'premium-ai');
       const campi = { piano: 'premium', premium_scadenza: null, premium_pagato: true };
@@ -309,8 +309,8 @@ exports.handler = async (event) => {
         tuttoBene = false;
         motivoErrore = 'premium non acceso';
         console.error('[PAGATO MA NON ACCESO] ' + (conAI ? 'premium-ai' : 'premium') + ', ' + email + ':', upPrem.error.message);
-        await avvisaAlessio('Pagamento ricevuto, Premium NON acceso', {
-          'Chi': email, 'Cosa aveva comprato': conAI ? 'Premium AI' : 'Premium',
+        await avvisaAlessio('Pagamento ricevuto, abbonamento NON acceso', {
+          'Chi': email, 'Cosa aveva comprato': conAI ? 'Gestionale AI' : 'Gestionale',
           'Quanto': (s.amount_total / 100).toFixed(2) + ' ' + String(s.currency || 'eur').toUpperCase(),
           'Riferimento Stripe': s.id, 'Errore del database': upPrem.error.message
         }, 'Apri Supabase &rarr; tabella <b>imprese</b>, cerca questa email e metti a mano '
@@ -323,7 +323,7 @@ exports.handler = async (event) => {
         quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
       });
 
-      // Email di conferma passaggio a Premium (best-effort, non blocca il webhook)
+      // Email di conferma dell'attivazione (best-effort, non blocca il webhook)
       try {
         const { data: row } = await supabase.from('imprese').select('nome, tipo').eq('email', email).single();
         await fetch('https://trovaimpresa.com/.netlify/functions/invia-email-benvenuto', {
@@ -483,7 +483,7 @@ exports.handler = async (event) => {
       // l'email arriva lo stesso dall'addebito. Cosi' com'era, il codice
       // finiva nel ramo qui sotto e rimetteva la persona al piano FREE
       // A INDOVINARE — anche se il rimborso era di 19 euro di crediti e
-      // il Premium l'aveva pagato a parte. Togliere per sbaglio quello
+      // l'abbonamento l'aveva pagato a parte. Togliere per sbaglio quello
       // che uno ha pagato e' peggio del buco che stiamo tappando.
       tolto = 'NIENTE: non ho ritrovato il pagamento di partenza, non tolgo a indovinare';
 
@@ -525,15 +525,15 @@ exports.handler = async (event) => {
   // LA DISDETTA
   //
   // ⛔ 29 agosto 2026 — IL BUCO CHE C'ERA QUI.
-  // Prima questo pezzo spegneva SOLO l'add-on gestionale. Chi disdiceva il
-  // Premium restava Premium per sempre: Stripe smetteva di incassare e il
+  // Prima questo pezzo spegneva SOLO l'add-on gestionale. Chi disdiceva
+  // restava abbonato per sempre: Stripe smetteva di incassare e il
   // sito continuava a dargli tutto. Adesso torna free davvero.
   //
   // ⚠️ Stripe manda questo avviso alla FINE del periodo gia' pagato, non
   //    nel momento in cui la persona clicca «disdici»: fino a quel giorno
   //    ha pagato, e fino a quel giorno tiene quello che ha pagato.
   // ⚠️ Gli abbonamenti nati prima del 29 agosto non hanno `prodotto` nei
-  //    metadata: se manca, si considera un Premium.
+  //    metadata: se manca, si considera il Gestionale.
   // -------------------------------------------------------------------
   if (ev.type === 'customer.subscription.deleted') {
     const sub = ev.data.object;
@@ -555,7 +555,7 @@ exports.handler = async (event) => {
         console.log('[disdetta] gestionale spento:', email);
       }
     } else {
-      // Premium e Premium AI: si torna al piano free e si spegne la chat AI.
+      // Gestionale e Gestionale AI: si torna al piano free e si spegne la chat AI.
       const { error } = await supabase.from('imprese').update({
         piano:             'free',
         premium_pagato:    false,

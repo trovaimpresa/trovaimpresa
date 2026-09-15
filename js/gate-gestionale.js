@@ -3,7 +3,7 @@
 
    Fino a oggi questa schermata viveva DENTRO gestionale-app.html, e
    basta: gestionale-noleggio.html non ne aveva nessuna. Chi si scriveva
-   l'indirizzo del noleggio a mano entrava, senza login e senza Premium.
+   l'indirizzo del noleggio a mano entrava, senza login e senza abbonamento.
    Alessio l'aveva segnato nel referto del 22 agosto: «il noleggio non ha
    nessun cancello: chi conosce l'indirizzo entra».
 
@@ -44,7 +44,7 @@
         Vogliamo darvelo finito, non a met&agrave;: per questo per ora &egrave; chiuso.
       </p>
       <p style="margin:0 0 24px;font-size:17px;line-height:1.7;">
-        Quando sar&agrave; pronto entrer&agrave; nel piano <b>Premium</b>, insieme alla vetrina
+        Quando sar&agrave; pronto entrer&agrave; nel <b>Gestionale</b>, insieme alla vetrina
         su TrovaImpresa.
       </p>
       <div id="gate-avvisami-box" style="background:var(--sfondo,#f3f5f2);border-radius:12px;padding:20px;">
@@ -69,15 +69,15 @@
       </p>
     </div>
     <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
-      <p id="gate-paywall-titolo" style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Il Gestionale &egrave; incluso nel piano Premium</p>
+      <p id="gate-paywall-titolo" style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Il Gestionale TrovaImpresa</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;">Cantieri, squadra, preventivi PDF, fatture, agenda, scadenze fiscali e mezzi: tutto in un unico posto.</p>
-      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Con il <strong>Premium</strong> lo sblocchi insieme a tutto il resto: <strong>29&euro; al mese</strong> oppure <strong>249&euro; l&rsquo;anno</strong>.</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Con il <strong>Gestionale</strong> lo sblocchi insieme a tutto il resto: <strong>29&euro; al mese</strong> oppure <strong>249&euro; l&rsquo;anno</strong>.</p>
       <div id="gate-btns">
-        <a href="/info-premium.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;margin-bottom:10px;border-radius:10px;background:var(--blu,#0066ff);color:#fff;font-size:17px;font-weight:700;">Scopri il Premium</a>
+        <a href="/info-premium.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;margin-bottom:10px;border-radius:10px;background:var(--blu,#0066ff);color:#fff;font-size:17px;font-weight:700;">Scopri il Gestionale</a>
         <a href="/prezzi.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;border-radius:10px;background:var(--sfondo,#f3f5f2);color:var(--testo,#1c2b36);font-size:16px;font-weight:700;">Vedi tutti i piani</a>
       </div>
       <p style="margin:18px 0 0;font-size:14px;color:var(--testo-3,#7a848f);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
-      <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; il Premium? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
+      <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; il Gestionale? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
       <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu,#0066ff);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
     </div>
     <div id="gate-lento" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
@@ -103,7 +103,7 @@
   function q(id){return document.getElementById(id);}
   /* ===== MANUTENZIONE =====
      Se true, il gestionale è chiuso a tutti tranne le email in AMMESSI.
-     Rimessa a false il 6 agosto 2026: aperto ai Premium.
+     Rimessa a false il 6 agosto 2026: aperto agli abbonati.
      ⛔ RIMESSA A TRUE IL 20 AGOSTO 2026, deciso da Alessio:
         «prima si costruisce la casa poi si vende».
      ✅ RIMESSA A FALSE IL 30 AGOSTO 2026, deciso da Alessio: il gestionale
@@ -118,8 +118,8 @@
   var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
 
   /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====
-     Il gestionale è incluso nel piano Premium (29 euro/mese o 249 euro/anno,
-     prezzi del 29 agosto 2026; il Premium AI, che aggiunge la chat con AI,
+     Il gestionale è il Gestionale TrovaImpresa (29 euro/mese o 249 euro/anno,
+     prezzi del 29 agosto 2026; il Gestionale AI, che aggiunge la chat con AI,
      costa 39 euro/mese o 349 euro/anno e NON cambia chi entra qui dentro).
      Chi è Free vede la schermata che spiega come sbloccarlo.
      Il blocco sulla card del pannello resta: questo chiude l'accesso diretto
@@ -130,7 +130,7 @@
     if(!row) return false;
     var piano = String(row.piano||'').trim().toLowerCase();
     if(piano !== 'premium') return false;
-    /* se c'e' una scadenza ed è passata, non è più Premium */
+    /* se c'e' una scadenza ed è passata, non è più abbonato */
     if(row.premium_scadenza){
       var scad = new Date(row.premium_scadenza);
       if(!isNaN(scad.getTime()) && scad.getTime() < Date.now()) return false;
@@ -141,10 +141,10 @@
   /* ============================================================
      ===== IL PIANO PRO — 29 agosto 2026 =====
      ============================================================
-     Deciso da Alessio: il Pro NON sostituisce il Premium, ci si aggiunge
-     sopra. Premium = la vetrina sul sito + il gestionale con tutte le sue
-     funzioni, AI comprese. Pro = quello, PIU' la chat. Chi passa al Pro non
-     perde niente, e chi resta Premium nemmeno: l'unica differenza e' la chat.
+     Deciso da Alessio: il Gestionale AI NON sostituisce il Gestionale, ci si aggiunge
+     sopra. Gestionale = la vetrina sul sito + il gestionale con tutte le sue
+     funzioni, AI comprese. Gestionale AI = quello, PIU' la chat. Chi passa all'AI non
+     perde niente, e chi resta sul Gestionale nemmeno: l'unica differenza e' la chat.
 
      ⛔ E PER QUESTO IL PRO NON STA NELLA COLONNA `piano`.
      Nel progetto ci sono 91 punti, in 29 file, che chiedono
@@ -156,16 +156,17 @@
      del gestionale del 22 agosto. Non e' una forma nuova.
 
      ⛔ QUESTA FUNZIONE NON DECIDE CHI ENTRA NEL GESTIONALE.
-     Decide solo chi vede la chat. Il cancello resta quello del Premium:
+     Decide solo chi vede la chat. Il cancello resta quello del Gestionale:
      sbagliare qui deve poter costare al massimo una chat, mai il gestionale.
 
-     ⚠️ Chiede il Premium per prima cosa, perche' il Pro si APPOGGIA sopra:
-     un Pro con il Premium scaduto non e' un Pro.
+     ⚠️ Chiede il
+       Gestionale per prima cosa, perche' l'AI si APPOGGIA sopra:
+     l'AI con il Gestionale scaduto non vale.
      ============================================================ */
   function haChatPro(row){
-    if(!haPremium(row)) return false;          /* il Pro sta SOPRA il Premium */
+    if(!haPremium(row)) return false;          /* l'AI sta SOPRA il Gestionale */
     if(row.chat_pro !== true) return false;    /* solo true vale: null e undefined no */
-    /* se c'e' una scadenza ed e' passata, il Pro non vale piu' */
+    /* se c'e' una scadenza ed e' passata, l'AI non vale piu' */
     if(row.chat_pro_scadenza){
       var sc = new Date(row.chat_pro_scadenza);
       if(!isNaN(sc.getTime()) && sc.getTime() < Date.now()) return false;
@@ -183,7 +184,7 @@
                 il divieto di salvare sta gia' nel database.
        PROVA  — 30 giorni pieni, salvataggi compresi, senza carta.
                 Sta in `gest_prova_fine`, e la scrive solo il server.
-     ⚠️ Qui la prova vale quanto il Premium: chi ce l'ha entra e basta.
+     ⚠️ Qui la prova vale quanto il Gestionale: chi ce l'ha entra e basta.
      ============================================================ */
   function inProva(row){
     if(!row||!row.gest_prova_fine)return false;
@@ -330,7 +331,7 @@
     showChecking('Apertura del gestionale…');
     var deciso=false;
     var chiave=(new URLSearchParams(location.search).get('chiave')==='apri');
-    /* esito: 'ok' entra · 'manutenzione' · 'premium' mostra il Premium ·
+    /* esito: 'ok' entra · 'manutenzione' · 'premium' mostra il listino ·
               'lento' non si e' riuscito a verificare */
     var decidi=function(email,esito){
       if(deciso)return; deciso=true;
@@ -375,7 +376,7 @@
 
       gc.auth.getSession().then(function(r){
         var s=r.data && r.data.session;
-        /* senza login non si entra: si vede la schermata del Premium col link per accedere */
+        /* senza login non si entra: si vede la schermata del listino col link per accedere */
         if(!s){clearTimeout(timer);decidi('','premium');return;}
         window._gestUid=s.user.id;
         /* ⚠️ 29 agosto 2026 — due colonne in piu' nella STESSA lettura: la
@@ -386,33 +387,34 @@
         gc.from('imprese').select('email, piano, premium_scadenza, chat_pro, chat_pro_scadenza, gest_prova_fine').eq('user_id',s.user.id).maybeSingle().then(function(res){
           /* ⚠️ Supabase non lancia: l'errore torna DENTRO la risposta. Senza
              questa riga una lettura rifiutata passava per «nessuna riga»,
-             cioe' per «non e' Premium»: colpa data al piano invece che alla
+             cioe' per «non e' abbonato»: colpa data al piano invece che alla
              rete. */
           if(res&&res.error){ if(tentativi<2){prova();} else {clearTimeout(timer);decidi(window._gestEmail||'','lento');} return; }
           clearTimeout(timer);
           var row=res && res.data;
           window._gestEmail=(row&&row.email)||s.user.email||'';
-          /* ⚠️ la prova apre quanto il Premium: se restasse fuori, uno che
+          /* ⚠️ la prova apre quanto il Gestionale: se restasse fuori, uno che
              ha chiesto i 30 giorni si vedrebbe ancora il paywall. */
           var ok=haPremium(row)||inProva(row);
           window._gestPremium=ok;
           window._gestProvaGiorni=giorniProva(row);
-          /* ⛔ il Pro NON entra nella decisione qui sotto: e' solo una
-             lampadina che la chat guardera'. Il cancello resta il Premium. */
+          /* ⛔ l'AI NON entra nella decisione qui sotto: e' solo una
+             lampadina che la chat guardera'. Il cancello resta il Gestionale. */
           /* ⛔ 30 agosto 2026 — LA PORTA DECIDE LA CHAT.
-             Dal pannello ci sono due porte: «Gestionale Premium» e
-             «Gestionale Premium AI». Chi ha l'AI le apre tutte e due, ma
-             entrando da quella Premium deve vedere il gestionale Premium,
-             cioe' SENZA la voce «Chat con AI» — se no le due porte portano
-             nello stesso identico posto e la parola «Premium» non vuol
+             Dal pannello ci sono due porte: «Gestionale» e
+             «Gestionale AI». Chi ha l'AI le apre tutte e due, ma
+             entrando da quella del Gestionale deve vedere il gestionale
+             senza AI, cioe' SENZA la voce «Chat con AI» — se no le due porte portano
+             nello stesso identico posto e la parola «Gestionale AI» non vuol
              dire niente. Il piano non si tocca: si spegne solo la voce. */
           var daPortaPremium=(new URLSearchParams(location.search).get('piano')==='premium');
           window._chatPro=haChatPro(row) && !daPortaPremium;
           /* ⛔ 30 agosto 2026 — L'ASSAGGIO.
-             Chi non ha il Premium AI vede lo stesso la voce «Chat con AI»
+             Chi non ha il Gestionale AI vede lo stesso la voce «Chat con AI»
              e puo' scrivere 10 messaggi in tutto: se non la vede, non
              comprera' mai un piano che costa 100 euro l'anno in piu'.
-             ⚠️ Non dalla porta Premium: da li' si entra nel gestionale
+             ⚠️ Non dalla porta del
+       Gestionale: da li' si entra nel gestionale
              senza AI, ed e' quello il senso di avere due porte. */
           window._chatAssaggio=(!haChatPro(row)) && !daPortaPremium;
           registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);

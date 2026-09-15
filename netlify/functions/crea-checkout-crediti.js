@@ -20,8 +20,8 @@
 //
 // ⚠️ 3. NON SI VENDE A CHI NON PUO' USARLI.
 //    consume_ai_credit si ferma sul piano 'base' PRIMA di guardare i
-//    crediti comprati: uno senza Premium se li ritroverebbe nel conto
-//    senza poterli spendere. Quindi il Premium si controlla qui, prima
+//    crediti comprati: uno senza abbonamento se li ritroverebbe nel conto
+//    senza poterli spendere. Quindi l'abbonamento si controlla qui, prima
 //    di far partire il pagamento.
 //
 // ⚠️ 4. 14 SETTEMBRE 2026 — QUI SI VENDONO DUE COSE DIVERSE.
@@ -107,7 +107,7 @@ exports.handler = async (event) => {
       });
     }
 
-    // ---- 3. il Premium ---------------------------------------------
+    // ---- 3. l'abbonamento ---------------------------------------------
     // stessa regola di haPremium() nel gestionale e di ai_allinea_piano
     // nel database: piano 'premium' e, se c'e' una scadenza, non passata.
     const { data: impresa } = await supabase
