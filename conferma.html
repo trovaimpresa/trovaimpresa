@@ -137,6 +137,15 @@ function mostra(quale){
     const { error } = await sb.auth.verifyOtp({ token_hash, type });
     if (error) throw error;
     mostra('fatto');
+    /* ⛔ 15 settembre 2026 — CHI ARRIVA DAL GESTIONALE NON VA NEL PANNELLO.
+       Il modulo di iscrizione manda `emailRedirectTo` con dentro
+       `?redirect=gestionale`, ma quel valore NON viene MAI usato: il modello
+       della mail su Supabase punta a mano a questa pagina
+       (`conferma.html?token_hash=...`), quindi `emailRedirectTo` viene
+       buttato. Per questo chi si iscriveva dalla porta del gestionale
+       atterrava lo stesso sul sito.
+       La decisione va presa QUI, guardando chi e'. */
+    if (type === 'email') adattaAlGestionale();
     /* 11 settembre 2026 — il benvenuto parte DA QUI, non piu' dalla pagina di
        registrazione: prima arrivava insieme alla conferma e diceva «completa
        il tuo profilo» a uno che nel profilo non poteva ancora entrare.
@@ -147,6 +156,42 @@ function mostra(quale){
     mostra('scaduto');
   }
 })();
+
+// --- chi viene dalla porta del gestionale -----------------------------------
+/* Come si riconosce: il modulo con `?da=gestionale` scrive
+   `vetrina_attiva: 'false'` nei dati dell'utente, e il trigger del database
+   spegne la vetrina. Guardiamo prima il metadato (c'e' sempre, anche se il
+   database fosse lento), poi la tabella come rete di sicurezza.
+   ⚠️ Se qualcosa va storto si tace e resta la schermata normale: questa e'
+   la pagina che ATTIVA il profilo, non deve rompersi mai per un dettaglio. */
+async function adattaAlGestionale(){
+  try {
+    const { data } = await sb.auth.getUser();
+    const u = data && data.user;
+    if (!u) return;
+
+    let dalGestionale =
+      String((u.user_metadata || {}).vetrina_attiva || '').toLowerCase() === 'false';
+
+    if (!dalGestionale) {
+      const r = await sb.from('imprese')
+        .select('vetrina_attiva').eq('user_id', u.id).maybeSingle();
+      dalGestionale = !!(r && r.data && r.data.vetrina_attiva === false);
+    }
+    if (!dalGestionale) return;
+
+    const box = document.getElementById('fatto');
+    if (!box) return;
+    const t = box.querySelector('h1');
+    const p = box.querySelector('p');
+    const a = box.querySelector('a.btn');
+    if (t) t.textContent = 'Il tuo gestionale \u00e8 pronto';
+    if (p) p.textContent = 'Puoi entrare adesso. I primi 30 giorni sono gratis, '
+                         + 'senza carta di credito.';
+    if (a) { a.href = '/login-impresa.html?redirect=gestionale';
+             a.textContent = 'Apri il gestionale'; }
+  } catch (e) { /* silenzio: il profilo e' attivo lo stesso */ }
+}
 
 // --- il benvenuto con i 3 mesi di Premium ----------------------------------
 // Non deve MAI bloccare l'attivazione: se qualcosa va storto si tace, e la
