@@ -30,7 +30,14 @@
     .step.active .step-circle { background: #0066ff; color: white; }
     .step-label { font-size: 11px; color: #999; text-align: center; }
     .step.active .step-label { color: #0066ff; font-weight: 600; }
-    .content { padding: 32px; }
+    /* ⛔ 15 set 2026 — il modulo si allargava per tutto lo schermo mentre
+       la testata blu restava stretta: su un monitor grande le caselle
+       erano lunghe →1700← px. Il `.container` da 680 px si chiude subito
+       dopo la testata, quindi `.content` non era dentro niente. Invece di
+       spostare i div — e rischiare di rompere un modulo che funziona —
+       gli diamo le stesse misure del contenitore: 680 px, centrato, con
+       gli stessi 24 px di lato. Cosi' testata e caselle sono allineate. */
+    .content { padding: 32px 24px; max-width: 680px; margin: 0 auto; box-sizing: border-box; }
     .form-section { display: none; }
     .form-section.active { display: block; }
     .form-section h2 { font-size: 22px; color: #0a2a4d; margin-bottom: 24px; }
@@ -447,7 +454,13 @@
         '<p style="font-size:18px;line-height:1.55;color:#333;margin:0 0 6px">Ti ho mandato una mail a</p>' +
         '<p id="sc-email" style="font-size:20px;font-weight:800;color:#0066ff;word-break:break-all;margin:0 0 18px"></p>' +
         '<p style="font-size:17px;line-height:1.6;color:#333;margin:0 0 8px">' +
-        'Aprila e <b>clicca sul link</b>: solo così il tuo profilo diventa attivo e i clienti possono trovarti.</p>' +
+        /* ⛔ 15 set 2026: chi entra dalla porta del gestionale NON vuole
+           essere trovato dai clienti — la sua vetrina nasce spenta.
+           Dirgli «cosi' i clienti ti trovano» era una bugia. */
+        'Aprila e <b>clicca sul link</b>: ' +
+        (window.DA_GESTIONALE
+          ? 'solo cos&igrave; il tuo gestionale si apre.'
+          : 'solo così il tuo profilo diventa attivo e i clienti possono trovarti.') + '</p>' +
         '<p style="font-size:16px;line-height:1.6;color:#b45309;background:#fffbeb;border:1.5px solid #fde68a;' +
         'border-radius:12px;padding:12px 14px;margin:0 0 20px">⚠️ Se non la vedi, <b>guarda nella cartella SPAM</b>: ' +
         'ci finisce spesso. Può metterci un paio di minuti.</p>' +
