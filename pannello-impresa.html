@@ -7090,4 +7090,236 @@ function sottoscriviRealtimeMessaggi() {
     .subscribe();
 }
 </script>
+
+<!-- =====================================================================
+     INTERRUTTORE DELLA SCHEDA PUBBLICA — 15 settembre 2026
+
+     ⛔ IL DIFETTO CHE CHIUDE: da oggi si puo' entrare dalla porta del
+     gestionale (registrazione-*.html?da=gestionale). Chi entra da li'
+     nasce con `imprese.vetrina_attiva = false`: la sua scheda NON esce
+     nelle ricerche, ed e' giusto — non ha messo ne' mestiere ne' citta'.
+     Ma senza un interruttore non poteva piu' accenderla: la porta del
+     gestionale era una gabbia. Questo blocco e' l'interruttore.
+
+     Come e' fatto: tutto dentro una funzione anonima, in coda alla
+     pagina, dopo il blocco grande. Non tocca una riga di quello che
+     c'era. Se questo blocco si rompe, il pannello resta intero.
+
+     Legge `imprese.vetrina_attiva` e:
+       - spenta -> fascia rossa in cima + card «Scheda pubblica: spenta»
+       - accesa -> solo la card «Scheda pubblica: accesa»
+     L'interruttore va nei due sensi: si accende e si rispegne.
+
+     ⚠️ Accendere NON basta a farsi trovare: servono anche mestiere e
+     citta'. Per questo dopo l'accensione la finestra lo dice e manda a
+     «modifica-profilo.html». Dirgli solo «fatto» sarebbe una bugia.
+     ===================================================================== -->
+<script>
+(function () {
+  var IMPRESA_ID = null;
+  var ACCESA = null;
+
+  function q(sel) { return document.querySelector(sel); }
+
+  function titoloAccessi() {
+    var t = document.querySelectorAll('.dash-quick-title');
+    for (var i = 0; i < t.length; i++) {
+      if (/Gestisci il tuo profilo/i.test(t[i].textContent || '')) return t[i];
+    }
+    return t[0] || null;
+  }
+
+  /* ---------- la card dentro «Gestisci il tuo profilo pubblico» ---------- */
+  function disegnaCard() {
+    var titolo = titoloAccessi();
+    if (!titolo) return;
+    var griglia = titolo.nextElementSibling;
+    if (!griglia || griglia.className.indexOf('dash-quick-grid') < 0) return;
+
+    var card = document.getElementById('card-vetrina');
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'card-vetrina';
+      card.className = 'dash-quick-card';
+      card.setAttribute('data-card-id', 'vetrina');
+      card.style.cursor = 'pointer';
+      card.onclick = apriFinestra;
+      /* ⚠️ in CODA, non in testa: il foglio di stile colora il bordo con
+         `:nth-child(2)` e `:nth-child(3)`. Mettendola in testa, le carte
+         che c'erano gia' cambiavano tutte colore. */
+      griglia.appendChild(card);
+    }
+    card.style.borderTopColor = ACCESA ? '#16a34a' : '#c0392b';
+    card.innerHTML =
+      '<div class="dash-quick-icon">' + (ACCESA ? '🌐' : '🙈') + '</div>' +
+      '<div class="dash-quick-label">Scheda pubblica: ' + (ACCESA ? 'accesa' : 'spenta') + '</div>' +
+      '<div class="dash-quick-sub">' +
+      (ACCESA ? 'I clienti possono trovarti' : 'Non esci nelle ricerche') +
+      '</div>';
+  }
+
+  /* ---------- la fascia rossa, solo quando e' spenta ---------- */
+  function disegnaFascia() {
+    var vecchia = document.getElementById('fascia-vetrina');
+    if (ACCESA) { if (vecchia) vecchia.remove(); return; }
+    if (vecchia) return;
+    var titolo = titoloAccessi();
+    if (!titolo || !titolo.parentNode) return;
+
+    var f = document.createElement('div');
+    f.id = 'fascia-vetrina';
+    f.style.cssText = 'background:#fef2f2;border:2px solid #fecaca;border-radius:12px;' +
+      'padding:16px 18px;margin:0 0 22px;line-height:1.55;font-size:16px;color:#7f1d1d';
+    f.innerHTML =
+      '<div style="font-weight:800;font-size:18px;margin-bottom:6px">🙈 La tua scheda pubblica &egrave; spenta</div>' +
+      'Hai aperto l\'account per il gestionale, quindi il tuo profilo non esce nelle ricerche di TrovaImpresa. ' +
+      'Va bene cos&igrave;: il gestionale funziona lo stesso.<br>' +
+      'Se per&ograve; vuoi anche i clienti, la scheda &egrave; <b>gratis</b> — accendila.' +
+      '<div style="margin-top:12px">' +
+      '<button type="button" id="btn-fascia-vetrina" style="background:#16a34a;color:#fff;border:0;' +
+      'border-radius:10px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer">' +
+      'Accendi la mia scheda</button></div>';
+    titolo.parentNode.insertBefore(f, titolo);
+    var b = document.getElementById('btn-fascia-vetrina');
+    if (b) b.onclick = function () { cambia(true); };
+  }
+
+  /* ---------- la finestra dell'interruttore ---------- */
+  function chiudiFinestra() {
+    var m = document.getElementById('modal-vetrina');
+    if (m) m.remove();
+  }
+
+  function apriFinestra() {
+    chiudiFinestra();
+    var m = document.createElement('div');
+    m.id = 'modal-vetrina';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;' +
+      'display:flex;align-items:center;justify-content:center;padding:16px';
+    m.innerHTML =
+      '<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;padding:24px;' +
+      'font-size:16px;line-height:1.55;color:#0f172a;max-height:90vh;overflow:auto">' +
+      '<div style="font-size:20px;font-weight:800;margin-bottom:12px">' +
+      (ACCESA ? '🌐 La tua scheda &egrave; accesa' : '🙈 La tua scheda &egrave; spenta') +
+      '</div>' +
+      '<div style="margin-bottom:18px">' +
+      (ACCESA
+        ? 'Il tuo profilo esce nelle ricerche di TrovaImpresa e i clienti possono scriverti. ' +
+          'Se la spegni sparisci dalle ricerche: foto, recensioni e messaggi restano dove sono, ' +
+          'e il gestionale continua a funzionare come prima.'
+        : 'Il tuo profilo non esce nelle ricerche. Il gestionale funziona lo stesso. ' +
+          'Accenderla &egrave; gratis e non cambia niente di quello che hai gi&agrave; dentro.') +
+      '</div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+      '<button type="button" id="btn-vetrina-ok" style="flex:1;min-width:180px;background:' +
+      (ACCESA ? '#c0392b' : '#16a34a') + ';color:#fff;border:0;border-radius:10px;padding:13px 16px;' +
+      'font-size:16px;font-weight:700;cursor:pointer">' +
+      (ACCESA ? 'Spegni la scheda' : 'Accendi la scheda') + '</button>' +
+      '<button type="button" id="btn-vetrina-no" style="flex:1;min-width:120px;background:#e5e7eb;' +
+      'color:#0f172a;border:0;border-radius:10px;padding:13px 16px;font-size:16px;font-weight:700;' +
+      'cursor:pointer">Lascia stare</button>' +
+      '</div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function (e) { if (e.target === m) chiudiFinestra(); });
+    document.getElementById('btn-vetrina-no').onclick = chiudiFinestra;
+    document.getElementById('btn-vetrina-ok').onclick = function () { cambia(!ACCESA); };
+  }
+
+  /* ---------- il pezzo che scrive davvero ---------- */
+  async function cambia(nuovo) {
+    var bottoni = document.querySelectorAll('#btn-vetrina-ok, #btn-fascia-vetrina');
+    for (var i = 0; i < bottoni.length; i++) {
+      bottoni[i].disabled = true;
+      bottoni[i].textContent = 'Un attimo...';
+    }
+    try {
+      var r = await sb.from('imprese')
+        .update({ vetrina_attiva: nuovo })
+        .eq('id', IMPRESA_ID)
+        .select('vetrina_attiva')
+        .maybeSingle();
+      if (r.error) throw r.error;
+      ACCESA = (r.data && r.data.vetrina_attiva !== false);
+    } catch (e) {
+      console.error('vetrina:', e);
+      chiudiFinestra();
+      var err = document.createElement('div');
+      err.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:99999;' +
+        'background:#7f1d1d;color:#fff;border-radius:12px;padding:14px 16px;font-size:16px';
+      err.textContent = 'Non sono riuscito a cambiarla. Riprova fra un minuto.';
+      document.body.appendChild(err);
+      setTimeout(function () { err.remove(); }, 6000);
+      disegnaCard();
+      disegnaFascia();
+      return;
+    }
+    chiudiFinestra();
+    disegnaCard();
+    disegnaFascia();
+    if (ACCESA) finestraDopoAccensione();
+  }
+
+  /* ⚠️ Accesa non vuol dire trovata: senza mestiere e citta' il cliente
+     non la vede lo stesso. Glielo diciamo subito, non dopo. */
+  function finestraDopoAccensione() {
+    var m = document.createElement('div');
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;' +
+      'display:flex;align-items:center;justify-content:center;padding:16px';
+    m.innerHTML =
+      '<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;padding:24px;' +
+      'font-size:16px;line-height:1.55;color:#0f172a">' +
+      '<div style="font-size:20px;font-weight:800;margin-bottom:12px">✅ Scheda accesa</div>' +
+      '<div style="margin-bottom:18px">Adesso manca una cosa sola: <b>mestiere e citt&agrave;</b>. ' +
+      'Il cliente cerca per quelli, quindi finch&eacute; sono vuoti non ti trova nessuno. ' +
+      'Ci metti un minuto.</div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+      '<button type="button" id="btn-vai-profilo" style="flex:1;min-width:180px;background:#0066ff;' +
+      'color:#fff;border:0;border-radius:10px;padding:13px 16px;font-size:16px;font-weight:700;' +
+      'cursor:pointer">Completa il profilo</button>' +
+      '<button type="button" id="btn-dopo-profilo" style="flex:1;min-width:120px;background:#e5e7eb;' +
+      'color:#0f172a;border:0;border-radius:10px;padding:13px 16px;font-size:16px;font-weight:700;' +
+      'cursor:pointer">Lo faccio dopo</button>' +
+      '</div></div>';
+    document.body.appendChild(m);
+    document.getElementById('btn-vai-profilo').onclick = function () {
+      window.location.href = 'modifica-profilo.html';
+    };
+    document.getElementById('btn-dopo-profilo').onclick = function () { m.remove(); };
+  }
+
+  /* ---------- avvio ---------- */
+  async function avvia() {
+    try {
+      if (typeof sb === 'undefined' || !sb) return;
+      var u = await sb.auth.getUser();
+      var user = u && u.data && u.data.user;
+      if (!user) return;
+      var r = await sb.from('imprese')
+        .select('id, vetrina_attiva')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (r.error || !r.data) return;
+      IMPRESA_ID = r.data.id;
+      ACCESA = (r.data.vetrina_attiva !== false);
+      disegnaCard();
+      disegnaFascia();
+    } catch (e) { console.error('vetrina:', e); }
+  }
+
+  /* La dashboard si disegna dopo il login: si aspetta che la griglia
+     esista davvero, invece di sperare che ci sia gia'. */
+  function aspettaGriglia(tentativi) {
+    if (titoloAccessi()) { avvia(); return; }
+    if (tentativi <= 0) return;
+    setTimeout(function () { aspettaGriglia(tentativi - 1); }, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { aspettaGriglia(40); });
+  } else {
+    aspettaGriglia(40);
+  }
+})();
+</script>
+
 </html>

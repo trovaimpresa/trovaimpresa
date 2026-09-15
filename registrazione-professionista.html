@@ -468,6 +468,8 @@
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
       const pw = el('password').value;
       if (pw.length < 8) { markInvalid('password'); showMsg('La password deve avere almeno 8 caratteri.', 'error'); return false; }
+      /* 15 set 2026: nel modo gestionale queste quattro non si chiedono */
+      if (!DA_GESTIONALE) {
       if (!el('mestiere').value) { markInvalid('mestiere'); showMsg('Seleziona la professione principale.', 'error'); return false; }
       if (el('mestiere').value === 'altro' && !el('mestiere_altro').value.trim()) {
         markInvalid('mestiere_altro'); showMsg('Scrivi qual e\' la tua professione.', 'error'); return false;
@@ -475,6 +477,7 @@
       if (!need('regione', 'Regione')) return false;
       if (!need('provincia', 'Provincia')) return false;
       if (!need('citta', 'Città')) return false;
+      }
       return true;
     }
 
@@ -669,9 +672,14 @@
           password,
           options: {
             /* il link della mail riporta qui, all'accesso, invece che sulla home */
-            emailRedirectTo: window.location.origin + '/login-impresa.html',
+            emailRedirectTo: window.location.origin + '/login-impresa.html'
+                            + (DA_GESTIONALE ? '?redirect=gestionale' : ''),
             data: {
               tipo: 'professionista',
+              /* 15 set 2026: 'false' SOLO dalla porta del gestionale. Il trigger
+                 crea_profilo_impresa legge questa stringa; qualunque altro valore
+                 (assente, vuoto, scritto storto) lascia la vetrina ACCESA. */
+              vetrina_attiva: DA_GESTIONALE ? 'false' : 'true',
               /* 5 set 2026 — da dove arriva questo iscritto (la scrive
                  js/conta-visita.js al primo arrivo sul sito). Serve a sapere
                  quanti li porta davvero la pubblicita'. */
@@ -717,7 +725,7 @@
         }
         /* ⛔ 11 settembre 2026 — IL BENVENUTO NON PARTE PIU' DA QUI.
            Prima, al momento dell'iscrizione, partivano DUE email nello stesso
-           minuto: «Conferma la tua email» e «Benvenuto — 3 mesi in regalo».
+           minuto: «Conferma la tua email» e «Benvenuto — 3 mesi di Premium».
            La seconda diceva «completa il tuo profilo», ma nel profilo non si
            poteva ancora entrare: non era confermato. Due richieste diverse
            insieme confondono, e due mail nello stesso minuto aumentano il
@@ -806,5 +814,58 @@
 <footer style="background:#0a2a4d;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/meta-modulo-aperto.js" defer></script>
+
+<!-- =====================================================================
+     15 SETTEMBRE 2026 — IL MODO GESTIONALE
+     Chi arriva dalle pagine del gestionale su Google passa dalla porta
+     (prova-il-gestionale.html) e atterra qui con ?da=gestionale.
+     Lui non vuole farsi trovare dai clienti: vuole un programma per
+     preventivi e fatture. Quindi in questo modo il modulo:
+       · chiede SOLO nome, email e password (via mestiere, regione,
+         provincia, citta': sono domande del marketplace)
+       · nasce con la VETRINA SPENTA (vetrina_attiva=false), che lui
+         accende quando vuole dal pannello
+       · dopo la conferma dell'email lo porta nel GESTIONALE, non nel
+         pannello del marketplace
+     ⛔ SENZA ?da=gestionale NON CAMBIA NIENTE: chi arriva dal marketplace
+        vede esattamente il modulo di prima. Questa e' la ragione per cui
+        tutto sta dentro un `if`: un difetto qui non puo' toccare
+        l'iscrizione normale, che e' la porta principale del sito.
+     ===================================================================== -->
+<script>
+  var DA_GESTIONALE = (function () {
+    try { return new URLSearchParams(window.location.search).get('da') === 'gestionale'; }
+    catch (e) { return false; }
+  })();
+
+  if (DA_GESTIONALE) (function () {
+    function spegni(id) {
+      var e = document.getElementById(id);
+      if (!e) return;
+      var riga = e.closest ? e.closest('.form-group') : null;
+      (riga || e).style.display = 'none';
+      /* ⚠️ tolto anche `required`: se resta, il browser si rifiuta di mandare
+         il modulo per una casella che nessuno vede piu'. */
+      if (e.removeAttribute) e.removeAttribute('required');
+    }
+    ['mestiere', 'regione', 'provincia', 'citta'].forEach(spegni);
+    var altro = document.getElementById('riga-altro-mestiere');
+    if (altro) altro.style.display = 'none';
+
+    var t = document.querySelector('.form-section.active h1, h1');
+    if (t) t.textContent = 'Crea il tuo Gestionale';
+
+    /* ⛔ 15 settembre 2026 — anche il sottotitolo parlava del marketplace.
+       Chi arriva da qui non cerca clienti: cerca un programma. */
+    var sotto = document.querySelector('.header p');
+    if (sotto) sotto.textContent = 'Preventivi, fatture e cantieri in ordine';
+
+    var intro = document.querySelector('.form-section.active > p');
+    if (intro) intro.innerHTML =
+      '\u2705 <b>Ti servono tre caselle.</b> Il resto lo metti dentro il gestionale, quando vuoi.' +
+      '<br>Nessuna carta di credito: i primi 30 giorni sono gratis.';
+  })();
+</script>
+
 </body>
 </html>

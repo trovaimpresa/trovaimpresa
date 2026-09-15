@@ -263,7 +263,12 @@
           btn.disabled = false;
         } else {
           const redirect = new URLSearchParams(window.location.search).get('redirect');
-          if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
+          /* 15 set 2026: chi si e' iscritto dalla porta del gestionale torna qui
+             dal link della mail con ?redirect=gestionale, e deve trovarsi
+             dentro il GESTIONALE, non nel pannello del marketplace: e'
+             quello che era venuto a prendere. */
+          if (redirect === 'gestionale') window.location.href = 'gestionale-app.html';
+          else if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
           else window.location.href = pannelloUtente;
         }
       } catch(err) {
@@ -288,7 +293,12 @@
         });
         if (error) throw error;
         const redirect = new URLSearchParams(window.location.search).get('redirect');
-        if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
+        /* 15 set 2026: chi si e' iscritto dalla porta del gestionale torna qui
+             dal link della mail con ?redirect=gestionale, e deve trovarsi
+             dentro il GESTIONALE, non nel pannello del marketplace: e'
+             quello che era venuto a prendere. */
+          if (redirect === 'gestionale') window.location.href = 'gestionale-app.html';
+          else if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
         else window.location.href = pannelloUtente;
       } catch(err) {
         showError('❌ Codice non valido o scaduto.');
