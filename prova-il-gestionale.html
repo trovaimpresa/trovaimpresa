@@ -241,5 +241,52 @@
     </p>
   </div>
 </footer>
+
+<!-- =====================================================================
+     I DUE PULSANTI DEVONO SEMPRE PORTARE ALLE TRE CASELLE — 15 set 2026
+
+     ⛔ IL DIFETTO CHE CHIUDE: «Provalo 30 giorni gratis» e «Comincia
+     adesso» puntano tutti e due a `#scegli`. Il browser, se l'indirizzo
+     FINISCE GIA' con `#scegli`, non fa niente: non e' un errore, e' come
+     funzionano le ancore. Quindi al SECONDO clic il pulsante era morto —
+     e il secondo clic e' proprio quello di chi ha letto la pagina fino
+     in fondo ed e' pronto a iscriversi. Il pulsante piu' importante del
+     sito non faceva niente.
+
+     Qui il clic lo gestiamo noi: si porta alla sezione sempre, che
+     l'indirizzo abbia gia' il `#scegli` oppure no. Si toglie anche
+     l'altezza della barra in alto, se no il titolo finisce sotto.
+     ===================================================================== -->
+<script>
+(function () {
+  function vaiAlleCaselle(e) {
+    var meta = document.getElementById('scegli');
+    if (!meta) return;                 /* se un giorno sparisce, il link normale resta */
+    if (e) e.preventDefault();
+
+    /* la barra in alto e' appiccicata: senza questo sconto il titolo
+       «Comincia da qui» finisce nascosto sotto il menu */
+    var barra = document.querySelector('header, .navbar, .menu, nav');
+    var alta = (barra && getComputedStyle(barra).position === 'fixed') ||
+               (barra && getComputedStyle(barra).position === 'sticky')
+               ? barra.getBoundingClientRect().height + 12 : 12;
+
+    var y = meta.getBoundingClientRect().top + window.pageYOffset - alta;
+    try { window.scrollTo({ top: y, behavior: 'smooth' }); }
+    catch (err) { window.scrollTo(0, y); }
+
+    /* l'indirizzo lo aggiorniamo senza far saltare la pagina */
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', '#scegli');
+    }
+  }
+
+  /* ⚠️ solo i link di QUESTA pagina: se un domani ci fosse un link a
+     un'altra pagina che finisce con #scegli, non va bloccato. */
+  var link = document.querySelectorAll('a[href="#scegli"]');
+  for (var i = 0; i < link.length; i++) link[i].addEventListener('click', vaiAlleCaselle);
+})();
+</script>
+
 </body>
 </html>
