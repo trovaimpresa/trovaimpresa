@@ -4,8 +4,69 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 13 settembre 2026 (sera) — il gestionale e' entrato su Google con 27 pagine; via i «3 mesi in regalo»; crediti 40/100
+Ultimo aggiornamento: 15 settembre 2026 (sera) — la porta del gestionale e' aperta e collaudata; crediti Netlify quasi finiti, ricarica dopo il 20
 
+
+---
+
+## 🆕 IL 15 SETTEMBRE — LA PORTA DEL GESTIONALE (→9← file, →5← push)
+
+Alex: «sdoppiarlo, venderlo sia sul sito che su Google come gestionale puro».
+Non e' un secondo account: e' **la stessa registrazione con due facce**.
+`?da=gestionale` → →3← caselle invece di →7←, titolo «Crea il tuo Gestionale»,
+vetrina **spenta** alla nascita, e dopo la conferma si apre il gestionale.
+
+### ✅ FATTO E PUBBLICATO
+- Migrazione `vetrina_attiva_15set2026` (colonna, vista, trigger) —
+  `sql/vetrina-attiva.sql`. →132← imprese, →103← visibili prima e dopo
+- I →3← moduli di registrazione con il blocco `DA_GESTIONALE`
+- `login-impresa.html` e `prova-il-gestionale.html` collegati
+- **L'interruttore della scheda pubblica** nei →3← pannelli: senza, chi entrava
+  dalla porta del gestionale non poteva piu' pubblicarsi. Va nei due sensi
+- `conferma.html`: dopo la conferma email chi viene dal gestionale entra nel
+  **gestionale**, non nel pannello
+- Pagina di vendita: «Iscriviti» sopra i prezzi, i due piani con lo stesso bordo
+
+### ✅ PROVATO DAL VIVO
+L'iscrizione vera di Alex (`pinto ristrutturazione`, ore 17:15) e' nata con
+`vetrina_attiva = false`. Le →3← porte controllate sul sito pubblicato: →3←
+caselle, `required` tolto, la porta normale intatta.
+
+### ⬜ RESTA DA PROVARE — solo Alex puo' farlo
+Il giro completo: iscrizione → mail → clic sul link → **deve aprirsi il
+gestionale**. Claude non crea account. Da fare dopo il →20←.
+
+### ⛔ DIFETTI TROVATI PER STRADA (tutti riparati)
+1. `emailRedirectTo` **non viene mai usato**: il modello della mail su Supabase
+   punta a mano a `conferma.html`. La decisione va presa li'
+2. I pulsanti «Provalo» e «Comincia adesso» erano **morti al secondo clic**
+   (ancora `#scegli` gia' nell'indirizzo)
+3. Il modulo di registrazione si allargava per tutto lo schermo (→1.800← px):
+   `.container` si chiude subito dopo la testata. Valeva anche per la
+   registrazione NORMALE
+4. «cosi' i clienti possono trovarti» detto a chi ha la vetrina spenta
+
+### ⛔ CREDITI NETLIFY — la regola c'era gia', e l'ho rotta io
+→500← deploy = →7.500← crediti (→15← l'uno). Tutto il resto insieme: →77←.
+⚠️ **Questa analisi era gia' scritta il 13 settembre** (sezione «DOVE FINISCONO
+I SOLDI DI NETLIFY»), con la regola «un solo push a fine lavoro». Claude non
+l'ha cercata, l'ha rifatta da capo e intanto ha fatto fare →5← push in un
+pomeriggio. **Prima di riaprire un tema si cerca se e' gia' deciso.**
+⛔ **Non proporre di cambiare piano**: quello di Alex e' vecchio, se lo cambia
+non torna piu'. La ricarica arriva dopo il →20← di ogni mese.
+
+### ⛔ LA TRAPPOLA DEL FILE CHE NON ARRIVA
+`device_commit_files` ha risposto `written` tre volte mandando la versione
+VECCHIA. Git diceva `nothing to commit` — ed era vero. **Dopo ogni scrittura si
+rifa' `device_stage_files` e si controlla che dentro ci sia la modifica.**
+
+### 🎁 REGALO INATTESO — Google
+L'AI Overview descrive TrovaImpresa come «un noto software gestionale in cloud
+specifico per imprese edili e artigiani», prezzo giusto, →3← citazioni, primo e
+secondo risultato, e **Odoo** nella colonna di lato. Chieste le →2←
+reindicizzazioni per il riassunto vecchio.
+⚠️ Il nome fa confusione con le visure: nelle pagine scrivere sempre
+«gestionale per imprese edili», mai «TrovaImpresa» da solo.
 
 ---
 

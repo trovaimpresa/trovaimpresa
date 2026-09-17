@@ -118,6 +118,15 @@
   status = 404
   force = true
 
+# ⚠️ 15 settembre 2026 — il racconto giorno per giorno, uscito da CLAUDE.md
+# quando quel file ha superato 1,25 MB. Stessa roba: dice cosa e' rotto e
+# dove si sta lavorando. Non deve stare online.
+[[redirects]]
+  from = "/STORIA-2026.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/PROMPT-sessione-nuova.md"
   to = "/404.html"
