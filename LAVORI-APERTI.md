@@ -4,9 +4,85 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 15 settembre 2026 (sera) — la porta del gestionale e' aperta e collaudata; crediti Netlify quasi finiti, ricarica dopo il 20
+Ultimo aggiornamento: 17 settembre 2026 (sera) — la porta del gestionale era murata da un noindex: tolto e pubblicato. Restano menu+home e la verifica dei 30 giorni di prova
 
 
+---
+
+## 🆕 IL 17 SETTEMBRE — LA PORTA DEL GESTIONALE ERA MURATA (→2← file, →1← push →bafd185←)
+
+Alex, dopo un'ora in cui Claude non capiva la domanda:
+«io voglio che vado su google scrivo gestionale trovaimpresa e c'e' il mio
+gestionale, non un blog».
+
+### ⛔ IL GUASTO — una riga sola
+`prova-il-gestionale.html` (nata il →14 set←) aveva dentro:
+
+    <meta name="robots" content="noindex,follow">
+
+**Era l'unica pagina del sito con quella riga.** Controllate a mano
+`prezzi`, `index`, `software-gestionale-imprese-edili`, `gestionale-termoidraulici`:
+nessuna ce l'ha. Quindi tutto il lavoro del →15 set← (la porta separata,
+`?da=gestionale`, `vetrina_attiva`) era **invisibile a Google per costruzione**.
+Google lo diceva a chiare lettere in Search Console: *«La pagina non puo' essere
+indicizzata: Esclusa in base al tag noindex»*.
+
+Secondo difetto, minore: il `canonical` diceva `…/prova-il-gestionale.html`,
+mentre TUTTE le altre pagine lo scrivono senza `.html`. Due indirizzi diversi
+per Google.
+Terzo: la pagina non era in NESSUNA delle →3← sitemap (`sitemap.xml`,
+`sitemap-seo.xml`, `sitemap-gestionale.xml`) — cercata, →0← occorrenze.
+
+### ✅ FATTO E PUBBLICATO (→bafd185←)
+- Tolto il `noindex`
+- `canonical` → `https://trovaimpresa.com/prova-il-gestionale` (senza `.html`)
+- Titolo nuovo, quello voluto da Alex:
+  **«Gestionale TrovaImpresa per l'edilizia — preventivi, fatture e cantieri»**
+  (risponde alla ricerca di marca «gestionale trovaimpresa»)
+- Descrizione che parte dal nome
+- Messa in `sitemap-gestionale.xml` **per prima** e con `priority 1.0`
+  (le altre →27← hanno →0.8←). La sitemap passa da →27← a →28← pagine
+- Alex ha chiesto l'indicizzazione (accettata) e reinviato `sitemap-gestionale.xml`
+
+### ⬜ DA CONTROLLARE IL →24 SETTEMBRE←
+1. Su Google cercare **gestionale trovaimpresa** → deve uscire
+   *Gestionale TrovaImpresa per l'edilizia*, non un articolo
+2. Search Console → Sitemap → `/sitemap-gestionale.xml` da →27← a →28←
+
+### 🔴 DA VERIFICARE PER PRIMO, PRIMA DI TOCCARE LA REGISTRAZIONE
+**`gest_prova_fine` non risulta scritto da nessuna parte** nei →3← moduli di
+registrazione. `js/gate-gestionale.js` lo legge (`inProva(row)`) ma nessuno lo
+scrive alla nascita. Se e' vero, chi si iscrive da `?da=gestionale` **non
+riceve i →30← giorni promessi in `prova-il-gestionale.html`, ma il paywall**.
+Da controllare in `sql/` (funzione `crea_profilo_impresa()`) prima di costruirci
+sopra qualunque piano.
+
+### 🔴 LA PORTA C'E' MA NON E' SEGNALATA DA NESSUNA PARTE
+Letta tutta la home a schermo: **la parola «gestionale» non compare mai**.
+Non nel menu in alto (→7← voci: Bandi, Guide, Offerte, Candidature, Subappalti,
+Prezzi, Pubblicita'), non in un riquadro. L'unico collegamento in tutto il sito
+e' nel **pie' di pagina**, la parola «Gestionale» in mezzo ad altri →4← link.
+Per Google una pagina che il sito stesso non indica e' una pagina di serie B.
+Da fare: voce nel menu + riquadro sulla home (si vede a schermo → anteprima
+computer e telefono PRIMA di toccare i file), e far puntare le →27← guide alla
+pagina prodotto.
+
+### ⛔ LEZIONI
+1. **Prima di dire «Google non ci trova», guardare il `<meta name="robots">`
+   della pagina.** Sono →3← minuti e qui era tutta la spiegazione. Claude ha
+   invece cercato nelle sitemap, nei link interni e nella home
+2. **`noindex` + `priority 1.0` nella sitemap e' una contraddizione muta**: la
+   sitemap non lo segnala, Google obbedisce al `noindex` e basta
+3. **Chiedere l'indicizzazione PRIMA del push non serve a niente**: Google legge
+   la pagina ONLINE in quel momento. Rifiuto garantito. Ordine giusto:
+   push → Netlify Published → test in tempo reale → richiesta
+4. **Le sitemap non si mandano da «Controllo URL»** (Alex ci ha provato e la
+   richiesta e' stata accettata ma inutile): si mandano dal menu **Sitemap**
+5. ⛔ **METODO — il guasto peggiore della serata e' stato di Claude.** Alex ha
+   dovuto scrivere DUE volte «forse non ci capiamo» prima che Claude si
+   fermasse. Per un'ora Claude ha risposto a una domanda che non era quella
+   fatta, indovinando. **Quando la risposta non combacia con la domanda, ci si
+   ferma e si chiede — non si indovina un'altra volta.**
 ---
 
 ## 🆕 IL 15 SETTEMBRE — LA PORTA DEL GESTIONALE (→9← file, →5← push)

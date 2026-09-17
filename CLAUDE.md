@@ -2159,3 +2159,68 @@ resta solo in `termini-condizioni.html` come *«Promozione chiusa il 13 settembr
 - **Ogni `execute_sql` dell'MCP Supabase è una transazione a sé**: un `begin;`
   non sopravvive alla chiamata dopo. Le prove con finti utenti vanno scritte
   **in una sola query**, e si controlla sempre dopo che non sia rimasto niente.
+
+
+---
+
+# IL 17 SETTEMBRE 2026 — IL `noindex` SULLA PORTA DEL GESTIONALE
+
+Commit →bafd185←. →2← file: `prova-il-gestionale.html`, `sitemap-gestionale.xml`.
+
+## Il fatto
+
+La porta separata del gestionale, costruita il →15 settembre← (`?da=gestionale`,
+`vetrina_attiva`, interruttore nei pannelli), non e' mai uscita su Google.
+Il motivo era una riga sola dentro `prova-il-gestionale.html`:
+
+    <meta name="robots" content="noindex,follow">
+
+Unica pagina del sito con quel tag. Verificato a mano su `index.html`,
+`prezzi.html`, `software-gestionale-imprese-edili.html`,
+`gestionale-termoidraulici.html`: nessuna ce l'ha.
+
+In piu': `canonical` con il `.html` finale (tutte le altre pagine senza), e la
+pagina assente da tutte e →3← le sitemap.
+
+## Cosa e' stato cambiato
+
+| Prima | Dopo |
+|---|---|
+| `<meta name="robots" content="noindex,follow">` | riga tolta |
+| `canonical …/prova-il-gestionale.html` | `canonical …/prova-il-gestionale` |
+| `<title>Prova il gestionale — TrovaImpresa</title>` | `<title>Gestionale TrovaImpresa per l'edilizia — preventivi, fatture e cantieri</title>` |
+| non in sitemap | prima riga di `sitemap-gestionale.xml`, `priority 1.0` |
+
+Il titolo nuovo e' una scelta di Alex: vuole che cercando **«gestionale
+trovaimpresa»** esca il prodotto, non un articolo del blog.
+⚠️ Non contraddice la regola del →13 set← («nelle pagine scrivere sempre
+*gestionale per imprese edili*, mai *TrovaImpresa* da solo»): qui il nome nudo
+non c'e', c'e' *Gestionale TrovaImpresa **per l'edilizia***, che il significato
+ce l'ha attaccato.
+
+## Regole nuove, da non ridimenticare
+
+- ⛔ **Sospetto «Google non ci trova» → prima cosa: `grep robots <pagina>`.**
+  Prima delle sitemap, prima dei link interni, prima della home. →3← minuti.
+- ⛔ **L'ordine e' push → Netlify Published → test in tempo reale → richiesta di
+  indicizzazione.** Chiedere l'indicizzazione prima che il deploy sia online fa
+  leggere a Google la versione vecchia e la richiesta viene RIFIUTATA.
+- ⛔ **Le sitemap si mandano dal menu «Sitemap», non da «Controllo URL».**
+  Da Controllo URL la richiesta viene accettata ma non serve a niente.
+- ⛔ **Una pagina con `noindex` e `priority 1.0` nella sitemap non da' nessun
+  avviso**: la sitemap tace e Google obbedisce al `noindex`.
+
+## Metodo — l'errore piu' costoso della serata e' stato di Claude
+
+Alex ha scritto **due volte** «forse non ci capiamo». Nel mezzo Claude ha
+risposto per un'ora a domande che non erano quelle fatte: ha spiegato la home,
+poi le descrizioni vecchie su Google, poi ha proposto un menu nuovo — mentre la
+domanda era «perche' cercando il mio gestionale esce un blog».
+
+**Regola: quando la risposta non combacia con la domanda, ci si ferma e si
+chiede in una riga. Non si indovina una seconda volta.** Indovinare due volte
+di fila costa piu' tempo di qualunque domanda.
+
+Corollario gia' scritto altrove ma ignorato oggi: **prima di dire «non era mai
+stato fatto», cercare nel quaderno.** Il lavoro del →15 settembre← era scritto
+in `LAVORI-APERTI.md` e Claude ha detto ad Alex che non c'era traccia.
