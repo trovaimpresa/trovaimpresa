@@ -98,6 +98,24 @@
   .sidebar-nav::-webkit-scrollbar-track { background:transparent; }
   .sidebar-nav::-webkit-scrollbar-thumb { background:rgba(0,0,0,.18); border-radius:4px; }
   .sidebar-nav:hover::-webkit-scrollbar-thumb { background:rgba(0,0,0,.32); }
+  /* ⛔ 18 set 2026 — L'INGRESSO RAPIDO AL GESTIONALE.
+     Alex: «mi inserisci sul mio pannello admin l'ingresso rapido al
+     gestionale trovaimpresa».
+     Il collegamento c'era gia', ma sepolto dentro «Le mie viste»: per
+     arrivarci servivano due clic e bisognava ricordarsi dov'era.
+     Adesso sta in cima alla colonna, sempre in vista, e si apre in una
+     scheda nuova cosi' il pannello admin non si perde. */
+  .apri-gest {
+    display:flex; align-items:center; gap:10px; justify-content:center;
+    margin:14px 14px 6px; padding:14px 12px; border-radius:11px;
+    background:var(--verde); color:#fff; text-decoration:none;
+    font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:800;
+    letter-spacing:.2px; box-shadow:0 4px 14px rgba(0,102,255,.28);
+    transition:all .15s;
+  }
+  .apri-gest:hover { background:#0047b3; box-shadow:0 6px 18px rgba(0,102,255,.36); }
+  .apri-gest .ag-ico { font-size:1.15rem; line-height:1; }
+
   .nav-item {
     display:flex; align-items:center; gap:11px;
     padding:12px 14px; border-radius:10px; cursor:pointer;
@@ -502,6 +520,14 @@
       <span class="trova">Trova</span><span class="impresa">Impresa</span>
       <small>Admin Panel</small>
     </div>
+    <!-- ⚠️ `?vedi=` vuoto e' lo stesso indirizzo che sta gia' in «Le mie
+         viste» sotto «Gestionale impresa e artigiano»: apre la vista di
+         impresa e artigiano. Si tiene identico apposta, cosi' si comporta
+         come il collegamento che Alex usa gia'. -->
+    <a class="apri-gest" href="/gestionale-app.html?vedi=" target="_blank" rel="noopener">
+      <span class="ag-ico">&#128736;</span> Apri il Gestionale
+    </a>
+
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showSection('dashboard',this)">
         <span class="nav-icon">📊</span> Dashboard
