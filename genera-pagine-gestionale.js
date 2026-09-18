@@ -107,7 +107,7 @@ function riquadroPrezzo(cosa) {
         <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
         <li>Ricevi regolare fattura per ogni pagamento.</li>
       </ul>
-      <p style="margin-top:22px"><a href="/prova-il-gestionale.html" class="cta-dark">Provalo 30 giorni gratis</a>
+      <p style="margin-top:22px"><a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
         <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
     </div>`;
 }
@@ -217,7 +217,7 @@ ${riquadroSorelle(pag, tutte)}
     <div class="cta-band">
       <h3>${pag.ctaTitolo}</h3>
       <p>${pag.ctaTesto}</p>
-      <a href="/prova-il-gestionale.html" class="cta-dark">Provalo 30 giorni gratis</a>
+      <a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
       <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
     </div>
 

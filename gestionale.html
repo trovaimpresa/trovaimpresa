@@ -1,0 +1,337 @@
+<!-- 18 settembre 2026 — QUESTA PAGINA SI CHIAMAVA `prova-il-gestionale.html`.
+     Rinominata in `gestionale.html` perche' la gente su Google scrive
+     «gestionale trovaimpresa», non «prova il gestionale»: l'indirizzo, il
+     titolo e il titolo grosso adesso dicono tutti e tre la stessa cosa.
+     ⚠️ Il vecchio indirizzo NON e' morto: in netlify.toml c'e' un rinvio 301
+     (definitivo) da /prova-il-gestionale a /gestionale, che passa a Google
+     tutto quello che la pagina vecchia aveva guadagnato.
+     ⛔ Il file `prova-il-gestionale.html` e' rimasto nella cartella ma non lo
+     vede piu' nessuno: il rinvio ha `force = true` e passa davanti al file.
+     Si puo' cancellare a mano quando capita. -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestionale TrovaImpresa per l'edilizia — preventivi, fatture e cantieri</title>
+<meta name="description" content="Gestionale TrovaImpresa per l'edilizia: preventivi, lavori, fatture elettroniche, computo metrico, mezzi e ore. Per artigiani, imprese edili e studi tecnici. 30 giorni gratis senza carta, poi 249 € l'anno.">
+<link rel="canonical" href="https://trovaimpresa.com/gestionale">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+
+  .sommario{font-size:19px;color:var(--muted);line-height:1.6;max-width:640px}
+  .due-piani{display:grid;gap:18px;margin:30px 0 14px}
+  @media(min-width:760px){.due-piani{grid-template-columns:1fr 1fr}}
+  /* ⛔ 15 set 2026: il riquadro con l'AI aveva il bordo blu e lo sfondo
+     sfumato, quello normale no. Sembrava GIA' SCELTO, e l'altro uno
+     scarto. I due piani si vendono tutti e due: stesso bordo, stesso
+     sfondo. L'unica differenza resta la targhetta «Con l'AI», che dice
+     cosa c'e' dentro, non quale devi prendere. */
+  .piano{border:2px solid var(--primary);border-radius:18px;padding:26px 24px;background:#fff;position:relative}
+  .piano--ai{}
+  .p-targa{position:absolute;top:-13px;left:24px;background:var(--primary);color:#fff;
+           font-size:12.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+           padding:5px 12px;border-radius:99px}
+  .p-nome{font-size:19px;font-weight:800;color:var(--primary-dark)}
+  .p-cifra{font-size:42px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:8px 0 2px}
+  .p-cifra span{display:block;font-size:16px;font-weight:600;color:var(--muted);margin-top:2px}
+  .p-mese{color:var(--muted);font-size:16px}
+  .piano ul{list-style:none;padding:0;margin:18px 0 0}
+  .piano li{padding:9px 0 9px 26px;position:relative;font-size:16.5px;line-height:1.5;border-bottom:1px solid var(--line)}
+  .piano li:last-child{border-bottom:0}
+  .piano li:before{content:"\2713";position:absolute;left:0;color:var(--primary);font-weight:800}
+  .sotto-piani{font-size:16.5px;color:var(--muted);line-height:1.6;margin:0 0 6px}
+  .sotto-h1{font-size:22px;font-weight:700;color:var(--primary-dark);margin:2px 0 10px}
+  .sotto-scelte{font-size:16.5px;color:var(--muted);line-height:1.6;margin:0 0 6px}
+  .scelte{display:grid;gap:14px;margin:26px 0 10px}
+  @media(min-width:820px){.scelte{grid-template-columns:repeat(3,1fr)}}
+  /* ⛔ 17 set 2026 — LE TRE CASELLE NON SEMBRAVANO BOTTONI.
+     Erano tre rettangoli col bordo grigio: diventavano blu solo passandoci
+     sopra col mouse, e sul telefono il mouse non c'e'. Chi arrivava qui
+     leggeva «Sono un artigiano» come una descrizione, non come un pulsante.
+     Adesso il bordo e' blu da fermo e dentro ogni casella c'e' un bottone
+     vero, con la stessa parola usata in tutta la pagina: «Iscriviti». */
+  .scelta{display:flex;flex-direction:column;border:2px solid var(--primary);border-radius:16px;
+          padding:20px 20px 18px;text-decoration:none;background:#fff;transition:.15s}
+  /* ⚠️ i tre testi non sono lunghi uguali: senza `margin-top:auto` i bottoni
+     finivano a tre altezze diverse e la fila sembrava storta. */
+  .scelta .s-d{margin-bottom:16px}
+  .scelta .s-go{display:block;margin-top:auto;background:var(--primary);color:#fff;
+          font-weight:800;font-size:16.5px;text-align:center;padding:13px 14px;border-radius:10px}
+  .scelta:hover .s-go{background:var(--primary-dark)}
+  .scelta:hover{border-color:var(--primary);box-shadow:0 6px 20px rgba(15,23,42,.10);transform:translateY(-2px)}
+  .scelta .s-t{display:block;font-size:19px;font-weight:800;color:var(--primary-dark)}
+  .scelta .s-d{display:block;font-size:15.5px;color:var(--muted);line-height:1.5;margin-top:6px}
+  .dentro{list-style:none;padding:0;margin:18px 0}
+  .dentro li{padding:12px 0;border-bottom:1px solid var(--line);font-size:17px;line-height:1.6}
+  .onesto{border:1px solid var(--line);border-left:5px solid var(--primary);border-radius:14px;
+          padding:20px 24px;margin:34px 0;background:var(--bg-alt)}
+  .onesto h3{margin-top:0;color:var(--primary-dark)}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <!-- una parola sola, la stessa in tutta la pagina -->
+    <a href="#scegli" class="menu-btn">Iscriviti</a>
+  </div>
+</nav>
+<main class="wrap">
+
+  <!-- ⛔ 18 set 2026 — IL NOME DELLA COSA, NON LA SUA DESCRIZIONE.
+       Alex: «scrivo su Google gestionale trovaimpresa e ci deve essere il
+       gestionale». La ricerca e' di marca, quindi il titolo grosso deve
+       essere il marchio. La frase di prima resta, ma sotto. -->
+  <h1>Gestionale TrovaImpresa</h1>
+  <p class="sotto-h1">Il gestionale per chi lavora in cantiere</p>
+  <p class="sommario">Preventivi, lavori, fatture, computo metrico, mezzi e ore.
+     Dal telefono in cantiere e dal computer la sera. Senza installare niente.</p>
+
+  <!-- ⛔ 15 set 2026 — «mettiamolo in alto in bella vista non in basso e
+       nascosto». Prima le tre porte stavano a 1211 px dall'alto, sotto i
+       prezzi: chi apriva la pagina vedeva quanto costa PRIMA di vedere come
+       si comincia. Adesso si vedono subito, e i prezzi stanno sotto. -->
+  <!-- «Comincia da qui» non diceva cosa si fa. Adesso c'e' il verbo
+       che la gente cerca: iscriversi. -->
+  <h2 id="scegli">Iscriviti</h2>
+  <p>Il gestionale cambia le parole secondo il mestiere che fai: un artigiano manda un
+     <b>preventivo</b> a un cliente, uno studio tecnico accetta un <b>incarico</b> e chiede un
+     <b>onorario</b>. Scegli come sei e ti apre quello giusto.</p>
+
+  <div class="scelte">
+    <a class="scelta" href="/registrazione-artigiano.html?da=gestionale">
+      <span class="s-t">Sono un artigiano</span>
+      <span class="s-d">Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</span>
+      <span class="s-go">Iscriviti</span></a>
+    <a class="scelta" href="/registrazione-impresa.html?da=gestionale">
+      <span class="s-t">Sono un&rsquo;impresa edile</span>
+      <span class="s-d">Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</span>
+      <span class="s-go">Iscriviti</span></a>
+    <a class="scelta" href="/registrazione-professionista.html?da=gestionale">
+      <span class="s-t">Sono uno studio tecnico</span>
+      <span class="s-d">Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</span>
+      <span class="s-go">Iscriviti</span></a>
+  </div>
+  <p class="sotto-scelte"><b>30 giorni gratis</b>, senza carta di credito.
+     Ti registri con la mail e basta.</p>
+
+  <div class="due-piani">
+
+    <div class="piano">
+      <div class="p-nome">Gestionale</div>
+      <div class="p-cifra">249 €<span>all&rsquo;anno</span></div>
+      <div class="p-mese">oppure 29 € al mese</div>
+      <ul>
+        <li>Lavori, preventivi, fatture</li>
+        <li>Computo metrico, analisi prezzi e SAL</li>
+        <li>Mezzi, attrezzature, ore e rapportini</li>
+        <li>Scadenze e promemoria, con l&rsquo;email del mattino</li>
+      </ul>
+    </div>
+
+    <div class="piano piano--ai">
+      <div class="p-targa">Con l&rsquo;AI</div>
+      <div class="p-nome">Gestionale con AI</div>
+      <div class="p-cifra">349 €<span>all&rsquo;anno</span></div>
+      <div class="p-mese">oppure 39 € al mese</div>
+      <ul>
+        <li><b>Tutto quello del Gestionale, pi&ugrave;:</b></li>
+        <li>La chat con AI dentro il gestionale</li>
+        <li>Ti risponde coi conti dei tuoi lavori</li>
+        <li>Ti compila i moduli: lavori e clienti</li>
+        <li>300 messaggi al mese</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <p class="sotto-piani"><b>30 giorni gratis</b>, senza carta di credito.
+     Prezzo finale, nessuna IVA da aggiungere. Finita la prova non parte nessun
+     addebito: paghi solo se lo scegli tu.</p>
+
+  <h2>Cosa c&rsquo;&egrave; dentro</h2>
+  <ul class="dentro">
+    <li><b>Lavori e cantieri</b> — cosa c&rsquo;&egrave; da fare, chi ci va, quando &egrave; finito</li>
+    <li><b>Preventivi</b> — li scrivi, esce il PDF, il cliente risponde</li>
+    <li><b>Fatture</b> — con sconto, IVA, bollo, ritenuta e cassa gi&agrave; al posto giusto</li>
+    <li><b>Computo metrico</b> — voci, misure, analisi prezzi e stati di avanzamento</li>
+    <li><b>Mezzi e attrezzature</b> — revisioni, assicurazioni, tarature, carburante</li>
+    <li><b>Ore e rapportini</b> — chi ha lavorato dove, preso dal telefono in cantiere</li>
+    <li><b>Scadenze e promemoria</b> — e un&rsquo;email la mattina quando cambia qualcosa</li>
+  </ul>
+
+  <div class="onesto">
+    <h3>Una cosa detta chiara</h3>
+    <p>Il gestionale sta dentro TrovaImpresa, che &egrave; anche un posto dove i clienti cercano
+       imprese e artigiani. Quindi <b>insieme al gestionale ti arriva anche una vetrina</b> col tuo
+       profilo.</p>
+    <p>Se cercavi solo il gestionale, la vetrina puoi ignorarla: non devi compilare niente e il
+       gestionale funziona lo stesso. Se invece ti fa comodo, &egrave; gi&agrave; pagata.</p>
+  </div>
+
+  <div class="cta-band">
+    <h3>Trenta giorni, poi decidi tu</h3>
+    <p>Ti registri con la mail e basta. Nessuna carta, nessun addebito automatico,
+       nessun vincolo.</p>
+    <a class="cta-dark" href="#scegli">Iscriviti</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>&middot;
+      <a href="/software-gestionale-imprese-edili.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Gestionale</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<!-- =====================================================================
+     I DUE PULSANTI DEVONO SEMPRE PORTARE ALLE TRE CASELLE — 15 set 2026
+
+     ⛔ IL DIFETTO CHE CHIUDE: «Provalo 30 giorni gratis» e «Comincia
+     adesso» puntano tutti e due a `#scegli`. Il browser, se l'indirizzo
+     FINISCE GIA' con `#scegli`, non fa niente: non e' un errore, e' come
+     funzionano le ancore. Quindi al SECONDO clic il pulsante era morto —
+     e il secondo clic e' proprio quello di chi ha letto la pagina fino
+     in fondo ed e' pronto a iscriversi. Il pulsante piu' importante del
+     sito non faceva niente.
+
+     Qui il clic lo gestiamo noi: si porta alla sezione sempre, che
+     l'indirizzo abbia gia' il `#scegli` oppure no. Si toglie anche
+     l'altezza della barra in alto, se no il titolo finisce sotto.
+     ===================================================================== -->
+<script>
+(function () {
+  function vaiAlleCaselle(e) {
+    var meta = document.getElementById('scegli');
+    if (!meta) return;                 /* se un giorno sparisce, il link normale resta */
+    if (e) e.preventDefault();
+
+    /* la barra in alto e' appiccicata: senza questo sconto il titolo
+       «Comincia da qui» finisce nascosto sotto il menu */
+    var barra = document.querySelector('header, .navbar, .menu, nav');
+    var alta = (barra && getComputedStyle(barra).position === 'fixed') ||
+               (barra && getComputedStyle(barra).position === 'sticky')
+               ? barra.getBoundingClientRect().height + 12 : 12;
+
+    var y = meta.getBoundingClientRect().top + window.pageYOffset - alta;
+    try { window.scrollTo({ top: y, behavior: 'smooth' }); }
+    catch (err) { window.scrollTo(0, y); }
+
+    /* l'indirizzo lo aggiorniamo senza far saltare la pagina */
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', '#scegli');
+    }
+  }
+
+  /* ⚠️ solo i link di QUESTA pagina: se un domani ci fosse un link a
+     un'altra pagina che finisce con #scegli, non va bloccato. */
+  var link = document.querySelectorAll('a[href="#scegli"]');
+  for (var i = 0; i < link.length; i++) link[i].addEventListener('click', vaiAlleCaselle);
+})();
+</script>
+
+</body>
+</html>

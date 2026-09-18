@@ -2265,3 +2265,29 @@ metadato non basta piu': ci vuole un `da_gestionale` suo, scritto dai →3← mo
 - ⛔ **Una promessa scritta su una pagina e' un collaudo da fare.** «30 giorni
   gratis» stava li' dal →14 settembre← e non li riceveva nessuno. Quando una
   pagina promette qualcosa, si controlla nel database che quel qualcosa arrivi.
+
+
+# 18 SETTEMBRE 2026 — LA PAGINA DEL GESTIONALE SI CHIAMA `/gestionale`
+
+Si chiamava `prova-il-gestionale.html`. La gente su Google scrive **«gestionale
+trovaimpresa»**, non «prova il gestionale»: l'indirizzo non combaciava con la
+ricerca. Adesso indirizzo, `<title>` e `<h1>` dicono tutti e tre **Gestionale
+TrovaImpresa**.
+
+- `/prova-il-gestionale` → `/gestionale`, **301 con `force = true`**. Il `force`
+  serve perche' il vecchio file e' rimasto nella cartella: senza, Netlify
+  servirebbe il file e il rinvio non partirebbe.
+- La scorciatoia `/gestionale` → `gestionale-invito.html` e' diventata
+  `/invito-gestionale`. `gestionale-app.html` chiama sempre
+  `gestionale-invito.html?codice=…`, quindi non si rompe niente.
+- →90← link cambiati in →32← file, **generatore compreso**
+  (`genera-pagine-gestionale.js`): se si cambia un indirizzo e non si tocca il
+  generatore, la prima rigenerazione delle pagine rimette il link vecchio.
+
+## Regola nuova
+
+- ⛔ **L'indirizzo di una pagina e' una parola chiave.** Deve contenere quello
+  che la gente scrive su Google, non come la chiamiamo noi in casa. Prima di
+  battezzare una pagina: quale ricerca deve intercettare?
+- ⛔ **Prima di prendersi un indirizzo, cercarlo in `netlify.toml`**: puo' gia'
+  rinviare da qualche parte.

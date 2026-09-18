@@ -4,8 +4,67 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 17 settembre 2026 (notte) — i 30 giorni di prova NON arrivavano a nessuno: riparato nel database. Menu, riquadro sulla home e i 3 bottoni «Iscriviti» fatti, in attesa di push
+Ultimo aggiornamento: 18 settembre 2026 (notte) — i 30 giorni di prova riparati nel database. La pagina del gestionale rinominata /gestionale. Tutto in attesa di UN push
 
+
+---
+
+## 🆕 LA NOTTE DEL 18 SETTEMBRE — `/gestionale`, NON `/prova-il-gestionale`
+
+Alex, dopo un giro a vuoto: «io vado su Google, scrivo **gestionale
+trovaimpresa**, e ci deve essere il gestionale. Non la guida e non *prova il
+gestionale*».
+
+### ⛔ IL GUASTO — il nome non combaciava con la ricerca
+La pagina si chiamava `prova-il-gestionale.html`. **Nessuno cerca quelle
+parole.** Titolo, indirizzo e titolo grosso dicevano tre cose diverse:
+
+| | prima | adesso |
+|---|---|---|
+| indirizzo | `/prova-il-gestionale` | **`/gestionale`** |
+| `<title>` | Gestionale TrovaImpresa per l'edilizia… | uguale |
+| `<h1>` | Il gestionale per chi lavora in cantiere | **Gestionale TrovaImpresa** |
+
+La frase vecchia non e' sparita: e' scesa sotto il titolo, in blu.
+
+### ✅ FATTO (→34← file, in attesa di push)
+- `gestionale.html` nuova, canonical `/gestionale`
+- →90← link sistemati in →32← file: le →27← guide, la home, `info-premium`,
+  `software-gestionale-imprese-edili`, la sitemap e il generatore delle pagine
+- `netlify.toml`: rinvio **301 `force`** da `/prova-il-gestionale` (e dalla
+  versione con `.html`) a `/gestionale`. Il 301 passa a Google tutto quello che
+  la pagina vecchia aveva guadagnato
+- `/gestionale` prima rinviava a `gestionale-invito.html` (la pagina dove il
+  collaboratore accetta l'invito): quella scorciatoia adesso si chiama
+  `/invito-gestionale`. **Niente si rompe**: `gestionale-app.html` chiama
+  sempre `gestionale-invito.html?codice=…`, mai `/gestionale` — controllato
+
+### ⚠️ DA SAPERE
+- Il file `prova-il-gestionale.html` e' **rimasto nella cartella**. Non lo vede
+  piu' nessuno perche' il rinvio ha `force = true`, ma va cancellato a mano
+  quando capita
+- Dopo il push, in Search Console va chiesta l'indicizzazione di
+  **`/gestionale`**, non piu' del vecchio indirizzo
+
+### ⬜ RESTA DA FARE — il pezzo grosso
+Da Google al modulo ci sono ancora **→3← clic**: guida → pagina prodotto →
+scegli chi sei → modulo. Sulle guide di **un mestiere solo** il mestiere lo
+sappiamo gia', quindi il bottone puo' andare **dritto al modulo giusto**
+(`gestionale-muratori` → artigiano, `gestionale-geometri` → professionista,
+`software-gestionale-imprese-edili` → impresa). Sulle →9← pagine generiche
+servono le →3← scelte in fondo. **→1← clic invece di →3←.**
+
+### ⛔ LEZIONI
+1. **Alex ha scritto «non ci capiamo» per la seconda volta in due giorni.** La
+   domanda era sempre la stessa dal →17 set←; Claude rispondeva su un altro
+   piano (dove sta il bottone, quale pagina e' la porta) invece che sul nome
+   della cosa. **Quando si ripete la stessa domanda con altre parole, non e'
+   una domanda nuova: e' la prima che non ha avuto risposta.**
+2. **Un difetto di Claude da non rifare:** aveva detto «le guide hanno →0← link
+   di registrazione». Vero alla lettera, ma le guide hanno →3← bottoni
+   «Provalo 30 giorni gratis» per pagina. La frase esatta dava l'idea sbagliata
+3. **Prima di prendersi un indirizzo, guardare se e' gia' occupato**:
+   `/gestionale` rinviava gia' da qualche parte
 
 ---
 
@@ -73,7 +132,10 @@ vedere se **la mail di conferma arriva**. Claude non crea account.
 2. **Dentro il gestionale un logo non c'e' per niente** — la barra mostra il
    nome del reparto e l'etichetta «TrovaImpresa» fu tolta il →15 ago←. Metterlo
    li' e' un disegno nuovo, non uno scambio
-3. Le →27← guide del gestionale non puntano ancora alla pagina prodotto
+3. ✅ **Gia' fatto, controllato il →18 set←:** tutte e →28← le pagine di
+   `sitemap-gestionale.xml` puntano gia' a `prova-il-gestionale` — →28← su →28←,
+   →0← senza. Il lavoro «far puntare le →27← guide alla pagina prodotto»,
+   scritto il →17 set←, era gia' fatto. **Non rifarlo.**
 4. La stessa logica `DA_GESTIONALE` e' copiata **identica in →3← file**. La cura
    e' spostarla in un `js/registrazione-porta.js` solo. Un'oretta, tutto
    spostamento

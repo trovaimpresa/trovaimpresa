@@ -287,10 +287,40 @@
   status = 200
   force = true
 
+# ======================================================================
+# 18 settembre 2026 — /gestionale E' LA PAGINA DEL PRODOTTO
+# ======================================================================
+# Alex: «scrivo su Google gestionale trovaimpresa e ci deve essere il
+# gestionale, non la guida e non prova il gestionale».
+# La pagina si chiamava `prova-il-gestionale.html`: nessuno cerca quelle
+# parole. Adesso e' `gestionale.html` e risponde a /gestionale.
+#
+# ⚠️ /gestionale prima rinviava a `gestionale-invito.html`, la pagina dove il
+# collaboratore accetta l'invito. Quella pagina NON si tocca e continua a
+# funzionare dal suo indirizzo vero: `gestionale-app.html` la chiama sempre
+# come `gestionale-invito.html?codice=...`, mai come /gestionale. La
+# scorciatoia corta resta, ma con un nome che non fa confusione.
 [[redirects]]
-  from = "/gestionale"
+  from = "/invito-gestionale"
   to = "/gestionale-invito.html"
   status = 302
+
+# ⛔ IL VECCHIO INDIRIZZO NON MUORE. 301 = «traslocato per sempre»: Google
+# sposta sulla pagina nuova tutto quello che la vecchia aveva guadagnato, e
+# chi ha salvato il link fra i preferiti ci arriva lo stesso.
+# `force = true` perche' il file `prova-il-gestionale.html` e' rimasto nella
+# cartella: senza `force` Netlify servirebbe il file e il rinvio non partirebbe.
+[[redirects]]
+  from = "/prova-il-gestionale"
+  to = "/gestionale"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/prova-il-gestionale.html"
+  to = "/gestionale"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/registrazione.html"
