@@ -26,7 +26,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gestionale TrovaImpresa per l'edilizia — preventivi, fatture e cantieri</title>
-<meta name="description" content="Gestionale TrovaImpresa per l'edilizia: preventivi, lavori, fatture elettroniche, computo metrico, mezzi e ore. Per artigiani, imprese edili e studi tecnici. 30 giorni gratis senza carta, poi 249 € l'anno.">
+<meta name="description" content="Gestionale TrovaImpresa per l'edilizia: preventivi, lavori, fatture elettroniche, computo metrico, mezzi e ore. Per artigiani, imprese edili e studi tecnici. Da 249 € l'anno, oppure 29 € al mese.">
 <link rel="canonical" href="https://trovaimpresa.com/gestionale">
 <style>
   :root{
@@ -226,10 +226,10 @@
       <p class="claim">Preventivi, computo metrico, fatture e cantieri.<br>In un posto solo.</p>
       <p class="sotto">Dal telefono in cantiere e dal computer la sera. Senza installare niente.</p>
       <div class="bottoni">
-        <a class="btn btn-blu" href="#iscriviti">Provalo 30 giorni gratis</a>
+        <a class="btn btn-blu" href="#iscriviti">Vedi i prezzi</a>
         <a class="btn btn-vuoto" href="#prezzi">Quanto costa</a>
       </div>
-      <p class="rassicura"><b>Senza carta di credito.</b> Ti registri con la mail e basta.</p>
+      <p class="rassicura"><b>Da 249 &euro; l&rsquo;anno</b>, oppure 29 &euro; al mese. Prezzo finale, nessuna IVA da aggiungere.</p>
     </div>
 
     <!-- ⛔ DISEGNO, NON FOTO. I lavori e le cifre sono inventati. -->
@@ -267,9 +267,9 @@
 
 <div class="promesse">
   <div class="wrap">
-    <span>30 giorni gratis</span>
-    <span>Nessuna carta di credito</span>
-    <span>Nessun addebito automatico</span>
+    <span>Da 29 &euro; al mese</span>
+    <span>Nessuna IVA da aggiungere</span>
+    <span>Si disdice quando vuoi</span>
   </div>
 </div>
 
@@ -374,7 +374,7 @@
   <div class="wrap">
     <h2 class="titolone">Cambia le parole secondo chi sei</h2>
     <p class="introne">Un artigiano manda un <b>preventivo</b> a un cliente. Uno studio tecnico accetta
-       un <b>incarico</b> e chiede un <b>onorario</b>. Scegli come sei e ti apre quello giusto.</p>
+       un <b>incarico</b> e chiede un <b>onorario</b>. Scegli il tuo mestiere e ti si apre gi&agrave; quello giusto.</p>
     <div class="tre">
       <div class="chi"><h3>Artigiano</h3><p>Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</p></div>
       <div class="chi"><h3>Impresa edile</h3><p>Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</p></div>
@@ -383,41 +383,72 @@
   </div>
 </section>
 
-<!-- ================= QUANTO COSTA ================= -->
-<section class="fascia grigia" id="prezzi">
-  <div class="wrap">
-    <h2 class="titolone">Quanto costa</h2>
-    <div class="prezzi">
-      <div class="piano">
-        <div class="p-nome">Gestionale</div>
-        <div class="p-cifra">249 &euro;<span>all&rsquo;anno</span></div>
-        <div class="p-mese">oppure 29 &euro; al mese</div>
-        <ul>
-          <li>Lavori, preventivi, fatture</li>
-          <li>Computo metrico, analisi prezzi e SAL</li>
-          <li>Mezzi, attrezzature, ore e rapportini</li>
-          <li>Scadenze e promemoria, con l&rsquo;email del mattino</li>
-        </ul>
-      </div>
-      <div class="piano">
-        <div class="p-targa">CON L&rsquo;AI</div>
-        <div class="p-nome">Gestionale con AI</div>
-        <div class="p-cifra">349 &euro;<span>all&rsquo;anno</span></div>
-        <div class="p-mese">oppure 39 &euro; al mese</div>
-        <ul>
-          <li><b>Tutto quello del Gestionale, pi&ugrave;:</b></li>
-          <li>La chat con AI dentro il gestionale</li>
-          <li>Ti risponde coi conti dei tuoi lavori</li>
-          <li>Ti compila i moduli: lavori e clienti</li>
-          <li>300 messaggi al mese</li>
-        </ul>
-      </div>
-    </div>
-    <p style="text-align:center;color:var(--muted);font-size:17px;max-width:740px;margin:26px auto 0">
-      <b style="color:var(--ink)">30 giorni gratis</b>, senza carta di credito. Prezzo finale, nessuna IVA da aggiungere.
-      Finita la prova non parte nessun addebito: paghi solo se lo scegli tu.</p>
-  </div>
-</section>
+<style>
+  /* ============ LE QUATTRO CARD, CON I MESTIERI DENTRO ============ */
+  .scheda{background:#fff;border:1px solid var(--bd);border-radius:20px;
+          box-shadow:0 14px 44px rgba(10,42,77,.12);padding:32px 30px;max-width:1000px;margin:0 auto}
+  /* ⚠️ due per riga, non quattro: con quattro in fila gli elenchi
+     diventavano colonnine da 200px e le righe andavano a capo ovunque. */
+  .scheda .prezzi{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:none;margin:0}
+  .scheda .piano{display:flex;flex-direction:column;border:2px solid var(--bd);position:relative}
+  .scheda .piano:hover{border-color:var(--blu)}
+  .scheda .piano ul{margin-bottom:16px}
+  .p-durata{display:inline-block;background:var(--bd);color:var(--ink);font-size:13px;font-weight:800;
+            letter-spacing:.6px;border-radius:999px;padding:5px 11px;margin:0 0 10px}
+  .p-risparmio{display:inline-block;background:#e8f6ee;color:#0a7a3d;font-size:14.5px;font-weight:800;
+               border-radius:8px;padding:6px 10px;margin:0 0 12px}
+  .p-uguale{color:var(--muted);font-size:15.5px;margin:0 0 12px}
+  /* ⚠️ l'unica riga diversa fra i due prodotti: si vede subito, se no uno
+     legge due elenchi identici e non capisce cosa cambia. */
+  .scheda .piano li .piu{color:var(--blu)}
+  /* ⚠️ la spunta della riga sta in `position:absolute` a sinistra: dando
+     alla riga uno sfondo e un rientro suo, la spunta finiva SOPRA la
+     parola. Quindi il rientro si allarga invece di spostare la riga. */
+  .scheda .piano li:has(.piu){background:var(--blu-tenue);border-radius:9px;
+     margin:8px 0 0;padding-left:38px;padding-right:10px;border-bottom:none}
+
+  /* --- i tre mestieri, in fondo a ogni card --- */
+  .p-chi{font-size:14px;font-weight:800;color:var(--muted);letter-spacing:.6px;
+         margin:auto 0 9px;text-transform:uppercase}
+  /* ⚠️ uno sotto l'altro, non affiancati: «Studio tecnico» in una colonna
+     da 140px andava a capo e i tre bottoni venivano di tre altezze. */
+  .porte{display:grid;grid-template-columns:1fr;gap:8px}
+  /* ⚠️ da spenti sono col bordo e non pieni: con dodici rettangoli blu
+     pieni la scheda diventava un muro di blu e non si capiva piu' niente. */
+  .porta{display:block;width:100%;background:#fff;color:var(--blu);border:2px solid var(--bd);
+         font:inherit;font-weight:800;font-size:16.5px;padding:11px 10px;border-radius:9px;
+         cursor:pointer;text-align:center;transition:.15s}
+  .porta:hover{border-color:var(--blu);background:var(--blu-tenue)}
+  .porta.acceso{background:var(--blu);border-color:var(--blu);color:#fff}
+  .porta .si{display:none}
+  .porta.acceso .si{display:inline}
+  .porta.acceso .no{display:none}
+  .scheda .piano.acceso{border:3px solid var(--blu);box-shadow:0 10px 30px rgba(0,102,255,.18)}
+
+  /* --- il riepilogo e il bottone finale --- */
+  .riepilogo{background:var(--blu-tenue);border:1px solid #cfe0ff;border-radius:14px;
+             padding:20px 22px;margin:24px 0 18px}
+  .riepilogo h4{font-size:19px;color:var(--ink);margin:0 0 10px;letter-spacing:-.3px}
+  .riep-riga{display:flex;gap:10px;font-size:17.5px;color:var(--ink);line-height:1.6;margin:0 0 6px}
+  .riep-riga .et{color:var(--muted);min-width:96px}
+  .riep-vuoto{color:var(--muted);font-weight:700}
+  .vai{display:block;width:100%;max-width:520px;margin:0 auto;background:var(--blu);color:#fff;
+       border:none;border-radius:12px;padding:19px 20px;font:inherit;font-size:21px;font-weight:800;
+       cursor:pointer;text-align:center;box-shadow:0 8px 24px rgba(0,102,255,.3);transition:.15s}
+  .vai:hover{background:var(--blu-scuro)}
+  /* ⚠️ spento finche' non ha scelto: grigio, e non clicca */
+  .vai[disabled]{background:#e8ecf2;color:#93a1b3;box-shadow:none;cursor:not-allowed}
+  @media(max-width:760px){ .riepilogo{padding:16px} .riep-riga{flex-direction:column;gap:0;margin-bottom:10px} }
+
+  .nota-prezzi{text-align:center;color:var(--muted);font-size:16.5px;max-width:760px;margin:22px auto 0}
+  .nota-prezzi b{color:var(--ink)}
+  .chi-e{color:var(--muted);font-size:16px;line-height:1.85;max-width:840px;margin:16px auto 0}
+  .chi-e b{color:var(--ink)}
+  @media(max-width:760px){
+    .scheda{padding:22px 16px;border-radius:16px}
+    .scheda .prezzi{grid-template-columns:1fr}
+  }
+</style>
 
 <!-- ================= LA COSA DETTA CHIARA ================= -->
 <section class="fascia">
@@ -432,32 +463,225 @@
   </div>
 </section>
 
-<!-- ================= L'ISCRIZIONE, IN FONDO ================= -->
-<!-- ⚠️ `id="scegli"` e' il nome vecchio della sezione: chi ha in giro un link
-     con `#scegli` (email, preferiti) deve atterrare lo stesso qui sotto. -->
+<!-- ================= PREZZO E MESTIERE, INSIEME ================= -->
+<!-- ⚠️ `id="scegli"` e `id="prezzi"` sono i nomi vecchi delle due sezioni:
+     chi ha in giro un link con #scegli o #prezzi deve atterrare lo stesso qui. -->
 <span id="scegli"></span>
-<section class="iscriviti" id="iscriviti">
+<section class="fascia grigia" id="prezzi">
   <div class="wrap">
-    <h2>Provalo 30 giorni</h2>
-    <p class="intro">Ti registri con la mail e basta. Nessuna carta, nessun addebito automatico,
-       nessun vincolo. Scegli come sei:</p>
-    <div class="scelte">
-      <a class="scelta" href="/registrazione-artigiano.html?da=gestionale">
-        <span class="s-t">Sono un artigiano</span>
-        <span class="s-d">Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</span>
-        <span class="s-go">Iscriviti</span></a>
-      <a class="scelta" href="/registrazione-impresa.html?da=gestionale">
-        <span class="s-t">Sono un&rsquo;impresa edile</span>
-        <span class="s-d">Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</span>
-        <span class="s-go">Iscriviti</span></a>
-      <a class="scelta" href="/registrazione-professionista.html?da=gestionale">
-        <span class="s-t">Sono uno studio tecnico</span>
-        <span class="s-d">Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</span>
-        <span class="s-go">Iscriviti</span></a>
+    <h2 class="titolone">Quanto costa e come si comincia</h2>
+    <p class="introne">Scegli il prezzo e il mestiere con un clic solo.</p>
+
+    <div class="scheda" id="iscriviti">
+      <div class="prezzi">
+        <div class="piano">
+          <span class="p-durata">OGNI ANNO</span>
+          <div class="p-nome">Gestionale</div>
+          <div class="p-cifra">249 &euro;<span>all&rsquo;anno</span></div>
+          <p class="p-risparmio">Risparmi 99 &euro; in un anno</p>
+          <ul>
+            <li>Lavori, preventivi e fatture</li>
+            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
+            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
+            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
+            <li>Calendario, promemoria e scadenzario</li>
+            <li>Report, galleria foto e mappa dei lavori</li>
+            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
+            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+          </ul>
+          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
+               Prima erano tre card a parte, sotto: la scelta 1 era grande
+               e la scelta 2 piccolissima, e le due cose non si univano mai.
+               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
+          <p class="p-chi">Iscriviti come</p>
+          <div class="porte">
+            <button type="button" class="porta" id="p-base-anno-artigiano" onclick="scegli('base-anno','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
+            <button type="button" class="porta" id="p-base-anno-impresa" onclick="scegli('base-anno','impresa')"><span class="no">Impresa edile</span><span class="si">&#10003; Impresa edile</span></button>
+            <button type="button" class="porta" id="p-base-anno-professionista" onclick="scegli('base-anno','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
+          </div>
+        </div>
+        <div class="piano">
+          <span class="p-durata">OGNI MESE</span>
+          <div class="p-nome">Gestionale</div>
+          <div class="p-cifra">29 &euro;<span>al mese</span></div>
+          <p class="p-uguale">Stesso gestionale, pagato mese per mese.</p>
+          <ul>
+            <li>Lavori, preventivi e fatture</li>
+            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
+            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
+            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
+            <li>Calendario, promemoria e scadenzario</li>
+            <li>Report, galleria foto e mappa dei lavori</li>
+            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
+            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+          </ul>
+          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
+               Prima erano tre card a parte, sotto: la scelta 1 era grande
+               e la scelta 2 piccolissima, e le due cose non si univano mai.
+               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
+          <p class="p-chi">Iscriviti come</p>
+          <div class="porte">
+            <button type="button" class="porta" id="p-base-mese-artigiano" onclick="scegli('base-mese','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
+            <button type="button" class="porta" id="p-base-mese-impresa" onclick="scegli('base-mese','impresa')"><span class="no">Impresa edile</span><span class="si">&#10003; Impresa edile</span></button>
+            <button type="button" class="porta" id="p-base-mese-professionista" onclick="scegli('base-mese','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
+          </div>
+        </div>
+        <div class="piano">
+          <div class="p-targa">CON L&rsquo;AI</div>
+          <span class="p-durata">OGNI ANNO</span>
+          <div class="p-nome">Gestionale con AI</div>
+          <div class="p-cifra">349 &euro;<span>all&rsquo;anno</span></div>
+          <p class="p-risparmio">Risparmi 119 &euro; in un anno</p>
+          <ul>
+            <li>Lavori, preventivi e fatture</li>
+            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
+            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
+            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
+            <li>Calendario, promemoria e scadenzario</li>
+            <li>Report, galleria foto e mappa dei lavori</li>
+            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
+            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+            <li><b class="piu">In pi&ugrave;: la Chat con AI.</b> Le chiedi i conti dei tuoi lavori e ti risponde &mdash; 300 messaggi al mese</li>
+          </ul>
+          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
+               Prima erano tre card a parte, sotto: la scelta 1 era grande
+               e la scelta 2 piccolissima, e le due cose non si univano mai.
+               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
+          <p class="p-chi">Iscriviti come</p>
+          <div class="porte">
+            <button type="button" class="porta" id="p-ai-anno-artigiano" onclick="scegli('ai-anno','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
+            <button type="button" class="porta" id="p-ai-anno-impresa" onclick="scegli('ai-anno','impresa')"><span class="no">Impresa edile</span><span class="si">&#10003; Impresa edile</span></button>
+            <button type="button" class="porta" id="p-ai-anno-professionista" onclick="scegli('ai-anno','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
+          </div>
+        </div>
+        <div class="piano">
+          <div class="p-targa">CON L&rsquo;AI</div>
+          <span class="p-durata">OGNI MESE</span>
+          <div class="p-nome">Gestionale con AI</div>
+          <div class="p-cifra">39 &euro;<span>al mese</span></div>
+          <p class="p-uguale">Stesso gestionale, pagato mese per mese.</p>
+          <ul>
+            <li>Lavori, preventivi e fatture</li>
+            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
+            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
+            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
+            <li>Calendario, promemoria e scadenzario</li>
+            <li>Report, galleria foto e mappa dei lavori</li>
+            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
+            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+            <li><b class="piu">In pi&ugrave;: la Chat con AI.</b> Le chiedi i conti dei tuoi lavori e ti risponde &mdash; 300 messaggi al mese</li>
+          </ul>
+          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
+               Prima erano tre card a parte, sotto: la scelta 1 era grande
+               e la scelta 2 piccolissima, e le due cose non si univano mai.
+               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
+          <p class="p-chi">Iscriviti come</p>
+          <div class="porte">
+            <button type="button" class="porta" id="p-ai-mese-artigiano" onclick="scegli('ai-mese','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
+            <button type="button" class="porta" id="p-ai-mese-impresa" onclick="scegli('ai-mese','impresa')"><span class="no">Impresa edile</span><span class="si">&#10003; Impresa edile</span></button>
+            <button type="button" class="porta" id="p-ai-mese-professionista" onclick="scegli('ai-mese','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="riepilogo">
+        <h4>Quello che hai scelto</h4>
+        <p class="riep-riga"><span class="et">Piano</span>
+           <b id="riep-piano" class="riep-vuoto">&mdash; non l&rsquo;hai ancora scelto</b></p>
+        <p class="riep-riga"><span class="et">Mestiere</span>
+           <b id="riep-mestiere" class="riep-vuoto">&mdash; non l&rsquo;hai ancora scelto</b></p>
+      </div>
+
+      <button type="button" class="vai" id="vai" disabled onclick="vaiAllaRegistrazione()">
+        Scegli qui sopra
+      </button>
+
+      <p class="nota-prezzi">Prezzo finale, <b>nessuna IVA da aggiungere</b>.
+         Si disdice quando vuoi. Pagamento sicuro con Stripe.</p>
+      <!-- ⛔ 18 set 2026 — LA VETRINA ESCE DALL'ELENCO.
+           Qui si vende il gestionale e basta: chi arriva da Google cerca un
+           programma, non un profilo su un marketplace. Metterla fra le
+           funzioni faceva sembrare che gli si stesse vendendo dell'altro.
+           Resta scritta, ma come nota, dove non disturba. -->
+      <p class="nota-prezzi" style="margin-top:10px">In pi&ugrave;, senza pagarla:
+         insieme al gestionale ti arriva anche <b>un profilo su TrovaImpresa</b>,
+         dove i clienti cercano imprese e artigiani. Se non ti serve, puoi ignorarlo.</p>
+
+      <p class="chi-e">
+        <b>Artigiano</b>: idraulico, elettricista, imbianchino, giardiniere &mdash; lavori tuoi, con o senza dipendenti.<br>
+        <b>Impresa edile</b>: cantieri, squadra, mezzi &mdash; computo metrico, SAL e fatture con l&rsquo;IVA al 10%.<br>
+        <b>Studio tecnico</b>: geometra, architetto, ingegnere, perito &mdash; pratiche invece di lavori, parcelle con cassa e ritenuta.
+      </p>
     </div>
-    <p class="sotto-scelte"><b>30 giorni gratis</b>, senza carta di credito.</p>
   </div>
 </section>
+
+<script>
+/* ⛔ 18 set 2026 — UN CLIC SCEGLIE TUTTE E DUE LE COSE.
+   I dodici bottoni dentro le card non portano via: accendono. Ognuno sa
+   gia' il prezzo (e' la card in cui sta) e il mestiere (e' la sua riga),
+   quindi con un clic solo il riepilogo e' completo.
+   Il bottone finale compone l'indirizzo:
+       /registrazione-impresa.html?da=gestionale&piano=ai-mese
+   La registrazione lo legge e lo scrive nei dati dell'account; il trigger
+   `crea_profilo_impresa` lo mette in `imprese.gest_piano_scelto`.
+   ⚠️ Il bottone finale parte SPENTO: finche' non c'e' una scelta non si sa
+      nemmeno su quale dei tre moduli mandare la gente. */
+(function () {
+  var PIANI = {
+    'base-anno': 'Gestionale — 249 € all’anno',
+    'base-mese': 'Gestionale — 29 € al mese',
+    'ai-anno':   'Gestionale con AI — 349 € all’anno',
+    'ai-mese':   'Gestionale con AI — 39 € al mese'
+  };
+  var MESTIERI = {
+    artigiano:      'Artigiano',
+    impresa:        'Impresa edile',
+    professionista: 'Studio tecnico'
+  };
+
+  var piano = null, mestiere = null;
+
+  function segna(el, si) {
+    if (!el) return;
+    el.className = el.className.replace(/\s*acceso/g, '') + (si ? ' acceso' : '');
+  }
+
+  window.scegli = function (p, m) {
+    if (!PIANI[p] || !MESTIERI[m]) return;
+    piano = p; mestiere = m;
+
+    /* si spengono tutti e dodici, poi si accende quello cliccato */
+    var q, v, tutti = document.querySelectorAll('.porta');
+    for (q = 0; q < tutti.length; q++) segna(tutti[q], false);
+    var carte = document.querySelectorAll('.scheda .piano');
+    for (q = 0; q < carte.length; q++) segna(carte[q], false);
+
+    var b = document.getElementById('p-' + p + '-' + m);
+    segna(b, true);
+    /* ⚠️ `closest` non c'e' su qualche telefono vecchio: si sale a mano */
+    v = b;
+    while (v && (' ' + v.className + ' ').indexOf(' piano ') < 0) v = v.parentNode;
+    segna(v, true);
+
+    var rp = document.getElementById('riep-piano');
+    if (rp) { rp.innerHTML = PIANI[p]; rp.className = ''; }
+    var rm = document.getElementById('riep-mestiere');
+    if (rm) { rm.innerHTML = MESTIERI[m]; rm.className = ''; }
+
+    var go = document.getElementById('vai');
+    if (go) { go.disabled = false; go.textContent = 'Registrati e paga'; }
+
+    /* sul telefono il riepilogo resta fuori schermo: glielo si porta davanti */
+    if (go && go.scrollIntoView) go.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.vaiAllaRegistrazione = function () {
+    if (!piano || !mestiere) return;
+    window.location.href = '/registrazione-' + mestiere + '.html?da=gestionale&piano=' + piano;
+  };
+})();
+</script>
 
 <footer>
   <div class="wrap">

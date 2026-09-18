@@ -594,6 +594,12 @@
                  crea_profilo_impresa legge questa stringa; qualunque altro valore
                  (assente, vuoto, scritto storto) lascia la vetrina ACCESA. */
               vetrina_attiva: DA_GESTIONALE ? 'false' : 'true',
+              /* 18 set 2026: quale dei quattro prezzi aveva scelto sulla
+                 pagina /gestionale (base-anno, base-mese, ai-anno, ai-mese).
+                 NON e' un permesso: il piano lo accende solo il pagamento.
+                 Serve a sapere quale prezzo mettergli alla cassa senza
+                 fargli rifare la scelta da capo. */
+              gest_piano: DA_GESTIONALE ? PIANO_GEST : null,
               /* 5 set 2026 — da dove arriva questo iscritto (la scrive
                  js/conta-visita.js al primo arrivo sul sito). Serve a sapere
                  quanti li porta davvero la pubblicita'. */
@@ -758,6 +764,22 @@
     catch (e) { return false; }
   })();
 
+  /* ⛔ 18 set 2026 — IL PREZZO SCELTO SULLA PAGINA /gestionale.
+     Prima le card dei prezzi e le caselle del mestiere erano due cose
+     separate: uno sceglieva il prezzo e quella scelta si perdeva al primo
+     clic, perche' non arrivava fin qui e nel database non c'era nemmeno
+     una casella dove metterla.
+     ⚠️ Si accettano SOLO questi quattro nomi. Qualunque altra cosa scritta
+        a mano nell'indirizzo diventa null: il database la rifiuterebbe
+        contro il CHECK e l'iscrizione salterebbe per una sciocchezza. */
+  var PIANI_VALIDI = ['base-anno', 'base-mese', 'ai-anno', 'ai-mese'];
+  var PIANO_GEST = (function () {
+    try {
+      var p = (new URLSearchParams(window.location.search).get('piano') || '').toLowerCase();
+      return PIANI_VALIDI.indexOf(p) >= 0 ? p : null;
+    } catch (e) { return null; }
+  })();
+
   if (DA_GESTIONALE) (function () {
     function spegni(id) {
       var e = document.getElementById(id);
@@ -779,6 +801,42 @@
        Chi arriva da qui non cerca clienti: cerca un programma. */
     var sotto = document.querySelector('.header p');
     if (sotto) sotto.textContent = 'Preventivi, fatture e cantieri in ordine';
+
+    /* ⛔ 18 set 2026 — IL RIEPILOGO CHE COLLEGA LE DUE PAGINE.
+       Senza questo uno sceglie il piano e il mestiere sulla pagina prima,
+       arriva qui e non vede piu' nessuna traccia di quello che ha scelto:
+       sembra di aver sbagliato strada. Adesso se lo ritrova scritto tutto,
+       e con un clic torna indietro a cambiarlo. */
+    (function () {
+      var NOMI = {
+        'base-anno': 'Gestionale \u2014 249 \u20ac all\u2019anno',
+        'base-mese': 'Gestionale \u2014 29 \u20ac al mese',
+        'ai-anno':   'Gestionale con AI \u2014 349 \u20ac all\u2019anno',
+        'ai-mese':   'Gestionale con AI \u2014 39 \u20ac al mese'
+      };
+      var righe = '';
+      if (PIANO_GEST) righe += 'Piano: <b>' + NOMI[PIANO_GEST] + '</b><br>';
+      righe += 'Mestiere: <b>Impresa edile</b>';
+
+      var c = document.createElement('div');
+      c.style.cssText = 'background:#eaf2ff;border:1px solid #cfe0ff;border-radius:10px;' +
+        'padding:13px 15px;margin:0 0 16px;font-size:15px;color:#0a2a4d;line-height:1.75';
+      c.innerHTML =
+        '<div style="font-weight:800;margin-bottom:5px">Quello che hai scelto</div>' +
+        righe +
+        /* ⛔ 18 set 2026 — QUI NON SI PROMETTE NIENTE DI GRATIS.
+           Fino a stamattina c'era scritto «30 giorni gratis, senza carta».
+           Alex: «lasciamo stare la prova di 30 giorni, si paga e basta».
+           ⚠️ E SI DICE COSA SUCCEDE DOPO, perche' oggi la cassa non parte
+              da sola: si conferma la mail e si paga dal pannello. Scrivere
+              «paghi adesso» sarebbe una bugia finche' non c'e' la cassa. */
+        '<div style="margin-top:7px;color:#5f6c7b">Dopo la conferma della mail ' +
+        'il pagamento si fa dal tuo pannello. \u00b7 ' +
+        '<a href="/gestionale#prezzi" style="color:#0066ff">cambia</a></div>';
+
+      var dove = document.querySelector('.form-section.active > p');
+      if (dove && dove.parentNode) dove.parentNode.insertBefore(c, dove.nextSibling);
+    })();
 
     var intro = document.querySelector('.form-section.active > p');
     if (intro) intro.innerHTML =
