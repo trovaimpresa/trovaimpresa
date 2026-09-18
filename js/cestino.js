@@ -147,6 +147,49 @@
   var stato = {};
   TABELLE.forEach(function (t) { stato[t] = "attesa"; });
 
+  /* ============================================================
+     18 settembre 2026 — LA PROVA SI RICORDA.
+     Misurato sul sito vero, account di Alessio: all'apertura del gestionale
+     partivano 28 domandine tutte insieme, una per tabella, solo per sapere
+     se la colonna eliminato_il c'e'. Tutte e 28 rispondevano "ok", ogni
+     volta, a ogni apertura. E costavano: con 28 richieste in coda ognuna
+     ci metteva ~2500 ms, mentre la stessa richiesta da sola ne prende ~200.
+     Le letture VERE della pagina — i reparti, le schede — partivano a 6,2
+     secondi dall'apertura.
+     Adesso l'esito si tiene nel browser e la prova non si rifa'.
+
+     SI RICORDANO SOLO LE "ok", ed e' il punto:
+       - "ok" vuol dire che la colonna c'e'. Una colonna non sparisce, quindi
+         ricordarlo non puo' far danno.
+       - "manca" e "attesa" NON si ricordano mai: sono i casi che possono
+         migliorare — basta che Alessio esegua la migrazione e alla prima
+         apertura dopo la tabella si accende da sola, senza aspettare niente.
+     La memoria scade da sola dopo 30 giorni, e si butta se l'elenco delle
+     tabelle qui sopra e' cambiato: cosi' una tabella nuova viene provata.
+     ============================================================ */
+  var MEM_CHIAVE = "gest_cestino_colonne";
+  var MEM_GIORNI = 30;
+  var _memFirma = TABELLE.join(",");
+  function memLeggi() {
+    try {
+      var g = JSON.parse(localStorage.getItem(MEM_CHIAVE) || "null");
+      if (!g || g.v !== 1 || g.elenco !== _memFirma) return null;
+      if (!g.quando || (Date.now() - g.quando) > MEM_GIORNI * 86400000) return null;
+      return Array.isArray(g.ok) ? g.ok : null;
+    } catch (e) { return null; }
+  }
+  function memScrivi() {
+    try {
+      var vive = TABELLE.filter(function (t) { return stato[t] === "ok"; });
+      localStorage.setItem(MEM_CHIAVE, JSON.stringify({ v: 1, quando: Date.now(), elenco: _memFirma, ok: vive }));
+    } catch (e) { /* niente memoria nel browser: si riprova come prima */ }
+  }
+  (function ricorda() {
+    var vive = memLeggi();
+    if (!vive) return;
+    vive.forEach(function (t) { if (stato[t] === "attesa") stato[t] = "ok"; });
+  })();
+
   var motivo = "";             /* "", "rete", "migrazione", "migrazione-parziale" */
   var provaFatta = null;       /* promessa: si risolve al primo giro completo */
   var risolviProva = null;
@@ -274,7 +317,13 @@
 
     function giro() {
       var daFare = TABELLE.filter(function (t) { return stato[t] === "attesa"; });
-      if (!daFare.length) return Promise.resolve();
+      /* ⛔ 18 settembre 2026 — QUI CI SI USCIVA SENZA CHIUDERE.
+         Con la memoria qui sopra puo' capitare che al primo giro non ci sia
+         piu' niente da provare. Prima si usciva e basta: aggiornaMotivo() non
+         girava mai, e la promessa di cestinoPronto() restava appesa per
+         sempre. Adesso si chiude la partita anche quando non c'e' niente da
+         chiedere. */
+      if (!daFare.length) { aggiornaMotivo(); return Promise.resolve(); }
       return Promise.all(daFare.map(provaUna)).then(function (esiti) {
         esiti.forEach(function (e) {
           if (!e.err) { stato[e.t] = "ok"; return; }
@@ -303,6 +352,9 @@
         console.warn("[cestino] in attesa di risposta su " + quante("attesa") +
                      " tabelle: l'eliminazione resta bloccata finche' non si sa.");
       }
+
+      /* l'esito si tiene da parte: la prossima apertura non ripete le domande */
+      if (quante("attesa") === 0) memScrivi();
 
       /* la promessa pubblica si risolve al primo giro che chiude tutto */
       if (!giaRisolta && quante("attesa") === 0) {
