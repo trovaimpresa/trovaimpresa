@@ -52,6 +52,30 @@ const RIGA_LEGALE =
   '    P.IVA ' + PIVA + '\n' +
   '  </p>\n';
 
+
+/* ⛔ 18 set 2026 — LE PAGINE SENZA NESSUN PIE' DI PAGINA.
+   Sono ~20 e finiscono direttamente con gli <script>: bandi, il-posto,
+   attiva-profilo, convenzioni, galleria-video...
+   A queste non basta aggiungere una riga: il pie' di pagina non c'e' proprio,
+   va costruito. Lo stile e' scritto dentro il tag apposta: cosi' non litiga
+   col foglio di stile della pagina, che su ognuna e' diverso. */
+const PIEDE_INTERO =
+  '\n<footer style="margin-top:40px;padding:26px 20px;border-top:1px solid #e3e8ef;' +
+  'background:#f7f9fa;color:#5f6c7b;font-size:14px;line-height:1.7;text-align:center;' +
+  'font-family:\'Trebuchet MS\',system-ui,sans-serif">\n' +
+  '  <p style="margin:0 0 6px">&copy; 2026 TrovaImpresa &mdash; ' +
+  '<a href="/" style="color:#0066ff;text-decoration:none">Home</a> &middot; ' +
+  '<a href="/cerca-imprese" style="color:#0066ff;text-decoration:none">Cerca imprese</a> &middot; ' +
+  '<a href="/gestionale" style="color:#0066ff;text-decoration:none">Gestionale</a></p>\n' +
+  '  <p style="margin:0">\n' +
+  '    <a href="/privacy-policy.html" style="color:#0066ff;text-decoration:none">Privacy</a> &middot;\n' +
+  '    <a href="/cookie-policy.html" style="color:#0066ff;text-decoration:none">Cookie</a> &middot;\n' +
+  '    <a href="/termini-condizioni.html" style="color:#0066ff;text-decoration:none">Termini</a><br>\n' +
+  '    Alessio Pinto &mdash; Rieti (RI) &mdash;\n' +
+  '    <a href="mailto:info@trovaimpresa.com" style="color:#0066ff;text-decoration:none">info@trovaimpresa.com</a>' +
+  ' &mdash; P.IVA ' + PIVA + '\n' +
+  '  </p>\n</footer>\n';
+
 /* ⛔ Queste NON si toccano: pagine dietro il login o roba di servizio. */
 const NON_TOCCARE = [
   'gestionale-app.html', 'gestionale-operatore.html', 'gestionale-noleggio.html',
@@ -72,8 +96,8 @@ function tuttiIFile(dir, trovati = []) {
 }
 
 const file = tuttiIFile(RADICE);
-let banner = 0, piva = 0, legale = 0, saltati = 0;
-const nonSoDove = [];
+let banner = 0, piva = 0, legale = 0, piedeNuovo = 0, saltati = 0;
+const nonSoDove = [], quali = [];
 
 for (const f of file) {
   const nome = path.basename(f);
@@ -104,7 +128,13 @@ for (const f of file) {
       /* pie' di pagina ridotto: ci va la riga intera, prima di </footer> */
       t = t.replace(/<\/footer>/i, RIGA_LEGALE + '</footer>');
       legale++;
+    } else if (/<\/body>/i.test(t)) {
+      /* non ha nessun pie' di pagina: glielo si costruisce */
+      t = t.replace(/<\/body>/i, PIEDE_INTERO + '</body>');
+      piedeNuovo++;
+      quali.push(nome);
     } else {
+      /* niente <body>: sono i file di verifica di Google, si lasciano stare */
       nonSoDove.push(nome);
     }
   }
@@ -120,6 +150,8 @@ console.log('1) Banner cookie da mettere:            ' + banner);
 console.log('2) P.IVA da attaccare alla mail:        ' + piva);
 console.log('3) Riga intera nel pie\' di pagina:      ' + legale);
 console.log('   (privacy, cookie, termini, mail, P.IVA)');
+console.log('4) Pie\' di pagina COSTRUITO da zero:    ' + piedeNuovo);
+if (quali.length) console.log('   ' + quali.join(', '));
 if (nonSoDove.length) {
   console.log('');
   console.log('⚠️ Senza pie\' di pagina, non so dove metterla (' + nonSoDove.length + '):');
