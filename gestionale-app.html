@@ -985,12 +985,26 @@
        di Alessio: «pulizia» ed «elettricista» sono nel cestino dal 21 agosto,
        e devono restare dove sono. Qui muore solo quello che nel database non
        c'e' proprio piu'. */
-    const {data:mest,error}=await _sbTutto("gest_mestieri").select("id").eq("user_id",sbUid);
+    const {data:mest,error}=await _sbTutto("gest_mestieri").select("id,eliminato_il").eq("user_id",sbUid);
     if(error||!mest)return;
     _repartiPuliti=true;
     const vivi=new Set(mest.map(m=>String(m.id)));
+    /* ⛔ 18 settembre 2026 — LA BANDIERINA DEL CESTINO.
+       Questa lettura è l'unica del gestionale che vede anche i reparti
+       cestinati, quindi è l'unico posto da cui si può sapere chi è nel
+       cestino senza fare una seconda chiamata. Si segna qui e la schermata
+       dei reparti la legge: vedi _landingDisegna. */
+    const inCestino=new Set(mest.filter(m=>m.eliminato_il).map(m=>String(m.id)));
+    let segnati=false;
+    state.panels.forEach(p=>{
+      const c=!!(p.mestiere_id&&inCestino.has(String(p.mestiere_id)));
+      if(!!p.cestinato!==c){p.cestinato=c;segnati=true;}
+    });
     const morti=state.panels.filter(p=>p.mestiere_id&&!vivi.has(String(p.mestiere_id)));
-    if(!morti.length)return;
+    if(!morti.length){
+      if(segnati){await save();if(!cur)renderLanding();}
+      return;
+    }
     const nomeAperto=(morti.find(p=>p.id===cur)||{}).nome||null;
     state.panels=state.panels.filter(p=>morti.indexOf(p)<0);
     morti.forEach(p=>{delete state[p.id];});
@@ -2130,6 +2144,9 @@
         }else{
           p.nome=m.nome; p.icon=m.icona||p.icon; /* nome/icona dal DB come fonte primaria */
           if(pal){p.a=pal.a;p.ad=pal.ad;p.as=pal.as;}
+          /* qui ci arriva solo chi il database lo dà per vivo: se era segnato
+             come cestinato vuol dire che l'hanno appena recuperato */
+          if(p.cestinato){p.cestinato=false;changed=true;}
         }
         return p;
       });
@@ -2197,7 +2214,18 @@
   /* il guasto della lettura dei reparti: null = tutto a posto */
   let _landingGuasta=null;
   function _landingDisegna(ps,rows){
-    ps=ps||[]; rows=rows||[];
+    /* ⛔ 18 settembre 2026 — UN REPARTO NEL CESTINO NON STA NELL'ELENCO.
+       Sulla schermata dei reparti «pulizia» ed «elettricista», nel cestino
+       dal 21 agosto, comparivano identici ai vivi: stesso colore, stessa
+       scheda, nessuna scritta. Ci si entrava senza sapere di essere in un
+       reparto buttato via. Adesso non si vedono e si recuperano dal Cestino,
+       come tutto il resto del gestionale.
+       ⚠️ NON si toccano i dati: `cestinato` è solo una bandierina sulla
+          copia del browser, la messa via vera l'ha già fatta il cestino.
+          Chi lo recupera se lo ritrova qui da solo: renderLanding legge i
+          reparti con sb.from, che i cestinati non li dà, e a chi torna
+          rimette la bandierina a false qui sotto. */
+    ps=(ps||[]).filter(p=>!p.cestinato); rows=rows||[];
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
       const tot=mine.length, df=mine.filter(l=>l.stato!=="fatto").length;
@@ -12706,7 +12734,7 @@
        disegnata sotto, cosi' la freccia trova gia' tutto pronto. */
     const ps=state.panels||[];
     let id=null; try{id=localStorage.getItem(GEST_ULTIMO);}catch(e){}
-    if(id&&ps.some(p=>p.id===id)&&(_deepTab||_rientroDaGestionale())) enterPanel(id);
+    if(id&&ps.some(p=>p.id===id&&!p.cestinato)&&(_deepTab||_rientroDaGestionale())) enterPanel(id);
     /* il secondo dei due punti: adesso i reparti del browser ci sono. Se
        l'utente non si sa ancora, questa non fa niente e ci pensa _authRefresh. */
     pulisciRepartiSpariti();
