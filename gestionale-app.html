@@ -1107,6 +1107,20 @@
     /* titolo grande della schermata iniziale (statico nell'HTML, fuori dal translator) */
     const lt=document.querySelector('.landing-top h1');
     if(lt)lt.textContent=nome;
+    /* ⛔ 18 settembre 2026 — LA RIGA SOTTO IL TITOLO E LA NOTA DEI REPARTI.
+       Sono scritte nell'HTML statico, cioè FUORI da #appview: il traduttore
+       delle pratiche non le ha mai viste. Allo studio tecnico la prima
+       schermata diceva ancora «Lavori, preventivi e fatture» e parlava di
+       idraulica e giardinaggio, mentre da dentro era tutto «pratiche».
+       Stanno qui perché qui sta già il titolo della stessa schermata: una
+       regola che vale per la landing sta in un posto solo. */
+    const _pro18=(ruoloUtente==='professionista');
+    const ls=document.querySelector('.landing-top small');
+    if(ls)ls.textContent=_pro18?'Pratiche, preventivi e parcelle':'Lavori, preventivi e fatture';
+    const ln=document.querySelector('.landing-nota-rep');
+    if(ln)ln.innerHTML=_pro18
+      ? 'Un <b>reparto</b> serve solo se tieni separate due attivit\u00e0 \u2014 per esempio strutture e catasto: pratiche, clienti e calendario di una non si mischiano con l\'altra. Se fai un lavoro solo, non te ne serve un secondo.'
+      : 'Un <b>reparto</b> serve solo se tieni separate due attivit\u00e0 \u2014 per esempio idraulica e giardinaggio: lavori, clienti e calendario di una non si mischiano con l\'altra. Se fai un mestiere solo, non te ne serve un secondo.';
     /* e il nome della scheda del browser, che si vede quando si tengono
        aperte piu' pagine */
     document.title=nome+' — TrovaImpresa';
@@ -1877,7 +1891,7 @@
      chiusa qui sopra (una parola si cambia solo se e' intera), ma questi due
      restano nell'elenco lo stesso: sono contenuto dell'utente e non vanno
      toccati nemmeno per caso. */
-  const _SKIP_UTENTE='option,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
+  const _SKIP_UTENTE='option,.rc-rt-u,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,.ct-t,.ct-s,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
   /* ⛔ 21 agosto 2026 — DUE LISTE, NON UNA.
      «textarea» sta in _SKIP_UTENTE per proteggere quello che l'utente SCRIVE
      DENTRO la casella. Ma il suggerimento grigio (`placeholder`) e il `title`
@@ -2209,7 +2223,7 @@
       return `<div class="panel-card" data-action="enter" data-p="${p.id}" role="button" tabindex="0">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${icoRep(p.icon)}</span><h2>${esc(p.nome)}</h2>
-        <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
+        <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):(tot===1?'lavoro totale':'lavori totali')}</span></div>`;
     }).join(""):(_landingGuasta
       ? `<div class="empty-rep" style="border-color:var(--err,#c0392b)">
            <b>Non riesco a leggere i tuoi reparti.</b><br>
@@ -4136,7 +4150,7 @@
       ? '<div class="rc-list">'+righe.map(r=>{
           const cli=r.action?' data-action="'+r.action+'" data-id="'+esc(r.id)+'"':"";
           return '<div class="rc-r'+(r.action?" cliccabile":"")+'"'+cli+'>'
-               +   '<span class="rc-rt">'+esc(r.t||"")+'</span>'
+               +   '<span class="rc-rt'+(r.fisso?"":" rc-rt-u")+'">'+esc(r.t||"")+'</span>'
                +   '<span class="rc-rv'+(r.cls?" "+r.cls:"")+'">'+esc(r.v||"")+'</span>'
                + '</div>';
         }).join("")+'</div>'

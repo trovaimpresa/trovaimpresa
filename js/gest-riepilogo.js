@@ -393,7 +393,11 @@
                                   d:"La data prevista è già passata",go:"lavori"});
     if(scScadute.length) DA.push({g:1,male:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
                                   d:(scScadute[0].titolo||"Scadenza")+(scScadute[0]._persona?" · "+scScadute[0]._nome:"")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
-    if(mzScaduti.length) DA.push({g:1,male:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
+    /* ⛔ 18 settembre 2026 — NON allo studio tecnico: i Mezzi gli sono
+       nascosti dal menu (TAB_NASCOSTI_PRO), quindi la riga lo invitava a
+       cliccare per andare in una sezione che per lui non esiste.
+       Le tarature dei suoi strumenti restano: sono la riga qui sotto. */
+    if(!_pro && mzScaduti.length) DA.push({g:1,male:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
     /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.
        Per lo studio tecnico e' l'avviso della taratura, quello promesso. */
@@ -713,7 +717,7 @@
          TOTALE delle spese — quello che, tolto dall'incassato, fa l'utile
          grande in cima alla scheda. Nessun conto nuovo: speseMese e' lo
          stesso di sempre. */
-      righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese)},
+      righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese),fisso:1},
              (function(){
                const voci=[];
                if(speseLav)  voci.push("lavori "+eur(speseLav));
@@ -722,7 +726,7 @@
                if(speseRif)  voci.push("rifornimenti "+eur(speseRif));
                if(speseForn) voci.push("fornitori "+eur(speseForn));
                return {t: voci.length?("Spese: "+voci.join(" · ")):"Spese di questo mese",
-                       v: eur(speseMese)};
+                       v: eur(speseMese), fisso:1};
              })()]
     }));
 
@@ -730,7 +734,7 @@
       tab:"galleria", titolo:"Galleria", n:(nFoto+nVideo), dati:(nFoto+nVideo)>0,
       lab:_plur(nFoto+nVideo,"foto o video caricato","foto e video caricati"), tono:"neutro",
       vuoto:"Nessuna foto o video caricato",
-      righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto)},{t:"Video",v:String(nVideo)}]:[]
+      righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto),fisso:1},{t:"Video",v:String(nVideo),fisso:1}]:[]
     }));
 
     /* Mappa: quanti cantieri hanno un indirizzo e le distanze già calcolate.
@@ -750,8 +754,8 @@
       const C=JSON.parse(localStorage.getItem(MP_CACHE_KEY)||"{}");
       const km=Object.values(C.km||{}).filter(v=>typeof v==="number").sort((a,b)=>a-b);
       if(km.length){
-        mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0])},
-                {t:"Il più lontano",v:mpFormattaKm(km[km.length-1])}];
+        mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0]),fisso:1},
+                {t:"Il più lontano",v:mpFormattaKm(km[km.length-1]),fisso:1}];
       }
     }catch(e){}
     C.push(rieCard({
