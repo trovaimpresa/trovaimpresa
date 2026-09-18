@@ -69,15 +69,16 @@
       </p>
     </div>
     <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
-      <p id="gate-paywall-titolo" style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Il Gestionale TrovaImpresa</p>
-      <p style="margin:0 0 12px;font-size:16px;line-height:1.7;">Cantieri, squadra, preventivi PDF, fatture, agenda, scadenze fiscali e mezzi: tutto in un unico posto.</p>
-      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Con il <strong>Gestionale</strong> lo sblocchi insieme a tutto il resto: <strong>29&euro; al mese</strong> oppure <strong>249&euro; l&rsquo;anno</strong>.</p>
-      <div id="gate-btns">
-        <a href="/info-premium.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;margin-bottom:10px;border-radius:10px;background:var(--blu,#0066ff);color:#fff;font-size:17px;font-weight:700;">Scopri il Gestionale</a>
-        <a href="/prezzi.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;border-radius:10px;background:var(--sfondo,#f3f5f2);color:var(--testo,#1c2b36);font-size:16px;font-weight:700;">Vedi tutti i piani</a>
+      <p id="gate-paywall-titolo" style="margin:0 0 12px;font-size:21px;font-weight:800;line-height:1.35;">Il tuo gestionale ti aspetta</p>
+      <p id="gate-pw-riga" style="margin:0 0 6px;font-size:16px;line-height:1.7;">Lavori, preventivi, fatture, computo metrico, mezzi e scadenze: tutto in un posto solo.</p>
+      <div id="gate-pw-scelto" style="display:none;background:var(--sfondo,#eaf2ff);border-radius:12px;padding:14px 16px;margin:14px 0 18px;">
+        <div style="font-size:14px;color:var(--testo-3,#7a848f);font-weight:700;letter-spacing:.4px;">IL PREZZO CHE AVEVI SCELTO</div>
+        <div id="gate-pw-nome" style="font-size:19px;font-weight:800;margin-top:4px;"></div>
       </div>
-      <p style="margin:18px 0 0;font-size:14px;color:var(--testo-3,#7a848f);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
-      <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; il Gestionale? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
+      <div id="gate-btns"></div>
+      <p style="margin:16px 0 0;font-size:14px;color:var(--testo-3,#7a848f);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; si disdice quando vuoi &middot; nessuna IVA da aggiungere</p>
+      <p id="gate-pw-err" style="display:none;margin:12px 0 0;font-size:15px;color:#b1442a;text-align:center;line-height:1.6;"></p>
+      <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; pagato? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
       <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu,#0066ff);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
     </div>
     <div id="gate-lento" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
@@ -207,7 +208,98 @@
     document.body.style.overflow='hidden';
   }
   function showChecking(t){gateMostra('gate-checking');q('gate-checking').textContent=t;}
-  function showPaywall(){gateMostra('gate-paywall');}
+  /* ⛔ 18 set 2026 — PAGA-E-ATTIVA: il muro apre la cassa, non una pagina.
+     Prima i due bottoni portavano a `info-premium.html` e `prezzi.html`:
+     due pagine che SPIEGANO. Chi e' arrivato fin qui ha gia' scelto e si e'
+     gia' registrato — vuole pagare, non leggere un'altra volta cosa compra.
+     ⚠️ La cassa e il webhook esistono dal 29 agosto: qui si chiama soltanto
+        `crea-checkout-abbonamento`, che vuole prodotto + mensile/annuale +
+        la mail. Non serve essere dentro: basta la mail. */
+  var PIANI_CASSA = {
+    'base-anno': { prodotto:'premium',    piano:'annuale', nome:'Gestionale \u2014 249 \u20ac all\u2019anno' },
+    'base-mese': { prodotto:'premium',    piano:'mensile', nome:'Gestionale \u2014 29 \u20ac al mese' },
+    'ai-anno':   { prodotto:'premium-ai', piano:'annuale', nome:'Gestionale con AI \u2014 349 \u20ac all\u2019anno' },
+    'ai-mese':   { prodotto:'premium-ai', piano:'mensile', nome:'Gestionale con AI \u2014 39 \u20ac al mese' }
+  };
+
+  function pwErrore(t){
+    var e=q('gate-pw-err'); if(!e)return;
+    e.textContent=t; e.style.display='block';
+  }
+
+  function vaiAllaCassa(chiave, bottone){
+    var scelta=PIANI_CASSA[chiave];
+    if(!scelta){ pwErrore('Non riconosco il piano. Riprova dalla pagina dei prezzi.'); return; }
+    var email=window._gestEmail||'';
+    if(!email){ pwErrore('Non trovo la tua email: esci e rientra, poi riprova.'); return; }
+
+    var testoPrima=bottone.textContent;
+    bottone.disabled=true; bottone.style.opacity='.65'; bottone.textContent='Apro la cassa\u2026';
+    var e=q('gate-pw-err'); if(e)e.style.display='none';
+
+    fetch('/.netlify/functions/crea-checkout-abbonamento',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        prodotto: scelta.prodotto,
+        piano:    scelta.piano,
+        email:    email,
+        /* ⚠️ finito il pagamento si torna QUI, non sul pannello: uno che
+           ha appena pagato vuole entrare nel gestionale, non guardare un
+           cruscotto. Il webhook nel frattempo ha acceso il piano. */
+        returnUrl: location.origin + '/gestionale-app.html'
+      })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.url){ location.href=d.url; return; }
+      throw new Error((d && d.error) || 'la cassa non ha risposto');
+    })
+    .catch(function(err){
+      bottone.disabled=false; bottone.style.opacity='1'; bottone.textContent=testoPrima;
+      pwErrore('Non sono riuscito ad aprire il pagamento: ' + ((err&&err.message)||'riprova fra poco') + '.');
+    });
+  }
+
+  function bottonePaga(testo, chiave, principale){
+    var b=document.createElement('button');
+    b.type='button';
+    b.textContent=testo;
+    b.style.cssText='display:block;width:100%;padding:16px;margin-bottom:10px;border:0;border-radius:10px;'
+      + 'font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;'
+      + (principale
+          ? 'background:var(--blu,#0066ff);color:#fff;'
+          : 'background:var(--sfondo,#f3f5f2);color:var(--testo,#1c2b36);');
+    b.onclick=function(){ vaiAllaCassa(chiave, b); };
+    return b;
+  }
+
+  function showPaywall(){
+    gateMostra('gate-paywall');
+    var box=q('gate-btns'); if(!box)return;
+    box.innerHTML='';
+
+    var scelto=window._gestPianoScelto;
+    if(scelto && PIANI_CASSA[scelto]){
+      /* ha gia' scelto sulla pagina: un bottone solo, col suo prezzo */
+      var c=q('gate-pw-scelto'), n=q('gate-pw-nome');
+      if(c&&n){ n.textContent=PIANI_CASSA[scelto].nome; c.style.display='block'; }
+      box.appendChild(bottonePaga('Paga e attiva', scelto, true));
+      var alt=document.createElement('p');
+      alt.style.cssText='margin:6px 0 0;text-align:center;font-size:15px;';
+      alt.innerHTML='<a href="/gestionale#prezzi" style="color:var(--blu,#0066ff);text-decoration:none;font-weight:700;">Cambia prezzo</a>';
+      box.appendChild(alt);
+    }else{
+      /* ⚠️ non ha scelto niente (arriva dal marketplace, o il campo e'
+         vuoto): si fa scegliere qui, non si decide al posto suo. */
+      box.appendChild(bottonePaga('Gestionale \u2014 249 \u20ac l\u2019anno', 'base-anno', true));
+      box.appendChild(bottonePaga('Gestionale con AI \u2014 349 \u20ac l\u2019anno', 'ai-anno', false));
+      var v=document.createElement('p');
+      v.style.cssText='margin:6px 0 0;text-align:center;font-size:15px;';
+      v.innerHTML='<a href="/gestionale#prezzi" style="color:var(--blu,#0066ff);text-decoration:none;font-weight:700;">Vedi tutti e quattro i prezzi</a>';
+      box.appendChild(v);
+    }
+  }
   function showManutenzione(){gateMostra('gate-manutenzione');}
   function showLento(){gateMostra('gate-lento');}
 
@@ -384,7 +476,7 @@
            sulla pagina vera prima di metterle qui: se PostgREST non le
            conoscesse, la lettura andrebbe in errore e il cancello
            chiuderebbe a TUTTI. */
-        gc.from('imprese').select('email, piano, premium_scadenza, chat_pro, chat_pro_scadenza, gest_prova_fine').eq('user_id',s.user.id).maybeSingle().then(function(res){
+        gc.from('imprese').select('email, piano, premium_scadenza, chat_pro, chat_pro_scadenza, gest_prova_fine, gest_piano_scelto').eq('user_id',s.user.id).maybeSingle().then(function(res){
           /* ⚠️ Supabase non lancia: l'errore torna DENTRO la risposta. Senza
              questa riga una lettura rifiutata passava per «nessuna riga»,
              cioe' per «non e' abbonato»: colpa data al piano invece che alla
@@ -398,6 +490,9 @@
           var ok=haPremium(row)||inProva(row);
           window._gestPremium=ok;
           window._gestProvaGiorni=giorniProva(row);
+          /* ⛔ 18 set 2026 — il prezzo scelto su /gestionale, che il muro
+             usera' per aprire la cassa giusta invece di dire 29/249 a tutti. */
+          window._gestPianoScelto=(row&&row.gest_piano_scelto)||null;
           /* ⛔ l'AI NON entra nella decisione qui sotto: e' solo una
              lampadina che la chat guardera'. Il cancello resta il Gestionale. */
           /* ⛔ 30 agosto 2026 — LA PORTA DECIDE LA CHAT.
