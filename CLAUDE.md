@@ -2224,3 +2224,44 @@ di fila costa piu' tempo di qualunque domanda.
 Corollario gia' scritto altrove ma ignorato oggi: **prima di dire «non era mai
 stato fatto», cercare nel quaderno.** Il lavoro del →15 settembre← era scritto
 in `LAVORI-APERTI.md` e Claude ha detto ad Alex che non c'era traccia.
+
+
+# LA NOTTE DEL 17 SETTEMBRE 2026 — I 30 GIORNI DI PROVA NASCONO COL PROFILO
+
+`prova-il-gestionale.html` promette «30 giorni gratis, senza carta». Chi si
+iscriveva da quella porta nasceva con `gest_prova_fine` vuoto — →0← righe su
+→137← ce l'avevano — e trovava il **paywall** al primo ingresso.
+
+Migrazione **`prova_30_giorni_porta_gestionale_17set2026`**, due funzioni:
+
+- `crea_profilo_impresa()` scrive `now() + interval '30 days'` **solo** quando
+  `raw_user_meta_data->>'vetrina_attiva' = 'false'`, cioe' solo dalla porta del
+  gestionale. Dal marketplace non cambia niente.
+- `imprese_blocca_piano()` ha un'eccezione nuova, la **1-bis**: passa l'INSERT
+  quando `current_setting('app.nascita_profilo')` vale `'1'`.
+
+## ⛔ Perche' il contrassegno e non un controllo sul ruolo
+
+`imprese_blocca_piano()` azzera `gest_prova_fine` su ogni INSERT che non venga
+da `service_role`/`postgres`/`supabase_admin` — regola del →30 ago←, e va
+tenuta. Allargarla al ruolo con cui gira la registrazione sarebbe stato fragile.
+
+`app.nascita_profilo` lo accende **solo** `crea_profilo_impresa()`, per la riga
+che sta creando lei, e lo spegne alla riga dopo (anche nel ramo `exception`).
+**Dal browser non si puo' accendere**: PostgREST lascia passare solo i parametri
+con prefisso `request.`. Provato fingendo il ruolo `anon`: un UPDATE del browser
+a →9999← giorni viene respinto, un INSERT a mano con la prova dentro viene
+azzerato, e la nascita legittima tiene i suoi →30← giorni.
+
+## ⚠️ Se un giorno si tocca questa roba
+
+La prova e la vetrina viaggiano **sullo stesso metadato**: `vetrina_attiva`
+uguale a `'false'` vuol dire insieme «vetrina spenta» e «30 giorni aperti».
+Se un giorno servisse una nascita con la vetrina spenta **senza** prova, quel
+metadato non basta piu': ci vuole un `da_gestionale` suo, scritto dai →3← moduli.
+
+## Regola nuova
+
+- ⛔ **Una promessa scritta su una pagina e' un collaudo da fare.** «30 giorni
+  gratis» stava li' dal →14 settembre← e non li riceveva nessuno. Quando una
+  pagina promette qualcosa, si controlla nel database che quel qualcosa arrivi.

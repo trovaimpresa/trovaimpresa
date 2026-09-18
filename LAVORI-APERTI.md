@@ -4,8 +4,98 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 17 settembre 2026 (sera) — la porta del gestionale era murata da un noindex: tolto e pubblicato. Restano menu+home e la verifica dei 30 giorni di prova
+Ultimo aggiornamento: 17 settembre 2026 (notte) — i 30 giorni di prova NON arrivavano a nessuno: riparato nel database. Menu, riquadro sulla home e i 3 bottoni «Iscriviti» fatti, in attesa di push
 
+
+---
+
+## 🆕 LA NOTTE DEL 17 SETTEMBRE — LA PROVA DI 30 GIORNI NON ARRIVAVA A NESSUNO
+
+### ⛔ IL GUASTO — la promessa non era mantenuta
+`prova-il-gestionale.html` prometteva **«30 giorni gratis, senza carta»**.
+Chi si iscriveva da li' (`?da=gestionale`) nasceva con `gest_prova_fine` **VUOTO**:
+su →137← imprese, quelle con la prova aperta erano →0←.
+Dopo la conferma mail `conferma.html` lo mandava dritto nel gestionale, dove
+`js/gate-gestionale.js` non trovava ne' piano ne' prova e gli chiudeva la porta
+col **paywall**. La prima cosa che vedeva era un listino prezzi.
+
+Il secondo muro, quello che non si vedeva: `imprese_blocca_piano()` **azzera**
+`gest_prova_fine` a ogni INSERT che non venga dal server (regola del →30 ago←,
+giusta: se no uno se la dava fino al 2050 dalla console). Bloccava pero' anche
+la nascita legittima.
+
+### ✅ FATTO — migrazione `prova_30_giorni_porta_gestionale_17set2026`
+Solo database. **Nessun file toccato, nessun push, attivo subito.**
+- `crea_profilo_impresa()` scrive `now() + 30 giorni` **solo** se il metadato
+  dice `vetrina_attiva = 'false'`, cioe' solo dalla porta del gestionale
+- `imprese_blocca_piano()` riconosce quella nascita con un contrassegno di
+  transazione, `app.nascita_profilo`, che accende solo `crea_profilo_impresa()`
+  e spegne subito dopo. **Dal browser non si puo' accendere**: PostgREST lascia
+  passare solo i parametri `request.*`
+
+Provato in transazione annullata fingendo il ruolo `anon` (il caso peggiore):
+
+| prova | esito |
+|---|---|
+| nato da `?da=gestionale` | →30← giorni ✅ |
+| nato dal marketplace | niente prova ✅ |
+| metadato storto (`'x'`) | niente prova, vetrina accesa ✅ |
+| UPDATE dal browser a →9999← giorni | respinto ✅ |
+| INSERT a mano con →9999← giorni | azzerato ✅ |
+| dopo la conferma mail, esce nelle ricerche? | gestionale **no**, marketplace **si** ✅ |
+
+Dopo il rollback: →0← account di prova rimasti.
+
+### ✅ COLLAUDO — →9← anelli su →10←
+Provati sul sito pubblicato: le →3← porte con →4← caselle (nome, email,
+password, spunta), il controllo del modulo che salta i campi spenti invece di
+bloccare l'invio, `vetrina_attiva:false` scritto davvero, la porta normale
+intatta (→7← caselle), `conferma.html` col ramo giusto, `login-impresa
+?redirect=gestionale`, `gestionale-app.html` →200←, manutenzione spenta.
+Il cancello interrogato dal vivo: riga con →30← giorni **apre**, senza prova
+chiude, scaduta ieri chiude.
+
+⬜ **L'anello mancante, solo Alex puo' farlo:** iscriversi con una mail vera e
+vedere se **la mail di conferma arriva**. Claude non crea account.
+
+### ✅ FATTO, IN ATTESA DI PUSH (→3← file)
+- `index.html` — voce **«Gestionale»** nel menu (pastiglia blu, per prima) e
+  **riquadro blu** sulla home sotto «Prendi il tuo spazio», stessa forma di
+  quello del negozio
+- `prova-il-gestionale.html` — le →3← caselle diventano **bottoni veri**
+- `img/trovaimpresa-gestionale-logo.svg` — logo nuovo (versione **B**: la parola
+  «Gestionale» sotto, arancione, stessa forma del nome)
+
+### ⬜ RESTA DA FARE
+1. Il logo **non lo usa ancora nessuna pagina**. Nella barra di
+   `prova-il-gestionale` va deciso fra: barra alta uguale (nome piu' piccolo) o
+   barra +→15← px (nome della stessa misura)
+2. **Dentro il gestionale un logo non c'e' per niente** — la barra mostra il
+   nome del reparto e l'etichetta «TrovaImpresa» fu tolta il →15 ago←. Metterlo
+   li' e' un disegno nuovo, non uno scambio
+3. Le →27← guide del gestionale non puntano ancora alla pagina prodotto
+4. La stessa logica `DA_GESTIONALE` e' copiata **identica in →3← file**. La cura
+   e' spostarla in un `js/registrazione-porta.js` solo. Un'oretta, tutto
+   spostamento
+
+### ⛔ LEZIONI
+1. **Una promessa scritta su una pagina e' un collaudo da fare.** «30 giorni
+   gratis» era in `prova-il-gestionale.html` dal →14 set←: nessuno aveva
+   controllato che qualcuno li ricevesse davvero
+2. **Falso allarme di Claude, da non ripetere:** aveva detto che il file sul
+   computer e quello online erano diversi per via del `.html` nei link. E'
+   **Netlify** che li accorcia quando pubblica — sulla home i link con `.html`
+   sono →21← in locale e →0← online. Succede su tutto il sito, da sempre
+3. **Le foto nella chat Alex non le vede**: restano chiuse dentro una scheda da
+   cliccare, e un `.svg` grande si apre ingrandito e tagliato. **La strada che
+   funziona e' una pagina HTML sola, salvata in `Downloads`, che lui apre con un
+   doppio clic.** Ci sono volute →3← prove per capirlo
+4. **I font: il container di Claude non ha «Trebuchet MS».** Qualunque anteprima
+   del logo fatta li' mostra lettere sbagliate. Le anteprime del logo si fanno
+   sul computer di Alex, mai in locale
+5. **Quando Alex chiede «come fa ad andare bene?» sta correggendo, non
+   chiedendo.** Sul logo aveva ragione lui: se il prodotto si chiama
+   «TrovaImpresa Gestionale», le due parole vanno dello stesso peso
 
 ---
 

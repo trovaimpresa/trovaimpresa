@@ -796,6 +796,25 @@
   .nav-pub:hover{ background:#bbf7d0; color:#14532d; }
   /* Chi e' gia' iscritto entra ogni giorno: deve trovare l'accesso a colpo
      d'occhio, non nascosto tra i link di testo. */
+  /* 17 set 2026 — LA VOCE DEL GESTIONALE. Blu come il prodotto, e non
+     come le altre tre pastiglie (gialla i bandi, viola le guide, verde la
+     pubblicita'): questa e' l'unica che porta a una cosa che si vende. */
+  .nav-gest{ background:#dbeafe; color:#1e40af; font-weight:700; }
+  .nav-gest:hover{ background:#bfdbfe; color:#1e3a8a; }
+  /* il bottone del riquadro: blu = si prova gratis (regola dei colori del 13 set).
+     ⚠️ due classi insieme, non `.gest-btn` da sola: `.posto-btn` e' scritta
+     PIU' IN BASSO nel foglio e con lo stesso peso vincerebbe lei, arancione. */
+  .posto-btn.gest-btn{ background:#0066ff; }
+  .posto-btn.gest-btn:hover{ background:#0052cc; }
+  /* ⛔ 17 set 2026 — CON OTTO VOCI IL MENU ANDAVA A CAPO.
+     Aggiunta «Gestionale», a 1440 px «Pubblicita'» finiva su una seconda
+     riga e la barra diventava alta il doppio. Si stringono le distanze
+     invece di accorciare i nomi. */
+  @media (min-width:1025px) and (max-width:1650px){
+    .nav-links{ gap:2px; }
+    .nav-a{ padding:8px 8px; font-size:13.5px; }
+    .nav-sinistra{ gap:12px; }
+  }
   .nav-login{ display:inline-flex; align-items:center; gap:7px; color:var(--ti-blu); background:#fff; border:2px solid var(--ti-blu); text-decoration:none; font-size:14px; font-weight:700; padding:8px 15px; border-radius:8px; white-space:nowrap; }
   .nav-login:hover{ background:#eaf2ff; }
   /* 23 agosto 2026 — IL PULSANTE CHE MANCAVA.
@@ -1183,6 +1202,7 @@
           <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-expanded="false" aria-controls="nav-links" onclick="apriMenuHome()">&#9776; Menu</button>
         </div>
         <div class="nav-links" id="nav-links">
+          <a href="/prova-il-gestionale" class="nav-a nav-gest">Gestionale</a>
           <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
           <a href="/blog.html" class="nav-a nav-guide">Guide e costi</a>
           <a href="/offerte-lavoro.html" class="nav-a nav-2righe">Bacheca offerte<br>lavoro</a>
@@ -1283,6 +1303,26 @@
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-artigiano.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="tile-n">Artigiano</span><small class="tile-d">Ricevi richieste dai clienti</small></a><select class="tile-sel" data-cat="artigiano" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-impresa.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg><span class="tile-n">Impresa edile</span><small class="tile-d">Cantieri e lavori completi</small></a><select class="tile-sel" data-cat="impresa" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
             <div class="tile-wrap" style="--tc:#15803d;"><a href="registrazione-professionista.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="tile-n">Professionista</span><small class="tile-d">Progetti, pratiche e perizie</small></a><select class="tile-sel" data-cat="professionista" data-nogo="1" aria-label="Mestieri di questa categoria"></select></div>
+          </div>
+        </section>
+
+        <!-- 17 set 2026 — IL GESTIONALE SULLA HOME.
+             Fino a oggi la parola «gestionale» non compariva da nessuna
+             parte sulla home: l'unico collegamento in tutto il sito era nel
+             pie' di pagina. Una pagina che il sito stesso non indica, per
+             Google e' una pagina di serie B.
+             Sta QUI, subito sotto il riquadro verde «Prendi il tuo spazio»,
+             perche' chi ha appena letto «hai un'attivita'?» e' la stessa
+             persona che compra il gestionale. Stessa forma del riquadro del
+             negozio (.posto-riga), cambia solo il colore. -->
+        <section class="hcard" id="il-gestionale" style="--hc:#0066ff;--hb:#f0f5ff;">
+          <div class="posto-riga">
+            <div class="posto-icona">📐</div>
+            <div class="posto-testo">
+              <h2>Il gestionale per chi lavora in cantiere</h2>
+              <p>Preventivi, computo metrico, fatture elettroniche, cantieri, ore e mezzi. Tutto in un posto solo, fatto su come si lavora davvero. <strong>30 giorni gratis, senza carta di credito.</strong></p>
+            </div>
+            <a class="posto-btn gest-btn" href="/prova-il-gestionale">Provalo 30 giorni gratis</a>
           </div>
         </section>
 

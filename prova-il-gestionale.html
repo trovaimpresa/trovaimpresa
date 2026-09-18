@@ -117,8 +117,20 @@
   .sotto-scelte{font-size:16.5px;color:var(--muted);line-height:1.6;margin:0 0 6px}
   .scelte{display:grid;gap:14px;margin:26px 0 10px}
   @media(min-width:820px){.scelte{grid-template-columns:repeat(3,1fr)}}
-  .scelta{display:block;border:2px solid var(--line);border-radius:16px;padding:20px;
-          text-decoration:none;background:#fff;transition:.15s}
+  /* ⛔ 17 set 2026 — LE TRE CASELLE NON SEMBRAVANO BOTTONI.
+     Erano tre rettangoli col bordo grigio: diventavano blu solo passandoci
+     sopra col mouse, e sul telefono il mouse non c'e'. Chi arrivava qui
+     leggeva «Sono un artigiano» come una descrizione, non come un pulsante.
+     Adesso il bordo e' blu da fermo e dentro ogni casella c'e' un bottone
+     vero, con la stessa parola usata in tutta la pagina: «Iscriviti». */
+  .scelta{display:flex;flex-direction:column;border:2px solid var(--primary);border-radius:16px;
+          padding:20px 20px 18px;text-decoration:none;background:#fff;transition:.15s}
+  /* ⚠️ i tre testi non sono lunghi uguali: senza `margin-top:auto` i bottoni
+     finivano a tre altezze diverse e la fila sembrava storta. */
+  .scelta .s-d{margin-bottom:16px}
+  .scelta .s-go{display:block;margin-top:auto;background:var(--primary);color:#fff;
+          font-weight:800;font-size:16.5px;text-align:center;padding:13px 14px;border-radius:10px}
+  .scelta:hover .s-go{background:var(--primary-dark)}
   .scelta:hover{border-color:var(--primary);box-shadow:0 6px 20px rgba(15,23,42,.10);transform:translateY(-2px)}
   .scelta .s-t{display:block;font-size:19px;font-weight:800;color:var(--primary-dark)}
   .scelta .s-d{display:block;font-size:15.5px;color:var(--muted);line-height:1.5;margin-top:6px}
@@ -159,13 +171,16 @@
   <div class="scelte">
     <a class="scelta" href="/registrazione-artigiano.html?da=gestionale">
       <span class="s-t">Sono un artigiano</span>
-      <span class="s-d">Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</span></a>
+      <span class="s-d">Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</span>
+      <span class="s-go">Iscriviti</span></a>
     <a class="scelta" href="/registrazione-impresa.html?da=gestionale">
       <span class="s-t">Sono un&rsquo;impresa edile</span>
-      <span class="s-d">Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</span></a>
+      <span class="s-d">Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</span>
+      <span class="s-go">Iscriviti</span></a>
     <a class="scelta" href="/registrazione-professionista.html?da=gestionale">
       <span class="s-t">Sono uno studio tecnico</span>
-      <span class="s-d">Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</span></a>
+      <span class="s-d">Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</span>
+      <span class="s-go">Iscriviti</span></a>
   </div>
   <p class="sotto-scelte"><b>30 giorni gratis</b>, senza carta di credito.
      Ti registri con la mail e basta.</p>
