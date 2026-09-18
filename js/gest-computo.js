@@ -442,7 +442,8 @@
       +'<div class="copag" data-p="3">'
       +'<div class="sh-b"><div class="sh-tit">Il ribasso</div>'
       +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
-      +  '<div class="sh-nota">Lo sconto che fai sul totale. Il conto col ribasso lo trovi in fondo alle <b>Lavorazioni</b>.</div>'
+      +  '<div class="sh-nota">Lo sconto che fai sul totale. Qui sotto vedi subito com\'\u00e8 il conto.</div>'
+      +  '<div id="co-rib-conto"></div>'
       +'</div></div>'
 
       +'<div class="copag" data-p="4">'
@@ -479,7 +480,11 @@
        e niente lo diceva. Trovato provando dal vivo il 6 set 2026. */
     const _rb=$("#co-rib");
     if(_rb)_rb.addEventListener("input",qeAggiorna);
+    /* 18 settembre 2026 \u2014 e insieme al quadro economico si riscrive il conto
+       qui sotto al ribasso: sono due letture dello stesso numero. */
+    if(_rb)_rb.addEventListener("input",compRibConto);
     qeAggiorna();
+    compRibConto();
     const _ps=$("#co-prz-sel");
     if(_ps)_ps.onchange=function(){
       const box=$("#co-prz-mio");
@@ -857,6 +862,28 @@
     const B=c2(out.reduce((s,r)=>s+r.importo,0));
     return {righe:out, totaleA:A, totaleB:B, totale:c2(A+B)};
   }
+  /* \u26d4 18 settembre 2026 \u2014 IL RIBASSO SI GUARDA INSIEME ALLA CIFRA CHE CAMBIA.
+     Questa pagina si chiama \u00abRibasso e totale\u00bb e il totale non c'era: si
+     scriveva la percentuale e per sapere quanto veniva bisognava salvare,
+     uscire e guardarlo nell'elenco. Chi deve decidere quanto ribassare
+     decideva al buio \u2014 ed \u00e8 l'unico numero che gli serve.
+     \u26a0\ufe0f IL CONTO NON \u00c8 NUOVO e non se ne fa uno secondo: \u00e8 lo stesso
+        compRiepilogo che scrive il fondo delle Lavorazioni, letto da
+        qeBaseA() che prende il ribasso APPENA SCRITTO e non quello salvato.
+        Un conto solo, due schermi: se cambia la regola, cambiano tutti e due.
+     \u26a0\ufe0f Le classi qe-a/qe-r sono quelle del quadro economico: stessa
+        grafica, nessun colore scritto a mano. */
+  function compRibConto(){
+    const box=$("#co-rib-conto"); if(!box)return;
+    let r=null; try{ r=qeBaseA(); }catch(e){ r=null; }
+    if(!r){ box.innerHTML=""; return; }
+    box.innerHTML='<div class="qe-a">'
+      +'<div class="qe-r"><span>Totale dei lavori</span><b>'+eur2(r.lordo)+'</b></div>'
+      +(r.perc?'<div class="qe-r"><span>Ribasso '+esc(_numTesto(r.perc))+'%</span><b>\u2212 '+eur2(r.ribasso)+'</b></div>':'')
+      +'<div class="qe-r qe-r--tot"><span>Totale del computo</span><b>'+eur2(r.netto)+'</b></div>'
+      +'</div>';
+  }
+
   /* ---- il quadro economico dentro il modulo del computo ---- */
   function qeRigaHtml(r){
     r=r||{};
@@ -1643,6 +1670,9 @@
     }
     $$("#co-nav .conav-v").forEach(function(x){x.classList.toggle("on",x===b);});
     $$(".copag").forEach(function(x){x.classList.toggle("on",String(x.dataset.p)===String(n));});
+    /* il conto del ribasso si riscrive ogni volta che si entra nella sua
+       pagina: le lavorazioni possono essere cambiate mentre eri altrove */
+    if(String(n)==="3"){ try{ compRibConto(); }catch(e){} }
     /* si torna in cima: cambiando voce restando a meta' pagina sembra che
        non sia successo niente */
     const corpo=document.querySelector("#sheet .sh-body");

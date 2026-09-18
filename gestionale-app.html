@@ -6,7 +6,16 @@
 <meta name="robots" content="noindex">
 <title>Gestionale — TrovaImpresa</title>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<!-- ⛔ 18 settembre 2026 — LA STRETTA DI MANO COL DATABASE, PRIMA.
+       Nel <head> c'era il preconnect per i caratteri di Google ma NON per
+       Supabase, che è il server con cui questa pagina parla davvero: la
+       connessione si apriva solo quando partiva la prima lettura, in fondo
+       alla pagina, e quel DNS + TLS si pagava a pagina già aperta.
+       Una riga, nessun rischio: se il browser non la sfrutta non cambia
+       niente. ⚠️ L'indirizzo è lo stesso di SUPA_URL più in basso: se un
+       giorno cambia il progetto Supabase, va cambiato anche qui. -->
+  <link rel="preconnect" href="https://nacvrsgkyfavykxjxszu.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/gestionale.css">
@@ -991,9 +1000,9 @@
     const vivi=new Set(mest.map(m=>String(m.id)));
     /* ⛔ 18 settembre 2026 — LA BANDIERINA DEL CESTINO.
        Questa lettura è l'unica del gestionale che vede anche i reparti
-       cestinati, quindi è l'unico posto da cui si può sapere chi è nel
-       cestino senza fare una seconda chiamata. Si segna qui e la schermata
-       dei reparti la legge: vedi _landingDisegna. */
+       cestinati: è l'unico posto da cui si può sapere chi è nel cestino senza
+       una seconda chiamata. La schermata dei reparti la legge in
+       _landingDisegna. */
     const inCestino=new Set(mest.filter(m=>m.eliminato_il).map(m=>String(m.id)));
     let segnati=false;
     state.panels.forEach(p=>{
@@ -2144,8 +2153,8 @@
         }else{
           p.nome=m.nome; p.icon=m.icona||p.icon; /* nome/icona dal DB come fonte primaria */
           if(pal){p.a=pal.a;p.ad=pal.ad;p.as=pal.as;}
-          /* qui ci arriva solo chi il database lo dà per vivo: se era segnato
-             come cestinato vuol dire che l'hanno appena recuperato */
+          /* qui ci arriva solo chi il database dà per vivo: se era segnato
+             cestinato vuol dire che l'hanno appena recuperato */
           if(p.cestinato){p.cestinato=false;changed=true;}
         }
         return p;
@@ -2215,16 +2224,11 @@
   let _landingGuasta=null;
   function _landingDisegna(ps,rows){
     /* ⛔ 18 settembre 2026 — UN REPARTO NEL CESTINO NON STA NELL'ELENCO.
-       Sulla schermata dei reparti «pulizia» ed «elettricista», nel cestino
-       dal 21 agosto, comparivano identici ai vivi: stesso colore, stessa
-       scheda, nessuna scritta. Ci si entrava senza sapere di essere in un
-       reparto buttato via. Adesso non si vedono e si recuperano dal Cestino,
-       come tutto il resto del gestionale.
-       ⚠️ NON si toccano i dati: `cestinato` è solo una bandierina sulla
-          copia del browser, la messa via vera l'ha già fatta il cestino.
-          Chi lo recupera se lo ritrova qui da solo: renderLanding legge i
-          reparti con sb.from, che i cestinati non li dà, e a chi torna
-          rimette la bandierina a false qui sotto. */
+       «pulizia» ed «elettricista», nel cestino dal 21 agosto, comparivano
+       identici ai vivi: stesso colore, stessa scheda, nessuna scritta. Ci si
+       entrava senza sapere di essere in un reparto buttato via.
+       ⚠️ NON si toccano i dati: `cestinato` è solo una bandierina sulla copia
+          del browser. Chi lo recupera se lo ritrova qui da solo. */
     ps=(ps||[]).filter(p=>!p.cestinato); rows=rows||[];
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
