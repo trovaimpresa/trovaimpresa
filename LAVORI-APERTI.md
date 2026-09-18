@@ -4,8 +4,54 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 18 settembre 2026 (notte) — i 30 giorni di prova riparati nel database. La pagina del gestionale rinominata /gestionale. Tutto in attesa di UN push
+Ultimo aggiornamento: 18 settembre 2026 (mattina) — /gestionale rifatta come pagina di presentazione, con le finestre del programma disegnate. In attesa di push
 
+
+---
+
+## 🆕 IL 18 SETTEMBRE (mattina) — `/gestionale` NON DEVE SEMBRARE UN BLOG
+
+Alex, guardando la pagina appena pubblicata: «sembra un blog», «delle scritte
+in grande», «si deve solo scrollare», «ci vuole un'anteprima», «come si capisce
+che e' un gestionale?», «ci vuole una pagina di presentazione, come il mio sito
+trovaimpresa, non una guida». E ha mandato →3← concorrenti: **Edil ProFlow**,
+**Danea Easyfatt**, **Gestionale Immobiliare**.
+
+### ⛔ COSA NON ANDAVA, misurato
+- `--maxw: 780px` — una colonna di testo stretta. E' la forma di un ARTICOLO
+- **→1← sola immagine in tutta la pagina, ed era il logo.** Del programma non
+  si vedeva niente
+- chiedeva di iscriversi al terzo scroll, prima di aver mostrato qualcosa
+- →456← parole: la piu' magra del gruppo (le guide ne hanno →900←-→1500←)
+
+### ✅ RIFATTA (in attesa di push)
+Fasce larghe tutto lo schermo, titolo da →34← a →54← px, colori e riquadri
+della home. Ordine: il programma → il preventivo → il cantiere dal telefono →
+cosa c'e' dentro → la chat AI → chi lo usa → i prezzi → **iscriviti in fondo**.
+Il logo nuovo e' nella barra.
+
+### ⛔ LE FINESTRE DEL PROGRAMMA SONO DISEGNATE, NON FOTO
+Fatte in HTML/CSS con lavori e cifre **inventati** («Via Mazzini 4», «18.400 €»).
+E' la stessa cosa che fa Edil ProFlow — guardare la loro finestra: e' disegnata.
+
+**Il motivo non e' pigrizia:** nel gestionale vero ci sono clienti e fatture di
+persone reali, e questa pagina e' pubblica. Se un giorno si vogliono foto vere,
+vanno fatte **da un account di prova** con dentro roba finta.
+
+### ⚠️ Dettaglio da non perdere
+Nella pagina c'e' uno `<span id="scegli">` vuoto prima della sezione
+«Iscriviti»: e' il nome VECCHIO della sezione. Chi ha un link con `#scegli` in
+una mail o nei preferiti deve atterrare lo stesso al posto giusto.
+
+### ⬜ RESTA (gia' scritto sotto, non e' cambiato)
+Le guide devono portare **dritte al modulo**: →1← clic da Google invece di →3←.
+
+### ⛔ LEZIONE — un difetto di Claude da non rifare
+Costruendo la pagina di anteprima, le immagini venivano incollate una dopo
+l'altra con `replace('XX1', ...)`. **«XX1» puo' capitare DENTRO il base64 di
+un'immagine gia' inserita**, e la sostituzione successiva ci finisce dentro: il
+file e' esploso da →1,6← MB a →143← MB. Segnaposto con caratteri che nel base64
+non esistono (`@@UNO@@`), e si controlla la misura del file dopo.
 
 ---
 
