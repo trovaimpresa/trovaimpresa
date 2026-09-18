@@ -4,8 +4,57 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 18 settembre 2026 (mattina) — /gestionale rifatta come pagina di presentazione, con le finestre del programma disegnate. In attesa di push
+Ultimo aggiornamento: 18 settembre 2026 (mattina) — /gestionale rifatta come presentazione, e privacy/cookie/mail/P.IVA messe su tutto il sito. Tutto pubblicato
 
+
+---
+
+## 🆕 IL 18 SETTEMBRE — PRIVACY, COOKIE, MAIL E P.IVA SU TUTTO IL SITO
+
+Alex, guardando la pagina nuova: «dobbiamo sempre mettere privacy cookie»,
+«partita iva», «mail».
+
+### ⛔ QUELLO CHE HA TROVATO LO STRUMENTO — piu' grosso del previsto
+Claude aveva guardato →12← pagine a occhio e detto «il banner manca su →6← su
+→12←». **Numero sbagliato, tirato da un campione.** Sulle →2088← vere:
+
+| | quante |
+|---|---|
+| banner cookie mancante | →96← |
+| P.IVA da attaccare alla mail | →130← |
+| **pie' di pagina RIDOTTO**, di una riga sola | **→1913←** |
+| **nessun pie' di pagina**, finivano con gli `<script>` | **→17←** |
+
+Le →1913← sono le pagine **mestiere+citta'**: quelle dove Google manda la gente.
+Avevano solo «© 2026 TrovaImpresa — Home | Cerca imprese | Registra la tua
+impresa». Niente privacy, niente cookie, niente mail, niente P.IVA.
+
+### ✅ FATTO E PUBBLICATO — in →2← push
+`tools/cookie-e-piva.js`, che gira sul computer di Alex (a →2088← pagine Claude
+non arriva: dovrebbe spostarle tutte avanti e indietro). Fa →4← lavori, salta
+quello che c'e' gia', **si puo' rilanciare senza danni**.
+
+Controllate →16← pagine online dopo il push: **→16← complete su →16←**.
+
+### ⚠️ Cose lasciate fuori APPOSTA
+- I →2← file di verifica di Google (`google….html`): →53← byte, senza `<body>`.
+  **Se ci si mette dentro qualcosa, Google smette di riconoscere il sito.**
+- `demo-arcade.html`: senza `<body>`, saltata
+- Le pagine dietro il login (gestionale, pannelli): il banner serve a chi arriva
+  da fuori, non a chi sta gia' lavorando dentro
+
+### ⛔ LEZIONI
+1. **Un file di troppo finito nel push: `gestionale-1.html`.** Un doppione della
+   pagina nuova, nato da come Claude scrive i file sul computer. E' rimasto
+   online una decina di minuti. **Dopo un push, guardare la riga
+   `create mode` di git: dice i file NUOVI, e se ce n'e' uno che non
+   riconosci e' un errore.**
+2. **Non dare numeri tirati da un campione.** «→6← su →12←» ha fatto sembrare il
+   guasto meta' di quello che era in un verso e il doppio nell'altro. Quando le
+   pagine sono migliaia, si conta con uno strumento prima di aprire bocca.
+3. **Prima di attaccarsi alla mail nel pie' di pagina, controllare che ci sia.**
+   Il primo giro dello strumento dava →1937← «non so dove metterla»: non era un
+   errore, era la scoperta.
 
 ---
 
