@@ -441,9 +441,33 @@
        IVA i PDF di preventivi e fatture escono senza intestazione, quindi è la
        prima cosa da fare appena ci si iscrive. */
     if(!AZ||!(AZ.nome||"").trim()||!(AZ.piva||"").trim()){
-      DA.unshift({g:2,t:"Completa i dati della tua azienda",
+      DA.unshift({g:2,pri:0,t:"Completa i dati della tua azienda",
                   d:"Nome e partita IVA compaiono in cima a ogni preventivo e fattura",act:"rie-azienda"});
     }
+
+    /* ⛔ 18 settembre 2026 — PRIMA LE GRAVI, E NIENTE SPARISCE IN SILENZIO.
+       Due difetti in una riga sola, trovati insieme:
+       1. la fascia diceva «N cose che chiedono attenzione» e ne disegnava 5.
+          Con undici voci — e ci si arriva — sei sparivano senza che niente
+          lo dicesse. È la stessa cosa del controllo del computo: dire che
+          c'è qualcosa e non far vedere dove.
+       2. non veniva ordinata: il campo `g` (1 grave, 2 attesa) serviva solo
+          al colore. Le voci uscivano nell'ordine in cui sono scritte qui
+          sopra, quindi «Patente a crediti sotto il minimo» — l'unica che
+          dice all'impresa che in cantiere non ci puo' entrare — poteva
+          restare fuori dalle prime cinque, spinta giù da cose meno gravi.
+       Adesso: prima le gravi (pri, se c'è, se no g), l'ordine dentro il
+       gruppo resta quello scritto, e le altre si aprono qui sotto senza
+       cambiare pagina. */
+    /* \u26a0\ufe0f LO ZERO NON \u00c8 VUOTO. Qui la prima volta c'era `(...)||9`: con
+       `pri:0` \u2014 i dati azienda, che devono stare in cima \u2014 JavaScript legge
+       lo zero come vuoto e ci metteva 9, cio\u00e8 in fondo. Visto in anteprima
+       prima di toccare i file. Niente `||` sui numeri che possono valere 0. */
+    const _quantoUrge=function(x){
+      const v=(x&&x.pri!=null)?x.pri:(x?x.g:null);
+      return (v==null||isNaN(+v))?9:(+v);
+    };
+    DA.sort(function(a,b){ return _quantoUrge(a)-_quantoUrge(b); });
 
     /* ⛔ QUALI SEZIONI VANNO MALE: si prende da qui e da nessun'altra parte,
        cioe' dalla stessa lista che leggi nella fascia. «Lavoro in programma
@@ -461,12 +485,18 @@
         ra.innerHTML='<div class="rie-oggi">'
           + '<div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
           + '<div class="ro-sotto">'+(DA.length===1?"Una cosa che chiede attenzione.":DA.length+" cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
-          + DA.slice(0,5).map(r=>
-              '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'" '
+          + DA.map(function(r,i){
+              return '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'"'
+            +   (i>=5?' data-ro-piu="1" style="display:none"':'')+' '
             +   (r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
             +   '<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
             +   '<span class="ro-freccia">›</span>'
-            + '</div>').join("")
+            + '</div>';}).join("")
+          + (DA.length>5
+              ? '<div class="ro-riga attesa" id="ro-piu-tasto" data-action="rie-piu">'
+                + '<span class="ro-testo">Vedi le altre '+(DA.length-5)+'</span>'
+                + '<span class="ro-freccia">›</span></div>'
+              : '')
           + '</div>';
       }
       /* il secondo giro di letture è andato male: i numeri di spese, foto e

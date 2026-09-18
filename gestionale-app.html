@@ -1139,9 +1139,9 @@
        regola che vale per la landing sta in un posto solo. */
     const _pro18=(ruoloUtente==='professionista');
     const ls=document.querySelector('.landing-top small');
-    /* ⚠️ 18 settembre 2026 — «parcelle» no: la sezione, dentro, si chiama
+    /* \u26a0\ufe0f 18 settembre 2026 \u2014 NON \u00abparcelle\u00bb: dentro, la sezione si chiama
        FATTURE anche per lo studio tecnico. Una riga che promette una parola
-       che poi nel menu non c'è fa cercare una cosa che non esiste. */
+       che poi nel menu non c'\u00e8 manda a cercare una cosa che non esiste. */
     if(ls)ls.textContent=_pro18?'Pratiche, preventivi e fatture':'Lavori, preventivi e fatture';
     const ln=document.querySelector('.landing-nota-rep');
     if(ln)ln.innerHTML=_pro18
@@ -3532,10 +3532,10 @@
     $$(".conav-ctr").forEach(x=>x.remove());
   }
 
-  /* ⛔ 18 settembre 2026 — UN AVVISO DENTRO UNA PAGINA CHIUSA NON LO VEDE
-     NESSUNO — la stessa lezione del 19 agosto sulle pieghe, ma per le sei
+  /* \u26d4 18 settembre 2026 \u2014 UN AVVISO DENTRO UNA PAGINA CHIUSA NON LO VEDE
+     NESSUNO \u2014 la stessa lezione del 19 agosto sulle pieghe, ma per le sei
      linguette del computo, che pieghe non sono.
-     Provato dal vivo: il controllo diceva «3 da guardare», i tre avvisi
+     Provato dal vivo: il controllo diceva \u00ab3 da guardare\u00bb, i tre avvisi
      stavano sulle pagine 2 e 4, io ero sulla 1, e sulle linguette non c'era
      nessun segno. Per trovarli bisognava aprire le sei pagine a una a una.
      Adesso ogni linguetta che ne ha porta il suo numero, e si va da sola
@@ -3557,14 +3557,13 @@
       const s=document.createElement("span");
       s.className="conav-ctr";
       s.textContent=String(conto[n]);
-      /* stile qui e non nel foglio: è un segno che vive quanto il controllo,
-         e css/gestionale.css è in comune ai quattro gestionali */
+      /* stile qui e non nel foglio: \u00e8 un segno che vive quanto il controllo,
+         e css/gestionale.css \u00e8 in comune ai quattro gestionali */
       s.style.cssText="display:inline-flex;align-items:center;justify-content:center;"
-        /* \u26d4 18 settembre 2026 \u2014 TREDICI E NON MENO. Il controllo prima di
-           pubblicare si e' fermato proprio qui: l'avevo scritto piu' piccolo.
-           Sotto la misura minima non si scrive niente, in nessun punto del
-           gestionale, nemmeno un numerino dentro un pallino. */
         +"min-width:20px;height:20px;margin-left:6px;padding:0 6px;border-radius:10px;"
+        /* \u26d4 18 settembre 2026 \u2014 13px E NON MENO. Il controllo prima di
+           pubblicare si e' fermato su questa riga: l'avevo scritta a 11px.
+           Sotto i 13 non si scrive niente, in nessun punto del gestionale. */
         +"background:var(--attesa);color:#fff;font-size:13px;font-weight:700;line-height:1";
       b.appendChild(s);
       if(prima===null||(+n)<(+prima))prima=n;
@@ -12156,7 +12155,33 @@
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non è una scheda del menu — quindi apro direttamente quella. */
     if(a==="rie-azienda")return aziendaForm();
-    if(a==="rie-go-fatture"){const b=document.querySelector('nav.tabs button[data-tab="fatture"]');if(b){b.click();window.scrollTo(0,0);}return;}
+    if(a==="rie-piu"){
+      $$('#rie-alert [data-ro-piu]').forEach(function(x){x.style.display="";});
+      const tt=$("#ro-piu-tasto"); if(tt)tt.remove();
+      return;
+    }
+    /* ⛔ 18 settembre 2026 — LA RIGA DELLA FATTURA SI APRIVA SULL'ELENCO.
+       Il Riepilogo la scrive per nome e numero e si porta dietro il suo id
+       (gest-riepilogo.js, riga della scheda Fatture), ma qui l'id si buttava
+       via: si finiva in cima alla sezione, e con trenta fatture in elenco
+       quella che avevi cliccato era da ritrovare a mano. Le altre due righe
+       del Riepilogo aprono davvero la loro scheda — questa no.
+       ⚠️ fattCache si riempie con renderFatture, che è asincrona: si prova
+          qualche volta e poi si lascia perdere, restando comunque nella
+          sezione giusta. Mai un'attesa infinita. */
+    if(a==="rie-go-fatture"){
+      const b=document.querySelector('nav.tabs button[data-tab="fatture"]');
+      if(b){b.click();window.scrollTo(0,0);}
+      if(id){
+        let giri=0;
+        (function apri(){
+          const f=(typeof fattCache!=="undefined"&&fattCache)?fattCache.find(x=>String(x.id)===String(id)):null;
+          if(f){ try{ fattForm(f); }catch(e){} return; }
+          if(++giri<12) setTimeout(apri,400);
+        })();
+      }
+      return;
+    }
   });
   /* al cambio desktop/mobile ridisegna liste (tabella ↔ card).
      Come sopra: su iOS vecchi esiste solo addListener. */
