@@ -59,6 +59,13 @@ exports.handler = async function(event) {
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
   let userId = null;   // riempito qui sotto: serve ai bottoni del sondaggio
+  /* ⛔ 18 set 2026 — DAL-GESTIONALE: da quale porta e' entrato.
+     `vetrina_attiva=false` vuol dire «si e' iscritto da /gestionale»: lo
+     scrive il trigger crea_profilo_impresa e non si puo' falsificare dal
+     browser. `gest_piano_scelto` e' il prezzo che aveva scelto, e serve a
+     scriverglielo nell'email invece di fargli rifare la scelta. */
+  let daGestionale = false;
+  let pianoScelto = null;
 
   if (!premium && SUPABASE_KEY) {
     const sbHeaders = {
@@ -72,7 +79,8 @@ exports.handler = async function(event) {
 
     async function provaAPrendere(tab) {
       const url = SUPABASE_URL + '/rest/v1/' + tab
-                + '?email=eq.' + emailEnc + '&benvenuto_inviato=is.false&select=id,user_id';
+                + '?email=eq.' + emailEnc + '&benvenuto_inviato=is.false'
+                + '&select=id,user_id,vetrina_attiva,gest_piano_scelto';
       const r = await fetch(url, {
         method: 'PATCH',
         headers: sbHeaders,
@@ -84,6 +92,13 @@ exports.handler = async function(event) {
          conosciuto?» in fondo all'email. Se non si trova, quel blocco non
          compare e basta: l'email parte lo stesso. */
       if (Array.isArray(righe) && righe.length && righe[0].user_id) userId = righe[0].user_id;
+      /* ⚠️ `=== false` e non `!`: la tabella dei candidati questa colonna non
+         ce l'ha, e li' il valore arriva `undefined`. Con `!` sarebbero
+         finiti tutti i candidati nell'email del gestionale. */
+      if (Array.isArray(righe) && righe.length) {
+        if (righe[0].vetrina_attiva === false) daGestionale = true;
+        if (righe[0].gest_piano_scelto) pianoScelto = righe[0].gest_piano_scelto;
+      }
       return Array.isArray(righe) ? righe.length : 0;
     }
     async function esiste(tab) {
@@ -117,7 +132,16 @@ exports.handler = async function(event) {
 
   const saluto = nome ? 'Gentile ' + nome + ',' : 'Gentile utente,';
   const pannello = PANNELLI[tipo] || 'login-impresa.html';
+  /* ⛔ 18 set 2026 — chi arriva dal gestionale NON va sul pannello del
+     marketplace: va dritto al gestionale, dove il muro gli mostra il suo
+     prezzo e il bottone per pagare. */
   const linkPannello = 'https://trovaimpresa.com/' + pannello;
+  const NOMI_PIANO = {
+    'base-anno': 'Gestionale &mdash; 249 &euro; all&rsquo;anno',
+    'base-mese': 'Gestionale &mdash; 29 &euro; al mese',
+    'ai-anno':   'Gestionale con AI &mdash; 349 &euro; all&rsquo;anno',
+    'ai-mese':   'Gestionale con AI &mdash; 39 &euro; al mese'
+  };
   const isCandidato = tipo === 'candidato';
 
   let subject, corpo, mostraRegalo, ctaTesto;
@@ -159,6 +183,29 @@ exports.handler = async function(event) {
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
       '<p style="margin:0 0 16px;">Il tuo profilo &egrave; attivo, ma per farti trovare dalle imprese che cercano collaboratori nella tua zona deve essere <strong>completo</strong>: mestiere, esperienza, zona e curriculum. Un profilo a met&agrave; non viene notato.</p>';
+  } else if (daGestionale) {
+    /* ⛔ 18 SETTEMBRE 2026 — L'EMAIL DI CHI VIENE PER IL GESTIONALE.
+       Non si e' iscritto per farsi trovare dai clienti: si e' iscritto per
+       un programma, e lo vuole aprire. Quindi niente «vetrina gratis per
+       sempre», niente «completa il profilo», niente 30 giorni.
+       Una cosa sola: il prezzo che aveva scelto e il bottone per entrare. */
+    subject = '\u2699\uFE0F Il tuo Gestionale TrovaImpresa \u2014 manca un passo';
+    mostraRegalo = false;
+    ctaTesto = 'Entra e attiva &rarr;';
+    const rigaPrezzo = pianoScelto && NOMI_PIANO[pianoScelto]
+      ? '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">'
+        + '<tr><td style="background:#eaf2ff;border-radius:10px;padding:14px 16px;">'
+        + '<div style="font-size:13px;font-weight:800;color:#5a6b7b;letter-spacing:.4px;">IL PREZZO CHE AVEVI SCELTO</div>'
+        + '<div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:4px;">' + NOMI_PIANO[pianoScelto] + '</div>'
+        + '</td></tr></table>'
+      : '';
+    corpo =
+      '<p style="margin:0 0 16px;">' + saluto + '</p>' +
+      '<p style="margin:0 0 16px;">il tuo account &egrave; pronto: <strong>la mail &egrave; confermata</strong> e il gestionale ti aspetta.</p>' +
+      rigaPrezzo +
+      '<p style="margin:0 0 16px;">Manca solo il pagamento. Premi il bottone qui sotto: entri nel gestionale e trovi il tuo prezzo con il tasto per attivarlo. Ci vuole un minuto, si paga con Stripe e si disdice quando vuoi.</p>' +
+      '<p style="margin:0 0 16px;">Dentro ci trovi lavori, preventivi e fatture, computo metrico e stati di avanzamento, clienti e fornitori, mezzi, squadra, scadenze e l&rsquo;AI che ti compila i moduli.</p>' +
+      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Insieme al gestionale ti arriva anche un profilo su TrovaImpresa, dove i clienti cercano imprese e artigiani. Non devi compilare niente: se non ti serve, ignoralo.</p>';
   } else {
     /* ⛔ 13 SETTEMBRE 2026 — VIA IL REGALO DEI 3 MESI.
        Alex: «togliere i tre mesi gratis a tutti i nuovi iscritti perche'
@@ -178,7 +225,7 @@ exports.handler = async function(event) {
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
       '<p style="margin:0 0 16px;">La tua vetrina &egrave; attiva ed &egrave; <strong>gratis. E resta gratis</strong>: niente scadenze, niente carta, nessun addebito. Foto dei lavori, video, recensioni, messaggi dai clienti &mdash; &egrave; tutto tuo senza pagare niente.</p>' +
       bloccoProfilo +
-      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">L&rsquo;unica cosa a pagamento &egrave; il <strong>gestionale</strong> &mdash; preventivi, fatture, cantieri, computo metrico. Quello lo puoi provare <strong>30 giorni</strong> dal tuo pannello, senza carta.</p>';
+      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">L&rsquo;unica cosa a pagamento &egrave; il <strong>gestionale</strong> &mdash; preventivi, fatture, cantieri, computo metrico. Da <strong>249 &euro; l&rsquo;anno</strong>, oppure 29 &euro; al mese: lo attivi dal tuo pannello quando vuoi.</p>';
   }
 
   /* ⛔ 11 settembre 2026 — «COME CI HAI CONOSCIUTO?» DENTRO L'EMAIL.
@@ -243,7 +290,7 @@ exports.handler = async function(event) {
             corpo +
             '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px auto 22px;"><tr>' +
               '<td align="center" style="border-radius:9px;background:#0066ff;">' +
-                '<a href="' + linkPannello + '" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:9px;">' + (ctaTesto || 'Vai al tuo pannello &rarr;') + '</a>' +
+                '<a href="' + (daGestionale ? 'https://trovaimpresa.com/gestionale-app.html' : linkPannello) + '" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:9px;">' + (ctaTesto || 'Vai al tuo pannello &rarr;') + '</a>' +
               '</td>' +
             '</tr></table>' +
             bloccoSondaggio +
