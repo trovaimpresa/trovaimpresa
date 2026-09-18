@@ -830,8 +830,8 @@
            ⚠️ E SI DICE COSA SUCCEDE DOPO, perche' oggi la cassa non parte
               da sola: si conferma la mail e si paga dal pannello. Scrivere
               «paghi adesso» sarebbe una bugia finche' non c'e' la cassa. */
-        '<div style="margin-top:7px;color:#5f6c7b">Dopo la conferma della mail ' +
-        'il pagamento si fa dal tuo pannello. \u00b7 ' +
+        '<div style="margin-top:7px;color:#5f6c7b">Confermi la mail, entri, e paghi ' +
+        'da l\u00ec: un minuto, con Stripe. \u00b7 ' +
         '<a href="/gestionale#prezzi" style="color:#0066ff">cambia</a></div>';
 
       var dove = document.querySelector('.form-section.active > p');
@@ -839,9 +839,31 @@
     })();
 
     var intro = document.querySelector('.form-section.active > p');
+    /* ⛔ 18 set 2026 — QUI NON SI PROMETTONO PIU' GIORNI GRATIS.
+       C'era scritto «Nessuna carta di credito: i primi 30 giorni sono
+       gratis»: da stasera la prova non esiste, e questa e' la prima riga
+       che uno legge dopo aver scelto il prezzo. */
     if (intro) intro.innerHTML =
       '\u2705 <b>Ti servono tre caselle.</b> Il resto lo metti dentro il gestionale, quando vuoi.' +
-      '<br>Nessuna carta di credito: i primi 30 giorni sono gratis.';
+      '<br>Subito dopo si paga: un minuto, con Stripe.';
+
+    /* ⛔ 18 set 2026 — «ACCEDI» TORNA AL GESTIONALE, NON AL MARKETPLACE.
+       Alex: «sono due cose separate; andava bene se era nel sito, ma non lo
+       e'». Chi e' gia' registrato e clicca qui vuole il suo gestionale.
+       ⚠️ `?redirect=gestionale` non me lo invento: login-impresa.html lo
+          legge gia' dal 15 settembre e manda dritto a gestionale-app.html. */
+    var acc = document.querySelector('a[href="login-impresa.html"]');
+    if (acc) {
+      acc.href = 'login-impresa.html?redirect=gestionale';
+      acc.textContent = 'Entra nel gestionale';
+    }
+
+    /* ⛔ 18 set 2026 — via «e' gratis» dal bottone grosso.
+       L'account e' gratis, il gestionale no: su questa porta si vende il
+       gestionale, e quella parola messa li' e' quella che poi fa arrabbiare
+       uno quando trova il muro del pagamento. */
+    var creo = document.getElementById('btn-next');
+    if (creo && creo.textContent.indexOf('gratis') >= 0) creo.textContent = 'Crea il mio account';
   })();
 </script>
 
