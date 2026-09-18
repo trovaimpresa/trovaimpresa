@@ -852,10 +852,11 @@
        e'». Chi e' gia' registrato e clicca qui vuole il suo gestionale.
        ⚠️ `?redirect=gestionale` non me lo invento: login-impresa.html lo
           legge gia' dal 15 settembre e manda dritto a gestionale-app.html. */
-    var acc = document.querySelector('a[href="login-impresa.html"]');
-    if (acc) {
-      acc.href = 'login-impresa.html?redirect=gestionale';
-      acc.textContent = 'Entra nel gestionale';
+    var accs = document.querySelectorAll('a[href*="login-impresa"]');
+    for (var k = 0; k < accs.length; k++) {
+      if (accs[k].textContent.trim() !== 'Accedi') continue;   /* solo il bottone, non altri link */
+      accs[k].href = '/login-impresa?redirect=gestionale';
+      accs[k].textContent = 'Entra nel gestionale';
     }
 
     /* ⛔ 18 set 2026 — via «e' gratis» dal bottone grosso.
