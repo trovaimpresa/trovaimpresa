@@ -1139,7 +1139,10 @@
        regola che vale per la landing sta in un posto solo. */
     const _pro18=(ruoloUtente==='professionista');
     const ls=document.querySelector('.landing-top small');
-    if(ls)ls.textContent=_pro18?'Pratiche, preventivi e parcelle':'Lavori, preventivi e fatture';
+    /* ⚠️ 18 settembre 2026 — «parcelle» no: la sezione, dentro, si chiama
+       FATTURE anche per lo studio tecnico. Una riga che promette una parola
+       che poi nel menu non c'è fa cercare una cosa che non esiste. */
+    if(ls)ls.textContent=_pro18?'Pratiche, preventivi e fatture':'Lavori, preventivi e fatture';
     const ln=document.querySelector('.landing-nota-rep');
     if(ln)ln.innerHTML=_pro18
       ? 'Un <b>reparto</b> serve solo se tieni separate due attivit\u00e0 \u2014 per esempio strutture e catasto: pratiche, clienti e calendario di una non si mischiano con l\'altra. Se fai un lavoro solo, non te ne serve un secondo.'
@@ -3529,10 +3532,10 @@
     $$(".conav-ctr").forEach(x=>x.remove());
   }
 
-  /* \u26d4 18 settembre 2026 \u2014 UN AVVISO DENTRO UNA PAGINA CHIUSA NON LO VEDE
-     NESSUNO \u2014 la stessa lezione del 19 agosto sulle pieghe, ma per le sei
+  /* ⛔ 18 settembre 2026 — UN AVVISO DENTRO UNA PAGINA CHIUSA NON LO VEDE
+     NESSUNO — la stessa lezione del 19 agosto sulle pieghe, ma per le sei
      linguette del computo, che pieghe non sono.
-     Provato dal vivo: il controllo diceva \u00ab3 da guardare\u00bb, i tre avvisi
+     Provato dal vivo: il controllo diceva «3 da guardare», i tre avvisi
      stavano sulle pagine 2 e 4, io ero sulla 1, e sulle linguette non c'era
      nessun segno. Per trovarli bisognava aprire le sei pagine a una a una.
      Adesso ogni linguetta che ne ha porta il suo numero, e si va da sola
@@ -3554,13 +3557,14 @@
       const s=document.createElement("span");
       s.className="conav-ctr";
       s.textContent=String(conto[n]);
-      /* stile qui e non nel foglio: \u00e8 un segno che vive quanto il controllo,
-         e css/gestionale.css \u00e8 in comune ai quattro gestionali */
+      /* stile qui e non nel foglio: è un segno che vive quanto il controllo,
+         e css/gestionale.css è in comune ai quattro gestionali */
       s.style.cssText="display:inline-flex;align-items:center;justify-content:center;"
+        /* \u26d4 18 settembre 2026 \u2014 TREDICI E NON MENO. Il controllo prima di
+           pubblicare si e' fermato proprio qui: l'avevo scritto piu' piccolo.
+           Sotto la misura minima non si scrive niente, in nessun punto del
+           gestionale, nemmeno un numerino dentro un pallino. */
         +"min-width:20px;height:20px;margin-left:6px;padding:0 6px;border-radius:10px;"
-        /* \u26d4 18 settembre 2026 \u2014 13px E NON MENO. Il controllo prima di
-           pubblicare si e' fermato su questa riga: l'avevo scritta a 11px.
-           Sotto i 13 non si scrive niente, in nessun punto del gestionale. */
         +"background:var(--attesa);color:#fff;font-size:13px;font-weight:700;line-height:1";
       b.appendChild(s);
       if(prima===null||(+n)<(+prima))prima=n;
