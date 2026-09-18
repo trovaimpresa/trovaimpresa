@@ -3526,6 +3526,46 @@
   function ctrToglieTutto(){
     $$(".ctr-msg").forEach(x=>x.remove());
     $$(".ctr-rosso,.ctr-arancio").forEach(x=>x.classList.remove("ctr-rosso","ctr-arancio"));
+    $$(".conav-ctr").forEach(x=>x.remove());
+  }
+
+  /* \u26d4 18 settembre 2026 \u2014 UN AVVISO DENTRO UNA PAGINA CHIUSA NON LO VEDE
+     NESSUNO \u2014 la stessa lezione del 19 agosto sulle pieghe, ma per le sei
+     linguette del computo, che pieghe non sono.
+     Provato dal vivo: il controllo diceva \u00ab3 da guardare\u00bb, i tre avvisi
+     stavano sulle pagine 2 e 4, io ero sulla 1, e sulle linguette non c'era
+     nessun segno. Per trovarli bisognava aprire le sei pagine a una a una.
+     Adesso ogni linguetta che ne ha porta il suo numero, e si va da sola
+     sulla prima. Torna il numero della prima pagina che ha un avviso. */
+  function ctrSegnaLinguette(lista){
+    const nav=document.querySelector("#co-nav");
+    if(!nav)return null;
+    const conto={};
+    (lista||[]).forEach(function(s){
+      const pag=(s&&s.el&&s.el.closest)?s.el.closest(".copag"):null;
+      const n=pag&&pag.dataset?String(pag.dataset.p||""):"";
+      if(!n)return;
+      conto[n]=(conto[n]||0)+1;
+    });
+    let prima=null;
+    Object.keys(conto).forEach(function(n){
+      const b=nav.querySelector('.conav-v[data-p="'+n+'"]');
+      if(!b)return;
+      const s=document.createElement("span");
+      s.className="conav-ctr";
+      s.textContent=String(conto[n]);
+      /* stile qui e non nel foglio: \u00e8 un segno che vive quanto il controllo,
+         e css/gestionale.css \u00e8 in comune ai quattro gestionali */
+      s.style.cssText="display:inline-flex;align-items:center;justify-content:center;"
+        +"min-width:20px;height:20px;margin-left:6px;padding:0 6px;border-radius:10px;"
+        /* \u26d4 18 settembre 2026 \u2014 13px E NON MENO. Il controllo prima di
+           pubblicare si e' fermato su questa riga: l'avevo scritta a 11px.
+           Sotto i 13 non si scrive niente, in nessun punto del gestionale. */
+        +"background:var(--attesa);color:#fff;font-size:13px;font-weight:700;line-height:1";
+      b.appendChild(s);
+      if(prima===null||(+n)<(+prima))prima=n;
+    });
+    return prima;
   }
 
   function ctrSegna(s){
@@ -3573,6 +3613,16 @@
     if(rossi)  pezzi.push(rossi+(rossi===1?" da correggere":" da correggere"));
     if(gialli) pezzi.push(gialli+(gialli===1?" da guardare":" da guardare"));
     toast("Te le ho segnate: "+pezzi.join(", ")+". Non ti fermo: puoi salvare lo stesso.");
+    /* nel computo: i numeri sulle linguette, e si apre la prima pagina che ne
+       ha uno. Senza questo lo scrollIntoView qui sotto cadeva su un elemento
+       nascosto e non faceva niente. */
+    try{
+      const pag=ctrSegnaLinguette(l);
+      if(pag&&typeof compPag==="function"){
+        const aperta=document.querySelector("#co-nav .conav-v.on");
+        if(!aperta||String(aperta.dataset.p)!==String(pag)) compPag(pag,true);
+      }
+    }catch(e){}
     /* portarlo sulla prima, se no su un modulo lungo non la trova */
     const primo=$(".ctr-msg");
     if(primo&&primo.scrollIntoView) primo.scrollIntoView({block:"center",behavior:"smooth"});
