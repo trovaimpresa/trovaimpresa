@@ -239,7 +239,13 @@ const CODE_PRIVATE     = ['.md', '.sql', '.csv', '.py', '.txt', '.json'];
    un'icona sulla schermata Home. Se lo chiudiamo con un 404, l'icona non
    si puo' piu' aggiungere. Dentro non c'e' niente di riservato: nome,
    colori e i disegni delle icone. */
-const PUBBLICI_APPOSTA = new Set(['robots.txt', 'llms.txt', 'manifest.json']);
+/* ⚠️ 19 set 2026 — c670...040.txt e' la chiave di IndexNow, il campanello
+   che avvisa Bing quando pubblichiamo. Dentro c'e' solo la chiave, che non
+   e' un segreto: serve a dimostrare che il sito e' nostro, e Bing la deve
+   poter leggere. Se si cambia chiave, va cambiato anche questo nome e
+   quello dentro tools/indexnow.js. */
+const PUBBLICI_APPOSTA = new Set(['robots.txt', 'llms.txt', 'manifest.json',
+                                  'c670fbe9c5c6a2205488dd36e94bd040.txt']);
 /* Attrezzi da riga di comando: non li carica nessuna pagina, ma hanno
    l'estensione .js come i file veri del sito, quindi vanno detti a mano. */
 const ATTREZZI_PRIVATI = ['genera-imprese-citta.js', 'genera-seo-pagine.js'];
