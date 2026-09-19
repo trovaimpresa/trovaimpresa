@@ -1980,12 +1980,48 @@
     if(!f){toast("Fattura non trovata");return;}
     const mancano=fattXmlControllo(f);
     if(mancano.length){
-      openSheetGrande("Non posso ancora fare il file per lo SDI",
-        '<div class="sh-b"><div class="sh-tit">Cosa manca</div>'
-        + '<div class="sh-nota">Lo SDI rifiuta la fattura se anche una sola di queste cose non c\'è. Meglio saperlo adesso che fra una settimana.</div>'
-        + '<ul class="xml-manca">'+mancano.map(m=>"<li>"+esc(m)+"</li>").join("")+'</ul>'
-        + '</div>',
-        '<button class="btn b-cancel" data-action="close">Ho capito</button>');
+      /* \u26d4 19 settembre 2026 \u2014 VENTICINQUE RIGHE CHE DICONO DOVE ANDARE,
+         E UN SOLO TASTO \u00abHo capito\u00bb.
+         Ogni riga qui dentro finisce gi\u00e0 con il posto \u2014 \u00ab\u2026 Dati azienda.\u00bb,
+         \u00ab\u2026 Clienti.\u00bb \u2014 ma erano parole e basta: si chiudeva la finestra e
+         bisognava ricordarsele a memoria girando per tre sezioni.
+         Adesso le righe si raggruppano per POSTO, e ogni gruppo ha il suo
+         tasto che ci porta davvero.
+         \u26a0\ufe0f I trenta messaggi di fattXmlControllo NON sono stati toccati: il
+            posto si legge dal testo che gi\u00e0 c'\u00e8. Cos\u00ec uno nuovo che finisce
+            con \u00ab\u2014 Dati azienda.\u00bb prende il suo tasto da solo, senza che
+            nessuno si ricordi di aggiungerlo qui. */
+      const GRUPPI=[
+        {k:"azienda", tit:"Dati della tua azienda", tasto:"Apri Dati azienda",
+         act:'data-action="azienda"',
+         test:function(t){ return /Dati azienda/i.test(t); }},
+        {k:"cliente", tit:"La scheda del cliente", tasto:"Apri il cliente",
+         act:'data-action="edit-cli" data-id="'+esc(f.cliente_id||"")+'"',
+         test:function(t){ return /Clienti\.|scheda in Clienti/i.test(t); }},
+        {k:"fattura", tit:"Questa fattura", tasto:"Torna alla fattura",
+         act:'data-action="edit-fatt" data-id="'+esc(f.id)+'"',
+         test:function(){ return true; }}   /* tutto il resto sta nella fattura */
+      ];
+      const dentro={};
+      mancano.forEach(function(t){
+        const g=GRUPPI.find(function(x){ return x.test(t); });
+        (dentro[g.k]=dentro[g.k]||[]).push(t);
+      });
+      let corpo='<div class="sh-b">'
+        + '<div class="sh-nota">Lo SDI rifiuta la fattura se anche una sola di queste cose non c\'\u00e8. '
+        + 'Meglio saperlo adesso che fra una settimana. Ogni gruppo ha il tasto che ti porta dove si sistema.</div></div>';
+      GRUPPI.forEach(function(g){
+        const righe=dentro[g.k]; if(!righe||!righe.length)return;
+        /* il cliente non si pu\u00f2 aprire se la fattura non ne ha uno */
+        const apribile=(g.k!=="cliente")||!!f.cliente_id;
+        corpo+='<div class="sh-b">'
+          + '<div class="sh-tit">'+esc(g.tit)+' \u00b7 '+righe.length+(righe.length===1?' cosa':' cose')+'</div>'
+          + '<ul class="xml-manca">'+righe.map(function(t){return "<li>"+esc(t)+"</li>";}).join("")+'</ul>'
+          + (apribile?'<button type="button" class="btn btn-primary" '+g.act+'>'+esc(g.tasto)+'</button>':'')
+          + '</div>';
+      });
+      openSheetGrande("Non posso ancora fare il file per lo SDI", corpo,
+        '<button class="btn b-cancel" data-action="close">Chiudi</button>');
       return;
     }
     const {xml,nome}=fattXmlCostruisci(f);
