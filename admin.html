@@ -1774,6 +1774,35 @@ function doLogout() {
   document.getElementById('admin-panel').style.display = 'none';
 }
 
+/* ⛔ 19 settembre 2026 — LEGGERE COL PERMESSO DELL'ADMIN, NON CON QUELLO
+   DEL BROWSER.
+
+   Il pannello chiedeva le imprese con la chiave pubblica, cioe' con lo
+   stesso permesso di un'impresa qualunque. Nel database c'e' una regola
+   che dice: vedi solo la TUA, tranne se sei entrato con l'email del
+   fondatore. Risultato: il 18 settembre Alex si e' registrato con una
+   seconda email per provare il gestionale, e da quel momento il pannello
+   gli faceva vedere UNA impresa su 139. Svuotando i cookie sarebbe andata
+   peggio: senza nessun account collegato ne avrebbe viste ZERO.
+
+   `admin-dati` invece controlla la password dell'admin sul server e poi
+   legge con `service_role`, che le regole del database non le sente. E'
+   la stessa strada che gia' usano recensioni, segnalazioni, subappalti,
+   lavoro e richieste dei clienti: 15 sezioni su 17.
+
+   ⚠️ Non cambia NESSUNA protezione: un'impresa continua a vedere solo la
+      sua. Cambia solo da dove chiede i dati questo pannello, che una
+      password ce l'ha gia'. */
+async function adminLista(tabella) {
+  const res = await fetch('/.netlify/functions/admin-dati', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: tabella })
+  });
+  const json = await res.json().catch(function () { return {}; });
+  if (!res.ok || !json.success) throw new Error(json.error || 'errore sconosciuto');
+  return json.data || [];
+}
+
 // NAVIGAZIONE
 function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1924,9 +1953,17 @@ async function caricaPubblicitaClienti(segnaVisti = true) {
   const ids = [...new Set((ann || []).map(a => a.impresa_id).filter(Boolean))];
   let impMap = {};
   if (ids.length) {
-    const { data: imp } = await sb.from('imprese')
-      .select('id,nome_attivita,nome,email,telefono,tipo').in('id', ids);
-    (imp || []).forEach(i => { impMap[i.id] = i; });
+    /* ⛔ 19 set 2026 — stesso difetto dell'elenco imprese, ma piu' subdolo:
+       qui la colonna col nome dell'impresa restava semplicemente vuota, e
+       non compariva nessun errore. ⚠️ `admin-dati` sa solo dare l'elenco
+       intero, non cercare per id: si prendono tutte (139 righe, niente) e
+       si tengono quelle che servono. Se l'elenco e' gia' in memoria dalla
+       sezione Imprese, non si chiede niente a nessuno. */
+    let imp = [];
+    try { imp = tutteImprese.length ? tutteImprese : await adminLista('imprese'); }
+    catch (e) { console.warn('[pubblicita] imprese:', e.message || e); }
+    const voluti = new Set(ids.map(String));
+    imp.forEach(i => { if (voluti.has(String(i.id))) impMap[i.id] = i; });
   }
   _pubData = (ann || []).map(a => Object.assign({}, a, { _imp: impMap[a.impresa_id] || null }));
 
@@ -3653,10 +3690,15 @@ async function contaSupportoDashboard() {
 
 // CARICA IMPRESE
 async function caricaImprese() {
-  const { data, error } = await sb.from('imprese').select('*').order('created_at', { ascending: false });
-  if (error) {
-    console.error(error);
-    _erroreTabella('table-imprese', 8, 'Non riesco a leggere le imprese: ' + (error.message || 'errore sconosciuto'));
+  /* ⛔ 19 set 2026 — prima qui c'era `sb.from('imprese')`, cioe' la lettura
+     col permesso del browser: faceva vedere solo l'impresa dell'account
+     collegato in Chrome. Vedi il commento su `adminLista`. */
+  let data;
+  try {
+    data = await adminLista('imprese');
+  } catch (e) {
+    console.error(e);
+    _erroreTabella('table-imprese', 8, 'Non riesco a leggere le imprese: ' + (e.message || 'errore sconosciuto'));
     return;
   }
   tutteImprese = data || [];
