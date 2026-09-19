@@ -12305,16 +12305,39 @@
     if(a==="cest-guasto-copia"){
       const g=cestGuastoLeggi();
       if(!g){ toast("Non c’è niente da copiare"); return; }
+      /* ⛔ 19 settembre 2026, provato dal vivo — navigator.clipboard NON
+         basta: nel browser dentro l’app il permesso «clipboard-write»
+         risulta negato e il tasto diceva solo «selezionalo a mano».
+         Quindi prima si prova la strada vecchia (una casella nascosta piu'
+         execCommand), che funziona dappertutto e non chiede permessi, e
+         solo se fallisce si prova quella nuova. */
+      let fatto=false;
+      try{
+        const c=document.createElement("textarea");
+        c.value=g.testo;
+        c.setAttribute("readonly","");
+        c.style.cssText="position:fixed;top:0;left:-9999px;opacity:0";
+        document.body.appendChild(c);
+        c.select(); c.setSelectionRange(0,c.value.length);
+        fatto=document.execCommand("copy");
+        c.remove();
+      }catch(e){}
+      if(fatto){ toast("Elenco copiato ✔ — incollalo dove vuoi tenerlo"); return; }
       try{
         navigator.clipboard.writeText(g.testo).then(
           function(){ toast("Elenco copiato ✔ — incollalo dove vuoi tenerlo"); },
-          function(){ toast("Non sono riuscito a copiarlo: selezionalo a mano e copia"); });
-      }catch(e){ toast("Non sono riuscito a copiarlo: selezionalo a mano e copia"); }
+          function(){ toast("Non sono riuscito a copiarlo: selezionalo con il dito e copia"); });
+      }catch(e){ toast("Non sono riuscito a copiarlo: selezionalo con il dito e copia"); }
       return;
     }
     if(a==="cest-guasto-via"){
       try{ localStorage.removeItem(CEST_GUASTO); }catch(e){}
       closeSheet();
+      /* ⛔ 19 settembre 2026, provato dal vivo — renderCestino() rifa'
+         tutte le domande al database e ci mette qualche secondo: premevi
+         il tasto e l’avviso restava li', come se non avesse funzionato.
+         Quindi prima si toglie dallo schermo, poi si rifa' il conto. */
+      const _f=t.closest?t.closest(".cest-testa"):null; if(_f)_f.remove();
       renderCestino();
       toast("Avviso tolto");
       return;
@@ -12344,7 +12367,13 @@
           const pronto = (typeof salTuttiCache!=="undefined") && salTuttiCache
             && salTuttiCache.some(function(x){return String(x.id)===String(id);});
           if(pronto && typeof salApriDaElenco==="function"){ salApriDaElenco(id); return; }
-          if(giri<12) setTimeout(apri,400);
+          if(giri<12){ setTimeout(apri,400); return; }
+          /* ⛔ 19 settembre 2026, provato dal vivo — se il SAL non si trova
+             (il suo computo sta in un altro reparto, o e’ finito nel
+             Cestino) prima non succedeva NIENTE: restavi nell’elenco senza
+             sapere perche'. E il silenzio e' proprio il difetto che stiamo
+             togliendo. */
+          toast("Non trovo quello stato di avanzamento in questo reparto: prova a cercarlo negli altri, o nel Cestino");
         })();
       }
       return;
