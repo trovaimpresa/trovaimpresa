@@ -4,8 +4,97 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 18 settembre 2026 (mattina) — /gestionale rifatta come presentazione, e privacy/cookie/mail/P.IVA messe su tutto il sito. Tutto pubblicato
+Ultimo aggiornamento: 19 settembre 2026 (mattina) — Bing acceso, /info-premium chiusa, barra e fasce di /gestionale rifatte, pannello admin staccato dall'account di Chrome
 
+
+
+---
+
+## 🆕 IL 19 SETTEMBRE (mattina) — BING, LA PAGINA CHE VENDE, E IL PANNELLO CHE NON SI AGGIORNAVA
+
+### ✅ FATTO E PUBBLICATO
+
+**1. Bing (IndexNow)** — `tools/indexnow.js` + la chiave
+`c670fbe9c5c6a2205488dd36e94bd040.txt` nella radice (aggiunta a
+`PUBBLICI_APPOSTA` in `tools/controllo-push.js`, se no il push si blocca).
+Mandati **→2133←** indirizzi, tutti accettati. Si rilancia quando serve:
+`node tools/indexnow.js` (solo gestionale) o `--tutte`.
+⚠️ **Non vale per Google**, che non usa IndexNow: serve per Bing, e quindi
+per Copilot e DuckDuckGo che pescano dal suo elenco.
+
+**2. `/info-premium` chiusa** — era il doppione di `/gestionale`: due pagine
+che vendevano la stessa cosa e si rubavano la forza su Google. Adesso
+rinvio **301** verso `/gestionale` (`netlify.toml`, cerca «SI CHIUDE
+/info-premium»), **→5←** link interni spostati (pannello impresa, galleria
+video, pubblicita'), tolta da `sitemap.xml`. Il file resta spento, con
+`noindex` e il canonical su `/gestionale`. Verificato dal vivo.
+
+**3. La barra in cima a `/gestionale`** — diceva Home / Prezzi / Iscriviti:
+il logo e «Home» portavano al **marketplace**, «Prezzi» e «Iscriviti»
+cadevano nello stesso punto a →130← pixel di distanza, e un «Accedi» non
+c'era proprio. Adesso: logo su `/gestionale`, **Cosa fa** · **Quanto costa** ·
+**Visita il sito TrovaImpresa** · **🔒 Accedi al sito TrovaImpresa** ·
+**🔒 Accedi al gestionale**. I due bottoni hanno il colore del sito
+(`.nav-login`) e due azzurri diversi. Sul telefono restano «Quanto costa» e
+«Accedi».
+
+**4. Il pannello admin non dipende piu' da chi e' collegato in Chrome** —
+vedi la trappola n.2 in `CLAUDE.md`. Nuovo helper `adminLista()` in
+`admin.html`. Collaudato: **→6← prove su →6←**, con controprova sulla
+versione vecchia (→0← imprese).
+
+### ✅ FATTO, DA PUBBLICARE
+**Le →7← fasce nuove su `/gestionale`** al posto delle →6← card piccole.
+Scritte leggendo il codice vero: computo metrico (le misure, «si detrae»),
+analisi prezzi (spese generali e utile, ribasso, oneri sicurezza fuori),
+SAL (quantita' progressive, ritenuta di garanzia), fattura elettronica
+(XML SDI, cassa, bollo, i controlli), l'AI che compila, la mail delle 7:30,
+mezzi e squadra. Piu' una riga finale che elenca il resto.
+⚠️ **Tolta una promessa falsa**: «al cliente arriva un link dove risponde
+si' o no». Quel link **non esiste**: nessun portale cliente, nessuna
+accettazione online, lo stato «Accettato» lo mette l'utente a mano.
+Ricontrollato con tutti e 24 i file: confermato.
+
+### 🔴 DA FINIRE
+- [29 ago 2026] **Nessuno ha mai pagato davvero.** La catena e' tutta
+  collegata — `/gestionale` → registrazione → muro → Stripe — ma nessuna
+  carta vera l'ha mai percorsa. **Non sappiamo se il webhook accende il
+  piano da solo.** Finche' non si prova, ogni cliente potrebbe dover essere
+  acceso a mano. · `stripe-webhook-abbonamenti.js` · manca: comprare un
+  mensile da →29 €← e guardare se il gestionale si apre da solo, poi disdire.
+- [19 set 2026] **La pagina che vende non nomina il caricamento del computo.**
+  «Carica qui il computo del geometra» funziona (Excel, CSV **e PDF**) ed e'
+  un pezzo forte, ma nelle fasce nuove non c'e': Claude lo credeva rotto.
+  · `gestionale.html` · manca: una fascia, o due righe dentro quella del
+  computo metrico.
+
+### ⚖️ DA DECIDERE (aspettano una parola di Alex)
+- **L'AI che riempie i prezzi del computo.** Alex: «se parliamo di artigiano
+  e impresa, il computo che lui esporta ha gia' le voci compilate dal
+  geometra, deve solamente mettere i prezzi». Oggi
+  `compPrezziDaPrezzario()` cerca **per codice di tariffa**: le righe senza
+  codice, o con il codice di un'altra tariffa, restano a →0,00 €←.
+  L'idea: prima il codice (gratis ed esatto), **poi l'AI solo su quelle
+  rimaste**, che sceglie la voce giusta dentro il **suo** prezzario — sceglie,
+  non inventa, e fa vedere le accoppiate prima di scrivere.
+  ⚖️ La domanda a cui non ha risposto: **quando l'AI non e' sicura, lascia
+  la riga a zero o propone lo stesso la voce piu' vicina segnandola come
+  incerta?**
+- **Prezzari regionali gia' pronti?** Oggi l'utente carica il file della sua
+  Regione da Excel (Prezzario → «⬆ Importa da Excel o CSV»), e funziona.
+  Alex potrebbe aver chiesto un'altra cosa: che siano **gia' dentro** i
+  prezzari, senza che nessuno carichi niente. Non ha risposto.
+
+### ⛔ LEZIONI (le due grosse sono in `CLAUDE.md`, trappole 4 e 5)
+1. **Claude ha detto due volte che un pulsante era morto, e non lo era.**
+   Aveva cercato in una cartella portata a meta'. Ha anche scritto la copia
+   della funzione, che avrebbe rotto tutti i PDF del computo. Ripristinato
+   prima del push, niente e' andato online.
+2. **`device_commit_files` ha risposto «written» rimandando il file vecchio**,
+   due volte. Il controllo con l'md5 che Alex ha imposto ha salvato il lavoro
+   tutte e due le volte.
+3. **La riga del push va data pulita.** Una volta ci e' finito dentro un
+   `</parameter>`, e il comando e' morto con un errore di sintassi.
 
 ---
 

@@ -160,9 +160,65 @@ lato server, scrive con `service_role`) tramite l'helper `adminWrite()` in `admi
 La function restituisce `count` = righe toccate: se e' 0 il pannello avvisa.
 Tabelle in whitelist: `feedback_clienti, segnalazioni, subappalti, imprese, preventivi, lead_imprese`.
 
+⛔ **19 SETTEMBRE 2026 — VALE ANCHE IN LETTURA, NON SOLO IN SCRITTURA.**
+La sola regola di SELECT su `imprese` e':
+`imprese_select_propria` -> `(user_id = auth.uid()) OR sono_il_fondatore()`,
+e `sono_il_fondatore()` e' vera **solo per `pintoalessio@icloud.com`**.
+Quindi il pannello admin, che leggeva con `sb.from('imprese')` (chiave
+pubblica), faceva vedere:
+- **1 impresa** se in Chrome c'era collegato un altro account di Alex —
+  ed e' successo davvero: il 18 set si e' registrato con
+  `pintoalessio@hotmail.it` per provare la porta del gestionale;
+- **0 imprese** dopo aver svuotato i cookie, perche' per gli ospiti di
+  SELECT non ce n'e' nessuna.
+Adesso c'e' l'helper **`adminLista(tabella)`** in `admin.html`, gemello di
+`adminWrite()`: passa da `admin-dati` con la password e legge con
+`service_role`. Lo usano `caricaImprese()` e i nomi delle imprese nella
+tabella della pubblicita'.
+⚠️ **Regola generale: nel pannello admin nessuna lettura con `sb.from(...)`
+su tabelle protette.** Se una casella dice un numero piccolo e strano
+invece di un errore, e' quasi sempre questo.
+
 ### 3. Verificare che una scrittura sia andata a buon fine
 Aggiungere sempre `.select('id')` a UPDATE e DELETE e controllare che tornino righe.
 Senza, una scrittura bloccata da RLS e' indistinguibile da una riuscita.
+
+### 4. ⛔ NON DIRE CHE UNA FUNZIONE NON ESISTE FINCHE' NON HAI TUTTI I FILE
+**19 settembre 2026, l'errore piu' grosso della giornata.**
+Claude ha cercato `compApriFile()` dentro `/mnt/user-data/uploads/trovaimpresa/js/`,
+dove aveva portato **12 file su 24**, non l'ha trovata, e ha concluso che il
+pulsante «Carica qui il computo del geometra» fosse morto. L'ha detto ad Alex
+**due volte** e l'ha scritto nella pagina che vende.
+
+La funzione c'era dal 18 agosto, in **`js/gest-computo-pdf.js`** — uno dei 12
+file non portati — e fa **piu'** di quella che Claude stava per scrivere: legge
+Excel, CSV **e PDF** (con `pdf.js`, righe «Sommano», e riconosce le scansioni).
+Anche `compPrezziDaPrezzario()` c'era, nello stesso file.
+
+E la copia scritta per «riparare» avrebbe fatto un danno vero: due
+`const COMP_IMP_MAX` nello stesso spazio globale = **SyntaxError**, e
+`gest-computo-pdf.js` non sarebbe partito affatto. Via tutti i PDF del computo.
+
+**La regola, da qui in avanti:**
+1. La pagina del gestionale carica **24 file js**. L'elenco vero si prende cosi':
+   `grep -o '<script[^>]*src="/js/[a-z0-9-]*\.js"' gestionale-app.html`
+2. Prima di dire «non esiste», si portano **tutti**, e si controlla che ci siano.
+3. Per trovare i pulsanti morti si guarda che ogni `if(a==="...")return X();`
+   abbia la sua `X` definita — **su tutti i file caricati**. Fatto cosi' il
+   19 settembre su **→153← pulsanti: zero morti.**
+4. Una funzione definita due volte in file diversi non da' errore (vince
+   l'ultimo caricato), ma **due `const` con lo stesso nome fanno saltare il
+   secondo file intero**.
+
+### 5. ⛔ DOPO OGNI `device_commit_files`, RICONTROLLARE CON L'md5
+Regola di Alex, e il 19 settembre e' servita due volte: `device_commit_files`
+ha risposto **`written`** rimandando poi la **versione vecchia** del file.
+Si riconosce dalla misura in byte che non cambia.
+**Cura:** ricopiare il file sotto un **nome nuovo** in `/mnt/user-data/outputs/`
+(es. `gestionale-v2.html`) e rifare il commit da li'. Con lo stesso nome di
+prima continua a rimandare quello vecchio.
+Il controllo si fa sempre: `device_stage_files` + `md5sum`, e i due md5 devono
+combaciare. Senza, si pubblica la versione di prima senza accorgersene.
 ## Pannelli
 - 5 pannelli: `pannello-impresa`, `pannello-artigiano`, `pannello-professionisti`, `pannello-negozio` (le 4 categorie business) + `pannello-candidato`.
 - Modal "Genera preventivo con AI": stile `.modal-ai` a tutta pagina (fullscreen), header chiaro. Funzione AI (generaConAI/generaTestoPreventivo/calcolaPrezzo) uniforme su tutti i 4 pannelli.
