@@ -723,11 +723,26 @@
     const spazio=tagliato.lastIndexOf(" ");
     return (spazio>quante*0.5?tagliato.slice(0,spazio):tagliato).replace(/[ ,;.:]+$/,"")+"…";
   }
+  /* \u26d4 19 settembre 2026 \u2014 \u00abAPRI LA LAVORAZIONE\u00bb, E POI VAI A TROVARLA.
+     Ogni motivo qui sotto dice di andare nella lavorazione \u2014 \u00abapri la
+     lavorazione e cercala a mano\u00bb, \u00abcorreggilo nella lavorazione\u00bb \u2014 ma la
+     riga non era cliccabile. Su un computo arrivato dal geometra questi
+     gruppi fanno venti righe l'uno: bisognava ritrovarle a occhio in un
+     elenco di sessanta voci, partendo da un codice e da una descrizione
+     tagliata a centodieci lettere.
+     Adesso la riga apre la sua lavorazione, con l'azione che il computo ha
+     gi\u00e0 (comp-voce): stesso tasto delle righe dell'elenco.
+     \u26a0\ufe0f Se la voce non ha un id la riga resta com'era, muta ma senza
+        promettere niente: un cursore a manina che non apre niente \u00e8 peggio
+        di una riga normale. */
   function _przRigaHtml(v,motivo){
-    return '<div class="spesa-row"><span>'
+    const id=(v&&v.id!=null)?String(v.id):"";
+    const apre=id?' data-action="comp-voce" data-id="'+esc(id)+'" style="cursor:pointer"':'';
+    return '<div class="spesa-row"'+apre+'><span>'
       +(v.codice?'<b>'+esc(String(v.codice))+'</b> · ':'')
       +esc(_przAccorcia(v.descrizione||"(senza descrizione)",110))
-      +'<small class="sp-forn">'+motivo+'</small></span><b></b><span></span></div>';
+      +'<small class="sp-forn">'+motivo+'</small></span><b></b>'
+      +'<span'+(id?' style="color:var(--testo-2)"':'')+'>'+(id?'\u203a':'')+'</span></div>';
   }
   function _przGruppo(titolo,elenco){
     if(!elenco||!elenco.length)return "";
