@@ -2946,3 +2946,243 @@
   }
 
 
+  /* ============================================================
+     CARICARE IL COMPUTO DEL GEOMETRA — 19 settembre 2026
+
+     Il pulsante «Carica qui il computo del geometra» esisteva dal 18
+     agosto e chiamava `compApriFile()`. Quella funzione non e' mai
+     stata scritta: il clic finiva in un «is not defined» nella console
+     e a schermo non succedeva niente.
+
+     ⛔ NIENTE DI NUOVO: si fa come l'importatore del prezzario
+        (`pzImporta`), che questa stessa cosa la fa da agosto. Si riusa
+        il suo `_pzCol`, che gia' cerca anche la colonna «quantita».
+     ============================================================ */
+
+  /* quante righe al massimo: un computo da piu' di duemila lavorazioni non
+     esiste, e oltre si rischia solo di piantare il browser */
+  const COMP_IMP_MAX = 2000;
+  /* a blocchi, non tutte insieme: una insert con duemila righe dentro
+     viene rifiutata o ci mette una vita */
+  const COMP_IMP_BLOCCO = 200;
+
+  function compApriFile(){
+    const f=$("#comp-file");
+    if(!f){toast("Non trovo la casella del file: ricarica la pagina");return;}
+    /* ⚠️ si azzera prima: se no, ricaricando DUE VOLTE LO STESSO file il
+       browser non considera cambiato il valore e `onchange` non scatta.
+       Stesso motivo per cui lo fa anche pzApriFile. */
+    f.value="";
+    f.onchange=function(){ if(f.files&&f.files[0])compImporta(f.files[0]); };
+    f.click();
+  }
+
+  /* ⚠️ nel progetto c'e' `gconfirm` ma NON un «galert»: un avviso lungo
+     con `toast` non si legge (sparisce in 2,6 secondi e sta su una riga).
+     Questo e' `gconfirm` senza la domanda, e passa dalla stessa
+     traduzione per i professionisti (pratiche invece di lavori). */
+  function _compAvviso(m){ alert(_msgPro(String(m))); }
+
+  /* i numeri scritti all'italiana: 1.234,56 e' milleduecentotrentaquattro
+     e cinquantasei, non uno. Stessa regola del prezzario. */
+  function _compNum(v){
+    if(v==null)return 0;
+    if(typeof v==="number")return isFinite(v)?v:0;
+    let t=String(v).replace(/[€\s ]/g,"").trim();
+    if(!t)return 0;
+    /* se ci sono tutti e due i segni, l'ULTIMO e' la virgola dei decimali */
+    if(t.indexOf(",")>=0&&t.indexOf(".")>=0){
+      t=(t.lastIndexOf(",")>t.lastIndexOf("."))
+        ? t.replace(/\./g,"").replace(",",".")
+        : t.replace(/,/g,"");
+    }else if(t.indexOf(",")>=0){
+      t=t.replace(/\./g,"").replace(",",".");
+    }
+    const n=parseFloat(t);
+    return isFinite(n)?n:0;
+  }
+
+  async function compImporta(file){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!compVociCompId){toast("Apri prima un computo, poi carica il file");return;}
+
+    /* --- 1. il PDF non si legge, e si dice perche' --------------------- */
+    if(/\.pdf$/i.test(file.name||"")){
+      _compAvviso("Questo e' un PDF, e un PDF non lo so leggere.\n\n"
+        +"Un computo in PDF esce da dieci programmi diversi con dieci "
+        +"impaginazioni diverse: leggendolo a indovinare importerei "
+        +"quantita' sbagliate senza dirtelo, ed e' molto peggio che non "
+        +"importare niente.\n\n"
+        +"Chiedi al geometra il file in EXCEL: tutti i programmi di computo "
+        +"(Primus, STR, ACCA…) lo esportano con un clic. Va bene anche un CSV.");
+      return;
+    }
+
+    toast("Sto leggendo "+file.name+"…");
+    if(!(await caricaXLSX())){
+      toast("Non riesco a scaricare il modulo per leggere i file Excel: controlla la connessione e riprova");
+      return;
+    }
+
+    /* --- 2. aprire il file --------------------------------------------- */
+    let righe;
+    try{
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(new Uint8Array(buf),{type:"array"});
+      const sh=wb.Sheets[wb.SheetNames[0]];
+      righe=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,defval:""});
+    }catch(e){
+      _compAvviso("Non riesco ad aprire il file:\n"+((e&&e.message)||String(e))
+        +"\n\nSe e' un CSV, prova a riaprirlo con Excel e a salvarlo come .xlsx.");
+      return;
+    }
+    if(!righe||!righe.length){_compAvviso("Il file e' vuoto.");return;}
+
+    /* --- 3. la riga di intestazione e le colonne ------------------------ */
+    let iInt=-1;
+    for(let i=0;i<Math.min(righe.length,30);i++){
+      if((righe[i]||[]).some(c=>/descriz|lavoraz|denominaz|designaz/i.test(String(c||"")))){iInt=i;break;}
+    }
+    if(iInt<0){
+      _compAvviso("Non trovo la riga di intestazione.\n\n"
+        +"Il file deve avere una riga con scritto almeno DESCRIZIONE, e "
+        +"possibilmente anche Codice, U.M., Quantita' e Prezzo.\n\n"
+        +"Aprilo con Excel, aggiungi quella riga sopra alle lavorazioni e riprova.");
+      return;
+    }
+    /* ⚠️ `_pzCol` sta in gest-sal-prezzario.js. Se quel file non e' stato
+       caricato non si va avanti a indovinare: si dice cosa non c'e'. */
+    if(typeof _pzCol!=="function"){
+      _compAvviso("Manca il pezzo che riconosce le colonne (gest-sal-prezzario.js): ricarica la pagina.");
+      return;
+    }
+    const C=_pzCol(righe[iInt]);
+    if(C.descrizione==null){
+      _compAvviso("Non trovo la colonna della descrizione.\n\n"
+        +"Nella riga di intestazione ci deve essere scritto DESCRIZIONE "
+        +"(oppure Lavorazione, Denominazione).");
+      return;
+    }
+
+    /* --- 4. dividere capitoli e lavorazioni ---------------------------- */
+    const dati=righe.slice(iInt+1);
+    const pezzi=[];            /* {tipo:'cap'|'voce', ...} nell'ordine del file */
+    let saltate=0;
+    dati.slice(0,COMP_IMP_MAX).forEach(r=>{
+      const desc=String((r[C.descrizione]!=null?r[C.descrizione]:"")).replace(/\s+/g," ").trim();
+      if(!desc||desc.length<3){saltate++;return;}
+      /* le righe dei totali non sono lavorazioni */
+      if(/^(totale|totali|sommano|a riportare|riporto)\b/i.test(desc)){saltate++;return;}
+
+      const cod =(C.codice!=null)?String(r[C.codice]||"").trim():"";
+      const uni =(C.unita!=null)?String(r[C.unita]||"").trim():"";
+      const qta =(C.quantita!=null)?_compNum(r[C.quantita]):0;
+      const prz =(C.prezzo!=null)?_compNum(r[C.prezzo]):0;
+
+      /* ⚠️ COS'E' UN CAPITOLO: una riga che ha solo un titolo. Niente
+         unita' di misura, niente quantita', niente prezzo. Nei computi
+         veri i capitoli sono scritti cosi': «Cap. 1 — Demolizioni» e
+         basta. Se ha anche solo l'unita' di misura, e' una lavorazione
+         a cui manca il prezzo, non un capitolo. */
+      if(!uni&&!qta&&!prz){ pezzi.push({tipo:"cap",titolo:desc,numero:cod}); return; }
+
+      pezzi.push({tipo:"voce",codice:cod||null,descrizione:desc,
+                  unita:uni||null,quantita:qta,prezzo_unitario:prz});
+    });
+
+    const voci=pezzi.filter(x=>x.tipo==="voce");
+    const capi=pezzi.filter(x=>x.tipo==="cap");
+    if(!voci.length){
+      _compAvviso("Nel file non ho trovato nessuna lavorazione.\n\n"
+        +"Righe lette: "+dati.length+". Servono righe con una descrizione e "
+        +"almeno l'unita' di misura, la quantita' o il prezzo.");
+      return;
+    }
+
+    /* --- 5. far vedere cosa si e' capito, PRIMA di scrivere ------------- */
+    const senzaPrezzo=voci.filter(v=>!(+v.prezzo_unitario)).length;
+    const senzaQta   =voci.filter(v=>!(+v.quantita)).length;
+    const totale=voci.reduce((t,v)=>t+(+v.quantita||0)*(+v.prezzo_unitario||0),0);
+    const pr=voci[0];
+    const eur=n=>n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+
+    if(!gconfirm(
+       "Ho letto "+file.name+".\n\n"
+      +"Lavorazioni: "+voci.length+"\n"
+      +"Capitoli: "+capi.length+"\n"
+      +(saltate?("Righe saltate (vuote, titoli, totali): "+saltate+"\n"):"")
+      +(C.quantita==null?"⚠ Non ho trovato la colonna della QUANTITA': entrano tutte a 0.\n":"")
+      +(C.prezzo==null  ?"⚠ Non ho trovato la colonna del PREZZO: entrano tutte a 0,00 €.\n":"")
+      +(senzaQta   &&C.quantita!=null?("⚠ "+senzaQta+" lavorazioni senza quantita'.\n"):"")
+      +(senzaPrezzo&&C.prezzo!=null  ?("⚠ "+senzaPrezzo+" lavorazioni senza prezzo.\n"):"")
+      +"\nTotale che verrebbe fuori: "+eur(totale)+"\n\n"
+      +"La prima lavorazione e' questa:\n"
+      +"  "+(pr.codice?("["+pr.codice+"] "):"")+pr.descrizione.slice(0,70)+"\n"
+      +"  "+(pr.unita||"—")+" × "+pr.quantita+" a "+eur(pr.prezzo_unitario)+"\n\n"
+      +"Se non torna, annulla e controlla le colonne del file.\n"
+      +"Le lavorazioni si aggiungono in fondo: quelle che hai gia' non si toccano.\n\n"
+      +"Le carico?")) { toast("Importazione annullata"); return; }
+
+    /* --- 6. scrivere: prima i capitoli, poi le lavorazioni -------------- */
+    toast("Sto caricando "+voci.length+" lavorazioni…");
+    let ordCap=compCapCache.reduce((m,c)=>Math.max(m,+c.ordine||0),0);
+    let ordVoce=compVociCache.reduce((m,v)=>Math.max(m,+v.ordine||0),0);
+
+    /* i capitoli uno per uno: sono pochi, e serve l'id di ognuno per
+       attaccarci sotto le lavorazioni che lo seguono nel file */
+    let capCorrente=null;
+    const daScrivere=[];
+    for(const x of pezzi){
+      if(x.tipo==="cap"){
+        ordCap++;
+        const rc=await sb.from("gest_computo_capitoli").insert({
+          user_id:sbUid, computo_id:compVociCompId, ordine:ordCap,
+          numero:(x.numero||String(ordCap)).slice(0,10), titolo:x.titolo.slice(0,200),
+          sicurezza:false
+        }).select("id");
+        if(rc.error){
+          _compAvviso("Errore mentre creavo il capitolo «"+x.titolo.slice(0,40)+"»:\n"
+            +rc.error.message+"\n\nQuello che era gia' entrato resta: controlla il computo.");
+          await renderCompVoci(compVociCompId);
+          return;
+        }
+        capCorrente=(rc.data&&rc.data[0])?rc.data[0].id:null;
+        continue;
+      }
+      ordVoce++;
+      daScrivere.push({
+        user_id:sbUid, computo_id:compVociCompId, capitolo_id:capCorrente,
+        codice:x.codice?String(x.codice).slice(0,60):null,
+        descrizione:x.descrizione.slice(0,2000),
+        unita:x.unita?String(x.unita).slice(0,20):null,
+        prezzo_unitario:x.prezzo_unitario||0,
+        /* ⚠️ «a corpo» e non «dalle misure»: nel file c'e' la quantita'
+           gia' fatta, le misure che l'hanno prodotta non ci sono. Messe
+           «dalle misure», la quantita' verrebbe dalla somma di zero
+           misure e il computo importato varrebbe 0,00 €. */
+        quantita_manuale:true,
+        quantita:x.quantita||0,
+        ordine:ordVoce
+      });
+    }
+
+    let scritte=0;
+    for(let i=0;i<daScrivere.length;i+=COMP_IMP_BLOCCO){
+      const blocco=daScrivere.slice(i,i+COMP_IMP_BLOCCO);
+      const rv=await sb.from("gest_computo_voci").insert(blocco).select("id");
+      if(rv.error){
+        _compAvviso("Ne ho caricate "+scritte+" su "+daScrivere.length+", poi mi sono fermato:\n"
+          +rv.error.message+"\n\nQuelle entrate restano nel computo.");
+        await renderCompVoci(compVociCompId);
+        rinfresca("computi");
+        return;
+      }
+      scritte+=(rv.data?rv.data.length:blocco.length);
+    }
+
+    await renderCompVoci(compVociCompId);
+    await cronoRiallinea();
+    rinfresca("computi");
+    toast(scritte+" lavorazioni caricate ✔"+(capi.length?(" e "+capi.length+" capitoli"):"")
+      +(senzaPrezzo?" — i prezzi a zero li riempi col pulsante del prezzario":""));
+  }
