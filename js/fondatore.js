@@ -214,9 +214,9 @@
      \u26a0\ufe0f SI GUARDA LA COLONNA, NON IL VALORE. Una colonna che esiste ma
         \u00e8 vuota \u00e8 legittima; una che non esiste \u00e8 un aggiornamento
         mancante. Per aggiungerne una: una riga in PROVE. */
-  /* ⛔ 19 SETTEMBRE 2026 — DA 15 CONTROLLI A 97, CON UNA DOMANDA SOLA.
+  /* ⛔ 19 SETTEMBRE 2026 — DA 15 CONTROLLI A 149, CON UNA DOMANDA SOLA.
      Prima qui c'erano 15 prove scritte a mano, ognuna con la sua domanda al
-     database: 15 domande, e coprivano 13 file sql su 36. Gli altri 23 non li
+     database: 15 domande, e coprivano 13 file sql su 37. Gli altri 24 non li
      guardava nessuno.
      Adesso l'elenco e' completo e la domanda e' UNA: il browser manda quello
      che si aspetta, il database (funzione gest_schema_mancanti, in
@@ -240,6 +240,11 @@
           l'anagrafica dei mezzi e' una sola (sql/mezzi-una-lista-sola.sql).
      Sono gli unici due buchi del 19 settembre, e sono voluti.
 
+     ⚠️ NON SI SCRIVE PIU' A MANO. Il controllo prima di pubblicare
+        (tools/controllo-push.js, punto 8) legge la cartella sql/ e ferma
+        il push se qui manca un file che il gestionale nomina. Cosi' il
+        giorno che me ne dimentico non lo scopro da un iscritto.
+
      ⚠️ COSTA ZERO A CHI NON SONO IO. Sta in questo file apposta:
         fondatore.js esce subito per chiunque non sia nell'elenco AMMESSI,
         quindi per gli iscritti questa domanda non esiste.
@@ -248,25 +253,26 @@
      ⚠️ SI GUARDA IL NOME, NON IL VALORE. Una colonna che esiste ma e'
         vuota e' legittima; una che non esiste e' un aggiornamento mancante. */
   var PROVE = {
-    "aggiungi-commercialista.sql":      "gest_azienda.comm_studio",
+    "aggiungi-commercialista.sql":      "gest_azienda.comm_studio gest_azienda.comm_nome gest_azienda.comm_tel gest_azienda.comm_email gest_azienda.comm_pec gest_azienda.comm_note",
     "capitolo-costi-sicurezza.sql":     "gest_computo_capitoli.sicurezza gest_computo_totali",
+    "controllo-aggiornamenti.sql":      "gest_schema_mancanti()",
     "gest-analisi-arrotondamento.sql":  "gest_analisi_righe_calc gest_analisi_totali",
     "gest-analisi-prezzi.sql":          "gest_computo_voci.an_spese_perc gest_computo_voci.an_utile_perc gest_analisi_righe gest_analisi_totali gest_computo_voci_calc",
-    "gest-azienda-polizza.sql":         "gest_azienda.pol_compagnia",
+    "gest-azienda-polizza.sql":         "gest_azienda.pol_compagnia gest_azienda.pol_numero gest_azienda.pol_massimale gest_azienda.pol_scadenza",
     "gest-azienda-tariffa-oraria.sql":  "gest_azienda.tariffa_oraria",
     "gest-cestino-elimina.sql":         "_gest_cascata() gest_cestino_elimina()",
-    "gest-cestino.sql":                 "gest_lavori.eliminato_il gest_clienti.eliminato_il gest_preventivi.eliminato_il gest_fatture.eliminato_il gest_scadenze.eliminato_il gest_mestieri.eliminato_il gest_mezzi.eliminato_il gest_operatori.eliminato_il gest_carte.eliminato_il gest_fornitori.eliminato_il gest_fatture_fornitori.eliminato_il gest_spese.eliminato_il gest_ore.eliminato_il gest_crediti.eliminato_il gest_foto.eliminato_il gest_video.eliminato_il promemoria.eliminato_il gest_mezzi_scadenze",
+    "gest-cestino.sql":                 "gest_lavori.eliminato_il gest_clienti.eliminato_il gest_preventivi.eliminato_il gest_fatture.eliminato_il gest_scadenze.eliminato_il gest_mestieri.eliminato_il gest_mezzi.eliminato_il gest_operatori.eliminato_il gest_carte.eliminato_il gest_fornitori.eliminato_il gest_fatture_fornitori.eliminato_il gest_spese.eliminato_il gest_ore.eliminato_il gest_crediti.eliminato_il gest_foto.eliminato_il gest_video.eliminato_il gest_mezzi_scadenze",
     "gest-computo-cronoprogramma.sql":  "gest_computi.data_inizio gest_computo_capitoli.giorni gest_computo_capitoli.insieme",
-    "gest-computo-metrico.sql":         "gest_computi.preventivo_id gest_computi.ribasso_perc gest_computi.prezzario gest_computi.prezzario_anno gest_computo_voci.incidenza_manodopera gest_computo_voci.oneri_sicurezza gest_prezzi_propri.incidenza_manodopera gest_prezzi_propri.fonte gest_computi gest_computo_capitoli gest_computo_misure gest_computo_voci gest_prezzi_propri gest_computo_totali gest_computo_voci_calc",
+    "gest-computo-metrico.sql":         "gest_computi.preventivo_id gest_computi.ribasso_perc gest_computi.prezzario gest_computi.prezzario_anno gest_computo_voci.incidenza_manodopera gest_computo_voci.oneri_sicurezza gest_prezzi_propri.incidenza_manodopera gest_prezzi_propri.fonte gest_computi gest_computo_capitoli gest_computo_voci gest_computo_misure gest_prezzi_propri gest_computo_voci_calc gest_computo_totali",
     "gest-computo-quadro.sql":          "gest_computi.quadro_economico",
     "gest-computo-variante.sql":        "gest_computi.variante_di gest_computo_voci.origine_id",
-    "gest-fattura-cassa.sql":           "gest_fatture.cassa_perc",
+    "gest-fattura-cassa.sql":           "gest_fatture.cassa_perc gest_fatture.cassa_tipo gest_fatture.spese",
     "gest-fornitori-plus.sql":          "gest_fornitori.trovaimpresa_id gest_foto.fornitore_id",
-    "gest-fornitori.sql":               "gest_fatture_fornitori gest_fornitori",
-    "gest-ore-e-crediti.sql":           "gest_azienda.cfp_obiettivo gest_crediti gest_ore",
-    "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc",
+    "gest-fornitori.sql":               "gest_fornitori gest_fatture_fornitori",
+    "gest-ore-e-crediti.sql":           "gest_azienda.cfp_obiettivo gest_ore gest_crediti",
+    "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
-    "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo",
+    "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo gest_lavori.pratica_protocollo gest_lavori.pratica_comune gest_lavori.pratica_data_dep gest_lavori.pratica_stato gest_lavori.catasto_foglio gest_lavori.catasto_particella gest_lavori.catasto_sub",
     "gest-preventivo-sezioni.sql":      "gest_preventivo_righe.sezione",
     "gest-rapportini-cestino.sql":      "gest_rapportino_cestina()",
     "gest-rapportini.sql":              "gest_ore.rapportino_id gest_rapportini",
@@ -276,13 +282,13 @@
     "gest-scadenze-ripeti.sql":         "gest_scadenze.ripeti_mesi",
     "gest-squadra-nomi.sql":            "gest_squadra_nomi",
     "gest-variante-origine-vista.sql":  "gest_computo_voci_calc",
-    "gestionale-mezzi.sql":             "gest_scadenze.mezzo_id gest_lavoro_mezzi gest_mezzi gest_mezzi_scadenze",
-    "mezzi-una-lista-sola.sql":         "gest_mezzi.noleggiabile gest_mezzi_scadenze",
+    "gestionale-mezzi.sql":             "gest_scadenze.mezzo_id gest_mezzi gest_lavoro_mezzi gest_mezzi_scadenze",
+    "mezzi-una-lista-sola.sql":         "gest_mezzi.noleggiabile gest_mezzi.codice gest_mezzi.tariffa_ora gest_mezzi.tariffa_giorno gest_mezzi.tariffa_settimana gest_mezzi.tariffa_mese gest_mezzi.ore_incluse_giorno gest_mezzi.tariffa_ora_extra gest_mezzi.km_inclusi_giorno gest_mezzi.tariffa_km gest_mezzi.usura_fissa gest_mezzi.usura_percento gest_mezzi.cauzione gest_mezzi.ha_contaore gest_mezzi.ha_contakm gest_mezzi.verifica_ultima gest_mezzi.verifica_mesi gest_mezzi.verifica_ente gest_mezzi.assicurazione_scad gest_mezzi.revisione_scad gest_mezzi.collaudo_scad gest_mezzi.tagliando_ogni_ore gest_mezzi.tagliando_ultimo_ore gest_mezzi.contaore_attuale gest_mezzi.fuori_servizio gest_mezzi.fuori_servizio_perche gest_mezzi.manutenzione_note gest_mezzi_scadenze",
     "neg-preventivi-cestino.sql":       "neg_preventivi.eliminato_il",
     "noleggio-cestino.sql":             "nol_clienti.eliminato_il nol_noleggi.eliminato_il neg_prodotti.eliminato_il neg_fornitori.eliminato_il neg_movimenti.eliminato_il",
     "noleggio-fatture.sql":             "nol_noleggi.fattura_id gest_azienda.num_fattura nol_fatture",
     "noleggio-foto-video.sql":          "nol_media",
-    "promemoria-sezione.sql":           "promemoria.ora",
+    "promemoria-sezione.sql":           "promemoria.ora promemoria.note promemoria.avvisa_giorni promemoria.ripeti_mesi promemoria.stato promemoria.eliminato_il",
     "supporto-origine.sql":             "supporto_messaggi.origine"
   };
 

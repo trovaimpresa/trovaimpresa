@@ -469,6 +469,159 @@ function controllaFinestre(){
 }
 
 /* ------------------------------------------------------------------ */
+/* 8. GLI AGGIORNAMENTI DEL DATABASE CHE NON SONO IN ELENCO            */
+/*    19 settembre 2026                                                 */
+/* ------------------------------------------------------------------ */
+/* Il gestionale ha un controllo che mi avvisa se nel database manca un
+   aggiornamento: js/fondatore.js manda l'elenco di quello che si aspetta
+   (la variabile PROVE) e il database risponde con quello che non c'e'.
+   Gira solo per me, una domanda sola, e il 19 settembre copriva 36 file
+   sql su 36.
+
+   Ha un punto debole solo, ed e' umano: quell'elenco lo aggiorno A MANO.
+   Il giorno che scrivo un file sql nuovo e mi dimentico la sua riga, il
+   controllo continua a dire «tutto a posto» — controllando una cosa in
+   meno. Un guardiano che non sa di dover guardare una porta e' peggio di
+   nessun guardiano, perche' ti fa stare tranquillo.
+
+   Questo pezzo chiude quel buco: al push confronta l'elenco con la
+   cartella sql/ e dice quello che manca.
+
+   COSA FERMA LA PUBBLICAZIONE (sono sicuri, non sospetti):
+     · un file sql che il gestionale NOMINA nei suoi messaggi, che crea
+       davvero qualcosa nel database, e che in PROVE non c'e';
+     · un file elencato in PROVE che nella cartella sql/ non esiste piu'.
+   COSA E' SOLO UN AVVISO (potrebbe avere ragione il codice):
+     · un file in elenco che crea piu' roba di quella controllata;
+     · una riga di PROVE che quel file non crea (magari arriva da un altro
+       file: e' il caso di promemoria.eliminato_il, che sta in PROVE sotto
+       gest-cestino.sql ma nasce altrove. Vero e innocuo).
+
+   ⚠️ SI GUARDA SOLO IL GESTIONALE. Il noleggio, il negozio e il pannello
+      hanno i loro file sql e non passano da PROVE: metterli qui vorrebbe
+      dire fermare la pubblicazione per una cosa che nessuno ha promesso
+      di controllare. Se un giorno anche loro avranno il loro elenco, si
+      aggiunge il loro nome qui sotto. */
+const FILE_CHE_NOMINANO_SQL = [
+  'gestionale-app.html',
+  'js/fondatore.js',
+  'js/cestino.js'
+];
+
+/* legge la variabile PROVE dentro js/fondatore.js senza far girare il file */
+function elencoAtteso(){
+  if (!esiste('js/fondatore.js')) return null;
+  let t;
+  try { t = leggi('js/fondatore.js'); } catch(e){ return null; }
+  const m = t.match(/var\s+PROVE\s*=\s*(\{[\s\S]*?\n\s*\});/);
+  if (!m) return null;
+  try { return vm.runInNewContext('(' + m[1] + ')'); } catch(e){ return null; }
+}
+
+/* quello che un file sql crea davvero: colonne, tabelle, viste, funzioni */
+function cosaCreaIlFile(testoSql){
+  const fuori = new Set();
+  let m;
+  /* ⚠️ un ALTER TABLE puo' aggiungere PIU' colonne in una volta sola:
+     «alter table x add column a, add column b, add column c;». Leggendo solo
+     la prima si perdevano 54 colonne su 151 — fra cui promemoria.eliminato_il,
+     che mi ha fatto scrivere la riga sbagliata la prima volta. Quindi si
+     prende TUTTA l'istruzione, fino al punto e virgola, e dentro si cercano
+     tutte le sue «add column». */
+  const alt = /alter\s+table\s+(?:if\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?\b([\s\S]*?);/gi;
+  while ((m = alt.exec(testoSql)) !== null){
+    const tabella = m[1];
+    const dentro = m[2];
+    const col = /add\s+column\s+(?:if\s+not\s+exists\s+)?"?([a-z0-9_]+)"?/gi;
+    let c;
+    while ((c = col.exec(dentro)) !== null) fuori.add(tabella + '.' + c[1]);
+  }
+  const tab = /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?/gi;
+  while ((m = tab.exec(testoSql)) !== null) if (m[1] !== 'if') fuori.add(m[1]);
+  const vis = /create\s+(?:or\s+replace\s+)?view\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?/gi;
+  while ((m = vis.exec(testoSql)) !== null) fuori.add(m[1]);
+  const fun = /create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?"?([a-z0-9_]+)"?/gi;
+  while ((m = fun.exec(testoSql)) !== null) fuori.add(m[1] + '()');
+  return fuori;
+}
+
+/* Le due cose che un file sql crea ma che in PROVE NON devono esserci.
+   Senza questo elenco, il controllo le segnalerebbe a ogni push: e un avviso
+   finto ripetuto insegna a saltare gli avvisi — e' la regola di questo file. */
+const FUORI_APPOSTA = {
+  'gest_note.eliminato_il':
+    'tolta il 9/8/2026: il cestino rompeva il salvataggio delle note del calendario (il perche\' sta in js/cestino.js)',
+  'nol_mezzi.eliminato_il':
+    'quella tabella non esiste piu\' dal 4/9/2026: l\'anagrafica dei mezzi e\' una sola (sql/mezzi-una-lista-sola.sql)'
+};
+
+function controllaAggiornamentiDatabase(){
+  const PROVE = elencoAtteso();
+  if (!PROVE){
+    /* non si ferma niente: se il file cambia forma, il controllo si tira
+       indietro e lo dice. Un controllo che non sa leggere non ha il
+       diritto di bloccare una pubblicazione. */
+    avviso('js/fondatore.js', 'non riesco a leggere l\'elenco PROVE: il controllo degli aggiornamenti del database non ha girato');
+    return;
+  }
+
+  /* 1. i file sql che il gestionale nomina nei suoi messaggi */
+  const nominati = new Set();
+  const suoi = FILE_CHE_NOMINANO_SQL.slice();
+  for (const f of tuttiIFile(['.js'])) if (/^js\/gest-/.test(f)) suoi.push(f);
+  for (const f of suoi){
+    if (!esiste(f)) continue;
+    let t;
+    try { t = leggi(f); } catch(e){ continue; }
+    (t.match(/sql\/[A-Za-z0-9_.-]+\.sql/g) || []).forEach(s => {
+      const nome = s.slice(4);
+      /* i nomi finti negli esempi dei commenti non esistono nella cartella:
+         si scartano da soli, senza un elenco di eccezioni da mantenere */
+      if (esiste('sql/' + nome)) nominati.add(nome);
+    });
+  }
+
+  /* 2. un file nominato che crea qualcosa e non e' in elenco: si ferma */
+  const inElenco = new Set(Object.keys(PROVE));
+  const scoperti = [];
+  for (const nome of nominati){
+    if (inElenco.has(nome)) continue;
+    let t;
+    try { t = leggi('sql/' + nome); } catch(e){ continue; }
+    const crea = cosaCreaIlFile(t);
+    if (crea.size) scoperti.push(nome + ' (crea ' + [...crea].slice(0, 4).join(', ')
+                                + (crea.size > 4 ? ', …' : '') + ')');
+  }
+  if (scoperti.length)
+    errore('js/fondatore.js',
+      'questi file sql sono nominati dal gestionale ma NON sono in PROVE, quindi nessuno controlla che siano stati eseguiti: '
+      + scoperti.join(' · ') + ' — aggiungi una riga per ognuno.');
+
+  /* 3. un file in elenco che non esiste piu': si ferma */
+  const spariti = [...inElenco].filter(n => !esiste('sql/' + n));
+  if (spariti.length)
+    errore('js/fondatore.js',
+      'PROVE elenca file sql che nella cartella sql/ non ci sono: ' + spariti.join(', '));
+
+  /* 4. copertura parziale e righe orfane: solo avvisi */
+  for (const nome of inElenco){
+    if (!esiste('sql/' + nome)) continue;
+    let t;
+    try { t = leggi('sql/' + nome); } catch(e){ continue; }
+    const crea = cosaCreaIlFile(t);
+    const controllati = new Set(String(PROVE[nome] || '').split(/\s+/).filter(Boolean));
+    const fuori = [...crea].filter(x => !controllati.has(x) && !FUORI_APPOSTA[x]);
+    if (fuori.length)
+      avviso('js/fondatore.js', nome + ': crea anche ' + fuori.join(', ')
+             + ' — in PROVE non ci sono (se servono al gestionale, aggiungili)');
+    const orfane = [...controllati].filter(x => !crea.has(x));
+    if (orfane.length)
+      avviso('js/fondatore.js', nome + ': in PROVE c\'è ' + orfane.join(', ')
+             + ' ma questo file non le crea (arrivano da un altro file? controlla)');
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* AVVISI — si leggono, non fermano niente                             */
 /* ------------------------------------------------------------------ */
 function guardaGliAccenti(){
@@ -495,6 +648,7 @@ function main(){
   controllaSchema();
   controllaMisure();
   controllaFinestre();
+  controllaAggiornamentiDatabase();
   guardaGliAccenti();
 
   const secondi = ((Date.now() - t0) / 1000).toFixed(1);
