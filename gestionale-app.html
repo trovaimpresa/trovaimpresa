@@ -8202,7 +8202,21 @@
                                      +"e non sono riuscito a rimetterla a posto da solo:\n  •  "+elenca(rimaste)
                                      +"\n\nVai nel Cestino, scegli «Tutti i reparti» e premi «Rimetti a "
                                      +"posto» su quelle cose. Il resto del reparto è già a posto.";
-        alert(testa+coda);
+        /* ⛔ 19 settembre 2026 — L'ELENCO CHE SPARIVA CON UN OK.
+           Qui sotto c'era un alert(). Dentro c'era o l'elenco delle cose
+           rimaste nel Cestino da rimettere a posto a mano, o — nel caso
+           peggiore, quello senza Cestino — l'elenco di quelle cancellate
+           PER SEMPRE. Premevi OK e quell'elenco non esisteva piu' da
+           nessuna parte: nel caso peggiore era l'unica traccia di quello
+           che avevi perso, e la riga che diceva «usa il backup» era andata
+           via insieme all'elenco delle cose da recuperare.
+           Adesso: un pannello che resta, un tasto per copiarselo, e la
+           stessa cosa scritta in cima al Cestino finche' non dici tu che
+           l'hai sistemata. */
+        const _guastoTesto=testa+coda;
+        cestGuastoSalva(_guastoTesto);
+        try{ console.error("[reparto]",_guastoTesto); }catch(_e){}
+        cestGuastoPannello(_guastoTesto);
         renderLanding();return;
       }
     }
@@ -10781,6 +10795,44 @@
     }catch(e){}
   }
 
+  /* ⛔ 19 settembre 2026 — LA TRACCIA DI UN'ELIMINAZIONE FERMATA A META'.
+     Se ne occupano insieme il pannello qui sotto e la fascia rossa in cima
+     al Cestino: l'elenco si scrive una volta e resta li' finche' non e'
+     stato sistemato davvero. Non si cancella da solo dopo tot giorni: e'
+     roba persa o da rimettere a posto, e sparisce solo quando lo dice lui. */
+  const CEST_GUASTO="gest_cestino_guasto";
+  function cestGuastoSalva(testo){
+    try{ localStorage.setItem(CEST_GUASTO,
+      JSON.stringify({quando:Date.now(),testo:String(testo||"")})); }catch(e){}
+  }
+  function cestGuastoLeggi(){
+    try{ const v=JSON.parse(localStorage.getItem(CEST_GUASTO)||"null");
+         return (v&&v.testo)?v:null; }catch(e){ return null; }
+  }
+  function cestGuastoHTML(){
+    const g=cestGuastoLeggi(); if(!g) return "";
+    let quando="";
+    try{ quando=new Date(g.quando||Date.now()).toLocaleDateString("it-IT"); }catch(e){}
+    return '<div class="cest-testa" style="border-left:4px solid var(--err);background:var(--err-bg)">'
+      + '<div><b>Un\u2019eliminazione si è fermata a metà</b>'
+      +   (quando?' <small>— '+esc(quando)+'</small>':'')+'</div>'
+      + '<div class="cest-nota" style="white-space:pre-wrap">'+esc(g.testo)+'</div>'
+      + '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">'
+      +   '<button type="button" class="btn" data-action="cest-guasto-copia">Copia l\u2019elenco</button>'
+      +   '<button type="button" class="btn b-cancel" data-action="cest-guasto-via">L\u2019ho sistemato, togli l\u2019avviso</button>'
+      + '</div></div>';
+  }
+  function cestGuastoPannello(testo){
+    openSheetGrande("L\u2019eliminazione si è fermata a metà",
+        '<div class="sh-b"><div class="sh-nota" style="white-space:pre-wrap">'+esc(testo)+'</div></div>'
+      + '<div class="sh-b"><div class="sh-tit">Questo elenco non lo perdi</div>'
+      +   '<div class="sh-nota">Resta scritto in cima al <b>Cestino</b> finché non premi '
+      +   '«L\u2019ho sistemato». Qui sotto puoi anche copiartelo.</div>'
+      +   '<button type="button" class="btn btn-primary" data-action="cest-guasto-copia" '
+      +     'style="margin-top:9px">Copia l\u2019elenco</button></div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>');
+  }
+
   async function renderCestino(soloDisegno){
     const box=$("#cest-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML="";return;}
@@ -10789,14 +10841,14 @@
        "Il cestino non è ancora acceso", che è una bugia e spaventa. */
     const cst=(window.cestinoStato&&window.cestinoStato())||null;
     if(cst&&cst.attesa>0){
-      $("#cest-riass").innerHTML="";
+      $("#cest-riass").innerHTML=cestGuastoHTML();
       box.innerHTML=tabVuoto("Sto controllando il cestino",
         "Ci vuole un attimo. Finché non ho una risposta chiara dal database non lascio eliminare niente, così non si perde nulla per colpa della connessione. Riprova fra qualche secondo.",
         _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>');
       return;
     }
     if(!(window.cestinoAttivo&&window.cestinoAttivo())){
-      $("#cest-riass").innerHTML="";
+      $("#cest-riass").innerHTML=cestGuastoHTML();
       box.innerHTML=tabVuoto("Il cestino non è ancora acceso",
         "Esegui sql/gest-cestino.sql su Supabase (SQL Editor → Run) e ricarica la pagina. Da quel momento tutto quello che elimini finisce qui e si può rimettere a posto.",
         _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>');
@@ -10805,7 +10857,7 @@
     if(cst&&cst.motivo==="migrazione-parziale"){
       /* la migrazione e' passata a meta': su alcune tabelle l'eliminazione e'
          bloccata, e l'utente deve sapere perche' invece di pensare a un guasto */
-      $("#cest-riass").innerHTML='<div class="cest-testa"><div><b>Manca un pezzo di migrazione</b></div>'
+      $("#cest-riass").innerHTML=cestGuastoHTML()+'<div class="cest-testa"><div><b>Manca un pezzo di migrazione</b></div>'
         +'<div class="cest-nota">Su alcune parti del gestionale il cestino non è installato, quindi lì l\'eliminazione è bloccata per non perdere niente. '
         +'Esegui sql/gest-cestino.sql su Supabase e ricarica la pagina. Il dettaglio è in F12 → Console, riga [cestino].</div></div>';
     }
@@ -10903,7 +10955,7 @@
     /* quante ce ne sono negli ALTRI reparti: si dice, se no uno crede che il
        cestino sia vuoto e invece sta solo guardando un pannello */
     const altrove=(cestVista!=="tutti"&&cestTotale!=null)?Math.max(0,cestTotale-totVero):0;
-    if($("#cest-riass"))$("#cest-riass").innerHTML=(totVero||q||altrove)
+    if($("#cest-riass"))$("#cest-riass").innerHTML=cestGuastoHTML()+((totVero||q||altrove)
       ? '<div class="cest-testa"><div><b>'+totVero+'</b> '
         +(totVero===1?'cosa eliminata':'cose eliminate')
         +(cestVista!=="tutti"?' in questo reparto':'')
@@ -10913,7 +10965,7 @@
         +'Foto, video e documenti però continuano a occupare spazio finché non li elimini per sempre.'
         +(altrove?(' <b>Altre '+altrove+' stanno in altri reparti:</b> per vederle scegli «Tutti i reparti» qui sopra.'):'')
         +'</div></div>'
-      : "";
+      : "");
 
     renderTabella({
       id:"cest", box:"#cest-list",
@@ -12250,6 +12302,23 @@
        che li ascoltava: si cliccava e non succedeva niente.
        Adesso il nome generico c'e' davvero, e vale per tutti i file.
        Si usa cosi': data-action="vai-sezione" data-go="<nome della sezione>". */
+    if(a==="cest-guasto-copia"){
+      const g=cestGuastoLeggi();
+      if(!g){ toast("Non c’è niente da copiare"); return; }
+      try{
+        navigator.clipboard.writeText(g.testo).then(
+          function(){ toast("Elenco copiato ✔ — incollalo dove vuoi tenerlo"); },
+          function(){ toast("Non sono riuscito a copiarlo: selezionalo a mano e copia"); });
+      }catch(e){ toast("Non sono riuscito a copiarlo: selezionalo a mano e copia"); }
+      return;
+    }
+    if(a==="cest-guasto-via"){
+      try{ localStorage.removeItem(CEST_GUASTO); }catch(e){}
+      closeSheet();
+      renderCestino();
+      toast("Avviso tolto");
+      return;
+    }
     if(a==="vai-sezione"){
       const dove=t.dataset.go||"";
       closeSheet();
