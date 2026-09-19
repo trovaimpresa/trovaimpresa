@@ -605,7 +605,14 @@
        Si legge sull'ANNO INTERO dell'utente, non sul reparto: la serie dei
        numeri e' una sola per partita IVA, e con due reparti guardare solo il
        reparto farebbe vedere buchi che non esistono. */
-    let buchiTesto="numerate nel corso dell'anno", buchiTono="neutro";
+    /* 19 settembre 2026 — IL RIQUADRO ROSSO CHE NON PORTAVA DA NESSUNA PARTE.
+       Questo e' l'unico dei cinque riquadri che diventa rosso, e diceva
+       «mancano le n.3, n.5 — sono nel Cestino» senza un modo per arrivarci.
+       Adesso, se almeno un buco e' davvero nel Cestino, il riquadro si
+       clicca e apre il Cestino. Se invece il numero non e' mai stato
+       scritto non c'e' niente da aprire: il riquadro resta fermo, perche'
+       un tasto che non porta da nessuna parte e' il difetto di prima. */
+    let buchiTesto="numerate nel corso dell'anno", buchiTono="neutro", buchiNelCestino=0;
     try{
       const _raw=(sb.raw||sb.from.bind(sb));
       const [{data:vivi},{data:tutti}]=await Promise.all([
@@ -619,7 +626,9 @@
       for(let n=1;n<=massimo;n++) if(!setVivi.has(n)) buchi.push({n:n, cestino:setTutti.has(n)});
       if(buchi.length){
         const nCest=buchi.filter(b=>b.cestino).length;
-        const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")+(buchi.length>6?"…":"");
+        buchiNelCestino=nCest;
+        const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")
+          +(buchi.length>6?(" …e altre "+(buchi.length-6)):"");
         buchiTesto=(buchi.length===1?"manca la ":"mancano le ")+elenco
           +(nCest?(nCest===buchi.length?" — "+(nCest===1?"è nel Cestino":"sono nel Cestino"):" — qualcuna è nel Cestino"):"");
         buchiTono="err";
@@ -644,7 +653,9 @@
       + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
             piuVecchio==null?"nessuna fattura in attesa":"dalla data della fattura",
             (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
-      + box(String(emesseAnno),"Fatture emesse "+anno,buchiTesto,buchiTono);
+      + box(String(emesseAnno),"Fatture emesse "+anno,
+            buchiTesto+(buchiNelCestino?" · apri il Cestino":""),buchiTono,
+            buchiNelCestino?'data-action="vai-sezione" data-go="cestino"':"");
 
     const filtra=(A,v)=>
         v==="bozze"    ? A.filter(f=>f.stato==="bozza")
