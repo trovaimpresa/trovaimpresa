@@ -804,6 +804,24 @@ function sezioneLocale(m, c) {
    vince sempre il dato fresco: il file e' solo la scorta.
    Per rifare la fotografia: rilancia lo script da dove la rete c'e',
    oppure fatti riscrivere il file. La data dentro dice quanto e' vecchio. */
+
+/* --- dove mandare chi vuole iscriversi, secondo il tipo di voce --- */
+const IMPRESE = ['impresa-edile', 'rifacimento-tetti'];
+function regUrl(m) {
+  if (m.ruolo === 'professionista') return '/registrazione-professionista.html';
+  if (IMPRESE.includes(m.slug)) return '/registrazione-impresa.html';
+  return '/registrazione-artigiano.html';
+}
+function regTesto(m) {
+  if (m.ruolo === 'professionista') return 'Sono un professionista &mdash; iscrivimi gratis';
+  if (IMPRESE.includes(m.slug)) return 'Ho un&rsquo;impresa &mdash; iscrivimi gratis';
+  return 'Sono ' + m.articolo + m.nome.toLowerCase() + ' &mdash; iscrivimi gratis';
+}
+function regNav(m) {
+  // corto apposta: su telefono le parole lunghe uscivano dallo schermo
+  return 'Registrati';
+}
+
 const FILE_SCORTA = path.join(OUT, 'dati-imprese.json');
 let scorta = null;
 let usataScorta = false;
@@ -1009,6 +1027,16 @@ const STILE = `<style>
   .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); margin-bottom:16px; }
   .hero p { font-size:1.1rem; opacity:0.9; max-width:600px; margin:0 auto 32px; }
   .hero-btn { background:var(--arancio); color:white; padding:14px 32px; border-radius:30px; font-weight:700; text-decoration:none; font-size:1.1rem; }
+
+  /* riparazione: il bottone arancione si rompeva quando il testo andava a capo (telefono, pagine dei tecnici) */
+  .hero-btn { display:inline-block; max-width:100%; line-height:1.35; }
+  .hero-iscriviti { margin-top:18px; padding-top:18px; border-top:1px solid rgba(255,255,255,.28); }
+  .hero-iscriviti p { margin:0 0 10px; font-size:0.98rem; opacity:.95; }
+  .hero-iscriviti a { display:inline-block; background:#fff; color:#0a2a4d; padding:12px 26px; border-radius:30px; font-weight:700; text-decoration:none; font-size:0.98rem; }
+  .hero-iscriviti a:hover { background:#eaf2ff; }
+  .hero-iscriviti small { display:block; margin-top:9px; font-size:0.8rem; opacity:.85; }
+  @media(max-width:600px){ .hero-iscriviti a{ display:block; } }
+
   .section { max-width:900px; margin:0 auto; padding:48px 24px; }
   .section h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--verde); margin-bottom:16px; }
   .section h3 { font-size:1.05rem; color:#0a2a4d; margin:22px 0 8px; }
@@ -1127,7 +1155,7 @@ ${JSON.stringify(schemaBc, null, 2)}
   <a href="/" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
   <div class="nav-btns">
     <a href="/login-impresa.html" class="btn-outline">Entra (Imprese)</a>
-    <a href="/#registrati" class="btn-fill">Registrati (Imprese)</a>
+    <a href="${regUrl(m)}" class="btn-fill">${regNav(m)}</a>
   </div>
 </nav>
 
@@ -1135,6 +1163,11 @@ ${JSON.stringify(schemaBc, null, 2)}
   <h1>${esc(m.nome)} a ${esc(c.nome)}</h1>
   <p>${esc(m.prezzo)}, cosa chiedere prima di firmare e chi trovi nella zona di ${esc(c.nome)}. ${P.gratuiti}</p>
   <a href="${P.cercaUrl(c)}" class="hero-btn">🔍 ${P.chiediUn} a ${esc(c.nome)}</a>
+  <div class="hero-iscriviti">
+    <p>Sei ${esc(m.articolo)}${esc(m.nome.toLowerCase())} a ${esc(c.nome)}? I clienti ti cercano proprio qui.</p>
+    <a href="${regUrl(m)}">${regTesto(m)}</a>
+    <small>Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  </div>
 </div>
 
 <div class="section">
@@ -1185,12 +1218,12 @@ ${bloccoImprese(m, c, imprese)}
   <div class="cta-box">
     <h2>Sei ${esc(m.articolo)}${esc(m.nome.toLowerCase())} a ${esc(c.nome)}?</h2>
     <p>Registrati gratis su TrovaImpresa e inizia a ricevere richieste di lavoro dalla tua zona.</p>
-    <a href="/#registrati" style="background:#e8733a;color:white;padding:14px 32px;border-radius:30px;font-weight:700;text-decoration:none;font-size:1rem;">Registrati gratis →</a>
+    <a href="${regUrl(m)}" style="background:#e8733a;color:white;padding:14px 32px;border-radius:30px;font-weight:700;text-decoration:none;font-size:1rem;">Registrati gratis →</a>
   </div>
 </div>
 
 <footer>
-  <p>© ${TODAY.slice(0, 4)} TrovaImpresa — <a href="/">Home</a> | <a href="/cerca-imprese.html">Cerca imprese</a> | <a href="/#registrati">Registra la tua impresa</a></p>
+  <p>© ${TODAY.slice(0, 4)} TrovaImpresa — <a href="/">Home</a> | <a href="/cerca-imprese.html">Cerca imprese</a> | <a href="${regUrl(m)}">Registrati gratis</a></p>
 </footer>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>

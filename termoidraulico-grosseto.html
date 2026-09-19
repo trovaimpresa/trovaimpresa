@@ -22,6 +22,16 @@
   .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); margin-bottom:16px; }
   .hero p { font-size:1.1rem; opacity:0.9; max-width:600px; margin:0 auto 32px; }
   .hero-btn { background:var(--arancio); color:white; padding:14px 32px; border-radius:30px; font-weight:700; text-decoration:none; font-size:1.1rem; }
+
+  /* riparazione: il bottone arancione si rompeva quando il testo andava a capo (telefono, pagine dei tecnici) */
+  .hero-btn { display:inline-block; max-width:100%; line-height:1.35; }
+  .hero-iscriviti { margin-top:18px; padding-top:18px; border-top:1px solid rgba(255,255,255,.28); }
+  .hero-iscriviti p { margin:0 0 10px; font-size:0.98rem; opacity:.95; }
+  .hero-iscriviti a { display:inline-block; background:#fff; color:#0a2a4d; padding:12px 26px; border-radius:30px; font-weight:700; text-decoration:none; font-size:0.98rem; }
+  .hero-iscriviti a:hover { background:#eaf2ff; }
+  .hero-iscriviti small { display:block; margin-top:9px; font-size:0.8rem; opacity:.85; }
+  @media(max-width:600px){ .hero-iscriviti a{ display:block; } }
+
   .section { max-width:900px; margin:0 auto; padding:48px 24px; }
   .section h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--verde); margin-bottom:16px; }
   .section h3 { font-size:1.05rem; color:#0a2a4d; margin:22px 0 8px; }
@@ -146,7 +156,7 @@
   <a href="/" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
   <div class="nav-btns">
     <a href="/login-impresa.html" class="btn-outline">Entra (Imprese)</a>
-    <a href="/#registrati" class="btn-fill">Registrati (Imprese)</a>
+    <a href="/registrazione-artigiano.html" class="btn-fill">Registrati</a>
   </div>
 </nav>
 
@@ -154,6 +164,11 @@
   <h1>Termoidraulico a Grosseto</h1>
   <p>1.800–2.500 € la caldaia installata, cosa chiedere prima di firmare e chi trovi nella zona di Grosseto. Preventivi gratuiti.</p>
   <a href="/cerca-imprese?citta=Grosseto" class="hero-btn">🔍 Chiedi un preventivo a Grosseto</a>
+  <div class="hero-iscriviti">
+    <p>Sei un termoidraulico a Grosseto? I clienti ti cercano proprio qui.</p>
+    <a href="/registrazione-artigiano.html">Sono un termoidraulico &mdash; iscrivimi gratis</a>
+    <small>Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  </div>
 </div>
 
 <div class="section">
@@ -164,21 +179,6 @@
     <p style="margin-bottom:0;"><a href="/quanto-costa-sostituire-la-caldaia" style="color:#0066ff;font-weight:700;">Quanto costa sostituire la caldaia: la guida completa →</a></p>
     
   </div>
-
-  <h3>Il costo della manodopera a Grosseto: il dato ufficiale</h3>
-  <p>Il Ministero del Lavoro pubblica il costo della manodopera edile <strong>provincia per provincia</strong>. A Grosseto un operaio qualificato costa all'impresa <strong>29,38 &euro; l'ora</strong>: in linea con la media italiana, che è 29,37 &euro;.</p>
-  <div class="tab-wrap">
-  <table class="prezzi">
-    <tr><th>Livello</th><th>Grosseto</th><th>Media Italia</th></tr>
-    <tr><td>Operaio comune</td><td><strong>26,37 &euro;</strong></td><td>26,33 &euro;</td></tr>
-    <tr><td>Operaio qualificato</td><td><strong>29,38 &euro;</strong></td><td>29,37 &euro;</td></tr>
-    <tr><td>Operaio specializzato</td><td><strong>31,70 &euro;</strong></td><td>31,68 &euro;</td></tr>
-    <tr><td>Caposquadra</td><td><strong>33,50 &euro;</strong></td><td>33,46 &euro;</td></tr>
-  </table>
-  </div>
-  <p class="nota-fonte">Fonte: Ministero del Lavoro, decreto direttoriale n. 5 del 29 gennaio 2025, tabelle aggiornate a dicembre 2023.<br>
-  È il costo che sostiene l'impresa per tenere l'operaio in cantiere: paga oraria, contributi, ferie, tredicesima e Cassa Edile. <strong>Non è il prezzo che paghi tu</strong>: al cliente si aggiungono materiali, attrezzatura, spese generali e utile d'impresa. Serve per capire una cosa sola, ma importante: a Grosseto la manodopera costa quanto la media italiana, e questo si riflette sui preventivi che ricevi.</p>
-
   <p>Queste cifre sono medie nazionali, prese dalle nostre guide prezzi scritte da chi i cantieri li ha fatti davvero. A Grosseto il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.</p>
 
   <h2>Il settore edile a Grosseto</h2>
@@ -236,21 +236,12 @@
   <div class="cta-box">
     <h2>Sei un termoidraulico a Grosseto?</h2>
     <p>Registrati gratis su TrovaImpresa e inizia a ricevere richieste di lavoro dalla tua zona.</p>
-    <a href="/#registrati" style="background:#e8733a;color:white;padding:14px 32px;border-radius:30px;font-weight:700;text-decoration:none;font-size:1rem;">Registrati gratis →</a>
+    <a href="/registrazione-artigiano.html" style="background:#e8733a;color:white;padding:14px 32px;border-radius:30px;font-weight:700;text-decoration:none;font-size:1rem;">Registrati gratis →</a>
   </div>
 </div>
 
 <footer>
-  <p>© 2026 TrovaImpresa — <a href="/">Home</a> | <a href="/cerca-imprese.html">Cerca imprese</a> | <a href="/#registrati">Registra la tua impresa</a></p>
-
-  <p style="font-size:13px;opacity:.85;line-height:1.7;margin:8px 0 0">
-    <a href="/privacy-policy.html">Privacy</a> &middot;
-    <a href="/cookie-policy.html">Cookie</a> &middot;
-    <a href="/termini-condizioni.html">Termini</a><br>
-    Alessio Pinto &mdash; Rieti (RI) &mdash;
-    <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a> &mdash;
-    P.IVA 01285950570
-  </p>
+  <p>© 2026 TrovaImpresa — <a href="/">Home</a> | <a href="/cerca-imprese.html">Cerca imprese</a> | <a href="/registrazione-artigiano.html">Registrati gratis</a></p>
 </footer>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
