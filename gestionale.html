@@ -48,6 +48,45 @@
   .navbar .menu a{text-decoration:none;color:var(--blu);font-weight:700;font-size:15px}
   .navbar .menu a.btn-arancio{background:var(--arancio);color:#fff;padding:12px 20px;border-radius:9px}
   .navbar .menu a.btn-arancio:hover{background:var(--arancio-scuro)}
+  /* ⛔ 19 set 2026 — IL BOTTONE DI CHI E' GIA' DENTRO E' QUELLO DEL SITO.
+     Alex: «cambia colore come nel sito». Nel marketplace il bottone per
+     entrare e' bianco con bordo e scritta blu e il lucchetto davanti
+     (`.nav-login` in index.html). Qui e' identico: stessa forma, stesso
+     blu, stesso lucchetto. Cosi' chi conosce il sito lo riconosce subito,
+     e l'arancione resta libero per quello che fa guadagnare.
+     ⚠️ Il lucchetto NON e' una figura da scaricare: e' disegnato nel CSS
+        come maschera, cosi' prende da solo il colore della scritta e
+        diventa bianco quando ci passi sopra col dito o col mouse. */
+  .navbar .menu a.btn-accedi{display:inline-flex;align-items:center;gap:7px;
+    background:#fff;color:var(--blu);border:2px solid var(--blu);
+    padding:8px 15px;border-radius:8px;white-space:nowrap}
+  .navbar .menu a.btn-accedi:hover{background:var(--blu-tenue)}
+  .navbar .menu a.btn-accedi::before{content:"";width:15px;height:15px;flex-shrink:0;
+    background:currentColor;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center/contain no-repeat}
+  /* ⛔ 19 set 2026 — IL SECONDO AZZURRO, per la porta del marketplace.
+     Stessa forma, stesso lucchetto, ma piu' tenue: sulla pagina del
+     gestionale la porta del gestionale deve pesare di piu'. */
+  .navbar .menu a.btn-accedi-sito{background:var(--blu-tenue);
+    border-color:#bcd4ff;color:var(--blu-scuro)}
+  .navbar .menu a.btn-accedi-sito:hover{background:#d6e6ff}
+  /* ⚠️ sul telefono la frase lunga non ci sta accanto a «Quanto costa»:
+     li' resta «Accedi» e basta. Due scritte, una sola si vede per volta. */
+  .navbar .menu a.btn-accedi .frase-corta{display:none}
+  @media(max-width:760px){
+    .navbar .menu a.btn-accedi .frase-lunga{display:none}
+    .navbar .menu a.btn-accedi .frase-corta{display:inline}
+  }
+  /* ⛔ 19 set 2026 — SUL TELEFONO LA BARRA TIENE DUE VOCI, NON CINQUE.
+     Restano «Quanto costa» e la porta del gestionale: «Cosa fa» ci si
+     arriva scorrendo, e le due voci del sito stanno gia' nel piede.
+     ⚠️ Questa regola va in FONDO e con `!important`: `display:none` da
+        solo perdeva contro `.navbar .menu a.btn-accedi{display:inline-flex}`,
+        che ha la stessa forza ed e' scritta prima. Risultato: sul telefono
+        spariva la porta del gestionale e restava quella del sito, cioe'
+        esattamente il contrario. */
+  @media(max-width:760px){ .navbar .menu a.solo-grande{display:none !important} }
 
   /* ---------- il colpo d'occhio ---------- */
   .hero{background:var(--bg);border-bottom:1px solid var(--bd);padding:52px 0 56px}
@@ -209,12 +248,36 @@
 </head>
 <body>
 
+<!-- ⛔ 19 set 2026 — LA BARRA NON RIPETE QUELLO CHE C'E' GIA' NELLA PAGINA.
+     Prima diceva Home / Prezzi / Iscriviti: ma la home di questo prodotto
+     E' questa pagina, i prezzi sono qui sotto e ci si iscrive qui.
+     «Home» e il logo portavano a /index.html, cioe' al MARKETPLACE, senza
+     dirlo. «Prezzi» e «Iscriviti» cadevano poi nello stesso punto.
+     Adesso ogni voce porta in un posto diverso e dice dove va.
+
+     ⚠️ DUE PORTE, NON UNA. Alex: «inseriamoli entrambi». Gestionale e
+        marketplace sono due cose separate, con due pannelli separati:
+        chi ha comprato il gestionale entra da una parte, chi ha la
+        vetrina sul sito dall'altra. Prima da questa pagina non si
+        entrava da nessuna delle due.
+     ⚠️ I DUE BOTTONI HANNO DUE AZZURRI DIVERSI apposta: quello del
+        gestionale e' pieno di bordo blu (siamo sulla sua pagina), quello
+        del sito e' piu' tenue. Si distinguono con l'occhio, non solo
+        leggendo. -->
 <nav class="navbar">
-  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></a>
+  <!-- ⚠️ il logo resta su /gestionale: e' la home DI QUESTO prodotto -->
+  <a href="/gestionale" class="logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></a>
   <div class="menu">
-    <a href="/index.html">Home</a>
-    <a href="#prezzi">Prezzi</a>
-    <a href="#iscriviti" class="btn-arancio">Iscriviti</a>
+    <a href="#dentro" class="solo-grande">Cosa fa</a>
+    <a href="#prezzi">Quanto costa</a>
+    <!-- ⚠️ il link al marketplace resta, ma adesso dice dove porta: prima
+         c'era scritto «Home» e uno ci finiva dentro senza capire. -->
+    <a href="/" class="solo-grande">Visita il sito TrovaImpresa</a>
+    <!-- ⚠️ questo porta al pannello del MARKETPLACE (la vetrina), non qui. -->
+    <a href="/login-impresa" class="btn-accedi btn-accedi-sito solo-grande">Accedi al sito TrovaImpresa</a>
+    <!-- ⚠️ `?redirect=gestionale` lo legge login-impresa.html dal 15 set
+         e porta dritto dentro al gestionale, non al pannello del sito. -->
+    <a href="/login-impresa?redirect=gestionale" class="btn-accedi"><span class="frase-lunga">Accedi al gestionale</span><span class="frase-corta">Accedi</span></a>
   </div>
 </nav>
 
@@ -226,8 +289,12 @@
       <p class="claim">Preventivi, computo metrico, fatture e cantieri.<br>In un posto solo.</p>
       <p class="sotto">Dal telefono in cantiere e dal computer la sera. Senza installare niente.</p>
       <div class="bottoni">
-        <a class="btn btn-blu" href="#iscriviti">Vedi i prezzi</a>
-        <a class="btn btn-vuoto" href="#prezzi">Quanto costa</a>
+        <!-- ⛔ 19 set 2026 — prima questi due cadevano nello stesso punto:
+             «Vedi i prezzi» su #iscriviti e «Quanto costa» su #prezzi, che
+             distano 130 pixel. Due bottoni affiancati che fanno la stessa
+             cosa. Adesso uno scende ai prezzi, l'altro a cosa c'e' dentro. -->
+        <a class="btn btn-blu" href="#prezzi">Vedi i prezzi</a>
+        <a class="btn btn-vuoto" href="#dentro">Cosa c&rsquo;&egrave; dentro</a>
       </div>
       <p class="rassicura"><b>Da 249 &euro; l&rsquo;anno</b>, oppure 29 &euro; al mese. Prezzo finale, nessuna IVA da aggiungere.</p>
     </div>
@@ -326,7 +393,8 @@
 </section>
 
 <!-- ================= TUTTO QUELLO CHE C'E' DENTRO ================= -->
-<section class="fascia">
+<!-- ⚠️ `id="dentro"`: ci puntano «Cosa fa» in cima e il bottone dell'hero. -->
+<section class="fascia" id="dentro">
   <div class="wrap">
     <h2 class="titolone">Tutto quello che c&rsquo;&egrave; dentro</h2>
     <p class="introne">Non sei tu che ti adatti al programma: il programma cambia le parole
