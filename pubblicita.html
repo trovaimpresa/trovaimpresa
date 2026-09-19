@@ -972,7 +972,7 @@ async function mettiInListaAttesa() {
   var piano = (currentImpresa.piano || '').toLowerCase();
   if (piano !== 'premium') {
     btnLista.style.display = 'none';
-    esito.innerHTML = '🔒 <strong>Riservato ai Premium.</strong><br><a href="info-premium.html" style="color:var(--verde);font-weight:700;">Scopri Premium →</a>';
+    esito.innerHTML = '🔒 <strong>Riservato ai Premium.</strong><br><a href="/gestionale" style="color:var(--verde);font-weight:700;">Scopri il Gestionale →</a>';
     esito.style.display = 'block';
     return;
   }

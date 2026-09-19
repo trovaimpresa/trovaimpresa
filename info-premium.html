@@ -1,7 +1,27 @@
 <!DOCTYPE html>
+<!-- =====================================================================
+     PAGINA SPENTA — 19 settembre 2026
+
+     Questa pagina non si vede piu': /info-premium e /info-premium.html
+     rinviano con un 301 a /gestionale (il blocco sta in netlify.toml,
+     cercalo con «SI CHIUDE /info-premium»).
+
+     Perche': dal 18 settembre il gestionale si vende su /gestionale, con
+     i quattro prezzi veri e senza la prova di 30 giorni. Qui dentro c'e'
+     ancora la roba vecchia — 15 voci su 20 parlano della vetrina del
+     marketplace, il prezzo e' solo 29/249, e il bottone dice «Provalo 30
+     giorni», che non e' piu' vero.
+
+     Il file resta qui apposta, non si cancella: se un domani serve
+     rileggere cosa c'era scritto, e' tutto qui. Per riaccenderla basta
+     togliere i due rinvii da netlify.toml — ma prima va riscritta.
+     ===================================================================== -->
 <html lang="it">
 <head>
-  <link rel="canonical" href="https://trovaimpresa.com/info-premium">
+  <!-- ⚠️ il canonical punta a /gestionale: se per sbaglio qualcuno
+       riuscisse a vedere questa pagina, Google sa qual e' quella buona. -->
+  <link rel="canonical" href="https://trovaimpresa.com/gestionale">
+  <meta name="robots" content="noindex, follow">
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +31,7 @@
   <meta property="og:site_name" content="TrovaImpresa">
   <meta property="og:title" content="Gestionale TrovaImpresa: cosa c’è dentro">
   <meta property="og:description" content="Posizione #1 nei risultati, visibilità in tutta Italia e strumenti per la tua impresa. €29/mese o €249/anno.">
-  <meta property="og:url" content="https://trovaimpresa.com/info-premium">
+  <meta property="og:url" content="https://trovaimpresa.com/gestionale">
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">

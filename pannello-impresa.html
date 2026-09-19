@@ -3886,7 +3886,7 @@ function bloccaCardPremium() {
     overlay.textContent = '🔒';
     overlay.onclick = (e) => {
       e.stopPropagation();
-      window.location.href = 'info-premium.html';
+      window.location.href = '/gestionale';
     };
     card.appendChild(overlay);
   });
@@ -4196,7 +4196,7 @@ async function apriModalQRCode() {
   const piano = (impresaCorrente.piano || '').toLowerCase();
   if (piano !== 'premium') {
     if (confirm('🔲 QR Code profilo è una funzione del Gestionale. Vuoi scoprire di più?')) {
-      window.location.href = 'info-premium.html';
+      window.location.href = '/gestionale';
     }
     return;
   }
@@ -4245,7 +4245,7 @@ function apriVideo() {
   const piano = (impresaCorrente.piano || '').toLowerCase();
   if (piano !== 'premium') {
     if (confirm('🎬 Fai conoscere la tua azienda è una funzione del Gestionale. Vuoi scoprire di più?')) {
-      window.location.href = 'info-premium.html';
+      window.location.href = '/gestionale';
     }
     return;
   }

@@ -322,6 +322,37 @@
   status = 301
   force = true
 
+# ======================================================================
+# 19 settembre 2026 — SI CHIUDE /info-premium
+# ======================================================================
+# Era la pagina che spiegava il Premium: 20 voci, di cui 15 della vetrina
+# del marketplace, un solo prezzo (29/249) e il bottone «Provalo 30
+# giorni». Dal 18 settembre il gestionale si vende su /gestionale, con
+# quattro prezzi veri e senza prova.
+#
+# Tenerle tutte e due voleva dire due pagine che vendono la stessa cosa e
+# si rubano la forza a vicenda su Google. Alex: «la chiudo e mando tutto
+# su /gestionale».
+#
+# ⚠️ 301 e non 302: «traslocato per sempre». Tutto quello che questa
+#    pagina ha guadagnato su Google da mesi passa a /gestionale, e chi
+#    aveva il link salvato ci arriva lo stesso.
+# ⚠️ `force = true` perche' `info-premium.html` e' rimasto nella cartella:
+#    senza, Netlify servirebbe il file e il rinvio non partirebbe.
+# ⚠️ Tolto anche da sitemap.xml lo stesso giorno: dire a Google «vieni a
+#    guardare qui» e poi rispondergli «traslocato» e' lavoro sprecato.
+[[redirects]]
+  from = "/info-premium"
+  to = "/gestionale"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/info-premium.html"
+  to = "/gestionale"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/registrazione.html"
   to = "/#registrati"

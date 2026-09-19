@@ -4157,6 +4157,10 @@
           .is("eliminato_il",null).neq("stato","fatto").lte("data",lim30);
         const prAp=pr||[];
         setCnt("#cnt-promemoria",prAp.length,prAp.some(x=>x.data&&x.data<oggi)?"err":"attesa");
+        /* nella fascia vanno solo quelli GIA' PASSATI: «Da sistemare oggi»
+           sono le cose che chiedono attenzione adesso, non fra tre settimane */
+        _riePromem=prAp.filter(x=>x.data&&x.data<oggi).length;
+        try{ rieVociExtra(); }catch(e){}
       }catch(e){}
     }catch(e){}
     contaCestinoUnaVolta();   /* senza await: il pallino del Cestino arriva quando arriva */
@@ -5913,6 +5917,83 @@
     contaDalSito();
   }
 
+  /* ============================================================
+     19 settembre 2026 — LE DUE COSE CHE IL RIEPILOGO NON DICEVA
+     ============================================================
+     «Richieste dal sito» e «Promemoria» avevano il pallino sulla voce di
+     menu e basta. Ma sul telefono il menu sta chiuso dietro il burger:
+     una richiesta di un cliente arrivata dalla pagina di TrovaImpresa
+     esisteva solo dentro un cassetto chiuso. Per un artigiano una
+     richiesta non vista è un lavoro perso — ed è il motivo per cui il
+     sito esiste.
+
+     ⚠️ NON SI LEGGE NIENTE DI NUOVO. I due numeri il gestionale li ha
+        già: renderContatori conta i promemoria per il suo pallino e
+        contaDalSito le richieste per il suo. Qui si riusano quelli. Una
+        lettura in più all'apertura è esattamente quello che abbiamo tolto
+        ieri, e non si rimette dalla porta di servizio.
+
+     ⚠️ L'ORDINE DI ARRIVO NON CONTA. La fascia la disegna
+        gest-riepilogo.js, i numeri arrivano da qui, e chi arriva per
+        primo non lo sappiamo: tutti e due chiamano questa, e l'ultimo
+        completa il lavoro. Per questo la funzione si può richiamare
+        quante volte si vuole — prima toglie le sue righe di prima. */
+  let _rieDalSito=null, _riePromem=null;
+  function rieVociExtra(){
+    const ra=$("#rie-alert"); if(!ra)return;
+    const voci=[];
+    if(_rieDalSito&&_rieDalSito>0)voci.push({
+      go:"dalsito", grave:true,
+      t:_rieDalSito+(_rieDalSito===1?" richiesta dal sito da aprire":" richieste dal sito da aprire"),
+      d:"Un cliente ti ha scritto dalla tua pagina su TrovaImpresa"});
+    if(_riePromem&&_riePromem>0)voci.push({
+      go:"promemoria", grave:true,
+      t:_riePromem+(_riePromem===1?" promemoria passato":" promemoria passati"),
+      d:"Il giorno che avevi segnato è già passato"});
+
+    /* via le righe del giro precedente, sempre: così non si accumulano */
+    ra.querySelectorAll("[data-rie-extra]").forEach(function(x){x.remove();});
+    if(!voci.length){ _rieContaFascia(ra); return; }
+
+    /* se la fascia dice «Tutto in ordine» non lo è più: diventa una fascia
+       vera, con dentro solo queste righe. Il resto lo rimetterà il
+       Riepilogo al prossimo giro, e questa funzione non lo tocca. */
+    let box=ra.querySelector(".rie-oggi:not(.tutto-ok)");
+    if(!box){
+      const okBox=ra.querySelector(".rie-oggi.tutto-ok");
+      if(okBox)okBox.remove();
+      ra.insertAdjacentHTML("beforeend",
+        '<div class="rie-oggi"><div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
+        +'<div class="ro-sotto"></div></div>');
+      box=ra.querySelector(".rie-oggi:not(.tutto-ok)");
+    }
+    const sotto=box.querySelector(".ro-sotto");
+    /* in cima: un cliente che aspetta viene prima di tutto il resto */
+    const dopo=sotto||box.firstChild;
+    voci.slice().reverse().forEach(function(v){
+      const d=document.createElement("div");
+      d.className="ro-riga "+(v.grave?"grave":"attesa");
+      d.setAttribute("data-rie-extra","1");
+      d.setAttribute("data-action","rie-go");
+      d.setAttribute("data-go",v.go);
+      d.innerHTML='<span class="ro-testo">'+esc(v.t)+'<span class="ro-dett">'+esc(v.d)+'</span></span>'
+                 +'<span class="ro-freccia">\u203a</span>';
+      dopo.parentNode.insertBefore(d,dopo.nextSibling);
+    });
+    _rieContaFascia(ra);
+  }
+  /* il numero in cima deve dire quante righe ci sono davvero, comprese
+     quelle chiuse dietro «Vedi le altre» e queste due */
+  function _rieContaFascia(ra){
+    const box=ra.querySelector(".rie-oggi:not(.tutto-ok)"); if(!box)return;
+    const sotto=box.querySelector(".ro-sotto"); if(!sotto)return;
+    const n=box.querySelectorAll(".ro-riga:not(#ro-piu-tasto)").length;
+    if(!n)return;
+    sotto.textContent=(n===1?"Una cosa che chiede attenzione.":n+" cose che chiedono attenzione.")
+      +" Clicca una riga per andarci.";
+  }
+  window.rieVociExtra=rieVociExtra;
+
   /* Il pallino sulla voce di menu: quante richieste non ancora aperte. */
   async function contaDalSito(){
     if(!sb||!sbUid){setCnt("#cnt-dalsito",0);return;}
@@ -5920,6 +6001,7 @@
       const L=dsCache.length?dsCache:await dsCarica();
       const n=L.filter(r=>r._stato==="nuova").length;
       setCnt("#cnt-dalsito",n,"attesa");
+      _rieDalSito=n; try{ rieVociExtra(); }catch(e){}
     }catch(e){}
   }
 

@@ -505,6 +505,11 @@
         '<div class="rie-errore"><b>Alcuni numeri non si sono caricati</b> (spese, foto o totali): '
         +'quello che vedi può essere incompleto. '
         +'<button class="btn" data-action="rie-riprova">Riprova</button></div>');
+      /* 19 settembre 2026 — le richieste dal sito e i promemoria passati.
+         I loro numeri li ha gestionale-app.html, che può averli già pronti
+         o non ancora: chiama lui questa stessa funzione quando arrivano.
+         Chi finisce per ultimo completa la fascia. */
+      try{ if(window.rieVociExtra)window.rieVociExtra(); }catch(e){}
     }
 
     /* ---- le 12 schede, nello stesso ordine del menu ---- */
