@@ -188,6 +188,79 @@
     }   /* fine apriBarra */
   }
 
+  /* ============================================================
+     19 settembre 2026 \u2014 IL CONTROLLO DEGLI AGGIORNAMENTI DEL DATABASE
+     ============================================================
+     Nel gestionale ci sono una trentina di messaggi del tipo \u00abesegui
+     sql/qualcosa.sql su Supabase\u00bb. Sono scritti per me, ma li legge
+     l'iscritto: lo mandano in un posto dove non pu\u00f2 entrare.
+
+     Il punto vero per\u00f2 \u00e8 un altro. Il database \u00e8 UNO SOLO per tutti:
+     se un aggiornamento \u00e8 fatto, \u00e8 fatto per tutti; se manca, \u00e8 rotto
+     per tutti. Controllati il 19 settembre: c'erano tutti e 11.
+     Quindi oggi quei messaggi non li vede nessuno.
+
+     Il giorno che aggiungo una funzione e mi DIMENTICO di eseguire il
+     suo file sql, per\u00f2, compaiono davvero \u2014 e io non lo so finch\u00e9 non
+     me lo dice un iscritto. Questo controllo serve a quello: lo scopro
+     io in tre secondi, non lui dopo tre settimane.
+
+     \u26a0\ufe0f COSTA ZERO A CHI NON SONO IO. Sta in questo file apposta:
+        fondatore.js esce subito per chiunque non sia nell'elenco
+        AMMESSI, quindi per gli iscritti queste letture non esistono.
+     \u26a0\ufe0f PARTE DOPO, non all'apertura: aspetta che la pagina abbia
+        finito le sue cose. Ieri abbiamo tolto 28 domande dall'avvio,
+        non se ne rimettono 11 dalla porta di servizio.
+     \u26a0\ufe0f SI GUARDA LA COLONNA, NON IL VALORE. Una colonna che esiste ma
+        \u00e8 vuota \u00e8 legittima; una che non esiste \u00e8 un aggiornamento
+        mancante. Per aggiungerne una: una riga in PROVE. */
+  var PROVE = [
+    {sql:"gest-cestino.sql",                 t:"gest_lavori",              c:"id,eliminato_il"},
+    {sql:"gest-cestino.sql",                 t:"promemoria",               c:"id,eliminato_il"},
+    {sql:"gest-computo-metrico.sql",         t:"gest_computo_voci",        c:"id"},
+    {sql:"gest-computo-quadro.sql",          t:"gest_computi",             c:"id,quadro_economico"},
+    {sql:"gest-computo-cronoprogramma.sql",  t:"gest_computi",             c:"id,data_inizio"},
+    {sql:"gest-computo-cronoprogramma.sql",  t:"gest_computo_capitoli",    c:"id,giorni,insieme"},
+    {sql:"gest-computo-variante.sql",        t:"gest_computi",             c:"id,variante_di"},
+    {sql:"gest-analisi-prezzi.sql",          t:"gest_computo_voci_calc",   c:"id,prezzo_da_analisi"},
+    {sql:"capitolo-costi-sicurezza.sql",     t:"gest_computo_capitoli",    c:"id,sicurezza"},
+    {sql:"gest-sal.sql",                     t:"gest_sal",                 c:"id"},
+    {sql:"gest-sal-fattura.sql",             t:"gest_sal",                 c:"id,fattura_id"},
+    {sql:"gest-rapportini-cestino.sql",      t:"gest_rapportini",          c:"id,eliminato_il"},
+    {sql:"gest-ore-e-crediti.sql",           t:"gest_crediti",             c:"id"},
+    {sql:"gest-preventivo-sezioni.sql",      t:"gest_preventivo_righe",    c:"id,sezione"},
+    {sql:"gest-fattura-cassa.sql",           t:"gest_fatture",             c:"id,cassa_perc,cassa_tipo"}
+  ];
+  function controllaDatabase(sb){
+    var mancano = [];
+    var fatte = 0;
+    PROVE.forEach(function(p){
+      sb.from(p.t).select(p.c).limit(1).then(function(r){
+        if(r && r.error) mancano.push(p);
+        if(++fatte === PROVE.length) esito(mancano);
+      }, function(){ if(++fatte === PROVE.length) esito(mancano); });
+    });
+  }
+  function esito(mancano){
+    if(!mancano.length){
+      console.log("[fondatore] aggiornamenti del database: tutti a posto ("+PROVE.length+" controllati)");
+      return;
+    }
+    /* raggruppati per file sql: uno stesso file pu\u00f2 aver dato due buchi */
+    var files = [];
+    mancano.forEach(function(m){ if(files.indexOf(m.sql)<0) files.push(m.sql); });
+    console.warn("[fondatore] AGGIORNAMENTI DEL DATABASE MANCANTI:", files.join(", "),
+                 "\u2014 dettaglio:", mancano.map(function(m){return m.t+"("+m.c+")";}).join(" \u00b7 "));
+    var barra = document.getElementById("ti-fondatore");
+    if(!barra) return;
+    var d = document.createElement("div");
+    d.id = "ti-db-manca";
+    d.style.cssText = "background:#b3261e;color:#fff;padding:8px 12px;font-size:14px;font-weight:600";
+    d.textContent = "\u26d4 Database indietro: manca " + files.join(", ")
+      + ". Nel gestionale ci sono pezzi spenti finch\u00e9 non li esegui su Supabase.";
+    barra.appendChild(d);
+  }
+
   function avvia(){
     var sb;
     try{ sb = window.supabase.createClient(SU,SK); }catch(e){ return; }
@@ -199,10 +272,16 @@
       sb.from("imprese").select("user_id,piano,tipo,nome_attivita").eq("user_id",s.user.id).maybeSingle()
         .then(function(res){
           var p = (res && res.data) || {user_id:s.user.id, piano:"free", tipo:null};
-          if(document.readyState==="loading"){
-            document.addEventListener("DOMContentLoaded", function(){ disegna(sb,p,email); });
-          }else{
+          var _poi = function(){
             disegna(sb,p,email);
+            /* il controllo del database parte DOPO, a pagina finita: non
+               deve rubare niente all'apertura del gestionale */
+            setTimeout(function(){ try{ controllaDatabase(sb); }catch(e){} }, 6000);
+          };
+          if(document.readyState==="loading"){
+            document.addEventListener("DOMContentLoaded", _poi);
+          }else{
+            _poi();
           }
         });
     }).catch(function(){});
