@@ -994,7 +994,15 @@
     openSheetGrande("La fattura è salvata. Il SAL no.",
         '<div class="sh-b"><div class="sh-nota"><b>'+esc(nome)+'</b> non risulta fatturato.<br><br>'
       + 'Finché resta così, il gestionale ti lascia fare una <b>seconda fattura per lo '
-      + 'stesso acconto</b>: gli stessi soldi chiesti due volte al committente, e non se ne '
+      /* ⛔ 19 settembre 2026 — QUESTO PANNELLO PARLAVA DA GEOMETRA.
+         Diceva «committente» a tutti e tre: e' la parola dello studio
+         tecnico, un artigiano e un'impresa dicono «cliente». Il testo e'
+         fisso e non passa dall'osservatore che traduce le parole al
+         professionista, quindi la parola sbagliata restava addosso a due
+         facce su tre. Stesso schema gia' usato in questo file per
+         Compenso/Imponibile (righe 780 e 1601). */
+      + 'stesso acconto</b>: gli stessi soldi chiesti due volte al '
+      + (ruoloUtente==='professionista'?'committente':'cliente')+', e non se ne '
       + 'accorge nessuno finché non arriva lui a dirlo.</div></div>'
       + '<div class="sh-b"><div class="sh-tit">Perché non è riuscito</div>'
       + '<div class="sh-nota">'+esc(a.perche)+'</div></div>'
@@ -1126,7 +1134,7 @@
 
     /* ⚠️ 19 agosto 2026 — LO STATO DI AVANZAMENTO SI SEGNA COME FATTURATO.
        Senza, niente impedisce di creare DUE fatture per lo stesso SAL: gli
-       stessi soldi chiesti due volte al committente, e nessuno che se ne
+       stessi soldi chiesti due volte al cliente, e nessuno che se ne
        accorga finche' non arriva lui a dirlo.
        Se la fattura non si e' salvata, qui non ci si arriva nemmeno: il
        collegamento si scrive solo dopo, mai prima.
