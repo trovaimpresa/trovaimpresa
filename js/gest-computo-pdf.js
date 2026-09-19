@@ -320,6 +320,30 @@
     return /^[a-zà-ù%²³0-9\/]+$/i.test(t) && /[a-zà-ù%²³]/i.test(t);
   }
 
+  /* ⛔ 19 settembre 2026 — I CODICI DI TARIFFA ARRIVAVANO SPORCHI.
+     Su un computo vero: 46 lavorazioni a 0,00 € su 88, e il prezzario non
+     ne agganciava NESSUNA. I codici erano finiti cosi':
+       A03.02.024.bLISTADELLE   A14.01.023.gmd   S01.01.001.0LISTADELLE7.a
+     Il perche': dentro una lavorazione aperta, TUTTO quello che sta a
+     sinistra della colonna della descrizione veniva infilato nel codice,
+     parola per parola. Se una pagina ha un'intestazione che il filtro delle
+     teste non toglie — perche' non si ripete su almeno il 60% delle pagine,
+     o perche' non sta sul bordo — le sue parole si attaccano al codice della
+     lavorazione in corso: da «LISTA DELLE CATEGORIE» esce «LISTADELLE»
+     incollato in fondo. E un codice sporco non lo trova nessun prezzario.
+     LA REGOLA: un pezzo di codice o ha dentro una CIFRA, oppure e' UNA SOLA
+     LETTERA — la sotto-variante .a .b .e, che nella colonna stretta va a
+     capo da sola. Due o piu' lettere di fila senza cifre non sono mai un
+     codice: «md», «LISTA», «DELLE» restano fuori.
+     ⚠️ Punti, trattini e barre non contano come lettere: «.e» passa. */
+  function _cpPezzoTariffa(t){
+    const s=String(t==null?"":t).trim();
+    if(!s)return "";
+    if(!/^[0-9A-Za-z\u00e0-\u00f9.\-\/]+$/i.test(s))return "";
+    if(/\d/.test(s))return s;
+    return (s.replace(/[.\-\/]/g,"").length<=1)?s:"";
+  }
+
   function _cpRighe(parole){
     const R=[];
     parole.slice().sort((a,b)=>(a.y-b.y)||(a.x-b.x)).forEach(p=>{
@@ -446,7 +470,7 @@
         const v=corr||nuova();
         /* il codice PUO' FINIRE SULLA RIGA DEL «SOMMANO»: la colonna e'
            stretta e i codici lunghi ci vanno a capo */
-        sin.forEach(p=>v.tariffa.push(p.t));
+        sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)v.tariffa.push(q);});
         chiudi(v,som,r.testo);
         corr=null;
         return;
@@ -456,7 +480,7 @@
          lavorazione chiusa, e' la coda del codice di QUELLA */
       if(!corr&&!des.length&&sin.length&&voci.length){
         const pezzo=sin.map(p=>p.t).join("");
-        if(sin.length<=2&&/^[0-9A-Za-z.\-\/]{1,12}$/.test(pezzo)&&/\d/.test(pezzo)){
+        if(sin.length<=2&&_cpPezzoTariffa(pezzo)&&/^[0-9A-Za-z.\-\/]{1,12}$/.test(pezzo)&&/\d/.test(pezzo)){
           const u=voci[voci.length-1];
           if(u.tariffa)u.tariffa=(u.tariffa+pezzo).trim();
         }
@@ -471,7 +495,7 @@
       const numLav=sin.find(p=>eNumLav(p.t));
       if(numLav&&des.length){
         corr=nuova(); corr.numero=+numLav.t;
-        sin.forEach(p=>{ if(p!==numLav)corr.tariffa.push(p.t); });
+        sin.forEach(p=>{ if(p===numLav)return; const q=_cpPezzoTariffa(p.t); if(q)corr.tariffa.push(q); });
         if(!_cpMisure(r,xDesc))corr.desc.push(des.map(p=>p.t).join(" "));
         corr.originali.push(r.testo);
         return;
@@ -481,7 +505,7 @@
          titoli dei capitoli e righe di riporto restano fuori */
       if(!corr)return;
 
-      sin.forEach(p=>corr.tariffa.push(p.t));
+      sin.forEach(p=>{const q=_cpPezzoTariffa(p.t);if(q)corr.tariffa.push(q);});
       if(des.length&&!_cpMisure(r,xDesc))corr.desc.push(des.map(p=>p.t).join(" "));
       corr.originali.push(r.testo);
     });
