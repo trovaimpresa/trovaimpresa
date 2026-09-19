@@ -12242,6 +12242,44 @@
       const tt=$("#ro-piu-tasto"); if(tt)tt.remove();
       return;
     }
+    /* ⛔ 19 settembre 2026 — IL TASTO CHE NON PORTAVA DA NESSUNA PARTE.
+       «rie-go» qui sopra fa esattamente questo, ma si chiama come il
+       Riepilogo e negli altri file nessuno lo sapeva. Cosi' il 18 settembre
+       sono nati dei tasti con data-action="vai-sezione" (il resoconto del
+       prezzario, il riquadro delle fatture emesse) che NON avevano nessuno
+       che li ascoltava: si cliccava e non succedeva niente.
+       Adesso il nome generico c'e' davvero, e vale per tutti i file.
+       Si usa cosi': data-action="vai-sezione" data-go="<nome della sezione>". */
+    if(a==="vai-sezione"){
+      const dove=t.dataset.go||"";
+      closeSheet();
+      const b=document.querySelector('nav.tabs button[data-tab="'+dove+'"]');
+      if(b){b.click();window.scrollTo(0,0);}
+      return;
+    }
+    /* ⛔ 19 settembre 2026 — DAL PANNELLO «IL SAL NON SI E' COLLEGATO»
+       ALLO STATO DI AVANZAMENTO GIUSTO.
+       Non basta portare nella sezione: con dieci SAL in elenco quello da
+       controllare e' ancora da cercare. Quindi si entra nella sezione e poi
+       si aspetta che l'elenco si sia riempito (e' asincrono) per aprire
+       proprio quello. Qualche tentativo e poi si lascia perdere, restando
+       comunque nella sezione giusta: mai un'attesa infinita. */
+    if(a==="fatt-vai-sal"){
+      closeSheet();
+      const b=document.querySelector('nav.tabs button[data-tab="sal"]');
+      if(b){b.click();window.scrollTo(0,0);}
+      if(id){
+        let giri=0;
+        (function apri(){
+          giri++;
+          const pronto = (typeof salTuttiCache!=="undefined") && salTuttiCache
+            && salTuttiCache.some(function(x){return String(x.id)===String(id);});
+          if(pronto && typeof salApriDaElenco==="function"){ salApriDaElenco(id); return; }
+          if(giri<12) setTimeout(apri,400);
+        })();
+      }
+      return;
+    }
     /* ⛔ 18 settembre 2026 — LA RIGA DELLA FATTURA SI APRIVA SULL'ELENCO.
        Il Riepilogo la scrive per nome e numero e si porta dietro il suo id
        (gest-riepilogo.js, riga della scheda Fatture), ma qui l'id si buttava

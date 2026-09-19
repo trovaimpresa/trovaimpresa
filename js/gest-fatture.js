@@ -972,6 +972,43 @@
     try{console.error("[FATTURA]",testo);}catch(e){}
   }
 
+  /* Come si chiama quel SAL: il numero, piu' il titolo del computo a cui sta
+     attaccato. Due letture piccole, e solo quando qualcosa e' andato storto. */
+  async function _salComeSiChiama(salId){
+    try{
+      const {data:s}=await sb.from("gest_sal").select("numero,computo_id")
+        .eq("id",salId).eq("user_id",sbUid).maybeSingle();
+      if(!s)return "";
+      let tit="";
+      if(s.computo_id){
+        const {data:c}=await sb.from("gest_computi").select("titolo")
+          .eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
+        tit=(c&&c.titolo)||"";
+      }
+      return "SAL n. "+(s.numero==null?"—":s.numero)+(tit?(" — "+tit):"");
+    }catch(e){ return ""; }
+  }
+
+  function _salAvvisoPannello(a){
+    const nome=a.nome||"Lo stato di avanzamento di questa fattura";
+    openSheetGrande("La fattura è salvata. Il SAL no.",
+        '<div class="sh-b"><div class="sh-nota"><b>'+esc(nome)+'</b> non risulta fatturato.<br><br>'
+      + 'Finché resta così, il gestionale ti lascia fare una <b>seconda fattura per lo '
+      + 'stesso acconto</b>: gli stessi soldi chiesti due volte al committente, e non se ne '
+      + 'accorge nessuno finché non arriva lui a dirlo.</div></div>'
+      + '<div class="sh-b"><div class="sh-tit">Perché non è riuscito</div>'
+      + '<div class="sh-nota">'+esc(a.perche)+'</div></div>'
+      + '<div class="sh-b"><div class="sh-tit">Cosa fare adesso</div>'
+      + '<ul class="xml-manca">'
+      + '<li>Apri quel SAL e guarda se c’è scritto <b>già fatturato</b>.</li>'
+      + '<li>Se non c’è, segnatelo: la fattura esiste lo stesso, è solo il SAL che non lo sa.</li>'
+      + '<li>Prima di rifare una fattura per quell’acconto, controlla in Fatture.</li>'
+      + '</ul>'
+      + '<button type="button" class="btn btn-primary" data-action="fatt-vai-sal" data-id="'
+      +   esc(String(a.id))+'">Apri lo stato di avanzamento</button></div>',
+      '<button class="btn b-cancel" data-action="close">Ho capito</button>');
+  }
+
   async function saveFattura(id){
     if(!sbUid){fattErrore("Non risulti loggato.");return;}
     try{
@@ -1095,15 +1132,32 @@
        collegamento si scrive solo dopo, mai prima.
        E se la colonna non c'e' ancora (migrazione non eseguita) la fattura
        resta buona lo stesso: si dice cosa manca e perche' e' importante. */
+    /* ⛔ 19 settembre 2026 — IL MESSAGGIO CHE SPARIVA, SUI SOLDI.
+       Qui sopra c'e' scritto perche' questo collegamento conta: senza, si
+       puo' fare una SECONDA fattura per lo stesso acconto. E quando non
+       riusciva, il gestionale lo diceva con un messaggino che:
+         - non diceva QUALE stato di avanzamento;
+         - non portava da nessuna parte;
+         - spariva da solo — anzi peggio: tre righe sotto partiva
+           «Fattura creata», che gli finiva sopra e lo cancellava subito.
+       Adesso e' un pannello che resta li', dice il numero del SAL e il
+       titolo del computo, spiega il rischio in una riga e ha il tasto che
+       ci porta davvero. */
+    let salAvviso=null;
     if(fattSalInCorso){
+      const _salId=fattSalInCorso;
       const {data:okSal,error:e4}=await sb.from("gest_sal")
-        .update({fattura_id:fid}).eq("id",fattSalInCorso).eq("user_id",sbUid).select("id");
-      if(e4){
-        toast(/fattura_id|column|schema cache/i.test(e4.message||"")
-          ? "Fattura salvata, ma lo stato di avanzamento non se la ricorda: esegui sql/gest-sal-fattura.sql su Supabase, se no rischi di fatturare due volte lo stesso acconto."
-          : "Fattura salvata, ma non sono riuscito a collegarla al SAL: "+e4.message);
-      }else if(!okSal||!okSal.length){
-        toast("Fattura salvata, ma il collegamento allo stato di avanzamento non è stato scritto. Riapri il SAL e controlla.");
+        .update({fattura_id:fid}).eq("id",_salId).eq("user_id",sbUid).select("id");
+      if(e4||!okSal||!okSal.length){
+        salAvviso={
+          id:_salId,
+          nome: await _salComeSiChiama(_salId),
+          perche: e4
+            ? (/fattura_id|column|schema cache/i.test(e4.message||"")
+               ? "Nel database manca la casella che tiene insieme il SAL e la fattura. Si accende così: Supabase → SQL Editor → incolla sql/gest-sal-fattura.sql → Run."
+               : ("Il database ha risposto: "+(e4.message||"")))
+            : "Il collegamento non è stato scritto e il database non ha detto perché. Può essere che quel SAL sia finito nel Cestino."
+        };
       }
       fattSalInCorso=null;
     }
@@ -1111,7 +1165,10 @@
     closeSheet();
     if(avvisoCassa)toast("Salvata, ma cassa e spese NON sono state registrate: esegui sql/gest-fattura-cassa.sql su Supabase.");
     rinfresca("fatture","riepilogo","lavori");
-    toast(id?"Fattura aggiornata ✔":"Fattura creata ✔ — è una bozza, emettila quando è pronta");
+    /* il pannello del SAL vince sul «creata»: e' l'unico dei due che chiede
+       di fare qualcosa, e prima gli finiva sopra */
+    if(salAvviso) _salAvvisoPannello(salAvviso);
+    else toast(id?"Fattura aggiornata ✔":"Fattura creata ✔ — è una bozza, emettila quando è pronta");
     }catch(err){
       fattErrore((err&&(err.message||err.toString()))||"errore sconosciuto");
     }
