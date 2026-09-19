@@ -169,6 +169,54 @@
   .tel .tel-btn{background:var(--blu);color:#fff;text-align:center;font-weight:800;padding:11px;border-radius:9px;margin-top:4px}
 
   /* ---------- griglia di quello che c'e' dentro ---------- */
+  /* ============ 19 set 2026 — I DISEGNI DELLE FASCE NUOVE ============
+     ⚠️ Sono DISEGNI fatti in HTML, non fotografie dello schermo: cosi'
+        restano nitidi su qualunque telefono e non invecchiano quando il
+        gestionale cambia un bottone. I numeri dentro sono inventati. */
+  /* riga di misura del computo: descrizione + quattro numerini */
+  .mis{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;
+       border-bottom:1px dashed #e8edf4;font-size:13.5px;color:var(--muted)}
+  .mis b{color:var(--ink);font-weight:700}
+  .mis .num{color:var(--ink);font-weight:800;white-space:nowrap}
+  .mis .meno{color:#b1442a}
+  .mis small{display:block;color:#8899ab;font-size:12px;margin-top:2px;letter-spacing:.3px}
+  /* elenco a gruppi dell'analisi prezzi */
+  .an-g{font-size:12px;font-weight:800;letter-spacing:.8px;color:#8899ab;
+        text-transform:uppercase;margin:12px 0 4px}
+  .an-g:first-child{margin-top:0}
+  /* pastiglie di scadenza: rossa se passata, ambra se manca poco */
+  .pill{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;
+        padding:3px 9px;white-space:nowrap}
+  .pill.rosso{background:#fdeceb;color:#b1442a}
+  .pill.ambra{background:#fff4e0;color:#9a6100}
+  .pill.verde{background:#e8f6ee;color:#0a7a3d}
+  /* la busta della mail del mattino */
+  .mail{background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;
+        box-shadow:0 14px 38px rgba(10,42,77,.13)}
+  .mail-top{background:var(--ink);color:#fff;padding:12px 16px;font-size:14px;font-weight:700}
+  .mail-top small{display:block;color:#a8bdd4;font-weight:400;font-size:12.5px;margin-top:2px}
+  .mail-b{padding:14px 16px;font-size:13.5px}
+  .mail-t{font-size:12px;font-weight:800;letter-spacing:.8px;color:#8899ab;
+          text-transform:uppercase;margin:12px 0 5px}
+  .mail-t:first-child{margin-top:0}
+  .mail-r{display:flex;justify-content:space-between;gap:10px;align-items:center;
+          padding:6px 0;border-bottom:1px dashed #e8edf4;color:var(--muted)}
+  .mail-r b{color:var(--ink)}
+  .mail-sot{background:var(--blu-tenue);border-radius:9px;padding:10px 12px;margin-top:12px;
+            font-weight:800;color:var(--ink);display:flex;justify-content:space-between}
+  /* la riga finale che elenca il resto */
+  .epoi{border-top:1px solid var(--bd);margin-top:34px;padding-top:22px;
+        color:var(--muted);font-size:17px;line-height:1.9;max-width:900px}
+  .epoi b{color:var(--ink)}
+  /* ⛔ 19 set 2026 — SUL TELEFONO IL TESTO VA SEMPRE PRIMO.
+     Nelle fasce col disegno a sinistra, sul telefono le due colonne
+     diventano una sola e il disegno finiva SOPRA: uno si trovava una
+     tabella di numeri senza sapere ancora di cosa si parla. Con
+     `order` il disegno scende sotto al testo, e sul computer non
+     cambia niente. Vale anche per la fascia «In cantiere», che aveva
+     lo stesso difetto da prima. */
+  @media(max-width:760px){ .due.rovescia > :first-child{order:2} }
+
   .sei{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
   .cosa{background:#fff;border:1px solid var(--bd);border-top:5px solid var(--blu);border-radius:16px;
         padding:22px 22px 24px;box-shadow:0 8px 24px rgba(10,42,77,.09)}
@@ -346,9 +394,18 @@
     <div>
       <p class="occhiello">Preventivi</p>
       <h2>Lo scrivi, esce il PDF,<br>il cliente risponde</h2>
-      <p>Voci, quantit&agrave;, prezzi. Il PDF esce gi&agrave; fatto col tuo nome sopra,
-         e al cliente arriva un link dove risponde s&igrave; o no.</p>
-      <p>Se il lavoro parte, il preventivo diventa il cantiere: non lo riscrivi da capo.</p>
+      <!-- ⛔ 19 set 2026 — QUI C'ERA UNA PROMESSA FALSA.
+           Diceva «al cliente arriva un link dove risponde si' o no»: quel
+           link non esiste, non c'e' nessun portale del cliente e nessuna
+           accettazione online. Lo stato «Accettato» lo mette l'utente a
+           mano. Quello che il gestionale fa davvero e' mandare il PDF per
+           email o WhatsApp, ed e' quello che c'e' scritto adesso. -->
+      <p>Voci, quantit&agrave;, prezzi, righe di sezione per dividere il lavoro in parti.
+         Il PDF esce gi&agrave; fatto col tuo nome sopra, e glielo mandi da l&igrave;,
+         per email o su WhatsApp.</p>
+      <p>Quando il cliente dice s&igrave;, il preventivo diventa il cantiere con un clic:
+         non lo riscrivi da capo. E la pagina ti dice su dieci che ne mandi quanti
+         te ne accettano.</p>
     </div>
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="doc">
@@ -369,7 +426,7 @@
 
 <!-- ================= IL CANTIERE DAL TELEFONO ================= -->
 <section class="fascia grigia">
-  <div class="wrap due">
+  <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="tel">
       <div class="tel-dentro">
@@ -392,21 +449,252 @@
   </div>
 </section>
 
-<!-- ================= TUTTO QUELLO CHE C'E' DENTRO ================= -->
-<!-- ⚠️ `id="dentro"`: ci puntano «Cosa fa» in cima e il bottone dell'hero. -->
+<!-- =====================================================================
+     19 settembre 2026 — SETTE FASCE VERE AL POSTO DELLE SEI CARD
+
+     Qui c'erano sei cartoncini con una riga di testo ciascuno. Alex: «le
+     togliamo e aumentiamo il potenziale delle informazioni». Ogni cosa
+     scritta qui sotto sta nel codice del gestionale: se un domani una
+     funzione cambia o sparisce, qui va cambiata o tolta anche la riga.
+     ===================================================================== -->
+
+<!-- ================= COMPUTO METRICO — LE MISURE ================= -->
+<!-- ⚠️ `id="dentro"`: ci puntano «Cosa fa» nella barra e il bottone dell'hero. -->
 <section class="fascia" id="dentro">
-  <div class="wrap">
-    <h2 class="titolone">Tutto quello che c&rsquo;&egrave; dentro</h2>
-    <p class="introne">Non sei tu che ti adatti al programma: il programma cambia le parole
-       secondo il mestiere che fai.</p>
-    <div class="sei">
-      <div class="cosa"><div class="ico">&#128736;</div><h3>Lavori e cantieri</h3><p>Cosa c&rsquo;&egrave; da fare, chi ci va, quando &egrave; finito.</p></div>
-      <div class="cosa"><div class="ico">&#128220;</div><h3>Preventivi</h3><p>Li scrivi, esce il PDF, il cliente risponde.</p></div>
-      <div class="cosa"><div class="ico">&#129534;</div><h3>Fatture elettroniche</h3><p>Sconto, IVA, bollo, ritenuta e cassa gi&agrave; al posto giusto.</p></div>
-      <div class="cosa"><div class="ico">&#128207;</div><h3>Computo metrico</h3><p>Voci, misure, analisi prezzi e stati di avanzamento.</p></div>
-      <div class="cosa"><div class="ico">&#128663;</div><h3>Mezzi e attrezzature</h3><p>Revisioni, assicurazioni, tarature, carburante.</p></div>
-      <div class="cosa"><div class="ico">&#9200;</div><h3>Ore e rapportini</h3><p>Chi ha lavorato dove, preso dal telefono in cantiere.</p></div>
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Computo metrico</p>
+      <h2>Le misure le scrivi<br>come sul quaderno</h2>
+      <p>Parti uguali, lunghezza, larghezza, altezza. Il vuoto di una porta lo metti
+         <b>&laquo;si detrae&raquo;</b> e se ne va da solo. La quantit&agrave; della lavorazione non la
+         scrivi tu: la somma il programma, misura per misura.</p>
+      <p>Computo, capitoli, lavorazioni, misure: quattro piani, come in un computo vero.
+         Ogni voce ha il suo codice di tariffa, l&rsquo;unit&agrave; di misura, gli oneri della
+         sicurezza e quanto pesa la manodopera.</p>
+      <p>Quando hai finito, <b>il computo diventa un preventivo</b> raggruppato per capitoli,
+         senza riscrivere una riga.</p>
     </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="doc">
+      <div class="doc-top">
+        <div><b>Intonaco civile su pareti interne</b><br>
+          <span style="color:#8899ab">Cap. 3 &mdash; Opere murarie &middot; cod. 1C.04.150.a</span></div>
+        <div style="text-align:right;color:#8899ab">m&sup2;</div>
+      </div>
+      <div class="mis"><span><b>Soggiorno</b><small>4 PARTI &middot; 4,20 &times; 2,90</small></span><span class="num">48,72</span></div>
+      <div class="mis"><span><b>Corridoio</b><small>2 PARTI &middot; 6,10 &times; 2,90</small></span><span class="num">35,38</span></div>
+      <div class="mis"><span><b>Vano porta</b> <span class="meno">si detrae</span><small>2 PARTI &middot; 0,90 &times; 2,10</small></span><span class="num meno">&minus; 3,78</span></div>
+      <div class="mis"><span><b>Finestra</b> <span class="meno">si detrae</span><small>1 PARTE &middot; 1,40 &times; 1,20</small></span><span class="num meno">&minus; 1,68</span></div>
+      <div class="doc-tot"><span>Quantit&agrave; &mdash; dalle misure</span><span>78,64 m&sup2;</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANALISI PREZZI E RIBASSO ================= -->
+<section class="fascia grigia">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="doc">
+      <div class="doc-top">
+        <div><b>Analisi del prezzo</b><br><span style="color:#8899ab">Intonaco civile &mdash; al m&sup2;</span></div>
+      </div>
+      <div class="an-g">Materiali</div>
+      <div class="doc-r"><span>Malta premiscelata &mdash; 18 kg</span><span>4,32 &euro;</span></div>
+      <div class="an-g">Manodopera</div>
+      <div class="doc-r"><span>Muratore &mdash; 0,42 h</span><span>11,34 &euro;</span></div>
+      <div class="doc-r"><span>Manovale &mdash; 0,21 h</span><span>4,89 &euro;</span></div>
+      <div class="an-g">Noli e mezzi</div>
+      <div class="doc-r"><span>Ponteggio interno &mdash; quota</span><span>1,10 &euro;</span></div>
+      <div class="doc-r" style="border-bottom:none"><span>Spese generali 15% &middot; utile 10%</span><span>5,42 &euro;</span></div>
+      <div class="doc-tot"><span>Prezzo unitario</span><span>27,07 &euro;</span></div>
+      <div style="margin-top:10px;font-size:12.5px;color:#8899ab">di cui manodopera 59,9%</div>
+    </div>
+    <div>
+      <p class="occhiello">Analisi prezzi</p>
+      <h2>Il prezzo lo costruisci,<br>non lo tiri a indovinare</h2>
+      <p>Materiali, manodopera, noli e mezzi. Ci metti sopra le <b>spese generali</b> e
+         l&rsquo;<b>utile</b>, ed esce il prezzo unitario con dentro scritto quanto pesa la
+         manodopera &mdash; quella percentuale che sui lavori pubblici ti chiedono sempre.</p>
+      <p>C&rsquo;&egrave; il <b>ribasso d&rsquo;asta</b>, e gli <b>oneri della sicurezza restano fuori dal
+         ribasso</b>, come dev&rsquo;essere. Il <b>quadro economico</b> arriva gi&agrave; con le sue righe:
+         imprevisti, incentivi per funzioni tecniche, IVA al 10%, spese tecniche,
+         allacciamenti.</p>
+      <p>E c&rsquo;&egrave; il <b>cronoprogramma</b> a barre, contato sui giorni feriali, che esce in PDF.
+         Se il lavoro cambia, fai la <b>variante</b> e il confronto riga per riga lo trovi gi&agrave; fatto.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STATI DI AVANZAMENTO ================= -->
+<section class="fascia">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Stati di avanzamento</p>
+      <h2>Il SAL si fa scrivendo<br>quanto hai fatto finora</h2>
+      <p>Le righe sono gi&agrave; quelle del computo, coi prezzi dentro. Tu scrivi solo la
+         quantit&agrave; arrivata a oggi, e accanto a ogni casella vedi <b>quanta ne avevi contata
+         l&rsquo;ultima volta</b>. La differenza la fa il programma.</p>
+      <p>Se conti pi&ugrave; di quello che c&rsquo;&egrave; nel computo, te lo dice. Esce il PDF di contabilit&agrave;
+         col <b>netto da pagare</b>, ritenuta di garanzia compresa, e finch&eacute; &egrave; una bozza
+         ci stampa sopra <b>&laquo;non da consegnare&raquo;</b>, cos&igrave; non lo mandi per sbaglio.</p>
+      <p>Da l&igrave;, <b>la fattura di acconto nasce con un clic</b>: per intero, oppure gi&agrave; al netto
+         della ritenuta.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="doc">
+      <div class="doc-top">
+        <div><b>S.A.L. n. 3</b><br><span style="color:#8899ab">Periodo 01/09 &mdash; 30/09/2026</span></div>
+        <div style="text-align:right"><span class="pill verde">Emesso</span></div>
+      </div>
+      <div class="doc-r"><span>Maturato a tutto oggi</span><span>96.400 &euro;</span></div>
+      <div class="doc-r"><span>Gi&agrave; chiesto col SAL n. 2</span><span>61.200 &euro;</span></div>
+      <div class="doc-r"><span>Avanzamento del periodo</span><span>35.200 &euro;</span></div>
+      <div class="doc-r"><span>Ribasso d&rsquo;asta 12,40%</span><span>&minus; 4.364 &euro;</span></div>
+      <div class="doc-r"><span>Ritenuta di garanzia 0,50%</span><span>&minus; 154 &euro;</span></div>
+      <div class="doc-tot"><span>Netto da pagare</span><span>30.682 &euro;</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FATTURA ELETTRONICA ================= -->
+<section class="fascia grigia">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="schermo">
+      <div class="sc-barra"><i class="pall"></i><i class="pall"></i><i class="pall"></i>
+        <span class="sc-titolo">Controllo prima di mandarla</span></div>
+      <div class="sc-main">
+        <div class="riga"><span>Partita IVA del cliente</span><span class="pill verde">a posto</span></div>
+        <div class="riga"><span>Codice destinatario</span><span class="pill verde">a posto</span></div>
+        <div class="riga"><span>IBAN</span><span class="pill rosso">una cifra non torna</span></div>
+        <div class="riga"><span>Righe con descrizione</span><span class="pill verde">a posto</span></div>
+        <div style="margin-top:12px;font-size:13.5px;color:#b1442a;line-height:1.6">
+          L&rsquo;IBAN non supera il controllo. Lo correggi in <b>Dati azienda &rsaquo; Pagamenti</b>.</div>
+      </div>
+    </div>
+    <div>
+      <p class="occhiello">Fatture</p>
+      <h2>Il file elettronico vero,<br>non un PDF rinominato</h2>
+      <p>Fattura, acconto e nota di credito, nel formato che lo <b>SDI</b> accetta.
+         <b>Ritenuta d&rsquo;acconto</b> (persona fisica o societ&agrave;, la capisce dal codice fiscale),
+         <b>cassa previdenziale</b> con tutti i codici &mdash; Inarcassa, Geometri, EPPI, INPS &mdash;,
+         <b>bollo virtuale</b>, e l&rsquo;<b>IVA al 10%</b> gi&agrave; messa in automatico per chi fa l&rsquo;edile.</p>
+      <p>Lo sconto viene spalmato riga per riga al centesimo, cos&igrave; i riepiloghi tornano
+         sempre col totale. La numerazione non salta e non si ripete mai, nemmeno se
+         cancelli una fattura.</p>
+      <p>Prima di mandarla, <b>controlla lei</b>: partita IVA, codice fiscale, IBAN, CAP,
+         codice destinatario. E se qualcosa non torna ti dice anche dove si rimedia.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= L'AI CHE COMPILA ================= -->
+<section class="fascia">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Assistenza AI</p>
+      <h2>Lo dici a parole,<br>il modulo si riempie</h2>
+      <p>&laquo;Cliente Bianchi, via Mazzini 4 a Rieti, referente il geometra Conti&raquo; &mdash;
+         e la scheda esce gi&agrave; compilata, casella per casella. Uguale per un lavoro,
+         una scadenza, un fornitore.</p>
+      <p>Per un preventivo lo descrivi a voce tua e ti escono <b>le voci una per una</b>,
+         con quantit&agrave;, unit&agrave; di misura e prezzi indicativi da correggere.</p>
+      <p><b>Non salva mai niente da sola.</b> Ti apre il modulo pieno, tu controlli e
+         premi Salva. E se sbagli a scrivere un numero all&rsquo;italiana, 1.200,50, lo capisce
+         lo stesso.</p>
+      <p style="font-size:17px">C&rsquo;&egrave; anche un aiuto <b>&laquo;come si fa&raquo;</b> che risponde alle domande
+         sul programma, e quello non costa niente.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="schermo">
+      <div class="sc-barra"><i class="pall"></i><i class="pall"></i><i class="pall"></i>
+        <span class="sc-titolo">Nuovo cliente</span></div>
+      <div class="sc-main">
+        <div class="riga" style="background:var(--blu-tenue);border-color:#c3d8ff;display:block">
+          <em>Cliente Bianchi, via Mazzini 4 a Rieti,<br>referente geom. Conti, 347 55 12 880</em></div>
+        <div class="campo" style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;margin:10px 0 8px">
+          <i style="font-size:11px;color:#8899ab;letter-spacing:.6px">NOME</i><br><b>Bianchi</b></div>
+        <div class="campo" style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;margin-bottom:8px">
+          <i style="font-size:11px;color:#8899ab;letter-spacing:.6px">INDIRIZZO</i><br><b>Via Mazzini 4, Rieti</b></div>
+        <div class="campo" style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;margin-bottom:8px">
+          <i style="font-size:11px;color:#8899ab;letter-spacing:.6px">REFERENTE</i><br><b>Geom. Conti</b></div>
+        <div style="font-size:12.5px;color:#8899ab">Controlla i dati e premi Salva.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LA MAIL DEL MATTINO ================= -->
+<section class="fascia grigia">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="mail">
+      <div class="mail-top">La tua settimana &mdash; luned&igrave; 21 settembre
+        <small>da TrovaImpresa Gestionale &middot; 7:30</small></div>
+      <div class="mail-b">
+        <div class="mail-t">Scadenze in arrivo</div>
+        <div class="mail-r"><span>Revisione &mdash; furgone Ducato</span><span class="pill ambra">fra 7 giorni</span></div>
+        <div class="mail-r"><span>Visita medica &mdash; Wahid</span><span class="pill ambra">fra 30 giorni</span></div>
+        <div class="mail-t">Scaduta ieri</div>
+        <div class="mail-r"><span>Assicurazione &mdash; miniescavatore</span><span class="pill rosso">scaduta</span></div>
+        <div class="mail-t">Non ti hanno ancora pagato</div>
+        <div class="mail-r"><span>Fatt. 2026/41 &mdash; Sig.ra Bianchi</span><span><b>7.360 &euro;</b></span></div>
+        <div class="mail-r"><span>Fatt. 2026/38 &mdash; Edil Sabina</span><span><b>4.880 &euro;</b></span></div>
+        <div class="mail-sot"><span>In tutto ti devono</span><span>12.240 &euro;</span></div>
+      </div>
+    </div>
+    <div>
+      <p class="occhiello">Avvisi</p>
+      <h2>Alle 7:30 sai gi&agrave;<br>cosa ti scade oggi</h2>
+      <p>Una mail sola, <b>e solo se c&rsquo;&egrave; qualcosa di nuovo</b>: una scadenza che arriva
+         fra trenta giorni, fra sette o domani; una scaduta ieri e ancora aperta;
+         una richiesta dal sito ferma da un giorno; un promemoria arrivato al suo giorno.</p>
+      <p>Il <b>luned&igrave;</b> arriva il quadro intero: scadenze gi&agrave; passate, fatture non pagate
+         col totale di quanto ti devono, lavori con la data superata.</p>
+      <p>Se non ti serve, <b>la spegni</b>. E non ne arriva mai pi&ugrave; di una al giorno.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MEZZI, SQUADRA E IL RESTO ================= -->
+<section class="fascia">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Mezzi e squadra</p>
+      <h2>Le scadenze le tiene lui,<br>non il foglio in cabina</h2>
+      <p>Assicurazione, revisione, collaudo, verifica periodica. <b>Rosso</b> se &egrave; gi&agrave;
+         passata, <b>arancione</b> se manca meno di un mese. Uguale per la squadra:
+         visita medica, formazione sicurezza, attestati, documenti in scadenza.</p>
+      <p>Ogni mezzo si porta dietro i suoi rifornimenti, ogni persona il suo costo
+         orario. Cos&igrave; quando guardi il margine di un lavoro &mdash; importo meno spese,
+         meno fatture dei fornitori, meno manodopera &mdash; quel numero &egrave; vero.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="schermo">
+      <div class="sc-barra"><i class="pall"></i><i class="pall"></i><i class="pall"></i>
+        <span class="sc-titolo">Scadenzario</span></div>
+      <div class="sc-main">
+        <div class="riga"><span>Assicurazione &mdash; miniescavatore</span><span class="pill rosso">passata da 3 gg</span></div>
+        <div class="riga"><span>Revisione &mdash; furgone Ducato</span><span class="pill ambra">fra 7 gg</span></div>
+        <div class="riga"><span>Verifica gru &mdash; ogni 12 mesi</span><span class="pill ambra">fra 22 gg</span></div>
+        <div class="riga"><span>Formazione sicurezza &mdash; David</span><span class="pill verde">a posto</span></div>
+        <div class="riga"><span>Patente a crediti</span><span class="pill verde">28 crediti</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <p class="epoi">E poi c&rsquo;&egrave; il resto, che non merita una fascia ma c&rsquo;&egrave;:
+      <b>clienti</b> e <b>fornitori</b> con le loro fatture che entrano nel margine,
+      il <b>prezzario tuo</b> caricato da un file Excel,
+      il <b>calendario</b> e l&rsquo;<b>agenda dell&rsquo;operatore</b>,
+      le <b>ore</b> e i <b>rapportini</b> presi dal telefono in cantiere,
+      la <b>galleria</b> delle foto e la <b>mappa</b> dei cantieri,
+      le <b>carte</b> e il carburante, i <b>crediti formativi</b>,
+      i <b>report</b> che si scaricano in Excel, le <b>richieste dal sito</b>,
+      e un <b>cestino</b> che recupera quello che cancelli per sbaglio.
+      Per chi ha lo studio tecnico c&rsquo;&egrave; anche il <b>decreto parametri</b>:
+      scegli la categoria d&rsquo;opera, scrivi l&rsquo;importo dei lavori, spunti le prestazioni
+      e la parcella si scrive da sola.</p>
   </div>
 </section>
 
