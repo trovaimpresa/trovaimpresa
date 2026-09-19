@@ -214,50 +214,133 @@
      \u26a0\ufe0f SI GUARDA LA COLONNA, NON IL VALORE. Una colonna che esiste ma
         \u00e8 vuota \u00e8 legittima; una che non esiste \u00e8 un aggiornamento
         mancante. Per aggiungerne una: una riga in PROVE. */
-  var PROVE = [
-    {sql:"gest-cestino.sql",                 t:"gest_lavori",              c:"id,eliminato_il"},
-    {sql:"gest-cestino.sql",                 t:"promemoria",               c:"id,eliminato_il"},
-    {sql:"gest-computo-metrico.sql",         t:"gest_computo_voci",        c:"id"},
-    {sql:"gest-computo-quadro.sql",          t:"gest_computi",             c:"id,quadro_economico"},
-    {sql:"gest-computo-cronoprogramma.sql",  t:"gest_computi",             c:"id,data_inizio"},
-    {sql:"gest-computo-cronoprogramma.sql",  t:"gest_computo_capitoli",    c:"id,giorni,insieme"},
-    {sql:"gest-computo-variante.sql",        t:"gest_computi",             c:"id,variante_di"},
-    {sql:"gest-analisi-prezzi.sql",          t:"gest_computo_voci_calc",   c:"id,prezzo_da_analisi"},
-    {sql:"capitolo-costi-sicurezza.sql",     t:"gest_computo_capitoli",    c:"id,sicurezza"},
-    {sql:"gest-sal.sql",                     t:"gest_sal",                 c:"id"},
-    {sql:"gest-sal-fattura.sql",             t:"gest_sal",                 c:"id,fattura_id"},
-    {sql:"gest-rapportini-cestino.sql",      t:"gest_rapportini",          c:"id,eliminato_il"},
-    {sql:"gest-ore-e-crediti.sql",           t:"gest_crediti",             c:"id"},
-    {sql:"gest-preventivo-sezioni.sql",      t:"gest_preventivo_righe",    c:"id,sezione"},
-    {sql:"gest-fattura-cassa.sql",           t:"gest_fatture",             c:"id,cassa_perc,cassa_tipo"}
-  ];
+  /* ⛔ 19 SETTEMBRE 2026 — DA 15 CONTROLLI A 97, CON UNA DOMANDA SOLA.
+     Prima qui c'erano 15 prove scritte a mano, ognuna con la sua domanda al
+     database: 15 domande, e coprivano 13 file sql su 36. Gli altri 23 non li
+     guardava nessuno.
+     Adesso l'elenco e' completo e la domanda e' UNA: il browser manda quello
+     che si aspetta, il database (funzione gest_schema_mancanti, in
+     sql/controllo-aggiornamenti.sql) risponde con quello che manca. Se non
+     manca niente risponde zero righe.
+     Costa meno di prima e controlla sei volte piu' roba.
+
+     COME SI LEGGE L'ELENCO — tre forme, una regola:
+       tabella.colonna   una colonna dentro una tabella o una vista
+       nome              una tabella oppure una vista
+       nome()            una funzione del database
+
+     QUANDO SI AGGIORNA: il giorno che scrivo un file sql nuovo, aggiungo qui
+     la sua riga. E' l'unico posto da toccare.
+
+     ⛔ DUE COSE NON CI SONO APPOSTA, e non vanno rimesse:
+        gest_note.eliminato_il  — tolta il 9/8/2026 (il cestino rompeva il
+          salvataggio delle note del calendario: il motivo sta scritto per
+          esteso in js/cestino.js);
+        nol_mezzi.eliminato_il  — quella tabella non esiste piu' dal 4/9/2026,
+          l'anagrafica dei mezzi e' una sola (sql/mezzi-una-lista-sola.sql).
+     Sono gli unici due buchi del 19 settembre, e sono voluti.
+
+     ⚠️ COSTA ZERO A CHI NON SONO IO. Sta in questo file apposta:
+        fondatore.js esce subito per chiunque non sia nell'elenco AMMESSI,
+        quindi per gli iscritti questa domanda non esiste.
+     ⚠️ PARTE DOPO, non all'apertura: il 18 settembre abbiamo tolto 28
+        domande dall'avvio, non se ne rimettono dalla porta di servizio.
+     ⚠️ SI GUARDA IL NOME, NON IL VALORE. Una colonna che esiste ma e'
+        vuota e' legittima; una che non esiste e' un aggiornamento mancante. */
+  var PROVE = {
+    "aggiungi-commercialista.sql":      "gest_azienda.comm_studio",
+    "capitolo-costi-sicurezza.sql":     "gest_computo_capitoli.sicurezza gest_computo_totali",
+    "gest-analisi-arrotondamento.sql":  "gest_analisi_righe_calc gest_analisi_totali",
+    "gest-analisi-prezzi.sql":          "gest_computo_voci.an_spese_perc gest_computo_voci.an_utile_perc gest_analisi_righe gest_analisi_totali gest_computo_voci_calc",
+    "gest-azienda-polizza.sql":         "gest_azienda.pol_compagnia",
+    "gest-azienda-tariffa-oraria.sql":  "gest_azienda.tariffa_oraria",
+    "gest-cestino-elimina.sql":         "_gest_cascata() gest_cestino_elimina()",
+    "gest-cestino.sql":                 "gest_lavori.eliminato_il gest_clienti.eliminato_il gest_preventivi.eliminato_il gest_fatture.eliminato_il gest_scadenze.eliminato_il gest_mestieri.eliminato_il gest_mezzi.eliminato_il gest_operatori.eliminato_il gest_carte.eliminato_il gest_fornitori.eliminato_il gest_fatture_fornitori.eliminato_il gest_spese.eliminato_il gest_ore.eliminato_il gest_crediti.eliminato_il gest_foto.eliminato_il gest_video.eliminato_il promemoria.eliminato_il gest_mezzi_scadenze",
+    "gest-computo-cronoprogramma.sql":  "gest_computi.data_inizio gest_computo_capitoli.giorni gest_computo_capitoli.insieme",
+    "gest-computo-metrico.sql":         "gest_computi.preventivo_id gest_computi.ribasso_perc gest_computi.prezzario gest_computi.prezzario_anno gest_computo_voci.incidenza_manodopera gest_computo_voci.oneri_sicurezza gest_prezzi_propri.incidenza_manodopera gest_prezzi_propri.fonte gest_computi gest_computo_capitoli gest_computo_misure gest_computo_voci gest_prezzi_propri gest_computo_totali gest_computo_voci_calc",
+    "gest-computo-quadro.sql":          "gest_computi.quadro_economico",
+    "gest-computo-variante.sql":        "gest_computi.variante_di gest_computo_voci.origine_id",
+    "gest-fattura-cassa.sql":           "gest_fatture.cassa_perc",
+    "gest-fornitori-plus.sql":          "gest_fornitori.trovaimpresa_id gest_foto.fornitore_id",
+    "gest-fornitori.sql":               "gest_fatture_fornitori gest_fornitori",
+    "gest-ore-e-crediti.sql":           "gest_azienda.cfp_obiettivo gest_crediti gest_ore",
+    "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc",
+    "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
+    "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo",
+    "gest-preventivo-sezioni.sql":      "gest_preventivo_righe.sezione",
+    "gest-rapportini-cestino.sql":      "gest_rapportino_cestina()",
+    "gest-rapportini.sql":              "gest_ore.rapportino_id gest_rapportini",
+    "gest-sal-fattura.sql":             "gest_sal.fattura_id",
+    "gest-sal.sql":                     "gest_sal gest_sal_righe gest_sal_righe_calc gest_sal_totali",
+    "gest-scadenze-pratiche.sql":       "gest_scadenze.lavoro_id gest_scadenze.avvisi gest_scadenze.avvisa",
+    "gest-scadenze-ripeti.sql":         "gest_scadenze.ripeti_mesi",
+    "gest-squadra-nomi.sql":            "gest_squadra_nomi",
+    "gest-variante-origine-vista.sql":  "gest_computo_voci_calc",
+    "gestionale-mezzi.sql":             "gest_scadenze.mezzo_id gest_lavoro_mezzi gest_mezzi gest_mezzi_scadenze",
+    "mezzi-una-lista-sola.sql":         "gest_mezzi.noleggiabile gest_mezzi_scadenze",
+    "neg-preventivi-cestino.sql":       "neg_preventivi.eliminato_il",
+    "noleggio-cestino.sql":             "nol_clienti.eliminato_il nol_noleggi.eliminato_il neg_prodotti.eliminato_il neg_fornitori.eliminato_il neg_movimenti.eliminato_il",
+    "noleggio-fatture.sql":             "nol_noleggi.fattura_id gest_azienda.num_fattura nol_fatture",
+    "noleggio-foto-video.sql":          "nol_media",
+    "promemoria-sezione.sql":           "promemoria.ora",
+    "supporto-origine.sql":             "supporto_messaggi.origine"
+  };
+
+  /* l'elenco scritto sopra, tradotto in quello che la funzione del database
+     sa leggere. Si costruisce qui una volta sola. */
+  function _attese(){
+    var fuori = [];
+    Object.keys(PROVE).forEach(function(file){
+      PROVE[file].split(/\s+/).forEach(function(v){
+        if(!v) return;
+        if(v.slice(-2) === "()"){
+          fuori.push({k:"funzione", f:file, t:v.slice(0,-2), c:null});
+        }else if(v.indexOf(".") > 0){
+          var due = v.split(".");
+          fuori.push({k:"colonna", f:file, t:due[0], c:due[1]});
+        }else{
+          fuori.push({k:"tabella", f:file, t:v, c:null});
+        }
+      });
+    });
+    return fuori;
+  }
+
   function controllaDatabase(sb){
-    var mancano = [];
-    var fatte = 0;
-    PROVE.forEach(function(p){
-      sb.from(p.t).select(p.c).limit(1).then(function(r){
-        if(r && r.error) mancano.push(p);
-        if(++fatte === PROVE.length) esito(mancano);
-      }, function(){ if(++fatte === PROVE.length) esito(mancano); });
+    var attese = _attese();
+    sb.rpc("gest_schema_mancanti", {attese: attese}).then(function(r){
+      if(r && r.error){
+        /* la funzione stessa non c'e' ancora: e' il primo aggiornamento da fare */
+        console.warn("[fondatore] il controllo non ha potuto girare:", r.error.message,
+                     "\u2014 esegui sql/controllo-aggiornamenti.sql su Supabase");
+        esito([{file:"controllo-aggiornamenti.sql", oggetto:"gest_schema_mancanti()"}], attese.length);
+        return;
+      }
+      esito((r && r.data) || [], attese.length);
+    }, function(e){
+      console.warn("[fondatore] il controllo non ha potuto girare:", e);
     });
   }
-  function esito(mancano){
+
+  function esito(mancano, quanti){
     if(!mancano.length){
-      console.log("[fondatore] aggiornamenti del database: tutti a posto ("+PROVE.length+" controllati)");
+      console.log("[fondatore] aggiornamenti del database: tutti a posto ("
+                  + quanti + " controllati, " + Object.keys(PROVE).length + " file sql)");
       return;
     }
-    /* raggruppati per file sql: uno stesso file pu\u00f2 aver dato due buchi */
+    /* raggruppati per file sql: uno stesso file puo' aver dato due buchi */
     var files = [];
-    mancano.forEach(function(m){ if(files.indexOf(m.sql)<0) files.push(m.sql); });
+    mancano.forEach(function(m){ if(files.indexOf(m.file) < 0) files.push(m.file); });
     console.warn("[fondatore] AGGIORNAMENTI DEL DATABASE MANCANTI:", files.join(", "),
-                 "\u2014 dettaglio:", mancano.map(function(m){return m.t+"("+m.c+")";}).join(" \u00b7 "));
+                 "\u2014 dettaglio:", mancano.map(function(m){ return m.oggetto; }).join(" \u00b7 "));
     var barra = document.getElementById("ti-fondatore");
     if(!barra) return;
     var d = document.createElement("div");
     d.id = "ti-db-manca";
     d.style.cssText = "background:#b3261e;color:#fff;padding:8px 12px;font-size:14px;font-weight:600";
     d.textContent = "\u26d4 Database indietro: manca " + files.join(", ")
-      + ". Nel gestionale ci sono pezzi spenti finch\u00e9 non li esegui su Supabase.";
+      + ". Nel gestionale ci sono pezzi spenti finch\u00e9 non li esegui su Supabase."
+      + " Il dettaglio \u00e8 in F12 \u2192 Console, riga [fondatore].";
     barra.appendChild(d);
   }
 
