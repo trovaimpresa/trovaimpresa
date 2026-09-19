@@ -173,6 +173,21 @@
   status = 404
   force = true
 
+# ⚠️ 19 settembre 2026 — IL PROMPT DI PASSAGGIO DEL 20 SETTEMBRE.
+# `PROMPT-sessione-20set.md` e' arrivato in root col commit 540d918 e ha
+# fermato DUE pubblicazioni di fila (540d918 e a5669ed): il controllo prima
+# di pubblicare l'ha visto e ha bloccato tutto, come deve fare. Dentro c'e'
+# il racconto di dove si sta lavorando e com'e' fatto il gestionale: non
+# deve stare online.
+# ⚠️ E' il quinto file «PROMPT-*.md» che casca nella stessa trappola: ogni
+#    volta che se ne scrive uno nuovo in root, il suo rinvio va messo qui
+#    PRIMA del push, se no il deploy muore e il sito resta indietro.
+[[redirects]]
+  from = "/PROMPT-sessione-20set.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # ⚠️ 21 agosto 2026 — I DUE FILE SUL PREZZO.
 # Sono del 19 agosto e stavano in root senza rinvio: il controllo prima di
 # pubblicare li ha visti e ha fermato il deploy. Dentro ci sono i conti veri
