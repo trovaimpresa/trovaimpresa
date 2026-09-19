@@ -133,6 +133,9 @@
     th,td{padding:10px}
     .seg button{min-width:0}
   }
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -170,6 +173,55 @@
   .madre{background:var(--bg-alt);border-radius:12px;padding:16px 18px;margin:26px 0;font-size:16.5px}
   .madre a{color:var(--primary);font-weight:700}
 </style>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
@@ -189,7 +241,17 @@
     <h1>Quanto costa rifare il bagno a Roma nel 2026</h1>
     <p class="meta">Prezzi veri di cantiere · Aggiornato settembre 2026 · Lettura 6 min</p>
 
-    <div class="answer">
+    <div class="tp-join tp-a">
+  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
+  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
+  <div class="tp-btns">
+    <a class="tp-b tp-b1" href="/registrazione-artigiano.html">Sono i lavori del bagno &mdash; iscrivimi gratis</a>
+    <a class="tp-b tp-b2" href="/cerca-artigiani.html">Sono un cliente &mdash; cerco chi rifa il bagno</a>
+  </div>
+  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+</div>
+
+  <div class="answer">
       <strong>Risposta rapida:</strong> a Roma rifare un bagno completo di 5–6 mq costa
       <span class="price-big">da 6.000 a 9.000 €</span>
       chiavi in mano con finiture normali. Un bagno piccolo di 3 mq parte da circa <strong>4.000 €</strong>, uno grande oltre i 7 mq arriva a <strong>14.000 €</strong>. Sono <strong>1.000–1.500 €/mq</strong>: circa il <strong>15–20% in più</strong> della media italiana.
@@ -217,7 +279,7 @@
 
     <h2 id="prezzi-roma">Quanto costa rifare il bagno a Roma, misura per misura</h2>
     <p>Prezzi chiavi in mano: demolizione, smaltimento, impianti, massetto, piastrelle, sanitari e manodopera. IVA al 10% esclusa.</p>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Bagno rifatto da zero a Roma — prezzi indicativi 2026</caption>
       <thead>
         <tr><th>Dimensione</th><th style="text-align:right">Finiture semplici</th><th style="text-align:right">Finiture normali</th><th style="text-align:right">Finiture di pregio</th></tr>
@@ -228,7 +290,7 @@
         <tr><td><strong>5 – 6 mq (il più comune)</strong></td><td class="num" style="text-align:right">5.500 – 7.000 €</td><td class="num" style="text-align:right"><strong>6.000 – 9.000 €</strong></td><td class="num" style="text-align:right">9.500 – 14.000 €</td></tr>
         <tr><td>7 mq e oltre</td><td class="num" style="text-align:right">7.500 – 9.500 €</td><td class="num" style="text-align:right">9.000 – 14.000 €</td><td class="num" style="text-align:right">14.000 – 20.000 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
     <p>Un bagno piccolo non costa poco: molte voci sono fisse — allestimento, viaggi, attrezzatura, smaltimento — quindi il prezzo <em>al metro quadro</em> di un bagno da 3 mq è più alto di quello di un bagno da 6.</p>
 
     <h2 id="perche-costa-di-piu">Perché a Roma costa di più che in provincia</h2>

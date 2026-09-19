@@ -114,17 +114,78 @@
     .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
     .seg button{min-width:0}
   }
+
+  .answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+  .answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+  .answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+  .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+  .answer-cta a:hover{background:#e85f2c}
+  .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
-<nav class="menu">
-  <div class="wrap">
-    <a href="/index.html" class="menu-logo">TrovaImpresa</a>
-    <a href="/candidature-lavoro.html" class="menu-btn">Vedi i candidati</a>
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/blog.html">Guide e Costi</a>
+    <a href="/cerca-artigiani.html" class="menu-btn">Trova un professionista</a>
   </div>
 </nav>
 
@@ -133,6 +194,14 @@
 
   <h1>Come trovare operai edili nel 2026</h1>
   <p class="meta">Scritto da un muratore con 25 anni di cantiere &middot; Aggiornato agosto 2026 &middot; Lettura 6 min</p>
+
+  <div class="tp-join tp-b-band">
+  <p class="tp-t">Hai un&rsquo;impresa edile?</p>
+  <p class="tp-s">Mettiti dove i clienti ti cercano. La tua pagina su TrovaImpresa &egrave; gratis, e i contatti che ricevi non si pagano.</p>
+  <a class="tp-go" href="/registrazione-impresa.html">Iscriviti gratis &rarr;</a>
+  <small class="tp-note">Un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <a class="tp-alt" href="/cerca-imprese.html">Cerco un&rsquo;impresa, non ne ho una</a>
+</div>
 
   <div class="answer">
     <strong>Risposta rapida:</strong> oggi le imprese artigiane non riescono a coprire
@@ -150,7 +219,7 @@
   <p class="lead">Parto da una cosa che in cantiere sappiamo tutti ma che nei convegni non dice nessuno: <strong>il problema non &egrave; che non ci sono operai, &egrave; che non conviene pi&ugrave; farlo</strong>. Finch&eacute; non si guarda in faccia questo, si continua a pubblicare annunci a cui non risponde nessuno. Poi, dentro questo quadro, qualcosa che funziona c'&egrave;.</p>
 
   <h2>I numeri della carenza</h2>
-  <table>
+  <div class="tab-wrap"><table>
     <caption>Quota di assunzioni previste che le imprese dichiarano di difficile reperimento</caption>
     <thead>
       <tr><th>Figura</th><th style="text-align:right">Difficolt&agrave; a trovarla</th></tr>
@@ -162,7 +231,7 @@
       <tr class="total-row"><td><strong>Media imprese artigiane</strong> (tutti i settori)</td><td class="num" style="text-align:right">59,7%</td></tr>
       <tr><td>Media nazionale, tutte le imprese</td><td class="num" style="text-align:right">47%</td></tr>
     </tbody>
-  </table>
+  </table></div>
   <p>In edilizia la ricerca di una figura specializzata pu&ograve; <strong>superare i sei mesi</strong>. Nel frattempo si rifiutano commesse e si spostano le consegne: il costo di non trovare nessuno &egrave; molto pi&ugrave; alto del costo di assumere.</p>
 
   <h2>Perch&eacute; non li trovi</h2>
@@ -182,7 +251,7 @@
   </ul>
 
   <h2>Quanto costa assumere</h2>
-  <table>
+  <div class="tab-wrap"><table>
     <caption>Costo reale per l'impresa: retribuzione lorda pi&ugrave; contributi, INAIL, Cassa Edile, ferie, tredicesima e TFR, su circa 210 giornate lavorate l'anno</caption>
     <thead>
       <tr><th>Chi assumi</th><th>Costo al mese</th><th style="text-align:right">Costo al giorno</th></tr>
@@ -191,7 +260,7 @@
       <tr><td><strong>Manovale</strong> (1&deg; livello)</td><td>2.500 &ndash; 2.800 &euro;</td><td class="num" style="text-align:right">145 &ndash; 160 &euro;</td></tr>
       <tr><td><strong>Muratore specializzato</strong> (3&deg; livello)</td><td>3.000 &ndash; 3.400 &euro;</td><td class="num" style="text-align:right">170 &ndash; 195 &euro;</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <h2>L'apprendistato: l'unica leva che sposta davvero il conto</h2>
   <p>Con l'<strong>apprendistato professionalizzante</strong> l'aliquota contributiva a carico dell'impresa scende all'<strong>11,31%</strong>, contro il 29&ndash;32% di un contratto ordinario. L'agevolazione vale per tutto il periodo formativo e prosegue per i <strong>12 mesi successivi</strong> alla conferma a tempo indeterminato.</p>

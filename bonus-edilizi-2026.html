@@ -119,6 +119,9 @@
     .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
     .seg button{min-width:0}
   }
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -140,6 +143,55 @@
   .answer-cta a:hover{background:#e85f2c}
   .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
@@ -159,7 +211,17 @@
     <h1>Bonus casa 2026: tutte le detrazioni in una pagina</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 9 min · Fonti: Agenzia delle Entrate, ENEA</p>
 
-    <div class="answer">
+    <div class="tp-join tp-a">
+  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
+  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
+  <div class="tp-btns">
+    <a class="tp-b tp-b1" href="/registrazione-impresa.html">Ho un&rsquo;impresa &mdash; iscrivimi gratis</a>
+    <a class="tp-b tp-b2" href="/cerca-imprese.html">Sono un cliente &mdash; cerco un'impresa</a>
+  </div>
+  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+</div>
+
+  <div class="answer">
       <strong>In breve:</strong> nel 2026 quasi tutti i bonus edilizi sono stati portati alla stessa aliquota
       <span class="price-big">50% sull'abitazione principale, 36% sugli altri immobili</span>
       Vale per <strong>ristrutturazione, ecobonus e sismabonus</strong>, su una spesa massima di <strong>96.000 €</strong> per unità immobiliare, in <strong>10 rate annuali</strong>. Fuori dallo schema restano il <strong>bonus mobili</strong> (50% su 5.000 €) e il <strong>conto termico</strong>, contributo del GSE e non detrazione. Bonus verde e barriere architettoniche al 75% non ci sono più.
@@ -175,7 +237,7 @@
     <p class="lead">Fino a due anni fa ogni bonus aveva la sua percentuale: 65, 70, 75, 85, 110. Oggi il quadro è più semplice, ma anche meno generoso. La differenza non la fa più il tipo di lavoro: la fa <strong>dove abiti</strong>. Qui sotto trovi tutti i bonus attivi nel 2026 in una tabella sola, con una scheda breve per ciascuno.</p>
 
     <h2>Tutti i bonus casa 2026 in una tabella</h2>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Quadro dei bonus edilizi per le spese sostenute nel 2026 — detrazioni IRPEF salvo dove indicato</caption>
       <thead>
         <tr><th>Bonus</th><th>Detrazione</th><th>Tetto di spesa</th><th>In quanti anni</th><th>Cosa ci rientra</th></tr>
@@ -190,7 +252,7 @@
         <tr><td><strong>Conto termico 3.0</strong></td><td>Contributo GSE, non detrazione</td><td>Variabile per intervento</td><td>1–5 anni</td><td>Pompe di calore, biomassa, solare termico</td></tr>
         <tr><td><strong>Superbonus</strong></td><td class="num">110% solo aree sisma</td><td>Limiti specifici</td><td class="num">10 anni</td><td>Immobili danneggiati dai terremoti del Centro Italia</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="note">
       <strong>Come leggere "50% / 36%":</strong> il 50% spetta a chi è proprietario (o titolare di un diritto reale) <strong>e</strong> ci abita davvero. Negli altri casi — seconde case, immobili affittati, inquilini, familiari conviventi — l'aliquota è il 36%.
@@ -207,7 +269,7 @@
     <strong>Cosa copre:</strong> cappotto e isolamento di pareti e tetto, infissi, pompe di calore, sistemi ibridi, solare termico, schermature solari (tende da sole, persiane), building automation.<br>
     <strong>Come si ottiene:</strong> come il bonus ristrutturazione, più un adempimento: la <strong>comunicazione all'ENEA</strong> entro 90 giorni dalla fine dei lavori. Per alcuni interventi serve anche l'asseverazione di un tecnico.</p>
     <p>L'ecobonus non ha un tetto unico: ogni intervento ha il suo <strong>massimale di detrazione</strong>, cioè il tetto dell'importo che porti in dichiarazione.</p>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Ecobonus 2026 — massimali di detrazione per tipo di intervento</caption>
       <thead>
         <tr><th>Intervento</th><th style="text-align:right">Detrazione massima</th></tr>
@@ -220,7 +282,7 @@
         <tr><td>Pannelli solari termici per acqua calda</td><td class="num" style="text-align:right">60.000 €</td></tr>
         <tr><td>Pompe di calore, sistemi ibridi, generatori a biomassa</td><td class="num" style="text-align:right">30.000 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
     <p>Sono tetti alti: con il 50% sugli infissi il massimale di 60.000 € corrisponde a una spesa di 120.000 €. Nella pratica non ti tocca quasi mai.</p>
     <div class="note">
       <strong>Le caldaie a gas non ci sono più.</strong> Le spese per le caldaie alimentate solo da combustibili fossili sono escluse. Oggi la strada agevolata è la pompa di calore o il sistema ibrido: vedi <a href="/quanto-costa-sostituire-la-caldaia.html">quanto costa sostituire la caldaia</a>.

@@ -2347,3 +2347,149 @@ TrovaImpresa**.
   battezzare una pagina: quale ricerca deve intercettare?
 - ⛔ **Prima di prendersi un indirizzo, cercarlo in `netlify.toml`**: puo' gia'
   rinviare da qualche parte.
+
+
+# 18–19 SETTEMBRE 2026 — «IL GESTIONALE SA LA COSA, MA NON TE LA FA TROVARE»
+
+Due giornate su una cosa sola: non funzioni nuove, ma **avvisi che dicevano
+«c'e' un problema» senza dire dove**. Alex l'ha chiesto cosi': «controlla cosa
+puo' mancare per funzionare e essere piu' completo possibile… se alcuni
+passaggi sono troppo difficili da capire, semplifichiamoli».
+
+## ⛔ LA REGOLA NUOVA, IN UNA RIGA
+
+> **Ogni messaggio che dice «c'e' qualcosa» deve anche dire DOVE, e portarci.**
+
+Trovata cinque volte in due giorni, sempre uguale: il gestionale conosceva
+gia' la risposta (il numero del SAL, quale casella, quale fattura) e la
+buttava via mentre scriveva il messaggio. Non era un problema di codice
+mancante: era informazione gia' in mano, non consegnata.
+
+## GLI →8← BUCHI, CHIUSI E PROVATI DAL VIVO
+
+| n | dove | prima | adesso |
+|---|---|---|---|
+| 1 | file per lo SDI | →25← righe e un solo «Ho capito» | raggruppate per posto, un tasto per gruppo |
+| 2 | resoconto prezzario | le righe dicevano il problema | le righe ci portano |
+| 3 | «non so dove cercare i prezzi» | solo testo | due tasti veri |
+| 4 | cronoprogramma | →3← avvisi che sparivano | portano alla pagina e alla casella |
+| 5 | fatture emesse | «mancano le n.3, n.5» | apre il Cestino (solo se ci sono davvero) |
+| 6 | SAL non collegato | messaggino cancellato da «Fattura creata» | pannello che dice **quale** SAL e ci porta |
+| 7 | emetti senza cliente | messaggino che svaniva | la tendina si segna in rosso e prende il fuoco |
+| 8 | eliminazione a meta' | `alert()` con l'elenco dentro | resta in cima al Cestino finche' non lo chiudi |
+
+⚠️ **Il buco 6 era il piu' caro**: senza quel collegamento si puo' fatturare
+**due volte lo stesso acconto**. E il messaggio che lo diceva veniva cancellato
+tre righe dopo da «Fattura creata ✔», che gli finiva sopra.
+
+## L'APERTURA DEL GESTIONALE: DA →16,8← A →1,5← SECONDI
+
+`js/cestino.js` faceva **→28← domande di prova al database a ogni apertura**,
+per ogni iscritto, solo per sapere se le tabelle avevano la colonna
+`eliminato_il`. La risposta non cambia mai: adesso si ricorda per →30← giorni
+(`localStorage`, chiave `gest_cestino_colonne`).
+
+⚠️ **La trappola dentro la correzione**: senza la riga
+`if (!daFare.length) { aggiornaMotivo(); return Promise.resolve(); }` la
+promessa `cestinoPronto()` non si chiudeva mai e **ogni Elimina restava
+bloccato**. Una cache che non risolve la promessa e' peggio di nessuna cache.
+
+⚠️ **E la trappola nella misura**: il browser dentro l'app Claude aggiunge
+~→600← ms a ogni connessione nuova. Misurando li' sembrava che la correzione
+non servisse. Provata la stessa pagina in Chrome vero: →16,8← → →1,5←.
+**Le misure di velocita' si fanno in Chrome vero, mai nel browser dell'app.**
+
+## IL CONTROLLO DEGLI AGGIORNAMENTI DEL DATABASE (19 set)
+
+Il database e' **UNO SOLO** per tutti gli iscritti. Se un aggiornamento c'e',
+c'e' per tutti; se manca, e' rotto per tutti insieme. Quindi non esiste
+«l'iscritto a cui manca una migrazione»: o manca a tutti o a nessuno.
+
+Il rischio vero e' un altro: **Alex scrive un file sql nuovo e si dimentica di
+eseguirlo**. Adesso ci sono due reti:
+
+1. **Nel gestionale** — `js/fondatore.js`, variabile `PROVE`: →149← controlli
+   su →37← file sql, **una sola domanda** al database (funzione
+   `gest_schema_mancanti`, in `sql/controllo-aggiornamenti.sql`). Gira solo
+   per Alex, →6← secondi dopo l'apertura. Se manca qualcosa: barra rossa col
+   nome del file da eseguire.
+2. **Al push** — `tools/controllo-push.js`, **punto 8**: legge la cartella
+   `sql/` e **ferma la pubblicazione** se un file sql nominato dal gestionale
+   non e' in `PROVE`, o se `PROVE` nomina un file cancellato.
+
+Provato il 19 settembre: →149← controlli, →833← ms, **zero mancanti**.
+
+⚠️ **Due esclusioni volute**, scritte come eccezioni in `controllo-push.js`
+(`FUORI_APPOSTA`) per non avere avvisi finti a ogni push:
+`gest_note.eliminato_il` (tolta il 9/8, rompeva le note del calendario) e
+`nol_mezzi.eliminato_il` (tabella sparita il 4/9).
+
+⛔ **La trappola del lettore sql**: un `alter table` puo' aggiungere **piu'
+colonne in una volta sola**. Leggendo solo la prima si perdevano →54← colonne
+su →151←. Se un giorno si riscrive quel pezzo: si prende **tutta**
+l'istruzione fino al punto e virgola, poi dentro si cercano tutte le
+`add column`.
+
+## ⚠️ LE LEZIONI — TUTTE E TRE MIE
+
+**1. Misurare prima di lavorare. Due lavori interi sono morti cosi'.**
+- «Sistemare i →35← messaggi sql»: controllate tutte le migrazioni, **c'erano
+  tutte**. Quei messaggi sono rami morti che non vede nessuno. Il lavoro non
+  esisteva — ed e' diventato il controllo qui sopra.
+- «Far girare le migrazioni per ogni iscritto»: il database e' uno solo.
+  Il lavoro non esisteva proprio.
+
+**2. Una cosa non e' finita finche' non l'hai toccata sul sito vero.**
+Il →19← settembre il collaudo dal vivo ha trovato **→3← difetti** che
+`node --check` aveva lasciato passare tranquillamente:
+- «Copia l'elenco» **non copiava**: `navigator.clipboard` e' negato in
+  parecchi browser. **Cura: prima la strada vecchia** (`textarea` nascosta +
+  `document.execCommand("copy")`), che funziona sempre e non chiede permessi;
+  quella nuova solo come riserva.
+- «L'ho sistemato, togli l'avviso» lasciava l'avviso a schermo →3← secondi
+  (il rinfresco e' asincrono): si toglie **prima** dal DOM, poi si rinfresca.
+- Il SAL non trovato non diceva **niente** — cioe' il difetto che stavamo
+  togliendo.
+
+**3. Un tasto pubblicato puo' essere morto.**
+Il →18← settembre ho pubblicato `data-action="vai-sezione"` in
+`gest-computo-pdf.js` **senza** il pezzo che lo ascolta in
+`gestionale-app.html`. Il tasto c'era, si cliccava, non succedeva niente.
+⛔ **Quando si inventa un `data-action` nuovo, si controlla che il suo
+`if(a==="…")` sia davvero nel file grande, e si prova il clic dal vivo.**
+
+## ⚠️ IL FILE CHE TORNA INDIETRO — CONFERMATO E CON LA CURA
+
+Il →19← settembre e' successo di nuovo: `device_commit_files` risponde
+**`written`**, ma poi il file sul computer e' quello di prima (le scritture di
+Claude e i `git add -A` di Alex si pestano i piedi). Il push diceva
+**«nothing to commit»** con dentro →30← righe di lavoro sparite.
+
+**La cura, da fare sempre:** dopo ogni `device_commit_files`, **ristaggiare il
+file e confrontarlo** con la copia in `/mnt/user-data/outputs/`. Se non
+combaciano, si riscrive con `force: true` e si ricontrolla. Solo allora si da'
+ad Alex il blocco git.
+
+## ⚠️ TRE DIAGNOSI SBAGLIATE, RITIRATE IN PUBBLICO
+
+1. «Crediti formativi si vede all'artigiano e non all'impresa» — avevo letto
+   l'elenco delle sezioni nel DOM invece del menu. Non la vede nessuno dei due,
+   ed e' giusto cosi'.
+2. «pulizia ed elettricista sono reparti fantasma» — stanno nel Cestino dal
+   →21← agosto, **scritto nel commento di Alex del →4← settembre**.
+   ⛔ Prima di riaprire una decisione, **cercare se e' gia' scritta**.
+3. «La correzione del cestino non ha migliorato niente» — misurata nel browser
+   sbagliato (vedi sopra).
+
+## Regole nuove, in breve
+
+- ⛔ Ogni messaggio che dice «c'e' qualcosa» deve dire **dove**, e portarci.
+- ⛔ Un tasto che non porta da nessuna parte e' peggio di nessun tasto: se non
+  c'e' niente da aprire (un numero mai usato, per esempio), **il riquadro resta
+  fermo**.
+- ⛔ Le misure di velocita' **in Chrome vero**, mai nel browser dentro l'app.
+- ⛔ Dopo `device_commit_files`, **ristaggiare e confrontare** prima di dare il
+  blocco git.
+- ⛔ Un `data-action` nuovo si prova **cliccandolo**, non leggendolo.
+- ⛔ Un avviso che comparirebbe a ogni push va messo fra le **eccezioni con il
+  suo perche'**: un avviso finto ripetuto insegna a saltare gli avvisi.

@@ -100,6 +100,58 @@
     border-radius:12px;box-shadow:0 4px 14px rgba(255,107,53,.26)}
   .answer-cta a:hover{background:#e85f2c}
   .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
+</style>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
 </head>
 <body>
@@ -120,7 +172,15 @@
     <h1>Come fare un preventivo edile: le 18 voci di un lavoro vero</h1>
     <p class="meta">Guida per le imprese edili · Aggiornato agosto 2026 · Lettura 8 min</p>
 
-    <div class="answer">
+    <div class="tp-join tp-b-band">
+  <p class="tp-t">Hai un&rsquo;impresa edile?</p>
+  <p class="tp-s">Mettiti dove i clienti ti cercano. La tua pagina su TrovaImpresa &egrave; gratis, e i contatti che ricevi non si pagano.</p>
+  <a class="tp-go" href="/registrazione-impresa.html">Iscriviti gratis &rarr;</a>
+  <small class="tp-note">Un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <a class="tp-alt" href="/cerca-imprese.html">Cerco un&rsquo;impresa, non ne ho una</a>
+</div>
+
+  <div class="answer">
       <strong>In breve:</strong> un preventivo edile che regge fino alla fine non si scrive per importi grossi, si scrive
       <span class="price-big">per voci separate</span>
       Una ristrutturazione completa di appartamento sta in <strong>circa 18 voci</strong>: tre di impianti, tre di ambienti finiti, sei di demolizioni e murature, quattro di finiture, due di cantiere. Qui sotto ci sono tutte, prese da un preventivo reale da <strong>circa 34.000 €</strong> più IVA, accettato dal cliente. Con accanto <strong>le voci che si dimenticano</strong> e le tre righe che evitano la discussione a lavori iniziati.
@@ -143,7 +203,7 @@
 
     <p>Questo è l'impianto di un preventivo reale: appartamento da ristrutturare per intero — salone ampliato, ingresso ridisegnato, cucina, due bagni, accesso alla terrazza. Lavoro preso, non un esercizio.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Preventivo di ristrutturazione completa di appartamento. I prezzi sono indicati in fasce: sono ricavati da un preventivo reale del 2026 e adattati, perché il listino di un'impresa è un fatto suo. Servono a mostrare <strong>il peso relativo delle voci</strong>, non a essere copiati. Prezzi al netto di IVA.</caption>
       <thead>
         <tr><th>N.</th><th>Voce di lavorazione</th><th style="text-align:right">Fascia di prezzo</th></tr>
@@ -169,7 +229,7 @@
         <tr><td class="n">18</td><td>Allestimento e messa in sicurezza del cantiere</td><td class="num" style="text-align:right">500 – 750 €</td></tr>
         <tr class="total-row"><td class="n"></td><td><strong>Totale lavori</strong> (IVA 10% esclusa)</td><td class="num" style="text-align:right">circa 34.000 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="note">
       ⚠️ <strong>L'IVA va scritta, non sottintesa.</strong> Su una ristrutturazione di questo tipo l'aliquota è normalmente il <strong>10%</strong>, e su 34.000 € fa <strong>3.400 €</strong>. Un cliente che legge «34.000» e poi si vede una fattura da 37.400 si sente preso in giro anche se hai ragione. Scrivi sempre imponibile, aliquota e totale, tutti e tre.
@@ -179,7 +239,7 @@
 
     <p>Raggruppate, le 18 voci raccontano dove stanno davvero i soldi di una ristrutturazione. Serve saperlo per due motivi: per accorgersi se un preventivo è sbilanciato, e per capire dove si perde il margine se una voce è stimata male.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Come si dividono le 18 voci per famiglia di lavorazione.</caption>
       <thead>
         <tr><th>Gruppo</th><th>Voci</th><th style="text-align:right">Peso</th></tr>
@@ -191,7 +251,7 @@
         <tr><td><strong>Demolizioni e murature</strong></td><td>3, 5, 6, 7, 9, 11</td><td class="num" style="text-align:right">19%</td></tr>
         <tr><td><strong>Cantiere</strong> (sicurezza e smaltimento)</td><td>17, 18</td><td class="num" style="text-align:right">5%</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <p>Due cose da guardare in questa tabella. La prima: <strong>impianti e ambienti completi da soli fanno oltre la metà del lavoro</strong>. Sono anche le voci dove è più facile sbagliare la stima, perché dipendono da cosa si trova sotto l'intonaco. La seconda: <strong>il cantiere pesa il 5%</strong>, ed è la parte che quasi tutti tagliano per far scendere il totale. È il taglio sbagliato — è l'unica voce che non produce niente di visibile e senza la quale non si può neanche cominciare.</p>
 

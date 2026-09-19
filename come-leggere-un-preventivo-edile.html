@@ -119,6 +119,9 @@
     .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
     .seg button{min-width:0}
   }
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -140,6 +143,55 @@
   .answer-cta a:hover{background:#e85f2c}
   .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
@@ -159,7 +211,17 @@
     <h1>Come leggere un preventivo edile senza farsi fregare</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 9 min · Guida pratica per il cliente privato</p>
 
-    <div class="answer">
+    <div class="tp-join tp-a">
+  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
+  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
+  <div class="tp-btns">
+    <a class="tp-b tp-b1" href="/registrazione-impresa.html">Ho un&rsquo;impresa &mdash; iscrivimi gratis</a>
+    <a class="tp-b tp-b2" href="/cerca-imprese.html">Sono un cliente &mdash; cerco un'impresa</a>
+  </div>
+  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+</div>
+
+  <div class="answer">
       <strong>Risposta rapida:</strong> un preventivo edile serio deve avere sempre <strong>8 cose</strong>:
       <span class="price-big">dati fiscali · voci dettagliate · esclusioni · IVA</span>
       e poi <strong>tempi</strong>, <strong>piano dei pagamenti</strong>, <strong>validità dell'offerta</strong> e <strong>firma</strong>. Se ne manca anche una sola, quella sarà la voce che ti costerà di più a lavori iniziati. Sotto trovi la checklist da spuntare e stampare.
@@ -196,7 +258,7 @@
     <h2>"A corpo" o "a misura": chi paga gli imprevisti</h2>
     <p>Sono i due modi di stabilire il prezzo. Nessuno dei due è una truffa: sono strumenti diversi, per lavori diversi. Il problema nasce quando "a corpo" viene usato per non descrivere niente.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Le due formule di prezzo a confronto — appalto privato</caption>
       <thead>
         <tr><th>&nbsp;</th><th>A corpo</th><th>A misura</th></tr>
@@ -208,7 +270,7 @@
         <tr><td><strong>Il pericolo</strong></td><td>Un "a corpo" descritto in due righe: non sai cosa comprende, quindi non sai cosa <em>non</em> comprende</td><td>La contabilità che si gonfia in corso d'opera senza che tu te ne accorga</td></tr>
         <tr><td><strong>Cosa chiedere</strong></td><td>L'elenco dettagliato di cosa include quel corpo d'opera</td><td>I prezzi unitari <em>e</em> le quantità stimate, così hai un totale previsto</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <p>La regola pratica: <strong>"a corpo" va benissimo, purché sotto ci sia scritto cosa comprende</strong>. Un preventivo a corpo di 15.000 € con dieci righe di dettaglio è un ottimo preventivo. Un preventivo a corpo di 15.000 € con scritto "ristrutturazione appartamento" è un salto nel buio.</p>
 
@@ -219,7 +281,7 @@
     <h2>IVA al 10% o al 22%: come capire quale ti spetta</h2>
     <p>È la voce che sposta più soldi in assoluto e quasi nessuno la controlla. Su 30.000 € di lavori, la differenza tra 10% e 22% è di <strong>3.600 €</strong>.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Aliquote IVA in edilizia su immobili a prevalente destinazione abitativa privata</caption>
       <thead>
         <tr><th>Tipo di intervento o voce</th><th style="text-align:right">IVA</th></tr>
@@ -231,7 +293,7 @@
         <tr><td>Prestazioni <strong>professionali</strong>: progetto, direzione lavori, coordinamento sicurezza, pratiche</td><td class="num" style="text-align:right">22%</td></tr>
         <tr><td>Materiali che <strong>compri tu</strong> in negozio e porti in cantiere</td><td class="num" style="text-align:right">22%</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <h3>La regola dei "beni significativi", spiegata semplice</h3>
     <p>Alcuni prodotti costosi non godono del 10% pieno. L'elenco fissato per decreto comprende: <strong>ascensori e montacarichi, infissi esterni e interni, caldaie, videocitofoni, apparecchiature di condizionamento e riciclo dell'aria, sanitari e rubinetteria, impianti di sicurezza</strong>.</p>
@@ -299,7 +361,7 @@
     <h2>Come confrontare due preventivi che sembrano diversi</h2>
     <p>Ecco il caso più comune che vediamo su TrovaImpresa: rifacimento completo di un bagno da 6 mq. Due imprese, due preventivi. Uno sembra più caro di 2.250 €. Alla fine costano identici.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Bagno 6 mq — Impresa A (preventivo dettagliato) contro Impresa B (preventivo "a corpo"). Importi IVA esclusa.</caption>
       <thead>
         <tr><th>Voce</th><th style="text-align:right">Impresa A</th><th style="text-align:right">Impresa B</th></tr>
@@ -315,7 +377,7 @@
         <tr><td><strong>Prezzo scritto sul preventivo</strong></td><td class="num" style="text-align:right">8.300 €</td><td class="num" style="text-align:right">6.050 €</td></tr>
         <tr><td><strong>Prezzo reale a fine lavori</strong></td><td class="num" style="text-align:right">8.300 €</td><td class="num" style="text-align:right">8.300 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <p>Stesso lavoro, stesso costo finale. Ma con l'Impresa B avevi fatto i conti su 6.050 €, e i 2.250 € di differenza li hai scoperti a bagno demolito. Attenzione però: <strong>l'Impresa B non ha barato</strong>, ha scritto le esclusioni come deve. Il problema è che tu hai confrontato due totali che non erano confrontabili.</p>
 

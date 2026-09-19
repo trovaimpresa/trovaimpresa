@@ -144,6 +144,9 @@
     th,td{padding:10px}
     .seg button{min-width:0}
   }
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -223,6 +226,55 @@
   ]
 }
 </script>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
@@ -242,7 +294,17 @@
     <h1>Quanto costa rifare il bagno nel 2026</h1>
     <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato agosto 2026 · Lettura 9 min</p>
 
-    <div class="answer">
+    <div class="tp-join tp-a">
+  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
+  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
+  <div class="tp-btns">
+    <a class="tp-b tp-b1" href="/registrazione-artigiano.html">Sono i lavori del bagno &mdash; iscrivimi gratis</a>
+    <a class="tp-b tp-b2" href="/cerca-artigiani.html">Sono un cliente &mdash; cerco chi rifa il bagno</a>
+  </div>
+  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+</div>
+
+  <div class="answer">
       <strong>Risposta rapida:</strong> rifare il bagno da zero in Italia costa
       <span class="price-big">da 5.000 a 15.000 €</span>
       Per un bagno medio di 5–6 mq con finiture normali la spesa reale si aggira sui <strong>7.000–11.000 €</strong> chiavi in mano. Sotto trovi i prezzi divisi voce per voce e un calcolatore per la tua stima.
@@ -285,7 +347,7 @@
     <h2 id="quanto-costa-in-base-ai">Quanto costa in base ai metri quadri</h2>
     <p>La domanda più frequente è "il mio bagno è piccolo, spenderò poco?". Solo in parte: molte voci sono fisse (il ponteggio del cantiere non c'è, ma allestimento, viaggi e attrezzatura sì), quindi il prezzo <em>al metro quadro</em> di un bagno piccolo è più alto. Ecco le forchette reali.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Costi indicativi 2026 chiavi in mano, secondo dimensione e livello di finiture</caption>
       <thead>
         <tr><th>Dimensione</th><th>Economico</th><th>Standard</th><th style="text-align:right">Alto / lusso</th></tr>
@@ -297,14 +359,14 @@
         <tr><td>5 – 6 mq (il più comune)</td><td class="num">4.500 – 6.000 €</td><td class="num">5.000 – 8.000 €</td><td class="num" style="text-align:right">8.000 – 12.000 €</td></tr>
         <tr><td>7 mq e oltre</td><td class="num">6.500 – 8.500 €</td><td class="num">8.000 – 12.000 €</td><td class="num" style="text-align:right">12.000 – 18.000 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <p>Tradotto al metro quadro siamo tra <strong>1.000 e 1.300 €/mq</strong> per un lavoro completo di livello medio. E c'è la geografia: lo stesso bagno da 5 mq che a Milano viene preventivato intorno agli <strong>8.000 €</strong>, a Firenze sta sui <strong>6.500 €</strong> e in molte zone del Sud sui <strong>5.000 €</strong>. Non è che al Sud si lavora peggio: è il costo della manodopera che cambia.</p>
 
     <h2 id="prezzi-reali-del-bagno-voce">Prezzi reali del bagno, voce per voce</h2>
     <p>Questa è la tabella che uso per far capire alla gente dove finiscono i soldi. I range sono per un bagno standard di circa 5–6 mq. Sono prezzi di lavoro fatto bene, non del cognato che "te lo sistema".</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Costi indicativi 2026 — bagno di 5–6 mq, IVA 10% esclusa dove non diversamente indicato</caption>
       <thead>
         <tr><th>Voce di lavoro</th><th>Cosa comprende</th><th style="text-align:right">Costo</th></tr>
@@ -320,7 +382,7 @@
         <tr><td>Manodopera generale e finiture</td><td>Montaggi, silicone, ritocchi, pulizia finale</td><td class="num" style="text-align:right">800 – 1.500 €</td></tr>
         <tr class="total-row"><td colspan="2">Totale indicativo chiavi in mano</td><td class="num" style="text-align:right">6.800 – 17.000 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="note">
       <strong>Occhio:</strong> se sommi i minimi non ottieni per forza il preventivo più basso. Un'impresa seria ti dà un prezzo unico "chiavi in mano" e si prende lei il rischio degli imprevisti. Diffida da chi ti spacchetta tutto per farti sembrare basso il totale, e poi ti aggiunge gli extra a lavoro iniziato.
@@ -329,7 +391,7 @@
     <h2 id="i-prezzi-degli-extra-quelli">I prezzi degli extra, quelli che decidi tu</h2>
     <p>Queste voci non ci sono in tutti i bagni: sono le scelte che fai tu e che spostano il totale. Le metto separate perché è qui che due preventivi identici sulla carta diventano diversi di 2.000 €.</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Extra più richiesti — fornitura e posa, prezzi indicativi 2026</caption>
       <thead>
         <tr><th>Extra</th><th>Note</th><th style="text-align:right">Costo</th></tr>
@@ -344,7 +406,7 @@
         <tr><td>Sanitari sospesi</td><td>Cassetta a incasso + telaio: si guadagna spazio e si pulisce meglio</td><td class="num" style="text-align:right">+ 500 – 800 €</td></tr>
         <tr><td>Spostare lo scarico del water</td><td>Nuova pendenza, spesso rialzo del pavimento</td><td class="num" style="text-align:right">+ 800 – 2.000 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <h2 id="cosa-fa-salire-il-prezzo">Cosa fa salire il prezzo</h2>
     <ul class="checklist up-list">
@@ -447,7 +509,7 @@
     <h2 id="quanto-dura-davvero-il-cantiere">Quanto dura davvero il cantiere</h2>
     <p>Il bagno è l'unica stanza che non puoi "usare a metà", quindi i tempi contano quanto i soldi. Questa è la scaletta reale di un bagno completo:</p>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Tempi indicativi per un bagno completo di 5–6 mq</caption>
       <thead>
         <tr><th>Fase</th><th>Cosa succede</th><th style="text-align:right">Giorni</th></tr>
@@ -460,7 +522,7 @@
         <tr><td>Piastrelle e sanitari</td><td>Posa, fughe, montaggio sanitari e box, silicone</td><td class="num" style="text-align:right">5</td></tr>
         <tr class="total-row"><td colspan="2">Dall'inizio alla consegna</td><td class="num" style="text-align:right">circa 3 – 4 settimane</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="note">
       <strong>I tempi morti non sono lentezza.</strong> Quasi metà del calendario è attesa: massetti, intonaci e colle hanno tempi di presa fisici. Chi ti promette il bagno "in una settimana" o salta l'asciugatura — e allora le piastrelle si staccano dopo un anno — oppure ha semplicemente contato solo i giorni in cui c'è qualcuno a lavorare.

@@ -162,6 +162,9 @@
     border-radius:12px;box-shadow:0 4px 14px rgba(255,107,53,.26)}
   .answer-cta a:hover{background:#e85f2c}
   .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
 <script type="application/ld+json">
 {
@@ -221,6 +224,55 @@
   ]
 }
 </script>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
@@ -240,7 +292,17 @@
     <h1>Quanto costa un idraulico nel 2026</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 7 min · Prezzi ricostruiti dal costo del lavoro, fonti in fondo alla pagina</p>
 
-    <div class="answer">
+    <div class="tp-join tp-a">
+  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
+  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
+  <div class="tp-btns">
+    <a class="tp-b tp-b1" href="/registrazione-artigiano.html">Sono un idraulico &mdash; iscrivimi gratis</a>
+    <a class="tp-b tp-b2" href="/cerca-artigiani.html">Sono un cliente &mdash; cerco un idraulico</a>
+  </div>
+  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+</div>
+
+  <div class="answer">
       <strong>Risposta rapida:</strong> un intervento normale da un idraulico costa
       <span class="price-big">da 70 a 150 €</span>
       Ma <strong>l'idraulico ha due prezzi, non uno</strong>. Lo stesso lavoro chiamato con calma costa <strong>70–95 €</strong>; chiamato d'urgenza, con l'acqua per terra, costa <strong>100–140 €</strong>. La differenza è la <strong>maggiorazione d'urgenza, circa +45%</strong>: è legittima, ma quasi nessuno te la dice al telefono. Qui sotto trovi tutti e due i prezzi, e il modo per pagarne il 40% in meno.
@@ -268,7 +330,7 @@
 
     <h2 id="perche-mezz-ora-di-lavoro">Perché mezz'ora di lavoro ti costa 100 €</h2>
     <p>È la domanda vera, quindi partiamo da lì. Immagina di chiamarlo per uno scarico otturato. Lui viene, in mezz'ora te lo libera, e ti lascia un conto da 100 €. Tu hai visto trenta minuti di lavoro. Ecco cosa hai pagato davvero:</p>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Uno scarico otturato, sturato in mezz'ora: com'è fatto il conto</caption>
       <thead>
         <tr><th>Voce</th><th style="text-align:right">Quanto pesa</th></tr>
@@ -280,12 +342,12 @@
         <tr><td>Maggiorazione d'urgenza, se lo hai fatto venire subito (+45%)</td><td class="num" style="text-align:right">~ 30 €</td></tr>
         <tr class="total-row"><td>Conto in urgenza</td><td class="num" style="text-align:right">~ 100 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
     <p>Tu hai visto <strong>mezz'ora di lavoro</strong>. Lui ti ha venduto <strong>un'ora e mezza della sua giornata</strong>, più il fatto di aver mollato quello che stava facendo per venire da te. Sono vere tutte e due le cose: semplicemente, nessuno te l'ha scritto.</p>
 
     <h2 id="piu-il-lavoro-e-corto">Più il lavoro è corto, più l'ora ti costa</h2>
     <p>Questa è la regola che spiega perché sui lavoretti gli idraulici sembrano cari e sulle giornate intere no. <strong>Il viaggio costa uguale</strong> che ti tengano trenta minuti o otto ore: su un lavoro breve quel costo fisso si spalma su niente.</p>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Stesso idraulico, stesso prezzo onesto: cambia solo la durata del lavoro</caption>
       <thead>
         <tr><th>Durata del lavoro</th><th style="text-align:right">Conto</th><th style="text-align:right">Costo per ora effettivo</th></tr>
@@ -297,7 +359,7 @@
         <tr><td>Mezza giornata</td><td class="num" style="text-align:right">~ 260 €</td><td class="num" style="text-align:right">65 €/ora</td></tr>
         <tr class="total-row"><td>Giornata intera</td><td class="num" style="text-align:right">~ 480 €</td><td class="num" style="text-align:right">60 €/ora</td></tr>
       </tbody>
-    </table>
+    </table></div>
     <p>Come vedi il prezzo dell'ora non cambia mai davvero: resta intorno ai <strong>55–60 €</strong>. Quello che cambia è quanto pesa il viaggio. <strong>Ecco perché il tariffario orario, da solo, non ti serve a niente</strong> — e perché gli idraulici, quasi tutti, il preventivo te lo fanno a intervento e non a ore.</p>
 
     <div class="esperienza">
@@ -320,7 +382,7 @@
       </div>
     </div>
 
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Gli stessi lavori, ai due prezzi. Manodopera e uscita comprese, materiale escluso</caption>
       <thead>
         <tr><th>Intervento</th><th style="text-align:right">Programmato</th><th style="text-align:right">In urgenza</th></tr>
@@ -335,12 +397,12 @@
         <tr><td>Sostituire uno scaldabagno</td><td class="num" style="text-align:right">200 – 300 €</td><td class="num" style="text-align:right">~ 360 €</td></tr>
         <tr class="total-row"><td>Un punto acqua nuovo (adduzione + scarico)</td><td class="num" style="text-align:right">75 – 150 €</td><td class="num" style="text-align:right">—</td></tr>
       </tbody>
-    </table>
+    </table></div>
     <p>Il <strong>punto acqua</strong> non ha prezzo d'urgenza perché è un lavoro da impianto, non da riparazione: si fa a cantiere aperto, con preventivo. Se devi rifare l'impianto di tutta la casa il conto si fa in un altro modo — lo trovi in <a href="/quanto-costa-rifare-impianto-idraulico.html">quanto costa rifare l'impianto idraulico</a>.</p>
 
     <h2 id="da-dove-esce-quel-prezzo">Da dove esce quel prezzo</h2>
     <p>Non è una cifra buttata lì: si ricostruisce partendo dal contratto di lavoro, che è un documento pubblico. Un idraulico con abilitazione è inquadrato al <strong>3° livello del contratto Metalmeccanici artigiani</strong>, che dal 1° marzo 2026 prevede <strong>1.758 € al mese</strong> di minimo tabellare.</p>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Il conto di un'ora di idraulico, dal contratto al prezzo che paghi</caption>
       <thead>
         <tr><th>Voce</th><th style="text-align:right">Quanto</th></tr>
@@ -354,11 +416,11 @@
         <tr><td>Utile d'impresa</td><td class="num" style="text-align:right">+ 10%</td></tr>
         <tr class="total-row"><td>Prezzo giusto di un'ora al cliente</td><td class="num" style="text-align:right">~ 55 €/ora</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <h2 id="perche-l-idraulico-ha-il">Perché l'idraulico ha il diritto di chiamata e il muratore no</h2>
     <p>Se hai fatto lavori in casa te ne sarai accorto: il muratore ti fa un prezzo e basta, l'idraulico ti mette l'uscita. Non è un capriccio, è come è fatta la loro giornata.</p>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>La giornata dei due mestieri, a confronto</caption>
       <thead>
         <tr><th>&nbsp;</th><th style="text-align:right">Lavori al giorno</th><th style="text-align:right">Ore in viaggio</th><th style="text-align:right">Il viaggio è</th></tr>
@@ -367,7 +429,7 @@
         <tr><td><strong>Muratore</strong></td><td class="num" style="text-align:right">1 cantiere da 8 ore</td><td class="num" style="text-align:right">~ 1,3 ore</td><td class="num" style="text-align:right">14% della giornata</td></tr>
         <tr class="total-row"><td><strong>Idraulico</strong></td><td class="num" style="text-align:right">5 interventi da 1 ora</td><td class="num" style="text-align:right">~ 6,7 ore</td><td class="num" style="text-align:right">57% della giornata</td></tr>
       </tbody>
-    </table>
+    </table></div>
     <p>Il muratore parcheggia la mattina e il furgone resta lì fino a sera: quel viaggio sparisce dentro otto ore di lavoro fatturato, e tu non lo vedi nemmeno. L'idraulico il furgone lo sposta cinque volte al giorno: <strong>più della metà della sua giornata la passa in mezzo al traffico</strong>. Se quel tempo non lo fattura da qualche parte, lavora dodici ore e ne incassa cinque. Il diritto di chiamata è quello.</p>
 
     <div class="note">

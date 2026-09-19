@@ -4,9 +4,57 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 19 settembre 2026 (mattina) — Bing acceso, /info-premium chiusa, barra e fasce di /gestionale rifatte, pannello admin staccato dall'account di Chrome
+Ultimo aggiornamento: 19 settembre 2026 (pomeriggio) — gli 8 buchi del gestionale chiusi e provati dal vivo, apertura da 16,8 a 1,5 secondi, controllo degli aggiornamenti del database (149 controlli) con il blocco al push
 
 
+
+---
+
+## 🆕 IL 18–19 SETTEMBRE — GLI →8← BUCHI DEL GESTIONALE E IL CONTROLLO DEL DATABASE
+
+### ✅ FATTO, PUBBLICATO E PROVATO DAL VIVO
+
+**Gli →8← avvisi che dicevano «c'e' un problema» senza dire dove.** Tutti e
+otto chiusi. Il filo era uno solo: *ogni messaggio che dice «c'e' qualcosa»
+deve dire DOVE, e portarci*. Il dettaglio sta in `CLAUDE.md`, sezione
+«18–19 SETTEMBRE 2026».
+
+**L'apertura del gestionale: da →16,8← a →1,5← secondi.** `js/cestino.js`
+faceva →28← domande di prova a ogni apertura, per ogni iscritto. Adesso se le
+ricorda per →30← giorni.
+
+**Il controllo degli aggiornamenti del database.** Due reti:
+- `js/fondatore.js` (`PROVE`): →149← controlli su →37← file sql, **una sola
+  domanda**, solo per Alex. Barra rossa se manca qualcosa.
+- `tools/controllo-push.js` **punto 8**: ferma il push se un file sql non e'
+  in elenco. Provato: →4← casi su →4←.
+- Funzione `gest_schema_mancanti` **gia' attiva su Supabase**
+  (`sql/controllo-aggiornamenti.sql`). Risultato del →19← set: **zero mancanti**.
+
+### 🔴 DA FINIRE — quello che resta aperto
+
+**1. Le altre tre facce non hanno il loro elenco.** `PROVE` copre solo il
+gestionale imprese/artigiani/professionisti. **Noleggio, negozio e operatore**
+hanno i loro file sql e nessuno controlla che siano stati eseguiti. Il punto 8
+di `controllo-push.js` li ignora apposta (`FILE_CHE_NOMINANO_SQL`): aggiungerli
+adesso fermerebbe il push per cose che nessuno ha promesso di controllare.
+→ Da fare: stesso lavoro, un elenco per ognuna.
+
+**2. Il collaudo dal vivo non e' mai stato fatto su impresa e professionista.**
+Gli otto buchi sono stati provati nel gestionale **artigiano** (reparti
+«giardiniere» e «progetto casa»). Il codice e' lo stesso file per tutte e tre
+le facce, ma `?vedi=impresa` e `?vedi=professionista` cambiano le etichette:
+i pannelli nuovi (SAL, Cestino) andrebbero riletti con quegli occhi.
+
+**3. Resta in giro un computo di prova.** `PROVA CLAUDE 18set`, nel reparto
+**giardiniere**. Da buttare quando Alex vuole.
+
+### ⚖️ DA DECIDERE — tocca ad Alex
+
+**Gli altri →3← `alert()` dell'eliminazione reparto** (`gestionale-app.html`,
+righe ~8042, ~8049, ~8075). Dicono «non ho toccato niente»: non c'e' nessun
+elenco da perdere, quindi un OK va benissimo. Lasciati apposta. Se si vuole
+l'uniformita' si trasformano in pannelli come il quarto, ma non e' un difetto.
 
 ---
 

@@ -458,9 +458,44 @@
      funzione cambia o sparisce, qui va cambiata o tolta anche la riga.
      ===================================================================== -->
 
+<!-- ================= IL COMPUTO DEL GEOMETRA ================= -->
+<!-- 19 settembre 2026 — Alex: la pagina non nominava il caricamento del
+     computo, che invece c'e' e funziona (js/gest-computo-pdf.js,
+     compApriFile → compImporta per Excel/CSV, compImportaPdf per il PDF).
+     ⚠️ Tutto quello che c'e' scritto qui sotto sta nel codice vero:
+     Excel, CSV e PDF; riconosce il tipo dal nome del file; sul PDF cerca
+     le righe «Sommano»; se il PDF non ha testo dentro (scansione o foto)
+     si ferma e lo dice invece di inventare numeri.
+     ⚠️ Questa fascia e' a tutta larghezza (`wrap`, non `wrap due`) apposta:
+     cosi' non rompe l'alternanza destra/sinistra delle fasce a due colonne.
+     Il bianco/grigio delle 9 fasce qui sotto e' stato invertito per fare
+     spazio a questa: chi ne aggiunge un'altra deve rifare la stessa cosa. -->
+<section class="fascia">
+  <div class="wrap">
+    <p class="occhiello" style="text-align:center">Se il computo ce l&rsquo;hai gi&agrave;</p>
+    <h2 class="titolone">Il file del geometra<br>lo carichi e basta</h2>
+    <p class="introne">Excel, CSV o PDF. Le lavorazioni entrano da sole con il codice di tariffa,
+       l&rsquo;unit&agrave; di misura, la quantit&agrave; e il prezzo. Non riscrivi cinquanta righe a mano.</p>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="doc" style="max-width:640px;margin:28px auto 0;text-align:left">
+      <div class="doc-top">
+        <div><b>computo_via_mazzini.pdf</b><br><span style="color:#8899ab">letto dal gestionale &middot; 52 lavorazioni</span></div>
+        <div style="text-align:right;color:#8899ab">&#10003;</div>
+      </div>
+      <div class="doc-r"><span><b>A03.01.016.e</b> &mdash; Demolizione rivestimenti</span><span>96,30 m</span></div>
+      <div class="doc-r"><span><b>A14.01.023.g</b> &mdash; Massetto in sabbia e cemento</span><span>42,80 m&sup2;</span></div>
+      <div class="doc-r"><span><b>A20.01.019.c</b> &mdash; Posa piastrelle 60&times;60</span><span>33,00 m&sup2;</span></div>
+      <div class="doc-r" style="border-bottom:none"><span style="color:#8899ab">&hellip;e altre 49</span><span></span></div>
+      <div class="doc-tot"><span>Entrate nel computo</span><span>52 righe</span></div>
+    </div>
+    <p class="epoi" style="max-width:640px;margin:18px auto 0">Se il PDF &egrave; la fotografia di un foglio,
+       il gestionale te lo dice e si ferma: i numeri non se li inventa.</p>
+  </div>
+</section>
+
 <!-- ================= COMPUTO METRICO — LE MISURE ================= -->
 <!-- ⚠️ `id="dentro"`: ci puntano «Cosa fa» nella barra e il bottone dell'hero. -->
-<section class="fascia" id="dentro">
+<section class="fascia grigia" id="dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Computo metrico</p>
@@ -491,7 +526,7 @@
 </section>
 
 <!-- ================= ANALISI PREZZI E RIBASSO ================= -->
-<section class="fascia grigia">
+<section class="fascia">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="doc">
@@ -526,7 +561,7 @@
 </section>
 
 <!-- ================= STATI DI AVANZAMENTO ================= -->
-<section class="fascia">
+<section class="fascia grigia">
   <div class="wrap due">
     <div>
       <p class="occhiello">Stati di avanzamento</p>
@@ -557,7 +592,7 @@
 </section>
 
 <!-- ================= FATTURA ELETTRONICA ================= -->
-<section class="fascia grigia">
+<section class="fascia">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="schermo">
@@ -589,7 +624,7 @@
 </section>
 
 <!-- ================= L'AI CHE COMPILA ================= -->
-<section class="fascia">
+<section class="fascia grigia">
   <div class="wrap due">
     <div>
       <p class="occhiello">Assistenza AI</p>
@@ -625,7 +660,7 @@
 </section>
 
 <!-- ================= LA MAIL DEL MATTINO ================= -->
-<section class="fascia grigia">
+<section class="fascia">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="mail">
@@ -657,7 +692,7 @@
 </section>
 
 <!-- ================= MEZZI, SQUADRA E IL RESTO ================= -->
-<section class="fascia">
+<section class="fascia grigia">
   <div class="wrap due">
     <div>
       <p class="occhiello">Mezzi e squadra</p>
@@ -699,7 +734,7 @@
 </section>
 
 <!-- ================= LA CHAT CON AI ================= -->
-<section class="fascia grigia">
+<section class="fascia">
   <div class="wrap due">
     <div>
       <p class="occhiello">Con l&rsquo;AI</p>
@@ -726,7 +761,7 @@
 </section>
 
 <!-- ================= CHI LO USA ================= -->
-<section class="fascia">
+<section class="fascia grigia">
   <div class="wrap">
     <h2 class="titolone">Cambia le parole secondo chi sei</h2>
     <p class="introne">Un artigiano manda un <b>preventivo</b> a un cliente. Uno studio tecnico accetta

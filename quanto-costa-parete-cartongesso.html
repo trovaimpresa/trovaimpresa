@@ -130,6 +130,9 @@
     .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
     .seg button{min-width:0}
   }
+
+  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
+  .tab-wrap>table{margin:0;min-width:520px}
 </style>
 <style>
 /* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
@@ -209,6 +212,55 @@
   ]
 }
 </script>
+
+<style id="tp-iscriviti">
+/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
+.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
+
+/* A - due porte */
+.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
+.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
+.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
+.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
+.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
+.tp-a .tp-b2:hover{border-color:var(--primary)}
+.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
+
+/* B - fascia arancione forte */
+.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
+.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
+.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
+.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.tp-b-band .tp-go:hover{background:#fff4e8}
+.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
+.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
+
+/* C - striscia sottile in cima a tutto */
+.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
+.tp-strip b{font-weight:800}
+.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
+
+@media(max-width:600px){
+  .tp-a{padding:18px 16px}
+  .tp-a .tp-t{font-size:18px}
+  .tp-a .tp-b{width:100%;min-width:0;flex:none}
+  .tp-b-band{padding:22px 16px}
+  .tp-b-band .tp-t{font-size:20px}
+  .tp-b-band .tp-go{display:block;padding:15px 18px}
+  .tp-strip{font-size:14px;padding:10px 12px}
+  .tp-strip a{display:block;margin:4px 0 0}
+}
+
+/* riparazione: .answer-cta era senza stile su questa pagina */
+.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
+.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
+.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
 </head>
 <body>
 
@@ -228,7 +280,17 @@
     <h1>Quanto costa una parete in cartongesso nel 2026 (e il controsoffitto)</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 7 min · Prezzi verificati su fonti di settore</p>
 
-    <div class="answer">
+    <div class="tp-join tp-a">
+  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
+  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
+  <div class="tp-btns">
+    <a class="tp-b tp-b1" href="/registrazione-artigiano.html">Sono un cartongessista &mdash; iscrivimi gratis</a>
+    <a class="tp-b tp-b2" href="/cerca-artigiani.html">Sono un cliente &mdash; cerco un cartongessista</a>
+  </div>
+  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+</div>
+
+  <div class="answer">
       <strong>Risposta rapida:</strong> una parete in cartongesso costa, posata e stuccata,
       <span class="price-big">da 60 a 85 €/mq</span>
       Con <strong>isolamento acustico e termico</strong> si sale a <strong>95–120 €/mq</strong>. Un <strong>controsoffitto</strong> parte da <strong>50 €/mq</strong> (60 in bagno con lastre idrofughe, 85 se isolato). La tinteggiatura è sempre a parte. Sotto trovi la tabella completa e un calcolatore.
@@ -260,7 +322,7 @@
     </div>
 
     <h2 id="prezzi-del-cartongesso-al-mq">Prezzi del cartongesso al mq</h2>
-    <table>
+    <div class="tab-wrap"><table>
       <caption>Costi indicativi 2026 — fornitura e posa, stuccatura compresa, tinteggiatura esclusa</caption>
       <thead>
         <tr><th>Lavoro</th><th>Note</th><th style="text-align:right">Costo al mq</th></tr>
@@ -274,7 +336,7 @@
         <tr><td>Controsoffitto isolato</td><td>Termico/acustico, utile sotto tetto o sotto vicini rumorosi</td><td class="num" style="text-align:right">da 85 €/mq</td></tr>
         <tr><td>Veletta con faretti</td><td>Il ribassamento decorativo perimetrale, a corpo</td><td class="num" style="text-align:right">da 500 €</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="note">
       <strong>Tinteggiatura sempre esclusa:</strong> il cartongesso arriva stuccato e rasato ma <strong>grezzo</strong>: primer e due mani di pittura sono un lavoro a parte. Vedi <a href="/quanto-costa-imbiancare-casa.html">quanto costa imbiancare casa</a> per i prezzi.
