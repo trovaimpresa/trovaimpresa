@@ -1174,6 +1174,38 @@
     }
   }
 
+  /* ⛔ 19 settembre 2026 — «SCEGLI IL CLIENTE» E POI ARRANGIATI.
+     Si cliccava «Emetti» su una bozza senza cliente e usciva un messaggino
+     che spariva da solo; sotto si apriva il modulo della fattura, che e'
+     lungo due colonne, e la tendina del cliente restava ferma su
+     «— nessuno —» senza un segno addosso. Il perche' dell'apertura era
+     gia' svanito, e il campo da sistemare era da cercare fra venti.
+     Il gestionale sa gia' segnare una casella (ctrSegna/ctrGuardaUna, quelli
+     del controllore) e sul cliente ha gia' la sua regola scritta: adesso la
+     usa anche qui, cosi' la frase esiste in un posto solo e il segno se ne
+     va da solo appena scegli il cliente. */
+  function _fattSegnaCliente(){
+    const el=document.getElementById("fa-cli");
+    if(!el){ toast("Scegli il cliente prima di emetterla"); return; }
+    try{
+      if(fattCliCache.length){
+        ctrGuardaUna("fattura",el);
+      }else{
+        /* la tendina e' vuota: dirgli «scegli» sarebbe preso in giro */
+        ctrTogli(el);
+        ctrSegna({el:el,grave:"rosso",
+          dice:"In questo reparto non hai ancora nessun cliente, quindi la tendina è vuota. Salva la bozza, aggiungi il cliente in Clienti, poi torna qui e la emetti."});
+      }
+    }catch(e){}
+    /* un filo di attesa: la finestra appena aperta cambia ancora altezza
+       (le emoji diventano icone), e senza questa pausa lo scorrimento
+       finisce nel posto sbagliato */
+    setTimeout(function(){
+      try{ el.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){}
+      try{ el.focus({preventScroll:true}); }catch(e){ try{ el.focus(); }catch(_){} }
+    },150);
+  }
+
   /* ---------- cambio di stato ---------- */
   async function fattCambiaStato(id,v){
     const f=fattCache.find(x=>String(x.id)===String(id));
@@ -1181,8 +1213,9 @@
     /* una fattura senza cliente non è una fattura: finche' è bozza va bene,
        ma non deve poter prendere un numero */
     if(v==="emessa"&&!f.cliente_id){
-      toast("Scegli il cliente prima di emetterla: una fattura deve dire a chi va");
-      fattForm(f);return;
+      await fattForm(f);
+      _fattSegnaCliente();
+      return;
     }
     const patch={stato:v};
     if(v==="pagata")patch.data_pagata=todayStr();
