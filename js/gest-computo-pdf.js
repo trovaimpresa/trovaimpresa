@@ -778,11 +778,22 @@
       compPrzEsitoId=cid;
       compPrzEsito='<div class="sh-nota" style="border-left:4px solid var(--err,#c0392b);padding-left:10px;margin-top:14px">'
         +'<b>Non so dove cercare i prezzi.</b><br>'
+        /* ⛔ 19 settembre 2026 — «APRILO»: MA È GIÀ APERTO.
+           Questo avviso viene disegnato DENTRO il computo aperto, e diceva
+           «Aprilo, vai su Da dove vengono i prezzi»: quella tendina sta
+           nella pagina 2 di questa stessa finestra, a due clic. Adesso c'è
+           il tasto che ci porta. L'altro ramo — prezzario vuoto — manda
+           alla sezione Prezzario, che sta fuori: quello chiude la finestra. */
         +(fonti.length
-          ? 'Questo computo non dice da quale prezzario vengono i prezzi, oppure il nome scritto non somiglia a nessuna delle tariffe che hai. Aprilo, vai su <b>Da dove vengono i prezzi</b> e scegli la tariffa dalla tendina.'
-          : 'Il tuo prezzario è ancora vuoto: prima importa una tariffa nella sezione <b>Prezzario</b>, poi torna qui.')
+          ? 'Questo computo non dice da quale prezzario vengono i prezzi, oppure il nome scritto non somiglia a nessuna delle tariffe che hai.'
+          : 'Il tuo prezzario è ancora vuoto: prima ci vuole una tariffa, poi torna qui.')
         +'<br><br>Non ho toccato nessuna lavorazione.'
-        +'<div style="margin-top:10px"><button type="button" class="btn-ghost quick-add" data-action="comp-prz-chiudi">Ho capito</button></div></div>';
+        +'<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
+        +(fonti.length
+          ? '<button type="button" class="btn btn-primary" data-action="co-pag" data-p="2">Scegli il prezzario</button>'
+          : '<button type="button" class="btn btn-primary" data-action="vai-sezione" data-go="prezzario">Apri il Prezzario</button>')
+        +'<button type="button" class="btn-ghost quick-add" data-action="comp-prz-chiudi">Ho capito</button>'
+        +'</div></div>';
       await renderCompVoci(cid);
       toast("Non so da quale prezzario prendere i prezzi");
       return;
