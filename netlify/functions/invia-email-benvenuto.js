@@ -167,7 +167,9 @@ exports.handler = async function(event) {
 
   if (premium) {
     // Upgrade pagato (Stripe): niente scadenza, ringraziamento.
-    subject = '⭐ Grazie per aver scelto il Gestionale TrovaImpresa!';
+    // 20 set 2026 — via l'emoji dall'oggetto (scelta di Alessio: e' brutto,
+    // e un'emoji in oggetto e' anche un segnale che piace poco ai filtri).
+    subject = 'Grazie per aver scelto il Gestionale TrovaImpresa';
     mostraRegalo = false;
     ctaTesto = 'Vai al tuo pannello &rarr;';
     corpo =

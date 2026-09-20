@@ -2195,10 +2195,18 @@
           if(!state[p1.id])state[p1.id]={clienti:[],dipendenti:[],lavori:[],note:{}};
           await save();
           ps=[p1];
-          /* si entra dentro subito: restare sull'elenco con un reparto
-             solo vuol dire chiedergli un tocco per una scelta che non c'è */
+          /* ⛔ 20 settembre 2026 — NON SI ENTRA PIU' DENTRO DA SOLI.
+             Prima qui c'era `enterPanel(p1.id)`: appena creato il primo
+             reparto il gestionale ci saltava dentro, e chi apriva per la
+             prima volta si trovava nel «Riepilogo» di un reparto che non
+             aveva chiesto. Decisione di Alessio: all'apertura si vede
+             SEMPRE l'elenco dei reparti, e dentro ci si entra con un
+             tocco. Il reparto continua a crearsi da solo (14 ago 2026):
+             quello che cambia e' solo dove si atterra.
+             ⚠️ Restano validi gli altri due ingressi automatici, che non
+             sono la prima apertura: il link diretto con `#tab` e il
+             rientro da noleggio/negozio/config (riga ~13038). */
           _landingDisegna(ps,rows);
-          enterPanel(p1.id);
           return;
         }
         /* se non riesce non si dice niente e non si blocca niente: resta
