@@ -79,6 +79,21 @@
       <p style="margin:16px 0 0;font-size:14px;color:var(--testo-3,#7a848f);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; si disdice quando vuoi &middot; nessuna IVA da aggiungere</p>
       <p id="gate-pw-err" style="display:none;margin:12px 0 0;font-size:15px;color:#b1442a;text-align:center;line-height:1.6;"></p>
       <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; pagato? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
+      <!-- 20 settembre 2026 — LA PORTA DI USCITA NEL MURO.
+           Provato dal vivo il 20 settembre con un account senza abbonamento:
+           il muro copriva tutto e il tasto «Esporta dati» stava DIETRO. Finito
+           il mese pagato uno non entrava piu', e con lui restavano chiusi
+           lavori, preventivi, fatture e clienti: i dati c'erano ancora (il
+           permesso su Supabase guarda solo chi sei, non il piano — verificato
+           leggendo le tabelle da quella stessa pagina), ma non c'era nessuna
+           porta per raggiungerli.
+           Non e' solo cortesia: i dati di un cliente restano suoi anche quando
+           smette di pagare, e deve poterseli riprendere. Anche sei mesi dopo,
+           e senza chiederlo a nessuno.
+           Compare SOLO se la pagina ha davvero le due funzioni
+           (gestionale-app.html le ha, gestionale-noleggio no) e solo a chi e'
+           collegato: a uno sconosciuto non c'e' niente da dare. -->
+      <p id="gate-pw-export" style="display:none;margin:16px 0 0;padding-top:14px;border-top:1px solid var(--bordo,#e2e8f0);font-size:15px;text-align:center;line-height:1.7;color:var(--testo-3,#7a848f);">I tuoi dati restano tuoi, anche senza abbonamento:<br><a href="#" id="gate-pw-export-x" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">scarica l&rsquo;Excel</a> &middot; <a href="#" id="gate-pw-export-j" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">backup completo</a></p>
       <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu,#0066ff);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
     </div>
     <div id="gate-lento" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
@@ -299,7 +314,40 @@
       v.innerHTML='<a href="/gestionale#prezzi" style="color:var(--blu,#0066ff);text-decoration:none;font-weight:700;">Vedi tutti e quattro i prezzi</a>';
       box.appendChild(v);
     }
+
+    /* la porta di uscita: vedi la nota nel markup qui sopra */
+    mostraScarica();
   }
+
+  /* ⚠️ IL RISULTATO SI DEVE VEDERE. Le funzioni di esportazione parlano con
+     toast(), che sta a z-index 90: sotto questo muro (999999) non lo vedrebbe
+     nessuno. In css/gestionale.css il toast e' stato alzato sopra il muro, e
+     in piu' qui il link stesso dice «Preparo...» mentre lavora: un file grande
+     ci mette qualche secondo, e senza un segno uno pensa che il tasto sia
+     morto e ci schiaccia sopra cinque volte. */
+  function mostraScarica(){
+    var p=q('gate-pw-export'); if(!p) return;
+    if(!window._gestUid) return;
+    if(typeof window.esportaExcel!=='function'||typeof window.esportaJson!=='function') return;
+    p.style.display='block';
+    var x=q('gate-pw-export-x'), j=q('gate-pw-export-j');
+    function attacca(el,fn){
+      if(!el) return;
+      el.onclick=function(ev){
+        ev.preventDefault();
+        var prima=el.textContent;
+        el.textContent='Preparo\u2026';
+        el.style.pointerEvents='none';
+        Promise.resolve().then(fn).catch(function(e){
+          var err=q('gate-pw-err');
+          if(err){ err.textContent='Non sono riuscito a preparare il file: '+((e&&e.message)||'riprova fra poco')+'.'; err.style.display='block'; }
+        }).then(function(){ el.textContent=prima; el.style.pointerEvents=''; });
+      };
+    }
+    attacca(x,function(){return window.esportaExcel();});
+    attacca(j,function(){return window.esportaJson();});
+  }
+
   function showManutenzione(){gateMostra('gate-manutenzione');}
   function showLento(){gateMostra('gate-lento');}
 
