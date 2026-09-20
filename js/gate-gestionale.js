@@ -431,13 +431,15 @@
   }
 
 ;
-  window.attivaGestionale=function(piano){
-    var b=q('gate-btns');b.style.opacity='0.5';b.style.pointerEvents='none';
-    fetch('/.netlify/functions/crea-checkout-gestionale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piano:piano,email:window._gestEmail||'',returnUrl:RETURN})})
-      .then(function(r){return r.json();})
-      .then(function(d){if(d&&d.url){location.href=d.url;}else{alert('Errore: '+((d&&d.error)||'riprova'));b.style.opacity='1';b.style.pointerEvents='auto';}})
-      .catch(function(){alert('Errore di rete, riprova.');b.style.opacity='1';b.style.pointerEvents='auto';});
-  };
+  /* ⛔ 20 settembre 2026 — TOLTA `window.attivaGestionale`.
+     Apriva `crea-checkout-gestionale`, la cassa del vecchio add-on a
+     12/119 euro. Non la chiamava piu' nessuno (controllato in tutto il
+     sito), ma era una porta aperta: chi ne conosceva l'indirizzo poteva
+     comprare al prezzo vecchio e — peggio — pagare per niente, perche'
+     quella cassa accende `gestionale_attivo`, che questo cancello non
+     guarda. Oggi si passa tutti da `vaiAllaCassa()` qui sopra, che usa
+     `crea-checkout-abbonamento` e i 4 prezzi veri.
+     La funzione sul server risponde 410 e spiega perche'. */
   /* Traccia chi apre il gestionale. Una riga ogni 30 minuti per utente,
      così i refresh non riempiono la tabella. Se fallisce non blocca nulla. */
   function registraAccesso(gc,uid,email,attivo){

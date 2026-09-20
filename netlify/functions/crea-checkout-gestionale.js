@@ -1,38 +1,36 @@
-const Stripe = require('stripe');
-
-// Checkout per l'ADD-ON GESTIONALE (indipendente dal piano Premium).
-// Riusa lo stesso webhook degli abbonamenti: distinguiamo con metadata.prodotto = 'gestionale'.
-// I price ID si impostano come variabili d'ambiente su Netlify:
-//   STRIPE_PRICE_GESTIONALE_MENSILE  (12€/mese)
-//   STRIPE_PRICE_GESTIONALE_ANNUALE  (119€/anno)
-exports.handler = async (event) => {
-  try {
-    const { piano, email, returnUrl } = JSON.parse(event.body);
-    const base = returnUrl || 'https://trovaimpresa.com/gestionale-app.html';
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-    const prezzi = {
-      mensile: process.env.STRIPE_PRICE_GESTIONALE_MENSILE,
-      annuale: process.env.STRIPE_PRICE_GESTIONALE_ANNUALE
-    };
-
-    if (!prezzi[piano]) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Piano non valido' }) };
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [{ price: prezzi[piano], quantity: 1 }],
-      customer_email: email,
-      metadata: { email, prodotto: 'gestionale' },
-      subscription_data: { metadata: { email, prodotto: 'gestionale' } },
-      success_url: base + '?gest=ok',
-      cancel_url: base + '?gest=cancel'
-    });
-
-    return { statusCode: 200, body: JSON.stringify({ url: session.url }) };
-  } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
-  }
-};
+// =====================================================================
+// ⛔ PORTA CHIUSA — 20 settembre 2026
+//
+// Questa era la cassa del vecchio ADD-ON GESTIONALE: 12 euro al mese o
+// 119 all'anno, presi da due variabili d'ambiente su Netlify
+// (STRIPE_PRICE_GESTIONALE_MENSILE / _ANNUALE). Oggi il Gestionale si
+// vende a 29/249 e 39/349 e passa TUTTO da `crea-checkout-abbonamento`.
+//
+// PERCHE' NON BASTAVA LASCIARLA LI'. Era una porta aperta sul sito:
+//   1. chiunque conoscesse l'indirizzo poteva comprare a 119 invece di
+//      249 — il prezzo vecchio era ancora vivo, solo nascosto;
+//   2. e soprattutto avrebbe pagato PER NIENTE: quella cassa scriveva
+//      `metadata.prodotto = 'gestionale'`, e il webhook a quel punto
+//      accende `gestionale_attivo`, che il cancello del gestionale
+//      (js/gate-gestionale.js) non guarda nemmeno. Avrebbe pagato e
+//      trovato il muro.
+//
+// CONTROLLATO PRIMA DI CHIUDERLA, il 20 settembre 2026:
+//   - nel sito non la chiamava piu' nessuno: l'unica riga rimasta era
+//     `window.attivaGestionale` dentro gate-gestionale.js, che a sua
+//     volta non era chiamata da niente. Tolta lo stesso giorno;
+//   - nel database `gestionale_attivo = true` risultava su UN account
+//     solo, quello del fondatore. Nessun cliente vero su questa strada.
+//
+// Il file resta, invece di sparire, per due motivi: se qualcosa la
+// chiamasse ancora si vede un errore CHIARO invece di un 404 muto, e
+// chi legge capisce perche' non c'e' piu'.
+// =====================================================================
+exports.handler = async () => ({
+  statusCode: 410,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    error: 'porta_chiusa',
+    messaggio: 'Questa cassa non è più in uso. Il Gestionale si attiva dalla pagina del gestionale.'
+  })
+});
