@@ -2263,6 +2263,10 @@
       if(!token){
         toast("La sessione è scaduta. Rientra e riprova.");
       }else{
+        /* il bigliettino del ritorno: al rientro dal portale gli si ricorda,
+           UNA volta sola, che i suoi dati puo' portarseli via. Vedi
+           `_rientroAbbonamento()` piu' sotto. */
+        try{ sessionStorage.setItem("gest_da_abbonamento", String(Date.now())); }catch(e){}
         const r = await fetch("/.netlify/functions/portale-clienti",{
           method:"POST",
           headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
@@ -13084,7 +13088,41 @@
     }catch(e){ return false; }
   }
 
+  /* ⛔ 20 settembre 2026 — IL PROMEMORIA AL RITORNO DALL'ABBONAMENTO.
+     Scelta di Alessio: quando uno disdice NON lo si obbliga a esportare —
+     «non deve essere obbligato a esportare ma un consiglio». Chi ha gia'
+     scaricato si troverebbe un passaggio in piu' proprio mentre se ne va, e
+     chi non scarica puo' tornare a farlo quando vuole (anche dal muro del
+     pagamento, da oggi). Quindi: una riga, un tasto, e si chiude.
+     ⚠️ NON sappiamo se ha davvero disdetto: dal portale di Stripe si torna
+     indietro uguale che uno abbia cambiato la carta, cambiato piano o
+     disdetto. Per questo la frase dice «se hai disdetto», e non da' per
+     scontato niente.
+     ⚠️ Il bigliettino scade dopo 30 minuti e si cancella appena letto: uno
+     che riapre il gestionale domani non se lo ritrova addosso. */
+  function _rientroAbbonamento(){
+    var t=0;
+    try{ t=parseInt(sessionStorage.getItem("gest_da_abbonamento")||"0",10);
+         sessionStorage.removeItem("gest_da_abbonamento"); }catch(e){}
+    if(!t || (Date.now()-t) > 1800000) return;
+    var land=document.querySelector("#landing .landing-top");
+    if(!land) return;
+    var d=document.createElement("div");
+    d.className="rientro-abb";
+    d.innerHTML='<div class="rientro-abb-txt"><b>Bentornato.</b> Se hai disdetto, '
+      + 'i tuoi dati restano tuoi: puoi portarteli via quando vuoi.</div>';
+    var b=document.createElement("button");
+    b.type="button"; b.className="rientro-abb-btn"; b.textContent="Scarica i tuoi dati";
+    b.onclick=function(){ esportaExcel(); };
+    var x=document.createElement("button");
+    x.type="button"; x.className="rientro-abb-x"; x.setAttribute("aria-label","Chiudi"); x.textContent="\u00d7";
+    x.onclick=function(){ d.remove(); };
+    d.appendChild(b); d.appendChild(x);
+    land.insertAdjacentElement("afterend", d);
+  }
+
   load().then(()=>{
+    _rientroAbbonamento();
     if(cur) return;
     renderLanding();
     /* e poi, se si sa dove si era, si entra dritti: la landing resta

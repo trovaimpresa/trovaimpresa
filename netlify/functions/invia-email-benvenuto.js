@@ -178,7 +178,7 @@ exports.handler = async function(event) {
       '<p style="margin:0 0 16px;">Da ora hai accesso a tutte le funzionalit&agrave; avanzate del portale: <strong>posizione prioritaria</strong> nei risultati, maggiore visibilit&agrave; e pi&ugrave; possibilit&agrave; di essere contattato dai clienti.</p>';
   } else if (isCandidato) {
     // I candidati non hanno il Gestionale: benvenuto semplice.
-    subject = '🎉 Benvenuto su TrovaImpresa!';
+    subject = 'Benvenuto su TrovaImpresa';
     mostraRegalo = false;
     ctaTesto = 'Completa il tuo profilo &rarr;';
     corpo =
@@ -191,7 +191,7 @@ exports.handler = async function(event) {
        un programma, e lo vuole aprire. Quindi niente «vetrina gratis per
        sempre», niente «completa il profilo», niente 30 giorni.
        Una cosa sola: il prezzo che aveva scelto e il bottone per entrare. */
-    subject = '\u2699\uFE0F Il tuo Gestionale TrovaImpresa \u2014 manca un passo';
+    subject = 'Il tuo Gestionale TrovaImpresa \u2014 manca un passo';
     mostraRegalo = false;
     ctaTesto = 'Entra e attiva &rarr;';
     const rigaPrezzo = pianoScelto && NOMI_PIANO[pianoScelto]
@@ -219,7 +219,7 @@ exports.handler = async function(event) {
        messaggio che l'iscritto riceve da noi.
        La riga che deve restare in cima, sempre (regola di Alex del 2 set):
        stare su TrovaImpresa e' gratis e non costa nulla. */
-    subject = '🎉 Benvenuto su TrovaImpresa — la tua vetrina &egrave; online';
+    subject = 'Benvenuto su TrovaImpresa — la tua vetrina &egrave; online';
     mostraRegalo = true;
     ctaTesto = 'Completa il tuo profilo &rarr;';
     corpo =
@@ -284,7 +284,9 @@ exports.handler = async function(event) {
             '<a href="https://trovaimpresa.com" style="text-decoration:none"><img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto"></a>' +
           '</td></tr>' +
           '<tr><td style="background:#0066ff;padding:26px 32px;text-align:center;">' +
-            '<div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">🏗️ TrovaImpresa</div>' +
+            /* 20 set 2026 — via l'emoji della gru: il sito non le usa piu'.
+               Il logo vero sta gia' nella riga qui sopra. */
+            '<div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">TrovaImpresa</div>' +
             '<div style="font-size:13px;color:#dbe8ff;margin-top:4px;">Il portale delle imprese e degli artigiani</div>' +
           '</td></tr>' +
           fasciaRegalo +
