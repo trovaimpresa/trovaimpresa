@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <link rel="canonical" href="https://trovaimpresa.com/elimina-profilo">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elimina il tuo profilo - TrovaImpresa</title>
+  <meta name="robots" content="noindex, nofollow">
+  <!-- ======================================================================
+       20 settembre 2026 — LA PAGINA PER ANDARSENE.
+       Chiesta da Alessio: «quello non e' il posto suo, non e' modifica
+       profilo ma e' elimina profilo».
+       Prima, dal pannello, «Disdetta abbonamento / Elimina account» era UN
+       link solo, piccolo e rosso, che portava a «Completa il tuo profilo»
+       — una pagina che serve a tutt'altro, e che per giunta non mostrava
+       niente perche' l'ancora non funzionava. Due cose diverse appiccicate
+       nel posto sbagliato.
+       ⚠️ LA REGOLA, decisa da Alessio: il SITO e' gratuito, il GESTIONALE
+       si paga, e sono due cose separate. Quindi:
+         - disdire il gestionale si fa SOLO DENTRO IL GESTIONALE;
+         - chiudere il profilo del sito si fa SOLO QUI.
+       Chi ha il gestionale ancora attivo non chiude il profilo: questa
+       pagina lo ferma e lo manda a disdire. Il controllo vero lo fa il
+       server (netlify/functions/elimina-account.js), che e' l'unico a
+       poter chiedere a Stripe; qui davanti si mostra solo la risposta.
+       ⛔ NIENTE EMOJI: Alessio le ha fatte togliere dalle pagine.
+       ====================================================================== -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #f5f7fa;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      color: #0a2a4d;
+    }
+    .wrap { max-width: 720px; margin: 24px auto 60px; }
+    .torna {
+      display: inline-block; background: #fff; border: 1px solid #ececec;
+      border-radius: 12px; padding: 11px 18px; font-size: 15px; font-weight: 700;
+      color: #0a2a4d; text-decoration: none; margin-bottom: 22px;
+    }
+    .torna:hover { background: #f0f3f7; }
+    .card {
+      background: #fff; border: 1px solid #ececec; border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 28px 30px; margin-bottom: 20px;
+    }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+    .sotto { font-size: 16px; color: #5f6b7a; line-height: 1.6; }
+    .titolo-sez { font-size: 17px; font-weight: 800; margin-bottom: 10px; }
+    ul.cosa { list-style: none; margin: 12px 0 0; }
+    ul.cosa li {
+      font-size: 15.5px; line-height: 1.6; color: #0a2a4d;
+      padding: 9px 0 9px 20px; border-bottom: 1px solid #f0f3f7; position: relative;
+    }
+    ul.cosa li:last-child { border-bottom: none; }
+    ul.cosa li::before { content: ''; position: absolute; left: 2px; top: 18px; width: 7px; height: 7px; border-radius: 50%; background: #b42318; }
+    .nota { font-size: 15px; color: #5f6b7a; line-height: 1.6; margin-top: 14px; }
+    label.motivo {
+      display: flex; align-items: flex-start; gap: 11px; padding: 11px 13px;
+      border: 1.5px solid #dbe3ec; border-radius: 10px; margin-bottom: 8px;
+      cursor: pointer; font-size: 15.5px; line-height: 1.4;
+    }
+    label.motivo:hover { background: #f8fafc; }
+    label.motivo input { width: 19px; height: 19px; flex: none; margin-top: 1px; accent-color: #0066ff; }
+    textarea, input[type=text] {
+      width: 100%; padding: 12px; border: 1.5px solid #dbe3ec; border-radius: 10px;
+      font-size: 15px; font-family: inherit; color: #0a2a4d;
+    }
+    textarea { min-height: 78px; resize: vertical; margin-top: 6px; }
+    .conferma-riga { font-size: 15px; color: #b42318; line-height: 1.5; margin: 22px 0 10px; }
+    .btn-elimina {
+      margin-top: 18px; width: 100%; background: #d92d20; color: #fff; border: none;
+      border-radius: 12px; padding: 15px; font-size: 16px; font-weight: 800;
+      font-family: inherit; cursor: pointer;
+    }
+    .btn-elimina:hover { background: #b42318; }
+    .btn-elimina:disabled { background: #e6a8a3; cursor: default; }
+    .btn-blu {
+      display: inline-block; background: #0066ff; color: #fff; border: none;
+      border-radius: 12px; padding: 14px 22px; font-size: 16px; font-weight: 800;
+      font-family: inherit; cursor: pointer; text-decoration: none;
+    }
+    .btn-blu:hover { background: #0052d6; }
+    .fermo { border-left: 5px solid #0066ff; }
+    .fermo h1 { color: #0a2a4d; }
+    .errore {
+      background: #fef3f2; border: 1px solid #fecdca; color: #b42318;
+      border-radius: 12px; padding: 14px 16px; font-size: 15px; line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .caricamento { font-size: 16px; color: #5f6b7a; }
+    @media (max-width: 560px) {
+      body { padding: 12px; }
+      .card { padding: 22px 18px; }
+      h1 { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="torna" id="torna" href="/pannello-impresa.html">&larr; Torna al pannello</a>
+    <div id="schermo">
+      <div class="card"><div class="caricamento">Un momento&hellip;</div></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    var sessione = null;
+    var schermo = document.getElementById('schermo');
+
+    /* stessa lista di modifica-profilo.html: se un giorno cambia, cambiarla
+       in tutti e due i posti — oppure tenerne uno solo. */
+    var MOTIVI_USCITA = [
+      { v: 'nessun-lavoro', t: 'Non mi sono arrivate richieste' },
+      { v: 'complicato',    t: 'Non ho capito come si usa' },
+      { v: 'no-tempo',      t: 'Non ho tempo di starci dietro' },
+      { v: 'troppe-email',  t: 'Ricevevo troppe email' },
+      { v: 'non-serve',     t: 'Ho già abbastanza lavoro' },
+      { v: 'diverso',       t: 'Mi aspettavo una cosa diversa' }
+    ];
+
+    function esc(t) {
+      return String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /* ---- schermata 1: il gestionale e' ancora attivo, non si chiude ---- */
+    function mostraBloccato(messaggio) {
+      schermo.innerHTML =
+        '<div class="card fermo">' +
+          '<h1>Prima devi disdire il Gestionale</h1>' +
+          '<p class="sotto">' + esc(messaggio) + '</p>' +
+          '<p class="nota">Se chiudessi il profilo adesso, la tua carta continuerebbe a pagare ' +
+            'un abbonamento che non potresti più nemmeno usare. Per questo prima si disdice.</p>' +
+          '<p class="nota"><b>Come si fa:</b> entra nel Gestionale e clicca <b>Abbonamento</b>, ' +
+            'in alto a sinistra. Da lì disdici quando vuoi. Poi torna qui.</p>' +
+          '<p style="margin-top:20px"><a class="btn-blu" href="/gestionale-app.html">Vai al Gestionale</a></p>' +
+        '</div>';
+    }
+
+    /* ---- schermata 2: si puo' chiudere ---- */
+    function mostraModulo() {
+      var caselle = MOTIVI_USCITA.map(function (m) {
+        return '<label class="motivo"><input type="checkbox" class="motivo-c" value="' +
+          esc(m.v) + '">' + esc(m.t) + '</label>';
+      }).join('');
+
+      schermo.innerHTML =
+        '<div class="card">' +
+          '<h1>Elimina il tuo profilo TrovaImpresa</h1>' +
+          '<p class="sotto">Te ne vai dal sito. Non si torna indietro e non si recupera niente.</p>' +
+          '<div style="margin-top:20px"><div class="titolo-sez">Cosa sparisce</div>' +
+            '<ul class="cosa">' +
+              '<li>La tua scheda pubblica: nessuno ti troverà più nelle ricerche</li>' +
+              '<li>Le foto dei lavori e la tua presentazione</li>' +
+              '<li>Le recensioni che hai ricevuto</li>' +
+              '<li>Le richieste dei clienti e i messaggi</li>' +
+              '<li>Tutto quello che avevi nel Gestionale: lavori, preventivi, fatture, clienti</li>' +
+            '</ul>' +
+            '<p class="nota"><b>Se ti servono i tuoi dati, scaricali prima.</b> Nel Gestionale, ' +
+              'in alto: <b>Esporta dati</b> e <b>Backup</b>. Dopo non si possono più recuperare.</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card">' +
+          '<div class="titolo-sez">Cosa non ha funzionato per te?</div>' +
+          '<p class="sotto" style="font-size:15px;margin-bottom:12px">Puoi spuntare più di una ' +
+            'risposta. È facoltativo, ma mi aiuta a sistemare il sito.</p>' +
+          caselle +
+          '<textarea id="motivo-libero" placeholder="Vuoi aggiungere qualcosa? (facoltativo)"></textarea>' +
+          '<div class="conferma-riga">Per confermare, scrivi <b>ELIMINA</b> qui sotto.</div>' +
+          '<input type="text" id="conferma" placeholder="ELIMINA" autocomplete="off">' +
+          '<div id="errore" class="errore" style="display:none;margin-top:14px"></div>' +
+          '<button type="button" class="btn-elimina" id="btn-elimina">Elimina il profilo</button>' +
+        '</div>';
+
+      document.getElementById('btn-elimina').onclick = eliminaDavvero;
+    }
+
+    function mostraErrore(testo) {
+      var box = document.getElementById('errore');
+      if (!box) { alert(testo); return; }
+      box.textContent = testo;
+      box.style.display = 'block';
+    }
+
+    async function eliminaDavvero() {
+      var scritto = (document.getElementById('conferma').value || '').trim().toUpperCase();
+      if (scritto !== 'ELIMINA') {
+        mostraErrore('Per confermare devi scrivere ELIMINA nella casella qui sopra.');
+        return;
+      }
+      var btn = document.getElementById('btn-elimina');
+      btn.disabled = true;
+      btn.textContent = 'Elimino…';
+
+      var scelti = Array.prototype.slice.call(document.querySelectorAll('.motivo-c'))
+        .filter(function (c) { return c.checked; })
+        .map(function (c) { return c.value; });
+
+      try {
+        var res = await fetch('/.netlify/functions/elimina-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: sessione.access_token,
+            motivo: scelti.join(',') || null,
+            motivo_libero: (document.getElementById('motivo-libero').value || '').trim() || null
+          })
+        });
+        if (res.ok) {
+          await sb.auth.signOut();
+          window.location.href = '/index.html';
+          return;
+        }
+        var j = null; try { j = await res.json(); } catch (e) {}
+        /* ⚠️ Il server ricontrolla Stripe anche adesso, non solo all'inizio:
+           uno puo' aver riattivato l'abbonamento in un'altra finestra mentre
+           compilava. Se ci ferma qui, si torna alla schermata del fermo. */
+        if (j && j.error === 'gestionale_attivo') {
+          mostraBloccato(j.messaggio || 'Hai il Gestionale attivo.');
+          return;
+        }
+        mostraErrore((j && (j.messaggio || j.error)) || 'Non sono riuscito a eliminare il profilo. Riprova fra poco.');
+      } catch (e) {
+        mostraErrore('Errore: ' + ((e && e.message) || e));
+      }
+      btn.disabled = false;
+      btn.textContent = 'Elimina il profilo';
+    }
+
+    async function avvia() {
+      var r = await sb.auth.getSession();
+      sessione = r && r.data && r.data.session;
+      if (!sessione) {
+        window.location.href = '/login-impresa';
+        return;
+      }
+
+      /* il tasto «Torna al pannello» porta al pannello giusto per il suo tipo */
+      try {
+        var q = await sb.from('imprese').select('tipo').eq('user_id', sessione.user.id).maybeSingle();
+        var tipo = ((q && q.data && q.data.tipo) || '').toLowerCase();
+        document.getElementById('torna').href =
+          tipo === 'professionista' ? '/pannello-professionisti.html' :
+          tipo === 'artigiano'      ? '/pannello-artigiano.html' :
+          tipo === 'negozio'        ? '/pannello-negozio.html' :
+                                      '/pannello-impresa.html';
+      } catch (e) {}
+
+      /* si puo' chiudere? lo sa solo il server, che chiede a Stripe */
+      try {
+        var pre = await fetch('/.netlify/functions/elimina-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: sessione.access_token, solo_controllo: true })
+        });
+        if (!pre.ok) {
+          var j = null; try { j = await pre.json(); } catch (e) {}
+          mostraBloccato((j && (j.messaggio || j.error))
+            || 'Non riesco a controllare il tuo abbonamento adesso. Riprova fra qualche minuto.');
+          return;
+        }
+      } catch (e) {
+        mostraBloccato('Non riesco a controllare il tuo abbonamento adesso. Riprova fra qualche minuto.');
+        return;
+      }
+
+      mostraModulo();
+    }
+
+    avvia();
+  </script>
+  <script src="/cookie-banner.js"></script>
+</body>
+</html>

@@ -1195,13 +1195,23 @@
             🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
             <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a>
           </p>
-          <div class="azioni-discrete">
-            <div id="card-disdetta" style="display:none;">
-              <button type="button" id="btn-disdici" onclick="disdiciAbbonamento()" class="link-discreto">⚙️ Gestione abbonamento</button>
-              <p id="info-disdetta" style="font-size:15px;color:#475569;margin-top:4px;margin-bottom:0;line-height:1.5;"></p>
-            </div>
-            <button type="button" id="btn-elimina" onclick="eliminaAccount()" class="link-discreto pericolo">Elimina account</button>
-          </div>
+          <!-- ⛔ 20 settembre 2026 — QUI NON CI STANNO PIU'.
+               C'erano «Gestione abbonamento» ed «Elimina account», tutti e
+               due in fondo a questa pagina. Alessio: «quello non e' il posto
+               suo, non e' modifica profilo ma e' elimina profilo».
+               Dove stanno adesso, e perche':
+                 - DISDIRE IL GESTIONALE sta dentro il gestionale, tasto
+                   «Abbonamento» in alto a sinistra. Il gestionale si apre
+                   anche da fuori il sito (trovaimpresa.com/gestionale): chi
+                   entra da li' nel pannello del sito non passa mai, e la
+                   disdetta per lui non esisteva;
+                 - ELIMINARE IL PROFILO ha la sua pagina, /elimina-profilo,
+                   linkata in fondo ai pannelli. Li' c'e' anche il fermo per
+                   chi ha il gestionale ancora attivo.
+               ⚠️ Le funzioni eliminaAccount(), chiediPerche() e
+               disdiciAbbonamento() restano piu' sotto ma da questa pagina non
+               le chiama piu' nessuno: si tengono finche' non si e' sicuri che
+               nessun'altra pagina ci si appoggi. -->
         </div><!-- /form-footer -->
 
       </div><!-- /form-wrapper -->
@@ -1645,7 +1655,12 @@
          Chi e' nei 3 mesi regalati NON ha nessun abbonamento su Stripe: a lui
          il portale risponderebbe «nessun abbonamento a tuo nome». Il pulsante
          non gli si mostra, gli si dice com'e'. */
-      if (d.piano && d.piano !== 'free') {
+      /* ⚠️ 20 settembre 2026: il riquadro qui sopra non esiste piu' in questa
+         pagina (vedi la nota nel corpo). Il codice resta, ma con la guardia:
+         senza, `document.getElementById('card-disdetta').style` tirava un
+         errore e da li' in giu' popolaCampi si fermava — cioe' mezzo profilo
+         non si sarebbe piu' riempito. */
+      if (d.piano && d.piano !== 'free' && document.getElementById('card-disdetta')) {
         const btnDisdici = document.getElementById('btn-disdici');
         const notaDisdetta = document.getElementById('info-disdetta');
         document.getElementById('card-disdetta').style.display = 'block';
