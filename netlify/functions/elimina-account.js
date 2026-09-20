@@ -28,6 +28,7 @@
 // perche' il registro e' pieno.
 // =====================================================================
 const { createClient } = require('@supabase/supabase-js');
+const Stripe = require('stripe');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,9 +54,9 @@ exports.handler = async function(event) {
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Configurazione server mancante.' }) };
   }
 
-  let access_token, motivo, motivo_libero;
+  let access_token, motivo, motivo_libero, solo_controllo;
   try {
-    ({ access_token, motivo, motivo_libero } = JSON.parse(event.body || '{}'));
+    ({ access_token, motivo, motivo_libero, solo_controllo } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Body JSON non valido.' }) };
   }
@@ -71,6 +72,94 @@ exports.handler = async function(event) {
     if (userErr || !user) {
       console.error('[elimina-account] token non valido:', userErr?.message);
       return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Token non valido o scaduto.' }) };
+    }
+
+    // ---------------------------------------------------------------
+    // ⛔ 20 settembre 2026 — PRIMA SI DISDICE, POI SI CHIUDE.
+    //
+    // IL BUCO CHE C'ERA QUI: non c'era niente. Questa funzione cancellava
+    // l'utente e basta, e su Stripe non toccava nulla. Chi aveva pagato il
+    // Gestionale e chiudeva il profilo spariva dal sito, ma LA CARTA
+    // CONTINUAVA A PAGARE 29 euro al mese — e senza piu' la sua riga non
+    // c'era nemmeno il modo di capire chi fosse. A lui restava solo il
+    // reclamo alla banca: un chargeback, cioe' soldi indietro, penale, e
+    // il conto Stripe segnato. Non era ancora successo solo perche'
+    // nessuno aveva mai pagato davvero: dal 20 settembre 2026 non e' piu'
+    // vero.
+    //
+    // LA REGOLA, scelta da Alessio: il sito e' gratis, il gestionale si
+    // paga, e sono due cose separate. Chi ha il gestionale ATTIVO non puo'
+    // chiudere il profilo: prima disdice, poi chiude. Due passi, non un
+    // rifiuto — e la pagina gli mette il tasto della disdetta li' sotto.
+    //
+    // ⚠️ BASTA AVER DISDETTO, non serve aspettare fine mese. Se
+    // `cancel_at_period_end` e' true l'abbonamento non si rinnovera' piu':
+    // non c'e' nessun addebito in arrivo, quindi si puo' chiudere subito.
+    // Tenerlo fermo un mese sarebbe solo fastidio a uno che ha gia' detto
+    // che se ne va (scelta di Alessio, 20 set).
+    //
+    // ⚠️ SE NON RIESCO A CHIEDERLO A STRIPE, NON CANCELLO. Non e' come la
+    // riga di congedo qui sotto, dove si tira dritto: li' si perde una
+    // statistica, qui si rischia di lasciare una carta che paga a vuoto.
+    // Si dice di riprovare fra poco, ed e' un fermo temporaneo.
+    //
+    // ⚠️ Chi non ha nessun cliente su Stripe (i Free, i Premium regalati)
+    // non passa nemmeno di qui: niente cliente, niente da controllare.
+    // ---------------------------------------------------------------
+    try {
+      const { data: impStripe } = await supabaseAdmin
+        .from('imprese')
+        .select('stripe_customer_id')
+        .eq('user_id', user.id)
+        .order('id', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const cliente = impStripe && impStripe.stripe_customer_id;
+      if (cliente && process.env.STRIPE_SECRET_KEY) {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        const abbonamenti = await stripe.subscriptions.list({
+          customer: cliente, status: 'all', limit: 20
+        });
+        const vivi = (abbonamenti && abbonamenti.data || []).filter(function (a) {
+          const stato = String(a.status || '');
+          const conta = (stato === 'active' || stato === 'trialing' || stato === 'past_due' || stato === 'unpaid');
+          return conta && a.cancel_at_period_end !== true;
+        });
+        if (vivi.length > 0) {
+          console.log('[elimina-account] fermato: gestionale ancora attivo,', user.id);
+          return {
+            statusCode: 409,
+            headers: corsHeaders,
+            body: JSON.stringify({
+              error: 'gestionale_attivo',
+              messaggio: 'Hai il Gestionale attivo. Prima disdici il Gestionale, poi puoi chiudere il profilo: '
+                       + 'il sito e\u2019 gratuito, il Gestionale si paga, e non vogliamo lasciarti una carta che paga a vuoto.'
+            })
+          };
+        }
+      }
+    } catch (exStripe) {
+      console.error('[elimina-account] non riesco a controllare Stripe:', exStripe && exStripe.message);
+      return {
+        statusCode: 503,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          error: 'controllo_non_riuscito',
+          messaggio: 'Non riesco a controllare il tuo abbonamento in questo momento. '
+                   + 'Riprova fra qualche minuto: non chiudo il profilo finche\u2019 non sono sicuro che non ci siano addebiti in arrivo.'
+        })
+      };
+    }
+
+    /* ⚠️ `solo_controllo`: la pagina chiede PRIMA se si puo' chiudere, e
+       solo dopo mostra il modulo del «perche' te ne vai». Se no uno
+       compila tutto, spunta le caselle, scrive il motivo — e alla fine si
+       sente dire che non puo'. Qui si e' gia' passati dal controllo di
+       Stripe qui sopra: se siamo arrivati fin qui, la strada e' libera.
+       ⛔ Da qui in giu' si CANCELLA: non spostare questo return piu' sotto. */
+    if (solo_controllo === true) {
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, controllo: true }) };
     }
 
     // ---------------------------------------------------------------

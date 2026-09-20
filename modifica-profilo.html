@@ -2180,15 +2180,68 @@
       });
     }
 
-    async function eliminaAccount() {
-      const risposte = await chiediPerche();
-      if (!risposte) return;
+    /* ⛔ 20 settembre 2026 — PRIMA SI DISDICE, POI SI CHIUDE.
+       Regola di Alessio: il sito e' GRATUITO, il Gestionale si PAGA, e sono
+       due cose separate. Chi ha il Gestionale ancora attivo non chiude il
+       profilo: prima disdice, poi chiude. Non e' un rifiuto, sono due passi
+       — e il tasto della disdetta glielo mettiamo qui sotto.
+       Il perche' sta in netlify/functions/elimina-account.js: cancellare
+       l'account NON disdiceva su Stripe, e la carta continuava a pagare 29
+       euro al mese a uno che dal sito era sparito.
+       ⚠️ Il controllo VERO sta sul server, che e' l'unico a poter chiedere a
+       Stripe. Questo qui davanti serve solo a non far compilare il modulo
+       del «perche' te ne vai» a uno che poi non puo' chiudere. */
+    function _fermoGestionaleAttivo(messaggio) {
+      const nota = document.getElementById('info-disdetta');
+      const card = document.getElementById('card-disdetta');
+      if (card) card.style.display = 'block';
+      if (nota) {
+        nota.innerHTML = '';
+        const p = document.createElement('p');
+        p.style.cssText = 'margin:0 0 10px;color:#0F172A;font-size:15px;line-height:1.5;font-weight:600';
+        p.textContent = messaggio;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = 'Disdici il Gestionale';
+        b.style.cssText = 'background:#0066FF;color:#fff;border:none;border-radius:10px;'
+                        + 'padding:12px 18px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer';
+        b.onclick = function () { disdiciAbbonamento(); };
+        nota.appendChild(p);
+        nota.appendChild(b);
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert(messaggio);
+      }
+    }
 
+    async function eliminaAccount() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) {
         alert('Sessione scaduta, rifai login');
         return;
       }
+
+      /* 1) si puo'? (il server chiede a Stripe) */
+      try {
+        const pre = await fetch('/.netlify/functions/elimina-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: session.access_token, solo_controllo: true })
+        });
+        if (!pre.ok) {
+          let j = null; try { j = await pre.json(); } catch (e) {}
+          _fermoGestionaleAttivo((j && (j.messaggio || j.error))
+            || 'Non riesco a controllare il tuo abbonamento adesso. Riprova fra qualche minuto.');
+          return;
+        }
+      } catch (e) {
+        alert('Non riesco a controllare il tuo abbonamento adesso. Riprova fra qualche minuto.');
+        return;
+      }
+
+      /* 2) solo adesso gli si chiede perche' se ne va */
+      const risposte = await chiediPerche();
+      if (!risposte) return;
 
       const res = await fetch('/.netlify/functions/elimina-account', {
         method: 'POST',
