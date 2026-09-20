@@ -160,6 +160,25 @@
     var dove = document.querySelector('#sec-dashboard .dash-stats');
     if (!dove || !imp || !imp.id) return;
 
+    /* ⛔ 20 settembre 2026 — LA CARTA DICEVA UNA BUGIA A CHI HA LA VETRINA SPENTA.
+       Trovato da Alessio guardando il suo pannello: in cima c'era «La tua
+       vetrina e' online — mandala ai tuoi clienti» col link, e venti
+       centimetri sotto la fascia rossa «La tua scheda pubblica e' spenta».
+       Due frasi opposte nella stessa schermata.
+       E non era solo una contraddizione a parole: provato dal vivo, quel
+       link su una scheda spenta apre una pagina che dice «Questa scheda non
+       e' piu' disponibile». Uno copiava il messaggio, lo mandava ai suoi
+       clienti su WhatsApp, e il cliente trovava quello.
+       Chi si iscrive dalla porta del Gestionale nasce con la vetrina spenta
+       (regola del 15 settembre), quindi non e' un caso raro: e' la
+       condizione normale di tutti quelli che arrivano da Google.
+       Adesso la carta non si disegna proprio. Quello che deve leggere sta
+       nella fascia rossa piu' sotto, che spiega com'e' e ha il tasto per
+       accendere. ⚠️ `impresaCorrente` arriva da un `select('*')`, quindi
+       `vetrina_attiva` c'e'. Il confronto e' `=== false` apposta: se un
+       giorno la colonna sparisse, `undefined` lascia la carta com'era. */
+    if (imp.vetrina_attiva === false) return;
+
     var s = document.createElement('style'); s.textContent = STILE;
     document.head.appendChild(s);
 
