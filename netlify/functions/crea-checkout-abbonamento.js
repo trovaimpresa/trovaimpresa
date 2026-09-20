@@ -63,6 +63,13 @@ exports.handler = async (event) => {
       mode: 'subscription',
       line_items: [{ price, quantity: 1 }],
       customer_email: email,
+      // 20 settembre 2026 — LA CASELLA DEL CODICE SCONTO.
+      // Senza questa riga Stripe non fa nemmeno vedere il campo «Codice
+      // promozionale», e un buono da 100% non si puo' usare. Serve a due
+      // cose: provare TUTTA la catena (cassa -> avviso -> piano acceso)
+      // senza spendere un euro, e fare promozioni vere senza toccare il
+      // codice. ⚠️ Non e' un buco: un codice vale solo se esiste su Stripe.
+      allow_promotion_codes: true,
       metadata: { email, prodotto },
       subscription_data: { metadata: { email, prodotto } },
       success_url: base + '?abb=ok',
