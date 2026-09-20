@@ -113,6 +113,7 @@
 
     var sessione = null;
     var schermo = document.getElementById('schermo');
+    var impresa = null;      /* {id, tipo, vetrina_attiva} */
 
     /* stessa lista di modifica-profilo.html: se un giorno cambia, cambiarla
        in tutti e due i posti — oppure tenerne uno solo. */
@@ -130,11 +131,75 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    /* ---- LA TERZA STRADA — 20 settembre 2026 ----
+       Chiesta da Alessio: «ci sono 2 vie, una che gli chiediamo se il
+       gestionale lo vuole usare comunque, non per forza eliminarlo».
+       Il Gestionale e' un prodotto suo: la gente lo trova su Google, entra
+       da trovaimpresa.com/gestionale e del marketplace non le importa
+       niente. Chi si registra da quella porta nasce gia' con
+       `vetrina_attiva = false` (fatto il 15 settembre 2026), quindi
+       l'interruttore c'e' gia' e la vista pubblica del sito lo rispetta:
+       `imprese_pubbliche` filtra COALESCE(vetrina_attiva, true) = true.
+       Qui non si costruisce niente di nuovo: si offre quell'interruttore
+       anche a chi era venuto per chiudere tutto, perche' quasi sempre
+       vuole solo sparire dalle ricerche, non buttare via il programma che
+       paga. ⚠️ Si RIACCENDE dal pannello: non e' una porta a senso unico. */
+    function cardVetrina() {
+      if (!impresa) return '';
+      if (impresa.vetrina_attiva === false) {
+        return '<div class="card">' +
+          '<h1 style="font-size:20px">La tua vetrina è già spenta</h1>' +
+          '<p class="sotto">Non compari nelle ricerche del sito. Il Gestionale, se ce l&rsquo;hai, ' +
+            'resta tuo: entri da trovaimpresa.com/gestionale.</p>' +
+          '<p class="nota">Se vuoi riaccenderla, si fa dal pannello.</p>' +
+        '</div>';
+      }
+      return '<div class="card fermo">' +
+        '<h1 style="font-size:20px">Vuoi solo sparire dalle ricerche?</h1>' +
+        '<p class="sotto">Spegni la vetrina invece di cancellare tutto. Nessuno ti trova più ' +
+          'sul sito, ma <b>non perdi niente</b>: account, dati e Gestionale restano tuoi, e nel ' +
+          'Gestionale entri da trovaimpresa.com/gestionale.</p>' +
+        '<p class="nota">Si riaccende quando vuoi, dal pannello.</p>' +
+        '<p style="margin-top:18px"><button type="button" class="btn-blu" id="btn-spegni-vetrina">Spegni la vetrina</button></p>' +
+        '<div id="vetrina-err" class="errore" style="display:none;margin-top:14px"></div>' +
+      '</div>';
+    }
+
+    function attaccaVetrina() {
+      var b = document.getElementById('btn-spegni-vetrina');
+      if (!b) return;
+      b.onclick = async function () {
+        b.disabled = true; b.textContent = 'Un attimo\u2026';
+        try {
+          var r = await sb.from('imprese')
+            .update({ vetrina_attiva: false })
+            .eq('id', impresa.id)
+            .select('vetrina_attiva')
+            .maybeSingle();
+          if (r.error) throw r.error;
+          impresa.vetrina_attiva = false;
+          schermo.innerHTML =
+            '<div class="card">' +
+              '<h1>Fatto: non compari più nelle ricerche</h1>' +
+              '<p class="sotto">La tua vetrina è spenta. Account, dati e Gestionale sono ' +
+                'rimasti dove erano: nel Gestionale entri da trovaimpresa.com/gestionale.</p>' +
+              '<p class="nota">Quando vuoi la riaccendi dal pannello, e torni nelle ricerche.</p>' +
+              '<p style="margin-top:20px"><a class="btn-blu" href="' + (document.getElementById('torna').getAttribute('href')) + '">Torna al pannello</a></p>' +
+            '</div>';
+          window.scrollTo(0, 0);
+        } catch (e) {
+          var err = document.getElementById('vetrina-err');
+          if (err) { err.textContent = 'Non sono riuscito a spegnerla: ' + ((e && e.message) || 'riprova fra poco') + '.'; err.style.display = 'block'; }
+          b.disabled = false; b.textContent = 'Spegni la vetrina';
+        }
+      };
+    }
+
     /* ---- schermata 1: il gestionale e' ancora attivo, non si chiude ---- */
     function mostraBloccato(messaggio) {
-      schermo.innerHTML =
-        '<div class="card fermo">' +
-          '<h1>Prima devi disdire il Gestionale</h1>' +
+      schermo.innerHTML = cardVetrina() +
+        '<div class="card fermo" style="border-left-color:#d92d20">' +
+          '<h1>Per cancellare tutto, prima disdici il Gestionale</h1>' +
           '<p class="sotto">' + esc(messaggio) + '</p>' +
           '<p class="nota">Se chiudessi il profilo adesso, la tua carta continuerebbe a pagare ' +
             'un abbonamento che non potresti più nemmeno usare. Per questo prima si disdice.</p>' +
@@ -142,6 +207,7 @@
             'in alto a sinistra. Da lì disdici quando vuoi. Poi torna qui.</p>' +
           '<p style="margin-top:20px"><a class="btn-blu" href="/gestionale-app.html">Vai al Gestionale</a></p>' +
         '</div>';
+      attaccaVetrina();
     }
 
     /* ---- schermata 2: si puo' chiudere ---- */
@@ -151,7 +217,7 @@
           esc(m.v) + '">' + esc(m.t) + '</label>';
       }).join('');
 
-      schermo.innerHTML =
+      schermo.innerHTML = cardVetrina() +
         '<div class="card">' +
           '<h1>Elimina il tuo profilo TrovaImpresa</h1>' +
           '<p class="sotto">Te ne vai dal sito. Non si torna indietro e non si recupera niente.</p>' +
@@ -191,6 +257,7 @@
         '</div>';
 
       document.getElementById('btn-elimina').onclick = eliminaDavvero;
+      attaccaVetrina();
     }
 
     function mostraErrore(testo) {
@@ -255,8 +322,14 @@
 
       /* il tasto «Torna al pannello» porta al pannello giusto per il suo tipo */
       try {
-        var q = await sb.from('imprese').select('tipo').eq('user_id', sessione.user.id).maybeSingle();
-        var tipo = ((q && q.data && q.data.tipo) || '').toLowerCase();
+        var q = await sb.from('imprese')
+          .select('id, tipo, vetrina_attiva')
+          .eq('user_id', sessione.user.id)
+          .order('id', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        impresa = (q && q.data) || null;
+        var tipo = ((impresa && impresa.tipo) || '').toLowerCase();
         document.getElementById('torna').href =
           tipo === 'professionista' ? '/pannello-professionisti.html' :
           tipo === 'artigiano'      ? '/pannello-artigiano.html' :
