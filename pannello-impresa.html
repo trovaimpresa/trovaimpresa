@@ -6558,8 +6558,20 @@ async function calcolaPrioritaImpresa() {
   return { posUtente, totale: lista.length, posSenza, citta };
 }
 </script>
-<div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
-  <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
+<!-- ⛔ 20 settembre 2026 — LA DISDETTA NON SI NASCONDE.
+     Prima qui c'era UNA riga rossa sola a 0.85rem: «Disdetta abbonamento /
+     Elimina account». Alessio: «e troppo piccolo e poco visibile». E le due
+     cose erano anche appiccicate nello stesso link, mentre disdire un
+     abbonamento e cancellare l'account non sono la stessa cosa: una la fai
+     a cuor leggero, l'altra ti porta via tutto.
+     Adesso sono due voci separate e leggibili (15px, sottolineate), e la
+     seconda dice per esteso che cancella tutto.
+     ⚠️ Non e' solo gentilezza: la disdetta dev'essere facile da trovare
+     quanto l'iscrizione. -->
+<div style="text-align:center;padding:22px 16px;border-top:1px solid #eee;margin-top:20px;">
+  <a href="modifica-profilo.html#card-disdetta" style="color:#475569;font-size:15px;font-weight:600;text-decoration:underline;">Gestisci o disdici l&rsquo;abbonamento</a>
+  <span style="color:#cbd5e1;margin:0 10px;">|</span>
+  <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:15px;text-decoration:underline;">Elimina account (cancella tutto)</a>
 </div>
 <footer style="background:#0a2a4d;color:white;font-size:15px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script>

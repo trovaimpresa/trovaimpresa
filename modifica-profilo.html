@@ -1649,6 +1649,25 @@
         const btnDisdici = document.getElementById('btn-disdici');
         const notaDisdetta = document.getElementById('info-disdetta');
         document.getElementById('card-disdetta').style.display = 'block';
+        /* ⛔ 20 settembre 2026 — L'ANCORA #card-disdetta NON PORTAVA DA NESSUNA PARTE.
+           Il link in fondo al pannello punta a modifica-profilo.html#card-disdetta,
+           ma quando il browser cerca quel punto la card e' ancora display:none
+           (la si accende QUI, dopo aver letto il profilo): per lui non esiste,
+           e il salto non avviene. Provato da Alessio il 20 settembre: clicchi
+           «Disdetta abbonamento» e ti ritrovi in cima a «Completa il tuo
+           profilo», senza una parola sulla disdetta — la piu' facile delle
+           trappole, perche' la pagina giusta era gia' quella.
+           Adesso, se si e' arrivati con quell'ancora, ce lo portiamo noi.
+           ⚠️ Serve il rinvio: lo scroll chiesto nello stesso giro in cui la
+           card si accende non trova ancora la sua altezza. */
+        if ((location.hash || '') === '#card-disdetta') {
+          setTimeout(function () {
+            try {
+              const c = document.getElementById('card-disdetta');
+              if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (e) {}
+          }, 150);
+        }
         if (d.premium_pagato === true) {
           /* ⛔ 30 agosto, difetto trovato solo aprendo la pagina vera: qui
              mancava la riga che RIACCENDE il pulsante. Il ramo di sotto lo

@@ -64,6 +64,17 @@
       <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
       <button class="lt-btn" data-action="export-excel">⬇ Esporta dati</button>
     </div>
+    <!-- 20 settembre 2026 — L'ABBONAMENTO, DALLA PARTE OPPOSTA.
+         Chiesto da Alessio: prima, per disdire o cambiare piano, bisognava
+         uscire dal gestionale, tornare nel pannello e trovare un link rosso
+         piccolo in fondo alla pagina. Adesso sta qui in alto.
+         ⚠️ STA DOPO gli altri sei APPOSTA: sotto i 640px la barra torna in
+         colonna e cosi' finisce in fondo, non come prima cosa che uno vede.
+         Se lo si sposta sopra, sul telefono diventa il primo tasto del
+         gestionale — e il primo tasto non puo' essere la disdetta. -->
+    <div class="lt-actions lt-actions--sx">
+      <button class="lt-btn" data-action="abbonamento">💳 Abbonamento</button>
+    </div>
     <!-- ⚠️ 14 agosto 2026 — QUESTA SCHERMATA NON PARLAVA A CHI LA APRE.
          Diceva «Gestionale Multiservizi · Scegli il reparto», e sotto
          spiegava che i reparti non si mischiano. Per un idraulico che
@@ -2229,6 +2240,42 @@
       if(n)return n.slice(0,60);
     }catch(e){}
     return ruoloUtente==='professionista'?"Il mio studio":"I miei lavori";
+  }
+
+  /* ⛔ 20 settembre 2026 — L'ABBONAMENTO SI GESTISCE DA DENTRO IL GESTIONALE.
+     ⚠️ NON si riapre il checkout: a chi e' gia' abbonato creerebbe un
+     SECONDO abbonamento (29 + 39 euro al mese). Si passa dal portale di
+     Stripe, la stessa porta del pannello:
+     netlify/functions/portale-clienti.js, che legge CHI SEI DAL TOKEN e
+     mai dall'email mandata dal browser — se no chiunque potrebbe aprire
+     il portale di un altro e disdirgli l'abbonamento.
+     ⚠️ Il portale vuole `returnUrl` che cominci con https://trovaimpresa.com,
+     se no la funzione ti rimanda al pannello: da qui gli passiamo la
+     pagina dove sei, cosi' tornando indietro ti ritrovi dov'eri.
+     ⚠️ Chi e' in prova e non ha nessun abbonamento su Stripe riceve
+     `senza_abbonamento`: non e' un guasto, e la frase gliela dice lui. */
+  async function apriAbbonamento(bottone){
+    const prima = bottone ? bottone.textContent : "";
+    if(bottone){ bottone.disabled=true; bottone.textContent="Apro…"; }
+    try{
+      const {data:ses} = await sb.auth.getSession();
+      const token = ses && ses.session && ses.session.access_token;
+      if(!token){
+        toast("La sessione è scaduta. Rientra e riprova.");
+      }else{
+        const r = await fetch("/.netlify/functions/portale-clienti",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+          body:JSON.stringify({returnUrl:location.href})
+        });
+        let d=null; try{ d=await r.json(); }catch(e){}
+        if(d && d.url){ location.href=d.url; return; }
+        toast((d && (d.messaggio||d.error)) || "Non riesco ad aprire la gestione abbonamento. Riprova più tardi.");
+      }
+    }catch(e){
+      toast("Errore: "+((e && e.message) || e));
+    }
+    if(bottone){ bottone.disabled=false; bottone.textContent=prima; }
   }
 
   /* il guasto della lettura dei reparti: null = tutto a posto */
@@ -12519,6 +12566,7 @@
     if(a==="appoperaio"){
       try{sessionStorage.setItem("gest_rientro",String(Date.now()));}catch(e){}
       location.href="/gestionale-operatore.html";return;}
+    if(a==="abbonamento")return apriAbbonamento(t);
     if(a==="save-azienda")return saveAzienda();
     if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
