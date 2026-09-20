@@ -147,11 +147,22 @@
     function cardVetrina() {
       if (!impresa) return '';
       if (impresa.vetrina_attiva === false) {
+        /* ⚠️ 20 settembre 2026 — «GIA' SPENTA» SPAVENTAVA.
+           Prima qui c'era scritto «La tua vetrina e' gia' spenta», e Alessio
+           si e' fermato: «perche' dice gia' spenta se non ho ancora fatto
+           niente?». Giusto: chi si iscrive dalla porta del Gestionale NASCE
+           con `vetrina_attiva = false` (regola del 15 settembre 2026), non
+           l'ha spenta nessuno. Dal database i due casi non si distinguono —
+           spenta oggi e mai accesa sono lo stesso `false` — quindi la frase
+           deve andare bene per tutti e due e, soprattutto, spiegare invece
+           di far pensare a un guasto. E gli si dice che la vetrina e'
+           gratis: e' l'unico momento in cui lo sta leggendo davvero. */
         return '<div class="card">' +
-          '<h1 style="font-size:20px">La tua vetrina è già spenta</h1>' +
-          '<p class="sotto">Non compari nelle ricerche del sito. Il Gestionale, se ce l&rsquo;hai, ' +
-            'resta tuo: entri da trovaimpresa.com/gestionale.</p>' +
-          '<p class="nota">Se vuoi riaccenderla, si fa dal pannello.</p>' +
+          '<h1 style="font-size:20px">Non compari nelle ricerche del sito</h1>' +
+          '<p class="sotto">La tua vetrina è spenta. Se ti sei iscritto dalla porta del ' +
+            'Gestionale non è mai stata accesa: è normale, non hai fatto niente.</p>' +
+          '<p class="nota">Se un giorno vuoi farti trovare anche dai clienti del sito, la ' +
+            'accendi dal pannello. <b>È gratis.</b></p>' +
         '</div>';
       }
       return '<div class="card fermo">' +
