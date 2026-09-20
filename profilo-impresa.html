@@ -1248,13 +1248,48 @@ async function caricaProfilo(id){
   try{
     /* prima, se la lettura falliva o l'id non esisteva, la pagina restava su
        "Caricamento..." per sempre: il visitatore non capiva e se ne andava */
-    function _profiloKo(msg){
-      var n=document.getElementById('profile-name');
-      if(n)n.textContent=msg;
-      var b=document.getElementById('profile-tipo-badge');
-      if(b)b.textContent='';
+    /* ⛔ 20 settembre 2026 — UNA SCHEDA CHE NON C'E' NON PRENDE RECENSIONI.
+       Prima qui si cambiava solo il NOME in cima e si nascondeva la barra
+       del telefono: tutto il resto della pagina restava in piedi. Risultato
+       provato dal vivo su una scheda spenta: sotto la scritta «Questa
+       scheda non e' piu' disponibile» c'erano ancora le stelle, il modulo
+       «Lascia la tua recensione» col tasto «Pubblica recensione», e i due
+       moduli del preventivo e dell'incarico. Si poteva recensire e chiedere
+       un preventivo a un'impresa che non esiste piu' — e quelle righe
+       sarebbero finite nel database attaccate a una scheda invisibile.
+       Adesso al posto della pagina resta un riquadro solo, che dice cos'e'
+       successo e dove andare. ⚠️ `msg` sono frasi scritte qui dentro, non
+       arrivano da fuori: si possono mettere nell'HTML senza ripulirle. */
+    function _profiloKo(msg, ricaricabile){
       var barra=document.getElementById('cta-bar-mobile');
       if(barra)barra.style.display='none';
+      ['sec-preventivo','sec-incarico'].forEach(function(id){
+        var e=document.getElementById(id); if(e)e.style.display='none';
+      });
+      var v=document.getElementById('profilo-view');
+      if(!v){
+        var n=document.getElementById('profile-name');
+        if(n)n.textContent=msg;
+        var b=document.getElementById('profile-tipo-badge');
+        if(b)b.textContent='';
+        return;
+      }
+      var bottone = ricaricabile
+        ? '<button type="button" onclick="location.reload()" style="background:#0066ff;color:#fff;'
+          + 'border:none;border-radius:11px;padding:14px 24px;font-family:inherit;font-size:16px;'
+          + 'font-weight:800;cursor:pointer">Ricarica la pagina</button>'
+        : '<a href="/" style="display:inline-block;background:#0066ff;color:#fff;text-decoration:none;'
+          + 'border-radius:11px;padding:14px 24px;font-size:16px;font-weight:800">Cerca un&rsquo;altra impresa</a>';
+      v.innerHTML =
+        '<div style="max-width:620px;margin:60px auto;padding:34px 30px;background:#fff;'
+        + 'border:1px solid #e6e9ef;border-radius:16px;box-shadow:0 2px 12px rgba(10,42,77,.07);'
+        + 'text-align:center;color:#0a2a4d;font-family:inherit">'
+        + '<div style="font-size:22px;font-weight:800;line-height:1.35;margin-bottom:10px">' + msg + '</div>'
+        + '<p style="font-size:16px;line-height:1.6;color:#5f6b7a;margin:0 0 22px">'
+        + (ricaricabile
+            ? 'I tuoi dati non c&rsquo;entrano: &egrave; la connessione. Riprova fra poco.'
+            : 'Pu&ograve; darsi che l&rsquo;impresa abbia tolto la sua scheda dal sito. Su TrovaImpresa ne trovi altre nella tua zona.')
+        + '</p>' + bottone + '</div>';
     }
     let r,data;
     try{
@@ -1283,7 +1318,7 @@ async function caricaProfilo(id){
       const _u=await r.json();
       data=_u?[_u]:[];
     }catch(e){
-      _profiloKo('Non riesco a caricare questa scheda — controlla la connessione e ricarica la pagina');
+      _profiloKo('Non riesco a caricare questa scheda', true);
       return;
     }
     if(!data||!data.length){
