@@ -12,47 +12,57 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'DM Sans',sans-serif; background:#f4f6f9; color:#1a1a1a; }
   nav { background:white; padding:14px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); display:flex; align-items:center; }
-  .nav-logo { font-family:'Playfair Display',serif; font-size:1.4rem; text-decoration:none; }
-  .nav-logo .trova { color:var(--verde); }
-  .nav-logo .impresa { color:var(--arancio); }
+  /* 21 set 2026 — il logo VERO al posto della scritta "TrovaImpresa".
+     Qui prima c'era solo testo: proprio su queste pagine, che sono quelle
+     che la gente trova da Google, il marchio non si vedeva mai. */
+  .nav-logo { text-decoration:none; display:flex; align-items:center; }
+  .nav-logo img { height:52px; width:auto; display:block; }
+  /* la fascia bianca col logo grande, come nella home e nelle guide */
+  .ti-logo-grande { background:#fff; text-align:center; padding:22px 20px 20px; border-bottom:1px solid #eef2f7; }
+  .ti-logo-grande img { max-width:330px; width:70%; height:auto; display:block; margin:0 auto; }
+  @media(max-width:600px){
+    .nav-logo img { height:42px; }
+    .ti-logo-grande { padding:14px 16px 12px; }
+    .ti-logo-grande img { max-width:230px; width:78%; }
+  }
   .nav-btns { margin-left:auto; display:flex; gap:10px; }
-  .btn-outline { border:2px solid var(--verde); color:var(--verde); padding:8px 20px; border-radius:25px; font-weight:600; text-decoration:none; font-size:0.9rem; }
-  .btn-fill { background:var(--arancio); color:white; padding:8px 20px; border-radius:25px; font-weight:600; text-decoration:none; font-size:0.9rem; }
+  .btn-outline { border:2px solid var(--verde); color:var(--verde); padding:10px 22px; border-radius:25px; font-weight:600; text-decoration:none; font-size:1rem; }
+  .btn-fill { background:var(--arancio); color:white; padding:10px 22px; border-radius:25px; font-weight:600; text-decoration:none; font-size:1rem; }
   .hero { background:linear-gradient(135deg, #0a2a4d, #0066ff); color:white; padding:60px 24px; text-align:center; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); margin-bottom:16px; }
-  .hero p { font-size:1.1rem; opacity:0.9; max-width:600px; margin:0 auto 32px; }
-  .hero-btn { background:var(--arancio); color:white; padding:14px 32px; border-radius:30px; font-weight:700; text-decoration:none; font-size:1.1rem; }
+  .hero p { font-size:1.25rem; opacity:0.9; max-width:600px; margin:0 auto 32px; }
+  .hero-btn { background:var(--arancio); color:white; padding:16px 36px; border-radius:30px; font-weight:700; text-decoration:none; font-size:1.22rem; }
 
   /* riparazione: il bottone arancione si rompeva quando il testo andava a capo (telefono, pagine dei tecnici) */
   .hero-btn { display:inline-block; max-width:100%; line-height:1.35; }
   .hero-iscriviti { margin-top:18px; padding-top:18px; border-top:1px solid rgba(255,255,255,.28); }
-  .hero-iscriviti p { margin:0 0 10px; font-size:0.98rem; opacity:.95; }
-  .hero-iscriviti a { display:inline-block; background:#fff; color:#0a2a4d; padding:12px 26px; border-radius:30px; font-weight:700; text-decoration:none; font-size:0.98rem; }
+  .hero-iscriviti p { margin:0 0 10px; font-size:1.08rem; opacity:.95; }
+  .hero-iscriviti a { display:inline-block; background:#fff; color:#0a2a4d; padding:14px 28px; border-radius:30px; font-weight:700; text-decoration:none; font-size:1.1rem; }
   .hero-iscriviti a:hover { background:#eaf2ff; }
   .hero-iscriviti small { display:block; margin-top:9px; font-size:0.8rem; opacity:.85; }
   @media(max-width:600px){ .hero-iscriviti a{ display:block; } }
 
   .section { max-width:900px; margin:0 auto; padding:48px 24px; }
-  .section h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--verde); margin-bottom:16px; }
-  .section h3 { font-size:1.05rem; color:#0a2a4d; margin:22px 0 8px; }
-  .section p { color:#555; line-height:1.7; margin-bottom:16px; font-size:1rem; }
+  .section h2 { font-family:'Playfair Display',serif; font-size:2.1rem; color:var(--verde); margin-bottom:16px; }
+  .section h3 { font-size:1.2rem; color:#0a2a4d; margin:22px 0 8px; }
+  .section p { color:#555; line-height:1.72; margin-bottom:18px; font-size:1.12rem; }
   .section ul { margin:0 0 18px; padding-left:22px; }
-  .section li { color:#555; line-height:1.7; font-size:1rem; margin-bottom:8px; }
+  .section li { color:#555; line-height:1.72; font-size:1.12rem; margin-bottom:8px; }
   .prezzo-box { background:white; border-radius:16px; border-top:4px solid var(--arancio); box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:24px; margin:8px 0 28px; }
-  .prezzo-cifra { font-family:'Playfair Display',serif; font-size:2rem; color:#0a2a4d; margin-bottom:8px; }
+  .prezzo-cifra { font-family:'Playfair Display',serif; font-size:2.3rem; color:#0a2a4d; margin-bottom:8px; }
   .prezzo-box p:last-child { margin-bottom:0; }
   /* 12 set 2026 — la tabella del decreto Parametri.
      Su telefono scorre di lato dentro .tab-wrap invece di rompere la pagina. */
   .tab-wrap { overflow-x:auto; margin:8px 0 14px; }
-  table.prezzi { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); font-size:0.95rem; }
+  table.prezzi { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); font-size:1.03rem; }
   table.prezzi th { background:#0a2a4d; color:white; text-align:left; padding:12px 14px; font-size:0.88rem; white-space:nowrap; }
   table.prezzi td { padding:12px 14px; border-top:1px solid #eef1f5; color:#444; white-space:nowrap; }
-  .nota-fonte { font-size:0.82rem; color:#888; line-height:1.55; }
+  .nota-fonte { font-size:0.95rem; color:#888; line-height:1.55; }
   .prezzo-box .nota-fonte { margin-top:10px; }
   .categorie { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin:32px 0; }
   .cat-card { background:white; border-radius:12px; padding:20px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-decoration:none; color:#1a1a1a; }
   .cat-icon { font-size:2rem; margin-bottom:8px; }
-  .cat-name { font-weight:600; font-size:0.95rem; }
+  .cat-name { font-weight:600; font-size:1.05rem; }
   .cta-box { background:linear-gradient(135deg,#0a2a4d,#0066ff); color:white; border-radius:20px; padding:48px 32px; text-align:center; margin:40px 0; }
   /* ⚠️ 30 ago 2026 — il "color:white" qui sotto NON e' un colore nuovo:
      e' quello che .cta-box dichiara gia' due righe sopra. Va ripetuto
@@ -153,12 +163,17 @@
 </head>
 <body>
 <nav>
-  <a href="/" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
+  <a href="/" class="nav-logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
   <div class="nav-btns">
     <a href="/login-impresa.html" class="btn-outline">Entra (Imprese)</a>
     <a href="/registrazione-artigiano.html" class="btn-fill">Registrati</a>
   </div>
 </nav>
+
+<!-- 21 set 2026 — logo grande come nella home -->
+<div class="ti-logo-grande">
+  <a href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
 
 <div class="hero">
   <h1>Serramentista a Cuneo</h1>
