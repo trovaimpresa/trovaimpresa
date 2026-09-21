@@ -2,7 +2,10 @@
    conta-clic-guide.js — 21 settembre 2026
 
    COSA CONTA
-   I clic sui riquadri «Trova un …» e «Registrati gratis» dentro le guide.
+   I clic sui riquadri «Trova un …» e «Registrati gratis» dentro le guide,
+   nella pagina Guide, nei Bandi e — dal 21 set 2026 — anche nelle pagine
+   «mestiere + citta'» (muratore-roma e compagnia), che sono quelle che la
+   gente trova da Google.
    Di ogni clic segna due cose sole:
      - DA DOVE: il riquadro in cima, la striscia a meta' pagina o il
        riquadro in fondo
@@ -80,6 +83,9 @@
     function punto(link) {
       try {
         if (link.closest('.ti-riga')) return 'meta';
+        /* pagine mestiere+citta': il riquadro blu in alto e quello in fondo */
+        if (link.closest('.hero')) return 'cima';
+        if (link.closest('.cta-box')) return 'fondo';
         var box = link.closest('.ti-promo');
         if (!box) return 'altro';
         var tutti = document.querySelectorAll('.ti-promo');
@@ -96,6 +102,7 @@
         if (link.classList.contains('verde')) return 'registra';
         var href = (link.getAttribute('href') || '').toLowerCase();
         if (href.indexOf('registrazione') !== -1 || href.indexOf('registrati') !== -1) return 'registra';
+        if (href.indexOf('#registrati') !== -1) return 'registra';
       } catch (e) {}
       return 'cerca';
     }
@@ -104,7 +111,11 @@
       try {
         var t = ev.target;
         if (!t || !t.closest) return;
-        var link = t.closest('.ti-promo-b, .ti-riga-btns a');
+        var link = t.closest(
+          '.ti-promo-b, .ti-riga-btns a,' +
+          /* pagine mestiere+citta' */
+          '.hero-btn, .hero-iscriviti a, .cta-box a'
+        );
         if (!link) return;
         manda(punto(link), lato(link));
       } catch (e) {}
