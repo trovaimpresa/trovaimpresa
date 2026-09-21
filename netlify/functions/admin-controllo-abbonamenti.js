@@ -36,6 +36,21 @@
 //
 // PROTEZIONE: utente e password admin, come admin-pagamenti.js. Dentro ci
 // sono email e importi di persone vere.
+//
+// ---------------------------------------------------------------------
+// 21 settembre 2026 (sera) — SPACCATO IN DUE, e il motivo conta.
+//
+// Il confronto vero adesso sta dentro `confronta()`, ed e' esportato in
+// fondo al file. Lo chiamano in DUE:
+//   - questo handler, quando Alessio schiaccia il bottone nel pannello;
+//   - netlify/functions/controllo-abbonamenti-settimanale.js, ogni
+//     lunedi' mattina, da solo.
+//
+// ⛔ UNA COPIA SOLA. Se il confronto fosse scritto due volte, il giorno
+//    che si corregge una regola (uno stato di Stripe in piu', una colonna
+//    nuova) si correggerebbe in un posto solo, e per mesi il bottone e
+//    l'email dell'orologio direbbero cose diverse. Un controllo di cui
+//    non ti fidi e' peggio di nessun controllo.
 // =====================================================================
 const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
@@ -66,6 +81,107 @@ const pulisci = (e) => String(e || '').trim().toLowerCase();
 /* gli stati che vogliono dire «questo sta pagando o sta per pagare».
    `canceled` e `incomplete_expired` no: quelli sono finiti. */
 const VIVI = ['active', 'trialing', 'past_due', 'unpaid'];
+
+// =====================================================================
+// IL CONFRONTO — la parte che conta, quella che non va duplicata.
+// Non legge process.env per l'autorizzazione e non risponde a nessuno:
+// prende le chiavi, guarda, e restituisce il rapporto. Chi la chiama
+// decide cosa farne (mostrarlo, mandarlo per email, ignorarlo).
+// =====================================================================
+async function confronta({ chiaveStripe, url, key }) {
+  const stripe = new Stripe(chiaveStripe);
+  const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  // ---- 1. chi paga, secondo Stripe ----------------------------------
+  /* ⚠️ Si scorrono TUTTE le pagine. Con `limit: 100` e basta, il giorno
+     che gli abbonati passano il centinaio il controllo comincerebbe a
+     guardarne solo cento e a dire che va tutto bene. */
+  const suStripe = new Map();   // email -> { stato, id, prodotto, disdetto_a_fine }
+  let pagina = await stripe.subscriptions.list({ status: 'all', limit: 100, expand: ['data.customer'] });
+  let giri = 0;
+  while (true) {
+    for (const a of pagina.data) {
+      if (!VIVI.includes(String(a.status || ''))) continue;
+      const email = pulisci(
+        (a.metadata && a.metadata.email) ||
+        (a.customer && a.customer.email) || ''
+      );
+      if (!email) continue;
+      suStripe.set(email, {
+        stato: a.status,
+        abbonamento: a.id,
+        prodotto: (a.metadata && a.metadata.prodotto) || null,
+        disdetto_a_fine_periodo: a.cancel_at_period_end === true
+      });
+    }
+    if (!pagina.has_more || giri++ > 50) break;
+    pagina = await stripe.subscriptions.list({
+      status: 'all', limit: 100, expand: ['data.customer'],
+      starting_after: pagina.data[pagina.data.length - 1].id
+    });
+  }
+
+  // ---- 2. chi risulta abbonato, secondo il database -----------------
+  const { data: righe, error } = await sb
+    .from('imprese')
+    .select('id, email, nome_attivita, piano, premium_pagato, premium_scadenza, chat_pro, gestionale_attivo, stripe_customer_id');
+  if (error) throw new Error('Non riesco a leggere le imprese: ' + error.message);
+
+  const nelSito = new Map();
+  for (const r of (righe || [])) {
+    const email = pulisci(r.email);
+    if (!email) continue;
+    /* «paga» vuol dire premium_pagato, non piano: i premium regalati
+       hanno piano = premium ma non hanno mai pagato niente. */
+    const paga = r.premium_pagato === true || r.gestionale_attivo === true;
+    const scaduto = r.premium_scadenza ? (new Date(r.premium_scadenza) < new Date()) : false;
+    nelSito.set(email, {
+      id: r.id,
+      nome: r.nome_attivita || null,
+      paga, scaduto,
+      piano: r.piano,
+      cliente_stripe: r.stripe_customer_id || null
+    });
+  }
+
+  // ---- 3. il confronto ----------------------------------------------
+  const paga_e_non_ha = [];   // il guaio grosso
+  const ha_e_non_paga = [];   // ci rimetti tu
+
+  for (const [email, s] of suStripe) {
+    const r = nelSito.get(email);
+    if (!r) {
+      paga_e_non_ha.push({ email, perche: 'su Stripe paga, ma nel sito non esiste nessuna riga con questa email', stripe: s });
+    } else if (!r.paga || r.scaduto) {
+      paga_e_non_ha.push({
+        email,
+        perche: r.scaduto ? 'su Stripe paga, ma nel sito il piano risulta scaduto'
+                          : 'su Stripe paga, ma nel sito non risulta pagato',
+        impresa: r, stripe: s
+      });
+    }
+  }
+
+  for (const [email, r] of nelSito) {
+    if (!r.paga) continue;
+    if (!suStripe.has(email)) {
+      ha_e_non_paga.push({ email, perche: "nel sito risulta pagato, ma su Stripe non c'è nessun abbonamento vivo", impresa: r });
+    }
+  }
+
+  return {
+    quando: new Date().toISOString(),
+    tutto_a_posto: paga_e_non_ha.length === 0 && ha_e_non_paga.length === 0,
+    quanti: {
+      abbonamenti_vivi_su_stripe: suStripe.size,
+      risultano_paganti_nel_sito: [...nelSito.values()].filter(x => x.paga).length,
+      paga_e_non_ha: paga_e_non_ha.length,
+      ha_e_non_paga: ha_e_non_paga.length
+    },
+    paga_e_non_ha,
+    ha_e_non_paga
+  };
+}
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') {
@@ -98,96 +214,19 @@ exports.handler = async function (event) {
   }
 
   try {
-    const stripe = new Stripe(chiaveStripe);
-    const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-
-    // ---- 1. chi paga, secondo Stripe --------------------------------
-    /* ⚠️ Si scorrono TUTTE le pagine. Con `limit: 100` e basta, il giorno
-       che gli abbonati passano il centinaio il controllo comincerebbe a
-       guardarne solo cento e a dire che va tutto bene. */
-    const suStripe = new Map();   // email -> { stato, id, prodotto, disdetto_a_fine }
-    let pagina = await stripe.subscriptions.list({ status: 'all', limit: 100, expand: ['data.customer'] });
-    let giri = 0;
-    while (true) {
-      for (const a of pagina.data) {
-        if (!VIVI.includes(String(a.status || ''))) continue;
-        const email = pulisci(
-          (a.metadata && a.metadata.email) ||
-          (a.customer && a.customer.email) || ''
-        );
-        if (!email) continue;
-        suStripe.set(email, {
-          stato: a.status,
-          abbonamento: a.id,
-          prodotto: (a.metadata && a.metadata.prodotto) || null,
-          disdetto_a_fine_periodo: a.cancel_at_period_end === true
-        });
-      }
-      if (!pagina.has_more || giri++ > 50) break;
-      pagina = await stripe.subscriptions.list({
-        status: 'all', limit: 100, expand: ['data.customer'],
-        starting_after: pagina.data[pagina.data.length - 1].id
-      });
-    }
-
-    // ---- 2. chi risulta abbonato, secondo il database ---------------
-    const { data: righe, error } = await sb
-      .from('imprese')
-      .select('id, email, piano, premium_pagato, premium_scadenza, chat_pro, gestionale_attivo, stripe_customer_id');
-    if (error) throw new Error('Non riesco a leggere le imprese: ' + error.message);
-
-    const nelSito = new Map();
-    for (const r of (righe || [])) {
-      const email = pulisci(r.email);
-      if (!email) continue;
-      /* «paga» vuol dire premium_pagato, non piano: i premium regalati
-         hanno piano = premium ma non hanno mai pagato niente. */
-      const paga = r.premium_pagato === true || r.gestionale_attivo === true;
-      const scaduto = r.premium_scadenza ? (new Date(r.premium_scadenza) < new Date()) : false;
-      nelSito.set(email, { id: r.id, paga, scaduto, piano: r.piano, cliente_stripe: r.stripe_customer_id || null });
-    }
-
-    // ---- 3. il confronto --------------------------------------------
-    const paga_e_non_ha = [];   // il guaio grosso
-    const ha_e_non_paga = [];   // ci rimetti tu
-
-    for (const [email, s] of suStripe) {
-      const r = nelSito.get(email);
-      if (!r) {
-        paga_e_non_ha.push({ email, perche: 'su Stripe paga, ma nel sito non esiste nessuna riga con questa email', stripe: s });
-      } else if (!r.paga || r.scaduto) {
-        paga_e_non_ha.push({ email, perche: r.scaduto ? 'su Stripe paga, ma nel sito il piano risulta scaduto' : 'su Stripe paga, ma nel sito non risulta pagato', impresa: r, stripe: s });
-      }
-    }
-
-    for (const [email, r] of nelSito) {
-      if (!r.paga) continue;
-      if (!suStripe.has(email)) {
-        ha_e_non_paga.push({ email, perche: 'nel sito risulta pagato, ma su Stripe non c’e’ nessun abbonamento vivo', impresa: r });
-      }
-    }
-
-    const tutto_a_posto = paga_e_non_ha.length === 0 && ha_e_non_paga.length === 0;
-
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        quando: new Date().toISOString(),
-        tutto_a_posto,
-        quanti: {
-          abbonamenti_vivi_su_stripe: suStripe.size,
-          risultano_paganti_nel_sito: [...nelSito.values()].filter(x => x.paga).length,
-          paga_e_non_ha: paga_e_non_ha.length,
-          ha_e_non_paga: ha_e_non_paga.length
-        },
-        paga_e_non_ha,
-        ha_e_non_paga
-      }, null, 2)
-    };
-
+    const rapporto = await confronta({ chiaveStripe, url, key });
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(rapporto, null, 2) };
   } catch (err) {
     console.error('[controllo-abbonamenti]', err && err.message);
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: String(err && err.message || err) }) };
   }
 };
+
+/* ⛔ NON TOGLIERE: lo chiama controllo-abbonamenti-settimanale.js.
+   Se sparisce questa riga, l'orologio del lunedi' si rompe in silenzio
+   — e un controllo rotto in silenzio e' esattamente il guaio che questo
+   file esiste per evitare. */
+module.exports.confronta = confronta;
+
+/* per il banco: la lista degli stati «vivi» si prova da sola */
+module.exports.VIVI = VIVI;

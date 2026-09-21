@@ -1489,6 +1489,30 @@
         <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
       </div>
       <div style="padding:18px">
+
+        <!-- CONTROLLA GLI ABBONAMENTI - 21 settembre 2026.
+             Il permesso di entrare nel gestionale NON sta su Stripe: sta
+             scritto sulla riga dell'impresa (piano, premium_pagato). A
+             tenerli allineati e' il webhook, che e' un messaggio che
+             viaggia in rete: puo' arrivare in ritardo, puo' fallire, puo'
+             non trovare la riga giusta perche' cerca per email. Finche'
+             nessuno li confronta, uno scollamento non fa rumore.
+             Questo bottone li confronta. Legge e basta: non accende e non
+             spegne niente, le riparazioni si fanno a mano.
+             Lo stesso confronto lo rifa' da solo ogni lunedi' mattina
+             (netlify/functions/controllo-abbonamenti-settimanale.js) e
+             scrive un'email SOLO se trova qualcosa. -->
+        <div id="ca-card" style="background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-bottom:20px">
+          <div style="font-size:18px;font-weight:800;color:#16263d">Soldi e permessi: sono allineati?</div>
+          <div style="color:#3d4b5c;font-size:15px;margin:4px 0 14px;max-width:760px">
+            Confronta chi paga su Stripe con chi risulta abbonato nel sito, e dice dove i due non tornano.
+            Guarda e basta: non attiva e non disattiva niente.
+            <span style="color:#5b6b80">Gira anche da solo ogni luned&igrave; mattina e ti scrive solo se trova qualcosa.</span>
+          </div>
+          <button class="u-btn" id="ca-btn" onclick="controllaAbbonamenti()">Controlla gli abbonamenti</button>
+          <div id="ca-esito" style="margin-top:16px"></div>
+        </div>
+
         <div class="u-numeri" id="u-numeri"></div>
         <div class="u-filtri">
           <button class="u-btn attivo" data-uf="tutte" onclick="filtraUtilizzo('tutte',this)">Tutte</button>
@@ -2804,6 +2828,96 @@ function _uQuando(iso){
   return new Date(iso).toLocaleDateString('it-IT');
 }
 function _uEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ============================================================
+   CONTROLLA GLI ABBONAMENTI - 21 settembre 2026
+
+   Chiede al server di mettere Stripe e il database uno accanto
+   all'altro. Il server (admin-controllo-abbonamenti.js) risponde
+   con il rapporto gia' fatto: qui si disegna e basta.
+
+   I DUE GUAI, e non sono lo stesso guaio:
+     - PAGA E NON HA NIENTE: c'e' un cliente vero che ha pagato e
+       trova il muro. Va sistemato subito, viene per primo.
+     - HA E NON PAGA: nel sito risulta pagante ma su Stripe non c'e'
+       piu' niente. Non danneggia lui, costa a te.
+
+   I premium REGALATI non compaiono: il conto si fa su
+   premium_pagato, che sui regali e' false.
+   ============================================================ */
+async function controllaAbbonamenti(){
+  const box = document.getElementById('ca-esito');
+  const btn = document.getElementById('ca-btn');
+  if(box) box.innerHTML = '<div class="loading">Sto confrontando Stripe con il sito...</div>';
+  if(btn){ btn.disabled = true; btn.textContent = 'Controllo in corso...'; }
+  try{
+    const res = await fetch('/.netlify/functions/admin-controllo-abbonamenti', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!res.ok || j.error) throw new Error(j.error || ('il server ha risposto ' + res.status));
+    disegnaControlloAbbonamenti(j);
+  }catch(e){
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">'
+      + 'Non sono riuscito a fare il controllo: ' + _uEsc(e.message)
+      + '<div style="font-weight:500;margin-top:6px">Non vuol dire che c\'e\' un problema sui pagamenti: vuol dire che stavolta non ho potuto guardare.</div></div>';
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Controlla gli abbonamenti'; }
+  }
+}
+
+function _caRiga(r, colore){
+  const imp = r.impresa || {};
+  const st  = r.stripe  || {};
+  const det = [];
+  if(imp.id)       det.push('riga nel sito n. ' + _uEsc(imp.id));
+  if(imp.piano)    det.push('piano: ' + _uEsc(imp.piano));
+  if(st.stato)     det.push('Stripe: ' + _uEsc(st.stato));
+  if(st.prodotto)  det.push('prodotto: ' + _uEsc(st.prodotto));
+  if(st.disdetto_a_fine_periodo) det.push('ha gi&agrave; disdetto');
+  return '<div class="u-riga" style="border-left-color:' + colore + '">'
+    + '<div class="n">' + _uEsc(imp.nome || r.email) + '</div>'
+    + '<div class="s">' + (imp.nome ? _uEsc(r.email) + ' &middot; ' : '') + _uEsc(r.perche) + '</div>'
+    + (det.length ? '<div style="color:#5b6b80;font-size:14px">' + det.join(' &middot; ') + '</div>' : '')
+    + '</div>';
+}
+
+function disegnaControlloAbbonamenti(j){
+  const box = document.getElementById('ca-esito');
+  if(!box) return;
+  const q = j.quanti || {};
+
+  const testata = '<div style="color:#3d4b5c;font-size:15px;margin-bottom:14px">'
+    + 'Su Stripe risultano <b>' + (q.abbonamenti_vivi_su_stripe || 0) + '</b> abbonamenti vivi; '
+    + 'nel sito risultano paganti <b>' + (q.risultano_paganti_nel_sito || 0) + '</b> imprese.'
+    + '</div>';
+
+  if(j.tutto_a_posto){
+    box.innerHTML = testata
+      + '<div style="background:#e6f6ec;border:2px solid #b7e0c5;color:#1b8a3f;padding:16px;border-radius:12px;font-weight:700">'
+      + 'Tutto allineato: chi paga ha il suo, e nessuno ha qualcosa senza pagarla.</div>';
+    return;
+  }
+
+  let html = testata;
+
+  const rossi = j.paga_e_non_ha || [];
+  if(rossi.length){
+    html += '<div style="margin:0 0 6px;font-size:17px;font-weight:800;color:#b3261e">Paga e non ha niente (' + rossi.length + ')</div>'
+      + '<div style="color:#3d4b5c;font-size:14.5px;margin-bottom:10px">Hanno pagato ma nel sito non risultano: aprono il gestionale e trovano il muro. Da sistemare subito.</div>'
+      + rossi.map(r => _caRiga(r, '#b3261e')).join('');
+  }
+
+  const gialli = j.ha_e_non_paga || [];
+  if(gialli.length){
+    html += '<div style="margin:18px 0 6px;font-size:17px;font-weight:800;color:#b26a00">Ha e non paga (' + gialli.length + ')</div>'
+      + '<div style="color:#3d4b5c;font-size:14.5px;margin-bottom:10px">Nel sito risultano paganti ma su Stripe non c\'&egrave; nessun abbonamento vivo: non danneggia loro, costa a te. I premium regalati non compaiono qui.</div>'
+      + gialli.map(r => _caRiga(r, '#b26a00')).join('');
+  }
+
+  box.innerHTML = html;
+}
 
 async function caricaUtilizzo(){
   const box = document.getElementById('u-lista');
