@@ -124,6 +124,12 @@
     .card h3 { font-size: 23px; line-height:1.3; margin-bottom: 10px; color: #0047b3; }
     .card .excerpt { font-size: 16.5px; line-height:1.55; color: #555; flex: 1; }
     .card .date { font-size: 13.5px; color: #999; margin-top: 14px; }
+    /* 21 set 2026 — le icone del sito (disegnate, non faccine): stesso tratto
+       delle icone della home, prendono il colore della scritta accanto. */
+    .ic { width: 22px; height: 22px; vertical-align: -4px; flex-shrink: 0; }
+    .salta a { display: inline-flex; align-items: center; gap: 8px; }
+    .sezione-testa .icona { display: inline-flex; align-items: center; }
+    .sezione-testa .icona .ic { width: 26px; height: 26px; vertical-align: 0; }
     .stato { text-align: center; padding: 60px 24px; color: #777; font-size: 16px; }
 
     /* --- Barra salto rapido per mestiere --- */
@@ -291,6 +297,11 @@
   </div>
 </div>
 
+    <div id="salta" class="salta" style="display:none;">
+      <h2>Vai al mestiere che ti serve</h2>
+      <div class="chips" id="salta-chips"></div>
+    </div>
+
     <div id="lista">
       <div class="stato">Caricamento articoli...</div>
     </div>
@@ -365,19 +376,19 @@
        "trova" = link alla ricerca di quel mestiere (lascia '' per non mostrarlo).
        ============================================================ */
     const GRUPPI = [
-      { id: 'ristrutturazione', nome: 'Ristrutturazione e impresa edile', icona: '🏗️', trova: 'cerca-imprese.html', trovaTesto: 'Trova imprese edili →' },
-      { id: 'bagno',            nome: 'Bagno e idraulica',                icona: '🚿', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Idraulica'), trovaTesto: 'Trova un idraulico →' },
-      { id: 'elettrico',        nome: 'Impianti elettrici',               icona: '⚡', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Impianti elettrici'), trovaTesto: 'Trova un elettricista →' },
-      { id: 'clima',            nome: 'Riscaldamento e climatizzazione',  icona: '🔥', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Climatizzazione / Caldaie'), trovaTesto: 'Trova un termoidraulico →' },
-      { id: 'tetto',            nome: 'Tetto, facciata e isolamento',     icona: '🏠', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Coperture / Tetti'), trovaTesto: 'Trova chi fa tetti →' },
-      { id: 'infissi',          nome: 'Infissi e serramenti',             icona: '🖼️', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Serramenti / Infissi'), trovaTesto: 'Trova un serramentista →' },
-      { id: 'pavimenti',        nome: 'Pavimenti e piastrelle',           icona: '🧱', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Pavimenti e piastrelle'), trovaTesto: 'Trova un piastrellista →' },
-      { id: 'pitture',          nome: 'Pitture e finiture',               icona: '🎨', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Pittura e tinteggiatura'), trovaTesto: 'Trova un imbianchino →' },
-      { id: 'cartongesso',      nome: 'Cartongesso',                      icona: '📐', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Cartongesso'), trovaTesto: 'Trova un cartongessista →' },
-      { id: 'bonus',            nome: 'Bonus fiscali e permessi',         icona: '📄', trova: 'bandi.html', trovaTesto: 'Bandi e fondi perduti →' },
-      { id: 'strumenti',        nome: 'Strumenti e guide pratiche',       icona: '🧮', trova: 'calcolatori.html', trovaTesto: 'Tutti i calcolatori →' },
-      { id: 'imprese',          nome: 'Per le imprese',                   icona: '🧰', trova: 'subappalto.html', trovaTesto: 'Bacheca subappalti →' },
-      { id: 'altro',            nome: 'Altre guide',                      icona: '📚', trova: '', trovaTesto: '' }
+      { id: 'ristrutturazione', nome: 'Ristrutturazione e impresa edile', icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2\" y=\"3\" width=\"20\" height=\"18\" rx=\"2\"/><path d=\"M9 22V12h6v10\"/><path d=\"M2 9h20\"/></svg>', trova: 'cerca-imprese.html', trovaTesto: 'Trova imprese edili →' },
+      { id: 'bagno',            nome: 'Bagno e idraulica',                icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Idraulica'), trovaTesto: 'Trova un idraulico →' },
+      { id: 'elettrico',        nome: 'Impianti elettrici',               icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M13 2 3 14h9l-1 8 10-12h-9l1-8z\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Impianti elettrici'), trovaTesto: 'Trova un elettricista →' },
+      { id: 'clima',            nome: 'Riscaldamento e climatizzazione',  icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Climatizzazione / Caldaie'), trovaTesto: 'Trova un termoidraulico →' },
+      { id: 'tetto',            nome: 'Tetto, facciata e isolamento',     icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><path d=\"M9 22V12h6v10\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Coperture / Tetti'), trovaTesto: 'Trova chi fa tetti →' },
+      { id: 'infissi',          nome: 'Infissi e serramenti',             icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 12h18\"/><path d=\"M12 3v18\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Serramenti / Infissi'), trovaTesto: 'Trova un serramentista →' },
+      { id: 'pavimenti',        nome: 'Pavimenti e piastrelle',           icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M3 15h18\"/><path d=\"M9 3v18\"/><path d=\"M15 3v18\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Pavimenti e piastrelle'), trovaTesto: 'Trova un piastrellista →' },
+      { id: 'pitture',          nome: 'Pitture e finiture',               icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"2\" width=\"16\" height=\"6\" rx=\"2\"/><path d=\"M11 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6\"/><rect x=\"9\" y=\"15\" width=\"4\" height=\"7\" rx=\"1\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Pittura e tinteggiatura'), trovaTesto: 'Trova un imbianchino →' },
+      { id: 'cartongesso',      nome: 'Cartongesso',                      icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m12.8 2.2a2 2 0 0 0-1.7 0L2.6 6.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.7 0l8.6-3.9a1 1 0 0 0 0-1.8z\"/><path d=\"m22 12.6-9.2 4.2a2 2 0 0 1-1.7 0L2 12.6\"/><path d=\"m22 17.6-9.2 4.2a2 2 0 0 1-1.7 0L2 17.6\"/></svg>', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Cartongesso'), trovaTesto: 'Trova un cartongessista →' },
+      { id: 'bonus',            nome: 'Bonus fiscali e permessi',         icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>', trova: 'bandi.html', trovaTesto: 'Bandi e fondi perduti →' },
+      { id: 'strumenti',        nome: 'Strumenti e guide pratiche',       icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"/><path d=\"M8 6h8\"/><path d=\"M8 11h2\"/><path d=\"M14 11h2\"/><path d=\"M8 16h2\"/><path d=\"M14 16h2\"/></svg>', trova: 'calcolatori.html', trovaTesto: 'Tutti i calcolatori →' },
+      { id: 'imprese',          nome: 'Per le imprese',                   icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"/></svg>', trova: 'subappalto.html', trovaTesto: 'Bacheca subappalti →' },
+      { id: 'altro',            nome: 'Altre guide',                      icona: '<svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 7v14\"/><path d=\"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z\"/></svg>', trova: '', trovaTesto: '' }
     ];
 
     /* Rete di sicurezza: se in Supabase la colonna "mestiere" è vuota,
@@ -541,8 +552,5 @@
   </div>
 </footer>
 <script src="/cookie-banner.js"></script>
-
-<!-- 21 set 2026: conta i clic sui riquadri -->
-<script src="/js/conta-clic-guide.js" defer></script>
 </body>
 </html>
