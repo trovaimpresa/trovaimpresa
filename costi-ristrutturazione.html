@@ -64,7 +64,7 @@
 
   footer{border-top:1px solid var(--line);margin-top:20px;padding:26px 24px;color:var(--muted);font-size:13px;text-align:center}
   @media(max-width:600px){
-    .navbar{padding:10px 16px}.navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{padding:10px 16px}.navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .hub-header h1{font-size:26px}.container{padding:30px 16px}
   }
 </style>
@@ -118,6 +118,7 @@
   ]
 }
 </script>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -130,8 +131,32 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <header class="hub-header">
   <h1>Quanto costano i lavori in casa</h1>
+
+<!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
+  </div>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
+</div>
+
   <p>Prezzi reali al metro quadro, calcolatori gratuiti e bonus fiscali 2026. Guide scritte da chi in cantiere ci lavora da 25 anni, senza numeri copiati.</p>
 </header>
 

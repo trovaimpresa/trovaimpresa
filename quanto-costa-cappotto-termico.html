@@ -37,17 +37,17 @@
   .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
   .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .indice li{margin:0}
-  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:17.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
   .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
   .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
   @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
   h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -55,17 +55,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:30px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -121,13 +121,13 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:17px}
+    body{font-size:18.5px}
     h1{font-size:28px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:26px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .seg button{min-width:0}
   }
   .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
@@ -267,6 +267,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -279,6 +280,12 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/blog.html">Guide e Costi</a> › Quanto costa il cappotto termico</nav>
 
@@ -286,201 +293,22 @@
     <h1>Quanto costa il cappotto termico al mq nel 2026</h1>
     <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato luglio 2026 · Lettura 6 min</p>
 
-    <div class="tp-join tp-a">
-  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
-  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
-  <div class="tp-btns">
-    <a class="tp-b tp-b1" href="/registrazione-impresa.html">Ho un&rsquo;impresa &mdash; iscrivimi gratis</a>
-    <a class="tp-b tp-b2" href="/cerca-imprese.html">Sono un cliente &mdash; cerco un'impresa</a>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
   </div>
-  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
 </div>
-
-  <div class="answer">
-      <strong>Risposta rapida:</strong> un cappotto termico esterno chiavi in mano costa
-      <span class="price-big">da 60 a 120 €/mq</span>
-      Il prezzo comprende isolante, posa, rasatura e finitura. Con isolante economico (EPS) si sta sui <strong>60–85 €/mq</strong>; con lana di roccia o fibra di legno si sale a <strong>90–145 €/mq</strong>. Attenzione: si misura sui <strong>metri quadri di parete</strong>, non di pavimento. Sotto trovi i prezzi per materiale e un calcolatore.
-    </div>
-        <nav class="indice">
-      <b>Vai dritto alla tua domanda</b>
-      <ul>
-        <li><a href="#villetta-200-mq">Villetta: quanto viene il cappotto in tutto</a></li>
-        <li><a href="#prezzi-del-cappotto-termico-per">Quanto costa al mq, materiale per materiale</a></li>
-        <li><a href="#cappotto-interno-quando-e-l">Cappotto interno: quando è l'unica strada</a></li>
-        <li><a href="#il-cappotto-in-condominio-come">In condominio: chi decide e chi paga</a></li>
-        <li><a href="#conviene-davvero-risparmio-e-detrazioni">Quanto si risparmia in bolletta</a></li>
-        <li><a href="#l-insufflaggio-l-alternativa-da">L'insufflaggio: quando basta</a></li>
-      </ul>
-    </nav>
-
-    <div class="answer-cta">
-      <b>Quanto costa a casa tua?</b>
-      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
-      <a href="/cerca-imprese.html">Chiedi preventivi gratis nella tua città →</a>
-      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
-    </div>
-
-
-    <p class="lead">Il cappotto è uno di quei lavori dove il prezzo al mq inganna: il grosso della spesa non è l'isolante in sé, ma il <strong>ponteggio, la preparazione della facciata e la finitura</strong>. Due preventivi con lo stesso €/mq possono nascondere lavori molto diversi. Ti spiego cosa deve esserci dentro e quanto costa davvero.</p>
-
-    <p>Un dato pratico per farti un'idea: una villetta su due piani ha in genere <strong>150–250 mq di facciata</strong>, un appartamento in condominio molto meno (ma lì il cappotto si fa di solito su tutto l'edificio e la spesa si divide tra i condomini).</p>
-
-    <h2 id="prezzi-del-cappotto-termico-per">Prezzi del cappotto termico per materiale</h2>
-    <div class="tab-wrap"><table>
-      <caption>Costi indicativi 2026 — cappotto esterno chiavi in mano, €/mq di parete, IVA esclusa</caption>
-      <thead>
-        <tr><th>Materiale isolante</th><th>Caratteristiche</th><th style="text-align:right">Costo al mq</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>EPS (polistirene)</td><td>Il più diffuso, economico, buon isolamento</td><td class="num" style="text-align:right">60 – 85 €/mq</td></tr>
-        <tr><td>Lana di roccia</td><td>Migliore su fuoco e acustica, un po' più caro</td><td class="num" style="text-align:right">90 – 115 €/mq</td></tr>
-        <tr><td>Fibra di legno</td><td>Naturale, ottimo comfort estivo, il più costoso</td><td class="num" style="text-align:right">115 – 145 €/mq</td></tr>
-        <tr><td>Sughero</td><td>Naturale e durevole, prezzo alto</td><td class="num" style="text-align:right">110 – 150 €/mq</td></tr>
-      </tbody>
-    </table></div>
-
-    <div class="note">
-      <strong>Nord più caro del Sud:</strong> al Nord la manodopera costa di più e servono spessori maggiori per il clima, quindi i prezzi tendono verso l'alto (65–100 €/mq per EPS); al Sud si può stare sui 40–70 €/mq.
-    </div>
-
-    <h2 id="villetta-200-mq">Quanto costa il cappotto per una villetta di 200 mq di facciata</h2>
-    <p>Il caso più comune è la <strong>villetta con circa 200 mq di pareti esterne</strong>, con
-    un cappotto da <strong>10 cm</strong> di spessore, che è quello che serve nella maggior parte
-    d'Italia per ottenere un buon risultato. Accanto al prezzo di mercato mettiamo il valore della
-    <strong>Tariffa dei prezzi della Regione Lazio 2023</strong>, il listino ufficiale dei lavori
-    pubblici, che serve come termine di paragone.</p>
-    <div class="tab-wrap"><table>
-      <caption>Villetta, 200 mq di facciata, cappotto da 10 cm rasato e armato, esclusi ponteggio e tinteggiatura — prezzo di mercato 2026 e riferimento ufficiale</caption>
-      <thead>
-        <tr><th>Isolante</th><th style="text-align:right">Prezzo di mercato per un privato</th><th style="text-align:right">Tariffa Regione Lazio 2023</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Polistirene (EPS / XPS)</td><td class="num" style="text-align:right">12.000 – 17.000 €</td><td class="num" style="text-align:right">≈ 25.700 € <span style="font-weight:400;color:var(--muted)">(128,67 €/mq)</span></td></tr>
-        <tr><td>Lana di roccia</td><td class="num" style="text-align:right">18.000 – 23.000 €</td><td class="num" style="text-align:right">≈ 25.300 € <span style="font-weight:400;color:var(--muted)">(126,68 €/mq)</span></td></tr>
-        <tr><td>Lana di vetro</td><td class="num" style="text-align:right">17.000 – 22.000 €</td><td class="num" style="text-align:right">≈ 26.200 € <span style="font-weight:400;color:var(--muted)">(131,09 €/mq)</span></td></tr>
-        <tr><td>Tinteggiatura finale al quarzo (da aggiungere)</td><td class="num" style="text-align:right">+ 1.500 – 2.500 €</td><td class="num" style="text-align:right">+ ≈ 2.300 € <span style="font-weight:400;color:var(--muted)">(11,69 €/mq)</span></td></tr>
-      </tbody>
-    </table></div>
-    <p>Due cose saltano all'occhio. La prima: sul listino ufficiale <strong>il polistirene e la lana
-    di roccia costano quasi uguale</strong>, perché il grosso della spesa non è il pannello ma la
-    manodopera, la rasatura armata e i tasselli; sul mercato la differenza è più marcata solo perché
-    l'EPS è il materiale su cui le imprese fanno più concorrenza. La seconda: la Tariffa regionale è
-    sempre più alta del mercato, perché include spese generali e utile d'impresa da appalto pubblico.
-    Se un preventivo la supera, è caro; se sta molto sotto il mercato, chiedi cosa manca: di solito
-    <strong>il ponteggio</strong> (che nel listino regionale è una voce a parte e sul mercato vale
-    3.000–6.000 € per una villetta), la preparazione della facciata o la tinteggiatura.</p>
-    <p style="font-size:14px;color:var(--muted)">Fonte dei valori ufficiali: Regione Lazio, <em>Tariffa dei prezzi 2023 – Parte A Opere edili</em> (DGR 101 del 14/04/2023), voce A 11.02.1 (isolamento termico a cappotto con intonaco sottile armato): A 11.02.1.d polistirene estruso 3 cm + 7 cm aggiuntivi, A 11.02.1.b lana di roccia 4 cm + 6 cm, A 11.02.1.a lana di vetro 4 cm + 6 cm; tinteggiatura esterna A 20.01.13.b.3. Totali calcolati su 200 mq di facciata.</p>
-
-    <h2 id="cappotto-interno-quando-e-l">Cappotto interno: quando è l'unica strada</h2>
-    <p>A volte il cappotto esterno non si può fare: la facciata è vincolata, il condominio non
-    delibera, oppure devi isolare una stanza sola. In quei casi si va dall'interno, e le regole
-    cambiano parecchio.</p>
-    <div class="tab-wrap"><table>
-      <caption>Costi indicativi 2026 — a confronto, fornitura e posa</caption>
-      <thead>
-        <tr><th></th><th style="text-align:right">Cappotto esterno</th><th style="text-align:right">Cappotto interno</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Costo al mq</td><td class="num" style="text-align:right">60 – 120 €/mq</td><td class="num" style="text-align:right">40 – 80 €/mq</td></tr>
-        <tr><td>Ponteggio</td><td>Sempre necessario</td><td>Non serve</td></tr>
-        <tr><td>Spessore tipico</td><td>10 – 14 cm</td><td>4 – 8 cm</td></tr>
-        <tr><td>Si può abitare durante i lavori</td><td>Sì</td><td>No, stanza per stanza</td></tr>
-      </tbody>
-    </table></div>
-    <p>Costa meno perché non c'è il ponteggio e la superficie da isolare è minore. Ma isola anche
-    meno, e ti <strong>mangia dai 5 ai 9 centimetri per parete</strong>: in una camera piccola si
-    sentono. E vanno smontati e rimontati termosifoni, prese e battiscopa.</p>
-    <div class="note">
-      <p><strong>Il rischio del cappotto interno: la muffa.</strong> È la ragione per cui
-      l'esterno resta sempre la scelta migliore quando si può fare.</p>
-      <p>Con il cappotto interno il muro resta freddo — l'isolante è dalla parte tua, non dalla
-      sua. Il vapore che produci in casa cucinando, lavandoti e respirando arriva alla parete
-      fredda e <strong>condensa lì dietro</strong>, dove non lo vedi. Dopo un inverno o due si
-      presenta come muffa negli angoli e dietro i mobili.</p>
-      <p>Si evita, ma solo facendolo bene: serve una <strong>barriera al vapore</strong> continua,
-      sigillata anche agli angoli e attorno alle prese, e vanno risolti i <strong>ponti
-      termici</strong> — pilastri, travetti, attacchi dei balconi. Se un preventivo per il
-      cappotto interno non nomina mai né la barriera al vapore né i ponti termici,
-      <strong>non è un preventivo completo</strong>: chiedi che te lo riscrivano.</p>
-    </div>
-
-    <h2 id="l-insufflaggio-l-alternativa-da">L'insufflaggio: l'alternativa da 20 € al metro quadro</h2>
-    <p>Se il muro è a cassa vuota — cioè due file di mattoni con un'intercapedine in mezzo, com'è
-    tanta edilizia dagli anni Sessanta in poi — c'è una terza strada che quasi nessuno propone: si
-    riempie quel vuoto con isolante soffiato da fuori, attraverso fori piccoli che poi si
-    richiudono.</p>
-    <div class="tab-wrap"><table>
-      <caption>Costi indicativi 2026 — insufflaggio dell'intercapedine</caption>
-      <thead>
-        <tr><th>Voce</th><th style="text-align:right">Costo</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Insufflaggio, fornitura e posa</td><td class="num" style="text-align:right">15 – 30 €/mq</td></tr>
-        <tr><td>Verifica dell'intercapedine con telecamera</td><td class="num" style="text-align:right">100 – 300 €</td></tr>
-      </tbody>
-    </table></div>
-    <p>Costa <strong>un quarto</strong> del cappotto esterno, si fa in due o tre giorni, non tocca
-    la facciata e non ruba spazio dentro. Isola meno di un cappotto vero e non risolve i ponti
-    termici, ma su una casa che oggi non ha niente il salto si sente eccome.</p>
-    <p>La condizione è una sola, e va verificata prima con una piccola telecamera: <strong>che
-    l'intercapedine ci sia davvero e sia vuota</strong>. Su un muro pieno non si può fare, e chi
-    te lo propone senza aver guardato dentro ti sta vendendo aria.</p>
-
-    <h2 id="il-cappotto-in-condominio-come">Il cappotto in condominio: come si decide e chi paga</h2>
-    <p>Sulla villetta decidi tu. In condominio il cappotto è una cosa collettiva, e prima ancora
-    del preventivo c'è da capire come si arriva alla firma.</p>
-    <ul>
-      <li><strong>Si decide in assemblea</strong>, non con un accordo fra vicini. Chiedi
-      all'amministratore di metterlo all'ordine del giorno e quale maggioranza serve nel vostro
-      caso: dipende dal tipo di intervento e dalle agevolazioni in gioco.</li>
-      <li><strong>La spesa si divide per millesimi di proprietà</strong>, non a testa e non per
-      metri di facciata. Chi ha l'appartamento più grande paga di più, anche se sta al piano dove
-      si risparmia meno.</li>
-      <li><strong>Chiedi il conto per appartamento, non solo il totale.</strong> Un preventivo da
-      180.000 € spaventa tutti; lo stesso preventivo scritto come «4.200 € al vostro appartamento,
-      in tre tranche» si discute in modo diverso. È il motivo singolo per cui più cappotti passano
-      o non passano in assemblea.</li>
-      <li><strong>I balconi sono quasi sempre a parte.</strong> Frontalini e sottobalconi vanno
-      trattati e isolati, ed è una voce che nei preventivi compare in fondo o non compare affatto.
-      Verifica che ci sia, prima di confrontare due offerte.</li>
-    </ul>
-
-    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
-    <p>Quando confronti i preventivi, controlla che ci siano tutte queste voci. Se ne manca una, il prezzo basso è finto.</p>
-    <ul class="checklist">
-      <li><strong>Ponteggio</strong>: montaggio, noleggio per la durata del cantiere e smontaggio. Da solo può pesare 8–15 €/mq.</li>
-      <li><strong>Preparazione della facciata</strong>: rimozione parti ammalorate, pulizia, primer. Su intonaci vecchi è lavoro vero.</li>
-      <li><strong>Isolante + collanti + tasselli</strong>: il pannello, incollato e fissato meccanicamente.</li>
-      <li><strong>Rasatura armata con rete</strong>: lo strato che tiene tutto e previene le crepe.</li>
-      <li><strong>Finitura (rasante colorato)</strong>: l'intonaco finale, colore a scelta.</li>
-      <li><strong>Accessori</strong>: paraspigoli, gocciolatoi, profili per finestre e davanzali.</li>
-    </ul>
-
-    <div class="related">
-      🏠 Il cappotto fa parte di una ristrutturazione più ampia? Vedi <a href="/quanto-costa-ristrutturare-casa.html">quanto costa ristrutturare casa al mq</a>.<br>
-      🖼️ Per l'isolamento delle finestre vedi <a href="/quanto-costa-cambiare-gli-infissi.html">quanto costa cambiare gli infissi</a>.<br>
-      🏚️ Per la copertura vedi <a href="/quanto-costa-rifare-il-tetto.html">quanto costa rifare il tetto</a>.<br>
-      📋 Il cappotto esterno modifica i prospetti e di norma richiede la SCIA, quello interno la CILA: <a href="/permessi-ristrutturazione-cila-scia.html">guida a CILA, SCIA e permesso di costruire</a>.
-    </div>
-
-    <!-- ================= CALCOLATORE ================= -->
-    <div class="calc" id="calcolatore">
-      <h3>Calcola il costo del tuo cappotto termico</h3>
-      <p class="sub">Stima in 15 secondi. Inserisci i metri quadri di <strong>parete</strong> da isolare, non di pavimento.</p>
-
-      <div class="field">
-        <label>Superficie di parete da isolare: <span class="val" id="mqVal">150 mq</span></label>
-        <input type="range" id="mq" min="30" max="500" value="150" step="10">
-      </div>
-
-      <div class="field">
-        <label>Materiale isolante</label>
-        <div class="seg" id="materiale">
-          <button data-eur="72" class="active">EPS<small>economico</small></button>
-          <button data-eur="102">Lana di roccia<small>medio</small></button>
-          <button data-eur="130">Fibra di legno<small>naturale</small></button>
-        </div>
-      </div>
 
       <div class="field">
         <label>Extra (aggiungono al costo al mq)</label>

@@ -27,17 +27,17 @@
   .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
   .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .indice li{margin:0}
-  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:17.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
   .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
   .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
   @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
   h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -45,17 +45,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -121,13 +121,13 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:17px}
-    h1{font-size:26px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    body{font-size:18.5px}
+    h1{font-size:31px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:24px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .seg button{min-width:0}
   }
 
@@ -261,6 +261,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -273,6 +274,12 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/costi-ristrutturazione.html">Costi</a> › Quanto costa abbattere un muro</nav>
 
@@ -280,47 +287,22 @@
     <h1>Quanto costa abbattere un muro nel 2026 (e aprire una porta)</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 8 min · Prezzi verificati su fonti di settore</p>
 
-    <div class="tp-join tp-a">
-  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
-  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
-  <div class="tp-btns">
-    <a class="tp-b tp-b1" href="/registrazione-impresa.html">Ho un&rsquo;impresa &mdash; iscrivimi gratis</a>
-    <a class="tp-b tp-b2" href="/cerca-imprese.html">Sono un cliente &mdash; cerco un'impresa</a>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
   </div>
-  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
 </div>
-
-  <div class="answer">
-      <strong>Risposta rapida:</strong> abbattere un <strong>tramezzo</strong> (muro non portante) costa
-      <span class="price-big">40 – 50 €/mq chiavi in mano</span>
-      compresi carico, trasporto e discarica. La sola demolizione, senza smaltimento, sta sui <strong>6–10 €/mq</strong>. Se il muro è <strong>portante</strong> cambia tutto: la parte muraria va da <strong>500 a 4.500 €</strong>, e con tecnico, calcoli, pratica e catasto si arriva a <strong>2.000–7.000 €</strong>. Aprire una porta in un tramezzo, invece, costa circa <strong>200 €</strong> più l'architrave.
-    </div>
-        <nav class="indice">
-      <b>Vai dritto alla tua domanda</b>
-      <ul>
-        <li><a href="#la-domanda-che-vale-mille">Come capisco se il muro è portante</a></li>
-        <li><a href="#prezzi-2026-demolizione-apertura-porta">Aprire una porta: quanto costa</a></li>
-        <li><a href="#permessi-cosa-serve-davvero">Che permessi servono: CILA o SCIA</a></li>
-        <li><a href="#le-voci-che-nei-preventivi">Macerie, trave, ingegnere: le voci dimenticate</a></li>
-        <li><a href="#qui-serve-per-forza-l">Quando serve per forza l'ingegnere</a></li>
-        <li><a href="#gli-errori-da-evitare">Gli errori da evitare</a></li>
-      </ul>
-    </nav>
-
-    <div class="answer-cta">
-      <b>Quanto costa a casa tua?</b>
-      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
-      <a href="/cerca-imprese.html">Chiedi preventivi gratis nella tua città →</a>
-      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
-    </div>
-
-
-    <p class="lead">Buttare giù un muro è il lavoro che tutti immaginano più caro di quanto sia, e più semplice di quanto sia. La demolizione in sé è manodopera e mezza giornata di martello. Il conto vero lo fanno tre cose: se il muro <strong>regge qualcosa</strong>, cosa c'è <strong>dentro</strong>, e cosa resta da <strong>rifare dopo</strong>.</p>
-
-    <div class="esperienza">
-      💬 <strong>Parola di cantiere:</strong> il muro lo tiro giù in mezza giornata, quello lo pago poco. Quello che costa è tutto il resto. Dentro quel muro ci trovo un tubo dell'acqua o la corrente di mezza casa, e mi tocca chiamare idraulico ed elettricista. Poi ci sono le macerie: cinquanta secchi da portare giù per le scale e un viaggio in discarica. E alla fine resta la cicatrice — la striscia di pavimento che manca e l'intonaco da riprendere su soffitto e pareti. Quando faccio un preventivo, la voce "demolizione" è la più piccola del foglio. Chi ti dà solo quella non ti ha fatto un preventivo, ti ha fatto uno sconto finto.
-      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
-    </div>
 
     <h2 id="la-domanda-che-vale-mille">La domanda che vale mille euro: il mio muro è portante?</h2>
     <p>Tutto il prezzo dipende da qui. Un muro <strong>non portante</strong> (tramezzo) divide e basta: si demolisce con una pratica leggera e in due giorni è finita. Un muro <strong>portante</strong> tiene su il solaio: toccarlo significa progetto strutturale, calcoli, pratica e responsabilità di un tecnico.</p>

@@ -27,17 +27,17 @@
   .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
   .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .indice li{margin:0}
-  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:17.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
   .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
   .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
   @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
   h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -45,17 +45,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -141,13 +141,13 @@
     .duebox{grid-template-columns:1fr}
   }
   @media(max-width:600px){
-    body{font-size:17px}
-    h1{font-size:26px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    body{font-size:18.5px}
+    h1{font-size:31px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:24px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     /* Su telefono i 5 pulsanti del calcolatore non stanno in fila e facevano
        sbordare la pagina di 3px: qui vanno a due per riga. */
     .seg button{min-width:0;flex:1 1 calc(50% - 4px)}
@@ -273,6 +273,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -285,6 +286,12 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/costi-ristrutturazione.html">Costi</a> › Quanto costa un idraulico</nav>
 
@@ -292,95 +299,22 @@
     <h1>Quanto costa un idraulico nel 2026</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 7 min · Prezzi ricostruiti dal costo del lavoro, fonti in fondo alla pagina</p>
 
-    <div class="tp-join tp-a">
-  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
-  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
-  <div class="tp-btns">
-    <a class="tp-b tp-b1" href="/registrazione-artigiano.html">Sono un idraulico &mdash; iscrivimi gratis</a>
-    <a class="tp-b tp-b2" href="/cerca-artigiani.html">Sono un cliente &mdash; cerco un idraulico</a>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un idraulico?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un idraulico nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-artigiani.html">Trova un idraulico</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
   </div>
-  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-artigiano.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
 </div>
-
-  <div class="answer">
-      <strong>Risposta rapida:</strong> un intervento normale da un idraulico costa
-      <span class="price-big">da 70 a 150 €</span>
-      Ma <strong>l'idraulico ha due prezzi, non uno</strong>. Lo stesso lavoro chiamato con calma costa <strong>70–95 €</strong>; chiamato d'urgenza, con l'acqua per terra, costa <strong>100–140 €</strong>. La differenza è la <strong>maggiorazione d'urgenza, circa +45%</strong>: è legittima, ma quasi nessuno te la dice al telefono. Qui sotto trovi tutti e due i prezzi, e il modo per pagarne il 40% in meno.
-    </div>
-        <nav class="indice">
-      <b>Vai dritto alla tua domanda</b>
-      <ul>
-        <li><a href="#i-due-prezzi-dell-idraulico">Quanto costa all'ora e quanto l'uscita</a></li>
-        <li><a href="#domande-frequenti-sul-costo-dell">Urgenza, notte e festivi: quanto costa</a></li>
-        <li><a href="#perche-mezz-ora-di-lavoro">Perché mezz'ora costa 100 €</a></li>
-        <li><a href="#dove-ti-fregano-davvero">Dove ti fregano davvero</a></li>
-        <li><a href="#le-5-domande-da-fare">Le 5 domande da fare al telefono</a></li>
-        <li><a href="#piu-il-lavoro-e-corto">Più il lavoro è corto, più l'ora costa</a></li>
-      </ul>
-    </nav>
-
-    <div class="answer-cta">
-      <b>Quanto costa a casa tua?</b>
-      <p>Questi sono prezzi medi nazionali. Quello vero dipende dal lavoro e dalla tua zona: se il lavoro puoi programmarlo, il modo più veloce per saperlo è farti fare due o tre preventivi dagli idraulici della tua città.</p>
-      <a href="/cerca-artigiani.html?mestiere=Idraulica">Chiedi preventivi gratis nella tua città →</a>
-      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
-    </div>
-
-    <p class="lead">Se sei qui probabilmente ti è successa una di queste due cose: o hai appena pagato mezz'ora di lavoro 100 € e ti stai chiedendo se ti hanno preso in giro, oppure devi chiamarlo e vuoi sapere a cosa vai incontro. In tutti e due i casi la risposta parte da un fatto che nessuno spiega: <strong>l'idraulico non ti vende ore, ti vende interventi</strong> — e su un lavoro corto quello cambia tutto.</p>
-
-    <h2 id="perche-mezz-ora-di-lavoro">Perché mezz'ora di lavoro ti costa 100 €</h2>
-    <p>È la domanda vera, quindi partiamo da lì. Immagina di chiamarlo per uno scarico otturato. Lui viene, in mezz'ora te lo libera, e ti lascia un conto da 100 €. Tu hai visto trenta minuti di lavoro. Ecco cosa hai pagato davvero:</p>
-    <div class="tab-wrap"><table>
-      <caption>Uno scarico otturato, sturato in mezz'ora: com'è fatto il conto</caption>
-      <thead>
-        <tr><th>Voce</th><th style="text-align:right">Quanto pesa</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Viaggio andata e ritorno (40 minuti in media, più il furgone)</td><td class="num" style="text-align:right">~ 40 €</td></tr>
-        <tr><td>Il lavoro vero: mezz'ora</td><td class="num" style="text-align:right">~ 30 €</td></tr>
-        <tr class="total-row"><td>Conto se lo hai chiamato con calma</td><td class="num" style="text-align:right">~ 70 €</td></tr>
-        <tr><td>Maggiorazione d'urgenza, se lo hai fatto venire subito (+45%)</td><td class="num" style="text-align:right">~ 30 €</td></tr>
-        <tr class="total-row"><td>Conto in urgenza</td><td class="num" style="text-align:right">~ 100 €</td></tr>
-      </tbody>
-    </table></div>
-    <p>Tu hai visto <strong>mezz'ora di lavoro</strong>. Lui ti ha venduto <strong>un'ora e mezza della sua giornata</strong>, più il fatto di aver mollato quello che stava facendo per venire da te. Sono vere tutte e due le cose: semplicemente, nessuno te l'ha scritto.</p>
-
-    <h2 id="piu-il-lavoro-e-corto">Più il lavoro è corto, più l'ora ti costa</h2>
-    <p>Questa è la regola che spiega perché sui lavoretti gli idraulici sembrano cari e sulle giornate intere no. <strong>Il viaggio costa uguale</strong> che ti tengano trenta minuti o otto ore: su un lavoro breve quel costo fisso si spalma su niente.</p>
-    <div class="tab-wrap"><table>
-      <caption>Stesso idraulico, stesso prezzo onesto: cambia solo la durata del lavoro</caption>
-      <thead>
-        <tr><th>Durata del lavoro</th><th style="text-align:right">Conto</th><th style="text-align:right">Costo per ora effettivo</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Mezz'ora (cambiare una guarnizione, sturare un sifone)</td><td class="num" style="text-align:right">~ 70 €</td><td class="num" style="text-align:right">140 €/ora</td></tr>
-        <tr><td>Un'ora (cambiare un rubinetto)</td><td class="num" style="text-align:right">~ 95 €</td><td class="num" style="text-align:right">95 €/ora</td></tr>
-        <tr><td>Due ore (sostituire un sanitario)</td><td class="num" style="text-align:right">~ 150 €</td><td class="num" style="text-align:right">75 €/ora</td></tr>
-        <tr><td>Mezza giornata</td><td class="num" style="text-align:right">~ 260 €</td><td class="num" style="text-align:right">65 €/ora</td></tr>
-        <tr class="total-row"><td>Giornata intera</td><td class="num" style="text-align:right">~ 480 €</td><td class="num" style="text-align:right">60 €/ora</td></tr>
-      </tbody>
-    </table></div>
-    <p>Come vedi il prezzo dell'ora non cambia mai davvero: resta intorno ai <strong>55–60 €</strong>. Quello che cambia è quanto pesa il viaggio. <strong>Ecco perché il tariffario orario, da solo, non ti serve a niente</strong> — e perché gli idraulici, quasi tutti, il preventivo te lo fanno a intervento e non a ore.</p>
-
-    <div class="esperienza">
-      💡 <strong>Il trucco che ti fa risparmiare il 40%.</strong> Fai la lista di tutto quello che perde, gocciola o scarica male in casa, e fallo fare <strong>in una chiamata sola</strong>. Tre lavoretti da mezz'ora chiamati in tre momenti diversi costano circa <strong>210 €</strong>. Gli stessi tre, fatti in una visita, costano circa <strong>120 €</strong>. Paghi il viaggio una volta invece di tre.
-    </div>
-
-    <h2 id="i-due-prezzi-dell-idraulico">I due prezzi dell'idraulico</h2>
-    <p>Questo è il motivo per cui i siti di prezzi si contraddicono tutti: chi scrive 20 €/ora, chi 70. Non sbagliano — <strong>stanno mescolando due mercati diversi</strong> e facendone la media. Tenuti separati, i conti tornano.</p>
-
-    <div class="duebox">
-      <div class="box rosso">
-        <h3>🔴 Urgenza</h3>
-        <p>Perdita, allagamento, wc otturato. Non puoi confrontare e non puoi trattare: paghi quello che ti dice.</p>
-        <span class="cifra">100 – 140 €</span>
-      </div>
-      <div class="box verde">
-        <h3>🟢 Programmato</h3>
-        <p>Il rubinetto che gocciola da tre mesi, i sanitari da cambiare. Puoi farti fare due o tre preventivi e scegliere.</p>
-        <span class="cifra">70 – 95 €</span>
-      </div>
-    </div>
 
     <div class="tab-wrap"><table>
       <caption>Gli stessi lavori, ai due prezzi. Manodopera e uscita comprese, materiale escluso</caption>

@@ -27,17 +27,17 @@
   .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
   .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .indice li{margin:0}
-  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:17.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
   .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
   .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
   @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
   h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -45,17 +45,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -121,13 +121,13 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:17px}
-    h1{font-size:26px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    body{font-size:18.5px}
+    h1{font-size:31px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:24px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .seg button{min-width:0}
   }
 
@@ -261,6 +261,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -273,6 +274,12 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/costi-ristrutturazione.html">Costi</a> › Quanto costa il cartongesso</nav>
 
@@ -280,46 +287,22 @@
     <h1>Quanto costa una parete in cartongesso nel 2026 (e il controsoffitto)</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 7 min · Prezzi verificati su fonti di settore</p>
 
-    <div class="tp-join tp-a">
-  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
-  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
-  <div class="tp-btns">
-    <a class="tp-b tp-b1" href="/registrazione-artigiano.html">Sono un cartongessista &mdash; iscrivimi gratis</a>
-    <a class="tp-b tp-b2" href="/cerca-artigiani.html">Sono un cliente &mdash; cerco un cartongessista</a>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un cartongessista?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un cartongessista nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-artigiani.html">Trova un cartongessista</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
   </div>
-  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-artigiano.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
 </div>
-
-  <div class="answer">
-      <strong>Risposta rapida:</strong> una parete in cartongesso costa, posata e stuccata,
-      <span class="price-big">da 60 a 85 €/mq</span>
-      Con <strong>isolamento acustico e termico</strong> si sale a <strong>95–120 €/mq</strong>. Un <strong>controsoffitto</strong> parte da <strong>50 €/mq</strong> (60 in bagno con lastre idrofughe, 85 se isolato). La tinteggiatura è sempre a parte. Sotto trovi la tabella completa e un calcolatore.
-    </div>
-        <nav class="indice">
-      <b>Vai dritto alla tua domanda</b>
-      <ul>
-        <li><a href="#prezzi-del-cartongesso-al-mq">Quanto costa al mq: parete e controsoffitto</a></li>
-        <li><a href="#domande-frequenti-sul-cartongesso">Ci posso appendere la TV? Quanto regge?</a></li>
-        <li><a href="#le-voci-che-nei-preventivi">Stuccatura e pittura: le voci dimenticate</a></li>
-        <li><a href="#permessi-e-detrazioni">Serve un permesso</a></li>
-        <li><a href="#gli-errori-da-evitare">Gli errori da evitare</a></li>
-      </ul>
-    </nav>
-
-    <div class="answer-cta">
-      <b>Quanto costa a casa tua?</b>
-      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
-      <a href="/cerca-artigiani.html">Chiedi preventivi gratis nella tua città →</a>
-      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
-    </div>
-
-
-    <p class="lead">Il cartongesso è il modo più rapido ed economico per dividere, ribassare e nascondere: una parete si monta in una giornata, senza demolizioni e con poca polvere. Ma non è tutto uguale: cambia la <strong>lastra</strong> (semplice, idrofuga, ignifuga), cambia l'<strong>isolante</strong> dentro, e cambia — soprattutto — la mano di chi <strong>stucca i giunti</strong>.</p>
-
-    <div class="esperienza">
-      💬 <strong>Parola di cantiere:</strong> il cartongesso si giudica <strong>sei mesi dopo</strong>, non il giorno della consegna. Le crepe sui giunti escono col tempo: chi stucca con il nastro di rinforzo e tre passate non le fa; chi corre e dà una passata sola sì. Quando confronti i preventivi, chiedi come viene trattato il giunto — è lì la differenza tra i 60 e gli 85 € al metro.
-      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
-    </div>
 
     <h2 id="prezzi-del-cartongesso-al-mq">Prezzi del cartongesso al mq</h2>
     <div class="tab-wrap"><table>

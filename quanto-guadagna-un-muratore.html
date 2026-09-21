@@ -20,11 +20,11 @@
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -32,17 +32,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -105,13 +105,13 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:17px}
-    h1{font-size:26px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    body{font-size:18.5px}
+    h1{font-size:31px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:24px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .seg button{min-width:0}
   }
 
@@ -177,6 +177,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -189,11 +190,35 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/blog.html">Guide</a> &rsaquo; Quanto guadagna un muratore</nav>
 
   <h1>Quanto guadagna un muratore nel 2026</h1>
   <p class="meta">Scritto da un muratore con 25 anni di cantiere &middot; Aggiornato agosto 2026 &middot; Lettura 6 min</p>
+
+<!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
+  </div>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
+</div>
+
 
   <div class="tp-join tp-b-band">
   <p class="tp-t">Lavori in proprio?</p>

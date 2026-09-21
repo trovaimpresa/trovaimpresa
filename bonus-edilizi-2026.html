@@ -23,11 +23,11 @@
     --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -35,17 +35,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -110,13 +110,13 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:17px}
-    h1{font-size:26px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    body{font-size:18.5px}
+    h1{font-size:31px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:24px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .seg button{min-width:0}
   }
 
@@ -192,6 +192,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -204,6 +205,12 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/blog.html">Guide e Costi</a> › Bonus casa 2026</nav>
 
@@ -211,123 +218,22 @@
     <h1>Bonus casa 2026: tutte le detrazioni in una pagina</h1>
     <p class="meta">Aggiornato agosto 2026 · Lettura 9 min · Fonti: Agenzia delle Entrate, ENEA</p>
 
-    <div class="tp-join tp-a">
-  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
-  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
-  <div class="tp-btns">
-    <a class="tp-b tp-b1" href="/registrazione-impresa.html">Ho un&rsquo;impresa &mdash; iscrivimi gratis</a>
-    <a class="tp-b tp-b2" href="/cerca-imprese.html">Sono un cliente &mdash; cerco un'impresa</a>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
   </div>
-  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
 </div>
-
-  <div class="answer">
-      <strong>In breve:</strong> nel 2026 quasi tutti i bonus edilizi sono stati portati alla stessa aliquota
-      <span class="price-big">50% sull'abitazione principale, 36% sugli altri immobili</span>
-      Vale per <strong>ristrutturazione, ecobonus e sismabonus</strong>, su una spesa massima di <strong>96.000 €</strong> per unità immobiliare, in <strong>10 rate annuali</strong>. Fuori dallo schema restano il <strong>bonus mobili</strong> (50% su 5.000 €) e il <strong>conto termico</strong>, contributo del GSE e non detrazione. Bonus verde e barriere architettoniche al 75% non ci sono più.
-    </div>
-    <div class="answer-cta">
-      <b>Quanto costa a casa tua?</b>
-      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
-      <a href="/cerca-imprese.html">Chiedi preventivi gratis nella tua città →</a>
-      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
-    </div>
-
-
-    <p class="lead">Fino a due anni fa ogni bonus aveva la sua percentuale: 65, 70, 75, 85, 110. Oggi il quadro è più semplice, ma anche meno generoso. La differenza non la fa più il tipo di lavoro: la fa <strong>dove abiti</strong>. Qui sotto trovi tutti i bonus attivi nel 2026 in una tabella sola, con una scheda breve per ciascuno.</p>
-
-    <h2>Tutti i bonus casa 2026 in una tabella</h2>
-    <div class="tab-wrap"><table>
-      <caption>Quadro dei bonus edilizi per le spese sostenute nel 2026 — detrazioni IRPEF salvo dove indicato</caption>
-      <thead>
-        <tr><th>Bonus</th><th>Detrazione</th><th>Tetto di spesa</th><th>In quanti anni</th><th>Cosa ci rientra</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><strong>Ristrutturazione</strong></td><td class="num">50% / 36%</td><td class="num">96.000 €</td><td class="num">10 anni</td><td>Manutenzione straordinaria, bagni, impianti, tramezzi, tetti, fotovoltaico</td></tr>
-        <tr><td><strong>Ecobonus</strong></td><td class="num">50% / 36%</td><td>Massimali per intervento (vedi sotto)</td><td class="num">10 anni</td><td>Cappotto, infissi, pompe di calore, solare termico, schermature</td></tr>
-        <tr><td><strong>Mobili ed elettrodomestici</strong></td><td class="num">50%</td><td class="num">5.000 €</td><td class="num">10 anni</td><td>Arredi e grandi elettrodomestici, solo se collegati a una ristrutturazione</td></tr>
-        <tr><td><strong>Sismabonus</strong></td><td class="num">50% / 36%</td><td class="num">96.000 €</td><td class="num">10 anni</td><td>Interventi antisismici in zona sismica 1, 2 e 3</td></tr>
-        <tr><td><strong>Barriere architettoniche</strong></td><td class="num">50% / 36%</td><td class="num">96.000 €</td><td class="num">10 anni</td><td>Il 75% è finito: nel 2026 rampe, ascensori e bagni accessibili passano dal bonus ristrutturazione</td></tr>
-        <tr><td><strong>Bonus verde</strong></td><td>Non più attivo</td><td>—</td><td class="num">10 anni</td><td>Solo rate residue di spese fino al 2024</td></tr>
-        <tr><td><strong>Conto termico 3.0</strong></td><td>Contributo GSE, non detrazione</td><td>Variabile per intervento</td><td>1–5 anni</td><td>Pompe di calore, biomassa, solare termico</td></tr>
-        <tr><td><strong>Superbonus</strong></td><td class="num">110% solo aree sisma</td><td>Limiti specifici</td><td class="num">10 anni</td><td>Immobili danneggiati dai terremoti del Centro Italia</td></tr>
-      </tbody>
-    </table></div>
-
-    <div class="note">
-      <strong>Come leggere "50% / 36%":</strong> il 50% spetta a chi è proprietario (o titolare di un diritto reale) <strong>e</strong> ci abita davvero. Negli altri casi — seconde case, immobili affittati, inquilini, familiari conviventi — l'aliquota è il 36%.
-    </div>
-
-    <h2>Bonus ristrutturazione</h2>
-    <p><strong>A chi serve:</strong> a chiunque metta mano a casa in modo serio, dal rifacimento del bagno al cambio di impianti.<br>
-    <strong>Cosa copre:</strong> manutenzione straordinaria, restauro, risanamento conservativo e ristrutturazione edilizia. Sulle parti comuni del condominio anche la manutenzione ordinaria. Ci sta dentro pure il fotovoltaico con l'accumulo.<br>
-    <strong>Come si ottiene:</strong> pratica edilizia dove serve, fatture intestate a chi detrae, bonifico parlante, detrazione in dichiarazione.</p>
-    <p>È il bonus più usato e il più ricco di regole: chi lo detrae, cosa succede se vendi casa, cosa cambia dal 2027. <a href="/bonus-ristrutturazione-2026.html"><strong>Vai alla guida completa al bonus ristrutturazione 2026</strong></a>, con calcolatore di quanto ti torna.</p>
-
-    <h2>Ecobonus</h2>
-    <p><strong>A chi serve:</strong> a chi fa lavori che riducono i consumi energetici della casa.<br>
-    <strong>Cosa copre:</strong> cappotto e isolamento di pareti e tetto, infissi, pompe di calore, sistemi ibridi, solare termico, schermature solari (tende da sole, persiane), building automation.<br>
-    <strong>Come si ottiene:</strong> come il bonus ristrutturazione, più un adempimento: la <strong>comunicazione all'ENEA</strong> entro 90 giorni dalla fine dei lavori. Per alcuni interventi serve anche l'asseverazione di un tecnico.</p>
-    <p>L'ecobonus non ha un tetto unico: ogni intervento ha il suo <strong>massimale di detrazione</strong>, cioè il tetto dell'importo che porti in dichiarazione.</p>
-    <div class="tab-wrap"><table>
-      <caption>Ecobonus 2026 — massimali di detrazione per tipo di intervento</caption>
-      <thead>
-        <tr><th>Intervento</th><th style="text-align:right">Detrazione massima</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Riqualificazione energetica globale dell'edificio</td><td class="num" style="text-align:right">100.000 €</td></tr>
-        <tr><td>Isolamento di pareti, tetti e pavimenti (cappotto)</td><td class="num" style="text-align:right">60.000 €</td></tr>
-        <tr><td>Infissi e serramenti</td><td class="num" style="text-align:right">60.000 €</td></tr>
-        <tr><td>Schermature solari e tende tecniche</td><td class="num" style="text-align:right">60.000 €</td></tr>
-        <tr><td>Pannelli solari termici per acqua calda</td><td class="num" style="text-align:right">60.000 €</td></tr>
-        <tr><td>Pompe di calore, sistemi ibridi, generatori a biomassa</td><td class="num" style="text-align:right">30.000 €</td></tr>
-      </tbody>
-    </table></div>
-    <p>Sono tetti alti: con il 50% sugli infissi il massimale di 60.000 € corrisponde a una spesa di 120.000 €. Nella pratica non ti tocca quasi mai.</p>
-    <div class="note">
-      <strong>Le caldaie a gas non ci sono più.</strong> Le spese per le caldaie alimentate solo da combustibili fossili sono escluse. Oggi la strada agevolata è la pompa di calore o il sistema ibrido: vedi <a href="/quanto-costa-sostituire-la-caldaia.html">quanto costa sostituire la caldaia</a>.
-    </div>
-
-    <h2>Bonus mobili ed elettrodomestici</h2>
-    <p><strong>A chi serve:</strong> a chi ha un cantiere aperto e deve riarredare.<br>
-    <strong>Cosa copre:</strong> mobili nuovi (cucine, armadi, letti, divani, materassi, lampade) e grandi elettrodomestici nuovi, con classe energetica minima: A per i forni, E per lavatrici, lavasciuga e lavastoviglie, F per frigoriferi e congelatori.<br>
-    <strong>Come si ottiene:</strong> ci deve essere una ristrutturazione in corso, iniziata <strong>non prima del 1° gennaio dell'anno precedente</strong> l'acquisto. Qui il bonifico parlante non è obbligatorio: valgono anche carta di credito e bancomat. Contanti e assegni no.</p>
-    <p>La detrazione è il <strong>50% su un massimo di 5.000 €</strong> di spesa per unità immobiliare: al massimo 2.500 € recuperati in 10 anni. Il tetto è dell'immobile, non del singolo mobile.</p>
-
-    <h2>Sismabonus</h2>
-    <p><strong>A chi serve:</strong> a chi possiede un immobile in <strong>zona sismica 1, 2 o 3</strong>. La zona 4 è esclusa.<br>
-    <strong>Cosa copre:</strong> interventi di messa in sicurezza statica e miglioramento sismico delle strutture.<br>
-    <strong>Come si ottiene:</strong> serve un tecnico strutturista che classifichi il rischio prima e dopo l'intervento, secondo il DM 58/2017. La comunicazione ENEA qui non serve.</p>
-    <p>Le vecchie aliquote legate al salto di classe di rischio (70%, 75%, 80%, 85%) non si applicano più: nel 2026 vale lo schema comune, <strong>50% o 36%</strong> su 96.000 €, in 10 anni.</p>
-
-    <h2>Bonus barriere architettoniche</h2>
-    <p><strong>A chi serve:</strong> a chi deve rendere accessibile una casa o un condominio.<br>
-    <strong>Cosa copre:</strong> rampe, ascensori e servoscala, allargamento di porte e passaggi, bagni accessibili, percorsi esterni, automazioni di porte e serramenti.<br>
-    <strong>Come si ottiene:</strong> nel 2026 non c'è più un bonus dedicato. La detrazione del <strong>75%</strong> si è chiusa il 31 dicembre 2025 e non è stata prorogata.</p>
-    <p>Questi lavori però non restano scoperti: rientrano nel <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione</a> al 50% o al 36%, entro 96.000 €. Restano validi i requisiti tecnici del DM 236/1989: fatti seguire da un tecnico.</p>
-
-    <h2>Bonus verde</h2>
-    <p><strong>A chi serviva:</strong> a chi rifaceva giardini, terrazzi e impianti di irrigazione.<br>
-    <strong>Cosa copre:</strong> nel 2026 niente. Si è chiuso il <strong>31 dicembre 2024</strong> e non è stato prorogato.<br>
-    <strong>Come si ottiene:</strong> chi ha speso entro il 2024 porta in dichiarazione le rate residue, fino a esaurimento delle 10.</p>
-    <p>Le opere edilizie vere e proprie sull'esterno (recinzioni, muretti, pavimentazioni, rifacimento di terrazzi) possono comunque rientrare nel bonus ristrutturazione. La semplice sistemazione a verde, invece, oggi non è agevolata.</p>
-
-    <h2>Conto termico 3.0</h2>
-    <p><strong>A chi serve:</strong> a chi installa impianti a fonti rinnovabili e vuole i soldi subito invece che in dieci anni.<br>
-    <strong>Cosa copre:</strong> per i privati sul residenziale conta soprattutto l'<strong>impianto</strong> — pompa di calore, biomassa, solare termico — più che l'involucro.<br>
-    <strong>Come si ottiene:</strong> non passa dalla dichiarazione. È un contributo a fondo perduto del <strong>GSE</strong>, da richiedere sul portale entro 90 giorni dalla fine dei lavori.</p>
-    <p>La versione 3.0 è in vigore da fine dicembre 2025 e operativa sul portale GSE dal febbraio 2026. Il vantaggio è la velocità: se l'importo è contenuto il contributo arriva in <strong>un'unica soluzione</strong>, altrimenti in poche rate annuali. Le percentuali cambiano molto per intervento e per tipo di richiedente, e per i privati sul residenziale l'accesso è limitato: <strong>da confermare caso per caso sul sito del GSE</strong>. Un punto fermo: sullo stesso intervento non puoi prendere il conto termico <em>e</em> la detrazione. Si sceglie.</p>
-
-    <h2>Superbonus: cosa resta nel 2026</h2>
-    <p><strong>A chi serve:</strong> ormai a pochissimi.<br>
-    <strong>Cosa copre:</strong> nel 2026 il <strong>110%</strong> sopravvive solo per gli immobili danneggiati dagli eventi sismici del Centro Italia successivi al 2009, nei comuni con stato di emergenza.<br>
-    <strong>Come si ottiene:</strong> con requisiti stringenti, che di norma richiedevano l'avvio delle procedure già negli anni scorsi.</p>
-    <p>Per tutti gli altri il superbonus è finito il 31 dicembre 2025. Chi ha fatto lavori negli anni scorsi continua però a portare in dichiarazione le <strong>rate residue</strong>. Sconto in fattura e cessione del credito restano bloccati, salvo casi residuali.</p>
-
-    <div class="esperienza">
-      💬 <strong>Parola di cantiere:</strong> in venticinque anni ho visto pochissime detrazioni perse perché il lavoro non ne aveva diritto. Le ho viste perdere quasi tutte per <strong>errori banali</strong>: il bonifico fatto normale invece che parlante perché "tanto è uguale", la CILA che nessuno ha presentato perché il cliente pensava la facesse l'impresa e l'impresa pensava la facesse il geometra, la comunicazione ENEA dimenticata a lavori finiti. Il cantiere era perfetto, la carta no. Prima di firmare metti nero su bianco chi fa cosa: chi presenta la pratica, chi manda l'ENEA, chi ti dà le fatture. Tre righe che valgono migliaia di euro.
-      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
-    </div>
 
     <h2>Come non perdere la detrazione</h2>
 

@@ -27,17 +27,17 @@
   .indice b{display:block;font-size:16px;margin-bottom:12px;color:var(--primary-dark)}
   .indice ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .indice li{margin:0}
-  .indice a{display:block;color:var(--text);text-decoration:none;font-size:16.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
+  .indice a{display:block;color:var(--text);text-decoration:none;font-size:17.5px;line-height:1.3;padding:8px 10px 8px 24px;border-radius:9px;background:var(--primary-soft);position:relative}
   .indice a:before{content:"\203A";position:absolute;left:11px;top:7px;color:var(--primary);font-weight:bold}
   .indice a:hover{background:#dbe9ff;color:var(--primary-dark)}
   @media(max-width:640px){.indice ul{grid-template-columns:1fr}.indice{padding:16px}}
   h2{scroll-margin-top:80px}
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:56px}
+  .navbar .logo img{height:64px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -45,17 +45,17 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
-  h3{font-size:20px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
-  .lead{font-size:21px;line-height:1.55}
+  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:23px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
+  .lead{font-size:22.5px;line-height:1.55}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
@@ -113,13 +113,13 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:17px}
-    h1{font-size:26px}
-    h2{font-size:22px}
-    .lead{font-size:19px}
+    body{font-size:18.5px}
+    h1{font-size:31px}
+    h2{font-size:25px}
+    .lead{font-size:20.5px}
     .price-big{font-size:24px}
     th,td{padding:10px}
-    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
     .seg button{min-width:0}
   }
   .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
@@ -259,6 +259,7 @@
 .answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
 .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -271,6 +272,12 @@
   </div>
 </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/costi-ristrutturazione.html">Costi</a> › Quanto costa rifare il tetto</nav>
 
@@ -278,95 +285,22 @@
     <h1>Quanto costa rifare il tetto nel 2026</h1>
     <p class="meta">Aggiornato luglio 2026 · Lettura 7 min</p>
 
-    <div class="tp-join tp-a">
-  <p class="tp-t">Questa pagina la leggono i clienti che cercano un preventivo.</p>
-  <p class="tp-s">Se questo lavoro lo fai tu, mettiti dove ti stanno gi&agrave; cercando. Se invece i lavori li devi far fare, trova chi li fa nella tua citt&agrave;.</p>
-  <div class="tp-btns">
-    <a class="tp-b tp-b1" href="/registrazione-impresa.html">Ho un&rsquo;impresa &mdash; iscrivimi gratis</a>
-    <a class="tp-b tp-b2" href="/cerca-imprese.html">Sono un cliente &mdash; cerco un'impresa</a>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
   </div>
-  <small class="tp-note">Iscrizione gratis, un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
 </div>
-
-  <div class="answer">
-      <strong>Risposta rapida:</strong> rifare il tetto costa
-      <span class="price-big">da 80 a 350 €/mq</span>
-      secondo l'intervento: rimettere solo il <strong>manto con nuove tegole</strong> sta sugli 80–110 €/mq; un tetto <strong>isolato e ventilato</strong> arriva a 180–270 €/mq; con <strong>nuova struttura in legno lamellare</strong> si va fino a 350 €/mq. Per una copertura di 120 mq isolata parli di circa <strong>25.000–32.000 €</strong>. Sotto trovi i prezzi per tipo di lavoro e un calcolatore.
-    </div>
-        <nav class="indice">
-      <b>Vai dritto alla tua domanda</b>
-      <ul>
-        <li><a href="#prezzi-del-tetto-per-tipo">Quanto costa al mq, intervento per intervento</a></li>
-        <li><a href="#domande-frequenti-sul-rifacimento-del">Tetto di 100 mq, amianto, permessi</a></li>
-        <li><a href="#cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</a></li>
-        <li><a href="#detrazioni-per-il-rifacimento-del">Detrazioni per il tetto</a></li>
-        <li><a href="#qui-serve-per-forza-l">Quando serve l'ingegnere</a></li>
-        <li><a href="#come-non-farsi-fregare-sul">Come non farsi fregare</a></li>
-      </ul>
-    </nav>
-
-    <div class="answer-cta">
-      <b>Quanto costa a casa tua?</b>
-      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
-      <a href="/cerca-imprese.html">Chiedi preventivi gratis nella tua città →</a>
-      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
-    </div>
-
-
-    <p class="lead">Il tetto è il lavoro dove sbagliare costa caro due volte: se lo fai a metà, tra pochi anni ci torni. Il prezzo lo decidono <strong>quanto scendi in profondità</strong> (solo tegole, oppure isolamento, oppure struttura nuova) e <strong>la difficoltà del cantiere</strong> (altezza, pendenza, accesso). E c'è una variabile che può cambiare tutto: se sotto c'è l'<strong>amianto</strong>.</p>
-
-    <h2 id="prezzi-del-tetto-per-tipo">Prezzi del tetto per tipo di intervento</h2>
-    <div class="tab-wrap"><table>
-      <caption>Costi indicativi 2026 — €/mq di falda, ponteggio escluso salvo dove indicato</caption>
-      <thead>
-        <tr><th>Intervento</th><th>Cosa comprende</th><th style="text-align:right">Costo al mq</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Solo manto</td><td>Rimozione e riposa tegole, piccole riparazioni</td><td class="num" style="text-align:right">80 – 110 €/mq</td></tr>
-        <tr><td>Isolato e ventilato</td><td>Nuovo pacchetto: isolamento, guaina, tegole</td><td class="num" style="text-align:right">180 – 270 €/mq</td></tr>
-        <tr><td>Nuova struttura</td><td>Orditura nuova in legno lamellare + pacchetto completo</td><td class="num" style="text-align:right">250 – 350 €/mq</td></tr>
-        <tr><td>Tetto piano — impermeabilizzazione</td><td>Nuova guaina/membrana su solaio piano</td><td class="num" style="text-align:right">25 – 70 €/mq</td></tr>
-      </tbody>
-    </table></div>
-
-    <div class="danger">
-      <strong>Se c'è l'amianto (eternit), fermati.</strong> La vecchia copertura in cemento-amianto <strong>non si può rompere né smaltire da soli</strong>: serve una ditta specializzata e iscritta, con notifica alla ASL e smaltimento certificato. Costa in genere <strong>15–40 €/mq in più</strong>, ma è obbligatorio per legge e per la tua salute. Non farlo fare a chi "te lo butta via lui".
-    </div>
-
-    <h2 id="cosa-deve-comprendere-il-prezzo">Cosa deve comprendere il prezzo</h2>
-    <ul class="checklist">
-      <li><strong>Ponteggio e sicurezza</strong>: obbligatori sopra i 2 metri. Da soli pesano 10–20 €/mq.</li>
-      <li><strong>Rimozione della vecchia copertura</strong> e smaltimento in discarica.</li>
-      <li><strong>Isolamento e barriera al vapore</strong>, se fai il tetto isolato: è il cuore del risparmio in bolletta.</li>
-      <li><strong>Guaina/membrana impermeabile</strong> sotto le tegole.</li>
-      <li><strong>Lattoneria</strong>: grondaie, pluviali, scossaline, converse in rame o alluminio.</li>
-      <li><strong>Manto di copertura</strong>: tegole, coppi o lamiera, a seconda della zona.</li>
-    </ul>
-
-    <div class="related">
-      🧱 Stai lavorando sull'isolamento della casa? Vedi <a href="/quanto-costa-cappotto-termico.html">quanto costa il cappotto termico</a> e il <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.<br>
-      🎨 Già che c'è il ponteggio, vedi <a href="/quanto-costa-rifare-la-facciata.html">quanto costa rifare la facciata</a>.<br>
-      📋 Se tocchi struttura o pendenza della copertura serve la SCIA: <a href="/permessi-ristrutturazione-cila-scia.html">CILA, SCIA o permesso di costruire</a>.
-    </div>
-
-    <!-- ================= CALCOLATORE ================= -->
-    <div class="calc" id="calcolatore">
-      <h3>Calcola il costo del tuo tetto</h3>
-      <p class="sub">Stima in 15 secondi. Inserisci i metri quadri di <strong>falda</strong> (più ampia della pianta della casa).</p>
-
-      <div class="field">
-        <label>Superficie del tetto: <span class="val" id="mqVal">120 mq</span></label>
-        <input type="range" id="mq" min="30" max="400" value="120" step="10">
-      </div>
-
-      <div class="field">
-        <label>Tipo di intervento</label>
-        <div class="seg" id="tipo">
-          <button data-eur="100">Solo manto<small>tegole nuove</small></button>
-          <button data-eur="200" class="active">Isolato e ventilato<small>pacchetto completo</small></button>
-          <button data-eur="300">Nuova struttura<small>legno lamellare</small></button>
-        </div>
-      </div>
 
       <div class="field">
         <label>Extra (aggiungono al costo al mq)</label>

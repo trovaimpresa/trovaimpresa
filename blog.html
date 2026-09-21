@@ -53,7 +53,7 @@
       z-index: 100;
     }
     .navbar .logo { display: flex; align-items: center; }
-    .navbar .logo img { height: 60px; }
+    .navbar .logo img { height: 68px; }
     .navbar .menu { display: flex; gap: 22px; align-items: center; }
     .navbar .menu a {
       text-decoration: none;
@@ -69,19 +69,21 @@
       border-radius: 8px;
     }
     .navbar .menu a.menu-btn:hover { background: #e67a00; color: #fff; }
+    .navbar .menu a.ti-iscriviti { color: #fff; }
+    .navbar .menu a.ti-accedi { color: #0066ff; }
     .blog-header {
       background: linear-gradient(135deg, #0066ff, #0047b3);
       color: #fff;
       padding: 56px 24px;
       text-align: center;
     }
-    .blog-header h1 { font-size: 34px; margin-bottom: 12px; }
-    .blog-header p { font-size: 17px; max-width: 640px; margin: 0 auto; opacity: 0.95; }
+    .blog-header h1 { font-size: 42px; margin-bottom: 12px; }
+    .blog-header p { font-size: 19px; max-width: 640px; margin: 0 auto; opacity: 0.95; }
     .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 26px;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 30px;
     }
     .card {
       background: #fff;
@@ -105,12 +107,12 @@
       object-fit: cover;
       background: #e8f0ff;
     }
-    .card .body { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+    .card .body { padding: 26px 24px 24px; display: flex; flex-direction: column; flex: 1; }
     .card .cat {
       display: inline-block;
       background: #fff3e6;
       color: #e65100;
-      font-size: 12px;
+      font-size: 13.5px;
       font-weight: bold;
       padding: 3px 10px;
       border-radius: 20px;
@@ -119,9 +121,9 @@
       letter-spacing: 0.5px;
       align-self: flex-start;
     }
-    .card h3 { font-size: 19px; margin-bottom: 8px; color: #0047b3; }
-    .card .excerpt { font-size: 14px; color: #555; flex: 1; }
-    .card .date { font-size: 12px; color: #999; margin-top: 14px; }
+    .card h3 { font-size: 23px; line-height:1.3; margin-bottom: 10px; color: #0047b3; }
+    .card .excerpt { font-size: 16.5px; line-height:1.55; color: #555; flex: 1; }
+    .card .date { font-size: 13.5px; color: #999; margin-top: 14px; }
     .stato { text-align: center; padding: 60px 24px; color: #777; font-size: 16px; }
 
     /* --- Barra salto rapido per mestiere --- */
@@ -132,7 +134,7 @@
       padding: 18px 20px;
       margin-bottom: 34px;
     }
-    .salta h2 { font-size: 15px; color: #555; margin-bottom: 12px; font-weight: bold; }
+    .salta h2 { font-size: 17px; color: #555; margin-bottom: 12px; font-weight: bold; }
     .salta .chips { display: flex; flex-wrap: wrap; gap: 9px; }
     .salta a {
       display: inline-block;
@@ -140,8 +142,8 @@
       color: #0047b3;
       text-decoration: none;
       font-weight: bold;
-      font-size: 14px;
-      padding: 8px 14px;
+      font-size: 16px;
+      padding: 10px 16px;
       border-radius: 20px;
       border: 1.5px solid #d8e4ff;
     }
@@ -160,7 +162,7 @@
       margin-bottom: 22px;
     }
     .sezione-testa h2 {
-      font-size: 23px;
+      font-size: 28px;
       color: #0047b3;
       display: flex;
       align-items: center;
@@ -169,7 +171,7 @@
     .sezione-testa .icona { font-size: 26px; }
     .sezione-testa .n { font-size: 13px; color: #888; font-weight: normal; }
     .sezione-testa .trova {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
       color: #ff8800;
       text-decoration: none;
@@ -204,7 +206,7 @@
       text-align: center;
       margin-top: 46px;
     }
-    .cta-box h3 { color: #0047b3; font-size: 22px; margin-bottom: 10px; }
+    .cta-box h3 { color: #0047b3; font-size: 26px; margin-bottom: 10px; }
     .cta-box p { color: #555; margin-bottom: 20px; }
     .cta-box a {
       display: inline-block;
@@ -221,13 +223,19 @@
       .navbar { padding: 10px 16px; }
       .navbar .menu { gap: 14px; }
       .navbar .menu a { font-size: 13px; }
-      .blog-header h1 { font-size: 26px; }
+      .blog-header h1 { font-size: 30px; }
       .container { padding: 28px 16px; }
-      .sezione-testa h2 { font-size: 19px; }
-      .salta a { font-size: 13px; padding: 7px 12px; }
+      .sezione-testa h2 { font-size: 23px; }
+      .salta a { font-size: 15px; padding: 9px 14px; }
+      /* 21 set 2026: sul telefono la barra sbordava e il logo finiva sotto
+         i link. Ora il logo sta sopra e i link sulla riga dopo. */
+      .navbar { flex-direction: column; gap: 8px; }
+      .navbar .logo img { height: 52px; }
+      .navbar .menu { width: 100%; justify-content: center; flex-wrap: wrap; gap: 10px; }
     }
   </style>
 <link rel="stylesheet" href="/css/barra-comune.css">
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -243,6 +251,12 @@
       <a href="/#registrati" class="ti-iscriviti">Iscrivi la tua attivit&agrave;</a>
     </div>
   </nav>
+
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
 
   <header class="blog-header">
     <h1>Guide e costi edili: prezzi reali dei lavori</h1>
@@ -260,15 +274,22 @@
          guarda per prima. Quella in fondo RESTA: prende chi arriva alla fine,
          che è il momento in cui uno ha appena letto quanto costa una cosa ed
          è più pronto a chiedere un preventivo. -->
-    <div class="cta-alto">
-      <div class="cta-alto-t"><b>Devi fare dei lavori?</b> Trova imprese edili e artigiani verificati nella tua zona. Preventivi gratis.</div>
-      <a href="index.html">Trova un'impresa</a>
-    </div>
-
-    <div id="salta" class="salta" style="display:none;">
-      <h2>Vai al mestiere che ti serve</h2>
-      <div class="chips" id="salta-chips"></div>
-    </div>
+    <!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
+     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa o un artigiano?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa o un artigiano nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
+  </div>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/#registrati">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
+</div>
 
     <div id="lista">
       <div class="stato">Caricamento articoli...</div>
