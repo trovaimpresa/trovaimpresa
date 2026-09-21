@@ -3177,7 +3177,8 @@ function disegnaRicerche(){
     + '<div class="u-num"><div class="v">' + _rvNum(d.ieri) + '</div><div class="e">Clienti ieri</div></div>'
     + '<div class="u-num viola"><div class="v">' + _rvNum(d.ricerche) + '</div><div class="e">Ricerche nel periodo scelto</div></div>'
     + '<div class="u-num arancio"><div class="v">' + _rvNum(d.schede) + '</div><div class="e">Schede impresa aperte</div></div>'
-    + '<div class="u-num rosso"><div class="v">' + _rvNum(d.vuote) + '</div><div class="e">Ricerche finite a vuoto</div></div>';
+    + '<div class="u-num rosso"><div class="v">' + _rvNum(d.vuote) + '</div><div class="e">Ricerche finite a vuoto</div></div>'
+    + '<div class="u-num"><div class="v">' + _rvNum(d.clic_totale) + '</div><div class="e">Clic dai riquadri delle guide</div></div>';
 
   /* La riga che impedisce di leggere uno zero come un fatto. */
   const avv = document.getElementById('rv-avviso');
@@ -3239,7 +3240,93 @@ function disegnaRicerche(){
         : '<div style="color:#5b6b80;font-size:15px">Nessuna ricerca a vuoto nel periodo scelto.</div>')
     + '</div></div>';
 
-  box.innerHTML = grafico + tre + rosso;
+  box.innerHTML = grafico + tre + _rvClicGuide(d) + rosso;
+}
+
+/* ============================================================
+   CLIC DAI RIQUADRI DELLE GUIDE — 21 settembre 2026
+
+   Ogni guida ha tre punti dove si puo' entrare nel sito: in cima, a
+   meta' pagina e in fondo. Questo riquadro dice quale dei tre lavora
+   davvero, e se chi clicca sta CERCANDO un artigiano o si sta
+   ISCRIVENDO. Serve per tenere i richiami che rendono e togliere gli
+   altri, invece di indovinare.
+
+   I dati li scrive js/conta-clic-guide.js nella stessa tabella delle
+   ricerche (tipo = 'clic_guida').
+   ============================================================ */
+const _RV_PUNTI = {
+  cima:  { nome: 'In cima alla guida',  spiega: 'I due riquadri sotto il titolo' },
+  meta:  { nome: 'A met\u00e0 pagina',     spiega: 'La striscia arancione in mezzo al testo' },
+  fondo: { nome: 'In fondo alla guida', spiega: 'I due riquadri dopo l\'ultima riga' }
+};
+
+function _rvClicGuide(d){
+  const punti = (d.clic_punti || []);
+  const lati  = (d.clic_lati  || []);
+  const pagine= (d.clic_pagine|| []);
+  const tot   = Number(d.clic_totale) || 0;
+
+  const quando = d.clic_da
+    ? 'Si contano dal <b>' + new Date(d.clic_da).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) + '</b>.'
+    : 'Il contatore \u00e8 appena stato acceso: i numeri compaiono appena qualcuno preme uno di quei pulsanti.';
+
+  if(!tot){
+    return '<div class="mv-card" style="margin-bottom:22px">'
+      + '<div style="font-size:18px;font-weight:800;margin-bottom:4px">Clic dai riquadri delle guide</div>'
+      + '<div style="color:#5b6b80;font-size:15px">Ancora nessun clic. ' + quando + '</div></div>';
+  }
+
+  /* i tre punti, in ordine di pagina e non di classifica: cosi' si legge
+     come si legge la guida, dall'alto in basso */
+  const mappa = {};
+  punti.forEach(p => { mappa[p.punto] = Number(p.n) || 0; });
+  const max = Math.max(1, ...['cima','meta','fondo'].map(k => mappa[k] || 0));
+
+  const barre = ['cima','meta','fondo'].map(k => {
+    const n = mappa[k] || 0;
+    const perc = Math.round(n / tot * 100);
+    const largh = Math.max(2, Math.round(n / max * 100));
+    const info = _RV_PUNTI[k];
+    return '<div style="margin-bottom:16px">'
+      + '<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px">'
+      +   '<span style="font-weight:700">' + info.nome + '</span>'
+      +   '<span style="font-weight:800">' + _rvNum(n) + ' <span style="color:#5b6b80;font-weight:600">(' + perc + '%)</span></span>'
+      + '</div>'
+      + '<div style="background:#eef2f7;border-radius:8px;height:16px;overflow:hidden">'
+      +   '<div style="background:#0066ff;height:16px;width:' + largh + '%"></div>'
+      + '</div>'
+      + '<div style="color:#5b6b80;font-size:14px;margin-top:5px">' + info.spiega + '</div>'
+      + '</div>';
+  }).join('');
+
+  const perLato = {};
+  lati.forEach(l => { perLato[l.lato] = Number(l.n) || 0; });
+  const cerca = perLato['cerca'] || 0, registra = perLato['registra'] || 0;
+
+  const due = '<div class="u-det" style="grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 18px">'
+    + '<div style="background:#eaf2ff;border:2px solid #b9d2ff;border-radius:12px;padding:14px">'
+    +   '<div style="font-size:26px;font-weight:800;color:#0047b3">' + _rvNum(cerca) + '</div>'
+    +   '<div style="color:#42546b;font-size:15px">Cercano un\'impresa o un artigiano</div></div>'
+    + '<div style="background:#eaf7ee;border:2px solid #b4e0c2;border-radius:12px;padding:14px">'
+    +   '<div style="font-size:26px;font-weight:800;color:#116631">' + _rvNum(registra) + '</div>'
+    +   '<div style="color:#42546b;font-size:15px">Vogliono registrare la loro attivit\u00e0</div></div>'
+    + '</div>';
+
+  const elenco = pagine.length
+    ? pagine.map(r => '<div style="display:flex;justify-content:space-between;gap:10px">'
+        + '<span class="k">' + _uEsc(r.pagina) + '</span>'
+        + '<span class="v">' + _rvNum(r.n) + '</span></div>').join('')
+    : '<div style="color:#5b6b80;font-size:15px">Nessuna guida ancora.</div>';
+
+  return '<div class="mv-card" style="margin-bottom:22px;border-left:9px solid #0066ff">'
+    + '<div style="font-size:18px;font-weight:800;margin-bottom:4px">Clic dai riquadri delle guide</div>'
+    + '<div style="color:#5b6b80;font-size:15px;margin-bottom:18px">Quale punto della guida fa entrare la gente nel sito. ' + quando + '</div>'
+    + due
+    + barre
+    + '<div style="font-weight:800;margin:18px 0 10px">Le guide che portano pi\u00f9 clic</div>'
+    + '<div class="u-det" style="grid-template-columns:1fr">' + elenco + '</div>'
+    + '</div>';
 }
 
 /* ============================================================
