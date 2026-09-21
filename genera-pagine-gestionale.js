@@ -218,7 +218,7 @@ ${riquadroSorelle(pag, tutte)}
       <h3>${pag.ctaTitolo}</h3>
       <p>${pag.ctaTesto}</p>
       <a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
-      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Si disdice quando vuoi</span>
     </div>
 
   </article>

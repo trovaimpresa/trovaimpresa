@@ -23,7 +23,7 @@ module.exports = [
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
   funzioni: ['Prezzo annuale unico senza costo per utente', 'Nessun costo di attivazione',
-    'Trenta giorni di prova senza carta di credito', 'Nessun rinnovo automatico',
+    'Trenta giorni di prova senza carta di credito', 'Si disdice quando vuoi',
     'Marketplace compreso nello stesso prezzo'],
   ctaTitolo: 'Il modo più economico di decidere',
   ctaTesto: 'Provane uno per 30 giorni senza mettere la carta. Se in un mese non lo apri più, hai la risposta e non hai speso niente.',
@@ -138,7 +138,7 @@ module.exports = [
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
   funzioni: ['Trenta giorni di prova senza carta di credito', 'Profilo gratuito sul marketplace',
-    'Nessun rinnovo automatico', 'Esportazione dei dati sempre gratuita'],
+    'Si disdice quando vuoi', 'Esportazione dei dati sempre gratuita'],
   ctaTitolo: 'Il gratis più utile: 30 giorni interi',
   ctaTesto: "Non una versione ridotta, ma il gestionale intero per 30 giorni. Senza carta e senza addebito alla fine: se non ti serve, non succede niente.",
   sommario: `il gratis esiste e per certe cose basta. <strong>Fogli di calcolo, agenda del telefono e
