@@ -18,6 +18,16 @@ const path = require('path');
 const OUT = __dirname;
 const BASE = 'https://trovaimpresa.com';
 const MODELLO = 'software-gestionale-imprese-edili.html';
+/* ⚠️ 21 set 2026 — LA SECONDA PAGINA CHE VUOLE L'ELENCO.
+   `gestionale.html` (l'indirizzo /gestionale) e' la pagina che Google mette
+   per prima e quella che la home indica. Non linkava NESSUNA delle 27: zero
+   su 27. Le 27 non erano orfane - ci si arrivava da
+   software-gestionale-imprese-edili - ma per la strada lunga, e dopo 8
+   giorni Google ne aveva prese 5 su 27.
+   ⛔ Sta scritto QUI, dentro il generatore, e non a mano nella pagina: se no
+      il giorno che nasce la pagina numero 28 l'elenco si aggiorna in un posto
+      e resta vecchio nell'altro. Una fonte sola. */
+const PORTA = 'gestionale.html';
 const OGGI = new Date().toISOString().slice(0, 10);
 const SCRIVI = process.argv.includes('--scrivi');
 
@@ -296,6 +306,57 @@ function innestaNellaMadre(html, tutte) {
   return html.slice(0, i) + nuovo + '\n\n' + html.slice(i);
 }
 
+/* ---------- 4-bis. Lo stesso elenco per la PORTA (/gestionale) ----------
+   Stesso testo, veste diversa: la porta ha la sua grafica (`.fascia`,
+   `.titolone`, `.pp-elenco`), non le `checklist ok-list` del modello.
+   ⚠️ I link NON hanno il `.html`: l'indirizzo pulito e' quello scritto nel
+   canonical delle 27 pagine. Col `.html` ogni clic passava da un rimbalzo. */
+const SEGNO_PA = '<!-- INIZIO famiglia gestionale (porta) - generato, non scrivere a mano -->';
+const SEGNO_PB = '<!-- FINE famiglia gestionale (porta) -->';
+
+function bloccoPorta(tutte) {
+  const gruppo = f => tutte.filter(p => p.famiglia === f);
+  const elenco = arr => arr.map(p =>
+    `        <li><a href="/${p.slug}">${p.link}</a><span>${p.riga}</span></li>`).join('\n');
+  const sezione = (titolo, arr) =>
+    `      <h3 class="pp-h3">${titolo}</h3>\n      <ul class="pp-elenco">\n${elenco(arr)}\n      </ul>`;
+  return `${SEGNO_PA}
+<section class="fascia" id="pagine-precise">
+  <div class="wrap">
+    <h2 class="titolone">Cerchi una cosa precisa?</h2>
+    <p class="introne">Questa pagina racconta il gestionale tutto intero.
+      Se sei arrivato cercando una cosa sola, qui sotto c&rsquo;&egrave; la pagina che parla di quella.</p>
+
+${sezione('Il lavoro che devi fare', gruppo('problema'))}
+
+${sezione('Il tuo mestiere', gruppo('mestiere'))}
+
+${sezione('Prima di decidere', gruppo('confronto'))}
+  </div>
+</section>
+${SEGNO_PB}`;
+}
+
+/* Si innesta SUBITO DOPO la fascia dei prezzi, che e' l'ultima della pagina.
+   Se il blocco c'e' gia', si sostituisce: rilanciare non duplica.
+   ⚠️ Il CSS di `.pp-elenco` sta dentro la porta, scritto a mano una volta
+      sola: qui si tocca solo l'elenco. */
+function innestaNellaPorta(html, tutte) {
+  const nuovo = bloccoPorta(tutte);
+  const a = html.indexOf(SEGNO_PA);
+  if (a !== -1) {
+    const b = html.indexOf(SEGNO_PB, a);
+    if (b === -1) throw new Error('Trovato il segno di inizio ma non quello di fine nella porta');
+    return html.slice(0, a) + nuovo + html.slice(b + SEGNO_PB.length);
+  }
+  const inizioPrezzi = html.indexOf('<section class="fascia grigia" id="prezzi">');
+  if (inizioPrezzi === -1) throw new Error('Nella porta non trovo la fascia dei prezzi: non innesto a caso');
+  const fine = html.indexOf('</section>', inizioPrezzi);
+  if (fine === -1) throw new Error('Nella porta la fascia dei prezzi non si chiude');
+  const i = fine + '</section>'.length;
+  return html.slice(0, i) + '\n\n' + nuovo + html.slice(i);
+}
+
 /* ---------- 5. Sitemap ---------- */
 function sitemap(tutte) {
   const righe = tutte.map(p =>
@@ -352,6 +413,18 @@ let madre = fs.readFileSync(modelloPath, 'utf8');
 const madreNuova = innestaNellaMadre(madre, PAGINE);
 if (SCRIVI && madreNuova !== madre) fs.writeFileSync(modelloPath, madreNuova, 'utf8');
 
+// la porta /gestionale
+/* ⚠️ Se il file non c'e' NON si ferma tutto: le 27 pagine e la madre sono
+   piu' importanti dell'elenco sulla porta. Si scrive nel resoconto e basta. */
+const portaPath = path.join(OUT, PORTA);
+let portaEsito = 'NON TROVATA (' + PORTA + ')';
+if (fs.existsSync(portaPath)) {
+  const porta = fs.readFileSync(portaPath, 'utf8');
+  const portaNuova = innestaNellaPorta(porta, PAGINE);
+  if (SCRIVI && portaNuova !== porta) fs.writeFileSync(portaPath, portaNuova, 'utf8');
+  portaEsito = (portaNuova !== porta ? 'blocco innestato' : 'gia\' a posto');
+}
+
 // sitemap
 const sm = sitemap(PAGINE);
 if (SCRIVI) fs.writeFileSync(path.join(OUT, 'sitemap-gestionale.xml'), sm, 'utf8');
@@ -367,6 +440,7 @@ console.log('  il mestiere:     ' + PAGINE.filter(p => p.famiglia === 'mestiere'
 console.log('  il confronto:    ' + PAGINE.filter(p => p.famiglia === 'confronto').length);
 console.log('Testo per pagina:  media ' + media + ' caratteri (min ' + min.n + ' ' + min.slug + ', max ' + max.n + ' ' + max.slug + ')');
 console.log('Pagina madre:      ' + (madreNuova !== madre ? 'blocco innestato' : 'gia\' a posto'));
+console.log('Porta /gestionale: ' + portaEsito);
 console.log('Sitemap:           sitemap-gestionale.xml, ' + PAGINE.length + ' indirizzi');
 console.log(SCRIVI ? '\n✅ Scritte ' + scritte + ' pagine.' : '\n(prova a vuoto — non ho scritto niente. Rilancia con --scrivi)');
 console.log('');
