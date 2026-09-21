@@ -97,3 +97,44 @@
   .ti-logo-grande{ padding:16px 16px 14px; }
   .ti-logo-grande img{ max-width:240px; width:80%; }
 }
+
+/* --- La striscia a meta' articolo: piu' bassa, per non spezzare la lettura --- */
+.ti-riga{
+  background:#fff7ed;
+  border:2px solid #ffd9a0;
+  border-radius:16px;
+  padding:20px 22px;
+  margin:34px 0;
+  text-align:center;
+}
+.ti-riga-t{
+  font-size:19px;
+  line-height:1.4;
+  color:#0a2a4d;
+  font-weight:800;
+  margin:0 0 14px;
+}
+.ti-riga-btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.ti-riga-btns a{
+  background:#ff8800;
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  font-size:17.5px;
+  padding:15px 18px;
+  border-radius:12px;
+  display:block;
+}
+.ti-riga-btns a:hover{ background:#e67a00; }
+.ti-riga-btns a.verde{ background:#15803d; }
+.ti-riga-btns a.verde:hover{ background:#116631; }
+
+@media (max-width:760px){
+  .ti-riga{ padding:18px 16px; }
+  .ti-riga-t{ font-size:18px; }
+  .ti-riga-btns{ grid-template-columns:1fr; gap:10px; }
+}
