@@ -20,42 +20,48 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; background: #f4f7fc; color: #1a1a1a; line-height: 1.6; }
     .navbar { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .navbar .logo img { height: 60px; }
+    .navbar .logo img { height: 68px; }
     .navbar .menu { display: flex; gap: 22px; align-items: center; }
     .navbar .menu a { text-decoration: none; color: #0066ff; font-weight: bold; font-size: 15px; }
     .navbar .menu a.menu-btn { background: #ff8800; color: #fff; padding: 8px 16px; border-radius: 8px; }
+    .navbar .menu a.ti-iscriviti { color: #fff; }
+    .navbar .menu a.ti-accedi { color: #0066ff; }
     .page-header { background: linear-gradient(135deg, #0066ff, #0047b3); color: #fff; padding: 52px 24px; text-align: center; }
-    .page-header h1 { font-size: 32px; margin-bottom: 12px; }
-    .page-header p { font-size: 17px; max-width: 680px; margin: 0 auto; opacity: 0.95; }
+    .page-header h1 { font-size: 42px; margin-bottom: 12px; }
+    .page-header p { font-size: 19px; max-width: 680px; margin: 0 auto; opacity: 0.95; }
     .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
     .filtri { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
-    .filtri select, .filtri input { padding: 11px 14px; border: 1.5px solid #d5dde8; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; }
+    .filtri select, .filtri input { padding: 14px 16px; border: 1.5px solid #d5dde8; border-radius: 10px; font-size: 16.5px; font-family: inherit; background: #fff; }
     .filtri input { flex: 1; min-width: 200px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #0066ff; padding: 20px; display: flex; flex-direction: column; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 26px; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #0066ff; padding: 26px 24px 24px; display: flex; flex-direction: column; }
     .card .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-    .tag { font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .tag { font-size: 13px; font-weight: bold; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.4px; }
     .tag.tipo { background: #e7f0fb; color: #0052cc; }
     .tag.reg { background: #eef2f7; color: #5a6a7a; }
-    .card h2 { font-size: 18px; margin-bottom: 8px; color: #0047b3; }
-    .card .desc { font-size: 14px; color: #555; flex: 1; }
-    .card .meta { font-size: 13px; color: #444; margin-top: 12px; display: flex; flex-direction: column; gap: 3px; }
+    .card h2 { font-size: 22px; line-height: 1.3; margin-bottom: 10px; color: #0047b3; }
+    .card .desc { font-size: 16.5px; line-height: 1.55; color: #555; flex: 1; }
+    .card .meta { font-size: 15px; color: #444; margin-top: 12px; display: flex; flex-direction: column; gap: 3px; }
     .card .meta b { color: #0066ff; }
     .scad { font-weight: bold; }
     .scad.vicina { color: #c0392b; }
-    .card .cta { display: inline-block; margin-top: 14px; background: #0066ff; color: #fff; text-decoration: none; font-weight: bold; padding: 10px 18px; border-radius: 8px; font-size: 14px; text-align: center; }
+    .card .cta { display: inline-block; margin-top: 14px; background: #0066ff; color: #fff; text-decoration: none; font-weight: bold; padding: 14px 20px; border-radius: 10px; font-size: 17px; text-align: center; }
     .card .cta:hover { background: #0047b3; }
     .stato { text-align: center; padding: 50px 24px; color: #777; font-size: 16px; }
     .cta-box { background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #ff8800; padding: 32px; text-align: center; margin-top: 40px; }
     .cta-box h3 { color: #0047b3; font-size: 20px; margin-bottom: 10px; }
     .cta-box a { display: inline-block; background: #ff8800; color: #fff; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; margin-top: 8px; }
-    .nota { font-size: 12px; color: #999; text-align: center; margin-top: 18px; }
+    .nota { font-size: 14px; color: #999; text-align: center; margin-top: 18px; }
     @media (max-width: 600px) {
-      .navbar { padding: 10px 16px; } .navbar .menu { gap: 14px; } .navbar .menu a { font-size: 13px; }
-      .page-header h1 { font-size: 24px; } .container { padding: 24px 16px; }
+      .navbar { padding: 10px 16px; flex-direction: column; gap: 8px; }
+      .navbar .logo img { height: 52px; }
+      .navbar .menu { width: 100%; justify-content: center; flex-wrap: wrap; gap: 10px; }
+      .navbar .menu a { font-size: 13px; }
+      .page-header h1 { font-size: 30px; } .container { padding: 24px 16px; }
     }
   </style>
 <link rel="stylesheet" href="/css/barra-comune.css">
+<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -70,6 +76,12 @@
     </div>
   </nav>
 
+<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
+<div class="ti-logo-grande">
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+</div>
+
+
   <header class="page-header">
     <h1>Bandi e fondi perduti per imprese edili e artigiani</h1>
     <h2 style="font-size:1.15rem;font-weight:600;margin:6px 0 0;opacity:.95;">Contributi, finanziamenti e scadenze aggiornate per il settore edile</h2>
@@ -77,6 +89,23 @@
   </header>
 
   <div class="container">
+
+<!-- 21 set 2026 — i due riquadri: a sinistra chi cerca, a destra chi ha un'impresa -->
+<div class="ti-promo">
+  <div class="ti-promo-c ti-promo-cli">
+    <p class="ti-promo-t">Cerchi un'impresa o un artigiano?</p>
+    <p class="ti-promo-s">Su TrovaImpresa trovi imprese edili e artigiani della tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
+    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
+  </div>
+  <div class="ti-promo-c ti-promo-imp">
+    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
+    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
+    <a class="ti-promo-b ti-promo-b2" href="/#registrati">Registrati gratis</a>
+    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+  </div>
+</div>
+
     <div class="filtri">
       <input type="text" id="f-cerca" placeholder="🔍 Cerca per parola (es. ristrutturazione, cappotto...)">
       <select id="f-regione"><option value="">Tutte le regioni</option></select>
@@ -89,10 +118,20 @@
 
     <p class="nota">Fonte dati: incentivi.gov.it (Ministero delle Imprese e del Made in Italy). I dati sono indicativi: verifica sempre condizioni e scadenze sulla pagina ufficiale del bando.</p>
 
-    <div class="cta-box">
-      <h3>Hai vinto un bando e ti serve un'impresa o un artigiano?</h3>
-      <p>Trova professionisti edili verificati nella tua zona e richiedi preventivi gratis.</p>
-      <a href="index.html">Trova un'impresa</a>
+    <!-- 21 set 2026 — in fondo: chi ha letto i bandi o cerca chi fa i lavori, o e' lui che li fa -->
+    <div class="ti-promo">
+      <div class="ti-promo-c ti-promo-cli">
+        <p class="ti-promo-t">Hai vinto un bando?</p>
+        <p class="ti-promo-s">Trova l'impresa o l'artigiano che ti fa i lavori, nella tua citt&agrave;.</p>
+        <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
+        <small class="ti-promo-n">Gratis per chi cerca, senza impegno.</small>
+      </div>
+      <div class="ti-promo-c ti-promo-imp">
+        <p class="ti-promo-t">Questi lavori li fai tu?</p>
+        <p class="ti-promo-s">Mettiti dove i clienti ti stanno gi&agrave; cercando. Iscrizione gratis.</p>
+        <a class="ti-promo-b ti-promo-b2" href="/#registrati">Registrati gratis</a>
+        <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
+      </div>
     </div>
   </div>
 
@@ -100,7 +139,13 @@
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    /* 21 set 2026 — rete di sicurezza. Se la libreria Supabase non arriva
+       (blocco pubblicita', wifi pubblico, rete lenta) prima la pagina
+       moriva qui con un errore e restava su "Caricamento bandi..." per
+       sempre. Ora almeno lo dice, e il resto della pagina funziona. */
+    const sb = (window.supabase && window.supabase.createClient)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+      : null;
 
     let BANDI = [];
 
@@ -153,6 +198,10 @@
 
     async function carica(){
       const box = document.getElementById('lista');
+      if (!sb) {
+        box.innerHTML = '<div class="stato">Non riesco a caricare i bandi in questo momento. Prova a ricaricare la pagina, oppure riapri il sito senza blocco pubblicit&agrave;.</div>';
+        return;
+      }
       const oggi = new Date().toISOString().slice(0,10);
       const { data, error } = await sb
         .from('bandi')
@@ -186,5 +235,8 @@
     <a href="mailto:info@trovaimpresa.com" style="color:#0066ff;text-decoration:none">info@trovaimpresa.com</a> &mdash; P.IVA 01285950570
   </p>
 </footer>
+
+<!-- 21 set 2026: conta i clic sui riquadri -->
+<script src="/js/conta-clic-guide.js" defer></script>
 </body>
 </html>
