@@ -48,22 +48,28 @@
   var LARGA_MIN  = 200;   // sotto questa non si mostra: sarebbe illeggibile
   var BORDO      = 24;    // aria fra il testo e il cartello
 
-  /* Le locandine, nell'ordine in cui escono. Stesse della home. */
+  /* Le locandine, nell'ordine in cui escono.
+     22 set 2026 — l'ordine NON e' quello della home, ed e' voluto: qui chi
+     legge e' un CLIENTE che sta per spendere (sta leggendo quanto costa un
+     lavoro). Quindi prima le locandine rivolte a lui — parla con chi lavora,
+     a chi mi rivolgo, le recensioni, la sua citta' — e solo dopo quelle per
+     le imprese. Le due che parlano delle guide stanno in fondo: chi le vede
+     e' gia' dentro una guida. */
   var LOCANDINE = [
-    ['01-vetrina',     '/#registrati'],
-    ['05-diretto',     '/cerca-imprese'],
-    ['02-gestionale',  '/software-gestionale-imprese-edili'],
-    ['03-computo',     '/software-gestionale-imprese-edili'],
-    ['07-bandi',       '/bandi'],
-    ['08-subappalti',  '/subappalto'],
-    ['13-blog',        '/blog'],
-    ['06-guide',       '/costi-ristrutturazione'],
-    ['09-offerte',     '/offerte-lavoro'],
-    ['14-recensioni',  '/cerca-imprese'],
-    ['11-citta',       '/citta'],
-    ['04-preventivi',  '/software-gestionale-imprese-edili'],
-    ['10-candidature', '/candidature-lavoro'],
-    ['12-chi-cerchi',  '/cerca-artigiani']
+    ['05-diretto',     '/cerca-imprese'],                        // cliente
+    ['12-chi-cerchi',  '/cerca-artigiani'],                      // cliente
+    ['14-recensioni',  '/cerca-imprese'],                        // cliente
+    ['11-citta',       '/citta'],                                // cliente
+    ['01-vetrina',     '/#registrati'],                          // impresa
+    ['02-gestionale',  '/software-gestionale-imprese-edili'],    // impresa
+    ['07-bandi',       '/bandi'],                                // impresa
+    ['08-subappalti',  '/subappalto'],                           // impresa
+    ['03-computo',     '/software-gestionale-imprese-edili'],    // impresa
+    ['04-preventivi',  '/software-gestionale-imprese-edili'],    // impresa
+    ['06-guide',       '/costi-ristrutturazione'],               // gia' nelle guide
+    ['13-blog',        '/blog'],                                 // gia' nelle guide
+    ['09-offerte',     '/offerte-lavoro'],                       // impresa che cerca operai
+    ['10-candidature', '/candidature-lavoro']                    // chi cerca lavoro
   ];
 
   try {
