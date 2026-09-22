@@ -805,6 +805,10 @@
      ⚠️ due classi insieme, non `.gest-btn` da sola: `.posto-btn` e' scritta
      PIU' IN BASSO nel foglio e con lo stesso peso vincerebbe lei, arancione. */
   .posto-btn.gest-btn{ background:#0066ff; }
+    /* 22 set 2026 - il verde del tasto Pubblicita del menu: da qui in avanti
+       la pubblicita' ha il suo colore, come i bandi il giallo e le guide il viola. */
+    .posto-btn.pub-btn{ background:#166534; }
+    .posto-btn.pub-btn:hover{ background:#14532d; }
   .posto-btn.gest-btn:hover{ background:#0052cc; }
   /* ⛔ 17 set 2026 — CON OTTO VOCI IL MENU ANDAVA A CAPO.
      Aggiunta «Gestionale», a 1440 px «Pubblicita'» finiva su una seconda
@@ -1346,6 +1350,23 @@
               <p>Sei l&rsquo;unico della tua merce davanti agli artigiani, alle imprese e ai professionisti della tua zona. <strong>Un posto solo per citt&agrave;.</strong></p>
             </div>
             <a class="posto-btn" href="/il-posto.html">Scopri come funziona</a>
+          </div>
+        </section>
+
+        <!-- 22 set 2026 - la terza fascia: la pubblicita'. Stesso verde del
+             tasto Pubblicita nel menu (#166534), cosi' il colore dice da solo
+             di cosa si parla. Il punto forte e' il doppio posto: la pagina
+             della citta' PIU' le guide dei prezzi.
+             Fatta cosi' apposta per NON toccare gli spazi pubblicitari: le
+             locandine che girano ai lati restano quelle che erano. -->
+        <section class="hcard" id="la-pubblicita" style="--hc:#166534;--hb:#f2fdf5;">
+          <div class="posto-riga">
+            <div class="posto-icona"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
+            <div class="posto-testo">
+              <h2>Vuoi farti vedere nella tua citt&agrave;?</h2>
+              <p>Il tuo cartello esce nella pagina della tua citt&agrave; <strong>e anche di lato alle guide dei prezzi</strong>, quelle che Google mostra a chi sta per far fare un lavoro. <strong>Uno spazio, due posti.</strong></p>
+            </div>
+            <a class="posto-btn pub-btn" href="/pubblicita.html">Scopri gli spazi</a>
           </div>
         </section>
 
