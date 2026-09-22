@@ -804,12 +804,12 @@
   /* il bottone del riquadro: blu = si prova gratis (regola dei colori del 13 set).
      ⚠️ due classi insieme, non `.gest-btn` da sola: `.posto-btn` e' scritta
      PIU' IN BASSO nel foglio e con lo stesso peso vincerebbe lei, arancione. */
-  .posto-btn.gest-btn{ background:#0066ff; }
+  .posto-btn.gest-btn{ background:#dbeafe; color:#1e40af; border-color:#bfdbfe; }
     /* 22 set 2026 - il verde del tasto Pubblicita del menu: da qui in avanti
        la pubblicita' ha il suo colore, come i bandi il giallo e le guide il viola. */
-    .posto-btn.pub-btn{ background:#166534; }
-    .posto-btn.pub-btn:hover{ background:#14532d; }
-  .posto-btn.gest-btn:hover{ background:#0052cc; }
+    .posto-btn.pub-btn{ background:#dcfce7; color:#166534; border-color:#86efac; }
+    .posto-btn.pub-btn:hover{ background:#bbf7d0; color:#14532d; }
+  .posto-btn.gest-btn:hover{ background:#bfdbfe; color:#1e3a8a; }
   /* ⛔ 17 set 2026 — CON OTTO VOCI IL MENU ANDAVA A CAPO.
      Aggiunta «Gestionale», a 1440 px «Pubblicita'» finiva su una seconda
      riga e la barra diventava alta il doppio. Si stringono le distanze
@@ -886,8 +886,7 @@
   .home-layout{ max-width:1080px; margin:0 auto; padding:36px 32px 56px; background:var(--ti-bg); }
   .home-main{ display:flex; flex-direction:column; gap:20px; min-width:0; }
     /* 22 set 2026 - le tre fasce (gestionale, negozio, pubblicita) staccate
-       una dall'altra: attaccate sembravano un blocco solo e si leggevano
-       come una cosa sola invece che come tre proposte diverse. */
+       una dall'altra: attaccate sembravano un blocco solo. */
     #il-gestionale, #il-posto, #la-pubblicita{ margin-top:20px; }
     @media(max-width:700px){ #il-gestionale, #il-posto, #la-pubblicita{ margin-top:14px; } }
   .hrow2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
@@ -922,9 +921,13 @@
   .posto-testo{ flex:1; min-width:0; }
   .posto-testo h2{ font-size:21px; line-height:1.35; margin:0 0 5px; color:var(--ti-ink); }
   .posto-testo p{ margin:0; font-size:15px; color:#41505f; line-height:1.5; }
-  .posto-btn{ background:#e8733a; color:#fff; font-weight:700; font-size:15px;
+  /* 22 set 2026 - i tasti delle tre fasce passano ai colori pastello del menu:
+     sfondo chiaro e scritta scura della stessa famiglia, come i tastini
+     «Gestionale», «Bandi e fondi» e «Pubblicita» in alto. */
+  .posto-btn{ background:#ffedd5; color:#9a3412; border:1.5px solid #fdba74;
+    font-weight:700; font-size:15px;
     border-radius:9px; padding:13px 22px; text-decoration:none; white-space:nowrap; flex:none; }
-  .posto-btn:hover{ background:#c45e28; }
+  .posto-btn:hover{ background:#fed7aa; color:#7c2d12; }
   .tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 10px; background:linear-gradient(135deg,#ffffff 0%, color-mix(in srgb, var(--tc,var(--ti-blu)) 9%, #ffffff) 100%); border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 22%, #ffffff); border-top:4px solid var(--tc,var(--ti-blu)); border-radius:12px; text-decoration:none; color:var(--ti-ink); font-weight:700; font-size:15px; text-align:center; box-shadow:0 4px 14px rgba(10,42,77,.07); transition:box-shadow .25s cubic-bezier(.34,1.56,.64,1), transform .25s cubic-bezier(.34,1.56,.64,1); }
   .tile:hover{ box-shadow:0 12px 28px rgba(10,42,77,.16); transform:translateY(-5px); }
   .tile-wrap{ display:flex; flex-direction:column; gap:8px; min-width:0; }
