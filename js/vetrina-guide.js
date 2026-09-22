@@ -44,7 +44,7 @@
   var BASE_LOC   = '/img/locandine/loc-';
   var PASSO      = 900;   // distanza fra una coppia e l'altra
   var MAX_COPPIE = 7;     // 7 x 2 = i 14 posti del listino
-  var LARGA_MAX  = 300;   // larghezza del cartello
+  var LARGA_MAX  = 520;   // larghezza del cartello: si prende tutto lo spazio che c'e'
   var LARGA_MIN  = 200;   // sotto questa non si mostra: sarebbe illeggibile
   var BORDO      = 24;    // aria fra il testo e il cartello
 
