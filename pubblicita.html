@@ -54,11 +54,10 @@
     .step-sub{color:var(--mid);font-size:15px;margin-bottom:28px;}
 
     /* STEP 1 - SELETTORE SPAZI */
-    /* 22 set 2026 - il verde del tasto Pubblicita del menu (#dcfce7 / #166534) */
-    .regalo-guide{max-width:760px;margin:0 auto 22px;background:#dcfce7;border:2px solid #86efac;
+    .regalo-guide{max-width:760px;margin:0 auto 22px;background:#eaf7ee;border:2px solid #b4e0c2;
       border-radius:16px;padding:20px 22px}
-    .rg-t{margin:0 0 8px;font-size:19px;font-weight:800;color:#166534}
-    .rg-s{margin:0;font-size:16px;line-height:1.6;color:#14532d}
+    .rg-t{margin:0 0 8px;font-size:19px;font-weight:800;color:#116631}
+    .rg-s{margin:0;font-size:16px;line-height:1.6;color:#33475b}
     @media(max-width:600px){.regalo-guide{padding:16px;margin-bottom:18px}.rg-t{font-size:17px}.rg-s{font-size:15px}}
     .spazio-fascia{margin-bottom:18px;}
     .spazio-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
@@ -189,7 +188,24 @@
    dove la scheda e' arancione. */
 .ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
-</style>
+
+    /* 22 set 2026 - I TASTI DI QUESTA PAGINA IN PASTELLO.
+       Stessi colori dei tastini del menu in alto: sfondo chiaro, scritta
+       scura della stessa famiglia, un filetto sottile intorno.
+       Sta in fondo al foglio di proposito: cosi' vince su quello che c'e'
+       sopra senza dover riscrivere le regole vecchie, e per tornare
+       indietro basta togliere questo pezzo. */
+    .nbtn-verde{ background:#dcfce7; color:#166534; border:1.5px solid #86efac; }
+    .nbtn-verde:hover{ background:#bbf7d0; color:#14532d; }
+    .nbtn-arancio{ background:#ffedd5; color:#9a3412; border:1.5px solid #fdba74; }
+    .nbtn-arancio:hover{ background:#fed7aa; color:#7c2d12; }
+    .btn-avanti{ background:#ffedd5; color:#9a3412; border:1.5px solid #fdba74; }
+    .btn-avanti:hover{ background:#fed7aa; color:#7c2d12; }
+    .btn-avanti:disabled{ background:#f1f3f6; color:#a9b2bd; border-color:#e2e6ec; }
+    .btn-ordina{ background:#dcfce7; color:#166534; border:1.5px solid #86efac; }
+    .btn-ordina:hover{ background:#bbf7d0; color:#14532d; }
+    .btn-ordina:disabled{ background:#f1f3f6; color:#a9b2bd; border-color:#e2e6ec; }
+  </style>
 </head>
 <body>
 
@@ -204,13 +220,13 @@
 </nav>
 
 <section class="hero">
-  <div class="hero-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Uno spazio, due posti</div>
-  <h1>Fai conoscere la tua azienda<br>nella <span>tua città</span> e nelle guide</h1>
-  <p>Uno spazio solo, due posti: la pagina della tua città <b>e</b> le guide dei prezzi, quelle che Google mostra a chi sta per far fare un lavoro. Si rinnova da solo, disdici quando vuoi.</p>
+  <div class="hero-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Spazi pubblicitari disponibili</div>
+  <h1>Fai conoscere la tua azienda<br>nella <span>tua città</span></h1>
+  <p>Scegli lo spazio e la città. Il tuo banner resta online e si rinnova da solo: disdici quando vuoi.</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
     <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Posizioni per città</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">€5</div><div class="hero-stat-label">Al mese da</div></div><div class="hero-stat"><div class="hero-stat-num">+</div><div class="hero-stat-label">Guide e blog<br>compresi</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">€5</div><div class="hero-stat-label">Al mese da</div></div>
   </div>
 </section>
 
