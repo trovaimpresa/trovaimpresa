@@ -885,6 +885,11 @@
 
   .home-layout{ max-width:1080px; margin:0 auto; padding:36px 32px 56px; background:var(--ti-bg); }
   .home-main{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+    /* 22 set 2026 - le tre fasce (gestionale, negozio, pubblicita) staccate
+       una dall'altra: attaccate sembravano un blocco solo e si leggevano
+       come una cosa sola invece che come tre proposte diverse. */
+    #il-gestionale, #il-posto, #la-pubblicita{ margin-top:20px; }
+    @media(max-width:700px){ #il-gestionale, #il-posto, #la-pubblicita{ margin-top:14px; } }
   .hrow2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 
   .hcard{ scroll-margin-top:90px; background:linear-gradient(135deg,#ffffff 0%, var(--hb,#ffffff) 100%); border:1px solid var(--ti-bd); border-top:5px solid var(--hc,var(--ti-blu)); border-radius:16px; padding:22px 24px 24px; box-shadow:0 8px 24px rgba(10,42,77,.09); }
@@ -1335,7 +1340,7 @@
               <h2>Il gestionale per chi lavora in cantiere</h2>
               <p>Preventivi, computo metrico, fatture elettroniche, cantieri, ore e mezzi. Tutto in un posto solo, fatto su come si lavora davvero. <strong>30 giorni gratis, senza carta di credito.</strong></p>
             </div>
-            <a class="posto-btn gest-btn" href="/gestionale">Provalo 30 giorni gratis</a>
+            <a class="posto-btn gest-btn" href="/gestionale">Scopri il nostro gestionale</a>
           </div>
         </section>
 
