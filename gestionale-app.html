@@ -34,6 +34,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Gestionale">
 <meta name="application-name" content="Gestionale">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 <div id="app-root">
@@ -42,7 +51,7 @@
 <div id="landing">
   <div class="landing-top">
     <div class="lt-actions">
-      <button class="lt-btn" data-action="azienda">⚙ Dati azienda</button>
+      <button class="lt-btn" data-action="azienda"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 7 2.6h.1A2 2 0 1 1 11 2.6V3a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Dati azienda</button>
       <!-- 24 agosto 2026 — IL NOLEGGIO ESCE DAL REPARTO.
            Il mezzo e' uno solo per tutta l'azienda: se il pulsante stesse
            dentro un reparto, lo stesso escavatore andrebbe messo in due
@@ -59,8 +68,8 @@
            un'ALTRA persona, con il SUO account. Se la apri tu vedi te stesso.
            Per questo la pagina dell'operaio, a chi non e' in squadra, adesso
            spiega che deve invitare qualcuno da Squadra. -->
-      <button class="lt-btn" data-action="appoperaio">📱 App operaio</button>
-      <button class="lt-btn" data-action="commercialista">📄 Commercialista</button>
+      <button class="lt-btn" data-action="appoperaio"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> App operaio</button>
+      <button class="lt-btn" data-action="commercialista"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Commercialista</button>
       <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
       <button class="lt-btn" data-action="export-excel">⬇ Esporta dati</button>
     </div>
@@ -73,7 +82,7 @@
          Se lo si sposta sopra, sul telefono diventa il primo tasto del
          gestionale — e il primo tasto non puo' essere la disdetta. -->
     <div class="lt-actions lt-actions--sx">
-      <button class="lt-btn" data-action="abbonamento">💳 Abbonamento</button>
+      <button class="lt-btn" data-action="abbonamento"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg> Abbonamento</button>
     </div>
     <!-- ⚠️ 14 agosto 2026 — QUESTA SCHERMATA NON PARLAVA A CHI LA APRE.
          Diceva «Gestionale Multiservizi · Scegli il reparto», e sotto
@@ -84,7 +93,7 @@
          «cliente», cioè le tre cose per cui era entrato.
          I reparti restano, per chi ne ha davvero più di uno — ma non
          sono più la prima cosa che ti si chiede. -->
-    <div class="mk">🛠️</div><h1>Il tuo gestionale</h1><small>Lavori, preventivi e fatture</small>
+    <div class="mk"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h1>Il tuo gestionale</h1><small>Lavori, preventivi e fatture</small>
   </div>
   <div class="wrap">
     <!-- ⚠️ 16 agosto 2026 — LA STRISCIA DELL'AI.
@@ -111,7 +120,7 @@
     </div>
     <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>
     <div class="panels" id="panels"></div>
-    <button class="new-rep-btn" data-action="new-panel">➕ Aggiungi un reparto</button>
+    <button class="new-rep-btn" data-action="new-panel"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Aggiungi un reparto</button>
     <p class="landing-nota-rep">Un <b>reparto</b> serve solo se tieni separate due attività — per esempio idraulica e giardinaggio: lavori, clienti e calendario di una non si mischiano con l'altra. Se fai un mestiere solo, non te ne serve un secondo.</p>
     <p style="text-align:center;font-size:14px;color:var(--testo-2);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--bordo)">
@@ -286,7 +295,7 @@
       </div>
 
       <div id="ag-parte-ore" style="display:none">
-        <div class="gal-intro">Le ore <b>timbrate</b> dal telefono e quelle <b>scritte a mano</b> non si sommano mai: sono due misure della stessa giornata. ⚠️ Qui si contano le ore di <b>tutta l'azienda</b>, non del solo reparto.</div>
+        <div class="gal-intro">Le ore <b>timbrate</b> dal telefono e quelle <b>scritte a mano</b> non si sommano mai: sono due misure della stessa giornata. <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Qui si contano le ore di <b>tutta l'azienda</b>, non del solo reparto.</div>
         <div class="filtri">
           <div class="filtro"><span class="filtro-lab">Mese</span>
             <div class="ore-mese">
@@ -294,7 +303,7 @@
               <span id="ore-mese-lab">—</span>
               <button data-action="ore-mese" data-v="1" title="Mese dopo">›</button>
             </div></div>
-          <button class="btn" data-action="ore-csv" style="margin-left:auto">⬇️ Scarica per Excel</button>
+          <button class="btn" data-action="ore-csv" style="margin-left:auto"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Scarica per Excel</button>
         </div>
         <div id="ore-body"></div>
       </div>
@@ -304,7 +313,7 @@
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button class="btn" data-action="cal-prev">‹</button><button class="btn" data-action="cal-today">•</button><button class="btn" data-action="cal-next">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span><i class="dot scad"></i>Scadenza</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span><i class="dot scad"></i>Scadenza</span><span><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Nota</span></div>
     </section>
 
     <section id="lavori">
@@ -370,7 +379,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o società: ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
+      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o società: ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Compila con AI</button></div></div>
       <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
@@ -391,7 +400,7 @@
            dentro la finestra che si apre dalla sua scheda. Nessuno lo trovava.
            Chiesto da Alessio il 5 settembre. -->
       <div class="app-op-card">
-        <p class="app-op-tit">📱 L'app dei tuoi operai</p>
+        <p class="app-op-tit"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> L'app dei tuoi operai</p>
         <p class="app-op-p">Ogni persona che aggiungi qui ha <b>la sua app sul telefono</b>: vede i lavori del giorno, segna le ore, i materiali, le foto e il rapportino. Puoi anche fargli raccontare la giornata <b>a voce</b>: l'AI ne tira fuori ore e materiali, e lui conferma.</p>
         <p class="app-op-p">Quello che scrive finisce <b>qui dentro</b>, negli stessi lavori: le sue ore entrano nella manodopera del cantiere. Tu lo rileggi in <b>Agenda operatore</b>.</p>
         <!-- ⚠️ 5 set 2026, corretto DOPO il collaudo dal vivo: qui c'era scritto
@@ -400,9 +409,9 @@
              (schedaUnPulsante): le altre voci compaiono DENTRO la finestra che
              si apre. Una spiegazione che manda a cercare un pulsante che non
              esiste e' peggio di nessuna spiegazione. -->
-        <p class="app-op-p"><b>Ognuno ha il suo codice.</b> Dopo aver aggiunto la persona, premi <b>Apri</b> sulla sua scheda: in cima alla finestra trovi <b>🔗 Copia link</b>, <b>💬 Invia su WhatsApp</b> e <b>📷 Mostra il QR</b> da fargli inquadrare col telefono.</p>
+        <p class="app-op-p"><b>Ognuno ha il suo codice.</b> Dopo aver aggiunto la persona, premi <b>Apri</b> sulla sua scheda: in cima alla finestra trovi <b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copia link</b>, <b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Invia su WhatsApp</b> e <b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Mostra il QR</b> da fargli inquadrare col telefono.</p>
         <div class="app-op-btns">
-          <button class="btn" data-action="appoperaio">📱 Guarda com'è fatta</button>
+          <button class="btn" data-action="appoperaio"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> Guarda com'è fatta</button>
         </div>
       </div>
       <div class="grid" id="dip-list"></div>
@@ -511,7 +520,7 @@
     </section>
 
     <section id="preventivi">
-      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn btn-ai" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai">✨ Genera con AI</button></div></div>
+      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn btn-ai" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Genera con AI</button></div></div>
       <div class="gal-intro">Puoi scriverlo a mano, dettarlo all'AI, o farlo nascere da un <b>computo metrico</b> già fatto.</div>
       <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
@@ -563,7 +572,7 @@
     <section id="lavoro-foto">
       <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="btn add" data-action="lf-back">‹ Indietro</button></div>
       <div class="gal-intro">Le foto che carichi qui le vedrà l'operaio nella sua agenda.</div>
-      <div class="field"><label>📷 Foto "cosa fare"</label>
+      <div class="field"><label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto "cosa fare"</label>
         <input type="file" id="lf-file" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="lf-file">＋ Aggiungi foto</label></div>
       <div class="thumbs" id="lf-grid"></div>

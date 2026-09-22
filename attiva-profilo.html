@@ -61,18 +61,27 @@
     }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <h1>🚀 Attiva il tuo profilo</h1>
+    <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1 0-2.9a2 2 0 0 0-3-.1z"/><path d="M12 15 9 12a15 15 0 0 1 8-9 15 15 0 0 1-3 11z"/><path d="M9 12H6s.3-2.2 1.5-3.4C8.6 7.4 12 7 12 7"/><path d="M12 15v3s2.2-.3 3.4-1.5C16.6 15.4 17 12 17 12"/></svg> Attiva il tuo profilo</h1>
     <p>Completa la registrazione e accedi al pannello TrovaImpresa</p>
   </div>
 
   <div class="content" id="main-content">
     <div class="loading-wrap" id="loading-state">
-      <div class="spin">⏳</div>
+      <div class="spin"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
       <div>Caricamento dati...</div>
     </div>
   </div>

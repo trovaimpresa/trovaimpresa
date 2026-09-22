@@ -180,6 +180,15 @@
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
@@ -190,11 +199,11 @@
     <a href="prezzi.html" class="nav-link">Prezzi imprese</a>
     <a href="login-impresa.html" class="nbtn nbtn-verde">Entra (Imprese)</a>
   </div>
-  <a href="#" id="nav-prenota" class="nbtn nbtn-arancio">📢 Prenota uno spazio</a>
+  <a href="#" id="nav-prenota" class="nbtn nbtn-arancio"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Prenota uno spazio</a>
 </nav>
 
 <section class="hero">
-  <div class="hero-badge">📢 Spazi pubblicitari disponibili</div>
+  <div class="hero-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Spazi pubblicitari disponibili</div>
   <h1>Fai conoscere la tua azienda<br>nella <span>tua città</span></h1>
   <p>Scegli lo spazio e la città. Il tuo banner resta online e si rinnova da solo: disdici quando vuoi.</p>
   <div class="hero-stats">
@@ -269,11 +278,11 @@
           </select>
         </div>
         <div class="citta-search-wrap">
-          <span class="csearch-icon">🔍</span>
+          <span class="csearch-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
           <input type="text" class="citta-search" id="citta-input" placeholder="Cerca una città...">
         </div>
         <div class="citta-grid" id="citta-grid"></div>
-        <p style="font-size:11px;color:var(--light);margin-top:8px">💡 Clicca per selezionare</p>
+        <p style="font-size:11px;color:var(--light);margin-top:8px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Clicca per selezionare</p>
       </div>
     </div>
     <div>
@@ -291,7 +300,7 @@
         </div>
       </div>
       <div class="riepilogo-box">
-        <div class="riepilogo-title">📋 Riepilogo</div>
+        <div class="riepilogo-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Riepilogo</div>
         <div class="ric-row"><span>Posizione</span><span id="r-formato">—</span></div>
         <div class="ric-row"><span>Città</span><span id="r-citta">—</span></div>
         <div class="ric-row"><span>Rinnovo</span><span id="r-periodo">ogni mese</span></div>
@@ -347,18 +356,18 @@
         <div style="font-size:13px;color:#0066ff;line-height:1.6;">Dopo la conferma verrai reindirizzato al pagamento sicuro Stripe. Il banner diventa live entro 24 ore dal pagamento confermato.</div>
       </div>
 
-      <button class="btn-ordina" id="btn-ordina">💳 Conferma e vai al pagamento</button>
+      <button class="btn-ordina" id="btn-ordina"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg> Conferma e vai al pagamento</button>
       <p class="note-small">Pagamento sicuro tramite Stripe</p>
     </div>
 
     <div class="sidebar-order">
-      <h3>🧾 Il tuo ordine</h3>
+      <h3><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M16 8H8"/><path d="M16 12H8"/></svg> Il tuo ordine</h3>
       <div id="ord-rows"></div>
       <div class="ord-total">
         <span class="ord-total-label">Totale</span>
         <span class="ord-total-num" id="ord-totale">€0</span>
       </div>
-      <div style="font-size:11px;color:var(--light);margin-top:10px;line-height:1.6">✅ Banner live entro 24 ore<br>✅ Pagamento sicuro Stripe</div>
+      <div style="font-size:11px;color:var(--light);margin-top:10px;line-height:1.6"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Banner live entro 24 ore<br><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Pagamento sicuro Stripe</div>
     </div>
   </div>
 </div>
@@ -366,7 +375,7 @@
 <!-- SUCCESS (fallback) -->
 <div class="step-page" id="page-ok">
   <div class="success-wrap">
-    <div class="big-emoji">🎉</div>
+    <div class="big-emoji"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21 8.5 8.5 17 17z"/><path d="M15 5a2 2 0 0 1 2-2"/><path d="M21 9a2 2 0 0 0-2 2"/><circle cx="19" cy="5" r="1"/><circle cx="14" cy="10" r="1"/></svg></div>
     <h2>Ordine ricevuto!</h2>
     <p>Grazie <strong id="ok-nome"></strong>! Stiamo elaborando la richiesta.</p>
     <a href="index.html" style="display:inline-block;background:var(--verde);color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;text-decoration:none">Torna alla home →</a>
@@ -376,7 +385,7 @@
 <!-- DIALOG SPAZIO OCCUPATO -->
 <div class="dlg-overlay" id="dlg-occupato">
   <div class="dlg">
-    <div class="dlg-emoji" id="dlg-occupato-emoji">🚫</div>
+    <div class="dlg-emoji" id="dlg-occupato-emoji"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></div>
     <h3 id="dlg-occupato-titolo">Spazio già occupato</h3>
     <p id="dlg-occupato-msg"></p>
     <p id="dlg-esito" style="display:none;font-size:14px;line-height:1.6;color:var(--dark);margin-bottom:18px;"></p>

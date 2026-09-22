@@ -54,11 +54,20 @@
     .toggle-pw:hover { color: #2e78cc; }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🗑️ Cancella Iscrizione</h1>
+      <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Cancella Iscrizione</h1>
       <p>Rimuovi il tuo profilo da TrovaImpresa</p>
     </div>
 
@@ -67,7 +76,7 @@
       <!-- FORM -->
       <div id="form-box">
         <div class="warning-box">
-          <strong>⚠️ Attenzione — azione irreversibile</strong>
+          <strong><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Attenzione — azione irreversibile</strong>
           Il tuo profilo, le foto e tutti i dati associati verranno eliminati definitivamente.
         </div>
 
@@ -75,9 +84,9 @@
           <label>Sei registrato come...</label>
           <select id="categoria">
             <option value="">— Seleziona categoria —</option>
-            <option value="artigiano">🔨 Artigiano</option>
-            <option value="impresa">🏗️ Impresa</option>
-            <option value="negozio">🏪 Negozio</option>
+            <option value="artigiano"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Artigiano</option>
+            <option value="impresa"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Impresa</option>
+            <option value="negozio"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18l-1.5 11a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2z"/><path d="M3 9 5 3h14l2 6"/><path d="M9 13h6"/></svg> Negozio</option>
             <option value="professionista">👔 Professionista</option>
           </select>
         </div>
@@ -103,7 +112,7 @@
 
       <!-- CONFERMA -->
       <div class="confirm-box" id="confirm-box">
-        <div class="icon">⚠️</div>
+        <div class="icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
         <h2>Sei sicuro?</h2>
         <p>Stai per eliminare definitivamente il tuo profilo. Questa azione <strong>non può essere annullata</strong>.</p>
 
@@ -134,7 +143,7 @@
 
       <!-- SUCCESSO -->
       <div class="success-box" id="success-box">
-        <div class="icon">✅</div>
+        <div class="icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
         <h2>Iscrizione cancellata</h2>
         <p>Il tuo profilo è stato eliminato con successo. Grazie per aver usato TrovaImpresa.</p>
         <a href="index.html" class="btn-home">Torna alla homepage</a>

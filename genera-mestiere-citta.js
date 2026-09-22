@@ -913,15 +913,15 @@ function combacia(impresa, mestiere) {
    schede sono identiche a quelle delle pagine citta'. */
 function cartellino(i) {
   const badge = i.piano === 'premium'
-    ? '<span style="background:#7b2fbe;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">💎 Premium</span>' : '';
+    ? '<span style="background:#7b2fbe;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="m12 21 4-12-3-6"/><path d="m12 21-4-12 3-6"/></svg> Premium</span>' : '';
   const verificata = i.verificata
     ? '<span style="color:#0066ff;font-size:12px;font-weight:700;margin-left:6px;">✓ Verificata</span>' : '';
-  const rating = i.valutazione_media > 0 ? `⭐ ${Number(i.valutazione_media).toFixed(1)}` : '⭐ Nuova';
+  const rating = i.valutazione_media > 0 ? `<svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> ${Number(i.valutazione_media).toFixed(1)}` : '<svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Nuova';
   const desc = i.descrizione
     ? `<p style="font-size:0.85rem;color:#666;margin:6px 0 0;line-height:1.4;">${esc(String(i.descrizione).slice(0, 120))}${i.descrizione.length > 120 ? '…' : ''}</p>` : '';
   return `    <a href="/profilo-impresa?id=${esc(i.id)}" style="display:block;background:white;border-radius:12px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-decoration:none;color:#1a1a1a;">
       <div style="font-weight:700;font-size:1rem;">${esc(i.nome || 'Impresa')}${badge}${verificata}</div>
-      <div style="font-size:0.85rem;color:#555;margin-top:4px;">🏗️ ${esc(i.mestiere || i.tipo || 'Edilizia')} · 📍 ${esc(i.citta || '')} · ${rating}</div>${desc}
+      <div style="font-size:0.85rem;color:#555;margin-top:4px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> ${esc(i.mestiere || i.tipo || 'Edilizia')} · <svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> ${esc(i.citta || '')} · ${rating}</div>${desc}
     </a>`;
 }
 
@@ -979,7 +979,7 @@ function bloccoImprese(m, c, imprese) {
   const elenco = altri.length ? `
     <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:#0a2a4d;margin:30px 0 12px;">Tutti gli altri a ${esc(c.nome)}</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 18px;margin-bottom:18px;">
-${altri.map(i => `      <a href="/profilo-impresa?id=${esc(i.id)}" style="color:#12233a;text-decoration:none;padding:7px 0;border-bottom:1px solid #e7ecf3;font-size:0.95rem;">${esc(i.nome || 'Impresa')}${i.piano === 'premium' ? ' 💎' : ''}${i.verificata ? ' <span style="color:#0066ff;">✓</span>' : ''}</a>`).join('\n')}
+${altri.map(i => `      <a href="/profilo-impresa?id=${esc(i.id)}" style="color:#12233a;text-decoration:none;padding:7px 0;border-bottom:1px solid #e7ecf3;font-size:0.95rem;">${esc(i.nome || 'Impresa')}${i.piano === 'premium' ? ' <svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="m12 21 4-12-3-6"/><path d="m12 21-4-12 3-6"/></svg>' : ''}${i.verificata ? ' <span style="color:#0066ff;">✓</span>' : ''}</a>`).join('\n')}
     </div>${avanzano ? `
     <p style="font-size:0.9rem;color:#5b6b80;">…e altri ${avanzano} su TrovaImpresa a ${esc(c.nome)}.</p>` : ''}` : '';
 
@@ -1177,7 +1177,7 @@ ${JSON.stringify(schemaBc, null, 2)}
 <div class="hero">
   <h1>${esc(m.nome)} a ${esc(c.nome)}</h1>
   <p>${esc(m.prezzo)}, cosa chiedere prima di firmare e chi trovi nella zona di ${esc(c.nome)}. ${P.gratuiti}</p>
-  <a href="${P.cercaUrl(c)}" class="hero-btn">🔍 ${P.chiediUn} a ${esc(c.nome)}</a>
+  <a href="${P.cercaUrl(c)}" class="hero-btn"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> ${P.chiediUn} a ${esc(c.nome)}</a>
   <div class="hero-iscriviti">
     <p>Sei ${esc(m.articolo)}${esc(m.nome.toLowerCase())} a ${esc(c.nome)}? I clienti ti cercano proprio qui.</p>
     <a href="${regUrl(m)}">${regTesto(m)}</a>

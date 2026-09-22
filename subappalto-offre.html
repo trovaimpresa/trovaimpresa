@@ -116,6 +116,15 @@
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
@@ -134,13 +143,13 @@
 </header>
 
 <div class="top-bar">
-  <h1>🙋 Sono Subappaltatore</h1>
+  <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Sono Subappaltatore</h1>
   <p>Offri la tua disponibilità e fatti trovare dalle imprese che cercano subappaltatori specializzati</p>
 </div>
 
 <div class="page-body">
-  <button class="btn-pubblica" onclick="apriModal()">🙋 Offri disponibilità</button>
-  <div id="lista-imprese"><div class="loading-state">⏳ Caricamento...</div></div>
+  <button class="btn-pubblica" onclick="apriModal()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità</button>
+  <div id="lista-imprese"><div class="loading-state"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Caricamento...</div></div>
   <div id="mappa-offre" style="height:420px;border-radius:16px;margin-top:28px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.10);position:relative;z-index:0;"></div>
 </div>
 
@@ -148,7 +157,7 @@
 <div class="modal-overlay" id="modal-offre" onclick="if(event.target===this)chiudiModal()">
   <div class="modal">
     <div class="modal-header">
-      <h2>🙋 Offri disponibilità come subappaltatore</h2>
+      <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità come subappaltatore</h2>
       <button class="modal-close" onclick="chiudiModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -250,10 +259,10 @@
         </div>
       </div>
       <input class="form-input" id="f-website" name="website" type="text" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;opacity:0;">
-      <button class="btn-submit" onclick="salva()">🙋 Offri disponibilità</button>
+      <button class="btn-submit" onclick="salva()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità</button>
       <div class="form-msg" id="form-msg"></div>
       <div id="gestione-link" style="display:none; margin-top:14px; padding:14px; border:2px solid #d4a017; border-radius:10px; background:#fff8e8;">
-        <div style="font-weight:700; color:#7a5200; margin-bottom:6px;">🔑 Salva questo link per modificare o cancellare il tuo annuncio:</div>
+        <div style="font-weight:700; color:#7a5200; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Salva questo link per modificare o cancellare il tuo annuncio:</div>
         <a id="gestione-link-url" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#a07a00; font-weight:600;"></a>
       </div>
     </div>

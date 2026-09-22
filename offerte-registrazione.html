@@ -366,6 +366,15 @@
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
@@ -386,7 +395,7 @@
 
 <div class="container">
     <div class="header">
-        <h1>📤 Pubblica Offerta di Lavoro</h1>
+        <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Pubblica Offerta di Lavoro</h1>
         <p>Pubblica la tua offerta e trova i candidati ideali</p>
     </div>
 
@@ -411,7 +420,7 @@
 
     <div class="form-content">
         <div class="success-message" id="successMsg">
-            ✅ Offerta pubblicata con successo! Verrai reindirizzato tra 2 secondi...
+            <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Offerta pubblicata con successo! Verrai reindirizzato tra 2 secondi...
         </div>
 
         <form id="offerteForm">
@@ -420,13 +429,13 @@
                 <div class="step-title">Dati Azienda</div>
 
                 <div class="senza-account">
-                  <h3>✅ Non serve iscriversi</h3>
+                  <h3><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Non serve iscriversi</h3>
                   <p>Compila il modulo e pubblica. <strong>Gratis, senza account.</strong> Quando hai finito ti diamo un link per riaprire o chiudere il tuo annuncio quando vuoi — e te lo mandiamo anche per email.</p>
                   <span class="piccolo">Se invece sei già iscritto, accedi qui sotto e i tuoi dati si compilano da soli.</span>
                 </div>
 
                 <div class="login-box">
-                    <h3>🔐 Sei già iscritto? Accedi e i campi si compilano da soli (facoltativo)</h3>
+                    <h3><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Sei già iscritto? Accedi e i campi si compilano da soli (facoltativo)</h3>
                     <div class="login-row">
                         <input type="email" id="login-email" placeholder="La tua email">
                         <div class="password-wrapper">
@@ -436,7 +445,7 @@
                         <button class="btn-login" onclick="accediImpresa()">Accedi</button>
                     </div>
                     <div class="login-msg" id="login-msg"></div>
-                    <div class="campi-compilati" id="campi-compilati">✅ Dati compilati automaticamente! Puoi procedere.</div>
+                    <div class="campi-compilati" id="campi-compilati"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Dati compilati automaticamente! Puoi procedere.</div>
                 </div>
 
                 <div class="campo-nascosto" aria-hidden="true">
@@ -465,7 +474,7 @@
                     <div class="file-input-wrapper">
                         <label class="file-input-label">
                             <input type="file" id="logo-azienda" accept="image/jpeg,image/png">
-                            <div>🏢 Carica il logo dell'azienda</div>
+                            <div><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg> Carica il logo dell'azienda</div>
                             <div class="file-name" id="logoName"></div>
                         </label>
                     </div>
@@ -531,7 +540,7 @@
                     <select id="citta-offerta" disabled required>
                         <option value="">-- Seleziona città --</option>
                     </select>
-                    <button type="button" class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()">📍 Localizzami</button>
+                    <button type="button" class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Localizzami</button>
                 </div>
 
                 <div class="form-group">
@@ -735,12 +744,12 @@
                 </div>
 
                 <p style="font-size: 13px; color: #999; margin-bottom: 20px;">
-                    📍 La tua offerta sarà visibile nella sezione "Ricerca Offerte" e i candidati potranno contattarti direttamente.
+                    <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> La tua offerta sarà visibile nella sezione "Ricerca Offerte" e i candidati potranno contattarti direttamente.
                 </p>
 
                 <div class="buttons">
                     <button type="button" class="btn btn-prev" onclick="prevStep()">← Indietro</button>
-                    <button type="submit" class="btn btn-submit">✅ Pubblica Offerta</button>
+                    <button type="submit" class="btn btn-submit"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Pubblica Offerta</button>
                 </div>
             </div>
         </form>

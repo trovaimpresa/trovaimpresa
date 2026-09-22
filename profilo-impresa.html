@@ -758,6 +758,15 @@ nav img{height:36px}
 }
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
@@ -795,11 +804,11 @@ nav img{height:36px}
 <div class="hero" id="hero-section">
   <div class="hero-cover" id="hero-cover"><div class="cover-img"></div></div>
   <div class="hero-riga">
-    <div class="hero-avatar" id="avatar-wrap">🏗️</div>
+    <div class="hero-avatar" id="avatar-wrap"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg></div>
     <div class="hero-left-col">
-      <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
+      <div class="hero-tipo" id="profile-tipo-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Artigiano</div>
       <div class="hero-nome" id="profile-name">Caricamento...</div>
-      <div class="hero-loc" id="profile-city">📍 —</div>
+      <div class="hero-loc" id="profile-city"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> —</div>
       <div class="hero-badges" id="profile-badges"></div>
       <!-- I NUMERI (1 settembre 2026): erano le tre carte bianche sotto la
            fascia. Misure e colori copiati da li' e dai bollini: niente di
@@ -807,9 +816,9 @@ nav img{height:36px}
            come gia' faceva la valutazione: oggi 0 imprese su 82 hanno una
            recensione, e uno «0» grande in fascia fa piu' male che bene. -->
       <div class="hero-num" id="hero-num">
-        <div class="hn"><span class="hn-i">⭐</span><span class="hn-n" id="stat-rating">—</span><span class="hn-l">Valutazione</span></div>
-        <div class="hn"><span class="hn-i">💬</span><span class="hn-n" id="stat-recensioni">—</span><span class="hn-l">Recensioni</span></div>
-        <div class="hn"><span class="hn-i">🏆</span><span class="hn-n" id="stat-anni">—</span><span class="hn-l">Anni esp.</span></div>
+        <div class="hn"><span class="hn-i"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span><span class="hn-n" id="stat-rating">—</span><span class="hn-l">Valutazione</span></div>
+        <div class="hn"><span class="hn-i"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="hn-n" id="stat-recensioni">—</span><span class="hn-l">Recensioni</span></div>
+        <div class="hn"><span class="hn-i"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v5a6 6 0 0 1-12 0z"/><path d="M6 6H4a2 2 0 0 0 2 4"/><path d="M18 6h2a2 2 0 0 1-2 4"/><path d="M9 20h6"/><path d="M12 15v5"/></svg></span><span class="hn-n" id="stat-anni">—</span><span class="hn-l">Anni esp.</span></div>
       </div>
     </div>
   </div>
@@ -839,7 +848,7 @@ nav img{height:36px}
     <div class="riga-rec">
     <!-- RECENSIONI -->
     <div class="card rec-card" id="recensioni" style="border-top-color:#0066ff">
-      <div class="card-title">✍️ Lascia la tua recensione</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Lascia la tua recensione</div>
       <!-- 3 set 2026, Alessio: «una risposta lì da sola che senso ha? la devi
            togliere. Io voglio quello spazio per le recensioni e uno spazio che
            dice guarda le recensioni lasciate da altri clienti». Quindi qui NON si
@@ -850,10 +859,10 @@ nav img{height:36px}
            non ci sono piu'. -->
       <div id="rec-tab-form">
         <div class="st-grid">
-          <div class="st-gruppo st-box"><label>⭐ Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
-          <div class="st-gruppo st-box"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setSG('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('puntualita',5)">★</span></div></div>
-          <div class="st-gruppo st-box"><label>💰 Prezzo</label><div class="st-row" id="stelle-prezzo"><span class="stella" data-v="1" onclick="setSG('prezzo',1)">★</span><span class="stella" data-v="2" onclick="setSG('prezzo',2)">★</span><span class="stella" data-v="3" onclick="setSG('prezzo',3)">★</span><span class="stella" data-v="4" onclick="setSG('prezzo',4)">★</span><span class="stella" data-v="5" onclick="setSG('prezzo',5)">★</span></div></div>
-          <div class="st-gruppo st-box"><label>🤝 Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setSG('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setSG('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setSG('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setSG('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setSG('professionalita',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setSG('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('puntualita',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Prezzo</label><div class="st-row" id="stelle-prezzo"><span class="stella" data-v="1" onclick="setSG('prezzo',1)">★</span><span class="stella" data-v="2" onclick="setSG('prezzo',2)">★</span><span class="stella" data-v="3" onclick="setSG('prezzo',3)">★</span><span class="stella" data-v="4" onclick="setSG('prezzo',4)">★</span><span class="stella" data-v="5" onclick="setSG('prezzo',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 1 0-2.8l.8-.8a2 2 0 0 1 2.8 0L21 9"/><path d="m21 3-5 5"/><path d="M3 9l3.5-3.5a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L6 13"/></svg> Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setSG('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setSG('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setSG('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setSG('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setSG('professionalita',5)">★</span></div></div>
         </div>
         <textarea class="rta" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
         <div class="r2" style="margin-bottom:10px">
@@ -864,7 +873,7 @@ nav img{height:36px}
           <div class="r2"><input type="text" class="ri" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0"><input type="email" class="ri" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0"></div>
           <p style="font-size:13px;color:#777;margin:8px 0 12px">L'email non sarà pubblica.</p>
         </div>
-        <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
+        <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Pubblica recensione</button>
         <div class="rec-msg" id="rec-msg"></div>
       </div>
     </div>
@@ -882,21 +891,21 @@ nav img{height:36px}
     <div class="cella-prev">
     <a class="btn-prev" id="cta-principale" onclick="apriRichiesta()">
       <div class="sidebar-trust">
-        <div class="st-icon">🛡️</div>
+        <div class="st-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
       </div>
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span>📋 Richiedi preventivo gratuito</span>
+      <span><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Richiedi preventivo gratuito</span>
     </a>
     <ul class="contacts contacts-card">
-      <li id="contact-indirizzo"><div class="ci">📍</div><span>—</span></li>
-      <li id="contact-tel"><div class="ci">📞</div><button type="button" class="mostra-tel" id="btn-mostra-tel" onclick="mostraNumero()">Mostra numero</button><a href="#" id="tel-link" style="display:none">—</a></li>
-      <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
+      <li id="contact-indirizzo"><div class="ci"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div><span>—</span></li>
+      <li id="contact-tel"><div class="ci"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg></div><button type="button" class="mostra-tel" id="btn-mostra-tel" onclick="mostraNumero()">Mostra numero</button><a href="#" id="tel-link" style="display:none">—</a></li>
+      <li id="contact-email"><div class="ci"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></div><a href="#" id="email-link">—</a></li>
       <!-- ⛔ 1 settembre 2026: il WhatsApp di 26 imprese non si vedeva da
            nessuna parte. Adesso c'e', e come le altre righe compare solo se
            l'impresa ce l'ha. L'emoji e' la stessa del pannello (📱). -->
-      <li id="contact-whatsapp" style="display:none"><div class="ci">📱</div><a href="#" id="wa-link" target="_blank" rel="noopener">—</a></li>
-      <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
+      <li id="contact-whatsapp" style="display:none"><div class="ci"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg></div><a href="#" id="wa-link" target="_blank" rel="noopener">—</a></li>
+      <li id="contact-sito" style="display:none"><div class="ci"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14"/><path d="M15 6v14"/></svg></div><a href="#" id="sito-link" target="_blank">—</a></li>
       <!-- ⛔ 3 SETTEMBRE 2026 — GLI ORARI TORNANO, MA VERI.
            Il vecchio orario fisso era stato tolto perche' era scritto in pagina
            uguale per tutte le imprese: inventato. Adesso questa riga legge la
@@ -905,7 +914,7 @@ nav img{height:36px}
            Contato prima di accendere: 0 imprese su 87 l'hanno riempita, quindi
            oggi la riga non si vede su nessuna scheda. Si vedra' man mano che le
            imprese la scrivono. -->
-      <li id="contact-orari" style="display:none"><div class="ci">🕐</div><span id="orari-testo">—</span></li>
+      <li id="contact-orari" style="display:none"><div class="ci"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><span id="orari-testo">—</span></li>
     </ul>
     <!-- 3 set 2026 — LO SPAZIO DELLE RECENSIONI DEGLI ALTRI — sta nella colonna del preventivo, sotto i contatti, cosi' riempie il vuoto («troppo spazio sotto preventivi, allinea», 3 set) (Alessio: «voglio uno
          spazio che dice guarda le recensioni lasciate da altri clienti, dove ci
@@ -919,7 +928,7 @@ nav img{height:36px}
            Niente elenco qui: le recensioni si leggono la'. -->
       <a class="rec-altri-link" id="rec-altri-link" href="#">
         <span class="rec-altri-voto" id="rec-altri-voto"><b>—</b></span>
-        <span class="rec-altri-txt"><b>💬 Guarda le recensioni lasciate da altri clienti</b><small id="rec-altri-sub">Commenti dei clienti e risposte dell'impresa</small></span>
+        <span class="rec-altri-txt"><b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Guarda le recensioni lasciate da altri clienti</b><small id="rec-altri-sub">Commenti dei clienti e risposte dell'impresa</small></span>
         <span class="rec-altri-vai">Apri →</span>
       </a>
     </div>
@@ -929,7 +938,7 @@ nav img{height:36px}
 
     <!-- CHAT CON L'IMPRESA -->
     <div class="card" id="card-chat-impresa">
-      <div class="card-title" id="scrivi-title">💬 Scrivi all'impresa</div>
+      <div class="card-title" id="scrivi-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Scrivi all'impresa</div>
       <div class="chat-box">
         <div id="chat-start-form">
           <div class="chat-field"><label>Nome</label><input type="text" id="chat-nome" placeholder="Il tuo nome"></div>
@@ -951,15 +960,15 @@ nav img{height:36px}
                nessuna riga viene cancellata, l'impresa tiene la sua copia.
                ⚠️ Il nome del bottone e' cambiato apposta: «Elimina» prometteva
                una cosa che adesso non fa piu'. -->
-          <button onclick="togliConversazioneDaQui()" style="margin-top:10px;padding:8px 14px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🗑 Togli da questo dispositivo</button>
-          <div id="chat-bloccato-box" style="display:none;margin-top:10px;padding:12px 14px;background:#c0392b;color:white;border-radius:8px;font-size:14px;font-weight:700">🚫 Sei stato bloccato da questa impresa e non puoi più inviare messaggi.</div>
+          <button onclick="togliConversazioneDaQui()" style="margin-top:10px;padding:8px 14px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Togli da questo dispositivo</button>
+          <div id="chat-bloccato-box" style="display:none;margin-top:10px;padding:12px 14px;background:#c0392b;color:white;border-radius:8px;font-size:14px;font-weight:700"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg> Sei stato bloccato da questa impresa e non puoi più inviare messaggi.</div>
         </div>
       </div>
     </div>
 
     <!-- INFORMAZIONI (vista unificata) -->
     <div class="card" id="card-info" style="display:none;border-top-color:#0066ff">
-      <div class="card-title">📋 Informazioni</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Informazioni</div>
       <div class="info-section" id="info-desc-wrap" style="display:none">
         <div class="info-label">Chi siamo</div>
         <p class="desc" id="profile-desc"></p>
@@ -992,22 +1001,22 @@ nav img{height:36px}
          ⚠️ Se nessun mestiere combacia resta la guida generale, che vale per
          tutti: meglio una risposta larga che nessuna risposta. -->
     <div class="card" id="card-guide-prezzi" style="display:none;border-top-color:#FF6B35">
-      <div class="card-title">💰 Quanto costa</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Quanto costa</div>
       <p class="gp-intro">Prezzi veri di cantiere, aggiornati al 2026.</p>
       <ul class="gp-lista" id="gp-lista"></ul>
     </div>
 
     <!-- MAPPA -->
     <div class="card" id="card-mappa-profilo" style="display:none;border-top-color:#0066ff">
-      <div class="card-title">📍 Dove siamo</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Dove siamo</div>
       <div id="mappa-profilo"></div>
     </div>
 
     <!-- FOTO -->
     <div class="card" id="card-foto-lavori" style="border-top-color:#0066ff;display:none">
-      <div class="card-title">📸 Foto dei lavori</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto dei lavori</div>
       <div class="fgrid" id="foto-lavori-grid">
-        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px">📷 Nessuna foto caricata</div>
+        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Nessuna foto caricata</div>
       </div>
     </div>
 
@@ -1021,7 +1030,7 @@ nav img{height:36px}
 
     <!-- CERTIFICAZIONI -->
     <div class="card" id="card-certificazioni" style="display:none;border-top-color:#0066ff">
-      <div class="card-title">🏆 Certificazioni e Patentini</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v5a6 6 0 0 1-12 0z"/><path d="M6 6H4a2 2 0 0 0 2 4"/><path d="M18 6h2a2 2 0 0 1-2 4"/><path d="M9 20h6"/><path d="M12 15v5"/></svg> Certificazioni e Patentini</div>
       <div id="lista-certificazioni-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
     </div>
 
@@ -1030,7 +1039,7 @@ nav img{height:36px}
          e il negozio le compilava da modifica-profilo.html, ma NESSUNA pagina
          pubblica le leggeva: il cliente non le ha mai viste. -->
     <div class="card" id="card-prodotti-marchi" style="display:none;border-top-color:#0066ff">
-      <div class="card-title">🧱 Cosa trovi qui</div>
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9.5h18"/><path d="M3 15h18"/><path d="M9 4v5.5"/><path d="M15 4v5.5"/><path d="M12 9.5V15"/><path d="M7 15v5"/><path d="M17 15v5"/></svg> Cosa trovi qui</div>
       <div id="pm-prodotti" style="display:none;margin-bottom:16px">
         <div style="font-size:14px;font-weight:700;color:#61738a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Prodotti trattati</div>
         <div id="pm-prodotti-lista" style="display:flex;flex-wrap:wrap;gap:8px"></div>
@@ -1060,7 +1069,7 @@ nav img{height:36px}
 <div class="prev-section" id="sec-preventivo">
   <div class="prev-topbar">
     <a class="prev-back" onclick="hidePreventivo()">← Torna</a>
-    <div class="prev-topbar-title">📋 Richiedi un sopralluogo per un preventivo</div>
+    <div class="prev-topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Richiedi un sopralluogo per un preventivo</div>
   </div>
   <div class="prev-card">
     <div class="prev-rassicura">
@@ -1129,7 +1138,7 @@ nav img{height:36px}
       </label>
     </div>
     <div id="prev-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.5;margin-bottom:12px"></div>
-    <button class="btn-sub" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
+    <button class="btn-sub" onclick="submitPreventivo()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Invia richiesta gratuita</button>
     <p class="prev-aiuto" style="text-align:center;margin-top:12px">Nessun costo, nessun abbonamento, nessuna carta di credito.</p>
   </div>
 </div>
@@ -1138,7 +1147,7 @@ nav img{height:36px}
 <div class="prev-section" id="sec-incarico">
   <div class="prev-topbar">
     <a class="prev-back" onclick="hideIncarico()">← Torna</a>
-    <div class="prev-topbar-title">📋 Affida un incarico</div>
+    <div class="prev-topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Affida un incarico</div>
   </div>
   <div class="prev-card">
     <p class="prev-sub">Nessun impegno: il professionista ti risponde con un preventivo di onorario.</p>
@@ -1149,7 +1158,7 @@ nav img{height:36px}
     <div class="fr2"><div class="fg"><label class="fl">Il tuo nome</label><input type="text" class="fi2" id="inc-nome" placeholder="Nome e cognome"></div><div class="fg"><label class="fl">Telefono</label><input type="tel" class="fi2" id="inc-telefono" placeholder="+39 333 1234567"></div></div>
     <div class="fg"><label class="fl">Email</label><input type="email" class="fi2" id="inc-email" placeholder="latua@email.it"></div>
     <div id="inc-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
-    <button class="btn-sub" onclick="submitIncarico()">📋 Invia richiesta di incarico</button>
+    <button class="btn-sub" onclick="submitIncarico()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Invia richiesta di incarico</button>
   </div>
 </div>
 
@@ -2694,8 +2703,8 @@ document.addEventListener('DOMContentLoaded',function(){
 }
 </style>
 <div class="cta-bar-mobile" id="cta-bar-mobile">
-  <a class="cbm-prev" id="cta-bar-prev" onclick="apriRichiesta()">📋 Preventivo gratuito</a>
-  <a class="cbm-call" id="cta-bar-tel" href="#">📞 Chiama</a>
+  <a class="cbm-prev" id="cta-bar-prev" onclick="apriRichiesta()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Preventivo gratuito</a>
+  <a class="cbm-call" id="cta-bar-tel" href="#"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> Chiama</a>
 </div>
 <script src="/js/convenzioni.js"></script>
 </body>

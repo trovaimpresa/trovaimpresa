@@ -22,10 +22,19 @@
     .msg.err { display:block; background:#fdeae1; color:#c0392b; }
     .link { display:block; text-align:center; margin-top:18px; font-size:13px; color:#69756e; }
   </style>
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
   <div class="card">
-    <h1>📥 Importa Bandi</h1>
+    <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Importa Bandi</h1>
     <div class="sub">Aggiorna i bandi e fondi perduti dalla fonte ufficiale incentivi.gov.it.</div>
 
     <ol>

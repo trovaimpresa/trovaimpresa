@@ -266,12 +266,21 @@
   .op-avv-t{flex:1 1 200px;min-width:0;}
   .op-storto{border-color:#d97706 !important;box-shadow:0 0 0 3px #fff6e5 !important;}
 </style>
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
 <!-- GATE: non collegato -->
 <div id="gate" class="hidden">
-  <div class="ic">🔒</div>
+  <div class="ic"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
   <h2 id="gate-titolo">Apri il tuo invito</h2>
   <p id="gate-msg">Per entrare usa il link che ti ha mandato la tua impresa.</p>
   <a class="btn" id="gate-btn" href="gestionale-invito.html">Vai al collegamento</a>
@@ -313,9 +322,9 @@
          la mattina: arriva, timbra, e solo a fine giornata scrive materiali e
          ore. Funziona anche senza campo (vedi il codice, sezione TIMBRATURA). -->
     <div class="tmb hidden" id="tmb-card">
-      <div class="tmb-tit">🕐 Timbratura</div>
+      <div class="tmb-tit"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Timbratura</div>
       <div class="tmb-coda hidden" id="tmb-coda">
-        <span class="tmb-clessidra">⏳</span>
+        <span class="tmb-clessidra"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
         <span><b id="tmb-coda-n">1 timbratura da mandare</b>
         <span id="tmb-coda-t">Nessun campo. Parte da sola appena torna la rete: puoi chiudere l'app.</span></span>
       </div>
@@ -329,7 +338,7 @@
       <div id="tmb-lista"></div>
     </div>
 
-    <button class="rv-apri hidden" id="btn-rapido">📝 Segna la giornata</button>
+    <button class="rv-apri hidden" id="btn-rapido"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Segna la giornata</button>
 
     <div class="day-title" id="day-title">Lavori di oggi</div>
     <div id="day-list"></div>
@@ -348,7 +357,7 @@
       <div class="label">La tua carta aziendale</div>
       <div id="carta-info"></div>
       <div id="carta-storico"></div>
-      <button class="btn-line" id="btn-carta-spesa" style="width:100%;margin-top:10px">💳 Registra una spesa</button>
+      <button class="btn-line" id="btn-carta-spesa" style="width:100%;margin-top:10px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg> Registra una spesa</button>
       <div id="carta-form" class="hidden" style="margin-top:10px">
         <input type="text" inputmode="decimal" id="carta-imp" placeholder="Importo speso (es. 12,50)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box" data-euro>
         <input type="text" id="carta-causale" placeholder="Per cosa? (es. viti e tasselli)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
@@ -439,7 +448,7 @@
       <div class="label">Le tue foto</div>
       <div class="foto-grid" id="lv-foto"></div>
       <input type="file" id="lv-file" accept="image/*" capture="environment" class="hidden">
-      <button class="btn-line" id="btn-foto" style="width:100%">📷 Aggiungi foto</button>
+      <button class="btn-line" id="btn-foto" style="width:100%"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Aggiungi foto</button>
     </div>
 
     <div class="panel">

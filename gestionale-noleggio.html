@@ -375,7 +375,7 @@
         <h1>Noleggio</h1>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="az-btn" data-action="azienda" title="Dati azienda, per le fatture">⚙ Dati azienda</button>
+        <button class="az-btn" data-action="azienda" title="Dati azienda, per le fatture"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 7 2.6h.1A2 2 0 1 1 11 2.6V3a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Dati azienda</button>
         <!-- 6 agosto 2026: in un noleggio non si creano "lavori": si registrano noleggi. -->
         <button class="btn-new" data-action="new-nol">+ Nuovo noleggio</button>
       </div>
@@ -2256,7 +2256,16 @@ body:has(#ti-fondatore) .sheet--grande{
       td{padding:8px 0;border-bottom:1px solid #eee;vertical-align:top}
       td.l{color:#666;width:42%}
       td.v{font-weight:600}
-      </style></head><body>
+      </style><style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
+</head><body>
       <h1>${esc(nolTitolo(tipo,d))}</h1>
       <div class="az">${esc(az)}</div>
       <table>${righe.map(x=>`<tr><td class="l">${esc(x[0])}</td><td class="v">${esc(x[1])}</td></tr>`).join("")}</table>

@@ -127,11 +127,20 @@
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🔨 Registrazione Artigiano</h1>
+      <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Registrazione Artigiano</h1>
       <p>Entra nella rete TrovaImpresa</p>
     </div>
 
@@ -142,7 +151,7 @@
       <div class="form-section active" id="step-1">
 
         <p style="font-size:16px;line-height:1.55;color:#14532d;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin:0 0 18px">
-          ✅ <b>Iscriversi e restare su TrovaImpresa è gratis.</b> Nessuna carta, nessun costo.
+          <svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> <b>Iscriversi e restare su TrovaImpresa è gratis.</b> Nessuna carta, nessun costo.
           Ti servono un minuto e sei caselle: il resto (foto, logo, descrizione, orari) lo metti quando vuoi dal tuo pannello.
         </p>
 
@@ -248,7 +257,7 @@
         <button class="btn-next" id="btn-next" style="width:100%">Crea il mio account — è gratis</button>
       </div>
       <div style="text-align:center;margin-top:12px;"><span style="font-size:16px;color:#3d4a5c;">Sei già registrato? </span><a href="login-impresa.html" style="display:inline-block;margin-left:8px;padding:9px 22px;background:#f5a800;color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;">Accedi</a></div>
-        <p style="text-align:center;font-size:14.5px;color:#4a5a6e;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
+        <p style="text-align:center;font-size:14.5px;color:#4a5a6e;margin-top:12px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
     </div>
   </div>
 

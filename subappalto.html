@@ -138,6 +138,15 @@
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
@@ -156,7 +165,7 @@
 </header>
 
 <div class="top-bar">
-  <h1>🏗️ Subappalto — Imprese cercano Imprese</h1>
+  <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Subappalto — Imprese cercano Imprese</h1>
   <p>Trova subappaltatori specializzati o offri la tua disponibilità per lavori in subappalto</p>
 </div>
 
@@ -164,18 +173,18 @@
 
   <!-- SINISTRA: Cerco Subappaltatori -->
   <div class="col col-left" id="col-cerca">
-    <div class="col-title">🔍 Cerco Subappaltatori</div>
+    <div class="col-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Cerco Subappaltatori</div>
     <div class="col-sub">Imprese che cercano subappaltatori per i loro cantieri</div>
-    <button class="btn-pubblica" onclick="apriModal('cerca')">📋 Pubblica richiesta</button>
-    <div id="lista-cerca"><div class="loading-state">⏳ Caricamento...</div></div>
+    <button class="btn-pubblica" onclick="apriModal('cerca')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta</button>
+    <div id="lista-cerca"><div class="loading-state"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Caricamento...</div></div>
   </div>
 
   <!-- DESTRA: Sono Subappaltatore -->
   <div class="col col-right" id="col-offre">
-    <div class="col-title">🏗️ Sono Subappaltatore</div>
+    <div class="col-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Sono Subappaltatore</div>
     <div class="col-sub">Imprese disponibili a lavorare in subappalto</div>
-    <button class="btn-pubblica" onclick="apriModal('offre')">🙋 Offri disponibilità</button>
-    <div id="lista-offre"><div class="loading-state">⏳ Caricamento...</div></div>
+    <button class="btn-pubblica" onclick="apriModal('offre')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità</button>
+    <div id="lista-offre"><div class="loading-state"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Caricamento...</div></div>
   </div>
 
 </div>
@@ -184,7 +193,7 @@
 <div class="modal-overlay" id="modal-cerca" onclick="if(event.target===this)chiudiModal('cerca')">
   <div class="modal">
     <div class="modal-header">
-      <h2>📋 Pubblica richiesta subappalto</h2>
+      <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta subappalto</h2>
       <button class="modal-close" onclick="chiudiModal('cerca')">✕</button>
     </div>
     <div class="modal-body">
@@ -224,10 +233,10 @@
         <label class="form-label">Email</label>
         <input class="form-input" id="cerca-email" placeholder="info@tuaimpresa.it" type="email">
       </div>
-      <button class="btn-submit" onclick="salvaCerca()">📋 Pubblica richiesta</button>
+      <button class="btn-submit" onclick="salvaCerca()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta</button>
       <div class="form-msg" id="msg-cerca"></div>
       <div id="gestione-link-cerca" style="display:none; margin-top:14px; padding:14px; border:2px solid #0066ff; border-radius:10px; background:#eafaf0;">
-        <div style="font-weight:700; color:#1a3a5e; margin-bottom:6px;">🔑 Salva questo link per modificare o cancellare il tuo annuncio:</div>
+        <div style="font-weight:700; color:#1a3a5e; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Salva questo link per modificare o cancellare il tuo annuncio:</div>
         <a id="gestione-link-url-cerca" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#0066ff; font-weight:600;"></a>
       </div>
     </div>
@@ -238,7 +247,7 @@
 <div class="modal-overlay" id="modal-offre" onclick="if(event.target===this)chiudiModal('offre')">
   <div class="modal">
     <div class="modal-header offre">
-      <h2>🙋 Offri disponibilità come subappaltatore</h2>
+      <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità come subappaltatore</h2>
       <button class="modal-close" onclick="chiudiModal('offre')">✕</button>
     </div>
     <div class="modal-body">
@@ -277,10 +286,10 @@
         <label class="form-label">Email</label>
         <input class="form-input" id="offre-email" placeholder="info@tuaimpresa.it" type="email">
       </div>
-      <button class="btn-submit offre" onclick="salvaOffre()">🙋 Offri disponibilità</button>
+      <button class="btn-submit offre" onclick="salvaOffre()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Offri disponibilità</button>
       <div class="form-msg" id="msg-offre"></div>
       <div id="gestione-link-offre" style="display:none; margin-top:14px; padding:14px; border:2px solid #d4a017; border-radius:10px; background:#fff8e8;">
-        <div style="font-weight:700; color:#7a5200; margin-bottom:6px;">🔑 Salva questo link per modificare o cancellare il tuo annuncio:</div>
+        <div style="font-weight:700; color:#7a5200; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Salva questo link per modificare o cancellare il tuo annuncio:</div>
         <a id="gestione-link-url-offre" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#a07a00; font-weight:600;"></a>
       </div>
     </div>

@@ -170,6 +170,15 @@
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <link rel="stylesheet" href="/css/barra-comune.css">
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
@@ -189,8 +198,8 @@
   <h1>👔 Trova un professionista dell'edilizia vicino a te</h1>
   <div class="top-search">
     <input type="text" id="cittaInput" placeholder="Città o CAP... es. Milano, Roma" />
-    <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
-    <button class="btn-loc" onclick="localizzami()">📍</button>
+    <button class="btn-cerca" onclick="cerca()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Cerca</button>
+    <button class="btn-loc" onclick="localizzami()"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
   </div>
 </div>
 
@@ -199,7 +208,7 @@
 <div class="page-body">
 
   <div class="sidebar">
-    <div class="sidebar-title">⚙️ Filtri</div>
+    <div class="sidebar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 7 2.6h.1A2 2 0 1 1 11 2.6V3a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Filtri</div>
 
     <div class="filter-group">
       <div class="filter-label">Prestazione</div>
@@ -244,13 +253,13 @@
       <div class="filter-label">Specializzazione</div>
       <div class="mestieri-scroll">
         <div class="chip all-chip" data-specializzazione="tutte" onclick="selectSpecializzazione(this)">👔 Tutte</div>
-        <div class="chip" data-specializzazione="Progettazione" onclick="selectSpecializzazione(this)">✏️ Progettazione</div>
-        <div class="chip" data-specializzazione="Direzione lavori" onclick="selectSpecializzazione(this)">📊 Direzione lavori</div>
+        <div class="chip" data-specializzazione="Progettazione" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Progettazione</div>
+        <div class="chip" data-specializzazione="Direzione lavori" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg> Direzione lavori</div>
         <div class="chip" data-specializzazione="Sicurezza cantieri" onclick="selectSpecializzazione(this)">🦺 Sicurezza cantieri</div>
         <div class="chip" data-specializzazione="Certificazioni energetiche" onclick="selectSpecializzazione(this)">🌿 Certificazioni energetiche</div>
         <div class="chip" data-specializzazione="Pratiche catastali" onclick="selectSpecializzazione(this)">📁 Pratiche catastali</div>
-        <div class="chip" data-specializzazione="Perizie" onclick="selectSpecializzazione(this)">🔍 Perizie</div>
-        <div class="chip" data-specializzazione="Computi metrici" onclick="selectSpecializzazione(this)">🧮 Computi metrici</div>
+        <div class="chip" data-specializzazione="Perizie" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Perizie</div>
+        <div class="chip" data-specializzazione="Computi metrici" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 11h2"/><path d="M14 11h2"/><path d="M8 16h2"/><path d="M14 16h2"/></svg> Computi metrici</div>
         <div class="chip" data-specializzazione="Restauro" onclick="selectSpecializzazione(this)">🏛️ Restauro</div>
       </div>
     </div>
@@ -318,7 +327,7 @@
       <div class="results-count" id="risultatiCount">Ricerca in corso...</div>
     </div>
     <div id="annunci-categoria"></div>
-    <div id="risultati"><div class="loading">⏳ Caricamento...</div></div>
+    <div id="risultati"><div class="loading"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Caricamento...</div></div>
     <div id="mappa-risultati"></div>
   </div>
 
@@ -557,7 +566,7 @@
 <!-- OVERLAY: RICHIESTA INCARICO -->
 <div class="inc-overlay" id="inc-overlay">
   <div class="inc-topbar">
-    <h2>📋 Affida un incarico</h2>
+    <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Affida un incarico</h2>
     <span class="inc-back" onclick="chiudiIncarico()">← Torna alla ricerca</span>
   </div>
   <div class="inc-card">

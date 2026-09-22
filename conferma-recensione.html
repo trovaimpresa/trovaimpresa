@@ -18,12 +18,21 @@
   .btn{display:inline-block;margin-top:18px;background:#0066ff;color:#fff;text-decoration:none;font-weight:800;padding:15px 26px;border-radius:10px;font-size:17px}
   .sotto{color:#5b6b80;font-size:16px}
 </style>
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 <nav><a href="/">TrovaImpresa</a></nav>
 <div class="wrap">
   <div class="card" id="box">
-    <div class="ico">⏳</div>
+    <div class="ico"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
     <h1>Un attimo…</h1>
     <p class="sotto">Sto pubblicando la tua recensione.</p>
   </div>

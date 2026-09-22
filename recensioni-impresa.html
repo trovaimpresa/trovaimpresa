@@ -383,6 +383,15 @@ nav img{height:36px}
 .rec-condividi:hover{background:#2863a7;color:#fff}
 .rec-nota-free{background:#fffaf0;border:1.5px solid #f0d9a8;border-radius:10px;padding:12px 16px;font-size:14px;color:#7a5a00;margin-top:12px;line-height:1.5}
 </style>
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 <nav>
@@ -393,14 +402,14 @@ nav img{height:36px}
 <div class="hero" id="hero-section">
   <div class="hero-cover" id="hero-cover"><div class="cover-img"></div></div>
   <div class="hero-riga">
-    <div class="hero-avatar" id="avatar-wrap">🏗️</div>
+    <div class="hero-avatar" id="avatar-wrap"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg></div>
     <div class="hero-left-col">
       <div class="hero-tipo" id="profile-tipo-badge">Recensioni dei clienti</div>
       <div class="hero-nome" id="profile-name">Caricamento...</div>
-      <div class="hero-loc" id="profile-city">📍 —</div>
+      <div class="hero-loc" id="profile-city"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> —</div>
       <div class="hero-num" id="hero-num">
-        <div class="hn"><span class="hn-i">⭐</span><span class="hn-n" id="stat-rating">—</span><span class="hn-l">Valutazione</span></div>
-        <div class="hn"><span class="hn-i">💬</span><span class="hn-n" id="stat-recensioni">—</span><span class="hn-l">Recensioni</span></div>
+        <div class="hn"><span class="hn-i"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span><span class="hn-n" id="stat-rating">—</span><span class="hn-l">Valutazione</span></div>
+        <div class="hn"><span class="hn-i"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="hn-n" id="stat-recensioni">—</span><span class="hn-l">Recensioni</span></div>
       </div>
     </div>
   </div>
@@ -409,10 +418,10 @@ nav img{height:36px}
 <div class="rec-pagina">
   <div class="card rec-card" style="border-top-color:#0066ff">
     <div class="rec-azioni-alto">
-      <div class="card-title" style="margin:0">⭐ Tutte le recensioni</div>
+      <div class="card-title" style="margin:0"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Tutte le recensioni</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button type="button" class="rec-condividi" onclick="condividiPagina()">🔗 Copia il link</button>
-        <a class="btn-rec" id="btn-lascia" href="#" style="width:auto;display:inline-block;padding:10px 18px;text-decoration:none;font-size:15px">✍️ Lascia una recensione</a>
+        <button type="button" class="rec-condividi" onclick="condividiPagina()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copia il link</button>
+        <a class="btn-rec" id="btn-lascia" href="#" style="width:auto;display:inline-block;padding:10px 18px;text-decoration:none;font-size:15px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Lascia una recensione</a>
       </div>
     </div>
     <div class="rec-riepilogo" id="rec-riepilogo" style="display:none">

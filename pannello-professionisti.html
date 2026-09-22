@@ -1875,13 +1875,22 @@
   [style*="Playfair"]{font-family:'Inter',sans-serif!important;font-weight:800!important;letter-spacing:-.3px}
   .emic{width:1em;height:1em;vertical-align:-.13em;display:inline-block}
 </style>
+<style>
+/* 22 set 2026 — le icone disegnate al posto delle faccine.
+   Dentro una frase: grandi come la riga e dello stesso colore del testo.
+   Da sole in un riquadro (le schede delle guide, i due banner): grandi
+   quanto era la faccina e del colore della scheda — blu, o arancione
+   dove la scheda e' arancione. */
+.ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+.ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
+</style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a2a4d,#0066ff)">
   <div style="text-align:center;color:white">
-    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
     <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
   </div>
 </div>
@@ -2133,8 +2142,8 @@
     <div style="text-align:right;margin-top:6px;margin-bottom:8px;">
       <a href="#" onclick="resetPassword(event)" style="font-size:0.82rem;color:#0066ff;font-weight:600;text-decoration:none;">Hai dimenticato la password?</a>
     </div>
-    <button class="login-btn" onclick="doLogin()">🔐 Accedi al pannello</button>
-    <div class="login-err" id="login-err">❌ Email o password errati</div>
+    <button class="login-btn" onclick="doLogin()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Accedi al pannello</button>
+    <div class="login-err" id="login-err"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Email o password errati</div>
     <div class="login-reg">Non sei ancora registrato? <a href="/#registrati">Registra la tua impresa →</a></div>
   </div>
 </div>
@@ -2150,7 +2159,7 @@
     </div>
     <div id="sidebar-map"></div>
     <div class="sidebar-footer">
-      <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
+      <div class="logout-btn" onclick="doLogout()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg> Esci</div>
     </div>
   </aside>
 
@@ -2197,7 +2206,7 @@
             <div class="dash-welcome" id="dash-welcome">Pannello professionista</div>
             <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
             <div class="dash-meta">
-              <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
+              <span class="dash-rating-badge" id="dash-rating-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> —</span>
               <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
             </div>
           </div>
@@ -2207,17 +2216,17 @@
       <!-- STATISTICHE -->
       <div class="dash-stats">
         <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
-          <div class="dash-stat-icon">⭐</div>
+          <div class="dash-stat-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
           <div class="dash-stat-num" id="stat-rating">—</div>
           <div class="dash-stat-lbl">Rating medio</div>
         </div>
         <div class="dash-stat-card" style="cursor:pointer" title="Apri le tue recensioni" onclick="showSection('recensioni', this)">
-          <div class="dash-stat-icon">💬</div>
+          <div class="dash-stat-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <div class="dash-stat-num" id="dash-stat-recensioni">0</div>
           <div class="dash-stat-lbl">Recensioni</div>
         </div>
         <div class="dash-stat-card">
-          <div class="dash-stat-icon">📷</div>
+          <div class="dash-stat-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
           <div class="dash-stat-num" id="dash-stat-foto">0</div>
           <div class="dash-stat-lbl">Foto caricate</div>
         </div>
@@ -2226,7 +2235,7 @@
              Quando sono zero non si scrive «0»: si scrive che ancora non e'
              arrivato nessuno — stessa regola dello zero delle recensioni. -->
         <div class="dash-stat-card cliccabile" onclick="apriModalContatti()" title="Vedi l'elenco">
-          <div class="dash-stat-icon">📞</div>
+          <div class="dash-stat-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg></div>
           <div class="dash-stat-num" id="dash-stat-contatti">—</div>
           <div class="dash-stat-lbl">Richieste di contatto</div>
           <div class="dash-stat-sub" id="dash-stat-contatti-sub">questo mese</div>
@@ -2237,28 +2246,28 @@
       <div class="dash-quick-title">Gestisci il tuo profilo pubblico</div>
       <div class="dash-quick-grid">
         <div class="dash-quick-card" data-card-id="foto-lavori" onclick="showSection('foto-lavori', this)">
-          <div class="dash-quick-icon">📋</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Gestisci i tuoi servizi</div>
         </div>
         <div class="dash-quick-card" onclick="showSection('recensioni', this)">
-          <div class="dash-quick-icon">⭐</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
           <div class="dash-quick-label">Recensioni</div>
           <div class="dash-quick-sub">Leggi e rispondi ai clienti</div>
         </div>
         <div class="dash-quick-card" data-card-id="messaggi" style="cursor:pointer;position:relative" onclick="showSection('messaggi', this)">
           <span id="badge-msg-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:15px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
-          <div class="dash-quick-icon">💬</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <div class="dash-quick-label">Messaggi</div>
           <div class="dash-quick-sub">Messaggi dai clienti</div>
         </div>
         <div class="dash-quick-card" data-card-id="anteprima" style="cursor:pointer" onclick="showSection('anteprima', this)">
-          <div class="dash-quick-icon">🔍</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
           <div class="dash-quick-label">Anteprima del tuo pannello pubblico</div>
           <div class="dash-quick-sub">Quello che i clienti vedono di te</div>
         </div>
         <div class="dash-quick-card" data-card-id="supporto" style="cursor:pointer" onclick="showSection('supporto', this)">
-          <div class="dash-quick-icon">🎧</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
           <div class="dash-quick-label">Parla subito con TrovaImpresa</div>
           <div class="dash-quick-sub">Assistenza e supporto</div>
         </div>
@@ -2268,12 +2277,12 @@
       <div class="dash-quick-title">Funzioni incluse</div>
       <div class="dash-quick-grid">
         <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='modifica-profilo.html'">
-          <div class="dash-quick-icon">👤</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           <div class="dash-quick-label">Completa il tuo profilo</div>
           <div class="dash-quick-sub">Più è pieno, più ti scelgono</div>
         </div>
         <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('recensioni', this)">
-          <div class="dash-quick-icon">✅</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
           <div class="dash-quick-label">Le tue recensioni</div>
           <div class="dash-quick-sub">Leggi e rispondi ai clienti</div>
         </div>
@@ -2282,24 +2291,24 @@
           <div class="dash-quick-label">QR Code profilo</div>
         </div>
         <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
-          <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
+          <div id="card-visibile-icon" class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
           <div class="dash-quick-sub">Quante persone ti trovano</div>
         </div>
         <div class="dash-quick-card" data-card-id="pubblicita" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='pubblicita.html'">
-          <div class="dash-quick-icon">📢</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
           <div class="dash-quick-label">Pubblicità</div>
         </div>
         <div class="dash-quick-card" data-card-id="le-mie-inserzioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='le-mie-inserzioni.html'">
-          <div class="dash-quick-icon">🖼️</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18"/><path d="M12 3v18"/></svg></div>
           <div class="dash-quick-label">Le tue inserzioni</div>
         </div>
         <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" style="cursor:pointer" onclick="apriModalListaAttesaPub()">
-          <div class="dash-quick-icon">⏳</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
           <div class="dash-quick-label">Lista d'attesa pubblicità</div>
         </div>
         <div class="dash-quick-card" data-card-id="personalizza-pannello" style="cursor:pointer" onclick="showSection('personalizza', this)">
-          <div class="dash-quick-icon">🎨</div>
+          <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2" width="16" height="6" rx="2"/><path d="M11 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6"/><rect x="9" y="15" width="4" height="7" rx="1"/></svg></div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
         <div class="dash-quick-card" data-card-id="priorita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
@@ -2318,21 +2327,21 @@
         </div>
                 <div class="dash-quick-card" data-card-id="lavoro" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="javascript:void(0)" onclick="showSection('mie-offerte'); caricaMieOfferte()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">📢</div>
+            <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
             <div class="dash-quick-label">Le mie offerte di lavoro</div>
           </a>
           <a href="javascript:void(0)" onclick="showSection('candidature'); caricaCandidature()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
-            <div class="dash-quick-icon">📥</div>
+            <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></div>
             <div class="dash-quick-label">Candidature ricevute</div>
           </a>
         </div>
         <div class="dash-quick-card" data-card-id="subappalto" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">🔍</div>
+            <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
             <div class="dash-quick-label">Cerco Subappaltatori</div>
           </a>
           <a href="subappalto-offre.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
-            <div class="dash-quick-icon">🏗️</div>
+            <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg></div>
             <div class="dash-quick-label">Sono Subappaltatore</div>
           </a>
         </div>
@@ -2340,7 +2349,7 @@
 
       <!-- CALENDARIO & ORARIO -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d">📅 Calendario &amp; Orario</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg> Calendario &amp; Orario</div>
 
         <div class="cal-section-grid" style="display:grid;grid-template-columns:1fr 0.5fr 0.5fr;grid-template-rows:auto auto;gap:14px">
 
@@ -2351,7 +2360,7 @@
 
           <!-- [B] Meteo (alto dx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:14px">
-            <div id="meteo-icona" style="font-size:2.2rem;line-height:1">⏳</div>
+            <div id="meteo-icona" style="font-size:2.2rem;line-height:1"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
             <div>
               <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#0a2a4d">Rilevamento...</div>
               <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#0066ff;font-weight:700"></div>
@@ -2380,7 +2389,7 @@
 
           <!-- [D] Note (basso dx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
-            <div style="font-size:15px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
+            <div style="font-size:15px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Note</div>
             <textarea id="widget-note" placeholder="Scrivi un appunto..." style="resize:none;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:60px;background:white"></textarea>
             <button onclick="aggiungiNota()" style="padding:8px 12px;background:#0066ff;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
             <div class="lista-note" id="lista-note" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
@@ -2388,7 +2397,7 @@
 
           <!-- [E] Calcolatrice (terza colonna, full height) -->
           <div class="widget-calc-card" style="grid-row:1 / span 2;grid-column:3;background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);padding:14px;display:flex;flex-direction:column;gap:10px">
-            <div style="font-size:15px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
+            <div style="font-size:15px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 11h2"/><path d="M14 11h2"/><path d="M8 16h2"/><path d="M14 16h2"/></svg> Calcolatrice</div>
             <div id="wcalc-display" style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;text-align:right;font-family:'Playfair Display',serif;font-size:1.4rem;color:#0a2a4d;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:42px;line-height:1.5">0</div>
             <div class="wcalc-keys" style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px;flex:1">
               <button type="button" onclick="wcalcClear()" class="wcalc-btn wcalc-clear">C</button>
@@ -2419,7 +2428,7 @@
         <div style="margin-bottom:16px">
           <!-- ⚠️ 15 set 2026: si chiamava «🛠️ Gestionale»: faceva eco al nome delle
                  due porte qui sotto. -->
-            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ I due gestionali</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> I due gestionali</div>
           <div style="font-size:15px;color:#888;margin-top:4px">Pratiche, clienti, collaboratori, preventivi, spese e report — tutto in un posto solo</div>
         </div>
         <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE PER GESTIONALE, IL NOME IN MEZZO
@@ -2430,7 +2439,7 @@
             <div class="gest-carte">
 
               <div class="gest-mezzo">
-                <span class="gest-emoji">🛠️</span>
+                <span class="gest-emoji"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
                 <span class="gest-nome">Gestionale</span>
                 <span class="gest-desc">Pratiche, clienti, collaboratori, preventivi e report</span>
                 <span class="gest-tuo" id="porta-premium-tuo">Il tuo piano</span>
@@ -2441,7 +2450,7 @@
                 <div class="gest-fila">
               <div class="g-carta g-compra" id="carta-attiva-premium">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#e8733a;background:#fdece1">🛠️</span>
+                  <span class="g-ico" style="color:#e8733a;background:#fdece1"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
                   <span class="g-tit">Attiva</span>
                 </div>
                 <div class="g-txt">Lo compri e diventa tuo. Al mese o all'anno.</div>
@@ -2449,7 +2458,7 @@
               </div>
               <div class="g-carta" id="carta-prova-premium">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb">🎁</span>
+                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v14"/><path d="M5 12v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/><path d="M12 8C12 8 11 3 8 3a2.5 2.5 0 0 0 0 5"/><path d="M12 8s1-5 4-5a2.5 2.5 0 0 1 0 5"/></svg></span>
                   <span class="g-tit">Prova 30 giorni</span>
                 </div>
                 <div class="g-txt">Tutto acceso per un mese. Non serve la carta.</div>
@@ -2457,7 +2466,7 @@
               </div>
               <div class="g-carta" id="carta-vedi-premium">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#3f6fd8;background:#eaf0fc">👀</span>
+                  <span class="g-ico" style="color:#3f6fd8;background:#eaf0fc"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span>
                   <span class="g-tit">Fai un giro</span>
                 </div>
                 <div class="g-txt">Entri e guardi com'&egrave; fatto. Non scrivi niente.</div>
@@ -2470,7 +2479,7 @@
                 <p class="gest-gruppo-tit">Se ce l'hai gi&agrave;</p>
               <div class="g-carta g-striscia" id="carta-entra-premium">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef">🚪</span>
+                  <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></span>
                   <span class="g-tit">Entra</span>
                 </div>
                 <div class="g-txt">Il gestionale &egrave; gi&agrave; tuo: si apre e basta.</div>
@@ -2485,7 +2494,7 @@
             <div class="gest-carte">
 
               <div class="gest-mezzo">
-                <span class="gest-emoji">✨</span>
+                <span class="gest-emoji"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span>
                 <span class="gest-nome">Gestionale AI</span>
                 <span class="gest-desc">Tutto il Gestionale, più la Chat con AI</span>
                 <span class="gest-tuo" id="porta-ai-tuo">Il tuo piano</span>
@@ -2496,7 +2505,7 @@
                 <div class="gest-fila">
               <div class="g-carta g-compra" id="carta-attiva-ai">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#e8733a;background:#fdece1">🛠️</span>
+                  <span class="g-ico" style="color:#e8733a;background:#fdece1"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
                   <span class="g-tit">Attiva</span>
                 </div>
                 <div class="g-txt">Lo compri e diventa tuo. Al mese o all'anno.</div>
@@ -2504,7 +2513,7 @@
               </div>
               <div class="g-carta" id="carta-prova-ai">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb">🎁</span>
+                  <span class="g-ico" style="color:#7b5cd6;background:#f0ecfb"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v14"/><path d="M5 12v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/><path d="M12 8C12 8 11 3 8 3a2.5 2.5 0 0 0 0 5"/><path d="M12 8s1-5 4-5a2.5 2.5 0 0 1 0 5"/></svg></span>
                   <span class="g-tit">Prova 30 giorni</span>
                 </div>
                 <div class="g-txt">Tutto acceso per un mese. Non serve la carta.</div>
@@ -2512,7 +2521,7 @@
               </div>
               <div class="g-carta" id="carta-vedi-ai">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#3f6fd8;background:#eaf0fc">👀</span>
+                  <span class="g-ico" style="color:#3f6fd8;background:#eaf0fc"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span>
                   <span class="g-tit">Fai un giro</span>
                 </div>
                 <div class="g-txt">Entri e guardi com'&egrave; fatto. Non scrivi niente.</div>
@@ -2525,7 +2534,7 @@
                 <p class="gest-gruppo-tit">Se ce l'hai gi&agrave;</p>
               <div class="g-carta g-striscia" id="carta-entra-ai">
                 <div class="g-testa">
-                  <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef">🚪</span>
+                  <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></span>
                   <span class="g-tit">Entra</span>
                 </div>
                 <div class="g-txt">Il gestionale &egrave; gi&agrave; tuo: si apre e basta.</div>
@@ -2543,7 +2552,7 @@
 
       <!-- FOTO DEI LAVORI (lista) -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d">📷 Foto dei lavori</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto dei lavori</div>
         <div class="foto-grid" id="lista-lavori-foto"></div>
       </div>
 
@@ -2562,7 +2571,7 @@
         <div class="topbar-title">📁 Richieste di incarico ricevute</div>
       </div>
       <!-- Contatore incarichi del mese -->
-      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #0066ff;">📊 Caricamento...</div>
+      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #0066ff;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg> Caricamento...</div>
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📁</div>Caricamento...</div></div>
     </div>
 
@@ -2571,14 +2580,14 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          📢 Le mie offerte di lavoro
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Le mie offerte di lavoro
         </div>
       </div>
       <div style="margin-bottom:16px">
-        <a href="offerte-registrazione.html" style="display:inline-block;background:#FF6B35;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px">➕ Pubblica una nuova offerta</a>
+        <a href="offerte-registrazione.html" style="display:inline-block;background:#FF6B35;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Pubblica una nuova offerta</a>
       </div>
       <div id="lista-mie-offerte">
-        <div class="empty-state"><div class="empty-icon">📢</div>Caricamento...</div>
+        <div class="empty-state"><div class="empty-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>Caricamento...</div>
       </div>
     </div>
 
@@ -2586,11 +2595,11 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          📥 Candidature ricevute
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Candidature ricevute
         </div>
       </div>
       <div id="lista-candidature">
-        <div class="empty-state"><div class="empty-icon">📥</div>Caricamento...</div>
+        <div class="empty-state"><div class="empty-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></div>Caricamento...</div>
       </div>
     </div>
 
@@ -2599,7 +2608,7 @@
     <!-- FOTO DEI LAVORI -->
     <div class="section" id="sec-foto-lavori">
       <div class="topbar">
-        <div class="topbar-title">📷 Foto dei lavori</div>
+        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto dei lavori</div>
       </div>
       <div class="profilo-card">
         <div class="profilo-title">Aggiungi foto lavoro</div>
@@ -2632,7 +2641,7 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          🎨 Personalizza pannello
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2" width="16" height="6" rx="2"/><path d="M11 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6"/><rect x="9" y="15" width="4" height="7" rx="1"/></svg> Personalizza pannello
         </div>
       </div>
       <div class="mpp-box">
@@ -2642,14 +2651,14 @@
           <div class="mpp-options">
 
             <div class="mpp-group mpp-span2">
-              <div class="mpp-group-title">🎨 Scegli un tema in un clic</div>
+              <div class="mpp-group-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2" width="16" height="6" rx="2"/><path d="M11 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6"/><rect x="9" y="15" width="4" height="7" rx="1"/></svg> Scegli un tema in un clic</div>
               <p class="mpp-group-sub">Cambia colori e sfondo tutti insieme. Poi, se vuoi, ritocchi i singoli colori qui sotto.</p>
               <div class="mpp-presets" id="pers-pannello-presets"></div>
               <button type="button" class="mpp-reset" onclick="resetPersonalizzaPannello()">↺ Torna ai colori di TrovaImpresa</button>
             </div>
 
             <div class="mpp-group g-colori">
-              <div class="mpp-group-title">🖌️ Colori</div>
+              <div class="mpp-group-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2" width="16" height="6" rx="2"/><path d="M11 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6"/><rect x="9" y="15" width="4" height="7" rx="1"/></svg> Colori</div>
               <p class="mpp-group-sub">Tocca il quadratino per scegliere il colore.</p>
               <div class="mpp-row">
                 <span class="mpp-label">Fascia in alto<span class="mpp-hint">La striscia colorata sotto la copertina, con il tuo nome</span></span>
@@ -2670,7 +2679,7 @@
             </div>
 
             <div class="mpp-group g-testo">
-              <div class="mpp-group-title">✍️ Nome e carattere</div>
+              <div class="mpp-group-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Nome e carattere</div>
               <p class="mpp-group-sub">Quello che si legge sulla fascia in alto.</p>
               <div class="mpp-row mpp-row-full">
                 <label class="mpp-label" for="pers-pannello-nome">Nome del pannello</label>
@@ -2695,7 +2704,7 @@
             </div>
 
             <div class="mpp-group g-foto mpp-span2">
-              <div class="mpp-group-title">🖼️ Le tue immagini</div>
+              <div class="mpp-group-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18"/><path d="M12 3v18"/></svg> Le tue immagini</div>
               <p class="mpp-group-sub">La foto tonda e la copertina compaiono qui nel pannello e sulla tua scheda pubblica.</p>
               <div class="form-row">
                 <div class="mpp-row mpp-row-full" style="border-bottom:none">
@@ -2716,7 +2725,7 @@
 
           <!-- COLONNA ANTEPRIMA: la testata del pannello in piccolo -->
           <div class="mpp-preview-col">
-            <div class="mpp-preview-title">👁️ Così lo vedrai tu</div>
+            <div class="mpp-preview-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Così lo vedrai tu</div>
             <div class="mpp-pv-frame" id="pv-frame">
               <div class="mpp-pv-side">
                 <div class="mpp-pv-side-logo"></div>
@@ -2735,10 +2744,10 @@
                   </div>
                 </div>
                 <div class="mpp-pv-cards" id="pv-cards">
-                  <div class="mpp-pv-card"><span>👤</span>Modifica profilo</div>
-                  <div class="mpp-pv-card"><span>🛠️</span>Gestionale</div>
+                  <div class="mpp-pv-card"><span><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Modifica profilo</div>
+                  <div class="mpp-pv-card"><span><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>Gestionale</div>
                   <div class="mpp-pv-card"><span>📩</span>Incarichi</div>
-                  <div class="mpp-pv-card"><span>⭐</span>Recensioni</div>
+                  <div class="mpp-pv-card"><span><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span>Recensioni</div>
                 </div>
               </div>
             </div>
@@ -2763,7 +2772,7 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          ⭐ Le tue recensioni
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Le tue recensioni
         </div>
       </div>
       <div class="rec-wrap">
@@ -2785,16 +2794,16 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          💬 Messaggi
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Messaggi
         </div>
       </div>
       <div id="lista-conversazioni">
-        <div class="empty-state"><div class="empty-icon">💬</div>Caricamento...</div>
+        <div class="empty-state"><div class="empty-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>Caricamento...</div>
       </div>
       <div id="chat-aperta" style="display:none">
         <a href="javascript:void(0)" onclick="tornaAConversazioni()" style="cursor:pointer;color:#7c3aed;font-size:0.95rem;font-weight:700;display:inline-block;margin-bottom:12px">← Torna alle conversazioni</a>
-        <button onclick="togliConversazioneDalMioElenco()" style="margin-left:12px;margin-bottom:12px;padding:6px 12px;background:#5b6b80;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">📥 Togli dal mio elenco</button>
-        <button id="btn-blocco-cliente" onclick="toggleBloccoCliente()" style="margin-left:8px;margin-bottom:12px;padding:6px 12px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">🚫 Blocca cliente</button>
+        <button onclick="togliConversazioneDalMioElenco()" style="margin-left:12px;margin-bottom:12px;padding:6px 12px;background:#5b6b80;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Togli dal mio elenco</button>
+        <button id="btn-blocco-cliente" onclick="toggleBloccoCliente()" style="margin-left:8px;margin-bottom:12px;padding:6px 12px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg> Blocca cliente</button>
         <div class="msg-messages" id="msg-messages"></div>
         <div class="msg-input-row">
           <input type="text" id="msg-testo" placeholder="Scrivi una risposta...">
@@ -2818,11 +2827,11 @@
           <label>Colore QR Code</label>
           <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
         </div>
-        <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
+        <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Scarica PNG 1024×1024</button>
         <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #0066ff;border-radius:8px;padding:12px;font-size:15px;line-height:1.5;color:#0a2a4d;">
-          <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Scaricato!</div>
           <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
-          <div style="font-size:15px;color:#0066ff;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+          <div style="font-size:15px;color:#0066ff;">📇 Biglietti da visita · 🚐 Furgone · <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18l-1.5 11a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2z"/><path d="M3 9 5 3h14l2 6"/><path d="M9 13h6"/></svg> Vetrina · <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Fatture · <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 8-9-5-9 5v8l9 5 9-5z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg> Volantini</div>
         </div>
       </div>
     </div>
@@ -2832,15 +2841,15 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          🔍 Anteprima pubblica
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Anteprima pubblica
         </div>
       </div>
       <div class="profilo-card">
         <p style="margin:0 0 12px;color:#555;font-size:0.9rem">Ecco come i clienti vedono il tuo profilo pubblico.</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px">
-          <button id="anteprima-btn-desktop" onclick="anteprimaDevice('desktop')" style="padding:9px 16px;border:1.5px solid #7c3aed;border-radius:10px;font-weight:700;cursor:pointer;background:#7c3aed;color:#fff">🖥️ Desktop</button>
-          <button id="anteprima-btn-mobile" onclick="anteprimaDevice('mobile')" style="padding:9px 16px;border:1.5px solid #7c3aed;border-radius:10px;font-weight:700;cursor:pointer;background:#f3f0fa;color:#7c3aed">📱 Mobile</button>
-          <button onclick="ricaricaAnteprima()" style="padding:9px 16px;border:1.5px solid var(--border);border-radius:10px;font-weight:700;cursor:pointer;background:#fff;color:#333">🔄 Ricarica</button>
+          <button id="anteprima-btn-desktop" onclick="anteprimaDevice('desktop')" style="padding:9px 16px;border:1.5px solid #7c3aed;border-radius:10px;font-weight:700;cursor:pointer;background:#7c3aed;color:#fff"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg> Desktop</button>
+          <button id="anteprima-btn-mobile" onclick="anteprimaDevice('mobile')" style="padding:9px 16px;border:1.5px solid #7c3aed;border-radius:10px;font-weight:700;cursor:pointer;background:#f3f0fa;color:#7c3aed"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> Mobile</button>
+          <button onclick="ricaricaAnteprima()" style="padding:9px 16px;border:1.5px solid var(--border);border-radius:10px;font-weight:700;cursor:pointer;background:#fff;color:#333"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 7 2.6h.1A2 2 0 1 1 11 2.6V3a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Ricarica</button>
           <a id="anteprima-newtab" href="#" target="_blank" rel="noopener" style="margin-left:auto;padding:9px 16px;border-radius:10px;font-weight:700;text-decoration:none;background:#0066ff;color:#fff">↗ Apri in nuova scheda</a>
         </div>
         <div id="anteprima-frame-wrap" style="margin:0 auto;width:100%;max-width:100%;height:720px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;transition:width .2s ease">
@@ -2854,7 +2863,7 @@
       <div class="topbar">
         <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
           <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
-          🎧 Parla con TrovaImpresa
+          <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Parla con TrovaImpresa
         </div>
       </div>
             <div class="sup-ling">
@@ -2881,7 +2890,7 @@
       <div class="profilo-card sup-pezzo" id="sup-chat">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px">
           <p style="margin:0;color:#555;font-size:0.9rem">Scrivici per assistenza: ti rispondiamo qui.</p>
-          <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap">📥 Svuota la mia schermata</button>
+          <button onclick="svuotaSchermataSupporto()" style="padding:7px 12px;border:1.5px solid #c9d4e0;border-radius:9px;background:#fff;color:#5b6b80;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> Svuota la mia schermata</button>
         </div>
         <div id="supporto-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px;align-items:flex-end">
@@ -2903,7 +2912,7 @@
         </div>
       </div>
       <div class="profilo-card">
-        <div class="profilo-title">➕ Aggiungi un video</div>
+        <div class="profilo-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Aggiungi un video</div>
         <div class="form-group">
           <label>URL video (YouTube o Vimeo)</label>
           <input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=...  oppure  https://vimeo.com/...">
@@ -3010,7 +3019,7 @@
   <div class="modal-ai" style="max-width:560px">
     <div class="modal-ai-header">
       <div>
-        <h2>📞 Richieste di contatto</h2>
+        <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> Richieste di contatto</h2>
         <p>Chi ha chiesto i tuoi contatti dalla scheda pubblica</p>
       </div>
       <button class="modal-ai-close" onclick="chiudiModalContatti()">✕</button>
@@ -3037,7 +3046,7 @@
         <button id="btn-invia-segnalazione" onclick="inviaSegnalazione()" style="width:100%;padding:13px;background:var(--verde);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Invia</button>
       </div>
       <div id="segnalazione-success" style="display:none;text-align:center;padding:20px 0;">
-        <div style="font-size:48px;margin-bottom:12px;">✅</div>
+        <div style="font-size:48px;margin-bottom:12px;"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
         <p style="font-size:15px;font-weight:600;color:#0066ff;margin-bottom:6px;">Segnalazione inviata!</p>
         <p style="font-size:15px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
       </div>
@@ -3057,7 +3066,7 @@
     </div>
     <div class="modal-ai-body">
       <div id="priorita-content">
-        <div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>
+        <div style="text-align:center;padding:40px 0;color:#999;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Calcolo in corso…</div>
       </div>
     </div>
   </div>
@@ -3068,7 +3077,7 @@
   <div class="modal-ai" style="max-width:760px">
     <div class="modal-ai-header">
       <div>
-        <h2>🏗️ Nuovo cantiere</h2>
+        <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Nuovo cantiere</h2>
         <p>Aggiungi un nuovo cantiere al tuo elenco</p>
       </div>
       <button class="modal-ai-close" onclick="chiudiModalNuovoCantiere()">✕</button>
@@ -3121,7 +3130,7 @@
   <div class="modal-ai" style="max-width:760px">
     <div class="modal-ai-header">
       <div>
-        <h2 id="dett-cant-nome">🏗️ Dettaglio cantiere</h2>
+        <h2 id="dett-cant-nome"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Dettaglio cantiere</h2>
         <p id="dett-cant-sub"></p>
       </div>
       <button class="modal-ai-close" onclick="chiudiModalDettaglioCantiere()">✕</button>
@@ -3129,11 +3138,11 @@
     <div class="modal-ai-body">
       <div class="cant-tabs">
         <button class="cant-tab active" data-tab="info" onclick="switchTabCantiere('info')">ℹ️ Info</button>
-        <button class="cant-tab" data-tab="foto" onclick="switchTabCantiere('foto')">📷 Foto</button>
-        <button class="cant-tab" data-tab="preventivi" onclick="switchTabCantiere('preventivi')">💰 Preventivi</button>
-        <button class="cant-tab" data-tab="fatture" onclick="switchTabCantiere('fatture')">🧾 Fatture</button>
+        <button class="cant-tab" data-tab="foto" onclick="switchTabCantiere('foto')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto</button>
+        <button class="cant-tab" data-tab="preventivi" onclick="switchTabCantiere('preventivi')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Preventivi</button>
+        <button class="cant-tab" data-tab="fatture" onclick="switchTabCantiere('fatture')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M16 8H8"/><path d="M16 12H8"/></svg> Fatture</button>
         <button class="cant-tab" data-tab="quaderno" onclick="switchTabCantiere('quaderno')">📓 Quaderno</button>
-        <button class="cant-tab" data-tab="scadenze" onclick="switchTabCantiere('scadenze')">⏰ Scadenze</button>
+        <button class="cant-tab" data-tab="scadenze" onclick="switchTabCantiere('scadenze')"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Scadenze</button>
       </div>
 
       <div class="cant-pane active" data-pane="info">
@@ -3150,17 +3159,17 @@
              onclick="document.getElementById('dett-cant-foto-input').click()"
              ondragover="dettCantDragOver(event)" ondragleave="dettCantDragLeave(event)" ondrop="dettCantDrop(event)">
           <input type="file" id="dett-cant-foto-input" accept="image/*" multiple style="display:none" onchange="uploadFotoCantiere(this.files)">
-          <div class="foto-upload-icon">📤</div>
+          <div class="foto-upload-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg></div>
           <div class="foto-upload-label">Clicca o trascina le foto qui</div>
           <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
         </div>
-        <div class="foto-upload-progress" id="dett-cant-foto-progress" style="display:none">⏳ Upload in corso...</div>
+        <div class="foto-upload-progress" id="dett-cant-foto-progress" style="display:none"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Upload in corso...</div>
         <div class="foto-grid" id="dett-cant-foto-grid"></div>
       </div>
 
       <div class="cant-pane" data-pane="preventivi">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuovo preventivo</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Nuovo preventivo</div>
           <div class="form-row">
             <div class="form-group">
               <label>Importo (€) *</label>
@@ -3191,7 +3200,7 @@
 
       <div class="cant-pane" data-pane="fatture">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova fattura</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Nuova fattura</div>
           <div class="form-row">
             <div class="form-group">
               <label>Numero fattura</label>
@@ -3236,7 +3245,7 @@
 
       <div class="cant-pane" data-pane="quaderno">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova registrazione</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Nuova registrazione</div>
           <div class="form-row">
             <div class="form-group">
               <label>Data</label>
@@ -3265,7 +3274,7 @@
 
       <div class="cant-pane" data-pane="scadenze">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Nuova scadenza</div>
           <div class="form-group">
             <label>Titolo *</label>
             <input type="text" id="scad-cant-titolo" placeholder="es. Consegna materiale, sopralluogo, pagamento acconto">
@@ -3300,7 +3309,7 @@
 <!-- MODAL 2FA -->
 <div class="mfa-overlay" id="mfa-overlay">
   <div class="mfa-box">
-    <h2 id="mfa-title">🔐 Attiva verifica in due passaggi</h2>
+    <h2 id="mfa-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Attiva verifica in due passaggi</h2>
     <p id="mfa-desc">Scansiona il QR code con Google Authenticator o un'app compatibile, poi inserisci il codice per confermare l'attivazione.</p>
     <div id="mfa-alert-box" style="display:none;" class="mfa-alert"></div>
     <div id="mfa-step-qr">
@@ -3308,7 +3317,7 @@
       <div class="mfa-secret" id="mfa-secret"></div>
       <p style="font-size:0.82rem;color:var(--mid);margin-bottom:12px;text-align:center;">Dopo aver scansionato, inserisci il codice a 6 cifre:</p>
       <input type="text" class="mfa-input" id="mfa-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
-      <button class="mfa-btn" id="mfa-btn" onclick="confermaMFA()">✅ Attiva 2FA</button>
+      <button class="mfa-btn" id="mfa-btn" onclick="confermaMFA()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Attiva 2FA</button>
     </div>
     <span class="mfa-cancel" onclick="chiudiMFA()">Annulla</span>
   </div>
@@ -3336,15 +3345,15 @@
           </button>
         </div>
         <div class="prev-generato" id="prev-generato">
-          <div class="prev-gen-label">✨ Preventivo generato dall'AI — personalizzalo a piacere</div>
+          <div class="prev-gen-label"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Preventivo generato dall'AI — personalizzalo a piacere</div>
           <textarea class="prev-textarea" id="prev-testo"></textarea>
           <div class="prev-prezzo-row">
             <div class="prev-input-wrap">
-              <label>💶 Prezzo minimo (€)</label>
+              <label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Prezzo minimo (€)</label>
               <input type="text" inputmode="decimal" class="prev-input" id="prev-min" placeholder="Es. 1500">
             </div>
             <div class="prev-input-wrap">
-              <label>💶 Prezzo massimo (€)</label>
+              <label><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Prezzo massimo (€)</label>
               <input type="text" inputmode="decimal" class="prev-input" id="prev-max" placeholder="Es. 2500">
             </div>
           </div>
@@ -3354,7 +3363,7 @@
     <div class="modal-ai-footer">
       <button class="btn-chiudi-modal" onclick="chiudiModal()">✕ Chiudi</button>
       <button class="btn-invia-prev" id="btn-invia-prev" onclick="inviaPreventivo()" style="display:none">
-        📤 Invia preventivo al cliente
+        <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg> Invia preventivo al cliente
       </button>
     </div>
   </div>
@@ -6705,7 +6714,7 @@ async function eliminaVideo(id) {
   <div class="modal-ai" style="max-width:760px">
     <div class="modal-ai-header">
       <div>
-        <h2>⏳ Lista d'attesa pubblicità</h2>
+        <h2><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Lista d'attesa pubblicità</h2>
       </div>
       <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiModalListaAttesaPub()">✕</button>
