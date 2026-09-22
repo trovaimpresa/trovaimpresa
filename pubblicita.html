@@ -54,6 +54,11 @@
     .step-sub{color:var(--mid);font-size:15px;margin-bottom:28px;}
 
     /* STEP 1 - SELETTORE SPAZI */
+    .regalo-guide{max-width:760px;margin:0 auto 22px;background:#eaf7ee;border:2px solid #b4e0c2;
+      border-radius:16px;padding:20px 22px}
+    .rg-t{margin:0 0 8px;font-size:19px;font-weight:800;color:#116631}
+    .rg-s{margin:0;font-size:16px;line-height:1.6;color:#33475b}
+    @media(max-width:600px){.regalo-guide{padding:16px;margin-bottom:18px}.rg-t{font-size:17px}.rg-s{font-size:15px}}
     .spazio-fascia{margin-bottom:18px;}
     .spazio-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
     .sezione-label{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;}
@@ -232,6 +237,14 @@
   <div class="guida-misura"><b>L'immagine da mandare è sempre la stessa forma:</b> 800 × 520 px (PNG o JPG).
   Cambia solo quanto grande si vede il tuo annuncio: dai 340 px in cima ai 170 px del formato biglietto da visita in fondo.
   Quando la carichi, la sistemi tu dentro il riquadro.</div>
+  <!-- 22 set 2026 — il regalo: ogni spazio esce anche nelle guide -->
+  <div class="regalo-guide">
+    <p class="rg-t">Compreso in ogni spazio: esci anche nelle guide</p>
+    <p class="rg-s">Il tuo cartello non resta solo nella pagina della tua citt&agrave;.
+    Esce anche di lato alle nostre <b>guide dei prezzi</b> &mdash; quelle che Google mostra a chi cerca
+    <i>quanto costa rifare il bagno</i> &mdash; a chi le legge dalla tua citt&agrave;.
+    Il cliente legge il prezzo, e accanto trova te. Nessun costo in pi&ugrave;.</p>
+  </div>
   <div id="schema"></div>
   <div style="max-width:760px;margin:24px auto 0;">
     <button class="btn-avanti" id="btn1" disabled>Continua → Scegli la città</button>

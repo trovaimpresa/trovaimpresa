@@ -32,6 +32,13 @@
 (function () {
   'use strict';
 
+  /* 22 set 2026 — IL REGALO DELLE GUIDE.
+     Ogni spazio comprato esce ANCHE di lato alle guide, al blog e ai bandi,
+     a chi le legge da quella citta'. Non e' uno spazio in piu' da comprare:
+     e' compreso. La frase sta qui una volta sola e finisce in fondo a ogni
+     riga del listino, cosi' non si puo' dimenticare di dirlo a qualcuno. */
+  var REGALO = ' \u2014 e in regalo anche di lato alle guide e al blog, a chi legge dalla tua citt\u00e0';
+
   // --- le 4 fasce, dalla piu' cara alla piu' economica ----------------------
   // "dove" e' la frase che il CLIENTE legge nel listino: deve dire il vero,
   // compreso quando lo stesso cartello si vede in piu' di una pagina.
@@ -190,7 +197,7 @@
       out.push({
         chiave: k, nome: FASCE[k].nome, prezzo: FASCE[k].prezzo,
         misura: FASCE[k].misura, spazi: ids,
-        desc: FASCE[k].dove
+        desc: FASCE[k].dove + REGALO
       });
     });
     return out;
