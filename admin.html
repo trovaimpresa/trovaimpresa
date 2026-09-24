@@ -553,6 +553,7 @@
       </div>
       <div class="nav-item" onclick="showSection('recensioni',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span> Recensioni
+        <span class="nav-badge" id="badge-valutazioni" style="background:var(--rosso);display:none">0</span>
       </div>
       <div class="nav-item" onclick="showSection('richieste',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span> Cosa chiedono
@@ -938,6 +939,27 @@
             </tr>
           </thead>
           <tbody id="table-recensioni"><tr><td colspan="5" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- 24 set 2026 — valutazioni del riquadro «Ti piace TrovaImpresa?» della home.
+           Nascono NON approvate: escono sul sito solo dopo il tasto Approva. -->
+      <div class="topbar" style="margin-top:28px">
+        <div class="topbar-title">Valutazioni del sito <span id="val-sito-conta" style="font-size:0.85rem;font-weight:600;color:var(--light)"></span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Voto</th>
+              <th>Commento</th>
+              <th>Data</th>
+              <th>Stato</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-valutazioni-sito"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -3747,7 +3769,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti()]);
 }
 
 // QUANTE PERSONE HANNO APERTO IL SITO (caselle in cima alla dashboard)
@@ -4499,6 +4521,63 @@ async function caricaRecensioni() {
       <td><button class="action-btn btn-elimina" onclick="eliminaRecensione('${r.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
+}
+
+// 24 set 2026 — VALUTAZIONI DEL SITO (riquadro «Ti piace TrovaImpresa?»)
+// Il 15 settembre qualcuno ci aveva messo la sua pubblicita'. Adesso
+// le nuove restano nascoste finche' non premi Approva.
+async function caricaValutazioniSito() {
+  const tbody = document.getElementById('table-valutazioni-sito');
+  if (!tbody) return;
+  let data;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'site_reviews' })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) { tbody.innerHTML = '<tr><td colspan="6">Errore: ' + esc(json.error || 'caricamento non riuscito') + '</td></tr>'; return; }
+    data = json.data || [];
+  } catch (e) { tbody.innerHTML = '<tr><td colspan="6">Errore di rete</td></tr>'; return; }
+  // prima quelle da controllare, poi le altre
+  data.sort((a, b) => (a.approved === b.approved ? 0 : a.approved ? 1 : -1));
+  const attesa = data.filter(r => !r.approved).length;
+  const b = document.getElementById('badge-valutazioni');
+  if (b) { b.textContent = attesa; b.style.display = attesa ? '' : 'none'; }
+  const c = document.getElementById('val-sito-conta');
+  if (c) c.textContent = attesa ? '· ' + attesa + ' da controllare' : '· tutte controllate';
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table">Nessuna valutazione ancora</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => {
+    const v = Math.max(0, Math.min(5, r.rating || 0));
+    const stato = r.approved
+      ? '<span class="badge badge-v">Sul sito</span>'
+      : '<span class="badge" style="background:#fff4e5;color:#b35f00;white-space:nowrap">Da controllare</span>';
+    const tasto = r.approved
+      ? `<button class="action-btn" onclick="approvaValutazione('${r.id}', false)">Nascondi</button>`
+      : `<button class="action-btn btn-verifica" onclick="approvaValutazione('${r.id}', true)">Approva</button>`;
+    return `
+    <tr${r.approved ? '' : ' style="background:#fffaf2"'}>
+      <td><strong>${esc(r.author_name) || '<span style="color:var(--light)">senza nome</span>'}</strong></td>
+      <td style="white-space:nowrap">${'★'.repeat(v)}${'☆'.repeat(5 - v)}</td>
+      <td style="max-width:260px">${esc(r.comment || '')}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${_data(r.created_at)}</td>
+      <td>${stato}</td>
+      <td style="white-space:nowrap">${tasto} <button class="action-btn btn-elimina" onclick="eliminaValutazione('${r.id}')">Elimina</button></td>
+    </tr>`;
+  }).join('');
+}
+async function approvaValutazione(id, si) {
+  if (!await adminWrite('update', 'site_reviews', id, { approved: !!si })) return;
+  await caricaValutazioniSito();
+}
+async function eliminaValutazione(id) {
+  if (!confirm('Eliminare questa valutazione?')) return;
+  if (!await adminWrite('delete', 'site_reviews', id)) return;
+  await caricaValutazioniSito();
 }
 
 // FILTRA IMPRESE

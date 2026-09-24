@@ -168,9 +168,19 @@
         b.addEventListener("click", function () { selected = +b.dataset.v; paint(selected); });
       });
 
+      // 24 set 2026 — stesse regole del trigger nel database
+      function sembraAnnuncio(testo) {
+        var t = (testo || "").toLowerCase().replace(/trovaimpresa\.com/g, "trovaimpresa");
+        return /(\+?\d[ .\/-]?){7,}/.test(t)
+          || /(https?:\/\/|www\.|\.(com|it|net|org|eu|info|biz|me|shop|store|online)\b)/.test(t)
+          || /[a-z0-9._%+-]+ ?(@|\(at\)) ?[a-z0-9.-]+\.[a-z]{2,}/.test(t)
+          || /(sono (un |una |un')?(artigian|idraulic|elettricist|murator|imbianchin|pittor|piastrellist|carpentier|falegnam|fabbr|geometr|architett|ingegner|impresa|ditta|giardinier)|cerco lavoro|cerchiamo lavoro|offro lavor|offro serviz|disponibil[ei] per lavor|chiamatemi|chiamami|contattatemi|contattami|scrivetemi|scrivimi|whatsapp|telegram|preventiv[io] gratuit|prezzi modic|prezzi economic|vendo |affitto )/.test(t);
+      }
+
       function load() {
         sb.from("site_reviews")
           .select("rating, comment, author_name, created_at")
+          .eq("approved", true)
           .order("created_at", { ascending: false })
           .limit(30)
           .then(function (res) {
@@ -240,7 +250,17 @@
           $("tir-name").focus();
           return;
         }
-        var last = +localStorage.getItem("tir_last") || 0;
+        // 24 set 2026 — il 15 settembre qualcuno ha usato il riquadro per
+        // farsi pubblicita'. Qui si ferma subito chi scrive telefoni, siti,
+        // email o frasi da annuncio. Il blocco vero sta nel database
+        // (trigger site_reviews_filtro): questo serve solo a spiegarlo gentilmente.
+        if (sembraAnnuncio($("tir-name").value + " " + $("tir-comment").value)) {
+          msg.textContent = "Qui si lascia solo un parere sul sito: niente numeri di telefono, siti, email o annunci.";
+          msg.classList.add("err");
+          return;
+        }
+        var last = 0;
+        try { last = +localStorage.getItem("tir_last") || 0; } catch (x) {}
         if (Date.now() - last < 60000) {
           msg.textContent = "Hai già inviato una valutazione da poco. Grazie!";
           msg.classList.add("err"); return;
@@ -254,9 +274,15 @@
           page: PAGE
         }).then(function (res) {
           btn.disabled = false; btn.textContent = "Invia valutazione";
-          if (res.error) { msg.textContent = "Ops, qualcosa è andato storto. Riprova."; msg.classList.add("err"); return; }
-          localStorage.setItem("tir_last", Date.now());
-          msg.textContent = "Grazie per la tua valutazione! ★";
+          if (res.error) {
+            msg.textContent = /recensione_non_ammessa/.test(res.error.message || "")
+              ? "Qui si lascia solo un parere sul sito: niente numeri di telefono, siti, email o annunci."
+              : "Ops, qualcosa è andato storto. Riprova.";
+            msg.classList.add("err"); return;
+          }
+          try { localStorage.setItem("tir_last", Date.now()); } catch (x) {}
+          // 24 set 2026 — le recensioni nuove escono solo dopo l'ok dall'admin
+          msg.textContent = "Grazie! La tua valutazione apparirà dopo un breve controllo.";
           msg.classList.add("ok");
           $("tir-form").reset(); selected = 0; paint(0);
           load();

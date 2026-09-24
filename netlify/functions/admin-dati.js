@@ -26,7 +26,10 @@ const TABELLE_CONSENTITE = [
   /* 6 settembre 2026 — le richieste che i clienti lasciano nei moduli
      "cerca" del sito (nome, telefono, zona, cosa cercano). C'erano da
      luglio ma nessuna pagina dell'admin le apriva. */
-  'richieste_clienti'
+  'richieste_clienti',
+  /* 24 settembre 2026 — le valutazioni del riquadro «Ti piace TrovaImpresa?»
+     nascono non approvate: dall'admin si approvano o si cancellano. */
+  'site_reviews'
 ];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 
