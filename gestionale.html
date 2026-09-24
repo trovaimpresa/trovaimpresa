@@ -392,6 +392,14 @@
   .totale b{font-size:19px;font-variant-numeric:tabular-nums;color:var(--ink)}
   .demo-nota{text-align:center;color:var(--muted);font-size:14.5px;margin:22px 0 0}
   @media(max-width:900px){.demo-griglia{grid-template-columns:1fr;max-width:460px;margin:0 auto}.demo-fascia h2{font-size:25px}}
+
+  /* 24 set 2026 — computo e controllo fattura che si muovono (solo con JS;
+     senza JS o con «riduci movimento» resta il disegno fermo di sempre) */
+  .anim-on .mis,.anim-on #anim-fattura-nota{transition:opacity .4s,transform .4s}
+  .anim-giu{opacity:0;transform:translateY(6px)}
+  .mis.lampo .num{animation:d-lampo 1s}
+  @keyframes d-lampo{0%{background:#fdeceb}100%{background:transparent}}
+  .pill.attesa{background:var(--bg);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -706,7 +714,7 @@
          senza riscrivere una riga.</p>
     </div>
     <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="doc">
+    <div class="doc" id="anim-computo">
       <div class="doc-top">
         <div><b>Intonaco civile su pareti interne</b><br>
           <span style="color:#8899ab">Cap. 3 &mdash; Opere murarie &middot; cod. 1C.04.150.a</span></div>
@@ -716,7 +724,7 @@
       <div class="mis"><span><b>Corridoio</b><small>2 PARTI &middot; 6,10 &times; 2,90</small></span><span class="num">35,38</span></div>
       <div class="mis"><span><b>Vano porta</b> <span class="meno">si detrae</span><small>2 PARTI &middot; 0,90 &times; 2,10</small></span><span class="num meno">&minus; 3,78</span></div>
       <div class="mis"><span><b>Finestra</b> <span class="meno">si detrae</span><small>1 PARTE &middot; 1,40 &times; 1,20</small></span><span class="num meno">&minus; 1,68</span></div>
-      <div class="doc-tot"><span>Quantit&agrave; &mdash; dalle misure</span><span>78,64 m&sup2;</span></div>
+      <div class="doc-tot"><span>Quantit&agrave; &mdash; dalle misure</span><span id="anim-computo-tot">78,64 m&sup2;</span></div>
     </div>
   </div>
 </section>
@@ -791,7 +799,7 @@
 <section class="fascia">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="schermo">
+    <div class="schermo" id="anim-fattura">
       <div class="sc-barra"><i class="pall"></i><i class="pall"></i><i class="pall"></i>
         <span class="sc-titolo">Controllo prima di mandarla</span></div>
       <div class="sc-main">
@@ -799,7 +807,7 @@
         <div class="riga"><span>Codice destinatario</span><span class="pill verde">a posto</span></div>
         <div class="riga"><span>IBAN</span><span class="pill rosso">una cifra non torna</span></div>
         <div class="riga"><span>Righe con descrizione</span><span class="pill verde">a posto</span></div>
-        <div style="margin-top:12px;font-size:13.5px;color:#b1442a;line-height:1.6">
+        <div id="anim-fattura-nota" style="margin-top:12px;font-size:13.5px;color:#b1442a;line-height:1.6">
           L&rsquo;IBAN non supera il controllo. Lo correggi in <b>Dati azienda &rsaquo; Pagamenti</b>.</div>
       </div>
     </div>
@@ -1370,7 +1378,10 @@
 (function(){
   var FERMO=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var aspetta=function(ms){return new Promise(function(r){setTimeout(r,FERMO?0:ms)})};
-  var euro=function(n){return n.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'};
+  /* 24 set 2026 — il punto delle migliaia SEMPRE: toLocaleString in italiano
+     su alcuni Chrome scrive «1200,00» (senza punto) sotto i 10.000. */
+  var num2=function(n){var p=(Math.round(n*100)/100).toFixed(2).split('.');return p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+p[1]};
+  var euro=function(n){return num2(n)+' €'};
   function $(id){return document.getElementById(id)}
   function bolla(dove,classe,html){var m=document.createElement('div');m.className='msg '+classe;m.innerHTML=html||'';dove.appendChild(m);
     if(FERMO)m.classList.add('si');else requestAnimationFrame(function(){requestAnimationFrame(function(){m.classList.add('si')})});return m}
@@ -1432,6 +1443,40 @@
     async function ciclo(){gira=true;while(va){await fn()}gira=false}
   }
   giraQuandoSiVede('d1',demo1);giraQuandoSiVede('d2',demo2);giraQuandoSiVede('d3',demo3);
+  /* 24 set 2026 — IL COMPUTO: le misure entrano una alla volta e la quantita' sale */
+  async function animComputo(){
+    var box=$('anim-computo'),tot=$('anim-computo-tot');if(!box||!tot)return;
+    var righe=[].slice.call(box.querySelectorAll('.mis'));
+    var val=righe.map(function(r){var t=r.querySelector('.num').textContent.replace('−','-').replace(/[^\d,-]/g,'').replace(',','.');return parseFloat(t)||0});
+    righe.forEach(function(r){r.classList.add('anim-giu')});tot.textContent='0,00 m²';await aspetta(700);
+    var somma=0;
+    for(var i=0;i<righe.length;i++){
+      righe[i].classList.remove('anim-giu');
+      if(val[i]<0){righe[i].classList.remove('lampo');void righe[i].offsetWidth;righe[i].classList.add('lampo')}
+      var da=somma;somma+=val[i];
+      for(var k=1;k<=12;k++){tot.textContent=num2(da+(val[i]*k/12))+' m²';await aspetta(35)}
+      await aspetta(550);
+    }
+    tot.textContent=num2(somma)+' m²';
+    await aspetta(4000);
+  }
+  /* IL CONTROLLO DELLA FATTURA: le caselle si controllano una dopo l'altra */
+  async function animFattura(){
+    var box=$('anim-fattura'),nota=$('anim-fattura-nota');if(!box)return;
+    var pill=[].slice.call(box.querySelectorAll('.pill'));
+    if(!box._fine)box._fine=pill.map(function(p){return {c:p.className,t:p.textContent}});
+    var fine=box._fine;
+    pill.forEach(function(p){p.className='pill attesa';p.textContent='controllo…'});
+    if(nota)nota.classList.add('anim-giu');await aspetta(900);
+    for(var i=0;i<pill.length;i++){await aspetta(650);pill[i].className=fine[i].c;pill[i].textContent=fine[i].t}
+    await aspetta(400);if(nota)nota.classList.remove('anim-giu');
+    await aspetta(4500);
+  }
+  if(!FERMO){
+    ['anim-computo','anim-fattura'].forEach(function(id){var e=$(id);if(e)e.classList.add('anim-on')});
+    giraQuandoSiVede('anim-computo',animComputo);giraQuandoSiVede('anim-fattura',animFattura);
+  }
+
 })();
 </script>
 </body>
