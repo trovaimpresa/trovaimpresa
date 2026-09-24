@@ -25,9 +25,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestionale TrovaImpresa per l'edilizia — preventivi, fatture e cantieri</title>
-<meta name="description" content="Gestionale TrovaImpresa per l'edilizia: preventivi, lavori, fatture elettroniche, computo metrico, mezzi e ore. Per artigiani, imprese edili e studi tecnici. Da 249 € l'anno, oppure 29 € al mese.">
+<title>Gestionale edile per imprese e artigiani | TrovaImpresa</title>
+<meta name="description" content="Gestionale edile per imprese, artigiani e studi tecnici: preventivi, computo, fatture elettroniche e cantieri, e quanto guadagni su ogni lavoro. Da 29 € al mese, provalo 30 giorni.">
 <link rel="canonical" href="https://trovaimpresa.com/gestionale">
+<!-- 24 set 2026: la striscia «100% italiana», stesso file della home -->
+<link rel="stylesheet" href="/css/fiducia.css?v=1">
 <style>
   :root{
     --blu:#0066ff;--blu-scuro:#0047b3;--blu-tenue:#eaf2ff;
@@ -91,7 +93,9 @@
   /* ---------- il colpo d'occhio ---------- */
   .hero{background:var(--bg);border-bottom:1px solid var(--bd);padding:52px 0 56px}
   .hero .wrap{display:grid;grid-template-columns:1.02fr 1.28fr;gap:46px;align-items:center}
-  h1{font-size:54px;line-height:1.04;letter-spacing:-1.6px;margin:0 0 12px;color:var(--ink)}
+  h1{font-size:40px;line-height:1.12;letter-spacing:-1px;margin:0 0 14px;color:var(--ink)}
+  .senza-carta{font-size:15px;color:var(--muted);margin:8px 0 0}
+  .ti-fiducia-sx{justify-content:flex-start;padding:0;margin:18px 0 0}
   .claim{font-size:25px;line-height:1.32;font-weight:700;color:var(--ink);margin:0 0 14px}
   .sotto{font-size:18.5px;color:var(--muted);margin:0 0 26px}
   .bottoni{display:flex;gap:12px;flex-wrap:wrap}
@@ -273,7 +277,9 @@
     body{font-size:17.5px}
     .hero{padding:32px 0 36px}
     .hero .wrap{grid-template-columns:1fr;gap:30px}
-    h1{font-size:36px;letter-spacing:-1px}
+    h1{font-size:29px;letter-spacing:-.6px}
+    .senza-carta{text-align:center}
+    .ti-fiducia-sx{justify-content:center}
     .claim{font-size:21px}
     .sotto{font-size:17px}
     .btn{width:100%;text-align:center}
@@ -337,6 +343,55 @@
   .mestieri3 a:hover{background:var(--blu-tenue)}
   .modo small{display:block;text-align:center;color:var(--muted);font-size:14px;margin-top:8px}
   @media(max-width:860px){.tre{grid-template-columns:1fr}.comincia h2{font-size:25px}}
+
+  /* ---------- 24 set 2026: LE TRE DEMO ANIMATE ----------
+     Solo le variabili della pagina (--blu, --ink, --txt, --muted, --bg,
+     --bd, --blu-tenue, --arancio): nessun colore scritto a mano. */
+  .demo-fascia{padding:48px 0 44px;background:#fff;border-bottom:1px solid var(--bd)}
+  .demo-fascia h2{font-size:32px;line-height:1.2;color:var(--ink);text-align:center;margin:0 0 6px}
+  .demo-fascia .intro{text-align:center;color:var(--muted);margin:0 0 30px;font-size:17px}
+  .demo-griglia{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .blocco .eti{font-size:12.5px;letter-spacing:.12em;color:var(--blu);font-weight:800;text-transform:uppercase;margin-bottom:6px}
+  .blocco h3{font-size:21px;line-height:1.25;color:var(--ink);margin:0 0 14px}
+  .demo{background:#fff;border:1px solid var(--bd);border-radius:18px;height:400px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(10,42,77,.07);font-size:14px}
+  .d-testa{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bd)}
+  .d-logo{width:32px;height:32px;border-radius:50%;background:var(--blu);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;flex:none}
+  .d-testa b{font-size:14.5px;display:block;color:var(--ink)}.d-testa small{font-size:12px;color:var(--muted)}
+  .d-corpo{flex:1;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;overflow:hidden}
+  #d3{height:470px}
+  #d3 .d-corpo{justify-content:flex-start}
+  .msg{max-width:88%;padding:9px 12px;border-radius:13px;line-height:1.45;opacity:0;transform:translateY(8px);transition:.35s;color:var(--ink)}
+  .msg.si{opacity:1;transform:none}
+  .msg.io{align-self:flex-end;background:var(--blu-tenue);border-bottom-right-radius:4px}
+  .msg.ai{align-self:flex-start;background:var(--bg);border-bottom-left-radius:4px}
+  .msg b{color:var(--blu-scuro)}
+  .cursore{display:inline-block;width:7px;height:14px;background:var(--blu);vertical-align:-2px;margin-left:2px;animation:d-lamp .8s infinite}
+  @keyframes d-lamp{50%{opacity:0}}
+  .foto{display:flex;align-items:center;gap:10px}
+  .foto .carta{width:44px;height:56px;border-radius:6px;background:#fff;border:1px solid var(--bd);padding:6px 5px;display:flex;flex-direction:column;gap:4px;flex:none}
+  .foto .carta i{display:block;height:3px;background:var(--bd);border-radius:2px}
+  .scan{height:4px;border-radius:2px;background:var(--bd);overflow:hidden;margin-top:6px;width:120px}
+  .scan span{display:block;height:100%;width:0;background:var(--arancio);transition:width 1.4s linear}
+  .d-piede{padding:9px 11px;border-top:1px solid var(--bd);display:flex;gap:8px;align-items:center}
+  .casella{flex:1;border:1px solid var(--bd);border-radius:11px;padding:9px 11px;color:var(--muted);min-height:38px;white-space:nowrap;overflow:hidden}
+  .casella.scrive{color:var(--ink)}
+  .invia{width:36px;height:36px;border-radius:10px;background:var(--blu);display:grid;place-items:center;flex:none}
+  .invia svg{width:17px;height:17px;fill:#fff}
+  .piu{font-size:21px;color:var(--muted);width:22px;text-align:center}
+  .prev-t{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bd)}
+  .prev-t b{font-size:14.5px;color:var(--ink)}.prev-t small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .stato{font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;background:var(--bg);color:var(--muted);white-space:nowrap}
+  .bot-ai{margin:10px 14px 0;padding:8px 11px;border-radius:10px;background:var(--blu-tenue);color:var(--blu-scuro);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .pallino{width:8px;height:8px;border-radius:50%;background:var(--arancio);animation:d-lamp 1s infinite;flex:none}
+  .pallino.fermo{animation:none;background:var(--blu)}
+  .riga-p{display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid var(--bd);opacity:0;transform:translateX(-10px);transition:.4s}
+  .riga-p.si{opacity:1;transform:none}
+  .riga-p .d{font-size:13.5px;color:var(--ink)}.riga-p .d small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .riga-p .p{font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+  .totale{padding:11px 14px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;color:var(--txt)}
+  .totale b{font-size:19px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .demo-nota{text-align:center;color:var(--muted);font-size:14.5px;margin:22px 0 0}
+  @media(max-width:900px){.demo-griglia{grid-template-columns:1fr;max-width:460px;margin:0 auto}.demo-fascia h2{font-size:25px}}
 </style>
 </head>
 <body>
@@ -378,18 +433,30 @@
 <header class="hero">
   <div class="wrap">
     <div>
-      <h1>Gestionale TrovaImpresa</h1>
-      <p class="claim">Preventivi, computo metrico, fatture e cantieri.<br>In un posto solo.</p>
-      <p class="sotto">Dal telefono in cantiere e dal computer la sera. Senza installare niente.</p>
+      <!-- ⛔ 24 set 2026 — LA PARTE ALTA RIFATTA.
+           Prima il titolo diceva solo il nome («Gestionale TrovaImpresa»):
+           Google non sapeva per cosa farci uscire e chi leggeva non sapeva
+           cosa ci guadagnava. Adesso: la parola che la gente cerca
+           («gestionale edile»), per chi e', e il guadagno. Titolo scelto da
+           Alex unendo tre proposte. La prova gratis sta in cima, come fanno
+           tutti; il prezzo in chiaro e' il nostro vantaggio e si dice. -->
+      <h1>Gestionale edile: sai sempre quanto ti costa e quanto ti rende ogni lavoro</h1>
+      <p class="claim">Per imprese, artigiani e studi tecnici: preventivi, computo, fatture e cantieri in un posto solo.</p>
+      <p class="sotto">E alla fine di ogni cantiere vedi quanto hai guadagnato. Dal telefono in cantiere e dal computer la sera, senza installare niente.</p>
       <div class="bottoni">
-        <!-- ⛔ 19 set 2026 — prima questi due cadevano nello stesso punto:
-             «Vedi i prezzi» su #iscriviti e «Quanto costa» su #prezzi, che
-             distano 130 pixel. Due bottoni affiancati che fanno la stessa
-             cosa. Adesso uno scende ai prezzi, l'altro a cosa c'e' dentro. -->
-        <a class="btn btn-blu" href="#prezzi">Vedi i prezzi</a>
-        <a class="btn btn-vuoto" href="#dentro">Cosa c&rsquo;&egrave; dentro</a>
+        <a class="btn btn-blu" href="#comincia">Provalo gratis 30 giorni</a>
+        <a class="btn btn-vuoto" href="#demo">Guardalo in azione</a>
       </div>
-      <p class="rassicura"><b>Da 249 &euro; l&rsquo;anno</b>, oppure 29 &euro; al mese. Prezzo finale, nessuna IVA da aggiungere.</p>
+      <p class="senza-carta">Senza carta di credito.</p>
+      <!-- ⚠️ I numeri qui sotto NON sono scritti a mano: lo script in fondo
+           li legge dalla tabella dei prezzi (#prezzi). Se cambi prezzo li',
+           cambia anche qui. Quello scritto nel file e' solo la riserva. -->
+      <p class="rassicura">Il prezzo lo vedi subito: <b>da <span data-prezzo-mese>29 &euro;</span> al mese</b>, prezzo finale senza IVA da aggiungere. Niente telefonate, niente &laquo;richiedi una demo&raquo;.</p>
+      <div class="ti-fiducia ti-fiducia-sx">
+        <span><b class="ti-bandiera" aria-hidden="true"></b>100% italiana</span>
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>106 citt&agrave; e tutti i comuni d&rsquo;Italia</span>
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Assistenza in italiano</span>
+      </div>
     </div>
 
     <!-- ⛔ DISEGNO, NON FOTO. I lavori e le cifre sono inventati. -->
@@ -424,6 +491,51 @@
     </div>
   </div>
 </header>
+
+<!-- ⛔ 24 set 2026 — LE TRE DEMO ANIMATE (id="demo": ci punta «Guardalo in azione»).
+     Fanno vedere SOLO cose che il gestionale fa davvero, controllate sul codice:
+     1) la Chat con AI legge fatture e lavori (chat-gestionale.mjs: fatture_totali, lavori);
+     2) la chat legge foto e PDF delle bolle e apre il modulo del fornitore (compila_fornitore);
+     3) «Genera con AI» in cima ai Preventivi.
+     La chat c'e' solo nel Gestionale con AI: lo dice l'etichetta. Nomi e cifre finti.
+     Con «riduci movimento» attivo si vede la scena gia' finita, ferma. -->
+<section class="demo-fascia" id="demo">
+  <div class="wrap">
+    <h2>Guardalo lavorare</h2>
+    <p class="intro">Tre cose che fa ogni giorno, cos&igrave; come le vedresti tu.</p>
+    <div class="demo-griglia">
+      <div class="blocco">
+        <div class="eti">Chat con AI &middot; nel Gestionale con AI</div>
+        <h3>Chiedi, e ti risponde coi tuoi numeri</h3>
+        <div class="demo" id="d1">
+          <div class="d-testa"><div class="d-logo">T</div><div><b>Assistente TrovaImpresa</b><small id="d1-st">online</small></div></div>
+          <div class="d-corpo" id="d1-c"></div>
+          <div class="d-piede"><div class="piu">+</div><div class="casella" id="d1-in">Scrivi una domanda</div><div class="invia"><svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg></div></div>
+        </div>
+      </div>
+      <div class="blocco">
+        <div class="eti">Legge le carte &middot; nel Gestionale con AI</div>
+        <h3>Fai la foto alla bolla, il resto lo fa lei</h3>
+        <div class="demo" id="d2">
+          <div class="d-testa"><div class="d-logo">T</div><div><b>Assistente TrovaImpresa</b><small id="d2-st">online</small></div></div>
+          <div class="d-corpo" id="d2-c"></div>
+          <div class="d-piede"><div class="piu">+</div><div class="casella">Scrivi una domanda</div><div class="invia"><svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg></div></div>
+        </div>
+      </div>
+      <div class="blocco">
+        <div class="eti">Preventivi &middot; in tutti e due i piani</div>
+        <h3>Il preventivo si scrive da solo</h3>
+        <div class="demo" id="d3">
+          <div class="prev-t"><div><b>Rossi &mdash; Bagno completo</b><small>Roma, via Tiburtina</small></div><span class="stato">Bozza</span></div>
+          <div class="bot-ai" id="d3-ai"><span class="pallino" id="d3-pal"></span><span id="d3-ai-t">Genera con AI&hellip;</span></div>
+          <div class="d-corpo" id="d3-c" style="gap:0;padding-top:4px"></div>
+          <div class="totale"><div>Totale</div><b id="d3-tot">0,00 &euro;</b></div>
+        </div>
+      </div>
+    </div>
+    <p class="demo-nota">Nomi e cifre sono di prova. Il gestionale vero lo apri tu, qui sotto.</p>
+  </div>
+</section>
 
 <!-- ⛔ 24 set 2026 — TRE MODI PER COMINCIARE (id="comincia": ci punta la
      striscia del giro). «Fai un giro» apre il gestionale con ?giro=1: dati
@@ -1237,5 +1349,90 @@
      manca sono quelle dove arriva la gente da Google. -->
 <script src="/cookie-banner.js"></script>
 
+
+<script>
+/* 24 set 2026 — il prezzo della parte alta preso dalla tabella dei prezzi */
+(function(){
+  try{
+    var piani=[].slice.call(document.querySelectorAll('#iscriviti .piano'));
+    var mese=piani.find(function(p){
+      var d=(p.querySelector('.p-durata')||{}).textContent||'', n=((p.querySelector('.p-nome')||{}).textContent||'').trim();
+      return /mese/i.test(d) && n==='Gestionale';
+    });
+    var c=mese&&mese.querySelector('.p-cifra');
+    var cifra=c&&c.firstChild&&c.firstChild.textContent.trim();
+    if(cifra) document.querySelectorAll('[data-prezzo-mese]').forEach(function(e){e.textContent=cifra;});
+  }catch(e){}
+})();
+
+/* 24 set 2026 — LE TRE DEMO. Partono quando si vedono, ricominciano da capo.
+   Con «riduci movimento» si mostra la scena finita, ferma. */
+(function(){
+  var FERMO=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var aspetta=function(ms){return new Promise(function(r){setTimeout(r,FERMO?0:ms)})};
+  var euro=function(n){return n.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'};
+  function $(id){return document.getElementById(id)}
+  function bolla(dove,classe,html){var m=document.createElement('div');m.className='msg '+classe;m.innerHTML=html||'';dove.appendChild(m);
+    if(FERMO)m.classList.add('si');else requestAnimationFrame(function(){requestAnimationFrame(function(){m.classList.add('si')})});return m}
+  async function scriviIn(el,t,v){el.classList.add('scrive');if(FERMO){el.textContent=t;return}el.textContent='';for(var c of t){el.textContent+=c;await aspetta(v||28)}}
+  async function rispondi(m,html,v){
+    if(FERMO){m.innerHTML=html;return}
+    var pezzi=html.split(/(<b>.*?<\/b>)/),fatto='',cur='<span class="cursore"></span>';
+    for(var p of pezzi){
+      if(p.indexOf('<b>')===0){var t=p.slice(3,-4),x='';for(var c of t){x+=c;m.innerHTML=fatto+'<b>'+x+'</b>'+cur;await aspetta(v||16)}fatto+=p}
+      else{for(var c2 of p){fatto+=c2;m.innerHTML=fatto+cur;await aspetta(v||16)}}
+    }
+    m.innerHTML=fatto;
+  }
+  async function staScrivendo(st,ms,t){if(FERMO)return;st.textContent=t||'sta scrivendo…';await aspetta(ms);st.textContent='online'}
+  function vuota(inp){inp.classList.remove('scrive');inp.textContent='Scrivi una domanda'}
+
+  async function demo1(){
+    var c=$('d1-c'),inp=$('d1-in'),st=$('d1-st');c.innerHTML='';vuota(inp);await aspetta(700);
+    await scriviIn(inp,'Quanto devo ancora incassare?');await aspetta(400);
+    bolla(c,'io','Quanto devo ancora incassare?');vuota(inp);await staScrivendo(st,1100);
+    await rispondi(bolla(c,'ai'),'Hai <b>2 fatture</b> da incassare, per <b>11.516,80 €</b>. Quella di Bianchi srl è scaduta da <b>18 giorni</b>.');
+    await aspetta(1300);
+    await scriviIn(inp,'E questa settimana dove vado?');await aspetta(400);
+    bolla(c,'io','E questa settimana dove vado?');vuota(inp);await staScrivendo(st,900);
+    await rispondi(bolla(c,'ai'),'Giovedì <b>impermeabilizzazione terrazzo</b> in via Flaminia 88, con Andrea. Poi niente fino a lunedì.');
+    await aspetta(3500);
+  }
+  async function demo2(){
+    var c=$('d2-c'),st=$('d2-st');c.innerHTML='';await aspetta(800);
+    var f=bolla(c,'io','<div class="foto"><div class="carta"><i></i><i style="width:70%"></i><i></i><i style="width:50%"></i><i></i></div><div>bolla-fornitore.jpg<div class="scan"><span></span></div></div></div>');
+    await aspetta(300);f.querySelector('.scan span').style.width='100%';
+    await staScrivendo(st,1700,'sta leggendo la foto…');
+    await rispondi(bolla(c,'ai'),'Ho letto la bolla <b>DDT 1142/2026</b>: 5 righe di materiale, imponibile <b>883,00 €</b>, IVA <b>194,26 €</b>, totale <b>1.077,26 €</b>. Da pagare entro il <b>30/09</b>.',14);
+    await aspetta(900);
+    await rispondi(bolla(c,'ai'),'Il fornitore non è ancora in rubrica. <b>Ti apro la scheda già compilata?</b>',18);
+    await aspetta(3500);
+  }
+  var RIGHE=[['Demolizione bagno esistente','1 corpo × 1.200,00 €',1200],['Impianto idraulico completo','1 corpo × 2.800,00 €',2800],['Massetto e impermeabilizzazione','6 m² × 45,00 €',270],['Posa piastrelle pavimento e pareti','28 m² × 38,00 €',1064],['Sanitari sospesi e box doccia','1 corpo × 1.650,00 €',1650]];
+  async function demo3(){
+    var c=$('d3-c'),tot=$('d3-tot'),pal=$('d3-pal'),ait=$('d3-ai-t');
+    c.innerHTML='';tot.textContent=euro(0);pal.classList.remove('fermo');ait.textContent='Genera con AI…';await aspetta(1000);
+    var somma=0;
+    for(var r of RIGHE){
+      var el=document.createElement('div');el.className='riga-p'+(FERMO?' si':'');
+      el.innerHTML='<div class="d">'+r[0]+'<small>'+r[1]+'</small></div><div class="p">'+euro(r[2])+'</div>';
+      c.appendChild(el);if(!FERMO)requestAnimationFrame(function(e){return function(){requestAnimationFrame(function(){e.classList.add('si')})}}(el));
+      var da=somma;somma+=r[2];
+      if(FERMO)tot.textContent=euro(somma);else for(var i=1;i<=15;i++){tot.textContent=euro(da+(r[2]*i/15));await aspetta(28)}
+      await aspetta(350);
+    }
+    ait.textContent='Fatto — controlla e premi Salva';pal.classList.add('fermo');
+    await aspetta(4000);
+  }
+  function giraQuandoSiVede(id,fn){
+    var el=$(id);if(!el)return;
+    if(FERMO||!('IntersectionObserver' in window)){fn();return}
+    var va=false,gira=false;
+    new IntersectionObserver(function(e){va=e[0].isIntersecting;if(va&&!gira)ciclo()},{threshold:.35}).observe(el);
+    async function ciclo(){gira=true;while(va){await fn()}gira=false}
+  }
+  giraQuandoSiVede('d1',demo1);giraQuandoSiVede('d2',demo2);giraQuandoSiVede('d3',demo3);
+})();
+</script>
 </body>
 </html>
