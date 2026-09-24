@@ -812,6 +812,44 @@ function regUrl(m) {
   if (IMPRESE.includes(m.slug)) return '/registrazione-impresa.html';
   return '/registrazione-artigiano.html';
 }
+/* ⛔ 24 set 2026 — LE 1.802 PAGINE PORTANO AL GESTIONALE.
+   Chi legge «Muratore a Roma» e' anche un muratore che cerca lavoro: in
+   fondo, dove gli si chiede di iscriversi, adesso c'e' anche il link al
+   gestionale del SUO mestiere, con le parole che la gente cerca su Google
+   («gestionale per muratori»). Cosi' ogni pagina gestionale-<mestiere>
+   riceve 106 link dal sito invece di zero.
+   ⚠️ Le pagine di arrivo sono quelle di genera-pagine-gestionale.js:
+      se una cambia nome, va cambiata anche qui. */
+const GESTIONALE = {
+  'impresa-edile':             ['/software-gestionale-imprese-edili', 'gestionale per imprese edili'],
+  'idraulico':                 ['/gestionale-idraulici', 'gestionale per idraulici'],
+  'elettricista':              ['/gestionale-elettricisti', 'gestionale per elettricisti'],
+  'imbianchino':               ['/gestionale-imbianchini', 'gestionale per imbianchini'],
+  'muratore':                  ['/gestionale-muratori', 'gestionale per muratori'],
+  'piastrellista':             ['/gestionale-piastrellisti', 'gestionale per piastrellisti'],
+  'cartongessista':            ['/gestionale-cartongessisti', 'gestionale per cartongessisti'],
+  'serramentista':             ['/gestionale-serramentisti', 'gestionale per serramentisti'],
+  'termoidraulico':            ['/gestionale-termoidraulici', 'gestionale per termoidraulici'],
+  'installatore-fotovoltaico': ['/gestionale-installatori-fotovoltaico', 'gestionale per installatori fotovoltaico'],
+  'rifacimento-tetti':         ['/gestionale-rifacimento-tetti', 'gestionale per chi rifà tetti'],
+  'geometra':                  ['/gestionale-geometri', 'gestionale per geometri'],
+  'architetto':                ['/gestionale-architetti', 'gestionale per architetti'],
+  'ingegnere-strutturale':     ['/gestionale-ingegneri-strutturali', 'gestionale per ingegneri strutturali'],
+  'certificato-energetico':    ['/gestionale-certificatori-energetici', 'gestionale per certificatori energetici'],
+  'direttore-lavori':          ['/gestionale-direttori-lavori', 'gestionale per direttori dei lavori'],
+  'interior-designer':         ['/gestionale-interior-designer', 'gestionale per interior designer']
+};
+function bloccoGestionale(m) {
+  const g = GESTIONALE[m.slug];
+  if (!g) return '';
+  const cosa = m.ruolo === 'professionista'
+    ? 'incarichi, scadenze delle pratiche, parcelle e fatture'
+    : 'preventivi, lavori, ore, spese e fatture';
+  return `
+    <div class="gest-link" style="margin:24px auto 0;max-width:560px;padding-top:18px;border-top:1px solid rgba(255,255,255,.35);font-size:0.98rem;line-height:1.6;color:rgba(255,255,255,.92);">
+      <b style="color:#fff;">I clienti li hai già?</b> Con il <a href="${g[0]}" style="color:#fff;font-weight:800;text-decoration:underline;text-underline-offset:3px;">${g[1]}</a> di TrovaImpresa tieni ${cosa} in un posto solo, dal telefono e dal computer.
+    </div>`;
+}
 function regTesto(m) {
   if (m.ruolo === 'professionista') return 'Sono un professionista &mdash; iscrivimi gratis';
   if (IMPRESE.includes(m.slug)) return 'Ho un&rsquo;impresa &mdash; iscrivimi gratis';
@@ -1234,6 +1272,7 @@ ${bloccoImprese(m, c, imprese)}
     <h2>Sei ${esc(m.articolo)}${esc(m.nome.toLowerCase())} a ${esc(c.nome)}?</h2>
     <p>Registrati gratis su TrovaImpresa e inizia a ricevere richieste di lavoro dalla tua zona.</p>
     <a href="${regUrl(m)}" style="background:#e8733a;color:white;padding:14px 32px;border-radius:30px;font-weight:700;text-decoration:none;font-size:1rem;">Registrati gratis →</a>
+${bloccoGestionale(m)}
   </div>
 </div>
 
