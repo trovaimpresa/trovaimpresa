@@ -1,0 +1,20 @@
+/* ============================================================
+   24 set 2026 — LA STRISCIA «100% ITALIANA»
+   Un file solo, lo usano la home (index.html) e /gestionale.
+   I colori li prende dalla pagina che lo carica:
+   home -> --ti-ink / --ti-blu · gestionale -> --ink / --blu.
+   ⛔ La bandiera e' disegnata in CSS, NON e' l'emoji: su Windows
+      l'emoji della bandiera si vede come due lettere («IT»).
+   ============================================================ */
+.ti-fiducia{
+  --fid-ink:var(--ti-ink,var(--ink,#0a2a4d));
+  --fid-blu:var(--ti-blu,var(--blu,#0066ff));
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  gap:10px 28px;margin:18px auto 0;padding:0 16px;max-width:680px;
+}
+.ti-fiducia span{display:inline-flex;align-items:center;gap:8px;font-size:15.5px;font-weight:700;color:var(--fid-ink);white-space:nowrap}
+.ti-bandiera{width:24px;height:16px;border-radius:3px;display:inline-block;flex:none;
+  background:linear-gradient(90deg,#009246 33.3%,#fff 33.3% 66.6%,#ce2b37 66.6%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.10)}
+.ti-fiducia svg{width:19px;height:19px;flex:none;fill:none;stroke:var(--fid-blu);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:600px){.ti-fiducia{gap:8px 18px}.ti-fiducia span{font-size:14.5px}}
