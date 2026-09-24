@@ -704,7 +704,8 @@
     if (!tuttiRisultati.length) {
       document.getElementById('risultatiCount').textContent = 'Nessun risultato';
       var _dm = parseInt((document.getElementById('distanzaSlider')||{}).value || 100);
-      div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p>' + bottoneAllarga(_dm) + formRichiestaClienteHTML() + '</div>';
+      div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p><div id="rimando-mestiere"></div>' + bottoneAllarga(_dm) + formRichiestaClienteHTML() + '</div>';
+      if(window.RimandoMestiere)RimandoMestiere.monta('rimando-mestiere',mestiereScelto,(document.getElementById('cittaInput')||{}).value);
       document.getElementById('pagination').innerHTML = ''; return;
     }
     const totale = tuttiRisultati.length;
@@ -854,5 +855,7 @@
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/sync-filtro.js"></script>
 <script src="/js/conta-cliente.js" defer></script>
+<!-- 24 set 2026: lista vuota -> pagina mestiere + citta (js/rimando-mestiere.js) -->
+<script src="/js/rimando-mestiere.js?v=1"></script>
 </body>
 </html>
