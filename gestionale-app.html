@@ -673,7 +673,10 @@
      non lascia scrivere niente a nessuno su quelle righe.
      ⚠️ In giro il quaderno locale (window.storage) vive solo in memoria:
         se no i reparti finti finirebbero nel browser di chi ha un account vero. */
-  const GIRO_UID="de770000-0000-4000-8000-000000000001";
+  /* 24 set 2026 — tre giri, uno per mestiere: ?giro=1&tipo=artigiano|impresa|professionista */
+  const GIRI={impresa:"de770000-0000-4000-8000-000000000001",artigiano:"de770000-0000-4000-8000-000000000002",professionista:"de770000-0000-4000-8000-000000000003"};
+  const GIRO_TIPO=GIRI[new URLSearchParams(location.search).get("tipo")]?new URLSearchParams(location.search).get("tipo"):"impresa";
+  const GIRO_UID=GIRI[GIRO_TIPO];
   const TI_GIRO=new URLSearchParams(location.search).get("giro")==="1";
   window.TI_GIRO=TI_GIRO;
   if(TI_GIRO){const _m={};window.storage={get:async k=>(k in _m?{value:_m[k]}:null),set:async(k,v)=>{_m[k]=v;return{value:v};},delete:async k=>{delete _m[k];return{deleted:true};}};}
@@ -1190,9 +1193,9 @@
     const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
-    /* 24 set 2026 — nel giro (dati finti) l'impresa finta e' un'impresa edile:
+    /* 24 set 2026 — nel giro (dati finti) il mestiere lo dice l'indirizzo:
        la domanda «Che lavoro fai?» non si fa, non c'e' niente da salvare. */
-    if(TI_GIRO)ruoloUtente='impresa';
+    if(TI_GIRO)ruoloUtente=GIRO_TIPO;
     /* ⚠️ CHI NON HA IL TIPO NON E' UN ERRORE: E' UNA REGISTRAZIONE A META'.
        14 agosto 2026. Sul database ci sono 4 account veri con `tipo` vuoto
        (e anche il nome dell'attività vuoto): si sono iscritti e non hanno
