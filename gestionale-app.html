@@ -1190,6 +1190,9 @@
     const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
+    /* 24 set 2026 — nel giro (dati finti) l'impresa finta e' un'impresa edile:
+       la domanda «Che lavoro fai?» non si fa, non c'e' niente da salvare. */
+    if(TI_GIRO)ruoloUtente='impresa';
     /* ⚠️ CHI NON HA IL TIPO NON E' UN ERRORE: E' UNA REGISTRAZIONE A META'.
        14 agosto 2026. Sul database ci sono 4 account veri con `tipo` vuoto
        (e anche il nome dell'attività vuoto): si sono iscritti e non hanno
@@ -2364,7 +2367,7 @@
 
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
-    try{localStorage.setItem(GEST_ULTIMO,id);}catch(e){}
+    try{if(!TI_GIRO)localStorage.setItem(GEST_ULTIMO,id);}catch(e){}
     /* colore primario fisso (blu professionale): il colore del reparto resta solo come pallino accanto al nome */
     const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
     const tdot=$("#tb-rep-dot");if(tdot)tdot.style.background=p.a;
@@ -2424,7 +2427,7 @@
   document.addEventListener("click",function(e){
     const b=e.target.closest&&e.target.closest('nav.tabs button[data-tab]');
     if(!b) return;
-    try{localStorage.setItem(GEST_ULTIMA_SEZ,b.dataset.tab);}catch(e2){}
+    try{if(!TI_GIRO)localStorage.setItem(GEST_ULTIMA_SEZ,b.dataset.tab);}catch(e2){}
   });
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
