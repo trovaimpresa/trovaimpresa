@@ -666,6 +666,17 @@
 <script src="/js/gest-decreto.js"></script>
 <script>
   const KEY="gestionale_multiservizi_v5";
+  /* ⛔ 24 settembre 2026 — IL GIRO («Fai un giro» sulla pagina /gestionale).
+     Con ?giro=1 il gestionale mostra un'impresa FINTA piena di dati finti
+     (Rossi, Bianchi srl...). Si guarda senza account: il database lascia
+     leggere a tutti SOLO le righe di GIRO_UID (regola giro_demo_lettura) e
+     non lascia scrivere niente a nessuno su quelle righe.
+     ⚠️ In giro il quaderno locale (window.storage) vive solo in memoria:
+        se no i reparti finti finirebbero nel browser di chi ha un account vero. */
+  const GIRO_UID="de770000-0000-4000-8000-000000000001";
+  const TI_GIRO=new URLSearchParams(location.search).get("giro")==="1";
+  window.TI_GIRO=TI_GIRO;
+  if(TI_GIRO){const _m={};window.storage={get:async k=>(k in _m?{value:_m[k]}:null),set:async(k,v)=>{_m[k]=v;return{value:v};},delete:async k=>{delete _m[k];return{deleted:true};}};}
   /* ⚠️ 21 agosto 2026 — LE ICONE DEL REPARTO: 14 -> 50, E DIVISE PER MESTIERE.
      Erano quattordici in fila, senza un titolo: chi apriva la finestra doveva
      guardarle una per una. Adesso stanno in sei gruppi con il nome sopra.
@@ -896,6 +907,7 @@
   /* ---- gli errori del database arrivano in inglese tecnico: qui vengono
      tradotti in italiano semplice prima di finire sotto gli occhi dell'utente ---- */
   function traduciErrore(s){
+    if(window.TI_GIRO)return "questo è il giro di prova con dati finti: qui non si salva niente. Per usarlo col tuo lavoro provalo gratis 30 giorni";
     const M=[
       [/row-level security|violates row-level/i,"il database ha bloccato la scrittura. Esci e rientra, poi riprova"],
       [/Failed to fetch|NetworkError|network error|fetch failed|Load failed/i,"la connessione non risponde. Controlla la rete e riprova"],
@@ -2037,8 +2049,8 @@
          Senza await: se la rete e' lenta il gestionale non aspetta un pallino. */
       if(sbUid){ try{ asstVedetta(); asstLeggi(false); contaRichiesteNuove(); contaDalSito(); aiStrisciaCarica(); }catch(e){} }
     }
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();_authRefresh();});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=TI_GIRO?GIRO_UID:(s?s.user.id:null);logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
+    sb.auth.getSession().then(({data})=>{sbUid=TI_GIRO?GIRO_UID:(data.session?data.session.user.id:null);backfillMestieri();_authRefresh();});
   }
 
   /* ---- RESTYLING PRO: emoji dell'interfaccia → icone SVG (Lucide-style) ----

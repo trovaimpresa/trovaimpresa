@@ -294,6 +294,26 @@
     var box=q('gate-btns'); if(!box)return;
     box.innerHTML='';
 
+    /* ⛔ 24 settembre 2026 — LA PROVA DI 30 GIORNI SUL MURO.
+       prova-il-gestionale.html e /gestionale promettono «30 giorni gratis,
+       senza carta». Ma chi si iscriveva da li' arrivava QUI, dove c'era solo
+       la cassa: la prova si chiedeva solo dal pannello, e lui nel pannello
+       non ci passa. Adesso, se e' iscritto e la prova non l'ha mai fatta,
+       il primo bottone e' la prova. Una volta sola: lo decide il server. */
+    if(window._gestUid && window._gestProvaLibera){
+      var bp=document.createElement('button');
+      bp.type='button';
+      bp.textContent='Provalo gratis 30 giorni';
+      bp.style.cssText='display:block;width:100%;padding:16px;margin-bottom:6px;border:0;border-radius:10px;'
+        +'font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;background:var(--verde,#1f9d55);color:#fff;';
+      bp.onclick=function(){ avviaProvaDalMuro(bp); };
+      box.appendChild(bp);
+      var np=document.createElement('p');
+      np.style.cssText='margin:0 0 16px;text-align:center;font-size:14px;color:var(--testo-3,#7a848f);';
+      np.textContent='Senza carta di credito. Finiti i 30 giorni non paghi niente, se non scegli tu.';
+      box.appendChild(np);
+    }
+
     var scelto=window._gestPianoScelto;
     if(scelto && PIANI_CASSA[scelto]){
       /* ha gia' scelto sulla pagina: un bottone solo, col suo prezzo */
@@ -348,6 +368,21 @@
     attacca(j,function(){return window.esportaJson();});
   }
 
+  function avviaProvaDalMuro(b){
+    var prima=b.textContent; b.disabled=true; b.style.opacity='.65'; b.textContent='Un attimo\u2026';
+    var e=q('gate-pw-err'); if(e)e.style.display='none';
+    window._gc.auth.getSession().then(function(r){
+      var t=r&&r.data&&r.data.session&&r.data.session.access_token;
+      if(!t)throw new Error('la sessione \u00e8 scaduta: esci e rientra');
+      return fetch('/.netlify/functions/prova-gestionale',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t}});
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d && (d.ok || d.gia_dentro || (d.gia_usata && d.attiva))){ location.reload(); return; }
+      throw new Error((d&&(d.messaggio||d.error))||'la prova non si \u00e8 aperta');
+    }).catch(function(err){
+      b.disabled=false; b.style.opacity='1'; b.textContent=prima;
+      pwErrore((err&&err.message)||'Riprova fra poco.');
+    });
+  }
   function showManutenzione(){gateMostra('gate-manutenzione');}
   function showLento(){gateMostra('gate-lento');}
 
@@ -417,6 +452,21 @@
     a.style.cssText='color:#fff;font-size:14px;font-weight:700;text-decoration:underline';
     d.appendChild(a);
   }
+  /* 24 set 2026 — IL GIRO: dati finti, niente account. Qui si offre la
+     prova, perche' chi fa il giro dalla pagina /gestionale non ha un
+     pannello da cui chiederla. */
+  function strisciaGiro(){
+    if(q('gest-striscia'))return;
+    var d=strisciaBasso();
+    var t=document.createElement('span');
+    t.textContent='Stai guardando un gestionale di prova, con dati finti. Qui non si salva niente.';
+    d.appendChild(t);
+    var a=document.createElement('a');
+    a.href='/gestionale#comincia';
+    a.textContent='Provalo gratis 30 giorni';
+    a.style.cssText='background:#fff;color:#0a2a4d;font-size:14px;font-weight:800;text-decoration:none;padding:8px 14px;border-radius:8px;white-space:nowrap';
+    d.appendChild(a);
+  }
   function strisciaProva(giorni){
     if(q('gest-striscia'))return;
     var d=strisciaBasso();
@@ -467,6 +517,14 @@
   }
 
   function start(){
+    /* 24 set 2026 — IL GIRO: si entra e basta, senza chiedere chi sei.
+       La chat resta spenta: e' per gli iscritti. */
+    if(window.TI_GIRO){
+      window._gestPremium=false; window._chatPro=false; window._chatAssaggio=false;
+      if(q('gate-gestionale'))hideGate();
+      strisciaGiro();
+      return;
+    }
     if(!window.supabase){return setTimeout(start,200);}
     var gc=window.supabase.createClient(SU,SK);
     window._gc=gc;
@@ -540,6 +598,8 @@
           var ok=haPremium(row)||inProva(row);
           window._gestPremium=ok;
           window._gestProvaGiorni=giorniProva(row);
+          /* 24 set 2026 — la prova si offre anche dal muro (vedi showPaywall) */
+          window._gestProvaLibera=!!row && !row.gest_prova_fine;
           /* ⛔ 18 set 2026 — il prezzo scelto su /gestionale, che il muro
              usera' per aprire la cassa giusta invece di dire 29/249 a tutti. */
           window._gestPianoScelto=(row&&row.gest_piano_scelto)||null;
