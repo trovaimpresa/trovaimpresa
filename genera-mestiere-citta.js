@@ -424,7 +424,7 @@ const MESTIERI = [
   },
   {
     slug: 'rifacimento-tetti', nome: 'Rifacimento tetti', articolo: 'il ',
-    db: ['coperture e tetti'],
+    db: ['coperture e tetti', 'coperture / tetti'],
     guida: '/quanto-costa-rifare-il-tetto', guidaNome: 'Quanto costa rifare il tetto',
     prezzo: '80–350 €/mq',
     prezzoDettaglio: 'Rifare il tetto costa da 80 a 350 €/mq. La differenza sta in cosa si tocca: solo il manto di copertura in basso, tutto il pacchetto con isolamento e struttura in legno in alto.',
@@ -878,7 +878,7 @@ function caricaScorta() {
 
 async function impreseCitta(citta) {
   const filtro = `or=(citta.ilike."${citta}",provincia.ilike."${citta}*")`;
-  const url = `${SUPABASE_URL}/rest/v1/imprese_pubbliche?select=id,nome,mestiere,mestieri,tipo,citta,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&limit=200`;
+  const url = `${SUPABASE_URL}/rest/v1/imprese_pubbliche?select=id,nome,mestiere,mestieri,tipo,citta,regione,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&limit=200`;
   /* ⚠️ 12 set 2026 — LO SCRIPT NON DEVE PIU' POTERSI PIANTARE.
      Senza scadenza, se la rete non risponde (non rifiuta: proprio non
      risponde) `fetch` aspetta per sempre e lo script resta fermo su una
@@ -947,9 +947,81 @@ function combacia(impresa, mestiere) {
   return mestiere.db.some(d => voci.includes(d));
 }
 
+/* ============================================================
+   ⛔ 25 set 2026 — CHI FA ANCHE QUESTO LAVORO.
+   Il 25 set su →1.802← pagine →1.689← dicevano «non c'e' ancora
+   nessuno». Anche muratore-roma, mentre a Roma c'erano 5 imprese di
+   ristrutturazione iscritte: chi fa ristrutturazioni fa anche muratura,
+   ma combacia() cercava solo chi aveva scritto «muratura».
+   Per Google una pagina vuota ripetuta 1.689 volte e' una fotocopia
+   senza valore: non la indicizza. Una pagina con imprese vere si'.
+   Qui sotto: per ogni mestiere, quali ALTRE voci del database fanno
+   anche quel lavoro. Solo accoppiamenti veri di cantiere: un'impresa
+   di ristrutturazione fa tramezzi, massetti, piastrelle, cartongesso
+   e tinteggiature. NON fa l'impianto elettrico o idraulico (serve la
+   dichiarazione di conformita'), quindi quelli restano esclusi.
+   Nella pagina prima vengono gli specialisti, poi questi.
+   ============================================================ */
+const GENERALISTI = ['ristrutturazione', 'ristrutturazione completa', 'costruzione nuova', 'edilizia / muratura', 'muratura e strutture'];
+const FANNO_ANCHE = {
+  'muratore': GENERALISTI,
+  'impresa-edile': GENERALISTI,
+  'piastrellista': GENERALISTI,
+  'cartongessista': GENERALISTI,
+  'imbianchino': GENERALISTI,
+  'termoidraulico': ['idraulica'],
+  'idraulico': ['climatizzazione / caldaie']
+};
+function vociDi(impresa) {
+  return []
+    .concat(Array.isArray(impresa.mestieri) ? impresa.mestieri : [])
+    .concat(impresa.mestiere ? [impresa.mestiere] : [])
+    .map(v => String(v).toLowerCase().trim());
+}
+function faAnche(impresa, mestiere) {
+  const lista = FANNO_ANCHE[mestiere.slug];
+  if (!lista || combacia(impresa, mestiere)) return false;
+  const voci = vociDi(impresa);
+  if (lista.some(d => voci.includes(d))) return true;
+  // Un'«impresa» iscritta con «Altro» e' comunque un'impresa edile.
+  return lista === GENERALISTI && impresa.tipo === 'impresa';
+}
+/* L'etichetta sotto il nome: per chi «fa anche» si mostra la voce che
+   lo porta qui (es. «Ristrutturazione completa»), non il mestiere
+   principale («Pittura»): se no sotto «Muratore a Roma» comparirebbe
+   un imbianchino e il cliente non capirebbe perche'. */
+function etichettaPer(impresa, mestiere) {
+  const lista = FANNO_ANCHE[mestiere.slug] || [];
+  const tutte = []
+    .concat(Array.isArray(impresa.mestieri) ? impresa.mestieri : [])
+    .concat(impresa.mestiere ? [impresa.mestiere] : []);
+  const giusta = tutte.find(v => lista.includes(String(v).toLowerCase().trim()));
+  return giusta || impresa.mestiere || impresa.tipo || 'Edilizia';
+}
+
+/* Le imprese della stessa REGIONE, per la riga «Vicino a <citta>».
+   Una chiamata per regione, tenuta in memoria. Se la rete non c'e'
+   la riga semplicemente non esce: la pagina funziona lo stesso. */
+const cacheRegioni = {};
+async function impreseRegione(regione) {
+  if (regione in cacheRegioni) return cacheRegioni[regione];
+  const url = `${SUPABASE_URL}/rest/v1/imprese_pubbliche?select=id,nome,mestiere,mestieri,tipo,citta,regione,piano&regione=eq.${encodeURIComponent(regione)}&limit=500`;
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      signal: AbortSignal.timeout(SCADENZA_MS)
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    cacheRegioni[regione] = await res.json();
+  } catch (e) {
+    cacheRegioni[regione] = [];
+  }
+  return cacheRegioni[regione];
+}
+
 /* Cartellino impresa: copiato da genera-imprese-citta.js, cosi' le
    schede sono identiche a quelle delle pagine citta'. */
-function cartellino(i) {
+function cartellino(i, etichetta) {
   const badge = i.piano === 'premium'
     ? '<span style="background:#7b2fbe;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="m12 21 4-12-3-6"/><path d="m12 21-4-12 3-6"/></svg> Premium</span>' : '';
   const verificata = i.verificata
@@ -959,7 +1031,7 @@ function cartellino(i) {
     ? `<p style="font-size:0.85rem;color:#666;margin:6px 0 0;line-height:1.4;">${esc(String(i.descrizione).slice(0, 120))}${i.descrizione.length > 120 ? '…' : ''}</p>` : '';
   return `    <a href="/profilo-impresa?id=${esc(i.id)}" style="display:block;background:white;border-radius:12px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-decoration:none;color:#1a1a1a;">
       <div style="font-weight:700;font-size:1rem;">${esc(i.nome || 'Impresa')}${badge}${verificata}</div>
-      <div style="font-size:0.85rem;color:#555;margin-top:4px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> ${esc(i.mestiere || i.tipo || 'Edilizia')} · <svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> ${esc(i.citta || '')} · ${rating}</div>${desc}
+      <div style="font-size:0.85rem;color:#555;margin-top:4px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> ${esc(etichetta || i.mestiere || i.tipo || 'Edilizia')} · <svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> ${esc(i.citta || '')} · ${rating}</div>${desc}
     </a>`;
 }
 
@@ -995,12 +1067,22 @@ function ordina(lista, chiave) {
    resta con un buco: al posto dell'elenco va l'invito a lasciare
    la richiesta. E' il motivo per cui queste pagine possono nascere
    prima che il database sia pieno. */
-function bloccoImprese(m, c, imprese) {
+function rigaVicini(m, c, vicini) {
+  if (!vicini || !vicini.length) return '';
+  return `
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:#0a2a4d;margin:30px 0 12px;">Vicino a ${esc(c.nome)}, ${c.regione === "Valle d'Aosta" ? 'in' : 'nella regione'} ${esc(c.regione)}</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 18px;margin-bottom:18px;">
+${vicini.slice(0, 24).map(i => `      <a href="/profilo-impresa?id=${esc(i.id)}" style="color:#12233a;text-decoration:none;padding:7px 0;border-bottom:1px solid #e7ecf3;font-size:0.95rem;">${esc(i.nome || 'Impresa')} <span style="color:#5b6b80;font-size:.85rem">· ${esc(i.citta || '')}</span></a>`).join('\n')}
+    </div>`;
+}
+
+function bloccoImprese(m, c, imprese, vicini) {
   const P = parole(m);
+  const vicinato = rigaVicini(m, c, vicini);
   if (!imprese.length) {
     return `  <div class="section" id="imprese-locali">
     <h2>${esc(m.nome)} a ${esc(c.nome)}: lascia la tua richiesta</h2>
-    <p>Su TrovaImpresa non c'è ancora ${esc(m.articolo)}${esc(m.nome.toLowerCase())} iscritto a ${esc(c.nome)}. Lascia lo stesso la richiesta: la giriamo ${m.ruolo === 'professionista' ? 'ai professionisti della zona che si occupano di pratiche simili' : 'alle imprese della zona che si occupano di lavori simili'} e a chi si iscrive nei giorni successivi.</p>
+    <p>Su TrovaImpresa non c'è ancora ${esc(m.articolo)}${esc(m.nome.toLowerCase())} iscritto a ${esc(c.nome)}. Lascia lo stesso la richiesta: la giriamo ${m.ruolo === 'professionista' ? 'ai professionisti della zona che si occupano di pratiche simili' : 'alle imprese della zona che si occupano di lavori simili'} e a chi si iscrive nei giorni successivi.</p>${vicinato}
     <p style="text-align:center;margin-top:20px;"><a href="${P.cercaUrl(c)}" class="hero-btn" style="display:inline-block;">${P.cercaTutti(c)} →</a></p>
   </div>`;
   }
@@ -1012,7 +1094,7 @@ function bloccoImprese(m, c, imprese) {
   const altri  = pieno ? imprese.slice(IN_EVIDENZA, MAX_ELENCO) : [];
   const avanzano = pieno ? Math.max(0, imprese.length - MAX_ELENCO) : 0;
 
-  const items = grandi.map(cartellino).join('\n');
+  const items = grandi.map(i => cartellino(i, i._etichetta)).join('\n');
 
   const elenco = altri.length ? `
     <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:#0a2a4d;margin:30px 0 12px;">Tutti gli altri a ${esc(c.nome)}</h3>
@@ -1039,7 +1121,7 @@ ${altri.map(i => `      <a href="/profilo-impresa?id=${esc(i.id)}" style="color:
     <p style="font-size:0.9rem;color:#5b6b80;">In evidenza i profili Premium; sotto trovi tutti gli altri.</p>` : ''}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0;">
 ${items}
-    </div>${elenco}
+    </div>${elenco}${vicinato}
     <p style="text-align:center;"><a href="${P.cercaUrl(c)}" style="color:#0066ff;font-weight:700;">${P.cercaTutti(c)} →</a></p>
   </div>
   <script type="application/ld+json">
@@ -1120,7 +1202,7 @@ const STILE = `<style>
   footer a { color:#999; text-decoration:none; }
 </style>`;
 
-function costruisciPagina(m, c, imprese) {
+function costruisciPagina(m, c, imprese, vicini) {
   const P = parole(m);
   const url = urlPagina(m, c);
   const titolo = `${m.nome} a ${c.nome}: prezzi ${TODAY.slice(0, 4)} ${m.ruolo === 'professionista' ? 'e studi' : 'e imprese'} | TrovaImpresa`;
@@ -1175,7 +1257,13 @@ function costruisciPagina(m, c, imprese) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="canonical" href="${url}">
+<link rel="canonical" href="${url}">${imprese.length ? '' : `
+<!-- 25 set 2026: nessuna impresa di ${esc(c.nome)} per questo lavoro. La pagina resta
+     per chi ci arriva dal sito, ma Google non la mette in indice finche' non
+     si iscrive qualcuno: 1.689 pagine vuote tutte uguali gli facevano credere
+     che il sito fosse fatto di fotocopie. Alla prossima rigenerazione, se nel
+     frattempo qualcuno si e' iscritto, questa riga sparisce da sola. -->
+<meta name="robots" content="noindex, follow">`}
 <title>${esc(titolo)}</title>
 <meta name="description" content="${esc(descr)}">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -1253,7 +1341,7 @@ ${faqHtml}
 </div>
 
 <div class="section" style="padding-top:0;">
-${bloccoImprese(m, c, imprese)}
+${bloccoImprese(m, c, imprese, vicini)}
 </div>
 
 <div class="section" style="padding-top:0;">
@@ -1295,6 +1383,7 @@ ${bloccoGestionale(m)}
    ============================================================ */
 (async () => {
   const generate = [];
+  const inIndice = [];   // solo le pagine con imprese della citta' vanno nella sitemap
   let conImprese = 0, senzaImprese = 0;
 
   for (const c of CITTA) {
@@ -1307,13 +1396,21 @@ ${bloccoGestionale(m)}
     }
 
     for (const m of MESTIERI) {
-      const imprese = ordina(tutte.filter(i => combacia(i, m)), nomeFile(m, c));
+      /* prima gli specialisti, poi chi fa anche questo lavoro */
+      const specialisti = ordina(tutte.filter(i => combacia(i, m)), nomeFile(m, c));
+      const anche = ordina(tutte.filter(i => faAnche(i, m)), nomeFile(m, c))
+        .map(i => Object.assign({}, i, { _etichetta: etichettaPer(i, m) }));
+      const imprese = specialisti.concat(anche);
+      const qui = new Set(tutte.map(i => String(i.id)));
+      const regione = await impreseRegione(c.regione);
+      const vicini = regione.filter(i => !qui.has(String(i.id)) && i.citta && (combacia(i, m) || faAnche(i, m)));
       /* il taglio NON si fa piu' qui: lo decide bloccoImprese, che
          sopra un certo numero divide fra cartellini ed elenco. */
 
       const file = nomeFile(m, c);
-      fs.writeFileSync(path.join(OUT, file), costruisciPagina(m, c, imprese), 'utf8');
+      fs.writeFileSync(path.join(OUT, file), costruisciPagina(m, c, imprese, vicini), 'utf8');
       generate.push(file);
+      if (imprese.length) inIndice.push(file);
 
       if (imprese.length) { conImprese++; console.log(`✓ ${file}: ${imprese.length} imprese`); }
       else { senzaImprese++; console.log(`· ${file}: nessuna impresa, pagina con invito`); }
@@ -1323,7 +1420,7 @@ ${bloccoGestionale(m)}
   // Sitemap separata: non tocca sitemap.xml ne' sitemap-seo.xml
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${generate.map(u => `  <url><loc>${BASE}/${u.replace(/\.html$/, '')}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}
+${inIndice.map(u => `  <url><loc>${BASE}/${u.replace(/\.html$/, '')}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}
 </urlset>
 `;
   fs.writeFileSync(path.join(OUT, 'sitemap-mestieri.xml'), sitemap, 'utf8');
@@ -1336,6 +1433,7 @@ ${generate.map(u => `  <url><loc>${BASE}/${u.replace(/\.html$/, '')}</loc><lastm
   }
   console.log(`Generate ${generate.length} pagine (${MESTIERI.length} mestieri × ${CITTA.length} città)`);
   console.log(`Con imprese: ${conImprese} · Con invito a lasciare la richiesta: ${senzaImprese}`);
+  console.log(`In sitemap e visibili a Google: ${inIndice.length} · Nascoste a Google (vuote): ${generate.length - inIndice.length}`);
   console.log('Scritta anche sitemap-mestieri.xml');
   console.log('='.repeat(60));
 })();
