@@ -1,6 +1,29 @@
 (function () {
   'use strict';
 
+  /* ⛔ 25 set 2026 — IL CONTATORE VISITE SU TUTTE LE PAGINE.
+     La dashboard diceva «0 hanno aperto il sito oggi» mentre Search Console
+     contava 15-20 clic al giorno da Google. Il motivo: js/conta-visita.js
+     stava SOLO sulla home e sulle registrazioni, e chi arriva da Google
+     atterra su muratore-roma, sulle guide, sulle schede: nessuno lo contava.
+     Questo file invece sta gia' su TUTTE le pagine pubbliche, quindi il
+     contatore parte da qui. Un file solo, niente pagine da rigenerare.
+     Sta in cima, PRIMA delle uscite del banner: deve partire anche per chi
+     ha gia' risposto ai cookie (e' statistica senza cookie).
+     Fuori le pagine private: admin, pannelli, login e il programma del
+     gestionale — li' ci sono gli iscritti, non i clienti.
+     Il doppio conteggio lo blocca conta-visita.js da solo (__tiContaVisita). */
+  try {
+    var percorso = location.pathname || '/';
+    var privata = /^\/(admin|pannello-|login-|gestionale-(app|negozio|noleggio|operatore|config|invito))/i.test(percorso);
+    if (!privata && !window.__tiContaVisita && !document.querySelector('script[src*="conta-visita"]')) {
+      var contatore = document.createElement('script');
+      contatore.src = '/js/conta-visita.js';
+      contatore.async = true;
+      (document.head || document.documentElement).appendChild(contatore);
+    }
+  } catch (e) { /* il contatore non deve mai rompere il banner */ }
+
   var STORAGE_KEY = 'cookie_consent';
   var STORAGE_DATE_KEY = 'cookie_consent_date';
   var EXPIRY_DAYS = 365;

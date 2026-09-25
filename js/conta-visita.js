@@ -29,6 +29,14 @@
 (function () {
   'use strict';
 
+  /* 25 set 2026 — UNA VOLTA SOLA PER PAGINA.
+     Da oggi questo file parte anche da cookie-banner.js, cosi' conta TUTTE
+     le pagine pubbliche (muratore-roma, le guide, le schede...). Sulla home
+     e sulle registrazioni c'e' pure il suo tag: senza questa guardia la
+     stessa apertura verrebbe scritta due volte. */
+  if (window.__tiContaVisita) return;
+  window.__tiContaVisita = true;
+
   var URL_DB = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   // Chiave pubblica "anon", la stessa che sta gia' in chiaro nelle pagine.
   // Su questa tabella puo' SOLO scrivere: non puo' rileggere niente.
