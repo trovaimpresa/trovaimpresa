@@ -47,6 +47,8 @@
      «Rating medio» diventa «Voto medio»: e' un pannello italiano. */
   '#sec-dashboard .dash-stat-card{display:grid;grid-template-columns:56px minmax(0,1fr);column-gap:16px;align-items:center;text-align:left;padding:18px 20px;border-radius:16px}' +
   '#sec-dashboard .dash-stat-card:hover{border-color:#0066ff !important}' +
+  /* su schermi medi (portatile piccolo, tablet) quattro carte in fila restavano larghe 165 px e le scritte andavano a capo parola per parola: li' due per riga */
+  '@media(min-width:601px) and (max-width:1300px){#sec-dashboard .dash-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}' +
   '#sec-dashboard .dash-stat-icon{grid-column:1;grid-row:1 / span 3;width:56px;height:56px;margin:0;border-radius:14px;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center}' +
   '#sec-dashboard .dash-stat-icon svg{width:28px;height:28px}' +
   '#sec-dashboard .dash-stat-num,#sec-dashboard .dash-stat-lbl,#sec-dashboard .dash-stat-sub{grid-column:2}' +
