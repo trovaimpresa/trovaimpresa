@@ -13,13 +13,14 @@
     pers:  '<svg '+S+'><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
     doc:   '<svg '+S+'><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>',
     palazzo:'<svg '+S+'><path d="M3 21h18M5 21V10M19 21V10M9 21v-7M15 21v-7M2 10l10-6 10 6"/></svg>',
+    matita:'<svg '+S+'><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
     cerca: '<svg '+S+'><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
     scudo: '<svg '+S+'><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
     foglia:'<svg '+S+'><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.1-6"/></svg>',
     cartella:'<svg '+S+'><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/></svg>'
   };
   // faccina -> disegno. Quelle che non sono in elenco si tolgono e basta.
-  var MAPPA = { '👔':'pers','🦺':'scudo','🌿':'foglia','📁':'cartella','🔍':'cerca','📍':'pin','🔨':'attr','🔧':'attr','🏗':'casa','🏛':'palazzo','📋':'doc','⭐':'stella','💎':'diam' };
+  var MAPPA = { '👔':'pers','🦺':'scudo','🌿':'foglia','📁':'cartella','🔍':'cerca','📍':'pin','🔨':'attr','🔧':'attr','🏗':'casa','🏛':'palazzo','📋':'doc','⭐':'stella','💎':'diam','✏':'matita','📝':'matita' };
   function iconaDi(e){ var k = MAPPA[e.replace(/\uFE0F/g,'')]; return k ? IC[k] : ''; }
   // cambia le faccine dentro i testi di un pezzo di pagina, senza toccare
   // i pulsanti e i loro clic: si lavora solo sui nodi di testo.
@@ -77,7 +78,9 @@
 
   function sistemaAltro(root){
     // «Nessun risultato», «Ricerca in corso»…: via le faccine dai titoli e dai testi
-    root.querySelectorAll('.no-results h3, .no-results p, .loading').forEach(function(el){ testoSolo(el); });
+    root.querySelectorAll('.no-results h3, .loading').forEach(function(el){ testoSolo(el); });
+    // i pulsanti sotto «Nessun risultato» (allarga la ricerca, cerco / offro)
+    root.querySelectorAll('.no-results').forEach(faccineInIcone);
   }
 
   function giro(){
@@ -118,5 +121,50 @@
     }
     giro();
   }
+  /* ---------- LA MAPPA DEI RISULTATI ----------
+     Prima restava sempre sulla vista di partenza (tutta Italia, e su certi
+     schermi finiva sulla Francia): nessuno la spostava sui risultati.
+     Adesso, dopo ogni ricerca, va sui risultati; se non ce ne sono, va
+     sulla citta' cercata con un cerchio blu. I colori sono gli stessi del
+     pannello. Si avvolge aggiornaMappaRis() della pagina senza toccarla. */
+  function coordCitta(nome){
+    try { if (typeof cittaLat !== 'undefined' && cittaLat !== null && typeof cittaLng !== 'undefined') return Promise.resolve([cittaLat, cittaLng]); } catch (e) {}
+    nome = String(nome || '').trim(); if (!nome) return Promise.resolve(null);
+    var k = 'ti_geo_' + nome.toLowerCase();
+    try { var v = JSON.parse(localStorage.getItem(k) || 'null'); if (v) return Promise.resolve(v); } catch (e) {}
+    return fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(nome + ', Italia') + '&format=json&limit=1', { headers: { 'Accept-Language': 'it' } })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if (!d || !d[0]) return null; var c = [parseFloat(d[0].lat), parseFloat(d[0].lon)]; try { localStorage.setItem(k, JSON.stringify(c)); } catch (e) {} return c; })
+      .catch(function(){ return null; });
+  }
+  var _cerchio = null;
+  function centraMappa(){
+    var m; try { m = mappaRis; } catch (e) { return; }
+    if (!m || !window.L) return;
+    try { m.invalidateSize(); } catch (e) {}
+    var punti = [];
+    try { markersRis.eachLayer(function(l){ if (l.getLatLng) punti.push(l.getLatLng()); }); } catch (e) {}
+    var nome = (document.getElementById('cittaInput') || {}).value;
+    coordCitta(nome).then(function(c){
+      if (_cerchio){ try { m.removeLayer(_cerchio); } catch (e) {} _cerchio = null; }
+      if (c){ _cerchio = L.circleMarker(c, { radius: 9, color: '#0066ff', weight: 3, fillColor: '#0066ff', fillOpacity: .25 }).addTo(m); }
+      if (punti.length){
+        if (c) punti.push(L.latLng(c[0], c[1]));
+        m.fitBounds(L.latLngBounds(punti), { padding: [40, 40], maxZoom: 12 });
+      } else if (c){
+        m.setView(c, 11);
+      } else {
+        m.setView([41.9, 12.5], 6);
+      }
+    });
+  }
+  function avvolgiMappa(){
+    if (typeof window.aggiornaMappaRis !== 'function' || window.aggiornaMappaRis._cv) return;
+    var orig = window.aggiornaMappaRis;
+    var nuova = function(){ var r = orig.apply(this, arguments); Promise.resolve(r).then(centraMappa, centraMappa); return r; };
+    nuova._cv = true; window.aggiornaMappaRis = nuova;
+  }
+
+  avvolgiMappa();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avvio); else avvio();
 })();

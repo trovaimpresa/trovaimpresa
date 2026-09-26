@@ -81,6 +81,8 @@ body{ background:#f3f6fa !important; }
 .loading, .no-results{ border-radius:20px !important; border:1px solid #e3ebf6; box-shadow:0 6px 18px rgba(10,42,77,.06); }
 .no-results h3{ color:#0a2a4d !important; }
 #mappa-risultati{ border-radius:20px !important; border:1px solid #e3ebf6; }
+/* stessi colori della mappa del pannello: piu' vivi */
+#mappa-risultati .leaflet-tile-pane{ filter:saturate(1.9) contrast(1.12) brightness(.97); }
 .page-btn{ border-radius:12px !important; min-width:46px; min-height:46px; font-size:16px !important; }
 .page-btn.active{ background:#0066ff !important; color:#fff !important; border-color:#0066ff !important; }
 
