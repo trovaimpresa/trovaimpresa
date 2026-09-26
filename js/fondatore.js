@@ -254,6 +254,7 @@
         vuota e' legittima; una che non esiste e' un aggiornamento mancante. */
   var PROVE = {
     "aggiungi-commercialista.sql":      "gest_azienda.comm_studio gest_azienda.comm_nome gest_azienda.comm_tel gest_azienda.comm_email gest_azienda.comm_pec gest_azienda.comm_note",
+    "chat-avvisi.sql":                  "chat_avvisi",
     "capitolo-costi-sicurezza.sql":     "gest_computo_capitoli.sicurezza gest_computo_totali",
     "controllo-aggiornamenti.sql":      "gest_schema_mancanti()",
     "gest-analisi-arrotondamento.sql":  "gest_analisi_righe_calc gest_analisi_totali",
@@ -289,6 +290,7 @@
     "noleggio-cestino.sql":             "nol_clienti.eliminato_il nol_noleggi.eliminato_il neg_prodotti.eliminato_il neg_fornitori.eliminato_il neg_movimenti.eliminato_il",
     "noleggio-fatture.sql":             "nol_noleggi.fattura_id gest_azienda.num_fattura nol_fatture",
     "noleggio-foto-video.sql":          "nol_media",
+    "prezzi-e-galleria.sql":            "prezzi_impresa galleria_lavori",
     "promemoria-sezione.sql":           "promemoria.ora promemoria.note promemoria.avvisa_giorni promemoria.ripeti_mesi promemoria.stato promemoria.eliminato_il",
     "supporto-origine.sql":             "supporto_messaggi.origine"
   };

@@ -5951,6 +5951,8 @@ else iconizza();
 <!-- 6 set 2026 — conta chi entra nel suo pannello e quanto ci resta (sezione «Chi entra nel sito» dell'admin) -->
 <script src="/js/conta-pannello.js" defer></script>
 <script src="/js/condividi-vetrina.js" defer></script>
+<!-- 26 set 2026 — «I tuoi prezzi»: la sezione e la carta le aggiunge questo file -->
+<script src="/js/prezzi-impresa.js"></script>
 </body>
 <script>
 function toggleSidebar() {
@@ -6437,13 +6439,38 @@ async function inviaMessaggioArtigiano() {
         mittente: 'impresa'
       })
     });
-    if (!res.ok) { console.error('Invio messaggio fallito:', res.status, await res.text()); return; }
+    if (!res.ok) { console.error('Invio messaggio fallito:', res.status, await res.text()); msgAvvisoInvio('Il messaggio non \u00e8 partito. Controlla la connessione e premi di nuovo Invia.'); return; }
+    msgAvvisoInvio('');
     const rows = await res.json().catch(() => []);
     const nuovo = (Array.isArray(rows) && rows.length) ? rows[0] : { testo, mittente: 'impresa', created_at: new Date().toISOString() };
     renderMessaggioChat(nuovo);
     input.value = '';
-  } catch (e) { console.error(e); }
+    /* 26 set 2026 — l'email al cliente «ti ha risposto», col link per tornare
+       nella chat. La funzione controlla da sola chi sei e ne manda al massimo
+       una ogni 30 minuti. Se non parte, il messaggio c'e' comunque. */
+    try {
+      fetch('/.netlify/functions/chat-avviso', { method: 'POST', headers: await chatHdr({ 'Content-Type': 'application/json' }), body: JSON.stringify({ conv: convId }) }).catch(() => {});
+    } catch (_) {}
+  } catch (e) { console.error(e); msgAvvisoInvio('Il messaggio non \u00e8 partito. Controlla la connessione e premi di nuovo Invia.'); }
 }
+
+/* 26 set 2026 — prima un invio fallito non lo diceva a nessuno */
+function msgAvvisoInvio(t) {
+  let b = document.getElementById('msg-avviso-invio');
+  if (!b) {
+    const row = document.querySelector('#sec-messaggi .msg-input-row') || document.getElementById('msg-testo');
+    if (!row || !row.parentNode) return;
+    b = document.createElement('div'); b.id = 'msg-avviso-invio'; b.setAttribute('role', 'status');
+    b.style.cssText = 'display:none;margin-top:10px;padding:12px 14px;border-radius:8px;background:#fdecea;color:#a61b1b;font-size:15px;font-weight:700';
+    row.parentNode.insertBefore(b, row.nextSibling);
+  }
+  b.textContent = t || ''; b.style.display = t ? 'block' : 'none';
+}
+/* Invio manda il messaggio (prima non faceva niente) */
+document.addEventListener('DOMContentLoaded', function () {
+  const i = document.getElementById('msg-testo');
+  if (i) i.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); inviaMessaggioArtigiano(); } });
+});
 
 function sottoscriviRealtimeMessaggi() {
   if (msgRealtimeChannel) return;

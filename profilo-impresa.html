@@ -562,6 +562,18 @@ nav img{height:36px}
    #0047b3 sono gia' nel foglio, il fondo #f7f9fb e il bordo chiaro vengono
    da `.prev-toggle`, il raggio 10px pure. */
 .gp-intro{font-size:13px;color:#7a8896;margin:0 0 12px}
+/* 26 set 2026 — i prezzi scritti dall'impresa (carta #card-prezzi-impresa) */
+.pzs-lista{list-style:none;margin:0;padding:0}
+.pzs-lista li{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:13px 0;border-top:1px solid #e6ebf1}
+.pzs-lista li:first-child{border-top:none;padding-top:4px}
+.pzs-voce{font-size:17px;font-weight:700;color:#1a2f47;line-height:1.4}
+.pzs-voce small{display:block;font-size:14.5px;font-weight:400;color:#64748b;margin-top:2px}
+.pzs-cifra{font-size:17px;font-weight:800;color:#0052cc;white-space:nowrap;text-align:right}
+.pzs-cifra small{display:block;font-size:14px;font-weight:600;color:#64748b}
+.pzs-nota{font-size:14.5px;color:#64748b;margin:12px 0 14px;line-height:1.5}
+.pzs-btn{display:block;width:100%;border:none;cursor:pointer;font-family:inherit;text-align:center;background:#ff8800;color:#fff;font-weight:800;font-size:17px;text-decoration:none;border-radius:10px;padding:14px}
+.pzs-btn:hover{background:#e67a00}
+@media(max-width:560px){.pzs-lista li{flex-direction:column;gap:2px}.pzs-cifra{text-align:left}.pzs-cifra small{display:inline;margin-left:6px;font-size:15px}}
 .gp-lista{list-style:none;display:flex;flex-direction:column;gap:8px}
 .gp-lista a{display:flex;align-items:center;gap:10px;text-decoration:none;
   background:#f7f9fb;border:1px solid #eef2f7;border-radius:10px;padding:12px 14px;
@@ -944,6 +956,7 @@ nav img{height:36px}
           <div class="chat-field"><label>Nome</label><input type="text" id="chat-nome" placeholder="Il tuo nome"></div>
           <div class="chat-field" style="margin-top:8px"><label>Email</label><input type="email" id="chat-email" placeholder="La tua email"></div>
           <button class="chat-btn" style="margin-top:10px" onclick="iniziaChatImpresa()">Inizia chat</button>
+          <p style="margin:10px 0 0;font-size:15px;color:#5b6574;line-height:1.5">Quando l&rsquo;impresa ti risponde, ti arriva un&rsquo;email con il link per tornare qui.</p>
         </div>
         <div id="chat-window" style="display:none">
           <div class="chat-messages" id="chat-messages"></div>
@@ -1000,6 +1013,18 @@ nav img{height:36px}
          mestieri dell'impresa: vedi `GUIDE_PER_MESTIERE` nel codice.
          ⚠️ Se nessun mestiere combacia resta la guida generale, che vale per
          tutti: meglio una risposta larga che nessuna risposta. -->
+    <!-- 26 set 2026 — I PREZZI SCRITTI DALL'IMPRESA (idea presa da Thumbtack).
+         Li scrive l'impresa dal pannello, sezione «I tuoi prezzi», tabella
+         `prezzi_impresa`. La carta resta nascosta se non ce n'e' nemmeno uno.
+         ⚠️ Sta PRIMA di «Quanto costa» (le guide): prima il prezzo di QUESTA
+         impresa, poi quello medio. -->
+    <div class="card" id="card-prezzi-impresa" style="display:none;border-top-color:#FF6B35">
+      <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> I prezzi di questa impresa</div>
+      <ul class="pzs-lista" id="pzs-lista"></ul>
+      <p class="pzs-nota">Prezzi indicativi scritti dall&rsquo;impresa. Il prezzo preciso te lo fa dopo aver visto il lavoro.</p>
+      <button type="button" class="pzs-btn" onclick="apriRichiesta()">Chiedi un preventivo gratuito</button>
+    </div>
+
     <div class="card" id="card-guide-prezzi" style="display:none;border-top-color:#FF6B35">
       <div class="card-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg> Quanto costa</div>
       <p class="gp-intro">Prezzi veri di cantiere, aggiornati al 2026.</p>
@@ -1018,6 +1043,8 @@ nav img{height:36px}
       <div class="fgrid" id="foto-lavori-grid">
         <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Nessuna foto caricata</div>
       </div>
+      <!-- 26 set 2026 — il ponte verso la galleria di tutti i lavori -->
+      <a href="/lavori-realizzati" style="display:block;margin-top:14px;font-size:16px;font-weight:700;color:#0052cc;text-decoration:none">Guarda altri lavori realizzati dalle imprese &rarr;</a>
     </div>
 
     <!-- VIDEO -->
@@ -1131,12 +1158,11 @@ nav img{height:36px}
       <div class="fg"><label class="fl">Email *</label><input type="email" class="fi2" id="prev-email" placeholder="nome@esempio.it"></div>
     </div>
 
-    <div class="fg" style="background:#f0f7f3;border:1px solid #cfd9e5;border-radius:8px;padding:14px 16px;margin-bottom:16px">
-      <label style="display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.55;color:#333;cursor:pointer">
-        <input type="checkbox" id="prev-condivisibile" checked style="margin-top:3px;width:18px;height:18px;flex-shrink:0">
-        <span>Se l'impresa non risponde entro <strong>48 ore</strong>, autorizzo TrovaImpresa a inviare la mia richiesta anche ad altre imprese della zona (massimo 5), cos&igrave; ricevo comunque dei preventivi.</span>
-      </label>
-    </div>
+    <!-- 26 set 2026 — TOLTA la casella «se l'impresa non risponde entro 48 ore
+         giro la tua richiesta ad altre 5 imprese». Due motivi: (1) non l'ha mai
+         fatto niente, nessuna funzione inoltrava davvero, quindi era una promessa
+         falsa; (2) TrovaImpresa e' una vetrina, non fa da intermediario (decisione
+         del 5 set). La colonna `condivisibile` resta e si scrive sempre false. -->
     <div id="prev-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.5;margin-bottom:12px"></div>
     <button class="btn-sub" onclick="submitPreventivo()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Invia richiesta gratuita</button>
     <p class="prev-aiuto" style="text-align:center;margin-top:12px">Nessun costo, nessun abbonamento, nessuna carta di credito.</p>
@@ -1653,6 +1679,8 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
       if(cta){const sp=cta.querySelector('span'); if(sp) sp.textContent=_ETICHETTA_RICHIESTA;}
       const barraRich=document.getElementById('cta-bar-prev');
       if(barraRich) barraRich.textContent=_ETICHETTA_RICHIESTA;
+      const pzsBtn=document.querySelector('#card-prezzi-impresa .pzs-btn');
+      if(pzsBtn) pzsBtn.textContent='Affida un incarico';
       const tl=document.getElementById('cta-trust-label');
       if(tl) tl.innerHTML='<strong>Affida un incarico</strong><span>Ti risponde con un preventivo di onorario</span>';
       const preComune=document.getElementById('inc-comune'); if(preComune&&d.citta) preComune.value=d.citta;
@@ -2247,7 +2275,7 @@ async function submitPreventivo(){
     /* La colonna "condivisibile" potrebbe non esistere nel database: se manca,
        PostgREST risponde 400 e la richiesta andava persa. Ora si riprova senza,
        cosi' la richiesta del cliente arriva comunque. */
-    const condivisibile=document.getElementById('prev-condivisibile').checked;
+    const condivisibile=false;
     let {error}=await sc.from('preventivi').insert(Object.assign({condivisibile,allegati},riga));
     if(error && /condivisibile|allegati/i.test(error.message||'')){
       const rip2=await sc.from('preventivi').insert(Object.assign({condivisibile},riga));
@@ -2601,7 +2629,13 @@ document.addEventListener('DOMContentLoaded',function(){
     const id=getImpresaId();
     const nome=document.getElementById('chat-nome').value.trim();
     const email=document.getElementById('chat-email').value.trim();
-    if(!nome||!email)return;
+    if(!nome||!email||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+      let e=document.getElementById('chat-start-err');
+      if(!e){e=document.createElement('div');e.id='chat-start-err';e.style.cssText='margin-top:10px;padding:12px 14px;border-radius:8px;background:#fdecea;color:#a61b1b;font-size:15px;font-weight:700';document.getElementById('chat-start-form').appendChild(e);}
+      e.textContent=!nome?'Scrivi il tuo nome.':'Scrivi un\'email giusta: e\' dove ti arriva la risposta dell\'impresa.';
+      return;
+    }
+    const e0=document.getElementById('chat-start-err');if(e0)e0.remove();
     const rand=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
     const conv=id+'_'+email+'_'+rand;
     localStorage.setItem('chat_'+id,conv);
@@ -2619,18 +2653,40 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!testo)return;
     const clienteNome=localStorage.getItem('chat_'+id+'_nome')||'';
     const clienteEmail=localStorage.getItem('chat_'+id+'_email')||'';
+    /* 26 set 2026 — prima il testo spariva anche quando l'invio falliva, e
+       nessuno lo diceva. Adesso resta nella casella e compare l'avviso. */
     input.value='';
+    chatAvviso('');
+    let r=null;
     try{
-      await chatRpc('chat_invia',{
-        p_conv:conv,
-        p_impresa_id:Number(id),
-        p_nome:clienteNome,
-        p_email:clienteEmail,
-        p_testo:testo
+      r=await fetch(`${SU}/rest/v1/rpc/chat_invia`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+        body:JSON.stringify({p_conv:conv,p_impresa_id:Number(id),p_nome:clienteNome,p_email:clienteEmail,p_testo:testo})
       });
-      await caricaMessaggiChat(conv,true);
     }catch(e){console.error(e)}
+    if(!r||!r.ok){
+      const dett=r?await r.text().catch(()=>''):'';
+      console.error('chat_invia:',r&&r.status,dett);
+      input.value=testo;
+      chatAvviso(/bloccato/i.test(dett)?'Questa impresa non riceve piu\' i tuoi messaggi.':'Il messaggio non e\' partito. Controlla la connessione e premi di nuovo Invia.');
+      return;
+    }
+    await caricaMessaggiChat(conv,true);
+    /* l'email all'impresa: se non parte, il messaggio c'e' comunque */
+    fetch('/.netlify/functions/chat-avviso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conv})}).catch(()=>{});
   };
+
+  function chatAvviso(t){
+    let b=document.getElementById('chat-avviso');
+    if(!b){
+      b=document.createElement('div');b.id='chat-avviso';b.setAttribute('role','status');
+      b.style.cssText='display:none;margin-top:10px;padding:12px 14px;border-radius:8px;background:#fdecea;color:#a61b1b;font-size:15px;font-weight:700';
+      const row=document.querySelector('#chat-window .chat-input-row')||document.getElementById('chat-start-form');
+      if(row&&row.parentNode)row.parentNode.insertBefore(b,row.nextSibling);
+    }
+    b.textContent=t||'';b.style.display=t?'block':'none';
+  }
 
   /* ⛔ 2 SETTEMBRE 2026 — «CANCELLA SOLO DALLA MIA PARTE», deciso da Alessio.
      Prima si chiamava `chat_elimina`, che fa `delete from chat_messaggi where
@@ -2658,12 +2714,64 @@ document.addEventListener('DOMContentLoaded',function(){
     const f=document.getElementById('chat-start-form'); if(f)f.style.display='';
   };
 
-  document.addEventListener('DOMContentLoaded',function(){
+  document.addEventListener('DOMContentLoaded',async function(){
     const id=getImpresaId();
     if(!id)return;
+    /* Invio manda il messaggio (prima non faceva niente) */
+    const inp=document.getElementById('chat-testo');
+    if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.inviaMessaggioChat();}});
+    /* 26 set 2026 — il link dell'email «ti ha risposto»: ?chat=<codice>.
+       Riapre la conversazione anche da un altro telefono o computer. Nome ed
+       email del cliente si riprendono dai suoi messaggi. Poi il codice si
+       toglie dall'indirizzo, cosi' non resta nella barra ne' nei preferiti. */
+    const qs=new URLSearchParams(location.search);
+    const daLink=qs.get('chat');
+    if(daLink && daLink.indexOf(id+'_')===0 && daLink.length>=20){
+      const msgs=await chatRpc('chat_leggi',{p_conv:daLink});
+      const mio=Array.isArray(msgs)?msgs.find(m=>m.mittente==='cliente'):null;
+      if(mio){
+        localStorage.setItem('chat_'+id,daLink);
+        localStorage.setItem('chat_'+id+'_nome',mio.cliente_nome||'');
+        localStorage.setItem('chat_'+id+'_email',mio.cliente_email||'');
+      }
+      qs.delete('chat');
+      history.replaceState(null,'',location.pathname+'?'+qs.toString()+location.hash);
+      if(mio){
+        mostraFinestraChat(daLink);
+        setTimeout(function(){const c=document.getElementById('card-chat-impresa');if(c)c.scrollIntoView({behavior:'smooth',block:'start'});},800);
+        return;
+      }
+    }
     const conv=localStorage.getItem('chat_'+id);
     if(conv)mostraFinestraChat(conv);
   });
+})();
+</script>
+<!-- 26 set 2026 — I PREZZI SCRITTI DALL'IMPRESA -->
+<script>
+(function(){
+  var UNITA={lavoro:'a lavoro finito',mq:'al metro quadro',metro:'al metro',ora:"all'ora",giorno:'al giorno',pezzo:'a pezzo'};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function euro(n){var v=Number(n)||0,intero=Math.round(v*100)%100===0;
+    return v.toLocaleString('it-IT',{minimumFractionDigits:intero?0:2,maximumFractionDigits:2,useGrouping:true})+'\u00a0\u20ac'}
+  async function leggi(q){var r=await fetch(SU+'/rest/v1/'+q,{headers:{apikey:SK,Authorization:'Bearer '+SK}});
+    if(!r.ok)throw new Error(r.status+' '+q);return r.json()}
+  async function via(){
+    var id=new URLSearchParams(location.search).get('id');
+    if(!id||!/^\d+$/.test(id))return;
+    try{
+      var imp=await leggi('imprese_pubbliche?id=eq.'+id+'&select=user_id');
+      if(!imp.length||!imp[0].user_id)return;
+      var righe=await leggi('prezzi_impresa?owner_id=eq.'+imp[0].user_id+'&select=voce,prezzo,unita,a_partire_da,nota&order=ordine.asc,created_at.asc');
+      if(!righe.length)return;
+      document.getElementById('pzs-lista').innerHTML=righe.map(function(p){
+        return '<li><span class="pzs-voce">'+esc(p.voce)+(p.nota?'<small>'+esc(p.nota)+'</small>':'')+'</span>'+
+          '<span class="pzs-cifra">'+(p.a_partire_da?'da ':'')+esc(euro(p.prezzo))+'<small>'+esc(UNITA[p.unita]||'')+'</small></span></li>';
+      }).join('');
+      document.getElementById('card-prezzi-impresa').style.display='';
+    }catch(e){console.error('prezzi scheda:',e)}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',via);else via();
 })();
 </script>
 <script src="/cookie-banner.js"></script>

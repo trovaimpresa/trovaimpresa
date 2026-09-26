@@ -2545,3 +2545,30 @@ JSON rotto → rimborso, crediti finiti → 402). SQL su Postgres 16 vero (altro
 account rifiutato da RLS e dal trigger, cascata sul lavoro). Le 5 funzioni nel
 gestionale vero col finto delle imprese, computer e telefono: zero errori.
 ⚠️ Le risposte VERE dell'AI si vedono solo sul sito, dopo il push.
+
+---
+
+# 26 SETTEMBRE 2026 (pomeriggio) — PREZZI, GALLERIA, CHAT
+
+Idee prese da siti stranieri (Thumbtack, Houzz), scelte da Alessio. Un push solo.
+
+| cosa | dove |
+|---|---|
+| **«I tuoi prezzi»** nei 3 pannelli (impresa, artigiano, professionisti): l'impresa scrive «Rifacimento bagno — da 6.000 € a lavoro finito» | `js/prezzi-impresa.js` (aggiunge da solo sezione `sec-prezzi` e carta dopo «Foto dei lavori», avvolge `showSection`) · tabella `prezzi_impresa` |
+| **I prezzi sulla scheda pubblica** (carta `#card-prezzi-impresa`, prima di «Quanto costa»; nascosta se non ce ne sono) | `profilo-impresa.html` |
+| **Galleria «Lavori realizzati»**: le foto di «Foto dei lavori» di tutte le imprese, filtri tipo/città/cerca fatti DAL DATABASE a pezzi da 24; il tocco porta alla scheda | `lavori-realizzati.html` · vista `galleria_lavori` (security_invoker) · link sotto le foto di ogni scheda · sitemap |
+| **Chat: email di avviso** all'impresa quando il cliente scrive, al cliente quando l'impresa risponde (link `profilo-impresa?id=X&chat=<codice>` che riapre la chat da qualsiasi telefono) | `netlify/functions/chat-avviso.js` · tabella `chat_avvisi` |
+| **Chat: numeri ed email non si cancellano più** (tolto il trigger `pulisci_chat`) | `sql/chat-avvisi.sql` |
+| **Chat: Invio manda, e un invio fallito lo dice** (il testo resta nella casella) | scheda + 3 pannelli |
+| **Tolta la casella «giro la richiesta ad altre 5 imprese»** | `profilo-impresa.html` |
+
+## Decisioni e cose da sapere
+
+- ⛔ La casella «se l'impresa non risponde in 48 ore giro la richiesta ad altre 5 imprese» **non l'ha mai fatto nessuno**: nessuna funzione inoltrava. Era una promessa falsa, ed era contro il modello vetrina (5 set). Tolta; `condivisibile` si scrive sempre false.
+- ⛔ Galleria: **niente commenti** fra imprese (deciso con Alessio): diventerebbero critiche fra concorrenti e andrebbero controllati a mano.
+- ⛔ `chat-avviso.js`: chi scrive a chi lo decidono i MESSAGGI nel database, non il browser. L'email del cliente si prende solo dai messaggi scritti dal cliente (così un'impresa non manda email a chi vuole). Una email ogni 30 minuti per conversazione e verso, massimo 20 avvisi al giorno per impresa. 10 prove verdi + 2 sabotaggi accusati.
+- ⚠️ `chat_avvisi` ha RLS accesa e ZERO regole, ma la SELECT data a `authenticated`: serve solo perché `gest_schema_mancanti` (che guarda information_schema) la veda. Senza, il controllo del fondatore la darebbe mancante.
+- ⚠️ `maschera_contatti` resta: la usa ancora `trg_pulisci_preventivo` sulle richieste di preventivo.
+- ⚠️ Resend gratuito = 100 email al giorno in tutto il sito: gli avvisi della chat ci passano dentro.
+- Numeri al 26 set: →110← foto pubbliche di →44← imprese nella galleria; nella chat c'era →1← solo messaggio da sempre.
+- Migrazioni applicate: `prezzi_e_galleria_26set2026`, `chat_avvisi_26set2026` (file in `sql/`, righe in `PROVE` di fondatore.js).

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavori realizzati: foto di bagni, cucine e ristrutturazioni vere | TrovaImpresa</title>
+<meta name="description" content="Foto di lavori veri fatti dalle imprese e dagli artigiani di TrovaImpresa: bagni, cucine, facciate, tetti, pavimenti, impianti. Trova un'idea e con un clic vedi chi l'ha fatto.">
+<link rel="canonical" href="https://trovaimpresa.com/lavori-realizzati">
+<meta property="og:title" content="Lavori realizzati dalle imprese di TrovaImpresa">
+<meta property="og:description" content="Foto di lavori veri: trova un'idea e scopri chi l'ha fatto.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/lavori-realizzati">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:site_name" content="TrovaImpresa">
+<!-- =====================================================================
+     26 settembre 2026 — LA GALLERIA DEI LAVORI (idea presa da Houzz,
+     scelta da Alessio).
+     Le foto sono quelle che le imprese caricano GIA' dal pannello, in
+     «Foto dei lavori», con titolo e descrizione. Qui si mettono tutte
+     insieme: il cliente cerca un'idea («bagno», «cucina»), vede un lavoro
+     che gli piace e con un tocco arriva alla scheda di chi l'ha fatto.
+     Legge la vista `galleria_lavori` (sql/prezzi-e-galleria.sql): solo foto
+     con «Mostra nel profilo pubblico» acceso, solo imprese visibili.
+     ⛔ Niente commenti, deciso con Alessio il 26 set: fra concorrenti
+        diventerebbero critiche, e andrebbero controllati a mano uno per uno.
+     ⚠️ I filtri li fa il DATABASE (a pezzi da 24), non il browser: la pagina
+        deve reggere anche con migliaia di foto.
+     ===================================================================== -->
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#5b6574;--line:#e5e7eb;
+    --font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.6;background:#f4f7fc}
+  a{color:var(--primary-dark)}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:64px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px}
+  .hdr{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:40px 20px 36px;text-align:center}
+  .hdr h1{font-size:34px;margin:0 0 10px;line-height:1.2}
+  .hdr p{font-size:18px;max-width:680px;margin:0 auto;opacity:.95}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 50px}
+
+  .filtri{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);padding:18px 18px 12px;margin:-46px auto 22px;position:relative}
+  .f-riga{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .f-riga input,.f-riga select{flex:1;min-width:200px;padding:13px 15px;border:1.5px solid #cbd5e1;border-radius:11px;font:inherit;font-size:17px;background:#fff;color:var(--text)}
+  .f-riga input:focus,.f-riga select:focus{outline:none;border-color:var(--primary)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chips button{padding:10px 16px;border:1.5px solid #cbd5e1;background:#fff;border-radius:999px;font:inherit;font-weight:bold;font-size:15.5px;color:var(--text);cursor:pointer}
+  .chips button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .conta{font-size:16px;color:var(--muted);font-weight:bold;margin:0 0 14px}
+
+  .griglia{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .lav{display:flex;flex-direction:column;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(10,42,77,.08);text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
+  .lav:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,42,77,.14)}
+  .lav-foto{aspect-ratio:4/3;background:#e8edf4;overflow:hidden}
+  .lav-foto img{width:100%;height:100%;object-fit:cover;display:block}
+  .lav-corpo{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
+  .lav-tit{font-size:18px;font-weight:800;color:#0f172a;line-height:1.3;margin:0 0 4px}
+  .lav-desc{font-size:15.5px;color:#475569;line-height:1.5;margin:0 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .lav-chi{margin-top:auto;display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+  .lav-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--primary-soft);flex:none;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:800}
+  .lav-nome{font-size:15.5px;font-weight:800;color:var(--primary-dark);line-height:1.25}
+  .lav-dove{font-size:14px;color:var(--muted)}
+  .lav-vai{margin-left:auto;font-size:14.5px;font-weight:800;color:var(--accent-dark);white-space:nowrap}
+
+  .altre{display:block;margin:26px auto 0;background:#fff;border:2px solid var(--primary);color:var(--primary);font:inherit;font-weight:800;font-size:17px;border-radius:12px;padding:14px 26px;cursor:pointer}
+  .vuoto{background:#fff;border-radius:16px;padding:34px 20px;text-align:center;font-size:17px;color:var(--muted)}
+  .imprese-box{background:#fff;border-radius:16px;border-top:5px solid var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.06);padding:26px;text-align:center;margin-top:34px}
+  .imprese-box h2{font-size:22px;color:var(--primary-dark);margin:0 0 8px}
+  .imprese-box p{font-size:17px;color:#475569;margin:0 0 16px}
+  .imprese-box a{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:bold;padding:13px 26px;border-radius:10px;font-size:17px}
+  footer{border-top:1px solid var(--line);padding:24px;color:var(--muted);font-size:14px;text-align:center}
+  @media(max-width:980px){.griglia{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:600px){
+    .navbar{padding:10px 16px}.navbar .menu{gap:10px}.navbar .menu a{font-size:14px}.navbar .logo img{height:44px}
+    .hdr h1{font-size:26px}.hdr p{font-size:16.5px}.wrap{padding:22px 14px 40px}
+    .griglia{grid-template-columns:1fr;gap:16px}
+    .f-riga input,.f-riga select{min-width:0;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/costi-ristrutturazione.html">Guide</a>
+    <a href="/cerca-imprese.html" class="menu-btn">Trova un'impresa</a>
+  </div>
+</nav>
+
+<header class="hdr">
+  <h1>Lavori realizzati</h1>
+  <p>Foto di lavori veri, fatti dalle imprese e dagli artigiani di TrovaImpresa. Trova un&rsquo;idea che ti piace e con un tocco vedi chi l&rsquo;ha fatto.</p>
+</header>
+
+<main class="wrap">
+  <div class="filtri">
+    <div class="f-riga">
+      <input type="search" id="f-cerca" placeholder="Cerca: bagno, cucina, tetto, cappotto&hellip;" aria-label="Cerca un lavoro">
+      <select id="f-citta" aria-label="Citt&agrave;"><option value="">Tutte le citt&agrave;</option></select>
+    </div>
+    <div class="chips" id="f-tipi" role="group" aria-label="Tipo di lavoro"></div>
+  </div>
+
+  <p class="conta" id="conta" aria-live="polite"></p>
+  <div class="griglia" id="griglia"></div>
+  <noscript><div class="vuoto">Per vedere le foto dei lavori serve JavaScript acceso.</div></noscript>
+  <button type="button" class="altre" id="altre" style="display:none">Mostra altri lavori</button>
+
+  <div class="imprese-box">
+    <h2>Hai un&rsquo;impresa o sei un artigiano?</h2>
+    <p>Metti le foto dei tuoi lavori: compaiono sulla tua scheda e anche qui, e chi le guarda arriva dritto da te. &Egrave; gratis.</p>
+    <a href="/registrazione-impresa.html">Registrati gratis</a>
+  </div>
+</main>
+
+<footer>
+  <p style="margin:0 0 10px;font-size:14.5px">
+    <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+    <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+    <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+    <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>
+  </p>
+  <p style="margin:0 0 10px;font-size:14px">
+    <a href="/privacy-policy.html" style="color:#556;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+    <a href="/cookie-policy.html" style="color:#556;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+    <a href="/termini-condizioni.html" style="color:#556;text-decoration:none;margin:0 6px">Termini</a>
+  </p>
+  <p style="margin:0;font-size:14px">
+    &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+    <a href="mailto:info@trovaimpresa.com" style="color:#556">info@trovaimpresa.com</a><br>P.IVA 01285950570
+  </p>
+</footer>
+
+<script>
+(function(){
+  var SU='https://nacvrsgkyfavykxjxszu.supabase.co';
+  var SK='sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+  var PER_PAGINA=24;
+
+  /* I tipi di lavoro: una parola che si cerca nel titolo, nella descrizione
+     e nel mestiere dell'impresa. Si allarga aggiungendo parole qui. */
+  var TIPI=[
+    {k:'bagno',  t:'Bagni',              p:['bagn','doccia','sanitari']},
+    {k:'cucina', t:'Cucine',             p:['cucin']},
+    {k:'ristr',  t:'Ristrutturazioni',   p:['ristruttur']},
+    {k:'facc',   t:'Facciate e cappotti',p:['facciat','cappotto','intonac']},
+    {k:'tetto',  t:'Tetti',              p:['tetto','tetti','copertur','tegol','guaina']},
+    {k:'pav',    t:'Pavimenti',          p:['paviment','piastrell','parquet','gres']},
+    {k:'impi',   t:'Impianti',           p:['impiant','elettric','idraul','caldaia','climatizz','antenn','allarm']},
+    {k:'infissi',t:'Infissi e porte',    p:['infiss','finestr','serrament','porta','porte']},
+    {k:'cartong',t:'Cartongesso',        p:['cartongess']},
+    {k:'pittura',t:'Pitture',            p:['pittur','tinteggi','imbianc']},
+    {k:'esterni',t:'Giardini ed esterni',p:['giardin','esterni','recinzion','cancell','pergol']}
+  ];
+
+  var stato={cerca:'',citta:'',tipo:'',da:0,finito:false,occupato:false};
+  var $=function(id){return document.getElementById(id)};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  /* dentro un filtro PostgREST virgole, parentesi e asterischi hanno un
+     significato: dal testo scritto dal cliente si tengono solo lettere,
+     numeri e spazi. */
+  function pulito(s){return String(s||'').toLowerCase().replace(/[^a-z0-9à-ÿ ]+/g,' ').replace(/\s+/g,' ').trim().slice(0,40)}
+
+  function orParole(parole){
+    var pezzi=[];
+    parole.forEach(function(p){
+      pezzi.push('titolo.ilike.*'+p+'*','descrizione.ilike.*'+p+'*','mestiere.ilike.*'+p+'*');
+    });
+    return '('+pezzi.join(',')+')';
+  }
+
+  function indirizzo(){
+    var q='galleria_lavori?select=id,foto,titolo,descrizione,impresa_id,impresa_nome,citta,provincia,logo_url'+
+          '&order=created_at.desc&limit='+PER_PAGINA+'&offset='+stato.da;
+    if(stato.citta) q+='&citta=eq.'+encodeURIComponent(stato.citta);
+    /* cerca e tipo insieme: tutti e due devono combaciare (and di due or) */
+    var ors=[];
+    if(stato.tipo){var t=TIPI.filter(function(x){return x.k===stato.tipo})[0]; if(t) ors.push('or'+orParole(t.p));}
+    var c=pulito(stato.cerca);
+    if(c) ors.push('or'+orParole([c]));
+    if(ors.length===1) q+='&'+ors[0].replace(/^or/,'or=');
+    else if(ors.length===2) q+='&and=('+ors.join(',')+')';
+    return q;
+  }
+
+  function carta(l){
+    var dove=[l.citta,l.provincia&&l.provincia!==l.citta?l.provincia:''].filter(Boolean).join(' · ');
+    var iniz=esc((l.impresa_nome||'?').trim().charAt(0).toUpperCase());
+    var logo=l.logo_url?'<img class="lav-logo" src="'+esc(l.logo_url)+'" alt="" loading="lazy">':'<span class="lav-logo">'+iniz+'</span>';
+    var tit=l.titolo||('Lavoro di '+(l.impresa_nome||'un’impresa'));
+    return '<a class="lav" href="/profilo-impresa.html?id='+encodeURIComponent(l.impresa_id)+'">'+
+      '<div class="lav-foto"><img src="'+esc(l.foto)+'" alt="'+esc(tit)+'" loading="lazy"></div>'+
+      '<div class="lav-corpo"><p class="lav-tit">'+esc(tit)+'</p>'+
+      (l.descrizione?'<p class="lav-desc">'+esc(l.descrizione)+'</p>':'')+
+      '<div class="lav-chi">'+logo+'<div><div class="lav-nome">'+esc(l.impresa_nome||'')+'</div>'+
+      (dove?'<div class="lav-dove">'+esc(dove)+'</div>':'')+'</div><span class="lav-vai">Vedi chi l&rsquo;ha fatto &rarr;</span></div>'+
+      '</div></a>';
+  }
+
+  async function leggi(q,conta){
+    var h={apikey:SK,Authorization:'Bearer '+SK};
+    if(conta) h.Prefer='count=exact';
+    var r=await fetch(SU+'/rest/v1/'+q,{headers:h});
+    if(!r.ok) throw new Error(r.status+' '+(await r.text().catch(function(){return''})));
+    var tot=null, cr=r.headers.get('content-range');
+    if(cr&&cr.indexOf('/')>0){var n=parseInt(cr.split('/')[1],10); if(!isNaN(n)) tot=n;}
+    return {righe:await r.json(),tot:tot};
+  }
+
+  async function carica(daCapo){
+    if(stato.occupato) return;
+    stato.occupato=true;
+    if(daCapo){stato.da=0;stato.finito=false;}
+    var g=$('griglia'), altre=$('altre');
+    if(daCapo) g.innerHTML='';
+    altre.disabled=true; altre.textContent='Caricamento…';
+    try{
+      var r=await leggi(indirizzo(),daCapo);
+      if(daCapo){
+        var n=r.tot!=null?r.tot:r.righe.length;
+        $('conta').textContent=n===0?'':(n===1?'1 lavoro':n.toLocaleString('it-IT',{useGrouping:true})+' lavori');
+      }
+      if(daCapo && !r.righe.length){
+        g.innerHTML='<div class="vuoto" style="grid-column:1/-1">Nessun lavoro trovato. Prova a togliere un filtro o a cercare un&rsquo;altra parola.</div>';
+      }
+      g.insertAdjacentHTML('beforeend',r.righe.map(carta).join(''));
+      stato.da+=r.righe.length;
+      stato.finito=r.righe.length<PER_PAGINA;
+      altre.style.display=stato.finito?'none':'block';
+    }catch(e){
+      console.error('galleria:',e);
+      if(daCapo) g.innerHTML='<div class="vuoto" style="grid-column:1/-1">Le foto non si sono caricate. Controlla la connessione e ricarica la pagina.</div>';
+      altre.style.display='none';
+    }finally{
+      altre.disabled=false; altre.textContent='Mostra altri lavori';
+      stato.occupato=false;
+    }
+  }
+
+  async function riempiCitta(){
+    try{
+      var r=await leggi('galleria_lavori?select=citta&limit=5000');
+      var visti={};
+      r.righe.forEach(function(x){var c=(x.citta||'').trim(); if(c) visti[c]=(visti[c]||0)+1;});
+      var sel=$('f-citta');
+      Object.keys(visti).sort(function(a,b){return a.localeCompare(b,'it')}).forEach(function(c){
+        var o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+      });
+    }catch(e){console.error('galleria citta:',e)}
+  }
+
+  function monta(){
+    var box=$('f-tipi');
+    box.innerHTML='<button type="button" class="on" data-t="">Tutti</button>'+
+      TIPI.map(function(t){return '<button type="button" data-t="'+t.k+'">'+esc(t.t)+'</button>'}).join('');
+    box.addEventListener('click',function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      box.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});
+      stato.tipo=b.getAttribute('data-t'); carica(true);
+    });
+    $('f-citta').addEventListener('change',function(){stato.citta=this.value; carica(true);});
+    var timer=null;
+    $('f-cerca').addEventListener('input',function(){
+      var v=this.value; clearTimeout(timer);
+      timer=setTimeout(function(){stato.cerca=v; carica(true);},350);
+    });
+    $('altre').addEventListener('click',function(){carica(false);});
+
+    /* chi arriva con ?citta=Roma o ?cerca=bagno (dai link delle altre pagine) */
+    var p=new URLSearchParams(location.search);
+    if(p.get('cerca')){ $('f-cerca').value=p.get('cerca'); stato.cerca=p.get('cerca'); }
+    var c=p.get('citta');
+    if(c){
+      /* prima le citta', poi le foto: se no le foto partono senza il filtro */
+      riempiCitta().then(function(){
+        var sel=$('f-citta');
+        for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value.toLowerCase()===c.toLowerCase()){ sel.selectedIndex=i; stato.citta=sel.options[i].value; break; } }
+        carica(true);
+      });
+    }else{ riempiCitta(); carica(true); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',monta); else monta();
+})();
+</script>
+<script src="/cookie-banner.js"></script>
+</body>
+</html>
