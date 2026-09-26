@@ -42,6 +42,21 @@
      ⚠️ Le due carte doppie (offerte di lavoro, subappalti) hanno lo stile
         scritto dentro l'HTML: per loro si sistemano i due mezzi, non la carta. */
   '#sec-dashboard .dash-stat-card{border-top:1px solid #e3e8ef !important;border:1px solid #e3e8ef;box-shadow:0 6px 20px rgba(10,42,77,.06)}' +
+  /* I QUATTRO NUMERI (26 set 2026): icona a sinistra in un quadrato azzurro,
+     numero grande senza grazie, scritta normale (non piu' MAIUSCOLA piccola).
+     «Rating medio» diventa «Voto medio»: e' un pannello italiano. */
+  '#sec-dashboard .dash-stat-card{display:grid;grid-template-columns:56px minmax(0,1fr);column-gap:16px;align-items:center;text-align:left;padding:18px 20px;border-radius:16px}' +
+  '#sec-dashboard .dash-stat-card:hover{border-color:#0066ff !important}' +
+  '#sec-dashboard .dash-stat-icon{grid-column:1;grid-row:1 / span 3;width:56px;height:56px;margin:0;border-radius:14px;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center}' +
+  '#sec-dashboard .dash-stat-icon svg{width:28px;height:28px}' +
+  '#sec-dashboard .dash-stat-num,#sec-dashboard .dash-stat-lbl,#sec-dashboard .dash-stat-sub{grid-column:2}' +
+  '#sec-dashboard .dash-stat-num{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:32px !important;font-weight:800;color:#0a2a4d;line-height:1.05}' +
+  '#sec-dashboard .dash-stat-lbl{text-transform:none;letter-spacing:0;font-size:16px;font-weight:600;color:#5f6b7a;margin-top:4px}' +
+  '#sec-dashboard .dash-stat-sub{font-size:14px;margin-top:2px;color:#8a94a3}' +
+  '#sec-dashboard .dash-quick-title{text-transform:none !important;letter-spacing:0 !important;font-size:20px !important;font-weight:800;color:#0a2a4d !important}' +
+  '@media(max-width:600px){#sec-dashboard .dash-stat-card{grid-template-columns:44px minmax(0,1fr);column-gap:12px;padding:14px}' +
+    '#sec-dashboard .dash-stat-icon{width:44px;height:44px;border-radius:12px}#sec-dashboard .dash-stat-icon svg{width:22px;height:22px}' +
+    '#sec-dashboard .dash-stat-num{font-size:26px !important}#sec-dashboard .dash-stat-lbl{font-size:15px}}' +
   '#sec-dashboard .dash-quick-title{font-size:15px;letter-spacing:.8px;color:#475569;margin:26px 0 12px}' +
   '#sec-dashboard .dash-quick-grid{gap:14px}' +
   '#sec-dashboard .dash-quick-card{border:1px solid #e3e8ef !important;box-shadow:0 6px 20px rgba(10,42,77,.06);border-radius:16px}' +
@@ -324,6 +339,9 @@
     'video-azienda': '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4z"/>'
   };
   function riepilogo() {
+    document.querySelectorAll('#sec-dashboard .dash-stat-lbl').forEach(function (l) {
+      if (/^\s*Rating medio\s*$/i.test(l.textContent)) l.textContent = 'Voto medio';
+    });
     Object.keys(ICONE_CARTE).forEach(function (id) {
       var ic = document.querySelector('#sec-dashboard .dash-quick-card[data-card-id="' + id + '"] .dash-quick-icon');
       if (ic && !ic.querySelector('svg')) {
