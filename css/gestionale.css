@@ -4586,3 +4586,28 @@ body:has(#ti-fondatore) .sheet--grande{
  .wrap section .griglia-schede > .job{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"top az" "stati az" "meta az";column-gap:10px;padding:12px 14px!important}
  .wrap section .griglia-schede > .job .stati{justify-self:start}
 }
+
+/* 26 set 2026 (sera) — CARTE E FORNITORI A RIGHE, come le altre liste.
+   Qui le schede sono .card dentro #carte-list / #forn-list (e i crediti
+   formativi, #cred-list): nome e dettagli a sinistra, importo e pulsante
+   a destra. Solo aspetto. */
+#carte-list,#forn-list,#cred-list{display:flex!important;flex-direction:column;gap:0!important}
+#carte-list > .card,#forn-list > .card,#cred-list > .card{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"head num az" "righe lab az";column-gap:18px;row-gap:4px;align-items:center;
+  padding:13px 20px!important;margin:0 0 -1px 0!important;border:1px solid #e3e8ef!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;min-height:0!important}
+#carte-list > .card:first-child,#forn-list > .card:first-child,#cred-list > .card:first-child{border-top-left-radius:14px!important;border-top-right-radius:14px!important}
+#carte-list > .card:last-child,#forn-list > .card:last-child,#cred-list > .card:last-child{border-bottom-left-radius:14px!important;border-bottom-right-radius:14px!important}
+#carte-list > .card:hover,#forn-list > .card:hover,#cred-list > .card:hover{background:#f5f9ff!important}
+#carte-list > .card > *,#forn-list > .card > *,#cred-list > .card > *{margin:0!important;padding:0!important;border:0!important}
+#carte-list .c-head,#forn-list .c-head,#cred-list .c-head{grid-area:head}
+#carte-list .c-head h3,#forn-list .c-head h3,#cred-list .c-head h3{font-size:17px!important;margin:0!important}
+#carte-list .c-num,#forn-list .c-num,#cred-list .c-num{grid-area:num;font-size:20px!important;text-align:right;align-self:end}
+#carte-list .c-lab,#forn-list .c-lab,#cred-list .c-lab{grid-area:lab;font-size:14px!important;text-align:right;align-self:start;color:#5f6b7a}
+#carte-list .c-righe,#forn-list .c-righe,#cred-list .c-righe{grid-area:righe;display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:4px 20px;font-size:15px!important;color:#5f6b7a}
+#carte-list .c-r,#forn-list .c-r,#cred-list .c-r{display:inline-flex!important;width:auto!important;justify-content:flex-start!important;flex:none!important;gap:5px;padding:0!important;border:0!important;margin:0!important}
+#carte-list .c-rt::after,#forn-list .c-rt::after,#cred-list .c-rt::after{content:":"}
+#carte-list .c-rt,#forn-list .c-rt,#cred-list .c-rt{font-weight:500!important;color:#5f6b7a!important}
+#carte-list .card-acts,#forn-list .card-acts,#cred-list .card-acts{grid-area:az;display:flex;gap:8px}
+@media(max-width:760px){
+ #carte-list > .card,#forn-list > .card,#cred-list > .card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"head az" "num az" "lab az" "righe az";padding:12px 14px!important}
+ #carte-list .c-num,#forn-list .c-num,#cred-list .c-num,#carte-list .c-lab,#forn-list .c-lab,#cred-list .c-lab{text-align:left}
+}
