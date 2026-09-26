@@ -495,7 +495,8 @@ async function rcScrivi(){
     if(r){
       r=r.trim();
       /* il nome lo mettiamo noi: all'AI non e' mai arrivato */
-      if(rcChi)r=r.replace(/^Buongiorno,?/i,"Buongiorno "+rcChi.split(" ")[0]+",");
+      /* la maiuscola la mettiamo noi: in rubrica c'e' anche «franco» (visto dal vivo) */
+      if(rcChi){const n=rcChi.trim().split(/\s+/)[0];r=r.replace(/^Buongiorno,?/i,"Buongiorno "+n.charAt(0).toUpperCase()+n.slice(1)+",");}
       const ta=document.getElementById("rc-testo");
       ta.value=r;ta.dispatchEvent(new Event("input",{bubbles:true}));
       ta.classList.add("ai-pieno");setTimeout(()=>ta.classList.remove("ai-pieno"),2600);
@@ -719,7 +720,7 @@ async function scElimina(id){
 /* il link segreto: si crea la prima volta che serve, poi e' sempre quello */
 async function scLinkUrl(){
   if(!_scLink){
-    const a=new Uint8Array(18);crypto.getRandomValues(a);
+    const a=new Uint8Array(24);crypto.getRandomValues(a);  /* 24: il database vuole almeno 20 caratteri (trovato dal vivo il 26/9: con 18 il link non nasceva) */
     const token=Array.from(a,x=>"ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"[x%57]).join("");
     const {data,error}=await sb.from("gest_scelte_link").insert({user_id:sbUid,lavoro_id:_scLav.id,token:token}).select("*");
     if(error||!data||!data.length){toast("Non riesco a creare il link: "+((error&&error.message)||"riprova"));return null;}

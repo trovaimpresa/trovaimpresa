@@ -832,10 +832,12 @@
   <div class="wrap due">
     <div>
       <p class="occhiello">Assistenza AI</p>
-      <h2>Lo dici a parole,<br>il modulo si riempie</h2>
+      <h2>Lo dici a voce,<br>il modulo si riempie</h2>
       <p>&laquo;Cliente Bianchi, via Mazzini 4 a Rieti, referente il geometra Conti&raquo; &mdash;
          e la scheda esce gi&agrave; compilata, casella per casella. Uguale per un lavoro,
          una scadenza, un fornitore.</p>
+      <p>Non serve nemmeno scriverlo: premi <b>&laquo;Parla&raquo;</b> e lo dici, come al telefono.
+         In cantiere, con le mani sporche, va meglio cos&igrave;.</p>
       <p>Per un preventivo lo descrivi a voce tua e ti escono <b>le voci una per una</b>,
          con quantit&agrave;, unit&agrave; di misura e prezzi indicativi da correggere.</p>
       <p><b>Non salva mai niente da sola.</b> Ti apre il modulo pieno, tu controlli e
@@ -858,6 +860,123 @@
         <div class="campo" style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;margin-bottom:8px">
           <i style="font-size:11px;color:#8899ab;letter-spacing:.6px">REFERENTE</i><br><b>Geom. Conti</b></div>
         <div style="font-size:12.5px;color:#8899ab">Controlla i dati e premi Salva.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     26 settembre 2026 — LE QUATTRO FASCE NUOVE («le idee rubate»)
+     Tutto quello che c'e' scritto qui sotto sta in js/gest-ai-cantiere.js.
+     ⚠️ Sono QUATTRO apposta: un numero pari non rompe l'alternanza
+        bianco/grigio delle fasce che vengono dopo.
+     ⛔ «Scelte del cliente» NON c'e' per gli studi tecnici (e' roba di
+        materiali e finiture): qui si dice «l'impresa».
+     ===================================================================== -->
+
+<!-- ================= LA FOTO DELLA FATTURA DEL FORNITORE ================= -->
+<section class="fascia">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="tel">
+      <div class="tel-dentro">
+        <h4>Fattura da pagare</h4>
+        <p class="tel-sub">letta dalla foto &#10003;</p>
+        <div class="campo"><i>FORNITORE</i><b>Edilcentro Rieti</b></div>
+        <div class="campo"><i>NUMERO E DATA</i><b>FT 312/2026 &middot; 22/09/2026</b></div>
+        <div class="campo"><i>DA PAGARE</i><b>1.284,66 &euro; IVA compresa</b></div>
+        <div class="campo"><i>ENTRO IL</i><b>31/10/2026</b></div>
+        <div class="tel-btn">Aggiungi</div>
+      </div>
+    </div>
+    <div>
+      <p class="occhiello">Fornitori</p>
+      <h2>La fattura del fornitore?<br>Le fai una foto</h2>
+      <p>Fotografi la fattura o la bolla, oppure carichi il PDF. Fornitore, numero, data,
+         importo e scadenza si scrivono da soli: tu controlli e premi Aggiungi.</p>
+      <p>Se il fornitore non &egrave; ancora in rubrica, lo aggiungi con un tocco. La foto resta
+         attaccata al fornitore, e se colleghi la fattura a un lavoro la spesa entra da sola
+         nel conto di quel cantiere.</p>
+      <p>E se la stessa fattura l&rsquo;hai gi&agrave; segnata, te lo dice: niente pagamenti doppi.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= AGGIORNA IL CLIENTE ================= -->
+<section class="fascia grigia">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Il cliente</p>
+      <h2>Il cliente sa a che punto sei,<br>senza chiamarti</h2>
+      <p>Da quello che la squadra scrive nei rapportini, il gestionale prepara il messaggio
+         della settimana: cosa avete fatto, cosa succede dopo. Lo rileggi, lo cambi se vuoi,
+         e lo mandi su WhatsApp con un tasto.</p>
+      <p>Niente soldi nel messaggio, niente cose inventate: solo il lavoro fatto,
+         in parole che capisce chi non &egrave; del mestiere.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="tel">
+      <div class="tel-dentro" style="background:#ece5dd">
+        <h4>WhatsApp</h4>
+        <p class="tel-sub">a Marco Rossi</p>
+        <div class="campo" style="background:#dcf8c6;border-color:#c5e8ad;line-height:1.5">
+          Buongiorno Marco,<br>questa settimana abbiamo:<br>
+          &ndash; tolto il vecchio rivestimento<br>
+          &ndash; rifatto gli scarichi, nessuna perdita<br>
+          &ndash; iniziato il pavimento, siamo a met&agrave;<br><br>
+          La prossima settimana montiamo i sanitari.<br><br>
+          <b>Edilizia Rossi</b></div>
+        <div class="tel-btn" style="background:#25a244">Manda su WhatsApp</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SCRIVILO MEGLIO ================= -->
+<section class="fascia">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="doc">
+      <div class="doc-top"><div><b>Prima</b><br><span style="color:#8899ab">scritto di corsa</span></div></div>
+      <p style="font-size:15.5px;color:#8899ab;margin:0 0 18px;line-height:1.5">buongiorno in allegato il preventivo x il bagno,
+         prezzo quello detto al tel vale 30 gg. se va bene si parte lunedi 5 ottobre fatemi sapere</p>
+      <div class="doc-top"><div><b>Dopo</b><br><span style="color:#8899ab">un tocco su &laquo;Scrivilo meglio&raquo;</span></div></div>
+      <p style="font-size:15.5px;color:var(--ink);margin:0;line-height:1.5">Buongiorno,<br>in allegato le mando il preventivo per il bagno.
+         Il prezzo &egrave; quello di cui abbiamo parlato al telefono e vale 30 giorni.
+         Se va bene, possiamo iniziare luned&igrave; 5 ottobre. Mi faccia sapere.</p>
+    </div>
+    <div>
+      <p class="occhiello">Messaggi</p>
+      <h2>Scrivi di corsa,<br>arriva in bella</h2>
+      <p>Il messaggio al cliente lo scrivi come viene. Un tocco su <b>&laquo;Scrivilo meglio&raquo;</b>
+         e diventa gentile e chiaro, con le maiuscole e le virgole al posto giusto.</p>
+      <p><b>Date, orari e prezzi restano quelli che hai scritto tu.</b> E se non ti piace,
+         &laquo;Torna com&rsquo;era&raquo; e rimette il tuo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LE SCELTE DEL CLIENTE ================= -->
+<section class="fascia grigia">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Materiali e finiture</p>
+      <h2>Piastrelle e sanitari<br>li sceglie il cliente, dal telefono</h2>
+      <p>Per ogni cosa da decidere metti le possibilit&agrave;, con la foto e il prezzo:
+         &laquo;compreso&raquo;, &laquo;+ 8 &euro;/mq&raquo;. Mandi un link su WhatsApp, e il cliente
+         sceglie con calma da casa sua, senza iscriversi a niente.</p>
+      <p>Quando conferma ti arriva un&rsquo;email, e le scelte restano scritte nel lavoro.
+         Niente pi&ugrave; <b>&laquo;ma io avevo detto l&rsquo;altro&raquo;</b> a pavimento gi&agrave; posato.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="tel">
+      <div class="tel-dentro">
+        <h4>Pavimento del bagno</h4>
+        <p class="tel-sub">tocca quello che preferisci</p>
+        <div class="campo"><i>GRES EFFETTO LEGNO 20&times;120</i><b>compreso</b></div>
+        <div class="campo" style="border:2px solid var(--blu);background:var(--blu-tenue)"><i>GRES EFFETTO MARMO 60&times;60 &#10003;</i><b>+ 8 &euro;/mq</b></div>
+        <div class="campo"><i>RESINA COLOR CEMENTO</i><b>+ 35 &euro;/mq</b></div>
+        <div class="tel-btn">Confermo le mie scelte</div>
       </div>
     </div>
   </div>
