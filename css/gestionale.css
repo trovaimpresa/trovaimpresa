@@ -4442,3 +4442,52 @@ body:has(#ti-fondatore) .sheet--grande{
 /* l'anteprima nel modulo «nuovo reparto»: senza tasto cestino, niente effetto al passaggio */
 .p-prev-box .panel-card.pc3{ grid-template-columns:52px minmax(0,1fr) auto auto; }
 .p-prev-box .panel-card.pc3:hover{ transform:none; box-shadow:0 1px 3px rgba(16,24,32,.06) !important; border-color:#e3e8ef !important; }
+
+/* =====================================================================
+   26 set 2026 — IL RIEPILOGO A RIGHE (scelto da Alessio: «versione 1»)
+   Il Riepilogo e' un riepilogo: si deve vedere tutto senza scorrere.
+   Le schede diventano righe (icona colorata, nome, spiegazione, numero,
+   pallino verde o rosso), 3 colonne sul computer, 2 sotto i 1300 px,
+   1 sul telefono. Le righe di dettaglio dentro le schede non si vedono
+   piu': chi vuole il dettaglio tocca la riga e va nella sezione.
+   «Da sistemare oggi» mette le sue righe su due colonne.
+   Solo aspetto: rieCard() scrive lo stesso HTML di prima.
+   ⚠️ :has(#rie-grid) apposta: anche il gestionale noleggio ha un
+   #riepilogo e carica questo foglio, ma le sue schede sono .nrc.
+   ===================================================================== */
+#riepilogo:has(#rie-grid) .rie-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 26px!important;background:#fff;border:1px solid #e3e8ef;border-radius:16px;padding:6px 18px}
+#riepilogo:has(#rie-grid) .rie-card{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"ic tit n p" "ic l n p";column-gap:12px;align-items:center;
+ padding:8px 4px!important;border:0!important;border-bottom:1px solid #eef2f7!important;border-radius:0!important;box-shadow:none!important;min-height:0!important;background:none!important}
+#riepilogo:has(#rie-grid) .rie-card:hover{background:#f5f9ff!important}
+#riepilogo:has(#rie-grid) .rie-card .rc-head{display:contents!important}
+#riepilogo:has(#rie-grid) .rie-card .rc-head svg{grid-area:ic;width:34px!important;height:34px!important;padding:7px!important;margin:0!important}
+#riepilogo:has(#rie-grid) .rie-card .rc-tit{grid-area:tit;font-size:16px!important;align-self:end}
+#riepilogo:has(#rie-grid) .rie-card .rc-l{grid-area:l;font-size:14px!important;margin:0!important;border:0!important;padding:0!important;align-self:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#riepilogo:has(#rie-grid) .rie-card .rc-n{grid-area:n;font-size:20px!important;margin:0!important;text-align:right}
+#riepilogo:has(#rie-grid) .rie-card .rc-pall{grid-area:p;margin:0!important;position:static!important}
+#riepilogo:has(#rie-grid) .rie-card .rc-list,#riepilogo:has(#rie-grid) .rie-card .rc-vuoto{display:none!important}
+@media(max-width:1300px){#riepilogo:has(#rie-grid) .rie-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:760px){#riepilogo:has(#rie-grid) .rie-grid{grid-template-columns:1fr!important;padding:4px 12px}
+ #riepilogo:has(#rie-grid) .rie-card{padding:9px 2px!important}#riepilogo:has(#rie-grid) .rie-card .rc-n{font-size:19px!important}}
+#riepilogo:has(#rie-grid) .rie-intro{margin:0 0 14px!important}
+#riepilogo:has(#rie-grid) .rie-intro h2{font-size:24px!important}
+#riepilogo:has(#rie-grid) .rie-intro p{display:none}
+#riepilogo:has(#rie-grid) .rie-oggi{padding:14px 18px 8px!important;margin-bottom:16px!important;display:grid!important;grid-template-columns:1fr 1fr;column-gap:22px}
+#riepilogo:has(#rie-grid) .rie-oggi > :not(.ro-riga){grid-column:1/-1}
+#riepilogo:has(#rie-grid) .ro-tit{font-size:18px!important;margin-bottom:4px!important}
+#riepilogo:has(#rie-grid) .ro-sotto{display:none}
+#riepilogo:has(#rie-grid) .ro-riga{padding:9px 8px!important;margin:0!important}
+#riepilogo:has(#rie-grid) .ro-testo{font-size:16px!important}
+#riepilogo:has(#rie-grid) .ro-testo .ro-dett{font-size:15px!important;margin-top:1px!important}
+@media(max-width:760px){#riepilogo:has(#rie-grid) .rie-oggi{grid-template-columns:1fr}}
+#riepilogo:has(#rie-grid){padding-top:0!important;margin-top:0!important}
+.wrap:has(#riepilogo.active #rie-grid){padding-top:18px!important}
+
+/* quello che non e' una riga occupa tutta la larghezza */
+#riepilogo:has(#rie-grid) .rie-grid > :not(.rie-card){grid-column:1/-1}
+/* Promemoria: l'unica voce del menu senza il suo colore */
+.rie-card[data-go="promemoria"] .rc-head svg,.side nav.tabs button[data-tab="promemoria"] svg{ color:#b7791f; background:#fdf3e1; }
+/* il pallino piu' grande (chiesto da Alessio): si vede da lontano */
+#riepilogo:has(#rie-grid) .rie-card .rc-pall{width:18px!important;height:18px!important;flex:0 0 18px!important;box-shadow:none!important}
+/* tutti i numeri dello stesso colore: il grigio sembrava «spento» */
+#riepilogo:has(#rie-grid) .rie-card .rc-n{color:var(--testo)!important}

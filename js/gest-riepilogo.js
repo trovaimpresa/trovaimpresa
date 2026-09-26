@@ -800,6 +800,73 @@
       righe:mpNote
     }));
 
+    /* ===== 26 settembre 2026 — LE QUATTRO SEZIONI CHE MANCAVANO =====
+       Regola di Alessio: ogni sezione del menu che hai usato compare nel
+       Riepilogo; se non l'hai mai usata non si vede. Mancavano Richieste dal
+       sito, Promemoria, Prezzario e Crediti formativi.
+       Ognuna legge per conto suo dentro un try: se una tabella non risponde
+       (o manca la migrazione) sparisce solo quella scheda, non il Riepilogo.
+       Promemoria, prezzario e crediti sono della PERSONA, non del reparto:
+       stessa eccezione dei pallini del menu (renderContatori). */
+    const _menuVisto=t=>{const b=document.querySelector('nav.tabs button[data-tab="'+t+'"]');
+      return !!b && b.style.display!=="none" && !tabNascosto(t);};
+    if(_menuVisto("dalsito")){
+      try{
+        const DS=(typeof dsCache!=="undefined"&&dsCache.length)?dsCache:await dsCarica();
+        const nuove=DS.filter(r=>r._stato==="nuova").length;
+        C.push(rieCard({
+          tab:"dalsito", titolo:"Richieste dal sito", n:nuove, dati:DS.length>0,
+          lab:nuove?_plur(nuove,"richiesta da leggere","richieste da leggere"):"tutte lette",
+          tono:"neutro", male:nuove>0, righe:[]
+        }));
+      }catch(e){}
+    }
+    if(_menuVisto("promemoria")){
+      try{
+        const {data:PR,error:ePr}=await sb.from("promemoria").select("data,stato")
+          .eq("user_id",sbUid).is("eliminato_il",null);
+        if(!ePr&&PR&&PR.length){
+          const ap=PR.filter(x=>x.stato!=="fatto");
+          const pass=ap.filter(x=>x.data&&x.data<oggi).length;
+          C.push(rieCard({
+            tab:"promemoria", titolo:"Promemoria", n:ap.length, dati:true,
+            lab:pass?(pass+(pass===1?" già passato":" già passati")):"da fare",
+            tono:"neutro", male:pass>0, righe:[]
+          }));
+        }
+      }catch(e){}
+    }
+    if(_menuVisto("prezzario")){
+      try{
+        const {count:nPz,error:ePz}=await sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).is("eliminato_il",null);
+        if(!ePz&&nPz>0)C.push(rieCard({
+          tab:"prezzario", titolo:"Prezzario", n:nPz.toLocaleString("it-IT",{useGrouping:true}), dati:true,
+          lab:_plur(nPz,"voce nel tuo prezzario","voci nel tuo prezzario"), tono:"neutro", male:false, righe:[]
+        }));
+      }catch(e){}
+    }
+    if(_menuVisto("crediti")){
+      try{
+        const {data:CR,error:eCr}=await sb.from("gest_crediti").select("data,crediti").eq("user_id",sbUid);
+        if(!eCr&&CR&&CR.length){
+          const anno=oggi.slice(0,4);
+          const fatti=CR.filter(c=>String(c.data||"").slice(0,4)===anno).reduce((t,c)=>t+(+c.crediti||0),0);
+          const ob=(AZ&&+AZ.cfp_obiettivo>0)?+AZ.cfp_obiettivo:30;
+          C.push(rieCard({
+            tab:"crediti", titolo:"Crediti formativi", n:String(Math.round(fatti*100)/100).replace(".",","), dati:true,
+            lab:"su "+ob+" di quest\u2019anno", tono:"neutro", male:false, righe:[]
+          }));
+        }
+      }catch(e){}
+    }
+
+    /* Stesso ordine del menu a sinistra: chi cerca «Fornitori» lo trova
+       nello stesso posto in tutte e due. */
+    const _ordMenu=[...document.querySelectorAll("nav.tabs button[data-tab]")].map(b=>b.dataset.tab);
+    const _pos=h=>{const m=/data-go="([a-z]+)"/.exec(h||"");const i=m?_ordMenu.indexOf(m[1]):-1;return i<0?999:i;};
+    C.sort((a,b)=>_pos(a)-_pos(b));
+
     /* ===== 15 agosto 2026 — il reparto nuovo =====
        Se non c'e' NIENTE dentro, non si mostra una griglia vuota: si spiega
        come funziona e si offrono i due primi passi. Il riquadro «Tutto in
