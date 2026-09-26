@@ -2572,3 +2572,11 @@ Idee prese da siti stranieri (Thumbtack, Houzz), scelte da Alessio. Un push solo
 - ⚠️ Resend gratuito = 100 email al giorno in tutto il sito: gli avvisi della chat ci passano dentro.
 - Numeri al 26 set: →110← foto pubbliche di →44← imprese nella galleria; nella chat c'era →1← solo messaggio da sempre.
 - Migrazioni applicate: `prezzi_e_galleria_26set2026`, `chat_avvisi_26set2026` (file in `sql/`, righe in `PROVE` di fondatore.js).
+
+## 26 set (sera) — la grafica di Foto dei lavori, Messaggi, I tuoi prezzi
+
+- `js/sezioni-vetrina.js` (nei 3 pannelli, DOPO `prezzi-impresa.js`): solo aspetto, stile limitato a `#sec-foto-lavori`, `#sec-messaggi`, `#sec-prezzi`, larghezza massima →1100← px (Alex: «queste linee lunghe e piatte»).
+- Foto dei lavori: riquadro grande «Tocca per scegliere la foto» con anteprima; **l'elenco `#lista-lavori-foto` è stato spostato dal RIEPILOGO dentro la sezione** (la funzione lo trova per id). `salvaLavoroFoto` avvolta solo per svuotare l'anteprima.
+- Messaggi: conversazioni a riquadri con iniziale e ora (avvolge `renderListaConversazioni`), chat aperta con testa (nome, email, pulsanti a destra; avvolge `apriConversazione`).
+- ⚠️ `js/freccia-indietro.js` parte PRIMA e trasforma i «← Torna» in `.ti-back`: chi aggiunge sezioni dopo di lui deve scrivere la freccia già fatta (come `prezzi-impresa.js`).
+- Alex: «il sito è tutto così, miglioriamolo». Deciso di andare un pannello/sezione alla volta, sempre con le foto prima.
