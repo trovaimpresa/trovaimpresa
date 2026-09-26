@@ -25,9 +25,47 @@
 
   var CSS = '' +
   /* ---------- in comune ---------- */
-  '#sec-foto-lavori,#sec-messaggi,#sec-prezzi{max-width:1100px}' +
+  /* al centro: sugli schermi larghi (1920) attaccata a sinistra lasciava un buco a destra (Alex, foto del 26 set) */
+  '#sec-foto-lavori.active,#sec-messaggi.active,#sec-prezzi.active{max-width:1240px;margin-left:auto;margin-right:auto}' +
   /* la freccia Indietro dentro il titolo prendeva il carattere del titolo (con le grazie) */
   '.section .ti-back{font-family:\'DM Sans\',Arial,sans-serif}' +
+
+  /* ---------- RIEPILOGO (26 set 2026) ----------
+     - al centro e non piu' largo di 1240 px, come le altre sezioni;
+     - copertina piu' bassa: prima arrivava a 800 px e spingeva tutto sotto;
+     - numeri e carte SENZA la striscia colorata in cima (ogni carta aveva
+       un colore diverso, senza un significato: e' la stessa regola gia'
+       decisa per il riepilogo del gestionale, il 20 agosto);
+     - carte in riga (icona a sinistra, scritte a destra) invece che
+       impilate e centrate: meno alte, si leggono da sinistra come un elenco.
+     ⚠️ Le due carte doppie (offerte di lavoro, subappalti) hanno lo stile
+        scritto dentro l'HTML: per loro si sistemano i due mezzi, non la carta. */
+  '#sec-dashboard.active{max-width:1240px;margin-left:auto;margin-right:auto}' +
+  '#sec-dashboard .dash-cover{max-height:320px}' +
+  '#sec-dashboard .dash-stat-card{border-top:1px solid #e3e8ef !important;border:1px solid #e3e8ef;box-shadow:0 6px 20px rgba(10,42,77,.06)}' +
+  '#sec-dashboard .dash-quick-title{font-size:15px;letter-spacing:.8px;color:#475569;margin:26px 0 12px}' +
+  '#sec-dashboard .dash-quick-grid{gap:14px}' +
+  '#sec-dashboard .dash-quick-card{border:1px solid #e3e8ef !important;box-shadow:0 6px 20px rgba(10,42,77,.06);border-radius:16px}' +
+  '#sec-dashboard .dash-quick-card:hover{border-color:#0066ff !important;box-shadow:0 10px 26px rgba(10,42,77,.12)}' +
+  '#sec-dashboard .dash-quick-card:not([data-card-id="lavoro"]):not([data-card-id="subappalto"]){display:grid;' +
+    'grid-template-columns:52px minmax(0,1fr);grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;padding:16px 18px;min-height:86px}' +
+  '#sec-dashboard .dash-quick-card .dash-quick-icon{grid-row:1 / span 2;width:52px;height:52px;border-radius:14px;background:#eef4ff;color:#0066ff;' +
+    'display:flex;align-items:center;justify-content:center;margin:0;font-size:24px}' +
+  '#sec-dashboard .dash-quick-card .dash-quick-icon svg{width:26px;height:26px}' +
+  '#sec-dashboard .dash-quick-card .dash-quick-label{font-size:17px;font-weight:800;color:#0f172a;align-self:end;line-height:1.3}' +
+  '#sec-dashboard .dash-quick-card .dash-quick-sub{font-size:15px;color:#5f6b7a;align-self:start;margin-top:2px;line-height:1.35}' +
+  /* ⚠️ colonna scritta a mano: con la sola riga, la scritta veniva messa per prima nella colonna stretta */
+  '#sec-dashboard .dash-quick-card .dash-quick-icon{grid-column:1}' +
+  '#sec-dashboard .dash-quick-card .dash-quick-label,#sec-dashboard .dash-quick-card .dash-quick-sub{grid-column:2}' +
+  '#sec-dashboard .dash-quick-card:not([data-card-id="lavoro"]):not([data-card-id="subappalto"]) .dash-quick-label:last-child{grid-row:1 / span 2;align-self:center}' +
+  /* le due carte doppie */
+  '#sec-dashboard .dash-quick-card[data-card-id="lavoro"]>a,#sec-dashboard .dash-quick-card[data-card-id="subappalto"]>a{display:grid !important;' +
+    'grid-template-columns:44px minmax(0,1fr);column-gap:12px;align-items:center;text-align:left !important;padding:16px !important}' +
+  '#sec-dashboard .dash-quick-card[data-card-id="lavoro"] .dash-quick-icon,#sec-dashboard .dash-quick-card[data-card-id="subappalto"] .dash-quick-icon{' +
+    'grid-row:1;width:44px;height:44px;border-radius:12px}' +
+  '#sec-dashboard .dash-quick-card[data-card-id="lavoro"] .dash-quick-label,#sec-dashboard .dash-quick-card[data-card-id="subappalto"] .dash-quick-label{font-size:16px}' +
+  '@media(max-width:820px){#sec-dashboard .dash-quick-grid{grid-template-columns:1fr !important}' +
+    '#sec-dashboard .dash-quick-card:not([data-card-id="lavoro"]):not([data-card-id="subappalto"]){min-height:74px;padding:14px}}' +
 
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
@@ -195,6 +233,23 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* le tre carte che avevano un'emoji al posto dell'icona disegnata
+     (Alessio non vuole emoji: regola dell'8 agosto) */
+  var ICONE_CARTE = {
+    'qr-profilo': '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>',
+    'priorita': '<path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
+    'video-azienda': '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4z"/>'
+  };
+  function riepilogo() {
+    Object.keys(ICONE_CARTE).forEach(function (id) {
+      var ic = document.querySelector('#sec-dashboard .dash-quick-card[data-card-id="' + id + '"] .dash-quick-icon');
+      if (ic && !ic.querySelector('svg')) {
+        ic.innerHTML = '<svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONE_CARTE[id] + '</svg>';
+      }
+    });
+  }
+
   function quando(iso) {
     var d = new Date(iso); if (isNaN(d)) return '';
     var oggi = new Date(), ieri = new Date(Date.now() - 864e5);
@@ -281,6 +336,7 @@
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
     try { foto(); } catch (e) { console.error('foto grafica:', e); }
+    try { riepilogo(); } catch (e) { console.error('riepilogo grafica:', e); }
     try { messaggi(); } catch (e) { console.error('messaggi grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);

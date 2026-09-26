@@ -2580,3 +2580,5 @@ Idee prese da siti stranieri (Thumbtack, Houzz), scelte da Alessio. Un push solo
 - Messaggi: conversazioni a riquadri con iniziale e ora (avvolge `renderListaConversazioni`), chat aperta con testa (nome, email, pulsanti a destra; avvolge `apriConversazione`).
 - ⚠️ `js/freccia-indietro.js` parte PRIMA e trasforma i «← Torna» in `.ti-back`: chi aggiunge sezioni dopo di lui deve scrivere la freccia già fatta (come `prezzi-impresa.js`).
 - Alex: «il sito è tutto così, miglioriamolo». Deciso di andare un pannello/sezione alla volta, sempre con le foto prima.
+- 26 set (sera, 2): il RIEPILOGO dei pannelli nello stesso `js/sezioni-vetrina.js` — al centro (max →1240← px, anche Foto/Messaggi/Prezzi: sul 1920 di Alex restava un buco a destra), copertina max →320← px, carte in riga icona+scritte, via le strisce colorate, emoji QR/Priorità/Video → icone. ⚠️ Nelle carte doppie (lavoro, subappalto) la colonna va scritta a mano, se no la scritta finisce nella colonna stretta dell'icona. Calendario e «I due gestionali» ancora da rifare.
+- Home: riquadro `#le-idee` «Cerchi idee per casa?» → `/lavori-realizzati`, subito dopo `#categorie`.
