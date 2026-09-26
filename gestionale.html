@@ -461,6 +461,15 @@
     #pagine-precise .pp-elenco{gap:4px}
   }
 
+  /* 26 set 2026 — il video nella cornice del telefono */
+  .video-tel{width:270px;margin:0 auto;background:var(--ink);border-radius:32px;padding:10px;
+    box-shadow:0 24px 48px rgba(15,23,42,.18)}
+  .video-tel video{display:block;width:100%;height:auto;aspect-ratio:9/16;border-radius:23px;background:#eef3fb}
+  .video-pc{max-width:880px;margin:26px auto 0;background:var(--ink);border-radius:18px;padding:12px 12px 16px;
+    box-shadow:0 24px 48px rgba(15,23,42,.18)}
+  .video-pc video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:10px;background:#eef3fb}
+  #f-computo .introne p{margin:0 0 10px}
+
 </style>
 </head>
 <body>
@@ -519,7 +528,7 @@
       <p class="senza-carta">Senza carta di credito.</p>
       <!-- 26 set 2026 — la fila per saltare dove serve, senza scorrere -->
       <nav class="indice" aria-label="Vai a">
-        <a href="#dentro">Preventivi</a><a href="#f-cantiere">Cantiere</a><a href="#f-fornitori">Fatture dei fornitori</a><a href="#f-scelte">Scelte del cliente</a><a href="#tutto">Tutte le funzioni</a><a href="#prezzi">Prezzi</a>
+        <a href="#dentro">Preventivi</a><a href="#f-cantiere">Cantiere</a><a href="#f-computo">Computo</a><a href="#f-fornitori">Fatture dei fornitori</a><a href="#f-scelte">Scelte del cliente</a><a href="#tutto">Tutte le funzioni</a><a href="#prezzi">Prezzi</a>
       </nav>
       <!-- ⚠️ I numeri qui sotto NON sono scritti a mano: lo script in fondo
            li legge dalla tabella dei prezzi (#prezzi). Se cambi prezzo li',
@@ -681,40 +690,28 @@
       <p>Voci, quantit&agrave;, prezzi, righe di sezione per dividere il lavoro in parti.
          Il PDF esce gi&agrave; fatto col tuo nome sopra, e glielo mandi da l&igrave;,
          per email o su WhatsApp.</p>
+      <p>Non hai voglia di scriverlo? Premi <b>&laquo;Genera con AI&raquo;</b>, raccontalo a voce,
+         e le voci con le quantit&agrave; e i prezzi si scrivono da sole: tu controlli e correggi.</p>
       <p>Quando il cliente dice s&igrave;, il preventivo diventa il cantiere con un clic:
          non lo riscrivi da capo. E la pagina ti dice su dieci che ne mandi quanti
          te ne accettano.</p>
     </div>
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="doc">
-      <div class="doc-top">
-        <div><b>Preventivo n. 2026/118</b><br><span style="color:#8899ab">Sig.ra Bianchi &mdash; Via Mazzini 4, Rieti</span></div>
-        <div style="text-align:right;color:#8899ab">18/09/2026</div>
-      </div>
-      <div class="doc-r"><span>Demolizione rivestimenti &mdash; 24 m&sup2;</span><span>1.080 &euro;</span></div>
-      <div class="doc-r"><span>Massetto e impermeabilizzazione &mdash; 9 m&sup2;</span><span>1.260 &euro;</span></div>
-      <div class="doc-r"><span>Impianto idraulico &mdash; 6 punti acqua</span><span>2.900 &euro;</span></div>
-      <div class="doc-r"><span>Posa piastrelle 60x60 &mdash; 33 m&sup2;</span><span>2.640 &euro;</span></div>
-      <div class="doc-r"><span>Sanitari e rubinetteria</span><span>1.850 &euro;</span></div>
-      <div class="doc-r"><span>Ponteggio interno e pulizia</span><span>470 &euro;</span></div>
-      <div class="doc-tot"><span>Totale &mdash; IVA 10%</span><span>18.400 &euro;</span></div>
+    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-preventivo.jpg" data-src="/video/gestionale-preventivo.mp4"
+             aria-label="Video: si racconta il lavoro a voce e il gestionale scrive le voci del preventivo con i prezzi"></video>
     </div>
   </div>
 </section>
 
 <section class="fascia grigia" id="f-cantiere">
   <div class="wrap due rovescia">
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="tel">
-      <div class="tel-dentro">
-        <h4>Rapportino di oggi</h4>
-        <p class="tel-sub">Via Mazzini 4 &mdash; gioved&igrave; 18</p>
-        <div class="campo"><i>SQUADRA</i><b>2 persone &middot; 8 ore</b></div>
-        <div class="campo"><i>FATTO OGGI</i><b>Massetto steso, secondo piano</b></div>
-        <div class="campo"><i>MATERIALE</i><b>12 sacchi &middot; 1 bancale piastrelle</b></div>
-        <div class="campo"><i>FOTO</i><b>3 scattate</b></div>
-        <div class="tel-btn">Salva</div>
-      </div>
+    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-cantiere.jpg" data-src="/video/gestionale-cantiere.mp4"
+             aria-label="Video: dal telefono in cantiere si racconta la giornata e il rapportino si riempie da solo con ore, materiali e spese"></video>
     </div>
     <div>
       <p class="occhiello">In cantiere</p>
@@ -726,19 +723,45 @@
   </div>
 </section>
 
-<section class="fascia" id="f-fornitori">
+<!-- 26 set 2026 — IL COMPUTO DIVENTA GRANDE, col suo video (orizzontale:
+     il computo si fa al computer). Il testo e' quello che stava fra le voci
+     che si aprono. ⚠️ Una fascia in piu': le fasce dopo hanno il bianco/grigio
+     girato apposta, per tenere l'alternanza. -->
+<section class="fascia" id="f-computo">
+  <div class="wrap">
+    <p class="occhiello" style="text-align:center">Computo metrico</p>
+    <h2 class="titolone">Le misure le scrivi<br>come sul quaderno</h2>
+    <div class="introne"><p>Parti uguali, lunghezza, larghezza, altezza. Il vuoto di una porta lo metti
+         <b>&laquo;si detrae&raquo;</b> e se ne va da solo. La quantit&agrave; della lavorazione non la
+         scrivi tu: la somma il programma, misura per misura.</p><p>Computo, capitoli, lavorazioni, misure: quattro piani, come in un computo vero.
+         Ogni voce ha il suo codice di tariffa, l&rsquo;unit&agrave; di misura, gli oneri della
+         sicurezza e quanto pesa la manodopera.</p><p>Quando hai finito, <b>il computo diventa un preventivo</b> raggruppato per capitoli,
+         senza riscrivere una riga.</p></div>
+    <div class="video-pc">
+      <video class="video-lazy" muted loop playsinline preload="none" width="960" height="540"
+             data-poster="/video/gestionale-computo.jpg" data-src="/video/gestionale-computo.mp4"
+             aria-label="Video: si crea un computo, si scrive la lavorazione e le misure, e il gestionale fa da solo quantità e totale"></video>
+    </div>
+  </div>
+</section>
+
+<section class="fascia grigia" id="f-fornitori">
   <div class="wrap due rovescia">
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="tel">
-      <div class="tel-dentro">
-        <h4>Fattura da pagare</h4>
-        <p class="tel-sub">letta dalla foto &#10003;</p>
-        <div class="campo"><i>FORNITORE</i><b>Edilcentro Rieti</b></div>
-        <div class="campo"><i>NUMERO E DATA</i><b>FT 312/2026 &middot; 22/09/2026</b></div>
-        <div class="campo"><i>DA PAGARE</i><b>1.284,66 &euro; IVA compresa</b></div>
-        <div class="campo"><i>ENTRO IL</i><b>31/10/2026</b></div>
-        <div class="tel-btn">Aggiungi</div>
-      </div>
+    <!-- ⛔ 26 set 2026 — IL VIDEO AL POSTO DEL DISEGNO, fatto per non pesare.
+         Alex: «basta che Google non la penalizza» (i reel in home li aveva
+         dovuti togliere). Quindi:
+         · il video pesa 450 KB (540x960, niente audio) e la copertina 35 KB;
+         · preload="none" e il file vero si chiede SOLO quando il riquadro
+           arriva sullo schermo (data-src + lo script in fondo): chi non
+           scorre fin qui non lo scarica mai;
+         · width/height e aspect-ratio fissi: la pagina non «salta» quando
+           arriva il video;
+         · con «riduci movimento» non parte da solo, ci sono i comandi.
+         Fornitore e impresa del video sono inventati («nomi e cifre di prova»). -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-foto-fattura.jpg" data-src="/video/gestionale-foto-fattura.mp4"
+             aria-label="Video: si fotografa la fattura del fornitore e il gestionale riempie da solo fornitore, numero, data, importo e scadenza"></video>
     </div>
     <div>
       <p class="occhiello">Fornitori</p>
@@ -753,7 +776,7 @@
   </div>
 </section>
 
-<section class="fascia grigia" id="f-scelte">
+<section class="fascia" id="f-scelte">
   <div class="wrap due">
     <div>
       <p class="occhiello">Materiali e finiture</p>
@@ -764,21 +787,16 @@
       <p>Quando conferma ti arriva un&rsquo;email, e le scelte restano scritte nel lavoro.
          Niente pi&ugrave; <b>&laquo;ma io avevo detto l&rsquo;altro&raquo;</b> a pavimento gi&agrave; posato.</p>
     </div>
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="tel">
-      <div class="tel-dentro">
-        <h4>Pavimento del bagno</h4>
-        <p class="tel-sub">tocca quello che preferisci</p>
-        <div class="campo"><i>GRES EFFETTO LEGNO 20&times;120</i><b>compreso</b></div>
-        <div class="campo" style="border:2px solid var(--blu);background:var(--blu-tenue)"><i>GRES EFFETTO MARMO 60&times;60 &#10003;</i><b>+ 8 &euro;/mq</b></div>
-        <div class="campo"><i>RESINA COLOR CEMENTO</i><b>+ 35 &euro;/mq</b></div>
-        <div class="tel-btn">Confermo le mie scelte</div>
-      </div>
+    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-scelte.jpg" data-src="/video/gestionale-scelte.mp4"
+             aria-label="Video: il cliente apre il link sul telefono, sceglie pavimento, sanitari e colore e conferma"></video>
     </div>
   </div>
 </section>
 
-<section class="fascia" id="tutto">
+<section class="fascia grigia" id="tutto">
   <div class="wrap">
     <h2 class="titolone">E poi c&rsquo;&egrave; tutto il resto</h2>
     <p class="introne">Tocca un titolo e si apre.</p>
@@ -806,38 +824,6 @@
     </div>
     <p class="epoi" style="max-width:640px;margin:18px auto 0">Se il PDF &egrave; la fotografia di un foglio,
        il gestionale te lo dice e si ferma: i numeri non se li inventa.</p>
-  </div>
-</div>
-</details>
-<details class="apri">
-  <summary><span class="apri-occ">Computo metrico</span><span class="apri-tit">Le misure le scrivi come sul quaderno</span></summary>
-  <div class="apri-dentro">
-  <div class="wrap due">
-    <div>
-      <p class="occhiello">Computo metrico</p>
-      <h2>Le misure le scrivi<br>come sul quaderno</h2>
-      <p>Parti uguali, lunghezza, larghezza, altezza. Il vuoto di una porta lo metti
-         <b>&laquo;si detrae&raquo;</b> e se ne va da solo. La quantit&agrave; della lavorazione non la
-         scrivi tu: la somma il programma, misura per misura.</p>
-      <p>Computo, capitoli, lavorazioni, misure: quattro piani, come in un computo vero.
-         Ogni voce ha il suo codice di tariffa, l&rsquo;unit&agrave; di misura, gli oneri della
-         sicurezza e quanto pesa la manodopera.</p>
-      <p>Quando hai finito, <b>il computo diventa un preventivo</b> raggruppato per capitoli,
-         senza riscrivere una riga.</p>
-    </div>
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="doc" id="anim-computo">
-      <div class="doc-top">
-        <div><b>Intonaco civile su pareti interne</b><br>
-          <span style="color:#8899ab">Cap. 3 &mdash; Opere murarie &middot; cod. 1C.04.150.a</span></div>
-        <div style="text-align:right;color:#8899ab">m&sup2;</div>
-      </div>
-      <div class="mis"><span><b>Soggiorno</b><small>4 PARTI &middot; 4,20 &times; 2,90</small></span><span class="num">48,72</span></div>
-      <div class="mis"><span><b>Corridoio</b><small>2 PARTI &middot; 6,10 &times; 2,90</small></span><span class="num">35,38</span></div>
-      <div class="mis"><span><b>Vano porta</b> <span class="meno">si detrae</span><small>2 PARTI &middot; 0,90 &times; 2,10</small></span><span class="num meno">&minus; 3,78</span></div>
-      <div class="mis"><span><b>Finestra</b> <span class="meno">si detrae</span><small>1 PARTE &middot; 1,40 &times; 1,20</small></span><span class="num meno">&minus; 1,68</span></div>
-      <div class="doc-tot"><span>Quantit&agrave; &mdash; dalle misure</span><span id="anim-computo-tot">78,64 m&sup2;</span></div>
-    </div>
   </div>
 </div>
 </details>
@@ -1152,7 +1138,7 @@
 </section>
 
 <!-- ================= CHI LO USA ================= -->
-<section class="fascia grigia">
+<section class="fascia">
   <div class="wrap">
     <h2 class="titolone">Cambia le parole secondo chi sei</h2>
     <p class="introne">Un artigiano manda un <b>preventivo</b> a un cliente. Uno studio tecnico accetta
@@ -1233,7 +1219,7 @@
 </style>
 
 <!-- ================= LA COSA DETTA CHIARA ================= -->
-<section class="fascia">
+<section class="fascia grigia">
   <div class="wrap">
     <div class="onesto">
       <h3>Una cosa detta chiara</h3>
@@ -1249,7 +1235,7 @@
 <!-- ⚠️ `id="scegli"` e `id="prezzi"` sono i nomi vecchi delle due sezioni:
      chi ha in giro un link con #scegli o #prezzi deve atterrare lo stesso qui. -->
 <span id="scegli"></span>
-<section class="fascia grigia" id="prezzi">
+<section class="fascia" id="prezzi">
   <div class="wrap">
     <h2 class="titolone">Quanto costa e come si comincia</h2>
     <p class="introne">Scegli il prezzo e il mestiere con un clic solo.</p>
@@ -1388,7 +1374,7 @@
 </section>
 
 <!-- INIZIO famiglia gestionale (porta) - generato, non scrivere a mano -->
-<section class="fascia" id="pagine-precise">
+<section class="fascia grigia" id="pagine-precise">
   <div class="wrap">
     <h2 class="titolone">Cerchi una cosa precisa?</h2>
     <p class="introne">Questa pagina racconta il gestionale tutto intero.
@@ -1688,6 +1674,31 @@
   function aggiorna(){var su=fuori&&!vicino.prezzi&&!vicino.comincia;barra.classList.toggle('su',su);barra.setAttribute('aria-hidden',su?'false':'true');}
   new IntersectionObserver(function(e){fuori=!e[0].isIntersecting&&e[0].boundingClientRect.top<0;aggiorna();}).observe(bott);
   [['prezzi',prezzi],['comincia',comincia]].forEach(function(c){if(c[1])new IntersectionObserver(function(e){vicino[c[0]]=e[0].isIntersecting;aggiorna();},{threshold:.05}).observe(c[1]);});
+})();
+</script>
+
+<script>
+/* 26 set 2026 — il video si carica solo quando si vede, e si ferma quando esce */
+(function(){
+  var fermo=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* la copertina si chiede quando mancano ~800 px (prima che si veda), il
+     video vero solo quando e' sullo schermo: chi apre la pagina e non scorre
+     non scarica nessuno dei due */
+  function copertina(v){if(!v.poster&&v.dataset.poster)v.poster=v.dataset.poster;}
+  if('IntersectionObserver' in window){
+    var vicino=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){copertina(e.target);vicino.unobserve(e.target);}});},{rootMargin:'800px 0px'});
+    document.querySelectorAll('video.video-lazy').forEach(function(v){vicino.observe(v);});
+  }else document.querySelectorAll('video.video-lazy').forEach(copertina);
+  document.querySelectorAll('video.video-lazy').forEach(function(v){
+    function carica(){copertina(v);if(!v.src&&v.dataset.src){v.src=v.dataset.src;}}
+    if(fermo){v.controls=true;v.addEventListener('play',carica,{once:true});v.preload='none';
+      v.addEventListener('click',function(){carica();v.play();},{once:true});return;}
+    if(!('IntersectionObserver' in window)){carica();v.play().catch(function(){});return;}
+    new IntersectionObserver(function(e){
+      if(e[0].isIntersecting){carica();var p=v.play();if(p&&p.catch)p.catch(function(){});}
+      else if(!v.paused){v.pause();}
+    },{threshold:.4,rootMargin:'200px 0px'}).observe(v);
+  });
 })();
 </script>
 </body>
