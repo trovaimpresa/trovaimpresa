@@ -254,6 +254,9 @@
         <div class="chip" data-specializzazione="Perizie e stime" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Perizie e stime</div>
         <div class="chip" data-specializzazione="Successioni" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 3l9 8v10H3z"/><path d="M9 21v-6h6v6"/></svg> Successioni</div>
         <div class="chip" data-specializzazione="Restauro" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-8h6v8"/></svg> Restauro</div>
+        <div class="chip" data-specializzazione="Geologia" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 20 7-12 4 6 3-4 6 10z"/></svg> Geologia</div>
+        <div class="chip" data-specializzazione="Acustica" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg> Acustica</div>
+        <div class="chip" data-specializzazione="Condominio" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg> Condominio</div>
         <div class="chip" data-specializzazione="Interni e arredo" onclick="selectSpecializzazione(this)"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6"/><path d="M2 18h20M6 10V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3"/></svg> Interni e arredo</div>
       </div>
     </div>
@@ -555,7 +558,7 @@
     'Progettazione':/progett|\bbim\b|rendering|progetto/i,
     'Pratiche edilizie e sanatorie':/pratiche edilizie|\bcila\b|\bscia\b|permesso di costruire|sanatori|condon|agibilit/i,
     'Pratiche catastali':/catast|docfa|pregeo|frazionament|voltur/i,
-    'Rilievi topografici':/rilievi|topograf/i,
+    'Rilievi topografici':/rilie|topograf|tracciament|laser scanner|drone|pregeo|frazionament/i,
     'Direzione lavori':/direzione (dei )?lavori/i,
     'Strutture e antisismica':/struttur|sismic|collaudo statico|genio civile/i,
     'Impianti':/impiant|dm 37|fotovoltaic/i,
@@ -566,6 +569,9 @@
     'Perizie e stime':/perizi|stim[ae]|\bctu\b|\bctp\b/i,
     'Successioni':/successioni/i,
     'Restauro':/restaur/i,
+    'Geologia':/geolog|geotecn|idrogeolog/i,
+    'Acustica':/acustic/i,
+    'Condominio':/condomin/i,
     'Interni e arredo':/interni|arred|home stag|interior/i
   };
   function passaSpecializzazione(i){

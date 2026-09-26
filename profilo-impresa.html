@@ -1750,7 +1750,7 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
       document.getElementById('info-mestieri-wrap').style.display='';_infoHasContent=true;
     }
     // Prestazioni (array text[] per professionisti → chip)
-    const prestArr=Array.isArray(d.prestazioni)?d.prestazioni.filter(Boolean):[];
+    const prestArr=Array.isArray(d.prestazioni)?d.prestazioni.filter(Boolean):[];window._prestProf=prestArr;window._mestProf=[d.mestiere].concat(Array.isArray(d.mestieri)?d.mestieri:[]).filter(Boolean);
     if(prestArr.length){
       const w=document.getElementById('info-prest-wrap');
       if(w){document.getElementById('profile-prest').innerHTML=prestArr.map(v=>`<div class="cat"><span>🛠️</span> ${_esc(v)}</div>`).join('');w.style.display='';_infoHasContent=true;}
@@ -2161,7 +2161,20 @@ const PRESTAZIONI_CATALOGO={
   "Perito industriale":["Progettazione impianti elettrici","Progettazione impianti termici e climatizzazione","Dichiarazione di conformità impianti (DM 37/2008)","Progettazione impianto fotovoltaico","Pratiche antincendio","Collaudo e certificazione impianti","Consulenza efficientamento energetico","Direzione lavori impiantistici"],
   "Perito estimatore":["Stime e valutazioni immobiliari","Perizie di stima per mutuo","Perizie giurate / asseverate","Consulenza tecnica (CTU e CTP)","Stime per successioni e divisioni","Perizie danni e assicurative","Stime di aziende e macchinari","Perizie estimative agrarie"]
 };
-function popolaIncPrestazioni(){const sel=document.getElementById('inc-prestazione');if(!sel||sel.dataset.done)return;sel.insertAdjacentHTML('beforeend',Object.keys(PRESTAZIONI_CATALOGO).map(cat=>`<optgroup label="${cat}">${PRESTAZIONI_CATALOGO[cat].map(p=>`<option value="${p}">${p}</option>`).join('')}</optgroup>`).join(''));sel.dataset.done='1';}
+/* 26 set 2026 — la tendina propone PRIMA quello che fa davvero questo
+   professionista (le sue prestazioni), poi i gruppi del suo mestiere presi
+   dal catalogo unico (js/prestazioni-catalogo.js). Se quel file non c'e',
+   si torna al catalogo vecchio qui sopra. */
+function popolaIncPrestazioni(){const sel=document.getElementById('inc-prestazione');if(!sel||sel.dataset.done)return;
+  const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const opt=p=>`<option value="${esc(p)}">${esc(p)}</option>`;
+  const sue=(window._prestProf||[]);let html='';const gia={};
+  if(sue.length){html+=`<optgroup label="Le sue prestazioni">${sue.map(p=>{gia[String(p).toLowerCase()]=1;return opt(p);}).join('')}</optgroup>`;}
+  const T=window.TI_PRESTAZIONI;
+  if(T){const gr=T.gruppiPer(window._mestProf||[]);const lista=gr.length?gr:Object.keys(T.gruppi);
+    lista.forEach(g=>{const v=T.gruppi[g].filter(p=>!gia[p.toLowerCase()]);if(v.length)html+=`<optgroup label="${esc(g)}">${v.map(opt).join('')}</optgroup>`;});}
+  else{html+=Object.keys(PRESTAZIONI_CATALOGO).map(cat=>`<optgroup label="${cat}">${PRESTAZIONI_CATALOGO[cat].map(opt).join('')}</optgroup>`).join('');}
+  sel.insertAdjacentHTML('beforeend',html);sel.dataset.done='1';}
 function showIncarico(){_navTorna(true,hideIncarico);popolaIncPrestazioni();document.getElementById('profilo-view').style.display='none';document.getElementById('sec-incarico').classList.add('open');window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
 function hideIncarico(){_navTorna(false);document.getElementById('sec-incarico').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
 async function submitIncarico(){
@@ -2808,6 +2821,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <script src="/js/spazi-elenco.js"></script>
 <script src="/js/spazi-laterali.js" data-spazi="profilo-sx-1,profilo-sx-2,profilo-dx-1,profilo-dx-2"></script>
 <script src="/js/conta-cliente.js" defer></script>
+<script src="/js/prestazioni-catalogo.js?v=1"></script>
 <!-- Barra fissa su mobile: il preventivo e la chiamata sempre a portata di pollice (7/8/2026) -->
 <style>
 .cta-bar-mobile{display:none}
