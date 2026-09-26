@@ -1322,7 +1322,7 @@ ${JSON.stringify(schemaBc, null, 2)}
   </div>
   <p>${m.ruolo === 'professionista'
       ? `Queste cifre sono medie di mercato. A ${esc(c.nome)} l'onorario può stare un po' sopra o un po' sotto secondo la complessità della pratica, i tempi del Comune e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea: un onorario molto sotto il minimo di solito vuol dire che qualcosa non è compreso.`
-      : `Queste cifre sono medie nazionali, prese dalle nostre guide prezzi scritte da chi i cantieri li ha fatti davvero. A ${esc(c.nome)} il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.`}</p>
+      : `Queste cifre sono medie nazionali, prese dalle nostre guide, fatte con i prezzi veri di cantiere. A ${esc(c.nome)} il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.`}</p>
 ${sezioneLocale(m, c)}
 ${m.tabella || ''}
 
