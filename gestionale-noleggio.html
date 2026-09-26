@@ -357,6 +357,46 @@
     header .top-in > div:last-child{width:100%;display:flex;gap:10px}
     header .top-in > div:last-child > button{flex:1;min-width:0;white-space:nowrap}
   }
+
+  /* ⛔ 26 set 2026 — L'INGRANAGGIO GIGANTE di «Dati azienda».
+     Il 22 settembre le faccine sono diventate icone disegnate (.ti-ic), ma la
+     regola che le fa grandi come la scritta era finita DENTRO la stampa del
+     contratto (un <style> scritto nel JavaScript), non nella pagina. Qui
+     l'icona non aveva misura e si allargava a tutto il pulsante. */
+  .ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
+
+  /* 26 set 2026 — IL RIEPILOGO A RIGHE, come nel gestionale imprese
+     (scelto da Alessio: «queste modifiche sono per tutti i gestionali»).
+     Le schede .nrc diventano righe: icona, nome, spiegazione, numero,
+     pallino grande. Gli id dei numeri NON cambiano (li scrive scrivi()). */
+  #riepilogo .rie-intro p{display:none}
+  #riepilogo .nrc-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 26px!important;background:#fff;border:1px solid #e3e8ef;border-radius:16px;padding:6px 18px;margin-bottom:14px!important}
+  #riepilogo .nrc{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"ic tit n p" "ic l n p";column-gap:12px;align-items:center;padding:8px 4px!important;border:0!important;border-bottom:1px solid #eef2f7!important;border-radius:0!important;box-shadow:none!important;min-height:0!important;background:none!important}
+  #riepilogo .nrc-head{display:contents!important}
+  #riepilogo .nrc-head svg{grid-area:ic;width:38px!important;height:38px!important;padding:8px!important;margin:0!important;border-radius:10px}
+  #riepilogo .nrc-tit{grid-area:tit;font-size:16px!important;align-self:end}
+  #riepilogo .nrc-l{grid-area:l;font-size:14px!important;margin:0!important;border:0!important;padding:0!important;align-self:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #riepilogo .nrc-n{grid-area:n;font-size:20px!important;margin:0!important;text-align:right;color:var(--testo,#0f172a)!important}
+  #riepilogo .nrc-pall{grid-area:p;margin:0!important;position:static!important;width:18px!important;height:18px!important;flex:0 0 18px!important;box-shadow:none!important}
+  #riepilogo .nrc-vuoto,#riepilogo .nrc > :not(.nrc-head):not(.nrc-n):not(.nrc-l){display:none!important}
+  @media(max-width:1300px){#riepilogo .nrc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+  @media(max-width:760px){#riepilogo .nrc-grid{grid-template-columns:1fr!important;padding:4px 12px}#riepilogo .nrc{padding:9px 2px!important}}
+
+  /* 26 set 2026 — IL CALENDARIO SUL TELEFONO: sotto la griglia a pallini,
+     l'elenco dei giorni da oggi in avanti coi nomi interi (calListaTelefono). */
+  .cal-lista{display:none}
+  @media(max-width:760px){
+    .cal-lista{display:block;margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:4px 14px}
+    .cal-lista .cl-g{font-size:16px;font-weight:800;color:#1a2f47;padding:14px 2px 8px;border-bottom:1px solid #eef2f7;cursor:pointer}
+    .cal-lista .cl-g.oggi{color:#0066ff}
+    .cal-lista .cl-r{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid #eef2f7;font-size:17px;color:#1a2f47;cursor:pointer}
+    .cal-lista .cl-r .dot{flex:0 0 12px;width:12px;height:12px;margin:0}
+    .cal-lista .cl-t{flex:1;min-width:0;line-height:1.35}
+    .cal-lista .cl-f{color:#94a3b8;font-size:22px;flex:none}
+    .cal-lista .cl-vuoto{padding:14px 2px;font-size:16px;color:#64748b;border-bottom:1px solid #eef2f7}
+    .cal-lista .dot.nota{background:#94a3b8}
+    .cal-lista > :last-child{border-bottom:0}
+  }
 </style>
 
 <!-- 24 agosto 2026 — IL NOLEGGIO ESCE DAL REPARTO.
@@ -871,8 +911,8 @@ body:has(#ti-fondatore) .sheet--grande{
 /* ⚠️ i lavori nel calendario avevano lo stesso arancione di «esce»:
    due cose diverse dello stesso colore, sulla stessa casella. */
 .dot.esce{background:#e65100} .dot.rientra{background:#1565c0} .dot.prenot{background:#7C3AED}
-.cal-grid .dot.todo,.cal-legend .dot.todo{background:#7C3AED}
-.cal-grid .dot.done,.cal-legend .dot.done{background:#2e7d32}
+.cal-grid .dot.todo,.cal-legend .dot.todo,.cal-lista .dot.todo{background:#7C3AED}
+.cal-grid .dot.done,.cal-legend .dot.done,.cal-lista .dot.done{background:#2e7d32}
 /* il meno e il piu' della giacenza, dentro la scheda: grossi da premere */
 .mag-btn{width:52px;height:52px;border:none;border-radius:12px;background:#e6ecf3;
   font-size:26px;font-weight:700;line-height:1;cursor:pointer;font-family:inherit;color:#26415f}
@@ -6048,12 +6088,47 @@ body:has(#ti-fondatore) .sheet--grande{
       html+=`<div class="cal-cell ${ds===oggi?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
+    calListaTelefono(y,m,days,oggi);
     /* la riga di oggi sopra il mese: quello che serve sapere appena entri */
     const o=giornoDi(oggi,oggi), box=$("#cal-oggi");
     if(box) box.innerHTML=
       `<button class="cal-oggi-b esce"   data-action="open-day" data-d="${oggi}"><b>${o.escono.length}</b> escono oggi</button>`+
       `<button class="cal-oggi-b rientra" data-action="open-day" data-d="${oggi}"><b>${o.rientrano.length}</b> rientri previsti</button>`+
       `<button class="cal-oggi-b ritardo" data-action="open-day" data-d="${oggi}"><b>${o.ritardi.length}</b> in ritardo</button>`;
+  }
+
+  /* 26 set 2026 — IL CALENDARIO SUL TELEFONO (come nel gestionale imprese).
+     Sul telefono sotto il mese a pallini c'e' l'elenco, giorno per giorno,
+     con i nomi interi: chi esce, chi rientra, chi e' in ritardo, i lavori.
+     Mese di oggi: da oggi in avanti. Altro mese: i giorni che hanno qualcosa.
+     Ogni riga apre la giornata (a tutta pagina). Sul computer non si vede. */
+  function calListaTelefono(y,m,days,oggi){
+    const grid=$("#cal-grid"); if(!grid)return;
+    let box=$("#cal-lista");
+    if(!box){ grid.insertAdjacentHTML("afterend",'<div id="cal-lista" class="cal-lista"></div>'); box=$("#cal-lista"); }
+    const meseOggi=oggi.slice(0,7)===ymd(y,m,1).slice(0,7);
+    const GG=["domenica","luned\u00ec","marted\u00ec","mercoled\u00ec","gioved\u00ec","venerd\u00ec","sabato"];
+    const riga=(ds,cls,t)=>'<div class="cl-r" data-action="open-day" data-d="'+ds+'"><i class="dot '+cls+'"></i>'
+      +'<span class="cl-t">'+t+'</span><span class="cl-f">\u203a</span></div>';
+    const chi=x=>esc(x.mezzo||"Mezzo")+(x.cliente?" \u00b7 "+esc(x.cliente):"");
+    let h="";
+    for(let d=1;d<=days;d++){
+      const ds=ymd(y,m,d);
+      if(meseOggi&&ds<oggi)continue;
+      const g=giornoDi(ds,oggi), nota=db().note[ds];
+      const tanti=g.escono.length+g.rientrano.length+g.ritardi.length+g.lavori.length;
+      if(!tanti&&!nota&&ds!==oggi)continue;
+      const nome=GG[new Date(y,m,d).getDay()];
+      h+='<div class="cl-g'+(ds===oggi?" oggi":"")+'" data-action="open-day" data-d="'+ds+'">'
+        +(ds===oggi?"Oggi \u00b7 ":"")+nome.charAt(0).toUpperCase()+nome.slice(1)+" "+d+" "+mesi[m]+'</div>';
+      g.ritardi.forEach(x=>{h+=riga(ds,"ritardo","In ritardo: "+chi(x));});
+      g.escono.forEach(x=>{const p=nolFaseDi(x)==="prenotato";h+=riga(ds,p?"prenot":"esce",(p?"Prenotato: ":"Esce: ")+chi(x));});
+      g.rientrano.forEach(x=>{h+=riga(ds,"rientra","Rientra: "+chi(x));});
+      g.lavori.forEach(j=>{h+=riga(ds,j.stato==="fatto"?"done":"todo",esc(j.descrizione||"Lavoro"));});
+      if(nota)h+=riga(ds,"nota","Nota: "+esc(String(nota).slice(0,80)));
+      if(!tanti&&!nota)h+='<div class="cl-vuoto">Niente in programma</div>';
+    }
+    box.innerHTML=h||'<div class="cl-vuoto">Niente in programma in questo mese</div>';
   }
 
   /* cosa succede in un giorno: la stessa risposta serve al mese, alla
