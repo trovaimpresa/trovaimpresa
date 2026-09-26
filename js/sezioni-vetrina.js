@@ -471,6 +471,46 @@
     }
   }
 
+
+  /* LA MAPPA DEL MENU PARTE DALLA CITTA' DELL'IMPRESA (26 set 2026).
+     Prima partiva sempre da mezza Europa, tagliata. Adesso si centra sulla
+     citta' del profilo, con un puntino blu. Coordinate: quelle gia' salvate
+     nel profilo (lat/lng); se mancano, si cercano UNA volta per citta' su
+     OpenStreetMap (Nominatim) e si tengono in memoria nel browser. */
+  function mappaCitta() {
+    var tentativi = 0;
+    function metti(lat, lng) {
+      var m = window.sidebarMap;
+      if (!m || !window.L || !isFinite(lat) || !isFinite(lng)) return;
+      m.setView([lat, lng], 10);
+      if (!m.__tiPunto) {
+        m.__tiPunto = L.circleMarker([lat, lng], { radius: 9, color: '#fff', weight: 3, fillColor: '#0066ff', fillOpacity: 1 }).addTo(m);
+      } else m.__tiPunto.setLatLng([lat, lng]);
+    }
+    function cerca(citta) {
+      var chiave = 'ti_geo_' + citta.toLowerCase();
+      try { var c = JSON.parse(localStorage.getItem(chiave) || 'null'); if (c) { metti(c[0], c[1]); return; } } catch (e) {}
+      fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&accept-language=it&q=' + encodeURIComponent(citta))
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (a) {
+          if (!a || !a[0]) return;
+          var lat = parseFloat(a[0].lat), lng = parseFloat(a[0].lon);
+          try { localStorage.setItem(chiave, JSON.stringify([lat, lng])); } catch (e) {}
+          metti(lat, lng);
+        }).catch(function () {});
+    }
+    (function aspetta() {
+      var imp = (typeof impresaCorrente !== 'undefined') ? impresaCorrente : null;
+      if (window.sidebarMap && imp) {
+        var lat = parseFloat(imp.lat), lng = parseFloat(imp.lng);
+        if (isFinite(lat) && isFinite(lng) && (lat || lng)) { metti(lat, lng); return; }
+        var citta = String(imp.citta || '').trim();
+        if (citta) { cerca(citta); return; }
+      }
+      if (++tentativi < 40) setTimeout(aspetta, 500);
+    })();
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -478,6 +518,7 @@
     try { riepilogo(); } catch (e) { console.error('riepilogo grafica:', e); }
     try { messaggi(); } catch (e) { console.error('messaggi grafica:', e); }
     try { giornata(); } catch (e) { console.error('giornata grafica:', e); }
+    try { mappaCitta(); } catch (e) { console.error('mappa citta:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
