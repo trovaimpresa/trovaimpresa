@@ -1,0 +1,74 @@
+/* 26 set 2026 — LE PAGINE DELLE CITTA' («Imprese a Roma», →106←) E LE
+   PAGINE MESTIERE + CITTA' («Muratore a Roma», →1.802←) con l'aspetto della
+   home e del gestionale: carte bianche con la riga grigia a sinistra, niente
+   strisce colorate in cima, titoli nella stessa scritta del resto del sito.
+   Solo aspetto: testi, link e dati per Google non cambiano.
+   Lo mette nelle pagine tools/stile-pagine-citta.js; genera-mestiere-citta.js
+   lo scrive gia' nelle pagine nuove. */
+
+body{ background:#f3f6fa !important; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important; color:#1a2f47; }
+
+/* ---------- la fascia in cima ---------- */
+.hero{ background:linear-gradient(135deg,#0066ff 0%,#0047b3 100%) !important; padding:52px 24px 48px !important; }
+.hero h1{ font-family:inherit !important; font-weight:800 !important; letter-spacing:-.5px; }
+.hero p{ color:#dbe8ff; opacity:1 !important; }
+.hero-btn{ background:#fff !important; color:#0047b3 !important; box-shadow:0 10px 24px rgba(0,20,60,.25); border-radius:14px !important; }
+.hero-btn:hover{ background:#eef4ff !important; }
+.hero-iscriviti{ border-top-color:rgba(255,255,255,.22) !important; }
+.hero-iscriviti a{ border-radius:14px !important; }
+
+/* ---------- le sezioni diventano carte ---------- */
+.section{ max-width:1000px !important; }
+body > .section, body > main > .section, body > div > .section:not(#imprese-locali){
+  background:#fff; border:1px solid #e3e8ef; border-left:4px solid #cbd5e1; border-radius:18px;
+  box-shadow:0 1px 3px rgba(10,42,77,.06), 0 6px 18px rgba(10,42,77,.05);
+  padding:36px 40px !important; margin:24px auto !important; }
+/* una carta dentro l'altra no: quella di dentro resta piatta */
+.section .section{ background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; margin:0 !important; max-width:none !important; }
+.section h2, .cta-box h2{ font-family:inherit !important; font-weight:800 !important; letter-spacing:-.3px; }
+.section h2{ color:#0a2a4d !important; font-size:1.75rem !important; }
+.section h3{ color:#0a2a4d !important; }
+.section p, .section li{ color:#3b4a5c !important; }
+.section a{ color:#0052cc; }
+
+/* il prezzo in evidenza: via la striscia arancione in cima */
+.prezzo-box{ border:1px solid #e3e8ef !important; border-left:4px solid #cbd5e1 !important; border-top:1px solid #e3e8ef !important; box-shadow:0 1px 3px rgba(10,42,77,.06) !important; background:#f8fbff !important; }
+.prezzo-cifra{ font-family:inherit !important; font-weight:800 !important; color:#0a2a4d !important; }
+
+/* tabella dei prezzi dei tecnici */
+table.prezzi{ border:1px solid #e3e8ef; box-shadow:none !important; }
+table.prezzi th{ background:#f3f6fa !important; color:#0a2a4d !important; }
+
+/* ---------- le carte: categorie, mestieri, guide ---------- */
+.categorie{ gap:14px !important; }
+.cat-card{ border:1px solid #e3e8ef; border-left:4px solid #cbd5e1; border-radius:16px !important;
+  box-shadow:0 1px 3px rgba(10,42,77,.06) !important; display:flex; flex-direction:column; align-items:center; gap:10px; transition:border-color .15s, box-shadow .15s; }
+.cat-card:hover{ border-color:#bcd3f7; box-shadow:0 8px 22px rgba(10,42,77,.09) !important; }
+.cat-icon{ width:52px; height:52px; border-radius:14px; background:#eaf2ff; color:#0066ff; display:flex; align-items:center; justify-content:center; margin:0 !important; font-size:26px !important; }
+.cat-icon svg{ width:26px !important; height:26px !important; }
+.cat-name{ color:#0a2a4d; }
+
+/* le schede delle imprese della zona (scritte dallo script con lo stile nel tag) */
+#imprese-locali a[href^="/profilo-impresa"]{ border:1px solid #e3e8ef !important; border-left:4px solid #cbd5e1 !important;
+  border-radius:16px !important; box-shadow:0 1px 3px rgba(10,42,77,.06) !important; padding:18px 20px !important; transition:border-color .15s, box-shadow .15s; }
+#imprese-locali a[href^="/profilo-impresa"]:hover{ border-color:#bcd3f7 !important; box-shadow:0 8px 22px rgba(10,42,77,.09) !important; }
+#imprese-locali a[href^="/profilo-impresa"] span[style*="7b2fbe"]{ background:#f3ecff !important; color:#6d28d9 !important; border-radius:999px !important; }
+
+/* tutte le scritte nella stessa famiglia (restavano titoletti col carattere
+   vecchio, tipo «Artigiani e imprese», «Vicino a Roma») */
+h1,h2,h3,h4,h5,h6,.grp,.cat-name,.trova{ font-family:inherit !important; }
+
+/* ---------- l'invito in fondo ---------- */
+.cta-box{ background:linear-gradient(135deg,#0066ff 0%,#0047b3 100%) !important; border-radius:20px !important; }
+/* dentro l'invito blu le scritte restano bianche (le regole delle sezioni le farebbero scure) */
+.section .cta-box h2, .section .cta-box h3, .cta-box h2, .cta-box h3{ color:#fff !important; }
+.section .cta-box p, .cta-box p, .section .cta-box li{ color:#e3edff !important; }
+.section .cta-box a:not([class*="btn"]){ color:#fff !important; }
+.cta-box .hero-btn, .cta-box a[class*="btn"]{ border-radius:14px !important; }
+
+/* ---------- telefono ---------- */
+@media (max-width:700px){
+  body > .section, body > main > .section, body > div > .section:not(#imprese-locali){ padding:24px 18px !important; margin:14px 12px !important; border-radius:16px; }
+  .section h2{ font-size:1.45rem !important; }
+  .hero{ padding:36px 18px 34px !important; }
+}

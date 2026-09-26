@@ -1269,6 +1269,7 @@ function costruisciPagina(m, c, imprese, vicini) {
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 ${STILE}
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<link rel="stylesheet" href="/css/pagine-citta.css?v=1">
 <script type="application/ld+json">
 ${JSON.stringify(schemaLocal, null, 2)}
 </script>
@@ -1374,6 +1375,7 @@ ${bloccoGestionale(m)}
      mestieri portano davvero gente dentro il sito. Si vede nel pannello
      admin, in «Ricerche e visite». -->
 <script src="/js/conta-clic-guide.js" defer></script>
+<script src="/js/pagine-citta.js?v=1" defer></script>
 </body>
 </html>`;
 }
