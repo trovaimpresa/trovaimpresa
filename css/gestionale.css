@@ -4542,3 +4542,17 @@ body:has(#ti-fondatore) .sheet--grande{
   .cal-lista .cl-vuoto{padding:14px 2px;font-size:16px;color:#64748b;border-bottom:1px solid #eef2f7}
   .cal-lista > :last-child{border-bottom:0}
 }
+
+/* 26 set 2026 (sera) — IL MENU A SINISTRA PIU' GRANDE (chiesto da Alessio)
+   Sul computer: menu da 244 a 290 px, voci 17 px, icone 30 px col loro
+   quadratino colorato. Sul telefono (sotto 761 px) non cambia niente. */
+@media(min-width:761px){
+ .side{width:290px!important;flex:0 0 290px!important;padding:16px 14px!important}
+ .side nav.tabs button{font-size:17px!important;padding:7px 10px!important;gap:13px!important;line-height:1.25!important;min-height:0!important;margin:1px 0!important}
+ .side nav.tabs button[data-tab] svg{width:30px!important;height:30px!important;padding:5px!important;border-radius:9px!important}
+ .side nav.tabs button.tab-cta svg{width:22px!important;height:22px!important;padding:0!important}
+ .side nav.tabs button .tab-cnt{font-size:14px!important;min-width:24px!important;height:24px!important}
+ .side-group{font-size:15px!important;margin:18px 0 6px 4px!important}
+ .side nav.tabs button.tab-cta{font-size:17px!important}
+ .side nav.tabs button.tab-cta small{font-size:14.5px!important}
+}
