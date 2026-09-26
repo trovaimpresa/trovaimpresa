@@ -3385,6 +3385,27 @@ const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ⛔ 26 SETTEMBRE 2026 — «CHI SEI?» SI CHIEDE UNA VOLTA SOLA.
+   All'apertura il pannello chiedeva al server chi e' l'utente (getUser) cinque
+   volte, e ogni volta ci voleva fino a 2-3 secondi. Adesso la prima risposta
+   si tiene per un minuto e le altre funzioni la riusano. Se l'utente esce o
+   cambia, si richiede da capo. Il resto del codice non cambia: chiama sempre
+   sb.auth.getUser() come prima. */
+(function () {
+  const orig = sb.auth.getUser.bind(sb.auth);
+  let pronta = null, quando = 0;
+  sb.auth.getUser = function (jwt) {
+    if (jwt) return orig(jwt);
+    if (!pronta || Date.now() - quando > 60000) {
+      quando = Date.now();
+      pronta = orig().then(function (r) { if (!r || r.error) pronta = null; return r; },
+                           function (e) { pronta = null; throw e; });
+    }
+    return pronta;
+  };
+  sb.auth.onAuthStateChange(function (ev) { if (ev !== 'INITIAL_SESSION') pronta = null; });
+})();
+
 /* ⛔ 21 agosto 2026 — L'AI DEVE SAPERE CHI LA STA CHIAMANDO.
    netlify/functions/ai-claude.js prima si fidava dell'impresa_id scritto
    qui nel browser: con l'id di un altro iscritto (che e' pubblico, la
@@ -5116,16 +5137,12 @@ async function inizializza() {
   const isPremium = piano === 'premium';
   /* 3 set 2026: rating e numero calcolati dalle recensioni CONFERMATE, come nel
      pannello artigiano e sulla scheda pubblica (prima: colonna `rating` vecchia) */
-  const { data: recsRating } = await sb.from('feedback_clienti')
+  const _pRating = Promise.resolve(sb.from('feedback_clienti')
     .select('stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita')
-    .eq('impresa_id', impresaCorrente.id).eq('confermata', true);
-  const stelleRating = (recsRating || []).flatMap(r => [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita]).filter(s => s != null);
-  const rating = stelleRating.length ? (stelleRating.reduce((a, b) => a + b, 0) / stelleRating.length).toFixed(1) : '—';
-  { const nRec = document.getElementById('dash-stat-recensioni'); if (nRec) nRec.textContent = (recsRating || []).length; }
+    .eq('impresa_id', impresaCorrente.id).eq('confermata', true));
 
   // Header dashboard
   document.getElementById('dash-nome-impresa').textContent = nome;
-  document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
   aggiornaBadgeEOverlay();
 
   // Colore header (chi ha il Gestionale)
@@ -5178,14 +5195,22 @@ async function inizializza() {
   if (prevLogoWrap && impresaCorrente.logo_url) prevLogoWrap.innerHTML = `<img src="${impresaCorrente.logo_url}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
 
   // Stat rating (condiviso)
-  document.getElementById('stat-rating').textContent = rating;
+  /* il voto medio arriva quando arriva: intanto il nome e il resto si vedono subito */
+  _pRating.then(({ data: recsRating }) => {
+    const stelleRating = (recsRating || []).flatMap(r => [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita]).filter(s => s != null);
+    const rating = stelleRating.length ? (stelleRating.reduce((a, b) => a + b, 0) / stelleRating.length).toFixed(1) : '—';
+    { const nRec = document.getElementById('dash-stat-recensioni'); if (nRec) nRec.textContent = (recsRating || []).length; }
+    const _rb = document.getElementById('dash-rating-badge'); if (_rb) _rb.textContent = `⭐ ${rating}`;
+    const _rs = document.getElementById('stat-rating'); if (_rs) _rs.textContent = rating;
+  }).catch(function (err) { console.error('voto medio:', err); });
 
-  await caricaPreventivi();
-  await caricaRecensioni();
-  await caricaContatti();
-  await caricaListaLavoriFoto();
-  await caricaCertificazioni();
-  await caricaCantieri();
+  /* ⛔ 26 set 2026 — I DATI DEL PANNELLO ARRIVANO TUTTI INSIEME.
+     Prima si chiedevano uno dopo l'altro (ognuno aspettava il precedente):
+     il pannello si riempiva a pezzi per 5-6 secondi. Adesso partono insieme;
+     se uno si rompe gli altri arrivano lo stesso (prima si fermava tutto). */
+  await Promise.all([caricaPreventivi, caricaRecensioni, caricaContatti, caricaListaLavoriFoto, caricaCertificazioni, caricaCantieri].map(function (fn) {
+    return Promise.resolve().then(fn).catch(function (err) { console.error('avvio pannello, ' + fn.name + ':', err); });
+  }));
   // Applica la personalizzazione salvata al pannello reale
   applicaPersonalizzazioneDashboard();
   const cardOrd = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.card_ordine;
