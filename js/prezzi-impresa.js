@@ -342,6 +342,67 @@
     if (location.hash === '#prezzi') setTimeout(function () { window.showSection('prezzi', null, true); }, 400);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', monta);
-  else monta();
+  /* ===================================================================
+     L'AVVISO «NOVITA'» IN CIMA AL RIEPILOGO (26 set 2026)
+     Al posto di una email a tutti: Resend gratuito fa 100 email al giorno
+     e servono alle conferme d'iscrizione. Lo vede chi entra nel pannello.
+     - sparisce per sempre (su quel telefono/computer) quando lo chiude
+       o quando tocca il pulsante;
+     - non compare a chi ha GIA' scritto almeno un prezzo.
+     =================================================================== */
+  var CHIAVE_NOVITA = 'ti_novita_prezzi_galleria_2609';
+  function giaVisto() { try { return localStorage.getItem(CHIAVE_NOVITA) === '1'; } catch (e) { return false; } }
+  function segnaVisto() { try { localStorage.setItem(CHIAVE_NOVITA, '1'); } catch (e) {} }
+
+  var tentativi = 0;
+  async function novita() {
+    if (giaVisto() || document.getElementById('novita-prezzi')) return;
+    var hero = document.getElementById('dash-hero');
+    if (!hero || typeof sb === 'undefined') return;
+    try {
+      var u = await sb.auth.getUser();
+      var uid = u && u.data && u.data.user && u.data.user.id;
+      /* il pannello a volte non ha ancora la sessione: si riprova un paio di volte */
+      if (!uid) { if (++tentativi < 4) setTimeout(novita, 2500); return; }
+      var r = await sb.from('prezzi_impresa').select('id').eq('owner_id', uid).limit(1);
+      if (!r.error && r.data && r.data.length) { segnaVisto(); return; }
+    } catch (e) { /* se non si riesce a controllare, l'avviso si mostra lo stesso */ }
+
+    var box = document.createElement('div');
+    box.id = 'novita-prezzi';
+    box.setAttribute('role', 'region');
+    box.setAttribute('aria-label', 'Novit\u00e0');
+    box.style.cssText = 'position:relative;background:#fff7ec;border:2px solid #ff8800;border-radius:16px;' +
+      'padding:20px 56px 20px 22px;margin:18px 0;box-shadow:0 6px 20px rgba(255,136,0,.12)';
+    box.innerHTML =
+      '<button type="button" id="novita-chiudi" aria-label="Chiudi" style="position:absolute;top:10px;right:10px;width:44px;height:44px;' +
+        'border:none;background:transparent;font-size:26px;line-height:1;color:#7a4a00;cursor:pointer">\u00d7</button>' +
+      '<div style="font-size:14px;font-weight:800;letter-spacing:.6px;color:#b35f00;margin:0 0 4px">NOVIT\u00c0</div>' +
+      '<div style="font-size:21px;font-weight:800;color:#0f172a;line-height:1.3;margin:0 0 8px">Metti i tuoi prezzi sulla scheda</div>' +
+      '<p style="font-size:17px;line-height:1.55;color:#334155;margin:0 0 6px">Scrivi quanto costano, pi\u00f9 o meno, i tuoi lavori: ' +
+        'il cliente capisce subito se sei nel suo budget, prima ancora di chiamarti.</p>' +
+      '<p style="font-size:17px;line-height:1.55;color:#334155;margin:0 0 14px">E le foto dei tuoi lavori adesso compaiono anche nella pagina ' +
+        '<b>Lavori realizzati</b>: chi vede un tuo lavoro arriva dritto da te.</p>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+        '<button type="button" id="novita-prezzi-vai" style="background:#ff8800;color:#fff;border:none;border-radius:10px;padding:13px 20px;' +
+          'font:inherit;font-size:17px;font-weight:800;cursor:pointer">Scrivi i tuoi prezzi</button>' +
+        '<button type="button" id="novita-foto-vai" style="background:#fff;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:10px;' +
+          'padding:13px 20px;font:inherit;font-size:17px;font-weight:700;cursor:pointer">Aggiungi foto dei lavori</button>' +
+      '</div>';
+    hero.parentNode.insertBefore(box, hero.nextSibling);
+
+    function chiudi() { segnaVisto(); box.remove(); }
+    document.getElementById('novita-chiudi').addEventListener('click', chiudi);
+    document.getElementById('novita-prezzi-vai').addEventListener('click', function () {
+      chiudi(); window.showSection('prezzi', document.querySelector('.dash-quick-card[data-card-id="prezzi"]'));
+    });
+    document.getElementById('novita-foto-vai').addEventListener('click', function () {
+      chiudi(); window.showSection('foto-lavori', document.querySelector('.dash-quick-card[data-card-id="foto-lavori"]'));
+    });
+  }
+  window.mostraNovitaPrezzi = novita;
+
+  function parti() { monta(); setTimeout(novita, 1200); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
+  else parti();
 })();
