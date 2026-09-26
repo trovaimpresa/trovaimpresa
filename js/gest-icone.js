@@ -119,12 +119,15 @@
   function presto() {
     if (inAttesa) return;
     inAttesa = true;
-    (window.requestAnimationFrame || setTimeout)(function () {
+    /* setTimeout e non requestAnimationFrame: con la scheda in secondo piano
+       rAF si ferma, e al ritorno le faccine restavano li' finche' non cambiava
+       qualcos'altro (trovato al collaudo dal vivo del 26 set). */
+    setTimeout(function () {
       inAttesa = false;
       oss.disconnect();
       try { cambia(document.body); } catch (e) {}
       oss.observe(document.body, { childList: true, subtree: true, characterData: true });
-    });
+    }, 30);
   }
   var oss = new MutationObserver(presto);
   function avvio() {
