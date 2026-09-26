@@ -17,21 +17,21 @@
       RIEPILOGO, lontano dal modulo per aggiungerle: qui si porta dentro
       «Foto dei lavori». La funzione che lo riempie
       (caricaListaLavoriFoto) lo cerca per id, quindi continua a funzionare.
-   ⚠️ Le righe non vanno piu' da un bordo all'altro dello schermo: la
-      sezione si ferma a 1100 px, il testo si legge senza girare la testa.
+   ⚠️ Le sezioni vanno a tutta pagina: Alex non vuole bordi vuoti ai lati.
    ===================================================================== */
 (function () {
   'use strict';
 
   var CSS = '' +
   /* ---------- in comune ---------- */
-  /* al centro: sugli schermi larghi (1920) attaccata a sinistra lasciava un buco a destra (Alex, foto del 26 set) */
-  '#sec-foto-lavori.active,#sec-messaggi.active,#sec-prezzi.active{max-width:1240px;margin-left:auto;margin-right:auto}' +
+  /* A TUTTA PAGINA (Alex, 26 set sera: «la preferisco a tutta pagina, non i bordi vuoti ai lati»).
+     Prima: al centro, max 1240 px. Niente tetto di larghezza. */
+  '#sec-foto-lavori.active,#sec-messaggi.active,#sec-prezzi.active,#sec-dashboard.active{max-width:none;margin-left:0;margin-right:0}' +
   /* la freccia Indietro dentro il titolo prendeva il carattere del titolo (con le grazie) */
   '.section .ti-back{font-family:\'DM Sans\',Arial,sans-serif}' +
 
   /* ---------- RIEPILOGO (26 set 2026) ----------
-     - al centro e non piu' largo di 1240 px, come le altre sezioni;
+     - a tutta pagina, come le altre sezioni;
      - copertina piu' bassa: prima arrivava a 800 px e spingeva tutto sotto;
      - numeri e carte SENZA la striscia colorata in cima (ogni carta aveva
        un colore diverso, senza un significato: e' la stessa regola gia'
@@ -40,7 +40,6 @@
        impilate e centrate: meno alte, si leggono da sinistra come un elenco.
      ⚠️ Le due carte doppie (offerte di lavoro, subappalti) hanno lo stile
         scritto dentro l'HTML: per loro si sistemano i due mezzi, non la carta. */
-  '#sec-dashboard.active{max-width:1240px;margin-left:auto;margin-right:auto}' +
   '#sec-dashboard .dash-cover{max-height:320px}' +
   '#sec-dashboard .dash-stat-card{border-top:1px solid #e3e8ef !important;border:1px solid #e3e8ef;box-shadow:0 6px 20px rgba(10,42,77,.06)}' +
   '#sec-dashboard .dash-quick-title{font-size:15px;letter-spacing:.8px;color:#475569;margin:26px 0 12px}' +
@@ -67,13 +66,39 @@
   '@media(max-width:820px){#sec-dashboard .dash-quick-grid{grid-template-columns:1fr !important}' +
     '#sec-dashboard .dash-quick-card:not([data-card-id="lavoro"]):not([data-card-id="subappalto"]){min-height:74px;padding:14px}}' +
 
+  /* ---------- I DUE GESTIONALI, AFFIANCATI (26 set 2026) ----------
+     Prima: due riquadri enormi uno SOTTO l'altro, ognuno con tre carte alte
+     →165← px in fila. Adesso: affiancati sul computer, e dentro ognuno le
+     tre scelte sono righe basse (titolo, una riga, bottone a destra).
+     ⛔ Resta tutto quello deciso il 13 set: stessa schermata per tutti,
+        un solo arancione (Attiva), «Entra» verde in fondo. Cambia la forma,
+        non cosa c'e' dentro ne' cosa fanno i bottoni. */
+  '@media(min-width:1100px){#sec-dashboard #porte-gestionale{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:20px}}' +
+  '#sec-dashboard .gest-porta{background:#fff;border:1px solid #e3e8ef;box-shadow:0 6px 20px rgba(10,42,77,.06);padding:20px}' +
+  '#sec-dashboard .gest-mezzo{display:flex;flex-direction:column;align-items:center;margin:0 0 4px}' +
+  '#sec-dashboard .gest-mezzo .gest-nome{font-family:\'DM Sans\',Arial,sans-serif;font-size:24px;font-weight:800;color:#0f172a}' +
+  '#sec-dashboard .gest-mezzo .gest-emoji{margin-bottom:2px}' +
+  '#sec-dashboard .gest-gruppo{margin-top:14px}' +
+  '#sec-dashboard .gest-fila{grid-template-columns:minmax(0,1fr) !important;gap:10px}' +
+  '#sec-dashboard .g-carta:not(.g-striscia){min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 190px;' +
+    'grid-template-areas:"testa azione" "txt azione";column-gap:16px;row-gap:2px;align-items:center;padding:14px 16px}' +
+  '#sec-dashboard .g-carta:not(.g-striscia) .g-testa{grid-area:testa;margin:0}' +
+  '#sec-dashboard .g-carta:not(.g-striscia) .g-txt{grid-area:txt;font-size:15px;color:#475569}' +
+  '#sec-dashboard .g-carta:not(.g-striscia) .g-azione{grid-area:azione;margin:0;padding:0;border:0}' +
+  '#sec-dashboard .g-tit{font-size:18px}' +
+  '#sec-dashboard .g-b{padding:11px 8px;font-size:15.5px;border-radius:10px}' +
+  '#sec-dashboard .g-carta.g-striscia{grid-template-columns:auto minmax(0,1fr) 190px;gap:16px;padding:14px 16px}' +
+  '@media(max-width:600px){#sec-dashboard .g-carta:not(.g-striscia){grid-template-columns:minmax(0,1fr);' +
+    'grid-template-areas:"testa" "txt" "azione";row-gap:8px}' +
+    '#sec-dashboard .g-carta.g-striscia{grid-template-columns:minmax(0,1fr)}}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
   '#sec-foto-lavori .fl-tit{font-size:20px;font-weight:800;color:#0f172a;margin:0 0 18px}' +
   '#sec-foto-lavori .fl-griglia{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:26px;align-items:start}' +
   '#sec-foto-lavori .fl-scatola{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;' +
-    'aspect-ratio:4/3;border:2.5px dashed #b8c4d6;border-radius:16px;background:#f5f8fc;cursor:pointer;overflow:hidden;' +
+    'height:380px;border:2.5px dashed #b8c4d6;border-radius:16px;background:#f5f8fc;cursor:pointer;overflow:hidden;' +
     'position:relative;text-align:center;padding:16px;transition:border-color .15s,background .15s}' +
   '#sec-foto-lavori .fl-scatola:hover{border-color:#0066ff;background:#eef4ff}' +
   '#sec-foto-lavori .fl-scatola svg{width:46px;height:46px;color:#0066ff}' +
@@ -95,7 +120,7 @@
   '#sec-foto-lavori .fl-elenco-tit span{font-size:16px;color:#5f6b7a;font-weight:700}' +
   '#sec-foto-lavori .fl-elenco-sub{font-size:15px;color:#5f6b7a;margin:0}' +
   '#sec-foto-lavori .foto-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}' +
-  '@media(max-width:820px){#sec-foto-lavori .fl-griglia{grid-template-columns:1fr}#sec-foto-lavori .fl-card{padding:18px}' +
+  '@media(max-width:820px){#sec-foto-lavori .fl-scatola{height:auto;aspect-ratio:4/3}#sec-foto-lavori .fl-griglia{grid-template-columns:1fr}#sec-foto-lavori .fl-card{padding:18px}' +
     '#sec-foto-lavori .foto-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}' +
 
   /* ---------- MESSAGGI ---------- */
