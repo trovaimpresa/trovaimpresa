@@ -212,6 +212,42 @@
     '#rec-riepilogo .rr-riga{grid-template-columns:110px minmax(0,1fr) 30px;font-size:15px}' +
     '#sec-recensioni .rec-card{padding:18px !important}#sec-recensioni .rec-data{margin-left:0 !important;width:100%}}' +
 
+  /* ---------- RICHIESTE DI PREVENTIVO / DI INCARICO (26 set 2026) ----------
+     Via le emoji (disegni come il resto del pannello), il contatore del mese
+     diventa una carta con il numero grande, le richieste due per riga sugli
+     schermi larghi, nome del cliente con l'iniziale nel tondo. */
+  '#sec-preventivi .profilo-card{background:transparent !important;box-shadow:none !important;padding:0 !important;border:0 !important}' +
+  '#sec-preventivi #contatore-preventivi-mese{display:flex !important;align-items:center;gap:16px;background:#fff !important;border:1px solid #e3e8ef !important;border-left:1px solid #e3e8ef !important;border-radius:18px !important;padding:18px 22px !important;margin-bottom:18px !important;box-shadow:0 6px 20px rgba(10,42,77,.06);max-width:560px}' +
+  '#sec-preventivi .pv-ic{width:56px;height:56px;border-radius:14px;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center;flex:0 0 56px}' +
+  '#sec-preventivi .pv-ic svg{width:28px !important;height:28px !important;flex:0 0 28px !important;color:#0066ff}' +
+  '#sec-preventivi .pv-num{font-size:32px;font-weight:800;color:#0a2a4d;line-height:1.05}' +
+  '#sec-preventivi .pv-lbl{font-size:16px;font-weight:600;color:#5f6b7a}' +
+  '#sec-preventivi #lista-preventivi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}' +
+  '#sec-preventivi #lista-preventivi > .empty-state{grid-column:1 / -1}' +
+  '#sec-preventivi .prev-card{margin:0 !important;background:#fff;border:1px solid #e3e8ef !important;border-radius:18px !important;box-shadow:0 6px 20px rgba(10,42,77,.06) !important;padding:20px 22px !important}' +
+  '#sec-preventivi .prev-card:hover{border-color:#0066ff !important}' +
+  '#sec-preventivi .prev-header{gap:12px;flex-wrap:wrap}' +
+  '#sec-preventivi .prev-nome{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:18px !important;font-weight:800;color:#0a2a4d;display:flex;align-items:center;gap:12px}' +
+  '#sec-preventivi .pv-av{width:44px;height:44px;border-radius:50%;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:0 0 44px}' +
+  '#sec-preventivi .prev-badge{font-size:14px !important;display:inline-flex;align-items:center;gap:5px}' +
+  '#sec-preventivi .prev-badge svg{width:15px;height:15px}' +
+  '#sec-preventivi .prev-info{font-size:16px !important;color:#334155 !important;gap:10px 20px !important}' +
+  '#sec-preventivi .prev-info span,#sec-preventivi .prev-card a,#sec-preventivi .prev-card button{display:inline-flex;align-items:center;gap:6px}' +
+  '#sec-preventivi .ti-em{width:18px;height:18px;flex:0 0 18px;color:#0066ff}' +
+  '#sec-preventivi .prev-card a .ti-em,#sec-preventivi .prev-card button .ti-em{color:currentColor}' +
+  '#sec-preventivi .prev-desc{font-size:16px !important;color:#1f2937 !important;line-height:1.6 !important}' +
+  '#sec-preventivi .prev-data{font-size:15px !important;color:#8a94a3 !important}' +
+  '#sec-preventivi .prev-card button[title="Elimina preventivo"]{padding:7px 12px !important;font-size:14px !important;border-radius:10px !important}' +
+  '#sec-preventivi .prev-card > button[title="Elimina preventivo"] ~ .prev-header{padding-right:110px}' +
+  '#sec-preventivi .prev-card > button[title="Elimina preventivo"] ~ .prev-header .prev-badge{margin-right:0 !important}' +
+  '#sec-preventivi .empty-state{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:44px 24px !important;font-size:17px;color:#475569;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}' +
+  '#sec-preventivi .empty-state .empty-icon{width:64px;height:64px;border-radius:18px;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center;font-size:0 !important;margin:0 !important}' +
+  '#sec-preventivi .empty-state .empty-icon svg{width:32px !important;height:32px !important;flex:0 0 32px !important}' +
+  '#sec-preventivi .empty-state small{font-size:16px;color:#5f6b7a}' +
+  '@media(max-width:1100px){#sec-preventivi #lista-preventivi{grid-template-columns:minmax(0,1fr)}}' +
+  '@media(max-width:600px){#sec-preventivi .prev-card{padding:16px !important}#sec-preventivi .prev-badge{margin-right:0 !important}' +
+    '#sec-preventivi .prev-card button[title="Elimina preventivo"]{position:static !important;margin-bottom:10px}#sec-preventivi .prev-card > button[title="Elimina preventivo"] ~ .prev-header{padding-right:0}}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
@@ -638,6 +674,90 @@
     window.disegnaRecensioniSezione = nuova;
   }
 
+
+  /* RICHIESTE DI PREVENTIVO: le emoji diventano disegni. Si lavora sul
+     risultato gia' disegnato (le funzioni che leggono i dati non si toccano),
+     e si ripassa ogni volta che la lista cambia. */
+  var EM_SVG = {
+    attrezzo: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    posto: '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+    orologio: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    euro: '<path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h10M4 14h10"/>',
+    graffetta: '<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+    chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    telefono: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+    cestino: '<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+    spunta: '<path d="M20 6 9 17l-5-5"/>',
+    cartella: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+    grafico: '<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',
+    mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+    matita: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'
+  };
+  var EMOJI_PV = { '🔨':'attrezzo','🛠️':'attrezzo','🛠':'attrezzo','📍':'posto','⏰':'orologio','💶':'euro','📎':'graffetta',
+    '💬':'chat','📞':'telefono','🗑️':'cestino','🗑':'cestino','✅':'spunta','📋':'cartella','📁':'cartella','📊':'grafico',
+    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita' };
+  var EMOJI_VIA = ['👤','🆕'];
+  function svgEm(nome) {
+    return '<svg class="ti-em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + EM_SVG[nome] + '</svg>';
+  }
+  function togliEmoji(radice) {
+    var w = document.createTreeWalker(radice, NodeFilter.SHOW_TEXT, null), nodi = [], n;
+    while ((n = w.nextNode())) nodi.push(n);
+    var tocco = false;
+    nodi.forEach(function (t) {
+      var v = t.nodeValue, cambiato = false;
+      EMOJI_VIA.forEach(function (e) { if (v.indexOf(e) >= 0) { v = v.split(e).join(''); cambiato = true; } });
+      Object.keys(EMOJI_PV).forEach(function (e) {
+        if (v === null || v.indexOf(e) < 0) return;
+        var pezzi = v.split(e), frag = document.createDocumentFragment();
+        pezzi.forEach(function (p, i) {
+          if (i > 0) { var sp = document.createElement('span'); sp.style.display = 'contents'; sp.innerHTML = svgEm(EMOJI_PV[e]); frag.appendChild(sp); }
+          if (p) frag.appendChild(document.createTextNode(i > 0 ? p.replace(/^\s+/, '') : p));
+        });
+        t.parentNode.replaceChild(frag, t); v = null; tocco = true;
+      });
+      if (v !== null && cambiato) t.nodeValue = v.replace(/^\s+/, '');
+    });
+    return tocco;
+  }
+  function abbellisciPreventivi() {
+    var sez = document.getElementById('sec-preventivi'); if (!sez) return;
+    var cont = document.getElementById('contatore-preventivi-mese');
+    if (cont && !cont.querySelector('.pv-num')) {
+      var forte = cont.querySelector('strong');
+      if (forte) {
+        var testo = (cont.textContent || '').replace(/[^\p{L}\p{N}\s:()]/gu, '').trim();
+        var etichetta = testo.split(':')[0].trim() || 'Richieste questo mese';
+        cont.innerHTML = '<span class="pv-ic">' + svgEm('grafico') + '</span><div><div class="pv-num">' + forte.textContent + '</div><div class="pv-lbl">' + etichetta.replace(/</g, '&lt;') + '</div></div>';
+      }
+    }
+    var lista = document.getElementById('lista-preventivi');
+    if (!lista) return;
+    lista.querySelectorAll('.prev-nome').forEach(function (n) {
+      if (n.querySelector('.pv-av')) return;
+      togliEmoji(n);
+      var nome = (n.textContent || '').trim();
+      var av = document.createElement('span'); av.className = 'pv-av';
+      av.textContent = (nome.charAt(0) || '?').toUpperCase();
+      n.insertBefore(av, n.firstChild);
+    });
+    for (var giri = 0; giri < 4 && togliEmoji(lista); giri++) {}
+  }
+  function preventivi() {
+    var lista = document.getElementById('lista-preventivi'), cont = document.getElementById('contatore-preventivi-mese');
+    if (!lista) return;
+    var inCorso = false;
+    var ob = new MutationObserver(function () {
+      if (inCorso) return; inCorso = true;
+      try { abbellisciPreventivi(); } catch (e) { console.error('preventivi grafica:', e); }
+      ob.takeRecords(); inCorso = false;
+    });
+    ob.observe(lista, { childList: true, subtree: true });
+    if (cont) ob.observe(cont, { childList: true, subtree: true });
+    try { abbellisciPreventivi(); } catch (e) {}
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -647,6 +767,7 @@
     try { giornata(); } catch (e) { console.error('giornata grafica:', e); }
     try { mappaCitta(); } catch (e) { console.error('mappa citta:', e); }
     try { recensioni(); } catch (e) { console.error('recensioni grafica:', e); }
+    try { preventivi(); } catch (e) { console.error('preventivi grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
