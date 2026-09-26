@@ -5252,6 +5252,52 @@
       html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
+    calListaTelefono(y,m,days);
+  }
+
+  /* ===== 26 settembre 2026 — IL CALENDARIO SUL TELEFONO (modello «A») =====
+     Sul telefono le caselle sono larghe 48 px: i nomi dei lavori uscivano
+     tagliati a pezzi («prat o…») e non si leggeva niente. Adesso sul
+     telefono la griglia mostra solo i pallini colorati (lo fa il CSS) e
+     sotto c'e' questo ELENCO, giorno per giorno, coi nomi interi:
+     - mese di oggi: da oggi in avanti (oggi c'e' sempre, anche se vuoto);
+     - un altro mese: tutti i giorni che hanno qualcosa.
+     Sul computer l'elenco non si vede (display:none sopra i 760 px).
+     Ogni riga apre quello che apre il riquadro del giorno: il lavoro, la
+     scadenza, la scheda della persona. Il titolo del giorno apre il giorno. */
+  function calListaTelefono(y,m,days){
+    const grid=$("#cal-grid"); if(!grid)return;
+    let box=$("#cal-lista");
+    if(!box){ grid.insertAdjacentHTML("afterend",'<div id="cal-lista" class="cal-lista"></div>'); box=$("#cal-lista"); }
+    const oggi=todayStr(), meseOggi=oggi.slice(0,7)===ymd(y,m,1).slice(0,7);
+    const GG=["domenica","luned\u00ec","marted\u00ec","mercoled\u00ec","gioved\u00ec","venerd\u00ec","sabato"];
+    let h="";
+    for(let d=1;d<=days;d++){
+      const ds=ymd(y,m,d);
+      if(meseOggi&&ds<oggi)continue;
+      const jobs=calJobs.filter(l=>l.data_prevista===ds), sc=calScad.filter(x=>x.data===ds), nota=noteCache[ds];
+      if(!jobs.length&&!sc.length&&!nota&&ds!==oggi)continue;
+      const scaduto=ds<oggi, dd=new Date(y,m,d);
+      const nome=GG[dd.getDay()], tit=nome.charAt(0).toUpperCase()+nome.slice(1)+" "+d+" "+mesi[m];
+      h+='<div class="cl-g'+(ds===oggi?" oggi":"")+'" data-action="open-day" data-d="'+ds+'">'
+        +(ds===oggi?"Oggi \u00b7 ":"")+esc(tit)+'</div>';
+      jobs.forEach(j=>{
+        const cls=j.stato==="fatto"?"fatto":(scaduto?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
+        h+='<div class="cl-r" data-action="edit-job" data-id="'+esc(String(j.id))+'"><i class="cal-lav-bar '+cls+'"></i>'
+          +'<span class="cl-t">'+esc(j.descrizione||"Lavoro")+'</span><span class="cl-f">\u203a</span></div>';
+      });
+      sc.forEach(x=>{
+        const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
+        const az=x._persona?'data-action="scad-persona" data-id="'+esc(String(x._opId||""))+'"'
+                           :'data-action="edit-scad" data-id="'+esc(String(x.id))+'"';
+        h+='<div class="cl-r" '+az+'><i class="cal-lav-bar '+cls+'"></i>'
+          +'<span class="cl-t">Scadenza: '+esc(x.titolo)+'</span><span class="cl-f">\u203a</span></div>';
+      });
+      if(nota)h+='<div class="cl-r" data-action="open-day" data-d="'+ds+'"><i class="cal-lav-bar nota"></i>'
+          +'<span class="cl-t">Nota: '+esc(String((nota&&nota.testo)||nota).slice(0,80))+'</span><span class="cl-f">\u203a</span></div>';
+      if(!jobs.length&&!sc.length&&!nota)h+='<div class="cl-vuoto">Niente in programma</div>';
+    }
+    box.innerHTML=h||'<div class="cl-vuoto">Niente in programma in questo mese</div>';
   }
 
   /* ===== 12 agosto 2026 — IL RIQUADRO DEL GIORNO =====
