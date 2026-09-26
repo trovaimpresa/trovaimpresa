@@ -300,6 +300,44 @@
   '#sec-anteprima #anteprima-btn-desktop.ti-attivo,#sec-anteprima #anteprima-btn-mobile.ti-attivo{background:#0066ff !important;color:#fff !important;border-color:#0066ff !important}' +
   '#sec-anteprima a#anteprima-newtab{height:44px;border-radius:12px !important;font-size:15px !important;display:inline-flex !important;align-items:center;gap:7px;padding:0 18px !important}' +
 
+  /* ---------- UN PO' DI VOLUME (26 set 2026) ----------
+     Alex: le sezioni «sembrano pagine vuote», «dargli un po' di volume».
+     1) Il titolo di ogni sezione diventa una fascia: sfondo azzurro chiaro
+        che sfuma nel bianco, icona grande in un quadrato blu, bordo e ombra.
+     2) Le carte hanno un'ombra piu' profonda e il titolo con una barretta blu.
+     3) «I tuoi prezzi»: due colonne (a sinistra si scrive, a destra si vede
+        come appare al cliente), idee veloci da cliccare, esempi in grigio
+        quando non c'e' ancora nessun prezzo. */
+  '.section:not(#sec-dashboard) > .topbar{background:linear-gradient(120deg,#e8f1ff 0%,#f5f9ff 45%,#fff 100%);border:1px solid #dce7f7;border-radius:20px;padding:20px 26px;box-shadow:0 10px 30px rgba(10,42,77,.07);margin-bottom:22px !important}' +
+  '.section:not(#sec-dashboard) > .topbar{display:block !important}' +
+  '.section:not(#sec-dashboard) > .topbar .ti-sotto{font-size:17px !important;line-height:1.6 !important;color:#475569 !important;margin:12px 0 0 74px !important;max-width:980px}' +
+  '@media(max-width:700px){.section:not(#sec-dashboard) > .topbar .ti-sotto{margin-left:0 !important;font-size:16px !important}}' +
+  '.section:not(#sec-dashboard) > .topbar .topbar-title{display:flex !important;align-items:center;gap:16px !important;font-size:30px !important;color:#0a2a4d;flex-wrap:wrap}' +
+  '.section:not(#sec-dashboard) > .topbar .topbar-title > svg.ti-ic{width:58px;height:58px;padding:14px;box-sizing:border-box;border-radius:16px;background:#0066ff;color:#fff;flex:0 0 58px;box-shadow:0 8px 18px rgba(0,102,255,.25)}' +
+  '.section .profilo-card,#sec-foto-lavori .fl-card{box-shadow:0 12px 32px rgba(10,42,77,.08) !important}' +
+  '.section .profilo-title,#sec-foto-lavori .fl-tit,#sec-foto-lavori .fl-elenco-tit{display:flex;align-items:center;gap:12px}' +
+  '.section .profilo-title::before,#sec-foto-lavori .fl-tit::before,#sec-foto-lavori .fl-elenco-tit::before{content:"";width:6px;height:24px;border-radius:6px;background:#0066ff;flex:0 0 6px}' +
+  '#sec-prezzi .pz-duo{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:start}' +
+  '#sec-prezzi .pz-duo > .profilo-card{margin:0 !important}' +
+  '#sec-prezzi .pz-duo .pz-griglia{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important}' +
+  '#sec-prezzi .pz-duo .pz-griglia > .form-group:first-child{grid-column:1 / -1}' +
+  '#sec-prezzi .pz-duo #pz-salva{width:100%;font-size:18px !important;padding:15px !important}' +
+  '#sec-prezzi .pz-idee{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px}' +
+  '#sec-prezzi .pz-idee span{font-size:15px;font-weight:700;color:#5f6b7a;margin-right:4px}' +
+  '#sec-prezzi .pz-idee button{font:inherit;font-size:15px;font-weight:600;color:#0047b3;background:#eef4ff;border:1px solid #cfe0fb;border-radius:999px;padding:8px 14px;cursor:pointer}' +
+  '#sec-prezzi .pz-idee button:hover{background:#0066ff;color:#fff;border-color:#0066ff}' +
+  '#sec-prezzi .pz-vetrina{border:1px solid #e3e8ef;border-radius:16px;overflow:hidden;background:#fff}' +
+  '#sec-prezzi .pz-vetrina-testa{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#0a2a4d;color:#fff;font-weight:800;font-size:16px}' +
+  '#sec-prezzi .pz-vetrina-testa svg{width:20px;height:20px}' +
+  '#sec-prezzi .pz-vetrina #pz-lista{padding:4px 18px}' +
+  '#sec-prezzi .pz-esempio{opacity:.55;position:relative}' +
+  '#sec-prezzi .pz-esempio .pz-tag{flex:none;font-size:13px;font-weight:800;color:#5f6b7a;background:#eef1f5;border-radius:999px;padding:4px 10px}' +
+  '#sec-prezzi .pz-vuoto-nuovo{display:flex;gap:12px;align-items:center;background:#fff8e6;border:1px solid #f5dfa6;border-radius:12px;padding:12px 14px;margin:14px 0 6px;font-size:15px;color:#7a5a00;font-weight:600}' +
+  '@media(max-width:1100px){#sec-prezzi .pz-duo{grid-template-columns:minmax(0,1fr)}}' +
+  '@media(max-width:700px){.section:not(#sec-dashboard) > .topbar{padding:14px 16px}.section:not(#sec-dashboard) > .topbar .topbar-title{font-size:24px !important;gap:12px !important}' +
+    '.section:not(#sec-dashboard) > .topbar .topbar-title > svg.ti-ic{width:46px;height:46px;padding:11px;flex-basis:46px}' +
+    '#sec-prezzi .pz-duo .pz-griglia{grid-template-columns:minmax(0,1fr) !important}}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
@@ -861,6 +899,63 @@
     segna('desktop');
   }
 
+
+  /* I TUOI PREZZI con volume: due colonne, idee veloci, esempi in grigio */
+  var IDEE_PREZZI = /professionist/.test(location.pathname)
+    ? ['Pratica CILA', 'Pratica SCIA', 'Attestato APE', 'Rilievo e planimetria', 'Direzione lavori', 'Perizia tecnica']
+    : ['Rifacimento bagno completo', 'Tinteggiatura', 'Posa pavimento', 'Rifacimento tetto', 'Impianto elettrico', 'Cappotto termico'];
+  var ESEMPI_PREZZI = /professionist/.test(location.pathname)
+    ? [['Pratica CILA', 'da 800 € a lavoro finito'], ['Attestato APE', 'da 150 € a lavoro finito'], ['Rilievo e planimetria', 'da 3 € al metro quadro']]
+    : [['Rifacimento bagno completo', 'da 6.000 € a lavoro finito'], ['Tinteggiatura', 'da 8 € al metro quadro'], ['Posa pavimento', 'da 30 € al metro quadro']];
+  function esempiPrezzi() {
+    var box = document.getElementById('pz-lista'); if (!box) return;
+    var v = box.querySelector('.pz-vuoto');
+    if (!v || !/Ancora nessun prezzo/.test(v.textContent) || box.querySelector('.pz-esempio')) return;
+    box.innerHTML = '<div class="pz-vuoto-nuovo">Qui compariranno i tuoi prezzi. Per ora vedi degli esempi: spariscono appena scrivi il primo.</div>'
+      + ESEMPI_PREZZI.map(function (e) {
+        return '<div class="pz-riga pz-esempio"><div class="pz-testo"><div class="pz-voce">' + e[0] + '</div><div class="pz-cifra">' + e[1] + '</div></div><span class="pz-tag">Esempio</span></div>';
+      }).join('');
+  }
+  function prezziVolume() {
+    var sez = document.getElementById('sec-prezzi'); if (!sez || sez.querySelector('.pz-duo')) return;
+    var carte = sez.querySelectorAll(':scope > .profilo-card'); if (carte.length < 2) return;
+    var duo = document.createElement('div'); duo.className = 'pz-duo';
+    carte[0].parentNode.insertBefore(duo, carte[0]);
+    duo.appendChild(carte[0]); duo.appendChild(carte[1]);
+    var gr = carte[0].querySelector('.pz-griglia');
+    if (gr) {
+      var idee = document.createElement('div'); idee.className = 'pz-idee';
+      idee.innerHTML = '<span>Idee veloci:</span>' + IDEE_PREZZI.map(function (t) { return '<button type="button">' + t + '</button>'; }).join('');
+      idee.addEventListener('click', function (ev) {
+        var b = ev.target.closest('button'); if (!b) return;
+        var voce = document.getElementById('pz-voce'), pr = document.getElementById('pz-prezzo');
+        if (voce) voce.value = b.textContent;
+        if (pr) pr.focus();
+      });
+      gr.parentNode.insertBefore(idee, gr);
+    }
+    var lista = document.getElementById('pz-lista');
+    if (lista && !lista.parentNode.classList.contains('pz-vetrina')) {
+      var v = document.createElement('div'); v.className = 'pz-vetrina';
+      v.innerHTML = '<div class="pz-vetrina-testa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h10M4 14h10"/></svg>Prezzi indicativi — cosi\' sulla tua scheda</div>';
+      lista.parentNode.insertBefore(v, lista); v.appendChild(lista);
+      new MutationObserver(esempiPrezzi).observe(lista, { childList: true });
+      esempiPrezzi();
+    }
+  }
+
+
+  /* la frase di spiegazione sotto il titolo entra nella fascia del titolo */
+  function spiegazioniNelTitolo() {
+    document.querySelectorAll('.section:not(#sec-dashboard)').forEach(function (sez) {
+      var top = sez.querySelector(':scope > .topbar'); if (!top || top.querySelector('.ti-sotto')) return;
+      var p = sez.querySelector(':scope > #foto-galleria-nota, :scope > .pz-intro, :scope > .rec-wrap > .rec-intro');
+      if (!p) return;
+      p.classList.add('ti-sotto');
+      top.appendChild(p);
+    });
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -873,6 +968,8 @@
     try { preventivi(); } catch (e) { console.error('preventivi grafica:', e); }
     try { lavoro(); } catch (e) { console.error('lavoro grafica:', e); }
     try { anteprima(); } catch (e) { console.error('anteprima grafica:', e); }
+    try { prezziVolume(); } catch (e) { console.error('prezzi grafica:', e); }
+    try { spiegazioniNelTitolo(); } catch (e) { console.error('titoli grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
