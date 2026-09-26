@@ -823,7 +823,7 @@
   };
   var EMOJI_PV = { '🔨':'attrezzo','🛠️':'attrezzo','🛠':'attrezzo','📍':'posto','⏰':'orologio','💶':'euro','📎':'graffetta',
     '💬':'chat','📞':'telefono','🗑️':'cestino','🗑':'cestino','✅':'spunta','📋':'cartella','📁':'cartella','📊':'grafico',
-    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita','🔧':'attrezzo','📅':'calendario','📥':'scarica','➕':'piu','📢':'megafono','💾':'salva','✨':'scintille','🔲':'qr','🎬':'video','📇':'biglietto','🚐':'furgone','🏗️':'cantiere','🏗':'cantiere','⭐':'stella' };
+    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita','🔧':'attrezzo','📅':'calendario','📥':'scarica','➕':'piu','📢':'megafono','💾':'salva','✨':'scintille','🔲':'qr','🎬':'video','📇':'biglietto','🚐':'furgone','🏗️':'cantiere','🏗':'cantiere','⭐':'stella','📩':'mail' };
   var EMOJI_VIA = ['👤','🆕'];
   function svgEm(nome) {
     return '<svg class="ti-em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + EM_SVG[nome] + '</svg>';
@@ -997,6 +997,20 @@
   function titoliConIcona() {
     document.querySelectorAll('.section:not(#sec-dashboard) > .topbar .topbar-title').forEach(function (t) {
       if (t.querySelector(':scope > svg.ti-ic')) return;
+      /* sul sito c'e' un altro script che cambia le emoji in disegni (classe
+         «emic») e a volte arriva prima: il suo disegno diventa l'icona grande */
+      var em = t.querySelector('svg.emic');
+      if (em) {
+        var casa = em.parentNode === t ? null : em.parentNode;
+        em.classList.add('ti-ic');
+        t.insertBefore(em, casa && casa.parentNode === t ? casa : t.firstChild.nextSibling);
+        return;
+      }
+      if (!t.__tiGuardia) {
+        t.__tiGuardia = true;
+        new MutationObserver(function () { if (!t.querySelector(':scope > svg.ti-ic') && t.querySelector('svg.emic')) titoliConIcona(); })
+          .observe(t, { childList: true, subtree: true });
+      }
       var w = document.createTreeWalker(t, NodeFilter.SHOW_TEXT, null), n;
       while ((n = w.nextNode())) {
         var v = n.nodeValue, trovata = null;
