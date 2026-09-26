@@ -234,7 +234,9 @@
   '#sec-preventivi .prev-info{font-size:16px !important;color:#334155 !important;gap:10px 20px !important}' +
   '#sec-preventivi .prev-info span,#sec-preventivi .prev-card a,#sec-preventivi .prev-card button{display:inline-flex;align-items:center;gap:6px}' +
   '#sec-preventivi .ti-em{width:18px;height:18px;flex:0 0 18px;color:#0066ff}' +
-  '#sec-preventivi .prev-card a .ti-em,#sec-preventivi .prev-card button .ti-em{color:currentColor}' +
+  /* sul sito c'e' gia' un altro script che cambia le emoji in disegni (classe «emic»): arriva prima del nostro, quindi gli si danno la stessa misura e lo stesso blu */
+  '#sec-preventivi .prev-card svg.emic{width:18px !important;height:18px !important;flex:0 0 18px;color:#0066ff}' +
+  '#sec-preventivi .prev-card a .ti-em,#sec-preventivi .prev-card button .ti-em,#sec-preventivi .prev-card a svg.emic,#sec-preventivi .prev-card button svg.emic{color:currentColor}' +
   '#sec-preventivi .prev-desc{font-size:16px !important;color:#1f2937 !important;line-height:1.6 !important}' +
   '#sec-preventivi .prev-data{font-size:15px !important;color:#8a94a3 !important}' +
   '#sec-preventivi .prev-card button[title="Elimina preventivo"]{padding:7px 12px !important;font-size:14px !important;border-radius:10px !important}' +
