@@ -120,8 +120,8 @@
     </div>
     <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>
     <div class="panels" id="panels"></div>
-    <button class="new-rep-btn" data-action="new-panel"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Aggiungi un reparto</button>
-    <p class="landing-nota-rep">Un <b>reparto</b> serve solo se tieni separate due attività — per esempio idraulica e giardinaggio: lavori, clienti e calendario di una non si mischiano con l'altra. Se fai un mestiere solo, non te ne serve un secondo.</p>
+    <button class="new-rep-btn" data-action="new-panel"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Aggiungi un reparto</button>
+    <p class="landing-nota-rep">Un <b>reparto</b> serve solo per tenere separate due attività, per esempio idraulica e giardinaggio.</p>
     <p style="text-align:center;font-size:14px;color:var(--testo-2);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--bordo)">
       <p style="color:var(--testo-2);font-size:var(--f-base);margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
@@ -1181,8 +1181,8 @@
     if(ls)ls.textContent=_pro18?'Pratiche, preventivi e fatture':'Lavori, preventivi e fatture';
     const ln=document.querySelector('.landing-nota-rep');
     if(ln)ln.innerHTML=_pro18
-      ? 'Un <b>reparto</b> serve solo se tieni separate due attivit\u00e0 \u2014 per esempio strutture e catasto: pratiche, clienti e calendario di una non si mischiano con l\'altra. Se fai un lavoro solo, non te ne serve un secondo.'
-      : 'Un <b>reparto</b> serve solo se tieni separate due attivit\u00e0 \u2014 per esempio idraulica e giardinaggio: lavori, clienti e calendario di una non si mischiano con l\'altra. Se fai un mestiere solo, non te ne serve un secondo.';
+      ? 'Un <b>reparto</b> serve solo per tenere separate due attivit\u00e0, per esempio strutture e catasto.'
+      : 'Un <b>reparto</b> serve solo per tenere separate due attivit\u00e0, per esempio idraulica e giardinaggio.';
     /* e il nome della scheda del browser, che si vede quando si tengono
        aperte piu' pagine */
     document.title=nome+' — TrovaImpresa';
@@ -2313,6 +2313,30 @@
     if(bottone){ bottone.disabled=false; bottone.textContent=prima; }
   }
 
+  /* ⛔ 26 settembre 2026 — LA RIGA DEL REPARTO, VERSIONE «B» SCELTA DA ALESSIO.
+     Prima: carta piccola, «5 da fare · 5 lavori totali» scritto piccolo e
+     il cestino grande accanto al nome, nel posto dove si tocca di piu'.
+     Adesso ogni reparto e' una riga larga: icona, nome, il numero dei
+     lavori da fare grande, il tasto blu «Apri →», e il cestino piccolo e
+     grigio in fondo, lontano dal nome (chiede sempre conferma: delPanel).
+     Una funzione sola per l'elenco e per l'anteprima del modulo «nuovo
+     reparto», cosi' le due non si scollano.
+     «da fare» = stato diverso da «fatto». */
+  function cartaReparto(p,df,tot,anteprima){
+    const pro=ruoloUtente==='professionista';
+    const tutto=pro?(tot===1?'pratica in tutto':'pratiche in tutto'):(tot===1?'lavoro in tutto':'lavori in tutto');
+    const apri=anteprima?'':` data-action="enter" data-p="${p.id}" role="button" tabindex="0"`;
+    const cest=anteprima?'':`<button type="button" class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto" aria-label="Elimina reparto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>`;
+    return `<div class="panel-card pc3${df?' c-dafare':''}"${apri}>
+      <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${icoRep(p.icon)}</span>
+      <div class="pc3-nome"><h2${p._vuoto?' class="pc-vuoto"':''}>${p._vuoto?"Il nome del reparto":esc(p.nome)}</h2>
+        <span class="pc3-sotto">${df} da fare &middot; ${tot} ${tutto}</span></div>
+      <div class="pc3-num"><b>${df}</b><span>da fare</span></div>
+      <span class="pc3-apri">Apri <span aria-hidden="true">&rarr;</span></span>
+      ${cest}
+    </div>`;
+  }
+
   /* il guasto della lettura dei reparti: null = tutto a posto */
   let _landingGuasta=null;
   function _landingDisegna(ps,rows){
@@ -2345,11 +2369,8 @@
          cestino sta dentro la scheda. Il tasto Invio e la barra spaziatrice
          li fa funzionare l'ascoltatore unico piu' in basso (cerca
          «INVIO E BARRA SPAZIATRICE»). */
-      return `<div class="panel-card" data-action="enter" data-p="${p.id}" role="button" tabindex="0">
-        <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
-        <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${icoRep(p.icon)}</span><h2>${esc(p.nome)}</h2>
-        <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):(tot===1?'lavoro totale':'lavori totali')}</span></div>`;
-    }).join(""):(_landingGuasta
+      return cartaReparto(p,df,tot,false);
+    }).join("")+'<button class="new-rep-btn pc3-nuovo" data-action="new-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Nuovo reparto</button>':(_landingGuasta
       ? `<div class="empty-rep" style="border-color:var(--err,#c0392b)">
            <b>Non riesco a leggere i tuoi reparti.</b><br>
            Non vuol dire che non ci sono: è la connessione con il database che non ha risposto.<br>
@@ -2359,6 +2380,8 @@
       : `<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`);
     /* col guasto in corso il modulo «crea reparto» si nasconde: se no si
        finisce per crearne uno doppio credendo di aver perso il primo */
+    const _nb=document.querySelector(".wrap > .new-rep-btn");
+    if(_nb)_nb.style.display=ps.length?"none":"";   // con dei reparti, «Nuovo reparto» sta nella griglia
     const _nuovo=document.querySelector("#nuovo-reparto,#panel-new,.landing-new");
     if(_nuovo)_nuovo.style.display=_landingGuasta?"none":"";
   }
@@ -7950,10 +7973,7 @@
     const ic=$("#p-ic"); if(ic)ic.style.color=c.ad;
     const nome=($("#p-nome")&&$("#p-nome").value.trim())||"";
     const vuoto=!nome;
-    box.innerHTML=`<div class="panel-card">
-      <span class="pc-ic no-ico" style="background:${c.as};color:${c.ad}">${icoRep(nuovoSel.icon)}</span>
-      <h2${vuoto?' class="pc-vuoto"':''}>${vuoto?"Il nome del reparto":esc(nome)}</h2>
-      <span class="pc-meta">0 da fare · 0 ${ruoloUtente==='professionista'?'pratiche totali':'lavori totali'}</span></div>`;
+    box.innerHTML=cartaReparto({as:c.as,ad:c.ad,icon:nuovoSel.icon,nome:nome,_vuoto:vuoto},0,0,true);
   }
 
   function panelForm(){

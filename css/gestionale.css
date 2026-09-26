@@ -4396,3 +4396,49 @@ body:has(#ti-fondatore) .sheet--grande{
 @media (max-width:880px){
   .aic-btn,.aic-mic{flex:1 1 auto;justify-content:center}
 }
+
+
+/* ============================================================
+   26 settembre 2026 — I REPARTI A RIGHE, VERSIONE «B».
+   Scelta da Alessio fra tre prove. Una riga larga per reparto,
+   riga grigia a sinistra come il Riepilogo: icona, nome, numero
+   grande dei lavori da fare, tasto blu «Apri →», cestino piccolo
+   e grigio in fondo. «Nuovo reparto» e' una riga tratteggiata.
+   ============================================================ */
+.panels{ grid-template-columns:minmax(0,1fr) !important; max-width:900px !important; gap:12px !important; }
+.panel-card.pc3{ display:grid !important; grid-template-columns:52px minmax(0,1fr) auto auto 38px; align-items:center; gap:18px !important;
+  padding:16px 16px 16px 18px !important; min-height:0 !important; background:#fff !important; color:var(--testo,#0f172a) !important;
+  border:1px solid #e3e8ef !important; border-left:4px solid #cbd5e1 !important; border-radius:14px !important;
+  box-shadow:0 1px 3px rgba(16,24,32,.06) !important; }
+.panel-card.pc3:hover{ box-shadow:0 10px 24px rgba(16,24,32,.10) !important; border-color:#bcd3f7 !important; transform:translateY(-1px); }
+.pc3 .pc-ic{ width:52px !important; height:52px !important; border-radius:14px !important; margin:0 !important; }
+.pc3 .pc-ic svg, .pc3 .pc-ic .ico-rep{ width:24px !important; height:24px !important; }
+.pc3 h2{ font-size:20px !important; font-weight:800 !important; margin:0 !important; overflow-wrap:anywhere; }
+.pc3-sotto{ display:block; font-size:14.5px; color:#64748b; margin-top:3px; }
+.pc3-num{ text-align:center; min-width:86px; }
+.pc3-num b{ display:block; font-size:26px; font-weight:800; line-height:1.1; color:#0f172a; }
+.pc3.c-dafare .pc3-num b{ color:#b45309; }
+.pc3-num span{ font-size:13.5px; color:#64748b; font-weight:600; }
+.pc3-apri{ background:#0066ff; color:#fff; border-radius:10px; padding:11px 18px; font-weight:800; font-size:15.5px; white-space:nowrap; }
+.panel-card.pc3:hover .pc3-apri{ background:#0052cc; }
+.pc3 .pc-del{ position:static !important; width:38px !important; height:38px !important; border-radius:10px !important; background:transparent !important;
+  color:#94a3b8 !important; display:grid !important; place-items:center; border:0; cursor:pointer; }
+.pc3 .pc-del:hover{ background:#fef3f2 !important; color:#b42318 !important; }
+.pc3 .pc-del svg{ width:19px; height:19px; }
+/* «Nuovo reparto»: riga tratteggiata sotto l'elenco */
+.panels .new-rep-btn.pc3-nuovo{ max-width:none !important; margin:0 !important; width:100%; display:flex !important; align-items:center; justify-content:center; gap:8px;
+  border:2px dashed #cbd5e1 !important; background:#fff !important; border-radius:14px !important; color:#0052cc !important; font-size:16px !important; padding:16px !important; box-shadow:none !important; }
+.panels .new-rep-btn.pc3-nuovo:hover{ border-color:#8fb5ff !important; background:#f5f9ff !important; }
+.panels .new-rep-btn.pc3-nuovo svg{ width:20px; height:20px; }
+/* telefono: numero sotto il nome, «Apri» su tutta la riga */
+@media(max-width:639px){
+  .panel-card.pc3{ grid-template-columns:48px minmax(0,1fr) 38px; gap:12px !important; padding:14px !important; }
+  .pc3 .pc-ic{ width:48px !important; height:48px !important; }
+  .pc3 h2{ font-size:18px !important; }
+  .pc3-num{ display:none; }
+  .pc3-apri{ grid-column:1 / -1; grid-row:2; text-align:center; }
+  .pc3 .pc-del{ grid-column:3; grid-row:1; }
+}
+/* l'anteprima nel modulo «nuovo reparto»: senza tasto cestino, niente effetto al passaggio */
+.p-prev-box .panel-card.pc3{ grid-template-columns:52px minmax(0,1fr) auto auto; }
+.p-prev-box .panel-card.pc3:hover{ transform:none; box-shadow:0 1px 3px rgba(16,24,32,.06) !important; border-color:#e3e8ef !important; }
