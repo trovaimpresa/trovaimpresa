@@ -151,6 +151,13 @@
     var ta = document.getElementById('f-prestazioni');
     var selM = document.getElementById('f-mestiere-professionista');
     if (!ta || !selM) return;
+    /* «Cosa sai fare» subito sotto la professione: chi cambia professione
+       vede cambiare i suggerimenti li' sotto, senza scorrere mezza pagina.
+       Si sposta il riquadro intero (titolo e casella): il salvataggio lo
+       trova per id, quindi non cambia niente. Solo per i professionisti. */
+    var card = document.getElementById('card-prestazioni');
+    var primo = document.querySelector('#sec-professionista > .form-card');
+    if (card && primo && !card.getAttribute('data-spostata')) { primo.parentNode.insertBefore(card, primo.nextSibling); card.setAttribute('data-spostata', '1'); }
     var box = document.getElementById('prest-suggerimenti');
     if (!box) {
       box = document.createElement('div');
@@ -167,8 +174,15 @@
         '.prest-sugg .ps-chip:hover{border-color:#8fb5ff;background:#f5f9ff}' +
         '.prest-sugg .ps-chip.on{background:#eefaf2;border-color:#a9dcb9;color:#146c31;font-weight:700}' +
         '.prest-sugg .ps-chip.on::before{content:"\\2713  "}' +
-        '.prest-sugg details{margin-top:12px}' +
-        '.prest-sugg summary{cursor:pointer;font-size:15px;font-weight:700;color:#1d4ed8}';
+        '.prest-sugg .ps-tend{border:1.5px solid #e3ebf6;border-radius:14px;background:#fff;margin:0 0 8px}' +
+        '.prest-sugg .ps-tend[open]{border-color:#bcd3f7}' +
+        '.prest-sugg .ps-tend summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:16px;font-weight:700;color:#0a2a4d}' +
+        '.prest-sugg .ps-tend summary::-webkit-details-marker{display:none}' +
+        '.prest-sugg .ps-tend summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid #0066ff;border-bottom:2.5px solid #0066ff;transform:rotate(45deg);transition:transform .15s}' +
+        '.prest-sugg .ps-tend[open] summary::after{transform:rotate(-135deg)}' +
+        '.prest-sugg .ps-tend summary em{font-style:normal;font-size:13.5px;font-weight:700;color:#146c31;background:#eefaf2;border:1px solid #a9dcb9;border-radius:999px;padding:2px 9px}' +
+        '.prest-sugg .ps-tend .ps-chips{padding:2px 16px 16px}' +
+        '.prest-sugg .ps-altre{font-size:14.5px;font-weight:700;color:#475569;margin:16px 0 8px}';
       document.head.appendChild(st);
     }
     function righe() { return (ta.value || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }
@@ -176,18 +190,26 @@
       var on = sc.some(function (r) { return r.toLowerCase() === p.toLowerCase(); });
       return '<button type="button" class="ps-chip' + (on ? ' on' : '') + '" data-p="' + p.replace(/"/g, '&quot;') + '">' + p + '</button>';
     }
+    /* ogni gruppo e' una tendina chiusa: si apre toccandola. Sul titolo
+       c'e' quante ne hai gia' scelte, cosi' non serve aprirle per saperlo. */
     function gruppoHtml(g, sc) {
-      return '<div class="ps-gr">' + g + '</div><div class="ps-chips">' + GRUPPI[g].map(function (p) { return chipHtml(p, sc); }).join('') + '</div>';
+      var n = GRUPPI[g].filter(function (p) { return sc.some(function (r) { return r.toLowerCase() === p.toLowerCase(); }); }).length;
+      var aperta = aperte.indexOf(g) >= 0 ? ' open' : '';
+      return '<details class="ps-tend" data-g="' + g + '"' + aperta + '><summary><span>' + g + '</span>' +
+        (n ? '<em>' + n + (n === 1 ? ' scelta' : ' scelte') + '</em>' : '') + '</summary>' +
+        '<div class="ps-chips">' + GRUPPI[g].map(function (p) { return chipHtml(p, sc); }).join('') + '</div></details>';
     }
+    var aperte = [];   // le tendine aperte restano aperte quando si ridisegna
     function disegna() {
+      aperte = [].map.call(box.querySelectorAll('details.ps-tend[open]'), function (d) { return d.getAttribute('data-g'); });
       var sel2 = document.getElementById('f-mestiere2-professionista');
       var miei = gruppiPer([selM.value, sel2 && sel2.value]);
       var altri = Object.keys(GRUPPI).filter(function (g) { return miei.indexOf(g) < 0; });
       var sc = righe();
       box.innerHTML = '<div class="ps-tit">Tocca per aggiungere le prestazioni che fai</div>' +
         miei.map(function (g) { return gruppoHtml(g, sc); }).join('') +
-        (altri.length ? '<details' + (miei.length ? '' : ' open') + '><summary>' + (miei.length ? 'Altre prestazioni' : 'Tutte le prestazioni') + '</summary>' +
-          altri.map(function (g) { return gruppoHtml(g, sc); }).join('') + '</details>' : '');
+        (altri.length ? '<div class="ps-altre">' + (miei.length ? 'Altre prestazioni' : 'Tutte le prestazioni') + '</div>' +
+          altri.map(function (g) { return gruppoHtml(g, sc); }).join('') : '');
     }
     box.onclick = function (e) {
       var b = e.target.closest && e.target.closest('.ps-chip'); if (!b) return;

@@ -109,6 +109,27 @@
     }
     faccineInIcone(document.querySelector('.sidebar'));
     faccineInIcone(document.querySelector('.results-header'));
+    /* Specializzazioni dei professionisti: una TENDINA come «Professione»,
+       non un elenco lungo sempre aperto (Alex, 26 set). Le voci vecchie
+       restano nella pagina, nascoste: la tendina preme la voce giusta, cosi'
+       il filtro della pagina non cambia di una virgola. */
+    var voci = document.querySelectorAll('.chip[data-specializzazione]');
+    if (voci.length && !document.getElementById('cv-spec-sel')){
+      var cont = voci[0].parentNode, sel = document.createElement('select');
+      sel.id = 'cv-spec-sel'; sel.setAttribute('aria-label', 'Specializzazione');
+      [].forEach.call(voci, function(c){
+        var o = document.createElement('option'); o.value = c.getAttribute('data-specializzazione');
+        o.textContent = c.getAttribute('data-specializzazione') === 'tutte' ? 'Tutte le specializzazioni' : c.textContent.trim();
+        if (c.classList.contains('active') || (c.classList.contains('all-chip') && !c.classList.contains('inactive') && !document.querySelector('.chip[data-specializzazione].active'))) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change', function(){
+        var v = sel.value, c = [].filter.call(voci, function(x){ return x.getAttribute('data-specializzazione') === v; })[0];
+        if (c) c.click();
+      });
+      cont.parentNode.insertBefore(sel, cont);
+      cont.style.display = 'none';
+    }
     // «Mostra i imprese»
     document.querySelectorAll('.filtri-azioni button').forEach(function(b){ if (/Mostra i imprese/.test(b.textContent)) b.textContent = 'Mostra le imprese'; });
     var r = document.getElementById('risultati');

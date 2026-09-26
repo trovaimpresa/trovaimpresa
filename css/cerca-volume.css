@@ -32,6 +32,7 @@ body{ background:#f3f6fa !important; }
 .sidebar-title .ti-ic{ width:40px; height:40px; padding:9px; border-radius:12px; background:#e3eeff; color:#0066ff; }
 .filter-group{ border:1px solid #e3ebf6 !important; border-left:1px solid #e3ebf6 !important; border-radius:18px !important; box-shadow:0 4px 14px rgba(10,42,77,.05) !important; padding:18px !important; }
 .filter-label{ text-transform:none !important; letter-spacing:0 !important; font-size:16px !important; color:#0a2a4d !important; font-weight:800 !important; }
+.filter-group select, #cv-spec-sel{ width:100%; background:#fff; font-family:inherit; color:#111; }
 .filter-group select{ font-size:16px !important; padding:12px !important; border-radius:12px !important; border:1.5px solid #d6e4ff !important; min-height:48px; }
 .tipo-btn, .chip, .star-option{ border-radius:12px !important; }
 .tipo-btn{ border:1.5px solid #e3ebf6 !important; }
@@ -43,8 +44,6 @@ body{ background:#f3f6fa !important; }
 .tipo-btn:hover, .chip:hover, .star-option:hover, .check-option:hover{ background:#f5f9ff !important; }
 .check-option input[type=checkbox]{ width:20px !important; height:20px !important; }
 .slider-value{ color:#0066ff !important; }
-/* le specializzazioni si vedono tutte, senza la finestrella che scorre */
-.mestieri-scroll{ max-height:none !important; overflow:visible !important; }
 
 /* ---------- i risultati ---------- */
 .results-col{ padding:24px 32px 24px 20px !important; }
