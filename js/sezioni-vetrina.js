@@ -167,6 +167,51 @@
   '#sidebar-map .leaflet-tile-pane{filter:saturate(1.9) contrast(1.12) brightness(.97)}' +
   '#sidebar-map{border:1px solid #e3e8ef;box-shadow:0 4px 14px rgba(10,42,77,.08)}' +
 
+  /* ---------- LE TUE RECENSIONI (26 set 2026) ----------
+     In cima il riassunto: voto medio grande, quante recensioni, e i quattro
+     voti (qualita', puntualita', prezzo, professionalita') con una barra.
+     Le recensioni due per riga sugli schermi larghi, con l'iniziale del
+     cliente in un tondo, stelle piu' grandi, niente MAIUSCOLO piccolo. */
+  '#sec-recensioni.active{max-width:none}' +
+  '#sec-recensioni .rec-wrap{max-width:none !important}' +
+  '#sec-recensioni .rec-intro{font-size:17px !important;color:#475569 !important;max-width:900px}' +
+  '#rec-riepilogo{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center;background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:24px 28px;margin:0 0 20px;box-shadow:0 6px 20px rgba(10,42,77,.06)}' +
+  '#rec-riepilogo .rr-voto{text-align:center;padding-right:28px;border-right:1px solid #e3e8ef}' +
+  '#rec-riepilogo .rr-num{font-size:52px;font-weight:800;color:#0a2a4d;line-height:1}' +
+  '#rec-riepilogo .rr-stelle{color:#f5b50a;font-size:22px;letter-spacing:2px;margin:6px 0 4px;font-family:Arial,\'Segoe UI Symbol\',sans-serif}' +
+  '#rec-riepilogo .rr-quante{font-size:16px;color:#5f6b7a;font-weight:600}' +
+  '#rec-riepilogo .rr-barre{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px}' +
+  '#rec-riepilogo .rr-riga{display:grid;grid-template-columns:130px minmax(0,1fr) 34px;gap:12px;align-items:center;font-size:16px;color:#0a2a4d;font-weight:600}' +
+  '#rec-riepilogo .rr-barra{height:10px;border-radius:99px;background:#eef1f5;overflow:hidden}' +
+  '#rec-riepilogo .rr-barra i{display:block;height:100%;border-radius:99px;background:#f5b50a}' +
+  '#rec-riepilogo .rr-val{text-align:right;color:#475569}' +
+  '#sec-recensioni #rec-lista{columns:2;column-gap:18px}' +
+  '#sec-recensioni #rec-lista > .rec-card{break-inside:avoid;margin:0 0 18px !important;display:block}' +
+  '#sec-recensioni #rec-lista > .rec-vuoto{column-span:all}' +
+  '#sec-recensioni .rec-card{border:1px solid #e3e8ef !important;box-shadow:0 6px 20px rgba(10,42,77,.06) !important;border-radius:18px !important;padding:22px 24px !important}' +
+  '#sec-recensioni .rec-testa{gap:10px 12px !important;margin-bottom:10px !important}' +
+  '#sec-recensioni .rv-av{width:46px;height:46px;border-radius:50%;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;flex:0 0 46px}' +
+  '#sec-recensioni .rec-nome{font-size:18px !important}' +
+  '#sec-recensioni .rec-data{font-size:15px !important;color:#8a94a3 !important}' +
+  '#sec-recensioni .rec-bollo{font-size:14px !important;display:inline-flex !important;align-items:center;gap:5px}' +
+  '#sec-recensioni .rec-bollo svg{width:15px;height:15px}' +
+  '#sec-recensioni .rec-stelle{font-size:22px !important;letter-spacing:2px !important;margin-bottom:10px !important}' +
+  '#sec-recensioni .rec-testo{font-size:17px !important;color:#1f2937 !important;line-height:1.65 !important}' +
+  '#sec-recensioni .rec-risp{margin:16px 0 0 !important;border-left:0 !important;background:#f5f8fc !important;border:1px solid #e3e8ef !important;border-radius:14px !important;padding:16px 18px !important}' +
+  '#sec-recensioni .rec-risp-tit{text-transform:none !important;letter-spacing:0 !important;font-size:16px !important;flex-wrap:wrap}' +
+  '#sec-recensioni .rec-risp-tit small{font-size:14px !important;color:#8a94a3 !important}' +
+  '#sec-recensioni .rec-risp-testo{font-size:16px !important}' +
+  '#sec-recensioni textarea.rec-ta{font-size:16px !important;border-radius:12px !important}' +
+  '#sec-recensioni .rec-btn{font-size:15px !important;border-radius:12px !important;padding:12px 20px !important}' +
+  '#sec-recensioni .rec-vuoto{display:flex;flex-direction:column;align-items:center;gap:12px;padding:44px 24px !important;font-size:17px !important;color:#475569 !important;border:1px solid #e3e8ef !important;border-radius:18px !important}' +
+  '#sec-recensioni .rv-vuoto-ic{width:64px;height:64px;border-radius:18px;background:#fff6e0;color:#f5b50a;display:flex;align-items:center;justify-content:center}' +
+  '#sec-recensioni .rv-vuoto-ic svg{width:34px;height:34px}' +
+  '@media(max-width:1100px){#sec-recensioni #rec-lista{columns:1}#rec-riepilogo .rr-barre{grid-template-columns:minmax(0,1fr)}}' +
+  '@media(max-width:700px){#rec-riepilogo{grid-template-columns:minmax(0,1fr);gap:18px;padding:20px}' +
+    '#rec-riepilogo .rr-voto{border-right:0;padding-right:0;border-bottom:1px solid #e3e8ef;padding-bottom:16px}' +
+    '#rec-riepilogo .rr-riga{grid-template-columns:110px minmax(0,1fr) 30px;font-size:15px}' +
+    '#sec-recensioni .rec-card{padding:18px !important}#sec-recensioni .rec-data{margin-left:0 !important;width:100%}}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
@@ -531,6 +576,68 @@
     })();
   }
 
+
+  /* LE TUE RECENSIONI: riassunto in cima, iniziale del cliente, bollino
+     «Verificata» col disegno invece dell'emoji. Non tocca la funzione che
+     salva le risposte: si mette DOPO quella che disegna l'elenco. */
+  var SPUNTA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  var STELLA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>';
+  function abbellisciRecensioni() {
+    var box = document.getElementById('rec-lista');
+    if (!box) return;
+    var dati = (typeof _recCache !== 'undefined' && Array.isArray(_recCache)) ? _recCache : [];
+    /* riassunto */
+    var rie = document.getElementById('rec-riepilogo');
+    if (!dati.length) { if (rie) rie.remove(); }
+    else {
+      if (!rie) { rie = document.createElement('div'); rie.id = 'rec-riepilogo'; box.parentNode.insertBefore(rie, box); }
+      var voci = [['stelle_qualita', 'Qualità'], ['stelle_puntualita', 'Puntualità'], ['stelle_prezzo', 'Prezzo'], ['stelle_professionalita', 'Professionalità']];
+      var tutte = [];
+      var barre = voci.map(function (v) {
+        var val = dati.map(function (r) { return r[v[0]]; }).filter(function (x) { return x != null && !isNaN(x); }).map(Number);
+        tutte = tutte.concat(val);
+        var m = val.length ? val.reduce(function (a, b) { return a + b; }, 0) / val.length : 0;
+        return '<div class="rr-riga"><span>' + v[1] + '</span><span class="rr-barra"><i style="width:' + Math.round(m / 5 * 100) + '%"></i></span><span class="rr-val">' + (val.length ? m.toFixed(1).replace('.', ',') : '—') + '</span></div>';
+      }).join('');
+      var media = tutte.length ? tutte.reduce(function (a, b) { return a + b; }, 0) / tutte.length : 0;
+      var piene = Math.round(media);
+      rie.innerHTML = '<div class="rr-voto"><div class="rr-num">' + (tutte.length ? media.toFixed(1).replace('.', ',') : '—') + '</div>'
+        + '<div class="rr-stelle">' + '★'.repeat(piene) + '☆'.repeat(5 - piene) + '</div>'
+        + '<div class="rr-quante">' + dati.length + (dati.length === 1 ? ' recensione' : ' recensioni') + '</div></div>'
+        + '<div class="rr-barre">' + barre + '</div>';
+    }
+    /* vuoto */
+    var vuoto = box.querySelector('.rec-vuoto');
+    if (vuoto && !dati.length && !vuoto.querySelector('.rv-vuoto-ic') && !/Carico/.test(vuoto.textContent)) {
+      vuoto.insertAdjacentHTML('afterbegin', '<span class="rv-vuoto-ic">' + STELLA + '</span>');
+    }
+    /* carte */
+    box.querySelectorAll('.rec-card').forEach(function (c) {
+      var testa = c.querySelector('.rec-testa'), nome = c.querySelector('.rec-nome');
+      if (testa && nome && !testa.querySelector('.rv-av')) {
+        var av = document.createElement('span'); av.className = 'rv-av';
+        av.textContent = ((nome.textContent || '?').trim().charAt(0) || '?').toUpperCase();
+        testa.insertBefore(av, testa.firstChild);
+      }
+      var ta = c.querySelector('textarea.rec-ta'), nomeC = nome ? (nome.textContent || '').trim().split(/\s+/)[0] : '';
+      if (ta && nomeC && nomeC !== 'Cliente') ta.placeholder = 'Es. Grazie ' + nomeC + ', è stato un piacere lavorare con te.';
+      c.querySelectorAll('.rec-bollo.ok').forEach(function (b) {
+        if (!b.querySelector('svg')) b.innerHTML = SPUNTA + ' Verificata';
+      });
+    });
+  }
+  function recensioni() {
+    if (typeof window.disegnaRecensioniSezione !== 'function' || window.disegnaRecensioniSezione.__vetrina) return;
+    var prima = window.disegnaRecensioniSezione;
+    var nuova = function () {
+      var r = prima.apply(this, arguments);
+      try { abbellisciRecensioni(); } catch (e) { console.error('recensioni grafica:', e); }
+      return r;
+    };
+    nuova.__vetrina = true;
+    window.disegnaRecensioniSezione = nuova;
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -539,6 +646,7 @@
     try { messaggi(); } catch (e) { console.error('messaggi grafica:', e); }
     try { giornata(); } catch (e) { console.error('giornata grafica:', e); }
     try { mappaCitta(); } catch (e) { console.error('mappa citta:', e); }
+    try { recensioni(); } catch (e) { console.error('recensioni grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
