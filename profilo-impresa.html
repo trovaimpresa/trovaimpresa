@@ -780,7 +780,7 @@ nav img{height:36px}
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
 </style>
 <!-- 26 set 2026: la scheda con «un po' di volume», come il pannello (solo aspetto, vedi il file) -->
-<link rel="stylesheet" href="/css/scheda-volume.css?v=1">
+<link rel="stylesheet" href="/css/scheda-volume.css?v=2">
 </head>
 <body>
 
@@ -959,6 +959,20 @@ nav img{height:36px}
           <div class="chat-field" style="margin-top:8px"><label>Email</label><input type="email" id="chat-email" placeholder="La tua email"></div>
           <button class="chat-btn" style="margin-top:10px" onclick="iniziaChatImpresa()">Inizia chat</button>
           <p style="margin:10px 0 0;font-size:15px;color:#5b6574;line-height:1.5">Quando l&rsquo;impresa ti risponde, ti arriva un&rsquo;email con il link per tornare qui.</p>
+          <!-- 26 set 2026: la carta «Scrivi all'impresa» e' alta quanto «Informazioni»
+               (carte della stessa riga alte uguali, deciso il 1 settembre) e restava
+               mezza vuota. Qui sotto un esempio di come funziona la chat: si vede solo
+               finche' non si comincia (sta dentro #chat-start-form). -->
+          <div class="chat-esempio" aria-hidden="true">
+            <div class="ce-tit">Come funziona <span>Esempio</span></div>
+            <div class="ce-bolla ce-tu">Buongiorno, vorrei rifare il bagno. Quando potete passare a vedere?</div>
+            <div class="ce-bolla ce-loro">Buongiorno! Possiamo venire gioved&igrave; mattina per il sopralluogo.</div>
+            <ol class="ce-passi">
+              <li><b>1</b>Scrivi il tuo nome e la tua email</li>
+              <li><b>2</b>Racconti cosa ti serve</li>
+              <li><b>3</b>L&rsquo;impresa ti risponde, e ti arriva un&rsquo;email</li>
+            </ol>
+          </div>
         </div>
         <div id="chat-window" style="display:none">
           <div class="chat-messages" id="chat-messages"></div>

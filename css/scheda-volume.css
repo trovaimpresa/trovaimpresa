@@ -18,3 +18,13 @@ body{background:#f3f6fa}
 .contacts-card,.rec-altri{border-radius:20px !important;box-shadow:0 12px 32px rgba(10,42,77,.08) !important;border:1px solid #e3e8ef !important;border-top:1px solid #e3e8ef !important}
 .fgrid > *{border-radius:16px !important;overflow:hidden;box-shadow:0 6px 18px rgba(10,42,77,.08)}
 @media(max-width:768px){.card-title{font-size:21px !important}.card-title > svg,.card-title > .ti-ic{width:42px !important;height:42px !important;padding:10px;flex-basis:42px}}
+/* esempio della chat nella carta «Scrivi all'impresa» (26 set 2026) */
+.chat-esempio{margin-top:22px;background:#f5f8fc;border:1px solid #e3e8ef;border-radius:18px;padding:18px}
+.chat-esempio .ce-tit{display:flex;align-items:center;justify-content:space-between;font-size:17px;font-weight:800;color:#0a2a4d;margin-bottom:14px}
+.chat-esempio .ce-tit span{font-size:13px;font-weight:800;color:#5f6b7a;background:#e8edf3;border-radius:999px;padding:4px 10px}
+.chat-esempio .ce-bolla{max-width:82%;padding:11px 14px;border-radius:16px;font-size:15px;line-height:1.5;margin-bottom:10px}
+.chat-esempio .ce-tu{margin-left:auto;background:#0066ff;color:#fff;border-bottom-right-radius:6px}
+.chat-esempio .ce-loro{background:#fff;color:#1f2937;border:1px solid #e3e8ef;border-bottom-left-radius:6px}
+.chat-esempio .ce-passi{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}
+.chat-esempio .ce-passi li{display:flex;align-items:center;gap:12px;font-size:15px;font-weight:600;color:#334155}
+.chat-esempio .ce-passi b{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:#eaf2ff;color:#0066ff;display:flex;align-items:center;justify-content:center;font-size:15px}
