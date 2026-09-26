@@ -2493,3 +2493,55 @@ ad Alex il blocco git.
 - ⛔ Un `data-action` nuovo si prova **cliccandolo**, non leggendolo.
 - ⛔ Un avviso che comparirebbe a ogni push va messo fra le **eccezioni con il
   suo perche'**: un avviso finto ripetuto insegna a saltare gli avvisi.
+
+---
+
+# 26 SETTEMBRE 2026 — LE IDEE RUBATE AI GESTIONALI STRANIERI
+
+Alessio ha chiesto di «rubare idee» ai gestionali fuori dall'Italia (Jobber,
+Buildertrend, Plancraft, Tradify...). Ne ha scelte cinque, fatte tutte
+insieme, un solo push. Codice nuovo quasi tutto in **`js/gest-ai-cantiere.js`**
+(stesso stile degli altri js/ del gestionale: non in un IIFE, un suo
+ascoltatore su `[data-action]`).
+
+| n | cosa | dove si apre |
+|---|---|---|
+| 1 | **Foto della fattura del fornitore**: l'AI legge fornitore, numero, data, totale IVA compresa, scadenza; propone di aggiungere il fornitore se non c'e'; la foto resta fra i documenti del fornitore | Fornitori → «📷 Fotografa una fattura» / «+ Fattura da pagare» |
+| 2 | **«Parla»**: microfono del browser (Web Speech, gratis) nella riga AI di lavoro, cliente, preventivo | riga «AI» dentro i moduli |
+| 3 | **Aggiorna il cliente**: dai rapportini del periodo l'AI scrive il messaggio WhatsApp | finestra del lavoro → «📣 Aggiorna il cliente» |
+| 4 | **Scrivilo meglio**: riscrive il messaggio al cliente senza cambiare date e prezzi, con «Torna com'era» | dentro «Aggiorna il cliente» e nell'email del documento al cliente |
+| 5 | **Scelte del cliente**: l'impresa mette le possibilita' (con foto e prezzo), il cliente sceglie da `trovaimpresa.com/scelte?t=...` senza account e conferma; all'impresa arriva un'email | finestra del lavoro → «🎨 Scelte del cliente» (non per i professionisti) |
+
+## Dove sta cosa
+
+- **Edge Function nuova `ai-cantiere`** (Supabase, verify_jwt): le feature
+  `dati_fattura_fornitore` (con immagine o PDF), `resoconto_cliente`,
+  `scrivi_meglio`. 1 credito l'una, stesse funzioni SQL di `ai-generate`
+  (consume/settle/refund). Copia nel repo: `supabase/functions/ai-cantiere/index.ts`.
+  ⛔ `ai-generate` NON e' stata toccata apposta.
+- `js/ai-integrazione.js`: nuova porta `AI.cantiere(feature, testo, file, json)`.
+- **Tabelle nuove** `gest_scelte` e `gest_scelte_link` — `sql/gest-scelte.sql`,
+  eseguito il 26/9 (migrazione `gest_scelte_26set2026`), in `PROVE` di fondatore.js.
+  Niente `eliminato_il` apposta: il cestino non le conosce e una scelta buttata
+  la vedrebbe ancora il cliente. Trigger `gest_scelte_controlla_lavoro`: il
+  lavoro deve essere dell'impresa che scrive.
+- **`netlify/functions/scelte-cliente.js`**: l'unica porta del cliente. Chi e'
+  lo dice solo il token; dopo la conferma le scelte sono ferme (409), si
+  riaprono dal gestionale.
+- **`scelte.html`**: la pagina del cliente, noindex, grande, col pollice.
+
+## Decisioni di Alessio
+
+- ⛔ In fondo al messaggio «Aggiorna il cliente» **niente** riga «Lavori seguiti
+  con TrovaImpresa»: l'aveva proposta Claude, Alessio l'ha fatta togliere.
+  Il messaggio porta solo il nome dell'impresa (da Dati azienda).
+- Al resoconto l'AI non riceve nome ne' indirizzo del cliente, e non parla mai
+  di soldi. Il «Buongiorno Marco» lo mette il gestionale.
+
+## Provato prima del push
+
+Edge function con un finto (13 prove verdi: immagine, PDF, file sbagliato,
+JSON rotto → rimborso, crediti finiti → 402). SQL su Postgres 16 vero (altro
+account rifiutato da RLS e dal trigger, cascata sul lavoro). Le 5 funzioni nel
+gestionale vero col finto delle imprese, computer e telefono: zero errori.
+⚠️ Le risposte VERE dell'AI si vedono solo sul sito, dopo il push.

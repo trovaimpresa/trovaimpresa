@@ -177,6 +177,41 @@
   };
 
   /* ------------------------------------------------------------------ */
+  /* AI.cantiere — 26 settembre 2026                                     */
+  /*                                                                     */
+  /* La porta verso la funzione «ai-cantiere» (le idee prese dai         */
+  /* gestionali stranieri): la foto della fattura del fornitore, il      */
+  /* resoconto al cliente, «scrivilo meglio». Stesso biglietto (il token */
+  /* dell'iscritto), stessi crediti, stessa finestra quando finiscono.   */
+  /*                                                                     */
+  /* file = {tipo:'image/jpeg'|'application/pdf', dati:<base64>} o null.  */
+  /* Restituisce il testo (o l'oggetto, se json=true); null se i crediti */
+  /* sono finiti (l'avviso l'ha gia' mostrato mostraUpgrade).            */
+  /* ------------------------------------------------------------------ */
+  const CANTIERE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-cantiere';
+  AI.cantiere = async function (feature, testo, file, json) {
+    const token = getToken();
+    if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
+    let res;
+    try {
+      res = await fetch(CANTIERE_URL, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feature: feature, input: testo, file: file || null }),
+      });
+    } catch (e) {
+      throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione e riprova.');
+    }
+    const body = await res.json().catch(function () { return {}; });
+    if (res.status === 402) { await caricaStato(); mostraUpgrade(body.reason); return null; }
+    if (!res.ok) throw new Error(body.error || 'L\'assistente non ha risposto. Riprova fra un attimo.');
+    if (AI.stato && typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+    if (!json) return String(body.result || '');
+    try { return JSON.parse(body.result); }
+    catch (e) { throw new Error('Non ho capito la risposta. Riprova.'); }
+  };
+
+  /* ------------------------------------------------------------------ */
   /* PANNELLO GENERAZIONE                                                */
   /* ------------------------------------------------------------------ */
   function apriPannello() {

@@ -4318,3 +4318,81 @@ body:has(#ti-fondatore) .sheet--grande{
   .ore-g .d{width:auto}
   .ore-g .fix{margin-left:0;width:100%}
 }
+
+/* ============================================================
+   26 settembre 2026 — LE IDEE RUBATE (js/gest-ai-cantiere.js)
+   foto della fattura fornitore · microfono · aggiorna il cliente ·
+   scrivilo meglio · scelte del cliente.
+   ⚠️ Classi tutte nuove col prefisso .aic-: non tocca niente di prima.
+   ⚠️ Niente testo sotto i 13 px (regola del progetto).
+   ============================================================ */
+.aic-ico{width:18px;height:18px;flex:0 0 auto}
+.aic-fila{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.aic-fila--sotto{margin-top:8px}
+.aic-btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;
+  border:1.5px solid var(--bordo-forte);border-radius:var(--r);background:var(--card);
+  color:var(--testo);font-family:inherit;font-size:16px;font-weight:600;line-height:1.2;cursor:pointer;text-decoration:none}
+.aic-btn:hover{border-color:var(--blu);background:var(--blu-tenue)}
+.aic-btn small{font-size:13px;font-weight:600;color:var(--testo-3)}
+.aic-btn:disabled{opacity:.6;cursor:default}
+.aic-btn--pieno{background:var(--blu);border-color:var(--blu);color:#fff}
+.aic-btn--pieno:hover{background:var(--blu-hover);border-color:var(--blu-hover)}
+.aic-btn--pieno small{color:rgba(255,255,255,.85)}
+.aic-link{background:none;border:none;color:var(--blu);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;padding:8px 4px}
+.aic-link--del{color:var(--testo-2)}
+.aic-link--del:hover{color:var(--err)}
+.aic-mic{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;
+  border:1.5px solid var(--bordo-forte);border-radius:var(--r);background:var(--card);
+  color:var(--testo);font-family:inherit;font-size:16px;font-weight:600;line-height:1.2;cursor:pointer}
+.aic-mic[hidden]{display:none}
+.aic-mic:hover{border-color:var(--blu);background:var(--blu-tenue)}
+.aic-mic--on{background:var(--err-bg);border-color:var(--err);color:var(--err)}
+.aic-mic--on .aic-ico{animation:aicPulsa 1s ease-in-out infinite}
+@keyframes aicPulsa{50%{opacity:.35}}
+.aic-st{font-size:15px;line-height:1.45;color:var(--testo-2);margin-top:8px;min-height:0}
+.aic-st:empty{display:none}
+.aic-st--ok{color:var(--ok);font-weight:600}
+.aic-st--err{color:var(--err);font-weight:600}
+.sh-b.aic-box{border:1.5px dashed var(--blu);border-radius:var(--r-card);padding:16px;background:var(--blu-tenue)}
+.sh-b.aic-box .sh-tit{border:none;padding-bottom:4px}
+.aic-box--lavora{opacity:.75;pointer-events:none}
+.aic-nuovo{margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;
+  background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);padding:10px 12px}
+.aic-nuovo[hidden]{display:none}
+.aic-lav{font-size:17px;margin-bottom:12px}
+.aic-segm{margin-bottom:12px;flex-wrap:wrap}
+.aic-segm button{height:40px;font-size:15px}
+.aic-conta{list-style:none;margin:0 0 10px;padding:0;border:1px solid var(--bordo);border-radius:var(--r)}
+.aic-conta li{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:16px;border-top:1px solid var(--bordo)}
+.aic-conta li:first-child{border-top:none}
+.aic-conta li span{color:var(--testo-2)}
+.aic-rap{display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.45;color:var(--testo)}
+.aic-rap div{background:var(--sfondo);border-radius:8px;padding:8px 10px}
+.aic-rap small{display:block;font-size:14px;color:var(--testo-3);font-weight:600}
+.aic-banda{border-radius:var(--r);padding:12px 14px;font-size:16px;line-height:1.5;background:var(--sfondo);border:1px solid var(--bordo)}
+.aic-banda .aic-btn{margin-top:10px}
+.aic-banda--ok{background:var(--ok-bg);border-color:#a7f3d0}
+.aic-banda--attesa{background:var(--attesa-bg);border-color:#fcd34d}
+.aic-pill{font-size:14px;font-weight:700;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.aic-pill--ok{background:var(--ok-bg);color:var(--ok)}
+.aic-pill--attesa{background:var(--attesa-bg);color:var(--attesa)}
+.aic-sc{border:1px solid var(--bordo);border-radius:var(--r-card);padding:14px;margin-bottom:12px;background:var(--card)}
+.aic-sc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:17px;margin-bottom:10px;flex-wrap:wrap}
+.aic-sc-ops{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:6px}
+.aic-sc-ops li{display:flex;align-items:center;gap:10px;font-size:16px;padding:6px 8px;border-radius:8px}
+.aic-sc-ops li small{margin-left:auto;font-size:15px;color:var(--testo-2);font-weight:600}
+.aic-sc-ops li.on{background:var(--ok-bg);font-weight:700}
+.aic-sc-foto{display:inline-block;width:44px;height:44px;border-radius:8px;background:var(--sfondo) center/cover no-repeat;border:1px solid var(--bordo);flex:0 0 auto}
+.aic-sc-nota{font-size:15px;color:var(--testo-2);font-style:italic;margin-bottom:8px}
+.aic-opz{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+.aic-opz-foto{width:56px;height:56px;border:1.5px dashed var(--bordo-forte);border-radius:10px;display:flex;
+  align-items:center;justify-content:center;color:var(--testo-2);cursor:pointer;flex:0 0 auto;overflow:hidden}
+.aic-opz-foto .aic-sc-foto{width:56px;height:56px;border:none;border-radius:0}
+.aic-opz-foto:hover{border-color:var(--blu);color:var(--blu)}
+.aic-opz-campi{flex:1 1 auto;display:flex;flex-direction:column;gap:6px;min-width:0}
+.aic-opz-campi input{width:100%;min-height:42px;border:1.5px solid var(--bordo);border-radius:var(--r);padding:0 12px;font-family:inherit;font-size:16px;color:var(--testo)}
+.aic-opz-campi input:focus{outline:none;border-color:var(--blu)}
+.aic-opz .aic-link--del{font-size:18px;padding:10px}
+@media (max-width:880px){
+  .aic-btn,.aic-mic{flex:1 1 auto;justify-content:center}
+}

@@ -438,7 +438,7 @@
     </section>
 
     <section id="fornitori">
-      <div class="sec-head"><h2>Fornitori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button><button class="btn add" data-action="new-fattf">+ Fattura da pagare</button></div></div>
+      <div class="sec-head"><h2>Fornitori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button><button class="btn add" data-action="new-fattf">📷 Fotografa una fattura</button><button class="btn add" data-action="new-fattf">+ Fattura da pagare</button></div></div>
       <div id="fattf-riass"></div>
       <div class="grid" id="forn-list"></div>
       <h3 id="fattf-tit" style="margin:24px 0 12px;font-size:19px;display:none">Fatture da pagare</h3>
@@ -657,6 +657,7 @@
 <script src="/js/gest-promemoria.js"></script>
 <script src="/js/gest-fornitori.js"></script>
 <script src="/js/gest-mezzi.js"></script>
+<script src="/js/gest-ai-cantiere.js"></script>
 <!-- il punto delle migliaia nelle caselle in euro: basta `data-euro` sulla casella -->
 <script src="/js/euro-casella.js"></script>
 <!-- Le tavole del decreto parametri (DM 17 giugno 2016): servono solo agli
@@ -2119,6 +2120,9 @@
        in fila con tutte le altre. */
     "📐":'<path d="M4 4v16h16"/><path d="M4 4 20 20"/>',
     "🏷":'<path d="M20.6 12.4 12.4 20.6a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 2 12V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.6Z"/><path d="M7 7h.01"/>',
+    /* 26 set 2026 — le idee rubate: il microfono e «Aggiorna il cliente» */
+    "🎤":'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/>',
+    "📣":'<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
     "🏛":'<path d="M3 22h18"/><path d="m12 3 9 6H3Z"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/>'
   };
   const _EMO_KEYS=Object.keys(_ICONS).join("|");
@@ -2647,7 +2651,7 @@
       +   '<span class="ai-riga-c">1 credito</span>'
       + '</button>'
       + '<div class="ai-riga-giu" id="ai-riga-giu" hidden>'
-      +   '<label class="ai-riga-lab" for="ai-riga-in">Scrivi come parleresti al telefono</label>'
+      +   '<label class="ai-riga-lab" for="ai-riga-in">Scrivi o parla come al telefono</label>'
       +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(m.esempio) + '"></textarea>'
       /* ⛔ 22 agosto 2026 — LE MISURE, SCRITTE PRIMA DI SCRIVERE.
          Alessio aveva chiesto un preventivo per un bagno senza dire quanto
@@ -2667,6 +2671,10 @@
             : '')
       +   '<div class="ai-riga-az">'
       +     '<button type="button" class="ai-riga-go" id="ai-riga-go">Riempi le caselle</button>'
+      /* 26 set 2026 — «Parla»: in cantiere si parla, non si scrive
+         (js/gest-ai-cantiere.js). Nasce nascosto: compare solo dove il
+         browser sa ascoltare. */
+      +     (typeof aiMicHTML==="function"?aiMicHTML("ai-riga-mic"):"")
       +     '<span class="ai-riga-st" id="ai-riga-st"></span>'
       +   '</div>'
       + '</div>'
@@ -2714,6 +2722,7 @@
       if(si) setTimeout(()=>inp.focus(),60);
     }
     apri.onclick=()=>mostra(giu.hasAttribute("hidden"));
+    if(typeof aiMicrofono==="function") aiMicrofono($("#ai-riga-mic"),inp,st);
 
     /* ============================================================
        ⛔ 22 agosto 2026 — LE MISURE SI CHIEDONO PRIMA, E GRATIS
@@ -4599,6 +4608,9 @@
     if(ruoloUtente==='professionista')v.push({lab:"\ud83d\udccb Verbale di sopralluogo",action:"verbale",data:{id:l.id}});
     if(l.dove)v.push({lab:"\ud83d\uddfa Mappa",action:"map",data:{q:l.dove}});
     v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
+    /* 26 set 2026 — le idee rubate (js/gest-ai-cantiere.js) */
+    v.push({lab:"📣 Aggiorna il cliente",action:"res-cliente",data:{id:l.id}});
+    if(ruoloUtente!=='professionista')v.push({lab:"🎨 Scelte del cliente",action:"scelte-cliente",data:{id:l.id}});
     v.push({sep:true});
     v.push({lab:"\ud83d\udcc4 Scarica PDF",action:"pdf",data:{id:l.id}});
     if(fatto)v.push({lab:(fs==="none"&&!_lavFatturati.has(String(l.id)))?"\ud83e\uddfe Crea fattura":"\ud83e\uddfe Apri fattura",action:"fatt",data:{id:l.id}});
@@ -5819,8 +5831,10 @@
 
   async function fattfForm(f){
     const isNew=!(f&&f.id);f=f||{};
-    if(isNew&&!fornCache.length){toast("Prima aggiungi un fornitore");fornForm(null);return;}
-    const fops=fornCache.map(x=>'<option value="'+x.id+'" '+(String(f.fornitore_id||'')===String(x.id)?'selected':'')+'>'+esc(x.nome)+'</option>').join("");
+    /* 26 set 2026 — prima qui si fermava: «Prima aggiungi un fornitore».
+       Con la foto della fattura il fornitore lo si aggiunge da li', con un
+       tocco: quindi il modulo si apre lo stesso, con la tendina vuota. */
+    const fops=(fornCache.length?'':'<option value="">— nessun fornitore ancora —</option>')+fornCache.map(x=>'<option value="'+x.id+'" '+(String(f.fornitore_id||'')===String(x.id)?'selected':'')+'>'+esc(x.nome)+'</option>').join("");
     let lavOps='<option value="">— nessuno —</option>';
     if(sb&&sbUid){
       const {data:lv}=await sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("data_prevista",{ascending:false}).limit(100);
@@ -5828,9 +5842,12 @@
     }
     openSheetGrande(isNew?'Fattura da pagare':'Modifica fattura',
       '<div class="sh-cols"><div class="sh-col">'
+      +(isNew&&typeof ffFotoHTML==="function"?ffFotoHTML():'')
       +'<div class="sh-b">'
       +'<div class="sh-tit">La fattura</div>'
-      +'<div class="field"><label>Fornitore</label><select id="ff-forn">'+fops+'</select></div>'
+      +'<div class="field"><label>Fornitore</label><select id="ff-forn">'+fops+'</select>'
+      +(fornCache.length?'':'<div class="campo-aiuto">Con la foto qui sopra lo aggiungo io. A mano: <button type="button" class="aic-link" data-action="new-forn">+ Nuovo fornitore</button></div>')
+      +'</div>'
       +'<div class="row2">'
       +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
       +'<div class="field"><label>Data fattura</label><input type="date" id="ff-data" value="'+(f.data||todayStr())+'"></div></div>'
@@ -5850,6 +5867,7 @@
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-fattf" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button>');
     ctrAscolta('fattfornitore');
+    if(isNew&&typeof ffFotoVia==="function")ffFotoVia();
   }
   async function saveFattf(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -5862,6 +5880,8 @@
       :await sb.from("gest_fatture_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere(),stato:"da_pagare"})).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+    /* la foto letta dall'AI resta fra i documenti del fornitore */
+    if(!id&&typeof ffFotoAllega==="function")ffFotoAllega(fornitore_id);
     closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornata ✔":"Fattura registrata ✔");
   }
 
@@ -7816,6 +7836,7 @@
       + '</div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       + '<button class="btn-primary" data-action="doc-cli-invia" data-id="'+esc(id)+'">Invia</button>');
+    if(typeof aiScriviMeglioAggancia==="function")aiScriviMeglioAggancia("#dm-msg","dm");
   }
 
   async function docCliInvia(id){

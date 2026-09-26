@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Le tue scelte per il lavoro</title>
+<link rel="icon" href="/img/trovaimpresa-logo.svg">
+<!--
+  LE SCELTE DEL CLIENTE — 26 settembre 2026 (idea presa da Buildertrend)
+
+  La pagina che il CLIENTE dell'impresa apre dal link mandato su WhatsApp.
+  Niente account, niente menu del sito: solo le cose da scegliere, grandi,
+  da fare col pollice. Parla solo con netlify/functions/scelte-cliente.js.
+
+  ⛔ noindex: e' una pagina privata di un cliente, Google non la deve vedere.
+  ⛔ Si salva a ogni tocco (senza confermare): se il cliente chiude a meta'
+     e riapre domani, ritrova quello che aveva scelto.
+-->
+<style>
+  :root{--blu:#0066ff;--blu-s:#0047b3;--aran:#ff8800;--testo:#0f172a;--t2:#475569;--bordo:#e2e8f0;
+        --ok:#059669;--okbg:#ecfdf5;--att:#b45309;--attbg:#fffbeb;--sf:#f4f7fb}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--sf);color:var(--testo);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .testa{background:#fff;border-bottom:1px solid var(--bordo);padding:18px 16px 16px;text-align:center}
+  .testa .imp{font-size:15px;color:var(--t2);font-weight:600}
+  .testa h1{font-size:23px;line-height:1.25;margin-top:4px}
+  .testa p{font-size:16px;color:var(--t2);margin-top:8px}
+  main{max-width:640px;margin:0 auto;padding:16px 16px 140px}
+  .banda{border-radius:14px;padding:14px 16px;font-size:16px;margin-bottom:16px}
+  .banda--ok{background:var(--okbg);border:1px solid #a7f3d0}
+  .banda--att{background:var(--attbg);border:1px solid #fcd34d}
+  .scelta{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);padding:18px 16px;margin-bottom:18px;border-top:4px solid var(--blu)}
+  .scelta.fatta{border-top-color:var(--ok)}
+  .scelta h2{font-size:20px;line-height:1.3;display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .scelta h2 small{font-size:14px;font-weight:700;border-radius:999px;padding:4px 10px;white-space:nowrap}
+  .scelta h2 small.si{background:var(--okbg);color:var(--ok)}
+  .scelta h2 small.no{background:var(--attbg);color:var(--att)}
+  .ops{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
+  .op{display:flex;flex-direction:column;text-align:left;border:2px solid var(--bordo);border-radius:14px;background:#fff;
+      font:inherit;color:inherit;cursor:pointer;overflow:hidden;padding:0;min-height:64px;transition:border-color .15s}
+  .op:hover{border-color:#93b8ff}
+  .op.on{border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.15)}
+  .op:disabled{cursor:default}
+  .op .foto{width:100%;aspect-ratio:1/1;background:var(--sf) center/cover no-repeat}
+  .op .dati{display:flex;align-items:flex-start;gap:10px;padding:12px}
+  .op .pallino{width:26px;height:26px;border-radius:50%;border:2px solid #94a3b8;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+  .op.on .pallino{border-color:var(--blu);background:var(--blu)}
+  .op.on .pallino::after{content:"";width:10px;height:10px;border-radius:50%;background:#fff}
+  .op .nome{font-weight:700;font-size:16px;line-height:1.3}
+  .op .prezzo{font-size:15px;color:var(--t2);margin-top:2px}
+  .nota{margin-top:12px}
+  .nota label{font-size:15px;color:var(--t2);font-weight:600}
+  .nota textarea{width:100%;margin-top:6px;border:1.5px solid var(--bordo);border-radius:12px;padding:12px;font:inherit;font-size:16px;min-height:52px;resize:vertical}
+  .nota textarea:focus{outline:none;border-color:var(--blu)}
+  .fondo{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--bordo);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .fondo .in{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+  .fondo .conta{font-size:15px;color:var(--t2);text-align:center}
+  .conferma{width:100%;min-height:54px;border:none;border-radius:12px;background:var(--blu);color:#fff;font:700 18px inherit;cursor:pointer}
+  .conferma:disabled{background:#cbd5e1;cursor:default}
+  .msg{font-size:15px;text-align:center;min-height:0}
+  .msg.err{color:#dc2626;font-weight:600}
+  .piede{text-align:center;font-size:14px;color:var(--t2);margin-top:28px}
+  .piede a{color:var(--blu);text-decoration:none;font-weight:600}
+  .piede img{width:170px;height:auto;display:block;margin:0 auto 6px}
+  .riep{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);overflow:hidden}
+  .riep div{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-top:1px solid var(--bordo)}
+  .riep div:first-child{border-top:none}
+  .riep span{font-size:15px;color:var(--t2)}
+  .riep b{font-size:18px}
+  .riep i{font-size:15px;color:var(--t2)}
+  .vuoto{text-align:center;padding:40px 10px;font-size:18px}
+  .tel{display:inline-block;margin-top:12px;background:var(--blu);color:#fff;text-decoration:none;padding:12px 20px;border-radius:12px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="testa" id="testa">
+  <div class="imp" id="t-imp">&nbsp;</div>
+  <h1 id="t-lav">Le tue scelte</h1>
+  <p id="t-sub">Sto caricando…</p>
+</div>
+<main id="main"></main>
+<div class="fondo" id="fondo" hidden>
+  <div class="in">
+    <div class="conta" id="conta"></div>
+    <button class="conferma" id="conferma" disabled>Confermo le mie scelte</button>
+    <div class="msg" id="msg" aria-live="polite"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var API="/.netlify/functions/scelte-cliente";
+  var t=new URLSearchParams(location.search).get("t")||"";
+  var S=null, ferme=false, salvaTimer=null;
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function piede(){
+    return '<div class="piede"><a href="https://trovaimpresa.com" target="_blank" rel="noopener">'
+      +'<img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa">Pagina fatta con il gestionale TrovaImpresa</a></div>';
+  }
+  function errore(testo){
+    $("t-sub").textContent="";
+    $("main").innerHTML='<div class="vuoto">'+esc(testo)+'</div>'+piede();
+    $("fondo").hidden=true;
+  }
+  function disegna(){
+    $("t-imp").textContent=S.impresa;
+    $("t-lav").textContent=S.lavoro;
+    ferme=!!S.confermato_il;
+    $("t-sub").textContent=ferme?"Hai già confermato le tue scelte.":"Tocca quello che preferisci. Quando hai scelto tutto, premi «Confermo».";
+    var h="";
+    if(ferme){
+      h+='<div class="banda banda--ok"><b>Scelte confermate il '+new Date(S.confermato_il).toLocaleDateString("it-IT",{day:"numeric",month:"long"})
+        +'.</b> Le abbiamo mandate a '+esc(S.impresa)+'. Se vuoi cambiare qualcosa, chiamali.'
+        +(S.telefono?'<br><a class="tel" href="tel:'+esc(String(S.telefono).replace(/[^\d+]/g,""))+'">Chiama '+esc(S.impresa)+'</a>':'')+'</div>';
+    }
+    if(!S.scelte.length){h+='<div class="vuoto">Per ora non c\'è niente da scegliere.</div>';}
+    /* confermate: non si rimostra tutto il catalogo, solo quello che ha scelto */
+    if(ferme&&S.scelte.length){
+      h+='<div class="riep">'+S.scelte.map(function(s){var o=s.opzioni[s.scelta]||{};
+        return '<div><span>'+esc(s.titolo)+'</span><b>'+esc(o.nome||"—")+'</b>'+(o.prezzo?'<span>'+esc(o.prezzo)+'</span>':'')
+          +(s.nota?'<i>«'+esc(s.nota)+'»</i>':'')+'</div>';}).join("")+'</div>'+piede();
+      $("main").innerHTML=h;$("fondo").hidden=true;return;
+    }
+    S.scelte.forEach(function(s,i){
+      var fatta=s.scelta!==null&&s.scelta!==undefined;
+      h+='<section class="scelta'+(fatta?' fatta':'')+'"><h2>'+esc(s.titolo)
+        +'<small class="'+(fatta?'si':'no')+'">'+(fatta?'Scelto':'Da scegliere')+'</small></h2><div class="ops">';
+      s.opzioni.forEach(function(o,k){
+        h+='<button type="button" class="op'+(s.scelta===k?' on':'')+'" data-s="'+i+'" data-k="'+k+'"'+(ferme?' disabled':'')+'>'
+          +(o.foto?'<span class="foto" style="background-image:url(\''+esc(o.foto)+'\')"></span>':'')
+          +'<span class="dati"><span class="pallino"></span><span><span class="nome">'+esc(o.nome)+'</span>'
+          +(o.prezzo?'<span class="prezzo" style="display:block">'+esc(o.prezzo)+'</span>':'')+'</span></span></button>';
+      });
+      h+='</div>'
+        +(ferme?(s.nota?'<div class="nota"><label>La tua nota</label><div>«'+esc(s.nota)+'»</div></div>':'')
+          :'<div class="nota"><label for="n'+i+'">Vuoi aggiungere qualcosa? (facoltativo)</label><textarea id="n'+i+'" data-s="'+i+'" rows="1" placeholder="Es. il colore più chiaro">'+esc(s.nota)+'</textarea></div>')
+        +'</section>';
+    });
+    h+=piede();
+    $("main").innerHTML=h;
+    $("fondo").hidden=ferme||!S.scelte.length;
+    conta();
+  }
+  function conta(){
+    var fatte=S.scelte.filter(function(s){return s.scelta!==null&&s.scelta!==undefined;}).length, tot=S.scelte.length;
+    $("conta").textContent=fatte===tot?"Hai scelto tutto.":"Hai scelto "+fatte+" su "+tot+".";
+    $("conferma").disabled=fatte!==tot;
+  }
+  function manda(conferma){
+    var corpo={t:t,conferma:!!conferma,scelte:S.scelte.filter(function(s){return s.scelta!==null&&s.scelta!==undefined;})
+      .map(function(s){return{id:s.id,scelta:s.scelta,nota:s.nota||""};})};
+    return fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(corpo)})
+      .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});});
+  }
+  function salvaPiano(){clearTimeout(salvaTimer);salvaTimer=setTimeout(function(){manda(false).catch(function(){});},700);}
+
+  document.addEventListener("click",function(e){
+    var b=e.target.closest(".op");if(!b||ferme)return;
+    var i=+b.dataset.s,k=+b.dataset.k;
+    S.scelte[i].scelta=k;
+    var sec=b.closest(".scelta");
+    sec.querySelectorAll(".op").forEach(function(x){x.classList.toggle("on",x===b);});
+    sec.classList.add("fatta");
+    var sm=sec.querySelector("h2 small");sm.className="si";sm.textContent="Scelto";
+    conta();salvaPiano();
+  });
+  document.addEventListener("input",function(e){
+    var ta=e.target.closest("textarea[data-s]");if(!ta)return;
+    S.scelte[+ta.dataset.s].nota=ta.value;salvaPiano();
+  });
+  $("conferma").onclick=function(){
+    var b=this;b.disabled=true;b.textContent="Invio…";$("msg").className="msg";$("msg").textContent="";
+    clearTimeout(salvaTimer);
+    manda(true).then(function(r){
+      if(!r.ok){b.textContent="Confermo le mie scelte";b.disabled=false;$("msg").className="msg err";$("msg").textContent=(r.j&&r.j.error)||"Non è andata. Riprova.";return;}
+      S.confermato_il=new Date().toISOString();disegna();window.scrollTo(0,0);
+    }).catch(function(){b.textContent="Confermo le mie scelte";b.disabled=false;$("msg").className="msg err";$("msg").textContent="Manca la connessione. Riprova fra un attimo.";});
+  };
+
+  if(!/^[A-Za-z0-9_-]{20,64}$/.test(t)){errore("Questo link non è completo. Riaprilo dal messaggio che ti hanno mandato.");return;}
+  fetch(API+"?t="+encodeURIComponent(t)).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});})
+    .then(function(r){if(!r.ok){errore((r.j&&r.j.error)||"Questo link non funziona.");return;}S=r.j;disegna();})
+    .catch(function(){errore("Manca la connessione. Riprova fra un attimo.");});
+})();
+</script>
+</body>
+</html>
