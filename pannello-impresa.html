@@ -6823,14 +6823,32 @@ function toggleSidebar() {
     }
   }
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function(pos) { caricaMeteo(pos.coords.latitude, pos.coords.longitude); },
-      function()    { setMeteo('📍', 'Posizione non autorizzata', '', ''); }
-    );
-  } else {
-    setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
+  /* ⛔ 26 SETTEMBRE 2026 — IL METEO E' QUELLO DELLA CITTA' DELL'IMPRESA.
+     Prima chiedeva al browser «dove sei?» a ogni apertura del pannello: chi
+     diceva no (o non capiva la domanda) vedeva «Posizione non autorizzata».
+     La citta' l'impresa l'ha gia' scritta nel profilo: si usa quella, niente
+     domanda, e funziona sempre. Descrizione in italiano (`lang=it`).
+     ⚠️ Il nome mostrato e' quello del PROFILO, non quello che risponde wttr.in:
+        per «Rieti» wttr.in risponde «Cantalice» (la stazione piu' vicina). */
+  async function caricaMeteoCitta(citta) {
+    try {
+      var r   = await fetchRetry('https://wttr.in/' + encodeURIComponent(citta + ', Italia') + '?format=j1&lang=it', 3);
+      var d   = await r.json();
+      var cur = d.current_condition[0];
+      var desc = (cur.lang_it && cur.lang_it[0] && cur.lang_it[0].value) ||
+                 (cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value) || '';
+      setMeteo(WMO_ICONA[parseInt(cur.weatherCode, 10)] || '🌡️', citta, cur.temp_C + '°C', desc);
+    } catch(e) {
+      setMeteo('❌', 'Meteo non disponibile', '', '');
+    }
   }
+  (function aspettaCitta(n) {
+    var imp   = (typeof impresaCorrente !== 'undefined') ? impresaCorrente : null;
+    var citta = imp && String(imp.citta || '').trim();
+    if (citta) { caricaMeteoCitta(citta); return; }
+    if ((imp && n >= 6) || n >= 40) { setMeteo('📍', 'Scrivi la tua città nel profilo', '', ''); return; }
+    setTimeout(function () { aspettaCitta(n + 1); }, 500);
+  })(0);
 })();
 </script>
 

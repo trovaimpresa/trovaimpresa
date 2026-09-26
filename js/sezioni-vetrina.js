@@ -143,6 +143,13 @@
     '#sec-dashboard .ti-giornata .widget-calc-card{grid-row:5 !important;grid-column:1 !important}' +
     '#sec-dashboard .ti-giornata #cal-griglia > div{min-height:42px;padding:6px 0 !important}}' +
 
+  /* ---------- LA MAPPA NEL MENU A SINISTRA (26 set 2026) ----------
+     Le mattonelle di OpenStreetMap a quello zoom sono color pastello: nel menu
+     sembrava sbiadita (Alex: «da' piu' colore alla mappa»). Si ravvivano i
+     colori con un filtro, senza cambiare fornitore della mappa. */
+  '#sidebar-map .leaflet-tile-pane{filter:saturate(1.9) contrast(1.12) brightness(.97)}' +
+  '#sidebar-map{border:1px solid #e3e8ef;box-shadow:0 4px 14px rgba(10,42,77,.08)}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
