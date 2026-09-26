@@ -4556,3 +4556,33 @@ body:has(#ti-fondatore) .sheet--grande{
  .side nav.tabs button.tab-cta{font-size:17px!important}
  .side nav.tabs button.tab-cta small{font-size:14.5px!important}
 }
+
+/* =====================================================================
+   26 set 2026 (sera) — LE LISTE A RIGHE, come il Riepilogo (ok di Alessio)
+   Lavori, Preventivi, Fatture, Clienti, Mezzi, Squadra, Scadenzario,
+   Computi, Agenda, Richieste dal sito, Cestino: ogni .job dentro
+   .griglia-schede diventa una riga (nome, dettagli sotto, stato e
+   pulsanti a destra). Solo aspetto: l'HTML resta quello di prima.
+   Le cose che non sono .job (i riquadri coi numeri, la riga dei totali)
+   restano come erano, una sotto l'altra.
+   ===================================================================== */
+.wrap section .griglia-schede{display:flex!important;flex-direction:column;gap:0!important}
+.wrap section .griglia-schede > :not(.job){margin-bottom:12px!important}
+.wrap section .griglia-schede > .job{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"top stati az" "meta stati az";column-gap:18px;row-gap:5px;align-items:center;
+  padding:13px 20px!important;margin:0 0 -1px 0!important;border:1px solid #e3e8ef!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;min-height:0!important}
+.wrap section .griglia-schede > :not(.job) + .job{border-top-left-radius:14px!important;border-top-right-radius:14px!important}
+.wrap section .griglia-schede > .job:last-child{border-bottom-left-radius:14px!important;border-bottom-right-radius:14px!important}
+.wrap section .griglia-schede > .job:first-child{border-top-left-radius:14px!important;border-top-right-radius:14px!important}
+.wrap section .griglia-schede > .job:hover{background:#f5f9ff!important}
+.wrap section .griglia-schede > .job > *{margin:0!important;padding:0!important;border:0!important}
+.wrap section .griglia-schede > .job .job-top{grid-area:top;display:flex;align-items:center;gap:10px;min-width:0}
+.wrap section .griglia-schede > .job .job-cli{font-size:17px!important;font-weight:700}
+.wrap section .griglia-schede > .job .stati{grid-area:stati;justify-self:end}
+.wrap section .griglia-schede > .job .job-meta{grid-area:meta;display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:4px 20px;font-size:15px!important;color:#5f6b7a}
+.wrap section .griglia-schede > .job .job-meta > *{display:inline-flex!important;align-items:center;gap:5px;margin:0!important}
+.wrap section .griglia-schede > .job .job-meta:empty{display:none!important}
+.wrap section .griglia-schede > .job .job-actions{grid-area:az;display:flex;gap:8px;align-items:center}
+@media(max-width:760px){
+ .wrap section .griglia-schede > .job{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"top az" "stati az" "meta az";column-gap:10px;padding:12px 14px!important}
+ .wrap section .griglia-schede > .job .stati{justify-self:start}
+}
