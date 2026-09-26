@@ -32,7 +32,8 @@
 
   /* ---------- RIEPILOGO (26 set 2026) ----------
      - a tutta pagina, come le altre sezioni;
-     - copertina piu' bassa: prima arrivava a 800 px e spingeva tutto sotto;
+     - la copertina NON si tocca: resta 2,5:1 come la scheda pubblica (il tetto
+       di 320 px tagliava il personaggio di Alex, 26 set sera: tolto);
      - numeri e carte SENZA la striscia colorata in cima (ogni carta aveva
        un colore diverso, senza un significato: e' la stessa regola gia'
        decisa per il riepilogo del gestionale, il 20 agosto);
@@ -40,7 +41,6 @@
        impilate e centrate: meno alte, si leggono da sinistra come un elenco.
      ⚠️ Le due carte doppie (offerte di lavoro, subappalti) hanno lo stile
         scritto dentro l'HTML: per loro si sistemano i due mezzi, non la carta. */
-  '#sec-dashboard .dash-cover{max-height:320px}' +
   '#sec-dashboard .dash-stat-card{border-top:1px solid #e3e8ef !important;border:1px solid #e3e8ef;box-shadow:0 6px 20px rgba(10,42,77,.06)}' +
   '#sec-dashboard .dash-quick-title{font-size:15px;letter-spacing:.8px;color:#475569;margin:26px 0 12px}' +
   '#sec-dashboard .dash-quick-grid{gap:14px}' +
@@ -91,6 +91,57 @@
   '@media(max-width:600px){#sec-dashboard .g-carta:not(.g-striscia){grid-template-columns:minmax(0,1fr);' +
     'grid-template-areas:"testa" "txt" "azione";row-gap:8px}' +
     '#sec-dashboard .g-carta.g-striscia{grid-template-columns:minmax(0,1fr)}}' +
+
+  /* ---------- LA TUA GIORNATA (ex «Calendario & Orario», 26 set 2026) ----------
+     Prima: orologio in una scatola enorme e vuota, meteo con le emoji,
+     numeri del calendario piccoli, bordi e colori diversi per ogni pezzo.
+     Adesso: in alto ora + data e meteo, sotto calendario e appunti, a destra
+     la calcolatrice. Stessi bordi grigi delle altre carte, numeri grandi.
+     ⚠️ SUL TELEFONO la calcolatrice era ROTTA: css/mobile.css mette a una
+        colonna ogni griglia scritta nello stile (`[style*=grid-template-columns]`),
+        anche i tasti. Il «=» restava in colonna 4 e i tasti diventavano
+        stecchini. Qui le colonne si rimettono con un selettore piu' forte. */
+  '#sec-dashboard .ti-giornata{padding:26px !important;border:1px solid #e3e8ef;box-shadow:0 6px 20px rgba(10,42,77,.06) !important}' +
+  '#sec-dashboard .ti-giornata .tg-titolo{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:22px !important;font-weight:800;margin-bottom:18px !important}' +
+  '#sec-dashboard .ti-giornata .cal-section-grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.95fr) !important;' +
+    'grid-template-rows:auto 1fr !important;grid-template-areas:"ora meteo calc" "cal note calc";gap:16px !important}' +
+  '#sec-dashboard .ti-giornata .tg-box{border:1px solid #e3e8ef !important;border-radius:16px !important;background:#fff !important;box-shadow:none !important}' +
+  '#sec-dashboard .ti-giornata .tg-ora{grid-area:ora;flex-direction:column;align-items:flex-start !important;justify-content:center !important;padding:18px 22px !important;gap:4px}' +
+  '#sec-dashboard .ti-giornata #cal-orologio{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:44px !important;letter-spacing:1px !important;color:#0a2a4d !important;text-align:left !important;line-height:1.05;font-variant-numeric:tabular-nums}' +
+  '#sec-dashboard .ti-giornata .tg-data{font-size:18px;font-weight:600;color:#5f6b7a}' +
+  '#sec-dashboard .ti-giornata .tg-data::first-letter{text-transform:uppercase}' +
+  '#sec-dashboard .ti-giornata .tg-meteo{grid-area:meteo;padding:18px 22px !important;gap:18px !important}' +
+  '#sec-dashboard .ti-giornata #meteo-icona{width:52px;height:52px;flex:0 0 52px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#fff6e0;color:#e8a317}' +
+  '#sec-dashboard .ti-giornata #meteo-icona svg{width:32px;height:32px}' +
+  '#sec-dashboard .ti-giornata #meteo-citta{font-size:17px !important;color:#0a2a4d !important}' +
+  '#sec-dashboard .ti-giornata #meteo-temp{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:30px !important;color:#0a2a4d !important;font-weight:800;line-height:1.1}' +
+  '#sec-dashboard .ti-giornata #meteo-condizione{font-size:15px !important;color:#5f6b7a !important}' +
+  '#sec-dashboard .ti-giornata .tg-cal{grid-area:cal}' +
+  '#sec-dashboard .ti-giornata .tg-cal > div:first-child{padding:12px 16px !important}' +
+  '#sec-dashboard .ti-giornata #cal-label{font-size:18px !important}' +
+  '#sec-dashboard .ti-giornata .tg-cal button{font-size:28px !important;min-width:40px;min-height:40px !important}' +
+  '#sec-dashboard .ti-giornata .calendar-header{background:#f3f6fa !important}' +
+  '#sec-dashboard .ti-giornata .calendar-header > div{color:#5f6b7a !important;font-size:15px !important}' +
+  '#sec-dashboard .ti-giornata #cal-griglia{background:#eef1f5 !important}' +
+  '#sec-dashboard .ti-giornata #cal-griglia > div{font-size:17px !important;padding:10px 0 !important;min-height:46px;display:flex;align-items:center;justify-content:center}' +
+  '#sec-dashboard .ti-giornata #cal-griglia > div > div{width:36px !important;height:36px !important;font-size:17px !important}' +
+  '#sec-dashboard .ti-giornata .tg-note{grid-area:note;padding:18px !important;gap:12px !important}' +
+  '#sec-dashboard .ti-giornata .tg-note > div:first-child,#sec-dashboard .ti-giornata .widget-calc-card > div:first-child{font-size:15px !important;color:#0a2a4d !important;letter-spacing:.6px}' +
+  '#sec-dashboard .ti-giornata #widget-note{font-size:16px !important;min-height:96px;padding:12px !important;border-radius:12px !important;border-color:#d5dde8 !important}' +
+  '#sec-dashboard .ti-giornata .tg-note > button{font-size:16px !important;padding:12px 18px !important;border-radius:12px !important}' +
+  '#sec-dashboard .ti-giornata .widget-calc-card{grid-row:1 / span 2 !important;grid-column:3 !important;padding:18px !important}' +
+  '#sec-dashboard .ti-giornata #wcalc-display{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:32px !important;padding:14px 16px !important;border-radius:12px !important;background:#f3f6fa !important}' +
+  '#sec-dashboard .ti-giornata .wcalc-keys{grid-template-columns:repeat(4,minmax(0,1fr)) !important;grid-auto-rows:minmax(52px,1fr) !important;gap:8px !important}' +
+  '#sec-dashboard .ti-giornata .wcalc-btn{font-size:21px;border-radius:12px;min-height:0 !important}' +
+  '#sec-dashboard .ti-giornata .wcalc-btn.wcalc-op{background:#eaf2ff;color:#0066ff}' +
+  '@media(max-width:1100px){#sec-dashboard .ti-giornata .cal-section-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;' +
+    'grid-template-areas:"ora meteo" "cal note" "calc calc"}' +
+    '#sec-dashboard .ti-giornata .widget-calc-card{grid-row:3 !important;grid-column:1 / -1 !important}}' +
+  '@media(max-width:768px){#sec-dashboard .ti-giornata{padding:16px !important}' +
+    '#sec-dashboard .ti-giornata .cal-section-grid{grid-template-columns:minmax(0,1fr) !important;grid-template-areas:"ora" "meteo" "cal" "note" "calc";gap:12px !important}' +
+    '#sec-dashboard .ti-giornata #cal-orologio{font-size:38px !important}' +
+    '#sec-dashboard .ti-giornata .widget-calc-card{grid-row:5 !important;grid-column:1 !important}' +
+    '#sec-dashboard .ti-giornata #cal-griglia > div{min-height:42px;padding:6px 0 !important}}' +
 
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
@@ -357,12 +408,69 @@
     }
   }
 
+
+  /* LA TUA GIORNATA: dà i nomi ai pezzi (per il CSS), mette la data sotto
+     l'ora e cambia le emoji del meteo in disegni come il resto del pannello. */
+  var METEO_SVG = {
+    sole: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    nuvola: '<path d="M17.5 19H8a5 5 0 1 1 1.3-9.8A6 6 0 0 1 20.8 12 3.5 3.5 0 0 1 17.5 19z"/>',
+    pioggia: '<path d="M16 13H8a4 4 0 1 1 1-7.9A5 5 0 0 1 18.6 7 3 3 0 0 1 16 13z"/><path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>',
+    neve: '<path d="M16 12H8a4 4 0 1 1 1-7.9A5 5 0 0 1 18.6 6 3 3 0 0 1 16 12z"/><path d="M8 16h.01M12 18h.01M16 16h.01M10 21h.01M14 21h.01"/>',
+    tuono: '<path d="M16 12H8a4 4 0 1 1 1-7.9A5 5 0 0 1 18.6 6 3 3 0 0 1 16 12z"/><path d="m13 14-3 4h4l-3 4"/>',
+    nebbia: '<path d="M4 9h16M4 13h16M6 17h12"/>',
+    posto: '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+    no: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>'
+  };
+  var EMOJI_METEO = { '☀️':'sole','⛅':'nuvola','☁️':'nuvola','🌫️':'nebbia','🌦️':'pioggia','🌧️':'pioggia',
+    '🌨️':'neve','❄️':'neve','⛈️':'tuono','📍':'posto','❌':'no','🌡️':'sole' };
+  function iconaMeteo(el) {
+    if (!el || el.querySelector('svg.tg-m')) return;
+    var t = (el.textContent || '').trim();
+    var nome = EMOJI_METEO[t] || (t ? 'sole' : null);
+    if (!nome) return;
+    el.innerHTML = '<svg class="tg-m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + METEO_SVG[nome] + '</svg>';
+    el.style.color = nome === 'sole' ? '#e8a317' : (nome === 'posto' || nome === 'no') ? '#5f6b7a' : '#3a78d6';
+    el.style.background = nome === 'sole' ? '#fff6e0' : '#eef4ff';
+  }
+  function giornata() {
+    var griglia = document.querySelector('#sec-dashboard .cal-section-grid');
+    if (!griglia || griglia.parentNode.classList.contains('ti-giornata')) return;
+    var blocco = griglia.parentNode;
+    blocco.classList.add('ti-giornata');
+    var tit = blocco.firstElementChild;
+    if (tit && tit !== griglia) {
+      tit.classList.add('tg-titolo');
+      for (var i = tit.childNodes.length - 1; i >= 0; i--) {
+        var n = tit.childNodes[i];
+        if (n.nodeType === 3 && /Calendario/.test(n.textContent)) { n.textContent = ' La tua giornata'; break; }
+      }
+    }
+    function metti(sel, cls) { var e = document.querySelector(sel); var box = e && e.closest('.cal-section-grid > div'); if (box) box.classList.add('tg-box', cls); return box; }
+    var ora = metti('#cal-orologio', 'tg-ora');
+    metti('#meteo-icona', 'tg-meteo');
+    metti('#cal-griglia', 'tg-cal');
+    metti('#widget-note', 'tg-note');
+    metti('.wcalc-keys', 'tg-calc');
+    if (ora && !ora.querySelector('.tg-data')) {
+      var d = document.createElement('div'); d.className = 'tg-data';
+      var scrivi = function () { d.textContent = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }); };
+      scrivi(); setInterval(scrivi, 60000);
+      ora.appendChild(d);
+    }
+    var mi = document.getElementById('meteo-icona');
+    if (mi) {
+      iconaMeteo(mi);
+      new MutationObserver(function () { iconaMeteo(mi); }).observe(mi, { childList: true, characterData: true, subtree: true });
+    }
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
     try { foto(); } catch (e) { console.error('foto grafica:', e); }
     try { riepilogo(); } catch (e) { console.error('riepilogo grafica:', e); }
     try { messaggi(); } catch (e) { console.error('messaggi grafica:', e); }
+    try { giornata(); } catch (e) { console.error('giornata grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
