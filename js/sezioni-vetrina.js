@@ -338,6 +338,31 @@
     '.section:not(#sec-dashboard) > .topbar .topbar-title > svg.ti-ic{width:46px;height:46px;padding:11px;flex-basis:46px}' +
     '#sec-prezzi .pz-duo .pz-griglia{grid-template-columns:minmax(0,1fr) !important}}' +
 
+  /* ---------- TUTTE LE SEZIONI (26 set 2026, «senza fare uno per uno») ---------- */
+  '.section .profilo-title > svg{display:none}' +
+  '#sec-qrcode .profilo-card{display:grid;grid-template-columns:360px minmax(0,1fr);gap:18px 32px;align-items:start}' +
+  '#sec-qrcode #qr-code-container{grid-column:1;grid-row:1 / span 6;min-height:340px !important;margin:0 !important;border-radius:18px !important;box-shadow:inset 0 0 0 1px #e3e8ef;border:0 !important}' +
+  '#sec-qrcode #qr-url-line{grid-column:2;text-align:left !important;font-size:15px !important;margin:0 !important}' +
+  '#sec-qrcode .ai-form-group{grid-column:2;display:flex;align-items:center;gap:14px}' +
+  '#sec-qrcode .ai-form-group label{font-size:16px;font-weight:800;color:#0f172a;text-transform:none !important;letter-spacing:0 !important;margin:0}' +
+  '#sec-qrcode #qr-color-picker{width:64px !important;height:48px !important;border-radius:12px !important}' +
+  '#sec-qrcode .profilo-card > button{grid-column:2;background:#0066ff !important;border-radius:12px !important;font-size:17px !important;padding:15px !important;display:flex;align-items:center;justify-content:center;gap:8px}' +
+  '#sec-qrcode #qrSuccessBox{grid-column:2}' +
+  '#sec-qrcode .qr-usi{grid-column:2;grid-row:1}' +
+  '#sec-qrcode .qr-usi h3{font-size:20px;font-weight:800;color:#0f172a;margin:0 0 6px}' +
+  '#sec-qrcode .qr-usi p{font-size:16px;color:#475569;line-height:1.6;margin:0 0 14px}' +
+  '#sec-qrcode .qr-usi ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}' +
+  '#sec-qrcode .qr-usi li{display:flex;align-items:center;gap:10px;background:#f5f8fc;border:1px solid #e3e8ef;border-radius:14px;padding:12px 14px;font-size:15px;font-weight:700;color:#0a2a4d}' +
+  '#sec-qrcode .qr-usi li svg{width:22px;height:22px;color:#0066ff;flex:0 0 22px}' +
+  '.section .btn-salva-annuncio,.section .mpp-btn-save{display:inline-flex !important;align-items:center;justify-content:center;gap:8px}' +
+  '.section .profilo-title .ti-em{display:none}' +
+  /* Personalizza: via le strisce colorate in cima alle carte (anche nella miniatura del pannello: il Riepilogo vero non le ha piu') */
+  '#sec-personalizza .mpp-group{border-top:1px solid #e3e8ef !important;border-radius:18px !important;box-shadow:0 12px 32px rgba(10,42,77,.08) !important}' +
+  '#sec-personalizza .mpp-pv-card{border-top:1px solid #e3e8ef !important}' +
+  '#sec-personalizza .mpp-btn-save{background:#0066ff !important;border-color:#0066ff !important;display:inline-flex;align-items:center;gap:8px}' +
+  '.section .ti-em{width:18px;height:18px;flex:0 0 18px}' +
+  '@media(max-width:900px){#sec-qrcode .profilo-card{grid-template-columns:minmax(0,1fr)}#sec-qrcode .profilo-card > *{grid-column:1 !important;grid-row:auto !important}#sec-qrcode .qr-usi ul{grid-template-columns:minmax(0,1fr)}}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
@@ -783,6 +808,14 @@
     mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
     calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
     scarica: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    salva: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+    scintille: '<path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16.4l-1.8-4.9L5 9.7l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+    qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>',
+    video: '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4z"/>',
+    biglietto: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M13 10h5M13 14h4"/>',
+    furgone: '<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+    cantiere: '<path d="M2 20h20M5 20V9l7-5 7 5v11"/><path d="M9 20v-6h6v6"/>',
+    stella: '<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>',
     megafono: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
     piu: '<path d="M12 5v14M5 12h14"/>',
     matita: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
@@ -790,7 +823,7 @@
   };
   var EMOJI_PV = { '🔨':'attrezzo','🛠️':'attrezzo','🛠':'attrezzo','📍':'posto','⏰':'orologio','💶':'euro','📎':'graffetta',
     '💬':'chat','📞':'telefono','🗑️':'cestino','🗑':'cestino','✅':'spunta','📋':'cartella','📁':'cartella','📊':'grafico',
-    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita','🔧':'attrezzo','📅':'calendario','📥':'scarica','➕':'piu','📢':'megafono' };
+    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita','🔧':'attrezzo','📅':'calendario','📥':'scarica','➕':'piu','📢':'megafono','💾':'salva','✨':'scintille','🔲':'qr','🎬':'video','📇':'biglietto','🚐':'furgone','🏗️':'cantiere','🏗':'cantiere','⭐':'stella' };
   var EMOJI_VIA = ['👤','🆕'];
   function svgEm(nome) {
     return '<svg class="ti-em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + EM_SVG[nome] + '</svg>';
@@ -800,6 +833,7 @@
     while ((n = w.nextNode())) nodi.push(n);
     var tocco = false;
     nodi.forEach(function (t) {
+      if (t.parentNode && t.parentNode.closest && t.parentNode.closest('textarea,script,style,option,select,input')) return;
       var v = t.nodeValue, cambiato = false;
       EMOJI_VIA.forEach(function (e) { if (v.indexOf(e) >= 0) { v = v.split(e).join(''); cambiato = true; } });
       Object.keys(EMOJI_PV).forEach(function (e) {
@@ -956,6 +990,40 @@
     });
   }
 
+
+  /* TUTTE LE SEZIONI: icona nel titolo al posto dell'emoji, emoji dei
+     bottoni in disegni, QR Code con la spiegazione accanto */
+  var SEZ_EMOJI = ['sec-qrcode', 'sec-video', 'sec-personalizza', 'sec-supporto', 'sec-anteprima', 'sec-foto-lavori', 'sec-mie-offerte', 'sec-candidature', 'sec-preventivi'];
+  function titoliConIcona() {
+    document.querySelectorAll('.section:not(#sec-dashboard) > .topbar .topbar-title').forEach(function (t) {
+      if (t.querySelector(':scope > svg.ti-ic')) return;
+      var w = document.createTreeWalker(t, NodeFilter.SHOW_TEXT, null), n;
+      while ((n = w.nextNode())) {
+        var v = n.nodeValue, trovata = null;
+        Object.keys(EMOJI_PV).forEach(function (e) { if (!trovata && v.indexOf(e) >= 0) trovata = e; });
+        if (!trovata) continue;
+        n.nodeValue = v.split(trovata).join('').replace(/^\s+/, ' ');
+        var tmp = document.createElement('span');
+        tmp.innerHTML = '<svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + EM_SVG[EMOJI_PV[trovata]] + '</svg>';
+        t.insertBefore(tmp.firstChild, n);
+        break;
+      }
+    });
+  }
+  function emojiSezioni() {
+    SEZ_EMOJI.forEach(function (id) { var el = document.getElementById(id); if (el) for (var g = 0; g < 4 && togliEmoji(el); g++) {} });
+  }
+  function qrVolume() {
+    var c = document.querySelector('#sec-qrcode .profilo-card'); if (!c || c.querySelector('.qr-usi')) return;
+    var d = document.createElement('div'); d.className = 'qr-usi';
+    d.innerHTML = '<h3>Il tuo QR Code</h3><p>Chi lo inquadra col telefono arriva dritto alla tua scheda. Scaricalo e stampalo dove ti vedono i clienti.</p>'
+      + '<ul><li>' + svgEm('biglietto') + 'Biglietti da visita</li><li>' + svgEm('furgone') + 'Sul furgone</li><li>' + svgEm('cantiere') + 'Cartello di cantiere</li></ul>';
+    c.insertBefore(d, c.firstChild.nextSibling);
+  }
+  function tutteLeSezioni() {
+    titoliConIcona(); emojiSezioni(); qrVolume();
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -970,6 +1038,7 @@
     try { anteprima(); } catch (e) { console.error('anteprima grafica:', e); }
     try { prezziVolume(); } catch (e) { console.error('prezzi grafica:', e); }
     try { spiegazioniNelTitolo(); } catch (e) { console.error('titoli grafica:', e); }
+    try { tutteLeSezioni(); } catch (e) { console.error('sezioni grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
