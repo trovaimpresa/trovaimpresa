@@ -1942,6 +1942,19 @@
       .c3-riga{ grid-template-columns:minmax(0,1fr); }
       .c3-fondo .citta-go{ max-width:none; }
     }
+
+    /* 26 set 2026 — LE CARTE DELLA HOME COME QUELLE DEL GESTIONALE.
+       Alessio: via le strisce colorate in cima, tutte come il Riepilogo del
+       gestionale, con la sua riga grigia a sinistra (il gestionale NON si
+       tocca: e' solo il modello). Carta bianca, bordo grigio chiaro, angoli tondi, ombra
+       leggera. Il colore resta solo nelle icone. */
+    .hcard{ background:#fff !important; border:1px solid #e3e8ef !important; border-left:4px solid #cbd5e1 !important; border-radius:18px !important; box-shadow:0 1px 3px rgba(10,42,77,.06), 0 6px 18px rgba(10,42,77,.05) !important; }
+    .hcard-h{ border-bottom:1px solid #e3e8ef !important; }
+    .cerca3{ border:1px solid #e3e8ef !important; border-left:4px solid #cbd5e1 !important; box-shadow:0 1px 3px rgba(10,42,77,.06), 0 10px 28px rgba(10,42,77,.07) !important; }
+    .posto-icona{ width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:30px !important; background:color-mix(in srgb, var(--hc,#0066ff) 11%, #ffffff); }
+    .guide-costi-home a[href^="/quanto-costa"]{ border:1px solid #e3e8ef !important; border-left:4px solid #cbd5e1 !important; border-radius:16px !important; box-shadow:0 1px 3px rgba(10,42,77,.05); transition:box-shadow .15s, border-color .15s; }
+    .guide-costi-home a[href^="/quanto-costa"] > div svg{ width:24px !important; height:24px !important; padding:11px; box-sizing:content-box; background:#eaf2ff; border-radius:12px; }
+    .guide-costi-home a[href^="/quanto-costa"]:hover{ border-color:#bcd3f7 !important; box-shadow:0 8px 22px rgba(10,42,77,.09); }
 </style>
     <script>
     var FOTO_BG = [
