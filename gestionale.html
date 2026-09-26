@@ -400,6 +400,67 @@
   .mis.lampo .num{animation:d-lampo 1s}
   @keyframes d-lampo{0%{background:#fdeceb}100%{background:transparent}}
   .pill.attesa{background:var(--bg);color:var(--muted)}
+  /* ================================================================
+     26 settembre 2026 — LA PAGINA ACCORCIATA
+     indice in cima · voci che si aprono · prezzi con l'interruttore ·
+     bottone fisso sul telefono
+     ================================================================ */
+  .indice{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+  .indice a{font-size:15px;font-weight:700;color:var(--blu);background:#fff;border:1.5px solid #cfe0ff;
+    border-radius:999px;padding:8px 14px;text-decoration:none;white-space:nowrap}
+  .indice a:hover{background:var(--blu-tenue);border-color:var(--blu)}
+  .apri-gruppo{font-size:15px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);
+    max-width:900px;margin:34px auto 10px}
+  .apri-lista{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  details.apri{background:#fff;border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+  details.apri[open]{border-color:#cfe0ff;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+  details.apri summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:2px;
+    padding:16px 56px 16px 20px;position:relative}
+  details.apri summary::-webkit-details-marker{display:none}
+  details.apri summary::after{content:"";position:absolute;right:22px;top:50%;width:11px;height:11px;
+    border-right:2.5px solid var(--blu);border-bottom:2.5px solid var(--blu);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+  details.apri[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+  details.apri summary:hover{background:var(--blu-tenue)}
+  .apri-occ{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--blu)}
+  .apri-tit{font-size:20px;font-weight:800;color:var(--ink);line-height:1.25}
+  .apri-dentro{padding:6px 20px 26px;border-top:1px solid var(--bd)}
+  .apri-dentro .wrap{padding:0 !important;max-width:none}
+  .apri-dentro .occhiello,.apri-dentro h2,.apri-dentro .titolone{display:none}
+  .apri-dentro .due{gap:28px;margin-top:14px}
+  .apri-dentro .introne{margin-bottom:18px;text-align:left}
+  .periodo{display:flex;justify-content:center;gap:4px;background:var(--bg);border:1px solid var(--bd);
+    border-radius:999px;padding:4px;width:max-content;margin:0 auto 20px}
+  .periodo button{border:none;background:none;font:inherit;font-size:16px;font-weight:700;color:var(--muted);
+    padding:10px 22px;border-radius:999px;cursor:pointer}
+  .periodo button small{font-size:13px;font-weight:800;color:#0a7a3e;margin-left:4px}
+  .periodo button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(15,23,42,.12)}
+  .prezzi.vedi-anno .p-mese,.prezzi.vedi-mese .p-anno{display:none !important}
+  .incluso{max-width:880px;margin:22px auto 18px;border:1px solid var(--bd);border-radius:14px;padding:18px 22px}
+  .incluso h4{margin:0 0 8px;font-size:17px;color:var(--ink)}
+  .incluso ul{margin:0;padding:0;list-style:none;columns:2;column-gap:28px}
+  .incluso li{font-size:15.5px;color:var(--muted);padding:6px 0 6px 22px;position:relative;break-inside:avoid}
+  .incluso li::before{content:"\2713";position:absolute;left:0;color:var(--blu);font-weight:800}
+  .barra-fissa{display:none}
+  @media(max-width:760px){
+    .incluso ul{columns:1}
+    .apri-tit{font-size:18px}
+    .barra-fissa{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;gap:8px;background:#fff;
+      border-top:1px solid var(--bd);padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      box-shadow:0 -6px 18px rgba(15,23,42,.08);transform:translateY(110%);transition:transform .25s}
+    .barra-fissa.su{transform:none}
+    .barra-fissa a{flex:1;text-align:center;font-weight:800;font-size:16px;border-radius:12px;padding:13px 8px;text-decoration:none}
+    .barra-fissa .bf-blu{background:var(--blu);color:#fff}
+    .barra-fissa .bf-vuoto{flex:0 0 auto;padding:13px 16px;border:1.5px solid var(--blu);color:var(--blu)}
+    body{padding-bottom:78px}
+    /* le tre demo una accanto all'altra, si scorrono col dito */
+    .demo-griglia{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:86%;max-width:none !important;
+      overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding-bottom:8px;margin:0 -16px !important;padding-left:16px;padding-right:16px}
+    .demo-griglia > *{scroll-snap-align:center}
+    /* le pagine precise: sul telefono solo i titoli (le righe restano nella pagina, per Google) */
+    #pagine-precise .pp-elenco span{display:none}
+    #pagine-precise .pp-elenco{gap:4px}
+  }
+
 </style>
 </head>
 <body>
@@ -456,6 +517,10 @@
         <a class="btn btn-vuoto" href="#demo">Guardalo in azione</a>
       </div>
       <p class="senza-carta">Senza carta di credito.</p>
+      <!-- 26 set 2026 — la fila per saltare dove serve, senza scorrere -->
+      <nav class="indice" aria-label="Vai a">
+        <a href="#dentro">Preventivi</a><a href="#f-cantiere">Cantiere</a><a href="#f-fornitori">Fatture dei fornitori</a><a href="#f-scelte">Scelte del cliente</a><a href="#tutto">Tutte le funzioni</a><a href="#prezzi">Prezzi</a>
+      </nav>
       <!-- ⚠️ I numeri qui sotto NON sono scritti a mano: lo script in fondo
            li legge dalla tabella dei prezzi (#prezzi). Se cambi prezzo li',
            cambia anche qui. Quello scritto nel file e' solo la riserva. -->
@@ -593,7 +658,16 @@
 </div>
 
 <!-- ================= IL PREVENTIVO ================= -->
-<section class="fascia">
+<!-- =====================================================================
+     26 settembre 2026 — LA PAGINA ACCORCIATA (Alex: «bisogna scrollare molto»)
+     Sul telefono era lunga 36 schermate. Restano GRANDI quattro fasce:
+     preventivi, cantiere, foto della fattura, scelte del cliente. Tutte le
+     altre sono qui sotto, dentro <details>: si aprono col tocco.
+     ⛔ Il testo e i disegni sono gli STESSI di prima, parola per parola:
+        stanno nella pagina anche da chiusi, quindi Google li legge.
+     ⚠️ Quattro fasce grandi + questa = alternanza bianco/grigio salva.
+     ===================================================================== -->
+<section class="fascia" id="dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Preventivi</p>
@@ -628,8 +702,7 @@
   </div>
 </section>
 
-<!-- ================= IL CANTIERE DAL TELEFONO ================= -->
-<section class="fascia grigia">
+<section class="fascia grigia" id="f-cantiere">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="tel">
@@ -653,28 +726,67 @@
   </div>
 </section>
 
-<!-- =====================================================================
-     19 settembre 2026 — SETTE FASCE VERE AL POSTO DELLE SEI CARD
+<section class="fascia" id="f-fornitori">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="tel">
+      <div class="tel-dentro">
+        <h4>Fattura da pagare</h4>
+        <p class="tel-sub">letta dalla foto &#10003;</p>
+        <div class="campo"><i>FORNITORE</i><b>Edilcentro Rieti</b></div>
+        <div class="campo"><i>NUMERO E DATA</i><b>FT 312/2026 &middot; 22/09/2026</b></div>
+        <div class="campo"><i>DA PAGARE</i><b>1.284,66 &euro; IVA compresa</b></div>
+        <div class="campo"><i>ENTRO IL</i><b>31/10/2026</b></div>
+        <div class="tel-btn">Aggiungi</div>
+      </div>
+    </div>
+    <div>
+      <p class="occhiello">Fornitori</p>
+      <h2>La fattura del fornitore?<br>Le fai una foto</h2>
+      <p>Fotografi la fattura o la bolla, oppure carichi il PDF. Fornitore, numero, data,
+         importo e scadenza si scrivono da soli: tu controlli e premi Aggiungi.</p>
+      <p>Se il fornitore non &egrave; ancora in rubrica, lo aggiungi con un tocco. La foto resta
+         attaccata al fornitore, e se colleghi la fattura a un lavoro la spesa entra da sola
+         nel conto di quel cantiere.</p>
+      <p>E se la stessa fattura l&rsquo;hai gi&agrave; segnata, te lo dice: niente pagamenti doppi.</p>
+    </div>
+  </div>
+</section>
 
-     Qui c'erano sei cartoncini con una riga di testo ciascuno. Alex: «le
-     togliamo e aumentiamo il potenziale delle informazioni». Ogni cosa
-     scritta qui sotto sta nel codice del gestionale: se un domani una
-     funzione cambia o sparisce, qui va cambiata o tolta anche la riga.
-     ===================================================================== -->
+<section class="fascia grigia" id="f-scelte">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Materiali e finiture</p>
+      <h2>Piastrelle e sanitari<br>li sceglie il cliente, dal telefono</h2>
+      <p>Per ogni cosa da decidere metti le possibilit&agrave;, con la foto e il prezzo:
+         &laquo;compreso&raquo;, &laquo;+ 8 &euro;/mq&raquo;. Mandi un link su WhatsApp, e il cliente
+         sceglie con calma da casa sua, senza iscriversi a niente.</p>
+      <p>Quando conferma ti arriva un&rsquo;email, e le scelte restano scritte nel lavoro.
+         Niente pi&ugrave; <b>&laquo;ma io avevo detto l&rsquo;altro&raquo;</b> a pavimento gi&agrave; posato.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="tel">
+      <div class="tel-dentro">
+        <h4>Pavimento del bagno</h4>
+        <p class="tel-sub">tocca quello che preferisci</p>
+        <div class="campo"><i>GRES EFFETTO LEGNO 20&times;120</i><b>compreso</b></div>
+        <div class="campo" style="border:2px solid var(--blu);background:var(--blu-tenue)"><i>GRES EFFETTO MARMO 60&times;60 &#10003;</i><b>+ 8 &euro;/mq</b></div>
+        <div class="campo"><i>RESINA COLOR CEMENTO</i><b>+ 35 &euro;/mq</b></div>
+        <div class="tel-btn">Confermo le mie scelte</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<!-- ================= IL COMPUTO DEL GEOMETRA ================= -->
-<!-- 19 settembre 2026 — Alex: la pagina non nominava il caricamento del
-     computo, che invece c'e' e funziona (js/gest-computo-pdf.js,
-     compApriFile → compImporta per Excel/CSV, compImportaPdf per il PDF).
-     ⚠️ Tutto quello che c'e' scritto qui sotto sta nel codice vero:
-     Excel, CSV e PDF; riconosce il tipo dal nome del file; sul PDF cerca
-     le righe «Sommano»; se il PDF non ha testo dentro (scansione o foto)
-     si ferma e lo dice invece di inventare numeri.
-     ⚠️ Questa fascia e' a tutta larghezza (`wrap`, non `wrap due`) apposta:
-     cosi' non rompe l'alternanza destra/sinistra delle fasce a due colonne.
-     Il bianco/grigio delle 9 fasce qui sotto e' stato invertito per fare
-     spazio a questa: chi ne aggiunge un'altra deve rifare la stessa cosa. -->
-<section class="fascia">
+<section class="fascia" id="tutto">
+  <div class="wrap">
+    <h2 class="titolone">E poi c&rsquo;&egrave; tutto il resto</h2>
+    <p class="introne">Tocca un titolo e si apre.</p>
+    <h3 class="apri-gruppo">Computo e contabilit&agrave;</h3>
+    <div class="apri-lista">
+<details class="apri">
+  <summary><span class="apri-occ">Se il computo ce l&rsquo;hai gi&agrave;</span><span class="apri-tit">Il file del geometra lo carichi e basta</span></summary>
+  <div class="apri-dentro">
   <div class="wrap">
     <p class="occhiello" style="text-align:center">Se il computo ce l&rsquo;hai gi&agrave;</p>
     <h2 class="titolone">Il file del geometra<br>lo carichi e basta</h2>
@@ -695,11 +807,11 @@
     <p class="epoi" style="max-width:640px;margin:18px auto 0">Se il PDF &egrave; la fotografia di un foglio,
        il gestionale te lo dice e si ferma: i numeri non se li inventa.</p>
   </div>
-</section>
-
-<!-- ================= COMPUTO METRICO — LE MISURE ================= -->
-<!-- ⚠️ `id="dentro"`: ci puntano «Cosa fa» nella barra e il bottone dell'hero. -->
-<section class="fascia grigia" id="dentro">
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Computo metrico</span><span class="apri-tit">Le misure le scrivi come sul quaderno</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Computo metrico</p>
@@ -727,10 +839,11 @@
       <div class="doc-tot"><span>Quantit&agrave; &mdash; dalle misure</span><span id="anim-computo-tot">78,64 m&sup2;</span></div>
     </div>
   </div>
-</section>
-
-<!-- ================= ANALISI PREZZI E RIBASSO ================= -->
-<section class="fascia">
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Analisi prezzi</span><span class="apri-tit">Il prezzo lo costruisci, non lo tiri a indovinare</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="doc">
@@ -762,10 +875,11 @@
          Se il lavoro cambia, fai la <b>variante</b> e il confronto riga per riga lo trovi gi&agrave; fatto.</p>
     </div>
   </div>
-</section>
-
-<!-- ================= STATI DI AVANZAMENTO ================= -->
-<section class="fascia grigia">
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Stati di avanzamento</span><span class="apri-tit">Il SAL si fa scrivendo quanto hai fatto finora</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Stati di avanzamento</p>
@@ -793,10 +907,11 @@
       <div class="doc-tot"><span>Netto da pagare</span><span>30.682 &euro;</span></div>
     </div>
   </div>
-</section>
-
-<!-- ================= FATTURA ELETTRONICA ================= -->
-<section class="fascia">
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Fatture</span><span class="apri-tit">Il file elettronico vero, non un PDF rinominato</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="schermo" id="anim-fattura">
@@ -825,10 +940,70 @@
          codice destinatario. E se qualcosa non torna ti dice anche dove si rimedia.</p>
     </div>
   </div>
-</section>
-
-<!-- ================= L'AI CHE COMPILA ================= -->
-<section class="fascia grigia">
+</div>
+</details>
+    </div>
+    <h3 class="apri-gruppo">Il cliente e i messaggi</h3>
+    <div class="apri-lista">
+<details class="apri">
+  <summary><span class="apri-occ">Il cliente</span><span class="apri-tit">Il cliente sa a che punto sei, senza chiamarti</span></summary>
+  <div class="apri-dentro">
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Il cliente</p>
+      <h2>Il cliente sa a che punto sei,<br>senza chiamarti</h2>
+      <p>Da quello che la squadra scrive nei rapportini, il gestionale prepara il messaggio
+         della settimana: cosa avete fatto, cosa succede dopo. Lo rileggi, lo cambi se vuoi,
+         e lo mandi su WhatsApp con un tasto.</p>
+      <p>Niente soldi nel messaggio, niente cose inventate: solo il lavoro fatto,
+         in parole che capisce chi non &egrave; del mestiere.</p>
+    </div>
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="tel">
+      <div class="tel-dentro" style="background:#ece5dd">
+        <h4>WhatsApp</h4>
+        <p class="tel-sub">a Marco Rossi</p>
+        <div class="campo" style="background:#dcf8c6;border-color:#c5e8ad;line-height:1.5">
+          Buongiorno Marco,<br>questa settimana abbiamo:<br>
+          &ndash; tolto il vecchio rivestimento<br>
+          &ndash; rifatto gli scarichi, nessuna perdita<br>
+          &ndash; iniziato il pavimento, siamo a met&agrave;<br><br>
+          La prossima settimana montiamo i sanitari.<br><br>
+          <b>Edilizia Rossi</b></div>
+        <div class="tel-btn" style="background:#25a244">Manda su WhatsApp</div>
+      </div>
+    </div>
+  </div>
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Messaggi</span><span class="apri-tit">Scrivi di corsa, arriva in bella</span></summary>
+  <div class="apri-dentro">
+  <div class="wrap due rovescia">
+    <!-- ⛔ DISEGNO, NON FOTO -->
+    <div class="doc">
+      <div class="doc-top"><div><b>Prima</b><br><span style="color:#8899ab">scritto di corsa</span></div></div>
+      <p style="font-size:15.5px;color:#8899ab;margin:0 0 18px;line-height:1.5">buongiorno in allegato il preventivo x il bagno,
+         prezzo quello detto al tel vale 30 gg. se va bene si parte lunedi 5 ottobre fatemi sapere</p>
+      <div class="doc-top"><div><b>Dopo</b><br><span style="color:#8899ab">un tocco su &laquo;Scrivilo meglio&raquo;</span></div></div>
+      <p style="font-size:15.5px;color:var(--ink);margin:0;line-height:1.5">Buongiorno,<br>in allegato le mando il preventivo per il bagno.
+         Il prezzo &egrave; quello di cui abbiamo parlato al telefono e vale 30 giorni.
+         Se va bene, possiamo iniziare luned&igrave; 5 ottobre. Mi faccia sapere.</p>
+    </div>
+    <div>
+      <p class="occhiello">Messaggi</p>
+      <h2>Scrivi di corsa,<br>arriva in bella</h2>
+      <p>Il messaggio al cliente lo scrivi come viene. Un tocco su <b>&laquo;Scrivilo meglio&raquo;</b>
+         e diventa gentile e chiaro, con le maiuscole e le virgole al posto giusto.</p>
+      <p><b>Date, orari e prezzi restano quelli che hai scritto tu.</b> E se non ti piace,
+         &laquo;Torna com&rsquo;era&raquo; e rimette il tuo.</p>
+    </div>
+  </div>
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Assistenza AI</span><span class="apri-tit">Lo dici a voce, il modulo si riempie</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Assistenza AI</p>
@@ -863,127 +1038,14 @@
       </div>
     </div>
   </div>
-</section>
-
-<!-- =====================================================================
-     26 settembre 2026 — LE QUATTRO FASCE NUOVE («le idee rubate»)
-     Tutto quello che c'e' scritto qui sotto sta in js/gest-ai-cantiere.js.
-     ⚠️ Sono QUATTRO apposta: un numero pari non rompe l'alternanza
-        bianco/grigio delle fasce che vengono dopo.
-     ⛔ «Scelte del cliente» NON c'e' per gli studi tecnici (e' roba di
-        materiali e finiture): qui si dice «l'impresa».
-     ===================================================================== -->
-
-<!-- ================= LA FOTO DELLA FATTURA DEL FORNITORE ================= -->
-<section class="fascia">
-  <div class="wrap due rovescia">
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="tel">
-      <div class="tel-dentro">
-        <h4>Fattura da pagare</h4>
-        <p class="tel-sub">letta dalla foto &#10003;</p>
-        <div class="campo"><i>FORNITORE</i><b>Edilcentro Rieti</b></div>
-        <div class="campo"><i>NUMERO E DATA</i><b>FT 312/2026 &middot; 22/09/2026</b></div>
-        <div class="campo"><i>DA PAGARE</i><b>1.284,66 &euro; IVA compresa</b></div>
-        <div class="campo"><i>ENTRO IL</i><b>31/10/2026</b></div>
-        <div class="tel-btn">Aggiungi</div>
-      </div>
+</div>
+</details>
     </div>
-    <div>
-      <p class="occhiello">Fornitori</p>
-      <h2>La fattura del fornitore?<br>Le fai una foto</h2>
-      <p>Fotografi la fattura o la bolla, oppure carichi il PDF. Fornitore, numero, data,
-         importo e scadenza si scrivono da soli: tu controlli e premi Aggiungi.</p>
-      <p>Se il fornitore non &egrave; ancora in rubrica, lo aggiungi con un tocco. La foto resta
-         attaccata al fornitore, e se colleghi la fattura a un lavoro la spesa entra da sola
-         nel conto di quel cantiere.</p>
-      <p>E se la stessa fattura l&rsquo;hai gi&agrave; segnata, te lo dice: niente pagamenti doppi.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ================= AGGIORNA IL CLIENTE ================= -->
-<section class="fascia grigia">
-  <div class="wrap due">
-    <div>
-      <p class="occhiello">Il cliente</p>
-      <h2>Il cliente sa a che punto sei,<br>senza chiamarti</h2>
-      <p>Da quello che la squadra scrive nei rapportini, il gestionale prepara il messaggio
-         della settimana: cosa avete fatto, cosa succede dopo. Lo rileggi, lo cambi se vuoi,
-         e lo mandi su WhatsApp con un tasto.</p>
-      <p>Niente soldi nel messaggio, niente cose inventate: solo il lavoro fatto,
-         in parole che capisce chi non &egrave; del mestiere.</p>
-    </div>
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="tel">
-      <div class="tel-dentro" style="background:#ece5dd">
-        <h4>WhatsApp</h4>
-        <p class="tel-sub">a Marco Rossi</p>
-        <div class="campo" style="background:#dcf8c6;border-color:#c5e8ad;line-height:1.5">
-          Buongiorno Marco,<br>questa settimana abbiamo:<br>
-          &ndash; tolto il vecchio rivestimento<br>
-          &ndash; rifatto gli scarichi, nessuna perdita<br>
-          &ndash; iniziato il pavimento, siamo a met&agrave;<br><br>
-          La prossima settimana montiamo i sanitari.<br><br>
-          <b>Edilizia Rossi</b></div>
-        <div class="tel-btn" style="background:#25a244">Manda su WhatsApp</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= SCRIVILO MEGLIO ================= -->
-<section class="fascia">
-  <div class="wrap due rovescia">
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="doc">
-      <div class="doc-top"><div><b>Prima</b><br><span style="color:#8899ab">scritto di corsa</span></div></div>
-      <p style="font-size:15.5px;color:#8899ab;margin:0 0 18px;line-height:1.5">buongiorno in allegato il preventivo x il bagno,
-         prezzo quello detto al tel vale 30 gg. se va bene si parte lunedi 5 ottobre fatemi sapere</p>
-      <div class="doc-top"><div><b>Dopo</b><br><span style="color:#8899ab">un tocco su &laquo;Scrivilo meglio&raquo;</span></div></div>
-      <p style="font-size:15.5px;color:var(--ink);margin:0;line-height:1.5">Buongiorno,<br>in allegato le mando il preventivo per il bagno.
-         Il prezzo &egrave; quello di cui abbiamo parlato al telefono e vale 30 giorni.
-         Se va bene, possiamo iniziare luned&igrave; 5 ottobre. Mi faccia sapere.</p>
-    </div>
-    <div>
-      <p class="occhiello">Messaggi</p>
-      <h2>Scrivi di corsa,<br>arriva in bella</h2>
-      <p>Il messaggio al cliente lo scrivi come viene. Un tocco su <b>&laquo;Scrivilo meglio&raquo;</b>
-         e diventa gentile e chiaro, con le maiuscole e le virgole al posto giusto.</p>
-      <p><b>Date, orari e prezzi restano quelli che hai scritto tu.</b> E se non ti piace,
-         &laquo;Torna com&rsquo;era&raquo; e rimette il tuo.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ================= LE SCELTE DEL CLIENTE ================= -->
-<section class="fascia grigia">
-  <div class="wrap due">
-    <div>
-      <p class="occhiello">Materiali e finiture</p>
-      <h2>Piastrelle e sanitari<br>li sceglie il cliente, dal telefono</h2>
-      <p>Per ogni cosa da decidere metti le possibilit&agrave;, con la foto e il prezzo:
-         &laquo;compreso&raquo;, &laquo;+ 8 &euro;/mq&raquo;. Mandi un link su WhatsApp, e il cliente
-         sceglie con calma da casa sua, senza iscriversi a niente.</p>
-      <p>Quando conferma ti arriva un&rsquo;email, e le scelte restano scritte nel lavoro.
-         Niente pi&ugrave; <b>&laquo;ma io avevo detto l&rsquo;altro&raquo;</b> a pavimento gi&agrave; posato.</p>
-    </div>
-    <!-- ⛔ DISEGNO, NON FOTO -->
-    <div class="tel">
-      <div class="tel-dentro">
-        <h4>Pavimento del bagno</h4>
-        <p class="tel-sub">tocca quello che preferisci</p>
-        <div class="campo"><i>GRES EFFETTO LEGNO 20&times;120</i><b>compreso</b></div>
-        <div class="campo" style="border:2px solid var(--blu);background:var(--blu-tenue)"><i>GRES EFFETTO MARMO 60&times;60 &#10003;</i><b>+ 8 &euro;/mq</b></div>
-        <div class="campo"><i>RESINA COLOR CEMENTO</i><b>+ 35 &euro;/mq</b></div>
-        <div class="tel-btn">Confermo le mie scelte</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= LA MAIL DEL MATTINO ================= -->
-<section class="fascia">
+    <h3 class="apri-gruppo">Scadenze e chat con AI</h3>
+    <div class="apri-lista">
+<details class="apri">
+  <summary><span class="apri-occ">Avvisi</span><span class="apri-tit">Alle 7:30 sai gi&agrave; cosa ti scade oggi</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due rovescia">
     <!-- ⛔ DISEGNO, NON FOTO -->
     <div class="mail">
@@ -1012,10 +1074,11 @@
       <p>Se non ti serve, <b>la spegni</b>. E non ne arriva mai pi&ugrave; di una al giorno.</p>
     </div>
   </div>
-</section>
-
-<!-- ================= MEZZI, SQUADRA E IL RESTO ================= -->
-<section class="fascia grigia">
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Mezzi e squadra</span><span class="apri-tit">Le scadenze le tiene lui, non il foglio in cabina</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Mezzi e squadra</p>
@@ -1054,10 +1117,11 @@
       scegli la categoria d&rsquo;opera, scrivi l&rsquo;importo dei lavori, spunti le prestazioni
       e la parcella si scrive da sola.</p>
   </div>
-</section>
-
-<!-- ================= LA CHAT CON AI ================= -->
-<section class="fascia">
+</div>
+</details>
+<details class="apri">
+  <summary><span class="apri-occ">Con l&rsquo;AI</span><span class="apri-tit">Una chat che sa i conti dei tuoi lavori</span></summary>
+  <div class="apri-dentro">
   <div class="wrap due">
     <div>
       <p class="occhiello">Con l&rsquo;AI</p>
@@ -1079,6 +1143,10 @@
           Ti resta un margine di 7.140 &euro;, ma le piastrelle non sono ancora fatturate.</small>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+</details>
     </div>
   </div>
 </section>
@@ -1187,21 +1255,23 @@
     <p class="introne">Scegli il prezzo e il mestiere con un clic solo.</p>
 
     <div class="scheda" id="iscriviti">
-      <div class="prezzi">
-        <div class="piano">
+      <!-- 26 set 2026 — da quattro schede a due: l'interruttore sceglie se
+           vedere i prezzi all'anno o al mese. Le quattro card restano tutte
+           nella pagina (con i loro id: scegli() e il prezzo in cima le leggono),
+           si nascondono solo quelle dell'altro periodo. -->
+      <div class="periodo" role="group" aria-label="Come vuoi pagare">
+        <button type="button" class="on" data-periodo="anno">All&rsquo;anno <small>risparmi</small></button>
+        <button type="button" data-periodo="mese">Al mese</button>
+      </div>
+      <div class="prezzi vedi-anno">
+        <div class="piano p-anno">
           <span class="p-durata">OGNI ANNO</span>
           <div class="p-nome">Gestionale</div>
           <div class="p-cifra">249 &euro;<span>all&rsquo;anno</span></div>
           <p class="p-risparmio">Risparmi 99 &euro; in un anno</p>
           <ul>
-            <li>Lavori, preventivi e fatture</li>
-            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
-            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
-            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
-            <li>Calendario, promemoria e scadenzario</li>
-            <li>Report, galleria foto e mappa dei lavori</li>
-            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
-            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+            <li><b>Tutto il gestionale</b> (l&rsquo;elenco &egrave; qui sotto)</li>
+            <li><b>L&rsquo;assistenza AI</b>: 40 crediti al mese per compilare i moduli, leggere le fatture dei fornitori, scrivere ai clienti</li>
           </ul>
           <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
                Prima erano tre card a parte, sotto: la scelta 1 era grande
@@ -1214,25 +1284,15 @@
             <button type="button" class="porta" id="p-base-anno-professionista" onclick="scegli('base-anno','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
           </div>
         </div>
-        <div class="piano">
+        <div class="piano p-mese">
           <span class="p-durata">OGNI MESE</span>
           <div class="p-nome">Gestionale</div>
           <div class="p-cifra">29 &euro;<span>al mese</span></div>
           <p class="p-uguale">Stesso gestionale, pagato mese per mese.</p>
           <ul>
-            <li>Lavori, preventivi e fatture</li>
-            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
-            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
-            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
-            <li>Calendario, promemoria e scadenzario</li>
-            <li>Report, galleria foto e mappa dei lavori</li>
-            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
-            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+            <li><b>Tutto il gestionale</b> (l&rsquo;elenco &egrave; qui sotto)</li>
+            <li><b>L&rsquo;assistenza AI</b>: 40 crediti al mese per compilare i moduli, leggere le fatture dei fornitori, scrivere ai clienti</li>
           </ul>
-          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
-               Prima erano tre card a parte, sotto: la scelta 1 era grande
-               e la scelta 2 piccolissima, e le due cose non si univano mai.
-               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
           <p class="p-chi">Iscriviti come</p>
           <div class="porte">
             <button type="button" class="porta" id="p-base-mese-artigiano" onclick="scegli('base-mese','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
@@ -1240,27 +1300,17 @@
             <button type="button" class="porta" id="p-base-mese-professionista" onclick="scegli('base-mese','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
           </div>
         </div>
-        <div class="piano">
+        <div class="piano p-anno">
           <div class="p-targa">CON L&rsquo;AI</div>
           <span class="p-durata">OGNI ANNO</span>
           <div class="p-nome">Gestionale con AI</div>
           <div class="p-cifra">349 &euro;<span>all&rsquo;anno</span></div>
           <p class="p-risparmio">Risparmi 119 &euro; in un anno</p>
           <ul>
-            <li>Lavori, preventivi e fatture</li>
-            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
-            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
-            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
-            <li>Calendario, promemoria e scadenzario</li>
-            <li>Report, galleria foto e mappa dei lavori</li>
-            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
-            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+            <li><b>Tutto il gestionale</b> (l&rsquo;elenco &egrave; qui sotto)</li>
+            <li><b>L&rsquo;assistenza AI</b>: 100 crediti al mese per compilare i moduli, leggere le fatture dei fornitori, scrivere ai clienti</li>
             <li><b class="piu">In pi&ugrave;: la Chat con AI.</b> Le chiedi i conti dei tuoi lavori e ti risponde &mdash; 300 messaggi al mese</li>
           </ul>
-          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
-               Prima erano tre card a parte, sotto: la scelta 1 era grande
-               e la scelta 2 piccolissima, e le due cose non si univano mai.
-               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
           <p class="p-chi">Iscriviti come</p>
           <div class="porte">
             <button type="button" class="porta" id="p-ai-anno-artigiano" onclick="scegli('ai-anno','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
@@ -1268,27 +1318,17 @@
             <button type="button" class="porta" id="p-ai-anno-professionista" onclick="scegli('ai-anno','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
           </div>
         </div>
-        <div class="piano">
+        <div class="piano p-mese">
           <div class="p-targa">CON L&rsquo;AI</div>
           <span class="p-durata">OGNI MESE</span>
           <div class="p-nome">Gestionale con AI</div>
           <div class="p-cifra">39 &euro;<span>al mese</span></div>
           <p class="p-uguale">Stesso gestionale, pagato mese per mese.</p>
           <ul>
-            <li>Lavori, preventivi e fatture</li>
-            <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
-            <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
-            <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
-            <li>Calendario, promemoria e scadenzario</li>
-            <li>Report, galleria foto e mappa dei lavori</li>
-            <li><b>L&rsquo;AI ti compila i moduli</b>: &laquo;Genera con AI&raquo; nei preventivi, &laquo;Compila con AI&raquo; in lavori e clienti</li>
-            <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+            <li><b>Tutto il gestionale</b> (l&rsquo;elenco &egrave; qui sotto)</li>
+            <li><b>L&rsquo;assistenza AI</b>: 100 crediti al mese per compilare i moduli, leggere le fatture dei fornitori, scrivere ai clienti</li>
             <li><b class="piu">In pi&ugrave;: la Chat con AI.</b> Le chiedi i conti dei tuoi lavori e ti risponde &mdash; 300 messaggi al mese</li>
           </ul>
-          <!-- ⛔ 18 set 2026 — I TRE MESTIERI DENTRO LA CARD DEL PREZZO.
-               Prima erano tre card a parte, sotto: la scelta 1 era grande
-               e la scelta 2 piccolissima, e le due cose non si univano mai.
-               Adesso un clic qui sceglie prezzo E mestiere insieme. -->
           <p class="p-chi">Iscriviti come</p>
           <div class="porte">
             <button type="button" class="porta" id="p-ai-mese-artigiano" onclick="scegli('ai-mese','artigiano')"><span class="no">Artigiano</span><span class="si">&#10003; Artigiano</span></button>
@@ -1296,6 +1336,23 @@
             <button type="button" class="porta" id="p-ai-mese-professionista" onclick="scegli('ai-mese','professionista')"><span class="no">Studio tecnico</span><span class="si">&#10003; Studio tecnico</span></button>
           </div>
         </div>
+      </div>
+
+      <div class="incluso">
+        <h4>In tutti e due c&rsquo;&egrave;</h4>
+        <ul>
+          <li>Lavori, preventivi e fatture</li>
+          <li>Computo metrico (o da prezzare), prezzario e stati di avanzamento</li>
+          <li>Clienti, fornitori e le richieste che arrivano dal sito</li>
+          <li>Mezzi, attrezzature, squadra e agenda dell&rsquo;operatore</li>
+          <li>Calendario, promemoria e scadenzario</li>
+          <li>Report, galleria foto e mappa dei lavori</li>
+          <li><b>La foto della fattura del fornitore</b> che riempie il modulo da sola</li>
+          <li><b>Le scelte del cliente</b>: piastrelle, sanitari e colori li sceglie lui dal telefono</li>
+          <li><b>Aggiorna il cliente</b> e <b>Scrivilo meglio</b>: i messaggi al cliente scritti dall&rsquo;AI</li>
+          <li><b>&laquo;Parla&raquo;</b>: dici il lavoro a voce e le caselle si riempiono</li>
+          <li><b>L&rsquo;assistente AI</b> che ti spiega come si fa, dentro il gestionale</li>
+        </ul>
       </div>
 
       <div class="riepilogo">
@@ -1596,6 +1653,41 @@
     giraQuandoSiVede('anim-computo',animComputo);giraQuandoSiVede('anim-fattura',animFattura);
   }
 
+})();
+</script>
+
+<!-- 26 set 2026 — il bottone fisso sul telefono: compare quando i bottoni
+     in cima sono usciti dallo schermo, sparisce sui prezzi (li' ci sono gia') -->
+<div class="barra-fissa" id="barra-fissa" aria-hidden="true">
+  <a class="bf-blu" href="#comincia">Provalo gratis 30 giorni</a>
+  <a class="bf-vuoto" href="#prezzi">Prezzi</a>
+</div>
+<script>
+(function(){
+  /* l'interruttore anno / mese dei prezzi */
+  var box=document.querySelector('#iscriviti .prezzi');
+  document.querySelectorAll('.periodo [data-periodo]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var v=b.getAttribute('data-periodo');
+      document.querySelectorAll('.periodo [data-periodo]').forEach(function(x){x.classList.toggle('on',x===b);});
+      if(box){box.classList.toggle('vedi-anno',v==='anno');box.classList.toggle('vedi-mese',v==='mese');}
+    });
+  });
+  /* chi arriva da un link a una voce chiusa (#...) la trova aperta */
+  function apriSeServe(){
+    var id=location.hash.slice(1);if(!id)return;
+    var el=document.getElementById(id);var d=el&&el.closest&&el.closest('details');
+    if(d&&!d.open){d.open=true;setTimeout(function(){el.scrollIntoView();},50);}
+  }
+  apriSeServe();window.addEventListener('hashchange',apriSeServe);
+  /* la barra fissa */
+  var barra=document.getElementById('barra-fissa'), bott=document.querySelector('.hero .bottoni'),
+      prezzi=document.getElementById('prezzi'), comincia=document.getElementById('comincia');
+  if(!barra||!bott||!('IntersectionObserver' in window))return;
+  var fuori=false, vicino={};
+  function aggiorna(){var su=fuori&&!vicino.prezzi&&!vicino.comincia;barra.classList.toggle('su',su);barra.setAttribute('aria-hidden',su?'false':'true');}
+  new IntersectionObserver(function(e){fuori=!e[0].isIntersecting&&e[0].boundingClientRect.top<0;aggiorna();}).observe(bott);
+  [['prezzi',prezzi],['comincia',comincia]].forEach(function(c){if(c[1])new IntersectionObserver(function(e){vicino[c[0]]=e[0].isIntersecting;aggiorna();},{threshold:.05}).observe(c[1]);});
 })();
 </script>
 </body>
