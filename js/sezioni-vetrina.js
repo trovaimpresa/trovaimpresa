@@ -282,6 +282,24 @@
   '@media(max-width:600px){#lista-mie-offerte > div:not(.empty-state),#lista-candidature > .prev-card{padding:16px !important}' +
     '#lista-mie-offerte a[onclick^="chiudiOfferta"]{margin-left:0 !important}}' +
 
+  /* ---------- LO STESSO STILE IN TUTTE LE SEZIONI (26 set 2026) ----------
+     Alex: «hai modificato la grafica di Foto dei lavori ma non nelle altre
+     card». Le carte generiche del pannello (.profilo-card, usate da Prezzi,
+     Anteprima, Profilo, Certificazioni…) prendono lo stile di «Foto dei
+     lavori»: titolo della carta senza grazie e senza riga sotto, etichette
+     normali (non MAIUSCOLE piccole), caselle e bottoni piu' grandi.
+     I titoli delle sezioni in alto (con le grazie) restano come sono. */
+  '.section .profilo-card{border:1px solid #e3e8ef !important;border-radius:18px !important;box-shadow:0 6px 20px rgba(10,42,77,.06) !important;padding:26px !important}' +
+  '.section .profilo-title{font-family:\'DM Sans\',Arial,sans-serif !important;font-size:20px !important;font-weight:800;color:#0f172a;border-bottom:0 !important;padding-bottom:0 !important;margin-bottom:18px !important}' +
+  '.section .form-group label{text-transform:none !important;letter-spacing:0 !important;font-size:16px !important;color:#0f172a !important}' +
+  '.section .form-group input:not([type=checkbox]):not([type=radio]):not([type=file]),.section .form-group select,.section .form-group textarea{font-size:17px !important;padding:13px 15px !important;border-radius:12px !important}' +
+  '.section .btn-salva-annuncio{font-size:17px !important;padding:14px 28px !important;border-radius:12px !important}' +
+  '#sec-prezzi .pz-da{background:var(--verde3) !important;border-color:var(--verde) !important;color:var(--verde2) !important}' +
+  '#sec-anteprima .profilo-card > p:first-child{font-size:17px !important;color:#334155 !important}' +
+  '#sec-anteprima #anteprima-btn-desktop,#sec-anteprima #anteprima-btn-mobile,#sec-anteprima button[onclick^="ricaricaAnteprima"]{height:44px;padding:0 18px !important;border-radius:12px !important;font-size:15px !important;display:inline-flex;align-items:center;gap:7px;background:#fff !important;color:#334155 !important;border:1.5px solid #cbd5e1 !important}' +
+  '#sec-anteprima #anteprima-btn-desktop.ti-attivo,#sec-anteprima #anteprima-btn-mobile.ti-attivo{background:#0066ff !important;color:#fff !important;border-color:#0066ff !important}' +
+  '#sec-anteprima a#anteprima-newtab{height:44px;border-radius:12px !important;font-size:15px !important;display:inline-flex !important;align-items:center;gap:7px;padding:0 18px !important}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
@@ -825,6 +843,24 @@
     try { abbellisciLavoro(); } catch (e) {}
   }
 
+
+  /* ANTEPRIMA: i due bottoni Computer/Telefono erano viola scritto dentro lo
+     stile; si segna quale e' acceso con una classe, e il colore lo da' il CSS */
+  function anteprima() {
+    function segna(modo) {
+      var d = document.getElementById('anteprima-btn-desktop'), m = document.getElementById('anteprima-btn-mobile');
+      if (d) d.classList.toggle('ti-attivo', modo !== 'mobile');
+      if (m) m.classList.toggle('ti-attivo', modo === 'mobile');
+    }
+    if (typeof window.anteprimaDevice === 'function' && !window.anteprimaDevice.__vetrina) {
+      var prima = window.anteprimaDevice;
+      var nuova = function (modo) { var r = prima.apply(this, arguments); segna(modo); return r; };
+      nuova.__vetrina = true;
+      window.anteprimaDevice = nuova;
+    }
+    segna('desktop');
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -836,6 +872,7 @@
     try { recensioni(); } catch (e) { console.error('recensioni grafica:', e); }
     try { preventivi(); } catch (e) { console.error('preventivi grafica:', e); }
     try { lavoro(); } catch (e) { console.error('lavoro grafica:', e); }
+    try { anteprima(); } catch (e) { console.error('anteprima grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
