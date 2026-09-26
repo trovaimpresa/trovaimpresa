@@ -250,6 +250,38 @@
   '@media(max-width:600px){#sec-preventivi .prev-card{padding:16px !important}#sec-preventivi .prev-badge{margin-right:0 !important}' +
     '#sec-preventivi .prev-card button[title="Elimina preventivo"]{position:static !important;margin-bottom:10px}#sec-preventivi .prev-card > button[title="Elimina preventivo"] ~ .prev-header{padding-right:0}}' +
 
+  /* ---------- LE MIE OFFERTE DI LAVORO + CANDIDATURE RICEVUTE (26 set 2026) ----------
+     Le carte hanno lo stile scritto dentro l'HTML: qui si rimette tutto in
+     riga con il resto del pannello (bordo grigio, angoli 18, niente striscia
+     viola a sinistra), due per riga sugli schermi larghi, emoji in disegni.
+     Il viola resta dove dice «lavoro»: bottoni e bollino «Online». */
+  '#lista-mie-offerte,#lista-candidature{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}' +
+  '#lista-mie-offerte > .empty-state,#lista-candidature > .empty-state{grid-column:1 / -1}' +
+  '#lista-mie-offerte > div:not(.empty-state),#lista-candidature > .prev-card{margin:0 !important;background:#fff !important;border:1px solid #e3e8ef !important;border-left:1px solid #e3e8ef !important;border-radius:18px !important;box-shadow:0 6px 20px rgba(10,42,77,.06) !important;padding:20px 22px !important}' +
+  '#lista-mie-offerte > div:not(.empty-state):hover,#lista-candidature > .prev-card:hover{border-color:#7c3aed !important}' +
+  '#lista-mie-offerte > div > div:first-child > div > div:first-child{font-size:20px !important;color:#0a2a4d !important}' +
+  '#lista-mie-offerte > div > div:first-child > div > div:nth-child(2){font-size:16px !important;color:#475569 !important;margin-top:8px !important;line-height:1.9}' +
+  '#lista-mie-offerte > div > div:first-child > div > div:nth-child(2) svg{vertical-align:-3px;margin-right:5px}' +
+  '#lista-mie-offerte a{border-radius:12px !important;padding:11px 18px !important;font-size:15px !important}' +
+  '#sec-mie-offerte > div[style*="margin-bottom"] > a{border-radius:12px !important;padding:13px 22px !important;font-size:16px !important;display:inline-flex !important;align-items:center;gap:8px}' +
+  '#lista-candidature > .prev-card > div:first-child > div:first-child{font-size:18px;font-weight:800 !important;color:#0a2a4d;display:flex;align-items:center;gap:12px}' +
+  '#lista-candidature .pv-av{width:44px;height:44px;border-radius:50%;background:#f0ebfd;color:#7c3aed;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:0 0 44px}' +
+  '#lista-candidature > .prev-card > div:first-child > span{font-size:14px !important;font-weight:700;border-radius:999px !important;padding:5px 12px !important}' +
+  '#lista-candidature > .prev-card > div{font-size:16px !important;line-height:1.6}' +
+  '#lista-candidature > .prev-card > div:nth-child(2){color:#5f6b7a !important;margin-top:8px}' +
+  '#lista-candidature > .prev-card > div:not(:first-child) svg{vertical-align:-3px;margin-right:6px}' +
+  '#lista-candidature > .prev-card a{color:#0066ff;font-weight:700;display:inline-flex;align-items:center;gap:6px}' +
+  '#lista-candidature > .prev-card button{border-radius:12px !important;padding:12px 20px !important;font-size:15px !important;font-weight:700 !important}' +
+  '#lista-mie-offerte svg.ti-em,#lista-mie-offerte svg.emic,#lista-candidature svg.ti-em,#lista-candidature svg.emic{width:18px !important;height:18px !important;flex:0 0 18px;color:#7c3aed}' +
+  '#lista-mie-offerte a svg.ti-em,#lista-mie-offerte a svg.emic,#lista-candidature a svg.ti-em,#lista-candidature a svg.emic,#lista-candidature button svg{color:currentColor}' +
+  '#sec-mie-offerte .empty-state,#sec-candidature .empty-state{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:44px 24px !important;font-size:17px;color:#475569;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}' +
+  '#sec-mie-offerte .empty-state .empty-icon,#sec-candidature .empty-state .empty-icon{width:64px;height:64px;border-radius:18px;background:#f0ebfd;color:#7c3aed;display:flex;align-items:center;justify-content:center;font-size:0 !important;margin:0 !important}' +
+  '#sec-mie-offerte .empty-state .empty-icon svg,#sec-candidature .empty-state .empty-icon svg{width:32px !important;height:32px !important;flex:0 0 32px !important}' +
+  '#sec-candidature .empty-state a{border-radius:12px !important;display:inline-flex !important;align-items:center;gap:6px}' +
+  '@media(max-width:1100px){#lista-mie-offerte,#lista-candidature{grid-template-columns:minmax(0,1fr)}}' +
+  '@media(max-width:600px){#lista-mie-offerte > div:not(.empty-state),#lista-candidature > .prev-card{padding:16px !important}' +
+    '#lista-mie-offerte a[onclick^="chiudiOfferta"]{margin-left:0 !important}}' +
+
   /* ---------- FOTO DEI LAVORI ---------- */
   '#sec-foto-lavori .fl-card{background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:26px;' +
     'box-shadow:0 8px 28px rgba(10,42,77,.08);margin:0 0 20px}' +
@@ -693,12 +725,16 @@
     cartella: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
     grafico: '<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',
     mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+    calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    scarica: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    megafono: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+    piu: '<path d="M12 5v14M5 12h14"/>',
     matita: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'
   };
   var EMOJI_PV = { '🔨':'attrezzo','🛠️':'attrezzo','🛠':'attrezzo','📍':'posto','⏰':'orologio','💶':'euro','📎':'graffetta',
     '💬':'chat','📞':'telefono','🗑️':'cestino','🗑':'cestino','✅':'spunta','📋':'cartella','📁':'cartella','📊':'grafico',
-    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita' };
+    '✉️':'mail','📧':'mail','📄':'documento','📝':'documento','✍️':'matita','✍':'matita','🔧':'attrezzo','📅':'calendario','📥':'scarica','➕':'piu','📢':'megafono' };
   var EMOJI_VIA = ['👤','🆕'];
   function svgEm(nome) {
     return '<svg class="ti-em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + EM_SVG[nome] + '</svg>';
@@ -760,6 +796,35 @@
     try { abbellisciPreventivi(); } catch (e) {}
   }
 
+
+  /* OFFERTE DI LAVORO e CANDIDATURE: stessa cura delle richieste di preventivo */
+  function abbellisciLavoro() {
+    var off = document.getElementById('lista-mie-offerte'), can = document.getElementById('lista-candidature');
+    if (can) can.querySelectorAll(':scope > .prev-card > div:first-child > div:first-child').forEach(function (n) {
+      if (n.querySelector('.pv-av')) return;
+      var av = document.createElement('span'); av.className = 'pv-av';
+      av.textContent = ((n.textContent || '?').trim().charAt(0) || '?').toUpperCase();
+      n.insertBefore(av, n.firstChild);
+    });
+    [off, can].forEach(function (l) { if (l) for (var g = 0; g < 4 && togliEmoji(l); g++) {} });
+    if (off) off.querySelectorAll(':scope > div > div:first-child > div > div:nth-child(2)').forEach(function (r) {
+      [].slice.call(r.childNodes).forEach(function (t) { if (t.nodeType === 3 && /·/.test(t.nodeValue)) t.nodeValue = t.nodeValue.replace(/\s*·\s*/g, '\u2003'); });
+    });
+  }
+  function lavoro() {
+    ['lista-mie-offerte', 'lista-candidature'].forEach(function (id) {
+      var l = document.getElementById(id); if (!l) return;
+      var inCorso = false;
+      var ob = new MutationObserver(function () {
+        if (inCorso) return; inCorso = true;
+        try { abbellisciLavoro(); } catch (e) { console.error('lavoro grafica:', e); }
+        ob.takeRecords(); inCorso = false;
+      });
+      ob.observe(l, { childList: true, subtree: true });
+    });
+    try { abbellisciLavoro(); } catch (e) {}
+  }
+
   function parti() {
     var st = document.createElement('style'); st.id = 'sezioni-vetrina-css'; st.textContent = CSS;
     document.head.appendChild(st);
@@ -770,6 +835,7 @@
     try { mappaCitta(); } catch (e) { console.error('mappa citta:', e); }
     try { recensioni(); } catch (e) { console.error('recensioni grafica:', e); }
     try { preventivi(); } catch (e) { console.error('preventivi grafica:', e); }
+    try { lavoro(); } catch (e) { console.error('lavoro grafica:', e); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();

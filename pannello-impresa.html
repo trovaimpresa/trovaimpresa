@@ -5299,21 +5299,26 @@ async function caricaCandidature() {
   container.innerHTML = lista.map(c => {
     const cand = c.candidati_lavoro || {};
     const off = c.offerte_lavoro || {};
-    const nome = [cand.nome, cand.cognome].filter(Boolean).join(' ') || 'Candidato';
-    const cvLink = cand.cv ? `<a href="${cand.cv}" target="_blank" rel="noopener">📄 Apri CV</a>` : '';
+    /* ⛔ 26 set 2026 — TUTTO QUELLO CHE SCRIVE IL CANDIDATO PASSA DA escHtml.
+       Prima nome, messaggio, email e link del CV finivano nella pagina cosi'
+       com'erano: chi si candidava poteva infilare del codice nel pannello
+       dell'impresa. Il CV si apre solo se e' un indirizzo https vero. */
+    const nome = escHtml([cand.nome, cand.cognome].filter(Boolean).join(' ') || 'Candidato');
+    const cvOk = typeof cand.cv === 'string' && /^https:\/\//i.test(cand.cv.trim());
+    const cvLink = cvOk ? `<a href="${escHtml(cand.cv.trim())}" target="_blank" rel="noopener">📄 Apri CV</a>` : '';
     const st = badge[c.stato] || badge.inviata;
     return `
       <div class="prev-card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div style="font-weight:600">${nome}${cand.mestiere ? ' · ' + cand.mestiere : ''}</div>
+          <div style="font-weight:600">${nome}${cand.mestiere ? ' · ' + escHtml(cand.mestiere) : ''}</div>
           <span style="background:${st.col};color:#fff;padding:3px 10px;border-radius:12px;font-size:15px;white-space:nowrap">${st.txt}</span>
         </div>
-        ${off.titolo ? `<div style="color:#666;font-size:14px">Offerta: ${off.titolo}</div>` : ''}
-        ${c.messaggio ? `<div style="margin-top:8px">${c.messaggio}</div>` : ''}
-        <div style="margin-top:8px;font-size:14px">${cand.email ? '✉️ ' + cand.email + ' ' : ''}${cand.telefono ? '· 📞 ' + cand.telefono + ' ' : ''}${cvLink}</div>
+        ${off.titolo ? `<div style="color:#666;font-size:14px">Offerta: ${escHtml(off.titolo)}</div>` : ''}
+        ${c.messaggio ? `<div style="margin-top:8px">${escHtml(c.messaggio)}</div>` : ''}
+        <div style="margin-top:8px;font-size:14px">${cand.email ? '✉️ ' + escHtml(cand.email) + ' ' : ''}${cand.telefono ? '· 📞 ' + escHtml(cand.telefono) + ' ' : ''}${cvLink}</div>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button onclick="aggiornaStatoCandidatura(${c.id}, 'accettata')" style="background:#2e537d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✓ Accetta</button>
-          <button onclick="aggiornaStatoCandidatura(${c.id}, 'rifiutata')" style="background:#c62828;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✗ Rifiuta</button>
+          <button onclick="aggiornaStatoCandidatura(${Number(c.id)}, 'accettata')" style="background:#2e537d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✓ Accetta</button>
+          <button onclick="aggiornaStatoCandidatura(${Number(c.id)}, 'rifiutata')" style="background:#c62828;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✗ Rifiuta</button>
         </div>
       </div>`;
   }).join('');
