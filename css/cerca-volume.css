@@ -43,6 +43,8 @@ body{ background:#f3f6fa !important; }
 .tipo-btn:hover, .chip:hover, .star-option:hover, .check-option:hover{ background:#f5f9ff !important; }
 .check-option input[type=checkbox]{ width:20px !important; height:20px !important; }
 .slider-value{ color:#0066ff !important; }
+/* le specializzazioni si vedono tutte, senza la finestrella che scorre */
+.mestieri-scroll{ max-height:none !important; overflow:visible !important; }
 
 /* ---------- i risultati ---------- */
 .results-col{ padding:24px 32px 24px 20px !important; }
