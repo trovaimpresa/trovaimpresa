@@ -53,6 +53,12 @@
   };
 
   var CSS = '' +
+    /* ripiego: identico a .ti-back di js/freccia-indietro.js, vale se quel file manca */
+    '#sec-prezzi .ti-back{display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 18px 0 14px;background:#fff;' +
+      'border:1.5px solid #c9d4e3;border-radius:12px;color:#0a2a4d;font-family:inherit;font-size:16px;font-weight:700;line-height:1;cursor:pointer}' +
+    '#sec-prezzi .ti-back:hover{background:#eaf2ff;border-color:#0066ff;color:#0047b3}' +
+    '#sec-prezzi .ti-back svg{width:22px;height:22px;flex:0 0 auto}' +
+    '#sec-prezzi .ti-back-riga{margin:0 0 18px}' +
     '#sec-prezzi .pz-intro{font-size:17px;line-height:1.6;color:#334155;margin:0 0 18px;max-width:760px}' +
     '#sec-prezzi .pz-griglia{display:grid;grid-template-columns:2fr 1fr 1.3fr;gap:14px}' +
     '#sec-prezzi .pz-griglia .form-group{margin:0}' +
@@ -94,9 +100,13 @@
   }
 
   var HTML = '' +
-    '<div class="topbar"><div class="topbar-title" style="display:flex;align-items:center;gap:14px">' +
-      '<span onclick="showSection(\'dashboard\')" style="cursor:pointer;color:#0066ff;font-size:1rem;font-weight:700">← Torna</span>' +
-      ICONA + ' I tuoi prezzi</div></div>' +
+    /* la freccia «Indietro» e' la STESSA di js/freccia-indietro.js (classe
+       .ti-back): quel file parte prima di questo e non vede la sezione,
+       quindi qui la si scrive gia' fatta. Stile di ripiego nel CSS sopra. */
+    '<div class="ti-back-riga"><button type="button" class="ti-back" id="pz-indietro" title="Torna indietro" aria-label="Torna indietro">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span>Indietro</span></button></div>' +
+    '<div class="topbar"><div class="topbar-title">' + ICONA + ' I tuoi prezzi</div></div>' +
     '<p class="pz-intro">Scrivi quanto costano, più o meno, i tuoi lavori. Il cliente li vede sulla tua scheda ' +
       'e capisce subito se sei nel suo budget. Il prezzo preciso lo fai tu, dopo il sopralluogo.</p>' +
     '<div class="profilo-card">' +
@@ -315,6 +325,7 @@
       cartaFoto.parentNode.insertBefore(c, cartaFoto.nextSibling);
     }
 
+    $('pz-indietro').addEventListener('click', function () { window.showSection('dashboard'); });
     $('pz-salva').addEventListener('click', salva);
     $('pz-annulla').addEventListener('click', function () { pulisciForm(); msg(''); });
     $('pz-prezzo').addEventListener('keydown', function (e) { if (e.key === 'Enter') salva(); });
