@@ -1,0 +1,20 @@
+/* ⛔ 26 SETTEMBRE 2026 — LA SCHEDA CON «UN PO' DI VOLUME», COME IL PANNELLO.
+   Alessio: le pagine «sembrano vuote», «dargli un po' di volume», «il sito e'
+   tutto cosi', miglioriamolo». Qui NON si tocca l'ordine delle carte ne' la
+   griglia a due colonne (decise il 1 settembre): si cambia solo l'aspetto.
+   - carte: via la striscia colorata in cima, bordo grigio sottile, ombra piu'
+     profonda, angoli 20;
+   - titoli delle carte: scuri, e l'icona dentro un quadrato azzurro;
+   - le scritte piccole in MAIUSCOLO («CHI SIAMO», «DATI») diventano normali;
+   - sfondo della pagina appena azzurrato, cosi' le carte si staccano. */
+body{background:#f3f6fa}
+.card{border:1px solid #e3e8ef !important;border-top:1px solid #e3e8ef !important;border-radius:20px !important;box-shadow:0 12px 32px rgba(10,42,77,.08) !important}
+.card:hover{box-shadow:0 18px 44px rgba(10,42,77,.13) !important}
+.card-title{color:#0a2a4d !important;font-size:24px !important;border-bottom:0 !important;padding-bottom:0 !important;margin-bottom:18px !important;display:flex !important;align-items:center;gap:14px}
+.card-title > svg,.card-title > .ti-ic{width:48px !important;height:48px !important;padding:12px;box-sizing:border-box;border-radius:14px;background:#eaf2ff;color:#0066ff;flex:0 0 48px}
+.info-label{font-size:17px !important;text-transform:none !important;letter-spacing:0 !important;color:#0a2a4d !important;margin-bottom:10px !important}
+.desc{font-size:16px !important;color:#334155 !important;line-height:1.7 !important}
+.info-grid > *{border-radius:14px !important}
+.contacts-card,.rec-altri{border-radius:20px !important;box-shadow:0 12px 32px rgba(10,42,77,.08) !important;border:1px solid #e3e8ef !important;border-top:1px solid #e3e8ef !important}
+.fgrid > *{border-radius:16px !important;overflow:hidden;box-shadow:0 6px 18px rgba(10,42,77,.08)}
+@media(max-width:768px){.card-title{font-size:21px !important}.card-title > svg,.card-title > .ti-ic{width:42px !important;height:42px !important;padding:10px;flex-basis:42px}}
