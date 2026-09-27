@@ -2725,3 +2725,12 @@ database sono state fatte in transazioni annullate (tutte verdi).
 - Strumenti: ravvedimento (D.Lgs 87/2024: 0,0833%/giorno fino a 14, 1,25% fino a 30, 1,39% fino a 90, 3,125% entro l'anno, 3,57% entro 2, 4,17% oltre; interessi legali 2% 2025, 1,6% 2026) e «Mi è arrivata una lettera» (avviso bonario 60 gg / 20 rate; cartella 60 gg / 84 rate fino a 120.000 €, decadenza a 8 rate).
 - ⚠️ Quando esce la circolare INPS 2027 si aggiornano `FT_INPS` e le date 2027.
 - Banco: `prove-claude/banchi-fissi/banco-fisco-tasse.html` (?sez=tasse&p=forf|ord|srl|gs|none).
+
+## 27 SETTEMBRE 2026 (notte, 3) — TASSE E FISCO, TAPPA 3: «SOPRAVVIVERE» (NASCOSTO)
+
+- File nuovo `js/gest-fisco-vivere.js` (`fiscoVivere(box, mio)`), stile `.fv-*`. Usa `ftStima`, `ftScadenze`, `ftIndovina` di gest-fisco-tasse.js: i conti NON sono rifatti.
+- «Quanto ti resta»: incassato (fatture pagate, imponibile) − spese − tasse stimate. Le spese sono le STESSE fonti del Riepilogo (gest_spese, gest_carte_movimenti tipo spesa, gest_rifornimenti senza movimento_id, gest_fatture_fornitori), di tutti i reparti e dell'anno. Se il Riepilogo aggiunge una fonte, va aggiunta in `fvSpese`.
+- «I prossimi 3 mesi»: entrano le fatture emesse alla loro scadenza (quelle già scadute a parte, con link a Farsi pagare), escono le fatture fornitori non pagate e le scadenze fiscali stimate. Avviso sul mese peggiore.
+- «Il prezzo giusto»: bisezione su ftStima per trovare l'incasso annuo che lascia il netto voluto; giornata e ora minime; «Usa come mia tariffa oraria» scrive `gest_azienda.tariffa_oraria`. I numeri si ricordano nelle colonne `pg_*` di `gest_fisco_profilo` (migrazione `fisco_prezzo_giusto`, in sql/fisco.sql e PROVE).
+- «La cartella dell'anno»: PDF (jsPDF, logo con gestLogoPdf) con profilo, incassi per mese, spese, fatture aperte, fornitori da pagare, stima, domande per il commercialista.
+- ⛔ Corsa fra sezioni: `fpGiro` in gest-fisco.js. Ogni sezione riceve `mio` e dopo ogni await esce se `mio !== fpGiro`. Chi aggiunge una sezione nuova deve fare lo stesso.

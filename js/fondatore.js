@@ -267,7 +267,7 @@
     "gest-computo-metrico.sql":         "gest_computi.preventivo_id gest_computi.ribasso_perc gest_computi.prezzario gest_computi.prezzario_anno gest_computo_voci.incidenza_manodopera gest_computo_voci.oneri_sicurezza gest_prezzi_propri.incidenza_manodopera gest_prezzi_propri.fonte gest_computi gest_computo_capitoli gest_computo_voci gest_computo_misure gest_prezzi_propri gest_computo_voci_calc gest_computo_totali",
     "gest-computo-quadro.sql":          "gest_computi.quadro_economico",
     "gest-computo-variante.sql":        "gest_computi.variante_di gest_computo_voci.origine_id",
-    "fisco.sql":                        "gest_solleciti gest_fisco_profilo",
+    "fisco.sql":                        "gest_solleciti gest_fisco_profilo gest_fisco_profilo.pg_netto_mese gest_fisco_profilo.pg_spese_mese gest_fisco_profilo.pg_mesi gest_fisco_profilo.pg_giorni gest_fisco_profilo.pg_ore gest_fisco_profilo.pg_non_fatt",
     "gest-fattura-cassa.sql":           "gest_fatture.cassa_perc gest_fatture.cassa_tipo gest_fatture.spese",
     "gest-fornitori-plus.sql":          "gest_fornitori.trovaimpresa_id gest_foto.fornitore_id",
     "gest-fornitori.sql":               "gest_fornitori gest_fatture_fornitori",

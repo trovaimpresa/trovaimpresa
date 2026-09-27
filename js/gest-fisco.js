@@ -190,6 +190,7 @@
     const mio = ++fpGiro;
     fpDisegnaNav();
     if (fpSezione === "tasse" && typeof fiscoTasse === "function") { fiscoTasse(box, mio); return; }
+    if (fpSezione === "vivere" && typeof fiscoVivere === "function") { fiscoVivere(box, mio); return; }
     if (fpSezione !== "pagare") { box.innerHTML = fpPresto(fpSezione); return; }
     if (!sb || !sbUid) {
       box.innerHTML = tabVuoto("Farsi pagare", "Accedi per vedere chi ti deve dei soldi.");

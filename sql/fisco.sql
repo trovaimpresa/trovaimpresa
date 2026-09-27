@@ -55,3 +55,12 @@ create trigger trg_gest_piano before insert or update or delete on public.gest_f
 revoke all on public.gest_fisco_profilo from anon;
 grant select on public.gest_fisco_profilo to anon;
 grant select, insert, update, delete on public.gest_fisco_profilo to authenticated;
+
+-- 3. «Il prezzo giusto» (tappa «Sopravvivere», js/gest-fisco-vivere.js) — migrazione fisco_prezzo_giusto
+alter table public.gest_fisco_profilo
+  add column if not exists pg_netto_mese numeric check (pg_netto_mese is null or pg_netto_mese >= 0),
+  add column if not exists pg_spese_mese numeric check (pg_spese_mese is null or pg_spese_mese >= 0),
+  add column if not exists pg_mesi numeric check (pg_mesi is null or (pg_mesi > 0 and pg_mesi <= 12)),
+  add column if not exists pg_giorni numeric check (pg_giorni is null or (pg_giorni > 0 and pg_giorni <= 31)),
+  add column if not exists pg_ore numeric check (pg_ore is null or (pg_ore > 0 and pg_ore <= 24)),
+  add column if not exists pg_non_fatt numeric check (pg_non_fatt is null or (pg_non_fatt >= 0 and pg_non_fatt < 100));

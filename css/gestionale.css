@@ -4892,3 +4892,25 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .ft-let p{margin:6px 0}
 .ft-let ul{margin:6px 0;padding-left:20px;line-height:1.5}
 @media(max-width:640px){.ft-sc{grid-template-columns:54px 1fr}.ft-sc-e{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;text-align:left}.ft-strum{grid-template-columns:1fr}}
+/* ═══ 27 set 2026 — TASSE E FISCO · Sopravvivere (js/gest-fisco-vivere.js) ═══ */
+.fv-conto{background:var(--card);border:1px solid var(--bordo);border-radius:14px;padding:6px 16px 12px;margin-bottom:10px}
+.fv-riga{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--bordo);font-size:15px}
+.fv-riga:last-child{border-bottom:0}
+.fv-riga.meno b{color:var(--testo-2)}
+.fv-riga.tot{font-size:17px;border-bottom:0}
+.fv-riga.tot b{font-size:20px}
+.fv-sotto{font-size:14px;color:var(--testo-2);margin-top:4px}
+.fv-mesi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.fv-mese{background:var(--card);border:1px solid var(--bordo);border-radius:14px;padding:10px 14px}
+.fv-mese.sotto{border-color:var(--err);background:var(--err-bg)}
+.fv-mese-n{font-weight:800;font-size:15px;text-transform:capitalize;margin-bottom:2px}
+.fv-mese .fv-riga{font-size:14px;padding:6px 0}
+.fv-mese .fv-riga.tot b{font-size:17px}
+.fv-pg{border-left:4px solid var(--blu)}
+.fv-pg-campi{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 14px}
+.fv-pg-ris{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.fv-pg-ris>div{flex:1;min-width:150px;background:var(--sfondo);border-radius:12px;padding:10px 12px}
+.fv-pg-ris small{display:block;color:var(--testo-2);font-size:13px}
+.fv-pg-ris b{font-size:21px}
+@media(max-width:760px){.fv-mesi{grid-template-columns:1fr}.fv-pg-campi{grid-template-columns:1fr}}
+.fv-riga b{white-space:nowrap}.fv-pg>p{margin-bottom:10px}
