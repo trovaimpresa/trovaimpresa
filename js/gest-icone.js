@@ -60,7 +60,8 @@
     campana:  '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
     tocco:    '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
     video:    '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4z"/>',
-    stella:   '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>'
+    stella:   '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+    ripeti:   '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'
   };
   var MAPPA = {
     '✔':'ok','✓':'ok','✅':'ok','☑':'ok','⚠':'avviso','⛔':'stop','🚫':'stop','❌':'stop','🗑':'cestino',
@@ -75,7 +76,7 @@
     '🔒':'lucchetto','🔐':'lucchetto','🔎':'cerca','🔍':'cerca','⛽':'carburante','🏪':'negozio',
     '🧰':'cassetta','🧱':'muro','🧮':'calcolo','📐':'righello','📏':'righello','🎨':'pennello',
     '📇':'contatti','🏠':'casa','🏡':'casa','⚡':'lampo','✨':'lampo','💡':'idea','📊':'grafico','📈':'grafico',
-    '📧':'busta','✉':'busta','📥':'scarica','⬇':'scarica','⭐':'stella','🔔':'campana','🎓':'tocco','🎥':'video','📹':'video','🎬':'video'
+    '📧':'busta','✉':'busta','📥':'scarica','⬇':'scarica','⭐':'stella','🔔':'campana','🎓':'tocco','🎥':'video','📹':'video','🎬':'video','🔁':'ripeti','🔄':'ripeti'
   };
   var TROVA = /(⬇|✉|⭐|[☀-➿⌚-⏿]|[\uD83C-\uD83E][\uDC00-\uDFFF])️?/g;
   var SALTA = 'input,textarea,select,option,script,style,svg,.no-ico,[contenteditable="true"]';

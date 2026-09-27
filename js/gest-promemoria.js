@@ -150,7 +150,36 @@
             { lab: "🗑 Butta",    action: "del-prom",  data: { id: p.id } }
           ]
         };
-      })
+      }),
+      /* 27 set 2026 — le schede come Scadenzario e Lavori: prima qui usciva
+         l'unica tabella piatta del gestionale */
+      cards: () => L.map(p => promCard(p, oggi)).join("")
+    });
+  }
+
+  function promCard(p, oggi) {
+    const fatto = p.stato === "fatto";
+    const passato = !fatto && p.data && p.data < oggi;
+    let bg = "var(--sfondo)", fg = "var(--testo-2)", lab = "Da fare", tono = "t-neutro";
+    if (fatto)        { bg = "var(--ok-bg)";  fg = "var(--ok)";  lab = "Fatto";   tono = "t-ok"; }
+    else if (passato) { bg = "var(--err-bg)"; fg = "var(--err)"; lab = "Passato"; tono = "t-err"; }
+    const q = quando(p.data, { neutro: fatto });
+    const ora = promOra(p.ora);
+    return schedaJob({
+      tono, titolo: esc(p.testo || "Promemoria"),
+      destra: `<span class="stato" style="background:${bg};color:${fg}">${lab}</span>`,
+      meta: [
+        "📅 " + q.testo + (ora ? " &middot; " + ora : ""),
+        "🔔 " + esc(promEtichetta(PROM_AVVISI, p.avvisa_giorni || 0)),
+        p.ripeti_mesi ? "🔁 " + esc(promEtichetta(PROM_RIPETI, p.ripeti_mesi)) : ""
+      ],
+      nota: p.note ? "📝 " + esc(p.note) : "",
+      azioni: [
+        fatto ? { lab: "↩ Riapri",      action: "prom-stato", data: { id: p.id, v: "aperto" } }
+              : { lab: "✔ Segna fatto", action: "prom-stato", data: { id: p.id, v: "fatto" } },
+        { lab: "✏ Modifica", action: "edit-prom", data: { id: p.id } },
+        { lab: "🗑 Butta",    action: "del-prom",  data: { id: p.id }, del: true }
+      ]
     });
   }
 

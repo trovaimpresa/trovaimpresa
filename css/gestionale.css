@@ -4693,3 +4693,26 @@ body:has(#ti-fondatore) .sheet--grande{
  .wrap section .griglia-schede > .job,#carte-list > .card,#forn-list > .card,#cred-list > .card,#pz-list .pz-card{padding:14px 14px 14px 16px!important}
  .wrap section .griglia-schede > .job .job-cli{font-size:18px!important}
 }
+
+/* 27 set 2026 — LA NOTA GIALLA SOTTO, NON IN MEZZO ALLA RIGA.
+   Nelle righe (Scadenzario, Promemoria...) la nota non aveva un posto suo
+   e finiva a destra accanto alla pastiglia. Adesso va su una riga sua,
+   sotto i dettagli, lunga quanto serve. */
+.wrap section .griglia-schede > .job:has(> .job-note){grid-template-areas:"top stati az" "meta stati az" "nota nota az"}
+.wrap section .griglia-schede > .job > .job-note{grid-area:nota;justify-self:start;margin-top:6px!important;padding:7px 12px!important;border-radius:9px!important;font-size:15px!important}
+@media(max-width:760px){
+ .wrap section .griglia-schede > .job:has(> .job-note){grid-template-areas:"top az" "stati az" "meta az" "nota nota"}
+}
+
+/* 27 set 2026 — «CHIEDI UNA FUNZIONE» E «ASSISTENZA DIRETTA» PIU' VISIBILI (modello 1 scelto da Alessio).
+   Stessa misura tutti e due, bordo blu pieno al posto del tratteggio, icona
+   grande in un tondo blu. Resta il blu del sito: nessun colore nuovo. */
+@media(min-width:761px){
+.side nav.tabs button.tab-cta{min-height:0!important;height:108px!important;align-items:center!important;margin:0 0 10px!important;padding:12px 14px!important;border-radius:14px!important;gap:12px!important}
+.side nav.tabs button.tab-cta .cta-txt small{font-size:14.5px!important}
+.side nav.tabs button.tab-cta .cta-txt b{font-size:18px!important}
+}
+.side nav.tabs button.tab-cta{background:#eef4ff!important;border:2px solid #0066ff!important;color:#0a2a4d!important;box-shadow:0 3px 10px rgba(0,102,255,.12)!important}
+.side nav.tabs button.tab-cta svg{width:42px!important;height:42px!important;padding:9px!important;border-radius:50%!important;background:#0066ff!important;color:#fff!important}
+.side nav.tabs button.tab-cta .cta-txt b{color:#0046b3!important}
+.side nav.tabs button.tab-cta .cta-txt small{color:#3b4a5e!important}
