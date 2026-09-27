@@ -923,6 +923,43 @@ body:has(#ti-fondatore) .sheet--grande{
 .nol-cons-via{border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;padding:0 12px;cursor:pointer;font-size:15px}
 .nol-agg{border:1px solid #2e537d;color:#2e537d;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px}
 @media(max-width:600px){.nol-due{grid-template-columns:1fr}.nol-cons-riga{grid-template-columns:1fr 1fr}}
+/* 27 set 2026 — LE LISTE DEL NOLEGGIO A RIGHE «GONFIE», come nel gestionale
+   principale: una riga per voce, filo colorato della sezione a sinistra,
+   ombra, pulsante Apri a destra. Prima erano schede piccole a tre colonne. */
+#mezzi{--acc:#3f8fbf}#clienti-nol{--acc:#3f6fd8}#noleggi{--acc:#e8833a}#prodotti{--acc:#a2731c}
+#magazzino{--acc:#0f8f8f}#fornitori{--acc:#0f8f6f}#movimenti{--acc:#6b7a8d}#fatture{--acc:#2fa46a}
+#cauzioni{--acc:#1f8fb8}#rendimento{--acc:#5b73d6}#promemoria{--acc:#b7791f}#riepilogo{--acc:#0066ff}
+#calendario{--acc:#5b73d6}#documenti{--acc:#6b7a8d}#cestino{--acc:#8a94a0}
+#app-root .nol-elenco{display:flex!important;flex-direction:column;gap:12px!important}
+#app-root .nol-elenco > .nol-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"tit az" "sub az" "sub2 az";grid-template-rows:1fr auto auto;column-gap:22px;row-gap:3px;align-items:center;
+  margin:0!important;padding:18px 22px!important;border:1px solid #e3e8ef!important;
+  border-left:6px solid var(--acc,#0066ff)!important;border-radius:16px!important;
+  box-shadow:0 3px 10px rgba(15,23,42,.07)!important;background:#fff!important}
+#app-root .nol-elenco > .nol-card:hover{box-shadow:0 8px 22px rgba(15,23,42,.12)!important;transform:translateY(-2px)}
+#app-root .nol-elenco > .nol-card > *{margin:0!important}
+#app-root .nol-elenco > .nol-card .tit{grid-area:tit;justify-content:flex-start;align-items:center}
+#app-root .nol-elenco > .nol-card .tit strong{font-size:19px;font-weight:800}
+#app-root .nol-elenco > .nol-card .sub{grid-area:sub;font-size:16px}
+#app-root .nol-elenco > .nol-card .sub2{grid-area:sub2;font-size:16px}
+#app-root .nol-elenco > .nol-card .sub:empty,#app-root .nol-elenco > .nol-card .sub2:empty{display:none}
+#app-root .nol-elenco > .nol-card .nol-azioni{grid-area:az;grid-row:1/-1;margin:0!important;padding:0!important;border:0!important;display:flex;flex-wrap:wrap;justify-content:flex-end;align-self:center}
+#app-root .nol-elenco > .nol-card .nol-az-apri{min-height:44px;background:#f3f8ff!important;color:#0066ff!important;border:2px solid #0066ff!important}
+/* I promemoria qui li disegna un'altra funzione (.grid > .card): stessa forma */
+#app-root #prom-list.grid{display:flex!important;flex-direction:column;gap:12px}
+#app-root #prom-list > .card{display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:20px;
+  margin:0!important;padding:18px 22px!important;border:1px solid #e3e8ef!important;border-left:6px solid var(--acc)!important;
+  border-radius:16px!important;box-shadow:0 3px 10px rgba(15,23,42,.07)!important;background:#fff!important;max-width:none!important;width:auto!important}
+#app-root #prom-list > .card h3{font-size:19px;font-weight:800;margin:0 0 4px}
+#app-root #prom-list > .card p{font-size:16px;margin:0}
+#app-root #prom-list > .card .card-acts{border:0!important;margin:0!important;padding:0!important;flex:0 0 auto}
+@media(max-width:760px){
+ #app-root .nol-elenco > .nol-card{grid-template-columns:minmax(0,1fr) auto;padding:14px 14px!important;column-gap:10px}
+ #app-root #prom-list > .card{flex-direction:column!important;align-items:stretch;padding:14px!important}
+}
+/* il menu in alto: scritte piu' grandi (erano 14 px) */
+nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
+#app-root .nol-eti:empty{display:none}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1980,7 +2017,7 @@ body:has(#ti-fondatore) .sheet--grande{
         titolo:esc(x.nome||"—"),
         eti:[{t:esc(sc?sc.testo:(x.stato||"").toUpperCase())}],
         corpo:`${sc?`<div class="sub2" style="color:${sc.col};font-weight:600">${esc(mezzoBloccato(x)?("Non si può noleggiare: "+mezzoBloccato(x)):"")}</div>`:""}
-        <div class="sub">${esc([x.tipo,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        <div class="sub">${esc([x.tipo,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||""}</div>
         <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>`,
         pulsanti:nolPulsanti("mezzo",x.id)});
     }).join("");
@@ -4929,7 +4966,7 @@ body:has(#ti-fondatore) .sheet--grande{
     box.innerHTML=c.map(x=>
       nolCard({col:"#1565c0",
         titolo:esc(x.nome||"—"),
-        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||""}</div>
         ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
         ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}`,
         pulsanti:nolPulsanti("cliente",x.id)})).join("");
@@ -7212,7 +7249,7 @@ body:has(#ti-fondatore) .sheet--grande{
     box.innerHTML=f.map(x=>
       nolCard({col:"#1565c0",
         titolo:esc(x.nome||"—"),
-        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||"&nbsp;"}</div>
+        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||""}</div>
         ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
         ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}`,
         pulsanti:nolPulsanti("fornitore",x.id)})).join("");
