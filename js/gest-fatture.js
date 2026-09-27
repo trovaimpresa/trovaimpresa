@@ -1490,6 +1490,7 @@
     let y=18;
 
     /* intestazione: chi emette */
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(15);
     doc.text(az.nome||"La tua azienda",M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);

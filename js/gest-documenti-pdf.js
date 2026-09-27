@@ -68,6 +68,7 @@
       doc.setTextColor(0);
       y=26;
     }
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(16);
     doc.text(az.nome||"(il nome della tua attivita' va nei Dati azienda)",M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
@@ -436,6 +437,7 @@
     const titoletto=t=>{ nArt++; y+=4; spazio(10); paragrafo(nArt+". "+t,10.5,true); y+=1.5; };
 
     /* --- intestazione dello studio --- */
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;
@@ -756,6 +758,7 @@
     const titoletto=t=>{ nArt++; y+=4; if(y+10>272){doc.addPage();y=20;} paragrafo(nArt+". "+t,10.5,true); y+=1.5; };
 
     /* intestazione impresa */
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;
@@ -1022,6 +1025,7 @@
     const titoletto=t=>{ y+=4; if(y+10>272){doc.addPage();y=20;} paragrafo(t,10.5,true); y+=1.5; };
 
     /* intestazione */
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;

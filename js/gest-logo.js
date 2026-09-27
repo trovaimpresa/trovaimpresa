@@ -84,6 +84,47 @@
     i.click();
   });
 
+  /* ---- IL LOGO NEI PDF (27 set 2026) ----
+     Si mette in alto a sinistra, SOPRA il nome dell'impresa, e sposta giu'
+     l'intestazione di quanto serve. Senza logo il foglio resta identico.
+     Il browser lo ridisegna in PNG: jsPDF non legge il webp.
+     Se qualcosa va storto (rete, immagine rotta) il PDF esce senza logo:
+     mai un PDF fermo per colpa del logo. */
+  var PDF_CACHE = null;
+  function logoPerPdf() {
+    if (PDF_CACHE && PDF_CACHE.src === URL_LOGO) return Promise.resolve(PDF_CACHE);
+    return new Promise(function (ok) {
+      if (!URL_LOGO) return ok(null);
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      var fatto = false, fine = function (v) { if (!fatto) { fatto = true; ok(v); } };
+      setTimeout(function () { fine(null); }, 6000);
+      im.onload = function () {
+        try {
+          var c = document.createElement('canvas');
+          c.width = im.naturalWidth; c.height = im.naturalHeight;
+          var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0);
+          PDF_CACHE = { src: URL_LOGO, url: c.toDataURL('image/png'), w: im.naturalWidth, h: im.naturalHeight };
+          fine(PDF_CACHE);
+        } catch (e) { fine(null); }
+      };
+      im.onerror = function () { fine(null); };
+      im.src = URL_LOGO;
+    });
+  }
+  window.gestLogoPdf = async function (doc, M, y) {
+    try {
+      if (!URL_LOGO && SB && UID) {
+        var r = await SB.from('imprese').select('logo_url').eq('user_id', UID).maybeSingle();
+        if (!r.error && r.data && r.data.logo_url && r.data.logo_url !== '/img/logo.png') URL_LOGO = r.data.logo_url;
+      }
+      var d = await logoPerPdf(); if (!d) return y;
+      var maxW = 42, maxH = 18, k = Math.min(maxW / d.w, maxH / d.h);
+      var w = d.w * k, h = d.h * k;
+      doc.addImage(d.url, 'PNG', M, y - 6, w, h);
+      return y + h + 2;
+    } catch (e) { return y; }
+  };
+
   window.gestLogoAvvia = function (sb, getUid) {
     SB = sb; if (!SB) return;
     var giri = 0;

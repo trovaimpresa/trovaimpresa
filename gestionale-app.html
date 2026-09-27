@@ -8440,6 +8440,7 @@
     const pp=(state.panels||[]).find(p=>p.id===cur), repNome=pp?pp.nome:"";
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
     let y=20;
+    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
