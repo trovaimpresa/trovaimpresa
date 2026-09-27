@@ -37,11 +37,25 @@
       '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span>Indietro</span></button>';
     briciole.parentNode.insertBefore(riga, briciole);
 
+    /* 27 settembre 2026 — da Google, «Indietro» portava SEMPRE alle guide dei
+       prezzi (/blog.html), anche dalle 27 pagine del GESTIONALE: chi cercava
+       «gestionale trovaimpresa» finiva sulle guide per i clienti. Adesso le pagine
+       del gestionale (nelle briciole c'e' /prezzi, /gestionale o /software-gestionale-imprese-edili) tornano alla
+       pagina del gestionale; tutte le altre alle guide, come prima. */
+    function dove() {
+      var link = briciole.querySelectorAll('a[href]');
+      for (var i = link.length - 1; i >= 0; i--) {
+        var h = link[i].getAttribute('href') || '';
+        if (/^\/(prezzi|gestionale|software-gestionale-imprese-edili)(\.html)?\/?$/.test(h)) return '/gestionale';
+      }
+      return '/blog.html';
+    }
+
     riga.querySelector('.ti-back').addEventListener('click', function () {
       var daNoi = false;
       try { daNoi = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) {}
-      if (daNoi && history.length > 1) history.back();
-      else location.href = '/blog.html';
+      if (daNoi && history.length > 1) { history.back(); return; }
+      location.href = dove();
     });
   });
 })();
