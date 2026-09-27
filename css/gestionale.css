@@ -4658,3 +4658,14 @@ body:has(#ti-fondatore) .sheet--grande{
  #pz-list .pz-card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"testa x" "desc x" "prezzo x" "meta x";padding:11px 12px!important}
  #pz-list .pz-prezzo,#pz-list .pz-meta{text-align:left}
 }
+
+/* 27 set 2026 — STATI DI AVANZAMENTO VUOTO: una riga che spiega e i
+   computi, ognuno col suo «Fai un SAL» (salVuotoCoiComputi). */
+.salv{ grid-column:1/-1; max-width:760px; margin:36px auto; text-align:center; }
+.salv-tit{ font-size:22px; font-weight:800; color:var(--testo); margin-bottom:8px; }
+.salv-txt{ font-size:17px; line-height:1.5; color:var(--testo-2); margin-bottom:20px; }
+.salv-lista{ text-align:left; background:#fff; border:1px solid #e3e8ef; border-radius:14px; }
+.salv-r{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 18px; border-bottom:1px solid #eef2f7; }
+.salv-r:last-child{ border-bottom:0; }
+.salv-nome{ font-size:17px; font-weight:700; color:var(--testo); min-width:0; }
+.salv-r .btn{ flex:none; }

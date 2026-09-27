@@ -12308,6 +12308,7 @@
     if(a==="sal-el-apri")return salApriDaElenco(id);
     if(a==="sal-torna")return salTorna();
     if(a==="sal-filtro"){salFiltro=t.dataset.v||"tutti";renderSalTutti();return;}
+    if(a==="sal-comp-apri")return salApriComputo(id);
     if(a==="sal-vai-computi"){const b=document.querySelector('nav.tabs button[data-tab="computi"]');if(b){b.click();window.scrollTo(0,0);}return;}
     if(a==="sal-apri")return salForm(id);
     if(a==="sal-salva")return salSalva(id);

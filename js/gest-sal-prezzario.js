@@ -240,12 +240,10 @@
     renderTabella({
       id:"sal", box:"#sal-list",
       viste:"#sal-viste", visteDef:SAL_VISTE, vista:salFiltro, conta:conta, azioneVista:"sal-filtro",
-      vuoto:tabVuoto(
-        salTuttiCache.length?"Nessuno stato di avanzamento con questo filtro":"Ancora nessuno stato di avanzamento",
-        salTuttiCache.length?"Prova a cambiare vista qui sopra."
-          :"Uno stato di avanzamento è il conto di quello che hai fatto finora, per farti pagare un acconto mentre il lavoro va avanti. Nasce dentro un computo: aprilo e creane uno.",
-        _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
-        salTuttiCache.length?null:{t:"Vai ai computi",a:"sal-vai-computi"}),
+      vuoto:salTuttiCache.length
+        ? tabVuoto("Nessuno stato di avanzamento con questo filtro","Prova a cambiare vista qui sopra.",
+            _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',null)
+        : salVuotoCoiComputi(),
       colonne:[{lab:"N.",w:"10%"},{lab:"Computo",w:"34%"},{lab:"Cliente",w:"20%",cls:"c-cli"},
                {lab:"Quando",w:"16%"},{lab:"Importo",w:"20%",cls:"c-imp"}],
       righe:L.map(s=>{
@@ -281,6 +279,50 @@
                      PRECEDENTE («l'ultima volta») e a proporre il numero.
      Chi salta uno di questi tre pezzi non vede un errore: vede un numero
      sbagliato, che e' peggio. */
+  /* ===== 27 settembre 2026 — LA PAGINA VUOTA CHE PORTA DA QUALCHE PARTE =====
+     Alessio: «non capisco stati di avanzamento, perche' e' vuoto, e se clicco
+     vai al computo mi porta li' ma non capisco il nesso». Aveva ragione: il
+     pulsante lo lasciava nella lista dei computi senza dirgli cosa fare.
+     Adesso la pagina vuota dice in una riga cos'e' un SAL e mostra i SUOI
+     computi, ognuno col pulsante «Fai un SAL» che apre quel computo gia'
+     sulla linguetta «Acconti (SAL)». Senza computi resta «Vai ai computi». */
+  function salVuotoCoiComputi(){
+    const C=Object.values(salTuttiComp||{});
+    const ico=_SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>';
+    if(!C.length) return tabVuoto("Ancora nessuno stato di avanzamento",
+      "Il SAL è un acconto a metà lavoro: conti quello che hai fatto e ti fai pagare quella parte. Si fa dentro un computo, e tu non ne hai ancora nessuno.",
+      ico,{t:"Vai ai computi",a:"sal-vai-computi"});
+    C.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")));
+    return '<div class="salv">'
+      +'<div class="salv-tit">Ancora nessuno stato di avanzamento</div>'
+      +'<div class="salv-txt">Il SAL è un <b>acconto a metà lavoro</b>: conti quello che hai fatto finora e ti fai pagare quella parte. Si fa dentro un computo: scegli quale.</div>'
+      +'<div class="salv-lista">'
+      +C.map(c=>'<div class="salv-r">'
+          +'<span class="salv-nome">'+(c.numero?"N. "+esc(String(c.numero))+" — ":"")+esc(c.titolo||"Computo")+'</span>'
+          +'<button type="button" class="btn btn-primary" data-action="sal-comp-apri" data-id="'+esc(String(c.id))+'">Fai un SAL</button>'
+        +'</div>').join("")
+      +'</div></div>';
+  }
+  async function salApriComputo(id){
+    const c=(salTuttiComp||{})[String(id)];
+    if(!c){toast("Computo non trovato: riapri la sezione");return;}
+    const i=compCache.findIndex(x=>String(x.id)===String(c.id));
+    if(i<0)compCache.push(c); else compCache[i]=c;
+    await computoForm(c);
+    /* 350 ms: dopo gli ultimi riallineamenti di openSheetGrande (vedi
+       compTornaAlComputo), se no la linguetta scelta viene ricoperta */
+    /* la linguetta «Acconti» si accende solo quando sono arrivate le
+       lavorazioni: si aspetta fino a 2 secondi. Se resta spenta (computo
+       senza lavorazioni) compPag dice da sola perche'. */
+    let giri=0;
+    const prova=()=>{
+      const b=document.querySelector('#co-nav .conav-v[data-p="5"]');
+      if(b&&(!b.classList.contains("spento")||giri>=7)){try{compPag(5);}catch(e){}return;}
+      giri++; setTimeout(prova,250);
+    };
+    setTimeout(prova,350);
+  }
+
   async function salApriDaElenco(id){
     const s=salTuttiCache.find(x=>String(x.id)===String(id));
     if(!s){toast("Stato di avanzamento non trovato: riapri la sezione");return;}
