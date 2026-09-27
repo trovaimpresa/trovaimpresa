@@ -4636,3 +4636,25 @@ body:has(#ti-fondatore) .sheet--grande{
 .mp-pin{ background:none!important; border:0!important; filter:drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
 /* gli avvisi senza pulsante sono una frase: non vanno spezzati in colonne */
 .mp-avviso:not(:has(button)){ display:block!important; }
+
+/* 27 set 2026 — IL PREZZARIO A RIGHE, come le altre liste (ok di Alessio).
+   A schermo la descrizione si ferma a 2 righe: e' solo per riconoscere la
+   voce. Toccando si apre la scheda con il testo intero. ⛔ Nel computo e nei
+   PDF la descrizione resta INTERA: e' il testo ufficiale della tariffa. */
+#pz-list .pz-griglia{display:flex!important;flex-direction:column;gap:0!important;background:none!important}
+#pz-list .pz-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"testa prezzo x" "desc prezzo x" "desc meta x";column-gap:18px;row-gap:3px;align-items:start;
+  padding:12px 18px!important;margin:0 0 -1px 0!important;border:1px solid #e3e8ef!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;min-height:0!important;height:auto!important;cursor:pointer}
+#pz-list .pz-card:first-child{border-top-left-radius:14px!important;border-top-right-radius:14px!important}
+#pz-list .pz-card:last-child{border-bottom-left-radius:14px!important;border-bottom-right-radius:14px!important}
+#pz-list .pz-card:hover{background:#f5f9ff!important}
+#pz-list .pz-card > *{margin:0!important}
+#pz-list .pz-testa{display:contents!important}
+#pz-list .pz-cod{grid-area:testa;justify-self:start;font-size:14px!important;padding:2px 8px!important;width:auto!important}
+#pz-list .pz-x{grid-area:x;align-self:center}
+#pz-list .pz-desc{grid-area:desc;font-size:16px!important;line-height:1.4!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#pz-list .pz-prezzo{grid-area:prezzo;text-align:right;font-size:19px!important;white-space:nowrap}
+#pz-list .pz-meta{grid-area:meta;text-align:right;font-size:14px!important;white-space:nowrap;align-self:start}
+@media(max-width:760px){
+ #pz-list .pz-card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"testa x" "desc x" "prezzo x" "meta x";padding:11px 12px!important}
+ #pz-list .pz-prezzo,#pz-list .pz-meta{text-align:left}
+}
