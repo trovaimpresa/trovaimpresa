@@ -19,5 +19,9 @@ exports.handler = async function(event) {
   }
 
   const ok = u === ADMIN_USER && p === ADMIN_PASS;
+  /* 27 set 2026: freno sui tentativi (netlify/functions/lib/admin-freno.js) */
+  if (await require('./lib/admin-freno')(event, ok)) {
+    return { statusCode: 200, body: JSON.stringify({ ok: false, bloccato: true }) };
+  }
   return { statusCode: 200, body: JSON.stringify({ ok }) };
 };

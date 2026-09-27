@@ -15,6 +15,10 @@ exports.handler = async function(event) {
   }
   const ADMIN_USER = (process.env.ADMIN_USER || '').trim();
   const ADMIN_PASS = process.env.ADMIN_PASS || '';
+  /* 27 set 2026: freno sui tentativi (netlify/functions/lib/admin-freno.js) */
+  if (await require('./lib/admin-freno')(event, u === ADMIN_USER && p === ADMIN_PASS)) {
+    return { statusCode: 429,  body: JSON.stringify({ error: 'Troppi tentativi: riprova fra 15 minuti.' }) };
+  }
   if (!ADMIN_USER || !ADMIN_PASS || u !== ADMIN_USER || p !== ADMIN_PASS) {
     return { statusCode: 401, body: 'Non autorizzato' };
   }

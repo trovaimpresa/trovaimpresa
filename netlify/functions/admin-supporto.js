@@ -66,6 +66,10 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Body JSON non valido.' }) };
   }
 
+  /* 27 set 2026: freno sui tentativi (netlify/functions/lib/admin-freno.js) */
+  if (await require('./lib/admin-freno')(event, u === ADMIN_USER && p === ADMIN_PASS)) {
+    return { statusCode: 429, headers: corsHeaders, body: JSON.stringify({ error: 'Troppi tentativi: riprova fra 15 minuti.' }) };
+  }
   if (u !== ADMIN_USER || p !== ADMIN_PASS) {
     return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Credenziali admin non valide.' }) };
   }

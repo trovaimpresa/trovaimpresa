@@ -2679,3 +2679,27 @@ Legge destinatario e testo dal database, oppure chiede una chiave.
 - `invia-email` (modulo contatti → info@) → testo disinnescato.
 Banco: `prove-claude/banchi-fissi/banco-email.js` (24 prove, tutte verdi).
 Backup: `prove-claude/*-prima-email-27set.*`.
+
+# 27 SETTEMBRE 2026 (sera) — I 4 PUNTI DI SICUREZZA
+
+Migrazione `sicurezza_27set2026` (gia' nel database) + codice:
+1. **Freno password admin** — tabella `admin_tentativi` + funzione `admin_freno`
+   (solo chiave di servizio). Tutte le funzioni admin (16) chiamano
+   `netlify/functions/lib/admin-freno.js` PRIMA di confrontare la password:
+   10 errori dallo stesso IP in 15 min (o 100 in tutto) → bloccato 15 min,
+   anche con la password giusta. Se il DB non risponde NON blocca.
+   admin.html mostra «Troppi tentativi sbagliati» (`bloccato:true` da admin-auth).
+   ⚠️ Una funzione admin NUOVA deve chiamare anche lei il freno.
+2. **Candidati** — `candidati_lavoro_pubblici` ricreata SENZA `sesso` e solo
+   con chi ha un account (`user_id is not null`): chi si candida a un annuncio
+   senza iscriversi non finisce piu' nell'elenco pubblico.
+3. **Anti-spam** — trigger `trg_freno_moduli` (funzione `freno_moduli`) su
+   `preventivi`, `incarichi_richieste` (10/ora stessa email o telefono, 30/ora
+   per impresa), `subappalti` (5 al giorno) e `chat_messaggi` lato cliente
+   (30 in 10 min per conversazione, 60/ora per email).
+4. **Gestionale** — trigger `trg_gest_stesso_padrone` su tutte le tabelle gest_
+   con collegamenti: ogni collegamento deve puntare a una riga dello STESSO
+   account. `gest_redeem_invito`: serve essere collegati e il codice vale
+   →14← giorni.
+Banco: `prove-claude/banchi-fissi/banco-freno.js` (16 verdi); le prove del
+database sono state fatte in transazioni annullate (tutte verdi).

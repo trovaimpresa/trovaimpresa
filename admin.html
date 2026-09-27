@@ -1818,7 +1818,16 @@ async function doLogin() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ u, p })
     });
-    const { ok } = await res.json();
+    const { ok, bloccato } = await res.json();
+    /* 27 set 2026: dopo 10 password sbagliate il server blocca per 15 minuti */
+    const errBox = document.getElementById('login-err');
+    if (errBox._originale == null) errBox._originale = errBox.innerHTML;
+    if (bloccato) {
+      const ic = errBox.querySelector('svg');
+      errBox.innerHTML = (ic ? ic.outerHTML + ' ' : '') + 'Troppi tentativi sbagliati: riprova fra 15 minuti.';
+    } else {
+      errBox.innerHTML = errBox._originale;
+    }
     if (ok) {
       adminU = u; adminP = p;
       try { localStorage.setItem('ti_admin_user', u); } catch(e){}
