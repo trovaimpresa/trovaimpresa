@@ -275,6 +275,16 @@
     });
   }
 
+  /* 26 set 2026 — il pin a goccia, del colore dello stato, col numero dei
+     lavori quando nello stesso posto ce n'e' piu' d'uno. */
+  function mpPinIcona(col,n){
+    const num=n>1?'<text x="15" y="18" text-anchor="middle" font-size="12" font-weight="800" fill="'+col+'" font-family="system-ui,Arial">'+n+'</text>'
+                 :'<circle cx="15" cy="14" r="4.5" fill="'+col+'"/>';
+    return L.divIcon({className:"mp-pin",iconSize:[30,40],iconAnchor:[15,39],popupAnchor:[0,-34],
+      html:'<svg width="30" height="40" viewBox="0 0 30 40"><path d="M15 39C15 39 2 23.5 2 14a13 13 0 0 1 26 0c0 9.5-13 25-13 25z" fill="'+col+'" stroke="#fff" stroke-width="2.5"/>'
+          +'<circle cx="15" cy="14" r="8" fill="#fff"/>'+num+'</svg>'});
+  }
+
   /* indirizzo scritto a mano -> punto sulla carta */
   async function mpTrovaPunto(indirizzo,vicinoA){
     const q=mpChiave(indirizzo);
@@ -363,7 +373,11 @@
       if(avviso)avviso.innerHTML = partenzaTxt
         ? '<div class="mp-ufficio"><span class="mp-u-lab">Ufficio</span><b>'
           +esc(az.nome||"La tua azienda")+'</b><span class="mp-u-ind">'+esc(partenzaTxt)+'</span></div>'
-        : '<div class="mp-avviso">Per vedere le distanze mi serve l\'indirizzo del tuo ufficio. Lo trovi nel pulsante <b>Azienda</b> in alto a destra, primo campo utile: <b>Indirizzo</b>. Scrivilo con via, numero e comune. Intanto la carta con i cantieri la vedi lo stesso.</div>';
+        /* 26 set 2026 — l'avviso andava a capo a pezzi (.mp-avviso e' flex e
+           ogni <b> diventava una colonna) e mandava a cercare un pulsante.
+           Adesso una frase sola e il pulsante che porta dove serve. */
+        : '<div class="mp-avviso"><span>Per vedere i chilometri scrivi l\'<b>indirizzo del tuo ufficio</b> in Dati azienda.</span>'
+          +'<button type="button" class="btn" data-action="azienda">Apri Dati azienda</button></div>';
       $("#mp-mappa").style.display="";
 
       /* 2) i lavori con un indirizzo */
@@ -442,6 +456,7 @@
       }
 
       /* 5) i cantieri, uno alla volta: il pin compare appena lo trovo */
+      const mpGruppi={};
       const righe=[];
       let fatti=1;
       for(const v of voci){
@@ -452,20 +467,37 @@
         const haComune=/\d{5}|,/.test(v.ind);
         const ipotesi=!haComune&&!!comuneUff;
         const q=v.ind+(haComune?", Italia":(comuneUff?", "+comuneUff+", Italia":", Italia"));
-        const pt=await mpTrovaPunto(q,pPart);
+        let pt=await mpTrovaPunto(q,pPart), circa=false;
+        /* 26 set 2026 — se la via col numero non c'e' sulla carta gratuita
+           (succede: molti civici non sono segnati), si riprova senza numero.
+           Il pin cade sulla via e nella lista c'e' scritto «via trovata, numero no». */
+        if(!pt){
+          const senzaNum=q.replace(/(\b\d{1,4}[a-zA-Z]?\b)(?=\s*,)/,"").replace(/\s+,/g,",").replace(/,\s*,/g,",");
+          if(senzaNum!==q){ pt=await mpTrovaPunto(senzaNum,pPart); circa=!!pt; }
+        }
         let km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
         /* rete di sicurezza: se l'indirizzo era incompleto e il risultato è
            lontanissimo, non è il posto giusto. Meglio dire "non lo so". */
         const sospetto=(!haComune&&km!=null&&km>80);
         if(sospetto)km=null;
-        righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto});
+        righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto,circa});
         if(pt&&!sospetto&&ok&&window.L){
           punti.push([pt.lat,pt.lon]);
-          const col=v.l.stato==="fatto"?"#059669":(inRitardo(v.l.stato,v.l.data_prevista)?"#DC2626":"#D97706");
-          L.circleMarker([pt.lat,pt.lon],{radius:11,color:"#fff",weight:3,fillColor:col,fillOpacity:1})
-            .addTo(mpLayer)
-            .bindPopup("<b>"+esc(v.l.descrizione||"Lavoro")+"</b><br>"+esc(v.ind)
-              +(km!=null?"<br><b>"+mpFormattaKm(km)+"</b> dall'ufficio":""));
+          /* 26 set 2026 — UN PIN PER OGNI LAVORO (Alessio: «ci devono essere i
+             pin per ogni lavoro»). Prima erano pallini, e tre lavori nello
+             stesso indirizzo finivano uno sopra l'altro: se ne vedeva uno.
+             Adesso stesso punto = un pin solo col NUMERO dei lavori, e il
+             fumetto li elenca tutti. Il colore e' quello del piu' urgente. */
+          const peso=v.l.stato==="fatto"?0:(inRitardo(v.l.stato,v.l.data_prevista)?2:1);
+          const chiave=pt.lat.toFixed(5)+","+pt.lon.toFixed(5);
+          const g=mpGruppi[chiave]||(mpGruppi[chiave]={lav:[],peso:0,m:null});
+          g.lav.push({t:v.l.descrizione||"Lavoro",ind:v.ind,km});
+          g.peso=Math.max(g.peso,peso);
+          const icona=mpPinIcona(["#059669","#D97706","#DC2626"][g.peso],g.lav.length);
+          const fumetto=g.lav.map(x=>"<b>"+esc(x.t)+"</b><br>"+esc(x.ind)
+              +(x.km!=null?"<br><b>"+mpFormattaKm(x.km)+"</b> dall'ufficio":"")).join("<hr style='border:0;border-top:1px solid #e3e8ef;margin:6px 0'>");
+          if(g.m){ g.m.setIcon(icona); g.m.setPopupContent(fumetto); }
+          else g.m=L.marker([pt.lat,pt.lon],{icon:icona}).addTo(mpLayer).bindPopup(fumetto);
           inquadra();
         }
         fatti++;dice(fatti-1,voci.length+1);
@@ -498,6 +530,7 @@
             +    (r.c?' · '+esc(r.c.nome||""):"")
             +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+esc(q.testo)+'</span>'
             +    (r.ipotesi&&!r.sospetto?' · <span class="mp-ipotesi">comune ipotizzato: '+esc(comuneUff)+'</span>':"")
+            +    (r.circa?' · <span class="mp-ipotesi">via trovata, numero no</span>':"")
             +    '</div>'
             +'</div>'
             +'<div class="mp-r-dist">'

@@ -4611,3 +4611,28 @@ body:has(#ti-fondatore) .sheet--grande{
  #carte-list > .card,#forn-list > .card,#cred-list > .card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"head az" "num az" "lab az" "righe az";padding:12px 14px!important}
  #carte-list .c-num,#forn-list .c-num,#cred-list .c-num,#carte-list .c-lab,#forn-list .c-lab,#cred-list .c-lab{text-align:left}
 }
+
+/* 26 set 2026 (notte) — I RIQUADRI COI NUMERI SUL TELEFONO (Lavori,
+   Preventivi, Computi, Scadenzario): prima uno sotto l'altro, grandi, mezzo
+   schermo. Adesso sono righe come il Riepilogo: la domanda a sinistra, il
+   numero a destra. La riga piccola sotto (.num-s) sul telefono non si vede:
+   toccando la riga si arriva comunque al dettaglio. */
+@media(max-width:560px){
+  .num-fila{ display:flex!important; flex-direction:column; gap:0!important; margin-bottom:12px!important; }
+  .num-c{ flex-direction:row!important; align-items:center; justify-content:space-between; gap:12px!important;
+    border-left-width:1px!important; border-radius:0!important; margin-bottom:-1px; padding:11px 14px!important; }
+  .num-c:first-child{ border-top-left-radius:14px!important; border-top-right-radius:14px!important; }
+  .num-c:last-child{ border-bottom-left-radius:14px!important; border-bottom-right-radius:14px!important; }
+  .num-d{ flex:1; min-width:0; font-size:16px!important; }
+  .num-n{ font-size:20px!important; white-space:nowrap; }
+  .num-s{ display:none!important; }
+}
+
+/* 26 set 2026 — LA MAPPA PIU' COLORATA E COI PIN (Alessio: «piu' colorato e
+   meno sbiadito, i pin per ogni lavoro»). Stessi colori della mappa delle
+   pagine di ricerca. Il pin e' .mp-pin (disegnato da mpPinIcona in
+   js/gest-galleria-mappa.js): niente riquadro bianco di Leaflet dietro. */
+#mp-mappa .leaflet-tile-pane{ filter:saturate(1.9) contrast(1.12) brightness(.97); }
+.mp-pin{ background:none!important; border:0!important; filter:drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+/* gli avvisi senza pulsante sono una frase: non vanno spezzati in colonne */
+.mp-avviso:not(:has(button)){ display:block!important; }

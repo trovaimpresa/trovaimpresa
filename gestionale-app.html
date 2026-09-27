@@ -401,15 +401,10 @@
            Chiesto da Alessio il 5 settembre. -->
       <div class="app-op-card">
         <p class="app-op-tit"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> L'app dei tuoi operai</p>
-        <p class="app-op-p">Ogni persona che aggiungi qui ha <b>la sua app sul telefono</b>: vede i lavori del giorno, segna le ore, i materiali, le foto e il rapportino. Puoi anche fargli raccontare la giornata <b>a voce</b>: l'AI ne tira fuori ore e materiali, e lui conferma.</p>
-        <p class="app-op-p">Quello che scrive finisce <b>qui dentro</b>, negli stessi lavori: le sue ore entrano nella manodopera del cantiere. Tu lo rileggi in <b>Agenda operatore</b>.</p>
-        <!-- ⚠️ 5 set 2026, corretto DOPO il collaudo dal vivo: qui c'era scritto
-             di aprire un menu a puntini che su questa scheda non esiste.
-             La scheda della persona ha UN pulsante solo, «Apri»
-             (schedaUnPulsante): le altre voci compaiono DENTRO la finestra che
-             si apre. Una spiegazione che manda a cercare un pulsante che non
-             esiste e' peggio di nessuna spiegazione. -->
-        <p class="app-op-p"><b>Ognuno ha il suo codice.</b> Dopo aver aggiunto la persona, premi <b>Apri</b> sulla sua scheda: in cima alla finestra trovi <b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copia link</b>, <b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Invia su WhatsApp</b> e <b><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Mostra il QR</b> da fargli inquadrare col telefono.</p>
+        <!-- 26 set 2026 — accorciato (Alessio: «spiegazioni lunghe»). Prima
+             erano tre paragrafi; il succo sta tutto in due righe. Il QR sta
+             DENTRO la scheda della persona (un pulsante solo, «Apri»). -->
+        <p class="app-op-p">Ogni persona che aggiungi ha <b>la sua app sul telefono</b>: segna ore, materiali e foto, e tu li ritrovi qui. Per dargliela: <b>Apri</b> la sua scheda e fagli inquadrare il <b>QR</b>.</p>
         <div class="app-op-btns">
           <button class="btn" data-action="appoperaio"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg> Guarda com'è fatta</button>
         </div>
@@ -1584,10 +1579,8 @@
         var i=sez.querySelector('.gal-intro');
         /* ⚠️ scritto dal punto di vista di chi il computo lo RICEVE, non di
            chi lo fa. E senza mettere l'impresa in posizione di chi chiede. */
-        if(i)i.innerHTML='Il computo che ti manda il geometra arriva quasi sempre <b>senza prezzi</b>: '
-          +'qui lo carichi, ci metti <b>i tuoi</b> prezzi presi dal tuo prezzario, aggiungi il ribasso '
-          +'e con un clic diventa un <b>preventivo</b> da mandare al cliente. '
-          +'Puoi anche partire da zero e farti tu le metrature del cantiere.';
+        /* 26 set 2026 — accorciato: quattro righe diventano una. */
+        if(i)i.innerHTML='Carichi il computo del geometra, ci metti <b>i tuoi prezzi</b> e con un clic diventa un <b>preventivo</b>.';
       }
       /* ============================================================
          ⛔ 29 agosto 2026 — DUE POSTI CHE NON CHIEDEVANO LA PAROLA A _cm()
