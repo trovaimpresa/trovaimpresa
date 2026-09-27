@@ -2734,3 +2734,12 @@ database sono state fatte in transazioni annullate (tutte verdi).
 - «Il prezzo giusto»: bisezione su ftStima per trovare l'incasso annuo che lascia il netto voluto; giornata e ora minime; «Usa come mia tariffa oraria» scrive `gest_azienda.tariffa_oraria`. I numeri si ricordano nelle colonne `pg_*` di `gest_fisco_profilo` (migrazione `fisco_prezzo_giusto`, in sql/fisco.sql e PROVE).
 - «La cartella dell'anno»: PDF (jsPDF, logo con gestLogoPdf) con profilo, incassi per mese, spese, fatture aperte, fornitori da pagare, stima, domande per il commercialista.
 - ⛔ Corsa fra sezioni: `fpGiro` in gest-fisco.js. Ogni sezione riceve `mio` e dopo ogni await esce se `mio !== fpGiro`. Chi aggiunge una sezione nuova deve fare lo stesso.
+
+## 27 SETTEMBRE 2026 (notte, 4) — TASSE E FISCO, TAPPA 4: «CHIEDI ALL'AI» (NASCOSTO)
+
+- File nuovo `js/gest-fisco-ai.js` (`fiscoAI(box, mio)`), stile `.fi-*`. Chat semplice come la Chat con AI (niente benvenuto, niente domande di esempio: decisione di Alessio del 29 agosto) + «📷 Lettera» (foto o PDF).
+- AI: Edge Function Supabase `ai-cantiere` (versione 4, deploy dal connettore, NON costa crediti Netlify), feature nuove `domanda_fisco` (testo) e `spiega_lettera` (foto/PDF → JSON chi/cosa/in_breve/importo/scadenza/urgenza/cosa_fare/rate/attenzione). 1 credito AI ciascuna. Le regole 2026 sono nella costante `REGOLE` dentro la funzione: quando cambiano, si cambiano LI' e in `js/gest-fisco-tasse.js`. Copia nel repo: `supabase/functions/ai-cantiere/index.ts`.
+- Il contesto lo costruisce `fiContesto()` (profilo, incassato, stima, riduzione 35%, spese, fatture aperte, tariffa): niente nomi di clienti. Alle AI vanno le ultime 3 domande/risposte; la conversazione vive solo in memoria.
+- Provato DAL VIVO con l'account di Alessio (3 crediti): la prima versione sbagliava i contributi del forfettario («paghi sempre il minimo») e scriveva in markdown → corretto il prompt (esempio 38.000 € → circa 7.850 € di INPS, riduzione 35% su tutto, niente markdown, niente sanzioni inventate). Lettera di prova (avviso bonario, ricevuta il 15/09) → scadenza 14/11 giusta, importo giusto, 20 rate.
+- ⚠️ È Haiku: sui calcoli a mano può sbagliare. Per questo il contesto porta già i numeri calcolati dal gestionale e il prompt gli dice di usare quelli.
+- In giro di prova l'AI non risponde (niente sessione): lo dice con «provalo gratis 30 giorni».

@@ -4914,3 +4914,24 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .fv-pg-ris b{font-size:21px}
 @media(max-width:760px){.fv-mesi{grid-template-columns:1fr}.fv-pg-campi{grid-template-columns:1fr}}
 .fv-riga b{white-space:nowrap}.fv-pg>p{margin-bottom:10px}
+/* ═══ 27 set 2026 — TASSE E FISCO · Chiedi all'AI (js/gest-fisco-ai.js) ═══ */
+.fi-chat{display:flex;flex-direction:column;min-height:60vh}
+.fi-msgs{flex:1;display:flex;flex-direction:column;gap:10px;padding:4px 0 12px;max-height:62vh;overflow-y:auto}
+.fi-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.5}
+.fi-msg.io{align-self:flex-end;background:var(--blu);color:#fff;border-bottom-right-radius:4px}
+.fi-msg.ai{align-self:flex-start;background:var(--card);border:1px solid var(--bordo);border-bottom-left-radius:4px}
+.fi-pensa{color:var(--testo-2);font-style:italic}
+.fi-barra{position:sticky;bottom:0;background:var(--sfondo);padding-top:8px}
+.fi-barra textarea{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--bordo-forte,var(--bordo));border-radius:14px;resize:vertical;min-height:56px;background:var(--card);color:var(--testo)}
+.fi-tasti{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+.fi-lettera{min-width:min(520px,70vw)}
+.fi-l-testa{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.fi-l-testa b{display:block;font-size:16px}
+.fi-l-testa span{font-size:13px;color:var(--testo-2)}
+.fi-urg{font-size:13px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.fi-urg.rosso{background:var(--err-bg);color:var(--err)} .fi-urg.giallo{background:var(--attesa-bg);color:var(--warn)} .fi-urg.verde{background:var(--ok-bg);color:var(--ok)}
+.fi-l-riga{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--bordo)}
+.fi-l-tit{font-weight:800;margin-top:10px}
+.fi-lettera ol{margin:6px 0;padding-left:20px}
+.fi-lettera ol li{margin-bottom:4px}
+@media(max-width:640px){.fi-msg{max-width:94%}.fi-lettera{min-width:0}}
