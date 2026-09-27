@@ -2582,3 +2582,74 @@ Idee prese da siti stranieri (Thumbtack, Houzz), scelte da Alessio. Un push solo
 - Alex: «il sito è tutto così, miglioriamolo». Deciso di andare un pannello/sezione alla volta, sempre con le foto prima.
 - 26 set (sera, 2): il RIEPILOGO dei pannelli nello stesso `js/sezioni-vetrina.js` — al centro (max →1240← px, anche Foto/Messaggi/Prezzi: sul 1920 di Alex restava un buco a destra), copertina max →320← px, carte in riga icona+scritte, via le strisce colorate, emoji QR/Priorità/Video → icone. ⚠️ Nelle carte doppie (lavoro, subappalto) la colonna va scritta a mano, se no la scritta finisce nella colonna stretta dell'icona. Calendario e «I due gestionali» ancora da rifare.
 - Home: riquadro `#le-idee` «Cerchi idee per casa?» → `/lavori-realizzati`, subito dopo `#categorie`.
+
+---
+
+# 27 SETTEMBRE 2026 — LA GRAFICA DEI GESTIONALI, IL LOGO, E L'ASSISTENZA CHE AVVISA
+
+Giornata lunga, →11← push, tutti provati dal vivo su trovaimpresa.com.
+
+## Grafica (gestionale principale + Noleggio)
+- **Righe «gonfie»**: ogni lista (`.griglia-schede > .job`) e' una riga con filo
+  colorato a sinistra (`--acc` per sezione, in `css/gestionale.css`), ombra, «Apri» a destra.
+  Nel Noleggio stesse righe su `.nol-elenco > .nol-card` e `#prom-list > .card`
+  (CSS dentro `gestionale-noleggio.html`, prefisso `#app-root`).
+- **Promemoria a righe**: `js/gest-promemoria.js` ora passa `cards:` a `renderTabella`
+  (`promCard`, usa `schedaJob`). La nota gialla (`.job-note`) sta su una riga sua.
+- **Menu del telefono**: icone →34← px a menu aperto (`.side.open`).
+- **Noleggio**: menu in alto a →16,5← px; tolto `&nbsp;` dalle `.sub` vuote (3 punti).
+- `js/gest-icone.js`: aggiunta l'icona `ripeti` (🔁 🔄).
+
+## Il logo dell'impresa (richiesta n. 1 di «Chiedi una funzione», chiusa «Fatta»)
+- `js/gest-logo.js` (IIFE): legge `imprese.logo_url` (lo stesso della vetrina,
+  deposito `loghi-imprese`, `<uid>/logo.webp`). Slot `[data-logo="grande"]` nella
+  prima schermata (se manca: riquadro «+ Il tuo logo» che lo carica) e
+  `[data-logo="piccolo"]` in barra reparto, menu del telefono e testata Noleggio.
+  La pagina lo accende con `gestLogoAvvia(sb,()=>sbUid)` subito dopo `let sbUid`.
+- **Nei PDF**: `window.gestLogoPdf(doc,M,y)` disegna il logo sopra il nome
+  dell'impresa e restituisce la y nuova. Chiamato in →7← PDF: `generaPdf` (app),
+  `prevPdf`/`incaricoPdf`/`ordinePdf`/`verbalePdf` (gest-documenti-pdf.js),
+  `fatturaPdf` (gest-fatture.js), `salPdf` (gest-sal-prezzario.js).
+  ⛔ NON nei fogli del computo (Lista gara, analisi): intestazione del modello ufficiale.
+  Se il logo non si carica il PDF esce lo stesso (timeout 6 s, ridisegnato in PNG).
+
+## «Chiedi una funzione» e «Assistenza diretta»
+- Card del menu modello «1» (bordo blu pieno, icona nel tondo, stessa altezza).
+  Con qualcosa di nuovo la card si accende d'arancione, tondo rosso col numero, e la
+  scritta diventa «Hai una risposta nuova» / «Hai un messaggio nuovo» (solo CSS, `:has`).
+- Nel Noleggio: due riquadri in cima al Riepilogo (`.nol-cta`, `data-sup-apri`) e le
+  due sezioni copiate, codice con prefisso `sup` dentro l'IIFE. Stesse tabelle.
+- Esempi da toccare (`data-rq-es`), microfono «Parla» (riusa `aiMicrofono` di
+  gest-ai-cantiere.js), Invio manda / Maiusc+Invio a capo, spunte «✓ Inviato / ✓✓ Letto».
+- Bug chiuso: `.asst-chip` mostrava un riquadro vuoto (display vinceva su `[hidden]`).
+
+## Le email (Resend) — PROVATE CON EMAIL VERE
+- **Impresa scrive in Assistenza → Alessio**: `netlify/functions/supporto-avviso.js`.
+  Dal browser solo `msg_id` + gettone; il server controlla che il messaggio sia di chi
+  chiama e scritto da meno di 10 min. Una email ogni 15 min per impresa.
+- **Alessio risponde → impresa**: dentro `admin-supporto.js` azione `reply`
+  (una ogni 15 min per conversazione; `origine` decide il link, gestionale o sito).
+- **Richiesta cambia stato o riceve risposta → impresa**: azione `avvisa_richiesta`
+  di `admin-supporto.js`, chiamata da `admin.html`.
+- `richiesta-funzione.js`: parte solo per richieste di meno di 10 min (prima chiunque
+  poteva rimandare le email di una richiesta vecchia).
+- ⚠️ Tutto dentro le →100← email al giorno di Resend gratuito.
+
+## Pannello admin
+- «Cosa chiedono»: filtro «Da fare / Tutte», risposta in una casella dentro la
+  scheda (niente piu' `prompt()`), stato attuale acceso in blu, avviso `rqaToast`.
+- Chat: sotto le tue risposte «✓ Consegnata / ✓✓ Letta».
+
+## L'ACCOUNT SBAGLIATO (successo davvero oggi)
+Alessio ha aperto il gestionale dall'admin e l'ha trovato vuoto: in un'altra scheda
+era entrato con **pintoalessio@hotmail.it** (account di prova, reparto «pinto
+ristrutturazione»). Il browser tiene UN account alla volta per tutto il sito, e il
+pulsante «Apri il Gestionale» dell'admin apre quello collegato.
+- Prima schermata del gestionale: «Sei dentro come … · Cambia account» (gest-logo.js).
+- `js/fondatore.js`: se il browser e' quello dell'admin (`ti_admin_user`) e l'account
+  NON e' in `AMMESSI`, fascia arancione «qui sei dentro come …» + «Esci e rientra col tuo».
+- Consiglio dato: l'account di prova si apre in una finestra in incognito.
+
+## Da ricordare
+- Il negozio (`gestionale-negozio.html`) non esiste piu' nella cartella.
+- Il Noleggio ha il menu in alto, non a sinistra: deciso di lasciarlo cosi'.
