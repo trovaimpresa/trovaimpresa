@@ -4809,3 +4809,18 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .nol-cta:has(.tab-cnt:not(:empty)){background:#fff4e8;border-color:#e8833a;box-shadow:0 0 0 3px rgba(232,131,58,.22)}
 .nol-cta .tab-cnt:not(:empty){background:#d93025;color:#fff;font-weight:800;min-width:26px;height:26px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
 .asst-quando b{font-weight:800}
+
+/* ⛔ 27 settembre 2026 — LA FILA DI TASTI IN ALTO NON ANDAVA A CAPO.
+   Sul telefono i 6 tasti stavano su una riga sola, centrata e senza scorrere:
+   «Dati azienda», «Noleggio», «Backup» ed «Esporta dati» finivano fuori
+   dallo schermo e non si potevano toccare. Sul tablet (fino a ~1100px)
+   «Dati azienda» finiva SOTTO «Abbonamento», uno sopra l'altro.
+   Adesso fino a 1100px le due file stanno al loro posto nel flusso e vanno
+   a capo, come il menu della home (scelta «A — va a capo», 30 ago 2026). */
+@media(max-width:1100px){
+  .lt-actions,.lt-actions--sx{position:static;flex-wrap:wrap;justify-content:center;margin:0 auto 10px}
+}
+@media(max-width:640px){
+  .lt-actions{gap:6px}
+  .lt-btn{font-size:13px;padding:8px 11px}
+}

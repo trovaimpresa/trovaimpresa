@@ -424,6 +424,9 @@
       st.id='gest-striscia-stile';
       st.textContent='#gest-striscia{position:fixed;left:0;right:0;bottom:0;z-index:9998;'
         +'background:#0a2a4d;color:#fff;padding:12px 16px;font-size:14px;line-height:1.4;'
+        /* 27 set 2026: la striscia sta fuori da #app-root, quindi non prendeva
+           il carattere del gestionale e usciva in Times. */
+        +'font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;'
         +'display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;'
         +'box-shadow:0 -2px 12px rgba(0,0,0,0.25);'
         +'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))}'
