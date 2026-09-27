@@ -93,7 +93,7 @@
          «cliente», cioè le tre cose per cui era entrato.
          I reparti restano, per chi ne ha davvero più di uno — ma non
          sono più la prima cosa che ti si chiede. -->
-    <div class="mk"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h1>Il tuo gestionale</h1><small>Lavori, preventivi e fatture</small>
+    <div class="gl-slot gl-grande" data-logo="grande"></div><h1>Il tuo gestionale</h1><small>Lavori, preventivi e fatture</small>
   </div>
   <div class="wrap">
     <!-- ⚠️ 16 agosto 2026 — LA STRISCIA DELL'AI.
@@ -135,7 +135,7 @@
   <aside class="side">
     <div class="side-top">
       <button class="back" data-action="home">←</button>
-      <div class="side-brand"><h1><span class="rep-dot" id="rep-dot"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
+      <div class="side-brand"><span class="gl-slot gl-piccolo" data-logo="piccolo" hidden></span><h1><span class="rep-dot" id="rep-dot"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
       <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
     <!-- 15 agosto 2026 (11) — QUI C'ERA «+ Nuovo lavoro», TOLTO.
@@ -229,6 +229,7 @@
   <header class="topbar">
     <div class="tb-left">
       <button class="tb-back" data-action="home" title="Cambia reparto" aria-label="Cambia reparto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></button>
+      <span class="gl-slot gl-piccolo" data-logo="piccolo" hidden></span>
       <div class="tb-id">
         <strong><span class="rep-dot" id="tb-rep-dot"></span><span id="tb-panel-name">—</span></strong>
         <span class="tb-sub">Reparto attivo</span>
@@ -612,6 +613,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/cestino.js"></script>
 <script src="/js/foto-upload.js"></script>
+<script src="/js/gest-logo.js"></script>
 <!-- ============================================================
      22 agosto 2026 — IL GESTIONALE È SPEZZATO IN QUATTRO PEZZI
      Il codice qui sotto era tutto dentro un file solo: 23.328 righe,
@@ -1063,6 +1065,8 @@
   /* Da qui in poi "cancella" vuol dire "metti da parte": vedi js/cestino.js */
   if(sb&&window.attivaCestino)window.attivaCestino(sb);
   let sbUid=null;
+  /* 27 set 2026 — il logo dell'impresa in cima (js/gest-logo.js) */
+  if(window.gestLogoAvvia)window.gestLogoAvvia(sb,()=>sbUid);
 
   /* ===== 10 agosto 2026 — IL CLIENTE DEI DOCUMENTI =====
      Un documento gia' fatto non deve cambiare perche' hai messo il cliente nel

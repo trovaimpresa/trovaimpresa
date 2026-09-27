@@ -412,6 +412,7 @@
     <div class="top-in">
       <div class="brand">
         <button class="back" data-action="home">← Indietro</button>
+        <span class="gl-slot gl-piccolo" data-logo="piccolo" hidden></span>
         <h1>Noleggio</h1>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
@@ -1016,6 +1017,7 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
 <script src="/js/foto-upload.js"></script>
 <script src="/js/centesimi.js"></script>
 <script src="/js/noleggio-prezzo.js"></script>
+<script src="/js/gest-logo.js"></script>
 <script>
 (function(){
   const KEY="gestionale_multiservizi_v5";
@@ -1160,6 +1162,8 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
   /* Da qui in poi "cancella" vuol dire "metti da parte": vedi js/cestino.js */
   if(sb&&window.attivaCestino)window.attivaCestino(sb);
   let sbUid=null;
+  /* 27 set 2026 — il logo dell'impresa in cima (js/gest-logo.js) */
+  if(window.gestLogoAvvia)window.gestLogoAvvia(sb,()=>sbUid);
   const sbRand=()=>Math.random().toString(36).slice(2,8).toUpperCase();
   const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;
   function copyLink(txt){
