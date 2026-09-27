@@ -45,6 +45,44 @@ exports.handler = async function(event) {
     'Authorization': 'Bearer ' + SUPABASE_KEY
   };
 
+  /* ⛔ 27 settembre 2026 — PORTA CHIUSA AGLI ESTRANEI.
+     Prima bastava chiamare questo indirizzo con un numero d'impresa e un
+     testo qualsiasi: partiva un'email firmata TrovaImpresa a quell'impresa,
+     con dentro quello che uno voleva (anche codice HTML). Adesso l'email
+     parte SOLO se nel database c'e' davvero una richiesta appena arrivata
+     (ultima ora: l'ora la scrive il telefono del cliente, che puo' essere un po' avanti o indietro) per quell'impresa, con la stessa email o lo stesso
+     telefono. E tutto quello che arriva dal modulo viene "disinnescato"
+     prima di finire nell'email. */
+  if (!/^[0-9]{1,12}$/.test(String(impresa_id))) {
+    return { statusCode: 400, body: 'impresa_id non valido' };
+  }
+  impresa_id = Number(impresa_id);
+  {
+    const soglia = encodeURIComponent(new Date(Date.now() - 60 * 60 * 1000).toISOString());
+    const pulito = v => String(v || '').trim().toLowerCase();
+    const soloCifre = v => String(v || '').replace(/[^0-9]/g, '');
+    const combacia = r => (email_cliente && pulito(r.email) === pulito(email_cliente))
+                       || (telefono && soloCifre(r.telefono).length >= 6 && soloCifre(telefono).length >= 6
+                           && soloCifre(r.telefono).slice(-6) === soloCifre(telefono).slice(-6));
+    let trovata = false;
+    for (const [tab, col] of [['preventivi', 'impresa_id'], ['incarichi_richieste', 'professionista_id']]) {
+      const rr = await fetch(`${SUPABASE_URL}/rest/v1/${tab}?${col}=eq.${impresa_id}&created_at=gte.${soglia}&select=email,telefono&limit=30`, { headers: sbHeaders });
+      const righe = rr.ok ? await rr.json() : [];
+      if (Array.isArray(righe) && righe.some(combacia)) { trovata = true; break; }
+    }
+    if (!trovata) {
+      return { statusCode: 403, body: 'Nessuna richiesta appena arrivata per questa impresa' };
+    }
+  }
+  const escH = v => String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  const nomeTesto = String(nome || '').replace(/[\r\n<>]/g, ' ').slice(0, 80);
+  nome = escH(nome); categoria_lavoro = escH(categoria_lavoro); citta = escH(citta);
+  descrizione = escH(descrizione); data_preferita = escH(data_preferita);
+  urgenza = escH(urgenza); budget = escH(budget);
+  foto = (typeof foto === 'string' && /^https:\/\/[a-z0-9.-]+\.supabase\.co\//i.test(foto)) ? escH(foto) : null;
+
   try {
     // "tipo" serve a mandare ognuno al SUO pannello: prima il pulsante dell'email
     // portava tutti su pannello-artigiano, anche negozi e professionisti.
@@ -68,7 +106,7 @@ exports.handler = async function(event) {
           <h1 style="color:white;margin:0;font-size:22px">📋 Nuova richiesta di preventivo</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
-          <p style="font-size:15px;margin-bottom:20px">Ciao <strong>${impresa.nome_attivita || impresa.nome}</strong>!</p>
+          <p style="font-size:15px;margin-bottom:20px">Ciao <strong>${escH(impresa.nome_attivita || impresa.nome)}</strong>!</p>
           <p style="font-size:14px;line-height:1.6;margin-bottom:20px">
             Hai ricevuto una nuova richiesta di preventivo su TrovaImpresa.
           </p>
@@ -155,7 +193,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: fromAddr,
         to: [toAddr],
-        subject: `🔔 Richiesta sopralluogo da ${nome} – ${categoria_lavoro || ''}`,
+        subject: `🔔 Richiesta sopralluogo da ${nomeTesto} – ${String(categoria_lavoro || '').replace(/&amp;/g,'&').replace(/&#39;/g,"'")}`,
         html
       })
     });

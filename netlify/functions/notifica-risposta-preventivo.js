@@ -3,36 +3,55 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  /* ⛔ 27 settembre 2026 — PORTA CHIUSA AGLI ESTRANEI.
+     Prima questa funzione prendeva dal messaggio l'indirizzo del cliente, il
+     nome dell'impresa e il testo, e spediva senza chiedere niente: chiunque
+     poteva mandare a chiunque un'email firmata TrovaImpresa, con dentro
+     quello che voleva (anche codice HTML). E' il modo piu' veloce per far
+     finire trovaimpresa.com nella lista nera dello spam.
+     Adesso dal messaggio si prende SOLO preventivo_id. Tutto il resto si legge
+     dal database: parte solo se l'impresa ha davvero salvato una risposta
+     nell'ultima ora (il pannello la salva un attimo prima di chiamare
+     qui, e il database lascia scrivere la risposta solo all'impresa giusta). */
   let preventivo_id, email_cliente, nome_cliente, impresa_nome, risposta, prezzo_min, prezzo_max;
   try {
-    ({ preventivo_id, email_cliente, nome_cliente, impresa_nome, risposta, prezzo_min, prezzo_max } = JSON.parse(event.body));
+    ({ preventivo_id } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
-
-  if (!impresa_nome || !risposta) {
-    return { statusCode: 400, body: 'Parametri mancanti: impresa_nome e risposta sono obbligatori' };
+  if (!/^[0-9]{1,15}$/.test(String(preventivo_id || ''))) {
+    return { statusCode: 400, body: 'Parametro mancante: preventivo_id' };
   }
 
-  // I pannelli leggono la vista preventivi_safe (senza email del cliente):
-  // recuperiamo email e nome col service key partendo dal preventivo_id.
-  // Nessun pay-per-lead: l'impresa può sempre rispondere.
-  if (preventivo_id) {
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
     if (!SUPABASE_KEY) return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${encodeURIComponent(preventivo_id)}&select=email,nome`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    });
+    const h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${preventivo_id}&select=email,nome,impresa_id,risposta,risposta_at,prezzo_min,prezzo_max`, { headers: h });
     const rows = await r.json();
-    const prev = rows && rows[0];
+    const prev = Array.isArray(rows) && rows[0];
     if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
+    const quando = prev.risposta_at ? new Date(prev.risposta_at).getTime() : 0;
+    if (!prev.risposta || !quando || Date.now() - quando > 60 * 60 * 1000) {
+      return { statusCode: 403, body: 'Nessuna risposta appena salvata per questo preventivo' };
+    }
+    const ri = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${Number(prev.impresa_id)}&select=nome,nome_attivita`, { headers: h });
+    const imp = (await ri.json())[0] || {};
     email_cliente = prev.email;
-    nome_cliente = nome_cliente || prev.nome || 'cliente';
+    nome_cliente  = esc(prev.nome || 'cliente');
+    impresa_nome  = esc(imp.nome_attivita || imp.nome || 'L\'impresa');
+    risposta      = esc(prev.risposta);
+    prezzo_min    = prev.prezzo_min;
+    prezzo_max    = prev.prezzo_max;
   }
 
-  if (!email_cliente || !nome_cliente) {
-    return { statusCode: 400, body: 'Parametri mancanti: preventivo_id (o email_cliente e nome_cliente) obbligatori' };
+  if (!email_cliente) {
+    return { statusCode: 400, body: 'Il cliente non ha lasciato un\'email' };
   }
 
   try {
@@ -90,7 +109,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: fromAddr,
         to: [toAddr],
-        subject: `Hai ricevuto un preventivo da ${impresa_nome} — TrovaImpresa`,
+        subject: `Hai ricevuto un preventivo da ${impresa_nome.replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&lt;|&gt;/g,'')} — TrovaImpresa`,
         html
       })
     });

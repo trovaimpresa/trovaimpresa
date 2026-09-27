@@ -31,6 +31,26 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'Parametro mancante: email obbligatoria' };
   }
 
+  /* ⛔ 27 settembre 2026 — PORTA CHIUSA AGLI ESTRANEI.
+     1. L'email «grazie per il Gestionale» (premium: true) la chiede SOLO il
+        webhook di Stripe, dal server: adesso deve presentare la chiave
+        interna. Prima chiunque poteva farla partire verso un indirizzo
+        qualsiasi.
+     2. Il nome arriva dal browser: si disinnesca prima di metterlo
+        nell'email (prima ci si poteva scrivere dentro codice HTML).
+     3. Piu' sotto: se l'indirizzo non e' di nessun iscritto, NON si manda
+        piu' niente (prima «meglio una email in piu'»: era la porta aperta). */
+  if (premium) {
+    const chiave = (event.headers && (event.headers['x-chiave-interna'] || event.headers['X-Chiave-Interna'])) || '';
+    if (!process.env.SUPABASE_SERVICE_KEY || chiave !== process.env.SUPABASE_SERVICE_KEY) {
+      return { statusCode: 401, body: 'Non autorizzato' };
+    }
+  }
+  nome = nome == null ? '' : String(nome).slice(0, 120)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  tipo = String(tipo || '').replace(/[^a-z]/g, '');
+
   // ------------------------------------------------------------------
   //  L'indirizzo arriva come lo ha scritto l'utente. Sul telefono la tastiera
   //  mette da sola la maiuscola iniziale ("Ac.immobiliare@..."), mentre in
@@ -121,12 +141,17 @@ exports.handler = async function(event) {
           console.log('[benvenuto] gia inviata a', email, '- non rimando');
           return { statusCode: 200, body: JSON.stringify({ ok: true, saltata: true }) };
         }
-        // nessuna riga trovata: mando lo stesso, meglio una email in piu' che nessuna
-        console.log('[benvenuto] nessun profilo trovato per', email, '- mando comunque');
+        // ⛔ 27 set 2026: nessun iscritto con questa email -> non si manda.
+        // Prima si mandava lo stesso: chiunque poteva usarla per spedire
+        // email firmate TrovaImpresa a indirizzi a caso.
+        console.log('[benvenuto] nessun profilo trovato per', email, '- NON mando');
+        return { statusCode: 200, body: JSON.stringify({ ok: true, saltata: true, motivo: 'nessun_iscritto' }) };
       }
     } catch (e) {
-      // se il controllo non funziona non blocco l'email: meglio un doppione che il silenzio
-      console.warn('[benvenuto] controllo non riuscito:', e && e.message);
+      // ⛔ 27 set 2026: se non si riesce a controllare, non si manda (prima
+      // si mandava «per sicurezza»: era lo stesso buco di sopra).
+      console.warn('[benvenuto] controllo non riuscito, non mando:', e && e.message);
+      return { statusCode: 503, body: JSON.stringify({ ok: false, motivo: 'controllo_non_riuscito' }) };
     }
   }
 

@@ -4060,6 +4060,8 @@ async function inviaRispostaIncarico(id) {
       const res = await fetch('/.netlify/functions/notifica-risposta-incarico', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          /* 27 set 2026: il server legge tutto dal database partendo da qui */
+          incarico_id: id,
           email_cliente: row.email,
           nome_cliente: row.nome || 'cliente',
           professionista_nome: (impresaCorrente.nome_attivita || impresaCorrente.nome || 'Il professionista'),

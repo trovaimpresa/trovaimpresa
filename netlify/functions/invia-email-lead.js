@@ -3,12 +3,25 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let nome, email, citta;
+  /* ⛔ 27 settembre 2026 — la usa SOLO il pannello admin (sezione Lead).
+     Prima chiunque poteva chiamarla con un'email qualsiasi e far partire
+     un'email firmata TrovaImpresa: adesso servono utente e password admin,
+     come per tutte le altre funzioni admin-*. */
+  let nome, email, citta, u, p;
   try {
-    ({ nome, email, citta } = JSON.parse(event.body));
+    ({ nome, email, citta, u, p } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
+  const ADMIN_USER = (process.env.ADMIN_USER || '').trim();
+  const ADMIN_PASS = process.env.ADMIN_PASS || '';
+  if (!ADMIN_USER || !ADMIN_PASS || u !== ADMIN_USER || p !== ADMIN_PASS) {
+    return { statusCode: 401, body: 'Non autorizzato' };
+  }
+  const esc = v => String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  nome = esc(nome); citta = esc(citta);
 
   if (!nome || !email) {
     return { statusCode: 400, body: 'Parametri mancanti: nome ed email sono obbligatori' };

@@ -328,7 +328,8 @@ exports.handler = async (event) => {
         const { data: row } = await supabase.from('imprese').select('nome, tipo').eq('email', email).single();
         await fetch('https://trovaimpresa.com/.netlify/functions/invia-email-benvenuto', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          /* 27 set 2026: la chiave interna dice «sono il server, non un estraneo» */
+          headers: { 'Content-Type': 'application/json', 'x-chiave-interna': process.env.SUPABASE_SERVICE_KEY || '' },
           body: JSON.stringify({ nome: row && row.nome, email, tipo: row && row.tipo, premium: true })
         });
       } catch (e) {

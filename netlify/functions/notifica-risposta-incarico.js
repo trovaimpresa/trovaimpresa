@@ -3,33 +3,48 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  /* ⛔ 27 settembre 2026 — PORTA CHIUSA AGLI ESTRANEI.
+     Prima si prendevano dal messaggio indirizzo, nome e testo, e si spediva
+     senza controllare niente: chiunque poteva mandare a chiunque un'email
+     firmata TrovaImpresa. Adesso dal messaggio si prende SOLO incarico_id:
+     il resto si legge dal database, e parte solo se il professionista ha
+     davvero salvato una risposta nell'ultima ora. */
   let email_cliente, nome_cliente, professionista_nome, risposta, onorario, incarico_id;
   try {
-    ({ email_cliente, nome_cliente, professionista_nome, risposta, onorario, incarico_id } = JSON.parse(event.body));
+    ({ incarico_id } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
-
-  // Se non arriva l'email del cliente, la recuperiamo dalla riga con la service key.
-  if (!email_cliente && incarico_id) {
+  if (!incarico_id || !/^[0-9a-f-]{1,40}$/i.test(String(incarico_id))) {
+    return { statusCode: 400, body: 'Parametro mancante: incarico_id' };
+  }
+  {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
     if (!SUPABASE_KEY) return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/incarichi_richieste?id=eq.${encodeURIComponent(incarico_id)}&select=email,nome`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    });
+    const h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/incarichi_richieste?id=eq.${encodeURIComponent(incarico_id)}&select=email,nome,professionista_id,risposta,onorario,risposta_at`, { headers: h });
     const rows = await r.json();
-    const row = rows && rows[0];
+    const row = Array.isArray(rows) && rows[0];
     if (!row) return { statusCode: 404, body: 'Incarico non trovato' };
+    const quando = row.risposta_at ? new Date(row.risposta_at).getTime() : 0;
+    if (!row.risposta || !quando || Date.now() - quando > 60 * 60 * 1000) {
+      return { statusCode: 403, body: 'Nessuna risposta appena salvata per questo incarico' };
+    }
+    const ri = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${Number(row.professionista_id)}&select=nome,nome_attivita`, { headers: h });
+    const imp = (await ri.json())[0] || {};
     email_cliente = row.email;
-    nome_cliente = nome_cliente || row.nome || 'cliente';
+    nome_cliente = row.nome || 'cliente';
+    professionista_nome = imp.nome_attivita || imp.nome || 'Il professionista';
+    risposta = row.risposta;
+    onorario = row.onorario;
   }
 
-  if (!email_cliente || !professionista_nome || !risposta) {
-    return { statusCode: 400, body: 'Parametri mancanti: email_cliente, professionista_nome e risposta sono obbligatori' };
+  if (!email_cliente) {
+    return { statusCode: 400, body: 'Il cliente non ha lasciato un\'email' };
   }
 
-  const esc = (s) => String(s == null ? '' : s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   try {
     const rispostaSafe = esc(risposta);

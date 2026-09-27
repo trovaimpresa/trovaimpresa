@@ -21,6 +21,39 @@ exports.handler = async function(event) {
     return { statusCode: 200, body: JSON.stringify({ ok: true, skipped: true }) };
   }
 
+  /* ⛔ 27 settembre 2026 — PORTA CHIUSA AGLI ESTRANEI.
+     Questo indirizzo lo chiama il database (webhook su lista_attesa_pubblicita),
+     ma era aperto a tutti: bastava mandargli un "record" inventato con
+     un'email qualsiasi e partiva un'email firmata TrovaImpresa. Adesso del
+     messaggio si usa solo l'id: la riga vera si rilegge dal database, e
+     l'email parte solo se e' davvero in stato «offerto». */
+  {
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    if (!SUPABASE_KEY) return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
+    if (!/^[0-9a-f-]{1,40}$/i.test(String(record.id || ''))) {
+      return { statusCode: 400, body: 'record.id mancante' };
+    }
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/lista_attesa_pubblicita?id=eq.${encodeURIComponent(record.id)}&select=id,email,nome_azienda,citta,stato,offerta_scadenza`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const righe = r.ok ? await r.json() : [];
+    const vera = Array.isArray(righe) && righe[0];
+    if (!vera || vera.stato !== 'offerto') {
+      return { statusCode: 200, body: JSON.stringify({ ok: true, skipped: true }) };
+    }
+    const esc = v => String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    record = {
+      id: vera.id,
+      email: vera.email,
+      nome_azienda: esc(vera.nome_azienda),
+      citta: esc(vera.citta),
+      offerta_scadenza: vera.offerta_scadenza
+    };
+  }
+
   if (!record.email) {
     return { statusCode: 400, body: 'record.email mancante' };
   }
@@ -30,7 +63,7 @@ exports.handler = async function(event) {
   if (record.offerta_scadenza) {
     const [g, m, a] = String(record.offerta_scadenza).split('/');
     const d = new Date(`${a}-${m}-${g}`);
-    scadenza = isNaN(d) ? String(record.offerta_scadenza) : d.toLocaleDateString('it-IT');
+    scadenza = isNaN(d) ? String(record.offerta_scadenza).replace(/[<>"'&]/g, '') : d.toLocaleDateString('it-IT');
   }
 
   const html = `
@@ -80,7 +113,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: 'TrovaImpresa <info@trovaimpresa.com>',
         to: [record.email],
-        subject: `Si è liberato uno spazio pubblicitario a ${record.citta}`,
+        subject: `Si è liberato uno spazio pubblicitario a ${String(record.citta).replace(/&amp;/g,'&').replace(/&#39;/g,"'")}`,
         html
       })
     });

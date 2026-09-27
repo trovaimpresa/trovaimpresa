@@ -3,12 +3,25 @@ const https = require('https');
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') return { statusCode: 405 };
 
-  const { nome, email, messaggio } = JSON.parse(event.body);
+  let nome, email, messaggio;
+  try { ({ nome, email, messaggio } = JSON.parse(event.body || '{}')); }
+  catch { return { statusCode: 400, body: 'JSON non valido' }; }
+  /* 27 set 2026: il modulo contatti arriva nella TUA casella. Prima il testo
+     finiva nell'email cosi' com'era: qualcuno poteva metterci link e pezzi
+     di pagina finti. Adesso si disinnesca tutto. */
+  const esc = v => String(v == null ? '' : v).slice(0, 5000)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  if (!email || !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/.test(String(email))) {
+    return { statusCode: 400, body: 'Email non valida' };
+  }
+  const nomeTesto = String(nome || '').replace(/[\r\n<>]/g, ' ').slice(0, 80);
+  nome = esc(nome); email = esc(email); messaggio = esc(messaggio).replace(/\n/g, '<br>');
 
   const data = JSON.stringify({
     from: 'TrovaImpresa <info@trovaimpresa.com>',
     to: ['info@trovaimpresa.com'],
-    subject: '📩 Nuovo messaggio da ' + nome,
+    subject: '📩 Nuovo messaggio da ' + nomeTesto,
     html: `
       <div style="text-align:center;padding:16px 0 20px">
         <a href="https://trovaimpresa.com" style="text-decoration:none">

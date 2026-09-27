@@ -5354,7 +5354,7 @@ async function aggiungiLead() {
     fetch('/.netlify/functions/invia-email-lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, citta })
+      body: JSON.stringify({ nome, email, citta, u: adminU, p: adminP })
     });
   }
   setTimeout(() => { msg.textContent = ''; }, 3000);

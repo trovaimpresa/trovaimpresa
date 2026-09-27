@@ -2653,3 +2653,29 @@ pulsante «Apri il Gestionale» dell'admin apre quello collegato.
 ## Da ricordare
 - Il negozio (`gestionale-negozio.html`) non esiste piu' nella cartella.
 - Il Noleggio ha il menu in alto, non a sinistra: deciso di lasciarlo cosi'.
+
+# 27 SETTEMBRE 2026 — CHIUSE LE PORTE DELLE EMAIL
+
+Trovato nel controllo completo del sito: →6← funzioni spedivano email firmate
+TrovaImpresa a chiunque, senza controllare chi le chiamava (bastava conoscere
+l'indirizzo). Rischio: dominio in lista nera dello spam → tutte le email del
+sito (conferme, avvisi) finiscono nello spam.
+
+Regola da oggi: **una funzione che manda email NON si fida del messaggio**.
+Legge destinatario e testo dal database, oppure chiede una chiave.
+- `notifica-risposta-preventivo` → prende solo `preventivo_id`; parte se nel DB
+  c'e' una risposta con `risposta_at` dell'ultima ora. Testo, email, nome dal DB.
+- `notifica-risposta-incarico` → idem con `incarico_id` (il pannello
+  professionisti ora lo manda).
+- `notifica-preventivo` → parte solo se nell'ultima ora c'e' una riga vera in
+  `preventivi` / `incarichi_richieste` per quell'impresa con la stessa email o
+  lo stesso telefono (ultime 6 cifre). Tutto il testo del modulo disinnescato.
+- `invia-email-lead` → serve utente+password admin (admin.html li manda).
+- `notifica-spazio-libero` → rilegge la riga di `lista_attesa_pubblicita` per id,
+  parte solo se `stato='offerto'`, usa l'email del DB.
+- `invia-email-benvenuto` → `premium:true` solo con header `x-chiave-interna`
+  = SUPABASE_SERVICE_KEY (lo manda `stripe-webhook-abbonamenti`); email di
+  nessun iscritto → non manda piu' niente; nome disinnescato.
+- `invia-email` (modulo contatti → info@) → testo disinnescato.
+Banco: `prove-claude/banchi-fissi/banco-email.js` (24 prove, tutte verdi).
+Backup: `prove-claude/*-prima-email-27set.*`.
