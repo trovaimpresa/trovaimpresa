@@ -4669,3 +4669,27 @@ body:has(#ti-fondatore) .sheet--grande{
 .salv-r:last-child{ border-bottom:0; }
 .salv-nome{ font-size:17px; font-weight:700; color:var(--testo); min-width:0; }
 .salv-r .btn{ flex:none; }
+
+/* 27 set 2026 — LE RIGHE «GONFIE» (Alessio: «sono tutte cosi piatte, sembrano
+   non servire, non danno attenzione»). Ogni riga e' una scheda staccata, con
+   ombra, la striscia a sinistra del colore della sezione (lo stesso
+   dell'icona nel menu, --acc), nomi piu' grandi e «Apri» blu. */
+#lavori{--acc:#e8833a}#preventivi{--acc:#d9534f}#fatture{--acc:#2fa46a}#agenda{--acc:#5b73d6}#mezzi{--acc:#3f8fbf}#attrezzature{--acc:#0f8f8f}
+#squadra{--acc:#c2569b}#carte{--acc:#6b7a8d}#clienti{--acc:#3f6fd8}#fornitori{--acc:#0f8f6f}#computi{--acc:#b8631f}#prezzario{--acc:#a2731c}
+#sal{--acc:#1f8fb8}#scadenzario{--acc:#c0392b}#dalsito{--acc:#0066ff}#cestino{--acc:#8a94a0}#promemoria{--acc:#b7791f}
+.wrap section .griglia-schede,#carte-list,#forn-list,#cred-list,#pz-list .pz-griglia{gap:12px!important}
+.wrap section .griglia-schede > .job,#carte-list > .card,#forn-list > .card,#cred-list > .card,#pz-list .pz-card{
+  margin:0!important;border:1px solid #dfe6ef!important;border-left:6px solid var(--acc,#94a3b8)!important;border-radius:16px!important;
+  box-shadow:0 2px 4px rgba(10,42,77,.05),0 8px 20px rgba(10,42,77,.07)!important;padding:18px 22px!important;
+  transition:transform .12s ease,box-shadow .12s ease}
+.wrap section .griglia-schede > .job:hover,#carte-list > .card:hover,#forn-list > .card:hover,#cred-list > .card:hover,#pz-list .pz-card:hover{
+  transform:translateY(-2px);box-shadow:0 4px 8px rgba(10,42,77,.06),0 14px 30px rgba(10,42,77,.11)!important;background:#fff!important}
+.wrap section .griglia-schede > .job .job-cli,#carte-list .c-head h3,#forn-list .c-head h3,#cred-list .c-head h3{font-size:19px!important;font-weight:800!important}
+.wrap section .griglia-schede > .job .job-meta,#carte-list .c-righe,#forn-list .c-righe{font-size:16px!important}
+.wrap section .griglia-schede > .job .job-actions .btn,#carte-list .card-acts .btn,#forn-list .card-acts .btn,#cred-list .card-acts .btn{
+  border:1.5px solid var(--blu,#0066ff)!important;color:var(--blu,#0066ff)!important;background:#f3f8ff!important;font-weight:700!important;min-height:44px;padding:0 20px!important}
+.wrap section .griglia-schede > .job .job-actions .btn:hover,#carte-list .card-acts .btn:hover,#forn-list .card-acts .btn:hover{background:var(--blu,#0066ff)!important;color:#fff!important}
+@media(max-width:760px){
+ .wrap section .griglia-schede > .job,#carte-list > .card,#forn-list > .card,#cred-list > .card,#pz-list .pz-card{padding:14px 14px 14px 16px!important}
+ .wrap section .griglia-schede > .job .job-cli{font-size:18px!important}
+}

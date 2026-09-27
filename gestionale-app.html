@@ -4247,7 +4247,11 @@
       setCnt("#cnt-mezzi",mAvvisa.length,mAvvisa.some(v=>v.scadute>0)?"err":"attesa");
       setCnt("#cnt-attrezzature",sAvvisa2.length,sAvvisa2.some(v=>v.scadute>0)?"err":"attesa");
       /* Scadenzario: aperte, scadute o entro 30 giorni. */
-      const sAperte=(sc||[]).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
+      /* 27 set 2026 — anche quelle delle PERSONE (visita medica, formazione...):
+         lo Scadenzario le mostra, e il numerino del menu diceva 1 mentre dentro
+         ce n'erano 2 scadute. Stessa lista che usa renderScadenze. */
+      let _per=[];try{_per=await scadenzePersone(curMestiere());}catch(_){}
+      const sAperte=(sc||[]).concat(_per).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
       setCnt("#cnt-scadenzario",sAperte.length,sAperte.some(x=>x.data_scadenza<oggi)?"err":"attesa");
       /* Fornitori: fatture da pagare. Rosso se qualcuna è scaduta.
          (se la tabella non esiste ancora, ff è undefined e il pallino resta spento) */
