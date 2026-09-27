@@ -2703,3 +2703,13 @@ Migrazione `sicurezza_27set2026` (gia' nel database) + codice:
    →14← giorni.
 Banco: `prove-claude/banchi-fissi/banco-freno.js` (16 verdi); le prove del
 database sono state fatte in transazioni annullate (tutte verdi).
+
+## 27 SETTEMBRE 2026 (notte) — TASSE E FISCO, TAPPA 1: «FARSI PAGARE» (NASCOSTO)
+
+- File nuovo `js/gest-fisco.js` + 4 punti in `gestionale-app.html` (voce `#tab-fisco`, `<section id="fisco">`, `fisco:_rt("renderFisco")` in RENDER_TAB, `<script>`) + stile `.fp-*` in fondo a `css/gestionale.css`.
+- ⛔ NASCOSTO: `#tab-fisco` nasce `display:none`; lo accende `fiscoAccendi()` solo con `?giro=1` o per le email in `FISCO_ANTEPRIMA`. Per accenderlo a tutti: togliere il controllo in `fiscoAccendi()` (e aggiungere "fisco" all'elenco dei deep link).
+- Legge le fatture `emessa` NON pagate di TUTTI i reparti (non filtra per mestiere), scadenza = data + `gest_azienda.giorni_pagamento`.
+- 4 passi: 1 promemoria gentile, 2 sollecito deciso, 3 diffida PEC (testo + PDF), 4 giudice (info). Ogni passo mandato va in `gest_solleciti` (RLS own, giro_demo_lettura, trg_gest_piano, trg_gest_stesso_padrone). «Ha pagato» = come fattCambiaStato: stato pagata + data_pagata + gest_lavori.fatt_stato.
+- Interessi: B2B (cliente tipo `azienda`) mora D.Lgs 231/2002 + 40 €; privati interesse legale. Tassi in `FP_MORA` / `FP_LEGALE`: quando cambiano si AGGIUNGE una riga, non si corregge la vecchia.
+- Numeri verificati il 27/09/2026: mora 2H2026 10,40% (1H2026 10,15%), legale 2026 1,60%, giudice di pace fino a 10.000 €, da soli fino a 1.100 €, contributo unificato decreto ingiuntivo 21,50/49/118,50/259 € + marca 27 €.
+- Banco: `prove-claude/banchi-fissi/banco-fisco.html` (dati finti, niente rete).
