@@ -53,6 +53,11 @@ exports.handler = async function (event) {
     const { data: r } = await sb.from('gest_richieste')
       .select('id, user_id, email, testo, created_at').eq('id', id).maybeSingle();
     if (!r) return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Richiesta non trovata.' }) };
+    // 27 set 2026 — solo per le richieste appena scritte: prima chiunque poteva
+    // rimandare le due email di una richiesta vecchia chiamando questo indirizzo.
+    if (Date.now() - new Date(r.created_at).getTime() > 10 * 60 * 1000) {
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, saltato: 'vecchia' }) };
+    }
 
     // solo per dare un nome nella email ad Alessio
     let chi = r.email || '';
@@ -76,7 +81,7 @@ exports.handler = async function (event) {
           <p>abbiamo ricevuto quello che ci hai scritto dal gestionale:</p>
           <blockquote style="border-left:4px solid #0066ff;margin:18px 0;padding:8px 0 8px 16px;color:#334">${esc(r.testo)}</blockquote>
           <p>La leggo di persona. Se decidiamo di farla te lo scrivo, e intanto nel gestionale
-             — sezione <b>Cosa ti manca?</b> — vedi sempre a che punto siamo.</p>
+             — sezione <b>Chiedi una funzione</b> — vedi sempre a che punto siamo.</p>
           <p style="color:#5b6b80;font-size:15px">Se vuoi aggiungere qualcosa, rispondi pure a questa email.</p>
           <p>Alessio<br>TrovaImpresa</p>
         </div>

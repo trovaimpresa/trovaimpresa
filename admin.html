@@ -405,7 +405,19 @@
       background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
     }
     .toggle-pw:hover { color: #2e78cc; }
-  </style>
+  
+/* 27 set 2026 — le richieste di «Chiedi una funzione» nel pannello */
+.rqa-filtri{display:flex;gap:8px;margin:0 0 14px}
+.rqa-f{font:inherit;font-size:15px;font-weight:700;padding:8px 16px;border-radius:999px;border:2px solid #d6dee8;background:#fff;color:#334;cursor:pointer}
+.rqa-f.on{background:#0066ff;border-color:#0066ff;color:#fff}
+.rqa-riga{background:#fff;border:1px solid #e2e8f0;border-left:6px solid #8a94a0;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 3px 10px rgba(15,23,42,.06)}
+.rqa-riga.rqa-in_lavorazione{border-left-color:#e8833a}.rqa-riga.rqa-fatta{border-left-color:#2fa46a}.rqa-riga.rqa-non_faremo{border-left-color:#c0392b}
+.rqa-risp{width:100%;box-sizing:border-box;font:inherit;font-size:16px;line-height:1.5;padding:10px 12px;border:2px solid #d6dee8;border-radius:10px;resize:vertical}
+.rqa-risp:focus{border-color:#0066ff;outline:none}
+.u-btn.rqa-on{background:#0066ff!important;color:#fff!important;border-color:#0066ff!important}
+.u-btn.rqa-salva{background:#f3f8ff;border-color:#0066ff;color:#0046b3}
+.rqa-nota{font-size:14px;color:#5b6b80;margin-top:8px}
+</style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <style>
   /* Le mie viste */
@@ -920,6 +932,10 @@
     <div class="section" id="sec-richieste">
       <h2 style="margin:0 0 6px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Cosa chiedono le imprese</h2>
       <p style="color:#5b6b80;margin:0 0 18px;font-size:15px">Quello che le imprese ti scrivono dal gestionale, dalla piu' recente. Cambiando lo stato loro lo vedono subito.</p>
+      <div class="rqa-filtri" id="rqa-filtri">
+        <button type="button" class="rqa-f on" data-rqa-f="aperte" onclick="rqaFiltro('aperte')">Da fare</button>
+        <button type="button" class="rqa-f" data-rqa-f="tutte" onclick="rqaFiltro('tutte')">Tutte</button>
+      </div>
       <div id="lista-richieste"><div class="loading">Caricamento...</div></div>
     </div>
 
@@ -2477,8 +2493,10 @@ async function rispondiSupportoAdmin(q) {
   const txt = (inp.value || '').trim();
   if (!txt) return;
   inp.value = '';
-  const j = await suppFetch('reply', { user_id: cfg.uid, messaggio: txt });
+  const j = await suppFetch('reply', { user_id: cfg.uid, messaggio: txt, origine: q });
   if (!j || !j.success) { alert('Errore invio: ' + ((j && j.error) || '')); inp.value = txt; return; }
+  /* 27 set 2026 — la prima risposta di ogni quarto d'ora parte anche per email */
+  if (j.email) rqaToast('Risposta mandata, e avvisato per email');
   await caricaSupportoAdmin();
 }
 
@@ -5193,37 +5211,78 @@ async function caricaRichieste() {
     if (i.user_id) nomeDiUser[i.user_id] = i.nome_attivita || i.nome || '';
   });
 
-  box.innerHTML = data.map(r => {
+  RQA_CACHE = data;
+  const lista = RQA_FILTRO === 'tutte' ? data : data.filter(r => r.stato !== 'fatta' && r.stato !== 'non_faremo');
+  document.querySelectorAll('[data-rqa-f]').forEach(b => {
+    const n = b.dataset.rqaF === 'tutte' ? data.length : data.filter(r => r.stato !== 'fatta' && r.stato !== 'non_faremo').length;
+    b.classList.toggle('on', b.dataset.rqaF === RQA_FILTRO);
+    b.textContent = (b.dataset.rqaF === 'tutte' ? 'Tutte' : 'Da fare') + ' (' + n + ')';
+  });
+  if (!lista.length) { box.innerHTML = '<div class="empty-table"><div class="eicon">✅</div>Niente da fare: hai risposto a tutte</div>'; return; }
+  const bott = (r, k, lab) => '<button class="u-btn' + (r.stato === k ? ' rqa-on' : '') + '" onclick="cambiaStatoRichiesta(' + r.id + ',\'' + k + '\')">' + lab + '</button>';
+  box.innerHTML = lista.map(r => {
     const st = RQ_STATI_ADM[r.stato] || RQ_STATI_ADM.ricevuta;
     const quando = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
     const chi = (r.user_id && nomeDiUser[r.user_id]) ? nomeDiUser[r.user_id] : '';
-    return '<div style="background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:14px">'
+    return '<div class="rqa-riga rqa-' + esc(r.stato || 'ricevuta') + '">'
       + '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px">'
       +   '<span class="badge ' + st.cls + '">' + st.lab + '</span>'
       +   '<span style="color:#5b6b80;font-size:14px">'
       +     (chi ? '<b style="color:#12233a">' + esc(chi) + '</b> &middot; ' : '')
       +     esc(r.email || '') + ' &middot; ' + quando + '</span>'
       + '</div>'
-      + '<div style="font-size:17px;line-height:1.6;margin-bottom:12px">' + esc(r.testo || '') + '</div>'
-      + (r.risposta ? '<div style="background:#f4f8ff;border-left:4px solid #0066ff;border-radius:8px;padding:10px 14px;font-size:15px;margin-bottom:12px"><b>Risposta:</b> ' + esc(r.risposta) + '</div>' : '')
-      + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
-      +   '<button class="u-btn" onclick="cambiaStatoRichiesta(' + r.id + ',\'in_lavorazione\')">Ci sto lavorando</button>'
-      +   '<button class="u-btn" onclick="cambiaStatoRichiesta(' + r.id + ',\'fatta\')">Fatta</button>'
-      +   '<button class="u-btn" onclick="cambiaStatoRichiesta(' + r.id + ',\'non_faremo\')">Non la facciamo</button>'
-      +   '<button class="u-btn" onclick="rispondiRichiesta(' + r.id + ')">Scrivi una risposta</button>'
-      + '</div></div>';
+      + '<div style="font-size:17px;line-height:1.6;margin-bottom:12px;font-weight:600">' + esc(r.testo || '') + '</div>'
+      + '<textarea class="rqa-risp" id="rqa-t-' + r.id + '" rows="2" placeholder="Scrivi la risposta che vedrà nel gestionale (e per email)">' + esc(r.risposta || '') + '</textarea>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'
+      +   bott(r, 'in_lavorazione', 'Ci sto lavorando') + bott(r, 'fatta', 'Fatta') + bott(r, 'non_faremo', 'Non la facciamo')
+      +   '<button class="u-btn rqa-salva" onclick="rispondiRichiesta(' + r.id + ')">Salva la risposta</button>'
+      + '</div>'
+      + '<div class="rqa-nota">Quando cambi lo stato o salvi una risposta, all\'impresa arriva un\'email.</div>'
+      + '</div>';
   }).join('');
 }
 
+let RQA_CACHE = [], RQA_FILTRO = 'aperte';
+/* un avviso che compare in basso e sparisce da solo: il pannello non ne aveva uno */
+function rqaToast(t) {
+  let d = document.getElementById('rqa-toast');
+  if (!d) { d = document.createElement('div'); d.id = 'rqa-toast';
+    d.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12233a;color:#fff;padding:12px 20px;border-radius:12px;font-size:16px;font-weight:600;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25)';
+    document.body.appendChild(d); }
+  d.textContent = t; d.style.display = 'block';
+  clearTimeout(d._t); d._t = setTimeout(() => { d.style.display = 'none'; }, 3500);
+}
+function rqaFiltro(f) { RQA_FILTRO = f; caricaRichieste(); }
+
+/* 27 set 2026 — l'email all'impresa parte dal server (admin-supporto,
+   azione avvisa_richiesta), che rilegge la richiesta dal database.
+   Se non parte, la modifica e' comunque salvata. */
+async function rqaAvvisa(id) {
+  try { const j = await suppFetch('avvisa_richiesta', { richiesta_id: id }); return !!(j && j.email); } catch (e) { return false; }
+}
+
 async function cambiaStatoRichiesta(id, stato) {
-  if (!await adminWrite('update', 'gest_richieste', id, { stato: stato, aggiornata_il: new Date().toISOString() })) return;
+  /* la risposta scritta nella casella si salva insieme allo stato: prima
+     bisognava premere due pulsanti, e chi premeva solo «Fatta» la perdeva */
+  const t = document.getElementById('rqa-t-' + id);
+  const campi = { stato: stato, aggiornata_il: new Date().toISOString() };
+  if (t) campi.risposta = t.value.trim() || null;
+  if (!await adminWrite('update', 'gest_richieste', id, campi)) return;
+  if (stato === 'fatta' || stato === 'non_faremo' || stato === 'in_lavorazione') {
+    const ok = await rqaAvvisa(id);
+    rqaToast((ok ? 'Salvato, e avvisata l\'impresa per email' : 'Salvato (email non partita)'));
+  }
   caricaRichieste();
 }
 
 async function rispondiRichiesta(id) {
-  const t = prompt('Cosa vuoi rispondere? (lo vede nel suo gestionale)');
-  if (t === null) return;
-  if (!await adminWrite('update', 'gest_richieste', id, { risposta: t.trim() || null, aggiornata_il: new Date().toISOString() })) return;
+  const t = document.getElementById('rqa-t-' + id);
+  const testo = t ? t.value.trim() : '';
+  if (!await adminWrite('update', 'gest_richieste', id, { risposta: testo || null, aggiornata_il: new Date().toISOString() })) return;
+  if (testo) {
+    const ok = await rqaAvvisa(id);
+    rqaToast((ok ? 'Risposta salvata e mandata per email' : 'Risposta salvata (email non partita)'));
+  }
   caricaRichieste();
 }
 

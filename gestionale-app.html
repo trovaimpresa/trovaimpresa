@@ -456,10 +456,24 @@
     <section id="richieste">
       <div class="sec-head"><h2>Chiedi una funzione</h2></div>
       <div class="gal-intro">Questo gestionale lo scrivo io, da solo, per imprese come la tua. Se ti serve una cosa che qui non c'è, scrivimela qui sotto: la leggo di persona. Non serve che sia una richiesta ben scritta — bastano due righe.</div>
-      <div class="field" style="margin-top:8px">
-        <textarea id="rq-testo" rows="5" placeholder="Es. Mi servirebbe segnare le ore dei dipendenti giorno per giorno..." style="font-size:1.05rem;padding:14px;line-height:1.6"></textarea>
+      <!-- 27 set 2026 — tre esempi da toccare, il microfono, e la riga che dice
+           cosa succede dopo. Chi non sa da dove cominciare tocca un esempio e
+           lo cambia: una casella vuota fa paura, una frase a meta' no. -->
+      <div class="rq-esempi" aria-label="Esempi">
+        <span class="rq-esempi-lab">Per esempio:</span>
+        <button type="button" class="rq-es" data-rq-es="Mi servirebbe poter ">Mi servirebbe poter…</button>
+        <button type="button" class="rq-es" data-rq-es="Quando faccio ">Quando faccio… vorrei che…</button>
+        <button type="button" class="rq-es" data-rq-es="Non riesco a capire come ">Non riesco a capire come…</button>
       </div>
-      <button class="btn btn-primary" style="font-size:1.05rem;padding:13px 26px" data-action="save-richiesta">Manda la richiesta</button>
+      <div class="field" style="margin-top:8px">
+        <textarea id="rq-testo" rows="5" placeholder="Scrivi con parole tue, bastano due righe" style="font-size:1.05rem;padding:14px;line-height:1.6"></textarea>
+      </div>
+      <div class="rq-azioni">
+        <button class="btn btn-primary" style="font-size:1.05rem;padding:13px 26px" data-action="save-richiesta">Manda la richiesta</button>
+        <button type="button" class="aic-mic" id="rq-mic" hidden></button>
+      </div>
+      <div class="rq-st" id="rq-st"></div>
+      <div class="rq-come"><b>Cosa succede dopo:</b> ti arriva subito un'email di conferma. Quando la richiesta cambia (ci lavoriamo, è fatta) ti arriva un'altra email, e qui sotto vedi sempre a che punto è.</div>
       <div id="rq-lista"></div>
     </section>
 
@@ -477,6 +491,7 @@
           <button class="btn asst-allega" data-action="asst-allega" title="Allega una foto, uno screenshot o un PDF" aria-label="Allega un file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <button class="btn btn-primary" data-action="asst-invia">Invia</button>
         </div>
+        <div class="asst-sotto"><button type="button" class="aic-mic" id="asst-mic" hidden></button><span class="asst-tasti">Invio manda · per andare a capo <b>Maiusc + Invio</b></span></div>
         <input type="file" id="asst-file" accept="image/*,application/pdf" hidden>
         <div class="asst-chip" id="asst-chip" hidden></div>
         <div class="asst-nota" id="asst-nota"></div>
@@ -6318,6 +6333,11 @@
 
   async function renderRichieste(){
     const lista=$("#rq-lista");if(!lista)return;
+    const _ta=$("#rq-testo");
+    if(_ta&&!_ta._agg){_ta._agg=true;
+      document.querySelectorAll("[data-rq-es]").forEach(b=>b.addEventListener("click",()=>{_ta.value=b.dataset.rqEs;_ta.focus();_ta.setSelectionRange(_ta.value.length,_ta.value.length);}));
+      if(window.aiMicrofono&&window.aiMicHTML){const m=$("#rq-mic");if(m){m.outerHTML=aiMicHTML("rq-mic");aiMicrofono($("#rq-mic"),_ta,$("#rq-st"));}}
+    }
     _rqSegnaViste();          /* apri la sezione = hai visto le risposte */
     if(!sb||!sbUid){lista.innerHTML="";return;}
     const {data}=await sb.from("gest_richieste")
@@ -6329,15 +6349,15 @@
       return;
     }
     const fmt=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"";
-    lista.innerHTML=`<h3 style="margin:28px 0 12px;font-size:1.15rem">Cosa ci hai chiesto</h3>`+R.map(r=>{
+    lista.innerHTML=`<h3 class="rq-tit">Cosa ci hai chiesto</h3>`+R.map(r=>{
       const st=RQ_STATI[r.stato]||RQ_STATI.ricevuta;
-      return `<div style="background:var(--card,#fff);border:2px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
-          <span style="background:${st.bg};color:${st.fg};font-weight:800;font-size:0.9rem;padding:5px 14px;border-radius:999px">${st.lab}</span>
-          <span style="color:var(--testo-2);font-size:0.9rem">${fmt(r.created_at)}</span>
+      return `<div class="rq-riga rq-${esc(r.stato||"ricevuta")}">
+        <div class="rq-testa">
+          <span class="rq-pill" style="background:${st.bg};color:${st.fg}">${st.lab}</span>
+          <span class="rq-data">${fmt(r.created_at)}</span>
         </div>
-        <div style="font-size:1.05rem;line-height:1.6">${esc(r.testo)}</div>
-        ${r.risposta?`<div style="margin-top:12px;padding:12px 14px;background:#f4f8ff;border-left:4px solid var(--blu,#0066ff);border-radius:8px;font-size:1rem"><b>Risposta:</b> ${esc(r.risposta)}</div>`:""}
+        <div class="rq-testo">${esc(r.testo)}</div>
+        ${r.risposta?`<div class="rq-risp"><b>Risposta:</b> ${esc(r.risposta)}</div>`:""}
       </div>`;
     }).join("");
   }
@@ -6533,6 +6553,12 @@
 
   async function renderAssistenza(){
     const box=$("#asst-msgs");if(!box)return;
+    const _at=$("#asst-testo");
+    if(_at&&!_at._agg){_at._agg=true;
+      /* Invio manda, Maiusc+Invio va a capo: come nel pannello admin e in ogni chat */
+      _at.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();asstInvia();}});
+      if(window.aiMicrofono&&window.aiMicHTML){const m=$("#asst-mic");if(m){m.outerHTML=aiMicHTML("asst-mic");aiMicrofono($("#asst-mic"),_at,$("#asst-nota"));}}
+    }
     asstAperta=true;
     const fi=$("#asst-file");
     if(fi&&!fi._agganciato){fi._agganciato=true;fi.addEventListener("change",asstFileCambiato);}
@@ -6617,6 +6643,15 @@
     if(!data||!data.length){toast("Non mandato: il database non ha scritto niente. Riprova.");return;}
     if(ta)ta.value="";
     asstTogliFile();
+    /* 27 set 2026 — l'email ad Alessio parte dal server (supporto-avviso):
+       qui si passa solo il numero del messaggio e il gettone della sessione.
+       Se non parte, il messaggio e' comunque salvato: non si dice niente. */
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(session&&data&&data[0])fetch("/.netlify/functions/supporto-avviso",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+        body:JSON.stringify({msg_id:data[0].id})}).catch(()=>{});
+    }catch(_){}
     await asstLeggi(false);
     asstDisegna();
     toast("Mandato ✔");

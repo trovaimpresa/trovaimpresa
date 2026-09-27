@@ -539,6 +539,7 @@
           <button class="btn asst-allega" data-action="asst-allega" title="Allega una foto, uno screenshot o un PDF" aria-label="Allega un file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <button class="btn btn-primary" data-action="asst-invia">Invia</button>
         </div>
+        <div class="asst-sotto"><span class="asst-tasti">Invio manda · per andare a capo <b>Maiusc + Invio</b></span></div>
         <input type="file" id="asst-file" accept="image/*,application/pdf" hidden>
         <div class="asst-chip" id="asst-chip" hidden></div>
         <div class="asst-nota" id="asst-nota"></div>
@@ -7357,6 +7358,8 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
     const box=$("#asst-msgs");if(!box)return;
     const fi=$("#asst-file");
     if(fi&&!fi._agg){fi._agg=true;fi.addEventListener("change",supFileCambiato);}
+    const _at=$("#asst-testo");
+    if(_at&&!_at._agg){_at._agg=true;_at.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();supInvia();}});}
     if(!sb||!sbUid){box.innerHTML='<div class="asst-vuoto">Accedi per scrivere.</div>';return;}
     if(!supCache.length)box.innerHTML='<div class="asst-vuoto">Leggo…</div>';
     if(!await supLeggi(true)){box.innerHTML='<div class="asst-vuoto">Non riesco a leggere i messaggi: controlla la connessione e riprova.</div>';return;}
@@ -7401,6 +7404,9 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
     if(!data||!data.length){toast("Non mandato: il database non ha scritto niente. Riprova.");return;}
     if(ta)ta.value="";
     supTogliFile();
+    /* l'email ad Alessio parte dal server (supporto-avviso), come nel gestionale principale */
+    try{const {data:{session}}=await sb.auth.getSession();
+      if(session)fetch("/.netlify/functions/supporto-avviso",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},body:JSON.stringify({msg_id:data[0].id})}).catch(()=>{});}catch(_){}
     await supLeggi(false);supDisegna();
     toast("Mandato ✔");
   }
