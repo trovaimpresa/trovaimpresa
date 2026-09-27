@@ -184,6 +184,7 @@
   async function renderFisco() {
     const box = $("#fisco-corpo"); if (!box) return;
     fpDisegnaNav();
+    if (fpSezione === "tasse" && typeof fiscoTasse === "function") { fiscoTasse(box); return; }
     if (fpSezione !== "pagare") { box.innerHTML = fpPresto(fpSezione); return; }
     if (!sb || !sbUid) {
       box.innerHTML = tabVuoto("Farsi pagare", "Accedi per vedere chi ti deve dei soldi.");

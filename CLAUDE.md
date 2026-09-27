@@ -2713,3 +2713,15 @@ database sono state fatte in transazioni annullate (tutte verdi).
 - Interessi: B2B (cliente tipo `azienda`) mora D.Lgs 231/2002 + 40 €; privati interesse legale. Tassi in `FP_MORA` / `FP_LEGALE`: quando cambiano si AGGIUNGE una riga, non si corregge la vecchia.
 - Numeri verificati il 27/09/2026: mora 2H2026 10,40% (1H2026 10,15%), legale 2026 1,60%, giudice di pace fino a 10.000 €, da soli fino a 1.100 €, contributo unificato decreto ingiuntivo 21,50/49/118,50/259 € + marca 27 €.
 - Banco: `prove-claude/banchi-fissi/banco-fisco.html` (dati finti, niente rete).
+
+## 27 SETTEMBRE 2026 (notte, 2) — TASSE E FISCO, TAPPA 2: «LE TUE TASSE» (NASCOSTO)
+
+- File nuovo `js/gest-fisco-tasse.js` (`fiscoTasse(box)`), chiamato da `renderFisco()` quando si sceglie «Le tue tasse». Stile `.ft-*` in fondo a `css/gestionale.css`.
+- Tabella `gest_fisco_profilo` (una riga per utente: forma, regime, cassa, anno_inizio, aliquota_5, coeff, riduzione35, iva, spese_anno, perc_commercialista). File `sql/fisco.sql` (con `gest_solleciti`), riga in `PROVE` di fondatore.js. Giro: profili di esempio per i 3 utenti demo (impresa = srl, artigiano = forfettario, professionista = forfettario CIPAG).
+- Senza profilo: lo indovina da `gest_azienda.regime_fiscale` (RF19 = forfettario) e dal ruolo, e dice «l'ho indovinato: controllalo».
+- Incassato = fatture PAGATE nell'anno (data_pagata), imponibile. Stima sull'anno intero (proiezione) dopo il 60° giorno.
+- Conti: forfettario = incassi × coeff, contributi (INPS minimo + 24%/25% oltre 18.808/56.224; −35% se riduzione; GS 26,07%; CIPAG 20% min 4.240; Inarcassa 14,5% min 2.785), imposta 15%/5% su (reddito − contributi). Ordinario individuale = IRPEF 23/33/43 su (incassi − spese − contributi), SENZA detrazioni e addizionali (lo dice). Società: nessun calcolo, solo la % del commercialista.
+- Scadenze dal calendario 1/10/2026–31/12/2027 (fisco/regole-2026 voce 11), acconti stimati al 50% delle tasse dell'anno. «Ricordamelo» scrive nei `promemoria` (avviso 7 giorni prima), senza doppioni.
+- Strumenti: ravvedimento (D.Lgs 87/2024: 0,0833%/giorno fino a 14, 1,25% fino a 30, 1,39% fino a 90, 3,125% entro l'anno, 3,57% entro 2, 4,17% oltre; interessi legali 2% 2025, 1,6% 2026) e «Mi è arrivata una lettera» (avviso bonario 60 gg / 20 rate; cartella 60 gg / 84 rate fino a 120.000 €, decadenza a 8 rate).
+- ⚠️ Quando esce la circolare INPS 2027 si aggiornano `FT_INPS` e le date 2027.
+- Banco: `prove-claude/banchi-fissi/banco-fisco-tasse.html` (?sez=tasse&p=forf|ord|srl|gs|none).
