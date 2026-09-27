@@ -4716,3 +4716,10 @@ body:has(#ti-fondatore) .sheet--grande{
 .side nav.tabs button.tab-cta svg{width:42px!important;height:42px!important;padding:9px!important;border-radius:50%!important;background:#0066ff!important;color:#fff!important}
 .side nav.tabs button.tab-cta .cta-txt b{color:#0046b3!important}
 .side nav.tabs button.tab-cta .cta-txt small{color:#3b4a5e!important}
+
+/* 27 set 2026 — IL MENU SUL TELEFONO: icone grandi come sul computer
+   (prima erano quadratini da 20 px quasi invisibili). Solo a menu aperto. */
+@media(max-width:760px){
+ .side.open nav.tabs button[data-tab]:not(.tab-cta) svg{width:34px!important;height:34px!important;padding:6px!important;border-radius:10px!important}
+ .side.open nav.tabs button[data-tab]:not(.tab-cta){font-size:17px!important;gap:13px!important}
+}
