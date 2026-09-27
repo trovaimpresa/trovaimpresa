@@ -4788,3 +4788,8 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 @media(max-width:760px){.asst-tasti{display:none}}
 .asst-scrivi .btn-primary,.asst-scrivi .asst-allega{height:auto!important;min-height:52px}
 .asst-nota{font-size:14.5px!important}
+/* 27 set 2026 — «Sei dentro come …» nella prima schermata */
+.landing-top .gl-chi{margin-top:12px;font-size:14.5px;color:#dbe8ff}
+.landing-top .gl-chi b{color:#fff}
+.landing-top .gl-chi button{font:inherit;font-weight:700;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 12px;cursor:pointer;margin-left:4px}
+.landing-top .gl-chi button:hover{background:rgba(255,255,255,.28)}

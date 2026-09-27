@@ -353,6 +353,30 @@
     barra.appendChild(d);
   }
 
+  function avvisaAccount(sb,email){
+    var fai=function(){
+      if(document.getElementById("ti-account")) return;
+      var d=document.createElement("div");
+      d.id="ti-account";
+      d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:2147483000;background:#b85c00;color:#fff;"
+        +"font:600 15px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;padding:9px 14px;"
+        +"display:flex;flex-wrap:wrap;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.25)";
+      var t=document.createElement("span");
+      t.textContent="Attenzione: qui sei dentro come "+email+", non col tuo account.";
+      var b=document.createElement("button");
+      b.textContent="Esci e rientra col tuo";
+      b.style.cssText="font:inherit;font-weight:800;padding:6px 14px;border-radius:8px;border:none;background:#fff;color:#b85c00;cursor:pointer";
+      b.onclick=function(){
+        b.disabled=true;b.textContent="Esco…";
+        sb.auth.signOut().catch(function(){}).then(function(){ location.href="/login-impresa.html?redirect=gestionale"; });
+      };
+      d.appendChild(t);d.appendChild(b);
+      document.body.appendChild(d);
+      document.body.style.paddingTop=d.offsetHeight+"px";
+    };
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",fai); else fai();
+  }
+
   function avvia(){
     var sb;
     try{ sb = window.supabase.createClient(SU,SK); }catch(e){ return; }
@@ -360,7 +384,17 @@
       var s = r && r.data && r.data.session;
       if(!s) return;
       var email = s.user.email || "";
-      if(!ammesso(email)) return;                  /* non sei tu: la barra non esiste */
+      /* 27 set 2026 — L'ACCOUNT SBAGLIATO.
+         Alessio entra nel gestionale dal pannello admin, ma il gestionale apre
+         l'account collegato nel browser. Se in un'altra scheda era entrato con
+         l'account di prova, si ritrovava un gestionale vuoto senza capire
+         perche'. Se questo browser e' quello del pannello admin (ti_admin_user)
+         e l'account NON e' il suo, compare una fascia arancione che lo dice. */
+      if(!ammesso(email)){
+        var adm=""; try{ adm=localStorage.getItem("ti_admin_user")||""; }catch(e){}
+        if(adm) avvisaAccount(sb,email);
+        return;                                    /* non sei tu: la barra non esiste */
+      }
       sb.from("imprese").select("user_id,piano,tipo,nome_attivita").eq("user_id",s.user.id).maybeSingle()
         .then(function(res){
           var p = (res && res.data) || {user_id:s.user.id, piano:"free", tipo:null};

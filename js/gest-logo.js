@@ -41,8 +41,22 @@
     });
   }
 
+  /* 27 set 2026 — CON CHE ACCOUNT SEI DENTRO.
+     Chi ha due account (uno vero, uno di prova) si ritrovava un gestionale
+     vuoto senza capire perche': il browser tiene un account solo alla volta.
+     Nella prima schermata adesso c'e' scritto con quale email sei dentro,
+     e un tasto per cambiarla. */
+  function chiSono() {
+    var el = document.querySelector('[data-chi-sono]'); if (!el || !SB) return;
+    SB.auth.getUser().then(function (r) {
+      var em = r && r.data && r.data.user && r.data.user.email; if (!em) return;
+      el.hidden = false;
+      el.innerHTML = 'Sei dentro come <b>' + esc(em) + '</b> · <button type="button" data-gl="esci">Cambia account</button>';
+    }).catch(function () {});
+  }
   function leggi() {
     if (!SB || !UID) return;
+    chiSono();
     SB.from('imprese').select('logo_url').eq('user_id', UID).maybeSingle().then(function (r) {
       if (r.error) return;                   /* se non legge non si tocca niente */
       URL_LOGO = (r.data && r.data.logo_url && r.data.logo_url !== '/img/logo.png') ? r.data.logo_url : null;
@@ -77,6 +91,10 @@
   }
 
   document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-gl="esci"]') && SB) {
+      SB.auth.signOut().catch(function () {}).then(function () { location.href = '/login-impresa.html?redirect=gestionale'; });
+      return;
+    }
     var b = e.target.closest('[data-gl="carica"]'); if (!b) return;
     var i = document.createElement('input');
     i.type = 'file'; i.accept = 'image/*';
