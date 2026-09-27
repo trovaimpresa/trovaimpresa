@@ -13174,7 +13174,7 @@
          ridisegnano sempre: lavori/agenda cambiano forma con la larghezza
          dello schermo, mappa e richieste si disegnano solo quando le apri. */
       const tb=b.dataset.tab;
-      const SEMPRE=["lavori","agenda","mappa","richieste","dalsito","mezzi","attrezzature","assistenza"];
+      const SEMPRE=["lavori","agenda","mappa","richieste","dalsito","mezzi","attrezzature","assistenza","fisco"]; /* fisco: i soldi da incassare cambiano da Fatture, va sempre riletto */
       if(_tabSporchi.has(tb)||SEMPRE.includes(tb)){
         _tabSporchi.delete(tb);
         const fn=RENDER_TAB[tb];if(fn)fn();
