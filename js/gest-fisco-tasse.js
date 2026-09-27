@@ -214,7 +214,8 @@
   // ---------------------------------------------------------------------
   // LA SEZIONE
   // ---------------------------------------------------------------------
-  async function fiscoTasse(box) {
+  async function fiscoTasse(box, mio) {
+    const vecchio = () => mio != null && typeof fpGiro !== "undefined" && mio !== fpGiro;
     if (!sb || !sbUid) { box.innerHTML = tabVuoto("Le tue tasse", "Accedi per vedere le tue tasse."); return; }
     box.innerHTML = '<div class="fp-carica">Sto facendo i conti…</div>';
     const Y = ftAnno(), oggi = todayStr();
@@ -225,6 +226,7 @@
       sb.from("gest_fatture").select("id,stato,data,data_pagata").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01")
     ]);
+    if (vecchio()) return;
     ftProfilo = rP.data || null;
     ftPresunto = false;
     if (!ftProfilo) { ftProfilo = ftIndovina(rA.data); ftPresunto = !!ftProfilo; }
@@ -232,6 +234,7 @@
     const ff = rF.data || [];
     const ids = ff.map(f => f.id);
     const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva").in("fattura_id", ids) : { data: [] };
+    if (vecchio()) return;
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
 
     /* incassato = fatture PAGATE quest'anno (conta il giorno in cui ti pagano) */
@@ -281,9 +284,16 @@
 
     /* IL SALVADANAIO */
     if (st.totale != null && proiezione > 0) {
-      const su100 = Math.min(100, Math.ceil(st.totale / proiezione * 100));
+      const su100 = Math.ceil(st.totale / proiezione * 100);
+      if (su100 >= 100) {
+        /* i contributi fissi da soli superano quello che entra: dire «metti da
+           parte 100 € su 100» non aiuta nessuno, va detto com'e' */
+        h += `<div class="ft-salva"><div class="ft-salva-n">🐷 Quest'anno tasse e contributi (<b>${eur(st.totale)}</b>)<br>sono <b class="fp-rosso">più di quello che incassi</b></div>
+          <div class="ft-salva-d">Ti mancano circa <b>${eur(st.totale - proiezione)}</b>. Succede quando si incassa poco: i contributi fissi INPS si pagano lo stesso. Metti da parte tutto quello che puoi, circa <b>${eur(st.totale / 12)}</b> al mese, e parlane col commercialista.</div>`;
+      } else {
       h += `<div class="ft-salva"><div class="ft-salva-n">🐷 Su ogni <b>100 €</b> che incassi,<br>metti da parte <b class="ft-grande">${su100} €</b></div>
         <div class="ft-salva-d">Cioè circa <b>${eur(st.totale / 12)}</b> al mese. Apri un conto a parte, anche gratuito, e ogni volta che un cliente paga sposta lì la tua parte: a giugno e novembre i soldi ci sono già.</div>`;
+      }
       if (st.calcolabile) {
         h += `<table class="fp-tab">
           <tr><td>Contributi (${esc(ftEtich(FT_CASSE, p.cassa))})</td><td><b>${eur(st.contrib.tot)}</b>${st.contrib.fissi ? ` <span class="ft-grigio">di cui fissi ${eur(st.contrib.fissi)}</span>` : ""}${st.contrib.nota ? `<br><span class="ft-grigio">${esc(st.contrib.nota)}</span>` : ""}</td></tr>

@@ -77,6 +77,10 @@
   let fpAzienda = null;
   let fpSolleciti = [];
   let fpSezione = "pagare";
+  /* ⛔ il numero del giro di disegno. Si cambia sezione mentre l'altra sta
+     ancora leggendo dal database: senza questo numero la risposta vecchia
+     arrivava dopo e scriveva «Farsi pagare» sotto il bottone «Le tue tasse». */
+  let fpGiro = 0;
 
   // ---------------------------------------------------------------------
   // ACCENDERE LA VOCE (solo giro e anteprima)
@@ -183,8 +187,9 @@
   // ---------------------------------------------------------------------
   async function renderFisco() {
     const box = $("#fisco-corpo"); if (!box) return;
+    const mio = ++fpGiro;
     fpDisegnaNav();
-    if (fpSezione === "tasse" && typeof fiscoTasse === "function") { fiscoTasse(box); return; }
+    if (fpSezione === "tasse" && typeof fiscoTasse === "function") { fiscoTasse(box, mio); return; }
     if (fpSezione !== "pagare") { box.innerHTML = fpPresto(fpSezione); return; }
     if (!sb || !sbUid) {
       box.innerHTML = tabVuoto("Farsi pagare", "Accedi per vedere chi ti deve dei soldi.");
@@ -201,6 +206,7 @@
       sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_solleciti").select("*").eq("user_id", sbUid).is("eliminato_il", null).order("inviato_il", { ascending: true })
     ]);
+    if (mio !== fpGiro) return;
     if (rF.error) { box.innerHTML = tabVuoto("Farsi pagare", "Non riesco a leggere le fatture: " + esc(rF.error.message)); return; }
     fpAzienda = rA.data || {};
     fpSolleciti = rS.error ? [] : (rS.data || []);
@@ -212,6 +218,7 @@
       ids.length ? sb.from("gest_fatture_totali").select("fattura_id,totale,segno").in("fattura_id", ids) : Promise.resolve({ data: [] }),
       cliIds.length ? sb.from("gest_clienti").select("id,nome,referente,telefono,email,tipo,piva,sdi_pec").in("id", cliIds) : Promise.resolve({ data: [] })
     ]);
+    if (mio !== fpGiro) return;
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
     const cli = {}; (rC.data || []).forEach(c => { cli[c.id] = c; });
     const gg = (+fpAzienda.giorni_pagamento) || 30;
