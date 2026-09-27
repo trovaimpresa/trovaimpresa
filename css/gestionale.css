@@ -4793,3 +4793,19 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .landing-top .gl-chi b{color:#fff}
 .landing-top .gl-chi button{font:inherit;font-weight:700;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 12px;cursor:pointer;margin-left:4px}
 .landing-top .gl-chi button:hover{background:rgba(255,255,255,.28)}
+
+/* 27 set 2026 — LA RISPOSTA NUOVA SI DEVE VEDERE.
+   Prima il numerino era un «1» giallo pallido nell'angolo: nessuno lo notava.
+   Adesso la card si accende d'arancione, il numero e' un tondo rosso pieno
+   e sotto compare «Nuova risposta». Vale per tutte e due le card. */
+.side nav.tabs button.tab-cta:has(.tab-cnt:not(:empty)){background:#fff4e8!important;border-color:#e8833a!important;box-shadow:0 0 0 3px rgba(232,131,58,.22)!important;position:relative}
+.side nav.tabs button.tab-cta .tab-cnt:not(:empty){background:#d93025!important;color:#fff!important;font-size:14px!important;font-weight:800!important;min-width:26px!important;height:26px!important;border-radius:999px!important;display:inline-flex!important;align-items:center;justify-content:center;position:absolute;top:8px;right:8px;animation:tiPulse 1.6s ease-in-out 3}
+.side nav.tabs button.tab-cta:has(.tab-cnt:not(:empty)) .cta-txt small{color:#b85c00!important;font-weight:800!important}
+.side nav.tabs button.tab-cta:has(.tab-cnt:not(:empty)) .cta-txt small{font-size:0!important}
+.side nav.tabs button.tab-cta:has(.tab-cnt:not(:empty)) .cta-txt small::before{font-size:14.5px;line-height:1.3}
+.side nav.tabs button.tab-cta[data-tab="assistenza"]:has(.tab-cnt:not(:empty)) .cta-txt small::before{content:"Hai un messaggio nuovo"}
+.side nav.tabs button.tab-cta[data-tab="richieste"]:has(.tab-cnt:not(:empty)) .cta-txt small::before{content:"Hai una risposta nuova"}
+@keyframes tiPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.nol-cta:has(.tab-cnt:not(:empty)){background:#fff4e8;border-color:#e8833a;box-shadow:0 0 0 3px rgba(232,131,58,.22)}
+.nol-cta .tab-cnt:not(:empty){background:#d93025;color:#fff;font-weight:800;min-width:26px;height:26px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
+.asst-quando b{font-weight:800}

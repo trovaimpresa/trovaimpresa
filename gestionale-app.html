@@ -6476,7 +6476,9 @@
       const mio=!m.da_admin;
       return testa+'<div class="asst-msg '+(mio?"mio":"suo")+'">'+esc(m.messaggio||"")
         +_asstAllegatoHtml(m)
-        +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_asstOra(m.created_at))+'</div></div>';
+        +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_asstOra(m.created_at))
+        /* 27 set 2026 — sui tuoi messaggi: «Letto» quando TrovaImpresa li ha aperti */
+        +(mio?(m.letto?' · <b>✓✓ Letto</b>':' · ✓ Inviato'):'')+'</div></div>';
     }).join("");
     box.scrollTop=box.scrollHeight;
     _asstRisolviAllegati();

@@ -2475,7 +2475,9 @@ async function apriConversazioneAdmin(uid, q) {
       + '<button onclick="eliminaMsgAdmin(\'' + m.id + '\',\'' + q + '\')" title="Elimina questo messaggio"'
       + ' style="flex:0 0 auto;background:none;border:none;cursor:pointer;font-size:15px;opacity:.45;padding:6px 2px"'
       + ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">\ud83d\uddd1</button>'
-      + '<div style="' + style.replace('align-self:flex-end;', '').replace('max-width:75%;', 'max-width:100%;min-width:0;') + '">' + esc(m.messaggio || '') + '</div>'
+      + '<div style="' + style.replace('align-self:flex-end;', '').replace('max-width:75%;', 'max-width:100%;min-width:0;') + '">' + esc(m.messaggio || '')
+      /* 27 set 2026 — la spunta: «Consegnata» appena scritta, «Letta» quando l'impresa apre la chat */
+      + '<div style="font-size:13px;font-weight:700;margin-top:6px;opacity:.9">' + (m.letto ? '✓✓ Letta' : '✓ Consegnata') + '</div>' + '</div>'
       + '</div>';
   }).join('');
   box.scrollTop = box.scrollHeight;

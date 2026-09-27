@@ -7324,7 +7324,8 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
       if(g&&g!==ultimo){ultimo=g;testa='<div class="asst-giorno">'+esc(_supGiorno(m.created_at))+'</div>';}
       const mio=!m.da_admin;
       return testa+'<div class="asst-msg '+(mio?"mio":"suo")+'">'+esc(m.messaggio||"")+_supAllegato(m)
-        +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_supOra(m.created_at))+'</div></div>';
+        +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_supOra(m.created_at))
+        +(mio?(m.letto?' · <b>✓✓ Letto</b>':' · ✓ Inviato'):'')+'</div></div>';
     }).join("");
     box.scrollTop=box.scrollHeight;
     _supRisolvi();
