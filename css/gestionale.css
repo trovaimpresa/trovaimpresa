@@ -4917,9 +4917,11 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 /* ═══ 27 set 2026 — TASSE E FISCO · Chiedi all'AI (js/gest-fisco-ai.js) ═══ */
 .fi-chat{display:flex;flex-direction:column;min-height:60vh}
 .fi-msgs{flex:1;display:flex;flex-direction:column;gap:10px;padding:4px 0 12px;max-height:62vh;overflow-y:auto}
-.fi-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.5}
+.fi-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:16px;line-height:1.55}
 .fi-msg.io{align-self:flex-end;background:var(--blu);color:#fff;border-bottom-right-radius:4px}
-.fi-msg.ai{align-self:flex-start;background:var(--card);border:1px solid var(--bordo);border-bottom-left-radius:4px}
+.fi-msg.ai{align-self:flex-start;background:var(--card);border:1px solid var(--bordo);border-bottom-left-radius:4px;color:#0B1220;font-weight:500}
+.fi-tasti .fi-svuota{margin-right:auto;color:var(--err)}
+.fi-tasti .fi-svuota[hidden]{display:none}
 .fi-pensa{color:var(--testo-2);font-style:italic}
 .fi-barra{position:sticky;bottom:0;background:var(--sfondo);padding-top:8px}
 .fi-barra textarea{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--bordo-forte,var(--bordo));border-radius:14px;resize:vertical;min-height:56px;background:var(--card);color:var(--testo)}

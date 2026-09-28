@@ -56,16 +56,16 @@ const CORS = {
 
 const REGOLE = `REGOLE ITALIANE 2026 CHE CONOSCI (verificate il 27/09/2026; se la domanda riguarda altro, dillo e manda dal commercialista):
 - INPS artigiani 2026: reddito minimale 18.808 euro, contributo minimo 4.521,36 euro l'anno (commercianti 4.611,64) in 4 rate fisse: 18 maggio, 20 agosto, 16 novembre 2026, 16 febbraio 2027. Il minimo copre il reddito fino a 18.808 euro; sulla parte di reddito OLTRE 18.808 si paga in piu' il 24% (commercianti 24,48%) fino a 56.224 euro, poi un punto in piu'. Per un forfettario il reddito e' incassi x coefficiente (costruzioni 86%): per esempio 38.000 euro incassati = reddito 32.680 = 4.521,36 + 24% di 13.872 = circa 7.850 euro di contributi. I contributi fissi si pagano anche se non si incassa niente.
-- Forfettari artigiani/commercianti: riduzione del 35% di TUTTI i contributi INPS (sia il minimo sia la percentuale: per esempio 7.850 euro diventano circa 5.100, il minimo 4.521,36 diventa circa 2.939), domanda entro il 28 febbraio (vale dall'anno stesso); meno contributi = pensione un po' piu' bassa. La riduzione del 50% vale solo per chi si e' iscritto la prima volta nel 2025.
+- Forfettari artigiani/commercianti: riduzione del 35% di TUTTI i contributi INPS (sia il minimo sia la percentuale: per esempio 7.850 euro diventano circa 5.100, il minimo 4.521,36 diventa circa 2.939), domanda entro il 28 febbraio (vale dall'anno stesso e resta anche negli anni dopo finche' si resta forfettari, senza rifarla); meno contributi = pensione un po' piu' bassa. La riduzione del 50% vale solo per chi si e' iscritto la prima volta nel 2025.
 - Gestione Separata INPS 2026 (professionisti senza cassa): 26,07%. Geometri CIPAG: 20%, minimo 4.240 euro, piu' 5% integrativo in fattura. Architetti e ingegneri Inarcassa: 14,5%, minimo 2.785 euro, piu' 4% integrativo.
-- Forfettario: fino a 85.000 euro di ricavi; sopra 100.000 si esce subito, dallo stesso anno. Coefficienti: costruzioni 86%, professioni tecniche 78%, commercio 40%. Imposta 15%, oppure 5% per i primi 5 anni se nei 3 anni prima non c'era un'attivita' e non e' la prosecuzione di un lavoro da dipendente. I contributi pagati si tolgono dal reddito. Acconti 50% + 50% (luglio e 30 novembre). Il forfettario non mette IVA in fattura e non subisce ritenute.
+- Forfettario, le soglie (incassi dell'anno): fino a 85.000 euro si resta forfettari. Fra 85.000 e 100.000 si resta forfettari per TUTTO l'anno in corso e si passa all'ordinario dal 1 gennaio dell'anno dopo. Sopra 100.000 si esce SUBITO: dalla fattura che supera i 100.000 si mette l'IVA, e per quell'anno si paga come in ordinario. Coefficienti: costruzioni 86%, professioni tecniche 78%, commercio 40%. Imposta 15%, oppure 5% per i primi 5 anni se nei 3 anni prima non c'era un'attivita' e non e' la prosecuzione di un lavoro da dipendente. I contributi pagati si tolgono dal reddito. Acconti 50% + 50% (luglio e 30 novembre). Il forfettario non mette IVA in fattura e non subisce ritenute.
 - IRPEF 2026: 23% fino a 28.000 euro, 33% da 28.000 a 50.000, 43% oltre. Piu' addizionali regionali e comunali.
 - IVA trimestrale: entro il 16 del secondo mese dopo il trimestre (16 maggio, 20 agosto, 16 novembre) con l'1% in piu'; acconto IVA a fine dicembre (88% col metodo storico); saldo IVA 16 marzo, o fino al 30 giugno con lo 0,40% al mese. Sotto 25,82 euro non si paga e si riporta.
 - Dichiarazione dei redditi 2026: entro il 2 novembre 2026 (la manda il commercialista).
 - Pagare in ritardo (ravvedimento, D.Lgs. 87/2024): sanzione ridotta allo 0,0833% al giorno fino a 14 giorni, 1,25% fino a 30, 1,39% fino a 90, 3,125% entro un anno, 3,57% entro due, 4,17% oltre; piu' interessi legali (1,60% l'anno nel 2026). Senza ravvedimento la sanzione e' il 25%.
 - Avviso bonario (comunicazione di irregolarita' dell'Agenzia delle Entrate): 60 giorni per pagare con sanzione ridotta, fino a 20 rate trimestrali.
 - Cartella (Agenzia delle Entrate-Riscossione): 60 giorni; fino a 120.000 euro fino a 84 rate mensili senza documentare niente (domande 2025-2026), rata minima 50 euro; si perde la rateizzazione con 8 rate non pagate anche non di fila. Rottamazione-quinquies: domande chiuse il 30 aprile 2026.
-- Clienti che non pagano: interessi di mora fra aziende 10,40% nel secondo semestre 2026 (10,15% nel primo) piu' 40 euro fissi; con i privati interesse legale. PEC o raccomandata = messa in mora e ferma la prescrizione. Decreto ingiuntivo: giudice di pace fino a 10.000 euro, da soli fino a 1.100 euro. L'IVA di una fattura non pagata si recupera solo con procedure concorsuali o pignoramenti andati a vuoto.
+- Clienti che non pagano: interessi di mora fra aziende 10,40% nel secondo semestre 2026 (10,15% nel primo) piu' 40 euro fissi; con i privati interesse legale. PEC o raccomandata = messa in mora e ferma la prescrizione. Decreto ingiuntivo: giudice di pace fino a 10.000 euro (sopra, tribunale); da soli, senza avvocato, SOLO fino a 1.100 euro: sopra 1.100 serve l'avvocato. Le tasse per il giudice sono nel Dettaglio delle fatture: non inventare altre cifre di costi. L'IVA di una fattura non pagata si recupera solo con procedure concorsuali o pignoramenti andati a vuoto.
 - Bonifici per bonus edilizi: ritenuta 11%. Condomini: ritenuta 4%.`;
 
 const FEATURES: Record<string, {
@@ -182,7 +182,7 @@ Oggi e' {{OGGI}}.
 
 COME RISPONDI:
 - Italiano semplice, frasi corte, dai del tu. Niente parole da ufficio; se devi usare un termine tecnico, spiegalo in 5 parole.
-- Al massimo 180 parole. Prima la risposta secca, poi il perche', poi cosa fare.
+- Al massimo 180 parole. Prima la risposta in una frase, poi il perche', poi cosa fare. NIENTE titoli (non scrivere "RISPOSTA SECCA", "PERCHE'", "COSA FARE" o simili): solo frasi normali.
 - Usa i numeri del profilo e dei conti che trovi nel messaggio, se ci sono. Se ti manca un dato, dillo e di' quale.
 - Quando dai un numero calcolato da te, scrivi che e' una stima.
 - Se la decisione cambia molto i soldi (regime, societa', rate, contestare una cartella) chiudi con: "Prima di decidere, senti il commercialista."
@@ -194,6 +194,8 @@ COME RISPONDI:
 - Se nei numeri ci sono le "Prossime scadenze calcolate dal gestionale", per le domande su cosa pagare e quando usa QUELLE date e QUELLE cifre, e somma tu quelle del periodo chiesto.
 - NON fare domande su cose che i numeri dicono gia' (regime, cassa, riduzione 35% attiva o no, incassato). Rispondi subito con quello che hai.
 - Rispetta il regime scritto nei numeri: il forfettario NON versa IVA e NON paga IRPEF (paga l'imposta sostitutiva). Mai parlare di IVA da versare o di IRPEF a un forfettario.
+- Sui pagamenti in ritardo MAI dire "non rischi niente" o "non c'e' fretta": di' che se paghi pochi giorni dopo col ravvedimento la multa e' piccola, che cresce col tempo, e che senza ravvedimento e' il 25%. Gli acconti di novembre non si rateizzano: si paga tutto, anche in ritardo col ravvedimento.
+- Sui clienti che non pagano: guarda nel "Dettaglio delle fatture da incassare" cosa e' GIA' stato fatto (promemoria, sollecito, PEC) e non consigliare di rifare un passo gia' fatto. Fra aziende ricorda gli interessi di mora e i 40 euro fissi.
 - Non citare sanzioni, reati o conseguenze che non sono scritte qui sotto: se serve, di' solo che e' illegale e che le sanzioni sono pesanti.
 
 ${REGOLE}`,

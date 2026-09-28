@@ -185,6 +185,51 @@
   // ---------------------------------------------------------------------
   // LA SEZIONE
   // ---------------------------------------------------------------------
+  /* le fatture emesse non pagate, con cliente, scadenza, ritardo, passi e
+     interessi. UN posto solo: la usano Farsi pagare e Chiedi all'AI. */
+  async function fpCaricaAperte() {
+    const [rF, rA, rS] = await Promise.all([
+      sb.from("gest_fatture")
+        .select("id,numero,anno,data,stato,cliente_id,cli_nome,cli_piva,cli_cod_fiscale,cli_indirizzo,cli_cap,cli_citta,cli_prov,cli_pec")
+        .eq("user_id", sbUid).eq("stato", "emessa").is("eliminato_il", null).not("numero", "is", null),
+      sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
+      sb.from("gest_solleciti").select("*").eq("user_id", sbUid).is("eliminato_il", null).order("inviato_il", { ascending: true })
+    ]);
+    if (rF.error) return { errore: rF.error.message, lista: [] };
+    fpAzienda = rA.data || {};
+    fpSolleciti = rS.error ? [] : (rS.data || []);
+    const ff = rF.data || [];
+    const ids = ff.map(f => f.id);
+    const cliIds = [...new Set(ff.map(f => f.cliente_id).filter(Boolean))];
+
+    const [rT, rC] = await Promise.all([
+      ids.length ? sb.from("gest_fatture_totali").select("fattura_id,totale,segno").in("fattura_id", ids) : Promise.resolve({ data: [] }),
+      cliIds.length ? sb.from("gest_clienti").select("id,nome,referente,telefono,email,tipo,piva,sdi_pec").in("id", cliIds) : Promise.resolve({ data: [] })
+    ]);
+    const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
+    const cli = {}; (rC.data || []).forEach(c => { cli[c.id] = c; });
+    const gg = (+fpAzienda.giorni_pagamento) || 30;
+
+    const lista = ff.map(f => {
+      const t = tot[f.id] || {};
+      const importo = (+t.segno || 1) > 0 ? (+t.totale || 0) : 0;
+      const c = cli[f.cliente_id] || {};
+      const b2b = c.tipo ? c.tipo === "azienda" : !!String(f.cli_piva || c.piva || "").trim();
+      const scadenza = _giorniDopo(f.data, gg);
+      const ritardo = -(_giorniA(scadenza) || 0);
+      const sol = fpSolleciti.filter(s => s.fattura_id === f.id);
+      const ultimo = sol.length ? sol[sol.length - 1] : null;
+      const passo = sol.reduce((m, s) => Math.max(m, +s.passo || 0), 0);
+      const giorniDalPasso = ultimo ? -(_giorniA(String(ultimo.inviato_il).slice(0, 10)) || 0) : null;
+      const interessi = ritardo > 0 ? fpInteressi(importo, scadenza, b2b) : 0;
+      const o = { ...f, cli: c, importo, b2b, scadenza, ritardo, sol, passo, giorniDalPasso, interessi };
+      o.cons = fpConsiglio(o);
+      return o;
+    }).filter(f => f.importo > 0);
+
+    return { errore: null, lista };
+  }
+
   async function renderFisco() {
     const box = $("#fisco-corpo"); if (!box) return;
     const mio = ++fpGiro;
@@ -201,46 +246,10 @@
 
     /* ⛔ NON si filtra per reparto: i soldi che ti devono sono tuoi, da
        qualunque reparto arrivino (stessa regola dei Promemoria). */
-    const [rF, rA, rS] = await Promise.all([
-      sb.from("gest_fatture")
-        .select("id,numero,anno,data,stato,cliente_id,cli_nome,cli_piva,cli_cod_fiscale,cli_indirizzo,cli_cap,cli_citta,cli_prov,cli_pec")
-        .eq("user_id", sbUid).eq("stato", "emessa").is("eliminato_il", null).not("numero", "is", null),
-      sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_solleciti").select("*").eq("user_id", sbUid).is("eliminato_il", null).order("inviato_il", { ascending: true })
-    ]);
+    const L = await fpCaricaAperte();
     if (mio !== fpGiro) return;
-    if (rF.error) { box.innerHTML = tabVuoto("Farsi pagare", "Non riesco a leggere le fatture: " + esc(rF.error.message)); return; }
-    fpAzienda = rA.data || {};
-    fpSolleciti = rS.error ? [] : (rS.data || []);
-    const ff = rF.data || [];
-    const ids = ff.map(f => f.id);
-    const cliIds = [...new Set(ff.map(f => f.cliente_id).filter(Boolean))];
-
-    const [rT, rC] = await Promise.all([
-      ids.length ? sb.from("gest_fatture_totali").select("fattura_id,totale,segno").in("fattura_id", ids) : Promise.resolve({ data: [] }),
-      cliIds.length ? sb.from("gest_clienti").select("id,nome,referente,telefono,email,tipo,piva,sdi_pec").in("id", cliIds) : Promise.resolve({ data: [] })
-    ]);
-    if (mio !== fpGiro) return;
-    const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
-    const cli = {}; (rC.data || []).forEach(c => { cli[c.id] = c; });
-    const gg = (+fpAzienda.giorni_pagamento) || 30;
-
-    fpCache = ff.map(f => {
-      const t = tot[f.id] || {};
-      const importo = (+t.segno || 1) > 0 ? (+t.totale || 0) : 0;
-      const c = cli[f.cliente_id] || {};
-      const b2b = c.tipo ? c.tipo === "azienda" : !!String(f.cli_piva || c.piva || "").trim();
-      const scadenza = _giorniDopo(f.data, gg);
-      const ritardo = -(_giorniA(scadenza) || 0);
-      const sol = fpSolleciti.filter(s => s.fattura_id === f.id);
-      const ultimo = sol.length ? sol[sol.length - 1] : null;
-      const passo = sol.reduce((m, s) => Math.max(m, +s.passo || 0), 0);
-      const giorniDalPasso = ultimo ? -(_giorniA(String(ultimo.inviato_il).slice(0, 10)) || 0) : null;
-      const interessi = ritardo > 0 ? fpInteressi(importo, scadenza, b2b) : 0;
-      const o = { ...f, cli: c, importo, b2b, scadenza, ritardo, sol, passo, giorniDalPasso, interessi };
-      o.cons = fpConsiglio(o);
-      return o;
-    }).filter(f => f.importo > 0);
+    if (L.errore) { box.innerHTML = tabVuoto("Farsi pagare", "Non riesco a leggere le fatture: " + esc(L.errore)); return; }
+    fpCache = L.lista;
 
     const scadute = fpCache.filter(f => f.ritardo > 0).sort((a, b) => b.ritardo - a.ritardo);
     const arrivo = fpCache.filter(f => f.ritardo <= 0).sort((a, b) => a.ritardo - b.ritardo);

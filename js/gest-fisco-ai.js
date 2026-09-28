@@ -69,6 +69,25 @@
       righe.push("Incassato nel " + Y + " finora (fatture pagate, senza IVA): " + eur(inc) + ".");
       righe.push("Spese segnate nel gestionale nel " + Y + ": " + eur(sp.tot) + ".");
       righe.push("Fatture emesse non ancora pagate: " + aperte.length + " per " + eur(daIncassare) + ".");
+      /* il dettaglio di chi deve pagare, con i passi GIA' fatti: senza,
+         l'AI consigliava di mandare la PEC a chi l'aveva gia' ricevuta */
+      if (typeof fpCaricaAperte === "function") {
+        const L = await fpCaricaAperte();
+        const NOMI = ["", "promemoria gentile", "sollecito deciso", "lettera formale PEC (messa in mora)", "giudice"];
+        const sc = (L.lista || []).slice().sort((a, b) => b.ritardo - a.ritardo);
+        if (sc.length) righe.push("Dettaglio delle fatture da incassare (usa QUESTI dati, sono gia' calcolati):\n" + sc.map(f => {
+          const fatti = f.sol.map(s => NOMI[+s.passo] + " il " + fdate(String(s.inviato_il).slice(0, 10)));
+          return "- " + (f.cli_nome || (f.cli && f.cli.nome) || "cliente") + " (" + (f.b2b ? "azienda" : "privato") + "), fattura " + fpNumFatt(f) + " di " + eur(f.importo)
+            + (f.ritardo > 0 ? ", scaduta da " + f.ritardo + " giorni" : ", scade il " + fdate(f.scadenza))
+            + ". Gia' fatto: " + (fatti.length ? fatti.join(", ") : "niente")
+            + (f.ritardo > 0 ? ". Interessi maturati: " + eur(f.interessi) + (f.b2b ? " (mora fra aziende) piu' " + eur(FP_SPESE_FISSE) + " di indennizzo fisso" : " (interesse legale)") : "")
+            + (f.passo >= 3 ? (() => { const cu = fpContributo(f.importo);
+                return ". Decreto ingiuntivo: " + (f.importo <= FP_GDP_MAX ? "giudice di pace" : "tribunale")
+                  + (cu != null ? ", tasse per il giudice " + eur(cu + FP_MARCA) + " (contributo unificato " + eur(cu) + " + marca " + eur(FP_MARCA) + ")" : "")
+                  + (f.importo > 1100 ? ", serve l'avvocato (sopra 1.100 euro)" : ", si puo' fare da soli"); })() : "")
+            + ". Prossimo passo consigliato dal gestionale: " + f.cons.testo;
+        }).join("\n"));
+      }
       if (+d.az.tariffa_oraria) righe.push("Tariffa oraria: " + eur(+d.az.tariffa_oraria) + ".");
       return righe.join("\n");
     } catch (e) { return "Numeri dell'utente: non disponibili."; }
@@ -84,6 +103,7 @@
         <div class="fi-barra">
           <textarea id="fi-in" rows="2" placeholder="Scrivi la tua domanda su tasse, contributi, fatture…"></textarea>
           <div class="fi-tasti">
+            <button class="btn fi-svuota" data-action="fi-svuota" id="fi-svuota" title="Cancella la conversazione" hidden>🗑 Cancella</button>
             <button class="btn" data-action="fi-lettera" title="Fotografa una lettera del Fisco, dell'INPS o della Riscossione">📷 Lettera</button>
             <button class="btn aic-mic" id="fi-mic" hidden></button>
             <button class="btn-primary" data-action="fi-manda">Chiedi</button>
@@ -108,6 +128,7 @@
       return `<div class="fi-msg ${x.chi}">${esc(x.testo).replace(/\n/g, "<br>")}</div>`;
     }).join("") + (fiOccupato ? `<div class="fi-msg ai fi-pensa">Sto pensando…</div>` : "");
     m.scrollTop = m.scrollHeight;
+    const c = $("#fi-svuota"); if (c) c.hidden = !fiStoria.length || fiOccupato;
   }
 
   function fiGiro() {
@@ -128,13 +149,17 @@
     const prima = fiStoria.slice(0, -1).filter(x => !x.lettera).slice(-6)
       .map(x => (x.chi === "io" ? "Domanda: " : "Risposta: ") + x.testo).join("\n");
     const lettera = fiStoria.slice().reverse().find(x => x.lettera);
-    let testo = "I MIEI NUMERI (dal gestionale):\n" + (fiCtx || "non disponibili") + "\n";
+    /* la domanda non si taglia MAI: se il testo e' troppo lungo si accorcia
+       la conversazione di prima, poi i numeri */
+    let coda = "\nLA MIA DOMANDA:\n" + q.slice(0, 1500);
+    let testo = "";
     if (lettera) testo += "\nLETTERA CHE HO FOTOGRAFATO: " + [lettera.lettera.chi, lettera.lettera.cosa, lettera.lettera.in_breve,
       lettera.lettera.importo != null ? "importo " + lettera.lettera.importo + " euro" : "", lettera.lettera.scadenza ? "scadenza " + lettera.lettera.scadenza : ""].filter(Boolean).join(" · ") + "\n";
-    if (prima) testo += "\nCONVERSAZIONE DI PRIMA:\n" + prima + "\n";
-    testo += "\nLA MIA DOMANDA:\n" + q;
+    if (prima) testo += "\nCONVERSAZIONE DI PRIMA:\n" + prima.slice(-2500) + "\n";
+    const numeri = "I MIEI NUMERI (dal gestionale):\n" + (fiCtx || "non disponibili") + "\n";
+    testo = numeri.slice(0, Math.max(500, 7900 - testo.length - coda.length)) + testo + coda;
     let r = null;
-    try { r = await window.AI.cantiere("domanda_fisco", testo.slice(0, 7900), null, false); }
+    try { r = await window.AI.cantiere("domanda_fisco", testo.slice(-7950), null, false); }
     catch (e) { fiStoria.push({ chi: "ai", testo: (e && e.message) || "Non ci sono riuscito. Riprova fra un attimo." }); }
     fiOccupato = false;
     if (r) fiStoria.push({ chi: "ai", testo: r });
@@ -201,6 +226,7 @@
     if (!t) return;
     const a = t.dataset.action;
     if (a === "fi-manda")   { fiManda(); return; }
+    if (a === "fi-svuota")  { if (fiOccupato) return; fiStoria = []; fiDisegna(); const t = $("#fi-in"); if (t) t.focus(); return; }
     if (a === "fi-lettera") { if (fiGiro()) return; const f = $("#fi-file"); if (f) { f.value = ""; f.click(); } return; }
   });
   document.addEventListener("change", function (e) {
