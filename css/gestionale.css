@@ -5231,3 +5231,8 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .wrap section .rq-risp{font-size:17.5px!important}
 /* squadra */
 .wrap section .app-op-p{font-size:17px!important}
+/* 28/09/2026 — il Prezzario ha regole sue con «#pz-list» che vincevano */
+#pz-list .pz-desc{font-size:18px!important}
+#pz-list .pz-cod{font-size:16px!important}
+#pz-list .pz-meta{font-size:16px!important;color:#0b1220!important}
+#pz-list .pz-prezzo{font-size:21px!important}

@@ -4966,6 +4966,10 @@
     if(!box)return;
     tabChiudiPop();
     if(!sb||!sbUid){if(viste)viste.innerHTML="";box.style.display="block";box.innerHTML=lavVuoto("tutti");return;}
+    /* 28/09/2026 — senza reparto aperto le tre letture partivano con
+       mestiere_id=null e Supabase rispondeva 400 (tre errori rossi nella
+       console). Si aspetta di essere dentro un reparto. */
+    if(!curMestiere())return;
     const oggi=todayStr();
     const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
       /* Per gli studi si legge tutta la riga ("*") invece dell'elenco fisso: servono
