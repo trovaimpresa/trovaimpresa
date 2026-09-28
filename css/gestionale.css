@@ -5236,3 +5236,16 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 #pz-list .pz-cod{font-size:16px!important}
 #pz-list .pz-meta{font-size:16px!important;color:#0b1220!important}
 #pz-list .pz-prezzo{font-size:21px!important}
+/* ═══ 28/09/2026 — LE FINESTRE DEI MODULI: SCRITTE NERE ═══════════════════
+   Nuovo lavoro, cliente, preventivo, fattura, mezzo, persona... Le misure
+   erano gia' quasi tutte sopra i 16 px: il problema era il GRIGIO delle note
+   sotto le caselle. Qui tutto nero e le poche scritte piccole piu' grandi.
+   Le finestre di Tasse e fisco hanno gia' le loro regole (.fisco-sh). */
+.sheet{--testo-2:#0b1220;--testo-3:#1f2937;--muted:#0b1220}
+.sheet .sh-nota,.sheet .sh-nota b,.sheet .campo-aiuto,.sheet .fn-d{color:#0b1220!important;font-size:17px!important}
+.sheet .sh-nota{font-weight:500}
+.sheet span > small,.sheet .tipo-btn small{font-size:15px!important;color:inherit!important}
+.sheet .ai-riga-t{font-size:16px!important;color:#0b1220!important}
+.sheet .ai-riga-mk,.sheet .ai-riga-c{font-size:15px!important}
+.sheet .ai-riga-c{color:#1f2937!important}
+.sheet span > b{font-size:16.5px}
