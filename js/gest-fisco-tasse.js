@@ -442,7 +442,7 @@
     const p = ftProfilo || {};
     const opz = (el, sel) => el.map(x => `<option value="${x[0]}"${String(x[0]) === String(sel == null ? "" : sel) ? " selected" : ""}>${x[1]}</option>`).join("");
     const coeffSel = FT_COEFF.some(x => +x[0] === +p.coeff) ? String(+p.coeff) : (p.coeff ? "altro" : (p.forma === "professionista" ? "78" : "86"));
-    openSheetGrande("Il tuo profilo fiscale", `<div class="sh-cols"><div class="sh-col">
+    fpSheet("Il tuo profilo fiscale", `<div class="sh-cols"><div class="sh-col">
       <div class="sh-b"><div class="sh-tit">Chi sei</div>
         <div class="field"><label>1. Che attività hai?</label><select id="ft-forma">${opz(FT_FORME, p.forma || "ditta")}</select></div>
         <div class="field ft-solo-indiv"><label>2. Che regime hai?</label><select id="ft-regime">${opz([["forfettario", "Forfettario (niente IVA in fattura)"], ["ordinario", "Ordinario / semplificato (con IVA)"]], p.regime || "forfettario")}</select></div>
@@ -559,7 +559,7 @@
     return tot;
   }
   function ftRavvForm() {
-    openSheetGrande("Ho pagato in ritardo: quanto costa?", `<div class="sh-b">
+    fpSheet("Ho pagato in ritardo: quanto costa?", `<div class="sh-b">
       <p>Se una tassa la paghi in ritardo <b>di tua iniziativa</b>, prima che arrivi la lettera, la multa è molto più bassa. Si chiama <b>ravvedimento operoso</b>.</p>
       <div class="row2"><div class="field"><label>Quanto dovevi pagare</label><input id="ft-r-imp" type="number" min="0" step="0.01" placeholder="Es. 1500"></div>
       <div class="field"><label>Entro quando</label><input id="ft-r-sc" type="date"></div></div>
@@ -591,7 +591,7 @@
   });
 
   function ftLettera() {
-    openSheetGrande("Mi è arrivata una lettera", `<div class="sh-b">
+    fpSheet("Mi è arrivata una lettera", `<div class="sh-b">
       <p><b>Prima regola: non buttarla e non aspettare.</b> Quasi tutte hanno una scadenza, e pagare presto costa meno. Guarda chi la manda e come si chiama.</p>
       <div class="ft-let"><b>${fpIc("doc")} «Comunicazione di irregolarità» (avviso bonario)</b>
         <p>La manda l'<b>Agenzia delle Entrate</b> quando dai controlli risulta una tassa non pagata o pagata male. Non è ancora una cartella.</p>
@@ -654,7 +654,7 @@
   // ---------------------------------------------------------------------
   let ftIvaStato = {};
   function ftIvaForm() {
-    openSheetGrande("Quale IVA metto?", `<div class="sh-b"><div id="ft-iva-box"></div>
+    fpSheet("Quale IVA metto?", `<div class="sh-b"><div id="ft-iva-box"></div>
       <p class="fp-stima">Regole generali del 2026. Nei casi misti (un contratto unico per tutto l'edificio, lavori su parti di uso diverso) chiedi al commercialista.</p></div>`,
       `<button class="btn-primary" data-action="close">Chiudi</button>`);
     ftIvaDisegna();
@@ -722,7 +722,7 @@
   // 28/09/2026 — IL BONIFICO DEL BONUS CASA
   // ---------------------------------------------------------------------
   function ftBonusForm() {
-    openSheetGrande("Bonifico del bonus casa", `<div class="sh-b">
+    fpSheet("Bonifico del bonus casa", `<div class="sh-b">
       <p>Quando il cliente usa un <b>bonus casa</b> (ristrutturazioni, ecobonus…) ti paga con il <b>bonifico parlante</b>. La banca ti trattiene una parte e la manda allo Stato a nome tuo.</p>
       <div class="field"><label>Quanto ti paga il cliente (il totale della fattura)</label><input id="ft-b-imp" type="text" inputmode="decimal" placeholder="Es. 11000" data-euro></div>
       <div id="ft-b-out"></div>

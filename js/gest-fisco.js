@@ -113,6 +113,14 @@
     ripeti:   '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
     freccia:  '<path d="m9 18 6-6-6-6"/>'
   };
+  /* 28/09/2026 — le finestre del reparto hanno le scritte grandi e nere come
+     il reparto: si apre la finestra di sempre e le si da' la classe
+     «fisco-sh». La prossima finestra di un'altra sezione la perde da sola
+     (openSheetGrande riscrive la classe). */
+  function fpSheet(titolo, corpo, azioni) {
+    openSheetGrande(titolo, corpo, azioni);
+    const sh = document.querySelector("#sheet"); if (sh) sh.classList.add("fisco-sh");
+  }
   function fpIc(n, cls) {
     return '<svg class="fp-ic' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (FP_IC[n] || FP_IC.info) + "</svg>";
   }
@@ -534,11 +542,11 @@
       if (mail) az += `<button class="${tel ? "btn" : "btn-primary"}" data-action="fp-manda" data-id="${f.id}" data-v="${n}" data-c="email">${fpIc("busta")} Email</button>`;
       az += `<button class="btn" data-action="fp-segna" data-id="${f.id}" data-v="${n}" data-c="${tel || mail ? "altro" : "telefono"}">${fpIc("spunta")} ${tel || mail ? "Mandato in altro modo" : "Fatto (a voce / altro)"}</button>`;
     }
-    openSheetGrande(titolo, corpo, az);
+    fpSheet(titolo, corpo, az);
   }
 
   function fpComePec() {
-    openSheetGrande("Come si manda una PEC", `<div class="sh-b"><ol class="fp-ol">
+    fpSheet("Come si manda una PEC", `<div class="sh-b"><ol class="fp-ol">
       <li><b>Ti serve la tua casella PEC.</b> Chi ha partita IVA ce l'ha per legge: la trovi nella visura camerale o la chiedi al commercialista. Se non ce l'hai, costa pochi euro l'anno (Aruba, Legalmail, Poste…).</li>
       <li><b>Trova la PEC del cliente.</b> Aziende e professionisti ce l'hanno per legge: la cerchi gratis su <a href="https://www.inipec.gov.it/cerca-pec" target="_blank" rel="noopener">INI-PEC</a> scrivendo la partita IVA o il codice fiscale.</li>
       <li><b>Scarica la lettera in PDF</b> con il pulsante «Scarica PDF».</li>
@@ -570,14 +578,14 @@
       <div class="sh-nota">${fpIc("avviso")} L'IVA di una fattura non pagata l'hai già versata. Si recupera solo dopo una procedura (fallimento, pignoramento andato a vuoto): chiedi al commercialista quando è il momento.</div>
       <p class="fp-stima">Sono informazioni generali, non un parere legale. Per decidere senti un avvocato: porta la fattura, la PEC e le ricevute.</p>
     </div>`;
-    openSheetGrande("La strada del giudice", corpo,
+    fpSheet("La strada del giudice", corpo,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>
        <button class="btn-primary" data-action="fp-segna" data-id="${f.id}" data-v="4" data-c="giudice">${fpIc("spunta")} Ho avviato la pratica</button>`);
   }
 
   function fpPagatoForm(id) {
     const f = fpCache.find(x => String(x.id) === String(id)); if (!f) return;
-    openSheetGrande("Ha pagato", `<div class="sh-b">
+    fpSheet("Ha pagato", `<div class="sh-b">
       <div class="sh-tit">${esc(f.cli.nome || f.cli_nome || "Cliente")} · fattura ${esc(fpNumFatt(f))} · ${eur(f.importo)}</div>
       <div class="field"><label>Quando hai ricevuto i soldi</label><input id="fp-data-pag" type="date" value="${todayStr()}" max="${todayStr()}"></div>
       <div class="sh-nota">La fattura diventa <b>pagata</b> anche nella sezione Fatture e nei lavori collegati.</div></div>`,

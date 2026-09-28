@@ -5094,5 +5094,31 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .ft-sc-piu{display:block;width:100%;margin-top:8px;border:1px dashed var(--bordo);background:transparent;border-radius:12px;padding:10px;font:inherit;font-size:18px;font-weight:700;color:var(--blu);cursor:pointer}
 .ft-sc-piu:hover{background:var(--card)}
 @media(max-width:640px){.fp-adesso{grid-template-columns:auto minmax(0,1fr);padding:14px 16px}.fp-ad-b{grid-column:1/-1}.fp-ad-b .btn-primary{width:100%}.fp-ad-t>b{font-size:24px}}
+/* le finestre del reparto (classe fisco-sh messa da fpSheet): stesse
+   scritte grandi e nere del reparto — «questo e' rimasto chiaro», 28/09 */
+.sheet.fisco-sh{--testo-2:#0b1220;--testo:#0b1220;color:#0b1220}
+.sheet.fisco-sh .sh-head h3{font-size:24px;font-weight:800}
+.sheet.fisco-sh .sh-body{font-size:19px;font-weight:600;line-height:1.55}
+.sheet.fisco-sh .sh-body b,.sheet.fisco-sh .sh-body strong{font-weight:800}
+.sheet.fisco-sh .sh-body p,.sheet.fisco-sh .sh-body li{font-size:19px}
+.sheet.fisco-sh .fp-tab{font-size:18.5px}
+.sheet.fisco-sh .fp-tab td{color:#0b1220!important;font-weight:600;padding:11px 8px}
+.sheet.fisco-sh .fp-tab td:first-child{width:34%}
+.sheet.fisco-sh .sh-nota,.sheet.fisco-sh .fp-stima,.sheet.fisco-sh .ft-grigio{font-size:18px;color:#0b1220!important;font-weight:600}
+.sheet.fisco-sh .field label{font-size:18px;font-weight:700;color:#0b1220}
+.sheet.fisco-sh input,.sheet.fisco-sh select,.sheet.fisco-sh textarea{font-size:19px;color:#0b1220}
+.sheet.fisco-sh .ft-let{font-size:19px}
+.sheet.fisco-sh .ft-let b{font-size:20px}
+.sheet.fisco-sh .fp-cons{font-size:19px;font-weight:600}
+.sheet.fisco-sh .fp-cons b{font-size:20px}
+.sheet.fisco-sh .ft-iva-q{font-size:20px;font-weight:800}
+.sheet.fisco-sh .ft-iva-o .fp-chip{font-size:18px;color:#0b1220}
+.sheet.fisco-sh .ft-iva-o .fp-chip.on{color:#fff}
+.sheet.fisco-sh .ft-iva-r b{font-size:21px} .sheet.fisco-sh .ft-iva-r p{font-size:19px}
+.sheet.fisco-sh .ft-iva-al{font-size:32px}
+.sheet.fisco-sh .ft-iva-frase{font-size:18px} .sheet.fisco-sh .ft-iva-frase small{font-size:16px;color:#0b1220}
+.sheet.fisco-sh .ft-grande2{font-size:24px}
+.sheet.fisco-sh .sh-foot .btn,.sheet.fisco-sh .sh-foot .btn-primary{font-size:18px}
+.sheet.fisco-sh .fp-ic{width:20px;height:20px;vertical-align:-4px}
 @media(max-width:760px){.fp-tot{grid-template-columns:1fr}.fp-nav{display:flex}.fp-nav .fp-chip{flex:1 1 auto;justify-content:center;padding:9px 10px}}
 @media(max-width:640px){.ft-sc-lista .ft-sc{grid-template-columns:54px 1fr}.ft-sc-e{grid-column:1/-1;justify-content:space-between}.ft-imp{text-align:left}.ft-salva{grid-template-columns:1fr}#fisco .ft-salva-ic{grid-row:auto;margin-bottom:10px}}
