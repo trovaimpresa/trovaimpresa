@@ -109,7 +109,7 @@
     h += `<h3 class="fp-h3">Quanto ti resta in tasca nel ${Y}</h3><div class="fv-conto">
       <div class="fv-riga"><span>Hai incassato</span><b>${eur(incassi)}</b></div>
       <div class="fv-riga meno"><span>Spese segnate nel gestionale</span><b>− ${eur(sp.tot)}</b></div>
-      <div class="fv-riga meno"><span>Tasse e contributi (stima)</span><b>${tasse != null ? "− " + eur(tasse) : "chiedi al commercialista"}</b></div>
+      <div class="fv-riga meno"><span>Tasse e contributi su questi incassi (stima)</span><b>${tasse != null ? "− " + eur(tasse) : "chiedi al commercialista"}</b></div>
       <div class="fv-riga tot"><span>Ti resta</span><b class="${resta != null && resta < 0 ? "fp-rosso" : "fp-verde"}">${resta != null ? eur(resta) : "—"}</b></div>
       ${resta != null ? `<div class="fv-sotto">Cioè circa <b>${eur(resta / mesi)}</b> al mese${incassi > 0 ? ` · su ogni 100 € incassati te ne restano <b>${Math.round(resta / incassi * 100)} €</b>` : ""}.</div>` : ""}
     </div>`;
@@ -170,7 +170,7 @@
       const k = (sc < oggi ? oggi : sc).slice(0, 7); if (riga[k]) riga[k].out += +f.importo;
     });
     if (p && d.st) {
-      const stAnno = ftStima(p, d.incassi * 365 / Math.max(60, (new Date() - new Date(Y0, 0, 1)) / 86400000));
+      const stAnno = ftStima(p, ftProiezione(d.incassi).val);
       ftScadenze(p, stAnno, { ivaQ3: null, ivaMese: null }).forEach(s => {
         if (s.d > fine || !(s.imp > 0)) return;
         const k = s.d.slice(0, 7); if (riga[k]) { riga[k].fisco += s.imp; riga[k].voci.push(s.cosa); }

@@ -47,10 +47,22 @@
           + "; contributi: " + ftEtich(FT_CASSE, p.cassa) + (p.anno_inizio ? "; partita IVA dal " + p.anno_inizio : "")
           + (d.profiloVero ? "" : " (profilo indovinato, non confermato)"));
         if (p.perc_commercialista) righe.push("Il commercialista gli ha detto di mettere da parte il " + p.perc_commercialista + "%.");
-        const st = ftStima(p, inc);
-        if (st.totale != null && st.calcolabile) righe.push("Stima tasse e contributi sull'incassato " + Y + " finora: " + eur(st.totale) + " (contributi " + eur(st.contrib.tot) + ", tasse " + eur(st.imposta) + ").");
-        if (st.calcolabile && p.regime === "forfettario" && !p.riduzione35 && (p.cassa === "artigiani" || p.cassa === "commercianti"))
-          righe.push("Con la riduzione INPS del 35% i contributi sarebbero circa " + eur(st.contrib.tot * 0.65) + " (risparmio circa " + eur(st.contrib.tot * 0.35) + ").");
+        const inps = p.cassa === "artigiani" || p.cassa === "commercianti";
+        if (p.regime === "forfettario") {
+          righe.push("È in regime forfettario: NON versa IVA (le sue fatture sono senza IVA), NON paga IRPEF né addizionali: paga l'imposta sostitutiva e i contributi.");
+          if (inps) righe.push("Riduzione INPS del 35%: " + (p.riduzione35 ? "ATTIVA (i numeri qui sotto sono già ridotti)." : "NON attiva (non l'ha chiesta: i numeri qui sotto sono pieni)."));
+        }
+        const pr = ftProiezione(inc);
+        const st = ftStima(p, pr.val);
+        if (st.totale != null && st.calcolabile) {
+          righe.push((pr.doy >= 60 ? "Incassato previsto a fine " + Y + " (se continua così): " + eur(pr.val) + ". " : "")
+            + "Stima tasse e contributi dell'anno intero: " + eur(st.totale) + " (contributi " + eur(st.contrib.tot) + ", di cui fissi " + eur(st.contrib.fissi || 0) + "; " + st.cosa + " " + eur(st.imposta) + ").");
+          if (pr.val > 0) righe.push("Il gestionale gli consiglia di mettere da parte " + Math.ceil(st.totale / pr.val * 100) + " € ogni 100 € incassati.");
+          const sc = ftScadenze(p, st, { ivaQ3: null, ivaMese: null });
+          if (sc.length) righe.push("Prossime scadenze calcolate dal gestionale (usa QUESTE date e cifre):\n" + sc.map(s => "- " + s.d.split("-").reverse().join("/") + ": " + s.cosa + (s.imp > 0 ? ", circa " + eur(s.imp) : "")).join("\n"));
+        }
+        if (st.calcolabile && p.regime === "forfettario" && !p.riduzione35 && inps)
+          righe.push("Con la riduzione INPS del 35% i contributi dell'anno sarebbero circa " + eur(st.contrib.tot * 0.65) + " (risparmio circa " + eur(st.contrib.tot * 0.35) + ").");
       } else {
         righe.push("Profilo fiscale: non compilato (non sappiamo il regime).");
       }

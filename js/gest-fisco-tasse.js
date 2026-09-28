@@ -55,6 +55,15 @@
   function ftEtich(el, v) { const r = el.find(x => x[0] === v); return r ? r[1] : ""; }
   function ftAnno() { return +todayStr().slice(0, 4); }
 
+  /* l'incassato portato a fine anno. UNA formula sola: la usano Le tue
+     tasse, Sopravvivere (i prossimi 3 mesi) e Chiedi all'AI. Prima erano
+     due formule diverse e le scadenze di novembre non combaciavano. */
+  function ftProiezione(incassi) {
+    const inizio = new Date(ftAnno(), 0, 1), oggiD = new Date(); oggiD.setHours(0, 0, 0, 0);
+    const doy = Math.round((oggiD - inizio) / 86400000) + 1;
+    return { doy, val: doy >= 60 ? incassi * 365 / doy : incassi };
+  }
+
   /* il profilo che si puo' indovinare quando non l'ha ancora scritto:
      dal regime scritto nei Dati azienda (RF19 = forfettario) e dal mestiere */
   function ftIndovina(az) {
@@ -256,9 +265,7 @@
       ivaMese: ivaTra(mp + "-01", mp + "-31")
     };
 
-    const inizio = new Date(Y, 0, 1), oggiD = new Date(); oggiD.setHours(0, 0, 0, 0);
-    const doy = Math.round((oggiD - inizio) / 86400000) + 1;
-    const proiezione = doy >= 60 ? incassi * 365 / doy : incassi;
+    const { doy, val: proiezione } = ftProiezione(incassi);
 
     let h = "";
     if (!ftProfilo) {
