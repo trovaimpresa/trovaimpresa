@@ -5177,3 +5177,17 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 #carte-list .c-righe,#forn-list .c-righe,#cred-list .c-righe{font-size:17px!important;color:#0b1220!important}
 #carte-list .c-rt,#forn-list .c-rt,#cred-list .c-rt{font-size:17.5px!important;font-weight:600!important;color:#0b1220!important}
 #carte-list .c-rv,#forn-list .c-rv,#cred-list .c-rv{font-size:17.5px!important}
+/* ═══ 28/09/2026 — CALENDARIO: SCRITTE GRANDI E NERE ═══════════════════════
+   Stessa cura di Riepilogo e schede. I nomi dei lavori nelle caselle vanno a
+   capo fino a 3 righe invece di 2; sul telefono le caselle sono strette e
+   restano piu' piccoli. + la correzione del titolo delle schede: la regola
+   del 26 set con «.griglia-schede >» vinceva su quella qui sopra. */
+.wrap section .griglia-schede > .job .job-cli{font-size:21px!important}
+#calendario .cal-head h2{font-size:30px}
+#calendario .cal-dow{font-size:16px!important;font-weight:800;color:#0b1220!important}
+#calendario .cal-cell .dn{font-size:19px!important;font-weight:800}
+#calendario .cal-lav-t{font-size:15.5px!important;font-weight:600;color:#0b1220!important;-webkit-line-clamp:3!important;line-height:1.3}
+#calendario .cal-piu{font-size:15px!important;color:#0b1220!important}
+#calendario .cal-legend{font-size:17px!important;font-weight:600;color:#0b1220!important}
+#calendario .cal-legend span{color:#0b1220!important}
+@media(max-width:640px){#calendario .cal-lav-t{font-size:13.5px!important;-webkit-line-clamp:2!important}#calendario .cal-cell .dn{font-size:16px!important}#calendario .cal-dow{font-size:14px!important}}
