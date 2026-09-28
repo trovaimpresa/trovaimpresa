@@ -15,10 +15,8 @@
    Ogni passo mandato si segna in `gest_solleciti`, cosi' il consiglio sa a
    che punto sei e quanti giorni sono passati.
 
-   ⛔ PER ORA E' NASCOSTO.
-   La voce #tab-fisco nasce con display:none e la accende SOLO fiscoAccendi():
-   nel giro di prova (?giro=1) e per le email in FISCO_ANTEPRIMA. Per tutti gli
-   altri non esiste. Quando Alessio dice «ok», si toglie il controllo e basta.
+   ✅ 28/09/2026: ACCESO PER TUTTI (ok di Alessio). La voce #tab-fisco non
+   nasce piu' spenta; fiscoAccendi() resta solo come rete di sicurezza.
 
    ⛔ I NUMERI DI LEGGE STANNO TUTTI QUI SOTTO, IN FP_MORA / FP_LEGALE /
       FP_CONTRIBUTO. Verificati il 27/09/2026 (vedi CLAUDE.md). Cambiano ogni
@@ -42,7 +40,6 @@
    4. lo <script> di questo file
    ═════════════════════════════════════════════════════════════════════════ */
 
-  const FISCO_ANTEPRIMA = ["pintoalessio@icloud.com"];
 
   /* Interessi di mora, D.Lgs. 231/2002: tasso BCE + 8 punti, fisso per
      semestre. Solo fra aziende (B2B). Riga = dal giorno, tasso annuo %. */
@@ -87,20 +84,7 @@
   // ---------------------------------------------------------------------
   function fiscoAccendi() {
     const b = document.querySelector("#tab-fisco");
-    if (!b) return;
-    if (window.TI_GIRO) { b.style.display = ""; return; }
-    let giri = 0;
-    const prova = function () {
-      if (typeof sb === "undefined" || !sb || !sb.auth) {
-        if (++giri < 40) setTimeout(prova, 250);
-        return;
-      }
-      sb.auth.getSession().then(function (r) {
-        const em = String((r && r.data && r.data.session && r.data.session.user && r.data.session.user.email) || "").toLowerCase();
-        if (FISCO_ANTEPRIMA.indexOf(em) >= 0) b.style.display = "";
-      }).catch(function () {});
-    };
-    prova();
+    if (b) b.style.display = "";
   }
   document.addEventListener("DOMContentLoaded", fiscoAccendi);
 
