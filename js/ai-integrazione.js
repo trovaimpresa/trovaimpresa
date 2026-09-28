@@ -29,8 +29,14 @@
   async function getAnon(){
     if(ANON) return ANON;
     try{
+      /* 28/09/2026 — L'ERRORE 401 DI OGNI APERTURA.
+         La chiave pubblica del sito non e' piu' un «eyJ...» ma una
+         «sb_publishable_...»: questa ricerca non la trovava piu', mandava
+         apikey=null, get_ai_status rispondeva 401 e AI.stato restava vuoto.
+         Cosi' «Genera un preventivo» diceva a TUTTI «l'AI non e' nel tuo
+         piano». Si cercano tutte e due le forme, la nuova per prima. */
       const html=await (await fetch(location.href,{cache:'no-store'})).text();
-      const m=html.match(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}/);
+      const m=html.match(/sb_publishable_[A-Za-z0-9_-]{10,}/)||html.match(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}/);
       if(m){ANON=m[0];return ANON;}
     }catch(e){}
     return null;
