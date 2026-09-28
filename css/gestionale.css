@@ -5249,3 +5249,14 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .sheet .ai-riga-mk,.sheet .ai-riga-c{font-size:15px!important}
 .sheet .ai-riga-c{color:#1f2937!important}
 .sheet span > b{font-size:16.5px}
+/* ═══ 28/09/2026 — IL MENU CORTO (js/gest-menu-corto.js) ═══════════════════ */
+.side nav.tabs .menu-altro{display:flex;align-items:center;gap:12px;width:100%;border:1px dashed var(--bordo-forte);background:transparent;border-radius:12px;padding:10px 12px;margin:8px 0;font:inherit;font-size:17px;font-weight:700;color:#0b1220;cursor:pointer;text-align:left}
+.side nav.tabs .menu-altro:hover{background:var(--card)}
+.side nav.tabs .menu-altro[hidden]{display:none}
+.side nav.tabs .menu-altro .ma-ic{width:30px;height:30px;padding:6px;border-radius:9px;background:#f0f2f5;color:#0b1220;flex:0 0 auto}
+.side nav.tabs .menu-altro .ma-t{flex:1}
+.side nav.tabs .menu-altro .ma-n{background:#fdeceb;color:#d9534f;border-radius:999px;padding:1px 9px;font-size:15px;font-weight:800}
+.side nav.tabs .menu-altro .ma-n[hidden]{display:none}
+.side nav.tabs .menu-altro .ma-f{width:20px;height:20px;transition:transform .15s}
+.side nav.tabs .menu-altro.aperto .ma-f{transform:rotate(180deg)}
+.side nav.tabs .menu-altro-box[hidden]{display:none}
