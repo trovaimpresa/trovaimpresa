@@ -103,8 +103,8 @@
         <div class="fi-barra">
           <textarea id="fi-in" rows="2" placeholder="Scrivi la tua domanda su tasse, contributi, fatture…"></textarea>
           <div class="fi-tasti">
-            <button class="btn fi-svuota" data-action="fi-svuota" id="fi-svuota" title="Cancella la conversazione" hidden>🗑 Cancella</button>
-            <button class="btn" data-action="fi-lettera" title="Fotografa una lettera del Fisco, dell'INPS o della Riscossione">📷 Lettera</button>
+            <button class="btn fi-svuota" data-action="fi-svuota" id="fi-svuota" title="Cancella la conversazione" hidden>${fpIc("cestino")} Cancella</button>
+            <button class="btn" data-action="fi-lettera" title="Fotografa una lettera del Fisco, dell'INPS o della Riscossione">${fpIc("foto")} Lettera</button>
             <button class="btn aic-mic" id="fi-mic" hidden></button>
             <button class="btn-primary" data-action="fi-manda">Chiedi</button>
           </div>
@@ -215,9 +215,9 @@
       ${d.importo != null && isFinite(+d.importo) ? `<div class="fi-l-riga"><span>Importo</span><b>${eur(+d.importo)}</b></div>` : ""}
       ${sc}
       ${fare.length ? `<div class="fi-l-tit">Cosa fare</div><ol>${fare.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
-      ${d.rate ? `<div class="fp-cons verde"><div>💳</div><div><b>Si può pagare a rate</b>${esc(d.rate)}</div></div>` : ""}
-      ${d.attenzione ? `<div class="fp-cons rosso"><div>⚠️</div><div><b>Attenzione</b>${esc(d.attenzione)}</div></div>` : ""}
-      <div class="fp-btns">${d.scadenza && /^\d{4}-\d{2}-\d{2}$/.test(d.scadenza) && d.scadenza >= todayStr() ? `<button class="btn" data-action="ft-ricorda" data-d="${esc(d.scadenza)}" data-t="${esc((d.cosa || "Lettera") + (d.chi ? " — " + d.chi : ""))}" data-i="${d.importo != null && isFinite(+d.importo) ? +d.importo : ""}">🔔 Ricordamelo</button>` : ""}</div>
+      ${d.rate ? `<div class="fp-cons verde"><div>${fpIc("carta")}</div><div><b>Si può pagare a rate</b>${esc(d.rate)}</div></div>` : ""}
+      ${d.attenzione ? `<div class="fp-cons rosso"><div>${fpIc("avviso")}</div><div><b>Attenzione</b>${esc(d.attenzione)}</div></div>` : ""}
+      <div class="fp-btns">${d.scadenza && /^\d{4}-\d{2}-\d{2}$/.test(d.scadenza) && d.scadenza >= todayStr() ? `<button class="btn" data-action="ft-ricorda" data-d="${esc(d.scadenza)}" data-t="${esc((d.cosa || "Lettera") + (d.chi ? " — " + d.chi : ""))}" data-i="${d.importo != null && isFinite(+d.importo) ? +d.importo : ""}">${fpIc("campana")} Ricordamelo</button>` : ""}</div>
       <p class="fp-stima">Letta dall'AI: controlla importo e date sulla lettera. Se ti sembra sbagliata, portala subito al commercialista.</p></div>`;
   }
 

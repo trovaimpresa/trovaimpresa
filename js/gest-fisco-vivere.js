@@ -75,7 +75,7 @@
   // ---------------------------------------------------------------------
   async function fiscoVivere(box, mio) {
     const vecchio = () => mio != null && typeof fpGiro !== "undefined" && mio !== fpGiro;
-    if (!sb || !sbUid) { box.innerHTML = tabVuoto("Sopravvivere", "Accedi per vedere i tuoi conti."); return; }
+    if (!sb || !sbUid) { box.innerHTML = tabVuoto("Quanto ti resta", "Accedi per vedere i tuoi conti."); return; }
     box.innerHTML = '<div class="fp-carica">Sto facendo i conti…</div>';
     const d = await fvCarica();
     if (vecchio()) return;
@@ -101,7 +101,7 @@
     const mesi = Math.max(1, (Math.round((oggiD - inizio) / 86400000) + 1) / 30.42);
 
     let h = "";
-    if (d.errore) h += `<div class="fp-cons giallo"><div>⚠️</div><div><b>Alcuni dati non si sono letti</b>I numeri qui sotto potrebbero essere incompleti. Ricarica la pagina.</div></div>`;
+    if (d.errore) h += `<div class="fp-cons giallo"><div>${fpIc("avviso")}</div><div><b>Alcuni dati non si sono letti</b>I numeri qui sotto potrebbero essere incompleti. Ricarica la pagina.</div></div>`;
 
     /* 1. QUANTO TI RESTA */
     const tasse = st && st.totale != null ? st.totale : null;
@@ -114,13 +114,13 @@
       ${resta != null ? `<div class="fv-sotto">Cioè circa <b>${eur(resta / mesi)}</b> al mese${incassi > 0 ? ` · su ogni 100 € incassati te ne restano <b>${Math.round(resta / incassi * 100)} €</b>` : ""}.</div>` : ""}
     </div>`;
     if (!p) {
-      h += `<div class="fp-cons giallo"><div>✏️</div><div><b>Manca il tuo profilo fiscale</b>Senza non posso stimare le tasse. <button class="fp-link" data-action="ft-profilo">Compilalo adesso</button> (6 domande).</div></div>`;
+      h += `<div class="fp-cons giallo"><div>${fpIc("matita")}</div><div><b>Manca il tuo profilo fiscale</b>Senza non posso stimare le tasse. <button class="fp-link" data-action="ft-profilo">Compilalo adesso</button> (6 domande).</div></div>`;
     }
     if (sp.tot === 0 && incassi > 0) {
-      h += `<div class="fp-cons giallo"><div>🧾</div><div><b>Non hai segnato nessuna spesa quest'anno</b>Materiali, gasolio, fatture dei fornitori: se non li segni nel gestionale, qui sembra che ti resti più di quello che hai davvero.</div></div>`;
+      h += `<div class="fp-cons giallo"><div>${fpIc("doc")}</div><div><b>Non hai segnato nessuna spesa quest'anno</b>Materiali, gasolio, fatture dei fornitori: se non li segni nel gestionale, qui sembra che ti resti più di quello che hai davvero.</div></div>`;
     }
     if (resta != null && resta < 0) {
-      h += `<div class="fp-cons rosso"><div>🆘</div><div><b>Quest'anno stai lavorando in perdita</b>Spese e tasse superano quello che incassi. Guarda qui sotto «Il prezzo giusto»: probabilmente chiedi troppo poco.</div></div>`;
+      h += `<div class="fp-cons rosso"><div>${fpIc("salvagente")}</div><div><b>Quest'anno stai lavorando in perdita</b>Spese e tasse superano quello che incassi. Guarda qui sotto «Il prezzo giusto»: probabilmente chiedi troppo poco.</div></div>`;
     }
 
     /* 2. I PROSSIMI 3 MESI */
@@ -141,8 +141,8 @@
 
     /* 4. LA CARTELLA */
     h += `<h3 class="fp-h3">Per il commercialista</h3>
-      <div class="ft-strum"><button class="ft-str" data-action="fv-pdf"><span>📁</span><b>La cartella dell'anno</b><small>Un PDF con incassi, spese, fatture aperte e stima</small></button></div>
-      <p class="fp-stima">⚖️ Sono stime fatte con i dati che hai segnato nel gestionale. Il conto vero lo fa il tuo commercialista.</p>`;
+      <div class="ft-strum"><button class="ft-str" data-action="fv-pdf"><span class="t-blu">${fpIc("cartella")}</span><b>La cartella dell'anno</b><small>Un PDF con incassi, spese, fatture aperte e stima</small></button></div>
+      <p class="fp-stima">${fpIc("bilancia")} Sono stime fatte con i dati che hai segnato nel gestionale. Il conto vero lo fa il tuo commercialista.</p>`;
 
     box.innerHTML = h;
     fvPrezzo();
@@ -189,10 +189,10 @@
     });
     h += `</div>`;
     if (ritardo > 0) {
-      h += `<div class="fp-cons giallo"><div>💶</div><div><b>In più ti devono ${eur(ritardo)} di fatture già scadute</b>Non li ho messi nei mesi perché non si sa quando arrivano. <button class="fp-link" data-action="fp-sez" data-v="pagare">Vai a «Farsi pagare»</button></div></div>`;
+      h += `<div class="fp-cons giallo"><div>${fpIc("euro")}</div><div><b>In più ti devono ${eur(ritardo)} di fatture già scadute</b>Non li ho messi nei mesi perché non si sa quando arrivano. <button class="fp-link" data-action="fp-sez" data-v="pagare">Vai a «Farsi pagare»</button></div></div>`;
     }
     if (peggio) {
-      h += `<div class="fp-cons rosso"><div>⚠️</div><div><b>A ${FV_MESI[+peggio.k.slice(5, 7) - 1]} escono più soldi di quanti ne entrano: ${eur(-peggio.diff)}</b>Muoviti adesso, non quel mese: sollecita chi ti deve dei soldi, chiedi un acconto sui lavori nuovi, oppure chiedi al fornitore di spostare una scadenza. Per le tasse si può chiedere di pagare a rate.</div></div>`;
+      h += `<div class="fp-cons rosso"><div>${fpIc("avviso")}</div><div><b>A ${FV_MESI[+peggio.k.slice(5, 7) - 1]} escono più soldi di quanti ne entrano: ${eur(-peggio.diff)}</b>Muoviti adesso, non quel mese: sollecita chi ti deve dei soldi, chiedi un acconto sui lavori nuovi, oppure chiedi al fornitore di spostare una scadenza. Per le tasse si può chiedere di pagare a rate.</div></div>`;
     } else {
       h += `<p class="fp-stima">Contano le fatture che hai segnato: quelle ai clienti alla loro scadenza, quelle dei fornitori non ancora pagate e le tasse stimate.</p>`;
     }
@@ -225,9 +225,9 @@
     const netto = n("#fv-netto"), fisse = n("#fv-fisse"), mesi = n("#fv-mesi"), giorni = n("#fv-giorni"), ore = n("#fv-ore"), nf = n("#fv-nf");
     const p = fvDati.p;
     if (!(netto > 0)) { out.innerHTML = ""; return; }
-    if (!p) { out.innerHTML = `<div class="fp-cons giallo"><div>✏️</div><div><b>Prima il profilo fiscale</b>Mi serve per sapere quante tasse paghi. <button class="fp-link" data-action="ft-profilo">Compilalo</button></div></div>`; return; }
+    if (!p) { out.innerHTML = `<div class="fp-cons giallo"><div>${fpIc("matita")}</div><div><b>Prima il profilo fiscale</b>Mi serve per sapere quante tasse paghi. <button class="fp-link" data-action="ft-profilo">Compilalo</button></div></div>`; return; }
     const societa = p.forma === "societa_persone" || p.forma === "srl";
-    if (societa && !p.perc_commercialista) { out.innerHTML = `<div class="fp-cons giallo"><div>🏢</div><div><b>Mi serve la % del commercialista</b>Per una società scrivila nel profilo fiscale. <button class="fp-link" data-action="ft-profilo">Apri il profilo</button></div></div>`; return; }
+    if (societa && !p.perc_commercialista) { out.innerHTML = `<div class="fp-cons giallo"><div>${fpIc("palazzo")}</div><div><b>Mi serve la % del commercialista</b>Per una società scrivila nel profilo fiscale. <button class="fp-link" data-action="ft-profilo">Apri il profilo</button></div></div>`; return; }
     if (!(mesi > 0 && giorni > 0 && ore > 0) || nf >= 90) { out.innerHTML = ""; return; }
     const G = fvLordoServe(p, netto * 12, fisse * 12);
     const giornate = mesi * giorni, oreVere = giornate * ore * (1 - nf / 100);
@@ -237,8 +237,8 @@
     let cfr = "";
     if (tariffa > 0) {
       cfr = tariffa + 0.001 >= allOra
-        ? `<div class="fp-cons verde"><div>👍</div><div><b>La tua tariffa di ${eur(tariffa)} l'ora ci sta</b>Con questi numeri il minimo è ${eur(allOra)}.</div></div>`
-        : `<div class="fp-cons rosso"><div>⚠️</div><div><b>La tua tariffa di ${eur(tariffa)} l'ora è troppo bassa</b>Per portare a casa ${eur(netto)} al mese ti servono almeno ${eur(allOra)}: ti mancano ${eur(allOra - tariffa)} per ogni ora.</div></div>`;
+        ? `<div class="fp-cons verde"><div>${fpIc("ok")}</div><div><b>La tua tariffa di ${eur(tariffa)} l'ora ci sta</b>Con questi numeri il minimo è ${eur(allOra)}.</div></div>`
+        : `<div class="fp-cons rosso"><div>${fpIc("avviso")}</div><div><b>La tua tariffa di ${eur(tariffa)} l'ora è troppo bassa</b>Per portare a casa ${eur(netto)} al mese ti servono almeno ${eur(allOra)}: ti mancano ${eur(allOra - tariffa)} per ogni ora.</div></div>`;
     }
     out.innerHTML = `<div class="fv-pg-ris">
         <div><small>Devi incassare in un anno</small><b>${eur(G)}</b></div>
@@ -248,7 +248,7 @@
       <p class="ft-grigio">Materiali esclusi: quelli li fai pagare a parte. Su ${giornate.toLocaleString("it-IT")} giornate l'anno, di cui ${Math.round(nf)}% di ore che nessuno ti paga.</p>
       ${cfr}
       <div class="fp-btns"><button class="btn-primary" data-action="fv-tariffa" data-v="${oraTonda}">Usa ${eur(oraTonda)} come mia tariffa oraria</button>
-      ${fvDati.profiloVero ? `<button class="btn" data-action="fv-pg-salva">💾 Ricorda questi numeri</button>` : ""}</div>`;
+      ${fvDati.profiloVero ? `<button class="btn" data-action="fv-pg-salva">${fpIc("salva")} Ricorda questi numeri</button>` : ""}</div>`;
   }
   document.addEventListener("input", function (e) {
     if (e.target && ["fv-netto", "fv-fisse", "fv-mesi", "fv-giorni", "fv-ore", "fv-nf"].indexOf(e.target.id) >= 0) fvPrezzo();

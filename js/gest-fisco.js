@@ -70,6 +70,53 @@
     { n: 4, lab: "Giudice",            attesa: 0 }
   ];
 
+
+  /* 28/09/2026 — LE ICONE DEL REPARTO.
+     Niente faccine: icone a linea come nel resto del sito (viewBox 24,
+     tratto 1.8, angoli tondi). fpIc("nome") le usa tutti e quattro i file
+     del reparto (stesso spazio della pagina). */
+  const FP_IC = {
+    euro:     '<path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h9M4 14h9"/>',
+    doc:      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+    scudo:    '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    scintilla:'<path d="M10 3.5 11.8 8.2 16.5 10l-4.7 1.8L10 16.5l-1.8-4.7L3.5 10l4.7-1.8z"/><path d="M18 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/>',
+    ok:       '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+    spunta:   '<path d="M20 6 9 17l-5-5"/>',
+    avviso:   '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+    info:     '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    bilancia: '<path d="M12 3v18M7 21h10M5 7h14"/><path d="m5 7-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/>',
+    busta:    '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+    invia:    '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
+    messaggio:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    storia:   '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+    indietro: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+    matita:   '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    pin:      '<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+    copia:    '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+    scarica:  '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+    idea:     '<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>',
+    orologio: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    salvadanaio:'<path d="M19 9.5c.8.4 2 1.2 2 2.5v2h-2c-.5 1.2-1.3 2.2-2.4 2.9V20h-3v-2h-3v2H7.6v-3.2A6.5 6.5 0 0 1 5 11.5C5 7.9 8.1 5 12 5c2 0 3.8.7 5 1.9L19 6z"/><path d="M15 10h.01M9.5 7.5a4 4 0 0 1 4 0"/>',
+    palazzo:  '<path d="M3 21h18M5 21V10M19 21V10M9 21v-7M15 21v-7M2 10l10-7 10 7z"/>',
+    data:     '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    campana:  '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+    calcolo:  '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h4"/>',
+    banca:    '<path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M2 11l10-7 10 7z"/>',
+    cartella: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+    salvagente:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/>',
+    foto:     '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+    cestino:  '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
+    carta:    '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+    persone:  '<circle cx="9" cy="8" r="4"/><path d="M1 21a8 8 0 0 1 16 0"/><path d="M17 4a4 4 0 0 1 0 8M23 21a8 8 0 0 0-4-6.9"/>',
+    grafico:  '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
+    salva:    '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+    ripeti:   '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+    freccia:  '<path d="m9 18 6-6-6-6"/>'
+  };
+  function fpIc(n, cls) {
+    return '<svg class="fp-ic' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (FP_IC[n] || FP_IC.info) + "</svg>";
+  }
+
   let fpCache = [];       /* le fatture non pagate, gia' arricchite */
   let fpAzienda = null;
   let fpSolleciti = [];
@@ -218,6 +265,7 @@
     const box = $("#fisco-corpo"); if (!box) return;
     const mio = ++fpGiro;
     fpDisegnaNav();
+    fpAdesso(mio);
     if (fpSezione === "tasse" && typeof fiscoTasse === "function") { fiscoTasse(box, mio); return; }
     if (fpSezione === "vivere" && typeof fiscoVivere === "function") { fiscoVivere(box, mio); return; }
     if (fpSezione === "ai" && typeof fiscoAI === "function") { fiscoAI(box, mio); return; }
@@ -242,9 +290,9 @@
     if (typeof setCnt === "function") setCnt("#cnt-fisco", scadute.length, "err");
 
     let h = `<div class="fp-tot">
-      <div><small>Ti devono (scadute)</small><b>${eur(devono)}</b></div>
-      <div><small>Clienti in ritardo</small><b>${new Set(scadute.map(f => f.cliente_id || f.cli_nome)).size}</b></div>
-      <div><small>Interessi e spese che ti spettano</small><b class="fp-verde">+ ${eur(extra)}</b></div>
+      <div class="k-rosso">${fpIc("euro")}<div><small>Ti devono (scadute)</small><b>${eur(devono)}</b></div></div>
+      <div class="k-giallo">${fpIc("persone")}<div><small>Clienti in ritardo</small><b>${new Set(scadute.map(f => f.cliente_id || f.cli_nome)).size}</b></div></div>
+      <div class="k-verde">${fpIc("grafico")}<div><small>Interessi e spese che ti spettano</small><b class="fp-verde">+ ${eur(extra)}</b></div></div>
     </div>`;
 
     if (!fpCache.length) {
@@ -255,51 +303,122 @@
     if (scadute.length) {
       h += `<h3 class="fp-h3">Scadute, da farsi pagare</h3>` + scadute.map(fpScheda).join("");
     } else if (fpCache.length) {
-      h += `<div class="fp-cons verde"><div>👍</div><div><b>Nessuna fattura scaduta</b>Quelle qui sotto non sono ancora scadute.</div></div>`;
+      h += `<div class="fp-cons verde"><div>${fpIc("ok")}</div><div><b>Nessuna fattura scaduta</b>Quelle qui sotto non sono ancora scadute.</div></div>`;
     }
     if (arrivo.length) {
       h += `<h3 class="fp-h3">Non ancora scadute</h3>` + arrivo.map(fpRigaArrivo).join("");
     }
-    h += `<p class="fp-stima">⚖️ Interessi e costi sono una <b>stima</b> calcolata sulle regole in vigore. Prima di andare dal giudice senti un avvocato; per le tasse, il tuo commercialista.</p>`;
+    h += `<p class="fp-stima">${fpIc("bilancia")} Interessi e costi sono una <b>stima</b> calcolata sulle regole in vigore. Prima di andare dal giudice senti un avvocato; per le tasse, il tuo commercialista.</p>`;
     box.innerHTML = h;
   }
 
   function fpDisegnaNav() {
     const n = $("#fisco-nav"); if (!n) return;
-    const V = [["pagare", "💶 Farsi pagare"], ["tasse", "🧾 Le tue tasse"], ["vivere", "🛟 Sopravvivere"], ["ai", "🤖 Chiedi all'AI"]];
-    n.innerHTML = V.map(v => `<button class="fp-chip${fpSezione === v[0] ? " on" : ""}" data-action="fp-sez" data-v="${v[0]}">${v[1]}</button>`).join("");
+    const V = [["pagare", "euro", "Farsi pagare"], ["tasse", "doc", "Le tue tasse"], ["vivere", "salvagente", "Quanto ti resta"], ["ai", "scintilla", "Chiedi all'AI"]];
+    n.innerHTML = V.map(v => `<button class="fp-chip${fpSezione === v[0] ? " on" : ""}" data-action="fp-sez" data-v="${v[0]}">${fpIc(v[1])}<span>${v[2]}</span></button>`).join("");
   }
   function fpPresto(k) {
     const T = {
       tasse: ["Le tue tasse", "Il tuo profilo (forfettario, ordinario, SNC, SRL, professionista), le scadenze con gli importi, il salvadanaio per non farti trovare scoperto e le lettere dell'Agenzia spiegate semplici."],
-      vivere: ["Sopravvivere", "Quanto ti resta davvero in tasca, il prezzo giusto per non lavorare in perdita e la cartella pronta per il commercialista."],
+      vivere: ["Quanto ti resta", "Quanto ti resta davvero in tasca, il prezzo giusto per non lavorare in perdita e la cartella pronta per il commercialista."],
       ai: ["Chiedi all'AI", "Le domande che ti vergogni di fare al commercialista: risposte semplici, con i tuoi numeri."]
     }[k] || ["", ""];
     return tabVuoto(T[0], T[1] + "<br><b>Arriva nella prossima tappa.</b>");
+  }
+
+  /* il pulsante del passo dopo: lo usano la scheda e il riquadro «Da fare adesso» */
+  function fpBtnNext(f) {
+    const c = f.cons;
+    return c.prossimo === 4
+      ? `<button class="btn-primary" data-action="fp-apri" data-id="${f.id}" data-v="4">${fpIc("bilancia")} Cosa fare col giudice</button>`
+      : c.prossimo === 3
+        ? `<button class="btn-primary" data-action="fp-apri" data-id="${f.id}" data-v="3">${fpIc("busta")} Prepara la lettera PEC</button>`
+        : `<button class="btn-primary" data-action="fp-apri" data-id="${f.id}" data-v="${c.prossimo}">${fpIc("messaggio")} Scrivi il ${c.prossimo === 1 ? "promemoria" : "sollecito"}</button>`;
+  }
+
+  // ---------------------------------------------------------------------
+  // 28/09/2026 — «DA FARE ADESSO»: UNA COSA SOLA, IN CIMA AL REPARTO
+  // Chi apre Tasse e fisco deve capire subito da dove partire. Regola:
+  //  1. una tassa che scade entro 7 giorni (le scadenze dello Stato non
+  //     aspettano)
+  //  2. se no, la fattura scaduta piu' vecchia su cui c'e' un passo da fare
+  //     (non quelle dove si sta aspettando dopo un sollecito)
+  //  3. se no, una tassa entro 30 giorni
+  //  4. se no, «niente di urgente» e la prossima scadenza
+  // Non compare in «Chiedi all'AI», che usa tutta la pagina per la chat.
+  // ---------------------------------------------------------------------
+  const FP_MESI_LUNGHI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  function fpGiorno(d) { const g = +d.slice(8, 10); return (g === 1 || g === 8 || g === 11 ? "l'" : "il ") + g + " " + FP_MESI_LUNGHI[+d.slice(5, 7) - 1]; }
+  function fpFra(g) { return g <= 0 ? "oggi" : g === 1 ? "domani" : "fra " + g + " giorni"; }
+  async function fpAdesso(mio) {
+    let box = $("#fisco-adesso");
+    const nav = $("#fisco-nav");
+    if (!box) {
+      if (!nav || !nav.parentNode) return;
+      box = document.createElement("div"); box.id = "fisco-adesso";
+      nav.parentNode.insertBefore(box, nav);
+    }
+    if (fpSezione === "ai" || !sb || !sbUid) { box.innerHTML = ""; return; }
+    let L = { lista: [] }, T = null;
+    try {
+      [L, T] = await Promise.all([fpCaricaAperte(), typeof ftCarica === "function" ? ftCarica() : Promise.resolve(null)]);
+    } catch (_) { box.innerHTML = ""; return; }
+    if (mio !== fpGiro) return;
+
+    let sc = null;
+    if (T && T.profilo) {
+      const st = ftStima(T.profilo, ftProiezione(T.dati.incassi).val);
+      sc = ftScadenze(T.profilo, st, T.dati, true)[0] || null;
+    }
+    const gSc = sc ? _giorniA(sc.d) : null;
+    const fatt = (L.lista || []).filter(f => f.ritardo > 0 && f.cons && f.cons.tono !== "neutro").sort((a, b) => b.ritardo - a.ritardo)[0];
+
+    const tassa = tono => `<div class="fp-adesso ${tono}">
+        <div class="fp-ad-ic">${fpIc("data")}</div>
+        <div class="fp-ad-t"><small>Da fare adesso</small>
+          <b>${fpGiorno(sc.d).replace(/^./, c => c.toUpperCase())}${sc.imp > 0 ? " paghi circa " + eur(sc.imp) : ""}</b>
+          <span>${esc(sc.cosa)} · <b class="fp-ad-fra">${fpFra(gSc)}</b></span></div>
+        <div class="fp-ad-b"><button class="btn-primary" data-action="ft-ricorda" data-d="${sc.d}" data-t="${esc(sc.cosa)}" data-i="${sc.imp != null ? Math.round(sc.imp * 100) / 100 : ""}">${fpIc("campana")} Ricordamelo</button></div>
+      </div>`;
+    let h;
+    if (sc && gSc <= 7) h = tassa("rosso");
+    else if (fatt) {
+      const nome = esc((fatt.cli && fatt.cli.nome) || fatt.cli_nome || "Un cliente");
+      h = `<div class="fp-adesso ${fatt.cons.tono === "rosso" ? "rosso" : "giallo"}">
+        <div class="fp-ad-ic">${fpIc("euro")}</div>
+        <div class="fp-ad-t"><small>Da fare adesso</small>
+          <b>${nome} ti deve ${eur(fatt.importo)} da ${fatt.ritardo} ${fatt.ritardo === 1 ? "giorno" : "giorni"}</b>
+          <span>Fattura ${esc(fpNumFatt(fatt))}${fatt.passo ? " · hai già fatto il passo " + fatt.passo : " · non gli hai ancora scritto"}</span></div>
+        <div class="fp-ad-b">${fpBtnNext(fatt)}</div>
+      </div>`;
+    }
+    else if (sc && gSc <= 30) h = tassa("giallo");
+    else h = `<div class="fp-adesso verde">
+        <div class="fp-ad-ic">${fpIc("ok")}</div>
+        <div class="fp-ad-t"><small>Da fare adesso</small><b>Niente di urgente</b>
+          <span>${sc ? "Prossima scadenza: " + esc(sc.cosa) + ", " + fpGiorno(sc.d) + (sc.imp > 0 ? " (circa " + eur(sc.imp) + ")" : "") : "Nessuna fattura scaduta e nessuna tassa in arrivo."}</span></div>
+      </div>`;
+    box.innerHTML = h;
   }
 
   function fpScheda(f) {
     const c = f.cons;
     const pill = [1, 2, 3, 4].map(n => {
       const cls = n <= f.passo ? "ok" : (n === c.prossimo ? "ora" : "");
-      return `<button class="fp-passo ${cls}" data-action="fp-apri" data-id="${f.id}" data-v="${n}">${n <= f.passo ? "✓ " : ""}${n} · ${FP_PASSI[n].lab}</button>`;
+      return `<button class="fp-passo ${cls}" data-action="fp-apri" data-id="${f.id}" data-v="${n}">${n <= f.passo ? fpIc("spunta") : ""}${n} · ${FP_PASSI[n].lab}</button>`;
     }).join("");
     const storia = f.sol.map(s => `${fdate(String(s.inviato_il).slice(0, 10))}: passo ${s.passo} (${esc(s.canale)})`).join(" · ");
     const extra = f.interessi + (f.b2b ? FP_SPESE_FISSE : 0);
-    const btnNext = c.prossimo === 4
-      ? `<button class="btn-primary" data-action="fp-apri" data-id="${f.id}" data-v="4">⚖️ Cosa fare col giudice</button>`
-      : c.prossimo === 3
-        ? `<button class="btn-primary" data-action="fp-apri" data-id="${f.id}" data-v="3">📨 Prepara la lettera PEC</button>`
-        : `<button class="btn-primary" data-action="fp-apri" data-id="${f.id}" data-v="${c.prossimo}">💬 Scrivi il ${c.prossimo === 1 ? "promemoria" : "sollecito"}</button>`;
+    const btnNext = fpBtnNext(f);
     return `<div class="fp-card">
       <div class="fp-cli"><div><div class="fp-n">${esc(f.cli.nome || f.cli_nome || "Cliente")}</div>
         <div class="fp-sotto">Fattura ${esc(fpNumFatt(f))} del ${fdate(f.data)} · <b class="fp-rosso">scaduta da ${f.ritardo} ${f.ritardo === 1 ? "giorno" : "giorni"}</b></div></div>
         <div class="fp-e">${eur(f.importo)}${extra > 0 ? `<small>+ ${eur(extra)} ${f.b2b ? "interessi e spese" : "interessi"}</small>` : ""}</div></div>
       <div class="fp-passi">${pill}</div>
-      <div class="fp-cons ${c.tono}"><div>🤖</div><div><b>Il mio consiglio</b>${esc(c.testo)}</div></div>
-      ${storia ? `<div class="fp-storia">🗂️ ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">↩ togli l'ultimo</button>` : ""}</div>` : ""}
+      <div class="fp-cons ${c.tono}"><div>${fpIc("idea")}</div><div><b>Il mio consiglio</b>${esc(c.testo)}</div></div>
+      ${storia ? `<div class="fp-storia">${fpIc("storia")} ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">togli l'ultimo</button>` : ""}</div>` : ""}
       <div class="fp-btns">${btnNext}
-        <button class="btn" data-action="fp-pagato" data-id="${f.id}">✓ Ha pagato</button></div>
+        <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button></div>
     </div>`;
   }
 
@@ -308,8 +427,8 @@
     return `<div class="fp-riga">
       <div><b>${esc(f.cli.nome || f.cli_nome || "Cliente")}</b><span>Fattura ${esc(fpNumFatt(f))} · ${g === 0 ? "scade oggi" : "scade fra " + g + (g === 1 ? " giorno" : " giorni")} (${fdate(f.scadenza)})</span></div>
       <div class="fp-riga-d"><b>${eur(f.importo)}</b>
-        <button class="btn" data-action="fp-apri" data-id="${f.id}" data-v="1">💬 Ricordaglielo</button>
-        <button class="btn" data-action="fp-pagato" data-id="${f.id}">✓ Pagata</button></div>
+        <button class="btn" data-action="fp-apri" data-id="${f.id}" data-v="1">${fpIc("messaggio")} Ricordaglielo</button>
+        <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Pagata</button></div>
     </div>`;
   }
 
@@ -393,11 +512,11 @@
 
     let corpo = `<div class="sh-b">
       <div class="sh-tit">${esc(f.cli.nome || f.cli_nome || "Cliente")} · ${eur(f.importo)} · fattura ${esc(fpNumFatt(f))}</div>
-      ${manca.length ? `<div class="fp-cons giallo"><div>✏️</div><div><b>Manca qualcosa nei Dati azienda</b>Per una lettera completa aggiungi ${manca.join(", ")}. Intanto puoi scriverlo qui a mano.</div></div>` : ""}
+      ${manca.length ? `<div class="fp-cons giallo"><div>${fpIc("matita")}</div><div><b>Manca qualcosa nei Dati azienda</b>Per una lettera completa aggiungi ${manca.join(", ")}. Intanto puoi scriverlo qui a mano.</div></div>` : ""}
       <div class="field"><label>Il testo (puoi cambiarlo come vuoi)</label>
         <textarea id="fp-testo" rows="${n === 3 ? 22 : 10}" style="font-size:14px;line-height:1.45">${esc(testo)}</textarea></div>`;
     if (n === 3) {
-      corpo += `<div class="sh-nota">📌 <b>PEC del cliente:</b> ${pecCli ? esc(pecCli) : "non la conosco."}
+      corpo += `<div class="sh-nota">${fpIc("pin")} <b>PEC del cliente:</b> ${pecCli ? esc(pecCli) : "non la conosco."}
         ${f.b2b ? ` Se è un'azienda o un professionista <b>ce l'ha per legge</b>: la trovi gratis su <a href="https://www.inipec.gov.it/cerca-pec" target="_blank" rel="noopener">INI-PEC</a>.` : " Se è un privato spesso non ce l'ha: in quel caso stampa la lettera e mandala con <b>raccomandata A/R</b>."}</div>
         <div class="sh-nota">Come si manda una PEC? <button class="fp-link" data-action="fp-come-pec">Te lo spiego in 6 passi</button></div>`;
     } else {
@@ -406,14 +525,14 @@
     corpo += `</div>`;
 
     let az = `<button class="btn b-cancel" data-action="close">Chiudi</button>
-      <button class="btn" data-action="fp-copia">📋 Copia</button>`;
+      <button class="btn" data-action="fp-copia">${fpIc("copia")} Copia</button>`;
     if (n === 3) {
-      az += `<button class="btn" data-action="fp-pdf" data-id="${f.id}">📄 Scarica PDF</button>
-        <button class="btn-primary" data-action="fp-segna" data-id="${f.id}" data-v="3" data-c="pec">✓ L'ho mandata</button>`;
+      az += `<button class="btn" data-action="fp-pdf" data-id="${f.id}">${fpIc("scarica")} Scarica PDF</button>
+        <button class="btn-primary" data-action="fp-segna" data-id="${f.id}" data-v="3" data-c="pec">${fpIc("spunta")} L'ho mandata</button>`;
     } else {
-      if (tel) az += `<button class="btn-primary" data-action="fp-manda" data-id="${f.id}" data-v="${n}" data-c="whatsapp">💬 WhatsApp</button>`;
-      if (mail) az += `<button class="${tel ? "btn" : "btn-primary"}" data-action="fp-manda" data-id="${f.id}" data-v="${n}" data-c="email">✉️ Email</button>`;
-      az += `<button class="btn" data-action="fp-segna" data-id="${f.id}" data-v="${n}" data-c="${tel || mail ? "altro" : "telefono"}">✓ ${tel || mail ? "Mandato in altro modo" : "Fatto (a voce / altro)"}</button>`;
+      if (tel) az += `<button class="btn-primary" data-action="fp-manda" data-id="${f.id}" data-v="${n}" data-c="whatsapp">${fpIc("messaggio")} WhatsApp</button>`;
+      if (mail) az += `<button class="${tel ? "btn" : "btn-primary"}" data-action="fp-manda" data-id="${f.id}" data-v="${n}" data-c="email">${fpIc("busta")} Email</button>`;
+      az += `<button class="btn" data-action="fp-segna" data-id="${f.id}" data-v="${n}" data-c="${tel || mail ? "altro" : "telefono"}">${fpIc("spunta")} ${tel || mail ? "Mandato in altro modo" : "Fatto (a voce / altro)"}</button>`;
     }
     openSheetGrande(titolo, corpo, az);
   }
@@ -438,7 +557,7 @@
     const anni = f.data ? Math.floor(-(_giorniA(f.data) || 0) / 365) : 0;
     const corpo = `<div class="sh-b">
       <div class="sh-tit">${esc(f.cli.nome || f.cli_nome || "Cliente")} · ti deve ${eur(tot)}</div>
-      ${f.passo < 3 ? `<div class="fp-cons giallo"><div>☝️</div><div><b>Prima la lettera formale</b>Non è obbligatoria, ma il giudice vede che hai provato con le buone e spesso basta la PEC per farsi pagare. <button class="fp-link" data-action="fp-apri" data-id="${f.id}" data-v="3">Preparala adesso</button></div></div>` : ""}
+      ${f.passo < 3 ? `<div class="fp-cons giallo"><div>${fpIc("info")}</div><div><b>Prima la lettera formale</b>Non è obbligatoria, ma il giudice vede che hai provato con le buone e spesso basta la PEC per farsi pagare. <button class="fp-link" data-action="fp-apri" data-id="${f.id}" data-v="3">Preparala adesso</button></div></div>` : ""}
       <p><b>Cos'è il decreto ingiuntivo.</b> È un ordine del giudice che dice al cliente: «paga entro 40 giorni». Si chiede con la fattura in mano, <b>senza udienza</b> e senza che il cliente venga sentito. Se non paga e non si oppone, puoi pignorare (conto, stipendio, beni).</p>
       <table class="fp-tab">
         <tr><td>Chi lo decide</td><td><b>${gdp ? "Giudice di pace" : "Tribunale"}</b> ${gdp ? "(fino a " + eur(FP_GDP_MAX) + ")" : "(sopra " + eur(FP_GDP_MAX) + ")"}</td></tr>
@@ -447,13 +566,13 @@
         <tr><td>Chi paga le spese</td><td>Se vinci, il giudice le mette <b>a carico del cliente</b> (anche l'avvocato), ma intanto le anticipi tu.</td></tr>
         <tr><td>Tempi</td><td>Di solito da qualche settimana a qualche mese, dipende dall'ufficio.</td></tr>
       </table>
-      <div class="sh-nota">⏳ <b>Non aspettare troppo.</b> Un credito si prescrive in 10 anni, ma per i professionisti in 3 anni (prescrizione «presuntiva»). La PEC formale ferma l'orologio.${anni >= 2 ? " <b>Questa fattura ha già " + anni + " anni: muoviti.</b>" : ""}</div>
-      <div class="sh-nota">⚠️ L'IVA di una fattura non pagata l'hai già versata. Si recupera solo dopo una procedura (fallimento, pignoramento andato a vuoto): chiedi al commercialista quando è il momento.</div>
+      <div class="sh-nota">${fpIc("orologio")} <b>Non aspettare troppo.</b> Un credito si prescrive in 10 anni, ma per i professionisti in 3 anni (prescrizione «presuntiva»). La PEC formale ferma l'orologio.${anni >= 2 ? " <b>Questa fattura ha già " + anni + " anni: muoviti.</b>" : ""}</div>
+      <div class="sh-nota">${fpIc("avviso")} L'IVA di una fattura non pagata l'hai già versata. Si recupera solo dopo una procedura (fallimento, pignoramento andato a vuoto): chiedi al commercialista quando è il momento.</div>
       <p class="fp-stima">Sono informazioni generali, non un parere legale. Per decidere senti un avvocato: porta la fattura, la PEC e le ricevute.</p>
     </div>`;
     openSheetGrande("La strada del giudice", corpo,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>
-       <button class="btn-primary" data-action="fp-segna" data-id="${f.id}" data-v="4" data-c="giudice">✓ Ho avviato la pratica</button>`);
+       <button class="btn-primary" data-action="fp-segna" data-id="${f.id}" data-v="4" data-c="giudice">${fpIc("spunta")} Ho avviato la pratica</button>`);
   }
 
   function fpPagatoForm(id) {
@@ -463,7 +582,7 @@
       <div class="field"><label>Quando hai ricevuto i soldi</label><input id="fp-data-pag" type="date" value="${todayStr()}" max="${todayStr()}"></div>
       <div class="sh-nota">La fattura diventa <b>pagata</b> anche nella sezione Fatture e nei lavori collegati.</div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
-       <button class="btn-primary" data-action="fp-pagato-ok" data-id="${f.id}">✓ Segna pagata</button>`);
+       <button class="btn-primary" data-action="fp-pagato-ok" data-id="${f.id}">${fpIc("spunta")} Segna pagata</button>`);
   }
 
   // ---------------------------------------------------------------------

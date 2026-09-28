@@ -59,6 +59,7 @@
   const FT_COEFF = [["86", "Edilizia e costruzioni — 86%"], ["78", "Professioni tecniche — 78%"], ["40", "Commercio — 40%"]];
 
   let ftProfilo = null, ftPresunto = false, ftDati = null;
+  let ftScTutte = false;   /* «Vedi tutte» le scadenze: resta aperto finche' non lo richiude */
 
   function ftEtich(el, v) { const r = el.find(x => x[0] === v); return r ? r[1] : ""; }
   function ftAnno() { return +todayStr().slice(0, 4); }
@@ -286,27 +287,23 @@
   // ---------------------------------------------------------------------
   // LA SEZIONE
   // ---------------------------------------------------------------------
-  async function fiscoTasse(box, mio) {
-    const vecchio = () => mio != null && typeof fpGiro !== "undefined" && mio !== fpGiro;
-    if (!sb || !sbUid) { box.innerHTML = tabVuoto("Le tue tasse", "Accedi per vedere le tue tasse."); return; }
-    box.innerHTML = '<div class="fp-carica">Sto facendo i conti…</div>';
+  /* 28/09/2026 — la lettura dei dati sta in una funzione sua: la usano
+     «Le tue tasse» e il riquadro «Da fare adesso» in cima al reparto.
+     Non scrive nei globali: chi la chiama decide (per via del giro). */
+  async function ftCarica() {
     const Y = ftAnno(), oggi = todayStr();
-
     const [rP, rA, rF] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("regime_fiscale").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_fatture").select("id,stato,data,data_pagata,bollo").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01")
     ]);
-    if (vecchio()) return;
-    ftProfilo = rP.data || null;
-    ftPresunto = false;
-    if (!ftProfilo) { ftProfilo = ftIndovina(rA.data); ftPresunto = !!ftProfilo; }
+    let profilo = rP.data || null, presunto = false;
+    if (!profilo) { profilo = ftIndovina(rA.data); presunto = !!profilo; }
 
     const ff = rF.data || [];
     const ids = ff.map(f => f.id);
     const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva").in("fattura_id", ids) : { data: [] };
-    if (vecchio()) return;
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
 
     /* incassato = fatture PAGATE quest'anno (conta il giorno in cui ti pagano) */
@@ -330,11 +327,22 @@
       if (!bollo[k]) bollo[k] = { eur: 0, n: 0 };
       bollo[k].eur += b; bollo[k].n++;
     });
-    ftDati = {
+    return { profilo, presunto, dati: {
       incassi, ivaAnno, bollo,
       ivaQ3: ivaTra("2026-07-01", "2026-09-30"),
       ivaMese: ivaTra(mp + "-01", mp + "-31")
-    };
+    } };
+  }
+
+  async function fiscoTasse(box, mio) {
+    const vecchio = () => mio != null && typeof fpGiro !== "undefined" && mio !== fpGiro;
+    if (!sb || !sbUid) { box.innerHTML = tabVuoto("Le tue tasse", "Accedi per vedere le tue tasse."); return; }
+    box.innerHTML = '<div class="fp-carica">Sto facendo i conti…</div>';
+    const Y = ftAnno();
+    const R = await ftCarica();
+    if (vecchio()) return;
+    ftProfilo = R.profilo; ftPresunto = R.presunto; ftDati = R.dati;
+    const incassi = ftDati.incassi;
 
     const { doy, val: proiezione } = ftProiezione(incassi);
 
@@ -352,12 +360,12 @@
 
     h += `<div class="ft-chi"><div><small>${ftPresunto ? "Il tuo profilo (l'ho indovinato: controllalo)" : "Il tuo profilo"}</small>
       <b>${esc(ftEtich(FT_FORME, p.forma).split(" (")[0])} · ${p.regime === "forfettario" ? "forfettario" + (p.aliquota_5 ? " 5%" : "") : "ordinario"} · ${esc(ftEtich(FT_CASSE, p.cassa))}</b></div>
-      <button class="btn" data-action="ft-profilo">✏️ ${ftPresunto ? "Controlla" : "Cambia"}</button></div>`;
+      <button class="btn" data-action="ft-profilo">${fpIc("matita")} ${ftPresunto ? "Controlla" : "Cambia"}</button></div>`;
 
     h += `<div class="fp-tot">
-      <div><small>Incassato nel ${Y} finora</small><b>${eur(incassi)}</b></div>
-      <div><small>${doy >= 60 ? "Se continui così, a fine anno" : "A inizio anno conto l'incassato"}</small><b>${eur(proiezione)}</b></div>
-      <div><small>Tasse e contributi dell'anno (stima)</small><b class="fp-rosso">${st.totale != null ? eur(st.totale) : "—"}</b></div>
+      <div class="k-verde">${fpIc("euro")}<div><small>Incassato nel ${Y} finora</small><b>${eur(incassi)}</b></div></div>
+      <div class="k-blu">${fpIc("grafico")}<div><small>${doy >= 60 ? "Se continui così, a fine anno" : "A inizio anno conto l'incassato"}</small><b>${eur(proiezione)}</b></div></div>
+      <div class="k-rosso">${fpIc("palazzo")}<div><small>Tasse e contributi dell'anno (stima)</small><b class="fp-rosso">${st.totale != null ? eur(st.totale) : "—"}</b></div></div>
     </div>`;
 
     /* IL SALVADANAIO */
@@ -366,10 +374,10 @@
       if (su100 >= 100) {
         /* i contributi fissi da soli superano quello che entra: dire «metti da
            parte 100 € su 100» non aiuta nessuno, va detto com'e' */
-        h += `<div class="ft-salva"><div class="ft-salva-n">🐷 Quest'anno tasse e contributi (<b>${eur(st.totale)}</b>)<br>sono <b class="fp-rosso">più di quello che incassi</b></div>
+        h += `<div class="ft-salva">${fpIc("salvadanaio", "ft-salva-ic")}<div class="ft-salva-n">Quest'anno tasse e contributi (<b>${eur(st.totale)}</b>)<br>sono <b class="fp-rosso">più di quello che incassi</b></div>
           <div class="ft-salva-d">Ti mancano circa <b>${eur(st.totale - proiezione)}</b>. Succede quando si incassa poco: i contributi fissi si pagano lo stesso. Metti da parte tutto quello che puoi, circa <b>${eur(st.totale / 12)}</b> al mese, e parlane col commercialista.</div>`;
       } else {
-      h += `<div class="ft-salva"><div class="ft-salva-n">🐷 Su ogni <b>100 €</b> che incassi,<br>metti da parte <b class="ft-grande">${su100} €</b></div>
+      h += `<div class="ft-salva">${fpIc("salvadanaio", "ft-salva-ic")}<div class="ft-salva-n">Su ogni <b>100 €</b> che incassi,<br>metti da parte <b class="ft-grande">${su100} €</b></div>
         <div class="ft-salva-d">Cioè circa <b>${eur(st.totale / 12)}</b> al mese. Apri un conto a parte, anche gratuito, e ogni volta che un cliente paga sposta lì la tua parte: a giugno e novembre i soldi ci sono già.</div>`;
       }
       if (st.calcolabile) {
@@ -381,49 +389,49 @@
         h += `<p class="ft-grigio">Calcolato con il ${esc(String(p.perc_commercialista))}% che ti ha detto il commercialista.</p>`;
       }
       if (p.regime === "ordinario" && ftDati.ivaAnno > 0) {
-        h += `<div class="fp-cons giallo"><div>⚠️</div><div><b>E l'IVA non è tua</b>Quest'anno hai incassato <b>${eur(ftDati.ivaAnno)}</b> di IVA dai clienti: sono dello Stato. Mettili da parte a parte, fuori dal conto sopra.</div></div>`;
+        h += `<div class="fp-cons giallo"><div>${fpIc("avviso")}</div><div><b>E l'IVA non è tua</b>Quest'anno hai incassato <b>${eur(ftDati.ivaAnno)}</b> di IVA dai clienti: sono dello Stato. Mettili da parte a parte, fuori dal conto sopra.</div></div>`;
       }
       if (p.perc_commercialista && st.calcolabile) {
         h += `<p class="ft-grigio">Il tuo commercialista ti ha detto di mettere da parte il ${esc(String(p.perc_commercialista))}%: se è diverso da qui, fidati di lui.</p>`;
       }
       h += `</div>`;
     } else if (!st.calcolabile) {
-      h += `<div class="fp-cons giallo"><div>🏢</div><div><b>Per una società le tasse le calcola il commercialista</b>Chiedigli: «su 100 € che incasso, quanti ne devo mettere da parte?». Scrivi il numero nel profilo e ti faccio il salvadanaio.</div></div>`;
-      if (ftDati.ivaAnno > 0) h += `<div class="fp-cons giallo"><div>⚠️</div><div><b>L'IVA non è tua</b>Quest'anno la società ha incassato <b>${eur(ftDati.ivaAnno)}</b> di IVA: tienili da parte.</div></div>`;
+      h += `<div class="fp-cons giallo"><div>${fpIc("palazzo")}</div><div><b>Per una società le tasse le calcola il commercialista</b>Chiedigli: «su 100 € che incasso, quanti ne devo mettere da parte?». Scrivi il numero nel profilo e ti faccio il salvadanaio.</div></div>`;
+      if (ftDati.ivaAnno > 0) h += `<div class="fp-cons giallo"><div>${fpIc("avviso")}</div><div><b>L'IVA non è tua</b>Quest'anno la società ha incassato <b>${eur(ftDati.ivaAnno)}</b> di IVA: tienili da parte.</div></div>`;
     } else {
-      h += `<div class="fp-cons neutro"><div>🐷</div><div><b>Ancora nessun incasso quest'anno</b>Quando segni pagata la prima fattura, qui ti dico quanto mettere da parte.${(p.cassa === "artigiani" || p.cassa === "commercianti") ? " Intanto ricorda: i contributi fissi INPS (" + eur(st.contrib.fissi) + " l'anno) si pagano anche senza incassi." : ""}</div></div>`;
+      h += `<div class="fp-cons neutro"><div>${fpIc("salvadanaio")}</div><div><b>Ancora nessun incasso quest'anno</b>Quando segni pagata la prima fattura, qui ti dico quanto mettere da parte.${(p.cassa === "artigiani" || p.cassa === "commercianti") ? " Intanto ricorda: i contributi fissi INPS (" + eur(st.contrib.fissi) + " l'anno) si pagano anche senza incassi." : ""}</div></div>`;
     }
 
     /* LE SCADENZE */
-    const sc = ftScadenze(p, st, ftDati);
+    const sc = ftScadenze(p, st, ftDati, true);
     if (sc.length) {
       h += `<div class="ft-sc-testa"><h3 class="fp-h3">Le prossime scadenze</h3>
-        <button class="btn" data-action="ft-ics">📅 Mettile nel calendario del telefono</button></div>` + sc.map(x => {
+        <button class="btn" data-action="ft-ics">${fpIc("data")} Mettile nel calendario del telefono</button></div><div class="ft-sc-lista${ftScTutte ? " tutte" : ""}">` + sc.map((x, i) => {
         const g = _giorniA(x.d);
-        return `<div class="ft-sc${g <= 15 ? " vicina" : ""}">
+        return `<div class="ft-sc${g <= 15 ? " vicina" : ""}${i >= 3 ? " ft-sc-altra" : ""}"${x.nota ? ' data-action="ft-sc-nota"' : ""}>
           <div class="ft-sc-d"><b>${x.d.slice(8, 10)}</b><span>${["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"][+x.d.slice(5, 7) - 1]} ${x.d.slice(2, 4)}</span></div>
-          <div class="ft-sc-t"><b>${esc(x.cosa)}</b>${x.nota ? `<span>${esc(x.nota)}</span>` : ""}<span class="ft-fra">${g === 0 ? "oggi" : "fra " + g + (g === 1 ? " giorno" : " giorni")}</span></div>
-          <div class="ft-sc-e">${x.imp != null && x.imp > 0 ? "circa<br><b>" + eur(x.imp) + "</b>" : ""}
-            <button class="btn" data-action="ft-ricorda" data-d="${x.d}" data-t="${esc(x.cosa)}" data-i="${x.imp != null ? Math.round(x.imp * 100) / 100 : ""}">🔔 Ricordamelo</button></div>
+          <div class="ft-sc-t"><b>${esc(x.cosa)}${x.nota ? fpIc("freccia", "ft-sc-apri") : ""}</b>${x.nota ? `<span class="ft-sc-nota">${esc(x.nota)}</span>` : ""}<span class="ft-fra">${g === 0 ? "oggi" : "fra " + g + (g === 1 ? " giorno" : " giorni")}</span></div>
+          <div class="ft-sc-e">${x.imp != null && x.imp > 0 ? '<span class="ft-imp"><small>circa</small><b>' + eur(x.imp) + "</b></span>" : ""}
+            <button class="btn" data-action="ft-ricorda" data-d="${x.d}" data-t="${esc(x.cosa)}" data-i="${x.imp != null ? Math.round(x.imp * 100) / 100 : ""}" title="Te lo ricordo 7 giorni prima">${fpIc("campana")}<span>Ricordamelo</span></button></div>
         </div>`;
-      }).join("");
+      }).join("") + `</div>` + (sc.length > 3 ? `<button class="ft-sc-piu" data-action="ft-sc-tutte">${ftScTutte ? "Mostra meno" : "Vedi tutte (" + sc.length + ")"}</button>` : "");
     }
 
     /* I CONSIGLI */
     h += `<h3 class="fp-h3">I miei consigli</h3>` + ftConsigli(p, st, proiezione).map(c =>
-      `<div class="fp-cons ${c.tono}"><div>💡</div><div><b>${esc(c.t)}</b>${esc(c.s)}${c.t.indexOf("Non riesci") === 0 ? ` <button class="fp-link" data-action="ft-ravv">Calcola quanto costa</button>` : ""}</div></div>`).join("");
+      `<div class="fp-cons ${c.tono}"><div>${fpIc(c.tono === "verde" ? "euro" : c.tono === "neutro" ? "info" : "avviso")}</div><div><b>${esc(c.t)}</b>${esc(c.s)}${c.t.indexOf("Non riesci") === 0 ? ` <button class="fp-link" data-action="ft-ravv">Calcola quanto costa</button>` : ""}</div></div>`).join("");
 
     h += ftStrumenti();
-    h += `<p class="fp-stima">⚖️ È una <b>stima</b> fatta con le regole del 2026 sui tuoi incassi: niente detrazioni, niente addizionali, e le fatture che non segni pagate non ci sono. Il conto vero lo fa il tuo commercialista.</p>`;
+    h += `<p class="fp-stima">${fpIc("bilancia")} È una <b>stima</b> fatta con le regole del 2026 sui tuoi incassi: niente detrazioni, niente addizionali, e le fatture che non segni pagate non ci sono. Il conto vero lo fa il tuo commercialista.</p>`;
     box.innerHTML = h;
   }
 
   function ftStrumenti() {
     return `<h3 class="fp-h3">Ti serve aiuto?</h3><div class="ft-strum">
-      <button class="ft-str" data-action="ft-ravv"><span>⏰</span><b>Ho pagato in ritardo</b><small>Quanto costa il ravvedimento</small></button>
-      <button class="ft-str" data-action="ft-lettera"><span>✉️</span><b>Mi è arrivata una lettera</b><small>Avviso bonario o cartella: cosa fare</small></button>
-      <button class="ft-str" data-action="ft-iva"><span>🧮</span><b>Quale IVA metto?</b><small>10%, 22%, 4% o reverse charge: 3 domande</small></button>
-      <button class="ft-str" data-action="ft-bonus"><span>🏦</span><b>Bonifico del bonus casa</b><small>Perché ti arriva meno di quanto hai fatturato</small></button>
+      <button class="ft-str" data-action="ft-ravv"><span class="t-rosso">${fpIc("orologio")}</span><b>Ho pagato in ritardo</b><small>Quanto costa il ravvedimento</small></button>
+      <button class="ft-str" data-action="ft-lettera"><span class="t-blu">${fpIc("busta")}</span><b>Mi è arrivata una lettera</b><small>Avviso bonario o cartella: cosa fare</small></button>
+      <button class="ft-str" data-action="ft-iva"><span class="t-viola">${fpIc("calcolo")}</span><b>Quale IVA metto?</b><small>10%, 22%, 4% o reverse charge: 3 domande</small></button>
+      <button class="ft-str" data-action="ft-bonus"><span class="t-verde">${fpIc("banca")}</span><b>Bonifico del bonus casa</b><small>Perché ti arriva meno di quanto hai fatturato</small></button>
     </div>`;
   }
 
@@ -567,7 +575,7 @@
     if (!(imp > 0) || !sc || !pag) { out.innerHTML = ""; return; }
     const [a, b, c] = sc.split("-").map(Number), [d, e, f] = pag.split("-").map(Number);
     const gg = Math.round((new Date(d, e - 1, f) - new Date(a, b - 1, c)) / 86400000);
-    if (gg <= 0) { out.innerHTML = `<div class="fp-cons verde"><div>👍</div><div><b>Sei in tempo</b>Se paghi entro la scadenza non c'è nessuna multa.</div></div>`; return; }
+    if (gg <= 0) { out.innerHTML = `<div class="fp-cons verde"><div>${fpIc("ok")}</div><div><b>Sei in tempo</b>Se paghi entro la scadenza non c'è nessuna multa.</div></div>`; return; }
     const perc = ftSanzione(gg), sanz = imp * perc / 100, int = ftInteresseLegale(imp, sc, pag);
     const senza = imp * 25 / 100;
     out.innerHTML = `<table class="fp-tab">
@@ -576,7 +584,7 @@
       <tr><td>Interessi</td><td><b>${eur(int)}</b></td></tr>
       <tr><td>Totale da pagare</td><td><b class="ft-grande2">${eur(imp + sanz + int)}</b></td></tr>
       </table>
-      <div class="fp-cons ${gg > 90 ? "giallo" : "verde"}"><div>💡</div><div><b>${gg <= 90 ? "Paga adesso: costa poco" : "Paga il prima possibile"}</b>Se invece aspetti che ti scriva l'Agenzia, la multa può arrivare al 25% (${eur(senza)}), più gli interessi.</div></div>`;
+      <div class="fp-cons ${gg > 90 ? "giallo" : "verde"}"><div>${fpIc("idea")}</div><div><b>${gg <= 90 ? "Paga adesso: costa poco" : "Paga il prima possibile"}</b>Se invece aspetti che ti scriva l'Agenzia, la multa può arrivare al 25% (${eur(senza)}), più gli interessi.</div></div>`;
   }
   document.addEventListener("input", function (e) {
     if (e.target && ["ft-r-imp", "ft-r-sc", "ft-r-pag"].indexOf(e.target.id) >= 0) ftRavvCalcola();
@@ -585,15 +593,15 @@
   function ftLettera() {
     openSheetGrande("Mi è arrivata una lettera", `<div class="sh-b">
       <p><b>Prima regola: non buttarla e non aspettare.</b> Quasi tutte hanno una scadenza, e pagare presto costa meno. Guarda chi la manda e come si chiama.</p>
-      <div class="ft-let"><b>📄 «Comunicazione di irregolarità» (avviso bonario)</b>
+      <div class="ft-let"><b>${fpIc("doc")} «Comunicazione di irregolarità» (avviso bonario)</b>
         <p>La manda l'<b>Agenzia delle Entrate</b> quando dai controlli risulta una tassa non pagata o pagata male. Non è ancora una cartella.</p>
         <ul><li>Hai <b>60 giorni</b> per pagare con la multa ridotta.</li><li>Puoi pagare <b>fino a 20 rate</b> ogni 3 mesi, per qualunque importo.</li><li>Se pensi che sia sbagliata, portala subito al commercialista: si può correggere.</li></ul></div>
-      <div class="ft-let"><b>📕 «Cartella di pagamento»</b>
+      <div class="ft-let"><b>${fpIc("doc")} «Cartella di pagamento»</b>
         <p>La manda l'<b>Agenzia delle Entrate-Riscossione</b> (l'ex Equitalia) quando l'avviso non è stato pagato.</p>
         <ul><li>Hai <b>60 giorni</b> per pagare o chiedere le rate.</li><li>Fino a <b>120.000 €</b> puoi chiedere <b>fino a 84 rate</b> mensili senza dimostrare niente (domande 2025–2026). Rata minima 50 €.</li><li>Attenzione: se salti <b>8 rate</b>, anche non di fila, perdi la rateizzazione.</li><li>La domanda si fa online sul sito dell'Agenzia Riscossione, anche da solo.</li></ul></div>
-      <div class="ft-let"><b>🏛️ Lettera dell'INPS</b>
+      <div class="ft-let"><b>${fpIc("palazzo")} Lettera dell'INPS</b>
         <p>Di solito sono contributi non pagati. Controlla nel <b>Cassetto previdenziale</b> sul sito INPS e chiama il commercialista.</p></div>
-      <div class="fp-cons neutro"><div>📷</div><div><b>Fotografala: te la spiega l'AI</b>Fai una foto alla prima pagina e l'AI ti dice con parole semplici cos'è e cosa fare. <button class="fp-link" data-action="ft-vai-ai">Apri «Chiedi all'AI»</button></div></div>
+      <div class="fp-cons neutro"><div>${fpIc("foto")}</div><div><b>Fotografala: te la spiega l'AI</b>Fai una foto alla prima pagina e l'AI ti dice con parole semplici cos'è e cosa fare. <button class="fp-link" data-action="ft-vai-ai">Apri «Chiedi all'AI»</button></div></div>
       <p class="fp-stima">Informazioni generali aggiornate al 2026, non un parere. Per la tua lettera senti il commercialista.</p>
     </div>`, `<button class="btn-primary" data-action="close">Ho capito</button>`);
   }
@@ -660,7 +668,7 @@
     return `<div class="ft-iva-r"><div class="ft-iva-al">${aliq}</div><div><b>${titolo}</b>
       ${righe.map(r => `<p>${r}</p>`).join("")}
       ${frase ? `<div class="ft-iva-frase"><small>Da scrivere in fattura</small>${frase}</div>` : ""}
-      <button class="fp-link" data-action="ft-iva-da-capo">↺ Ricomincia</button></div></div>`;
+      <button class="fp-link" data-action="ft-iva-da-capo">Ricomincia</button></div></div>`;
   }
   function ftIvaDisegna() {
     const box = $("#ft-iva-box"); if (!box) return;
@@ -678,14 +686,14 @@
     if (!S.chi) return fine("");
     if (S.chi === "impresa") return fine(ftIvaRis("RC", "Reverse charge: niente IVA in fattura",
       ["L'IVA la mette l'impresa che ti paga, non tu.",
-       "⚠️ Attenzione ai soldi: i materiali li paghi col 22% ma l'IVA non la incassi. A fine anno puoi trovarti <b>a credito IVA</b>: dillo al commercialista, si può recuperare."],
+       "<b>Attenzione ai soldi:</b> i materiali li paghi col 22% ma l'IVA non la incassi. A fine anno puoi trovarti <b>a credito IVA</b>: dillo al commercialista, si può recuperare."],
       "Inversione contabile – art. 17, comma 6, lett. a), DPR 633/72 (natura N6.3)"));
     if (S.chi === "azienda") {
       h += ftIvaDom("ater", "2. È uno di questi lavori?", [["si", "Pulizie, demolizione, impianti (elettrico, idraulico, gas, clima), completamento (intonaci, pavimenti, pitture, infissi…)"], ["no", "No, altro"]]);
       if (!S.ater) return fine("");
       if (S.ater === "si") return fine(ftIvaRis("RC", "Reverse charge: niente IVA in fattura",
         ["Per questi lavori su un edificio, se il cliente ha la partita IVA, l'IVA la mette lui. Vale anche se non sei in subappalto.",
-         "⚠️ Come sopra: puoi trovarti a credito IVA a fine anno."],
+         "Come sopra: puoi trovarti a credito IVA a fine anno."],
         "Inversione contabile – art. 17, comma 6, lett. a-ter), DPR 633/72 (natura N6.7)"));
     }
     const n = S.chi === "azienda" ? 3 : 2;
@@ -707,7 +715,7 @@
     if (S.dove === "altro") return fine(ftIvaRis("22%", "IVA al 22%", ["La manutenzione su edifici che non sono case va al 22%."], ""));
     return fine(ftIvaRis("10%", "IVA al 10%",
       ["Per la manutenzione (ordinaria e straordinaria) sulle case.",
-       "⚠️ Se monti <b>caldaia, infissi, sanitari, rubinetteria, condizionatori, ascensore o videocitofono</b>: su questi pezzi il 10% vale solo fino al valore della manodopera, il resto va al 22%. Scrivi in fattura il valore di questi pezzi."], ""));
+       "<b>Attenzione:</b> se monti <b>caldaia, infissi, sanitari, rubinetteria, condizionatori, ascensore o videocitofono</b>: su questi pezzi il 10% vale solo fino al valore della manodopera, il resto va al 22%. Scrivi in fattura il valore di questi pezzi."], ""));
   }
 
   // ---------------------------------------------------------------------
@@ -722,7 +730,7 @@
         <ul><li>Sono tasse <b>già pagate in anticipo</b>. In dichiarazione il commercialista le toglie dalle tue tasse.</li>
         <li>Se sono più delle tue tasse, ti restano come <b>credito</b> da usare negli F24.</li>
         <li>Conserva le contabili dei bonifici e dalle al commercialista.</li></ul></div>
-      <div class="fp-cons giallo"><div>☝️</div><div><b>Nel gestionale segna la fattura pagata per intero</b>Il cliente ha pagato tutto: la differenza l'ha presa lo Stato per te. Se segni solo quello che ti è arrivato, i conti delle tue tasse vengono sbagliati.</div></div>
+      <div class="fp-cons giallo"><div>${fpIc("info")}</div><div><b>Nel gestionale segna la fattura pagata per intero</b>Il cliente ha pagato tutto: la differenza l'ha presa lo Stato per te. Se segni solo quello che ti è arrivato, i conti delle tue tasse vengono sbagliati.</div></div>
       <p class="fp-stima">Ritenuta dell'${FT_RIT_BONUS}% in vigore dal 1° marzo 2024, uguale nel 2026. La banca toglie sempre il 22% di IVA prima del conto, anche se in fattura c'è il 10% o niente IVA.</p>
     </div>`, `<button class="btn-primary" data-action="close">Ho capito</button>`);
   }
@@ -752,6 +760,13 @@
     if (a === "ft-lettera") { ftLettera(); return; }
     if (a === "ft-vai-ai")  { closeSheet(); fpSezione = "ai"; renderFisco(); return; }
     if (a === "ft-ics")     { ftIcs(); return; }
+    if (a === "ft-sc-tutte") {
+      ftScTutte = !ftScTutte;
+      const L = $("#fisco .ft-sc-lista"); if (L) L.classList.toggle("tutte", ftScTutte);
+      t.textContent = ftScTutte ? "Mostra meno" : "Vedi tutte (" + document.querySelectorAll("#fisco .ft-sc").length + ")";
+      return;
+    }
+    if (a === "ft-sc-nota") { t.classList.toggle("aperta"); return; }
     if (a === "ft-iva")     { ftIvaStato = {}; ftIvaForm(); return; }
     if (a === "ft-iva-sc")  { ftIvaStato[t.dataset.k] = t.dataset.v; ftIvaDisegna(); return; }
     if (a === "ft-iva-da-capo") { ftIvaStato = { tutte: "1" }; ftIvaDisegna(); return; }

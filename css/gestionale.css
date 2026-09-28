@@ -4951,3 +4951,148 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .fi-lettera ol{margin:6px 0;padding-left:20px}
 .fi-lettera ol li{margin-bottom:4px}
 @media(max-width:640px){.fi-msg{max-width:94%}.fi-lettera{min-width:0}}
+
+/* ═══ 28/09/2026 — TASSE E FISCO · LA GRAFICA NUOVA ═══════════════════════
+   Solo il reparto Tasse e fisco. Stesso modo del Riepilogo: carte bianche,
+   icona a linea in un quadratino colorato, riga colorata a SINISTRA per lo
+   stato (mai in cima), niente faccine. Viene dopo le regole del 27 set e le
+   corregge: le vecchie restano sopra per non toccare altro. */
+.side nav.tabs button[data-tab="fisco"] svg{color:#0f8a5f;background:#e3f5ec}
+#fisco{--acc:#0f8a5f}
+#fisco .fp-ic,.sheet .fp-ic{width:17px;height:17px;flex:0 0 auto;vertical-align:-3px}
+#fisco .btn .fp-ic,#fisco .btn-primary .fp-ic,.sheet .btn .fp-ic,.sheet .btn-primary .fp-ic{margin-right:6px}
+/* le quattro schede in alto */
+.fp-nav{display:inline-flex;gap:4px;flex-wrap:wrap;background:var(--card);border:1px solid var(--bordo);border-radius:14px;padding:4px;margin:2px 0 20px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.fp-nav .fp-chip{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--testo-2);border-radius:10px;padding:9px 16px;font-size:14.5px}
+.fp-nav .fp-chip:hover{background:var(--sfondo);color:var(--testo)}
+.fp-nav .fp-chip.on{background:var(--blu);color:#fff;box-shadow:0 2px 8px rgba(0,102,255,.25)}
+/* i tre numeri */
+.fp-tot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.fp-tot>div{display:flex;align-items:center;gap:14px;min-width:0;background:var(--card);border:1px solid var(--bordo);border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+#fisco .fp-tot>div>.fp-ic{width:42px;height:42px;padding:10px;border-radius:12px;background:var(--sfondo);color:var(--testo-2)}
+#fisco .fp-tot .k-rosso>.fp-ic{color:#d9534f;background:#fdeceb}
+#fisco .fp-tot .k-verde>.fp-ic{color:#2fa46a;background:#e8f6ef}
+#fisco .fp-tot .k-giallo>.fp-ic{color:#b7791f;background:#fdf3e1}
+#fisco .fp-tot .k-blu>.fp-ic{color:#3f6fd8;background:#eaf0fc}
+.fp-tot small{display:block;line-height:1.3}
+.fp-tot b{font-size:22px;margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fp-h3{font-size:13.5px;letter-spacing:.06em;margin:26px 0 10px}
+/* i consigli: carta bianca, riga a sinistra, icona nel quadratino */
+.fp-cons{background:var(--card);border:1px solid var(--bordo);border-left:4px solid #3f6fd8;border-radius:12px;padding:12px 14px;gap:12px;font-size:14.5px}
+.fp-cons>div:first-child{flex:0 0 auto;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#eaf0fc;color:#3f6fd8}
+.fp-cons.giallo{background:var(--card);border-left-color:#e0a106} .fp-cons.giallo>div:first-child{background:#fdf3e1;color:#b7791f}
+.fp-cons.rosso{background:var(--card);border-left-color:#d9534f} .fp-cons.rosso>div:first-child{background:#fdeceb;color:#d9534f}
+.fp-cons.verde{background:var(--card);border-left-color:#2fa46a} .fp-cons.verde>div:first-child{background:#e8f6ef;color:#2fa46a}
+.fp-cons.neutro{border-left-color:#8a94a0} .fp-cons.neutro>div:first-child{background:#f0f2f5;color:#6b7a8d}
+/* Farsi pagare */
+.fp-card{box-shadow:0 1px 2px rgba(16,24,40,.05);padding:16px 18px}
+.fp-passo{display:inline-flex;align-items:center;gap:5px}
+#fisco .fp-passo .fp-ic{width:14px;height:14px;vertical-align:0}
+.fp-storia{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fp-riga{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+#fisco .fp-stima .fp-ic{margin-right:6px}
+/* Le tue tasse */
+.ft-chi{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.ft-salva{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:center;background:linear-gradient(135deg,#e9f7f0,#f6fcf9);border:1px solid #cfe9dc;padding:18px 20px}
+#fisco .ft-salva-ic{width:54px;height:54px;padding:12px;border-radius:15px;background:#fff;color:#2fa46a;grid-row:span 2;box-shadow:0 1px 3px rgba(16,24,40,.08)}
+.ft-salva>*:not(.ft-salva-ic):not(.ft-salva-n):not(.ft-salva-d){grid-column:1/-1}
+.ft-salva .fp-tab{margin-top:14px}
+.ft-sc-lista{background:var(--card);border:1px solid var(--bordo);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.ft-sc-lista .ft-sc{border:0;border-radius:0;margin:0;border-bottom:1px solid var(--bordo);padding:12px 16px}
+.ft-sc-lista .ft-sc:last-child{border-bottom:0}
+.ft-sc-lista .ft-sc.vicina{border-left:0;box-shadow:inset 4px 0 0 #e0a106}
+.ft-sc-d{background:#eaf0fc;color:#3f6fd8}
+.ft-sc-d span{color:#3f6fd8}
+.ft-sc.vicina .ft-sc-d,.ft-sc.vicina .ft-sc-d span{background:#fdf3e1;color:#b7791f}
+.ft-sc-e{flex-direction:row;align-items:center;gap:16px}
+.ft-imp{text-align:right;line-height:1.2}
+.ft-imp small{display:block;font-size:13px;color:var(--testo-2)}
+.ft-imp b{font-size:17px;color:var(--testo);font-variant-numeric:tabular-nums;white-space:nowrap}
+#fisco .ft-sc .btn[data-action="ft-ricorda"]{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:13.5px}
+#fisco .ft-sc .btn[data-action="ft-ricorda"] .fp-ic{margin:0;width:16px;height:16px}
+.ft-str{grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:14px;box-shadow:0 1px 2px rgba(16,24,40,.05);transition:border-color .15s,box-shadow .15s}
+.ft-str:hover{border-color:var(--blu);box-shadow:0 4px 14px rgba(0,102,255,.10)}
+.ft-str span{grid-row:1/span 2;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--sfondo);color:var(--testo-2)}
+#fisco .ft-str span .fp-ic{width:22px;height:22px;vertical-align:0}
+.ft-str b,.ft-str small{grid-column:2}
+.ft-str::after{content:"";grid-column:3;grid-row:1/span 2;width:8px;height:8px;border-right:2px solid var(--testo-2);border-top:2px solid var(--testo-2);transform:rotate(45deg);margin-right:4px;opacity:.6}
+.ft-str .t-rosso{background:#fdeceb;color:#d9534f} .ft-str .t-blu{background:#eaf0fc;color:#3f6fd8}
+.ft-str .t-viola{background:#f0ecfb;color:#7b5cd6} .ft-str .t-verde{background:#e8f6ef;color:#2fa46a}
+.ft-let b{display:flex;align-items:center;gap:8px}
+.ft-let b .fp-ic{color:#3f6fd8}
+/* Sopravvivere */
+.fv-conto,.fv-mese{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.fv-mese.sotto{background:var(--card);border-color:var(--bordo);box-shadow:inset 4px 0 0 #d9534f}
+/* scritte GRANDI e marcate (chiesto da Alessio il 28/09, due volte:
+   «siccome si deve leggere»). Base del reparto 20px, niente sotto i 18px (terza volta: «certo che sono piccole»). */
+#fisco{--testo-2:#0b1220;--testo:#0b1220;color:#0b1220;font-size:20px;font-weight:600}
+/* tutte le scritte dello stesso nero: le piccole sotto i titoli (small,
+   span, note) non sono piu' grigie ma nere, solo un filo meno spesse */
+#fisco small,#fisco .fp-sotto,#fisco .fp-storia,#fisco .fp-stima,#fisco .ft-grigio,#fisco .ft-sc-t span,#fisco .fp-ad-t span,#fisco .fv-sotto,#fisco .fp-tab td{color:#0b1220!important;font-weight:600;opacity:1}
+#fisco .ft-sc-t .ft-fra{color:var(--blu)!important;font-weight:800} #fisco .fp-e small{color:var(--ok)!important;font-weight:800}
+#fisco b,#fisco strong{font-weight:800}
+#fisco .ft-fra,#fisco .fp-ad-fra{font-weight:800}
+#fisco .fp-ic{width:20px;height:20px}
+#fisco .fp-nav .fp-chip{font-size:20.5px;font-weight:700;padding:11px 18px}
+#fisco .fp-tot small{font-size:19px;font-weight:700;color:var(--testo-2)}
+#fisco .fp-tot b{font-size:33.5px;font-weight:800}
+#fisco .fp-h3{font-size:20.5px;font-weight:800;color:var(--testo)}
+#fisco .fp-cons,.sheet .fp-cons{font-weight:600;font-size:20.5px;line-height:1.55}
+#fisco .fp-cons b,.sheet .fp-cons b{font-size:21.5px;font-weight:800}
+#fisco .fp-n{font-size:25px}
+#fisco .fp-sotto{font-size:20px}
+#fisco .fp-e{font-size:31px}
+#fisco .fp-e small{font-size:18.5px}
+#fisco .fp-passo{font-size:18.5px;padding:8px 12px}
+#fisco .fp-storia{font-size:18.5px}
+#fisco .fp-riga{font-size:20.5px} #fisco .fp-riga span{font-size:19px}
+#fisco .fp-link{font-size:inherit}
+#fisco .btn,#fisco .btn-primary{font-size:20px}
+#fisco .ft-chi small{font-size:19px} #fisco .ft-chi b{font-size:23px;font-weight:800}
+#fisco .ft-salva-n{font-size:29px;font-weight:700}
+#fisco .ft-grande{font-size:53px;font-weight:800}
+#fisco .ft-salva-d{font-size:21px;line-height:1.55}
+#fisco .fp-tab{font-size:20.5px} #fisco .fp-tab b{font-weight:800}
+#fisco .ft-grigio{font-size:18.5px}
+#fisco .ft-sc-lista .ft-sc{grid-template-columns:72px 1fr auto;padding:14px 18px}
+#fisco .ft-sc-d b{font-size:33.5px;font-weight:800} #fisco .ft-sc-d span{font-size:18.5px;font-weight:700}
+#fisco .ft-sc-t b{font-size:22px;font-weight:800} #fisco .ft-sc-t span{font-size:19px}
+#fisco .ft-imp small{font-size:18px} #fisco .ft-imp b{font-size:26.5px;font-weight:800}
+#fisco .ft-sc .btn[data-action="ft-ricorda"]{font-size:18.5px;padding:9px 14px}
+#fisco .ft-str{padding:18px 18px}
+#fisco .ft-str b{font-size:23px;font-weight:800} #fisco .ft-str small{font-size:19px}
+#fisco .fp-stima{font-size:19px}
+#fisco .fv-riga{font-size:21.5px} #fisco .fv-riga b{font-weight:800}
+#fisco .fv-riga.tot{font-size:24px;font-weight:800} #fisco .fv-riga.tot b{font-size:31px}
+#fisco .fv-sotto{font-size:20.5px}
+#fisco .fv-mese-n{font-size:23px} #fisco .fv-mese .fv-riga{font-size:20.5px} #fisco .fv-mese .fv-riga.tot b{font-size:25px}
+#fisco .fv-pg-ris small{font-size:19px} #fisco .fv-pg-ris b{font-size:32.5px;font-weight:800}
+#fisco .field label{font-size:19px}
+#fisco .fi-msg{font-size:21.5px}
+#fisco .fi-barra textarea{font-size:21.5px}
+#fisco .ft-sc-piu{font-size:20.5px}
+/* «Da fare adesso» in cima al reparto (28/09) */
+#fisco-adesso:empty{display:none}
+.fp-adesso{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;background:var(--card);border:1px solid var(--bordo);border-left:5px solid #3f6fd8;border-radius:16px;padding:16px 20px;margin:0 0 18px;box-shadow:0 4px 16px rgba(16,24,40,.07)}
+.fp-ad-ic{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#eaf0fc;color:#3f6fd8}
+#fisco .fp-ad-ic .fp-ic{width:26px;height:26px;vertical-align:0}
+.fp-ad-t small{display:block;font-size:18px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--testo-2)}
+.fp-ad-t>b{display:block;font-size:27.5px;font-weight:800;line-height:1.3;margin:2px 0}
+.fp-ad-t span{display:block;font-size:20.5px;color:var(--testo-2)}
+.fp-ad-fra{color:var(--testo)}
+.fp-adesso.rosso{border-left-color:#d9534f} .fp-adesso.rosso .fp-ad-ic{background:#fdeceb;color:#d9534f} .fp-adesso.rosso .fp-ad-fra{color:#d9534f}
+.fp-adesso.giallo{border-left-color:#e0a106} .fp-adesso.giallo .fp-ad-ic{background:#fdf3e1;color:#b7791f}
+.fp-adesso.verde{border-left-color:#2fa46a;grid-template-columns:auto minmax(0,1fr)} .fp-adesso.verde .fp-ad-ic{background:#e8f6ef;color:#2fa46a}
+/* scadenze: 3 in vista, le altre con «Vedi tutte»; la spiegazione a clic */
+.ft-sc-lista:not(.tutte) .ft-sc-altra{display:none}
+#fisco .ft-sc-nota{display:none}
+#fisco .ft-sc.aperta .ft-sc-nota{display:block}
+.ft-sc[data-action="ft-sc-nota"]{cursor:pointer}
+.ft-sc[data-action="ft-sc-nota"]:hover{background:#fafbfd}
+#fisco .ft-sc-apri{width:15px;height:15px;margin-left:6px;vertical-align:-2px;color:var(--testo-2);transition:transform .15s}
+.ft-sc.aperta .ft-sc-apri{transform:rotate(90deg)}
+.ft-sc-piu{display:block;width:100%;margin-top:8px;border:1px dashed var(--bordo);background:transparent;border-radius:12px;padding:10px;font:inherit;font-size:18px;font-weight:700;color:var(--blu);cursor:pointer}
+.ft-sc-piu:hover{background:var(--card)}
+@media(max-width:640px){.fp-adesso{grid-template-columns:auto minmax(0,1fr);padding:14px 16px}.fp-ad-b{grid-column:1/-1}.fp-ad-b .btn-primary{width:100%}.fp-ad-t>b{font-size:24px}}
+@media(max-width:760px){.fp-tot{grid-template-columns:1fr}.fp-nav{display:flex}.fp-nav .fp-chip{flex:1 1 auto;justify-content:center;padding:9px 10px}}
+@media(max-width:640px){.ft-sc-lista .ft-sc{grid-template-columns:54px 1fr}.ft-sc-e{grid-column:1/-1;justify-content:space-between}.ft-imp{text-align:left}.ft-salva{grid-template-columns:1fr}#fisco .ft-salva-ic{grid-row:auto;margin-bottom:10px}}
