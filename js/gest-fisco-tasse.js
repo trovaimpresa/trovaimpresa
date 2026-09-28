@@ -177,7 +177,20 @@
       add("2026-12-28", "Acconto IVA", null, "Chiedi l'importo al commercialista.", true);
       add("2027-03-16", "Saldo IVA dell'anno 2026", null, "", true);
     }
-    if (p.cassa === "inarcassa") add("2027-06-30", "Inarcassa: prima rata dei minimi", FT_INARCASSA.minimo / 2, "La seconda al 30 settembre, il conguaglio entro il 31 dicembre.", true);
+    /* le casse dei tecnici (date verificate il 28/09/2026 su cassageometri.it
+       e inarcassa.it). Le date 2027 non sono ancora uscite: le teniamo uguali. */
+    if (p.cassa === "cipag") {
+      add("2026-09-30", "Cassa Geometri: dichiarazione del reddito 2025 e contributi oltre il minimo", null, "Si possono pagare in 4 rate: 30 settembre, 27 ottobre, 27 novembre, 28 dicembre. L'importo te lo dà la Cassa dopo la dichiarazione.", true);
+      ["2027-02-27", "2027-04-27", "2027-06-27", "2027-08-27"].forEach(d =>
+        add(d, "Cassa Geometri: rata dei contributi minimi", FT_CIPAG.minimo / 4, "Date 2027 non ancora uscite: le metto uguali al 2026.", true));
+      add("2027-09-30", "Cassa Geometri: contributi 2026 oltre il minimo", st.calcolabile && st.contrib.variabili > 0 ? st.contrib.variabili : null, "Stima sui tuoi incassi 2026, più il 5% integrativo che hai messo in fattura. Si può pagare in 4 rate fino a dicembre.", true);
+    }
+    if (p.cassa === "inarcassa") {
+      add("2026-12-31", "Inarcassa: conguaglio dei contributi 2025", null, "L'importo te lo dà Inarcassa dopo la dichiarazione del reddito professionale.", true);
+      add("2027-06-30", "Inarcassa: prima rata dei minimi", FT_INARCASSA.minimo / 2, "Date 2027 non ancora uscite: le metto uguali al 2026.", true);
+      add("2027-09-30", "Inarcassa: seconda rata dei minimi", FT_INARCASSA.minimo / 2, "", true);
+      add("2027-12-31", "Inarcassa: conguaglio dei contributi 2026", st.calcolabile && st.contrib.variabili > 0 ? st.contrib.variabili : null, "Stima sui tuoi incassi 2026, più il 4% integrativo che hai messo in fattura.", true);
+    }
 
     const oggi = todayStr();
     return L.filter(x => x.d >= oggi).sort((a, b) => a.d < b.d ? -1 : 1).slice(0, 7);
@@ -296,7 +309,7 @@
         /* i contributi fissi da soli superano quello che entra: dire «metti da
            parte 100 € su 100» non aiuta nessuno, va detto com'e' */
         h += `<div class="ft-salva"><div class="ft-salva-n">🐷 Quest'anno tasse e contributi (<b>${eur(st.totale)}</b>)<br>sono <b class="fp-rosso">più di quello che incassi</b></div>
-          <div class="ft-salva-d">Ti mancano circa <b>${eur(st.totale - proiezione)}</b>. Succede quando si incassa poco: i contributi fissi INPS si pagano lo stesso. Metti da parte tutto quello che puoi, circa <b>${eur(st.totale / 12)}</b> al mese, e parlane col commercialista.</div>`;
+          <div class="ft-salva-d">Ti mancano circa <b>${eur(st.totale - proiezione)}</b>. Succede quando si incassa poco: i contributi fissi si pagano lo stesso. Metti da parte tutto quello che puoi, circa <b>${eur(st.totale / 12)}</b> al mese, e parlane col commercialista.</div>`;
       } else {
       h += `<div class="ft-salva"><div class="ft-salva-n">🐷 Su ogni <b>100 €</b> che incassi,<br>metti da parte <b class="ft-grande">${su100} €</b></div>
         <div class="ft-salva-d">Cioè circa <b>${eur(st.totale / 12)}</b> al mese. Apri un conto a parte, anche gratuito, e ogni volta che un cliente paga sposta lì la tua parte: a giugno e novembre i soldi ci sono già.</div>`;
