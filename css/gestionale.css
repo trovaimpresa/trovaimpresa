@@ -5191,3 +5191,43 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 #calendario .cal-legend{font-size:17px!important;font-weight:600;color:#0b1220!important}
 #calendario .cal-legend span{color:#0b1220!important}
 @media(max-width:640px){#calendario .cal-lav-t{font-size:13.5px!important;-webkit-line-clamp:2!important}#calendario .cal-cell .dn{font-size:16px!important}#calendario .cal-dow{font-size:14px!important}}
+/* ═══ 28/09/2026 — LE ALTRE SEZIONI: SCRITTE PIU' GRANDI ═══════════════════
+   Agenda, Galleria, Mappa, Prezzario, Report, Richieste, Assistenza,
+   Squadra, SAL, Computo, Cestino. I colori sono gia' neri (la variabile
+   --testo-2 e' nera in tutte le sezioni, vedi le schede qui sopra): qui
+   salgono solo le misure che stavano fra 13 e 15,5 px. */
+.wrap section .segm button{font-size:17px!important}
+.wrap section .filtro .filtro-lab,.wrap section .filtro .btn{font-size:17px!important}
+.wrap section .job-top .stato{font-size:17px!important}
+.wrap section .filo .filo-t{font-size:17px!important}
+.wrap section .field > label{font-size:16.5px!important}
+.wrap section .sh-nota{font-size:17px!important}
+/* assistenza */
+.wrap section .asst-quando,.wrap section .asst-giorno{font-size:15px!important}
+.wrap section .asst-tasti,.wrap section .asst-nota{font-size:16.5px!important}
+/* cestino */
+.wrap section .cest-nota{font-size:17px!important}
+/* galleria */
+.wrap section .gal-conta{font-size:17px!important;color:#0b1220!important}
+.wrap section .thumb .thop,.wrap section .thumb .thtag,.wrap section .vid-play span{font-size:14.5px!important}
+/* mappa */
+.wrap section .mp-r-sub{font-size:17px!important}
+.wrap section .mp-min{font-size:16px!important}
+.wrap section .mp-r-btn{font-size:16.5px!important}
+.wrap section .mp-u-lab{font-size:15px!important}
+/* prezzario */
+.wrap section .pz-cod{font-size:16px!important}
+.wrap section .pz-desc{font-size:18px!important}
+.wrap section .pz-prezzo small{font-size:16.5px!important}
+.wrap section .pz-meta{font-size:16px!important;color:#0b1220!important}
+/* report */
+.wrap section .rep-bar-lab{font-size:15px!important;color:#0b1220!important}
+.wrap section .mbadge{font-size:15.5px!important}
+.wrap section .mlav-sub,.wrap section .rep-legend span,.wrap section .rep-sub{font-size:17px!important}
+#report td span{font-size:15px!important}
+/* richieste dal sito */
+.wrap section .rq-es,.wrap section .rq-esempi-lab,.wrap section .rq-come,.wrap section .rq-data{font-size:17px!important}
+.wrap section .rq-pill span{font-size:16px!important}
+.wrap section .rq-risp{font-size:17.5px!important}
+/* squadra */
+.wrap section .app-op-p{font-size:17px!important}
