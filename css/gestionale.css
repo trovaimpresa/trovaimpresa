@@ -4891,6 +4891,20 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
 .ft-let{border:1px solid var(--bordo);border-radius:12px;padding:12px 14px;margin:10px 0}
 .ft-let p{margin:6px 0}
 .ft-let ul{margin:6px 0;padding-left:20px;line-height:1.5}
+/* 28/09/2026 — Tasse e fisco potenziato: calendario, Quale IVA, bonus casa */
+.ft-sc-testa{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ft-sc-testa .btn{margin-top:14px}
+.ft-iva-d{margin-bottom:14px}
+.ft-iva-q{font-weight:700;font-size:15.5px;margin-bottom:8px}
+.ft-iva-o{display:flex;flex-wrap:wrap;gap:8px}
+.ft-iva-o .fp-chip{text-align:left;line-height:1.35}
+.ft-iva-r{display:flex;gap:14px;align-items:flex-start;background:var(--ok-bg);border:1px solid var(--bordo);border-radius:14px;padding:14px 16px;margin-top:6px}
+.ft-iva-al{flex:0 0 auto;min-width:64px;text-align:center;font-size:26px;font-weight:800;color:var(--ok);background:var(--card);border-radius:12px;padding:10px 8px;font-variant-numeric:tabular-nums}
+.ft-iva-r b{font-size:16px}
+.ft-iva-r p{margin:6px 0;font-size:14.5px;line-height:1.45}
+.ft-iva-frase{background:var(--card);border:1px dashed var(--bordo);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:14px}
+.ft-iva-frase small{display:block;color:var(--testo-2);font-size:13px;margin-bottom:2px}
+@media(max-width:640px){.ft-iva-r{flex-direction:column}.ft-sc-testa .btn{width:100%;margin-top:0}}
 @media(max-width:640px){.ft-sc{grid-template-columns:54px 1fr}.ft-sc-e{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;text-align:left}.ft-strum{grid-template-columns:1fr}}
 /* ═══ 27 set 2026 — TASSE E FISCO · Sopravvivere (js/gest-fisco-vivere.js) ═══ */
 .fv-conto{background:var(--card);border:1px solid var(--bordo);border-radius:14px;padding:6px 16px 12px;margin-bottom:10px}

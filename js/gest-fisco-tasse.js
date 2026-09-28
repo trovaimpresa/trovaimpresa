@@ -43,6 +43,14 @@
   const FT_IRPEF = [[28000, 23], [50000, 33], [Infinity, 43]];
   const FT_SOGLIA_FORF = 85000, FT_USCITA_FORF = 100000;
   const FT_LEGALE = [["2025-01-01", 2.00], ["2026-01-01", 1.60]];
+  /* 28/09/2026 — bollo sulle fatture elettroniche senza IVA sopra 77,47 €:
+     si paga a trimestre. Se il 1° trimestre, o 1°+2°, restano sotto i
+     5.000 € di bolli si paga piu' tardi (fonte: flextax.it, fiscoetasse.com) */
+  const FT_BOLLO_SOGLIA = 5000;
+  /* 28/09/2026 — ritenuta che la banca trattiene sui bonifici dei bonus casa:
+     11% dal 1/3/2024, uguale nel 2026. La banca toglie SEMPRE il 22% di IVA
+     prima di calcolarla, anche se in fattura c'e' il 10% o niente IVA. */
+  const FT_RIT_BONUS = 11;
 
   const FT_FORME = [["ditta", "Ditta individuale (artigiano, impresa, negozio)"], ["professionista", "Professionista con partita IVA"],
                     ["societa_persone", "Società di persone (SNC, SAS)"], ["srl", "Società di capitali (SRL, SRLS)"]];
@@ -143,7 +151,46 @@
   // ---------------------------------------------------------------------
   // LE SCADENZE — calendario 1/10/2026 – 31/12/2027 (regole-2026, voce 11)
   // ---------------------------------------------------------------------
-  function ftScadenze(p, st, dati) {
+  /* sabato e domenica la scadenza va al lunedi' */
+  function ftFeriale(d) {
+    const [y, m, g] = d.split("-").map(Number), x = new Date(y, m - 1, g);
+    while (x.getDay() === 0 || x.getDay() === 6) x.setDate(x.getDate() + 1);
+    return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0");
+  }
+
+  /* il bollo da 2 € delle fatture: le scadenze, con i bolli veri delle sue
+     fatture. Solo se chi chiama ha passato dati.bollo (Le tue tasse). */
+  function ftBollo(p, dati, add) {
+    const B = dati && dati.bollo; if (!B) return;
+    const Y = ftAnno(), oggi = todayStr();
+    const q = (y, n) => B[y + "-" + n] || { eur: 0, n: 0 };
+    const fine = (y, n) => y + "-" + ["03-31", "06-30", "09-30", "12-31"][n - 1];
+    const usa = p.regime === "forfettario" || Object.keys(B).length > 0;
+    if (!usa) return;
+    for (let y = Y - 1; y <= Y + 1; y++) {
+      const a1 = q(y, 1).eur, a2 = q(y, 2).eur;
+      const gruppi = {};
+      const metti = (d, n) => { d = ftFeriale(d); (gruppi[d] = gruppi[d] || []).push(n); };
+      if (a1 + a2 < FT_BOLLO_SOGLIA) { metti(y + "-11-30", 1); metti(y + "-11-30", 2); }
+      else { metti(a1 < FT_BOLLO_SOGLIA ? y + "-09-30" : y + "-05-31", 1); metti(y + "-09-30", 2); }
+      metti(y + "-11-30", 3);
+      metti((y + 1) + "-02-28", 4);
+      Object.keys(gruppi).forEach(d => {
+        if (d < oggi) return;
+        const T = gruppi[d];
+        const eurT = T.reduce((s, n) => s + q(y, n).eur, 0), nT = T.reduce((s, n) => s + q(y, n).n, 0);
+        const aperto = T.some(n => fine(y, n) >= oggi);   /* un trimestre non ancora finito */
+        if (!(eurT > 0) && !(aperto && p.regime === "forfettario")) return;
+        if (!(eurT > 0) && y > Y) return;                 /* l'anno prossimo solo se ci sono gia' bolli */
+        const nomi = T.length > 1 ? T.slice(0, -1).map(n => n + "°").join(", ") + " e " + T[T.length - 1] + "°" : T[0] + "°";
+        const nota = (eurT > 0 ? nT + (nT === 1 ? " fattura" : " fatture") + " col bollo da 2 €" + (aperto ? ", per ora" : "") + ". " : "Ogni fattura senza IVA sopra 77,47 € ha il bollo da 2 €. ")
+          + "L'F24 già pronto lo trovi sul sito dell'Agenzia, in «Fatture e corrispettivi».";
+        add(d, "Bollo delle fatture (" + nomi + " trimestre " + y + ")", eurT > 0 ? eurT : null, nota, true);
+      });
+    }
+  }
+
+  function ftScadenze(p, st, dati, tutte) {
     const indiv = p.forma === "ditta" || p.forma === "professionista";
     const inps = p.cassa === "artigiani" || p.cassa === "commercianti";
     const ivaSi = p.regime === "ordinario";
@@ -192,8 +239,11 @@
       add("2027-12-31", "Inarcassa: conguaglio dei contributi 2026", st.calcolabile && st.contrib.variabili > 0 ? st.contrib.variabili : null, "Stima sui tuoi incassi 2026, più il 4% integrativo che hai messo in fattura.", true);
     }
 
+    ftBollo(p, dati, add);
+
     const oggi = todayStr();
-    return L.filter(x => x.d >= oggi).sort((a, b) => a.d < b.d ? -1 : 1).slice(0, 7);
+    const F = L.filter(x => x.d >= oggi).sort((a, b) => a.d < b.d ? -1 : 1);
+    return tutte ? F : F.slice(0, 7);
   }
 
   // ---------------------------------------------------------------------
@@ -245,7 +295,7 @@
     const [rP, rA, rF] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("regime_fiscale").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_fatture").select("id,stato,data,data_pagata").eq("user_id", sbUid)
+      sb.from("gest_fatture").select("id,stato,data,data_pagata,bollo").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01")
     ]);
     if (vecchio()) return;
@@ -272,8 +322,16 @@
     const [yy, mm] = oggi.split("-").map(Number);
     const mesePrec = mm === 1 ? [(yy - 1), 12] : [yy, mm - 1];
     const mp = mesePrec[0] + "-" + String(mesePrec[1]).padStart(2, "0");
+    /* i bolli per trimestre: conta la data della fattura. Chiave «2026-3» */
+    const bollo = {};
+    ff.forEach(f => {
+      const b = +f.bollo || 0; if (!(b > 0) || !f.data) return;
+      const k = f.data.slice(0, 4) + "-" + Math.ceil(+f.data.slice(5, 7) / 3);
+      if (!bollo[k]) bollo[k] = { eur: 0, n: 0 };
+      bollo[k].eur += b; bollo[k].n++;
+    });
     ftDati = {
-      incassi, ivaAnno,
+      incassi, ivaAnno, bollo,
       ivaQ3: ivaTra("2026-07-01", "2026-09-30"),
       ivaMese: ivaTra(mp + "-01", mp + "-31")
     };
@@ -339,7 +397,8 @@
     /* LE SCADENZE */
     const sc = ftScadenze(p, st, ftDati);
     if (sc.length) {
-      h += `<h3 class="fp-h3">Le prossime scadenze</h3>` + sc.map(x => {
+      h += `<div class="ft-sc-testa"><h3 class="fp-h3">Le prossime scadenze</h3>
+        <button class="btn" data-action="ft-ics">📅 Mettile nel calendario del telefono</button></div>` + sc.map(x => {
         const g = _giorniA(x.d);
         return `<div class="ft-sc${g <= 15 ? " vicina" : ""}">
           <div class="ft-sc-d"><b>${x.d.slice(8, 10)}</b><span>${["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"][+x.d.slice(5, 7) - 1]} ${x.d.slice(2, 4)}</span></div>
@@ -363,6 +422,8 @@
     return `<h3 class="fp-h3">Ti serve aiuto?</h3><div class="ft-strum">
       <button class="ft-str" data-action="ft-ravv"><span>⏰</span><b>Ho pagato in ritardo</b><small>Quanto costa il ravvedimento</small></button>
       <button class="ft-str" data-action="ft-lettera"><span>✉️</span><b>Mi è arrivata una lettera</b><small>Avviso bonario o cartella: cosa fare</small></button>
+      <button class="ft-str" data-action="ft-iva"><span>🧮</span><b>Quale IVA metto?</b><small>10%, 22%, 4% o reverse charge: 3 domande</small></button>
+      <button class="ft-str" data-action="ft-bonus"><span>🏦</span><b>Bonifico del bonus casa</b><small>Perché ti arriva meno di quanto hai fatturato</small></button>
     </div>`;
   }
 
@@ -532,10 +593,152 @@
         <ul><li>Hai <b>60 giorni</b> per pagare o chiedere le rate.</li><li>Fino a <b>120.000 €</b> puoi chiedere <b>fino a 84 rate</b> mensili senza dimostrare niente (domande 2025–2026). Rata minima 50 €.</li><li>Attenzione: se salti <b>8 rate</b>, anche non di fila, perdi la rateizzazione.</li><li>La domanda si fa online sul sito dell'Agenzia Riscossione, anche da solo.</li></ul></div>
       <div class="ft-let"><b>🏛️ Lettera dell'INPS</b>
         <p>Di solito sono contributi non pagati. Controlla nel <b>Cassetto previdenziale</b> sul sito INPS e chiama il commercialista.</p></div>
-      <div class="fp-cons neutro"><div>🤖</div><div><b>Presto potrai fotografarla</b>Nella prossima tappa potrai fare una foto alla lettera e l'AI te la spiega con parole semplici.</div></div>
+      <div class="fp-cons neutro"><div>📷</div><div><b>Fotografala: te la spiega l'AI</b>Fai una foto alla prima pagina e l'AI ti dice con parole semplici cos'è e cosa fare. <button class="fp-link" data-action="ft-vai-ai">Apri «Chiedi all'AI»</button></div></div>
       <p class="fp-stima">Informazioni generali aggiornate al 2026, non un parere. Per la tua lettera senti il commercialista.</p>
     </div>`, `<button class="btn-primary" data-action="close">Ho capito</button>`);
   }
+
+  // ---------------------------------------------------------------------
+  // 28/09/2026 — LE SCADENZE NEL CALENDARIO DEL TELEFONO (.ics)
+  // Tutte le scadenze, non solo le prime 7. Ogni evento ha due avvisi del
+  // telefono: 7 giorni prima e il giorno prima, alle 9. L'UID e' fisso per
+  // data+testo: se lo riscarica, Google e iPhone aggiornano invece di doppiare.
+  // ---------------------------------------------------------------------
+  function ftIcsTesto(t) { return String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+  function ftIcsUid(d, t) { let h = 0; for (const c of d + t) h = (h * 31 + c.charCodeAt(0)) | 0; return "ti-fisco-" + d + "-" + (h >>> 0).toString(36) + "@trovaimpresa.com"; }
+  function ftIcs() {
+    if (!ftProfilo || !ftDati) { toast("Prima compila il profilo fiscale"); return; }
+    const L = ftScadenze(ftProfilo, ftStima(ftProfilo, ftProiezione(ftDati.incassi).val), ftDati, true);
+    if (!L.length) { toast("Nessuna scadenza da mettere"); return; }
+    const ora = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+    const giornoDopo = d => { const [y, m, g] = d.split("-").map(Number), x = new Date(y, m - 1, g + 1); return x.getFullYear() + String(x.getMonth() + 1).padStart(2, "0") + String(x.getDate()).padStart(2, "0"); };
+    const R = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//TrovaImpresa//Tasse e fisco//IT", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Tasse e fisco"];
+    L.forEach(x => {
+      const desc = (x.imp > 0 ? "Circa " + eur(x.imp) + " (stima: verifica col commercialista). " : "") + (x.nota || "");
+      R.push("BEGIN:VEVENT", "UID:" + ftIcsUid(x.d, x.cosa), "DTSTAMP:" + ora,
+        "DTSTART;VALUE=DATE:" + x.d.replace(/-/g, ""), "DTEND;VALUE=DATE:" + giornoDopo(x.d),
+        "SUMMARY:" + ftIcsTesto("Tasse: " + x.cosa), "DESCRIPTION:" + ftIcsTesto(desc), "TRANSP:TRANSPARENT",
+        "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + ftIcsTesto(x.cosa), "TRIGGER:-P6DT15H", "END:VALARM",
+        "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + ftIcsTesto(x.cosa), "TRIGGER:-PT15H", "END:VALARM",
+        "END:VEVENT");
+    });
+    R.push("END:VCALENDAR");
+    const blob = new Blob([R.join("\r\n") + "\r\n"], { type: "text/calendar;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "scadenze-tasse.ics";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast("Scaricato ✔ Aprilo e scegli «Aggiungi tutti»: il telefono ti avvisa 7 giorni prima e il giorno prima");
+  }
+
+  // ---------------------------------------------------------------------
+  // 28/09/2026 — «QUALE IVA METTO?»
+  // Tre domande a bottoni. Le regole (DPR 633/72 e L. 488/1999):
+  //  - forfettario: niente IVA, mai (neanche il reverse charge)
+  //  - subappalto a un'impresa edile: reverse charge art. 17 c.6 lett. a (N6.3)
+  //  - pulizie, demolizione, impianti, completamento per chi ha P.IVA:
+  //    reverse charge lett. a-ter (N6.7)
+  //  - manutenzione su casa: 10% (beni significativi a parte)
+  //  - ristrutturazione / restauro / risanamento: 10% su tutto
+  //  - casa nuova prima casa non di lusso 4%, altre case non di lusso 10%
+  //  - barriere architettoniche 4%
+  //  - manutenzione su negozio, ufficio, capannone: 22%
+  // ---------------------------------------------------------------------
+  let ftIvaStato = {};
+  function ftIvaForm() {
+    openSheetGrande("Quale IVA metto?", `<div class="sh-b"><div id="ft-iva-box"></div>
+      <p class="fp-stima">Regole generali del 2026. Nei casi misti (un contratto unico per tutto l'edificio, lavori su parti di uso diverso) chiedi al commercialista.</p></div>`,
+      `<button class="btn-primary" data-action="close">Chiudi</button>`);
+    ftIvaDisegna();
+  }
+  function ftIvaDom(k, dom, opz) {
+    const sc = ftIvaStato[k];
+    return `<div class="ft-iva-d"><div class="ft-iva-q">${dom}</div><div class="ft-iva-o">` +
+      opz.map(o => `<button class="fp-chip${sc === o[0] ? " on" : ""}" data-action="ft-iva-sc" data-k="${k}" data-v="${o[0]}">${o[1]}</button>`).join("") + `</div></div>`;
+  }
+  function ftIvaRis(aliq, titolo, righe, frase) {
+    return `<div class="ft-iva-r"><div class="ft-iva-al">${aliq}</div><div><b>${titolo}</b>
+      ${righe.map(r => `<p>${r}</p>`).join("")}
+      ${frase ? `<div class="ft-iva-frase"><small>Da scrivere in fattura</small>${frase}</div>` : ""}
+      <button class="fp-link" data-action="ft-iva-da-capo">↺ Ricomincia</button></div></div>`;
+  }
+  function ftIvaDisegna() {
+    const box = $("#ft-iva-box"); if (!box) return;
+    const S = ftIvaStato, p = ftProfilo || {};
+    if (p.regime === "forfettario" && !S.tutte) {
+      box.innerHTML = ftIvaRis("0", "Sei forfettario: niente IVA, mai",
+        ["Né 10%, né 22%, né reverse charge: anche se lavori in subappalto per un'impresa edile.",
+         "Se la fattura supera <b>77,47 €</b> ci va il <b>bollo da 2 €</b>. Il gestionale lo mette nel campo «Bollo»."],
+        "Operazione senza applicazione dell'IVA, effettuata ai sensi dell'art. 1, commi da 54 a 89, Legge n. 190/2014 – Regime forfettario")
+        + `<p class="ft-grigio">Non sei forfettario? <button class="fp-link" data-action="ft-iva-da-capo">Rispondi alle domande</button> e poi correggi il profilo.</p>`;
+      return;
+    }
+    let h = ftIvaDom("chi", "1. Per chi fai il lavoro?", [["privato", "Un privato o un condominio"], ["impresa", "Un'impresa edile (sono in subappalto)"], ["azienda", "Un'altra azienda, un negozio, un ente"]]);
+    const fine = r => { box.innerHTML = h + r; };
+    if (!S.chi) return fine("");
+    if (S.chi === "impresa") return fine(ftIvaRis("RC", "Reverse charge: niente IVA in fattura",
+      ["L'IVA la mette l'impresa che ti paga, non tu.",
+       "⚠️ Attenzione ai soldi: i materiali li paghi col 22% ma l'IVA non la incassi. A fine anno puoi trovarti <b>a credito IVA</b>: dillo al commercialista, si può recuperare."],
+      "Inversione contabile – art. 17, comma 6, lett. a), DPR 633/72 (natura N6.3)"));
+    if (S.chi === "azienda") {
+      h += ftIvaDom("ater", "2. È uno di questi lavori?", [["si", "Pulizie, demolizione, impianti (elettrico, idraulico, gas, clima), completamento (intonaci, pavimenti, pitture, infissi…)"], ["no", "No, altro"]]);
+      if (!S.ater) return fine("");
+      if (S.ater === "si") return fine(ftIvaRis("RC", "Reverse charge: niente IVA in fattura",
+        ["Per questi lavori su un edificio, se il cliente ha la partita IVA, l'IVA la mette lui. Vale anche se non sei in subappalto.",
+         "⚠️ Come sopra: puoi trovarti a credito IVA a fine anno."],
+        "Inversione contabile – art. 17, comma 6, lett. a-ter), DPR 633/72 (natura N6.7)"));
+    }
+    const n = S.chi === "azienda" ? 3 : 2;
+    h += ftIvaDom("lavoro", n + ". Che lavoro è?", [["manut", "Manutenzione o riparazione"], ["ristr", "Ristrutturazione, restauro, risanamento"], ["nuova", "Una casa nuova"], ["barriere", "Togliere barriere (rampe, montascale, bagno per disabili)"]]);
+    if (!S.lavoro) return fine("");
+    if (S.lavoro === "barriere") return fine(ftIvaRis("4%", "IVA al 4%",
+      ["Vale per le opere fatte apposta per superare le barriere architettoniche."], ""));
+    if (S.lavoro === "ristr") return fine(ftIvaRis("10%", "IVA al 10% su tutto",
+      ["Lavoro e materiali, senza limiti.", "Serve il titolo del Comune (CILA, SCIA o permesso di costruire): tienine il numero e scrivilo in fattura."], ""));
+    if (S.lavoro === "nuova") {
+      h += ftIvaDom("prima", (n + 1) + ". È la prima casa del cliente?", [["si", "Sì, prima casa (non di lusso)"], ["no", "No, o non lo so"]]);
+      if (!S.prima) return fine("");
+      return fine(S.prima === "si"
+        ? ftIvaRis("4%", "IVA al 4%", ["Fatti dare dal cliente la dichiarazione che ha i requisiti della prima casa, e tienila con la fattura."], "")
+        : ftIvaRis("10%", "IVA al 10%", ["Vale per le case non di lusso. Per una casa di lusso è 22%."], ""));
+    }
+    h += ftIvaDom("dove", (n + 1) + ". Su che edificio?", [["casa", "Una casa o un appartamento"], ["altro", "Negozio, ufficio, capannone"]]);
+    if (!S.dove) return fine("");
+    if (S.dove === "altro") return fine(ftIvaRis("22%", "IVA al 22%", ["La manutenzione su edifici che non sono case va al 22%."], ""));
+    return fine(ftIvaRis("10%", "IVA al 10%",
+      ["Per la manutenzione (ordinaria e straordinaria) sulle case.",
+       "⚠️ Se monti <b>caldaia, infissi, sanitari, rubinetteria, condizionatori, ascensore o videocitofono</b>: su questi pezzi il 10% vale solo fino al valore della manodopera, il resto va al 22%. Scrivi in fattura il valore di questi pezzi."], ""));
+  }
+
+  // ---------------------------------------------------------------------
+  // 28/09/2026 — IL BONIFICO DEL BONUS CASA
+  // ---------------------------------------------------------------------
+  function ftBonusForm() {
+    openSheetGrande("Bonifico del bonus casa", `<div class="sh-b">
+      <p>Quando il cliente usa un <b>bonus casa</b> (ristrutturazioni, ecobonus…) ti paga con il <b>bonifico parlante</b>. La banca ti trattiene una parte e la manda allo Stato a nome tuo.</p>
+      <div class="field"><label>Quanto ti paga il cliente (il totale della fattura)</label><input id="ft-b-imp" type="text" inputmode="decimal" placeholder="Es. 11000" data-euro></div>
+      <div id="ft-b-out"></div>
+      <div class="ft-let"><b>Non sono soldi persi</b>
+        <ul><li>Sono tasse <b>già pagate in anticipo</b>. In dichiarazione il commercialista le toglie dalle tue tasse.</li>
+        <li>Se sono più delle tue tasse, ti restano come <b>credito</b> da usare negli F24.</li>
+        <li>Conserva le contabili dei bonifici e dalle al commercialista.</li></ul></div>
+      <div class="fp-cons giallo"><div>☝️</div><div><b>Nel gestionale segna la fattura pagata per intero</b>Il cliente ha pagato tutto: la differenza l'ha presa lo Stato per te. Se segni solo quello che ti è arrivato, i conti delle tue tasse vengono sbagliati.</div></div>
+      <p class="fp-stima">Ritenuta dell'${FT_RIT_BONUS}% in vigore dal 1° marzo 2024, uguale nel 2026. La banca toglie sempre il 22% di IVA prima del conto, anche se in fattura c'è il 10% o niente IVA.</p>
+    </div>`, `<button class="btn-primary" data-action="close">Ho capito</button>`);
+  }
+  function ftBonusCalcola() {
+    const out = $("#ft-b-out"); if (!out) return;
+    const v = parseFloat(String(($("#ft-b-imp") || {}).value || "").replace(/\./g, "").replace(",", "."));
+    if (!(v > 0)) { out.innerHTML = ""; return; }
+    const rit = Math.round(v / 1.22 * FT_RIT_BONUS) / 100;
+    out.innerHTML = `<table class="fp-tab">
+      <tr><td>Il cliente paga</td><td><b>${eur(v)}</b></td></tr>
+      <tr><td>La banca trattiene</td><td><b class="fp-rosso">− ${eur(rit)}</b> <span class="ft-grigio">(${FT_RIT_BONUS}% di ${eur(v / 1.22)})</span></td></tr>
+      <tr><td>Sul tuo conto arrivano</td><td><b class="ft-grande2">${eur(v - rit)}</b></td></tr></table>`;
+  }
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "ft-b-imp") ftBonusCalcola();
+  });
 
   document.addEventListener("click", function (e) {
     const t = e.target && e.target.closest ? e.target.closest("[data-action]") : null;
@@ -547,4 +750,10 @@
     if (a === "ft-ricorda") { ftRicorda(t.dataset.d, t.dataset.t, t.dataset.i); return; }
     if (a === "ft-ravv")    { ftRavvForm(); return; }
     if (a === "ft-lettera") { ftLettera(); return; }
+    if (a === "ft-vai-ai")  { closeSheet(); fpSezione = "ai"; renderFisco(); return; }
+    if (a === "ft-ics")     { ftIcs(); return; }
+    if (a === "ft-iva")     { ftIvaStato = {}; ftIvaForm(); return; }
+    if (a === "ft-iva-sc")  { ftIvaStato[t.dataset.k] = t.dataset.v; ftIvaDisegna(); return; }
+    if (a === "ft-iva-da-capo") { ftIvaStato = { tutte: "1" }; ftIvaDisegna(); return; }
+    if (a === "ft-bonus")   { ftBonusForm(); return; }
   });
