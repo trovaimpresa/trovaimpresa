@@ -5361,7 +5361,7 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
      (a 375 px non ci stavano: min-width 132 + 132 > 263 e finivano uno sotto l'altro) */
   .sheet--grande .sh-foot:has(.ctr-tasto){gap:8px!important;padding-top:10px!important;padding-bottom:10px!important}
   .sheet--grande .sh-foot .ctr-tasto,.sheet--grande .sh-foot .ctr-tasto-ai{flex:1 0 100%!important;white-space:normal!important;height:auto!important;min-height:44px;padding:8px 12px!important;font-size:15px!important;line-height:1.25;margin-bottom:0!important}
-  .sheet--grande .sh-foot:has(.ctr-tasto) .b-cancel,.sheet--grande .sh-foot:has(.ctr-tasto) .b-save{flex:1 1 0!important;min-width:0!important}
+  .sheet--grande .sh-foot:has(.ctr-tasto) .b-cancel,.sheet--grande .sh-foot:has(.ctr-tasto) .b-save{flex:1 1 0!important;min-width:0!important;white-space:normal!important;line-height:1.15!important;padding:0 8px!important;font-size:16px!important}   /* «Crea preventivo» a 375 px usciva dal pulsante */
 }
 /* le «i» di aiuto: il disegno resta piccolo, l'area da toccare diventa da dito (44 px) */
 @media(max-width:880px){
