@@ -29,7 +29,14 @@ Alex: «lo facciamo domani, mettilo in programmi… dobbiamo finire il lavoro, c
 
 **Limiti noti:** noleggio con IVA a 0% non parte (serve il codice reverse charge N6.x); il bollo nel noleggio non c'è; ambiente test/prod si legge dalla variabile, non dal database.
 
-**Dopo:** gestionale dal TELEFONO/cantiere, poi pulizia del codice (CSS a strati, `gestionale-app.html` enorme).
+**Fatto la sera del 29 settembre (online e provato dal vivo):**
+- TELEFONO/cantiere: menu con aiuti affiancati, piede delle finestre compatto, barra «Lavori», «i» da dito, Noleggio installabile.
+- PULIZIA DEL CODICE, passo 1: il codice che stava DENTRO le pagine e' uscito, identico riga per riga, in `js/gest-core.js` (gestionale, pagina da 787 a 57 KB), `js/nol-core.js` (noleggio, da 483 a 79 KB), `js/op-core.js` (agenda operaio). `tools/controllo-push.js` e i banchi di prova sono stati adattati a leggerli. ⚠️ Nel commento in cima a questi file NON scrivere il tag di chiusura dello script: se si rimette il codice dentro la pagina (i banchi lo fanno) chiude lo script a meta'.
+- MENU CORTO: ora parte SEMPRE corto (prima si ricordava «aperto» per sempre nel browser).
+- «Tasse e fisco»: online e visibile per tutti e 3 i ruoli; il Noleggio ha il suo pulsante che porta li'.
+
+**DA FARE DOPO L'SDI — PULIZIA DEL CODICE, passo 2 (deciso con Alex il 29 set):** `js/gest-core.js` e' ancora UN file da ~749 KB. Va DIVISO in pezzi piccoli (per esempio menu e reparti · clienti · preventivi · lavori · finestre), UN pezzo alla volta, con banchi e collaudo dal vivo dopo ogni pezzo: alcune parti si chiamano fra loro. Lo scopo, detto da Alex: ogni modifica deve toccare un pezzo solo, senza dover rileggere tutto. Poi lo stesso per `js/nol-core.js` (~404 KB) e `js/op-core.js` (~105 KB). Il CSS resta a strati: rischio alto, guadagno basso (deciso).
+- Banco `banco-app-operaio.js`: →6← prove rosse gia' PRIMA della pulizia (cerca ancora `gestionale-negozio.html`, che non esiste piu': il negozio e' un ruolo dentro `gestionale-app.html`). Da riallineare.
 
 ---
 
