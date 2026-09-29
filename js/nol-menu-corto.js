@@ -69,7 +69,6 @@
       nav.classList.toggle("nol-altre-aperte", si);
       btn.setAttribute("aria-expanded", si ? "true" : "false");
       btn.classList.toggle("aperto", si);
-      try { localStorage.setItem(CHIAVE, si ? "1" : "0"); } catch (_) {}
     }
     function aggiorna() {
       var voci = altre.filter(visibile);
@@ -82,9 +81,10 @@
     }
     btn.addEventListener("click", function () { apri(!nav.classList.contains("nol-altre-aperte")); aggiorna(); });
 
-    var ricordato = null;
-    try { ricordato = localStorage.getItem(CHIAVE); } catch (_) {}
-    apri(ricordato === "1");
+    /* 29/09/2026: parte SEMPRE corto. Prima si ricordava «aperto» per sempre: bastava
+       aprirlo una volta (o arrivare da un link) e restava aperto ogni volta. */
+    try { localStorage.removeItem(CHIAVE); } catch (_) {}
+    apri(false);
     aggiorna();
 
     var inAttesa = false;

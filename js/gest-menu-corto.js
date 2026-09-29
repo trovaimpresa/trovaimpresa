@@ -10,7 +10,7 @@
      qualcosa da guardare (il loro contatore non e' vuoto).
    - Se la sezione aperta e' una di quelle nascoste (per esempio arrivi da
      un link dell'email ai Promemoria), il gruppo si apre da solo.
-   - Aperto/chiuso si ricorda nel browser (se il browser lo permette).
+   - NON si ricorda: ad ogni apertura del gestionale parte corto (29/09).
    - Non cambia nessun data-tab e nessun pulsante: sposta solo i pulsanti
      che ci sono gia' dentro un contenitore. Il resto del gestionale li
      trova come prima (cerca per [data-tab], non per posizione).
@@ -67,7 +67,6 @@
       box.hidden = !si;
       btn.setAttribute("aria-expanded", si ? "true" : "false");
       btn.classList.toggle("aperto", si);
-      try { localStorage.setItem(CHIAVE, si ? "1" : "0"); } catch (_) {}
     }
     function aggiorna() {
       var voci = Array.prototype.slice.call(box.querySelectorAll("button[data-tab]")).filter(visibile);
@@ -81,9 +80,10 @@
     }
     btn.addEventListener("click", function () { apri(box.hidden); });
 
-    var ricordato = null;
-    try { ricordato = localStorage.getItem(CHIAVE); } catch (_) {}
-    apri(ricordato === "1");
+    /* 29/09/2026: parte SEMPRE corto. Prima si ricordava «aperto» per sempre: bastava
+       aprirlo una volta (o arrivare da un link) e restava aperto ogni volta. */
+    try { localStorage.removeItem(CHIAVE); } catch (_) {}
+    apri(false);
     aggiorna();
 
     /* i contatori e le voci accese/spente cambiano mentre si lavora */
