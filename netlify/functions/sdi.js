@@ -152,13 +152,25 @@ exports.handler = async function (event) {
     const n = await chiamaOpenapi(BASE, TOKEN, 'GET', '/invoices_notifications/' + encodeURIComponent(f.sdi_uuid));
     const lista = n.json && Array.isArray(n.json.data) ? n.json.data : (Array.isArray(n.json) ? n.json : []);
     const s = statoDaNotifiche(lista);
+    /* 29/09/2026 — il CONTROLLO: cosa dice Openapi della fattura, per capire
+       dove si e' fermata se la risposta dello SDI non arriva. Solo numeri e
+       codici, niente dati del cliente. */
+    const i = await chiamaOpenapi(BASE, TOKEN, 'GET', '/invoices/' + encodeURIComponent(f.sdi_uuid));
+    const d = (i.json && (i.json.data || i.json)) || {};
+    const controllo = {
+      notifiche_http: n.status, notifiche: lista.map(x => ({ tipo: x.type, il: x.created_at })),
+      fattura_http: i.status,
+      stato_openapi: d.status || d.state || d.sdi_status || null,
+      campi_openapi: Object.keys(d).slice(0, 40),
+      errore_openapi: (i.json && (i.json.error || i.json.message)) || null
+    };
     if (s.stato) {
       const { data: agg } = await db.from('gest_fatture').update({
         sdi_stato: s.stato, sdi_esito: s.esito, sdi_aggiornata_il: new Date().toISOString()
       }).eq('id', f.id).select('*').maybeSingle();
-      return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: agg || f });
+      return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: agg || f, controllo });
     }
-    return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: f });
+    return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: f, controllo });
   }
 
   if (azione !== 'invia') return risposta(400, { error: 'Azione sconosciuta.' });
