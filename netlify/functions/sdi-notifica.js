@@ -65,7 +65,9 @@ exports.handler = async function (event) {
   if (!uuid) return { statusCode: 200, body: 'ok' };   /* niente da fare, ma non far ripetere */
 
   const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const { data: f } = await db.from('gest_fatture').select('id').eq('sdi_uuid', uuid).maybeSingle();
+  let TAB = 'gest_fatture';
+  let { data: f } = await db.from(TAB).select('id').eq('sdi_uuid', uuid).maybeSingle();
+  if (!f) { TAB = 'nol_fatture'; ({ data: f } = await db.from(TAB).select('id').eq('sdi_uuid', uuid).maybeSingle()); }
   if (!f) return { statusCode: 200, body: 'ok' };
 
   const r = await fetch(BASE + '/invoices_notifications/' + encodeURIComponent(uuid), {
@@ -75,7 +77,7 @@ exports.handler = async function (event) {
   const lista = j && Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
   const s = statoDaNotifiche(lista);
   if (s.stato) {
-    await db.from('gest_fatture').update({
+    await db.from(TAB).update({
       sdi_stato: s.stato, sdi_esito: s.esito, sdi_aggiornata_il: new Date().toISOString()
     }).eq('id', f.id);
   }

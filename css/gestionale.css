@@ -5322,3 +5322,28 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
 .sheet .sdi-conferma span{display:block;font-size:18px;color:#0b1220;margin:4px 0 12px}
 .sheet .sdi-autorizzo{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:17px;color:#0b1220;line-height:1.45;cursor:pointer}
 .sheet .sdi-autorizzo input{width:22px;height:22px;flex:0 0 auto;margin-top:2px}
+/* ═══ 29/09/2026 — FATTURA DEL NOLEGGIO ALLO SDI (js/nol-sdi.js) ═════════ */
+.nsdi-riga{margin:8px 0 0;font-size:17px;color:#0b1220}
+#nsdi-fin{position:fixed;inset:0;z-index:100000;background:rgba(11,18,32,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#nsdi-fin .nsdi-box{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+#nsdi-fin .nsdi-tit{font-size:22px;font-weight:800;color:#0b1220;padding:18px 20px;border-bottom:1px solid #e2e8f0}
+#nsdi-fin .nsdi-corpo{padding:16px 20px;display:flex;flex-direction:column;gap:14px;font-size:17px;color:#0b1220;line-height:1.45}
+#nsdi-fin .nsdi-pul{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:14px 20px;border-top:1px solid #e2e8f0}
+#nsdi-fin .nsdi-b{font:inherit;font-size:17px;font-weight:700;padding:12px 20px;border-radius:10px;border:1.5px solid #cbd5e1;background:#fff;color:#0b1220;cursor:pointer}
+#nsdi-fin .nsdi-b-p{background:#0066ff;border-color:#0066ff;color:#fff}
+#nsdi-fin .nsdi-b:disabled{opacity:.6}
+#nsdi-fin .nsdi-nota{font-size:17px;color:#0b1220}
+#nsdi-fin .nsdi-elenco{margin:0;padding-left:22px;font-size:17px;color:#0b1220}
+#nsdi-fin .nsdi-elenco li{margin:6px 0}
+#nsdi-fin .nsdi-conf b{display:block;font-size:21px}
+#nsdi-fin .nsdi-conf span{display:block;font-size:18px;margin-top:4px}
+#nsdi-fin .nsdi-prova{background:#fff5e6;border:1.5px solid #ffcf8a;border-radius:12px;padding:12px 14px;color:#6b4c00}
+#nsdi-fin .nsdi-aut{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+#nsdi-fin .nsdi-aut input{width:22px;height:22px;flex:0 0 auto;margin-top:2px}
+#nsdi-fin .nsdi-stato{border-radius:12px;padding:14px 16px;border:1.5px solid #e2e8f0}
+#nsdi-fin .nsdi-stato b{display:block;font-size:20px}
+#nsdi-fin .nsdi-stato span{display:block;margin-top:6px}
+#nsdi-fin .nsdi-stato small{display:block;font-size:15px;margin-top:8px;color:#1f2937}
+#nsdi-fin .nsdi-ok{background:#ecfdf5;border-color:#a7e3c9}
+#nsdi-fin .nsdi-err{background:#fef2f2;border-color:#f5b5b5}
+#nsdi-fin .nsdi-attesa{background:#fffbeb;border-color:#f6d58e}

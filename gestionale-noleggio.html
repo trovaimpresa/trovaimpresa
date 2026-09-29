@@ -2455,6 +2455,8 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
   /* ---- ELIMINA ---- */
   async function nolElimina(tipo,d){
     const t=NOL_TIPI[tipo]; if(!t||!t.tab) return;
+    /* 29/09/2026 — una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
+    if(tipo==="fattnol"&&d.sdi_uuid&&d.sdi_stato!=="scartata"){toast("Questa fattura è già partita allo SDI: non si elimina. Per correggerla serve una nota di credito.");return;}
     const come=d.nome||d.descrizione||d.mezzo||"questa scheda";
     if(!confirm("Eliminare "+t.che.toLowerCase()+" «"+come+"»?\n"+
                 (t.avviso?t.avviso+"\n":"")+cestFrase())) return;
@@ -4146,7 +4148,8 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
         <div class="sub2">${esc((f.periodo_dal&&f.periodo_al?fdate(f.periodo_dal)+" — "+fdate(f.periodo_al):"periodo non indicato")+
           " · "+quante+(quante===1?" riga":" righe"))}</div>
         <div class="sub2"><b>${esc(_eur(f.totale))}</b>${esc(" (imponibile "+_eur(f.imponibile)+")")}${
-          f.pagata_il?esc(" · pagata il "+fdate(f.pagata_il)):""}</div>`,
+          f.pagata_il?esc(" · pagata il "+fdate(f.pagata_il)):""}</div>${
+          f.sdi_stato?`<div class="sub2"><b>SDI:</b> ${esc(({inviata:"partita",consegnata:"consegnata",non_consegnata:"nel cassetto fiscale",scartata:"scartata",errore:"non partita"})[f.sdi_stato]||f.sdi_stato)}${f.sdi_ambiente==="test"?" (prova)":""}</div>`:""}`,
         pulsanti:nolPulsanti("fattnol",f.id)});
     }).join("");
   }
@@ -4208,7 +4211,9 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
       <div class="nol-azioni">
         <button type="button" class="nol-az nol-az-apri" data-action="fattnol-stampa" data-id="${f.id||""}">Stampa la fattura</button>
         <button type="button" class="nol-az" data-action="fattnol-pdf" data-id="${f.id||""}">Fattura in PDF</button>
+        ${f.id&&f.numero&&(st==="emessa"||st==="pagata")?`<button type="button" class="nol-az nol-az-apri" data-nol-sdi="${f.id}">${f.sdi_uuid&&f.sdi_stato!=="scartata"?"Stato SDI":"Invia allo SDI"}</button>`:""}
       </div>
+      ${f.sdi_stato?`<p class="nsdi-riga">SDI: <b>${esc(({inviata:"partita, aspettiamo lo SDI",consegnata:"consegnata al cliente",non_consegnata:"nel cassetto fiscale del cliente",scartata:"scartata dallo SDI",errore:"non partita"})[f.sdi_stato]||f.sdi_stato)}</b>${f.sdi_ambiente==="test"?" (prova)":""}</p>`:""}
       <p style="margin:10px 0 0;font-size:13px;color:#666">Salva prima, poi stampa.</p>
       ${nolDocBlocco("fattnol",f.id||"")}
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
@@ -7708,5 +7713,6 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
 <!-- 29/09/2026 — menu corto e Primi passi anche nel Noleggio -->
 <script src="/js/nol-menu-corto.js"></script>
 <script src="/js/nol-primi-passi.js"></script>
+<script src="/js/nol-sdi.js"></script>
 </body>
 </html>

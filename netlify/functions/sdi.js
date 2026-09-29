@@ -133,6 +133,9 @@ exports.handler = async function (event) {
   let q;
   try { q = JSON.parse(event.body || '{}'); } catch { return risposta(400, { error: 'Body JSON non valido.' }); }
   const { azione, access_token, fattura_id } = q || {};
+  /* 29/09/2026 — le fatture del Noleggio stanno in un'altra tabella. Il browser
+     dice quale, ma solo fra queste due: il nome non entra mai nella query. */
+  const TAB = q && q.tabella === 'nol_fatture' ? 'nol_fatture' : 'gest_fatture';
   if (!access_token || (!fattura_id && azione !== 'ambiente')) return risposta(400, { error: 'Mancano dei dati.' });
 
   const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
@@ -143,7 +146,7 @@ exports.handler = async function (event) {
   /* prima di aprire la finestra: siamo in prova o sul serio? */
   if (azione === 'ambiente') return risposta(200, { ok: true, ambiente: AMBIENTE });
 
-  const { data: f } = await db.from('gest_fatture').select('*').eq('id', fattura_id).eq('user_id', uid).maybeSingle();
+  const { data: f } = await db.from(TAB).select('*').eq('id', fattura_id).eq('user_id', uid).maybeSingle();
   if (!f || f.eliminato_il) return risposta(404, { error: 'Fattura non trovata.' });
 
   /* ---------- RILEGGI L'ESITO ---------- */
@@ -174,9 +177,17 @@ exports.handler = async function (event) {
       errore_openapi: (i.json && (i.json.error || i.json.message)) || null
     };
     if (s.stato) {
-      const { data: agg } = await db.from('gest_fatture').update({
+      const { data: agg } = await db.from(TAB).update({
         sdi_stato: s.stato, sdi_esito: s.esito, sdi_aggiornata_il: new Date().toISOString()
       }).eq('id', f.id).select('*').maybeSingle();
+      return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: agg || f, controllo });
+    }
+    /* 29/09/2026 — l'esito non c'e' ancora, ma se Openapi l'ha girata allo SDI
+       e lo SDI le ha dato un numero, lo si dice: e' andata avanti. */
+    if (mk === 'sent' && d.sdi_file_id && f.sdi_stato === 'inviata') {
+      const esito = 'Lo SDI l\'ha presa in carico (file n. ' + String(d.sdi_file_id).slice(0, 20) + '). Aspettiamo l\'esito: consegnata o scartata.';
+      const { data: agg } = await db.from(TAB).update({ sdi_esito: esito, sdi_aggiornata_il: new Date().toISOString() })
+        .eq('id', f.id).select('*').maybeSingle();
       return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: agg || f, controllo });
     }
     return risposta(200, { ok: true, ambiente: AMBIENTE, fattura: f, controllo });
@@ -217,14 +228,14 @@ exports.handler = async function (event) {
   const uuid = inv.json && inv.json.data && inv.json.data.uuid;
   if (!inv.ok || !uuid) {
     const msg = (inv.json && (inv.json.message || inv.json.error)) || inv.testo.slice(0, 400) || ('errore ' + inv.status);
-    await db.from('gest_fatture').update({
+    await db.from(TAB).update({
       sdi_stato: f.sdi_uuid ? f.sdi_stato : 'errore', sdi_esito: 'Non partita: ' + msg, sdi_aggiornata_il: new Date().toISOString()
     }).eq('id', f.id);
     return risposta(502, { error: 'Openapi non l\'ha presa: ' + msg });
   }
 
   const ora = new Date().toISOString();
-  const { data: agg } = await db.from('gest_fatture').update({
+  const { data: agg } = await db.from(TAB).update({
     sdi_uuid: uuid, sdi_stato: 'inviata', sdi_esito: 'Partita. Aspettiamo la risposta dello SDI (di solito arriva in pochi minuti, a volte in qualche ora).',
     sdi_inviata_il: ora, sdi_aggiornata_il: ora, sdi_ambiente: AMBIENTE
   }).eq('id', f.id).select('*').maybeSingle();
