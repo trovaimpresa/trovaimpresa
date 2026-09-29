@@ -45,6 +45,7 @@ const FILE_GESTIONALE = [
      e metterlo dentro adesso vorrebbe dire alzare il tetto — cioe' il
      contrario di quello che serve. Entrera' quando saranno sistemate. */
   'gestionale-noleggio.html',
+  'js/nol-core.js',   /* 29 set 2026: il codice che stava dentro gestionale-noleggio.html. Va guardato uguale, come gest-core.js */
   /* ⛔ 26 agosto 2026 — e adesso entra anche il NEGOZIO, alla stessa
      condizione del noleggio: le sue 43 misure sotto i 13 px sono state
      portate tutte a 13, quindi entra a ZERO e il tetto qui sotto resta
