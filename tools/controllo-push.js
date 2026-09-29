@@ -34,6 +34,7 @@ const RADI = process.env.CONTROLLO_RADI || path.resolve(__dirname, '..');
 /* ------------------------------------------------------------------ */
 const FILE_GESTIONALE = [
   'gestionale-app.html',
+  'js/gest-core.js',   /* 29 set 2026: il codice che stava dentro gestionale-app.html. Va guardato uguale: senza questa riga i testi sotto i 13 px li' dentro non si vedrebbero piu' */
   'gestionale-operatore.html',
   /* ⛔ 25 agosto 2026 — il noleggio entra nella lista OGGI, che e' il giorno
      giusto: le sue diciotto misure sotto i 13 px sono state sistemate tutte,
@@ -463,7 +464,8 @@ function controllaMisure(){
 function controllaFinestre(){
   const f = 'gestionale-app.html';
   if (!esiste(f)) return;
-  const t = leggi(f);
+  /* 29 set 2026: il codice della pagina sta in js/gest-core.js, si guarda insieme */
+  const t = leggi(f) + (esiste('js/gest-core.js') ? '\n' + leggi('js/gest-core.js') : '');
   // solo le chiamate con il testo diretto: `openSheet(\`...`
   const quante = (t.match(/openSheet\(`/g) || []).length;
   if (quante > 1)
@@ -507,6 +509,7 @@ function controllaFinestre(){
       aggiunge il loro nome qui sotto. */
 const FILE_CHE_NOMINANO_SQL = [
   'gestionale-app.html',
+  'js/gest-core.js',
   'js/fondatore.js',
   'js/cestino.js'
 ];

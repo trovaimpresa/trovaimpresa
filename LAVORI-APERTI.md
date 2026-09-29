@@ -8,6 +8,29 @@ Ultimo aggiornamento: 19 settembre 2026 (pomeriggio) — gli 8 buchi del gestion
 
 
 
+
+## 🆕 IL 29 SETTEMBRE — LA FATTURA ALLO SDI CON UN CLIC (DA FINIRE E COLLAUDARE, DOMANI POMERIGGIO)
+
+Alex: «lo facciamo domani, mettilo in programmi… dobbiamo finire il lavoro, completarlo e collaudarlo: lasciato a metà non serve a niente».
+
+**Fatto e pubblicato (solo in PROVA):**
+- Openapi (account info@trovaimpresa.com), sandbox attiva, partita IVA di Alex registrata da sola alla prima fattura. Chiave sandbox su Netlify: `OPENAPI_SDI_TOKEN` (segreta) e `OPENAPI_SDI_URL=https://test.sdi.openapi.it`.
+- `netlify/functions/sdi.js` (azioni: ambiente, invia, stato; tabella `gest_fatture` o `nol_fatture`), `sdi-notifica.js` (Openapi ci avvisa quando lo SDI risponde), `js/gest-sdi.js` (gestionale), `js/nol-sdi.js` (noleggio, costruttore XML suo).
+- Database: colonne `sdi_*` su `gest_fatture` e `nol_fatture` (le scrive solo il server, trigger `gest_fatture_sdi_blocco`), tabella `gest_sdi_anagrafiche`.
+- Prova: fattura n. 12 (reparto «Prova Tasse e fisco») → Openapi dice `sent`, lo SDI le ha dato il file n. 61197249743. La prova NON simula l'esito (consegnata/scartata). Nel noleggio c'è la fattura di prova n. 1 (Edil Rossi Srl).
+- Privacy: Openapi aggiunta tra i fornitori (sezione 4).
+
+**Per FINIRLA (in quest'ordine):**
+1. File XML nel validatore gratuito dell'Agenzia delle Entrate — gestionale E noleggio. Dal cloud non si raggiunge: lo fa Alex a clic.
+2. Openapi: chiave **Produzione** (Autenticazione → Lista Token Produzione → Nuovo token, scope «Fatturazione Elettronica SDI») + piccola ricarica (~10 €). Prezzo: 0,07 € a fattura inviata.
+3. Netlify: cambiare `OPENAPI_SDI_TOKEN` (chiave nuova) e `OPENAPI_SDI_URL=https://sdi.openapi.it`. La striscia «PROVA» sparisce da sola.
+4. Condizioni del servizio: una riga sull'invio allo SDI fatto per conto dell'impresa.
+5. COLLAUDO con UNA fattura vera e l'esito (consegnata / scartata), poi «Aggiorna lo stato».
+
+**Limiti noti:** noleggio con IVA a 0% non parte (serve il codice reverse charge N6.x); il bollo nel noleggio non c'è; ambiente test/prod si legge dalla variabile, non dal database.
+
+**Dopo:** gestionale dal TELEFONO/cantiere, poi pulizia del codice (CSS a strati, `gestionale-app.html` enorme).
+
 ---
 
 ## 🆕 IL 18–19 SETTEMBRE — GLI →8← BUCHI DEL GESTIONALE E IL CONTROLLO DEL DATABASE
