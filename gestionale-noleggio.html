@@ -2,6 +2,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestionale Noleggio &mdash; TrovaImpresa</title>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<!-- 29/09/2026 — il Noleggio si puo' mettere sulla schermata del telefono, come il gestionale -->
+<link rel="manifest" href="/manifest-noleggio.json">
+<meta name="theme-color" content="#0066FF">
+<link rel="apple-touch-icon" href="/img/app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Noleggio">
 <div id="app-root">
 <style>
   :root{
@@ -658,7 +666,7 @@
       <div class="sec-head"><h2>Contratti e documenti</h2></div>
       <div class="gal-intro">Le cinque carte di ogni noleggio: il contratto, il verbale di consegna e quello di riconsegna, e i due DDT. Qui si vede a colpo d'occhio a quale noleggio manca quale foglio.</div>
       <input type="text" id="documenti-search" placeholder="Cerca: mezzo, cliente o numero di contratto" autocomplete="off" spellcheck="false"
-             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:16px;font-family:inherit;margin-bottom:16px">
       <div id="documenti-body" class="nol-elenco"></div>
     </section>
 
@@ -666,7 +674,7 @@
       <div class="sec-head"><h2>Foto e video</h2></div>
       <div class="gal-intro">Com'è uscito e com'è tornato. Si fotografa e si filma il mezzo alla consegna, e di nuovo al rientro: se al rientro c'è un danno che prima non c'era, la prova sta qui. Le foto vengono rimpicciolite da sole e i video ridotti, per non riempire lo spazio.</div>
       <input type="text" id="media-search" placeholder="Cerca: mezzo o cliente" autocomplete="off" spellcheck="false"
-             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:16px;font-family:inherit;margin-bottom:16px">
       <div id="media-peso" style="font-size:14px;color:#666;margin-bottom:14px"></div>
       <div id="media-body" class="nol-elenco"></div>
     </section>
@@ -675,7 +683,7 @@
       <div class="sec-head"><h2>Cestino</h2></div>
       <div class="gal-intro">Tutto quello che elimini dal gestionale passa di qui e resta a disposizione: finché è nel cestino non è perso. Apri una riga per rimetterla a posto.</div>
       <input type="text" id="cest-search" placeholder="Cerca nel cestino: nome o tipo" autocomplete="off" spellcheck="false"
-             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:16px">
+             style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:16px;font-family:inherit;margin-bottom:16px">
       <div id="cest-body" class="nol-elenco"></div>
     </section>
 
@@ -767,7 +775,7 @@ body:has(#ti-fondatore) .sheet--grande{
 /* la barra «cerca ed esporta», uguale in tutte le sezioni (23 agosto 2026) */
 .nol-barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
 .nol-cerca{flex:1 1 240px;min-width:200px;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;
-  border-radius:10px;font-size:15px;font-family:inherit;box-sizing:border-box}
+  border-radius:10px;font-size:16px;font-family:inherit;box-sizing:border-box}   /* 16px: sotto, il telefono ingrandisce la pagina quando ci tocchi */
 .nol-conta{font-size:14px;color:#666;white-space:nowrap}
 .nol-riq{background:#f7f9fc;border:1px solid #dbe4f0;border-radius:12px;padding:12px;margin-bottom:10px}
 .nol-riq h4{margin:0 0 8px;font-size:15px;color:#2e537d}

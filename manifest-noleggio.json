@@ -1,0 +1,36 @@
+{
+  "name": "Noleggio TrovaImpresa",
+  "short_name": "Noleggio",
+  "description": "Mezzi, noleggi, contratti e fatture del tuo noleggio.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "/gestionale-noleggio",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#FFFFFF",
+  "theme_color": "#0066FF",
+  "icons": [
+    {
+      "src": "/img/app/gestionale-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/app/gestionale-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/app/gestionale-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

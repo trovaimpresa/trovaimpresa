@@ -13152,6 +13152,17 @@
         if(v)v.click();
       });
     });
+    /* 29/09/2026 — le etichette della barra sono corte: «Lavori e interventi»
+       non ci sta e usciva «Lavori e i…». Resta la prima parola (Lavori,
+       Pratiche, Incarichi). Si rifa se un altro pezzo cambia il testo. */
+    function corte(){
+      bb.querySelectorAll("button[data-vai] span").forEach(function(s){
+        const t=s.textContent.trim();
+        if(t.indexOf(" ")>0&&t.length>9){ s.title=t; s.textContent=t.split(" ")[0]; }
+      });
+    }
+    corte();
+    try{ new MutationObserver(corte).observe(bb,{subtree:true,childList:true,characterData:true}); }catch(e){}
     function sincro(){
       const att=document.querySelector("nav.tabs button.active");
       const k=att?att.dataset.tab:"";
