@@ -157,11 +157,20 @@ exports.handler = async function (event) {
        codici, niente dati del cliente. */
     const i = await chiamaOpenapi(BASE, TOKEN, 'GET', '/invoices/' + encodeURIComponent(f.sdi_uuid));
     const d = (i.json && (i.json.data || i.json)) || {};
+    /* le risposte dello SDI stanno anche DENTRO la fattura (campo notifications) */
+    const dentro = Array.isArray(d.notifications) ? d.notifications : [];
+    const tutte = lista.concat(dentro.filter(x => x && typeof x === 'object'));
+    const s2 = statoDaNotifiche(tutte);
+    if (s2.stato) { s.stato = s2.stato; s.esito = s2.esito; }
+    /* «marking» e' lo stato secondo Openapi (es. in attesa, inviata, scartata) */
+    const mk = String(d.marking == null ? '' : (typeof d.marking === 'object' ? JSON.stringify(d.marking) : d.marking));
+    if (!s.stato && /reject|scart|discard|error/i.test(mk)) { s.stato = 'scartata'; s.esito = String(d.notice || 'Scartata: ' + mk).slice(0, 500); }
+    const breve = (v) => v == null ? null : (typeof v === 'object' ? JSON.stringify(v).slice(0, 300) : String(v).slice(0, 300));
     const controllo = {
-      notifiche_http: n.status, notifiche: lista.map(x => ({ tipo: x.type, il: x.created_at })),
+      notifiche_http: n.status, notifiche: tutte.map(x => ({ tipo: x.type, il: x.created_at })),
       fattura_http: i.status,
-      stato_openapi: d.status || d.state || d.sdi_status || null,
-      campi_openapi: Object.keys(d).slice(0, 40),
+      marking: breve(d.marking), notice: breve(d.notice), retry: breve(d.retry_information),
+      nome_file_sdi: d.sdi_file_name || null, id_file_sdi: d.sdi_file_id || null,
       errore_openapi: (i.json && (i.json.error || i.json.message)) || null
     };
     if (s.stato) {
