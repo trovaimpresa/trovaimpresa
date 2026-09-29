@@ -19,7 +19,7 @@
    gestionale-app.html). Le voci che il ruolo nasconde restano nascoste.
    ═════════════════════════════════════════════════════════════════════════ */
 (function () {
-  var PRINCIPALI = ["riepilogo", "chat", "lavori", "preventivi", "fatture", "clienti", "calendario", "fisco"];
+  var PRINCIPALI = ["riepilogo", "chat", "clienti", "preventivi", "lavori", "fatture", "calendario", "fisco"];   /* in ordine di partenza, come i Primi passi */
   var FISSE = ["richieste", "assistenza"];      /* non si toccano mai */
   var CHIAVE = "ti-menu-altro-aperto";
 
