@@ -1,5 +1,5 @@
 /* ═══ 29 settembre 2026 — IL CODICE DEL NOLEGGIO, FUORI DALLA PAGINA ══════════
-   Questo era dentro gestionale-noleggio.html, tra <script> e </script>.
+   Questo era dentro gestionale-noleggio.html, dentro il tag script della pagina.
    E' IDENTICO, riga per riga: e' stato solo spostato. Gira nello stesso
    punto della pagina (dopo gest-logo.js, prima del cancello), quindi
    vede le stesse cose di prima. Nessuna riga e' stata cambiata.
