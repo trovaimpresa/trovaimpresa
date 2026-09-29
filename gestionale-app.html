@@ -668,6 +668,7 @@
      ============================================================ -->
 <script src="/js/centesimi.js"></script>
 <script src="/js/gest-fatture.js"></script>
+<script src="/js/gest-sdi.js"></script>
 <script src="/js/gest-computo.js"></script>
 <script src="/js/gest-sal-prezzario.js"></script>
 <script src="/js/gest-computo-pdf.js"></script>
@@ -12765,6 +12766,7 @@
     if(a==="del-fatt")return eliminaFattura(id);
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-xml")return fatturaXml(id);
+    if(a==="fatt-sdi")return fattSdi(id);   /* 29/09/2026 — js/gest-sdi.js */
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
     if(a==="edit-job"){
       closeSheet();

@@ -500,7 +500,9 @@
         ? '<span'+(scaduta?' style="color:var(--err);font-weight:700"':'')+'>⏳ aspetti da '+gio+(gio===1?" giorno":" giorni")+'</span>'
         : "",
       f.tipo!=="fattura" ? "📄 "+FATT_TIPO_LAB[f.tipo] : "",
-      pdf?"":'<span style="color:var(--testo-3)">nessun PDF allegato</span>'
+      pdf?"":'<span style="color:var(--testo-3)">nessun PDF allegato</span>',
+      /* 29/09/2026 — a che punto e' con lo SDI */
+      f.sdi_stato ? '<span class="sdi-meta sdi-m-'+esc(f.sdi_stato)+'">✉ SDI: '+esc((typeof SDI_STATO_LAB!=="undefined"&&SDI_STATO_LAB[f.sdi_stato])||f.sdi_stato)+(f.sdi_ambiente==="test"?" (prova)":"")+'</span>' : ""
     ];
 
     const az=[];
@@ -514,9 +516,14 @@
     /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
        lo SDI non la accetta */
     if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
+    /* 29/09/2026 — la fattura parte allo SDI con un clic (js/gest-sdi.js) */
+    const sdiPartita=!!(f.sdi_uuid&&f.sdi_stato!=="scartata");
+    if(f.numero&&(f.stato==="emessa"||f.stato==="pagata"))
+      az.push({lab:sdiPartita?"✉ Stato SDI":"✉ Invia allo SDI",action:"fatt-sdi",data:{id:f.id}});
     if(pdf) az.push({lab:"📄 Apri il PDF allegato",action:"open-fattura", data:{id:pdf.id}});
     else    az.push({lab:"📎 Allega un PDF tuo",   action:"upload-fattura",data:{id:f.id}});
-    az.push({lab:"🗑 Elimina",action:"del-fatt",data:{id:f.id},del:true});
+    /* una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
+    if(!sdiPartita) az.push({lab:"🗑 Elimina",action:"del-fatt",data:{id:f.id},del:true});
 
     return schedaJob({
       tono,

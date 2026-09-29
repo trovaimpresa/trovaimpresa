@@ -5304,3 +5304,21 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
 #riepilogo #rie-primi .pp-fine span{display:block;font-size:19px;font-weight:600;color:#0b1220;margin-top:6px}
 #riepilogo #rie-primi .pp-fine-btn{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
 #riepilogo #rie-primi .pp-fine-btn button{font-size:18px!important;font-weight:700;padding:12px 22px;border-radius:10px}
+/* ═══ 29/09/2026 — FATTURA ALLO SDI (js/gest-sdi.js) ═════════════════════ */
+.sdi-meta{font-weight:700}
+.sdi-m-consegnata{color:var(--ok)}
+.sdi-m-scartata,.sdi-m-errore{color:var(--err)}
+.sdi-m-inviata,.sdi-m-non_consegnata{color:#8a5200}
+.sheet .sdi-stato{border-radius:12px;padding:14px 16px;border:1.5px solid var(--bordo)}
+.sheet .sdi-stato b{display:block;font-size:20px;color:#0b1220}
+.sheet .sdi-stato span{display:block;font-size:17px;color:#0b1220;margin-top:6px;line-height:1.45}
+.sheet .sdi-stato small{display:block;font-size:15px!important;color:#1f2937!important;margin-top:8px}
+.sheet .sdi-stato.sdi-ok{background:var(--ok-bg);border-color:#a7e3c9}
+.sheet .sdi-stato.sdi-err{background:var(--err-bg);border-color:#f5b5b5}
+.sheet .sdi-stato.sdi-attesa{background:var(--attesa-bg);border-color:#f6d58e}
+.sheet .sdi-prova{background:#fff5e6;border:1.5px solid #ffcf8a;border-radius:12px;padding:12px 14px;font-size:17px;color:#6b4c00;line-height:1.45}
+.sheet .sdi-prova b{color:#6b4c00}
+.sheet .sdi-conferma b{display:block;font-size:21px;color:#0b1220}
+.sheet .sdi-conferma span{display:block;font-size:18px;color:#0b1220;margin:4px 0 12px}
+.sheet .sdi-autorizzo{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:17px;color:#0b1220;line-height:1.45;cursor:pointer}
+.sheet .sdi-autorizzo input{width:22px;height:22px;flex:0 0 auto;margin-top:2px}
