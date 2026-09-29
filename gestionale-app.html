@@ -2488,7 +2488,7 @@
   });
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza","promemoria"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza","promemoria","fisco"].includes(_deepTab))_deepTab=null; /* 29/09/2026 «fisco»: ci arriva il Noleggio */
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */

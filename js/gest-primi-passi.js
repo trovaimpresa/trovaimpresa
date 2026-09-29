@@ -17,6 +17,10 @@
    ═════════════════════════════════════════════════════════════════════════ */
 (function () {
   var CHIAVE = "ti-primi-passi-chiuso";
+  /* 29/09/2026 — deciso con Alessio: finiti i 5 passi l'aiuto NON sparisce da
+     solo. Chiede «Hai imparato: vuoi che lo togliamo?». Chi usava gia' il
+     gestionale prima (e il riquadro non l'ha mai visto) non lo vede. */
+  var VISTO = "ti-primi-passi-visto", TIENI = "ti-primi-passi-tieni";
   var PASSI = [
     { k: "azienda",    tit: "Scrivi i dati della tua azienda", sotto: "Nome, partita IVA, indirizzo: finiscono su preventivi e fatture.", az: "azienda" },
     { k: "clienti",    tit: "Aggiungi il tuo primo cliente",   sotto: "Chi ti chiede il lavoro. Lo scrivi una volta sola.", tab: "clienti" },
@@ -26,6 +30,8 @@
   ];
   var ultimo = 0, inCorso = false;
 
+  function leggi(k) { try { return localStorage.getItem(k) === "1"; } catch (_) { return false; } }
+  function segna(k) { try { localStorage.setItem(k, "1"); } catch (_) {} }
   function chiuso() { try { return localStorage.getItem(CHIAVE) === "1"; } catch (_) { return false; } }
   function nomeMenu(tab, riserva) {
     var b = document.querySelector('.side nav.tabs button[data-tab="' + tab + '"] span');
@@ -62,7 +68,9 @@
       if (res.some(function (x) { return x === null; })) { if (box) box.remove(); return; }   /* se una lettura non va, meglio niente che un passo sbagliato */
       var fatti = res.map(function (n) { return n > 0; });
       var quanti = fatti.filter(Boolean).length;
-      if (quanti === PASSI.length) { if (box) box.remove(); return; }
+      var finito = quanti === PASSI.length;
+      if (finito && !leggi(VISTO)) { if (box) box.remove(); return; }   /* chi lo sapeva gia' usare */
+      if (!finito) segna(VISTO);
       var prossimo = fatti.indexOf(false);
 
       var righe = PASSI.map(function (p, i) {
@@ -76,8 +84,12 @@
           + '</div>';
       }).join("");
 
-      var html = '<div class="pp-testa"><div><b>Primi passi</b><span>' + quanti + ' fatti su ' + PASSI.length + ' · segui i numeri, uno alla volta</span></div>'
-        + '<button type="button" class="pp-chiudi" data-pp-chiudi="1">Lo so già usare</button></div>'
+      var html = finito && !leggi(TIENI)
+        ? '<div class="pp-fine"><b>Bravo, hai fatto tutti i passi!</b><span>Hai imparato a usare il gestionale. Vuoi che togliamo l\'aiuto?</span>'
+          + '<div class="pp-fine-btn"><button type="button" class="btn-primary" data-pp-chiudi="1">Sì, toglilo</button>'
+          + '<button type="button" class="btn" data-pp-tieni="1">Tienilo ancora</button></div></div>'
+        : '<div class="pp-testa"><div><b>' + (finito ? 'Primi passi: tutti fatti' : 'Primi passi') + '</b><span>' + quanti + ' fatti su ' + PASSI.length + (finito ? '' : ' · segui i numeri, uno alla volta') + '</span></div>'
+        + '<button type="button" class="pp-chiudi" data-pp-chiudi="1">Togli l\'aiuto</button></div>'
         + '<div class="pp-barra"><i style="width:' + Math.round(quanti / PASSI.length * 100) + '%"></i></div>'
         + '<div class="pp-lista">' + righe + '</div>';
       if (!box) { box = document.createElement("div"); box.id = "rie-primi"; alert.parentNode.insertBefore(box, alert); }
@@ -86,8 +98,9 @@
   }
 
   document.addEventListener("click", function (e) {
-    var t = e.target && e.target.closest ? e.target.closest("[data-pp-tab],[data-pp-chiudi]") : null;
+    var t = e.target && e.target.closest ? e.target.closest("[data-pp-tab],[data-pp-chiudi],[data-pp-tieni]") : null;
     if (!t) return;
+    if (t.dataset.ppTieni) { segna(TIENI); ultimo = 0; disegna(); return; }
     if (t.dataset.ppChiudi) {
       try { localStorage.setItem(CHIAVE, "1"); } catch (_) {}
       var b = document.querySelector("#rie-primi"); if (b) b.remove();

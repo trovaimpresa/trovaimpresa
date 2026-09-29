@@ -49,7 +49,7 @@
   async function fvCarica() {
     const Y = ftAnno();
     const da = Y + "-01-01";
-    const [rP, rA, rF, rS, rC, rR, rFF] = await Promise.all([
+    const [rP, rA, rF, rS, rC, rR, rFF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_fatture").select("id,numero,anno,data,stato,data_pagata,cli_nome").eq("user_id", sbUid)
@@ -57,13 +57,15 @@
       sb.from("gest_spese").select("importo,data").eq("user_id", sbUid).gte("data", da),
       sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at").eq("user_id", sbUid).gte("created_at", da),
       sb.from("gest_rifornimenti").select("importo,data,movimento_id").eq("user_id", sbUid).gte("data", da),
-      sb.from("gest_fatture_fornitori").select("importo,data,scadenza,stato,numero").eq("user_id", sbUid).gte("data", (Y - 1) + "-01-01")
+      sb.from("gest_fatture_fornitori").select("importo,data,scadenza,stato,numero").eq("user_id", sbUid).gte("data", (Y - 1) + "-01-01"),
+      ftNolFatture(Y)   /* 29/09/2026 — anche le fatture del Noleggio */
     ]);
     const ff = rF.data || [];
     const ids = ff.map(f => f.id);
     const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva,totale,segno").in("fattura_id", ids) : { data: [] };
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
-    const errore = [rF, rS, rC, rR, rFF, rT].some(r => r && r.error);
+    rN.fatture.forEach(f => { ff.push(f); tot[f.id] = rN.tot[f.id]; });
+    const errore = [rF, rS, rC, rR, rFF, rT].some(r => r && r.error) || rN.errore;
     return {
       profiloVero: rP.data || null, az: rA.data || {}, fatture: ff, tot,
       spese: rS.data || [], carte: rC.data || [], rif: rR.data || [], fornF: rFF.data || [], errore

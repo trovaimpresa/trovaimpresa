@@ -5289,3 +5289,18 @@ header.top .brand .gl-piccolo{flex:0 0 auto;width:42px;height:42px;border-radius
  #riepilogo #rie-primi .pp-t{flex:1 1 calc(100% - 60px)}
  #riepilogo #rie-primi .pp-vai{margin-left:54px;width:calc(100% - 54px)}
 }
+/* ═══ 29/09/2026 — MENU CORTO del NOLEGGIO (js/nol-menu-corto.js) ═════════ */
+nav.tabs:not(.nol-altre-aperte) button.nol-altra{display:none!important}
+nav.tabs button.nol-fisco,nav.tabs button.nol-altro{display:inline-flex;align-items:center;gap:8px}
+nav.tabs button.nol-altro[hidden]{display:none!important}
+nav.tabs button.nol-altro{border:1.5px dashed rgba(255,255,255,.7)!important;border-radius:10px;margin:0 6px 6px;padding:6px 12px!important;color:#fff!important}
+nav.tabs button.nol-altro:hover{background:rgba(255,255,255,.12)}
+nav.tabs button.nol-altro .ma-f{width:18px;height:18px;transition:transform .15s}
+nav.tabs button.nol-altro.aperto .ma-f{transform:rotate(180deg)}
+nav.tabs button.nol-altro .ma-n{background:#fff;color:#d9534f;border-radius:999px;padding:0 8px;font-size:15px;font-weight:800;line-height:22px}
+nav.tabs button.nol-altro .ma-n[hidden]{display:none}
+/* 29/09/2026 — Primi passi finiti: «vuoi che togliamo l'aiuto?» */
+#riepilogo #rie-primi .pp-fine b{display:block;font-size:24px;font-weight:800;color:#0b1220}
+#riepilogo #rie-primi .pp-fine span{display:block;font-size:19px;font-weight:600;color:#0b1220;margin-top:6px}
+#riepilogo #rie-primi .pp-fine-btn{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+#riepilogo #rie-primi .pp-fine-btn button{font-size:18px!important;font-weight:700;padding:12px 22px;border-radius:10px}

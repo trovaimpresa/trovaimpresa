@@ -290,13 +290,39 @@
   /* 28/09/2026 — la lettura dei dati sta in una funzione sua: la usano
      «Le tue tasse» e il riquadro «Da fare adesso» in cima al reparto.
      Non scrive nei globali: chi la chiama decide (per via del giro). */
+  /* 29/09/2026 — LE FATTURE DEL NOLEGGIO.
+     Il Noleggio le tiene in una tabella sua (nol_fatture), con i totali gia'
+     scritti dentro. Le tasse pero' sono della persona: una fattura del
+     noleggio e' un incasso come le altre. Qui si mettono nella stessa forma
+     delle fatture del gestionale (id con davanti «nol-», cosi' non si
+     confondono), e le leggono sia «Le tue tasse» sia «Quanto ti resta».
+     Se la lettura non va si torna vuoti: meglio un conto senza noleggio
+     che nessun conto. Il bollo: il noleggio per ora non lo segna (0). */
+  async function ftNolFatture(Y) {
+    const vuoto = { fatture: [], tot: {}, errore: false };
+    try {
+      const r = await sb.from("nol_fatture").select("id,numero,data,stato,pagata_il,cliente,imponibile,iva,totale")
+        .eq("user_id", sbUid).in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01");
+      if (r.error) return { ...vuoto, errore: true };
+      const out = { fatture: [], tot: {}, errore: false };
+      (r.data || []).forEach(n => {
+        const id = "nol-" + n.id;
+        const a = String(n.data || "").slice(0, 4);
+        out.fatture.push({ id, numero: n.numero, anno: a ? +a : null, data: n.data, stato: n.stato, data_pagata: n.pagata_il, cli_nome: n.cliente, bollo: 0 });
+        out.tot[id] = { fattura_id: id, imponibile: +n.imponibile || 0, iva: +n.iva || 0, totale: +n.totale || 0, segno: 1 };
+      });
+      return out;
+    } catch (_) { return { ...vuoto, errore: true }; }
+  }
+
   async function ftCarica() {
     const Y = ftAnno(), oggi = todayStr();
-    const [rP, rA, rF] = await Promise.all([
+    const [rP, rA, rF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("regime_fiscale").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_fatture").select("id,stato,data,data_pagata,bollo").eq("user_id", sbUid)
-        .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01")
+        .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
+      ftNolFatture(Y)
     ]);
     let profilo = rP.data || null, presunto = false;
     if (!profilo) { profilo = ftIndovina(rA.data); presunto = !!profilo; }
@@ -305,6 +331,8 @@
     const ids = ff.map(f => f.id);
     const rT = ids.length ? await sb.from("gest_fatture_totali").select("fattura_id,imponibile,iva").in("fattura_id", ids) : { data: [] };
     const tot = {}; (rT.data || []).forEach(t => { tot[t.fattura_id] = t; });
+    /* 29/09/2026 — dentro anche le fatture del NOLEGGIO (tabella nol_fatture) */
+    rN.fatture.forEach(f => { ff.push(f); tot[f.id] = rN.tot[f.id]; });
 
     /* incassato = fatture PAGATE quest'anno (conta il giorno in cui ti pagano) */
     let incassi = 0, ivaAnno = 0;

@@ -275,6 +275,30 @@
 .ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
 </style>
+<!-- 29/09/2026 — SCRITTE GRANDI E NERE anche nell'agenda dell'operaio.
+     Come nel resto del gestionale: niente grigio chiaro, niente testo sotto i 16px.
+     Sta in fondo alla testa, cosi' vince sulle regole di sopra. -->
+<style id="op-leggibile">
+  body{color:#0b1220}
+  #gate-msg,.tmb-vuoto,.empty-state,.rap-data,.rap-nota,.istr{font-size:18px!important;line-height:1.5!important;color:#1f2937!important}
+  .rap-nota b{color:#0b1220!important}
+  .tmb-tit{font-size:19px!important;color:#0b1220!important}
+  .tmb-stato b,#tmb-stato-t{font-size:18px!important;color:#0b1220!important}
+  .tmb-stato span span{font-size:16px!important;color:#1f2937!important}
+  #tmb-coda-n{font-size:17px!important}
+  #tmb-coda-t{font-size:16px!important}
+  .tmb-btn small{font-size:16px!important;opacity:1!important}
+  .day-title,.label{font-size:17px!important}
+  .cal-mese{font-size:19px!important}
+  .cal-dow{font-size:16px!important;color:#1f2937!important}
+  .cal-day{font-size:17px!important}
+  .cal-day:not(.sel){color:#0b1220!important}
+  .btn-line,.btn-fill,.back,.nav-btn,.esci,#gate-btn{font-size:17px!important}
+  .h-hi{font-size:16px!important}
+  #lv-title{font-size:22px!important}
+  .rv-tit{font-size:21px!important}
+  .rv-x{color:#1f2937!important}
+</style>
 </head>
 <body>
 
