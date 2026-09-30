@@ -43,6 +43,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-ai-moduli.js',
   'js/gest-riepilogo-schede.js',
   'js/gest-schede-clienti.js',
+  'js/gest-carte-documenti.js',
   'js/gest-core.js'
 ];
 
