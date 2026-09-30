@@ -2758,3 +2758,13 @@ database sono state fatte in transazioni annullate (tutte verdi).
 - ⚠️ Per scrivere file sul computer di Alessio: un nome di passaggio NUOVO a ogni scrittura in `/mnt/user-data/outputs/`. Riusare lo stesso nome ha fatto scrivere la copia vecchia (successo due volte il 30/09: gest-fatture.js e CLAUDE.md). Dopo ogni scrittura, ri-leggere e confrontare md5/misura.
 - FATTO (30/09, dopo la prova da geometra): per gli studi tecnici il «Computo metrico» sale in vista nel menu corto, sotto Clienti (`window.menuCortoPromuovi('computi','clienti')` in `js/gest-menu-corto.js`, chiamata da `adattaMenuProfessionista` in `js/gest-core.js`; se il menu non e' ancora montato la richiesta aspetta in `window._tiPromuovi`). Impresa e artigiano non cambiano. In Mezzi la frase «Il resto sta in Attrezzature» diventa «Strumenti» per gli studi.
 - ⚠️ Effetto da tenere d'occhio: con 9 voci in vista il menu degli studi e' piu' lungo; su schermi bassi (768 px) compare lo scorrimento e «Altre voci» finisce sotto. Possibile rimedio, NON deciso: rimpicciolire i due riquadri «Chiedi una funzione» / «Assistenza diretta» (li aveva fissati Alessio il 28/09, quindi chiedere prima).
+
+### 30 settembre 2026 (sera) — PAROLE SEMPLICI per artigiano e impresa
+
+Alex ha chiesto di sostituire le parole difficili, **solo per artigiano e impresa** (lo studio resta com'era; PDF e XML fiscali non si toccano). Deciso con lista «prima → dopo» approvata prima di toccare i file. Tutte le condizioni sono `ruoloUtente==='professionista'` (studio = vecchie parole).
+
+- Backup (JSON) → «Salva una copia dei dati»; Esporta CSV → «Scarica per Excel» (impostati in gest-core.js dopo `applicaNomeGestionale()`).
+- Fattura (gest-fatture.js): Imponibile → «Prezzo senza IVA»; «Imponibile IVA» → «Su cui si paga l'IVA»; Bollo → «Marca da bollo (€)»; Ritenuta d'acconto → «Trattenuta (ritenuta d'acconto) %».
+- gest-core.js: «Controlla prima di mandarlo» → «Controlla che sia giusto»; `CTR_AI_LABEL` non c'è più, ora è la funzione `ctrAiLabel()` («Fai controllare anche all'intelligenza artificiale · 1 credito»); «Come si incastrano» → «Cosa viene prima e cosa dopo»; blocco `imp` di `_cm`: «Computo da prezzare» → «Elenco lavori da prezzare».
+- Collaudato sul sito vero nel giro artigiano, impresa e studio. Non provata dal vivo la riga «Cosa viene prima e cosa dopo» (compare solo con 2+ passi visibili).
+- ⚠️ Se si aggiunge una parola nuova: stessa regola, condizione sul ruolo, mai cambiarla per lo studio.
