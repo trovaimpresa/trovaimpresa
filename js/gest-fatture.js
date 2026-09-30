@@ -631,7 +631,12 @@
       const massimo=setTutti.size?Math.max.apply(null,Array.from(setTutti)):0;
       const buchi=[];
       for(let n=1;n<=massimo;n++) if(!setVivi.has(n)) buchi.push({n:n, cestino:setTutti.has(n)});
-      if(buchi.length){
+      /* 30 settembre 2026 — NEL «GIRO» NIENTE AVVISO SUI NUMERI MANCANTI.
+         Le fatture finte del giro partono da numeri a meta' (25, 12, 8):
+         chi guardava la prova vedeva una riga rossa «mancano le n.1...»
+         su dati che non hanno niente di sbagliato. Nel gestionale vero i
+         numeri li dai tu da 1 e l'avviso resta. */
+      if(buchi.length&&!window.TI_GIRO){
         const nCest=buchi.filter(b=>b.cestino).length;
         buchiNelCestino=nCest;
         const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")
