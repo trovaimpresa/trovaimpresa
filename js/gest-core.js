@@ -1,4 +1,4 @@
-// [SPOSTATO] gest-core.js: le righe 1-4036 del vecchio file ora stanno in: gest-base.js (righe 1-421), gest-reparti.js (righe 422-1251), gest-ingresso.js (righe 1252-1842), gest-ai-moduli.js (righe 1843-3411), gest-riepilogo-schede.js (righe 3412-4036). Qui resta il resto.
+// [SPOSTATO] gest-core.js: le righe 1-3986 del vecchio file ora stanno in: gest-base.js (righe 1-421), gest-reparti.js (righe 422-1251), gest-ingresso.js (righe 1252-1842), gest-ai-moduli.js (righe 1843-3411), gest-riepilogo-schede.js (righe 3412-3986). Qui resta il resto.
   /* ============================================================
      16 agosto 2026 — LE SCHEDE ERANO ALTE IL DOPPIO DEL NECESSARIO
      Nei Lavori una scheda mostra due pulsanti e mette il resto sotto
@@ -7576,6 +7576,56 @@
   }
   ctInit();
 
+  /* ⛔ 21 agosto 2026 — SE UN PEZZO NON ARRIVA, IL GESTIONALE LO DICE.
+     Da quando le sezioni pesanti stanno in quattro file esterni
+     (js/gest-fatture.js · js/gest-computo.js · js/gest-sal-prezzario.js ·
+     js/gest-computo-pdf.js, caricati alle righe 502-505), questa tabella era
+     l'UNICO punto del blocco che li nominava subito, appena letta la pagina.
+     Se uno dei quattro non arrivava — rete di cantiere, un 503 di Netlify —
+     la riga lanciava ReferenceError e da li' in giu' NON veniva eseguito piu'
+     niente: la pagina iniziale si disegnava lo stesso (load e' altrove) e poi
+     nessuna scheda si apriva piu'. Nessun messaggio, nessun errore visibile.
+     Provato davvero, con un 503 finto su js/gest-computo.js.
+     ⚠️ Adesso il nome si cerca a runtime: se manca, la pagina lo dice in cima
+     e quella singola scheda spiega cosa fare, invece di restare muta.
+     ⚠️ Chi sposta una funzione di sezione in un altro file non deve fare
+     niente qui: basta che resti una funzione di primo livello. */
+  var _pezziMancanti=[];
+  function _rt(nome){
+    var f=window[nome];
+    if(typeof f==="function")return f;
+    _pezziMancanti.push(nome);
+    return function(){
+      if(typeof toast==="function")
+        toast("⚠️ Questa parte non si è caricata. Ricarica la pagina (F5).");
+    };
+  }
+  const RENDER_TAB={
+    riepilogo:_rt("renderRiepilogo"), lavori:_rt("renderJobs"), preventivi:_rt("renderPreventivi"), computi:_rt("renderComputi"),
+    prezzario:_rt("renderPrezzario"), sal:_rt("renderSalTutti"),
+    fatture:_rt("renderFatture"), calendario:_rt("renderCal"), agenda:_rt("renderAgenda"),
+    mezzi:_rt("renderMezzi"), attrezzature:_rt("renderAttrezzature"), squadra:_rt("renderDip"),
+    carte:_rt("renderCarte"), clienti:_rt("renderClienti"), scadenzario:_rt("renderScadenze"), crediti:_rt("renderCrediti"), cestino:_rt("renderCestino"),
+    report:_rt("renderReport"), galleria:_rt("renderGalleria"), mappa:_rt("renderMappa"),
+    richieste:_rt("renderRichieste"), dalsito:_rt("renderDalSito"), fornitori:_rt("renderFornitori"),
+    assistenza:_rt("renderAssistenza"),
+    promemoria:_rt("renderPromemoria"), fisco:_rt("renderFisco")
+  };
+  /* l'avviso in cima: si vede subito, senza aspettare che clicchi la scheda
+     rotta. Scritto con il DOM nudo apposta — se manca un pezzo non e' il
+     momento di dipendere da altre funzioni del gestionale. */
+  if(_pezziMancanti.length){
+    try{
+      var _av=document.createElement("div");
+      _av.setAttribute("role","alert");
+      _av.style.cssText="position:fixed;left:0;right:0;top:0;z-index:99999;background:#8a1c1c;color:#fff;"
+        +"font:600 15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:12px 16px;text-align:center";
+      _av.textContent="Una parte del gestionale non si è caricata. Ricarica la pagina (F5). "
+        +"Se il problema resta, controlla la connessione.";
+      document.body.appendChild(_av);
+      console.error("[gestionale] pezzi non caricati:",_pezziMancanti.join(", "));
+    }catch(e){}
+  }
   /* ============================================================
      INVIO E BARRA SPAZIATRICE — 6 settembre 2026
      ============================================================
