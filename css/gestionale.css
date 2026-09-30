@@ -5368,3 +5368,13 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
   .ti-i{position:relative}
   .ti-i::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 }
+
+/* 30 settembre 2026 — FATTURE: la riga rossa che sostituisce due riquadri.
+   Compare solo se c'e' un problema (credito fermo, numeri mancanti).
+   Testo 15px: sotto i 13 non si legge (regola fissa). Occupa tutta la riga. */
+#fatture .fatt-avviso{
+  grid-column:1/-1; display:block; margin:0;
+  background:#FDECEC; border:1px solid #F3B8B8; color:#B42318;
+  border-radius:12px; padding:14px 18px; font-size:15px; font-weight:700; line-height:1.4;
+}
+#fatture .fatt-avviso[data-action]:hover{ background:#FBDADA; }

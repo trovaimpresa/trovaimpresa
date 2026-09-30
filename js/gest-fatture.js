@@ -656,13 +656,20 @@
          due sbagliato — qui sono i soldi entrati davvero (IVA compresa,
          ritenuta tolta), là è l'imponibile su cui si fa l'utile. Adesso si
          chiamano con parole diverse, così non si confondono più. */
-      + box(eur2(incAnno),"Entrato in cassa "+anno,"IVA compresa, ritenuta tolta","ok")
-      + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
-            piuVecchio==null?"nessuna fattura in attesa":"dalla data della fattura",
-            (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
-      + box(String(emesseAnno),"Fatture emesse "+anno,
-            buchiTesto+(buchiNelCestino?" · apri il Cestino":""),buchiTono,
-            buchiNelCestino?'data-action="vai-sezione" data-go="cestino"':"");
+      + box(eur2(incAnno),"Entrato in cassa "+anno,"IVA compresa, ritenuta tolta","ok");
+    /* 30 settembre 2026 — DA CINQUE RIQUADRI A TRE + UNA RIGA ROSSA.
+       «Il credito piu' vecchio» e «Fatture emesse» (coi buchi nella
+       numerazione) erano due riquadri sempre accesi, anche quando andava
+       tutto bene. Ora compare UNA riga rossa sola, e solo se c'e' un problema:
+       credito fermo da piu' dei giorni di pagamento, oppure numeri mancanti.
+       Il buco nella numerazione si vede ancora (decisione del 12 agosto) e,
+       se e' nel Cestino, la riga si clicca e apre il Cestino (19 settembre). */
+    const avvisi=[];
+    if(piuVecchio!=null&&piuVecchio>gg) avvisi.push("credito fermo da "+piuVecchio+(piuVecchio===1?" giorno":" giorni"));
+    if(buchiTono==="err") avvisi.push(buchiTesto);
+    if(sum&&avvisi.length)
+      sum.innerHTML+='<div class="fatt-avviso"'+(buchiNelCestino?' data-action="vai-sezione" data-go="cestino" style="cursor:pointer"':'')+'>⚠ '
+        +esc(avvisi.join(" · "))+(buchiNelCestino?" · apri il Cestino":"")+'</div>';
 
     const filtra=(A,v)=>
         v==="bozze"    ? A.filter(f=>f.stato==="bozza")
