@@ -38,6 +38,7 @@ const RADI = process.env.CONTROLLO_RADI || path.resolve(__dirname, '..');
    i suoi controlli spariscono in silenzio. */
 const PEZZI_GEST_CORE = [
   'js/gest-base.js',
+  'js/gest-reparti.js',
   'js/gest-core.js'
 ];
 
