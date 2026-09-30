@@ -2769,10 +2769,16 @@
 
 /* --- una riga della fattura: descrizione, quantita', prezzo, IVA, cestino --- */
 .fatt-riga{
-  display:grid; grid-template-columns:1fr 72px 104px 88px 40px;
-  gap:8px; margin-bottom:8px; align-items:center;
+  display:grid; grid-template-columns:72px 104px 88px 40px; justify-content:start;
+  gap:8px; padding-bottom:12px; margin-bottom:12px; align-items:center;
+  border-bottom:1px solid var(--bordo);
+}
+/* 30 set 2026: la descrizione sta sulla sua riga, in una casella da 3 righe */
+.fatt-riga .fr-desc{
+  grid-column:1 / -1; min-height:84px; resize:vertical; line-height:1.4;
 }
 .fatt-riga input,
+.fatt-riga textarea,
 .fatt-riga select{
   width:100%; font-family:inherit; font-size:16px; padding:11px 12px;
   border:1.5px solid var(--bordo); border-radius:10px; background:var(--card);
@@ -2788,12 +2794,7 @@
 
 /* sul telefono cinque colonne non ci stanno: descrizione sopra, il resto sotto */
 @media(max-width:760px){
-  .fatt-riga{
-    grid-template-columns:1fr 1fr 88px 44px;
-    gap:8px; padding-bottom:12px; margin-bottom:12px;
-    border-bottom:1px solid var(--bordo);
-  }
-  .fatt-riga .fr-desc{ grid-column:1 / -1; }
+  .fatt-riga{ grid-template-columns:1fr 1fr 88px 44px; justify-content:stretch; }
 }
 
 /* --- il conto, sempre sotto gli occhi mentre scrivi --- */

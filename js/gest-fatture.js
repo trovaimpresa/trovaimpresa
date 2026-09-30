@@ -754,7 +754,7 @@
     const iva=r.iva!=null?+r.iva:ivaDefault();
     const opts=IVA_SCELTE.map(v=>'<option value="'+v+'"'+(+iva===v?" selected":"")+'>'+v+'%</option>').join("");
     return '<div class="fatt-riga" data-riga>'
-      + '<input class="fr-desc" placeholder="Descrizione voce" value="'+esc(r.descrizione||"")+'">'
+      + '<textarea class="fr-desc" rows="3" placeholder="Descrizione voce">'+esc(r.descrizione||"")+'</textarea>'
       + '<input class="fr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="'+_numTesto(r.qta!=null?r.qta:1)+'">'
       + '<input class="fr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="'+_prezzoCasella(r.prezzo)+'" data-euro>'
       + '<select class="fr-iva"'+(fattForfettario()?' style="display:none"':'')+'>'+opts+'</select>'
