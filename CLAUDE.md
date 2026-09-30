@@ -2743,3 +2743,12 @@ database sono state fatte in transazioni annullate (tutte verdi).
 - Provato DAL VIVO con l'account di Alessio (3 crediti): la prima versione sbagliava i contributi del forfettario («paghi sempre il minimo») e scriveva in markdown → corretto il prompt (esempio 38.000 € → circa 7.850 € di INPS, riduzione 35% su tutto, niente markdown, niente sanzioni inventate). Lettera di prova (avviso bonario, ricevuta il 15/09) → scadenza 14/11 giusta, importo giusto, 20 rate.
 - ⚠️ È Haiku: sui calcoli a mano può sbagliare. Per questo il contesto porta già i numeri calcolati dal gestionale e il prompt gli dice di usare quelli.
 - In giro di prova l'AI non risponde (niente sessione): lo dice con «provalo gratis 30 giorni».
+
+## 30 SETTEMBRE 2026 — SEMPLIFICARE IL GESTIONALE: COSA SI E' FATTO E COSA SI E' DECISO DI LASCIARE
+
+- FATTURE (fatto, `js/gest-fatture.js` + fondo di `css/gestionale.css`): i riquadri in cima da 5 a 3 (Da incassare, Da fatturare, Entrato in cassa). «Il credito piu' vecchio» e «Fatture emesse» non sono piu' riquadri: c'e' UNA riga rossa (`.fatt-avviso`) che compare solo se c'e' un problema (credito fermo oltre i giorni di pagamento, numeri mancanti). Se i numeri mancanti sono nel Cestino la riga si clicca e apre il Cestino. Provata con 5 casi in Node e sul sito vero (3 riquadri, 0 errori, niente sotto 13 px). La riga rossa non e' stata vista sul sito vero: nel reparto provato non c'erano problemi.
+- ⛔ DA LASCIARE COSI (Alessio, 30/09): la riga «Puoi scriverlo a mano, dettarlo all'AI, o farlo nascere da un computo metrico gia' fatto» sotto il titolo di Preventivi — «serve questa informazione».
+- ⛔ DA LASCIARE COSI (Alessio, 30/09): il Riepilogo coi suoi 16 riquadri — «lo voglio cosi come lo abbiamo fatto». NON riproporre di nasconderne una parte.
+- Lavori e Preventivi: gia' ordinati (tabella, un solo pulsante «Apri», numeri solo quando servono). Niente da toccare.
+- Noleggio, operatore e negozio non hanno quei riquadri: niente da replicare.
+- Nota: la shell sul computer di Alessio non parte (aggiornamento Windows dell'8 settembre); i file si leggono e si scrivono con stage/commit.
