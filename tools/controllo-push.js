@@ -40,6 +40,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-base.js',
   'js/gest-reparti.js',
   'js/gest-ingresso.js',
+  'js/gest-ai-moduli.js',
   'js/gest-core.js'
 ];
 
