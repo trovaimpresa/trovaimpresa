@@ -796,7 +796,7 @@
     const netto=tot-ritE;                        /* quanto ti bonificano davvero */
     const el=$("#fatt-somma");
     if(el)el.innerHTML=
-        '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Imponibile')+'</span><b>'+eur2(b.compenso)+'</b></div>'
+        '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Prezzo senza IVA')+'</span><b>'+eur2(b.compenso)+'</b></div>'
       + (b.cassa ?'<div class="fs-r"><span>Cassa '+f.cassa_perc+'%</span><b>'+eur2(b.cassa)+'</b></div>':"")
       + (b.speseIva?'<div class="fs-r"><span>Rimborso spese</span><b>'+eur2(b.speseIva)+'</b></div>':"")
       + (b.spese ?'<div class="fs-r"><span>Spese anticipate'+(b.art15?' (fuori IVA)':'')+'</span><b>'+eur2(b.spese)+'</b></div>':"")
@@ -804,7 +804,7 @@
       /* "Imponibile IVA" non si puo' piu' dire, da quando dentro ci sono anche
          le spese art. 15 che l'IVA non ce l'hanno: su 5.550 di imponibile
          l'IVA e' 1.188 e non 1.221, e chi fa il conto a mente non torna. */
-      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':'Imponibile IVA')+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
+      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':(ruoloUtente==='professionista'?'Imponibile IVA':'Su cui si paga l\'IVA'))+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
       + (forf?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(b.iva)+'</b></div>')
       + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
       + (ritE   ?'<div class="fs-r"><span>Ritenuta '+_pct(f.ritenuta_perc)+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
@@ -893,7 +893,7 @@
       + '<div class="sh-b"><div class="sh-tit">In fondo alla fattura</div>'
       +   '<div class="row2">'
       +     '<div class="field"><label>Sconto (€)</label><input type="text" inputmode="decimal" id="fa-sconto" value="'+_numTesto(+f.sconto||"")+'" placeholder="0" data-euro></div>'
-      +     '<div class="field"><label>Bollo (€)</label><input type="text" inputmode="decimal" id="fa-bollo" value="'+_numTesto(+f.bollo||"")+'" placeholder="0" data-euro></div>'
+      +     '<div class="field"><label>'+(ruoloUtente==='professionista'?'Bollo (€)':'Marca da bollo (€)')+'</label><input type="text" inputmode="decimal" id="fa-bollo" value="'+_numTesto(+f.bollo||"")+'" placeholder="0" data-euro></div>'
       +   '</div>'
       /* ===== 9 agosto 2026 — la cassa previdenziale =====
          C'era nel preventivo e mancava in fattura: un geometra non poteva
@@ -930,7 +930,7 @@
                     + '<div class="sh-nota"><b>Questa fattura è nata prima del 13 agosto 2026</b>, quindi le spese seguono ancora il conto di allora: entrano nell\'imponibile e prendono l\'IVA. Non la cambio, perché è già stata mandata allo SDI così e deve restare uguale a quella che ha in mano il cliente.<br><br>Dalla prossima fattura nuova troverai due caselle separate: spese anticipate (escluse IVA, art. 15) e rimborso spese.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu.</div>');
               })()
             : '')
-      +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
+      +   '<div class="field"><label>'+(ruoloUtente==='professionista'?'Ritenuta d\'acconto (%)':'Trattenuta (ritenuta d\'acconto) %')+'</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
       +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
       + '</div>'
 

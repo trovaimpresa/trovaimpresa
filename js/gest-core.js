@@ -575,6 +575,13 @@
           lezione che e' gia' costata una giornata. Adesso il nome lo decide
           nomeGestionale() e basta. */
     applicaNomeGestionale();
+    /* 30 set 2026 — parole semplici per artigiano e impresa (lo studio resta com'era) */
+    if(ruoloUtente!=='professionista'){
+      const _bj=document.querySelector('[data-action="export-json"]');
+      if(_bj&&/Backup/.test(_bj.textContent))_bj.textContent="Salva una copia dei dati";
+      const _rc=document.querySelector('[data-action="report-csv"]');
+      if(_rc)_rc.textContent="⬇ Scarica per Excel";
+    }
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
@@ -913,9 +920,9 @@
       spiega:"Un computo raccoglie le lavorazioni con le loro misure: parti uguali, lunghezza, larghezza, altezza, e i vuoti da detrarre. La quantità la calcola il gestionale."
     },
     imp:{
-      nome:"Computo da prezzare", uno:"computo da prezzare", tanti:"computi da prezzare",
-      nuovo:"Nuovo computo da prezzare", crea:"+ Nuovo computo da prezzare",
-      primo:"+ Crea il primo computo da prezzare", vuoto:"Ancora nessun computo da prezzare",
+      nome:"Elenco lavori da prezzare", uno:"elenco lavori da prezzare", tanti:"elenchi lavori da prezzare",
+      nuovo:"Nuovo elenco lavori da prezzare", crea:"+ Nuovo elenco lavori",
+      primo:"+ Crea il primo elenco lavori", vuoto:"Ancora nessun elenco lavori da prezzare",
       spiega:"Il computo che ti manda il geometra arriva quasi sempre senza prezzi. Creane uno qui e dentro ci carichi il suo file: le lavorazioni entrano con le loro quantità, e i prezzi ce li metti tu."
     }
   };
@@ -3140,7 +3147,7 @@
      automatici nella stessa riga si spartiscono lo spazio a caso. */
   function ctrTastoHTML(tipo){
     return '<button type="button" class="btn ctr-tasto" data-action="ctr-guarda" data-ctr="'+tipo+'">'
-         + 'Controlla prima di mandarlo</button>'
+         + (ruoloUtente==='professionista'?'Controlla prima di mandarlo':'Controlla che sia giusto')+'</button>'
          /* ⚠️ 19 agosto 2026 — IL TASTO DELL'AI SI VEDE SUBITO.
             Prima compariva solo dopo il controllo gratis, per non far
             spendere un credito per sbaglio. Ma nascosto vuol dire anche
@@ -3149,7 +3156,7 @@
             PREMUTO, non il fatto che sia invisibile. */
          + (CTR_AI_SEZIONI.indexOf(tipo)>=0
             ? '<button type="button" class="btn ctr-tasto-ai" data-action="ctr-ai" data-ctr="'+tipo+'">'
-              + CTR_AI_LABEL+'</button>'
+              + ctrAiLabel()+'</button>'
             : "");
   }
 
@@ -3183,7 +3190,7 @@
   const CTR_AI_SEZIONI=["preventivo","fattura","computo"];
   /* la scritta del tasto sta in un posto solo: dopo una lettura il tasto
      torna com'era, e non si ritrova scritto due modi diversi */
-  const CTR_AI_LABEL="✨ Falla leggere anche all'AI · 1 credito";
+  function ctrAiLabel(){ return ruoloUtente==='professionista' ? "✨ Falla leggere anche all'AI · 1 credito" : "✨ Fai controllare anche all'intelligenza artificiale · 1 credito"; }
   const CTR_AI_MAX=40;      /* quante voci si mandano al massimo */
   const CTR_AI_QUANTE=6;    /* quante segnalazioni si mostrano */
   let ctrAiInCorso=false;
@@ -3274,7 +3281,7 @@
         +'<div class="ctr-ai-sub">'+esc((e&&e.message)||"Riprova fra un attimo.")+'</div>');
     }finally{
       ctrAiInCorso=false;
-      if(tasto){ tasto.disabled=false; tasto.textContent=CTR_AI_LABEL; }
+      if(tasto){ tasto.disabled=false; tasto.textContent=ctrAiLabel(); }
     }
   }
   function ctrAiRiquadroVia(){
@@ -3379,7 +3386,7 @@
     });
     if(passi.length<2) return "";
     return '<div class="filo">'
-      + '<span class="filo-t">Come si incastrano</span>'
+      + '<span class="filo-t">'+(ruoloUtente==='professionista'?'Come si incastrano':'Cosa viene prima e cosa dopo')+'</span>'
       + passi.map(function(p,i){
           return (i?'<span class="filo-fre">&rarr;</span>':'')
             + (p.tab===qui
