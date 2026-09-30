@@ -674,6 +674,14 @@
       /* Computo metrico: nascosta a tutti, accesa per gli studi tecnici */
       var _tabCo=document.querySelector('#tab-computi');
       if(_tabCo)_tabCo.style.display='';
+      /* 30/09/2026 — per uno studio il Computo metrico e' il lavoro principale:
+         sale in vista nel menu corto, sotto Clienti (era dentro «Altre voci»). */
+      window._tiPromuovi=[['computi','clienti']];
+      if(typeof window.menuCortoPromuovi==='function')window.menuCortoPromuovi('computi','clienti');
+      /* 30/09/2026 — in Mezzi la frase mandava a «Attrezzature», ma per gli studi
+         la voce si chiama «Strumenti» (come nel menu). */
+      var _miz=document.querySelector('#mezzi .gal-intro b');
+      if(_miz&&_miz.textContent.trim()==='Attrezzature')_miz.textContent='Strumenti';
       /* il Prezzario va insieme al computo: senza computo non serve a niente */
       var _tabPz=document.querySelector('#tab-prezzario');
       if(_tabPz)_tabPz.style.display='';

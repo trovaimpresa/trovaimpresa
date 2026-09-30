@@ -86,6 +86,18 @@
     apri(false);
     aggiorna();
 
+    /* 30/09/2026 — UNA VOCE PUO' SALIRE IN VISTA PER UN MESTIERE.
+       Per gli studi tecnici il Computo metrico e' il lavoro principale, ma
+       stava dentro «Altre voci». gest-core.js (adattaMenuProfessionista) lo
+       chiede con menuCortoPromuovi('computi','clienti'). Se il menu corto non
+       e' ancora montato, la richiesta aspetta in window._tiPromuovi. */
+    window.menuCortoPromuovi = function (tab, dopoTab) {
+      var b = nav.querySelector('button[data-tab="' + tab + '"]');
+      var d = nav.querySelector('button[data-tab="' + dopoTab + '"]');
+      if (b && d && d.nextElementSibling !== b) { d.after(b); aggiorna(); }
+    };
+    (window._tiPromuovi || []).forEach(function (p) { window.menuCortoPromuovi(p[0], p[1]); });
+
     /* i contatori e le voci accese/spente cambiano mentre si lavora */
     var inAttesa = false;
     new MutationObserver(function () {
