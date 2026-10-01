@@ -32,7 +32,7 @@ const RADI = process.env.CONTROLLO_RADI || path.resolve(__dirname, '..');
 /* Quello che si guarda con l'occhio severo: qui la regola dei 13 px   */
 /* e' scritta nel progetto, e vale.                                     */
 /* ------------------------------------------------------------------ */
-/* 30 set 2026: il codice della pagina gestionale-app.html sta in PIU' pezzi (js/gest-base.js, js/gest-core.js...).
+/* 30 set 2026: il codice della pagina gestionale-app.html sta in PIU' pezzi (js/gest-base.js ... js/gest-avvio.js: il vecchio js/gest-core.js e' stato diviso il 1 ott 2026).
    ⚠️ Ogni pezzo nuovo va aggiunto QUI, UNA volta sola, nello stesso ordine dei tag script:
    da qui lo prendono le tre liste sotto e il controllo delle finestre. Se se ne dimentica uno,
    i suoi controlli spariscono in silenzio. */
@@ -53,7 +53,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-cestino.js',
   'js/gest-ricerca.js',
   'js/gest-finestre-eventi.js',
-  'js/gest-core.js'
+  'js/gest-avvio.js'
 ];
 
 const FILE_GESTIONALE = [
@@ -490,7 +490,7 @@ function controllaMisure(){
 function controllaFinestre(){
   const f = 'gestionale-app.html';
   if (!esiste(f)) return;
-  /* 29 set 2026: il codice della pagina sta in js/gest-core.js, si guarda insieme */
+  /* 29 set 2026: il codice della pagina sta nei pezzi js/gest-*.js (PEZZI_GEST_CORE), si guarda insieme */
   const t = leggi(f) + PEZZI_GEST_CORE.map(p => esiste(p) ? '\n' + leggi(p) : '').join('');
   // solo le chiamate con il testo diretto: `openSheet(\`...`
   const quante = (t.match(/openSheet\(`/g) || []).length;

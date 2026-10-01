@@ -1,4 +1,4 @@
-// [SPOSTATO] gest-core.js: le righe 1-12571 del vecchio file ora stanno in: gest-base.js (righe 1-421), gest-reparti.js (righe 422-1251), gest-ingresso.js (righe 1252-1842), gest-ai-moduli.js (righe 1843-3411), gest-riepilogo-schede.js (righe 3412-3986), gest-schede-clienti.js (righe 3987-4805), gest-carte-documenti.js (righe 4806-5415), gest-richieste-chat.js (righe 5416-6041), gest-scadenze-pratiche.js (righe 6042-6983), gest-commercialista.js (righe 6984-7418), gest-elimina-reparto.js (righe 7419-8084), gest-ore-spese.js (righe 8085-9228), gest-preventivi.js (righe 9229-10132), gest-cestino.js (righe 10133-11291), gest-ricerca.js (righe 11292-11563), gest-finestre-eventi.js (righe 11564-12571). Qui resta il resto.
+// [SPOSTATO] gest-avvio.js: era dentro gest-core.js, righe 12572-12657, spostato identico. gest-core.js non esiste piu': questo e' l'ultimo pezzo, quello che parte per ultimo.
   /* ============================================================
      ⛔ 5 SETTEMBRE 2026 — APRENDO IL GESTIONALE SI VEDE LA SCHERMATA
         DEI REPARTI, NON L'ULTIMO REPARTO DI IERI
