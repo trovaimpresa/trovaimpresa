@@ -96,6 +96,41 @@
       <p id="gate-pw-export" style="display:none;margin:16px 0 0;padding-top:14px;border-top:1px solid var(--bordo,#e2e8f0);font-size:15px;text-align:center;line-height:1.7;color:var(--testo-3,#7a848f);">I tuoi dati restano tuoi, anche senza abbonamento:<br><a href="#" id="gate-pw-export-x" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">scarica l&rsquo;Excel</a> &middot; <a href="#" id="gate-pw-export-j" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">backup completo</a></p>
       <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu,#0066ff);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
     </div>
+    <!-- 1 ottobre 2026 — IL PROFILO MINIMO. Si vede solo se PROFILO_MINIMO_ATTIVO
+         e' acceso (o con ?profilo=prova). Le righe le disegna mostraProfilo(). -->
+    <div id="gate-profilo" style="display:none;padding:26px 24px 30px;color:var(--testo,#1c2b36);">
+      <style>
+        #gate-profilo .gp-riga{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 0;border-top:1px solid var(--bordo,#e2e8f0);}
+        #gate-profilo .gp-ico{flex:0 0 24px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;line-height:1;box-sizing:border-box;}
+        #gate-profilo .gp-ok{background:#1f9d55;color:#fff;}
+        #gate-profilo .gp-no{border:2px solid #b8c1cc;color:transparent;}
+        #gate-profilo .gp-nome{flex:1 1 140px;min-width:0;font-size:16px;line-height:1.35;}
+        #gate-profilo .gp-aiuto{display:block;font-size:13px;color:var(--testo-3,#7a848f);margin-top:2px;}
+        #gate-profilo .gp-btn{flex:0 0 auto;padding:9px 16px;border:1.5px solid var(--blu,#0066ff);border-radius:9px;background:#fff;color:var(--blu,#0066ff);font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;line-height:1.2;}
+        #gate-profilo .gp-btn:disabled{opacity:.6;cursor:default;}
+        #gate-profilo .gp-edit{flex:1 1 100%;display:none;padding:2px 0 4px 36px;}
+        #gate-profilo .gp-edit.aperto{display:block;}
+        #gate-profilo .gp-in{width:100%;box-sizing:border-box;padding:11px 12px;border:1.5px solid #b8c1cc;border-radius:9px;font-size:16px;font-family:inherit;color:inherit;background:#fff;}
+        #gate-profilo textarea.gp-in{min-height:110px;resize:vertical;line-height:1.5;}
+        #gate-profilo .gp-sotto{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:8px;}
+        #gate-profilo .gp-conta{font-size:13px;color:var(--testo-3,#7a848f);flex:1 1 auto;}
+        #gate-profilo .gp-salva{padding:10px 20px;border:0;border-radius:9px;background:var(--blu,#0066ff);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;}
+        #gate-profilo .gp-salva:disabled{opacity:.6;cursor:default;}
+        @media(max-width:480px){#gate-profilo{padding:22px 16px 26px !important;}#gate-profilo .gp-edit{padding-left:0;}}
+      </style>
+      <p style="margin:0 0 6px;font-size:21px;font-weight:800;line-height:1.35;">Completa il profilo per aprire il gestionale</p>
+      <p id="gp-sub" style="margin:0 0 16px;font-size:16px;line-height:1.6;color:var(--testo-2,#5b6672);"></p>
+      <div style="display:flex;align-items:center;gap:12px;margin:0 0 6px;">
+        <div style="flex:1;height:9px;border-radius:5px;background:#e3e8ee;overflow:hidden;"><div id="gp-barra" style="height:100%;width:0%;background:var(--blu,#0066ff);transition:width .4s ease;"></div></div>
+        <span id="gp-conta" style="font-size:14px;font-weight:800;white-space:nowrap;"></span>
+      </div>
+      <div id="gp-righe"></div>
+      <button type="button" id="gp-avanti" style="display:block;width:100%;margin-top:18px;padding:16px;border:0;border-radius:10px;background:var(--blu,#0066ff);color:#fff;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;">Completa il profilo</button>
+      <p id="gp-err" style="display:none;margin:12px 0 0;font-size:15px;color:#b1442a;text-align:center;line-height:1.6;"></p>
+      <p id="gp-msg" style="display:none;margin:12px 0 0;font-size:15px;color:#1b8a3f;text-align:center;line-height:1.6;"></p>
+      <p id="gate-pr-export" style="display:none;margin:16px 0 0;padding-top:14px;border-top:1px solid var(--bordo,#e2e8f0);font-size:15px;text-align:center;line-height:1.7;color:var(--testo-3,#7a848f);">I tuoi dati restano tuoi:<br><a href="#" id="gate-pr-export-x" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">scarica l&rsquo;Excel</a> &middot; <a href="#" id="gate-pr-export-j" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">backup completo</a></p>
+      <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu,#0066ff);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
+    </div>
     <div id="gate-lento" style="display:none;padding:28px 28px 32px;color:var(--testo,#1c2b36);">
       <p style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Non riesco a verificare il tuo accesso</p>
       <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">La linea sta rispondendo troppo lentamente, oppure &egrave; caduta. Il tuo abbonamento non c&rsquo;entra: appena la linea torna, entri.</p>
@@ -216,7 +251,7 @@
   /* ⛔ 22 agosto 2026 — le schermate si spengono a vicenda da un ELENCO SOLO.
      Prima ognuna spegneva le altre a mano: con la quarta (gate-lento)
      dimenticarne una avrebbe lasciato due schermate una sopra l'altra. */
-  var GATE_SCHERMATE=['gate-checking','gate-paywall','gate-manutenzione','gate-lento'];
+  var GATE_SCHERMATE=['gate-checking','gate-paywall','gate-manutenzione','gate-lento','gate-profilo'];
   function gateMostra(quale){
     q('gate-gestionale').style.display='flex';
     GATE_SCHERMATE.forEach(function(id){ var e=q(id); if(e)e.style.display=(id===quale?'block':'none'); });
@@ -345,12 +380,15 @@
      in piu' qui il link stesso dice «Preparo...» mentre lavora: un file grande
      ci mette qualche secondo, e senza un segno uno pensa che il tasto sia
      morto e ci schiaccia sopra cinque volte. */
-  function mostraScarica(){
-    var p=q('gate-pw-export'); if(!p) return;
+  /* 1 ottobre 2026: i tre id si possono passare, cosi' la stessa porta di
+     uscita serve anche alla schermata del profilo (gate-pr-*). Senza
+     argomenti fa quello di prima, identico. */
+  function mostraScarica(idBox,idX,idJ,idErr){
+    var p=q(idBox||'gate-pw-export'); if(!p) return;
     if(!window._gestUid) return;
     if(typeof window.esportaExcel!=='function'||typeof window.esportaJson!=='function') return;
     p.style.display='block';
-    var x=q('gate-pw-export-x'), j=q('gate-pw-export-j');
+    var x=q(idX||'gate-pw-export-x'), j=q(idJ||'gate-pw-export-j');
     function attacca(el,fn){
       if(!el) return;
       el.onclick=function(ev){
@@ -359,7 +397,7 @@
         el.textContent='Preparo\u2026';
         el.style.pointerEvents='none';
         Promise.resolve().then(fn).catch(function(e){
-          var err=q('gate-pw-err');
+          var err=q(idErr||'gate-pw-err');
           if(err){ err.textContent='Non sono riuscito a preparare il file: '+((e&&e.message)||'riprova fra poco')+'.'; err.style.display='block'; }
         }).then(function(){ el.textContent=prima; el.style.pointerEvents=''; });
       };
@@ -383,6 +421,321 @@
       pwErrore((err&&err.message)||'Riprova fra poco.');
     });
   }
+  /* ============================================================
+     ===== IL PROFILO MINIMO — 1 ottobre 2026 =====
+     ============================================================
+     Idea di Alessio: il gestionale base si regala a chi si iscrive, ma chi
+     lo vuole usare deve avere un profilo VERO: «verranno bloccati se non
+     inseriranno almeno il 90% delle loro informazioni». Cosi' ogni iscritto
+     che usa il gestionale lascia sul sito una scheda piena, e il sito vale
+     di piu' per i clienti, per i negozi e per chi vuole fare pubblicita'.
+
+     ⚠️ NON E' IL 90%: e' una lista fissa di 7 cose — nome, mestiere, citta',
+     telefono scritto bene, descrizione di almeno 100 caratteri, logo, email
+     confermata. Una percentuale non si spiega a nessuno e si aggira con un
+     campo qualunque; con una lista l'iscritto vede cosa gli manca.
+     Le foto dei lavori restano FUORI: oggi `lavori_foto` si conta a parte e
+     non e' una colonna del profilo.
+
+     ⛔ INTERRUTTORE SPENTO (PROFILO_MINIMO_ATTIVO = false): oggi questa
+     schermata non compare a nessuno. Si accende INSIEME all'apertura del
+     gestionale base gratuito, non prima. Misurato il 1 ottobre 2026 su 144
+     iscritti: tutte e 7 le voci le hanno 20; almeno 6 le hanno 64; ne manca
+     soprattutto la descrizione (32 su 144) e il logo (57 su 144). Quindi
+     accenderlo adesso metterebbe davanti alla schermata 124 iscritti, anche
+     fra chi PAGA. Per guardarla senza accenderla: aggiungere ?profilo=prova
+     all'indirizzo del gestionale (anteprima: non salva niente).
+
+     ⛔ IL LOGO. Nel pannello il pulsante del logo lo vede solo chi ha il
+     Premium (`btn-logo` e' nascosto agli altri). Chiedere il logo a chi non
+     lo puo' caricare sarebbe un blocco impossibile da superare: per questo
+     il caricamento sta QUI, nella schermata. Il database lo permette a
+     tutti (la regola di `loghi-imprese` guarda solo che la cartella sia
+     dell'utente, non il piano).
+
+     ⛔ IN CASO DI DUBBIO SI ENTRA. Al contrario del resto del cancello:
+     questo non e' un controllo di sicurezza, e' una cortesia. Se la lettura
+     del profilo va in errore o ci mette piu' di 6 secondi, chi ha gia'
+     diritto di entrare entra. Chiudere fuori un cliente pagante per una
+     tentennata della rete sarebbe il danno peggiore.
+     ============================================================ */
+  var PROFILO_MINIMO_ATTIVO = false;
+  var DESCR_MIN = 100;           /* caratteri minimi della descrizione */
+  var DESCR_MAX_FREE = 200;      /* il piano Free non ne accetta di piu' (vedi modifica-profilo.html) */
+  var COLONNE_PROFILO = 'nome_attivita, nome, mestiere, mestieri, citta, telefono, descrizione, logo_url, email_confermata, piano';
+  var _gpRiga = null, _gpProva = false, _gpAperto = null;
+
+  function _pieno(v){ return v!==null && v!==undefined && String(v).trim()!==''; }
+
+  /* Un numero italiano: cellulare (3...), fisso (0...) o numero verde.
+     Si tolgono spazi, punti, trattini, parentesi e il prefisso +39 / 0039.
+     Misurato sui 122 telefoni veri: 121 passano; l'unico scartato e' una
+     riga con DUE numeri attaccati. */
+  function telefonoValido(t){
+    var s=String(t==null?'':t).replace(/[\s.\-()\/]/g,'').replace(/^(\+39|0039)/,'');
+    if(!/^\d+$/.test(s)) return false;
+    if(/^(\d)\1+$/.test(s)) return false;           /* 3333333333 */
+    return /^3\d{8,9}$/.test(s) || /^0\d{5,10}$/.test(s) || /^(800|803|199|848)\d{3,7}$/.test(s);
+  }
+  /* il mestiere sta in DUE colonne: la vecchia `mestiere` e la lista `mestieri`.
+     Vale l'una O l'altra (stessa regola di completa-profilo.js). */
+  function _haMestiere(r){
+    var l=r.mestieri;
+    var haLista=Array.isArray(l) ? l.filter(Boolean).length>0 : _pieno(l);
+    return _pieno(r.mestiere) || haLista;
+  }
+  var VOCI_PROFILO=[
+    {id:'nome',        etichetta:'Nome attività',  come:'link',  ok:function(r){return _pieno(r.nome_attivita)||_pieno(r.nome);}},
+    {id:'mestiere',    etichetta:'Mestiere',            come:'link',  ok:_haMestiere},
+    {id:'citta',       etichetta:'Città',          come:'link',  ok:function(r){return _pieno(r.citta);}},
+    {id:'telefono',    etichetta:'Telefono',            come:'testo', aiuto:'Il numero dove ti chiamano i clienti', ok:function(r){return telefonoValido(r.telefono);}},
+    {id:'descrizione', etichetta:'Descrizione',         come:'lungo', aiuto:'Almeno 100 caratteri', ok:function(r){return String(r.descrizione==null?'':r.descrizione).trim().length>=DESCR_MIN;}},
+    {id:'logo',        etichetta:'Logo',                come:'file',  aiuto:'Il tuo marchio o una foto', ok:function(r){return _pieno(r.logo_url);}},
+    {id:'email',       etichetta:'Email confermata',    come:'email', aiuto:'Controlla la tua posta', ok:function(r){return r.email_confermata===true;}}
+  ];
+  /* l'unico punto che decide se un profilo basta: il banco lo chiama da qui */
+  function profiloMinimo(riga){
+    var r=riga||{}, fatte=0, mancanti=[];
+    VOCI_PROFILO.forEach(function(v){ if(v.ok(r)) fatte++; else mancanti.push(v.id); });
+    return {fatte:fatte, totale:VOCI_PROFILO.length, completo:fatte===VOCI_PROFILO.length, mancanti:mancanti};
+  }
+  window._profiloMinimo=profiloMinimo;
+  window._telefonoValido=telefonoValido;
+
+  function leggiProfilo(gc,uid){
+    return gc.from('imprese').select(COLONNE_PROFILO).eq('user_id',uid).maybeSingle().then(function(res){
+      if(res&&res.error) throw res.error;
+      return (res&&res.data)||null;
+    });
+  }
+  /* Si risolve SEMPRE, con 'ok' o 'profilo': mai rifiutata, mai appesa. */
+  function controllaProfilo(gc,uid,prova){
+    return new Promise(function(risolvi){
+      var finito=false, t=null;
+      function fine(esito){ if(finito)return; finito=true; clearTimeout(t); risolvi(esito); }
+      t=setTimeout(function(){ fine('ok'); },6000);
+      leggiProfilo(gc,uid).then(function(riga){
+        if(!riga){ fine('ok'); return; }      /* nessuna riga: non tocca a questa schermata dirlo */
+        if(prova){ riga=Object.assign({},riga,{descrizione:'',logo_url:'',email_confermata:false}); }
+        _gpRiga=riga; _gpProva=!!prova;
+        fine(profiloMinimo(riga).completo?'ok':'profilo');
+      },function(){ fine('ok'); });
+    });
+  }
+
+  function gpErr(t){ var e=q('gp-err'),m=q('gp-msg'); if(e){e.textContent=t||'';e.style.display=t?'block':'none';} if(t&&m)m.style.display='none'; }
+  function gpMsg(t){ var m=q('gp-msg'),e=q('gp-err'); if(m){m.textContent=t||'';m.style.display=t?'block':'none';} if(t&&e)e.style.display='none'; }
+  var GP_ANTEPRIMA='Questa è solo un’anteprima: non salvo niente.';
+
+  function mostraProfilo(){
+    gateMostra('gate-profilo');
+    disegnaProfilo();
+    mostraScarica('gate-pr-export','gate-pr-export-x','gate-pr-export-j','gp-err');
+  }
+  function profiloCompletato(){
+    hideGate();
+    if(window._gestProvaGiorni>0)strisciaProva(window._gestProvaGiorni);
+  }
+
+  function disegnaProfilo(){
+    var esito=profiloMinimo(_gpRiga), man=esito.totale-esito.fatte;
+    q('gp-sub').textContent = man===1 ? 'Ti manca 1 cosa. Ci vuole un minuto.' : 'Ti mancano '+man+' cose. Ci vogliono pochi minuti.';
+    q('gp-conta').textContent = esito.fatte+' di '+esito.totale;
+    q('gp-barra').style.width = Math.round(esito.fatte/esito.totale*100)+'%';
+    var box=q('gp-righe'); box.innerHTML='';
+    VOCI_PROFILO.forEach(function(v){ box.appendChild(rigaProfilo(v, v.ok(_gpRiga))); });
+    q('gp-avanti').onclick=avantiProfilo;
+    if(_gpAperto) apriEditor(_gpAperto,true);
+  }
+
+  function rigaProfilo(v,ok){
+    var riga=document.createElement('div'); riga.className='gp-riga'; riga.setAttribute('data-voce',v.id);
+    var ico=document.createElement('span'); ico.className='gp-ico '+(ok?'gp-ok':'gp-no'); ico.textContent=ok?'✓':''; ico.setAttribute('aria-hidden','true');
+    var nome=document.createElement('span'); nome.className='gp-nome'; nome.textContent=v.etichetta;
+    if(!ok && v.aiuto){ var a=document.createElement('span'); a.className='gp-aiuto'; a.textContent=v.aiuto; nome.appendChild(a); }
+    riga.appendChild(ico); riga.appendChild(nome);
+    if(ok) return riga;
+    if(v.come==='link'){
+      var l=document.createElement('a'); l.className='gp-btn'; l.href='/modifica-profilo.html'; l.textContent='Aggiungi';
+      if(_gpProva) l.onclick=function(ev){ ev.preventDefault(); gpMsg('Anteprima: da qui ti porto alla pagina per modificare il profilo.'); };
+      riga.appendChild(l); return riga;
+    }
+    if(v.come==='email'){
+      var b=document.createElement('button'); b.type='button'; b.className='gp-btn'; b.textContent='Invia di nuovo';
+      b.onclick=function(){ rimandaEmail(b); };
+      riga.appendChild(b); return riga;
+    }
+    var bt=document.createElement('button'); bt.type='button'; bt.className='gp-btn'; bt.textContent='Aggiungi';
+    bt.onclick=function(){ apriEditor(v.id); };
+    var ed=document.createElement('div'); ed.className='gp-edit';
+    riga.appendChild(bt); riga.appendChild(ed);
+    costruisciEditor(v,ed);
+    return riga;
+  }
+
+  function apriEditor(id,senzaFocus){
+    _gpAperto=id;
+    var righe=q('gp-righe').querySelectorAll('.gp-riga');
+    for(var i=0;i<righe.length;i++){
+      var ed=righe[i].querySelector('.gp-edit'); if(!ed)continue;
+      var mio=(righe[i].getAttribute('data-voce')===id);
+      if(mio) ed.classList.add('aperto'); else ed.classList.remove('aperto');
+      if(mio && !senzaFocus){
+        var f=ed.querySelector('input[type=tel],textarea'); if(f){ try{f.focus();}catch(_){} }
+        try{ righe[i].scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){}
+      }
+    }
+  }
+
+  function bottoneSalva(testo,fn){
+    var b=document.createElement('button'); b.type='button'; b.className='gp-salva'; b.textContent=testo||'Salva';
+    b.onclick=fn; return b;
+  }
+
+  function costruisciEditor(v,ed){
+    var sotto=document.createElement('div'); sotto.className='gp-sotto';
+    if(v.id==='telefono'){
+      var inp=document.createElement('input'); inp.type='tel'; inp.className='gp-in'; inp.placeholder='333 1234567';
+      inp.setAttribute('inputmode','tel'); inp.setAttribute('autocomplete','tel'); inp.maxLength=20;
+      var sv=bottoneSalva('Salva',function(){
+        var val=inp.value.trim();
+        if(!telefonoValido(val)){ gpErr('Scrivi un numero italiano: un cellulare che comincia con 3, oppure un fisso che comincia con 0.'); return; }
+        salvaProfilo({telefono:val},sv);
+      });
+      ed.appendChild(inp); sotto.appendChild(sv); ed.appendChild(sotto);
+      return;
+    }
+    if(v.id==='descrizione'){
+      var free=String((_gpRiga&&_gpRiga.piano)||'free').toLowerCase()==='free';
+      var ta=document.createElement('textarea'); ta.className='gp-in';
+      ta.placeholder='Cosa fai, in quali zone lavori e da quanti anni. Per esempio: «Ristrutturazioni di appartamenti e bagni chiavi in mano, a Rieti e provincia, da 15 anni.»';
+      ta.maxLength=free?DESCR_MAX_FREE:2000;
+      var co=document.createElement('span'); co.className='gp-conta';
+      var agg=function(){
+        var n=ta.value.trim().length;
+        co.textContent = n>=DESCR_MIN ? 'Perfetto, '+n+' caratteri' : 'Ne mancano '+(DESCR_MIN-n)+' (hai scritto '+n+')';
+      };
+      ta.addEventListener('input',agg); agg();
+      var sd=bottoneSalva('Salva',function(){
+        var val=ta.value.trim();
+        if(val.length<DESCR_MIN){ gpErr('Servono almeno '+DESCR_MIN+' caratteri: ne hai scritti '+val.length+'.'); return; }
+        salvaProfilo({descrizione:val},sd);
+      });
+      ed.appendChild(ta); sotto.appendChild(co); sotto.appendChild(sd); ed.appendChild(sotto);
+      return;
+    }
+    if(v.id==='logo'){
+      var fi=document.createElement('input'); fi.type='file'; fi.accept='image/png,image/jpeg,image/webp'; fi.style.display='none';
+      var sc=bottoneSalva('Scegli un’immagine',function(){ if(_gpProva){ gpMsg(GP_ANTEPRIMA); return; } fi.click(); });
+      fi.onchange=function(){ caricaLogoProfilo(fi.files&&fi.files[0],sc); fi.value=''; };
+      var hint=document.createElement('span'); hint.className='gp-conta'; hint.textContent='JPG, PNG o WEBP. Va bene anche una tua foto.';
+      sotto.appendChild(hint); sotto.appendChild(sc); ed.appendChild(fi); ed.appendChild(sotto);
+      return;
+    }
+  }
+
+  /* ⚠️ Ogni UPDATE si verifica con .select('id'): senza, un blocco di Supabase
+     passerebbe per un salvataggio riuscito (regola del gestionale). */
+  function salvaProfilo(campi,bottone){
+    gpErr(''); gpMsg('');
+    if(_gpProva){ gpMsg(GP_ANTEPRIMA); return Promise.resolve(false); }
+    var gc=window._gc, uid=window._gestUid;
+    if(!gc||!uid){ gpErr('Non sono collegato al tuo account: esci e rientra, poi riprova.'); return Promise.resolve(false); }
+    var prima=bottone?bottone.textContent:'';
+    if(bottone){ bottone.disabled=true; bottone.textContent='Salvo…'; }
+    return gc.from('imprese').update(campi).eq('user_id',uid).select('id').then(function(res){
+      if(res&&res.error) throw res.error;
+      if(!res||!res.data||!res.data.length) throw new Error('il salvataggio non è passato');
+      /* se la rilettura non arriva, si tengono i dati di prima piu' quelli appena salvati */
+      return leggiProfilo(gc,uid).catch(function(){ return null; });
+    }).then(function(riga){
+      _gpRiga = riga || Object.assign({},_gpRiga,campi);
+      _gpAperto=null;
+      if(profiloMinimo(_gpRiga).completo){ profiloCompletato(); }
+      else { disegnaProfilo(); gpMsg('Salvato.'); }
+      return true;
+    }).catch(function(e){
+      if(bottone){ bottone.disabled=false; bottone.textContent=prima; }
+      gpErr('Non sono riuscito a salvare: '+((e&&e.message)||'riprova fra poco')+'.');
+      return false;
+    });
+  }
+
+  /* Il logo si rimpicciolisce a 400 px (come nel pannello) prima di salirlo:
+     una foto di telefono pesa 5 MB e il logo si vede in un cerchio da 120. */
+  function rimpicciolisci(file,lato){
+    return new Promise(function(ok){
+      try{
+        var url=URL.createObjectURL(file), im=new Image();
+        im.onload=function(){
+          try{
+            var s=Math.min(1,lato/Math.max(im.width,im.height)), c=document.createElement('canvas');
+            c.width=Math.max(1,Math.round(im.width*s)); c.height=Math.max(1,Math.round(im.height*s));
+            c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+            c.toBlob(function(b){
+              URL.revokeObjectURL(url);
+              if(!b||!b.size){ ok(null); return; }
+              ok({blob:b,tipo:b.type||'image/png',ext:(b.type==='image/webp'?'webp':'png')});
+            },'image/webp',0.82);
+          }catch(e){ ok(null); }
+        };
+        im.onerror=function(){ URL.revokeObjectURL(url); ok(null); };
+        im.src=url;
+      }catch(e){ ok(null); }
+    });
+  }
+  function caricaLogoProfilo(file,bottone){
+    gpErr(''); gpMsg('');
+    if(!file) return;
+    if(_gpProva){ gpMsg(GP_ANTEPRIMA); return; }
+    if(!/^image\/(png|jpe?g|webp)$/i.test(file.type||'')){ gpErr('Scegli una foto JPG, PNG o WEBP.'); return; }
+    if(file.size>10*1024*1024){ gpErr('L’immagine è troppo grande: scegline una sotto i 10 MB.'); return; }
+    var gc=window._gc, uid=window._gestUid;
+    if(!gc||!uid){ gpErr('Non sono collegato al tuo account: esci e rientra, poi riprova.'); return; }
+    var prima=bottone.textContent; bottone.disabled=true; bottone.textContent='Carico…';
+    var ripristina=function(){ bottone.disabled=false; bottone.textContent=prima; };
+    rimpicciolisci(file,400).then(function(r){
+      if(!r) throw new Error('non riesco a leggere questa immagine, prova con un’altra');
+      var path=uid+'/logo.'+r.ext;
+      return gc.storage.from('loghi-imprese').upload(path,r.blob,{upsert:true,contentType:r.tipo,cacheControl:'31536000'}).then(function(up){
+        if(up&&up.error) throw up.error;
+        var pu=gc.storage.from('loghi-imprese').getPublicUrl(path);
+        return pu.data.publicUrl+'?v='+Date.now();
+      });
+    }).then(function(url){
+      return salvaProfilo({logo_url:url},bottone);
+    }).then(function(fatto){ if(!fatto) ripristina(); })
+    .catch(function(e){ ripristina(); gpErr('Non sono riuscito a caricare il logo: '+((e&&e.message)||'riprova fra poco')+'.'); });
+  }
+
+  function rimandaEmail(b){
+    gpErr(''); gpMsg('');
+    if(_gpProva){ gpMsg('Anteprima: non mando nessuna email.'); return; }
+    var gc=window._gc, email=window._gestEmail;
+    if(!gc||!email){ gpErr('Non trovo la tua email: esci e rientra, poi riprova.'); return; }
+    var prima=b.textContent; b.disabled=true; b.textContent='Un attimo…';
+    gc.auth.resend({type:'signup',email:email}).then(function(res){
+      if(res&&res.error) throw res.error;
+      b.disabled=false; b.textContent=prima;
+      gpMsg('Ti ho mandato una nuova email. Controlla la posta, anche nella cartella spam.');
+    }).catch(function(e){
+      b.disabled=false; b.textContent=prima;
+      gpErr('Non sono riuscito a mandare l’email: '+((e&&e.message)||'riprova fra poco')+'.');
+    });
+  }
+
+  /* il pulsante grande: porta alla prima cosa che manca */
+  function avantiProfilo(){
+    var m=profiloMinimo(_gpRiga).mancanti[0]; if(!m)return;
+    var v=VOCI_PROFILO.filter(function(x){return x.id===m;})[0];
+    if(v.come==='link'){
+      if(_gpProva){ gpMsg('Anteprima: da qui ti porto alla pagina per modificare il profilo.'); return; }
+      location.href='/modifica-profilo.html'; return;
+    }
+    if(v.come==='email'){ gpMsg('Apri la mail che ti abbiamo mandato e premi il link. Se non la trovi, premi «Invia di nuovo».'); return; }
+    apriEditor(v.id);
+  }
+
   function showManutenzione(){gateMostra('gate-manutenzione');}
   function showLento(){gateMostra('gate-lento');}
 
@@ -541,6 +894,8 @@
       if(chiave){hideGate();return;}                       /* scorciatoia per Alessio */
       if(esito==='lento'){showLento();return;}             /* nel dubbio, FUORI */
       if(!ammesso(email)){showManutenzione();return;}
+      /* 1 ottobre 2026 — ha diritto di entrare, ma il profilo non basta */
+      if(esito==='profilo'){ mostraProfilo(); return; }
       if(esito==='premium'){
         /* ⛔ NON SI SPAVENTA IL CLIENTE PRIMA DI FARLO ENTRARE.
            Se arriva dal pulsante «Entra e guarda» del pannello il paywall
@@ -626,7 +981,16 @@
              senza AI, ed e' quello il senso di avere due porte. */
           window._chatAssaggio=(!haChatPro(row)) && !daPortaPremium;
           registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
-          decidi(window._gestEmail, ok?'ok':'premium');
+          /* 1 ottobre 2026 — il profilo minimo: SOLO per chi ha gia' diritto di
+             entrare, e solo con l'interruttore acceso o con ?profilo=prova.
+             Con l'interruttore spento questo ramo non si apre mai e il
+             cancello fa esattamente quello di prima. */
+          var provaProfilo=(new URLSearchParams(location.search).get('profilo')==='prova');
+          if(ok && (PROFILO_MINIMO_ATTIVO||provaProfilo)){
+            controllaProfilo(gc,s.user.id,provaProfilo).then(function(esito){ decidi(window._gestEmail,esito); });
+          }else{
+            decidi(window._gestEmail, ok?'ok':'premium');
+          }
         },function(){
           /* la lettura non e' riuscita: si riprova, e se non va nemmeno la
              seconda volta si resta FUORI dicendolo (prima qui si entrava) */
