@@ -52,6 +52,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-preventivi.js',
   'js/gest-cestino.js',
   'js/gest-ricerca.js',
+  'js/gest-finestre-eventi.js',
   'js/gest-core.js'
 ];
 
