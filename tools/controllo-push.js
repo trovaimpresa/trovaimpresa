@@ -77,7 +77,26 @@ const FILE_GESTIONALE = [
      e metterlo dentro adesso vorrebbe dire alzare il tetto — cioe' il
      contrario di quello che serve. Entrera' quando saranno sistemate. */
   'gestionale-noleggio.html',
-  'js/nol-core.js',   /* 29 set 2026: il codice che stava dentro gestionale-noleggio.html. Va guardato uguale, come gest-core.js */
+  'js/nol-base.js',
+  'js/nol-navigazione-riepilogo.js',
+  'js/nol-numeri-conto-mezzi.js',
+  'js/nol-card-righe-stampa.js',
+  'js/nol-schede.js',
+  'js/nol-cauzione-contratti.js',
+  'js/nol-verbale-rendimento.js',
+  'js/nol-fatture.js',
+  'js/nol-firme-documenti.js',
+  'js/nol-salva-noleggio.js',
+  'js/nol-lavori-fatture-pdf.js',
+  'js/nol-cestino.js',
+  'js/nol-media-documenti.js',
+  'js/nol-registratore-calendario.js',
+  'js/nol-giornata-squadra-promemoria.js',
+  'js/nol-moduli-azienda-agenda.js',
+  'js/nol-pannello-azioni.js',
+  'js/nol-supporto.js',
+  'js/nol-listini-barre.js',
+  'js/nol-avvio.js',   /* 1 ott 2026: ultimo pezzo del noleggio (era nol-core.js, ora diviso in js/nol-*.js). Va guardato uguale */
   /* ⛔ 26 agosto 2026 — e adesso entra anche il NEGOZIO, alla stessa
      condizione del noleggio: le sue 43 misure sotto i 13 px sono state
      portate tutte a 13, quindi entra a ZERO e il tetto qui sotto resta
