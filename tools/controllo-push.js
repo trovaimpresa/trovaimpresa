@@ -46,6 +46,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-carte-documenti.js',
   'js/gest-richieste-chat.js',
   'js/gest-scadenze-pratiche.js',
+  'js/gest-commercialista.js',
   'js/gest-core.js'
 ];
 
