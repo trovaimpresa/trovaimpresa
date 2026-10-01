@@ -49,6 +49,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-commercialista.js',
   'js/gest-elimina-reparto.js',
   'js/gest-ore-spese.js',
+  'js/gest-preventivi.js',
   'js/gest-core.js'
 ];
 
