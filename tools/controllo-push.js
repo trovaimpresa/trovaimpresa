@@ -64,6 +64,7 @@ const FILE_GESTIONALE = [
   'js/op-agenda-giorno.js',
   'js/op-spese-foto.js',
   'js/op-rapido-voce.js',
+  'js/op-rapportini.js',
   'js/op-core.js',   /* 29 set 2026: il codice che stava dentro gestionale-operatore.html. Va guardato uguale, come gest-core.js */
   /* ⛔ 25 agosto 2026 — il noleggio entra nella lista OGGI, che e' il giorno
      giusto: le sue diciotto misure sotto i 13 px sono state sistemate tutte,
