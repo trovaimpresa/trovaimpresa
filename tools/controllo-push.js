@@ -50,6 +50,7 @@ const PEZZI_GEST_CORE = [
   'js/gest-elimina-reparto.js',
   'js/gest-ore-spese.js',
   'js/gest-preventivi.js',
+  'js/gest-cestino.js',
   'js/gest-core.js'
 ];
 
