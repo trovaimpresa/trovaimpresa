@@ -1,4 +1,4 @@
-// [SPOSTATO] op-core.js: le righe 1-2058 del vecchio file ora stanno in: op-base.js (righe 1-268), op-agenda-giorno.js (righe 269-627), op-spese-foto.js (righe 628-853), op-rapido-voce.js (righe 854-1422), op-rapportini.js (righe 1423-1764), op-salvataggio-lavoro.js (righe 1765-1830), op-timbratura.js (righe 1831-2058). Qui resta il resto.
+// [SPOSTATO] op-avvio.js: era dentro op-core.js, righe 2059-fine del riferimento, spostato identico. op-core.js non esiste piu': questo e' l'ultimo pezzo, quello che parte per ultimo. Le righe 1-2058 stanno in: op-base.js, op-agenda-giorno.js, op-spese-foto.js, op-rapido-voce.js, op-rapportini.js, op-salvataggio-lavoro.js, op-timbratura.js.
 /* ===== RESTYLING PRO: emoji dell'interfaccia → icone SVG ===== */
 const _ICONS={
   "📍":'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',

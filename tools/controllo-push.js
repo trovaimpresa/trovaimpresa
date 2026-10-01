@@ -67,7 +67,7 @@ const FILE_GESTIONALE = [
   'js/op-rapportini.js',
   'js/op-salvataggio-lavoro.js',
   'js/op-timbratura.js',
-  'js/op-core.js',   /* 29 set 2026: il codice che stava dentro gestionale-operatore.html. Va guardato uguale, come gest-core.js */
+  'js/op-avvio.js',   /* 1 ott 2026: ultimo pezzo dell'app operaio (era op-core.js, ora diviso in js/op-*.js). Va guardato uguale */
   /* ⛔ 25 agosto 2026 — il noleggio entra nella lista OGGI, che e' il giorno
      giusto: le sue diciotto misure sotto i 13 px sono state sistemate tutte,
      quindi entra a ZERO e il tetto qui sotto non si muove. Da domani, se
