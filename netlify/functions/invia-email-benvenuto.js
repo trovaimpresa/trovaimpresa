@@ -1,11 +1,11 @@
 // Email di benvenuto inviata alla registrazione.
-// 13 set 2026: il regalo dei 3 mesi NON esiste piu'. Ogni nuovo iscritto
-// nasce sul piano 'free' (trigger crea_profilo_impresa): la vetrina e'
-// gratis per sempre, a pagamento c'e' solo il gestionale (30 giorni di prova)
-// crea_profilo_impresa; qui inviamo la mail che lo annuncia.
+// 3 ott 2026: il gestionale base e' GRATIS PER SEMPRE per ogni iscritto. L'email
+// dice solo questo: il sito e' gratuito, gestionale compreso; per usarlo si
+// completa la registrazione (profilo); il benvenuto; e che ci si puo' scrivere
+// dal sito in qualsiasi momento. Niente prezzi, niente prove, niente regali.
 // Body atteso: { nome, email, tipo, premium }
-//  - premium: true  -> email "grazie per il Gestionale" (upgrade pagato)
-//  - premium: false/assente -> email di benvenuto (vetrina gratis, nessun regalo)
+//  - premium: true  -> email "grazie" (chi attiva il piano con assistenza AI e chat)
+//  - premium: false/assente -> email di benvenuto
 
 const PANNELLI = {
   impresa: 'pannello-impresa.html',
@@ -161,31 +161,18 @@ exports.handler = async function(event) {
      marketplace: va dritto al gestionale, dove il muro gli mostra il suo
      prezzo e il bottone per pagare. */
   const linkPannello = 'https://trovaimpresa.com/' + pannello;
-  const NOMI_PIANO = {
-    'base-anno': 'Gestionale &mdash; 249 &euro; all&rsquo;anno',
-    'base-mese': 'Gestionale &mdash; 29 &euro; al mese',
-    'ai-anno':   'Gestionale con AI &mdash; 349 &euro; all&rsquo;anno',
-    'ai-mese':   'Gestionale con AI &mdash; 39 &euro; al mese'
-  };
   const isCandidato = tipo === 'candidato';
 
   let subject, corpo, mostraRegalo, ctaTesto;
 
-  // Il pezzo piu' importante di tutta l'email: senza profilo completo
-  // l'iscritto resta invisibile e il portale non puo' fare niente per lui.
-  // Va detto subito e chiaro, altrimenti legge "ti ho regalato l'abbonamento",
-  // pensa di aver finito e non torna piu'.
-  const bloccoProfilo =
+  // Il pezzo che chiude il benvenuto: si puo' scrivere a noi dal sito, sempre.
+  const bloccoAiuto =
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 20px;">' +
-      '<tr><td style="background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:10px;padding:16px 18px;">' +
-        '<div style="font-size:15px;font-weight:800;color:#1e8e3e;margin-bottom:6px;">Adesso serve una cosa sola: completare il profilo</div>' +
-        '<div style="font-size:14px;color:#25452f;line-height:1.6;">' +
-          'Entra nel pannello, apri <strong>&ldquo;Modifica profilo&rdquo;</strong> e compila tutti i campi. Contano soprattutto tre cose: ' +
-          'l&rsquo;<strong>indirizzo</strong>, che &egrave; quello che ti fa comparire tra i risultati dei clienti della tua zona; ' +
-          'una <strong>descrizione</strong> chiara di quello che fai; e qualche <strong>foto dei tuoi lavori</strong>.<br><br>' +
-          'Ci tengo a essere chiaro, perch&eacute; &egrave; il cuore di TrovaImpresa: tutto il portale si regge sul farti vedere e notare dai clienti. ' +
-          'Ma io posso mostrare solo quello che c&rsquo;&egrave;. <strong>Se il profilo resta a met&agrave; rimani invisibile</strong>, e il sito non pu&ograve; aiutarti. ' +
-          'Non &egrave; una formalit&agrave;: &egrave; la differenza tra essere iscritto ed essere trovato.' +
+      '<tr><td style="background:#eaf2ff;border-radius:10px;padding:16px 18px;">' +
+        '<div style="font-size:15px;font-weight:800;color:#0a2a4d;margin-bottom:6px;">Se hai bisogno, siamo qui</div>' +
+        '<div style="font-size:14px;color:#25384d;line-height:1.6;">' +
+          'Puoi scriverci in qualsiasi momento <strong>direttamente dal sito</strong>: dentro il tuo pannello apri <strong>&ldquo;Parla con TrovaImpresa&rdquo;</strong> e scegli <strong>&ldquo;Scrivi a noi&rdquo;</strong>. ' +
+          'Qualsiasi problema tu abbia, lo risolviamo noi.' +
         '</div>' +
       '</td></tr>' +
     '</table>';
@@ -194,13 +181,13 @@ exports.handler = async function(event) {
     // Upgrade pagato (Stripe): niente scadenza, ringraziamento.
     // 20 set 2026 — via l'emoji dall'oggetto (scelta di Alessio: e' brutto,
     // e un'emoji in oggetto e' anche un segnale che piace poco ai filtri).
-    subject = 'Grazie per aver scelto il Gestionale TrovaImpresa';
+    subject = 'Grazie per aver scelto TrovaImpresa';
     mostraRegalo = false;
     ctaTesto = 'Vai al tuo pannello &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
-      '<p style="margin:0 0 16px;">grazie per aver scelto il <strong>Gestionale TrovaImpresa</strong>.</p>' +
-      '<p style="margin:0 0 16px;">Da ora hai accesso a tutte le funzionalit&agrave; avanzate del portale: <strong>posizione prioritaria</strong> nei risultati, maggiore visibilit&agrave; e pi&ugrave; possibilit&agrave; di essere contattato dai clienti.</p>';
+      '<p style="margin:0 0 16px;">grazie per aver scelto il piano <strong>Gestionale con assistenza AI e chat</strong>.</p>' +
+      '<p style="margin:0 0 16px;">Da ora hai in pi&ugrave; l&rsquo;<strong>assistenza AI</strong> che ti compila i moduli e prepara i preventivi, la <strong>Chat con AI</strong> dentro il gestionale e pi&ugrave; visibilit&agrave; nei risultati dei clienti.</p>';
   } else if (isCandidato) {
     // I candidati non hanno il Gestionale: benvenuto semplice.
     subject = 'Benvenuto su TrovaImpresa';
@@ -211,48 +198,32 @@ exports.handler = async function(event) {
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
       '<p style="margin:0 0 16px;">Il tuo profilo &egrave; attivo, ma per farti trovare dalle imprese che cercano collaboratori nella tua zona deve essere <strong>completo</strong>: mestiere, esperienza, zona e curriculum. Un profilo a met&agrave; non viene notato.</p>';
   } else if (daGestionale) {
-    /* ⛔ 18 SETTEMBRE 2026 — L'EMAIL DI CHI VIENE PER IL GESTIONALE.
-       Non si e' iscritto per farsi trovare dai clienti: si e' iscritto per
-       un programma, e lo vuole aprire. Quindi niente «vetrina gratis per
-       sempre», niente «completa il profilo», niente 30 giorni.
-       Una cosa sola: il prezzo che aveva scelto e il bottone per entrare. */
-    subject = 'Il tuo Gestionale TrovaImpresa \u2014 manca un passo';
+    /* ⛔ 3 OTTOBRE 2026 — L'EMAIL DI CHI VIENE PER IL GESTIONALE.
+       Il gestionale e' gratis: niente prezzo da scegliere, niente pagamento.
+       Basta completare la registrazione per usarlo. */
+    subject = 'Benvenuto: il tuo Gestionale TrovaImpresa \u00e8 pronto';
     mostraRegalo = false;
-    ctaTesto = 'Entra e attiva &rarr;';
-    const rigaPrezzo = pianoScelto && NOMI_PIANO[pianoScelto]
-      ? '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">'
-        + '<tr><td style="background:#eaf2ff;border-radius:10px;padding:14px 16px;">'
-        + '<div style="font-size:13px;font-weight:800;color:#5a6b7b;letter-spacing:.4px;">IL PREZZO CHE AVEVI SCELTO</div>'
-        + '<div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:4px;">' + NOMI_PIANO[pianoScelto] + '</div>'
-        + '</td></tr></table>'
-      : '';
+    ctaTesto = 'Completa la registrazione &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
-      '<p style="margin:0 0 16px;">il tuo account &egrave; pronto: <strong>la mail &egrave; confermata</strong> e il gestionale ti aspetta.</p>' +
-      rigaPrezzo +
-      '<p style="margin:0 0 16px;">Manca solo il pagamento. Premi il bottone qui sotto: entri nel gestionale e trovi il tuo prezzo con il tasto per attivarlo. Ci vuole un minuto, si paga con Stripe e si disdice quando vuoi.</p>' +
-      '<p style="margin:0 0 16px;">Dentro ci trovi lavori, preventivi e fatture, computo metrico e stati di avanzamento, clienti e fornitori, mezzi, squadra, scadenze e l&rsquo;AI che ti compila i moduli.</p>' +
-      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Insieme al gestionale ti arriva anche un profilo su TrovaImpresa, dove i clienti cercano imprese e artigiani. Non devi compilare niente: se non ti serve, ignoralo.</p>';
+      '<p style="margin:0 0 16px;">benvenuto su <strong>TrovaImpresa</strong>. Il tuo account &egrave; pronto e la mail &egrave; confermata.</p>' +
+      '<p style="margin:0 0 16px;">Il <strong>gestionale &egrave; gratis, per sempre</strong>. Per usarlo devi solo <strong>completare la registrazione</strong>: ti bastano pochi minuti, dal tuo pannello.</p>' +
+      bloccoAiuto;
   } else {
-    /* ⛔ 13 SETTEMBRE 2026 — VIA IL REGALO DEI 3 MESI.
-       Alex: «togliere i tre mesi gratis a tutti i nuovi iscritti perche'
-       ormai il progetto e' cambiato — a pagamento e' solamente il
-       Gestionale e il Gestionale AI, tutto il resto rimane attivo».
-       Prima questa email prometteva «3 mesi in regalo» e una
-       fascia viola col regalo. Adesso il trigger del database scrive
-       piano='free', quindi quella promessa sarebbe una bugia al primo
-       messaggio che l'iscritto riceve da noi.
-       La riga che deve restare in cima, sempre (regola di Alex del 2 set):
-       stare su TrovaImpresa e' gratis e non costa nulla. */
-    subject = 'Benvenuto su TrovaImpresa — la tua vetrina &egrave; online';
+    /* ⛔ 3 OTTOBRE 2026 — IL BENVENUTO: IL SITO E' GRATIS, GESTIONALE COMPRESO.
+       Alex: «gli diciamo che il sito e' gratuito sempre, gestionale compreso, ma
+       devono completare la registrazione per poterlo usare, niente di piu';
+       diamogli il benvenuto e che possono comunicare con noi dentro il sito in
+       qualsiasi momento: ogni problema lo risolviamo noi». */
+    subject = 'Benvenuto su TrovaImpresa';
     mostraRegalo = true;
-    ctaTesto = 'Completa il tuo profilo &rarr;';
+    ctaTesto = 'Completa la registrazione &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
-      '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
-      '<p style="margin:0 0 16px;">La tua vetrina &egrave; attiva ed &egrave; <strong>gratis. E resta gratis</strong>: niente scadenze, niente carta, nessun addebito. Foto dei lavori, video, recensioni, messaggi dai clienti &mdash; &egrave; tutto tuo senza pagare niente.</p>' +
-      bloccoProfilo +
-      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">L&rsquo;unica cosa a pagamento &egrave; il <strong>gestionale</strong> &mdash; preventivi, fatture, cantieri, computo metrico. Da <strong>249 &euro; l&rsquo;anno</strong>, oppure 29 &euro; al mese: lo attivi dal tuo pannello quando vuoi.</p>';
+      '<p style="margin:0 0 16px;"><strong>benvenuto su TrovaImpresa.com</strong>, siamo contenti di averti con noi.</p>' +
+      '<p style="margin:0 0 16px;">Il sito &egrave; <strong>gratuito, per sempre</strong>, gestionale compreso: niente scadenze, niente carta, nessun addebito.</p>' +
+      '<p style="margin:0 0 16px;">Per poter usare tutto devi solo <strong>completare la registrazione</strong>: apri il pannello e compila il profilo. Ti bastano pochi minuti.</p>' +
+      bloccoAiuto;
   }
 
   /* ⛔ 11 settembre 2026 — «COME CI HAI CONOSCIUTO?» DENTRO L'EMAIL.
@@ -298,7 +269,7 @@ exports.handler = async function(event) {
     : '';
 
   const fasciaRegalo = mostraRegalo
-    ? '<tr><td style="background:#1e8e3e;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">✓ La tua vetrina su TrovaImpresa &egrave; gratis, per sempre</td></tr>'
+    ? '<tr><td style="background:#1e8e3e;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">✓ Il sito &egrave; gratis, per sempre &mdash; gestionale compreso</td></tr>'
     : '';
 
   const html =

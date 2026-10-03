@@ -21,7 +21,7 @@
 .gest-unico .gest-gruppo-tit { margin-bottom:10px; }
 .gest-unico .gest-fila { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:16px; }
 .gest-unico .g-carta { min-height:0; }
-#porte-gestionale.gest-unico .g-prezzo .g-txt { font-size:20px; font-weight:700; }
+#sec-dashboard #porte-gestionale.gest-unico .g-prezzo .g-txt { font-size:20px !important; font-weight:700; }
 .gest-unico .gest-gruppo + .gest-gruppo { grid-column:1 / -1; margin-top:22px; padding-top:18px; border-top:1px solid #eef0f3; }
 @media (max-width:900px) {
   .gest-unico .gest-carte { grid-template-columns:minmax(0,1fr); row-gap:20px; }
