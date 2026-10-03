@@ -248,6 +248,20 @@
   }
   window._inProva=inProva;
 
+  /* 3 ottobre 2026 — LA SCADENZA SI VEDE UN MESE PRIMA.
+     Chi ha un piano con una data di fine (il regalo dei 3 mesi) deve vedere la
+     scritta da 30 giorni prima, non il giorno dopo. Chi paga davvero non ha
+     data di fine (il webhook la mette a vuoto), quindi non la vede mai. */
+  var GIORNI_AVVISO=30;
+  function giorniAllaScadenza(row){
+    if(!haPremium(row)||!row.premium_scadenza) return 0;
+    var s=new Date(row.premium_scadenza);
+    if(isNaN(s.getTime())) return 0;
+    var gg=Math.ceil((s.getTime()-Date.now())/86400000);
+    return (gg>=1 && gg<=GIORNI_AVVISO) ? gg : 0;
+  }
+  window._giorniAllaScadenza=giorniAllaScadenza;
+
   /* ⛔ 22 agosto 2026 — le schermate si spengono a vicenda da un ELENCO SOLO.
      Prima ognuna spegneva le altre a mano: con la quarta (gate-lento)
      dimenticarne una avrebbe lasciato due schermate una sopra l'altra. */
@@ -551,7 +565,7 @@
   }
   function profiloCompletato(){
     hideGate();
-    if(window._gestProvaGiorni>0)strisciaProva(window._gestProvaGiorni);
+    mostraStrisce();
   }
 
   function disegnaProfilo(){
@@ -840,6 +854,28 @@
     a.style.cssText='background:#fff;color:#0a2a4d;font-size:14px;font-weight:800;text-decoration:none;padding:8px 14px;border-radius:8px;white-space:nowrap';
     d.appendChild(a);
   }
+  /* la prova ha la sua striscia; se non e' in prova, quella della scadenza */
+  function mostraStrisce(){
+    if(window._gestProvaGiorni>0) strisciaProva(window._gestProvaGiorni);
+    else if(window._gestScadGiorni>0) strisciaScadenza(window._gestScadGiorni, window._gestScadData);
+  }
+  function strisciaScadenza(giorni,data){
+    if(q('gest-striscia'))return;
+    var d=strisciaBasso();
+    var quando='';
+    try{ quando=new Date(data).toLocaleDateString('it-IT',{day:'numeric',month:'long'}); }catch(_){}
+    var manca=(giorni===1?'ultimo giorno':('mancano '+giorni+' giorni'));
+    var t=document.createElement('span');
+    t.textContent = (window.GESTIONALE_BASE_APERTO===true)
+      ? 'Assistenza AI: '+manca+(quando?' (scade il '+quando+')':'')+'. Poi resti al gestionale base, gratis.'
+      : 'Gestionale: '+manca+(quando?' (scade il '+quando+')':'')+'.';
+    d.appendChild(t);
+    var a=document.createElement('a');
+    a.href='pannello-impresa.html?attiva=ai';
+    a.textContent = (window.GESTIONALE_BASE_APERTO===true) ? 'Rinnova' : 'Attiva';
+    a.style.cssText='background:#fff;color:#0a2a4d;font-size:14px;font-weight:800;text-decoration:none;padding:8px 14px;border-radius:8px;white-space:nowrap';
+    d.appendChild(a);
+  }
   function strisciaProva(giorni){
     if(q('gest-striscia'))return;
     var d=strisciaBasso();
@@ -925,7 +961,7 @@
         showPaywall();return;
       }
       hideGate();
-      if(window._gestProvaGiorni>0)strisciaProva(window._gestProvaGiorni);
+      mostraStrisce();
     };
 
     /* ⛔ 22 agosto 2026 — LE DUE PORTE CHE SI APRIVANO DA SOLE.
@@ -976,6 +1012,8 @@
           var ok=haPremium(row)||inProva(row)||(BASE_APERTA&&!!row);
           window._gestPremium=ok;
           window._gestProvaGiorni=giorniProva(row);
+          window._gestScadGiorni=giorniAllaScadenza(row);
+          window._gestScadData=(row&&row.premium_scadenza)||null;
           /* 24 set 2026 — la prova si offre anche dal muro (vedi showPaywall) */
           window._gestProvaLibera=!!row && !row.gest_prova_fine;
           /* ⛔ 18 set 2026 — il prezzo scelto su /gestionale, che il muro

@@ -2428,6 +2428,12 @@
         </div>
         <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE PER GESTIONALE, IL NOME IN MEZZO
              (il perche' e le misure stanno nel commento del CSS) -->
+        <!-- ⛔ 3 ott 2026: l'avviso di scadenza, da 30 giorni prima. Resta nascosto
+             finche' non serve. -->
+        <div id="gest-scadenza" style="display:none;margin-bottom:18px;background:#fff7ed;border:1.5px solid #e8733a;border-radius:14px;padding:14px 18px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <span id="gest-scadenza-testo" style="font-size:16px;font-weight:600;color:#1a1a1a"></span>
+          <span id="azione-scadenza" style="flex:0 0 auto"></span>
+        </div>
         <!-- ⛔ 3 ott 2026: riquadro del gestionale base gratis. Resta nascosto finche'
              GESTIONALE_BASE_APERTO e' false (o non c'e' ?piani=prova). -->
         <div id="gest-base-gratis" style="display:none;margin-bottom:18px">
@@ -6281,6 +6287,29 @@ function montaPorteGestionale() {
     b.style.cssText = 'background:#eef1f6;color:#5f6b7a;border:1px solid #dfe4ec;cursor:default';
     box.appendChild(b);
   }
+
+
+  /* ⛔ 3 OTTOBRE 2026 — LA SCADENZA SI VEDE UN MESE PRIMA (Alex).
+     Per chi ha una data di fine e non ha ancora pagato: da 30 giorni prima
+     compare l'avviso con il bottone per attivare. Chi paga davvero non ha data
+     di fine, quindi non lo vede. */
+  (function () {
+    const box = document.getElementById('gest-scadenza');
+    if (!box) return;
+    let giorni = 0;
+    if (haPremium && !abbonato && scad && !isNaN(scad.getTime())) {
+      giorni = Math.ceil((scad.getTime() - Date.now()) / 86400000);
+    }
+    if (!(giorni >= 1 && giorni <= 30)) { box.style.display = 'none'; return; }
+    const quando = scad.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
+    const manca = giorni === 1 ? 'ultimo giorno' : 'mancano ' + giorni + ' giorni';
+    const aperto = (typeof GESTIONALE_BASE_APERTO !== 'undefined') && GESTIONALE_BASE_APERTO;
+    document.getElementById('gest-scadenza-testo').textContent = aperto
+      ? 'Assistenza AI: ' + manca + ' (scade il ' + quando + '). Poi resti al gestionale base, gratis.'
+      : 'Gestionale: ' + manca + ' (scade il ' + quando + ').';
+    box.style.display = 'flex';
+    metti('azione-scadenza', aperto ? 'Rinnova' : 'Attiva', ARANCIO, () => mostraListino(PORTE_GESTIONALE[0], null));
+  })();
 
   PORTE_GESTIONALE.forEach(porta => {
     const k = porta.chiave === 'premium' ? 'premium' : 'ai';
