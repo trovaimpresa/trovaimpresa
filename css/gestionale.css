@@ -4732,6 +4732,9 @@ body:has(#ti-fondatore) .sheet--grande{
    Gestionale». Sopra i 640px i pulsanti sono in alto a destra, in
    assoluto: il logo scende per non finirci sotto. */
 .landing-top .gc-brand{margin-top:18px!important;margin-bottom:6px!important}
+/* Logo del Gestionale piu' grande (chiesto da Alessio, 3 ottobre): scritta e riquadro crescono insieme,
+   cosi' le lettere non si deformano. */
+.landing-top .gc-brand{width:min(320px,calc(100% - 8px))!important;height:190px!important;object-fit:contain!important;padding:2px 10px!important}
 @media(min-width:641px){.landing-top .gc-brand{margin-top:60px!important}}
 
 /* 27 set 2026 — «CHIEDI UNA FUNZIONE» E «ASSISTENZA DIRETTA», IL GIRO DI RIFINITURA */
