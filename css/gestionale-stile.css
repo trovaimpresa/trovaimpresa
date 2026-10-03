@@ -75,3 +75,7 @@
 #app>header .esci{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important}
 #app>header .nav-btn{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important;font-weight:600 !important}
 #app>header .nav-btn.active{background:#ff8800 !important;color:#0a2a4d !important;border-color:#ff8800 !important;font-weight:700 !important}
+
+/* ===== 3 ott 2026 - BORDO BLU su tutte le card del gestionale (la classe la mette js/gest-bordo-blu.js) ===== */
+html body .ti-bb.ti-bb.ti-bb{border:2px solid #0a2a4d !important;border-left:2px solid #0a2a4d !important;border-radius:10px !important}
+html body .ti-bgt.ti-bgt{background-color:#e7eef8 !important;background-image:linear-gradient(rgba(10,42,77,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(10,42,77,.045) 1px,transparent 1px) !important;background-size:40px 40px !important}
