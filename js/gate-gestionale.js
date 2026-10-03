@@ -867,7 +867,7 @@
     var manca=(giorni===1?'ultimo giorno':('mancano '+giorni+' giorni'));
     var t=document.createElement('span');
     t.textContent = (window.GESTIONALE_BASE_APERTO===true)
-      ? 'Assistenza AI: '+manca+(quando?' (scade il '+quando+')':'')+'. Poi resti al gestionale base, gratis.'
+      ? 'Assistenza AI e chat: '+manca+(quando?' (scade il '+quando+')':'')+'. Poi resti al gestionale base, gratis.'
       : 'Gestionale: '+manca+(quando?' (scade il '+quando+')':'')+'.';
     d.appendChild(t);
     var a=document.createElement('a');

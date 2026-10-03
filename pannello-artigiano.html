@@ -3436,10 +3436,10 @@ function montaPorteGestionale() {
     const manca = giorni === 1 ? 'ultimo giorno' : 'mancano ' + giorni + ' giorni';
     const aperto = (typeof GESTIONALE_BASE_APERTO !== 'undefined') && GESTIONALE_BASE_APERTO;
     document.getElementById('gest-scadenza-testo').textContent = aperto
-      ? 'Assistenza AI: ' + manca + ' (scade il ' + quando + '). Poi resti al gestionale base, gratis.'
+      ? 'Assistenza AI e chat: ' + manca + ' (scade il ' + quando + '). Poi resti al gestionale base, gratis.'
       : 'Gestionale: ' + manca + ' (scade il ' + quando + ').';
     box.style.display = 'flex';
-    metti('azione-scadenza', aperto ? 'Rinnova' : 'Attiva', ARANCIO, () => mostraListino(PORTE_GESTIONALE[0], null));
+    metti('azione-scadenza', aperto ? 'Rinnova' : 'Attiva', ARANCIO, () => mostraListino(PORTE_GESTIONALE[(aperto) ? 1 : 0], null));
   })();
 
   PORTE_GESTIONALE.forEach(porta => {
@@ -3512,13 +3512,18 @@ function montaPorteGestionale() {
     const nasc = id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; };
     const NOMI = {
       premium: { nome: 'Gestionale con assistenza AI', desc: 'Tutto il gestionale, pi\u00f9 l\u2019assistenza AI', label: 'con assistenza AI' },
-      ai:      { nome: 'Gestionale con assistenza AI e chat', desc: 'Tutto il resto, pi\u00f9 la Chat con AI', label: 'con assistenza AI e chat' }
+      ai:      { nome: 'Gestionale con assistenza AI e chat', desc: 'Tutto il gestionale, pi\u00f9 l\u2019assistenza AI e la Chat con AI', label: 'con assistenza AI e chat' }
     };
+    /* ⛔ 3 OTTOBRE 2026 — PIANO UNICO (Alex): assistenza AI e chat insieme, 39/349.
+       Resta la porta «premium-ai» (quella che gia' accende la chat nel pagamento);
+       la porta da 29/249 sparisce. Entra da /gestionale-app.html senza ?piano=...,
+       e nella finestra c'e' l'elenco completo, chat compresa. */
     const tit = document.getElementById('gest-titolo-testo');
     if (tit) tit.textContent = 'Il tuo gestionale';
 
     PORTE_GESTIONALE.forEach(porta => {
       const k = porta.chiave === 'premium' ? 'premium' : 'ai';
+      if (k === 'premium') { nasc('porta-premium'); return; }   /* piano unico: la porta da 29/249 non c'e' piu' */
       nasc('carta-prova-' + k);
       nasc('carta-vedi-' + k);
       const n = NOMI[k];
@@ -3554,7 +3559,7 @@ function montaPorteGestionale() {
       /* «Se ce l'hai già»: chi non ha il piano entra dal riquadro verde in
          alto, quindi la striscia «Attivalo per entrare» qui non serve (Alex,
          3 ott). Resta solo per chi il piano ce l'ha. */
-      const apertaK = k === 'premium' ? haPremium : haAI;
+      const apertaK = haAI;
       const stEntra = document.getElementById('carta-entra-' + k);
       const grEntra = stEntra && stEntra.closest('.gest-gruppo');
       if (grEntra) grEntra.style.display = apertaK ? '' : 'none';
@@ -5783,7 +5788,8 @@ function apriAttivaDaLink() {
   if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   if (!impresaCorrente) return;
   if (impresaCorrente.premium_pagato === true) return;
-  const porta = PORTE_GESTIONALE.find(p => p.chiave === (a === 'chat' ? 'premium-ai' : 'premium'));
+  const unico = GESTIONALE_BASE_APERTO || new URLSearchParams(location.search).get('piani') === 'prova';
+  const porta = PORTE_GESTIONALE.find(p => p.chiave === ((a === 'chat' || unico) ? 'premium-ai' : 'premium'));
   if (porta) apriModalPiano(porta);
 }
 
