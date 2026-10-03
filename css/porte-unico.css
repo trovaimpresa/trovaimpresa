@@ -21,7 +21,7 @@
 .gest-unico .gest-gruppo-tit { margin-bottom:10px; }
 .gest-unico .gest-fila { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:16px; }
 .gest-unico .g-carta { min-height:0; }
-#sec-dashboard #porte-gestionale.gest-unico .g-prezzo .g-txt { font-size:20px !important; font-weight:700; }
+
 .gest-unico .gest-gruppo + .gest-gruppo { grid-column:1 / -1; margin-top:22px; padding-top:18px; border-top:1px solid #eef0f3; }
 @media (max-width:900px) {
   .gest-unico .gest-carte { grid-template-columns:minmax(0,1fr); row-gap:20px; }
@@ -38,3 +38,55 @@
 #porte-gestionale.gest-unico .gest-mezzo .gest-tuo { margin-left:0 !important; margin-right:auto !important; }
 /* il blocco del nome e' una colonna centrata dalla pagina: qui parte da sinistra */
 #porte-gestionale.gest-unico .gest-mezzo { align-items:flex-start !important; }
+
+/* ⛔ 3 ott 2026 — «IL TUO GESTIONALE» IN STILE C (blu a quadretti, scelto da Alex).
+   Vale per tutto il riquadro .gest-c nei 3 pannelli. Le scritte sono grandi e chiare
+   (da 18px in su). I bottoni hanno il colore messo dal JS dentro lo stile: qui serve !important. */
+.gest-c { background-color:#0a2a4d !important;
+  background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;
+  background-size:40px 40px !important; border-radius:14px !important; padding:32px 36px !important;
+  box-shadow:0 12px 30px rgba(10,42,77,.28) !important; color:#fff; font-family:'IBM Plex Sans',system-ui,sans-serif; }
+.gc-logo { display:inline-flex; background:#fff; border-radius:14px; padding:2px 14px; margin-bottom:20px; }
+.gc-logo img { height:104px; width:auto; display:block; }
+.gest-c .gc-testa { border-bottom:2px solid rgba(255,255,255,.5); padding-bottom:18px; margin-bottom:22px !important; }
+.gest-c .gc-tit { font-family:'IBM Plex Sans',system-ui,sans-serif !important; font-size:42px !important; font-weight:700; color:#fff !important; line-height:1.1; }
+.gest-c .gc-tit svg { display:none; }
+.gest-c .gc-sub { font-size:20px !important; color:#d6e2f4 !important; font-weight:500; margin-top:8px !important; }
+.gest-c #gest-scadenza { background:rgba(255,136,0,.10) !important; border:2px solid #ff8800 !important; border-radius:10px !important; padding:16px 22px !important; }
+.gest-c #gest-scadenza-testo { color:#fff !important; font-size:20px !important; line-height:1.4; }
+.gest-c .gest-porta { background:rgba(10,42,77,.82) !important; border:2px solid rgba(255,255,255,.55) !important; border-radius:10px !important; box-shadow:none !important; }
+.gest-c .gest-mezzo .gest-nome { font-family:'IBM Plex Sans',system-ui,sans-serif !important; color:#fff !important; font-size:32px !important; font-weight:700; line-height:1.15; }
+.gest-c .gest-mezzo .gest-desc { color:#d6e2f4 !important; font-size:19px !important; }
+.gest-c .gest-mezzo .gest-emoji { background:transparent !important; color:#ff8800 !important; }
+.gest-c .gest-mezzo .gest-tuo { background:transparent !important; color:#ff8800 !important; border:2px solid #ff8800; border-radius:6px !important;
+  font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:2px; text-transform:uppercase; font-size:15px !important; padding:4px 12px !important; }
+.gest-c .gest-gruppo-tit { font-family:'IBM Plex Mono',monospace; color:#b7cae6 !important; letter-spacing:3px; font-size:15px !important; }
+.gest-c .g-carta { background:transparent !important; border:2px solid rgba(255,255,255,.7) !important; border-radius:8px !important; box-shadow:none !important; }
+.gest-c .g-carta.g-striscia { border-color:rgba(255,255,255,.55) !important; border-radius:10px !important; }
+.gest-c .g-tit { color:#fff !important; font-size:22px !important; }
+.gest-c .g-txt { color:#d6e2f4 !important; font-size:19px !important; }
+.gest-c .g-ico { background:transparent !important; color:#ff8800 !important; }
+.gest-c .g-azione { border-top-color:rgba(255,255,255,.3) !important; }
+.gest-c .g-b { background:#ff8800 !important; color:#0a2a4d !important; border:none !important; font-size:19px !important; padding:12px 24px !important; border-radius:8px !important; width:auto; min-width:120px; }
+.gest-c #carta-entra-premium .g-b { background:#fff !important; }
+.gest-c .g-b:disabled { background:rgba(255,255,255,.12) !important; color:#b7cae6 !important; border:1px solid rgba(255,255,255,.3) !important; }
+/* i due prezzi: una riga ciascuno, nome e cifra a sinistra, bottone a destra */
+#sec-dashboard #porte-gestionale.gest-unico .gest-fila { grid-template-columns:minmax(0,1fr) !important; gap:16px; }
+.gest-c .g-prezzo { display:grid !important; grid-template-columns:minmax(0,1fr) auto; column-gap:18px; align-items:center; padding:18px 22px !important; }
+.gest-c .g-prezzo .g-testa { grid-column:1; grid-row:1; margin:0 0 2px; }
+.gest-c .g-prezzo .g-txt { grid-column:1; grid-row:2; }
+.gest-c #sec-dashboard #porte-gestionale .g-prezzo .g-txt, #sec-dashboard #porte-gestionale.gest-unico .g-prezzo .g-txt { color:#fff !important; font-size:30px !important; font-weight:700 !important; }
+.gest-c .g-prezzo .g-azione { grid-column:2; grid-row:1 / span 2; margin:0; padding:0; border:0 !important; }
+.gest-c .g-prezzo .g-tit { font-family:'IBM Plex Mono',monospace; color:#ff8800 !important; font-size:15px !important; letter-spacing:2px; text-transform:uppercase; }
+.gest-c .g-prezzo .g-ico { display:none !important; }
+@media (max-width:560px) {
+  .gest-c { padding:22px 18px !important; }
+  .gc-logo img { height:84px; }
+  .gest-c .gc-tit { font-size:32px !important; }
+  .gest-c .gc-sub { font-size:18px !important; }
+  .gest-c .gest-mezzo .gest-nome { font-size:26px !important; }
+  .gest-c .g-prezzo { grid-template-columns:minmax(0,1fr); }
+  .gest-c .g-prezzo .g-azione { grid-column:1; grid-row:3; margin-top:12px; }
+  .gest-c .g-b { width:100% !important; }
+  #sec-dashboard #porte-gestionale.gest-unico .g-prezzo .g-txt { font-size:28px !important; }
+}
