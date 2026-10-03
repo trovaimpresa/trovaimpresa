@@ -165,6 +165,12 @@
           <input type="email" id="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="mario@artigiano.it">
         </div>
 
+        <!-- 3 ott 2026: il telefono torna in registrazione, FACOLTATIVO (chiesto da Alex) -->
+        <div class="form-group">
+          <label>Telefono <span style="font-weight:400;color:#64748b">(facoltativo, ma fa chiamare i clienti)</span></label>
+          <input type="tel" id="telefono" inputmode="tel" autocomplete="tel" placeholder="Es. 333 1234567">
+        </div>
+
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
           <div class="password-wrapper">
@@ -395,6 +401,7 @@
       const need = (id, lbl) => { const e = el(id); if (!e || !e.value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
       if (!need('nome', 'Nome della tua attività')) return false;
       if (!need('email', 'Email')) return false;
+      { const _t = (document.getElementById('telefono')||{}).value || ''; if (_t.trim() && _t.replace(/\D/g,'').length < 6) { markInvalid('telefono'); showMsg('Il telefono sembra incompleto: scrivi almeno 6 cifre, oppure lascialo vuoto.', 'error'); return false; } }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
       const pw = el('password').value;
       if (pw.length < 8) { markInvalid('password'); showMsg('La password deve avere almeno 8 caratteri.', 'error'); return false; }
@@ -820,7 +827,7 @@
          il modulo per una casella che nessuno vede piu'. */
       if (e.removeAttribute) e.removeAttribute('required');
     }
-    ['mestiere', 'regione', 'provincia', 'citta'].forEach(spegni);
+    ['mestiere', 'regione', 'provincia', 'citta', 'telefono'].forEach(spegni);
     var altro = document.getElementById('riga-altro-mestiere');
     if (altro) altro.style.display = 'none';
 
