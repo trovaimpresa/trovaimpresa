@@ -21,24 +21,12 @@
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]; }); }
 
+  /* 3 ottobre 2026 — IL LOGO NON SI MOSTRA PIU' NEL GESTIONALE.
+     Chiesto da Alessio: il logo dell'attivita' sta solo fuori (scheda
+     pubblica e pannello). Le caselle [data-logo] restano nascoste e vuote:
+     questa funzione c'e' ancora solo perche' la chiamano leggi() e carica(). */
   function disegna() {
-    document.querySelectorAll('[data-logo]').forEach(function (el) {
-      var grande = el.getAttribute('data-logo') === 'grande';
-      if (URL_LOGO) {
-        el.hidden = false;
-        el.classList.add('gl-si'); el.classList.remove('gl-no');
-        el.innerHTML = '<img src="' + esc(URL_LOGO) + '" alt="Il tuo logo">'
-          + (grande ? '<button type="button" class="gl-cambia" data-gl="carica">Cambia logo</button>' : '');
-      } else if (grande) {
-        el.hidden = false;
-        el.classList.add('gl-no'); el.classList.remove('gl-si');
-        el.innerHTML = '<button type="button" class="gl-vuoto" data-gl="carica" title="Metti il logo della tua impresa">'
-          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'
-          + '<span>Il tuo logo</span></button>';
-      } else {
-        el.hidden = true; el.innerHTML = '';
-      }
-    });
+    document.querySelectorAll('[data-logo]').forEach(function (el) { el.hidden = true; el.innerHTML = ''; });
   }
 
   /* 27 set 2026 — CON CHE ACCOUNT SEI DENTRO.
