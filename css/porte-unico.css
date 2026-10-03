@@ -96,3 +96,5 @@
 .gest-c .gest-emoji svg{width:44px !important;height:44px !important;stroke:#ff8800 !important}
 .gest-c .g-ico{background:transparent !important;color:#fff !important}
 .gest-c .g-ico svg{width:30px !important;height:30px !important;color:#fff !important;stroke:#fff !important}
+.gest-c .g-ico{width:auto !important;height:auto !important;padding:0 !important;min-width:0 !important}
+.gest-c .g-ico svg{max-width:none !important;flex:none !important}
