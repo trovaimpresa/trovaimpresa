@@ -4,6 +4,9 @@
    larghezza come l'avviso e il riquadro verde sopra, nome e descrizione
    a sinistra, i due prezzi affiancati a destra. */
 .gest-porte.gest-unico { grid-template-columns:minmax(0,1fr); gap:0; }
+/* ⚠️ sul computer largo una regola della pagina (#sec-dashboard #porte-gestionale, da 1100 px, con !important)
+   forzava DUE colonne: serve la stessa forza per tornare a una sola. */
+#porte-gestionale.gest-unico, #sec-dashboard #porte-gestionale.gest-unico { grid-template-columns:minmax(0,1fr) !important; gap:0 !important; }
 .gest-unico .gest-porta { background:#fff; border:1.5px solid #e5e7eb; border-radius:16px; padding:26px 28px;
   box-shadow:0 1px 3px rgba(16,24,40,.05); }
 .gest-unico .gest-carte { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); column-gap:44px; align-items:center; }
@@ -13,12 +16,12 @@
 .gest-unico .gest-mezzo .gest-nome { font-size:1.55rem; line-height:1.25; }
 .gest-unico .gest-mezzo .gest-desc { max-width:none; margin:8px 0 0; font-size:16px; color:#4b5563; }
 .gest-unico .gest-mezzo .gest-tuo { display:inline-block; margin-top:12px; padding:3px 12px; border-radius:999px;
-  background:#f0ecfb; font-size:13px; }
+  background:#f0ecfb; font-size:13px; width:fit-content; }
 .gest-unico .gest-gruppo { grid-column:2; margin-top:0; }
 .gest-unico .gest-gruppo-tit { margin-bottom:10px; }
 .gest-unico .gest-fila { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:16px; }
 .gest-unico .g-carta { min-height:0; }
-.gest-unico .g-prezzo .g-txt { font-size:20px; font-weight:700; }
+#porte-gestionale.gest-unico .g-prezzo .g-txt { font-size:20px; font-weight:700; }
 .gest-unico .gest-gruppo + .gest-gruppo { grid-column:1 / -1; margin-top:22px; padding-top:18px; border-top:1px solid #eef0f3; }
 @media (max-width:900px) {
   .gest-unico .gest-carte { grid-template-columns:minmax(0,1fr); row-gap:20px; }
@@ -28,3 +31,10 @@
   .gest-unico .gest-porta { padding:18px; }
   .gest-unico .gest-fila { grid-template-columns:minmax(0,1fr) !important; }
 }
+/* stesso motivo: la pagina ha regole con #sec-dashboard che centrano il testo */
+#porte-gestionale.gest-unico .gest-mezzo { text-align:left !important; }
+#porte-gestionale.gest-unico .gest-mezzo .gest-desc { margin-left:0 !important; margin-right:0 !important; }
+#porte-gestionale.gest-unico .gest-mezzo .gest-emoji,
+#porte-gestionale.gest-unico .gest-mezzo .gest-tuo { margin-left:0 !important; margin-right:auto !important; }
+/* il blocco del nome e' una colonna centrata dalla pagina: qui parte da sinistra */
+#porte-gestionale.gest-unico .gest-mezzo { align-items:flex-start !important; }
