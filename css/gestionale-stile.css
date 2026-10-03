@@ -63,3 +63,15 @@
 #appview .topbar{background:#0a2a4d !important;border-bottom:3px solid #ff8800 !important}
 #appview .topbar button,#appview .topbar a{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important}
 #appview .wrap h2{color:#0a2a4d !important}
+
+/* ===== 3 ott 2026 - STILE C anche nel NOLEGGIO e nell'APP OPERAIO ===== */
+#app-root header.top{background-color:#0a2a4d !important;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;background-size:40px 40px !important;border-bottom:3px solid #ff8800 !important;font-family:'IBM Plex Sans',Inter,system-ui,sans-serif}
+#app-root header.top .back,#app-root header.top .az-btn{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important;box-shadow:none !important}
+#app-root header.top .btn-new{background:#ff8800 !important;color:#0a2a4d !important;border:2px solid #ff8800 !important;border-radius:8px !important;font-weight:700 !important}
+#app-root nav.tabs button{color:#fff !important;font-weight:600 !important}
+#app-root nav.tabs button.active{color:#ff8800 !important;border-bottom-color:#ff8800 !important}
+#app-root nav.tabs button:hover{background:rgba(255,255,255,.12) !important}
+#app>header{background-color:#0a2a4d !important;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;background-size:40px 40px !important;border-bottom:3px solid #ff8800 !important;font-family:'IBM Plex Sans',Inter,system-ui,sans-serif}
+#app>header .esci{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important}
+#app>header .nav-btn{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important;font-weight:600 !important}
+#app>header .nav-btn.active{background:#ff8800 !important;color:#0a2a4d !important;border-color:#ff8800 !important;font-weight:700 !important}
