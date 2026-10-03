@@ -1,0 +1,183 @@
+/* 3 ott 2026 — /gestionale in STILE C: blu progetto #0a2a4d a quadretti, bordi bianchi,
+   arancione #ff8800, IBM Plex. Stesso aspetto del riquadro «Il tuo gestionale» nel pannello.
+   Si carica DOPO il CSS scritto dentro gestionale.html, quindi quello che c'e' qui vince.
+   Non tocca nessun testo: solo l'aspetto. */
+:root{--c-blu:#0a2a4d;--c-chiaro:#d6e2f4;--c-ar:#ff8800;--c-riga:rgba(255,255,255,.55);--c-vetro:rgba(10,42,77,.82)}
+body{background-color:var(--c-blu);background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:40px 40px;color:#fff;font-family:'IBM Plex Sans','Segoe UI',Roboto,Arial,sans-serif}
+a{color:var(--c-ar)}
+.navbar{border-bottom:2px solid var(--c-blu)}
+
+/* ---- parte alta ---- */
+.hero{background:transparent;border-bottom:2px solid rgba(255,255,255,.5)}
+.hero-logo{background:#fff;border-radius:10px;padding:10px 14px;box-sizing:content-box;height:70px;width:auto}
+h1{color:#fff;font-weight:700;font-size:44px;letter-spacing:-1px}
+.claim{color:var(--c-chiaro);font-weight:500}
+.btn{border-radius:8px;font-weight:700}
+.btn-blu{background:var(--c-ar);color:var(--c-blu)}
+.btn-blu:hover{background:#ffa033}
+.btn-vuoto{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.7)}
+.btn-vuoto:hover{background:var(--c-ar);color:var(--c-blu);border-color:var(--c-ar)}
+.senza-carta,.rassicura{color:var(--c-chiaro)}
+.rassicura b{color:var(--c-ar)}
+.ti-fiducia{--fid-ink:#fff;--fid-blu:var(--c-ar)}
+.hero-foto img{border:2px solid var(--c-riga);border-radius:10px}
+
+/* ---- Cosa fa: le schede ---- */
+.cf{padding:52px 0 18px}
+.cf h2{font-size:36px;line-height:1.15;margin:0 0 6px;color:#fff}
+.cf .sub{color:var(--c-chiaro);font-size:20px;margin:0 0 26px}
+.cf-griglia{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.cf-card{background:var(--c-vetro);border:2px solid var(--c-riga);border-radius:10px;padding:22px;display:flex;flex-direction:column;align-items:flex-start;scroll-margin-top:90px}
+.cf-card:hover,.cf-card:target{border-color:var(--c-ar)}
+.cf-ic{width:46px;height:46px;border-radius:10px;background:var(--c-ar);color:var(--c-blu);display:grid;place-items:center;margin-bottom:14px}
+.cf-ic svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cf-card h3{margin:0 0 6px;font-size:25px;color:#fff;font-weight:700}
+.cf-card p{margin:0 0 14px;color:var(--c-chiaro);font-size:18px;line-height:1.45}
+.cf-tag{display:inline-block;margin:-4px 0 14px;font-family:'IBM Plex Mono',Consolas,monospace;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c-ar);border:1.5px solid var(--c-ar);border-radius:6px;padding:3px 8px}
+.cf-btn{margin-top:auto;display:inline-block;background:var(--c-ar);color:var(--c-blu);font:inherit;font-weight:700;font-size:17px;border:0;border-radius:8px;padding:12px 18px;cursor:pointer;text-decoration:none}
+.cf-btn:hover{background:#ffa033}
+@media(max-width:900px){.cf-griglia{grid-template-columns:1fr}.cf h2{font-size:29px}}
+
+/* la finestra col video e il testo intero */
+.cf-dialog{border:2px solid var(--c-riga);border-radius:14px;padding:0;color:#fff;background-color:var(--c-blu);background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:40px 40px;width:min(980px,94vw);max-height:92vh;overflow:auto}
+.cf-dialog::backdrop{background:rgba(4,18,36,.8)}
+.cf-in{padding:30px 28px 30px}
+.cf-xf{margin:0;position:absolute;top:12px;right:12px}
+.cf-x{width:42px;height:42px;border-radius:8px;border:2px solid var(--c-riga);background:var(--c-blu);color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+.cf-x:hover{background:var(--c-ar);color:var(--c-blu);border-color:var(--c-ar)}
+.cf-x svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.cf-dialog .wrap{padding:0;max-width:none}
+.cf-dialog .occhiello{color:var(--c-ar);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.18em}
+.cf-dialog h2,.cf-dialog .titolone{color:#fff;font-size:32px;text-align:left;margin:0 0 14px;letter-spacing:-.5px}
+.cf-dialog p{color:var(--c-chiaro);font-size:18.5px;margin:0 0 12px}
+.cf-dialog .introne{color:var(--c-chiaro);text-align:left;margin:0 0 16px;max-width:none}
+.cf-dialog b{color:#fff}
+.cf-dialog .video-tel,.cf-dialog .video-pc{background:#06192e;border:2px solid var(--c-riga);box-shadow:none}
+.cf-dialog .video-tel{width:250px}
+@media(max-width:760px){.cf-in{padding:56px 16px 22px}.cf-dialog h2,.cf-dialog .titolone{font-size:25px}}
+
+/* ---- le tre demo ---- */
+.demo-fascia{background:transparent;border-bottom:0;border-top:2px solid rgba(255,255,255,.5);margin-top:34px}
+.demo-fascia h2{color:#fff;text-align:left;font-size:36px}
+.demo-fascia .intro{color:var(--c-chiaro);text-align:left;font-size:20px}
+.blocco .eti{color:var(--c-ar);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.14em}
+.blocco h3{color:#fff;font-size:22px}
+.demo{border:2px solid var(--c-riga);border-radius:10px;box-shadow:none}
+.demo-nota{color:var(--c-chiaro)}
+.demo-nota a{color:var(--c-ar)}
+
+/* ---- tutto il resto: le voci che si aprono ---- */
+#tutto.fascia.grigia{background:transparent;border-top:2px solid rgba(255,255,255,.5);border-bottom:0}
+.titolone{color:#fff;text-align:left;font-size:36px}
+.introne{color:var(--c-chiaro);text-align:left;margin-left:0;margin-right:0;max-width:none}
+.apri-gruppo{color:var(--c-chiaro);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.18em;max-width:none;margin:30px 0 12px}
+.apri-lista{max-width:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+details.apri{background:var(--c-vetro);border:2px solid var(--c-riga);border-radius:10px}
+details.apri[open]{grid-column:1/-1;border-color:var(--c-ar);box-shadow:none}
+details.apri summary:hover{background:rgba(255,255,255,.06)}
+details.apri summary::after{border-color:var(--c-ar)}
+.apri-occ{color:var(--c-ar);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.14em}
+.apri-tit{color:#fff}
+.apri-dentro{border-top:2px solid rgba(255,255,255,.4)}
+#tutto .apri-dentro p{color:var(--c-chiaro)}
+#tutto .apri-dentro p b{color:#fff}
+.epoi{color:var(--c-chiaro);border-top-color:rgba(255,255,255,.4)}
+.epoi b{color:#fff}
+@media(max-width:860px){.apri-lista{grid-template-columns:1fr}.titolone,.demo-fascia h2{font-size:28px}}
+
+/* ---- prezzi: un riquadro solo, come nel pannello ---- */
+#prezzi.fascia{padding:30px 0 56px}
+#prezzi > .wrap{max-width:1140px;border:2px solid var(--c-riga);border-radius:14px;background:var(--c-vetro);padding:30px 30px 34px}
+.pann-logo{display:block;background:#fff;border-radius:10px;padding:10px 14px;height:70px;width:auto;box-sizing:content-box;margin:0 0 14px}
+#prezzi .titolone{font-size:38px;margin:0 0 6px}
+#prezzi .introne{font-size:20px;margin:0 0 22px;padding-bottom:22px;border-bottom:2px solid rgba(255,255,255,.4)}
+#prezzi .scheda{background:transparent;border:0;box-shadow:none;padding:0;max-width:none}
+.gratis-box{background:transparent;border:2px solid var(--c-riga);border-radius:10px;text-align:left;padding:20px 22px}
+.gratis-box:target{border-color:var(--c-ar)}
+.gratis-box h4{color:#fff;font-size:22px;margin:0 0 14px}
+.gratis-porte a{background:var(--c-ar);color:var(--c-blu);border-radius:8px;font-weight:700;font-size:17px}
+.gratis-porte a:hover{background:#ffa033}
+.gratis-nota{color:var(--c-chiaro)}
+#prezzi .pp-h3{font-family:'IBM Plex Mono',Consolas,monospace;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--c-chiaro);text-align:left !important;margin:28px 0 12px !important}
+.periodo{display:none}
+#prezzi .scheda .prezzi,#prezzi .scheda .prezzi.vedi-anno,#prezzi .scheda .prezzi.vedi-mese{grid-template-columns:1fr 1fr;max-width:none;margin:0;gap:18px}
+#prezzi .scheda .prezzi.vedi-anno .p-mese,#prezzi .scheda .prezzi.vedi-mese .p-anno{display:flex !important}
+#prezzi .scheda .piano{background:rgba(10,42,77,.6);border:2px solid var(--c-riga);border-radius:10px;box-shadow:none;color:var(--c-chiaro)}
+#prezzi .scheda .piano.p-anno{border-color:var(--c-ar)}
+#prezzi .scheda .piano:hover{border-color:var(--c-ar)}
+.p-targa{background:var(--c-ar);color:var(--c-blu);border-radius:6px;font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.14em}
+.p-durata{background:transparent;border:1.5px solid var(--c-riga);color:var(--c-ar);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.16em;border-radius:6px}
+.p-nome{color:#fff;font-size:21px}
+.p-cifra{color:#fff;font-family:'IBM Plex Mono',Consolas,monospace;font-weight:600;letter-spacing:-1px}
+.p-cifra span{color:var(--c-chiaro);font-family:'IBM Plex Sans',sans-serif}
+.p-risparmio{background:rgba(255,136,0,.15);color:var(--c-ar);border-radius:6px}
+.p-uguale{color:var(--c-chiaro)}
+.piano li{color:var(--c-chiaro);border-bottom-color:rgba(255,255,255,.2)}
+.piano li b{color:#fff}
+.piano li:before{color:var(--c-ar)}
+#prezzi .scheda .piano li .piu{color:var(--c-ar)}
+#prezzi .scheda .piano li:has(.piu){background:rgba(255,136,0,.12)}
+.incluso-due{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0 6px}
+.incluso{max-width:none;margin:0;border:2px solid var(--c-riga);border-radius:10px;background:transparent}
+.incluso h4{color:var(--c-chiaro);font-family:'IBM Plex Mono',Consolas,monospace;font-size:14px;letter-spacing:.16em;text-transform:uppercase}
+.incluso ul{columns:1}
+.incluso li{color:var(--c-chiaro)}
+.incluso li b{color:#fff}
+.incluso li::before{color:var(--c-ar)}
+.nota-prezzi{text-align:left;color:var(--c-chiaro);max-width:none}
+.nota-prezzi b,.chi-e b{color:#fff}
+.chi-e{color:var(--c-chiaro);max-width:none}
+@media(max-width:860px){#prezzi > .wrap{padding:20px 16px 24px}#prezzi .titolone{font-size:28px}#prezzi .scheda .prezzi,#prezzi .scheda .prezzi.vedi-anno,#prezzi .scheda .prezzi.vedi-mese,.incluso-due{grid-template-columns:1fr}}
+
+/* ---- «Cerchi una cosa precisa?»: tre gruppi chiusi ---- */
+#pagine-precise.fascia.grigia{background:transparent;border-top:2px solid rgba(255,255,255,.5);border-bottom:0}
+.pp-gruppo{background:var(--c-vetro);border:2px solid var(--c-riga);border-radius:10px;margin:0 0 12px}
+.pp-gruppo[open]{border-color:var(--c-ar)}
+.pp-gruppo summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:14px;padding:16px 56px 16px 20px;position:relative}
+.pp-gruppo summary::-webkit-details-marker{display:none}
+.pp-gruppo summary::after{content:"";position:absolute;right:22px;top:50%;width:11px;height:11px;border-right:2.5px solid var(--c-ar);border-bottom:2.5px solid var(--c-ar);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+.pp-gruppo[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+.pp-gruppo summary:hover{background:rgba(255,255,255,.06)}
+#pagine-precise .pp-gruppo .pp-h3{display:inline;margin:0;font-size:21px;color:#fff;font-weight:700}
+.pp-gruppo small{font-family:'IBM Plex Mono',Consolas,monospace;font-size:13px;letter-spacing:.12em;color:var(--c-ar);text-transform:uppercase}
+.pp-gruppo .pp-elenco{padding:6px 20px 20px;border-top:2px solid rgba(255,255,255,.4);margin:0}
+#pagine-precise .pp-elenco{margin-top:0}
+#pagine-precise .pp-elenco li{border-left-color:var(--c-ar)}
+#pagine-precise .pp-elenco a{color:#fff}
+#pagine-precise .pp-elenco span{color:var(--c-chiaro)}
+
+/* ---- piede e barra fissa del telefono ---- */
+footer{background:#071f38;color:var(--c-chiaro);border-top:2px solid rgba(255,255,255,.5)}
+footer a{color:var(--c-chiaro) !important}
+@media(max-width:760px){
+  .barra-fissa{background:var(--c-blu);border-top:2px solid var(--c-riga);box-shadow:none}
+  .barra-fissa .bf-blu{background:var(--c-ar);color:var(--c-blu);border-radius:8px}
+  .barra-fissa .bf-vuoto{border:2px solid var(--c-riga);color:#fff;border-radius:8px}
+  h1{font-size:30px}
+}
+
+/* ---- più forti del CSS scritto nella pagina (che viene dopo e ha selettori piu' lunghi) ---- */
+.fascia h2,.fascia .titolone{color:#fff}
+.fascia p,.fascia .introne{color:var(--c-chiaro)}
+.fascia p b{color:#fff}
+#prezzi .gratis-box{background:transparent;border:2px solid var(--c-riga);border-radius:10px;text-align:left}
+#prezzi .gratis-box:target{border-color:var(--c-ar)}
+#prezzi .gratis-box h4{color:#fff;font-size:22px;margin:0 0 14px}
+#prezzi .gratis-porte a{background:var(--c-ar);color:var(--c-blu);border-radius:8px;font-weight:700;font-size:17px}
+#prezzi .gratis-porte a:hover{background:#ffa033}
+#prezzi .gratis-nota{color:var(--c-chiaro)}
+#prezzi .p-durata{background:transparent;border:1.5px solid var(--c-riga);color:var(--c-ar);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.16em;border-radius:6px}
+#prezzi .p-risparmio{background:rgba(255,136,0,.15);color:var(--c-ar);border-radius:6px}
+#prezzi .p-uguale{color:var(--c-chiaro)}
+#prezzi .p-nome{color:#fff}
+#prezzi .p-cifra{color:#fff;white-space:nowrap}
+#prezzi .nota-prezzi{text-align:left;color:var(--c-chiaro);max-width:none}
+#prezzi .nota-prezzi b,#prezzi .chi-e b{color:#fff}
+#prezzi .chi-e{color:var(--c-chiaro);max-width:none}
+#prezzi .incluso{max-width:none;margin:0;border:2px solid var(--c-riga);border-radius:10px;background:transparent}
+#prezzi .incluso ul{columns:1}
+#prezzi .incluso li{color:var(--c-chiaro)}
+#prezzi .piano li{color:var(--c-chiaro)}
+#prezzi .p-durata,#prezzi .p-risparmio{align-self:flex-start}
+#prezzi .gratis-porte a{text-align:center}
+#prezzi .gratis-porte{margin-bottom:6px}

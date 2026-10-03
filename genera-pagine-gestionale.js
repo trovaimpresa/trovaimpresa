@@ -320,10 +320,17 @@ function bloccoPorta(tutte) {
   const gruppo = f => tutte.filter(p => p.famiglia === f);
   const elenco = arr => arr.map(p =>
     `        <li><a href="/${p.slug}">${p.link}</a><span>${p.riga}</span></li>`).join('\n');
+  /* 3 ott 2026 — I TRE GRUPPI SONO CHIUSI (`<details>`): la pagina /gestionale
+     era troppo lunga. I link restano tutti nella pagina, per Google: chiusi
+     non vuol dire nascosti. Il titolo resta un <h3> dentro la riga che si tocca.
+     ⛔ La striscia «Gestionale gratis / Nessuna IVA / Si disdice» che stava qui
+        dentro e' stata TOLTA: era scritta a mano fra i due segni, e ogni
+        rilancio del generatore l'avrebbe cancellata. Le stesse frasi stanno
+        gia' nella nota sotto i prezzi. */
   const sezione = (titolo, arr) =>
-    `      <h3 class="pp-h3">${titolo}</h3>\n      <ul class="pp-elenco">\n${elenco(arr)}\n      </ul>`;
+    `      <details class="pp-gruppo">\n        <summary><h3 class="pp-h3">${titolo}</h3><small>${arr.length} pagine</small></summary>\n      <ul class="pp-elenco">\n${elenco(arr)}\n      </ul>\n      </details>`;
   return `${SEGNO_PA}
-<section class="fascia" id="pagine-precise">
+<section class="fascia grigia" id="pagine-precise">
   <div class="wrap">
     <h2 class="titolone">Cerchi una cosa precisa?</h2>
     <p class="introne">Questa pagina racconta il gestionale tutto intero.

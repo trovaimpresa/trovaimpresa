@@ -486,6 +486,12 @@
   #f-computo .introne p{margin:0 0 10px}
 
 </style>
+<!-- 3 ott 2026 — STILE C anche fuori: stesso blu a quadretti del riquadro «Il tuo gestionale».
+     Questo file viene DOPO il CSS della pagina, quindi vince lui. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/css/gestionale-vendita.css?v=1">
 </head>
 <body>
 
@@ -509,7 +515,7 @@
   <!-- ⚠️ il logo resta su /gestionale: e' la home DI QUESTO prodotto -->
   <a href="/gestionale" class="logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></a>
   <div class="menu">
-    <a href="#dentro" class="solo-grande">Cosa fa</a>
+    <a href="#cosa-fa" class="solo-grande">Cosa fa</a>
     <a href="#prezzi">Quanto costa</a>
     <!-- ⚠️ il link al marketplace resta, ma adesso dice dove porta: prima
          c'era scritto «Home» e uno ci finiva dentro senza capire. -->
@@ -536,16 +542,12 @@
       <img class="hero-logo" src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa" width="190" height="150">
       <h1>Gestionale edile: sai sempre quanto ti costa e quanto ti rende ogni lavoro</h1>
       <p class="claim">Per imprese, artigiani e studi tecnici: preventivi, computo, fatture e cantieri in un posto solo.</p>
-      <p class="sotto">E alla fine di ogni cantiere vedi quanto hai guadagnato. Dal telefono in cantiere e dal computer la sera, senza installare niente.</p>
       <div class="bottoni">
         <a class="btn btn-blu" href="#comincia">Usa il gestionale gratis</a>
         <a class="btn btn-vuoto" href="#demo">Guardalo in azione</a>
       </div>
       <p class="senza-carta">Gratis per sempre, senza carta di credito.</p>
       <!-- 26 set 2026 — la fila per saltare dove serve, senza scorrere -->
-      <nav class="indice" aria-label="Vai a">
-        <a href="#dentro">Preventivi</a><a href="#f-cantiere">Cantiere</a><a href="#f-computo">Computo</a><a href="#f-fornitori">Fatture dei fornitori</a><a href="#f-scelte">Scelte del cliente</a><a href="#tutto">Tutte le funzioni</a><a href="#prezzi">Prezzi</a>
-      </nav>
       <!-- ⚠️ I numeri qui sotto NON sono scritti a mano: lo script in fondo
            li legge dalla tabella dei prezzi (#prezzi). Se cambi prezzo li',
            cambia anche qui. Quello scritto nel file e' solo la riserva. -->
@@ -575,6 +577,183 @@
      3) «Genera con AI» in cima ai Preventivi.
      La chat c'e' solo nel Gestionale con AI: lo dice l'etichetta. Nomi e cifre finti.
      Con «riduci movimento» attivo si vede la scena gia' finita, ferma. -->
+<!-- 3 ott 2026 — COSA FA, in schede. Prima erano 5 sezioni lunghe una dopo l'altra.
+     ⚠️ Il testo intero e il video di ogni sezione stanno nella finestra che si apre
+        dal bottone «Guarda il video» (sono sempre nella pagina, per Google).
+     ⚠️ Gli id vecchi (#dentro, #f-cantiere, #f-computo, #f-fornitori, #f-scelte)
+        sono sulle schede: chi ha un link vecchio atterra lo stesso qui. -->
+<section class="cf" id="cosa-fa">
+  <div class="wrap">
+    <h2>Cosa fa</h2>
+    <p class="sub">Le cose che usi ogni giorno. Tocca per vedere il video.</p>
+    <div class="cf-griglia">
+      <article class="cf-card" id="dentro">
+        <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></span>
+        <h3>Preventivi</h3>
+        <p>Lo scrivi, esce il PDF, il cliente risponde. Con l&rsquo;AI lo racconti a voce.</p>
+        <button type="button" class="cf-btn" data-dlg="dlg-dentro">Guarda il video</button>
+      </article>
+      <article class="cf-card" id="f-cantiere">
+        <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        <h3>In cantiere</h3>
+        <p>Mezzo minuto sul posto, non mezz&rsquo;ora la sera. Il rapportino dal telefono.</p>
+        <button type="button" class="cf-btn" data-dlg="dlg-f-cantiere">Guarda il video</button>
+      </article>
+      <article class="cf-card" id="f-computo">
+        <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17L17 3l4 4L7 21z"/><path d="M8 12l2 2M11 9l2 2M14 6l2 2"/></svg></span>
+        <h3>Computo metrico</h3>
+        <p>Le misure le scrivi come sul quaderno. Il totale lo fa lui.</p>
+        <button type="button" class="cf-btn" data-dlg="dlg-f-computo">Guarda il video</button>
+      </article>
+      <article class="cf-card" id="f-fornitori">
+        <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+        <h3>Fatture dei fornitori</h3>
+        <p>Le fai una foto: fornitore, importo e scadenza si scrivono da soli.</p>
+        <span class="cf-tag">Con assistenza AI</span>
+        <button type="button" class="cf-btn" data-dlg="dlg-f-fornitori">Guarda il video</button>
+      </article>
+      <article class="cf-card" id="f-scelte">
+        <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></span>
+        <h3>Scelte del cliente</h3>
+        <p>Piastrelle e sanitari li sceglie il cliente, dal telefono.</p>
+        <button type="button" class="cf-btn" data-dlg="dlg-f-scelte">Guarda il video</button>
+      </article>
+      <article class="cf-card">
+        <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        <h3>E tutto il resto</h3>
+        <p>Analisi prezzi, SAL, fattura elettronica, scadenze, chat con AI&hellip;</p>
+        <a class="cf-btn" href="#tutto">Vedi l&rsquo;elenco</a>
+      </article>
+    </div>
+  </div>
+<dialog class="cf-dialog" id="dlg-dentro" aria-label="Preventivi">
+  <div class="cf-in">
+    <form method="dialog" class="cf-xf"><button class="cf-x" aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Preventivi</p>
+      <h2>Lo scrivi, esce il PDF,<br>il cliente risponde</h2>
+      <!-- ⛔ 19 set 2026 — QUI C'ERA UNA PROMESSA FALSA.
+           Diceva «al cliente arriva un link dove risponde si' o no»: quel
+           link non esiste, non c'e' nessun portale del cliente e nessuna
+           accettazione online. Lo stato «Accettato» lo mette l'utente a
+           mano. Quello che il gestionale fa davvero e' mandare il PDF per
+           email o WhatsApp, ed e' quello che c'e' scritto adesso. -->
+      <p>Voci, quantit&agrave;, prezzi, righe di sezione per dividere il lavoro in parti.
+         Il PDF esce gi&agrave; fatto col tuo nome sopra, e glielo mandi da l&igrave;,
+         per email o su WhatsApp.</p>
+      <p>Non hai voglia di scriverlo? Premi <b>&laquo;Genera con AI&raquo;</b>, raccontalo a voce,
+         e le voci con le quantit&agrave; e i prezzi si scrivono da sole: tu controlli e correggi.</p>
+      <p>Quando il cliente dice s&igrave;, il preventivo diventa il cantiere con un clic:
+         non lo riscrivi da capo. E la pagina ti dice su dieci che ne mandi quanti
+         te ne accettano.</p>
+    </div>
+    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-preventivo.jpg" data-src="/video/gestionale-preventivo.mp4"
+             aria-label="Video: si racconta il lavoro a voce e il gestionale scrive le voci del preventivo con i prezzi"></video>
+    </div>
+  </div>
+  </div>
+</dialog>
+<dialog class="cf-dialog" id="dlg-f-cantiere" aria-label="In cantiere">
+  <div class="cf-in">
+    <form method="dialog" class="cf-xf"><button class="cf-x" aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+  <div class="wrap due rovescia">
+    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-cantiere.jpg" data-src="/video/gestionale-cantiere.mp4"
+             aria-label="Video: dal telefono in cantiere si racconta la giornata e il rapportino si riempie da solo con ore, materiali e spese"></video>
+    </div>
+    <div>
+      <p class="occhiello">In cantiere</p>
+      <h2>Mezzo minuto sul posto,<br>non mezz&rsquo;ora la sera</h2>
+      <p>Il rapportino si fa dal telefono mentre sei l&igrave;. Le ore finiscono nel lavoro giusto,
+         e a fine mese sai quanto ti &egrave; costato davvero quel cantiere.</p>
+      <p>Le foto restano attaccate al lavoro: quando il cliente chiede, le hai.</p>
+    </div>
+  </div>
+  </div>
+</dialog>
+<dialog class="cf-dialog" id="dlg-f-computo" aria-label="Computo metrico">
+  <div class="cf-in">
+    <form method="dialog" class="cf-xf"><button class="cf-x" aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+  <div class="wrap">
+    <p class="occhiello" style="text-align:center">Computo metrico</p>
+    <h2 class="titolone">Le misure le scrivi<br>come sul quaderno</h2>
+    <div class="introne"><p>Parti uguali, lunghezza, larghezza, altezza. Il vuoto di una porta lo metti
+         <b>&laquo;si detrae&raquo;</b> e se ne va da solo. La quantit&agrave; della lavorazione non la
+         scrivi tu: la somma il programma, misura per misura.</p><p>Computo, capitoli, lavorazioni, misure: quattro piani, come in un computo vero.
+         Ogni voce ha il suo codice di tariffa, l&rsquo;unit&agrave; di misura, gli oneri della
+         sicurezza e quanto pesa la manodopera.</p><p>Quando hai finito, <b>il computo diventa un preventivo</b> raggruppato per capitoli,
+         senza riscrivere una riga.</p></div>
+    <div class="video-pc">
+      <video class="video-lazy" muted loop playsinline preload="none" width="960" height="540"
+             data-poster="/video/gestionale-computo.jpg" data-src="/video/gestionale-computo.mp4"
+             aria-label="Video: si crea un computo, si scrive la lavorazione e le misure, e il gestionale fa da solo quantità e totale"></video>
+    </div>
+  </div>
+  </div>
+</dialog>
+<dialog class="cf-dialog" id="dlg-f-fornitori" aria-label="Fatture dei fornitori">
+  <div class="cf-in">
+    <form method="dialog" class="cf-xf"><button class="cf-x" aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+  <div class="wrap due rovescia">
+    <!-- ⛔ 26 set 2026 — IL VIDEO AL POSTO DEL DISEGNO, fatto per non pesare.
+         Alex: «basta che Google non la penalizza» (i reel in home li aveva
+         dovuti togliere). Quindi:
+         · il video pesa 450 KB (540x960, niente audio) e la copertina 35 KB;
+         · preload="none" e il file vero si chiede SOLO quando il riquadro
+           arriva sullo schermo (data-src + lo script in fondo): chi non
+           scorre fin qui non lo scarica mai;
+         · width/height e aspect-ratio fissi: la pagina non «salta» quando
+           arriva il video;
+         · con «riduci movimento» non parte da solo, ci sono i comandi.
+         Fornitore e impresa del video sono inventati («nomi e cifre di prova»). -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-foto-fattura.jpg" data-src="/video/gestionale-foto-fattura.mp4"
+             aria-label="Video: si fotografa la fattura del fornitore e il gestionale riempie da solo fornitore, numero, data, importo e scadenza"></video>
+    </div>
+    <div>
+      <p class="occhiello">Fornitori</p>
+      <h2>La fattura del fornitore?<br>Le fai una foto</h2>
+      <p>Fotografi la fattura o la bolla, oppure carichi il PDF. Fornitore, numero, data,
+         importo e scadenza si scrivono da soli: tu controlli e premi Aggiungi.</p>
+      <p>Se il fornitore non &egrave; ancora in rubrica, lo aggiungi con un tocco. La foto resta
+         attaccata al fornitore, e se colleghi la fattura a un lavoro la spesa entra da sola
+         nel conto di quel cantiere.</p>
+      <p>E se la stessa fattura l&rsquo;hai gi&agrave; segnata, te lo dice: niente pagamenti doppi.</p>
+    </div>
+  </div>
+  </div>
+</dialog>
+<dialog class="cf-dialog" id="dlg-f-scelte" aria-label="Scelte del cliente">
+  <div class="cf-in">
+    <form method="dialog" class="cf-xf"><button class="cf-x" aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+  <div class="wrap due">
+    <div>
+      <p class="occhiello">Materiali e finiture</p>
+      <h2>Piastrelle e sanitari<br>li sceglie il cliente, dal telefono</h2>
+      <p>Per ogni cosa da decidere metti le possibilit&agrave;, con la foto e il prezzo:
+         &laquo;compreso&raquo;, &laquo;+ 8 &euro;/mq&raquo;. Mandi un link su WhatsApp, e il cliente
+         sceglie con calma da casa sua, senza iscriversi a niente.</p>
+      <p>Quando conferma ti arriva un&rsquo;email, e le scelte restano scritte nel lavoro.
+         Niente pi&ugrave; <b>&laquo;ma io avevo detto l&rsquo;altro&raquo;</b> a pavimento gi&agrave; posato.</p>
+    </div>
+    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
+    <div class="video-tel">
+      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
+             data-poster="/video/gestionale-scelte.jpg" data-src="/video/gestionale-scelte.mp4"
+             aria-label="Video: il cliente apre il link sul telefono, sceglie pavimento, sanitari e colore e conferma"></video>
+    </div>
+  </div>
+  </div>
+</dialog>
+</section>
+
 <section class="demo-fascia" id="demo">
   <div class="wrap">
     <h2>Guardalo lavorare</h2>
@@ -623,126 +802,10 @@
         stanno nella pagina anche da chiusi, quindi Google li legge.
      ⚠️ Quattro fasce grandi + questa = alternanza bianco/grigio salva.
      ===================================================================== -->
-<section class="fascia" id="dentro">
-  <div class="wrap due">
-    <div>
-      <p class="occhiello">Preventivi</p>
-      <h2>Lo scrivi, esce il PDF,<br>il cliente risponde</h2>
-      <!-- ⛔ 19 set 2026 — QUI C'ERA UNA PROMESSA FALSA.
-           Diceva «al cliente arriva un link dove risponde si' o no»: quel
-           link non esiste, non c'e' nessun portale del cliente e nessuna
-           accettazione online. Lo stato «Accettato» lo mette l'utente a
-           mano. Quello che il gestionale fa davvero e' mandare il PDF per
-           email o WhatsApp, ed e' quello che c'e' scritto adesso. -->
-      <p>Voci, quantit&agrave;, prezzi, righe di sezione per dividere il lavoro in parti.
-         Il PDF esce gi&agrave; fatto col tuo nome sopra, e glielo mandi da l&igrave;,
-         per email o su WhatsApp.</p>
-      <p>Non hai voglia di scriverlo? Premi <b>&laquo;Genera con AI&raquo;</b>, raccontalo a voce,
-         e le voci con le quantit&agrave; e i prezzi si scrivono da sole: tu controlli e correggi.</p>
-      <p>Quando il cliente dice s&igrave;, il preventivo diventa il cantiere con un clic:
-         non lo riscrivi da capo. E la pagina ti dice su dieci che ne mandi quanti
-         te ne accettano.</p>
-    </div>
-    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
-    <div class="video-tel">
-      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
-             data-poster="/video/gestionale-preventivo.jpg" data-src="/video/gestionale-preventivo.mp4"
-             aria-label="Video: si racconta il lavoro a voce e il gestionale scrive le voci del preventivo con i prezzi"></video>
-    </div>
-  </div>
-</section>
-
-<section class="fascia grigia" id="f-cantiere">
-  <div class="wrap due rovescia">
-    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
-    <div class="video-tel">
-      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
-             data-poster="/video/gestionale-cantiere.jpg" data-src="/video/gestionale-cantiere.mp4"
-             aria-label="Video: dal telefono in cantiere si racconta la giornata e il rapportino si riempie da solo con ore, materiali e spese"></video>
-    </div>
-    <div>
-      <p class="occhiello">In cantiere</p>
-      <h2>Mezzo minuto sul posto,<br>non mezz&rsquo;ora la sera</h2>
-      <p>Il rapportino si fa dal telefono mentre sei l&igrave;. Le ore finiscono nel lavoro giusto,
-         e a fine mese sai quanto ti &egrave; costato davvero quel cantiere.</p>
-      <p>Le foto restano attaccate al lavoro: quando il cliente chiede, le hai.</p>
-    </div>
-  </div>
-</section>
-
 <!-- 26 set 2026 — IL COMPUTO DIVENTA GRANDE, col suo video (orizzontale:
      il computo si fa al computer). Il testo e' quello che stava fra le voci
      che si aprono. ⚠️ Una fascia in piu': le fasce dopo hanno il bianco/grigio
      girato apposta, per tenere l'alternanza. -->
-<section class="fascia" id="f-computo">
-  <div class="wrap">
-    <p class="occhiello" style="text-align:center">Computo metrico</p>
-    <h2 class="titolone">Le misure le scrivi<br>come sul quaderno</h2>
-    <div class="introne"><p>Parti uguali, lunghezza, larghezza, altezza. Il vuoto di una porta lo metti
-         <b>&laquo;si detrae&raquo;</b> e se ne va da solo. La quantit&agrave; della lavorazione non la
-         scrivi tu: la somma il programma, misura per misura.</p><p>Computo, capitoli, lavorazioni, misure: quattro piani, come in un computo vero.
-         Ogni voce ha il suo codice di tariffa, l&rsquo;unit&agrave; di misura, gli oneri della
-         sicurezza e quanto pesa la manodopera.</p><p>Quando hai finito, <b>il computo diventa un preventivo</b> raggruppato per capitoli,
-         senza riscrivere una riga.</p></div>
-    <div class="video-pc">
-      <video class="video-lazy" muted loop playsinline preload="none" width="960" height="540"
-             data-poster="/video/gestionale-computo.jpg" data-src="/video/gestionale-computo.mp4"
-             aria-label="Video: si crea un computo, si scrive la lavorazione e le misure, e il gestionale fa da solo quantità e totale"></video>
-    </div>
-  </div>
-</section>
-
-<section class="fascia grigia" id="f-fornitori">
-  <div class="wrap due rovescia">
-    <!-- ⛔ 26 set 2026 — IL VIDEO AL POSTO DEL DISEGNO, fatto per non pesare.
-         Alex: «basta che Google non la penalizza» (i reel in home li aveva
-         dovuti togliere). Quindi:
-         · il video pesa 450 KB (540x960, niente audio) e la copertina 35 KB;
-         · preload="none" e il file vero si chiede SOLO quando il riquadro
-           arriva sullo schermo (data-src + lo script in fondo): chi non
-           scorre fin qui non lo scarica mai;
-         · width/height e aspect-ratio fissi: la pagina non «salta» quando
-           arriva il video;
-         · con «riduci movimento» non parte da solo, ci sono i comandi.
-         Fornitore e impresa del video sono inventati («nomi e cifre di prova»). -->
-    <div class="video-tel">
-      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
-             data-poster="/video/gestionale-foto-fattura.jpg" data-src="/video/gestionale-foto-fattura.mp4"
-             aria-label="Video: si fotografa la fattura del fornitore e il gestionale riempie da solo fornitore, numero, data, importo e scadenza"></video>
-    </div>
-    <div>
-      <p class="occhiello">Fornitori</p>
-      <h2>La fattura del fornitore?<br>Le fai una foto</h2>
-      <p>Fotografi la fattura o la bolla, oppure carichi il PDF. Fornitore, numero, data,
-         importo e scadenza si scrivono da soli: tu controlli e premi Aggiungi.</p>
-      <p>Se il fornitore non &egrave; ancora in rubrica, lo aggiungi con un tocco. La foto resta
-         attaccata al fornitore, e se colleghi la fattura a un lavoro la spesa entra da sola
-         nel conto di quel cantiere.</p>
-      <p>E se la stessa fattura l&rsquo;hai gi&agrave; segnata, te lo dice: niente pagamenti doppi.</p>
-    </div>
-  </div>
-</section>
-
-<section class="fascia" id="f-scelte">
-  <div class="wrap due">
-    <div>
-      <p class="occhiello">Materiali e finiture</p>
-      <h2>Piastrelle e sanitari<br>li sceglie il cliente, dal telefono</h2>
-      <p>Per ogni cosa da decidere metti le possibilit&agrave;, con la foto e il prezzo:
-         &laquo;compreso&raquo;, &laquo;+ 8 &euro;/mq&raquo;. Mandi un link su WhatsApp, e il cliente
-         sceglie con calma da casa sua, senza iscriversi a niente.</p>
-      <p>Quando conferma ti arriva un&rsquo;email, e le scelte restano scritte nel lavoro.
-         Niente pi&ugrave; <b>&laquo;ma io avevo detto l&rsquo;altro&raquo;</b> a pavimento gi&agrave; posato.</p>
-    </div>
-    <!-- 26 set 2026 — il video al posto del disegno (si carica solo quando si vede) -->
-    <div class="video-tel">
-      <video class="video-lazy" muted loop playsinline preload="none" width="540" height="960"
-             data-poster="/video/gestionale-scelte.jpg" data-src="/video/gestionale-scelte.mp4"
-             aria-label="Video: il cliente apre il link sul telefono, sceglie pavimento, sanitari e colore e conferma"></video>
-    </div>
-  </div>
-</section>
-
 <section class="fascia grigia" id="tutto">
   <div class="wrap">
     <h2 class="titolone">E poi c&rsquo;&egrave; tutto il resto</h2>
@@ -1085,19 +1148,6 @@
 </section>
 
 <!-- ================= CHI LO USA ================= -->
-<section class="fascia">
-  <div class="wrap">
-    <h2 class="titolone">Cambia le parole secondo chi sei</h2>
-    <p class="introne">Un artigiano manda un <b>preventivo</b> a un cliente. Uno studio tecnico accetta
-       un <b>incarico</b> e chiede un <b>onorario</b>. Scegli il tuo mestiere e ti si apre gi&agrave; quello giusto.</p>
-    <div class="tre">
-      <div class="chi"><h3>Artigiano</h3><p>Idraulico, elettricista, imbianchino, giardiniere. Lavori tuoi, con o senza dipendenti.</p></div>
-      <div class="chi"><h3>Impresa edile</h3><p>Cantieri, squadra, mezzi. Computo metrico, SAL e fatture con l&rsquo;IVA al 10%.</p></div>
-      <div class="chi"><h3>Studio tecnico</h3><p>Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta.</p></div>
-    </div>
-  </div>
-</section>
-
 <style>
   /* ============ LE QUATTRO CARD, CON I MESTIERI DENTRO ============ */
   .scheda{background:#fff;border:1px solid var(--bd);border-radius:20px;
@@ -1175,48 +1225,7 @@
   @media(max-width:620px){.gratis-porte{grid-template-columns:1fr}}
 </style>
 
-<!-- ================= LA COSA DETTA CHIARA ================= -->
-<section class="fascia grigia">
-  <div class="wrap">
-    <div class="onesto">
-      <h3>Una cosa detta chiara</h3>
-      <p>Il gestionale sta dentro TrovaImpresa, che &egrave; anche un posto dove i clienti cercano
-         imprese e artigiani. Quindi <b>insieme al gestionale ti arriva anche una vetrina</b> col tuo profilo.</p>
-      <p>Se cercavi solo il gestionale, la vetrina puoi ignorarla: non devi compilare niente e il
-         gestionale funziona lo stesso. Se invece ti fa comodo, &egrave; gi&agrave; pagata.</p>
-    </div>
-  </div>
-</section>
 
-<!-- 26 set 2026: spostato qui, attaccato ai prezzi (Alex: «troppo distanti»).
-     ⛔ 24 set 2026 — TRE MODI PER COMINCIARE (id="comincia": ci punta la
-     striscia del giro). «Fai un giro» apre il gestionale con ?giro=1: dati
-     finti, senza account, non si salva niente (vedi gestionale-app.html).
-     «Prova 30 giorni» manda all'iscrizione: appena entra, il muro del
-     gestionale gli offre la prova come primo bottone. -->
-<section class="comincia" id="comincia">
-  <div class="wrap">
-    <h2>Comincia gratis. Passa all&rsquo;AI quando vuoi.</h2>
-    <p class="intro">Ti iscrivi e il gestionale &egrave; tuo, per sempre. L&rsquo;assistenza AI e la chat le attivi dopo, solo se ti servono.</p>
-    <div class="tre coppia">
-      <div class="modo verde">
-        <div class="modo-t">Usa gratis</div>
-        <p>Preventivi, fatture, cantieri e computo, subito. Non serve la carta.</p>
-        <div class="modo-chi">SONO</div>
-        <div class="mestieri3">
-          <a href="/registrazione-artigiano.html?da=gestionale">Un artigiano</a>
-          <a href="/registrazione-impresa.html?da=gestionale">Un&rsquo;impresa edile</a>
-          <a href="/registrazione-professionista.html?da=gestionale">Uno studio tecnico</a>
-        </div>
-      </div>
-      <div class="modo arancio">
-        <div class="modo-t">Con assistenza AI e chat</div>
-        <p>Quando ti serve la attivi dal tuo pannello. Da 39&nbsp;&euro; al mese, ti disdici quando vuoi.</p>
-        <a class="b b-arancio" href="#prezzi">Vedi i prezzi</a>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ================= PREZZO E MESTIERE, INSIEME ================= -->
 <!-- ⚠️ `id="scegli"` e `id="prezzi"` sono i nomi vecchi delle due sezioni:
@@ -1224,11 +1233,12 @@
 <span id="scegli"></span>
 <section class="fascia" id="prezzi">
   <div class="wrap">
+    <img class="pann-logo" src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa" width="150" height="118">
     <h2 class="titolone">Il gestionale &egrave; gratis. L&rsquo;AI da 39&nbsp;&euro; al mese</h2>
     <p class="introne">Ti iscrivi gratis e usi tutto il gestionale. L&rsquo;assistenza AI e la chat le attivi dopo, quando vuoi.</p>
 
     <div class="scheda" id="iscriviti">
-      <div class="gratis-box">
+      <div class="gratis-box" id="comincia">
         <h4>Iscriviti gratis come</h4>
         <div class="gratis-porte">
           <a href="/registrazione-artigiano.html?da=gestionale">Artigiano</a>
@@ -1275,6 +1285,7 @@
         </div>
       </div>
 
+      <div class="incluso-due">
       <div class="incluso">
         <h4>Nel gestionale gratis c&rsquo;&egrave;</h4>
         <ul>
@@ -1299,6 +1310,7 @@
           <li><b>Compila con AI</b>: 100 crediti al mese per moduli e preventivi</li>
         </ul>
       </div>
+      </div>
 
       <p class="nota-prezzi">Il gestionale &egrave; gratis. L&rsquo;AI: prezzo finale, <b>nessuna IVA da aggiungere</b>.
          Si disdice quando vuoi e resti con il gestionale gratis. Pagamento sicuro con Stripe.</p>
@@ -1321,21 +1333,14 @@
 </section>
 
 <!-- INIZIO famiglia gestionale (porta) - generato, non scrivere a mano -->
-<div class="promesse">
-  <div class="wrap">
-    <span>Gestionale gratis</span>
-    <span>Nessuna IVA da aggiungere</span>
-    <span>Si disdice quando vuoi</span>
-  </div>
-</div>
-
 <section class="fascia grigia" id="pagine-precise">
   <div class="wrap">
     <h2 class="titolone">Cerchi una cosa precisa?</h2>
     <p class="introne">Questa pagina racconta il gestionale tutto intero.
       Se sei arrivato cercando una cosa sola, qui sotto c&rsquo;&egrave; la pagina che parla di quella.</p>
 
-      <h3 class="pp-h3">Il lavoro che devi fare</h3>
+      <details class="pp-gruppo">
+        <summary><h3 class="pp-h3">Il lavoro che devi fare</h3><small>8 pagine</small></summary>
       <ul class="pp-elenco">
         <li><a href="/software-computo-metrico">Software computo metrico</a><span>capitoli, misure, analisi prezzi e il computo da prezzare che ti manda il geometra</span></li>
         <li><a href="/programma-preventivi-edili">Programma per preventivi edili</a><span>voci, IVA riga per riga, PDF pronto e il preventivo che diventa lavoro</span></li>
@@ -1346,8 +1351,10 @@
         <li><a href="/software-gestione-mezzi-attrezzature">Gestione mezzi e attrezzature</a><span>revisione, bollo, assicurazione, carburante e le carte che si scaricano</span></li>
         <li><a href="/software-gestione-ore-operai">Gestione ore degli operai</a><span>ore per persona e per cantiere, timbrature e il costo vero del lavoro</span></li>
       </ul>
+      </details>
 
-      <h3 class="pp-h3">Il tuo mestiere</h3>
+      <details class="pp-gruppo">
+        <summary><h3 class="pp-h3">Il tuo mestiere</h3><small>16 pagine</small></summary>
       <ul class="pp-elenco">
         <li><a href="/gestionale-idraulici">Gestionale per idraulici</a><span>interventi urgenti, ricambi e il preventivo fatto in macchina</span></li>
         <li><a href="/gestionale-elettricisti">Gestionale per elettricisti</a><span>punti luce a preventivo, dichiarazioni di conformità e materiale</span></li>
@@ -1366,13 +1373,16 @@
         <li><a href="/gestionale-direttori-lavori">Gestionale per la direzione lavori</a><span>sopralluoghi, verbali, SAL da approvare e compensi a percentuale</span></li>
         <li><a href="/gestionale-interior-designer">Gestionale per interior designer</a><span>progetti, fornitori, capitolato arredi e le revisioni infinite</span></li>
       </ul>
+      </details>
 
-      <h3 class="pp-h3">Prima di decidere</h3>
+      <details class="pp-gruppo">
+        <summary><h3 class="pp-h3">Prima di decidere</h3><small>3 pagine</small></summary>
       <ul class="pp-elenco">
         <li><a href="/quanto-costa-un-gestionale-edile">Quanto costa un gestionale edile</a><span>le fasce di prezzo vere del mercato italiano, e cosa cambia fra una e l'altra</span></li>
         <li><a href="/gestionale-cantieri-gratis">Gestionale cantieri gratis</a><span>cosa regge davvero nel gratis, dove cede, e quando conviene pagare</span></li>
         <li><a href="/gestionale-piccola-impresa-edile">Gestionale per la piccola impresa</a><span>da uno a dieci: quello che serve davvero e quello che è solo peso</span></li>
       </ul>
+      </details>
   </div>
 </section>
 <!-- FINE famiglia gestionale (porta) -->
@@ -1574,6 +1584,18 @@
       if(e[0].isIntersecting){carica();var p=v.play();if(p&&p.catch)p.catch(function(){});}
       else if(!v.paused){v.pause();}
     },{threshold:.4,rootMargin:'200px 0px'}).observe(v);
+  });
+})();
+</script>
+<script>
+/* 3 ott 2026 — le schede «Cosa fa»: il bottone apre la finestra col testo intero e il video.
+   Il video parte da solo quando la finestra si apre (lo script dei video guarda se si vede). */
+(function(){
+  document.querySelectorAll('[data-dlg]').forEach(function(b){
+    b.addEventListener('click',function(){var d=document.getElementById(b.getAttribute('data-dlg'));if(d&&d.showModal)d.showModal();});
+  });
+  document.querySelectorAll('dialog.cf-dialog').forEach(function(d){
+    d.addEventListener('click',function(e){if(e.target===d)d.close();});
   });
 })();
 </script>
