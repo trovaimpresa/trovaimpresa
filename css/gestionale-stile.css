@@ -1,0 +1,38 @@
+/* 3 ott 2026 - STILE C del gestionale: blu progetto a quadretti, linee bianche, arancione.
+   Vale per la schermata dei reparti (#landing) di gestionale-app.html. Niente altro viene toccato. */
+#landing{background-color:#0a2a4d !important;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;background-size:40px 40px !important;color:#fff;font-family:'IBM Plex Sans',Inter,system-ui,sans-serif;min-height:100vh}
+#landing .landing-top{background:transparent !important;box-shadow:none !important;border-bottom:2px solid rgba(255,255,255,.5);position:relative;padding-bottom:26px}
+#landing .landing-top h1{color:#fff !important;font-weight:700 !important;font-size:42px !important;line-height:1.1}
+#landing .landing-top small{color:#d6e2f4 !important;font-size:20px !important;font-weight:500}
+#landing .lt-btn{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important;font-weight:600 !important;font-size:16px !important;box-shadow:none !important}
+#landing .lt-btn:hover{background:#ff8800 !important;color:#0a2a4d !important;border-color:#ff8800 !important}
+#landing .gl-slot.gl-grande{background:#fff;border-radius:14px;padding:4px 10px}
+#landing .gl-cambia{color:#0a2a4d !important}
+#landing .landing-sub{color:#d6e2f4 !important;font-size:20px !important;font-weight:500}
+#landing .ai-str{background:rgba(255,136,0,.10) !important;border:2px solid #ff8800 !important;border-radius:10px !important;color:#fff !important}
+#landing .ai-str *{color:#fff}
+#landing .ai-str-mk{background:#ff8800 !important;color:#0a2a4d !important;font-weight:700}
+#landing .ai-str-cta{background:#ff8800 !important;color:#0a2a4d !important;font-weight:700;border-radius:8px}
+#landing .ai-str-piu{background:transparent !important;border:2px solid rgba(255,255,255,.65) !important;color:#fff !important;border-radius:8px}
+#landing .panel-card{background:rgba(10,42,77,.82) !important;border:2px solid rgba(255,255,255,.55) !important;border-radius:10px !important;box-shadow:0 10px 24px rgba(0,0,0,.25) !important;color:#fff !important}
+#landing .panel-card:hover{border-color:#ff8800 !important}
+#landing .panel-card .pc-ic{background:#ff8800 !important;color:#0a2a4d !important;border-radius:12px !important}
+#landing .panel-card h2{color:#fff !important;font-weight:700 !important;font-size:28px !important}
+#landing .pc3-sotto{color:#d6e2f4 !important;font-size:18px !important;font-weight:500}
+#landing .pc3-num b{color:#ff8800 !important;font-family:'IBM Plex Mono',monospace !important;font-size:48px !important;font-weight:600 !important}
+#landing .pc3-num span{color:#d6e2f4 !important;font-size:16px !important}
+#landing .pc3-apri{background:#ff8800 !important;color:#0a2a4d !important;font-weight:700 !important;font-size:19px !important;border-radius:8px !important}
+#landing .pc-del{color:#d6e2f4 !important;background:transparent !important}
+#landing .pc-del:hover{color:#ff8800 !important}
+#landing .new-rep-btn{background:transparent !important;border:2px dashed rgba(255,255,255,.7) !important;color:#fff !important;font-weight:600 !important;font-size:18px !important;border-radius:10px !important}
+#landing .new-rep-btn:hover{border-color:#ff8800 !important;color:#ff8800 !important}
+#landing .landing-nota-rep,#landing .wrap>p{color:#d6e2f4 !important;font-size:17px !important}
+#landing .wrap>div[style*="border-top"]{border-top:2px solid rgba(255,255,255,.4) !important}
+#landing .wrap>div[style*="border-top"] p{color:#d6e2f4 !important}
+#landing .wrap>div[style*="border-top"] a{background:#ff8800 !important;color:#0a2a4d !important;font-weight:700 !important;border-radius:8px !important}
+@media (max-width:560px){
+ #landing .landing-top h1{font-size:32px !important}
+ #landing .landing-top small{font-size:18px !important}
+ #landing .panel-card h2{font-size:24px !important}
+ #landing .pc3-num b{font-size:40px !important}
+}
