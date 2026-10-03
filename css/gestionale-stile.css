@@ -89,3 +89,6 @@ html body .num-fila .num-c.num-c.num-c:first-child{border-top:0 !important}
 
 /* Mappa: lista dei punti */
 html body .mp-righe.mp-righe{border:2px solid #0a2a4d !important;border-radius:10px !important}
+
+/* rete di sicurezza: le schede delle liste lunghe (lavori, preventivi, fatture, carte, fornitori, crediti, prezzario) hanno il bordo blu anche se lo script arriva tardi */
+html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card.card,html body #forn-list > .card.card,html body #cred-list > .card.card,html body #pz-list .pz-card.pz-card{border:2px solid #0a2a4d !important;border-left:2px solid #0a2a4d !important;border-radius:10px !important}
