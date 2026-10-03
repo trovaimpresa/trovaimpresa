@@ -1,0 +1,30 @@
+/* ⛔ 3 ott 2026 — IL PIANO UNICO DEL GESTIONALE, PIU' BELLO E ALLINEATO.
+   Vale solo quando js/porte-gestionale.js mette la classe .gest-unico
+   (interruttore acceso o ?piani=prova). Con una sola porta: a tutta
+   larghezza come l'avviso e il riquadro verde sopra, nome e descrizione
+   a sinistra, i due prezzi affiancati a destra. */
+.gest-porte.gest-unico { grid-template-columns:minmax(0,1fr); gap:0; }
+.gest-unico .gest-porta { background:#fff; border:1.5px solid #e5e7eb; border-radius:16px; padding:26px 28px;
+  box-shadow:0 1px 3px rgba(16,24,40,.05); }
+.gest-unico .gest-carte { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); column-gap:44px; align-items:center; }
+.gest-unico .gest-mezzo { grid-column:1; grid-row:1; text-align:left; margin:0; }
+.gest-unico .gest-mezzo .gest-emoji { display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px;
+  border-radius:12px; background:#fdece1; color:#e8733a; font-size:1.5rem; margin:0 0 12px; }
+.gest-unico .gest-mezzo .gest-nome { font-size:1.55rem; line-height:1.25; }
+.gest-unico .gest-mezzo .gest-desc { max-width:none; margin:8px 0 0; font-size:16px; color:#4b5563; }
+.gest-unico .gest-mezzo .gest-tuo { display:inline-block; margin-top:12px; padding:3px 12px; border-radius:999px;
+  background:#f0ecfb; font-size:13px; }
+.gest-unico .gest-gruppo { grid-column:2; margin-top:0; }
+.gest-unico .gest-gruppo-tit { margin-bottom:10px; }
+.gest-unico .gest-fila { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:16px; }
+.gest-unico .g-carta { min-height:0; }
+.gest-unico .g-prezzo .g-txt { font-size:20px; font-weight:700; }
+.gest-unico .gest-gruppo + .gest-gruppo { grid-column:1 / -1; margin-top:22px; padding-top:18px; border-top:1px solid #eef0f3; }
+@media (max-width:900px) {
+  .gest-unico .gest-carte { grid-template-columns:minmax(0,1fr); row-gap:20px; }
+  .gest-unico .gest-gruppo { grid-column:1; }
+}
+@media (max-width:560px) {
+  .gest-unico .gest-porta { padding:18px; }
+  .gest-unico .gest-fila { grid-template-columns:minmax(0,1fr) !important; }
+}

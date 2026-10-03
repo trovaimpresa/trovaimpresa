@@ -205,6 +205,8 @@ function montaPorteGestionale() {
        Resta la porta «premium-ai» (quella che gia' accende la chat nel pagamento);
        la porta da 29/249 sparisce. Entra da /gestionale-app.html senza ?piano=...,
        e nella finestra c'e' l'elenco completo, chat compresa. */
+    const elPorte = document.getElementById('porte-gestionale');
+    if (elPorte) elPorte.classList.add('gest-unico');   /* vedi css/porte-unico.css */
     const tit = document.getElementById('gest-titolo-testo');
     if (tit) tit.textContent = 'Il tuo gestionale';
 
@@ -239,6 +241,7 @@ function montaPorteGestionale() {
           carta.after(anno);
         }
         carta.style.minHeight = '0'; anno.style.minHeight = '0';
+        carta.classList.add('g-prezzo'); anno.classList.add('g-prezzo');
         const ta = anno.querySelector('.g-tit'); if (ta) ta.textContent = "All'anno";
         const xa = anno.querySelector('.g-txt'); if (xa) xa.textContent = porta.anno;
         metti('azione-attiva-anno-' + k, 'Attiva', ARANCIO, () => mostraListino(porta, null));
