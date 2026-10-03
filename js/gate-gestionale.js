@@ -459,10 +459,14 @@
      diritto di entrare entra. Chiudere fuori un cliente pagante per una
      tentennata della rete sarebbe il danno peggiore.
      ============================================================ */
-  var PROFILO_MINIMO_ATTIVO = false;
+  /* 3 ottobre 2026 — UN SOLO INTERRUTTORE: lo legge da js/gestionale-base.js.
+     Spento = il cancello fa quello di sempre. Acceso = entra anche chi e'
+     iscritto senza piano, e chi non paga passa dal profilo minimo. */
+  var BASE_APERTA = (window.GESTIONALE_BASE_APERTO === true);
+  var PROFILO_MINIMO_ATTIVO = BASE_APERTA;
   var DESCR_MIN = 100;           /* caratteri minimi della descrizione */
   var DESCR_MAX_FREE = 200;      /* il piano Free non ne accetta di piu' (vedi modifica-profilo.html) */
-  var COLONNE_PROFILO = 'nome_attivita, nome, mestiere, mestieri, citta, telefono, descrizione, logo_url, email_confermata, piano';
+  var COLONNE_PROFILO = 'nome_attivita, nome, mestiere, mestieri, citta, telefono, descrizione, logo_url, email_confermata, piano, premium_scadenza, premium_pagato';
   var _gpRiga = null, _gpProva = false, _gpAperto = null;
 
   function _pieno(v){ return v!==null && v!==undefined && String(v).trim()!==''; }
@@ -508,6 +512,13 @@
       return (res&&res.data)||null;
     });
   }
+  function pagaDavvero(riga){
+    if(!riga || riga.premium_pagato!==true) return false;
+    if(String(riga.piano||'').trim().toLowerCase()!=='premium') return false;
+    if(riga.premium_scadenza){ var s=new Date(riga.premium_scadenza); if(!isNaN(s.getTime()) && s.getTime()<=Date.now()) return false; }
+    return true;
+  }
+  window._pagaDavvero=pagaDavvero;
   /* Si risolve SEMPRE, con 'ok' o 'profilo': mai rifiutata, mai appesa. */
   function controllaProfilo(gc,uid,prova){
     return new Promise(function(risolvi){
@@ -516,6 +527,12 @@
       t=setTimeout(function(){ fine('ok'); },6000);
       leggiProfilo(gc,uid).then(function(riga){
         if(!riga){ fine('ok'); return; }      /* nessuna riga: non tocca a questa schermata dirlo */
+        /* 3 ott 2026 — CHI PAGA DAVVERO NON PASSA DAL PROFILO. Il profilo
+           minimo serve a chi usa il gestionale gratis (o col regalo): chi ha
+           un abbonamento a pagamento in corso ha gia' dato abbastanza, e
+           fermarlo davanti a una schermata sarebbe farlo pagare per niente.
+           Nell'anteprima (?profilo=prova) invece si vede sempre. */
+        if(!prova && pagaDavvero(riga)){ fine('ok'); return; }
         if(prova){ riga=Object.assign({},riga,{descrizione:'',logo_url:'',email_confermata:false}); }
         _gpRiga=riga; _gpProva=!!prova;
         fine(profiloMinimo(riga).completo?'ok':'profilo');
@@ -953,7 +970,10 @@
           window._gestEmail=(row&&row.email)||s.user.email||'';
           /* ⚠️ la prova apre quanto il Gestionale: se restasse fuori, uno che
              ha chiesto i 30 giorni si vedrebbe ancora il paywall. */
-          var ok=haPremium(row)||inProva(row);
+          /* 3 ott 2026 — col gestionale base gratis aperto entra anche chi e'
+             iscritto (ha una riga in imprese) ma non ha ne' piano ne' prova.
+             Senza riga no: il database non gli lascerebbe salvare niente. */
+          var ok=haPremium(row)||inProva(row)||(BASE_APERTA&&!!row);
           window._gestPremium=ok;
           window._gestProvaGiorni=giorniProva(row);
           /* 24 set 2026 — la prova si offre anche dal muro (vedi showPaywall) */

@@ -1128,6 +1128,7 @@
 .ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
 </style>
+<script src="/js/gestionale-base.js"></script>
 </head>
 <body>
 
@@ -3312,7 +3313,7 @@ function bloccaCardPremium() {
 // Per lui il pulsante apre il portale clienti di Stripe, che cambia il
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
-/* ⛔ 3 OTTOBRE 2026 — L'INTERRUTTORE DEL GESTIONALE BASE GRATIS.
+/* ⛔ 3 OTTOBRE 2026 — L'INTERRUTTORE DEL GESTIONALE BASE GRATIS (letto da js/gestionale-base.js).
    FALSE = la schermata resta quella di sempre (Gestionale, Gestionale AI,
    prova 30 giorni, Fai un giro). TRUE = schermata nuova: il riquadro verde
    «Usa gratis il gestionale base» e due sole card a pagamento (assistenza AI
@@ -3321,7 +3322,7 @@ function bloccaCardPremium() {
    e finche' il cancello (js/gate-gestionale.js) e la guardia del database non
    fanno entrare chi ha il piano gratis, quel bottone porta a un muro.
    Per vederla senza accenderla: aggiungere ?piani=prova all'indirizzo. */
-const GESTIONALE_BASE_APERTO = false;
+const GESTIONALE_BASE_APERTO = (window.GESTIONALE_BASE_APERTO === true);   /* 3 ott: l'interruttore vero sta in js/gestionale-base.js */
 const PORTE_GESTIONALE = [
   { chiave: 'premium', label: 'Gestionale', attiva: 'Attiva il Gestionale',
     mese: '29 \u20ac al mese', anno: '249 \u20ac all\'anno',

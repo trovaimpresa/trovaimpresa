@@ -58,9 +58,16 @@
       cta.textContent = "Ricarica";
       cta.href = "/ricarica-crediti.html";
     }else{
+      if(window.GESTIONALE_BASE_APERTO===true){
+        /* 3 ott 2026: col gestionale base gratis l'AI e' il piano a pagamento */
+        txt.innerHTML = "<b>non è attiva</b> — c'è nell'assistenza AI";
+        cta.textContent = "Attiva l'assistenza AI";
+        cta.href = "/prezzi.html";
+      }else{
       txt.innerHTML = "<b>non è attiva</b> — arriva col Gestionale";
       cta.textContent = "Vedi il Gestionale";
       cta.href = "/prezzi.html";
+      }
     }
 
     const lavori = _lav();   /* 22 ago: la parola la dice _lav(), non un if suo */
