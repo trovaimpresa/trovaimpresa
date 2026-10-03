@@ -1,0 +1,52 @@
+/* 3 ott 2026 — le pagine del gestionale per Google (mestieri, problemi, confronti) in STILE C scuro:
+   blu progetto a quadretti, bordi bianchi sottili, testo chiaro, arancione solo su bottoni e link.
+   Niente strisce colorate sui riquadri (Alex: «le voglio piu neutre come e fatto sul sito»).
+   Si carica DOPO il CSS scritto dentro la pagina, quindi vince lui. Non cambia nessun testo.
+   Lo usano le 27 pagine generate da genera-pagine-gestionale.js e la pagina madre. */
+:root{--c-blu:#0a2a4d;--c-chiaro:#d6e2f4;--c-ar:#ff8800;--c-riga:rgba(255,255,255,.55);--c-vetro:rgba(10,42,77,.82)}
+body{background-color:var(--c-blu);background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:40px 40px;font-family:'IBM Plex Sans','Segoe UI',Roboto,Arial,sans-serif;color:var(--c-chiaro)}
+.navbar{box-shadow:none;border-bottom:2px solid var(--c-blu)}
+.navbar .menu a.menu-btn{background:var(--c-ar);color:var(--c-blu);border-radius:8px}
+main.wrap{max-width:900px;background:var(--c-vetro);border:2px solid var(--c-riga);border-radius:14px;margin:34px auto 0;padding:6px 38px 40px}
+.breadcrumb,.breadcrumb a{color:#9fb4d0}
+h1,h2,h3{color:#fff;font-weight:700}
+h1{font-size:40px}
+h2{border-top:2px solid rgba(255,255,255,.4);padding-top:22px}
+p,li,td{color:var(--c-chiaro)}
+.lead{color:#fff}
+strong,b{color:#fff}
+.meta{font-family:'IBM Plex Mono',Consolas,monospace;font-size:13.5px;letter-spacing:.08em;color:#9fb4d0}
+a{color:var(--c-ar)}
+.answer{background:transparent;border:2px solid var(--c-riga);border-radius:10px}
+.answer strong{color:#fff}
+.price-big{color:#fff;font-family:'IBM Plex Mono',Consolas,monospace;font-weight:600;font-size:19px;line-height:1.4;margin-top:8px}
+table{border:2px solid var(--c-riga);border-radius:10px}
+thead th{background:rgba(255,255,255,.14);color:#fff;font-weight:700;border-bottom:2px solid var(--c-riga)}
+th,td{border-bottom:1px solid rgba(255,255,255,.25)}
+tbody tr:nth-child(even){background:rgba(255,255,255,.05)}
+.checklist li{border-bottom-color:rgba(255,255,255,.22)}
+.checklist li:before{color:var(--c-ar)}
+.ok-list li:before{color:var(--c-ar)}
+.err-list li:before{color:#ff6b5b}
+.note{background:transparent;border:2px solid var(--c-riga);border-radius:10px;color:var(--c-chiaro)}
+.esperienza{background:transparent;border:2px solid var(--c-riga);border-radius:10px;color:var(--c-chiaro)}
+.related{background:transparent;border:2px solid var(--c-riga);border-radius:10px}
+figure img{border:2px solid var(--c-riga);border-radius:10px;box-shadow:none}
+figcaption{color:#9fb4d0}
+.faq details{background:transparent;border:2px solid var(--c-riga);border-radius:10px}
+.faq details[open]{border-color:#fff}
+.faq summary{color:#fff}
+.faq summary:after{color:var(--c-ar)}
+.faq details[open] summary{border-bottom-color:rgba(255,255,255,.3)}
+.prezzo-box{background:transparent;border:2px solid var(--c-riga);border-radius:10px}
+.prezzo-box .cifra{color:#fff;font-family:'IBM Plex Mono',Consolas,monospace;font-weight:600}
+.prezzo-box .sotto,.prezzo-ai{color:var(--c-chiaro)}
+.prezzo-ai{border-top-color:rgba(255,255,255,.35)}
+.prezzo-ai b{color:#fff}
+.cta-band{background:transparent;border:2px solid var(--c-riga);border-radius:10px}
+.cta-band h3{color:#fff}
+.cta-sotto{color:#9fb4d0}
+.cta-dark{background:var(--c-ar);color:var(--c-blu);border-radius:8px}
+footer{margin-top:40px;border-top:2px solid rgba(255,255,255,.5);color:var(--c-chiaro);background:#071f38}
+footer a{color:var(--c-chiaro) !important}
+@media(max-width:700px){main.wrap{margin:16px 12px 0;padding:2px 16px 28px;border-radius:12px}h1{font-size:28px}}

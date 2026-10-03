@@ -196,6 +196,11 @@ function costruisci(pag, tutte) {
   <meta property="og:image:height" content="971">
 <meta property="og:site_name" content="TrovaImpresa">
 <style>${CSS}</style>
+<!-- 3 ott 2026 — STILE C scuro (blu a quadretti, bordi bianchi): un file solo per tutte le pagine -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/css/gestionale-pagine.css?v=1">
 </head>
 <body>
 
