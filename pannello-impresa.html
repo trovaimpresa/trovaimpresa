@@ -6389,6 +6389,13 @@ function montaPorteGestionale() {
         const xa = anno.querySelector('.g-txt'); if (xa) xa.textContent = porta.anno;
         metti('azione-attiva-anno-' + k, 'Attiva', ARANCIO, () => mostraListino(porta, null));
       }
+      /* «Se ce l'hai già»: chi non ha il piano entra dal riquadro verde in
+         alto, quindi la striscia «Attivalo per entrare» qui non serve (Alex,
+         3 ott). Resta solo per chi il piano ce l'ha. */
+      const apertaK = k === 'premium' ? haPremium : haAI;
+      const stEntra = document.getElementById('carta-entra-' + k);
+      const grEntra = stEntra && stEntra.closest('.gest-gruppo');
+      if (grEntra) grEntra.style.display = apertaK ? '' : 'none';
     });
 
     /* il riquadro verde: solo per chi non ha gia' un piano a pagamento */
