@@ -90,3 +90,9 @@
   .gest-c .g-b { width:100% !important; }
   #sec-dashboard #porte-gestionale.gest-unico .g-prezzo .g-txt { font-size:28px !important; }
 }
+
+/* icone del pannello: arancioni e grandi (la stellina era blu su blu) */
+.gest-c .gest-emoji,.gest-c .gest-emoji svg{color:#ff8800 !important}
+.gest-c .gest-emoji svg{width:44px !important;height:44px !important;stroke:#ff8800 !important}
+.gest-c .g-ico{background:transparent !important;color:#fff !important}
+.gest-c .g-ico svg{width:30px !important;height:30px !important;color:#fff !important;stroke:#fff !important}

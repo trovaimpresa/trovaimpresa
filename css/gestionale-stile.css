@@ -38,3 +38,28 @@
 }
 #landing .gc-brand{display:block;margin:12px auto 10px;background:#fff;border-radius:14px;padding:2px 14px;height:104px;width:auto}
 @media (max-width:560px){#landing .gc-brand{height:84px}}
+
+/* ===== INTERNO del gestionale: menu e barra in alto in stile C, centro bianco ===== */
+#appview .side{background-color:#0a2a4d !important;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;background-size:40px 40px !important;color:#fff !important;border-right:2px solid rgba(255,255,255,.4) !important}
+#appview .side *{font-family:'IBM Plex Sans',Inter,system-ui,sans-serif}
+#appview .side .side-brand h1,#appview .side .side-brand small{color:#fff !important}
+#appview .side .back{background:transparent !important;border:2px solid rgba(255,255,255,.65) !important;color:#fff !important}
+#appview .side .tabs button{color:#fff !important;background:transparent !important;border:2px solid transparent !important;border-radius:8px !important;font-weight:600 !important}
+#appview .side .tabs button svg{stroke:#fff !important;color:#fff !important}
+#appview .side .tabs button>svg{background:transparent !important;box-shadow:none !important}
+#appview .side .tabs button:hover{background:rgba(255,255,255,.12) !important}
+#appview .side .tabs button.active{background:#ff8800 !important;color:#0a2a4d !important}
+#appview .side .tabs button.active svg{stroke:#0a2a4d !important}
+#appview .side .tabs button.tab-cta{background:rgba(10,42,77,.85) !important;border:2px solid rgba(255,255,255,.65) !important}
+#appview .side .tabs button.tab-cta b{color:#fff !important}
+#appview .side .tabs button.tab-cta small{color:#d6e2f4 !important}
+#appview .side .tabs button .tab-cnt{background:#ff8800 !important;color:#0a2a4d !important;font-weight:700 !important}
+#appview .side .tabs *{color:inherit}
+#appview .side .tabs [class*="grp"],#appview .side .tabs .tabs-tit,#appview .side .tabs h3,#appview .side .tabs .tg{color:#b7cae6 !important}
+#appview .side .menu-altro{background:transparent !important;border:2px dashed rgba(255,255,255,.7) !important;color:#fff !important;border-radius:8px !important}
+#appview .side .menu-altro .ma-t,#appview .side .menu-altro svg{color:#fff !important;stroke:#fff !important}
+#appview .side .menu-altro .ma-ic{fill:#fff !important;stroke:none !important}
+#appview .side .menu-altro .ma-n{background:#ff8800 !important;color:#0a2a4d !important;font-weight:700}
+#appview .topbar{background:#0a2a4d !important;border-bottom:3px solid #ff8800 !important}
+#appview .topbar button,#appview .topbar a{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important}
+#appview .wrap h2{color:#0a2a4d !important}
