@@ -2768,3 +2768,43 @@ Alex ha chiesto di sostituire le parole difficili, **solo per artigiano e impres
 - gest-core.js: «Controlla prima di mandarlo» → «Controlla che sia giusto»; `CTR_AI_LABEL` non c'è più, ora è la funzione `ctrAiLabel()` («Fai controllare anche all'intelligenza artificiale · 1 credito»); «Come si incastrano» → «Cosa viene prima e cosa dopo»; blocco `imp` di `_cm`: «Computo da prezzare» → «Elenco lavori da prezzare».
 - Collaudato sul sito vero nel giro artigiano, impresa e studio. Non provata dal vivo la riga «Cosa viene prima e cosa dopo» (compare solo con 2+ passi visibili).
 - ⚠️ Se si aggiunge una parola nuova: stessa regola, condizione sul ruolo, mai cambiarla per lo studio.
+
+
+# 1-3 OTTOBRE 2026 — GESTIONALE GRATIS, UN SOLO PIANO A PAGAMENTO, E LA GRAFICA TUTTA SUA
+
+## Cosa e' stato deciso (3 ottobre 2026)
+- Il gestionale BASE e' gratis per sempre per chi si iscrive a TrovaImpresa. Un SOLO piano a pagamento: «Gestionale con assistenza AI e chat», →39← euro al mese o →349← euro all'anno. I prezzi Stripe vecchi (→29←/→249←) sono archiviati.
+- Per entrare nel gestionale gratis serve il profilo completo (7 voci, `VOCI_PROFILO` in `js/gate-gestionale.js`; la descrizione deve avere almeno →100← caratteri). `pagaDavvero(riga)` = premium_pagato vero + piano premium + non scaduto: chi paga davvero salta il controllo del profilo. Anteprima della schermata del profilo: `?profilo=prova`.
+- Interruttori: nel database `gest_base_aperto()` = true; nel codice `GESTIONALE_BASE_APERTO = true` (`PROFILO_MINIMO_ATTIVO = BASE_APERTA`).
+- Fatti e online: →27← pagine SEO del gestionale, prezzi, gestionale, termini, info-premium, FAQ; `js/porte-gestionale.js` (le «porte» nel pannello) e `css/porte-unico.css`.
+- Home: «Gratis per sempre, senza carta di credito». Email di benvenuto nuova (`netlify/functions/invia-email-benvenuto.js`): oggetto «Benvenuto su TrovaImpresa», fascia verde «Il sito e' gratis, per sempre — gestionale compreso», riquadro «Se hai bisogno, siamo qui».
+- Bing avvisato con `tools/indexnow.js` (chiave `c670fbe9c5c6a2205488dd36e94bd040.txt`, gia' dentro `PUBBLICI_APPOSTA`; NON creare un secondo file chiave: il guardiano blocca il push). In Git Bash i percorsi si scrivono `//prezzi` perche' `/prezzi` viene trasformato in un percorso Windows. Google non usa IndexNow: indicizzazione chiesta a mano in Search Console per `/`, `/gestionale`, `/prezzi`.
+
+## PAROLE FISSE DI ALEX (3 ott)
+- **«il pannello»** = tutto quello che sta FUORI (scheda «Il tuo gestionale» nei pannelli, prezzi, pagine Google). **«l'app»** = il gestionale dentro (`gestionale-app.html`, reparti, Riepilogo). Se dice solo «gestionale», chiedere quale dei due.
+- Su Google e nei testi: nome «TrovaImpresa Gestionale»; per spiegarlo «gestionale per imprese edili e artigiani» (anche «gestionale cantieri», «gestionale preventivi e fatture»); per attirare «gestionale gratuito». NON «sito gestionale».
+
+## LA GRAFICA PROPRIA DEL GESTIONALE — STILE C (scelto da Alex il 3 ott)
+Blu progetto a quadretti `#0a2a4d` (griglia `rgba(255,255,255,.06)` ogni →40← px), linee bianche, arancione `#ff8800`, font IBM Plex Sans/Mono, logo `img/trovaimpresa-gestionale-logo.svg` (testo in Trebuchet). Tre posti, tutti online e collaudati dal vivo:
+1. **Il pannello «Il tuo gestionale»** nei 3 pannelli (impresa, artigiano, professionisti): contenitore con classe `gest-c`, logo in `.gc-logo`, titolo `.gc-tit`, `.gc-sub`. CSS: `css/porte-unico.css?v=7`. Prezzi uno per riga, bottoni arancioni ≥19px, icone arancioni (stellina →44← px) o bianche (lucchetto di «Entra», →30← px).
+2. **La schermata dei reparti** di `gestionale-app.html` (`#landing`): `css/gestionale-stile.css?v=2`, logo come `<img class="gc-brand">` prima dell'`<h1>`.
+3. **L'interno dell'app**: SOLO menu a sinistra (`#appview .side`) e barra in alto (`#appview .topbar`) in stile C, voce attiva arancione, contatori arancioni, voci «Chiedi una funzione»/«Assistenza» con bordo bianco; il CENTRO resta bianco di proposito (si lavora per ore su numeri: blu a quadretti stancherebbe).
+- ⛔ `css/gestionale-stile.css` si carica DOPO `css/gestionale.css` (che e' in comune a tutti i gestionali); le regole sono scritte con `#landing` / `#appview` davanti. Non toccare `gestionale.css` per lo stile.
+- ⚠️ TRAPPOLE CSS trovate: (a) `js/porte-gestionale.js` mette i colori dei bottoni in `style.cssText` inline: per cambiarli serve `!important`; (b) il foglio della pagina ha regole con `#sec-dashboard #porte-gestionale…`: per vincere serve un selettore con gli stessi id; (c) `.g-ico` ha `padding:6px` e l'svg dentro ha `max-width:100%`: l'icona si riduceva a →10← px — serve `padding:0;width:auto` sul contenitore e `max-width:none` sull'svg; (d) le icone del menu dell'app hanno una piastrella colorata sull'svg: va azzerata (`background:transparent`) o su fondo blu sparisce.
+- Il titolo «Gestionale impresa/artigiano/…» e' scritto dal JS: non fidarsi del testo nell'HTML.
+- Il logo della sua attivita' (con «Cambia logo») e il logo Gestionale stanno uno sotto l'altro nella schermata dei reparti e occupano molto spazio, soprattutto sul telefono: da sistemare.
+
+## LAVORI RIMASTI (3 ott)
+1. **TRE PANNELLI, CODICE CONDIVISO.** Confrontati: →161← funzioni su →199← sono identiche nei tre pannelli (~→112← KB), →19← hanno lo stesso nome ma sono diverse (`inizializza`, `caricaProfilo`, `caricaPreventivi`, `inviaPreventivo`…, restano separate), →19← stanno in uno o due soli. Piano: spostare SOLO le identiche in un file condiviso in `js/`, un gruppo alla volta, senza cambiare cosa si vede, un push e un collaudo sui TRE pannelli per gruppo; partire dal gruppo piu' piccolo e dirgli prima quale.
+2. Sistemare i due loghi nella schermata dei reparti (anteprima in foto prima).
+3. Collaudo dal vivo dello stile C in artigiano e professionista (stesso `gestionale-app.html`) e del telefono DENTRO l'app: visto solo l'impresa.
+4. Il noleggio (`gestionale-noleggio.html`) e l'app operaio non hanno lo stile C: da decidere con lui (condividono `css/gestionale.css`).
+5. Fra 3-4 giorni: Search Console, se Google ha letto il testo nuovo di `/prezzi` e della home. Le →1.650← pagine «scoperte, non indicizzate» si lasciano stare.
+6. Guardare quanti iscritti restano fermi su «Completa il profilo» (7 voci, descrizione ≥100 caratteri): se tanti, abbassare i →100← caratteri. Da misurare nelle prime due settimane anche quanti passano dal gratis al piano a pagamento (se pochissimi, il salto da zero a →39←€ e' troppo grande).
+7. `pubblica.bat` (un clic al posto del push): idea NON approvata.
+
+## LEZIONI DEL 3 OTTOBRE
+- ⛔ `device_commit_files` ha scritto una copia VECCHIA di un file (il CSS, mancavano le ultime righe) e ha risposto «written»: il push e' partito con un file senza le misure del logo. Cura: dopo OGNI commit ri-prendere il file dal PC con `device_stage_files` e confrontare i BYTE con quelli attesi, PRIMA di dare la riga del push. Se i byte non tornano, ricommittare con `expectedMtimeMs` aggiornato.
+- Dopo un push i file nuovi non sono online subito (Netlify ci mette ~1-2 minuti, e il browser puo' tenere il CSS vecchio): si controlla chiedendo il file con `?y=<ora>` e cercando una riga nuova. Quando si cambia un CSS gia' online conviene alzare il numero `?v=` nelle pagine.
+- La riga del push va SEMPRE in un blocco di codice a parte (con il pulsante «copia»), mai in linea nel testo. Messaggi di commit senza parentesi tonde. Meno push possibile, lavori raggruppati.
+- Per mostrare un'anteprima su una pagina VERA (col suo login) si inietta un `<style>` nel browser integrato e si fotografa, prima di toccare i file. Dopo il test riportare la finestra a «desktop».
