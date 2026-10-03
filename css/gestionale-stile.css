@@ -79,3 +79,13 @@
 /* ===== 3 ott 2026 - BORDO BLU su tutte le card del gestionale (la classe la mette js/gest-bordo-blu.js) ===== */
 html body .ti-bb.ti-bb.ti-bb{border:2px solid #0a2a4d !important;border-left:2px solid #0a2a4d !important;border-radius:10px !important}
 html body .ti-bgt.ti-bgt{background-color:#e7eef8 !important;background-image:linear-gradient(rgba(10,42,77,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(10,42,77,.045) 1px,transparent 1px) !important;background-size:40px 40px !important}
+
+/* telefono: le 3 caselle numeriche (In ritardo / Il piu in ritardo / Finiti...) sono UN blocco unico: bordo blu sul gruppo, righe divise da una linea sottile */
+@media(max-width:560px){
+html body .num-fila{border:2px solid #0a2a4d !important;border-radius:14px !important;overflow:hidden !important;background:#fff !important}
+html body .num-fila .num-c.num-c.num-c{border:0 !important;border-top:1px solid #d3dce8 !important;border-radius:0 !important;margin:0 !important}
+html body .num-fila .num-c.num-c.num-c:first-child{border-top:0 !important}
+}
+
+/* Mappa: lista dei punti */
+html body .mp-righe.mp-righe{border:2px solid #0a2a4d !important;border-radius:10px !important}
