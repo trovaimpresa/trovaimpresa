@@ -3401,6 +3401,11 @@
 <script src="/js/pannelli-recensioni.js?v=1"></script>
 <script src="/js/pannelli-supporto.js?v=1"></script>
 <script src="/js/pannelli-contatti.js?v=1"></script>
+<script src="/js/pannelli-lavori.js?v=1"></script>
+<script src="/js/pannelli-preventivi.js?v=1"></script>
+<script src="/js/pannelli-ai.js?v=1"></script>
+<script src="/js/pannelli-qr.js?v=1"></script>
+<script src="/js/pannelli-vari.js?v=1"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
@@ -3427,22 +3432,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   sb.auth.onAuthStateChange(function (ev) { if (ev !== 'INITIAL_SESSION') pronta = null; });
 })();
 
-/* ⛔ 21 agosto 2026 — L'AI DEVE SAPERE CHI LA STA CHIAMANDO.
-   netlify/functions/ai-claude.js prima si fidava dell'impresa_id scritto
-   qui nel browser: con l'id di un altro iscritto (che e' pubblico, la
-   vetrina si legge senza account) si potevano bruciare le sue 30 chiamate
-   al giorno e scrivergli righe nel pannello. Adesso la function ricava
-   l'impresa dall'ACCESSO, e per farlo le serve il gettone della sessione.
-   ⚠️ Se una chiamata nuova a ai-claude non passa da qui, torna indietro
-   con 401 — ed e' giusto cosi'. */
-async function _aiIntestazioni(){
-  let token = '';
-  try { const s = await sb.auth.getSession(); token = (s && s.data && s.data.session && s.data.session.access_token) || ''; } catch(e){}
-  const h = { 'Content-Type': 'application/json' };
-  if (token) h['Authorization'] = 'Bearer ' + token;
-  return h;
-}
-
+// Codice uguale nei tre pannelli: e' in /js/pannelli-lavori.js, -preventivi.js, -ai.js, -qr.js, -vari.js
 /* ⛔ 21 agosto 2026 (notte) — IL PREVENTIVO NON SI ASPETTA PIU' COL FIATO SOSPESO.
    Netlify taglia una function normale a 26 secondi; sui lavori grossi il
    modello ci mette il doppio, ed era il 504 che si vedeva nel pannello.
@@ -3471,17 +3461,6 @@ function vistaFondatore(p){
   return p;
 }
 
-
-// --- CHAT: manda il token vero dell'utente loggato, non la chiave pubblica ---
-async function chatHdr(extra){
-  let tok = SUPABASE_KEY;
-  try{
-    const { data: { session } } = await sb.auth.getSession();
-    if (session && session.access_token) tok = session.access_token;
-  }catch(e){}
-  return Object.assign({ 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + tok }, extra || {});
-}
-let preventivoCorrente = null;
 
 async function caricaSessioneConDati(session) {
   let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
@@ -3599,84 +3578,6 @@ async function doLogout() {
   window.location.replace('login-impresa.html');
 }
 
-// =====================
-// 2FA (TOTP)
-// =====================
-let mfa2faFactorId = null;
-let mfa2faChallengeId = null;
-
-async function avviaMFA(e) {
-  e.preventDefault();
-  mfaShowAlert('', '');
-  document.getElementById('mfa-code').value = '';
-  document.getElementById('mfa-overlay').classList.add('open');
-  document.getElementById('mfa-btn').disabled = true;
-  document.getElementById('mfa-btn').textContent = '⏳ Caricamento...';
-
-  const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp' });
-  if (error) {
-    mfaShowAlert('Errore: ' + error.message, 'error');
-    document.getElementById('mfa-btn').textContent = '✅ Attiva 2FA';
-    return;
-  }
-  mfa2faFactorId = data.id;
-
-  // Mostra QR code (SVG fornito da Supabase)
-  document.getElementById('mfa-qr-wrap').innerHTML = data.totp.qr_code;
-  document.getElementById('mfa-secret').textContent = 'Codice manuale: ' + data.totp.secret;
-  document.getElementById('mfa-btn').disabled = false;
-  document.getElementById('mfa-btn').textContent = '✅ Attiva 2FA';
-
-  // Avvia subito la challenge
-  const { data: ch, error: chErr } = await sb.auth.mfa.challenge({ factorId: mfa2faFactorId });
-  if (chErr) { mfaShowAlert('Errore challenge: ' + chErr.message, 'error'); return; }
-  mfa2faChallengeId = ch.id;
-}
-
-async function confermaMFA() {
-  const code = document.getElementById('mfa-code').value.trim();
-  if (code.length !== 6) { mfaShowAlert('Inserisci un codice a 6 cifre.', 'error'); return; }
-  const btn = document.getElementById('mfa-btn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Verifica...';
-  mfaShowAlert('', '');
-
-  const { error } = await sb.auth.mfa.verify({
-    factorId: mfa2faFactorId,
-    challengeId: mfa2faChallengeId,
-    code
-  });
-
-  if (error) {
-    mfaShowAlert('❌ Codice non valido o scaduto. Riprova.', 'error');
-    btn.disabled = false;
-    btn.textContent = '✅ Attiva 2FA';
-    return;
-  }
-
-  mfaShowAlert('✅ 2FA attivato con successo!', 'success');
-  btn.style.display = 'none';
-  document.getElementById('mfa-qr-wrap').style.display = 'none';
-  document.getElementById('mfa-secret').style.display = 'none';
-  document.querySelector('#mfa-step-qr p').style.display = 'none';
-  document.getElementById('mfa-code').style.display = 'none';
-  document.getElementById('mfa-title').textContent = '🔐 2FA attivato!';
-  document.getElementById('mfa-desc').textContent = 'Da ora ti verrà chiesto il codice ad ogni accesso.';
-  setTimeout(chiudiMFA, 2500);
-}
-
-function chiudiMFA() {
-  document.getElementById('mfa-overlay').classList.remove('open');
-}
-
-function mfaShowAlert(msg, type) {
-  const box = document.getElementById('mfa-alert-box');
-  if (!msg) { box.style.display = 'none'; return; }
-  box.className = 'mfa-alert mfa-alert-' + type;
-  box.textContent = msg;
-  box.style.display = 'block';
-}
-
 function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -3713,21 +3614,6 @@ window.onpopstate = function(e) {
 };
 
 const PANNELLO_CORRENTE = 'professionista';
-
-/* ⛔ 30 agosto 2026 — IL NOME DELL'IMPRESA, IN UN POSTO SOLO.
-   Nella tabella `imprese` la colonna `cognome` NON ESISTE (controllato sul
-   database). Il pannello scriveva `nome_attivita || nome + ' ' + cognome`:
-   per chi non ha il nome dell'attivita' usciva «Spazio Giardino undefined».
-   Sono →4← imprese vere (→54←, →55←, →59←, →60←), e la stessa riga finiva
-   dentro il PREVENTIVO mandato al cliente.
-   La regola e' la stessa della scheda pubblica e delle pagine di ricerca:
-   prima il nome dell'attivita', se non c'e' quello della persona.
-   ⚠️ E' una `function` e non una `const` apposta: cosi' si puo' usare anche
-   sopra la riga in cui e' scritta, senza fermare tutta la pagina. */
-function _nomeImpresa(x) {
-  return String((x && x.nome_attivita) || '').trim()
-      || String((x && x.nome) || '').trim();
-}
 
 async function inizializza() {
   // mensile/annuale valgono come premium in tutto il pannello
@@ -4024,64 +3910,6 @@ async function segnaIncaricoGestito(id) {
     caricaMieOfferte();
   }
 
-async function caricaCandidature() {
-  const { data, error } = await sb.from('candidature')
-    .select('*, candidati_lavoro(nome,cognome,email,telefono,cv,mestiere,citta), offerte_lavoro(titolo)')
-    .eq('impresa_id', impresaCorrente.id)
-    .order('data_candidatura', { ascending: false });
-  const container = document.getElementById('lista-candidature');
-  if (error) { container.innerHTML = '<div class="empty-state">Errore nel caricamento. Riprova.</div>'; return; }
-  const lista = data || [];
-  if (!lista.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div>' +
-      '<div style="font-size:1.05rem;margin-bottom:6px">Nessuna candidatura ancora.</div>' +
-      '<div style="color:#777;font-size:0.95rem;margin-bottom:18px">Le candidature arrivano qui quando qualcuno risponde a una tua offerta di lavoro.</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">' +
-        '<a href="javascript:void(0)" onclick="showSection(\'mie-offerte\'); caricaMieOfferte()" style="background:#fff;border:2px solid #7c3aed;color:#7c3aed;text-decoration:none;font-weight:700;padding:11px 20px;border-radius:10px">Le mie offerte di lavoro</a>' +
-        '<a href="offerte-registrazione.html" style="background:#7c3aed;color:#fff;text-decoration:none;font-weight:700;padding:11px 20px;border-radius:10px">➕ Pubblica un\'offerta</a>' +
-      '</div></div>';
-    return;
-  }
-  const badge = {
-    inviata:   { txt: 'Nuova',     col: '#1565c0' },
-    vista:     { txt: 'Vista',     col: '#e65100' },
-    accettata: { txt: 'Accettata', col: '#2e537d' },
-    rifiutata: { txt: 'Rifiutata', col: '#c62828' }
-  };
-  container.innerHTML = lista.map(c => {
-    const cand = c.candidati_lavoro || {};
-    const off = c.offerte_lavoro || {};
-    /* ⛔ 26 set 2026 — TUTTO QUELLO CHE SCRIVE IL CANDIDATO PASSA DA escHtml.
-       Prima nome, messaggio, email e link del CV finivano nella pagina cosi'
-       com'erano: chi si candidava poteva infilare del codice nel pannello
-       dell'impresa. Il CV si apre solo se e' un indirizzo https vero. */
-    const nome = escHtml([cand.nome, cand.cognome].filter(Boolean).join(' ') || 'Candidato');
-    const cvOk = typeof cand.cv === 'string' && /^https:\/\//i.test(cand.cv.trim());
-    const cvLink = cvOk ? `<a href="${escHtml(cand.cv.trim())}" target="_blank" rel="noopener">📄 Apri CV</a>` : '';
-    const st = badge[c.stato] || badge.inviata;
-    return `
-      <div class="prev-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div style="font-weight:600">${nome}${cand.mestiere ? ' · ' + escHtml(cand.mestiere) : ''}</div>
-          <span style="background:${st.col};color:#fff;padding:3px 10px;border-radius:12px;font-size:15px;white-space:nowrap">${st.txt}</span>
-        </div>
-        ${off.titolo ? `<div style="color:#666;font-size:14px">Offerta: ${escHtml(off.titolo)}</div>` : ''}
-        ${c.messaggio ? `<div style="margin-top:8px">${escHtml(c.messaggio)}</div>` : ''}
-        <div style="margin-top:8px;font-size:14px">${cand.email ? '✉️ ' + escHtml(cand.email) + ' ' : ''}${cand.telefono ? '· 📞 ' + escHtml(cand.telefono) + ' ' : ''}${cvLink}</div>
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button onclick="aggiornaStatoCandidatura(${Number(c.id)}, 'accettata')" style="background:#2e537d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✓ Accetta</button>
-          <button onclick="aggiornaStatoCandidatura(${Number(c.id)}, 'rifiutata')" style="background:#c62828;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✗ Rifiuta</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-async function aggiornaStatoCandidatura(id, stato) {
-  const { error } = await sb.from('candidature').update({ stato }).eq('id', id);
-  if (error) { alert('Errore nell\'aggiornamento. Riprova.'); return; }
-  caricaCandidature();
-}
-
 // CARICA RECENSIONI
 async function caricaRecensioni() {
   const { data } = await sb.from('feedback_clienti').select('id')
@@ -4284,193 +4112,11 @@ function caricaProfilo() {
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
 
-/* La copertina si cambia dal bottone con la macchina fotografica, senza
-   passare da «Personalizza». Stesso secchio e stesso percorso del banner
-   salvato di la' (`banner-personalizzati/<user_id>/banner.<ext>`), cosi' i due
-   posti restano d'accordo. */
-// Logo e Contatti: il codice e' in /js/pannelli-contatti.js
-function chiudiModalContatti() {
-  document.getElementById('modal-contatti').classList.remove('show');
-}
-
 // =====================
 // MODAL AI PREVENTIVO DASHBOARD
 // =====================
 
-function chiudiModalPreventivoDash() {
-  showSection('dashboard');
-}
 
-
-
-// =====================
-// FOTO DEI LAVORI
-// =====================
-/* ⛔ 30 agosto 2026 — PERCHE' UN INTERRUTTORE E NON LA SCRITTA A SCHERMO.
-   Il primo tentativo guardava se la scritta qui sotto conteneva la clessidra
-   (⏳). Non puo' funzionare: piu' in basso in questa pagina c'e' `iconizza()`,
-   che gira per tutti i testi e TRASFORMA le emoji in disegni SVG. Quindici
-   millisecondi dopo, la clessidra non e' piu' testo e `textContent` legge
-   « Caricamento foto...» senza di lei. Il ramo non partiva mai.
-   Trovato aprendo la pagina vera: il banco, che usa una finta pagina, lo
-   dava verde. ⛔ Su questa pagina NESSUNO deve decidere leggendo un'emoji
-   dal testo: si usa una variabile. */
-let _fotoLavoroInCaricamento = false;
-
-// carica la foto nel bucket foto-lavori e mette l'URL pubblico in lav-foto
-async function caricaFotoLavoroFile(file) {
-  const stato = document.getElementById('lav-foto-stato');
-  const hidden = document.getElementById('lav-foto');
-  if (!file) { hidden.value = ''; stato.textContent = ''; _fotoLavoroInCaricamento = false; return; }
-  if (file.size > 5 * 1024 * 1024) { hidden.value = ''; stato.textContent = '❌ La foto supera i 5 MB.'; _fotoLavoroInCaricamento = false; return; }
-  _fotoLavoroInCaricamento = true;
-  stato.textContent = '⏳ Caricamento foto...';
-  const prep = await preparaFileUpload(file);
-  if (prep.errore) { hidden.value = ''; stato.textContent = '❌ ' + prep.errore; _fotoLavoroInCaricamento = false; return; }
-  const folder = String(impresaCorrente.id);
-  const ext = prep.compressa ? 'jpg' : (file.name.split('.').pop() || 'jpg');
-  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
-  const { error } = await sb.storage.from('foto-lavori').upload(path, prep.file, { upsert: false, contentType: prep.compressa ? 'image/jpeg' : file.type, cacheControl: '31536000' });
-  if (error) { hidden.value = ''; stato.textContent = '❌ Errore upload: ' + error.message; _fotoLavoroInCaricamento = false; return; }
-  const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(path);
-  hidden.value = publicUrl;
-  stato.textContent = '✅ Foto caricata';
-  _fotoLavoroInCaricamento = false;
-}
-
-// INSERT di un lavoro in lavori_foto
-async function salvaLavoroFoto() {
-  const foto = document.getElementById('lav-foto').value.trim();
-  const titolo = document.getElementById('lav-titolo').value.trim();
-  const descrizione = document.getElementById('lav-descrizione').value.trim();
-  const pubblico = document.getElementById('lav-pubblico').checked;
-
-  /* ⛔ 30 agosto 2026 — IL SALVA CHE SALVAVA IL NIENTE.
-     Premendo «Salva» senza aver scelto la foto, questa funzione scriveva
-     comunque la riga e rispondeva «✅ Lavoro salvato!»: una scheda senza
-     immagine, senza titolo, e per giunta con «Mostra nel profilo pubblico»
-     acceso. Il 30 agosto in tabella ce n'erano gia' 51, di 26 imprese
-     diverse, su 134 righe: due su cinque erano vuote.
-     Chi le ha fatte non ha sbagliato: ha premuto Salva mentre la foto era
-     ancora in caricamento, oppure prima di sceglierla, e nessuno gliel'ha
-     detto. Adesso glielo si dice, e si distingue fra le due cose. */
-  if (!foto) {
-    alert(_fotoLavoroInCaricamento
-      ? 'La foto si sta ancora caricando: aspetta il segno verde e poi premi Salva.'
-      : 'Manca la foto del lavoro: scegline una prima di salvare.');
-    return;
-  }
-
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
-
-  const { error } = await sb.from('lavori_foto').insert({
-    owner_id: user.id,
-    foto,
-    titolo,
-    descrizione,
-    pubblico
-  });
-  if (error) { alert('Errore nel salvataggio: ' + error.message); return; }
-
-  alert('✅ Lavoro salvato!');
-  document.getElementById('lav-foto-file').value = '';
-  document.getElementById('lav-foto').value = '';
-  document.getElementById('lav-titolo').value = '';
-  document.getElementById('lav-descrizione').value = '';
-  document.getElementById('lav-pubblico').checked = true;
-  await caricaListaLavoriFoto();
-}
-
-// legge lavori_foto dell'utente loggato e disegna le card (stessa grafica del pannello-negozio)
-async function caricaListaLavoriFoto() {
-  const grid = document.getElementById('lista-lavori-foto');
-  if (!grid) return;
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
-  /* ⭐ 12 set 2026 — l'ordine lo decide l'impresa, non l'orologio.
-     `ordine` piu' alto = viene prima. Tutte a 0 (come prima di oggi)
-     significa: decide la data, esattamente come si e' sempre fatto. */
-  const { data, error } = await sb.from('lavori_foto')
-    .select('*').eq('owner_id', user.id)
-    .order('ordine', { ascending: false })
-    .order('created_at', { ascending: false });
-  if (error) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">⚠️ Errore nel caricamento</div>';
-    return;
-  }
-  const lavori = data || [];
-  const statFoto = document.getElementById('dash-stat-foto');
-  if (statFoto) statFoto.textContent = lavori.length;
-  if (!lavori.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessun lavoro ancora.</div>';
-    return;
-  }
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
-  grid.innerHTML = lavori.map((l, idx) => {
-    const prima = idx === 0;
-    const foto = l.foto
-      ? `<img src="${esc(l.foto)}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f0f0f0">`
-      : '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#f0f0f0">📷</div>';
-    const checked = l.pubblico ? 'checked' : '';
-    const titoloHTML = l.titolo ? `<div style="font-size:0.95rem;font-weight:700;color:var(--dark);line-height:1.3">${esc(l.titolo)}</div>` : '';
-    return `<div style="background:white;border:1px solid ${prima ? 'var(--verde)' : 'var(--border)'};border-radius:12px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;position:relative">
-      ${prima ? '<div style="position:absolute;top:10px;left:10px;background:var(--verde);color:white;font-size:13px;font-weight:700;padding:4px 10px;border-radius:20px;z-index:1">⭐ Prima foto</div>' : ''}
-      ${foto}
-      <div style="padding:10px;display:flex;flex-direction:column;gap:4px">
-        ${titoloHTML}
-        <div style="font-size:0.85rem;color:var(--dark);line-height:1.4">${esc(l.descrizione)}</div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:15px;color:var(--mid);cursor:pointer;margin-top:4px">
-          <input type="checkbox" ${checked} style="width:18px;height:18px;accent-color:var(--verde);cursor:pointer" onchange="toggleLavoroPubblico('${esc(l.id)}', this.checked)">
-          Mostra nel profilo pubblico
-        </label>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
-          ${prima ? '' : `<button onclick="mettiPerPrima('${esc(l.id)}')" style="background:transparent;border:1.5px solid var(--verde);color:var(--verde);font-size:0.9rem;font-weight:700;padding:6px 12px;border-radius:20px;cursor:pointer">⭐ Metti per prima</button>`}
-          <button class="btn-rimuovi-riga" onclick="eliminaLavoroFoto('${esc(l.id)}')">🗑 Elimina</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ⭐ 12 set 2026 — «METTI PER PRIMA».
-   Nato da una domanda vera: Lares Srls, 12 set, «trovo solo una e non e'
-   la migliore». La prima foto e' il biglietto da visita dell'impresa e
-   fino a oggi la sceglieva l'orologio.
-   Come funziona: si scrive max(ordine)+1 sulla foto scelta, cosi' passa
-   davanti a tutte senza dover rinumerare le altre. Niente si sposta,
-   niente si rompe, e premendo la stella su un'altra si cambia di nuovo.
-   ⚠️ Stesso ordine in profilo-impresa.html: se cambia qui, cambia li'. */
-async function mettiPerPrima(id) {
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
-  const { data: righe, error: e1 } = await sb.from('lavori_foto')
-    .select('ordine').eq('owner_id', user.id)
-    .order('ordine', { ascending: false }).limit(1);
-  if (e1) { alert('Errore: ' + e1.message); return; }
-  const massimo = (righe && righe[0] && Number(righe[0].ordine)) || 0;
-  const { error } = await sb.from('lavori_foto')
-    .update({ ordine: massimo + 1 }).eq('id', id).eq('owner_id', user.id);
-  if (error) { alert('Errore: ' + error.message); return; }
-  await caricaListaLavoriFoto();
-}
-
-// aggiorna il flag pubblico del singolo lavoro
-async function toggleLavoroPubblico(id, pubblico) {
-  const { error } = await sb.from('lavori_foto').update({ pubblico }).eq('id', id);
-  if (error) {
-    alert('Errore aggiornamento visibilità: ' + error.message);
-    await caricaListaLavoriFoto();
-  }
-}
-
-// elimina un lavoro da lavori_foto
-async function eliminaLavoroFoto(id) {
-  if (!confirm('Eliminare questo lavoro?')) return;
-  const { error } = await sb.from('lavori_foto').delete().eq('id', id);
-  if (error) { alert('Errore eliminazione: ' + error.message); return; }
-  await caricaListaLavoriFoto();
-}
 
 // =====================
 // MODAL AI PREVENTIVO
@@ -4519,139 +4165,7 @@ async function apriModal(prevId) {
   document.getElementById('modal-overlay').classList.add('show');
 }
 
-function chiudiModal() {
-  document.getElementById('modal-overlay').classList.remove('show');
-}
-
-// ============ CONTATTO CLIENTE ============
-// ============ ALLEGATI DELLA RICHIESTA (4 settembre 2026) ============
-// Foto, PDF, computi e disegni che il cliente allega alla richiesta. Stanno
-// nel bucket privato "preventivi-allegati": si aprono con un link firmato
-// che vale un'ora, e lo puo' chiedere solo l'impresa proprietaria.
-async function mostraAllegatiRichiesta(allegati) {
-  const box = document.getElementById('ric-allegati');
-  if (!box) return;
-  let lista = [];
-  try { lista = (typeof allegati === 'string') ? JSON.parse(allegati) : (allegati || []); } catch (e) { lista = []; }
-  if (!Array.isArray(lista) || !lista.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
-  box.style.display = '';
-  box.innerHTML = `<span class="ric-key">Allegati:</span><span>\u23F3 caricamento\u2026</span>`;
-  const pezzi = [];
-  for (const a of lista) {
-    const nome = (a && (a.nome || a.path)) || 'allegato';
-    let url = '';
-    try {
-      const { data } = await sb.storage.from('preventivi-allegati').createSignedUrl(a.path, 3600);
-      url = (data && data.signedUrl) || '';
-    } catch (e) { }
-    const peso = (a && a.dim)
-      ? ` <span style="color:#888">(${a.dim >= 1048576 ? (a.dim / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(a.dim / 1024)) + ' KB'})</span>`
-      : '';
-    pezzi.push(url
-      ? `<a href="${escHtml(url)}" target="_blank" rel="noopener" style="display:inline-block;background:#eef4ff;border:1px solid #cfe0f5;color:#0052cc;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;margin:0 8px 8px 0">\uD83D\uDCCE ${escHtml(nome)}${peso}</a>`
-      : `<span style="display:inline-block;color:#c0392b;font-size:14px;margin:0 8px 8px 0">\uD83D\uDCCE ${escHtml(nome)} \u2014 non si apre, riprova fra poco</span>`);
-  }
-  box.innerHTML = `<span class="ric-key">Allegati:</span><span>${pezzi.join('')}</span>`;
-}
-
-async function caricaContattoSbloccato(prevId) {
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    const res = await fetch('/.netlify/functions/contatto-preventivo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-      body: JSON.stringify({ preventivo_id: prevId })
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const c = await res.json();
-    const telPulito = (c.telefono || '').replace(/[\s\-+]/g, '').replace(/^39/, '');
-    const waUrl = telPulito ? `https://wa.me/39${telPulito}` : '';
-    const el = document.getElementById('ric-contatto');
-    if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>${c.email || '—'} · ${c.telefono || '—'}${waUrl ? ` &nbsp;<a href="${waUrl}" target="_blank" style="background:#25d366;color:white;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">📱 WhatsApp</a>` : ''}</span>`;
-  } catch (e) {
-    const el = document.getElementById('ric-contatto');
-    if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>⚠️ Errore nel caricamento, riprova</span>`;
-  }
-}
-
 // ==========================================
-
-async function generaConAI() {
-  const btn = document.getElementById('btn-genera-ai');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
-
-  const p = preventivoCorrente;
-  const imp = impresaCorrente;
-  const nomeImp = _nomeImpresa(imp) || 'La tua impresa';
-
-  await new Promise(r => setTimeout(r, 2000));
-
-  const testo = generaTestoPreventivo(p, imp, nomeImp);
-  const { min, max } = calcolaPrezzo(p);
-
-  document.getElementById('prev-testo').value = testo;
-  document.getElementById('prev-min').value = min;
-  document.getElementById('prev-max').value = max;
-  document.getElementById('prev-generato').classList.add('show');
-  document.getElementById('btn-invia-prev').style.display = window._isMiaRichiesta ? 'block' : 'none';
-
-  btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
-}
-
-function generaTestoPreventivo(p, imp, nomeImp) {
-  const oggi = new Date().toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
-  const { min, max } = calcolaPrezzo(p);
-  return `Gentile ${p.nome.split(' ')[0]},
-
-grazie per aver contattato ${nomeImp} tramite TrovaImpresa.
-
-Abbiamo analizzato la sua richiesta riguardante: ${p.tipo_lavoro || 'il lavoro richiesto'}${p.indirizzo ? ` presso ${p.indirizzo}` : ''}.
-
-DESCRIZIONE LAVORO
-${p.descrizione || 'Come da richiesta.'}
-
-PREVENTIVO INDICATIVO
-• Costo manodopera e materiali: €${min.toLocaleString('it-IT')} – €${max.toLocaleString('it-IT')}
-• Tempistiche: da definire dopo sopralluogo
-• Inizio lavori: da concordare secondo disponibilità
-
-COSA INCLUDE
-✓ Sopralluogo gratuito senza impegno
-✓ Manodopera qualificata e assicurata
-✓ Materiali di prima qualità
-✓ Pulizia area lavoro al termine
-✓ Garanzia sulla lavorazione
-
-PROSSIMI PASSI
-Per un preventivo definitivo e vincolante, proponiamo un sopralluogo gratuito presso la sua abitazione. La contatteremo entro 24 ore per concordare data e orario.
-
-Cordiali saluti,
-${nomeImp}
-${imp.telefono || ''}
-${imp.email}
-
----
-Preventivo generato il ${oggi} tramite TrovaImpresa`;
-}
-
-function calcolaPrezzo(p) {
-  const prezzi = {
-    'muratura': [800,2500], 'elettricista': [500,1800], 'idraulico': [400,1500],
-    'tinteggiatura': [300,900], 'parquet': [600,1800], 'piastrelle': [500,1500],
-    'ristrutturazione': [15000,60000], 'climatizzatore': [800,2500], 'caldaia': [1200,3500],
-    'giardinaggio': [200,800], 'serramenti': [600,2500], 'fabbro': [200,800]
-  };
-  const lavoro = (p.tipo_lavoro || '').toLowerCase();
-  let [min, max] = [800, 2000];
-  for (const [k, v] of Object.entries(prezzi)) {
-    if (lavoro.includes(k)) { [min, max] = v; break; }
-  }
-  const sup = parseInt(p.superficie) || 0;
-  if (sup > 20) { min = Math.round(min * (1 + sup/100)); max = Math.round(max * (1 + sup/100)); }
-  if (p.urgenza === 'urgente') { min = Math.round(min * 1.2); max = Math.round(max * 1.3); }
-  return { min: Math.round(min/50)*50, max: Math.round(max/50)*50 };
-}
 
 async function inviaPreventivo() {
   const testo = document.getElementById('prev-testo').value.trim();
@@ -4710,18 +4224,6 @@ async function inviaPreventivo() {
   setTimeout(() => chiudiModal(), 1500);
 }
 
-function apriModalSegnalazione() {
-  document.getElementById('segnalazione-testo').value = '';
-  document.getElementById('segnalazione-form').style.display = '';
-  document.getElementById('segnalazione-success').style.display = 'none';
-  const btn = document.getElementById('btn-invia-segnalazione');
-  btn.disabled = false;
-  btn.textContent = 'Invia';
-  document.getElementById('modal-segnalazione').classList.add('show');
-}
-function chiudiModalSegnalazione() {
-  document.getElementById('modal-segnalazione').classList.remove('show');
-}
 async function inviaSegnalazione() {
   const descrizione = document.getElementById('segnalazione-testo').value.trim();
   if (!descrizione) { alert('Descrivi il problema prima di inviare.'); return; }
@@ -4741,9 +4243,6 @@ async function inviaSegnalazione() {
   }
 }
 
-function chiudiModalPriorita() {
-  document.getElementById('modalPriorita').classList.remove('show');
-}
 async function apriModalPriorita() {
   document.getElementById('modalPriorita').classList.add('show');
   const content = document.getElementById('priorita-content');
@@ -4793,22 +4292,6 @@ async function calcolaPrioritaProfessionista() {
   return { posUtente, totale: lista.length, posSenza, citta };
 }
 
-
-function aggiornaCardVisibile(piano) {
-  const card = document.getElementById('card-visibile');
-  const icon = document.getElementById('card-visibile-icon');
-  const label = document.getElementById('card-visibile-label');
-  if (!card || !icon || !label) return;
-  if (piano === 'premium') {
-    card.style.borderTopColor = '#7c3aed';
-    icon.textContent = '🌍';
-    label.textContent = 'Visibile in tutta la regione';
-  } else {
-    card.style.borderTopColor = '#0066ff';
-    icon.textContent = '📍';
-    label.textContent = 'Visibile nella tua città';
-  }
-}
 
 async function apriModalVisibile() {
   if(!impresaCorrente)return;
@@ -4912,12 +4395,6 @@ async function apriModalVisibile() {
 
 let cantiereAttivo = null;
 
-function chiudiCalcolatrice() {
-  showSection('dashboard');
-}
-const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
-
-
 
 
 
@@ -4945,32 +4422,6 @@ function bloccaCardPremium() {
     };
     card.appendChild(overlay);
   });
-}
-
-function ctaPremium(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Senza il Gestionale saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> perché sei in evidenza.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
-}
-function ctaFree(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Con il Gestionale saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#0066ff;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Attiva il Gestionale</button>`;
-}
-function renderModalVisibile(d) {
-  const titolo=d.isPremium?'🌍 Visibile in tutta la regione':'📍 Visibile nella tua città';
-  const bgBox=d.isPremium?'#e8f5e9':'#fff3e0';
-  const colorBox=d.isPremium?'#2e537d':'#e65100';
-  const numero=d.isPremium?d.nRegione:d.nCitta;
-  const dove=d.isPremium?'utenti in tutta la regione '+d.regione:'utenti a '+d.citta;
-  const piuUtenti=d.nRegione-d.nCitta;
-  let h='<div id="modalVisibileOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="document.getElementById(\'modalVisibileOverlay\').remove()">';
-  h+='<div style="background:white;border-radius:16px;padding:24px;max-width:500px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.2)" onclick="event.stopPropagation()">';
-  h+=`<h2 style="margin:0 0 16px">${titolo}</h2>`;
-  h+=`<div style="background:${bgBox};padding:16px;border-radius:8px;margin-bottom:16px">`;
-  h+=`<strong style="color:${colorBox}">✓ ATTIVO</strong>`;
-  h+=`<p style="margin:8px 0 0">Stai raggiungendo <strong>${numero}</strong> ${dove}.</p>`;
-  h+='</div>';
-  h+=d.isPremium?ctaPremium(d,piuUtenti):ctaFree(d,piuUtenti);
-  h+='<button onclick="document.getElementById(\'modalVisibileOverlay\').remove()" style="background:transparent;border:1px solid #ddd;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px">Chiudi</button>';
-  h+='</div></div>';
-  return h;
 }
 
 /* ============================================================
@@ -5036,187 +4487,6 @@ const FAQS_LIST = [
   }
 ];
 
-/* 6 settembre 2026 - le tre linguette di «Parla con TrovaImpresa».
-   Prima erano due card separate nel pannello: «Risoluzione problemi» (le
-   domande + l'assistente AI) e «Parla subito con TrovaImpresa» (la chat).
-   Misurato prima di unirle: la chat l'avevano usata 3 imprese vere,
-   l'assistente AI 1 sola volta, e il modulo «Scrivi all'assistenza» MAI
-   nessuno. Adesso sono un posto solo, e si sceglie con un bottone. */
-function mostraPezzoSupporto(quale, el){
-  ['domande','ai','chat'].forEach(function(n){
-    var p = document.getElementById('sup-' + n);
-    if(p) p.classList.toggle('on', n === quale);
-  });
-  document.querySelectorAll('.sup-ling button').forEach(function(b){
-    b.classList.toggle('on', b.getAttribute('data-sup') === quale);
-  });
-  /* se non arriva il bottone (chiamata da codice) si accende quello giusto */
-  if(!el){
-    var b = document.querySelector('.sup-ling button[data-sup="' + quale + '"]');
-    if(b) b.classList.add('on');
-  }
-}
-
-function apriModalRisoluzione() {
-  const lista = document.getElementById('faq-list');
-  if (!lista) return;
-  lista.innerHTML = FAQS_LIST.map(f => `
-    <div class="faq-item">
-      <div class="faq-domanda" onclick="toggleFaq(this)">${f.domanda}</div>
-      <div class="faq-risposta">${f.risposta}</div>
-    </div>
-  `).join('');
-}
-
-function toggleFaq(headerEl) {
-  headerEl.parentElement.classList.toggle('open');
-}
-
-function toggleFullscreen(btn) {
-  const modal = btn.closest('.modal-ai');
-  modal.classList.toggle('fullscreen');
-  btn.textContent = modal.classList.contains('fullscreen') ? '⊟' : '⛶';
-}
-
-function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-/* 6 settembre 2026 - «Chiedi all'AI» con le bolle, come «Scrivi a noi».
-   ⚠️ L'AI NON si ricorda le domande di prima: le bolle restano a schermo, ma
-   ogni domanda parte da zero. Farle ricordare la conversazione costa di piu'
-   a ogni messaggio, ed e' una scelta da prendere a parte. */
-function _aiBolla(testo, mia, html) {
-  const box = document.getElementById('ai-msgs');
-  if (!box) return null;
-  const div = document.createElement('div');
-  div.style.cssText = 'max-width:78%;padding:9px 13px;border-radius:12px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word;'
-    + (mia ? 'align-self:flex-end;background:#0066ff;color:#fff'
-           : 'align-self:flex-start;background:#fff;color:#111;border:1px solid var(--border)');
-  if (html) { div.style.whiteSpace = 'normal'; div.innerHTML = testo; }
-  else div.textContent = testo;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-  return div;
-}
-
-function svuotaChatAI() {
-  const box = document.getElementById('ai-msgs');
-  if (box) box.innerHTML = '';
-}
-
-async function chiediSupportoAI() {
-  const casella = document.getElementById('ai-supporto-prompt');
-  const btn = document.getElementById('btn-ai-supporto');
-  const testo = (casella.value || '').trim();
-  if (!testo) { casella.focus(); return; }
-  if (!impresaCorrente || !impresaCorrente.id) {
-    alert('Impresa non identificata. Ricarica la pagina.');
-    return;
-  }
-  _aiBolla(testo, true, false);
-  casella.value = '';
-  const attesa = _aiBolla('Sto pensando…', false, false);
-  btn.disabled = true;
-  btn.style.opacity = '0.6';
-  btn.style.cursor = 'not-allowed';
-
-  function rispondi(t, html) {
-    if (attesa) {
-      if (html) { attesa.style.whiteSpace = 'normal'; attesa.innerHTML = t; }
-      else attesa.textContent = t;
-      const box = document.getElementById('ai-msgs');
-      if (box) box.scrollTop = box.scrollHeight;
-    }
-  }
-
-  const faqTesto = FAQS_LIST.map(f => `D: ${f.domanda}\nR: ${f.risposta}`).join('\n\n');
-  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare la linguetta «Scrivi a noi» qui sopra.\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
-  try {
-    const resp = await fetch('/.netlify/functions/ai-claude', {
-      method: 'POST',
-      headers: await _aiIntestazioni(),
-      body: JSON.stringify({
-        azione: 'supporto',
-        impresa_id: impresaCorrente.id,
-        prompt: promptCompleto
-      })
-    });
-    const data = await resp.json().catch(() => null);
-    if (!resp.ok) {
-      rispondi('Errore AI: ' + ((data && data.error) || resp.status), false);
-      return;
-    }
-    if (data && data.risposta) {
-      /* 22 agosto 2026 - prima qui si trasformava SOLO il grassetto, e i
-         cancelletti dei titoli restavano a schermo. Adesso ci pensa
-         js/testo-ai.js, che e' uno solo per tutti e quattro i pannelli.
-         ⚠️ Se il file non si fosse caricato si torna al modo di prima,
-         cosi' la risposta si legge lo stesso invece di sparire. */
-      rispondi((typeof window.testoAI === 'function')
-        ? window.testoAI(data.risposta)
-        : escHtml(data.risposta).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'), true);
-    } else {
-      rispondi('Risposta vuota.', false);
-    }
-  } catch (e) {
-    rispondi('Errore di rete: ' + (e && e.message ? e.message : e), false);
-  } finally {
-    btn.disabled = false;
-    btn.style.opacity = '';
-    btn.style.cursor = '';
-    casella.focus();
-  }
-}
-
-/* --- Lista d'attesa pubblicità --- */
-async function apriModalListaAttesaPub() {
-  const ris = document.getElementById('lap-risultato');
-  ris.style.display = 'none';
-  ris.innerHTML = '';
-  document.getElementById('modalListaAttesaPub').classList.add('show');
-
-  // Carica le righe attive (attesa/offerto) dell'azienda loggata
-  const { data, error } = await sb.from('lista_attesa_pubblicita')
-    .select('citta, stato, created_at, offerta_scadenza')
-    .eq('impresa_id', impresaCorrente.id)
-    .in('stato', ['attesa', 'offerto'])
-    .order('created_at', { ascending: true });
-
-  if (error || !data || data.length === 0) {
-    ris.textContent = "Non sei in lista d'attesa. Per iscriverti vai su Pubblicità quando lo spazio che vuoi è occupato.";
-    ris.style.display = '';
-    return;
-  }
-
-  // 'offerto' ha priorità: spazio riservato all'azienda
-  const offerto = data.find(r => r.stato === 'offerto');
-  if (offerto) {
-    let scad = '';
-    if (offerto.offerta_scadenza) {
-      const [g, m, a] = String(offerto.offerta_scadenza).split('/');
-      const d = new Date(`${a}-${m}-${g}`);
-      scad = isNaN(d) ? String(offerto.offerta_scadenza) : d.toLocaleDateString('it-IT');
-    }
-    ris.innerHTML = `Si è liberato uno spazio a ${escHtml(offerto.citta)}! È tuo fino al ${escHtml(scad)}. Vuoi prenotarlo?` +
-      `<div style="margin-top:14px;"><a href="pubblicita.html" class="btn-salva-annuncio" style="display:inline-block;text-decoration:none;">🛒 Acquista</a></div>`;
-    ris.style.display = '';
-    return;
-  }
-
-  // 'attesa': posizione = n. aziende in attesa per quella città con created_at <= la sua
-  const inAttesa = data.find(r => r.stato === 'attesa');
-  const { count } = await sb.from('lista_attesa_pubblicita')
-    .select('id', { count: 'exact', head: true })
-    .ilike('citta', inAttesa.citta)
-    .eq('stato', 'attesa')
-    .lte('created_at', inAttesa.created_at);
-  ris.textContent = `Sei in posizione n° ${count || 1} per ${inAttesa.citta}`;
-  ris.style.display = '';
-}
-
-function chiudiModalListaAttesaPub() {
-  document.getElementById('modalListaAttesaPub').classList.remove('show');
-}
-
 /* --- Personalizza pannello --- */
 // Aggiorna l'ANTEPRIMA (mock) leggendo i valori correnti dei campi
 // Personalizza pannello: il codice comune e' in /js/pannelli-personalizza.js, qui resta solo aggiornaPreviewPersonalizza
@@ -5273,45 +4543,6 @@ function aggiornaPreviewPersonalizza(opts) {
 function apriModalCertificazioni() {
   caricaCertificazioni();
 }
-async function caricaCertificazioni() {
-  const { data } = await sb.from('imprese').select('certificazioni').eq('id', impresaCorrente.id).single();
-  const certs = data?.certificazioni || [];
-  impresaCorrente.certificazioni = certs;
-  renderCertificazioni(certs);
-}
-
-/* ⛔ 30 agosto 2026 — LA SCADENZA SCRITTA ALL'AMERICANA.
-   Qui la data usciva com'e' scritta nel database: «2027-12-31». Un
-   artigiano legge 31/12/2027.
-   ⚠️ NON si usa `new Date(iso).toLocaleDateString`: una data senza ora
-   viene letta come mezzanotte di Greenwich, e in un fuso indietro
-   rispetto a Londra diventerebbe il giorno prima. Qui c'e' solo una
-   data, quindi si spezza la stringa e basta: non puo' sbagliare.
-   (`fmtData` in strumenti-cantiere.js usa l'altra strada: in Italia va
-   sempre bene, ma e' la stessa trappola addormentata.) */
-function _dataIt(iso) {
-  var p = String(iso || '').slice(0, 10).split('-');
-  if (p.length !== 3 || p[0].length !== 4) return iso || '';
-  return p[2] + '/' + p[1] + '/' + p[0];
-}
-
-function renderCertificazioni(certs) {
-  const container = document.getElementById('lista-certificazioni');
-  if (!container) return;
-  if (!certs.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📜</div>Nessuna certificazione aggiunta.</div>';
-    return;
-  }
-  container.innerHTML = certs.map((c, i) => `
-    <div class="cert-item">
-      <div>
-        <div class="cert-nome">${c.nome}</div>
-        <div class="cert-meta">${c.scadenza ? '📅 Scade: ' + _dataIt(c.scadenza) : ''}${c.file_url ? (c.scadenza ? ' · ' : '') + '<a href="' + c.file_url + '" target="_blank" style="color:var(--verde);font-weight:700;">📎 Visualizza file</a>' : ''}</div>
-      </div>
-      <button class="btn-az arancio" style="padding:10px 16px;font-size:0.82rem;" onclick="eliminaCertificazione(${i})">🗑️ Rimuovi</button>
-    </div>
-  `).join('');
-}
 
 async function aggiungiCertificazione() {
   const inputEl = document.getElementById('cert-search');
@@ -5345,56 +4576,6 @@ async function aggiungiCertificazione() {
   fileInput.value = '';
 }
 
-async function eliminaCertificazione(index) {
-  if (!confirm('Rimuovere questa certificazione?')) return;
-  const certs = [...(impresaCorrente.certificazioni || [])];
-  certs.splice(index, 1);
-  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
-  if (error) { alert('Errore: ' + error.message); return; }
-  impresaCorrente.certificazioni = certs;
-  renderCertificazioni(certs);
-}
-
-/* --- QR Code profilo (copiato da pannello-artigiano) --- */
-let _qrCodeInstance = null;
-let _qrCodeCurrentColor = '#000000';
-let _qrCodeLibPromise = null;
-function _caricaQRCodeStylingLib() {
-  if (_qrCodeLibPromise) return _qrCodeLibPromise;
-  _qrCodeLibPromise = new Promise((resolve, reject) => {
-    if (window.QRCodeStyling) return resolve();
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js';
-    s.onload = () => resolve();
-    s.onerror = () => { _qrCodeLibPromise = null; reject(new Error('Impossibile caricare la libreria QR Code')); };
-    document.head.appendChild(s);
-  });
-  return _qrCodeLibPromise;
-}
-function _qrTargetUrl() {
-  return `https://trovaimpresa.com/profilo-impresa.html?id=${impresaCorrente.id}`;
-}
-function _qrLogoUrl() {
-  return (impresaCorrente && impresaCorrente.logo_url) || '/img/logo.png';
-}
-function _qrColorDefault() {
-  const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
-  return pers.colore_header || '#000000';
-}
-function _qrConfig(size, color) {
-  return {
-    width: size,
-    height: size,
-    type: 'canvas',
-    data: _qrTargetUrl(),
-    image: _qrLogoUrl(),
-    dotsOptions: { color: color, type: 'rounded' },
-    backgroundOptions: { color: '#ffffff' },
-    imageOptions: { crossOrigin: 'anonymous', margin: 6, imageSize: 0.25 },
-    cornersSquareOptions: { color: color, type: 'extra-rounded' },
-    cornersDotOptions: { color: color }
-  };
-}
 async function apriModalQRCode() {
   if (!impresaCorrente) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
@@ -5421,27 +4602,6 @@ async function apriModalQRCode() {
     container.innerHTML = '<div style="color:#c0392b;padding:20px 0;text-align:center;">Errore: ' + err.message + '</div>';
   }
 }
-function aggiornaColoreQRCode(nuovoColore) {
-  _qrCodeCurrentColor = nuovoColore;
-  if (!_qrCodeInstance) return;
-  _qrCodeInstance.update({
-    dotsOptions: { color: nuovoColore, type: 'rounded' },
-    cornersSquareOptions: { color: nuovoColore, type: 'extra-rounded' },
-    cornersDotOptions: { color: nuovoColore }
-  });
-}
-async function scaricaQRCodePNG() {
-  if (!impresaCorrente) return;
-  try {
-    await _caricaQRCodeStylingLib();
-    const qrDownload = new QRCodeStyling(_qrConfig(1024, _qrCodeCurrentColor));
-    await qrDownload.download({ name: `qr-trovaimpresa-${impresaCorrente.id}`, extension: 'png' });
-    const box = document.getElementById('qrSuccessBox');
-    if (box) box.style.display = 'block';
-  } catch (err) {
-    alert('Errore durante il download: ' + err.message);
-  }
-}
 
 // === FAI CONOSCERE LA TUA AZIENDA (VIDEO) ===
 function apriVideo() {
@@ -5454,66 +4614,6 @@ function apriVideo() {
     return;
   }
   showSection('video');
-  caricaVideo();
-}
-function _videoUrlValido(url) {
-  const lower = (url || '').toLowerCase();
-  return lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com');
-}
-function estraiVideoEmbed(url) {
-  try {
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./, '');
-    if (host === 'youtu.be') {
-      const id = u.pathname.slice(1).split('/')[0];
-      return /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
-    }
-    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
-      const id = u.searchParams.get('v');
-      return id && /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
-    }
-    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
-      const parts = u.pathname.split('/').filter(Boolean);
-      const id = parts.find(p => /^\d+$/.test(p));
-      return id ? 'https://player.vimeo.com/video/' + id : null;
-    }
-  } catch (_) {}
-  return null;
-}
-async function caricaVideo() {
-  const lista = document.getElementById('lista-video');
-  if (!lista || !impresaCorrente) return;
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
-  const { data, error } = await sb.from('video_lavori').select('*').eq('impresa_id', impresaCorrente.id).order('created_at', { ascending: false });
-  if (error) { lista.innerHTML = '<div class="empty-state">Errore caricamento video.</div>'; return; }
-  if (!data || !data.length) { lista.innerHTML = '<div class="empty-state">Nessun video caricato. Aggiungi il primo qui sopra.</div>'; return; }
-  lista.innerHTML = data.map(v => {
-    const embed = estraiVideoEmbed(v.video_url);
-    const iframe = embed
-      ? '<iframe src="' + esc(embed) + '" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
-      : '<div style="padding:20px;color:#fff;font-size:15px">URL non valido</div>';
-    const desc = v.descrizione ? esc(v.descrizione) : '<em style="color:#888">Nessuna descrizione</em>';
-    return '<div class="video-row"><div class="video-iframe-wrap">' + iframe + '</div><div class="video-info"><p>' + desc + '</p></div><button class="btn-del" onclick="eliminaVideo(' + v.id + ')">🗑️ Elimina</button></div>';
-  }).join('');
-}
-async function salvaVideo() {
-  const url = document.getElementById('video-url').value.trim();
-  const desc = document.getElementById('video-desc').value.trim();
-  if (!url) { alert('Inserisci un URL video.'); return; }
-  if (!_videoUrlValido(url)) { alert('URL non valido. Sono ammessi solo link YouTube (youtube.com, youtu.be) o Vimeo (vimeo.com).'); return; }
-  const btn = document.getElementById('btn-salva-video');
-  btn.disabled = true; btn.textContent = '⏳ Salvataggio...';
-  const { error } = await sb.from('video_lavori').insert({ impresa_id: impresaCorrente.id, video_url: url, descrizione: desc });
-  btn.disabled = false; btn.textContent = '💾 Salva video';
-  if (error) { alert('Errore: ' + error.message); return; }
-  document.getElementById('video-url').value = '';
-  document.getElementById('video-desc').value = '';
-  caricaVideo();
-}
-async function eliminaVideo(id) {
-  if (!confirm('Eliminare questo video?')) return;
-  const { error } = await sb.from('video_lavori').delete().eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
   caricaVideo();
 }
 </script>
