@@ -50,3 +50,7 @@ figcaption{color:#9fb4d0}
 footer{margin-top:40px;border-top:2px solid rgba(255,255,255,.5);color:var(--c-chiaro);background:#071f38}
 footer a{color:var(--c-chiaro) !important}
 @media(max-width:700px){main.wrap{margin:16px 12px 0;padding:2px 16px 28px;border-radius:12px}h1{font-size:28px}}
+/* il bottone «Indietro» (viene da js/torna-indietro.js, uguale su tutto il sito): qui in stile scuro.
+   Si cambia solo qui, con `main.wrap` davanti, per non toccare le altre pagine. */
+main.wrap .ti-back{background:transparent;border:2px solid var(--c-riga);border-radius:8px;color:#fff;height:42px}
+main.wrap .ti-back:hover{background:var(--c-ar);border-color:var(--c-ar);color:var(--c-blu)}
