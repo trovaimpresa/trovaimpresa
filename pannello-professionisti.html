@@ -2428,11 +2428,23 @@
         <div style="margin-bottom:16px">
           <!-- ⚠️ 15 set 2026: si chiamava «🛠️ Gestionale»: faceva eco al nome delle
                  due porte qui sotto. -->
-            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> I due gestionali</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> <span id="gest-titolo-testo">I due gestionali</span></div>
           <div style="font-size:15px;color:#888;margin-top:4px">Pratiche, clienti, collaboratori, preventivi, spese e report — tutto in un posto solo</div>
         </div>
         <!-- ⛔ 2 SETTEMBRE 2026 — QUATTRO CARTE PER GESTIONALE, IL NOME IN MEZZO
              (il perche' e le misure stanno nel commento del CSS) -->
+        <!-- ⛔ 3 ott 2026: riquadro del gestionale base gratis. Resta nascosto finche'
+             GESTIONALE_BASE_APERTO e' false (o non c'e' ?piani=prova). -->
+        <div id="gest-base-gratis" style="display:none;margin-bottom:18px">
+          <div class="g-carta g-striscia">
+            <div class="g-testa">
+              <span class="g-ico" style="color:#1e8e3e;background:#e8f6ef"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+              <span class="g-tit">Gestionale base</span>
+            </div>
+            <div class="g-txt">Gratis per sempre, per chi &egrave; iscritto a TrovaImpresa.</div>
+            <div class="g-azione" id="azione-base-gratis"></div>
+          </div>
+        </div>
         <div id="porte-gestionale" class="gest-porte">
 
           <section class="gest-porta" id="porta-premium">
@@ -4422,6 +4434,16 @@ function caricaProfilo() {
 // Per lui il pulsante apre il portale clienti di Stripe, che cambia il
 // prezzo dentro l'abbonamento che ha gia', col conguaglio.
 // =====================================================================
+/* ⛔ 3 OTTOBRE 2026 — L'INTERRUTTORE DEL GESTIONALE BASE GRATIS.
+   FALSE = la schermata resta quella di sempre (Gestionale, Gestionale AI,
+   prova 30 giorni, Fai un giro). TRUE = schermata nuova: il riquadro verde
+   «Usa gratis il gestionale base» e due sole card a pagamento (assistenza AI
+   a 29/249, assistenza AI e chat a 39/349), senza prova e senza giro.
+   ⚠️ NON metterlo a TRUE da solo: il bottone «Usa gratis» porta nel gestionale,
+   e finche' il cancello (js/gate-gestionale.js) e la guardia del database non
+   fanno entrare chi ha il piano gratis, quel bottone porta a un muro.
+   Per vederla senza accenderla: aggiungere ?piani=prova all'indirizzo. */
+const GESTIONALE_BASE_APERTO = false;
 const PORTE_GESTIONALE = [
   { chiave: 'premium', label: 'Gestionale', attiva: 'Attiva il Gestionale',
     mese: '29 \u20ac al mese', anno: '249 \u20ac all\'anno',
@@ -4573,6 +4595,70 @@ function montaPorteGestionale() {
     /* 4. ENTRA E VEDI — sempre, a chiunque */
     metti('azione-vedi-' + k, 'Fai un giro', VUOTO, () => { location.href = porta.guarda; });
   });
+
+  /* ⛔ 3 OTTOBRE 2026 — SCHERMATA NUOVA (vedi GESTIONALE_BASE_APERTO).
+     Con l'interruttore spento e senza ?piani=prova questo ramo non si apre mai. */
+  const anteprimaPiani = new URLSearchParams(location.search).get('piani') === 'prova';
+  if (GESTIONALE_BASE_APERTO || anteprimaPiani) {
+    const nasc = id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; };
+    const NOMI = {
+      premium: { nome: 'Gestionale con assistenza AI', desc: 'Tutto il gestionale, pi\u00f9 l\u2019assistenza AI', label: 'con assistenza AI' },
+      ai:      { nome: 'Gestionale con assistenza AI e chat', desc: 'Tutto il resto, pi\u00f9 la Chat con AI', label: 'con assistenza AI e chat' }
+    };
+    const tit = document.getElementById('gest-titolo-testo');
+    if (tit) tit.textContent = 'Il tuo gestionale';
+
+    PORTE_GESTIONALE.forEach(porta => {
+      const k = porta.chiave === 'premium' ? 'premium' : 'ai';
+      nasc('carta-prova-' + k);
+      nasc('carta-vedi-' + k);
+      const n = NOMI[k];
+      porta.label = n.label;
+      const sez = document.getElementById(k === 'premium' ? 'porta-premium' : 'porta-ai');
+      if (sez) {
+        const a = sez.querySelector('.gest-nome'); if (a) a.textContent = n.nome;
+        const d = sez.querySelector('.gest-desc'); if (d) d.textContent = n.desc;
+      }
+      /* le due righe del prezzo: al mese e all'anno, ognuna col suo «Attiva».
+         Chi e' gia' abbonato vede solo «Gestisci l'abbonamento»: due righe
+         gli farebbero ricomprare. */
+      const carta = document.getElementById('carta-attiva-' + k);
+      if (carta && !abbonato) {
+        const fila = carta.parentElement;
+        if (fila) fila.style.gridTemplateColumns = 'minmax(0,1fr)';
+        const tt = carta.querySelector('.g-tit'); if (tt) tt.textContent = 'Al mese';
+        const tx = carta.querySelector('.g-txt'); if (tx) tx.textContent = porta.mese;
+        const box1 = document.getElementById('azione-attiva-' + k);
+        metti('azione-attiva-' + k, 'Attiva', ARANCIO, () => mostraListino(porta, box1));
+        let anno = document.getElementById('carta-attiva-anno-' + k);
+        if (!anno) {
+          anno = carta.cloneNode(true);
+          anno.id = 'carta-attiva-anno-' + k;
+          anno.querySelectorAll('[id]').forEach(e => { e.id = e.id.replace('azione-attiva-', 'azione-attiva-anno-'); });
+          carta.after(anno);
+        }
+        carta.style.minHeight = '0'; anno.style.minHeight = '0';
+        const ta = anno.querySelector('.g-tit'); if (ta) ta.textContent = "All'anno";
+        const xa = anno.querySelector('.g-txt'); if (xa) xa.textContent = porta.anno;
+        metti('azione-attiva-anno-' + k, 'Attiva', ARANCIO, () => mostraListino(porta, null));
+      }
+    });
+
+    /* il riquadro verde: solo per chi non ha gia' un piano a pagamento */
+    const base = document.getElementById('gest-base-gratis');
+    if (base) {
+      base.style.display = haPremium ? 'none' : 'block';
+      metti('azione-base-gratis', 'Usa gratis il gestionale base', VERDE, function () {
+        if (anteprimaPiani && !GESTIONALE_BASE_APERTO) {
+          const b = this; const t = b.textContent;
+          b.textContent = 'Anteprima: ancora chiuso';
+          setTimeout(() => { b.textContent = t; }, 2200);
+          return;
+        }
+        location.href = '/gestionale-app.html?piano=base';
+      });
+    }
+  }
 
 }
 
