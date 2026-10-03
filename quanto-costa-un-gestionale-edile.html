@@ -23,11 +23,11 @@
     --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:19.5px;-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
   .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .navbar .logo{display:flex;align-items:center}
-  .navbar .logo img{height:64px}
+  .navbar .logo img{height:56px}
   .navbar .menu{display:flex;gap:20px;align-items:center}
   .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
   .navbar .menu a:hover{color:var(--primary-dark)}
@@ -35,18 +35,18 @@
   .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
   .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
   .breadcrumb a{color:var(--muted);text-decoration:none}
-  h1{font-size:40px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
-  h2{font-size:30px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
-  h3{font-size:23px;margin:28px 0 8px}
-  .meta{color:var(--muted);font-size:16.5px;margin-bottom:8px}
-  .lead{font-size:22.5px;line-height:1.55}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
   p{margin:14px 0}
   a{color:var(--primary-dark)}
   .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
   .answer strong{color:var(--primary-dark)}
   .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
 
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:17px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
   th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
   thead th{background:var(--primary);color:#fff;font-weight:600}
   tbody tr:nth-child(even){background:var(--bg-alt)}
@@ -97,69 +97,16 @@
 
   footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
   @media(max-width:600px){
-    body{font-size:18.5px}
-    h1{font-size:31px}
-    h2{font-size:25px}
-    .lead{font-size:20.5px}
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
     .prezzo-box .cifra{font-size:36px}
     th,td{padding:10px}
     table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-    .navbar{flex-direction:column;gap:8px;padding:10px 12px}.navbar .menu{width:100%;justify-content:center;flex-wrap:wrap;gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:50px}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
   }
-
-  .tab-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0}
-  .tab-wrap>table{margin:0;min-width:520px}
 </style>
-
-<style id="tp-iscriviti">
-/* --- riquadro ISCRIVITI GRATIS (nuovo) --- */
-.tp-join{border-radius:18px;margin:22px 0;overflow:hidden}
-
-/* A - due porte */
-.tp-a{background:var(--primary-soft);border:1.5px solid #c3d8ff;padding:22px 24px}
-.tp-a .tp-t{font-size:20px;font-weight:800;color:var(--primary-dark);margin:0 0 6px}
-.tp-a .tp-s{font-size:16px;color:#42546b;margin:0 0 16px;line-height:1.55}
-.tp-a .tp-btns{display:flex;gap:12px;flex-wrap:wrap}
-.tp-a .tp-b{flex:1;min-width:210px;display:block;text-align:center;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
-.tp-a .tp-b1{background:var(--accent);color:#fff;border:2px solid var(--accent)}
-.tp-a .tp-b1:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
-.tp-a .tp-b2{background:#fff;color:var(--primary-dark);border:2px solid #c3d8ff}
-.tp-a .tp-b2:hover{border-color:var(--primary)}
-.tp-a .tp-note{display:block;margin-top:12px;font-size:13.5px;color:#7a8a9c;text-align:center}
-
-/* B - fascia arancione forte */
-.tp-b-band{background:linear-gradient(135deg,#ff8800,#e2630a);color:#fff;padding:26px 24px;text-align:center}
-.tp-b-band .tp-t{font-size:23px;font-weight:800;margin:0 0 8px;line-height:1.25}
-.tp-b-band .tp-s{font-size:16.5px;margin:0 0 18px;opacity:.96;line-height:1.55}
-.tp-b-band .tp-go{display:inline-block;background:#fff;color:#c4540a;padding:15px 30px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
-.tp-b-band .tp-go:hover{background:#fff4e8}
-.tp-b-band .tp-note{display:block;margin-top:12px;font-size:13.5px;opacity:.92}
-.tp-b-band .tp-alt{display:block;margin-top:14px;font-size:15px;color:#fff;text-decoration:underline;opacity:.95}
-
-/* C - striscia sottile in cima a tutto */
-.tp-strip{background:var(--accent);color:#fff;font-size:15.5px;text-align:center;padding:11px 18px;line-height:1.45}
-.tp-strip b{font-weight:800}
-.tp-strip a{color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;white-space:nowrap}
-
-@media(max-width:600px){
-  .tp-a{padding:18px 16px}
-  .tp-a .tp-t{font-size:18px}
-  .tp-a .tp-b{width:100%;min-width:0;flex:none}
-  .tp-b-band{padding:22px 16px}
-  .tp-b-band .tp-t{font-size:20px}
-  .tp-b-band .tp-go{display:block;padding:15px 18px}
-  .tp-strip{font-size:14px;padding:10px 12px}
-  .tp-strip a{display:block;margin:4px 0 0}
-}
-
-/* riparazione: .answer-cta era senza stile su questa pagina */
-.answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;padding:18px 20px;margin:22px 0}
-.answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
-.answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
-.answer-cta a{display:block;text-align:center;background:#ff7a3c;color:#fff;padding:13px 18px;border-radius:10px;font-weight:700;text-decoration:none}
-.answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
-</style>
-<link rel="stylesheet" href="/css/promo-blog.css">
 </head>
 <body>
 
@@ -168,15 +115,9 @@
   <div class="menu">
     <a href="/index.html">Home</a>
     <a href="/prezzi.html">Prezzi</a>
-    <a href="/gestionale" class="menu-btn">Provalo 30 giorni gratis</a>
+    <a href="/gestionale" class="menu-btn">Iscriviti gratis</a>
   </div>
 </nav>
-
-<!-- 21 set 2026 — logo grande come nella home, sotto la barra -->
-<div class="ti-logo-grande">
-  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
-</div>
-
 
 <main class="wrap">
   <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/software-gestionale-imprese-edili.html">Gestionale</a> &rsaquo; Quanto costa un gestionale edile</nav>
@@ -185,37 +126,11 @@
     <h1>Quanto costa un gestionale per imprese edili</h1>
     <p class="meta">Aggiornato settembre 2026 &middot; Lettura 6 min</p>
 
-<!-- 21 set 2026 — i due riquadri grandi: a sinistra chi cerca, a destra chi
-     ha un'impresa. Prima c'era una striscia piccola che quasi nessuno vedeva. -->
-<div class="ti-promo">
-  <div class="ti-promo-c ti-promo-cli">
-    <p class="ti-promo-t">Cerchi un'impresa?</p>
-    <p class="ti-promo-s">Su TrovaImpresa trovi un'impresa nella tua citt&agrave;. Preventivi gratis, nessun impegno.</p>
-    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
-    <small class="ti-promo-n">Per chi cerca &egrave; sempre gratis.</small>
-  </div>
-  <div class="ti-promo-c ti-promo-imp">
-    <p class="ti-promo-t">Sei un&rsquo;impresa o un professionista?</p>
-    <p class="ti-promo-s">Registrati su TrovaImpresa e fatti trovare dai clienti della tua zona.</p>
-    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
-    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
-  </div>
-</div>
-
-
-    <div class="tp-join tp-b-band">
-  <p class="tp-t">Hai un&rsquo;impresa edile?</p>
-  <p class="tp-s">Mettiti dove i clienti ti cercano. La tua pagina su TrovaImpresa &egrave; gratis, e i contatti che ricevi non si pagano.</p>
-  <a class="tp-go" href="/registrazione-impresa.html">Iscriviti gratis &rarr;</a>
-  <small class="tp-note">Un minuto e sei caselle. Nessuna carta, nessun abbonamento.</small>
-  <a class="tp-alt" href="/cerca-imprese.html">Cerco un&rsquo;impresa, non ne ho una</a>
-</div>
-
-  <div class="answer">
+    <div class="answer">
       <strong>In due righe:</strong> un gestionale per l'edilizia in Italia costa in genere fra i <strong>200 e i 900 € l'anno</strong>,
     ma la cifra sul listino è solo metà del conto: le differenze vere stanno nel <strong>costo per
     utente</strong>, nell'<strong>attivazione</strong> e nei moduli venduti a parte.
-    <span class="price-big">Qui: 249 € l'anno, tutto compreso</span>
+    <span class="price-big">Qui: gratis, e l'AI da 39 € al mese</span>
     </div>
 
     <p class="lead">Cercare il prezzo di un gestionale edile è più difficile di quanto dovrebbe: molti
@@ -227,7 +142,7 @@
 
     <h2>Le tre fasce di prezzo</h2>
 
-    <div class="tab-wrap"><table>
+    <table>
       <thead>
         <tr><th>Fascia</th><th>Cosa trovi di solito</th></tr>
       </thead>
@@ -236,7 +151,7 @@
         <tr><td><strong>Fra 300 e 600 € l'anno</strong></td><td>I gestionali edili veri: cantieri, preventivi, computo, rapportini. È la fascia dove sta la maggior parte del mercato.</td></tr>
         <tr><td><strong>Sopra i 600 € l'anno</strong></td><td>Soluzioni per imprese strutturate, spesso con costo per utente e con un canone che cresce con la squadra.</td></tr>
       </tbody>
-    </table></div>
+    </table>
 
     <div class="note"><strong>Un riferimento verificato il 13 settembre 2026:</strong> fra i
         gestionali edili più diffusi in Italia, un canone dichiarato apertamente sul sito è di
@@ -257,19 +172,20 @@
 
     <h2>Cosa costa qui</h2>
 
-    <div class="tab-wrap"><table>
+    <table>
       <thead>
         <tr><th>Voce</th><th>Quanto</th></tr>
       </thead>
       <tbody>
-        <tr><td>Canone annuale</td><td class="num">249 €</td></tr>
-        <tr><td>Oppure mensile</td><td class="num">29 € al mese</td></tr>
+        <tr><td>Gestionale base</td><td class="num">Gratis per sempre, senza carta</td></tr>
+        <tr><td>Assistenza AI e chat, al mese</td><td class="num">39 € al mese</td></tr>
+        <tr><td>Assistenza AI e chat, all'anno</td><td class="num">349 € all'anno</td></tr>
         <tr><td>Costo per utente in più</td><td class="num">0 € — gli accessi per collaboratori e segretaria sono compresi</td></tr>
         <tr><td>Attivazione</td><td class="num">0 €</td></tr>
         <tr><td>Moduli a parte</td><td class="num">0 € — computo, SAL, rapportini, mezzi e ore sono dentro</td></tr>
-        <tr><td>Prova</td><td class="num">30 giorni, senza carta di credito</td></tr>
+        <tr><td>Prova</td><td class="num">Non serve: il gestionale base è gratis e non scade</td></tr>
       </tbody>
-    </table></div>
+    </table>
 
     <p>Il prezzo è finale: non c'è IVA da aggiungere, e per ogni pagamento ricevi regolare fattura.</p>
 
@@ -277,17 +193,7 @@
         prodotto principale. TrovaImpresa è un marketplace dove i clienti cercano imprese, e il gestionale
         è quello che ricevi restando lì. Chi vende solo il gestionale deve farci stare dentro tutto — noi no.</div>
 
-    
-<!-- 21 set 2026 — striscia a meta' guida: chi legge fin qui sta valutando il lavoro. -->
-<div class="ti-riga">
-  <p class="ti-riga-t">Ti serve un'impresa nella tua citt&agrave;?</p>
-  <div class="ti-riga-btns">
-    <a href="/cerca-imprese.html">Chiedi preventivi gratis</a>
-    <a class="verde" href="/registrazione-impresa.html">Registra la tua attivit&agrave;</a>
-  </div>
-</div>
-
-<h2>Quando conviene spendere di più</h2>
+    <h2>Quando conviene spendere di più</h2>
 
     <p>Vale la pena dirlo, anche se non aiuta a vendere.</p>
 
@@ -320,20 +226,21 @@
     <h2>Quanto costa</h2>
 
     <div class="prezzo-box">
-      <div class="sotto">Il gestionale fa parte del Gestionale TrovaImpresa</div>
-      <div class="cifra">249 € all'anno</div>
-      <div class="sotto">oppure 29 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <div class="sotto">Il gestionale &egrave; nel gestionale TrovaImpresa</div>
+      <div class="cifra">Gratis per sempre</div>
+      <div class="sotto">per chi si iscrive &middot; nessuna carta di credito</div>
       <div class="prezzo-ai">
-        <b>C'&egrave; anche il gestionale con l'AI</b> — 349 € all'anno oppure 39 € al mese.
-        Aggiunge la chat che ti risponde coi conti dei tuoi lavori e ti compila i moduli.
+        <b>Con l'assistenza AI e la chat</b> &mdash; 39 € al mese oppure 349 € all'anno
+        (prezzo finale, nessuna IVA da aggiungere). Aggiunge la chat che ti risponde coi conti dei tuoi lavori
+        e ti compila i moduli. La attivi quando vuoi e ti disdici quando vuoi.
       </div>
       <ul class="checklist ok-list">
-        <li><strong>Lo provi 30 giorni gratis</strong>, e non serve la carta di credito.</li>
-        <li><strong>Alla fine della prova non parte nessun addebito.</strong> Se non fai nulla resti sul piano gratuito, e il profilo resta online.</li>
-        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
-        <li>Ricevi regolare fattura per ogni pagamento.</li>
+        <li><strong>Ti iscrivi con la mail e il gestionale &egrave; tuo</strong>, senza scadenza e senza carta.</li>
+        <li><strong>Se attivi l'AI e poi smetti</strong>, resti sul gestionale gratis con tutti i tuoi dati.</li>
+        <li>Dentro c'&egrave; anche il profilo sul marketplace, dove i clienti ti cercano.</li>
+        <li>Per l'AI ricevi regolare fattura per ogni pagamento.</li>
       </ul>
-      <p style="margin-top:22px"><a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
+      <p style="margin-top:22px"><a href="/gestionale" class="cta-dark">Usa il gestionale gratis</a>
         <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
     </div>
 
@@ -353,18 +260,18 @@
           Il numero che conta è quanto pagherai il secondo anno con tutti gli utenti che ti servono.</p>
       </details>
       <details>
-        <summary>Il prezzo di 249 euro comprende tutto?</summary>
-        <p>Sì: nessun costo per utente aggiuntivo, nessuna attivazione e nessun modulo a parte. Computo
-          metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi, e con lo stesso
-          abbonamento c'è anche il profilo in evidenza sul marketplace.</p>
+        <summary>Il gestionale è davvero gratis? E cosa si paga?</summary>
+        <p>Il gestionale base è gratis per sempre: nessun costo per utente aggiuntivo, nessuna attivazione e nessun
+          modulo a parte. Computo metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi. Si paga solo
+          l'assistenza AI e la chat (39 euro al mese o 349 euro all'anno), che aggiunge anche il profilo in evidenza sul marketplace.</p>
       </details>
       <details>
         <summary>C'è l'IVA da aggiungere?</summary>
-        <p>No, 249 euro all'anno è il prezzo finale. Per ogni pagamento viene emessa regolare fattura.</p>
+        <p>No, 39 euro al mese e 349 euro all'anno sono prezzi finali. Per ogni pagamento viene emessa regolare fattura.</p>
       </details>
       <details>
         <summary>Posso provarlo prima di pagare?</summary>
-        <p>Sì, 30 giorni, e non serve la carta di credito. Alla fine della prova non c'è addebito automatico: se non fai nulla si resta sul piano gratuito.</p>
+        <p>Non serve nemmeno una prova: il gestionale base è gratis e non scade, senza carta di credito. L'assistenza AI e la chat si attivano dopo, solo se ti servono, e si disdicono quando vuoi.</p>
       </details>
     </div>
 
@@ -374,30 +281,12 @@
 
     <div class="cta-band">
       <h3>Il modo più economico di decidere</h3>
-      <p>Provane uno per 30 giorni senza mettere la carta. Se in un mese non lo apri più, hai la risposta e non hai speso niente.</p>
-      <a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
-      <span class="cta-sotto">Nessuna carta di credito &middot; Si disdice quando vuoi</span>
+      <p>Iscriviti e usalo con un lavoro vero: il gestionale è gratis e non scade. Se in un mese non lo apri più, hai la risposta e non hai speso niente.</p>
+      <a href="/gestionale" class="cta-dark">Usa il gestionale gratis</a>
+      <span class="cta-sotto">Gratis per sempre &middot; Nessuna carta di credito</span>
     </div>
 
-  
-<!-- 21 set 2026 — gli stessi due riquadri in fondo: chi arriva alla fine ha
-     appena letto quanto costa, ed e' il momento in cui chiede il preventivo. -->
-<div class="ti-promo">
-  <div class="ti-promo-c ti-promo-cli">
-    <p class="ti-promo-t">Ora che sai quanto costa</p>
-    <p class="ti-promo-s">Fatti fare due o tre preventivi da chi lavora nella tua citt&agrave; e confronta.</p>
-    <a class="ti-promo-b ti-promo-b1" href="/cerca-imprese.html">Trova un'impresa</a>
-    <small class="ti-promo-n">Gratis per chi cerca, senza impegno.</small>
-  </div>
-  <div class="ti-promo-c ti-promo-imp">
-    <p class="ti-promo-t">Questi lavori li fai tu?</p>
-    <p class="ti-promo-s">Mettiti dove i clienti ti stanno gi&agrave; cercando. Iscrizione gratis.</p>
-    <a class="ti-promo-b ti-promo-b2" href="/registrazione-impresa.html">Registrati gratis</a>
-    <small class="ti-promo-n">Un minuto, sei caselle. Nessuna carta.</small>
-  </div>
-</div>
-
-</article>
+  </article>
 </main>
 
 <footer>
@@ -435,19 +324,19 @@
   "inLanguage": "it-IT",
   "description": "Quanto costa un gestionale per imprese edili: le fasce di prezzo vere del mercato italiano e le voci nascoste da controllare prima di firmare.",
   "featureList": [
-    "Prezzo annuale unico senza costo per utente",
+    "Gestionale base gratis per chi si iscrive",
+    "Assistenza AI e chat a prezzo fisso, senza costo per utente",
     "Nessun costo di attivazione",
-    "Trenta giorni di prova senza carta di credito",
     "Si disdice quando vuoi",
     "Marketplace compreso nello stesso prezzo"
   ],
   "offers": {
     "@type": "Offer",
-    "price": "249",
+    "price": "0",
     "priceCurrency": "EUR",
     "url": "https://trovaimpresa.com/prezzi.html",
     "availability": "https://schema.org/InStock",
-    "description": "Compreso nel Gestionale TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con 30 giorni di prova gratuita, senza carta di credito."
+    "description": "Il gestionale base di TrovaImpresa e' gratis per chi si iscrive, senza carta di credito. Assistenza AI e chat: 39 euro al mese oppure 349 euro all'anno."
   },
   "publisher": {
     "@type": "Organization",
@@ -464,9 +353,9 @@
   "mainEntity":[
     {"@type":"Question","name":"Quanto costa in media un gestionale per imprese edili in Italia?","acceptedAnswer":{"@type":"Answer","text":"Le soluzioni pensate per l'edilizia stanno in genere fra i 300 e i 600 euro l'anno, con punte più alte per le imprese strutturate. Sotto i 250 euro si trovano soprattutto programmi di fatturazione generici."}},
     {"@type":"Question","name":"Ci sono costi nascosti da controllare?","acceptedAnswer":{"@type":"Answer","text":"Le tre voci da chiedere sempre prima di firmare sono il costo per utente aggiuntivo, l'eventuale quota di attivazione una tantum e quali funzioni sono moduli venduti a parte. Il numero che conta è quanto pagherai il secondo anno con tutti gli utenti che ti servono."}},
-    {"@type":"Question","name":"Il prezzo di 249 euro comprende tutto?","acceptedAnswer":{"@type":"Answer","text":"Sì: nessun costo per utente aggiuntivo, nessuna attivazione e nessun modulo a parte. Computo metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi, e con lo stesso abbonamento c'è anche il profilo in evidenza sul marketplace."}},
-    {"@type":"Question","name":"C'è l'IVA da aggiungere?","acceptedAnswer":{"@type":"Answer","text":"No, 249 euro all'anno è il prezzo finale. Per ogni pagamento viene emessa regolare fattura."}},
-    {"@type":"Question","name":"Posso provarlo prima di pagare?","acceptedAnswer":{"@type":"Answer","text":"Sì, 30 giorni, e non serve la carta di credito. Alla fine della prova non c'è addebito automatico: se non fai nulla si resta sul piano gratuito."}}
+    {"@type":"Question","name":"Il gestionale è davvero gratis? E cosa si paga?","acceptedAnswer":{"@type":"Answer","text":"Il gestionale base è gratis per sempre: nessun costo per utente aggiuntivo, nessuna attivazione e nessun modulo a parte. Computo metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi. Si paga solo l'assistenza AI e la chat (39 euro al mese o 349 euro all'anno), che aggiunge anche il profilo in evidenza sul marketplace."}},
+    {"@type":"Question","name":"C'è l'IVA da aggiungere?","acceptedAnswer":{"@type":"Answer","text":"No, 39 euro al mese e 349 euro all'anno sono prezzi finali. Per ogni pagamento viene emessa regolare fattura."}},
+    {"@type":"Question","name":"Posso provarlo prima di pagare?","acceptedAnswer":{"@type":"Answer","text":"Non serve nemmeno una prova: il gestionale base è gratis e non scade, senza carta di credito. L'assistenza AI e la chat si attivano dopo, solo se ti servono, e si disdicono quando vuoi."}}
   ]
 }
 </script>
@@ -498,11 +387,5 @@
 </script>
 
   <script src="/js/torna-indietro.js" defer></script>
-<script src="/cookie-banner.js"></script>
-
-<!-- 21 set 2026: conta i clic sui riquadri, per sapere quale punto della guida funziona -->
-<script src="/js/conta-clic-guide.js" defer></script>
-<!-- 22 set 2026: locandine e cartelli pagati ai lati (vedi js/vetrina-guide.js) -->
-<script src="/js/vetrina-guide.js" defer></script>
 </body>
 </html>

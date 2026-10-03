@@ -158,8 +158,8 @@
     </div>
     <p class="rep-dice">
       Un credito &egrave; una richiesta all&rsquo;AI: un preventivo generato, una scheda
-      cliente compilata, un controllo. Ogni mese ne hai <strong>40</strong> con il
-      Gestionale e <strong>100</strong> con il Gestionale AI.
+      cliente compilata, un controllo. Ogni mese ne hai <strong>100</strong> con il piano
+      Gestionale con assistenza AI e chat.
     </p>
 
     <!-- il contatore -->
@@ -236,7 +236,7 @@
       <h2>I messaggi della chat</h2>
     </div>
     <p class="rep-dice">
-      Con il Gestionale AI hai <strong>300 messaggi al mese</strong>. Se li finisci,
+      Con il piano con assistenza AI e chat hai <strong>300 messaggi al mese</strong>. Se li finisci,
       la chat si ferma e da qui ne compri altri: <strong>i crediti
       dell&rsquo;assistenza non si toccano</strong>.
     </p>
@@ -437,11 +437,11 @@
     if (puoiCrediti) {
       q('tagli').classList.remove('nascosto');
     } else {
-      avvisoIn('avvisi-crediti', 'attesa', 'I crediti si usano con il gestionale attivo',
+      avvisoIn('avvisi-crediti', 'attesa', 'I crediti si usano con il piano con assistenza AI e chat',
                'Senza un piano attivo l\'assistente AI resta spento, e i crediti comprati ' +
-               'resterebbero fermi nel conto. Attiva il gestionale e poi ricarica quando vuoi.');
+               'resterebbero fermi nel conto. Attiva il piano e poi ricarica quando vuoi.');
       q('avvisi-crediti').innerHTML +=
-        '<a class="torna" href="/prezzi.html">Vedi i piani</a>';
+        '<a class="torna" href="/prezzi.html">Vedi il piano</a>';
     }
 
     // ---- i messaggi della chat ------------------------------------
@@ -454,11 +454,11 @@
     if (haChat) {
       q('tagli-chat').classList.remove('nascosto');
     } else {
-      avvisoIn('avvisi-chat', 'attesa', 'I messaggi sono del Gestionale AI',
-               'La Chat con AI fa parte del Gestionale AI, che comprende 300 messaggi al mese. ' +
+      avvisoIn('avvisi-chat', 'attesa', 'I messaggi sono del piano con assistenza AI e chat',
+               'La Chat con AI fa parte del piano con assistenza AI e chat, che comprende 300 messaggi al mese. ' +
                'Attivalo dal tuo pannello: da lì questi pacchetti si aprono da soli.');
       q('avvisi-chat').innerHTML +=
-        '<a class="torna" href="/prezzi.html">Vedi i piani</a>';
+        '<a class="torna" href="/prezzi.html">Vedi il piano</a>';
     }
   }
 

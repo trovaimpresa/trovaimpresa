@@ -92,8 +92,6 @@ function blocco(b) {
 /* Il riquadro del prezzo: uno solo, uguale su tutte le pagine.
    ⛔ I prezzi stanno SOLO qui dentro. Se cambiano, si cambia questa
       funzione, non 28 pagine. */
-const PREZZO_ANNO = '249 €';
-const PREZZO_MESE = '29 €';
 /* 14 settembre 2026 — I GESTIONALI SONO DUE.
    Il secondo aggiunge la chat con AI dentro il gestionale. Le pagine
    nominavano solo il primo, e chi cercava «gestionale con AI» non trovava
@@ -103,21 +101,25 @@ const PREZZO_MESE = '29 €';
 const PREZZO_AI_ANNO = '349 €';
 const PREZZO_AI_MESE = '39 €';
 function riquadroPrezzo(cosa) {
+  /* ⛔ 3 ottobre 2026 — IL GESTIONALE BASE E' GRATIS. Prima qui c'era il
+     prezzo annuale (249/29) e la prova di 30 giorni: non esistono piu'.
+     A pagamento resta un piano solo, con assistenza AI e chat. */
   return `    <div class="prezzo-box">
-      <div class="sotto">${cosa} fa parte del Gestionale TrovaImpresa</div>
-      <div class="cifra">${PREZZO_ANNO} all'anno</div>
-      <div class="sotto">oppure ${PREZZO_MESE} al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <div class="sotto">${cosa} &egrave; nel gestionale TrovaImpresa</div>
+      <div class="cifra">Gratis per sempre</div>
+      <div class="sotto">per chi si iscrive &middot; nessuna carta di credito</div>
       <div class="prezzo-ai">
-        <b>C'&egrave; anche il gestionale con l'AI</b> — ${PREZZO_AI_ANNO} all'anno oppure ${PREZZO_AI_MESE} al mese.
-        Aggiunge la chat che ti risponde coi conti dei tuoi lavori e ti compila i moduli.
+        <b>Con l'assistenza AI e la chat</b> &mdash; ${PREZZO_AI_MESE} al mese oppure ${PREZZO_AI_ANNO} all'anno
+        (prezzo finale, nessuna IVA da aggiungere). Aggiunge la chat che ti risponde coi conti dei tuoi lavori
+        e ti compila i moduli. La attivi quando vuoi e ti disdici quando vuoi.
       </div>
       <ul class="checklist ok-list">
-        <li><strong>Lo provi 30 giorni gratis</strong>, e non serve la carta di credito.</li>
-        <li><strong>Alla fine della prova non parte nessun addebito.</strong> Se non fai nulla resti sul piano gratuito, e il profilo resta online.</li>
-        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
-        <li>Ricevi regolare fattura per ogni pagamento.</li>
+        <li><strong>Ti iscrivi con la mail e il gestionale &egrave; tuo</strong>, senza scadenza e senza carta.</li>
+        <li><strong>Se attivi l'AI e poi smetti</strong>, resti sul gestionale gratis con tutti i tuoi dati.</li>
+        <li>Dentro c'&egrave; anche il profilo sul marketplace, dove i clienti ti cercano.</li>
+        <li>Per l'AI ricevi regolare fattura per ogni pagamento.</li>
       </ul>
-      <p style="margin-top:22px"><a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
+      <p style="margin-top:22px"><a href="/gestionale" class="cta-dark">Usa il gestionale gratis</a>
         <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
     </div>`;
 }
@@ -170,9 +172,9 @@ function costruisci(pag, tutte) {
     description: testoPulito(pag.desc),
     featureList: pag.funzioni,
     offers: {
-      '@type': 'Offer', price: '249', priceCurrency: 'EUR',
+      '@type': 'Offer', price: '0', priceCurrency: 'EUR',
       url: BASE + '/prezzi.html', availability: 'https://schema.org/InStock',
-      description: "Compreso nel Gestionale TrovaImpresa: 249 euro all'anno oppure 29 euro al mese, con 30 giorni di prova gratuita, senza carta di credito."
+      description: "Il gestionale base di TrovaImpresa e' gratis per chi si iscrive, senza carta di credito. Assistenza AI e chat: 39 euro al mese oppure 349 euro all'anno."
     },
     publisher: { '@type': 'Organization', name: 'TrovaImpresa', url: BASE }
   }, null, 2);
@@ -227,8 +229,8 @@ ${riquadroSorelle(pag, tutte)}
     <div class="cta-band">
       <h3>${pag.ctaTitolo}</h3>
       <p>${pag.ctaTesto}</p>
-      <a href="/gestionale" class="cta-dark">Provalo 30 giorni gratis</a>
-      <span class="cta-sotto">Nessuna carta di credito &middot; Si disdice quando vuoi</span>
+      <a href="/gestionale" class="cta-dark">Usa il gestionale gratis</a>
+      <span class="cta-sotto">Gratis per sempre &middot; Nessuna carta di credito</span>
     </div>
 
   </article>

@@ -501,21 +501,21 @@
     } : motivo === 'subscription_expired' ? {
       occhio: 'Abbonamento scaduto',
       tit:    'Rinnova per continuare',
-      sub:    'I tuoi dati sono al sicuro. Rinnova il Gestionale e riprendi da dove avevi lasciato.',
+      sub:    'I tuoi dati sono al sicuro e il gestionale base resta gratis. Riattiva l\u2019assistenza AI e la chat e riprendi da dove avevi lasciato.',
       cta:    'Vedi i piani',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Gestionale', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
+        { n: 'Assistenza AI e chat', p: '349€', u: '/anno', d: '100 crediti AI al mese', top: true },
       ],
     } : {
       occhio: 'Assistente AI',
-      tit:    'L\'assistente AI è dentro il Gestionale',
-      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel Gestionale ci sono 40 crediti al mese, che si rinnovano ogni mese. Nel Gestionale AI sono 100.',
-      cta:    'Vedi il Gestionale',
+      tit:    'L\'assistente AI è nel piano con assistenza AI e chat',
+      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel piano ci sono 100 crediti al mese, che si rinnovano ogni mese. Il gestionale base resta gratis.',
+      cta:    'Vedi il piano',
       href:   '/prezzi.html',
       piani:  [
-        { n: 'Gestionale', p: '249€', u: '/anno', d: '40 crediti AI al mese', top: true },
-        { n: 'Gestionale', p: '29€', u: '/mese', d: 'stessa cosa, mese per mese' },
+        { n: 'Assistenza AI e chat', p: '349€', u: '/anno', d: '100 crediti AI al mese', top: true },
+        { n: 'Assistenza AI e chat', p: '39€', u: '/mese', d: 'stessa cosa, mese per mese' },
       ],
     };
 

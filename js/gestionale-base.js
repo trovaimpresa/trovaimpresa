@@ -10,4 +10,4 @@
       2) qui sotto: true, commit e push.
    Se si accende questo e non il database, chi entra non puo' salvare niente.
    Per spegnere: l'inverso, prima questo e poi il database. */
-window.GESTIONALE_BASE_APERTO = false;
+window.GESTIONALE_BASE_APERTO = true;

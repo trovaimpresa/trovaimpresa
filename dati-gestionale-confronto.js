@@ -22,15 +22,15 @@ module.exports = [
   minuti: 6,
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
-  funzioni: ['Prezzo annuale unico senza costo per utente', 'Nessun costo di attivazione',
-    'Trenta giorni di prova senza carta di credito', 'Si disdice quando vuoi',
+  funzioni: ['Gestionale base gratis per chi si iscrive', 'Assistenza AI e chat a prezzo fisso, senza costo per utente',
+    'Nessun costo di attivazione', 'Si disdice quando vuoi',
     'Marketplace compreso nello stesso prezzo'],
   ctaTitolo: 'Il modo più economico di decidere',
-  ctaTesto: 'Provane uno per 30 giorni senza mettere la carta. Se in un mese non lo apri più, hai la risposta e non hai speso niente.',
+  ctaTesto: 'Iscriviti e usalo con un lavoro vero: il gestionale è gratis e non scade. Se in un mese non lo apri più, hai la risposta e non hai speso niente.',
   sommario: `un gestionale per l'edilizia in Italia costa in genere fra i <strong>200 e i 900 € l'anno</strong>,
     ma la cifra sul listino è solo metà del conto: le differenze vere stanno nel <strong>costo per
     utente</strong>, nell'<strong>attivazione</strong> e nei moduli venduti a parte.
-    <span class="price-big">Qui: 249 € l'anno, tutto compreso</span>`,
+    <span class="price-big">Qui: gratis, e l'AI da 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -66,12 +66,13 @@ module.exports = [
 
     { h2: 'Cosa costa qui', blocchi: [
       { t:'tab', testa:['Voce','Quanto'], num:true, righe:[
-        ['Canone annuale', '249 €'],
-        ['Oppure mensile', '29 € al mese'],
+        ['Gestionale base', 'Gratis per sempre, senza carta'],
+        ['Assistenza AI e chat, al mese', '39 € al mese'],
+        ['Assistenza AI e chat, all\'anno', '349 € all\'anno'],
         ['Costo per utente in più', '0 € — gli accessi per collaboratori e segretaria sono compresi'],
         ['Attivazione', '0 €'],
         ['Moduli a parte', '0 € — computo, SAL, rapportini, mezzi e ore sono dentro'],
-        ['Prova', '30 giorni, senza carta di credito'],
+        ['Prova', 'Non serve: il gestionale base è gratis e non scade'],
       ]},
       `Il prezzo è finale: non c'è IVA da aggiungere, e per ogni pagamento ricevi regolare fattura.`,
       { t:'espe', x:`Il motivo per cui costa meno non è che vale meno: è che il gestionale non è il
@@ -113,14 +114,14 @@ module.exports = [
       r: `Le tre voci da chiedere sempre prima di firmare sono il costo per utente aggiuntivo,
           l'eventuale quota di attivazione una tantum e quali funzioni sono moduli venduti a parte.
           Il numero che conta è quanto pagherai il secondo anno con tutti gli utenti che ti servono.` },
-    { d: 'Il prezzo di 249 euro comprende tutto?',
-      r: `Sì: nessun costo per utente aggiuntivo, nessuna attivazione e nessun modulo a parte. Computo
-          metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi, e con lo stesso
-          abbonamento c'è anche il profilo in evidenza sul marketplace.` },
+    { d: 'Il gestionale è davvero gratis? E cosa si paga?',
+      r: `Il gestionale base è gratis per sempre: nessun costo per utente aggiuntivo, nessuna attivazione e nessun
+          modulo a parte. Computo metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi. Si paga solo
+          l'assistenza AI e la chat (39 euro al mese o 349 euro all'anno), che aggiunge anche il profilo in evidenza sul marketplace.` },
     { d: "C'è l'IVA da aggiungere?",
-      r: `No, 249 euro all'anno è il prezzo finale. Per ogni pagamento viene emessa regolare fattura.` },
+      r: `No, 39 euro al mese e 349 euro all'anno sono prezzi finali. Per ogni pagamento viene emessa regolare fattura.` },
     { d: 'Posso provarlo prima di pagare?',
-      r: `Sì, 30 giorni, e non serve la carta di credito. Alla fine della prova non c'è addebito automatico: se non fai nulla si resta sul piano gratuito.` },
+      r: `Non serve nemmeno una prova: il gestionale base è gratis e non scade, senza carta di credito. L'assistenza AI e la chat si attivano dopo, solo se ti servono, e si disdicono quando vuoi.` },
   ]
 },
 
@@ -132,19 +133,19 @@ module.exports = [
   riga: 'cosa regge davvero nel gratis, dove cede, e quando conviene pagare',
   briciola: 'Gestionale cantieri gratis',
   title: 'Gestionale cantieri gratis: dove regge e dove cede',
-  desc: 'Gestionale per cantieri gratis: cosa si riesce a fare senza pagare, dove il gratuito cede e quando conviene passare a pagamento.',
+  desc: 'Gestionale per cantieri gratis: cosa si fa con fogli di calcolo e gruppi WhatsApp, dove cedono e come il gestionale base di TrovaImpresa, gratis, li sostituisce.',
   h1: 'Gestionale cantieri gratis: cosa regge davvero e cosa no',
   minuti: 5,
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
-  funzioni: ['Trenta giorni di prova senza carta di credito', 'Profilo gratuito sul marketplace',
-    'Si disdice quando vuoi', 'Esportazione dei dati sempre gratuita'],
-  ctaTitolo: 'Il gratis più utile: 30 giorni interi',
-  ctaTesto: "Non una versione ridotta, ma il gestionale intero per 30 giorni. Senza carta e senza addebito alla fine: se non ti serve, non succede niente.",
+  funzioni: ['Gestionale base gratis per sempre', 'Nessuna carta di credito', 'Profilo gratuito sul marketplace',
+    'Esportazione dei dati sempre gratuita'],
+  ctaTitolo: 'Il gratis più utile: quello che non scade',
+  ctaTesto: "Non una prova che finisce: il gestionale base è tuo per sempre, con lavori, preventivi, computo e fatture. Paghi solo se un giorno vuoi l'assistenza AI.",
   sommario: `il gratis esiste e per certe cose basta. <strong>Fogli di calcolo, agenda del telefono e
     gruppi WhatsApp</strong> reggono fino a due cantieri; poi cedono su tre cose precise: le
     <strong>ore</strong>, il <strong>computo</strong> e la <strong>fattura elettronica</strong>.
-    <span class="price-big">Qui: 30 giorni interi, senza carta</span>`,
+    <span class="price-big">Qui: gratis per sempre, senza carta</span>`,
 
   sezioni: [
     { blocchi: [
@@ -178,28 +179,28 @@ module.exports = [
     ]},
 
     { h2: 'Il conto onesto', blocchi: [
-      `249 € all'anno fanno <strong>68 centesimi al giorno</strong>. La domanda giusta non è se te li puoi
-       permettere: è se ti fanno recuperare più di quello.`,
+      `Il gestionale base è gratis, quindi il conto è un altro: <strong>quanto tempo ti fa risparmiare</strong>.
+       La domanda giusta è se ti fa recuperare più delle serate che oggi passi sui fogli di calcolo.`,
       { t:'tab', testa:['Cosa recuperi','Quanto vale'], righe:[
         ['Un lavoro finito e dimenticato, fatturato', "Di solito qualche migliaio di euro. Una volta sola paga l'abbonamento per anni"],
         ['Le ore vere di un cantiere', 'Il numero che ti dice quali lavori lasciar perdere o rialzare di prezzo'],
         ['Un preventivo richiamato in tempo', 'Un lavoro che avresti perso solo per non aver risentito il cliente'],
         ['Le serate a rifare i computi', 'Il tempo tuo, che non è gratis nemmeno quando non lo fatturi'],
       ]},
-      `Se dopo 30 giorni di prova nessuna di queste cose è successa, allora il gratis ti basta davvero — e
+      `Se dopo un mese d'uso nessuna di queste cose è successa, allora i fogli di calcolo ti bastano davvero — e
        questa è una risposta buona, non una sconfitta.`
     ]},
 
-    { h2: 'Come provare senza rischiare niente', blocchi: [
+    { h2: 'Come cominciare senza rischiare niente', blocchi: [
       { t:'fig', src:'/img/gestionale-lavori.webp', w:1440, h:971,
-        alt:'Il gestionale durante i 30 giorni di prova, con i lavori e i loro stati',
-        cap:'Trenta giorni con tutte le funzioni, non una versione ridotta.' },
+        alt:'Il gestionale gratis, con i lavori e i loro stati',
+        cap:'Gratis per sempre, non una prova che finisce.' },
       `Il modo più onesto di rispondere alla domanda «mi serve?» è provarlo con un lavoro vero, non
        guardare una demo.`,
       { t:'ok', righe:[
-        `<strong>Trenta giorni interi</strong>, con tutte le funzioni, non una versione ridotta.`,
-        `<strong>Senza carta di credito.</strong> Non ti chiediamo il numero per farti provare.`,
-        `<strong>Senza addebito alla fine.</strong> Finiti i 30 giorni non ti addebitiamo niente: se non fai nulla resti sul piano gratuito e il profilo resta online.`,
+        `<strong>Gratis per sempre</strong>, senza scadenza: non è una prova che finisce.`,
+        `<strong>Senza carta di credito.</strong> Non ti chiediamo il numero per iniziare.`,
+        `<strong>Se un giorno vuoi l'AI</strong> la attivi dal pannello (39 € al mese o 349 € all'anno). Se smetti, resti sul gestionale gratis con tutti i tuoi dati.`,
         `<strong>I dati restano tuoi</strong> e si esportano in Excel o JSON anche se non continui.`,
       ]},
       { t:'espe', x:`La regola che seguiamo è semplice: un gestionale non si può far comprare a scatola
@@ -209,17 +210,18 @@ module.exports = [
 
   faq: [
     { d: 'Esiste un gestionale per cantieri completamente gratis?',
-      r: `Esistono strumenti gratuiti che coprono pezzi del lavoro — fogli di calcolo per i preventivi,
+      r: `Sì: il gestionale base di TrovaImpresa è gratis per chi si iscrive, senza scadenza, con preventivi, computo, fatture, cantieri e ore.
+          A pagamento c'è solo l'assistenza AI. Poi esistono strumenti gratuiti che coprono pezzi del lavoro — fogli di calcolo per i preventivi,
           programmi gratuiti di fatturazione, calendari condivisi. Quello che manca nel gratuito è il
           collegamento fra le cose: le ore sommate per cantiere, il computo che diventa preventivo e il
           preventivo che diventa fattura.` },
-    { d: 'Quanto dura la prova e serve la carta?',
-      r: `Trenta giorni, con tutte le funzioni, e la carta di credito non serve. Alla fine non c'è nessun addebito automatico: se non fai nulla resti sul piano gratuito.` },
-    { d: 'Se non continuo, perdo i dati?',
-      r: `No. I dati si esportano in Excel o in JSON quando vuoi, anche se non continui, e il profilo sul
-          marketplace resta online sul piano gratuito.` },
+    { d: 'Serve la carta di credito? Per quanto è gratis?',
+      r: `La carta non serve e non c'è scadenza: il gestionale base resta gratis per sempre. La carta serve solo se attivi l'assistenza AI e la chat.` },
+    { d: 'Se smetto di pagare l\'AI, perdo i dati?',
+      r: `No. Lavori, preventivi e fatture restano nel gestionale gratis: si spegne solo l'assistenza AI e la chat.
+          I dati si esportano comunque in Excel o in JSON quando vuoi.` },
     { d: 'Il profilo sul marketplace è gratuito?',
-      r: `Sì, il profilo e la presenza nelle pagine di ricerca ci sono anche senza pagare. Con il Gestionale
+      r: `Sì, il profilo e la presenza nelle pagine di ricerca ci sono anche senza pagare. Con l'assistenza AI e la chat
           il profilo esce più in alto ed è messo in evidenza.` },
     { d: 'Il foglio di calcolo può bastarmi?',
       r: `Con uno o due cantieri alla volta, spesso sì. Comincia a non bastare quando i cantieri aperti
@@ -236,7 +238,7 @@ module.exports = [
   riga: 'da uno a dieci: quello che serve davvero e quello che è solo peso',
   briciola: 'Gestionale per la piccola impresa edile',
   title: 'Gestionale per piccole imprese edili e artigiani',
-  desc: 'Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. 30 giorni gratis.',
+  desc: 'Gestionale per piccole imprese edili da 1 a 10 persone: le sei cose che servono davvero e quelle che sono solo peso. Gratis per chi si iscrive.',
   h1: 'Gestionale per la piccola impresa edile: sei cose servono, il resto è peso',
   minuti: 5,
   nomeApp: 'Gestionale TrovaImpresa',
@@ -248,7 +250,7 @@ module.exports = [
   sommario: `per un'impresa da <strong>una a dieci persone</strong> le funzioni che servono davvero sono
     sei, e i gestionali fatti per le imprese grandi falliscono proprio perché ne hanno ottanta.
     Qui c'è quello che serve, senza il peso.
-    <span class="price-big">30 giorni di prova, poi 249 € l'anno</span>`,
+    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
