@@ -3494,7 +3494,7 @@ async function caricaSessioneConDati(session) {
   impresaCorrente = vistaFondatore(impresaCorrente);
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
     const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
-    window.location.href = file;
+    window.location.href = file + (new URLSearchParams(location.search).get('attiva') ? '?attiva=' + encodeURIComponent(new URLSearchParams(location.search).get('attiva')) : '');
     return;
   }
   if (impresaCorrente.id) {
@@ -3536,7 +3536,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   impresaCorrente = vistaFondatore(impresaCorrente);
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
     const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
-    window.location.href = file;
+    window.location.href = file + (new URLSearchParams(location.search).get('attiva') ? '?attiva=' + encodeURIComponent(new URLSearchParams(location.search).get('attiva')) : '');
     return;
   }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
@@ -3581,7 +3581,7 @@ async function doLogin() {
   impresaCorrente = vistaFondatore(impresaCorrente);
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
     const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
-    window.location.href = file;
+    window.location.href = file + (new URLSearchParams(location.search).get('attiva') ? '?attiva=' + encodeURIComponent(new URLSearchParams(location.search).get('attiva')) : '');
     return;
   }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
@@ -3915,6 +3915,7 @@ function aggiornaBadgeEOverlay() {
   }
   aggiornaCardVisibile(piano);
   montaPorteGestionale();
+  apriAttivaDaLink();
   bloccaCardPremium();
 }
 
@@ -6586,6 +6587,22 @@ async function apriPortaleClienti(bottone) {
     alert('Errore: ' + e.message);
   }
   if (bottone) { bottone.disabled = false; montaPorteGestionale(); }
+}
+
+/* ⛔ 3 OTTOBRE 2026 — «ATTIVA» DALL'INTERNO DEL GESTIONALE.
+   Il gestionale (e la chat) mandano qui con ?attiva=ai (assistenza AI, 29/249)
+   o ?attiva=chat (assistenza AI e chat, 39/349): si apre subito la finestra
+   dei due prezzi, e da li' si va a Stripe. Chi e' gia' abbonato NON ricompra:
+   per lui si scorre solo fino alle porte, dove c'e' «Gestisci l'abbonamento». */
+function apriAttivaDaLink() {
+  const a = new URLSearchParams(location.search).get('attiva');
+  if (a !== 'ai' && a !== 'chat') return;
+  const box = document.getElementById('porte-gestionale');
+  if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!impresaCorrente) return;
+  if (impresaCorrente.premium_pagato === true) return;
+  const porta = PORTE_GESTIONALE.find(p => p.chiave === (a === 'chat' ? 'premium-ai' : 'premium'));
+  if (porta) apriModalPiano(porta);
 }
 
 function aggiornaCardVisibile(piano) {

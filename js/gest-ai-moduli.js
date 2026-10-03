@@ -62,7 +62,7 @@
         /* 3 ott 2026: col gestionale base gratis l'AI e' il piano a pagamento */
         txt.innerHTML = "<b>non è attiva</b> — c'è nell'assistenza AI";
         cta.textContent = "Attiva l'assistenza AI";
-        cta.href = "/prezzi.html";
+        cta.href = "/pannello-impresa.html?attiva=ai";
       }else{
       txt.innerHTML = "<b>non è attiva</b> — arriva col Gestionale";
       cta.textContent = "Vedi il Gestionale";

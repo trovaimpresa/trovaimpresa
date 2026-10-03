@@ -3907,6 +3907,7 @@ async function inizializza() {
   }
   aggiornaCardVisibile(piano);
   montaPorteGestionale();
+  apriAttivaDaLink();
   bloccaCardPremium();
 
   // Colore header: visibile solo per chi ha il Gestionale
@@ -5483,6 +5484,22 @@ async function calcolaPrioritaProfessionista() {
   const idxSenza = senza.findIndex(x => x.id === impresaCorrente.id);
   const posSenza = idxSenza >= 0 ? idxSenza + 1 : senza.length;
   return { posUtente, totale: lista.length, posSenza, citta };
+}
+
+/* ⛔ 3 OTTOBRE 2026 — «ATTIVA» DALL'INTERNO DEL GESTIONALE.
+   Il gestionale (e la chat) mandano qui con ?attiva=ai (assistenza AI, 29/249)
+   o ?attiva=chat (assistenza AI e chat, 39/349): si apre subito la finestra
+   dei due prezzi, e da li' si va a Stripe. Chi e' gia' abbonato NON ricompra:
+   per lui si scorre solo fino alle porte, dove c'e' «Gestisci l'abbonamento». */
+function apriAttivaDaLink() {
+  const a = new URLSearchParams(location.search).get('attiva');
+  if (a !== 'ai' && a !== 'chat') return;
+  const box = document.getElementById('porte-gestionale');
+  if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!impresaCorrente) return;
+  if (impresaCorrente.premium_pagato === true) return;
+  const porta = PORTE_GESTIONALE.find(p => p.chiave === (a === 'chat' ? 'premium-ai' : 'premium'));
+  if (porta) apriModalPiano(porta);
 }
 
 function aggiornaCardVisibile(piano) {

@@ -692,7 +692,7 @@
            un piano che non c'e'. Qui si aggiunge solo la strada per
            comprare, che e' il pannello: le porte stanno li'. */
         scrivi('ai', esc(d.error || 'La Chat con AI fa parte del Gestionale AI.')
-          + (d.assaggio_finito ? '<br><a href="/pannello-impresa.html#dashboard">Attiva il Gestionale AI dal pannello</a>' : ''));
+          + (d.assaggio_finito ? (window.GESTIONALE_BASE_APERTO===true ? '<br><a href="/pannello-impresa.html?attiva=chat">Attiva l\'assistenza AI e chat</a>' : '<br><a href="/pannello-impresa.html#dashboard">Attiva il Gestionale AI dal pannello</a>') : ''));
       } else if (d.serve_messaggi || d.serve_crediti) {
         /* ⛔ 14 set 2026: `serve_crediti` e' il nome vecchio, di quando la
            chat mangiava i crediti dell'assistenza. Resta riconosciuto solo
