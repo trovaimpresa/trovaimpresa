@@ -500,9 +500,9 @@
       spiega:"Un computo raccoglie le lavorazioni con le loro misure: parti uguali, lunghezza, larghezza, altezza, e i vuoti da detrarre. La quantità la calcola il gestionale."
     },
     imp:{
-      nome:"Elenco lavori da prezzare", uno:"elenco lavori da prezzare", tanti:"elenchi lavori da prezzare",
-      nuovo:"Nuovo elenco lavori da prezzare", crea:"+ Nuovo elenco lavori",
-      primo:"+ Crea il primo elenco lavori", vuoto:"Ancora nessun elenco lavori da prezzare",
+      nome:"Computo da prezzare", uno:"computo da prezzare", tanti:"computi da prezzare",
+      nuovo:"Nuovo computo da prezzare", crea:"+ Nuovo computo",
+      primo:"+ Crea il primo computo", vuoto:"Ancora nessun computo da prezzare",
       spiega:"Il computo che ti manda il geometra arriva quasi sempre senza prezzi. Creane uno qui e dentro ci carichi il suo file: le lavorazioni entrano con le loro quantità, e i prezzi ce li metti tu."
     }
   };
