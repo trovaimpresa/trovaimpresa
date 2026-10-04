@@ -1339,6 +1339,22 @@
       <div class="topbar">
         <div class="topbar-title">💬 Forum Edilizia</div>
       </div>
+      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(10,42,77,.08);padding:18px;margin:0 0 16px;max-width:900px">
+        <div style="font-weight:800;font-size:1.05rem">✍️ Pubblica una domanda della redazione</div>
+        <div style="color:#5a6b80;font-size:.85rem;margin:2px 0 8px">Esce subito nel forum, firmata «Redazione TrovaImpresa». Non serve confermare l'email.</div>
+        <label style="display:block;font-weight:700;font-size:.8rem;margin:8px 0 4px">Titolo</label>
+        <input id="forum-nuovo-titolo" maxlength="120" style="width:100%;box-sizing:border-box;border:1.5px solid #d5dfec;border-radius:10px;padding:10px 12px;font:inherit">
+        <label style="display:block;font-weight:700;font-size:.8rem;margin:8px 0 4px">Testo</label>
+        <textarea id="forum-nuovo-testo" maxlength="3000" style="width:100%;box-sizing:border-box;border:1.5px solid #d5dfec;border-radius:10px;padding:10px 12px;font:inherit;min-height:110px"></textarea>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+          <div><label style="display:block;font-weight:700;font-size:.8rem;margin:8px 0 4px">Mestiere</label>
+            <select id="forum-nuovo-mestiere" style="width:100%;box-sizing:border-box;border:1.5px solid #d5dfec;border-radius:10px;padding:10px 12px;font:inherit"><option>Muratore</option><option selected>Impresa edile</option><option>Idraulico</option><option>Elettricista</option><option>Imbianchino</option><option>Piastrellista</option><option>Falegname</option><option>Fabbro</option><option>Carpentiere</option><option>Cartongessista</option><option>Serramentista</option><option>Geometra</option><option>Architetto</option><option>Altro</option></select></div>
+          <div><label style="display:block;font-weight:700;font-size:.8rem;margin:8px 0 4px">Città</label>
+            <input id="forum-nuovo-citta" maxlength="60" value="Rieti" style="width:100%;box-sizing:border-box;border:1.5px solid #d5dfec;border-radius:10px;padding:10px 12px;font:inherit"></div>
+        </div>
+        <button class="action-btn" id="forum-nuovo-btn" onclick="forumCrea()" style="margin-top:14px;background:#0066ff;color:#fff;font-weight:800;padding:12px 20px">Pubblica subito</button>
+        <span id="forum-nuovo-msg" style="margin-left:10px;font-size:.85rem"></span>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">
         <button class="action-btn" id="forum-tab-controllo" onclick="forumFiltro('controllo')">Da controllare</button>
         <button class="action-btn" id="forum-tab-tutte" onclick="forumFiltro('tutte')">Tutte</button>
@@ -4962,6 +4978,20 @@ function forumFiltro(f) {
       </td>
     </tr>`;
   }).join('');
+}
+
+async function forumCrea() {
+  const g = id => document.getElementById('forum-nuovo-' + id);
+  const msg = g('msg'), btn = g('btn');
+  msg.style.color = '#5a6b80'; msg.textContent = 'Pubblico…'; btn.disabled = true;
+  try {
+    const j = await forumChiama({ action: 'crea', titolo: g('titolo').value, testo: g('testo').value, mestiere: g('mestiere').value, citta: g('citta').value });
+    msg.style.color = '#15803d';
+    msg.innerHTML = '✓ Pubblicata. <a href="/forum-richiesta?s=' + encodeURIComponent(j.slug) + '" target="_blank">Aprila</a>';
+    g('titolo').value = ''; g('testo').value = '';
+    await caricaForum();
+  } catch (e) { msg.style.color = '#b91c1c'; msg.textContent = 'Errore: ' + e.message; }
+  btn.disabled = false;
 }
 
 async function forumAzione(azione, tipo, id) {
