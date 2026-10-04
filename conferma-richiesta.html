@@ -13,19 +13,27 @@
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/forum.css?v=1">
+  <link rel="stylesheet" href="/css/forum-sito.css?v=1">
   <link rel="stylesheet" href="/css/mobile.css?v=3">
 </head>
 <body>
-<header>
-  <a href="/forum"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></a>
-  <nav>
-    <a href="/forum" class="attivo">Forum</a>
-    <a href="/index.html">Trova imprese</a>
-    <a href="/blog.html">Guide e costi</a>
-    <a href="/subappalto.html">Subappalti</a>
-    <a href="/login-impresa.html" class="btn-pannello">Accedi al tuo pannello</a>
+<!-- 4 ott 2026 — il sito intorno al forum: fascia, barra con logo e ricerca, riga dei mestieri. Stile in css/forum-sito.css -->
+<div class="fs-strip"><div class="in"><span>Gratis e senza registrarti</span><span>Rispondono imprese e artigiani iscritti</span><span>Scrivi una richiesta con foto</span><a href="/registrazione-impresa.html">Sei un'impresa? Iscriviti gratis</a></div></div>
+<div class="fs-nav"><div class="in">
+  <a class="fs-logo" href="/forum"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></a>
+  <form class="fs-cerca" action="/forum" method="get" role="search"><input type="search" name="q" maxlength="60" placeholder="Cerca una richiesta nel forum…" aria-label="Cerca una richiesta nel forum"></form>
+  <nav class="fs-links">
+    <a class="on" href="/forum">Forum</a>
+    <a class="g hide" href="/gestionale">Gestionale</a>
+    <a class="b hide" href="/bandi.html">Bandi e fondi</a>
+    <a class="u hide" href="/blog.html">Guide e costi</a>
+    <a class="hide" href="/subappalto.html">Subappalti</a>
+    <a class="hide" href="/prezzi.html">Prezzi</a>
+    <a class="acc" href="/login-impresa.html">Accedi</a>
+    <a class="isc" href="/registrazione-impresa.html">Iscriviti gratis</a>
   </nav>
-</header>
+</div></div>
+<div class="fs-sub"><div class="in"><a href="/forum" data-m="">Tutte</a><a href="/forum?m=Muratore" data-m="Muratore">Muratore</a><a href="/forum?m=Impresa%20edile" data-m="Impresa edile">Impresa edile</a><a href="/forum?m=Idraulico" data-m="Idraulico">Idraulico</a><a href="/forum?m=Elettricista" data-m="Elettricista">Elettricista</a><a href="/forum?m=Imbianchino" data-m="Imbianchino">Imbianchino</a><a href="/forum?m=Piastrellista" data-m="Piastrellista">Piastrellista</a><a href="/forum?m=Falegname" data-m="Falegname">Falegname</a><a href="/forum?m=Fabbro" data-m="Fabbro">Fabbro</a><a href="/forum?m=Carpentiere" data-m="Carpentiere">Carpentiere</a><a href="/forum?m=Cartongessista" data-m="Cartongessista">Cartongessista</a><a href="/forum?m=Serramentista" data-m="Serramentista">Serramentista</a><a href="/forum?m=Geometra" data-m="Geometra">Geometra</a><a href="/forum?m=Architetto" data-m="Architetto">Architetto</a><a href="/forum?m=Altro" data-m="Altro">Altro</a></div></div>
 <div class="f-layout" style="grid-template-columns:1fr;max-width:620px">
   <main class="f-main">
     <div class="f-comp" style="padding:26px 18px">
@@ -33,6 +41,15 @@
     </div>
   </main>
 </div>
+<footer class="fs-foot">
+  <div class="cols">
+    <div><h3>TrovaImpresa · Forum Edilizia</h3><p style="margin:0 0 10px;line-height:1.55">Il posto dove chiedere alle imprese e agli artigiani della tua zona. Gratis per i clienti.</p><p style="margin:0;font-size:13.5px;line-height:1.7">Alessio Pinto — Rieti (RI)<br><a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a><br>P.IVA 01285950570</p></div>
+    <div><h3>Per chi cerca</h3><ul><li><a href="/forum">Forum Edilizia</a></li><li><a href="/cerca-imprese.html">Cerca imprese</a></li><li><a href="/citta">Imprese per città</a></li><li><a href="/blog.html">Guide e costi edili</a></li></ul></div>
+    <div><h3>Per le imprese</h3><ul><li><a href="/registrazione-impresa.html">Iscrivi la tua attività</a></li><li><a href="/login-impresa.html">Accedi al tuo pannello</a></li><li><a href="/gestionale">Gestionale gratuito</a></li><li><a href="/prezzi.html">Piani e prezzi</a></li></ul></div>
+    <div><h3>Supporto</h3><ul><li><a href="/contatti.html">Contatti e assistenza</a></li><li><a href="/privacy-policy.html">Informativa sulla privacy</a></li><li><a href="/cookie-policy.html">Cookie Policy</a></li><li><a href="/termini-condizioni.html">Termini di servizio</a></li></ul></div>
+  </div>
+  <div class="bot">© 2026 TrovaImpresa — Alessio Pinto — Rieti (RI)</div>
+</footer>
 <script>
 (function(){
   var t=new URLSearchParams(location.search).get('t')||'', box=document.getElementById('esito');

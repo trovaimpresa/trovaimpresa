@@ -21,7 +21,13 @@
   var COLONNE = 'id,slug,titolo,testo,mestiere,citta,foto,nome_pubblico,stato,n_risposte,n_voti,indicizzabile,creato_il';
   var PER_PAGINA = 12;
 
-  var stato = { ordine: 'nuove', mestiere: '', pagina: 0, finito: false, singolo: false, slug: '', g: '' };
+  var stato = { ordine: 'nuove', mestiere: '', q: '', pagina: 0, finito: false, singolo: false, slug: '', g: '' };
+
+  /* 4 ott 2026 — la ricerca: toglie i caratteri che nel filtro del database
+     avrebbero un significato speciale (virgole, parentesi, asterischi, apici…) */
+  function pulisciRicerca(t) {
+    return String(t || '').replace(/[,()*%\\"'.:;<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+  }
   var io = { impresa: null };       // l'impresa che ha fatto l'accesso, se c'e'
   var mieiVoti = {};                // cosa ha gia' votato questo browser
   var fotoScelte = [];
@@ -154,6 +160,7 @@
     if (!aggiungi) { stato.pagina = 0; stato.finito = false; box.innerHTML = '<div class="f-vuoto">Carico le richieste…</div>'; }
     var q = sb.from('bacheca_richieste').select(COLONNE).in('stato', ['pubblicata', 'chiusa']);
     if (stato.mestiere) q = q.eq('mestiere', stato.mestiere);
+    if (stato.q) q = q.or('titolo.ilike.*' + stato.q + '*,testo.ilike.*' + stato.q + '*');
     if (stato.ordine === 'senza') q = q.eq('n_risposte', 0).eq('stato', 'pubblicata');
     if (stato.ordine === 'utili') q = q.order('n_voti', { ascending: false }).order('creato_il', { ascending: false });
     else q = q.order('creato_il', { ascending: false });
@@ -165,7 +172,9 @@
         var html = righe.map(function (r) { return htmlPost(r, mappa[r.id]); }).join('');
         if (!aggiungi) box.innerHTML = '';
         if (!righe.length && !aggiungi) {
-          box.innerHTML = '<div class="f-vuoto"><b>Ancora nessuna richiesta' + (stato.mestiere ? ' per questo mestiere' : '') + '.</b><br>Scrivi tu la prima: è gratis e non serve registrarsi.</div>';
+          box.innerHTML = stato.q
+            ? '<div class="f-vuoto"><b>Nessuna richiesta trovata per «' + esc(stato.q) + '».</b><br>Prova con un\'altra parola, oppure scrivi tu la richiesta: è gratis e non serve registrarsi.</div>'
+            : '<div class="f-vuoto"><b>Ancora nessuna richiesta' + (stato.mestiere ? ' per questo mestiere' : '') + '.</b><br>Scrivi tu la prima: è gratis e non serve registrarsi.</div>';
         } else { box.insertAdjacentHTML('beforeend', html); }
         stato.finito = righe.length < PER_PAGINA;
         var altro = $('#f-carica'); if (altro) altro.style.display = stato.finito ? 'none' : 'block';
@@ -434,12 +443,29 @@
         e.target.value = ''; disegnaAnteprime();
       });
       if (location.hash === '#scrivi') comp.classList.add('aperto');
+      /* i bottoni «Scrivi la tua richiesta» in cima alla pagina aprono la casella */
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href="#scrivi"]'); if (!a) return;
+        e.preventDefault(); comp.classList.add('aperto');
+        comp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var t = $('#f-titolo'); if (t) setTimeout(function () { try { t.focus({ preventScroll: true }); } catch (x) { t.focus(); } }, 400);
+      });
     }
+
+    /* ricerca e mestiere arrivano dall'indirizzo: /forum?q=bagno  /forum?m=Idraulico */
+    var qs = new URLSearchParams(location.search);
+    var mm = qs.get('m'); if (mm && MESTIERI.indexOf(mm) > -1) stato.mestiere = mm;
+    stato.q = pulisciRicerca(qs.get('q'));
+    var campoQ = document.querySelector('.fs-cerca input'); if (campoQ && stato.q) campoQ.value = stato.q;
+    if ($('#f-ordina')) document.querySelectorAll('.fs-sub a').forEach(function (a) {
+      a.classList.toggle('on', (a.getAttribute('data-m') || '') === stato.mestiere);
+    });
 
     var ord = $('#f-ordina');
     if (ord) {
       var sel = $('#f-filtro-mestiere');
       sel.innerHTML = '<option value="">Tutti i mestieri</option>' + MESTIERI.map(function (m) { return '<option>' + m + '</option>'; }).join('');
+      sel.value = stato.mestiere;
       ord.addEventListener('click', function (e) {
         var b = e.target.closest('button[data-ord]'); if (!b) return;
         ord.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on');

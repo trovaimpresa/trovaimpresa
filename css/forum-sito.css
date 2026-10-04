@@ -1,0 +1,100 @@
+/* Forum Edilizia — il sito intorno al forum (4 ottobre 2026).
+   Fascia informativa, barra con logo e ricerca, riga dei mestieri, banner,
+   parole chiave e footer completo. Si carica DOPO css/forum.css.
+   Blu e griglia sono quelli del gestionale; pastiglie colorate come la home.
+   Le classi iniziano tutte con «fs-» per non pestare quelle del forum («f-»). */
+
+.f-layout{padding-top:22px}
+.f-comp{scroll-margin-top:96px}
+
+/* ---- fascia informativa in cima ---- */
+.fs-strip{background:#ff8800;color:#fff;font-size:14px;font-weight:700}
+.fs-strip .in{max-width:1180px;margin:0 auto;padding:8px 16px;display:flex;gap:6px 26px;flex-wrap:wrap;justify-content:center;align-items:center;text-align:center}
+.fs-strip span::before{content:"✓ ";font-weight:800}
+.fs-strip a{color:#fff;text-decoration:underline}
+
+/* ---- barra: logo, ricerca, collegamenti ---- */
+.fs-nav{background:#fff;border-bottom:1px solid #e3e8ef;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(10,42,77,.06)}
+.fs-nav .in{max-width:1180px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:12px}
+.fs-logo img{height:66px;display:block}
+.fs-cerca{flex:1;min-width:170px;max-width:250px;position:relative;margin:0}
+.fs-cerca input{width:100%;border:2px solid #d5dfec;border-radius:30px;padding:11px 18px 11px 44px;font-size:15px;font-family:inherit;background:#f6f8fb;color:#12233a}
+.fs-cerca input:focus{outline:none;border-color:#0066ff;background:#fff}
+.fs-cerca::before{content:"🔍";position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.fs-links{display:flex;gap:2px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.fs-links a{padding:8px 9px;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none;color:#0a2a4d;white-space:nowrap}
+.fs-links a:hover{text-decoration:underline}
+.fs-links a.on{background:#ffe6d6;color:#b8470f}
+.fs-links a.g{background:#dbeafe;color:#1e40af}
+.fs-links a.b{background:#fef3c7;color:#92400e}
+.fs-links a.u{background:#ede9fe;color:#5b21b6}
+.fs-links a.acc{border:2px solid #0066ff;color:#0066ff;padding:7px 14px;border-radius:10px;margin-left:6px}
+.fs-links a.isc{background:#15803d;color:#fff;padding:9px 16px;border-radius:10px;margin-left:4px}
+.fs-links a.isc:hover{background:#116a32;text-decoration:none}
+
+/* ---- riga dei mestieri ---- */
+.fs-sub{background:#f4f7fb;border-bottom:1px solid #e3e8ef}
+.fs-sub .in{max-width:1180px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.fs-sub .in::-webkit-scrollbar{display:none}
+.fs-sub a{padding:11px 13px;font-size:13px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#0a2a4d;text-decoration:none;border-bottom:3px solid transparent}
+.fs-sub a:hover,.fs-sub a.on{color:#e8733a;border-bottom-color:#e8733a}
+
+/* ---- banner blu con la griglia, come il gestionale ---- */
+.fs-hero{background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px),radial-gradient(800px 380px at 88% 0%,rgba(0,102,255,.5),transparent 70%);background-size:34px 34px,34px 34px,auto;color:#fff;padding:46px 16px 78px}
+.fs-hero .in{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.fs-card{display:inline-block;background:#fff;border-radius:16px;padding:12px 20px;box-shadow:0 10px 30px rgba(0,0,0,.28);margin-bottom:22px}
+.fs-card img{height:86px;display:block}
+.fs-hero h1{font-size:46px;line-height:1.08;letter-spacing:-1.2px;margin:0 0 14px;font-weight:800;font-family:inherit;color:#fff}
+.fs-hero h1 em{font-style:normal;color:#ff9a2e}
+.fs-hero p.s{font-size:19px;line-height:1.5;color:#cfe0f7;margin:0 0 24px;max-width:600px}
+.fs-btns{display:flex;gap:12px;flex-wrap:wrap}
+.fs-btns a{display:inline-block;padding:15px 28px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none}
+.fs-btns .o{background:#ff8800;color:#fff}
+.fs-btns .o:hover{background:#e67a00}
+.fs-btns .v{border:2px solid rgba(255,255,255,.55);color:#fff}
+.fs-btns .v:hover{background:rgba(255,255,255,.12)}
+.fs-chk{display:flex;gap:8px 22px;flex-wrap:wrap;margin-top:20px;font-weight:700;font-size:15px;color:#e6f0ff}
+.fs-chk span::before{content:"✓ ";color:#3ddc84;font-weight:900}
+.fs-steps{display:grid;gap:12px}
+.fs-step{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:16px 18px}
+.fs-step b.n{flex:none;width:36px;height:36px;border-radius:50%;background:#ff8800;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+.fs-step strong{display:block;font-size:17px;margin-bottom:2px;color:#fff}
+.fs-step span{font-size:14.5px;color:#cfe0f7;line-height:1.4}
+
+/* ---- parole chiave, che si sovrappongono al banner ---- */
+.fs-tag{max-width:1020px;margin:-34px auto 0;padding:0 14px;position:relative;z-index:2}
+.fs-tag .box{background:#fff;border-radius:14px;box-shadow:0 6px 22px rgba(10,42,77,.15);padding:14px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fs-tag .box small{font-weight:800;color:#0a2a4d;margin-right:4px;font-size:14px}
+.fs-tag a{background:#eaf2ff;color:#0047b3;font-weight:700;font-size:13.5px;padding:6px 12px;border-radius:20px;text-decoration:none}
+.fs-tag a:hover{background:#d6e6ff}
+
+/* ---- footer completo ---- */
+.fs-foot{background:#0a2a4d;color:#cfe0f7;margin-top:30px;font-size:14.5px}
+.fs-foot .cols{max-width:1180px;margin:0 auto;padding:38px 16px 18px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px}
+.fs-foot h3{color:#fff;font-size:15px;margin:0 0 10px}
+.fs-foot ul{list-style:none;padding:0;margin:0}
+.fs-foot li{margin:0 0 7px}
+.fs-foot a{color:#a9c9f5;text-decoration:none}
+.fs-foot a:hover{text-decoration:underline}
+.fs-foot .bot{border-top:1px solid rgba(255,255,255,.14);text-align:center;padding:14px 16px;font-size:13.5px}
+
+@media(max-width:1100px){.fs-links a.hide{display:none}}
+@media(max-width:900px){
+  .fs-hero .in{grid-template-columns:1fr}
+  .fs-hero h1{font-size:34px}
+  .fs-foot .cols{grid-template-columns:1fr 1fr}
+  .fs-nav .in{flex-wrap:wrap}
+  .fs-cerca{order:3;max-width:none;flex-basis:100%}
+}
+@media(max-width:700px){
+  /* sul telefono la fascia in cima e' una riga sola */
+  .fs-strip span:nth-of-type(n+2){display:none}
+  .fs-strip .in{padding:7px 12px;gap:2px 12px}
+}
+@media(max-width:560px){
+  .fs-foot .cols{grid-template-columns:1fr}
+  .fs-btns a{width:100%;text-align:center}
+  .fs-logo img{height:54px}
+  .fs-card img{height:70px}
+  .fs-hero{padding:34px 16px 70px}
+}
