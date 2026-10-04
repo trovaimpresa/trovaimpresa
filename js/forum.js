@@ -366,7 +366,7 @@
 
     if (a === 'segnala') {
       var lista = el.closest('.f-menu-lista');
-      sb.rpc('bacheca_segnala', { p_tipo: el.getAttribute('data-t'), p_id: el.getAttribute('data-id'), p_visitatore: visitatore(), p_motivo: el.getAttribute('data-m') });
+      sb.rpc('bacheca_segnala', { p_tipo: el.getAttribute('data-t'), p_id: el.getAttribute('data-id'), p_visitatore: visitatore(), p_motivo: el.getAttribute('data-m') }).then(function () {});
       lista.innerHTML = '<small>Grazie, segnalato. Lo controlliamo.</small>';
       return;
     }
