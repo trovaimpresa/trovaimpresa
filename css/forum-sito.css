@@ -98,3 +98,14 @@
   .fs-card img{height:70px}
   .fs-hero{padding:34px 16px 70px}
 }
+
+/* ---- schermi grandi (4 ott 2026): tutto piu' grande e meno vuoto ai lati ---- */
+@media(min-width:1100px){
+  html{zoom:1.25}
+  .fs-strip .in,.fs-nav .in,.fs-sub .in,.fs-hero .in,.fs-foot .cols{max-width:1440px}
+  .fs-tag,.f-layout{max-width:1300px}
+  .f-layout{grid-template-columns:minmax(0,1fr) 340px;gap:26px}
+  .fs-logo img{height:76px}
+  .fs-links a{font-size:15px}
+  .fs-hero h1{font-size:54px}
+}
