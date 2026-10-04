@@ -38,22 +38,24 @@
         '<a class="fx-rs" data-fx href="/forum-richiesta?s=' + encodeURIComponent(q.slug) + '#rispondi">Rispondi</a></div>';
     }).join('');
     box.innerHTML = '<style>' +
-      '.fx{background:#fff;border-radius:20px;padding:20px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #e8733a}' +
-      '.fx-t{display:flex;align-items:center;gap:10px;margin-bottom:2px}.fx-t h3{font-family:"Playfair Display",Georgia,serif;font-size:1.2rem;color:#0a2a4d;margin:0}' +
-      '.fx-b{background:#c0392b;color:#fff;font-weight:700;font-size:.8rem;border-radius:12px;padding:2px 9px}' +
-      '.fx-s{color:#5b6b80;font-size:.9rem;margin-bottom:8px}' +
-      '.fx-lista{max-height:272px;overflow-y:auto;overscroll-behavior:contain}' +
-      '.fx-r{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #eef1f5}' +
-      '.fx-av{flex:none;width:40px;height:40px;border-radius:50%;background:#0066ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}' +
-      '.fx-tx{flex:1;min-width:0;color:#12233a;font-size:.95rem}.fx-ti{color:#2b3b50;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fx-tx small{color:#5b6b80;font-size:.82rem}' +
-      '.fx-rs{flex:none;background:#e8733a;color:#fff!important;font-weight:800;text-decoration:none;border-radius:22px;padding:10px 20px;font-size:.95rem}' +
-      '.fx-tutto{display:block;text-align:center;margin-top:10px;color:#0066ff;font-weight:700;text-decoration:none;font-size:.93rem}' +
-      '.fx-vuoto{padding:14px 0 4px;color:#5b6b80;line-height:1.5;border-top:1px solid #eef1f5}' +
-      '@media(max-width:600px){.fx{padding:16px}.fx-r{flex-wrap:wrap}.fx-rs{width:100%;text-align:center}.fx-ti{white-space:normal}}' +
-      'body.theme-dark .fx{background:#1e2a3a}body.theme-dark .fx-t h3,body.theme-dark .fx-tx,body.theme-dark .fx-ti{color:#e8eef6}body.theme-dark .fx-r,body.theme-dark .fx-vuoto{border-color:#2c3b50}' +
-      '</style><div class="fx"><div class="fx-t"><span style="font-size:1.3rem">💬</span><h3>Forum Edilizia</h3>' +
-      (nuove ? '<span class="fx-b">' + nuove + (nuove === 1 ? ' nuova' : ' nuove') + '</span>' : '') + '</div>' +
-      '<div class="fx-s">Richieste dei clienti per il tuo mestiere e la tua zona</div>' +
+      '.fx{background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px),radial-gradient(600px 300px at 92% 0%,rgba(0,102,255,.45),transparent 70%);background-size:34px 34px,34px 34px,auto;border-radius:20px;padding:26px 28px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,.12);color:#fff}' +
+      '.fx-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:6px}' +
+      '.fx-logo{flex:none;background:#fff;border-radius:14px;padding:8px 14px;box-shadow:0 6px 18px rgba(0,0,0,.25);display:inline-block}.fx-logo img{height:64px;display:block}' +
+      '.fx-t{flex:1;min-width:200px}.fx-t h3{font-family:"Playfair Display",Georgia,serif;font-size:1.7rem;color:#fff;margin:0 0 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}' +
+      '.fx-b{background:#ff8800;color:#fff;font-weight:800;font-size:.8rem;border-radius:12px;padding:3px 10px;font-family:inherit}' +
+      '.fx-s{color:#cfe0f7;font-size:1rem}' +
+      '.fx-lista{max-height:272px;overflow-y:auto;overscroll-behavior:contain;margin-top:14px;display:grid;gap:10px}' +
+      '.fx-r{display:flex;align-items:center;gap:14px;padding:12px 14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);border-radius:14px}' +
+      '.fx-av{flex:none;width:40px;height:40px;border-radius:50%;background:#ff8800;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}' +
+      '.fx-tx{flex:1;min-width:0;color:#e6f0ff;font-size:.95rem}.fx-tx b{color:#fff}.fx-ti{color:#fff;font-weight:700;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fx-tx small{color:#a9c9f5;font-size:.82rem}' +
+      '.fx-rs{flex:none;background:#ff8800;color:#fff!important;font-weight:800;text-decoration:none;border-radius:12px;padding:10px 20px;font-size:.95rem}.fx-rs:hover{background:#e67a00}' +
+      '.fx-tutto{display:inline-block;margin-top:16px;border:2px solid rgba(255,255,255,.55);color:#fff;font-weight:800;text-decoration:none;font-size:.95rem;padding:10px 20px;border-radius:12px}.fx-tutto:hover{background:rgba(255,255,255,.12)}' +
+      '.fx-vuoto{margin-top:14px;padding:14px 16px;color:#cfe0f7;line-height:1.5;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:14px}' +
+      '@media(max-width:600px){.fx{padding:18px 16px}.fx-logo img{height:52px}.fx-t h3{font-size:1.4rem}.fx-r{flex-wrap:wrap}.fx-rs{width:100%;box-sizing:border-box;text-align:center}.fx-ti{white-space:normal}.fx-tutto{display:block;text-align:center}}' +
+      '</style><div class="fx"><div class="fx-top"><div class="fx-logo"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></div>' +
+      '<div class="fx-t"><h3>Forum Edilizia' +
+      (nuove ? '<span class="fx-b">' + nuove + (nuove === 1 ? ' nuova' : ' nuove') + '</span>' : '') + '</h3>' +
+      '<div class="fx-s">Richieste dei clienti per il tuo mestiere e la tua zona</div></div></div>' +
       (righe ? '<div class="fx-lista">' + righe + '</div>' : '<div class="fx-vuoto">Per ora nessuna richiesta nuova per te. Quando un cliente scrive, la vedi qui.</div>') +
       '<a class="fx-tutto" data-fx href="/forum">Vai al Forum Edilizia →</a></div>';
     box.addEventListener('click', function (e) {
