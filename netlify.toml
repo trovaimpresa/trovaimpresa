@@ -1356,3 +1356,10 @@
   to = "/il-posto"
   status = 301
   force = true
+
+# ⛔ 4 ottobre 2026 — FORUM EDILIZIA. Sitemap delle richieste che hanno almeno
+# una risposta di un'impresa (le altre sono noindex e restano fuori).
+[[redirects]]
+  from = "/sitemap-forum.xml"
+  to = "/.netlify/functions/sitemap-forum"
+  status = 200

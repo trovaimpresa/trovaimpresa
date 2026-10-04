@@ -590,6 +590,9 @@
       <div class="nav-item" onclick="showSection('subappalti',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 1 0-2.8l.8-.8a2 2 0 0 1 2.8 0L21 9"/><path d="m21 3-5 5"/><path d="M3 9l3.5-3.5a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L6 13"/></svg></span> Subappalti
       </div>
+      <div class="nav-item" onclick="showSection('forum',this)">
+        <span class="nav-icon">💬</span> Forum <span id="badge-forum" style="display:none;background:#c0392b;color:#fff;border-radius:10px;padding:1px 7px;font-size:.75rem;font-weight:800;margin-left:4px"></span>
+      </div>
       <div class="nav-item" onclick="showSection('offerte-lavoro',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span> Offerte di lavoro
       </div>
@@ -1331,6 +1334,26 @@
       </div>
     </div>
 
+    <!-- FORUM EDILIZIA (4 ott 2026): moderazione. Legge e scrive solo da netlify/functions/admin-forum.js -->
+    <div class="section" id="sec-forum">
+      <div class="topbar">
+        <div class="topbar-title">💬 Forum Edilizia</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">
+        <button class="action-btn" id="forum-tab-controllo" onclick="forumFiltro('controllo')">Da controllare</button>
+        <button class="action-btn" id="forum-tab-tutte" onclick="forumFiltro('tutte')">Tutte</button>
+        <button class="action-btn" id="forum-tab-nascoste" onclick="forumFiltro('nascoste')">Nascoste</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tipo</th><th>Testo</th><th>Chi</th><th>Segnalazioni</th><th>Stato</th><th>Data</th><th>Azioni</th></tr>
+          </thead>
+          <tbody id="table-forum"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- OFFERTE DI LAVORO -->
     <div class="section" id="sec-offerte-lavoro">
       <div class="topbar">
@@ -1903,6 +1926,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
   if (id === 'subappalti') caricaSubappalti();
+  if (id === 'forum') caricaForum();
   if (id === 'offerte-lavoro') caricaOfferteLavoro();
   if (id === 'candidati') caricaCandidati();
   if (id === 'candidature') caricaCandidature();
@@ -4865,6 +4889,86 @@ async function caricaSubappalti() {
       <td><button class="action-btn btn-elimina" onclick="eliminaSubappalto('${s.id}')">🗑️ Elimina</button></td>
     </tr>`;
   }).join('');
+}
+
+/* ---------- FORUM EDILIZIA: moderazione (4 ott 2026) ---------- */
+let _forum = { richieste: [], risposte: [], filtro: 'controllo' };
+
+async function forumChiama(body) {
+  const res = await fetch('/.netlify/functions/admin-forum', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ u: adminU, p: adminP }, body))
+  });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok || !j.success) throw new Error(j.error || 'operazione non riuscita');
+  return j;
+}
+
+function forumDaControllare(x) { return (x.n_segnalazioni || 0) > 0 || x.stato === 'nascosta'; }
+
+async function caricaForum() {
+  const tbody = document.getElementById('table-forum');
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
+  try {
+    const j = await forumChiama({ action: 'list' });
+    _forum.richieste = j.richieste; _forum.risposte = j.risposte;
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    return;
+  }
+  forumFiltro(_forum.filtro);
+}
+
+function forumFiltro(f) {
+  _forum.filtro = f;
+  ['controllo', 'tutte', 'nascoste'].forEach(n => {
+    const b = document.getElementById('forum-tab-' + n);
+    if (b) b.style.cssText = n === f ? 'background:#0066ff;color:#fff' : '';
+  });
+  const righe = []
+    .concat(_forum.richieste.map(x => Object.assign({ _t: 'r' }, x)))
+    .concat(_forum.risposte.map(x => Object.assign({ _t: 'c' }, x)))
+    .sort((a, b) => new Date(b.creato_il) - new Date(a.creato_il));
+  const nControllo = righe.filter(forumDaControllare).length;
+  const bd = document.getElementById('badge-forum');
+  if (bd) { bd.textContent = nControllo; bd.style.display = nControllo ? '' : 'none'; }
+  const tab = document.getElementById('forum-tab-controllo');
+  if (tab) tab.textContent = 'Da controllare (' + nControllo + ')';
+  const mostra = righe.filter(x => f === 'tutte' ? true : f === 'nascoste' ? (x.stato === 'nascosta') : forumDaControllare(x));
+  const tbody = document.getElementById('table-forum');
+  if (!mostra.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">💬</div>' + (f === 'controllo' ? 'Niente da controllare' : 'Nessun messaggio') + '</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = mostra.map(x => {
+    const rich = x._t === 'r', nasc = x.stato === 'nascosta';
+    const titolo = rich ? x.titolo : x.testo;
+    const sotto = rich ? [x.citta, x.mestiere].filter(Boolean).join(' · ') : ('su: ' + (x.richiesta_titolo || ''));
+    const chi = rich ? esc(x.nome_pubblico || 'Cliente') + '<br><small>' + esc(x.email || '') + '</small>'
+                     : esc(x.impresa_nome || (x.autore ? 'Autore della richiesta' : 'Impresa')) + (x.impresa_id ? '<br><small>impresa #' + esc(x.impresa_id) + '</small>' : '');
+    const dt = new Date(x.creato_il).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const stato = rich ? (x.stato === 'pubblicata' ? 'Visibile' : x.stato === 'nascosta' ? 'Nascosta' : x.stato === 'chiusa' ? 'Chiusa' : 'In attesa email') : (nasc ? 'Nascosta' : 'Visibile');
+    const seg = x.n_segnalazioni ? '<span class="badge badge-rig">' + x.n_segnalazioni + '</span>' : '–';
+    return `<tr>
+      <td><span class="badge ${rich ? 'badge-a' : 'badge-v'}">${rich ? 'Richiesta' : 'Risposta'}</span></td>
+      <td style="max-width:320px;word-break:break-word"><strong>${esc(String(titolo || '').slice(0, 160))}</strong><br><small style="color:var(--light)">${esc(sotto)}</small></td>
+      <td style="font-size:.85rem">${chi}</td>
+      <td>${seg}</td>
+      <td><span class="badge ${nasc ? 'badge-att' : 'badge-v'}">${stato}</span></td>
+      <td style="white-space:nowrap;font-size:.78rem;color:var(--light)">${dt}</td>
+      <td style="white-space:nowrap">
+        <button class="action-btn" onclick="forumAzione('${nasc ? 'mostra' : 'nascondi'}','${x._t}','${x.id}')">${nasc ? 'Rimetti online' : 'Nascondi'}</button>
+        <button class="action-btn btn-elimina" onclick="forumAzione('elimina','${x._t}','${x.id}')">🗑️ Elimina</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function forumAzione(azione, tipo, id) {
+  if (azione === 'elimina' && !confirm('Eliminare per sempre' + (tipo === 'r' ? ' questa richiesta e tutte le sue risposte?' : ' questa risposta?'))) return;
+  try { await forumChiama({ action: azione, tipo, id }); }
+  catch (e) { alert('Errore: ' + e.message); return; }
+  await caricaForum();
 }
 
 async function eliminaSubappalto(id) {

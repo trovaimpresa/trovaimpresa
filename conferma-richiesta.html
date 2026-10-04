@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conferma la tua richiesta | Forum Edilizia</title>
+  <meta name="description" content="Conferma della richiesta pubblicata sul Forum Edilizia.">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="canonical" href="https://trovaimpresa.com/conferma-richiesta.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Conferma la tua richiesta | Forum Edilizia">
+  <meta property="og:description" content="Conferma della richiesta pubblicata sul Forum Edilizia.">
+  <meta property="og:image" content="https://trovaimpresa.com/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/forum.css?v=1">
+  <link rel="stylesheet" href="/css/mobile.css?v=3">
+</head>
+<body>
+<header>
+  <a href="/forum"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></a>
+  <nav>
+    <a href="/forum" class="attivo">Forum</a>
+    <a href="/index.html">Trova imprese</a>
+    <a href="/blog.html">Guide e costi</a>
+    <a href="/subappalto.html">Subappalti</a>
+    <a href="/login-impresa.html" class="btn-pannello">Accedi al tuo pannello</a>
+  </nav>
+</header>
+<div class="f-layout" style="grid-template-columns:1fr;max-width:620px">
+  <main class="f-main">
+    <div class="f-comp" style="padding:26px 18px">
+      <div class="f-ok-box" id="esito"><p>Un attimo, sto confermando la tua richiesta…</p></div>
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var t=new URLSearchParams(location.search).get('t')||'', box=document.getElementById('esito');
+  function ko(m){box.innerHTML='<div style="font-size:2.4rem">⚠️</div><h3>Link non valido</h3><p>'+m+'</p><p><a href="/forum#scrivi" class="f-btn" style="display:inline-block;text-decoration:none;margin-top:10px">Scrivi una nuova richiesta</a></p>';}
+  if(!t){ko('Apri il link che ti abbiamo mandato per email.');return;}
+  fetch('/.netlify/functions/bacheca-conferma',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:t})})
+  .then(function(r){return r.json().then(function(j){return {s:r.status,j:j};});})
+  .then(function(x){
+    if(!x.j.ok){ko(x.j.messaggio||x.j.error||'Riprova fra poco.');return;}
+    var u='/forum-richiesta?s='+encodeURIComponent(x.j.slug)+(x.j.gestione?'&g='+encodeURIComponent(x.j.gestione):'');
+    box.innerHTML='<div style="font-size:2.6rem">✅</div><h3>La tua richiesta è online</h3><p>Le imprese della tua zona la vedranno e ti risponderanno qui. '+(x.j.gestione?'Ti abbiamo mandato anche un\'email con il link per tornare a leggere le risposte e chiudere la richiesta.':'')+'</p><p><a href="'+u+'" class="f-btn" style="display:inline-block;text-decoration:none;margin-top:10px">Vai alla tua richiesta</a></p>';
+  }).catch(function(){ko('Problema di connessione. Riprova fra poco.');});
+})();
+</script>
+<script src="/cookie-banner.js"></script>
+</body>
+</html>
