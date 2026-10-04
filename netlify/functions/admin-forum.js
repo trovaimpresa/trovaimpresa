@@ -25,7 +25,7 @@ exports.handler = async function (event) {
         .select('id, slug, titolo, testo, mestiere, citta, nome_pubblico, email, stato, n_risposte, n_segnalazioni, creato_il').order('creato_il', { ascending: false }).limit(300);
       if (e1) throw e1;
       const { data: ris, error: e2 } = await sb.from('bacheca_risposte')
-        .select('id, richiesta_id, impresa_id, impresa_nome, testo, stato, autore, n_segnalazioni, creato_il').order('creato_il', { ascending: false }).limit(500);
+        .select('id, richiesta_id, impresa_id, impresa_nome, testo, stato, autore, ospite, n_segnalazioni, creato_il').order('creato_il', { ascending: false }).limit(500);
       if (e2) throw e2;
       const titoli = {}; (rich || []).forEach(r => { titoli[r.id] = r.titolo; });
       (ris || []).forEach(r => { r.richiesta_titolo = titoli[r.richiesta_id] || ''; });
@@ -77,8 +77,8 @@ exports.handler = async function (event) {
       }
       // ricalcolo: quante risposte di imprese restano visibili. Senza, la richiesta non va piu' su Google.
       if (r && r.richiesta_id) {
-        const { data: vis } = await sb.from('bacheca_risposte').select('id, autore').eq('richiesta_id', r.richiesta_id).eq('stato', 'visibile');
-        const imprese = (vis || []).filter(x => !x.autore).length;
+        const { data: vis } = await sb.from('bacheca_risposte').select('id, autore, ospite').eq('richiesta_id', r.richiesta_id).eq('stato', 'visibile');
+        const imprese = (vis || []).filter(x => !x.autore && !x.ospite).length;
         await sb.from('bacheca_richieste').update({ n_risposte: (vis || []).length, indicizzabile: imprese > 0 }).eq('id', r.richiesta_id);
       }
     }

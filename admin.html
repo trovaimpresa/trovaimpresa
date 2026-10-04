@@ -4961,7 +4961,7 @@ function forumFiltro(f) {
     const titolo = rich ? x.titolo : x.testo;
     const sotto = rich ? [x.citta, x.mestiere].filter(Boolean).join(' · ') : ('su: ' + (x.richiesta_titolo || ''));
     const chi = rich ? esc(x.nome_pubblico || 'Cliente') + '<br><small>' + esc(x.email || '') + '</small>'
-                     : esc(x.impresa_nome || (x.autore ? 'Autore della richiesta' : 'Impresa')) + (x.impresa_id ? '<br><small>impresa #' + esc(x.impresa_id) + '</small>' : '');
+                     : esc(x.impresa_nome || (x.autore ? 'Autore della richiesta' : 'Impresa')) + (x.ospite ? '<br><small>ospite (non registrato)</small>' : '') + (x.impresa_id ? '<br><small>impresa #' + esc(x.impresa_id) + '</small>' : '');
     const dt = new Date(x.creato_il).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     const stato = rich ? (x.stato === 'pubblicata' ? 'Visibile' : x.stato === 'nascosta' ? 'Nascosta' : x.stato === 'chiusa' ? 'Chiusa' : 'In attesa email') : (nasc ? 'Nascosta' : 'Visibile');
     const seg = x.n_segnalazioni ? '<span class="badge badge-rig">' + x.n_segnalazioni + '</span>' : '–';

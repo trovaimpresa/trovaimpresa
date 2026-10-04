@@ -84,10 +84,11 @@
   }
 
   function htmlCommento(c) {
-    var autore = c.autore === true;
-    var nome = c.impresa_nome || (autore ? 'Autore' : 'Impresa');
+    var autore = c.autore === true, ospite = c.ospite === true;
+    var nome = c.impresa_nome || (autore ? 'Autore' : ospite ? 'Ospite' : 'Impresa');
     var intest = autore
       ? '<b>' + esc(nome) + '</b><span class="f-tag-aut">Autore</span>'
+      : ospite ? '<b>' + esc(nome) + '</b>'
       : '<a href="/profilo-impresa?id=' + encodeURIComponent(c.impresa_id) + '">' + esc(nome) + '</a><span class="f-tag-imp">Impresa</span>' +
         (c.impresa_mestiere ? ' · ' + esc(c.impresa_mestiere) : '');
     var votato = mieiVoti['c' + c.id] ? ' on' : '';
@@ -116,8 +117,13 @@
         '<input type="text" maxlength="60" placeholder="Prezzo indicativo (facoltativo), es. 4.500 – 6.500 €">' +
         '<button class="f-btn" data-act="invia-risposta">Pubblica la risposta</button><div class="f-msg"></div></div></div>';
     }
-    return '<div class="f-rispondi"><div class="f-finta"><span>Sei un\'impresa? Scrivi una risposta…</span>' +
-      '<a href="/registrazione-impresa.html">Iscriviti gratis</a></div></div>';
+    return '<div class="f-rispondi" data-rid="' + esc(r.id) + '" data-slug="' + esc(r.slug) + '">' +
+      '<div class="f-finta" data-act="apri-risposta" style="cursor:text"><span>Scrivi una risposta…</span></div>' +
+      '<div class="f-scrivi" style="display:none"><input type="text" class="f-ospite-nome" maxlength="40" placeholder="Il tuo nome">' +
+      '<textarea maxlength="1500" placeholder="Scrivi la tua risposta"></textarea>' +
+      '<input type="text" class="f-trap" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0">' +
+      '<button class="f-btn" data-act="invia-ospite">Pubblica la risposta</button><div class="f-msg"></div>' +
+      '<div class="f-nota-imp">Niente link, email o numeri di telefono. <b>Sei un\'impresa?</b> <a href="/registrazione-impresa.html">Iscriviti gratis al sito</a>: compari con il bollino «Impresa» e ricevi le richieste nel tuo pannello.</div></div></div>';
   }
 
   function htmlPost(r, comm, opz) {
@@ -146,7 +152,7 @@
   function leggiCommenti(ids) {
     if (!ids.length) return Promise.resolve({});
     return sb.from('bacheca_risposte')
-      .select('id,richiesta_id,impresa_id,impresa_nome,impresa_mestiere,testo,prezzo_indicativo,creato_il,autore,n_voti')
+      .select('id,richiesta_id,impresa_id,impresa_nome,impresa_mestiere,testo,prezzo_indicativo,creato_il,autore,ospite,n_voti')
       .in('richiesta_id', ids).eq('stato', 'visibile').order('creato_il', { ascending: true })
       .then(function (res) {
         var mappa = {};
@@ -204,7 +210,7 @@
     if (!can) { can = document.createElement('link'); can.rel = 'canonical'; document.head.appendChild(can); }
     can.href = url; metaTag('og:url', url, 'property');
     /* solo le richieste con almeno una risposta di un'impresa si fanno vedere a Google */
-    var daGoogle = r.indicizzabile === true && comm.some(function (c) { return !c.autore; });
+    var daGoogle = r.indicizzabile === true && comm.some(function (c) { return !c.autore && !c.ospite; });
     metaTag('robots', daGoogle ? 'index,follow' : 'noindex,follow');
     var f = (r.foto || []).filter(fotoOk)[0]; if (f) metaTag('og:image', f, 'property');
     var ld = {
@@ -213,7 +219,7 @@
       image: f || undefined, commentCount: comm.length,
       comment: comm.map(function (c) {
         return { '@type': 'Comment', text: c.testo, dateCreated: c.creato_il,
-          author: { '@type': c.autore ? 'Person' : 'Organization', name: c.impresa_nome || 'Impresa' } };
+          author: { '@type': (c.autore || c.ospite) ? 'Person' : 'Organization', name: c.impresa_nome || 'Impresa' } };
       })
     };
     var s = document.createElement('script'); s.type = 'application/ld+json'; s.textContent = JSON.stringify(ld);
@@ -397,6 +403,31 @@
           var nuovo = res.data && res.data[0] ? res.data[0] : res.data;
           if (nuovo && nuovo.id) fetch('/.netlify/functions/bacheca-avviso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ risposta_id: nuovo.id }) }).catch(function () { });
           messaggio(msg, '✓ Risposta pubblicata', 'ok');
+          setTimeout(function () { rinfresca(); }, 700);
+        });
+      return;
+    }
+
+    if (a === 'invia-ospite') {
+      var bo = el.closest('.f-rispondi'), mo = bo.querySelector('.f-msg');
+      var no = bo.querySelector('.f-ospite-nome').value.trim(), to = bo.querySelector('textarea').value.trim();
+      if (no.length < 2) return messaggio(mo, 'Scrivi il tuo nome.', 'err');
+      if (to.length < 10) return messaggio(mo, 'Scrivi almeno una frase.', 'err');
+      el.disabled = true;
+      sb.rpc('bacheca_ospite_rispondi', { p_slug: bo.getAttribute('data-slug'), p_nome: no, p_testo: to, p_visitatore: visitatore(), p_trap: bo.querySelector('.f-trap').value })
+        .then(function (res) {
+          el.disabled = false;
+          var d = res && res.data;
+          if (!d || d.ok !== true) {
+            var e = d && d.err, t = 'Non sono riuscito a pubblicare. Riprova.';
+            if (e === 'link') t = 'Niente link, email o numeri di telefono. Per farti trovare, iscriviti gratis come impresa.';
+            else if (e === 'limite') t = 'Hai scritto molte risposte: riprova fra un po\'.';
+            else if (e === 'chiusa') t = 'Questa richiesta non accetta più risposte.';
+            else if (e === 'corto') t = 'Scrivi almeno una frase.';
+            return messaggio(mo, t, 'err');
+          }
+          fetch('/.netlify/functions/bacheca-avviso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ risposta_id: d.id }) }).catch(function () { });
+          messaggio(mo, '✓ Risposta pubblicata', 'ok');
           setTimeout(function () { rinfresca(); }, 700);
         });
       return;

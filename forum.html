@@ -12,13 +12,13 @@
   <meta property="og:description" content="Il forum dell'edilizia: scrivi cosa ti serve, aggiungi una foto e le imprese e gli artigiani della tua zona ti rispondono. Gratis, senza registrarti.">
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/forum.css?v=1">
+  <link rel="stylesheet" href="/css/forum.css?v=2">
   <link rel="stylesheet" href="/css/forum-sito.css?v=2">
   <link rel="stylesheet" href="/css/mobile.css?v=3">
 </head>
 <body>
 <!-- 4 ott 2026 — il sito intorno al forum: fascia, barra con logo e ricerca, riga dei mestieri. Stile in css/forum-sito.css -->
-<div class="fs-strip"><div class="in"><span>Gratis e senza registrarti</span><span>Rispondono imprese e artigiani iscritti</span><span>Scrivi una richiesta con foto</span><a href="/registrazione-impresa.html">Sei un'impresa? Iscriviti gratis</a></div></div>
+<div class="fs-strip"><div class="in"><span>Gratis e senza registrarti</span><span>Rispondono imprese e artigiani</span><span>Scrivi una richiesta con foto</span><a href="/registrazione-impresa.html">Sei un'impresa? Iscriviti gratis</a></div></div>
 <div class="fs-nav"><div class="in">
   <a class="fs-logo" href="/forum"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></a>
   <form class="fs-cerca" action="/forum" method="get" role="search"><input type="search" name="q" maxlength="60" placeholder="Cerca una richiesta nel forum…" aria-label="Cerca una richiesta nel forum"></form>
@@ -38,13 +38,13 @@
   <div>
     <div class="fs-card"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></div>
     <h1>Hai un lavoro da fare o un problema in casa? <em>Chiedi alle imprese.</em></h1>
-    <p class="s">Scrivi cosa ti serve e aggiungi una foto. Imprese e artigiani iscritti ti rispondono qui, con consigli e prezzi indicativi. Gratis, senza registrarti.</p>
-    <div class="fs-btns"><a class="o" href="#scrivi">Scrivi la tua richiesta</a><a class="v" href="/registrazione-impresa.html">Sei un'impresa? Rispondi</a></div>
+    <p class="s">Scrivi cosa ti serve e aggiungi una foto. Imprese e artigiani ti rispondono qui, con consigli e prezzi indicativi. Gratis, senza registrarti.</p>
+    <div class="fs-btns"><a class="o" href="#scrivi">Scrivi la tua richiesta</a><a class="v" href="#richieste">Rispondi alle richieste</a></div>
     <div class="fs-chk"><span>Gratis</span><span>Senza registrarti</span><span>La tua email resta privata</span></div>
   </div>
   <div class="fs-steps">
     <div class="fs-step"><b class="n">1</b><div><strong>Scrivi cosa ti serve</strong><span>Titolo, qualche riga e una foto: ti basta confermare l'email.</span></div></div>
-    <div class="fs-step"><b class="n">2</b><div><strong>Le imprese rispondono</strong><span>Solo imprese e artigiani iscritti, nei commenti sotto la tua richiesta.</span></div></div>
+    <div class="fs-step"><b class="n">2</b><div><strong>Arrivano le risposte</strong><span>Imprese, artigiani e altri utenti, nei commenti sotto la tua richiesta.</span></div></div>
     <div class="fs-step"><b class="n">3</b><div><strong>Scegli chi ti convince</strong><span>Niente obblighi: confronti le risposte e decidi tu.</span></div></div>
   </div>
 </div></div>
@@ -58,7 +58,7 @@
       <button data-ord="senza">Senza risposta</button>
       <select id="f-filtro-mestiere" aria-label="Filtra per mestiere"></select>
     </div>
-    <div id="f-elenco"></div>
+    <div id="richieste" style="scroll-margin-top:96px"></div><div id="f-elenco"></div>
     <button class="f-carica" id="f-carica" style="display:none">Mostra altre richieste</button>
   </main>
   <aside class="f-side">
@@ -76,7 +76,7 @@
       <h3>Le regole</h3>
       <ol>
         <li>Niente link né numeri di telefono nei testi.</li>
-        <li>Rispondono solo le imprese iscritte.</li>
+        <li>Può rispondere chiunque; le imprese iscritte hanno il bollino «Impresa».</li>
         <li>Rispetto per tutti.</li>
       </ol>
     </div>
@@ -93,7 +93,7 @@
 </footer>
 <div class="f-lb" id="f-lb"><img alt=""></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/forum.js?v=2"></script>
+<script src="/js/forum.js?v=3"></script>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
