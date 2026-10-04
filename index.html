@@ -803,6 +803,9 @@
      pubblicita'): questa e' l'unica che porta a una cosa che si vende. */
   .nav-gest{ background:#dbeafe; color:#1e40af; font-weight:700; }
   .nav-gest:hover{ background:#bfdbfe; color:#1e3a8a; }
+  /* 4 ott 2026 — Forum Edilizia: pastiglia arancione, come le altre */
+  .nav-forum{ background:#ffe6d6; color:#b8470f; font-weight:800; }
+  .nav-forum:hover{ background:#ffd5bb; color:#8f3608; }
   /* il bottone del riquadro: blu = si prova gratis (regola dei colori del 13 set).
      ⚠️ due classi insieme, non `.gest-btn` da sola: `.posto-btn` e' scritta
      PIU' IN BASSO nel foglio e con lo stesso peso vincerebbe lei, arancione. */
@@ -1225,6 +1228,7 @@
           <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-expanded="false" aria-controls="nav-links" onclick="apriMenuHome()">&#9776; Menu</button>
         </div>
         <div class="nav-links" id="nav-links">
+          <a href="/forum" class="nav-a nav-forum">Forum</a>
           <a href="/gestionale" class="nav-a nav-gest">Gestionale</a>
           <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
           <a href="/blog.html" class="nav-a nav-guide">Guide e costi</a>
@@ -1752,6 +1756,7 @@
             <div class="footer-section">
                 <h3>Per chi cerca</h3>
                 <ul>
+                    <li><a href="/forum">Forum Edilizia: chiedi alle imprese</a></li>
                     <li><a href="cerca-imprese.html">Cerca imprese</a></li>
                     <li><a href="cerca-artigiani.html">Cerca artigiani</a></li>
                     <li><a href="professionisti.html">Cerca professionisti</a></li>
