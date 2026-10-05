@@ -102,6 +102,8 @@
 /* ---- schermi grandi (4 ott 2026): tutto piu' grande e meno vuoto ai lati ---- */
 @media(min-width:1100px){
   html{zoom:1.25}
+  .pb{zoom:1.04 !important}
+  @media(min-width:1500px){.pb{zoom:1.2 !important}}
   .fs-strip .in,.fs-nav .in,.fs-sub .in,.fs-hero .in,.fs-foot .cols{max-width:1440px}
   .fs-tag,.f-layout{max-width:1300px}
   .f-layout{grid-template-columns:minmax(0,1fr) 340px;gap:26px}
