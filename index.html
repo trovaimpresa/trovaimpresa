@@ -1257,6 +1257,13 @@
 </style>
 <script>(function(){function f(){var b=document.querySelector('.hero-banda'),h=document.querySelector('.hero');if(!b||!h)return;var t=b.getBoundingClientRect().bottom-h.getBoundingClientRect().top+30;document.querySelectorAll('.hero .hero-pub').forEach(function(e){if(window.innerWidth>860){e.style.top=t+'px';e.style.transform='none'}else{e.style.top='';e.style.transform=''}})}
 window.addEventListener('load',f);window.addEventListener('resize',f);document.addEventListener('DOMContentLoaded',f);setTimeout(f,600);setTimeout(f,1800)})()</script>
+<style>/* 5 ott 2026: come il Gestionale - sfondo #e7eef8 e bordo blu scuro sulle schede */
+:root{--ti-bg:#e7eef8}
+body,.hero,.home-layout{background:#e7eef8 !important}
+.hero{background:transparent !important}
+.citta-box.cerca3,.hcard,.feature-card,.hero-pub{border:2px solid #0a2a4d !important}
+.hcard{border-top:5px solid var(--hc,#0a2a4d) !important}
+</style>
 </head>
 <body>
 
