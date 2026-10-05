@@ -1,0 +1,7 @@
+/* Loghi: tutte le card uguali (stesso bianco, stessa misura) */
+html body .pb-logo,html body .fs-card{display:flex !important;align-items:center;justify-content:center;width:320px;height:185px;padding:16px 28px !important;box-sizing:border-box !important;background:#fff !important;border:0 !important;border-radius:14px !important;box-shadow:0 8px 24px rgba(0,0,0,.25) !important;margin-bottom:18px}
+html body .pb-logo img,html body .fs-card img{width:100% !important;height:100% !important;max-width:100%;object-fit:contain;display:block}
+html body img.hero-logo,html body img.pann-logo{display:block;width:320px !important;height:185px !important;padding:16px 28px !important;box-sizing:border-box !important;object-fit:contain;background:#fff !important;border:0 !important;border-radius:14px !important;box-shadow:0 8px 24px rgba(0,0,0,.25) !important}
+@media(max-width:600px){
+html body .pb-logo,html body .fs-card,html body img.hero-logo,html body img.pann-logo{width:200px !important;height:116px !important;padding:10px 18px !important}
+}
