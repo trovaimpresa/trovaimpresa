@@ -78,3 +78,12 @@ body{ background:#e7eef8 !important; }
 body > .section, body > main > .section, body > div > .section:not(#imprese-locali){ border:2px solid #0a2a4d !important; }
 .prezzo-box,.cat-card{ border:2px solid #0a2a4d !important; }
 #imprese-locali a[href^="/profilo-impresa"]{ border:2px solid #0a2a4d !important; }
+
+/* 5 ott 2026: telefono (iPhone 13 mini, 375 px) - barra in alto ordinata: logo + due bottoni sulla stessa riga */
+@media (max-width:600px){
+  nav{ padding:10px 10px !important; gap:6px !important; flex-wrap:nowrap !important; }
+  .nav-logo{ font-size:.95rem !important; flex:0 0 auto; }
+  .nav-logo img{ height:34px !important; }
+  .nav-btns{ gap:5px !important; flex:0 1 auto; }
+  .nav-btns .btn-outline,.nav-btns .btn-fill{ padding:6px 9px !important; font-size:.76rem !important; line-height:1.2 !important; white-space:nowrap !important; }
+}
