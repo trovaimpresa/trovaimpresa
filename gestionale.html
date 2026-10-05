@@ -496,7 +496,10 @@
 <style>/* 5 ott 2026: pagina grande sugli schermi larghi, come il Forum */
 @media(min-width:1100px){html{zoom:1.15}.pb{zoom:1.13}}
 @media(min-width:1500px){html{zoom:1.3}.pb{zoom:1.15}}
-@media(min-width:1100px){.navbar .logo img{height:100px !important}.hero-logo{height:160px !important}}</style>
+@media(min-width:1100px){.navbar .logo img{height:100px !important}.hero-logo{height:160px !important}}
+/* allineamento: barra e pubblicita' sulla stessa colonna del resto della pagina (1140px) */
+@media(min-width:1100px){.navbar{padding-left:max(26px,calc((100% - 1140px)/2 + 24px)) !important;padding-right:max(26px,calc((100% - 1140px)/2 + 24px)) !important}.pb-w{max-width:1009px;padding:0 21px}}
+@media(min-width:1500px){.pb-w{max-width:991px;padding:0 21px}}</style>
 </head>
 <body>
 
