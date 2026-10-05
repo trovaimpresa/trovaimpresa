@@ -109,3 +109,8 @@
   .fs-links a{font-size:15px}
   .fs-hero h1{font-size:54px}
 }
+
+
+/* ---- 5 ott 2026: cerca piu' corto, mestieri su due righe sul computer ---- */
+@media(min-width:900px){.fs-sub .in{flex-wrap:wrap;overflow:visible;white-space:normal;justify-content:center}}
+.fs-cerca{max-width:280px}
