@@ -1252,6 +1252,11 @@
 .hb-btns a{font-size:23px;padding:20px 34px}.hb-chk{font-size:20px}
 .hb-dx{margin-top:0}.hb-step{padding:22px 24px}.hb-step b.n{width:54px;height:54px;font-size:26px}.hb-step strong{font-size:27px}.hb-step span{font-size:20px}}
 </style>
+<style>/* le locandine partono sotto la striscia blu */
+@media(min-width:861px){.hero .hero-pub{top:910px;transform:none}}
+</style>
+<script>(function(){function f(){var b=document.querySelector('.hero-banda'),h=document.querySelector('.hero');if(!b||!h)return;var t=b.getBoundingClientRect().bottom-h.getBoundingClientRect().top+30;document.querySelectorAll('.hero .hero-pub').forEach(function(e){if(window.innerWidth>860){e.style.top=t+'px';e.style.transform='none'}else{e.style.top='';e.style.transform=''}})}
+window.addEventListener('load',f);window.addEventListener('resize',f);document.addEventListener('DOMContentLoaded',f);setTimeout(f,600);setTimeout(f,1800)})()</script>
 </head>
 <body>
 
