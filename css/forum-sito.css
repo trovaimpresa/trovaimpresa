@@ -116,3 +116,7 @@
 /* ---- 5 ott 2026: cerca piu' corto, mestieri su due righe sul computer ---- */
 @media(min-width:900px){.fs-sub .in{flex-wrap:wrap;overflow:visible;white-space:normal;justify-content:center}}
 .fs-cerca{max-width:280px}
+
+
+/* loghi alla misura del Gestionale */
+@media(min-width:1100px){.fs-logo img{height:104px}.fs-card img{height:166px}}

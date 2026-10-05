@@ -5,7 +5,7 @@
 .pb-in{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:center}
 .pb-in.rev .pb-t{order:2}
 .pb-logo{display:inline-block;background:#fff;border-radius:14px;padding:12px 22px;box-shadow:0 8px 24px rgba(0,0,0,.25);margin-bottom:18px}
-.pb-logo img{height:104px;display:block}
+.pb-logo img{height:140px;display:block}
 .pb h2{font-size:34px;line-height:1.14;letter-spacing:-.8px;margin:0 0 12px;color:#fff}
 .pb p{font-size:18px;color:#d6e3f5;margin:0 0 22px;max-width:520px}
 .pb-btn{display:inline-block;text-decoration:none;font-weight:800;font-size:18px;padding:15px 26px;border-radius:11px;margin:0 8px 8px 0}
