@@ -72,3 +72,9 @@ h1,h2,h3,h4,h5,h6,.grp,.cat-name,.trova{ font-family:inherit !important; }
   .section h2{ font-size:1.45rem !important; }
   .hero{ padding:36px 18px 34px !important; }
 }
+
+/* 5 ott 2026: come il Gestionale - sfondo #e7eef8 e bordo blu scuro sulle schede */
+body{ background:#e7eef8 !important; }
+body > .section, body > main > .section, body > div > .section:not(#imprese-locali){ border:2px solid #0a2a4d !important; }
+.prezzo-box,.cat-card{ border:2px solid #0a2a4d !important; }
+#imprese-locali a[href^="/profilo-impresa"]{ border:2px solid #0a2a4d !important; }
