@@ -60,7 +60,7 @@
     return new Date(iso).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function iniziale(n) { return esc(String(n || '?').trim().charAt(0).toUpperCase() || '?'); }
-  function fotoOk(u) { return typeof u === 'string' && u.indexOf(SB_URL + '/storage/v1/object/public/') === 0; }
+  function fotoOk(u) { return typeof u === 'string' && (u.indexOf(SB_URL + '/storage/v1/object/public/') === 0 || u.indexOf('https://trovaimpresa.com/img/forum/') === 0); } /* 6 ott 2026: anche le foto della redazione, tenute nella cartella /img/forum/ */
   function urlRichiesta(r) { return '/forum-richiesta?s=' + encodeURIComponent(r.slug); }
 
   /* ---------- chi sono ---------- */
