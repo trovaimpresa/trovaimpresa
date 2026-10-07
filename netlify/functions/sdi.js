@@ -118,6 +118,27 @@ async function assicuraAnagrafica(db, base, token, ambiente, userId, az, piva) {
   return null;
 }
 
+
+/* 7 ottobre 2026 - IL CANCELLO DEGLI INVII (vale solo in produzione, in prova non blocca niente).
+   - gestionale a pagamento (chat_pro attivo): invii compresi, con un tetto al mese contro gli abusi;
+   - gestionale gratis: serve un pacchetto di invii (tabella sdi_crediti), ogni invio ne scala uno;
+   - una fattura SCARTATA rimandata non si paga di nuovo. */
+const SDI_TETTO_MESE = 200;
+async function sdiConto(db, uid) {
+  const { data: imp } = await db.from('imprese').select('chat_pro,chat_pro_scadenza').eq('user_id', uid).maybeSingle();
+  const scad = imp && imp.chat_pro_scadenza ? new Date(imp.chat_pro_scadenza).getTime() : null;
+  const incluso = !!(imp && imp.chat_pro && (scad === null || scad >= Date.now()));
+  const { data: cr } = await db.from('sdi_crediti').select('residuo').eq('user_id', uid).maybeSingle();
+  const inizio = new Date(); inizio.setUTCDate(1); inizio.setUTCHours(0, 0, 0, 0);
+  let usati = 0;
+  for (const t of ['gest_fatture', 'nol_fatture']) {
+    const { count } = await db.from(t).select('id', { count: 'exact', head: true })
+      .eq('user_id', uid).eq('sdi_ambiente', 'prod').gte('sdi_inviata_il', inizio.toISOString());
+    usati += count || 0;
+  }
+  return { incluso, residuo: cr ? cr.residuo : 0, usati_mese: usati, tetto: SDI_TETTO_MESE };
+}
+
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
   if (event.httpMethod !== 'POST') return risposta(405, { error: 'Method Not Allowed' });
@@ -136,7 +157,7 @@ exports.handler = async function (event) {
   /* 29/09/2026 — le fatture del Noleggio stanno in un'altra tabella. Il browser
      dice quale, ma solo fra queste due: il nome non entra mai nella query. */
   const TAB = q && q.tabella === 'nol_fatture' ? 'nol_fatture' : 'gest_fatture';
-  if (!access_token || (!fattura_id && azione !== 'ambiente')) return risposta(400, { error: 'Mancano dei dati.' });
+  if (!access_token || (!fattura_id && azione !== 'ambiente' && azione !== 'conto')) return risposta(400, { error: 'Mancano dei dati.' });
 
   const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const { data: u, error: eu } = await db.auth.getUser(access_token);
@@ -145,6 +166,7 @@ exports.handler = async function (event) {
 
   /* prima di aprire la finestra: siamo in prova o sul serio? */
   if (azione === 'ambiente') return risposta(200, { ok: true, ambiente: AMBIENTE });
+  if (azione === 'conto') return risposta(200, Object.assign({ ok: true, ambiente: AMBIENTE }, await sdiConto(db, uid)));
 
   const { data: f } = await db.from(TAB).select('*').eq('id', fattura_id).eq('user_id', uid).maybeSingle();
   if (!f || f.eliminato_il) return risposta(404, { error: 'Fattura non trovata.' });
@@ -224,9 +246,22 @@ exports.handler = async function (event) {
   const err = await assicuraAnagrafica(db, BASE, TOKEN, AMBIENTE, uid, az || {}, piva);
   if (err) return risposta(502, { error: err });
 
+  /* IL CANCELLO: solo in produzione, e non per una fattura scartata che si rimanda */
+  let creditoUsato = false;
+  if (AMBIENTE === 'prod' && !f.sdi_uuid) {
+    const c = await sdiConto(db, uid);
+    if (c.incluso) {
+      if (c.usati_mese >= c.tetto) return risposta(429, { error: 'Hai raggiunto il limite di ' + c.tetto + ' invii allo SDI di questo mese. Scrivici e lo alziamo.', codice: 'tetto_mese' });
+    } else {
+      const { data: ok } = await db.rpc('sdi_usa_credito', { p_user: uid });
+      if (!ok) return risposta(402, { error: 'Non hai invii allo SDI a disposizione. Con il gestionale a pagamento sono compresi; nel gestionale gratuito si comprano a pacchetto.', codice: 'serve_pacchetto' });
+      creditoUsato = true;
+    }
+  }
   const inv = await chiamaOpenapi(BASE, TOKEN, 'POST', '/invoices', xml, 'application/xml');
   const uuid = inv.json && inv.json.data && inv.json.data.uuid;
   if (!inv.ok || !uuid) {
+    if (creditoUsato) await db.rpc('sdi_rimborsa_credito', { p_user: uid });
     const msg = (inv.json && (inv.json.message || inv.json.error)) || inv.testo.slice(0, 400) || ('errore ' + inv.status);
     await db.from(TAB).update({
       sdi_stato: f.sdi_uuid ? f.sdi_stato : 'errore', sdi_esito: 'Non partita: ' + msg, sdi_aggiornata_il: new Date().toISOString()
