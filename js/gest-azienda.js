@@ -155,7 +155,7 @@
         <div class="field"><label>Codice destinatario</label>
           <input id="a-sdi" value="${esc(a.sdi_codice||"")}" placeholder="7 caratteri, oppure 0000000" maxlength="7" style="text-transform:uppercase"></div>
         <div class="field"><label>PEC</label><input id="a-pec" type="email" value="${esc(a.sdi_pec||"")}" placeholder="nomeazienda@pec.it"></div>
-        <div class="sh-nota">Questi tre te li dà il commercialista. Non servono ancora a niente: li chiederà la fattura elettronica, che sto ancora costruendo. Compilarli adesso ti fa risparmiare tempo dopo.</div>
+        <div class="sh-nota"><b>Regime fiscale</b>: te lo dà il commercialista e finisce dentro ogni fattura che mandi.<br><b>Codice destinatario e PEC</b>: servono per <b>ricevere</b> fatture. Per <b>mandarle</b> si usa il codice del tuo cliente, che scrivi nella sua scheda in «Clienti».</div>
       </div>
 
       ${ruoloUtente==='professionista'?`
