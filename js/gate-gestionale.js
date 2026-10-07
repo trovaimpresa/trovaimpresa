@@ -806,17 +806,23 @@
     if(!q('gest-striscia-stile')){
       var st=document.createElement('style');
       st.id='gest-striscia-stile';
-      st.textContent='#gest-striscia{position:fixed;left:0;right:0;bottom:0;z-index:9998;'
-        +'background:#0a2a4d;color:#fff;padding:12px 16px;font-size:14px;line-height:1.4;'
+      /* 7 ottobre 2026 (Alex): la striscia larga in fondo copriva i pulsanti
+         delle finestre («Invia allo SDI», «Salva»...). Ora e' una pastiglia
+         piccola in basso a sinistra, e sparisce quando si apre una finestra. */
+      st.textContent='#gest-striscia{position:fixed;left:14px;bottom:14px;z-index:9998;'
+        +'max-width:min(460px,calc(100vw - 28px));'
+        +'background:#0a2a4d;color:#fff;padding:6px 6px 6px 16px;font-size:14px;line-height:1.35;'
+        +'border-radius:24px;'
         /* 27 set 2026: la striscia sta fuori da #app-root, quindi non prendeva
            il carattere del gestionale e usciva in Times. */
         +'font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;'
-        +'display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;'
-        +'box-shadow:0 -2px 12px rgba(0,0,0,0.25);'
-        +'padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px))}'
+        +'display:flex;gap:10px;align-items:center;flex-wrap:wrap;'
+        +'box-shadow:0 4px 14px rgba(0,0,0,0.3);'
+        +'margin-bottom:env(safe-area-inset-bottom, 0px)}'
+        +'#gest-striscia a{border-radius:999px}'
+        +'body:has(#overlay.open) #gest-striscia{display:none}'
         +'@media(max-width:880px){#gest-striscia{'
-        +'bottom:calc(68px + env(safe-area-inset-bottom, 0px));'
-        +'padding-bottom:12px}}';
+        +'bottom:calc(76px + env(safe-area-inset-bottom, 0px));margin-bottom:0}}';
       document.head.appendChild(st);
     }
     var d=document.createElement('div');
@@ -866,14 +872,18 @@
     try{ quando=new Date(data).toLocaleDateString('it-IT',{day:'numeric',month:'long'}); }catch(_){}
     var manca=(giorni===1?'ultimo giorno':('mancano '+giorni+' giorni'));
     var t=document.createElement('span');
-    t.textContent = (window.GESTIONALE_BASE_APERTO===true)
+    var lungo = (window.GESTIONALE_BASE_APERTO===true)
       ? 'Assistenza AI e chat: '+manca+(quando?' (scade il '+quando+')':'')+'. Poi resti al gestionale base, gratis.'
       : 'Gestionale: '+manca+(quando?' (scade il '+quando+')':'')+'.';
+    t.textContent = (window.GESTIONALE_BASE_APERTO===true)
+      ? 'Assistenza AI e chat: '+(giorni===1?'ultimo giorno':giorni+' giorni')
+      : 'Gestionale: '+(giorni===1?'ultimo giorno':giorni+' giorni');
+    d.title = lungo;
     d.appendChild(t);
     var a=document.createElement('a');
     a.href='pannello-impresa.html?attiva=ai';
     a.textContent = (window.GESTIONALE_BASE_APERTO===true) ? 'Rinnova' : 'Attiva';
-    a.style.cssText='background:#fff;color:#0a2a4d;font-size:14px;font-weight:800;text-decoration:none;padding:8px 14px;border-radius:8px;white-space:nowrap';
+    a.style.cssText='background:#fff;color:#0a2a4d;font-size:14px;font-weight:800;text-decoration:none;padding:7px 14px;border-radius:999px;white-space:nowrap';
     d.appendChild(a);
   }
   function strisciaProva(giorni){
