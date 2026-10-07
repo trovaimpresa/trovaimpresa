@@ -1819,8 +1819,8 @@
     /* --- chi riceve: il cliente --- */
     if(!f.cliente_id)                m.push("La fattura non ha un cliente.");
     else{
-      const piva=(f.cli_piva||cli.piva||"").trim();
-      const cf  =(f.cli_cod_fiscale||cli.cod_fiscale||"").trim();
+      const piva=(cli.piva||f.cli_piva||"").trim();
+      const cf  =(cli.cod_fiscale||f.cli_cod_fiscale||"").trim();
       const pP=pulita(piva), pC=pulita(cf);
       if(!pP&&!pC)                   m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Clienti.");
       if(pP&&!/^\d{11}$/.test(pP))
@@ -1829,13 +1829,13 @@
         m.push("La partita IVA del cliente ha 11 cifre ma non è valida: la cifra di controllo non torna. Ricontrollala — Clienti.");
       if(pC&&!/^(\d{11}|[A-Z0-9]{16})$/.test(pC))
         m.push("Il codice fiscale del cliente non ha una forma valida: 11 cifre per un condominio o un'azienda, 16 caratteri per un privato — Clienti.");
-      if(!(f.cli_indirizzo||cli.indirizzo||"").trim()) m.push("Manca la via del cliente — Clienti.");
-      if(!/^\d{5}$/.test((f.cli_cap||cli.cap||"").trim())) m.push("Il CAP del cliente manca o non è di 5 cifre — Clienti.");
-      if(!(f.cli_citta||cli.citta||"").trim())          m.push("Manca la città del cliente — Clienti.");
-      const prv=(f.cli_prov||cli.prov||"").trim();
+      if(!(cli.indirizzo||f.cli_indirizzo||"").trim()) m.push("Manca la via del cliente — Clienti.");
+      if(!/^\d{5}$/.test((cli.cap||f.cli_cap||"").trim())) m.push("Il CAP del cliente manca o non è di 5 cifre — Clienti.");
+      if(!(cli.citta||f.cli_citta||"").trim())          m.push("Manca la città del cliente — Clienti.");
+      const prv=(cli.prov||f.cli_prov||"").trim();
       if(prv&&!/^[A-Za-z]{2}$/.test(prv)) m.push("La provincia del cliente deve essere di 2 lettere, es. RI — Clienti.");
-      const sdi=(f.cli_sdi||cli.sdi_codice||"").trim();
-      const pec=(f.cli_pec||cli.sdi_pec||"").trim();
+      const sdi=(cli.sdi_codice||f.cli_sdi||"").trim();
+      const pec=(cli.sdi_pec||f.cli_pec||"").trim();
       if(!sdi&&!pec)
         m.push("Il cliente non ha né codice destinatario né PEC. Se non li ha davvero, scrivi 0000000 nel codice destinatario: la fattura gli arriverà nel suo cassetto fiscale.");
       if(sdi&&sdi!=="0000000"&&sdi.length!==7)
@@ -1871,10 +1871,10 @@
        Stessa pulizia del controllo: restano solo lettere e numeri. */
     const xpul=v=>String(v||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
 
-    const cPiva = xpul(f.cli_piva||cli.piva);
-    const cCf   = xpul(f.cli_cod_fiscale||cli.cod_fiscale);
-    const cSdi  =(f.cli_sdi||cli.sdi_codice||"").trim();
-    const cPec  =(f.cli_pec||cli.sdi_pec||"").trim();
+    const cPiva = xpul(cli.piva||f.cli_piva);
+    const cCf   = xpul(cli.cod_fiscale||f.cli_cod_fiscale);
+    const cSdi  =(cli.sdi_codice||f.cli_sdi||"").trim();
+    const cPec  =(cli.sdi_pec||f.cli_pec||"").trim();
     const codDest = cSdi || "0000000";
 
     /* il progressivo dell'invio: identifica il file, non la fattura.
@@ -1894,13 +1894,13 @@
       + ((o[pref+"prov"]||"").trim()?"        <Provincia>"+xesc(o[pref+"prov"].trim().toUpperCase())+"</Provincia>\n":"")
       + "        <Nazione>IT</Nazione>\n";
 
-    /* i dati del cliente: quelli congelati nella fattura, se ci sono, altrimenti
-       quelli dell'anagrafica di adesso */
+    /* 7 ott 2026: per lo SDI vince la scheda cliente di ADESSO (se corretta dopo l'emissione
+       vale la correzione); i dati congelati nella fattura servono solo se la scheda e' vuota */
     const cliDati={
-      indirizzo:f.cli_indirizzo||cli.indirizzo||"",
-      cap:f.cli_cap||cli.cap||"",
-      citta:f.cli_citta||cli.citta||"",
-      prov:f.cli_prov||cli.prov||"",
+      indirizzo:cli.indirizzo||f.cli_indirizzo||"",
+      cap:cli.cap||f.cli_cap||"",
+      citta:cli.citta||f.cli_citta||"",
+      prov:cli.prov||f.cli_prov||"",
       nome:f.cli_nome||cli.nome||""
     };
 
