@@ -905,7 +905,7 @@
         <div class="field"><label>Codice destinatario</label>
           <input id="c-sdi" value="${esc(c.sdi_codice||"")}" placeholder="7 caratteri" maxlength="7" style="text-transform:uppercase"></div>
         <div class="field"><label>PEC</label><input id="c-pec" type="email" value="${esc(c.sdi_pec||"")}" placeholder="cliente@pec.it"></div>
-        <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — si usa <b>0000000</b> e la fattura gli arriva nel cassetto fiscale. Non servono ancora a niente: li chiederà la fattura elettronica.</div>
+        <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — si usa <b>0000000</b> e la fattura gli arriva nel cassetto fiscale. <b>Servono per mandargli la fattura allo SDI</b> con un clic: il codice si scrive qui, nella sua scheda.</div>
       </div>
 
       </div></div>`,
