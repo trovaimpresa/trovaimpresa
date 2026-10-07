@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dove scrivere il codice SDI nel gestionale | TrovaImpresa</title>
+<meta name="description" content="Guida con immagini: dove si scrive il codice SDI (codice destinatario) del cliente per mandare la fattura elettronica dal gestionale TrovaImpresa, e dove si scrive il tuo.">
+<link rel="canonical" href="https://trovaimpresa.com/guida-codice-sdi.html">
+<style>
+:root{--blu:#1a6fe0;--blu-scuro:#0b2a55;--arancio:#f58a07;--sfondo:#eef3fb;--testo:#14213d;--bordo:#cfd9ec}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--sfondo);color:var(--testo);line-height:1.55;font-size:19px}
+header{background:var(--blu-scuro);color:#fff;padding:18px 20px}
+header a{color:#fff;text-decoration:none;font-weight:800;font-size:22px}
+header a span{color:var(--arancio)}
+main{max-width:980px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.2;margin:8px 0 12px}
+h2{font-size:clamp(24px,4vw,32px);margin:0 0 6px}
+.sotto{font-size:20px;color:#3b4a6b;margin:0 0 24px}
+.box{background:#fff;border:2px solid var(--bordo);border-radius:16px;padding:22px;margin:0 0 26px}
+.box.cosa{border-color:var(--blu);background:#f4f8ff}
+.etichetta{display:inline-block;font-weight:800;font-size:15px;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:10px}
+.mandare{background:#dff3e4;color:#14612c}
+.ricevere{background:#fdebd0;color:#8a4b00}
+ol{padding-left:0;list-style:none;counter-reset:p;margin:16px 0}
+ol li{counter-increment:p;position:relative;padding:6px 0 6px 52px;margin:6px 0}
+ol li::before{content:counter(p);position:absolute;left:0;top:4px;width:38px;height:38px;border-radius:50%;background:var(--blu);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+b.v{background:#fff3cf;padding:1px 6px;border-radius:6px}
+/* finta schermata del gestionale */
+.finta{border:2px solid #9fb2d6;border-radius:14px;overflow:hidden;background:#e8eef9;margin:18px 0}
+.finta .barra{background:var(--blu-scuro);color:#fff;font-weight:700;padding:10px 16px;font-size:16px}
+.finta .corpo{padding:18px}
+.finta h3{margin:0 0 8px;font-size:21px;border-bottom:3px solid var(--blu);padding-bottom:6px}
+.finta label{display:block;font-weight:700;font-size:16px;margin:12px 0 5px}
+.campo{background:#fff;border:1px solid #c5d0e6;border-radius:10px;padding:11px 14px;color:#4a5878;font-size:17px}
+.campo.cerchiato{border:3px solid var(--arancio);box-shadow:0 0 0 6px rgba(245,138,7,.22);color:#14213d;font-weight:700;position:relative}
+.freccia{display:flex;align-items:center;gap:10px;color:#b25d00;font-weight:800;font-size:19px;margin:8px 0 2px}
+.freccia svg{flex:none}
+.riga2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.nota{background:#fff8e6;border-left:6px solid var(--arancio);padding:14px 18px;border-radius:8px;margin:16px 0}
+.finta .bottoni{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.btn{padding:10px 20px;border-radius:10px;border:1px solid #9fb2d6;background:#fff;font-weight:700;font-size:16px}
+.btn.salva{background:var(--blu);color:#fff;border-color:var(--blu)}
+.btn.cerchiato{box-shadow:0 0 0 5px rgba(245,138,7,.35);border:3px solid var(--arancio)}
+ul.link{margin:10px 0 0;padding-left:22px}ul.link li{margin:8px 0}ul.link a{color:var(--blu);font-weight:700}
+.cta{display:inline-block;background:var(--arancio);color:#fff;text-decoration:none;font-weight:800;padding:14px 26px;border-radius:12px;font-size:20px}
+@media(max-width:640px){body{font-size:18px}.riga2{grid-template-columns:1fr}.box{padding:16px}ol li{padding-left:48px}}
+</style>
+</head>
+<body>
+<header><a href="/">Trova<span>Impresa</span></a></header>
+<main>
+  <h1>Dove si scrive il codice SDI nel gestionale</h1>
+  <p class="sotto">Una guida con le immagini, passo per passo. Le schermate qui sotto hanno dati di esempio.</p>
+
+  <div class="box cosa">
+    <h2>Cos'è il codice SDI</h2>
+    <p>Si chiama anche <b>codice destinatario</b>. Sono <b>7 caratteri</b> (lettere e numeri) e dicono allo SDI dove consegnare la fattura elettronica: come l'indirizzo di una cassetta delle lettere.</p>
+    <p><b>Chi lo dà?</b> Non lo Stato. Lo dà il servizio che usa chi riceve la fattura: il suo programma di fatturazione, il commercialista o la banca. <b>Se il cliente non ce l'ha</b>, scrivi <b class="v">0000000</b> (sette zeri): la fattura gli arriva nel cassetto fiscale. Se ha una PEC, scrivi anche quella.</p>
+  </div>
+
+  <div class="box">
+    <span class="etichetta mandare">Per mandare una fattura</span>
+    <h2>Scrivi il codice del tuo cliente</h2>
+    <p>Per mandare una fattura serve il codice <b>del cliente a cui la mandi</b>. Si scrive nella sua scheda.</p>
+    <ol>
+      <li>Apri il gestionale e scegli il tuo lavoro (reparto).</li>
+      <li>Nel menu a sinistra clicca <b>Clienti</b>.</li>
+      <li>Clicca <b>Apri</b> sul cliente, poi <b>Modifica</b> in basso a destra.</li>
+      <li>Scorri fino a <b>«Dove mandargli la fattura»</b> e scrivi il codice nella casella <b>Codice destinatario</b>.</li>
+      <li>Clicca <b>Salva</b>.</li>
+    </ol>
+    <div class="finta" role="img" aria-label="Schermata Modifica cliente con la casella Codice destinatario evidenziata">
+      <div class="barra">Modifica cliente</div>
+      <div class="corpo">
+        <h3>Dove mandargli la fattura</h3>
+        <label>Codice destinatario</label>
+        <div class="campo cerchiato">ABC1234</div>
+        <div class="freccia"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 30V6M7 15l10-10 10 10" fill="none" stroke="#b25d00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>Scrivi qui il codice del cliente (7 caratteri, oppure 0000000)</div>
+        <label>PEC</label>
+        <div class="campo">cliente@pec.it</div>
+        <div class="bottoni"><span class="btn">Annulla</span><span class="btn salva cerchiato">Salva</span></div>
+      </div>
+    </div>
+    <div class="nota"><b>Basta uno dei due:</b> il codice destinatario <i>oppure</i> la PEC. Se il cliente non ha né l'uno né l'altro (capita con i privati) scrivi 0000000.</div>
+  </div>
+
+  <div class="box">
+    <span class="etichetta ricevere">Per ricevere fatture</span>
+    <h2>Il codice della tua azienda</h2>
+    <p>Il codice che scrivi in <b>Dati azienda</b> è il <b>tuo</b>, e serve solo per <b>ricevere</b> fatture. <b>Per mandarle non serve.</b> Per ora il gestionale non riceve fatture: puoi compilarlo adesso e lo troverai pronto.</p>
+    <ol>
+      <li>Apri il gestionale e clicca <b>Dati azienda</b> (in alto a destra).</li>
+      <li>A destra trovi il riquadro <b>«Fattura elettronica»</b>.</li>
+      <li>Scrivi il tuo codice nella casella <b>Codice destinatario</b> (7 caratteri, oppure 0000000).</li>
+      <li>Clicca <b>Salva</b> in basso.</li>
+    </ol>
+    <div class="finta" role="img" aria-label="Schermata Dati azienda con la casella Codice destinatario evidenziata">
+      <div class="barra">Dati azienda</div>
+      <div class="corpo">
+        <h3>Fattura elettronica</h3>
+        <label>Regime fiscale</label>
+        <div class="campo">RF01 — Ordinario (il più comune)</div>
+        <label>Codice destinatario</label>
+        <div class="campo cerchiato">XYZ9876</div>
+        <div class="freccia"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 30V6M7 15l10-10 10 10" fill="none" stroke="#b25d00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>Qui il tuo codice, per ricevere</div>
+        <label>PEC</label>
+        <div class="campo">nomeazienda@pec.it</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="box">
+    <h2>Link utili</h2>
+    <ul class="link">
+      <li><a href="/software-gestionale-imprese-edili.html">Il gestionale per imprese edili: preventivi, fatture e cantieri</a></li>
+      <li><a href="/prezzi.html">Piani e prezzi</a></li>
+      <li><a href="/termini-condizioni.html#s10-sdi">Condizioni d'uso: invio delle fatture allo SDI</a></li>
+      <li><a href="/">Cerca un'impresa o un artigiano vicino a te</a></li>
+    </ul>
+  </div>
+
+  <p><a class="cta" href="/gestionale-app">Apri il gestionale</a></p>
+</main>
+</body>
+</html>
