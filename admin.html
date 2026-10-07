@@ -585,7 +585,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       </div>
       <div class="nav-item" onclick="showSection('segnalazioni',this)">
         <span class="nav-icon">🆘</span> Segnalazioni
-        <span class="nav-badge" id="badge-segnalazioni" style="background:var(--rosso)">0</span>
+        <span class="nav-badge" id="badge-segnalazioni" style="background:var(--rosso);display:none">0</span>
       </div>
       <div class="nav-item" onclick="showSection('lead',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Lead
@@ -2529,7 +2529,7 @@ async function apriConversazioneAdmin(uid, q) {
       + ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">\ud83d\uddd1</button>'
       + '<div style="' + style.replace('align-self:flex-end;', '').replace('max-width:75%;', 'max-width:100%;min-width:0;') + '">' + esc(m.messaggio || '')
       /* 27 set 2026 — la spunta: «Consegnata» appena scritta, «Letta» quando l'impresa apre la chat */
-      + '<div style="font-size:13px;font-weight:700;margin-top:6px;opacity:.9">' + (m.letto ? '✓✓ Letta' : '✓ Consegnata') + '</div>' + '</div>'
+      + '<div style="font-size:13px;margin-top:7px">' + (m.letto ? '<span style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#0a84ff">✓✓ Letta</span>' : '<span style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#6b7280">✓ Consegnata</span>') + '</div>' + '</div>'
       + '</div>';
   }).join('');
   box.scrollTop = box.scrollHeight;
@@ -4837,6 +4837,8 @@ async function caricaSegnalazioni() {
   }
   const aperte = (data || []).filter(s => s.stato === 'aperto').length;
   document.getElementById('badge-segnalazioni').textContent = aperte;
+  /* 7 ott 2026: lo 0 non si mostra, il pallino compare solo se c'e' qualcosa da guardare */
+  document.getElementById('badge-segnalazioni').style.display = aperte > 0 ? '' : 'none';
   if (!data || !data.length) {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">🆘</div>Nessuna segnalazione</div></td></tr>';
     return;

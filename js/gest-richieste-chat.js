@@ -369,7 +369,7 @@
         +_asstAllegatoHtml(m)
         +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_asstOra(m.created_at))
         /* 27 set 2026 — sui tuoi messaggi: «Letto» quando TrovaImpresa li ha aperti */
-        +(mio?(m.letto?' · <b>✓✓ Letto</b>':' · ✓ Inviato'):'')+'</div></div>';
+        +(mio?(m.letto?' · <span style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#0a84ff">✓✓ Letto</span>':' · <span style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#6b7280">✓ Inviato</span>'):'')+'</div></div>';
     }).join("");
     box.scrollTop=box.scrollHeight;
     _asstRisolviAllegati();

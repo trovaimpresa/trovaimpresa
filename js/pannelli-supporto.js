@@ -78,6 +78,9 @@ async function caricaSupporto() {
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'supporto_messaggi', filter: 'user_id=eq.' + user.id },
         function (payload) { renderSupportoMsg(payload.new); scrollSupporto(); })
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'supporto_messaggi', filter: 'user_id=eq.' + user.id },
+        function (payload) { supportoSegnaLetto(payload.new); })
       .subscribe();
   }
 }
@@ -90,7 +93,29 @@ function renderSupportoMsg(m) {
     + (mine ? 'align-self:flex-end;background:#0066ff;color:#fff' : 'align-self:flex-start;background:#fff;color:#111;border:1px solid var(--border)');
   div.textContent = m.messaggio || '';
   if (m.allegato) div.appendChild(supportoAllegatoEl(m));
+  /* 7 ott 2026 - la spunta sui messaggi MIEI: «Inviato» appena scritto, «Letto» quando l'assistenza apre la conversazione */
+  if (mine) {
+    const sp = document.createElement('div');
+    sp.className = 'sp-spunta';
+    sp.style.cssText = 'font-size:12px;margin-top:6px;text-align:right';
+    supportoSpunta(sp, !!m.letto);
+    div.appendChild(sp);
+    if (m.id != null) div.setAttribute('data-msg-id', String(m.id));
+  }
   box.appendChild(div);
+}
+/* quando l'assistenza legge, la spunta passa a «Letto» senza ricaricare la pagina */
+/* 7 ott 2026: spunta colorata come WhatsApp - grigia «Inviato», blu «Letto» (sul fondo bianco si legge su qualunque bolla) */
+function supportoSpunta(el, letto) {
+  el.innerHTML = '<span></span>';
+  const sp = el.firstChild;
+  sp.textContent = letto ? '\u2713\u2713 Letto' : '\u2713 Inviato';
+  sp.style.cssText = letto ? 'display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#0a84ff' : 'display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#6b7280';
+}
+function supportoSegnaLetto(m) {
+  if (!m || m.id == null || !m.letto || m.da_admin) return;
+  const el = document.querySelector('#supporto-msgs [data-msg-id="' + String(m.id) + '"] .sp-spunta');
+  if (el) supportoSpunta(el, true);
 }
 
 // 3 settembre 2026 — allegati: bucket privato «supporto-allegati», cartella <uid>/.

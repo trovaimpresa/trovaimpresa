@@ -89,7 +89,7 @@
       const mio=!m.da_admin;
       return testa+'<div class="asst-msg '+(mio?"mio":"suo")+'">'+esc(m.messaggio||"")+_supAllegato(m)
         +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_supOra(m.created_at))
-        +(mio?(m.letto?' · <b>✓✓ Letto</b>':' · ✓ Inviato'):'')+'</div></div>';
+        +(mio?(m.letto?' · <span style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#0a84ff">✓✓ Letto</span>':' · <span style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;font-weight:800;color:#6b7280">✓ Inviato</span>'):'')+'</div></div>';
     }).join("");
     box.scrollTop=box.scrollHeight;
     _supRisolvi();
