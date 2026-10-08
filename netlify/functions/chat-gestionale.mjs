@@ -78,7 +78,7 @@ const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
 const ATTREZZI = {
   lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato', ordine:'data_prevista', nome:'i lavori' },
   preventivi:   { tabella:'gest_preventivi',        campi:'id,numero,titolo,stato,data',                        ordine:'data',          nome:'i preventivi' },
-  fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome',                 ordine:'data',          nome:'le fatture' },
+  fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome,cliente_id',      ordine:'data',          nome:'le fatture' },
   clienti:      { tabella:'gest_clienti',           campi:'id,nome,tipo,citta',                                 ordine:'nome',          nome:'i clienti' },
   fornitori:    { tabella:'gest_fornitori',         campi:'id,nome,categoria,telefono',                         ordine:'nome',          nome:'i fornitori' },
   scadenze:     { tabella:'gest_scadenze',          campi:'id,titolo,data_scadenza,stato',                      ordine:'data_scadenza', nome:'le scadenze' },
@@ -633,7 +633,13 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Sai aprire questi quattro moduli e basta. Se ti chiede un preventivo, mandalo al pulsante «Genera con AI» che sta in cima ai Preventivi.',
     'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
-    'Nel database non scrivi e non cambi mai niente: tu leggi, spieghi, e al massimo gli apri un modulo già pieno. A salvare è sempre lui.'
+    '',
+    // ⛔ 8 ottobre 2026 — I SOLLECITI E I PULSANTI A UN TOCCO (gradini 1 e 2)
+    'SE TI CHIEDE UN SOLLECITO (un messaggio a chi non ha ancora pagato): prima leggi la fattura con gli attrezzi (deve essere EMESSA, non bozza e non già pagata) e il cliente. Poi scrivi UN messaggio gentile da mandare al cliente, in italiano semplice, dandogli del lei, e mettilo TUTTO fra virgolette basse «così». Dentro il messaggio: il numero della fattura, il TOTALE da pagare (con l\'IVA, senza l\'imponibile: al cliente interessa quanto deve bonificare), la data della fattura, una riga che dice «se ha già pagato mi scusi e ignori questo messaggio», e un ringraziamento. ⛔ NON inventare date di scadenza, IBAN, penali o minacce: se non lo sai, non lo scrivi. Non firmare con nessun nome: lo aggiunge lui.',
+    'Subito DOPO il messaggio scrivi il segnalino [wa:ID_CLIENTE] con l\'id del cliente, quello vero, preso da `cliente_id` della fattura o da `clienti`. Il gestionale lo trasforma nel pulsante «Manda su WhatsApp»: il messaggio lo prende da quello che hai messo fra «». Un solo messaggio fra «» per risposta, e solo per i solleciti: per le altre cose non usare le virgolette basse.',
+    'PULSANTE «SEGNA COME PAGATA»: quando nomini una fattura EMESSA e non ancora pagata, o quando ti dice che una fattura è stata pagata, scrivi dopo il suo nome il segnalino [pagata:ID_FATTURA] con l\'id vero letto con gli attrezzi. Diventa un pulsante: a premerlo è lui, tu non segni niente. ⛔ Mai su una fattura in bozza, già pagata o annullata. Se ti dice «ha pagato, segnala pagata», NON dire «fatto»: di\' che sotto trovi il pulsante da premere.',
+    '',
+    'Nel database non scrivi e non cambi mai niente: tu leggi, spieghi, e al massimo gli apri un modulo già pieno o gli metti un pulsante da premere. A salvare è sempre lui.'
   ].join('\n');
 }
 

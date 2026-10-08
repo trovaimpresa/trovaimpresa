@@ -5372,3 +5372,10 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
   border-radius:12px; padding:14px 18px; font-size:15px; font-weight:700; line-height:1.4;
 }
 #fatture .fatt-avviso[data-action]:hover{ background:#FBDADA; }
+
+/* 8 ottobre 2026 — pulsanti a un tocco sotto le risposte della chat
+   (WhatsApp, Segna come pagata). Stessa forma di .chip, solo il colore cambia. */
+.asst-msg .chip.wa{background:#1f9d55;border-color:#1f9d55;color:#fff;font-size:14px;padding:9px 16px}
+.asst-msg .chip.ok{background:var(--blu);border-color:var(--blu);color:#fff;font-size:14px;padding:9px 16px}
+.asst-msg .chip.fatto{background:#e8f6ee;border-color:#9bd3b1;color:#17663a;font-size:14px;padding:9px 16px;cursor:default}
+.asst-msg .chip[disabled]{opacity:.7}

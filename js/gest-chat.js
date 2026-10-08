@@ -175,7 +175,100 @@
      `white-space:pre-wrap`, quindi gli a capo li tiene da solo. Mettendoci
      anche i <br> le righe venivano doppie. Si converte solo il grassetto. */
   function testoRisposta(t) {
-    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri);
+    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
+      .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata);
+  }
+
+  /* ============================================================
+     ⛔ 8 ottobre 2026 — SOLLECITI E PULSANTI A UN TOCCO (gradini 1 e 2)
+     ============================================================
+     Due segnalini nuovi, come [apri:...]: la chat li scrive, qui diventano
+     pulsanti.
+       [wa:ID_CLIENTE]    → «Manda su WhatsApp»: prende il messaggio scritto
+                            fra «», cerca il telefono del cliente e apre WhatsApp.
+       [pagata:ID_FATTURA] → «Segna come pagata».
+     ⛔ L'AI NON SEGNA NIENTE. Il pulsante lo preme lui, e a scrivere nel
+        database e' il codice di sempre (`fattCambiaStato`, in
+        js/gest-fatture.js, tramite `window.chatSegnaPagata`).
+     ⚠️ Prima di segnare si RILEGGE lo stato dal database: i pulsanti restano
+        nelle chat vecchie, e una fattura gia' pagata non deve essere
+        segnata un'altra volta (cambierebbe la data di incasso).
+     ⚠️ Gli id devono essere di 36 caratteri come sempre: un segnalino con un
+        id inventato resta scritto e non diventa un pulsante. */
+  var SEGNALINO_WA  = /\[wa:([0-9a-fA-F-]{36})\]/g;
+  var SEGNALINO_PAG = /\[pagata:([0-9a-fA-F-]{36})\]/g;
+  function pulsanteWa(tutto, id) {
+    return ' <button class="chip wa" type="button" data-wa="' + id + '">Manda su WhatsApp</button>';
+  }
+  function pulsantePagata(tutto, id) {
+    return ' <button class="chip ok" type="button" data-pagata="' + id + '">Segna come pagata</button>';
+  }
+
+  /* il telefono all'italiana: solo cifre, col 39 davanti se manca */
+  function telefonoWa(t) {
+    var n = String(t || '').replace(/[^0-9+]/g, '');
+    if (n.indexOf('+') === 0) return n.replace(/\D/g, '');
+    n = n.replace(/\D/g, '');
+    if (n.indexOf('00') === 0) return n.slice(2);
+    if (!n) return '';
+    if (n.indexOf('39') === 0 && n.length >= 11) return n;
+    return '39' + n;
+  }
+
+  /* il testo del sollecito: l'ULTIMO pezzo fra «», se c'e'; se no tutta la
+     risposta senza i pulsanti. Si lavora su una copia della bolla. */
+  function testoSollecito(bolla) {
+    var copia = bolla.cloneNode(true);
+    Array.prototype.slice.call(copia.querySelectorAll('button')).forEach(function (x) { x.remove(); });
+    var tutto = (copia.innerText || copia.textContent || '').trim();
+    var pezzi = tutto.match(/«([^»]+)»/g);
+    if (pezzi && pezzi.length) return pezzi[pezzi.length - 1].replace(/^«|»$/g, '').trim();
+    return tutto;
+  }
+
+  async function mandaWhatsApp(b) {
+    var bolla = b.closest('.asst-msg'); if (!bolla) return;
+    var testo = testoSollecito(bolla);
+    if (!testo) { scrivi('ai', 'Non trovo il messaggio da mandare.'); return; }
+    /* la finestra si apre SUBITO, prima di aspettare il telefono: dopo
+       un'attesa il telefono e Safari bloccano l'apertura (non c'e' piu' il tocco) */
+    var w = null;
+    try { w = window.open('', '_blank'); } catch (e) {}
+    var tel = '';
+    try {
+      if (window._gc) {
+        var r = await window._gc.from('gest_clienti').select('telefono')
+          .eq('id', b.getAttribute('data-wa')).maybeSingle();
+        if (r && r.data) tel = telefonoWa(r.data.telefono);
+      }
+    } catch (e) {}
+    var url = 'https://wa.me/' + (tel ? tel : '') + '?text=' + encodeURIComponent(testo);
+    if (w) { try { w.location.href = url; return; } catch (e) {} }
+    window.location.href = url;
+  }
+
+  async function segnaPagata(b) {
+    if (b.disabled) return;
+    var id = b.getAttribute('data-pagata');
+    var prima = b.textContent;
+    b.disabled = true; b.textContent = 'Un attimo…';
+    function chiudi(testo, buono) {
+      b.textContent = testo;
+      if (buono) { b.className = 'chip fatto'; b.disabled = true; } else { b.disabled = false; }
+    }
+    try {
+      if (!window._gc || typeof window.chatSegnaPagata !== 'function') {
+        return chiudi('Ricarica la pagina e riprova', false);
+      }
+      var l = await window._gc.from('gest_fatture').select('stato').eq('id', id).maybeSingle();
+      if (!l || !l.data) return chiudi('Fattura non trovata', false);
+      if (l.data.stato === 'pagata') return chiudi('✔ Era già pagata', true);
+      if (l.data.stato !== 'emessa') return chiudi('Non è una fattura emessa', false);
+      await window.chatSegnaPagata(id);
+      var d = await window._gc.from('gest_fatture').select('stato').eq('id', id).maybeSingle();
+      if (d && d.data && d.data.stato === 'pagata') return chiudi('✔ Segnata pagata', true);
+      chiudi(prima, false);
+    } catch (e) { chiudi('Non ci sono riuscito, riprova', false); }
   }
 
   /* ============================================================
@@ -302,6 +395,10 @@
     document.getElementById('chat-righe').addEventListener('click', function (e) {
       var c = e.target.closest('[data-copia]');
       if (c) return copiaRisposta(c);
+      var w = e.target.closest('[data-wa]');
+      if (w) return mandaWhatsApp(w);
+      var p = e.target.closest('[data-pagata]');
+      if (p) return segnaPagata(p);
       var b = e.target.closest('[data-apri]'); if (!b) return;
       var ok = (typeof window.apriCosa === 'function')
         && window.apriCosa(b.getAttribute('data-apri'), b.getAttribute('data-apri-id'));

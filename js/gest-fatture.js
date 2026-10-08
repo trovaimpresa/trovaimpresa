@@ -1265,6 +1265,24 @@
     toast(v==="emessa"?("Fattura n. "+f.numero+"/"+fattAnno(f)+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
   }
 
+  /* 8 ottobre 2026 — IL PULSANTE «SEGNA COME PAGATA» DELLA CHAT.
+     La chat sta fuori da questa closure: da li' non si vede `fattCambiaStato`
+     ne' `fattCache`. Questa e' la porta. NON riscrive come si segna una
+     fattura: chiama quella di sempre, la stessa del menu «Segna pagata».
+     ⚠️ La lista fatture si carica solo quando apri la sezione Fatture: se
+        la fattura non e' nella memoria, si carica prima.
+     ⚠️ Solo le EMESSE: una bozza non e' un incasso e una gia' pagata non
+        si tocca (cambierebbe la data di incasso). */
+  window.chatSegnaPagata=async function(id){
+    try{
+      let f=fattCache.find(x=>String(x.id)===String(id));
+      if(!f){ await renderFatture(); f=fattCache.find(x=>String(x.id)===String(id)); }
+      if(!f||f.stato!=="emessa")return false;
+      await fattCambiaStato(id,"pagata");
+      return true;
+    }catch(_){ return false; }
+  };
+
   async function eliminaFattura(id){
     const f=fattCache.find(x=>String(x.id)===String(id));
     const avviso=f&&f.numero
