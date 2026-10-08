@@ -214,14 +214,18 @@
         '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-chiudi="1">Ho capito</button>');
       return;
     }
-    var amb = await chiama({ azione: "ambiente" });
+    var amb = await chiama({ azione: "conto" });
     var prova = amb && amb.ambiente === "test";
+    /* gestionale gratis: servono gli invii del pacchetto (anche in prova, cosi la finestra si vede subito) */
+    var aPacchetto = !!amb && amb.incluso === false;
+    if (aPacchetto && !(amb.residuo > 0)) { vendi(prova, id); return; }
     var gia = false; try { gia = localStorage.getItem(OK_KEY) === "1"; } catch (_) {}
     finestra("Invia allo SDI",
       (prova ? '<div class="nsdi-prova"><b>Siamo in PROVA.</b> La fattura va al finto SDI di Openapi: non arriva al cliente e non vale per il Fisco.</div>' : "")
       + (f.sdi_stato === "scartata" ? rigaStato(f) + '<div class="nsdi-nota">Hai sistemato quello che lo SDI chiedeva? Allora puoi rimandarla.</div>' : "")
       + '<div class="nsdi-conf"><b>Mando allo SDI la fattura n. ' + esc(f.numero) + '</b><span>a ' + esc(f.cliente || "il cliente") + '</span></div>'
       + '<div class="nsdi-nota"><b>Una fattura partita non si ritira.</b> Se c\'è un errore si corregge con una nota di credito. Controlla la fattura prima di mandarla.</div>'
+      + (aPacchetto ? '<div class="nsdi-nota">Questo invio usa <b>1</b> dei tuoi invii. Te ne restano <b>' + esc(String(amb.residuo)) + '</b>.</div>' : "")
       + (gia ? "" : '<label class="nsdi-aut"><input type="checkbox" id="nsdi-aut"> Autorizzo TrovaImpresa a trasmettere allo SDI, per mio conto, le fatture che mando con questo pulsante.</label>'),
       '<button type="button" class="nsdi-b" data-nsdi-chiudi="1">Annulla</button>'
       + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-vai="' + esc(id) + '">Invia allo SDI</button>');
@@ -235,11 +239,48 @@
     var D = await carica(id);
     if (!D || controllo(D).length) { chiudi(); apri(id); return; }
     var r = await chiama({ azione: "invia", fattura_id: id, xml: costruisci(D) });
+    if (r.codice === "serve_pacchetto") { chiudi(); vendi(); return; }
     if (r.error) { btn.disabled = false; btn.textContent = "Riprova"; toast("Non partita: " + r.error); return; }
     chiudi();
     toast(r.ambiente === "test" ? "Partita (PROVA) ✅ — fra poco arriva la risposta" : "Fattura partita per lo SDI ✅");
     apri(id);
   }
+
+  /* ---- i pacchetti di invii (gestionale gratis) ---- */
+  function vendi(prova, id) {
+    finestra("Invii allo SDI",
+      '<div class="nsdi-conf"><b>Hai finito gli invii allo SDI</b><span>Compra un pacchetto: non scade e lo usi quando vuoi.</span></div>'
+      + '<div class="nsdi-nota">Con il gestionale con assistenza AI e chat gli invii sono già compresi.</div>',
+      '<button type="button" class="nsdi-b" data-nsdi-chiudi="1">Chiudi</button>'
+      + (prova ? '<button type="button" class="nsdi-b" data-nsdi-vai="' + esc(id) + '">Prova lo stesso (PROVA)</button>' : '')
+      + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-compra="50">50 invii · 7,90 €</button>'
+      + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-compra="200">200 invii · 24 €</button>');
+  }
+
+  async function compra(pacchetto, btn) {
+    var testo = btn.textContent;
+    btn.disabled = true; btn.textContent = "Apro il pagamento…";
+    var tok = null;
+    try { var g = await sb.auth.getSession(); tok = g && g.data && g.data.session ? g.data.session.access_token : null; } catch (_) {}
+    if (!tok) { btn.disabled = false; btn.textContent = testo; toast("Accesso scaduto: ricarica la pagina."); return; }
+    try {
+      var r = await fetch("/.netlify/functions/crea-checkout-sdi", {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+        body: JSON.stringify({ pacchetto: pacchetto, pagina: "noleggio" })
+      });
+      var j = await r.json().catch(function () { return {}; });
+      if (j.url) { window.location.href = j.url; return; }
+      toast(j.messaggio || j.error || "Non riesco ad aprire il pagamento.");
+    } catch (e) { toast("Nessuna connessione. Riprova fra poco."); }
+    btn.disabled = false; btn.textContent = testo;
+  }
+
+  /* di ritorno da Stripe */
+  (function () {
+    var q = ""; try { q = new URLSearchParams(location.search).get("sdi") || ""; } catch (_) {}
+    if (q === "ok") setTimeout(function () { toast("Pagamento ricevuto ✅ — gli invii arrivano in pochi secondi"); }, 1500);
+    else if (q === "annullato") setTimeout(function () { toast("Pagamento annullato: non hai speso nulla"); }, 1500);
+  })();
 
   async function aggiorna(id, btn) {
     btn.disabled = true; btn.textContent = "Chiedo…";
@@ -249,10 +290,11 @@
   }
 
   document.addEventListener("click", function (e) {
-    var t = e.target && e.target.closest ? e.target.closest("[data-nol-sdi],[data-nsdi-chiudi],[data-nsdi-vai],[data-nsdi-agg]") : null;
+    var t = e.target && e.target.closest ? e.target.closest("[data-nol-sdi],[data-nsdi-chiudi],[data-nsdi-vai],[data-nsdi-agg],[data-nsdi-compra]") : null;
     if (!t) return;
     if (t.dataset.nolSdi) { if (sb) apri(t.dataset.nolSdi); return; }
     if (t.dataset.nsdiChiudi) { chiudi(); return; }
+    if (t.dataset.nsdiCompra) { compra(t.dataset.nsdiCompra, t); return; }
     if (t.dataset.nsdiVai) { vai(t.dataset.nsdiVai, t); return; }
     if (t.dataset.nsdiAgg) { aggiorna(t.dataset.nsdiAgg, t); }
   });

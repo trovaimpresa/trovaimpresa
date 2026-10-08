@@ -172,8 +172,9 @@ async function accreditaCrediti(supabase, s, ev) {
   const userId  = meta.user_id || s.client_reference_id || null;
   const crediti = parseInt(meta.crediti, 10);
   const perChat = (meta.prodotto === 'messaggi-chat');
-  const etich   = perChat ? '[messaggi]' : '[crediti]';
-  const parola  = perChat ? 'messaggi' : 'crediti';
+  const perSdi  = (meta.prodotto === 'invii-sdi');
+  const etich   = perSdi ? '[sdi]' : perChat ? '[messaggi]' : '[crediti]';
+  const parola  = perSdi ? 'invii SDI' : perChat ? 'messaggi' : 'crediti';
 
   // ⚠️ IL CASO CHE NON DEVE ACCREDITARE NIENTE.
   // Con la carta `payment_status` e' 'paid' subito. Con i pagamenti che
@@ -188,7 +189,7 @@ async function accreditaCrediti(supabase, s, ev) {
 
   // l'incasso si segna comunque, anche se poi l'accredito va storto
   await segnaIncasso(supabase, {
-    prodotto: perChat ? 'messaggi-chat' : 'crediti-ai', centesimi: s.amount_total, riferimento: s.id,
+    prodotto: perSdi ? 'invii-sdi' : perChat ? 'messaggi-chat' : 'crediti-ai', centesimi: s.amount_total, riferimento: s.id,
     email, valuta: s.currency, tipo_evento: ev.type,
     quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
   });
@@ -202,7 +203,14 @@ async function accreditaCrediti(supabase, s, ev) {
     return true;
   }
 
-  const { data, error } = perChat
+  const { data, error } = perSdi
+    ? await supabase.rpc('sdi_accredita_pacchetto', {
+        p_user_id:           userId,
+        p_invii:             crediti,
+        p_amount_eur:        (s.amount_total || 0) / 100,
+        p_payment_reference: s.id
+      })
+    : perChat
     ? await supabase.rpc('add_chat_pack', {
         p_user_id:           userId,
         p_messaggi:          crediti,
@@ -260,7 +268,7 @@ exports.handler = async (event) => {
     // Una ricarica di crediti porta con se' l'email, e senza questa riga
     // finirebbe nel ramo qui sotto: 19 euro di crediti diventerebbero un
     // abbonamento regalato.
-    if (prodotto === 'crediti-ai' || prodotto === 'messaggi-chat') {
+    if (prodotto === 'crediti-ai' || prodotto === 'messaggi-chat' || prodotto === 'invii-sdi') {
       tuttoBene = await accreditaCrediti(supabase, s, ev);
 
     } else if (email && prodotto === 'gestionale') {
@@ -343,7 +351,7 @@ exports.handler = async (event) => {
   if (ev.type === 'checkout.session.async_payment_failed') {
     const s = ev.data.object;
     const pr = s.metadata && s.metadata.prodotto;
-    if (pr === 'crediti-ai' || pr === 'messaggi-chat') {
+    if (pr === 'crediti-ai' || pr === 'messaggi-chat' || pr === 'invii-sdi') {
       console.log('[' + pr + '] pagamento non riuscito, nessun accredito:', s.id);
     }
   }
@@ -469,6 +477,13 @@ exports.handler = async (event) => {
           }
         }
       }
+
+    } else if (prodotto === 'invii-sdi') {
+      // ⚠️ 8 ott 2026 — un pacchetto di invii rimborsato NON deve toccare il
+      // piano della persona (senza questo ramo finiva nel «premium» e la
+      // rimetteva al piano free). Gli invii possono essere gia' partiti
+      // verso lo SDI e non si richiamano: decide Alessio, a mano.
+      tolto = 'NIENTE: pacchetto invii SDI rimborsato, tolgo gli invii a mano su Supabase (tabella sdi_crediti) se servono';
 
     } else if (prodotto === 'gestionale' && email) {
       const up = await supabase.from('imprese')
