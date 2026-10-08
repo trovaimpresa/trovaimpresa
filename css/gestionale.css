@@ -5379,3 +5379,18 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
 .asst-msg .chip.ok{background:var(--blu);border-color:var(--blu);color:#fff;font-size:14px;padding:9px 16px}
 .asst-msg .chip.fatto{background:#e8f6ee;border-color:#9bd3b1;color:#17663a;font-size:14px;padding:9px 16px;cursor:default}
 .asst-msg .chip[disabled]{opacity:.7}
+
+/* 8 ottobre 2026 — LA CHAT PIU' ALTA (chiesta da Alessio: «piu' grande in
+   ALTEZZA, non in larghezza»). Solo dentro #chat: nessun'altra sezione cambia.
+   Tolto il titolo (il menu a sinistra dice gia' dove sei) e abbassata la
+   casella di scrittura; l'altezza esatta la calcola js/gest-chat.js
+   (`adattaAltezza`), qui c'e' solo una misura di ripiego. Testo e larghezza
+   delle risposte restano com'erano. */
+#chat.active{ height:calc(100vh - 222px); }
+#chat .sec-head{ display:none; }
+#chat .asst-scrivi textarea{ min-height:64px; height:64px; }
+#chat .asst-msg .chip{ margin:8px 10px 0 0; }
+@media(max-width:880px){
+  #chat.active{ height:auto; }
+  #chat .sec-head{ display:block; }
+}

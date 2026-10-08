@@ -176,7 +176,12 @@
      anche i <br> le righe venivano doppie. Si converte solo il grassetto. */
   function testoRisposta(t) {
     return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
-      .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata);
+      .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata)
+      /* 8 ott 2026 — i pulsanti a un tocco stanno TUTTI IN FILA: la chat li
+         scrive ognuno su una riga sua e con `white-space:pre-wrap` si
+         impilavano uno sotto l'altro. Via gli a capo FRA i pulsanti. */
+      .replace(/[ \t]*\n+[ \t]*(<button class="chip (?:wa|ok)")/g, '\n$1')
+      .replace(/(<\/button>)\s+(<button class="chip (?:wa|ok)")/g, '$1 $2');
   }
 
   /* ============================================================
@@ -754,6 +759,9 @@
           cop.setAttribute('data-copia', '1'); cop.textContent = 'Copia';
           bolla.appendChild(document.createElement('br'));
           bolla.appendChild(cop);
+          /* 8 ott 2026 — «Copia» arriva DOPO l'ultimo pezzo di testo: se non
+             si scende ancora, resta tagliato sotto il bordo */
+          if (scatola) scatola.scrollTop = scatola.scrollHeight;
         }
         if (fine) {
           /* se l'ha pagato il pacchetto, il pacchetto e' sceso di uno */
