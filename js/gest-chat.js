@@ -323,7 +323,8 @@
     /* ⛔ 30 agosto 2026 — i due nuovi. Stanno in js/ai-integrazione.js
        insieme agli altri: qui si preme il campanello, non si apre la porta. */
     scadenza:  'compilaScadenzaDaChat',
-    fornitore: 'compilaFornitoreDaChat'
+    fornitore: 'compilaFornitoreDaChat',
+    preventivo: 'compilaPreventivoDaChat'
   };
 
   function apriModulo(m) {

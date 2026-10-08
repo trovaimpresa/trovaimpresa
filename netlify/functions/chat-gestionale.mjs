@@ -57,7 +57,7 @@ import { createClient } from '@supabase/supabase-js';
    mosso. */
 const TEMPO_ACCESSO  = 8000;    // ms — tetto sui controlli d'accesso
 const TEMPO_CLAUDE   = 30000;   // ms — tetto su una risposta di Claude
-const GIRI_MAX       = 4;       // quante volte Claude puo' chiedere dati
+const GIRI_MAX       = 6;       // quante volte Claude puo' chiedere dati
 const RIGHE_MAX      = 25;      // righe per attrezzata: piu' di cosi' non serve
 const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
 
@@ -271,7 +271,11 @@ const MODULI = {
   scadenza:  { caselle: ['titolo', 'data', 'note'],
                serve: 'titolo', manca: 'manca cosa scade' },
   fornitore: { caselle: ['nome', 'categoria', 'telefono', 'email', 'indirizzo', 'piva'],
-               serve: 'nome',   manca: 'manca il nome del fornitore' }
+               serve: 'nome',   manca: 'manca il nome del fornitore' },
+  /* 8 ott 2026 — IL PREVENTIVO. Titolo + voci (descrizione, unita', quantita',
+     prezzo). Le voci si puliscono in costruisciModulo: max 30, testi corti,
+     numeri veri. Un prezzo che non c'e' resta VUOTO, mai 0. */
+  preventivo: { caselle: ['titolo'], serve: 'titolo', manca: 'manca il titolo del preventivo' }
 };
 const CASELLE_LAVORO = MODULI.lavoro.caselle;    // per chi lo chiedeva prima
 const LUNGHEZZA_MAX  = 300;
@@ -290,6 +294,23 @@ function costruisciModulo(tipo, dati) {
     campi[k] = v;
   });
   if (!campi[m.serve]) return { errore: m.manca };
+  if (tipo === 'preventivo') {
+    const voci = [];
+    (Array.isArray(d.voci) ? d.voci : []).slice(0, 30).forEach(function (v) {
+      if (!v) return;
+      const desc = String(v.descrizione == null ? '' : v.descrizione).trim().slice(0, 200);
+      if (!desc) return;
+      const voce = { descrizione: desc };
+      const un = String(v.unita == null ? '' : v.unita).trim().slice(0, 12);
+      if (un) voce.unita = un;
+      const q = Number(v.quantita);
+      if (isFinite(q) && q > 0 && q < 1000000) voce.quantita = q;
+      const pz = (v.prezzo_unitario === null || v.prezzo_unitario === undefined || v.prezzo_unitario === '') ? NaN : Number(v.prezzo_unitario);
+      if (isFinite(pz) && pz >= 0 && pz < 10000000) voce.prezzo_unitario = pz;
+      voci.push(voce);
+    });
+    if (voci.length) campi.voci = voci;
+  }
   return { tipo: tipo, campi: campi };
 }
 
@@ -544,6 +565,37 @@ const STRUMENTI = [
       },
       required: ['nome']
     }
+  },
+  {
+    // ⛔ come compila_lavoro: non legge e non scrive niente
+    name: 'compila_preventivo',
+    description: 'Apre nel gestionale il modulo «Nuovo preventivo» GIÀ COMPILATO con titolo e voci. Usalo quando ti chiede un preventivo. PRIMA guarda i SUOI prezzi con `miei_prezzi` e, se serve, i suoi preventivi vecchi. NON salva niente: l\'utente controlla e preme Salva lui. Il prezzo di una voce lo metti SOLO se lo hai letto fra i suoi prezzi o nei suoi preventivi: altrimenti lo lasci fuori (resta vuoto, lo scrive lui). La quantità la metti solo se te l\'ha detta o si ricava dalle misure che ti ha dato.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        titolo: { type:'string', description:'titolo breve, per esempio «Rifacimento bagno 6 mq — Rossi»' },
+        voci: {
+          type: 'array',
+          description: 'le voci di costo, nell\'ordine di lavoro',
+          items: {
+            type: 'object',
+            properties: {
+              descrizione:     { type:'string' },
+              unita:           { type:'string', description:'mq, ml, cad, ore…' },
+              quantita:        { type:'number' },
+              prezzo_unitario: { type:'number', description:'euro per unità, SOLO se è un prezzo suo che hai letto' }
+            },
+            required: ['descrizione']
+          }
+        }
+      },
+      required: ['titolo']
+    }
+  },
+  {
+    name: 'miei_prezzi',
+    description: 'Legge la LISTA DEI PREZZI di chi chiede (quelli che ha salvato lui: voce, unità, prezzo). Usalo prima di fare un preventivo, con una parola della voce («piastrelle», «tinteggiatura»). Senza parola dà quelli che usa di più.',
+    input_schema: { type:'object', properties: { parola: { type:'string' } } }
   }
 ];
 
@@ -630,7 +682,8 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Dopo che l\'hai aperto, scrivi UNA riga sola per dire cosa ci hai messo: il modulo ce l\'ha davanti, non serve rileggerglielo tutto.',
     'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
-    'Sai aprire questi quattro moduli e basta. Se ti chiede un preventivo, mandalo al pulsante «Genera con AI» che sta in cima ai Preventivi.',
+    'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
+    'Sai aprire questi cinque moduli e basta: lavoro, cliente, scadenza, fornitore, preventivo.',
     'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
     '',
@@ -1027,6 +1080,13 @@ export default async function (req) {
              chiede da auth.uid(), e col service role sarebbe vuoto. */
           var rs = await chiamaRpc(dati, 'chat_soldi', { p_mestiere: mestiere_id });
           esito = rs.errore ? { errore: rs.errore } : (rs.dati || { errore: 'nessun conto' });
+        } else if (t.name === 'miei_prezzi') {
+          /* i prezzi sono dell'utente (user_id), non del reparto: la tabella
+             non ha `mestiere_id`. Il filtro sull'utente c'e' sempre. */
+          const qp = { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario,categoria',
+                       filtri: { user_id: uid }, senzaCestino: true, ordine: 'usata_volte', limite: RIGHE_MAX, soloConta: false };
+          if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
+          esito = uid ? await esegui(dati, qp) : { errore: 'manca chi sta chiedendo' };
         } else if (t.name.indexOf('compila_') === 0 && MODULI[t.name.slice(8)]) {
           /* ⛔ QUI NON SI SCRIVE NIENTE. Si prepara solo il modulo che
              aprira' il browser, e a salvarlo sara' l'iscritto. Il

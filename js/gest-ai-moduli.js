@@ -1513,6 +1513,22 @@
     jobForm(null,"",null,true,false,riga);
   };
 
+  /* 8 ott 2026 — IL PREVENTIVO DALLA CHAT. Apre il modulo e ci mette titolo e
+     voci con la STESSA macchina del pulsante «Genera con AI» (aiRiempiPreventivo):
+     qui non si ricopia niente. Non salva: a premere «Crea preventivo» e' lui.
+     Un prezzo che la chat non sa resta una casella vuota. */
+  window.gestRiempiPreventivoDaChat=async function(d){
+    try{
+      await prevForm(null,null,false);
+      const messi=[];
+      const t=String((d&&d.titolo)||"").trim().slice(0,200);
+      const el=$("#pv-tit");
+      if(t&&el){ el.value=t; el.dispatchEvent(new Event("input",{bubbles:true})); }
+      aiRiempiPreventivo(d,messi);
+      return true;
+    }catch(e){ return false; }
+  };
+
   /* ============================================================
      IL FILO — 18 agosto 2026 (domanda di Alessio: «e il cliente lo sa?»)
 

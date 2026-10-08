@@ -700,6 +700,15 @@
     return riempiCliente(d);
   };
 
+  /* 8 ott 2026 — la porta della chat per il preventivo: il lavoro vero lo fa
+     gest-ai-moduli.js (stessa macchina di «Genera con AI») */
+  AI.compilaPreventivoDaChat = function (d) {
+    chiudiTutto();
+    if (typeof window.gestRiempiPreventivoDaChat !== 'function') return false;
+    window.gestRiempiPreventivoDaChat(d);
+    return true;
+  };
+
   function compilaCliente() {
     if (typeof window.gestApriModuloAI === 'function') { window.gestApriModuloAI('cliente'); return; }
     pannelloCompila(
