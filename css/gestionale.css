@@ -5387,15 +5387,15 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
 #chat.active{ display:flex; flex-direction:column; height:calc(100vh - 192px); }
 #chat .sec-head{ display:none; }
 #chat .asst-msgs{ padding:24px 28px; gap:18px; }
-#chat .asst-msg{ max-width:100%; font-size:22px; line-height:1.6; padding:0; border:0; background:transparent; color:var(--testo); }
-#chat .asst-msg.mio{ max-width:75%; align-self:flex-end; background:#eef1f5; padding:12px 20px; border-radius:16px; }
-#chat .asst-msg .chip{ font-size:17px; padding:10px 18px; margin:10px 12px 0 0; }
-#chat .asst-scrivi textarea{ font-size:22px; line-height:1.5; min-height:84px; height:84px; }
+#chat .asst-msg{ max-width:100%!important; font-size:22px!important; line-height:1.6!important; padding:0!important; border:0!important; box-shadow:none!important; background:transparent!important; color:var(--testo)!important; }
+#chat .asst-msg.mio{ max-width:75%!important; align-self:flex-end; background:#eef1f5!important; padding:12px 20px!important; border-radius:16px!important; }
+#chat .asst-msg .chip{ font-size:17px!important; padding:10px 18px!important; margin:10px 12px 0 0; }
+#chat .asst-scrivi textarea{ font-size:22px!important; line-height:1.5; min-height:84px; height:84px; }
 @media(max-width:880px){
   #chat.active{ height:auto; }
   #chat .sec-head{ display:block; }
-  #chat .asst-msg{ font-size:19px; }
-  #chat .asst-msg.mio{ max-width:90%; }
+  #chat .asst-msg{ font-size:19px!important; }
+  #chat .asst-msg.mio{ max-width:90%!important; }
 }
 
 /* 8 ottobre 2026 — il menu a sinistra: spazio in fondo, cosi' «Altre N voci»
