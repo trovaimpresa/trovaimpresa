@@ -486,6 +486,11 @@ const STRUMENTI = [
     input_schema: { type:'object', properties: {} }
   },
   {
+    name: 'liquidita_30_giorni',
+    description: 'Dà la LIQUIDITÀ dei prossimi 30 giorni del reparto aperto: quanti soldi dovrebbero ENTRARE (fatture emesse e non pagate, divise per scadenza: già scadute, entro 7 giorni, da 8 a 14, da 15 a 30) e quanti dovrebbero USCIRE (fatture dei fornitori da pagare, stessa divisione), più il saldo previsto. USALO per domande come «quanti soldi entrano e escono questo mese», «come sto messo a soldi», «riesco a pagare i fornitori». I conti li fa il gestionale: non sommare a mano.',
+    input_schema: { type:'object', properties: {} }
+  },
+  {
     name: 'cerca_per_nome',
     description: 'Cerca una parola nel nome o nel titolo delle cose di un tipo, dentro il reparto aperto. Usalo quando l\'utente nomina un cliente, un lavoro o un documento.',
     input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE }, parola: { type:'string' } }, required:['cosa','parola'] }
@@ -670,6 +675,7 @@ function istruzioni(sezione, nomeReparto, oggi) {
     '',
     '⛔ LE ORE NON SI CONTANO A RIGHE. `conta_cose` su `ore` dice quante SEGNATURE ci sono, non quante ore: una segnatura da 8 ore e una da 2 sono due righe e dieci ore. Per rispondere sulle ore prendi l\'elenco con `elenco_cose` e SOMMA la colonna `ore`, poi di\' anche su quante segnature hai fatto il conto. Se le segnature sono piu\' di 25 avvisalo che il conto e\' solo delle ultime 25.',
     'I SOLDI DEL REPARTO nel loro insieme si chiedono SEMPRE a `soldi_del_reparto`, mai sommando a mano le righe che leggi: le somme le fa il gestionale, tu le riporti.',
+    '⛔ LIQUIDITÀ A 30 GIORNI («quanti soldi entrano e escono», «come sto messo», «riesco a pagare i fornitori?»): chiama `liquidita_30_giorni` e rispondi con questo schema, righe corte, importi in euro con i punti (1.250,00 €):\n**ENTRANO** (fatture da incassare)\n- già scadute: N fatture, X € ← sono i soldi da rincorrere\n- entro 7 giorni: …\n- da 8 a 14 giorni: …\n- da 15 a 30 giorni: …\n**ESCONO** (fornitori da pagare)\n- già scadute / entro 7 giorni / 8-14 / 15-30, uguale\n**SALDO PREVISTO a 30 giorni**: quello che dice il campo `saldo_previsto_30_giorni` (le scadute NON ci sono dentro, dillo).\nSaltare le righe a zero. Una riga finale di consiglio vera e semplice (per esempio «ti conviene sollecitare le fatture già scadute prima di pagare X»). ⛔ Dì sempre in una riga che sono le SCADENZE scritte nel gestionale, non il conto in banca: i soldi veri in banca non li vedi. Non inventare importi e non sommare a mano. Se ci sono fatture già scadute, offri di scrivere i solleciti.',
     'QUANTO VALE UN DOCUMENTO PRECISO invece sta in `fatture_totali` e `preventivi_totali`. Si legge la fattura (o il preventivo) e poi il suo totale, e si incrociano per id: `fatture_totali.fattura_id` e\' l\'`id` della fattura, `preventivi_totali.preventivo_id` e\' l\'`id` del preventivo. Lo stesso vale per le ore: `ore.operatore_id` e\' l\'`id` della persona della squadra, `ore.lavoro_id` e\' l\'`id` del lavoro. Gli importi di quelle tabelle NON si sommano a mano se la domanda riguarda tutto il reparto: per quello c\'e\' `soldi_del_reparto`.',
     'Quando dici una cifra, dì SEMPRE tutte e due: il totale con l\'IVA (quello che il cliente bonifica) e, fra parentesi, l\'imponibile. Esempio: «9.760,00 € (8.000,00 € imponibile)». Scelta di Alessio, 29 agosto.',
     'Scrivi i soldi all\'italiana, col punto delle migliaia e la virgola dei centesimi: 8.000,00 €.',
@@ -1072,6 +1078,11 @@ export default async function (req) {
               ? await esegui(dati, costruisciLetturaFiglio(inp.cosa, uid, inp.id, { quanti: inp.quanti }))
               : { errore: 'quel documento non e\' in questo reparto, oppure non esiste' };
           }
+        } else if (t.name === 'liquidita_30_giorni') {
+          /* come soldi_del_reparto: i conti li fa `chat_liquidita` su Supabase,
+             col client dell'ISCRITTO (dentro si prende chi chiede da auth.uid()) */
+          var rl = await chiamaRpc(dati, 'chat_liquidita', { p_mestiere: mestiere_id });
+          esito = rl.errore ? { errore: rl.errore } : (rl.dati || { errore: 'nessun conto' });
         } else if (t.name === 'soldi_del_reparto') {
           /* ⛔ i conti li fa `chat_soldi` su Supabase, che a sua volta legge
              la vista `gest_fatture_totali`: la formula dei soldi resta in un
