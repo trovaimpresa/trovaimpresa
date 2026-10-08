@@ -383,6 +383,7 @@
     +       '<button class="btn btn-primary" type="button" id="chat-manda">Manda</button>'
     +     '</div>'
     +     '<div class="asst-nota" id="chat-allegato"></div>'
+    +     '<div class="asst-nota" id="chat-voce"></div>'
     +     '<div class="asst-nota" id="chat-sotto"></div>'
     +   '</div>'
     /* ✨ 29 agosto 2026 — le chat di prima, chieste da Alessio */
@@ -402,6 +403,19 @@
     window.addEventListener('resize', adattaAltezza);
     try { new MutationObserver(adattaAltezza).observe(sez, { attributes: true, attributeFilter: ['class'] }); } catch (_) {}
     setTimeout(adattaAltezza, 0);
+
+    /* 8 ott 2026 — LA VOCE. Il pulsante «Parla» e' quello di sempre
+       (js/gest-ai-cantiere.js, lo stesso delle richieste e dei moduli): qui
+       non si riscrive niente. Il testo detto va nella casella e NON parte da
+       solo: lo controlli e premi Manda. Dove il browser non ha il microfono
+       (Firefox) il pulsante resta nascosto. */
+    try {
+      if (window.aiMicrofono && window.aiMicHTML) {
+        document.getElementById('chat-piu').insertAdjacentHTML('afterend', window.aiMicHTML('chat-mic'));
+        window.aiMicrofono(document.getElementById('chat-mic'),
+          document.getElementById('chat-domanda'), document.getElementById('chat-voce'));
+      }
+    } catch (_) {}
 
     document.getElementById('chat-manda').addEventListener('click', function () {
       if (inCorso) { if (annulla) annulla.abort(); return; }
@@ -659,6 +673,10 @@
   }
 
   async function manda() {
+    /* se sta ancora ascoltando, prima lo ferma: se no continuerebbe a scrivere
+       nella casella gia' svuotata */
+    var micOn = document.getElementById('chat-mic');
+    if (micOn && micOn.classList.contains('aic-mic--on')) micOn.click();
     if (inCorso) return;
     var casella = document.getElementById('chat-domanda');
     var domanda = (casella.value || '').trim();
