@@ -124,8 +124,8 @@ function sdiVendi(prova, id) {
     + '<div class="sh-nota">Con il gestionale con assistenza AI e chat gli invii sono già compresi.</div></div>',
     '<button class="btn b-cancel" data-action="close">Chiudi</button>'
     + (prova ? '<button class="btn b-cancel" type="button" data-sdi-vai="' + esc(id) + '">Prova lo stesso (PROVA)</button>' : '')
-    + '<button class="btn btn-primary" type="button" data-sdi-compra="50">50 invii · 7,90 €</button>'
-    + '<button class="btn btn-primary" type="button" data-sdi-compra="200">200 invii · 24 €</button>');
+    + '<button class="btn btn-primary" type="button" data-sdi-compra="50">50 invii · 9,90 €</button>'
+    + '<button class="btn btn-primary" type="button" data-sdi-compra="200">200 invii · 29 €</button>');
 }
 
 async function sdiCompra(pacchetto, btn) {

@@ -123,7 +123,7 @@ async function assicuraAnagrafica(db, base, token, ambiente, userId, az, piva) {
    - gestionale a pagamento (chat_pro attivo): invii compresi, con un tetto al mese contro gli abusi;
    - gestionale gratis: serve un pacchetto di invii (tabella sdi_crediti), ogni invio ne scala uno;
    - una fattura SCARTATA rimandata non si paga di nuovo. */
-const SDI_TETTO_MESE = 200;
+const SDI_TETTO_MESE = 50;
 async function sdiConto(db, uid) {
   const { data: imp } = await db.from('imprese').select('chat_pro,chat_pro_scadenza').eq('user_id', uid).maybeSingle();
   const scad = imp && imp.chat_pro_scadenza ? new Date(imp.chat_pro_scadenza).getTime() : null;

@@ -253,8 +253,8 @@
       + '<div class="nsdi-nota">Con il gestionale con assistenza AI e chat gli invii sono già compresi.</div>',
       '<button type="button" class="nsdi-b" data-nsdi-chiudi="1">Chiudi</button>'
       + (prova ? '<button type="button" class="nsdi-b" data-nsdi-vai="' + esc(id) + '">Prova lo stesso (PROVA)</button>' : '')
-      + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-compra="50">50 invii · 7,90 €</button>'
-      + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-compra="200">200 invii · 24 €</button>');
+      + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-compra="50">50 invii · 9,90 €</button>'
+      + '<button type="button" class="nsdi-b nsdi-b-p" data-nsdi-compra="200">200 invii · 29 €</button>');
   }
 
   async function compra(pacchetto, btn) {
