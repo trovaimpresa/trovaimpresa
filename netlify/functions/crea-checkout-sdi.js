@@ -74,7 +74,7 @@ exports.handler = async (event) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const email = utente.email || (impresa && impresa.email) || undefined;
     // si torna nella pagina da cui si e' partiti (elenco chiuso, mai un indirizzo dal browser)
-    const base = 'https://trovaimpresa.com/' + (String(corpo.pagina || '') === 'noleggio' ? 'gestionale-noleggio.html' : 'gestionale-artigiano.html');
+    const base = 'https://trovaimpresa.com/' + (String(corpo.pagina || '') === 'noleggio' ? 'gestionale-noleggio.html' : 'gestionale-app.html');
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
