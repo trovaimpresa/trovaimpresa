@@ -366,6 +366,10 @@ function costruisciEmail(d) {
     ? `<div style="background:#fdf0f0;border-radius:10px;padding:14px 16px;margin-top:16px;font-size:17px;font-weight:800;color:#0a2a4d">In tutto ti devono ${euro(d.totaleScaduto)}</div>`
     : '';
 
+  /* i quattro avvisi nuovi: stesse righe, stessi colori */
+  const daRighe = lista => (lista || []).map(x => riga(x.tit, x.sotto, x.ev, x.col));
+  const rForn = daRighe(d.forn), rSquadra = daRighe(d.squadra), rMezzi = daRighe(d.mezzi), rPrevAtt = daRighe(d.prevAtt);
+
   const titolo = d.completo ? 'La tua settimana' : 'Guarda questo';
 
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:640px;margin:0 auto;color:#22303f;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #dfe5ee">
@@ -388,12 +392,16 @@ function costruisciEmail(d) {
   ${sezione('#e65100', 'Richieste che ti aspettano', rRich, 'Apri le richieste', SITO + '#dalsito')}
   ${sezione('#c62828', 'Non ti hanno ancora pagato', rFatt, 'Apri le fatture', SITO + '#fatture', codaFatt)}
   ${sezione('#e65100', parole.lavori, rLav, parole.apri, SITO + '#lavori')}
+  ${sezione('#e65100', 'Preventivi senza risposta', rPrevAtt, 'Apri i preventivi', SITO + '#preventivi')}
+  ${sezione('#c62828', 'Fatture dei fornitori da pagare', rForn, 'Apri i fornitori', SITO + '#fornitori')}
+  ${sezione('#0066ff', 'Documenti della squadra', rSquadra, 'Apri la squadra', SITO + '#squadra')}
+  ${sezione('#0066ff', 'Mezzi: assicurazione e revisione', rMezzi, 'Apri i mezzi', SITO + '#mezzi')}
   <div style="padding:6px 26px 28px;border-top:1px solid #edf1f6;margin-top:6px">
     <p style="font-size:14px;color:#7a8798;line-height:1.7;margin:18px 0 0">
       ${d.completo
         ? 'È lunedì: questo è il quadro completo.'
         : 'Ti scrivo solo quando cambia qualcosa. Il quadro completo arriva il lunedì.'}
-      Puoi spegnere queste email dai <b>Dati azienda</b> del gestionale.
+      Puoi scegliere cosa ricevere, e quando, dai <b>Dati azienda</b> del gestionale.
     </p>
   </div>
 </div>
@@ -409,6 +417,10 @@ function oggetto(d) {
   if (d.appenaScadute.length) pezzi.push(plurale(d.appenaScadute.length, 'scadenza passata ieri', 'scadenze passate ieri'));
   if (d.richieste.length)     pezzi.push(plurale(d.richieste.length, 'richiesta che ti aspetta', 'richieste che ti aspettano'));
   if (d.inArrivo.length)      pezzi.push(plurale(d.inArrivo.length, 'scadenza in arrivo', 'scadenze in arrivo'));
+  if ((d.prevAtt || []).length) pezzi.push(plurale(d.prevAtt.length, 'preventivo senza risposta', 'preventivi senza risposta'));
+  if ((d.forn || []).length)    pezzi.push(plurale(d.forn.length, 'fattura fornitore da pagare', 'fatture fornitori da pagare'));
+  if ((d.squadra || []).length) pezzi.push(plurale(d.squadra.length, 'documento della squadra', 'documenti della squadra'));
+  if ((d.mezzi || []).length)   pezzi.push(plurale(d.mezzi.length, 'scadenza di un mezzo', 'scadenze dei mezzi'));
   if (d.completo) {
     if ((d.promPassati || []).length) pezzi.push(plurale(d.promPassati.length, 'promemoria da fare', 'promemoria da fare'));
     if (d.scadute.length) pezzi.push(plurale(d.scadute.length, 'scadenza già passata', 'scadenze già passate'));
@@ -471,8 +483,14 @@ const handler = async function () {
     let colonnaInterruttore = true;
     let az = [];
     {
-      const r = await sb.from('gest_azienda')
-        .select('user_id, nome, giorni_pagamento, riepilogo_lunedi').in('user_id', utenti);
+      let r = await sb.from('gest_azienda')
+        .select('user_id, nome, giorni_pagamento, riepilogo_lunedi, avvisi_esclusi, avvisi_solo_lunedi').in('user_id', utenti);
+      /* 8 ott 2026: se le due colonne delle preferenze non ci sono (migrazione
+         non fatta) si legge come prima: tutti ricevono tutto. */
+      if (r.error && /avvisi_/.test(r.error.message || '')) {
+        r = await sb.from('gest_azienda')
+          .select('user_id, nome, giorni_pagamento, riepilogo_lunedi').in('user_id', utenti);
+      }
       if (r.error && /riepilogo_lunedi/.test(r.error.message || '')) {
         colonnaInterruttore = false;
         const r2 = await sb.from('gest_azienda')
@@ -529,6 +547,60 @@ const handler = async function () {
         .in('user_id', utenti).lte('data', fra30).neq('stato', 'fatto'), f))
     ]);
     for (const q of [qScad, qCli, qMest, qProm]) if (q.error) throw q.error;
+
+    /* -----------------------------------------------------------------------
+       8 ottobre 2026 — QUATTRO AVVISI IN PIU' (chiesti da Alessio):
+         1. fatture dei fornitori da pagare
+         2. documenti della squadra (visita medica, formazione, documento)
+         3. assicurazione, revisione e collaudo dei mezzi
+         4. preventivi mandati e ancora senza risposta
+       ⛔ LE STESSE REGOLE DI PRIMA: in settimana avvisano solo quando OGGI
+          taglia una tappa (30/7/1 giorni, scaduta ieri; i preventivi a 7 e 14
+          giorni); il lunedi' arriva anche tutto il vecchio. Niente registro
+          nuovo: una tappa e' un giorno preciso, e di email ne parte UNA al
+          giorno a persona (paletto 1).
+       ⚠️ Se una di queste letture fallisce (colonna cambiata, tabella
+          mancante) l'email parte LO STESSO senza quella sezione: un avviso
+          che non arriva e' peggio di un avviso senza una sezione. L'errore
+          finisce nel risultato, dove lo si vede.
+       ----------------------------------------------------------------------- */
+    const erroriNuovi = [];
+    const leggiLarga = async (nome, costruisci) => {
+      try {
+        const r = await senzaCestino(costruisci);
+        if (r.error) { erroriNuovi.push(nome + ': ' + r.error.message); return []; }
+        return r.data || [];
+      } catch (e) { erroriNuovi.push(nome + ': ' + e.message); return []; }
+    };
+    const dataTetto7 = giorniDopo(oggi, -7);
+    const [dFF, dFor, dOp, dMezzi, dPrevAtt] = await Promise.all([
+      leggiLarga('fatture fornitori', f => vivi(sb.from('gest_fatture_fornitori')
+        .select('id, user_id, fornitore_id, numero, importo, scadenza')
+        .in('user_id', utenti).is('data_pagata', null).neq('stato', 'pagata')
+        .not('scadenza', 'is', null).lte('scadenza', fra7), f)),
+      leggiLarga('fornitori', f => vivi(sb.from('gest_fornitori')
+        .select('id, nome').in('user_id', utenti), f)),
+      leggiLarga('squadra', f => vivi(sb.from('gest_operatori')
+        .select('id, user_id, nome, visita_medica_scadenza, formazione_scadenza, documento_scadenza')
+        .in('user_id', utenti), f)),
+      leggiLarga('mezzi', f => vivi(sb.from('gest_mezzi')
+        .select('id, user_id, nome, targa, assicurazione_scad, revisione_scad, collaudo_scad')
+        .in('user_id', utenti), f)),
+      leggiLarga('preventivi in attesa', f => vivi(sb.from('gest_preventivi')
+        .select('id, user_id, numero, titolo, stato, data, cliente_id')
+        .in('user_id', utenti).in('stato', ['bozza', 'inviato']).lte('data', dataTetto7), f))
+    ]);
+    const nomeFornitore = Object.fromEntries(dFor.map(x => [String(x.id), x.nome || '']));
+    /* il valore del preventivo lo dice la vista (la formula dei soldi sta li') */
+    const totPrev = {};
+    if (dPrevAtt.length) {
+      try {
+        const q = await sb.from('gest_preventivi_totali').select('preventivo_id, totale')
+          .in('preventivo_id', dPrevAtt.map(x => x.id));
+        if (q.error) erroriNuovi.push('totali preventivi: ' + q.error.message);
+        else (q.data || []).forEach(t => { totPrev[String(t.preventivo_id)] = +t.totale || 0; });
+      } catch (e) { erroriNuovi.push('totali preventivi: ' + e.message); }
+    }
 
     // il lunedi' servono anche i soldi e i lavori: negli altri giorni non si
     // leggono nemmeno, perche' nell'email non ci entrerebbero comunque
@@ -614,6 +686,12 @@ const handler = async function () {
 
       const a     = azPerUte[uid] || {};
       const ggPag = (+a.giorni_pagamento) || 30;
+      /* 8 ott 2026 — LE SUE SCELTE: cosa ricevere e quando. Vuoto = tutto. */
+      const spente  = new Set(String(a.avvisi_esclusi || '').split(',').map(x => x.trim()).filter(Boolean));
+      const voglio  = k => !spente.has(k);
+      const soloLun = a.avvisi_solo_lunedi === true;
+      if (soloLun && !completo) { niente++; continue; }
+      const lunSolo = soloLun && completo;   // il lunedi' di chi vuole solo il lunedi'
       const pro   = imp.tipo === 'professionista';
 
       const mie = (qScad.data || []).filter(s => String(s.user_id) === uid && s.data_scadenza)
@@ -624,16 +702,18 @@ const handler = async function () {
       /* LE COSE CAMBIATE OGGI — sono queste tre che possono interrompere. */
 
       // a) la scadenza che taglia oggi il traguardo dei 30, 7 o 1 giorno
-      const inArrivo = mie.filter(s => s.avvisa !== false
-        && tappaPerData[s.data_scadenza]
-        && !s.gia.includes(String(tappaPerData[s.data_scadenza].giorni)));
+      const inArrivo = !voglio('scadenze') ? [] : mie.filter(s => s.avvisa !== false
+        && (lunSolo
+              ? (s.giorni >= 0 && s.giorni <= 7)      // chi vuole solo il lunedi': tutta la settimana davanti
+              : (tappaPerData[s.data_scadenza]
+                 && !s.gia.includes(String(tappaPerData[s.data_scadenza].giorni)))));
 
       // b) la scadenza che era ieri ed e' ancora aperta
-      const appenaScadute = mie.filter(s => s.avvisa !== false
+      const appenaScadute = !voglio('scadenze') ? [] : mie.filter(s => s.avvisa !== false
         && s.data_scadenza === ieri && !s.gia.includes(SEGNO_SCADUTA));
 
       // c) la richiesta dal sito ferma da piu' di 24 ore
-      const richieste = richiestePerUte[uid] || [];
+      const richieste = voglio('richieste') ? (richiestePerUte[uid] || []) : [];
 
       /* d) il promemoria che ha scritto lui, arrivato al suo giorno di avviso.
          Il giorno dell'avviso e' `data` meno `avvisa_giorni`: chi ha chiesto
@@ -643,19 +723,86 @@ const handler = async function () {
          lasciarlo senza avviso per sempre. A non ripeterlo ci pensa
          `inviato`. */
       const miei = (qProm.data || []).filter(x => String(x.user_id) === uid && x.data);
-      const promemoria = miei
-        .filter(x => !x.inviato && giorniDopo(x.data, -(+x.avvisa_giorni || 0)) <= oggi)
+      const promemoria = !voglio('promemoria') ? [] : miei
+        .filter(x => !x.inviato && giorniDopo(x.data, -(+x.avvisa_giorni || 0)) <= (lunSolo ? giorniDopo(oggi, 6) : oggi))
         .map(x => ({ ...x, giorni: quantiGiorni(oggi, x.data) }))
         .sort((a, b) => a.giorni - b.giorni);
 
-      const cambiato = inArrivo.length + appenaScadute.length + richieste.length + promemoria.length;
+      /* ---- i quattro avvisi nuovi. Ognuno e' una lista di righe gia' pronte
+              {tit, sotto, ev, col}; `ora` = tappa di oggi, `vecchie` = solo lunedi'. */
+      const tappaDi = (data, ammesse) => {
+        if (!data) return null;
+        const g = quantiGiorni(oggi, String(data).slice(0, 10));
+        if (g === -1) return { g, testo: 'Era ieri', col: '#c62828' };
+        if (ammesse.includes(g) || (lunSolo && g >= 0 && g <= 7)) return { g, testo: nomeGiorno(String(data).slice(0, 10)) + ' ' + dataIt(data).slice(0, 5) + ' — ' + fra(g),
+                                         col: g <= 1 ? '#c62828' : g <= 7 ? '#e65100' : '#0066ff' };
+        return null;
+      };
+      const giaPassata = data => data && quantiGiorni(oggi, String(data).slice(0, 10)) < -1;
+      const passataTesto = data => 'Era il ' + dataIt(data) + ' — scaduto da '
+        + plurale(-quantiGiorni(oggi, String(data).slice(0, 10)), 'giorno', 'giorni');
+
+      // 1. fornitori da pagare (tappe 7 e 1 giorno)
+      const ffMie = voglio('fornitori') ? dFF.filter(x => String(x.user_id) === uid) : [];
+      const rigaFF = (x, ev, col) => ({
+        tit: 'Fattura ' + (x.numero || '—') + (nomeFornitore[String(x.fornitore_id)] ? ' — ' + nomeFornitore[String(x.fornitore_id)] : ''),
+        sotto: 'Da pagare: ' + euro(x.importo), ev, col });
+      const fornOra = [], fornVecchie = [];
+      ffMie.forEach(x => {
+        const t = tappaDi(x.scadenza, [7, 1]);
+        if (t) fornOra.push(rigaFF(x, t.testo === 'Era ieri' ? 'Scadeva ieri — ancora da pagare' : t.testo, t.col));
+        else if (completo && giaPassata(x.scadenza)) fornVecchie.push(rigaFF(x, passataTesto(x.scadenza), '#c62828'));
+      });
+
+      // 2. squadra: visita medica, formazione, documento (tappe 30, 7, 1)
+      const COSE_SQUADRA = [['visita_medica_scadenza', 'Visita medica'], ['formazione_scadenza', 'Formazione sicurezza'], ['documento_scadenza', 'Documento d\'identità']];
+      const squadraOra = [], squadraVecchie = [];
+      (voglio('squadra') ? dOp : []).filter(x => String(x.user_id) === uid).forEach(x => {
+        COSE_SQUADRA.forEach(c => {
+          const data = x[c[0]]; if (!data) return;
+          const t = tappaDi(data, [30, 7, 1]);
+          const r = { tit: (x.nome || 'Un collaboratore') + ' — ' + c[1], sotto: '' };
+          if (t) squadraOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduta ieri' : t.testo, col: t.col }));
+          else if (completo && giaPassata(data)) squadraVecchie.push(Object.assign(r, { ev: passataTesto(data).replace('scaduto', 'scaduta'), col: '#c62828' }));
+        });
+      });
+
+      // 3. mezzi: assicurazione, revisione, collaudo (tappe 30, 7, 1)
+      const COSE_MEZZI = [['assicurazione_scad', 'Assicurazione'], ['revisione_scad', 'Revisione'], ['collaudo_scad', 'Collaudo']];
+      const mezziOra = [], mezziVecchie = [];
+      (voglio('mezzi') ? dMezzi : []).filter(x => String(x.user_id) === uid).forEach(x => {
+        COSE_MEZZI.forEach(c => {
+          const data = x[c[0]]; if (!data) return;
+          const t = tappaDi(data, [30, 7, 1]);
+          const r = { tit: (x.nome || 'Mezzo') + (x.targa ? ' (' + x.targa + ')' : '') + ' — ' + c[1], sotto: '' };
+          if (t) mezziOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduta ieri' : t.testo, col: t.col }));
+          else if (completo && giaPassata(data)) mezziVecchie.push(Object.assign(r, { ev: passataTesto(data).replace('scaduto', 'scaduta'), col: '#c62828' }));
+        });
+      });
+
+      // 4. preventivi senza risposta: a 7 e a 14 giorni; il lunedi' tutti
+      const prevOra = [], prevVecchi = [];
+      (voglio('preventivi') ? dPrevAtt : []).filter(x => String(x.user_id) === uid && x.data).forEach(x => {
+        const gg = -quantiGiorni(oggi, String(x.data).slice(0, 10));
+        const r = { tit: 'Preventivo ' + (x.numero || '—') + (x.titolo ? ' — ' + x.titolo : '')
+                         + (nomeCli[String(x.cliente_id)] ? ' (' + nomeCli[String(x.cliente_id)] + ')' : ''),
+                    sotto: totPrev[String(x.id)] ? 'Valore: ' + euro(totPrev[String(x.id)]) : '',
+                    ev: 'Fatto ' + gg + ' giorni fa, nessuna risposta', col: '#e65100' };
+        if (gg === 7 || gg === 14) prevOra.push(r);
+        else if (completo && gg > 7) prevVecchi.push(r);
+      });
+
+      const nuoviOra = fornOra.length + squadraOra.length + mezziOra.length + prevOra.length;
+      const nuoviVecchi = fornVecchie.length + squadraVecchie.length + mezziVecchie.length + prevVecchi.length;
+
+      const cambiato = inArrivo.length + appenaScadute.length + richieste.length + promemoria.length + nuoviOra;
 
       /* IL QUADRO COMPLETO — solo il lunedi'. Sono le cose vecchie: non
          interrompono mai in settimana, ma il lunedi' vanno viste. */
-      const scadute = completo
+      const scadute = (completo && voglio('scadenze'))
         ? mie.filter(s => s.giorni < 0).sort((x, y) => x.giorni - y.giorni)
         : [];
-      const fatture = completo
+      const fatture = (completo && voglio('fatture'))
         ? (qFatt.data || [])
             .filter(f => String(f.user_id) === uid && f.data && giorniDopo(f.data, ggPag) < oggi)
             .map(f => ({ numero: f.numero, cliente: nomeCli[String(f.cliente_id)] || '',
@@ -663,7 +810,7 @@ const handler = async function () {
                          giorniRitardo: quantiGiorni(giorniDopo(f.data, ggPag), oggi) }))
             .sort((x, y) => y.giorniRitardo - x.giorniRitardo)
         : [];
-      const lavori = completo
+      const lavori = (completo && voglio('lavori'))
         ? (qLav.data || [])
             .filter(l => String(l.user_id) === uid && l.data_prevista)
             .map(l => ({ titolo: l.descrizione, cliente: nomeCli[String(l.cliente_id)] || '',
@@ -674,13 +821,13 @@ const handler = async function () {
 
       /* il lunedi' si vedono anche i promemoria gia' passati e ancora aperti,
          pure quelli gia' avvisati: e' il quadro completo, non un avviso nuovo */
-      const promPassati = completo
+      const promPassati = (completo && voglio('promemoria'))
         ? miei.filter(x => x.data < oggi && !promemoria.some(p => String(p.id) === String(x.id)))
               .map(x => ({ ...x, giorni: quantiGiorni(oggi, x.data) }))
               .sort((a, b) => a.giorni - b.giorni)
         : [];
 
-      const vecchio = scadute.length + fatture.length + lavori.length + promPassati.length;
+      const vecchio = scadute.length + fatture.length + lavori.length + promPassati.length + nuoviVecchi;
 
       /* ⛔ LA REGOLA, IN UNA RIGA SOLA.
          In settimana si scrive solo se e' cambiato qualcosa. Il lunedi' basta
@@ -719,6 +866,8 @@ const handler = async function () {
         azienda: a.nome || imp.nome_attivita || '',
         appenaScadute, inArrivo, richieste, promemoria, promPassati,
         scadute, fatture, lavori,
+        forn: fornOra.concat(fornVecchie), squadra: squadraOra.concat(squadraVecchie),
+        mezzi: mezziOra.concat(mezziVecchie), prevAtt: prevOra.concat(prevVecchi),
         totaleScaduto: fatture.reduce((s, f) => s + f.totale, 0),
         cappello: null
       };
@@ -751,6 +900,7 @@ const handler = async function () {
          promemoria-scadenze.js e promemoria-dalsito.js, percio' chi e' gia'
          stato avvisato da loro ieri non viene riavvisato da qui oggi. */
       for (const s of inArrivo) {
+        if (!tappaPerData[s.data_scadenza]) continue;   // lunedi' di chi vuole solo il lunedi': non e' una tappa
         const nuovo = s.gia.concat(String(tappaPerData[s.data_scadenza].giorni)).join(',');
         const e2 = await sb.from('gest_scadenze').update({ avvisi: nuovo }).eq('id', s.id);
         if (e2.error) errori.push('avvisi ' + s.id + ': ' + e2.error.message);
@@ -782,7 +932,7 @@ const handler = async function () {
       giaMandataOggi: giaOggi, senzaEmail,
       registro: senzaRegistro ? 'TABELLA MANCANTE — rischio doppioni' : 'attivo',
       interruttore: colonnaInterruttore ? 'attivo' : 'colonna mancante, tutti accesi',
-      errori
+      errori: errori.concat(erroriNuovi)
     }) };
   } catch (err) {
     console.error('promemoria-mattina:', err.message);

@@ -81,6 +81,40 @@
       aziendaRow=data||null;
     }
     const a=aziendaRow||{};
+/* 8 ott 2026 — «LE MIE EMAIL DI AVVISO». Chi non tocca niente riceve TUTTO
+   come prima (colonne vuote = tutto acceso). L'interruttore grande
+   (riepilogo_lunedi) resta quello di sempre. */
+const AV_VOCI=[
+  ["promemoria","I miei promemoria"],
+  ["scadenze","Scadenze"],
+  ["richieste","Richieste dal sito"],
+  ["fatture","Fatture che non mi hanno pagato"],
+  ["lavori",ruoloUtente==='professionista'?"Pratiche in ritardo":"Lavori in ritardo"],
+  ["preventivi","Preventivi senza risposta"],
+  ["fornitori","Fatture dei fornitori da pagare"],
+  ["squadra","Documenti della squadra"]
+].concat(ruoloUtente==='professionista'?[]:[["mezzi","Assicurazione e revisione dei mezzi"]]);
+const avOff=String(a.avvisi_esclusi||"").split(",").filter(Boolean);
+const avSoloLun=a.avvisi_solo_lunedi===true;
+const avHtml=`
+      <div class="sh-b">
+        <div class="sh-tit">Le mie email di avviso</div>
+        <label for="a-rieplun" style="display:flex;gap:12px;align-items:flex-start;font-size:17px;line-height:1.6;cursor:pointer;padding:4px 0">
+          <input type="checkbox" id="a-rieplun"${a.riepilogo_lunedi===false?"":" checked"} style="width:24px;height:24px;margin:2px 0 0;flex:0 0 auto;cursor:pointer">
+          <span>Mandami l'<b>email di avviso</b> la mattina alle 7:30</span>
+        </label>
+        <div class="sh-nota">Arriva <b>una sola email al giorno</b>, e solo se c'è qualcosa da dire: niente email a vuoto.</div>
+        <div id="a-av-box" style="margin-top:14px">
+          <div style="font-size:17px;font-weight:800;color:var(--testo);margin:6px 0 8px">Cosa vuoi ricevere</div>
+          ${AV_VOCI.map(v=>`<label style="display:flex;gap:12px;align-items:center;font-size:17px;line-height:1.5;cursor:pointer;padding:7px 0">
+            <input type="checkbox" data-av="${v[0]}"${avOff.includes(v[0])?"":" checked"} style="width:24px;height:24px;margin:0;flex:0 0 auto;cursor:pointer"><span>${v[1]}</span></label>`).join("")}
+          <div style="font-size:17px;font-weight:800;color:var(--testo);margin:18px 0 8px">Quando</div>
+          <label style="display:flex;gap:12px;align-items:center;font-size:17px;line-height:1.5;cursor:pointer;padding:7px 0">
+            <input type="radio" name="a-av-quando" value="novita"${avSoloLun?"":" checked"} style="width:24px;height:24px;margin:0;flex:0 0 auto;cursor:pointer"><span>Ogni mattina, quando c'è una novità</span></label>
+          <label style="display:flex;gap:12px;align-items:center;font-size:17px;line-height:1.5;cursor:pointer;padding:7px 0">
+            <input type="radio" name="a-av-quando" value="lunedi"${avSoloLun?" checked":""} style="width:24px;height:24px;margin:0;flex:0 0 auto;cursor:pointer"><span>Solo il lunedì, con il quadro della settimana</span></label>
+        </div>
+      </div>`;
     const reg=a.regime_fiscale||"RF01";
     /* Modulo lungo -> finestra grande a due colonne, come persona, lavoro e
        preventivo. A sinistra chi sei e dove sei, a destra fisco e cantiere.
@@ -183,14 +217,7 @@
         <div class="sh-nota">Si parte da 30 crediti; <b class="az-rosso">sotto 15 non si può operare in cantiere</b>. Il Riepilogo ti avvisa già sotto 20, così hai tempo di recuperarli. È dell'impresa, non del singolo dipendente. Aggiornalo tu quando cambia: non si può leggere da solo dal portale.</div>
       </div>`}
 
-      <div class="sh-b">
-        <div class="sh-tit">Email dal gestionale</div>
-        <label for="a-rieplun" style="display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.6;cursor:pointer;padding:4px 0">
-          <input type="checkbox" id="a-rieplun"${a.riepilogo_lunedi===false?"":" checked"} style="width:22px;height:22px;margin:2px 0 0;flex:0 0 auto;cursor:pointer">
-          <span>Mandami il <b>riepilogo del lunedì</b> mattina</span>
-        </label>
-        <div class="sh-nota">Un'email il lunedì alle 7:30 con le scadenze della settimana, le fatture che non ti hanno ancora pagato e ${ruoloUtente==='professionista'?"le pratiche":"i lavori"} in ritardo. <b>Se in una settimana non c'è niente da segnalare, non arriva niente</b>: nessuna email a vuoto.</div>
-      </div>
+      ${avHtml}
 
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
@@ -262,6 +289,12 @@
     /* riepilogo del lunedì: la casella c'e' per tutti i ruoli, quindi qui non
        serve la precauzione della patente e della polizza */
     if($("#a-rieplun"))row.riepilogo_lunedi=!!$("#a-rieplun").checked;
+    /* 8 ott 2026 — cosa ricevere e quando. Si salvano SOLO le voci spente. */
+    if(document.querySelector("[data-av]")){
+      row.avvisi_esclusi=Array.from(document.querySelectorAll("[data-av]")).filter(x=>!x.checked).map(x=>x.dataset.av).join(",");
+      const q=document.querySelector('input[name="a-av-quando"]:checked');
+      row.avvisi_solo_lunedi=!!(q&&q.value==="lunedi");
+    }
     /* 22 agosto 2026 — la tariffa oraria. Vuoto = null, non zero: uno zero
        sembra un prezzo, il vuoto si vede che manca. */
     if($("#a-tariffa")){
@@ -275,7 +308,7 @@
     const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti","cfp_obiettivo",
                "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec",
                "pol_compagnia","pol_numero","pol_massimale","pol_scadenza",
-               "riepilogo_lunedi","tariffa_oraria"];
+               "riepilogo_lunedi","avvisi_esclusi","avvisi_solo_lunedi","tariffa_oraria"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
