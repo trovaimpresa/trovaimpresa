@@ -391,6 +391,17 @@
     +   '</aside>'
     + '</div>';
 
+    /* 8 ott 2026 — la chat alta quanto lo schermo (solo computer) */
+    function adattaAltezza() {
+      if (!sez.classList.contains('active')) return;
+      if (window.innerWidth <= 880) { sez.style.height = ''; return; }
+      var top = sez.getBoundingClientRect().top;
+      sez.style.height = Math.max(420, window.innerHeight - top - 12) + 'px';
+    }
+    window.addEventListener('resize', adattaAltezza);
+    try { new MutationObserver(adattaAltezza).observe(sez, { attributes: true, attributeFilter: ['class'] }); } catch (_) {}
+    setTimeout(adattaAltezza, 0);
+
     document.getElementById('chat-manda').addEventListener('click', function () {
       if (inCorso) { if (annulla) annulla.abort(); return; }
       manda();

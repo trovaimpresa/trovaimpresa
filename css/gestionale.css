@@ -5380,17 +5380,24 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
 .asst-msg .chip.fatto{background:#e8f6ee;border-color:#9bd3b1;color:#17663a;font-size:14px;padding:9px 16px;cursor:default}
 .asst-msg .chip[disabled]{opacity:.7}
 
-/* 8 ottobre 2026 — LA CHAT PIU' ALTA (chiesta da Alessio: «piu' grande in
-   ALTEZZA, non in larghezza»). Solo dentro #chat: nessun'altra sezione cambia.
-   Tolto il titolo (il menu a sinistra dice gia' dove sei) e abbassata la
-   casella di scrittura; l'altezza esatta la calcola js/gest-chat.js
-   (`adattaAltezza`), qui c'e' solo una misura di ripiego. Testo e larghezza
-   delle risposte restano com'erano. */
-#chat.active{ height:calc(100vh - 222px); }
+/* 8 ottobre 2026 — LA CHAT COME COWORK (chiesta da Alessio: lettere grandi e
+   chat alta quanto lo schermo). Solo dentro #chat. Le risposte dell'AI senza
+   riquadro, i messaggi suoi in un riquadro grigio chiaro. L'altezza esatta
+   la calcola js/gest-chat.js (`adattaAltezza`); qui una misura di ripiego. */
+#chat.active{ display:flex; flex-direction:column; height:calc(100vh - 192px); }
 #chat .sec-head{ display:none; }
-#chat .asst-scrivi textarea{ min-height:64px; height:64px; }
-#chat .asst-msg .chip{ margin:8px 10px 0 0; }
+#chat .asst-msgs{ padding:24px 28px; gap:18px; }
+#chat .asst-msg{ max-width:100%; font-size:22px; line-height:1.6; padding:0; border:0; background:transparent; color:var(--testo); }
+#chat .asst-msg.mio{ max-width:75%; align-self:flex-end; background:#eef1f5; padding:12px 20px; border-radius:16px; }
+#chat .asst-msg .chip{ font-size:17px; padding:10px 18px; margin:10px 12px 0 0; }
+#chat .asst-scrivi textarea{ font-size:22px; line-height:1.5; min-height:84px; height:84px; }
 @media(max-width:880px){
   #chat.active{ height:auto; }
   #chat .sec-head{ display:block; }
+  #chat .asst-msg{ font-size:19px; }
+  #chat .asst-msg.mio{ max-width:90%; }
 }
+
+/* 8 ottobre 2026 — il menu a sinistra: spazio in fondo, cosi' «Altre N voci»
+   non finisce dietro la scritta fissa «Assistenza AI e chat…» */
+.side nav.tabs{ padding-bottom:96px; }
