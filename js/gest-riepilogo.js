@@ -482,7 +482,20 @@
           + '<div class="ro-sotto">Niente di scaduto e niente in ritardo. Buon lavoro.</div>'
           + '</div>';
       }else{
-        ra.innerHTML='<div class="rie-oggi">'
+        /* 9 ott 2026 — «PARTI DA QUI»: la prima voce della lista, in grande, col
+           pulsante per andarci. Non legge niente di nuovo (usa DA) e non costa
+           crediti. Il secondo pulsante apre la chat già con la domanda. */
+        const _p=DA[0];
+        const _chatOk=!!document.querySelector('nav.tabs button[data-tab="chat"]');
+        const _parti='<div class="rie-parti" style="background:#fff;border:2px solid #7c5cff;border-radius:16px;padding:20px;margin-bottom:16px">'
+          + '<div style="font-size:15px;font-weight:700;letter-spacing:.04em;color:#7c5cff">PARTI DA QUI</div>'
+          + '<div style="font-size:26px;font-weight:700;margin:6px 0 4px">'+esc(_p.t)+'</div>'
+          + '<div style="font-size:18px;color:#586574;margin-bottom:12px">'+esc(_p.d)+'</div>'
+          + '<button type="button" class="btn-primary" style="font-size:19px;padding:13px 20px;margin:4px 8px 0 0" '
+          +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemarlo</button>'
+          + (_chatOk?'<button type="button" class="btn" id="rie-chiedi-ai" style="font-size:19px;padding:13px 20px;margin:4px 0 0">Chiedi all\'AI cosa fare oggi</button>':'')
+          + '</div>';
+        ra.innerHTML=_parti+'<div class="rie-oggi">'
           + '<div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
           + '<div class="ro-sotto">'+(DA.length===1?"Una cosa che chiede attenzione.":DA.length+" cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
           + DA.map(function(r,i){
@@ -499,6 +512,17 @@
               : '')
           + '</div>';
       }
+      const _bAI=ra.querySelector("#rie-chiedi-ai");
+      if(_bAI)_bAI.onclick=function(){
+        const t=document.querySelector('nav.tabs button[data-tab="chat"]'); if(!t)return;
+        t.click(); window.scrollTo(0,0);
+        setTimeout(function(){
+          const c=document.getElementById("chat-domanda"), m=document.getElementById("chat-manda");
+          if(!c||!m)return;
+          c.value="Guarda le mie fatture da incassare, le scadenze, i lavori e le richieste dal sito: cosa devo fare oggi, in ordine di importanza? Dammi al massimo 3 cose.";
+          m.click();
+        },600);
+      };
       /* il secondo giro di letture è andato male: i numeri di spese, foto e
          totali possono essere incompleti. Meglio dirlo che far finta di niente. */
       if(erroreLettura2)ra.insertAdjacentHTML("afterbegin",
