@@ -144,6 +144,33 @@
      del sito; non manda niente: l'impresa la legge, la cambia e la manda lei.
      \u26d4 Prezzi: solo quelli del SUO elenco (gest_prezzi_propri), mai inventati.
      Funzione: supabase edge \u00abai-risposta\u00bb (1 credito, stesse regole di ai-cantiere). */
+  /* Le voci del prezzario che somigliano alla richiesta: prima le TUE (fonte «mio»),
+     poi quelle del prezzario caricato (es. Tariffa Regione Lazio), cercate per
+     parole della richiesta. Mai le prime 40 a caso fra migliaia. */
+  async function dsPrezziPerRichiesta(r){
+    try{
+      const stop=new Set(["della","delle","degli","dello","dell","nella","nelle","sulla","sulle","come","anche","fare","vorrei","dovrei","devo","casa","lavoro","lavori","quanto","costa","serve","servono","richiesta","preventivo","cerco","cercasi","bisogno"]);
+      const parole=[...new Set(String([_dsCosa(r),r.descrizione].filter(Boolean).join(" ").toLowerCase()
+        .replace(/[^a-zà-ú0-9 ]/g," ").split(/\s+/)))].filter(w=>w.length>=5&&!stop.has(w)).slice(0,6);
+      const cols="descrizione,unita,prezzo_unitario,fonte";
+      const mie=await sb.from("gest_prezzi_propri").select(cols).eq("user_id",sbUid).eq("fonte","mio").is("eliminato_il",null).order("usata_volte",{ascending:false}).limit(25);
+      let altre={data:[]};
+      if(parole.length){
+        const rad=parole.map(w=>w.length>6?w.slice(0,w.length-1):w);   /* pittura/pitture, piastrella/piastrelle */
+        altre=await sb.from("gest_prezzi_propri").select(cols).eq("user_id",sbUid).neq("fonte","mio").is("eliminato_il",null)
+          .or(rad.map(w=>"descrizione.ilike.%"+w+"%").join(",")).limit(40);
+      }
+      /* fra le voci del prezzario, prima quelle che contengono PIU' parole della richiesta */
+      const punti=x=>rad_p(parole,x.descrizione);
+      const A=((altre&&altre.data)||[]).sort((a,b)=>punti(b)-punti(a)).slice(0,15);
+      return ((mie&&mie.data)||[]).concat(A);
+    }catch(e){return [];}
+  }
+  function rad_p(parole,desc){
+    const d=String(desc||"").toLowerCase();
+    return parole.filter(w=>d.indexOf(w.length>6?w.slice(0,w.length-1):w)>=0).length;
+  }
+
   async function dsRisposta(r){
     const box=$("#ds-risp-box"); if(!box)return;
     box.innerHTML='<p style="margin:0;font-size:17px">Sto scrivendo la risposta\u2026 (10 secondi)</p>';
@@ -151,14 +178,13 @@
       const {data:{session}}=await sb.auth.getSession();
       if(!session)throw new Error("Sessione scaduta, rientra nel gestionale e riprova.");
       const [pz,az]=await Promise.all([
-        sb.from("gest_prezzi_propri").select("descrizione,unita,prezzo_unitario")
-          .eq("user_id",sbUid).is("eliminato_il",null)
-          .order("usata_volte",{ascending:false}).limit(40),
+        dsPrezziPerRichiesta(r),
         sb.from("gest_azienda").select("nome").eq("user_id",sbUid).maybeSingle()
       ]);
       const nomeImp=((az&&az.data&&az.data.nome)||"").trim();
-      const prezzi=((pz&&pz.data)||[]).filter(x=>x.descrizione&&x.prezzo_unitario!=null)
-        .map(x=>"- "+x.descrizione+": "+x.prezzo_unitario+" euro"+(x.unita?" al "+x.unita:"")).join("\n");
+      const prezzi=(pz||[]).filter(x=>x.descrizione&&x.prezzo_unitario!=null)
+        .map(x=>"- "+String(x.descrizione).slice(0,110)+": "+x.prezzo_unitario+" euro"+(x.unita?" al "+x.unita:"")
+          +(x.fonte==="mio"?" (prezzo mio)":" (riferimento "+(x.fonte||"prezzario")+", indicativo)")).join("\n");
       const campi=[["Lavoro",_dsCosa(r)],["Descrizione",r.descrizione],["Citta'",r.citta],
         ["Metri quadri",r.mq],["Piano",r.piano],["Urgenza",r.urgenza],["Quando serve",r.data_preferita],
         ["Budget del cliente",r.budget],["Altro",r.note_aggiuntive],["Foto allegata",r.foto?"si":""]]

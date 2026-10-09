@@ -688,29 +688,38 @@
       if(senza.length)avvisi.push(["Una voce è senza prezzo o senza quantità"+(senza.length>1?" ("+senza.length+" voci)":""),
         "«"+String(senza[0].descrizione||"").slice(0,50)+"»"]);
       else if(righe.length)ok.push("Tutte le voci hanno quantità e prezzo");
-      /* confronto con il TUO listino: solo se la voce somiglia davvero a una tua */
-      const {data:pz}=await sb.from("gest_prezzi_propri").select("descrizione,unita,prezzo_unitario")
-        .eq("user_id",sbUid).is("eliminato_il",null).limit(300);
-      const L=(pz||[]).filter(x=>x.descrizione&&+x.prezzo_unitario>0).map(x=>({d:x.descrizione,u:x.unita,p:+x.prezzo_unitario,w:new Set(_pcParole(x.descrizione))}));
+      /* confronto col prezzario: prima i TUOI prezzi, poi il prezzario caricato
+         (es. Tariffa Regione Lazio). Si cerca per parole della voce, non si
+         scaricano migliaia di righe. Solo se la voce somiglia DAVVERO. */
       let strani=0;
-      righe.forEach(function(r){
-        if(strani>=3||!(+r.prezzo>0))return;
-        const w=_pcParole(r.descrizione); if(w.length<1)return;
+      const _rad=w=>w.length>6?w.slice(0,w.length-1):w;
+      for(const r of righe.slice(0,12)){
+        if(strani>=3||!(+r.prezzo>0))continue;
+        const w=[...new Set(_pcParole(r.descrizione).filter(x=>x.length>=5))].slice(0,5);
+        if(w.length<1)continue;
+        const {data:cand}=await sb.from("gest_prezzi_propri").select("descrizione,unita,prezzo_unitario,fonte")
+          .eq("user_id",sbUid).is("eliminato_il",null)
+          .or(w.map(x=>"descrizione.ilike.%"+_rad(x)+"%").join(",")).limit(40);
         let best=null,bs=0;
-        L.forEach(function(x){
-          const comuni=w.filter(a=>x.w.has(a)).length; if(!comuni)return;
-          const sc=comuni/Math.max(w.length,x.w.size);
-          if(sc>bs){bs=sc;best=x;}
+        (cand||[]).forEach(function(x){
+          if(!(+x.prezzo_unitario>0))return;
+          const dw=String(x.descrizione).toLowerCase();
+          const comuni=w.filter(a=>dw.indexOf(_rad(a))>=0).length;
+          const sc=comuni/w.length;
+          const mio=(x.fonte==="mio");
+          const pt=sc+(mio?0.5:0)-String(x.descrizione).length/5000;   /* a parità, la voce tua e la più corta */
+          if(sc>=(w.length>=2?0.8:1)&&pt>bs){bs=pt;best=x;}
         });
-        if(best&&bs>=0.6){
-          const rapp=(+r.prezzo)/best.p;
-          if(rapp<0.6||rapp>1.7){
-            strani++;
-            avvisi.push(["«"+String(r.descrizione).slice(0,40)+"» costa "+eur2(+r.prezzo)+(best.u?" al "+best.u:""),
-              "Di solito la fai pagare "+eur2(best.p)+(best.u?" al "+best.u:"")+" ("+best.d.slice(0,40)+")"]);
-          }
+        if(!best)continue;
+        const mio=(best.fonte==="mio"), rapp=(+r.prezzo)/(+best.prezzo_unitario);
+        const lo=mio?0.6:0.5, hi=mio?1.7:2;
+        if(rapp<lo||rapp>hi){
+          strani++;
+          avvisi.push(["«"+String(r.descrizione).slice(0,40)+"» costa "+eur2(+r.prezzo),
+            (mio?"Di solito la fai pagare ":"Il prezzario indica circa ")+eur2(+best.prezzo_unitario)+(best.unita?" al "+best.unita:"")
+            +" ("+String(best.descrizione).slice(0,50)+")"+(mio?"":" — controlla che sia la stessa lavorazione")]);
         }
-      });
+      }
       const note=String(p.note||"");
       if(!/valid|giorni|scad/i.test(note))avvisi.push(["Manca la validità dell'offerta","Scrivi per quanti giorni vale il prezzo (aggiungi una nota)"]);
       if(!pro&&!/esclus|non compres|a carico|escluso/i.test(note))avvisi.push(["Nessuna nota su cosa è escluso","Es. materiali, smaltimento, ponteggio (aggiungi una nota)"]);
