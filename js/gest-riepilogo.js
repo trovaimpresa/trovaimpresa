@@ -951,7 +951,7 @@
         const DS=(typeof dsCache!=="undefined"&&dsCache.length)?dsCache:await dsCarica();
         const nuove=DS.filter(r=>r._stato==="nuova").length;
         C.push(rieCard({
-          tab:"dalsito", titolo:"Richieste dal sito", n:nuove, dati:DS.length>0,
+          tab:"dalsito", titolo:"Richiesta preventivo sito", n:nuove, dati:DS.length>0,
           lab:nuove?_plur(nuove,"richiesta da leggere","richieste da leggere"):"tutte lette",
           tono:"neutro", male:nuove>0, righe:[]
         }));
