@@ -253,7 +253,7 @@
     if(a==="prev-to-lavoro")return prevToLavoro(id);
     if(a==="prev-to-fatt")return fattDaPreventivoId(id);
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
-    if(a==="prev-pdf")return prevPdf(id);
+    if(a==="prev-pdf")return prevControllaEManda(id);
     if(a==="prev-incarico")return incaricoForm(id);
     if(a==="incarico-pdf")return incaricoPdf(id);
     if(a==="prev-ordine")return ordineForm(id);

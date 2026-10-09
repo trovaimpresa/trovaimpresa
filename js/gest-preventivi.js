@@ -666,6 +666,75 @@
      il cliente accetta. Risultato: due pratiche per lo stesso incarico, quella
      buona coi dati e una vuota, che era poi l'unica agganciata alla fattura.
      Adesso, se c'e' già una pratica aperta per quel cliente, chiede. */
+  /* ============================================================
+     9 ott 2026 — «CONTROLLO PRIMA DI MANDARE»
+     ============================================================
+     Prima di fare il PDF (cioè prima che il preventivo parta) si guardano
+     poche cose a regole fisse: niente AI, niente crediti, istantaneo.
+     ⛔ NON BLOCCA MAI: se c'è qualcosa da vedere si apre una finestra con
+        «Sistemo» e «Mando lo stesso». Se è tutto a posto, non si vede niente
+        e il PDF parte come prima. */
+  function _pcParole(t){
+    return String(t||"").toLowerCase().replace(/[^a-zà-ú0-9 ]/g," ").split(/\s+/).filter(w=>w.length>=4);
+  }
+  async function prevControllaEManda(id){
+    let avvisi=[], ok=[];
+    try{
+      const p=prevCache.find(x=>x.id===id); if(!p)return prevPdf(id);
+      const pro=(ruoloUtente==='professionista');
+      const {data:rr}=await sb.from("gest_preventivo_righe").select("descrizione,qta,prezzo,sezione").eq("preventivo_id",id).order("ordine");
+      const righe=(rr||[]).filter(r=>!r.sezione);
+      const senza=righe.filter(r=>!(+r.prezzo>0)||!(+r.qta>0));
+      if(senza.length)avvisi.push(["Una voce è senza prezzo o senza quantità"+(senza.length>1?" ("+senza.length+" voci)":""),
+        "«"+String(senza[0].descrizione||"").slice(0,50)+"»"]);
+      else if(righe.length)ok.push("Tutte le voci hanno quantità e prezzo");
+      /* confronto con il TUO listino: solo se la voce somiglia davvero a una tua */
+      const {data:pz}=await sb.from("gest_prezzi_propri").select("descrizione,unita,prezzo_unitario")
+        .eq("user_id",sbUid).is("eliminato_il",null).limit(300);
+      const L=(pz||[]).filter(x=>x.descrizione&&+x.prezzo_unitario>0).map(x=>({d:x.descrizione,u:x.unita,p:+x.prezzo_unitario,w:new Set(_pcParole(x.descrizione))}));
+      let strani=0;
+      righe.forEach(function(r){
+        if(strani>=3||!(+r.prezzo>0))return;
+        const w=_pcParole(r.descrizione); if(w.length<1)return;
+        let best=null,bs=0;
+        L.forEach(function(x){
+          const comuni=w.filter(a=>x.w.has(a)).length; if(!comuni)return;
+          const sc=comuni/Math.max(w.length,x.w.size);
+          if(sc>bs){bs=sc;best=x;}
+        });
+        if(best&&bs>=0.6){
+          const rapp=(+r.prezzo)/best.p;
+          if(rapp<0.6||rapp>1.7){
+            strani++;
+            avvisi.push(["«"+String(r.descrizione).slice(0,40)+"» costa "+eur2(+r.prezzo)+(best.u?" al "+best.u:""),
+              "Di solito la fai pagare "+eur2(best.p)+(best.u?" al "+best.u:"")+" ("+best.d.slice(0,40)+")"]);
+          }
+        }
+      });
+      const note=String(p.note||"");
+      if(!/valid|giorni|scad/i.test(note))avvisi.push(["Manca la validità dell'offerta","Scrivi per quanti giorni vale il prezzo (aggiungi una nota)"]);
+      if(!pro&&!/esclus|non compres|a carico|escluso/i.test(note))avvisi.push(["Nessuna nota su cosa è escluso","Es. materiali, smaltimento, ponteggio (aggiungi una nota)"]);
+      if(!p.cliente_id)avvisi.push(["Manca il cliente","Scegli a chi è intestato il preventivo"]);
+      else{
+        const {data:c}=await sb.from("gest_clienti").select("email,telefono").eq("id",p.cliente_id).maybeSingle();
+        if(c&&!String(c.email||"").trim()&&!String(c.telefono||"").trim())
+          avvisi.push(["Il cliente non ha né telefono né email","Come glielo mandi? Aggiungili nella scheda cliente"]);
+        else if(c)ok.push("Il cliente ha un recapito");
+      }
+    }catch(e){ return prevPdf(id); }   /* un controllo che si rompe non deve fermare il preventivo */
+    if(!avvisi.length){ toast("Controllo fatto: tutto a posto ✔"); return prevPdf(id); }
+    const riga=(ic,t,d,cl)=>'<div style="display:flex;gap:12px;padding:13px 14px;border-radius:12px;margin-bottom:10px;font-size:19px;'
+      +(cl==="w"?'background:#fff4e0;border:1px solid #f0c36d':'background:#eaf7ef')+'"><span style="font-size:24px">'+ic+'</span><div>'+esc(t)
+      +(d?'<small style="display:block;color:#586574;font-size:16px;margin-top:2px">'+esc(d)+'</small>':'')+'</div></div>';
+    openSheetGrande("Controllo prima di mandare",
+      '<div class="sh-b">'+avvisi.map(a=>riga("⚠️",a[0],a[1],"w")).join("")+ok.map(t=>riga("✅",t,"","o")).join("")+'</div>',
+      '<button class="btn-primary b-save" type="button" id="pc-sistemo">Sistemo</button>'
+      +'<button class="btn" type="button" id="pc-lostesso">Mando lo stesso</button>');
+    const A=$("#pc-sistemo"),B=$("#pc-lostesso");
+    if(A)A.onclick=function(){closeSheet(); const p=prevCache.find(x=>x.id===id); if(p)prevForm(p);};
+    if(B)B.onclick=function(){closeSheet(); prevPdf(id);};
+  }
+
   async function prevToLavoro(id){
     const p=prevCache.find(x=>x.id===id);if(!p||!sbUid)return;
     const pro=ruoloUtente==='professionista';
