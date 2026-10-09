@@ -90,7 +90,58 @@
       '<button class="btn b-cancel" data-action="close">Chiudi</button>');
   }
 
+  /* ---- 9 ott 2026 — IL PULSANTE «✨ AI»: un punto solo per tutte le funzioni AI.
+     Sta in basso a destra su ogni pagina del gestionale. Non costa niente da
+     solo: i crediti si usano quando poi chiedi qualcosa. Si nasconde dentro la
+     chat e quando c'è una finestra aperta. Compare solo con l'AI nel piano. ---- */
+  function rieChiediOggi(){
+    const t=document.querySelector('nav.tabs button[data-tab="chat"]'); if(!t)return;
+    t.click(); window.scrollTo(0,0);
+    setTimeout(function(){
+      const c=document.getElementById("chat-domanda"), m=document.getElementById("chat-manda");
+      if(!c||!m)return;
+      c.value="Guarda le mie fatture da incassare, le scadenze, i lavori e le richieste dal sito: cosa devo fare oggi, in ordine di importanza? Dammi al massimo 3 cose.";
+      m.click();
+    },600);
+  }
+  let _fabFatto=false;
+  function rieFabAI(){
+    if(_fabFatto)return;
+    if(!(window.AI&&window.AI.stato&&window.AI.stato.has_ai)){
+      if((rieFabAI._n=(rieFabAI._n||0)+1)<8)setTimeout(rieFabAI,2000);
+      return;
+    }
+    _fabFatto=true;
+    const voce=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;gap:14px;align-items:center;width:100%;text-align:left;border:0;background:#fff;'
+      +'padding:14px;border-radius:12px;font-size:20px;font-weight:700;cursor:pointer;color:#1c2733"><span style="font-size:28px">'+ic+'</span><span>'+t
+      +'<small style="display:block;font-weight:400;font-size:15px;color:#586574">'+d+'</small></span></button>';
+    const chatOk=!!document.querySelector('nav.tabs button[data-tab="chat"]');
+    const box=document.createElement("div"); box.id="rie-fab-box";
+    box.innerHTML='<div id="rie-fab-menu" style="display:none;position:fixed;right:22px;bottom:96px;width:min(380px,calc(100vw - 44px));background:#fff;border-radius:18px;padding:10px;box-shadow:0 10px 36px rgba(0,0,0,.35);z-index:800">'
+      +(chatOk?voce("rf-chat","💬","Chiedi alla chat","Domande, fatture, soldi")+voce("rf-oggi","🎯","Cosa faccio oggi?","L'AI guarda i tuoi dati e ti dice le 3 cose"):"")
+      +voce("rf-prev","📝","Genera un preventivo","Descrivi il lavoro a voce o a testo")
+      +voce("rf-foto","📷","Fotografa","Fattura del fornitore o lettera")
+      +'</div><button type="button" id="rie-fab" style="position:fixed;right:22px;bottom:22px;z-index:800;background:#7c5cff;color:#fff;border:0;border-radius:40px;padding:16px 24px;font-size:21px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">✨ AI</button>';
+    document.body.appendChild(box);
+    const menu=document.getElementById("rie-fab-menu"), fab=document.getElementById("rie-fab");
+    const chiudi=()=>{menu.style.display="none";};
+    fab.onclick=function(e){e.stopPropagation();menu.style.display=menu.style.display==="none"?"block":"none";};
+    menu.onclick=function(e){e.stopPropagation();};
+    document.addEventListener("click",chiudi);
+    const on=(id,fn)=>{const b=document.getElementById(id); if(b)b.onclick=function(){chiudi();fn();};};
+    on("rf-chat",function(){const t=document.querySelector('nav.tabs button[data-tab="chat"]');if(t){t.click();window.scrollTo(0,0);}});
+    on("rf-oggi",rieChiediOggi);
+    on("rf-prev",function(){if(window.AI&&typeof window.AI.apri==="function")window.AI.apri();});
+    on("rf-foto",rieFotoScegli);
+    /* si nasconde dentro la chat e quando c'è una finestra aperta */
+    setInterval(function(){
+      const nasc=!!document.querySelector("#chat.active")||!!document.querySelector("#overlay.open")||!!document.querySelector(".ai-ov");
+      box.style.display=nasc?"none":"block";
+    },700);
+  }
+
   async function renderRiepilogo(){
+    try{ rieFabAI(); }catch(e){}
     const G=$("#rie-grid");if(!G)return;
     if($("#rie-alert"))$("#rie-alert").innerHTML="";
     if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
