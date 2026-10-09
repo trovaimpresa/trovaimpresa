@@ -124,11 +124,81 @@
         ${riga("Altro",r.note_aggiuntive)}
         ${r.foto?`<div class="field"><label>Foto</label><a href="${esc(r.foto)}" target="_blank" rel="noopener">Apri la foto</a></div>`:""}
         </div>
+        <div class="sh-b" style="border:2px solid #7c5cff;background:#f6f3ff">
+        <div class="sh-tit">\u2728 Risposta pronta</div>
+        <div id="ds-risp-box">
+          <p style="margin:0 0 10px;font-size:16px">L'AI scrive la risposta al cliente con i tuoi prezzi. Tu la leggi e la modifichi. Costa 1 credito.</p>
+          <button class="btn-primary" type="button" id="ds-risp-go">Scrivi la risposta</button>
+        </div>
+        </div>
         </div></div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>
        <button class="btn-primary b-save" data-action="ds-prev" data-id="${esc(String(r.id))}">Crea il preventivo</button>`);
+    const _go=$("#ds-risp-go"); if(_go)_go.onclick=function(){dsRisposta(r);};
     if(r._stato==="nuova"){
       if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();}
+    }
+  }
+
+  /* 9 ott 2026 \u2014 \u00abRISPOSTA PRONTA\u00bb. L'AI scrive la prima risposta al cliente
+     del sito; non manda niente: l'impresa la legge, la cambia e la manda lei.
+     \u26d4 Prezzi: solo quelli del SUO elenco (gest_prezzi_propri), mai inventati.
+     Funzione: supabase edge \u00abai-risposta\u00bb (1 credito, stesse regole di ai-cantiere). */
+  async function dsRisposta(r){
+    const box=$("#ds-risp-box"); if(!box)return;
+    box.innerHTML='<p style="margin:0;font-size:17px">Sto scrivendo la risposta\u2026 (10 secondi)</p>';
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(!session)throw new Error("Sessione scaduta, rientra nel gestionale e riprova.");
+      const [pz,az]=await Promise.all([
+        sb.from("gest_prezzi_propri").select("descrizione,unita,prezzo_unitario")
+          .eq("user_id",sbUid).is("eliminato_il",null)
+          .order("usata_volte",{ascending:false}).limit(40),
+        sb.from("gest_azienda").select("nome").eq("user_id",sbUid).maybeSingle()
+      ]);
+      const nomeImp=((az&&az.data&&az.data.nome)||"").trim();
+      const prezzi=((pz&&pz.data)||[]).filter(x=>x.descrizione&&x.prezzo_unitario!=null)
+        .map(x=>"- "+x.descrizione+": "+x.prezzo_unitario+" euro"+(x.unita?" al "+x.unita:"")).join("\n");
+      const campi=[["Lavoro",_dsCosa(r)],["Descrizione",r.descrizione],["Citta'",r.citta],
+        ["Metri quadri",r.mq],["Piano",r.piano],["Urgenza",r.urgenza],["Quando serve",r.data_preferita],
+        ["Budget del cliente",r.budget],["Altro",r.note_aggiuntive],["Foto allegata",r.foto?"si":""]]
+        .filter(x=>x[1]).map(x=>x[0]+": "+x[1]).join("\n");
+      const input="Nome dell'impresa: "+(nomeImp||"(non indicato: firma solo con \u00abUn saluto,\u00bb)")
+        +"\nNome del cliente: "+(r.nome||"(non indicato)")
+        +"\n\nRICHIESTA DEL CLIENTE\n"+campi
+        +"\n\nPREZZI DELL'IMPRESA\n"+(prezzi||"(nessun prezzo salvato: non fare cifre)");
+      /* i contatti, per i pulsanti WhatsApp ed Email */
+      let c={email:"",telefono:""};
+      try{
+        const rc=await fetch("/.netlify/functions/contatto-preventivo",{method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+          body:JSON.stringify({preventivo_id:Number(r.id)})});
+        if(rc.ok)c=await rc.json();
+      }catch(e){}
+      const res=await fetch("https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-risposta",{method:"POST",
+        headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
+        body:JSON.stringify({input:input})});
+      const body=await res.json().catch(()=>({}));
+      if(res.status===402)throw new Error(body.reason==="no_credits"?"Hai finito i crediti AI di questo mese.":"Questa funzione \u00e8 nel piano con assistenza AI.");
+      if(!res.ok)throw new Error(body.error||"L'assistente non ha risposto. Riprova.");
+      const tel=String(c.telefono||"").replace(/[\s\-+]/g,"").replace(/^39/,"");
+      box.innerHTML=
+        '<textarea id="ds-risp-txt" style="width:100%;min-height:210px;font:20px/1.45 system-ui;padding:12px;border:1px solid #cfd6df;border-radius:10px;box-sizing:border-box">'+esc(String(body.result||""))+'</textarea>'
+        +'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px">'
+        +(tel?'<button class="btn-primary" type="button" id="ds-risp-wa" style="background:#1fa855;border-color:#1fa855">WhatsApp</button>':"")
+        +(c.email?'<button class="btn" type="button" id="ds-risp-em">Email</button>':"")
+        +'<button class="btn" type="button" id="ds-risp-cp">Copia</button>'
+        +'<button class="btn" type="button" id="ds-risp-ri">\u21bb Riscrivi (1 credito)</button></div>'
+        +(!tel&&!c.email?'<p style="margin:8px 0 0;font-size:15px">Il cliente non ha lasciato email n\u00e9 telefono: usa Copia.</p>':"");
+      const T=()=>$("#ds-risp-txt").value;
+      const wa=$("#ds-risp-wa"); if(wa)wa.onclick=()=>window.open("https://wa.me/39"+tel+"?text="+encodeURIComponent(T()),"_blank","noopener");
+      const em=$("#ds-risp-em"); if(em)em.onclick=()=>{location.href="mailto:"+encodeURIComponent(c.email)+"?subject="+encodeURIComponent("Re: "+(_dsCosa(r)||"la sua richiesta"))+"&body="+encodeURIComponent(T());};
+      $("#ds-risp-cp").onclick=async()=>{try{await navigator.clipboard.writeText(T());toast("Copiato \u2714");}catch(e){const t=$("#ds-risp-txt");t.select();document.execCommand("copy");toast("Copiato \u2714");}};
+      $("#ds-risp-ri").onclick=()=>dsRisposta(r);
+    }catch(e){
+      box.innerHTML='<p style="margin:0 0 10px;color:var(--err)">'+esc(e.message||"Non ci sono riuscito, riprova")+'</p>'
+        +'<button class="btn-primary" type="button" id="ds-risp-go">Riprova</button>';
+      const g=$("#ds-risp-go"); if(g)g.onclick=()=>dsRisposta(r);
     }
   }
 
