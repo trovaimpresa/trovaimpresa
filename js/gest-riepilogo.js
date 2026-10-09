@@ -35,6 +35,61 @@
    prove-claude/banchi-fissi/smontaggio/banco-fette.js
    ═══════════════════════════════════════════════════════════════════════ */
 
+  /* ---- «FOTOGRAFA»: scegli cosa stai fotografando ---- */
+  function rieFotoScegli(){
+    const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;gap:14px;align-items:center;width:100%;text-align:left;'
+      +'border:2px solid #d9dfe7;border-radius:14px;padding:16px;margin-bottom:12px;background:#fff;font-size:21px;font-weight:700;cursor:pointer">'
+      +'<span style="font-size:34px">'+ic+'</span><span>'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
+    openSheetGrande("Cosa stai fotografando?",
+      '<div class="sh-b"><p style="margin:0 0 14px;font-size:18px">Scegli, poi scatta o scegli la foto. L\'AI legge e riempie tutto. Costa 1 credito.</p>'
+      +c("pf-forn","🧾","Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
+      +c("pf-lett","✉️","Lettera del Fisco o dell'INPS","Te la spiega in parole semplici")
+      +c("pf-altro","💬","Altro: scrivi alla chat","La chat guarda la foto e ti risponde")+'</div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>');
+    const F=document.getElementById("pf-forn"),L=document.getElementById("pf-lett"),A=document.getElementById("pf-altro");
+    if(F)F.onclick=async function(){
+      closeSheet();
+      try{ await fornForm(null); }catch(e){ toast("Non riesco ad aprire il modulo, riprova"); return; }
+      setTimeout(function(){ const cam=document.getElementById("ff-foto-cam"); if(cam)cam.click(); },300);
+    };
+    if(L)L.onclick=function(){
+      const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*,application/pdf"; inp.style.display="none";
+      document.body.appendChild(inp);
+      inp.onchange=function(){ const f=inp.files&&inp.files[0]; inp.remove(); if(f)rieFotoLettera(f); };
+      inp.click();
+    };
+    if(A)A.onclick=function(){
+      closeSheet();
+      const t=document.querySelector('nav.tabs button[data-tab="chat"]');
+      if(t){t.click();window.scrollTo(0,0);}else toast("La chat è nel piano con assistenza AI");
+    };
+  }
+  async function rieFotoLettera(file){
+    if(!window.AI||typeof window.AI.cantiere!=="function"||typeof _aicBase64!=="function"||typeof fiLetteraHtml!=="function"){
+      toast("L'assistente non si è caricato: ricarica la pagina (F5)");return;}
+    let blob=file, tipo=file.type||"";
+    if(tipo!=="application/pdf"){
+      const p=typeof preparaFileUpload==="function"?await preparaFileUpload(file,{lato:1800,qualita:0.85}):{file:file};
+      if(p.errore){toast(p.errore);return;}
+      blob=p.file; tipo=(p.compressa||!file.type)?"image/jpeg":file.type;
+      if(["image/jpeg","image/png","image/webp"].indexOf(tipo)<0){
+        if(/heic|heif/i.test(file.type||file.name||"")){toast("Questa foto è in un formato che non riesco a leggere (HEIC). Fai una foto nuova dal pulsante.");return;}
+        tipo="image/jpeg";
+      }
+    }
+    if(blob.size>5*1024*1024){toast("Il file è troppo grande: massimo 5 MB. Fotografa solo la prima pagina.");return;}
+    toast("Sto leggendo la lettera… (10 secondi)");
+    let d=null;
+    try{
+      const dati=await _aicBase64(blob);
+      d=await window.AI.cantiere("spiega_lettera","Spiegami questa lettera in parole semplici.",{tipo:tipo,dati:dati},true);
+    }catch(e){toast((e&&e.message)||"Non ci sono riuscito. Riprova fra un attimo.");return;}
+    if(!d)return;   /* crediti finiti: la finestra l'ha già mostrata l'AI */
+    if(d.leggibile===false){toast("Non riesco a leggerla: la foto è sfocata o non è una lettera. Rifalla dritta, con più luce.");return;}
+    openSheetGrande("La tua lettera, spiegata",'<div class="sh-b">'+fiLetteraHtml(d)+'</div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>');
+  }
+
   async function renderRiepilogo(){
     const G=$("#rie-grid");if(!G)return;
     if($("#rie-alert"))$("#rie-alert").innerHTML="";
@@ -512,6 +567,12 @@
               : '')
           + '</div>';
       }
+      /* 9 ott 2026 — «FOTOGRAFA»: un solo punto d'ingresso per le foto.
+         Non decide l'AI che foto è (costerebbe un credito in più): scegli tu. */
+      ra.insertAdjacentHTML("afterbegin",
+        '<button type="button" class="btn-primary" id="rie-foto" style="font-size:20px;font-weight:700;padding:14px 22px;margin-bottom:14px">📷 Fotografa</button>');
+      const _bF=ra.querySelector("#rie-foto");
+      if(_bF)_bF.onclick=rieFotoScegli;
       const _bAI=ra.querySelector("#rie-chiedi-ai");
       if(_bAI)_bAI.onclick=function(){
         const t=document.querySelector('nav.tabs button[data-tab="chat"]'); if(!t)return;
