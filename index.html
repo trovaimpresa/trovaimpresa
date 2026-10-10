@@ -1550,10 +1550,16 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
     #registrati .v3-ok{flex:none;width:34px;height:34px;border-radius:50%;background:#ff8800;color:#fff;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
     @media(max-width:1099px){
       body section#registrati.hcard{padding:24px 16px !important}
-      #registrati .v3-g{grid-template-columns:1fr;gap:20px}
+      #registrati .v3-g{grid-template-columns:minmax(0,1fr);gap:20px}
+      #registrati .v3-sx,#registrati .v3-dx{min-width:0}
+      #registrati .v3-b{gap:10px;padding:12px}
+      #registrati .v3-b svg{width:30px;height:30px}
+      #registrati .v3-b small{font-size:14px}
+      #registrati .v3-b em{font-size:16px;padding:10px 12px}
+      #registrati .v3-su{font-size:14px}
       #registrati .v3-h{font-size:32px}
       #registrati .v3-p{font-size:18px}
-      #registrati .v3-r{grid-template-columns:1fr}
+      #registrati .v3-r{grid-template-columns:minmax(0,1fr)}
       #registrati .v3-b strong{font-size:20px}
     }
     </style>
