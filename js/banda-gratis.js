@@ -63,8 +63,10 @@
     sec.setAttribute('aria-label', 'Iscrizione gratuita per artigiani e imprese');
     sec.innerHTML = html;
 
+    var qui = document.getElementById('banda-gratis-qui');
     var foot = document.querySelector('footer');
-    if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot);
+    if (qui && qui.parentNode) qui.parentNode.insertBefore(sec, qui);
+    else if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot);
     else document.body.appendChild(sec);
   } catch (e) { /* mai rompere la pagina */ }
 })();
