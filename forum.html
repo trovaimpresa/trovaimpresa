@@ -19,6 +19,25 @@
 <link rel="stylesheet" href="/css/loghi-uguali.css?v=1">
 <style>@media(min-width:1100px){html body .fs-card,html body .pb-logo{zoom:.8}}</style>
 <style>/* 5 ott 2026: banner A a destra del titolo, come nella home */.pb-ill-f{max-width:560px;justify-self:center;width:100%}</style>
+<style id="forum-ott10">
+/* 10 ott 2026: barra in alto e logo come nel sito (menu B). Solo computer: il telefono non cambia. */
+@media(min-width:1100px){
+  .fs-nav .in{flex-wrap:wrap;column-gap:14px;row-gap:0;padding-top:10px;padding-bottom:0}
+  .fs-links{display:contents}
+  .fs-logo{order:1;margin-right:6px}
+  .fs-cerca{order:2;max-width:300px}
+  .fs-links a.acc{order:3;margin-left:auto;font-size:21px;font-weight:800;padding:13px 26px;border-radius:12px;border:2px solid #0a2a4d;color:#0a2a4d;background:#fff}
+  .fs-links a.acc:hover{background:#0a2a4d;color:#fff;text-decoration:none}
+  .fs-links a.isc{order:4;margin-left:0;font-size:21px;font-weight:800;padding:15px 28px;border-radius:12px}
+  .fs-nav .in::after{content:"";order:5;flex:0 0 100%;height:0;border-top:3px solid #0a2a4d;margin-top:10px}
+  .fs-links a:not(.acc):not(.isc){order:6;flex:1 1 auto;text-align:center;padding:12px 4px;font-size:clamp(17px,1.1vw,21px);font-weight:800;color:#0a2a4d;background:none !important;border-radius:0;border-bottom:3px solid transparent}
+  .fs-links a:not(.acc):not(.isc):hover,.fs-links a.on{border-bottom-color:#ff8800;text-decoration:none;color:#0a2a4d}
+  html body .fs-card{display:none !important}
+  .fs-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 26px}
+  .fs-hero .in{align-items:start}
+}
+@media(max-width:1099px){.fs-logo-centro{display:none}}
+</style>
 </head>
 <body>
 <!-- 4 ott 2026 — il sito intorno al forum: fascia, barra con logo e ricerca, riga dei mestieri. Stile in css/forum-sito.css -->
@@ -38,7 +57,7 @@
   </nav>
 </div></div>
 <div class="fs-sub"><div class="in"><a href="/forum" data-m="">Tutte</a><a href="/forum?m=Muratore" data-m="Muratore">Muratore</a><a href="/forum?m=Impresa%20edile" data-m="Impresa edile">Impresa edile</a><a href="/forum?m=Idraulico" data-m="Idraulico">Idraulico</a><a href="/forum?m=Elettricista" data-m="Elettricista">Elettricista</a><a href="/forum?m=Imbianchino" data-m="Imbianchino">Imbianchino</a><a href="/forum?m=Piastrellista" data-m="Piastrellista">Piastrellista</a><a href="/forum?m=Falegname" data-m="Falegname">Falegname</a><a href="/forum?m=Fabbro" data-m="Fabbro">Fabbro</a><a href="/forum?m=Carpentiere" data-m="Carpentiere">Carpentiere</a><a href="/forum?m=Cartongessista" data-m="Cartongessista">Cartongessista</a><a href="/forum?m=Serramentista" data-m="Serramentista">Serramentista</a><a href="/forum?m=Geometra" data-m="Geometra">Geometra</a><a href="/forum?m=Architetto" data-m="Architetto">Architetto</a><a href="/forum?m=Altro" data-m="Altro">Altro</a></div></div>
-<div class="fs-hero"><div class="in">
+<div class="fs-hero"><img class="fs-logo-centro" src="/img/trovaimpresa-forum-edilizia-logo-bianco.svg" alt="TrovaImpresa Forum Edilizia" width="380" height="233"><div class="in">
   <div>
     <div class="fs-card"><a href="/forum"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></a></div>
     <h1>Hai un lavoro da fare o un problema in casa? <em>Chiedi alle imprese gratis.</em></h1>
