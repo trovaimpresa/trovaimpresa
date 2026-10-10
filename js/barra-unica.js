@@ -17,6 +17,7 @@
 
     var CSS = '' +
       '.tb-bar{display:block !important;position:static !important;float:none !important;width:auto !important;max-width:none !important;height:auto !important;min-height:0 !important;margin:0 !important;padding:10px 40px 0 !important;background:#fff !important;border:0 !important;box-shadow:none !important;text-align:left !important;font-family:"DM Sans",sans-serif !important}' +
+      '.tb-bar.tb-abs{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;box-sizing:border-box !important}' +
       '.tb-bar .tb-top{display:flex;align-items:center;gap:22px}' +
       '.tb-bar .tb-logo{display:block;width:268px;flex:0 0 268px;margin:0;padding:0}' +
       '.tb-bar .tb-logo img{display:block;width:268px;height:auto;max-width:none;margin:0}' +
@@ -38,9 +39,24 @@
       return null;
     }
 
+    /* Pagine senza una vera barra (login, registrazioni, landing «per-...», convenzioni): la prima fascia in alto diventa la barra uguale */
+    function extra() {
+      var f = document.body && document.body.firstElementChild;
+      if (!f) return null;
+      if (f.matches('.top,.logobar,.barra')) return f;
+      if (f.tagName === 'HEADER' && f.querySelector('a[href="/"]')) return f;
+      if (f.matches('.logo') && /login-/.test(location.pathname)) {
+        var d = document.createElement('div');
+        f.parentNode.replaceChild(d, f);
+        d.setAttribute('data-abs', '1');
+        return d;
+      }
+      return null;
+    }
+
     function costruisci() {
       if (document.querySelector('.tb-bar,.nav-std,#nav-links,.fs-nav')) return;
-      var el = pagina();
+      var el = pagina() || extra();
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
       var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>' +
@@ -53,7 +69,10 @@
       st.textContent = '@media(min-width:1100px){' + CSS + '}';
       document.head.appendChild(st);
       el.className = 'tb-bar';
+      if (el.getAttribute('data-abs')) { el.className = 'tb-bar tb-abs'; document.body.style.paddingTop = '230px'; }
       el.removeAttribute('style');
+      var bs = getComputedStyle(document.body), pl = parseFloat(bs.paddingLeft) || 0, pt = parseFloat(bs.paddingTop) || 0;
+      if (pl > 0 && !el.getAttribute('data-abs')) el.style.setProperty('margin', '-' + pt + 'px -' + pl + 'px 0', 'important');
       var pre = document.getElementById('nav-prenota'); /* Pubblicita': il bottone «Prenota uno spazio» ha una sua funzione, lo sposto nella barra nuova senza toccarlo */
       el.innerHTML = h;
       if (pre) { pre.className = 'tb-btn'; pre.removeAttribute('style'); el.querySelector('.tb-top').appendChild(pre); }
