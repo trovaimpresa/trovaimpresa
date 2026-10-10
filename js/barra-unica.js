@@ -44,7 +44,7 @@
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
       var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>' +
-        '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/login-impresa?redirect=gestionale">Accedi al gestionale</a><a class="tb-btn" href="/login-impresa">Accedi al forum</a></div><div class="tb-links">';
+        '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/login-impresa?redirect=gestionale">Accedi al gestionale</a><a class="tb-btn" href="/login-impresa?redirect=forum">Accedi al forum</a></div><div class="tb-links">';
       LINKS.forEach(function (l) {
         h += '<a href="' + l[0] + '"' + (path === l[0] ? ' class="on"' : '') + '>' + l[1] + '</a>';
       });

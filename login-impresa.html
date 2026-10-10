@@ -198,8 +198,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
                     /* 15 set 2026: se sono arrivato qui con ?redirect=gestionale,
                        l'email rimandata deve riportarmi al gestionale, non al pannello. */
                     + (function () {
-                        try { return new URLSearchParams(window.location.search).get('redirect') === 'gestionale'
-                                     ? '?redirect=gestionale' : ''; }
+                        try { var rr = new URLSearchParams(window.location.search).get('redirect');
+                                     return (rr === 'gestionale' || rr === 'forum') ? '?redirect=' + rr : ''; }
                         catch (e) { return ''; }
                       })() }
         });
@@ -288,6 +288,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
              dentro il GESTIONALE, non nel pannello del marketplace: e'
              quello che era venuto a prendere. */
           if (redirect === 'gestionale') window.location.href = 'gestionale-app.html';
+          else if (redirect === 'forum') window.location.href = 'forum.html';
           else if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
           else window.location.href = pannelloUtente;
         }
@@ -318,6 +319,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
              dentro il GESTIONALE, non nel pannello del marketplace: e'
              quello che era venuto a prendere. */
           if (redirect === 'gestionale') window.location.href = 'gestionale-app.html';
+          else if (redirect === 'forum') window.location.href = 'forum.html';
           else if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
         else window.location.href = pannelloUtente;
       } catch(err) {
