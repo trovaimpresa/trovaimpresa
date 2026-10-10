@@ -65,7 +65,9 @@
 
   var BORDO   = 20;                    // distanza dal bordo dello schermo
   var LARGA   = 600;                   // larghezza voluta per le due in alto
-  var SCALINO = 0.85;                  // ogni fascia e' l'85% di quella sopra
+  var BORDO_MIN = 6;                   // piu' vicino di cosi' al bordo schermo non si va
+  var DISTANZA_MIN = 8;                // distanza minima dal riquadro della pagina
+  var SCALINO = 0.85;                 // ogni fascia e' l'85% di quella sopra
   var MINIMA  = 140;                   // sotto questa non si mostra
   var TELEFONO = '(max-width:1100px)';
 
@@ -500,7 +502,10 @@
     return document.documentElement.clientWidth || window.innerWidth;
   }
 
-  function spazioLibero(el) {
+  // larghezza VERA del riquadro visibile: contenuto piu' largo + margine
+  // interno e bordo della sezione (prima si contava solo il contenuto e i
+  // cartelli finivano sopra il bordo del riquadro)
+  function larghezzaRiquadro(el) {
     var largo = el.getBoundingClientRect().width;
     var figli = el.children;
     if (figli.length) {
@@ -509,9 +514,16 @@
         var w = figli[i].getBoundingClientRect().width;
         if (w > largo) largo = w;
       }
-      if (!largo) largo = el.getBoundingClientRect().width;
+      if (!largo) return el.getBoundingClientRect().width;
+      var cs = window.getComputedStyle(el);
+      largo += (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0)
+             + (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.borderRightWidth) || 0);
     }
-    return (larghezzaSchermo() - largo) / 2 - BORDO * 2;
+    return largo;
+  }
+
+  function spazioLibero(el, margine) {
+    return (larghezzaSchermo() - larghezzaRiquadro(el)) / 2 - (margine === undefined ? BORDO * 2 : margine);
   }
 
   function sistema() {
@@ -579,6 +591,7 @@
       }
     }
 
+    var bordoComune = BORDO;
     var precedente = largaOk;
     var perPasso = {};
     for (var p = 1; p <= 5; p++) {
@@ -586,7 +599,8 @@
       for (var k = 0; k < l.length; k++) {
         if (parseInt(l[k].getAttribute('data-passo'), 10) !== p) continue;
         var sz = document.querySelector(l[k].getAttribute('data-sez'));
-        if (sz) spazio = Math.min(spazio, Math.round(spazioLibero(sz)));
+        // la misura venduta non si restringe: si toglie solo il margine minimo
+        if (sz) spazio = Math.min(spazio, Math.round(spazioLibero(sz, BORDO_MIN + DISTANZA_MIN)));
       }
       if (spazio === 99999) { perPasso[p] = 0; continue; }
       perPasso[p] = Math.max(0, Math.min(spazio, Math.round(precedente * SCALINO)));
@@ -609,8 +623,26 @@
       a.style.width = L + 'px';
       a.style.height = H + 'px';
       a.style.top = Math.round(centro - H / 2) + 'px';
-      if (a.getAttribute('data-lato') === 'sx') { a.style.left = BORDO + 'px'; a.style.right = 'auto'; }
-      else { a.style.right = BORDO + 'px'; a.style.left = 'auto'; }
+      var lib = (larghezzaSchermo() - larghezzaRiquadro(sez)) / 2;
+      var bordo = Math.max(BORDO_MIN, Math.min(BORDO, Math.floor(lib - L - DISTANZA_MIN)));
+      if (bordo < bordoComune) bordoComune = bordo;
+    }
+
+    // TUTTI alla stessa distanza dal bordo (la piu' stretta che serve): stessa
+    // colonna della home, la misura venduta non cambia mai
+    for (var j = 0; j < l.length; j++) {
+      var c = l[j];
+      if (c.style.display === 'none') continue;
+      if (c.getAttribute('data-lato') === 'sx') { c.style.left = bordoComune + 'px'; c.style.right = 'auto'; }
+      else { c.style.right = bordoComune + 'px'; c.style.left = 'auto'; }
+    }
+    if (largaOk >= MINIMA) {
+      IN_ALTO.forEach(function (id) {
+        var h = document.querySelector('a.pub-link[data-spazio-id="' + id + '"]');
+        if (h && h.style.display !== 'none') {
+          h.style.setProperty(id.indexOf('sx') >= 0 ? 'left' : 'right', bordoComune + 'px', 'important');
+        }
+      });
     }
   }
 })();
