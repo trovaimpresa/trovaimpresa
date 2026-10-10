@@ -1313,6 +1313,36 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 .hb-btns a{font-size:21px !important;padding:18px 28px !important;white-space:nowrap}
 }
 </style>
+
+<!-- 10 ott 2026: tolto ogni azzurro dalla home, al suo posto il blu scuro #0a2a4d (nuvola, Cerca, bottoni, icone, titoli guide). -->
+<style id="blu-ott10">
+:root{--ti-blu:#0a2a4d !important}
+#ti-bolla{background:#0a2a4d !important}
+#ti-head{background:linear-gradient(135deg,#0a2a4d,#123c6b) !important}
+.ti-btn,.ti-link{background:#0a2a4d !important}
+.ti-btn:hover{background:#07203b !important}
+.ti-btn.sec{background:#fff !important;color:#0a2a4d !important;border-color:#0a2a4d !important}
+.citta-go{background:#0a2a4d !important}.citta-go:hover{background:#07203b !important}
+.c3-fondo .citta-go{box-shadow:0 10px 24px rgba(10,42,77,.25) !important}
+#btn-geo-home{color:#0a2a4d !important;border:1.5px solid #c9d2de !important}
+.c3-nonso,.citta-attiva a,.citta-geo:hover{color:#0a2a4d !important}
+.citta-geo{color:#6b7a8d !important}.citta-geo:hover{background:#eef1f5 !important}
+.posto-btn.gest-btn{background:#0a2a4d !important;color:#fff !important;border-color:#0a2a4d !important}
+.posto-btn.gest-btn:hover,.nav-gest:hover{background:#07203b !important;color:#fff !important}
+.citta-box,.citta-attiva{background:#f3f5f8 !important;border-color:#d9dee6 !important}
+.citta-campo,.mest-sel{border-color:#c9d2de !important}
+.citta-campo:focus-within,.mest-sel:focus{border-color:#0a2a4d !important;box-shadow:0 0 0 3px rgba(10,42,77,.15) !important}
+.citta-lab .passo-n,.mest-lab .passo-n,.c3-lab .passo-n{background:#0a2a4d !important;color:#fff !important}
+.c3-testa{border-bottom-color:#d9dee6 !important}
+.cerca3{border-top-color:#0a2a4d !important;border-color:#d9dee6 !important}
+.ti-ic-solo{color:#0a2a4d !important}
+.feature-icon svg{stroke:#0a2a4d !important}
+.hcard svg[stroke="#0066ff"]{stroke:#0a2a4d !important}
+.guide-costi-home h3{color:#0a2a4d !important}
+.guide-costi-home a[href^="/quanto-costa"] > div svg{background:#eef1f5 !important}
+.guide-costi-home a[href^="/quanto-costa"]:hover{border-color:#0a2a4d !important}
+.av b{background:#0a2a4d !important}
+</style>
 </head>
 <body>
 
@@ -2375,5 +2405,21 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 <script src="/js/spazi-elenco.js"></script>
 <script src="/js/spazi-citta.js" defer></script>
 <!-- 10 ott 2026: banda «Tutto GRATIS» tolta dalla home, unita al blocco #registrati (js/banda-gratis.js resta per le altre pagine). -->
+<script>
+/* 10 ott 2026: conta i clic sui 3 bottoni «Iscriviti» del blocco #registrati (come faceva la banda blu). Tipo 'clic_banda', senza cookie. Mai bloccare il clic. */
+(function(){try{
+  var ua=(navigator&&navigator.userAgent)||'';
+  if(/bot|crawl|spider|slurp|preview|headless|lighthouse|pingdom|gtmetrix|semrush|ahrefs/i.test(ua)||navigator.webdriver)return;
+  var sec=document.getElementById('registrati'); if(!sec)return;
+  sec.addEventListener('click',function(ev){try{
+    var a=ev.target&&ev.target.closest?ev.target.closest('a.v3-b'):null; if(!a)return;
+    var ses=null; try{ses=sessionStorage.getItem('ti_visita');}catch(e){}
+    fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/visite_clienti',{method:'POST',keepalive:true,
+      headers:{'apikey':'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R','Authorization':'Bearer sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R','Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({tipo:'clic_banda',cosa:'banda',dove:'registra',pagina:String(location.pathname||'/').slice(0,200),sessione:ses?String(ses).slice(0,60):null,telefono:(window.innerWidth||1024)<768})
+    })['catch'](function(){});
+  }catch(e){}},true);
+}catch(e){}})();
+</script>
 </body>
 </html>
