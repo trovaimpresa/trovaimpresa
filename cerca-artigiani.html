@@ -726,7 +726,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     if (!tuttiRisultati.length) {
       document.getElementById('risultatiCount').textContent = 'Nessun risultato';
       var _dm = parseInt((document.getElementById('distanzaSlider')||{}).value || 100);
-      div.innerHTML = '<div class="no-results">'+rcTestata('un artigiano')+'<div id="rimando-mestiere"></div>' + bottoneAllarga(_dm) + formRichiestaClienteHTML() + '</div>';
+      div.innerHTML = '<div class="no-results">'+rcTestata('un artigiano')+bottoneAllarga(_dm)+formRichiestaClienteHTML()+'<div id="rimando-mestiere" style="margin-top:22px"></div>' + '</div>';
       if(window.RimandoMestiere)RimandoMestiere.monta('rimando-mestiere',mestiereScelto,(document.getElementById('cittaInput')||{}).value);
       document.getElementById('pagination').innerHTML = ''; return;
     }
