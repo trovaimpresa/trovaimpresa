@@ -1287,10 +1287,21 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 <style id="hero-ott10">/* 10 ott 2026: logo al centro in alto sulla striscia blu, grande, senza riquadro bianco (versione con la scritta bianca); i passi partono alla stessa altezza del titolo */
 @media(min-width:1100px){
 .hb-sx .hero-logo{display:none !important}
-.hb-logo-centro{display:block;width:560px;max-width:90%;height:auto;margin:0 auto 26px}
+.hb-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 8px}
+.hero-banda{padding-top:14px !important}
 .hb-grid{align-items:start !important}
 }
 @media(max-width:1099px){.hb-logo-centro{display:none}}
+</style>
+<style id="menu-b-ott10">/* 10 ott 2026: menu in alto regolare - una riga sotto il logo, scritte blu scuro grandi, tutte uguali (solo computer; il telefono non cambia) */
+@media(min-width:1100px){
+.br-tel{display:none}
+.navbar{flex-wrap:wrap !important;row-gap:0 !important;align-items:center !important;padding:10px 40px 0 !important;background:#fff !important}
+.navbar .nav-sinistra{flex:1 1 100%;display:flex;align-items:center;gap:20px;padding-bottom:4px}
+.navbar .nav-links{flex:1 1 100%;width:100% !important;display:flex !important;justify-content:space-between !important;gap:0 !important;flex-wrap:nowrap !important;border-top:3px solid #0a2a4d;margin-top:4px}
+.navbar .nav-a,.navbar .nav-a.nav-forum,.navbar .nav-a.nav-gest,.navbar .nav-a.nav-bandi,.navbar .nav-a.nav-guide,.navbar .nav-a.nav-pub{background:none !important;color:#0a2a4d !important;font-size:clamp(17px,1.1vw,21px) !important;font-weight:800 !important;padding:10px 4px !important;border-radius:0 !important;border-bottom:4px solid transparent;white-space:nowrap !important;font-family:'DM Sans',sans-serif}
+.navbar .nav-a:hover{border-bottom-color:#ff8800}
+}
 </style>
 </head>
 <body>
@@ -1337,8 +1348,8 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
           <a href="/gestionale" class="nav-a nav-gest">Gestionale</a>
           <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
           <a href="/blog.html" class="nav-a nav-guide">Guide e costi</a>
-          <a href="/offerte-lavoro.html" class="nav-a nav-2righe">Bacheca offerte<br>lavoro</a>
-          <a href="/candidature-lavoro.html" class="nav-a nav-2righe">Bacheca candidature<br>lavoro</a>
+          <a href="/offerte-lavoro.html" class="nav-a nav-2righe">Bacheca offerte <br class="br-tel">lavoro</a>
+          <a href="/candidature-lavoro.html" class="nav-a nav-2righe">Bacheca candidature <br class="br-tel">lavoro</a>
           <a href="/subappalto.html" class="nav-a">Subappalti</a>
           <a href="/prezzi.html" class="nav-a">Prezzi</a>
           <a href="/pubblicita.html" class="nav-a nav-pub">Pubblicit&agrave;</a>
