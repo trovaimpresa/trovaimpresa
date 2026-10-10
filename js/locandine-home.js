@@ -174,6 +174,7 @@
     // la colonna: ogni fascia piu' piccola di quella sopra (scala dolce),
     // e comunque mai piu' larga dello spazio libero di quella zona
     var l = document.querySelectorAll('.ti-loc-col');
+    var bordoComune = BORDO;
     var precedente = largaOk;
     var perPasso = {};
     for (var p = 1; p <= 5; p++) {
@@ -209,8 +210,21 @@
       // avvicina (min 6 px) cosi' la misura resta quella e non tocca il riquadro
       var lib = (larghezzaSchermo() - larghezzaRiquadro(sez)) / 2;
       var bordo = Math.max(BORDO_MIN, Math.min(BORDO, Math.floor(lib - L - DISTANZA_MIN)));
-      if (a.getAttribute('data-lato') === 'sx') { a.style.left = bordo + 'px'; a.style.right = 'auto'; }
-      else { a.style.right = bordo + 'px'; a.style.left = 'auto'; }
+      if (bordo < bordoComune) bordoComune = bordo;
+    }
+
+    // TUTTE alla stessa distanza dal bordo (la piu' stretta che serve), cosi'
+    // stanno sulla stessa colonna: la misura venduta non cambia mai
+    for (var j = 0; j < l.length; j++) {
+      var c = l[j];
+      if (c.style.display === 'none') continue;
+      if (c.getAttribute('data-lato') === 'sx') { c.style.left = bordoComune + 'px'; c.style.right = 'auto'; }
+      else { c.style.right = bordoComune + 'px'; c.style.left = 'auto'; }
+    }
+    if (!telefono && largaOk >= MINIMA) {
+      alto.forEach(function (o) {
+        o.a.style.setProperty(o.lato === 'sx' ? 'left' : 'right', bordoComune + 'px', 'important');
+      });
     }
   }
 })();
