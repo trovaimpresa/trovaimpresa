@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Iscrivi la tua attività — 3 mesi di Premium in regalo | TrovaImpresa</title>
-<meta name="description" content="Pubblica la tua attività su TrovaImpresa e ricevi le richieste di preventivo della tua zona. 3 mesi di Premium in regalo, senza carta di credito.">
+<title>Iscriviti gratis — sito, gestionale e forum gratuiti | TrovaImpresa</title>
+<meta name="description" content="Iscrizione, preventivi, gestionale base e forum: tutto gratis su TrovaImpresa. Nessuna carta di credito.">
 <link rel="canonical" href="https://trovaimpresa.com/iscriviti">
 <meta name="robots" content="noindex,follow">
-<meta property="og:title" content="Iscrivi la tua attività — 3 mesi di Premium in regalo">
-<meta property="og:description" content="I clienti della tua zona ti trovano qui. 3 mesi di Premium in regalo, senza carta di credito.">
+<meta property="og:title" content="Tutto gratis: sito, gestionale e forum">
+<meta property="og:description" content="I clienti della tua zona ti trovano qui. Nessuna carta di credito.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://trovaimpresa.com/iscriviti">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--blu:#0066ff;--nav:#0a2a4d;--ora:#ff8800}
@@ -18,7 +21,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
 .top{background:#fff;border-bottom:2px solid var(--nav)}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:130px}
-.top img{height:150px;margin:-10px 0}
+.top img{height:120px;margin:0}
 .top a.t{font-weight:800;color:var(--blu);text-decoration:none;font-size:1.05rem}
 .hero{background:linear-gradient(160deg,#0a2a4d,#0066ff);color:#fff;padding:64px 0 120px;text-align:center}
 .bol{display:inline-block;background:var(--ora);color:#fff;border-radius:999px;padding:10px 24px;font-weight:800;font-size:1.05rem;margin-bottom:22px}
@@ -50,48 +53,56 @@ h2{font-size:2.3rem;font-weight:900;text-align:center;margin:56px 0 26px;letter-
 .fin a{display:inline-block;background:var(--ora);color:#fff;text-decoration:none;font-weight:900;font-size:1.3rem;padding:18px 44px;border-radius:14px}
 .nota{text-align:center;color:#3d4b5f;font-size:1.05rem;margin-bottom:40px}
 footer{background:var(--nav);color:#c9d8ea;font-size:.9rem;text-align:center;padding:26px 20px;line-height:1.9}
-@media(max-width:900px){body{font-size:18px}.top .wrap{height:96px}.top img{height:110px;margin:-8px 0}h1{font-size:2.15rem}.hero{padding:40px 0 100px}.hero p{font-size:1.15rem}.sc{grid-template-columns:1fr;gap:14px}a.sc1{padding:20px 12px}.ic{width:64px;height:64px}.ic svg{width:34px;height:34px}a.sc1 strong{font-size:1.15rem}a.sc1 span.s{font-size:.9rem;min-height:0}.go{font-size:1rem;padding:12px}.pass{grid-template-columns:1fr}.cosa{grid-template-columns:1fr;padding:20px}h2{font-size:1.7rem}.fin{padding:30px 18px}.fin h3{font-size:1.5rem}.top a.t{display:none}}
-</style>
-  <meta property="og:image" content="https://trovaimpresa.com/logo.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+@media(max-width:900px){body{font-size:18px}.top .wrap{height:96px}.top img{height:84px;margin:0}h1{font-size:2.15rem}.hero{padding:40px 0 100px}.hero p{font-size:1.15rem}.sc{grid-template-columns:1fr;gap:14px}a.sc1{padding:20px 12px}.ic{width:64px;height:64px}.ic svg{width:34px;height:34px}a.sc1 strong{font-size:1.15rem}a.sc1 span.s{font-size:.9rem;min-height:0}.go{font-size:1rem;padding:12px}.pass{grid-template-columns:1fr}.cosa{grid-template-columns:1fr;padding:20px}h2{font-size:1.7rem}.fin{padding:30px 18px}.fin h3{font-size:1.5rem}.top a.t{display:none}}
+
+@keyframes luce{0%,100%{text-shadow:0 0 12px #ffd24a,0 0 28px #ff8800,0 0 48px #ff8800}50%{text-shadow:0 0 6px #ffd24a,0 0 14px #ff8800,0 0 24px #ff8800}}
+@keyframes colori{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes pulsa{0%,100%{box-shadow:0 0 0 0 rgba(255,136,0,.55)}50%{box-shadow:0 0 0 14px rgba(255,136,0,0)}}
+.glow{color:#ffd24a;animation:luce 2.2s ease-in-out infinite}
+.arc{background:linear-gradient(90deg,#e06a00,#ff8800,#ffb000,#ff8800,#e06a00);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:colori 4s linear infinite}
+.bol{animation:pulsa 2s infinite;font-size:1.25rem;letter-spacing:.5px}
+.gr{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:10px}
+.gr div{background:#fff;border:3px solid #ff8800;border-radius:20px;padding:26px 14px;text-align:center;box-shadow:0 0 26px rgba(255,136,0,.35)}
+.gr ul{list-style:none;margin-top:14px;text-align:left;display:inline-block}.gr li{font-size:1.15rem;font-weight:700;padding:5px 0 5px 30px;position:relative}.gr li::before{content:"✓";position:absolute;left:0;color:#0a7d3c;font-weight:900}.gr small{display:block;font-size:1.5rem;font-weight:800;color:#0a2a4d;margin-bottom:6px}
+.gr b{display:block;font-size:3rem;font-weight:900;letter-spacing:1px}
+.str{background:linear-gradient(160deg,#0a2a4d,#0b3d7a);color:#fff;border-radius:24px;padding:54px 40px;text-align:center;margin:56px 0 0;border:3px solid #0a2a4d}
+.str .p1{font-size:1.2rem;font-weight:800;color:#ffb27a;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.str .arc{background-image:linear-gradient(90deg,#ffb000,#ffd24a,#fff1b8,#ffd24a,#ffb000)}.str h3{font-size:3rem;line-height:1.1;font-weight:900;margin-bottom:16px}
+.str p{font-size:1.3rem;max-width:760px;margin:0 auto;opacity:.95}
+.str .pill{display:inline-block;margin-top:22px;background:#fff;color:#0a2a4d;font-weight:900;font-size:1.2rem;padding:12px 28px;border-radius:999px}
+@media(max-width:900px){.gr{grid-template-columns:1fr;gap:14px}.gr b{font-size:1.7rem}.gr small{font-size:.95rem}.str{padding:34px 18px}.str h3{font-size:1.9rem}.str p{font-size:1.1rem}}
+@media(prefers-reduced-motion:reduce){.glow,.arc,.bol{animation:none}}
+.hero .glow{color:#fff!important;background:#ff8800;padding:0 18px;border-radius:14px;text-shadow:none!important;display:inline-block;animation:pulsa2 2s infinite}@keyframes pulsa2{0%,100%{box-shadow:0 0 14px rgba(255,136,0,.6)}50%{box-shadow:0 0 40px rgba(255,136,0,.9)}}</style>
 </head>
 <body>
-
 <div class="top"><div class="wrap"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"><a class="t" href="/index.html">Vai al sito ›</a></div></div>
 <section class="hero"><div class="wrap">
-<div class="bol">Offerta di lancio · 3 mesi di Premium in regalo</div>
-<h1>I clienti della tua zona<br><em>ti trovano qui</em></h1>
-<p>Pubblica la tua attività e ricevi richieste di preventivo dal tuo territorio. Gratis, senza carta di credito.</p>
+<div class="bol">100% GRATIS · SENZA CARTA DI CREDITO</div>
+<h1>Tutto <span class="glow">GRATIS</span>:<br><em>sito, gestionale e forum</em></h1>
+<p>I clienti della tua zona ti trovano qui. Tu ti iscrivi, resti online e ricevi richieste senza pagare niente.</p>
 </div></section>
 <div class="wrap">
-<div class="sc" id="scelte">
-<a class="sc1" href="/registrazione-impresa.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg></span><strong>Impresa edile</strong><span class="s">Costruzioni, ristrutturazioni</span><span class="go">Iscriviti ›</span></a>
-<a class="sc1" href="/registrazione-artigiano.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><strong>Artigiano</strong><span class="s">Idraulico, elettricista, imbianchino…</span><span class="go">Iscriviti ›</span></a>
-<a class="sc1" href="/registrazione-professionista.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><strong>Professionista</strong><span class="s">Geometra, architetto, ingegnere…</span><span class="go">Iscriviti ›</span></a>
-
+<div class="sc" id="scelte"><a class="sc1" href="/registrazione-impresa.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg></span><strong>Impresa edile</strong><span class="s">Costruzioni, ristrutturazioni</span><span class="go">Iscriviti gratis ›</span></a><a class="sc1" href="/registrazione-artigiano.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><strong>Artigiano</strong><span class="s">Idraulico, elettricista, imbianchino…</span><span class="go">Iscriviti gratis ›</span></a><a class="sc1" href="/registrazione-professionista.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><strong>Professionista</strong><span class="s">Geometra, architetto, ingegnere…</span><span class="go">Iscriviti gratis ›</span></a></div>
+<h2><span class="arc">3 cose GRATIS</span>, ogni giorno</h2>
+<div class="gr">
+<div><small>Il sito</small><b class="arc">GRATIS</b><ul><li>Iscrizione</li><li>Restare online</li><li>Preventivi che ricevi</li></ul></div>
+<div><small>Il gestionale</small><b class="arc">GRATIS</b><ul><li>Gestionale base</li><li>Il tuo strumento di lavoro</li></ul></div>
+<div><small>Il forum</small><b class="arc">GRATIS</b><ul><li>Rispondi ai potenziali clienti</li><li>Trova nuovi lavori</li></ul></div>
 </div>
-<div class="garanzie"><span>Nessuna carta di credito</span><span>Nessun addebito automatico</span><span>Disdici quando vuoi</span></div>
+<div class="str"><div class="p1">Gestionale base gratis</div>
+<h3><span class="arc">Il tuo strumento di lavoro</span><br>che ti accompagna su ogni lavoro</h3>
+<p>Dal primo preventivo all'ultimo cantiere: tieni il tuo lavoro in ordine, da telefono e da computer.</p>
+<span class="pill">Lo trovi già dentro, appena ti iscrivi</span></div>
 <h2>Come funziona</h2>
 <div class="pass">
 <div><b>1</b><strong>Ti iscrivi in 2 minuti</strong><p>Scegli la tua attività e compili pochi dati.</p></div>
 <div><b>2</b><strong>Il tuo profilo va online</strong><p>Foto dei lavori, zona e contatti: i clienti ti vedono.</p></div>
 <div><b>3</b><strong>Ricevi le richieste</strong><p>I preventivi della tua zona arrivano direttamente per email.</p></div>
 </div>
-<h2>Cosa ricevi</h2>
-<ul class="cosa">
-<li>Il tuo profilo con le foto dei lavori già fatti</li>
-<li>Richieste di preventivo della tua zona, per email</li>
-<li>Il tuo nome su Google nella tua città</li>
-<li>Le recensioni dei clienti in un posto solo</li>
-<li>Con il Premium: preventivi, agenda e scadenze fiscali</li>
-<li>3 mesi di Premium in regalo</li>
-</ul>
-<div class="fin"><h3>Inizia ora: bastano due minuti</h3><p>Finiti i 3 mesi non ti addebitiamo niente: il profilo resta online sul piano Gratuito.</p><a href="#scelte">Scegli la tua attività ↑</a></div>
-<p class="nota">Vuoi prima vedere i prezzi? <a href="/prezzi.html" style="color:#0066ff;font-weight:800">Guarda i piani</a></p>
+<div class="fin"><h3>Inizia ora: è gratis e bastano due minuti</h3><p>Nessuna carta di credito, nessun addebito automatico.</p><a href="#scelte">Scegli la tua attività ↑</a></div>
+<p class="nota">Più avanti, se vuoi, c'è anche il gestionale con assistente AI: lo scegli tu, quando vuoi. <a href="/prezzi.html" style="color:#0066ff;font-weight:800">Guarda i piani</a></p>
 </div>
 <footer>© 2026 TrovaImpresa — Alessio Pinto — Via Dante Alighieri 5, 02100 Rieti (RI) — P.IVA 01285950570<br><a href="/privacy-policy.html" style="color:#a9c9f5;text-decoration:none">Privacy</a> · <a href="/cookie-policy.html" style="color:#a9c9f5;text-decoration:none">Cookie</a> · <a href="/termini-condizioni.html" style="color:#a9c9f5;text-decoration:none">Termini</a></footer>
-
 <script src="/cookie-banner.js" defer></script>
 </body>
 </html>
