@@ -33,6 +33,7 @@
   html body .fs-logo{display:block;width:268px;height:auto;flex:0 0 268px;margin:0}
   html body .fs-logo img{display:block;width:268px !important;height:auto !important;max-width:none !important}
   .fs-links a.acc{order:2;margin:0;font-size:21px;font-weight:800;padding:13px 26px;border-radius:12px;border:2px solid #0a2a4d;color:#0a2a4d;background:#fff}
+  .fs-links a.acc2{order:2}
   .fs-links a.acc:hover{background:#0a2a4d;color:#fff;text-decoration:none}
   .fs-links a.isc{display:none !important;order:3;margin:0;font-size:21px;font-weight:800;padding:15px 28px;border-radius:12px}
   .fs-cerca{order:4;margin-left:auto;max-width:300px}
@@ -41,13 +42,15 @@
   .fs-links a:not(.acc):not(.isc):hover,.fs-links a.on{border-bottom-color:#ff8800;text-decoration:none;color:#0a2a4d}
   .fs-nav .in{justify-content:flex-start}
   .fs-links a:not(.acc):not(.isc):first-of-type{margin-left:0}
+  html body .fs-strip{display:none !important}
   html body .fs-card{display:none !important}
   html body .fs-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 26px}
   .fs-hero .in{align-items:start}
   html body .fs-hero .in,html body .fs-sub .in{max-width:1300px}
 }
-html body .fs-links a.isc{background:#0a2a4d !important;border-color:#0a2a4d !important;color:#fff !important}
-html body .fs-links a.isc:hover{background:#07203b !important;border-color:#07203b !important;text-decoration:none}
+html body .fs-strip,html body .fs-links a.isc{display:none !important}
+html body .fs-links a.acc{border:2px solid #0a2a4d !important;color:#0a2a4d !important;background:#fff !important}
+html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;background-size:40px 40px !important}
 @media(max-width:1099px){.fs-logo-centro{display:none}}
 </style>
 </head>
@@ -67,7 +70,8 @@ html body .fs-links a.isc:hover{background:#07203b !important;border-color:#0720
     <a class="hide" href="/subappalto">Subappalti</a>
     <a class="hide" href="/prezzi">Prezzi</a>
     <a class="hide" href="/pubblicita">Pubblicit&agrave;</a>
-    <a class="acc" href="/login-impresa.html">Accedi imprese</a>
+    <a class="acc" href="/login-impresa.html">Accedi al sito TrovaImpresa</a>
+    <a class="acc acc2 hide" href="/login-impresa.html?redirect=gestionale">Accedi al gestionale</a>
     <a class="isc" href="/registrazione-impresa.html">Iscrivi la tua impresa</a>
   </nav>
 </div></div>
