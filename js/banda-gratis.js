@@ -68,5 +68,41 @@
     if (qui && qui.parentNode) qui.parentNode.insertBefore(sec, qui);
     else if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot);
     else document.body.appendChild(sec);
+
+    /* 10 ott 2026 — conta i clic sul pulsante della banda, per sapere da quale
+       pagina arrivano gli iscritti. Scrive in `visite_clienti` con tipo
+       'clic_banda' (stessa tabella dei clic delle guide, righe separate).
+       Niente cookie, niente IP. Non deve mai rompere ne' rallentare il clic. */
+    try {
+      var ua = (navigator && navigator.userAgent) || '';
+      if (!/bot|crawl|spider|slurp|preview|headless|lighthouse|pingdom|gtmetrix|semrush|ahrefs/i.test(ua) && !navigator.webdriver) {
+        sec.addEventListener('click', function (ev) {
+          try {
+            var a = ev.target && ev.target.closest ? ev.target.closest('a.bg-bt') : null;
+            if (!a) return;
+            var ses = null;
+            try { ses = sessionStorage.getItem('ti_visita'); } catch (e) {}
+            fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/visite_clienti', {
+              method: 'POST',
+              keepalive: true,
+              headers: {
+                'apikey': 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R',
+                'Authorization': 'Bearer sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R',
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({
+                tipo: 'clic_banda',
+                cosa: 'banda',
+                dove: 'registra',
+                pagina: String(location.pathname || '/').slice(0, 200),
+                sessione: ses ? String(ses).slice(0, 60) : null,
+                telefono: (window.innerWidth || 1024) < 768
+              })
+            })['catch'](function () {});
+          } catch (e) {}
+        }, true);
+      }
+    } catch (e) {}
   } catch (e) { /* mai rompere la pagina */ }
 })();

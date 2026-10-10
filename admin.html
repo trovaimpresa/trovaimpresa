@@ -3343,7 +3343,7 @@ function disegnaRicerche(){
         : '<div style="color:#5b6b80;font-size:15px">Nessuna ricerca a vuoto nel periodo scelto.</div>')
     + '</div></div>';
 
-  box.innerHTML = grafico + tre + _rvClicGuide(d) + rosso;
+  box.innerHTML = grafico + tre + _rvClicGuide(d) + _rvBanda(d) + rosso;
 }
 
 /* ============================================================
@@ -3358,6 +3358,35 @@ function disegnaRicerche(){
    I dati li scrive js/conta-clic-guide.js nella stessa tabella delle
    ricerche (tipo = 'clic_guida').
    ============================================================ */
+/* ============================================================
+   CLIC SULLA BANDA «TUTTO GRATIS» — 10 ottobre 2026
+   La banda blu in fondo (o a meta') alle guide e alla home, scritta da
+   js/banda-gratis.js. Ogni clic sul pulsante «Iscriviti gratis» scrive una
+   riga (tipo = 'clic_banda') e qui si vede da QUALE PAGINA e' partito.
+   ============================================================ */
+function _rvBanda(d){
+  const tot = Number(d.banda_totale) || 0;
+  const pagine = d.banda_pagine || [];
+  const da = d.banda_da
+    ? 'Si contano dal <b>' + new Date(d.banda_da).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) + '</b>.'
+    : 'Il contatore \u00e8 appena stato acceso: i numeri compaiono appena qualcuno preme il pulsante.';
+  if(!tot){
+    return '<div class="mv-card" style="margin-bottom:22px;border-left:9px solid #ff8800">'
+      + '<div style="font-size:18px;font-weight:800;margin-bottom:4px">Clic sulla banda \u00abTutto GRATIS\u00bb</div>'
+      + '<div style="color:#5b6b80;font-size:15px">Ancora nessun clic. ' + da + '</div></div>';
+  }
+  const elenco = pagine.map(r => '<div style="display:flex;justify-content:space-between;gap:10px">'
+      + '<span class="k">' + _uEsc(r.pagina) + '</span>'
+      + '<span class="v">' + _rvNum(r.n) + '</span></div>').join('');
+  return '<div class="mv-card" style="margin-bottom:22px;border-left:9px solid #ff8800">'
+    + '<div style="font-size:18px;font-weight:800;margin-bottom:4px">Clic sulla banda \u00abTutto GRATIS\u00bb</div>'
+    + '<div style="color:#5b6b80;font-size:15px;margin-bottom:14px">Chi preme \u00abIscriviti gratis\u00bb nella banda. ' + da + '</div>'
+    + '<div style="font-size:34px;font-weight:900;color:#c25f00;margin-bottom:14px">' + _rvNum(tot) + ' <span style="font-size:16px;font-weight:700;color:#5b6b80">clic</span></div>'
+    + '<div style="font-weight:800;margin:6px 0 10px">Le pagine che portano pi\u00f9 clic</div>'
+    + '<div class="u-det" style="grid-template-columns:1fr">' + elenco + '</div>'
+    + '</div>';
+}
+
 const _RV_PUNTI = {
   cima:  { nome: 'In cima alla guida',  spiega: 'I due riquadri sotto il titolo' },
   meta:  { nome: 'A met\u00e0 pagina',     spiega: 'La striscia arancione in mezzo al testo' },
