@@ -57,6 +57,7 @@
       bar.innerHTML = h;
       if (!forum) el.style.setProperty('display', 'none', 'important');
       document.body.insertBefore(bar, document.body.firstChild);
+      setTimeout(function () { try { var r = bar.getBoundingClientRect(); if (r.left > 1 || r.width < window.innerWidth - 4) { bar.style.setProperty('margin-left', (-r.left) + 'px', 'important'); bar.style.setProperty('width', document.documentElement.clientWidth + 'px', 'important'); bar.style.setProperty('max-width', 'none', 'important'); } } catch (e) {} }, 50);
       var pb = bar.querySelector('.tbm-pren');
       if (pb) pb.addEventListener('click', function (e) { e.preventDefault(); bar.classList.remove('open'); pren.click(); });
       bar.querySelector('.tbm-mn').addEventListener('click', function () {
