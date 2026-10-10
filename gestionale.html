@@ -503,19 +503,31 @@
 @media(min-width:1100px){.navbar{padding-left:max(26px,calc((100% - 1140px)/2 + 24px)) !important;padding-right:max(26px,calc((100% - 1140px)/2 + 24px)) !important}.pb-w{max-width:1009px;padding:0 21px}}
 @media(min-width:1500px){.pb-w{max-width:991px;padding:0 21px}}</style>
 <style id="gest-ott10">
-/* 10 ott 2026: barra in alto e logo come nel sito (menu B). Solo computer: il telefono non cambia. */
+/* 10 ott 2026: barra e logo UGUALI alla home (stessa misura). Solo computer: il telefono non cambia. */
 @media(min-width:1100px){
-  .navbar{flex-wrap:wrap;justify-content:flex-start;align-items:center;column-gap:14px;row-gap:0;padding-top:10px !important;padding-bottom:0 !important}
+  /* la pagina e' ingrandita (zoom 1.15 / 1.3): qui lo annullo, cosi' la barra ha le stesse misure della home */
+  html body .navbar{zoom:.8696}
+  html body .hg-logo-centro{width:330px !important}
+}
+@media(min-width:1500px){
+  html body .navbar{zoom:.7692}
+  html body .hg-logo-centro{width:292px !important}
+}
+@media(min-width:1100px){
+  html body .navbar{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;column-gap:22px;row-gap:0;max-width:none;width:auto;margin:0;padding:10px 40px 0 !important;background:#fff}
   .navbar .menu{display:contents}
-  .navbar .logo{order:1;margin-right:14px}
+  .navbar .logo{order:1;margin:0}
+  html body .navbar .logo{display:block;width:268px;height:130px;flex:0 0 268px;margin:0}
+  html body .navbar .logo img{display:block;width:268px !important;height:130px !important;max-width:none !important;object-fit:contain;object-position:left center}
   .navbar .menu a.btn-accedi{order:2;font-size:21px;font-weight:800;padding:13px 26px;border-radius:12px;border:2px solid #0a2a4d;background:#fff;color:#0a2a4d}
-  .navbar .menu a.btn-accedi:hover{background:#0a2a4d;color:#fff}
   .navbar .menu a.btn-accedi::before{display:none}
-  .navbar::after{content:"";order:3;flex:0 0 100%;height:0;border-top:3px solid #0a2a4d;margin-top:10px}
-  .navbar .menu a:not(.btn-accedi){order:4;flex:1 1 auto;text-align:center;padding:12px 4px;font-size:clamp(17px,1.1vw,21px);font-weight:800;color:#0a2a4d;border-bottom:3px solid transparent}
-  .navbar .menu a:not(.btn-accedi):hover{border-bottom-color:#ff8800}
+  .navbar .menu a.btn-accedi:hover{background:#0a2a4d;color:#fff}
+  .navbar::after{content:"";order:3;flex:0 0 100%;height:0;border-top:3px solid #0a2a4d;margin-top:4px}
+  .navbar .menu a.nav-std{order:4;display:block;flex:1 1 auto;text-align:center;padding:10px 2px;font-size:clamp(16px,1.05vw,21px);font-weight:800;color:#0a2a4d;background:none;border-radius:0;border-bottom:4px solid transparent;white-space:nowrap}
+  .navbar .menu a.nav-std:hover{border-bottom-color:#ff8800}
   .hero-logo{display:none !important}
-  .hg-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 22px}
+  html body .hg-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 22px}
+  html body .hero .wrap{max-width:1300px}
 }
 @media(max-width:1099px){.hg-logo-centro{display:none}}
 </style>
@@ -542,11 +554,15 @@
   <!-- ⚠️ il logo resta su /gestionale: e' la home DI QUESTO prodotto -->
   <a href="/gestionale" class="logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></a>
   <div class="menu">
-    <a href="#cosa-fa" class="solo-grande">Cosa fa</a>
-    <a href="#prezzi">Quanto costa</a>
-    <!-- ⚠️ il link al marketplace resta, ma adesso dice dove porta: prima
-         c'era scritto «Home» e uno ci finiva dentro senza capire. -->
-    <a href="/" class="solo-grande">Visita il sito TrovaImpresa</a>
+    <a href="/forum" class="solo-grande nav-std">Forum</a>
+    <a href="/gestionale" class="solo-grande nav-std">Gestionale</a>
+    <a href="/bandi" class="solo-grande nav-std">Bandi e fondi</a>
+    <a href="/blog" class="solo-grande nav-std">Guide e costi</a>
+    <a href="/offerte-lavoro" class="solo-grande nav-std">Bacheca offerte lavoro</a>
+    <a href="/candidature-lavoro" class="solo-grande nav-std">Bacheca candidature lavoro</a>
+    <a href="/subappalto" class="solo-grande nav-std">Subappalti</a>
+    <a href="/prezzi" class="solo-grande nav-std">Prezzi</a>
+    <a href="/pubblicita" class="solo-grande nav-std">Pubblicit&agrave;</a>
     <!-- ⚠️ questo porta al pannello del MARKETPLACE (la vetrina), non qui. -->
     <a href="/login-impresa" class="btn-accedi btn-accedi-sito solo-grande">Accedi al sito TrovaImpresa</a>
     <!-- ⚠️ `?redirect=gestionale` lo legge login-impresa.html dal 15 set

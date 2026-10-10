@@ -20,24 +20,34 @@
 <style>@media(min-width:1100px){html body .fs-card,html body .pb-logo{zoom:.8}}</style>
 <style>/* 5 ott 2026: banner A a destra del titolo, come nella home */.pb-ill-f{max-width:560px;justify-self:center;width:100%}</style>
 <style id="forum-ott10">
-/* 10 ott 2026: barra in alto e logo come nel sito (menu B). Solo computer: il telefono non cambia. */
+/* 10 ott 2026: barra e logo UGUALI alla home. Solo computer: il telefono non cambia. */
 @media(min-width:1100px){
-  .fs-nav .in{flex-wrap:wrap;column-gap:14px;row-gap:0;padding-top:10px;padding-bottom:0}
-  .fs-links{display:contents}
-  .fs-logo{order:1;margin-right:6px}
-  .fs-cerca{order:2;max-width:300px}
-  .fs-links a.acc{order:3;margin-left:auto;font-size:21px;font-weight:800;padding:13px 26px;border-radius:12px;border:2px solid #0a2a4d;color:#0a2a4d;background:#fff}
-  .fs-links a.acc:hover{background:#0a2a4d;color:#fff;text-decoration:none}
-  .fs-links a.isc{order:4;margin-left:0;font-size:21px;font-weight:800;padding:15px 28px;border-radius:12px}
-  .fs-nav .in::after{content:"";order:5;flex:0 0 100%;height:0;border-top:3px solid #0a2a4d;margin-top:10px}
-  .fs-links a:not(.acc):not(.isc){order:6;flex:1 1 auto;text-align:center;padding:12px 4px;font-size:clamp(17px,1.1vw,21px);font-weight:800;color:#0a2a4d;background:none !important;border-radius:0;border-bottom:3px solid transparent}
-  .fs-links a:not(.acc):not(.isc):hover,.fs-links a.on{border-bottom-color:#ff8800;text-decoration:none;color:#0a2a4d}
-  html body .fs-card{display:none !important}
-  .fs-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 26px}
-  .fs-hero .in{align-items:start}
+  /* la pagina e' ingrandita (zoom 1.25): lo annullo, cosi' la barra ha le stesse misure della home */
+  html body .fs-nav{zoom:.8}
+  html body .fs-logo-centro{width:304px !important}
 }
-html body .fs-links a.isc{background:#ff8800 !important;border-color:#ff8800 !important;color:#0a2a4d !important}
-html body .fs-links a.isc:hover{background:#e07a00 !important;text-decoration:none}
+@media(min-width:1100px){
+  html body .fs-nav .in{display:flex;flex-wrap:wrap;align-items:center;column-gap:22px;row-gap:0;max-width:none;padding:10px 40px 0}
+  .fs-links{display:contents}
+  .fs-logo{order:1;margin:0}
+  html body .fs-logo{display:block;width:268px;height:130px;flex:0 0 268px;margin:0}
+  html body .fs-logo img{display:block;width:268px !important;height:130px !important;max-width:none !important;object-fit:contain;object-position:left center}
+  .fs-links a.acc{order:2;margin:0;font-size:21px;font-weight:800;padding:13px 26px;border-radius:12px;border:2px solid #0a2a4d;color:#0a2a4d;background:#fff}
+  .fs-links a.acc:hover{background:#0a2a4d;color:#fff;text-decoration:none}
+  .fs-links a.isc{display:none !important;order:3;margin:0;font-size:21px;font-weight:800;padding:15px 28px;border-radius:12px}
+  .fs-cerca{order:4;margin-left:auto;max-width:300px}
+  .fs-nav .in::after{content:"";order:5;flex:0 0 100%;height:0;border-top:3px solid #0a2a4d;margin-top:4px}
+  .fs-links a:not(.acc):not(.isc){order:6;flex:1 1 auto;text-align:center;display:block;padding:10px 2px;font-size:clamp(16px,1.05vw,21px);font-weight:800;color:#0a2a4d;background:none !important;border-radius:0;border-bottom:4px solid transparent;white-space:nowrap}
+  .fs-links a:not(.acc):not(.isc):hover,.fs-links a.on{border-bottom-color:#ff8800;text-decoration:none;color:#0a2a4d}
+  .fs-nav .in{justify-content:flex-start}
+  .fs-links a:not(.acc):not(.isc):first-of-type{margin-left:0}
+  html body .fs-card{display:none !important}
+  html body .fs-logo-centro{display:block;width:380px;max-width:90%;height:auto;margin:0 auto 26px}
+  .fs-hero .in{align-items:start}
+  html body .fs-hero .in,html body .fs-sub .in{max-width:1300px}
+}
+html body .fs-links a.isc{background:#0a2a4d !important;border-color:#0a2a4d !important;color:#fff !important}
+html body .fs-links a.isc:hover{background:#07203b !important;border-color:#07203b !important;text-decoration:none}
 @media(max-width:1099px){.fs-logo-centro{display:none}}
 </style>
 </head>
@@ -48,12 +58,15 @@ html body .fs-links a.isc:hover{background:#e07a00 !important;text-decoration:no
   <a class="fs-logo" href="/forum"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></a>
   <form class="fs-cerca" action="/forum" method="get" role="search"><input type="search" name="q" maxlength="60" placeholder="Cerca nel forum…" aria-label="Cerca una richiesta nel forum"></form>
   <nav class="fs-links">
-    <a class="on" href="/forum">Forum</a>
-    <a class="g hide" href="/gestionale">Gestionale</a>
-    <a class="b hide" href="/bandi.html">Bandi e fondi</a>
-    <a class="u hide" href="/blog.html">Guide e costi</a>
-    <a class="hide" href="/subappalto.html">Subappalti</a>
-    <a class="hide" href="/prezzi.html">Prezzi</a>
+    <a class="on hide" href="/forum">Forum</a>
+    <a class="hide" href="/gestionale">Gestionale</a>
+    <a class="hide" href="/bandi">Bandi e fondi</a>
+    <a class="hide" href="/blog">Guide e costi</a>
+    <a class="hide" href="/offerte-lavoro">Bacheca offerte lavoro</a>
+    <a class="hide" href="/candidature-lavoro">Bacheca candidature lavoro</a>
+    <a class="hide" href="/subappalto">Subappalti</a>
+    <a class="hide" href="/prezzi">Prezzi</a>
+    <a class="hide" href="/pubblicita">Pubblicit&agrave;</a>
     <a class="acc" href="/login-impresa.html">Accedi imprese</a>
     <a class="isc" href="/registrazione-impresa.html">Iscrivi la tua impresa</a>
   </nav>
