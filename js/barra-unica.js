@@ -13,8 +13,23 @@
       ['/prezzi', 'Prezzi'], ['/pubblicita', 'Pubblicità']
     ];
 
-
     /* ---------- TELEFONO (<1100px): barra uguale su tutte le pagine ---------- */
+
+    var SERVIZIO = /^\/(attiva-profilo|cancella-iscrizione|conferma|conferma-recensione|conferma-richiesta|elimina-profilo|galleria-video|grazie-sondaggio|grazie|iscriviti|modifica-profilo|niente-email|scelte|guida-codice-sdi)$/;
+    function paginaServizio(path) {
+      if (!SERVIZIO.test(path)) return null;
+      var fc = document.body.firstElementChild;
+      while (fc && /^(SCRIPT|STYLE|LINK|NOSCRIPT)$/.test(fc.tagName)) fc = fc.nextElementSibling;
+      if (fc && (/^(NAV|HEADER)$/.test(fc.tagName) || /(^|\s)(top|testa|logobar|barra)(\s|$)/.test(fc.className || ''))) return fc;
+      var d = document.createElement('div');
+      document.body.insertBefore(d, document.body.firstChild);
+      d.setAttribute('data-tb-nuovo', '1');
+      return d;
+    }
+    function pienaLarghezza(bar) {
+      setTimeout(function () { try { var r = bar.getBoundingClientRect(); if (r.left > 1 || r.width < document.documentElement.clientWidth - 4) { bar.style.setProperty('margin-left', (-r.left) + 'px', 'important'); bar.style.setProperty('width', document.documentElement.clientWidth + 'px', 'important'); bar.style.setProperty('max-width', 'none', 'important'); } } catch (e) {} }, 50);
+    }
+
     var CSSM = '' +
       '.tbm{width:100%;align-self:stretch;flex:0 0 auto;position:sticky;top:0;z-index:99990;background:#fff;font-family:"DM Sans",sans-serif;box-shadow:0 2px 8px rgba(10,42,77,.12)}' +
       '.tbm *{box-sizing:border-box}' +
@@ -35,6 +50,7 @@
       if (document.querySelector('.tbm')) return;
       var forum = document.querySelector('.fs-nav');
       var el = forum || pagina();
+      if (!el) el = paginaServizio(location.pathname.replace(/\.html$/, ''));
       if (!el) { var fc = document.body.firstElementChild; if (fc && /(^|\s)(logo|logobar|barra)(\s|$)/.test(fc.className || '')) el = fc; }
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
@@ -55,8 +71,10 @@
       var bar = document.createElement('div');
       bar.className = 'tbm';
       bar.innerHTML = h;
-      if (!forum) el.style.setProperty('display', 'none', 'important');
+      var nuovoT = !!el.getAttribute('data-tb-nuovo');
+      if (!forum) { if (el.getAttribute('data-tb-nuovo')) el.remove(); else el.style.setProperty('display', 'none', 'important'); }
       document.body.insertBefore(bar, document.body.firstChild);
+      if (nuovoT) { bar.style.cssText += ';position:absolute !important;left:0;top:0;width:100% !important;margin:0 !important'; document.body.style.setProperty('padding-top', (bar.offsetHeight + (parseFloat(getComputedStyle(document.body).paddingTop) || 0)) + 'px', 'important'); }
       setTimeout(function () { try { var r = bar.getBoundingClientRect(); if (r.left > 1 || r.width < window.innerWidth - 4) { bar.style.setProperty('margin-left', (-r.left) + 'px', 'important'); bar.style.setProperty('width', document.documentElement.clientWidth + 'px', 'important'); bar.style.setProperty('max-width', 'none', 'important'); } } catch (e) {} }, 50);
       var pb = bar.querySelector('.tbm-pren');
       if (pb) pb.addEventListener('click', function (e) { e.preventDefault(); bar.classList.remove('open'); pren.click(); });
@@ -75,6 +93,7 @@
 
     var CSS = '' +
       '.tb-bar{display:block !important;position:static !important;float:none !important;width:auto !important;max-width:none !important;height:auto !important;min-height:0 !important;margin:0 !important;padding:10px 40px 0 !important;background:#fff !important;border:0 !important;box-shadow:none !important;text-align:left !important;font-family:"DM Sans",sans-serif !important}' +
+      '.tb-bar.tb-abs{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;box-sizing:border-box !important}' +
       '.tb-bar .tb-top{display:flex;align-items:center;gap:22px}' +
       '.tb-bar .tb-logo{display:block;width:268px;flex:0 0 268px;margin:0;padding:0}' +
       '.tb-bar .tb-logo img{display:block;width:268px;height:auto;max-width:none;margin:0}' +
@@ -96,13 +115,29 @@
       return null;
     }
 
+    /* Pagine senza una vera barra (login, registrazioni, landing «per-...», convenzioni): la prima fascia in alto diventa la barra uguale */
+    function extra() {
+      var f = document.body && document.body.firstElementChild;
+      if (!f) return null;
+      if (f.matches('.top,.logobar,.barra')) return f;
+      if (f.tagName === 'HEADER' && f.querySelector('a[href="/"]')) return f;
+      if (f.matches('.logo') && /login-/.test(location.pathname)) {
+        var d = document.createElement('div');
+        f.parentNode.replaceChild(d, f);
+        d.setAttribute('data-abs', '1');
+        return d;
+      }
+      return null;
+    }
+
     function costruisci() {
-      if (document.querySelector('.tb-bar,.nav-std,#nav-links,.fs-nav,#nav-prenota')) return;
-      var el = pagina();
-      if (!el) return;
+      if (document.querySelector('.tb-bar,.nav-std,#nav-links,.fs-nav')) return;
       var path = location.pathname.replace(/\.html$/, '');
+      var el = pagina() || extra() || paginaServizio(path);
+      if (!el) return;
+      if (el.getAttribute('data-tb-nuovo')) el.setAttribute('data-abs', '1');
       var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>' +
-        '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/login-impresa?redirect=gestionale">Accedi al gestionale</a><a class="tb-btn" href="/login-impresa">Accedi al forum</a></div><div class="tb-links">';
+        '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/gestionale">Accedi al gestionale</a><a class="tb-btn" href="/forum">Accedi al forum</a></div><div class="tb-links">';
       LINKS.forEach(function (l) {
         h += '<a href="' + l[0] + '"' + (path === l[0] ? ' class="on"' : '') + '>' + l[1] + '</a>';
       });
@@ -111,8 +146,14 @@
       st.textContent = '@media(min-width:1100px){' + CSS + '}';
       document.head.appendChild(st);
       el.className = 'tb-bar';
+      var nuovo = el.getAttribute('data-tb-nuovo'); if (el.getAttribute('data-abs')) { el.className = 'tb-bar tb-abs'; if (!nuovo) document.body.style.paddingTop = '230px'; }
       el.removeAttribute('style');
+      var bs = getComputedStyle(document.body), pl = parseFloat(bs.paddingLeft) || 0, pt = parseFloat(bs.paddingTop) || 0;
+      if (pl > 0 && !el.getAttribute('data-abs')) el.style.setProperty('margin', '-' + pt + 'px -' + pl + 'px 0', 'important');
+      var pre = document.getElementById('nav-prenota'); /* Pubblicita': il bottone «Prenota uno spazio» ha una sua funzione, lo sposto nella barra nuova senza toccarlo */
       el.innerHTML = h;
+      if (nuovo) { document.body.style.setProperty('padding-top', (el.offsetHeight + (parseFloat(getComputedStyle(document.body).paddingTop) || 0)) + 'px', 'important'); }
+      if (pre) { pre.className = 'tb-btn'; pre.removeAttribute('style'); el.querySelector('.tb-top').appendChild(pre); }
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', costruisci);
