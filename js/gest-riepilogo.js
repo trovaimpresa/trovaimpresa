@@ -105,10 +105,14 @@
     },600);
   }
   let _fabFatto=false;
-  function rieFabAI(){
+  function rieFabAI(n){
     if(_fabFatto)return;
-    if(!(window.AI&&window.AI.stato&&window.AI.stato.has_ai)){
-      if((rieFabAI._n=(rieFabAI._n||0)+1)<8)setTimeout(rieFabAI,2000);
+    n=(typeof n==="number")?n:0;
+    /* c'è se l'AI è nel piano (has_ai) OPPURE se nel menu c'è già la Chat con AI */
+    const _haChat=!!document.querySelector('nav.tabs button[data-tab="chat"]');
+    const _haAI=!!(window.AI&&window.AI.stato&&window.AI.stato.has_ai);
+    if(!_haChat&&!_haAI){
+      if(n<90)setTimeout(function(){rieFabAI(n+1);},2000);   /* riprova per 3 minuti */
       return;
     }
     _fabFatto=true;
@@ -141,7 +145,7 @@
   }
 
   async function renderRiepilogo(){
-    try{ rieFabAI(); }catch(e){}
+    try{ rieFabAI(); }catch(e){ console.warn("[fab AI]",e); }
     const G=$("#rie-grid");if(!G)return;
     if($("#rie-alert"))$("#rie-alert").innerHTML="";
     if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
