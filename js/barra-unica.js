@@ -16,7 +16,7 @@
 
     /* ---------- TELEFONO (<1100px): barra uguale su tutte le pagine ---------- */
     var CSSM = '' +
-      '.tbm{position:sticky;top:0;z-index:99990;background:#fff;font-family:"DM Sans",sans-serif;box-shadow:0 2px 8px rgba(10,42,77,.12)}' +
+      '.tbm{width:100%;align-self:stretch;flex:0 0 auto;position:sticky;top:0;z-index:99990;background:#fff;font-family:"DM Sans",sans-serif;box-shadow:0 2px 8px rgba(10,42,77,.12)}' +
       '.tbm *{box-sizing:border-box}' +
       '.tbm-top{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:3px solid #0a2a4d;background:#fff}' +
       '.tbm-logo{display:block;line-height:0}.tbm-logo img{display:block;width:150px;height:auto}' +
@@ -32,9 +32,10 @@
       'html body .feature-icon{background:#e7eef8 !important}html body .feature-icon svg{stroke:#0a2a4d !important}';
 
     function telefono() {
-      if (document.querySelector('.tbm,#nav-prenota')) return;
+      if (document.querySelector('.tbm')) return;
       var forum = document.querySelector('.fs-nav');
       var el = forum || pagina();
+      if (!el) { var fc = document.body.firstElementChild; if (fc && /(^|\s)(logo|logobar|barra)(\s|$)/.test(fc.className || '')) el = fc; }
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
       var logo = /^\/gestionale/.test(path) ? '/img/trovaimpresa-gestionale-logo.svg' : (/^\/forum/.test(path) ? '/img/trovaimpresa-forum-edilizia-logo.svg' : '/img/trovaimpresa-logo.svg');
@@ -44,6 +45,8 @@
         '<a class="tbm-btn" href="' + (/^\/gestionale/.test(path) ? '/login-impresa?redirect=gestionale' : '/gestionale') + '">Accedi al gestionale</a>' +
         '<a class="tbm-btn" href="' + (/^\/forum/.test(path) ? '/login-impresa?redirect=forum' : '/forum') + '">Accedi al forum</a>';
       LINKS.forEach(function (l) { h += '<a class="tbm-l' + (path === l[0] ? ' on' : '') + '" href="' + l[0] + '">' + l[1] + '</a>'; });
+      var pren = document.querySelector('#nav-prenota');
+      if (pren) h = h.replace('<a class="tbm-btn" href="/">', '<a class="tbm-btn tbm-pren" href="#">' + (pren.textContent || 'Prenota').trim() + '</a><a class="tbm-btn" href="/">');
       h += '</div>';
       var st = document.createElement('style');
       st.textContent = '@media(max-width:1099px){' + CSSM +
@@ -54,6 +57,8 @@
       bar.innerHTML = h;
       if (!forum) el.style.setProperty('display', 'none', 'important');
       document.body.insertBefore(bar, document.body.firstChild);
+      var pb = bar.querySelector('.tbm-pren');
+      if (pb) pb.addEventListener('click', function (e) { e.preventDefault(); bar.classList.remove('open'); pren.click(); });
       bar.querySelector('.tbm-mn').addEventListener('click', function () {
         var o = bar.classList.toggle('open');
         this.setAttribute('aria-expanded', o ? 'true' : 'false');
