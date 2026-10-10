@@ -115,6 +115,8 @@
 
     .loading, .no-results { text-align: center; padding: 50px; color: #111; background: white; border-radius: 14px; font-size: 18px; }
     .no-results h3 { font-size: 20px; color: #111; margin-bottom: 10px; }
+    .no-results { padding: 28px 18px; }
+    #richiesta-cliente-box { text-align: left; }
 
   /* pulsante "Filtri" (solo telefono) e barra di chiusura del pannello */
   .filtri-btn{display:none;align-items:center;gap:8px;background:#fff;border:1.5px solid #0066ff;
@@ -336,6 +338,29 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   function selectMestiere(el){mestiereScelto=el.value;aggiornaStatus();}
   function aggiornaStatus(){const m=mestiereScelto==='tutti'?'🏗️ Tutte le specializzazioni':mestiereScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${m}</strong>${c}`;}
   function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
+  /* 10 ott 2026 — LA SCHERMATA «ZERO RISULTATI»
+     Su 51 ricerche dei clienti in 30 giorni, 31 sono finite a zero (Modena, Genova,
+     Bari, Cosenza, Udine...). Prima: faccina triste, «prova a cambiare», due
+     pulsanti, poi 4 caselle. Risultato: 1 richiesta a settembre, 0 a ottobre.
+     Adesso il titolo dice la cosa vera con la citta' scritta, e il modulo e'
+     subito li': nome, telefono, un clic. Il consenso resta, e il server lo
+     controlla lo stesso. */
+  function rcTestata(chi){
+    var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+    var citta=((document.getElementById('cittaInput')||{}).value||'').trim();
+    var regione=((document.getElementById('regioneSelect')||{}).value||'').trim();
+    var dove=citta||regione;
+    var cosa=(typeof mestiereScelto !== 'undefined' && mestiereScelto !== 'tutti') ? mestiereScelto : '';
+    var titolo=dove?('A '+esc(dove)+' non c&rsquo;&egrave; ancora '+chi+' iscritto'):('Non c&rsquo;&egrave; ancora '+chi+' iscritto in questa zona');
+    if(chi==="un'impresa")titolo=titolo.replace('iscritto','iscritta');
+    var chips='';
+    if(cosa)chips+='<span style="display:inline-block;background:#eaf1ff;color:#0049b8;border-radius:99px;padding:7px 14px;font-weight:700;font-size:15px;margin:4px 4px 0">&#128295; '+esc(cosa)+'</span>';
+    if(dove)chips+='<span style="display:inline-block;background:#eaf1ff;color:#0049b8;border-radius:99px;padding:7px 14px;font-weight:700;font-size:15px;margin:4px 4px 0">&#128205; '+esc(dove)+'</span>';
+    return '<h3 style="font-size:24px;line-height:1.25">'+titolo+'</h3>'
+      +'<p style="font-size:17px;margin:8px 0 0">Lascia il numero: <b>appena ne arriva una in zona ti chiama lei.</b> Gratis, nessun impegno.</p>'
+      +(chips?'<div style="margin-top:6px">'+chips+'</div>':'');
+  }
+
   let rcInvioInCorso = false;
   function formRichiestaClienteHTML() {
     rcInvioInCorso = false;
@@ -348,19 +373,10 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
          iscriversi» stava li' e nessuno lo leggeva.
          Adesso non c'e' piu' niente da leggere: si sceglie, e chi si propone
          finisce sulla registrazione gratuita invece che in un cassetto. */
-      + '<div id="rc-bivio" style="margin-bottom:16px">'
-      +   '<p style="font-size:15px;color:#333;font-weight:700;margin-bottom:12px">Non hai trovato quello che cercavi?</p>'
-      +   '<div style="display:grid;gap:10px">'
-      +     '<button type="button" onclick="rcMostraModulo()" style="width:100%;padding:15px;border:2px solid #0066ff;background:#0066ff;color:#fff;border-radius:12px;font-family:inherit;font-size:15.5px;font-weight:700;cursor:pointer;text-align:left">🔍 Cerco un\'impresa edile<br><span style="font-weight:500;font-size:13.5px;opacity:.9">Lascio la richiesta, mi chiamano loro</span></button>'
-      +     '<a href="registrazione-impresa.html" style="display:block;padding:15px;border:2px solid #e8733a;background:#fff;color:#c45e28;border-radius:12px;font-size:15.5px;font-weight:700;text-decoration:none;text-align:left">🔧 Offro io questo servizio<br><span style="font-weight:500;font-size:13.5px;color:#7a5a10">Mi iscrivo gratis a TrovaImpresa</span></a>'
-      +   '</div>'
-      + '</div>'
-      + '<div id="rc-modulo" style="display:none">'
-      + '<p style="font-size:14px;color:#555;margin-bottom:12px">Non hai trovato quello che cercavi? Lasciaci la tua richiesta: ti mettiamo in contatto appena arriva un\'attività nella tua zona</p>'
+      + '<div id="rc-modulo">'
       + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px">'
       + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
-      + '<input type="email" id="rc-email" placeholder="La tua email (facoltativa, per ricevere risposta)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
-      + '<textarea id="rc-cerca" required placeholder="Cosa cerchi? Descrivi il lavoro *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;min-height:70px;resize:vertical;font-family:inherit"></textarea>'
+      + '<textarea id="rc-cerca" placeholder="Vuoi aggiungere qualcosa? (facoltativo)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;min-height:56px;resize:vertical;font-family:inherit"></textarea>'
       /* ===== 16 agosto 2026 — IL CONSENSO, SCRITTO E SPUNTATO =====
          Prima qui c'era una riga a 11 px in grigio chiaro, sotto il pulsante,
          che diceva solo "puo' essere inoltrata alle imprese della tua zona":
@@ -375,9 +391,10 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       +   '<span id="rc-cons-testo" style="font-size:13px;line-height:1.55;color:#42546b">Ho letto la <a href="/privacy-policy.html" target="_blank" rel="noopener" style="color:#0066ff;font-weight:700">privacy policy</a> e accetto che la mia richiesta venga mandata a un massimo di 5 attivit&agrave; iscritte della mia zona, e che il mio nome, il mio telefono e la mia email vengano dati solo a quelle che chiederanno di contattarmi.</span>'
       + '</label>'
       + '<p id="rc-cons-err" style="display:none;font-size:13px;color:#c0392b;font-weight:700;margin:0 0 10px">Metti la spunta qui sopra per poter mandare la richiesta.</p>'
-      + '<button id="rc-btn" onclick="inviaRichiestaCliente()" style="background:#0066ff;color:white;border:none;border-radius:8px;padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer">Invia richiesta</button>'
+      + '<button id="rc-btn" onclick="inviaRichiestaCliente()" style="width:100%;background:#0066ff;color:white;border:none;border-radius:12px;padding:17px 24px;font-size:18px;font-weight:800;font-family:inherit;cursor:pointer">Fatti chiamare</button>'
       + '<p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.5">Le attività che ricevono la tua richiesta ti chiamano direttamente. Se cambi idea scrivi a <a href="mailto:info@trovaimpresa.com" style="color:#0066ff">info@trovaimpresa.com</a> e cancelliamo i tuoi dati.</p>'
       + '</div>'
+      + '<p style="text-align:center;margin:16px 0 0;font-size:15px;color:#667">Offri tu questo servizio? <a href="registrazione-artigiano.html" style="color:#c45e28;font-weight:700">Iscriviti gratis</a></p>'
       + '</div>';
   }
   /* apre il modulo vero e chiude il bivio: chi ha scelto «cerco» non deve
@@ -416,8 +433,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     const emailEl = document.getElementById('rc-email');
     const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { alert('Controlla l\'email: non sembra valida.'); emailEl.focus(); return; }
-    const cosaCerca = document.getElementById('rc-cerca').value.trim();
-    if (!cosaCerca) { alert('Descrivi cosa cerchi (es. il tipo di lavoro).'); document.getElementById('rc-cerca').focus(); return; }
+    let cosaCerca = document.getElementById('rc-cerca').value.trim();
+    if (!cosaCerca) { cosaCerca = ((typeof mestiereScelto !== 'undefined' && mestiereScelto !== 'tutti') ? mestiereScelto : '') || 'Cerco un\'impresa (richiesta dalla ricerca senza risultati)'; }
     if (cosaCerca.length > 300) { alert('La descrizione \u00e8 troppo lunga: massimo 300 caratteri.'); document.getElementById('rc-cerca').focus(); return; }
     if (/(https?:\/\/|www\.|\b\d{9,}\b|whatsapp|preventivi gratuiti|contattami|chiamami|scrivimi)/i.test(cosaCerca)) {
       if (confirm('Sembra che tu stia offrendo i tuoi servizi, non cercandone uno.\n\nQuesto form serve ai clienti che cercano un professionista. Per farti trovare su TrovaImpresa devi iscriverti: ti porto alla registrazione?')) {
@@ -428,7 +445,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     }
     const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('regioneSelect').value || '').trim();
     const _contesto = (typeof mestiereScelto !== 'undefined' && mestiereScelto !== 'tutti') ? mestiereScelto : '';
-    const ricerca = _contesto ? (cosaCerca + ' — ' + _contesto) : cosaCerca;
+    const ricerca = (_contesto && cosaCerca.indexOf(_contesto) === -1) ? (cosaCerca + ' — ' + _contesto) : cosaCerca;
     rcInvioInCorso = true;
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'not-allowed'; btn.textContent = 'Invio in corso...'; }
     try {
@@ -441,7 +458,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       document.getElementById('richiesta-cliente-box').innerHTML = '<p style="font-weight:700;color:#0066ff;font-size:15px">✅ Grazie! Ti ricontatteremo presto.</p>';
     } catch (e) {
       rcInvioInCorso = false;
-      if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.textContent = 'Invia richiesta'; }
+      if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.textContent = 'Fatti chiamare'; }
       alert('Errore nell\'invio. Riprova.');
     }
   }
@@ -492,7 +509,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     });
   }
 
-  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const cittaSafe=cittaScelta.replace(/[,()]/g,'').trim();const soloVerificati=document.getElementById('soloVerificati').checked;const conFoto=document.getElementById('conFoto').checked;const rispondeIn24h=document.getElementById('rispondeIn24h').checked;const preventivoOnline=document.getElementById('preventivoOnline').checked;const soaCertificata=document.getElementById('soaCertificata').checked;aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';var _rc=document.getElementById('risultatiCount');if(_rc)_rc.textContent='Ricerca in corso...';try{let q=supabaseClient./* 5 set 2026 — dalla tabella `imprese` alla vista `imprese_pubbliche`: stesse colonne che questa pagina disegna, senza email/whatsapp/P.IVA e senza le colonne dei conti. La vista filtra gia' profili di prova ed email non confermate, quindi quei due filtri sono spariti da qui. */from('imprese_pubbliche').select('*').eq('tipo', 'impresa').order('piano_ordine',{ascending:false}).order('created_at',{ascending:false});if(mestiereScelto!=='tutti')q=q.contains('mestieri',[mestiereScelto]);const regione=document.getElementById('regioneSelect').value;const provinciaSel=document.getElementById('provincia').value;if(!cittaScelta&&!regione){const div=document.getElementById('risultati');div.innerHTML='<div class="no-results"><h3>📍 Inserisci una città o regione</h3><p>Per vedere le imprese, indica dove stai cercando</p></div>';if(_rc)_rc.textContent='Scegli una città per iniziare';aggiornaMappaRis([]);return;}if(cittaScelta){if(regione){q=q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);}else{const _rg=(window._C2R=window._C2R||(function(){const m={};const g=window.GEO_ITALIA||{};for(const r in g){for(const p in g[r]){const cc=g[r][p];if(Array.isArray(cc))cc.forEach(c=>{m[c.toLowerCase()]=r;});}}return m;})())[cittaSafe.toLowerCase()];if(_rg){q=q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${_rg})`);}else{q=q.ilike('citta',`%${cittaSafe}%`);}}}if(regione)q=q.eq('regione',regione);if(provinciaSel)q=q.eq('provincia',provinciaSel);if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificata',true);if(conFoto)q=q.not('foto_urls','is',null).neq('foto_urls','[]');if(rispondeIn24h)q=q.eq('risponde_24h',true);if(preventivoOnline)q=q.eq('preventivo_online',true);if(soaCertificata)q=q.eq('soa_certificata',true);if(tipoImpresa==='piccola'){q=q.gte('dipendenti',1).lte('dipendenti',10);}else if(tipoImpresa==='media'){q=q.gte('dipendenti',11).lte('dipendenti',50);}const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=ordinaFuoriZona(filtraDistanza(data||[],distanzaMax,cittaLat,cittaSafe));if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessuna impresa trovata</h3><p>Prova a cambiare città o specializzazione</p><div id="rimando-mestiere"></div>'+bottoneAllarga(distanzaMax)+formRichiestaClienteHTML()+'</div>';if(window.RimandoMestiere)RimandoMestiere.monta('rimando-mestiere',mestiereScelto,(document.getElementById('cittaInput')||{}).value);if(_rc)_rc.textContent='Nessun risultato';aggiornaMappaRis([]);return;}if(_rc)_rc.innerHTML='Trovate <strong>'+risultati.length+'</strong> imprese'+((data&&data.length>=50)?' (le prime 50 — restringi la zona per vederne altre)':'');div.innerHTML=`<div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){if(_rc)_rc.textContent='Errore di caricamento';div.innerHTML=`<div class="no-results"><h3>Non riesco a caricare i risultati</h3><p>Controlla la connessione e riprova. (${e.message})</p></div>`;}}
+  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const cittaSafe=cittaScelta.replace(/[,()]/g,'').trim();const soloVerificati=document.getElementById('soloVerificati').checked;const conFoto=document.getElementById('conFoto').checked;const rispondeIn24h=document.getElementById('rispondeIn24h').checked;const preventivoOnline=document.getElementById('preventivoOnline').checked;const soaCertificata=document.getElementById('soaCertificata').checked;aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';var _rc=document.getElementById('risultatiCount');if(_rc)_rc.textContent='Ricerca in corso...';try{let q=supabaseClient./* 5 set 2026 — dalla tabella `imprese` alla vista `imprese_pubbliche`: stesse colonne che questa pagina disegna, senza email/whatsapp/P.IVA e senza le colonne dei conti. La vista filtra gia' profili di prova ed email non confermate, quindi quei due filtri sono spariti da qui. */from('imprese_pubbliche').select('*').eq('tipo', 'impresa').order('piano_ordine',{ascending:false}).order('created_at',{ascending:false});if(mestiereScelto!=='tutti')q=q.contains('mestieri',[mestiereScelto]);const regione=document.getElementById('regioneSelect').value;const provinciaSel=document.getElementById('provincia').value;if(!cittaScelta&&!regione){const div=document.getElementById('risultati');div.innerHTML='<div class="no-results"><h3>📍 Inserisci una città o regione</h3><p>Per vedere le imprese, indica dove stai cercando</p></div>';if(_rc)_rc.textContent='Scegli una città per iniziare';aggiornaMappaRis([]);return;}if(cittaScelta){if(regione){q=q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);}else{const _rg=(window._C2R=window._C2R||(function(){const m={};const g=window.GEO_ITALIA||{};for(const r in g){for(const p in g[r]){const cc=g[r][p];if(Array.isArray(cc))cc.forEach(c=>{m[c.toLowerCase()]=r;});}}return m;})())[cittaSafe.toLowerCase()];if(_rg){q=q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${_rg})`);}else{q=q.ilike('citta',`%${cittaSafe}%`);}}}if(regione)q=q.eq('regione',regione);if(provinciaSel)q=q.eq('provincia',provinciaSel);if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificata',true);if(conFoto)q=q.not('foto_urls','is',null).neq('foto_urls','[]');if(rispondeIn24h)q=q.eq('risponde_24h',true);if(preventivoOnline)q=q.eq('preventivo_online',true);if(soaCertificata)q=q.eq('soa_certificata',true);if(tipoImpresa==='piccola'){q=q.gte('dipendenti',1).lte('dipendenti',10);}else if(tipoImpresa==='media'){q=q.gte('dipendenti',11).lte('dipendenti',50);}const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=ordinaFuoriZona(filtraDistanza(data||[],distanzaMax,cittaLat,cittaSafe));if(!risultati.length){div.innerHTML='<div class="no-results">'+rcTestata('un\'impresa')+'<div id="rimando-mestiere"></div>'+bottoneAllarga(distanzaMax)+formRichiestaClienteHTML()+'</div>';if(window.RimandoMestiere)RimandoMestiere.monta('rimando-mestiere',mestiereScelto,(document.getElementById('cittaInput')||{}).value);if(_rc)_rc.textContent='Nessun risultato';aggiornaMappaRis([]);return;}if(_rc)_rc.innerHTML='Trovate <strong>'+risultati.length+'</strong> imprese'+((data&&data.length>=50)?' (le prime 50 — restringi la zona per vederne altre)':'');div.innerHTML=`<div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){if(_rc)_rc.textContent='Errore di caricamento';div.innerHTML=`<div class="no-results"><h3>Non riesco a caricare i risultati</h3><p>Controlla la connessione e riprova. (${e.message})</p></div>`;}}
   /* Scudo anti-codice: i dati che arrivano dalle imprese (nome, descrizione,
      citta', logo...) vanno sempre "disinnescati" prima di finire nella pagina,
      altrimenti chi si registra puo' iniettare codice visto da tutti i clienti. */
