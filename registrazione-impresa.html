@@ -140,12 +140,31 @@
 body{background:#e7eef8 !important}
 body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .gest-box,body .highlight-box,body .misura-card,body .riepilogo-box,body .periodo-box,body .info-box,body .annuncio-card,body .card-offerta,body .gratis-box,body .imprese-box,body .mappa-box,body .duebox>div,body .cat-card,body .ti-promo-cli,body .ti-promo-imp,body .ti-riga,body .faq-item,body .faq details{border:2px solid #0a2a4d !important}
 </style>
+<style>
+/* 10 ott 2026: grafica grande e messaggio "tutto gratis", come la pagina Iscriviti */
+.logobar{max-width:760px;margin:0 auto;padding:6px 24px 0;text-align:center}
+.logobar img{height:120px}
+.container{max-width:760px !important}
+.content{max-width:760px !important}
+.header{background:#0a2a4d !important;padding:44px 24px 36px !important;border-radius:20px}
+.header h1{font-size:36px !important;font-weight:900;margin-bottom:10px !important;letter-spacing:-.5px}
+.header p{font-size:20px !important;opacity:.95 !important}
+.gchips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.gchips span{background:#fff;color:#0a2a4d;border-radius:14px;padding:10px 18px;font-weight:800;font-size:17px}
+.gchips b{display:inline-block;background:#ff8800;color:#fff;border-radius:8px;padding:1px 9px;margin-left:6px;letter-spacing:.5px}
+.form-group label{font-size:18px !important}
+.form-group input,.form-group select,.form-group textarea{font-size:18px !important;padding:16px 14px !important}
+.btn-next{font-size:20px !important;padding:20px 24px !important}
+@media(max-width:768px){.logobar img{height:84px}.header h1{font-size:26px !important}.header p{font-size:17px !important}.gchips span{font-size:15px;padding:8px 12px}}
+</style>
 </head>
 <body>
+  <div class="logobar"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></div>
   <div class="container">
     <div class="header">
-      <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> Registrazione Impresa</h1>
-      <p>Entra nella rete TrovaImpresa</p>
+      <h1>Registrazione Impresa</h1>
+      <p>Iscriviti in 2 minuti: è tutto gratis</p>
+      <div class="gchips"><span>Il sito <b>GRATIS</b></span><span>Il gestionale <b>GRATIS</b></span><span>Il forum <b>GRATIS</b></span></div>
     </div>
 
     </div>
@@ -161,7 +180,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
         <p style="font-size:16px;line-height:1.55;color:#14532d;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin:0 0 18px">
           <svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> <b>Iscriversi e restare su TrovaImpresa è gratis.</b> Nessuna carta, nessun costo.
-          Ti servono un minuto e sei caselle: il resto (foto, logo, descrizione, orari) lo metti quando vuoi dal tuo pannello.
+          Ti servono un minuto e poche caselle: il resto (foto, logo, descrizione, orari) lo metti quando vuoi dal tuo pannello.
         </p>
 
         <div class="form-group">
