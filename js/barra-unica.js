@@ -39,7 +39,7 @@
     }
 
     function costruisci() {
-      if (document.querySelector('.tb-bar,.nav-std,#nav-links,.fs-nav,#nav-prenota')) return;
+      if (document.querySelector('.tb-bar,.nav-std,#nav-links,.fs-nav')) return;
       var el = pagina();
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
@@ -54,7 +54,9 @@
       document.head.appendChild(st);
       el.className = 'tb-bar';
       el.removeAttribute('style');
+      var pre = document.getElementById('nav-prenota'); /* Pubblicita': il bottone «Prenota uno spazio» ha una sua funzione, lo sposto nella barra nuova senza toccarlo */
       el.innerHTML = h;
+      if (pre) { pre.className = 'tb-btn'; pre.removeAttribute('style'); el.querySelector('.tb-top').appendChild(pre); }
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', costruisci);
