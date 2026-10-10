@@ -1284,6 +1284,14 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 <style>/* locandine: niente bordo bianco ne contorno */
 .hero-pub,.hero-pub.sx,.hero-pub.dx{outline:none !important;background:transparent !important;border-radius:12px;overflow:hidden}
 </style>
+<style id="hero-ott10">/* 10 ott 2026: logo al centro in alto sulla striscia blu, grande, senza riquadro bianco (versione con la scritta bianca); i passi partono alla stessa altezza del titolo */
+@media(min-width:1100px){
+.hb-sx .hero-logo{display:none !important}
+.hb-logo-centro{display:block;width:560px;max-width:90%;height:auto;margin:0 auto 26px}
+.hb-grid{align-items:start !important}
+}
+@media(max-width:1099px){.hb-logo-centro{display:none}}
+</style>
 </head>
 <body>
 
@@ -1369,6 +1377,7 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 
         <div class="hero-inner">
 <div class="hero-banda">
+<img src="/img/trovaimpresa-logo-bianco.svg" alt="TrovaImpresa" class="hb-logo-centro">
 <div class="hb-grid">
  <div class="hb-sx">
   <img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" class="hero-logo">
