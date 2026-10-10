@@ -133,6 +133,12 @@ export default async (request, context) => {
     html = html.replace(/<title id="page-title">[\s\S]*?<\/title>/,
                         '<title id="page-title">' + esc(M.titolo) + '</title>');
 
+    /* 10 ott 2026: il canonical nel file e' quello generico (/profilo-impresa)
+       e Google lo leggeva PRIMA del JavaScript: tutte le schede sembravano
+       copie di una sola. Qui lo si scrive con l'id vero. */
+    html = html.replace(/<link rel="canonical" href="[^"]*">/,
+                        '<link rel="canonical" href="' + esc(M.url) + '">');
+
     const testate = new Headers(risposta.headers);
     testate.set('content-type', 'text/html; charset=utf-8');
     testate.delete('content-length');
