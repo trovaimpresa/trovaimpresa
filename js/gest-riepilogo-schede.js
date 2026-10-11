@@ -565,6 +565,7 @@
     /* il verbale di sopralluogo è roba da tecnici: nasce dalle foto della pratica */
     if(ruoloUtente==='professionista')v.push({lab:"\ud83d\udccb Verbale di sopralluogo",action:"verbale",data:{id:l.id}});
     if(l.dove)v.push({lab:"\ud83d\uddfa Mappa",action:"map",data:{q:l.dove}});
+    v.push({lab:"\ud83d\udcac Messaggi del lavoro",action:"chat-lavoro",data:{id:l.id,t:(l.dove||l.descrizione||"Lavoro").slice(0,50),op:l.operatore_id||""}});
     v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
     /* 26 set 2026 — le idee rubate (js/gest-ai-cantiere.js) */
     v.push({lab:"📣 Aggiorna il cliente",action:"res-cliente",data:{id:l.id}});

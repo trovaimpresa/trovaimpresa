@@ -415,6 +415,7 @@
       <button type="button" class="on" data-s="lavori">Lavori</button>
       <button type="button" data-s="foto">Foto</button>
       <button type="button" data-s="preventivi">Preventivi <span id="op-n-prev"></span></button>
+      <button type="button" data-s="chat">Chat <span id="op-n-chat"></span></button>
       <button type="button" data-s="archivio">Archivio <span id="op-n-arch"></span></button>
     </div>
 
@@ -435,6 +436,12 @@
       <div class="op-sub" id="op-prev-sub"></div>
       <div id="op-prev-modulo"></div>
       <div id="op-prev-lista" style="margin-top:14px"></div>
+    </div>
+
+    <div id="op-p-chat" class="hidden">
+      <div class="op-h">Chat col capo</div>
+      <div class="op-sub">Qui le cose generali. Per un lavoro scrivi dentro il lavoro.</div>
+      <div id="op-chat-box"></div>
     </div>
 
     <div id="op-p-archivio" class="hidden">
@@ -499,6 +506,12 @@
       <div class="meta" id="lv-meta"></div>
       <div class="label">Cosa devi fare</div>
       <div class="istr" id="lv-istr">—</div>
+    </div>
+
+    <!-- 11/10/2026 — la chat di QUESTO lavoro (js/chat-squadra.js, js/op-chat.js) -->
+    <div class="panel" id="lv-chat-box">
+      <div class="label">Messaggi su questo lavoro</div>
+      <div id="lv-chat"></div>
     </div>
 
     <!-- RAPPORTINO DI CANTIERE — compare solo con il permesso «Rapportini» -->
@@ -600,6 +613,8 @@
 <script src="/js/op-salvataggio-lavoro.js"></script>
 <script src="/js/op-schede.js?v=2"></script>
 <script src="/js/op-preventivi.js?v=1"></script>
+<script src="/js/chat-squadra.js?v=1"></script>
+<script src="/js/op-chat.js?v=1"></script>
 <script src="/js/op-timbratura.js"></script>
 <script src="/js/op-avvio.js"></script>
 <script src="/js/freccia-indietro.js"></script>

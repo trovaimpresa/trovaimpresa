@@ -193,7 +193,7 @@ function applicaPermessi(){
   const dt=$("#day-title"); if(dt)dt.style.display=vediLavori?"":"none";
   const dl=$("#day-list");  if(dl)dl.style.display=vediLavori?"":"none";
   /* 11 ott 2026 — le schede Lavori/Foto/Archivio seguono lo stesso permesso */
-  ["#op-tabs","#op-p-lavori","#op-p-foto","#op-p-preventivi","#op-p-archivio"].forEach(s=>{const e=$(s); if(e&&!vediLavori)e.style.display="none"; else if(e)e.style.display="";});
+  ["#op-tabs","#op-p-lavori","#op-p-foto","#op-p-preventivi","#op-p-chat","#op-p-archivio"].forEach(s=>{const e=$(s); if(e&&!vediLavori)e.style.display="none"; else if(e)e.style.display="";});
   /* foto e video: si vedono sempre quelle del capo, si AGGIUNGONO solo col permesso */
   _mostra("#btn-foto",  puo("foto"));
   _mostra("#btn-video", puo("foto"));

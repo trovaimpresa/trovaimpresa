@@ -69,7 +69,8 @@ async function boot(session){
        senza la guardia la pagina si riaprirebbe sul lavoro dopo ogni «Torna». */
     try{
       const pid=new URLSearchParams(location.search).get("lavoro");
-      if(pid && !window.__opLavoroAperto){
+      if(new URLSearchParams(location.search).get("chat") && !window.__opChatAperta){window.__opChatAperta=true;if(window.opVaiScheda)opVaiScheda("chat");}
+       if(pid && !window.__opLavoroAperto){
         window.__opLavoroAperto=true;
         if(LAVORI.some(x=>x.id===pid))openLavoro(pid);
         else toast("Questo lavoro non risulta tra i tuoi.");

@@ -41,11 +41,14 @@
     const box=$("#dip-list");if(!box)return;
     if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
     if(!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Accedi per gestire la squadra","Entra nel pannello per invitare le persone.");return;}
-    const [{data:ops},{data:membri},{data:docsAll}]=await Promise.all([
+    const [{data:ops},{data:membri},{data:docsAll},{data:msgNuovi}]=await Promise.all([
       sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()),
       sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi"),
-      sb.from("gest_operatore_documenti").select("*")
+      sb.from("gest_operatore_documenti").select("*"),
+      /* 11 ott 2026 — messaggi della chat generale non ancora letti, per persona */
+      sb.from("gest_messaggi").select("operatore_id").eq("autore","operaio").is("letto_il",null).is("lavoro_id",null)
     ]);
+    const nB={};(msgNuovi||[]).forEach(function(m){nB[m.operatore_id]=(nB[m.operatore_id]||0)+1;});
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
     const dB={};(docsAll||[]).forEach(function(d){(dB[d.operatore_id]=dB[d.operatore_id]||[]).push(d);});
     /* dipCache alimenta il modulo di modifica: deve contenere tutti i campi della persona */
@@ -53,7 +56,7 @@
     let L=(ops||[]).map(o=>{
       const inv=mB[o.id]||{}, dc=dipCache.find(d=>d.id===o.id)||{};
       const link=inviteLink(inv.codice||"");
-      return Object.assign({},o,{ruolo:dc.ruolo||"operaio",docs:dc.docs||[],
+      return Object.assign({},o,{ruolo:dc.ruolo||"operaio",docs:dc.docs||[],nuovi:nB[o.id]||0,
         attivo:inv.stato==="attivo",codice:inv.codice||"",link:link,
         wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)});
     });
@@ -71,7 +74,7 @@
         id:o.id,
         click:{action:"sq-edit",data:{id:o.id}},
         celle:[
-          `<span class="c-nome">${esc(o.nome||"—")}</span>`,
+          `<span class="c-nome">${esc(o.nome||"—")}</span>`+dipNuovi(o),
           esc(o.mansione||SQ_RUOLO[o.ruolo]||"—"),
           esc(o.telefono||"—"),
           dipBadge(o),
@@ -432,8 +435,13 @@
   }
   /* Copia link, WhatsApp e Rimuovi accesso esistono solo se la persona ha un
      codice d'invito: senza codice non c'e' niente da mandare né da revocare. */
+  /* il pallino «N nuovi» dei messaggi non letti (chat generale) */
+  function dipNuovi(o){
+    return o&&o.nuovi?' <span class="stato da_fare" style="background:#fdecea;color:#b3261e;margin-left:6px">'+o.nuovi+(o.nuovi===1?' nuovo messaggio':' nuovi messaggi')+'</span>':'';
+  }
   function dipVoci(o){
-    const v=[{lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}}];
+    const v=[{lab:"\ud83d\udcac Messaggi"+(o.nuovi?" ("+o.nuovi+")":""),action:"chat-squadra",data:{id:o.id,nome:o.nome||""}},
+             {lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}}];
     if(o.codice){
       v.push({lab:"🔗 Copia link",action:"sq-copy",data:{link:o.link}});
       v.push({lab:"💬 Invia su WhatsApp",action:"sq-wa",data:{wa:o.wa}});
@@ -462,7 +470,7 @@
       : (av.length?"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", ")):"");
     return schedaJob({
       tono, titolo:esc(o.nome),
-      destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${o.attivo?"Attivo":"Invitato"}</span>`,
+      destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${o.attivo?"Attivo":"Invitato"}</span>`+dipNuovi(o),
       meta:[o.mansione?"👷 "+esc(o.mansione):"", o.telefono?"📞 "+esc(o.telefono):""],
       nota, azioni:dipVoci(o)
     });
