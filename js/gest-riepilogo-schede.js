@@ -391,12 +391,40 @@
   }
   /* Lavori: tabella ordinabile su desktop, card su mobile */
   const _deskTab=()=>window.matchMedia("(min-width:881px)").matches;
-  function _waLavoro(l,opTel){
-    const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
+  /* 11 ottobre 2026 — IL MESSAGGIO WHATSAPP AL SUO OPERAIO, FATTO BENE
+     Prima: una riga di testo e il link alla pagina generica dell'operaio, che
+     si apriva sull'agenda e non sul lavoro. Adesso:
+       · il messaggio ha le voci in grassetto, una sotto l'altra, sempre nello
+         stesso ordine: Cliente · Dove · Mappa · Quando · Cosa fare;
+       · c'e' il link alla MAPPA, cosi' non si ricopia l'indirizzo;
+       · il link finale apre DIRETTAMENTE quel lavoro (?lavoro=ID), con le
+         foto e il pulsante «Segna come fatto» — vedi op-agenda-giorno.js.
+     ⚠️ I grassetti di WhatsApp sono *cosi*. Una voce vuota non si scrive:
+     niente «Dove: —». La descrizione lunga si taglia a →700← caratteri e si
+     dice di aprire il link per il resto, altrimenti il messaggio diventa un
+     muro di testo (e l'indirizzo wa.me ha un limite).
+     `cliente` e' facoltativo: la lista Lavori lo conosce, altri punti no. */
+  function _waLavoro(l,opTel,cliente){
+    const opLink=location.href.replace(/[?#].*$/,"").replace(/[^/]*$/,"")+"gestionale-operatore.html"+(l.id?("?lavoro="+encodeURIComponent(l.id)):"");
     const isPro=ruoloUtente==='professionista';
-    const termCap=isPro?"Pratica":"Lavoro";
-    const intro=isPro?"Ciao! C'\u00e8 una nuova pratica per te.":"Ciao! C'\u00e8 un nuovo lavoro per te.";
-    const waText=encodeURIComponent(intro+"\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(l.dove||"\u2014")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const intro=isPro?"*Nuova pratica per te*":"*Nuovo lavoro per te*";
+    const righe=[intro,""];
+    if(cliente)righe.push("*Cliente:* "+cliente);
+    if(l.dove){
+      righe.push("*Dove:* "+l.dove);
+      righe.push("*Mappa:* https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(l.dove));
+    }
+    if(l.data_prevista)righe.push("*Quando:* "+fdate(l.data_prevista));
+    const desc=(l.descrizione||"").trim();
+    if(desc){
+      righe.push("");
+      righe.push("*Cosa fare:*");
+      righe.push(desc.length>700?desc.slice(0,700).replace(/\s+\S*$/,"")+"\u2026":desc);
+    }
+    righe.push("");
+    righe.push("Apri "+(isPro?"la pratica":"il lavoro")+" (foto e dettagli):");
+    righe.push(opLink);
+    const waText=encodeURIComponent(righe.join("\n").replace(/\n{3,}/g,"\n\n"));
     const waTel=waCleanTel(opTel);
     return waTel?("https://wa.me/"+waTel+"?text="+waText):("https://wa.me/?text="+waText);
   }

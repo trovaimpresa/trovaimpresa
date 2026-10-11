@@ -330,7 +330,7 @@
             _praPro?(_staPra?esc(_staPra):"\u2014"):esc(opName[l.operatore_id]||"\u2014"),
             +l.importo?eur(l.importo):"\u2014"
           ],
-          menu:lavVoci(l,_waLavoro(l,lavTel[l.operatore_id]||""))
+          menu:lavVoci(l,_waLavoro(l,lavTel[l.operatore_id]||"",cliName[l.cliente_id]||""))
         };
       }),
       numeri:lavNumeri(TUTTI,oggi,_praPro),

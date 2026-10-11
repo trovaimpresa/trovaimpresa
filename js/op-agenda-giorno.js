@@ -61,6 +61,17 @@ async function boot(session){
     show("agenda");
     tmbAvvia();
     caricaCartaMia();
+    /* 11 ott 2026 — il link del messaggio WhatsApp porta a UN lavoro (?lavoro=ID):
+       lo si apre una volta sola. boot() gira a ogni cambio di sessione, e
+       senza la guardia la pagina si riaprirebbe sul lavoro dopo ogni «Torna». */
+    try{
+      const pid=new URLSearchParams(location.search).get("lavoro");
+      if(pid && !window.__opLavoroAperto){
+        window.__opLavoroAperto=true;
+        if(LAVORI.some(x=>x.id===pid))openLavoro(pid);
+        else toast("Questo lavoro non risulta tra i tuoi.");
+      }
+    }catch(_){}
   }else if(puo("clienti")){
     await loadClienti();
     show("clienti");
