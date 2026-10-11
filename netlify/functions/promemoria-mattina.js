@@ -581,7 +581,7 @@ const handler = async function () {
       leggiLarga('fornitori', f => vivi(sb.from('gest_fornitori')
         .select('id, nome').in('user_id', utenti), f)),
       leggiLarga('squadra', f => vivi(sb.from('gest_operatori')
-        .select('id, user_id, nome, visita_medica_scadenza, formazione_scadenza, documento_scadenza')
+        .select('id, user_id, nome, visita_medica_scadenza, formazione_scadenza, documento_scadenza, permesso_scadenza')
         .in('user_id', utenti), f)),
       leggiLarga('mezzi', f => vivi(sb.from('gest_mezzi')
         .select('id, user_id, nome, targa, assicurazione_scad, revisione_scad, collaudo_scad')
@@ -762,7 +762,7 @@ const handler = async function () {
       });
 
       // 2. squadra: visita medica, formazione, documento (tappe 30, 7, 1)
-      const COSE_SQUADRA = [['visita_medica_scadenza', 'Visita medica'], ['formazione_scadenza', 'Formazione sicurezza'], ['documento_scadenza', 'Documento d\'identità']];
+      const COSE_SQUADRA = [['visita_medica_scadenza', 'Visita medica'], ['formazione_scadenza', 'Formazione sicurezza'], ['documento_scadenza', 'Documento d\'identità'], ['permesso_scadenza', 'Permesso di soggiorno']];
       const squadraOra = [], squadraVecchie = [];
       (voglio('squadra') ? dOp : []).filter(x => String(x.user_id) === uid).forEach(x => {
         COSE_SQUADRA.forEach(c => {

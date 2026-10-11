@@ -138,8 +138,11 @@ async function chatMonta(el,ctx){
     else if(a==="elim"){
       if(b.dataset.sicuro!=="1"){b.dataset.sicuro="1";b.textContent="Sicuro? Premi ancora";return;}
       b.disabled=true;
-      const {data,error}=await sb.from(CHAT_TAB).update({eliminato_il:new Date().toISOString()}).eq("id",id).select("id");
-      if(error||!data||!data.length){b.disabled=false;toast("Non eliminato: "+(error?error.message:"non puoi cambiare questo messaggio"));return;}
+      /* si cancella davvero: la riga e anche le foto/PDF */
+      const m=msgs.find(x=>x.id===id),fs=m?chatAllegati(m).map(f=>f.path):[];
+      const {data,error}=await sb.from(CHAT_TAB).delete().eq("id",id).select("id");
+      if(error||!data||!data.length){b.disabled=false;toast("Non eliminato: "+(error?error.message:"non puoi togliere questo messaggio"));return;}
+      if(fs.length){try{await sb.storage.from(CHAT_BUCKET).remove(fs);}catch(_){}}
       await carica(true);
     }
   });
