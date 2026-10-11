@@ -41,17 +41,19 @@
     const box=$("#dip-list");if(!box)return;
     if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
     if(!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Accedi per gestire la squadra","Entra nel pannello per invitare le persone.");return;}
-    const [{data:ops},{data:membri}]=await Promise.all([
+    const [{data:ops},{data:membri},{data:docsAll}]=await Promise.all([
       sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()),
-      sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi")
+      sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi"),
+      sb.from("gest_operatore_documenti").select("*")
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
+    const dB={};(docsAll||[]).forEach(function(d){(dB[d.operatore_id]=dB[d.operatore_id]||[]).push(d);});
     /* dipCache alimenta il modulo di modifica: deve contenere tutti i campi della persona */
-    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{}});});
+    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{},docs:dB[o.id]||[]});});
     let L=(ops||[]).map(o=>{
       const inv=mB[o.id]||{}, dc=dipCache.find(d=>d.id===o.id)||{};
       const link=inviteLink(inv.codice||"");
-      return Object.assign({},o,{ruolo:dc.ruolo||"operaio",
+      return Object.assign({},o,{ruolo:dc.ruolo||"operaio",docs:dc.docs||[],
         attivo:inv.stato==="attivo",codice:inv.codice||"",link:link,
         wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)});
     });
@@ -94,109 +96,250 @@
   const CONTRATTI=["Tempo indeterminato","Tempo determinato","Apprendistato","Part-time","Stagionale","A chiamata","Collaborazione","Altro"];
 
   /* ============================================================
-     11 ottobre 2026 — ATTESTATI, PATENTINI E DOCUMENTI: UNA LISTA SENZA LIMITE
+     11 ottobre 2026 — ATTESTATI, PATENTINI E CORSI: UNA TABELLA VERA
      ============================================================
-     Prima c'era UNA casella di testo («Attestati e patentini») e quattro
-     scadenze fisse. Una persona con muletto, piattaforma, primo soccorso,
-     antincendio e ponteggi doveva infilare tutto in una riga, e SOLO le
-     quattro voci fisse facevano avvisare quando scadevano.
-     Adesso: una lista dove si aggiunge quanti ne servono, ognuno col suo
-     nome, numero (facoltativo) e data di scadenza. Quelli con una scadenza
-     fanno avvisi come gli altri (dipAvvisi).
-     Si salvano in `gest_operatori.documenti` (jsonb, array di
-     {tipo, numero, scadenza}) — sql/gest-operatori-documenti.sql.
-     ⚠️ Il vecchio testo `attestati` NON si butta: se `documenti` e' vuoto, le
-     sue voci (separate da virgola) compaiono come righe senza scadenza, cosi'
-     chi le aveva scritte non le perde. Salvando, `attestati` si riscrive con
-     i soli nomi, per chi lo legge ancora.
+     Ogni attestato, patentino o corso e' UNA RIGA SUA nella tabella
+     `gest_operatore_documenti` (sql/gest-operatore-documenti.sql): nome,
+     numero (facoltativo), data di inizio, data di scadenza, note.
+     Se ne aggiungono quanti si vuole; ognuno si riapre, si controlla, si
+     modifica o si elimina. Quelli con scadenza fanno avvisi come la visita
+     medica (dipAvvisi): scaduto, oppure in scadenza entro 30 giorni.
+     ⚠️ Persona NUOVA (non ancora salvata): le righe stanno in memoria
+     (_doc.nuovi) e vengono scritte dopo la persona, in squadraAdd.
+     ⚠️ Le vecchie voci (colonna jsonb `documenti` e testo `attestati`) NON si
+     buttano: se la tabella e' vuota si offre «Importa le voci vecchie».
      ⚠️ Il file parte PRIMA della pagina: qui non si usa niente che stia nella
-     pagina, e le azioni si agganciano con un ascoltatore PROPRIO su
-     data-doc-* (quelli della pagina, su data-action, sono catene di if che
-     lasciano passare solo quello che conoscono). */
+     pagina a livello alto, e le azioni si agganciano con un ascoltatore
+     PROPRIO su data-doc (quelli della pagina, su data-action, sono catene di
+     if che lasciano passare solo quello che conoscono). */
   const DOC_SUGGERITI=["Patentino muletto","Piattaforma aerea (PLE)","Primo soccorso","Antincendio",
     "Lavori in quota","Montaggio ponteggi","Spazi confinati","Rischio elettrico (PES/PAV)",
-    "Escavatore / terna","Gru","Patente B","Patente C","Patente CQC","Preposto","RLS","Amianto","Formazione specifica"];
+    "Escavatore / terna","Gru","Patente B","Patente C","Patente CQC","Preposto","RLS","Amianto","Formazione specifica","Corso sicurezza"];
+  const DOC_TAB="gest_operatore_documenti";
+  let _doc={opId:null,rows:[],nuovi:[],edit:null,del:null,vecchi:[]};
+  function docMappa(d){
+    return {id:d.id,tipo:String(d.tipo||"").trim(),numero:String(d.numero||"").trim(),
+      inizio:String(d.data_inizio||"").slice(0,10),scadenza:String(d.data_scadenza||"").slice(0,10),
+      note:String(d.note||"").trim()};
+  }
   function docLista(o){
+    if(!o||!Array.isArray(o.docs))return [];
+    return o.docs.filter(function(d){return d&&typeof d==="object";}).map(docMappa);
+  }
+  /* le voci del vecchio sistema, da offrire come importazione */
+  function docVecchie(o){
     if(!o)return [];
     let a=o.documenti;
     if(typeof a==="string"){try{a=JSON.parse(a);}catch(_){a=null;}}
-    if(Array.isArray(a)){
-      return a.filter(function(d){return d&&typeof d==="object";}).map(function(d){
-        return {tipo:String(d.tipo||"").trim(),numero:String(d.numero||"").trim(),scadenza:String(d.scadenza||"").trim()};});
+    if(Array.isArray(a)&&a.length){
+      return a.filter(function(d){return d&&typeof d==="object"&&String(d.tipo||"").trim();}).map(function(d){
+        return {tipo:String(d.tipo).trim(),numero:String(d.numero||"").trim(),inizio:"",scadenza:String(d.scadenza||"").trim(),note:""};});
     }
-    return [];
-  }
-  /* la lista da mostrare nel modulo: quella vera, oppure — se non c'e' ancora —
-     le voci del vecchio testo, una per riga, senza scadenza */
-  function docListaPerModulo(o){
-    const l=docLista(o);
-    if(l.length)return l;
-    const vecchio=String((o&&o.attestati)||"").split(/[,;\n]+/).map(function(s){return s.trim();}).filter(Boolean);
-    return vecchio.map(function(n){return {tipo:n,numero:"",scadenza:""};});
+    return String(o.attestati||"").split(/[,;\n]+/).map(function(s){return s.trim();}).filter(Boolean)
+      .map(function(n){return {tipo:n,numero:"",inizio:"",scadenza:"",note:""};});
   }
   /* «scaduto» o «scaduta»: si guarda la prima parola. Finisce in -o = maschile
-     (Patentino, Attestato, Corso, Primo, Antincendio); altrimenti femminile
-     (Patente, Abilitazione, Formazione, Idoneità). */
+     (Patentino, Attestato, Corso, Primo, Antincendio); altrimenti femminile. */
   function docParticipio(tipo){
     const p=String(tipo||"").trim().split(/\s+/)[0]||"";
     return /o$/i.test(p)||p===""?"scaduto":"scaduta";
   }
-  function docRiga(d){
-    d=d||{};
-    return '<div class="doc-riga">'
-      +'<input class="doc-tipo" list="d-doc-sugg" maxlength="80" value="'+esc(d.tipo||"")+'" placeholder="Es. Patentino muletto" aria-label="Nome del documento">'
-      +'<input class="doc-num" maxlength="40" value="'+esc(d.numero||"")+'" placeholder="Numero (facoltativo)" aria-label="Numero">'
-      +'<input class="doc-scad" type="date" value="'+esc(d.scadenza||"")+'" aria-label="Scade il">'
-      +'<button type="button" class="doc-del" data-doc-del="1" aria-label="Togli questo documento" title="Togli">'
-      +'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>'
-      +'</div>';
+  function docData(s){
+    const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||""));
+    return m?m[3]+"/"+m[2]+"/"+m[1]:"";
+  }
+  function docStato(d){
+    if(!d.scadenza)return {t:"Senza scadenza",c:"dt-gr",o:3};
+    const oggi=new Date();oggi.setHours(0,0,0,0);
+    const x=new Date(d.scadenza+"T00:00:00");
+    if(isNaN(x))return {t:"Senza scadenza",c:"dt-gr",o:3};
+    const g=Math.round((x-oggi)/86400000);
+    if(g<0)return {t:"Scaduto da "+(-g)+" gg",c:"dt-ro",o:0};
+    if(g<=30)return {t:"Scade fra "+g+" gg",c:"dt-ar",o:1};
+    return {t:"In regola",c:"dt-ve",o:2};
+  }
+  function docTutti(){
+    return _doc.rows.concat(_doc.nuovi).slice().sort(function(a,b){
+      const sa=a.scadenza||"9999",sb2=b.scadenza||"9999";
+      return sa<sb2?-1:sa>sb2?1:String(a.tipo).localeCompare(String(b.tipo));
+    });
   }
   function docBlocco(op){
-    const l=docListaPerModulo(op);
-    return '<div class="field"><label>Attestati, patentini e altri documenti</label>'
-      +'<div class="doc-intest"><span>Nome</span><span>Numero</span><span>Scade il</span><span></span></div>'
-      +'<div id="d-docs">'+l.map(docRiga).join("")+'</div>'
+    return '<div class="field"><label>Attestati, patentini e corsi</label><div id="d-docs-box"></div></div>';
+  }
+  function docInizia(op){
+    _doc={opId:(op&&op.id)||null,rows:docLista(op),nuovi:[],edit:null,del:null,vecchi:docVecchie(op)};
+    docRender();
+  }
+  function docPannello(d){
+    d=d||{};
+    const v=function(x){return esc(x||"");};
+    return '<div class="dt-form">'
+      +'<div class="dt-tit">'+(d.id?"Modifica":"Nuovo attestato o corso")+'</div>'
+      +'<div class="field"><label>Nome</label><input id="dd-tipo" list="d-doc-sugg" maxlength="80" value="'+v(d.tipo)+'" placeholder="Es. Patentino muletto"></div>'
       +'<datalist id="d-doc-sugg">'+DOC_SUGGERITI.map(function(s){return '<option value="'+esc(s)+'"></option>';}).join("")+'</datalist>'
-      +'<button type="button" class="btn doc-aggiungi" data-doc-add="1">+ Aggiungi attestato o documento</button>'
-      +'<div class="sh-nota">Quanti ne vuoi. Con la data di scadenza ti avvisa il Riepilogo, come per la visita medica.</div></div>';
+      +'<div class="row2">'
+      +'<div class="field"><label>Data di inizio</label><input id="dd-ini" type="date" value="'+v(d.inizio)+'"></div>'
+      +'<div class="field"><label>Data di scadenza</label><input id="dd-scad" type="date" value="'+v(d.scadenza)+'"></div>'
+      +'</div>'
+      +'<div class="field"><label>Numero (facoltativo)</label><input id="dd-num" maxlength="40" value="'+v(d.numero)+'" placeholder="Es. MU-2231"></div>'
+      +'<div class="field"><label>Note (facoltativo)</label><input id="dd-note" maxlength="200" value="'+v(d.note)+'" placeholder="Es. ente che l\'ha rilasciato"></div>'
+      +'<div class="dt-btns"><button type="button" class="btn-primary" data-doc="salva">Salva</button>'
+      +'<button type="button" class="btn" data-doc="annulla">Annulla</button></div>'
+      +'</div>';
   }
-  /* legge le righe dal modulo; le righe del tutto vuote si scartano, e una riga
-     con scadenza ma senza nome si chiama «Documento» */
-  function docRaccogli(){
-    const out=[];
-    document.querySelectorAll("#d-docs .doc-riga").forEach(function(r){
-      const v=function(s){const e=r.querySelector(s);return e?String(e.value||"").trim():"";};
-      let tipo=v(".doc-tipo"),numero=v(".doc-num"),scadenza=v(".doc-scad");
-      if(!tipo&&!numero&&!scadenza)return;
-      if(!tipo)tipo="Documento";
-      out.push({tipo:tipo.slice(0,80),numero:numero.slice(0,40),scadenza:scadenza});
-    });
-    return out;
+  function docRiga(d){
+    const s=docStato(d);
+    const sub=[d.numero?("N. "+d.numero):"",d.note,String(d.id).charAt(0)==="n"?"da salvare con la persona":""].filter(Boolean).join(" · ");
+    const az=_doc.del===d.id
+      ?'<span class="dt-az"><span class="dt-chiedi">Eliminare?</span>'
+        +'<button type="button" class="dt-b dt-bdel" data-doc="si" data-did="'+esc(d.id)+'">Si, elimina</button>'
+        +'<button type="button" class="dt-b" data-doc="no">No</button></span>'
+      :'<span class="dt-az"><button type="button" class="dt-b" data-doc="modifica" data-did="'+esc(d.id)+'">Modifica</button>'
+        +'<button type="button" class="dt-b dt-bdel" data-doc="elimina" data-did="'+esc(d.id)+'">Elimina</button></span>';
+    return '<div class="dt-r">'
+      +'<div class="dt-n"><b>'+esc(d.tipo||"Documento")+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div>'
+      +'<div class="dt-c" data-l="Inizio">'+(docData(d.inizio)||"—")+'</div>'
+      +'<div class="dt-c" data-l="Scade">'+(docData(d.scadenza)||"—")+'</div>'
+      +'<div class="dt-s"><span class="dt-st '+s.c+'">'+esc(s.t)+'</span></div>'
+      +az+'</div>';
   }
-  /* un ascoltatore solo, per sempre: le righe nascono e muoiono dentro il modulo */
-  if(!window.__docAscolto){
-    window.__docAscolto=1;
-    document.addEventListener("click",function(e){
-      const add=e.target.closest&&e.target.closest("[data-doc-add]");
-      if(add){
-        const box=document.getElementById("d-docs");if(!box)return;
-        box.insertAdjacentHTML("beforeend",docRiga());
-        const ult=box.querySelector(".doc-riga:last-child .doc-tipo");if(ult)ult.focus();
-        return;
+  function docRender(){
+    const box=document.getElementById("d-docs-box");if(!box)return;
+    const l=docTutti();
+    let h="";
+    if(!l.length&&_doc.vecchi.length&&_doc.opId&&_doc.edit===null){
+      h+='<div class="dt-import">Ci sono <b>'+_doc.vecchi.length+'</b> voci scritte col vecchio sistema ('
+        +esc(_doc.vecchi.slice(0,3).map(function(x){return x.tipo;}).join(", "))+(_doc.vecchi.length>3?"...":"")
+        +').<button type="button" class="btn" data-doc="importa">Importale nella tabella</button></div>';
+    }
+    if(l.length){
+      h+='<div class="dt"><div class="dt-h"><span>Nome</span><span>Inizio</span><span>Scade</span><span>Stato</span><span></span></div>'
+        +l.map(docRiga).join("")+'</div>';
+    }else{
+      h+='<div class="dt-vuoto">Nessun attestato salvato. Premi il pulsante qui sotto per aggiungere il primo.</div>';
+    }
+    if(_doc.edit!==null){
+      const d=_doc.edit==="nuovo"?null:(l.find(function(x){return String(x.id)===String(_doc.edit);})||null);
+      h+=docPannello(d);
+    }else{
+      h+='<button type="button" class="btn doc-aggiungi" data-doc="nuovo">+ Nuovo attestato o corso</button>';
+    }
+    h+='<div class="sh-nota">'+(_doc.opId?"Ogni attestato si salva subito.":"Si salvano quando premi Aggiungi.")
+      +" Con la data di scadenza ti avvisa il Riepilogo, come per la visita medica.</div>";
+    box.innerHTML=h;
+    if(_doc.edit!==null){const t=document.getElementById("dd-tipo");if(t&&!t.value)t.focus();}
+  }
+  /* c'e' un attestato scritto nel pannello ma NON salvato? Salvare la persona
+     lo perderebbe in silenzio: si ferma e si dice. */
+  function docNonSalvato(){
+    if(_doc.edit===null)return false;
+    return ["#dd-tipo","#dd-num","#dd-ini","#dd-scad","#dd-note"].some(function(s){
+      const e=document.querySelector(s);return e&&String(e.value||"").trim()!=="";});
+  }
+  function docDaDb(r){return {tipo:r.tipo,numero:r.numero||null,data_inizio:r.inizio||null,data_scadenza:r.scadenza||null,note:r.note||null};}
+  function docAggCache(){
+    if(!_doc.opId||typeof dipCache==="undefined"||!dipCache)return;
+    const i=dipCache.findIndex(function(d){return String(d.id)===String(_doc.opId);});
+    if(i>=0)dipCache[i]=Object.assign({},dipCache[i],{docs:_doc.rows.map(function(d){
+      return {id:d.id,tipo:d.tipo,numero:d.numero,data_inizio:d.inizio||null,data_scadenza:d.scadenza||null,note:d.note};})});
+  }
+  async function docSalva(){
+    const v=function(s){const e=document.querySelector(s);return e?String(e.value||"").trim():"";};
+    const tipo=v("#dd-tipo");
+    if(!tipo){toast("Scrivi il nome dell'attestato o del corso");return;}
+    const ini=v("#dd-ini"),sc=v("#dd-scad");
+    if(ini&&sc&&sc<ini){toast("La scadenza non puo' essere prima dell'inizio");return;}
+    const rec={tipo:tipo.slice(0,80),numero:v("#dd-num").slice(0,40),inizio:ini,scadenza:sc,note:v("#dd-note").slice(0,200)};
+    const id=_doc.edit;
+    if(_doc.opId){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      if(id==="nuovo"){
+        const {data,error}=await sb.from(DOC_TAB).insert(Object.assign({user_id:sbUid,operatore_id:_doc.opId},docDaDb(rec))).select().single();
+        if(error||!data){toast("Non salvato: "+((error&&error.message)||"errore"));return;}
+        _doc.rows.push(docMappa(data));
+      }else{
+        const {data,error}=await sb.from(DOC_TAB).update(docDaDb(rec)).eq("id",id).eq("user_id",sbUid).select();
+        if(error){toast("Non salvato: "+error.message);return;}
+        if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+        const i=_doc.rows.findIndex(function(x){return String(x.id)===String(id);});
+        if(i>=0)_doc.rows[i]=docMappa(data[0]);
       }
-      const del=e.target.closest&&e.target.closest("[data-doc-del]");
-      if(del){const r=del.closest(".doc-riga");if(r)r.remove();}
+      docAggCache();
+    }else{
+      if(id==="nuovo")_doc.nuovi.push(Object.assign({id:"n"+Date.now()+Math.floor(Math.random()*1000)},rec));
+      else{const i=_doc.nuovi.findIndex(function(x){return String(x.id)===String(id);});if(i>=0)_doc.nuovi[i]=Object.assign({id:id},rec);}
+    }
+    _doc.edit=null;_doc.del=null;docRender();toast("Salvato ✔");
+    if(_doc.opId&&typeof renderDip==="function")renderDip();
+  }
+  async function docElimina(id){
+    if(String(id).charAt(0)==="n"||!_doc.opId){
+      _doc.nuovi=_doc.nuovi.filter(function(x){return String(x.id)!==String(id);});
+      _doc.del=null;docRender();return;
+    }
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const {data,error}=await sb.from(DOC_TAB).delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Non eliminato: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminato: riprova.");return;}
+    _doc.rows=_doc.rows.filter(function(x){return String(x.id)!==String(id);});
+    _doc.del=null;docAggCache();docRender();toast("Eliminato");
+    if(typeof renderDip==="function")renderDip();
+  }
+  async function docImporta(){
+    if(!_doc.opId||!_doc.vecchi.length||!sb||!sbUid)return;
+    const righe=_doc.vecchi.map(function(r){return Object.assign({user_id:sbUid,operatore_id:_doc.opId},docDaDb(r));});
+    const {data,error}=await sb.from(DOC_TAB).insert(righe).select();
+    if(error||!data){toast("Non importato: "+((error&&error.message)||"errore"));return;}
+    data.forEach(function(d){_doc.rows.push(docMappa(d));});
+    _doc.vecchi=[];docAggCache();docRender();toast("Importate "+data.length+" voci ✔");
+    if(typeof renderDip==="function")renderDip();
+  }
+  /* scrive in tabella le righe di una persona appena creata (vedi squadraAdd) */
+  async function docScriviNuovi(opId){
+    if(!_doc.nuovi.length)return null;
+    const righe=_doc.nuovi.map(function(r){return Object.assign({user_id:sbUid,operatore_id:opId},docDaDb(r));});
+    const {error}=await sb.from(DOC_TAB).insert(righe);
+    if(error)return error.message;
+    _doc.nuovi=[];return null;
+  }
+  /* un ascoltatore solo, per sempre */
+  if(!window.__docAscolto2){
+    window.__docAscolto2=1;
+    document.addEventListener("click",function(e){
+      const b=e.target.closest&&e.target.closest("[data-doc]");
+      if(!b)return;
+      const a=b.getAttribute("data-doc"),id=b.getAttribute("data-did");
+      if(a==="nuovo"){_doc.edit="nuovo";_doc.del=null;docRender();}
+      else if(a==="modifica"){_doc.edit=id;_doc.del=null;docRender();}
+      else if(a==="annulla"){_doc.edit=null;docRender();}
+      else if(a==="salva")docSalva();
+      else if(a==="elimina"){_doc.del=id;docRender();}
+      else if(a==="no"){_doc.del=null;docRender();}
+      else if(a==="si")docElimina(id);
+      else if(a==="importa")docImporta();
     });
     const st=document.createElement("style");
     st.id="doc-stile";
     st.textContent=
-      "#d-docs{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}"
-      +".doc-intest,.doc-riga{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.1fr) minmax(0,1fr) 44px;gap:8px;align-items:center}"
-      +".doc-intest{font-size:15px;font-weight:700;margin:2px 0 6px}"
-      +".doc-riga input{width:100%;min-width:0;box-sizing:border-box}"
-      +".doc-del{width:44px;height:44px;border:1.5px solid #d9a3a3;border-radius:10px;background:#fff;color:#b3261e;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}"
+      ".dt{border:2px solid #0a2a4d;border-radius:10px;overflow:hidden;margin-bottom:12px;background:#fff}"
+      +".dt-h,.dt-r{display:grid;grid-template-columns:minmax(0,2fr) 100px 100px minmax(0,1.3fr) minmax(0,1.5fr);gap:8px;align-items:center;padding:10px 12px}"
+      +".dt-h{background:#e7eef8;font-size:15px;font-weight:700;color:#0a2a4d}"
+      +".dt-r{border-top:1px solid #d3dce8;font-size:16px}"
+      +".dt-n b{display:block;font-size:17px}.dt-n small{display:block;color:#5b6b7e;font-size:14px;margin-top:2px}"
+      +".dt-st{display:inline-block;padding:4px 10px;border-radius:999px;font-size:14px;font-weight:700}"
+      +".dt-ve{background:#e3f4e6;color:#1b6e2d}.dt-ar{background:#fdf3e3;color:#b26a00}.dt-ro{background:#fdecea;color:#b3261e}.dt-gr{background:#eceff3;color:#5b6b7e}"
+      +".dt-az{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end}"
+      +".dt-b{min-height:40px;padding:0 12px;border:1.5px solid #0a2a4d;border-radius:8px;background:#fff;color:#0a2a4d;font-weight:700;font-size:15px;cursor:pointer}"
+      +".dt-bdel{border-color:#d9a3a3;color:#b3261e}"
+      +".dt-chiedi{font-weight:700;color:#b3261e;font-size:15px}"
+      +".dt-vuoto{padding:14px;border:2px dashed #b7cae6;border-radius:10px;color:#5b6b7e;font-size:16px;margin-bottom:12px}"
+      +".dt-import{padding:12px;border:2px solid #ff8800;background:#fff7ec;border-radius:10px;margin-bottom:12px;font-size:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}"
+      +".dt-form{border:2px solid #ff8800;border-radius:10px;padding:12px;margin-bottom:10px;background:#fffaf3}"
+      +".dt-tit{font-weight:700;font-size:18px;margin-bottom:8px;color:#0a2a4d}"
+      +".dt-btns{display:flex;gap:10px}.dt-btns .btn,.dt-btns .btn-primary{flex:1;min-height:48px;font-weight:700}"
       +".doc-aggiungi{width:100%;margin:2px 0 8px;min-height:48px;font-weight:700}"
-      +"@media(max-width:620px){.doc-intest{display:none}.doc-riga{grid-template-columns:minmax(0,1fr) 44px}.doc-riga .doc-tipo{grid-column:1}.doc-riga .doc-del{grid-column:2;grid-row:1}.doc-riga .doc-num,.doc-riga .doc-scad{grid-column:1 / -1}}";
+      +"@media(max-width:620px){.dt-h{display:none}.dt-r{grid-template-columns:1fr 1fr;gap:6px 10px}.dt-n,.dt-s,.dt-az{grid-column:1 / -1}.dt-az{justify-content:flex-start}.dt-c::before{content:attr(data-l) \": \";color:#5b6b7e;font-size:14px}}";
     document.head.appendChild(st);
   }
 
@@ -274,10 +417,7 @@
       costo_orario:_numIt("#d-costo"),
       visita_medica_scadenza:o(v("#d-visita")),
       formazione_scadenza:o(v("#d-formazione")),
-      /* 11 ott 2026 — la lista libera; `attestati` (testo) si riscrive con i
-         soli nomi, per chi lo legge ancora */
-      documenti:docRaccogli(),
-      attestati:o(docRaccogli().map(function(d){return d.tipo;}).join(", ")),
+      /* 11 ott 2026 — attestati e corsi non passano da qui: hanno la loro tabella */
       documento_numero:o(v("#d-doc-num")),
       documento_scadenza:o(v("#d-doc-scad")),
       permesso_scadenza:o(v("#d-permesso")),
@@ -415,6 +555,14 @@
       else if(data)fresco=data;
       else if(!cache){toast("Persona non trovata");return;}
     }catch(e){guasto=true;}
+    let docsFreschi=null;
+    if(fresco){
+      try{
+        const rd=await sb.from("gest_operatore_documenti").select("*").eq("operatore_id",id);
+        if(rd.error)guasto=true;else docsFreschi=rd.data||[];
+      }catch(e){guasto=true;}
+      if(docsFreschi)fresco.docs=docsFreschi;
+    }
     if(fresco){
       /* la cache tiene ruolo e permessi, che stanno su gest_membri e non
          arrivano da questa lettura: si parte da quella e ci si sovrascrive
@@ -429,7 +577,7 @@
   function squadraForm(op,vecchi){
     _sqOpAppenaCreato=null;
     const isNew=!op;op=op||{};
-    const apriSic=(dipAvvisi(op).length||docLista(op).length)?" open":"";
+    const apriSic=(dipAvvisi(op).length||docLista(op).length||docVecchie(op).length)?" open":"";
     /* Modulo lungo -> finestra grande a due colonne, come lavoro e preventivo.
        A sinistra la persona e i suoi documenti, a destra cosa vede sul telefono
        e l'anagrafica. Sotto i 900px torna una colonna sola. */
@@ -515,6 +663,7 @@ ${vecchi?`
       +`<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button>`);
     ctrAscolta('operatore');
+    docInizia(isNew?null:op);
     $("#d-ruolo").onchange=applyRuoloPreset;
     $$("#d-perms input[data-perm]").forEach(ch=>ch.addEventListener("change",permAvviso));
     if(isNew){applyRuoloPreset();}
@@ -559,6 +708,7 @@ ${vecchi?`
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
     const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
+    if(docNonSalvato()){toast("Hai scritto un attestato ma non l'hai salvato: premi Salva sotto la tabella, oppure Annulla.");return;}
     const extra=dipCampiExtra();
     /* ⚠️ I DOPPIONI QUANDO L'INVITO NON PARTE — 14 agosto 2026.
        Qui si scrive in due tabelle: prima la persona (gest_operatori), poi
@@ -581,6 +731,8 @@ ${vecchi?`
          frattempo ha corretto il nome o il telefono */
       await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",opId).eq("user_id",sbUid);
     }
+    const errDoc=await docScriviNuovi(opId);
+    if(errDoc){toast("La persona e' salvata ma gli attestati no: "+errDoc+". Premi di nuovo Aggiungi per riprovare.");return;}
     const codice=sbRand();
     const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:opId,codice,stato:"invitato",ruolo,permessi});
     if(e2){
@@ -600,6 +752,7 @@ ${vecchi?`
     const ruolo=($("#d-ruolo")&&$("#d-ruolo").value)?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
+    if(docNonSalvato()){toast("Hai scritto un attestato ma non l'hai salvato: premi Salva sotto la tabella, oppure Annulla.");return;}
     const extra=dipCampiExtra();
     const {data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
