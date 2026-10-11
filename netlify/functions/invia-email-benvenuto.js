@@ -1,4 +1,5 @@
 // Email di benvenuto inviata alla registrazione.
+// 11 ott 2026: grafica nuova «modello C» (vedi piu' sotto, htmlNuovo).
 // 3 ott 2026: il gestionale base e' GRATIS PER SEMPRE per ogni iscritto. L'email
 // dice solo questo: il sito e' gratuito, gestionale compreso; per usarlo si
 // completa la registrazione (profilo); il benvenuto; e che ci si puo' scrivere
@@ -272,7 +273,7 @@ exports.handler = async function(event) {
     ? '<tr><td style="background:#1e8e3e;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">✓ Il sito &egrave; gratis, per sempre &mdash; gestionale compreso</td></tr>'
     : '';
 
-  const html =
+  const htmlVecchio =
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;margin:0;padding:24px 0;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,sans-serif;">' +
       '<tr><td align="center">' +
         '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(10,42,77,0.08);">' +
@@ -305,6 +306,84 @@ exports.handler = async function(event) {
         '</table>' +
       '</td></tr>' +
     '</table>';
+
+  /* ⛔ 11 ottobre 2026 — NUOVO BENVENUTO, «modello C» scelto da Alex.
+     Piu' corto, tutto in un colpo d'occhio: GRATIS per sempre, sito, gestionale,
+     FORUM (novita'), un solo passo (completa il profilo), «Serve aiuto?» ben
+     visibile, «come ci hai conosciuto?». Vale per il benvenuto normale e per
+     quello di chi viene dal gestionale. L'email «grazie» del piano a pagamento
+     (premium) e quella dei candidati restano com'erano.
+     Le 4 icone stanno in img/email/ (PNG: le email non leggono gli SVG).
+     Il nome non c'e' piu' nel piede: solo «TrovaImpresa · Rieti (RI)». */
+  const IMG = 'https://trovaimpresa.com/img/email/';
+  const FORUM_URL = 'https://trovaimpresa.com/forum';
+  const ctaUrl = daGestionale ? 'https://trovaimpresa.com/gestionale-app.html' : linkPannello;
+  const titoloNome = nome ? ', ' + nome : '';
+
+  function pilloleSondaggio() {
+    if (!userId) return '';   // senza user_id il bottone non scriverebbe: meglio niente
+    const bottoni = SONDAGGIO.map(function (s) {
+      const url = 'https://trovaimpresa.com/.netlify/functions/sondaggio'
+                + '?u=' + encodeURIComponent(userId)
+                + '&r=' + encodeURIComponent(s.v)
+                + '&t=' + encodeURIComponent(tipo || '');
+      return '<a href="' + url + '" style="display:inline-block;margin:0 3px 6px 0;padding:8px 14px;font-size:14px;'
+           + 'font-weight:700;color:#0a2a4d;background:#f0f3f7;border:1px solid #dbe3ec;'
+           + 'border-radius:999px;text-decoration:none">' + s.t + '</a>';
+    }).join('');
+    return '<div style="font-size:14px;font-weight:700;color:#0a2a4d;margin-bottom:8px">'
+         + 'Come ci hai conosciuto? Un tocco e basta.</div>' + bottoni;
+  }
+  const pillole = pilloleSondaggio();
+
+  const htmlNuovo = `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>@media (max-width:480px){.tile{height:auto!important}.nopad{padding:0!important}.col{display:block!important;width:100%!important}.pad{padding-left:14px!important;padding-right:14px!important}.gap{padding:0 0 8px 0!important}.big{font-size:56px!important}}</style></head>
+<body style="margin:0;padding:0;background:#e7eef8">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e7eef8;padding:18px 0;font-family:Arial,Helvetica,sans-serif"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden">
+
+<tr><td align="center" style="padding:16px 24px 6px"><a href="https://trovaimpresa.com"><img src="https://trovaimpresa.com/img/logo-email.png" width="200" alt="TrovaImpresa" style="display:block;border:0;width:200px;max-width:70%;height:auto"></a></td></tr>
+<tr><td class="pad" style="padding:6px 24px 14px;text-align:center"><div style="font-size:22px;font-weight:800;color:#0a2a4d">Benvenuto${titoloNome}!</div><div style="font-size:15px;color:#25384d;margin-top:3px">Il tuo account è pronto.</div></td></tr>
+
+<tr><td class="pad" style="padding:0 20px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+  <td class="col gap" width="46%" valign="top" style="padding:0 6px 0 0">
+    <table role="presentation" width="100%" height="100%" cellpadding="0" cellspacing="0"><tr><td class="tile" style="height:170px;background:#ff8800;border-radius:16px;padding:22px 16px;text-align:center" valign="middle">
+      <div class="big" style="font-size:50px;line-height:1;font-weight:900;color:#0a2a4d">GRATIS</div>
+      <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:6px">per sempre</div>
+      <div style="font-size:14px;line-height:1.4;color:#0a2a4d;margin-top:10px">Niente scadenze, niente carta, nessun addebito.</div>
+    </td></tr></table></td>
+  <td class="col nopad" width="54%" valign="top" style="padding:0 0 0 6px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="background:#0a2a4d;border-radius:14px;padding:12px 14px"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle" style="padding-right:12px"><img src="${IMG}icona-sito-bianco.png" width="36" height="36" alt="" style="display:block;border:0"></td><td valign="middle"><div style="font-size:16px;font-weight:800;color:#ffffff">Il sito</div><div style="font-size:13px;line-height:1.35;color:#cfe0f7">Online, con richieste di preventivo.</div></td></tr></table></td></tr>
+      <tr><td height="8" style="height:8px;line-height:8px;font-size:8px">&nbsp;</td></tr>
+      <tr><td style="background:#0a2a4d;border-radius:14px;padding:12px 14px"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle" style="padding-right:12px"><img src="${IMG}icona-gestionale-bianco.png" width="36" height="36" alt="" style="display:block;border:0"></td><td valign="middle"><div style="font-size:16px;font-weight:800;color:#ffffff">Il gestionale</div><div style="font-size:13px;line-height:1.35;color:#cfe0f7">Lavori, clienti, preventivi, fatture.</div></td></tr></table></td></tr>
+      <tr><td height="8" style="height:8px;line-height:8px;font-size:8px">&nbsp;</td></tr>
+      <tr><td style="background:#e7eef8;border:2px solid #ff8800;border-radius:14px;padding:10px 14px"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle" style="padding-right:12px"><img src="${IMG}icona-forum-blu.png" width="36" height="36" alt="" style="display:block;border:0"></td><td valign="middle"><div style="font-size:16px;font-weight:800;color:#0a2a4d">Il forum <span style="background:#ff8800;color:#0a2a4d;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;vertical-align:middle">NUOVO</span></div><div style="font-size:13px;line-height:1.35;color:#25384d">Rispondi ai clienti, senza registrarti. <a href="${FORUM_URL}" style="color:#0a2a4d;font-weight:800">Entra &rarr;</a></div></td></tr></table></td></tr>
+    </table></td>
+</tr></table></td></tr>
+
+<tr><td class="pad" style="padding:12px 20px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="background:#e7eef8;border-radius:16px;padding:18px 16px">
+  <div style="font-size:16px;color:#0a2a4d;margin-bottom:12px"><b>Ti manca un solo passo:</b> completa il profilo, bastano pochi minuti.</div>
+  <a href="${ctaUrl}" style="display:inline-block;background:#0a2a4d;color:#ffffff;font-size:17px;font-weight:800;text-decoration:none;padding:14px 30px;border-radius:9px">Completa la registrazione &rarr;</a>
+</td></tr></table></td></tr>
+
+<tr><td class="pad" style="padding:12px 20px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:#0a2a4d;border-radius:16px;padding:16px 18px">
+  <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+    <td valign="middle" width="70" style="width:70px;padding-right:14px"><table role="presentation" width="56" cellpadding="0" cellspacing="0" style="width:56px"><tr><td width="56" height="56" align="center" valign="middle" style="width:56px;height:56px;background:#ff8800;border-radius:28px"><img src="${IMG}icona-chat-blu.png" width="32" height="32" alt="" style="display:block;margin:0 auto;border:0"></td></tr></table></td>
+    <td valign="middle"><div style="font-size:20px;font-weight:800;color:#ff8800;line-height:1.2">Serve aiuto?</div>
+      <div style="font-size:15px;line-height:1.45;color:#ffffff;margin-top:3px">Nel pannello apri <b>&ldquo;Parla con TrovaImpresa&rdquo;</b> e scegli <b>&ldquo;Scrivi a noi&rdquo;</b>. Qualsiasi problema, lo risolviamo noi.</div></td>
+  </tr></table>
+</td></tr></table></td></tr>
+
+<tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
+  ${pillole}
+</td></tr>
+<tr><td style="padding:6px 20px 16px;text-align:center;font-size:14px;color:#25384d">Il Team di <b>TrovaImpresa</b></td></tr>
+<tr><td style="background:#0a2a4d;padding:14px 24px;text-align:center;color:#a9c9f5;font-size:12px;line-height:1.5">&copy; 2026 TrovaImpresa &middot; Rieti (RI) &middot; <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> &middot; <a href="https://trovaimpresa.com/privacy-policy.html" style="color:#a9c9f5">Privacy</a></td></tr>
+</table></td></tr></table></body></html>`;
+
+  const html = (premium || isCandidato) ? htmlVecchio : htmlNuovo;
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
