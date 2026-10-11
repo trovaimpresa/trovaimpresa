@@ -573,7 +573,7 @@ const handler = async function () {
       } catch (e) { erroriNuovi.push(nome + ': ' + e.message); return []; }
     };
     const dataTetto7 = giorniDopo(oggi, -7);
-    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt] = await Promise.all([
+    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt, dPrevCtl] = await Promise.all([
       leggiLarga('fatture fornitori', f => vivi(sb.from('gest_fatture_fornitori')
         .select('id, user_id, fornitore_id, numero, importo, scadenza')
         .in('user_id', utenti).is('data_pagata', null).neq('stato', 'pagata')
@@ -594,7 +594,12 @@ const handler = async function () {
          `eliminato_il` (si cancella davvero), quindi niente vivi(). */
       leggiLarga('attestati squadra', f => sb.from('gest_operatore_documenti')
         .select('id, user_id, operatore_id, tipo, data_scadenza')
-        .in('user_id', utenti).not('data_scadenza', 'is', null))
+        .in('user_id', utenti).not('data_scadenza', 'is', null)),
+      /* 12 ott 2026 — preventivi che chi lavora con te ha segnato «controllato» nelle ultime 24 ore */
+      leggiLarga('preventivi controllati', f => vivi(sb.from('gest_op_preventivi')
+        .select('id, user_id, titolo, esito_nota, controllato_da, controllato_il')
+        .in('user_id', utenti).eq('stato', 'controllato')
+        .gte('controllato_il', new Date(Date.now() - 24 * 3600 * 1000).toISOString()), f))
     ]);
     const nomeOperatore = Object.fromEntries(dOp.map(x => [String(x.id), x.nome || '']));
     const nomeFornitore = Object.fromEntries(dFor.map(x => [String(x.id), x.nome || '']));
@@ -807,6 +812,12 @@ const handler = async function () {
         const r = { tit: (nomeOperatore[String(x.operatore_id)] || 'Un collaboratore') + ' — ' + (x.tipo || 'Attestato'), sotto: '' };
         if (t) squadraOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduto ieri' : t.testo, col: t.col }));
         else if (completo && giaPassata(data)) squadraVecchie.push(Object.assign(r, { ev: passataTesto(data), col: '#c62828' }));
+      });
+
+      /* preventivi controllati: una riga ciascuno, solo la mattina dopo */
+      (voglio('squadra') ? dPrevCtl : []).filter(x => String(x.user_id) === uid).forEach(x => {
+        squadraOra.push({ tit: 'Preventivo «' + (x.titolo || '—') + '» controllato' + (x.controllato_da ? ' da ' + x.controllato_da : ''),
+                          sotto: x.esito_nota ? 'Nota: ' + x.esito_nota : '', ev: 'Controllato', col: '#1c7a43' });
       });
 
       const nuoviOra = fornOra.length + squadraOra.length + mezziOra.length + prevOra.length;

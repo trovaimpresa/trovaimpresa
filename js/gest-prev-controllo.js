@@ -18,14 +18,21 @@ async function gpCarica(){
   if(error){toast("Non riesco a leggere i preventivi: "+error.message);GP=[];return false;}
   GP=data||[];return true;
 }
+/* «visti»: i preventivi controllati dopo l'ultima volta che hai aperto la finestra sono «nuovi» */
+function gpVisti(){try{return localStorage.getItem("gp_visti_"+sbUid)||"";}catch(_){return "";}}
+function gpSegnaVisti(){try{localStorage.setItem("gp_visti_"+sbUid,new Date().toISOString());}catch(_){}}
 async function gpBanner(){
-  const b=document.getElementById("gp-banner");if(!b)return;
+  const b=document.getElementById("gp-banner");
+  if(!b)return;
   if(!sb||!sbUid){b.innerHTML="";return;}
   try{
-    const {data}=await sb.from(GP_TAB).select("id,stato").eq("user_id",sbUid).is("eliminato_il",null);
+    const {data}=await sb.from(GP_TAB).select("id,stato,controllato_il").eq("user_id",sbUid).is("eliminato_il",null);
     const tot=(data||[]).length,da=(data||[]).filter(x=>x.stato!=="controllato").length;
-    b.innerHTML='<button type="button" class="gp-ban'+(da?" r":"")+'" data-gp="apri">Preventivi da controllare'
-      +(da?' <span class="gp-n">'+da+'</span>':(tot?' <span class="gp-ok">tutti controllati</span>':""))+'</button>';
+    let visti=gpVisti();if(!visti){gpSegnaVisti();visti=gpVisti();}   /* la prima volta nulla e' «nuovo» */
+    const nuovi=(data||[]).filter(x=>x.stato==="controllato"&&x.controllato_il&&x.controllato_il>visti).length;
+    b.innerHTML='<button type="button" class="gp-ban'+(da?" r":"")+(nuovi?" v":"")+'" data-gp="apri"><span>Preventivi da controllare</span><span class="gp-dx">'
+      +(nuovi?'<span class="gp-nv">'+nuovi+(nuovi===1?" controllato":" controllati")+'</span>':"")
+      +(da?'<span class="gp-n">'+da+'</span>':(!nuovi&&tot?'<span class="gp-ok">tutti controllati</span>':""))+'</span></button>';
   }catch(_){}
 }
 function gpCard(p,urls){
@@ -70,7 +77,7 @@ async function gpDisegna(){
   gpBanner();
 }
 function gpApri(){
-  gpForm=false;
+  gpForm=false;gpSegnaVisti();
   openSheetGrande("Preventivi da controllare",'<div id="gp-corpo"><div class="gp-vuoto">Carico…</div></div>','<button class="btn b-cancel" data-action="close">Chiudi</button>');
   gpDisegna();
 }
@@ -123,6 +130,8 @@ if(!document.getElementById("gp-stile")){
     "#gp-banner{margin:0 0 14px}"
     +".gp-ban{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;font:inherit;font-size:19px;font-weight:800;color:#0a2a4d;background:#fff;border:2px solid #0a2a4d;border-radius:12px;padding:16px 18px;cursor:pointer;text-align:left}"
     +".gp-ban.r{border-color:#c62828;background:#fdecea;color:#7f1d1d}"
+    +".gp-dx{display:flex;align-items:center;gap:8px}.gp-ban.v{border-color:#1c7a43}"
+    +".gp-nv{background:#1c7a43;color:#fff;border-radius:999px;padding:3px 12px;font-size:16px;font-weight:800}"
     +".gp-n{background:#c62828;color:#fff;border-radius:999px;min-width:30px;text-align:center;padding:2px 10px;font-size:18px}"
     +".gp-ok{font-size:16px;font-weight:700;color:#1c7a43}"
     +".gp-card{border:2px solid #0a2a4d;border-radius:12px;padding:14px;margin:12px 0;background:#fff}"
