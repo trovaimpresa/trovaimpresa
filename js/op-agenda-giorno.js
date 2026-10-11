@@ -58,7 +58,10 @@ async function boot(session){
     await loadLavori();
     const n=new Date();calY=n.getFullYear();calM=n.getMonth();
     renderCal();renderDay();
-    show("agenda");
+    /* 11 ott 2026 — boot() parte DUE volte all'apertura (getSession e poi
+       onAuthStateChange). Se la prima ha gia' aperto il lavoro del link
+       WhatsApp, la seconda non deve riportare all'agenda. */
+    if(!(window.__opLavoroAperto && curLavoro && !$("#view-lavoro").classList.contains("hidden")))show("agenda");
     tmbAvvia();
     caricaCartaMia();
     /* 11 ott 2026 — il link del messaggio WhatsApp porta a UN lavoro (?lavoro=ID):
