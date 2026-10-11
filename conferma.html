@@ -186,8 +186,8 @@ async function adattaAlGestionale(){
     const p = box.querySelector('p');
     const a = box.querySelector('a.btn');
     if (t) t.textContent = 'Il tuo gestionale \u00e8 pronto';
-    if (p) p.textContent = 'Puoi entrare adesso. I primi 30 giorni sono gratis, '
-                         + 'senza carta di credito.';
+    if (p) p.textContent = 'Sei registrato a TrovaImpresa: il gestionale \u00e8 tuo, gratis, '
+                         + 'senza carta. L\u2019assistenza AI e la chat (39 \u20ac al mese) le attivi quando vuoi, da dentro.';
     if (a) { a.href = '/login-impresa.html?redirect=gestionale';
              a.textContent = 'Apri il gestionale'; }
   } catch (e) { /* silenzio: il profilo e' attivo lo stesso */ }

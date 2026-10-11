@@ -534,7 +534,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         '<button type="button" id="sc-rimanda" style="width:100%;background:#0066ff;color:#fff;border:none;' +
         'border-radius:12px;padding:16px;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;margin-bottom:10px">' +
         '📨 Non mi è arrivata — rimandamela</button>' +
-        '<a href="login-impresa.html" style="display:block;background:#fff;color:#0066ff;border:2px solid #0066ff;' +
+        '<a href="login-impresa.html' + (DA_GESTIONALE ? '?redirect=gestionale' : '') + '" style="display:block;background:#fff;color:#0066ff;border:2px solid #0066ff;' +
         'border-radius:12px;padding:14px;font-size:16px;font-weight:700;text-decoration:none;margin-bottom:14px">' +
         'Ho già confermato — vai all\'accesso</a>' +
         '<p style="font-size:15px;color:#666;line-height:1.55;margin:0">Hai sbagliato indirizzo o non arriva proprio? ' +
@@ -869,8 +869,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
        e con un clic torna indietro a cambiarlo. */
     (function () {
       var NOMI = {
-        'base-anno': 'Gestionale \u2014 249 \u20ac all\u2019anno',
-        'base-mese': 'Gestionale \u2014 29 \u20ac al mese',
+        'base-anno': 'Gestionale gratis',
+        'base-mese': 'Gestionale gratis',
         'ai-anno':   'Gestionale con AI \u2014 349 \u20ac all\u2019anno',
         'ai-mese':   'Gestionale con AI \u2014 39 \u20ac al mese'
       };
@@ -890,8 +890,9 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
            ⚠️ E SI DICE COSA SUCCEDE DOPO, perche' oggi la cassa non parte
               da sola: si conferma la mail e si paga dal pannello. Scrivere
               «paghi adesso» sarebbe una bugia finche' non c'e' la cassa. */
-        '<div style="margin-top:7px;color:#5f6c7b">Confermi la mail, entri, e paghi ' +
-        'da l\u00ec: un minuto, con Stripe. \u00b7 ' +
+        '<div style="margin-top:7px;color:#5f6c7b">' + ((PIANO_GEST && String(PIANO_GEST).indexOf('ai') === 0)
+          ? 'Confermi la mail, entri, e attivi l\u2019assistenza AI da l\u00ec: un minuto, con Stripe.'
+          : 'Il gestionale \u00e8 gratis, senza carta.') + ' \u00b7 ' +
         '<a href="/gestionale#prezzi" style="color:#0066ff">cambia</a></div>';
 
       var dove = document.querySelector('.form-section.active > p');
@@ -904,8 +905,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
        gratis»: da stasera la prova non esiste, e questa e' la prima riga
        che uno legge dopo aver scelto il prezzo. */
     if (intro) intro.innerHTML =
-      '\u2705 <b>Ti servono tre caselle.</b> Il resto lo metti dentro il gestionale, quando vuoi.' +
-      '<br>Subito dopo si paga: un minuto, con Stripe.';
+      '\u2705 <b>Il gestionale \u00e8 gratis: per usarlo ti registri a TrovaImpresa, una volta sola.</b>' +
+      '<br>\u00c8 lo stesso account del sito e del forum. Nessuna carta. L\u2019assistenza AI e la chat costano 39 \u20ac al mese e le attivi solo se vuoi, dopo.';
 
     /* ⛔ 18 set 2026 — «ACCEDI» TORNA AL GESTIONALE, NON AL MARKETPLACE.
        Alex: «sono due cose separate; andava bene se era nel sito, ma non lo

@@ -180,6 +180,29 @@
     });
   }
 
+  function disegnaGestionale() {
+    if (document.getElementById('ti-completa')) return;
+    var stile = document.createElement('style');
+    stile.textContent = CSS;
+    document.head.appendChild(stile);
+    var barra = document.createElement('div');
+    barra.id = 'ti-completa';
+    barra.innerHTML =
+      '<button class="ti-x" type="button" aria-label="Chiudi">&times;</button>' +
+      '<div class="ti-wrap">' +
+        '<div class="ti-testo">' +
+          '<p class="ti-titolo">La tua scheda sul sito &egrave; spenta, e va bene cos&igrave;</p>' +
+          '<p class="ti-sub">Il gestionale &egrave; pronto: aprilo quando vuoi. Se un giorno vuoi farti trovare dai clienti, completa il profilo da qui.</p>' +
+        '</div>' +
+        '<a class="ti-cta" href="/gestionale-app.html">Apri il gestionale &rarr;</a>' +
+      '</div>';
+    document.body.insertBefore(barra, document.body.firstChild);
+    barra.querySelector('.ti-x').addEventListener('click', function () {
+      barra.remove();
+      try { sessionStorage.setItem('ti_fascia_chiusa', '1'); } catch (e) {}
+    });
+  }
+
   function avvia() {
     try {
       if (sessionStorage.getItem('ti_fascia_chiusa') === '1') return;
@@ -217,6 +240,12 @@
         })
         .then(function (x) {
           if (!x) return;
+          /* 11 ott 2026 — CHI VIENE DALLA PORTA DEL GESTIONALE (vetrina spenta)
+             non cerca clienti: «profilo completo al 0%, cosi' non ti trova
+             nessuno» gli fa pensare di aver sbagliato strada. Per lui un
+             avviso diverso: la scheda e' spenta, va bene, il gestionale e'
+             pronto. Il resto del pannello non cambia. */
+          if (x.riga && x.riga.vetrina_attiva === false) { disegnaGestionale(); return; }
           var riga = chiaviCalcolate(x.riga, x.foto);
           var esito = calcola(riga);
           if (!esito || esito.perc >= 100) return;
