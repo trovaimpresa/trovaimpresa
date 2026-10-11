@@ -4,6 +4,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const { mailForum } = require('./_forum-email');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,16 +34,14 @@ async function inviaEmail(to, subject, html) {
 }
 
 function emailConferma(nome, titolo, link) {
-  return `
-  <div style="font-family:system-ui,Arial,sans-serif;font-size:17px;line-height:1.6;color:#12233a;max-width:560px">
-    <div style="text-align:center;padding:0 0 20px"><a href="https://trovaimpresa.com" style="text-decoration:none"><img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto"></a></div>
-    <p>Ciao ${esc(nome || '')},</p>
-    <p>hai scritto la richiesta <strong>«${esc(titolo)}»</strong> sulla bacheca di TrovaImpresa.</p>
-    <p><strong>Manca un ultimo passo:</strong> clicca il bottone e la richiesta va online. Le imprese iscritte potranno risponderti.</p>
-    <p style="margin:28px 0"><a href="${link}" style="background:#0066ff;color:#fff;text-decoration:none;font-weight:700;padding:16px 28px;border-radius:10px;display:inline-block;font-size:17px">Pubblica la mia richiesta</a></p>
-    <p style="font-size:15px;color:#5b6b80">Il tuo indirizzo email non sarà mai visibile sul sito. Il link vale 14 giorni. Se non hai scritto tu questa richiesta, ignora la email: senza il tuo clic non viene pubblicata.</p>
-    <p style="font-size:15px;color:#5b6b80">Se il bottone non funziona, copia questo indirizzo nel browser:<br>${link}</p>
-  </div>`;
+  return mailForum({
+    titolo: 'La tua richiesta è quasi online',
+    sub: 'Un solo clic e le imprese della tua zona possono risponderti.',
+    citazione: esc(titolo),
+    cta: { url: link, testo: 'Pubblica la mia richiesta &rarr;' },
+    box: { titolo: 'Ci vuole un solo clic', testo: 'Il tuo indirizzo email non sarà mai visibile sul sito. Il link vale <b>14 giorni</b>. <b>Non l&rsquo;hai scritta tu?</b> Ignora questa email: senza il tuo clic non viene pubblicata.' },
+    sotto: 'Il pulsante non funziona? Copia questo indirizzo nel browser:<br>' + link
+  });
 }
 
 exports.handler = async function (event) {

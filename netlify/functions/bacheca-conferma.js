@@ -2,7 +2,7 @@
 // Restituisce lo slug (per aprire la pagina) e il codice per chiuderla in seguito.
 
 const { createClient } = require('@supabase/supabase-js');
-const { SITO, esc, cornice, bottone, inviaUna } = require('./_forum-email');
+const { SITO, esc, mailForum, inviaUna } = require('./_forum-email');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,10 +42,13 @@ exports.handler = async function (event) {
       if (process.env.RESEND_API_KEY && r.email) {
         const url = SITO + '/forum-richiesta?s=' + encodeURIComponent(r.slug) + '&g=' + r.token_gestione;
         await inviaUna(process.env.RESEND_API_KEY, r.email, 'La tua richiesta è online',
-          cornice('La tua richiesta è online',
-            '<p>Ciao' + (r.nome_pubblico ? ' ' + esc(r.nome_pubblico) : '') + ', la tua richiesta «' + esc(r.titolo) + '» è sul Forum Edilizia. Le imprese della tua zona potranno risponderti.</p>' +
-            '<p>Conserva questo link: è il tuo, ti serve per leggere le risposte, scrivere e chiudere la richiesta quando hai risolto. Non condividerlo.</p>' +
-            bottone(url, 'Apri la mia richiesta')));
+          mailForum({
+            titolo: 'La tua richiesta è online',
+            sub: 'Le imprese della tua zona potranno risponderti.',
+            citazione: esc(r.titolo),
+            cta: { url: url, testo: 'Apri la mia richiesta &rarr;' },
+            box: { titolo: 'Conserva questa email', testo: 'Il link è <b>solo tuo</b>: ti serve per leggere le risposte, scrivere e <b>chiudere la richiesta</b> quando hai risolto. Non condividerlo.' }
+          }));
       }
     } catch (e) { console.error('[bacheca-conferma] email', e); }
     return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, slug: r.slug, gestione: r.token_gestione }) };
