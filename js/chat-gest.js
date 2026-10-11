@@ -28,3 +28,31 @@ document.addEventListener("click",function(e){
       linkAvviso:location.origin+"/gestionale-operatore.html?lavoro="+id}));
   }
 });
+
+/* 12 ottobre 2026 — LINK DIRETTO: il messaggio WhatsApp dell'operaio apre il gestionale
+   gia' sulla chat giusta (?chat=<persona> oppure ?chatlavoro=<lavoro>). */
+(function(){
+  const q=new URLSearchParams(location.search);
+  const chat=q.get("chat"),lav=q.get("chatlavoro");
+  if(!chat&&!lav)return;
+  let giri=0;
+  const t=setInterval(function(){
+    giri++;
+    const pronto=typeof sbUid!=="undefined"&&sbUid&&typeof openSheetGrande==="function"&&typeof chatMonta==="function";
+    if(!pronto){if(giri>60)clearInterval(t);return;}
+    const persone=(typeof dipCache!=="undefined"&&dipCache)||[];
+    if(chat&&!persone.length&&giri<12)return;   /* aspetta un poco i nomi della squadra */
+    clearInterval(t);
+    const base={impresaId:sbUid,lato:"titolare",nome:"Titolare"};
+    if(chat){
+      const o=persone.find(function(x){return String(x.id)===String(chat);});
+      chatGestApri("Messaggi con "+(o?o.nome:"la persona"),Object.assign(base,{
+        operatoreId:chat,destinatario:o?o.nome:"la persona",telDestinatario:o?o.telefono:"",
+        linkAvviso:location.origin+"/gestionale-operatore.html?chat=1"}));
+    }else{
+      chatGestApri("Messaggi del lavoro",Object.assign(base,{
+        lavoroId:lav,destinatario:"la squadra",telDestinatario:"",
+        linkAvviso:location.origin+"/gestionale-operatore.html?lavoro="+lav}));
+    }
+  },500);
+})();

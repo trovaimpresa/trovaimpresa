@@ -275,6 +275,7 @@
     "gest-operatore-documenti.sql":    "gest_operatore_documenti",
     "gest-op-preventivi.sql":          "gest_op_preventivi",
     "gest-messaggi.sql":               "gest_messaggi",
+    "gest-messaggi-2.sql":             "gest_messaggi",
     "gest-ore-e-crediti.sql":           "gest_azienda.cfp_obiettivo gest_ore gest_crediti",
     "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",

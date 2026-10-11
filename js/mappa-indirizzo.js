@@ -6,8 +6,14 @@
    ⚠️ Il file parte PRIMA della pagina: non usa niente della pagina in cima. */
 function mappaUrl(ind){return "https://maps.google.com/maps?q="+encodeURIComponent(ind)+"&z=16&output=embed";}
 function mappaLink(ind){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(ind);}
-function mappaHtml(ind){
-  ind=String(ind||"").trim();
+/* la citta' si aggiunge da sola (dal cliente) se nell'indirizzo non c'e' gia' */
+function mappaConCitta(ind,citta){
+  ind=String(ind||"").trim();citta=String(citta||"").trim();
+  if(ind&&citta&&ind.toLowerCase().indexOf(citta.toLowerCase())<0)return ind+", "+citta;
+  return ind;
+}
+function mappaHtml(ind,citta){
+  ind=mappaConCitta(ind,citta);
   if(ind.length<6)return "";
   return '<div class="mp-prev"><iframe class="mp-fr" src="'+mappaUrl(ind).replace(/"/g,"&quot;")+'" loading="lazy" title="Mappa" referrerpolicy="no-referrer-when-downgrade"></iframe>'
     +'<a class="mp-ap" href="'+mappaLink(ind).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">Apri in Google Maps</a></div>';
@@ -27,8 +33,15 @@ function mappaHtml(ind){
     const box=document.createElement("div");box.id="j-dove-mappa";
     const campo=i.closest(".field")||i.parentNode;
     campo.parentNode.insertBefore(box,campo.nextSibling);
-    const agg=function(){box.innerHTML=mappaHtml(i.value);};
+    /* citta' del cliente scelto nel modulo (cliCache e' della pagina: si legge solo qui, a chiamata avvenuta) */
+    const citta=function(){
+      try{const s=document.getElementById("j-cli");if(!s||!s.value)return "";
+        const c=(typeof cliCache!=="undefined"?cliCache:[]).find(function(x){return String(x.id)===String(s.value);});
+        return c&&c.citta?c.citta:"";}catch(_){return "";}
+    };
+    const agg=function(){box.innerHTML=mappaHtml(i.value,citta());};
     i.addEventListener("input",function(){clearTimeout(timer);timer=setTimeout(agg,800);});
+    const sc=document.getElementById("j-cli");if(sc)sc.addEventListener("change",agg);
     agg();
   };
   const mo=new MutationObserver(function(){aggancia();});

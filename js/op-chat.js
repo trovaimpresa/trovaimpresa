@@ -6,9 +6,9 @@
 function opChatCtx(lavoro){
   /* se chi guarda E' il titolare (prova la pagina dell'operaio col suo account) i suoi messaggi sono «titolare» */
   const base={impresaId:MIO.impresaId,lato:(MIO.uid&&MIO.uid===MIO.impresaId)?"titolare":"operaio",nome:MIO.nome||"",operatoreId:MIO.operatoreId||null,
-    destinatario:"il capo",telDestinatario:"",linkAvviso:location.origin+"/gestionale-app.html",
+    destinatario:"il capo",telDestinatario:"",linkAvviso:location.origin+"/gestionale-app.html"+(MIO.operatoreId?"?chat="+MIO.operatoreId:""),
     dopoLetti:()=>{opChatBadge();}};
-  if(lavoro){base.lavoroId=lavoro.id;base.titolo=(typeof opTitolo==="function"?opTitolo(lavoro):"");}
+  if(lavoro){base.lavoroId=lavoro.id;base.linkAvviso=location.origin+"/gestionale-app.html?chatlavoro="+lavoro.id;base.titolo=(typeof opTitolo==="function"?opTitolo(lavoro):"");}
   return base;
 }
 async function opChatBadge(){
