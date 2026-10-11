@@ -36,7 +36,7 @@ document.addEventListener("click",function(e){
   const chat=q.get("chat"),lav=q.get("chatlavoro");
   if(!chat&&!lav)return;
   let giri=0;
-  const t=setInterval(function(){
+  const t=setInterval(async function(){
     giri++;
     const pronto=typeof sbUid!=="undefined"&&sbUid&&typeof openSheetGrande==="function"&&typeof chatMonta==="function";
     if(!pronto){if(giri>60)clearInterval(t);return;}
@@ -45,7 +45,8 @@ document.addEventListener("click",function(e){
     clearInterval(t);
     const base={impresaId:sbUid,lato:"titolare",nome:"Titolare"};
     if(chat){
-      const o=persone.find(function(x){return String(x.id)===String(chat);});
+      let o=persone.find(function(x){return String(x.id)===String(chat);});
+      if(!o){try{const r=await sb.from("gest_operatori").select("nome,telefono").eq("id",chat).maybeSingle();if(r&&r.data)o=r.data;}catch(_){}}
       chatGestApri("Messaggi con "+(o?o.nome:"la persona"),Object.assign(base,{
         operatoreId:chat,destinatario:o?o.nome:"la persona",telDestinatario:o?o.telefono:"",
         linkAvviso:location.origin+"/gestionale-operatore.html?chat=1"}));
