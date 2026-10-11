@@ -833,6 +833,10 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     var altro = document.getElementById('riga-altro-mestiere');
     if (altro) altro.style.display = 'none';
 
+    /* 11 ott 2026 - chi viene dal gestionale non vede «Il sito / Il forum GRATIS»: non lo riguardano */
+    var chips = document.querySelector('.gchips');
+    if (chips) chips.style.display = 'none';
+
     var t = document.querySelector('.form-section.active h1, h1');
     if (t) t.textContent = 'Crea il tuo Gestionale';
 
@@ -857,6 +861,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       if (PIANO_GEST) righe += 'Piano: <b>' + NOMI[PIANO_GEST] + '</b><br>';
       righe += 'Mestiere: <b>Impresa edile</b>';
 
+      if (!(PIANO_GEST && String(PIANO_GEST).indexOf('ai') === 0)) return;
       var c = document.createElement('div');
       c.style.cssText = 'background:#eaf2ff;border:1px solid #cfe0ff;border-radius:10px;' +
         'padding:13px 15px;margin:0 0 16px;font-size:15px;color:#0a2a4d;line-height:1.75';
