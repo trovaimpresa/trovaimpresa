@@ -303,7 +303,7 @@
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=6">
 <!-- 11/10/2026 — LE SCHEDE Lavori · Foto · Archivio: rosso = da fare, verde = fatto -->
 <style id="op-schede">
-  .op-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 14px}
+  .op-tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:4px 0 14px}
   .op-tabs button{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 4px;font:inherit;font-size:18px;font-weight:800;color:#0b1220;cursor:pointer}
   .op-tabs button.on{background:var(--green-d);border-color:var(--green-d);color:#fff}
   .op-h{font-size:21px;font-weight:800;margin:6px 2px 4px;color:#0b1220}
@@ -327,6 +327,21 @@
   html body .op-card.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #c62828 !important}
   html body .op-card.v.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #1c7a43 !important}
   .op-nofoto{font-size:18px;color:#1f2937}
+  /* 11/10/2026 — Preventivi da controllare (js/op-preventivi.js) */
+  .op-prev{cursor:default}
+  .op-grande{width:100%;flex:none;font-size:20px;padding:18px 8px;display:block}
+  .op-pform,.op-esform{background:#fff;border:2px solid var(--green-d);border-radius:12px;padding:14px}
+  .op-esform{margin-top:12px;background:#f7fbf8}
+  .op-lab{display:block;font-size:17px;font-weight:800;margin:12px 0 4px;color:#0b1220}
+  .op-pform input,.op-pform textarea,.op-esform textarea{width:100%;box-sizing:border-box;font:inherit;font-size:18px;padding:12px;border:1.5px solid #9aa7b5;border-radius:10px;background:#fff}
+  .op-pfiles{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+  .op-pth img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1.5px solid #9aa7b5;display:block}
+  .op-pdf{display:inline-block;padding:14px 12px;border:1.5px solid #c62828;border-radius:10px;font-size:17px;font-weight:800;color:#c62828;text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .op-esito{margin-top:10px;font-size:18px;line-height:1.45;background:#f1f8f3;border-radius:10px;padding:10px 12px}
+  .op-esito small{display:block;color:#4b5563;font-size:15px;margin-top:2px}
+  .op-bx{border-color:#c62828;color:#c62828}
+  html body .op-card.op-prev.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #c62828 !important}
+  html body .op-card.op-prev.v.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #1c7a43 !important}
 </style>
 </head>
 <body>
@@ -399,6 +414,7 @@
     <div class="op-tabs" id="op-tabs">
       <button type="button" class="on" data-s="lavori">Lavori</button>
       <button type="button" data-s="foto">Foto</button>
+      <button type="button" data-s="preventivi">Preventivi <span id="op-n-prev"></span></button>
       <button type="button" data-s="archivio">Archivio <span id="op-n-arch"></span></button>
     </div>
 
@@ -412,6 +428,13 @@
       <div class="op-h">Foto</div>
       <div class="op-sub">Divise per lavoro: prima e dopo.</div>
       <div id="op-foto-lista"></div>
+    </div>
+
+    <div id="op-p-preventivi" class="hidden">
+      <div class="op-h">Preventivi da controllare</div>
+      <div class="op-sub" id="op-prev-sub"></div>
+      <div id="op-prev-modulo"></div>
+      <div id="op-prev-lista" style="margin-top:14px"></div>
     </div>
 
     <div id="op-p-archivio" class="hidden">
@@ -575,7 +598,8 @@
 <script src="/js/op-rapido-voce.js"></script>
 <script src="/js/op-rapportini.js"></script>
 <script src="/js/op-salvataggio-lavoro.js"></script>
-<script src="/js/op-schede.js?v=1"></script>
+<script src="/js/op-schede.js?v=2"></script>
+<script src="/js/op-preventivi.js?v=1"></script>
 <script src="/js/op-timbratura.js"></script>
 <script src="/js/op-avvio.js"></script>
 <script src="/js/freccia-indietro.js"></script>
