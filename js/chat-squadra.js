@@ -96,7 +96,13 @@ async function chatMonta(el,ctx){
       +'<div class="ch-nota">Il messaggio e\' salvato. Questo pulsante serve solo a farglielo sapere subito.</div>';
   };
   _chatTimer=setInterval(()=>{
-    if(!document.body.contains(el)||el.offsetParent===null){if(!document.body.contains(el)){clearInterval(_chatTimer);_chatTimer=null;}return;}
+    if(!document.body.contains(el)){clearInterval(_chatTimer);_chatTimer=null;return;}
+    /* si aggiorna (e si segna «letto») SOLO se la chat si sta davvero guardando:
+       finestra chiusa, scheda nascosta o pagina in secondo piano = niente.
+       Se no un messaggio arrivato a finestra chiusa risultava gia' letto. */
+    if(document.hidden||el.offsetParent===null)return;
+    const ov=el.closest("#overlay");
+    if(ov&&!ov.classList.contains("open"))return;
     carica(false);
   },CHAT_SECONDI*1000);
 }

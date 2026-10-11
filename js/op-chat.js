@@ -4,7 +4,8 @@
    Il motore e' js/chat-squadra.js (condiviso col gestionale). Qui solo il
    collegamento con questa pagina. */
 function opChatCtx(lavoro){
-  const base={impresaId:MIO.impresaId,lato:"operaio",nome:MIO.nome||"",operatoreId:MIO.operatoreId||null,
+  /* se chi guarda E' il titolare (prova la pagina dell'operaio col suo account) i suoi messaggi sono «titolare» */
+  const base={impresaId:MIO.impresaId,lato:(MIO.uid&&MIO.uid===MIO.impresaId)?"titolare":"operaio",nome:MIO.nome||"",operatoreId:MIO.operatoreId||null,
     destinatario:"il capo",telDestinatario:"",linkAvviso:location.origin+"/gestionale-app.html",
     dopoLetti:()=>{opChatBadge();}};
   if(lavoro){base.lavoroId=lavoro.id;base.titolo=(typeof opTitolo==="function"?opTitolo(lavoro):"");}
@@ -13,7 +14,7 @@ function opChatCtx(lavoro){
 async function opChatBadge(){
   try{
     if(!sb||!MIO||!MIO.impresaId)return;
-    const {count}=await sb.from(CHAT_TAB).select("id",{count:"exact",head:true}).eq("user_id",MIO.impresaId).is("letto_il",null).neq("autore","operaio");
+    const {count}=await sb.from(CHAT_TAB).select("id",{count:"exact",head:true}).eq("user_id",MIO.impresaId).is("letto_il",null).neq("autore",(MIO.uid&&MIO.uid===MIO.impresaId)?"titolare":"operaio");
     const e=document.getElementById("op-n-chat");if(e)e.textContent=count?"("+count+")":"";
   }catch(_){}
 }
