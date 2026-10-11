@@ -93,6 +93,113 @@
     "Escavatorista","Autista","Operatore macchine","Geometra","Impiegato","Altro"];
   const CONTRATTI=["Tempo indeterminato","Tempo determinato","Apprendistato","Part-time","Stagionale","A chiamata","Collaborazione","Altro"];
 
+  /* ============================================================
+     11 ottobre 2026 — ATTESTATI, PATENTINI E DOCUMENTI: UNA LISTA SENZA LIMITE
+     ============================================================
+     Prima c'era UNA casella di testo («Attestati e patentini») e quattro
+     scadenze fisse. Una persona con muletto, piattaforma, primo soccorso,
+     antincendio e ponteggi doveva infilare tutto in una riga, e SOLO le
+     quattro voci fisse facevano avvisare quando scadevano.
+     Adesso: una lista dove si aggiunge quanti ne servono, ognuno col suo
+     nome, numero (facoltativo) e data di scadenza. Quelli con una scadenza
+     fanno avvisi come gli altri (dipAvvisi).
+     Si salvano in `gest_operatori.documenti` (jsonb, array di
+     {tipo, numero, scadenza}) — sql/gest-operatori-documenti.sql.
+     ⚠️ Il vecchio testo `attestati` NON si butta: se `documenti` e' vuoto, le
+     sue voci (separate da virgola) compaiono come righe senza scadenza, cosi'
+     chi le aveva scritte non le perde. Salvando, `attestati` si riscrive con
+     i soli nomi, per chi lo legge ancora.
+     ⚠️ Il file parte PRIMA della pagina: qui non si usa niente che stia nella
+     pagina, e le azioni si agganciano con un ascoltatore PROPRIO su
+     data-doc-* (quelli della pagina, su data-action, sono catene di if che
+     lasciano passare solo quello che conoscono). */
+  const DOC_SUGGERITI=["Patentino muletto","Piattaforma aerea (PLE)","Primo soccorso","Antincendio",
+    "Lavori in quota","Montaggio ponteggi","Spazi confinati","Rischio elettrico (PES/PAV)",
+    "Escavatore / terna","Gru","Patente B","Patente C","Patente CQC","Preposto","RLS","Amianto","Formazione specifica"];
+  function docLista(o){
+    if(!o)return [];
+    let a=o.documenti;
+    if(typeof a==="string"){try{a=JSON.parse(a);}catch(_){a=null;}}
+    if(Array.isArray(a)){
+      return a.filter(function(d){return d&&typeof d==="object";}).map(function(d){
+        return {tipo:String(d.tipo||"").trim(),numero:String(d.numero||"").trim(),scadenza:String(d.scadenza||"").trim()};});
+    }
+    return [];
+  }
+  /* la lista da mostrare nel modulo: quella vera, oppure — se non c'e' ancora —
+     le voci del vecchio testo, una per riga, senza scadenza */
+  function docListaPerModulo(o){
+    const l=docLista(o);
+    if(l.length)return l;
+    const vecchio=String((o&&o.attestati)||"").split(/[,;\n]+/).map(function(s){return s.trim();}).filter(Boolean);
+    return vecchio.map(function(n){return {tipo:n,numero:"",scadenza:""};});
+  }
+  /* «scaduto» o «scaduta»: si guarda la prima parola. Finisce in -o = maschile
+     (Patentino, Attestato, Corso, Primo, Antincendio); altrimenti femminile
+     (Patente, Abilitazione, Formazione, Idoneità). */
+  function docParticipio(tipo){
+    const p=String(tipo||"").trim().split(/\s+/)[0]||"";
+    return /o$/i.test(p)||p===""?"scaduto":"scaduta";
+  }
+  function docRiga(d){
+    d=d||{};
+    return '<div class="doc-riga">'
+      +'<input class="doc-tipo" list="d-doc-sugg" maxlength="80" value="'+esc(d.tipo||"")+'" placeholder="Es. Patentino muletto" aria-label="Nome del documento">'
+      +'<input class="doc-num" maxlength="40" value="'+esc(d.numero||"")+'" placeholder="Numero (facoltativo)" aria-label="Numero">'
+      +'<input class="doc-scad" type="date" value="'+esc(d.scadenza||"")+'" aria-label="Scade il">'
+      +'<button type="button" class="doc-del" data-doc-del="1" aria-label="Togli questo documento" title="Togli">'
+      +'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>'
+      +'</div>';
+  }
+  function docBlocco(op){
+    const l=docListaPerModulo(op);
+    return '<div class="field"><label>Attestati, patentini e altri documenti</label>'
+      +'<div class="doc-intest"><span>Nome</span><span>Numero</span><span>Scade il</span><span></span></div>'
+      +'<div id="d-docs">'+l.map(docRiga).join("")+'</div>'
+      +'<datalist id="d-doc-sugg">'+DOC_SUGGERITI.map(function(s){return '<option value="'+esc(s)+'"></option>';}).join("")+'</datalist>'
+      +'<button type="button" class="btn doc-aggiungi" data-doc-add="1">+ Aggiungi attestato o documento</button>'
+      +'<div class="sh-nota">Quanti ne vuoi. Con la data di scadenza ti avvisa il Riepilogo, come per la visita medica.</div></div>';
+  }
+  /* legge le righe dal modulo; le righe del tutto vuote si scartano, e una riga
+     con scadenza ma senza nome si chiama «Documento» */
+  function docRaccogli(){
+    const out=[];
+    document.querySelectorAll("#d-docs .doc-riga").forEach(function(r){
+      const v=function(s){const e=r.querySelector(s);return e?String(e.value||"").trim():"";};
+      let tipo=v(".doc-tipo"),numero=v(".doc-num"),scadenza=v(".doc-scad");
+      if(!tipo&&!numero&&!scadenza)return;
+      if(!tipo)tipo="Documento";
+      out.push({tipo:tipo.slice(0,80),numero:numero.slice(0,40),scadenza:scadenza});
+    });
+    return out;
+  }
+  /* un ascoltatore solo, per sempre: le righe nascono e muoiono dentro il modulo */
+  if(!window.__docAscolto){
+    window.__docAscolto=1;
+    document.addEventListener("click",function(e){
+      const add=e.target.closest&&e.target.closest("[data-doc-add]");
+      if(add){
+        const box=document.getElementById("d-docs");if(!box)return;
+        box.insertAdjacentHTML("beforeend",docRiga());
+        const ult=box.querySelector(".doc-riga:last-child .doc-tipo");if(ult)ult.focus();
+        return;
+      }
+      const del=e.target.closest&&e.target.closest("[data-doc-del]");
+      if(del){const r=del.closest(".doc-riga");if(r)r.remove();}
+    });
+    const st=document.createElement("style");
+    st.id="doc-stile";
+    st.textContent=
+      "#d-docs{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}"
+      +".doc-intest,.doc-riga{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.1fr) minmax(0,1fr) 44px;gap:8px;align-items:center}"
+      +".doc-intest{font-size:15px;font-weight:700;margin:2px 0 6px}"
+      +".doc-riga input{width:100%;min-width:0;box-sizing:border-box}"
+      +".doc-del{width:44px;height:44px;border:1.5px solid #d9a3a3;border-radius:10px;background:#fff;color:#b3261e;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}"
+      +".doc-aggiungi{width:100%;margin:2px 0 8px;min-height:48px;font-weight:700}"
+      +"@media(max-width:620px){.doc-intest{display:none}.doc-riga{grid-template-columns:minmax(0,1fr) 44px}.doc-riga .doc-tipo{grid-column:1}.doc-riga .doc-del{grid-column:2;grid-row:1}.doc-riga .doc-num,.doc-riga .doc-scad{grid-column:1 / -1}}";
+    document.head.appendChild(st);
+  }
+
   /* Restituisce le scadenze scadute o vicine (entro 30 giorni) di una persona. */
   function dipAvvisi(o){
     if(!o)return [];
@@ -105,6 +212,12 @@
                 ["Formazione sicurezza",o.formazione_scadenza,"scaduta"],
                 ["Documento",o.documento_scadenza,"scaduto"],
                 ["Permesso di soggiorno",o.permesso_scadenza,"scaduto"]];
+    /* 11 ottobre 2026 — gli attestati, i patentini e gli altri documenti della
+       lista libera (colonna `documenti`) fanno avvisi come le quattro voci
+       fisse: scaduto o in scadenza entro 30 giorni. */
+    docLista(o).forEach(function(d){
+      if(d.scadenza)voci.push([d.tipo||"Documento",d.scadenza,docParticipio(d.tipo)]);
+    });
     const out=[];
     voci.forEach(function(v){
       if(!v[1])return;
@@ -161,7 +274,10 @@
       costo_orario:_numIt("#d-costo"),
       visita_medica_scadenza:o(v("#d-visita")),
       formazione_scadenza:o(v("#d-formazione")),
-      attestati:o(v("#d-attestati")),
+      /* 11 ott 2026 — la lista libera; `attestati` (testo) si riscrive con i
+         soli nomi, per chi lo legge ancora */
+      documenti:docRaccogli(),
+      attestati:o(docRaccogli().map(function(d){return d.tipo;}).join(", ")),
       documento_numero:o(v("#d-doc-num")),
       documento_scadenza:o(v("#d-doc-scad")),
       permesso_scadenza:o(v("#d-permesso")),
@@ -313,7 +429,7 @@
   function squadraForm(op,vecchi){
     _sqOpAppenaCreato=null;
     const isNew=!op;op=op||{};
-    const apriSic=dipAvvisi(op).length?" open":"";
+    const apriSic=(dipAvvisi(op).length||docLista(op).length)?" open":"";
     /* Modulo lungo -> finestra grande a due colonne, come lavoro e preventivo.
        A sinistra la persona e i suoi documenti, a destra cosa vede sul telefono
        e l'anagrafica. Sotto i 900px torna una colonna sola. */
@@ -349,7 +465,7 @@ ${vecchi?`
             <div class="field"><label>Visita medica \u2014 scade il</label><input id="d-visita" type="date" value="${esc(op.visita_medica_scadenza||"")}"></div>
             <div class="field"><label>Formazione sicurezza \u2014 scade il</label><input id="d-formazione" type="date" value="${esc(op.formazione_scadenza||"")}"></div>
           </div>
-          <div class="field"><label>Attestati e patentini</label><input id="d-attestati" value="${esc(op.attestati||"")}" placeholder="Es. muletto, piattaforma aerea, primo soccorso"></div>
+          ${docBlocco(op)}
           <div class="row2">
             <div class="field"><label>Documento \u2014 numero</label><input id="d-doc-num" value="${esc(op.documento_numero||"")}" placeholder="Es. CA12345AB"></div>
             <div class="field"><label>Documento \u2014 scade il</label><input id="d-doc-scad" type="date" value="${esc(op.documento_scadenza||"")}"></div>

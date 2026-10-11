@@ -271,6 +271,7 @@
     "gest-fattura-cassa.sql":           "gest_fatture.cassa_perc gest_fatture.cassa_tipo gest_fatture.spese",
     "gest-fornitori-plus.sql":          "gest_fornitori.trovaimpresa_id gest_foto.fornitore_id",
     "gest-fornitori.sql":               "gest_fornitori gest_fatture_fornitori",
+    "gest-operatori-documenti.sql":    "gest_operatori.documenti",
     "gest-ore-e-crediti.sql":           "gest_azienda.cfp_obiettivo gest_ore gest_crediti",
     "gest-parcella-professionisti.sql": "gest_preventivi.cassa_perc gest_preventivi.iva_perc gest_preventivi.ritenuta gest_preventivi.ritenuta_perc gest_preventivi.spese_forfait",
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
