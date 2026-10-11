@@ -799,6 +799,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <input id="imp-search" class="search-input" placeholder="🔍 Cerca impresa..." oninput="applicaFiltriImprese()">
           <select id="imp-filtro-tipo" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i tipi</option><option value="impresa">Impresa</option><option value="artigiano">Artigiano</option><option value="professionista">Professionista</option><option value="negozio">Negozio</option></select>
+          <select id="imp-filtro-origine" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutte le provenienze</option><option value="sito">Dal sito</option><option value="gestionale">Dal gestionale</option></select>
           <select id="imp-filtro-piano" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i piani</option><option value="premium">Premium</option><option value="free">Free</option></select>
           <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">Da controllare</option></select>
         </div>
@@ -4048,7 +4049,7 @@ function renderImprese(lista) {
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${esc(_nomeImp(i))}</strong><br><small style="color:var(--light)">${esc(i.email)}</small></td>
+      <td><strong>${esc(_nomeImp(i))}</strong>${i.vetrina_attiva===false?' <span class="badge" style="background:#e3edff;color:#0a2a4d;font-size:0.72rem">Dal gestionale</span>':''}<br><small style="color:var(--light)">${esc(i.email)}</small></td>
       <td><span class="badge ${(i.tipo||'').toLowerCase()==='artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
       <td>📍 ${esc(i.citta) || '–'}</td>
       <td>${esc(_arr(i.mestieri).slice(0,2).join(', '))}${_arr(i.mestieri).length>2?' +altri':''}</td>
@@ -4618,7 +4619,10 @@ function applicaFiltriImprese() {
   const ft = document.getElementById('imp-filtro-tipo')?.value || '';
   const fp = document.getElementById('imp-filtro-piano')?.value || '';
   const fs = document.getElementById('imp-filtro-stato')?.value || '';
+  const fo = document.getElementById('imp-filtro-origine')?.value || '';
   const f = tutteImprese.filter(i => {
+    if (fo === 'gestionale' && i.vetrina_attiva !== false) return false;
+    if (fo === 'sito' && i.vetrina_attiva === false) return false;
     const testo = ((i.nome_attivita || '') + ' ' + (i.citta || '') + ' ' + (i.email || '')).toLowerCase();
     if (q && !testo.includes(q)) return false;
     if (ft && (i.tipo || '').toLowerCase() !== ft.toLowerCase()) return false;
@@ -4629,7 +4633,7 @@ function applicaFiltriImprese() {
     return true;
   });
   const c = document.getElementById('imprese-count');
-  if (c) c.textContent = (q || ft || fp || fs)
+  if (c) c.textContent = (q || ft || fp || fs || fo)
     ? f.length + ' su ' + tutteImprese.length + ' imprese'
     : f.length + ' imprese registrate';
   renderImprese(f);

@@ -389,7 +389,7 @@ exports.handler = async function(event) {
   <table role="presentation" cellpadding="0" cellspacing="0"><tr>
     <td valign="middle" width="70" style="width:70px;padding-right:14px"><table role="presentation" width="56" cellpadding="0" cellspacing="0" style="width:56px"><tr><td width="56" height="56" align="center" valign="middle" style="width:56px;height:56px;background:#ff8800;border-radius:28px"><img src="${IMG}icona-chat-blu.png" width="32" height="32" alt="" style="display:block;margin:0 auto;border:0"></td></tr></table></td>
     <td valign="middle"><div style="font-size:20px;font-weight:800;color:#ff8800;line-height:1.2">Serve aiuto?</div>
-      <div style="font-size:15px;line-height:1.45;color:#ffffff;margin-top:3px">Scrivi a <b>info@trovaimpresa.com</b>. Qualsiasi problema, lo risolviamo noi.</div></td>
+      <div style="font-size:15px;line-height:1.45;color:#ffffff;margin-top:3px">Scrivi a <a href="mailto:info@trovaimpresa.com" style="color:#ffffff;font-weight:700">info@trovaimpresa.com</a>. Qualsiasi problema, lo risolviamo noi.</div></td>
   </tr></table>
 </td></tr></table></td></tr>
 
@@ -433,13 +433,14 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           from: 'TrovaImpresa <info@trovaimpresa.com>',
           to: ['info@trovaimpresa.com'],
-          subject: (premium ? '⭐ Ha attivato il Gestionale: ' : '🔔 Nuova iscrizione: ')
+          subject: (premium ? '⭐ Ha attivato il Gestionale: ' : (daGestionale ? '🔔 Nuova iscrizione dal gestionale: ' : '🔔 Nuova iscrizione: '))
                    + (nome || 'senza nome') + ' (' + (tipo || 'n/d') + ')',
           html: '<h2>' + (premium ? 'Ha attivato il Gestionale' : 'Nuova iscrizione') + ' su TrovaImpresa</h2>'
                 + '<p><strong>Nome:</strong> ' + (nome || '—') + '</p>'
                 + '<p><strong>Email:</strong> ' + email + '</p>'
                 + '<p><strong>Tipo:</strong> ' + (tipo || '—') + '</p>'
                 + (premium ? '<p><strong>Gestionale:</strong> sì</p>' : '')
+                + (daGestionale && !premium ? '<p><strong>Da:</strong> gestionale (la scheda sul sito resta spenta)</p>' : '')
         })
       });
     } catch (e) {
