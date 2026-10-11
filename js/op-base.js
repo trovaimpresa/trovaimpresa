@@ -89,6 +89,7 @@ function show(v){
   $("#view-scadenze").classList.toggle("hidden",v!=="scadenze");
   $("#view-fatture").classList.toggle("hidden",v!=="fatture");
   if(v==="agenda"||v==="clienti"||v==="scadenze"||v==="fatture"){curView=v;renderNav();}
+  if(v==="agenda"&&window.opRender)opRender();   /* 11 ott 2026 — schede Lavori/Foto/Archivio */
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
 
@@ -191,6 +192,8 @@ function applicaPermessi(){
   /* l'elenco dei lavori del giorno: chi ha solo la carta aziendale non lo vede */
   const dt=$("#day-title"); if(dt)dt.style.display=vediLavori?"":"none";
   const dl=$("#day-list");  if(dl)dl.style.display=vediLavori?"":"none";
+  /* 11 ott 2026 — le schede Lavori/Foto/Archivio seguono lo stesso permesso */
+  ["#op-tabs","#op-p-lavori","#op-p-foto","#op-p-archivio"].forEach(s=>{const e=$(s); if(e&&!vediLavori)e.style.display="none"; else if(e)e.style.display="";});
   /* foto e video: si vedono sempre quelle del capo, si AGGIUNGONO solo col permesso */
   _mostra("#btn-foto",  puo("foto"));
   _mostra("#btn-video", puo("foto"));

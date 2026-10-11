@@ -301,6 +301,33 @@
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=6">
+<!-- 11/10/2026 — LE SCHEDE Lavori · Foto · Archivio: rosso = da fare, verde = fatto -->
+<style id="op-schede">
+  .op-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 14px}
+  .op-tabs button{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 4px;font:inherit;font-size:18px;font-weight:800;color:#0b1220;cursor:pointer}
+  .op-tabs button.on{background:var(--green-d);border-color:var(--green-d);color:#fff}
+  .op-h{font-size:21px;font-weight:800;margin:6px 2px 4px;color:#0b1220}
+  .op-sub{font-size:18px;color:#1f2937;margin:0 2px 12px;min-height:4px}
+  .op-card{background:#fff;border:1px solid var(--line);border-left:8px solid #c62828;border-radius:12px;padding:14px;margin-bottom:12px;cursor:pointer}
+  .op-card.v{border-left-color:#1c7a43}
+  .op-t{font-size:20px;font-weight:800;color:#0b1220}
+  .op-dove{font-size:18px;color:#1f2937;margin:4px 0 6px}
+  .op-cosa{font-size:18px;line-height:1.45;color:#0b1220;margin:6px 0 10px;white-space:pre-wrap}
+  .op-st{display:inline-block;font-weight:800;font-size:17px;border-radius:8px;padding:4px 10px}
+  .op-st.r{background:#fdeaea;color:#c62828}.op-st.g{background:#e3f3e8;color:#1c7a43}
+  .op-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .op-btns:empty{display:none}
+  .op-b{flex:1;min-width:130px;text-align:center;text-decoration:none;border:1.5px solid var(--green-d);color:var(--green-d);background:#fff;border-radius:10px;padding:14px 8px;font:inherit;font-size:18px;font-weight:800;cursor:pointer}
+  .op-b.p{background:var(--green-d);color:#fff}
+  .op-fblocco{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  .op-flab{font-size:17px;font-weight:800;text-transform:uppercase;color:var(--green-d);margin:12px 0 6px}
+  .b-dafare{background:#fdeaea!important;color:#c62828!important}
+  /* il bordo blu di gestionale-stile.css (.ti-bb) rimette tutti i lati a 2px blu e cancella la striscia:
+     qui la striscia SIGNIFICA qualcosa (rosso = da fare, verde = fatto), quindi si ripristina, solo per queste schede */
+  html body .op-card.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #c62828 !important}
+  html body .op-card.v.ti-bb.ti-bb.ti-bb.ti-bb{border-left:10px solid #1c7a43 !important}
+  .op-nofoto{font-size:18px;color:#1f2937}
+</style>
 </head>
 <body>
 
@@ -366,6 +393,32 @@
 
     <button class="rv-apri hidden" id="btn-rapido"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Segna la giornata</button>
 
+    <!-- 11 ottobre 2026 — LE SCHEDE: ogni cosa ha il suo posto e non si mischia.
+         Il calendario e la lista del giorno di prima sono finiti in «Archivio»,
+         identici (stessi id): il motore non e' stato toccato. -->
+    <div class="op-tabs" id="op-tabs">
+      <button type="button" class="on" data-s="lavori">Lavori</button>
+      <button type="button" data-s="foto">Foto</button>
+      <button type="button" data-s="archivio">Archivio <span id="op-n-arch"></span></button>
+    </div>
+
+    <div id="op-p-lavori">
+      <div class="op-h">Lavori di adesso</div>
+      <div class="op-sub" id="op-sub"></div>
+      <div id="op-lista"></div>
+    </div>
+
+    <div id="op-p-foto" class="hidden">
+      <div class="op-h">Foto</div>
+      <div class="op-sub">Divise per lavoro: prima e dopo.</div>
+      <div id="op-foto-lista"></div>
+    </div>
+
+    <div id="op-p-archivio" class="hidden">
+      <div class="op-h">Lavori vecchi</div>
+      <div class="op-sub">Fatti da più di 7 giorni.</div>
+      <div id="op-arch-lista"></div>
+      <div class="op-h" style="margin-top:22px">Cerca per giorno</div>
     <div class="day-title" id="day-title">Lavori di oggi</div>
     <div id="day-list"></div>
 
@@ -376,6 +429,7 @@
         <button class="cal-nav" id="cal-next">›</button>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
+    </div>
     </div>
 
     <div class="empty-state hidden" id="carta-nessuna">Il tuo capo non ti ha ancora assegnato una carta aziendale.<br>Appena te la assegna, qui vedrai il saldo.</div>
@@ -521,6 +575,7 @@
 <script src="/js/op-rapido-voce.js"></script>
 <script src="/js/op-rapportini.js"></script>
 <script src="/js/op-salvataggio-lavoro.js"></script>
+<script src="/js/op-schede.js?v=1"></script>
 <script src="/js/op-timbratura.js"></script>
 <script src="/js/op-avvio.js"></script>
 <script src="/js/freccia-indietro.js"></script>
