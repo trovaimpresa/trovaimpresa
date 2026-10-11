@@ -573,7 +573,7 @@ const handler = async function () {
       } catch (e) { erroriNuovi.push(nome + ': ' + e.message); return []; }
     };
     const dataTetto7 = giorniDopo(oggi, -7);
-    const [dFF, dFor, dOp, dMezzi, dPrevAtt] = await Promise.all([
+    const [dFF, dFor, dOp, dMezzi, dPrevAtt, dAtt] = await Promise.all([
       leggiLarga('fatture fornitori', f => vivi(sb.from('gest_fatture_fornitori')
         .select('id, user_id, fornitore_id, numero, importo, scadenza')
         .in('user_id', utenti).is('data_pagata', null).neq('stato', 'pagata')
@@ -588,8 +588,15 @@ const handler = async function () {
         .in('user_id', utenti), f)),
       leggiLarga('preventivi in attesa', f => vivi(sb.from('gest_preventivi')
         .select('id, user_id, numero, titolo, stato, data, cliente_id')
-        .in('user_id', utenti).in('stato', ['bozza', 'inviato']).lte('data', dataTetto7), f))
+        .in('user_id', utenti).in('stato', ['bozza', 'inviato']).lte('data', dataTetto7), f)),
+      /* 11 ott 2026 — attestati, patentini e corsi della squadra: una riga
+         ciascuno in gest_operatore_documenti. Questa tabella NON ha
+         `eliminato_il` (si cancella davvero), quindi niente vivi(). */
+      leggiLarga('attestati squadra', f => sb.from('gest_operatore_documenti')
+        .select('id, user_id, operatore_id, tipo, data_scadenza')
+        .in('user_id', utenti).not('data_scadenza', 'is', null))
     ]);
+    const nomeOperatore = Object.fromEntries(dOp.map(x => [String(x.id), x.nome || '']));
     const nomeFornitore = Object.fromEntries(dFor.map(x => [String(x.id), x.nome || '']));
     /* il valore del preventivo lo dice la vista (la formula dei soldi sta li') */
     const totPrev = {};
@@ -790,6 +797,16 @@ const handler = async function () {
                     ev: 'Fatto ' + gg + ' giorni fa, nessuna risposta', col: '#e65100' };
         if (gg === 7 || gg === 14) prevOra.push(r);
         else if (completo && gg > 7) prevVecchi.push(r);
+      });
+
+      /* attestati, patentini e corsi: stesse tappe (30, 7, 1 giorni) */
+      /* solo le persone ancora in squadra: dOp non contiene quelle eliminate */
+      (voglio('squadra') ? dAtt : []).filter(x => String(x.user_id) === uid && nomeOperatore[String(x.operatore_id)] !== undefined).forEach(x => {
+        const data = x.data_scadenza; if (!data) return;
+        const t = tappaDi(data, [30, 7, 1]);
+        const r = { tit: (nomeOperatore[String(x.operatore_id)] || 'Un collaboratore') + ' — ' + (x.tipo || 'Attestato'), sotto: '' };
+        if (t) squadraOra.push(Object.assign(r, { ev: t.testo === 'Era ieri' ? 'È scaduto ieri' : t.testo, col: t.col }));
+        else if (completo && giaPassata(data)) squadraVecchie.push(Object.assign(r, { ev: passataTesto(data), col: '#c62828' }));
       });
 
       const nuoviOra = fornOra.length + squadraOra.length + mezziOra.length + prevOra.length;
