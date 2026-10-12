@@ -185,15 +185,7 @@ const handler = async function () {
       else risultato.errori.push('invio fallito per ' + imp.email);
     }
 
-    // Riepilogo allo staff (solo se c'è stato almeno un avviso).
-    if (risultato.avvisi > 0) {
-      await inviaEmail(
-        'info@trovaimpresa.com',
-        '🔔 Abbonamenti in scadenza: ' + risultato.avvisi + ' avvisi inviati',
-        '<p>Ho inviato ' + risultato.avvisi + ' email "il Gestionale scade fra 7 giorni".</p>'
-        + (risultato.errori.length ? '<p>Errori: ' + esc(risultato.errori.join(', ')) + '</p>' : '')
-      );
-    }
+    // Riepilogo allo staff: tolto (12 ott 2026), non deve piu partire.
 
     return { statusCode: 200, body: JSON.stringify({ ok: true, ...risultato }) };
   } catch (err) {
