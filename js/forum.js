@@ -163,6 +163,18 @@
 
   function caricaElenco(aggiungi) {
     var box = $('#f-elenco');
+    /* 14 ott 2026: l'elenco ha un'altezza fissa e scorre da solo, cosi' la pagina resta lunga uguale
+       e le fasce sotto (Gestionale, Sito) non finiscono lontane. In fondo carica le altre da solo. */
+    box.classList.add('f-scroll');
+    if (!box._fScroll) {
+      box._fScroll = true;
+      box.addEventListener('scroll', function () {
+        if (!stato.finito && !stato.carico && box.scrollTop + box.clientHeight >= box.scrollHeight - 160) {
+          stato.carico = true;
+          caricaElenco(true).then(function () { stato.carico = false; }, function () { stato.carico = false; });
+        }
+      });
+    }
     if (!aggiungi) { stato.pagina = 0; stato.finito = false; box.innerHTML = '<div class="f-vuoto">Carico le richieste…</div>'; }
     var q = sb.from('bacheca_richieste').select(COLONNE).in('stato', ['pubblicata', 'chiusa']);
     if (stato.mestiere) q = q.eq('mestiere', stato.mestiere);
@@ -228,6 +240,7 @@
 
   function caricaSingola() {
     var box = $('#f-elenco');
+    box.classList.remove('f-scroll');
     return sb.from('bacheca_richieste').select(COLONNE).eq('slug', stato.slug).in('stato', ['pubblicata', 'chiusa']).limit(1).then(function (res) {
       var r = res && res.data && res.data[0];
       if (!r) {

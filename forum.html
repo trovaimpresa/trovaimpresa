@@ -127,6 +127,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
     </div>
   </aside>
 </div>
+<div class="pb-due">
 <section class="pb pb-gest" id="pub-gest"><div class="pb-w pb-in">
   <div class="pb-t">
     <div class="pb-logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></div>
@@ -160,6 +161,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
     <div class="fl">✓ Nuovo cliente</div>
   </div>
 </div></section>
+</div>
 
 <footer class="fs-foot">
   <div class="cols">
@@ -175,5 +177,17 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 <script src="/js/forum.js?v=3"></script>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
+<style id="forum-corto-ott14">
+/* 14 ott 2026: sotto l'elenco, Gestionale a sinistra e Sito a destra, affiancati e senza disegno (pagina piu' corta) */
+.pb-due{display:grid;grid-template-columns:1fr 1fr}
+.pb-due .pb{padding:38px 0}
+.pb-due .pb-w{padding:0 36px;max-width:640px}
+.pb-due .pb-in{grid-template-columns:1fr !important;gap:0}
+.pb-due .pb-in.rev .pb-t{order:0}
+.pb-due .pb-ill{display:none !important}
+.pb-due .pb-logo{margin-left:-20px}
+@media(min-width:1100px){.pb-due #pub-gest .pb-w{margin:0 0 0 auto}.pb-due #pub-sito .pb-w{margin:0 auto 0 0}}
+@media(max-width:860px){.pb-due{grid-template-columns:1fr}.pb-due .pb{padding:28px 0}.pb-due .pb-w{padding:0 20px;max-width:none}.pb-due .pb-logo{margin-left:0}}
+</style>
 </body>
 </html>
