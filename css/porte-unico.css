@@ -46,7 +46,7 @@
   background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;
   background-size:40px 40px !important; border-radius:14px !important; padding:32px 36px !important;
   box-shadow:0 12px 30px rgba(10,42,77,.28) !important; color:#fff; font-family:'IBM Plex Sans',system-ui,sans-serif; }
-.gc-logo { display:inline-flex; background:#fff; border-radius:14px; padding:2px 14px; margin-bottom:20px; }
+.gc-logo { display:inline-flex; background:none; padding:2px 0; margin-bottom:20px; }
 .gc-logo img { height:104px; width:auto; display:block; }
 .gest-c .gc-testa { border-bottom:2px solid rgba(255,255,255,.5); padding-bottom:18px; margin-bottom:22px !important; }
 .gest-c .gc-tit { font-family:'IBM Plex Sans',system-ui,sans-serif !important; font-size:42px !important; font-weight:700; color:#fff !important; line-height:1.1; }
