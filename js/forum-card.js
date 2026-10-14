@@ -40,7 +40,7 @@
     box.innerHTML = '<style>' +
       '.fx{background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px),radial-gradient(600px 300px at 92% 0%,rgba(0,102,255,.45),transparent 70%);background-size:34px 34px,34px 34px,auto;border-radius:20px;padding:26px 28px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,.12);color:#fff}' +
       '.fx-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:6px}' +
-      '.fx-logo{flex:none;background:#fff;border-radius:14px;padding:8px 14px;box-shadow:0 6px 18px rgba(0,0,0,.25);display:inline-block}.fx-logo img{height:64px;display:block}' +
+      '.fx-logo{flex:none;background:none;padding:0;display:inline-block}.fx-logo img{height:64px;display:block}' +
       '.fx-t{flex:1;min-width:200px}.fx-t h3{font-family:"Playfair Display",Georgia,serif;font-size:1.7rem;color:#fff;margin:0 0 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}' +
       '.fx-b{background:#ff8800;color:#fff;font-weight:800;font-size:.8rem;border-radius:12px;padding:3px 10px;font-family:inherit}' +
       '.fx-s{color:#cfe0f7;font-size:1rem}' +
@@ -52,7 +52,7 @@
       '.fx-tutto{display:inline-block;margin-top:16px;border:2px solid rgba(255,255,255,.55);color:#fff;font-weight:800;text-decoration:none;font-size:.95rem;padding:10px 20px;border-radius:12px}.fx-tutto:hover{background:rgba(255,255,255,.12)}' +
       '.fx-vuoto{margin-top:14px;padding:14px 16px;color:#cfe0f7;line-height:1.5;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:14px}' +
       '@media(max-width:600px){.fx{padding:18px 16px}.fx-logo img{height:52px}.fx-t h3{font-size:1.4rem}.fx-r{flex-wrap:wrap}.fx-rs{width:100%;box-sizing:border-box;text-align:center}.fx-ti{white-space:normal}.fx-tutto{display:block;text-align:center}}' +
-      '</style><div class="fx"><div class="fx-top"><div class="fx-logo"><img src="/img/trovaimpresa-forum-edilizia-logo.svg" alt="TrovaImpresa Forum Edilizia"></div>' +
+      '</style><div class="fx"><div class="fx-top"><div class="fx-logo"><img src="/img/trovaimpresa-forum-edilizia-logo-bianco.svg" alt="TrovaImpresa Forum Edilizia"></div>' +
       '<div class="fx-t"><h3>Forum Edilizia' +
       (nuove ? '<span class="fx-b">' + nuove + (nuove === 1 ? ' nuova' : ' nuove') + '</span>' : '') + '</h3>' +
       '<div class="fx-s">Richieste dei clienti per il tuo mestiere e la tua zona</div></div></div>' +

@@ -9,7 +9,7 @@ a{color:var(--c-ar)}
 
 /* ---- parte alta ---- */
 .hero{background:transparent;border-bottom:2px solid rgba(255,255,255,.5)}
-.hero-logo{background:#fff;border-radius:10px;padding:10px 14px;box-sizing:content-box;height:70px;width:auto}
+.hero-logo{background:none;border-radius:0;padding:0;box-sizing:content-box;height:70px;width:auto}
 h1{color:#fff;font-weight:700;font-size:44px;letter-spacing:-1px}
 .claim{color:var(--c-chiaro);font-weight:500}
 .btn{border-radius:8px;font-weight:700}
@@ -71,7 +71,7 @@ h1{color:#fff;font-weight:700;font-size:44px;letter-spacing:-1px}
 .titolone{color:#fff;text-align:left;font-size:36px}
 .introne{color:var(--c-chiaro);text-align:left;margin-left:0;margin-right:0;max-width:none}
 .apri-gruppo{color:var(--c-chiaro);font-family:'IBM Plex Mono',Consolas,monospace;letter-spacing:.18em;max-width:none;margin:30px 0 12px}
-.apri-lista{max-width:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.apri-lista{max-width:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;grid-auto-flow:dense}
 details.apri{background:var(--c-vetro);border:2px solid var(--c-riga);border-radius:10px}
 details.apri[open]{grid-column:1/-1;border-color:var(--c-ar);box-shadow:none}
 details.apri summary:hover{background:rgba(255,255,255,.06)}
@@ -88,7 +88,7 @@ details.apri summary::after{border-color:var(--c-ar)}
 /* ---- prezzi: un riquadro solo, come nel pannello ---- */
 #prezzi.fascia{padding:30px 0 56px}
 #prezzi > .wrap{max-width:1140px;border:2px solid var(--c-riga);border-radius:14px;background:var(--c-vetro);padding:30px 30px 34px}
-.pann-logo{display:block;background:#fff;border-radius:10px;padding:10px 14px;height:70px;width:auto;box-sizing:content-box;margin:0 0 14px}
+.pann-logo{display:block;background:none;border-radius:0;padding:0;height:70px;width:auto;box-sizing:content-box;margin:0 0 14px}
 #prezzi .titolone{font-size:38px;margin:0 0 6px}
 #prezzi .introne{font-size:20px;margin:0 0 22px;padding-bottom:22px;border-bottom:2px solid rgba(255,255,255,.4)}
 #prezzi .scheda{background:transparent;border:0;box-shadow:none;padding:0;max-width:none}
@@ -181,3 +181,10 @@ footer a{color:var(--c-chiaro) !important}
 #prezzi .p-durata,#prezzi .p-risparmio{align-self:flex-start}
 #prezzi .gratis-porte a{text-align:center}
 #prezzi .gratis-porte{margin-bottom:6px}
+
+/* 14 ott 2026 - «E poi c'e' tutto il resto»: una griglia sola, senza i titoli di gruppo (la pagina era troppo lunga) */
+#tutto > .wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;grid-auto-flow:dense}
+#tutto > .wrap > .titolone,#tutto > .wrap > .introne{grid-column:1/-1;margin:0 0 6px;justify-self:start;text-align:left}
+#tutto .apri-gruppo{display:none}
+#tutto .apri-lista{display:contents}
+@media(max-width:860px){#tutto > .wrap{grid-template-columns:1fr}}
