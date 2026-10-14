@@ -627,10 +627,81 @@
         dal bottone «Guarda il video» (sono sempre nella pagina, per Google).
      ⚠️ Gli id vecchi (#dentro, #f-cantiere, #f-computo, #f-fornitori, #f-scelte)
         sono sulle schede: chi ha un link vecchio atterra lo stesso qui. -->
+<style id="gest-cosafa-ott14">
+/* 14 ott 2026: «Cosa fa» e «Guardalo lavorare» uniti in un blocco solo. Le tre scene animate in alto, le altre voci in schede basse. */
+#cosa-fa.cf{padding:44px 0 26px}
+#cosa-fa .cf-occ{margin:0 0 8px;font-family:'IBM Plex Mono',Consolas,monospace;font-size:15px;font-weight:600;letter-spacing:.2em;color:var(--c-ar)}
+#cosa-fa > .wrap > h2{font-size:44px;line-height:1.1;letter-spacing:-1px;margin:0 0 8px;color:#fff}
+#cosa-fa > .wrap > h2:after{content:"";display:block;width:84px;height:5px;border-radius:3px;background:var(--c-ar);margin-top:14px}
+#cosa-fa .sub{font-size:21px;margin:14px 0 28px;color:var(--c-chiaro)}
+#cosa-fa .cf-demo{scroll-margin-top:90px;counter-reset:scena}
+#cosa-fa .demo-griglia{gap:26px}
+#cosa-fa .blocco{counter-increment:scena;position:relative;padding-top:2px}
+#cosa-fa .blocco .eti{display:flex;gap:10px;font-size:14px;margin-bottom:8px}
+#cosa-fa .blocco .eti:before{content:counter(scena);flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--c-ar);color:var(--c-blu);font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:17px;letter-spacing:0;display:grid;place-items:center}
+#cosa-fa .blocco h3{font-size:24px;line-height:1.2;margin:0 0 14px;min-height:58px}
+#cosa-fa .blocco .eti{min-height:42px;align-items:flex-start}
+#cosa-fa .demo,#cosa-fa #d3{height:470px}
+#cosa-fa .demo{border:2px solid var(--c-riga);box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 6px rgba(255,136,0,.07);border-radius:14px}
+#cosa-fa .demo-nota{text-align:left;margin:20px 0 0;font-size:18px;color:var(--c-chiaro)}
+#cosa-fa .cf-sott{margin:34px 0 14px;padding-top:26px;border-top:2px solid rgba(255,255,255,.35);font-size:15px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',Consolas,monospace;color:var(--c-chiaro)}
+#cosa-fa .cf-griglia{grid-template-columns:repeat(3,1fr);gap:16px}
+#cosa-fa .cf-card{display:grid;grid-template-columns:62px 1fr;column-gap:18px;align-items:start;padding:20px 22px;border-radius:12px;transition:.15s}
+#cosa-fa .cf-card:hover{transform:translateY(-3px);border-color:var(--c-ar);box-shadow:0 12px 28px rgba(0,0,0,.3)}
+#cosa-fa .cf-ic{grid-column:1;grid-row:1/span 4;width:62px;height:62px;border-radius:14px;margin:0}
+#cosa-fa .cf-ic svg{width:32px;height:32px}
+#cosa-fa .cf-card > :not(.cf-ic){grid-column:2}
+#cosa-fa .cf-card h3{font-size:23px;margin:0 0 4px}
+#cosa-fa .cf-card p{font-size:17.5px;margin:0 0 12px}
+#cosa-fa .cf-tag{margin:-2px 0 12px;justify-self:start}
+#cosa-fa .cf-btn{margin-top:0;justify-self:start;font-size:17px;padding:11px 18px}
+@media(max-width:900px){
+  #cosa-fa > .wrap > h2{font-size:30px}
+  #cosa-fa .sub{font-size:18px}
+  #cosa-fa .cf-griglia{grid-template-columns:1fr}
+  #cosa-fa .cf-card{grid-template-columns:54px 1fr;column-gap:14px}
+  #cosa-fa .cf-ic{width:54px;height:54px}
+}
+</style>
 <section class="cf" id="cosa-fa">
   <div class="wrap">
-    <h2>Cosa fa</h2>
-    <p class="sub">Le cose che usi ogni giorno. Tocca per vedere il video.</p>
+    <p class="cf-occ">COSA FA &middot; GUARDALO LAVORARE</p>
+    <h2>Guarda il gestionale al lavoro</h2>
+    <p class="sub">Tre scene di ogni giorno, come le vedresti tu. Sotto, le altre: tocchi e guardi il video.</p>
+    <div id="demo" class="cf-demo">
+<div class="demo-griglia">
+      <div class="blocco">
+        <div class="eti">Chat con AI &middot; nel Gestionale con AI</div>
+        <h3>Chiedi, e ti risponde coi tuoi numeri</h3>
+        <div class="demo" id="d1">
+          <div class="d-testa"><div class="d-logo">T</div><div><b>Assistente TrovaImpresa</b><small id="d1-st">online</small></div></div>
+          <div class="d-corpo" id="d1-c"></div>
+          <div class="d-piede"><div class="piu">+</div><div class="casella" id="d1-in">Scrivi una domanda</div><div class="invia"><svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg></div></div>
+        </div>
+      </div>
+      <div class="blocco">
+        <div class="eti">Legge le carte &middot; nel Gestionale con AI</div>
+        <h3>Fai la foto alla bolla, il resto lo fa lei</h3>
+        <div class="demo" id="d2">
+          <div class="d-testa"><div class="d-logo">T</div><div><b>Assistente TrovaImpresa</b><small id="d2-st">online</small></div></div>
+          <div class="d-corpo" id="d2-c"></div>
+          <div class="d-piede"><div class="piu">+</div><div class="casella">Scrivi una domanda</div><div class="invia"><svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg></div></div>
+        </div>
+      </div>
+      <div class="blocco">
+        <div class="eti">Preventivi &middot; in tutti e due i piani</div>
+        <h3>Il preventivo si scrive da solo</h3>
+        <div class="demo" id="d3">
+          <div class="prev-t"><div><b>Rossi &mdash; Bagno completo</b><small>Roma, via Tiburtina</small></div><span class="stato">Bozza</span></div>
+          <div class="bot-ai" id="d3-ai"><span class="pallino" id="d3-pal"></span><span id="d3-ai-t">Genera con AI&hellip;</span></div>
+          <div class="d-corpo" id="d3-c" style="gap:0;padding-top:4px"></div>
+          <div class="totale"><div>Totale</div><b id="d3-tot">0,00 &euro;</b></div>
+        </div>
+      </div>
+    </div>
+      <p class="demo-nota">Nomi e cifre sono di prova. Vuoi vedere quello vero? <a href="#comincia">Fai un giro, senza iscriverti</a>.</p>
+    </div>
+    <h3 class="cf-sott">Le altre cose che fa ogni giorno</h3>
     <div class="cf-griglia">
       <article class="cf-card" id="dentro">
         <span class="cf-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></span>
@@ -797,44 +868,6 @@
   </div>
   </div>
 </dialog>
-</section>
-
-<section class="demo-fascia" id="demo">
-  <div class="wrap">
-    <h2>Guardalo lavorare</h2>
-    <p class="intro">Tre cose che fa ogni giorno, cos&igrave; come le vedresti tu.</p>
-    <div class="demo-griglia">
-      <div class="blocco">
-        <div class="eti">Chat con AI &middot; nel Gestionale con AI</div>
-        <h3>Chiedi, e ti risponde coi tuoi numeri</h3>
-        <div class="demo" id="d1">
-          <div class="d-testa"><div class="d-logo">T</div><div><b>Assistente TrovaImpresa</b><small id="d1-st">online</small></div></div>
-          <div class="d-corpo" id="d1-c"></div>
-          <div class="d-piede"><div class="piu">+</div><div class="casella" id="d1-in">Scrivi una domanda</div><div class="invia"><svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg></div></div>
-        </div>
-      </div>
-      <div class="blocco">
-        <div class="eti">Legge le carte &middot; nel Gestionale con AI</div>
-        <h3>Fai la foto alla bolla, il resto lo fa lei</h3>
-        <div class="demo" id="d2">
-          <div class="d-testa"><div class="d-logo">T</div><div><b>Assistente TrovaImpresa</b><small id="d2-st">online</small></div></div>
-          <div class="d-corpo" id="d2-c"></div>
-          <div class="d-piede"><div class="piu">+</div><div class="casella">Scrivi una domanda</div><div class="invia"><svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg></div></div>
-        </div>
-      </div>
-      <div class="blocco">
-        <div class="eti">Preventivi &middot; in tutti e due i piani</div>
-        <h3>Il preventivo si scrive da solo</h3>
-        <div class="demo" id="d3">
-          <div class="prev-t"><div><b>Rossi &mdash; Bagno completo</b><small>Roma, via Tiburtina</small></div><span class="stato">Bozza</span></div>
-          <div class="bot-ai" id="d3-ai"><span class="pallino" id="d3-pal"></span><span id="d3-ai-t">Genera con AI&hellip;</span></div>
-          <div class="d-corpo" id="d3-c" style="gap:0;padding-top:4px"></div>
-          <div class="totale"><div>Totale</div><b id="d3-tot">0,00 &euro;</b></div>
-        </div>
-      </div>
-    </div>
-    <p class="demo-nota">Nomi e cifre sono di prova. Vuoi vedere quello vero? <a href="#comincia">Fai un giro, senza iscriverti</a>.</p>
-  </div>
 </section>
 
 <!-- ================= IL PREVENTIVO ================= -->
