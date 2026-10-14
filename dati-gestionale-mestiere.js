@@ -752,7 +752,7 @@ module.exports = MESTIERI.map(m => {
     sommario: `il gestionale di TrovaImpresa visto dalla parte di ${m.articolo}: ${p.docPl},
       ${p.lavori}, fatture e scadenze, dal telefono e dal computer. Le stesse funzioni degli altri, ma
       con le parole e i conti del tuo mestiere.
-      <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+      <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
     sezioni: [
       { blocchi: [
@@ -815,9 +815,7 @@ module.exports = MESTIERI.map(m => {
         r: `No. Si apre dal browser, sul telefono e sul computer. Niente da scaricare, nessun aggiornamento
             da fare a mano, basta la connessione.` },
       { d: `Quanto costa il gestionale per ${m.nome}?`,
-        r: `Il gestionale base è gratis per chi si iscrive, senza scadenza e senza carta di credito. Se vuoi anche
-            l'assistenza AI e la chat costa 39 euro al mese oppure 349 euro all'anno, prezzo finale senza IVA da aggiungere,
-            e ti disdici quando vuoi restando sul gestionale gratis.` },
+        r: `Il gestionale base è gratis per chi si iscrive, senza scadenza e senza carta di credito. Se vuoi anche il piano completo, con assistenza AI e chat, costa 39 euro al mese oppure 349 euro all'anno, prezzo finale senza IVA da aggiungere: compila moduli e preventivi al posto tuo, ti segnala gli errori e risponde alle tue domande. Ti disdici quando vuoi restando sul gestionale gratis.` },
       { d: 'I dati sono miei?',
         r: `Sì. Si esportano in Excel o in JSON quando vuoi, senza costi e senza chiedere permesso: se un
             giorno vai da un'altra parte, te li porti dietro.` },

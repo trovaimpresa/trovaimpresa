@@ -32,7 +32,7 @@ module.exports = [
   sommario: `un programma per fare il <strong>computo metrico</strong> senza Excel: i capitoli, le voci
     con le misure una sotto l'altra, l'analisi prezzi e il tuo prezzario. Quando hai finito,
     <strong>il computo diventa un preventivo</strong> senza riscrivere niente.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -179,7 +179,7 @@ module.exports = [
   sommario: `un programma per fare <strong>preventivi edili</strong> con le voci, l'IVA giusta riga per riga
     e il PDF pronto. Ogni preventivo ha uno stato, e <strong>quando il cliente accetta diventa un
     lavoro</strong> senza riscriverlo.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -291,7 +291,7 @@ module.exports = [
   sommario: `un programma per tenere in ordine i <strong>cantieri aperti</strong>: a che punto sono,
     chi ci va, quanto hanno speso e cosa manca. Con la mappa, l'agenda della squadra e le foto,
     dal telefono mentre sei sul posto.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -405,7 +405,7 @@ module.exports = [
   sommario: `il <strong>rapportino giornaliero</strong> compilato dal telefono, in cantiere, mentre te
     lo ricordi: chi c'era, cosa si è fatto, quante ore e le foto. Le ore poi
     <strong>entrano da sole nel costo del lavoro</strong>.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -511,7 +511,7 @@ module.exports = [
   sommario: `fatturazione elettronica pensata per l'edilizia: prepara il <strong>file XML per lo SDI</strong>
     con l'<strong>IVA al 10% riga per riga</strong>, la ritenuta, il bollo e la cassa previdenziale.
     Il file lo mandi tu o il commercialista.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -621,7 +621,7 @@ module.exports = [
   sommario: `un programma per gestire gli <strong>stati di avanzamento lavori</strong>: quante quantità
     hai eseguito, quanto è <strong>maturato</strong>, quanto <strong>resta</strong>, e la fattura che
     esce da lì. Per i lavori che durano mesi.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -723,7 +723,7 @@ module.exports = [
   sommario: `un posto solo per <strong>mezzi e attrezzature</strong>: revisione, bollo, assicurazione e
     tagliando con l'<strong>avviso prima che scadano</strong>, i rifornimenti di carburante e il saldo
     delle carte.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -818,7 +818,7 @@ module.exports = [
   sommario: `un programma per contare le <strong>ore degli operai</strong>: per persona e per cantiere,
     con le timbrature e il rapportino dal telefono. Le ore poi entrano nel
     <strong>costo vero del lavoro</strong>.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [

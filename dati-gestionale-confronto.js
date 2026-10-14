@@ -30,7 +30,7 @@ module.exports = [
   sommario: `un gestionale per l'edilizia in Italia costa in genere fra i <strong>200 e i 900 € l'anno</strong>,
     ma la cifra sul listino è solo metà del conto: le differenze vere stanno nel <strong>costo per
     utente</strong>, nell'<strong>attivazione</strong> e nei moduli venduti a parte.
-    <span class="price-big">Qui: gratis, e l'AI da 39 € al mese</span>`,
+    <span class="price-big">Qui: gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [
@@ -250,7 +250,7 @@ module.exports = [
   sommario: `per un'impresa da <strong>una a dieci persone</strong> le funzioni che servono davvero sono
     sei, e i gestionali fatti per le imprese grandi falliscono proprio perché ne hanno ottanta.
     Qui c'è quello che serve, senza il peso.
-    <span class="price-big">Gratis per sempre. L'AI da 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
 
   sezioni: [
     { blocchi: [

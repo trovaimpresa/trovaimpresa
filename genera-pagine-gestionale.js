@@ -109,9 +109,10 @@ function riquadroPrezzo(cosa) {
       <div class="cifra">Gratis per sempre</div>
       <div class="sotto">per chi si iscrive &middot; nessuna carta di credito</div>
       <div class="prezzo-ai">
-        <b>Con l'assistenza AI e la chat</b> &mdash; ${PREZZO_AI_MESE} al mese oppure ${PREZZO_AI_ANNO} all'anno
-        (prezzo finale, nessuna IVA da aggiungere). Aggiunge la chat che ti risponde coi conti dei tuoi lavori
-        e ti compila i moduli. La attivi quando vuoi e ti disdici quando vuoi.
+        <b>Piano completo, con assistenza AI e chat</b> &mdash; ${PREZZO_AI_MESE} al mese oppure ${PREZZO_AI_ANNO} all'anno
+        (prezzo finale, nessuna IVA da aggiungere). Non è solo l'AI: lavori più veloce (compila moduli e preventivi
+        al posto tuo), fai meno errori (ti segnala cosa hai sbagliato e dove) e la chat ti risponde su conti e fatture.
+        Lo attivi quando vuoi e disdici quando vuoi.
       </div>
       <ul class="checklist ok-list">
         <li><strong>Ti iscrivi con la mail e il gestionale &egrave; tuo</strong>, senza scadenza e senza carta.</li>
