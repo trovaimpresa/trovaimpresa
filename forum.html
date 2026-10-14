@@ -130,7 +130,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 <div class="pb-due">
 <section class="pb pb-gest" id="pub-gest"><div class="pb-w pb-in">
   <div class="pb-t">
-    <div class="pb-logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></div>
+    <div class="pb-logo"><img src="/img/trovaimpresa-gestionale-logo-bianco.svg" alt="Gestionale TrovaImpresa"></div>
     <h2>Preventivi, fatture e cantieri in un posto solo. Gratis.</h2>
     <p>Il gestionale per imprese e artigiani: sai sempre quanto ti costa e quanto ti rende ogni lavoro.</p>
     <a class="pb-btn o" href="/gestionale">Scopri il gestionale</a> <a class="pb-btn v2" href="/login-impresa?redirect=gestionale">Accedi</a>
@@ -178,16 +178,20 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <style id="forum-corto-ott14">
-/* 14 ott 2026: sotto l'elenco, Gestionale a sinistra e Sito a destra, affiancati e senza disegno (pagina piu' corta) */
-.pb-due{display:grid;grid-template-columns:1fr 1fr}
-.pb-due .pb{padding:38px 0}
-.pb-due .pb-w{padding:0 36px;max-width:640px}
+/* 14 ott 2026: le due fasce (Gestionale/Forum e Sito) una sopra l'altra, stesso blu, senza disegni e senza riquadri bianchi */
+.pb-due{display:block}
+.pb-due .pb{padding:40px 0;background-color:#0a2a4d !important;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) !important;background-size:44px 44px !important;color:#fff !important;border-top:0 !important;border-bottom:0 !important}
+.pb-due .pb + .pb{border-top:2px solid rgba(255,255,255,.28) !important}
+.pb-due .pb h2{color:#fff !important}
+.pb-due .pb p{color:#d6e3f5 !important}
 .pb-due .pb-in{grid-template-columns:1fr !important;gap:0}
 .pb-due .pb-in.rev .pb-t{order:0}
 .pb-due .pb-ill{display:none !important}
-.pb-due .pb-logo{margin-left:-20px}
-@media(min-width:1100px){.pb-due #pub-gest .pb-w{margin:0 0 0 auto}.pb-due #pub-sito .pb-w{margin:0 auto 0 0}}
-@media(max-width:860px){.pb-due{grid-template-columns:1fr}.pb-due .pb{padding:28px 0}.pb-due .pb-w{padding:0 20px;max-width:none}.pb-due .pb-logo{margin-left:0}}
+.pb-due .pb-btn.v,.pb-due .pb-btn.v2{border:2px solid rgba(255,255,255,.7) !important;color:#fff !important;background:transparent}
+@media(max-width:860px){.pb-due .pb{padding:28px 0}html body .pb-due .pb h2{font-size:27px !important}}
+html body .pb-due .pb-logo{width:auto !important;height:auto !important;padding:0 !important;margin:0 0 18px !important;display:block !important;zoom:1 !important}
+html body .pb-due .pb-logo img{width:220px !important;height:auto !important;max-width:100% !important;object-fit:initial !important}
+@media(max-width:860px){html body .pb-due .pb-logo img{width:230px !important}}
 </style>
 </body>
 </html>
