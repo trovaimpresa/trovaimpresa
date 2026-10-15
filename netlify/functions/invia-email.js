@@ -18,6 +18,27 @@ exports.handler = async function(event) {
   const nomeTesto = String(nome || '').replace(/[\r\n<>]/g, ' ').slice(0, 80);
   nome = esc(nome); email = esc(email); messaggio = esc(messaggio).replace(/\n/g, '<br>');
 
+  /* 15 ottobre 2026: il messaggio si SALVA anche nel database (tabella
+     `messaggi`), cosi' finisce nel conto «Clienti che cercano» dell'admin e
+     non esiste solo nella casella di posta. Se il salvataggio fallisce
+     l'email parte lo stesso: non blocca mai. */
+  try {
+    const sbUrl = (process.env.SUPABASE_URL || '').trim();
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || '').trim();
+    if (sbUrl && sbKey) {
+      const { createClient } = require('@supabase/supabase-js');
+      const sb = createClient(sbUrl, sbKey, { auth: { persistSession: false, autoRefreshToken: false } });
+      const { error: errSalva } = await sb.from('messaggi').insert({
+        nome: nomeTesto,
+        email: String(JSON.parse(event.body || '{}').email || '').slice(0, 200),
+        messaggio: String(JSON.parse(event.body || '{}').messaggio || '').slice(0, 5000)
+      });
+      if (errSalva) console.error('[invia-email] salvataggio messaggio:', errSalva.message);
+    }
+  } catch (e) {
+    console.error('[invia-email] salvataggio messaggio:', e.message);
+  }
+
   const data = JSON.stringify({
     from: 'TrovaImpresa <info@trovaimpresa.com>',
     to: ['info@trovaimpresa.com'],

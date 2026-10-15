@@ -417,6 +417,18 @@
 .u-btn.rqa-on{background:#0066ff!important;color:#fff!important;border-color:#0066ff!important}
 .u-btn.rqa-salva{background:#f3f8ff;border-color:#0066ff;color:#0046b3}
 .rqa-nota{font-size:14px;color:#5b6b80;margin-top:8px}
+  /* 15 ottobre 2026 - pagina «Clienti che cercano» */
+  .cc-per { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 22px; }
+  .cc-grid { display:flex; align-items:stretch; gap:12px; }
+  .cc-box { flex:1 1 0; min-width:0; background:white; border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:28px 18px; text-align:center; }
+  .cc-box.cc-ok { border-bottom:6px solid var(--verde); }
+  .cc-ico { font-size:2.4rem; }
+  .cc-num { font-family:'Playfair Display',serif; font-size:4.2rem; font-weight:700; line-height:1.05; margin:8px 0; }
+  .cc-lbl { font-size:1.15rem; font-weight:700; color:var(--mid); line-height:1.35; }
+  .cc-lbl small { font-weight:600; color:var(--light); font-size:.95rem; }
+  .cc-freccia { align-self:center; font-size:2.2rem; color:var(--light); }
+  .cc-nota { color:var(--mid); font-size:1.02rem; margin-top:14px; }
+  @media(max-width:1100px){ .cc-grid { flex-direction:column; } .cc-freccia { transform:rotate(90deg); } }
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <style>
@@ -556,6 +568,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       <div class="nav-item active" onclick="showSection('dashboard',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg></span> Dashboard
       </div>
+      <!-- 15 ottobre 2026 - quanti clienti entrano, cercano e chiedono contatto o preventivo. -->
+      <div class="nav-item" onclick="showSection('clienti-cercano',this)">
+        <span class="nav-icon">📈</span> Clienti che cercano
+      </div>
       <div class="nav-item" onclick="showSection('imprese',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg></span> Imprese
         <span class="nav-badge" id="badge-imprese">0</span>
@@ -656,6 +672,47 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
 
   <!-- MAIN -->
   <main class="main">
+
+    <!-- CLIENTI CHE CERCANO (15 ottobre 2026) -->
+    <div class="section" id="sec-clienti-cercano">
+      <div class="topbar">
+        <div class="topbar-title">📈 Clienti che cercano</div>
+      </div>
+      <div class="cc-per" id="cc-per">
+        <button type="button" class="rqa-f" onclick="ccPeriodo(1,this)">Oggi</button>
+        <button type="button" class="rqa-f" onclick="ccPeriodo(7,this)">7 giorni</button>
+        <button type="button" class="rqa-f on" onclick="ccPeriodo(30,this)">30 giorni</button>
+        <button type="button" class="rqa-f" onclick="ccPeriodo(0,this)">Da sempre</button>
+      </div>
+      <div id="cc-errore"></div>
+      <div class="cc-grid">
+        <div class="cc-box">
+          <div class="cc-ico">🌐</div>
+          <div class="cc-num" id="cc-entrati">–</div>
+          <div class="cc-lbl">persone hanno visitato il sito</div>
+        </div>
+        <div class="cc-freccia">→</div>
+        <div class="cc-box">
+          <div class="cc-ico">🔎</div>
+          <div class="cc-num" id="cc-cercato">–</div>
+          <div class="cc-lbl">hanno cercato un'impresa</div>
+        </div>
+        <div class="cc-freccia">→</div>
+        <div class="cc-box">
+          <div class="cc-ico">👆</div>
+          <div class="cc-num" id="cc-contatto">–</div>
+          <div class="cc-lbl">hanno preso il contatto di un'impresa<br><small>(telefono, WhatsApp, email, sito)</small></div>
+        </div>
+        <div class="cc-freccia">→</div>
+        <div class="cc-box cc-ok">
+          <div class="cc-ico">📞</div>
+          <div class="cc-num" id="cc-richiesta">–</div>
+          <div class="cc-lbl">hanno lasciato il numero o chiesto un preventivo</div>
+        </div>
+      </div>
+      <p class="cc-nota">Si contano le <b>persone</b>, non i clic: chi cerca dieci volte vale uno.</p>
+      <p class="cc-nota" id="cc-dal"></p>
+    </div>
 
     <!-- DASHBOARD -->
     <div class="section active" id="sec-dashboard">
@@ -1928,6 +1985,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'utilizzo') caricaUtilizzo();
   if (id === 'chientra') caricaChiEntra();
   if (id === 'ricerche') caricaRicerche();
+  if (id === 'clienti-cercano') caricaClientiCercano();
   if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
@@ -3195,6 +3253,40 @@ function _rvClassifica(titolo, righe, vuota){
   return '<div class="mv-card">'
     + '<div style="font-size:18px;font-weight:800;margin-bottom:14px">' + titolo + '</div>'
     + '<div class="u-det" style="grid-template-columns:1fr">' + dentro + '</div></div>';
+}
+
+/* 15 ottobre 2026 - «Clienti che cercano»: entrati, hanno cercato, hanno preso
+   un contatto, hanno lasciato una richiesta. Legge admin-clienti-cercano. */
+let _ccGiorni = 30;
+async function caricaClientiCercano(){
+  const err = document.getElementById('cc-errore');
+  if(err) err.innerHTML = '';
+  try{
+    const res = await fetch('/.netlify/functions/admin-clienti-cercano', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP, giorni: _ccGiorni })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    const d = j.data || {};
+    const n = v => (v == null ? '–' : Number(v).toLocaleString('it-IT'));
+    document.getElementById('cc-entrati').textContent = n(d.entrati);
+    document.getElementById('cc-cercato').textContent = n(d.cercato);
+    document.getElementById('cc-contatto').textContent = n(d.contatto);
+    document.getElementById('cc-richiesta').textContent = n(d.richiesta);
+    const gg = x => x ? new Date(x).toLocaleDateString('it-IT',{day:'numeric',month:'long'}) : '';
+    const dal = document.getElementById('cc-dal');
+    if(dal) dal.textContent = 'Le visite si contano dal ' + gg(d.entrati_da) + ', le ricerche dal ' + gg(d.cercato_da) + ': prima non c\'era il conteggio.';
+  }catch(e){
+    ['cc-entrati','cc-cercato','cc-contatto','cc-richiesta'].forEach(i => { const el = document.getElementById(i); if(el) el.textContent = '–'; });
+    if(err) err.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600;margin-bottom:16px">Non sono riuscito a leggere i dati: ' + String(e.message || e).replace(/</g,'&lt;') + '</div>';
+  }
+}
+function ccPeriodo(g, el){
+  _ccGiorni = g;
+  document.querySelectorAll('#cc-per .rqa-f').forEach(b => b.classList.remove('on'));
+  if(el) el.classList.add('on');
+  caricaClientiCercano();
 }
 
 async function caricaRicerche(){
