@@ -123,6 +123,15 @@
     .card { padding:28px 20px; }
     .info-box { padding:20px; }
   }
+  /* 15 ottobre 2026 - avviso sopra il modulo: per un preventivo si va alla scheda dell'impresa */
+  .cp-box { display:flex; align-items:center; gap:22px; background:#fff7f0; border:2px solid #f3c9a8; border-left:8px solid var(--arancio); border-radius:18px; padding:26px 28px; margin-bottom:28px; flex-wrap:wrap; }
+  .cp-ico { font-size:2.8rem; flex:0 0 auto; }
+  .cp-txt { flex:1 1 auto; }
+  .cp-txt h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin:0 0 8px; color:var(--dark); }
+  .cp-txt p { font-size:1.12rem; line-height:1.5; margin:0 0 8px; color:#3f4652; }
+  .cp-txt ol { margin:0; padding-left:22px; font-size:1.12rem; line-height:1.7; color:#3f4652; }
+  .cp-btn { flex:1 1 100%; text-align:center; background:var(--verde); color:#fff; text-decoration:none; font-weight:800; font-size:1.1rem; padding:16px 26px; border-radius:14px; white-space:nowrap; }
+  @media(max-width:640px){ .cp-box { padding:22px 20px; } }
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
   <meta property="og:type" content="website">
@@ -161,6 +170,22 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 </div>
 
 <div class="container">
+  <!-- 15 ottobre 2026 - chi cerca un'impresa o un preventivo non deve usare questo modulo:
+       questo scrive a TrovaImpresa, non alle imprese. -->
+  <div class="cp-box">
+    <div class="cp-ico">🏗️</div>
+    <div class="cp-txt">
+      <h2>Cerchi un'impresa o vuoi un preventivo?</h2>
+      <p>Questo modulo scrive a <b>TrovaImpresa</b>, non alle imprese: nessuna impresa lo riceve.</p>
+      <ol>
+        <li>Cerca la tua città.</li>
+        <li>Apri la scheda dell'impresa.</li>
+        <li>Premi <b>«Chiedi un preventivo gratuito»</b>.</li>
+      </ol>
+    </div>
+    <a class="cp-btn" href="/cerca-imprese.html">Cerca un'impresa</a>
+  </div>
+
   <div class="card">
     <div class="form-group">
       <label for="nome">Nome<span class="required">*</span></label>

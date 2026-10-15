@@ -15,6 +15,7 @@ exports.handler = async function(event) {
   if (!email || !/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/.test(String(email))) {
     return { statusCode: 400, body: 'Email non valida' };
   }
+  const emailRaw = String(email).trim();
   const nomeTesto = String(nome || '').replace(/[\r\n<>]/g, ' ').slice(0, 80);
   nome = esc(nome); email = esc(email); messaggio = esc(messaggio).replace(/\n/g, '<br>');
 
@@ -30,7 +31,7 @@ exports.handler = async function(event) {
       const sb = createClient(sbUrl, sbKey, { auth: { persistSession: false, autoRefreshToken: false } });
       const { error: errSalva } = await sb.from('messaggi').insert({
         nome: nomeTesto,
-        email: String(JSON.parse(event.body || '{}').email || '').slice(0, 200),
+        email: emailRaw.slice(0, 200),
         messaggio: String(JSON.parse(event.body || '{}').messaggio || '').slice(0, 5000)
       });
       if (errSalva) console.error('[invia-email] salvataggio messaggio:', errSalva.message);
@@ -42,6 +43,8 @@ exports.handler = async function(event) {
   const data = JSON.stringify({
     from: 'TrovaImpresa <info@trovaimpresa.com>',
     to: ['info@trovaimpresa.com'],
+    /* 15 ottobre 2026: «Rispondi» in Aruba scrive al CLIENTE, non a info@ */
+    reply_to: emailRaw,
     subject: '📩 Nuovo messaggio da ' + nomeTesto,
     html: `
       <div style="text-align:center;padding:16px 0 20px">
