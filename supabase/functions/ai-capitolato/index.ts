@@ -57,6 +57,34 @@ REGOLE:
 - NON scrivere prezzi, importi o totali: il capitolato non li contiene.
 - Italiano corretto, frasi corte, nessuna emoji.`;
 
+// IL CONTROLLO (modo «controllo», aggiunto il 16 ottobre sera): l'AI legge un capitolato
+// gia' scritto e dice cosa MANCA o puo' far discutere. Non lo riscrive e non cambia niente:
+// segnala soltanto. Stesso credito (1), stessa funzione.
+const SYSTEM_CONTROLLO = `Sei un capocantiere italiano con trent'anni di mestiere e hai visto mille litigi con i clienti. Ti arriva un CAPITOLATO di un lavoro edile (voci, tempi, pagamenti, note) e, a volte, l'elenco delle voci del preventivo.
+
+Il tuo compito: dire cosa MANCA o puo' far discutere dopo. NON riscrivere il capitolato.
+
+Rispondi SOLO con questo JSON, senza testo attorno:
+{"giudizio":"","segnalazioni":[{"dove":"","problema":"","suggerimento":""}]}
+
+COSA CERCARE (solo se e' davvero un problema):
+- esclusioni mancanti per quella lavorazione (amianto, ponteggi, colonne condominiali, pratiche edilizie, allacci, smaltimento, ripristini nascosti)
+- materiali lasciati "da concordare" senza che si capisca chi decide e quando
+- lavorazioni del preventivo che nel capitolato non ci sono, o il contrario
+- tempi o pagamenti mancanti o incompleti
+- frasi vaghe che il cliente puo' interpretare come vuole
+- cose in contraddizione fra due voci
+
+REGOLE:
+- Massimo 8 segnalazioni, le piu' importanti per prime.
+- "dove": il titolo della voce a cui ti riferisci, oppure "Generale".
+- "problema": una frase semplice, per chi non e' del mestiere.
+- "suggerimento": una frase breve gia' pronta da scrivere nel capitolato (per esempio nelle note), scritta come la leggerebbe il cliente. Se non serve, stringa vuota.
+- NON inventare prezzi, importi, percentuali, marche, durate.
+- NON fare commenti di stile o di grammatica.
+- "giudizio": una frase sola. Se il capitolato e' a posto, dillo e lascia "segnalazioni" vuoto.
+- Italiano corretto, frasi corte, nessuna emoji.`;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
@@ -77,6 +105,7 @@ Deno.serve(async (req) => {
     // ---- 2. cosa chiedi ---------------------------------------------
     const corpo = await req.json().catch(() => ({}));
     const input = corpo.input;
+    const controllo = corpo.modo === "controllo";
     if (typeof input !== "string" || input.trim().length < 3) return json({ error: "Scrivi qualcosa in più, e riprovo." }, 400);
     if (input.length > 8000) return json({ error: "Il testo è troppo lungo (massimo 8000 caratteri)." }, 400);
 
@@ -103,7 +132,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model: MODEL,
           max_tokens: MAX_TOKENS,
-          system: SYSTEM,
+          system: controllo ? SYSTEM_CONTROLLO : SYSTEM,
           messages: [{ role: "user", content: input }],
         }),
       });
@@ -114,7 +143,9 @@ Deno.serve(async (req) => {
       testo = testo.trim().replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
       // se non e' JSON, meglio rimborsare subito che far pagare una risposta rotta
       const prova = JSON.parse(testo);
-      if (!prova || !Array.isArray(prova.voci) || prova.voci.length === 0) throw new Error("Capitolato senza voci");
+      if (controllo) {
+        if (!prova || !Array.isArray(prova.segnalazioni)) throw new Error("Controllo senza elenco");
+      } else if (!prova || !Array.isArray(prova.voci) || prova.voci.length === 0) throw new Error("Capitolato senza voci");
 
       const inTok = aiData.usage?.input_tokens ?? 0, outTok = aiData.usage?.output_tokens ?? 0;
       const costo = (inTok / 1_000_000) * PREZZO_INPUT_EUR_PER_MTOK + (outTok / 1_000_000) * PREZZO_OUTPUT_EUR_PER_MTOK;

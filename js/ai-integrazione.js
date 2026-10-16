@@ -227,7 +227,7 @@
   /* sono finiti (l'avviso l'ha gia' mostrato mostraUpgrade).            */
   /* ------------------------------------------------------------------ */
   const CAPITOLATO_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-capitolato';
-  AI.capitolato = async function (testo) {
+  AI.capitolato = async function (testo, modo) {
     const token = getToken();
     if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
     let res;
@@ -235,7 +235,7 @@
       res = await fetch(CAPITOLATO_URL, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: testo }),
+        body: JSON.stringify(modo ? { input: testo, modo: modo } : { input: testo }),
       });
     } catch (e) {
       throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione e riprova.');
