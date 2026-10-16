@@ -1129,6 +1129,9 @@
     if(ruoloUtente==='professionista')v.push({lab:"📝 Lettera d'incarico",action:"prev-incarico",data:{id:p.id}});
     /* per chi lavora in cantiere il gemello è la conferma d'ordine */
     else v.push({lab:"📝 Conferma d'ordine",action:"prev-ordine",data:{id:p.id}});
+    /* 16 ottobre 2026 — il capitolato: cosa si fa, con quali materiali, cosa e' compreso e cosa no.
+       Sta in js/gest-capitolato.js e vale per tutti i profili. */
+    v.push({lab:"📋 Capitolato",action:"prev-capitolato",data:{id:p.id}});
     if(p.stato==="bozza")v.push({lab:"📤 Segna inviato",action:"prev-stato",data:{id:p.id,v:"inviato"}});
     if(p.stato==="bozza"||p.stato==="inviato"){
       v.push({lab:"✔ Accettato → crea lavoro",action:"prev-to-lavoro",data:{id:p.id}});

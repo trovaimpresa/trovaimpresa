@@ -218,6 +218,37 @@
   };
 
   /* ------------------------------------------------------------------ */
+  /* AI.capitolato — 16 ottobre 2026                                     */
+  /*                                                                     */
+  /* La porta verso la funzione «ai-capitolato» (il capitolato scritto a */
+  /* parole). Funzione a parte, come ai-cantiere: non tocca ai-generate. */
+  /* Stesso biglietto, stessi crediti (1), stessa finestra quando        */
+  /* finiscono. Restituisce l'oggetto con le voci; null se i crediti     */
+  /* sono finiti (l'avviso l'ha gia' mostrato mostraUpgrade).            */
+  /* ------------------------------------------------------------------ */
+  const CAPITOLATO_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-capitolato';
+  AI.capitolato = async function (testo) {
+    const token = getToken();
+    if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
+    let res;
+    try {
+      res = await fetch(CAPITOLATO_URL, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: testo }),
+      });
+    } catch (e) {
+      throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione e riprova.');
+    }
+    const body = await res.json().catch(function () { return {}; });
+    if (res.status === 402) { await caricaStato(); mostraUpgrade(body.reason); return null; }
+    if (!res.ok) throw new Error(body.error || 'L\'assistente non ha risposto. Riprova fra un attimo.');
+    if (AI.stato && typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+    try { return JSON.parse(body.result); }
+    catch (e) { throw new Error('Non ho capito la risposta. Riprova.'); }
+  };
+
+  /* ------------------------------------------------------------------ */
   /* PANNELLO GENERAZIONE                                                */
   /* ------------------------------------------------------------------ */
   function apriPannello() {

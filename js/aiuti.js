@@ -127,6 +127,7 @@
     'comp-pdf':         'Il computo in PDF: capitoli, misure una per una, importi e il riquadro dei totali.',
     'del-computo':      'Manda il computo nel Cestino. Non è perso: da lì lo rimetti a posto quando vuoi.',
     'prev-pdf':         'Il preventivo in PDF, pronto da mandare al cliente.',
+    'prev-capitolato':  'Il capitolato: cosa si fa, con quali materiali, cosa è compreso e cosa no. Parti da un modello o fallo scrivere all\'AI, poi lo scarichi in PDF.',
     'edit-prev':        'Riapre il preventivo per cambiare voci, prezzi o condizioni.',
     'del-prev':         'Manda il preventivo nel Cestino. Da lì lo rimetti a posto quando vuoi.',
     'apri-cli':         'La scheda completa del cliente: lavori, preventivi, fatture e documenti, tutto insieme.',
