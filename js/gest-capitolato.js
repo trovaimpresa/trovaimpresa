@@ -338,10 +338,24 @@
     }
     /* le voci del preventivo vanno anche all'AI: cosi' il capitolato parla
        delle stesse lavorazioni che il cliente ha letto nel preventivo */
+    /* ⛔ IL SERVER ACCETTA AL MASSIMO 8000 CARATTERI. Un preventivo grosso (visto dal
+       vivo il 16 ott: quasi 90 voci) li superava e l'AI rispondeva «Il testo e' troppo
+       lungo» senza fare niente. Per questo qui si taglia: il testo scritto da chi usa
+       il gestionale ha la precedenza (fino a 3000), le voci del preventivo entrano
+       una per una finche' c'e' posto, ognuna accorciata a 140 caratteri. */
     var righe=_stato.righe.filter(function(r){ return !_rigaSezione(r)&&T(r.descrizione); });
-    var input=testo;
-    if(_stato.p&&_stato.p.titolo) input+="\n\nTitolo del preventivo: "+_stato.p.titolo;
-    if(righe.length) input+="\n\nVoci del preventivo:\n"+righe.map(function(r){ return "- "+T(r.descrizione); }).join("\n");
+    var MAX=7400;
+    var input=testo.slice(0,3000);
+    if(_stato.p&&_stato.p.titolo) input+="\n\nTitolo del preventivo: "+T(_stato.p.titolo).slice(0,200);
+    if(righe.length){
+      var elenco=[], tot=input.length+30;
+      for(var k=0;k<righe.length;k++){
+        var riga="- "+T(righe[k].descrizione).slice(0,140);
+        if(tot+riga.length+1>MAX) break;
+        elenco.push(riga); tot+=riga.length+1;
+      }
+      if(elenco.length) input+="\n\nVoci del preventivo:\n"+elenco.join("\n");
+    }
     var prima=go.textContent;
     go.disabled=true; go.textContent="Ci penso io...";
     st.className="ai-riga-st"; st.textContent="";

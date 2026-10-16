@@ -53,7 +53,7 @@ REGOLE:
 - "durata_giorni": numero intero SOLO se l'utente ha detto i tempi ("tre settimane" = 15 giorni lavorativi). Altrimenti null.
 - "pagamenti": SOLO se l'utente ha detto come si paga. Altrimenti stringa vuota. MAI inventare percentuali.
 - "garanzie": SOLO se l'utente le ha nominate. Altrimenti stringa vuota. Le garanzie di legge le scrive gia' il gestionale.
-- "note": una riga per quello che l'utente ha detto e non sta in nessun'altra casella. Altrimenti stringa vuota.
+- "note": SOLO quello che l'utente ha detto e non sta in nessun'altra casella (per esempio chi fornisce i materiali, SE l'ha detto). NON aggiungere assunzioni, condizioni o frasi tue: niente su chi paga i materiali, niente sulle misure, niente di quello che non e' stato detto. Se non c'e' altro da scrivere: stringa vuota.
 - NON scrivere prezzi, importi o totali: il capitolato non li contiene.
 - Italiano corretto, frasi corte, nessuna emoji.`;
 
