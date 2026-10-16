@@ -79,10 +79,10 @@ REGOLE:
 - Massimo 8 segnalazioni, le piu' importanti per prime.
 - "dove": il titolo della voce a cui ti riferisci, oppure "Generale".
 - "problema": una frase semplice, per chi non e' del mestiere.
-- "suggerimento": una frase breve gia' pronta da scrivere nel capitolato (per esempio nelle note), scritta come la leggerebbe il cliente. Se non serve, stringa vuota.
+- "suggerimento": una frase breve gia' PRONTA da scrivere nel capitolato (per esempio nelle note), scritta come la leggerebbe il cliente, senza parentesi quadre, senza segnaposto tipo [data] o [X] e senza decidere cose che non sai (chi paga, quando, quanto). Se per scriverla servirebbero dati che non hai, lascia stringa vuota e spiega il problema soltanto.
 - NON inventare prezzi, importi, percentuali, marche, durate.
 - NON fare commenti di stile o di grammatica.
-- "giudizio": una frase sola. Se il capitolato e' a posto, dillo e lascia "segnalazioni" vuoto.
+- "giudizio": una frase sola e breve. Se il capitolato e' a posto, dillo e lascia "segnalazioni" vuoto.
 - Italiano corretto, frasi corte, nessuna emoji.`;
 
 Deno.serve(async (req) => {

@@ -579,7 +579,7 @@
     return g;
   }
   function qtaTesto(r){ var q=+r.qta; return (q&&q!==1)?String(q).replace(".",","):""; }
-  function rigaTesto(r){ var q=qtaTesto(r); return T(r.descrizione).slice(0,200)+(q?" — quantità "+q:""); }
+  function rigaTesto(r){ var q=qtaTesto(r); var d=T(r.descrizione); if(d.length>130) d=d.slice(0,130).replace(/\s+\S*$/,"")+"…"; return d+(q?" — quantità "+q:""); }
   function voceDaRiga(r){
     var q=qtaTesto(r);
     return {titolo:T(r.descrizione).slice(0,120),cosa:q?"Quantità prevista: "+q:"",materiali:"",compreso:"",escluso:""};
@@ -591,8 +591,9 @@
     g.forEach(function(x){
       if(!x.righe.length) return;
       if(haSez){
-        var righe=x.righe.slice(0,40).map(function(r){ return "- "+rigaTesto(r); });
-        if(x.righe.length>40) righe.push("- …e altre "+(x.righe.length-40)+" voci");
+        /* un capitolo con 90 righe non deve diventare un muro di testo: le prime 30, accorciate */
+        var righe=x.righe.slice(0,30).map(function(r){ return "- "+rigaTesto(r); });
+        if(x.righe.length>30) righe.push("- …e altre "+(x.righe.length-30)+" voci (vedi il preventivo)");
         out.push({titolo:(x.titolo||"Altre lavorazioni").slice(0,120),cosa:"Opere previste:\n"+righe.join("\n"),materiali:"",compreso:"",escluso:""});
       }else{
         x.righe.forEach(function(r){ out.push(voceDaRiga(r)); });
@@ -971,6 +972,8 @@
       var d=await window.AI.capitolato(testoPerControllo(c),"controllo");
       if(d===null) return;   /* crediti finiti: l'avviso l'ha gia' dato l'AI */
       var seg=(d.segnalazioni||[]).filter(function(x){ return x&&(T(x.problema)||T(x.suggerimento)); }).slice(0,8);
+      /* un suggerimento con segnaposto [data] o [X] finirebbe nel PDF cosi' com'e': si tiene solo il problema */
+      seg.forEach(function(x){ if(/[\[\]]/.test(T(x.suggerimento))) x.suggerimento=""; });
       _stato.ctr=seg;
       var h='<div class="cap-ctr-g">'+esc(T(d.giudizio)||(seg.length?"Ho trovato "+seg.length+(seg.length===1?" cosa":" cose")+" da guardare.":"Non ho trovato niente che manca."))+'</div>';
       seg.forEach(function(x,i){
