@@ -24,6 +24,7 @@
 // ============================================================
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const RIC = require('./lib/sdi-ricezione');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -157,7 +158,9 @@ exports.handler = async function (event) {
   /* 29/09/2026 — le fatture del Noleggio stanno in un'altra tabella. Il browser
      dice quale, ma solo fra queste due: il nome non entra mai nella query. */
   const TAB = q && q.tabella === 'nol_fatture' ? 'nol_fatture' : 'gest_fatture';
-  if (!access_token || (!fattura_id && azione !== 'ambiente' && azione !== 'conto')) return risposta(400, { error: 'Mancano dei dati.' });
+  /* 16/10/2026 — le azioni per RICEVERE le fatture (ric_*) non hanno una fattura da inviare */
+  const RICEZIONE = typeof azione === 'string' && azione.indexOf('ric_') === 0;
+  if (!access_token || (!fattura_id && !RICEZIONE && azione !== 'ambiente' && azione !== 'conto')) return risposta(400, { error: 'Mancano dei dati.' });
 
   const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const { data: u, error: eu } = await db.auth.getUser(access_token);
@@ -167,6 +170,25 @@ exports.handler = async function (event) {
   /* prima di aprire la finestra: siamo in prova o sul serio? */
   if (azione === 'ambiente') return risposta(200, { ok: true, ambiente: AMBIENTE });
   if (azione === 'conto') return risposta(200, Object.assign({ ok: true, ambiente: AMBIENTE }, await sdiConto(db, uid)));
+
+  /* ---------- RICEVERE LE FATTURE (16/10/2026) ---------- */
+  if (RICEZIONE) {
+    const ctx = { BASE, TOKEN, AMBIENTE, uid, piva: '', az: null, assicura: assicuraAnagrafica };
+    const idR = q && q.ricevuta_id;
+    let r;
+    if (azione === 'ric_stato') r = { status: 200, body: await RIC.stato(db, uid, AMBIENTE) };
+    else if (azione === 'ric_attiva' || azione === 'ric_prova') {
+      const { data: az } = await db.from('gest_azienda').select('nome,piva,email').eq('user_id', uid).maybeSingle();
+      ctx.az = az || {}; ctx.piva = soloCifre(az && az.piva);
+      r = azione === 'ric_attiva' ? await RIC.attiva(db, ctx) : await RIC.prova(db, ctx);
+    }
+    else if (!idR) r = { status: 400, body: { error: 'Mancano dei dati.' } };
+    else if (azione === 'ric_sblocca') r = await RIC.sblocca(db, uid, idR);
+    else if (azione === 'ric_vista') r = await RIC.segnaVista(db, uid, idR, q.vista !== false);
+    else if (azione === 'ric_file') r = await RIC.file(db, ctx, idR, q.formato === 'xml' ? 'xml' : 'pdf');
+    else r = { status: 400, body: { error: 'Azione sconosciuta.' } };
+    return risposta(r.status, r.body);
+  }
 
   const { data: f } = await db.from(TAB).select('*').eq('id', fattura_id).eq('user_id', uid).maybeSingle();
   if (!f || f.eliminato_il) return risposta(404, { error: 'Fattura non trovata.' });

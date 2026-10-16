@@ -337,7 +337,7 @@
     </section>
 
     <section id="fatture">
-      <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div>
+      <div class="sec-head"><h2>Fatture</h2><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-ric-apri="1">📥 Fatture ricevute <span id="ric-badge" class="ric-badge" hidden></span></button><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div></div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div class="viste" id="fatt-viste"></div>
       <div id="fatt-body"></div>
@@ -672,6 +672,7 @@
 <script src="/js/centesimi.js"></script>
 <script src="/js/gest-fatture.js"></script>
 <script src="/js/gest-sdi.js"></script>
+<script src="/js/gest-ricevute.js"></script>
 <script src="/js/gest-computo.js"></script>
 <script src="/js/gest-sal-prezzario.js"></script>
 <script src="/js/gest-computo-pdf.js"></script>

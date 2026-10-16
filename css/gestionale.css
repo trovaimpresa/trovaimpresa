@@ -5401,3 +5401,17 @@ nav.tabs button.nol-altro .ma-n[hidden]{display:none}
 /* 8 ottobre 2026 — il menu a sinistra: spazio in fondo, cosi' «Altre N voci»
    non finisce dietro la scritta fissa «Assistenza AI e chat…» */
 .side nav.tabs{ padding-bottom:96px; }
+
+/* ═══ 16 ottobre 2026 — LE FATTURE RICEVUTE DAI FORNITORI (js/gest-ricevute.js) ═══ */
+.ric-badge{display:inline-block;min-width:24px;padding:1px 8px;margin-left:8px;border-radius:999px;background:#dc2626;color:#fff;font-size:15px;font-weight:800;line-height:1.5;text-align:center}
+.ric-badge[hidden]{display:none}
+.ric-sommario{font-size:20px;font-weight:700;color:#0b1220;margin-bottom:8px}
+.ric-lista{display:grid;gap:14px;margin-top:12px}
+.ric-passi{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:16px}
+.ric-passi li{display:flex;gap:14px;align-items:flex-start;font-size:18px;line-height:1.5;color:#0b1220}
+.ric-passi li>i{flex:0 0 36px;height:36px;border-radius:50%;background:#1d4ed8;color:#fff;font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ric-codice{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#eef4ff;border:2px solid #b9d0ff;border-radius:12px;padding:14px 16px;margin:10px 0}
+.ric-codice b{font-size:30px;letter-spacing:3px;color:#0b1220;font-family:"IBM Plex Mono",ui-monospace,monospace}
+.ric-attenzione{background:#fff5e6;border:1.5px solid #ffcf8a;border-radius:12px;padding:14px 16px;font-size:17px;color:#6b4c00;line-height:1.5}
+.ric-attenzione b{color:#6b4c00}
+@media(max-width:600px){ .ric-codice b{font-size:26px} }

@@ -2828,3 +2828,19 @@ Blu progetto a quadretti `#0a2a4d` (griglia `rgba(255,255,255,.06)` ogni →40�
 - ⛔ **File orfani:** le foto tolte o caricate e poi lasciate (Annulla) si cancellano dallo storage quando si salva o si chiude con Annulla. Se si chiude in altro modo (fuori dalla finestra) puo' restare qualche foto: sono sotto la sua cartella.
 - **AI controllo:** `AI.capitolato(testo,"controllo")` → stessa funzione `ai-capitolato` (v3), modo `controllo`, risposta `{giudizio,segnalazioni:[{dove,problema,suggerimento}]}`. Segnala soltanto, non cambia niente.
 - **Provato:** banco `prova2.py` con 50 controlli (schede, modelli, foto, firme e decadenza, controllo AI, salva/riapri, vecchio formato, PDF singolo e di tutti, file orfani, zero errori JS, nessun testo sotto 13px).
+
+---
+
+## LE FATTURE RICEVUTE DAI FORNITORI (16 ott 2026, sera)
+
+Pulsante «📥 Fatture ricevute» nella sezione Fatture (gestionale-app.html). Costruito con Openapi.
+
+- **Come funziona:** l'impresa registra il codice destinatario di Openapi **JKKZDGR** sul sito dell'Agenzia delle Entrate, preme «Attiva la ricezione» (azione `ric_attiva` in `netlify/functions/sdi.js`: aggiunge a `/api_configurations` l'avviso `supplier-invoice` SENZA togliere quello dell'esito delle fatture inviate). Quando arriva una fattura Openapi chiama `netlify/functions/sdi-ricevuta.js`, che NON si fida del messaggio: scarica l'XML da Openapi (`/invoices_download/{uuid}`), lo legge e salva.
+- **Tutta la logica:** `netlify/functions/lib/sdi-ricezione.js`. Client: `js/gest-ricevute.js`. SQL: `sql/fatture-ricevute.sql` (3 tabelle: `gest_sdi_ricezione`, `gest_fatture_ricevute`, `gest_fatture_ricevute_file`).
+- ⛔ **Il file XML sta in una tabella a parte SENZA regole di lettura**: il browser non lo vede mai. Si scarica solo dalla funzione, e solo se la fattura è «sbloccata».
+- **Costo:** Openapi fa pagare la fattura ricevuta come quella inviata (risposta del supporto del 15 ott 2026). Quindi: gestionale a pagamento = compresa; gratis = scala 1 invio da `sdi_crediti`; senza invii la fattura si SALVA lo stesso (è un documento fiscale) ma resta «da sbloccare». In PROVA non si scala niente.
+- **Il badge e la lista si leggono dal database direttamente** (niente funzione Netlify = niente crediti Netlify). La funzione serve solo per attivare, sbloccare, scaricare.
+- ⚠️ **Da sapere dall'impresa:** col codice JKKZDGR le fatture dei fornitori arrivano a TrovaImpresa e NON più al commercialista. La schermata lo dice in un riquadro arancione.
+- **Prova:** in sandbox c'è il pulsante «Fattura di prova» (usa `/simulate-supplier-invoice` di Openapi). In produzione non c'è.
+- **Collaudo fatto:** 56 controlli sul lato server con un finto Supabase e un finto Openapi (attivazione, avviso doppio, fattura di un altro, invio da rimborsare se il salvataggio fallisce, file di un altro utente...) + 38 sul lato pagina. ⛔ NON provato contro Openapi vero: il formato esatto dell'avviso e di `GET /api_configurations` viene dalla documentazione, non da una prova. Se la prima fattura di prova non arriva, guardare i log di `sdi-ricevuta` su Netlify.
+- **Non fatto (di proposito):** Noleggio (ha il suo `nol-sdi.js`, non ha ancora la ricezione); nota di credito passiva trattata come una fattura qualsiasi (si vede «Nota di credito» nella scheda).
