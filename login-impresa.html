@@ -97,6 +97,14 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
     <button type="button" class="btn-login btn-senza-password" id="btn-senza-password" onclick="entraSenzaPassword()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> Senza password</button>
 
+    <div id="blocco-codice" style="display:none;margin-top:18px;">
+      <div class="form-group">
+        <label for="codice-mail">Oppure scrivi qui il codice che trovi nella mail</label>
+        <input type="text" id="codice-mail" placeholder="000000" maxlength="10" inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:4px;font-size:1.2rem;text-align:center;">
+      </div>
+      <button type="button" class="btn-login" id="btn-codice" onclick="entraConCodice()">Entra con il codice</button>
+    </div>
+
     <div class="divider">oppure</div>
 
     <div class="links">
@@ -182,6 +190,35 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       const ok = document.createElement('div');
       ok.textContent = '✅ Se ' + email + ' è registrata, ti ho mandato il link per entrare. Guarda anche nello SPAM.';
       el.appendChild(ok);
+      document.getElementById('blocco-codice').style.display = 'block';
+    }
+
+    /* 17 ott 2026 — se la mail si legge sul telefono ma si vuole entrare sul computer,
+       il link non basta (entra solo chi lo clicca): si scrive il codice a numeri che
+       sta nella stessa mail. Poi si passa da conferma.html, che decide il pannello. */
+    let codiceInCorso = false;
+    async function entraConCodice() {
+      if (codiceInCorso) return;
+      const email = document.getElementById('email').value.trim();
+      const codice = document.getElementById('codice-mail').value.replace(/\s/g, '');
+      if (!/^\d{6,10}$/.test(codice)) { showError('Scrivi il codice di soli numeri che trovi nella mail.'); return; }
+      const btn = document.getElementById('btn-codice');
+      codiceInCorso = true;
+      btn.disabled = true;
+      let errore = null;
+      try {
+        const r = await supabaseClient.auth.verifyOtp({ email: email, token: codice, type: 'email' });
+        errore = r.error;
+      } catch (e) { errore = e; }
+      if (errore) {
+        codiceInCorso = false;
+        btn.disabled = false;
+        showError(/failed to fetch|network/i.test(String(errore.message || ''))
+          ? errore.message
+          : 'Codice sbagliato o scaduto. Controllalo, oppure clicca «Senza password» per averne uno nuovo.');
+        return;
+      }
+      window.location.href = '/conferma.html?accesso=1&sessione=1';
     }
 
     function togglePassword() {
@@ -325,6 +362,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           document.querySelector('.card p').textContent = 'Secondo passaggio di accesso';
           /* con la verifica in due passaggi in corso il link via email non c'entra */
           document.getElementById('btn-senza-password').style.display = 'none';
+          document.getElementById('blocco-codice').style.display = 'none';
           btn.onclick = doVerify2FA;
           btn.innerHTML = '✅ Verifica codice';
           btn.disabled = false;

@@ -152,6 +152,9 @@ function mostra(quale){
       'Il link per entrare dura poco e funziona una volta sola. Scrivi qui sotto la tua email e te ne mandiamo uno nuovo.';
   }
 
+  // dal login col codice: la sessione c'e' gia', si va dritti al pannello
+  if (IN_ACCESSO && p.get('sessione') === '1') { await entraNelPannello(); return; }
+
   if (!token_hash) { mostra('scaduto'); return; }
 
   try {
