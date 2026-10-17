@@ -26,6 +26,10 @@
     .btn-login { width: 100%; padding: 18px; background: #0066ff; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-top: 8px; }
     .btn-login:hover { background: #0052cc; transform: translateY(-2px); }
     .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    /* 17 ott 2026: il pulsante «Senza password» (link via email). Stesse misure di
+       Accedi, ma a contorno: bianco col bordo blu scuro delle schede della pagina. */
+    .btn-login.btn-senza-password { background: white; color: #0a2a4d; border: 2px solid #0a2a4d; margin-top: 12px; }
+    .btn-login.btn-senza-password:hover { background: #e7eef8; transform: translateY(-2px); }
     .errore { display: none; background: #fff0f0; border: 1px solid #ffcccc; color: #cc0000; border-radius: 8px; padding: 12px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; }
     .divider { text-align: center; color: #bbb; font-size: 0.85rem; margin: 20px 0; position: relative; }
     .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #eee; }
@@ -91,6 +95,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
     <button type="button" class="btn-login" id="btn-login" onclick="doLogin()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Accedi</button>
 
+    <button type="button" class="btn-login btn-senza-password" id="btn-senza-password" onclick="entraSenzaPassword()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> Senza password</button>
+
     <div class="divider">oppure</div>
 
     <div class="links">
@@ -141,6 +147,43 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       el.appendChild(ok);
     }
 
+    /* 17 ott 2026 — «Senza password»: manda un link via email e basta, niente password
+       da ricordare. Il link porta su conferma.html (sul nostro dominio, come la mail di
+       conferma: se portasse su supabase.co finirebbe in spam). Se l'email non e'
+       registrata NON lo diciamo: la risposta e' sempre la stessa, cosi' nessuno puo'
+       scoprire chi e' iscritto. */
+    let linkInCorso = false;
+    async function entraSenzaPassword() {
+      if (linkInCorso) return;
+      const email = document.getElementById('email').value.trim();
+      const el = document.getElementById('errore');
+      if (!email) { showError('Scrivi prima la tua email nel campo qui sopra.'); return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { showError('Questa email non sembra scritta bene. Controllala.'); return; }
+      const btn = document.getElementById('btn-senza-password');
+      linkInCorso = true;
+      btn.disabled = true;
+      el.innerHTML = '<div>⏳ Invio in corso...</div>';
+      el.style.display = 'block';
+      let errore = null;
+      try {
+        const r = await supabaseClient.auth.signInWithOtp({
+          email: email,
+          options: { shouldCreateUser: false, emailRedirectTo: window.location.origin + '/conferma.html' }
+        });
+        errore = r.error;
+      } catch (e) { errore = e; }
+      linkInCorso = false;
+      btn.disabled = false;
+      if (errore && errore.code !== 'otp_disabled' && !/signups not allowed|not allowed for otp|user not found/i.test(String(errore.message || ''))) {
+        showError(errore.message);
+        return;
+      }
+      el.innerHTML = '';
+      const ok = document.createElement('div');
+      ok.textContent = '✅ Se ' + email + ' è registrata, ti ho mandato il link per entrare. Guarda anche nello SPAM.';
+      el.appendChild(ok);
+    }
+
     function togglePassword() {
       const input = document.getElementById('password');
       input.type = input.type === 'password' ? 'text' : 'password';
@@ -154,6 +197,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         return { testo: 'Devi ancora confermare la tua email. Apri la mail che ti abbiamo mandato e clicca il link (guarda anche nello SPAM).', rimanda: true };
       if (/Invalid login credentials/i.test(m))
         return { testo: 'Email o password non corretti. Controlla bene, oppure usa "Password dimenticata".' };
+      if (/only request this after|for security purposes/i.test(m))
+        return { testo: 'Hai già chiesto il link da poco. Aspetta un minuto e riprova.' };
       if (/Email rate limit|rate limit|too many/i.test(m))
         return { testo: 'Troppi tentativi ravvicinati. Aspetta un paio di minuti e riprova.' };
       if (/User already registered/i.test(m))
@@ -278,6 +323,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           document.getElementById('step-2fa').style.display = 'block';
           document.querySelector('.card h1').textContent = '🔐 Verifica identità';
           document.querySelector('.card p').textContent = 'Secondo passaggio di accesso';
+          /* con la verifica in due passaggi in corso il link via email non c'entra */
+          document.getElementById('btn-senza-password').style.display = 'none';
           btn.onclick = doVerify2FA;
           btn.innerHTML = '✅ Verifica codice';
           btn.disabled = false;

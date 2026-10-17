@@ -86,7 +86,7 @@
     <!-- 1. mentre attiva -->
     <div id="attesa">
       <div class="cerchio attesa"><div class="rotella"></div></div>
-      <h1>Sto attivando il tuo profilo…</h1>
+      <h1 id="attesa-titolo">Sto attivando il tuo profilo…</h1>
       <p>Un attimo solo.</p>
     </div>
 
@@ -102,11 +102,19 @@
     <div id="scaduto" hidden>
       <div class="cerchio ko">!</div>
       <h1>Questo link non vale più</h1>
-      <p>I link di conferma durano poco. Scrivi qui sotto la tua email e te ne mandiamo uno nuovo, valido adesso.</p>
+      <p id="scaduto-testo">I link di conferma durano poco. Scrivi qui sotto la tua email e te ne mandiamo uno nuovo, valido adesso.</p>
       <input type="email" id="email" placeholder="La tua email" autocomplete="email">
       <button class="btn btn-arancio" id="rimanda">Mandami un nuovo link</button>
       <div class="msg" id="msg"></div>
       <p class="piccolo">Se hai già confermato, <a href="/login-impresa.html">entra direttamente</a>.</p>
+    </div>
+
+    <!-- 4. avviso: entrata col link — due passaggi attivi, scheda mancante, riprova -->
+    <div id="avviso" hidden>
+      <div class="cerchio ko">!</div>
+      <h1 id="avviso-titolo"></h1>
+      <p id="avviso-testo"></p>
+      <button class="btn" id="avviso-btn" type="button"></button>
     </div>
 
     <p class="piccolo">Problemi? Scrivici a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a><br>P.IVA 01285950570</p>
@@ -118,8 +126,15 @@ const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* 17 ottobre 2026 — IL LINK «SENZA PASSWORD».
+   Il pulsante «Senza password» della pagina di accesso manda una mail il cui
+   link porta QUI con `&accesso=1` in coda. Stessa pagina della conferma
+   iscrizione (sta sul nostro dominio, quindi niente spam), ma a fine giro non
+   dice «profilo attivato»: fa entrare la persona nel suo pannello. */
+const IN_ACCESSO = new URLSearchParams(location.search).get('accesso') === '1';
+
 function mostra(quale){
-  ['attesa','fatto','scaduto'].forEach(function(id){
+  ['attesa','fatto','scaduto','avviso'].forEach(function(id){
     document.getElementById(id).hidden = (id !== quale);
   });
 }
@@ -131,11 +146,20 @@ function mostra(quale){
   // 'recovery' per il recupero password
   const type = p.get('type') || 'email';
 
+  if (IN_ACCESSO) {
+    document.getElementById('attesa-titolo').textContent = 'Ti sto facendo entrare…';
+    document.getElementById('scaduto-testo').textContent =
+      'Il link per entrare dura poco e funziona una volta sola. Scrivi qui sotto la tua email e te ne mandiamo uno nuovo.';
+  }
+
   if (!token_hash) { mostra('scaduto'); return; }
 
   try {
     const { error } = await sb.auth.verifyOtp({ token_hash, type });
     if (error) throw error;
+    /* entrata col link: niente «profilo attivato», niente benvenuto (la persona
+       e' gia' iscritta e gia' confermata): si apre il suo pannello */
+    if (IN_ACCESSO) { await entraNelPannello(); return; }
     mostra('fatto');
     /* ⛔ 15 settembre 2026 — CHI ARRIVA DAL GESTIONALE NON VA NEL PANNELLO.
        Il modulo di iscrizione manda `emailRedirectTo` con dentro
@@ -156,6 +180,65 @@ function mostra(quale){
     mostra('scaduto');
   }
 })();
+
+// --- entrata col link «Senza password» ------------------------------------
+function avviso(titolo, testo, etichetta, azione){
+  document.getElementById('avviso-titolo').textContent = titolo;
+  document.getElementById('avviso-testo').textContent = testo;
+  const b = document.getElementById('avviso-btn');
+  b.textContent = etichetta;
+  b.onclick = azione;
+  mostra('avviso');
+}
+
+/* Dove portarla: lo stesso criterio di login-impresa.html e di
+   adattaAlGestionale(): chi si e' iscritto dalla porta del gestionale (vetrina
+   spenta) va nel gestionale, tutti gli altri nel pannello del loro tipo.
+   ⛔ Verifica in due passaggi: se l'account ce l'ha, il link da solo NON basta —
+   si esce e si chiede di entrare con la password, dove il codice viene chiesto. */
+async function entraNelPannello(){
+  mostra('attesa');
+  try {
+    const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (a.error) throw a.error;
+    const aal = a.data || {};
+    if (aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+      await sb.auth.signOut();
+      avviso('Serve la password',
+             'Il tuo account ha la verifica in due passaggi: per entrare usa email e password.',
+             'Vai all\u2019accesso', function(){ location.href = '/login-impresa.html'; });
+      return;
+    }
+    const g = await sb.auth.getUser();
+    const u = g.data && g.data.user;
+    if (!u) throw new Error('nessun utente');
+    const r = await sb.from('imprese').select('tipo, vetrina_attiva').eq('user_id', u.id).maybeSingle();
+    if (r.error) throw r.error;
+    if (!r.data) {
+      await sb.auth.signOut();
+      avviso('Manca la scheda della tua attività',
+             'Il tuo account esiste, ma la scheda no: è un problema nostro, non tuo. Scrivici a info@trovaimpresa.com con questa email e te la sistemiamo.',
+             'Torna all\u2019accesso', function(){ location.href = '/login-impresa.html'; });
+      return;
+    }
+    const PANNELLI = {
+      artigiano: 'pannello-artigiano.html',
+      impresa: 'pannello-impresa.html',
+      negozio: 'pannello-negozio.html',
+      professionista: 'pannello-professionisti.html'
+    };
+    const dalGestionale =
+      r.data.vetrina_attiva === false ||
+      String((u.user_metadata || {}).vetrina_attiva || '').toLowerCase() === 'false';
+    location.replace(dalGestionale ? '/gestionale-app.html' : '/' + (PANNELLI[r.data.tipo] || 'pannello-impresa.html'));
+  } catch (e) {
+    // il link e' stato usato e la persona e' dentro: qui si puo' solo riprovare a
+    // leggere il profilo, NON ricaricare la pagina (il link non vale piu')
+    avviso('Non riesco ad aprire il pannello',
+           'Sei entrato, ma in questo momento non riesco a leggere il tuo profilo. Riprova fra un attimo.',
+           'Riprova', entraNelPannello);
+  }
+}
 
 // --- chi viene dalla porta del gestionale -----------------------------------
 /* Come si riconosce: il modulo con `?da=gestionale` scrive
@@ -227,11 +310,18 @@ document.getElementById('rimanda').addEventListener('click', async function(){
   }
   btn.disabled = true; btn.textContent = 'Invio…';
   try {
-    const { error } = await sb.auth.resend({
-      type: 'signup',
-      email: email,
-      options: { emailRedirectTo: location.origin + '/login-impresa.html' }
-    });
+    // link di conferma scaduto -> si rimanda la conferma; link per entrare
+    // scaduto -> si rimanda un link per entrare (la persona e' gia' confermata)
+    const { error } = IN_ACCESSO
+      ? await sb.auth.signInWithOtp({
+          email: email,
+          options: { shouldCreateUser: false, emailRedirectTo: location.origin + '/conferma.html' }
+        })
+      : await sb.auth.resend({
+          type: 'signup',
+          email: email,
+          options: { emailRedirectTo: location.origin + '/login-impresa.html' }
+        });
     if (error) throw error;
     msg.textContent = 'Fatto: controlla la posta, il link nuovo è appena partito.';
     msg.classList.add('ok');
