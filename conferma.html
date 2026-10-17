@@ -64,6 +64,8 @@
     }
     .btn:hover{background:#0052cc}
     .btn[disabled]{opacity:.6;cursor:default}
+    .btn-chiaro{background:#eef2f7;color:#0a2a4d}
+    .btn-chiaro:hover{background:#dbe3ec}
     .btn-arancio{background:#e8733a}
     .btn-arancio:hover{background:#c45e28}
     input[type=email]{
@@ -117,6 +119,15 @@
       <button class="btn" id="avviso-btn" type="button"></button>
     </div>
 
+    <!-- 5. dopo l'accesso col link o col codice: attivare volto/impronta -->
+    <div id="passkey" hidden>
+      <div class="cerchio ok"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1M15 10v1M9.5 15a3.5 3.5 0 0 0 5 0"/></svg></div>
+      <h1 id="pk-titolo">Entra col volto o l’impronta</h1>
+      <p id="pk-testo">La prossima volta puoi entrare con il volto o l’impronta di questo dispositivo, senza mail e senza password.</p>
+      <button class="btn" id="pk-si" type="button">Attiva</button><br>
+      <button class="btn btn-chiaro" id="pk-no" type="button">Non ora</button>
+    </div>
+
     <p class="piccolo">Problemi? Scrivici a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a><br>P.IVA 01285950570</p>
   </div>
 
@@ -124,7 +135,7 @@
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { experimental: { passkey: true } } });
 
 /* 17 ottobre 2026 — IL LINK «SENZA PASSWORD».
    Il pulsante «Senza password» della pagina di accesso manda una mail il cui
@@ -134,7 +145,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const IN_ACCESSO = new URLSearchParams(location.search).get('accesso') === '1';
 
 function mostra(quale){
-  ['attesa','fatto','scaduto','avviso'].forEach(function(id){
+  ['attesa','fatto','scaduto','avviso','passkey'].forEach(function(id){
     document.getElementById(id).hidden = (id !== quale);
   });
 }
@@ -185,6 +196,49 @@ function mostra(quale){
 })();
 
 // --- entrata col link «Senza password» ------------------------------------
+/* 17 ott 2026 — dopo un accesso col link o col codice (non dopo quello col volto,
+   dove c'e' gia') si propone di attivare volto/impronta. Si chiede una volta ogni 30
+   giorni se dice «Non ora», mai piu' se l'ha attivata su questo dispositivo. */
+async function offriPasskey(){
+  if (!IN_ACCESSO || new URLSearchParams(location.search).get('pk') === '1') return;
+  try {
+    if (localStorage.getItem('pk_ok') === '1') return;
+    if (Date.now() - (Number(localStorage.getItem('pk_no')) || 0) < 30 * 86400000) return;
+  } catch (e) {}
+  try {
+    if (typeof sb.auth.registerPasskey !== 'function' || !window.PublicKeyCredential ||
+        typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !== 'function') return;
+    if (!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())) return;
+  } catch (e) { return; }
+  return new Promise(function(resolve){
+    const si = document.getElementById('pk-si'), no = document.getElementById('pk-no');
+    mostra('passkey');
+    no.onclick = function(){
+      try { localStorage.setItem('pk_no', String(Date.now())); } catch (e) {}
+      resolve();
+    };
+    si.onclick = async function(){
+      si.disabled = true;
+      let errore = null;
+      try { const r = await sb.auth.registerPasskey(); errore = r.error; } catch (e) { errore = e; }
+      si.disabled = false;
+      if (errore) {
+        document.getElementById('pk-testo').textContent =
+          'Non è partito (forse hai annullato). Puoi riprovare, oppure saltare.';
+        si.textContent = 'Riprova';
+        return;
+      }
+      try { localStorage.setItem('pk_ok', '1'); } catch (e) {}
+      document.getElementById('pk-titolo').textContent = 'Fatto!';
+      document.getElementById('pk-testo').textContent =
+        'Da adesso puoi entrare col volto o l’impronta di questo dispositivo.';
+      no.hidden = true;
+      si.textContent = 'Vai al pannello';
+      si.onclick = function(){ resolve(); };
+    };
+  });
+}
+
 function avviso(titolo, testo, etichetta, azione){
   document.getElementById('avviso-titolo').textContent = titolo;
   document.getElementById('avviso-testo').textContent = testo;
@@ -233,7 +287,9 @@ async function entraNelPannello(){
     const dalGestionale =
       r.data.vetrina_attiva === false ||
       String((u.user_metadata || {}).vetrina_attiva || '').toLowerCase() === 'false';
-    location.replace(dalGestionale ? '/gestionale-app.html' : '/' + (PANNELLI[r.data.tipo] || 'pannello-impresa.html'));
+    const dest = dalGestionale ? '/gestionale-app.html' : '/' + (PANNELLI[r.data.tipo] || 'pannello-impresa.html');
+    try { await offriPasskey(); } catch (e) {}
+    location.replace(dest);
   } catch (e) {
     // il link e' stato usato e la persona e' dentro: qui si puo' solo riprovare a
     // leggere il profilo, NON ricaricare la pagina (il link non vale piu')

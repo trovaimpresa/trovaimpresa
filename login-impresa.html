@@ -105,6 +105,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       <button type="button" class="btn-login" id="btn-codice" onclick="entraConCodice()">Entra con il codice</button>
     </div>
 
+    <button type="button" class="btn-login btn-senza-password" id="btn-passkey" onclick="entraConPasskey()" style="display:none;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1M15 10v1M9.5 15a3.5 3.5 0 0 0 5 0"/></svg> Volto o impronta</button>
+
     <div class="divider">oppure</div>
 
     <div class="links">
@@ -118,7 +120,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   <script>
     const supabaseClient = supabase.createClient(
       'https://nacvrsgkyfavykxjxszu.supabase.co',
-      'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R'
+      'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R',
+      { auth: { experimental: { passkey: true } } }
     );
 
     let mfaFactorId = null;
@@ -219,6 +222,39 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         return;
       }
       window.location.href = '/conferma.html?accesso=1&sessione=1';
+    }
+
+    /* 17 ott 2026 — entrare col volto o l'impronta (passkey). Il pulsante compare solo se
+       il browser sa farlo. Non serve scrivere l'email: il telefono/computer trova da solo
+       l'account. Poi si passa da conferma.html, che decide il pannello. La passkey si
+       attiva da li' dopo un accesso col link o col codice. */
+    if (window.PublicKeyCredential) document.getElementById('btn-passkey').style.display = '';
+    let passkeyInCorso = false;
+    async function entraConPasskey() {
+      if (passkeyInCorso) return;
+      const btn = document.getElementById('btn-passkey');
+      passkeyInCorso = true;
+      btn.disabled = true;
+      let errore = null;
+      try {
+        const r = await supabaseClient.auth.signInWithPasskey();
+        errore = r.error;
+      } catch (e) { errore = e; }
+      if (errore) {
+        passkeyInCorso = false;
+        btn.disabled = false;
+        const m = String((errore && (errore.code || errore.name || '')) + ' ' + (errore && errore.message || ''));
+        if (/credential_not_found|credential not found/i.test(m)) {
+          try { localStorage.removeItem('pk_ok'); } catch (e) {}
+          showError('Su questo dispositivo non trovo il tuo volto o la tua impronta. Clicca «Senza password» per entrare e attivarli di nuovo.');
+        } else if (/failed to fetch|network/i.test(m)) {
+          showError(errore.message);
+        } else {
+          showError('Non sono riuscito a farti entrare col volto o l\u2019impronta. Riprova, oppure entra con la password o con «Senza password».');
+        }
+        return;
+      }
+      window.location.href = '/conferma.html?accesso=1&sessione=1&pk=1';
     }
 
     function togglePassword() {
@@ -363,6 +399,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           /* con la verifica in due passaggi in corso il link via email non c'entra */
           document.getElementById('btn-senza-password').style.display = 'none';
           document.getElementById('blocco-codice').style.display = 'none';
+          document.getElementById('btn-passkey').style.display = 'none';
           btn.onclick = doVerify2FA;
           btn.innerHTML = '✅ Verifica codice';
           btn.disabled = false;
