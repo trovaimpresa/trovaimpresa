@@ -30,6 +30,7 @@
        Accedi, ma a contorno: bianco col bordo blu scuro delle schede della pagina. */
     .btn-login.btn-senza-password { background: white; color: #0a2a4d; border: 2px solid #0a2a4d; margin-top: 12px; }
     .btn-login.btn-senza-password:hover { background: #e7eef8; transform: translateY(-2px); }
+    .errore.ok { background: #fff; border: 1.5px solid #1a7f43; color: #1a7f43; font-weight: 600; }
     .errore { display: none; background: #fff0f0; border: 1px solid #ffcccc; color: #cc0000; border-radius: 8px; padding: 12px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; }
     .divider { text-align: center; color: #bbb; font-size: 0.85rem; margin: 20px 0; position: relative; }
     .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #eee; }
@@ -145,6 +146,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       if (!email) { showError('Scrivi prima la tua email nel campo qui sopra.'); return; }
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { showError('Questa email non sembra scritta bene. Controllala.'); return; }
       resetInCorso = true;
+      el.classList.remove('ok');
       el.innerHTML = '<div>⏳ Invio in corso...</div>';
       el.style.display = 'block';
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
@@ -155,6 +157,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       el.innerHTML = '';
       const ok = document.createElement('div');
       ok.textContent = '✅ Ti ho mandato l\'email per rifare la password a ' + email + '. Guarda anche nello SPAM.';
+      el.classList.add('ok');
       el.appendChild(ok);
     }
 
@@ -173,6 +176,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       const btn = document.getElementById('btn-senza-password');
       linkInCorso = true;
       btn.disabled = true;
+      el.classList.remove('ok');
       el.innerHTML = '<div>⏳ Invio in corso...</div>';
       el.style.display = 'block';
       let errore = null;
@@ -192,6 +196,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       el.innerHTML = '';
       const ok = document.createElement('div');
       ok.textContent = '✅ Se ' + email + ' è registrata, ti ho mandato il link per entrare. Guarda anche nello SPAM.';
+      el.classList.add('ok');
       el.appendChild(ok);
       document.getElementById('blocco-codice').style.display = 'block';
     }
@@ -250,7 +255,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         } else if (/failed to fetch|network/i.test(m)) {
           showError(errore.message);
         } else {
-          showError('Non sono riuscito a farti entrare col volto o l\u2019impronta. Riprova, oppure entra con la password o con «Senza password».');
+          showError('Non ti ho riconosciuto. Se non hai ancora attivato il volto su questo telefono, entra con «Senza password» e premi «Attiva».');
         }
         return;
       }
@@ -286,6 +291,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     function showError(msg, opzioni) {
       const el = document.getElementById('errore');
       const t = traduciSupabase(msg);
+      el.classList.remove('ok');
       el.innerHTML = '';
       const p = document.createElement('div');
       p.textContent = t.testo;
@@ -307,6 +313,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       const email = document.getElementById('email').value.trim();
       const el = document.getElementById('errore');
       if (!email) { showError('Scrivi prima la tua email qui sopra.'); return; }
+      el.classList.remove('ok');
       el.innerHTML = '<div>⏳ Sto rimandando l\'email...</div>';
       try {
         const { error } = await supabaseClient.auth.resend({
@@ -325,6 +332,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         el.innerHTML = '';
         const ok = document.createElement('div');
         ok.textContent = '✅ Fatto! Ti ho rimandato l\'email a ' + email + '. Guarda anche nello SPAM: può metterci un paio di minuti.';
+        el.classList.add('ok');
         el.appendChild(ok);
       } catch (e) {
         showError(e.message || 'Non sono riuscito a rimandare l\'email. Riprova fra un minuto.');
