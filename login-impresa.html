@@ -420,7 +420,21 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           if (redirect === 'gestionale') window.location.href = 'gestionale-app.html';
           else if (redirect === 'forum') window.location.href = 'forum.html';
           else if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
-          else window.location.href = pannelloUtente;
+          else {
+            /* 17 ott 2026: chi entra con la password puo' attivare volto/impronta: se il
+               dispositivo lo sa fare e non e' gia' attivato (ne' rifiutato da poco) si passa
+               da conferma.html, che propone «Attiva» e poi porta nello STESSO pannello. */
+            let proponi = false;
+            try {
+              proponi = !!window.PublicKeyCredential &&
+                localStorage.getItem('pk_ok') !== '1' &&
+                (Date.now() - (Number(localStorage.getItem('pk_no')) || 0)) >= 30 * 86400000 &&
+                await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+            } catch (e) { proponi = false; }
+            window.location.href = proponi
+              ? '/conferma.html?accesso=1&sessione=1&vai=' + encodeURIComponent(pannelloUtente)
+              : pannelloUtente;
+          }
         }
       } catch(err) {
         showError('❌ ' + err.message);

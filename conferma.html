@@ -287,7 +287,12 @@ async function entraNelPannello(){
     const dalGestionale =
       r.data.vetrina_attiva === false ||
       String((u.user_metadata || {}).vetrina_attiva || '').toLowerCase() === 'false';
-    const dest = dalGestionale ? '/gestionale-app.html' : '/' + (PANNELLI[r.data.tipo] || 'pannello-impresa.html');
+    // dalla password (login-impresa.html) arriva anche «vai»: il pannello che il login
+    // avrebbe aperto comunque. Vale solo se e' uno dei quattro pannelli (niente indirizzi liberi).
+    const vai = new URLSearchParams(location.search).get('vai');
+    const dest = (vai && Object.keys(PANNELLI).some(function(k){ return PANNELLI[k] === vai; }))
+      ? '/' + vai
+      : (dalGestionale ? '/gestionale-app.html' : '/' + (PANNELLI[r.data.tipo] || 'pannello-impresa.html'));
     try { await offriPasskey(); } catch (e) {}
     location.replace(dest);
   } catch (e) {
