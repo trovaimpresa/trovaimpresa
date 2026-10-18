@@ -475,8 +475,8 @@
         "nome": "EDEL MOMA Felix",
         "mestiere": "Ristrutturazione completa",
         "mestieri": [
-          "الأنظمة الكهربائية",
-          "ألواح الجبس"
+          "Impianti elettrici",
+          "Cartongesso"
         ],
         "tipo": "artigiano",
         "citta": "Genova",
@@ -492,7 +492,7 @@
       {
         "id": 278,
         "nome": "Edil ozer",
-        "mestiere": "Duvarcılık ve yapılar",
+        "mestiere": "Muratura e strutture",
         "mestieri": null,
         "tipo": "impresa",
         "citta": "Imperia",
@@ -813,9 +813,9 @@
       {
         "id": 259,
         "nome": "KIMO SERVIZI",
-        "mestiere": "أعمال البناء والتشييد",
+        "mestiere": "Muratura e strutture",
         "mestieri": [
-          "الواجهات والعزل الحراري"
+          "Facciate e cappotto termico"
         ],
         "tipo": "impresa",
         "citta": "Milano",
@@ -827,7 +827,7 @@
       {
         "id": 262,
         "nome": "Marwen",
-        "mestiere": "أعمال التسقيف والتغطية",
+        "mestiere": "Coperture e tetti",
         "mestieri": null,
         "tipo": "impresa",
         "citta": "Casorezzo",
