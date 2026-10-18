@@ -334,6 +334,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/geo-italia.js"></script>
+<script src="js/ricerca-mai-vuota.js?v=1"></script>
 <script>
   let mappaLeaflet = null;
 
@@ -522,6 +523,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   }
 
   async function cerca() {
+    if (window.ZonaRicerca) { try { await ZonaRicerca.prepara(); } catch(e) {} }
+    window._zonaVicine = '';
     const citta = document.getElementById('cittaInput').value.trim();
     const cittaSafe = citta.replace(/[,()]/g, '').trim();
     const soloVerificati = document.getElementById('soloVerificati').checked;
@@ -586,6 +589,22 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       // Va per ultimo: qualsiasi altro ordinamento non deve risollevare
       // i Premium fuori zona sopra a chi il cliente ha davvero vicino.
       tuttiRisultati = ordinaFuoriZona(tuttiRisultati);
+      // 18 ott 2026 — se nella citta' non c'e' nessuno, le piu' vicine (js/ricerca-mai-vuota.js)
+      if (!tuttiRisultati.length && window.ZonaRicerca && citta && cittaLat !== null) {
+        try {
+          const vic = await ZonaRicerca.vicine(function () {
+            let v = supabaseClient.from('imprese_pubbliche').select('*').eq('tipo', 'artigiano');
+            if (mestiereScelto !== 'tutti') v = v.contains('mestieri', [mestiereScelto]);
+            if (valutazioneMin > 0) v = v.gte('valutazione_media', valutazioneMin);
+            if (soloVerificati) v = v.eq('verificata', true);
+            if (conFoto) v = v.not('foto_urls', 'is', null).neq('foto_urls', '[]');
+            if (rispondeIn24h) v = v.eq('risponde_24h', true);
+            if (preventivoOnline) v = v.eq('preventivo_online', true);
+            return v;
+          }, cittaLat, cittaLng, 100);
+          if (vic.length) { tuttiRisultati = vic; window._zonaVicine = citta; }
+        } catch (e) {}
+      }
       paginaCorrente = 1;
       mostraPagina(1);
       aggiornaMappaRis(tuttiRisultati);
@@ -733,8 +752,10 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     const totale = tuttiRisultati.length;
     const totPagine = Math.ceil(totale / PER_PAGE);
     const slice = tuttiRisultati.slice((pagina - 1) * PER_PAGE, pagina * PER_PAGE);
-    document.getElementById('risultatiCount').innerHTML = `Trovati <strong>${totale}</strong> artigiani`;
-    div.innerHTML = `<div class="results-grid">${slice.map(i => cardHTML(i)).join('')}</div>`;
+    document.getElementById('risultatiCount').innerHTML = window._zonaVicine
+      ? (totale === 1 ? 'L&rsquo;artigiano pi&ugrave; vicino a ' : `I <strong>${totale}</strong> artigiani pi&ugrave; vicini a `) + _sx(window._zonaVicine)
+      : (totale === 1 ? 'Trovato <strong>1</strong> artigiano' : `Trovati <strong>${totale}</strong> artigiani`);
+    div.innerHTML = (window._zonaVicine && pagina === 1 ? ZonaRicerca.testata(window._zonaVicine, 'un artigiano', totale) : '') + `<div class="results-grid">${slice.map(i => cardHTML(i)).join('')}</div>`;
     const pag = document.getElementById('pagination');
     if (totPagine <= 1) { pag.innerHTML = ''; return; }
     let html = '';
