@@ -134,6 +134,28 @@ exports.handler = async function (event) {
     mailAvvisi ? ('Gli avvisi automatici arrivano a ' + mailAvvisi + '.')
                : 'Gli avvisi automatici arrivano a info@trovaimpresa.com.');
 
+  // ---- 5) Nessuna chiave Supabase VECCHIA? (18 ott 2026) ----
+  // Le chiavi vecchie (quelle che iniziano con «eyJ») smettono di funzionare
+  // a fine 2026. Qui si guarda ogni variabile di Netlify che puo' contenere
+  // una chiave Supabase e si dice di che tipo e': mai il valore.
+  const NOMI_CHIAVI = ['SUPABASE_SERVICE_KEY', 'SUPABASE_SERVICE_ROLE', 'SUPABASE_SERVICE_ROLE_KEY',
+    'SUPABASE_SECRET_KEY', 'SUPABASE_ANON_KEY', 'SUPABASE_KEY'];
+  const vecchie = [], nuove = [];
+  for (const n of NOMI_CHIAVI) {
+    const v = (process.env[n] || '').trim();
+    if (!v) continue;
+    if (v.startsWith('eyJ')) vecchie.push(n);
+    else nuove.push(n);
+  }
+  if (vecchie.length) {
+    aggiungi('Chiavi Supabase', false,
+      'Queste variabili hanno ancora la chiave VECCHIA, che smette di funzionare a fine 2026: ' + vecchie.join(', ') + '.',
+      'Supabase → Settings → API Keys: copia la chiave «secret» (sb_secret_…) o, per SUPABASE_ANON_KEY, la «publishable» (sb_publishable_…). Incollala su Netlify al posto di quella vecchia, poi Deploys → Trigger deploy.');
+  } else {
+    aggiungi('Chiavi Supabase', true,
+      'Tutte le chiavi sono quelle nuove (' + (nuove.join(', ') || 'nessuna variabile') + ').');
+  }
+
   const problemi = controlli.filter(c => !c.ok);
   return {
     statusCode: 200, headers: corsHeaders,

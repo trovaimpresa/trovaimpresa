@@ -30,7 +30,7 @@
 // togliendo `path` qui in fondo e la pagina torna com'era.
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || 'https://nacvrsgkyfavykxjxszu.supabase.co';
-const SUPABASE_ANON = Deno.env.get('SUPABASE_ANON_KEY') || 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+const SUPABASE_ANON = (k => (k && !k.startsWith('eyJ')) ? k : 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R')(Deno.env.get('SUPABASE_ANON_KEY'));
 
 const APRE = '<!--META-SCHEDA-->';
 const CHIUDE = '<!--/META-SCHEDA-->';

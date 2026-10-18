@@ -16,7 +16,7 @@
 //    dove la tabella `imprese` e' chiusa e si deve passare da `imprese_pubbliche`.
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
-const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY || 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+const SUPABASE_ANON = (k => (k && !k.startsWith('eyJ')) ? k : 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R')(process.env.SUPABASE_ANON_KEY);
 
 const SITO = 'https://trovaimpresa.com';
 const MAX_URL = 5000;

@@ -822,8 +822,9 @@ export default async function (req) {
   //    js/gate-gestionale.js, che il browser scarica. Il ripiego e'
   //    copiato da netlify/functions/sitemap-offerte.js, cosi' la function
   //    parte anche se su Netlify la variabile non c'e' ancora.
-  const ANON_KEY = process.env.SUPABASE_ANON_KEY
-    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  const ANON_KEY = (process.env.SUPABASE_ANON_KEY && !process.env.SUPABASE_ANON_KEY.startsWith('eyJ'))
+    ? process.env.SUPABASE_ANON_KEY
+    : 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
   if (!SUPABASE_URL || !SERVICE_KEY) {
     return rispondi(500, { error: 'Configurazione server mancante.' });
   }
