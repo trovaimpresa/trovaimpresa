@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Richiesta | Forum Edilizia | TrovaImpresa</title>
   <meta name="description" content="Richiesta del forum edilizia di TrovaImpresa con le risposte delle imprese.">
-  <meta name="robots" content="noindex,follow">
-  <link rel="canonical" href="https://trovaimpresa.com/forum">
+  <!-- 18 ott 2026: niente «noindex» e niente canonical scritti fissi qui.
+       Col noindex fisso Google spesso non aspetta il codice e scarta la pagina,
+       anche quando js/forum.js la apre. Decide js/forum.js, richiesta per
+       richiesta (seo()). Senza ?s= la pagina non e' una richiesta: noindex subito. -->
+  <script>if(!/[?&]s=/.test(location.search)){document.write('<meta name="robots" content="noindex,follow">');}</script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="Richiesta | Forum Edilizia | TrovaImpresa">
   <meta property="og:description" content="Richiesta del forum edilizia di TrovaImpresa con le risposte delle imprese.">
@@ -72,7 +75,7 @@
 </footer>
 <div class="f-lb" id="f-lb"><img alt=""></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/forum.js?v=3"></script>
+<script src="/js/forum.js?v=4"></script>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>

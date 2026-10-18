@@ -221,8 +221,13 @@
     var can = document.querySelector('link[rel=canonical]');
     if (!can) { can = document.createElement('link'); can.rel = 'canonical'; document.head.appendChild(can); }
     can.href = url; metaTag('og:url', url, 'property');
-    /* solo le richieste con almeno una risposta di un'impresa si fanno vedere a Google */
-    var daGoogle = r.indicizzabile === true && comm.some(function (c) { return !c.autore && !c.ospite; });
+    /* 18 ott 2026 — a Google va la richiesta che ha almeno UNA RISPOSTA VERA:
+       non dell'autore e lunga almeno 200 caratteri, chiunque l'abbia scritta
+       (impresa o ospite). Prima contava solo l'impresa iscritta: cosi' le 9
+       risposte utili scritte da ospite restavano nascoste, e passava solo
+       «meglio fare il sopralluogo». La stessa regola sta nel database, in
+       bacheca_risposta_dopo_insert (colonna indicizzabile, usata dalla sitemap). */
+    var daGoogle = comm.some(function (c) { return !c.autore && String(c.testo || '').trim().length >= 200; });
     metaTag('robots', daGoogle ? 'index,follow' : 'noindex,follow');
     var f = (r.foto || []).filter(fotoOk)[0]; if (f) metaTag('og:image', f, 'property');
     var ld = {
