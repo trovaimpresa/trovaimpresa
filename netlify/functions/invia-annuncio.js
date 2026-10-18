@@ -12,7 +12,7 @@ const crypto = require('crypto');
 //   [VETRINA]   link alla sua scheda pubblica (esiste sempre)
 //   [PAGINA]    link alla pagina mestiere+citta' dove compare
 //
-// Gruppi: 'completi' | 'incompleti' | 'tutti' | 'prova'
+// Gruppi: 'completi' | 'incompleti' | 'senza_foto' | 'tutti' | 'prova'
 // 'prova' manda solo ad Alessio, per vedere com'e' venuta prima di
 // spedirla a tutti. Usare SEMPRE quello prima dell'invio vero.
 //
@@ -288,7 +288,7 @@ exports.handler = async function (event) {
 
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
-    .select('id, nome, nome_attivita, email, citta, provincia, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo')
+    .select('id, user_id, nome, nome_attivita, email, citta, provincia, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo, vetrina_attiva')
     .eq('is_test', false)
     .eq('email_confermata', true)
     // chi si e' tolto dalle email promozionali non riceve piu' nulla da qui
@@ -310,6 +310,18 @@ exports.handler = async function (event) {
     destinatari = conEmail.filter(completo);
   } else if (gruppo === 'incompleti') {
     destinatari = conEmail.filter(i => !completo(i));
+  } else if (gruppo === 'senza_foto') {
+    // 18 ott 2026 — chi ha la scheda online ma nessuna foto dei lavori
+    // pubblica: la scheda c'e', ma a un cliente non dice niente.
+    // Le foto stanno in `lavori_foto` (owner_id = user_id dell'impresa).
+    const { data: foto, error: ef } = await sb.from('lavori_foto')
+      .select('owner_id').eq('pubblico', true).limit(20000);
+    if (ef) {
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura foto: ' + ef.message }) };
+    }
+    const conFoto = new Set((foto || []).map(f => String(f.owner_id)));
+    destinatari = conEmail.filter(i => completo(i) && i.vetrina_attiva !== false
+      && i.user_id && !conFoto.has(String(i.user_id)));
   } else {
     destinatari = conEmail;
   }
