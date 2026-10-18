@@ -2904,7 +2904,9 @@ async function controllaStatoSistema() {
     if (j.tutto_ok) {
       box.className = 'ok';
       box.innerHTML = '<div class="ss-tit">🟢 Tutto a posto</div>'
-        + 'Database, email e pagamenti funzionano.';
+        + 'Database, email e pagamenti funzionano.'
+        + j.controlli.filter(c => c.nome === 'Chiavi Supabase').map(c =>
+            '<div class="ss-voce"><span class="ss-nome" style="color:#1b6b3a">✔ ' + c.nome + '</span> — ' + c.dettaglio + '</div>').join('');
     } else {
       box.className = 'ko';
       const guasti = j.controlli.filter(c => !c.ok);
