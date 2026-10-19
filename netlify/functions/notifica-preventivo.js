@@ -182,6 +182,22 @@ exports.handler = async function(event) {
     console.log('[DEBUG] RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'presente' : 'MANCANTE');
     const fromAddr = 'TrovaImpresa <info@trovaimpresa.com>';
     const toAddr = impresa.email;
+
+    // 19 ott 2026 — tetto giornaliero: il piano gratuito di Resend arriva a 100 email al giorno
+    // in tutto il sito. Si contano le richieste delle ultime 24 ore (preventivi + incarichi).
+    // Oltre 80 niente email per richiesta: la richiesta resta nel pannello con l'avviso.
+    const finestra = encodeURIComponent(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    const contaRichieste = async (tab) => {
+      const rc = await fetch(`${SUPABASE_URL}/rest/v1/${tab}?created_at=gte.${finestra}&select=id`,
+        { headers: { ...sbHeaders, 'Prefer': 'count=exact', 'Range': '0-0' } });
+      const t = (rc.headers.get('content-range') || '').split('/')[1];
+      return parseInt(t, 10) || 0;
+    };
+    const richiesteOggi = (await contaRichieste('preventivi')) + (await contaRichieste('incarichi_richieste'));
+    if (richiesteOggi > 80) {
+      console.log('[LIMITE] oltre 80 richieste nelle ultime 24 ore: email saltata, resta nel pannello');
+      return { statusCode: 200, body: JSON.stringify({ ok: true, email: 'saltata_limite' }) };
+    }
     console.log('[DEBUG] Resend pre-fetch — from:', fromAddr, '| to:', toAddr);
 
     const res = await fetch('https://api.resend.com/emails', {
