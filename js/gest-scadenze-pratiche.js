@@ -499,7 +499,13 @@
           : (job.fattStato||"none")==="emessa" ? "\ud83e\uddfe Fatturato, in attesa di incasso"
           : "Non ancora fatturato"}</div>
         <div class="campo-aiuto">Lo stato lo decide la fattura, non questo modulo: si aggiorna da solo quando emetti o incassi.${
-          job.id?' <b>Salva</b>, poi usa il pulsante <b>Crea fattura</b> sulla scheda del lavoro.':''}</div></div>
+          /* 21 ott 2026 — il testo diceva «usa il pulsante Crea fattura sulla
+             scheda del lavoro», ma quel pulsante non c'e': «Crea fattura» sta
+             nel menu «…» della riga, e compare solo quando il lavoro e' FATTO.
+             E si leggeva anche a lavoro gia' fatturato. Trovato nel collaudo. */
+          (job.id&&(job.fattStato||"none")==="none")
+            ?' Quando '+(ruoloUtente==='professionista'?'la pratica':'il lavoro')+' è finit'+(ruoloUtente==='professionista'?'a':'o')+', segnal'+(ruoloUtente==='professionista'?'a':'o')+' <b>Fatto</b>: poi nel menu <b>…</b> della riga trovi <b>Crea fattura</b>.'
+            :''}</div></div>
       </div>
       </div></div>`,
       `${ctrTastoHTML('lavoro')}

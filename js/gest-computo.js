@@ -427,7 +427,7 @@
       +    (_fonti.length?'':'<div class="sh-nota">Quando importerai una tariffa nella sezione Prezzario, la troverai qui dentro.</div>')+'</div>'
       +  '<div class="row2" id="co-prz-mio"'+(_mio?'':' style="display:none"')+'>'
       +    '<div class="field"><label>Come si chiama</label><input id="co-prz" value="'+esc(_daTendina?"":(c.prezzario||""))+'" placeholder="Es. Tariffa Regione Lazio"></div>'
-      +    '<div class="field"><label>Anno</label><input type="number" id="co-prz-anno" value="'+(c.prezzario_anno||"")+'" placeholder="2023" style="max-width:130px"></div>'
+      +    '<div class="field"><label>Anno</label><input type="number" id="co-prz-anno" value="'+(c.prezzario_anno||"")+'" placeholder="anno" style="max-width:130px"></div>'
       +  '</div>'
       /* 12 agosto 2026 (sera) — era type="number". Un ribasso si scrive
          «12,5», con la virgola: una casella type=number con la virgola dentro
@@ -2089,12 +2089,12 @@
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">La lavorazione</div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Codice del prezzario</label><input id="cv-cod"'+_noAuto()+' value="'+esc(v.codice||"")+'" placeholder="A.01.002"></div>'
+      +    '<div class="field"><label>Codice del prezzario</label><input id="cv-cod"'+_noAuto()+' value="'+esc(v.codice||"")+'" placeholder="facoltativo"></div>'
       +    '<div class="field"><label>Unità di misura</label><select id="cv-uni">'+uniOpts+'</select></div>'
       +  '</div>'
       +  '<div class="field"><label>Descrizione</label><textarea id="cv-desc" rows="4" placeholder="Come la scrive il prezzario, per esteso">'+esc(v.descrizione||"")+'</textarea></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50" data-euro>'
+      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="euro" data-euro>'
       /* ⚠️ se la lavorazione ha l'analisi, questa casella non comanda piu'
          niente: si spegne e mostra il prezzo costruito (vedi
          anPrezzoCasella). Una casella che si puo' scrivere e che non serve
@@ -2123,7 +2123,7 @@
       +(pubblico
         ? '<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
           +'<div class="row2">'
-          +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano"'+_noAuto()+' value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="35"></div>'
+          +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano"'+_noAuto()+' value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="per cento"></div>'
           /* ⚠️ 6 set 2026 — LA VECCHIA CASELLA DELLA SICUREZZA SI VEDE SOLO SE
              E' GIA' PIENA. Non si capiva se quel numero fosse al metro quadro o
              in tutto (il conto lo prendeva in tutto), e soprattutto non e' li'
@@ -2762,10 +2762,10 @@
       +    ' style="margin-top:8px;'+((inCorr&&inCorr.unita&&UNITA.indexOf(inCorr.unita)<0)?'':'display:none')+'"'
       +    ' value="'+(inCorr?esc(inCorr.unita||""):"")+'" placeholder="sacco, viaggio, q.li…"></div>'
       +  '<div class="field"><label>Quantità per '+esc(perUno)+'</label><input type="text" inputmode="decimal" id="an-qta"'+_noAuto()
-      +  ' value="'+(inCorr?_v(inCorr.quantita):"")+'" placeholder="1,05"></div>'
+      +  ' value="'+(inCorr?_v(inCorr.quantita):"")+'" placeholder="quantità"></div>'
       +'</div>'
       +'<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="an-prezzo"'+_noAuto()
-      +' value="'+(inCorr?esc(_prezzoTesto(inCorr.prezzo_unitario)):"")+'" placeholder="42,00" style="max-width:200px" data-euro></div>'
+      +' value="'+(inCorr?esc(_prezzoTesto(inCorr.prezzo_unitario)):"")+'" placeholder="euro" style="max-width:200px" data-euro></div>'
       +'<button type="button" class="btn-primary quick-add" data-action="an-add" data-id="'+esc(String(voceId))+'">'
       + (inCorr?"Salva la riga":"+ Aggiungi al prezzo")+'</button>'
       + (inCorr?' <button type="button" class="btn-ghost quick-add" data-action="an-annulla">Annulla la correzione</button>':'')
