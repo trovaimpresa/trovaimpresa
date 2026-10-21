@@ -19,7 +19,7 @@
       const ds=ymd(y,m,d);
       if(meseOggi&&ds<oggi)continue;
       const g=giornoDi(ds,oggi), nota=db().note[ds];
-      const tanti=g.escono.length+g.rientrano.length+g.ritardi.length+g.lavori.length;
+      const tanti=g.escono.length+g.rientrano.length+g.ritardi.length+g.lavori.length+g.scadenze.length;
       if(!tanti&&!nota&&ds!==oggi)continue;
       const nome=GG[new Date(y,m,d).getDay()];
       h+='<div class="cl-g'+(ds===oggi?" oggi":"")+'" data-action="open-day" data-d="'+ds+'">'
@@ -28,6 +28,8 @@
       g.escono.forEach(x=>{const p=nolFaseDi(x)==="prenotato";h+=riga(ds,p?"prenot":"esce",(p?"Prenotato: ":"Esce: ")+chi(x));});
       g.rientrano.forEach(x=>{h+=riga(ds,"rientra","Rientra: "+chi(x));});
       g.lavori.forEach(j=>{h+=riga(ds,j.stato==="fatto"?"done":"todo",esc(j.descrizione||"Lavoro"));});
+      /* le scadenze aprono la loro scheda (il mezzo, la fattura, il promemoria), non la giornata */
+      g.scadenze.forEach(x=>{h+='<div class="cl-r" '+x.az+'><i class="dot scad"></i><span class="cl-t">'+esc(x.testo)+'</span><span class="cl-f">\u203a</span></div>';});
       if(nota)h+=riga(ds,"nota","Nota: "+esc(String(nota).slice(0,80)));
       if(!tanti&&!nota)h+='<div class="cl-vuoto">Niente in programma</div>';
     }
@@ -45,7 +47,8 @@
          nessuno e' ancora in ritardo */
       ritardi:   ds<=oggi?calNol.filter(x=>!x.data_rientro_effettivo&&x.data_rientro_prevista&&
                                            x.data_rientro_prevista<ds):[],
-      lavori:    calJobs.filter(l=>l.data_prevista===ds)
+      lavori:    calJobs.filter(l=>l.data_prevista===ds),
+      scadenze:  (typeof calScadNol!=="undefined"?calScadNol:[]).filter(x=>x.data===ds)
     };
   }
 
@@ -87,6 +90,12 @@
         eti:[{t:(statoLabel[j.stato]||j.stato||"").toUpperCase(),col:j.stato==='fatto'?'#2e7d32':'#757575'}],
         pulsanti:nolPulsanti("fattura",j.id)})).join("")
       :vuoto("Nessun lavoro in questa data.");
+    if(g.scadenze.length){
+      h+=`<div class="mini-title">Scadenze (${g.scadenze.length})</div>`;
+      h+=g.scadenze.map(x=>nolCard({cls:"riga-gior",titolo:esc(x.testo),
+        eti:[{t:"SCADENZA",col:"#0f766e"}],
+        pulsanti:`<div class="nol-azioni"><button class="nol-az nol-az-apri" ${x.az}>Apri</button></div>`})).join("");
+    }
     openSheet(`<h3>${esc(nolTitolo("giornata",g))}</h3>${nolPulsantiScheda("giornata",ds,["nol-pdf","nol-stampa"])}
       ${h}
       <div class="field" style="margin-top:18px"><label>📌 Nota / promemoria del giorno</label>

@@ -267,7 +267,33 @@
      tornato». Percio' il mese mostra i noleggi, e il giorno si apre a
      tutta pagina come tutte le altre schede.
      ================================================================ */
-  let calJobs=[], calNol=[];
+  let calJobs=[], calNol=[], calScadNol=[];
+  /* 21 ott 2026 — LE ALTRE DATE NEL CALENDARIO DEL NOLEGGIO.
+     Le scadenze dei mezzi (assicurazione, revisione, collaudo, verifica)
+     stavano solo nella scheda del mezzo: proprio quelle che decidono se un
+     mezzo si puo' dare a noleggio. Adesso stanno anche qui, insieme ai
+     promemoria e alle fatture del noleggio da incassare. Le date dei mezzi
+     le dice mezzoScadenze(), la stessa che usa l'elenco dei mezzi. */
+  async function calScadenzeNol(){
+    const ok=r=>(r&&!r.error&&r.data)||[];
+    const [rm,rp,rf,raz]=await Promise.all([
+      sb.from("gest_mezzi").select("*").eq("user_id",sbUid).is("eliminato_il",null),
+      sb.from("promemoria").select("id,testo,data,stato").eq("user_id",sbUid).is("eliminato_il",null),
+      sb.from("nol_fatture").select("id,numero,data,cliente,stato").eq("user_id",sbUid).is("eliminato_il",null).eq("stato","emessa"),
+      sb.from("gest_azienda").select("giorni_pagamento").eq("user_id",sbUid).maybeSingle()
+    ]);
+    const out=[];
+    ok(rm).forEach(m=>{ mezzoScadenze(m).forEach(s=>{ if(s.data)out.push({data:s.data,
+      testo:s.cosa+" · "+(m.nome||"mezzo"),az:'data-action="nol-mod" data-t="mezzo" data-id="'+esc(String(m.id))+'"'}); }); });
+    ok(rp).forEach(p=>{ if(p.data&&p.stato!=="fatto")out.push({data:p.data,
+      testo:"Promemoria: "+(p.testo||""),az:'data-action="edit-prom" data-id="'+esc(String(p.id))+'"'}); });
+    const gg=(raz&&raz.data&&+raz.data.giorni_pagamento)||30;
+    ok(rf).forEach(f=>{ if(!f.data)return; const d=new Date(f.data+"T12:00:00"); d.setDate(d.getDate()+gg);
+      out.push({data:ymd(d.getFullYear(),d.getMonth(),d.getDate()),
+        testo:"Da incassare: "+(f.cliente||"cliente")+(f.numero?" · fattura "+f.numero:""),
+        az:'data-action="nol-mod" data-t="fattnol" data-id="'+esc(String(f.id))+'"'}); });
+    return out;
+  }
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
@@ -280,7 +306,8 @@
         .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento,fase")
         .eq("user_id",sbUid);
       calNol=nn||[];
-    } else { calJobs=[]; calNol=[]; }
+      try{ calScadNol=await calScadenzeNol(); }catch(e){ calScadNol=[]; }
+    } else { calJobs=[]; calNol=[]; calScadNol=[]; }
     const oggi=todayStr();
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -293,6 +320,7 @@
         .concat(g.rientrano.slice(0,4).map(()=>'<i class="dot rientra" title="rientra"></i>'))
         .concat(g.ritardi.slice(0,3).map(()=>'<i class="dot ritardo" title="in ritardo"></i>'))
         .concat(g.lavori.slice(0,3).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`))
+        .concat(g.scadenze.slice(0,3).map(x=>`<i class="dot scad" title="${esc(x.testo)}"></i>`))
         .slice(0,8).join("");
       const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell ${ds===oggi?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;

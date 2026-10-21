@@ -593,7 +593,7 @@
         <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">•</button><button data-action="cal-next">›</button></div></div>
       <div class="cal-oggi" id="cal-oggi"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot prenot"></i>Prenotato</span><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot prenot"></i>Prenotato</span><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span><i class="dot scad"></i>Scadenza</span><span>📌 Nota</span></div>
     </section>
 
     <section id="fatture">
@@ -957,6 +957,8 @@ body:has(#ti-fondatore) .sheet--grande{
 /* ⚠️ i lavori nel calendario avevano lo stesso arancione di «esce»:
    due cose diverse dello stesso colore, sulla stessa casella. */
 .dot.esce{background:#e65100} .dot.rientra{background:#1565c0} .dot.prenot{background:#7C3AED}
+/* 21 ott 2026 — scadenze di mezzi, promemoria e fatture: un colore loro, diverso da prenotato e lavori */
+.cal-grid .dot.scad,.cal-legend .dot.scad,.cal-lista .dot.scad{background:#0f766e}
 .cal-grid .dot.todo,.cal-legend .dot.todo,.cal-lista .dot.todo{background:#7C3AED}
 .cal-grid .dot.done,.cal-legend .dot.done,.cal-lista .dot.done{background:#2e7d32}
 /* il meno e il piu' della giacenza, dentro la scheda: grossi da premere */
