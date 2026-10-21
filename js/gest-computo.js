@@ -2482,11 +2482,34 @@
       +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg"'+_noAuto()+' value="'+(inCorr?_v(inCorr.larghezza):"")+'" placeholder="vuoto = non la uso"></div>'
       +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt"'+_noAuto()+' value="'+(inCorr?_v(inCorr.altezza):"")+'" placeholder="metri"></div>'
       +  '</div>'
+      /* 21 ott 2026 — IL RISULTATO MENTRE SCRIVI. Nel collaudo si e' perso
+         mezz'ora: le caselle sembravano piene (erano gli esempi grigi) e il
+         totale restava fermo, perche' il totale conta solo le misure SALVATE.
+         Adesso sotto le caselle si legge subito quanto fa la misura che stai
+         scrivendo, con la stessa formula del database (vuoto = 1). */
+      +  '<div class="spesa-row" id="cm-anteprima" style="display:none"></div>'
       +  '<button type="button" class="btn-primary quick-add" data-action="comp-mis-add" data-id="'+esc(String(voceId))+'">'+(inCorr?"Salva la misura":"+ Aggiungi la misura")+'</button>'
       +  (inCorr?' <button type="button" class="btn-ghost quick-add" data-action="comp-mis-annulla">Annulla la correzione</button>':'')
       +  '<div class="sh-nota">Un campo <b>vuoto</b> non entra nel conto (vale 1): per i metri quadri riempi lunghezza e altezza e lascia stare la larghezza. Uno <b>zero</b> scritto invece vale zero davvero.</div>'
       +'</div>';
     bindSeg("cm-verso");
+    box.oninput=function(e){if(e.target&&/^cm-(parti|lung|larg|alt)$/.test(e.target.id))compMisAnteprima();};
+    const _vs=$("#cm-verso");if(_vs)_vs.addEventListener("click",()=>setTimeout(compMisAnteprima,0));
+    compMisAnteprima();
+  }
+  /* stessa formula della colonna quantita di gest_computo_misure:
+     segno x parti x lunghezza x larghezza x altezza, con il vuoto che vale 1 */
+  function compMisAnteprima(){
+    const el=$("#cm-anteprima");if(!el)return;
+    const v=[_numIt("#cm-parti"),_numIt("#cm-lung"),_numIt("#cm-larg"),_numIt("#cm-alt")];
+    if(v.every(x=>x==null)){el.style.display="none";el.innerHTML="";return;}
+    const meno=segVal("cm-verso")==="meno";
+    const q=(meno?-1:1)*v.reduce((p,x)=>p*(x==null?1:x),1);
+    const conto=[_partiTesto(v[0])].concat(v.slice(1).filter(x=>x!=null).map(_misTesto)).join(" × ");
+    const rosso=meno?' style="color:var(--err,#c0392b)"':'';
+    el.innerHTML='<span><b>Questa misura</b><small class="sp-forn">'+esc(conto)+'</small></span>'
+      +'<b'+rosso+'>'+(meno?'− ':'')+_misLetta(Math.abs(q))+'</b><span></span>';
+    el.style.display="";
   }
 
   /* ⚠️ Il chiavistello del doppio clic. 10 agosto 2026.
