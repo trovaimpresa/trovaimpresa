@@ -547,6 +547,13 @@
           .concat((per||[]).map(x=>({id:x.id,titolo:x.titolo+" · "+x._nome,data:x.data_scadenza,fatta:false,
                                      _persona:true,_opId:x._opId})));
       }catch(e){ calScad=[]; }
+      /* 21 ott 2026 — IL CALENDARIO UNICO. Le date stavano sparse in cinque
+         sezioni: i promemoria, le scadenze scritte sulla scheda del mezzo
+         (assicurazione, revisione, collaudo, verifica), le fatture da
+         incassare e quelle dei fornitori da pagare. Adesso si vedono tutte
+         qui. Ognuna legge per conto suo: se una tabella non risponde, le
+         altre si vedono lo stesso. */
+      try{ calScad=calScad.concat(await calAltreDate(curMestiere())); }catch(e){}
     }
     await caricaNote();
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
@@ -579,7 +586,7 @@
       }).join("");
       const righeSc=sc.slice(0,nSc).map(x=>{
         const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
-        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">⏰ ${esc(x.titolo)}</span></span>`;
+        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</span></span>`;
       }).join("");
       const tot=jobs.length+sc.length, mostrate=nJobs+nSc;
       const piu=tot>mostrate?`<span class="cal-piu">+${tot-mostrate}</span>`:"";
@@ -601,6 +608,72 @@
      Sul computer l'elenco non si vede (display:none sopra i 760 px).
      Ogni riga apre quello che apre il riquadro del giorno: il lavoro, la
      scadenza, la scheda della persona. Il titolo del giorno apre il giorno. */
+  /* le date che non sono righe di gest_scadenze. _az dice cosa si apre
+     cliccando: si passa dalla sezione giusta (cal-vai), perche' i moduli di
+     fatture, mezzi e fornitori leggono dai loro elenchi, che si caricano
+     solo quando la sezione si apre. */
+  async function calAltreDate(mid){
+    const out=[], ok=r=>(r&&!r.error&&r.data)||[];
+    const vai=(tab,az,id)=>'data-action="cal-vai" data-tab="'+tab+'" data-azione="'+az+'" data-id="'+esc(String(id))+'"';
+    const [rp,rm,rf,rff,rfo,raz]=await Promise.all([
+      sb.from("promemoria").select("id,testo,data,stato").eq("user_id",sbUid).is("eliminato_il",null),
+      sb.from("gest_mezzi").select("id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
+        .eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null),
+      sb.from("gest_fatture").select("id,numero,data,cli_nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+        .eq("stato","emessa").is("eliminato_il",null).not("numero","is",null),
+      sb.from("gest_fatture_fornitori").select("id,numero,scadenza,stato,fornitore_id").eq("user_id",sbUid).eq("mestiere_id",mid)
+        .is("eliminato_il",null).neq("stato","pagata"),
+      sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid),
+      sb.from("gest_azienda").select("giorni_pagamento").eq("user_id",sbUid).maybeSingle()
+    ]);
+    /* i promemoria sono della persona, non del reparto: si vedono da tutti */
+    ok(rp).forEach(p=>{ if(p.data)out.push({id:p.id,titolo:p.testo||"Promemoria",data:p.data,fatta:p.stato==="fatto",
+      _pre:"",_lab:"Promemoria: ",_az:vai("promemoria","edit-prom",p.id)}); });
+    /* le stesse quattro date della vista gest_mezzi_scadenze */
+    const piuMesi=(d,n)=>{const x=new Date(d+"T12:00:00");const g=x.getDate();x.setMonth(x.getMonth()+n);if(x.getDate()<g)x.setDate(0);return ymd(x.getFullYear(),x.getMonth(),x.getDate());};
+    ok(rm).forEach(m=>{
+      const tab=m.tipo==="attrezzatura"?"attrezzature":"mezzi";
+      [["assicurazione_scad","Assicurazione"],["revisione_scad","Revisione"],["collaudo_scad","Collaudo"]].forEach(c=>{
+        if(m[c[0]])out.push({id:m.id,titolo:c[1]+" · "+(m.nome||"mezzo"),data:m[c[0]],fatta:false,_az:vai(tab,"edit-mezzo",m.id)});
+      });
+      if(m.verifica_ultima&&(+m.verifica_mesi||0)>0)
+        out.push({id:m.id,titolo:"Verifica periodica · "+(m.nome||"mezzo"),data:piuMesi(m.verifica_ultima,+m.verifica_mesi),fatta:false,_az:vai(tab,"edit-mezzo",m.id)});
+    });
+    /* la fattura scade dopo i giorni di pagamento di Dati azienda: la stessa
+       regola di Fatture e di Tasse e fisco */
+    const gg=(raz&&raz.data&&+raz.data.giorni_pagamento)||30;
+    ok(rf).forEach(x=>{ if(!x.data)return;
+      const d=new Date(x.data+"T12:00:00");d.setDate(d.getDate()+gg);
+      out.push({id:x.id,titolo:(x.cli_nome||"cliente")+" · fattura "+x.numero,data:ymd(d.getFullYear(),d.getMonth(),d.getDate()),fatta:false,
+        _pre:"",_lab:"Da incassare: ",_az:vai("fatture","edit-fatt",x.id)}); });
+    const fn={};ok(rfo).forEach(x=>{fn[x.id]=x.nome;});
+    ok(rff).forEach(x=>{ if(!x.scadenza)return;
+      out.push({id:x.id,titolo:(fn[x.fornitore_id]||"fornitore")+(x.numero?" · n. "+x.numero:""),data:x.scadenza,fatta:false,
+        _pre:"",_lab:"Da pagare: ",_az:vai("fornitori","edit-fattf",x.id)}); });
+    /* nella cella e nel riquadro del giorno la parola sta davanti al titolo */
+    out.forEach(x=>{ if(x._lab&&x._pre==="")x.titolo=x._lab+x.titolo, x._lab=""; });
+    return out;
+  }
+  /* apre la sezione giusta e, appena il suo elenco e' caricato, la scheda */
+  const CAL_PRONTO={"edit-prom":()=>typeof promCache!=="undefined"&&promCache,"edit-mezzo":()=>typeof mezziCache!=="undefined"&&mezziCache,
+    "edit-fatt":()=>typeof fattCache!=="undefined"&&fattCache,"edit-fattf":()=>typeof fattfCache!=="undefined"&&fattfCache};
+  async function calVai(tab,azione,id){
+    if(typeof closeSheet==="function")closeSheet();
+    const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"]'); if(b)b.click();
+    for(let i=0;i<40;i++){
+      const L=(CAL_PRONTO[azione]||(()=>null))();
+      if(L&&L.some(x=>String(x.id)===String(id)))break;
+      await new Promise(r=>setTimeout(r,150));
+    }
+    const x=document.createElement("button");x.type="button";x.style.display="none";
+    x.dataset.action=azione;x.dataset.id=id;document.body.appendChild(x);x.click();x.remove();
+  }
+  document.addEventListener("click",function(e){
+    const t=e.target&&e.target.closest?e.target.closest('[data-action="cal-vai"]'):null;
+    if(!t)return;
+    calVai(t.dataset.tab,t.dataset.azione,t.dataset.id);
+  });
+
   function calListaTelefono(y,m,days){
     const grid=$("#cal-grid"); if(!grid)return;
     let box=$("#cal-lista");
@@ -624,10 +697,10 @@
       });
       sc.forEach(x=>{
         const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
-        const az=x._persona?'data-action="scad-persona" data-id="'+esc(String(x._opId||""))+'"'
+        const az=x._az?x._az:x._persona?'data-action="scad-persona" data-id="'+esc(String(x._opId||""))+'"'
                            :'data-action="edit-scad" data-id="'+esc(String(x.id))+'"';
         h+='<div class="cl-r" '+az+'><i class="cal-lav-bar '+cls+'"></i>'
-          +'<span class="cl-t">Scadenza: '+esc(x.titolo)+'</span><span class="cl-f">\u203a</span></div>';
+          +'<span class="cl-t">'+(x._lab!=null?x._lab:"Scadenza: ")+esc(x.titolo)+'</span><span class="cl-f">\u203a</span></div>';
       });
       if(nota)h+='<div class="cl-r" data-action="open-day" data-d="'+ds+'"><i class="cal-lav-bar nota"></i>'
           +'<span class="cl-t">Nota: '+esc(String((nota&&nota.testo)||nota).slice(0,80))+'</span><span class="cl-f">\u203a</span></div>';
@@ -674,11 +747,12 @@
        di una persona nella scheda della persona (li' si cambia la data). */
     const listSc=scDel.length?scDel.map(x=>{
       const late=!x.fatta&&ds<todayStr();
-      const azione=x._persona
+      const azione=x._az ? x._az
+        : x._persona
         ? `data-action="scad-persona" data-id="${esc(String(x._opId||""))}" title="Apri la scheda della persona"`
         : `data-action="edit-scad" data-id="${esc(String(x.id))}" title="Apri la scadenza"`;
       return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'todo')}"></i>
-        <div style="flex:1"><b style="font-size:14px">⏰ ${esc(x.titolo)}</b></div>
+        <div style="flex:1"><b style="font-size:14px">${x._pre!=null?x._pre:"⏰ "}${esc(x.titolo)}</b></div>
         <span class="stato ${x.fatta?'fatto':(late?'ritardo':'da_fare')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
     /* ⛔ 29 agosto 2026 — Alessio: «la voglio come e' su tutti i gestionali».
        Era l'ultima finestra rimasta con la sola freccia in cima invece della
