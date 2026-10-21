@@ -56,6 +56,36 @@
       return out;
     }catch(_){ return []; }
   }
+  /* ============================================================
+     21 ott 2026 — LE SCADENZE SCRITTE SULLA SCHEDA DEL MEZZO.
+     Assicurazione, revisione, collaudo e verifica periodica si scrivono
+     dentro il mezzo (o l'attrezzatura), e nello Scadenzario non comparivano:
+     proprio dove uno va a cercarle. Stessa idea delle persone: sola lettura,
+     il dato resta in un posto solo, si cambia aprendo il mezzo. Le date sono
+     le stesse della vista gest_mezzi_scadenze.
+     ============================================================ */
+  const SCAD_MEZZO=[["assicurazione_scad","Assicurazione"],["revisione_scad","Revisione"],["collaudo_scad","Collaudo"]];
+  async function scadenzeMezzi(mid){
+    if(!sb||!sbUid)return [];
+    try{
+      const {data:mz}=await sb.from("gest_mezzi")
+        .select("id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
+        .eq("user_id",sbUid).or(_cliOr(mid||curMestiere())).is("eliminato_il",null);
+      const out=[];
+      (mz||[]).forEach(function(m){
+        const att=m.tipo==="attrezzatura";
+        const base={_mezzo:true,_mzId:m.id,_tab:att?"attrezzature":"mezzi",_nome:m.nome||(att?"Attrezzatura":"Mezzo"),
+                    tipo_pratica:att?"Attrezzatura":"Mezzo",stato:"aperta"};
+        SCAD_MEZZO.forEach(function(t){
+          if(m[t[0]])out.push(Object.assign({id:"mz:"+m.id+":"+t[0],titolo:t[1],data_scadenza:m[t[0]]},base));
+        });
+        if(m.verifica_ultima&&(+m.verifica_mesi||0)>0)
+          out.push(Object.assign({id:"mz:"+m.id+":verifica",titolo:"Verifica periodica",
+            data_scadenza:_mesiDopo(m.verifica_ultima,+m.verifica_mesi)},base));
+      });
+      return out;
+    }catch(_){ return []; }
+  }
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
@@ -79,8 +109,8 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    const scadPersone=await scadenzePersone(mid);
-    const scadTutte=scadCache.concat(scadPersone).sort(function(a,b){
+    const [scadPersone,scadMezzi]=await Promise.all([scadenzePersone(mid),scadenzeMezzi(mid)]);
+    const scadTutte=scadCache.concat(scadPersone,scadMezzi).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
@@ -104,6 +134,20 @@
                  :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        if(s._mezzo){
+          const apri={action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}};
+          return {
+            id:s.id,
+            click:apri,
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"Aperta")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica),
+              `🚚 ${esc(s._nome)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"🚚 Apri la scheda del mezzo",action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
+          };
+        }
         if(s._persona){
           return {
             id:s.id,
@@ -141,6 +185,17 @@
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
+    if(s._mezzo){
+      let bgM="var(--sfondo)",fgM="var(--testo-2)",labM="Aperta",tonoM="t-neutro";
+      if(s.data_scadenza<oggi){bgM="var(--err-bg)";fgM="var(--err)";labM="Scaduta";tonoM="t-err";}
+      else if(s.data_scadenza<=lim){bgM="var(--attesa-bg)";fgM="var(--attesa)";labM="In scadenza";tonoM="t-attesa";}
+      return schedaJob({
+        tono:tonoM, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgM};color:${fgM}">${labM}</span>`,
+        meta:["🚚 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri la scheda",action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
+      });
+    }
     if(s._persona){
       let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="Aperta",tonoP="t-neutro";
       if(s.data_scadenza<oggi){bgP="var(--err-bg)";fgP="var(--err)";labP="Scaduta";tonoP="t-err";}
