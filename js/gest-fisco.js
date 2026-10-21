@@ -298,7 +298,7 @@
     if (typeof setCnt === "function") setCnt("#cnt-fisco", scadute.length, "err");
 
     let h = `<div class="fp-tot">
-      <div class="k-rosso">${fpIc("euro")}<div><small>Ti devono (scadute)</small><b>${eur(devono)}</b></div></div>
+      <div class="k-rosso">${fpIc("euro")}<div><small>Ti devono (scadute) · tutti i reparti</small><b>${eur(devono)}</b></div></div>
       <div class="k-giallo">${fpIc("persone")}<div><small>Clienti in ritardo</small><b>${new Set(scadute.map(f => f.cliente_id || f.cli_nome)).size}</b></div></div>
       <div class="k-verde">${fpIc("grafico")}<div><small>Interessi e spese che ti spettano</small><b class="fp-verde">+ ${eur(extra)}</b></div></div>
     </div>`;

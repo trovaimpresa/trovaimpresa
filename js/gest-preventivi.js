@@ -795,8 +795,19 @@
     toast("Preventivo collegato ✔");
   }
   async function _prevCreaLavoro(id,p,tot){
+    /* 21 ott 2026 — il lavoro nasceva senza indirizzo anche quando il cliente
+       ce l'aveva: la Mappa restava vuota e il «Dove» andava riscritto a mano.
+       Adesso si prende dalla scheda del cliente. */
+    let dove="";
+    if(p.cliente_id){
+      const {data:c}=await sb.from("gest_clienti").select("indirizzo,cap,citta,prov").eq("id",p.cliente_id).eq("user_id",sbUid).maybeSingle();
+      if(c){
+        const luogo=[c.cap,c.citta].filter(x=>x&&String(x).trim()).join(" ")+(c.prov?" ("+c.prov+")":"");
+        dove=[c.indirizzo,luogo].map(x=>String(x||"").trim()).filter(Boolean).join(", ");
+      }
+    }
     const {data:lav,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
-      descrizione:p.titolo,dove:"",data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
+      descrizione:p.titolo,dove:dove,data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
     if(error){toast("Errore: "+error.message);return;}
     const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid).select("id");
     rinfresca("preventivi","lavori","riepilogo");

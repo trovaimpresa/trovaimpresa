@@ -210,7 +210,7 @@
       const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
       return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.sp/mlMax*100,m.sp?1:0)}%"></div></div>
-      <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · Manodopera "+eur(m.md):""}</div></div>`;
+      <div class="mlav-sub">Importo ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · Manodopera "+eur(m.md):""}</div></div>`;
     }).join("");
     /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere, TUTTI i
        margini di questa pagina (e i Totali storici, e il CSV) sono scritti
@@ -221,7 +221,7 @@
       : "";
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
       ${avvisoOre}
-      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Incasso</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
+      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Importo del lavoro</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
       ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
       ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;
     box.innerHTML=`<div class="rep-grid">
