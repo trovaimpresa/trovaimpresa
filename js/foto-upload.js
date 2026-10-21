@@ -33,7 +33,8 @@
 (function(){
   var LATO_DEFAULT    = 1600;             /* px sul lato lungo */
   var QUALITA_DEFAULT = 0.75;             /* qualità di default */
-  var MAX_BYTE        = 15 * 1024 * 1024; /* 15 MB sul file ORIGINALE */
+  var MAX_BYTE        = 15 * 1024 * 1024; /* 15 MB: file ricevuto dal bucket (dopo la compressione) e PDF */
+  var MAX_BYTE_FOTO   = 40 * 1024 * 1024; /* 21 ott 2026: le FOTO possono essere originali piu' grandi, si riducono prima dell'invio */
 
   function eImmagine(file){
     return !!(file && file.type && file.type.indexOf("image/") === 0);
@@ -86,23 +87,32 @@
 
     /* il limite vale sull'originale: è li' che si difende la connessione
        di chi carica dal cantiere, non solo lo spazio nel bucket */
-    if(file.size > MAX_BYTE){
-      return { errore: (eImmagine(file) ? "Foto" : "File") + " troppo grande, massimo 15 MB" };
+    var maxOrig = eImmagine(file) ? MAX_BYTE_FOTO : MAX_BYTE;
+    if(file.size > maxOrig){
+      return { errore: (eImmagine(file) ? "Foto" : "File") + " troppo grande, massimo " + (eImmagine(file) ? "40" : "15") + " MB" };
     }
 
     var intatto = { file: file, nome: file.name, compressa: false,
                     byteOrig: file.size, byteFin: file.size };
+    /* se la foto non si riduce e il bucket accetta al massimo 15 MB, si dice
+       all'utente cosa fare invece di mandare un upload che fallisce */
+    function intatto_o_errore(){
+      if(eImmagine(file) && file.size > MAX_BYTE){
+        return { errore: "Questa foto non si riesce a ridurre e pesa piu' di 15 MB. Dal telefono salvala come JPG (o fai una foto piu' piccola) e riprova." };
+      }
+      return intatto;
+    }
     if(!eImmagine(file)) return intatto;   /* PDF della fattura: non si tocca */
 
     try{
       var blob = await comprimiImmagine(file, lato, qualita, mime);
       /* se il "compresso" pesa di piu' (foto già piccole, o già ottimizzate)
          si tiene l'originale: comprimere due volte peggiora e basta */
-      if(!blob || blob.size >= file.size) return intatto;
+      if(!blob || blob.size >= file.size) return intatto_o_errore();
       return { file: blob, nome: nomeConEstensione(file.name, ext), compressa: true,
                byteOrig: file.size, byteFin: blob.size };
     }catch(e){
-      return intatto;                       /* mai far fallire l'upload per questo */
+      return intatto_o_errore();                       /* mai far fallire l'upload per questo */
     }
   }
 

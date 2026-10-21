@@ -25,7 +25,7 @@ async function caricaFotoLavoroFile(file) {
   const stato = document.getElementById('lav-foto-stato');
   const hidden = document.getElementById('lav-foto');
   if (!file) { hidden.value = ''; stato.textContent = ''; _fotoLavoroInCaricamento = false; return; }
-  if (file.size > 5 * 1024 * 1024) { hidden.value = ''; stato.textContent = '❌ La foto supera i 5 MB.'; _fotoLavoroInCaricamento = false; return; }
+  /* 21 ott 2026: niente più limite di 5 MB qui. La foto si riduce in preparaFileUpload (1600 px), il limite vero e' quello li' */
   _fotoLavoroInCaricamento = true;
   stato.textContent = '⏳ Caricamento foto...';
   const prep = await preparaFileUpload(file);
