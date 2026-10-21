@@ -752,8 +752,19 @@
   }
   async function fillClienti(selId){
     const sel=$("#j-cliente");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
+    const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(c=>`<option value="${esc(c.id)}" ${c.id===selId?"selected":""}>${esc(c.nome)}</option>`).join("");
+    /* 21 ott 2026 — scegliendo il cliente, il «Dove» si riempie col suo
+       indirizzo, se e' vuoto. Se l'avevi gia' scritto tu non si tocca; se
+       l'aveva messo lui da un altro cliente, si aggiorna. */
+    const dove=$("#j-dove"); if(!dove)return;
+    const ind=c=>{if(!c)return "";const luogo=[c.cap,c.citta].filter(x=>x&&String(x).trim()).join(" ")+(c.prov?" ("+c.prov+")":"");
+      return [c.indirizzo,luogo].map(x=>String(x||"").trim()).filter(Boolean).join(", ");};
+    sel.addEventListener("change",function(){
+      const c=(data||[]).find(x=>String(x.id)===String(sel.value));
+      const v=ind(c);
+      if(!dove.value.trim()||dove.value===dove.dataset.auto){ dove.value=v; dove.dataset.auto=v; }
+    });
   }
   function bindSeg(id){$$("#"+id+" button").forEach(b=>b.onclick=()=>{$$("#"+id+" button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});}
   function segVal(id){const e=$("#"+id+" button.on");return e?e.dataset.v:"";}
