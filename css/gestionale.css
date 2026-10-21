@@ -925,7 +925,12 @@
   @media(max-width:880px){
     .topbar{position:static;flex:0 0 auto;height:auto;padding:8px 12px;gap:8px}
     .topbar .tb-left{display:none}
-    .tb-actions{margin-left:0;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    /* 21 ott 2026 — prima la barra scorreva di lato: sul telefono si
+       vedevano Dati azienda e Commercialista, Backup tagliato, Esporta e
+       Aiuto nascosti a destra senza che nessuno lo sapesse. Ora vanno a capo
+       e riempiono la riga: tutti e cinque visibili. */
+    .tb-actions{margin-left:0;width:100%;flex-wrap:wrap}
+    .tb-actions .tb-btn{flex:1 1 auto}
   }
 
   /* ================================================================
