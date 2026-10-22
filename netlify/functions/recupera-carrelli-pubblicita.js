@@ -21,6 +21,7 @@
 
 const { schedule } = require('@netlify/functions');
 const { createClient } = require('@supabase/supabase-js');
+const { unaVolta } = require('./lib/una-volta');
 
 const NOMI_SPAZIO = {
   'hero-sx': 'Banner in alto (sinistra)', 'hero-dx': 'Banner in alto (destra)',
@@ -176,6 +177,9 @@ const handler = async function () {
           .update({ promemoria_carrello: new Date().toISOString() }).eq('id', a.id);
         continue;
       }
+
+      // 22 ott 2026: se la funzione gira due volte insieme, l'email parte una volta sola.
+      if (!(await unaVolta(sb, 'carrello-' + a.id))) continue;
 
       const ok = await inviaEmail(
         email,
