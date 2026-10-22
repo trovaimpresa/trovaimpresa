@@ -35,6 +35,20 @@ function dataItaliana(iso) {
   return `${g}/${m}/${a}`;
 }
 
+
+// 22 ott 2026: una email parte UNA volta sola. Il 21 ottobre l'avviso del
+// gestionale e' partito tre volte alle stesse imprese (Netlify ha lanciato la
+// funzione tre volte). Prima di mandare si scrive la chiave in email_una_volta:
+// se c'e' gia', e' gia' partita. Se la tabella non risponde si manda lo stesso
+// (meglio un doppione raro che un avviso perso). Vedi sql/email-una-volta.sql.
+async function unaVolta(sb, chiave) {
+  const { error } = await sb.from('email_una_volta').insert({ chiave });
+  if (!error) return true;
+  if (error.code === '23505') return false;
+  console.error('email_una_volta:', error.message);
+  return true;
+}
+
 async function inviaEmail(to, subject, html) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -225,6 +239,7 @@ const handler = async function () {
 
       const email = imp && imp.email;
       if (!email) { risultato.errori.push('email mancante per annuncio ' + ann.id); continue; }
+      if (!(await unaVolta(sb, 'pubb-7gg-' + ann.id + '-' + ann.data_fine))) continue;
 
       // 10 set 2026: due mail diverse. Chi ha l'abbonamento non deve
       // rinnovare niente: va solo avvisato dell'addebito in arrivo.
@@ -246,7 +261,7 @@ const handler = async function () {
     }
 
     // ---------- 1b. RIEPILOGO ad Alex ----------
-    if (perAdmin.length) {
+    if (perAdmin.length && await unaVolta(sb, 'pubb-admin-' + giorno(7))) {
       const okAdmin = await inviaEmail(
         process.env.ADMIN_EMAIL || 'info@trovaimpresa.com',
         '[Admin] ' + perAdmin.length + ' spazi pubblicitari in scadenza fra 7 giorni',
