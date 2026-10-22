@@ -193,4 +193,11 @@ const handler = async function () {
   }
 };
 
-exports.handler = schedule('0 9 * * *', handler);
+// ⛔ 22 OTTOBRE 2026 — SPENTA, deciso da Alessio: «togliamolo adesso, e' tutto gratuito».
+// Dal 3 ottobre il gestionale base e' gratis per sempre: alla scadenza dei 3 mesi
+// non si perde niente, quindi l'avviso «il tuo Gestionale scade» non e' piu' vero.
+// In piu' il 21 ottobre e' partita TRE volte alle stesse imprese.
+// Niente orario: Netlify non la lancia piu'. Il codice resta qui sotto per storia.
+// Per riaccenderla: exports.handler = schedule('0 9 * * *', handler);
+void schedule; void handler;
+exports.handler = async () => ({ statusCode: 200, body: JSON.stringify({ ok: true, spenta: true }) });
