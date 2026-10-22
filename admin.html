@@ -587,7 +587,8 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <span class="nav-badge" id="badge-valutazioni" style="background:var(--rosso);display:none">0</span>
       </div>
       <div class="nav-item" onclick="showSection('richieste',this)">
-        <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span> Cosa chiedono
+        <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span> Idee per il gestionale
+        <span class="nav-badge" id="badge-richieste-gest" style="background:var(--rosso);display:none">0</span>
       </div>
       <div class="nav-item" onclick="showSection('locandine',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span> Locandine Pub.
@@ -981,8 +982,8 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
 
     <!-- RECENSIONI -->
     <div class="section" id="sec-richieste">
-      <h2 style="margin:0 0 6px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Cosa chiedono le imprese</h2>
-      <p style="color:#5b6b80;margin:0 0 18px;font-size:15px">Quello che le imprese ti scrivono dal gestionale, dalla piu' recente. Cambiando lo stato loro lo vedono subito.</p>
+      <h2 style="margin:0 0 6px"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Idee per il gestionale</h2>
+      <p style="color:#5b6b80;margin:0 0 18px;font-size:16px;line-height:1.55">Le imprese le scrivono da dentro il loro gestionale, col pulsante «Chiedi una funzione». Ti chiedono una cosa che manca o che vorrebbero fatta meglio.<br>Quando cambi lo stato o rispondi, l'impresa lo vede nel suo gestionale e le arriva un'email.</p>
       <div class="rqa-filtri" id="rqa-filtri">
         <button type="button" class="rqa-f on" data-rqa-f="aperte" onclick="rqaFiltro('aperte')">Da fare</button>
         <button type="button" class="rqa-f" data-rqa-f="tutte" onclick="rqaFiltro('tutte')">Tutte</button>
@@ -3897,7 +3898,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti(), caricaBadgeRichieste()]);
 }
 
 // QUANTE PERSONE HANNO APERTO IL SITO (caselle in cima alla dashboard)
@@ -5415,10 +5416,14 @@ async function caricaRichieste() {
   // incrociare user_id: nessuna chiamata in piu' al server.
   // Se il nome non si trova (profilo cancellato, oppure le imprese non sono
   // ancora arrivate) NON si scrive niente di finto: resta l'email, come prima.
-  const nomeDiUser = {};
+  const nomeDiUser = {}, impDiUser = {};
   (tutteImprese || []).forEach(i => {
-    if (i.user_id) nomeDiUser[i.user_id] = i.nome_attivita || i.nome || '';
+    if (i.user_id) { nomeDiUser[i.user_id] = i.nome_attivita || i.nome || ''; impDiUser[i.user_id] = i; }
   });
+  // 22 ott 2026: chi scrive, che cosa e', di dove — detto in chiaro (Alessio:
+  // «non capisco chi scrive, da dove e perche'»).
+  const TIPO_LAB = { impresa: 'Impresa', artigiano: 'Artigiano', professionista: 'Studio tecnico', negozio: 'Negozio' };
+  aggiornaBadgeRichieste(data);
 
   RQA_CACHE = data;
   const lista = RQA_FILTRO === 'tutte' ? data : data.filter(r => r.stato !== 'fatta' && r.stato !== 'non_faremo');
@@ -5436,9 +5441,11 @@ async function caricaRichieste() {
     return '<div class="rqa-riga rqa-' + esc(r.stato || 'ricevuta') + '">'
       + '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px">'
       +   '<span class="badge ' + st.cls + '">' + st.lab + '</span>'
-      +   '<span style="color:#5b6b80;font-size:14px">'
-      +     (chi ? '<b style="color:#12233a">' + esc(chi) + '</b> &middot; ' : '')
-      +     esc(r.email || '') + ' &middot; ' + quando + '</span>'
+      +   '<span style="color:#5b6b80;font-size:15px;line-height:1.5">'
+      +     (chi ? '<b style="color:#12233a;font-size:16px">' + esc(chi) + '</b>' : '<b style="color:#12233a;font-size:16px">' + esc(r.email || 'Impresa') + '</b>')
+      +     (function () { const i = impDiUser[r.user_id] || {}; const pz = [TIPO_LAB[i.tipo], i.citta].filter(Boolean); return pz.length ? ' &middot; ' + esc(pz.join(' · ')) : ''; })()
+      +     '<br>Scritta dal suo gestionale il ' + quando + (chi && r.email ? ' &middot; ' + esc(r.email) : '')
+      +   '</span>'
       + '</div>'
       + '<div style="font-size:17px;line-height:1.6;margin-bottom:12px;font-weight:600">' + esc(r.testo || '') + '</div>'
       + '<textarea class="rqa-risp" id="rqa-t-' + r.id + '" rows="2" placeholder="Scrivi la risposta che vedrà nel gestionale (e per email)">' + esc(r.risposta || '') + '</textarea>'
@@ -5469,6 +5476,23 @@ function rqaFiltro(f) { RQA_FILTRO = f; caricaRichieste(); }
    Se non parte, la modifica e' comunque salvata. */
 async function rqaAvvisa(id) {
   try { const j = await suppFetch('avvisa_richiesta', { richiesta_id: id }); return !!(j && j.email); } catch (e) { return false; }
+}
+
+/* 22 ott 2026 — il pallino rosso nel menu: richieste ancora da fare */
+function aggiornaBadgeRichieste(data) {
+  const n = (data || []).filter(r => r.stato !== 'fatta' && r.stato !== 'non_faremo').length;
+  const b = document.getElementById('badge-richieste-gest');
+  if (b) { b.textContent = n; b.style.display = n ? '' : 'none'; }
+}
+async function caricaBadgeRichieste() {
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'gest_richieste' })
+    });
+    const j = await res.json();
+    if (res.ok && j.success) aggiornaBadgeRichieste(j.data);
+  } catch (e) { /* senza pallino, come prima */ }
 }
 
 async function cambiaStatoRichiesta(id, stato) {
