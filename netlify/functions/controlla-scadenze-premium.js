@@ -45,7 +45,7 @@
 // i 39€ del Gestionale AI aggiungono solo l'aiuto dell'AI dentro al gestionale.
 // Se un giorno cambia quella pagina, va cambiata anche questa email.
 
-const { schedule } = require('@netlify/functions');
+// const { schedule } = require('@netlify/functions');  // spenta il 22 ott 2026: Netlify NON pubblica se `schedule` e' importato e non usato
 const { createClient } = require('@supabase/supabase-js');
 
 function esc(str) {
@@ -198,6 +198,6 @@ const handler = async function () {
 // non si perde niente, quindi l'avviso «il tuo Gestionale scade» non e' piu' vero.
 // In piu' il 21 ottobre e' partita TRE volte alle stesse imprese.
 // Niente orario: Netlify non la lancia piu'. Il codice resta qui sotto per storia.
-// Per riaccenderla: exports.handler = schedule('0 9 * * *', handler);
-void schedule; void handler;
+// Per riaccenderla: togliere il // davanti al require in cima E rimettere exports.handler = schedule('0 9 * * *', handler);
+void handler;
 exports.handler = async () => ({ statusCode: 200, body: JSON.stringify({ ok: true, spenta: true }) });
