@@ -173,6 +173,40 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   <p>Trova subappaltatori specializzati o offri la tua disponibilità per lavori in subappalto</p>
 </div>
 
+<!-- 22 ott 2026: la fascia che invita le imprese a iscriversi. Subappalto e' l'unica
+     pagina dove da Google arrivano IMPRESE: qui si chiede l'iscrizione. -->
+<style>
+  .sub-invito { max-width:1200px; margin:28px auto 0; padding:0 20px; box-sizing:border-box; }
+  .sub-invito-box { background:#fff; border:2px solid #f0a020; border-radius:18px; padding:26px 30px;
+    display:flex; gap:28px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    box-shadow:0 6px 20px rgba(10,42,77,.08); }
+  .sub-invito-tit { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:800; color:#0a2a4d; margin:0 0 12px; }
+  .sub-invito ul { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .sub-invito li { font-size:1.12rem; color:#1a1a1a; line-height:1.4; padding-left:30px; position:relative; }
+  .sub-invito li::before { content:"✓"; position:absolute; left:0; top:0; color:#1b8a3a; font-weight:800; font-size:1.2rem; }
+  .sub-invito-btn { display:inline-block; background:#ff8800; color:#fff; text-decoration:none; font-weight:800;
+    font-size:1.25rem; padding:18px 30px; border-radius:14px; white-space:nowrap; box-shadow:0 4px 14px rgba(255,136,0,.35); }
+  .sub-invito-btn:hover { background:#e67a00; }
+  .sub-invito-nota { display:block; text-align:center; margin-top:8px; color:#5b6b80; font-size:.95rem; }
+  @media (max-width:700px){ .sub-invito-box{padding:20px} .sub-invito-tit{font-size:1.4rem} .sub-invito-btn{white-space:normal; text-align:center; width:100%; box-sizing:border-box} .sub-invito-cta{width:100%} }
+</style>
+<section class="sub-invito" aria-label="Iscrivi la tua impresa">
+  <div class="sub-invito-box">
+    <div>
+      <h2 class="sub-invito-tit">Sei un'impresa? Iscriviti gratis</h2>
+      <ul>
+        <li>Le imprese della tua zona ti trovano per i subappalti</li>
+        <li>I clienti ti chiedono preventivi dalla tua vetrina</li>
+        <li>Gestionale gratis: preventivi, fatture e cantieri</li>
+      </ul>
+    </div>
+    <div class="sub-invito-cta">
+      <a class="sub-invito-btn" href="/iscriviti.html">Iscrivi la tua impresa</a>
+      <span class="sub-invito-nota">Gratis per sempre · 1 minuto</span>
+    </div>
+  </div>
+</section>
+
 <div class="page-body">
 
   <!-- SINISTRA: Cerco Subappaltatori -->
