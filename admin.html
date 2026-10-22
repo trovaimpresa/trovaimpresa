@@ -5445,6 +5445,7 @@ async function caricaRichieste() {
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'
       +   bott(r, 'in_lavorazione', 'Ci sto lavorando') + bott(r, 'fatta', 'Fatta') + bott(r, 'non_faremo', 'Non la facciamo')
       +   '<button class="u-btn rqa-salva" onclick="rispondiRichiesta(' + r.id + ')">Salva la risposta</button>'
+      +   '<button class="u-btn" style="margin-left:auto;color:#c62828;border-color:#e57373" onclick="eliminaRichiesta(' + r.id + ')">Elimina</button>'
       + '</div>'
       + '<div class="rqa-nota">Quando cambi lo stato o salvi una risposta, all\'impresa arriva un\'email.</div>'
       + '</div>';
@@ -5481,6 +5482,15 @@ async function cambiaStatoRichiesta(id, stato) {
     const ok = await rqaAvvisa(id);
     rqaToast((ok ? 'Salvato, e avvisata l\'impresa per email' : 'Salvato (email non partita)'));
   }
+  caricaRichieste();
+}
+
+/* 22 ott 2026 — Elimina, chiesto da Alessio. Nessuna email all'impresa:
+   la richiesta sparisce e basta, anche dal suo gestionale. */
+async function eliminaRichiesta(id) {
+  if (!confirm('Eliminare questa richiesta? Sparisce anche dal gestionale dell\'impresa e non torna indietro.')) return;
+  if (!await adminWrite('delete', 'gest_richieste', id)) return;
+  rqaToast('Richiesta eliminata');
   caricaRichieste();
 }
 
