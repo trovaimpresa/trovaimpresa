@@ -46,7 +46,7 @@
     var ua = (navigator && navigator.userAgent) || '';
 
     // I robot non sono visite.
-    if (/bot|crawl|spider|slurp|preview|headless|lighthouse|pingdom|gtmetrix|semrush|ahrefs/i.test(ua)) return;
+    if (/bot|crawl|spider|slurp|preview|headless|lighthouse|pingdom|gtmetrix|semrush|ahrefs|mediapartners|adsbot|google-|googleother/i.test(ua)) return;
     if (navigator.webdriver) return;
 
     // Pagina caricata in anticipo dal browser, che nessuno sta guardando.

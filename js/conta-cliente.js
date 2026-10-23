@@ -32,7 +32,7 @@
 
   try {
     var ua = (navigator && navigator.userAgent) || '';
-    if (/bot|crawl|spider|slurp|preview|headless|lighthouse|pingdom|gtmetrix|semrush|ahrefs/i.test(ua)) return;
+    if (/bot|crawl|spider|slurp|preview|headless|lighthouse|pingdom|gtmetrix|semrush|ahrefs|mediapartners|adsbot|google-|googleother/i.test(ua)) return;
     if (navigator.webdriver) return;
     if (document.visibilityState === 'prerender') return;
 
