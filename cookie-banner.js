@@ -24,6 +24,45 @@
     }
   } catch (e) { /* il contatore non deve mai rompere il banner */ }
 
+  /* ⛔ 23 ott 2026 — GOOGLE ANALYTICS SU TUTTE LE PAGINE PUBBLICHE.
+     Il codice G-GQ0HDYPCXE stava solo su 18 pagine (home e professionisti):
+     guide, mestiere+citta', forum e schede non venivano contate, e Analytics
+     diceva 16 persone a settimana. Stessa strada del contatore qui sopra:
+     un file solo, niente pagine da rigenerare.
+     Il consenso resta quello di prima: si parte NEGATO e si sblocca solo
+     se la persona ha accettato i cookie (qui sotto, o in una visita prima).
+     Se la pagina ha gia' il suo codice Analytics, non si carica due volte.
+     Fuori le pagine private, come il contatore. */
+  try {
+    var percorsoGa = location.pathname || '/';
+    var privataGa = /^\/(admin|pannello-|login-|gestionale-(app|negozio|noleggio|operatore|config|invito))/i.test(percorsoGa);
+    if (!privataGa && !document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+      window.dataLayer = window.dataLayer || [];
+      if (typeof window.gtag !== 'function') {
+        window.gtag = function () { window.dataLayer.push(arguments); };
+      }
+      window.gtag('consent', 'default', {
+        ad_storage: 'denied', ad_user_data: 'denied',
+        ad_personalization: 'denied', analytics_storage: 'denied',
+        wait_for_update: 500
+      });
+      var giaAccettato = false;
+      try { giaAccettato = localStorage.getItem('cookie_consent') === 'all'; } catch (e2) {}
+      if (giaAccettato) {
+        window.gtag('consent', 'update', {
+          ad_storage: 'granted', ad_user_data: 'granted',
+          ad_personalization: 'granted', analytics_storage: 'granted'
+        });
+      }
+      var ga = document.createElement('script');
+      ga.async = true;
+      ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-GQ0HDYPCXE';
+      (document.head || document.documentElement).appendChild(ga);
+      window.gtag('js', new Date());
+      window.gtag('config', 'G-GQ0HDYPCXE', { anonymize_ip: true });
+    }
+  } catch (e) { /* Analytics non deve mai rompere il banner */ }
+
   var STORAGE_KEY = 'cookie_consent';
   var STORAGE_DATE_KEY = 'cookie_consent_date';
   var EXPIRY_DAYS = 365;
