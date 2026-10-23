@@ -527,6 +527,33 @@
 <style>/* 5 ott 2026: bordo blu scuro sulle schede (come il Gestionale); lo sfondo resta quello scelto dall utente */
 body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,body .mv-card{border:2px solid #0a2a4d !important}
 </style>
+<style>
+/* 23 ott 2026 — IL PANNELLO ADMIN SUL TELEFONO.
+   Alex dal telefono: «Impossibile da utilizzare». Il menu largo 310 px
+   stava sempre aperto e copriva quasi tutto lo schermo (375 px), la
+   Dashboard restava tagliata a destra. Sotto i 900 px adesso il menu
+   e' nascosto: si apre col bottone «Menu» in alto e si chiude da solo
+   quando si sceglie una voce. Il computer resta com'era. */
+.menu-tel,.menu-velo{display:none}
+@media(max-width:900px){
+  .sidebar{width:min(310px,85vw);transform:translateX(-105%);transition:transform .22s ease;z-index:300}
+  .admin.menu-aperto .sidebar{transform:none;box-shadow:6px 0 30px rgba(0,0,0,.25)}
+  .menu-velo{position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:250}
+  .admin.menu-aperto .menu-velo{display:block}
+  .menu-tel{display:flex;align-items:center;gap:8px;position:fixed;top:12px;left:12px;z-index:200;
+    background:#0a2a4d;color:#fff;border:none;border-radius:11px;padding:11px 16px;
+    font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.22)}
+  .menu-tel svg{width:20px;height:20px}
+  .main{margin-left:0;padding:70px 14px 28px;max-width:100vw;overflow-x:hidden}
+  .topbar{flex-wrap:wrap;gap:10px;margin-bottom:18px}
+  .topbar-title{font-size:1.5rem}
+  .main table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:620px){
+  .stats-grid{grid-template-columns:1fr !important}
+}
+</style>
 </head>
 <body>
 
@@ -549,6 +576,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
 
 <!-- ADMIN PANEL -->
 <div class="admin" id="admin-panel">
+
+  <!-- 23 ott 2026: bottone e velo del menu sul telefono (sotto i 900 px). -->
+  <button type="button" class="menu-tel" onclick="menuTel(true)" aria-label="Apri il menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg> Menu</button>
+  <div class="menu-velo" onclick="menuTel(false)"></div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -5743,5 +5774,16 @@ async function aggiungiLead() {
      sezione tranne la dashboard, e riporta alla dashboard. Stessa forma
      della .sh-back del gestionale. -->
 <script src="/js/freccia-indietro.js"></script>
+<script>
+/* 23 ott 2026 — menu del telefono: si apre col bottone, si chiude
+   toccando fuori o scegliendo una voce. */
+function menuTel(apri){
+  var a=document.getElementById('admin-panel'); if(!a) return;
+  a.classList.toggle('menu-aperto', !!apri);
+}
+document.addEventListener('click',function(e){
+  if(e.target.closest && e.target.closest('.sidebar .nav-item, .sidebar .apri-gest')) menuTel(false);
+});
+</script>
 </body>
 </html>
