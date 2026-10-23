@@ -76,9 +76,9 @@
         <div id="gate-pw-nome" style="font-size:19px;font-weight:800;margin-top:4px;"></div>
       </div>
       <div id="gate-btns"></div>
-      <p style="margin:16px 0 0;font-size:14px;color:var(--testo-3,#7a848f);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; si disdice quando vuoi &middot; nessuna IVA da aggiungere</p>
+      <p id="gate-pw-stripe" style="margin:16px 0 0;font-size:14px;color:var(--testo-3,#7a848f);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; si disdice quando vuoi &middot; nessuna IVA da aggiungere</p>
       <p id="gate-pw-err" style="display:none;margin:12px 0 0;font-size:15px;color:#b1442a;text-align:center;line-height:1.6;"></p>
-      <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; pagato? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
+      <p id="gate-pw-accedi" style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; pagato? <a href="/login-impresa.html" style="color:var(--blu,#0066ff);font-weight:700;text-decoration:none;">Accedi</a></p>
       <!-- 20 settembre 2026 — LA PORTA DI USCITA NEL MURO.
            Provato dal vivo il 20 settembre con un account senza abbonamento:
            il muro copriva tutto e il tasto «Esporta dati» stava DIETRO. Finito
@@ -342,6 +342,29 @@
     gateMostra('gate-paywall');
     var box=q('gate-btns'); if(!box)return;
     box.innerHTML='';
+
+    /* ⛔ 23 ott 2026 — COL GESTIONALE BASE GRATIS IL MURO NON VENDE PIU'.
+       Dal 3 ottobre chi e' iscritto entra gratis (BASE_APERTA). Qui arriva
+       solo chi NON e' collegato (o non ha un profilo impresa): a lui non si
+       chiedono 249 euro, si dice di entrare o di iscriversi. I prezzi vecchi
+       29/249 e «quattro prezzi» non esistono piu'. */
+    if(BASE_APERTA){
+      var tit=q('gate-paywall-titolo'); if(tit) tit.textContent='Il tuo gestionale ti aspetta';
+      var rg=q('gate-pw-riga'); if(rg) rg.innerHTML='Lavori, preventivi, fatture, computo metrico, mezzi e scadenze: tutto in un posto solo.<br><b>Gratis per sempre</b> per chi &egrave; iscritto a TrovaImpresa. Senza carta di credito.';
+      ['gate-pw-scelto','gate-pw-stripe','gate-pw-accedi'].forEach(function(id){ var e=q(id); if(e) e.style.display='none'; });
+      function link(testo,href,principale){
+        var a=document.createElement('a');
+        a.href=href; a.textContent=testo;
+        a.style.cssText='display:block;box-sizing:border-box;width:100%;padding:16px;margin-bottom:10px;border-radius:10px;'
+          +'font-size:17px;font-weight:800;text-align:center;text-decoration:none;font-family:inherit;'
+          +(principale?'background:var(--blu,#0066ff);color:#fff;':'background:var(--sfondo,#f3f5f2);color:var(--testo,#1c2b36);');
+        box.appendChild(a);
+      }
+      link('Entra nel gestionale','/login-impresa?redirect=gestionale',true);
+      link('Non sei iscritto? Iscriviti gratis','/gestionale',false);
+      mostraScarica();
+      return;
+    }
 
     /* ⛔ 24 settembre 2026 — LA PROVA DI 30 GIORNI SUL MURO.
        prova-il-gestionale.html e /gestionale promettono «30 giorni gratis,
