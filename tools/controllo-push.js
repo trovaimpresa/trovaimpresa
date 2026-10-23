@@ -300,7 +300,7 @@ const CODE_PRIVATE     = ['.md', '.sql', '.csv', '.py', '.txt', '.json'];
 /* ⚠️ 29 set 2026 — manifest-noleggio.json: lo stesso del manifest.json, per il
    Noleggio (icona sulla schermata Home). Senza questa riga il controllo lo
    scambiava per un file privato e fermava la pubblicazione. */
-const PUBBLICI_APPOSTA = new Set(['robots.txt', 'llms.txt', 'manifest.json', 'manifest-noleggio.json',
+const PUBBLICI_APPOSTA = new Set(['robots.txt', 'ads.txt', 'llms.txt', 'manifest.json', 'manifest-noleggio.json',
                                   'c670fbe9c5c6a2205488dd36e94bd040.txt']);
 /* Attrezzi da riga di comando: non li carica nessuna pagina, ma hanno
    l'estensione .js come i file veri del sito, quindi vanno detti a mano. */
