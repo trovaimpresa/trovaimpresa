@@ -7,7 +7,17 @@
 <!-- 23 ott 2026: Alex vuole sul telefono la STESSA pagina del computer
      (menu a sinistra, schede in fila). La pagina si disegna larga 1400 px
      e il telefono la rimpicciolisce; si allarga con due dita. -->
-<meta name="viewport" content="width=1400">
+<meta name="viewport" id="vp-admin" content="width=1400">
+<script>
+/* 23 ott 2026: il telefono non rimpiccioliva abbastanza e la quarta
+   colonna restava tagliata a destra. Qui si dice al telefono di quanto
+   rimpicciolire perche' i 1400 px stiano interi nello schermo. */
+(function(){try{
+  var w=Math.min(screen.width||1400, window.innerWidth||1400);
+  if(w<1400){var z=(w/1400).toFixed(4);
+    document.getElementById('vp-admin').setAttribute('content','width=1400, initial-scale='+z+', minimum-scale='+z);}
+}catch(e){}})();
+</script>
 <title>Admin — TrovaImpresa</title>
   <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
