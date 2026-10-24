@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrazione Candidato - TrovaImpresa</title>
   <meta name="description" content="Cerchi lavoro nell'edilizia? Registrati gratis su TrovaImpresa, carica il CV e candidati alle offerte di imprese e artigiani della tua zona.">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -166,6 +165,14 @@
     header.sito { width:100vw; margin-left:calc(50% - 50vw); margin-top:0; margin-bottom:0; }
     header.sito + * { margin-top: 34px; }
 
+
+    /* 24 ott 2026: i dettagli facoltativi chiusi in una tendina */
+    .altri-dettagli { margin: 6px 0 20px; border: 2px dashed #b9c8de; border-radius: 14px; background: #f7faff; }
+    .altri-dettagli summary { cursor: pointer; padding: 15px 18px; font-size: 17px; font-weight: 800; color: #0047b3; list-style: none; display: flex; align-items: center; gap: 10px; }
+    .altri-dettagli summary::-webkit-details-marker { display: none; }
+    .altri-dettagli summary::before { content: '+'; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #0066ff; color: #fff; font-size: 19px; line-height: 1; flex: none; }
+    .altri-dettagli[open] summary::before { content: '–'; }
+    .altri-dentro { padding: 2px 18px 6px; }
   </style>
 <style>
   /* MOBILE */
@@ -229,19 +236,11 @@
     <div class="steps">
       <div class="step active" id="step-1-indicator">
         <div class="step-circle">1</div>
-        <div class="step-label">Dati Personali</div>
+        <div class="step-label">Il tuo lavoro</div>
       </div>
       <div class="step" id="step-2-indicator">
         <div class="step-circle">2</div>
-        <div class="step-label">Professione</div>
-      </div>
-      <div class="step" id="step-3-indicator">
-        <div class="step-circle">3</div>
-        <div class="step-label">Contatti</div>
-      </div>
-      <div class="step" id="step-4-indicator">
-        <div class="step-circle">4</div>
-        <div class="step-label">Accesso</div>
+        <div class="step-label">Il tuo accesso</div>
       </div>
     </div>
 
@@ -262,63 +261,18 @@
         <div class="campi-compilati" id="campi-compilati"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Dati compilati automaticamente! Puoi procedere.</div>
       </div>
 
+<!-- 24 ott 2026: due passaggi invece di quattro, niente piu' «sesso».
+           Obbligatori solo: nome, lavoro, dove, telefono, email, password. -->
       <!-- STEP 1 -->
       <div class="form-section active" id="step-1">
-        <h2>Dati Personali</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nome <span class="required">*</span></label>
-            <input type="text" id="nome" placeholder="Es. Mario">
-          </div>
-          <div class="form-group">
-            <label>Cognome <small style="color:#888;font-weight:400">(facoltativo)</small></label>
-            <input type="text" id="cognome" placeholder="Es. Rossi">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Età <small style="color:#888;font-weight:400">(facoltativo)</small></label>
-            <input type="number" id="eta" placeholder="Es. 35" min="18" max="100">
-          </div>
-          <div class="form-group">
-            <label>Sesso <small style="color:#888;font-weight:400">(facoltativo)</small></label>
-            <select id="sesso">
-              <option value="">-- Seleziona --</option>
-              <option value="Uomo">Uomo</option>
-              <option value="Donna">Donna</option>
-              <option value="Altro">Altro</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 2 -->
-      <div class="form-section" id="step-2">
-        <h2>Professione</h2>
+        <h2>Il tuo lavoro</h2>
         <div class="form-group">
-          <label>Mestiere <span class="required">*</span></label>
+          <label>Nome <span class="required">*</span></label>
+          <input type="text" id="nome" placeholder="Es. Mario">
+        </div>
+        <div class="form-group">
+          <label>Che lavoro fai? <span class="required">*</span></label>
           <input type="text" id="mestiere" placeholder="Es. Idraulico, Muratore, Elettricista...">
-        </div>
-        <div class="form-group">
-          <label>Anni di Esperienza <small style="color:#888;font-weight:400">(facoltativo)</small></label>
-          <input type="number" id="anni_esperienza" placeholder="Es. 5" min="0" max="60">
-        </div>
-        <div class="form-group">
-          <label>Descrizione Competenze</label>
-          <textarea id="competenze" placeholder="Descrivi le tue competenze e specializzazioni..."></textarea>
-        </div>
-      </div>
-
-      <!-- STEP 3 -->
-      <div class="form-section" id="step-3">
-        <h2>Contatti</h2>
-        <div class="form-group">
-          <label>Email <span class="required">*</span></label>
-          <input type="email" id="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="mario@example.com">
-        </div>
-        <div class="form-group">
-          <label>Telefono <span class="required">*</span></label>
-          <input type="tel" id="telefono" placeholder="+39 123 456 7890">
         </div>
         <div class="form-group">
           <label>Regione <span class="required">*</span></label>
@@ -339,15 +293,18 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Anteprima posizione sulla mappa</label>
-          <div id="mappa-anteprima" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;"></div>
+          <label>Telefono <span class="required">*</span></label>
+          <input type="tel" id="telefono" placeholder="Es. 333 123 4567">
         </div>
       </div>
 
-      <!-- STEP 4 -->
-      <div class="form-section" id="step-4">
-        <h2>Password e Documenti</h2>
-
+      <!-- STEP 2 -->
+      <div class="form-section" id="step-2">
+        <h2>Il tuo accesso</h2>
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" id="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="mario@example.com">
+        </div>
         <div class="form-group">
           <label>Crea password <span class="required">*</span></label>
           <div class="password-wrapper">
@@ -359,7 +316,7 @@
         </div>
 
         <div class="form-group">
-          <label>Curriculum (PDF o Word)</label>
+          <label>Curriculum <small style="color:#888;font-weight:400">(facoltativo, PDF o Word)</small></label>
           <div class="upload-area" id="upload-area" onclick="document.getElementById('cv-input').click()">
             <div class="upload-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div>
             <p><strong>Clicca per caricare</strong> oppure trascina qui</p>
@@ -372,6 +329,29 @@
           </div>
         </div>
 
+        <details class="altri-dettagli">
+          <summary>Aggiungi altri dettagli (facoltativo)</summary>
+          <div class="altri-dentro">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Cognome <small style="color:#888;font-weight:400">(facoltativo)</small></label>
+                <input type="text" id="cognome" placeholder="Es. Rossi">
+              </div>
+              <div class="form-group">
+                <label>Età <small style="color:#888;font-weight:400">(facoltativo)</small></label>
+                <input type="number" id="eta" placeholder="Es. 35" min="18" max="100">
+              </div>
+            </div>
+            <div class="form-group">
+          <label>Anni di Esperienza <small style="color:#888;font-weight:400">(facoltativo)</small></label>
+          <input type="number" id="anni_esperienza" placeholder="Es. 5" min="0" max="60">
+        </div>
+          <div class="form-group">
+          <label>Cosa sai fare <small style="color:#888;font-weight:400">(facoltativo)</small></label>
+          <textarea id="competenze" placeholder="Descrivi le tue competenze e specializzazioni..."></textarea>
+        </div>
+          </div>
+        </details>
         <div class="form-group">
           <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
             <input type="checkbox" id="termini" style="width: auto;">
@@ -393,7 +373,6 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/geo-italia.js"></script>
   <script>
@@ -543,12 +522,12 @@
       document.getElementById('step-' + step).classList.add('active');
       document.getElementById('step-' + step + '-indicator').classList.add('active');
       document.getElementById('btn-back').style.display = step === 1 ? 'none' : 'block';
-      document.getElementById('btn-next').textContent = step === 4 ? '✓ Completa Registrazione' : 'Avanti →';
+      document.getElementById('btn-next').textContent = step === 2 ? '✓ Completa Registrazione' : 'Avanti →';
       currentStep = step;
       if (!fromPopstate) history.pushState({step: step}, '');
     }
 
-    function nextStep() { if (currentStep < 4) { if (validateStep(currentStep)) goToStep(currentStep + 1); } else { submitForm(); } }
+    function nextStep() { if (currentStep < 2) { if (validateStep(currentStep)) goToStep(currentStep + 1); } else { submitForm(); } }
     function prevStep() { if (currentStep > 1) { goToStep(currentStep - 1); } }
 
     // ---- Helper UI: messaggi, validazione, robustezza password ----
@@ -599,17 +578,15 @@
       hideMsg();
       const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
       if (step === 1) {
-        // Obbligatorio solo il nome: cognome, età e sesso si aggiungono dopo dal pannello.
         if (!need('nome', 'Nome')) return false;
-      } else if (step === 2) {
-        if (!need('mestiere', 'Mestiere')) return false;
-      } else if (step === 3) {
-        if (!need('email', 'Email')) return false;
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
-        if (!need('telefono', 'Telefono')) return false;
+        if (!need('mestiere', 'Che lavoro fai')) return false;
         if (!need('regione', 'Regione')) return false;
         if (!need('provincia', 'Provincia')) return false;
         if (!need('citta', 'Città')) return false;
+        if (!need('telefono', 'Telefono')) return false;
+      } else if (step === 2) {
+        if (!need('email', 'Email')) return false;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
       }
       return true;
     }
@@ -669,10 +646,9 @@
       hideMsg();
       // Anti-bot: se il campo honeypot è pieno, è un bot → esci in silenzio.
       if (document.getElementById('website_hp').value) { return; }
-      // Rivalida gli step 1-3
+      // Rivalida i due passaggi
       if (!validateStep(1)) { goToStep(1); return; }
       if (!validateStep(2)) { goToStep(2); return; }
-      if (!validateStep(3)) { goToStep(3); return; }
       const pw = document.getElementById('password').value;
       if (pw.length < 6) { markInvalid('password'); showMsg('La password deve avere almeno 6 caratteri.', 'error'); return; }
       if (!document.getElementById('termini').checked) { showMsg('Devi accettare i Termini di Servizio per completare la registrazione.', 'error'); return; }
@@ -703,7 +679,6 @@
               nome: val('nome'),
               cognome: val('cognome'),
               eta: val('eta'),
-              sesso: val('sesso'),
               mestiere: val('mestiere'),
               anni_esperienza: val('anni_esperienza'),
               competenze: val('competenze'),

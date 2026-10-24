@@ -357,6 +357,20 @@
     header.sito { width:100vw; margin-left:calc(50% - 50vw); margin-top:0; margin-bottom:0; }
     header.sito + * { margin-top: 34px; }
 
+
+        /* 24 ott 2026: una pagina sola, il resto dietro «Aggiungi altri dettagli» */
+        .altri-dettagli { margin: 22px 0 6px; border: 2px dashed #b9c8de; border-radius: 14px; background: #f7faff; }
+        .altri-dettagli summary { cursor: pointer; padding: 16px 20px; font-size: 18px; font-weight: 800; color: #0047b3; list-style: none; display: flex; align-items: center; gap: 10px; }
+        .altri-dettagli summary::-webkit-details-marker { display: none; }
+        .altri-dettagli summary::before { content: '+'; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #0066ff; color: #fff; font-size: 20px; line-height: 1; flex: none; }
+        .altri-dettagli[open] summary::before { content: '–'; }
+        .altri-dentro { padding: 4px 20px 18px; }
+        .dopo-pubblica { text-align: center; font-size: 16px; color: #475569; line-height: 1.55; margin: 12px 0 0; }
+        .errore-modulo { display: none; background: #fdecea; color: #b42318; border-radius: 10px; padding: 14px 16px; font-size: 16.5px; font-weight: 700; margin: 18px 0 0; }
+        .campo-errore { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220,38,38,.15) !important; }
+        #btn-pubblica { font-size: 19px; padding: 17px 28px; width: 100%; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr !important; } }
+        #btn-pubblica:disabled { opacity: .65; cursor: default; }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
   <meta property="og:type" content="website">
@@ -399,360 +413,230 @@
         <p>Pubblica la tua offerta e trova i candidati ideali</p>
     </div>
 
-    <div class="progress-bar">
-        <div class="progress-step">
-            <div class="step-circle active" id="circle-1">1</div>
-            <div class="step-label active">Dati Azienda</div>
-        </div>
-        <div class="progress-step">
-            <div class="step-circle" id="circle-2">2</div>
-            <div class="step-label">Offerta</div>
-        </div>
-        <div class="progress-step">
-            <div class="step-circle" id="circle-3">3</div>
-            <div class="step-label">Descrizione</div>
-        </div>
-        <div class="progress-step">
-            <div class="step-circle" id="circle-4">4</div>
-            <div class="step-label">Conferma</div>
-        </div>
-    </div>
-
     <div class="form-content">
         <div class="success-message" id="successMsg">
             <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Offerta pubblicata con successo! Verrai reindirizzato tra 2 secondi...
         </div>
 
         <form id="offerteForm">
-            <!-- STEP 1: Dati Azienda -->
-            <div class="form-step active" id="step-1">
-                <div class="step-title">Dati Azienda</div>
+<!-- STEP 1: Dati Azienda -->
+<div class="form-step active" id="step-1">
+<div class="step-title">Pubblica la tua offerta</div>
+<div class="senza-account">
+<h3><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg> Non serve iscriversi</h3>
+<p>Compila il modulo e pubblica. <strong>Gratis, senza account.</strong> Ti mandiamo per email un link per modificare l'offerta, chiuderla quando hai trovato la persona, o rinnovarla.</p>
+<span class="piccolo">Se invece sei già iscritto, accedi qui sotto e i tuoi dati si compilano da soli.</span>
+</div>
+<div class="login-box">
+<h3><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="11" rx="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Sei già iscritto? Accedi e i campi si compilano da soli (facoltativo)</h3>
+<div class="login-row">
+<input id="login-email" placeholder="La tua email" type="email"/>
+<div class="password-wrapper">
+<input id="login-password" placeholder="Password" type="password"/>
+<button class="toggle-pw" onclick="togglePassword('login-password', this)" tabindex="-1" type="button"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+</div>
+<button class="btn-login" onclick="accediImpresa()">Accedi</button>
+</div>
+<div class="login-msg" id="login-msg"></div>
+<div class="campi-compilati" id="campi-compilati"><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg> Dati compilati automaticamente! Puoi procedere.</div>
+</div>
+<div aria-hidden="true" class="campo-nascosto">
+<label for="azienda-sito">Non compilare questo campo</label>
+<input autocomplete="off" id="azienda-sito" name="azienda-sito" tabindex="-1" type="text"/>
+</div>
+<div class="form-group">
+<label for="nome-azienda">Nome Attività <span class="required">*</span></label>
+<input id="nome-azienda" placeholder="Es. Ditta Rossi s.r.l." required="" type="text"/>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="email-azienda">Email <span class="required">*</span></label>
+<input id="email-azienda" placeholder="Es. info@azienda.it" required="" type="email"/>
+</div>
+<div class="form-group">
+<label for="telefono-azienda">Telefono <span class="required">*</span></label>
+<input id="telefono-azienda" placeholder="Es. +39 333 1234567" required="" type="tel"/>
+</div>
+</div>
 
-                <div class="senza-account">
-                  <h3><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Non serve iscriversi</h3>
-                  <p>Compila il modulo e pubblica. <strong>Gratis, senza account.</strong> Quando hai finito ti diamo un link per riaprire o chiudere il tuo annuncio quando vuoi — e te lo mandiamo anche per email.</p>
-                  <span class="piccolo">Se invece sei già iscritto, accedi qui sotto e i tuoi dati si compilano da soli.</span>
-                </div>
 
-                <div class="login-box">
-                    <h3><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Sei già iscritto? Accedi e i campi si compilano da soli (facoltativo)</h3>
-                    <div class="login-row">
-                        <input type="email" id="login-email" placeholder="La tua email">
-                        <div class="password-wrapper">
-                          <input type="password" id="login-password" placeholder="Password">
-                          <button class="toggle-pw" type="button" onclick="togglePassword('login-password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                        </div>
-                        <button class="btn-login" onclick="accediImpresa()">Accedi</button>
-                    </div>
-                    <div class="login-msg" id="login-msg"></div>
-                    <div class="campi-compilati" id="campi-compilati"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Dati compilati automaticamente! Puoi procedere.</div>
-                </div>
-
-                <div class="campo-nascosto" aria-hidden="true">
-                    <label for="azienda-sito">Non compilare questo campo</label>
-                    <input type="text" id="azienda-sito" name="azienda-sito" tabindex="-1" autocomplete="off">
-                </div>
-
-                <div class="form-group">
-                    <label for="nome-azienda">Nome Attività <span class="required">*</span></label>
-                    <input type="text" id="nome-azienda" placeholder="Es. Ditta Rossi s.r.l." required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="email-azienda">Email <span class="required">*</span></label>
-                        <input type="email" id="email-azienda" placeholder="Es. info@azienda.it" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="telefono-azienda">Telefono <span class="required">*</span></label>
-                        <input type="tel" id="telefono-azienda" placeholder="Es. +39 333 1234567" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="logo-azienda">Logo Azienda (opzionale)</label>
-                    <div class="file-input-wrapper">
-                        <label class="file-input-label">
-                            <input type="file" id="logo-azienda" accept="image/jpeg,image/png">
-                            <div><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg> Carica il logo dell'azienda</div>
-                            <div class="file-name" id="logoName"></div>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="buttons">
-                    <button type="button" class="btn btn-next" onclick="nextStep()">Avanti →</button>
-                </div>
-            </div>
-
-            <!-- STEP 2: Offerta di Lavoro -->
-            <div class="form-step" id="step-2">
-                <div class="step-title">Offerta di Lavoro</div>
-
-                <div class="form-group">
-                    <label for="tipo-offerta">Tipo di Lavoro <span class="required">*</span></label>
-                    <select id="tipo-offerta" required>
-                        <option value="">-- Seleziona --</option>
-                        <option>Muratore</option>
-                        <option>Elettricista</option>
-                        <option>Idraulico</option>
-                        <option>Carpentiere</option>
-                        <option>Pittore/Imbianchino</option>
-                        <option>Piastrellista</option>
-                        <option>Operaio generico</option>
-                        <option>Geometra</option>
-                        <option>Ingegnere</option>
-                        <option>Architetto</option>
-                        <option>Gruista</option>
-                        <option>Saldatore</option>
-                        <option>Giardiniere</option>
-                        <option>Altro</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="tipo-contratto">Tipo Contratto <span class="required">*</span></label>
-                    <select id="tipo-contratto" required>
-                        <option value="">-- Seleziona --</option>
-                        <option value="Tempo indeterminato">Tempo indeterminato</option>
-                        <option value="Tempo determinato">Tempo determinato</option>
-                        <option value="Partita IVA">Partita IVA</option>
-                        <option value="Stage/Apprendistato">Stage/Apprendistato</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="regione">Regione <span class="required">*</span></label>
-                    <select id="regione" required>
-                        <option value="">-- Seleziona regione --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="provincia">Provincia <span class="required">*</span></label>
-                    <select id="provincia" disabled required>
-                        <option value="">-- Seleziona provincia --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="citta-offerta">Città <span class="required">*</span></label>
-                    <select id="citta-offerta" disabled required>
-                        <option value="">-- Seleziona città --</option>
-                    </select>
-                    <button type="button" class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Localizzami</button>
-                </div>
-
-                <div class="form-group">
-                    <label>Anteprima posizione sulla mappa</label>
-                    <div id="mappa-anteprima" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="mestiere">Mestiere <span class="required">*</span></label>
-                    <select id="mestiere" required>
-                        <option value="">-- Seleziona --</option>
-                        <option>Muratura</option>
-                        <option>Carpentiere</option>
-                        <option>Cartongesso</option>
-                        <option>Coperture / Tetti</option>
-                        <option>Impermeabilizzazione</option>
-                        <option>Ponteggi</option>
-                        <option>Elettricista</option>
-                        <option>Idraulico</option>
-                        <option>Termoidraulico</option>
-                        <option>Tecnico caldaie</option>
-                        <option>Climatizzatore</option>
-                        <option>Impianto solare</option>
-                        <option>Autospurghi</option>
-                        <option>Pittore</option>
-                        <option>Piastrellista</option>
-                        <option>Pavimentista</option>
-                        <option>Intonacatore</option>
-                        <option>Fabbro</option>
-                        <option>Falegname</option>
-                        <option>Vetraio</option>
-                        <option>Giardiniere</option>
-                        <option>Demolizione</option>
-                        <option>Movimento terra</option>
-                        <option>Asfalti</option>
-                        <option>Sgomberi</option>
-                        <option>Cottimisti</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="livello-esperienza">Livello Esperienza <span class="required">*</span></label>
-                    <select id="livello-esperienza" required>
-                        <option value="">-- Seleziona --</option>
-                        <option value="Junior 0-2 anni">Junior 0-2 anni</option>
-                        <option value="Intermedio 3-5 anni">Intermedio 3-5 anni</option>
-                        <option value="Senior 5+ anni">Senior 5+ anni</option>
-                        <option value="Indifferente">Indifferente</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="orario">Orario <span class="required">*</span></label>
-                    <select id="orario" required>
-                        <option value="">-- Seleziona --</option>
-                        <option value="Full time">Full time</option>
-                        <option value="Part time">Part time</option>
-                        <option value="Flessibile">Flessibile</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="posti-disponibili">Posti Disponibili <span class="required">*</span></label>
-                    <input type="number" id="posti-disponibili" value="1" min="1" required style="font-size:18px;padding:14px;width:100%;text-align:center;font-weight:600;">
-                </div>
-
-                <div class="form-group">
-                    <label for="stipendio">Stipendio (opzionale)</label>
-                    <input type="text" id="stipendio" placeholder="Es. 1500-2000€/mese">
-                </div>
-
-                <div class="form-group">
-                    <label>Data Scadenza Annuncio <span class="required">*</span></label>
-                    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="30" checked onchange="aggiornaScadenza(this)"> 30 giorni</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="60" onchange="aggiornaScadenza(this)"> 60 giorni</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="90" onchange="aggiornaScadenza(this)"> 90 giorni</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="custom" onchange="aggiornaScadenza(this)"> Personalizzata</label>
-                    </div>
-                    <input type="date" id="data-scadenza-custom" style="display:none;border:1.5px solid #ddd;border-radius:8px;padding:7px 10px;font-size:14px;" onchange="document.getElementById('data-scadenza-annuncio').value=this.value">
-                    <input type="hidden" id="data-scadenza-annuncio">
-                </div>
-
-                <div class="form-group">
-                    <label>Patenti Richieste</label>
-                    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:4px;">
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-A" value="A"> A</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-B" value="B"> B</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-C" value="C"> C</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-CE" value="CE"> CE</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-D" value="D"> D</label>
-                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-DE" value="DE"> DE</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Certificazioni Richieste</label>
-                    <select multiple id="certificazioni-select" style="width:100%;min-height:130px;border:1.5px solid #ddd;border-radius:8px;padding:6px;font-size:14px;">
-                        <option value="RSPP">RSPP – Responsabile Servizio Prevenzione e Protezione</option>
-                        <option value="ASPP">ASPP – Addetto Servizio Prevenzione e Protezione</option>
-                        <option value="PES">PES – Persona Esperta</option>
-                        <option value="PAV">PAV – Persona Avvertita</option>
-                        <option value="PEI">PEI – Persona Istruita</option>
-                        <option value="Antincendio rischio basso">Antincendio – Rischio Basso</option>
-                        <option value="Antincendio rischio medio">Antincendio – Rischio Medio</option>
-                        <option value="Antincendio rischio alto">Antincendio – Rischio Alto</option>
-                        <option value="Primo Soccorso">Primo Soccorso</option>
-                        <option value="HACCP">HACCP – Sicurezza Alimentare</option>
-                        <option value="Lavori in quota">Lavori in Quota</option>
-                        <option value="Patentino muletto">Patentino Muletto</option>
-                        <option value="Ponteggiatore">Ponteggiatore</option>
-                        <option value="ISO 9001">ISO 9001 – Sistema Qualità</option>
-                    </select>
-                    <small style="color:#888;font-size:12px;margin-top:4px;display:block;">Tieni premuto Ctrl (o Cmd su Mac) per selezionare più voci, poi clicca Aggiungi.</small>
-                    <div style="display:flex;gap:8px;margin-top:6px;">
-                        <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChipDaSelect('certificazioni-select','certificazioni-chips','certificazioni-list')">+ Aggiungi selezionate</button>
-                    </div>
-                    <div style="display:flex;gap:8px;margin-top:10px;">
-                        <input type="text" id="certificazioni-input" placeholder="Altra certificazione..." style="flex:1;">
-                        <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChip('certificazioni-input','certificazioni-chips','certificazioni-list')">+ Aggiungi</button>
-                    </div>
-                    <div id="certificazioni-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-                    <input type="hidden" id="certificazioni-list">
-                </div>
-
-                <div class="form-group">
-                    <label for="note_aggiuntive">Note Aggiuntive (opzionale)</label>
-                    <textarea id="note_aggiuntive" rows="3" maxlength="500" placeholder="Informazioni aggiuntive sull'offerta..." style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;resize:vertical;"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" id="auto-propria"> Auto propria richiesta
+<div class="form-group">
+<label for="tipo-offerta">Chi cerchi? <span class="required">*</span></label>
+<select id="tipo-offerta" required="">
+<option value="">-- Seleziona --</option>
+<option>Muratore</option>
+<option>Elettricista</option>
+<option>Idraulico</option>
+<option>Carpentiere</option>
+<option>Pittore/Imbianchino</option>
+<option>Piastrellista</option>
+<option>Operaio generico</option>
+<option>Geometra</option>
+<option>Ingegnere</option>
+<option>Architetto</option>
+<option>Gruista</option>
+<option>Saldatore</option>
+<option>Giardiniere</option>
+<option>Altro</option>
+</select>
+</div><div class="form-group">
+<label for="regione">Regione <span class="required">*</span></label>
+<select id="regione" required="">
+<option value="">-- Seleziona regione --</option>
+</select>
+</div><div class="form-group">
+<label for="provincia">Provincia <span class="required">*</span></label>
+<select disabled="" id="provincia" required="">
+<option value="">-- Seleziona provincia --</option>
+</select>
+</div><div class="form-group">
+<label for="citta-offerta">Città <span class="required">*</span></label>
+<select disabled="" id="citta-offerta" required="">
+<option value="">-- Seleziona città --</option>
+</select>
+<button class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()" type="button"><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Localizzami</button>
+</div><div class="form-group">
+<label for="descrizione-offerta">Due righe sul lavoro (facoltativo)</label>
+<textarea id="descrizione-offerta" placeholder="Es. Cantiere a Rieti, ristrutturazione appartamenti. Inizio subito."></textarea>
+</div><details class="altri-dettagli"><summary>Aggiungi altri dettagli (facoltativo)</summary><div class="altri-dentro"><div class="form-group">
+<label for="titolo-offerta">Titolo dell'annuncio (se vuoi cambiarlo)</label>
+<input id="titolo-offerta" placeholder="Se lo lasci vuoto scriviamo «Cerco muratore», con il lavoro che hai scelto" type="text"/>
+</div><div class="form-group">
+<label for="tipo-contratto">Tipo Contratto </label>
+<select id="tipo-contratto">
+<option value="">-- Seleziona --</option>
+<option value="Tempo indeterminato">Tempo indeterminato</option>
+<option value="Tempo determinato">Tempo determinato</option>
+<option value="Partita IVA">Partita IVA</option>
+<option value="Stage/Apprendistato">Stage/Apprendistato</option>
+</select>
+</div><div class="form-group">
+<label for="mestiere">Mestiere </label>
+<select id="mestiere">
+<option value="">-- Seleziona --</option>
+<option>Muratura</option>
+<option>Carpentiere</option>
+<option>Cartongesso</option>
+<option>Coperture / Tetti</option>
+<option>Impermeabilizzazione</option>
+<option>Ponteggi</option>
+<option>Elettricista</option>
+<option>Idraulico</option>
+<option>Termoidraulico</option>
+<option>Tecnico caldaie</option>
+<option>Climatizzatore</option>
+<option>Impianto solare</option>
+<option>Autospurghi</option>
+<option>Pittore</option>
+<option>Piastrellista</option>
+<option>Pavimentista</option>
+<option>Intonacatore</option>
+<option>Fabbro</option>
+<option>Falegname</option>
+<option>Vetraio</option>
+<option>Giardiniere</option>
+<option>Demolizione</option>
+<option>Movimento terra</option>
+<option>Asfalti</option>
+<option>Sgomberi</option>
+<option>Cottimisti</option>
+</select>
+</div><div class="form-group">
+<label for="livello-esperienza">Livello Esperienza </label>
+<select id="livello-esperienza">
+<option value="">-- Seleziona --</option>
+<option value="Junior 0-2 anni">Junior 0-2 anni</option>
+<option value="Intermedio 3-5 anni">Intermedio 3-5 anni</option>
+<option value="Senior 5+ anni">Senior 5+ anni</option>
+<option value="Indifferente">Indifferente</option>
+</select>
+</div><div class="form-group">
+<label for="orario">Orario </label>
+<select id="orario">
+<option value="">-- Seleziona --</option>
+<option value="Full time">Full time</option>
+<option value="Part time">Part time</option>
+<option value="Flessibile">Flessibile</option>
+</select>
+</div><div class="form-group">
+<label for="posti-disponibili">Posti Disponibili </label>
+<input id="posti-disponibili" min="1" style="font-size:18px;padding:14px;width:100%;text-align:center;font-weight:600;" type="number" value="1"/>
+</div><div class="form-group">
+<label for="stipendio">Stipendio (opzionale)</label>
+<input id="stipendio" placeholder="Es. 1500-2000€/mese" type="text"/>
+</div><div class="form-group">
+<label>Patenti Richieste</label>
+<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:4px;">
+<label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input id="patente-A" type="checkbox" value="A"/> A</label>
+<label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input id="patente-B" type="checkbox" value="B"/> B</label>
+<label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input id="patente-C" type="checkbox" value="C"/> C</label>
+<label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input id="patente-CE" type="checkbox" value="CE"/> CE</label>
+<label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input id="patente-D" type="checkbox" value="D"/> D</label>
+<label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input id="patente-DE" type="checkbox" value="DE"/> DE</label>
+</div>
+</div><div class="form-group">
+<label>Certificazioni Richieste</label>
+<select id="certificazioni-select" multiple="" style="width:100%;min-height:130px;border:1.5px solid #ddd;border-radius:8px;padding:6px;font-size:14px;">
+<option value="RSPP">RSPP – Responsabile Servizio Prevenzione e Protezione</option>
+<option value="ASPP">ASPP – Addetto Servizio Prevenzione e Protezione</option>
+<option value="PES">PES – Persona Esperta</option>
+<option value="PAV">PAV – Persona Avvertita</option>
+<option value="PEI">PEI – Persona Istruita</option>
+<option value="Antincendio rischio basso">Antincendio – Rischio Basso</option>
+<option value="Antincendio rischio medio">Antincendio – Rischio Medio</option>
+<option value="Antincendio rischio alto">Antincendio – Rischio Alto</option>
+<option value="Primo Soccorso">Primo Soccorso</option>
+<option value="HACCP">HACCP – Sicurezza Alimentare</option>
+<option value="Lavori in quota">Lavori in Quota</option>
+<option value="Patentino muletto">Patentino Muletto</option>
+<option value="Ponteggiatore">Ponteggiatore</option>
+<option value="ISO 9001">ISO 9001 – Sistema Qualità</option>
+</select>
+<small style="color:#888;font-size:12px;margin-top:4px;display:block;">Tieni premuto Ctrl (o Cmd su Mac) per selezionare più voci, poi clicca Aggiungi.</small>
+<div style="display:flex;gap:8px;margin-top:6px;">
+<button class="btn btn-next" onclick="aggiungiChipDaSelect('certificazioni-select','certificazioni-chips','certificazioni-list')" style="flex:none;padding:0 16px;font-size:13px;" type="button">+ Aggiungi selezionate</button>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px;">
+<input id="certificazioni-input" placeholder="Altra certificazione..." style="flex:1;" type="text"/>
+<button class="btn btn-next" onclick="aggiungiChip('certificazioni-input','certificazioni-chips','certificazioni-list')" style="flex:none;padding:0 16px;font-size:13px;" type="button">+ Aggiungi</button>
+</div>
+<div id="certificazioni-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+<input id="certificazioni-list" type="hidden"/>
+</div><div class="form-group">
+<label for="note_aggiuntive">Note Aggiuntive (opzionale)</label>
+<textarea id="note_aggiuntive" maxlength="500" placeholder="Informazioni aggiuntive sull'offerta..." rows="3" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;resize:vertical;"></textarea>
+</div><div class="form-group">
+<label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
+<input id="auto-propria" type="checkbox"/> Auto propria richiesta
                     </label>
-                </div>
-
-                <div class="form-group">
-                    <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" id="disponibilita-trasferte"> Disponibilità a trasferte
+</div><div class="form-group">
+<label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
+<input id="disponibilita-trasferte" type="checkbox"/> Disponibilità a trasferte
                     </label>
-                </div>
-
-                <div class="form-group">
-                    <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" id="mezzi-forniti"> Mezzi di lavoro forniti
+</div><div class="form-group">
+<label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
+<input id="mezzi-forniti" type="checkbox"/> Mezzi di lavoro forniti
                     </label>
-                </div>
+</div><div class="form-group">
+<label for="logo-azienda">Logo Azienda (opzionale)</label>
+<div class="file-input-wrapper">
+<label class="file-input-label">
+<input accept="image/jpeg,image/png" id="logo-azienda" type="file"/>
+<div><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="18" rx="2" width="20" x="2" y="3"></rect><path d="M9 22V12h6v10"></path><path d="M2 9h20"></path></svg> Carica il logo dell'azienda</div>
+<div class="file-name" id="logoName"></div>
+</label>
+</div>
+</div><div class="form-group">
+<label>Anteprima posizione sulla mappa</label>
+<div id="mappa-anteprima" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;"></div>
+</div></div></details><div class="errore-modulo" id="errore-modulo" role="alert"></div><div class="buttons"><button class="btn btn-submit" id="btn-pubblica" type="submit">Pubblica l'offerta</button></div><p class="dopo-pubblica">Gratis. Ti mandiamo per email il link per modificare, chiudere o rinnovare l'annuncio. Resta online 30 giorni.</p></div>
+<!-- STEP 2: Offerta di Lavoro -->
 
-                <div class="buttons">
-                    <button type="button" class="btn btn-prev" onclick="prevStep()">← Indietro</button>
-                    <button type="button" class="btn btn-next" onclick="nextStep()">Avanti →</button>
-                </div>
-            </div>
+<!-- STEP 3: Descrizione -->
 
-            <!-- STEP 3: Descrizione -->
-            <div class="form-step" id="step-3">
-                <div class="step-title">Descrizione Lavoro</div>
+<!-- STEP 4: Conferma -->
 
-                <div class="form-group">
-                    <label for="titolo-offerta">Titolo Offerta <span class="required">*</span></label>
-                    <input type="text" id="titolo-offerta" placeholder="Es. Cerco muratore esperienza 5+ anni" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="descrizione-offerta">Descrizione <span class="required">*</span></label>
-                    <textarea id="descrizione-offerta" placeholder="Descrivi il lavoro, i requisiti richiesti, orari, competenze necessarie..." required></textarea>
-                </div>
-
-                <div class="buttons">
-                    <button type="button" class="btn btn-prev" onclick="prevStep()">← Indietro</button>
-                    <button type="button" class="btn btn-next" onclick="nextStep()">Avanti →</button>
-                </div>
-            </div>
-
-            <!-- STEP 4: Conferma -->
-            <div class="form-step" id="step-4">
-                <div class="step-title">Riepilogo & Pubblicazione</div>
-
-                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #666;">
-                    <p style="margin-bottom: 10px;"><strong>Verifica i dati prima di pubblicare:</strong></p>
-                    <ul style="margin-left: 20px; line-height: 1.8;">
-                        <li><strong id="recap-azienda">Azienda:</strong> --</li>
-                        <li><strong id="recap-offerta">Tipo di lavoro:</strong> --</li>
-                        <li><strong id="recap-contratto">Contratto:</strong> --</li>
-                        <li><strong id="recap-citta">Città:</strong> --</li>
-                        <li id="recap-regione-li" style="display:none"><strong>Regione:</strong> <span id="recap-regione"></span></li>
-                        <li id="recap-mestiere-li" style="display:none"><strong>Mestiere:</strong> <span id="recap-mestiere"></span></li>
-                        <li id="recap-esperienza-li" style="display:none"><strong>Esperienza richiesta:</strong> <span id="recap-esperienza"></span></li>
-                        <li id="recap-orario-li" style="display:none"><strong>Orario:</strong> <span id="recap-orario"></span></li>
-                        <li id="recap-posti-li" style="display:none"><strong>Posti disponibili:</strong> <span id="recap-posti"></span></li>
-                        <li id="recap-stipendio-li" style="display:none"><strong>Stipendio:</strong> <span id="recap-stipendio"></span></li>
-                        <li id="recap-scadenza-li" style="display:none"><strong>Scadenza annuncio:</strong> <span id="recap-scadenza"></span></li>
-                        <li id="recap-patenti-li" style="display:none"><strong>Patenti richieste:</strong> <span id="recap-patenti"></span></li>
-                        <li id="recap-certificazioni-li" style="display:none"><strong>Certificazioni:</strong> <span id="recap-certificazioni"></span></li>
-                        <li id="recap-note-li" style="display:none"><strong>Note:</strong> <span id="recap-note"></span></li>
-                        <li><strong id="recap-titolo">Titolo:</strong> --</li>
-                        <li><strong>Auto propria:</strong> <span id="recap-auto"></span></li>
-                        <li><strong>Trasferte:</strong> <span id="recap-trasferte"></span></li>
-                        <li><strong>Mezzi forniti:</strong> <span id="recap-mezzi"></span></li>
-                    </ul>
-                </div>
-
-                <p style="font-size: 13px; color: #999; margin-bottom: 20px;">
-                    <svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> La tua offerta sarà visibile nella sezione "Ricerca Offerte" e i candidati potranno contattarti direttamente.
-                </p>
-
-                <div class="buttons">
-                    <button type="button" class="btn btn-prev" onclick="prevStep()">← Indietro</button>
-                    <button type="submit" class="btn btn-submit"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Pubblica Offerta</button>
-                </div>
-            </div>
-        </form>
+</form>
     </div>
 </div>
 
@@ -850,109 +734,40 @@
         document.getElementById('campi-compilati').style.display = 'block';
     }
 
-    let currentStep = 1;
-
-    // Navigazione step
-    function nextStep() {
-        if (validateStep(currentStep)) {
-            currentStep++;
-            updateStep();
-            if (currentStep === 4) {
-                aggiornaRecap();
+    // 24 ott 2026: una pagina sola, niente passaggi. Si controlla tutto al momento di pubblicare.
+    function controllaCampi() {
+        const obbligatori = [
+            ['nome-azienda', 'il nome della tua attività'],
+            ['email-azienda', "l'email"],
+            ['telefono-azienda', 'il telefono'],
+            ['tipo-offerta', 'chi cerchi'],
+            ['regione', 'la regione'],
+            ['provincia', 'la provincia'],
+            ['citta-offerta', 'la città']
+        ];
+        document.querySelectorAll('.campo-errore').forEach(el => el.classList.remove('campo-errore'));
+        for (const [id, nome] of obbligatori) {
+            const el = document.getElementById(id);
+            if (!el || !String(el.value || '').trim()) {
+                if (el) { el.classList.add('campo-errore'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.focus(), 300); }
+                return 'Manca ' + nome + '.';
             }
-        } else {
-            alert('Per favore, compila tutti i campi obbligatori.');
         }
-    }
-
-    function prevStep() {
-        currentStep--;
-        updateStep();
-    }
-
-    function updateStep(fromPopstate) {
-        document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
-        document.querySelectorAll('.step-circle').forEach(circle => circle.classList.remove('active'));
-        document.querySelectorAll('.step-label').forEach(label => label.classList.remove('active'));
-
-        document.getElementById(`step-${currentStep}`).classList.add('active');
-        document.getElementById(`circle-${currentStep}`).classList.add('active');
-        document.querySelector(`.progress-step:nth-child(${currentStep}) .step-label`).classList.add('active');
-
-        for (let i = 1; i < currentStep; i++) {
-            document.getElementById(`circle-${i}`).classList.add('completed');
+        const email = document.getElementById('email-azienda');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) {
+            email.classList.add('campo-errore'); email.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return "L'email non sembra giusta: ti serve per ricevere il link dell'offerta.";
         }
-        if (!fromPopstate) history.pushState({step: currentStep}, '');
+        return '';
+    }
+    function mostraErrore(testo) {
+        const box = document.getElementById('errore-modulo');
+        box.textContent = testo; box.style.display = testo ? 'block' : 'none';
     }
 
-    history.replaceState({step: 1}, '');
-    window.onpopstate = function(e) {
-      if (e.state && typeof e.state.step !== 'undefined') {
-        currentStep = e.state.step;
-        updateStep(true);
-      }
-    };
-
-    function validateStep(step) {
-        if (step === 1) {
-            return document.getElementById('nome-azienda').value && 
-                   document.getElementById('email-azienda').value && 
-                   document.getElementById('telefono-azienda').value;
-        } else if (step === 2) {
-            return document.getElementById('tipo-offerta').value &&
-                   document.getElementById('tipo-contratto').value &&
-                   document.getElementById('citta-offerta').value &&
-                   document.getElementById('regione').value &&
-                   document.getElementById('mestiere').value &&
-                   document.getElementById('livello-esperienza').value &&
-                   document.getElementById('orario').value &&
-                   document.getElementById('posti-disponibili').value &&
-                   document.getElementById('data-scadenza-annuncio').value;
-        } else if (step === 3) {
-            return document.getElementById('titolo-offerta').value && 
-                   document.getElementById('descrizione-offerta').value;
-        }
-        return true;
-    }
-
-    function aggiornaRecap() {
-        document.getElementById('recap-azienda').innerHTML = `<strong>Azienda:</strong> ${document.getElementById('nome-azienda').value}`;
-        document.getElementById('recap-offerta').innerHTML = `<strong>Tipo di lavoro:</strong> ${document.getElementById('tipo-offerta').value}`;
-        document.getElementById('recap-contratto').innerHTML = `<strong>Contratto:</strong> ${document.getElementById('tipo-contratto').value}`;
-        document.getElementById('recap-citta').innerHTML = `<strong>Città:</strong> ${document.getElementById('citta-offerta').value}`;
-        document.getElementById('recap-titolo').innerHTML = `<strong>Titolo:</strong> ${document.getElementById('titolo-offerta').value}`;
-
-        const mostraSeValido = (liId, spanId, val) => {
-            const v = (val || '').toString().trim();
-            document.getElementById(liId).style.display = v ? 'list-item' : 'none';
-            if (v) document.getElementById(spanId).textContent = v;
-        };
-
-        mostraSeValido('recap-regione-li', 'recap-regione', document.getElementById('regione').value);
-        mostraSeValido('recap-mestiere-li', 'recap-mestiere', document.getElementById('mestiere').value);
-        mostraSeValido('recap-esperienza-li', 'recap-esperienza', document.getElementById('livello-esperienza').value);
-        mostraSeValido('recap-orario-li', 'recap-orario', document.getElementById('orario').value);
-        mostraSeValido('recap-posti-li', 'recap-posti', document.getElementById('posti-disponibili').value);
-        mostraSeValido('recap-stipendio-li', 'recap-stipendio', document.getElementById('stipendio').value);
-
-        const dataRaw = document.getElementById('data-scadenza-annuncio').value;
-        if (dataRaw) {
-            const [y, m, d] = dataRaw.split('-');
-            mostraSeValido('recap-scadenza-li', 'recap-scadenza', `${d}/${m}/${y}`);
-        } else {
-            document.getElementById('recap-scadenza-li').style.display = 'none';
-        }
-
-        const patenti = ['A','B','C','CE','D','DE'].filter(p => document.getElementById('patente-' + p).checked);
-        mostraSeValido('recap-patenti-li', 'recap-patenti', patenti.join(', '));
-
-        mostraSeValido('recap-certificazioni-li', 'recap-certificazioni', document.getElementById('certificazioni-list').value);
-        mostraSeValido('recap-note-li', 'recap-note', document.getElementById('note_aggiuntive').value);
-
-        document.getElementById('recap-auto').textContent = document.getElementById('auto-propria').checked ? 'Sì' : 'No';
-        document.getElementById('recap-trasferte').textContent = document.getElementById('disponibilita-trasferte').checked ? 'Sì' : 'No';
-        document.getElementById('recap-mezzi').textContent = document.getElementById('mezzi-forniti').checked ? 'Sì' : 'No';
-    }
+    // dal «Chi cerchi» si ricava il mestiere, se nei dettagli non l'hanno scelto
+    const MESTIERE_DA_TIPO = { 'Muratore': 'Muratura', 'Elettricista': 'Elettricista', 'Idraulico': 'Idraulico', 'Carpentiere': 'Carpentiere',
+        'Pittore/Imbianchino': 'Pittore', 'Piastrellista': 'Piastrellista', 'Giardiniere': 'Giardiniere' };
 
     // Geolocalizzazione
     function geolocalizzaOfferta() {
@@ -1023,6 +838,11 @@
     // Submit form
     document.getElementById('offerteForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const errore = controllaCampi();
+        mostraErrore(errore);
+        if (errore) return;
+        const bottone = document.getElementById('btn-pubblica');
+        if (bottone) { bottone.disabled = true; bottone.textContent = 'Pubblico…'; }
 
         const patenti = ['A','B','C','CE','D','DE']
             .filter(p => document.getElementById('patente-' + p).checked);
@@ -1034,14 +854,13 @@
 
         const { data: { user } } = await supabaseClient.auth.getUser();
         let impresaId = null;
-        let impresaPiano = 'free';
         if (user) {
             const { data: impresa } = await supabaseClient
                 .from('imprese')
-                .select('id,piano')
+                .select('id')
                 .eq('email', user.email)
                 .single();
-            if (impresa) { impresaId = impresa.id; impresaPiano = (impresa.piano || 'free').toLowerCase(); }
+            if (impresa) impresaId = impresa.id;
         }
 
         // Dal 12 set 2026 NON si ferma piu' chi non ha l'account: chi non e' iscritto
@@ -1055,43 +874,26 @@
             return;
         }
 
-        // Pubblicazione illimitata per tutti i piani — la bacheca deve riempirsi
-        if (impresaId) {
-            const _maxMese = 999; // illimitato per tutti. Per rimettere un tetto ai Free: (impresaPiano === 'premium') ? 999 : 5
-            if (_maxMese !== Infinity) {
-                const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
-                const { count } = await supabaseClient
-                    .from('offerte_lavoro')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('impresa_id', impresaId)
-                    .gte('created_at', _inizioMese.toISOString());
-                if ((count || 0) >= _maxMese) {
-                    alert(`Hai raggiunto il limite di ${_maxMese} offerta/e al mese del piano ${impresaPiano.charAt(0).toUpperCase()+impresaPiano.slice(1)}. Passa a un piano superiore per pubblicarne di più.`);
-                    return;
-                }
-            }
-        }
-
         const formData = {
             impresa_id: impresaId,
             nome_azienda: document.getElementById('nome-azienda').value,
             email: document.getElementById('email-azienda').value,
             telefono: document.getElementById('telefono-azienda').value,
-            titolo: document.getElementById('titolo-offerta').value,
+            titolo: document.getElementById('titolo-offerta').value.trim() || ('Cerco ' + document.getElementById('tipo-offerta').value.toLowerCase()),
             tipo_offerta: document.getElementById('tipo-offerta').value,
-            tipo_contratto: document.getElementById('tipo-contratto').value,
+            tipo_contratto: document.getElementById('tipo-contratto').value || null,
             citta: document.getElementById('citta-offerta').value,
             descrizione: document.getElementById('descrizione-offerta').value,
             data_pubblicazione: new Date().toISOString(),
             attiva: true,
             regione: document.getElementById('regione').value,
             provincia: document.getElementById('provincia').value,
-            mestiere: document.getElementById('mestiere').value,
-            livello_esperienza: document.getElementById('livello-esperienza').value,
-            orario: document.getElementById('orario').value,
+            mestiere: document.getElementById('mestiere').value || MESTIERE_DA_TIPO[document.getElementById('tipo-offerta').value] || null,
+            livello_esperienza: document.getElementById('livello-esperienza').value || null,
+            orario: document.getElementById('orario').value || null,
             posti_disponibili: parseInt(document.getElementById('posti-disponibili').value) || 1,
             stipendio: document.getElementById('stipendio').value || null,
-            data_scadenza_annuncio: document.getElementById('data-scadenza-annuncio').value || null,
+            data_scadenza_annuncio: null, // la mette il database: 30 giorni
             patenti_richieste: patenti,
             certificazioni_richieste: csvToArray('certificazioni-list'),
             note_aggiuntive: document.getElementById('note_aggiuntive').value || null,
@@ -1113,30 +915,34 @@
                 mostraLinkGestione(data.id, data.token, campi.email);
 
                 // l'email col link: se non parte, l'annuncio resta comunque pubblicato
-                fetch('/.netlify/functions/offerta-link-gestione', {
+                fetch('/.netlify/functions/offerta-gestione', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: data.id, token: data.token })
+                    body: JSON.stringify({ azione: 'link', id: data.id, token: data.token })
                 }).catch(() => {});
                 return;
             }
 
             const { data, error } = await supabaseClient
                 .from('offerte_lavoro')
-                .insert([formData]);
+                .insert([formData])
+                .select('id')
+                .single();
 
-            if (error) {
-                console.error('Errore Supabase:', error);
-                alert('❌ Errore nel salvataggio. Riprova.');
-            } else {
-                document.getElementById('successMsg').classList.add('show');
-                setTimeout(() => {
-                    window.location.href = 'offerte-lavoro.html';
-                }, 2000);
-            }
+            if (error) throw error;
+
+            // l'email col link: ce l'ha anche chi e' iscritto (la ritrova pure nel pannello)
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            fetch('/.netlify/functions/offerta-gestione', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session ? session.access_token : '') },
+                body: JSON.stringify({ azione: 'link', id: data.id })
+            }).catch(() => {});
+            mostraFatto(data.id, formData.email);
         } catch (error) {
             console.error('Errore:', error);
-            alert('❌ ' + (error.message || 'Errore sconosciuto. Riprova.'));
+            mostraErrore('Non sono riuscito a pubblicare: ' + (error.message || 'riprova fra un attimo.'));
+            if (bottone) { bottone.disabled = false; bottone.textContent = "Pubblica l'offerta"; }
         }
     });
 
@@ -1150,12 +956,29 @@
         box.innerHTML = '✅ Offerta pubblicata! È già online sulla bacheca.'
           + '<div class="box-link">'
           + '<h3>🔑 Il tuo link per gestire l\'annuncio</h3>'
-          + '<p>Con questo link puoi rivedere il tuo annuncio e chiuderlo quando hai trovato la persona. Non serve nessuna password.</p>'
+          + '<p>Con questo link puoi modificare l\'offerta, chiuderla quando hai trovato la persona, o rinnovarla. Resta online 30 giorni. Non serve nessuna password.</p>'
           + '<a class="link-riga" href="' + esc(link) + '">' + esc(link) + '</a>'
           + '<div class="avviso">📧 Te l\'abbiamo mandato anche per email a <strong>' + esc(email) + '</strong>. Se non lo trovi, guarda nella posta indesiderata.</div>'
           + '<div class="riga-tasti">'
           + '<a class="t-primario" href="/offerta-lavoro.html?id=' + encodeURIComponent(id) + '">👀 Vedi il tuo annuncio</a>'
           + '<button type="button" class="t-secondario" onclick="copiaLink(this, \'' + esc(link) + '\')">📋 Copia il link</button>'
+          + '</div></div>';
+        box.classList.add('show');
+        document.getElementById('offerteForm').style.display = 'none';
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // dopo la pubblicazione da iscritto: il link e' nel pannello e nell'email
+    function mostraFatto(id, email) {
+        const esc = t => String(t ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        const box = document.getElementById('successMsg');
+        box.innerHTML = '✅ Offerta pubblicata! È già online sulla bacheca per 30 giorni.'
+          + '<div class="box-link">'
+          + '<p>La ritrovi nel tuo pannello, in <strong>«Le mie offerte»</strong>: da lì la modifichi, la chiudi o la rinnovi. '
+          + 'Ti abbiamo mandato il link anche per email a <strong>' + esc(email) + '</strong>.</p>'
+          + '<div class="riga-tasti">'
+          + '<a class="t-primario" href="/offerta-lavoro.html?id=' + encodeURIComponent(id) + '">Vedi la tua offerta</a>'
+          + '<a class="t-secondario" href="/login-impresa.html">Vai al pannello</a>'
           + '</div></div>';
         box.classList.add('show');
         document.getElementById('offerteForm').style.display = 'none';
@@ -1185,22 +1008,6 @@
         input.value = '';
         aggiornaListaChip(chipsId, listId);
     }
-
-    function aggiornaScadenza(radio) {
-        const custom = document.getElementById('data-scadenza-custom');
-        const hidden = document.getElementById('data-scadenza-annuncio');
-        if (radio.value === 'custom') {
-            custom.style.display = '';
-            hidden.value = custom.value;
-        } else {
-            custom.style.display = 'none';
-            const d = new Date();
-            d.setDate(d.getDate() + parseInt(radio.value));
-            hidden.value = d.toISOString().slice(0, 10);
-        }
-    }
-    // Imposta default 30 giorni al caricamento
-    aggiornaScadenza(document.querySelector('input[name="scadenza-radio"][value="30"]'));
 
     function aggiungiChipDaSelect(selectId, chipsId, listId) {
         const select = document.getElementById(selectId);
@@ -1287,6 +1094,8 @@
     }
 
     (function() {
+      const det = document.querySelector('.altri-dettagli');
+      if (det) det.addEventListener('toggle', () => { if (det.open) aggiornaPinAnteprima(document.getElementById('citta-offerta').value); });
       const cs = document.getElementById('citta-offerta');
       if (cs) cs.addEventListener('change', e => aggiornaPinAnteprima(e.target.value));
     })();

@@ -62,6 +62,29 @@
     .msg.err { background:#fdecea; color:#c0392b; }
 
     @media (max-width:600px) { .top-bar h1 { font-size:1.5rem; } .top-bar { padding:30px 20px 26px; } }
+
+    /* 24 ott 2026: modifica, chiudi, riapri, rinnova */
+    .stato { display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:white; border-radius:14px; padding:16px 20px; box-shadow:0 2px 10px rgba(0,0,0,0.07); margin-bottom:18px; font-size:1.05rem; }
+    .pallino { width:14px; height:14px; border-radius:50%; background:#16a34a; flex:none; }
+    .pallino.chiuso { background:#9ca3af; }
+    .stato small { color:#555; font-size:0.95rem; width:100%; }
+    .modulo { background:white; border-radius:14px; padding:20px 22px; box-shadow:0 2px 10px rgba(0,0,0,0.07); margin-bottom:18px; }
+    .modulo h2 { font-size:1.25rem; margin-bottom:14px; }
+    .modulo label { display:block; font-weight:700; font-size:1rem; margin:14px 0 6px; }
+    .modulo input, .modulo textarea { width:100%; padding:12px 14px; border:1.5px solid #d6dbe1; border-radius:10px; font:inherit; font-size:1.02rem; }
+    .modulo textarea { min-height:150px; resize:vertical; line-height:1.5; }
+    .riga2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:600px) { .riga2 { grid-template-columns:1fr; } }
+    .bottoni { display:grid; gap:12px; }
+    .btn { width:100%; border:none; border-radius:12px; padding:15px; font-family:'DM Sans',sans-serif; font-weight:800; font-size:1.08rem; cursor:pointer; }
+    .btn-salva { background:#0066ff; color:white; }
+    .btn-salva:hover { background:#0052cc; }
+    .btn-rinnova { background:#16a34a; color:white; }
+    .btn-chiudi2 { background:white; color:#1a1a1a; border:2px solid #d6dbe1; }
+    .btn:disabled { opacity:.6; cursor:default; }
+    .btn-elimina { width:100%; background:#c0392b; color:white; border:none; border-radius:12px; padding:15px; font-family:'DM Sans',sans-serif; font-weight:800; font-size:1.08rem; cursor:pointer; }
+    .modulo select { width:100%; padding:12px 14px; border:1.5px solid #d6dbe1; border-radius:10px; font:inherit; font-size:1.02rem; background:#fff; }
+    .vedi { display:block; text-align:center; font-weight:700; font-size:1.05rem; color:#0047b3; margin:4px 0 18px; }
   </style>
   <link rel="stylesheet" href="/css/mobile.css?v=3">
 <style>
@@ -95,8 +118,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 </header>
 
 <div class="top-bar">
-  <h1><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Gestisci il tuo annuncio</h1>
-  <p>Da qui puoi rivedere il tuo annuncio di lavoro e chiuderlo quando hai trovato la persona.</p>
+  <h1>Gestisci la tua offerta</h1>
+  <p>Modifica, chiudi quando hai trovato la persona, riapri o rinnova la tua offerta di lavoro.</p>
 </div>
 
 <div class="page-body">
@@ -104,115 +127,119 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   <div id="annuncio-box"><div class="loading-state">Caricamento…</div></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const supabaseClient = supabase.createClient(
-    'https://nacvrsgkyfavykxjxszu.supabase.co',
-    'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R'
-  );
-
+  /* 24 ott 2026: tutto passa da /.netlify/functions/offerta-gestione,
+     che controlla il token. Dal browser il token non si legge. */
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-
   function mostraMsg(testo, classe) {
     const msg = document.getElementById('msg');
-    msg.textContent = testo;
-    msg.className = 'msg ' + classe;
-    msg.style.display = 'block';
+    msg.textContent = testo; msg.className = 'msg ' + classe; msg.style.display = 'block';
+    msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   const token = params.get('token');
+  let offerta = null;
 
-  async function caricaAnnuncio() {
-    const box = document.getElementById('annuncio-box');
-    if (!id || !token) {
-      box.innerHTML = '';
-      mostraMsg('⚠️ Link non valido: mancano dei pezzi. Usa il link completo che ti abbiamo mandato per email.', 'err');
-      return;
-    }
-
-    try {
-      // il link e' davvero di questo annuncio? lo decide il database, non il browser
-      const { data: valido, error: errTok } = await supabaseClient
-        .rpc('verifica_token_offerta', { p_id: id, p_token: token });
-      if (errTok) throw errTok;
-
-      if (!valido) {
-        box.innerHTML = '';
-        mostraMsg('⚠️ Questo link non è valido per nessun annuncio. Controlla di averlo copiato tutto.', 'err');
-        return;
-      }
-
-      const { data, error } = await supabaseClient
-        .from('offerte_lavoro')
-        .select('id, titolo, nome_azienda, descrizione, citta, provincia, mestiere, tipo_contratto, orario, stipendio, posti_disponibili, telefono, email, attiva, data_pubblicazione')
-        .eq('id', id)
-        .maybeSingle();
-      if (error || !data) throw error || new Error('not found');
-
-      disegna(data);
-
-    } catch (e) {
-      document.getElementById('annuncio-box').innerHTML = '';
-      mostraMsg('⚠️ Non riesco a caricare l\'annuncio. Riprova fra poco.', 'err');
-    }
+  async function chiama(azione, extra) {
+    const res = await fetch('/.netlify/functions/offerta-gestione', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ azione, id, token }, extra || {}))
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || 'Qualcosa non ha funzionato, riprova.');
+    return json;
   }
+  const dataIt = d => d ? new Date(String(d).slice(0, 10) + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const CONTRATTI = ['', 'Tempo indeterminato', 'Tempo determinato', 'Partita IVA', 'Stage/Apprendistato'];
+  const ORARI = ['', 'Full time', 'Part time', 'Flessibile'];
+  const scelta = (lista, v) => lista.concat(v && !lista.includes(v) ? [v] : [])
+    .map(x => `<option value="${esc(x)}"${x === (v || '') ? ' selected' : ''}>${x ? esc(x) : '-- Non indicato --'}</option>`).join('');
 
-  function disegna(d) {
-    const box = document.getElementById('annuncio-box');
-    const chiuso = d.attiva === false;
+  function disegna() {
+    const o = offerta, box = document.getElementById('annuncio-box');
+    const aperta = o.attiva !== false;
     box.innerHTML = `
-      <div class="annuncio-card">
-        <div class="annuncio-tag ${chiuso ? 'chiuso' : ''}">${chiuso ? '🔒 Annuncio chiuso' : '🟢 Annuncio online'}</div>
-        <div class="annuncio-nome">${esc(d.titolo) || 'Offerta di lavoro'}</div>
-        <div class="annuncio-azienda">${esc(d.nome_azienda) || ''}</div>
-        ${d.descrizione ? `<div class="annuncio-desc">${esc(d.descrizione)}</div>` : ''}
-        <div class="annuncio-meta">
-          ${d.citta ? `<span>📍 ${esc(d.citta)}</span>` : ''}
-          ${d.mestiere ? `<span>🔨 ${esc(d.mestiere)}</span>` : ''}
-          ${d.tipo_contratto ? `<span>📄 ${esc(d.tipo_contratto)}</span>` : ''}
-          ${d.orario ? `<span>🕐 ${esc(d.orario)}</span>` : ''}
-          ${d.stipendio ? `<span>💶 ${esc(d.stipendio)}</span>` : ''}
-          ${d.posti_disponibili ? `<span>👷 ${esc(d.posti_disponibili)} posto/i</span>` : ''}
-          ${d.telefono ? `<span>📞 ${esc(d.telefono)}</span>` : ''}
-          ${d.email ? `<span>✉️ ${esc(d.email)}</span>` : ''}
+      <div class="stato">
+        <span class="pallino ${aperta ? '' : 'chiuso'}"></span>
+        <strong>${aperta ? 'La tua offerta è online' : 'La tua offerta è chiusa'}</strong>
+        <small>${aperta ? (o.data_scadenza_annuncio ? 'Resta online fino al ' + dataIt(o.data_scadenza_annuncio) + '. Prima che scada ti scriviamo per rinnovarla.' : '') : 'Non si vede più nella bacheca. Puoi riaprirla quando vuoi.'}</small>
+      </div>
+      ${aperta ? `<a class="vedi" href="/offerta-lavoro.html?id=${encodeURIComponent(o.id)}" target="_blank" rel="noopener">Vedi come la vedono i lavoratori ↗</a>` : ''}
+      <div class="modulo">
+        <h2>${esc(o.tipo_offerta ? 'Cerco: ' + o.tipo_offerta : 'La tua offerta')}</h2>
+        <label for="m-titolo">Titolo</label>
+        <input id="m-titolo" value="${esc(o.titolo)}">
+        <label for="m-testo">Il lavoro</label>
+        <textarea id="m-testo" placeholder="Es. Cantiere a Rieti, ristrutturazione appartamenti. Inizio subito.">${esc(o.descrizione)}</textarea>
+        <label for="m-citta">Città</label>
+        <input id="m-citta" value="${esc(o.citta)}">
+        <div class="riga2">
+          <div><label for="m-contratto">Contratto</label><select id="m-contratto">${scelta(CONTRATTI, o.tipo_contratto)}</select></div>
+          <div><label for="m-orario">Orario</label><select id="m-orario">${scelta(ORARI, o.orario)}</select></div>
+        </div>
+        <label for="m-stipendio">Paga (facoltativo)</label>
+        <input id="m-stipendio" value="${esc(o.stipendio)}" placeholder="Es. 1.600 € al mese, oppure 13 € l'ora">
+        <label for="m-nome">Nome dell'impresa</label>
+        <input id="m-nome" value="${esc(o.nome_azienda)}">
+        <div class="riga2">
+          <div><label for="m-tel">Telefono</label><input id="m-tel" type="tel" value="${esc(o.telefono)}"></div>
+          <div><label for="m-email">Email</label><input id="m-email" type="email" value="${esc(o.email)}"></div>
         </div>
       </div>
-      ${chiuso ? `
-        <p class="spiega">Questo annuncio non è più sulla bacheca. Se ti serve di nuovo, pubblicane uno nuovo:
-        <a href="/offerte-registrazione.html">pubblica un'offerta</a>.</p>
-      ` : `
-        <a class="btn-vedi" href="/offerta-lavoro.html?id=${encodeURIComponent(d.id)}">👀 Vedi come lo vedono gli altri</a>
-        <button class="btn-chiudi" id="btn-chiudi" onclick="chiudiAnnuncio()">🔒 Chiudi l'annuncio</button>
-        <p class="spiega">Chiudendolo sparisce dalla bacheca e non riceverai più candidature.<br>Fallo quando hai trovato la persona.</p>
-      `}
-    `;
+      <div class="bottoni">
+        <button class="btn btn-salva" onclick="salva(this)">Salva le modifiche</button>
+        ${aperta
+          ? `<button class="btn btn-rinnova" onclick="azione('rinnova', this)">Rinnova per altri 30 giorni</button>
+             <button class="btn btn-chiudi2" onclick="azione('chiudi', this)">Ho trovato la persona: chiudi l'offerta</button>`
+          : `<button class="btn btn-rinnova" onclick="azione('riapri', this)">Riapri l'offerta</button>`}
+        <button class="btn-elimina" onclick="elimina()">Elimina per sempre</button>
+      </div>`;
   }
 
-  async function chiudiAnnuncio() {
-    if (!confirm('Vuoi chiudere questo annuncio? Sparirà dalla bacheca e non riceverai più candidature.')) return;
-    const btn = document.getElementById('btn-chiudi');
-    if (btn) { btn.disabled = true; btn.textContent = 'Un attimo…'; }
+  async function carica() {
+    const box = document.getElementById('annuncio-box');
+    if (!id || !token) { box.innerHTML = ''; mostraMsg('Link non valido: usa il link completo che ti abbiamo mandato per email.', 'err'); return; }
     try {
-      const { data, error } = await supabaseClient
-        .rpc('chiudi_offerta_anonima', { p_id: id, p_token: token });
-      if (error) throw error;
-      if (!data) {
-        mostraMsg('⚠️ Link non valido: l\'annuncio non è stato chiuso.', 'err');
-        if (btn) { btn.disabled = false; btn.textContent = '🔒 Chiudi l\'annuncio'; }
-        return;
+      offerta = (await chiama('leggi')).offerta;
+      disegna();
+      // dal bottone «Sì, rinnovala» dell'email
+      if (params.get('azione') === 'rinnova') {
+        offerta = (await chiama('rinnova')).offerta; disegna();
+        mostraMsg('✅ Fatto: la tua offerta resta online fino al ' + dataIt(offerta.data_scadenza_annuncio) + '.', 'ok');
+        history.replaceState(null, '', location.pathname + '?id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(token));
       }
-      mostraMsg('✅ Annuncio chiuso. Non è più sulla bacheca.', 'ok');
-      caricaAnnuncio();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-      mostraMsg('⚠️ Non sono riuscito a chiuderlo. Riprova fra poco.', 'err');
-      if (btn) { btn.disabled = false; btn.textContent = '🔒 Chiudi l\'annuncio'; }
-    }
+    } catch (e) { box.innerHTML = ''; mostraMsg('⚠️ ' + e.message, 'err'); }
   }
 
-  caricaAnnuncio();
+  async function salva(btn) {
+    const v = x => document.getElementById(x).value;
+    const campi = {
+      titolo: v('m-titolo'), descrizione: v('m-testo'), citta: v('m-citta'),
+      tipo_contratto: v('m-contratto'), orario: v('m-orario'), stipendio: v('m-stipendio'),
+      nome_azienda: v('m-nome'), telefono: v('m-tel'), email: v('m-email')
+    };
+    btn.disabled = true;
+    try { offerta = (await chiama('modifica', { campi })).offerta; disegna(); mostraMsg('✅ Modifiche salvate.', 'ok'); }
+    catch (e) { btn.disabled = false; mostraMsg('⚠️ ' + e.message, 'err'); }
+  }
+
+  async function azione(nome, btn) {
+    btn.disabled = true;
+    try {
+      offerta = (await chiama(nome)).offerta; disegna();
+      mostraMsg(nome === 'chiudi' ? '✅ Offerta chiusa: non si vede più nella bacheca.'
+        : '✅ La tua offerta è online fino al ' + dataIt(offerta.data_scadenza_annuncio) + '.', 'ok');
+    } catch (e) { btn.disabled = false; mostraMsg('⚠️ ' + e.message, 'err'); }
+  }
+
+  async function elimina() {
+    if (!confirm('Vuoi eliminare per sempre questa offerta? Non si potrà più recuperare.')) return;
+    try { await chiama('elimina'); document.getElementById('annuncio-box').innerHTML = ''; mostraMsg('✅ Offerta eliminata.', 'ok'); }
+    catch (e) { mostraMsg('⚠️ ' + e.message, 'err'); }
+  }
+
+  carica();
 </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">
