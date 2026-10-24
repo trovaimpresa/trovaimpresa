@@ -265,10 +265,12 @@
     let r;
     try{
       r = await sb.from('subappalti')
-            .select('id, tipo, nome_impresa, descrizione, lavoro, citta, regione, telefono, email, created_at')
+            .select('id, tipo, nome_impresa, descrizione, lavoro, citta, regione, telefono, email, created_at, attivo')
             .eq('id', id).maybeSingle();
     }catch(e){ return nonTrovato('Non riesco a leggere l’annuncio in questo momento. Riprova fra poco.'); }
     if(r.error || !r.data) return nonTrovato('Questo annuncio non c’è più, oppure è stato tolto da chi l’aveva pubblicato.');
+    /* 24 ott 2026: annuncio chiuso o scaduto -> non si mostra */
+    if(r.data.attivo === false) return nonTrovato('Questo annuncio è chiuso: chi l\'aveva pubblicato non lo cerca più.');
 
     const a = r.data;
     const cerca = a.tipo === 'cerca';

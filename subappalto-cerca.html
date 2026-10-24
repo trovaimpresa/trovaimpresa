@@ -312,7 +312,7 @@
           <input class="form-input" id="f-tel" placeholder="Es. 333 1234567" type="tel">
         </div>
         <div class="form-group">
-          <label class="form-label">Email</label>
+          <label class="form-label">Email * <span style="font-weight:400;color:#666">(ti mandiamo il link per gestire l'annuncio)</span></label>
           <input class="form-input" id="f-email" placeholder="info@tuaimpresa.it" type="email">
         </div>
       </div>
@@ -320,7 +320,7 @@
       <button class="btn-submit" onclick="salva()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pubblica richiesta</button>
       <div class="form-msg" id="form-msg"></div>
       <div id="gestione-link" style="display:none; margin-top:14px; padding:14px; border:2px solid #0066ff; border-radius:10px; background:#eafaf0;">
-        <div style="font-weight:700; color:#1a3a5e; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Salva questo link per modificare o cancellare il tuo annuncio:</div>
+        <div style="font-weight:700; color:#1a3a5e; margin-bottom:6px;"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Ti abbiamo mandato questo link anche per email. Da qui modifichi, chiudi o rinnovi il tuo annuncio:</div>
         <a id="gestione-link-url" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#0066ff; font-weight:600;"></a>
       </div>
     </div>
@@ -406,7 +406,8 @@
       let q = supabaseClient
         .from('subappalti')
         .select('id, tipo, nome_impresa, descrizione, lavoro, citta, telefono, email, created_at, categoria, mestiere, regione')
-        .eq('tipo', 'cerca');
+        .eq('tipo', 'cerca')
+        .eq('attivo', true); /* 24 ott 2026: i chiusi e gli scaduti non si vedono */
       if (fCat) q = q.eq('categoria', fCat);
       if (fMest) q = q.eq('mestiere', fMest);
       if (fReg) q = q.eq('regione', fReg);
@@ -500,6 +501,11 @@
       mostraMsg('Compila i campi obbligatori (nome impresa, categoria, regione, tipo lavoro, zona cantiere).', 'err');
       return;
     }
+    // 24 ott 2026: l'email serve: li' arriva il link per modificare, chiudere o rinnovare l'annuncio
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      mostraMsg('Scrivi la tua email: ti mandiamo il link per modificare o chiudere l\'annuncio.', 'err');
+      return;
+    }
     if (categoria === 'cottimisti' && !mestiere) {
       mostraMsg('Seleziona il mestiere.', 'err');
       return;
@@ -514,6 +520,9 @@
     if (budget) descrizione += '\nBudget: ' + budget;
     if (requisiti.length) descrizione += '\nRequisiti: ' + requisiti.join(', ');
 
+    // 24 ott 2026: chi e' iscritto ritrova l'annuncio nel suo pannello
+    let _uid = null;
+    try { const { data: _s } = await supabaseClient.auth.getSession(); _uid = (_s && _s.session && _s.session.user) ? _s.session.user.id : null; } catch (_) {}
     const token = crypto.randomUUID();
 
     try {
@@ -527,6 +536,7 @@
         citta: zona,
         telefono: tel || null,
         email: email || null,
+        user_id: _uid,
         token,
         created_at: new Date().toISOString()
       }).select('id').single();
@@ -537,6 +547,8 @@
       aLink.href = linkGestione;
       aLink.textContent = linkGestione;
       document.getElementById('gestione-link').style.display = 'block';
+      // 24 ott 2026: il link arriva anche per email, cosi' non si perde
+      fetch('/.netlify/functions/subappalto-gestione', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ azione: 'link', id: nuovo.id, token }) }).catch(() => {});
       ['f-nome','f-categoria','f-mestiere','f-regione','f-tipo-lavoro','f-desc','f-zona','f-periodo','f-budget','f-tel','f-email']
         .forEach(id => { document.getElementById(id).value = ''; });
       reqIds.forEach(id => { document.getElementById(id).checked = false; });

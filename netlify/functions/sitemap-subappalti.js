@@ -64,6 +64,7 @@ exports.handler = async function () {
   try {
     const q = new URLSearchParams({
       select: 'id,tipo,descrizione,lavoro,citta,regione,created_at',
+      attivo: 'eq.true', // 24 ott 2026: su Google solo gli annunci aperti
       order: 'created_at.desc',
       limit: String(MAX_URL)
     });
