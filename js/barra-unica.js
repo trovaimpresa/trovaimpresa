@@ -8,10 +8,14 @@
     window.__barraUnica = 1;
     var LINKS = [
       ['/forum', 'Forum'], ['/gestionale', 'Gestionale'], ['/bandi', 'Bandi e fondi'],
-      ['/blog', 'Guide e costi'], ['/offerte-lavoro', 'Bacheca offerte lavoro'],
-      ['/candidature-lavoro', 'Bacheca candidature lavoro'], ['/subappalto', 'Subappalti'],
+      ['/blog', 'Guide e costi'], ['/lavoro-edilizia', 'Lavoro Edilizia'],
       ['/prezzi', 'Prezzi'], ['/pubblicita', 'Pubblicità']
     ];
+
+    /* la voce accesa del menu: le pagine di offerte, candidati e subappalti stanno sotto «Lavoro Edilizia» */
+    function voceAccesa(p) {
+      return /^\/(offerte-lavoro|offerta-|offerte-registrazione|candidature-lavoro|registrazione-candidato|subappalto|trova-cantieri)/.test(p) ? '/lavoro-edilizia' : p;
+    }
 
     /* ---------- TELEFONO (<1100px): barra uguale su tutte le pagine ---------- */
 
@@ -54,13 +58,13 @@
       if (!el) { var fc = document.body.firstElementChild; if (fc && /(^|\s)(logo|logobar|barra)(\s|$)/.test(fc.className || '')) el = fc; }
       if (!el) return;
       var path = location.pathname.replace(/\.html$/, '');
-      var logo = /^\/gestionale/.test(path) ? '/img/trovaimpresa-gestionale-logo.svg' : (/^\/forum/.test(path) ? '/img/trovaimpresa-forum-edilizia-logo.svg' : '/img/trovaimpresa-logo.svg');
-      var home = /^\/gestionale/.test(path) ? '/gestionale' : (/^\/forum/.test(path) ? '/forum' : '/');
+      var logo = /^\/gestionale/.test(path) ? '/img/trovaimpresa-gestionale-logo.svg' : (/^\/forum/.test(path) ? '/img/trovaimpresa-forum-edilizia-logo.svg' : (/^\/lavoro-edilizia/.test(path) ? '/img/trovaimpresa-lavoro-edilizia-logo.svg' : '/img/trovaimpresa-logo.svg'));
+      var home = /^\/gestionale/.test(path) ? '/gestionale' : (/^\/forum/.test(path) ? '/forum' : (/^\/lavoro-edilizia/.test(path) ? '/lavoro-edilizia' : '/'));
       var h = '<div class="tbm-top"><a class="tbm-logo" href="' + home + '"><img src="' + logo + '" alt="TrovaImpresa"></a><button type="button" class="tbm-mn" aria-expanded="false">&#9776; Menu</button></div><div class="tbm-panel">' +
         '<a class="tbm-btn" href="' + (path === '/' || path === '/index' ? '/login-impresa' : '/') + '">Accedi al sito TrovaImpresa</a>' +
         '<a class="tbm-btn" href="' + (/^\/gestionale/.test(path) ? '/login-impresa?redirect=gestionale' : '/gestionale') + '">Accedi al gestionale</a>' +
         '<a class="tbm-btn" href="' + (/^\/forum/.test(path) ? '/login-impresa?redirect=forum' : '/forum') + '">Accedi al forum</a>';
-      LINKS.forEach(function (l) { h += '<a class="tbm-l' + (path === l[0] ? ' on' : '') + '" href="' + l[0] + '">' + l[1] + '</a>'; });
+      LINKS.forEach(function (l) { h += '<a class="tbm-l' + (voceAccesa(path) === l[0] ? ' on' : '') + '" href="' + l[0] + '">' + l[1] + '</a>'; });
       var pren = document.querySelector('#nav-prenota');
       if (pren) h = h.replace('<a class="tbm-btn" href="/">', '<a class="tbm-btn tbm-pren" href="#">' + (pren.textContent || 'Prenota').trim() + '</a><a class="tbm-btn" href="/">');
       h += '</div>';
@@ -139,7 +143,7 @@
       var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>' +
         '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/gestionale">Accedi al gestionale</a><a class="tb-btn" href="/forum">Accedi al forum</a></div><div class="tb-links">';
       LINKS.forEach(function (l) {
-        h += '<a href="' + l[0] + '"' + (path === l[0] ? ' class="on"' : '') + '>' + l[1] + '</a>';
+        h += '<a href="' + l[0] + '"' + (voceAccesa(path) === l[0] ? ' class="on"' : '') + '>' + l[1] + '</a>';
       });
       h += '</div>';
       var st = document.createElement('style');

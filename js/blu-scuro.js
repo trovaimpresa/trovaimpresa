@@ -101,7 +101,7 @@
     if (!window.__barraCaricata) {
       window.__barraCaricata = 1;
       var s = document.createElement('script');
-      s.src = '/js/barra-unica.js?v=2';
+      s.src = '/js/barra-unica.js?v=3';
       document.head.appendChild(s);
     }
   } catch (e) {}
