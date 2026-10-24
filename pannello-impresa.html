@@ -3721,7 +3721,7 @@ const FAQS_LIST = [
   },
   {
     domanda: "Ho caricato un nuovo logo ma non si vede",
-    risposta: "Il logo si cambia dalla foto tonda in cima al pannello: sopra c'è il bottoncino con la macchina fotografica, «Cambia il logo». Si può fare anche dalla card «Personalizza pannello». Il logo nuovo si vede subito, senza ricaricare la pagina; se per caso vedessi ancora quello vecchio premi CTRL+F5 (Windows) o CMD+MAIUSC+R (Mac). Va bene qualsiasi immagine — JPG, PNG, WEBP — fino a 15 MB: la rimpiccioliamo noi. Il bottoncino compare col Gestionale attivo."
+    risposta: "Il logo si cambia dalla foto tonda in cima al pannello: sopra c'è il bottoncino con la macchina fotografica, «Cambia il logo». Si può fare anche dalla card «Personalizza pannello». Il logo nuovo si vede subito, senza ricaricare la pagina; se per caso vedessi ancora quello vecchio premi CTRL+F5 (Windows) o CMD+MAIUSC+R (Mac). Va bene qualsiasi immagine — JPG, PNG, WEBP — fino a 15 MB: la rimpiccioliamo noi."
   },
   {
     domanda: "Non appaio nelle ricerche dei clienti",
@@ -3995,13 +3995,16 @@ async function inizializza() {
       imgLogo.style.display = haLogo ? 'block' : 'none';
     }
     if (phLogo) phLogo.style.display = haLogo ? 'none' : 'flex';
-    /* cambiare copertina e logo resta come prima: solo col Gestionale */
-    if (btnLogo) btnLogo.style.display = isPremium ? '' : 'none';
-    if (btnCop)  btnCop.style.display  = isPremium ? '' : 'none';
+    /* 24 ott 2026: copertina e logo li carica TUTTI, anche il piano Free.
+       Prima solo col Gestionale: due imprese Free (21 e 24 ott) hanno scritto
+       che «non si attivano i comandi di upload». La scheda pubblica mostra
+       logo e copertina a tutti, e il database lo permetteva gia'. */
+    if (btnLogo) btnLogo.style.display = '';
+    if (btnCop)  btnCop.style.display  = '';
     /* 2 set 2026: «Riposiziona» non ha senso finche' non c'e' una copertina */
     const btnRip = document.getElementById('btn-riposiziona');
     const _haCop = !!((impresaCorrente.personalizzazione||{}).banner_url);
-    if (btnRip) btnRip.style.display = (isPremium && _haCop) ? '' : 'none';
+    if (btnRip) btnRip.style.display = _haCop ? '' : 'none';
   }
 
   // Anteprima profilo pubblico (elementi opzionali)
