@@ -64,7 +64,7 @@
     '<div class="dash-quick-label">I tuoi subappalti</div>' +
     '<div class="dash-quick-sub">Modifica, chiudi o rinnova</div>';
 
-  async function carica() {
+  async function carica(riprova) {
     var box = $('ms-lista'); if (!box) return;
     box.innerHTML = '<div class="ms-vuoto">Caricamento…</div>';
     try {
@@ -95,6 +95,8 @@
           '</div><a class="ms-gestisci" href="' + esc(a.gestisci) + '" target="_blank" rel="noopener">Gestisci</a></div>';
       }).join('');
     } catch (e) {
+      /* la prima chiamata dopo un po' di riposo a volte cade (funzione «fredda»): si riprova una volta da soli */
+      if (!riprova) { setTimeout(function () { carica(true); }, 1500); return; }
       box.innerHTML = '<div class="ms-vuoto">Non riesco a leggere i tuoi annunci in questo momento. Riprova fra un attimo.</div>';
     }
   }
