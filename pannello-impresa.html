@@ -2211,7 +2211,7 @@ body .profilo-card,body .dash-quick-card,body .prev-card,body .candidatura-card{
             <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
             <div class="dash-meta">
               <span class="dash-rating-badge" id="dash-rating-badge"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> —</span>
-              <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
+              <span class="dash-piano-badge" id="dash-piano-badge" style="display:none"></span><!-- 24 ott 2026: niente piu' targhetta Free/Gestionale, il sito e' uguale per tutti -->
             </div>
           </div>
         </div>
@@ -2313,11 +2313,7 @@ body .profilo-card,body .dash-quick-card,body .prev-card,body .candidatura-card{
           <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="2" width="16" height="6" rx="2"/><path d="M11 15v-2a2 2 0 0 1 2-2h6a2 2 0 0 0 2-2V6"/><rect x="9" y="15" width="4" height="7" rx="1"/></svg></div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
-        <div class="dash-quick-card" data-card-id="priorita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
-          <div class="dash-quick-icon">🔝</div>
-          <div class="dash-quick-label">Priorità nei risultati</div>
-          <div class="dash-quick-sub">In che posizione compari</div>
-        </div>
+        <!-- 24 ott 2026: tolta la carta «Priorità nei risultati»: il sito e' uguale per tutti -->
         <div class="dash-quick-card" data-card-id="preventivi-illimitati" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:15px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div>
@@ -3408,7 +3404,7 @@ body .profilo-card,body .dash-quick-card,body .prev-card,body .candidatura-card{
 <script src="/js/foto-upload.js"></script>
 <script src="/js/numero-italiano.js"></script>
 <script src="strumenti-cantiere.js?v=1"></script>
-<script src="/js/porte-gestionale.js?v=1"></script>
+<script src="/js/porte-gestionale.js?v=2"></script>
 <script src="/js/pannelli-comuni.js?v=1"></script>
 <script src="/js/pannelli-personalizza.js?v=1"></script>
 <script src="/js/pannelli-recensioni.js?v=1"></script>
@@ -3418,7 +3414,7 @@ body .profilo-card,body .dash-quick-card,body .prev-card,body .candidatura-card{
 <script src="/js/pannelli-preventivi.js?v=1"></script>
 <script src="/js/pannelli-ai.js?v=1"></script>
 <script src="/js/pannelli-qr.js?v=1"></script>
-<script src="/js/pannelli-vari.js?v=1"></script>
+<script src="/js/pannelli-vari.js?v=2"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
@@ -3650,10 +3646,10 @@ function aggiornaBadgeEOverlay() {
   if (pianoBadge) {
     pianoBadge.classList.remove('premium');
     if (piano === 'premium') {
-      pianoBadge.textContent = '💎 Gestionale';
+      pianoBadge.style.display = 'none';
       pianoBadge.classList.add('premium');
     } else {
-      pianoBadge.textContent = '🆓 Free';
+      pianoBadge.style.display = 'none';
     }
   }
   if (piano === 'free') {
@@ -3725,15 +3721,15 @@ const FAQS_LIST = [
   },
   {
     domanda: "Non appaio nelle ricerche dei clienti",
-    risposta: "Tre cose, in quest'ordine. 1) L'email della registrazione deve essere confermata: finché non lo è la tua scheda non esce nelle ricerche. 2) Città e mestiere devono essere scritti nel profilo, perché il cliente cerca per quelli. 3) Chi ha il gestionale attivo esce in tutta la regione e più in alto nell'elenco; senza, esci nella tua città — la scheda resta comunque online e gratis. Per vedere quello che vedono i clienti apri la card «Anteprima del tuo pannello pubblico»."
+    risposta: "Tre cose, in quest'ordine. 1) L'email della registrazione deve essere confermata: finché non lo è la tua scheda non esce nelle ricerche. 2) Città e mestiere devono essere scritti nel profilo, perché il cliente cerca per quelli. 3) La scheda esce nelle ricerche della tua città: vale per tutti, gratis, senza piani da attivare. Per vedere quello che vedono i clienti apri la card «Anteprima del tuo pannello pubblico»."
   },
   {
     domanda: "Cosa costa e cosa è gratis?",
-    risposta: "Il gestionale base è gratis, per sempre, per chi si iscrive: preventivi, lavori, fatture, scadenze, e la vetrina con foto, video, QR Code, recensioni e richieste dei clienti. Non c'è nessuna scadenza e non serve la carta. L'unica cosa a pagamento è il piano «Gestionale con assistenza AI e chat», a 39 € al mese oppure 349 € all'anno: aggiunge l'assistenza AI (compila moduli e preventivi al posto tuo, ti segnala gli errori, legge la foto della fattura), la Chat con AI e la visibilità in più nei risultati. Per usare il gestionale il profilo deve avere le voci minime compilate: il pannello ti dice quali mancano."
+    risposta: "Il gestionale base è gratis, per sempre, per chi si iscrive: preventivi, lavori, fatture, scadenze, e la vetrina con foto, video, QR Code, recensioni e richieste dei clienti. Non c'è nessuna scadenza e non serve la carta. L'unica cosa a pagamento è il piano «Gestionale con assistenza AI e chat», a 39 € al mese oppure 349 € all'anno: aggiunge l'assistenza AI (compila moduli e preventivi al posto tuo, ti segnala gli errori, legge la foto della fattura) e la Chat con AI. Per usare il gestionale il profilo deve avere le voci minime compilate: il pannello ti dice quali mancano."
   },
   {
     domanda: "Che differenza c'è fra Gestionale e Gestionale AI?",
-    risposta: "Il gestionale base è gratis e comprende tutto il gestionale. Il piano «Gestionale con assistenza AI e chat» (39 € al mese, 349 € all'anno) aggiunge l'assistente AI che ti compila i moduli e prepara i preventivi (100 crediti al mese), ti segnala cosa hai sbagliato e dove, legge la foto della fattura del fornitore, la Chat con AI dentro il gestionale (300 messaggi al mese) che risponde con i conti dei tuoi lavori, e più visibilità nei risultati."
+    risposta: "Il gestionale base è gratis e comprende tutto il gestionale. Il piano «Gestionale con assistenza AI e chat» (39 € al mese, 349 € all'anno) aggiunge l'assistente AI che ti compila i moduli e prepara i preventivi (100 crediti al mese), ti segnala cosa hai sbagliato e dove, legge la foto della fattura del fornitore, la Chat con AI dentro il gestionale (300 messaggi al mese) che risponde con i conti dei tuoi lavori."
   },
   {
     domanda: "Come passo al Gestionale?",
@@ -3968,7 +3964,7 @@ async function inizializza() {
   aggiornaBadgeEOverlay();
 
   // Colore header (chi ha il Gestionale)
-  if (isPremium) {
+  { /* 24 ott 2026: per tutti */
     const ctrl = document.getElementById('header-color-controls');
     if (ctrl) ctrl.style.display = '';
     if (impresaCorrente.colore_header) {
@@ -4050,7 +4046,7 @@ async function inizializza() {
       cards.forEach(c => grid.appendChild(c));
     });
   }
-  if (piano === 'premium' && window.Sortable) {
+  if (window.Sortable) /* 24 ott 2026: per tutti */ {
     document.querySelectorAll('.dash-quick-grid').forEach(grid => {
       new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine, delay: 400, delayOnTouchOnly: true, touchStartThreshold: 8 });
     });

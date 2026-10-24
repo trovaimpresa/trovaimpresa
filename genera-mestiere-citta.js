@@ -1022,8 +1022,7 @@ async function impreseRegione(regione) {
 /* Cartellino impresa: copiato da genera-imprese-citta.js, cosi' le
    schede sono identiche a quelle delle pagine citta'. */
 function cartellino(i, etichetta) {
-  const badge = i.piano === 'premium'
-    ? '<span style="background:#7b2fbe;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="m12 21 4-12-3-6"/><path d="m12 21-4-12 3-6"/></svg> Premium</span>' : '';
+  const badge = ''; /* 24 ott 2026: niente piu' targhetta Premium, il sito e' uguale per tutti */
   const verificata = i.verificata
     ? '<span style="color:#0066ff;font-size:12px;font-weight:700;margin-left:6px;">✓ Verificata</span>' : '';
   const rating = i.valutazione_media > 0 ? `<svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> ${Number(i.valutazione_media).toFixed(1)}` : '<svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Nuova';
@@ -1052,15 +1051,8 @@ const SETTIMANA = settimana(new Date());
 
 function ordina(lista, chiave) {
   const perVoto = (a, b) => (b.valutazione_media || 0) - (a.valutazione_media || 0);
-  const premium = lista.filter(i => i.piano === 'premium').sort(perVoto);
-  const free = lista.filter(i => i.piano !== 'premium').sort(perVoto);
-  if (premium.length > 1) {
-    let n = 0;
-    for (let k = 0; k < chiave.length; k++) n = (n * 31 + chiave.charCodeAt(k)) % 100000;
-    const giro = (SETTIMANA + n) % premium.length;
-    premium.push(...premium.splice(0, giro));
-  }
-  return premium.concat(free);
+  /* 24 ott 2026: niente piu' Premium davanti. Tutti uguali, in ordine di voto. */
+  return lista.slice().sort(perVoto);
 }
 
 /* Il blocco delle imprese. Se non ce n'e' nessuna la pagina NON
@@ -1118,7 +1110,7 @@ ${altri.map(i => `      <a href="/profilo-impresa?id=${esc(i.id)}" style="color:
   return `  <div class="section" id="imprese-locali">
     <h2>${esc(m.nome)} a ${esc(c.nome)}: chi trovi su TrovaImpresa</h2>
     <p>${P.sonoQui} ${esc(c.nome)} ${P.siOccupano}</p>${pieno ? `
-    <p style="font-size:0.9rem;color:#5b6b80;">In evidenza i profili Premium; sotto trovi tutti gli altri.</p>` : ''}
+    <p style="font-size:0.9rem;color:#5b6b80;">I primi in evidenza; sotto trovi tutti gli altri.</p>` : ''}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0;">
 ${items}
     </div>${elenco}${vicinato}

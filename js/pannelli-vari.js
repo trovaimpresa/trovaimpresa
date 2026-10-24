@@ -276,45 +276,28 @@ function chiudiModalPriorita() {
 }
 
 function aggiornaCardVisibile(piano) {
+  /* 24 ott 2026: il sito e' uguale per tutti. Ognuno si vede nella sua citta',
+     nessuno compra la regione. */
   const card = document.getElementById('card-visibile');
   const icon = document.getElementById('card-visibile-icon');
   const label = document.getElementById('card-visibile-label');
   if (!card || !icon || !label) return;
-  if (piano === 'premium') {
-    card.style.borderTopColor = '#7c3aed';
-    icon.textContent = '🌍';
-    label.textContent = 'Visibile in tutta la regione';
-  } else {
-    card.style.borderTopColor = '#0066ff';
-    icon.textContent = '📍';
-    label.textContent = 'Visibile nella tua città';
-  }
-}
-
-function ctaPremium(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Senza il Gestionale saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> perché sei in evidenza.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
-}
-
-function ctaFree(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Con il Gestionale saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#0066ff;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Attiva il Gestionale</button>`;
+  card.style.borderTopColor = '#0066ff';
+  icon.textContent = '📍';
+  label.textContent = 'Visibile nella tua città';
 }
 
 // Recensioni: il codice e' in /js/pannelli-recensioni.js
 function renderModalVisibile(d) {
-  const titolo=d.isPremium?'🌍 Visibile in tutta la regione':'📍 Visibile nella tua città';
-  const bgBox=d.isPremium?'#e8f5e9':'#fff3e0';
-  const colorBox=d.isPremium?'#2e537d':'#e65100';
-  const numero=d.isPremium?d.nRegione:d.nCitta;
-  const dove=d.isPremium?'utenti in tutta la regione '+d.regione:'utenti a '+d.citta;
-  const piuUtenti=d.nRegione-d.nCitta;
+  /* 24 ott 2026: una sola versione per tutti, senza inviti a pagare */
   let h='<div id="modalVisibileOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="document.getElementById(\'modalVisibileOverlay\').remove()">';
   h+='<div style="background:white;border-radius:16px;padding:24px;max-width:500px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.2)" onclick="event.stopPropagation()">';
-  h+=`<h2 style="margin:0 0 16px">${titolo}</h2>`;
-  h+=`<div style="background:${bgBox};padding:16px;border-radius:8px;margin-bottom:16px">`;
-  h+=`<strong style="color:${colorBox}">✓ ATTIVO</strong>`;
-  h+=`<p style="margin:8px 0 0">Stai raggiungendo <strong>${numero}</strong> ${dove}.</p>`;
+  h+='<h2 style="margin:0 0 16px">📍 Visibile nella tua città</h2>';
+  h+='<div style="background:#fff3e0;padding:16px;border-radius:8px;margin-bottom:16px">';
+  h+='<strong style="color:#e65100">✓ ATTIVO</strong>';
+  h+=`<p style="margin:8px 0 0">Chi cerca a <strong>${d.citta}</strong> ti trova nei risultati, insieme alle altre attività della città.</p>`;
   h+='</div>';
-  h+=d.isPremium?ctaPremium(d,piuUtenti):ctaFree(d,piuUtenti);
+  h+=`<button onclick="window.location.href='${d.cercaPage}?citta=${encodeURIComponent(d.citta)}'" style="background:#0066ff;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
   h+='<button onclick="document.getElementById(\'modalVisibileOverlay\').remove()" style="background:transparent;border:1px solid #ddd;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px">Chiudi</button>';
   h+='</div></div>';
   return h;

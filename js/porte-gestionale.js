@@ -289,13 +289,12 @@ const PIANI_INFO = {
      Da oggi quelle cose ce le hanno TUTTI, gratis: erano diventate una
      promessa falsa dentro la finestra dove uno tira fuori la carta.
      Adesso qui c'e' solo quello che si paga davvero: il gestionale, piu'
-     le tre cose che restano legate all'abbonamento (regione, priorita',
-     badge). Chi cambia questo elenco controlli prima cos'e' gratis. */
-  'premium': { sotto: 'Tutto il gestionale, più la vetrina in evidenza', voci: [
+     (24 ott 2026: regione, priorita' e badge non esistono piu', il sito e'
+     uguale per tutti). Chi cambia questo elenco controlli prima cos'e' gratis. */
+  'premium': { sotto: 'Tutto il gestionale', voci: [
     'Cantieri e lavori, tutti in un posto', 'Preventivi in PDF, con lo storico', 'Preventivi con AI',
     'Computo metrico', 'Fatture, spese e margini', 'Squadra, ore e rapportini',
-    'Agenda e scadenze fiscali', "L'email del mattino con le tue scadenze", 'Calcolatrice edile', 'Report dei lavori',
-    'Visibile in tutta la regione', 'Priorità nei risultati', 'Badge In evidenza sulla tua scheda' ] },
+    'Agenda e scadenze fiscali', "L'email del mattino con le tue scadenze", 'Calcolatrice edile', 'Report dei lavori' ] },
   /* ⛔ 2 settembre 2026 sera, lo stesso difetto della pagina dei prezzi: qui
      l'AI aveva 6 righe e il Gestionale 17, e il piano che costa di piu' sembrava
      il piu' povero. Prima quello che si paga in piu', poi tutto il Gestionale. */
@@ -304,8 +303,7 @@ const PIANI_INFO = {
     '300 messaggi al mese', 'Cantieri e lavori, tutti in un posto',
     'Preventivi in PDF, con lo storico', 'Preventivi con AI', 'Computo metrico',
     'Fatture, spese e margini', 'Squadra, ore e rapportini', 'Agenda e scadenze fiscali',
-    "L'email del mattino con le tue scadenze", 'Calcolatrice edile', 'Report dei lavori', 'Visibile in tutta la regione',
-    'Priorità nei risultati', 'Badge In evidenza sulla tua scheda' ] }
+    "L'email del mattino con le tue scadenze", 'Calcolatrice edile', 'Report dei lavori' ] }
 };
 function mostraListino(porta, box) {
   apriModalPiano(porta);

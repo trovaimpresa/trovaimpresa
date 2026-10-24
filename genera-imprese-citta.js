@@ -42,18 +42,13 @@ async function fetchImprese(citta) {
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   const data = await res.json();
-  // Premium prima, poi per valutazione
-  data.sort((a, b) => {
-    const p = (x) => (x.piano === 'premium' ? 1 : 0);
-    if (p(b) !== p(a)) return p(b) - p(a);
-    return (b.valutazione_media || 0) - (a.valutazione_media || 0);
-  });
+  // 24 ott 2026: tutti uguali, in ordine di valutazione
+  data.sort((a, b) => (b.valutazione_media || 0) - (a.valutazione_media || 0));
   return data.slice(0, MAX_IMPRESE);
 }
 
 function cardHTML(i) {
-  const badge = i.piano === 'premium'
-    ? '<span style="background:#7b2fbe;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="m12 21 4-12-3-6"/><path d="m12 21-4-12 3-6"/></svg> Premium</span>' : '';
+  const badge = ''; /* 24 ott 2026: niente piu' targhetta Premium */
   const verificata = i.verificata
     ? '<span style="color:#0066ff;font-size:12px;font-weight:700;margin-left:6px;">✓ Verificata</span>' : '';
   const rating = i.valutazione_media > 0

@@ -488,7 +488,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     // a qualsiasi impostazione dello slider. La query a monte porta solo i
     // Premium della regione della citta' cercata, quindi qui basta lasciarli
     // passare. E' un vantaggio venduto: non va tolto dal filtro distanza.
-    function premium(i) { return i && i.piano === 'premium'; }
+    function premium(i) { return false; } /* 24 ott 2026: il sito e' uguale per tutti, nessuno compare fuori dalla sua zona */
 
     // _fuoriZona = sta nei risultati solo perche' e' Premium della regione,
     // non perche' e' davvero nella zona cercata. Va in fondo, con l'etichetta.
@@ -556,11 +556,11 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       if (mestiereScelto !== 'tutti') q = q.contains('mestieri', [mestiereScelto]);
       if (citta) {
         if (regione) {
-          q = q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);
+          q = q.ilike('citta',`%${cittaSafe}%`);
         } else {
           const regioneDaCitta = CITTA_TO_REGIONE[cittaSafe.toLowerCase()];
           if (regioneDaCitta) {
-            q = q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regioneDaCitta})`);
+            q = q.ilike('citta',`%${cittaSafe}%`);
           } else {
             q = q.ilike('citta', `%${cittaSafe}%`);
           }
@@ -573,7 +573,6 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       if (conFoto) q = q.not('foto_urls', 'is', null).neq('foto_urls', '[]');
       if (rispondeIn24h) q = q.eq('risponde_24h', true);
       if (preventivoOnline) q = q.eq('preventivo_online', true);
-      q = q.order('piano_ordine', { ascending: false });
       if (sortBy === 'valutazione') q = q.order('valutazione_media', { ascending: false });
       else if (sortBy === 'recenti') q = q.order('created_at', { ascending: false });
       else q = q.order('created_at', { ascending: false });
@@ -585,7 +584,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         i._distKm = (cittaLat !== null && i.lat && i.lng) ? Math.round(haversine(cittaLat, cittaLng, i.lat, i.lng)) : null;
       });
       tuttiRisultati = filtraDistanza(tuttiRisultati, distanzaMax, cittaLat, cittaSafe);
-      if (sortBy === 'piano') { const pp=p=>p==='premium'?2:1; tuttiRisultati.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
+      
       // Va per ultimo: qualsiasi altro ordinamento non deve risollevare
       // i Premium fuori zona sopra a chi il cliente ha davvero vicino.
       tuttiRisultati = ordinaFuoriZona(tuttiRisultati);
@@ -801,12 +800,12 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
   function cardHTML(i) {
     const logo = i.logo_url ? `<img src="${_sx(i.logo_url)}" alt="logo" loading="lazy" width="56" height="56">` : `🔨`;
-    const badge = i.piano === 'premium' ? '<span class="badge-premium">💎 PREMIUM</span>' : '';
+    const badge = '';
     const desc = i.descrizione ? `<div class="card-desc">${_sx(i.descrizione)}</div>` : '';
     const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
     const fzBadge = i._fuoriZona ? '<span style="display:inline-block;background:#f3e8ff;color:#7b1fa2;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:10px;margin-left:6px;">anche nella tua regione</span>' : '';
     const ratingBadge = `<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">⭐ ${i.valutazione_media>0?Number(i.valutazione_media).toFixed(1):'Nuovo'}</span>`;
-    return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${_sx(i.nome||'Artigiano')}${badge}</div>${desc}<div class="card-tipo">🔧 ${_sx(i.mestiere||i.tipo||'Artigiano')}</div></div></div><div class="card-citta">📍 ${_sx(i.citta||'')}${distBadge}${ratingBadge}${fzBadge}</div></a>`;
+    return `<a class="card" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${_sx(i.nome||'Artigiano')}${badge}</div>${desc}<div class="card-tipo">🔧 ${_sx(i.mestiere||i.tipo||'Artigiano')}</div></div></div><div class="card-citta">📍 ${_sx(i.citta||'')}${distBadge}${ratingBadge}${fzBadge}</div></a>`;
   }
 
   // Cascata Regione → Provincia
