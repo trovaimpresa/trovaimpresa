@@ -62,7 +62,8 @@
   var COL_SUB = 'id,tipo,nome_impresa,descrizione,lavoro,citta,regione,mestiere,categoria,created_at';
   var PER_PAGINA = 15;
 
-  var stato = { tipo: '', mestiere: '', q: '', regione: '', tutti: [], mostrati: 0 };
+  /* 25 ott 2026: due sezioni separate — «lavoro» (offerte di lavoro) e «sub» (subappalti, con dentro cerco/offro) */
+  var stato = { sezione: '', tipo: '', mestiere: '', q: '', regione: '', tutti: [], mostrati: 0 };
 
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
@@ -150,7 +151,8 @@
     var parole = stato.mestiere ? (PAROLE[stato.mestiere] || []).concat([stato.mestiere.toLowerCase()]) : null;
     var q = stato.q.toLowerCase().split(' ').filter(Boolean);
     return stato.tutti.filter(function (x) {
-      if (stato.tipo && x.genere !== stato.tipo) return false;
+      if (stato.sezione === 'lavoro' ? x.genere !== 'offerta' : x.genere === 'offerta') return false;
+      if (stato.sezione === 'sub' && stato.tipo && x.genere !== stato.tipo) return false;
       if (stato.regione && !inRegione(x, stato.regione)) return false;
       if (parole && stato.mestiere !== 'Altro' && !parole.some(function (p) { return x.cerca.indexOf(p) > -1; })) return false;
       if (q.length && !q.every(function (p) { return x.cerca.indexOf(p) > -1; })) return false;
@@ -164,15 +166,16 @@
     if (!aggiungi) stato.mostrati = 0;
     var da = stato.mostrati, a = Math.min(lista.length, da + PER_PAGINA);
     if (!lista.length) {
-      box.innerHTML = '<div class="f-vuoto"><b>' + (stato.q || stato.mestiere || stato.tipo || stato.regione ? 'Nessun annuncio trovato con questi filtri.' : 'Ancora nessun annuncio.') + '</b><br>' +
+      var lav = stato.sezione === 'lavoro', filtri = stato.q || stato.mestiere || stato.tipo || stato.regione;
+      box.innerHTML = '<div class="f-vuoto"><b>' + (filtri ? 'Nessun annuncio trovato con questi filtri.' : (lav ? 'Ancora nessuna offerta di lavoro.' : 'Ancora nessun subappalto.')) + '</b><br>' +
         'Pubblica tu il primo: è gratis e non serve registrarsi.<br><br>' +
-        '<a href="/offerte-registrazione.html" style="color:#0066ff;font-weight:800">Pubblica un\'offerta di lavoro</a> · ' +
-        '<a href="/subappalto.html" style="color:#0066ff;font-weight:800">Pubblica un subappalto</a></div>';
+        (lav ? '<a href="/offerte-registrazione.html" style="color:#0a2a4d;font-weight:800">Pubblica un\'offerta di lavoro</a>'
+             : '<a href="/subappalto.html" style="color:#0a2a4d;font-weight:800">Pubblica un subappalto</a>') + '</div>';
       altro.style.display = 'none';
       return;
     }
     var html = lista.slice(da, a).map(htmlAnnuncio).join('');
-    if (aggiungi) box.insertAdjacentHTML('beforeend', html); else box.innerHTML = html;
+    if (aggiungi) box.insertAdjacentHTML('beforeend', html); else { box.innerHTML = html; box.scrollTop = 0; }
     stato.mostrati = a;
     altro.style.display = a < lista.length ? '' : 'none';
   }
@@ -196,6 +199,8 @@
           var k = x.genere + '|' + x.nome.toLowerCase().trim() + '|' + String(x.testo).toLowerCase().replace(/\s+/g, ' ').trim();
           if (visti[k]) return false; visti[k] = 1; return true;
         });
+      if (!stato.sezione) stato.sezione = sezionePredefinita();
+      segnaSezione();
       contaTipi();
       disegna(false);
     }).catch(function () {
@@ -205,16 +210,29 @@
 
   /* quanti per ogni tipo, scritto sui pulsanti */
   function contaTipi() {
-    var n = { '': stato.tutti.length, offerta: 0, cerca: 0, offre: 0 };
     var base = stato.regione ? stato.tutti.filter(function (x) { return inRegione(x, stato.regione); }) : stato.tutti;
-    n[''] = base.length;
+    var n = { '': 0, offerta: 0, cerca: 0, offre: 0 };
     base.forEach(function (x) { n[x.genere]++; });
+    n[''] = n.cerca + n.offre;
     document.querySelectorAll('#le-tipi button').forEach(function (b) {
       var t = b.getAttribute('data-tipo') || '';
       if (!b.getAttribute('data-nome')) b.setAttribute('data-nome', b.textContent);
       b.textContent = b.getAttribute('data-nome') + ' (' + n[t] + ')';
-      /* 25 ott 2026: una scheda a zero fa sembrare la pagina vuota — si nasconde (resta se e' quella scelta) */
-      b.hidden = t !== '' && n[t] === 0 && stato.tipo !== t;
+    });
+    var nl = $('#le-n-lavoro'), ns = $('#le-n-sub');
+    if (nl) nl.textContent = n.offerta;
+    if (ns) ns.textContent = n[''];
+    $('#le-tipi').hidden = stato.sezione !== 'sub';
+  }
+
+  /* la sezione da aprire se l'indirizzo non la dice: quella con annunci dentro (le offerte, se ce ne sono) */
+  function sezionePredefinita() {
+    return stato.tutti.some(function (x) { return x.genere === 'offerta'; }) ? 'lavoro' : 'sub';
+  }
+  function segnaSezione() {
+    document.querySelectorAll('#le-sez button').forEach(function (b) {
+      var on = b.getAttribute('data-sez') === stato.sezione;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
 
@@ -222,7 +240,10 @@
     var qs = new URLSearchParams(location.search);
     var mm = qs.get('m'); if (mm && MESTIERI.indexOf(mm) > -1) stato.mestiere = mm;
     var rr = qs.get('r'); if (rr && REGIONI[rr]) stato.regione = rr;
-    var tt = qs.get('t'); if (['offerta', 'cerca', 'offre'].indexOf(tt) > -1) stato.tipo = tt;
+    var ss = qs.get('s'); if (ss === 'lavoro' || ss === 'sub') stato.sezione = ss;
+    var tt = qs.get('t');
+    if (tt === 'offerta') stato.sezione = 'lavoro';
+    else if (tt === 'cerca' || tt === 'offre') { stato.sezione = 'sub'; stato.tipo = tt; }
     stato.q = pulisci(qs.get('q'));
     var campoQ = $('.fs-cerca input'); if (campoQ && stato.q) campoQ.value = stato.q;
     document.querySelectorAll('.fs-sub a').forEach(function (a) {
@@ -237,6 +258,21 @@
       disegna(false);
     });
     $('#le-carica').addEventListener('click', function () { disegna(true); });
+    /* i due bottoni grandi: Offerte di lavoro / Subappalti */
+    $('#le-sez').addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-sez]'); if (!b) return;
+      stato.sezione = b.getAttribute('data-sez'); stato.tipo = '';
+      tipi.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', !x.getAttribute('data-tipo')); });
+      var u = new URL(location.href); u.searchParams.set('s', stato.sezione); u.searchParams.delete('t');
+      history.replaceState(null, '', u.pathname + u.search);
+      segnaSezione(); contaTipi(); disegna(false);
+    });
+    /* come nel Forum: l'elenco ha un'altezza fissa e scorre da solo; in fondo carica gli altri da solo */
+    var elenco = $('#le-elenco');
+    elenco.classList.add('f-scroll');
+    elenco.addEventListener('scroll', function () {
+      if (elenco.scrollTop + elenco.clientHeight >= elenco.scrollHeight - 160 && stato.mostrati < filtrati().length) disegna(true);
+    });
     /* la tendina delle regioni: si sceglie e l'elenco cambia subito, l'indirizzo si aggiorna (si puo' condividere) */
     var sel = $('#le-regione');
     if (sel) {

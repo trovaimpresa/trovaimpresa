@@ -65,7 +65,18 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 .le-det span{font-size:15px;font-weight:700;color:#0a2a4d;background:#f1f5fb;border-radius:8px;padding:5px 10px}
 .le-apri{font-weight:800 !important;color:#0047b3 !important}
 #le-tipi{flex-wrap:wrap}
-#le-tipi button[hidden]{display:none !important}
+#le-tipi button[hidden],#le-tipi[hidden]{display:none !important}
+/* 25 ott 2026: due bottoni grandi per passare da Offerte di lavoro a Subappalti */
+.le-sez{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.le-sez button{font:inherit;font-size:19px;font-weight:800;padding:15px 12px;border-radius:12px;border:2px solid #0a2a4d;background:#fff;color:#0a2a4d;cursor:pointer}
+.le-sez button span{font-weight:700;opacity:.8}
+.le-sez button.on{background:#0a2a4d;color:#fff}
+.le-sez button:not(.on):hover{background:#e7eef8}
+@media(max-width:640px){.le-sez button{font-size:16px;padding:13px 6px}}
+/* come nel Forum: l'elenco a altezza fissa scorre dentro; il bottone «Mostra altri» serve solo sul telefono */
+html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0 0;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9db4d6 transparent}
+@media(min-width:701px){html body #le-carica{display:none !important}}
+@media(max-width:700px){html body #le-elenco.f-scroll{max-height:none;overflow:visible;padding:0}}
 /* 25 ott 2026: «Dove cerchi?» — tutte le regioni in una tendina, al posto delle 8 citta' fisse */
 .le-dove{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .le-dove label{font-size:18px;font-weight:800;color:#0a2a4d}
@@ -133,9 +144,12 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 <div class="fs-tag"><div class="box le-dove"><label for="le-regione">Dove cerchi?</label><select id="le-regione" aria-label="Scegli la regione"><option value="">Tutta Italia</option></select><span class="le-dove-n">Chi lavora in tutta Italia compare in ogni regione.</span></div></div>
 <div class="f-layout">
   <main class="f-main">
-    <div class="f-ordina" id="le-tipi">
+    <div class="le-sez" id="le-sez" role="group" aria-label="Scegli cosa vedere">
+      <button type="button" data-sez="lavoro">Offerte di lavoro <span>(<b id="le-n-lavoro">0</b>)</span></button>
+      <button type="button" data-sez="sub">Subappalti <span>(<b id="le-n-sub">0</b>)</span></button>
+    </div>
+    <div class="f-ordina" id="le-tipi" hidden>
       <button data-tipo="" class="on">Tutti</button>
-      <button data-tipo="offerta">Offerte di lavoro</button>
       <button data-tipo="cerca">Cerco subappaltatori</button>
       <button data-tipo="offre">Offro disponibilità</button>
     </div>
@@ -227,7 +241,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
   <div class="bot">© 2026 TrovaImpresa — Alessio Pinto — Rieti (RI)</div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/lavoro-edilizia.js?v=2"></script>
+<script src="/js/lavoro-edilizia.js?v=3"></script>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <style id="forum-corto-ott14">
