@@ -133,11 +133,11 @@
     var nome = nomePulito(x.nome), zona = zonaPulita(x.citta);
     /* l'etichetta grigia «subappalto» si toglie: lo dice gia' l'etichetta colorata */
     var chip = x.chip && x.chip.toLowerCase() !== 'subappalto' ? x.chip : '';
+    /* 25 ott 2026 (sera): la riga in cima uguale al Forum — pallino, nome, quando, dove, etichetta. Niente strisce colorate */
     return '<article class="f-post le-post ' + classe + '">' +
-      '<div class="f-ph le-ph"><div class="f-av le-av">' + iniziale(nome) + '</div>' +
-      '<div class="le-chi"><b>' + esc(nome) + '</b><span class="le-quando">' + esc(fa(x.quando)) +
-      (zona ? ' · <span class="le-zona">' + ICO_ZONA + esc(zona) + '</span>' : '') + '</span></div>' +
-      '<span class="le-tipo">' + esc(x.etichetta) + '</span>' +
+      '<div class="f-ph"><div class="f-av">' + iniziale(nome) + '</div><b>' + esc(nome) + '</b> · ' + esc(fa(x.quando)) +
+      (zona ? ' · <span class="le-zona">' + ICO_ZONA + esc(zona) + '</span>' : '') +
+      ' <span class="f-chip">' + esc(x.etichetta) + '</span>' +
       (chip ? ' <span class="f-chip">' + esc(chip) + '</span>' : '') + '</div>' +
       '<h2><a href="' + x.url + '">' + esc(x.titolo) + '</a></h2>' +
       (resto(x) ? '<div class="f-tx">' + nl2br(corto(resto(x), 280)) + '</div>' : '') +

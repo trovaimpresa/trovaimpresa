@@ -54,16 +54,8 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 @media(max-width:1099px){.fs-logo-centro{display:none}}
 </style>
 <style id="lavoro-edilizia">
-/* 24 ott 2026: i tre tipi di annuncio si riconoscono dal filo a sinistra e dall'etichetta */
-.le-post{border-left:6px solid #0066ff !important}
-.le-post.le-cerca{border-left-color:#ff8800 !important}
-.le-post.le-offre{border-left-color:#16a34a !important}
-.le-tipo{display:inline-block;font-size:14px;font-weight:800;padding:3px 10px;border-radius:999px;background:#eaf2ff;color:#0047b3;margin-left:4px}
-.le-cerca .le-tipo{background:#fff1e0;color:#b45309}
-.le-offre .le-tipo{background:#e7f6ec;color:#15803d}
 .le-det{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
 .le-det span{font-size:15px;font-weight:700;color:#0a2a4d;background:#f1f5fb;border-radius:8px;padding:5px 10px}
-.le-apri{font-weight:800 !important;color:#0047b3 !important}
 #le-tipi{flex-wrap:wrap}
 #le-tipi button[hidden],#le-tipi[hidden]{display:none !important}
 /* 25 ott 2026: due bottoni grandi per passare da Offerte di lavoro a Subappalti */
@@ -84,20 +76,8 @@ html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0
 .le-dove select:focus{outline:3px solid #ff8800;outline-offset:2px}
 .le-dove-n{font-size:15px;color:#4a5a6e}
 @media(max-width:640px){.le-dove select{width:100%;min-width:0}.le-dove label{width:100%}}
-/* 25 ott 2026: riga in cima all'annuncio piu' ordinata — chi, quando e dove su due righe, etichetta a destra */
-.le-ph{display:grid !important;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:4px 12px}
-.le-av{width:44px !important;height:44px !important;flex:none;background:#0a2a4d !important;color:#fff !important;font-size:18px !important}
-.le-chi{display:flex;flex-direction:column;min-width:0;line-height:1.3}
-.le-chi b{font-size:17px;color:#0a2a4d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.le-quando{font-size:15px;color:#4a5a6e}
 .le-zona{display:inline-flex;align-items:center;gap:3px}
-.le-zona svg{flex:none;color:#0a2a4d}
-.le-ph .le-tipo{justify-self:end;font-size:15px;padding:5px 12px}
-@media(max-width:640px){
-  .le-ph{grid-template-columns:44px minmax(0,1fr)}
-  .le-ph .le-tipo{grid-column:2;justify-self:start;margin:4px 0 0}
-  .le-chi b{white-space:normal}
-}
+.le-zona svg{flex:none;width:14px;height:14px}
 /* il link «Iscriviti gratis come lavoratore» nei colori del sito, non nel blu del browser */
 .f-side .f-box2:not(.f-iscr) a.f-link2{color:#0a2a4d;font-weight:800;text-decoration:underline;text-decoration-color:#ff8800;text-decoration-thickness:2px;text-underline-offset:4px}
 .f-side .f-box2:not(.f-iscr) a.f-link2:hover{color:#ff8800}
@@ -241,7 +221,7 @@ html body #le-elenco.f-scroll{max-height:1100px;overflow-y:auto;padding:0 10px 0
   <div class="bot">© 2026 TrovaImpresa — Alessio Pinto — Rieti (RI)</div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/lavoro-edilizia.js?v=3"></script>
+<script src="/js/lavoro-edilizia.js?v=4"></script>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <style id="forum-corto-ott14">
