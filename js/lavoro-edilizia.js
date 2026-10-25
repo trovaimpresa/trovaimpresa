@@ -63,7 +63,7 @@
   var PER_PAGINA = 15;
 
   /* 25 ott 2026: due sezioni separate — «lavoro» (offerte di lavoro) e «sub» (subappalti, con dentro cerco/offro) */
-  var stato = { sezione: '', tipo: '', mestiere: '', q: '', regione: '', tutti: [], mostrati: 0 };
+  var stato = { sezione: '', tipo: '', contratto: '', orario: '', mestiere: '', q: '', regione: '', tutti: [], mostrati: 0 };
 
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
@@ -90,6 +90,7 @@
       testo: o.descrizione || '', citta: o.citta || o.provincia || '', regione: o.provincia || '',
       etichetta: 'Offerta di lavoro', chip: o.tipo_offerta || o.mestiere || '',
       dettagli: [o.tipo_contratto, o.orario, o.stipendio].filter(Boolean),
+      contratto: o.tipo_contratto || '', orario: o.orario || '',
       url: '/offerta-lavoro.html?id=' + encodeURIComponent(o.id),
       cerca: [o.titolo, o.descrizione, o.tipo_offerta, o.mestiere, o.citta, o.provincia, o.nome_azienda].join(' ').toLowerCase()
     };
@@ -153,6 +154,8 @@
     return stato.tutti.filter(function (x) {
       if (stato.sezione === 'lavoro' ? x.genere !== 'offerta' : x.genere === 'offerta') return false;
       if (stato.sezione === 'sub' && stato.tipo && x.genere !== stato.tipo) return false;
+      if (stato.sezione === 'lavoro' && stato.contratto && x.contratto !== stato.contratto) return false;
+      if (stato.sezione === 'lavoro' && stato.orario && x.orario !== stato.orario) return false;
       if (stato.regione && !inRegione(x, stato.regione)) return false;
       if (parole && stato.mestiere !== 'Altro' && !parole.some(function (p) { return x.cerca.indexOf(p) > -1; })) return false;
       if (q.length && !q.every(function (p) { return x.cerca.indexOf(p) > -1; })) return false;
@@ -166,7 +169,7 @@
     if (!aggiungi) stato.mostrati = 0;
     var da = stato.mostrati, a = Math.min(lista.length, da + PER_PAGINA);
     if (!lista.length) {
-      var lav = stato.sezione === 'lavoro', filtri = stato.q || stato.mestiere || stato.tipo || stato.regione;
+      var lav = stato.sezione === 'lavoro', filtri = stato.q || stato.mestiere || stato.tipo || stato.regione || stato.contratto || stato.orario;
       box.innerHTML = '<div class="f-vuoto"><b>' + (filtri ? 'Nessun annuncio trovato con questi filtri.' : (lav ? 'Ancora nessuna offerta di lavoro.' : 'Ancora nessun subappalto.')) + '</b><br>' +
         'Pubblica tu il primo: è gratis e non serve registrarsi.<br><br>' +
         (lav ? '<a href="/offerte-registrazione.html" style="color:#0a2a4d;font-weight:800">Pubblica un\'offerta di lavoro</a>'
@@ -223,6 +226,8 @@
     if (nl) nl.textContent = n.offerta;
     if (ns) ns.textContent = n[''];
     $('#le-tipi').hidden = stato.sezione !== 'sub';
+    /* i filtri delle offerte servono solo quando ci sono offerte da filtrare */
+    var fo = $('#le-filtri-off'); if (fo) fo.hidden = !(stato.sezione === 'lavoro' && n.offerta > 0);
   }
 
   /* la sezione da aprire se l'indirizzo non la dice: quella con annunci dentro (le offerte, se ce ne sono) */
@@ -266,6 +271,11 @@
       var u = new URL(location.href); u.searchParams.set('s', stato.sezione); u.searchParams.delete('t');
       history.replaceState(null, '', u.pathname + u.search);
       segnaSezione(); contaTipi(); disegna(false);
+    });
+    /* 25 ott 2026: le offerte si filtrano anche per contratto e orario */
+    ['contratto', 'orario'].forEach(function (k) {
+      var s = $('#le-f-' + k); if (!s) return;
+      s.addEventListener('change', function () { stato[k] = s.value; disegna(false); });
     });
     /* come nel Forum: l'elenco ha un'altezza fissa e scorre da solo; in fondo carica gli altri da solo */
     var elenco = $('#le-elenco');

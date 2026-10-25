@@ -389,6 +389,16 @@
 .ti-ic{width:1.1em;height:1.1em;vertical-align:-.18em;display:inline-block;flex:none}
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
 </style>
+<style id="login-chiuso-ott25">
+/* 25 ott 2026: l'accesso per chi e' gia' iscritto resta chiuso in una riga; si apre toccandola.
+   Chi pubblica senza account (la maggior parte) vede subito il modulo. */
+.login-box{padding:14px 20px !important;margin-bottom:22px !important;background:#fff !important}
+.login-box h3{cursor:pointer;margin:0 !important;display:flex;align-items:center;gap:8px;font-size:16px !important}
+.login-box h3::after{content:"▾";margin-left:auto;font-size:18px;color:#0a2a4d;transition:transform .15s}
+.login-box.aperto h3::after{transform:rotate(180deg)}
+.login-box:not(.aperto) .login-row,.login-box:not(.aperto) .login-msg{display:none !important}
+.login-box.aperto .login-row{margin-top:14px}
+</style>
 </head>
 <body>
 
@@ -423,7 +433,7 @@
 <div class="senza-account">
 <h3><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg> Non serve iscriversi</h3>
 <p>Compila il modulo e pubblica. <strong>Gratis, senza account.</strong> Ti mandiamo per email un link per modificare l'offerta, chiuderla quando hai trovato la persona, o rinnovarla.</p>
-<span class="piccolo">Se invece sei già iscritto, accedi qui sotto e i tuoi dati si compilano da soli.</span>
+
 </div>
 <div class="login-box">
 <h3><svg aria-hidden="true" class="ti-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="11" rx="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Sei già iscritto? Accedi e i campi si compilano da soli (facoltativo)</h3>
@@ -1102,5 +1112,12 @@
 <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a><br>P.IVA 01285950570 | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
+<script>
+/* 25 ott 2026: apre e chiude l'accesso per chi e' gia' iscritto */
+(function(){var b=document.querySelector('.login-box'),t=b&&b.querySelector('h3');if(!t)return;
+t.setAttribute('role','button');t.setAttribute('tabindex','0');t.setAttribute('aria-expanded','false');
+function gira(){var a=b.classList.toggle('aperto');t.setAttribute('aria-expanded',a?'true':'false');if(a){var e=document.getElementById('login-email');e&&e.focus();}}
+t.addEventListener('click',gira);t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();gira();}});})();
+</script>
 </body>
 </html>
