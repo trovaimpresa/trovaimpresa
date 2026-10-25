@@ -1280,7 +1280,8 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
 </style>
 <style>body .hcard select{border:1.5px solid #0a2a4d !important}</style>
 <style>body .guide-costi-home{background:#e7eef8 !important}</style>
-<style>body .why-section,body .pb.pb-gest,body footer.footer{background:#e7eef8 !important}</style>
+<style>/* 25 ott 2026: le fasce in fondo alla home tutte blu, separate da una riga, come Forum, Gestionale e Lavoro */section.pb.pb-forum + section.pb.pb-forum{border-top:2px solid rgba(255,255,255,.28) !important}</style>
+<style>body .why-section,body footer.footer{background:#e7eef8 !important}</style>
 <style>/* locandine: niente bordo bianco ne contorno */
 .hero-pub,.hero-pub.sx,.hero-pub.dx{outline:none !important;background:transparent !important;border-radius:12px;overflow:hidden}
 </style>
@@ -1917,14 +1918,30 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
   </div>
 </div></section>
 
-<section class="pb pb-gest" id="pub-gest"><div class="pb-w pb-in">
+<section class="pb pb-forum pb-gest-blu" id="pub-gest"><div class="pb-w pb-in">
   <div class="pb-t">
-    <div class="pb-logo"><img src="/img/trovaimpresa-gestionale-logo.svg" alt="Gestionale TrovaImpresa"></div>
+    <div class="pb-logo"><img src="/img/trovaimpresa-gestionale-logo-bianco.svg" alt="Gestionale TrovaImpresa"></div>
     <h2>Preventivi, fatture e cantieri in un posto solo. Gratis.</h2>
     <p>Il gestionale per imprese e artigiani: sai sempre quanto ti costa e quanto ti rende ogni lavoro.</p>
-    <a class="pb-btn o" href="/gestionale">Scopri il gestionale</a> <a class="pb-btn v2" href="/login-impresa?redirect=gestionale">Accedi</a>
+    <a class="pb-btn o" href="/gestionale">Scopri il gestionale</a> <a class="pb-btn v" href="/login-impresa?redirect=gestionale">Accedi</a>
   </div>
   <div class="pb-ill pb-ill-g" aria-hidden="true"><img src="/img/gestionale-computer-telefono.webp" width="1240" height="800" alt="" loading="lazy"></div>
+</div></section>
+
+<section class="pb pb-forum pb-lavoro" id="pub-lavoro"><div class="pb-w pb-in">
+  <div class="pb-t">
+    <div class="pb-logo"><img src="/img/trovaimpresa-lavoro-edilizia-logo-bianco.svg" alt="TrovaImpresa Lavoro Edilizia"></div>
+    <h2>Cerchi operai o subappaltatori? Pubblica gratis.</h2>
+    <p>In Lavoro Edilizia le imprese pubblicano chi cercano: operai, muratori, subappaltatori. Gratis e senza registrarti.</p>
+    <a class="pb-btn o" href="/lavoro-edilizia">Entra in Lavoro Edilizia</a>
+  </div>
+  <div class="pb-ill pb-ill-f" aria-hidden="true">
+    <div class="scr"><div class="esempio-tag">ESEMPIO — così funziona Lavoro Edilizia</div><div class="bar"><i></i><i></i><i></i><span>Lavoro Edilizia</span></div>
+      <div class="post"><div class="ph"><b class="av">E</b><div><strong>Edil Rossi</strong><small>Rieti · oggi</small></div><em>Offerta di lavoro</em></div>
+        <h4>Cerco muratore esperto</h4><p>Ristrutturazione appartamenti, inizio subito. Tempo determinato.</p><div class="az"><span>📍 Rieti</span><span>📞 Chiama</span></div></div>
+      <div class="rep"><b class="av b">B</b><div><strong>Bianchi Impianti <u>Subappalto</u></strong><p>Cerchiamo elettricista per cantiere a Terni.</p></div></div></div>
+    <div class="fl">✓ Nuovo annuncio</div>
+  </div>
 </div></section>
 
 <footer class="footer">
