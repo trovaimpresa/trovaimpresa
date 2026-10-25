@@ -63,7 +63,9 @@
       var h = '<div class="tbm-top"><a class="tbm-logo" href="' + home + '"><img src="' + logo + '" alt="TrovaImpresa"></a><button type="button" class="tbm-mn" aria-expanded="false">&#9776; Menu</button></div><div class="tbm-panel">' +
         '<a class="tbm-btn" href="' + (path === '/' || path === '/index' ? '/login-impresa' : '/') + '">Accedi al sito TrovaImpresa</a>' +
         '<a class="tbm-btn" href="' + (/^\/gestionale/.test(path) ? '/login-impresa?redirect=gestionale' : '/gestionale') + '">Accedi al gestionale</a>' +
-        '<a class="tbm-btn" href="' + (/^\/forum/.test(path) ? '/login-impresa?redirect=forum' : '/forum') + '">Accedi al forum</a>';
+        '<a class="tbm-btn" href="' + (/^\/forum/.test(path) ? '/login-impresa?redirect=forum' : '/forum') + '">Accedi al forum</a>' +
+        /* 25 ott 2026: anche Lavoro Edilizia, tranne quando ci sei gia' dentro */
+        (/^\/lavoro-edilizia/.test(path) ? '' : '<a class="tbm-btn" href="/lavoro-edilizia">Accedi a Lavoro Edilizia</a>');
       LINKS.forEach(function (l) { h += '<a class="tbm-l' + (voceAccesa(path) === l[0] ? ' on' : '') + '" href="' + l[0] + '">' + l[1] + '</a>'; });
       var pren = document.querySelector('#nav-prenota');
       if (pren) h = h.replace('<a class="tbm-btn" href="/">', '<a class="tbm-btn tbm-pren" href="#">' + (pren.textContent || 'Prenota').trim() + '</a><a class="tbm-btn" href="/">');
@@ -141,7 +143,7 @@
       if (!el) return;
       if (el.getAttribute('data-tb-nuovo')) el.setAttribute('data-abs', '1');
       var h = '<div class="tb-top"><a class="tb-logo" href="/"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>' +
-        '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/gestionale">Accedi al gestionale</a><a class="tb-btn" href="/forum">Accedi al forum</a></div><div class="tb-links">';
+        '<a class="tb-btn" href="/login-impresa">Accedi al sito TrovaImpresa</a><a class="tb-btn" href="/gestionale">Accedi al gestionale</a><a class="tb-btn" href="/forum">Accedi al forum</a><a class="tb-btn" href="/lavoro-edilizia">Accedi a Lavoro Edilizia</a></div><div class="tb-links">';
       LINKS.forEach(function (l) {
         h += '<a href="' + l[0] + '"' + (voceAccesa(path) === l[0] ? ' class="on"' : '') + '>' + l[1] + '</a>';
       });
