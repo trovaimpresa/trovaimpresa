@@ -65,6 +65,31 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
 .le-det span{font-size:15px;font-weight:700;color:#0a2a4d;background:#f1f5fb;border-radius:8px;padding:5px 10px}
 .le-apri{font-weight:800 !important;color:#0047b3 !important}
 #le-tipi{flex-wrap:wrap}
+#le-tipi button[hidden]{display:none !important}
+/* 25 ott 2026: «Dove cerchi?» — tutte le regioni in una tendina, al posto delle 8 citta' fisse */
+.le-dove{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.le-dove label{font-size:18px;font-weight:800;color:#0a2a4d}
+.le-dove select{font:inherit;font-size:18px;font-weight:700;color:#0a2a4d;background:#fff;border:2px solid #0a2a4d;border-radius:12px;padding:10px 40px 10px 16px;min-width:280px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230a2a4d' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.le-dove select:focus{outline:3px solid #ff8800;outline-offset:2px}
+.le-dove-n{font-size:15px;color:#4a5a6e}
+@media(max-width:640px){.le-dove select{width:100%;min-width:0}.le-dove label{width:100%}}
+/* 25 ott 2026: riga in cima all'annuncio piu' ordinata — chi, quando e dove su due righe, etichetta a destra */
+.le-ph{display:grid !important;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:4px 12px}
+.le-av{width:44px !important;height:44px !important;flex:none;background:#0a2a4d !important;color:#fff !important;font-size:18px !important}
+.le-chi{display:flex;flex-direction:column;min-width:0;line-height:1.3}
+.le-chi b{font-size:17px;color:#0a2a4d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.le-quando{font-size:15px;color:#4a5a6e}
+.le-zona{display:inline-flex;align-items:center;gap:3px}
+.le-zona svg{flex:none;color:#0a2a4d}
+.le-ph .le-tipo{justify-self:end;font-size:15px;padding:5px 12px}
+@media(max-width:640px){
+  .le-ph{grid-template-columns:44px minmax(0,1fr)}
+  .le-ph .le-tipo{grid-column:2;justify-self:start;margin:4px 0 0}
+  .le-chi b{white-space:normal}
+}
+/* il link «Iscriviti gratis come lavoratore» nei colori del sito, non nel blu del browser */
+.f-side .f-box2:not(.f-iscr) a.f-link2{color:#0a2a4d;font-weight:800;text-decoration:underline;text-decoration-color:#ff8800;text-decoration-thickness:2px;text-underline-offset:4px}
+.f-side .f-box2:not(.f-iscr) a.f-link2:hover{color:#ff8800}
 </style>
 </head>
 <body>
@@ -75,17 +100,16 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
   <a class="fs-logo" href="/lavoro-edilizia"><img src="/img/trovaimpresa-lavoro-edilizia-logo.svg" alt="TrovaImpresa Lavoro Edilizia"></a>
   <form class="fs-cerca" action="/lavoro-edilizia" method="get" role="search"><input type="search" name="q" maxlength="60" placeholder="Cerca un lavoro o una città…" aria-label="Cerca un annuncio di lavoro"></form>
   <nav class="fs-links">
-    <a class="on hide" href="/lavoro-edilizia">Lavoro Edilizia</a>
+    <a class="hide" href="/forum">Forum</a>
     <a class="hide" href="/gestionale">Gestionale</a>
     <a class="hide" href="/bandi">Bandi e fondi</a>
     <a class="hide" href="/blog">Guide e costi</a>
-    <a class="hide" href="/forum">Forum Edilizia</a>
-    <a class="hide" href="/candidature-lavoro">Lavoratori disponibili</a>
+    <a class="on hide" href="/lavoro-edilizia">Lavoro Edilizia</a>
     <a class="hide" href="/prezzi">Prezzi</a>
     <a class="hide" href="/pubblicita">Pubblicit&agrave;</a>
     <a class="acc" href="/">Accedi al sito TrovaImpresa</a>
     <a class="acc acc2 hide" href="/gestionale">Accedi al gestionale</a>
-    <a class="acc acc2 hide" href="/login-impresa.html">Accedi</a>
+    <a class="acc acc2 hide" href="/login-impresa.html">Accedi a Lavoro Edilizia</a>
     <a class="isc" href="/registrazione-impresa.html">Iscrivi la tua impresa</a>
   </nav>
 </div></div>
@@ -106,7 +130,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
     <div class="fl">✓ Nuovo annuncio</div>
   </div>
 </div></div>
-<div class="fs-tag"><div class="box"><small>Cerca per città:</small><a href="/lavoro-edilizia?q=Roma">Roma</a><a href="/lavoro-edilizia?q=Milano">Milano</a><a href="/lavoro-edilizia?q=Napoli">Napoli</a><a href="/lavoro-edilizia?q=Torino">Torino</a><a href="/lavoro-edilizia?q=Bologna">Bologna</a><a href="/lavoro-edilizia?q=Firenze">Firenze</a><a href="/lavoro-edilizia?q=Bari">Bari</a><a href="/lavoro-edilizia?q=Rieti">Rieti</a></div></div>
+<div class="fs-tag"><div class="box le-dove"><label for="le-regione">Dove cerchi?</label><select id="le-regione" aria-label="Scegli la regione"><option value="">Tutta Italia</option></select><span class="le-dove-n">Chi lavora in tutta Italia compare in ogni regione.</span></div></div>
 <div class="f-layout">
   <main class="f-main">
     <div class="f-ordina" id="le-tipi">
@@ -124,6 +148,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
       <p>Pubblica un'offerta di lavoro o un subappalto: bastano cinque campi. Ti mandiamo per email il link per modificarlo, chiuderlo o rinnovarlo.</p>
       <a href="/offerte-registrazione.html">Pubblica un'offerta</a>
       <a href="/subappalto.html" class="f-link2">Pubblica un subappalto</a>
+      <a href="/candidature-lavoro" class="f-link2">Vedi i lavoratori disponibili</a>
     </div>
     <div class="f-box2">
       <h3>Cerchi lavoro?</h3>
@@ -186,7 +211,7 @@ html body .fs-hero{background-image:linear-gradient(rgba(255,255,255,.06) 1px,tr
   <div class="bot">© 2026 TrovaImpresa — Alessio Pinto — Rieti (RI)</div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/lavoro-edilizia.js?v=1"></script>
+<script src="/js/lavoro-edilizia.js?v=2"></script>
 <script src="/cookie-banner.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <style id="forum-corto-ott14">
