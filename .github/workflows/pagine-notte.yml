@@ -1,0 +1,52 @@
+# ======================================================================
+# 27 ottobre 2026 — LE PAGINE MESTIERE+CITTA' SI AGGIORNANO DA SOLE
+# ======================================================================
+# Ogni notte alle 03:30 (ora italiana circa) GitHub lancia
+#   node genera-mestiere-citta.js
+# cosi' chi si iscrive oggi compare domani in «piastrellista-roma» ecc.
+# Nasce da Arif (id 297): iscritto il 26 ott, scheda attiva, ma assente
+# dalle pagine di Roma perche' il generatore si lanciava solo a mano.
+#
+# ⚠️ CREDITI NETLIFY: si fa il commit SOLO se cambia almeno una pagina
+# .html. Se cambia solo la data in sitemap-mestieri.xml, si butta via:
+# se no ogni notte partirebbe una pubblicazione inutile.
+#
+# Per lanciarlo subito a mano: GitHub → Actions → «Pagine mestiere
+# ogni notte» → Run workflow.
+# ======================================================================
+name: Pagine mestiere ogni notte
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  genera:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Genera le pagine
+        run: node genera-mestiere-citta.js
+
+      - name: Pubblica solo se e' cambiata qualche pagina
+        run: |
+          if git diff --quiet -- '*.html'; then
+            echo "Nessuna pagina cambiata: niente pubblicazione."
+            git checkout -- .
+            exit 0
+          fi
+          git config user.name  "TrovaImpresa bot"
+          git config user.email "info@trovaimpresa.com"
+          git add -A -- '*.html' sitemap-mestieri.xml
+          git commit -m "Pagine mestiere aggiornate da sole ($(date -u +%F))"
+          git push
