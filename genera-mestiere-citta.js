@@ -1337,6 +1337,9 @@ ${faqHtml}
 ${bloccoImprese(m, c, imprese, vicini)}
 </div>
 
+<!-- 27 ott 2026: il riquadro «Avvisami gratis» per i clienti (lo disegna js/avvisi-clienti.js) -->
+<div style="max-width:1000px;margin:0 auto;padding:8px 0 0;box-sizing:border-box"><div id="avvisi-clienti-qui" data-citta="${esc(c.nome)}" data-mestiere="${esc(m.db.join('|'))}" data-etichetta="${esc(m.nome)}"></div></div>
+
 <div class="section" style="padding-top:0;">
   <!-- forum-riquadro -->
   <div id="forum-riquadro" style="margin:0 0 32px;padding:22px 22px 24px;border-radius:16px;background:#fff4ec;border:2px solid #e8733a;">
@@ -1376,6 +1379,7 @@ ${bloccoGestionale(m)}
      admin, in «Ricerche e visite». -->
 <script src="/js/conta-clic-guide.js" defer></script>
 <script src="/js/pagine-citta.js?v=1" defer></script>
+<script src="/js/avvisi-clienti.js" defer></script>
 </body>
 </html>`;
 }

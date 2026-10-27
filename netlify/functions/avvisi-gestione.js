@@ -26,7 +26,7 @@ exports.handler = async function (event) {
 
   const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
   try {
-    const { data: r } = await sb.from('avvisi_clienti').select('id, email, citta, tipo, mestiere, confermato_il, attivo')
+    const { data: r } = await sb.from('avvisi_clienti').select('id, email, citta, tipo, mestiere, etichetta, origine, confermato_il, attivo')
       .eq('token', t).maybeSingle();
     if (!r) return risposta(404, { error: 'Questo link non è valido.' });
 
@@ -38,7 +38,7 @@ exports.handler = async function (event) {
         if (error) throw error;
         if (!data || !data.length) throw new Error('nessuna riga aggiornata');
       }
-      return risposta(200, { ok: true, cosa: cosaCerca(r), tipo: r.tipo, citta: r.citta });
+      return risposta(200, { ok: true, cosa: cosaCerca(r), tipo: r.tipo, citta: r.citta, origine: r.tipo === 'mestiere' ? r.origine : null });
     }
 
     const { data, error } = await sb.from('avvisi_clienti').update({ attivo: false })

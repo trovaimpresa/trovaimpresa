@@ -21,7 +21,7 @@ const H = {
   'Content-Type': 'application/json'
 };
 const risposta = (code, obj) => ({ statusCode: code, headers: H, body: JSON.stringify(obj) });
-const TIPI = ['impresa', 'artigiano', 'professionista'];
+const TIPI = ['impresa', 'artigiano', 'professionista', 'mestiere'];
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: H, body: '' };
@@ -42,13 +42,16 @@ exports.handler = async function (event) {
   const citta = String(b.citta || '').replace(/[%_,()]/g, ' ').trim().replace(/\s+/g, ' ').slice(0, 80);
   const regione = String(b.regione || '').trim().slice(0, 60) || null;
   const tipo = String(b.tipo || '').trim();
-  let mestiere = String(b.mestiere || '').trim().slice(0, 80);
+  // per le pagine mestiere+citta' (tipo 'mestiere') qui arrivano le voci del database separate da |
+  let mestiere = String(b.mestiere || '').trim().slice(0, 300);
+  const etichetta = String(b.etichetta || '').trim().slice(0, 80) || null;
   if (!mestiere || mestiere === 'tutti' || mestiere === 'tutte') mestiere = null;
   const origine = String(b.origine || '').slice(0, 60) || null;
 
   if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) return risposta(400, { error: 'Scrivi un indirizzo email valido.' });
   if (citta.length < 2) return risposta(400, { error: 'Scrivi la città.' });
   if (!TIPI.includes(tipo)) return risposta(400, { error: 'Dati non validi.' });
+  if (tipo === 'mestiere' && !mestiere) return risposta(400, { error: 'Dati non validi.' });
 
   const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
   try {
@@ -80,7 +83,7 @@ exports.handler = async function (event) {
       riga = r2;
     } else {
       const { data: r2, error } = await sb.from('avvisi_clienti')
-        .insert({ email, citta, regione, tipo, mestiere, origine, confermato_il: giaFidata ? adesso : null })
+        .insert({ email, citta, regione, tipo, mestiere, etichetta, origine, confermato_il: giaFidata ? adesso : null })
         .select('id, token, confermato_il').single();
       if (error) throw error;
       riga = r2;
@@ -88,7 +91,7 @@ exports.handler = async function (event) {
 
     if (riga.confermato_il) return risposta(200, { ok: true, stato: 'attivo' });
 
-    const cosa = cosaCerca({ tipo, mestiere, citta });
+    const cosa = cosaCerca({ tipo, mestiere, citta, etichetta });
     await invia(RESEND_API_KEY, email, 'Attiva i tuoi avvisi su TrovaImpresa', mailAvvisi({
       titolo: 'Un clic e ti avvisiamo noi',
       sub: 'Ti scriveremo quando arriva qualcuno di nuovo per:',

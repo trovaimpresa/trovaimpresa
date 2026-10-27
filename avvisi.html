@@ -59,7 +59,7 @@
       if (a === 'conferma') {
         mostra(SPUNTA, 'Avvisi attivi!',
           '<p>Quando arriva qualcuno di nuovo ti scriviamo noi:</p><div class="cosa">' + ESC(j.cosa) + '</div>' +
-          '<p>Intanto puoi guardare chi c’è già.</p><a class="btn" href="/' + ({ artigiano: 'cerca-artigiani.html', professionista: 'cerca-professionisti.html' }[j.tipo] || 'cerca-imprese.html') + '?citta=' + encodeURIComponent(j.citta || '') + '">Cerca adesso</a>');
+          '<p>Intanto puoi guardare chi c’è già.</p><a class="btn" href="/' + (j.origine && /^[a-z0-9-]+$/.test(j.origine) ? j.origine : (({ artigiano: 'cerca-artigiani.html', professionista: 'cerca-professionisti.html' }[j.tipo] || 'cerca-imprese.html') + '?citta=' + encodeURIComponent(j.citta || ''))) + '">Cerca adesso</a>');
       } else {
         mostra(CAMPANA, 'Fatto, niente più avvisi',
           '<p>Non ti scriveremo più. Se cambi idea, ti basta iscriverti di nuovo dalla ricerca.</p><a class="btn" href="/">Vai su TrovaImpresa</a>');

@@ -28,7 +28,7 @@
     '.avvisi-ico svg{width:46px;height:46px;stroke:#fff}' +
     '.avvisi-testo{flex:1;min-width:0}' +
     '.avvisi-testo h3{margin:0 0 8px;font-size:30px;line-height:1.2;color:#fff !important;font-weight:800}' +
-    '.avvisi-testo p{margin:0;font-size:20px;line-height:1.45;color:#fff;font-weight:600}' +
+    '.avvisi-box .avvisi-testo p{margin:0 !important;font-size:20px !important;line-height:1.45 !important;color:#fff !important;font-weight:600}' +
     '.avvisi-form{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}' +
     '.avvisi-form input,.avvisi-form select{font-size:19px;padding:16px 18px;border-radius:12px;border:0;color:#0a2a4d;background:#fff;font-family:inherit;margin:0}' +
     '.avvisi-form .av-citta{flex:0 0 200px;min-width:0;font-weight:600}' +
@@ -40,7 +40,7 @@
     '.avvisi-nota{margin-top:12px;font-size:16px;color:#fff;opacity:.85}' +
     '.avvisi-err{margin-top:12px;font-size:17px;font-weight:700;color:#ffb35c}' +
     '.avvisi-fatto{margin-top:18px;background:#fff;color:#0a2a4d;border-radius:14px;padding:18px 20px;font-size:19px;font-weight:700;line-height:1.45}' +
-    '@media(max-width:700px){.avvisi-box{flex-direction:column;align-items:flex-start;padding:26px 20px;gap:16px;margin:24px 0}.avvisi-ico{flex-basis:64px;width:64px;height:64px}.avvisi-ico svg{width:34px;height:34px}.avvisi-testo h3{font-size:24px}.avvisi-testo p{font-size:18px}.avvisi-form input,.avvisi-form button,.avvisi-form select,.avvisi-form .av-citta,.avvisi-form .av-email{width:100%;flex:1 1 100%}}';
+    '@media(max-width:700px){.avvisi-box{flex-direction:column;align-items:flex-start;padding:26px 20px;gap:16px;margin:24px 0}.avvisi-ico{flex-basis:64px;width:64px;height:64px}.avvisi-ico svg{width:34px;height:34px}.avvisi-testo h3{font-size:24px}.avvisi-box .avvisi-testo p{font-size:18px !important}#avvisi-clienti-qui .avvisi-box{margin:24px 12px}.avvisi-form input,.avvisi-form button,.avvisi-form select,.avvisi-form .av-citta,.avvisi-form .av-email{width:100%;flex:1 1 100%}}';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -59,11 +59,19 @@
   }
 
   function monta() {
-    var ris = $('risultati');
+    // pagine mestiere+citta' (piastrellista-roma...): il generatore lascia un posto
+    // <div id="avvisi-clienti-qui" data-citta data-mestiere data-etichetta>
+    var qui = $('avvisi-clienti-qui');
+    var ris = qui || $('risultati');
     if (!ris || $('avvisi-box')) return;
+    var MESTIERE = qui ? {
+      citta: qui.getAttribute('data-citta') || '',
+      db: qui.getAttribute('data-mestiere') || '',
+      etichetta: qui.getAttribute('data-etichetta') || ''
+    } : null;
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
 
-    var filtro = $('mestiereSelect') || $('professioneSelect');
+    var filtro = MESTIERE ? null : ($('mestiereSelect') || $('professioneSelect'));
     var opzioni = '<option value="">' + TUTTI + '</option>';
     if (filtro) {
       for (var k = 0; k < filtro.options.length; k++) {
@@ -79,10 +87,12 @@
       '<div class="avvisi-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>' +
       '<div class="avvisi-testo">' +
         '<h3>Sei un cliente e non hai trovato quello che cercavi?</h3>' +
-        '<p>Iscriviti gratis: scegli città e lavoro, e quando arriva una nuova impresa o professionista ti avvisiamo noi.</p>' +
+        (MESTIERE
+          ? '<p>Iscriviti gratis: ogni volta che arriva una nuova impresa o professionista per <b style="color:#ffb35c">' + esc(MESTIERE.etichetta) + '</b> nella tua città, ti avvisiamo noi.</p>'
+          : '<p>Iscriviti gratis: scegli città e lavoro, e quando arriva una nuova impresa o professionista ti avvisiamo noi.</p>') +
         '<form class="avvisi-form" novalidate>' +
           '<input class="av-citta" type="text" maxlength="80" placeholder="Città" aria-label="Città" autocomplete="address-level2">' +
-          '<select class="av-mest" aria-label="Lavoro">' + opzioni + '</select>' +
+          (MESTIERE ? '' : '<select class="av-mest" aria-label="Lavoro">' + opzioni + '</select>') +
           '<input class="av-email" type="email" maxlength="200" placeholder="La tua email" aria-label="La tua email" autocomplete="email">' +
           '<input class="av-hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">' +
           '<button type="submit">Avvisami gratis</button>' +
@@ -90,7 +100,7 @@
         '<div class="avvisi-err" role="alert" hidden></div>' +
         '<div class="avvisi-nota">Niente password. Ti cancelli con un clic.</div>' +
       '</div>';
-    ris.parentNode.insertBefore(box, ris.nextSibling);
+    if (qui) qui.appendChild(box); else ris.parentNode.insertBefore(box, ris.nextSibling);
 
     var fCitta = box.querySelector('.av-citta'), fMest = box.querySelector('.av-mest'),
         fEmail = box.querySelector('.av-email'), fHp = box.querySelector('.av-hp'),
@@ -99,6 +109,7 @@
 
     // la citta' e il lavoro seguono la ricerca della pagina, finche' il cliente non li cambia lui
     function segui() {
+      if (MESTIERE) { if (!cittaToccata && !fCitta.value) fCitta.value = MESTIERE.citta; return; }
       var ci = $('cittaInput');
       if (!cittaToccata && ci && ci.value.trim()) fCitta.value = ci.value.trim();
       if (!mestToccato && filtro) {
@@ -110,12 +121,12 @@
     }
     segui();
     fCitta.addEventListener('input', function () { cittaToccata = true; });
-    fMest.addEventListener('change', function () { mestToccato = true; });
+    if (fMest) fMest.addEventListener('change', function () { mestToccato = true; });
     var ci = $('cittaInput');
     if (ci) { ci.addEventListener('change', segui); ci.addEventListener('input', segui); }
     if (filtro) filtro.addEventListener('change', segui);
     // i filtri della pagina cambiano anche da codice (chip, link): si ricontrolla ogni tanto
-    setInterval(segui, 1500);
+    if (!MESTIERE) setInterval(segui, 1500);
 
     function errore(t) { err.textContent = t; err.hidden = !t; }
 
@@ -128,12 +139,14 @@
       btn.disabled = true; btn.textContent = 'Un attimo…';
       fetch('/.netlify/functions/avvisi-iscrivi', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, citta: citta, regione: regioneDi(citta), tipo: TIPO, mestiere: fMest.value,
-          origine: location.pathname.replace(/^\//, '').slice(0, 60), sito_web_extra: fHp.value })
+        body: JSON.stringify({ email: email, citta: citta, regione: regioneDi(citta),
+          tipo: MESTIERE ? 'mestiere' : TIPO, mestiere: MESTIERE ? MESTIERE.db : fMest.value, etichetta: MESTIERE ? MESTIERE.etichetta : '',
+          origine: location.pathname.replace(/^\//, '').replace(/\.html$/, '').slice(0, 60), sito_web_extra: fHp.value })
       }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
         .then(function (x) {
           if (!x.ok || !x.j.ok) throw new Error((x.j && x.j.error) || 'Non sono riuscito a salvare. Riprova fra poco.');
-          var cosa = (fMest.value ? fMest.options[fMest.selectedIndex].textContent + ' a ' : 'novità a ') + citta;
+          var cosa = MESTIERE ? MESTIERE.etichetta + ' a ' + citta
+            : (fMest.value ? fMest.options[fMest.selectedIndex].textContent + ' a ' : 'novità a ') + citta;
           var testo = x.j.stato === 'attivo'
             ? 'Fatto! Ti scriviamo noi quando arriva qualcuno di nuovo: <b>' + esc(cosa) + '</b>.'
             : 'Ci siamo quasi: ti abbiamo mandato una email a <b>' + esc(email) + '</b>. Clicca il pulsante dentro per attivare gli avvisi. Se non la trovi, guarda nello spam.';

@@ -5330,7 +5330,7 @@ function renderCandidati() {
 
 /* ---------- CLIENTI ISCRITTI AGLI AVVISI (27 ottobre 2026) ---------- */
 let AVVCLI = [], AVVINV = [];
-const AVV_TIPO = { impresa: 'Imprese', artigiano: 'Artigiani', professionista: 'Professionisti' };
+const AVV_TIPO = { impresa: 'Imprese', artigiano: 'Artigiani', professionista: 'Professionisti', mestiere: 'Pagina mestiere' };
 
 async function caricaClientiIscritti() {
   const tbody = document.getElementById('table-clienti-iscritti');
@@ -5368,13 +5368,15 @@ function renderClientiIscritti() {
     box(email.size, 'clienti (email)') + box(attivi, 'avvisi attivi') + box(daConf, 'da confermare') + box(AVVINV.length, 'imprese segnalate');
 
   let lista = AVVCLI.slice();
-  if (q) lista = lista.filter(a => [a.email, a.citta, a.regione, a.mestiere, AVV_TIPO[a.tipo]].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if (q) lista = lista.filter(a => [a.email, a.citta, a.regione, a.mestiere, a.etichetta, AVV_TIPO[a.tipo]].filter(Boolean).join(' ').toLowerCase().includes(q));
   document.getElementById('avv-count').textContent = AVVCLI.length + ' iscrizioni · mostrate ' + lista.length;
   if (!lista.length) { vuotoLav(tbody, 7, '🔔', 'Ancora nessun cliente iscritto'); return; }
 
   tbody.innerHTML = lista.map(a => {
     const st = statoAvviso(a);
-    const cosa = (AVV_TIPO[a.tipo] || esc(a.tipo)) + ' · ' + (a.mestiere ? esc(String(a.mestiere).replace(/_/g, ' ')) : 'tutti i lavori');
+    const cosa = a.tipo === 'mestiere'
+      ? esc(a.etichetta || 'Pagina mestiere') + (a.origine ? '<div style="font-size:0.78rem;color:var(--light)">/' + esc(a.origine) + '</div>' : '')
+      : (AVV_TIPO[a.tipo] || esc(a.tipo)) + ' · ' + (a.mestiere ? esc(String(a.mestiere).replace(/_/g, ' ')) : 'tutti i lavori');
     return '<tr>' +
       '<td><strong>' + esc(a.email) + '</strong></td>' +
       '<td>📍 ' + esc(a.citta) + (a.regione ? '<div style="font-size:0.78rem;color:var(--light)">' + esc(a.regione) + '</div>' : '') + '</td>' +

@@ -43,12 +43,13 @@ const linkCancella = token => SITO + '/avvisi.html?a=cancella&t=' + token;
 const linkConferma = token => SITO + '/avvisi.html?a=conferma&t=' + token;
 
 // «Ristrutturazione a Roma», «artigiani a Roma», «Geometra a Roma»
-const NOMI_TIPO = { impresa: 'imprese', artigiano: 'artigiani', professionista: 'professionisti' };
+const NOMI_TIPO = { impresa: 'imprese', artigiano: 'artigiani', professionista: 'professionisti', mestiere: 'imprese' };
 const ETICHETTE_PROF = {
   architetto: 'Architetto', ingegnere_civile: 'Ingegnere civile', ingegnere_strutturale: 'Ingegnere strutturale',
   ingegnere_impiantistico: 'Ingegnere impiantistico', geometra: 'Geometra'
 };
 function cosaCerca(a) {
+  if (a.tipo === 'mestiere') return (a.etichetta || 'Nuovi arrivi') + ' a ' + a.citta;
   const m = a.mestiere ? (ETICHETTE_PROF[a.mestiere] || a.mestiere.replace(/_/g, ' ')) : null;
   const tutti = { impresa: 'Tutte le imprese', artigiano: 'Tutti gli artigiani', professionista: 'Tutti i professionisti' };
   return (m ? m : tutti[a.tipo]) + ' a ' + a.citta;

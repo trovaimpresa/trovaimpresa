@@ -30,6 +30,15 @@ const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ
   .replace(/[^a-z0-9]+/g, ' ').trim();
 
 function combacia(a, i) {
+  // pagine mestiere+citta': chiunque faccia quel lavoro (stessa regola di genera-mestiere-citta.js)
+  if (a.tipo === 'mestiere') {
+    const c = norm(a.citta);
+    if (c !== norm(i.citta) && c !== norm(i.provincia)) return false;
+    const db = String(a.mestiere || '').toLowerCase().split('|').map(s => s.trim()).filter(Boolean);
+    const voci = [].concat(Array.isArray(i.mestieri) ? i.mestieri : []).concat(i.mestiere ? [i.mestiere] : [])
+      .map(v => String(v).toLowerCase().trim());
+    return db.some(d => voci.includes(d));
+  }
   if (a.tipo !== i.tipo) return false;
   const c = norm(a.citta);
   if (c !== norm(i.citta) && c !== norm(i.provincia)) return false;
@@ -60,7 +69,9 @@ function mail(email, righe, token) {
       titolo,
       sub: 'Si ' + (n === 1 ? 'è appena iscritto' : 'sono appena iscritti') + ' su TrovaImpresa, nella zona che ci hai indicato.',
       corpo: '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + card + '</table>',
-      cta: { url: SITO + '/' + PAGINA[primo.tipo] + '?citta=' + encodeURIComponent(citta), testo: { impresa: 'Vedi tutte le imprese', artigiano: 'Vedi tutti gli artigiani', professionista: 'Vedi tutti i professionisti' }[primo.tipo] + ' a ' + esc(citta) + ' &rarr;' },
+      cta: primo.tipo === 'mestiere' && /^[a-z0-9-]+$/.test(primo.origine || '')
+        ? { url: SITO + '/' + primo.origine, testo: esc(primo.etichetta || 'Vedi tutti') + ' a ' + esc(citta) + ' &rarr;' }
+        : { url: SITO + '/' + (PAGINA[primo.tipo] || 'cerca-imprese.html') + '?citta=' + encodeURIComponent(citta), testo: { impresa: 'Vedi tutte le imprese', artigiano: 'Vedi tutti gli artigiani', professionista: 'Vedi tutti i professionisti' }[primo.tipo] + ' a ' + esc(citta) + ' &rarr;' },
       sotto: 'Ricevi questa email perché hai chiesto di essere avvisato su TrovaImpresa.',
       cancella: linkCancella(token)
     })
@@ -89,7 +100,7 @@ async function handler() {
     if (!nuove || !nuove.length) return { statusCode: 200 };
 
     const { data: avvisi, error: e2 } = await sb.from('avvisi_clienti')
-      .select('id, email, citta, tipo, mestiere, token, confermato_il')
+      .select('id, email, citta, tipo, mestiere, etichetta, origine, token, confermato_il')
       .eq('attivo', true).not('confermato_il', 'is', null).limit(5000);
     if (e2) throw e2;
     if (!avvisi || !avvisi.length) return { statusCode: 200 };
