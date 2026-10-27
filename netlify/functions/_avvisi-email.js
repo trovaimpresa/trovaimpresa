@@ -50,7 +50,8 @@ const ETICHETTE_PROF = {
 };
 function cosaCerca(a) {
   const m = a.mestiere ? (ETICHETTE_PROF[a.mestiere] || a.mestiere.replace(/_/g, ' ')) : null;
-  return (m ? m : 'Tutti i ' + NOMI_TIPO[a.tipo]) + ' a ' + a.citta;
+  const tutti = { impresa: 'Tutte le imprese', artigiano: 'Tutti gli artigiani', professionista: 'Tutti i professionisti' };
+  return (m ? m : tutti[a.tipo]) + ' a ' + a.citta;
 }
 
 module.exports = { SITO, esc, mailAvvisi, invia, linkCancella, linkConferma, cosaCerca, NOMI_TIPO };

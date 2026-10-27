@@ -29,7 +29,9 @@ const TABELLE_CONSENTITE = [
   'richieste_clienti',
   /* 24 settembre 2026 — le valutazioni del riquadro «Ti piace TrovaImpresa?»
      nascono non approvate: dall'admin si approvano o si cancellano. */
-  'site_reviews'
+  'site_reviews',
+  /* 27 ottobre 2026 — i clienti iscritti agli avvisi «Avvisami gratis» e le mail mandate. */
+  'avvisi_clienti', 'avvisi_inviati'
 ];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 
@@ -38,7 +40,9 @@ const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 // Se la colonna non esiste PostgREST da' errore, quindi va indicata qui.
 const COLONNA_ORDINE = {
   candidature: 'data_candidatura',
-  richieste_clienti: 'creato_il'
+  richieste_clienti: 'creato_il',
+  avvisi_clienti: 'creato_il',
+  avvisi_inviati: 'inviato_il'
 };
 
 exports.handler = async function(event) {

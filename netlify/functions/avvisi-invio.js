@@ -60,7 +60,7 @@ function mail(email, righe, token) {
       titolo,
       sub: 'Si ' + (n === 1 ? 'è appena iscritto' : 'sono appena iscritti') + ' su TrovaImpresa, nella zona che ci hai indicato.',
       corpo: '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' + card + '</table>',
-      cta: { url: SITO + '/' + PAGINA[primo.tipo] + '?citta=' + encodeURIComponent(citta), testo: 'Vedi tutti i ' + NOMI_TIPO[primo.tipo] + ' a ' + esc(citta) + ' &rarr;' },
+      cta: { url: SITO + '/' + PAGINA[primo.tipo] + '?citta=' + encodeURIComponent(citta), testo: { impresa: 'Vedi tutte le imprese', artigiano: 'Vedi tutti gli artigiani', professionista: 'Vedi tutti i professionisti' }[primo.tipo] + ' a ' + esc(citta) + ' &rarr;' },
       sotto: 'Ricevi questa email perché hai chiesto di essere avvisato su TrovaImpresa.',
       cancella: linkCancella(token)
     })
