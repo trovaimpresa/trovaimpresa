@@ -3872,8 +3872,25 @@ function disegnaAbbandoni(){
         + '<div><div class="k">Era iscritto da</div><div class="v">' + _abDurata(r.giorni_iscritto) + '</div></div>'
         + '<div><div class="k">Si era iscritto</div><div class="v">' + _uQuando(r.iscritto_il) + '</div></div>'
         + perche
-      + '</div></div>';
+      + '</div>'
+      + '<div style="margin-top:12px"><button class="action-btn btn-elimina" onclick="eliminaAbbandono(\'' + _uEsc(String(r.id)) + '\')">🗑️ Elimina</button></div>'
+      + '</div>';
   }).join('');
+}
+
+/* 27 ottobre 2026 — toglie una riga da «Chi se n'è andato» */
+async function eliminaAbbandono(id){
+  if(!confirm('Eliminare questa riga da «Chi se n\'è andato»?\n\nNon si torna indietro.')) return;
+  try{
+    const res = await fetch('/.netlify/functions/admin-abbandoni', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP, elimina: id })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'operazione non riuscita');
+    if(!j.count) throw new Error('nessuna riga eliminata');
+  }catch(e){ alert('Errore: ' + e.message); return; }
+  caricaAbbandoni();
 }
 
 async function adminWrite(action, table, id, patch) {

@@ -52,9 +52,9 @@ exports.handler = async function (event) {
   const ADMIN_USER = (process.env.ADMIN_USER || '').trim();
   const ADMIN_PASS = process.env.ADMIN_PASS || '';
 
-  let u, p;
+  let u, p, elimina;
   try {
-    ({ u, p } = JSON.parse(event.body || '{}'));
+    ({ u, p, elimina } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Body JSON non valido.' }) };
   }
@@ -80,6 +80,17 @@ exports.handler = async function (event) {
   const supabaseAdmin = createClient(url.valore, key.valore, {
     auth: { persistSession: false, autoRefreshToken: false }
   });
+
+  // 27 ott 2026: il bottone «Elimina» del pannello — toglie UNA riga dalla lista
+  if (elimina) {
+    if (!/^[0-9a-f-]{36}$/i.test(String(elimina))) {
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Id non valido.' }) };
+    }
+    const { data: tolte, error: errDel } = await supabaseAdmin
+      .from('iscrizioni_annullate').delete().eq('id', elimina).select('id');
+    if (errDel) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: errDel.message }) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, count: (tolte || []).length }) };
+  }
 
   try {
     const { data, error } = await supabaseAdmin
