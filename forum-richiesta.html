@@ -10,6 +10,10 @@
        anche quando js/forum.js la apre. Decide js/forum.js, richiesta per
        richiesta (seo()). Senza ?s= la pagina non e' una richiesta: noindex subito. -->
   <script>if(!/[?&]s=/.test(location.search)){document.write('<meta name="robots" content="noindex,follow">');}</script>
+  <!-- 28 ott 2026: Search Console segnalava le richieste come «pagina duplicata senza
+       canonical»: il canonical lo metteva solo js/forum.js, dopo aver caricato i dati.
+       Ora c'e' subito, scritto dall'indirizzo; js/forum.js poi aggiorna lo stesso tag. -->
+  <script>(function(){var s=new URLSearchParams(location.search).get('s');if(s){document.write('<link rel="canonical" href="https://trovaimpresa.com/forum-richiesta?s='+encodeURIComponent(s)+'">');}})();</script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="Richiesta | Forum Edilizia | TrovaImpresa">
   <meta property="og:description" content="Richiesta del forum edilizia di TrovaImpresa con le risposte delle imprese.">
