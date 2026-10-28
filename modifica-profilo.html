@@ -1789,7 +1789,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         document.getElementById('f-cap-professionista').value = d.cap || '';
         document.getElementById('f-indirizzo-professionista').value = d.indirizzo || '';
         document.getElementById('f-zone-professionista').value = d.zone || '';
-        document.getElementById('f-comuni_competenza').value = d.comuni_competenza || '';
+        document.getElementById('f-comuni_competenza').value = Array.isArray(d.comuni_competenza) ? d.comuni_competenza.join(', ') : (d.comuni_competenza || '');
         document.getElementById('f-whatsapp-professionista').value = d.whatsapp || '';
         document.getElementById('f-dipendenti-professionista').value = d.dipendenti || '';
         document.getElementById('iscritto_albo-professionista').checked = !!d.iscritto_albo;
@@ -2045,7 +2045,23 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
             cap: document.getElementById('f-cap-professionista').value.trim(),
             indirizzo: document.getElementById('f-indirizzo-professionista').value.trim(),
             zone: document.getElementById('f-zone-professionista').value.trim(),
-            comuni_competenza: document.getElementById('f-comuni_competenza').value.trim(),
+            /* 28 ott 2026 — `comuni_competenza` e' un ELENCO (text[]) nel database.
+               Qui si mandava il testo cosi' com'era («Monza, Milano», o «» se vuota):
+               Postgres rispondeva «malformed array literal» e al professionista non si
+               salvava NIENTE della scheda. Trovato da un iscritto vero (Duowatt Srl).
+               Si spezza sulle virgole e si scrive come in pannello-professionisti.html
+               (stessa pulizia di normalizzaComuneProf, che la ricerca usa per trovarli). */
+            comuni_competenza: [...new Set((document.getElementById('f-comuni_competenza').value || '')
+              .split(',')
+              .map(function (c) {
+                return String(c).trim().toLowerCase()
+                  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                  .replace(/['\u2019`]/g, ' ')
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+              })
+              .filter(Boolean))],
             whatsapp: document.getElementById('f-whatsapp-professionista').value.trim(),
             dipendenti: document.getElementById('f-dipendenti-professionista').value.trim(),
             specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null,
