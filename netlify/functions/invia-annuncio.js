@@ -12,7 +12,7 @@ const crypto = require('crypto');
 //   [VETRINA]   link alla sua scheda pubblica (esiste sempre)
 //   [PAGINA]    link alla pagina mestiere+citta' dove compare
 //
-// Gruppi: 'completi' | 'incompleti' | 'senza_foto' | 'tutti' | 'prova'
+// Gruppi: 'completi' | 'incompleti' | 'senza_foto' (+ '_1' / '_2': divisa in due giorni) | 'tutti' | 'prova'
 // 'prova' manda solo ad Alessio, per vedere com'e' venuta prima di
 // spedirla a tutti. Usare SEMPRE quello prima dell'invio vero.
 //
@@ -310,7 +310,7 @@ exports.handler = async function (event) {
     destinatari = conEmail.filter(completo);
   } else if (gruppo === 'incompleti') {
     destinatari = conEmail.filter(i => !completo(i));
-  } else if (gruppo === 'senza_foto') {
+  } else if (gruppo === 'senza_foto' || gruppo === 'senza_foto_1' || gruppo === 'senza_foto_2') {
     // 18 ott 2026 — chi ha la scheda online ma nessuna foto dei lavori
     // pubblica: la scheda c'e', ma a un cliente non dice niente.
     // Le foto stanno in `lavori_foto` (owner_id = user_id dell'impresa).
@@ -322,6 +322,12 @@ exports.handler = async function (event) {
     const conFoto = new Set((foto || []).map(f => String(f.owner_id)));
     destinatari = conEmail.filter(i => completo(i) && i.vetrina_attiva !== false
       && i.user_id && !conFoto.has(String(i.user_id)));
+    // 28 ott 2026 — Resend gratuito manda 100 email al giorno (contando anche
+    // quelle ricevute): un gruppo grande si spedisce in DUE giorni. La divisione
+    // e' per id pari / dispari e non «i primi N», cosi' resta la stessa anche se
+    // nel frattempo qualcuno carica una foto: nessuno la riceve due volte.
+    if (gruppo === 'senza_foto_1') destinatari = destinatari.filter(i => Number(i.id) % 2 === 0);
+    if (gruppo === 'senza_foto_2') destinatari = destinatari.filter(i => Number(i.id) % 2 !== 0);
   } else {
     destinatari = conEmail;
   }

@@ -1613,6 +1613,8 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <option value="completi">Solo chi ha il profilo compilato</option>
           <option value="incompleti">Solo chi ha il profilo vuoto</option>
           <option value="senza_foto">Solo chi non ha foto dei lavori</option>
+          <option value="senza_foto_1">Senza foto dei lavori — parte 1 (primo giorno)</option>
+          <option value="senza_foto_2">Senza foto dei lavori — parte 2 (giorno dopo)</option>
           <option value="tutti">Tutti gli iscritti</option>
         </select>
         <div id="st-quanti" class="st-nota">—</div>
@@ -2932,7 +2934,7 @@ async function caricaEmailInviate() {
   _emailInviate = j.email || [];
   if (!_emailInviate.length) { box.innerHTML = '<div class="ei-vuoto">Nessuna email mandata finora. Le prossime che mandi da «Scrivi a tutti» compaiono qui.</div>'; return; }
   const esc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const gruppoNome = { completi: 'profilo compilato', incompleti: 'profilo vuoto', tutti: 'tutti gli iscritti', prova: 'solo a me' };
+  const gruppoNome = { completi: 'profilo compilato', incompleti: 'profilo vuoto', senza_foto: 'senza foto', senza_foto_1: 'senza foto, parte 1', senza_foto_2: 'senza foto, parte 2', tutti: 'tutti gli iscritti', prova: 'solo a me' };
   box.innerHTML = _emailInviate.map((e, i) => {
     const d = new Date(e.created_at);
     const quando = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
