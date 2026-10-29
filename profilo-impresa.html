@@ -273,6 +273,21 @@ nav img{height:36px}
 .hn-i{font-size:28px;line-height:1}
 .hn-n{font-size:1.6rem;font-weight:800;color:#fff;line-height:1}
 .hn-l{font-size:13px;color:rgba(255,255,255,0.8);font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+/* ⭐ 29 ottobre 2026 — IL SITO DELL'IMPRESA, IN GRANDE NELLA FASCIA.
+   Prima il sito stava solo come ultima riga piccola dei contatti, in fondo
+   alla colonna: non lo vedeva nessuno. Alex: «lo vorrei mettere bene in
+   evidenza». Pulsante bianco grande a destra nella fascia, testo arancione
+   come «Richiedi preventivo». Si vede SOLO se l'impresa ha scritto il sito.
+   La riga nei contatti resta. Sul telefono va a tutta larghezza, sotto i numeri. */
+.hero-sito{align-self:center;flex-shrink:0;display:flex;align-items:center;gap:14px;
+  background:#fff;color:#FF6B35;text-decoration:none;border-radius:16px;
+  padding:20px 32px;box-shadow:0 4px 18px rgba(0,0,0,0.22);max-width:460px;
+  transition:transform .15s ease,box-shadow .15s ease}
+.hero-sito:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.28)}
+.hero-sito .ti-ic{width:42px;height:42px;flex-shrink:0}
+.hero-sito-t{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.hero-sito-a{font-size:1.55rem;font-weight:800}
+.hero-sito-d{font-size:16px;font-weight:600;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 
 
@@ -733,6 +748,9 @@ nav img{height:36px}
   .hero-avatar{width:96px;height:96px;border-width:4px;font-size:2rem}
   .hero-cover.ha-copertina + .hero-riga .hero-avatar{margin-top:0}
   .hero-nome{font-size:1.6rem}
+  .hero-riga{flex-wrap:wrap}
+  .hero-sito{order:3;width:100%;max-width:none;justify-content:center;padding:14px 18px}
+  .hero-sito-a{font-size:1.2rem}
   nav{padding:10px 16px}
   .cal-grid-2x2{grid-template-columns:1fr}
   .st-grid,.rec-voti-grid{grid-template-columns:1fr}
@@ -839,6 +857,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         <div class="hn"><span class="hn-i"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v5a6 6 0 0 1-12 0z"/><path d="M6 6H4a2 2 0 0 0 2 4"/><path d="M18 6h2a2 2 0 0 1-2 4"/><path d="M9 20h6"/><path d="M12 15v5"/></svg></span><span class="hn-n" id="stat-anni">—</span><span class="hn-l">Anni esp.</span></div>
       </div>
     </div>
+    <a class="hero-sito" id="hero-sito" href="#" target="_blank" rel="noopener" style="display:none"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="hero-sito-t"><span class="hero-sito-a">Visita il sito web ↗</span><span class="hero-sito-d" id="hero-sito-d"></span></span></a>
   </div>
   <div class="hero-mestieri" id="hero-mestieri"></div>
 </div>
@@ -1805,6 +1824,9 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
     const sl=document.getElementById('sito-link');const cs=document.getElementById('contact-sito');
     const sito=d.sito_web||'';
     if(sito&&sl){sl.href=sito.startsWith('http')?sito:'https://'+sito;sl.textContent=sito.replace(/^https?:\/\//,'');if(cs)cs.style.display=''}
+    /* 29 ott 2026: lo stesso sito, in grande nella fascia */
+    const hs=document.getElementById('hero-sito');
+    if(sito&&sl&&hs){hs.href=sl.href;document.getElementById('hero-sito-d').textContent=sl.textContent.replace(/\/$/,'');hs.style.display=''}
     /* ⛔ 1 SETTEMBRE 2026 — IL WHATSAPP, FINALMENTE MOSTRATO.
        Contati nel database: 26 imprese pubbliche ce l'hanno, e non compariva
        da nessuna parte.
@@ -1820,10 +1842,10 @@ if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap
        la riga: meglio niente che un link sbagliato. */
     /* 2 set 2026: i clic sugli altri contatti si contano senza nascondere
        niente. `segnaContatto` non blocca mai il collegamento. */
-    ['email-link','sito-link','wa-link','cta-bar-tel'].forEach(function(_id){
+    ['email-link','sito-link','hero-sito','wa-link','cta-bar-tel'].forEach(function(_id){
       var _e=document.getElementById(_id);
       if(_e)_e.addEventListener('click',function(){
-        segnaContatto(_id==='email-link'?'email':_id==='sito-link'?'sito':_id==='wa-link'?'whatsapp':'telefono');
+        segnaContatto(_id==='email-link'?'email':(_id==='sito-link'||_id==='hero-sito')?'sito':_id==='wa-link'?'whatsapp':'telefono');
       });
     });
     /* 3 settembre 2026: gli orari, scritti dall'impresa in «Modifica profilo».
