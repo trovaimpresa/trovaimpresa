@@ -28,11 +28,24 @@
 
    ⚠️ File chiuso in se' (IIFE). Le funzioni della pagina (promForm,
    compVoceForm, cliCache...) si leggono sempre con typeof davanti.
+
+   29 ottobre 2026 (sera) — LO STESSO FILE IN TRE GESTIONALI (PAG):
+   - 'app' gestionale-app.html: quello qui sopra.
+   - 'nol' gestionale-noleggio.html: noleggio, cliente, fornitore, prodotto,
+     promemoria. Il noleggio non carica ai-integrazione.js: la funzione
+     ai-cantiere si chiama qui col gettone della sessione.
+   - 'op'  gestionale-operatore.html (app operaio): niente AI in piu'. Quello
+     che dici va dritto in «Segna la giornata → Racconta la giornata», che
+     c'era gia' e sa fare il rapportino. «Apri le foto» e simili: gratis.
    ===================================================================== */
 (function () {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return;
-  if (!document.querySelector('nav.tabs')) return;   /* solo nel gestionale */
+  var PAG = document.getElementById('op-tabs') ? 'op'
+          : (/noleggio/.test(location.pathname) ? 'nol'
+          : (document.querySelector('nav.tabs') ? 'app' : ''));
+  if (!PAG) return;   /* solo nei gestionali */
+  var CANTIERE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-cantiere';
 
   var MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg>';
   var STOP = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
@@ -109,21 +122,50 @@
   function avvisa(t) { if (typeof toast === 'function') { try { toast(t); return; } catch (e) {} } }
 
   /* ---------------- dove sono ---------------- */
+  /* il nome scritto sul pulsante, senza il numerino del contatore */
+  function nomeBottone(b) {
+    var s = b.querySelector('.cta-txt b') || b.querySelector('span:not(.tab-cnt):not([id^="op-n-"])');
+    if (s) return s.textContent.trim();
+    var c = b.cloneNode(true);
+    c.querySelectorAll('.tab-cnt,[id^="op-n-"],svg').forEach(function (x) { x.remove(); });
+    return c.textContent.replace(/\s+/g, ' ').trim();
+  }
   function sezioni() {
     var out = [];
+    if (PAG === 'op') {
+      /* le viste in alto (Agenda, Clienti...) e le schede dentro l'Agenda */
+      document.querySelectorAll('#app-nav .nav-btn').forEach(function (b) {
+        if (b.classList.contains('hidden')) return;
+        var lab = nomeBottone(b); if (lab) out.push({ k: b.id, lab: lab, b: b });
+      });
+      var ag = el('nav-agenda');
+      document.querySelectorAll('#op-tabs [data-s]').forEach(function (b) {
+        if (b.classList.contains('hidden') || b.style.display === 'none') return;
+        var lab = nomeBottone(b);
+        if (lab) out.push({ k: 'op-' + b.getAttribute('data-s'), lab: lab, b: b, prima: ag });
+      });
+      return out;
+    }
     document.querySelectorAll('nav.tabs button[data-tab]').forEach(function (b) {
       if (b.style.display === 'none') return;
-      var s = b.querySelector('.cta-txt b') || b.querySelector('span:not(.tab-cnt)');
-      var lab = s ? s.textContent.trim() : b.textContent.trim();
+      var lab = nomeBottone(b);
       if (lab) out.push({ k: b.getAttribute('data-tab'), lab: lab, b: b });
     });
     return out;
   }
+  function vaiA(s) {
+    chiudiBolla();
+    if (s.prima && !s.prima.classList.contains('hidden') && !vis(el('view-agenda'))) s.prima.click();
+    setTimeout(function () { s.b.click(); window.scrollTo(0, 0); }, s.prima ? 150 : 0);
+  }
   function sezioneAperta() {
+    if (PAG === 'op') {
+      var v = document.querySelector('#app-nav .nav-btn.active');
+      return { k: v ? v.id : '', lab: v ? nomeBottone(v) : '' };
+    }
     var b = document.querySelector('nav.tabs button[data-tab].active');
     if (!b) return { k: '', lab: '' };
-    var s = b.querySelector('.cta-txt b') || b.querySelector('span:not(.tab-cnt)');
-    return { k: b.getAttribute('data-tab'), lab: s ? s.textContent.trim() : '' };
+    return { k: b.getAttribute('data-tab'), lab: nomeBottone(b) };
   }
   function computoAperto() {
     try { return sezioneAperta().k === 'computi' && typeof compVociCompId !== 'undefined' && !!compVociCompId; }
@@ -132,8 +174,9 @@
 
   /* ---------------- quando si vede ---------------- */
   function posiziona() {
-    var av = el('appview');
+    var av = el(PAG === 'op' ? 'app' : 'appview');
     var nascosto = !vis(av)
+      || (PAG === 'op' && (vis(el('rv-ov')) || vis(el('view-lavoro')) || vis(el('gate'))))
       || !!document.querySelector('#overlay.open')
       || !!document.querySelector('.ai-ov')
       || !!document.querySelector('#chat.active')
@@ -260,7 +303,12 @@
     var cli = [];
     try { if (typeof cliCache !== 'undefined' && Array.isArray(cliCache)) cliCache.slice(0, 120).forEach(function (c) { if (c && c.nome) cli.push(String(c.nome)); }); } catch (e) {}
     var sez = sezioni().map(function (s) { return s.k + ' = ' + s.lab; }).join('; ');
+    var azioni = PAG === 'nol'
+      ? 'noleggio, cliente, fornitore, prodotto, promemoria, vai, non_capito'
+      : 'lavoro, cliente, preventivo, scadenza, fornitore, promemoria, voce_computo, vai, non_capito';
     return 'GIORNO DI OGGI: ' + giornoOggi() + '\n'
+      + 'GESTIONALE: ' + (PAG === 'nol' ? 'noleggio di mezzi e attrezzature' : 'imprese e artigiani') + '\n'
+      + 'AZIONI POSSIBILI: ' + azioni + '\n'
       + 'SEZIONE APERTA: ' + (ap.lab || 'Riepilogo') + '\n'
       + 'COMPUTO APERTO: ' + (computoAperto() ? 'si' : 'no') + '\n'
       + 'CLIENTI DEL REPARTO: ' + (cli.length ? cli.join('; ') : 'nessuno') + '\n'
@@ -268,20 +316,53 @@
       + 'HA DETTO: «' + t.slice(0, 1500) + '»';
   }
 
+  /* il noleggio non ha js/ai-integrazione.js: la funzione si chiama qui */
+  async function chiamaNoleggio(testo) {
+    var tok = null;
+    try { tok = (await sb.auth.getSession()).data.session.access_token; } catch (e) {}
+    if (!tok) throw new Error('Sessione scaduta: esci e rientra.');
+    var res;
+    try {
+      res = await fetch(CANTIERE_URL, { method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feature: 'comando_voce', input: testo, file: null }) });
+    } catch (e) { throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione.'); }
+    var body = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(body.error || 'L\'assistente non ha risposto. Riprova fra un attimo.');
+    try { return JSON.parse(body.result); } catch (e) { throw new Error('Non ho capito. Riprova.'); }
+  }
+
+  /* app operaio: quello che dici va in «Racconta la giornata», che c'era gia' */
+  function raccontaGiornata(t) {
+    if (typeof rvApri !== 'function' || typeof RV === 'undefined') { disegnaMsg('Ricarica la pagina e riprova.', true); return; }
+    if (typeof puo === 'function' && !puo('rapportini')) { disegnaMsg('Il capo non ti ha dato il permesso dei rapportini. A voce puoi dire «apri le foto», «apri la chat»…', true); return; }
+    chiudiBolla();
+    rvApri();
+    RV.tipo = 'voce'; RV.detto = t;
+    var solo = typeof rvUnicoDiOggi === 'function' ? rvUnicoDiOggi() : null;
+    if (solo) { RV.lavoro = solo; RV.passo = 3; RV.autoLavoro = true; }
+    else { RV.lavoro = null; RV.passo = 2; RV.autoLavoro = false; }
+    rvDisegna();
+  }
+
   async function esegui(t) {
     var dove = navigazioneLocale(t);
-    if (dove) { chiudiBolla(); dove.b.click(); window.scrollTo(0, 0); return; }
+    if (dove) { vaiA(dove); return; }
+    if (PAG === 'op') { raccontaGiornata(t); return; }
 
-    if (!window.AI || typeof window.AI.cantiere !== 'function') {
+    if (PAG === 'app' && (!window.AI || typeof window.AI.cantiere !== 'function')) {
       disegnaMsg('L\'assistente non si è caricato. Ricarica la pagina e riprova.', true); return;
     }
     lavora = true; etichetta(); disegnaPenso();
     var r = null;
-    try { r = await window.AI.cantiere('comando_voce', contesto(t), null, true); }
+    try {
+      r = PAG === 'nol' ? await chiamaNoleggio(contesto(t))
+                        : await window.AI.cantiere('comando_voce', contesto(t), null, true);
+    }
     catch (e) { lavora = false; etichetta(); disegnaMsg((e && e.message) || 'Non ho capito. Riprova.', true); return; }
     lavora = false; etichetta();
     if (r === null) { chiudiBolla(); return; }   /* crediti finiti: la finestra l'ha gia' aperta l'AI */
-    try { await apri(r || {}); }
+    try { await (PAG === 'nol' ? apriNoleggio(r || {}) : apri(r || {})); }
     catch (e) { disegnaMsg('Ho capito, ma il modulo non si è aperto. Riprova.', true); }
   }
 
@@ -305,7 +386,7 @@
     if (az === 'vai') {
       var s = sezioni().filter(function (x) { return x.k === r.sezione; })[0];
       if (!s) return disegnaMsg('Questa sezione non la trovo nel tuo menu.', true);
-      chiudiBolla(); s.b.click(); window.scrollTo(0, 0); return;
+      vaiA(s); return;
     }
     if (PORTE[az]) {
       var p = pulisci(c);
@@ -361,6 +442,70 @@
       return;
     }
     disegnaMsg(String(r.messaggio || '').trim() || 'Questo non lo so fare a voce. Posso aprirti un lavoro, un cliente, un preventivo, un promemoria o una scadenza.', false);
+  }
+
+  /* ---------------- noleggio ---------------- */
+  /* la tendina del mezzo: «la miniescavatore» deve trovare «Miniescavatore 1,5 t (ME01)» */
+  function tendinaLarga(sel, nome, ms) {
+    if (!sel || !nome) return;
+    var cerca = norm(nome), fine = Date.now() + (ms || 3000);
+    (function prova() {
+      var trovata = null, i, t;
+      for (i = 0; i < sel.options.length; i++) { if (sel.options[i].value && norm(sel.options[i].textContent) === cerca) { trovata = sel.options[i]; break; } }
+      if (!trovata) for (i = 0; i < sel.options.length; i++) {
+        t = norm(sel.options[i].textContent);
+        if (sel.options[i].value && t && (t.indexOf(cerca) >= 0 || cerca.indexOf(t) >= 0)) { trovata = sel.options[i]; break; }
+      }
+      if (trovata) { sel.value = trovata.value; sel.dispatchEvent(new Event('change', { bubbles: true })); return; }
+      if (Date.now() < fine) setTimeout(prova, 200);
+    })();
+  }
+  async function apriNoleggio(r) {
+    var az = String(r.azione || ''), c = r.campi || {}, p = pulisci(c);
+    var giorno = function (x) { return DATA.test(String(x || '')) ? String(x) : ''; };
+    if (az === 'vai') {
+      var s = sezioni().filter(function (x) { return x.k === r.sezione; })[0];
+      if (!s) return disegnaMsg('Questa sezione non la trovo nel tuo menu.', true);
+      vaiA(s); return;
+    }
+    var FORM = { noleggio: 'schedaNoleggio', cliente: 'schedaClienteNol', fornitore: 'schedaFornitore', prodotto: 'schedaProdotto', promemoria: 'promForm' };
+    var nomeF = FORM[az];
+    if (!nomeF) return disegnaMsg(String(r.messaggio || '').trim() || 'Questo non lo so fare a voce. Posso aprirti un noleggio, un cliente, un fornitore, un prodotto o un promemoria.', false);
+    var f = null;
+    try { f = { schedaNoleggio: typeof schedaNoleggio === 'function' ? schedaNoleggio : null,
+                schedaClienteNol: typeof schedaClienteNol === 'function' ? schedaClienteNol : null,
+                schedaFornitore: typeof schedaFornitore === 'function' ? schedaFornitore : null,
+                schedaProdotto: typeof schedaProdotto === 'function' ? schedaProdotto : null,
+                promForm: typeof promForm === 'function' ? promForm : null }[nomeF]; } catch (e) {}
+    if (!f) return disegnaMsg('Il modulo non riesco ad aprirlo. Ricarica la pagina e riprova.', true);
+    chiudiBolla();
+    await f(null);
+    if (az === 'noleggio') {
+      await aspetta('nn-mezzo', 3000);
+      tendinaLarga(el('nn-mezzo'), p.mezzo, 3000);
+      tendinaLarga(el('nn-cliente'), p.cliente, 3000);
+      metti('nn-luogo', p.luogo); metti('nn-note', p.note);
+      metti('nn-uscita', giorno(p.uscita)); metti('nn-prevista', giorno(p.rientro));
+      if (p.ora && /^\d{1,2}:\d{2}$/.test(p.ora)) metti('nn-ora-uscita', p.ora.length === 4 ? '0' + p.ora : p.ora);
+    } else if (az === 'cliente') {
+      await aspetta('ncl-nome', 2000);
+      metti('ncl-nome', p.nome); metti('ncl-indirizzo', p.indirizzo); metti('ncl-telefono', p.telefono);
+      metti('ncl-email', p.email); metti('ncl-piva', p.piva);
+    } else if (az === 'fornitore') {
+      await aspetta('nf-nome', 2000);
+      metti('nf-nome', p.nome); metti('nf-indirizzo', p.indirizzo); metti('nf-telefono', p.telefono);
+      metti('nf-email', p.email); metti('nf-piva', p.piva);
+    } else if (az === 'prodotto') {
+      await aspetta('np-nome', 2000);
+      metti('np-nome', p.nome); metti('np-categoria', p.categoria); metti('np-unita', p.unita);
+      if (p.prezzo && isFinite(Number(p.prezzo))) metti('np-prezzo', virgola(p.prezzo));
+      if (p.quantita && isFinite(Number(p.quantita))) metti('np-quantita', Number(p.quantita).toLocaleString('it-IT', { maximumFractionDigits: 3, useGrouping: false }));
+    } else if (az === 'promemoria') {
+      await aspetta('p-testo', 2000);
+      metti('p-testo', p.testo); metti('p-data', p.data); metti('p-note', p.note);
+      if (p.ora && /^\d{1,2}:\d{2}$/.test(p.ora)) metti('p-ora', p.ora.length === 4 ? '0' + p.ora : p.ora);
+    }
+    avvisa('Controlla e premi Salva');
   }
 
   /* ---------------- partenza ---------------- */

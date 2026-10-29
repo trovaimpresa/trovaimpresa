@@ -227,10 +227,13 @@ Capisci COSA vuole fare e rispondi SOLO con questo JSON, senza testo attorno:
 - "fornitore": un fornitore nuovo. campi: nome, categoria, telefono, email, indirizzo, piva.
 - "promemoria": una cosa da ricordarsi (chiamare qualcuno, pagare un F24, passare in banca...). campi: testo, data, ora (HH:MM), note.
 - "voce_computo": una lavorazione da aggiungere al computo APERTO. campi: descrizione, unita, quantita, prezzo_unitario. Usala SOLO se il contesto dice che c'e' un computo aperto.
+- "noleggio": (solo gestionale noleggio) un mezzo o un'attrezzatura da noleggiare a un cliente. campi: mezzo (come l'ha detto), cliente, luogo, uscita (AAAA-MM-GG), rientro (AAAA-MM-GG), ora (HH:MM, di uscita), note.
+- "prodotto": (solo gestionale noleggio) un prodotto del magazzino. campi: nome, categoria, unita (pz, mq, ml, mc, kg, q, t, sacco, bancale, conf, lt), prezzo (numero, di vendita), quantita (numero).
 - "vai": vuole solo aprire una sezione. "sezione" = la chiave esatta presa dall'elenco delle sezioni.
 - "non_capito": non si capisce, oppure chiede una cosa che non e' in questo elenco (una domanda, un conto, cancellare, mandare un'email). In "messaggio" scrivi UNA frase corta e gentile, dando del tu, che dice cosa puoi fare (es. "Questo non lo so fare a voce. Posso aprirti e riempirti un lavoro, un cliente, un preventivo o un promemoria.").
 
 REGOLE:
+- Usa SOLO le azioni scritte in AZIONI POSSIBILI nel contesto: quelle sono le uniche che questo gestionale sa aprire. Se serve un'altra, rispondi "non_capito".
 - Se la frase va bene per piu' azioni, scegli quella della SEZIONE APERTA (in Clienti un nome e un indirizzo sono un cliente; in Promemoria "chiamare il commercialista venerdi'" e' un promemoria; in Scadenzario "revisione furgone 12 dicembre" e' una scadenza).
 - Con un computo aperto, frasi come "aggiungi massetto venti metri quadri a diciotto euro" sono "voce_computo".
 - I numeri detti a parole diventano cifre: "trecentocinquanta" = 350, "diciotto e cinquanta" = 18.5. Importi, quantita' e prezzi sono NUMERI col punto per i decimali, senza euro.
