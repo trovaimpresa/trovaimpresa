@@ -293,6 +293,79 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   </div>
 </div>
 
+    <!-- 30 ott 2026 — RIPRISTINATO: il 21 set 2026 lo script dei due riquadri
+         aveva cancellato per sbaglio questo pezzo (risposta rapida, indice, tabelle). -->
+  <div class="answer">
+      <strong>In breve:</strong> nel 2026 il bonus ristrutturazione ti fa detrarre dalle tasse
+      <span class="price-big">il 50% sulla prima casa, il 36% sulle altre</span>
+      su una spesa massima di <strong>96.000 € per unità immobiliare</strong>, recuperati in <strong>10 rate annuali</strong> uguali. Devi pagare con bonifico parlante. Sotto trovi come funziona nel dettaglio e un calcolatore di quanto ti torna.
+    </div>
+    <div class="answer-cta">
+      <b>Quanto costa a casa tua?</b>
+      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
+      <a href="/cerca-imprese.html">Chiedi preventivi gratis nella tua città →</a>
+      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
+    </div>
+
+
+    <p class="lead">Il bonus ristrutturazione è uno sconto sulle tasse (una detrazione IRPEF), non un contributo che ti arriva sul conto. Funziona così: fai i lavori, e ogni anno per 10 anni ti riprendi un pezzo della spesa scalandolo dalle tasse che devi pagare. Se non paghi abbastanza IRPEF, la parte non usata di quell'anno si perde (non si recupera dopo).</p>
+
+    <h2>Percentuali e tetti 2026</h2>
+    <div class="tab-wrap"><table>
+      <caption>Bonus ristrutturazione 2026 — detrazione IRPEF in 10 rate annuali</caption>
+      <thead>
+        <tr><th>Immobile</th><th>Detrazione</th><th style="text-align:right">Spesa massima</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Prima casa (abitazione principale)</td><td>50%</td><td class="num" style="text-align:right">96.000 €</td></tr>
+        <tr><td>Seconda casa e altri immobili</td><td>36%</td><td class="num" style="text-align:right">96.000 €</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <strong>Chi ha diritto al 50%:</strong> il 50% spetta a chi è <strong>proprietario</strong> (o titolare di un diritto reale, come l'usufrutto) <strong>e</strong> ha in quell'immobile la propria abitazione principale. Chi paga i lavori ma non è proprietario — l'inquilino, il familiare convivente, il comodatario — detrae al <strong>36%</strong> anche se ci abita. Il dubbio più frequente: se compri casa e ci fai i lavori prima di andarci a vivere, il 50% spetta a condizione che l'immobile diventi abitazione principale entro la fine dei lavori. Nel dubbio, chiedi al commercialista prima di iniziare a pagare.
+    </div>
+
+    <div class="note">
+      <strong>Attenzione al 2027:</strong> queste percentuali valgono per le spese sostenute nel 2026. Salvo proroghe, dal 2027 sono previste percentuali più basse (per le seconde case si scende verso il 30%). Se puoi, chi deve fare lavori importanti ha convenienza a sostenere la spesa entro fine 2026.
+    </div>
+
+    <h2>Quali lavori rientrano</h2>
+    <p>Il bonus copre soprattutto la <strong>manutenzione straordinaria</strong>, il restauro, il risanamento conservativo e la ristrutturazione edilizia sulle singole abitazioni. La manutenzione ordinaria (tinteggiature, piccole riparazioni) rientra solo sulle <strong>parti comuni</strong> dei condomini.</p>
+    <ul class="checklist">
+      <li>Rifacimento di bagni, impianti idraulici ed elettrici</li>
+      <li>Sostituzione di infissi e serramenti</li>
+      <li>Rifacimento di pavimenti e tramezzi, modifiche interne</li>
+      <li>Opere per il risparmio energetico e la sicurezza (antifurto, messa a norma)</li>
+      <li>Rifacimento di scale, tetti, recinzioni e opere sulle parti esterne</li>
+    </ul>
+
+    <div class="related">
+      💶 Per capire su quali cifre si applica il bonus, vedi i costi reali: <a href="/quanto-costa-ristrutturare-casa.html">ristrutturare casa</a>, <a href="/quanto-costa-rifare-il-bagno.html">rifare il bagno</a> e <a href="/quanto-costa-cappotto-termico.html">cappotto termico</a>.<br>
+      📋 Per detrarre, i lavori devono essere regolari: <a href="/permessi-ristrutturazione-cila-scia.html">quale titolo edilizio serve per i tuoi lavori</a>.
+    </div>
+
+    <!-- ================= CALCOLATORE ================= -->
+    <div class="calc" id="calcolatore">
+      <h3>Calcola quanto ti torna col bonus</h3>
+      <p class="sub">Inserisci la spesa prevista per i lavori e scopri la detrazione totale e la rata annuale.</p>
+
+      <div class="field">
+        <label>Spesa prevista per i lavori (€)</label>
+        <input type="number" id="spesa" min="0" step="1000" placeholder="es. 40000" value="40000">
+      </div>
+
+      <div class="field">
+        <label>Tipo di immobile</label>
+        <div class="seg" id="tipo">
+          <button data-p="0.50" class="active">Prima casa<small>detrazione 50%</small></button>
+          <button data-p="0.36">Seconda casa<small>detrazione 36%</small></button>
+        </div>
+      </div>
+
+      
+
+
       <div class="result">
         <div class="lbl">Detrazione totale in 10 anni</div>
         <div class="amount" id="out">20.000 €</div>

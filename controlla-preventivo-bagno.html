@@ -192,6 +192,34 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   </div>
 </div>
 
+    <!-- 30 ott 2026 — RIPRISTINATO: il 21 set 2026 lo script dei due riquadri
+         aveva cancellato per sbaglio questo pezzo (risposta rapida, indice, tabelle). -->
+<p>Inserisci le voci che hai sul preventivo. Ti dico in un minuto quali prezzi sono nella norma e quali sono troppo alti. Gratis, senza registrazione.</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Compila le voci del preventivo</h2>
+    <p class="sub">Non serve averle tutte: inserisci solo gli importi che hai. Metti le cifre <strong>IVA esclusa</strong> per un confronto corretto.</p>
+
+    <div class="field">
+      <label>Dimensione del bagno <span class="hint">(serve per calcolare la posa al metro quadro)</span></label>
+      <input type="number" id="mq" min="1" max="30" step="1" placeholder="es. 6" value="6"> <span class="hint">mq</span>
+    </div>
+
+    <div class="field">
+      <label>Livello delle finiture</label>
+      <div class="seg" id="livello">
+        <button data-k="0.85">Economico</button>
+        <button data-k="1" class="active">Medio</button>
+        <button data-k="1.4">Alto / lusso</button>
+      </div>
+    </div>
+
+    
+
+
     <div class="field">
       <label>Importi per voce <span class="hint">(in €, lascia vuoto quelle che non hai)</span></label>
       <div class="voci" id="voci">

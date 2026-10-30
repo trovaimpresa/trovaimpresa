@@ -305,6 +305,88 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   </div>
 </div>
 
+    <!-- 30 ott 2026 — RIPRISTINATO: il 21 set 2026 lo script dei due riquadri
+         aveva cancellato per sbaglio questo pezzo (risposta rapida, indice, tabelle). -->
+  <div class="answer">
+      <strong>Risposta rapida:</strong> un impianto fotovoltaico chiavi in mano costa
+      <span class="price-big">circa 1.500 – 2.500 €/kW</span>
+      Un impianto <strong>3 kW</strong> (famiglia piccola) sta sui <strong>5.000–7.000 €</strong>, un <strong>6 kW</strong> (famiglia media) sugli <strong>8.500–13.000 €</strong>. La <strong>batteria di accumulo</strong> aggiunge circa 800–1.300 € per ogni kWh (una da 10 kWh sono 8.000–13.000 € in più). Sotto trovi i prezzi e un calcolatore.
+    </div>
+        <nav class="indice">
+      <b>Vai dritto alla tua domanda</b>
+      <ul>
+        <li><a href="#prezzi-del-fotovoltaico-per-taglia">3, 4,5 o 6 kW: quanto costa</a></li>
+        <li><a href="#domande-frequenti-sul-fotovoltaico">Quanti kW servono alla mia famiglia</a></li>
+        <li><a href="#cosa-comprende-il-prezzo-chiavi">Cosa c'è dentro il chiavi in mano</a></li>
+        <li><a href="#detrazioni-e-incentivi">Detrazioni e incentivi 2026</a></li>
+        <li><a href="#come-non-farsi-fregare-sul">Come non farsi fregare</a></li>
+      </ul>
+    </nav>
+
+    <div class="answer-cta">
+      <b>Quanto costa a casa tua?</b>
+      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo agli artigiani della tua città.</p>
+      <a href="/cerca-artigiani.html">Chiedi preventivi gratis nella tua città →</a>
+      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
+    </div>
+
+
+    <p class="lead">Nel fotovoltaico ci sono due decisioni che spostano il conto più di tutto: <strong>quanti kW</strong> di pannelli metti (più grande = costa di più ma scende il prezzo al kW) e se aggiungi o no la <strong>batteria di accumulo</strong>, che spesso vale quanto metà impianto. Il resto (staffe, inverter, allacci) è più standard.</p>
+
+    <h2 id="prezzi-del-fotovoltaico-per-taglia">Prezzi del fotovoltaico per taglia</h2>
+    <div class="tab-wrap"><table>
+      <caption>Costi indicativi 2026 — chiavi in mano, IVA agevolata esclusa</caption>
+      <thead>
+        <tr><th>Impianto</th><th>Per chi</th><th style="text-align:right">Solo pannelli</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>3 kW</td><td>1–2 persone, consumi bassi</td><td class="num" style="text-align:right">5.000 – 7.000 €</td></tr>
+        <tr><td>4,5 kW</td><td>famiglia di 3</td><td class="num" style="text-align:right">7.000 – 9.500 €</td></tr>
+        <tr><td>6 kW</td><td>famiglia di 4, casa media</td><td class="num" style="text-align:right">8.500 – 13.000 €</td></tr>
+        <tr><td>Batteria di accumulo</td><td>per usare l'energia la sera</td><td class="num" style="text-align:right">800 – 1.300 €/kWh</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <strong>La batteria conviene?</strong> Dipende da quando consumi. Se sei fuori tutto il giorno e usi corrente soprattutto la sera, l'accumulo ti fa sfruttare l'energia prodotta di giorno invece di venderla a poco. Se invece sei molto in casa di giorno, può bastare un buon impianto senza batteria. È la scelta che cambia di più il prezzo, valutala bene.
+    </div>
+
+    <h2 id="cosa-comprende-il-prezzo-chiavi">Cosa comprende il prezzo chiavi in mano</h2>
+    <ul class="checklist">
+      <li><strong>Pannelli e inverter</strong>: il cuore dell'impianto, di marca e con garanzia.</li>
+      <li><strong>Struttura di fissaggio</strong> adatta al tuo tetto (tegole, lamiera, piano).</li>
+      <li><strong>Installazione e cablaggi</strong>, quadri e protezioni.</li>
+      <li><strong>Pratiche</strong>: connessione alla rete, comunicazioni al gestore e allo GSE.</li>
+      <li><strong>Collaudo e messa in servizio</strong>, con l'app di monitoraggio.</li>
+    </ul>
+
+    <div class="related">
+      ❄️ Abbini una pompa di calore o un condizionatore? Vedi <a href="/quanto-costa-installare-un-condizionatore.html">quanto costa installare un condizionatore</a>. E il <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.<br>
+      📋 I pannelli rientrano in edilizia libera solo nei casi ammessi, e sugli edifici vincolati le regole cambiano: <a href="/permessi-ristrutturazione-cila-scia.html">quale permesso serve per i tuoi lavori</a>.
+    </div>
+
+    <!-- ================= CALCOLATORE ================= -->
+    <div class="calc" id="calcolatore">
+      <h3>Calcola il costo del tuo impianto fotovoltaico</h3>
+      <p class="sub">Stima in 15 secondi, chiavi in mano.</p>
+
+      <div class="field">
+        <label>Potenza dell'impianto: <span class="val" id="kwVal">6 kW</span></label>
+        <input type="range" id="kw" min="2" max="12" value="6" step="0.5">
+      </div>
+
+      <div class="field">
+        <label>Batteria di accumulo</label>
+        <div class="seg" id="accumulo">
+          <button data-kwh="0" class="active">Nessuna</button>
+          <button data-kwh="5">5 kWh</button>
+          <button data-kwh="10">10 kWh</button>
+        </div>
+      </div>
+
+      
+
+
       <div class="field">
         <label>Extra (aggiungono al totale)</label>
         <div class="checks" id="extra">
