@@ -138,7 +138,7 @@
     return '<article class="f-post le-post ' + classe + '">' +
       '<div class="f-ph"><div class="f-av">' + iniziale(nome) + '</div><b>' + esc(nome) + '</b> · ' + esc(fa(x.quando)) +
       (zona ? ' · <span class="le-zona">' + ICO_ZONA + esc(zona) + '</span>' : '') +
-      ' <span class="f-chip">' + esc(x.etichetta) + '</span>' +
+      ' <span class="f-chip le-et-' + x.genere + '">' + esc(x.etichetta) + '</span>' +
       (chip ? ' <span class="f-chip">' + esc(chip) + '</span>' : '') + '</div>' +
       '<h2><a href="' + x.url + '">' + esc(x.titolo) + '</a></h2>' +
       (resto(x) ? '<div class="f-tx">' + nl2br(corto(resto(x), 280)) + '</div>' : '') +
