@@ -1397,6 +1397,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       <div class="topbar">
         <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 1 0-2.8l.8-.8a2 2 0 0 1 2.8 0L21 9"/><path d="m21 3-5 5"/><path d="M3 9l3.5-3.5a2 2 0 0 1 2.8 0l.8.8a2 2 0 0 1 0 2.8L6 13"/></svg> Subappalti</div>
       </div>
+      <div class="u-numeri" id="sa-numeri"></div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -1456,6 +1457,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       <div class="topbar">
         <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> Offerte di lavoro</div>
       </div>
+      <div class="u-numeri" id="offlav-numeri"></div>
       <div class="table-header" style="flex-wrap:wrap;gap:10px">
         <div class="table-title" id="offlav-count">–</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -1515,6 +1517,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       <div class="topbar">
         <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Candidati registrati</div>
       </div>
+      <div class="u-numeri" id="cand-numeri"></div>
       <div class="table-header" style="flex-wrap:wrap;gap:10px">
         <div class="table-title" id="cand-count">–</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -5025,6 +5028,42 @@ async function segnalazioneRisolta(id) {
   await caricaSegnalazioni();
 }
 
+/* ---------- 30 ott 2026: LE CARTE IN CIMA A SUBAPPALTI, OFFERTE, CANDIDATI ----------
+   Stessa forma di «Chi usa il gestionale» (.u-numeri / .u-num). Le persone che
+   aprono le pagine arrivano da admin-visite.js ({sezioni:true}); il resto si conta
+   dalle righe gia' caricate per la tabella. Se le visite non rispondono, le carte
+   degli annunci si vedono lo stesso. */
+let _visiteSez = null;
+async function visiteSezioni() {
+  if (_visiteSez) return _visiteSez;
+  try {
+    const res = await fetch('/.netlify/functions/admin-visite', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, sezioni: true })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (j.success) _visiteSez = j.sezioni || {};
+  } catch (_) {}
+  return _visiteSez || {};
+}
+function _numCarta(v, e, colore, sotto) {
+  return '<div class="u-num ' + (colore || '') + '"><div class="v">' + v + '</div><div class="e">' + e
+    + (sotto ? '<br><span style="font-size:13.5px">' + sotto + '</span>' : '') + '</div></div>';
+}
+function _numDa(lista, campo, giorni) {
+  const da = Date.now() - giorni * 86400000;
+  return lista.filter(r => r[campo] && new Date(r[campo]).getTime() >= da).length;
+}
+async function disegnaNumeri(boxId, chiave, carteAnnunci) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.innerHTML = carteAnnunci;
+  const vis = (await visiteSezioni())[chiave];
+  if (!vis) return;
+  box.innerHTML = _numCarta(vis.p30, 'Persone che hanno aperto queste pagine', 'verde', 'ultimi 30 giorni')
+    + _numCarta(vis.p7, 'Persone negli ultimi 7 giorni', 'verde') + carteAnnunci;
+}
+
 // SUBAPPALTI
 async function caricaSubappalti() {
   const tbody = document.getElementById('table-subappalti');
@@ -5042,6 +5081,15 @@ async function caricaSubappalti() {
   } catch {
     tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
+  }
+  {
+    const l = data || [];
+    const senza = l.filter(s => !s.user_id).length;
+    disegnaNumeri('sa-numeri', 'subappalti',
+        _numCarta(l.length, 'Annunci in tutto')
+      + _numCarta(_numDa(l, 'created_at', 30), 'Annunci ultimi 30 giorni', 'giallo', _numDa(l, 'created_at', 7) + ' negli ultimi 7')
+      + _numCarta(l.filter(s => s.tipo !== 'cerca').length + ' / ' + l.filter(s => s.tipo === 'cerca').length, 'Offrono lavoro / Cercano lavoro', 'viola')
+      + _numCarta(senza, 'Senza account sul sito', senza ? 'rosso' : '', senza ? 'imprese da invitare a iscriversi' : ''));
   }
   if (!data || !data.length) {
     tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🤝</div>Nessun annuncio subappalto</div></td></tr>';
@@ -5218,6 +5266,11 @@ async function caricaOfferteLavoro() {
   tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
   try {
     OFFLAV = await adminApi('list', 'offerte_lavoro') || [];
+    const senza = OFFLAV.filter(o => !o.impresa_id).length;
+    disegnaNumeri('offlav-numeri', 'lavoro',
+        _numCarta(OFFLAV.length, 'Offerte in tutto', '', OFFLAV.filter(o => o.attiva).length + ' attive')
+      + _numCarta(_numDa(OFFLAV, 'created_at', 30), 'Offerte ultimi 30 giorni', 'giallo', _numDa(OFFLAV, 'created_at', 7) + ' negli ultimi 7')
+      + _numCarta(senza, 'Messe senza account', senza ? 'rosso' : ''));
   } catch (e) {
     OFFLAV = [];
     vuotoLav(tbody, 7, '⚠️', 'Errore caricamento: ' + esc(e.message));
@@ -5300,6 +5353,10 @@ async function caricaCandidati() {
   tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
   try {
     CANDLAV = await adminApi('list', 'candidati_lavoro') || [];
+    disegnaNumeri('cand-numeri', 'candidati',
+        _numCarta(CANDLAV.length, 'Candidati registrati')
+      + _numCarta(_numDa(CANDLAV, 'created_at', 30), 'Iscritti ultimi 30 giorni', 'giallo', _numDa(CANDLAV, 'created_at', 7) + ' negli ultimi 7')
+      + _numCarta(CANDLAV.filter(c => c.cv).length, 'Hanno caricato il curriculum', 'viola'));
   } catch (e) {
     CANDLAV = [];
     vuotoLav(tbody, 7, '⚠️', 'Errore caricamento: ' + esc(e.message));

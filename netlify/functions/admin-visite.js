@@ -84,6 +84,21 @@ exports.handler = async function (event) {
     auth: { persistSession: false, autoRefreshToken: false }
   });
 
+  /* 30 ott 2026 — le carte di Subappalti, Offerte di lavoro e Candidati:
+     quante persone aprono le pagine di ogni sezione (7 e 30 giorni). */
+  let sezioni = false;
+  try { sezioni = JSON.parse(event.body || '{}').sezioni === true; } catch (_) {}
+  if (sezioni) {
+    try {
+      const { data, error } = await supabaseAdmin.rpc('admin_visite_sezioni');
+      if (error) throw error;
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, sezioni: data || {} }) };
+    } catch (err) {
+      console.error('[admin-visite] sezioni:', err.message);
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.message }) };
+    }
+  }
+
   try {
     const { data, error } = await supabaseAdmin
       .from('visite_giorno')
