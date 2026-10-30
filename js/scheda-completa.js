@@ -35,7 +35,7 @@
     { id: 'logo',        nome: 'Il logo o una tua foto',      ok: function (r) { return pieno(r.logo_url); },
       tasto: 'Carica il logo', fai: function () { var i = document.getElementById('input-logo-impresa'); if (i) i.click(); } },
     { id: 'foto',        nome: 'Almeno una foto dei lavori',  ok: function (r, n) { return n > 0; },
-      tasto: 'Aggiungi foto', fai: function () { vai('sec-foto-lavori'); } },
+      tasto: 'Aggiungi foto', fai: function () { vai('foto-lavori'); } },
     { id: 'descrizione', nome: 'Due righe su di te',          ok: function (r) { return String(r.descrizione || '').trim().length >= DESCR_MIN; },
       tasto: 'Scrivi', fai: profilo },
     { id: 'mestiere',    nome: 'Il tuo mestiere',             ok: haMestiere, tasto: 'Aggiungi', fai: profilo },
@@ -46,8 +46,8 @@
   ];
   function profilo() { window.location.href = '/modifica-profilo.html'; }
   function vai(id) {
-    if (typeof window.showSectionById === 'function') { window.showSectionById(id); window.scrollTo(0, 0); return; }
-    var el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (typeof window.showSection === 'function') { window.showSection(id, null); return; }
+    var el = document.getElementById('sec-' + id); if (el) el.scrollIntoView({ behavior: 'smooth' });
   }
 
   var css = ''
@@ -79,8 +79,8 @@
       hero.parentNode.insertBefore(box, hero.nextSibling);
     }
     box.innerHTML = '<div class="sc-tit">La tua scheda è completa al ' + perc + '%</div>'
-      + '<div class="sc-sub">Le schede complete le aprono e le chiamano molto di più. Mancano ' + mancano.length
-      + (mancano.length === 1 ? ' cosa' : ' cose') + '.</div>'
+      + '<div class="sc-sub">Le schede complete le aprono e le chiamano molto di più. '
+      + (mancano.length === 1 ? 'Manca 1 cosa' : 'Mancano ' + mancano.length + ' cose') + '.</div>'
       + '<div class="sc-barra"><span style="width:' + perc + '%"></span></div>'
       + '<div class="sc-lista">' + mancano.map(function (v, i) {
           return '<div class="sc-voce"><span class="sc-pallino"></span><b>' + v.nome + '</b>'
