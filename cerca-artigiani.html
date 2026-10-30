@@ -839,6 +839,11 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
   if (params.get('citta')) document.getElementById('cittaInput').value = params.get('citta');
   if (params.get('mestiere')) {
     mestiereScelto = params.get('mestiere');
+    /* 30 ott 2026 — le pagine citta' mandavano «Falegname», ma nel database e
+       nella tendina il mestiere si chiama «Falegnameria»: Falegnami a Roma = 0
+       anche con 2 falegnami iscritti. I link vecchi (gia' su Google) si correggono qui. */
+    var _alias = { 'Falegname': 'Falegnameria', 'Falegnami': 'Falegnameria' };
+    if (_alias[mestiereScelto]) mestiereScelto = _alias[mestiereScelto];
     /* prima il filtro veniva applicato ma la tendina restava su "Tutti i mestieri":
        l'utente non capiva perche' vedeva pochi risultati */
     var _ms = document.getElementById('mestiereSelect');

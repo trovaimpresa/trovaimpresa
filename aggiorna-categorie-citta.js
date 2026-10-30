@@ -83,7 +83,7 @@ function casella(href, icona, nome) {
 function griglie(c) {
   const a = ARTIGIANI.map(([s, i, n]) => casella(`/${s}-${c.slug}`, i, n));
   // i falegnami non hanno (ancora) una pagina loro: resta la ricerca
-  a.push(casella(`/cerca-artigiani.html?citta=${encodeURIComponent(c.nome)}&mestiere=Falegname`, '<svg class="cat-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d=\"M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14\"/><path d=\"M2 20h20\"/><path d=\"M14 12v.01\"/></svg>', 'Falegnami'));
+  a.push(casella(`/cerca-artigiani.html?citta=${encodeURIComponent(c.nome)}&mestiere=Falegnameria`, '<svg class="cat-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d=\"M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14\"/><path d=\"M2 20h20\"/><path d=\"M14 12v.01\"/></svg>', 'Falegnami'));
   const t = TECNICI.map(([s, i, n]) => casella(`/${s}-${c.slug}`, i, n));
   return `  <h3 class="grp">Artigiani e imprese</h3>\n`
        + `  <div class="categorie">\n${a.join('\n')}\n  </div>\n`
