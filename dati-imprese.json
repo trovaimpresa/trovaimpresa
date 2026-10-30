@@ -191,7 +191,7 @@
       {
         "id": 268,
         "nome": "Daka Costruzioni srl",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": null,
         "tipo": "impresa",
         "citta": "Coccaglio",
@@ -444,7 +444,7 @@
       {
         "id": 225,
         "nome": "BV COSTRUZIONI SRLS",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": null,
         "tipo": "impresa",
         "citta": "Strangolagalli",
@@ -552,7 +552,7 @@
       {
         "id": 148,
         "nome": "Sanapo daniela",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": [],
         "tipo": "impresa",
         "citta": "Lecce",
@@ -1481,7 +1481,7 @@
       {
         "id": 104,
         "nome": "General Service",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": [
           "Climatizzazione / Caldaie",
           "Fabbro / Cancelli / Recinzioni",
@@ -1513,7 +1513,7 @@
       {
         "id": 176,
         "nome": "D'Urso costruzioni",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": [],
         "tipo": "impresa",
         "citta": "Pontecagnano Faiano",
@@ -1716,7 +1716,7 @@
       {
         "id": 118,
         "nome": "AS EDILSERVICE 14 DI ANTONIO BRUNO",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": [],
         "tipo": "impresa",
         "citta": "Torino",
@@ -1743,7 +1743,7 @@
       {
         "id": 260,
         "nome": "PMP di Farinella",
-        "mestiere": "Altro (scrivi quale)",
+        "mestiere": "Altro",
         "mestieri": [],
         "tipo": "impresa",
         "citta": "Torino",
