@@ -619,6 +619,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       <!-- 27 ottobre 2026 - i clienti che lasciano l'email nel riquadro «Avvisami gratis» delle ricerche. -->
       <div class="nav-item" onclick="showSection('clienti-iscritti',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span> Clienti iscritti
+        <span class="nav-badge" id="badge-clienti-iscritti">0</span>
       </div>
       <div class="nav-item" onclick="showSection('imprese',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg></span> Imprese
@@ -1490,22 +1491,22 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
          Una riga = un avviso: la stessa email puo' avere piu' righe (Roma artigiani, Rieti idraulica...). -->
     <div class="section" id="sec-clienti-iscritti">
       <div class="topbar">
-        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Clienti iscritti agli avvisi</div>
+        <div class="topbar-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Tutti i clienti iscritti</div>
       </div>
-      <div id="avv-numeri" style="display:flex;gap:14px;flex-wrap:wrap;margin:0 0 18px"></div>
       <div class="table-header" style="flex-wrap:wrap;gap:10px">
         <div class="table-title" id="avv-count">–</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <input id="avv-search" class="search-input" placeholder="Cerca email, città, lavoro..." oninput="renderClientiIscritti()">
-          <button class="action-btn btn-dettagli" onclick="caricaClientiIscritti()">Aggiorna</button>
+          <input id="avv-search" class="search-input" placeholder="🔍 Cerca email, città..." oninput="renderClientiIscritti()">
+          <select id="avv-filtro-tipo" onchange="renderClientiIscritti()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i tipi</option><option value="impresa">Imprese</option><option value="artigiano">Artigiani</option><option value="professionista">Professionisti</option><option value="mestiere">Pagina mestiere</option></select>
+          <select id="avv-filtro-stato" onchange="renderClientiIscritti()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="attivo">Attivi</option><option value="conferma">Da confermare</option><option value="cancellato">Cancellati</option></select>
         </div>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Email</th><th>Città</th><th>Cosa cerca</th><th>Stato</th><th>Mail ricevute</th><th>Iscritto il</th><th>Azioni</th></tr>
+            <tr><th>Email</th><th>Tipo</th><th>Città</th><th>Cosa cerca</th><th>Stato</th><th>Mail ricevute</th><th>Data</th><th>Azioni</th></tr>
           </thead>
-          <tbody id="table-clienti-iscritti"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-clienti-iscritti"><tr><td colspan="8" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -3990,7 +3991,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti(), caricaBadgeRichieste()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaValutazioniSito(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita(), caricaVisite(), caricaRichiesteClienti(), caricaBadgeRichieste(), caricaClientiIscritti().catch(() => {})]);
 }
 
 // QUANTE PERSONE HANNO APERTO IL SITO (caselle in cima alla dashboard)
@@ -5353,57 +5354,66 @@ const AVV_TIPO = { impresa: 'Imprese', artigiano: 'Artigiani', professionista: '
 
 async function caricaClientiIscritti() {
   const tbody = document.getElementById('table-clienti-iscritti');
-  tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" class="loading">Caricamento...</td></tr>';
   try {
     const r = await Promise.all([adminApi('list', 'avvisi_clienti'), adminApi('list', 'avvisi_inviati')]);
     AVVCLI = r[0] || []; AVVINV = r[1] || [];
   } catch (e) {
     AVVCLI = []; AVVINV = [];
-    vuotoLav(tbody, 7, '⚠️', 'Errore caricamento: ' + esc(e.message));
+    vuotoLav(tbody, 8, '⚠️', 'Errore caricamento: ' + esc(e.message));
     document.getElementById('avv-count').textContent = '–';
     return;
   }
   renderClientiIscritti();
 }
 
+/* 30 ottobre 2026 — come Imprese: pallino arancione nel menu e badge colorati. */
 function statoAvviso(a) {
-  if (!a.attivo) return { t: 'Cancellato', c: '#64748b' };
-  if (!a.confermato_il) return { t: 'Da confermare', c: '#b45309' };
-  return { t: 'Attivo', c: '#15803d' };
+  if (!a.attivo) return { t: 'Cancellato', k: 'cancellato', b: 'badge-rig' };
+  if (!a.confermato_il) return { t: 'Da confermare', k: 'conferma', b: 'badge-att' };
+  return { t: '✅ Attivo', k: 'attivo', b: 'badge-v' };
 }
+const AVV_BADGE = { impresa: 'badge-imp', artigiano: 'badge-art', professionista: 'badge-pro', mestiere: 'badge-a' };
 
 function renderClientiIscritti() {
   const tbody = document.getElementById('table-clienti-iscritti');
   const q = (document.getElementById('avv-search').value || '').toLowerCase().trim();
+  const ft = document.getElementById('avv-filtro-tipo')?.value || '';
+  const fs = document.getElementById('avv-filtro-stato')?.value || '';
   const perAvviso = {};
   AVVINV.forEach(x => { perAvviso[x.avviso_id] = (perAvviso[x.avviso_id] || 0) + 1; });
 
-  const email = new Set(AVVCLI.map(a => String(a.email).toLowerCase()));
-  const attivi = AVVCLI.filter(a => a.attivo && a.confermato_il).length;
-  const daConf = AVVCLI.filter(a => a.attivo && !a.confermato_il).length;
-  const box = (n, t) => '<div style="background:#fff;border:2px solid #0a2a4d;border-radius:14px;padding:14px 20px;min-width:170px">' +
-    '<div style="font-size:30px;font-weight:800;color:#0a2a4d">' + n + '</div><div style="font-size:16px;font-weight:700;color:#0a2a4d">' + t + '</div></div>';
-  document.getElementById('avv-numeri').innerHTML =
-    box(email.size, 'clienti (email)') + box(attivi, 'avvisi attivi') + box(daConf, 'da confermare') + box(AVVINV.length, 'imprese segnalate');
+  const nClienti = new Set(AVVCLI.map(a => String(a.email).toLowerCase())).size;
+  _set('badge-clienti-iscritti', nClienti);
 
-  let lista = AVVCLI.slice();
-  if (q) lista = lista.filter(a => [a.email, a.citta, a.regione, a.mestiere, a.etichetta, AVV_TIPO[a.tipo]].filter(Boolean).join(' ').toLowerCase().includes(q));
-  document.getElementById('avv-count').textContent = AVVCLI.length + ' iscrizioni · mostrate ' + lista.length;
-  if (!lista.length) { vuotoLav(tbody, 7, '🔔', 'Ancora nessun cliente iscritto'); return; }
+  const lista = AVVCLI.filter(a => {
+    if (ft && a.tipo !== ft) return false;
+    if (fs && statoAvviso(a).k !== fs) return false;
+    if (q && ![a.email, a.citta, a.regione, a.mestiere, a.etichetta, AVV_TIPO[a.tipo]].filter(Boolean).join(' ').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('avv-count').textContent = (q || ft || fs)
+    ? lista.length + ' su ' + AVVCLI.length + ' iscrizioni'
+    : nClienti + (nClienti === 1 ? ' cliente iscritto' : ' clienti iscritti') + ' · ' + AVVCLI.length + ' avvisi';
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="eicon">🔔</div>Nessun cliente trovato</div></td></tr>';
+    return;
+  }
 
   tbody.innerHTML = lista.map(a => {
     const st = statoAvviso(a);
     const cosa = a.tipo === 'mestiere'
-      ? esc(a.etichetta || 'Pagina mestiere') + (a.origine ? '<div style="font-size:0.78rem;color:var(--light)">/' + esc(a.origine) + '</div>' : '')
-      : (AVV_TIPO[a.tipo] || esc(a.tipo)) + ' · ' + (a.mestiere ? esc(String(a.mestiere).replace(/_/g, ' ')) : 'tutti i lavori');
+      ? esc(a.etichetta || 'Pagina mestiere') + (a.origine ? '<br><small style="color:var(--light)">/' + esc(a.origine) + '</small>' : '')
+      : (a.mestiere ? esc(String(a.mestiere).replace(/_/g, ' ')) : 'Tutti i lavori');
     return '<tr>' +
       '<td><strong>' + esc(a.email) + '</strong></td>' +
-      '<td>📍 ' + esc(a.citta) + (a.regione ? '<div style="font-size:0.78rem;color:var(--light)">' + esc(a.regione) + '</div>' : '') + '</td>' +
+      '<td><span class="badge ' + (AVV_BADGE[a.tipo] || 'badge-a') + '">' + (AVV_TIPO[a.tipo] || esc(a.tipo) || '–') + '</span></td>' +
+      '<td>📍 ' + (esc(a.citta) || '–') + (a.regione ? '<br><small style="color:var(--light)">' + esc(a.regione) + '</small>' : '') + '</td>' +
       '<td>' + cosa + '</td>' +
-      '<td><span style="font-weight:700;color:' + st.c + '">' + st.t + '</span></td>' +
+      '<td><span class="badge ' + st.b + '">' + st.t + '</span></td>' +
       '<td style="text-align:center">' + (perAvviso[a.id] || 0) + '</td>' +
-      '<td style="white-space:nowrap;font-size:0.78rem;color:var(--light)">' + fmtDataLav(a.creato_il) + '</td>' +
-      '<td><button class="action-btn btn-elimina" onclick="eliminaClienteIscritto(\'' + esc(String(a.id)) + '\')">🗑️ Elimina</button></td>' +
+      '<td style="font-size:0.78rem;color:var(--light)">' + fmtDataLav(a.creato_il) + '</td>' +
+      '<td><button class="action-btn btn-elimina" onclick="eliminaClienteIscritto(\'' + esc(String(a.id)) + '\')">🗑️</button></td>' +
     '</tr>';
   }).join('');
 }
