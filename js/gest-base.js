@@ -419,4 +419,6 @@
   let sbUid=null;
   /* 27 set 2026 — il logo dell'impresa in cima (js/gest-logo.js) */
   if(window.gestLogoAvvia)window.gestLogoAvvia(sb,()=>sbUid);
+  /* 31 ott 2026 — invito a recensire il gestionale su G2 (js/invito-g2.js) */
+  if(window.invitoG2Avvia)window.invitoG2Avvia(sb,()=>sbUid,["gest_preventivi","gest_fatture","gest_lavori"]);
 
