@@ -840,7 +840,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         </div>
         <div class="stat-card apri" data-va="utilizzo">
           <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-          <div><div class="stat-num" id="stat-gestionali">–</div><div class="stat-lbl">Gestionali attivi</div></div>
+          <div><div class="stat-num" id="stat-gestionali">–</div><div class="stat-lbl">Usano il gestionale (7 gg)</div></div>
           <span class="stat-freccia">›</span>
         </div>
         <div class="stat-card apri" data-va="preventivi">
@@ -3106,6 +3106,19 @@ function disegnaControlloAbbonamenti(j){
   box.innerHTML = html;
 }
 
+async function contaGestionaliAttivi(){
+  try{
+    const res = await fetch('/.netlify/functions/admin-utilizzo', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) return;
+    const el = document.getElementById('stat-gestionali');
+    if(el) el.textContent = (j.data || []).filter(r => _uStato(r) === 'viva').length;
+  }catch(e){ /* resta il trattino */ }
+}
+
 async function caricaUtilizzo(){
   const box = document.getElementById('u-lista');
   if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
@@ -4180,7 +4193,9 @@ async function caricaImprese() {
   _set('stat-oggi', impreseVere.filter(i => i.created_at && new Date(i.created_at).toLocaleDateString('sv-SE') === oggiStr).length);
   _set('stat-settimana', impreseVere.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
   _set('stat-premium', impreseVere.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
-  _set('stat-gestionali', impreseVere.filter(i => i.gestionale_attivo === true).length);
+  /* 31 ott 2026: prima contava la colonna vecchia gestionale_attivo (sempre 0).
+     Adesso lo stesso conto di «Chi usa il gestionale»: entrate negli ultimi 7 giorni. */
+  contaGestionaliAttivi();
 
   /* 13 settembre 2026 — i numeri «da tenere d'occhio».
      Erano tutti gia' dentro `imprese`, nessuno li guardava. */
