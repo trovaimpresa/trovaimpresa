@@ -118,8 +118,11 @@
     sec.setAttribute("aria-label", "Recensioni del sito");
     sec.innerHTML = html;
 
+    // Sulla home sta subito dopo «Perché scegliere TrovaImpresa»; altrove sopra il footer
+    var why = document.querySelector(".why-section");
     var footer = document.querySelector("footer");
-    if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer);
+    if (why && why.parentNode) why.parentNode.insertBefore(sec, why.nextSibling);
+    else if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer);
     else document.body.appendChild(sec);
 
     avvia(sec);
