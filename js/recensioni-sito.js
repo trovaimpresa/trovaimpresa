@@ -37,8 +37,8 @@
     + '#ti-recensioni .tir-avg{font-size:44px;font-weight:800;line-height:1;display:block}'
     + '#ti-recensioni .tir-stars{color:var(--tir-star);letter-spacing:2px;font-size:18px}'
     + '#ti-recensioni .tir-count{display:block;color:var(--tir-muted);font-size:13px;margin-top:4px}'
-    + '#ti-recensioni .tir-title h2{margin:0 0 4px;font-size:22px}'
-    + '#ti-recensioni .tir-title p{margin:0;color:var(--tir-muted);font-size:15px}'
+    + '#ti-recensioni .tir-title h2{margin:0 0 6px;font-size:30px;line-height:1.2}'
+    + '#ti-recensioni .tir-title p{margin:0;color:var(--tir-muted);font-size:19px}'
     + '#ti-recensioni .tir-form{background:var(--tir-card);border:1px solid var(--tir-border);border-radius:12px;padding:20px;margin-bottom:28px}'
     + '#ti-recensioni .tir-rate{display:flex;gap:4px;margin-bottom:14px}'
     + '#ti-recensioni .tir-star{background:none;border:none;cursor:pointer;font-size:32px;line-height:1;color:#d9d9d9;padding:0;transition:color .1s}'
@@ -81,7 +81,7 @@
     + '#ti-recensioni .tir-bott a:hover{filter:brightness(1.12)}'
     + '#ti-recensioni .tir-bott a:focus-visible{outline:3px solid #0066ff;outline-offset:2px}'
     + '@media(max-width:520px){#ti-recensioni .tir-bott a{width:100%;text-align:center;align-items:center}#ti-recensioni .tir-invito{padding:20px}}'
-    + '@media(max-width:520px){#ti-recensioni .tir-head{justify-content:center;text-align:center}}';
+    + '@media(max-width:520px){#ti-recensioni .tir-head{justify-content:center;text-align:center}#ti-recensioni .tir-title h2{font-size:25px}}';
 
   // ---- HTML del blocco ----
   var html = ''
@@ -93,8 +93,8 @@
     +       '<span class="tir-count" id="tir-count">Caricamento…</span>'
     +     '</div>'
     +     '<div class="tir-title">'
-    +       '<h2>Ti piace TrovaImpresa?</h2>'
-    +       '<p>Raccontalo su Trustpilot.</p>'
+    +       '<h2>La tua recensione per noi è molto importante</h2>'
+    +       '<p>Bastano pochi clic.</p>'
     +     '</div>'
     +   '</div>'
     +   '<div class="tir-invito">'
