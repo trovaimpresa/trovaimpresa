@@ -28,6 +28,7 @@
     "#ti-g2 .g2-stelle{color:#ff8800;font-size:30px;letter-spacing:4px;margin:0 0 10px}" +
     "#ti-g2 h2{margin:0 0 14px;font-size:26px;line-height:1.25;color:#0a2a4d;padding-right:40px}" +
     "#ti-g2 p{margin:0 0 14px;font-size:18px;line-height:1.55;color:#1e293b}" +
+    "#ti-g2 .g2-sotto{font-size:19px;color:#475569;margin-top:-6px}" +
     "#ti-g2 .g2-nota{font-size:16px;color:#475569}" +
     "#ti-g2 .g2-bott{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}" +
     "#ti-g2 .g2-si{flex:1 1 260px;display:flex;align-items:center;justify-content:center;min-height:60px;padding:0 22px;background:#ff8800;color:#fff;font-size:19px;font-weight:700;text-decoration:none;border-radius:12px;box-sizing:border-box}" +
@@ -48,10 +49,11 @@
       '<div class="g2-box">' +
         '<button type="button" class="g2-x" aria-label="Chiudi">&times;</button>' +
         '<div class="g2-stelle" aria-hidden="true">★★★★★</div>' +
-        '<h2 id="g2-tit">Ti trovi bene col gestionale?</h2>' +
-        '<p>Raccontalo su G2, il sito dove le imprese confrontano i programmi gestionali.</p>' +
+        '<h2 id="g2-tit">La tua recensione per noi è molto importante</h2>' +
+        '<p class="g2-sotto">Bastano pochi clic.</p>' +
+        '<p>Racconta com\'è il gestionale su G2, il sito dove le imprese confrontano i programmi gestionali.</p>' +
         '<p>La tua recensione lo fa conoscere ad altre imprese. Più TrovaImpresa cresce, più clienti trovano le imprese iscritte e mandano loro richieste di preventivo.</p>' +
-        '<p class="g2-nota">Ci vogliono due minuti. Scrivi quello che pensi davvero, anche cosa manca.</p>' +
+        '<p class="g2-nota">Scrivi quello che pensi davvero, anche cosa manca.</p>' +
         '<div class="g2-bott">' +
           '<a class="g2-si" href="' + LINK + '" target="_blank" rel="noopener">Recensisci su G2</a>' +
           '<button type="button" class="g2-no">Non ora</button>' +
