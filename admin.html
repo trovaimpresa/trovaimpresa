@@ -1590,7 +1590,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
 
         <div style="background:#e7f0ff;border:2px solid #b7d4ff;border-radius:14px;padding:18px 20px;margin-bottom:24px;line-height:1.7;font-size:15px">
           Nel testo puoi usare queste parole magiche: verranno sostituite per ognuno.<br>
-          <b>[NOME]</b> il nome dell'attività &nbsp;·&nbsp; <b>[SCADENZA]</b> la sua data di scadenza Premium &nbsp;·&nbsp; <b>[CITTA]</b> la sua città<br>
+          <b>[NOME]</b> il nome dell'attività &nbsp;·&nbsp; <b>[CITTA]</b> la sua città<br>
           Lascia una <b>riga vuota</b> fra un paragrafo e l'altro. Niente asterischi o simboli: scrivi come parli.
         </div>
 
@@ -1622,7 +1622,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div id="st-quanti" class="st-nota">—</div>
 
         <label class="st-lab">Oggetto</label>
-        <input id="st-oggetto" class="st-campo" placeholder="Il tuo Piano Premium è attivo — un regalo di benvenuto">
+        <input id="st-oggetto" class="st-campo" placeholder="Oggetto dell'email">
 
         <label class="st-lab">Testo della email</label>
         <textarea id="st-testo" class="st-campo" rows="16" placeholder="Gentile [NOME],&#10;&#10;grazie per esserti iscritto a TrovaImpresa.com.&#10;&#10;..."></textarea>
@@ -1735,7 +1735,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div class="u-numeri" id="pg-numeri"></div>
         <div class="u-filtri">
           <button class="u-btn attivo" data-pf="tutti" onclick="filtraPagamenti('tutti',this)">Tutti</button>
-          <button class="u-btn" data-pf="premium" onclick="filtraPagamenti('premium',this)">Premium</button>
+          <button class="u-btn" data-pf="premium" onclick="filtraPagamenti('premium',this)">Vecchio Premium</button>
           <button class="u-btn" data-pf="gestionale" onclick="filtraPagamenti('gestionale',this)">Gestionale</button>
           <button class="u-btn" data-pf="pubblicita" onclick="filtraPagamenti('pubblicita',this)">Pubblicità</button>
           <button class="u-btn" data-pf="crediti-ai" onclick="filtraPagamenti('crediti-ai',this)">Crediti AI</button>
@@ -1761,7 +1761,6 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <button class="u-btn attivo" data-af="tutti" onclick="filtraAbbandoni('tutti',this)">Tutti</button>
           <button class="u-btn" data-af="30" onclick="filtraAbbandoni('30',this)">Ultimi 30 giorni</button>
           <button class="u-btn" data-af="subito" onclick="filtraAbbandoni('subito',this)">Andati entro una settimana</button>
-          <button class="u-btn" data-af="premium" onclick="filtraAbbandoni('premium',this)">Erano Premium</button>
           <button class="u-btn" data-af="motivo" onclick="filtraAbbandoni('motivo',this)">Hanno detto perché</button>
           <button class="u-btn" onclick="caricaAbbandoni()">Aggiorna</button>
         </div>
@@ -1833,7 +1832,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <div style="font-weight:800;font-size:17px;margin-bottom:8px;color:#7b1fa2">Come funziona</div>
           Entra con il <b>tuo unico account</b> (pintoalessio@icloud.com). Dentro il gestionale e nei
           pannelli trovi in alto la <b>barra FONDATORE</b>: da lì cambi la categoria che vuoi vedere
-          (impresa, artigiano, professionista, negozio) e passi da Free a Premium con un clic.
+          (impresa, artigiano, professionista, negozio).
           I link dei pannelli qui sotto entrano <b>già nella categoria giusta</b> da soli.
           <b>Non ti servono più account finti.</b>
         </div>
@@ -3610,7 +3609,7 @@ function _pgEuro(cent){
 }
 
 const _PG_NOMI = {
-  'premium':    'Premium',
+  'premium':    'Vecchio Premium',
   'gestionale': 'Gestionale',
   'pubblicita': 'Pubblicità',
   'crediti-ai': 'Crediti AI'
@@ -3829,7 +3828,6 @@ function disegnaAbbandoni(){
         '<div class="u-num"><div class="k">Se ne sono andati in tutto</div><div class="v">' + (c.totale || 0) + '</div></div>'
       + '<div class="u-num"><div class="k">Negli ultimi 30 giorni</div><div class="v">' + (c.ultimi_30 || 0) + '</div></div>'
       + '<div class="u-num"><div class="k">Entro la prima settimana</div><div class="v">' + (c.entro_7_giorni || 0) + '</div></div>'
-      + '<div class="u-num"><div class="k">Erano Premium</div><div class="v">' + (c.erano_premium || 0) + '</div></div>'
       + '<div class="u-num"><div class="k">Quanto duravano</div><div class="v">' + _abDurata(c.giorni_mediana) + '</div></div>';
   }
 
@@ -3857,8 +3855,7 @@ function disegnaAbbandoni(){
   box.innerHTML = righe.map(r => {
     const subito = (r.giorni_iscritto != null && r.giorni_iscritto <= 7);
     const nome = r.nome_attivita || '(profilo mai completato)';
-    const prem = String(r.piano || '').toLowerCase() === 'premium'
-      ? '<span class="u-badge">Era Premium</span>' : '';
+    const prem = '';  /* 31 ott 2026: Premium e Free non esistono piu' */
     const perche = r.motivo || r.motivo_libero
       ? '<div><div class="k">Perché se n\'è andato</div><div class="v">'
         + _uEsc(_abMotivi(r.motivo))
@@ -5845,7 +5842,6 @@ async function aggiungiLead() {
 'Ti chiedo un favore: vai a controllare come appare il tuo. Molte schede sono rimaste a meta, e cosi non rendono giustizia a chi lavora bene.\n\n' +
 'Entra nel tuo pannello e apri la sezione "Modifica profilo": li trovi tutti i campi da completare. Prenditi il tempo di compilarli tutti - l\'indirizzo, che e quello che ti fa comparire tra i risultati dei clienti della tua zona, una descrizione chiara di quello che fai, e qualche foto dei tuoi lavori. Si entra da qui: https://trovaimpresa.com/login-impresa.html\n\n' +
 'Ci tengo a essere chiaro, perche e il cuore di TrovaImpresa: tutto il sito si regge sul farti vedere e notare dai clienti. Ma io posso mostrare solo quello che c\'e. Se il profilo resta a meta rimani invisibile, e il sito non puo aiutarti. Non e una formalita: e la differenza tra essere iscritto ed essere trovato.\n\n' +
-'Ne vale la pena anche per un altro motivo: il tuo Piano Premium e attivo e gratuito fino al [SCADENZA], e a breve ci entrera dentro anche il gestionale - fatture, cantieri, operatori e scadenze, tutto in un posto solo. Mi farebbe piacere che tu lo trovassi gia pronto quando arriva.\n\n' +
 'Un cordiale saluto,\n' +
 'Il Team di TrovaImpresa.com'
   }];
@@ -5855,7 +5851,18 @@ async function aggiungiLead() {
       var g = localStorage.getItem(CHIAVE);
       if (!g) { scrivi(INIZIALI); return INIZIALI.slice(); }
       var v = JSON.parse(g);
-      return Array.isArray(v) ? v : [];
+      if (!Array.isArray(v)) return [];
+      /* 31 ott 2026: Premium non esiste piu'. Dai modelli gia' salvati si toglie
+         il paragrafo che prometteva il «Piano Premium gratuito fino al [SCADENZA]». */
+      var cambiato = false;
+      v.forEach(function (e) {
+        if (e && typeof e.testo === 'string' && /Piano Premium/i.test(e.testo)) {
+          e.testo = e.testo.split('\n\n').filter(function (par) { return !/Piano Premium/i.test(par); }).join('\n\n');
+          cambiato = true;
+        }
+      });
+      if (cambiato) scrivi(v);
+      return v;
     } catch (e) { return []; }
   }
   function scrivi(lista) {
