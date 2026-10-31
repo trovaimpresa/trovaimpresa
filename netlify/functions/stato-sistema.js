@@ -25,6 +25,31 @@ function trova(nomi) {
   return { nome: null, valore: '' };
 }
 
+// 31 ott 2026 — «la chiave e' sbagliata» solo se Supabase lo dice davvero.
+// Tutto il resto (pagina 52x di Cloudflare, tempo scaduto, rete) vuol dire
+// che il database non risponde, e cambiare le chiavi non serve a niente.
+function eChiaveRifiutata(msg) {
+  return /invalid api key|jwt|unauthori[sz]ed|invalid.*(key|token)|no api key|401/i.test(msg)
+    && !/<html|<!doctype|error code 52\d|web server is down/i.test(msg);
+}
+
+// Toglie la pagina HTML che a volte arriva al posto del messaggio, e accorcia.
+function pulisci(msg) {
+  let t = String(msg || '');
+  const codice = t.match(/error code (52\d)/i);
+  if (/<html|<!doctype|<[a-z][^>]*>/i.test(t)) {
+    t = codice ? ('Cloudflare errore ' + codice[1] + ': il server di Supabase non risponde.') : 'Il server di Supabase non risponde.';
+  }
+  if (/statement timeout/i.test(t)) t = 'Il database è troppo lento e annulla le richieste.';
+  else if (/abort|timeout|timed out/i.test(t)) t = 'Nessuna risposta in 6 secondi.';
+  return t.replace(/\s+/g, ' ').trim().slice(0, 160);
+}
+
+// Fetch con scadenza: se il database e' bloccato, meglio un avviso chiaro
+// in 6 secondi che la funzione intera che scade senza dire niente.
+const fetchConScadenza = (input, init = {}) =>
+  fetch(input, Object.assign({}, init, { signal: AbortSignal.timeout(6000) }));
+
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method Not Allowed' }) };
@@ -58,7 +83,7 @@ exports.handler = async function (event) {
       'Netlify → Site configuration → Environment variables.');
   } else {
     try {
-      const sb = createClient(url.valore, key.valore, { auth: { persistSession: false, autoRefreshToken: false } });
+      const sb = createClient(url.valore, key.valore, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: fetchConScadenza } });
 
       // Lettura semplice: se la chiave non e' valida, qui fallisce.
       const { error: e1 } = await sb.from('imprese').select('id').limit(1);
@@ -68,6 +93,8 @@ exports.handler = async function (event) {
       // Se la leggiamo, la chiave e' davvero quella dei permessi pieni.
       let piena = true, notaPiena = '';
       const { error: e2 } = await sb.from('gest_accessi_riepilogo').select('user_id').limit(1);
+      // Se il database e' lento o giu', non e' un problema di permessi.
+      if (e2 && !/permission|denied|not allowed|42501/i.test(e2.message || '')) throw new Error(e2.message);
       if (e2) {
         piena = false;
         notaPiena = e2.message;
@@ -81,9 +108,20 @@ exports.handler = async function (event) {
           'Su Netlify SUPABASE_SERVICE_KEY deve contenere la chiave "secret" di Supabase, non quella pubblica.');
       }
     } catch (err) {
-      aggiungi('Database', false,
-        'Supabase rifiuta la chiave: ' + err.message,
-        'Copia la chiave secret da Supabase (Settings → API Keys → Secret keys) e rimettila su Netlify in SUPABASE_SERVICE_KEY e SUPABASE_SERVICE_ROLE. Poi Deploys → Trigger deploy → Clear cache and deploy site.');
+      // 31 ott 2026: il database si era bloccato (Disk IO finito) e qui si
+      // diceva «Supabase rifiuta la chiave», con dentro la pagina HTML intera
+      // di Cloudflare. Il consiglio era sbagliato: la chiave andava benissimo.
+      // Adesso si distingue: chiave rifiutata OPPURE database che non risponde.
+      const msg = String((err && err.message) || err || '');
+      if (eChiaveRifiutata(msg)) {
+        aggiungi('Database', false,
+          'Supabase rifiuta la chiave: ' + pulisci(msg),
+          'Copia la chiave secret da Supabase (Settings → API Keys → Secret keys) e rimettila su Netlify in SUPABASE_SERVICE_KEY e SUPABASE_SERVICE_ROLE. Poi Deploys → Trigger deploy → Clear cache and deploy site.');
+      } else {
+        aggiungi('Database', false,
+          'Il database non risponde (bloccato o spento). Le chiavi non c\'entrano: non toccarle.' + (pulisci(msg) ? ' Dettaglio: ' + pulisci(msg) : ''),
+          'Supabase → progetto trovaimpresa → Settings → General → Restart project. Aspetta 3 minuti e ricarica questa pagina. Se succede spesso, guarda in alto su Supabase se c\'è l\'avviso «Disk IO Budget».');
+      }
     }
   }
 
