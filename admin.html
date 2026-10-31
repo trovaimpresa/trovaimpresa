@@ -907,8 +907,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <input id="imp-search" class="search-input" placeholder="🔍 Cerca impresa..." oninput="applicaFiltriImprese()">
           <select id="imp-filtro-tipo" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i tipi</option><option value="impresa">Impresa</option><option value="artigiano">Artigiano</option><option value="professionista">Professionista</option><option value="negozio">Negozio</option></select>
           <select id="imp-filtro-origine" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutte le provenienze</option><option value="sito">Dal sito</option><option value="gestionale">Dal gestionale</option></select>
-          <select id="imp-filtro-piano" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i piani</option><option value="premium">Premium</option><option value="free">Free</option></select>
-          <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">Da controllare</option></select>
+          <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">Non verificate</option></select>
         </div>
       </div>
       <div class="table-wrap">
@@ -920,12 +919,11 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
               <th>Città</th>
               <th>Mestieri</th>
               <th>Verifica</th>
-              <th>Piano</th>
               <th>Data</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-imprese"><tr><td colspan="8" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-imprese"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -4236,23 +4234,21 @@ async function caricaImprese() {
 function renderImprese(lista) {
   const tbody = document.getElementById('table-imprese');
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa trovata</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa trovata</div></td></tr>';
     return;
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${esc(_nomeImp(i))}</strong>${i.vetrina_attiva===false?' <span class="badge" style="background:#e3edff;color:#0a2a4d;font-size:0.72rem">Dal gestionale</span>':''}<br><small style="color:var(--light)">${esc(i.email)}</small></td>
+      <td><strong>${esc(_nomeImp(i))}</strong>${i.is_test?' <span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span>':''}${i.vetrina_attiva===false?' <span class="badge" style="background:#e3edff;color:#0a2a4d;font-size:0.72rem">Dal gestionale</span>':''}<br><small style="color:var(--light)">${esc(i.email)}</small></td>
       <td><span class="badge ${(i.tipo||'').toLowerCase()==='artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
       <td>📍 ${esc(i.citta) || '–'}</td>
       <td>${esc(_arr(i.mestieri).slice(0,2).join(', '))}${_arr(i.mestieri).length>2?' +altri':''}</td>
       <td>${i.verificata
             ? '<span class="badge badge-v">✅ Verificata</span>'
-            : '<span class="badge badge-att">Da controllare</span>'}</td>
-      <td>${i.is_test?'<span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span><br>':''}${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
+            : '<span style="color:var(--light);font-weight:600">Non verificata</span>'}</td>
       <td style="font-size:0.78rem;color:var(--light)">${_data(i.created_at)}</td>
       <td>
-        ${!i.verificata ? `<button class="action-btn btn-verifica" onclick="apriDettaglio('${i.id}')">🔍 Controlla</button> ` : ''}
-        <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
+        <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">Apri la scheda</button>
         <button class="action-btn btn-elimina" onclick="eliminaImpresa('${i.id}')">🗑️</button>
       </td>
     </tr>
@@ -4809,7 +4805,6 @@ async function eliminaValutazione(id) {
 function applicaFiltriImprese() {
   const q = (document.getElementById('imp-search')?.value || '').toLowerCase();
   const ft = document.getElementById('imp-filtro-tipo')?.value || '';
-  const fp = document.getElementById('imp-filtro-piano')?.value || '';
   const fs = document.getElementById('imp-filtro-stato')?.value || '';
   const fo = document.getElementById('imp-filtro-origine')?.value || '';
   const f = tutteImprese.filter(i => {
@@ -4818,14 +4813,12 @@ function applicaFiltriImprese() {
     const testo = ((i.nome_attivita || '') + ' ' + (i.citta || '') + ' ' + (i.email || '')).toLowerCase();
     if (q && !testo.includes(q)) return false;
     if (ft && (i.tipo || '').toLowerCase() !== ft.toLowerCase()) return false;
-    if (fp === 'premium' && (i.piano || '').toLowerCase() !== 'premium') return false;
-    if (fp === 'free' && (i.piano || '').toLowerCase() === 'premium') return false;
     if (fs === 'verificata' && !i.verificata) return false;
     if (fs === 'attesa' && i.verificata) return false;
     return true;
   });
   const c = document.getElementById('imprese-count');
-  if (c) c.textContent = (q || ft || fp || fs || fo)
+  if (c) c.textContent = (q || ft || fs || fo)
     ? f.length + ' su ' + tutteImprese.length + ' imprese'
     : f.length + ' imprese registrate';
   renderImprese(f);
@@ -4928,7 +4921,7 @@ function apriDettaglio(id) {
     <div class="modal-row"><span class="modal-key">Dal:</span><span class="modal-val">${esc(i.anno_fondazione)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Costo:</span><span class="modal-val">${esc(i.costo)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Descrizione:</span><span class="modal-val">${esc(i.descrizione)||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></span></div>
+    <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'Non verificata'}</span></span></div>
     <div class="modal-row"><span class="modal-key">Registrato:</span><span class="modal-val">${new Date(i.created_at).toLocaleString('it-IT')}</span></div>
     ${!i.verificata ? `
     <div style="margin-top:20px;padding:16px 18px;background:#f2fbf5;border:2px solid #b5e2c5;border-radius:12px">

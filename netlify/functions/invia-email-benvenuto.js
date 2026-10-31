@@ -87,6 +87,11 @@ exports.handler = async function(event) {
      scriverglielo nell'email invece di fargli rifare la scelta. */
   let daGestionale = false;
   let pianoScelto = null;
+  /* 31 ott 2026 — la spunta benvenuto_inviato non c'era per →19← iscritti di
+     luglio-agosto: al loro PRIMO ACCESSO partiva «Nuova iscrizione», e nel
+     pannello admin non si trovava fra quelle del giorno (Mahmoud, iscritto il
+     27 lug, e' arrivato cosi' il 30 ott). Si guarda quando e' nata la scheda. */
+  let iscrittoIl = null;
 
   if (!premium && SUPABASE_KEY) {
     const sbHeaders = {
@@ -101,7 +106,11 @@ exports.handler = async function(event) {
     async function provaAPrendere(tab) {
       const url = SUPABASE_URL + '/rest/v1/' + tab
                 + '?email=eq.' + emailEnc + '&benvenuto_inviato=is.false'
-                + '&select=id,user_id,vetrina_attiva,gest_piano_scelto';
+                + '&select=' + (tab === 'candidati_lavoro'
+                  /* 31 ott 2026: i candidati non hanno vetrina_attiva e gest_piano_scelto:
+                     chiederle faceva fallire la PATCH, la spunta non si metteva mai */
+                  ? 'id,user_id,created_at'
+                  : 'id,user_id,vetrina_attiva,gest_piano_scelto,created_at');
       const r = await fetch(url, {
         method: 'PATCH',
         headers: sbHeaders,
@@ -119,6 +128,7 @@ exports.handler = async function(event) {
       if (Array.isArray(righe) && righe.length) {
         if (righe[0].vetrina_attiva === false) daGestionale = true;
         if (righe[0].gest_piano_scelto) pianoScelto = righe[0].gest_piano_scelto;
+        if (righe[0].created_at) iscrittoIl = new Date(righe[0].created_at);
       }
       return Array.isArray(righe) ? righe.length : 0;
     }
@@ -423,6 +433,8 @@ exports.handler = async function(event) {
     }
 
     // Notifica admin: avvisa info@trovaimpresa.com di ogni nuova iscrizione/upgrade.
+    const vecchio = !premium && iscrittoIl && !isNaN(iscrittoIl) && (Date.now() - iscrittoIl.getTime()) > 3 * 24 * 3600 * 1000;
+    const dataIscr = vecchio ? iscrittoIl.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) : '';
     try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -433,9 +445,13 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           from: 'TrovaImpresa <info@trovaimpresa.com>',
           to: ['info@trovaimpresa.com'],
-          subject: (premium ? '⭐ Ha attivato il Gestionale: ' : (daGestionale ? '🔔 Nuova iscrizione dal gestionale: ' : '🔔 Nuova iscrizione: '))
-                   + (nome || 'senza nome') + ' (' + (tipo || 'n/d') + ')',
-          html: '<h2>' + (premium ? 'Ha attivato il Gestionale' : 'Nuova iscrizione') + ' su TrovaImpresa</h2>'
+          subject: (premium ? '⭐ Ha attivato il Gestionale: '
+                   : (vecchio ? '👋 Primo accesso (già iscritto): '
+                   : (daGestionale ? '🔔 Nuova iscrizione dal gestionale: ' : '🔔 Nuova iscrizione: ')))
+                   + (nome || 'senza nome') + ' (' + (tipo || 'n/d') + ')'
+                   + (vecchio ? ' — iscritto il ' + dataIscr : ''),
+          html: '<h2>' + (premium ? 'Ha attivato il Gestionale' : (vecchio ? 'Primo accesso di un iscritto' : 'Nuova iscrizione')) + ' su TrovaImpresa</h2>'
+                + (vecchio ? '<p><strong>Iscritto il:</strong> ' + dataIscr + ' (non è un iscritto nuovo: è entrato per la prima volta)</p>' : '')
                 + '<p><strong>Nome:</strong> ' + (nome || '—') + '</p>'
                 + '<p><strong>Email:</strong> ' + email + '</p>'
                 + '<p><strong>Tipo:</strong> ' + (tipo || '—') + '</p>'
