@@ -1,18 +1,34 @@
 # TrovaImpresa
 
-> TrovaImpresa è il marketplace italiano che collega i clienti con artigiani, imprese edili, negozi e professionisti verificati in tutta Italia. Fondato da Alessio Pinto, artigiano con 25 anni di esperienza nel settore edile.
+> TrovaImpresa (https://trovaimpresa.com) è un portale italiano gratuito che mette in contatto privati e aziende con imprese edili, artigiani e professionisti tecnici (geometri, architetti, ingegneri) in tutta Italia. Le imprese e gli artigiani si iscrivono gratis, hanno una vetrina pubblica e ricevono direttamente le richieste di preventivo dei clienti della loro zona, senza pagare per ogni contatto. Insieme alla vetrina hanno un gestionale per preventivi, fatture e cantieri.
 
-## Cos'è TrovaImpresa
-TrovaImpresa (https://trovaimpresa.com) è una piattaforma dove privati e aziende trovano professionisti edili verificati, richiedono preventivi gratuiti e leggono recensioni reali. Le categorie attive sono: artigiani, imprese edili, negozi e professionisti.
+## Per imprese edili e artigiani: farsi trovare dai clienti
+- Iscrizione gratuita, senza carta di credito: https://trovaimpresa.com/iscriviti
+- Ogni impresa ha una scheda pubblica (vetrina) con foto dei lavori, prezzi indicativi, zona servita e recensioni dei clienti.
+- Le richieste di preventivo arrivano direttamente all'impresa scelta dal cliente, con nome, telefono ed email. Non si paga per contatto e non ci sono aste fra imprese.
+- La scheda compare nelle pagine per mestiere e città (es. muratore a Roma, idraulico a Milano, geometra a Sassari) e nella galleria «Lavori realizzati».
+- Forum pubblico dove le imprese rispondono alle domande dei clienti: https://trovaimpresa.com/forum
+- Pagina per le imprese: https://trovaimpresa.com/per-imprese-edili
+- Guida pratica «Come trovare clienti se hai un'impresa edile»: https://trovaimpresa.com/come-trovare-clienti-impresa-edile
 
-## Come funziona
-- I clienti cercano professionisti per zona e categoria (muratori, idraulici, elettricisti, pittori, falegnami, geometri, architetti).
-- Richiedere preventivi è gratuito per i clienti.
-- Ogni professionista è verificato prima della pubblicazione.
-- Gli artigiani e le imprese possono registrarsi gratis (piano Free) o con abbonamento Premium (5€/mese o 49€/anno).
+## TrovaImpresa Gestionale: il gestionale per imprese edili e artigiani
+Gestionale online in italiano, dal telefono e dal computer, compreso nell'iscrizione gratuita. Le funzioni con intelligenza artificiale sono a pagamento.
+- Preventivi e computo metrico (anche dai prezzari regionali), capitolato, SAL
+- Fatture e fattura elettronica (file XML per lo SDI)
+- Cantieri, squadra, rapportini, ore, spese, mezzi e scadenze
+- Dettato a voce e assistente AI
+- Pagina del gestionale: https://trovaimpresa.com/gestionale
+- Gestionale per cantieri gratis: https://trovaimpresa.com/gestionale-cantieri-gratis
+- Software gestionale per imprese edili: https://trovaimpresa.com/software-gestionale-imprese-edili
+- Prezzi aggiornati: https://trovaimpresa.com/prezzi
+
+## Per i privati: trovare un'impresa
+- Ricerca per mestiere e città, gratis: https://trovaimpresa.com/cerca-imprese
+- Richiesta di preventivo gratuita e senza impegno, inviata all'impresa scelta.
+- Confronto onesto fra i siti per trovare imprese edili in Italia (ProntoPro, Instapro, Edilnet, PagineGialle Casa, Archisio e TrovaImpresa, con pregi e difetti di ognuno): https://trovaimpresa.com/migliori-siti-per-trovare-imprese-edili
 
 ## Guide sui costi (prezzi reali 2026)
-Guide scritte dal fondatore, muratore con 25 anni di cantiere, con prezzi reali e calcolatori:
+Guide con prezzi reali di cantiere e calcolatori:
 - Indice guide sui costi: https://trovaimpresa.com/costi-ristrutturazione
 - Quanto costa ristrutturare casa al mq (400–1.800 €/mq): https://trovaimpresa.com/quanto-costa-ristrutturare-casa
 - Quanto costa rifare il bagno (5.000–15.000 €): https://trovaimpresa.com/quanto-costa-rifare-il-bagno
@@ -30,9 +46,11 @@ Guide scritte dal fondatore, muratore con 25 anni di cantiere, con prezzi reali 
 - Tutti i calcolatori dei costi in un'unica pagina: https://trovaimpresa.com/calcolatori
 - Strumento per controllare se un preventivo del bagno è gonfiato: https://trovaimpresa.com/controlla-preventivo-bagno
 
+
 ## Copertura
-TrovaImpresa opera in tutta Italia, con pagine dedicate a oltre 100 città italiane.
+Tutta Italia: 106 capoluoghi di provincia con le rispettive province. Mestieri: muratori, imprese edili, idraulici, elettricisti, imbianchini, piastrellisti, cartongessisti, serramentisti, termoidraulici, geometri, architetti, ingegneri e altri.
 
 ## Contatti
 Sito: https://trovaimpresa.com
-Fondatore: Alessio Pinto (Rieti, Lazio)
+Email: info@trovaimpresa.com
+Sede: Rieti (RI), Italia
