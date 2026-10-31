@@ -2,6 +2,8 @@
 -- Prima chi arrivava da ChatGPT (utm_source=chatgpt.com, senza provenienza)
 -- finiva in «Diretto o sconosciuto», e Meta AI finiva in «Altro».
 -- Si riconosce l'AI sia dalla provenienza sia da utm_source.
+-- 31 ott 2026 (sera): aggiunti Grok, DeepSeek e Mistral (prima finivano in «Altro»).
+--   Gemini e Claude erano gia' riconosciuti.
 
 create or replace function public.canale_da_provenienza(p text)
  returns text language sql immutable set search_path to 'public'
@@ -9,7 +11,7 @@ as $function$
   select case
     when p is null or p = ''            then 'Diretto o sconosciuto'
     when p ilike 'google_ads%'          then 'Google Ads (a pagamento)'
-    when p ~* '(chatgpt|openai|meta\.ai|perplexity|copilot|gemini\.google|claude\.ai)'
+    when p ~* '(chatgpt|openai|meta\.ai|perplexity|copilot|gemini\.google|claude\.ai|grok\.com|deepseek|mistral\.ai)'
                                         then 'ChatGPT e altre AI'
     when p ilike '%trovaimpresa.com%'   then 'Giro dentro il sito'
     when p ilike '%facebook%'           then 'Facebook'
@@ -28,7 +30,7 @@ with (security_invoker = true) as
  with base as (
    select canale_da_provenienza(
             case when v.utm_source ilike 'google_ads%' then 'google_ads'
-                 when v.utm_source ~* '(chatgpt|openai|perplexity|copilot|gemini|claude)' then v.utm_source
+                 when v.utm_source ~* '(chatgpt|openai|perplexity|copilot|gemini|claude|grok|deepseek|mistral)' then v.utm_source
                  else v.provenienza end) as canale,
           v.sessione, v.creato_il, v.da_meta
      from visite_sito v)
@@ -47,7 +49,7 @@ with (security_invoker = true) as
  with prima_visita as (
    select distinct on (v.sessione) v.sessione,
           case when v.utm_source ilike 'google_ads%' then 'google_ads'
-               when v.utm_source ~* '(chatgpt|openai|perplexity|copilot|gemini|claude)' then v.utm_source
+               when v.utm_source ~* '(chatgpt|openai|perplexity|copilot|gemini|claude|grok|deepseek|mistral)' then v.utm_source
                else v.provenienza end as provenienza,
           v.da_meta
      from visite_sito v where v.sessione is not null
