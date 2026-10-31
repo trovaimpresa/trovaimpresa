@@ -2790,7 +2790,8 @@ function _arEsc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, functi
 const AR_ICONE = {
   'Facebook':'📘', 'Instagram':'📸', 'Google':'🔍', 'LinkedIn':'💼', 'Threads':'🧵',
   'Altri motori di ricerca':'🔎', 'Diretto o sconosciuto':'✉️',
-  'Giro dentro il sito':'🔁', 'Altro':'•'
+  'Giro dentro il sito':'🔁', 'Altro':'•',
+  'ChatGPT e altre AI':'🤖', 'Google Ads (a pagamento)':'💰'
 };
 
 async function caricaArrivi(){
@@ -2830,7 +2831,8 @@ function disegnaArrivi(righe, dichiarate, iscrizioni){
   }
   /* «Giro dentro il sito» non e' una fonte: e' chi si sposta da una pagina
      all'altra. Va tolto dai conti, se no sembra il canale piu' grosso. */
-  const fonti = righe.filter(function(r){ return r.canale !== 'Giro dentro il sito'; });
+  const fonti = righe.filter(function(r){ return r.canale !== 'Giro dentro il sito'; })
+                     .sort(function(a,b){ return (+b.persone_30gg || 0) - (+a.persone_30gg || 0); });
   const somma = function(campo){ return fonti.reduce(function(t,r){ return t + (+r[campo] || 0); }, 0); };
   const tot30 = somma('persone_30gg');
   const tot7  = somma('persone_7gg');
@@ -2839,6 +2841,10 @@ function disegnaArrivi(righe, dichiarate, iscrizioni){
                       .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
   const google = fonti.filter(function(r){ return ['Google','Altri motori di ricerca'].indexOf(r.canale) >= 0; })
                       .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
+  /* 31 ott 2026: ChatGPT e le altre AI (Meta AI, Perplexity, Gemini...) prima
+     finivano in «Diretto o sconosciuto». Adesso sono un canale loro. */
+  const ai = fonti.filter(function(r){ return r.canale === 'ChatGPT e altre AI'; })
+                  .reduce(function(t,r){ return t + (+r.persone_30gg || 0); }, 0);
   const iscr30 = (iscrizioni || []).reduce(function(t,r){ return t + (+r.iscrizioni_30gg || 0); }, 0);
 
   if (num) num.innerHTML =
@@ -2846,6 +2852,7 @@ function disegnaArrivi(righe, dichiarate, iscrizioni){
     + '<div class="u-num verde"><div class="v">' + tot7 + '</div><div class="e">Negli ultimi 7 giorni</div></div>'
     + '<div class="u-num viola"><div class="v">' + social + '</div><div class="e">Da Facebook e Instagram (30 gg)</div></div>'
     + '<div class="u-num giallo"><div class="v">' + google + '</div><div class="e">Da Google e altri motori (30 gg)</div></div>'
+    + '<div class="u-num verde"><div class="v">' + ai + '</div><div class="e">Da ChatGPT e altre AI (30 gg)</div></div>'
     + '<div class="u-num arancio"><div class="v">' + iscr30 + '</div><div class="e">Si sono ISCRITTI (30 gg)</div></div>';
 
   let h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:15px;min-width:560px">'
