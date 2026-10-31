@@ -68,6 +68,19 @@
     + '#ti-recensioni .tir-altri b{color:#0a2a4d}'
     + '#ti-recensioni .tir-altri .v{color:var(--tir-star);letter-spacing:1px}'
     + '#ti-recensioni .tir-altri .q{color:var(--tir-muted)}'
+    /* 31 ott 2026 - il modulo con stelle e nome e' stato tolto: i pareri nuovi
+       si chiedono su Trustpilot (G2 per il gestionale sta dentro il gestionale), dove li vedono
+       anche Google e le AI. Restano visibili il voto medio e i pareri gia' arrivati. */
+    + '#ti-recensioni .tir-invito{background:var(--tir-card);border:2px solid var(--tir-accent);border-radius:14px;padding:26px;margin-bottom:28px}'
+    + '#ti-recensioni .tir-invito p{margin:0 0 20px;font-size:18px;line-height:1.55;color:#333;max-width:65ch}'
+    + '#ti-recensioni .tir-bott{display:flex;gap:14px;flex-wrap:wrap}'
+    + '#ti-recensioni .tir-bott a{display:inline-flex;flex-direction:column;justify-content:center;min-height:60px;padding:12px 26px;border-radius:10px;'
+    +   'font-size:19px;font-weight:700;text-decoration:none;color:#fff;line-height:1.2}'
+    + '#ti-recensioni .tir-bott a small{font-size:14px;font-weight:500;opacity:.9;margin-top:3px}'
+    + '#ti-recensioni .tir-bott .tp{background:var(--tir-accent)}'
+    + '#ti-recensioni .tir-bott a:hover{filter:brightness(1.12)}'
+    + '#ti-recensioni .tir-bott a:focus-visible{outline:3px solid #0066ff;outline-offset:2px}'
+    + '@media(max-width:520px){#ti-recensioni .tir-bott a{width:100%;text-align:center;align-items:center}#ti-recensioni .tir-invito{padding:20px}}'
     + '@media(max-width:520px){#ti-recensioni .tir-head{justify-content:center;text-align:center}}';
 
   // ---- HTML del blocco ----
@@ -81,25 +94,15 @@
     +     '</div>'
     +     '<div class="tir-title">'
     +       '<h2>Ti piace TrovaImpresa?</h2>'
-    +       '<p>Lascia la tua valutazione: ci aiuti a migliorare il servizio.</p>'
+    +       '<p>Raccontalo su Trustpilot.</p>'
     +     '</div>'
     +   '</div>'
-    +   '<form class="tir-form" id="tir-form" novalidate>'
-    +     '<div class="tir-rate" id="tir-rate" role="radiogroup" aria-label="Voto da 1 a 5 stelle">'
-    +       '<button type="button" class="tir-star" data-v="1" aria-label="1 stella">★</button>'
-    +       '<button type="button" class="tir-star" data-v="2" aria-label="2 stelle">★</button>'
-    +       '<button type="button" class="tir-star" data-v="3" aria-label="3 stelle">★</button>'
-    +       '<button type="button" class="tir-star" data-v="4" aria-label="4 stelle">★</button>'
-    +       '<button type="button" class="tir-star" data-v="5" aria-label="5 stelle">★</button>'
+    +   '<div class="tir-invito">'
+    +     '<p>Una tua recensione su Trustpilot fa conoscere TrovaImpresa a più persone. Il sito cresce, e più clienti trovano le imprese iscritte e mandano loro richieste di preventivo.</p>'
+    +     '<div class="tir-bott">'
+    +       '<a class="tp" href="https://it.trustpilot.com/evaluate/trovaimpresa.com" target="_blank" rel="noopener">Recensisci il sito su Trustpilot</a>'
     +     '</div>'
-    +     '<input class="tir-input" id="tir-name" type="text" maxlength="60" placeholder="Il tuo nome" autocomplete="name">'
-    +     '<textarea class="tir-input" id="tir-comment" maxlength="600" rows="3" placeholder="Scrivi un commento (facoltativo)"></textarea>'
-    +     '<input type="text" id="tir-website" class="tir-hp" tabindex="-1" autocomplete="off" aria-hidden="true">'
-    +     '<div class="tir-actions">'
-    +       '<button type="submit" class="tir-submit" id="tir-submit">Invia valutazione</button>'
-    +       '<span class="tir-msg" id="tir-msg" role="status"></span>'
-    +     '</div>'
-    +   '</form>'
+    +   '</div>'
     +   '<div class="tir-list" id="tir-list"></div>'
     +   '<div class="tir-altri" id="tir-altri" style="display:none"></div>'
     + '</div>';
@@ -154,7 +157,8 @@
 
       var selected = 0;
       var rate = $("tir-rate");
-      var starBtns = [].slice.call(rate.querySelectorAll(".tir-star"));
+      // 31 ott 2026 - il modulo non c'e' piu': senza, qui sotto non si aggancia niente
+      var starBtns = rate ? [].slice.call(rate.querySelectorAll(".tir-star")) : [];
       var paint = function (n) {
         starBtns.forEach(function (b) { b.classList.toggle("on", +b.dataset.v <= n); });
       };
@@ -235,7 +239,7 @@
           });
       }
 
-      $("tir-form").addEventListener("submit", function (e) {
+      if ($("tir-form")) $("tir-form").addEventListener("submit", function (e) {
         e.preventDefault();
         var msg = $("tir-msg");
         msg.className = "tir-msg";
