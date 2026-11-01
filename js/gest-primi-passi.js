@@ -21,12 +21,16 @@
      solo. Chiede «Hai imparato: vuoi che lo togliamo?». Chi usava gia' il
      gestionale prima (e il riquadro non l'ha mai visto) non lo vede. */
   var VISTO = "ti-primi-passi-visto", TIENI = "ti-primi-passi-tieni";
+  /* ⛔ 1 nov 2026 — L'ORDINE E' CAMBIATO (Alex). Prima il PREVENTIVO, fatto
+     con l'AI, e per ultimi i dati azienda: erano il primo passo e il piu'
+     noioso, e tanti si fermavano li'. Misurato quel giorno: 30 entrati nel
+     gestionale, 13 non hanno scritto niente, 7 hanno fatto un preventivo. */
   var PASSI = [
-    { k: "azienda",    tit: "Scrivi i dati della tua azienda", sotto: "Nome, partita IVA, indirizzo: finiscono su preventivi e fatture.", az: "azienda" },
+    { k: "preventivi", tit: "Fai il primo preventivo",         sotto: "Lo scrive l'AI: tu controlli e salvi.", tab: "preventivi" },
     { k: "clienti",    tit: "Aggiungi il tuo primo cliente",   sotto: "Chi ti chiede il lavoro. Lo scrivi una volta sola.", tab: "clienti" },
-    { k: "preventivi", tit: "Fai il primo preventivo",         sotto: "Scegli il cliente, scrivi le voci: il PDF lo fa il gestionale.", tab: "preventivi" },
     { k: "lavori",     tit: "Apri il primo lavoro",            sotto: "Quando il cliente accetta, il preventivo diventa un lavoro.", tab: "lavori" },
-    { k: "fatture",    tit: "Fai la prima fattura",            sotto: "A lavoro finito, dal lavoro nasce la fattura.", tab: "fatture" }
+    { k: "fatture",    tit: "Fai la prima fattura",            sotto: "A lavoro finito, dal lavoro nasce la fattura.", tab: "fatture" },
+    { k: "azienda",    tit: "Scrivi i dati della tua azienda", sotto: "Nome, partita IVA, indirizzo: finiscono su preventivi e fatture.", az: "azienda" }
   ];
   var ultimo = 0, inCorso = false;
 
@@ -57,12 +61,13 @@
     inCorso = true;
     try {
       var nonButtato = function (q) { return q.is("eliminato_il", null); };
+      /* ⚠️ l'ordine qui deve essere lo STESSO di PASSI */
       var res = await Promise.all([
-        (async function () { try { var r = await sb.from("gest_azienda").select("nome").eq("user_id", sbUid).maybeSingle(); return r.data && String(r.data.nome || "").trim() ? 1 : 0; } catch (_) { return null; } })(),
-        conta("gest_clienti", nonButtato),
         conta("gest_preventivi", nonButtato),
+        conta("gest_clienti", nonButtato),
         conta("gest_lavori", nonButtato),
-        conta("gest_fatture", nonButtato)
+        conta("gest_fatture", nonButtato),
+        (async function () { try { var r = await sb.from("gest_azienda").select("nome").eq("user_id", sbUid).maybeSingle(); return r.data && String(r.data.nome || "").trim() ? 1 : 0; } catch (_) { return null; } })()
       ]);
       ultimo = Date.now();
       if (res.some(function (x) { return x === null; })) { if (box) box.remove(); return; }   /* se una lettura non va, meglio niente che un passo sbagliato */
@@ -92,14 +97,35 @@
         + '<button type="button" class="pp-chiudi" data-pp-chiudi="1">Togli l\'aiuto</button></div>'
         + '<div class="pp-barra"><i style="width:' + Math.round(quanti / PASSI.length * 100) + '%"></i></div>'
         + '<div class="pp-lista">' + righe + '</div>';
+      /* 1 nov 2026 — IL PRIMO PREVENTIVO CON L'AI, in grande, finche' non c'e'.
+         «Parla» preme il pulsante Parla che c'e' gia' (js/gest-voce.js): dove
+         il browser non sa ascoltare quel pulsante non esiste, e qui non si mostra.
+         «Scrivi» apre il preventivo con la casella «Scrivilo a parole». */
+      if (!fatti[0]) {
+        var puoParlare = !!document.getElementById("gv-btn");
+        html = '<div class="pp-primo"><h3>Il tuo primo preventivo in un minuto</h3>'
+          + '<p>Dimmi il lavoro, il cliente e il prezzo. Lo scrivo io, tu controlli e salvi.</p>'
+          + '<div class="pp-bt">'
+          + (puoParlare ? '<button type="button" class="pp-parla" data-pp-primo="parla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Parla</button>' : '')
+          + '<button type="button" class="pp-scrivi" data-pp-primo="scrivi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Scrivi</button>'
+          + '</div><p class="pp-es">Per esempio: <b>«Preventivo per Mario Rossi: rifare il bagno, piastrelle e sanitari, 6.500 euro»</b></p></div>'
+          + '<div class="pp-dentro">' + html + '</div>';
+      }
       if (!box) { box = document.createElement("div"); box.id = "rie-primi"; alert.parentNode.insertBefore(box, alert); }
       box.innerHTML = html;
+      box.classList.toggle("pp-ha-primo", !fatti[0]);
     } finally { inCorso = false; }
   }
 
   document.addEventListener("click", function (e) {
-    var t = e.target && e.target.closest ? e.target.closest("[data-pp-tab],[data-pp-chiudi],[data-pp-tieni]") : null;
+    var t = e.target && e.target.closest ? e.target.closest("[data-pp-tab],[data-pp-chiudi],[data-pp-tieni],[data-pp-primo]") : null;
     if (!t) return;
+    if (t.dataset.ppPrimo === "parla") { var g = document.getElementById("gv-btn"); if (g) g.click(); return; }
+    if (t.dataset.ppPrimo === "scrivi") {
+      if (typeof window.gestApriModuloAI === "function") window.gestApriModuloAI("preventivo");
+      else { var pv = document.querySelector('.side nav.tabs button[data-tab="preventivi"]'); if (pv) pv.click(); }
+      return;
+    }
     if (t.dataset.ppTieni) { segna(TIENI); ultimo = 0; disegna(); return; }
     if (t.dataset.ppChiudi) {
       try { localStorage.setItem(CHIAVE, "1"); } catch (_) {}

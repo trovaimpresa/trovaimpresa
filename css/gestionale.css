@@ -5431,3 +5431,19 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 .via-libera.no{background:#fdecec;color:#b42318;border:2px solid #b42318}
 .via-libera.forse{background:#fff7ed;color:#b45309;border:2px solid #d97706}
 .via-libera.si{background:#e3f4e8;color:#1e6b34;border:2px solid #1e8e3e;cursor:default}
+
+/* 1 nov 2026 — IL PRIMO PREVENTIVO CON L'AI, in cima ai Primi passi (js/gest-primi-passi.js) */
+#riepilogo #rie-primi.pp-ha-primo{border:0;padding:0;background:transparent;box-shadow:none}
+#riepilogo #rie-primi .pp-dentro{background:var(--card);border:2px solid var(--blu);border-radius:16px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,102,255,.08)}
+@media(max-width:700px){#riepilogo #rie-primi .pp-dentro{padding:16px 14px}}
+#riepilogo #rie-primi .pp-primo{background:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:40px 40px;color:#fff;border-radius:16px;padding:26px 28px;margin:0 0 16px}
+#riepilogo #rie-primi .pp-primo h3{margin:0 0 6px;font-size:28px;line-height:1.2;color:#fff}
+#riepilogo #rie-primi .pp-primo p{margin:0 0 18px;font-size:19px;line-height:1.4;color:#dbe6f3}
+#riepilogo #rie-primi .pp-primo .pp-bt{display:flex;gap:14px;flex-wrap:wrap}
+#riepilogo #rie-primi .pp-primo .pp-bt button{display:inline-flex;align-items:center;justify-content:center;gap:10px;font:inherit;font-size:21px;font-weight:800;border-radius:12px;padding:16px 28px;cursor:pointer;border:2px solid #fff;min-width:200px}
+#riepilogo #rie-primi .pp-primo .pp-parla{background:#ff8800;border-color:#ff8800;color:#0a2a4d}
+#riepilogo #rie-primi .pp-primo .pp-scrivi{background:transparent;color:#fff}
+#riepilogo #rie-primi .pp-primo svg{width:26px;height:26px}
+#riepilogo #rie-primi .pp-primo .pp-es{margin:16px 0 0;font-size:17px}
+#riepilogo #rie-primi .pp-primo .pp-es b{color:#ff8800}
+@media(max-width:700px){#riepilogo #rie-primi .pp-primo{padding:20px 18px}#riepilogo #rie-primi .pp-primo h3{font-size:24px}#riepilogo #rie-primi .pp-primo .pp-bt button{flex:1 1 100%}}
