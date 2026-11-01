@@ -143,7 +143,8 @@
   }
 
   /* ---------- la finestra ---------- */
-  async function invApri(id){
+  async function invApri(id,opz){
+    opz=opz||{};
     if(!sb||!sbUid){ toast("Devi essere loggato"); return; }
     var r1=await sb.from("gest_preventivi").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     var p=r1.data; if(!p){ toast("Preventivo non trovato"); return; }
@@ -164,6 +165,8 @@
     }else{
       caps.forEach(function(c){ sel.caps[c.id]=true; });
     }
+    /* aperta dal capitolato: i capitolati vanno dentro (se il cliente non ha gia' firmato) */
+    if(opz.capitolati&&!(link&&link.firmato_il)) caps.forEach(function(c){ sel.caps[c.id]=true; });
     _inv={p:p,righe:(res[0].data||[]),az:res[1].data||{},cli:res[2]||{},link:link,caps:caps,sel:sel,cambiato:false};
     if(!(await salvaFoto())) return;
     invDisegna();

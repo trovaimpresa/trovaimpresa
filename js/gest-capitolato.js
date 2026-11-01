@@ -693,6 +693,8 @@
       corpo,
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn" id="cp-pdf-tutti" data-action="cap-pdf-tutti" data-id="'+esc(String(id))+'" style="display:none">📄 PDF di tutti</button>'
+      /* 1 nov 2026 — «Invia al cliente» anche da qui: salva e apre la finestra del link (js/gest-invia-cliente.js) */
+      +'<button class="btn" data-action="cap-invia" data-id="'+esc(String(id))+'">📤 Invia al cliente</button>'
       +'<button class="btn" data-action="cap-pdf" data-id="'+esc(String(id))+'">📄 Scarica PDF</button>'
       +'<button class="btn-primary b-save" data-action="cap-salva" data-id="'+esc(String(id))+'">Salva capitolato</button>');
     caricaForm();
@@ -1221,6 +1223,12 @@
     if(a.indexOf("cap-")!==0&&a!=="prev-capitolato") return;
     if(a==="prev-capitolato") return capitolatoForm(t.dataset.id);
     if(a==="cap-salva"){ var d=await salva(t.dataset.id); if(d) closeSheet(); return; }
+    if(a==="cap-invia"){
+      /* prima si salva: il cliente deve vedere quello che c'e' a schermo adesso */
+      var sv=await salva(t.dataset.id,true); if(!sv) return;
+      if(typeof window.gestInviaCliente!=="function"){ toast("Capitolato salvato ✅ Mandalo da «Invia al cliente» nel preventivo"); return; }
+      closeSheet(); return window.gestInviaCliente(t.dataset.id,{capitolati:true});
+    }
     if(a==="cap-pdf") return capitolatoPdf(t.dataset.id,false);
     if(a==="cap-pdf-tutti") return capitolatoPdf(t.dataset.id,true);
     if(a==="cap-ai") return scriviConAI();
