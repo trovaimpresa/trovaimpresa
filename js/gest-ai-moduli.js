@@ -34,6 +34,8 @@
   }
 
   function _aiStrisciaDisegna(){
+    /* 1 nov 2026: il numero accanto a «Ricarica crediti» nel menu */
+    try{ const c=document.getElementById("cnt-crediti"); if(c&&_aiStato) c.textContent=String(Number(_aiStato.remaining||0)); }catch(e){}
     const box=$("#ai-striscia"), st=_aiStato; if(!box||!st)return;
     const txt=$("#ai-str-txt"), cta=$("#ai-str-cta"), piu=$("#ai-str-piu"), giu=$("#ai-str-giu");
     if(!txt||!cta||!piu||!giu)return;

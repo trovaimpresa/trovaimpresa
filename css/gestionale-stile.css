@@ -92,3 +92,7 @@ html body .mp-righe.mp-righe{border:2px solid #0a2a4d !important;border-radius:1
 
 /* rete di sicurezza: le schede delle liste lunghe (lavori, preventivi, fatture, carte, fornitori, crediti, prezzario) hanno il bordo blu anche se lo script arriva tardi */
 html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card.card,html body #forn-list > .card.card,html body #cred-list > .card.card,html body #pz-list .pz-card.pz-card{border:2px solid #0a2a4d !important;border-left:2px solid #0a2a4d !important;border-radius:10px !important}
+
+/* 1 nov 2026: il numero dei crediti nel menu e' GRIGIO, non arancione: non e' una cosa da fare */
+#appview .side .tabs button .tab-cnt.cnt-crediti{background:rgba(255,255,255,.2) !important;color:#fff !important}
+#appview .side .tabs button.active .tab-cnt.cnt-crediti{background:rgba(10,42,77,.15) !important;color:#0a2a4d !important}
