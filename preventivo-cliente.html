@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Il tuo preventivo</title>
+<link rel="icon" href="/img/trovaimpresa-logo.svg">
+<!--
+  INVIA AL CLIENTE — 1 novembre 2026
+
+  La pagina che il CLIENTE dell'impresa apre dal link (WhatsApp, email, QR).
+  Niente account, niente menu del sito: il preventivo, i capitolati, la
+  firma col dito. Parla solo con netlify/functions/preventivo-cliente.js.
+  Stampo: scelte.html (stessa testa, stesso piede, stessi colori).
+
+  ⛔ noindex: e' una pagina privata di un cliente, Google non la deve vedere.
+  ⛔ Nessun conto qui dentro: righe e totali arrivano gia' fatti, sono la
+     fotografia scattata dal gestionale con le funzioni del PDF.
+  ⛔ Tutto quello che arriva dal server passa da esc(): lo ha scritto
+     un'impresa, non noi.
+-->
+<style>
+  :root{--blu:#0066ff;--blu-s:#0a2a4d;--testo:#0f172a;--t2:#475569;--bordo:#e2e8f0;
+        --ok:#059669;--okbg:#ecfdf5;--att:#b45309;--attbg:#fffbeb;--sf:#e7eef8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--sf);color:var(--testo);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .testa{background:var(--blu-s);color:#fff;padding:22px 16px 20px}
+  .testa .in{max-width:720px;margin:0 auto}
+  .testa .da{font-size:15px;opacity:.8}
+  .testa h1{font-size:25px;line-height:1.25;margin-top:2px}
+  .testa .per{font-size:15px;opacity:.85;margin-top:4px}
+  main{max-width:720px;margin:0 auto;padding:16px 16px 40px}
+  .carta{background:#fff;border:2px solid var(--blu-s);border-radius:16px;padding:18px;margin-bottom:14px}
+  .numero{font-size:15px;color:var(--t2)}
+  .titolo{font-size:21px;font-weight:800;line-height:1.3;margin:4px 0 10px}
+  .grande{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .sotto{font-size:15px;color:var(--t2)}
+  .schede{display:flex;gap:8px;margin-bottom:12px}
+  .schede button{flex:1;min-height:50px;border-radius:12px;border:2px solid var(--blu-s);background:#fff;color:var(--testo);font:700 17px inherit;cursor:pointer}
+  .schede button.on{background:var(--blu-s);color:#fff}
+  .riga{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--bordo)}
+  .riga:first-child{border-top:none}
+  .riga .d{flex:1;min-width:0;font-size:16px}
+  .riga .q{font-size:14px;color:var(--t2);display:block;margin-top:2px}
+  .riga .t{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;font-size:16px}
+  .sez{background:#eef1f4;margin:8px -18px 0;padding:10px 18px;font-weight:800;font-size:16px}
+  .tot{margin-top:6px;border-top:2px solid var(--blu-s);padding-top:8px}
+  .tot .r{display:flex;justify-content:space-between;gap:10px;font-size:16px;padding:4px 0;font-variant-numeric:tabular-nums}
+  .tot .r.fin{font-size:20px;font-weight:800;padding-top:8px}
+  h2{font-size:20px;line-height:1.3;margin-bottom:10px}
+  h3{font-size:17px;margin:16px 0 6px}
+  .voce{border-top:1px solid var(--bordo);padding:12px 0}
+  .voce:first-of-type{border-top:none}
+  .voce b{font-size:17px;display:block;margin-bottom:4px}
+  .voce p{font-size:16px;margin-top:4px}
+  .voce .et{font-weight:700;color:var(--t2)}
+  .testo{font-size:16px;white-space:pre-line}
+  .piccolo{font-size:15px;color:var(--t2);margin-top:8px}
+  .foto{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
+  .foto a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--bordo);text-decoration:none;color:var(--t2);font-size:14px;background:#fff}
+  .foto img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+  .foto span{display:block;padding:6px 8px}
+  .bott{display:block;width:100%;min-height:56px;border-radius:12px;border:2px solid var(--blu-s);background:#fff;color:var(--testo);font:700 17px inherit;cursor:pointer;margin-bottom:10px;text-align:center;text-decoration:none;line-height:52px}
+  .bott--ok{background:var(--ok);border-color:var(--ok);color:#fff;font-size:19px;min-height:62px;line-height:58px}
+  .bott:disabled{opacity:.55;cursor:default}
+  .due{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .due .bott{margin-bottom:0}
+  .contatti{display:none;margin-top:10px}
+  .contatti.on{display:block}
+  .banda{border-radius:14px;padding:14px 16px;font-size:16px;margin-bottom:14px;background:var(--okbg);border:2px solid #a7f3d0}
+  .banda img{display:block;max-width:240px;width:100%;margin-top:10px;background:#fff;border-radius:8px;border:1px solid var(--bordo)}
+  .firma label{display:block;font-size:16px;font-weight:700;margin:12px 0 6px}
+  .firma input[type=text]{width:100%;min-height:52px;border:2px solid var(--bordo);border-radius:12px;padding:10px 14px;font:inherit;font-size:17px}
+  .firma input[type=text]:focus{outline:none;border-color:var(--blu)}
+  .tela{position:relative;border:2px dashed #94a3b8;border-radius:12px;background:#fff;touch-action:none}
+  .tela canvas{display:block;width:100%;height:190px}
+  .tela .vuota{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:16px;pointer-events:none}
+  .cancella{background:none;border:none;color:var(--blu);font:600 16px inherit;margin-top:6px;cursor:pointer;padding:6px 0}
+  .spunta{display:flex;gap:12px;align-items:flex-start;font-size:16px;margin:14px 0}
+  .spunta input{width:24px;height:24px;flex:0 0 auto;margin-top:2px}
+  .msg{font-size:16px;text-align:center;min-height:0;margin-top:8px}
+  .msg.err{color:#dc2626;font-weight:600}
+  .vuoto{text-align:center;padding:40px 10px;font-size:18px}
+  .piede{text-align:center;font-size:14px;color:var(--t2);margin-top:28px}
+  .piede a{color:var(--blu);text-decoration:none;font-weight:600}
+  .piede img{width:170px;height:auto;display:block;margin:0 auto 6px}
+  .solo-stampa{display:none}
+  @media print{
+    body{background:#fff;font-size:12pt}
+    .testa{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 10px}
+    .schede,.azioni,.firma,.piede,.contatti{display:none !important}
+    .pannello{display:block !important}
+    .solo-stampa{display:block}
+    .carta{border:1px solid #999;break-inside:avoid-page}
+    main{padding:10px 0}
+  }
+</style>
+</head>
+<body>
+<div class="testa"><div class="in">
+  <div class="da" id="t-da">&nbsp;</div>
+  <h1 id="t-imp">Sto caricando…</h1>
+  <div class="per" id="t-per"></div>
+</div></div>
+<main id="main"></main>
+<script>
+(function(){
+  var API="/.netlify/functions/preventivo-cliente";
+  var t=new URLSearchParams(location.search).get("t")||"";
+  var S=null, scheda="prev";
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function data(iso){if(!iso)return "";var d=new Date(String(iso).length===10?iso+"T12:00:00":iso);return isNaN(d)?"":d.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"});}
+  function ora(iso){var d=new Date(iso);return isNaN(d)?"":d.toLocaleString("it-IT",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});}
+  function piede(){
+    return '<div class="piede"><a href="https://trovaimpresa.com" target="_blank" rel="noopener">'
+      +'<img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa">Pagina fatta con il gestionale TrovaImpresa</a></div>';
+  }
+  function errore(testo){
+    $("t-da").textContent="";$("t-imp").textContent="Il tuo preventivo";$("t-per").textContent="";
+    $("main").innerHTML='<div class="vuoto">'+esc(testo)+'</div>'+piede();
+  }
+  function cosaE(){return S.tipo==="parcella"?"Parcella":"Preventivo";}
+
+  /* ---------------- il preventivo ---------------- */
+  function pannelloPrev(){
+    var h='<div class="carta">';
+    (S.righe||[]).forEach(function(r){
+      if(r.sez){h+='<div class="sez">'+esc(r.d)+'</div>';return;}
+      h+='<div class="riga"><div class="d">'+esc(r.d)+(r.q?'<span class="q">'+esc(r.q)+'</span>':'')+'</div><div class="t">'+esc(r.t)+'</div></div>';
+    });
+    if(!(S.righe||[]).length)h+='<div class="sotto">Nessuna voce.</div>';
+    h+='<div class="tot">';
+    (S.totali||[]).forEach(function(x){h+='<div class="r"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span></div>';});
+    if(S.totale)h+='<div class="r fin"><span>'+esc(S.totale[0])+'</span><span>'+esc(S.totale[1])+'</span></div>';
+    h+='</div>';
+    if(S.nota_iva)h+='<div class="piccolo">'+esc(S.nota_iva)+'</div>';
+    h+='</div>';
+    if(S.note)h+='<div class="carta"><h2>Note e condizioni</h2><div class="testo">'+esc(S.note)+'</div></div>';
+    return h;
+  }
+
+  /* ---------------- i capitolati ---------------- */
+  function pannelloCap(){
+    return (S.capitolati||[]).map(function(c){
+      var h='<div class="carta"><h2>'+esc(c.nome||"Capitolato")+'</h2>';
+      if(c.dove)h+='<div class="sotto">Dove: '+esc(c.dove)+'</div>';
+      h+='<h3>Cosa si fa</h3>';
+      (c.voci||[]).forEach(function(v){
+        h+='<div class="voce"><b>'+esc(v.titolo||"Lavorazione")+'</b>'
+          +(v.cosa?'<p>'+esc(v.cosa)+'</p>':'')
+          +(v.materiali?'<p><span class="et">Materiali:</span> '+esc(v.materiali)+'</p>':'')
+          +(v.compreso?'<p><span class="et">Compreso:</span> '+esc(v.compreso)+'</p>':'')
+          +(v.escluso?'<p><span class="et">Escluso:</span> '+esc(v.escluso)+'</p>':'')
+          +'</div>';
+      });
+      h+='<div class="piccolo">Tutto quello che non è scritto qui si intende escluso.</div>';
+      if(c.inizio||c.durata){
+        h+='<h3>Tempi</h3><div class="testo">'
+          +(c.inizio?'Inizio lavori: '+esc(data(c.inizio))+'. ':'')
+          +(c.durata?'Durata prevista: '+esc(c.durata)+' giorni lavorativi.':'')+'</div>';
+      }
+      if(c.pagamenti)h+='<h3>Pagamenti</h3><div class="testo">'+esc(c.pagamenti)+'</div>';
+      h+='<h3>Garanzia</h3><div class="testo">Garanzia di legge sulle opere eseguite a regola d\'arte (artt. 1667 e 1669 del codice civile).'
+        +(c.garanzie?' '+esc(c.garanzie):'')+'</div>';
+      if(c.note)h+='<h3>Condizioni particolari</h3><div class="testo">'+esc(c.note)+'</div>';
+      if((c.allegati||[]).length){
+        h+='<h3>Foto e allegati</h3><div class="foto">'+c.allegati.map(function(a){
+          return '<a href="'+esc(a.url)+'" target="_blank" rel="noopener"><img src="'+esc(a.url)+'" alt="'+esc(a.nome||"Foto")+'" loading="lazy">'
+            +(a.nome?'<span>'+esc(a.nome)+'</span>':'')+'</a>';
+        }).join("")+'</div>';
+      }
+      return h+'</div>';
+    }).join("");
+  }
+
+  /* ---------------- la firma ---------------- */
+  function bloccoFirma(){
+    if(S.firmato_il){
+      return '<div class="banda"><b>Firmato da '+esc(S.firma_nome||"")+'</b> il '+esc(ora(S.firmato_il))+'.'
+        +(S.firma_img?'<img src="'+esc(S.firma_img)+'" alt="Firma">':'')+'</div>';
+    }
+    return '<div class="firma" id="firma">'
+      +'<button type="button" class="bott bott--ok" id="apri-firma">Accetto e firmo</button>'
+      +'<div id="modulo-firma" hidden><div class="carta">'
+      +  '<h2>Accetto e firmo</h2>'
+      +  '<label for="f-nome">Nome e cognome</label><input type="text" id="f-nome" autocomplete="name" maxlength="120">'
+      +  '<label>Firma col dito qui sotto</label>'
+      +  '<div class="tela"><canvas id="f-tela"></canvas><div class="vuota" id="f-vuota">Firma qui</div></div>'
+      +  '<button type="button" class="cancella" id="f-cancella">Cancella la firma</button>'
+      +  '<label class="spunta"><input type="checkbox" id="f-ok"><span>Ho letto '+esc(S.includi_prev===false?"il capitolato":"il "+cosaE().toLowerCase()+((S.capitolati||[]).length?" e il capitolato":""))+' e li accetto.</span></label>'
+      +  '<button type="button" class="bott bott--ok" id="f-manda">Conferma la firma</button>'
+      +  '<div class="msg" id="f-msg" aria-live="polite"></div>'
+      +'</div></div></div>';
+  }
+  var tela=null, ctx=null, segnato=false;
+  function preparaTela(){
+    tela=$("f-tela");if(!tela)return;
+    var r=tela.getBoundingClientRect(), k=window.devicePixelRatio||1;
+    tela.width=Math.round(r.width*k);tela.height=Math.round(r.height*k);
+    ctx=tela.getContext("2d");ctx.scale(k,k);ctx.lineWidth=2.6;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#0f172a";
+    segnato=false;$("f-vuota").style.display="";
+    var giu=false;
+    function punto(e){var b=tela.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top};}
+    tela.onpointerdown=function(e){giu=true;try{tela.setPointerCapture(e.pointerId);}catch(_){}var p=punto(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();};
+    tela.onpointermove=function(e){if(!giu)return;var p=punto(e);ctx.lineTo(p.x,p.y);ctx.stroke();if(!segnato){segnato=true;$("f-vuota").style.display="none";}e.preventDefault();};
+    tela.onpointerup=tela.onpointercancel=function(){giu=false;};
+  }
+  /* la firma si ritaglia intorno al segno e si rimpicciolisce: pesa poco e si stampa bene */
+  function firmaPng(){
+    var w=tela.width,h=tela.height,d=ctx.getImageData(0,0,w,h).data,x0=w,y0=h,x1=0,y1=0;
+    for(var y=0;y<h;y+=2)for(var x=0;x<w;x+=2){if(d[(y*w+x)*4+3]>0){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}
+    if(x1<=x0||y1<=y0)return "";
+    x0=Math.max(0,x0-8);y0=Math.max(0,y0-8);x1=Math.min(w,x1+8);y1=Math.min(h,y1+8);
+    var cw=x1-x0,ch=y1-y0,sc=Math.min(1,500/cw),c=document.createElement("canvas");
+    c.width=Math.round(cw*sc);c.height=Math.round(ch*sc);
+    c.getContext("2d").drawImage(tela,x0,y0,cw,ch,0,0,c.width,c.height);
+    return c.toDataURL("image/png");
+  }
+  function mandaFirma(){
+    var b=$("f-manda"),m=$("f-msg");m.className="msg";m.textContent="";
+    var nome=$("f-nome").value.trim();
+    if(nome.length<3){m.className="msg err";m.textContent="Scrivi il tuo nome e cognome.";$("f-nome").focus();return;}
+    if(!segnato){m.className="msg err";m.textContent="Manca la firma: firma col dito nel riquadro.";return;}
+    if(!$("f-ok").checked){m.className="msg err";m.textContent="Spunta la casella per dire che accetti.";return;}
+    var png=firmaPng();if(!png){m.className="msg err";m.textContent="Manca la firma: firma col dito nel riquadro.";return;}
+    b.disabled=true;b.textContent="Invio…";
+    fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({t:t,nome:nome,firma:png,accetto:true})})
+      .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});})
+      .then(function(r){
+        if(!r.ok){b.disabled=false;b.textContent="Conferma la firma";m.className="msg err";m.textContent=(r.j&&r.j.error)||"Non è andata. Riprova.";return;}
+        S.firmato_il=r.j.firmato_il;S.firma_nome=r.j.firma_nome;S.firma_img=png;disegna();window.scrollTo(0,0);
+      })
+      .catch(function(){b.disabled=false;b.textContent="Conferma la firma";m.className="msg err";m.textContent="Manca la connessione. Riprova fra un attimo.";});
+  }
+
+  /* ---------------- la pagina ---------------- */
+  function disegna(){
+    var imp=S.impresa||{};
+    document.title=cosaE()+(S.numero?" n. "+S.numero:"")+" — "+(imp.nome||"La tua impresa");
+    $("t-da").textContent=(S.includi_prev===false?"Capitolato":cosaE())+" da";
+    $("t-imp").textContent=imp.nome||"La tua impresa";
+    $("t-per").textContent=[S.cliente?"per "+S.cliente:"",S.dove||""].filter(Boolean).join(" · ");
+    var haPrev=S.includi_prev!==false, haCap=(S.capitolati||[]).length>0;
+    if(!haPrev)scheda="cap";
+    var h='';
+    if(S.firmato_il)h+=bloccoFirma();
+    h+='<div class="carta"><div class="numero">'+esc(cosaE()+(S.numero?" n. "+S.numero:"")+(S.data?" · "+data(S.data):""))+'</div>'
+      +'<div class="titolo">'+esc(S.titolo||"")+'</div>'
+      +(haPrev&&S.totale?'<div class="grande">'+esc(S.totale[1])+'</div><div class="sotto">'+esc(S.totale_nota||"")+'</div>':'')
+      +'</div>';
+    if(haPrev&&haCap){
+      h+='<div class="schede"><button type="button" data-scheda="prev" class="'+(scheda==="prev"?"on":"")+'">'+esc(cosaE())+'</button>'
+        +'<button type="button" data-scheda="cap" class="'+(scheda==="cap"?"on":"")+'">Capitolato</button></div>';
+    }
+    if(haPrev)h+='<div class="pannello" id="p-prev"'+(scheda==="prev"?'':' style="display:none"')+'>'+pannelloPrev()+'</div>';
+    if(haCap)h+='<div class="pannello" id="p-cap"'+(scheda==="cap"?'':' style="display:none"')+'>'+pannelloCap()+'</div>';
+    if(!S.firmato_il)h+=bloccoFirma();
+    else h+='<div class="solo-stampa">'+bloccoFirma()+'</div>';
+    var tel=String(imp.tel||"").replace(/[^\d+]/g,""), wa=tel.replace(/^\+/,"").replace(/^00/,"");
+    if(wa&&wa.length<=10)wa="39"+wa;
+    h+='<div class="azioni"><div class="due">'
+      +'<button type="button" class="bott" id="stampa">Stampa o salva PDF</button>'
+      +'<button type="button" class="bott" id="scrivi"'+(tel||imp.email?'':' disabled')+'>Scrivi all\'impresa</button></div>'
+      +'<div class="contatti" id="contatti">'
+      +(tel?'<a class="bott" href="tel:'+esc(tel)+'">Chiama</a><a class="bott" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener">WhatsApp</a>':'')
+      +(imp.email?'<a class="bott" href="mailto:'+esc(imp.email)+'?subject='+encodeURIComponent(cosaE()+(S.numero?" n. "+S.numero:""))+'">Email</a>':'')
+      +'</div></div>';
+    h+=piede();
+    $("main").innerHTML=h;
+  }
+
+  document.addEventListener("click",function(e){
+    var s=e.target.closest("[data-scheda]");
+    if(s){scheda=s.dataset.scheda;document.querySelectorAll("[data-scheda]").forEach(function(b){b.classList.toggle("on",b===s);});
+      ["prev","cap"].forEach(function(k){var p=$("p-"+k);if(p)p.style.display=k===scheda?"":"none";});return;}
+    if(e.target.closest("#stampa")){window.print();return;}
+    if(e.target.closest("#scrivi")){$("contatti").classList.toggle("on");return;}
+    if(e.target.closest("#apri-firma")){$("apri-firma").hidden=true;$("modulo-firma").hidden=false;preparaTela();$("modulo-firma").scrollIntoView({behavior:"smooth",block:"start"});return;}
+    if(e.target.closest("#f-cancella")){preparaTela();return;}
+    if(e.target.closest("#f-manda")){mandaFirma();return;}
+  });
+
+  if(!/^[A-Za-z0-9_-]{20,64}$/.test(t)){errore("Questo link non è completo. Riaprilo dal messaggio che ti hanno mandato.");return;}
+  fetch(API+"?t="+encodeURIComponent(t)).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});})
+    .then(function(r){if(!r.ok){errore((r.j&&r.j.error)||"Questo link non funziona.");return;}S=r.j;disegna();})
+    .catch(function(){errore("Manca la connessione. Riprova fra un attimo.");});
+})();
+</script>
+</body>
+</html>

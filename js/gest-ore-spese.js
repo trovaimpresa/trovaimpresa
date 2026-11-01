@@ -1124,7 +1124,9 @@
   const PREV_BAR={bozza:"da_fare",inviato:"in_corso",accettato:"fatto",rifiutato:"ritardo"};
   const PREV_VERBO={bozza:"creato",inviato:"inviato",accettato:"accettato",rifiutato:"rifiutato"};
   function prevVoci(p){
-    const v=[{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
+    /* 1 novembre 2026 — «Invia al cliente»: link, WhatsApp, email, QR e firma col dito.
+       Sta in js/gest-invia-cliente.js. E' il primo: e' quello che si fa piu' spesso. */
+    const v=[{lab:"📤 Invia al cliente",action:"prev-invia",data:{id:p.id}},{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
     /* la lettera d'incarico è un obbligo di legge per i tecnici: sta accanto al PDF */
     if(ruoloUtente==='professionista')v.push({lab:"📝 Lettera d'incarico",action:"prev-incarico",data:{id:p.id}});
     /* per chi lavora in cantiere il gemello è la conferma d'ordine */

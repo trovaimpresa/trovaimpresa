@@ -2844,3 +2844,36 @@ Pulsante «📥 Fatture ricevute» nella sezione Fatture (gestionale-app.html). 
 - **Prova:** in sandbox c'è il pulsante «Fattura di prova» (usa `/simulate-supplier-invoice` di Openapi). In produzione non c'è.
 - **Collaudo fatto:** 56 controlli sul lato server con un finto Supabase e un finto Openapi (attivazione, avviso doppio, fattura di un altro, invio da rimborsare se il salvataggio fallisce, file di un altro utente...) + 38 sul lato pagina. ⛔ NON provato contro Openapi vero: il formato esatto dell'avviso e di `GET /api_configurations` viene dalla documentazione, non da una prova. Se la prima fattura di prova non arriva, guardare i log di `sdi-ricevuta` su Netlify.
 - **Non fatto (di proposito):** Noleggio (ha il suo `nol-sdi.js`, non ha ancora la ricezione); nota di credito passiva trattata come una fattura qualsiasi (si vede «Nota di credito» nella scheda).
+
+
+# 1 NOVEMBRE 2026 — «INVIA AL CLIENTE» (link, WhatsApp, email, QR, firma col dito)
+
+Chiesto da Alex dopo un collaudo dal vivo: computo e capitolato si potevano
+solo scaricare in PDF. Approvato con le foto (computer, telefono, pagina del
+cliente). Un push solo.
+
+| pezzo | file |
+|---|---|
+| pulsante «📤 Invia al cliente», primo in alto e nel menu «...» del preventivo | `js/gest-ore-spese.js` (`prevVoci`) |
+| la finestra grande a due colonne (cosa mandi · link · WhatsApp/Email/PDF · stato del cliente · QR) | `js/gest-invia-cliente.js` (IIFE, ascoltatore suo) |
+| la pagina del cliente, senza account, con firma col dito | `preventivo-cliente.html` (noindex, stampo `scelte.html`) |
+| l'unica porta del cliente | `netlify/functions/preventivo-cliente.js` |
+| la tabella | `gest_preventivi_link` — `sql/gest-preventivi-link.sql`, migrazione `gest_preventivi_link_1nov2026` |
+
+- ⛔ **`dati` è una FOTOGRAFIA** scattata dal gestionale all'apertura della
+  finestra, con le funzioni dei conti del PDF. La funzione del cliente non fa
+  conti. ⚠️ L'ordine dei totali in `invConti()` copia il riquadro di `prevPdf()`:
+  se cambia l'uno, va cambiato l'altro.
+- ⛔ **La firma la scrive solo il server.** Trigger `gest_preventivi_link_controlla`:
+  dal browser la firma si può solo TOGLIERE (versione nuova), mai mettere; le
+  aperture non si toccano; dopo la firma `dati` è fermo. Provato fingendo il
+  ruolo `authenticated` e il `service_role`, dentro transazioni annullate.
+- ⛔ Le foto dei capitolati si firmano solo se il percorso comincia con l'id
+  dell'impresa del link.
+- La firma vale per preventivo + capitolati mandati insieme (impronta sha256
+  della fotografia in `firma_hash`). **Non** finisce dentro le firme del
+  capitolato (`gest_preventivi.capitolato.firme`): sono due cose diverse.
+- Quando si manda (copia, WhatsApp, email, QR) una bozza diventa «Inviato».
+- Alla firma parte un'email all'impresa (Resend, quota condivisa).
+- Il PDF per il cliente è la stampa del browser («Stampa o salva PDF»),
+  così non nasce un secondo foglio da tenere uguale al primo.

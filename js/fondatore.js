@@ -289,6 +289,7 @@
     "gest-sal-fattura.sql":             "gest_sal.fattura_id",
     "gest-sal.sql":                     "gest_sal gest_sal_righe gest_sal_righe_calc gest_sal_totali",
     "gest-scelte.sql":                  "gest_scelte gest_scelte_link gest_scelte_controlla_lavoro()",
+    "gest-preventivi-link.sql":         "gest_preventivi_link gest_preventivi_link_controlla()",
     "gest-scadenze-pratiche.sql":       "gest_scadenze.lavoro_id gest_scadenze.avvisi gest_scadenze.avvisa",
     "gest-scadenze-ripeti.sql":         "gest_scadenze.ripeti_mesi",
     "gest-squadra-nomi.sql":            "gest_squadra_nomi",
