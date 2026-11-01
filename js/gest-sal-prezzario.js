@@ -471,6 +471,8 @@
          ancora niente di salvato da mettere sul foglio */
       +(isNew?"":'<button class="btn" data-action="sal-pdf" data-id="'+esc(String(s.id))+'">📄 PDF</button>')
       +'<button class="btn-primary b-save" data-action="sal-salva" data-id="'+esc(String(s.id||""))+'">'+(isNew?"Crea il SAL":"Salva")+'</button>');
+    /* 1 nov 2026: caselle rosse e verdi (js/gest-ai-moduli.js) */
+    try{ if(typeof ctrAscolta==="function") ctrAscolta("sal"); }catch(e){}
 
     bindSeg("sal-stato");
     const box=$("#sal-voci");
@@ -1142,6 +1144,8 @@
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +(isNew?"":'<button class="btn btn-danger" data-action="del-prezzo" data-id="'+esc(String(x.id))+'">🗑 Metti nel cestino</button>')
       +'<button class="btn-primary b-save" data-action="save-prezzo" data-id="'+esc(x.id||"")+'">'+(isNew?"Crea la voce":"Salva")+'</button>');
+    /* 1 nov 2026: caselle rosse e verdi (js/gest-ai-moduli.js) */
+    try{ if(typeof ctrAscolta==="function") ctrAscolta("prezzo"); }catch(e){}
   }
 
   async function savePrezzo(id){

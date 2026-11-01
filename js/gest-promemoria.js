@@ -222,6 +222,8 @@
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-prom" data-id="${esc(String(p.id || ""))}">Salva</button>`);
+    /* 1 nov 2026: caselle rosse e verdi (js/gest-ai-moduli.js) */
+    try{ if(typeof ctrAscolta==="function") ctrAscolta("promemoria"); }catch(e){}
   }
 
   async function salvaPromemoria(id) {

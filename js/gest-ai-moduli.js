@@ -553,6 +553,9 @@
       dentro:[],
       regole:ctrRegoleComputo
     },
+    promemoria:{ caselle:"#p-testo,#p-data,#p-ora,#p-note", dentro:[], regole:ctrRegolePromemoria },
+    sal:{ caselle:"#sal-num,#sal-data,#sal-dal,#sal-al,#sal-rit,#sal-note", dentro:[], regole:ctrRegoleSal },
+    prezzo:{ caselle:"#pz-cod,#pz-desc,#pz-prezzo,#pz-cat,#pz-fonte,#pz-mano", dentro:[], regole:ctrRegolePrezzo },
     azienda:{
       caselle:"#a-nome,#a-piva,#a-cf,#a-ind,#a-cap,#a-citta,#a-prov,#a-tel,#a-email,#a-pec,#a-sdi,#a-iban",
       dentro:[],
@@ -964,6 +967,51 @@
     const sdi=L.get("a-sdi");
     if(sdi&&sdi.length!==7) out.push({campo:"a-sdi",grave:"arancio",
       dice:"Il codice SDI è di 7 caratteri, questo ne ha "+sdi.length+"."});
+    return out;
+  }
+
+  /* ============================================================
+     PROMEMORIA, SAL E VOCE DEL PREZZARIO — 1 nov 2026
+     ============================================================ */
+  function _ctrNum(v){ const t=String(v||"").trim(); if(!t) return null;
+    const n=Number(t.replace(/\./g,"").replace(",",".")); return isNaN(n)?NaN:n; }
+  function ctrRegolePromemoria(L){
+    L=L||ctrDalModulo(); const out=[];
+    if(!L.get("p-testo")) out.push({campo:"p-testo",grave:"rosso",
+      dice:"Scrivi cosa ti devo ricordare: senza, l'email del mattino arriva vuota."});
+    const d=L.get("p-data");
+    if(!d) out.push({campo:"p-data",grave:"rosso", dice:"Manca il giorno: senza data il promemoria non parte mai."});
+    else if(d<todayStr()) out.push({campo:"p-data",grave:"arancio",
+      dice:"Questo giorno è già passato: l'avviso non arriverà più. Se è da fare ancora, metti una data nuova."});
+    return out;
+  }
+  function ctrRegoleSal(L){
+    L=L||ctrDalModulo(); const out=[];
+    const n=L.get("sal-num");
+    if(!n) out.push({campo:"sal-num",grave:"rosso", dice:"Manca il numero del SAL: sul foglio e in fattura serve (SAL n. 1, n. 2…)."});
+    else if(!(+n>=1)) out.push({campo:"sal-num",grave:"rosso", dice:"Il numero del SAL parte da 1."});
+    if(!L.get("sal-data")) out.push({campo:"sal-data",grave:"rosso", dice:"Manca la data del SAL."});
+    const dal=L.get("sal-dal"), al=L.get("sal-al");
+    if(dal&&al&&dal>al) out.push({campo:"sal-al",grave:"rosso",
+      dice:"Il periodo finisce prima di cominciare: controlla le due date."});
+    const r=_ctrNum(L.get("sal-rit"));
+    if(r!=null&&(isNaN(r)||r<0||r>100)) out.push({campo:"sal-rit",grave:"rosso",
+      dice:"La ritenuta è una percentuale fra 0 e 100 (di solito 0,5)."});
+    else if(r!=null&&r>10) out.push({campo:"sal-rit",grave:"arancio",
+      dice:"Una ritenuta del "+r+"% è molto alta: di solito è lo 0,5%. Controlla la virgola."});
+    return out;
+  }
+  function ctrRegolePrezzo(L){
+    L=L||ctrDalModulo(); const out=[];
+    if(!L.get("pz-desc")) out.push({campo:"pz-desc",grave:"rosso",
+      dice:"Manca la descrizione: nel preventivo uscirebbe una riga vuota."});
+    const p=_ctrNum(L.get("pz-prezzo"));
+    if(p==null) out.push({campo:"pz-prezzo",grave:"arancio", dice:"Manca il prezzo: la voce entra nel preventivo a 0 €."});
+    else if(isNaN(p)) out.push({campo:"pz-prezzo",grave:"rosso", dice:"Il prezzo va scritto con le cifre (es. 18,50)."});
+    else if(p<0) out.push({campo:"pz-prezzo",grave:"rosso", dice:"Il prezzo non può essere negativo."});
+    const m=_ctrNum(L.get("pz-mano"));
+    if(m!=null&&(isNaN(m)||m<0||m>100)) out.push({campo:"pz-mano",grave:"rosso",
+      dice:"Questa è una percentuale: va da 0 a 100."});
     return out;
   }
 
