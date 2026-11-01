@@ -260,7 +260,7 @@ ${briciole}
 </script>
 
   <script src="/js/torna-indietro.js" defer></script>
-</body>
+${pag.slug === 'quanto-costa-un-gestionale-edile' ? '<!-- 10 ott 2026: banda «Tutto GRATIS» (vedi js/banda-gratis.js). 1 nov 2026: ora la scrive il generatore, se no rigenerando spariva -->\n<script src="/js/banda-gratis.js?v=1" defer></script>\n' : ''}</body>
 </html>
 `;
 }

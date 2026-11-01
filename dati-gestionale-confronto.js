@@ -66,7 +66,7 @@ module.exports = [
 
     { h2: 'Cosa costa qui', blocchi: [
       { t:'tab', testa:['Voce','Quanto'], num:true, righe:[
-        ['Gestionale base', 'Gratis per sempre, senza carta'],
+        ['Gestionale con AI', 'Gratis per sempre, senza carta'],
         ['Assistenza AI e chat', 'compresa: 30 crediti e 50 messaggi al mese'],
         ['Crediti in più', 'pacchetti da 19 €, non scadono'],
         ['Costo per utente in più', '0 € — gli accessi per collaboratori e segretaria sono compresi'],
@@ -133,7 +133,7 @@ module.exports = [
   riga: 'cosa regge davvero nel gratis, dove cede, e quando conviene pagare',
   briciola: 'Gestionale cantieri gratis',
   title: 'Gestionale cantieri gratis: dove regge e dove cede',
-  desc: 'Gestionale per cantieri gratis: cosa si fa con fogli di calcolo e gruppi WhatsApp, dove cedono e come il gestionale di TrovaImpresa, gratis e con l’AI, li sostituisce.',
+  desc: 'Gestionale per cantieri gratis: cosa si fa con fogli di calcolo e WhatsApp, dove cedono e come il gestionale di TrovaImpresa, gratis e con l’AI, li sostituisce.',
   h1: 'Gestionale cantieri gratis: cosa regge davvero e cosa no',
   minuti: 5,
   nomeApp: 'Gestionale TrovaImpresa',

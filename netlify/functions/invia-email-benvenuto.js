@@ -1,6 +1,7 @@
 // Email di benvenuto inviata alla registrazione.
 // 11 ott 2026: grafica nuova «modello C» (vedi piu' sotto, htmlNuovo).
-// 3 ott 2026: il gestionale base e' GRATIS PER SEMPRE per ogni iscritto. L'email
+// 3 ott 2026: il gestionale base e' GRATIS PER SEMPRE per ogni iscritto.
+// 1 nov 2026: non c'e' piu' il base: il gestionale con AI e' gratis (30 crediti + 50 chat al mese). L'email
 // dice solo questo: il sito e' gratuito, gestionale compreso; per usarlo si
 // completa la registrazione (profilo); il benvenuto; e che ci si puo' scrivere
 // dal sito in qualsiasi momento. Niente prezzi, niente prove, niente regali.
@@ -218,7 +219,7 @@ exports.handler = async function(event) {
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;">benvenuto su <strong>TrovaImpresa</strong>. Il tuo account &egrave; pronto e la mail &egrave; confermata.</p>' +
-      '<p style="margin:0 0 16px;">Il <strong>gestionale &egrave; gratis, per sempre</strong>. Per usarlo devi solo <strong>completare la registrazione</strong>: ti bastano pochi minuti, dal tuo pannello.</p>' +
+      '<p style="margin:0 0 16px;">Il <strong>gestionale con AI &egrave; gratis, per sempre</strong>: ogni mese hai 30 crediti AI e 50 messaggi di chat compresi. Per usarlo devi solo <strong>completare la registrazione</strong>: ti bastano pochi minuti, dal tuo pannello.</p>' +
       bloccoAiuto;
   } else {
     /* ⛔ 3 OTTOBRE 2026 — IL BENVENUTO: IL SITO E' GRATIS, GESTIONALE COMPRESO.
@@ -232,7 +233,7 @@ exports.handler = async function(event) {
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;"><strong>benvenuto su TrovaImpresa.com</strong>, siamo contenti di averti con noi.</p>' +
-      '<p style="margin:0 0 16px;">Il sito &egrave; <strong>gratuito, per sempre</strong>, gestionale compreso: niente scadenze, niente carta, nessun addebito.</p>' +
+      '<p style="margin:0 0 16px;">Il sito &egrave; <strong>gratuito, per sempre</strong>, gestionale con AI compreso (30 crediti AI e 50 messaggi di chat ogni mese): niente scadenze, niente carta, nessun addebito.</p>' +
       '<p style="margin:0 0 16px;">Per poter usare tutto devi solo <strong>completare la registrazione</strong>: apri il pannello e compila il profilo. Ti bastano pochi minuti.</p>' +
       bloccoAiuto;
   }
