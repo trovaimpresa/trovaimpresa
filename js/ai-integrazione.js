@@ -28,6 +28,14 @@
   let ANON=null;
   async function getAnon(){
     if(ANON) return ANON;
+    /* 1 nov 2026 — IL 401 DI OGNI APERTURA, LA SECONDA VOLTA.
+       Da quando il codice della pagina e' stato diviso in js/gest-*.js (1 ott)
+       la chiave non sta piu' nell'HTML di gestionale-app.html: sta in
+       js/gest-base.js (SUPA_KEY). La ricerca nella pagina non la trovava,
+       get_ai_status rispondeva 401 «Invalid API key» e AI.stato restava
+       vuoto. Prima si chiede a SUPA_KEY (si vede da qui: e' un const fra
+       script classici), poi alla pagina come prima. */
+    try{ if(typeof SUPA_KEY==="string"&&SUPA_KEY){ ANON=SUPA_KEY; return ANON; } }catch(e){}
     try{
       /* 28/09/2026 — L'ERRORE 401 DI OGNI APERTURA.
          La chiave pubblica del sito non e' piu' un «eyJ...» ma una
