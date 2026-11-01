@@ -103,7 +103,16 @@
       capitolati:caps.map(function(c){ var x=Object.assign({},c); x.cap_id=c.id; delete x.id; return x; })
     };
   }
-  function uguali(a,b){ return JSON.stringify(a||{})===JSON.stringify(b||{}); }
+  /* ⚠️ Il database (jsonb) riordina le chiavi: un JSON.stringify secco direbbe
+     «diverso» anche quando non e' cambiato niente (trovato dal vivo il 1 nov:
+     «Hai cambiato il preventivo dopo la firma» senza aver toccato nulla).
+     Quindi si confronta con le chiavi in ordine. */
+  function inOrdine(x){
+    if(Array.isArray(x)) return x.map(inOrdine);
+    if(x&&typeof x==="object"){ var o={}; Object.keys(x).sort().forEach(function(k){ o[k]=inOrdine(x[k]); }); return o; }
+    return x;
+  }
+  function uguali(a,b){ return JSON.stringify(inOrdine(a||{}))===JSON.stringify(inOrdine(b||{})); }
 
   function nuovoToken(){
     var a=new Uint8Array(24); crypto.getRandomValues(a);
