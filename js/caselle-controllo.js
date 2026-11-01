@@ -102,7 +102,7 @@
     "nz-nome": obbligatorio("Manca il nome del mezzo: nei noleggi uscirebbe una riga vuota."),
     "nz-tora": euro, "nz-tgiorno": euro, "nz-tsett": euro, "nz-tmese": euro, "nz-toraextra": euro,
     "nz-tkm": euro, "nz-usurafissa": euro, "nz-cauzione": euro, "nz-usuraperc": percento,
-    "nz-oreincl": quantita, "nz-kmincl": quantita, "nz-contakm": quantita, "nz-contaore": quantita, "nz-vmesi": quantita,
+    "nz-oreincl": quantita, "nz-kmincl": quantita, "nz-vmesi": quantita,
     /* Prodotto e magazzino */
     "np-nome": obbligatorio("Manca il nome del prodotto."),
     "np-prezzo": function (v) {
@@ -137,6 +137,8 @@
   function esito(el) {
     var f = REGOLE[el.id];
     if (!f) return null;
+    var ty = (el.type || "").toLowerCase();
+    if (ty === "checkbox" || ty === "radio") return null;   /* le spunte non si controllano */
     try { return f(String(el.value || "").trim()); } catch (e) { return null; }
   }
   function togli(el) {
