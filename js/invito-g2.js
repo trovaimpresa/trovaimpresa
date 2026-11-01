@@ -1,18 +1,28 @@
 /* ============================================================
-   INVITO A RECENSIRE IL GESTIONALE SU G2  (31 ott 2026)
-   Compare UNA volta, a chi il gestionale l'ha gia' usato un po'
-   (almeno 5 righe salvate fra preventivi, fatture, lavori o
-   noleggi). «Non ora» lo rimanda di 30 giorni; «Recensisci»
-   lo spegne per sempre. Nessun premio in cambio: G2 non lo
-   permette, e chiede di invitare tutti, non solo i contenti.
-   Lo accende la pagina con:
+   «COME TI TROVI COL GESTIONALE?» — le stelle (1 nov 2026)
+   Prima qui c'era una finestra in mezzo allo schermo che mandava a
+   recensire su G2. Alex l'ha provata: «troppo difficile, nessuno lo
+   farà mai» — G2 obbliga a registrarsi e il modulo è lungo.
+   Adesso, come la domanda che fa Claude («come sta andando?»):
+   - una STRISCIA PICCOLA in basso, che non copre il lavoro;
+   - 5 stelle, un tocco, nessuna registrazione: il voto finisce nella
+     tabella gest_voti, e lo legge Alex;
+   - da 1 a 3 stelle: una casella «Cosa manca o cosa non va?»;
+   - 4 o 5 stelle: «Ci aiuti anche su Trustpilot?» (un tocco con Google),
+     e sotto, piccolo, anche G2;
+   - la × la chiude: torna dopo 30 giorni. Chi ha votato non la rivede.
+   Compare solo a chi il gestionale l'ha già usato (almeno 5 righe
+   salvate). Nessun premio in cambio: Trustpilot e G2 non lo permettono.
+   Lo accende la pagina con (nome rimasto quello vecchio apposta, cosi'
+   le due pagine che lo chiamano non si toccano):
      invitoG2Avvia(sb, ()=>sbUid, ["gest_preventivi", ...])
-   Anteprima: aggiungere ?g2=prova all'indirizzo.
+   Anteprima: aggiungere ?g2=prova all'indirizzo (non scrive niente).
    ============================================================ */
 (function () {
-  var LINK = "https://www.g2.com/products/trovaimpresa-gestionale/review_modalities/new";
+  var G2 = "https://www.g2.com/products/trovaimpresa-gestionale/review_modalities/new";
+  var TRUSTPILOT = "https://www.trustpilot.com/evaluate/trovaimpresa.com";
   var MINIMO = 5;                       // righe salvate prima di chiedere
-  var RIMANDO = 30 * 24 * 3600 * 1000;  // «Non ora» = fra 30 giorni
+  var RIMANDO = 30 * 24 * 3600 * 1000;  // × = fra 30 giorni
   var ATTESA = 20000;                   // non disturbare appena si entra
   var prova = /[?&]g2=prova\b/.test(location.search);
 
@@ -20,59 +30,82 @@
   function scrivi(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} }
 
   var css =
-    "#ti-g2{position:fixed;inset:0;z-index:99990;background:rgba(10,42,77,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
-    "#ti-g2 *{font-family:inherit}" +
-    "#ti-g2 .g2-box{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:34px 32px 28px;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;box-sizing:border-box;max-height:calc(100vh - 32px);overflow:auto}" +
-    "#ti-g2 .g2-x{position:absolute;top:10px;right:12px;width:48px;height:48px;border:0;background:none;font-size:30px;line-height:1;color:#64748b;cursor:pointer;border-radius:10px}" +
-    "#ti-g2 .g2-x:hover{background:#f1f5f9}" +
-    "#ti-g2 .g2-stelle{color:#ff8800;font-size:30px;letter-spacing:4px;margin:0 0 10px}" +
-    "#ti-g2 h2{margin:0 0 14px;font-size:26px;line-height:1.25;color:#0a2a4d;padding-right:40px}" +
-    "#ti-g2 p{margin:0 0 14px;font-size:18px;line-height:1.55;color:#1e293b}" +
-    "#ti-g2 .g2-sotto{font-size:19px;color:#475569;margin-top:-6px}" +
-    "#ti-g2 .g2-nota{font-size:16px;color:#475569}" +
-    "#ti-g2 .g2-bott{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}" +
-    "#ti-g2 .g2-si{flex:1 1 260px;display:flex;align-items:center;justify-content:center;min-height:60px;padding:0 22px;background:#ff8800;color:#fff;font-size:19px;font-weight:700;text-decoration:none;border-radius:12px;box-sizing:border-box}" +
-    "#ti-g2 .g2-si:hover{background:#e67700}" +
-    "#ti-g2 .g2-no{flex:0 1 160px;min-height:60px;padding:0 22px;background:#fff;color:#0a2a4d;border:2px solid #cbd5e1;font-size:18px;font-weight:600;border-radius:12px;cursor:pointer}" +
-    "#ti-g2 .g2-no:hover{border-color:#0a2a4d}" +
-    "@media (max-width:520px){#ti-g2 .g2-box{padding:28px 20px 22px}#ti-g2 h2{font-size:23px}#ti-g2 .g2-si,#ti-g2 .g2-no{flex:1 1 100%}}";
+    "#ti-voto{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9990;width:min(760px,calc(100% - 24px));box-sizing:border-box;background:#0a2a4d;color:#fff;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(0,0,0,.25);font-family:inherit}" +
+    "#ti-voto *{font-family:inherit;box-sizing:border-box}" +
+    "#ti-voto .v-tit{font-size:20px;font-weight:700;flex:1 1 220px;margin:0}" +
+    "#ti-voto .v-st{display:flex;gap:4px}" +
+    "#ti-voto .v-st button{background:none;border:0;padding:2px 3px;font-size:38px;line-height:1;color:#ff8800;cursor:pointer}" +
+    "#ti-voto .v-st button.spenta{color:rgba(255,255,255,.35)}" +
+    "#ti-voto .v-x{background:none;border:0;color:#fff;font-size:30px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px}" +
+    "#ti-voto .v-x:hover{background:rgba(255,255,255,.12)}" +
+    "#ti-voto .v-giu{flex:1 1 100%;font-size:18px;color:#dbe6f3;line-height:1.4}" +
+    "#ti-voto .v-giu textarea{display:block;width:100%;min-height:90px;margin:10px 0;border-radius:10px;border:2px solid #fff;padding:10px 12px;font-size:17px;color:#0a2a4d;resize:vertical}" +
+    "#ti-voto .v-btn{display:inline-block;margin-top:10px;background:#ff8800;color:#0a2a4d;font-weight:800;font-size:19px;padding:12px 20px;border-radius:10px;text-decoration:none;border:0;cursor:pointer}" +
+    "#ti-voto .v-alt{display:block;margin-top:8px;font-size:15px}" +
+    "#ti-voto .v-alt a{color:#fff;font-weight:600}" +
+    "@media (max-width:600px){#ti-voto{bottom:76px;padding:14px 16px}#ti-voto .v-tit{font-size:18px}#ti-voto .v-st button{font-size:40px}#ti-voto .v-btn{display:block;text-align:center}}";
 
-  function mostra(chiave) {
-    if (document.getElementById("ti-g2")) return;
+  function mostra(chiave, sb, uid, pagina) {
+    if (document.getElementById("ti-voto")) return;
     var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
     var d = document.createElement("div");
-    d.id = "ti-g2";
-    d.setAttribute("role", "dialog");
-    d.setAttribute("aria-modal", "true");
-    d.setAttribute("aria-labelledby", "g2-tit");
-    d.innerHTML =
-      '<div class="g2-box">' +
-        '<button type="button" class="g2-x" aria-label="Chiudi">&times;</button>' +
-        '<div class="g2-stelle" aria-hidden="true">★★★★★</div>' +
-        '<h2 id="g2-tit">La tua recensione per noi è molto importante</h2>' +
-        '<p class="g2-sotto">Bastano pochi clic.</p>' +
-        '<p>Racconta com\'è il gestionale su G2, il sito dove le imprese confrontano i programmi gestionali.</p>' +
-        '<p>La tua recensione lo fa conoscere ad altre imprese. Più TrovaImpresa cresce, più clienti trovano le imprese iscritte e mandano loro richieste di preventivo.</p>' +
-        '<p class="g2-nota">Scrivi quello che pensi davvero, anche cosa manca.</p>' +
-        '<div class="g2-bott">' +
-          '<a class="g2-si" href="' + LINK + '" target="_blank" rel="noopener">Recensisci su G2</a>' +
-          '<button type="button" class="g2-no">Non ora</button>' +
-        '</div>' +
-      '</div>';
+    d.id = "ti-voto";
+    d.setAttribute("role", "region");
+    d.setAttribute("aria-label", "Come ti trovi col gestionale?");
+    var stelle = "";
+    for (var i = 1; i <= 5; i++) stelle += '<button type="button" data-v="' + i + '" aria-label="' + i + (i === 1 ? " stella" : " stelle") + '">★</button>';
+    d.innerHTML = '<p class="v-tit">Come ti trovi col gestionale?</p>'
+      + '<div class="v-st">' + stelle + '</div>'
+      + '<button type="button" class="v-x" aria-label="Chiudi">&times;</button>';
     document.body.appendChild(d);
 
-    function chiudi(stato) {
-      if (!prova) scrivi(chiave, { stato: stato, quando: Date.now() });
-      document.removeEventListener("keydown", tasto);
-      d.remove();
+    var idVoto = null;
+    function segna(stato) { if (!prova) scrivi(chiave, { stato: stato, quando: Date.now() }); }
+    function chiudi() { d.remove(); }
+    d.querySelector(".v-x").addEventListener("click", function () {
+      if (!idVoto) segna("dopo");   /* chi ha gia' votato non la rivede comunque */
+      chiudi();
+    });
+    /* le stelle si accendono fino a quella sotto il dito */
+    var bott = d.querySelectorAll(".v-st button");
+    Array.prototype.forEach.call(bott, function (b) {
+      b.addEventListener("mouseenter", function () { var n = +b.dataset.v; Array.prototype.forEach.call(bott, function (x) { x.classList.toggle("spenta", +x.dataset.v > n); }); });
+      b.addEventListener("click", function () { vota(+b.dataset.v); });
+    });
+    d.querySelector(".v-st").addEventListener("mouseleave", function () { Array.prototype.forEach.call(bott, function (x) { x.classList.remove("spenta"); }); });
+
+    function vota(n) {
+      segna("fatto");
+      d.querySelector(".v-st").remove();
+      d.querySelector(".v-tit").textContent = n >= 4 ? "Grazie! " + n + " stelle" : "Grazie del voto";
+      var giu = document.createElement("div"); giu.className = "v-giu";
+      if (n >= 4) {
+        giu.innerHTML = 'Ci aiuti anche su Trustpilot? Basta un tocco con Google.'
+          + '<br><a class="v-btn" href="' + TRUSTPILOT + '" target="_blank" rel="noopener">Lascia la recensione su Trustpilot</a>'
+          + '<span class="v-alt">Oppure <a href="' + G2 + '" target="_blank" rel="noopener">scrivila su G2</a></span>';
+        giu.querySelector(".v-btn").addEventListener("click", function () { setTimeout(chiudi, 300); });
+      } else {
+        giu.innerHTML = 'Cosa manca o cosa non va? Lo leggiamo e lo sistemiamo.'
+          + '<textarea maxlength="2000" placeholder="Scrivi qui, anche due parole"></textarea>'
+          + '<button type="button" class="v-btn">Manda</button>';
+        giu.querySelector(".v-btn").addEventListener("click", function () {
+          var t = String(giu.querySelector("textarea").value || "").trim();
+          if (t && idVoto && sb && !prova) {
+            sb.from("gest_voti").update({ testo: t }).eq("id", idVoto).select("id").then(function () {}, function () {});
+          }
+          giu.innerHTML = "Grazie: lo leggiamo noi, di persona.";
+          setTimeout(chiudi, 2500);
+        });
+      }
+      d.appendChild(giu);
+      if (prova || !sb || !uid) return;
+      /* ⚠️ se il voto non si salva non si dice niente: e' un di piu', e
+         il pulsante per scrivere cosa manca funziona lo stesso */
+      try {
+        sb.from("gest_voti").insert({ user_id: uid, stelle: n, pagina: pagina }).select("id").single()
+          .then(function (r) { if (r && !r.error && r.data) idVoto = r.data.id; }, function () {});
+      } catch (_) {}
     }
-    function tasto(e) { if (e.key === "Escape") chiudi("dopo"); }
-    d.querySelector(".g2-si").addEventListener("click", function () { chiudi("fatto"); });
-    d.querySelector(".g2-no").addEventListener("click", function () { chiudi("dopo"); });
-    d.querySelector(".g2-x").addEventListener("click", function () { chiudi("dopo"); });
-    d.addEventListener("click", function (e) { if (e.target === d) chiudi("dopo"); });
-    document.addEventListener("keydown", tasto);
-    d.querySelector(".g2-si").focus();
   }
 
   function conta(sb, uid, tabelle) {
@@ -83,19 +116,23 @@
   }
 
   window.invitoG2Avvia = function (sb, getUid, tabelle) {
-    if (prova) { setTimeout(function () { mostra("ti_g2_prova"); }, 1500); return; }
+    var pagina = (location.pathname.split("/").pop() || "").replace(/\.html$/, "").slice(0, 60);
+    if (prova) { setTimeout(function () { mostra("ti_voto_prova", sb, null, pagina); }, 1500); return; }
     if (window.TI_GIRO || !sb || !tabelle || !tabelle.length) return;
     var giri = 0;
     (function aspetta() {
       var uid = getUid && getUid();
       if (!uid) { if (++giri < 60) setTimeout(aspetta, 1000); return; }
-      var chiave = "ti_g2_invito_" + uid;
+      var chiave = "ti_voto_" + uid;
       var s = leggi(chiave);
       if (s && s.stato === "fatto") return;
       if (s && s.stato === "dopo" && Date.now() - s.quando < RIMANDO) return;
+      /* chi aveva gia' cliccato «Recensisci su G2» nella finestra vecchia non si ridisturba */
+      var vecchia = leggi("ti_g2_invito_" + uid);
+      if (vecchia && vecchia.stato === "fatto") return;
       setTimeout(function () {
         conta(sb, uid, tabelle).then(function (n) {
-          if (n >= MINIMO) mostra(chiave);
+          if (n >= MINIMO) mostra(chiave, sb, uid, pagina);
         });
       }, ATTESA);
     })();
