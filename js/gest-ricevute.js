@@ -65,7 +65,7 @@
       + '</ul></div>'
       + '<div class="sh-b"><div class="ric-attenzione"><b>Attenzione:</b> con questo codice le fatture dei fornitori arrivano a TrovaImpresa e <b>non più al tuo commercialista</b>. Parlane prima con lui.</div></div>'
       + '<div class="sh-b"><div class="sh-nota">Ogni fattura ricevuta usa <b>1</b> dei tuoi invii, come quelle che mandi.'
-      + (_stato && _stato.incluso ? ' Con il tuo gestionale a pagamento sono <b>già compresi</b>.' : '') + '</div></div>';
+      + (_stato && _stato.incluso ? ' Con il tuo vecchio piano sono <b>già compresi</b>.' : '') + '</div></div>';
   }
 
   function cardRicevuta(r) {
@@ -103,7 +103,7 @@
         + 'Se non arriva niente, controlla che il codice destinatario <b>' + CODICE + '</b> sia registrato all\'Agenzia delle Entrate.</div>';
     } else {
       corpo += '<div class="ric-sommario">' + (nuove ? (nuove === 1 ? "1 nuova da vedere" : nuove + " nuove da vedere") : "Tutte viste") + '</div>'
-        + (da ? '<div class="sh-nota">' + (da === 1 ? "1 fattura è" : da + " fatture sono") + ' <b>da sbloccare</b>: non hai invii a disposizione. Con il gestionale a pagamento sono compresi.</div>' : '')
+        + (da ? '<div class="sh-nota">' + (da === 1 ? "1 fattura è" : da + " fatture sono") + ' <b>da sbloccare</b>: non hai invii a disposizione. <a href="/ricarica-crediti.html">Compra un pacchetto di invii</a> (50 a 7,90 €).</div>' : '')
         + '<div class="ric-lista">' + _lista.map(cardRicevuta).join("") + '</div>';
     }
     return corpo + '</div>';

@@ -1013,7 +1013,7 @@ async function mettiInListaAttesa() {
 
   // Funzione riservata ai Premium
   var piano = (currentImpresa.piano || '').toLowerCase();
-  if (piano !== 'premium') {
+  if (piano !== 'premium' && false) { /* 1 nov 2026: gratis per tutti */
     btnLista.style.display = 'none';
     esito.innerHTML = '🔒 <strong>Riservato ai Premium.</strong><br><a href="/gestionale" style="color:var(--verde);font-weight:700;">Scopri il Gestionale →</a>';
     esito.style.display = 'block';

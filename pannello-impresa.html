@@ -3670,6 +3670,7 @@ function aggiornaBadgeEOverlay() {
 }
 
 function bloccaCardPremium() {
+  return; /* 1 nov 2026: il sito e' gratis per tutti, nessun lucchetto */
   const piano = (impresaCorrente.piano || 'free').toLowerCase();
   if (piano === 'premium') return;
   document.querySelectorAll('[data-premium="true"]').forEach(card => {
@@ -3764,7 +3765,7 @@ const FAQS_LIST = [
 async function apriModalQRCode() {
   if (!impresaCorrente) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
-  if (piano !== 'premium') {
+  if (piano !== 'premium' && false) { /* 1 nov 2026: il sito e' gratis per tutti, niente piu' lucchetto */
     if (confirm('🔲 QR Code profilo è una funzione del Gestionale. Vuoi scoprire di più?')) {
       window.location.href = '/gestionale';
     }
@@ -3792,7 +3793,7 @@ async function apriModalQRCode() {
 function apriVideo() {
   if (!impresaCorrente) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
-  if (piano !== 'premium') {
+  if (piano !== 'premium' && false) { /* 1 nov 2026: il sito e' gratis per tutti, niente piu' lucchetto */
     if (confirm('🎬 Fai conoscere la tua azienda è una funzione del Gestionale. Vuoi scoprire di più?')) {
       window.location.href = '/gestionale';
     }

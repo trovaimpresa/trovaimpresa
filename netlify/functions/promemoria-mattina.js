@@ -465,11 +465,7 @@ const handler = async function () {
 
     const haGestionale = i => {
       if (!i.user_id) return false;
-      if (String(i.piano || '').trim().toLowerCase() !== 'premium') return false;
-      if (i.premium_scadenza) {
-        const s = new Date(i.premium_scadenza);
-        if (!isNaN(s.getTime()) && s.getTime() < Date.now()) return false;
-      }
+      /* 1 nov 2026: il gestionale e' gratis per tutti gli iscritti: niente piu' controllo del piano */
       return true;
     };
     const imprese = (qImp.data || []).filter(haGestionale);
