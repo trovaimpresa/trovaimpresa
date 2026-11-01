@@ -896,7 +896,10 @@
   /* l'etichetta: quella versione era quella che il cliente ha firmato, o che gli e' stata mandata? */
   function etichetta(dal,al){
     var L=_stato.link; if(!L) return "";
-    var a=dal?new Date(dal).getTime():0, b=al?new Date(al).getTime():Infinity;
+    /* ⚠️ «dal» lo scrive l'orologio del computer, le date del link quello del server:
+       possono differire di qualche secondo (misurato dal vivo: mezzo secondo), quindi
+       si allarga l'inizio di 15 secondi. Si salva «Invia al cliente» subito dopo il Salva. */
+    var a=dal?new Date(dal).getTime()-15000:0, b=al?new Date(al).getTime()-15000:Infinity;
     var dentro=function(x){ if(!x) return false; var t=new Date(x).getTime(); return t>=a&&t<b; };
     if(dentro(L.firmato_il)) return '<span class="aic-pill aic-pill--ok" style="margin-left:6px">Firmata dal cliente</span>';
     if(dentro(L.aggiornato_il)) return '<span class="aic-pill aic-pill--attesa" style="margin-left:6px">Mandata al cliente</span>';
