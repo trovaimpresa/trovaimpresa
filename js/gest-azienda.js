@@ -222,6 +222,8 @@ const avHtml=`
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-azienda">Salva</button>`);
+    /* 1 nov 2026: caselle rosse e verdi anche qui (js/gest-ai-moduli.js) */
+    try{ if(typeof ctrAscolta==="function") ctrAscolta("azienda"); }catch(e){}
   }
   async function saveAzienda(){
     if(!sbUid){toast("Devi essere loggato");return;}

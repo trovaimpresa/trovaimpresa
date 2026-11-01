@@ -553,8 +553,13 @@
       dentro:[],
       regole:ctrRegoleComputo
     },
+    azienda:{
+      caselle:"#a-nome,#a-piva,#a-cf,#a-ind,#a-cap,#a-citta,#a-prov,#a-tel,#a-email,#a-pec,#a-sdi,#a-iban",
+      dentro:[],
+      regole:ctrRegoleAzienda
+    },
     cliente:{
-      caselle:"#c-nome,#c-tel,#c-email,#c-piva,#c-cf,#c-pec,#c-sdi,#c-citta",
+      caselle:"#c-nome,#c-ref,#c-tel,#c-email,#c-ind,#c-cap,#c-citta,#c-prov,#c-piva,#c-cf,#c-pec,#c-sdi",
       dentro:[],
       regole:ctrRegoleCliente
     },
@@ -789,6 +794,20 @@
   /* solo le cifre: una partita IVA scritta «IT 012 345 678 90» ha 11 cifre
      vere, e non e' sbagliata. Si contano quelle, non i caratteri. */
   function ctrCifre(v){ return String(v||"").replace(/\D/g,""); }
+  /* 1 nov 2026 — i controlli di FORMA che non sbagliano mai (regole, non AI) */
+  function ctrPivaOk(n){ /* l'ultima cifra della partita IVA si calcola dalle altre 10 */
+    if(!/^\d{11}$/.test(n)) return false;
+    let t=0; for(let i=0;i<10;i++){ let c=+n[i]; if(i%2===1){ c*=2; if(c>9)c-=9; } t+=c; }
+    return ((10-t%10)%10)===+n[10];
+  }
+  function ctrIbanOk(v){
+    const s=String(v||"").replace(/\s/g,"").toUpperCase();
+    if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
+    if(s.slice(0,2)==="IT"&&s.length!==27) return false;
+    const r=(s.slice(4)+s.slice(0,4)).replace(/[A-Z]/g,c=>String(c.charCodeAt(0)-55));
+    let m=0; for(let i=0;i<r.length;i++) m=(m*10+(+r[i]))%97;
+    return m===1;
+  }
   /* un indirizzo scritto bene: qualcosa, la chiocciola, qualcosa, il punto,
      qualcosa. Non serve di piu': il resto lo dice il server quando rimbalza. */
   const CTR_EMAIL=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -889,6 +908,14 @@
         dice:"Il codice SDI è di 7 caratteri, questo ne ha "+hSdi.length+"."});
     }
 
+    if(nPiva.length===11&&!ctrPivaOk(nPiva)) out.push({campo:"c-piva",grave:"rosso",
+      dice:"Questa partita IVA ha 11 cifre ma una è sbagliata: l'ultima non torna con le altre. Ricontrollala."});
+    const hCap=L.get("c-cap"), hProv=L.get("c-prov");
+    if(hCap&&!/^\d{5}$/.test(hCap)) out.push({campo:"c-cap",grave:"rosso",
+      dice:"Il CAP ha 5 cifre: qui ce ne sono "+ctrCifre(hCap).length+"."});
+    if(hProv&&!/^[A-Za-z]{2}$/.test(hProv)) out.push({campo:"c-prov",grave:"arancio",
+      dice:"La provincia si scrive con 2 lettere (es. RI, RM)."});
+
     /* --- come lo si chiama --- */
     const hTel=L.get("c-tel"), hMail=L.get("c-email"), hPec2=L.get("c-pec");
     if(!hTel&&!hMail) out.push({campo:"c-tel",grave:"arancio",
@@ -897,6 +924,46 @@
       dice:"Questa email non è scritta bene: «"+hMail+"». Le manca la chiocciola o il punto finale, e così non le arriva niente."});
     if(hPec2&&!CTR_EMAIL.test(hPec2)) out.push({campo:"c-pec",grave:"rosso",
       dice:"Questa PEC non è scritta bene: «"+hPec2+"». La fattura elettronica non arriverebbe."});
+    return out;
+  }
+
+  /* ============================================================
+     I DATI AZIENDA — 1 nov 2026
+     Sono i dati che finiscono su OGNI preventivo e OGNI fattura: un errore
+     qui si ripete su tutti i documenti. Solo controlli di forma.
+     ============================================================ */
+  function ctrRegoleAzienda(L){
+    L=L||ctrDalModulo();
+    const out=[];
+    if(!L.get("a-nome")) out.push({campo:"a-nome",grave:"rosso",
+      dice:"Manca il nome dell'azienda: sui preventivi e sulle fatture uscirebbe vuoto."});
+    const n=ctrCifre(L.get("a-piva"));
+    if(!n) out.push({campo:"a-piva",grave:"arancio",
+      dice:"Manca la partita IVA: senza, le fatture elettroniche non si possono fare."});
+    else if(n.length!==11) out.push({campo:"a-piva",grave:"rosso",
+      dice:"La partita IVA ha 11 cifre, questa ne ha "+n.length+"."});
+    else if(!ctrPivaOk(n)) out.push({campo:"a-piva",grave:"rosso",
+      dice:"Questa partita IVA ha 11 cifre ma una è sbagliata: l'ultima non torna con le altre."});
+    const cf=L.get("a-cf");
+    if(cf&&cf.length!==16&&cf.length!==11) out.push({campo:"a-cf",grave:"rosso",
+      dice:"Il codice fiscale ha 16 caratteri (11 per una società): questo ne ha "+cf.length+"."});
+    const iban=L.get("a-iban");
+    if(iban&&!ctrIbanOk(iban)) out.push({campo:"a-iban",grave:"rosso",
+      dice:"Questo IBAN non torna: c'è una cifra sbagliata o ne manca una (in Italia sono 27 caratteri, IT + 25). Il cliente pagherebbe sul conto sbagliato."});
+    const cap=L.get("a-cap");
+    if(cap&&!/^\d{5}$/.test(cap)) out.push({campo:"a-cap",grave:"rosso",
+      dice:"Il CAP ha 5 cifre: qui ce ne sono "+ctrCifre(cap).length+"."});
+    const pr=L.get("a-prov");
+    if(pr&&!/^[A-Za-z]{2}$/.test(pr)) out.push({campo:"a-prov",grave:"arancio",
+      dice:"La provincia si scrive con 2 lettere (es. RI, RM)."});
+    const em=L.get("a-email"), pec=L.get("a-pec");
+    if(em&&!CTR_EMAIL.test(em)) out.push({campo:"a-email",grave:"rosso",
+      dice:"Questa email non è scritta bene: «"+em+"». Le manca la chiocciola o il punto finale."});
+    if(pec&&!CTR_EMAIL.test(pec)) out.push({campo:"a-pec",grave:"rosso",
+      dice:"Questa PEC non è scritta bene: «"+pec+"»."});
+    const sdi=L.get("a-sdi");
+    if(sdi&&sdi.length!==7) out.push({campo:"a-sdi",grave:"arancio",
+      dice:"Il codice SDI è di 7 caratteri, questo ne ha "+sdi.length+"."});
     return out;
   }
 
@@ -1179,7 +1246,7 @@
 
   function ctrTogli(el){
     if(!el) return;
-    el.classList.remove("ctr-rosso","ctr-arancio");
+    el.classList.remove("ctr-rosso","ctr-arancio","ctr-verde");
     const dopo=el.nextElementSibling;
     if(dopo&&dopo.classList&&dopo.classList.contains("ctr-msg")) dopo.remove();
     /* le voci hanno il messaggio sotto la RIGA, non sotto la casella */
@@ -1191,7 +1258,7 @@
   }
   function ctrToglieTutto(){
     $$(".ctr-msg").forEach(x=>x.remove());
-    $$(".ctr-rosso,.ctr-arancio").forEach(x=>x.classList.remove("ctr-rosso","ctr-arancio"));
+    $$(".ctr-rosso,.ctr-arancio,.ctr-verde").forEach(x=>x.classList.remove("ctr-rosso","ctr-arancio","ctr-verde"));
     $$(".conav-ctr").forEach(x=>x.remove());
   }
 
@@ -1260,11 +1327,52 @@
     dopo.parentNode.insertBefore(msg,dopo.nextSibling);
   }
 
+  /* ============================================================
+     IL VERDE E IL «VIA LIBERA» — 1 nov 2026 (idea di Alessio)
+     Una casella scritta bene diventa VERDE, una sbagliata ROSSA (o
+     arancio), e torna verde mentre la correggi. Le caselle vuote restano
+     grigie: un modulo pieno di rosso spaventa. In fondo, sopra i
+     pulsanti, una riga dice come sta tutto il modulo.
+     ⛔ AVVISA E NON BLOCCA, come tutto il controllore: si salva lo stesso.
+     ⚠️ Verde vuol dire «scritto bene», non «giusto»: 50 € al posto di
+        500 € resta verde. Una regola vede la forma, non i conti.
+     ============================================================ */
+  function ctrVerde(el,lista){
+    if(!el||!el.classList) return;
+    const t=el.tagName, ty=(el.type||"").toLowerCase();
+    if(!(t==="TEXTAREA"||(t==="INPUT"&&ty!=="checkbox"&&ty!=="radio"&&ty!=="file"&&ty!=="hidden"))) return;
+    if(!String(el.value||"").trim()) { el.classList.remove("ctr-verde"); return; }
+    if(lista.some(s=>s.el===el)) { el.classList.remove("ctr-verde"); return; }
+    el.classList.add("ctr-verde");
+  }
+  function ctrBarra(tipo,el){
+    const foglio=(el&&el.closest&&el.closest(".sheet"))||document.querySelector(".sheet--grande");
+    if(!foglio) return;
+    const piede=foglio.querySelector(".sh-foot");
+    let b=foglio.querySelector(".via-libera");
+    if(!b){
+      b=document.createElement("button"); b.type="button"; b.className="via-libera";
+      b.addEventListener("click",function(){ if(!b.classList.contains("si")) ctrGuardaTutto(tipo); });
+      if(piede&&piede.parentNode) piede.parentNode.insertBefore(b,piede); else foglio.appendChild(b);
+    }
+    const l=ctrLista(tipo), rossi=l.filter(s=>s.grave==="rosso").length, altri=l.length-rossi;
+    b.classList.remove("si","no","forse");
+    if(!l.length){ b.classList.add("si"); b.textContent="✓ Via libera: tutto scritto bene"; return; }
+    const pezzi=[];
+    if(rossi) pezzi.push(rossi===1?"1 da correggere":rossi+" da correggere");
+    if(altri) pezzi.push(altri===1?"1 da guardare":altri+" da guardare");
+    b.classList.add(rossi?"no":"forse");
+    b.textContent="✗ "+pezzi.join(", ")+" — tocca qui per vederle. Puoi salvare lo stesso";
+  }
+
   /* uscendo da una casella: si guarda SOLO quella */
   function ctrGuardaUna(tipo,el){
     if(!el) return;
     ctrTogli(el);
-    ctrLista(tipo).filter(s=>s.el===el).forEach(ctrSegna);
+    const l=ctrLista(tipo);
+    l.filter(s=>s.el===el).forEach(ctrSegna);
+    ctrVerde(el,l);
+    try{ ctrBarra(tipo,el); }catch(e){}
   }
 
   /* il tasto: si guarda tutto insieme e si dice quante cose ci sono */
@@ -1272,6 +1380,7 @@
     ctrToglieTutto();
     const l=ctrLista(tipo);
     l.forEach(ctrSegna);
+    try{ const doc=CTR_DOC[tipo]; if(doc) $$(doc.caselle).forEach(function(e){ ctrVerde(e,l); }); ctrBarra(tipo,l.length?l[0].el:null); }catch(e){}
     if(!l.length){ toast("Ho guardato tutto: non c'è niente da segnalare ✔"); return; }
     const rossi=l.filter(s=>s.grave==="rosso").length;
     const gialli=l.length-rossi;
@@ -1306,6 +1415,10 @@
     }
     $$(doc.caselle).forEach(function(el){
       el.addEventListener("blur",()=>ctrGuardaUna(tipo,el));
+      /* 1 nov 2026: una casella gia' segnata torna verde MENTRE la correggi */
+      el.addEventListener("input",function(){
+        if(el.classList.contains("ctr-rosso")||el.classList.contains("ctr-arancio")||el.classList.contains("ctr-verde")) ctrGuardaUna(tipo,el);
+      });
       /* le tendine e le spunte non hanno un "esco dalla casella" che si
          sente: li' vale il cambio */
       if(el.tagName==="SELECT"||el.type==="checkbox")
@@ -1318,6 +1431,10 @@
       box.addEventListener("focusout",function(e){
         const el=e.target;
         if(el&&el.tagName==="INPUT") ctrGuardaUna(tipo,el);
+      });
+      box.addEventListener("input",function(e){
+        const el=e.target;
+        if(el&&el.classList&&(el.classList.contains("ctr-rosso")||el.classList.contains("ctr-arancio")||el.classList.contains("ctr-verde"))) ctrGuardaUna(tipo,el);
       });
     });
   }
