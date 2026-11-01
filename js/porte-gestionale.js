@@ -196,6 +196,30 @@ function montaPorteGestionale() {
      Con l'interruttore spento e senza ?piani=prova questo ramo non si apre mai. */
   const anteprimaPiani = new URLSearchParams(location.search).get('piani') === 'prova';
   if (GESTIONALE_BASE_APERTO || anteprimaPiani) {
+    /* ⛔ 1 NOVEMBRE 2026 — UN SOLO GESTIONALE, CON L'AI, GRATIS (Alex).
+       Via il base, via il piano a pagamento: ogni iscritto entra nel
+       gestionale con l'AI (30 crediti e 50 messaggi di chat al mese, li
+       decide il database). Si pagano solo i pacchetti. Quindi qui niente
+       porte, niente prezzi, niente scadenza: un riquadro e «Entra». */
+    {
+      const via = id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; };
+      via('porte-gestionale'); via('gest-scadenza');
+      const tit1 = document.getElementById('gest-titolo-testo');
+      if (tit1) tit1.textContent = 'Il tuo gestionale';
+      const sub1 = document.querySelector('#gest-titolo-testo') && document.querySelector('#gest-titolo-testo').closest('.gc-testa');
+      const subR = sub1 ? sub1.querySelector('.gc-sub') : null;
+      if (subR) subR.style.display = 'none';
+      const base1 = document.getElementById('gest-base-gratis');
+      if (base1) {
+        base1.style.display = 'block';
+        const t = base1.querySelector('.g-tit'); if (t) t.textContent = 'Gestionale con AI';
+        const x = base1.querySelector('.g-txt');
+        if (x) x.innerHTML = 'Gratis, per chi &egrave; iscritto. Ogni mese hai <b>30 crediti AI</b> e <b>50 messaggi</b> di chat. '
+          + 'Ne vuoi di pi&ugrave;? <a href="/ricarica-crediti.html" style="color:#ff8800;font-weight:800">Compra un pacchetto</a>';
+        metti('azione-base-gratis', 'Entra nel gestionale', VERDE, () => { location.href = '/gestionale-app.html'; });
+      }
+      return;
+    }
     const nasc = id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; };
     const NOMI = {
       premium: { nome: 'Gestionale con assistenza AI', desc: 'Tutto il gestionale, pi\u00f9 l\u2019assistenza AI', label: 'con assistenza AI' },
@@ -450,6 +474,8 @@ async function apriPortaleClienti(bottone) {
 function apriAttivaDaLink() {
   const a = new URLSearchParams(location.search).get('attiva');
   if (a !== 'ai' && a !== 'chat') return;
+  /* 1 nov 2026: niente piu' piano da vendere. Il vecchio link porta ai pacchetti. */
+  if (GESTIONALE_BASE_APERTO) { location.href = '/ricarica-crediti.html'; return; }
   const box = document.getElementById('porte-gestionale');
   if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   if (!impresaCorrente) return;

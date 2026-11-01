@@ -27,7 +27,6 @@
 // =====================================================================
 const { createClient } = require('@supabase/supabase-js');
 
-const PIANI_OK = ['premium', 'mensile', 'annuale'];
 const TEMPO_ACCESSO = 4000;   // ms — tetto sui controlli d'accesso
 const TETTO_GIORNO = 30;      // chiamate al giorno per impresa
 
@@ -160,18 +159,10 @@ exports.handler = async function(event) {
   };
 
   try {
-    // ---- 3. il Premium, scadenza compresa -----------------------------
-    const piano = String(impresa.piano || '').trim().toLowerCase();
-    if (!PIANI_OK.includes(piano)) {
-      await logRichiesta({ errore: 'Piano Free' });
-      return rispondi(403, { error: 'AI solo Premium' });
-    }
-
-    const scad = impresa.premium_scadenza ? new Date(impresa.premium_scadenza) : null;
-    if (scad && !isNaN(scad.getTime()) && scad.getTime() <= Date.now()) {
-      await logRichiesta({ errore: 'Premium scaduto' });
-      return rispondi(403, { error: 'Il tuo Premium è scaduto. Rinnovalo per usare l’AI.' });
-    }
+    // ---- 3. (tolto il 1 nov 2026) -------------------------------------
+    // Qui si controllava il Premium. Dal 1 novembre 2026 il gestionale con
+    // l'AI e' gratis per ogni iscritto: basta che l'impresa esista (vedi
+    // sopra). Resta il tetto giornaliero qui sotto, che protegge i costi.
 
     // ---- 4. il tetto giornaliero, sull'impresa VERA -------------------
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -199,7 +190,7 @@ exports.handler = async function(event) {
     };
     if (azione === 'supporto') {
       apiBody.model = 'claude-haiku-4-5-20251001';
-      apiBody.system = `Sei l'assistente di supporto di TrovaImpresa.com, marketplace per imprese edili e artigiani. Aiuti gli iscritti a usare il pannello: profilo, foto dei lavori, certificazioni, recensioni, richieste di preventivo (anche con l'AI), pubblicità, ricerca e visibilità, e il gestionale: il gestionale base è gratis per sempre per ogni iscritto, e c'è un solo piano a pagamento, «Gestionale con assistenza AI e chat», a 39 € al mese o 349 € all'anno. Si attiva dal riquadro Gestionale, in fondo al pannello. Rispondi in italiano, breve e pratico, a passaggi. ⛔ Usa SOLO i nomi di card e pulsanti che compaiono nelle FAQ qui sotto: non inventarne altri e non inventare funzioni. Per problemi di pagamenti, account o guasti veri, invita a usare la linguetta «Scrivi a noi» della schermata «Parla con TrovaImpresa».`;
+      apiBody.system = `Sei l'assistente di supporto di TrovaImpresa.com, marketplace per imprese edili e artigiani. Aiuti gli iscritti a usare il pannello: profilo, foto dei lavori, certificazioni, recensioni, richieste di preventivo (anche con l'AI), pubblicità, ricerca e visibilità, e il gestionale: il gestionale con l'AI è gratis per ogni iscritto, con 30 crediti AI e 50 messaggi di chat ogni mese; chi ne vuole di più compra un pacchetto dalla pagina «Ricarica crediti». Si apre dal riquadro Gestionale, nel pannello. Rispondi in italiano, breve e pratico, a passaggi. ⛔ Usa SOLO i nomi di card e pulsanti che compaiono nelle FAQ qui sotto: non inventarne altri e non inventare funzioni. Per problemi di pagamenti, account o guasti veri, invita a usare la linguetta «Scrivi a noi» della schermata «Parla con TrovaImpresa».`;
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {

@@ -118,39 +118,14 @@ exports.handler = async (event) => {
       .limit(1)
       .maybeSingle();
 
-    const scad = impresa && impresa.premium_scadenza ? new Date(impresa.premium_scadenza) : null;
-    const haPremium = !!impresa
-      && String(impresa.piano || '').trim().toLowerCase() === 'premium'
-      && (!scad || isNaN(scad.getTime()) || scad.getTime() > Date.now());
-
-    if (!haPremium) {
+    /* ⛔ 1 NOVEMBRE 2026 — IL GESTIONALE CON AI E' GRATIS PER TUTTI.
+       Non c'e' piu' un piano da avere: crediti e messaggi si vendono a
+       chiunque sia iscritto (ha una riga in imprese). Il database fa lo
+       stesso controllo (ai_iscritto) quando li spende. */
+    if (!impresa) {
       return rispondi(403, {
-        error: 'senza_premium',
-        messaggio: 'I crediti e i messaggi si usano con il gestionale attivo. Attivalo e poi ricarica quando vuoi.'
-      });
-    }
-
-    /* ⛔ 14 SETTEMBRE 2026 — QUESTO CONTROLLO VALE SOLO PER I MESSAGGI.
-       Fino a oggi era su TUTTO, e bloccava i crediti a chi ha il gestionale
-       normale. Era giusto il 30 agosto, quando i crediti li spendeva solo
-       la chat; non lo e' piu' dal 13 settembre, da quando il Gestionale
-       normale ha i suoi 40 crediti al mese per l'assistenza. Cosi' com'era,
-       uno che paga 29 € e i crediti li usa davvero non poteva ricaricarli.
-
-       I MESSAGGI invece restano del Gestionale AI, e c'e' una ragione di
-       prezzo: 300 messaggi a 9 € una tantum, venduti a chi non ha il piano,
-       sarebbero piu' convenienti dei 10 € in piu' al mese del Gestionale AI
-       (che di messaggi ne da' 300 OGNI mese). Si venderebbe il piano a se'
-       stessi al ribasso. Chi sta facendo l'assaggio compra il piano, non il
-       pacchetto. */
-    const scadAI = impresa && impresa.chat_pro_scadenza ? new Date(impresa.chat_pro_scadenza) : null;
-    const haGestionaleAI = !!impresa && impresa.chat_pro === true
-      && (!scadAI || isNaN(scadAI.getTime()) || scadAI.getTime() > Date.now());
-
-    if (cosa === 'messaggi' && !haGestionaleAI) {
-      return rispondi(403, {
-        error: 'senza_gestionale_ai',
-        messaggio: 'I pacchetti di messaggi servono alla Chat con AI, che fa parte del Gestionale AI. Attivalo dal tuo pannello e poi torna qui.'
+        error: 'senza_profilo',
+        messaggio: 'I pacchetti sono per le imprese iscritte. Completa la tua iscrizione e poi torna qui.'
       });
     }
 

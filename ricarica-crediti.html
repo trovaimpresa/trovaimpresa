@@ -162,8 +162,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     </div>
     <p class="rep-dice">
       Un credito &egrave; una richiesta all&rsquo;AI: un preventivo generato, una scheda
-      cliente compilata, un controllo. Ogni mese ne hai <strong>100</strong> con il piano
-      Gestionale con assistenza AI e chat.
+      cliente compilata, un comando a voce. Ogni mese ne hai <strong>30</strong> gratis,
+      perch&eacute; sei iscritto. Quelli che compri si usano dopo, e non scadono mai.
     </p>
 
     <!-- il contatore -->
@@ -240,7 +240,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       <h2>I messaggi della chat</h2>
     </div>
     <p class="rep-dice">
-      Con il piano con assistenza AI e chat hai <strong>300 messaggi al mese</strong>. Se li finisci,
+      Ogni mese hai <strong>50 messaggi</strong> gratis. Se li finisci,
       la chat si ferma e da qui ne compri altri: <strong>i crediti
       dell&rsquo;assistenza non si toccano</strong>.
     </p>
@@ -441,11 +441,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     if (puoiCrediti) {
       q('tagli').classList.remove('nascosto');
     } else {
-      avvisoIn('avvisi-crediti', 'attesa', 'I crediti si usano con il piano con assistenza AI e chat',
-               'Senza un piano attivo l\'assistente AI resta spento, e i crediti comprati ' +
-               'resterebbero fermi nel conto. Attiva il piano e poi ricarica quando vuoi.');
-      q('avvisi-crediti').innerHTML +=
-        '<a class="torna" href="/prezzi.html">Vedi il piano</a>';
+      avvisoIn('avvisi-crediti', 'attesa', 'I crediti sono per le imprese iscritte',
+               'L\'AI del gestionale è gratis per chi è iscritto a TrovaImpresa. Completa la tua iscrizione e torna qui.');
     }
 
     // ---- i messaggi della chat ------------------------------------
@@ -458,11 +455,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     if (haChat) {
       q('tagli-chat').classList.remove('nascosto');
     } else {
-      avvisoIn('avvisi-chat', 'attesa', 'I messaggi sono del piano con assistenza AI e chat',
-               'La Chat con AI fa parte del piano con assistenza AI e chat, che comprende 300 messaggi al mese. ' +
-               'Attivalo dal tuo pannello: da lì questi pacchetti si aprono da soli.');
-      q('avvisi-chat').innerHTML +=
-        '<a class="torna" href="/prezzi.html">Vedi il piano</a>';
+      avvisoIn('avvisi-chat', 'attesa', 'I messaggi sono per le imprese iscritte',
+               'La Chat con AI è gratis per chi è iscritto a TrovaImpresa: 50 messaggi al mese. Completa la tua iscrizione e torna qui.');
     }
   }
 
@@ -589,8 +583,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           avviso('attesa', 'La sessione è scaduta',
                  'Rientra nel gestionale e riprova: non è stato addebitato niente.');
         } else if (res.status === 403){
-          avviso('attesa', 'Serve un piano attivo',
-                 dati.messaggio || 'Attiva il piano dal tuo pannello e poi riprova.');
+          avviso('attesa', 'Serve il profilo della tua impresa',
+                 dati.messaggio || 'Completa la tua iscrizione e poi riprova.');
         } else if (res.status === 503){
           // il prezzo su Stripe non c'e' ancora: va detto com'e', non
           // fatto passare per un guasto di rete

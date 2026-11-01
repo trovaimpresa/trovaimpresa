@@ -48,7 +48,7 @@
       '<div class="bg-box">' +
       '<p class="bg-su">Per artigiani, imprese e professionisti</p>' +
       '<h2>Fatti trovare dai clienti.<br>Tutto <span>GRATIS</span></h2>' +
-      '<p class="bg-p">Iscrizione, preventivi che ricevi e gestionale base: non paghi niente e non serve la carta di credito.</p>' +
+      '<p class="bg-p">Iscrizione, preventivi che ricevi e gestionale con l’AI: non paghi niente e non serve la carta di credito.</p>' +
       '<div class="bg-pas"><b>Il sito<i>GRATIS</i></b><b>Il gestionale<i>GRATIS</i></b><b>Il forum<i>GRATIS</i></b></div>' +
       '<a class="bg-bt" href="/iscriviti?da=banda">Iscriviti gratis &rsaquo;</a>' +
       '<span class="bg-s">Due minuti. Nessuna carta di credito.</span>' +

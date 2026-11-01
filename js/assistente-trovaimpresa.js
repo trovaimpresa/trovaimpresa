@@ -283,7 +283,7 @@ function assistenteQuiCiSta(){
   /* ---------- Il gestionale (base gratis) ---------- */
   function ramoGestionale() {
     pulisci();
-    msg('Il gestionale è il programma con cui imprese, artigiani e studi tecnici tengono in ordine il proprio lavoro: lavori e cantieri, preventivi, fatture, clienti, fornitori, calendario, squadra, mezzi, spese e scadenze.\n\nSi apre dal browser, senza installare niente, e funziona anche dal telefono in cantiere.\n\nIl gestionale base è gratis, per sempre, per chi è iscritto. Se vuoi anche l\'assistenza AI e la chat c\'è un piano a pagamento: 39 euro al mese oppure 349 euro all\'anno.');
+    msg('Il gestionale è il programma con cui imprese, artigiani e studi tecnici tengono in ordine il proprio lavoro: lavori e cantieri, preventivi, fatture, clienti, fornitori, calendario, squadra, mezzi, spese e scadenze.\n\nSi apre dal browser, senza installare niente, e funziona anche dal telefono in cantiere.\n\nÈ gratis, per sempre, per chi è iscritto, e l\'AI è compresa: ogni mese 30 crediti AI e 50 messaggi di chat. Se te ne servono di più compri un pacchetto, che non scade.');
     link('Vedi i piani', PAGINA_PREZZI);
     link('Entra nel tuo account', PAGINA_LOGIN_IMPRESA);
     sep('— non sei ancora registrato? —');
@@ -294,7 +294,7 @@ function assistenteQuiCiSta(){
   /* ---------- Computo metrico (studi tecnici e imprese) ---------- */
   function ramoComputo() {
     pulisci();
-    msg('Il computo metrico è dentro il gestionale. Scrivi le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e la quantità la calcola il programma: non si fa più a mano.\n\nI prezzi li prendi dal tuo prezzario (per esempio la tariffa della tua Regione) o li scrivi tu, e puoi applicare un ribasso su tutto. Dal computo finito esce il PDF, e con un clic diventa un preventivo.\n\nÈ compreso nel gestionale base, gratis.');
+    msg('Il computo metrico è dentro il gestionale. Scrivi le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e la quantità la calcola il programma: non si fa più a mano.\n\nI prezzi li prendi dal tuo prezzario (per esempio la tariffa della tua Regione) o li scrivi tu, e puoi applicare un ribasso su tutto. Dal computo finito esce il PDF, e con un clic diventa un preventivo.\n\nÈ compreso nel gestionale, gratis.');
     link('Vedi i piani', PAGINA_PREZZI);
     link('Entra nel tuo account', PAGINA_LOGIN_IMPRESA);
     bottoneIndietro();
@@ -303,7 +303,7 @@ function assistenteQuiCiSta(){
   /* ---------- Prezzi e piani ---------- */
   function ramoPrezzi() {
     pulisci();
-    msg('Su TrovaImpresa il sito è gratis e uguale per tutti: scheda, foto dei lavori, recensioni, richieste dei clienti e il gestionale base (lavori, preventivi, fatture, computo metrico, clienti, scadenze).\n\nL\'unica cosa a pagamento è il piano «Gestionale con assistenza AI e chat»: 39 euro al mese oppure 349 euro all\'anno. Lo attivi solo se ti serve.');
+    msg('Su TrovaImpresa il sito è gratis e uguale per tutti: scheda, foto dei lavori, recensioni, richieste dei clienti e il gestionale con l\'AI (lavori, preventivi, fatture, computo metrico, clienti, scadenze).\n\nSi pagano solo i pacchetti di crediti AI, se un mese te ne servono più di quelli gratis.');
     link('Vedi tutti i dettagli', PAGINA_PREZZI);
     bottoneIndietro();
   }

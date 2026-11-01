@@ -59,10 +59,11 @@
       cta.href = "/ricarica-crediti.html";
     }else{
       if(window.GESTIONALE_BASE_APERTO===true){
-        /* 3 ott 2026: col gestionale base gratis l'AI e' il piano a pagamento */
-        txt.innerHTML = "<b>non è attiva</b> — c'è nell'assistenza AI";
-        cta.textContent = "Attiva l'assistenza AI";
-        cta.href = "/pannello-impresa.html?attiva=ai";
+        /* 1 nov 2026: l'AI e' gratis per ogni iscritto. Qui arriva solo chi
+           non ha un profilo impresa (es. un collaboratore senza titolare). */
+        txt.innerHTML = "<b>non è attiva</b> — serve il profilo della tua impresa";
+        cta.textContent = "Ricarica crediti";
+        cta.href = "/ricarica-crediti.html";
       }else{
       txt.innerHTML = "<b>non è attiva</b> — arriva col Gestionale";
       cta.textContent = "Vedi il Gestionale";

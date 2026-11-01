@@ -350,7 +350,7 @@
        29/249 e «quattro prezzi» non esistono piu'. */
     if(BASE_APERTA){
       var tit=q('gate-paywall-titolo'); if(tit) tit.textContent='Il tuo gestionale ti aspetta';
-      var rg=q('gate-pw-riga'); if(rg) rg.innerHTML='Lavori, preventivi, fatture, computo metrico, mezzi e scadenze: tutto in un posto solo.<br><b>Gratis per sempre</b> per chi &egrave; iscritto a TrovaImpresa. Senza carta di credito.';
+      var rg=q('gate-pw-riga'); if(rg) rg.innerHTML='Lavori, preventivi, fatture, computo metrico, mezzi e scadenze: tutto in un posto solo, <b>con l&rsquo;AI</b>.<br><b>Gratis</b> per chi &egrave; iscritto a TrovaImpresa. Senza carta di credito.';
       ['gate-pw-scelto','gate-pw-stripe','gate-pw-accedi'].forEach(function(id){ var e=q(id); if(e) e.style.display='none'; });
       function link(testo,href,principale){
         var a=document.createElement('a');
@@ -1044,8 +1044,9 @@
              Senza riga no: il database non gli lascerebbe salvare niente. */
           var ok=haPremium(row)||inProva(row)||(BASE_APERTA&&!!row);
           window._gestPremium=ok;
-          window._gestProvaGiorni=giorniProva(row);
-          window._gestScadGiorni=giorniAllaScadenza(row);
+          /* 1 nov 2026: niente piu' strisce «prova» e «scadenza»: non c'e' piu' niente che scade */
+          window._gestProvaGiorni=BASE_APERTA?0:giorniProva(row);
+          window._gestScadGiorni=BASE_APERTA?0:giorniAllaScadenza(row);
           window._gestScadData=(row&&row.premium_scadenza)||null;
           /* 24 set 2026 — la prova si offre anche dal muro (vedi showPaywall) */
           window._gestProvaLibera=!!row && !row.gest_prova_fine;
@@ -1062,7 +1063,11 @@
              nello stesso identico posto e la parola «Gestionale AI» non vuol
              dire niente. Il piano non si tocca: si spegne solo la voce. */
           var daPortaPremium=(new URLSearchParams(location.search).get('piano')==='premium');
-          window._chatPro=haChatPro(row) && !daPortaPremium;
+          /* ⛔ 1 NOVEMBRE 2026 — IL GESTIONALE CON AI E' GRATIS PER TUTTI.
+             Resta un gestionale solo, con l'AI e la chat, per ogni iscritto.
+             Quanti messaggi gli restano lo decide chat_stato su Supabase
+             (50 al mese), non questa lampadina. */
+          window._chatPro=(haChatPro(row) || (BASE_APERTA && !!row)) && !daPortaPremium;
           /* ⛔ 30 agosto 2026 — L'ASSAGGIO.
              Chi non ha il Gestionale AI vede lo stesso la voce «Chat con AI»
              e puo' scrivere 10 messaggi in tutto: se non la vede, non
@@ -1070,7 +1075,14 @@
              ⚠️ Non dalla porta del
        Gestionale: da li' si entra nel gestionale
              senza AI, ed e' quello il senso di avere due porte. */
-          window._chatAssaggio=(!haChatPro(row)) && !daPortaPremium;
+          window._chatAssaggio=false;   /* 1 nov 2026: niente piu' assaggio, la chat e' di tutti */
+          /* 1 nov 2026: il tasto «Abbonamento» in alto serve solo a chi paga
+             davvero un vecchio abbonamento (piano premium SENZA data di fine:
+             il webhook la toglie a chi paga). Agli altri non c'e' niente da
+             disdire, e un tasto che porta a «nessun abbonamento» confonde. */
+          if(BASE_APERTA && !(haPremium(row) && !row.premium_scadenza)){
+            try{ document.querySelectorAll('[data-action="abbonamento"]').forEach(function(b){ b.style.display='none'; }); }catch(_){}
+          }
           registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
           /* 1 ottobre 2026 — il profilo minimo: SOLO per chi ha gia' diritto di
              entrare, e solo con l'interruttore acceso o con ?profilo=prova.

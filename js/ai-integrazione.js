@@ -529,24 +529,20 @@
         { n: '400 crediti',   p: '45€', d: 'non scadono mai', top: true },
         { n: '1.000 crediti', p: '99€', d: 'non scadono mai' },
       ],
-    } : motivo === 'subscription_expired' ? {
-      occhio: 'Abbonamento scaduto',
-      tit:    'Rinnova per continuare',
-      sub:    'I tuoi dati sono al sicuro e il gestionale base resta gratis. Riattiva l\u2019assistenza AI e la chat e riprendi da dove avevi lasciato.',
-      cta:    'Vedi i piani',
-      href:   '/prezzi.html',
-      piani:  [
-        { n: 'Assistenza AI e chat', p: '349€', u: '/anno', d: 'Più veloce, meno errori · 100 crediti AI al mese', top: true },
-      ],
     } : {
+      /* ⛔ 1 NOVEMBRE 2026 — NIENTE PIU' PIANI DA VENDERE.
+         Il gestionale con l'AI e' gratis per ogni iscritto (30 crediti al
+         mese). Qui si arriva solo se il conto non e' di un'impresa iscritta
+         o se e' scaduto un vecchio abbonamento: si manda ai pacchetti. */
       occhio: 'Assistente AI',
-      tit:    'L\'assistente AI è nel piano con assistenza AI e chat',
-      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, ti prepara il preventivo voce per voce e ti segnala cosa hai sbagliato e dove. Nel piano ci sono 100 crediti al mese, che si rinnovano ogni mese. Il gestionale base resta gratis.',
-      cta:    'Vedi il piano',
-      href:   '/prezzi.html',
+      tit:    'L\'AI è gratis per le imprese iscritte',
+      sub:    'Ogni mese hai 30 crediti AI e 50 messaggi di chat, gratis. Se ti servono di più, compri un pacchetto: i crediti comprati non scadono mai.',
+      cta:    'Vedi i pacchetti',
+      href:   '/ricarica-crediti.html',
       piani:  [
-        { n: 'Assistenza AI e chat', p: '349€', u: '/anno', d: 'Più veloce, meno errori · 100 crediti AI al mese', top: true },
-        { n: 'Assistenza AI e chat', p: '39€', u: '/mese', d: 'stessa cosa, mese per mese' },
+        { n: '150 crediti',   p: '19€', d: 'non scadono mai' },
+        { n: '400 crediti',   p: '45€', d: 'non scadono mai', top: true },
+        { n: '1.000 crediti', p: '99€', d: 'non scadono mai' },
       ],
     };
 

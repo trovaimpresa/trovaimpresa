@@ -22,7 +22,7 @@ module.exports = [
   minuti: 6,
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
-  funzioni: ['Gestionale base gratis per chi si iscrive', 'Assistenza AI e chat a prezzo fisso, senza costo per utente',
+  funzioni: ['Gestionale con AI gratis per chi si iscrive', 'Pacchetti di crediti che non scadono, senza costo per utente',
     'Nessun costo di attivazione', 'Si disdice quando vuoi',
     'Marketplace compreso nello stesso prezzo'],
   ctaTitolo: 'Il modo più economico di decidere',
@@ -30,7 +30,7 @@ module.exports = [
   sommario: `un gestionale per l'edilizia in Italia costa in genere fra i <strong>200 e i 900 € l'anno</strong>,
     ma la cifra sul listino è solo metà del conto: le differenze vere stanno nel <strong>costo per
     utente</strong>, nell'<strong>attivazione</strong> e nei moduli venduti a parte.
-    <span class="price-big">Qui: gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
+    <span class="price-big">Qui: gratis per sempre, con l’AI dentro</span>`,
 
   sezioni: [
     { blocchi: [
@@ -67,12 +67,12 @@ module.exports = [
     { h2: 'Cosa costa qui', blocchi: [
       { t:'tab', testa:['Voce','Quanto'], num:true, righe:[
         ['Gestionale base', 'Gratis per sempre, senza carta'],
-        ['Assistenza AI e chat, al mese', '39 € al mese'],
-        ['Assistenza AI e chat, all\'anno', '349 € all\'anno'],
+        ['Assistenza AI e chat', 'compresa: 30 crediti e 50 messaggi al mese'],
+        ['Crediti in più', 'pacchetti da 19 €, non scadono'],
         ['Costo per utente in più', '0 € — gli accessi per collaboratori e segretaria sono compresi'],
         ['Attivazione', '0 €'],
         ['Moduli a parte', '0 € — computo, SAL, rapportini, mezzi e ore sono dentro'],
-        ['Prova', 'Non serve: il gestionale base è gratis e non scade'],
+        ['Prova', 'Non serve: il gestionale con l’AI è gratis e non scade'],
       ]},
       `Il prezzo è finale: non c'è IVA da aggiungere, e per ogni pagamento ricevi regolare fattura.`,
       { t:'espe', x:`Il motivo per cui costa meno non è che vale meno: è che il gestionale non è il
@@ -115,13 +115,13 @@ module.exports = [
           l'eventuale quota di attivazione una tantum e quali funzioni sono moduli venduti a parte.
           Il numero che conta è quanto pagherai il secondo anno con tutti gli utenti che ti servono.` },
     { d: 'Il gestionale è davvero gratis? E cosa si paga?',
-      r: `Il gestionale base è gratis per sempre: nessun costo per utente aggiuntivo, nessuna attivazione e nessun
+      r: `Il gestionale con l’AI è gratis per sempre: nessun costo per utente aggiuntivo, nessuna attivazione e nessun
           modulo a parte. Computo metrico, stati di avanzamento, rapportini, mezzi e ore sono compresi. Si paga solo
-          l'assistenza AI e la chat (39 euro al mese o 349 euro all'anno), che aggiunge anche il profilo in evidenza sul marketplace.` },
+          i pacchetti di crediti AI, se un mese te ne servono più di quelli gratis.` },
     { d: "C'è l'IVA da aggiungere?",
-      r: `No, 39 euro al mese e 349 euro all'anno sono prezzi finali. Per ogni pagamento viene emessa regolare fattura.` },
+      r: `No, il gestionale è gratis. Anche i pacchetti di crediti hanno prezzi finali, e per ogni pagamento viene emessa regolare fattura.` },
     { d: 'Posso provarlo prima di pagare?',
-      r: `Non serve nemmeno una prova: il gestionale base è gratis e non scade, senza carta di credito. L'assistenza AI e la chat si attivano dopo, solo se ti servono, e si disdicono quando vuoi.` },
+      r: `Non serve nemmeno una prova: il gestionale con l’AI è gratis e non scade, senza carta di credito. Se un mese ti serve più AI, compri un pacchetto.` },
   ]
 },
 
@@ -133,15 +133,15 @@ module.exports = [
   riga: 'cosa regge davvero nel gratis, dove cede, e quando conviene pagare',
   briciola: 'Gestionale cantieri gratis',
   title: 'Gestionale cantieri gratis: dove regge e dove cede',
-  desc: 'Gestionale per cantieri gratis: cosa si fa con fogli di calcolo e gruppi WhatsApp, dove cedono e come il gestionale base di TrovaImpresa, gratis, li sostituisce.',
+  desc: 'Gestionale per cantieri gratis: cosa si fa con fogli di calcolo e gruppi WhatsApp, dove cedono e come il gestionale di TrovaImpresa, gratis e con l’AI, li sostituisce.',
   h1: 'Gestionale cantieri gratis: cosa regge davvero e cosa no',
   minuti: 5,
   nomeApp: 'Gestionale TrovaImpresa',
   cosaCosta: 'Il gestionale',
-  funzioni: ['Gestionale base gratis per sempre', 'Nessuna carta di credito', 'Profilo gratuito sul marketplace',
+  funzioni: ['Gestionale con AI gratis per sempre', 'Nessuna carta di credito', 'Profilo gratuito sul marketplace',
     'Esportazione dei dati sempre gratuita'],
   ctaTitolo: 'Il gratis più utile: quello che non scade',
-  ctaTesto: "Non una prova che finisce: il gestionale base è tuo per sempre, con lavori, preventivi, computo e fatture. Paghi solo se un giorno vuoi l'assistenza AI.",
+  ctaTesto: "Non una prova che finisce: il gestionale è tuo per sempre, con lavori, preventivi, computo, fatture e l’AI. Paghi solo se un mese ti serve più AI.",
   sommario: `il gratis esiste e per certe cose basta. <strong>Fogli di calcolo, agenda del telefono e
     gruppi WhatsApp</strong> reggono fino a due cantieri; poi cedono su tre cose precise: le
     <strong>ore</strong>, il <strong>computo</strong> e la <strong>fattura elettronica</strong>.
@@ -179,7 +179,7 @@ module.exports = [
     ]},
 
     { h2: 'Il conto onesto', blocchi: [
-      `Il gestionale base è gratis, quindi il conto è un altro: <strong>quanto tempo ti fa risparmiare</strong>.
+      `Il gestionale con l’AI è gratis, quindi il conto è un altro: <strong>quanto tempo ti fa risparmiare</strong>.
        La domanda giusta è se ti fa recuperare più delle serate che oggi passi sui fogli di calcolo.`,
       { t:'tab', testa:['Cosa recuperi','Quanto vale'], righe:[
         ['Un lavoro finito e dimenticato, fatturato', "Di solito qualche migliaio di euro. Una volta sola paga l'abbonamento per anni"],
@@ -200,7 +200,7 @@ module.exports = [
       { t:'ok', righe:[
         `<strong>Gratis per sempre</strong>, senza scadenza: non è una prova che finisce.`,
         `<strong>Senza carta di credito.</strong> Non ti chiediamo il numero per iniziare.`,
-        `<strong>Se un giorno vuoi l'AI</strong> la attivi dal pannello (39 € al mese o 349 € all'anno). Se smetti, resti sul gestionale gratis con tutti i tuoi dati.`,
+        `<strong>Se un giorno vuoi l’AI</strong> è già dentro, gratis: 30 crediti al mese. Se te ne servono di più compri un pacchetto, che non scade.`,
         `<strong>I dati restano tuoi</strong> e si esportano in Excel o JSON anche se non continui.`,
       ]},
       { t:'espe', x:`La regola che seguiamo è semplice: un gestionale non si può far comprare a scatola
@@ -210,13 +210,13 @@ module.exports = [
 
   faq: [
     { d: 'Esiste un gestionale per cantieri completamente gratis?',
-      r: `Sì: il gestionale base di TrovaImpresa è gratis per chi si iscrive, senza scadenza, con preventivi, computo, fatture, cantieri e ore.
+      r: `Sì: il gestionale di TrovaImpresa, con l’AI, è gratis per chi si iscrive, senza scadenza, con preventivi, computo, fatture, cantieri e ore.
           A pagamento c'è solo l'assistenza AI. Poi esistono strumenti gratuiti che coprono pezzi del lavoro — fogli di calcolo per i preventivi,
           programmi gratuiti di fatturazione, calendari condivisi. Quello che manca nel gratuito è il
           collegamento fra le cose: le ore sommate per cantiere, il computo che diventa preventivo e il
           preventivo che diventa fattura.` },
     { d: 'Serve la carta di credito? Per quanto è gratis?',
-      r: `La carta non serve e non c'è scadenza: il gestionale base resta gratis per sempre. La carta serve solo se attivi l'assistenza AI e la chat.` },
+      r: `La carta non serve e non c'è scadenza: il gestionale con l’AI resta gratis per sempre. La carta serve solo se compri un pacchetto di crediti.` },
     { d: 'Se smetto di pagare l\'AI, perdo i dati?',
       r: `No. Lavori, preventivi e fatture restano nel gestionale gratis: si spegne solo l'assistenza AI e la chat.
           I dati si esportano comunque in Excel o in JSON quando vuoi.` },
@@ -250,7 +250,7 @@ module.exports = [
   sommario: `per un'impresa da <strong>una a dieci persone</strong> le funzioni che servono davvero sono
     sei, e i gestionali fatti per le imprese grandi falliscono proprio perché ne hanno ottanta.
     Qui c'è quello che serve, senza il peso.
-    <span class="price-big">Gratis per sempre. Piano completo con AI: 39 € al mese</span>`,
+    <span class="price-big">Gratis per sempre, con l’AI dentro</span>`,
 
   sezioni: [
     { blocchi: [
