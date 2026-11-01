@@ -519,6 +519,9 @@
       return '<button type="button" class="cap-sch'+(i===_stato.att?' on':'')+'" data-action="cap-sch" data-i="'+i+'">'+esc(x.nome||"Capitolato")+'</button>';
     }).join("");
     h+='<button type="button" class="cap-sch-new" data-action="cap-sch-new">+ Nuovo capitolato</button>';
+    var nv=(_stato.ver||[]).length;
+    if(nv) h+='<button type="button" class="cap-sch-new" data-action="cap-ver" style="border-style:solid" aria-expanded="'+(_verAperto?'true':'false')+'">'
+      +'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>Versioni ('+nv+')</button>';
     c.innerHTML=h;
     var molti=_stato.lista.length>1;
     var d=el("cp-elimina"); if(d) d.style.display=molti?"":"none";
@@ -623,6 +626,8 @@
     var lista=normalizza(r1.data&&r1.data.capitolato);
     var prima=[]; lista.forEach(function(c){ c.allegati.forEach(function(a){ prima.push(a.path); }); });
     _stato={id:id,p:p,righe:righe,cli:cli||{},lista:lista,att:0,prima:prima,sess:[],ctr:[]};
+    /* 1 nov 2026 — le versioni: quello che c'e' nel database adesso, e le versioni di prima */
+    _stato.orig=(r1.data&&r1.data.capitolato)||null; _stato.ver=[]; _stato.link=null; _verAperto=false;
     _pad={};
 
     var modOpz='<option value="">— Scegli un modello —</option>'
@@ -634,6 +639,7 @@
 
     var corpo=
       '<div class="cap-schede" id="cp-schede"></div>'
+      +'<div class="sh-b" id="cp-ver" hidden></div>'
       /* la riga dell'AI: stessa faccia di quella del preventivo */
       +'<div class="ai-riga" id="cp-ai">'
       +'<button type="button" class="ai-riga-apri" id="cp-ai-apri" aria-expanded="false" aria-controls="cp-ai-giu">'
@@ -698,6 +704,7 @@
       +'<button class="btn" data-action="cap-pdf" data-id="'+esc(String(id))+'">📄 Scarica PDF</button>'
       +'<button class="btn-primary b-save" data-action="cap-salva" data-id="'+esc(String(id))+'">Salva capitolato</button>');
     caricaForm();
+    caricaVersioni(id);   /* 1 nov 2026: «Versioni (n)» compare quando arrivano */
 
     /* apre e chiude la riga dell'AI */
     var apri=el("cp-ai-apri"), giu=el("cp-ai-giu"), riga=el("cp-ai");
@@ -848,11 +855,110 @@
   function tuttiIPath(lista){ var o=[]; lista.forEach(function(c){ (c.allegati||[]).forEach(function(a){ o.push(a.path); }); }); return o; }
 
   /* ---------- salvare ---------- */
+  /* ============================================================
+     LE VERSIONI — 1 novembre 2026 (sql/gest-capitolato-versioni.sql)
+     Al Salva, se il testo e' cambiato, il capitolato di PRIMA va in
+     gest_capitolato_versioni. «Versioni (n)» le elenca: Vedi · Ripristina.
+     Ripristina rimette nelle caselle; diventa vero solo col Salva.
+     ============================================================ */
+  var _verAperto=false;
+  function inOrdine(x){
+    if(Array.isArray(x)) return x.map(inOrdine);
+    if(x&&typeof x==="object"){ var o={}; Object.keys(x).sort().forEach(function(k){ if(k!=="aggiornato") o[k]=inOrdine(x[k]); }); return o; }
+    return x;
+  }
+  function stessoTesto(a,b){ return JSON.stringify(inOrdine(a||{capitolati:[]}))===JSON.stringify(inOrdine(b||{capitolati:[]})); }
+  async function caricaVersioni(id){
+    var r=await sb.from("gest_capitolato_versioni").select("id,capitolato,creato_il").eq("preventivo_id",id).eq("user_id",sbUid).order("creato_il",{ascending:false}).limit(30);
+    var l=await sb.from("gest_preventivi_link").select("firmato_il,aggiornato_il,creato_il").eq("preventivo_id",id).maybeSingle();
+    if(String(_stato.id)!==String(id)) return;
+    _stato.ver=(r&&!r.error&&r.data)||[];
+    _stato.link=(l&&!l.error&&l.data)||null;
+    renderSchede(); if(_verAperto) renderVersioni();
+  }
+  function quandoVer(iso){
+    var d=new Date(iso); if(isNaN(d.getTime())) return "Senza data";
+    var ora=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+    var oggi=new Date(); oggi.setHours(0,0,0,0);
+    var g=new Date(d); g.setHours(0,0,0,0);
+    var diff=Math.round((oggi-g)/86400000);
+    if(diff===0) return "Oggi alle "+ora;
+    if(diff===1) return "Ieri alle "+ora;
+    var s=d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+    return s.charAt(0).toUpperCase()+s.slice(1)+" alle "+ora;
+  }
+  function riassunto(cap){
+    var l=normalizza(cap).filter(nonVuoto);
+    var voci=l.reduce(function(n,c){ return n+c.voci.length; },0);
+    var dur=l.length&&l[0].durata?" · durata "+l[0].durata+" giorni":"";
+    return (l.length>1?l.length+" capitolati · ":"")+voci+(voci===1?" voce":" voci")+dur;
+  }
+  /* l'etichetta: quella versione era quella che il cliente ha firmato, o che gli e' stata mandata? */
+  function etichetta(dal,al){
+    var L=_stato.link; if(!L) return "";
+    var a=dal?new Date(dal).getTime():0, b=al?new Date(al).getTime():Infinity;
+    var dentro=function(x){ if(!x) return false; var t=new Date(x).getTime(); return t>=a&&t<b; };
+    if(dentro(L.firmato_il)) return '<span class="aic-pill aic-pill--ok" style="margin-left:6px">Firmata dal cliente</span>';
+    if(dentro(L.aggiornato_il)) return '<span class="aic-pill aic-pill--attesa" style="margin-left:6px">Mandata al cliente</span>';
+    return "";
+  }
+  function rigaVer(tit,det,azioni,dettaglio){
+    return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:12px 0;border-top:1px solid var(--bordo)">'
+      +'<div style="flex:1 1 220px;min-width:0"><div style="font-size:16px;font-weight:700;color:var(--testo)">'+tit+'</div>'
+      +'<div style="font-size:15px;color:var(--testo-2)">'+det+'</div></div>'
+      +'<div class="aic-fila">'+azioni+'</div>'+(dettaglio||"")+'</div>';
+  }
+  function renderVersioni(){
+    var box=el("cp-ver"); if(!box) return;
+    box.hidden=!_verAperto; if(!_verAperto){ box.innerHTML=""; return; }
+    var o=_stato.orig, ver=_stato.ver||[];
+    var h='<div class="sh-tit">Versioni salvate</div>';
+    h+=rigaVer(esc(o&&o.aggiornato?quandoVer(o.aggiornato):"Non ancora salvata")+etichetta(o&&o.aggiornato,null),
+      esc(o?riassunto(o):"Vuoto"),'<span style="font-size:15px;color:var(--testo-2)">quella salvata adesso</span>');
+    ver.forEach(function(v,i){
+      var dal=v.capitolato&&v.capitolato.aggiornato, al=v.creato_il;
+      h+=rigaVer(esc(quandoVer(dal||al))+etichetta(dal,al),esc(riassunto(v.capitolato)),
+        '<button type="button" class="aic-btn" data-action="cap-ver-vedi" data-i="'+i+'">Vedi</button>'
+        +'<button type="button" class="aic-btn" data-action="cap-ver-rip" data-i="'+i+'">Ripristina</button>',
+        '<div id="cp-ver-d'+i+'" hidden style="flex:1 1 100%"></div>');
+    });
+    h+='<div class="campo-aiuto">«Ripristina» rimette quella versione nelle caselle: diventa vera solo quando premi «Salva capitolato».</div>';
+    box.innerHTML=h;
+  }
+  function vediVersione(i){
+    var d=el("cp-ver-d"+i), v=(_stato.ver||[])[i]; if(!d||!v) return;
+    if(!d.hidden){ d.hidden=true; d.innerHTML=""; return; }
+    d.innerHTML=normalizza(v.capitolato).filter(nonVuoto).map(function(c){
+      return '<div style="background:var(--sfondo);border-radius:var(--r);padding:10px 12px;margin-top:6px;font-size:15px;line-height:1.5;color:var(--testo)">'
+        +'<b>'+esc(c.nome)+'</b>'+(c.dove?' · '+esc(c.dove):'')
+        +'<ul style="margin:6px 0 0 18px;padding:0">'+c.voci.map(function(x){ return '<li>'+esc(x.titolo||x.cosa||"Lavorazione")+'</li>'; }).join("")+'</ul>'
+        +(c.inizio||c.durata?'<div>Tempi: '+esc([c.inizio?"inizio "+fdate(c.inizio):"",c.durata?c.durata+" giorni":""].filter(Boolean).join(", "))+'</div>':'')
+        +(c.pagamenti?'<div>Pagamenti: '+esc(c.pagamenti)+'</div>':'')
+        +(c.note?'<div>Condizioni: '+esc(c.note)+'</div>':'')
+        +'</div>';
+    }).join("")||'<div class="campo-aiuto">Vuota.</div>';
+    d.hidden=false;
+  }
+  function ripristinaVersione(i){
+    var v=(_stato.ver||[])[i]; if(!v) return;
+    if(!gconfirm("Rimetto nelle caselle la versione di "+quandoVer((v.capitolato&&v.capitolato.aggiornato)||v.creato_il).toLowerCase()+"? Diventa vera solo quando premi «Salva capitolato».")) return;
+    _stato.lista=normalizza(v.capitolato); _stato.att=0;
+    caricaForm();
+    toast("Versione rimessa nelle caselle. Premi «Salva capitolato» per tenerla");
+  }
+
   async function salva(id,zitto){
     if(!sync()) return null;
     var lista=_stato.lista.map(function(c){ return pulisci(c); }).filter(nonVuoto);
     /* pulisci() butta le firme sbagliate? No: le tiene, ma la firma dentro e' valida solo col suo testo */
     var dati=lista.length?{capitolati:lista,aggiornato:new Date().toISOString()}:null;
+    /* 1 nov 2026 — il capitolato di PRIMA si mette da parte (solo se il testo e' cambiato).
+       Se la tabella non c'e' o la scrittura non va, il Salva va avanti lo stesso. */
+    var exVer=_stato.orig;
+    if(exVer&&!stessoTesto(exVer,dati)){
+      var rv=await sb.from("gest_capitolato_versioni").insert({preventivo_id:id,user_id:sbUid,capitolato:exVer}).select("id,capitolato,creato_il");
+      if(!rv.error&&rv.data&&rv.data.length) _stato.ver=[rv.data[0]].concat(_stato.ver||[]).slice(0,30);
+    }
     var res=await sb.from("gest_preventivi").update({capitolato:dati}).eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error||!res.data||!res.data.length){
       toast("Non salvato: "+((res.error&&res.error.message)||"il preventivo non risponde")+". Riprova.");
@@ -860,6 +966,9 @@
     }
     /* i file che non servono piu' (tolti, o caricati e poi lasciati) si cancellano ora */
     var finali=tuttiIPath(lista);
+    /* le foto che stanno ancora in una versione non si buttano: servono al ripristino */
+    (_stato.ver||[]).forEach(function(v){ finali=finali.concat(tuttiIPath(normalizza(v.capitolato))); });
+    _stato.orig=dati;
     var daTogliere=_stato.prima.concat(_stato.sess).filter(function(p,i,a){ return finali.indexOf(p)<0&&a.indexOf(p)===i; });
     if(daTogliere.length) await togliFile(daTogliere);
     _stato.prima=finali; _stato.sess=[];
@@ -1241,6 +1350,9 @@
       statoFirme(); toast("Aggiunto alle note ✔"); return;
     }
     if(a==="cap-sch") return cambiaScheda(+t.dataset.i);
+    if(a==="cap-ver"){ _verAperto=!_verAperto; renderSchede(); renderVersioni(); return; }
+    if(a==="cap-ver-vedi") return vediVersione(+t.dataset.i);
+    if(a==="cap-ver-rip") return ripristinaVersione(+t.dataset.i);
     if(a==="cap-sch-new") return void nuovaScheda();
     if(a==="cap-sch-del") return eliminaScheda();
     if(a==="cap-voce-add"){

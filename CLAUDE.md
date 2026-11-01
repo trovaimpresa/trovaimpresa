@@ -2877,3 +2877,19 @@ cliente). Un push solo.
 - Alla firma parte un'email all'impresa (Resend, quota condivisa).
 - Il PDF per il cliente è la stampa del browser («Stampa o salva PDF»),
   così non nasce un secondo foglio da tenere uguale al primo.
+
+## 1 nov 2026 (sera) — il capitolato: «Invia al cliente» e le VERSIONI
+
+- Nel capitolato, in fondo: «📤 Invia al cliente» (`cap-invia`) — salva e apre
+  `window.gestInviaCliente(id,{capitolati:true})`, che mette dentro i capitolati.
+- **Le versioni** — tabella `gest_capitolato_versioni` (`sql/gest-capitolato-versioni.sql`,
+  migrazione `gest_capitolato_versioni_1nov2026`). Al Salva, se il testo è cambiato
+  (confronto in ordine, senza `aggiornato`), il capitolato DI PRIMA va lì. Trigger:
+  preventivo tuo + ne tiene 30. «Versioni (n)» accanto a «+ Nuovo capitolato»:
+  Vedi · Ripristina (rimette nelle caselle, vale solo col Salva).
+- ⛔ `salva()` non cancella più dal deposito le foto che stanno in una versione.
+- Le etichette «Firmata dal cliente» / «Mandata al cliente» si ricavano dalle date di
+  `gest_preventivi_link` (firmato_il / aggiornato_il) cadute nel periodo di quella versione.
+- Trovato e chiuso lo stesso giorno: `js/ai-integrazione.js` cercava la chiave pubblica
+  nell'HTML (dal 1 ott sta in `js/gest-base.js` come `SUPA_KEY`): `get_ai_status` dava
+  401 a ogni apertura e `AI.stato` restava vuoto.
