@@ -328,6 +328,12 @@ exports.handler = async function (event) {
     // nel frattempo qualcuno carica una foto: nessuno la riceve due volte.
     if (gruppo === 'senza_foto_1') destinatari = destinatari.filter(i => Number(i.id) % 2 === 0);
     if (gruppo === 'senza_foto_2') destinatari = destinatari.filter(i => Number(i.id) % 2 !== 0);
+  } else if (gruppo === 'tutti_1' || gruppo === 'tutti_2' || gruppo === 'tutti_3') {
+    // 1 nov 2026 — tutti gli iscritti, divisi in tre per id (resto 0, 1, 2):
+    // Resend gratuito manda 100 email al giorno, cosi' si spedisce in tre
+    // mattine e nessuno la riceve due volte.
+    const parte = Number(gruppo.slice(-1)) - 1;
+    destinatari = conEmail.filter(i => Number(i.id) % 3 === parte);
   } else {
     destinatari = conEmail;
   }
