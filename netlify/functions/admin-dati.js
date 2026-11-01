@@ -31,7 +31,9 @@ const TABELLE_CONSENTITE = [
      nascono non approvate: dall'admin si approvano o si cancellano. */
   'site_reviews',
   /* 27 ottobre 2026 — i clienti iscritti agli avvisi «Avvisami gratis» e le mail mandate. */
-  'avvisi_clienti', 'avvisi_inviati'
+  'avvisi_clienti', 'avvisi_inviati',
+  /* 1 novembre 2026 — le stelle «Come ti trovi col gestionale?» (js/invito-g2.js) */
+  'gest_voti'
 ];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 

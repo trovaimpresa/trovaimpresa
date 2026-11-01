@@ -132,7 +132,11 @@
       if (vecchia && vecchia.stato === "fatto") return;
       setTimeout(function () {
         conta(sb, uid, tabelle).then(function (n) {
-          if (n >= MINIMO) mostra(chiave, sb, uid, pagina);
+          if (n < MINIMO) return;
+          /* chi ha gia' votato da un altro telefono o computer non si richiede */
+          sb.from("gest_voti").select("id", { count: "exact", head: true }).eq("user_id", uid)
+            .then(function (r) { if (!(r && !r.error && r.count)) mostra(chiave, sb, uid, pagina); },
+                  function () { mostra(chiave, sb, uid, pagina); });
         });
       }, ATTESA);
     })();
