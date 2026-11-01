@@ -2893,3 +2893,9 @@ cliente). Un push solo.
 - Trovato e chiuso lo stesso giorno: `js/ai-integrazione.js` cercava la chiave pubblica
   nell'HTML (dal 1 ott sta in `js/gest-base.js` come `SUPA_KEY`): `get_ai_status` dava
   401 a ogni apertura e `AI.stato` restava vuoto.
+- **Il controllo rosso/arancio/verde anche nel capitolato** (1 nov, sera): `ctrRegoleCapitolato()`
+  in `js/gest-capitolato.js` si registra in `CTR_DOC.capitolato` all'apertura
+  (`ctrCapitolatoAccendi`), e in fondo c'è `ctrTastoHTML("capitolato")`. Rosso: nessuna
+  voce, voce senza «Cosa si fa», inizio già passato. Arancio: indirizzo, tempi, pagamenti,
+  materiali vuoti o «da concordare», voce senza «Escluso». Il capitolato NON è in
+  `CTR_AI_SEZIONI`: la sua AI ce l'ha già in cima («Controlla cosa manca»).

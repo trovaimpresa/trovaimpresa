@@ -697,13 +697,16 @@
 
     openSheetGrande("Capitolato — "+(p.titolo||("preventivo n. "+(p.numero||""))),
       corpo,
-      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      /* 1 nov 2026 — «Controlla che sia giusto», lo stesso tasto di preventivo e computo (va per primo) */
+      (typeof ctrTastoHTML==="function"?ctrTastoHTML("capitolato"):"")
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn" id="cp-pdf-tutti" data-action="cap-pdf-tutti" data-id="'+esc(String(id))+'" style="display:none">📄 PDF di tutti</button>'
       /* 1 nov 2026 — «Invia al cliente» anche da qui: salva e apre la finestra del link (js/gest-invia-cliente.js) */
       +'<button class="btn" data-action="cap-invia" data-id="'+esc(String(id))+'">📤 Invia al cliente</button>'
       +'<button class="btn" data-action="cap-pdf" data-id="'+esc(String(id))+'">📄 Scarica PDF</button>'
       +'<button class="btn-primary b-save" data-action="cap-salva" data-id="'+esc(String(id))+'">Salva capitolato</button>');
     caricaForm();
+    try{ ctrCapitolatoAccendi(); }catch(e){}   /* 1 nov 2026: rosso / arancio / verde */
     caricaVersioni(id);   /* 1 nov 2026: «Versioni (n)» compare quando arrivano */
 
     /* apre e chiude la riga dell'AI */
@@ -855,6 +858,49 @@
   function tuttiIPath(lista){ var o=[]; lista.forEach(function(c){ (c.allegati||[]).forEach(function(a){ o.push(a.path); }); }); return o; }
 
   /* ---------- salvare ---------- */
+  /* ============================================================
+     IL CONTROLLO ROSSO / ARANCIO / VERDE — 1 nov 2026 (approvato da Alex)
+     Lo stesso motore di preventivo e computo (js/gest-ai-moduli.js:
+     CTR_DOC, ctrAscolta, ctrGuardaTutto, ctrTastoHTML). Qui ci sono solo
+     le REGOLE del capitolato. Avvisa e non blocca: si salva lo stesso.
+     ============================================================ */
+  function ctrRegoleCapitolato(){
+    var out=[], g=function(id){ return document.getElementById(id); };
+    var voci=[].slice.call(document.querySelectorAll("#cp-voci .cap-voce"));
+    var piene=voci.filter(function(v){
+      return [].slice.call(v.querySelectorAll("input,textarea")).some(function(x){ return String(x.value||"").trim(); });
+    });
+    if(!piene.length){
+      var dove=voci.length?voci[0].querySelector(".cp-v-tit"):document.querySelector('#sheet [data-action="cap-voce-add"]');
+      if(dove) out.push({el:dove,grave:"rosso",dice:"Il capitolato non ha nessuna voce: il cliente non sa cosa farai. Parti da un modello o porta le voci dal preventivo."});
+    }
+    piene.forEach(function(v){
+      var q=function(c){ return v.querySelector(c); }, val=function(c){ var x=q(c); return x?String(x.value||"").trim():""; };
+      if(!val(".cp-v-cosa")&&q(".cp-v-cosa")) out.push({el:q(".cp-v-cosa"),grave:"rosso",dice:"Questa voce non dice cosa si fa: il cliente legge solo il titolo, ed è lì che poi si discute."});
+      if(!val(".cp-v-tit")&&q(".cp-v-tit")) out.push({el:q(".cp-v-tit"),grave:"arancio",dice:"Manca il titolo della voce: nel PDF esce «Lavorazione»."});
+      var mat=val(".cp-v-mat");
+      if(q(".cp-v-mat")&&(!mat||/da concordare/i.test(mat))) out.push({el:q(".cp-v-mat"),grave:"arancio",dice:"Materiali non scritti o «da concordare»: metti marca e tipo, se no il cliente può dire che si aspettava altro."});
+      if(!val(".cp-v-esc")&&q(".cp-v-esc")) out.push({el:q(".cp-v-esc"),grave:"arancio",dice:"Manca «Escluso»: senza, il cliente può pensare che sia tutto compreso."});
+    });
+    var ini=g("cp-inizio");
+    if(ini&&ini.value){
+      var oggi=new Date(); oggi.setHours(0,0,0,0);
+      if(new Date(ini.value+"T12:00:00")<oggi) out.push({el:ini,grave:"rosso",dice:"La data di inizio è già passata: correggila prima di mandarlo."});
+    }
+    var dov=g("cp-dove");
+    if(dov&&!String(dov.value||"").trim()) out.push({el:dov,grave:"arancio",dice:"Manca l'indirizzo del cantiere: è quello che lega il capitolato al lavoro giusto."});
+    var dur=g("cp-durata");
+    if(dur&&!String(dur.value||"").trim()&&!(ini&&ini.value)) out.push({el:dur,grave:"arancio",dice:"Mancano i tempi: né inizio né durata. È la prima cosa che il cliente chiede."});
+    var pag=g("cp-pag");
+    if(pag&&!String(pag.value||"").trim()) out.push({el:pag,grave:"arancio",dice:"Mancano i pagamenti: scrivi quando e quanto, se no si decide dopo, e dopo si litiga."});
+    return out;
+  }
+  function ctrCapitolatoAccendi(){
+    if(typeof CTR_DOC==="undefined"||typeof ctrAscolta!=="function") return;
+    CTR_DOC.capitolato={caselle:"#cp-nome,#cp-dove,#cp-inizio,#cp-durata,#cp-pag,#cp-gar,#cp-note",dentro:["#cp-voci"],regole:ctrRegoleCapitolato};
+    ctrAscolta("capitolato");
+  }
+
   /* ============================================================
      LE VERSIONI — 1 novembre 2026 (sql/gest-capitolato-versioni.sql)
      Al Salva, se il testo e' cambiato, il capitolato di PRIMA va in
