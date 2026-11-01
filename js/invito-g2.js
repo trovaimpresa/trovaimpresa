@@ -30,7 +30,7 @@
   function scrivi(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} }
 
   var css =
-    "#ti-voto{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9990;width:min(760px,calc(100% - 24px));box-sizing:border-box;background:#0a2a4d;color:#fff;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(0,0,0,.25);font-family:inherit}" +
+    "#ti-voto{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9990;width:min(760px,calc(100% - 24px));box-sizing:border-box;background:#0a2a4d;color:#fff;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(0,0,0,.25);font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
     "#ti-voto *{font-family:inherit;box-sizing:border-box}" +
     "#ti-voto .v-tit{font-size:20px;font-weight:700;flex:1 1 220px;margin:0}" +
     "#ti-voto .v-st{display:flex;gap:4px}" +
