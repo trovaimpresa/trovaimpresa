@@ -33,6 +33,19 @@
     _aiStrisciaDisegna();
   }
 
+  /* 1 nov 2026: il numero dei crediti nel menu si legge appena c'e' la
+     sessione, anche se si entra dritti in un reparto, e poi ogni 2 minuti
+     (solo se la pagina e' davanti), cosi' dopo aver usato l'AI scende. */
+  (function(){
+    let prove=0;
+    const t=setInterval(function(){
+      prove++;
+      if(typeof sbUid!=="undefined" && sbUid){ clearInterval(t); try{aiStrisciaCarica();}catch(e){}
+        setInterval(function(){ if(!document.hidden){ try{aiStrisciaCarica();}catch(e){} } },120000);
+      } else if(prove>40) clearInterval(t);
+    },500);
+  })();
+
   function _aiStrisciaDisegna(){
     /* 1 nov 2026: il numero accanto a «Ricarica crediti» nel menu */
     try{ const c=document.getElementById("cnt-crediti"); if(c&&_aiStato) c.textContent=String(Number(_aiStato.remaining||0)); }catch(e){}

@@ -38,6 +38,15 @@
       if (b) { dopo.after(b); dopo = b; }
     });
 
+    /* 1-bis. 1 nov 2026: «Ricarica crediti» (non ha data-tab: porta a
+       un'altra pagina) sta sempre in vista, subito sotto la Chat con AI */
+    var ric = nav.querySelector("#tab-ricarica");
+    if (ric) {
+      var ch = nav.querySelector('button[data-tab="chat"]');
+      if (ch) ch.after(ric); else { dopo.after(ric); }
+      if (dopo === ch) dopo = ric;
+    }
+
     /* 2. il pulsante «Altre voci» e il contenitore */
     var btn = document.createElement("button");
     btn.type = "button";
