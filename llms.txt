@@ -12,7 +12,7 @@
 - Guida pratica «Come trovare clienti se hai un'impresa edile»: https://trovaimpresa.com/come-trovare-clienti-impresa-edile
 
 ## TrovaImpresa Gestionale: il gestionale per imprese edili e artigiani
-Gestionale online in italiano, dal telefono e dal computer, compreso nell'iscrizione gratuita. Le funzioni con intelligenza artificiale sono a pagamento.
+Gestionale online in italiano, dal telefono e dal computer, gratis per sempre per chi si iscrive, intelligenza artificiale compresa (ogni mese 30 crediti AI e 50 messaggi di chat). Nessun abbonamento: si pagano solo pacchetti extra, se servono (crediti AI da 19 €, invii allo SDI da 7,90 €).
 - Preventivi e computo metrico (anche dai prezzari regionali), capitolato, SAL
 - Fatture e fattura elettronica (file XML per lo SDI)
 - Cantieri, squadra, rapportini, ore, spese, mezzi e scadenze
