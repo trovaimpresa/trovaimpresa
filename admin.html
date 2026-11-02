@@ -828,7 +828,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         </div>
         <div class="stat-card apri" data-va="incassi">
           <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#7b1fa2"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg></div>
-          <div><div class="stat-num" id="cr-premium">–</div><div class="stat-lbl">Premium pagati attivi</div><div class="stat-conf pari" id="cr-premium-conf"></div></div>
+          <div><div class="stat-num" id="cr-premium">–</div><div class="stat-lbl">Premium attivi</div></div>
           <span class="stat-freccia">›</span>
         </div>
       </div>
@@ -4272,7 +4272,6 @@ async function caricaCruscotto() {
     _set('cr-incasso-conf', eur(d.incasso_totale) + ' da sempre');
 
     _set('cr-premium', n(d.premium_pagati));
-    _set('cr-premium-conf', 'gli altri sono i 3 mesi regalati');
   } catch (e) { console.warn('[dashboard] cruscotto:', e.message || e); }
 }
 
