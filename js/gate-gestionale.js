@@ -166,7 +166,7 @@
         PER RICHIUDERLO basta rimettere true: nessun dato si perde, e chi
         e' dentro rivede la schermata «Il gestionale sta arrivando». */
   var MANUTENZIONE = false;
-  var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
+  var AMMESSI = ['info@trovaimpresa.com', 'pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
 
   /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====
      Il gestionale è il Gestionale TrovaImpresa (29 euro/mese o 249 euro/anno,

@@ -23,7 +23,7 @@
 (function(){
   "use strict";
 
-  var AMMESSI = ["pintoalessio@icloud.com"];   /* aggiungi altre email fra apici, separate da virgola */
+  var AMMESSI = ["info@trovaimpresa.com", "pintoalessio@icloud.com"];   /* aggiungi altre email fra apici, separate da virgola */
 
   var SU = "https://nacvrsgkyfavykxjxszu.supabase.co";
   var SK = "sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R";

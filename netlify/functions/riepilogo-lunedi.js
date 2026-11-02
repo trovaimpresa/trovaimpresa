@@ -57,7 +57,7 @@ const { createClient } = require('@supabase/supabase-js');
 // ---------------------------------------------------------------------------
 // L'UNICA RIGA DA CAMBIARE QUANDO VUOI APRIRLA A TUTTI: metti  null
 // ---------------------------------------------------------------------------
-const SOLO_A = 'pintoalessio@icloud.com';
+const SOLO_A = 'info@trovaimpresa.com';   // 2 nov 2026: era pintoalessio@icloud.com
 
 const SITO = 'https://trovaimpresa.com/gestionale-app.html';
 

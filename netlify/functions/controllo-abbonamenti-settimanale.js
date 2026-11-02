@@ -46,7 +46,7 @@ const { confronta } = require('./admin-controllo-abbonamenti.js');
 
 // A chi arriva. Se un giorno cambi indirizzo, metti ADMIN_EMAIL su
 // Netlify e non serve ripubblicare questo file.
-const A_CHI = (process.env.ADMIN_EMAIL || 'pintoalessio@icloud.com').trim();
+const A_CHI = (process.env.ADMIN_EMAIL || 'info@trovaimpresa.com').trim();   // 2 nov 2026: era pintoalessio@icloud.com
 
 const NOMI_URL = ['SUPABASE_URL', 'VITE_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL'];
 const NOMI_KEY = [

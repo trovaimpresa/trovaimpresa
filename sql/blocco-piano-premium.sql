@@ -63,7 +63,7 @@ begin
 
   -- 2) l'eccezione del fondatore
   select u.email into v_mail from auth.users u where u.id = auth.uid();
-  if v_mail = 'pintoalessio@icloud.com' then
+  if v_mail in ('pintoalessio@icloud.com', 'info@trovaimpresa.com') then
     return new;
   end if;
 
@@ -102,7 +102,7 @@ select 'guardiano acceso: ' || t.tgname
           where t2.tgrelid = t.tgrelid
             and not t2.tgisinternal
             and t2.tgname > t.tgname), 'nessun altro')
-    || '  ·  eccezione per: pintoalessio@icloud.com'
+    || '  ·  eccezione per: info@trovaimpresa.com, pintoalessio@icloud.com'
        as risultato
   from pg_trigger t
  where t.tgrelid = 'public.imprese'::regclass

@@ -162,8 +162,14 @@ async function confronta({ chiaveStripe, url, key }) {
     }
   }
 
+  /* 2 nov 2026 — l'account di Alessio ha tutto acceso perche' e' il
+     fondatore, non perche' paga: ogni lunedi' usciva come «ha e non paga».
+     Si salta qui, e solo in questo verso. */
+  const FONDATORE = ['info@trovaimpresa.com', 'pintoalessio@icloud.com'];
+
   for (const [email, r] of nelSito) {
     if (!r.paga) continue;
+    if (FONDATORE.includes(email)) continue;
     if (!suStripe.has(email)) {
       ha_e_non_paga.push({ email, perche: "nel sito risulta pagato, ma su Stripe non c'è nessun abbonamento vivo", impresa: r });
     }

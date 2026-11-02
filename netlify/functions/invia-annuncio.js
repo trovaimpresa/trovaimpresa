@@ -38,7 +38,7 @@ const corsHeaders = {
 };
 
 const MITTENTE = 'TrovaImpresa <info@trovaimpresa.com>';
-const EMAIL_PROVA = 'pintoalessio@icloud.com';
+const EMAIL_PROVA = 'info@trovaimpresa.com';   // 2 nov 2026: era pintoalessio@icloud.com
 /* Quanti ne accetta Resend in UNA chiamata batch: e' un limite loro. */
 const PER_LOTTO = 100;
 /* Quanti ne accettiamo NOI in un invio solo. Sta qui per non far partire

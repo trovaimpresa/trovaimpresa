@@ -59,7 +59,7 @@ const SITO = 'https://trovaimpresa.com/gestionale-app.html';
    un altro andrebbe detto; (2) e' una chiamata a pagamento per ogni persona
    ogni lunedi'. Finche' non si decidono quelle due cose, gli altri ricevono la
    riga fissa — che e' esattamente quello che ricevevano prima. */
-const CAPPELLO_AI_SOLO_A = 'pintoalessio@icloud.com';
+const CAPPELLO_AI_SOLO_A = 'info@trovaimpresa.com';   // 2 nov 2026: l'account di Alessio è passato da pintoalessio@icloud.com a info@
 
 // le tre tappe dell'avviso, identiche a quelle di promemoria-scadenze.js
 const TAPPE = [

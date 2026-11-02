@@ -140,7 +140,7 @@ begin
     v_titolare := nullif(to_jsonb(old) ->> v_colonna, '')::uuid;
     if v_titolare is not null and not public.gest_piano_ok(v_titolare) then
       select u.email into v_mail from auth.users u where u.id = auth.uid();
-      if coalesce(v_mail, '') <> 'pintoalessio@icloud.com' then
+      if coalesce(v_mail, '') not in ('pintoalessio@icloud.com', 'info@trovaimpresa.com') then
         raise exception
           'Il gestionale è compreso nel Piano Premium, e il tuo piano non è attivo. I tuoi dati ci sono tutti: puoi vederli e scaricarli, ma per salvare le modifiche serve il Premium. Lo riattivi dal tuo pannello e torna tutto come prima.'
           using errcode = '42501';
@@ -153,7 +153,7 @@ begin
     v_titolare := nullif(to_jsonb(new) ->> v_colonna, '')::uuid;
     if v_titolare is not null and not public.gest_piano_ok(v_titolare) then
       select u.email into v_mail from auth.users u where u.id = auth.uid();
-      if coalesce(v_mail, '') <> 'pintoalessio@icloud.com' then
+      if coalesce(v_mail, '') not in ('pintoalessio@icloud.com', 'info@trovaimpresa.com') then
         raise exception
           'Il gestionale è compreso nel Piano Premium, e il tuo piano non è attivo. I tuoi dati ci sono tutti: puoi vederli e scaricarli, ma per salvare le modifiche serve il Premium. Lo riattivi dal tuo pannello e torna tutto come prima.'
           using errcode = '42501';

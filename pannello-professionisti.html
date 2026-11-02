@@ -3451,10 +3451,10 @@ let impresaCorrente = null;
    ?vedi=impresa|artigiano|professionista|negozio nell'indirizzo (o la barra
    fondatore) cambia la categoria SOLO in memoria, in questa scheda.
    Il tipo vero nel database NON si tocca. Per chiunque altro non fa nulla. */
-const FONDATORE_EMAIL = 'pintoalessio@icloud.com';
+const FONDATORE_EMAIL = ['info@trovaimpresa.com', 'pintoalessio@icloud.com'];   // 2 nov 2026: l'account è passato a info@
 function vistaFondatore(p){
   try{
-    if (!p || String(p.email||'').trim().toLowerCase() !== FONDATORE_EMAIL) return p;
+    if (!p || !FONDATORE_EMAIL.includes(String(p.email||'').trim().toLowerCase())) return p;
     const qp = new URLSearchParams(location.search).get('vedi');
     if (qp !== null) { qp ? sessionStorage.setItem('ti_vedi_tipo', qp) : sessionStorage.removeItem('ti_vedi_tipo'); }
     const v = sessionStorage.getItem('ti_vedi_tipo');
