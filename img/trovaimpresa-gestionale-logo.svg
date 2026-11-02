@@ -80,7 +80,7 @@
   <!-- 17 set 2026 — la riga del prodotto -->
   <text x="500" y="705" text-anchor="middle"
     font-family="'Trebuchet MS', 'Arial Rounded MT Bold', sans-serif"
-    font-size="150" font-weight="900" letter-spacing="-3"
+    font-size="122" font-weight="900" letter-spacing="-3"
     fill="#ff8800" stroke="#ff8800" stroke-width="10" stroke-linejoin="round"
-    paint-order="stroke">Gestionale</text>
+    paint-order="stroke">Gestionale Edilizia</text>
 </svg>
