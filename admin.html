@@ -217,6 +217,8 @@
   .stat-conf.su   { color:#137333; }
   .stat-conf.giu  { color:#b3261e; }
   .stat-conf.pari { color:var(--light); }
+  /* 2 nov 2026: i due gruppi nuovi in cima (cosa fanno i clienti, soldi) */
+  .gruppo-stat.nuovo { color:#0066ff; }
 
   /* SEZIONE */
   .section { display:none; }
@@ -784,6 +786,53 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
            E sono divise in tre gruppi, perche' 20 caselle in fila sono
            un muro: come va il sito / chi c'e' dentro / da tenere d'occhio.
            ============================================================ -->
+      <!-- ============================================================
+           2 novembre 2026 — COSA FANNO I CLIENTI, E I SOLDI.
+           Alex: «cosa mi manca, posso avere piu' informazioni?». I numeri
+           c'erano gia' (visite_clienti, contatti, visite_sito,
+           accessi_pannello, pagamenti) ma stavano dentro le sezioni.
+           Arrivano tutti da UNA domanda: /.netlify/functions/admin-cruscotto
+           (funzione SQL admin_cruscotto, sql/admin-cruscotto.sql).
+           Riempite da caricaCruscotto(). Ultimi 30 giorni.
+           ============================================================ -->
+      <div class="gruppo-stat nuovo">Cosa fanno i clienti · ultimi 30 giorni</div>
+      <div class="stats-grid">
+        <div class="stat-card apri" data-va="ricerche">
+          <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#b3261e"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8.5 8.5l5 5M13.5 8.5l-5 5"/></svg></div>
+          <div><div class="stat-num" id="cr-vuote">–</div><div class="stat-lbl">Ricerche finite a vuoto</div><div class="stat-conf giu" id="cr-vuote-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="ricerche">
+          <div class="stat-icon g"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#137333"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></div>
+          <div><div class="stat-num" id="cr-contatti">–</div><div class="stat-lbl">Contatti presi dai clienti</div><div class="stat-conf su" id="cr-contatti-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="arrivi">
+          <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#0066ff"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+          <div><div class="stat-num" id="cr-google">–</div><div class="stat-lbl">Arrivati da Google</div><div class="stat-conf pari" id="cr-google-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="chientra">
+          <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#c45e28"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg></div>
+          <div><div class="stat-num" id="cr-spente">–</div><div class="stat-lbl">Imprese che si sono spente</div><div class="stat-conf giu" id="cr-spente-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+      </div>
+
+      <div class="gruppo-stat nuovo">Soldi</div>
+      <div class="stats-grid">
+        <div class="stat-card apri" data-va="incassi">
+          <div class="stat-icon g"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#137333"><path d="M18 7a6 6 0 1 0 0 10"/><path d="M4 10h9M4 14h9"/></svg></div>
+          <div><div class="stat-num" id="cr-incasso">–</div><div class="stat-lbl">Incassato questo mese</div><div class="stat-conf pari" id="cr-incasso-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="incassi">
+          <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#7b1fa2"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg></div>
+          <div><div class="stat-num" id="cr-premium">–</div><div class="stat-lbl">Premium pagati attivi</div><div class="stat-conf pari" id="cr-premium-conf"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+      </div>
+
       <div class="gruppo-stat">Come va il sito</div>
       <div class="stats-grid">
         <!-- 6 settembre 2026 — le due caselle che dicono se il sito sta
@@ -4184,6 +4233,49 @@ async function contaSupportoDashboard() {
   } catch (e) { console.warn('[dashboard] supporto:', e.message || e); }
 }
 
+/* ============================================================
+   2 novembre 2026 — COSA FANNO I CLIENTI, E I SOLDI
+   Una sola chiamata (admin-cruscotto) riempie le sei caselle nuove.
+   Se non risponde restano i trattini: le altre caselle non ne
+   risentono.
+   ============================================================ */
+async function caricaCruscotto() {
+  try {
+    const res = await fetch('/.netlify/functions/admin-cruscotto', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, giorni: 30 })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!j.success) throw new Error(j.error || 'errore sconosciuto');
+    const d = j.data || {};
+    const n = v => Number(v || 0).toLocaleString('it-IT');
+    const eur = v => Number(v || 0).toLocaleString('it-IT', { maximumFractionDigits: 2 }) + ' €';
+
+    _set('cr-vuote', n(d.vuote));
+    const top = d.vuota_top;
+    _set('cr-vuote-conf', 'su ' + n(d.ricerche) + (top ? ' · la più cercata: ' + top.cosa + ' a ' + top.dove : ''));
+
+    _set('cr-contatti', n(d.contatti));
+    _set('cr-contatti-conf', _plur(Number(d.contatti_imprese || 0), 'impresa contattata', 'imprese contattate') + ' · ' + n(d.contatti_telefono) + ' al telefono');
+
+    const f = d.fonti || {};
+    _set('cr-google', n(f.Google));
+    const altre = [['diretti', 'diretti'], ['Facebook', 'Facebook'], ['Bing', 'Bing'], ['AI', 'dalle AI']]
+      .filter(x => Number(f[x[0]] || 0) > 0)
+      .map(x => x[1] + ' ' + n(f[x[0]]));
+    _set('cr-google-conf', altre.join(' · '));
+
+    _set('cr-spente', n(d.spente));
+    _set('cr-spente-conf', 'non entrano da 30 giorni');
+
+    _set('cr-incasso', eur(d.incasso_mese));
+    _set('cr-incasso-conf', eur(d.incasso_totale) + ' da sempre');
+
+    _set('cr-premium', n(d.premium_pagati));
+    _set('cr-premium-conf', 'gli altri sono i 3 mesi regalati');
+  } catch (e) { console.warn('[dashboard] cruscotto:', e.message || e); }
+}
+
 // CARICA IMPRESE
 async function caricaImprese() {
   /* ⛔ 19 set 2026 — prima qui c'era `sb.from('imprese')`, cioe' la lettura
@@ -4260,6 +4352,7 @@ async function caricaImprese() {
   contaSchedeSenzaFoto(impreseVere);
   contaChiEntraDashboard();
   contaSchedeAperte();
+  caricaCruscotto();
   contaSupportoDashboard();
   // _set non si arrabbia se un elemento non c'e' piu' (es. il badge di
   // "Da verificare", rimosso dal menu): prima un solo id mancante bloccava
