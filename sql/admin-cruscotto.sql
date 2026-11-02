@@ -68,8 +68,14 @@ select json_build_object(
   'incasso_mese',      (select coalesce(sum(importo_eur), 0) from pagamenti
                           where quando >= date_trunc('month', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome'),
   'incasso_totale',    (select coalesce(sum(importo_eur), 0) from pagamenti),
-  'premium_pagati',    (select count(*) from vere
-                          where premium_pagato = true and (premium_scadenza is null or premium_scadenza > now()))
+  -- 2 nov 2026: Premium e Free non esistono piu' (deciso il 31 ott). Si pagano
+  -- solo i pacchetti: crediti AI, messaggi della chat, invii SDI.
+  -- un rimborso (riga negativa) toglie il pacchetto che annulla
+  'pacchetti_mese',    (select coalesce(sum(sign(importo_eur)), 0)::int from pagamenti
+                          where prodotto in ('crediti-ai', 'messaggi-chat', 'invii-sdi')
+                            and quando >= date_trunc('month', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome'),
+  'pacchetti_totale',  (select coalesce(sum(sign(importo_eur)), 0)::int from pagamenti
+                          where prodotto in ('crediti-ai', 'messaggi-chat', 'invii-sdi'))
 );
 $$;
 

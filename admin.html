@@ -827,8 +827,8 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <span class="stat-freccia">›</span>
         </div>
         <div class="stat-card apri" data-va="incassi">
-          <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#7b1fa2"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg></div>
-          <div><div class="stat-num" id="cr-premium">–</div><div class="stat-lbl">Premium attivi</div></div>
+          <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#0066ff"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></div>
+          <div><div class="stat-num" id="cr-pacchetti">–</div><div class="stat-lbl">Pacchetti AI venduti questo mese</div><div class="stat-conf pari" id="cr-pacchetti-conf"></div></div>
           <span class="stat-freccia">›</span>
         </div>
       </div>
@@ -4271,7 +4271,8 @@ async function caricaCruscotto() {
     _set('cr-incasso', eur(d.incasso_mese));
     _set('cr-incasso-conf', eur(d.incasso_totale) + ' da sempre');
 
-    _set('cr-premium', n(d.premium_pagati));
+    _set('cr-pacchetti', n(d.pacchetti_mese));
+    _set('cr-pacchetti-conf', n(d.pacchetti_totale) + ' da sempre');
   } catch (e) { console.warn('[dashboard] cruscotto:', e.message || e); }
 }
 
