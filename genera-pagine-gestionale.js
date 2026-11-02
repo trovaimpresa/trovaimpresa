@@ -270,7 +270,7 @@ const SEGNO_A = '<!-- INIZIO famiglia gestionale — generato, non scrivere a ma
 const SEGNO_B = '<!-- FINE famiglia gestionale -->';
 
 function bloccoMadre(tutte) {
-  const gruppo = f => tutte.filter(p => p.famiglia === f);
+  const gruppo = f => tutte.filter(p => p.famiglia === f).concat(f === 'confronto' ? PAGINE_SCRITTE_A_MANO : []);
   const elenco = arr => arr.map(p => `      <li><a href="/${p.slug}.html">${p.link}</a> &mdash; ${p.riga}</li>`).join('\n');
   return `${SEGNO_A}
     <h2>Cerchi una cosa precisa?</h2>
@@ -311,6 +311,15 @@ function innestaNellaMadre(html, tutte) {
   return html.slice(0, i) + nuovo + '\n\n' + html.slice(i);
 }
 
+/* 2 nov 2026 — Pagine del gestionale scritte A MANO (non da questo
+   generatore), che devono comparire lo stesso negli elenchi «Prima di
+   decidere». Senza, nascerebbero orfane: nessun link interno le trova. */
+const PAGINE_SCRITTE_A_MANO = [
+  { slug: 'migliori-gestionali-gratis-imprese-edili',
+    link: 'Migliori gestionali gratis per imprese edili',
+    riga: 'otto gestionali a confronto: cosa resta nel gratis, i limiti e quanto costano dopo' },
+];
+
 /* ---------- 4-bis. Lo stesso elenco per la PORTA (/gestionale) ----------
    Stesso testo, veste diversa: la porta ha la sua grafica (`.fascia`,
    `.titolone`, `.pp-elenco`), non le `checklist ok-list` del modello.
@@ -320,7 +329,7 @@ const SEGNO_PA = '<!-- INIZIO famiglia gestionale (porta) - generato, non scrive
 const SEGNO_PB = '<!-- FINE famiglia gestionale (porta) -->';
 
 function bloccoPorta(tutte) {
-  const gruppo = f => tutte.filter(p => p.famiglia === f);
+  const gruppo = f => tutte.filter(p => p.famiglia === f).concat(f === 'confronto' ? PAGINE_SCRITTE_A_MANO : []);
   const elenco = arr => arr.map(p =>
     `        <li><a href="/${p.slug}">${p.link}</a><span>${p.riga}</span></li>`).join('\n');
   /* 3 ott 2026 — I TRE GRUPPI SONO CHIUSI (`<details>`): la pagina /gestionale
