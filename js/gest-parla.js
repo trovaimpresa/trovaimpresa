@@ -40,6 +40,7 @@
     + '.gp-x{background:#fff;border:1.5px solid #CBD5E1;border-radius:12px;font:inherit;font-size:18px;font-weight:700;padding:10px 18px;cursor:pointer;min-height:48px}'
     + '.gp-detto{font-size:18px;line-height:1.5;color:#475569;margin:0 0 20px;padding:12px 16px;background:#fff;border-radius:12px;border:1px solid #E2E8F0}'
     + '.gp-detto b{color:#0F172A}'
+    + '.gp-foto{display:block;max-width:100%;max-height:260px;border-radius:12px;border:1px solid #E2E8F0;margin:0 0 20px;background:#fff}'
     + '.gp-io{background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:14px;padding:16px;margin-bottom:18px;font-size:19px}'
     + '.gp-io select{font:inherit;font-size:19px;padding:10px;border-radius:10px;border:1.5px solid #CBD5E1;margin-top:8px;min-width:260px;max-width:100%}'
     + '.gp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}'
@@ -179,7 +180,8 @@
       if (nuovi.length) h += '<div class="gp-nota">' + e(nuovi.join(', ')) + (nuovi.length === 1 ? ' non è' : ' non sono') + ' ancora in Squadra: lo aggiungo io.</div>';
     }
     if (c.tipo === 'spesa') h += '<div class="gp-tit">' + (c.importo == null ? 'Quanto?' : e(euro(c.importo))) + ' · ' + e(c.descrizione || 'spesa') + '</div>'
-      + '<div class="gp-r"><span>Cantiere</span>' + e(c.dove || 'da scegliere') + '</div><div class="gp-r"><span>Giorno</span>' + e(maiu(giorno(c.data))) + '</div>';
+      + '<div class="gp-r"><span>Cantiere</span>' + (c.dove ? e(c.dove) : '<b style="color:#DC2626">da scegliere: premi «Cambia»</b>') + '</div><div class="gp-r"><span>Giorno</span>' + e(maiu(giorno(c.data))) + '</div>'
+      + (c.foto ? '<div class="gp-nota">La foto resta fra i documenti del cantiere.</div>' : '');
     if (c.tipo === 'promemoria') h += '<div class="gp-tit">' + e(c.testo) + '</div><div class="gp-r"><span>Quando</span>' + e(maiu(giorno(c.data))) + (c.ora ? ' alle ' + e(c.ora) : '') + '</div>';
     if (c.tipo === 'nota') h += '<div class="gp-tit">' + e(c.dove || 'cantiere da scegliere') + '</div><div class="gp-r">' + e(c.testo) + '</div>';
     if (c.tipo === 'altro') {
@@ -195,8 +197,8 @@
 
   function disegna() {
     var da = P.cose.filter(function (c) { return c.tipo !== 'altro'; }).length;
-    var h = '<div class="gp-in"><div class="gp-top"><h2>' + (P.cose.length ? 'Ecco cosa ho capito' : 'Fatto') + '</h2><button type="button" class="gp-x" data-gp="chiudi">Chiudi</button></div>'
-      + '<p class="gp-detto"><b>Hai detto:</b> ' + e(P.detto) + '</p>';
+    var h = '<div class="gp-in"><div class="gp-top"><h2>' + (P.leggendo ? 'Sto leggendo la bolla…' : P.cose.length ? 'Ecco cosa ho capito' : 'Fatto') + '</h2><button type="button" class="gp-x" data-gp="chiudi">Chiudi</button></div>'
+      + (P.anteprima ? '<img class="gp-foto" src="' + P.anteprima + '" alt="La foto">' : '<p class="gp-detto"><b>Hai detto:</b> ' + e(P.detto) + '</p>');
     if (P.msg) h += '<div class="gp-msg gp-msg--' + P.msg.k + '">' + e(P.msg.t) + '</div>';
     if (serveIo()) {
       h += '<div class="gp-io">Hai detto «io»: chi sei tu nella squadra?<br><select data-gp-io><option value="">Scegli…</option>'
@@ -206,7 +208,7 @@
     h += '<div class="gp-grid">' + P.cose.map(scheda).join('') + '</div>'
       + '<datalist id="gp-cantieri">' + lavori().map(function (l) { return '<option value="' + e(nomeLav(l)) + '">'; }).join('') + '</datalist></div>';
     ov.innerHTML = h;
-    pie.hidden = !da;
+    pie.hidden = !da || !!P.leggendo;
     pie.innerHTML = '<button type="button" class="gp-b gp-b--blu" data-gp="salva">Salva tutto (' + da + ')</button><button type="button" class="gp-b" data-gp="chiudi">Annulla</button>';
     posiziona();
   }
@@ -231,7 +233,7 @@
     }
     ov.hidden = false; disegna(); ov.scrollTop = 0;
   }
-  function chiudi() { if (ov) { ov.hidden = true; pie.hidden = true; ov.innerHTML = ''; } P = null; }
+  function chiudi() { if (ov) { ov.hidden = true; pie.hidden = true; ov.innerHTML = ''; } try { if (P && P.anteprima) URL.revokeObjectURL(P.anteprima); } catch (x) {} P = null; }
 
   function leggi(i) {
     var c = P.cose[i], box = ov.querySelector('.gp-c[data-i="' + i + '"]'); if (!box) return;
@@ -305,6 +307,7 @@
         if (c.tipo === 'spesa') {
           var lav = await giorTrovaLavoro(c.dove, c.data);
           r = await sb.from('gest_spese').insert({ user_id: sbUid, lavoro_id: lav.id, descrizione: c.descrizione, importo: c.importo, data: c.data }).select('id');
+          if (r && !r.error && r.data && r.data.length && c.foto) await salvaFoto(c, lav.id);
         }
         if (c.tipo === 'promemoria') {
           r = await sb.from('promemoria').insert({ user_id: sbUid, testo: c.testo, data: c.data, ora: c.ora || null, avvisa_giorni: 0, stato: 'aperto', inviato: false }).select('id');
@@ -342,6 +345,62 @@
     /* Noleggio: ridisegna la sezione aperta se ha una sua funzione */
     try { if (typeof rinfresca !== 'function' && typeof renderAll === 'function') renderAll(); } catch (x) {}
   }
+
+  /* ---------------- la foto della bolla ----------------
+     3 nov 2026: fotografi la bolla (o la fattura, o lo scontrino) e diventa
+     una spesa sul cantiere. Legge con la stessa lettura dei Fornitori
+     (ai-cantiere, «dati_fattura_fornitore», 1 credito AI). La foto resta
+     fra i documenti del lavoro (gest_foto tipo «documento»). */
+  var fotoNascosto = null;
+  async function salvaFoto(c, lavId) {
+    try {
+      var nome = 'bolla-' + (c.fornitore || 'fornitore').replace(/[^a-zA-Z0-9]+/g, '-').slice(0, 30) + '-' + (c.data || oggi()) + '.jpg';
+      var path = sbUid + '/' + lavId + '/doc/' + Date.now() + '_' + nome;
+      var up = await sb.storage.from('gestionale-foto').upload(path, c.foto, { contentType: c.fotoTipo || 'image/jpeg' });
+      if (up.error) return;
+      var ins = await sb.from('gest_foto').insert({ user_id: sbUid, lavoro_id: lavId, tipo: 'documento', operatore: 'Capo', storage_path: path, nome_file: nome });
+      if (ins.error && typeof _fileOrfano === 'function') await _fileOrfano('gestionale-foto', path);
+    } catch (x) {}
+  }
+  function b64(blob) {
+    return new Promise(function (ok, ko) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1]); }; r.onerror = ko; r.readAsDataURL(blob); });
+  }
+  window.gestParlaFoto = async function (file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type || '') && !/\.(jpe?g|png|webp|heic)$/i.test(file.name || '')) { if (typeof toast === 'function') toast('Serve una foto.'); return; }
+    if (!window.AI || typeof window.AI.cantiere !== 'function') { if (typeof toast === 'function') toast("L'assistente non si è caricato. Ricarica la pagina."); return; }
+    try { if (typeof giorAssicura === 'function') await giorAssicura(); } catch (x) {}
+    var url = ''; try { url = URL.createObjectURL(file); } catch (x) {}
+    P = { detto: '', cose: [], vecchio: null, msg: null, leggendo: true, anteprima: url };
+    apriFinestra();
+    var blob = file, tipo = 'image/jpeg';
+    try {
+      var pr = typeof preparaFileUpload === 'function' ? await preparaFileUpload(file, { lato: 1600, qualita: 0.82 }) : { file: file };
+      if (pr.errore) throw new Error(pr.errore);
+      blob = pr.file;
+      if (!pr.compressa && /heic|heif/i.test(file.type || file.name || '')) throw new Error('Questa foto è in un formato che non riesco a leggere (HEIC). Scattala dal pulsante «Foto».');
+      if (!pr.compressa && ['image/jpeg', 'image/png', 'image/webp'].indexOf(file.type) >= 0) tipo = file.type;
+      if (blob.size > 5 * 1024 * 1024) throw new Error('La foto è troppo grande.');
+      var d = await window.AI.cantiere('dati_fattura_fornitore', "Leggi questa bolla (o fattura, o scontrino) di un fornitore di materiale.", { tipo: tipo, dati: await b64(blob) }, true);
+      if (!P) return;
+      P.leggendo = false;
+      if (!d) { chiudi(); return; }   /* crediti finiti: la finestra l'ha gia' aperta l'AI */
+      if (d.leggibile === false) { P.msg = { t: 'Non riesco a leggerla: la foto è sfocata o non è una bolla. Rifalla dritta, con più luce.', k: 'err' }; disegna(); return; }
+      var tot = typeof d.totale === 'number' ? d.totale : numero(d.totale);
+      var cant = lavori().filter(function (l) { return l.stato !== 'fatto'; });
+      P.cose = [{
+        tipo: 'spesa', data: DATA.test(d.data || '') && d.data <= oggi() ? d.data : oggi(),
+        descrizione: maiu(((d.cosa || 'Materiale') + (d.fornitore ? ' — ' + d.fornitore : '')).slice(0, 300)),
+        importo: isFinite(tot) && tot > 0 ? Math.round(tot * 100) / 100 : null,
+        dove: cant.length === 1 ? nomeLav(cant[0]) : '', fornitore: d.fornitore || '', foto: blob, fotoTipo: tipo
+      }];
+      if (P.cose[0].importo == null) P.msg = { t: 'Sulla bolla non c\'è il prezzo: premi «Cambia» e scrivi quanto hai speso.', k: 'err' };
+      disegna();
+    } catch (x) {
+      if (!P) return;
+      P.leggendo = false; P.msg = { t: (x && x.message) || 'Non ci sono riuscito. Riprova.', k: 'err' }; disegna();
+    }
+  };
 
   /* ---------------- la porta ----------------
      torna 'aperta' se ha aperto la finestra, 'vecchio' se tocca al Parla di prima */

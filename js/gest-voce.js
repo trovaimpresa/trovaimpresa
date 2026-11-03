@@ -54,7 +54,10 @@
     + '#gv-btn{position:fixed;right:22px;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;'
     +   'background:var(--blu,#0066FF);color:#fff;border:0;border-radius:40px;padding:16px 24px;'
     +   'font-size:21px;font-weight:700;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer}'
-    + '#gv-btn svg{width:26px;height:26px;flex:none}'
+    + '#gv-btn svg,#gv-foto svg{width:26px;height:26px;flex:none}'
+    + '#gv-foto{position:fixed;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;background:#fff;color:var(--blu,#0066FF);'
+    +   'border:2px solid var(--blu,#0066FF);border-radius:40px;padding:14px 22px;font-size:21px;font-weight:700;'
+    +   'font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer}'
     + '#gv-btn.gv-on{background:var(--err,#DC2626)}'
     + '#gv-btn.gv-on svg{animation:gvPulsa 1s ease-in-out infinite}'
     + '#gv-btn:disabled{opacity:.75;cursor:wait}'
@@ -76,7 +79,7 @@
     + '.gv-gira{display:inline-block;width:20px;height:20px;border:3px solid var(--bordo,#E2E8F0);border-top-color:var(--blu,#0066FF);'
     +   'border-radius:50%;animation:gvGira .8s linear infinite;vertical-align:-4px;margin-right:8px}'
     + '@keyframes gvGira{to{transform:rotate(360deg)}}'
-    + '@media(max-width:600px){#gv-btn{padding:14px 20px;font-size:19px}#gv-bolla{right:12px;width:calc(100vw - 24px)}}';
+    + '@media(max-width:600px){#gv-foto{padding:12px 18px;font-size:19px}#gv-btn{padding:14px 20px;font-size:19px}#gv-bolla{right:12px;width:calc(100vw - 24px)}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   var btn = document.createElement('button');
@@ -87,6 +90,22 @@
   bolla.id = 'gv-bolla'; bolla.hidden = true;
   bolla.setAttribute('role', 'dialog'); bolla.setAttribute('aria-live', 'polite');
   document.body.appendChild(bolla); document.body.appendChild(btn);
+
+  /* 3 nov 2026 — accanto a «Parla», «Foto»: fotografi la bolla e diventa una
+     spesa sul cantiere (gest-parla.js, window.gestParlaFoto). Solo nel
+     gestionale principale: li' ci sono i cantieri. */
+  var fbtn = null, finp = null;
+  if (PAG === 'app') {
+    fbtn = document.createElement('button');
+    fbtn.type = 'button'; fbtn.id = 'gv-foto';
+    fbtn.setAttribute('aria-label', 'Fotografa una bolla');
+    fbtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Foto</span>';
+    finp = document.createElement('input');
+    finp.type = 'file'; finp.accept = 'image/*'; finp.setAttribute('capture', 'environment'); finp.hidden = true;
+    document.body.appendChild(fbtn); document.body.appendChild(finp);
+    fbtn.addEventListener('click', function () { if (typeof window.gestParlaFoto === 'function') finp.click(); });
+    finp.addEventListener('change', function () { var f = finp.files && finp.files[0]; finp.value = ''; if (f) window.gestParlaFoto(f); });
+  }
 
   /* ---------------- utilita' ---------------- */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -182,14 +201,16 @@
       || !!document.querySelector('#gp-ov:not([hidden])')
       || !!document.querySelector('#chat.active')
       || (el('rie-fab-menu') && el('rie-fab-menu').style.display === 'block');
-    if (nascosto && !ascolta && !lavora) { btn.style.display = 'none'; chiudiBolla(); return; }
+    if (nascosto && !ascolta && !lavora) { btn.style.display = 'none'; if (fbtn) fbtn.style.display = 'none'; chiudiBolla(); return; }
     btn.style.display = 'flex';
+    if (fbtn) fbtn.style.display = (ascolta || lavora) ? 'none' : 'flex';
     var basso = 22;
     var barra = el('barra-basso');
     if (barra && vis(barra)) basso = Math.max(basso, barra.offsetHeight + 12);
     var fabBox = el('rie-fab-box'), fab = el('rie-fab');
     if (fab && fabBox && fabBox.style.display !== 'none') basso = Math.max(basso, 22 + fab.offsetHeight + 12);
     btn.style.bottom = basso + 'px';
+    if (fbtn) { fbtn.style.bottom = basso + 'px'; fbtn.style.right = (22 + btn.offsetWidth + 12) + 'px'; }
     bolla.style.bottom = (basso + btn.offsetHeight + 12) + 'px';
   }
 
