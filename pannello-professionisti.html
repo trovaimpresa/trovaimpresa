@@ -666,7 +666,7 @@
   }
   .modal-ai-header h2 { font-family:'Playfair Display',serif; font-size:1.25rem; margin-bottom:3px; }
   .modal-ai-header p { font-size:0.82rem; opacity:0.75; }
-  .modal-ai-close { background:none; border:none; color:#1a1a1a; font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
+  .modal-ai-close { background:none; border:none; color:var(--mid); font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
   .modal-ai-close:hover { opacity:1; }
   .modal-ai-body { padding:24px 28px; }
   .ai-form-group { margin-bottom:14px; }
@@ -799,7 +799,7 @@
   }
 
   /* === Copiato da pannello-artigiano: supporto card Risoluzione/Lista attesa/Personalizza === */
-  .btn-fullscreen { background:transparent; border:none; color:#1a1a1a; font-size:1.2rem; cursor:pointer; padding:4px 8px; }
+  .btn-fullscreen { background:transparent; border:none; color:var(--mid); font-size:1.2rem; cursor:pointer; padding:4px 8px; }
   .modal-ai-overlay .modal-ai.fullscreen {
     max-width: none !important;
     width: 100vw;
@@ -1515,9 +1515,9 @@
   }
   .modal-ai-header h2 { font-family:'Playfair Display',serif; font-size:1.25rem; margin-bottom:3px; }
   .modal-ai-header p { font-size:0.82rem; opacity:0.75; }
-  .modal-ai-close { background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
+  .modal-ai-close { background:none; border:none; color:var(--mid); font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
   .modal-ai-close:hover { opacity:1; }
-  .btn-fullscreen { background:transparent; border:none; color:white; font-size:1.2rem; cursor:pointer; padding:4px 8px; }
+  .btn-fullscreen { background:transparent; border:none; color:var(--mid); font-size:1.2rem; cursor:pointer; padding:4px 8px; }
   .modal-ai-overlay .modal-ai.fullscreen {
     max-width: none !important;
     width: 100vw;
@@ -4951,6 +4951,8 @@ function toggleSidebar() {
 
 <!-- MESSAGGI -->
 <script src="/js/pannelli-messaggi.js?v=1"></script>
+<!-- 3 nov 2026: finestra «Ci trovi su TrovaImpresa» per chi ha un sito (js/bollino-sito.js). Non è un obbligo: «Più tardi» resta sempre. -->
+<script src="/js/bollino-sito.js?v=1"></script>
 
 <!-- =====================================================================
      INTERRUTTORE DELLA SCHEDA PUBBLICA — 15 settembre 2026
