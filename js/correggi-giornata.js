@@ -26,17 +26,27 @@
 (function () {
   var URL_AI = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-correggi';
 
-  /* le caselle da correggere, e quale Salva le salva */
-  var CAMPI = ['rap-materiali', 'rap-note', 'lv-note', 'rv-testo'];
+  /* le caselle da correggere, e quale Salva le salva.
+     App operaio: i pulsanti hanno un id. Gestionale e Noleggio: i pulsanti
+     hanno un data-action (3 nov 2026: lavoro, nota del giorno, promemoria).
+     ⛔ Fuori apposta: computo e prezzario (il testo del prezzario non si
+     tocca, regola del 20 ago) e i documenti con valore legale. */
+  var CAMPI = ['rap-materiali', 'rap-note', 'lv-note', 'rv-testo',
+               'j-desc', 'j-note', 'j-svolto', 'day-note', 'p-note'];
   var SALVA = {
     'btn-rap-salva': ['rap-materiali', 'rap-note'],
     'btn-salva': ['lv-note'],
     'btn-fatto': ['lv-note'],
     'rv-ok': ['rv-testo']
   };
+  var SALVA_AZIONE = {
+    'save-job': ['j-desc', 'j-note', 'j-svolto'],
+    'save-note': ['day-note'],
+    'save-prom': ['p-note']
+  };
 
   var css = ''
-    + '.cg-riga{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;line-height:1.4;'
+    + '.cg-riga{display:flex!important;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;line-height:1.4;background:none!important;border:0!important;padding:0!important;box-shadow:none!important;min-height:0!important;'
     +   'color:var(--muted,#64748B);margin-top:6px}'
     + '.cg-riga b{color:var(--green,#16A34A);font-weight:600}'
     + '.cg-torna{background:none;border:0;padding:4px 0;font:inherit;font-size:14px;color:var(--blu,#0066FF);'
@@ -67,11 +77,19 @@
     r.innerHTML = html;
   }
 
+  /* il Noleggio tiene `sb` chiuso dentro la sua pagina: li' il gettone si
+     legge da dove lo salva supabase-js */
   async function token() {
     try {
-      if (typeof sb === 'undefined' || !sb) return null;
-      var r = await sb.auth.getSession();
-      return r && r.data && r.data.session && r.data.session.access_token;
+      if (typeof sb !== 'undefined' && sb && sb.auth) {
+        var r = await sb.auth.getSession();
+        var t = r && r.data && r.data.session && r.data.session.access_token;
+        if (t) return t;
+      }
+    } catch (e) {}
+    try {
+      var j = JSON.parse(localStorage.getItem('sb-nacvrsgkyfavykxjxszu-auth-token') || 'null');
+      return (j && (j.access_token || (j.currentSession && j.currentSession.access_token))) || null;
     } catch (e) { return null; }
   }
 
@@ -154,9 +172,11 @@
       return;
     }
     if (lascia) return;
-    var btn = e.target.closest && e.target.closest('button[id]');
-    if (!btn || !SALVA[btn.id]) return;
-    var tas = SALVA[btn.id].map(casella).filter(function (ta) { return ta && (daFare(ta) || s(ta.id).corso); });
+    var btn = e.target.closest && e.target.closest('button[id],button[data-action]');
+    if (!btn) return;
+    var elenco = SALVA[btn.id] || SALVA_AZIONE[btn.getAttribute('data-action')];
+    if (!elenco) return;
+    var tas = elenco.map(casella).filter(function (ta) { return ta && (daFare(ta) || s(ta.id).corso); });
     if (!tas.length) return;                     /* niente da correggere: salva come prima */
     e.preventDefault(); e.stopImmediatePropagation();
     Promise.all(tas.map(correggi)).then(function (cambiati) {
