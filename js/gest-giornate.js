@@ -310,6 +310,63 @@ async function giorCompila(){
 /* ---------------------------------------------------------------------
    IL SALVATAGGIO
    --------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------
+   giorScrivi(schede) — scrive le giornate: [{data,nomi[],dove,cosa}].
+   La usano «Salva» qui sotto e la finestra di «Parla» (gest-parla.js):
+   un posto solo per le 8 ore divise, il cantiere trovato o creato, il
+   rapportino e le ore. Lancia un Error col messaggio da far vedere.
+   --------------------------------------------------------------------- */
+async function giorAssicura(){
+  const [ro,rl]=await Promise.all([
+    sb.from("gest_operatori").select("id,nome,mestiere_id").eq("user_id",sbUid).is("eliminato_il",null).order("nome"),
+    sb.from("gest_lavori").select("id,descrizione,dove,stato,mestiere_id,created_at").eq("user_id",sbUid).is("eliminato_il",null).order("created_at",{ascending:false}).limit(200)
+  ]);
+  if(ro.error||rl.error) throw new Error((ro.error||rl.error).message);
+  giorOps=ro.data||[]; giorLav=rl.data||[];
+}
+async function giorTrovaLavoro(dove,data){
+  const mest=_gMest();
+  let lav=giorLav.find(l=>_gNorm(_gNomeLav(l))===_gNorm(dove));
+  if(lav) return lav;
+  const {data:d,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:mest,descrizione:dove.trim(),dove:dove.trim(),stato:"in_corso",data_prevista:data||_gOggi()}).select("id,descrizione,dove,stato,mestiere_id");
+  if(error||!d||!d.length) throw new Error("Non riesco a creare il cantiere «"+dove+"»: "+((error&&error.message)||"nessuna riga")+".");
+  giorLav.unshift(d[0]); return d[0];
+}
+async function giorScrivi(schede){
+  const mest=_gMest();
+  let fatte=0;
+  /* 1. i nomi nuovi entrano in Squadra */
+  for(const n of [...new Set(schede.flatMap(c=>c.nomi))]){
+    if(giorOps.some(o=>o.nome===n)) continue;
+    const {data,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id:mest,nome:n}).select("id,nome,mestiere_id");
+    if(error||!data||!data.length){ throw new Error("Non riesco ad aggiungere "+n+" alla squadra: "+((error&&error.message)||"nessuna riga")+"."); }
+    giorOps.push(data[0]);
+  }
+  if(giorIoNome){ const o=giorOps.find(x=>x.nome===giorIoNome); if(o) _gSetIo(o.id); giorIoNome=""; }
+  /* 2. quante schede ha ogni persona per ogni giorno: le 8 ore si dividono */
+  const quante={};
+  schede.forEach(c=>c.nomi.forEach(n=>{ const k=n+"|"+c.data; quante[k]=(quante[k]||0)+1; }));
+  for(const c of schede){
+    /* 3. il cantiere: un lavoro che c'e' gia', o uno nuovo */
+    const lav=await giorTrovaLavoro(c.dove,c.data);
+    const mid=lav.mestiere_id||mest;
+    /* 4. il rapportino */
+    const rr=await sb.from("gest_rapportini").insert({user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,data:c.data,note:c.cosa.trim()||null}).select("id");
+    if(rr.error||!rr.data||!rr.data.length){ throw new Error("Non salvato: "+((rr.error&&rr.error.message)||"nessuna riga")+"."); }
+    const rid=rr.data[0].id;
+    /* 5. le ore di chi c'era */
+    const righe=c.nomi.map(n=>{
+      const o=giorOps.find(x=>x.nome===n);
+      const ore=Math.round((GIOR_ORE_GIORNO/(quante[n+"|"+c.data]||1))*2)/2;
+      return {user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,operatore_id:o.id,data:c.data,ore,rapportino_id:rid};
+    });
+    const ro=await sb.from("gest_ore").insert(righe).select("id");
+    if(ro.error||!ro.data||ro.data.length!==righe.length){ { const x=new Error("La giornata di «"+c.dove+"» è salvata, ma le ore non tutte: "+((ro.error&&ro.error.message)||"")+". Controlla in «Il mese»."); x.parziale=true; throw x; } }
+    fatte++;
+  }
+  return fatte;
+}
+
 async function giorSalva(){
   giorLeggiProp();
   const io=_gIo();
@@ -322,42 +379,9 @@ async function giorSalva(){
     if(!c.nomi.length){ giorDisegna({t:"In una scheda non c'è nessuno: tocca almeno un nome.",k:"err"}); return; }
     if(!c.dove.trim()){ giorDisegna({t:"In una scheda manca il cantiere.",k:"err"}); return; }
   }
-  const mest=_gMest();
-  /* 1. i nomi nuovi entrano in Squadra */
-  for(const n of [...new Set(schede.flatMap(c=>c.nomi))]){
-    if(giorOps.some(o=>o.nome===n)) continue;
-    const {data,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id:mest,nome:n}).select("id,nome,mestiere_id");
-    if(error||!data||!data.length){ giorDisegna({t:"Non riesco ad aggiungere "+n+" alla squadra: "+((error&&error.message)||"nessuna riga")+".",k:"err"}); return; }
-    giorOps.push(data[0]);
-  }
-  if(giorIoNome){ const o=giorOps.find(x=>x.nome===giorIoNome); if(o) _gSetIo(o.id); giorIoNome=""; }
-  /* 2. quante schede ha ogni persona per ogni giorno: le 8 ore si dividono */
-  const quante={};
-  schede.forEach(c=>c.nomi.forEach(n=>{ const k=n+"|"+c.data; quante[k]=(quante[k]||0)+1; }));
   let fatte=0;
-  for(const c of schede){
-    /* 3. il cantiere: un lavoro che c'e' gia', o uno nuovo */
-    let lav=giorLav.find(l=>_gNorm(_gNomeLav(l))===_gNorm(c.dove));
-    if(!lav){
-      const {data,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:mest,descrizione:c.dove.trim(),dove:c.dove.trim(),stato:"in_corso",data_prevista:c.data}).select("id,descrizione,dove,stato,mestiere_id");
-      if(error||!data||!data.length){ giorDisegna({t:"Non riesco a creare il cantiere «"+c.dove+"»: "+((error&&error.message)||"nessuna riga")+".",k:"err"}); return; }
-      lav=data[0]; giorLav.unshift(lav);
-    }
-    const mid=lav.mestiere_id||mest;
-    /* 4. il rapportino */
-    const rr=await sb.from("gest_rapportini").insert({user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,data:c.data,note:c.cosa.trim()||null}).select("id");
-    if(rr.error||!rr.data||!rr.data.length){ giorDisegna({t:"Non salvato: "+((rr.error&&rr.error.message)||"nessuna riga")+".",k:"err"}); return; }
-    const rid=rr.data[0].id;
-    /* 5. le ore di chi c'era */
-    const righe=c.nomi.map(n=>{
-      const o=giorOps.find(x=>x.nome===n);
-      const ore=Math.round((GIOR_ORE_GIORNO/(quante[n+"|"+c.data]||1))*2)/2;
-      return {user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,operatore_id:o.id,data:c.data,ore,rapportino_id:rid};
-    });
-    const ro=await sb.from("gest_ore").insert(righe).select("id");
-    if(ro.error||!ro.data||ro.data.length!==righe.length){ giorDisegna({t:"La giornata di «"+c.dove+"» è salvata, ma le ore non tutte: "+((ro.error&&ro.error.message)||"")+". Controlla in «Il mese».",k:"err"}); await renderGiornate(); return; }
-    fatte++;
-  }
+  try{ fatte=await giorScrivi(schede); }
+  catch(e){ giorDisegna({t:e.message,k:"err"}); if(e.parziale) await renderGiornate(); return; }
   giorProp=null; giorNuovi=[]; giorVoce="";
   giorMese=schede[0].data.slice(0,7);
   await renderGiornate();

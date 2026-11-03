@@ -179,6 +179,7 @@
       || (PAG === 'op' && (vis(el('rv-ov')) || vis(el('view-lavoro')) || vis(el('gate'))))
       || !!document.querySelector('#overlay.open')
       || !!document.querySelector('.ai-ov')
+      || !!document.querySelector('#gp-ov:not([hidden])')
       || !!document.querySelector('#chat.active')
       || (el('rie-fab-menu') && el('rie-fab-menu').style.display === 'block');
     if (nascosto && !ascolta && !lavora) { btn.style.display = 'none'; chiudiBolla(); return; }
@@ -350,6 +351,20 @@
     if (dove) { vaiA(dove); return; }
     if (PAG === 'op') { raccontaGiornata(t); return; }
 
+    /* 3 nov 2026 — PRIMA l'aiutante gratis (gest-parla.js): giornate, spese,
+       promemoria e note in una finestra. Se non c'e' niente di questo, o non
+       risponde, si fa come prima (comando_voce, 1 credito). */
+    if (PAG === 'app' && typeof window.gestParla === 'function') {
+      lavora = true; etichetta(); disegnaPenso();
+      var esito = 'vecchio';
+      try { esito = await window.gestParla(t, function (x) { detto = x; return vecchio(x); }); } catch (e) {}
+      lavora = false; etichetta();
+      if (esito === 'aperta') { chiudiBolla(); return; }
+    }
+    return vecchio(t);
+  }
+
+  async function vecchio(t) {
     if (PAG === 'app' && (!window.AI || typeof window.AI.cantiere !== 'function')) {
       disegnaMsg('L\'assistente non si è caricato. Ricarica la pagina e riprova.', true); return;
     }
