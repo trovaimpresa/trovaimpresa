@@ -290,6 +290,7 @@
     "gest-sal.sql":                     "gest_sal gest_sal_righe gest_sal_righe_calc gest_sal_totali",
     "gest-scelte.sql":                  "gest_scelte gest_scelte_link gest_scelte_controlla_lavoro()",
     "gest-preventivi-link.sql":         "gest_preventivi_link gest_preventivi_link_controlla()",
+    "gest-mie-giornate.sql":            "gest_mie_giornate()",
     "gest-capitolato-versioni.sql":     "gest_capitolato_versioni gest_capitolato_versioni_controlla() gest_capitolato_versioni_pota()",
     "gest-scadenze-pratiche.sql":       "gest_scadenze.lavoro_id gest_scadenze.avvisi gest_scadenze.avvisa",
     "gest-scadenze-ripeti.sql":         "gest_scadenze.ripeti_mesi",

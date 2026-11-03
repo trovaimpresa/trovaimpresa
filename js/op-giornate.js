@@ -6,8 +6,10 @@
    (gest_ore + gest_rapportini). Per segnare la giornata usa il pulsante
    che c'era gia', «Segna la giornata» (rvApri): niente strada nuova.
 
-   ⛔ Vede SOLO le sue ore: lo dice la regola gest_ore_team_read del
-      database, non questo file.
+   ⛔ Vede SOLO le sue ore: le legge da gest_mie_giornate() (sql/
+      gest-mie-giornate.sql), che restituisce solo le righe dell'operaio
+      collegato. 3 nov 2026, deciso con Alessio: basta il permesso «Lavori»;
+      «Rapportini» serve solo per il pulsante «Segna la giornata».
    ⛔ La nota del capo la vede solo se il rapportino l'ha scritto lui
       (regola gest_rapportini_team_read): se no si vede solo il cantiere.
    ===================================================================== */
@@ -54,42 +56,36 @@
   async function disegna(){
     var p = pannello(); if (!p) return;
     var pronto = (typeof sb !== "undefined") && sb && typeof MIO !== "undefined" && MIO.impresaId && MIO.operatoreId;
-    var puoi = pronto && typeof puo === "function" && puo("rapportini");
+    var puoi = pronto && typeof puo === "function" && (puo("lavori") || puo("rapportini"));
+    var scrive = puoi && puo("rapportini");
     p.classList.toggle("hidden", !puoi);
     if (!puoi || gira) return;
     gira = true;
     try {
       if (!mese) mese = ym(new Date());
       var a = mese + "-01", b = sposta(mese, 1) + "-01";
-      var r = await sb.from("gest_ore").select("data,ore,lavoro_id,rapportino_id")
-        .eq("user_id", MIO.impresaId).eq("operatore_id", MIO.operatoreId)
-        .is("eliminato_il", null).gte("data", a).lt("data", b).order("data", { ascending: false });
+      var r = await sb.rpc("gest_mie_giornate", { p_impresa: MIO.impresaId, p_da: a, p_a: b });
       if (r.error) { p.innerHTML = '<div class="label">Le mie giornate</div><div class="mg-vuoto">Non riesco a leggerle adesso. Riprova fra un attimo.</div>'; return; }
       var ore = r.data || [];
       var ids = ore.map(function (o) { return o.rapportino_id; }).filter(Boolean);
-      var note = {}, buttati = {};
-      if (ids.length) {
-        var rr = await sb.from("gest_rapportini").select("id,note,eliminato_il").in("id", ids);
-        (rr.data || []).forEach(function (x) { if (x.eliminato_il) buttati[x.id] = 1; else note[x.id] = x.note || ""; });
+      var note = {};
+      if (ids.length && scrive) {
+        var rr = await sb.from("gest_rapportini").select("id,note").in("id", ids);
+        (rr.data || []).forEach(function (x) { note[x.id] = x.note || ""; });
       }
-      ore = ore.filter(function (o) { return !(o.rapportino_id && buttati[o.rapportino_id]); });
       var giorni = {};
       ore.forEach(function (o) { giorni[o.data] = 1; });
       var n = Object.keys(giorni).length;
-      var nomeLav = function (id) {
-        var l = (typeof LAVORI !== "undefined" ? LAVORI : []).find(function (x) { return String(x.id) === String(id); });
-        return l ? (l.descrizione || l.dove || "Cantiere") : "Cantiere";
-      };
       var righe = ore.map(function (o) {
         var t = note[o.rapportino_id] || "";
         var mezza = (+o.ore || 0) < 8 ? " (" + String(+o.ore).replace(".", ",") + " ore)" : "";
-        return '<div class="mg-r"><small>' + e(giorno(o.data)) + '</small><div>' + e(nomeLav(o.lavoro_id)) + (t ? " — " + e(t) : "") + e(mezza) + '</div></div>';
+        return '<div class="mg-r"><small>' + e(giorno(o.data)) + '</small><div>' + e(o.cantiere || "Cantiere") + (t ? " — " + e(t) : "") + e(mezza) + '</div></div>';
       }).join("");
       p.innerHTML = '<div class="label">Le mie giornate</div>'
         + '<div class="mg-mese"><button type="button" data-mg="prev" aria-label="Mese prima">‹</button><b>' + e(nomeMese(mese)) + '</b><button type="button" data-mg="next" aria-label="Mese dopo">›</button></div>'
         + '<div class="mg-tot"><span>Hai lavorato</span><b>' + n + (n === 1 ? " giorno" : " giorni") + '</b><span>' + (mese === ym(new Date()) ? "questo mese" : "in " + e(nomeMese(mese).toLowerCase())) + '</span></div>'
         + (righe || '<div class="mg-vuoto">Nessuna giornata segnata in questo mese.</div>')
-        + '<button type="button" class="btn-fill" data-mg="segna" style="margin-top:12px">Segna la giornata di oggi</button>';
+        + (scrive ? '<button type="button" class="btn-fill" data-mg="segna" style="margin-top:12px">Segna la giornata di oggi</button>' : '');
     } catch (err) {
       p.innerHTML = '<div class="label">Le mie giornate</div><div class="mg-vuoto">Non riesco a leggerle adesso.</div>';
     } finally { gira = false; }

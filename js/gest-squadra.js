@@ -488,7 +488,7 @@
      le due cose combaciano (vedi sql/gest-permessi-collaboratori.sql), e qui
      sotto c'e' scritto anche quali caselle da sole non aprono niente. */
   const PERMS=[
-    {key:"lavori",    label:"Lavori",     d:"Vede l'agenda e le scadenze, apre i lavori e li segna fatti.", sez:true},
+    {key:"lavori",    label:"Lavori",     d:"Vede l'agenda e le scadenze, apre i lavori e li segna fatti. Vede anche le sue giornate del mese.", sez:true},
     {key:"clienti",   label:"Clienti",    d:"Vede l'elenco dei clienti con i recapiti.", sez:true},
     {key:"fatture",   label:"Fatture",    d:"Vede le fatture e può allegare la fattura in PDF.", sez:true},
     {key:"pagamenti", label:"Pagamenti",  d:"Vede la sua carta aziendale e registra le spese.", sez:true},
