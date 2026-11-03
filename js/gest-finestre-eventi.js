@@ -32,7 +32,7 @@
     report:_rt("renderReport"), galleria:_rt("renderGalleria"), mappa:_rt("renderMappa"),
     richieste:_rt("renderRichieste"), dalsito:_rt("renderDalSito"), fornitori:_rt("renderFornitori"),
     assistenza:_rt("renderAssistenza"),
-    promemoria:_rt("renderPromemoria"), fisco:_rt("renderFisco")
+    promemoria:_rt("renderPromemoria"), giornate:_rt("renderGiornate"), fisco:_rt("renderFisco")
   };
   /* l'avviso in cima: si vede subito, senza aspettare che clicchi la scheda
      rotta. Scritto con il DOM nudo apposta — se manca un pezzo non e' il
