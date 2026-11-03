@@ -367,6 +367,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       +(chips?'<div style="margin-top:6px">'+chips+'</div>':'');
   }
 
+  function rcChip(el){ var on=el.classList.contains('on'); document.querySelectorAll('#rc-chips .rc-chip').forEach(function(b){b.classList.remove('on');}); if(!on) el.classList.add('on'); }
+  (function(){ var st=document.createElement('style'); st.textContent='.rc-chip{display:inline-block;border:1.5px solid #cfdcf3;background:#fff;color:#0a2a4d;border-radius:99px;padding:9px 15px;font-size:15px;font-weight:600;margin:0 6px 8px 0;cursor:pointer;font-family:inherit}.rc-chip.on{background:#0066ff;border-color:#0066ff;color:#fff}'; document.head.appendChild(st); })();
   let rcInvioInCorso = false;
   function formRichiestaClienteHTML() {
     rcInvioInCorso = false;
@@ -380,9 +382,17 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
          Adesso non c'e' piu' niente da leggere: si sceglie, e chi si propone
          finisce sulla registrazione gratuita invece che in un cassetto. */
       + '<div id="rc-modulo">'
-      + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px">'
-      + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
-      + '<textarea id="rc-cerca" placeholder="Vuoi aggiungere qualcosa? (facoltativo)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;min-height:56px;resize:vertical;font-family:inherit"></textarea>'
+      + '<div style="text-align:left">'
+      /* 3 nov 2026 — PRIMA IL LAVORO. La casella «Vuoi aggiungere qualcosa?
+         (facoltativo)» la lasciavano vuota quasi tutti, e a chi riceveva la
+         richiesta arrivava solo «Cerco un'impresa». Resta facoltativo (il
+         modulo corto del 10 ott non si allunga), ma ora basta un tocco. */
+      + '<div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-bottom:10px">Che lavoro devi fare?</div>'
+      + '<div id="rc-chips"><button type="button" class="rc-chip" onclick="rcChip(this)">Bagno</button><button type="button" class="rc-chip" onclick="rcChip(this)">Ristrutturazione</button><button type="button" class="rc-chip" onclick="rcChip(this)">Tetto</button><button type="button" class="rc-chip" onclick="rcChip(this)">Imbiancatura</button><button type="button" class="rc-chip" onclick="rcChip(this)">Impianti</button><button type="button" class="rc-chip" onclick="rcChip(this)">Pavimenti</button><button type="button" class="rc-chip" onclick="rcChip(this)">Altro</button></div>'
+      + '<textarea id="rc-cerca" placeholder="Due parole in più (es. rifare il bagno di 6 mq)" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin:4px 0 16px;min-height:60px;resize:vertical;font-family:inherit"></textarea>'
+      + '</div>'
+      + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:8px">'
+      + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:10px">'
       /* ===== 16 agosto 2026 — IL CONSENSO, SCRITTO E SPUNTATO =====
          Prima qui c'era una riga a 11 px in grigio chiaro, sotto il pulsante,
          che diceva solo "puo' essere inoltrata alle imprese della tua zona":
@@ -440,6 +450,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { alert('Controlla l\'email: non sembra valida.'); emailEl.focus(); return; }
     let cosaCerca = document.getElementById('rc-cerca').value.trim();
+    var _chip = document.querySelector('#rc-chips .rc-chip.on');
+    if (_chip) cosaCerca = _chip.textContent + (cosaCerca ? ' — ' + cosaCerca : '');
     if (!cosaCerca) { cosaCerca = ((typeof mestiereScelto !== 'undefined' && mestiereScelto !== 'tutti') ? mestiereScelto : '') || 'Cerco un\'impresa (richiesta dalla ricerca senza risultati)'; }
     if (cosaCerca.length > 300) { alert('La descrizione \u00e8 troppo lunga: massimo 300 caratteri.'); document.getElementById('rc-cerca').focus(); return; }
     if (/(https?:\/\/|www\.|\b\d{9,}\b|whatsapp|preventivi gratuiti|contattami|chiamami|scrivimi)/i.test(cosaCerca)) {

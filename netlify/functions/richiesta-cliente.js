@@ -141,48 +141,11 @@ exports.handler = async function (event) {
   const esc = s => (s == null ? '' : String(s))
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const dataFmt = new Date()
-    .toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    .toLocaleString('it-IT', { timeZone: 'Europe/Rome', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  // ---------- 1) EMAIL DI AVVISO A TROVAIMPRESA (invariata) ----------
-  const htmlAdmin = `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-        <div style="text-align:center;padding:16px 0 20px">
-          <a href="https://trovaimpresa.com" style="text-decoration:none">
-            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
-                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
-          </a>
-        </div>
-      <div style="background:linear-gradient(135deg,#0066ff,#0a2a4d);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
-        <h1 style="color:white;margin:0;font-size:22px">📞 Nuova richiesta cliente</h1>
-      </div>
-      <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
-        <p style="font-size:14px;line-height:1.6;margin-bottom:20px">
-          Un cliente ha lasciato una richiesta su <strong>TrovaImpresa</strong>.
-        </p>
-        <div style="background:#f5f5f5;border-radius:8px;padding:8px 20px;margin-bottom:24px">
-          <h3 style="font-size:13px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px">Dettagli</h3>
-          <table style="width:100%;border-collapse:collapse;font-size:14px">
-            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;width:140px">Nome</td><td style="padding:10px 0;font-weight:700">${esc(nome)}</td></tr>
-            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Telefono</td><td style="padding:10px 0">${esc(telefono)}</td></tr>
-            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Email</td><td style="padding:10px 0">${email ? `<a href="mailto:${esc(email)}">${esc(email)}</a>` : 'non lasciata'}</td></tr>
-            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Categoria</td><td style="padding:10px 0">${esc(categoria) || '—'}</td></tr>
-            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Zona</td><td style="padding:10px 0">${esc(zona) || '—'}</td></tr>
-            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;vertical-align:top">Ricerca</td><td style="padding:10px 0;white-space:pre-wrap">${esc(ricerca) || '—'}</td></tr>
-            <tr><td style="padding:10px 0;color:#666">Data</td><td style="padding:10px 0">${dataFmt}</td></tr>
-          </table>
-        </div>
-        <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
-          Email automatica dal sistema richieste clienti di TrovaImpresa.
-        </p>
-      </div>
-    </div>
-  `;
-  try {
-    const res = await inviaEmail('info@trovaimpresa.com', 'Nuova richiesta cliente da TrovaImpresa', htmlAdmin, email || null);
-    if (!res.ok) console.error('[richiesta-cliente] errore Resend admin:', await res.text());
-  } catch (err) {
-    console.error('[richiesta-cliente] errore email admin:', err.message);
-  }
+  /* 3 nov 2026 — l'email ad Alessio parte DOPO l'inoltro, cosi' puo' dire
+     a chi e' stata mandata la richiesta. */
+  const inviateA = [];
 
   // ---------- 2) INOLTRO AUTOMATICO AGLI ISCRITTI CHE COMBACIANO ----------
   // Match: categoria -> tipo, zona -> comune/provincia/regione (cascata).
@@ -310,6 +273,7 @@ exports.handler = async function (event) {
              suo indirizzo dentro l'email, cioe' proprio quello che stiamo
              togliendo. Si risponde a noi. */
           const r = await inviaEmail(im.email, 'Nuova richiesta cliente nella tua zona — TrovaImpresa', htmlImp, null);
+          if (r.ok) inviateA.push(im.nome_attivita || im.nome || ('impresa n. ' + im.id));
           if (!r.ok) {
             console.error('[richiesta-cliente] inoltro Resend fallito', im.id, await r.text());
             /* L'email non e' partita: si toglie la riga, se no quel codice
@@ -326,6 +290,91 @@ exports.handler = async function (event) {
   } catch (err) {
     console.error('[richiesta-cliente] inoltro (blocco) errore:', err.message);
   }
+
+  // ---------- 3) EMAIL DI AVVISO A TROVAIMPRESA ----------
+  /* 3 nov 2026 — tre cose nuove, dopo la richiesta di Jeton (Trieste):
+     1. se il cliente non ha scritto il lavoro, si dice chiaro, invece di
+        mostrare la frase di ripiego delle pagine «cerca»;
+     2. «Mandata a»: quali imprese l'hanno ricevuta, o nessuna;
+     3. «Lo stesso cliente»: cosa ha gia' fatto sul sito con lo stesso
+        telefono o la stessa email negli ultimi 30 giorni. */
+  const RIPIEGO = /\(richiesta dalla ricerca senza risultati\)/i;
+  const lavoroVuoto = !ricerca || RIPIEGO.test(ricerca);
+  const rosso = t => `<span style="color:#c0392b;font-weight:700">${t}</span>`;
+  const rigaLavoro = lavoroVuoto
+    ? rosso("Non l'ha scritto: chiamalo e chiedi")
+    : `<span style="white-space:pre-wrap">${esc(ricerca)}</span>`;
+  const rigaMandata = inviateA.length
+    ? inviateA.map(n => esc(n)).join('<br>')
+    : rosso('Nessuna impresa della zona: chiamalo tu');
+
+  const storico = [];
+  try {
+    const da = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+    const cifre = telefono.replace(/\D/g, '').slice(-6);
+    const ors = [];
+    if (cifre.length === 6) ors.push(`telefono.ilike.%${cifre}`);
+    if (email) ors.push(`email.eq.${email}`);
+    if (ors.length) {
+      const [rc, pv, av] = await Promise.all([
+        supabaseAdmin.from('richieste_clienti').select('id,zona,created_at')
+          .or(ors.join(',')).gte('created_at', da).neq('id', richiestaId || -1).limit(5),
+        supabaseAdmin.from('preventivi').select('id,impresa_id,created_at')
+          .or(ors.join(',')).gte('created_at', da).limit(5),
+        email ? supabaseAdmin.from('avvisi_clienti').select('id,confermato_il')
+          .eq('email', email).limit(1) : Promise.resolve({ data: [] })
+      ]);
+      (rc.data || []).forEach(x => storico.push('Altra richiesta (' + esc(x.zona || '—') + ')'));
+      if ((pv.data || []).length) storico.push((pv.data.length) + ' richiesta/e di preventivo a imprese');
+      (av.data || []).forEach(x => storico.push(x.confermato_il ? 'Iscritto agli avvisi' : 'Iscritto agli avvisi (da confermare)'));
+    }
+  } catch (err) {
+    console.error('[richiesta-cliente] storico cliente non letto:', err.message);
+  }
+  const rigaStorico = storico.length ? storico.join('<br>') : 'Niente prima di questa';
+
+  const htmlAdmin = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="text-align:center;padding:16px 0 20px">
+          <a href="https://trovaimpresa.com" style="text-decoration:none">
+            <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa"
+                 style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
+          </a>
+        </div>
+      <div style="background:linear-gradient(135deg,#0066ff,#0a2a4d);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+        <h1 style="color:white;margin:0;font-size:22px">📞 Nuova richiesta cliente</h1>
+      </div>
+      <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
+        <p style="font-size:14px;line-height:1.6;margin-bottom:20px">
+          Un cliente ha lasciato una richiesta su <strong>TrovaImpresa</strong>.
+        </p>
+        <div style="background:#f5f5f5;border-radius:8px;padding:8px 20px;margin-bottom:24px">
+          <h3 style="font-size:13px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px">Dettagli</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;width:140px">Nome</td><td style="padding:10px 0;font-weight:700">${esc(nome)}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Telefono</td><td style="padding:10px 0">${esc(telefono)}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Email</td><td style="padding:10px 0">${email ? `<a href="mailto:${esc(email)}">${esc(email)}</a>` : 'non lasciata'}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Categoria</td><td style="padding:10px 0">${esc(categoria) || '—'}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Zona</td><td style="padding:10px 0">${esc(zona) || '—'}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;vertical-align:top">Lavoro</td><td style="padding:10px 0">${rigaLavoro}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;vertical-align:top">Mandata a</td><td style="padding:10px 0">${rigaMandata}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;vertical-align:top">Lo stesso cliente</td><td style="padding:10px 0">${rigaStorico}</td></tr>
+            <tr><td style="padding:10px 0;color:#666">Data</td><td style="padding:10px 0">${dataFmt}</td></tr>
+          </table>
+        </div>
+        <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+          Email automatica dal sistema richieste clienti di TrovaImpresa.
+        </p>
+      </div>
+    </div>
+  `;
+  try {
+    const res = await inviaEmail('info@trovaimpresa.com', 'Nuova richiesta cliente da TrovaImpresa', htmlAdmin, email || null);
+    if (!res.ok) console.error('[richiesta-cliente] errore Resend admin:', await res.text());
+  } catch (err) {
+    console.error('[richiesta-cliente] errore email admin:', err.message);
+  }
+
 
   return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
 };
