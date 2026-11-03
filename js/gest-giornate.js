@@ -47,7 +47,9 @@ let giorIoNuovo = false;   /* il capo non e' ancora in Squadra: sta scrivendo il
 let giorIoNome = "";
 let giorTariffe = {per:{},media:0};  /* costo orario: stessa costiOrari() del margine dei lavori */
 let giorProposte = [];     /* le giornate mandate dagli operai, da approvare */
-let giorCdl = null;        /* {email,invio,ultimo} il consulente del lavoro */       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
+let giorCdl = null;
+let giorSera = null;        /* {si:true|false, ora, perche} la domanda della sera su QUESTO telefono */
+let giorDallaSera = /[?&]sera=1/.test(location.search);  /* arrivato toccando la notifica */        /* {email,invio,ultimo} il consulente del lavoro */       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
 
 function _gYmd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function _gOggi(){ return _gYmd(new Date()); }
@@ -118,6 +120,12 @@ const _gIc = {
 #giornate .gno{background:#fff;color:var(--err,#dc2626);border:1.5px solid var(--bordo-forte,#cbd5e1);border-radius:10px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer}
 #giornate .gspunta{display:flex;gap:10px;align-items:center;font-size:17px;cursor:pointer}
 #giornate .gspunta input{width:22px;height:22px;flex:none}
+#giornate .gsera{background:#0a2a4d;color:#fff;border:0}
+#giornate .gsera h4{color:#fff;font-size:24px}
+#giornate .gsera .gnota{color:#cbd5e1;font-size:16px}
+#giornate .gsera .gbig{font-size:21px}
+#giornate .gora{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:17px}
+#giornate .gora select{width:auto;min-width:120px}
 #giornate .gvuoto{color:var(--testo-2,#475569);text-align:center;padding:8px 0}
 `;
   const st=document.createElement("style"); st.id="gior-stile"; st.textContent=css;
@@ -230,6 +238,7 @@ async function renderGiornate(){
   const box=document.getElementById("gior-box"); if(!box) return;
   if(!giorMese) giorMese=_gOggi().slice(0,7);
   if(typeof sb==="undefined"||!sb||!sbUid){ box.innerHTML='<div class="gb"><div class="gvuoto">Accedi per segnare le giornate.</div></div>'; return; }
+  if(!giorSera) giorSeraLeggi().then(()=>{ if(document.getElementById("gior-box")&&!giorProp) giorDisegna(); }).catch(()=>{});
   try{ await giorCarica(); }
   catch(e){ box.innerHTML='<div class="gb"><div class="gmsg err">Non riesco a leggere le giornate: '+esc(e.message||"")+'. Riprova fra un attimo.</div></div>'; return; }
   giorDisegna();
@@ -252,6 +261,11 @@ function giorDisegna(msg){
         <div class="grow"><button type="button" class="gsi" data-gior="pro-si" data-id="${esc(p.id)}">Approva</button><button type="button" class="gno" data-gior="pro-no" data-id="${esc(p.id)}">Scarta</button></div></div>`;
     });
     h+=`</div>`;
+  }
+
+  if(giorDallaSera){
+    h+=`<div class="gb gsera"><h4>Com'è andata oggi?</h4><div class="gnota">Premi e racconta: chi c'era, dove, cosa avete fatto, cosa avete speso.</div>
+      <button type="button" class="gbig" data-gior="sera-parla">Parla</button></div>`;
   }
 
   h+=`<div class="gb"><h4>Racconta la giornata</h4>
@@ -300,6 +314,9 @@ function giorDisegna(msg){
     }
     h+=`</div>`;
   }
+
+  /* la domanda della sera, su questo telefono */
+  h+=giorSeraBox();
 
   /* il consulente del lavoro */
   if(giorCdl){
@@ -541,6 +558,76 @@ async function giorCdlProva(){
   }catch(e){ _gCdlMsg("Niente rete. Riprova.","err"); }
 }
 
+/* ---------------------------------------------------------------------
+   LA DOMANDA DELLA SERA — notifiche del telefono (sw-gestionale.js +
+   netlify/functions/avviso-sera.js). Ogni telefono si accende da solo:
+   il capo puo' averla sul telefono e non sul computer dell'ufficio.
+   --------------------------------------------------------------------- */
+const GIOR_SERA_URL="/.netlify/functions/avviso-sera";
+function _gSeraPuo(){ return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window; }
+function _gSeraMsg(t,k){ const m=document.getElementById("gior-sera-msg"); if(m){ m.className="gmsg "+(k||""); m.textContent=t; } }
+function _gIphone(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+async function giorSeraIscrizione(){
+  try{ const r=await navigator.serviceWorker.getRegistration("/"); return r?await r.pushManager.getSubscription():null; }catch(e){ return null; }
+}
+async function giorSeraChiama(corpo){
+  const tk=await giorToken(); if(!tk) return {error:"Sessione scaduta: esci e rientra."};
+  const s=await giorSeraIscrizione(); if(s&&!corpo.endpoint&&!corpo.sub) corpo.endpoint=s.endpoint;
+  try{
+    const r=await fetch(GIOR_SERA_URL,{method:"POST",headers:{Authorization:"Bearer "+tk,"Content-Type":"application/json"},body:JSON.stringify(corpo)});
+    const b=await r.json().catch(()=>({})); return r.ok?Object.assign({ok:true},b):{error:b.error||"Il servizio non ha risposto."};
+  }catch(e){ return {error:"Niente rete. Riprova."}; }
+}
+async function giorSeraLeggi(){
+  if(!_gSeraPuo()){ giorSera={si:false,perche:"no"}; return; }
+  if(Notification.permission==="denied"){ giorSera={si:false,perche:"negato"}; return; }
+  const s=await giorSeraIscrizione();
+  if(!s){ giorSera={si:false,ora:"18:30"}; return; }
+  const r=await giorSeraChiama({azione:"stato",endpoint:s.endpoint});
+  giorSera={si:!!r.acceso,ora:r.ora||"18:30"};
+}
+function _gB64(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); const b=atob(s+"===".slice((s.length+3)%4)); return Uint8Array.from(b,c=>c.charCodeAt(0)); }
+async function giorSeraAccendi(){
+  if(!_gSeraPuo()){ giorDisegna({t:"Su questo browser le notifiche non si possono accendere.",k:"err"}); return; }
+  const ora=((document.getElementById("gior-sera-ora")||{}).value)||"18:30";
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){ giorSera={si:false,perche:"negato"}; giorDisegna(); return; }
+    const reg=await navigator.serviceWorker.register("/sw-gestionale.js",{scope:"/"});
+    await navigator.serviceWorker.ready;
+    const kr=await fetch(GIOR_SERA_URL); const kb=await kr.json();
+    if(!kb.chiave) throw new Error("chiave");
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_gB64(kb.chiave)});
+    const r=await giorSeraChiama({azione:"iscrivi",sub:sub.toJSON(),ora});
+    if(!r.ok){ giorDisegna({t:r.error,k:"err"}); return; }
+    giorSera={si:true,ora:r.ora||ora};
+    giorDisegna({t:"Accesa: ogni sera alle "+giorSera.ora+" il telefono ti chiede com'è andata.",k:"ok"});
+  }catch(e){ giorDisegna({t:"Non riesco ad accendere le notifiche su questo telefono. Riprova.",k:"err"}); }
+}
+function giorSeraBox(){
+  if(!giorSera) return "";
+  const ore=[]; for(let h=17;h<=21;h++){ ore.push(String(h).padStart(2,"0")+":00"); if(h<21) ore.push(String(h).padStart(2,"0")+":30"); }
+  const sel=`<select id="gior-sera-ora">${ore.map(o=>`<option${o===(giorSera.ora||"18:30")?" selected":""}>${o}</option>`).join("")}</select>`;
+  let c=`<div class="gb"><h4>La domanda della sera</h4>`;
+  if(giorSera.perche==="no"){
+    c+=_gIphone()
+      ?`<div class="gnota">Su iPhone le notifiche arrivano solo se il gestionale è sulla schermata Home: in Safari tocca il tasto Condividi, poi «Aggiungi alla schermata Home», e aprilo da lì.</div>`
+      :`<div class="gnota">Su questo browser le notifiche non ci sono. Prova da Chrome sul telefono.</div>`;
+  } else if(giorSera.perche==="negato"){
+    c+=`<div class="gnota">Su questo telefono le notifiche di trovaimpresa.com sono bloccate. Sbloccale dalle impostazioni del browser (il lucchetto accanto all'indirizzo) e torna qui.</div>`;
+  } else if(giorSera.si){
+    c+=`<div class="gnota">Accesa su questo telefono. Se la giornata è già segnata, non suona. Domenica mai.</div>
+      <div class="gora">Alle ${sel}</div>
+      <div class="grow"><button type="button" class="btn" data-gior="sera-prova" style="flex:0 0 auto">Fallo suonare adesso</button><button type="button" class="btn" data-gior="sera-spegni" style="flex:0 0 auto">Spegni</button></div>`;
+  } else {
+    c+=`<div class="gnota">Ogni sera il telefono ti chiede «Com'è andata oggi?». Tocchi, racconti a voce, ed è segnata. Se l'hai già fatto, non suona.</div>
+      <div class="gora">Alle ${sel}</div>
+      <button type="button" class="gbig blu" data-gior="sera-accendi">Accendi su questo telefono</button>`;
+  }
+  return c+`<div class="gmsg" id="gior-sera-msg"></div></div>`;
+}
+
 async function giorCancella(k){
   const g=giorRighe.find(x=>x.k===k); if(!g) return;
   const ora=new Date().toISOString();
@@ -608,6 +695,12 @@ document.addEventListener("change",e=>{
   if(s.value==="+"){ giorIoNuovo=true; giorDisegna(); const x=document.getElementById("gior-io-nome"); if(x) x.focus(); return; }
   giorIoNuovo=false; _gSetIo(s.value); giorDisegna();
 });
+document.addEventListener("change",async e=>{
+  if(e.target&&e.target.id==="gior-sera-ora"&&giorSera&&giorSera.si){
+    const r=await giorSeraChiama({azione:"ora",ora:e.target.value});
+    if(r.ok){ giorSera.ora=e.target.value; _gSeraMsg("Fatto: ti chiedo alle "+e.target.value+".","ok"); } else _gSeraMsg(r.error||"Non salvato.","err");
+  }
+});
 document.addEventListener("click",async e=>{
   const b=e.target.closest&&e.target.closest("#giornate [data-gior]"); if(!b) return;
   const a=b.dataset.gior;
@@ -648,6 +741,10 @@ document.addEventListener("click",async e=>{
   if(a==="pro-si"){ b.disabled=true; await giorProApprova(b.dataset.id); return; }
   if(a==="pro-no"){ b.disabled=true; await giorProScarta(b.dataset.id); return; }
   if(a==="squadra"){ const t=document.querySelector('nav.tabs button[data-tab="squadra"]'); if(t) t.click(); return; }
+  if(a==="sera-parla"){ giorDallaSera=false; const v=document.getElementById("gv-btn"); if(v) v.click(); else { const t=document.getElementById("gior-voce"); if(t) t.focus(); } giorDisegna(); return; }
+  if(a==="sera-accendi"){ b.disabled=true; await giorSeraAccendi(); return; }
+  if(a==="sera-spegni"){ b.disabled=true; await giorSeraChiama({azione:"spegni"}); try{ const r=await navigator.serviceWorker.getRegistration("/"); const x=r&&await r.pushManager.getSubscription(); if(x) await x.unsubscribe(); }catch(e){} giorSera={si:false,ora:"18:30"}; giorDisegna({t:"Domanda della sera spenta su questo telefono.",k:"ok"}); return; }
+  if(a==="sera-prova"){ b.disabled=true; const r=await giorSeraChiama({azione:"prova"}); _gSeraMsg(r.ok?"Mandata: fra qualche secondo il telefono suona.":(r.error||"Non è partita."),r.ok?"ok":"err"); b.disabled=false; return; }
   if(a==="cdl-salva"){ b.disabled=true; await giorCdlSalva(); b.disabled=false; return; }
   if(a==="cdl-prova"){ b.disabled=true; await giorCdlProva(); b.disabled=false; return; }
   if(a==="pdf") return giorPdf();
