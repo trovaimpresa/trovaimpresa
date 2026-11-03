@@ -42,7 +42,9 @@ let giorOccupato = false;
 let giorConferma = null;   /* chiave della riga da cancellare */
 let giorModifica = null;   /* chiave della riga di cui si cambia il testo */
 let giorVoce = "";
-let giorAggiungi = null;   /* indice della scheda in cui si sta scrivendo un nome nuovo */
+let giorAggiungi = null;
+let giorIoNuovo = false;   /* il capo non e' ancora in Squadra: sta scrivendo il suo nome */
+let giorIoNome = "";       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
 
 function _gYmd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function _gOggi(){ return _gYmd(new Date()); }
@@ -219,7 +221,9 @@ function giorDisegnaProp(){
   if(serveIo){
     h+=`<div><div class="glab">Hai detto «io»: tu chi sei nella squadra?</div><select data-gior-io>
       <option value="">Scegli…</option>${giorOps.map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("")}
-      <option value="-">Non sono in squadra (non contare me)</option></select></div>`;
+      <option value="+">Non ci sono ancora: aggiungimi</option>
+      <option value="-">Non lavoro in cantiere (non contare me)</option></select>
+      ${giorIoNuovo?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-io-nome" placeholder="Il tuo nome"><button type="button" class="btn" data-gior="io-ok" style="flex:0 0 auto">Aggiungi</button></div>`:""}</div>`;
   }
   const lavNomi=[...new Set(giorLav.map(_gNomeLav))];
   h+=`<datalist id="gior-lavori">${lavNomi.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>`;
@@ -293,7 +297,12 @@ async function giorCompila(){
       chi.add(N);
     });
     const d=/^\d{4}-\d\d-\d\d$/.test(g.data||"")?g.data:_gOggi();
-    return {data:d,chi,dove:String(g.dove||"").slice(0,120),cosa:String(g.cosa||"").slice(0,2000)};
+    /* l'AI a volte lascia tutto minuscolo: la maiuscola la mettiamo noi */
+    let dove=String(g.dove||"").trim().slice(0,120);
+    if(dove===dove.toLowerCase()) dove=dove.replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase());
+    let cosa=String(g.cosa||"").trim().slice(0,2000);
+    cosa=cosa.charAt(0).toUpperCase()+cosa.slice(1);
+    return {data:d,chi,dove,cosa};
   });
   giorDisegna({t:"Controlla qui sotto e premi «Salva».",k:"ok"});
 }
@@ -321,6 +330,7 @@ async function giorSalva(){
     if(error||!data||!data.length){ giorDisegna({t:"Non riesco ad aggiungere "+n+" alla squadra: "+((error&&error.message)||"nessuna riga")+".",k:"err"}); return; }
     giorOps.push(data[0]);
   }
+  if(giorIoNome){ const o=giorOps.find(x=>x.nome===giorIoNome); if(o) _gSetIo(o.id); giorIoNome=""; }
   /* 2. quante schede ha ogni persona per ogni giorno: le 8 ore si dividono */
   const quante={};
   schede.forEach(c=>c.nomi.forEach(n=>{ const k=n+"|"+c.data; quante[k]=(quante[k]||0)+1; }));
@@ -417,7 +427,9 @@ async function giorPdf(){
    --------------------------------------------------------------------- */
 document.addEventListener("change",e=>{
   const s=e.target.closest&&e.target.closest("[data-gior-io]"); if(!s) return;
-  giorLeggiProp(); _gSetIo(s.value); giorDisegna();
+  giorLeggiProp();
+  if(s.value==="+"){ giorIoNuovo=true; giorDisegna(); const x=document.getElementById("gior-io-nome"); if(x) x.focus(); return; }
+  giorIoNuovo=false; _gSetIo(s.value); giorDisegna();
 });
 document.addEventListener("click",async e=>{
   const b=e.target.closest&&e.target.closest("#giornate [data-gior]"); if(!b) return;
@@ -444,6 +456,15 @@ document.addEventListener("click",async e=>{
       if(!giorOps.some(o=>o.nome===N)&&!giorNuovi.includes(N)) giorNuovi.push(N);
       const c=giorProp[+b.dataset.i]; if(c) c.chi.add(N);
     }
+    giorDisegna(); return;
+  }
+  if(a==="io-ok"){
+    const n=((document.getElementById("gior-io-nome")||{}).value||"").trim(); if(!n) return;
+    giorLeggiProp();
+    const N=n.charAt(0).toUpperCase()+n.slice(1);
+    giorIoNome=N; giorIoNuovo=false;
+    if(!giorOps.some(o=>o.nome===N)&&!giorNuovi.includes(N)) giorNuovi.push(N);
+    giorProp.forEach(c=>{ if(c.chi.has("IO")){ c.chi.delete("IO"); c.chi.add(N); } });
     giorDisegna(); return;
   }
   if(a==="salva"){ b.disabled=true; await giorSalva(); return; }
