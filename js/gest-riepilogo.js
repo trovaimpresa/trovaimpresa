@@ -408,6 +408,14 @@
     const mdRie=await pMd;                        /* partita piu' su, qui si aspetta */
     const _margL=l=>margineLavoro(l.importo,spPerL[l.id],ffPerL[l.id],mdRie.per[String(l.id)]);
     const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id]||ffPerL[l.id]||mdRie.per[String(l.id)])&&_margL(l)<0);
+    /* 3 nov 2026 — «STAI ANDANDO IN PERDITA»: un lavoro NON finito che ha gia'
+       speso l'80% (o piu') di quello che vale, ma non e' ancora sotto zero.
+       Stesso conto di sopra (margineLavoro): si avvisa PRIMA, mentre si e'
+       ancora in tempo, non a lavoro chiuso. */
+    const LIMITE_PERDITA=0.8;
+    const _spesoL=l=>(+l.importo||0)-_margL(l);
+    const quasiPerdita=L.filter(l=>l.stato!=="fatto"&&(+l.importo||0)>0&&_margL(l)>=0&&_spesoL(l)>=LIMITE_PERDITA*(+l.importo))
+                        .sort((a,b)=>_spesoL(b)/b.importo-_spesoL(a)/a.importo);
 
     /* preventivi in attesa (+ totale di ognuno) */
     const attesa=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato")
@@ -519,6 +527,9 @@
       go:"attrezzature"});
     if(inPerdita.length) DA.push({g:1,male:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
                                   d:"Fra spese, fornitori e manodopera esce più di quello che entra",go:"report"});
+    if(quasiPerdita.length){ const q=quasiPerdita[0];
+      DA.push({g:1,male:1,t:nn(quasiPerdita.length,"lavoro sta per andare in perdita","lavori stanno per andare in perdita"),
+        d:(q.descrizione||q.dove||"Lavoro")+": hai già speso il "+Math.round(_spesoL(q)/q.importo*100)+"% di quello che vale",go:"lavori"}); }
     /* patente a crediti: sotto 15 l'impresa non può operare in cantiere,
        quindi avviso già a 20 per dare il tempo di recuperarli. */
     const patC = AZ&&AZ.pat_crediti!=null ? +AZ.pat_crediti : null;

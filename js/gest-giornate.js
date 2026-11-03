@@ -46,7 +46,8 @@ let giorAggiungi = null;
 let giorIoNuovo = false;   /* il capo non e' ancora in Squadra: sta scrivendo il suo nome */
 let giorIoNome = "";
 let giorTariffe = {per:{},media:0};  /* costo orario: stessa costiOrari() del margine dei lavori */
-let giorProposte = [];     /* le giornate mandate dagli operai, da approvare */
+let giorProposte = [];
+let giorAvanz = {};         /* lavoro_id -> {importo, speso}: quanto ha gia' speso del suo valore */     /* le giornate mandate dagli operai, da approvare */
 let giorCdl = null;
 let giorSera = null;        /* {si:true|false, ora, perche} la domanda della sera su QUESTO telefono */
 let giorDallaSera = /[?&]sera=1/.test(location.search);  /* arrivato toccando la notifica */        /* {email,invio,ultimo} il consulente del lavoro */       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
@@ -110,6 +111,12 @@ const _gIc = {
 #giornate .gcan .g{color:var(--testo-2,#475569);font-size:15px}
 #giornate .gcan .e{font-weight:700;font-variant-numeric:tabular-nums;color:var(--testo,#0f172a);min-width:96px;text-align:right}
 #giornate .gcan.tot{border-top:2px solid var(--testo,#0f172a);font-size:18px}
+#giornate .gav{padding:0 0 10px;display:flex;flex-direction:column;gap:6px}
+#giornate .gbar{height:10px;border-radius:6px;background:var(--bordo,#e2e8f0);overflow:hidden}
+#giornate .gbar i{display:block;height:100%;background:var(--ok,#16a34a)}
+#giornate .gav.giallo .gbar i{background:#d97706}#giornate .gav.rosso .gbar i{background:var(--err,#dc2626)}
+#giornate .gavt{font-size:15px;color:var(--testo-2,#475569)}
+#giornate .gav.giallo .gavt b{color:#b45309}#giornate .gav.rosso .gavt b{color:var(--err,#dc2626)}
 #giornate .gpro{border:2px solid var(--blu,#0066ff)}
 #giornate .gpr{border-top:1px solid var(--bordo,#e2e8f0);padding-top:12px;display:flex;flex-direction:column;gap:8px}
 #giornate .gpr:first-of-type{border-top:0;padding-top:0}
@@ -174,6 +181,32 @@ async function giorCarica(){
     const rt=await leggi("gest_operatori").select("id,costo_orario").eq("user_id",sbUid);
     if(!rt.error&&typeof costiOrari==="function"){ giorTariffe=costiOrari(rt.data||[],giorOps); giorTariffe.letto=true; }
   }catch(e){}
+  /* 3 nov 2026 — «stai andando in perdita»: per i cantieri del mese, quanto
+     hanno gia' speso DA SEMPRE (spese + fornitori + manodopera) rispetto a
+     quanto valgono. Lo stesso conto della scheda del lavoro: margineLavoro. */
+  giorAvanz={};
+  try{
+    const ids=[...new Set(giorRighe.map(g=>g.lavoro_id).filter(Boolean))];
+    if(ids.length&&typeof margineLavoro==="function"&&typeof costoManodopera==="function"&&giorTariffe.letto){
+      const [rl2,rs,rf,rh2]=await Promise.all([
+        sb.from("gest_lavori").select("id,importo,stato").in("id",ids),
+        sb.from("gest_spese").select("lavoro_id,importo").in("lavoro_id",ids),
+        sb.from("gest_fatture_fornitori").select("lavoro_id,importo").in("lavoro_id",ids),
+        sb.from("gest_ore").select("lavoro_id,operatore_id,ore").eq("user_id",sbUid).in("lavoro_id",ids)
+      ]);
+      if(!rl2.error&&!rs.error&&!rf.error&&!rh2.error){
+        const sp={},ff={};
+        (rs.data||[]).forEach(x=>{sp[x.lavoro_id]=(sp[x.lavoro_id]||0)+(+x.importo||0);});
+        (rf.data||[]).forEach(x=>{ff[x.lavoro_id]=(ff[x.lavoro_id]||0)+(+x.importo||0);});
+        const md=costoManodopera(rh2.data||[],[],giorTariffe).per;
+        (rl2.data||[]).forEach(l=>{
+          const imp=+l.importo||0; if(imp<=0) return;
+          const speso=imp-margineLavoro(imp,sp[l.id],ff[l.id],md[String(l.id)]);
+          giorAvanz[String(l.id)]={importo:imp,speso,fatto:l.stato==="fatto"};
+        });
+      }
+    }
+  }catch(e){}
   /* le giornate mandate dagli operai senza il permesso «Rapportini» */
   giorProposte=[];
   try{
@@ -202,13 +235,13 @@ function giorCostiCantieri(){
   const can={};
   giorRighe.forEach(g=>{
     const k=String(g.lavoro_id);
-    if(!can[k]) can[k]={nome:_gNomeLav(giorLavoro(g.lavoro_id)),giorni:new Set(),euro:0};
+    if(!can[k]) can[k]={id:k,nome:_gNomeLav(giorLavoro(g.lavoro_id)),giorni:new Set(),euro:0};
     can[k].giorni.add(g.data);
   });
   Object.keys(can).forEach(k=>{ can[k].euro=+m.per[k]||0; });
   return Object.values(can).sort((a,b)=>b.euro-a.euro||b.giorni.size-a.giorni.size);
 }
-function _gEuro(n){ return (+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+" €"; }
+function _gEuro(n){ return (+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+"\u00a0€"; }
 function giorNomeOp(id){ const o=giorOps.find(x=>String(x.id)===String(id)); return o?o.nome:"Senza nome"; }
 function giorLavoro(id){ return giorLav.find(x=>String(x.id)===String(id)); }
 
@@ -304,7 +337,16 @@ function giorDisegna(msg){
   if(can.length){
     const conCosto=can.some(c=>c.euro>0);
     h+=`<div class="gb"><h4>I cantieri del mese</h4>`;
-    can.forEach(c=>{ h+=`<div class="gcan"><span class="n">${esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`; });
+    can.forEach(c=>{
+      h+=`<div class="gcan"><span class="n">${esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`;
+      const a=giorAvanz[c.id];
+      if(a&&!a.fatto){
+        const pc=Math.round(a.speso/a.importo*100), w=Math.max(0,Math.min(100,pc));
+        const cl=pc>=100?"rosso":pc>=80?"giallo":"";
+        h+=`<div class="gav ${cl}"><div class="gbar"><i style="width:${w}%"></i></div>
+          <div class="gavt">${pc>=100?"<b>In perdita:</b> ":pc>=80?"<b>Attenzione:</b> ":""}speso finora il ${pc}% di ${esc(_gEuro(a.importo))}${pc>=100?" — esce più di quello che entra":pc>=80?" — stai per andare in perdita":""}</div></div>`;
+      }
+    });
     if(conCosto){
       const tot=can.reduce((a,c)=>a+c.euro,0);
       h+=`<div class="gcan tot"><span class="n">Manodopera del mese</span><span class="e">${esc(_gEuro(tot))}</span></div>
