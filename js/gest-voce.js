@@ -336,7 +336,12 @@
   /* app operaio: quello che dici va in «Racconta la giornata», che c'era gia' */
   function raccontaGiornata(t) {
     if (typeof rvApri !== 'function' || typeof RV === 'undefined') { disegnaMsg('Ricarica la pagina e riprova.', true); return; }
-    if (typeof puo === 'function' && !puo('rapportini')) { disegnaMsg('Il capo non ti ha dato il permesso dei rapportini. A voce puoi dire «apri le foto», «apri la chat»…', true); return; }
+    /* 3 nov 2026 — senza «Rapportini» la giornata la racconta lo stesso:
+       va al capo, che la approva (op-giornate.js). */
+    if (typeof puo === 'function' && !puo('rapportini')) {
+      if (typeof window.mgRacconta === 'function' && puo('lavori')) { chiudiBolla(); window.mgRacconta(t); return; }
+      disegnaMsg('Il capo non ti ha dato il permesso dei lavori. A voce puoi dire «apri le foto», «apri la chat»…', true); return;
+    }
     chiudiBolla();
     rvApri();
     RV.tipo = 'voce'; RV.detto = t;
@@ -354,7 +359,7 @@
     /* 3 nov 2026 — PRIMA l'aiutante gratis (gest-parla.js): giornate, spese,
        promemoria e note in una finestra. Se non c'e' niente di questo, o non
        risponde, si fa come prima (comando_voce, 1 credito). */
-    if (PAG === 'app' && typeof window.gestParla === 'function') {
+    if ((PAG === 'app' || PAG === 'nol') && typeof window.gestParla === 'function') {
       lavora = true; etichetta(); disegnaPenso();
       var esito = 'vecchio';
       try { esito = await window.gestParla(t, function (x) { detto = x; return vecchio(x); }); } catch (e) {}

@@ -44,7 +44,10 @@ let giorModifica = null;   /* chiave della riga di cui si cambia il testo */
 let giorVoce = "";
 let giorAggiungi = null;
 let giorIoNuovo = false;   /* il capo non e' ancora in Squadra: sta scrivendo il suo nome */
-let giorIoNome = "";       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
+let giorIoNome = "";
+let giorTariffe = {per:{},media:0};  /* costo orario: stessa costiOrari() del margine dei lavori */
+let giorProposte = [];     /* le giornate mandate dagli operai, da approvare */
+let giorCdl = null;        /* {email,invio,ultimo} il consulente del lavoro */       /* il suo nome: al Salva entra in Squadra e diventa «io» */   /* indice della scheda in cui si sta scrivendo un nome nuovo */
 
 function _gYmd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function _gOggi(){ return _gYmd(new Date()); }
@@ -99,6 +102,22 @@ const _gIc = {
 #giornate .gmsg.ok{color:var(--ok,#16a34a)}#giornate .gmsg.err{color:var(--err,#dc2626)}
 #giornate .gconf{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:15px}
 #giornate .gconf .si{background:var(--err,#dc2626);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+#giornate .gcan{display:flex;gap:12px;align-items:baseline;border-top:1px solid var(--bordo,#e2e8f0);padding:10px 0;font-size:17px}
+#giornate .gcan:first-of-type{border-top:0}
+#giornate .gcan .n{flex:1;min-width:0;font-weight:700;color:var(--testo,#0f172a);overflow-wrap:anywhere}
+#giornate .gcan .g{color:var(--testo-2,#475569);font-size:15px}
+#giornate .gcan .e{font-weight:700;font-variant-numeric:tabular-nums;color:var(--testo,#0f172a);min-width:96px;text-align:right}
+#giornate .gcan.tot{border-top:2px solid var(--testo,#0f172a);font-size:18px}
+#giornate .gpro{border:2px solid var(--blu,#0066ff)}
+#giornate .gpr{border-top:1px solid var(--bordo,#e2e8f0);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+#giornate .gpr:first-of-type{border-top:0;padding-top:0}
+#giornate .gpr .w{font-weight:700;font-size:17px;color:var(--testo,#0f172a)}
+#giornate .gpr .c{font-size:16px;color:var(--testo-2,#475569);overflow-wrap:anywhere}
+#giornate .gpr .grow button{flex:0 0 auto;min-width:0}
+#giornate .gsi{background:var(--ok,#16a34a);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer}
+#giornate .gno{background:#fff;color:var(--err,#dc2626);border:1.5px solid var(--bordo-forte,#cbd5e1);border-radius:10px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer}
+#giornate .gspunta{display:flex;gap:10px;align-items:center;font-size:17px;cursor:pointer}
+#giornate .gspunta input{width:22px;height:22px;flex:none}
 #giornate .gvuoto{color:var(--testo-2,#475569);text-align:center;padding:8px 0}
 `;
   const st=document.createElement("style"); st.id="gior-stile"; st.textContent=css;
@@ -111,7 +130,7 @@ const _gIc = {
 async function giorCarica(){
   const a=giorMese+"-01", b=_gSposta(giorMese,1)+"-01";
   const [ro,rl,rh]=await Promise.all([
-    sb.from("gest_operatori").select("id,nome,mestiere_id").eq("user_id",sbUid).is("eliminato_il",null).order("nome"),
+    sb.from("gest_operatori").select("id,nome,mestiere_id,costo_orario").eq("user_id",sbUid).is("eliminato_il",null).order("nome"),
     sb.from("gest_lavori").select("id,descrizione,dove,stato,mestiere_id,created_at").eq("user_id",sbUid).is("eliminato_il",null).order("created_at",{ascending:false}).limit(200),
     sb.from("gest_ore").select("id,data,ore,operatore_id,lavoro_id,rapportino_id").eq("user_id",sbUid).is("eliminato_il",null).gte("data",a).lt("data",b)
   ]);
@@ -137,7 +156,51 @@ async function giorCarica(){
     g.cosa=r?[r.note,r.materiali?("Materiali: "+r.materiali):""].filter(Boolean).join(" · "):"";
   });
   giorRighe=Object.values(gruppi).sort((x,y)=>x.data.localeCompare(y.data));
+  /* il costo orario: le tariffe di TUTTI (anche chi sta nel Cestino, le sue ore
+     restano) e la media dei vivi — la stessa costiOrari() del margine dei
+     lavori (gest-ore-spese.js). Se la lettura cade, niente costi: meglio
+     nessun numero che un numero sbagliato. */
+  giorTariffe={per:{},media:0,letto:false};
+  try{
+    const leggi=(typeof sb.raw==="function")?sb.raw:sb.from.bind(sb);
+    const rt=await leggi("gest_operatori").select("id,costo_orario").eq("user_id",sbUid);
+    if(!rt.error&&typeof costiOrari==="function"){ giorTariffe=costiOrari(rt.data||[],giorOps); giorTariffe.letto=true; }
+  }catch(e){}
+  /* le giornate mandate dagli operai senza il permesso «Rapportini» */
+  giorProposte=[];
+  try{
+    const rp=await sb.from("gest_giornate_proposte").select("id,operatore_id,data,dove,cosa,creato_il").eq("user_id",sbUid).eq("stato","da_vedere").order("data",{ascending:false}).limit(50);
+    if(!rp.error) giorProposte=rp.data||[];
+  }catch(e){}
+  /* il consulente del lavoro */
+  try{
+    const rc=await sb.from("gest_azienda").select("cdl_email,cdl_invio,cdl_ultimo").eq("user_id",sbUid).maybeSingle();
+    if(!rc.error) giorCdl={email:(rc.data&&rc.data.cdl_email)||"",invio:!!(rc.data&&rc.data.cdl_invio),ultimo:(rc.data&&rc.data.cdl_ultimo)||""};
+  }catch(e){}
+  giorContatore();
 }
+/* il numero accanto a «Giornate» nel menu: quante ne aspettano il capo */
+function giorContatore(){
+  const b=document.getElementById("tab-giornate"); if(!b) return;
+  let c=b.querySelector(".gior-cnt");
+  if(!giorProposte.length){ if(c) c.remove(); return; }
+  if(!c){ c=document.createElement("span"); c.className="tab-cnt gior-cnt"; b.appendChild(c); }
+  c.textContent=giorProposte.length;
+}
+/* quanto e' costata la manodopera, cantiere per cantiere, nel mese */
+function giorCostiCantieri(){
+  const righe=[]; giorRighe.forEach(g=>g.ore.forEach(o=>righe.push({lavoro_id:g.lavoro_id,operatore_id:o.operatore_id,ore:o.ore})));
+  const m=(typeof costoManodopera==="function"&&giorTariffe.letto)?costoManodopera(righe,[],giorTariffe):{per:{},senzaNome:{}};
+  const can={};
+  giorRighe.forEach(g=>{
+    const k=String(g.lavoro_id);
+    if(!can[k]) can[k]={nome:_gNomeLav(giorLavoro(g.lavoro_id)),giorni:new Set(),euro:0};
+    can[k].giorni.add(g.data);
+  });
+  Object.keys(can).forEach(k=>{ can[k].euro=+m.per[k]||0; });
+  return Object.values(can).sort((a,b)=>b.euro-a.euro||b.giorni.size-a.giorni.size);
+}
+function _gEuro(n){ return (+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true})+" €"; }
 function giorNomeOp(id){ const o=giorOps.find(x=>String(x.id)===String(id)); return o?o.nome:"Senza nome"; }
 function giorLavoro(id){ return giorLav.find(x=>String(x.id)===String(id)); }
 
@@ -181,6 +244,16 @@ function giorDisegna(msg){
   let h=`<div class="gm"><button type="button" data-gior="prev" aria-label="Mese prima">‹</button><h3>${esc(_gMeseNome(giorMese))}</h3><button type="button" data-gior="next" aria-label="Mese dopo">›</button></div>`;
   if(tot.length) h+=`<div class="gt">${tot.map(([n,t])=>`<div><span>${esc(n)}</span><b>${t.g}</b><span>${t.g===1?"giorno":"giorni"}</span></div>`).join("")}</div>`;
 
+  if(giorProposte.length){
+    h+=`<div class="gb gpro"><h4>Da approvare (${giorProposte.length})</h4><div class="gnota">Le hanno mandate i tuoi operai. «Approva» le mette nel mese con 8 ore.</div>`;
+    giorProposte.forEach(p=>{
+      h+=`<div class="gpr"><div class="w">${esc(giorNomeOp(p.operatore_id))} · ${esc(_gData(p.data))}</div>
+        <div class="c"><b>${esc(p.dove)}</b>${p.cosa?" — "+esc(p.cosa):""}</div>
+        <div class="grow"><button type="button" class="gsi" data-gior="pro-si" data-id="${esc(p.id)}">Approva</button><button type="button" class="gno" data-gior="pro-no" data-id="${esc(p.id)}">Scarta</button></div></div>`;
+    });
+    h+=`</div>`;
+  }
+
   h+=`<div class="gb"><h4>Racconta la giornata</h4>
     <textarea id="gior-voce" placeholder="«Oggi io, Wahid e Luis a Campoloniano, rifatto il tetto»">${esc(giorVoce)}</textarea>
     <button type="button" class="gbig" data-gior="compila" ${giorOccupato?"disabled":""}>${giorOccupato?"Ci penso…":"Compila la giornata"}</button>
@@ -211,6 +284,34 @@ function giorDisegna(msg){
     h+=`</div>`;
   });
   h+=`</div>`;
+
+  /* i cantieri del mese, con il costo della manodopera */
+  const can=giorCostiCantieri();
+  if(can.length){
+    const conCosto=can.some(c=>c.euro>0);
+    h+=`<div class="gb"><h4>I cantieri del mese</h4>`;
+    can.forEach(c=>{ h+=`<div class="gcan"><span class="n">${esc(c.nome)}</span><span class="g">${c.giorni.size} ${c.giorni.size===1?"giorno":"giorni"}</span>${conCosto?`<span class="e">${esc(_gEuro(c.euro))}</span>`:""}</div>`; });
+    if(conCosto){
+      const tot=can.reduce((a,c)=>a+c.euro,0);
+      h+=`<div class="gcan tot"><span class="n">Manodopera del mese</span><span class="e">${esc(_gEuro(tot))}</span></div>
+        <div class="gnota">Ore segnate × costo orario di ognuno (lo scrivi in Squadra).</div>`;
+    } else {
+      h+=`<div class="gnota">Scrivi il costo orario dei tuoi operai in <button type="button" class="glink" data-gior="squadra">Squadra</button> e qui vedi quanto ti costa ogni cantiere.</div>`;
+    }
+    h+=`</div>`;
+  }
+
+  /* il consulente del lavoro */
+  if(giorCdl){
+    h+=`<div class="gb"><h4>Consulente del lavoro</h4>
+      <div class="gnota">Il primo di ogni mese gli mando le giornate del mese finito: giorni e ore di ognuno, cantiere per cantiere, e il file per Excel.</div>
+      <input type="text" id="gior-cdl-email" inputmode="email" autocomplete="email" placeholder="Email del consulente" value="${esc(giorCdl.email)}">
+      <label class="gspunta"><input type="checkbox" id="gior-cdl-invio" ${giorCdl.invio?"checked":""}> Mandagliele ogni mese</label>
+      <div class="grow"><button type="button" class="gbig blu" data-gior="cdl-salva">Salva</button><button type="button" class="btn" data-gior="cdl-prova" style="flex:0 0 auto">Mandale a me per prova</button></div>
+      ${giorCdl.ultimo?`<div class="gnota">Ultimo mese mandato: ${esc(_gMeseNome(giorCdl.ultimo).toLowerCase())}.</div>`:""}
+      <div class="gmsg" id="gior-cdl-msg"></div>
+    </div>`;
+  }
   box.innerHTML=h;
 }
 
@@ -318,7 +419,7 @@ async function giorCompila(){
    --------------------------------------------------------------------- */
 async function giorAssicura(){
   const [ro,rl]=await Promise.all([
-    sb.from("gest_operatori").select("id,nome,mestiere_id").eq("user_id",sbUid).is("eliminato_il",null).order("nome"),
+    sb.from("gest_operatori").select("id,nome,mestiere_id,costo_orario").eq("user_id",sbUid).is("eliminato_il",null).order("nome"),
     sb.from("gest_lavori").select("id,descrizione,dove,stato,mestiere_id,created_at").eq("user_id",sbUid).is("eliminato_il",null).order("created_at",{ascending:false}).limit(200)
   ]);
   if(ro.error||rl.error) throw new Error((ro.error||rl.error).message);
@@ -386,6 +487,58 @@ async function giorSalva(){
   giorMese=schede[0].data.slice(0,7);
   await renderGiornate();
   giorDisegna({t:fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔",k:"ok"});
+}
+
+/* ---------------------------------------------------------------------
+   LE GIORNATE MANDATE DAGLI OPERAI — «Approva» le scrive con giorScrivi
+   (8 ore, il cantiere trovato o creato), «Scarta» le mette da parte.
+   --------------------------------------------------------------------- */
+async function giorProApprova(id){
+  const p=giorProposte.find(x=>String(x.id)===String(id)); if(!p) return;
+  const nome=giorOps.find(o=>String(o.id)===String(p.operatore_id));
+  if(!nome){ giorDisegna({t:"Questa persona non è più in Squadra: scarta la giornata.",k:"err"}); return; }
+  try{
+    await giorAssicura();
+    await giorScrivi([{data:p.data,nomi:[nome.nome],dove:p.dove,cosa:p.cosa||""}]);
+  }catch(e){ giorDisegna({t:e.message,k:"err"}); return; }
+  const r=await sb.from("gest_giornate_proposte").update({stato:"approvata",visto_il:new Date().toISOString()}).eq("id",p.id).eq("user_id",sbUid).select("id");
+  await renderGiornate();
+  giorDisegna(r.error||!r.data||!r.data.length
+    ?{t:"Giornata scritta, ma non riesco a toglierla da «Da approvare»: non approvarla di nuovo.",k:"err"}
+    :{t:"Approvata ✔ "+nome.nome+", "+_gData(p.data),k:"ok"});
+}
+async function giorProScarta(id){
+  const r=await sb.from("gest_giornate_proposte").update({stato:"scartata",visto_il:new Date().toISOString()}).eq("id",id).eq("user_id",sbUid).select("id");
+  if(r.error||!r.data||!r.data.length){ giorDisegna({t:"Non scartata: "+((r.error&&r.error.message)||"nessuna riga")+".",k:"err"}); return; }
+  await renderGiornate();
+  giorDisegna({t:"Scartata.",k:"ok"});
+}
+
+/* ---------------------------------------------------------------------
+   IL CONSULENTE DEL LAVORO
+   --------------------------------------------------------------------- */
+function _gCdlMsg(t,k){ const m=document.getElementById("gior-cdl-msg"); if(m){ m.className="gmsg "+(k||""); m.textContent=t; } }
+async function giorCdlSalva(){
+  const email=((document.getElementById("gior-cdl-email")||{}).value||"").trim();
+  const invio=!!(document.getElementById("gior-cdl-invio")||{}).checked;
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ _gCdlMsg("Controlla l'email: così non è giusta.","err"); return false; }
+  if(invio&&!email){ _gCdlMsg("Scrivi l'email del consulente.","err"); return false; }
+  const r=await sb.from("gest_azienda").upsert({user_id:sbUid,cdl_email:email||null,cdl_invio:invio},{onConflict:"user_id"}).select("user_id");
+  if(r.error||!r.data||!r.data.length){ _gCdlMsg("Non salvato: "+((r.error&&r.error.message)||"nessuna riga")+".","err"); return false; }
+  giorCdl={...(giorCdl||{}),email,invio};
+  _gCdlMsg(invio?"Salvato ✔ Il primo del mese gli mando le giornate.":"Salvato ✔","ok");
+  return true;
+}
+async function giorCdlProva(){
+  if(!(await giorCdlSalva())) return;
+  const tk=await giorToken(); if(!tk){ _gCdlMsg("Sessione scaduta: esci e rientra.","err"); return; }
+  _gCdlMsg("Mando…","");
+  try{
+    const r=await fetch("/.netlify/functions/giornate-consulente",{method:"POST",headers:{Authorization:"Bearer "+tk,"Content-Type":"application/json"},body:JSON.stringify({prova:true,mese:giorMese})});
+    const b=await r.json().catch(()=>({}));
+    if(r.ok&&b.ok) _gCdlMsg("Mandata ✔ Guarda la tua email ("+(b.a||"")+"): è quella che riceverà il consulente.","ok");
+    else _gCdlMsg(b.error||"Non è partita. Riprova fra qualche minuto.","err");
+  }catch(e){ _gCdlMsg("Niente rete. Riprova.","err"); }
 }
 
 async function giorCancella(k){
@@ -492,6 +645,11 @@ document.addEventListener("click",async e=>{
     giorDisegna(); return;
   }
   if(a==="salva"){ b.disabled=true; await giorSalva(); return; }
+  if(a==="pro-si"){ b.disabled=true; await giorProApprova(b.dataset.id); return; }
+  if(a==="pro-no"){ b.disabled=true; await giorProScarta(b.dataset.id); return; }
+  if(a==="squadra"){ const t=document.querySelector('nav.tabs button[data-tab="squadra"]'); if(t) t.click(); return; }
+  if(a==="cdl-salva"){ b.disabled=true; await giorCdlSalva(); b.disabled=false; return; }
+  if(a==="cdl-prova"){ b.disabled=true; await giorCdlProva(); b.disabled=false; return; }
   if(a==="pdf") return giorPdf();
   if(a==="del"){ giorConferma=b.dataset.k; giorModifica=null; giorDisegna(); return; }
   if(a==="del-no"){ giorConferma=null; giorDisegna(); return; }

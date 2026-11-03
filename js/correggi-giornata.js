@@ -32,12 +32,13 @@
      ⛔ Fuori apposta: computo e prezzario (il testo del prezzario non si
      tocca, regola del 20 ago) e i documenti con valore legale. */
   var CAMPI = ['rap-materiali', 'rap-note', 'lv-note', 'rv-testo',
-               'j-desc', 'j-note', 'j-svolto', 'day-note', 'p-note'];
+               'j-desc', 'j-note', 'j-svolto', 'day-note', 'p-note', 'mg-cosa'];
   var SALVA = {
     'btn-rap-salva': ['rap-materiali', 'rap-note'],
     'btn-salva': ['lv-note'],
     'btn-fatto': ['lv-note'],
-    'rv-ok': ['rv-testo']
+    'rv-ok': ['rv-testo'],
+    'mg-manda': ['mg-cosa']
   };
   var SALVA_AZIONE = {
     'save-job': ['j-desc', 'j-note', 'j-svolto'],

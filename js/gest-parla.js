@@ -282,11 +282,12 @@
     P.cose.forEach(function (c, k) { if (c.mod) leggi(k); });
     var err = controlla();
     if (err) { P.msg = { t: err, k: 'err' }; disegna(); return; }
-    if (typeof giorScrivi !== 'function') { P.msg = { t: 'Ricarica la pagina e riprova.', k: 'err' }; disegna(); return; }
+    var serveGior = P.cose.some(function (c) { return c.tipo === 'giornata' || c.tipo === 'spesa' || c.tipo === 'nota'; });
+    if (serveGior && typeof giorScrivi !== 'function') { P.msg = { t: 'Ricarica la pagina e riprova.', k: 'err' }; disegna(); return; }
     var conto = { giornata: 0, spesa: 0, promemoria: 0, nota: 0 };
     var togli = function (c) { var k = P.cose.indexOf(c); if (k >= 0) P.cose.splice(k, 1); };
     try {
-      await giorAssicura();
+      if (serveGior) await giorAssicura();
       /* 1. le giornate, tutte insieme: le 8 ore si dividono fra i cantieri dello stesso giorno */
       var gg = P.cose.filter(function (c) { return c.tipo === 'giornata'; });
       if (gg.length) {
@@ -338,15 +339,23 @@
   }
   function rinfrescaTutto() {
     try { if (typeof rinfresca === 'function') rinfresca('giornate', 'promemoria', 'lavori', 'riepilogo', 'calendario'); } catch (x) {}
+    /* Noleggio: ridisegna la sezione aperta se ha una sua funzione */
+    try { if (typeof rinfresca !== 'function' && typeof renderAll === 'function') renderAll(); } catch (x) {}
   }
 
   /* ---------------- la porta ----------------
      torna 'aperta' se ha aperto la finestra, 'vecchio' se tocca al Parla di prima */
   window.gestParla = async function (t, vecchio) {
-    if (typeof giorScrivi !== 'function' || typeof sb === 'undefined') return 'vecchio';
+    if (typeof sb === 'undefined' || !sb) return 'vecchio';
     var cose = await capisci(t);
     if (!cose || !cose.length) return 'vecchio';
     cose = cose.slice(0, 20).map(pulisci);
+    /* nel Noleggio non ci sono Giornate ne' cantieri: giornate, spese e note
+       passano al Parla del Noleggio (scheda «Da aprire»). Restano i promemoria. */
+    if (typeof giorScrivi !== 'function') cose = cose.map(function (c) {
+      if (c.tipo === 'giornata' || c.tipo === 'spesa' || c.tipo === 'nota') return { tipo: 'altro', testo: c.tipo === 'spesa' ? (c.descrizione + (c.importo != null ? ' ' + euro(c.importo) : '') + (c.dove ? ' ' + c.dove : '')) : ((c.dove ? c.dove + ': ' : '') + (c.cosa || c.testo || '')) };
+      return c;
+    });
     if (!cose.some(function (c) { return c.tipo !== 'altro'; })) return 'vecchio';
     P = { detto: t, cose: cose, vecchio: vecchio, msg: null };
     apriFinestra();
