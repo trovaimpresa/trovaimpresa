@@ -166,6 +166,21 @@ function mostra(quale){
   // dal login col codice: la sessione c'e' gia', si va dritti al pannello
   if (IN_ACCESSO && p.get('sessione') === '1') { await entraNelPannello(); return; }
 
+  /* 4 nov 2026: dall'email «Attiva il tuo profilo» (iscritti mai confermati)
+     si arriva con ?attiva=1&email=...: stessa casella, ma senza dire
+     «il link non vale piu'» a chi un link non l'ha mai aperto. */
+  if (!token_hash && p.get('attiva') === '1') {
+    const sc = document.getElementById('scaduto');
+    sc.querySelector('h1').textContent = 'Attiva il tuo profilo';
+    sc.querySelector('.cerchio').textContent = '✓';
+    sc.querySelector('.cerchio').className = 'cerchio ok';
+    document.getElementById('scaduto-testo').textContent =
+      'Premi il pulsante: ti mandiamo subito un\'email con il link per attivare la tua scheda. Aprila e sei online (se non la trovi, guarda anche nella posta indesiderata).';
+    const em = p.get('email');
+    if (em) document.getElementById('email').value = em;
+    document.getElementById('rimanda').textContent = 'Mandami il link di attivazione';
+    mostra('scaduto'); return;
+  }
   if (!token_hash) { mostra('scaduto'); return; }
 
   try {

@@ -887,6 +887,12 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <div><div class="stat-num" id="stat-citta">–</div><div class="stat-lbl">Città coperte</div></div>
           <span class="stat-freccia">›</span>
         </div>
+        <!-- 4 nov 2026: i capoluoghi con almeno un'impresa visibile = le pagine citta' piene del sito -->
+        <div class="stat-card apri" data-va="imprese">
+          <div class="stat-icon g"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div><div class="stat-num" id="stat-capoluoghi">–</div><div class="stat-lbl">Capoluoghi coperti</div><div class="stat-conf" id="stat-capoluoghi-sub">su 106 · pagine città piene</div></div>
+          <span class="stat-freccia">›</span>
+        </div>
         <div class="stat-card apri" data-va="utilizzo">
           <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
           <div><div class="stat-num" id="stat-gestionali">–</div><div class="stat-lbl">Usano il gestionale (7 gg)</div></div>
@@ -4308,6 +4314,15 @@ async function caricaImprese() {
   const citta = new Set(impreseVere.map(i => (i.citta || '').trim().toLowerCase()).filter(Boolean));
   _set('stat-incompleti', senzaNome);
   _set('stat-citta', citta.size);
+  /* 4 nov 2026 — capoluoghi coperti: stessa regola delle pagine città
+     (genera-imprese-citta.js): citta' uguale al capoluogo, oppure provincia
+     che comincia col suo nome. Contano solo le email confermate, come sul sito. */
+  const CAPOLUOGHI = ["Roma", "Milano", "Torino", "Napoli", "Rieti", "Palermo", "Genova", "Bologna", "Firenze", "Bari", "Catania", "Verona", "Venezia", "Messina", "Padova", "Trieste", "Brescia", "Parma", "Modena", "Reggio Emilia", "Agrigento", "Alessandria", "Ancona", "Aosta", "Arezzo", "Ascoli Piceno", "Asti", "Avellino", "Barletta", "Belluno", "Benevento", "Bergamo", "Biella", "Bolzano", "Brindisi", "Cagliari", "Caltanissetta", "Campobasso", "Caserta", "Catanzaro", "Chieti", "Como", "Cosenza", "Cremona", "Crotone", "Cuneo", "Enna", "Fermo", "Ferrara", "Foggia", "Forlì", "Frosinone", "Gorizia", "Grosseto", "Imperia", "Isernia", "L'Aquila", "La Spezia", "Latina", "Lecce", "Lecco", "Livorno", "Lodi", "Lucca", "Macerata", "Mantova", "Massa", "Matera", "Monza", "Novara", "Nuoro", "Oristano", "Pavia", "Perugia", "Pesaro", "Pescara", "Piacenza", "Pisa", "Pistoia", "Pordenone", "Potenza", "Prato", "Ragusa", "Ravenna", "Reggio Calabria", "Rimini", "Rovigo", "Salerno", "Sassari", "Savona", "Siena", "Siracusa", "Sondrio", "Taranto", "Teramo", "Terni", "Trapani", "Trento", "Treviso", "Udine", "Varese", "Verbania", "Vercelli", "Vibo Valentia", "Vicenza", "Viterbo"];
+  const visibili = impreseVere.filter(i => i.email_confermata === true);
+  const capCoperti = CAPOLUOGHI.filter(c => { const k = c.toLowerCase(); return visibili.some(i =>
+    String(i.citta || '').trim().toLowerCase() === k || String(i.provincia || '').trim().toLowerCase().startsWith(k)); }).length;
+  _set('stat-capoluoghi', capCoperti);
+  _set('stat-capoluoghi-sub', 'su ' + CAPOLUOGHI.length + ' · pagine città piene');
   // restano aggiornati se un giorno rimettiamo i riquadri
   _set('stat-verificate', verificate);
   _set('stat-attesa', attesa);
