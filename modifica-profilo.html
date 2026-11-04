@@ -428,6 +428,23 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
         <div class="form-title"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Completa il tuo profilo</div>
 
+        <!-- 4 nov 2026 — «Cambia categoria». Nasce dal caso di Arif (Roma), che ha
+             scritto 5 volte per passare da Artigiano a Impresa edile. Da qui
+             l'impresa la cambia da sola. I negozi non la vedono: sono un'altra cosa.
+             Il cambio vero lo fa cambiaCategoria() e lo salva salvaProfilo(). -->
+        <div class="form-card" id="scheda-categoria" style="display:none;margin-top:22px;">
+          <div class="card-header"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18"/></svg> Categoria</div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="f-categoria">Come ti trovano i clienti <span class="required">*</span></label>
+            <select id="f-categoria" onchange="cambiaCategoria(this.value)">
+              <option value="impresa">Impresa edile</option>
+              <option value="artigiano">Artigiano</option>
+              <option value="professionista">Professionista (geometra, architetto, ingegnere…)</option>
+            </select>
+            <div style="margin-top:8px;font-size:14.5px;color:#64748b">Cambiandola compari in un'altra sezione della ricerca.</div>
+          </div>
+        </div>
+
         <!-- Card 1: Dati di contatto -->
         <div class="form-card">
           <div class="card-header"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Dati di contatto</div>
@@ -1243,6 +1260,30 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     let impresaData = null;
     let specializzazioni = [];
     let tipoCategoria = null;
+    let tipoIniziale = null;   /* la categoria con cui e' entrato: serve a capire se l'ha cambiata */
+
+    /* 4 nov 2026 — cambia la sezione sotto, senza salvare niente.
+       I campi che le due sezioni hanno uguali (nome, P.IVA, indirizzo…) si
+       portano dietro, cosi' non si perde quello che c'era. Il mestiere invece
+       va scelto di nuovo: le liste sono diverse per ogni categoria. */
+    function cambiaCategoria(nuovo) {
+      if (!nuovo || nuovo === tipoCategoria || nuovo === 'negozio') return;
+      const vecchio = tipoCategoria;
+      ['nome','partita_iva','anno_fondazione','specializzazioni','zone','indirizzo','cap','whatsapp','dipendenti']
+        .forEach(function (k) {
+          const da = document.getElementById('f-' + k + '-' + vecchio);
+          const a  = document.getElementById('f-' + k + '-' + nuovo);
+          if (da && a && !a.value && da.value) a.value = da.value;
+        });
+      /* se il mestiere di prima c'e' anche nella lista nuova, resta scelto */
+      const mVecchio = document.getElementById('f-mestiere-' + vecchio);
+      if (mVecchio && mVecchio.value) setSelectValue('f-mestiere-' + nuovo, mVecchio.value);
+      document.getElementById('sec-' + vecchio).classList.remove('visible');
+      document.getElementById('sec-' + nuovo).classList.add('visible');
+      tipoCategoria = nuovo;
+      const sel = document.getElementById('f-mestiere-' + nuovo);
+      if (sel && !sel.value) sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     // ===== MAPPA OPENSTREETMAP =====
     let mappa = null, mapMarker = null, nomTimer = null;
@@ -1728,6 +1769,11 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
       // Mostra la sezione corretta
       tipoCategoria = getRealTipo(d);
+      tipoIniziale = tipoCategoria;
+      if (tipoCategoria !== 'negozio') {
+        document.getElementById('f-categoria').value = tipoCategoria;
+        document.getElementById('scheda-categoria').style.display = '';
+      }
       document.getElementById('sec-' + tipoCategoria).classList.add('visible');
 
       if (tipoCategoria === 'artigiano') {
@@ -1922,6 +1968,11 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           return;
         }
       }
+      if (tipoCategoria !== tipoIniziale && tipoCategoria === 'impresa' && !document.getElementById('f-mestiere-impresa').value) {
+        alert('Scegli la specializzazione principale della tua impresa.');
+        document.getElementById('f-mestiere-impresa').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       const btn = document.getElementById('btn-save');
       btn.disabled = true;
       btn.textContent = '⏳ Salvataggio...';
@@ -2076,6 +2127,14 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
           });
         }
 
+        /* 4 nov 2026 — categoria cambiata: si scrive il tipo nuovo, e il
+           mestiere principale (lo leggono la ricerca e le pagine mestiere+citta')
+           diventa il primo della lista nuova. */
+        if (tipoCategoria !== tipoIniziale && ['impresa','artigiano','professionista'].includes(tipoCategoria)) {
+          dati.tipo = tipoCategoria;
+          if (Array.isArray(dati.mestieri) && dati.mestieri[0]) dati.mestiere = dati.mestieri[0];
+        }
+
         /* .select('id') NON e' un vezzo: senza, una modifica bloccata dalle regole
            di sicurezza del database non da' errore, aggiorna ZERO righe e risponde
            OK. La pagina direbbe "salvato con successo" senza aver salvato niente.
@@ -2099,6 +2158,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
         // Aggiorna dati locali
         Object.assign(impresaData, dati);
+        tipoIniziale = tipoCategoria;
 
         showSuccess('✅ Profilo aggiornato con successo! Reindirizzamento in corso...');
         window.scrollTo(0, 0);
