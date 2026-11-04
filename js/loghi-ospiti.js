@@ -97,10 +97,10 @@
     var s = document.createElement('style');
     s.id = 'ti-ospiti-css';
     s.textContent = [
-      '.ti-osp{position:fixed;z-index:40;box-sizing:border-box;background:#fff;border:2px solid #0a2a4d;',
+      '.ti-osp{position:fixed;transition:none;z-index:40;box-sizing:border-box;background:#fff;border:2px solid #0a2a4d;',
       'border-radius:16px;padding:18px 18px 20px;text-align:center;text-decoration:none;',
-      'box-shadow:0 6px 20px rgba(10,42,77,.15);font-family:inherit;transition:transform .15s}',
-      '.ti-osp:hover{transform:translateY(-3px)}',
+      'box-shadow:0 6px 20px rgba(10,42,77,.15);font-family:inherit}',
+      '.ti-osp:hover{box-shadow:0 10px 28px rgba(10,42,77,.25)}',
       '.ti-osp .o-t{color:#ff8800;font-weight:800;font-size:15px;letter-spacing:.04em;text-transform:uppercase}',
       '.ti-osp img{display:block;width:100%;height:150px;object-fit:contain;margin:12px 0}',
       '.ti-osp .o-n{color:#0a2a4d;font-weight:800;font-size:20px;line-height:1.25;overflow-wrap:anywhere}',
@@ -194,23 +194,34 @@
       return;
     }
 
-    var alto = window.innerHeight;
-    var perLato = alto >= 1000 ? 2 : 1;
-    var tops = perLato === 2 ? [230, 620] : [Math.max(120, Math.round(alto / 2 - 180))];
     var i = 0;
     ['sx', 'dx'].forEach(function (lato) {
       if (pagatoSu(lato)) return;
-      tops.forEach(function (top) {
+      for (var k = 0; k < 2; k++) {
         var o = LISTA[i++];
         if (!o) return;
         var a = scheda(o, CITTA);
         a.setAttribute('data-lato', lato);
+        a.setAttribute('data-n', k);
         a.style.width = largo + 'px';
-        a.style.top = top + 'px';
         a.style[lato === 'sx' ? 'left' : 'right'] = BORDO + 'px';
         document.body.appendChild(a);
         schede.push(a);
-      });
+      }
+    });
+    posiziona();
+  }
+
+  // Le schede partono SOTTO la testata blu (che e' larga tutta la pagina e ha
+  // scritte che vanno a sinistra), poi restano ferme mentre si scorre.
+  function posiziona() {
+    if (!schede.length) return;
+    var h = document.querySelector('.hero');
+    var sotto = h ? h.getBoundingClientRect().bottom + 24 : 24;
+    var base = Math.max(24, Math.round(sotto));
+    var alta = schede[0].offsetHeight || 340;
+    schede.forEach(function (s) {
+      s.style.top = (base + Number(s.getAttribute('data-n')) * (alta + 24)) + 'px';
     });
   }
 
@@ -238,6 +249,7 @@
     var giri = 0;
     var t = setInterval(function () { controllaPagati(); if (++giri > 30) clearInterval(t); }, 1000);
     var attesa;
+    window.addEventListener('scroll', posiziona, { passive: true });
     window.addEventListener('resize', function () { clearTimeout(attesa); attesa = setTimeout(metti, 200); });
   }
 
