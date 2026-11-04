@@ -191,8 +191,75 @@
     document.head.appendChild(s);
   }
 
+  /* ⛔ 4 nov 2026 — LA PROVA DEI LOGHI (idea di Alex).
+     Negli spazi LIBERI della pagina citta' mettiamo, in regalo, il logo delle
+     imprese iscritte di quella citta' (nome + mestiere, il clic apre la scheda).
+     Chi ha pagato resta sempre davanti: il regalo prende solo i posti liberi.
+     Se le imprese sono piu' degli spazi, girano un giorno alla volta.
+     Dopo PROVA_LOGHI_FINO gli spazi liberi tornano alle locandine da soli.
+     Sul telefono non si vedono (come le locandine: li' solo chi paga). */
+  var PROVA_LOGHI_FINO = '2027-02-04';
+  var OSPITI = [];
+
+  async function cercaOspiti() {
+    if (new Date().toISOString().slice(0, 10) > PROVA_LOGHI_FINO) return [];
+    var c = String(CITTA || '').replace(/[,()*"]/g, '');
+    if (!c) return [];
+    var url = SUPABASE_URL + '/rest/v1/imprese_pubbliche'
+            + '?select=id,nome,mestiere,logo_url'
+            + '&or=(citta.ilike.' + encodeURIComponent(c) + ',provincia.ilike.' + encodeURIComponent(c) + '*)'
+            + '&logo_url=not.is.null&order=id&limit=200';
+    try {
+      var r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY } });
+      if (!r.ok) return [];
+      var lista = (await r.json()).filter(function (i) { return i.logo_url && String(i.logo_url).trim(); });
+      if (!lista.length) return [];
+      // giro: ogni giorno si parte da un'impresa diversa
+      var giorno = Math.floor(Date.now() / 86400000);
+      var k = giorno % lista.length;
+      return lista.slice(k).concat(lista.slice(0, k));
+    } catch (e) { return []; }
+  }
+
+  function vestiOspite(a, o) {
+    // la misura vera la decide sistema() dopo: le scritte si adattano da sole
+    // alla larghezza del riquadro (cqw = per cento della larghezza)
+    a.style.containerType = 'inline-size';
+    var fn = 'clamp(14px,5.2cqw,26px)', fm = 'clamp(12px,3.6cqw,18px)', ft = 'clamp(10px,2.8cqw,14px)';
+    a.setAttribute('href', '/profilo-impresa?id=' + encodeURIComponent(o.id));
+    a.setAttribute('rel', 'noopener');
+    a.setAttribute('data-stato', 'ospite');
+    a.style.background = '#fff';
+    a.style.border = '2px solid #0a2a4d';
+    a.style.boxSizing = 'border-box';
+    a.style.textDecoration = 'none';
+    var box = document.createElement('div');
+    box.style.cssText = 'position:relative;width:100%;height:100%;text-align:center;font-family:inherit';
+    var top = document.createElement('div');
+    top.textContent = 'Imprese di ' + CITTA;
+    top.style.cssText = 'position:absolute;top:8px;left:10px;font-size:' + ft + ';font-weight:700;color:#ff8800';
+    var lg = document.createElement('div');
+    lg.style.cssText = 'position:absolute;left:0;right:0;top:14%;height:50%;display:flex;align-items:center;justify-content:center';
+    var im = document.createElement('img');
+    im.loading = 'lazy'; im.alt = o.nome || 'Impresa'; im.src = o.logo_url;
+    im.style.cssText = 'height:100%;max-width:80%;object-fit:contain';
+    lg.appendChild(im);
+    var tx = document.createElement('div');
+    tx.style.cssText = 'position:absolute;left:8px;right:8px;top:69%';
+    var nm = document.createElement('div');
+    nm.textContent = o.nome || 'Impresa';
+    nm.style.cssText = 'font-weight:800;color:#0a2a4d;font-size:' + fn + ';line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    var ms = document.createElement('div');
+    ms.textContent = o.mestiere || '';
+    ms.style.cssText = 'color:#5b6b80;font-size:' + fm + ';margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    tx.appendChild(nm); tx.appendChild(ms);
+    box.appendChild(top); box.appendChild(lg); box.appendChild(tx);
+    a.appendChild(box);
+  }
+
   async function avvia() {
     var venduti = await cercaVenduti();
+    OSPITI = await cercaOspiti();
     IN_ALTO.forEach(function (id) { if (venduti[id]) VENDUTI_ALTO[id] = venduti[id]; });
     creaColonna(venduti);
     creaExtra();
@@ -379,6 +446,14 @@
 
       var ann = venduti[v.spazio];
       var loc = LOCANDINE[v.spazio];
+
+      // 4 nov 2026: posto libero + prova dei loghi -> il logo di un'impresa
+      if (!ann && OSPITI.length) {
+        vestiOspite(a, OSPITI.shift());
+        frecciaSu(a);
+        document.body.appendChild(a);
+        return;
+      }
 
       // Niente segnaposti "spazio disponibile": o c'e' un cartello pagato,
       // o c'e' una locandina di TrovaImpresa. Mai un riquadro vuoto.

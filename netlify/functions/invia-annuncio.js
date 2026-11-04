@@ -239,6 +239,22 @@ function linkPagina(imp) {
   return 'https://trovaimpresa.com/imprese-' + slugCitta;
 }
 
+/* 4 nov 2026 — la pagina della CITTA' (index.html?citta=X) dove gira il logo
+   dell'impresa nella prova dei loghi. Se la citta' non e' un capoluogo si usa
+   il capoluogo della sua provincia, come fanno le pagine. */
+function linkPaginaCitta(imp) {
+  const citta = String(imp.citta || '').trim().toLowerCase();
+  const prov  = String(imp.provincia || '').trim().toLowerCase();
+  let chiave = CITTA_CON_PAGINE[citta] ? citta : (CITTA_CON_PAGINE[prov] ? prov : '');
+  if (!chiave) {
+    const slug = dallaProvincia(prov);
+    if (slug) chiave = Object.keys(CITTA_CON_PAGINE).find(k => CITTA_CON_PAGINE[k] === slug) || '';
+  }
+  if (!chiave) return 'https://trovaimpresa.com/';
+  const nome = chiave.replace(/(^|[\s'-])([a-zà-ù])/g, (m, a, b) => a + b.toUpperCase());
+  return 'https://trovaimpresa.com/?citta=' + encodeURIComponent(nome);
+}
+
 function riempi(testo, imp) {
   const nome = (imp.nome_attivita || imp.nome || '').trim() || 'utente';
   return String(testo || '')
@@ -248,6 +264,7 @@ function riempi(testo, imp) {
     .replace(/\[VETRINA\]/g, linkVetrina(imp))
     .replace(/\[PAGINA\]/g, linkPagina(imp))
     // 4 nov 2026: link per chi non ha mai confermato l'email (casella gia' scritta)
+    .replace(/\[PAGINA_CITTA\]/g, linkPaginaCitta(imp))
     .replace(/\[ATTIVA\]/g, 'https://trovaimpresa.com/conferma.html?attiva=1&email=' + encodeURIComponent(imp.email || ''));
 }
 
@@ -291,7 +308,7 @@ exports.handler = async function (event) {
 
   // ---- chi riceve ----
   const { data: tutte, error } = await sb.from('imprese')
-    .select('id, user_id, nome, nome_attivita, email, citta, provincia, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo, vetrina_attiva')
+    .select('id, user_id, nome, nome_attivita, email, citta, provincia, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo, vetrina_attiva, logo_url')
     .eq('is_test', false)
     /* 4 nov 2026: il gruppo «non_confermati» e' l'unico che scrive a chi
        NON ha confermato l'email (per invitarlo ad attivare la scheda). */
@@ -333,6 +350,9 @@ exports.handler = async function (event) {
     // nel frattempo qualcuno carica una foto: nessuno la riceve due volte.
     if (gruppo === 'senza_foto_1') destinatari = destinatari.filter(i => Number(i.id) % 2 === 0);
     if (gruppo === 'senza_foto_2') destinatari = destinatari.filter(i => Number(i.id) % 2 !== 0);
+  } else if (gruppo === 'con_logo') {
+    // 4 nov 2026 — chi ha il logo: e' chi gira gratis negli spazi della sua citta'
+    destinatari = conEmail.filter(i => i.logo_url && String(i.logo_url).trim() && i.vetrina_attiva !== false);
   } else if (gruppo === 'tutti_1' || gruppo === 'tutti_2' || gruppo === 'tutti_3') {
     // 1 nov 2026 — tutti gli iscritti, divisi in tre per id (resto 0, 1, 2):
     // Resend gratuito manda 100 email al giorno, cosi' si spedisce in tre
