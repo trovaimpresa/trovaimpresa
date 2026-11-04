@@ -1014,7 +1014,11 @@ async function impreseRegione(regione) {
     if (!res.ok) throw new Error(String(res.status));
     cacheRegioni[regione] = await res.json();
   } catch (e) {
-    cacheRegioni[regione] = [];
+    /* 4 nov 2026: senza rete si prende la regione dalla scorta, se no
+       il riquadro «Vicino a ...» spariva da tutte le pagine. */
+    const s = caricaScorta();
+    cacheRegioni[regione] = (s && s.regioni && s.regioni[regione]) || [];
+    if (s && s.regioni) usataScorta = true;
   }
   return cacheRegioni[regione];
 }
@@ -1027,7 +1031,7 @@ function cartellino(i, etichetta) {
     ? '<span style="color:#0066ff;font-size:12px;font-weight:700;margin-left:6px;">✓ Verificata</span>' : '';
   const rating = i.valutazione_media > 0 ? `<svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> ${Number(i.valutazione_media).toFixed(1)}` : '<svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Nuova';
   const desc = i.descrizione
-    ? `<p style="font-size:0.85rem;color:#666;margin:6px 0 0;line-height:1.4;">${esc(String(i.descrizione).slice(0, 120))}${i.descrizione.length > 120 ? '…' : ''}</p>` : '';
+    ? `<p style="font-size:0.85rem;color:#666;margin:6px 0 0;line-height:1.4;">${esc(String(i.descrizione).slice(0, 300))}${i.descrizione.length > 300 ? '…' : ''}</p>` : '';
   return `    <a href="/profilo-impresa?id=${esc(i.id)}" style="display:block;background:white;border-radius:12px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-decoration:none;color:#1a1a1a;">
       <div style="font-weight:700;font-size:1rem;">${esc(i.nome || 'Impresa')}${badge}${verificata}</div>
       <div style="font-size:0.85rem;color:#555;margin-top:4px;"><svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg> ${esc(etichetta || i.mestiere || i.tipo || 'Edilizia')} · <svg style="width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> ${esc(i.citta || '')} · ${rating}</div>${desc}
@@ -1194,6 +1198,67 @@ const STILE = `<style>
   footer a { color:#999; text-decoration:none; }
 </style>`;
 
+/* ⚠️ 4 nov 2026 — PAGINE MENO UGUALI FRA LORO (AdSense ha rifiutato il sito
+   per «violazioni delle norme»; le pagine fatte con lo stesso stampo sono il
+   rischio piu' grosso). Ogni pagina adesso porta cose che stanno SOLO li':
+   i comuni della provincia (da js/geo-italia.js, lo stesso elenco della
+   registrazione), quelli dove lavorano davvero gli iscritti, il prezzario
+   della sua Regione, e le altre citta' solo della stessa regione invece
+   dell'elenco di 105 link uguale dappertutto. */
+let _geo = null;
+function geo() {
+  if (_geo) return _geo;
+  try {
+    const vm = require('vm');
+    const ctx = { window: {} };
+    vm.runInNewContext(fs.readFileSync(path.join(OUT, 'js', 'geo-italia.js'), 'utf8'), ctx);
+    _geo = ctx.window.GEO_ITALIA || {};
+  } catch (e) { _geo = {}; }
+  return _geo;
+}
+function comuniProvincia(c) {
+  const g = geo();
+  const reg = g[c.regione] || {};
+  const ALIAS = { 'Reggio Emilia': "Reggio nell'Emilia", 'Verbania': 'Verbano-Cusio-Ossola' };
+  if (ALIAS[c.nome] && reg[ALIAS[c.nome]]) return { provincia: ALIAS[c.nome], comuni: reg[ALIAS[c.nome]] };
+  if (reg[c.nome]) return { provincia: c.nome, comuni: reg[c.nome] };
+  const k = Object.keys(reg).find(p => p.toLowerCase().startsWith(c.nome.toLowerCase()));
+  return k ? { provincia: k, comuni: reg[k] } : null;
+}
+function nomePrezzario(c) {
+  if (c.nome === 'Trento') return 'l’Elenco prezzi della Provincia autonoma di Trento';
+  if (c.nome === 'Bolzano') return 'l’Elenco prezzi della Provincia autonoma di Bolzano';
+  return `il Prezzario regionale ${c.regione === "Valle d'Aosta" ? 'della Valle d’Aosta' : c.regione === 'Lazio' || c.regione === 'Piemonte' || c.regione === 'Molise' || c.regione === 'Veneto' || c.regione === 'Trentino-Alto Adige' ? 'del ' + c.regione : 'della ' + c.regione}`;
+}
+function rigaPrezzario(m, c) {
+  if (m.ruolo === 'professionista') return '';
+  return `
+  <p>Se vuoi un riferimento ufficiale, per i lavori pubblici a ${esc(c.nome)} si usa ${esc(nomePrezzario(c))}: è la tariffa che la Regione aggiorna ogni anno. Fra privati non è obbligatoria, ma serve a capire se una voce del preventivo è fuori misura.</p>`;
+}
+function sezioneComuni(m, c, imprese) {
+  const pv = comuniProvincia(c);
+  if (!pv || !pv.comuni || !pv.comuni.length) return '';
+  const norm = s => String(s || '').trim().toLowerCase();
+  const tutti = pv.comuni;
+  const dove = [...new Set(imprese.map(i => i.citta).filter(Boolean))]
+    .map(x => tutti.find(k => norm(k) === norm(x)) || x)
+    .sort((a, b) => a.localeCompare(b, 'it'));
+  const chi = m.ruolo === 'professionista' ? 'i professionisti' : 'le imprese';
+  const rigaDove = dove.length
+    ? `<p>${chi.charAt(0).toUpperCase() + chi.slice(1)} qui sopra hanno sede a: <strong>${dove.map(esc).join(', ')}</strong>. Molti lavorano anche fuori dal loro comune: chiedi pure se arrivano da te.</p>`
+    : '';
+  return `
+  <div class="section" id="comuni-provincia" style="padding:32px 0 0;">
+    <h2>${esc(m.nome)} in provincia di ${esc(pv.provincia)}</h2>
+    ${rigaDove}
+    <p>La provincia di ${esc(pv.provincia)} ha ${tutti.length} comuni. Se abiti in uno di questi, questa è la pagina giusta: ${chi} della zona si spostano in tutta la provincia.</p>
+    <details style="margin:8px 0 0;">
+      <summary style="cursor:pointer;color:#0066ff;font-weight:700;">Vedi tutti i ${tutti.length} comuni della provincia di ${esc(pv.provincia)}</summary>
+      <p style="line-height:1.9;margin-top:12px;color:#33465c;">${tutti.map(esc).join(' · ')}</p>
+    </details>
+  </div>`;
+}
+
 function costruisciPagina(m, c, imprese, vicini) {
   const P = parole(m);
   const url = urlPagina(m, c);
@@ -1237,7 +1302,9 @@ function costruisciPagina(m, c, imprese, vicini) {
      che non esistono: il controllo prima di pubblicare le avrebbe
      fermate tutte. Quando aggiungi una città a CITTA, i link si
      allargano da soli. */
-  const vicine = CITTA.filter(x => x.slug !== c.slug)
+  /* 4 nov 2026: solo le citta' della STESSA regione (prima erano tutte e 105,
+     un blocco identico su 1.802 pagine). */
+  const vicine = CITTA.filter(x => x.slug !== c.slug && x.regione === c.regione)
     .map(x => `<a href="/${m.slug}-${x.slug}">${esc(x.nome)}</a>`)
     .join(' · ');
   const altriMestieri = MESTIERI.filter(x => x.slug !== m.slug && (x.ruolo || '') === (m.ruolo || ''))
@@ -1315,6 +1382,7 @@ ${JSON.stringify(schemaBc, null, 2)}
   <p>${m.ruolo === 'professionista'
       ? `Queste cifre sono medie di mercato. A ${esc(c.nome)} l'onorario può stare un po' sopra o un po' sotto secondo la complessità della pratica, i tempi del Comune e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea: un onorario molto sotto il minimo di solito vuol dire che qualcosa non è compreso.`
       : `Queste cifre sono medie nazionali, prese dalle nostre guide, fatte con i prezzi veri di cantiere. A ${esc(c.nome)} il prezzo può stare un po' sopra o un po' sotto secondo la zona, la difficoltà di accesso al cantiere e il periodo dell'anno. Ti servono per capire se quello che ti propongono è in linea o fuori mercato: se un preventivo sta molto sotto il minimo, di solito manca qualcosa dentro.`}</p>
+${rigaPrezzario(m, c)}
 ${sezioneLocale(m, c)}
 ${m.tabella || ''}
 
@@ -1335,6 +1403,7 @@ ${faqHtml}
 
 <div class="section" style="padding-top:0;">
 ${bloccoImprese(m, c, imprese, vicini)}
+${sezioneComuni(m, c, imprese)}
 </div>
 
 <!-- 27 ott 2026: il riquadro «Avvisami gratis» per i clienti (lo disegna js/avvisi-clienti.js) -->
@@ -1355,10 +1424,10 @@ ${bloccoImprese(m, c, imprese, vicini)}
     <p><a href="/imprese-${c.slug}">Tutte le imprese e gli artigiani a ${esc(c.nome)} →</a></p>
   </div>
 
-  <div class="section" id="stesso-mestiere-altrove" style="padding:32px 0 0;">
-    <h2>${esc(m.nome)} in altre città</h2>
+  ${vicine ? `<div class="section" id="stesso-mestiere-altrove" style="padding:32px 0 0;">
+    <h2>${esc(m.nome)} in altre città ${c.regione === "Valle d'Aosta" ? 'della Valle d’Aosta' : 'della regione ' + esc(c.regione)}</h2>
     <p style="line-height:2.1;">${vicine}</p>
-  </div>
+  </div>` : ''}
 
   <div class="cta-box">
     <h2>Sei ${esc(m.articolo)}${esc(m.nome.toLowerCase())} a ${esc(c.nome)}?</h2>
