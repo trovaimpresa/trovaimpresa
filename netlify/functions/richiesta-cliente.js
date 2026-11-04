@@ -75,6 +75,15 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Nome e telefono sono obbligatori.' }) };
   }
 
+  /* 4 nov 2026 — niente link (truffa del finto preventivo). La stessa regola
+     sta nel database (sql/niente-link-moduli.sql): qui serve solo a dare
+     al cliente un messaggio chiaro invece di un errore generico. */
+  const _testoLink = (ricerca + ' ' + nome + ' ' + zona).toLowerCase()
+    .replace(/[\w.%+-]+@[\w.-]+/g, ' ').replace(/\btrovaimpresa\.(com|it)\b/g, ' ');
+  if (/(https?:|www\.|\b[a-z0-9-]+\.(com|it|net|org|eu|info|biz|ly|gl|cc|ws|tk|ru|cn|xyz|top|site|online|link|click|app|page|dev|live|shop|store|club)\b)/.test(_testoLink)) {
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Niente link: scrivi a parole, senza indirizzi di siti internet.' }) };
+  }
+
   /* ===== 16 agosto 2026 — IL CONSENSO SI CONTROLLA QUI, NON SOLO NEL BROWSER =====
      Questa funzione manda nome, telefono ed email a un massimo di 5 imprese.
      La spunta nella pagina si aggira con due clic dagli strumenti del browser:

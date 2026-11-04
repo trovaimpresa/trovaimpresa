@@ -2724,7 +2724,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const dett=r?await r.text().catch(()=>''):'';
       console.error('chat_invia:',r&&r.status,dett);
       input.value=testo;
-      chatAvviso(/bloccato/i.test(dett)?'Questa impresa non riceve piu\' i tuoi messaggi.':'Il messaggio non e\' partito. Controlla la connessione e premi di nuovo Invia.');
+      chatAvviso(/LINK_VIETATO|Niente link/i.test(dett)?'Niente link nei messaggi: scrivi a parole, senza indirizzi di siti internet.':/bloccato/i.test(dett)?'Questa impresa non riceve piu\' i tuoi messaggi.':'Il messaggio non e\' partito. Controlla la connessione e premi di nuovo Invia.');
       return;
     }
     await caricaMessaggiChat(conv,true);

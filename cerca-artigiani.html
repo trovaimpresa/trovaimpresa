@@ -741,12 +741,12 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome, telefono, email, categoria: 'artigiani', zona, ricerca , consenso: true, consenso_testo: "Ho letto la privacy policy e accetto che la mia richiesta venga mandata a un massimo di 5 attivita iscritte della mia zona, e che il mio nome, il mio telefono e la mia email vengano dati solo a quelle che chiederanno di contattarmi."})
       });
-      if (!res.ok) throw new Error('invio fallito');
+      if (!res.ok) { let _m = ''; try { _m = (await res.json()).error || ''; } catch (_) {} throw new Error(_m || 'invio fallito'); }
       document.getElementById('richiesta-cliente-box').innerHTML = '<p style="font-weight:700;color:#0066ff;font-size:15px">✅ Grazie! Ti ricontatteremo presto.</p>';
     } catch (e) {
       rcInvioInCorso = false;
       if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.textContent = 'Fatti chiamare'; }
-      alert('Errore nell\'invio. Riprova.');
+      alert(/link/i.test(e && e.message || '') ? e.message : 'Errore nell\'invio. Riprova.');
     }
   }
 
