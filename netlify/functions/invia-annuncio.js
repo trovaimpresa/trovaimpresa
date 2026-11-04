@@ -11,6 +11,7 @@ const crypto = require('crypto');
 //   [CITTA]     citta' dell'impresa
 //   [VETRINA]   link alla sua scheda pubblica (esiste sempre)
 //   [PAGINA]    link alla pagina mestiere+citta' dove compare
+//   [ATTIVA]    link per attivare la scheda (gruppo «non confermati»)
 //
 // Gruppi: 'completi' | 'incompleti' | 'senza_foto' (+ '_1' / '_2': divisa in due giorni) | 'tutti' | 'prova'
 // 'prova' manda solo ad Alessio, per vedere com'e' venuta prima di
@@ -245,7 +246,9 @@ function riempi(testo, imp) {
     .replace(/\[SCADENZA\]/g, dataIta(imp.premium_scadenza))
     .replace(/\[CITTA\]/g, (imp.citta || '').trim())
     .replace(/\[VETRINA\]/g, linkVetrina(imp))
-    .replace(/\[PAGINA\]/g, linkPagina(imp));
+    .replace(/\[PAGINA\]/g, linkPagina(imp))
+    // 4 nov 2026: link per chi non ha mai confermato l'email (casella gia' scritta)
+    .replace(/\[ATTIVA\]/g, 'https://trovaimpresa.com/conferma.html?attiva=1&email=' + encodeURIComponent(imp.email || ''));
 }
 
 exports.handler = async function (event) {
@@ -290,7 +293,9 @@ exports.handler = async function (event) {
   const { data: tutte, error } = await sb.from('imprese')
     .select('id, user_id, nome, nome_attivita, email, citta, provincia, tipo, mestiere, mestieri, piano, premium_scadenza, is_test, email_promo, vetrina_attiva')
     .eq('is_test', false)
-    .eq('email_confermata', true)
+    /* 4 nov 2026: il gruppo «non_confermati» e' l'unico che scrive a chi
+       NON ha confermato l'email (per invitarlo ad attivare la scheda). */
+    .eq('email_confermata', gruppo !== 'non_confermati')
     // chi si e' tolto dalle email promozionali non riceve piu' nulla da qui
     // (7 set 2026). Le email di servizio partono da altre funzioni.
     .neq('email_promo', false);
