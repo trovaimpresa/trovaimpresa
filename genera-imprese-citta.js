@@ -39,11 +39,24 @@ async function fetchImprese(citta) {
   // prende ancora "Monza e della Brianza", ma "Enna" non prende "Ravenna").
   const filtro = `or=(citta.ilike."${citta}",provincia.ilike."${citta}*")`;
   const url = `${SUPABASE_URL}/rest/v1/imprese_pubbliche?select=id,nome,mestiere,tipo,citta,valutazione_media,piano,verificata,descrizione&${encodeURI(filtro)}&limit=40`;
-  const res = await fetch(url, {
-    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-  });
-  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
-  const data = await res.json();
+  /* 4 nov 2026: con scadenza, e se la rete non c'e' (giro automatico del
+     lunedi', o PC senza rete) si usa dati-imprese.json, la stessa scorta
+     di genera-mestiere-citta.js. */
+  let data;
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+    data = await res.json();
+  } catch (e) {
+    const f = path.join(__dirname, 'dati-imprese.json');
+    let scorta = null;
+    try { scorta = JSON.parse(fs.readFileSync(f, 'utf8')); } catch (_) {}
+    if (!scorta || !scorta.citta || !(citta in scorta.citta)) throw e;
+    data = scorta.citta[citta].slice();
+  }
   // 24 ott 2026: tutti uguali, in ordine di valutazione
   data.sort((a, b) => (b.valutazione_media || 0) - (a.valutazione_media || 0));
   return data.slice(0, MAX_IMPRESE);
@@ -121,8 +134,8 @@ if (require.main === module) (async () => {
     }
 
     // Rimuovi sezione precedente se presente
-    const reOld = new RegExp(`${START}[\\s\\S]*?${END}\\n?`, '');
-    html = html.replace(reOld, '');
+    const reOld = new RegExp(`\\s*${START}[\\s\\S]*?${END}\\s*`, "");  // 4 nov: si mangia anche gli a capo intorno, se no ogni giro aggiunge una riga vuota
+    html = html.replace(reOld, '\n\n  ');
 
     // 4 nov 2026: senza imprese -> noindex + fuori da sitemap; con imprese -> di nuovo su Google
     html = segnaPagina(html, !imprese.length);
