@@ -213,6 +213,12 @@ function controllaDoveVannoIRinvii(){
     const meta = a.split('#')[0].split('?')[0].replace(/^\//, '');
     if (!meta) continue;                            // "/" e "/#registrati"
     if (a.indexOf('/.netlify/') === 0) continue;    // lo serve Netlify
+    /* 4 nov 2026: «/imprese-:splat» porta a una pagina diversa per ogni
+       indirizzo. Basta che esista almeno un file con quell'inizio. */
+    if (meta.indexOf(':splat') !== -1) {
+      const testa = meta.split(':splat')[0];
+      if (fs.readdirSync(RADI).some(f => f.startsWith(testa) && f.endsWith('.html'))) continue;
+    }
     if (esiste(meta) || esiste(meta + '.html')) continue;
     errore('netlify.toml', 'il rinvio da ' + da + ' porta a ' + a + ', che non esiste');
   }

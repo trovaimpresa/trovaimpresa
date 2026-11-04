@@ -1363,3 +1363,94 @@
   from = "/sitemap-forum.xml"
   to = "/.netlify/functions/sitemap-forum"
   status = 200
+
+# ⛔ 4 novembre 2026 — PAGINE MESTIERE+CITTA' VUOTE TOLTE (AdSense).
+# Chi apre un indirizzo tolto (es. /muratore-enna) va a /imprese-enna.
+# NON forzate apposta: se la pagina rinasce (un'impresa si iscrive e si
+# rilancia genera-mestiere-citta.js) il file esiste e vince lui.
+# 302 e non 301: la pagina puo' tornare.
+[[redirects]]
+  from = "/impresa-edile-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/idraulico-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/elettricista-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/imbianchino-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/muratore-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/piastrellista-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/cartongessista-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/serramentista-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/termoidraulico-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/installatore-fotovoltaico-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/rifacimento-tetti-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/geometra-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/architetto-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/ingegnere-strutturale-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/certificato-energetico-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/direttore-lavori-*"
+  to = "/imprese-:splat"
+  status = 302
+
+[[redirects]]
+  from = "/interior-designer-*"
+  to = "/imprese-:splat"
+  status = 302
+

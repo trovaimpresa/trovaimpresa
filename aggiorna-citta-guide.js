@@ -53,7 +53,7 @@ function leggiCitta() {
 }
 
 /* ---- 2. i riquadri dentro una guida ---- */
-const RIQUADRO = /<div class="cities-grid">([\s\S]*?)<\/div>/g;
+const RIQUADRO = /<div class="cities-grid"(?: data-mestiere="[a-z0-9-]+")?>([\s\S]*?)<\/div>/g;
 
 /* ⚠️ 12 set 2026 — IL GUAIO DEI NOMI DOPPI.
    Il mestiere si deduce dai link che il riquadro ha gia'. Ma
@@ -75,15 +75,22 @@ function mestiereDal(href, citta) {
 function aggiorna(html, citta) {
   let cambiati = 0, mestieri = [];
   const nuovo = html.replace(RIQUADRO, (tutto, dentro) => {
+    /* 4 nov 2026: il mestiere si scrive nel riquadro (data-mestiere), perche'
+       adesso un pulsante puo' portare a /imprese-<citta> quando la pagina del
+       mestiere non esiste (le vuote sono state tolte): dal primo link non si
+       capirebbe piu' il mestiere. */
+    const segnato = tutto.match(/data-mestiere="([a-z0-9-]+)"/);
     const primo = dentro.match(/href="(\/[a-z0-9-]+)"/);
-    if (!primo) return tutto;                       // riquadro strano: lo lascio stare
-    const mestiere = mestiereDal(primo[1], citta);
+    if (!segnato && !primo) return tutto;           // riquadro strano: lo lascio stare
+    const mestiere = segnato ? segnato[1] : mestiereDal(primo[1], citta);
     if (!mestiere) return tutto;                    // non riconosco la citta': non tocco niente
     const righe = citta
-      .map(c => `        <a href="/${mestiere}-${c.slug}">${c.nome}</a>`)
+      .map(c => fs.existsSync(path.join(CARTELLA, `${mestiere}-${c.slug}.html`))
+        ? `        <a href="/${mestiere}-${c.slug}">${c.nome}</a>`
+        : `        <a href="/imprese-${c.slug}">${c.nome}</a>`)
       .join('\n');
     cambiati++; mestieri.push(mestiere);
-    return `<div class="cities-grid">\n${righe}\n      </div>`;
+    return `<div class="cities-grid" data-mestiere="${mestiere}">\n${righe}\n      </div>`;
   });
   return { nuovo, cambiati, mestieri };
 }

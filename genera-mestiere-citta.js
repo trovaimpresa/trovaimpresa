@@ -1304,10 +1304,10 @@ function costruisciPagina(m, c, imprese, vicini) {
      allargano da soli. */
   /* 4 nov 2026: solo le citta' della STESSA regione (prima erano tutte e 105,
      un blocco identico su 1.802 pagine). */
-  const vicine = CITTA.filter(x => x.slug !== c.slug && x.regione === c.regione)
+  const vicine = CITTA.filter(x => x.slug !== c.slug && x.regione === c.regione && PIENE.has(nomeFile(m, x)))
     .map(x => `<a href="/${m.slug}-${x.slug}">${esc(x.nome)}</a>`)
     .join(' · ');
-  const altriMestieri = MESTIERI.filter(x => x.slug !== m.slug && (x.ruolo || '') === (m.ruolo || ''))
+  const altriMestieri = MESTIERI.filter(x => x.slug !== m.slug && (x.ruolo || '') === (m.ruolo || '') && PIENE.has(nomeFile(x, c)))
     .map(x => `<a href="/${x.slug}-${c.slug}">${x.nome}</a>`)
     .join(' · ');
 
@@ -1419,8 +1419,8 @@ ${sezioneComuni(m, c, imprese)}
   </div>
 
   <div class="section" id="altri-mestieri" style="padding:0;">
-    <h2>${m.ruolo === 'professionista' ? 'Altri professionisti' : 'Altri mestieri'} a ${esc(c.nome)}</h2>
-    <p style="line-height:2.1;">${altriMestieri}</p>
+    ${altriMestieri ? `<h2>${m.ruolo === 'professionista' ? 'Altri professionisti' : 'Altri mestieri'} a ${esc(c.nome)}</h2>
+    <p style="line-height:2.1;">${altriMestieri}</p>` : ''}
     <p><a href="/imprese-${c.slug}">Tutte le imprese e gli artigiani a ${esc(c.nome)} →</a></p>
   </div>
 
@@ -1456,10 +1456,21 @@ ${bloccoGestionale(m)}
 /* ============================================================
    VIA
    ============================================================ */
+/* ⚠️ 4 nov 2026 — LE PAGINE VUOTE NON SI SCRIVONO PIU'.
+   Erano 1.513 su 1.802, gia' nascoste a Google dal 25 set, ma il
+   controllore di AdSense le vedeva lo stesso. Adesso: prima un giro per
+   sapere quali pagine hanno imprese (PIENE), poi si scrivono solo quelle
+   e si cancellano le vecchie rimaste vuote. I link fra pagine guardano
+   PIENE, cosi' nessuno punta a una pagina che non c'e'.
+   Chi arriva a un indirizzo cancellato va a /imprese-<citta>
+   (regole in netlify.toml, non forzate: se la pagina rinasce, vince lei). */
+const PIENE = new Set();
+
 (async () => {
   const generate = [];
   const inIndice = [];   // solo le pagine con imprese della citta' vanno nella sitemap
   let conImprese = 0, senzaImprese = 0;
+  const lavoro = [];
 
   for (const c of CITTA) {
     let tutte;
@@ -1483,13 +1494,21 @@ ${bloccoGestionale(m)}
          sopra un certo numero divide fra cartellini ed elenco. */
 
       const file = nomeFile(m, c);
-      fs.writeFileSync(path.join(OUT, file), costruisciPagina(m, c, imprese, vicini), 'utf8');
-      generate.push(file);
-      if (imprese.length) inIndice.push(file);
-
-      if (imprese.length) { conImprese++; console.log(`✓ ${file}: ${imprese.length} imprese`); }
-      else { senzaImprese++; console.log(`· ${file}: nessuna impresa, pagina con invito`); }
+      if (imprese.length) { PIENE.add(file); lavoro.push([m, c, imprese, vicini, file]); }
+      else {
+        senzaImprese++;
+        const vecchia = path.join(OUT, file);
+        if (fs.existsSync(vecchia)) { fs.unlinkSync(vecchia); console.log(`× ${file}: nessuna impresa, pagina tolta`); }
+      }
     }
+  }
+
+  for (const [m, c, imprese, vicini, file] of lavoro) {
+    fs.writeFileSync(path.join(OUT, file), costruisciPagina(m, c, imprese, vicini), 'utf8');
+    generate.push(file);
+    inIndice.push(file);
+    conImprese++;
+    console.log(`✓ ${file}: ${imprese.length} imprese`);
   }
 
   // Sitemap separata: non tocca sitemap.xml ne' sitemap-seo.xml
@@ -1506,9 +1525,8 @@ ${inIndice.map(u => `  <url><loc>${BASE}/${u.replace(/\.html$/, '')}</loc><lastm
     const q = caricaScorta();
     console.log(`⚠️  Internet non raggiungibile: usato dati-imprese.json del ${q && q.fotografia_del ? q.fotografia_del : '?'}`);
   }
-  console.log(`Generate ${generate.length} pagine (${MESTIERI.length} mestieri × ${CITTA.length} città)`);
-  console.log(`Con imprese: ${conImprese} · Con invito a lasciare la richiesta: ${senzaImprese}`);
-  console.log(`In sitemap e visibili a Google: ${inIndice.length} · Nascoste a Google (vuote): ${generate.length - inIndice.length}`);
+  console.log(`Scritte ${generate.length} pagine con imprese (su ${MESTIERI.length * CITTA.length} possibili)`);
+  console.log(`Senza imprese, non scritte: ${senzaImprese}`);
   console.log('Scritta anche sitemap-mestieri.xml');
   console.log('='.repeat(60));
 })();
