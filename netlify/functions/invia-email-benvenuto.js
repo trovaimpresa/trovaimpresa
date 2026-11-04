@@ -433,6 +433,45 @@ exports.handler = async function(event) {
       return { statusCode: 500, body: 'Errore Resend: ' + errBody };
     }
 
+    /* 4 nov 2026 — I DOPPIONI. Arif (Roma) si era iscritto due volte, con
+       due email diverse: una scheda artigiano piena e una impresa vuota. Poi
+       ha scritto →5← volte all'assistenza. Da oggi, a ogni iscrizione nuova,
+       si cerca se c'e' gia' qualcuno con lo STESSO TELEFONO (ultime →9← cifre)
+       o lo STESSO NOME dell'attivita' (senza spazi e segni). Se si', l'email
+       ad Alessio lo dice in rosso. Non blocca niente: avvisa e basta.
+       Se il controllo fallisce, l'email parte lo stesso senza avviso. */
+    let doppioni = [];
+    if (!premium && SUPABASE_KEY && tipo !== 'candidato') {
+      try {
+        const h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+        const r = await fetch(SUPABASE_URL + '/rest/v1/imprese?select=id,email,tipo,nome_attivita,telefono'
+                              + '&or=(is_test.is.null,is_test.eq.false)', { headers: h, signal: AbortSignal.timeout(6000) });
+        if (r.ok) {
+          const tutte = await r.json();
+          const tel = x => String(x || '').replace(/\D/g, '').slice(-9);
+          const nom = x => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const io = tutte.find(x => String(x.email || '').toLowerCase() === String(email).toLowerCase());
+          if (io) {
+            const t = tel(io.telefono), n = nom(io.nome_attivita);
+            doppioni = tutte.filter(x => x.id !== io.id && (
+              (t.length === 9 && tel(x.telefono) === t) ||
+              (n.length >= 3 && nom(x.nome_attivita) === n)
+            )).slice(0, 5);
+          }
+        }
+      } catch (e) {
+        console.warn('[benvenuto] controllo doppioni non riuscito:', e && e.message);
+      }
+    }
+    const escD = x => String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const bloccoDoppioni = doppioni.length
+      ? '<div style="border:2px solid #b42318;background:#fef3f2;border-radius:10px;padding:12px 16px;margin:12px 0">'
+        + '<p style="margin:0 0 6px;color:#b42318;font-weight:700">⚠️ Forse è un doppione. C\'è già:</p>'
+        + doppioni.map(x => '<p style="margin:4px 0">• <a href="https://trovaimpresa.com/profilo-impresa?id=' + x.id + '">'
+            + escD(x.nome_attivita || 'senza nome') + '</a> — ' + escD(x.tipo || '—') + ' — ' + escD(x.email) + ' (id ' + x.id + ')</p>').join('')
+        + '</div>'
+      : '';
+
     // Notifica admin: avvisa info@trovaimpresa.com di ogni nuova iscrizione/upgrade.
     const vecchio = !premium && iscrittoIl && !isNaN(iscrittoIl) && (Date.now() - iscrittoIl.getTime()) > 3 * 24 * 3600 * 1000;
     const dataIscr = vecchio ? iscrittoIl.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) : '';
@@ -446,12 +485,13 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           from: 'TrovaImpresa <info@trovaimpresa.com>',
           to: ['info@trovaimpresa.com'],
-          subject: (premium ? '⭐ Ha attivato il Gestionale: '
+          subject: (doppioni.length ? '⚠️ DOPPIONE? ' : '') + (premium ? '⭐ Ha attivato il Gestionale: '
                    : (vecchio ? '👋 Primo accesso (già iscritto): '
                    : (daGestionale ? '🔔 Nuova iscrizione dal gestionale: ' : '🔔 Nuova iscrizione: ')))
                    + (nome || 'senza nome') + ' (' + (tipo || 'n/d') + ')'
                    + (vecchio ? ' — iscritto il ' + dataIscr : ''),
           html: '<h2>' + (premium ? 'Ha attivato il Gestionale' : (vecchio ? 'Primo accesso di un iscritto' : 'Nuova iscrizione')) + ' su TrovaImpresa</h2>'
+                + bloccoDoppioni
                 + (vecchio ? '<p><strong>Iscritto il:</strong> ' + dataIscr + ' (non è un iscritto nuovo: è entrato per la prima volta)</p>' : '')
                 + '<p><strong>Nome:</strong> ' + (nome || '—') + '</p>'
                 + '<p><strong>Email:</strong> ' + email + '</p>'
