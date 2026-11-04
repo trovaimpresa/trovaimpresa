@@ -10,6 +10,8 @@
 
 const fs = require('fs');
 const path = require('path');
+// 4 nov 2026: le citta' senza imprese prendono il noindex e escono da sitemap.xml
+const { segnaPagina, aggiornaSitemap } = require('./nascondi-citta-vuote');
 
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
@@ -92,7 +94,9 @@ ${JSON.stringify(itemList, null, 2)}
 
 // ---------- main ----------
 
-(async () => {
+module.exports = { cardHTML, sezioneHTML };
+
+if (require.main === module) (async () => {
   const dir = __dirname;
   const files = fs.readdirSync(dir).filter((f) => /^imprese-.+\.html$/.test(f));
   console.log(`Trovate ${files.length} pagine città.\n`);
@@ -120,11 +124,15 @@ ${JSON.stringify(itemList, null, 2)}
     const reOld = new RegExp(`${START}[\\s\\S]*?${END}\\n?`, '');
     html = html.replace(reOld, '');
 
+    // 4 nov 2026: senza imprese -> noindex + fuori da sitemap; con imprese -> di nuovo su Google
+    html = segnaPagina(html, !imprese.length);
+    aggiornaSitemap(path.basename(file, '.html'), !imprese.length);
+
     if (!imprese.length) {
       // Nessuna impresa: pagina lasciata senza sezione (rimossa se c'era)
       fs.writeFileSync(fp, html, 'utf8');
       vuote++;
-      console.log(`— ${citta}: nessuna impresa, sezione omessa`);
+      console.log(`— ${citta}: nessuna impresa, sezione omessa, pagina nascosta a Google`);
       continue;
     }
 
