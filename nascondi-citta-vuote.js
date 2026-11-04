@@ -39,9 +39,13 @@ function segnaPagina(html, vuota) {
 function aggiornaSitemap(slug, vuota) {
   if (!fs.existsSync(SITEMAP)) return;
   let xml = fs.readFileSync(SITEMAP, 'utf8');
-  const loc = `https://trovaimpresa.com/${slug}`;
+  // 4 nov 2026: in sitemap le lettere accentate stanno scritte in codice
+  // (imprese-forl%C3%AC): si cercano tutte e due le forme, se no Forli' esce doppia
+  const loc = `https://trovaimpresa.com/${encodeURI(slug)}`;
+  const forme = [slug, encodeURI(slug)].map((x) =>
+    `https://trovaimpresa.com/${x}`.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const reUrl = new RegExp(
-    `\\s*<url>\\s*<loc>${loc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}</loc>[\\s\\S]*?</url>`
+    `\\s*<url>\\s*<loc>(?:${forme.join('|')})</loc>[\\s\\S]*?</url>`
   );
   const presente = reUrl.test(xml);
   if (vuota && presente) {
