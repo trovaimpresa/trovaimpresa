@@ -37,3 +37,13 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avvio); else avvio();
 })();
+
+/* 4 nov 2026 — prova dei loghi (fino al 4 feb 2027): carica js/loghi-ospiti.js,
+   cosi' le pagine citta' e mestiere non vanno toccate una per una. */
+(function () {
+  if (window.__loghiOspiti || document.querySelector('script[src*="loghi-ospiti"]')) return;
+  var s = document.createElement('script');
+  s.src = '/js/loghi-ospiti.js?v=1';
+  s.defer = true;
+  document.head.appendChild(s);
+})();

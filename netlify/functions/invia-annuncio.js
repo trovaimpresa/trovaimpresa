@@ -265,6 +265,8 @@ function riempi(testo, imp) {
     .replace(/\[PAGINA\]/g, linkPagina(imp))
     // 4 nov 2026: link per chi non ha mai confermato l'email (casella gia' scritta)
     .replace(/\[PAGINA_CITTA\]/g, linkPaginaCitta(imp))
+    // 4 nov 2026: dove si entra per caricare il logo (porta al pannello dopo il login)
+    .replace(/\[PANNELLO\]/g, 'https://trovaimpresa.com/login-impresa.html')
     .replace(/\[ATTIVA\]/g, 'https://trovaimpresa.com/conferma.html?attiva=1&email=' + encodeURIComponent(imp.email || ''));
 }
 
@@ -353,6 +355,10 @@ exports.handler = async function (event) {
   } else if (gruppo === 'con_logo') {
     // 4 nov 2026 — chi ha il logo: e' chi gira gratis negli spazi della sua citta'
     destinatari = conEmail.filter(i => i.logo_url && String(i.logo_url).trim() && i.vetrina_attiva !== false);
+  } else if (gruppo === 'senza_logo') {
+    // 4 nov 2026 — chi NON ha il logo: gli si dice che, se lo carica, anche lui
+    // gira gratis negli spazi della sua citta' fino al 4 feb 2027
+    destinatari = conEmail.filter(i => !(i.logo_url && String(i.logo_url).trim()) && i.vetrina_attiva !== false);
   } else if (gruppo === 'tutti_1' || gruppo === 'tutti_2' || gruppo === 'tutti_3') {
     // 1 nov 2026 — tutti gli iscritti, divisi in tre per id (resto 0, 1, 2):
     // Resend gratuito manda 100 email al giorno, cosi' si spedisce in tre
