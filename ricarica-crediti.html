@@ -124,6 +124,17 @@
     color:var(--blu);text-decoration:none}
   .torna:hover{text-decoration:underline}
 
+  /* 5 nov 2026 — «Come spendere meno crediti», copiato da css/gestionale.css */
+  .ai-risp{margin:0 0 20px;background:#fff4e3 !important;border:2px solid #ff8800 !important;border-radius:12px;padding:20px 22px}
+  .ai-risp[hidden]{display:none}
+  .ai-risp-tit{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;color:#0a2a4d !important;margin-bottom:12px}
+  .ai-risp-tit svg{width:28px;height:28px;flex:0 0 auto;stroke:#ff8800 !important;color:#ff8800 !important}
+  .ai-risp-l{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .ai-risp-l li{font-size:17px;line-height:1.5;color:#1b2b3d !important;padding-left:22px;position:relative}
+  .ai-risp-l li::before{content:"";position:absolute;left:4px;top:.65em;width:9px;height:9px;border-radius:50%;background:#ff8800}
+  .ai-risp-l b{font-weight:800;color:#0a2a4d !important}
+  @media(max-width:560px){.ai-risp{margin:0 0 16px;padding:16px}.ai-risp-tit{font-size:20px}.ai-risp-l li{font-size:16px}}
+
   .nascosto{display:none}
 </style>
 <style>/* 5 ott 2026: come il Gestionale - sfondo #e7eef8 e bordo blu scuro sulle schede */
@@ -196,6 +207,21 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       </div>
     </div>
 
+    <!-- 5 nov 2026 — stesso riquadro della prima schermata del gestionale
+         (gestionale-app.html, id ai-risp): se si cambia un consiglio, si
+         cambia in tutti e due i posti. -->
+    <div class="ai-risp" id="ai-risp">
+        <div class="ai-risp-tit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Come spendere meno crediti</div>
+        <ul class="ai-risp-l">
+          <li><b>Queste cose sono gratis:</b> il microfono per dettare, la correzione del testo, il racconto della giornata con «Parla» e le domande all'assistente.</li>
+          <li><b>Scrivi tutto in una volta.</b> Cliente, misure e materiali nello stesso messaggio: una richiesta costa 1 credito.</li>
+          <li><b>Se l'AI sbaglia una cosa piccola, correggila a mano.</b> Rifare la richiesta costa un altro credito.</li>
+          <li><b>Il Report costa 2 crediti:</b> fallo una volta, a fine mese.</li>
+          <li><b>Per le domande usa la chat o l'assistente.</b> La chat ha i suoi messaggi e non tocca i crediti.</li>
+          <li><b>I crediti del mese non si accumulano:</b> se non li usi si perdono. Quelli comprati invece non scadono mai.</li>
+          <li><b>Se l'AI non risponde, il credito ti torna da solo.</b></li>
+        </ul>
+      </div>
     <div id="avvisi-crediti"></div>
 
     <div class="tagli nascosto" id="tagli">
