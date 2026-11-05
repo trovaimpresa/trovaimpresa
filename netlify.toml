@@ -290,6 +290,22 @@
 
 # ===== fine della roba tenuta fuori =====
 
+# ===== 5 novembre 2026 — trovaimpresa.it GIRA SUL .com =====
+# Il .it e' solo un'insegna in piu': chi lo scrive finisce sul .com, alla
+# stessa pagina. 301 = trasloco definitivo, cosi' Google non vede due siti
+# uguali. force = true perche' i file esistono e senza Netlify li servirebbe.
+[[redirects]]
+  from = "https://trovaimpresa.it/*"
+  to = "https://trovaimpresa.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.trovaimpresa.it/*"
+  to = "https://trovaimpresa.com/:splat"
+  status = 301
+  force = true
+
 # ===== 18 agosto 2026 — «VOGLIO CONTATTARLO» =====
 # Il pulsante dentro l'email che arriva all'impresa. Indirizzo corto perche'
 # finisce dentro un'email: /.netlify/functions/... si legge male e certi
