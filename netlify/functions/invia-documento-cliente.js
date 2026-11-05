@@ -49,7 +49,7 @@ function corpoHtml(messaggio, nomeFile, mittenteNome) {
     +     '</div>'
     +   '</div>'
     +   '<div style="text-align:center;font-size:13px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
-    +     esc(mittenteNome || 'TrovaImpresa') + ' &middot; inviato tramite TrovaImpresa.com'
+    +     esc(mittenteNome || 'TrovaImpresa') + ' &middot; inviato tramite TrovaImpresa.it'
     +   '</div>'
     + '</div></body></html>';
 }

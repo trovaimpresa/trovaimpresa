@@ -109,8 +109,8 @@ function testoInHtml(testo, emailDest) {
     + corpo
     + '</div>'
     + '<div style="text-align:center;font-size:13px;color:#5b6b80;padding:18px 10px;line-height:1.6">'
-    + 'TrovaImpresa.com &middot; Alessio Pinto &middot; Rieti (RI)<br>'
-    + 'Ricevi questa email perche&#39; sei iscritto a TrovaImpresa.com<br>'
+    + 'TrovaImpresa.it &middot; Alessio Pinto &middot; Rieti (RI)<br>'
+    + 'Ricevi questa email perche&#39; sei iscritto a TrovaImpresa.it<br>'
     + '<a href="https://trovaimpresa.com/niente-email?e=' + encodeURIComponent(emailDest || '')
     + '&c=' + codiceDisiscrizione(emailDest)
     + '" style="color:#5b6b80">Non vuoi piu&#39; ricevere queste email? Togliti con un clic</a>'

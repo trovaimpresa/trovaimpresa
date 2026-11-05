@@ -97,7 +97,7 @@ function corpo(impresa, righe) {
       e il pulsante che ti prepara il preventivo gia’ compilato.
     </p>
     <p style="font-size:14.5px;color:#7a8a9c;margin:22px 0 0">
-      Un cordiale saluto,<br>Il Team di TrovaImpresa.com
+      Un cordiale saluto,<br>Il Team di TrovaImpresa.it
     </p>
   </div></body></html>`;
 }

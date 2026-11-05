@@ -32,7 +32,7 @@ async function mandaEmail(to, subject, corpo) {
         <img src="https://trovaimpresa.com/img/logo-email.png" width="220" alt="TrovaImpresa" style="width:220px;max-width:70%;height:auto;border:0;display:block;margin:0 auto">
       </div>
       ${corpo}
-      <p>Un cordiale saluto,<br>Il Team di TrovaImpresa.com</p>
+      <p>Un cordiale saluto,<br>Il Team di TrovaImpresa.it</p>
     </div>`;
   try {
     const r = await fetch('https://api.resend.com/emails', {

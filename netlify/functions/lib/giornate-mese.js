@@ -79,7 +79,7 @@ function html(d, prova) {
     + tab('Per lavoratore', ['Nome', 'Giorni', 'Ore'], d.persone.map(p => '<tr><td ' + td + '>' + esc(p.nome) + '</td><td ' + tdn + '>' + p.giorni + '</td><td ' + tdn + '>' + ore(p.ore) + '</td></tr>'))
     + tab('Per cantiere', ['Cantiere', 'Giorni'], d.cantieri.map(c => '<tr><td ' + td + '>' + esc(c.nome) + '</td><td ' + tdn + '>' + c.giorni + '</td></tr>'))
     + tab('Giorno per giorno', ['Giorno', 'Cantiere', 'Chi'], d.giorni.map(g => '<tr><td ' + td + '>' + esc(giorno(g.data)) + '</td><td ' + td + '>' + esc(g.cantiere) + '</td><td ' + td + '>' + esc(g.chi.join(', ')) + '</td></tr>'))
-    + '<p style="margin-top:28px;color:#64748b;font-size:13px">Mandata dal gestionale di TrovaImpresa.com</p></div>';
+    + '<p style="margin-top:28px;color:#64748b;font-size:13px">Mandata dal gestionale di TrovaImpresa.it</p></div>';
 }
 
 function csv(d) {

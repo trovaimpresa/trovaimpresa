@@ -140,7 +140,7 @@ function emailScadenzaPremium(nome, scadenza, tipo) {
           </tr></table>
           <p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Il tuo account, la tua scheda e i tuoi dati restano attivi in ogni caso.</p>
           <p style="margin:0 0 16px;">Resto a disposizione per qualsiasi necessità o chiarimento tramite questo indirizzo email.</p>
-          <p style="margin:0;">Un cordiale saluto,<br><strong>Il Team di TrovaImpresa.com</strong></p>
+          <p style="margin:0;">Un cordiale saluto,<br><strong>Il Team di TrovaImpresa.it</strong></p>
         </td></tr>
         <tr><td style="background:#0a2a4d;padding:18px 32px;text-align:center;color:#a9c9f5;font-size:13px;line-height:1.5;">
           &copy; 2026 TrovaImpresa &ndash; Alessio Pinto &ndash; Rieti (RI)<br>
