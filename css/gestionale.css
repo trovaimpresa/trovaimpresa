@@ -127,6 +127,16 @@
   .ai-risp-l li::before{content:"";position:absolute;left:4px;top:.65em;width:9px;height:9px;border-radius:50%;background:#ff8800}
   .ai-risp-l b{font-weight:800;color:#0a2a4d !important}
   @media(max-width:560px){.ai-risp{margin:0 10px 12px;padding:16px}.ai-risp-tit{font-size:20px}.ai-risp-l li{font-size:16px}}
+  /* 5 nov sera — chiuso su una riga (Alex: «piu' piccolo»), si apre col clic */
+  .ai-risp:not([open]){padding:10px 16px}
+  .ai-risp summary.ai-risp-tit{list-style:none;cursor:pointer;margin-bottom:0;font-size:18px}
+  .ai-risp summary.ai-risp-tit::-webkit-details-marker{display:none}
+  .ai-risp summary.ai-risp-tit svg{width:22px;height:22px}
+  .ai-risp[open] summary.ai-risp-tit{margin-bottom:12px}
+  .ai-risp-apri{margin-left:auto;font-size:15px;font-weight:700;color:#b35f00 !important;white-space:nowrap;flex:0 0 auto}
+  .ai-risp[open] .ai-risp-apri{font-size:0}
+  .ai-risp[open] .ai-risp-apri::after{content:"Chiudi \25B4";font-size:15px}
+  @media(max-width:560px){.ai-risp:not([open]){padding:10px 12px}.ai-risp summary.ai-risp-tit{font-size:16px}}
   .ai-str-giu{border-top:1px solid var(--bordo);padding:16px;background:var(--sfondo)}
   .ai-str-giu[hidden]{display:none}
 

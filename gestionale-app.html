@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/gestionale.css?v=20261105a">
+<link rel="stylesheet" href="/css/gestionale.css?v=20261105b">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=7">
 
@@ -119,14 +119,14 @@
         <a class="ai-str-cta" id="ai-str-cta" href="/ricarica-crediti.html">Ricarica</a>
       </div>
       <!-- 5 nov 2026 — COME SPENDERE MENO CREDITI (chiesto da Alex).
-           Sempre aperto, vicino al saldo, colore che si nota. I costi sono
+           5 nov sera: chiuso su una riga, si apre col clic (Alex: «più piccolo»). Vicino al saldo, colore che si nota. I costi sono
            quelli veri: supabase/functions/ai-generate (preventivo/cliente/
            lavoro 1, report 2), ai-correggi gratis, refund_ai_credit se l'AI
            non risponde, consume_ai_credit (il mese non si accumula, i
            comprati restano), la chat scala i suoi messaggi. Se cambiano li',
            si cambia anche qui. Si vede solo se l'AI e' attiva. -->
-      <div class="ai-risp" id="ai-risp">
-        <div class="ai-risp-tit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Come spendere meno crediti</div>
+      <details class="ai-risp" id="ai-risp">
+        <summary class="ai-risp-tit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Come spendere meno crediti<span class="ai-risp-apri" aria-hidden="true">Apri ▾</span></summary>
         <ul class="ai-risp-l">
           <li><b>Queste cose sono gratis:</b> il microfono per dettare, la correzione del testo, il racconto della giornata con «Parla» e le domande all'assistente.</li>
           <li><b>Scrivi tutto in una volta.</b> Cliente, misure e materiali nello stesso messaggio: una richiesta costa 1 credito.</li>
@@ -136,7 +136,7 @@
           <li><b>I crediti del mese non si accumulano:</b> se non li usi si perdono. Quelli comprati invece non scadono mai.</li>
           <li><b>Se l'AI non risponde, il credito ti torna da solo.</b></li>
         </ul>
-      </div>
+      </details>
       <div class="ai-str-giu" id="ai-str-giu" hidden></div>
     </div>
     <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>

@@ -19,8 +19,8 @@
    - non e' gia' comparsa in questa visita (sessionStorage)
 
    Si carica nei 3 pannelli: artigiano, impresa, professionisti.
-   Usa le classi delle finestre del pannello (.modal-ai-*),
-   qui sotto c'e' solo lo stile del bollino.
+   5 nov 2026: riquadro piccolo in basso a destra (#ti-bollino),
+   non piu' la finestra grande al centro.
    ============================================================ */
 (function () {
   var GIORNI_RIMANDO = 7;
@@ -49,23 +49,23 @@
       '<span style="font-size:15px;font-weight:600;color:#0066ff">&#9733; Leggi le recensioni &rarr;</span></span></a>';
   }
 
-  function scappa(t) {
-    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
+  // 5 nov 2026 sera: non piu' una finestra al centro ma un riquadro piccolo
+  // in basso a destra (Alex: «messo cosi' e' strano», «anche piu' piccolo»).
   function stile() {
     if (document.getElementById('ti-bollino-stile')) return;
     var s = document.createElement('style');
     s.id = 'ti-bollino-stile';
     s.textContent =
-      '#modal-bollino .modal-ai{max-width:720px}' +
-      '#modal-bollino .modal-ai-close{color:var(--mid)}' +
-      '#modal-bollino .bollino-anteprima{display:flex;justify-content:center;padding:18px;background:#fff;border-radius:12px;border:1px dashed var(--border)}' +
-      '#modal-bollino .bollino-codice{width:100%;height:96px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--mid);resize:none;line-height:1.5}' +
-      '#modal-bollino .bollino-nota{font-size:15px;color:var(--light);margin-top:10px}' +
-      '#modal-bollino .modal-footer{padding:0 28px 28px}' +
-      '#modal-bollino .btn-chiudi{flex:0 0 auto}' +
-      '@media(max-width:600px){#modal-bollino .modal-footer{flex-direction:column-reverse}#modal-bollino .btn-chiudi{width:100%}}';
+      '#ti-bollino{position:fixed;right:24px;bottom:96px;z-index:900;width:330px;background:#fff;border:1px solid #dde3ea;border-radius:14px;box-shadow:0 10px 30px rgba(10,42,77,.18);padding:14px 16px 16px;font-family:inherit;color:#0a2a4d;box-sizing:border-box}' +
+      '#ti-bollino .tb-top{display:flex;align-items:flex-start;gap:8px}' +
+      '#ti-bollino .tb-tit{font-size:15.5px;font-weight:800;flex:1;line-height:1.3;margin:0}' +
+      '#ti-bollino .tb-x{border:0;background:none;font-size:18px;color:#64748b;cursor:pointer;padding:0 2px;line-height:1}' +
+      '#ti-bollino .tb-txt{font-size:14px;color:#475569;margin:6px 0 12px;line-height:1.4}' +
+      '#ti-bollino .tb-btns{display:flex;gap:8px}' +
+      '#ti-bollino .tb-btns button{flex:1;font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:10px 8px;cursor:pointer}' +
+      '#ti-bollino .tb-copia{background:#0a2a4d;color:#fff;border:0}' +
+      '#ti-bollino .tb-fatto{background:#fff;color:#0a2a4d;border:1.5px solid #0a2a4d}' +
+      '@media(max-width:600px){#ti-bollino{left:12px;right:12px;width:auto;bottom:84px}}';
     document.head.appendChild(s);
   }
 
@@ -80,7 +80,7 @@
   }
 
   function chiudi(modo) {
-    var o = document.getElementById('modal-bollino');
+    var o = document.getElementById('ti-bollino');
     if (o) o.remove();
     if (modo === 'fatto') {
       salva({ bollino_messo_il: new Date().toISOString(), bollino_rimanda_al: null });
@@ -91,52 +91,39 @@
   }
 
   function apri(imp) {
+    if (document.getElementById('ti-bollino')) return;
     stile();
     var codice = codiceBollino(imp.id);
     var o = document.createElement('div');
-    o.className = 'modal-ai-overlay show';
-    o.id = 'modal-bollino';
+    o.id = 'ti-bollino';
+    o.setAttribute('role', 'dialog');
+    o.setAttribute('aria-labelledby', 'tb-titolo');
     o.innerHTML =
-      '<div class="modal-ai" role="dialog" aria-modal="true" aria-labelledby="bollino-titolo">' +
-        '<div class="modal-ai-header">' +
-          '<div><h2 id="bollino-titolo">⭐ Fatti trovare di più</h2>' +
-          '<p>Metti il bollino TrovaImpresa sul tuo sito: i clienti vedono le tue recensioni.</p></div>' +
-          '<button class="modal-ai-close" type="button" aria-label="Chiudi" data-b="tardi">✕</button>' +
-        '</div>' +
-        '<div class="modal-ai-body">' +
-          '<div class="richiesta-box">' +
-            '<div class="ric-title">Così si vede sul tuo sito</div>' +
-            '<div class="bollino-anteprima">' + codice.replace('target="_blank"', 'target="_blank" rel="noopener"') + '</div>' +
-          '</div>' +
-          '<div class="ric-title">Il codice da incollare</div>' +
-          '<textarea class="bollino-codice" readonly>' + scappa(codice) + '</textarea>' +
-          '<div class="ai-genera-box" style="margin-top:14px"><button class="ai-genera-btn" type="button" data-b="copia">📋 Copia il codice</button></div>' +
-          '<div class="bollino-nota">Non sai dove incollarlo? Giralo a chi ti ha fatto il sito.</div>' +
-        '</div>' +
-        '<div class="modal-footer">' +
-          '<button class="btn-chiudi" type="button" data-b="tardi">Più tardi</button>' +
-          '<button class="btn-invia-prev" type="button" data-b="fatto">✓ Fatto, l\'ho messo</button>' +
-        '</div>' +
-      '</div>';
+      '<div class="tb-top"><p class="tb-tit" id="tb-titolo">⭐ Hai un sito? Mettici il bollino</p>' +
+        '<button class="tb-x" type="button" aria-label="Più tardi" data-b="tardi">✕</button></div>' +
+      '<div class="tb-txt">Un riquadro «Ci trovi su TrovaImpresa»: i clienti leggono le tue recensioni.</div>' +
+      '<div class="tb-btns"><button class="tb-copia" type="button" data-b="copia">📋 Copia il codice</button>' +
+        '<button class="tb-fatto" type="button" data-b="fatto">✓ L\'ho messo</button></div>';
     document.body.appendChild(o);
 
     o.addEventListener('click', function (ev) {
-      if (ev.target === o) return chiudi('tardi');
       var b = ev.target.closest('[data-b]');
       if (!b) return;
       var cosa = b.getAttribute('data-b');
       if (cosa === 'copia') {
-        var ta = o.querySelector('.bollino-codice');
-        var fatto = function () { b.textContent = '✓ Codice copiato'; setTimeout(function () { b.textContent = '📋 Copia il codice'; }, 2500); };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(ta.value).then(fatto, function () { ta.select(); document.execCommand('copy'); fatto(); });
-        } else { ta.select(); document.execCommand('copy'); fatto(); }
+        var fatto = function () { b.textContent = '✓ Copiato'; setTimeout(function () { b.textContent = '📋 Copia il codice'; }, 3000); };
+        // Prima la strada vecchia (funziona sempre), poi quella nuova come riserva
+        var ok = false;
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = codice; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+          document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
+        } catch (e) {}
+        if (ok) return fatto();
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(codice).then(fatto, function () {});
         return;
       }
       chiudi(cosa);
-    });
-    document.addEventListener('keydown', function esc(ev) {
-      if (ev.key === 'Escape' && document.getElementById('modal-bollino')) { chiudi('tardi'); document.removeEventListener('keydown', esc); }
     });
   }
 
@@ -146,7 +133,7 @@
     if (imp.bollino_messo_il) return false;
     if (imp.bollino_rimanda_al && new Date(imp.bollino_rimanda_al) > new Date()) return false;
     try { if (sessionStorage.getItem(CHIAVE_VISTA)) return false; } catch (e) {}
-    if (document.querySelector('.modal-ai-overlay.show, .modal-overlay.show')) return false; // un'altra finestra aperta
+    if (document.getElementById('ti-bollino')) return false;
     return true;
   }
 
