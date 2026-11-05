@@ -45,7 +45,7 @@
       'style="display:inline-flex;align-items:center;gap:12px;padding:12px 18px;border:1.5px solid #dde3ea;' +
       'border-radius:14px;background:#fff;text-decoration:none;font-family:Arial,sans-serif;color:#1a1a1a">' +
       '<img src="https://trovaimpresa.com/img/trovaimpresa-logo.svg" alt="TrovaImpresa" height="46" style="height:46px;width:auto">' +
-      '<span style="display:block;line-height:1.3"><b style="font-size:17px">Ci trovi su TrovaImpresa</b><br>' +
+      '<span style="display:block;line-height:1.3"><b style="font-size:17px">Ci trovi su trovaimpresa.it</b><br>' +
       '<span style="font-size:15px;font-weight:600;color:#0066ff">&#9733; Leggi le recensioni &rarr;</span></span></a>';
   }
 
