@@ -116,6 +116,17 @@
   .ai-str-cta:hover{background:var(--blu-hover)}
   .ai-str--spenta .ai-str-cta{background:var(--blu-scuro)}
 
+  /* 5 nov 2026 — riquadro «Come spendere meno crediti»: chiaro col bordo
+     arancione apposta, deve saltare all'occhio sul blu (scelto da Alex). */
+  .ai-risp{margin:0 16px 16px;background:#fff4e3 !important;border:2px solid #ff8800 !important;border-radius:12px;padding:20px 22px}
+  .ai-risp[hidden]{display:none}
+  .ai-risp-tit{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;color:#0a2a4d !important;margin-bottom:12px}
+  .ai-risp-tit svg{width:28px;height:28px;flex:0 0 auto;stroke:#ff8800 !important;color:#ff8800 !important}
+  .ai-risp-l{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .ai-risp-l li{font-size:17px;line-height:1.5;color:#1b2b3d !important;padding-left:22px;position:relative}
+  .ai-risp-l li::before{content:"";position:absolute;left:4px;top:.65em;width:9px;height:9px;border-radius:50%;background:#ff8800}
+  .ai-risp-l b{font-weight:800;color:#0a2a4d !important}
+  @media(max-width:560px){.ai-risp{margin:0 10px 12px;padding:16px}.ai-risp-tit{font-size:20px}.ai-risp-l li{font-size:16px}}
   .ai-str-giu{border-top:1px solid var(--bordo);padding:16px;background:var(--sfondo)}
   .ai-str-giu[hidden]{display:none}
 

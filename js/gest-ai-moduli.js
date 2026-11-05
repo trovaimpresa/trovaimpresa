@@ -64,6 +64,8 @@
        quando stanno finendo (sotto il 20% del mese), grigio quando l'AI
        non c'e'. */
     const pochi = attiva && quota>0 && rest<=Math.round(quota*0.2);
+    /* 5 nov 2026: i consigli sui crediti servono solo a chi l'AI ce l'ha */
+    try{ const rsp=document.getElementById("ai-risp"); if(rsp) rsp.hidden=!attiva; }catch(e){}
     box.classList.toggle("ai-str--spenta", !attiva);
     box.classList.toggle("ai-str--pochi", pochi);
 
