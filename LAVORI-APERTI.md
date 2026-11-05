@@ -4,10 +4,43 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 19 settembre 2026 (pomeriggio) — gli 8 buchi del gestionale chiusi e provati dal vivo, apertura da 16,8 a 1,5 secondi, controllo degli aggiornamenti del database (149 controlli) con il blocco al push
+Ultimo aggiornamento: 5 novembre 2026 (sera) — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
 
 
 
+
+
+## 🆕 5 NOVEMBRE 2026 — DOVE SIAMO (riassunto di ottobre e inizio novembre)
+
+### ✅ FATTO E ONLINE (le cose grosse, dal 20 ottobre al 5 novembre)
+- **Gestionale con AI gratis per tutti** (1 nov): 30 crediti e 50 messaggi di chat al mese, via il piano a pagamento, si pagano solo i pacchetti. Via Premium/Free da pannelli, ricerche, admin e pagine.
+- **La voce**: dettato in tutte le caselle lunghe (28 ott), «Parla» su ogni sezione del gestionale, nel noleggio e nell'app operaio (29 ott), racconto unico che si divide in giornate, spese, promemoria e note (3 nov), correzione automatica del testo (3 nov).
+- **Giornate di cantiere** (3 nov): il capo detta per tutti, PDF del mese, «Le mie giornate» per l'operaio, costo dei cantieri e avviso «stai andando in perdita» dall'80%.
+- **La domanda della sera** (3 nov): notifica del telefono «Com'e' andata oggi?». Tabelle `app_chiavi_push` e `gest_avvisi_sera` create il 5 nov sera (migrazione `gest_avviso_sera_5nov2026`).
+- **Caselle rosse e verdi** («Via libera» in fondo, avvisa e non blocca): gestionale imprese (1 nov, 17 moduli, motore in `js/gest-ai-moduli.js`), noleggio (1 nov, `js/caselle-controllo.js`), **app operaio (5 nov, `js/caselle-operaio.js`)**. ⛔ E' FATTO DAPPERTUTTO: non riproporlo.
+- **Capitolato**: piu' capitolati per preventivo, 10 modelli, foto, firma col dito, controllo AI, versioni con Vedi/Ripristina, controllo rosso/verde.
+- **Invia al cliente** (1 nov): link, WhatsApp, email, QR, firma col dito per preventivo e capitolato (`preventivo-cliente.html`).
+- **Fatture ricevute dai fornitori** (16 ott) con Openapi: costruite e provate solo in prova.
+- **Lavoro Edilizia** (24-25 ott): offerte di lavoro e subappalti in una pagina come il Forum (`lavoro-edilizia.html`). Dal 5 nov c'e' anche la **card nei 3 pannelli** (`js/lavoro-card.js`), sotto «Il tuo gestionale», e il Forum e' sceso li' sotto con lei.
+- **Avvisi ai clienti** (27 ott): il cliente si iscrive e riceve un'email quando entra un'impresa nella sua citta'.
+- **AdSense e Google** (4 nov): tolte le 1.513 pagine mestiere-citta' vuote, pagine citta' senza imprese in noindex, pagine mestiere rigenerate ogni notte.
+- **Bollino «Ci trovi su TrovaImpresa»** (3 nov, rifatto il 5 nov): riquadro piccolo in basso a destra nei 3 pannelli, non piu' finestra al centro.
+- **trovaimpresa.it** rimanda a trovaimpresa.com (301, 5 nov).
+- **Account del fondatore**: dal 2-3 nov si entra con **info@trovaimpresa.com** (era pintoalessio@icloud.com, stesso account e stessi dati). L'account pintoalessio@hotmail.it e' quello di PROVA.
+
+### 🔴 DA FARE
+1. **Fattura elettronica allo SDI in produzione** — costruita e provata in prova. Aspetta Alex: la accende quando tante imprese useranno il gestionale (decisione del 16 ott).
+2. **Fatture ricevute dal vivo** — mai provate contro Openapi vero.
+3. **Firma digitale vera con Openapi** — oggi c'e' solo la firma col dito (firma semplice).
+4. **Lavoro Edilizia vuoto** — 0 offerte di lavoro, 35 subappalti (5 nov). Idea: email alle imprese iscritte per invitarle a pubblicare un'offerta gratis.
+5. **Il quaderno** — da tenere aggiornato a fine sessione (questa sezione).
+
+### ⛔ LEZIONI DEL 5 NOVEMBRE
+- **Il controllo del fondatore (`js/fondatore.js`, `PROVE`) vede solo le tabelle che l'utente puo' leggere.** Una tabella chiusa apposta (es. `app_chiavi_push`, chiave privata) risulta sempre «mancante»: va tolta da `PROVE` con un commento, MAI aperta agli utenti per far tacere l'avviso.
+- **Prima di proporre un lavoro, guardare il codice**: le caselle rosse/verdi erano gia' fatte in 3 gestionali su 4.
+- **Dopo il push non lasciare Alex ad aspettare**: niente «ti scrivo fra 2 minuti»; si controlla Netlify e il sito e si risponde una volta sola.
+
+---
 
 ## 🆕 IL 29 SETTEMBRE — LA FATTURA ALLO SDI CON UN CLIC (DA FINIRE E COLLAUDARE, DOMANI POMERIGGIO)
 
