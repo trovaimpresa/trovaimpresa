@@ -1992,6 +1992,20 @@ function _arr(v){
   if (v == null || v === '') return [];
   return String(v).split(',').map(s => s.trim()).filter(Boolean);
 }
+// 5 nov 2026: i mestieri di un'impresa stanno in DUE caselle: `mestieri`
+// (lista, la riempie l'artigiano) e `mestiere` (una sola, la riempie
+// l'impresa). Il pannello leggeva solo la lista: le imprese sembravano
+// senza mestiere. Qui si uniscono le due, senza doppioni, e i nomi tipo
+// «ingegnere_strutturale» si leggono «Ingegnere strutturale».
+function _bello(m){ m=String(m).replace(/_/g,' ').trim(); return m ? m.charAt(0).toUpperCase()+m.slice(1) : m; }
+function _mestieri(i){
+  const out=[], visti={};
+  _arr(i.mestieri).concat(i.mestiere ? [i.mestiere] : []).forEach(m => {
+    const b=_bello(m), k=b.toLowerCase();
+    if (b && !visti[k]) { visti[k]=1; out.push(b); }
+  });
+  return out;
+}
 // Data in formato italiano che non stampa mai "Invalid Date".
 function _data(d){ if(!d) return '–'; const x=new Date(d); return isNaN(x)?'–':x.toLocaleDateString('it-IT'); }
 // Nome da mostrare: mai "null null".
@@ -4396,7 +4410,7 @@ function renderImprese(lista) {
       <td><strong>${esc(_nomeImp(i))}</strong>${i.is_test?' <span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span>':''}${i.vetrina_attiva===false?' <span class="badge" style="background:#e3edff;color:#0a2a4d;font-size:0.72rem">Dal gestionale</span>':''}<br><small style="color:var(--light)">${esc(i.email)}</small></td>
       <td><span class="badge ${(i.tipo||'').toLowerCase()==='artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
       <td>📍 ${esc(i.citta) || '–'}</td>
-      <td>${esc(_arr(i.mestieri).slice(0,2).join(', '))}${_arr(i.mestieri).length>2?' +altri':''}</td>
+      <td>${esc(_mestieri(i).slice(0,2).join(', '))}${_mestieri(i).length>2?' +altri':''}</td>
       <td>${i.verificata
             ? '<span class="badge badge-v">✅ Verificata</span>'
             : '<span style="color:var(--light);font-weight:600">Non verificata</span>'}</td>
@@ -4679,7 +4693,7 @@ function _creCittaNuove(lista, giorni){
 function _topConteggi(lista){
   const mest = {}, citta = {};
   lista.forEach(i => {
-    _arr(i.mestieri).forEach(m => mest[m] = (mest[m]||0)+1);
+    _mestieri(i).forEach(m => mest[m] = (mest[m]||0)+1);
     const c = (i.citta || '').trim();
     if (c) citta[c] = (citta[c]||0)+1;
   });
@@ -5099,7 +5113,7 @@ function apriDettaglio(id) {
     <div class="modal-row"><span class="modal-key">Città:</span><span class="modal-val">${esc(i.citta)||'–'} ${esc(i.cap)||''}</span></div>
     <div class="modal-row"><span class="modal-key">Indirizzo:</span><span class="modal-val">${esc(i.indirizzo)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${esc(_lista(i.zone))||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${esc(_lista(i.mestieri))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${esc(_mestieri(i).join(', '))||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Dipendenti:</span><span class="modal-val">${esc(i.dipendenti)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Dal:</span><span class="modal-val">${esc(i.anno_fondazione)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Costo:</span><span class="modal-val">${esc(i.costo)||'–'}</span></div>
