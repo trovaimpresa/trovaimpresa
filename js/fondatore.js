@@ -291,7 +291,7 @@
     "gest-scelte.sql":                  "gest_scelte gest_scelte_link gest_scelte_controlla_lavoro()",
     "gest-preventivi-link.sql":         "gest_preventivi_link gest_preventivi_link_controlla()",
     "gest-mie-giornate.sql":            "gest_mie_giornate()",
-    "gest-avviso-sera.sql":             "app_chiavi_push gest_avvisi_sera gest_avvisi_sera.ultimo_giorno",
+    "gest-avviso-sera.sql":             "gest_avvisi_sera gest_avvisi_sera.ultimo_giorno", /* app_chiavi_push NON si controlla: e' chiusa agli utenti apposta (chiave privata), quindi da qui risulterebbe sempre mancante */
     "gest-giornate-consulente-proposte.sql": "gest_giornate_proposte gest_azienda.cdl_email gest_azienda.cdl_invio gest_azienda.cdl_ultimo gest_azienda.cdl_prova gest_giornate_proposte_freno()",
     "gest-capitolato-versioni.sql":     "gest_capitolato_versioni gest_capitolato_versioni_controlla() gest_capitolato_versioni_pota()",
     "gest-scadenze-pratiche.sql":       "gest_scadenze.lavoro_id gest_scadenze.avvisi gest_scadenze.avvisa",
