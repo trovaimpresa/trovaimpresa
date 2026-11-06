@@ -61,7 +61,7 @@
   function apriGiornata(ds){
     const g=leggiGiornata(ds);
     const COL_GIOR={ritardo:["#c62828","IN RITARDO"],esce:["#e65100","ESCE"],
-                    prenot:["#7C3AED","PRENOTATO"],rientra:["#1565c0","RIENTRA"]};
+                    prenot:["#475569","PRENOTATO"],rientra:["#1565c0","RIENTRA"]};
     const riga=(x,tipo,sotto)=>nolCard({cls:"riga-gior "+tipo,
       titolo:esc(x.mezzo||"—"),
       eti:[{t:(COL_GIOR[tipo]||COL_GIOR.rientra)[1],col:(COL_GIOR[tipo]||COL_GIOR.rientra)[0]}],

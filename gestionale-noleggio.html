@@ -956,10 +956,15 @@ body:has(#ti-fondatore) .sheet--grande{
 .cal-oggi-b.ritardo{border-left-color:#c62828}
 /* ⚠️ i lavori nel calendario avevano lo stesso arancione di «esce»:
    due cose diverse dello stesso colore, sulla stessa casella. */
-.dot.esce{background:#e65100} .dot.rientra{background:#1565c0} .dot.prenot{background:#7C3AED}
+/* 6 nov 2026 (ok di Alex): niente piu' viola nel calendario — il viola vuol dire solo AI.
+   Prenotato grigio scuro, Lavoro da fare giallo ocra, Scadenza azzurra come negli altri gestionali */
+.dot.esce{background:#e65100} .dot.rientra{background:#1565c0} .dot.prenot{background:#475569}
 /* 21 ott 2026 — scadenze di mezzi, promemoria e fatture: un colore loro, diverso da prenotato e lavori */
-.cal-grid .dot.scad,.cal-legend .dot.scad,.cal-lista .dot.scad{background:#0f766e}
-.cal-grid .dot.todo,.cal-legend .dot.todo,.cal-lista .dot.todo{background:#7C3AED}
+.cal-grid .dot.scad,.cal-legend .dot.scad,.cal-lista .dot.scad{background:#0891B2}
+.cal-grid .dot.todo,.cal-legend .dot.todo,.cal-lista .dot.todo{background:#CA8A04}
+/* 6 nov 2026: i pallini erano minuscoli e la legenda grigio chiaro: si leggevano a fatica */
+.cal-grid .dot,.cal-legend .dot{width:11px;height:11px}
+.cal-legend{font-size:16px;color:#0a2a4d;gap:18px}
 .cal-grid .dot.done,.cal-legend .dot.done,.cal-lista .dot.done{background:#2e7d32}
 /* il meno e il piu' della giacenza, dentro la scheda: grossi da premere */
 .mag-btn{width:52px;height:52px;border:none;border-radius:12px;background:#e6ecf3;
