@@ -5554,3 +5554,8 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 @media(max-width:900px){
   .sheet--grande .sh-foot.co-foot .btn,.sheet--grande .sh-foot.co-foot .btn-primary{ padding:0 8px; white-space:normal; line-height:1.15; }
 }
+/* 6 nov 2026 — computo nuovo: «Altri dati (facoltativi)» chiuso */
+.co-altri{ margin-top:18px; border:1px solid var(--bordo,#E2E8F0); border-radius:12px; background:var(--card,#fff); }
+.co-altri > summary{ cursor:pointer; padding:14px 16px; font-size:17px; font-weight:700; color:var(--testo,#0F172A); list-style-position:inside; }
+.co-altri[open] > summary{ border-bottom:1px solid var(--bordo,#E2E8F0); }
+.co-altri-in{ padding:14px 16px 4px; }

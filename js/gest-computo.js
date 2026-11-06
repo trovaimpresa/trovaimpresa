@@ -207,6 +207,56 @@
      ⚠️ Elimina sta in fondo al menu, in rosso, separato: non si preme per
         sbaglio cercando «Duplica».
      ============================================================ */
+  /* ============================================================
+     6 novembre 2026 — IL COMPUTO NUOVO SI APRE SEMPLICE
+     ============================================================
+     Prima un computo nuovo si apriva sulla linguetta «4 La scheda», con
+     1-2-3 spenti davanti e dodici caselle (numero, data, oggetto, dove,
+     cliente, lavoro collegato, privati/pubblici, bozza/definitivo, note)
+     piu' due tasti di controllo per un modulo vuoto. Detto da Alessio:
+     «rendiamolo piu' semplice, alla portata di tutti».
+     Adesso: niente barra dei passi, in vista solo Titolo, Cliente e Dove;
+     il resto sta chiuso in «Altri dati (facoltativi)». In fondo Annulla e
+     Crea computo.
+     ⛔ Le caselle NON si tolgono: si SPOSTANO dentro il riquadro chiuso.
+        saveComputo le legge per id e devono esserci tutte (vedi «LE PAGINE
+        CI SONO TUTTE NEL DOCUMENTO» sopra a computoForm).
+     ============================================================ */
+  function compNuovoSemplice(){
+    const sh=$("#sheet"); if(!sh)return;
+    const nav=$("#co-nav"); if(nav)nav.style.display="none";
+    const blocchi=Array.from(sh.querySelectorAll('.copag[data-p="4"] .sh-b'));
+    if(!blocchi.length)return;
+    const primo=blocchi[0];
+    const tit=primo.querySelector(".sh-tit"); if(tit)tit.textContent="Il nuovo computo";
+    const nota=primo.querySelector(".sh-nota");
+    if(nota)nota.innerHTML="Scrivi come si chiama il lavoro e premi <b>Crea computo</b>. Subito dopo ci metti dentro le lavorazioni"+(ruoloUtente==='professionista'?".":" o carichi il foglio del geometra.");
+    const campo=function(id){const e=$("#"+id);return e?e.closest(".field"):null;};
+    const riga=function(id){const e=$("#"+id);return e?(e.closest(".row2")||e.closest(".field")):null;};
+    const tTit=campo("co-tit"), tCli=campo("co-cli"), tDove=campo("co-luogo");
+    /* in vista: titolo, cliente, dove — in quest'ordine */
+    if(nota&&tTit)nota.after(tTit);
+    if(tTit&&tCli)tTit.after(tCli);
+    if(tCli&&tDove)tCli.after(tDove);
+    const det=document.createElement("details");
+    det.className="co-altri";
+    det.innerHTML='<summary>Altri dati (facoltativi)</summary><div class="co-altri-in"></div>';
+    const dentro=det.querySelector(".co-altri-in");
+    [riga("co-num"),campo("co-ogg"),campo("co-lav")].forEach(function(x){if(x)dentro.appendChild(x);});
+    blocchi.slice(1).forEach(function(b){
+      if(b.contains(tCli)||b.contains(tDove))return;
+      const t=b.querySelector(".sh-tit"); if(t)t.remove();
+      Array.from(b.children).forEach(function(x){dentro.appendChild(x);});
+      b.remove();
+    });
+    primo.appendChild(det);
+    /* il blocco «Per chi», rimasto senza caselle, se ne va */
+    blocchi.forEach(function(b){ if(b.isConnected&&!b.querySelector("input,select,textarea")) b.remove(); });
+    const foot=sh.querySelector(".sh-foot");
+    if(foot){ foot.querySelectorAll(".ctr-tasto,.ctr-tasto-ai").forEach(function(x){x.remove();}); foot.classList.add("co-foot"); }
+    setTimeout(function(){ const i=$("#co-tit"); if(i&&!i.value)i.focus(); },350);
+  }
+
   function _capDaComputo(c){
     if(!c||!c.preventivo_id||typeof prevCache==="undefined")return false;
     return (prevCache||[]).some(function(p){return String(p.id)===String(c.preventivo_id);});
@@ -546,6 +596,7 @@
        non nel modulo, e su un computo nuovo la cache e' ancora quella vecchia */
     ctrComputoId=(c&&c.id)?c.id:null;
     if(!isNew){ try{ compBarraAzioni(c); }catch(e){ console.warn("[computo] barra azioni:",e); } }
+    else{ try{ compNuovoSemplice(); }catch(e){ console.warn("[computo] nuovo semplice:",e); } }
     ctrAscolta('computo');
     bindSeg("co-tipo");
     bindSeg("co-stato");
