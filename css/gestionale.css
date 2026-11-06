@@ -3726,7 +3726,7 @@ body:has(#ti-fondatore) .sheet--grande{
 
 .cal-lavori{ gap:4px; margin-top:5px; }
 .cal-lav{ align-items:flex-start; gap:6px; }
-.cal-lav-bar{ width:3px; height:15px; margin-top:2px; }
+.cal-lav-bar{ width:5px; height:15px; margin-top:2px; }   /* 6 nov 2026: era 3px, il colore non si vedeva */
 /* il nome va a capo invece di essere tagliato: due righe, poi si ferma */
 .cal-lav-t{
   font-size:13.5px; line-height:1.3; color:var(--testo-2);
