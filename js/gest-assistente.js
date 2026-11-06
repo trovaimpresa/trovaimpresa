@@ -62,7 +62,13 @@
     /* il «Parla» tondo: sulla pagina di partenza e sul telefono no, salvo mentre ascolta */
     + 'body.ass-rie:not(.ass-ascolta) #gv-btn{display:none!important}'
     + '@media(max-width:880px){'
-    +   'body:not(.ass-ascolta) #gv-btn{display:none!important}'
+    /* 6 nov 2026 (sera, collaudo da telefono): il «Parla» tondo sul telefono
+       non si vede MAI, nemmeno mentre ascolta o quando dice un errore: c'e'
+       il microfono grande nella barra (che diventa rosso mentre ascolta e
+       si preme di nuovo per fermare). Prima ricompariva sopra la bolla. */
+    +   '#gv-btn{display:none!important}'
+    /* la casella della Chat finiva sotto la barra in basso */
+    +   '#chat.active{padding-bottom:120px}'
     +   '#ass-box{padding:16px;border-radius:16px}'
     +   '#ass-box .ass-ciao{font-size:28px}'
     +   '#ass-box .ass-tit{font-size:21px}'
