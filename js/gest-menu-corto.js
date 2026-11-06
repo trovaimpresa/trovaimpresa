@@ -48,6 +48,11 @@
       + ".side nav.tabs .ma-gruppo[hidden]{display:none}"
       + ".side nav.tabs .ma-aiuto{margin-top:22px}"
       + ".side .menu-strumenti{display:none}"
+      /* 6 nov 2026 — «Ricarica crediti» era piu' piccola delle altre voci:
+         non ha data-tab, quindi le regole delle icone del menu la saltavano */
+      + ".side nav.tabs #tab-ricarica svg{width:30px!important;height:30px!important;padding:5px!important;box-sizing:content-box!important;border-radius:9px!important;flex:0 0 auto}"
+      + "@media(max-width:880px){.side.open nav.tabs #tab-ricarica{font-size:17px!important;gap:13px!important}"
+      +   ".side.open nav.tabs #tab-ricarica svg{width:22px!important;height:22px!important;padding:6px!important;border-radius:10px!important}}"
       + "@media(max-width:880px){"
       +   "#appview .topbar{display:none!important}"
       +   ".side.open .menu-strumenti{display:block;margin-top:-80px;padding:12px 0 120px;border-top:2px solid rgba(255,255,255,.35)}"
@@ -55,6 +60,32 @@
       +   ".side .menu-strumenti .ms-btn{display:flex;align-items:center;gap:13px;width:100%;min-height:52px;padding:10px 12px;margin:0 0 6px;"
       +     "background:transparent;border:2px solid rgba(255,255,255,.45);border-radius:10px;color:#fff;font:inherit;font-size:17px;font-weight:600;text-align:left;cursor:pointer}"
       +   ".side .menu-strumenti .ms-btn svg{width:24px;height:24px;flex:0 0 auto;stroke:#fff}"
+      + "}"
+      /* 6 nov 2026 — LA SCHERMATA DEI REPARTI SUL TELEFONO: i 6 tasti in alto
+         stanno dietro «Menu», e il logo e il titolo sono piu' bassi, cosi' i
+         reparti si vedono senza scorrere. Sul computer non cambia niente. */
+      + "#landing .lt-menu-btn{display:none}"
+      + "@media(max-width:880px){"
+      +   "#landing .landing-top{padding-top:64px!important}"
+      +   "#landing .lt-menu-btn{display:flex;align-items:center;gap:8px;position:absolute;top:12px;right:12px;z-index:5;min-height:46px;padding:8px 16px;"
+      +     "background:transparent;color:#fff;border:2px solid rgba(255,255,255,.75);border-radius:10px;font:inherit;font-size:18px;font-weight:700;cursor:pointer}"
+      +   "#landing .lt-menu-btn svg{width:22px;height:22px;stroke:#fff}"
+      +   "#landing .landing-top .lt-actions{display:none!important}"
+      +   "#landing .landing-top.lt-aperto .lt-actions{display:flex!important;position:static!important;flex-direction:column;align-items:stretch;gap:8px;margin:0 0 14px}"
+      +   "#landing .landing-top.lt-aperto .lt-actions .lt-btn{width:100%;min-height:50px;font-size:17px;justify-content:flex-start}"
+      +   "#landing .landing-top.lt-aperto .lt-actions[hidden],#landing .landing-top.lt-aperto .lt-actions .lt-btn[hidden]{display:none!important}"
+      +   "#landing .landing-top .gc-brand{height:104px!important;width:auto!important;margin:0 auto 6px!important;padding:0!important}"
+      +   "#landing .landing-top h1{font-size:28px!important}"
+      +   "#landing .landing-top small{font-size:16px!important}"
+      + "}"
+      /* 6 nov 2026 — IL CALENDARIO SUL TELEFONO: l'elenco giorno per giorno
+         (c'era gia' dal 26 settembre) sale SOPRA la griglia dei numeri. Prima
+         per arrivarci bisognava scorrere tutto il mese. */
+      + "@media(max-width:760px){"
+      +   "#calendario.active{display:flex!important;flex-direction:column}"
+      +   "#calendario > .cal-head{order:0}#calendario > .ti-sez{order:1}"
+      +   "#calendario > .cal-lista{order:2;margin-bottom:18px}"
+      +   "#calendario > .cal-grid{order:3}#calendario > .cal-legend{order:4}"
       + "}";
     document.head.appendChild(st);
   })();
@@ -235,5 +266,25 @@
     }).observe(nav, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class", "style"] });
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", monta); else monta();
+  /* 6 nov 2026 — il tasto «Menu» della schermata dei reparti (si vede solo
+     sul telefono, vedi lo stile qui sopra). Apre e chiude i tasti che c'erano
+     gia': non li copia e non li sposta. */
+  function montaLanding() {
+    var top = document.querySelector("#landing .landing-top");
+    if (!top || top.querySelector(".lt-menu-btn")) return;
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "lt-menu-btn";
+    b.setAttribute("aria-expanded", "false");
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg><span>Menu</span>';
+    b.addEventListener("click", function () {
+      var si = !top.classList.contains("lt-aperto");
+      top.classList.toggle("lt-aperto", si);
+      b.setAttribute("aria-expanded", si ? "true" : "false");
+      b.querySelector("span").textContent = si ? "Chiudi" : "Menu";
+    });
+    top.insertBefore(b, top.firstChild);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { monta(); montaLanding(); });
+  else { monta(); montaLanding(); }
 })();

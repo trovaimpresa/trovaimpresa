@@ -77,6 +77,10 @@ const _gIc = {
 #giornate .gt span{display:block;font-size:15px;color:var(--testo-2,#475569)}
 #giornate .gt b{display:block;font-size:32px;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--testo,#0f172a)}
 #giornate .gb{background:#fff;border:1px solid var(--bordo,#e2e8f0);border-radius:14px;padding:18px;margin-bottom:18px;display:flex;flex-direction:column;gap:12px}
+#giornate details.gimp{display:block}
+#giornate .gimp-t{cursor:pointer;font-size:19px;font-weight:700;list-style:revert;padding:4px 0}
+#giornate .gimp-t span{display:block;font-size:15px;font-weight:400;color:var(--testo-2,#475569);margin-top:2px}
+#giornate .gimp>.gb{border:0;border-top:1px solid var(--bordo,#e2e8f0);border-radius:0;padding:16px 0 0;margin:16px 0 0}
 #giornate .gb h4{margin:0;font-size:18px;color:var(--testo,#0f172a)}
 #giornate textarea,#giornate input[type=text],#giornate input[type=date],#giornate select{font:inherit;font-size:17px;border:1.5px solid var(--bordo-forte,#cbd5e1);border-radius:10px;padding:12px;width:100%;box-sizing:border-box;background:#fff;color:var(--testo,#0f172a)}
 #giornate textarea{min-height:90px;resize:vertical}
@@ -277,6 +281,7 @@ async function renderGiornate(){
   giorDisegna();
 }
 
+let giorImpAperto=false;   /* 6 nov 2026: le Impostazioni di Giornate restano aperte se le hai aperte tu */
 function giorDisegna(msg){
   const box=document.getElementById("gior-box"); if(!box) return;
   const ta=document.getElementById("gior-voce"); if(ta) giorVoce=ta.value;
@@ -357,6 +362,13 @@ function giorDisegna(msg){
     h+=`</div>`;
   }
 
+  /* 6 nov 2026 — LE IMPOSTAZIONI SI CHIUDONO (ok di Alex). La domanda della
+     sera e il consulente del lavoro si impostano una volta e poi non si
+     toccano piu': stavano sempre aperti in fondo alla pagina. Adesso stanno
+     dentro «Impostazioni», chiuso. Resta aperto se l'avevi aperto tu
+     (giorImpAperto), cosi' premendo Salva la pagina non si richiude. */
+  h+=`<details class="gb gimp" id="gior-imp"${giorImpAperto?" open":""}><summary class="gimp-t">Impostazioni <span>notifica della sera e consulente del lavoro</span></summary>`;
+
   /* la domanda della sera, su questo telefono */
   h+=giorSeraBox();
 
@@ -371,7 +383,10 @@ function giorDisegna(msg){
       <div class="gmsg" id="gior-cdl-msg"></div>
     </div>`;
   }
+  h+=`</details>`;
   box.innerHTML=h;
+  const imp=document.getElementById("gior-imp");
+  if(imp) imp.addEventListener("toggle",function(){ giorImpAperto=imp.open; });
 }
 
 function giorDisegnaProp(){

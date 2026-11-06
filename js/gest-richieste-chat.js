@@ -58,7 +58,8 @@
       d.setAttribute("data-rie-extra","1");
       d.setAttribute("data-action","rie-go");
       d.setAttribute("data-go",v.go);
-      d.innerHTML='<span class="ro-testo">'+esc(v.t)+'<span class="ro-dett">'+esc(v.d)+'</span></span>'
+      /* 6 nov 2026: la frase sotto ripeteva il titolo con altre parole: non si scrive piu' */
+      d.innerHTML='<span class="ro-testo">'+esc(v.t)+'</span>'
                  +'<span class="ro-freccia">\u203a</span>';
       dopo.parentNode.insertBefore(d,dopo.nextSibling);
     });

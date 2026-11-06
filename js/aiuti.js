@@ -207,7 +207,7 @@
     'partita iva': 'Le 11 cifre di un’azienda o di un professionista. Un privato non ce l’ha: a lui serve il codice fiscale.',
     'codice fiscale': 'I 16 caratteri di una persona. Per un privato e’ obbligatorio in fattura: senza, lo SdI la rifiuta.',
     'prezzo unitario (€)': 'Il prezzo di UNA unita’, IVA esclusa. Il totale della riga lo fa il gestionale: prezzo per quantita’.',
-    'quantità': 'Quante unita’: metri quadri, ore, pezzi. Moltiplicata per il prezzo unitario fa il totale della riga.',
+    /* 6 nov 2026: (i) tolta, la parola si capisce da sola — 'quantità' */
     'unità di misura': 'In cosa la misuri: m², m, kg, ore, corpo (a corpo). Finisce stampata sul documento accanto alla quantita’.',
 
     /* ---- computo metrico ---- */
@@ -272,9 +272,9 @@
     'iban': 'Il conto su cui vuoi essere pagato. Finisce stampato sulla fattura e dentro il file per lo SdI.',
     'protocollo': 'Il numero che ti da\u2019 il Comune quando depositi la pratica. Scrivilo qui: lo ritrovi sulla card senza riaprire la mail.',
     'a che punto sta': 'Lo stato della pratica in Comune: da presentare, depositata, in istruttoria, integrazioni, conclusa. E\u2019 diverso da \u201cda fare / in corso / fatto\u201d, che dice a che punto sei TU.',
-    'data prevista': 'Quando pensi di chiuderla. Con una scadenza collegata ti arriva l\u2019email 30 giorni prima, 7 giorni prima e il giorno prima.',
-    'importo (\u20ac)': 'Quanto vale, IVA esclusa. E\u2019 il numero che diventa la riga della fattura: cassa, spese e IVA si aggiungono dopo, non metterle qui.',
-    'che tipo di cliente \u00e8': 'Privato (codice fiscale), Azienda (partita IVA) o Condominio (con l\u2019amministratore). Cambia cosa ti serve per fatturare.',
+    /* 6 nov 2026: (i) tolta, la parola si capisce da sola — 'data prevista' */
+    /* 6 nov 2026: (i) tolta, la parola si capisce da sola — 'importo (\u20ac)' */
+    /* 6 nov 2026: (i) tolta, la parola si capisce da sola — 'che tipo di cliente \u00e8' */
     'obiettivo crediti': 'Quanti CFP ti servono nel periodo. Per molti Ordini sono 30 all\u2019anno, ma controlla il tuo regolamento.',
     'da incassare': 'Fatture gia\u2019 emesse che il cliente non ha ancora pagato. In rosso quelle scadute.',
     'da fatturare': 'Lavoro finito e mai fatturato. Sono soldi tuoi fermi: clicca per emettere la fattura.',
@@ -506,7 +506,10 @@
           if (t) voci.push('\u2022 ' + b.textContent.trim() + ': ' + t);
         });
         riga.dataset.tiI = '1';
-        if (voci.length) riga.appendChild(creaI(voci.join('\n\n')));
+        /* 6 nov 2026 — una (i) per spiegare il solo «Apri» e' rumore: ogni
+           riga delle tabelle ne aveva una. Si mette solo se ci sono almeno
+           due pulsanti da spiegare. */
+        if (voci.length >= 2) riga.appendChild(creaI(voci.join('\n\n')));
       });
       /* ⚠️ NEL MENU DI NAVIGAZIONE NON SI ATTACCA NIENTE — 14 agosto 2026.
          Difetto vero, visto da Alessio sull'iPhone e riprodotto qui in

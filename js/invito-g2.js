@@ -65,6 +65,9 @@
        Riepilogo. Quando si apre un modulo si nasconde, e torna dopo. */
     function puoStare() {
       if (document.querySelector("#overlay.open,.ai-ov,#gp-ov:not([hidden]),.side.open")) return false;
+      /* nella schermata dei reparti no: si chiede solo DENTRO, nel Riepilogo */
+      var av = document.getElementById("appview");
+      if (av && getComputedStyle(av).display === "none") return false;
       var rie = document.getElementById("riepilogo");
       if (rie && !rie.classList.contains("active")) return false;
       return true;

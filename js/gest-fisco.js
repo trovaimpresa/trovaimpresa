@@ -409,6 +409,17 @@
     box.innerHTML = h;
   }
 
+  /* 6 nov 2026 — IL CONSIGLIO IN DUE RIGHE. Sul telefono il consiglio
+     occupava sette righe. Adesso si legge la prima frase; il resto si apre
+     con «Perché». Il testo e' lo stesso, solo diviso. */
+  function fpConsiglioHtml(c) {
+    const t = String(c.testo || "").trim();
+    const i = t.search(/[.!?]\s/);
+    const primo = i > 0 ? t.slice(0, i + 1) : t, resto = i > 0 ? t.slice(i + 2).trim() : "";
+    return `<div class="fp-cons ${c.tono}"><div>${fpIc("idea")}</div><div><b>Il mio consiglio</b>${esc(primo)}${resto
+      ? `<details class="fp-perche" style="margin-top:6px"><summary style="cursor:pointer;font-weight:600">Perché</summary>${esc(resto)}</details>` : ""}</div></div>`;
+  }
+
   function fpScheda(f) {
     const c = f.cons;
     const pill = [1, 2, 3, 4].map(n => {
@@ -427,7 +438,7 @@
           : `Non gli hai ancora scritto${c.prossimo && c.prossimo <= 4 ? ` · si comincia da: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`}</div>
       <details class="fp-tutti" style="margin:2px 0 8px"><summary style="cursor:pointer;font-size:16px;font-weight:600;padding:6px 0">Vedi tutti e 4 i passi</summary>
         <div class="fp-passi">${pill}</div></details>
-      <div class="fp-cons ${c.tono}"><div>${fpIc("idea")}</div><div><b>Il mio consiglio</b>${esc(c.testo)}</div></div>
+      ${fpConsiglioHtml(c)}
       ${storia ? `<div class="fp-storia">${fpIc("storia")} ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">togli l'ultimo</button>` : ""}</div>` : ""}
       <div class="fp-btns">${btnNext}
         <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button></div>

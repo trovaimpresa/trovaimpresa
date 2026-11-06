@@ -87,7 +87,7 @@
 const AV_VOCI=[
   ["promemoria","I miei promemoria"],
   ["scadenze","Scadenze"],
-  ["richieste","Richiesta preventivo sito"],
+  ["richieste","Richieste dal sito"],
   ["fatture","Fatture che non mi hanno pagato"],
   ["lavori",ruoloUtente==='professionista'?"Pratiche in ritardo":"Lavori in ritardo"],
   ["preventivi","Preventivi senza risposta"],

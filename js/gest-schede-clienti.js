@@ -358,13 +358,17 @@
        si fanno con una regola, si scrivono */
     const uno=pro?"pratica":"lavoro", tanti=pro?"pratiche":"lavori";
     const quanti=n=>n+" "+(n===1?uno:tanti);
+    /* 6 nov 2026 — via «In ritardo» e «Il più in ritardo» (ok di Alex): lo
+       dicono gia' il filtro «In ritardo» qui sopra e «Parti da qui» nel
+       Riepilogo. Resta solo quello che non sta da nessun'altra parte: i soldi
+       dei lavori finiti e non ancora incassati. */
     return numFila([
-      ritardo.length?numCard({
+      false?numCard({
         domanda:"In ritardo",
         numero:String(ritardo.length),
         sotto:quanti(ritardo.length)+" oltre la data",
         tono:"err", action:"lav-vista", v:"ritardo"}):null,
-      peggio?numCard({
+      false?numCard({
         domanda:"Il più in ritardo",
         numero:_ggCorto(gg),
         sotto:(peggio.descrizione||("Senza nome")),

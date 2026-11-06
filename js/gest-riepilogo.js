@@ -36,10 +36,17 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
   /* ---- «FOTOGRAFA»: scegli cosa stai fotografando ---- */
+  const RIE_IC={
+    "🧾":'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+    "📦":'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
+    "✉️":'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+    "💬":'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z"/>'
+  };
   function rieFotoScegli(){
-    const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;gap:14px;align-items:center;width:100%;text-align:left;'
+    const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;flex-wrap:nowrap!important;gap:14px;align-items:center;width:100%;text-align:left;'
       +'border:2px solid #d9dfe7;border-radius:14px;padding:16px;margin-bottom:12px;background:#fff;font-size:21px;font-weight:700;cursor:pointer">'
-      +'<span style="font-size:34px">'+ic+'</span><span>'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
+      /* 6 nov 2026: icone disegnate, non emoji (sul telefono le emoji mandavano a capo la scritta) */
+      +'<span style="flex:0 0 auto;width:34px;height:34px;color:#0a2a4d"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(RIE_IC[ic]||"")+'</svg></span><span style="flex:1 1 auto;min-width:0">'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
     openSheetGrande("Cosa stai fotografando?",
       '<div class="sh-b"><p style="margin:0 0 14px;font-size:18px">Scegli, poi scatta o scegli la foto. L\'AI legge e riempie tutto. Costa 1 credito.</p>'
       +c("pf-forn","🧾","Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
@@ -622,11 +629,19 @@
            pulsante per andarci. Non legge niente di nuovo (usa DA) e non costa
            crediti. Il secondo pulsante apre la chat già con la domanda. */
         const _p=DA[0];
+        /* 6 nov 2026 — le frasi sotto che non aggiungono niente al titolo
+           («5 lavori in ritardo» / «La data prevista è già passata») non si
+           scrivono. Restano quelle che dicono QUALE (il nome della persona,
+           del mezzo). */
+        const _VUOTE=new Set(["La data prevista è già passata","Il giorno che avevi segnato è già passato",
+          "Un cliente ti ha scritto dalla tua pagina su TrovaImpresa","Forse vanno sollecitati"]);
+        const _dett=x=>_VUOTE.has(String(x||"").trim())?"":(x||"");
         const _chatOk=!!document.querySelector('nav.tabs button[data-tab="chat"]');
-        const _parti='<div class="rie-parti" style="background:#fff;border:2px solid #7c5cff;border-radius:16px;padding:20px;margin-bottom:16px">'
-          + '<div style="font-size:15px;font-weight:700;letter-spacing:.04em;color:#7c5cff">PARTI DA QUI</div>'
+        /* 6 nov 2026: bordo e scritta blu scuro come il resto del gestionale (prima viola) */
+        const _parti='<div class="rie-parti" style="background:#fff;border:2px solid #0a2a4d;border-radius:16px;padding:20px;margin-bottom:16px">'
+          + '<div style="font-size:15px;font-weight:700;letter-spacing:.04em;color:#0066ff">PARTI DA QUI</div>'
           + '<div style="font-size:26px;font-weight:700;margin:6px 0 4px">'+esc(_p.t)+'</div>'
-          + '<div style="font-size:18px;color:#586574;margin-bottom:12px">'+esc(_p.d)+'</div>'
+          + (_dett(_p.d)?'<div style="font-size:18px;color:#586574;margin-bottom:12px">'+esc(_dett(_p.d))+'</div>':'<div style="margin-bottom:12px"></div>')
           + '<button type="button" class="btn-primary" style="font-size:19px;padding:13px 20px;margin:4px 8px 0 0" '
           +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemarlo</button>'
           + (_chatOk?'<button type="button" class="btn" id="rie-chiedi-ai" style="font-size:19px;padding:13px 20px;margin:4px 0 0">Chiedi all\'AI cosa fare oggi</button>':'')
@@ -642,7 +657,7 @@
               return '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'"'
             +   (i>=5?' data-ro-piu="1" style="display:none"':'')+' '
             +   (r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
-            +   '<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
+            +   '<span class="ro-testo">'+esc(r.t)+(_dett(r.d)?'<span class="ro-dett">'+esc(_dett(r.d))+'</span>':'')+'</span>'
             +   '<span class="ro-freccia">›</span>'
             + '</div>';}).join("")
           + (_RS.length>5
@@ -655,7 +670,7 @@
       /* 9 ott 2026 — «FOTOGRAFA»: un solo punto d'ingresso per le foto.
          Non decide l'AI che foto è (costerebbe un credito in più): scegli tu. */
       ra.insertAdjacentHTML("afterbegin",
-        '<button type="button" class="btn-primary" id="rie-foto" style="font-size:20px;font-weight:700;padding:14px 22px;margin-bottom:14px">📷 Fotografa</button>');
+        '<button type="button" class="btn-primary" id="rie-foto" style="font-size:19px;font-weight:700;padding:13px 20px;margin-bottom:14px">📷 Fotografa</button>');
       const _bF=ra.querySelector("#rie-foto");
       if(_bF)_bF.onclick=rieFotoScegli;
       const _bAI=ra.querySelector("#rie-chiedi-ai");
@@ -985,7 +1000,7 @@
         const DS=(typeof dsCache!=="undefined"&&dsCache.length)?dsCache:await dsCarica();
         const nuove=DS.filter(r=>r._stato==="nuova").length;
         C.push(rieCard({
-          tab:"dalsito", titolo:"Richiesta preventivo sito", n:nuove, dati:DS.length>0,
+          tab:"dalsito", titolo:"Richieste dal sito", n:nuove, dati:DS.length>0,
           lab:nuove?_plur(nuove,"richiesta da leggere","richieste da leggere"):"tutte lette",
           tono:"neutro", male:nuove>0, righe:[]
         }));

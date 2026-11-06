@@ -61,6 +61,7 @@
     tocco:    '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
     video:    '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4z"/>',
     stella:   '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+    pacco:    '<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
     ripeti:   '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'
   };
   var MAPPA = {
@@ -76,11 +77,13 @@
     '🔒':'lucchetto','🔐':'lucchetto','🔎':'cerca','🔍':'cerca','⛽':'carburante','🏪':'negozio',
     '🧰':'cassetta','🧱':'muro','🧮':'calcolo','📐':'righello','📏':'righello','🎨':'pennello',
     '📇':'contatti','🏠':'casa','🏡':'casa','⚡':'lampo','✨':'lampo','💡':'idea','📊':'grafico','📈':'grafico',
-    '📧':'busta','✉':'busta','📥':'scarica','⬇':'scarica','⭐':'stella','🔔':'campana','🎓':'tocco','🎥':'video','📹':'video','🎬':'video','🔁':'ripeti','🔄':'ripeti'
+    '📧':'busta','✉':'busta','📥':'scarica','⬇':'scarica','⭐':'stella','🔔':'campana','🎓':'tocco','🎥':'video','📹':'video','🎬':'video','🔁':'ripeti','🔄':'ripeti',
+    /* 6 nov 2026 */ '🚜':'camion','📦':'pacco','🔓':'lucchetto'
   };
   var TROVA = /(⬇|✉|⭐|[☀-➿⌚-⏿]|[\uD83C-\uD83E][\uDC00-\uDFFF])️?/g;
   var SALTA = 'input,textarea,select,option,script,style,svg,.no-ico,[contenteditable="true"]';
-  var DOVE = 'section, .sheet, .toast, #rie-alert';
+  /* 6 nov 2026: anche la schermata dei reparti (#landing): li' c'erano 🚜 e ⬇ */
+  var DOVE = 'section, .sheet, .toast, #rie-alert, #landing';
 
   function cambia(root) {
     if (!root || !root.nodeType) return;
