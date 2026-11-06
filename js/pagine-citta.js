@@ -36,6 +36,17 @@
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avvio); else avvio();
+
+  /* 6 nov 2026 — nelle 106 pagine «Imprese a <città>» carica anche la fascia
+     dei marchi (js/marchi-citta.js). Da qui, così non si toccano 106 file. */
+  try {
+    if (/^\/imprese-/.test(location.pathname)) {
+      var m = document.createElement('script');
+      m.src = '/js/marchi-citta.js?v=1';
+      m.defer = true;
+      document.head.appendChild(m);
+    }
+  } catch (e) {}
 })();
 
 /* 4 nov 2026 — prova dei loghi (fino al 4 feb 2027): carica js/loghi-ospiti.js,
