@@ -144,6 +144,8 @@
         var c = o.cloneNode(true);
         c.className = "ms-btn";
         c.removeAttribute("data-aiuto");
+        /* la (i) che aiuti.js mette accanto ad «Aiuto» non si copia */
+        Array.prototype.forEach.call(c.querySelectorAll(".ti-i"), function (x) { x.remove(); });
         ms.appendChild(c);
       });
       /* dopo il clic il menu si chiude, come per le altre voci */
