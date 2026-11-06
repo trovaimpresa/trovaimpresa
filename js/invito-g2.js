@@ -59,6 +59,22 @@
       + '<button type="button" class="v-x" aria-label="Chiudi">&times;</button>';
     document.body.appendChild(d);
 
+    /* 6 nov 2026 — LA STRISCIA NON COPRE IL LAVORO. Prima usciva sopra i
+       moduli aperti e copriva «Annulla». Adesso si vede solo quando non c'e'
+       nessuna finestra aperta e, nel gestionale principale, solo nel
+       Riepilogo. Quando si apre un modulo si nasconde, e torna dopo. */
+    function puoStare() {
+      if (document.querySelector("#overlay.open,.ai-ov,#gp-ov:not([hidden])")) return false;
+      var rie = document.getElementById("riepilogo");
+      if (rie && !rie.classList.contains("active")) return false;
+      return true;
+    }
+    var guardia = setInterval(function () {
+      if (!document.body.contains(d)) { clearInterval(guardia); return; }
+      d.style.display = puoStare() ? "" : "none";
+    }, 500);
+    d.style.display = puoStare() ? "" : "none";
+
     var idVoto = null;
     function segna(stato) { if (!prova) scrivi(chiave, { stato: stato, quando: Date.now() }); }
     function chiudi() { d.remove(); }

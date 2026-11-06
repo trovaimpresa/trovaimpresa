@@ -1,0 +1,1131 @@
+/* ANTEPRIMA 6 nov 2026 — solo per le foto, non va online */
+async function renderRiepilogo(){
+    /* 6 nov 2026 — il pulsante fisso «✨ AI» non si accende piu': sul telefono
+       copriva la voce «Fatture» della barra in basso, e insieme a «Parla» e
+       «Foto» faceva tre pulsanti sopra il lavoro. Le sue quattro voci ci sono
+       gia' altrove: Chat con AI (menu), «Chiedi all'AI cosa fare oggi» (qui
+       sopra), Genera con AI (Preventivi), Fotografa (qui sopra). */
+    /* try{ rieFabAI(); }catch(e){ console.warn("[fab AI]",e); } */
+    const G=$("#rie-grid");if(!G)return;
+    if($("#rie-alert"))$("#rie-alert").innerHTML="";
+    if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
+    const mid=curMestiere();
+    const oggi=todayStr(), lim7=_giorniDopo(oggi,7), lim30=_giorniDopo(oggi,30);
+
+    /* ============================================================
+       ⚠️ 19 agosto 2026 — LE SEI ANDATE E RITORNI
+
+       Le letture del Riepilogo erano ventiquattro, ma il problema non
+       erano quelle: erano le SEI ONDATE. Sei volte «chiedo, aspetto la
+       risposta, poi chiedo la prossima» — e su una linea da cantiere
+       ogni attesa e' un pezzo di secondo in cui non si vede niente,
+       uno dopo l'altro, prima ancora del primo numero.
+
+       Tre di quelle ondate non aspettavano NESSUNA delle altre: le
+       carte (tutte, anche quelle nel Cestino), i fornitori e i computi.
+       Stavano dopo solo perche' erano scritte dopo.
+
+       Adesso PARTONO SUBITO, qui, insieme alla prima ondata, e si
+       aspettano piu' giu' dove servono. ⚠️ Nessuna lettura in piu' e
+       nessuna in meno, nessun try spostato, nessun `if` tolto: cambia
+       solo QUANDO partono. Le due ondate che restano sono quelle che
+       aspettano davvero (servono gli id dei lavori e delle fatture).
+       Da sei andate e ritorni a due.
+
+       ⚠️ IL PEZZO DELICATO: fornitori e computi hanno una loro rete —
+       se la migrazione non e' stata eseguita, la scheda non compare e
+       il Riepilogo resta intero. Metterle dentro la Promise.all della
+       prima ondata avrebbe fatto scattare l'errore GROSSO («Non riesco
+       a leggere i dati») a chi non ha eseguito un file SQL: schermata
+       vuota per una scheda in meno. Per questo si avviano a parte e si
+       aspettano dentro il loro try, com'erano.
+       ============================================================ */
+    /* una lettura avviata e non ancora aspettata non deve poter urlare da
+       sola: qui qualunque inciampo diventa un {error} da guardare dopo */
+    const _avvia=p=>Promise.resolve(p).catch(e=>({error:e||new Error("lettura non riuscita")}));
+    /* ⚠️ sb.raw vede anche le carte nel Cestino: le spese fatte con una carta
+       poi eliminata sono uscite davvero e restano nei costi (13 agosto) */
+    const _sbCarte=(sb.raw||sb.from.bind(sb));
+    const pCarteTutte=_avvia(_sbCarte("gest_carte").select("id")
+      .eq("user_id",sbUid).eq("mestiere_id",mid));
+    const pForn=Promise.all([
+      _avvia(sb.from("gest_fatture_fornitori").select("fornitore_id,importo,scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid)),
+      _avvia(sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid))
+    ]);
+    /* i computi si leggono SOLO per gli studi tecnici, come prima: agli altri
+       la sezione non c'e', e due letture inutili sono due letture inutili */
+    /* ⚠️ 20 agosto 2026 — prima partiva SOLO per gli studi tecnici. Da oggi
+       il computo ce l'hanno anche le imprese, e senza questa lettura la loro
+       scheda del Riepilogo non sarebbe mai comparsa: la sezione nel menu e
+       nessuna scheda che ci porta. Una regola che sta in due posti non si
+       sistema a meta'. */
+    /* ⛔ 22 agosto 2026 — all'artigiano il computo e' spento: le sue due
+       letture non partono nemmeno. Stessa fonte del menu (tabNascosto), non
+       un secondo elenco. Il risultato si aspetta solo dentro lo stesso `if`. */
+    const pComputi=tabNascosto("computi")?null:Promise.all([
+      /* ⚠️ «tipo» SERVE, anche se qui non si mostra — 14 agosto 2026.
+         Da oggi compRiepilogoDa guarda il tipo del computo: gli oneri
+         della sicurezza restano fuori dal ribasso solo sui lavori
+         pubblici. Senza questa colonna il Riepilogo li avrebbe contati
+         come «privato» e avrebbe scritto una cifra diversa da quella
+         dell'elenco per lo stesso computo. Due schermate, due numeri:
+         e' il difetto delle fatture del 13 agosto, in un'altra stanza. */
+      _avvia(sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc,tipo").eq("user_id",sbUid).eq("mestiere_id",mid)
+        .order("data",{ascending:false})),
+      _avvia(sb.from("gest_computo_totali").select("computo_id,importo,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid))
+    ]);
+    /* le scadenze delle persone (visita medica, formazione, documento,
+       permesso): una lettura sola, e non aspetta niente nemmeno lei */
+    const pScadPers=scadenzePersone(mid);
+
+    /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
+    /* se una lettura fallisce NON si fa finta di niente: prima il Riepilogo
+       mostrava "Tutto in ordine" con tutti zeri, come se i dati fossero spariti */
+    let erroreLettura=false, erroreLettura2=false;
+    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[],FL=[],RIFR=[],FFO=[],NOLR=[];
+    try{
+      const r=await Promise.all([
+        sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(mid)),
+        sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).or(_cliOr(mid)),
+        sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
+        sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid),
+        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+        sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
+        /* i lavori già dentro una fattura, anche solo in bozza: è così che
+           la sezione Fatture decide chi e' "da fatturare". Il Riepilogo usava
+           invece fatt_stato, che resta "none" finche' la fattura non viene
+           emessa: le due schermate si contraddicevano. (9/8/2026) */
+        sb.from("gest_fattura_lavori").select("lavoro_id").eq("user_id",sbUid),
+        /* i pieni pagati in contanti e le fatture dei fornitori: sono costi
+           veri e prima non entravano nell'utile (9/8/2026) */
+        /* 13 agosto 2026 — mancava il filtro sul reparto: i pieni di TUTTI i
+           reparti finivano nei costi del reparto che stavi guardando. Con due
+           reparti, il gasolio dell'uno abbassava l'utile dell'altro. La riga
+           qui sotto (fatture fornitori) il filtro ce l'aveva gia'.
+           ⚠️ Si prendono anche quelli SENZA reparto: sono i pieni registrati
+           prima che la colonna esistesse, e farli sparire dai costi vorrebbe
+           dire alzare l'utile di un'impresa che non ha toccato niente. Quelli
+           restano contati in tutti i reparti finche' non gli si da' un reparto. */
+        sb.from("gest_rifornimenti").select("importo,data,movimento_id")
+          .eq("user_id",sbUid).or("mestiere_id.eq."+mid+",mestiere_id.is.null"),
+        sb.from("gest_fatture_fornitori").select("importo,data,lavoro_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        /* ⛔ 24 agosto 2026 — il noleggio e' uscito dal reparto, ma un mezzo
+           taggato a QUESTO reparto e' un noleggio interno vero: conta come
+           spesa qui, come se l'avessi preso da un fornitore esterno. */
+        sb.from("nol_noleggi").select("importo,data_uscita,fase").eq("user_id",sbUid).eq("mestiere_id",mid)
+      ]);
+      L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
+      MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
+      AZ=r[9].data||null;FT=r[10].data||[];FL=(r[11]&&r[11].data)||[];
+      RIFR=(((r[12]&&r[12].data)||[])).filter(x=>!x.movimento_id);   /* quelli con carta sono già in CM */
+      FFO=((r[13]&&r[13].data)||[]);
+      NOLR=((r[14]&&r[14].data)||[]);
+      const conErrore=r.find(x=>x&&x.error);
+      if(conErrore)erroreLettura=true;
+    }catch(e){erroreLettura=true;}
+
+    if(erroreLettura){
+      const ra0=$("#rie-alert");
+      if(ra0)ra0.innerHTML='<div class="rie-errore"><b>Non riesco a leggere i dati.</b> '
+        +'Forse la connessione fa i capricci: i numeri non sono aggiornati, ma i tuoi dati sono al sicuro. '
+        +'<button class="btn" data-action="rie-riprova">Riprova</button></div>';
+      G.innerHTML='<div class="rc-caricamento">Dati non caricati. Premi Riprova qui sopra.</div>';
+      return;
+    }
+
+    const ids=L.map(l=>l.id);
+    const cliMap=Object.fromEntries(CLI.map(c=>[c.id,c.nome||""]));
+    const opeMap=Object.fromEntries(OPE.map(o=>[o.id,o.nome||""]));
+    /* la manodopera ha bisogno dei lavori, quindi prima non poteva partire —
+       ma non ha bisogno di NIENT'ALTRO: parte adesso e cammina insieme al
+       secondo giro, invece di aspettare che finisca. Le sue tre letture non
+       sono un'ondata in piu': sono dentro la stessa.
+       ⚠️ caricaManodopera si mangia i suoi errori da sola e torna sempre
+       qualcosa: lasciarla correre senza aspettarla non lascia grida in giro. */
+    const pMd=caricaManodopera(mid,L);
+
+    /* ---- secondo giro: quello che ha bisogno degli id dei lavori ---- */
+    let SP=[],nFoto=0,nVideo=0,PR=[],CM=[],FR=[];
+    try{
+      const attesaIds=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato").map(p=>p.id);
+      /* ===== 13 agosto 2026 — LA CARTA ELIMINATA CHE ALZAVA L'UTILE =====
+         `CA` sono le carte VIVE: passa dal Cestino. Quindi i movimenti si
+         chiedevano solo per quelle, e mettendo una carta nel Cestino tutte le
+         spese gia' fatte con quella carta sparivano dai costi: l'utile del
+         mese saliva da solo, senza che nessuno avesse toccato un lavoro.
+         Ma quei soldi sono usciti davvero. Si legge dalla porta di servizio
+         (sb.raw), come si fa per le tariffe delle persone eliminate dal
+         13 agosto: mettere in ordine le carte non riscrive la storia. */
+      const {data:carteTutte}=await pCarteTutte;   /* partita in cima, qui si aspetta */
+      const carteIds=(carteTutte||[]).map(c=>c.id);
+      const q=await Promise.all([
+        ids.length?sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({data:[]}),
+        ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids).not("tipo","in",_nonFotoSql):Promise.resolve({count:0}),
+        ids.length?sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
+        attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]}),
+        carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]}),
+        FT.length?sb.from("gest_fattura_righe").select("fattura_id,qta,prezzo,iva").eq("user_id",sbUid).in("fattura_id",FT.map(f=>f.id)):Promise.resolve({data:[]})
+      ]);
+      SP=q[0].data||[];nFoto=q[1].count||0;nVideo=q[2].count||0;PR=q[3].data||[];
+      CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");FR=q[5].data||[];
+      if(q.find(x=>x&&x.error))erroreLettura2=true;
+    }catch(e){erroreLettura2=true;}
+
+    /* Fornitori: tabelle nuove (sql/gest-fornitori.sql). Lettura separata e
+       tollerante: se la migrazione non è stata eseguita, il Riepilogo non va
+       in errore e la scheda semplicemente non compare. */
+    let FFOR=[],FORNI=[],fornTabOk=true;
+    try{
+      const [rff2,rfo2]=await pForn;               /* partita in cima, qui si aspetta */
+      if(rff2.error||rfo2.error)fornTabOk=false;else{FFOR=rff2.data||[];FORNI=rfo2.data||[];}
+    }catch(e){fornTabOk=false;}
+
+    /* ---- calcoli (identici a prima) ---- */
+    const aperti   = L.filter(l=>l.stato!=="fatto");
+    const ritardo  = aperti.filter(l=>inRitardo(l.stato,l.data_prevista));
+    /* Stessa definizione della sezione Fatture: "da incassare" sono le fatture
+       che hai EMESSO e che non ti hanno pagato. I lavori finiti non ancora
+       fatturati sono un'altra cosa e li conto a parte: prima finivano qui dentro
+       e il numero del Riepilogo non tornava con quello di Fatture. */
+    /* i conti delle fatture arrivano dalle fatture vere, non più dalle
+       caselle sul lavoro: una fattura può tenerne dentro tre, e ha l'IVA. */
+    const fattRigheRie={};
+    FR.forEach(r=>{ (fattRigheRie[r.fattura_id]=fattRigheRie[r.fattura_id]||[]).push(r); });
+    /* 12 agosto 2026 — qui c'era la QUARTA copia della formula, scritta a mano,
+       e si dimenticava la cassa previdenziale e le spese. Su una parcella con
+       cassa 4% e 150 di spese la sezione Fatture diceva 2.053 e il Riepilogo
+       1.800: 253 euro di differenza per una fattura sola, sul numero che vedi
+       appena apri il gestionale. Adesso chiama la stessa fattBasi di tutti gli
+       altri, quindi la domanda "quanto devo incassare" ha una risposta sola. */
+    /* col segno: una nota di credito abbassa il "da incassare", non lo alza */
+    /* 13 agosto 2026 — qui la formula del netto era RISCRITTA A MANO: la quarta
+       copia. Oggi, cambiando la base della ritenuta, si e' scollata e il
+       Riepilogo diceva 400 € meno del vero su tre fatture su quattro. Adesso
+       chiama fattConti come tutti gli altri: di copie ne resta UNA. */
+    const totaleFatt=f=>fattConti(f,fattRigheRie[f.id]||[]).daPagareFirmato;
+    const daInc    = FT.filter(f=>f.stato==="emessa");
+    const totDaInc = daInc.reduce((s,f)=>s+totaleFatt(f),0);
+    /* "da fatturare" = lavori finiti con un importo che non stanno ancora
+       dentro nessuna fattura. Qui basta il flag sul lavoro, che la fattura
+       tiene aggiornato da sola. */
+    const _giaInFatt=new Set(FL.map(x=>String(x.lavoro_id)));
+    const daFatt   = L.filter(l=>l.stato==="fatto"&&!_giaInFatt.has(String(l.id))&&(l.fatt_stato||"none")==="none"&&+l.importo>0);
+    const totDaFatt= daFatt.reduce((s,l)=>s+(+l.importo||0),0);
+    const ggPag    = (AZ&&+AZ.giorni_pagamento)||30;
+    const scadenza = f=>f.data?_giorniDopo(f.data,ggPag):"";
+    /* una nota di credito non e' un credito: non puo' essere scaduta */
+    const scadute  = daInc.filter(f=>{const sc=scadenza(f);return fattSegno(f)>0&&sc&&sc<oggi;});
+    /* 9 agosto 2026 — l'utile si fa sull'IMPONIBILE, non sul totale incassato.
+       Prima: incassato con dentro l'IVA meno spese al netto, quindi l'utile
+       usciva gonfiato di tutta l'IVA — che non è tua, la giri allo Stato.
+       Il Report usa la stessa formula (fattImponibile), così le due
+       schermate smettono di dare due utili diversi sugli stessi dati. */
+    const incMese  = FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
+                       .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0);
+    const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
+    const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
+    /* anche le spese delle carte entrano nel conto: prima erano invisibili
+       e l'utile risultava più alto del vero */
+    const speseCarte= CM.filter(m=>thisMonth(m.data||(m.created_at||"").slice(0,10))).reduce((s,m)=>s+(+m.importo||0),0);
+    /* 9 agosto 2026 — gli stessi costi che conta il Report: se no il Riepilogo
+       dice un utile e il Report un altro. RIF = pieni pagati in contanti
+       (quelli con carta stanno già in CM), FFO = fatture dei fornitori. */
+    const speseRif  = RIFR.filter(r=>thisMonth(r.data)).reduce((s,r)=>s+(+r.importo||0),0);
+    const speseForn = FFO.filter(f=>thisMonth(f.data)).reduce((s,f)=>s+(+f.importo||0),0);
+    /* ⛔ 24 agosto 2026 — noleggio interno di questo reparto: la data che conta
+       e' l'uscita del mezzo, come per i lavori.
+       ⛔ 6 settembre 2026 — UN MEZZO PRENOTATO NON E' UNA SPESA. Prima il conto
+       prendeva ogni noleggio con l'uscita in questo mese, anche quelli in fase
+       «prenotato», cioe' mezzi promessi ma ancora fermi in piazzale: l'utile
+       del mese risultava piu' basso del vero per soldi mai usciti. Adesso
+       contano solo i mezzi usciti davvero («fuori») e quelli gia' rientrati.
+       Le fasi sono tre: prenotato · fuori · rientrato. */
+    const nolReale  = x => (x.fase || 'fuori') !== 'prenotato';
+    const speseNol  = NOLR.filter(x=>nolReale(x) && thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
+    const speseMese = speseLav+speseCarte+speseRif+speseForn+speseNol;
+    const utile     = incMese-speseMese;
+    /* la scheda Report compare quando c'e' stato ALMENO UN movimento di soldi,
+       anche di mesi passati: una fattura pagata, una spesa, un movimento di
+       carta, un pieno, una fattura di un fornitore. Non basta l'utile del mese:
+       un'impresa che ha incassato a maggio e a giugno niente deve continuare a
+       vedere la sua scheda Report. */
+    const _ciSonoSoldi = FT.some(f=>f.stato==="pagata") || SP.length>0 || CM.length>0
+                       || RIFR.length>0 || FFO.length>0 || NOLR.some(nolReale);
+
+    /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
+       (ora è una riga dentro "Da sistemare oggi", più in basso) */
+    const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
+    /* 12 agosto 2026 — lo stesso conto della scheda del lavoro e del Report:
+       importo − spese − fatture dei fornitori − manodopera. Prima qui si
+       guardavano solo le spese, quindi un lavoro che nella sua scheda era in
+       perdita di 1.200 € nel Riepilogo non veniva segnalato mai. */
+    const ffPerL={};FFO.forEach(x=>{if(x.lavoro_id)ffPerL[x.lavoro_id]=(ffPerL[x.lavoro_id]||0)+(+x.importo||0);});
+    const mdRie=await pMd;                        /* partita piu' su, qui si aspetta */
+    const _margL=l=>margineLavoro(l.importo,spPerL[l.id],ffPerL[l.id],mdRie.per[String(l.id)]);
+    const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id]||ffPerL[l.id]||mdRie.per[String(l.id)])&&_margL(l)<0);
+    /* 3 nov 2026 — «STAI ANDANDO IN PERDITA»: un lavoro NON finito che ha gia'
+       speso l'80% (o piu') di quello che vale, ma non e' ancora sotto zero.
+       Stesso conto di sopra (margineLavoro): si avvisa PRIMA, mentre si e'
+       ancora in tempo, non a lavoro chiuso. */
+    const LIMITE_PERDITA=0.8;
+    const _spesoL=l=>(+l.importo||0)-_margL(l);
+    const quasiPerdita=L.filter(l=>l.stato!=="fatto"&&(+l.importo||0)>0&&_margL(l)>=0&&_spesoL(l)>=LIMITE_PERDITA*(+l.importo))
+                        .sort((a,b)=>_spesoL(b)/b.importo-_spesoL(a)/a.importo);
+
+    /* preventivi in attesa (+ totale di ognuno) */
+    const attesa=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato")
+                   .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
+    rieprevCache=attesa;
+    const totPrev={};PR.forEach(r=>{totPrev[r.preventivo_id]=(totPrev[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
+    /* 9 agosto 2026 — anche qui il numero che vede il cliente, come nella
+       lista Preventivi e nel PDF: tre schermate, un numero solo. */
+    PV.forEach(function(p){
+      const base=totPrev[p.id]||0;
+      if(ruoloUtente==='professionista'){
+        totPrev[p.id]=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait).totale;
+      }else if(p.iva_perc!=null&&p.iva_perc!==""){
+        const iva=_centPerc(base,+p.iva_perc||0);
+        totPrev[p.id]=_cent2(base+iva);
+      }
+    });
+
+    /* prossimi lavori, ordinati per data */
+    const pross=aperti.slice().sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    /* calendario: cosa c'e' nei prossimi 7 giorni */
+    const set7=aperti.filter(l=>l.data_prevista&&l.data_prevista>=oggi&&l.data_prevista<=lim7)
+                     .sort((a,b)=>a.data_prevista.localeCompare(b.data_prevista));
+    /* agenda: lavori aperti raggruppati per operatore */
+    const perOpe={};aperti.forEach(l=>{if(l.operatore_id)perOpe[l.operatore_id]=(perOpe[l.operatore_id]||0)+1;});
+    const opeOrd=Object.keys(perOpe).sort((a,b)=>perOpe[b]-perOpe[a]);
+    /* ===== 12 agosto 2026 — MEZZI E STRUMENTI SONO DUE COSE DIVERSE =====
+       Stanno nella stessa tabella, distinti dalla colonna "categoria", e qui
+       il Riepilogo li contava insieme: la scheda diceva "2 mezzi in azienda",
+       ci cliccavi sopra ed entrando nei Mezzi ne trovavi 1. L'altro era la
+       stazione totale. E la verifica del ponteggio scaduta compariva come
+       "1 mezzo con scadenza passata", portandoti nei Mezzi.
+
+       Ma la cosa grave era per il PROFESSIONISTA. La sezione Strumenti
+       promette TRE VOLTE "il Riepilogo ti avvisa prima che scadano" (e gli
+       aiuti una quarta). Non era vero: la scheda Strumenti nel Riepilogo non
+       esisteva, e l'unica che leggeva quelle scadenze — la scheda Mezzi — per
+       lui e' nascosta. Un ingegnere con la stazione totale fuori taratura non
+       lo scopriva mai dalla prima pagina, e una misura presa con uno strumento
+       fuori taratura non vale. */
+    const _pro=(ruoloUtente==='professionista');
+    const _attr=m=>m&&m.categoria==="attrezzatura";
+    const MZveicoli=MZ.filter(m=>!_attr(m));
+    const MZstrum  =MZ.filter(_attr);
+    const mzNome=Object.fromEntries(MZ.map(m=>[m.id,m.nome||"Mezzo"]));
+    const _scadDi=elenco=>{
+      const ids=new Set(elenco.map(m=>m.id));
+      return MZS.filter(v=>ids.has(v.mezzo_id)&&(v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30)))
+                .sort((a,b)=>String(a.prossima_data||"9999").localeCompare(String(b.prossima_data||"9999")));
+    };
+    const mzAvvisa=_scadDi(MZveicoli);
+    const stAvvisa=_scadDi(MZstrum);
+    /* squadra: quanti lavori aperti ha ciascuno */
+    /* carte: saldo per carta */
+    const saldoMap=Object.fromEntries(CAS.map(x=>[x.carta_id,+x.saldo||0]));
+    const carteAtt=CA.filter(c=>c.stato!=="chiusa");
+    const saldoTot=carteAtt.reduce((s,c)=>s+(saldoMap[c.id]||0),0);
+    /* condomini: quanti lavori aperti per ciascuno */
+    const perCli={};aperti.forEach(l=>{if(l.cliente_id)perCli[l.cliente_id]=(perCli[l.cliente_id]||0)+1;});
+    const cliOrd=Object.keys(perCli).sort((a,b)=>perCli[b]-perCli[a]);
+    /* scadenzario */
+    /* 12 agosto 2026 — anche le scadenze delle PERSONE (visita medica,
+       formazione sicurezza, documento, permesso di soggiorno). Prima il
+       Riepilogo leggeva solo gest_scadenze: per un'impresa edile mancavano
+       proprio quelle che portano le sanzioni, e lo Scadenzario intanto
+       prometteva che "quelle gia' passate finiscono in cima al Riepilogo". */
+    const SCP=await pScadPers;                    /* partita in cima, qui si aspetta */
+    const scTutte=SC.concat(SCP);
+    const scAperte=scTutte.filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30)
+                     .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza));
+
+    /* ---- "Da sistemare oggi": la scorciatoia in cima ----
+       Non calcola niente di nuovo: raccoglie i numeri già contati qui sopra
+       e li mette in fila dal più urgente. Le schede sotto restano identiche.
+       Se non c'e' niente di scaduto o in ritardo, lo dice e basta. */
+    const lavOggi = aperti.filter(l=>l.data_prevista===oggi);
+    /* le scadenze legate a un mezzo (revisione, assicurazione...) sono le stesse
+       righe che la vista gest_mezzi_scadenze conta per i Mezzi: le tolgo da qui,
+       altrimenti la stessa cosa comparirebbe due volte con parole diverse. */
+    const scScadute = scAperte.filter(x=>x.data_scadenza<oggi&&!x.mezzo_id);
+    const mzScaduti = mzAvvisa.filter(v=>v.scadute>0);
+    const limVecchio = _giorniDopo(oggi,-7);
+    const prevFermi = attesa.filter(p=>p.data&&String(p.data)<limVecchio);
+    const totScadute = scadute.reduce((s,f)=>s+totaleFatt(f),0);
+
+    const DA=[];
+    const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
+    if(scadute.length)   DA.push({g:1,male:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
+                                  d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
+    if(daFatt.length)    DA.push({g:2,male:1,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
+                                  d:"Valgono "+eur(totDaFatt)+" e non sono ancora in nessuna fattura",go:"fatture"});
+    if(ritardo.length)   DA.push({g:1,male:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
+                                  d:"La data prevista è già passata",go:"lavori"});
+    if(scScadute.length) DA.push({g:1,male:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
+                                  d:(scScadute[0].titolo||"Scadenza")+(scScadute[0]._persona?" · "+scScadute[0]._nome:"")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
+    /* ⛔ 18 settembre 2026 — NON allo studio tecnico: i Mezzi gli sono
+       nascosti dal menu (TAB_NASCOSTI_PRO), quindi la riga lo invitava a
+       cliccare per andare in una sezione che per lui non esiste.
+       Le tarature dei suoi strumenti restano: sono la riga qui sotto. */
+    if(!_pro && mzScaduti.length) DA.push({g:1,male:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
+                                  d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
+    /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.
+       Per lo studio tecnico e' l'avviso della taratura, quello promesso. */
+    const stScaduti = stAvvisa.filter(v=>v.scadute>0);
+    if(stScaduti.length) DA.push({g:1,male:1,
+      t:nn(stScaduti.length, _pro?"strumento con scadenza passata":"attrezzatura con scadenza passata",
+                             _pro?"strumenti con scadenza passata":"attrezzature con scadenza passata"),
+      d:(mzNome[stScaduti[0].mezzo_id]||(_pro?"Strumento":"Attrezzatura"))+(stScaduti[0].prossimo_titolo?" · "+stScaduti[0].prossimo_titolo:""),
+      go:"attrezzature"});
+    if(inPerdita.length) DA.push({g:1,male:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
+                                  d:"Fra spese, fornitori e manodopera esce più di quello che entra",go:"report"});
+    if(quasiPerdita.length){ const q=quasiPerdita[0];
+      DA.push({g:1,male:1,t:nn(quasiPerdita.length,"lavoro sta per andare in perdita","lavori stanno per andare in perdita"),
+        d:(q.descrizione||q.dove||"Lavoro")+": hai già speso il "+Math.round(_spesoL(q)/q.importo*100)+"% di quello che vale",go:"lavori"}); }
+    /* patente a crediti: sotto 15 l'impresa non può operare in cantiere,
+       quindi avviso già a 20 per dare il tempo di recuperarli. */
+    const patC = AZ&&AZ.pat_crediti!=null ? +AZ.pat_crediti : null;
+    /* la patente a crediti serve a chi entra in cantiere: uno studio tecnico
+       non ce l'ha, e vedersi un allarme rosso su un adempimento che non lo
+       riguarda fa solo perdere fiducia nel resto degli avvisi (9/8/2026) */
+    const _patNo=(ruoloUtente==='professionista');
+    if(!_patNo&&patC!=null&&patC<15)      DA.push({g:1,male:1,t:"Patente a crediti sotto il minimo — "+patC+(patC===1?" credito":" crediti"),
+                                  d:"Sotto 15 crediti non si può operare in cantiere",act:"rie-azienda"});
+    else if(!_patNo&&patC!=null&&patC<20) DA.push({g:2,t:"Patente a crediti quasi al minimo — "+patC+" crediti",
+                                  d:"Il minimo per operare in cantiere è 15",act:"rie-azienda"});
+    if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
+                                  d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
+    /* ⚠️ 21 agosto 2026 — IL TITOLO DICEVA UNA COSA E LA SCHEDA UN'ALTRA.
+       Qui c'era «1 preventivo senza risposta», e due centimetri sotto la
+       scheda Preventivi diceva «2 in attesa di risposta». Non sono numeri
+       sbagliati — sono due conti diversi: uno e' «fermo da piu' di una
+       settimana», l'altro «in attesa» — ma sullo stesso schermo, con le
+       stesse parole e numeri diversi, sembra un errore del gestionale.
+       ⛔ Il titolo adesso dice DA QUANTO, che e' quello che lo distingue. */
+    if(prevFermi.length) DA.push({g:2,male:1,t:nn(prevFermi.length,"preventivo fermo da più di una settimana","preventivi fermi da più di una settimana"),
+                                  /* ⚠️ 21 agosto 2026 — con UNO si leggeva "Fermi ... vanno sollecitati".
+                                     Il titolo il singolare ce l'aveva (nn), la riga sotto no. Visto da
+                                     Alessio in una foto. Stessa famiglia di "le 1 righe rimaste uguali". */
+                                  d:prevFermi.length===1
+                                      ? "Forse va sollecitato"
+                                      : "Forse vanno sollecitati",go:"preventivi"});
+
+    /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
+       IVA i PDF di preventivi e fatture escono senza intestazione, quindi è la
+       prima cosa da fare appena ci si iscrive. */
+    if(!AZ||!(AZ.nome||"").trim()||!(AZ.piva||"").trim()){
+      DA.unshift({g:2,pri:0,t:"Completa i dati della tua azienda",
+                  d:"Nome e partita IVA compaiono in cima a ogni preventivo e fattura",act:"rie-azienda"});
+    }
+
+    /* ⛔ 18 settembre 2026 — PRIMA LE GRAVI, E NIENTE SPARISCE IN SILENZIO.
+       Due difetti in una riga sola, trovati insieme:
+       1. la fascia diceva «N cose che chiedono attenzione» e ne disegnava 5.
+          Con undici voci — e ci si arriva — sei sparivano senza che niente
+          lo dicesse. È la stessa cosa del controllo del computo: dire che
+          c'è qualcosa e non far vedere dove.
+       2. non veniva ordinata: il campo `g` (1 grave, 2 attesa) serviva solo
+          al colore. Le voci uscivano nell'ordine in cui sono scritte qui
+          sopra, quindi «Patente a crediti sotto il minimo» — l'unica che
+          dice all'impresa che in cantiere non ci puo' entrare — poteva
+          restare fuori dalle prime cinque, spinta giù da cose meno gravi.
+       Adesso: prima le gravi (pri, se c'è, se no g), l'ordine dentro il
+       gruppo resta quello scritto, e le altre si aprono qui sotto senza
+       cambiare pagina. */
+    /* \u26a0\ufe0f LO ZERO NON \u00c8 VUOTO. Qui la prima volta c'era `(...)||9`: con
+       `pri:0` \u2014 i dati azienda, che devono stare in cima \u2014 JavaScript legge
+       lo zero come vuoto e ci metteva 9, cio\u00e8 in fondo. Visto in anteprima
+       prima di toccare i file. Niente `||` sui numeri che possono valere 0. */
+    const _quantoUrge=function(x){
+      const v=(x&&x.pri!=null)?x.pri:(x?x.g:null);
+      return (v==null||isNaN(+v))?9:(+v);
+    };
+    DA.sort(function(a,b){ return _quantoUrge(a)-_quantoUrge(b); });
+
+    /* ⛔ QUALI SEZIONI VANNO MALE: si prende da qui e da nessun'altra parte,
+       cioe' dalla stessa lista che leggi nella fascia. «Lavoro in programma
+       oggi» NON e' un guaio, e infatti non ha il segno «male». */
+    _rieMale=new Set(DA.filter(x=>x.male&&x.go).map(x=>x.go));
+
+    const ra=$("#rie-alert");
+    if(ra){
+      if(!DA.length){
+        ra.innerHTML='<div class="rie-oggi tutto-ok">'
+          + '<div class="ro-tit"><span class="ro-pallino"></span>Tutto in ordine</div>'
+          + '<div class="ro-sotto">Niente di scaduto e niente in ritardo. Buon lavoro.</div>'
+          + '</div>';
+      }else{
+        /* 9 ott 2026 — «PARTI DA QUI»: la prima voce della lista, in grande, col
+           pulsante per andarci. Non legge niente di nuovo (usa DA) e non costa
+           crediti. Il secondo pulsante apre la chat già con la domanda. */
+        const _p=DA[0];
+        const _chatOk=!!document.querySelector('nav.tabs button[data-tab="chat"]');
+        const _parti='<div class="rie-parti" style="background:#fff;border:2px solid #7c5cff;border-radius:16px;padding:20px;margin-bottom:16px">'
+          + '<div style="font-size:15px;font-weight:700;letter-spacing:.04em;color:#7c5cff">PARTI DA QUI</div>'
+          + '<div style="font-size:26px;font-weight:700;margin:6px 0 4px">'+esc(_p.t)+'</div>'
+          + '<div style="font-size:18px;color:#586574;margin-bottom:12px">'+esc(_p.d)+'</div>'
+          + '<button type="button" class="btn-primary" style="font-size:19px;padding:13px 20px;margin:4px 8px 0 0" '
+          +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemarlo</button>'
+          + (_chatOk?'<button type="button" class="btn" id="rie-chiedi-ai" style="font-size:19px;padding:13px 20px;margin:4px 0 0">Chiedi all\'AI cosa fare oggi</button>':'')
+          + '</div>';
+        /* 6 nov 2026 — la prima cosa sta gia' grande in «Parti da qui»:
+           nella lista sotto non si ripete. Prima «5 lavori in ritardo» era
+           scritto due volte una sotto l'altra (e una terza nella scheda). */
+        const _RS=DA.slice(1);
+        ra.innerHTML=_parti+(!_RS.length?'':'<div class="rie-oggi">'
+          + '<div class="ro-tit"><span class="ro-pallino"></span>'+(_RS.length===1?"Poi c'è anche":"Poi ci sono anche")+'</div>'
+          + '<div class="ro-sotto">'+(_RS.length===1?"Un'altra cosa che chiede attenzione.":_RS.length+" altre cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
+          + _RS.map(function(r,i){
+              return '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'"'
+            +   (i>=5?' data-ro-piu="1" style="display:none"':'')+' '
+            +   (r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
+            +   '<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
+            +   '<span class="ro-freccia">›</span>'
+            + '</div>';}).join("")
+          + (_RS.length>5
+              ? '<div class="ro-riga attesa" id="ro-piu-tasto" data-action="rie-piu">'
+                + '<span class="ro-testo">Vedi le altre '+(_RS.length-5)+'</span>'
+                + '<span class="ro-freccia">›</span></div>'
+              : '')
+          + '</div>');
+      }
+      /* 9 ott 2026 — «FOTOGRAFA»: un solo punto d'ingresso per le foto.
+         Non decide l'AI che foto è (costerebbe un credito in più): scegli tu. */
+      ra.insertAdjacentHTML("afterbegin",
+        '<button type="button" class="btn-primary" id="rie-foto" style="font-size:20px;font-weight:700;padding:14px 22px;margin-bottom:14px">📷 Fotografa</button>');
+      const _bF=ra.querySelector("#rie-foto");
+      if(_bF)_bF.onclick=rieFotoScegli;
+      const _bAI=ra.querySelector("#rie-chiedi-ai");
+      if(_bAI)_bAI.onclick=function(){
+        const t=document.querySelector('nav.tabs button[data-tab="chat"]'); if(!t)return;
+        t.click(); window.scrollTo(0,0);
+        setTimeout(function(){
+          const c=document.getElementById("chat-domanda"), m=document.getElementById("chat-manda");
+          if(!c||!m)return;
+          c.value="Guarda le mie fatture da incassare, le scadenze, i lavori e le richieste dal sito: cosa devo fare oggi, in ordine di importanza? Dammi al massimo 3 cose.";
+          m.click();
+        },600);
+      };
+      /* il secondo giro di letture è andato male: i numeri di spese, foto e
+         totali possono essere incompleti. Meglio dirlo che far finta di niente. */
+      if(erroreLettura2)ra.insertAdjacentHTML("afterbegin",
+        '<div class="rie-errore"><b>Alcuni numeri non si sono caricati</b> (spese, foto o totali): '
+        +'quello che vedi può essere incompleto. '
+        +'<button class="btn" data-action="rie-riprova">Riprova</button></div>');
+      /* 19 settembre 2026 — le richieste dal sito e i promemoria passati.
+         I loro numeri li ha gestionale-app.html, che può averli già pronti
+         o non ancora: chiama lui questa stessa funzione quando arrivano.
+         Chi finisce per ultimo completa la fascia. */
+      try{ if(window.rieVociExtra)window.rieVociExtra(); }catch(e){}
+    }
+
+    /* ---- le 12 schede, nello stesso ordine del menu ---- */
+    const C=[];
+
+    C.push(rieCard({
+      tab:"lavori", titolo:_lav(), n:aperti.length, dati:L.length>0,
+      lab: ritardo.length? ritardo.length+" in ritardo":_plur(aperti.length,"lavoro aperto","lavori aperti"),
+      tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
+      vuoto:"Nessun lavoro aperto",
+      righe: pross.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
+        t:l.descrizione||"Lavoro", v:q.testo, cls:inRitardo(l.stato,l.data_prevista)?"q-passato":q.classe,
+        action:"edit-job", id:l.id};})
+    }));
+
+    C.push(rieCard({
+      tab:"preventivi", titolo:"Preventivi", n:attesa.length, dati:PV.length>0,
+      lab:_plur(attesa.length,"in attesa di risposta","in attesa di risposta"), tono:attesa.length?"attesa":"ok",
+      vuoto:"Nessun preventivo in attesa",
+      righe: attesa.slice(0,2).map(p=>({
+        t:p.titolo||"Preventivo", v:totPrev[p.id]?eur(totPrev[p.id]):"",
+        action:"rie-prev", id:p.id}))
+    }));
+
+    C.push(rieCard({
+      tab:"fatture", titolo:"Fatture", n:eur(totDaInc), dati:(FT.length>0||daFatt.length>0),
+      lab: scadute.length
+            ? "da incassare · "+scadute.length+(scadute.length===1?" fattura scaduta":" fatture scadute")
+            : "da incassare · da fatturare "+eur(totDaFatt),
+      tono: scadute.length?"err":(totDaInc>0?"attesa":"ok"),
+      vuoto: totDaFatt>0?("Da fatturare: "+eur(totDaFatt)):"Nessuna fattura da incassare",
+      righe: daInc.slice()
+              .sort((a,b)=>String(a.data||"").localeCompare(String(b.data||"")))
+              .slice(0,2).map(f=>{
+        const sc=scadenza(f), fuori=sc&&sc<oggi;
+        const g=f.data?-_giorniA(f.data):null;
+        return {t:"Fattura "+(f.numero?("n. "+f.numero+"/"+fattAnno(f)):"senza numero"),
+                v:eur(totaleFatt(f))+(g!=null?" · "+g+" gg":""),
+                cls:fuori?"q-passato":"",
+                action:"rie-go-fatture", id:f.id};
+      })
+    }));
+
+    C.push(rieCard({
+      tab:"calendario", titolo:"Calendario", n:set7.length, dati:L.some(l=>!!l.data_prevista),
+      lab:"nei prossimi 7 giorni", tono:set7.length?"info":"neutro",
+      vuoto:"Nessun impegno questa settimana",
+      righe: set7.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
+        t:l.descrizione||"Lavoro", v:q.testo, cls:q.classe, action:"edit-job", id:l.id};})
+    }));
+
+    if(!tabNascosto("agenda"))C.push(rieCard({
+      tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id),
+      lab:_plur(opeOrd.length,"operatore con lavori assegnati","operatori con lavori assegnati"), tono:opeOrd.length?"info":"neutro",
+      vuoto:"Nessun lavoro assegnato",
+      righe: opeOrd.slice(0,2).map(k=>({
+        t:opeMap[k]||"Operatore", v:perOpe[k]+(perOpe[k]===1?" lavoro":" lavori")}))
+    }));
+
+    /* il professionista ha Mezzi, Attrezzature e Carte nascosti nel menu:
+       le loro schede non devono comparire nemmeno nel Riepilogo, altrimenti
+       un clic lo porta in una sezione "fantasma" senza voce di menu */
+    /* ⛔ 22 agosto 2026: l'elenco non sta piu' qui dentro — lo dice
+       tabNascosto(), che lo dice anche al menu. Vale per lo studio tecnico
+       (mezzi, carte) e per l'artigiano (squadra, agenda, carte, e le quattro
+       da appalti). */
+    const _proNascosto=tabNascosto;
+    if(!_proNascosto("mezzi"))C.push(rieCard({
+      tab:"mezzi", titolo:"Mezzi", n:MZveicoli.length, dati:MZveicoli.length>0,
+      lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
+                          : (MZveicoli.length===1?"mezzo in azienda":"mezzi in azienda"),
+      tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
+      vuoto: MZveicoli.length?"Nessuna scadenza in arrivo":"Nessun mezzo registrato",
+      righe: mzAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
+        t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
+        v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
+    }));
+
+    /* la scheda che mancava: Strumenti per lo studio, Attrezzature per
+       l'impresa. Le tarature e le verifiche periodiche si vedono da qui. */
+    C.push(rieCard({
+      tab:"attrezzature", titolo: _pro?"Strumenti":"Attrezzature", n:MZstrum.length, dati:MZstrum.length>0,
+      lab: stAvvisa.length? stAvvisa.length+(stAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
+                          : (_pro?"strumenti dello studio":"attrezzature in azienda"),
+      tono: stAvvisa.some(v=>v.scadute>0)?"err":(stAvvisa.length?"attesa":"ok"),
+      vuoto: MZstrum.length?"Nessuna taratura o verifica in arrivo"
+                           :(_pro?"Nessuno strumento registrato":"Nessuna attrezzatura registrata"),
+      righe: stAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
+        t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
+        v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
+    }));
+
+    if(!tabNascosto("squadra"))C.push(rieCard({
+      tab:"squadra", titolo:"Squadra", n:OPE.length, dati:OPE.length>0,
+      lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+(Math.round(oreMese*10)/10)+" h questo mese",
+      tono:"neutro", vuoto:"Nessun operatore registrato",
+      righe: OPE.slice(0,2).map(o=>({
+        t:o.nome||"Operatore",
+        v:(perOpe[o.id]||0)+((perOpe[o.id]||0)===1?" lavoro":" lavori")}))
+    }));
+
+    if(fornTabOk){
+      const ffAp2=FFOR.filter(f=>f.stato!=="pagata");
+      const totFf=ffAp2.reduce((sm,f)=>sm+(+f.importo||0),0);
+      const ffRit=ffAp2.filter(f=>f.scadenza&&f.scadenza<oggi);
+      const ffOrd=ffAp2.filter(f=>f.scadenza).sort((a,b)=>a.scadenza.localeCompare(b.scadenza));
+      const fornNome=Object.fromEntries(FORNI.map(x=>[String(x.id),x.nome||"Fornitore"]));
+      C.push(rieCard({
+        tab:"fornitori", titolo:"Fornitori", n:eur(totFf), dati:(FFOR.length>0||FORNI.length>0),
+        lab: ffRit.length? ffRit.length+(ffRit.length===1?" fattura scaduta":" fatture scadute"):"da pagare ai fornitori",
+        tono: ffRit.length?"err":(ffAp2.length?"attesa":"ok"),
+        vuoto:"Nessuna fattura da pagare",
+        righe: ffOrd.slice(0,2).map(f=>{const q2=quando(f.scadenza);return{
+          t:fornNome[String(f.fornitore_id)]||"Fornitore",
+          v:q2.testo+" · "+eur(f.importo),
+          cls:f.scadenza<oggi?"q-passato":q2.classe};})
+      }));
+    }
+
+    if(!_proNascosto("carte"))C.push(rieCard({
+      tab:"carte", titolo:"Carte", n:eur(saldoTot), dati:CA.length>0,
+      lab:"saldo di "+carteAtt.length+(carteAtt.length===1?" carta attiva":" carte attive"),
+      tono: saldoTot<0?"err":"neutro", vuoto:"Nessuna carta attiva",
+      righe: carteAtt.slice(0,2).map(c=>({
+        t:c.nome||"Carta", v:eur(saldoMap[c.id]||0),
+        cls:(saldoMap[c.id]||0)<0?"q-passato":""}))
+    }));
+
+    C.push(rieCard({
+      tab:"clienti", titolo:"Clienti", n:CLI.length, dati:CLI.length>0,
+      lab:_plur(CLI.length,"cliente in anagrafica","clienti in anagrafica"), tono:"neutro",
+      vuoto:"Nessun cliente registrato",
+      righe: cliOrd.slice(0,2).map(k=>({
+        t:cliMap[k]||"Cliente",
+        v:perCli[k]+(perCli[k]===1?" lavoro aperto":" lavori aperti")}))
+    }));
+
+    /* ===== 10 agosto 2026 — la scheda dei Computi metrici =====
+       Il Riepilogo ha una scheda per ogni voce del menu, e questa mancava: la
+       sezione c'era ma dal Riepilogo non si arrivava.
+       Si legge SOLO per gli studi tecnici (gli altri non hanno la sezione) e
+       dentro un try: se sql/gest-computo-metrico.sql non e' stato eseguito la
+       scheda non compare e il Riepilogo resta intero — meglio una scheda in
+       meno che un Riepilogo rotto. */
+    if(!tabNascosto("computi")){
+      try{
+        const [rCo,rTo]=await pComputi;            /* partita in cima, qui si aspetta */
+        if(!rCo.error){
+          const CO=rCo.data||[];
+          /* anche qui il numero e' quello NETTO: il Riepilogo, l'elenco dei
+             computi, la scheda e il PDF devono dire tutti la stessa cifra */
+          const totDi={};(rTo&&rTo.data||[]).forEach(r=>{totDi[r.computo_id]=r;});
+          const impDi={};CO.forEach(c=>{const t=totDi[c.id]||{};
+            impDi[c.id]=compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;});
+          const bozze=CO.filter(c=>c.stato==="bozza");
+          C.push(rieCard({
+            /* ⚠️ il titolo lo scrive rieCard, non il menu: se cambiassi solo
+               la voce del menu qui resterebbe la parola del tecnico. */
+            tab:"computi", titolo:_cm('nome'), n:CO.length, dati:CO.length>0,
+            lab: CO.length===1?(_cm('uno')+" nel reparto"):(_cm('tanti')+" nel reparto"),
+            tono: bozze.length?"attesa":(CO.length?"ok":"neutro"),
+            vuoto:"Nessun "+_cm('uno'),
+            righe: CO.slice(0,2).map(c=>({
+              t:(c.numero?("N. "+c.numero+" — "):"")+(c.titolo||"Computo"),
+              v:eur(impDi[c.id]||0)}))
+          }));
+
+          /* ===== 20 agosto 2026 — la scheda degli STATI DI AVANZAMENTO =====
+             Ogni voce del menu ha la sua scheda, e questa e' nata insieme alla
+             sezione. Try suo: se sql/gest-sal.sql non fosse stato eseguito la
+             scheda non compare e il Riepilogo resta intero.
+             ⚠️ Solo i SAL dei computi DI QUESTO REPARTO, e solo di computi
+             vivi: e' la stessa regola dell'elenco (renderSalTutti). */
+          try{
+            const [rSa,rSt]=await Promise.all([
+              sb.from("gest_sal").select("*").eq("user_id",sbUid).order("data",{ascending:false}),
+              sb.from("gest_sal_totali").select("*").eq("user_id",sbUid)
+            ]);
+            if(!rSa.error&&!rSt.error){
+              const compDi={};CO.forEach(c=>{compDi[String(c.id)]=c;});
+              const totSa={};(rSt.data||[]).forEach(t=>{totSa[String(t.sal_id)]=t;});
+              const SA=(rSa.data||[]).filter(x=>!!compDi[String(x.computo_id)]);
+              /* ⚠️ «va male» qui vuol dire SOLDI NON CHIESTI: un SAL emesso e'
+                 un conto gia' consegnato al committente, e finche' non diventa
+                 fattura quei soldi non li ha chiesti nessuno. Un SAL in BOZZA
+                 non e' un problema: e' un lavoro ancora in corso. */
+              const daFatt2=SA.filter(x=>x.stato==="emesso"&&!x.fattura_id);
+              C.push(rieCard({
+                tab:"sal", titolo:"Stati di avanzamento", n:SA.length, dati:SA.length>0,
+                lab: daFatt2.length
+                      ? daFatt2.length+(daFatt2.length===1?" emesso e non ancora fatturato":" emessi e non ancora fatturati")
+                      : _plur(SA.length,"stato di avanzamento","stati di avanzamento"),
+                tono: daFatt2.length?"attesa":(SA.length?"ok":"neutro"),
+                male: daFatt2.length>0,
+                vuoto:"Nessuno stato di avanzamento",
+                /* i conti passano da salConti + compRiepilogoDa, come nell'elenco,
+                   nella scheda e nel PDF: nessuna formula copiata */
+                righe: SA.slice(0,2).map(x=>({
+                  t:"SAL n. "+(x.numero||"")+" — "+((compDi[String(x.computo_id)]||{}).titolo||"Computo"),
+                  v:eur2(salConti(totSa[String(x.id)],compDi[String(x.computo_id)]||{}).netto)}))
+              }));
+            }
+          }catch(_){}
+        }
+      }catch(_){}
+    }
+
+    C.push(rieCard({
+      tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length, dati:scTutte.length>0,
+      lab:_plur(scAperte.length,"scadenza entro 30 giorni","scadenze entro 30 giorni"),
+      tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
+      /* rosso gia' a sette giorni: una scadenza che scade lunedi' non si
+         sistema lunedi'. Trenta giorni invece sono ancora tempo. */
+      male: scAperte.some(x=>x.data_scadenza<=lim7),
+      vuoto:"Nessuna scadenza in arrivo",
+      righe: scAperte.slice(0,2).map(x=>{const q=quando(x.data_scadenza);return{
+        t:(x.titolo||"Scadenza")+(x._persona?" · "+x._nome:""), v:x.data_scadenza<oggi?"scaduta":q.testo,
+        cls:x.data_scadenza<oggi?"q-passato":q.classe};})
+    }));
+
+    C.push(rieCard({
+      tab:"report", titolo:"Report", n:eur(utile), dati:_ciSonoSoldi,
+      lab:"utile di questo mese (incassato − spese)",
+      tono: utile<0?"err":(utile>0?"ok":"neutro"),
+      vuoto:"Nessun movimento questo mese",
+      /* ⛔ 24 agosto 2026 — rieCard mostra solo le PRIME DUE righe (slice(0,2)):
+         una terza voce come riga a se' non si sarebbe mai vista quando
+         c'erano gia' rifornimenti o fatture fornitori. Il noleggio interno
+         va nella riga "Spese", sempre visibile, come lavori e carte.
+
+         ⛔ 4 settembre 2026 — LA RIGA DELLE SPESE SI LEGGEVA AL CONTRARIO.
+         Diceva: «Spese: lavori 0,00 € · carte · noleggio 250,00 €   0,00 €».
+         Il numero a destra erano le CARTE, ma la scritta finiva con la parola
+         «noleggio» e il suo importo: chiunque legge crede che i 250 € siano
+         le carte e che a destra ci sia il noleggio. In piu' le due righe
+         «Rifornimenti» e «Fatture dei fornitori» non si vedevano MAI (la
+         terza e la quarta riga vengono tagliate), quindi la scheda mostrava
+         un utile che comprendeva spese che non nominava nemmeno.
+         Adesso: a sinistra tutte le voci con il loro importo, a destra il
+         TOTALE delle spese — quello che, tolto dall'incassato, fa l'utile
+         grande in cima alla scheda. Nessun conto nuovo: speseMese e' lo
+         stesso di sempre. */
+      righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese),fisso:1},
+             (function(){
+               const voci=[];
+               if(speseLav)  voci.push("lavori "+eur(speseLav));
+               if(speseCarte)voci.push("carte "+eur(speseCarte));
+               if(speseNol)  voci.push("noleggio "+eur(speseNol));
+               if(speseRif)  voci.push("rifornimenti "+eur(speseRif));
+               if(speseForn) voci.push("fornitori "+eur(speseForn));
+               return {t: voci.length?("Spese: "+voci.join(" · ")):"Spese di questo mese",
+                       v: eur(speseMese), fisso:1};
+             })()]
+    }));
+
+    C.push(rieCard({
+      tab:"galleria", titolo:"Galleria", n:(nFoto+nVideo), dati:(nFoto+nVideo)>0,
+      lab:_plur(nFoto+nVideo,"foto o video caricato","foto e video caricati"), tono:"neutro",
+      vuoto:"Nessuna foto o video caricato",
+      righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto),fisso:1},{t:"Video",v:String(nVideo),fisso:1}]:[]
+    }));
+
+    /* Mappa: quanti cantieri hanno un indirizzo e le distanze già calcolate.
+       Qui non chiamo nessun servizio esterno: leggo solo quello che la sezione
+       Mappa ha già messo da parte, altrimenti aprire il Riepilogo diventerebbe
+       lento e consumerebbe le richieste del servizio gratuito. */
+    const conIndirizzo=aperti.filter(l=>{
+      const c=CLI.find(x=>x.id===l.cliente_id);
+      return (l.dove||"").trim()||(c&&cliIndirizzo(c).trim());
+    });
+    let mpNote=[];
+    try{
+      /* 12 agosto 2026 (sera) — il nome era scritto a mano e restava a v2
+         mentre la Mappa e' passata a v3: il Riepilogo leggeva la memoria
+         VECCHIA, cioe' le distanze sbagliate di prima. Adesso e' la stessa
+         costante per tutti e due, quindi non si possono piu' scollare. */
+      const C=JSON.parse(localStorage.getItem(MP_CACHE_KEY)||"{}");
+      const km=Object.values(C.km||{}).filter(v=>typeof v==="number").sort((a,b)=>a-b);
+      if(km.length){
+        mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0]),fisso:1},
+                {t:"Il più lontano",v:mpFormattaKm(km[km.length-1]),fisso:1}];
+      }
+    }catch(e){}
+    C.push(rieCard({
+      tab:"mappa", titolo:"Mappa", n:conIndirizzo.length, dati:conIndirizzo.length>0,
+      lab:_plur(conIndirizzo.length,"cantiere aperto con un indirizzo","cantieri aperti con un indirizzo"), tono:"neutro",
+      vuoto:"Apri la Mappa per calcolare le distanze",
+      righe:mpNote
+    }));
+
+    /* ===== 26 settembre 2026 — LE QUATTRO SEZIONI CHE MANCAVANO =====
+       Regola di Alessio: ogni sezione del menu che hai usato compare nel
+       Riepilogo; se non l'hai mai usata non si vede. Mancavano Richieste dal
+       sito, Promemoria, Prezzario e Crediti formativi.
+       Ognuna legge per conto suo dentro un try: se una tabella non risponde
+       (o manca la migrazione) sparisce solo quella scheda, non il Riepilogo.
+       Promemoria, prezzario e crediti sono della PERSONA, non del reparto:
+       stessa eccezione dei pallini del menu (renderContatori). */
+    const _menuVisto=t=>{const b=document.querySelector('nav.tabs button[data-tab="'+t+'"]');
+      return !!b && b.style.display!=="none" && !tabNascosto(t);};
+    if(_menuVisto("dalsito")){
+      try{
+        const DS=(typeof dsCache!=="undefined"&&dsCache.length)?dsCache:await dsCarica();
+        const nuove=DS.filter(r=>r._stato==="nuova").length;
+        C.push(rieCard({
+          tab:"dalsito", titolo:"Richiesta preventivo sito", n:nuove, dati:DS.length>0,
+          lab:nuove?_plur(nuove,"richiesta da leggere","richieste da leggere"):"tutte lette",
+          tono:"neutro", male:nuove>0, righe:[]
+        }));
+      }catch(e){}
+    }
+    if(_menuVisto("promemoria")){
+      try{
+        const {data:PR,error:ePr}=await sb.from("promemoria").select("data,stato")
+          .eq("user_id",sbUid).is("eliminato_il",null);
+        if(!ePr&&PR&&PR.length){
+          const ap=PR.filter(x=>x.stato!=="fatto");
+          const pass=ap.filter(x=>x.data&&x.data<oggi).length;
+          C.push(rieCard({
+            tab:"promemoria", titolo:"Promemoria", n:ap.length, dati:true,
+            lab:pass?(pass+(pass===1?" già passato":" già passati")):"da fare",
+            tono:"neutro", male:pass>0, righe:[]
+          }));
+        }
+      }catch(e){}
+    }
+    if(_menuVisto("prezzario")){
+      try{
+        const {count:nPz,error:ePz}=await sb.from("gest_prezzi_propri").select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).is("eliminato_il",null);
+        if(!ePz&&nPz>0)C.push(rieCard({
+          tab:"prezzario", titolo:"Prezzario", n:nPz.toLocaleString("it-IT",{useGrouping:true}), dati:true,
+          lab:_plur(nPz,"voce nel tuo prezzario","voci nel tuo prezzario"), tono:"neutro", male:false, righe:[]
+        }));
+      }catch(e){}
+    }
+    if(_menuVisto("crediti")){
+      try{
+        const {data:CR,error:eCr}=await sb.from("gest_crediti").select("data,crediti").eq("user_id",sbUid);
+        if(!eCr&&CR&&CR.length){
+          const anno=oggi.slice(0,4);
+          const fatti=CR.filter(c=>String(c.data||"").slice(0,4)===anno).reduce((t,c)=>t+(+c.crediti||0),0);
+          const ob=(AZ&&+AZ.cfp_obiettivo>0)?+AZ.cfp_obiettivo:30;
+          C.push(rieCard({
+            tab:"crediti", titolo:"Crediti formativi", n:String(Math.round(fatti*100)/100).replace(".",","), dati:true,
+            lab:"su "+ob+" di quest\u2019anno", tono:"neutro", male:false, righe:[]
+          }));
+        }
+      }catch(e){}
+    }
+
+    /* Stesso ordine del menu a sinistra: chi cerca «Fornitori» lo trova
+       nello stesso posto in tutte e due. */
+    const _ordMenu=[...document.querySelectorAll("nav.tabs button[data-tab]")].map(b=>b.dataset.tab);
+    const _pos=h=>{const m=/data-go="([a-z]+)"/.exec(h||"");const i=m?_ordMenu.indexOf(m[1]):-1;return i<0?999:i;};
+    C.sort((a,b)=>_pos(a)-_pos(b));
+
+    /* ===== 15 agosto 2026 — il reparto nuovo =====
+       Se non c'e' NIENTE dentro, non si mostra una griglia vuota: si spiega
+       come funziona e si offrono i due primi passi. Il riquadro «Tutto in
+       ordine» qui sopra resta come prima. */
+    const CV=C.filter(Boolean);
+    /* 6 nov 2026 — IN VISTA SOLO LE PRIME 4 SCHEDE (in ordine di menu:
+       Clienti, Preventivi, Lavori, Fatture — per lo studio Computo e Pratiche).
+       Prima erano fino a 17 caselle una sotto l'altra. Le altre non spariscono:
+       «Vedi tutte le schede» le apre qui, senza cambiare pagina. */
+    const RIE_IN_VISTA=4;
+    const _cvHtml=CV.map(function(h,i){
+      return i<RIE_IN_VISTA ? h : h.replace('<div class="rie-card ','<div style="display:none" data-rie-extra="1" class="rie-card ');
+    }).join("")
+      + (CV.length>RIE_IN_VISTA
+         ? '<button type="button" class="btn rie-tutte" id="rie-tutte" style="grid-column:1/-1;justify-self:start;font-size:18px;font-weight:700;padding:13px 20px;min-height:50px">'
+           + 'Vedi tutte le schede ('+CV.length+')</button>'
+         : '');
+    G.innerHTML = CV.length ? _cvHtml
+      : '<div class="rie-benvenuto">'
+      +   '<div class="rb-tit">Questo reparto è ancora vuoto</div>'
+      +   '<div class="rb-txt">Le schede qui sotto compaiono da sole, una alla volta, '
+      +     'man mano che inserisci qualcosa. Registra un cliente e compare la scheda '
+      +     'Clienti, fai un preventivo e compare quella dei Preventivi.</div>'
+      +   '<div class="rb-txt">Si comincia da qui:</div>'
+      +   '<div class="rb-bottoni">'
+      +     '<button class="btn add" data-action="new-cli" data-tipo="privato">+ Il primo cliente</button>'
+      +     '<button class="btn add" data-action="new-prev">+ Il primo preventivo</button>'
+      +   '</div>'
+      + '</div>';
+    const _bT=document.getElementById("rie-tutte");
+    if(_bT)_bT.onclick=function(){
+      const ex=G.querySelectorAll('[data-rie-extra]');
+      const apri=!!(ex[0]&&ex[0].style.display==="none");
+      ex.forEach(function(e){ e.style.display=apri?"":"none"; });
+      _bT.textContent=apri?"Mostra meno schede":"Vedi tutte le schede ("+CV.length+")";
+    };
+  }
+function rieFotoScegli(){
+    const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;gap:14px;align-items:center;width:100%;text-align:left;'
+      +'border:2px solid #d9dfe7;border-radius:14px;padding:16px;margin-bottom:12px;background:#fff;font-size:21px;font-weight:700;cursor:pointer">'
+      +'<span style="font-size:34px">'+ic+'</span><span>'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
+    openSheetGrande("Cosa stai fotografando?",
+      '<div class="sh-b"><p style="margin:0 0 14px;font-size:18px">Scegli, poi scatta o scegli la foto. L\'AI legge e riempie tutto. Costa 1 credito.</p>'
+      +c("pf-forn","🧾","Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
+      +(typeof window.gestParlaFoto==="function"?c("pf-bolla","📦","Bolla del cantiere","Diventa una spesa del cantiere"):"")
+      +c("pf-lett","✉️","Lettera del Fisco o dell'INPS","Te la spiega in parole semplici")
+      +c("pf-altro","💬","Altro: scrivi alla chat","La chat guarda la foto e ti risponde")+'</div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>');
+    const F=document.getElementById("pf-forn"),L=document.getElementById("pf-lett"),A=document.getElementById("pf-altro");
+    if(F)F.onclick=async function(){
+      closeSheet();
+      try{ await fornForm(null); }catch(e){ toast("Non riesco ad aprire il modulo, riprova"); return; }
+      setTimeout(function(){ const cam=document.getElementById("ff-foto-cam"); if(cam)cam.click(); },300);
+    };
+    /* 6 nov 2026 — la foto della bolla che prima stava nel pulsante fisso «Foto» */
+    const B=document.getElementById("pf-bolla");
+    if(B)B.onclick=function(){
+      closeSheet();
+      const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.setAttribute("capture","environment"); inp.style.display="none";
+      document.body.appendChild(inp);
+      inp.onchange=function(){ const f=inp.files&&inp.files[0]; inp.remove(); if(f&&typeof window.gestParlaFoto==="function")window.gestParlaFoto(f); };
+      inp.click();
+    };
+    if(L)L.onclick=function(){
+      const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*,application/pdf"; inp.style.display="none";
+      document.body.appendChild(inp);
+      inp.onchange=function(){ const f=inp.files&&inp.files[0]; inp.remove(); if(f)rieFotoLettera(f); };
+      inp.click();
+    };
+    if(A)A.onclick=function(){
+      closeSheet();
+      const t=document.querySelector('nav.tabs button[data-tab="chat"]');
+      if(t){t.click();window.scrollTo(0,0);}else toast("La chat è nel piano con assistenza AI");
+    };
+  }
+function cliForm(c,tipoNuovo,aiApri){
+    const isNew=!c;c=c||{};
+    if(isNew&&tipoNuovo)c.tipo=tipoNuovo;
+    const priv=ruoloUtente==='professionista';
+    /* che tipo di cliente è: privato (il caso più comune), azienda o condominio.
+       Cambia solo le parole del modulo, non i campi: così nessuno resta bloccato. */
+    const tipoCli=(c.tipo==='azienda'||c.tipo==='condominio')?c.tipo:'privato';
+    const LAB_T={privato:{nome:'Nome e cognome',ph:'Es. Mario Rossi',ref:'Referente (se diverso)'},
+                 azienda:{nome:'Ragione sociale',ph:'Es. Rossi Costruzioni Srl',ref:'Referente'},
+                 condominio:{nome:'Nome condominio',ph:'Es. Condominio Via Roma 12',ref:'Amministratore'}};
+    const Lt=LAB_T[tipoCli];
+    const T_TIT={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"};
+    /* 6 nov 2026 — IL MODULO PIU' CORTO. Prima si apriva con 12 caselle
+       insieme anche per un privato. Adesso si vedono nome, telefono, email e
+       indirizzo; i dati per la fattura (P.IVA, codice fiscale, codice
+       destinatario, PEC) stanno dietro un pulsante e si aprono da soli se
+       servono: azienda o condominio, un dato gia' scritto, il controllo
+       «Controlla che sia giusto», o l'AI che li riempie. Nessun campo
+       sparisce: sono tutti nel modulo, come prima. */
+    const _fiscPieno=!!(c.piva||c.cod_fiscale||c.sdi_codice||c.sdi_pec);
+    const _fiscAperto=tipoCli!=='privato'||_fiscPieno;
+    const _refVis=tipoCli!=='privato'||!!c.referente;
+    openSheetGrande(isNew?(T_TIT[tipoCli]||"Nuovo cliente"):"Modifica cliente",
+      `<div class="sh-cols sh-cols--fatt"><div class="sh-col">
+
+      <div class="sh-b">
+        <div class="sh-tit">Chi è</div>
+        ${isNew?aiRigaHTML('cliente'):''}
+        <div class="field"><label>Che tipo di cliente è</label>
+          <div class="tipo-cli" id="c-tipo-box" data-tipo="${tipoCli}">
+            <button type="button" class="tipo-btn${tipoCli==='privato'?' on':''}" data-t="privato" onclick="setTipoCliente(this)">Privato<small>una persona</small></button>
+            <button type="button" class="tipo-btn${tipoCli==='azienda'?' on':''}" data-t="azienda" onclick="setTipoCliente(this)">Azienda<small>ditta o società</small></button>
+            <button type="button" class="tipo-btn${tipoCli==='condominio'?' on':''}" data-t="condominio" onclick="setTipoCliente(this)">Condominio<small>con amministratore</small></button>
+          </div>
+        </div>
+        <div class="field"><label id="lab-c-nome">${Lt.nome}</label>
+          <input id="c-nome" value="${esc(c.nome||"")}" placeholder="${Lt.ph}"></div>
+        <div class="field" id="c-ref-f"${_refVis?'':' style="display:none"'}><label id="lab-c-ref">${Lt.ref}</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Es. Mario Rossi"></div>
+        <div class="row2">
+          <div class="field"><label>Telefono</label><input id="c-tel" type="tel" value="${esc(c.telefono||"")}" placeholder="Es. 0746 123456"></div>
+          <div class="field"><label>Email</label><input id="c-email" type="email" value="${esc(c.email||"")}" placeholder="cliente@email.it"></div>
+        </div>
+        <div class="sh-nota">L'email serve per mandargli preventivi e fatture. Non &egrave; la PEC: quella sta nei dati per la fattura.</div>
+      </div>
+
+      </div><div class="sh-col">
+
+      <div class="sh-b">
+        <div class="sh-tit">Dove sta</div>
+        <div class="field"><label>Via e numero</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Es. Via Roma, 12"></div>
+        <div class="row2">
+          <div class="field"><label>CAP</label><input id="c-cap" value="${esc(c.cap||"")}" placeholder="Es. 02100" inputmode="numeric"></div>
+          <div class="field"><label>Città</label><input id="c-citta" value="${esc(c.citta||"")}" placeholder="Es. Rieti"></div>
+        </div>
+        <div class="field"><label>Provincia</label>
+          <input id="c-prov" value="${esc(c.prov||"")}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+      </div>
+
+      <button type="button" class="btn" id="c-fisc-apri" style="width:100%;min-height:54px;font-size:18px;font-weight:700;justify-content:flex-start;text-align:left;${_fiscAperto?'display:none':''}">+ Dati per la fattura <span style="font-weight:400">(codice fiscale, partita IVA, PEC)</span></button>
+      <div id="c-fisc-box"${_fiscAperto?'':' style="display:none"'}>
+      <div class="sh-b">
+        <div class="sh-tit">Dati fiscali</div>
+        <div class="row2">
+          <div class="field"><label>Partita IVA</label><input id="c-piva" value="${esc(c.piva||"")}" placeholder="Se è un'azienda"></div>
+          <div class="field"><label>Codice fiscale</label><input id="c-cf" value="${esc(c.cod_fiscale||"")}" placeholder="Se è un privato" style="text-transform:uppercase"></div>
+        </div>
+        <div class="sh-nota" id="nota-c-fisc">Un condominio ha il codice fiscale, un'azienda la partita IVA, un privato il codice fiscale. Basta quello che ha.</div>
+      </div>
+
+      <div class="sh-b">
+        <div class="sh-tit">Dove mandargli la fattura</div>
+        <div class="field"><label>Codice destinatario</label>
+          <input id="c-sdi" value="${esc(c.sdi_codice||"")}" placeholder="7 caratteri" maxlength="7" style="text-transform:uppercase"></div>
+        <div class="field"><label>PEC</label><input id="c-pec" type="email" value="${esc(c.sdi_pec||"")}" placeholder="cliente@pec.it"></div>
+        <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — si usa <b>0000000</b> e la fattura gli arriva nel cassetto fiscale.</div>
+      </div>
+      </div>
+
+      </div></div>`,
+      `${ctrTastoHTML('cliente')}
+       <button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
+    cliFiscSorveglia();
+    if(isNew)aiRigaVia('cliente',!!aiApri);
+    ctrAscolta('cliente');
+  }
+function cliFiscApri(){
+    const b=document.getElementById("c-fisc-box"), t=document.getElementById("c-fisc-apri");
+    if(b)b.style.display=""; if(t)t.style.display="none";
+  }
+function cliFiscSorveglia(){
+    const t=document.getElementById("c-fisc-apri");
+    if(t)t.onclick=cliFiscApri;
+    const ctr=document.querySelector('#sheet [data-action="ctr-guarda"][data-ctr="cliente"]');
+    if(ctr)ctr.addEventListener("click",cliFiscApri);
+    const giro=setInterval(function(){
+      const b=document.getElementById("c-fisc-box");
+      if(!b){clearInterval(giro);return;}
+      const rf=document.getElementById("c-ref-f"), ri=document.getElementById("c-ref");
+      if(rf&&rf.style.display==="none"&&ri&&String(ri.value||"").trim())rf.style.display="";
+      if(b.style.display!=="none")return;
+      if(["c-piva","c-cf","c-sdi","c-pec"].some(function(id){const e=document.getElementById(id);return e&&String(e.value||"").trim();}))cliFiscApri();
+    },600);
+  }
+function filoMetti(sez,qui){
+    const s=document.getElementById(sez); if(!s) return;
+    const vecchia=s.querySelector(".filo");
+    /* 6 nov 2026 — LA STRISCIA NON SI METTE PIU' (ok di Alex). Quattro
+       pulsanti in cima a Preventivi e Fatture che portano in altre sezioni
+       confondevano chi entra per fare una cosa sola. Le sezioni restano nel
+       menu. filoHTML() resta qui sotto, nel caso si voglia rimetterla. */
+    if(vecchia)vecchia.remove();
+    return;
+    const html=filoHTML(qui);
+    if(!html){ if(vecchia)vecchia.remove(); return; }
+    if(vecchia){ vecchia.outerHTML=html; return; }
+    const dopo=s.querySelector(".gal-intro")||s.querySelector(".sec-head");
+    if(dopo) dopo.insertAdjacentHTML("afterend",html);
+  }
+function fpScheda(f) {
+    const c = f.cons;
+    const pill = [1, 2, 3, 4].map(n => {
+      const cls = n <= f.passo ? "ok" : (n === c.prossimo ? "ora" : "");
+      return `<button class="fp-passo ${cls}" data-action="fp-apri" data-id="${f.id}" data-v="${n}">${n <= f.passo ? fpIc("spunta") : ""}${n} · ${FP_PASSI[n].lab}</button>`;
+    }).join("");
+    const storia = f.sol.map(s => `${fdate(String(s.inviato_il).slice(0, 10))}: passo ${s.passo} (${esc(s.canale)})`).join(" · ");
+    const extra = f.interessi + (f.b2b ? FP_SPESE_FISSE : 0);
+    const btnNext = fpBtnNext(f);
+    return `<div class="fp-card">
+      <div class="fp-cli"><div><div class="fp-n">${esc(f.cli.nome || f.cli_nome || "Cliente")}</div>
+        <div class="fp-sotto">Fattura ${esc(fpNumFatt(f))} del ${fdate(f.data)} · <b class="fp-rosso">scaduta da ${f.ritardo} ${f.ritardo === 1 ? "giorno" : "giorni"}</b></div></div>
+        <div class="fp-e">${eur(f.importo)}${extra > 0 ? `<small>+ ${eur(extra)} ${f.b2b ? "interessi e spese" : "interessi"}</small>` : ""}</div></div>
+      <div class="fp-passo-corto" style="font-size:18px;margin:10px 0 4px">${f.passo
+          ? `Fatto: passo <b>${f.passo} di 4</b>${c.prossimo && c.prossimo <= 4 ? ` · adesso tocca a: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`
+          : `Non gli hai ancora scritto${c.prossimo && c.prossimo <= 4 ? ` · si comincia da: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`}</div>
+      <details class="fp-tutti" style="margin:2px 0 8px"><summary style="cursor:pointer;font-size:16px;font-weight:600;padding:6px 0">Vedi tutti e 4 i passi</summary>
+        <div class="fp-passi">${pill}</div></details>
+      <div class="fp-cons ${c.tono}"><div>${fpIc("idea")}</div><div><b>Il mio consiglio</b>${esc(c.testo)}</div></div>
+      ${storia ? `<div class="fp-storia">${fpIc("storia")} ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">togli l'ultimo</button>` : ""}</div>` : ""}
+      <div class="fp-btns">${btnNext}
+        <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button></div>
+    </div>`;
+  }
+window.setTipoCliente=function(btn){
+    const box=btn.closest(".tipo-cli");if(!box)return;
+    const t=btn.dataset.t||"privato";
+    box.dataset.tipo=t;
+    box.querySelectorAll(".tipo-btn").forEach(b=>b.classList.toggle("on",b===btn));
+    const L={privato:{nome:"Nome e cognome",ph:"Es. Mario Rossi",ref:"Referente (se diverso)",
+                      fisc:"Per un privato serve il codice fiscale. La partita IVA lasciala vuota."},
+             azienda:{nome:"Ragione sociale",ph:"Es. Rossi Costruzioni Srl",ref:"Referente",
+                      fisc:"Per un'azienda serve la partita IVA."},
+             condominio:{nome:"Nome condominio",ph:"Es. Condominio Via Roma 12",ref:"Amministratore",
+                      fisc:"Un condominio ha il codice fiscale, non la partita IVA."}}[t];
+    const ln=document.getElementById("lab-c-nome"); if(ln) ln.textContent=L.nome;
+    const inp=document.getElementById("c-nome");    if(inp) inp.placeholder=L.ph;
+    const lr=document.getElementById("lab-c-ref");  if(lr) lr.textContent=L.ref;
+    const nf=document.getElementById("nota-c-fisc");if(nf) nf.textContent=L.fisc;
+    /* 6 nov 2026 — un'azienda o un condominio i dati fiscali li hanno sempre:
+       si aprono. Il referente/amministratore si vede; per un privato no,
+       a meno che non sia gia' scritto. */
+    if(t!=="privato")cliFiscApri();
+    const rf=document.getElementById("c-ref-f"), ri=document.getElementById("c-ref");
+    if(rf)rf.style.display=(t!=="privato"||(ri&&String(ri.value||"").trim()))?"":"none";
+    /* anche il titolo in cima segue il bottone: prima restava quello di partenza
+       e leggevi "Nuova azienda" con Privato acceso */
+    const ht=document.querySelector("#sheet .sh-head h3");
+    if(ht&&/^Nuov/.test(ht.textContent||"")){
+      ht.textContent={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"}[t];
+    }
+  };
+window.cliFiscApri=cliFiscApri;

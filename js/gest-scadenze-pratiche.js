@@ -925,6 +925,16 @@
                  condominio:{nome:'Nome condominio',ph:'Es. Condominio Via Roma 12',ref:'Amministratore'}};
     const Lt=LAB_T[tipoCli];
     const T_TIT={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"};
+    /* 6 nov 2026 — IL MODULO PIU' CORTO. Prima si apriva con 12 caselle
+       insieme anche per un privato. Adesso si vedono nome, telefono, email e
+       indirizzo; i dati per la fattura (P.IVA, codice fiscale, codice
+       destinatario, PEC) stanno dietro un pulsante e si aprono da soli se
+       servono: azienda o condominio, un dato gia' scritto, il controllo
+       «Controlla che sia giusto», o l'AI che li riempie. Nessun campo
+       sparisce: sono tutti nel modulo, come prima. */
+    const _fiscPieno=!!(c.piva||c.cod_fiscale||c.sdi_codice||c.sdi_pec);
+    const _fiscAperto=tipoCli!=='privato'||_fiscPieno;
+    const _refVis=tipoCli!=='privato'||!!c.referente;
     openSheetGrande(isNew?(T_TIT[tipoCli]||"Nuovo cliente"):"Modifica cliente",
       `<div class="sh-cols sh-cols--fatt"><div class="sh-col">
 
@@ -940,14 +950,15 @@
         </div>
         <div class="field"><label id="lab-c-nome">${Lt.nome}</label>
           <input id="c-nome" value="${esc(c.nome||"")}" placeholder="${Lt.ph}"></div>
+        <div class="field" id="c-ref-f"${_refVis?'':' style="display:none"'}><label id="lab-c-ref">${Lt.ref}</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Es. Mario Rossi"></div>
         <div class="row2">
-          <div class="field"><label id="lab-c-ref">${Lt.ref}</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Es. Mario Rossi"></div>
           <div class="field"><label>Telefono</label><input id="c-tel" type="tel" value="${esc(c.telefono||"")}" placeholder="Es. 0746 123456"></div>
+          <div class="field"><label>Email</label><input id="c-email" type="email" value="${esc(c.email||"")}" placeholder="cliente@email.it"></div>
         </div>
-        <div class="field"><label>Email</label>
-          <input id="c-email" type="email" value="${esc(c.email||"")}" placeholder="cliente@email.it"></div>
-        <div class="sh-nota">Serve per mandargli preventivi e fatture via email. Non &egrave; la PEC: quella si scrive pi&ugrave; in basso.</div>
+        <div class="sh-nota">L'email serve per mandargli preventivi e fatture. Non &egrave; la PEC: quella sta nei dati per la fattura.</div>
       </div>
+
+      </div><div class="sh-col">
 
       <div class="sh-b">
         <div class="sh-tit">Dove sta</div>
@@ -958,11 +969,10 @@
         </div>
         <div class="field"><label>Provincia</label>
           <input id="c-prov" value="${esc(c.prov||"")}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
-        <div class="sh-nota">L'indirizzo finisce sul PDF della fattura e serve alla Mappa per calcolare la distanza del cantiere.</div>
       </div>
 
-      </div><div class="sh-col">
-
+      <button type="button" class="btn" id="c-fisc-apri" style="width:100%;min-height:54px;font-size:18px;font-weight:700;justify-content:flex-start;text-align:left;${_fiscAperto?'display:none':''}">+ Dati per la fattura <span style="font-weight:400">(codice fiscale, partita IVA, PEC)</span></button>
+      <div id="c-fisc-box"${_fiscAperto?'':' style="display:none"'}>
       <div class="sh-b">
         <div class="sh-tit">Dati fiscali</div>
         <div class="row2">
@@ -977,15 +987,41 @@
         <div class="field"><label>Codice destinatario</label>
           <input id="c-sdi" value="${esc(c.sdi_codice||"")}" placeholder="7 caratteri" maxlength="7" style="text-transform:uppercase"></div>
         <div class="field"><label>PEC</label><input id="c-pec" type="email" value="${esc(c.sdi_pec||"")}" placeholder="cliente@pec.it"></div>
-        <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — si usa <b>0000000</b> e la fattura gli arriva nel cassetto fiscale. <b>Servono per mandargli la fattura allo SDI</b> con un clic: il codice si scrive qui, nella sua scheda.</div>
+        <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — si usa <b>0000000</b> e la fattura gli arriva nel cassetto fiscale.</div>
+      </div>
       </div>
 
       </div></div>`,
       `${ctrTastoHTML('cliente')}
        <button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
+    cliFiscSorveglia();
     if(isNew)aiRigaVia('cliente',!!aiApri);
     ctrAscolta('cliente');
+  }
+  /* 6 nov 2026 — apre i dati per la fattura nascosti.
+     Si aprono da soli quando: si preme il pulsante, si preme «Controlla che
+     sia giusto» (il controllo puo' segnare proprio quelle caselle), oppure
+     una di quelle caselle riceve un valore (l'AI che compila, il dettato).
+     Il controllo gira solo finche' il modulo e' aperto. */
+  function cliFiscApri(){
+    const b=document.getElementById("c-fisc-box"), t=document.getElementById("c-fisc-apri");
+    if(b)b.style.display=""; if(t)t.style.display="none";
+  }
+  window.cliFiscApri=cliFiscApri;
+  function cliFiscSorveglia(){
+    const t=document.getElementById("c-fisc-apri");
+    if(t)t.onclick=cliFiscApri;
+    const ctr=document.querySelector('#sheet [data-action="ctr-guarda"][data-ctr="cliente"]');
+    if(ctr)ctr.addEventListener("click",cliFiscApri);
+    const giro=setInterval(function(){
+      const b=document.getElementById("c-fisc-box");
+      if(!b){clearInterval(giro);return;}
+      const rf=document.getElementById("c-ref-f"), ri=document.getElementById("c-ref");
+      if(rf&&rf.style.display==="none"&&ri&&String(ri.value||"").trim())rf.style.display="";
+      if(b.style.display!=="none")return;
+      if(["c-piva","c-cf","c-sdi","c-pec"].some(function(id){const e=document.getElementById(id);return e&&String(e.value||"").trim();}))cliFiscApri();
+    },600);
   }
   /* Clic su Privato / Azienda / Condominio: cambia solo le parole del modulo.
      Nessun campo sparisce, così nessuno resta bloccato se il suo caso è strano. */
@@ -1004,6 +1040,12 @@
     const inp=document.getElementById("c-nome");    if(inp) inp.placeholder=L.ph;
     const lr=document.getElementById("lab-c-ref");  if(lr) lr.textContent=L.ref;
     const nf=document.getElementById("nota-c-fisc");if(nf) nf.textContent=L.fisc;
+    /* 6 nov 2026 — un'azienda o un condominio i dati fiscali li hanno sempre:
+       si aprono. Il referente/amministratore si vede; per un privato no,
+       a meno che non sia gia' scritto. */
+    if(t!=="privato")cliFiscApri();
+    const rf=document.getElementById("c-ref-f"), ri=document.getElementById("c-ref");
+    if(rf)rf.style.display=(t!=="privato"||(ri&&String(ri.value||"").trim()))?"":"none";
     /* anche il titolo in cima segue il bottone: prima restava quello di partenza
        e leggevi "Nuova azienda" con Privato acceso */
     const ht=document.querySelector("#sheet .sh-head h3");
