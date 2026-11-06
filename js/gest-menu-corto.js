@@ -25,7 +25,9 @@
    gestionale-app.html). Le voci che il ruolo nasconde restano nascoste.
    ═════════════════════════════════════════════════════════════════════════ */
 (function () {
-  var PRINCIPALI = ["riepilogo", "chat", "clienti", "preventivi", "lavori", "giornate", "fatture", "calendario", "fisco"];   /* in ordine di partenza, come i Primi passi */
+  /* 6 nov 2026 — «computi» in vista subito dopo i Preventivi (ok di Alex):
+     il computo diventa un preventivo, e chiuso in «Altre voci» non lo trovava nessuno */
+  var PRINCIPALI = ["riepilogo", "chat", "clienti", "preventivi", "computi", "lavori", "giornate", "fatture", "calendario", "fisco"];   /* in ordine di partenza, come i Primi passi */
   var FISSE = ["richieste", "assistenza"];      /* vanno in fondo, sotto «Aiuto» */
   /* 6 nov 2026 — i gruppi dentro «Altre N voci». Una voce che non sta in
      nessun gruppo finisce in fondo, sotto «Altro»: non sparisce mai. */
