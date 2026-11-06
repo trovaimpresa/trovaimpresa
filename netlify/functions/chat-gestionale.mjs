@@ -641,6 +641,42 @@ function ripulisciAllegato(a) {
 }
 
 // ---------------------------------------------------------------------
+// ⛔ 6 nov 2026 — IL MANUALE DEL GESTIONALE (gestionale-app.html)
+// Scritto guardando i pulsanti VERI della pagina, non a memoria.
+// Le sezioni per ruolo: lo studio tecnico dice «pratiche» al posto di
+// «lavori» e «collaboratori» al posto di «squadra».
+// ---------------------------------------------------------------------
+const MANUALE_GESTIONALE = `MANUALE DEL GESTIONALE (com'e' fatto davvero: usa SOLO questi nomi)
+
+REPARTI. Il gestionale e' diviso in reparti (per esempio «giardiniere» e «idraulica»): ognuno ha i suoi lavori, clienti, preventivi e fatture. Si entra in un reparto dalla prima schermata col pulsante «Apri». Per cambiare reparto: la freccia in alto a sinistra, accanto al nome del reparto. «Nuovo reparto» sta in fondo alla prima schermata.
+
+IL MENU A SINISTRA (sul telefono si apre col pulsante ☰ in alto a destra). In vista: «Assistente» (la pagina di partenza, con la casella «Cosa facciamo?» e le cose da guardare oggi), «Preventivi», «Computo da prezzare» (o «Computo metrico»), «Lavori e interventi», «Fatture», «Clienti», «Calendario». Tutte le altre voci stanno sotto «Tutto il resto», divise in gruppi: Chat con AI, Giornate, Richieste dal sito, Promemoria, Scadenzario, Agenda operatore; Squadra, Mezzi, Attrezzature; Tasse e fisco, Prezzario, Stati di avanzamento, Fornitori, Carte, Report, Crediti formativi; Galleria, Mappa, Cestino. In fondo, sotto «Aiuto»: «Chiedi una funzione» e «Assistenza diretta». Sul telefono c'e' anche la barra in basso: Oggi, Lavori, il microfono grande al centro, Preventivi, Menu.
+
+LA BARRA IN ALTO (computer): «Dati azienda» (nome, P.IVA, logo, IBAN: vanno compilati PRIMA di fare PDF e fatture), «Commercialista» (gli mandi i documenti), «Backup» (salva una copia di tutti i dati), «Esporta» (Excel), «Aiuto» (apre questa chat). Sopra c'e' la ricerca: «Cerca un nome: cliente, lavoro, preventivo, fattura». Sul telefono questi pulsanti stanno in fondo al menu ☰.
+
+PARLA. Il pulsante «Parla» (sul telefono il microfono grande in basso) ascolta: racconti la giornata come viene («oggi Wahid e Luis da Rossi, 8 ore, spesi 45 euro di sabbia, domani chiamare il commercialista») e lui la divide in schede (giornata, spesa, promemoria) da controllare; poi «Salva tutto». Se dici «fammi un preventivo» o «apri le fatture» apre la cosa giusta. Nelle caselle di testo lunghe c'e' anche il microfono piccolo per dettare.
+
+PREVENTIVI. «+ Nuovo preventivo» (a mano) oppure «Genera con AI» (descrivi il lavoro e l'AI prepara le voci, 1 credito). Nel modulo: titolo, cliente, data, le voci di costo («+ Aggiungi voce», «+ Aggiungi capitolo»), aliquota IVA, note; in fondo «Controlla che sia giusto», «Fai controllare anche all'intelligenza artificiale» (1 credito) e «Crea preventivo». Le schede in alto: Tutti, Bozze, Inviati, Accettati, Rifiutati. Ogni preventivo ha il pulsante «Apri» e il menu «...» con: «Invia al cliente» (link, WhatsApp, email, QR: il cliente lo apre senza account e firma col dito), «Scarica PDF», «Lettera d'incarico», «Conferma d'ordine», «Capitolato», «Segna inviato», «Accettato, crea lavoro», «Rifiutato», «Crea la fattura da qui», «Modifica», «Elimina».
+
+FATTURA DA UN PREVENTIVO: Preventivi → «Apri» sul preventivo (o il suo menu «...») → «Crea la fattura da qui». Si apre la fattura con le voci gia' copiate: controlli e salvi.
+
+FATTURE. «+ Nuova fattura» e «Fatture ricevute» (le fatture dei fornitori che arrivano dallo SDI). Schede: Tutte, Bozze, Da incassare, Scadute, Pagate. Nel menu di ogni fattura: «Emetti» (da bozza diventa vera e prende il numero), «Segna pagata», «Non pagata», «Apri», «Crea il PDF», «File per lo SDI (XML)», «Allega un PDF tuo», «Elimina». Una bozza non ha ancora il numero e non conta fra i soldi da incassare.
+
+LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».
+
+COMPUTO. «+ Nuovo computo», oppure si carica il computo del geometra (Excel, CSV o PDF) e lo si prezza col proprio prezzario. Dal menu del computo: «Apri il computo», «Scarica il PDF», «Scarica l'analisi dei prezzi», «Crea il preventivo», «Duplica», «Crea la variante», «Elimina». Gli «Stati di avanzamento» (SAL) nascono dentro un computo.
+
+CLIENTI. «+ Privato», «+ Azienda», «+ Condominio», oppure «Compila con AI». Ogni cliente ha la sua scheda con lavori, preventivi, fatture e cosa deve ancora pagare.
+
+GIORNATE. Le giornate di lavoro della squadra (chi, dove, quante ore). Si segnano con «Parla» raccontando la giornata, o dall'app dell'operaio; «PDF del mese» fa il riepilogo del mese in PDF.
+
+CALENDARIO: lavori, scadenze e note giorno per giorno. PROMEMORIA: «+ Nuovo promemoria», le tue cose da ricordare con data; la mattina arriva l'email. SCADENZARIO: «+ Nuova scadenza» per revisioni, assicurazioni, DURC, visite mediche, pratiche. SQUADRA: «+ Persona», con le sue scadenze (visite, corsi). MEZZI: «+ Nuovo mezzo», con scadenze e rifornimenti. FORNITORI: «+ Nuovo fornitore», «Fotografa una fattura» (l'AI la legge), «+ Fattura da pagare». TASSE E FISCO: «Farsi pagare» (chi ti deve soldi e i passi per farsi pagare), «Le tue tasse», «Quanto ti resta», «Chiedi all'AI». GALLERIA: «Carica foto o video» dei lavori. CESTINO: le cose eliminate si recuperano da qui.
+
+CREDITI AI. Ogni mese ci sono crediti AI e messaggi di chat gratis; quelli comprati non scadono. Si vedono e si ricaricano dalla prima schermata (riquadro dei crediti, «Ricarica») e dalla voce «Ricarica crediti». Questa chat usa i messaggi del mese, non i crediti.
+
+AIUTO VERO. «Assistenza diretta» (in fondo al menu): scrivi e risponde una persona, anche con una foto dello schermo. «Chiedi una funzione»: per chiedere una cosa che il gestionale ancora non fa.`;
+
+// ---------------------------------------------------------------------
 // le istruzioni della chat
 // ⚠️ Le tre materie su cui si ferma le ha decise Alessio il 26 agosto:
 //    se Claude sbaglia un'aliquota o una regola di sicurezza, la figura
@@ -662,7 +698,15 @@ function istruzioni(sezione, nomeReparto, oggi) {
     'Gli attrezzi vedono SOLO il reparto aperto. Se ti chiede di un altro reparto, dillo: deve cambiare reparto e richiedere.',
     'PER GUARDARE DENTRO UN DOCUMENTO servono due passi: prima lo trovi con `elenco_cose` o `cerca_per_nome` e ti segni il suo `id`, poi chiami `dentro_al_documento` con quell\'id. Non inventare mai un id: se non l\'hai letto, cercalo.',
     '',
-    'QUANDO NON SAI, DILLO. Non inventare funzioni che non esistono e non inventare numeri. Se la domanda esce dal gestionale, o se ti serve un dato che non puoi leggere, dì che non lo sai e manda ai due riquadri in alto a sinistra: «Chiedi una funzione» e «Assistenza diretta».',
+    // ⛔ 6 nov 2026 — IL MANUALE. Prima la chat sapeva leggere i DATI ma non
+    //    sapeva com'e' fatto il gestionale: a «come faccio la fattura dal
+    //    preventivo?» rispondeva a caso («di solito in alto a destra»).
+    //    Chi aggiunge un pulsante o una sezione aggiorna MANUALE_GESTIONALE.
+    MANUALE_GESTIONALE,
+    '',
+    'QUANDO TI CHIEDE COME SI FA UNA COSA, rispondi SOLO con quello che sta nel manuale qui sopra, coi nomi veri dei pulsanti fra «». Se nel manuale non c\'e\', non tirare a indovinare («di solito sta in alto» e\' vietato): di\' che non sei sicuro e metti il segnalino [assistenza].',
+    'QUANDO NON SAI, DILLO. Non inventare funzioni che non esistono e non inventare numeri. Se la domanda esce dal gestionale, se non sai rispondere, o se c\'e\' un problema che non riesci a risolvere (un errore, una cosa che non funziona), scrivi una riga e poi il segnalino [assistenza]: diventa il pulsante «Passa la domanda all\'assistenza», che gliela prepara gia\' scritta. Se invece chiede una cosa che il gestionale non fa ancora, digli che puo\' chiederla da «Chiedi una funzione», in fondo al menu sotto «Aiuto».',
+    'SE TI RACCONTA LA GIORNATA (chi ha lavorato, dove, quante ore, cosa ha speso, cosa deve ricordarsi), non fare tu le schede: scrivi una riga sola e poi il segnalino [racconto]. Diventa il pulsante «Dividilo in schede», che prende il suo racconto e prepara giornate, spese e promemoria da controllare e salvare.',
     '',
     'FERMATI E DÌ DI CONTROLLARE su tre materie, sempre, anche se sai la risposta:',
     '· soldi e tasse (aliquote IVA, ritenute, regimi) → «questo fattelo confermare dal commercialista»;',
@@ -1020,6 +1064,18 @@ export default async function (req) {
         catch (e) { chiuso = true; }   /* se ha chiuso la pagina, si smette e basta */
       };
 
+      /* ⛔ 6 nov 2026 — fra un giro e l'altro (prima «fammi cercare…», poi
+         la risposta) a schermo le frasi uscivano attaccate: «…della
+         siepe:Ecco i passaggi». Nel database c'era gia' l'a capo; qui si
+         manda anche a schermo, una volta sola, prima del primo pezzo. */
+      const giroManda = function (dopoTesto) {
+        let primo = dopoTesto;
+        return function (o) {
+          if (primo && o && typeof o.pezzo === 'string') { primo = false; manda({ pezzo: '\n\n' }); }
+          manda(o);
+        };
+      };
+
       try {
         for (let giro = 0; giro < GIRI_MAX; giro++) {
           const g = await unGiro({
@@ -1031,7 +1087,7 @@ export default async function (req) {
             system: istruzioni(sezione, nomeReparto, oggi),
             tools: STRUMENTI,
             messages: messaggi
-          }, manda);
+          }, giroManda(!!risposta));
 
           tin  += g.tin;
           tout += g.tout;

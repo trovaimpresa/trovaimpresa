@@ -177,6 +177,10 @@
   function testoRisposta(t) {
     return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
       .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata)
+      /* 6 nov 2026 — due segnalini senza id: quando non sa, e quando gli
+         racconti la giornata (vedi passaAllAssistenza e dividiRacconto) */
+      .replace(/\[assistenza\]/g, ' <button class="chip" type="button" data-passa="1">Passa la domanda all\'assistenza</button>')
+      .replace(/\[racconto\]/g, ' <button class="chip" type="button" data-racconto="1">Dividilo in schede</button>')
       /* 8 ott 2026 — i pulsanti a un tocco stanno TUTTI IN FILA: la chat li
          scrive ognuno su una riga sua e con `white-space:pre-wrap` si
          impilavano uno sotto l'altro. Via gli a capo FRA i pulsanti. */
@@ -274,6 +278,51 @@
       if (d && d.data && d.data.stato === 'pagata') return chiudi('✔ Segnata pagata', true);
       chiudi(prima, false);
     } catch (e) { chiudi('Non ci sono riuscito, riprova', false); }
+  }
+
+  /* ============================================================
+     ⛔ 6 nov 2026 — «PASSA LA DOMANDA ALL'ASSISTENZA» e «DIVIDILO IN SCHEDE»
+     ============================================================
+     [assistenza] → apre «Assistenza diretta» con il messaggio GIA' SCRITTO
+     (la domanda e la risposta della chat). Non parte da solo: lo legge e
+     preme «Invia» lui, col codice di sempre (email all'assistenza compresa).
+     [racconto] → passa la sua domanda a window.gestParla (js/gest-parla.js),
+     lo stesso motore del pulsante «Parla»: giornate, spese e promemoria in
+     schede da controllare. Qui non si rifa' niente.
+     La domanda si prende dalla bolla SUA che sta subito sopra: cosi'
+     funziona anche nelle chat riaperte il giorno dopo. */
+  function domandaSopra(b) {
+    var bolla = b.closest('.asst-msg'); if (!bolla) return '';
+    var x = bolla.previousElementSibling;
+    while (x && !(x.classList.contains('asst-msg') && x.classList.contains('mio'))) x = x.previousElementSibling;
+    return x ? (x.innerText || x.textContent || '').trim() : '';
+  }
+  function testoBolla(b) {
+    var bolla = b.closest('.asst-msg'); if (!bolla) return '';
+    var copia = bolla.cloneNode(true);
+    Array.prototype.slice.call(copia.querySelectorAll('button')).forEach(function (x) { x.remove(); });
+    return (copia.innerText || copia.textContent || '').trim();
+  }
+  function passaAllAssistenza(b) {
+    var q = domandaSopra(b), r = testoBolla(b);
+    if (r.length > 600) r = r.slice(0, 600) + '…';
+    var msg = 'Ho chiesto all\'assistente del gestionale: «' + q + '»\n'
+      + 'Mi ha risposto: «' + r + '»\n\nMi serve una mano.';
+    var v = document.querySelector('nav.tabs button[data-tab="assistenza"]');
+    if (!v) { scrivi('ai', 'Apri «Assistenza diretta» in fondo al menu e scrivi lì.'); return; }
+    v.click();
+    var fine = Date.now() + 4000;
+    (function metti() {
+      var ta = document.getElementById('asst-testo');
+      if (ta) { ta.value = msg; ta.dispatchEvent(new Event('input', { bubbles: true })); ta.focus(); return; }
+      if (Date.now() < fine) setTimeout(metti, 150);
+    })();
+  }
+  function dividiRacconto(b) {
+    var q = domandaSopra(b);
+    if (!q) { scrivi('ai', 'Non trovo il racconto: premi «Parla» e raccontalo di nuovo.'); return; }
+    if (typeof window.gestParla !== 'function') { scrivi('ai', 'Ricarica la pagina e riprova.'); return; }
+    window.gestParla(q);
   }
 
   /* ============================================================
@@ -430,6 +479,10 @@
       if (w) return mandaWhatsApp(w);
       var p = e.target.closest('[data-pagata]');
       if (p) return segnaPagata(p);
+      var pa = e.target.closest('[data-passa]');
+      if (pa) return passaAllAssistenza(pa);
+      var ra = e.target.closest('[data-racconto]');
+      if (ra) return dividiRacconto(ra);
       var b = e.target.closest('[data-apri]'); if (!b) return;
       var ok = (typeof window.apriCosa === 'function')
         && window.apriCosa(b.getAttribute('data-apri'), b.getAttribute('data-apri-id'));

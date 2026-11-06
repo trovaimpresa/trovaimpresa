@@ -267,7 +267,11 @@
         if(conReparto)b=b.eq("mestiere_id",_mid);
         return b.order("eliminato_il",{ascending:false}).limit(CEST_MAX);
       };
-      const filtra=(cestVista!=="tutti")&&!!_mid&&c.t!=="gest_mestieri";
+      /* 6 nov 2026 — queste sei la colonna del reparto non ce l'hanno (sono
+         della persona): chiederle col reparto dava 6 errori 400 a ogni
+         apertura del Cestino, poi si richiedeva senza. Si chiede subito giusto. */
+      const filtra=(cestVista!=="tutti")&&!!_mid&&c.t!=="gest_mestieri"
+        &&["gest_spese","promemoria","gest_crediti","gest_prezzi_propri","gest_foto","gest_video"].indexOf(c.t)<0;
       let r=null;
       try{ r=await q(filtra); }catch(e){ r=null; }
       if(filtra&&r&&r.error&&/mestiere_id|42703|column/i.test((r.error.message||"")+(r.error.code||""))){

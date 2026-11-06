@@ -27,14 +27,20 @@
 (function () {
   /* 6 nov 2026 — «computi» in vista subito dopo i Preventivi (ok di Alex):
      il computo diventa un preventivo, e chiuso in «Altre voci» non lo trovava nessuno */
-  var PRINCIPALI = ["riepilogo", "chat", "clienti", "preventivi", "computi", "lavori", "giornate", "fatture", "calendario", "fisco"];   /* in ordine di partenza, come i Primi passi */
+  /* 6 nov 2026 (sera, anteprima approvata da Alex) — IL MENU DELL'ASSISTENTE:
+     in vista solo le voci di tutti i giorni. La Chat non serve in vista:
+     ci si arriva dalla casella «Cosa facciamo?» della pagina di partenza
+     (js/gest-assistente.js) e dal pulsante «Aiuto». Il Computo resta in
+     vista: e' stato deciso la mattina stessa («chiuso in Altre voci non lo
+     trovava nessuno»). Giornate e Tasse e fisco scendono nei loro gruppi. */
+  var PRINCIPALI = ["riepilogo", "preventivi", "computi", "lavori", "fatture", "clienti", "calendario"];   /* in ordine di partenza */
   var FISSE = ["richieste", "assistenza"];      /* vanno in fondo, sotto «Aiuto» */
   /* 6 nov 2026 — i gruppi dentro «Altre N voci». Una voce che non sta in
      nessun gruppo finisce in fondo, sotto «Altro»: non sparisce mai. */
   var GRUPPI = [
-    { t: "Ogni giorno",        tabs: ["dalsito", "giornate", "promemoria", "scadenzario", "agenda"] },
+    { t: "Ogni giorno",        tabs: ["chat", "giornate", "dalsito", "promemoria", "scadenzario", "agenda"] },
     { t: "Squadra e mezzi",    tabs: ["squadra", "mezzi", "attrezzature"] },
-    { t: "Conti e documenti",  tabs: ["computi", "prezzario", "sal", "fornitori", "carte", "report", "crediti"] },
+    { t: "Conti e documenti",  tabs: ["fisco", "computi", "prezzario", "sal", "fornitori", "carte", "report", "crediti"] },
     { t: "Archivio",           tabs: ["galleria", "mappa", "cestino"] }
   ];
   var CHIAVE = "ti-menu-altro-aperto";
@@ -149,6 +155,10 @@
       });
     });
     if (resto.length) { titoletto("Altro"); resto.forEach(function (b) { box.appendChild(b); }); }
+    /* 6 nov 2026 (sera) — la Chat e' scesa in «Tutto il resto»: «Ricarica
+       crediti» le resta accanto, dentro il gruppo, invece di finire in fondo */
+    var chBox = box.querySelector('button[data-tab="chat"]');
+    if (ric && chBox) chBox.after(ric);
 
     /* 3-bis. 6 nov 2026 — «Chiedi una funzione» e «Assistenza diretta» in
        fondo, sotto il titoletto «Aiuto». Restano dentro nav.tabs: il resto
@@ -200,7 +210,8 @@
     function aggiorna() {
       var voci = Array.prototype.slice.call(box.querySelectorAll("button[data-tab]")).filter(visibile);
       var avvisi = voci.filter(function (b) { var c = b.querySelector(".tab-cnt"); return c && c.textContent.trim() && c.textContent.trim() !== "0"; }).length;
-      btn.querySelector(".ma-t").textContent = "Altre " + voci.length + " voci";
+      btn.querySelector(".ma-t").textContent = "Tutto il resto";   /* 6 nov 2026: prima «Altre N voci» */
+      btn.title = voci.length + " voci";
       /* un titoletto senza voci accese sotto non si vede */
       Array.prototype.forEach.call(box.querySelectorAll(".ma-gruppo"), function (g) {
         var c = false, x = g.nextElementSibling;
