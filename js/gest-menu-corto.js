@@ -72,6 +72,15 @@
       +   "#landing .landing-top .gc-brand{height:104px!important;width:auto!important;margin:0 auto 6px!important;padding:0!important}"
       +   "#landing .landing-top h1{font-size:28px!important}"
       +   "#landing .landing-top small{font-size:16px!important}"
+      + "}"
+      /* 6 nov 2026 — IL CALENDARIO SUL TELEFONO: l'elenco giorno per giorno
+         (c'era gia' dal 26 settembre) sale SOPRA la griglia dei numeri. Prima
+         per arrivarci bisognava scorrere tutto il mese. */
+      + "@media(max-width:760px){"
+      +   "#calendario.active{display:flex!important;flex-direction:column}"
+      +   "#calendario > .cal-head{order:0}#calendario > .ti-sez{order:1}"
+      +   "#calendario > .cal-lista{order:2;margin-bottom:18px}"
+      +   "#calendario > .cal-grid{order:3}#calendario > .cal-legend{order:4}"
       + "}";
     document.head.appendChild(st);
   })();
