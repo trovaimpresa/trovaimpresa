@@ -132,6 +132,12 @@
   const CEST_FINESTRA=120000;
 
   let cestCache=[], cestQ="", cestTotale=null;
+  /* 6 nov 2026 — il Cestino a pezzi: prima si disegnavano tutte le cose
+     buttate insieme (sul conto di Alex 641 pulsanti, una pagina alta
+     36.000 pixel). Adesso: in cima le scelte per tipo («Lavori 12»,
+     «Foto 300»…) e sotto 50 righe alla volta, con «Mostra altre». */
+  const CEST_PASSO=50;
+  let cestMostra=CEST_PASSO, cestTipo="", cestChiave="";
   /* 12 agosto 2026 (sera) — IL CESTINO NON GUARDAVA IL REPARTO.
      Chiedeva tutto quello che e' eliminato per QUESTO ACCOUNT, senza badare a
      dove stava: se hai due reparti — poniamo "Edilizia" e "Impianti" — dentro
@@ -337,8 +343,18 @@
     /* la ricerca: cerca nel nome e nel tipo. Le posizioni restano quelle di
        cestCache, se no "Rimetti a posto" ripescherebbe la riga sbagliata. */
     const q=(cestQ||"").trim().toLowerCase();
-    const vis=cestCache.map((x,i)=>({x:x,i:i}))
-      .filter(v=>!q||(v.x.nome+" "+v.x.tipo).toLowerCase().includes(q));
+    /* le scelte per tipo si contano su quello che corrisponde alla ricerca */
+    const _perTipo={};
+    cestCache.forEach(function(x){
+      if(q&&!(x.nome+" "+x.tipo).toLowerCase().includes(q))return;
+      _perTipo[x.tipo]=(_perTipo[x.tipo]||0)+1;
+    });
+    if(cestTipo&&!_perTipo[cestTipo])cestTipo="";
+    const _chiave=q+"|"+cestTipo+"|"+cestVista;
+    if(_chiave!==cestChiave){cestChiave=_chiave;cestMostra=CEST_PASSO;}
+    const visTutte=cestCache.map((x,i)=>({x:x,i:i}))
+      .filter(v=>(!q||(v.x.nome+" "+v.x.tipo).toLowerCase().includes(q))&&(!cestTipo||v.x.tipo===cestTipo));
+    const vis=visTutte.slice(0,cestMostra);
 
     const totVero=(cestQui==null?cestCache.length:cestQui);
     const nascoste=Math.max(0,totVero-cestCache.length);
@@ -350,12 +366,24 @@
         +(totVero===1?'cosa eliminata':'cose eliminate')
         +(cestVista!=="tutti"?' in questo reparto':'')
         +(nascoste?(' <small>— ne mostro '+cestCache.length+', le più recenti</small>'):'')
-        +(q?(' <small>· trovate '+vis.length+' con «'+esc(cestQ)+'»</small>'):'')
+        +(q?(' <small>· trovate '+visTutte.length+' con «'+esc(cestQ)+'»</small>'):'')
         +'</div><div class="cest-nota">Restano qui finché non le rimetti a posto, e non si vedono da nessun\'altra parte del gestionale. '
         +'Foto, video e documenti però continuano a occupare spazio finché non li elimini per sempre.'
         +(altrove?(' <b>Altre '+altrove+' stanno in altri reparti:</b> per vederle scegli «Tutti i reparti» qui sopra.'):'')
         +'</div></div>'
+        /* le scelte per tipo: si vedono solo se i tipi sono almeno due */
+        +(Object.keys(_perTipo).length>1
+          ? '<div class="cest-tipi" style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px">'
+            +'<button type="button" class="'+(cestTipo?'btn':'btn-primary')+'" data-cesttipo="" style="font-size:16px;padding:8px 14px">Tutto</button>'
+            +Object.keys(_perTipo).sort((a,b)=>_perTipo[b]-_perTipo[a]).map(function(t){
+              return '<button type="button" class="'+(cestTipo===t?'btn-primary':'btn')+'" data-cesttipo="'+esc(t)+'" style="font-size:16px;padding:8px 14px">'+esc(t)+' <b>'+_perTipo[t]+'</b></button>';
+            }).join("")
+            +'</div>'
+          : "")
       : "");
+    Array.prototype.forEach.call(document.querySelectorAll("#cest-riass [data-cesttipo]"),function(b){
+      b.onclick=function(){cestTipo=b.getAttribute("data-cesttipo")||"";renderCestino(true);};
+    });
 
     renderTabella({
       id:"cest", box:"#cest-list",
@@ -401,6 +429,14 @@
         });
       }).join("")
     });
+    /* «Mostra altre»: aggiunge le righe dopo, senza rileggere il database */
+    const _resto=visTutte.length-vis.length;
+    if(_resto>0&&box){
+      box.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin:18px 0 6px"><button type="button" class="btn-primary" id="cest-altre" style="font-size:19px;font-weight:700;padding:14px 26px">Mostra altre '+Math.min(_resto,CEST_PASSO)+'</button>'
+        +'<div class="sh-nota" style="margin-top:8px">Ne vedi '+vis.length+' su '+visTutte.length+'. Per trovarne una in fretta, tocca un tipo qui sopra o cerca il nome.</div></div>');
+      const _ba=document.getElementById("cest-altre");
+      if(_ba)_ba.onclick=function(){cestMostra+=CEST_PASSO;renderCestino(true);};
+    }
   }
 
   /* rimette a posto UNA riga */
