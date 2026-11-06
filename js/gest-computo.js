@@ -2312,6 +2312,51 @@
   }
 
   /* ---- la scheda della singola lavorazione ---- */
+  /* ============================================================
+     6 novembre 2026 — APRENDO UNA LAVORAZIONE SI VEDE LA LAVORAZIONE
+     ============================================================
+     Prima, aprendo una riga gia' scritta, in cima c'era «Il tuo prezzario»
+     con la ricerca e le voci del prezzario; la lavorazione aperta stava
+     sotto, fuori schermo, e il titolo diceva solo «Lavorazione»: non si
+     capiva nemmeno quale si era aperta. Detto da Alessio: «piu' semplice».
+     Adesso, su una lavorazione GIA' SCRITTA: il titolo dice quale e', in
+     cima c'e' la lavorazione, e il prezzario sta in fondo alla colonna,
+     chiuso in «Cerca nel tuo prezzario» (si apre con un clic).
+     Su una lavorazione NUOVA resta tutto com'era: li' cercare nel prezzario
+     e' proprio la prima cosa da fare.
+     ⛔ Il riquadro del prezzario NON si ridisegna: si SPOSTA, cosi' la
+        ricerca (ppCerca, #pp-cerca, #pp-lista) resta quella di sempre.
+     ============================================================ */
+  function compVoceSemplice(v){
+    const sh=$("#sheet"); if(!sh)return;
+    const h3=sh.querySelector(".sh-head h3");
+    const d=String((v&&v.descrizione)||"").replace(/\s+/g," ").trim();
+    if(h3&&d)h3.textContent="Lavorazione: "+(d.length>70?d.slice(0,70).replace(/\s+\S*$/,"")+"\u2026":d);
+    const cerca=$("#pp-cerca"); if(!cerca)return;
+    const blocco=cerca.closest(".sh-b"); if(!blocco)return;
+    const col=blocco.parentElement; if(!col)return;
+    const tit=blocco.querySelector(".sh-tit"); if(tit)tit.remove();
+    const det=document.createElement("details");
+    det.className="co-altri cv-prz";
+    det.innerHTML='<summary>Cerca nel tuo prezzario</summary><div class="co-altri-in"></div>';
+    const dentro=det.querySelector(".co-altri-in");
+    Array.from(blocco.children).forEach(function(x){dentro.appendChild(x);});
+    blocco.appendChild(det);
+    /* l'ordine di lettura: la lavorazione, come si conta, LE MISURE (il motivo
+       per cui la si apre), come e' fatto il prezzo, e per ultimo il prezzario.
+       Le colonne si riempiono da sole (column-count in css/gestionale.css):
+       conta l'ordine nel documento, non in quale .sh-col sta il blocco. */
+    const mis=$("#cv-misure"), an=$("#cv-analisi");
+    const bMis=mis?mis.closest(".sh-b"):null, bAn=an?an.closest(".sh-b"):null;
+    const conta=$("#cv-conta"), bConta=conta?conta.closest(".sh-b"):null;
+    let dopo=bConta||blocco.previousElementSibling;
+    [bMis,bAn].forEach(function(b){ if(b&&dopo){ dopo.after(b); dopo=b; } });
+    /* sul computer le misure aprono la seconda colonna: si vedono subito,
+       accanto alla lavorazione, senza scorrere (css: .cv-a-capo) */
+    if(bMis)bMis.classList.add("cv-a-capo");
+    if(dopo)dopo.after(blocco); else col.appendChild(blocco);
+  }
+
   async function compVoceForm(voceId){
     if(!compVociCompId){toast("Apri prima il computo");return;}
     const computoId=compVociCompId;
@@ -2428,6 +2473,7 @@
       +'<button class="btn" data-action="pp-salva">★ Salva nel mio prezzario</button>'
       +'<button class="btn-primary b-save" data-action="comp-voce-salva" data-id="'+esc(String(v.id||""))+'">'+(isNew?"Crea lavorazione":"Salva")+'</button>');
 
+    if(!isNew){ try{ compVoceSemplice(v); }catch(e){ console.warn("[computo] lavorazione:",e); } }
     bindSeg("cv-conta");
     /* i due pulsanti accendono/spengono il campo della quantita' e sbiadiscono
        le misure, che con "a corpo" non contano piu' */
