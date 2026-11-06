@@ -12,7 +12,12 @@
   # esistevano. Cosa controlla e perche' e' scritto in tools/controllo-push.js.
   # Per spegnerlo in fretta, se un giorno dovesse dare fastidio: mettere un
   # cancelletto davanti alla riga qui sotto.
-  command = "node tools/controllo-push.js"
+  command = "node tools/controllo-push.js && (node tools/indexnow-lista.js || true)"
+  # ===== 6 novembre 2026 — IL CAMPANELLO AUTOMATICO PER BING =====
+  # Dopo il controllo, tools/indexnow-lista.js scrive quali pagine sono
+  # cambiate; a pubblicazione online netlify/functions/deploy-succeeded.js
+  # le manda a Bing (IndexNow). Il `|| true` e' voluto: la lista non deve
+  # mai fermare una pubblicazione.
 
 [build.environment]
   NODE_VERSION = "22"
@@ -24,6 +29,10 @@
   # ⚠️ REGOLA: se un giorno serve un pacchetto PER IL BUILD (non per l'app),
   # va messo in "dependencies", se no con questa riga non viene installato.
   NPM_FLAGS = "--omit=dev"
+
+# La lista di IndexNow viaggia dentro la function che la manda a Bing.
+[functions."deploy-succeeded"]
+  included_files = ["tools/.indexnow-lista.json"]
 
 [context.deploy-preview]
   command = "echo 'Deploy preview disabilitato per risparmiare crediti'"

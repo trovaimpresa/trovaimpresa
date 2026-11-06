@@ -173,6 +173,15 @@ Mandati **→2133←** indirizzi, tutti accettati. Si rilancia quando serve:
 `node tools/indexnow.js` (solo gestionale) o `--tutte`.
 ⚠️ **Non vale per Google**, che non usa IndexNow: serve per Bing, e quindi
 per Copilot e DuckDuckGo che pescano dal suo elenco.
+🆕 **6 nov 2026 — adesso parte DA SOLO a ogni pubblicazione.**
+`tools/indexnow-lista.js` (nel build, dopo il controllo) scrive le pagine
+cambiate che stanno in sitemap + gli indirizzi comparsi/spariti dalle
+sitemap; `netlify/functions/deploy-succeeded.js` le manda a Bing quando la
+pubblicazione è online. Registro: Netlify → Logs → Functions →
+deploy-succeeded (righe `[indexnow]`). Lo strumento a mano resta per i
+casi speciali (`--tutte`). Lo stesso giorno Bing Webmaster Tools è stato
+ricollegato con info@trovaimpresa.com (prima passava dall'account Google
+della moglie e si era scollegato).
 
 **2. `/info-premium` chiusa** — era il doppione di `/gestionale`: due pagine
 che vendevano la stessa cosa e si rubavano la forza su Google. Adesso
