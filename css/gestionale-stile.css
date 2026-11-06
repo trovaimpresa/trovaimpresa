@@ -48,7 +48,8 @@
 #appview .side .tabs button svg{stroke:#fff !important;color:#fff !important}
 #appview .side .tabs button>svg{background:transparent !important;box-shadow:none !important}
 #appview .side .tabs button:hover{background:rgba(255,255,255,.12) !important}
-#appview .side .tabs button.active{background:#ff8800 !important;color:#0a2a4d !important}
+/* 6 nov 2026 (ok di Alex): la voce aperta e' BIANCA, non arancione. L'arancione resta solo per «attento, da guardare» (i numerini) */
+#appview .side .tabs button.active{background:#ffffff !important;color:#0a2a4d !important}
 #appview .side .tabs button.active svg{stroke:#0a2a4d !important}
 #appview .side .tabs button.tab-cta{background:rgba(10,42,77,.85) !important;border:2px solid rgba(255,255,255,.65) !important}
 #appview .side .tabs button.tab-cta b{color:#fff !important}
@@ -69,7 +70,7 @@
 #app-root header.top .back,#app-root header.top .az-btn{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important;box-shadow:none !important}
 #app-root header.top .btn-new{background:#ff8800 !important;color:#0a2a4d !important;border:2px solid #ff8800 !important;border-radius:8px !important;font-weight:700 !important}
 #app-root nav.tabs button{color:#fff !important;font-weight:600 !important}
-#app-root nav.tabs button.active{color:#ff8800 !important;border-bottom-color:#ff8800 !important}
+#app-root nav.tabs button.active{color:#ffffff !important;border-bottom-color:#ffffff !important}
 #app-root nav.tabs button:hover{background:rgba(255,255,255,.12) !important}
 #app>header{background-color:#0a2a4d !important;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;background-size:40px 40px !important;border-bottom:3px solid #ff8800 !important;font-family:'IBM Plex Sans',Inter,system-ui,sans-serif}
 #app>header .esci{background:rgba(10,42,77,.85) !important;color:#fff !important;border:2px solid rgba(255,255,255,.65) !important;border-radius:8px !important}
@@ -78,7 +79,8 @@
 
 /* ===== 3 ott 2026 - BORDO BLU su tutte le card del gestionale (la classe la mette js/gest-bordo-blu.js) ===== */
 html body .ti-bb.ti-bb.ti-bb{border:2px solid #0a2a4d !important;border-left:2px solid #0a2a4d !important;border-radius:10px !important}
-html body .ti-bgt.ti-bgt{background-color:#e7eef8 !important;background-image:linear-gradient(rgba(10,42,77,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(10,42,77,.045) 1px,transparent 1px) !important;background-size:40px 40px !important}
+/* 6 nov 2026 (ok di Alex): dove si legge e si scrive lo sfondo e' liscio, senza quadretti: stanca meno. I quadretti restano sul blu (menu e barre) */
+html body .ti-bgt.ti-bgt{background-color:#e7eef8 !important;background-image:none !important}
 
 /* telefono: le 3 caselle numeriche (In ritardo / Il piu in ritardo / Finiti...) sono UN blocco unico: bordo blu sul gruppo, righe divise da una linea sottile */
 @media(max-width:560px){
