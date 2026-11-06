@@ -10,7 +10,7 @@
      1. QUESTO FILE gira durante il build di Netlify (netlify.toml,
         riga `command`). Guarda cosa e' cambiato fra la pubblicazione
         di prima e questa, e scrive la lista degli indirizzi da segnalare
-        in  tools/.indexnow-lista.json
+        in  netlify/functions/indexnow-lista.json
      2. netlify/functions/deploy-succeeded.js parte da sola quando la
         pubblicazione e' ONLINE, legge la lista e la manda a Bing.
         Si aspetta che sia online apposta: se Bing arrivasse prima,
@@ -38,7 +38,10 @@ const { execSync } = require('child_process');
 
 const SITO = 'https://trovaimpresa.com';
 const RADICE = path.join(__dirname, '..');
-const USCITA = path.join(__dirname, '.indexnow-lista.json');
+/* ⚠️ Sta accanto alla function e lei la prende con require(): cosi' il
+   pacchetto di Netlify la contiene di sicuro. Nel repo c'e' una copia
+   vuota, che il build sovrascrive. */
+const USCITA = path.join(RADICE, 'netlify', 'functions', 'indexnow-lista.json');
 /* IndexNow accetta fino a 10.000 indirizzi al giorno per sito. */
 const TETTO = 10000;
 

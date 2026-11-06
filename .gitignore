@@ -63,4 +63,3 @@ tools/conferme-mandate.txt
 # --- La lista delle 23 mail di conferma (5 set 2026) ---
 #     Dentro ci sono gli indirizzi veri degli iscritti: resta sul PC.
 tools/manda-le-23.js
-tools/.indexnow-lista.json

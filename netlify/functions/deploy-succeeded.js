@@ -6,7 +6,7 @@
    ⛔ NON RINOMINARE QUESTO FILE: col nome diverso non parte piu'.
 
    Legge la lista scritta durante il build da tools/indexnow-lista.js
-   (inclusa nella function con `included_files` in netlify.toml) e la
+   (netlify/functions/indexnow-lista.json, presa con require) e la
    manda a IndexNow, che la gira a Bing, Yandex, Naver, Seznam.
    DuckDuckGo e Copilot/ChatGPT cercano su Bing: arriva anche a loro.
 
@@ -24,24 +24,15 @@
    ===================================================================== */
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 
 const HOST = 'trovaimpresa.com';
 const CHIAVE = 'c670fbe9c5c6a2205488dd36e94bd040';
 const BLOCCO = 10000; // massimo per richiesta secondo IndexNow
 
 function leggiLista() {
-  const posti = [
-    path.join(__dirname, 'tools', '.indexnow-lista.json'),
-    path.join(process.cwd(), 'tools', '.indexnow-lista.json'),
-    path.join(__dirname, '..', '..', 'tools', '.indexnow-lista.json'),
-    path.join('/var/task', 'tools', '.indexnow-lista.json')
-  ];
-  for (const p of posti) {
-    try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { /* prova il posto dopo */ }
-  }
-  return null;
+  /* require() con un nome fisso: il bundler di Netlify mette il file
+     nel pacchetto da solo. Lo scrive tools/indexnow-lista.js nel build. */
+  try { return require('./indexnow-lista.json'); } catch (e) { return null; }
 }
 
 exports.handler = async (event) => {

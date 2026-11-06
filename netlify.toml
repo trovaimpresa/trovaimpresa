@@ -30,10 +30,6 @@
   # va messo in "dependencies", se no con questa riga non viene installato.
   NPM_FLAGS = "--omit=dev"
 
-# La lista di IndexNow viaggia dentro la function che la manda a Bing.
-[functions."deploy-succeeded"]
-  included_files = ["tools/.indexnow-lista.json"]
-
 [context.deploy-preview]
   command = "echo 'Deploy preview disabilitato per risparmiare crediti'"
 
