@@ -2899,3 +2899,61 @@ cliente). Un push solo.
   voce, voce senza «Cosa si fa», inizio già passato. Arancio: indirizzo, tempi, pagamenti,
   materiali vuoti o «da concordare», voce senza «Escluso». Il capitolato NON è in
   `CTR_AI_SEZIONI`: la sua AI ce l'ha già in cima («Controlla cosa manca»).
+
+# 6 NOVEMBRE 2026 (sera) — IL GESTIONALE DIVENTA UN ASSISTENTE
+
+Chiesto da Alex: «ispezionalo a fondo, rendiamolo piu' semplice e intuitivo,
+la grafica come un assistente». Ispezione dal vivo sul suo account, anteprima
+in foto approvata («si»), poi →7← push tutti controllati su Netlify e
+collaudati sul sito vero (computer 1440 e telefono 375).
+
+## Cosa si e' trovato nell'ispezione
+- →7← porte per l'aiuto (Chat, Parla, «Chiedi all'AI cosa fare oggi», Aiuto,
+  Assistenza diretta, Chiedi una funzione, AI dei moduli): nessuno sapeva quale usare.
+- ⛔ La Chat con AI NON sapeva com'e' fatto il gestionale: a «come faccio la
+  fattura dal preventivo?» rispondeva «di solito in alto a destra». E mandava
+  ai riquadri «in alto a sinistra» che dalla mattina stavano in fondo.
+- La vecchia guida «Come si fa» (MANUALE in `supabase/functions/ai-generate`)
+  e' ferma: non conosce Computo, Giornate, Fisco, Capitolato, Promemoria.
+- Prezzario: →1.000← schede insieme, pagina alta →186.220← px.
+  Cestino: →641← pulsanti, →103.933← px. Il Cestino faceva 6 richieste 400 a
+  ogni apertura (6 tabelle senza `mestiere_id` chieste col reparto).
+
+## Cosa e' stato fatto
+| cosa | dove |
+|---|---|
+| Casella «Cosa facciamo?» in cima al Riepilogo: saluto col nome, Parla, Manda, 4 scorciatoie | `js/gest-assistente.js` (nuovo, IIFE) |
+| «Manda» → Chat con AI (chat nuova); «Parla» preme il `#gv-btn` di sempre | idem |
+| «Aiuto» in alto apre la Chat, non piu' la guida vecchia | idem (`aiutoAllaChat`) |
+| Menu: «Riepilogo» si chiama «Assistente»; in vista Assistente, Preventivi, Computo, Lavori, Fatture, Clienti, Calendario; il resto in «Tutto il resto» (Chat, Giornate, Fisco scendono nei gruppi) | `js/gest-menu-corto.js` |
+| Telefono: barra Oggi · Lavori · microfono arancione · Preventivi · Fatture; niente barra nella schermata dei reparti; il Parla tondo non si vede mai | `js/gest-assistente.js` |
+| La Chat conosce il MANUALE (pulsanti veri) e non indovina le cause degli errori | `netlify/functions/chat-gestionale.mjs` (`MANUALE_GESTIONALE`) |
+| Segnalini nuovi `[assistenza]` → «Passa la domanda all'assistenza» (riempie Assistenza diretta, preme Invia lui) e `[racconto]` → «Dividilo in schede» (`window.gestParla`) | `js/gest-chat.js` |
+| Le frasi fra un giro e l'altro della chat non escono piu' attaccate | `chat-gestionale.mjs` (`giroManda`) |
+| Prezzario 60 alla volta + «Mostra altre», ricerca su tutte, senza rileggere il DB | `js/gest-sal-prezzario.js` |
+| Cestino: scelte per tipo in cima + 50 righe alla volta; niente piu' 6 richieste 400 | `js/gest-cestino.js` |
+| Studio tecnico: al posto di «Racconta la giornata» la scorciatoia «Cosa scade questo mese?» | `js/gest-assistente.js` |
+
+## Trappole trovate oggi
+- ⛔ Nel gestionale ogni `<section>` e' una SEZIONE (nascosta se non `.active`):
+  un riquadro nuovo dentro una sezione va fatto con `<div>`, non `<section>`.
+- ⛔ `js/gest-dettato.js` mette il microfono piccolo in OGNI textarea: dove non
+  serve si spegne con `data-no-dettato`.
+- `window._gc` (il client del cancello) arriva DOPO i file js: chi legge dal
+  database all'avvio deve riprovare finche' non c'e' (es. il nome del saluto).
+- Il ruolo (`ruoloUtente`) si sa qualche istante dopo l'avvio: chi disegna
+  cose diverse per lo studio deve ridisegnare quando cambia.
+- Il microfono nel browser dell'app Claude e' BLOCCATO: la voce vera la prova
+  solo Alex dal telefono. Il racconto si prova chiamando `window.gestParla(testo)`.
+- Il push da Claude passa solo se Alex ha detto «pubblica» nel messaggio:
+  il sistema blocca i push senza il suo ok esplicito.
+
+## Ancora aperto
+1. Noleggio e app operaio non hanno la casella «Cosa facciamo?» (grafica loro:
+   prima le foto ad Alex).
+2. Non visto: come appare la casella in un reparto vuoto (impresa nuova).
+3. La guida vecchia in `ai-generate` resta vecchia: oggi la usa solo chi non
+   passa da gestionale-app (da controllare chi la chiama ancora).
+4. Il Cestino del reparto giardiniere ha →2.562← cose buttate (quasi tutte voci
+   del prezzario). Un «Svuota» per tipo l'ha proposto Claude: Alex non l'ha chiesto.
+5. La voce vera dal telefono: tocca ad Alex.

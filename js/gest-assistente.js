@@ -161,13 +161,24 @@
         if (typeof window.gestApriModuloAI === 'function') { vai('preventivi'); window.gestApriModuloAI('preventivo'); }
         else vai('preventivi');
       } },
-    { t: 'Racconta la giornata', fa: parla },
+    { t: 'Racconta la giornata', fa: parla, no: 'studio' },
+    /* 6 nov 2026 (sera) — lo studio tecnico non ha giornate di cantiere:
+       al loro posto le pratiche e le scadenze che arrivano */
+    { t: 'Cosa scade questo mese?', fa: function () { allaChat('Quali scadenze e pratiche ho nei prossimi 30 giorni?'); }, solo: 'studio' },
     { t: 'Fattura da un preventivo', fa: function () { allaChat('Voglio fare la fattura partendo da un preventivo: quali preventivi ho che posso fatturare? Dimmi come si fa.'); } },
     { t: 'Quanto devo incassare?', fa: function () { allaChat('Quanto devo ancora incassare e da chi?'); } }
   ];
 
+  function chiSono() {
+    try { return (typeof ruoloUtente !== 'undefined' && ruoloUtente === 'professionista') ? 'studio' : 'impresa'; }
+    catch (e) { return 'impresa'; }
+  }
+  var montatoPer = '';
   function monta() {
     var sez = $('riepilogo'); if (!sez || $('ass-box')) return;
+    montatoPer = chiSono();
+    var SC = SCORCIATOIE.map(function (x, i) { return { x: x, i: i }; })
+      .filter(function (v) { return v.x.no !== montatoPer && (!v.x.solo || v.x.solo === montatoPer); });
     var box = document.createElement('div');   /* ⚠️ NON <section>: nel gestionale ogni section e' una sezione, nascosta se non e' «active» */
     box.id = 'ass-box';
     var conMic = !!$('gv-btn') || !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -180,8 +191,8 @@
       +   (conMic ? '<button type="button" class="ass-b ass-parla" id="ass-parla">' + MIC + 'Parla</button>' : '')
       +   '<button type="button" class="ass-b ass-manda" id="ass-manda">Manda</button>'
       + '</div>'
-      + '<div class="ass-chips">' + SCORCIATOIE.map(function (s, i) {
-          return '<button type="button" class="ass-chip" data-ass="' + i + '">' + s.t + '</button>';
+      + '<div class="ass-chips">' + SC.map(function (v) {
+          return '<button type="button" class="ass-chip" data-ass="' + v.i + '">' + v.x.t + '</button>';
         }).join('') + '</div>'
       + '<div class="ass-nota">Se l\'assistente non sa rispondere, ti prepara la domanda per l\'assistenza.</div>';
     var intro = sez.querySelector('.rie-intro');
@@ -240,6 +251,10 @@
     document.body.classList.toggle('ass-ascolta', ascolta);
     var mic = document.querySelector('#barra-basso .bb-mic');
     if (mic) mic.classList.toggle('on', ascolta);
+    /* il ruolo si sa dopo qualche istante: se e' cambiato, si rifanno le scorciatoie
+       (la casella si rimonta solo se e' vuota, per non buttare quello che sta scrivendo) */
+    var bx = $('ass-box'), tt = $('ass-testo');
+    if (bx && montatoPer !== chiSono() && !(tt && tt.value)) { bx.remove(); }
     if (!$('ass-box')) monta();
     if (!nome && !nomeChiesto && window._gc) leggiNome();
     aiutoAllaChat();
