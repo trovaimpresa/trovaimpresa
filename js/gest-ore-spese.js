@@ -1081,13 +1081,16 @@
     const esiti=(TUTTI||[]).filter(p=>(p.stato==="accettato"||p.stato==="rifiutato")
                                     && String(p.data||"")>=daQuando);
     const acc=esiti.filter(p=>p.stato==="accettato").length;
+    /* 6 nov 2026 — via «In attesa di risposta» e «Il più vecchio senza
+       risposta» (ok di Alex): li dicono gia' i filtri «Bozze»/«Inviati» e il
+       Riepilogo («preventivi fermi da più di una settimana»). */
     return numFila([
-      attesa.length?numCard({
+      false?numCard({
         domanda:"In attesa di risposta",
         numero:String(attesa.length),
         sotto:eur(valore)+" fermi",
         tono:"attesa"}):null,
-      vecchio?numCard({
+      false?numCard({
         domanda:"Il più vecchio senza risposta",
         numero:_ggCorto(gg),
         sotto:(vecchio.titolo||"Senza titolo"),

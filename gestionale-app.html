@@ -353,7 +353,8 @@
       <div class="lav-head">
         <h2>Lavori</h2>
         <div class="lav-head-act">
-          <input type="text" id="f-search" class="lav-search" placeholder="Cerca cliente, indirizzo, lavoro" autocomplete="off" spellcheck="false">
+          <!-- 6 nov 2026: la ricerca di Lavori e' nascosta (ok di Alex): ne resta una sola, quella in alto che cerca dappertutto. La casella resta nel codice perche' la leggono altri file. -->
+          <input type="text" id="f-search" class="lav-search" hidden style="display:none" placeholder="Cerca cliente, indirizzo, lavoro" autocomplete="off" spellcheck="false">
           <button class="btn" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">&#10024; Compila con AI</button>
           <button class="btn-primary" data-action="new-job">+ Nuovo lavoro</button>
         </div>
