@@ -171,10 +171,24 @@
          «pratica» — come in tutto il resto del suo pannello */
       const ctq=document.querySelector('#ct-q');
       if(ctq)ctq.placeholder="Cerca un nome: cliente, pratica, preventivo, fattura";
-      avviaLocalizzazionePratiche();
+      /* 6 nov 2026 — L'ERRORE «renderScadenze is not defined».
+         Il tipo arriva dal database e a volte arriva PRIMA che il browser
+         abbia finito di leggere i file che vengono dopo questo
+         (gest-ingresso.js, gest-scadenze-pratiche.js): la funzione non c'era
+         ancora, partiva l'errore e tutto quello che segue (la schermata dei
+         reparti coi contatori «pratiche») restava fermo. Adesso le tre
+         chiamate a funzioni di altri file aspettano che la pagina sia
+         pronta, e controllano che la funzione ci sia. */
+      const _pronto=function(fn){
+        if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fn,{once:true});
+        else fn();
+      };
+      _pronto(function(){ if(typeof avviaLocalizzazionePratiche==='function')avviaLocalizzazionePratiche(); });
       adattaMenuProfessionista();
-      renderScadenze();
-      if(!cur)renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
+      _pronto(function(){
+        if(typeof renderScadenze==='function')renderScadenze();
+        if(!cur&&typeof renderLanding==='function')renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
+      });
     } else if(ruoloUtente==='artigiano'){
       /* ⛔ 22 agosto 2026 — la terza faccia. Prima l'artigiano cadeva qui sotto,
          nel ramo dell'impresa edile, ed e' da li' che gli arrivavano Computo
