@@ -265,6 +265,11 @@
          sale in vista nel menu corto, sotto Clienti (era dentro «Altre voci»). */
       window._tiPromuovi=[['computi','clienti']];
       if(typeof window.menuCortoPromuovi==='function')window.menuCortoPromuovi('computi','clienti');
+      /* 6 nov 2026 — le «Giornate» sono le giornate di cantiere degli operai:
+         per uno studio non sono roba di tutti i giorni. Scendono dentro
+         «Altre voci» (gruppo «Ogni giorno»): non spariscono, si trovano li'. */
+      window._tiInAltre=['giornate'];
+      if(typeof window.menuCortoInAltre==='function')window.menuCortoInAltre('giornate');
       /* 30/09/2026 — in Mezzi la frase mandava a «Attrezzature», ma per gli studi
          la voce si chiama «Strumenti» (come nel menu). */
       var _miz=document.querySelector('#mezzi .gal-intro b');

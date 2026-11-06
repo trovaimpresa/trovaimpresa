@@ -43,6 +43,7 @@
     openSheetGrande("Cosa stai fotografando?",
       '<div class="sh-b"><p style="margin:0 0 14px;font-size:18px">Scegli, poi scatta o scegli la foto. L\'AI legge e riempie tutto. Costa 1 credito.</p>'
       +c("pf-forn","🧾","Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
+      +(typeof window.gestParlaFoto==="function"?c("pf-bolla","📦","Bolla del cantiere","Diventa una spesa del cantiere"):"")
       +c("pf-lett","✉️","Lettera del Fisco o dell'INPS","Te la spiega in parole semplici")
       +c("pf-altro","💬","Altro: scrivi alla chat","La chat guarda la foto e ti risponde")+'</div>',
       '<button class="btn b-cancel" data-action="close">Chiudi</button>');
@@ -51,6 +52,15 @@
       closeSheet();
       try{ await fornForm(null); }catch(e){ toast("Non riesco ad aprire il modulo, riprova"); return; }
       setTimeout(function(){ const cam=document.getElementById("ff-foto-cam"); if(cam)cam.click(); },300);
+    };
+    /* 6 nov 2026 — la foto della bolla che prima stava nel pulsante fisso «Foto» */
+    const B=document.getElementById("pf-bolla");
+    if(B)B.onclick=function(){
+      closeSheet();
+      const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.setAttribute("capture","environment"); inp.style.display="none";
+      document.body.appendChild(inp);
+      inp.onchange=function(){ const f=inp.files&&inp.files[0]; inp.remove(); if(f&&typeof window.gestParlaFoto==="function")window.gestParlaFoto(f); };
+      inp.click();
     };
     if(L)L.onclick=function(){
       const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*,application/pdf"; inp.style.display="none";
@@ -145,7 +155,12 @@
   }
 
   async function renderRiepilogo(){
-    try{ rieFabAI(); }catch(e){ console.warn("[fab AI]",e); }
+    /* 6 nov 2026 — il pulsante fisso «✨ AI» non si accende piu': sul telefono
+       copriva la voce «Fatture» della barra in basso, e insieme a «Parla» e
+       «Foto» faceva tre pulsanti sopra il lavoro. Le sue quattro voci ci sono
+       gia' altrove: Chat con AI (menu), «Chiedi all'AI cosa fare oggi» (qui
+       sopra), Genera con AI (Preventivi), Fotografa (qui sopra). */
+    /* try{ rieFabAI(); }catch(e){ console.warn("[fab AI]",e); } */
     const G=$("#rie-grid");if(!G)return;
     if($("#rie-alert"))$("#rie-alert").innerHTML="";
     if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
@@ -616,22 +631,26 @@
           +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemarlo</button>'
           + (_chatOk?'<button type="button" class="btn" id="rie-chiedi-ai" style="font-size:19px;padding:13px 20px;margin:4px 0 0">Chiedi all\'AI cosa fare oggi</button>':'')
           + '</div>';
-        ra.innerHTML=_parti+'<div class="rie-oggi">'
-          + '<div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
-          + '<div class="ro-sotto">'+(DA.length===1?"Una cosa che chiede attenzione.":DA.length+" cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
-          + DA.map(function(r,i){
+        /* 6 nov 2026 — la prima cosa sta gia' grande in «Parti da qui»:
+           nella lista sotto non si ripete. Prima «5 lavori in ritardo» era
+           scritto due volte una sotto l'altra (e una terza nella scheda). */
+        const _RS=DA.slice(1);
+        ra.innerHTML=_parti+(!_RS.length?'':'<div class="rie-oggi">'
+          + '<div class="ro-tit"><span class="ro-pallino"></span>'+(_RS.length===1?"Poi c'è anche":"Poi ci sono anche")+'</div>'
+          + '<div class="ro-sotto">'+(_RS.length===1?"Un'altra cosa che chiede attenzione.":_RS.length+" altre cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
+          + _RS.map(function(r,i){
               return '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'"'
             +   (i>=5?' data-ro-piu="1" style="display:none"':'')+' '
             +   (r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
             +   '<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
             +   '<span class="ro-freccia">›</span>'
             + '</div>';}).join("")
-          + (DA.length>5
+          + (_RS.length>5
               ? '<div class="ro-riga attesa" id="ro-piu-tasto" data-action="rie-piu">'
-                + '<span class="ro-testo">Vedi le altre '+(DA.length-5)+'</span>'
+                + '<span class="ro-testo">Vedi le altre '+(_RS.length-5)+'</span>'
                 + '<span class="ro-freccia">›</span></div>'
               : '')
-          + '</div>';
+          + '</div>');
       }
       /* 9 ott 2026 — «FOTOGRAFA»: un solo punto d'ingresso per le foto.
          Non decide l'AI che foto è (costerebbe un credito in più): scegli tu. */
@@ -1023,7 +1042,26 @@
        come funziona e si offrono i due primi passi. Il riquadro «Tutto in
        ordine» qui sopra resta come prima. */
     const CV=C.filter(Boolean);
-    G.innerHTML = CV.length ? CV.join("")
+    /* 6 nov 2026 — IN VISTA SOLO LE PRIME 4 SCHEDE (in ordine di menu:
+       Clienti, Preventivi, Lavori, Fatture — per lo studio Computo e Pratiche).
+       Prima erano fino a 17 caselle una sotto l'altra. Le altre non spariscono:
+       «Vedi tutte le schede» le apre qui, senza cambiare pagina. */
+    const RIE_IN_VISTA=4;
+    const _cvHtml=CV.map(function(h,i){
+      return i<RIE_IN_VISTA ? h : h.replace('<div class="rie-card ','<div data-rie-extra="1" class="rc-extra rie-card ');
+    }).join("")
+      + (CV.length>RIE_IN_VISTA
+         ? '<button type="button" class="btn rie-tutte" id="rie-tutte" style="grid-column:1/-1;justify-self:start;font-size:18px;font-weight:700;padding:13px 20px;min-height:50px">'
+           + 'Vedi tutte le schede ('+CV.length+')</button>'
+         : '');
+    /* la regola sta nel foglio con !important: le schede hanno un display
+       loro con !important, e uno style scritto sull'elemento perderebbe */
+    if(!document.getElementById("rie-extra-stile")){
+      const st=document.createElement("style"); st.id="rie-extra-stile";
+      st.textContent="#riepilogo #rie-grid .rie-card.rc-extra{display:none!important}";
+      document.head.appendChild(st);
+    }
+    G.innerHTML = CV.length ? _cvHtml
       : '<div class="rie-benvenuto">'
       +   '<div class="rb-tit">Questo reparto è ancora vuoto</div>'
       +   '<div class="rb-txt">Le schede qui sotto compaiono da sole, una alla volta, '
@@ -1035,4 +1073,11 @@
       +     '<button class="btn add" data-action="new-prev">+ Il primo preventivo</button>'
       +   '</div>'
       + '</div>';
+    const _bT=document.getElementById("rie-tutte");
+    if(_bT)_bT.onclick=function(){
+      const ex=G.querySelectorAll('[data-rie-extra]');
+      const apri=!!(ex[0]&&ex[0].classList.contains("rc-extra"));
+      ex.forEach(function(e){ e.classList.toggle("rc-extra",!apri); });
+      _bT.textContent=apri?"Mostra meno schede":"Vedi tutte le schede ("+CV.length+")";
+    };
   }

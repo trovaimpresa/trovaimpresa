@@ -3,9 +3,15 @@
    da dove partire. Ora in vista restano le voci di ogni giorno (PRINCIPALI)
    e tutte le altre stanno sotto «Altre N voci», che si apre con un clic.
 
-   REGOLE (decise con Alessio il 28/09):
-   - «Assistenza diretta» e «Chiedi una funzione» NON si toccano: restano
-     al loro posto, in cima. Questo file non le sposta mai.
+   REGOLE (decise con Alessio il 28/09, aggiornate il 6/11):
+   - 6 nov 2026 (ok di Alex, «facciamo tutti i 9 punti»): «Assistenza
+     diretta» e «Chiedi una funzione» scendono IN FONDO al menu, sotto il
+     titoletto «Aiuto». Prima stavano in cima, prima ancora del lavoro.
+   - 6 nov 2026: dentro «Altre N voci» le voci stanno in GRUPPI col loro
+     titoletto (GRUPPI qui sotto), non piu' tutte mischiate.
+   - 6 nov 2026: sul TELEFONO i cinque pulsanti della barra in alto (Dati
+     azienda, Commercialista, Backup, Esporta, Aiuto) stanno dentro il menu
+     ☰, in fondo: la barra in alto sul telefono non c'e' piu' (css).
    - Il numerino rosso su «Altre N voci» dice quante voci nascoste hanno
      qualcosa da guardare (il loro contatore non e' vuoto).
    - Se la sezione aperta e' una di quelle nascoste (per esempio arrivi da
@@ -20,8 +26,38 @@
    ═════════════════════════════════════════════════════════════════════════ */
 (function () {
   var PRINCIPALI = ["riepilogo", "chat", "clienti", "preventivi", "lavori", "giornate", "fatture", "calendario", "fisco"];   /* in ordine di partenza, come i Primi passi */
-  var FISSE = ["richieste", "assistenza"];      /* non si toccano mai */
+  var FISSE = ["richieste", "assistenza"];      /* vanno in fondo, sotto «Aiuto» */
+  /* 6 nov 2026 — i gruppi dentro «Altre N voci». Una voce che non sta in
+     nessun gruppo finisce in fondo, sotto «Altro»: non sparisce mai. */
+  var GRUPPI = [
+    { t: "Ogni giorno",        tabs: ["dalsito", "giornate", "promemoria", "scadenzario", "agenda"] },
+    { t: "Squadra e mezzi",    tabs: ["squadra", "mezzi", "attrezzature"] },
+    { t: "Conti e documenti",  tabs: ["computi", "prezzario", "sal", "fornitori", "carte", "report", "crediti"] },
+    { t: "Archivio",           tabs: ["galleria", "mappa", "cestino"] }
+  ];
   var CHIAVE = "ti-menu-altro-aperto";
+
+  /* 6 nov 2026 — lo stile dei pezzi nuovi sta qui, non in css/gestionale.css:
+     quel foglio lo usano anche il noleggio e l'app operaio, e la barra in alto
+     da nascondere sul telefono c'e' solo in gestionale-app.html. */
+  (function () {
+    if (document.getElementById("ma-stile")) return;
+    var st = document.createElement("style"); st.id = "ma-stile";
+    st.textContent = ""
+      + ".side nav.tabs .ma-gruppo,.side nav.tabs .ma-aiuto{font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#b7cae6;margin:16px 4px 6px}"
+      + ".side nav.tabs .ma-gruppo[hidden]{display:none}"
+      + ".side nav.tabs .ma-aiuto{margin-top:22px}"
+      + ".side .menu-strumenti{display:none}"
+      + "@media(max-width:880px){"
+      +   "#appview .topbar{display:none!important}"
+      +   ".side.open .menu-strumenti{display:block;margin-top:-80px;padding:12px 0 120px;border-top:2px solid rgba(255,255,255,.35)}"
+      +   ".side .menu-strumenti .ms-tit{font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#b7cae6;margin:4px 4px 8px}"
+      +   ".side .menu-strumenti .ms-btn{display:flex;align-items:center;gap:13px;width:100%;min-height:52px;padding:10px 12px;margin:0 0 6px;"
+      +     "background:transparent;border:2px solid rgba(255,255,255,.45);border-radius:10px;color:#fff;font:inherit;font-size:17px;font-weight:600;text-align:left;cursor:pointer}"
+      +   ".side .menu-strumenti .ms-btn svg{width:24px;height:24px;flex:0 0 auto;stroke:#fff}"
+      + "}";
+    document.head.appendChild(st);
+  })();
 
   function visibile(b) { return b.style.display !== "none" && getComputedStyle(b).display !== "none"; }
 
@@ -61,12 +97,63 @@
     dopo.after(btn);
     btn.after(box);
 
-    /* 3. tutto il resto dentro il contenitore (tranne le due fisse) */
-    Array.prototype.slice.call(nav.querySelectorAll("button[data-tab]")).forEach(function (b) {
+    /* 3. tutto il resto dentro il contenitore (tranne le due fisse),
+       diviso nei GRUPPI col loro titoletto (6 nov 2026) */
+    var resto = Array.prototype.slice.call(nav.querySelectorAll("button[data-tab]")).filter(function (b) {
       var t = b.dataset.tab;
-      if (PRINCIPALI.indexOf(t) >= 0 || FISSE.indexOf(t) >= 0) return;
-      box.appendChild(b);
+      return PRINCIPALI.indexOf(t) < 0 && FISSE.indexOf(t) < 0;
     });
+    function titoletto(testo) {
+      var g = document.createElement("div");
+      g.className = "ma-gruppo"; g.textContent = testo;
+      box.appendChild(g); return g;
+    }
+    GRUPPI.forEach(function (gr) {
+      gr.el = titoletto(gr.t);
+      gr.tabs.forEach(function (t) {
+        var b = resto.filter(function (x) { return x.dataset.tab === t; })[0];
+        if (b) { box.appendChild(b); resto.splice(resto.indexOf(b), 1); }
+      });
+    });
+    if (resto.length) { titoletto("Altro"); resto.forEach(function (b) { box.appendChild(b); }); }
+
+    /* 3-bis. 6 nov 2026 — «Chiedi una funzione» e «Assistenza diretta» in
+       fondo, sotto il titoletto «Aiuto». Restano dentro nav.tabs: il resto
+       del gestionale le trova come prima (per data-tab). */
+    var aiuto = document.createElement("div");
+    aiuto.className = "ma-aiuto"; aiuto.textContent = "Aiuto";
+    box.after(aiuto);
+    var dopoAiuto = aiuto;
+    FISSE.forEach(function (t) {
+      var b = nav.querySelector('button[data-tab="' + t + '"]');
+      if (b) { dopoAiuto.after(b); dopoAiuto = b; }
+    });
+
+    /* 3-ter. 6 nov 2026 — SUL TELEFONO i cinque pulsanti della barra in alto
+       entrano nel menu ☰, in fondo. Sono COPIE: gli originali restano nella
+       barra (che sul computer si vede come prima). Le copie stanno FUORI da
+       nav.tabs apposta: li' ogni pulsante viene preso per una sezione. Il
+       clic lo gestisce lo stesso ascoltatore di sempre (data-action). */
+    var side = nav.closest(".side");
+    var tb = document.querySelectorAll(".topbar .tb-actions .tb-btn");
+    if (side && tb.length && !side.querySelector(".menu-strumenti")) {
+      var ms = document.createElement("div");
+      ms.className = "menu-strumenti";
+      ms.innerHTML = '<div class="ms-tit">La tua azienda</div>';
+      Array.prototype.forEach.call(tb, function (o) {
+        var c = o.cloneNode(true);
+        c.className = "ms-btn";
+        c.removeAttribute("data-aiuto");
+        /* la (i) che aiuti.js mette accanto ad «Aiuto» non si copia */
+        Array.prototype.forEach.call(c.querySelectorAll(".ti-i"), function (x) { x.remove(); });
+        ms.appendChild(c);
+      });
+      /* dopo il clic il menu si chiude, come per le altre voci */
+      ms.addEventListener("click", function (e) {
+        if (e.target.closest(".ms-btn")) side.classList.remove("open");
+      });
+      side.appendChild(ms);
+    }
     /* il titoletto «Azienda/Studio» non serve piu': le voci sono tutte in «Altre» */
     Array.prototype.slice.call(nav.querySelectorAll(".side-group")).forEach(function (g) {
       if (g !== lavoro) g.style.display = "none";
@@ -81,6 +168,17 @@
       var voci = Array.prototype.slice.call(box.querySelectorAll("button[data-tab]")).filter(visibile);
       var avvisi = voci.filter(function (b) { var c = b.querySelector(".tab-cnt"); return c && c.textContent.trim() && c.textContent.trim() !== "0"; }).length;
       btn.querySelector(".ma-t").textContent = "Altre " + voci.length + " voci";
+      /* un titoletto senza voci accese sotto non si vede */
+      Array.prototype.forEach.call(box.querySelectorAll(".ma-gruppo"), function (g) {
+        var c = false, x = g.nextElementSibling;
+        while (x && !x.classList.contains("ma-gruppo")) { if (x.matches("button[data-tab]") && visibile(x)) { c = true; break; } x = x.nextElementSibling; }
+        g.hidden = !c;
+        /* allo studio tecnico «Squadra» si chiama «Collaboratori» */
+        if (g.textContent === "Squadra e mezzi" || g.textContent === "Collaboratori e strumenti") {
+          var sq = box.querySelector('button[data-tab="squadra"] span');
+          g.textContent = (sq && /Collaboratori/.test(sq.textContent)) ? "Collaboratori e strumenti" : "Squadra e mezzi";
+        }
+      });
       var n = btn.querySelector(".ma-n");
       n.textContent = avvisi; n.hidden = !avvisi;
       btn.hidden = !voci.length;
@@ -106,6 +204,28 @@
       if (b && d && d.nextElementSibling !== b) { d.after(b); aggiorna(); }
     };
     (window._tiPromuovi || []).forEach(function (p) { window.menuCortoPromuovi(p[0], p[1]); });
+
+    /* 6 nov 2026 — IL VERSO OPPOSTO: una voce principale che per un mestiere
+       non e' di tutti i giorni scende dentro «Altre voci», nel suo gruppo.
+       Lo studio tecnico non ha giornate di cantiere: gest-reparti.js
+       (adattaMenuProfessionista) chiede menuCortoInAltre('giornate'). */
+    window.menuCortoInAltre = function (tab) {
+      var b = nav.querySelector('button[data-tab="' + tab + '"]');
+      if (!b || box.contains(b)) return;
+      var gr = GRUPPI.filter(function (g) { return g.tabs.indexOf(tab) >= 0; })[0];
+      if (gr && gr.el) {
+        /* subito dopo il titoletto, rispettando l'ordine del gruppo */
+        var dopo = gr.el, x = gr.el.nextElementSibling;
+        var mio = gr.tabs.indexOf(tab);
+        while (x && !x.classList.contains("ma-gruppo")) {
+          if (x.dataset && gr.tabs.indexOf(x.dataset.tab) >= 0 && gr.tabs.indexOf(x.dataset.tab) < mio) dopo = x;
+          x = x.nextElementSibling;
+        }
+        dopo.after(b);
+      } else box.appendChild(b);
+      aggiorna();
+    };
+    (window._tiInAltre || []).forEach(function (t) { window.menuCortoInAltre(t); });
 
     /* i contatori e le voci accese/spente cambiano mentre si lavora */
     var inAttesa = false;

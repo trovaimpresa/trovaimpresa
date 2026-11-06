@@ -1765,6 +1765,12 @@
   function filoMetti(sez,qui){
     const s=document.getElementById(sez); if(!s) return;
     const vecchia=s.querySelector(".filo");
+    /* 6 nov 2026 — LA STRISCIA NON SI METTE PIU' (ok di Alex). Quattro
+       pulsanti in cima a Preventivi e Fatture che portano in altre sezioni
+       confondevano chi entra per fare una cosa sola. Le sezioni restano nel
+       menu. filoHTML() resta qui sotto, nel caso si voglia rimetterla. */
+    if(vecchia)vecchia.remove();
+    return;
     const html=filoHTML(qui);
     if(!html){ if(vecchia)vecchia.remove(); return; }
     if(vecchia){ vecchia.outerHTML=html; return; }

@@ -94,8 +94,13 @@
   /* 3 nov 2026 — accanto a «Parla», «Foto»: fotografi la bolla e diventa una
      spesa sul cantiere (gest-parla.js, window.gestParlaFoto). Solo nel
      gestionale principale: li' ci sono i cantieri. */
+  /* 6 nov 2026 — IL PULSANTE «FOTO» QUI SOTTO NON SI CREA PIU'.
+     Sul telefono tre pulsanti fissi (Foto, Parla, ✨ AI) coprivano il lavoro
+     e la barra in basso. Resta solo «Parla». La foto della bolla non sparisce:
+     sta nel Riepilogo, «Fotografa» → «Bolla del cantiere» (gest-riepilogo.js),
+     che chiama la stessa window.gestParlaFoto. */
   var fbtn = null, finp = null;
-  if (PAG === 'app') {
+  if (false && PAG === 'app') {
     fbtn = document.createElement('button');
     fbtn.type = 'button'; fbtn.id = 'gv-foto';
     fbtn.setAttribute('aria-label', 'Fotografa una bolla');
@@ -200,6 +205,8 @@
       || !!document.querySelector('.ai-ov')
       || !!document.querySelector('#gp-ov:not([hidden])')
       || !!document.querySelector('#chat.active')
+      /* 6 nov 2026 — sul telefono, col menu ☰ aperto, «Parla» copriva le voci */
+      || !!document.querySelector('.side.open')
       || (el('rie-fab-menu') && el('rie-fab-menu').style.display === 'block');
     if (nascosto && !ascolta && !lavora) { btn.style.display = 'none'; if (fbtn) fbtn.style.display = 'none'; chiudiBolla(); return; }
     btn.style.display = 'flex';

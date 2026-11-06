@@ -422,7 +422,11 @@
       <div class="fp-cli"><div><div class="fp-n">${esc(f.cli.nome || f.cli_nome || "Cliente")}</div>
         <div class="fp-sotto">Fattura ${esc(fpNumFatt(f))} del ${fdate(f.data)} · <b class="fp-rosso">scaduta da ${f.ritardo} ${f.ritardo === 1 ? "giorno" : "giorni"}</b></div></div>
         <div class="fp-e">${eur(f.importo)}${extra > 0 ? `<small>+ ${eur(extra)} ${f.b2b ? "interessi e spese" : "interessi"}</small>` : ""}</div></div>
-      <div class="fp-passi">${pill}</div>
+      <div class="fp-passo-corto" style="font-size:18px;margin:10px 0 4px">${f.passo
+          ? `Fatto: passo <b>${f.passo} di 4</b>${c.prossimo && c.prossimo <= 4 ? ` · adesso tocca a: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`
+          : `Non gli hai ancora scritto${c.prossimo && c.prossimo <= 4 ? ` · si comincia da: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`}</div>
+      <details class="fp-tutti" style="margin:2px 0 8px"><summary style="cursor:pointer;font-size:16px;font-weight:600;padding:6px 0">Vedi tutti e 4 i passi</summary>
+        <div class="fp-passi">${pill}</div></details>
       <div class="fp-cons ${c.tono}"><div>${fpIc("idea")}</div><div><b>Il mio consiglio</b>${esc(c.testo)}</div></div>
       ${storia ? `<div class="fp-storia">${fpIc("storia")} ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">togli l'ultimo</button>` : ""}</div>` : ""}
       <div class="fp-btns">${btnNext}
