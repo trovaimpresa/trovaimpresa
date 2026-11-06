@@ -277,7 +277,7 @@
     box.style.cssText = 'position:relative;width:100%;height:100%;display:flex;flex-direction:column;'
       + 'align-items:center;padding:8px 10px 10px;box-sizing:border-box';
     var t = document.createElement('div');
-    t.textContent = 'Partner di TrovaImpresa';
+    t.textContent = 'Negozio consigliato';
     t.style.cssText = 'font-size:clamp(10px,2.8cqw,13px);font-weight:700;letter-spacing:.4px;'
       + 'text-transform:uppercase;color:#8a97a6;margin-bottom:6px';
     var im = document.createElement('img');

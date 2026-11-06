@@ -168,7 +168,7 @@
         var P = dati.partner;
         d.innerHTML = '<a class="ti-vg-partner" rel="sponsored noopener" target="_blank" href="'
           + linkAwin(P, 'cread') + '">'
-          + '<p class="ti-vg-t">Partner di TrovaImpresa</p>'
+          + '<p class="ti-vg-t">Negozio consigliato</p>'
           + '<img src="' + linkAwin(P, 'cshow') + '" alt="' + P.nome + '" loading="lazy">'
           + '<p class="ti-vg-f">' + P.frase + '</p></a>';
         return d;
