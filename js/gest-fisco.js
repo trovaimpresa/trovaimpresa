@@ -412,7 +412,7 @@
   /* 6 nov 2026 — IL CONSIGLIO IN DUE RIGHE. Sul telefono il consiglio
      occupava sette righe. Adesso si legge la prima frase; il resto si apre
      con «Perché». Il testo e' lo stesso, solo diviso. */
-  function fpConsiglio(c) {
+  function fpConsiglioHtml(c) {
     const t = String(c.testo || "").trim();
     const i = t.search(/[.!?]\s/);
     const primo = i > 0 ? t.slice(0, i + 1) : t, resto = i > 0 ? t.slice(i + 2).trim() : "";
@@ -438,7 +438,7 @@
           : `Non gli hai ancora scritto${c.prossimo && c.prossimo <= 4 ? ` · si comincia da: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`}</div>
       <details class="fp-tutti" style="margin:2px 0 8px"><summary style="cursor:pointer;font-size:16px;font-weight:600;padding:6px 0">Vedi tutti e 4 i passi</summary>
         <div class="fp-passi">${pill}</div></details>
-      ${fpConsiglio(c)}
+      ${fpConsiglioHtml(c)}
       ${storia ? `<div class="fp-storia">${fpIc("storia")} ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">togli l'ultimo</button>` : ""}</div>` : ""}
       <div class="fp-btns">${btnNext}
         <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button></div>

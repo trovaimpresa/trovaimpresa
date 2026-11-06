@@ -52,7 +52,7 @@
          non ha data-tab, quindi le regole delle icone del menu la saltavano */
       + ".side nav.tabs #tab-ricarica svg{width:30px!important;height:30px!important;padding:5px!important;box-sizing:content-box!important;border-radius:9px!important;flex:0 0 auto}"
       + "@media(max-width:880px){.side.open nav.tabs #tab-ricarica{font-size:17px!important;gap:13px!important}"
-      +   ".side.open nav.tabs #tab-ricarica svg{width:34px!important;height:34px!important;padding:6px!important;border-radius:10px!important}}"
+      +   ".side.open nav.tabs #tab-ricarica svg{width:22px!important;height:22px!important;padding:6px!important;border-radius:10px!important}}"
       + "@media(max-width:880px){"
       +   "#appview .topbar{display:none!important}"
       +   ".side.open .menu-strumenti{display:block;margin-top:-80px;padding:12px 0 120px;border-top:2px solid rgba(255,255,255,.35)}"

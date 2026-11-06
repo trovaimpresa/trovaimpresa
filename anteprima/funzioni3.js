@@ -972,36 +972,12 @@ function rieFotoScegli(){
       if(t){t.click();window.scrollTo(0,0);}else toast("La chat è nel piano con assistenza AI");
     };
   }
-function fpConsiglio(f) {
-    const p = f.passo, gg = f.ritardo, dal = f.giorniDalPasso;
-    if (gg <= 0) {
-      return { tono: "neutro", prossimo: 1,
-        testo: gg >= -3
-          ? "Scade fra pochi giorni. Un messaggio gentile adesso, prima della scadenza, fa pagare prima: non è scortesia, è organizzazione."
-          : "Non è ancora scaduta. Te la ricordo io quando manca poco." };
-    }
-    if (p === 0) {
-      return { tono: gg > 30 ? "rosso" : "giallo", prossimo: gg > 30 ? 2 : 1,
-        testo: gg > 30
-          ? "È scaduta da " + gg + " giorni e non gli hai ancora scritto. Salta il messaggio gentile: mandagli subito un sollecito deciso, con una data precisa."
-          : "Un piccolo ritardo è normale. Parti gentile: un messaggio su WhatsApp risolve la metà dei casi, e il cliente non si offende." };
-    }
-    if (p >= 4) {
-      return { tono: "rosso", prossimo: 4,
-        testo: "Sei alla strada del giudice. Senti un avvocato: con la PEC già mandata e la fattura in mano il decreto ingiuntivo è una pratica veloce." };
-    }
-    const att = FP_PASSI[p].attesa;
-    if (dal < att) {
-      const manca = att - dal;
-      return { tono: "neutro", prossimo: p,
-        testo: "Hai mandato il passo " + p + " " + (dal === 0 ? "oggi" : (dal === 1 ? "ieri" : dal + " giorni fa")) + ". Dagli tempo: se entro " + manca + (manca === 1 ? " giorno" : " giorni") + " non paga, ti dico io cosa fare." };
-    }
-    if (p === 1) return { tono: "giallo", prossimo: 2,
-      testo: "Sono passati " + dal + " giorni dal messaggio gentile e non ha pagato. Ora un sollecito deciso: con una data precisa entro cui pagare." };
-    if (p === 2) return { tono: "rosso", prossimo: 3,
-      testo: "Non ha risposto al sollecito. È il momento della lettera formale via PEC: mette in mora il cliente, fa correre gli interessi e ferma la prescrizione. L'ho già scritta io con i tuoi dati." };
-    return { tono: "rosso", prossimo: 4,
-      testo: "Sono passati i 15 giorni della lettera formale. Adesso puoi chiedere al giudice un decreto ingiuntivo: ti spiego quanto costa e dove si fa." };
+function fpConsiglioHtml(c) {
+    const t = String(c.testo || "").trim();
+    const i = t.search(/[.!?]\s/);
+    const primo = i > 0 ? t.slice(0, i + 1) : t, resto = i > 0 ? t.slice(i + 2).trim() : "";
+    return `<div class="fp-cons ${c.tono}"><div>${fpIc("idea")}</div><div><b>Il mio consiglio</b>${esc(primo)}${resto
+      ? `<details class="fp-perche" style="margin-top:6px"><summary style="cursor:pointer;font-weight:600">Perché</summary>${esc(resto)}</details>` : ""}</div></div>`;
   }
 function fpScheda(f) {
     const c = f.cons;
@@ -1021,7 +997,7 @@ function fpScheda(f) {
           : `Non gli hai ancora scritto${c.prossimo && c.prossimo <= 4 ? ` · si comincia da: <b>${esc(FP_PASSI[c.prossimo].lab)}</b>` : ""}`}</div>
       <details class="fp-tutti" style="margin:2px 0 8px"><summary style="cursor:pointer;font-size:16px;font-weight:600;padding:6px 0">Vedi tutti e 4 i passi</summary>
         <div class="fp-passi">${pill}</div></details>
-      ${fpConsiglio(c)}
+      ${fpConsiglioHtml(c)}
       ${storia ? `<div class="fp-storia">${fpIc("storia")} ${storia}${f.sol.length ? ` · <button class="fp-link" data-action="fp-togli" data-id="${f.id}">togli l'ultimo</button>` : ""}</div>` : ""}
       <div class="fp-btns">${btnNext}
         <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button></div>
