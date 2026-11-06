@@ -1863,6 +1863,12 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
          Per aggiungerne uno: copiare un <a>, cambiare awinmid e il logo.
          Leroy Merlin e ManoMano vanno qui appena Awin li approva. -->
     <style>
+      /* ⛔ NON dare a questa sezione la classe why-section: recensioni-sito.js,
+         locandine-home.js e spazi-citta.js si agganciano alla PRIMA .why-section
+         e finirebbero qui invece che su «Perché scegliere». Lo stile è copiato. */
+      #ti-marchi{background:#e7eef8;padding:52px 20px;margin-top:40px}
+      #ti-marchi h2{font-size:30px;font-weight:800;text-align:center;margin-bottom:15px;color:#1a2f47}
+      #ti-marchi .why-container > p{text-align:center;color:#666;margin-bottom:32px;font-size:16px;font-weight:500}
       #ti-marchi .ti-marchi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
       #ti-marchi .ti-marchio{display:flex;flex-direction:column;align-items:center;text-align:center;
         text-decoration:none;color:inherit;padding:18px}
@@ -1871,6 +1877,8 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
       #ti-marchi .ti-marchio-logo img{width:75%;max-height:120px;height:auto;object-fit:contain}
       #ti-marchi .ti-marchio h3{margin-bottom:6px}
       @media (max-width:760px){
+        #ti-marchi{padding:40px 16px}
+        #ti-marchi h2{font-size:24px}
         #ti-marchi .ti-marchi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
         #ti-marchi .ti-marchio{padding:14px}
         #ti-marchi .ti-marchio-logo{height:80px}
@@ -1878,7 +1886,7 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
         #ti-marchi .ti-marchio p{display:none}
       }
     </style>
-    <section class="why-section" id="ti-marchi">
+    <section class="ti-marchi-sez" id="ti-marchi">
         <div class="why-container">
             <h2>Materiali ed elettrodomestici dai migliori negozi</h2>
             <p>Finiti i lavori, arreda e attrezza casa dai marchi che conosci</p>
