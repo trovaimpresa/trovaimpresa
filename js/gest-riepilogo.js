@@ -1048,12 +1048,19 @@
        «Vedi tutte le schede» le apre qui, senza cambiare pagina. */
     const RIE_IN_VISTA=4;
     const _cvHtml=CV.map(function(h,i){
-      return i<RIE_IN_VISTA ? h : h.replace('<div class="rie-card ','<div style="display:none" data-rie-extra="1" class="rie-card ');
+      return i<RIE_IN_VISTA ? h : h.replace('<div class="rie-card ','<div data-rie-extra="1" class="rc-extra rie-card ');
     }).join("")
       + (CV.length>RIE_IN_VISTA
          ? '<button type="button" class="btn rie-tutte" id="rie-tutte" style="grid-column:1/-1;justify-self:start;font-size:18px;font-weight:700;padding:13px 20px;min-height:50px">'
            + 'Vedi tutte le schede ('+CV.length+')</button>'
          : '');
+    /* la regola sta nel foglio con !important: le schede hanno un display
+       loro con !important, e uno style scritto sull'elemento perderebbe */
+    if(!document.getElementById("rie-extra-stile")){
+      const st=document.createElement("style"); st.id="rie-extra-stile";
+      st.textContent="#rie-grid .rc-extra{display:none!important}";
+      document.head.appendChild(st);
+    }
     G.innerHTML = CV.length ? _cvHtml
       : '<div class="rie-benvenuto">'
       +   '<div class="rb-tit">Questo reparto è ancora vuoto</div>'
@@ -1069,8 +1076,8 @@
     const _bT=document.getElementById("rie-tutte");
     if(_bT)_bT.onclick=function(){
       const ex=G.querySelectorAll('[data-rie-extra]');
-      const apri=!!(ex[0]&&ex[0].style.display==="none");
-      ex.forEach(function(e){ e.style.display=apri?"":"none"; });
+      const apri=!!(ex[0]&&ex[0].classList.contains("rc-extra"));
+      ex.forEach(function(e){ e.classList.toggle("rc-extra",!apri); });
       _bT.textContent=apri?"Mostra meno schede":"Vedi tutte le schede ("+CV.length+")";
     };
   }
