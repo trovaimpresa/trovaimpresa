@@ -282,7 +282,7 @@
 
       +'<div class="copag'+(isNew?" on":"")+'" data-p="4">'
       +'<div class="sh-b"><div class="sh-tit">Che computo è</div>'
-      + (isNew?'<div class="sh-nota">Dai un titolo e premi <b>Crea computo</b> qui sotto: subito dopo si accende <b>1 Lavorazioni</b> e ci metti dentro il foglio del geometra.</div>':'')
+      + (isNew?'<div class="sh-nota">Dai un titolo e premi <b>Crea computo</b> qui sotto: subito dopo si accende <b>1 Lavorazioni</b> e ci metti dentro '+(pro?'le lavorazioni':'il foglio del geometra')+'.</div>':'')
       +  '<div class="row2">'
       +    '<div class="field"><label>Numero</label><input id="co-num" value="'+esc(c.numero||"")+'" placeholder="01/2026" style="max-width:160px"></div>'
       +    '<div class="field"><label>Data</label><input type="date" id="co-data" value="'+esc(c.data||todayStr())+'"></div>'
@@ -412,6 +412,17 @@
       +'</div>'   /* <- fine pagina 4 (secondo pezzo) */
 
       +'<div class="copag" data-p="2">'
+      /* ⛔ 6 novembre 2026 — LA PAGINA «PREZZI» ADESSO METTE I PREZZI.
+         Prima qui c'era solo il NOME del prezzario: per prezzare il computo
+         del geometra bisognava aprire le lavorazioni una per una (ottanta
+         righe = ottanta finestre). Chiesto da Alessio: «rendiamolo piu'
+         semplice». Adesso c'e' la tabella con una casella prezzo per riga,
+         disegnata da renderCompPrezzi() in #co-prezzi.
+         Il prezzario resta qui sotto, nella stessa pagina e con gli stessi
+         id: saveComputo li legge da li'. */
+      +'<div class="sh-b"><div class="sh-tit">Metti i prezzi</div>'
+      +  '<div id="co-prezzi"></div>'
+      +'</div>'
       +'<div class="sh-b"><div class="sh-tit">Da dove vengono i prezzi</div>'
       +  '<div class="row2">'
       +  '</div>'
@@ -1698,6 +1709,135 @@
     }
   }
 
+  /* ============================================================
+     6 novembre 2026 — «METTI I PREZZI»: TUTTI I PREZZI IN UNA PAGINA
+     ============================================================
+     Una riga per lavorazione: quantita' (non si tocca, viene dalle misure),
+     casella del prezzo, importo. Scrivi e l'importo e il totale si rifanno
+     subito; uscendo dalla casella (o premendo Invio) il prezzo si salva da
+     solo nella lavorazione, come se l'avessi aperta e salvata.
+     ⚠️ Se il prezzo lo costruisce l'ANALISI la casella e' spenta: e' la
+        stessa regola di compVoceSalva (riscriverlo schiaccerebbe l'analisi).
+     ⚠️ Non si ridisegna mentre il cursore e' dentro la tabella: chi sta
+        scrivendo la riga dopo perderebbe quello che ha scritto.
+     ⚠️ L'importo sullo schermo si conta come la vista
+        gest_computo_voci_calc: quantita' a tre decimali x prezzo, ai
+        centesimi. Dopo il salvataggio il numero vero arriva dal database.
+     ============================================================ */
+  function _cpImporto(q,p){
+    const qq=Math.round((+q||0)*1000)/1000;
+    const g=qq*(+p||0);
+    return (typeof _cent2==="function")?_cent2(g):Math.round(g*100)/100;
+  }
+  function _cpConta(){
+    const box=$("#co-prezzi"); if(!box)return;
+    let mancano=0;
+    const voci=(compVociCache||[]).map(function(v){
+      const el=box.querySelector('.cp-in[data-id="'+String(v.id)+'"]');
+      let p=+v.prezzo_unitario||0;
+      if(el&&!el.disabled){ const n=_numeroIt(el.value); p=(n==null)?0:n; }
+      const imp=_cpImporto(v.quantita,p);
+      const riga=el&&el.closest(".cp-r");
+      if(riga){
+        riga.classList.toggle("vuota",!p);
+        const iv=riga.querySelector(".cp-iv");
+        if(iv)iv.textContent=p?eur2(imp):"manca il prezzo";
+      }
+      if(!p)mancano++;
+      return Object.assign({},v,{importo:imp});
+    });
+    const comp=compCache.find(x=>String(x.id)===String(compVociCompId))||{};
+    const rp=compRiepilogo(voci,comp);
+    const tv=box.querySelector("#cp-totv"); if(tv)tv.textContent=eur2(rp.lordo);
+    const tl=box.querySelector("#cp-totl");
+    if(tl)tl.textContent=(rp.perc||rp.sicurezza)?"Totale dei lavori, prima del ribasso":"Totale del computo";
+    const t=box.querySelector("#cp-testa");
+    if(t){
+      t.classList.toggle("tutto",!mancano);
+      t.innerHTML=mancano
+        ? '<span><b>'+(mancano===1?"Manca 1 prezzo":"Mancano "+mancano+" prezzi")+'</b> su '+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+'</span><span>Le righe arancioni sono da riempire</span>'
+        : '<span><b>Tutti i prezzi ci sono</b></span>'
+          +'<button type="button" class="btn-primary cp-prev" data-chiudi="1" data-action="comp-prev" data-id="'+esc(String(compVociCompId))+'">→ Crea il preventivo</button>';
+    }
+  }
+  function renderCompPrezzi(){
+    const box=$("#co-prezzi"); if(!box)return;
+    if(box.contains(document.activeElement)&&document.activeElement.classList.contains("cp-in"))return;
+    const voci=compVociCache||[];
+    if(!voci.length){ box.innerHTML='<div class="sh-nota">Prima mettici le lavorazioni (pagina 1): poi qui scrivi i prezzi tutti insieme.</div>'; return; }
+    const capById={}; (compCapCache||[]).forEach(function(c){capById[String(c.id)]=c;});
+    const gruppi=(compCapCache||[]).map(c=>({cap:c,voci:voci.filter(v=>String(v.capitolo_id)===String(c.id))}));
+    const senza=voci.filter(v=>!v.capitolo_id||!capById[String(v.capitolo_id)]);
+    if(senza.length)gruppi.push({cap:null,voci:senza});
+    const unoSolo=gruppi.length===1&&!gruppi[0].cap;
+    const zeri=voci.some(v=>!(+v.prezzo_unitario));
+    let h='<div class="cp-testa" id="cp-testa"></div>';
+    if(zeri)h+='<div class="cp-azioni"><button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Riempi i vuoti dal prezzario</button></div>';
+    if(compPrzEsito&&String(compPrzEsitoId||"")===String(compVociCompId))h+=compPrzEsito;
+    h+='<div class="cp-tab"><div class="cp-r cp-h"><span>Lavorazione</span><span>Quantità</span><span>Prezzo €</span><span>Importo</span></div>';
+    gruppi.forEach(function(g){
+      if(!g.voci.length)return;
+      if(!unoSolo)h+='<div class="cp-cap">'+(g.cap?((g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")):"Senza capitolo")+'</div>';
+      g.voci.forEach(function(v){
+        const um=v.unita?esc(_umSchermo(v.unita)):"";
+        const an=!!v.prezzo_da_analisi;
+        h+='<div class="cp-r'+(+v.prezzo_unitario?'':' vuota')+'">'
+          +'<span class="cp-d">'+esc(v.descrizione||"(senza descrizione)")+(v.codice?'<small>'+esc(v.codice)+'</small>':'')+'</span>'
+          +'<span class="cp-q"><span class="cp-lab">Quantità</span>'+_misLetta(v.quantita)+(um?" "+um:"")+'</span>'
+          +'<span class="cp-p"><span class="cp-lab">Prezzo €'+(um?" al "+um:"")+'</span>'
+          +  '<input type="text" inputmode="decimal" class="cp-in" data-id="'+esc(String(v.id))+'"'+_noAuto()
+          +  ' value="'+esc(_prezzoCasella(+v.prezzo_unitario?v.prezzo_unitario:""))+'" placeholder="manca"'
+          +  (an?' disabled title="Questo prezzo lo fa l\'analisi dei prezzi: si cambia aprendo la lavorazione"':'')+'>'
+          +  (an?'<small class="cp-an">dall\'analisi</small>':'')
+          +'</span>'
+          +'<span class="cp-imp"><span class="cp-lab">Importo</span><span class="cp-iv"></span></span>'
+          +'</div>';
+      });
+    });
+    h+='<div class="cp-tot"><span id="cp-totl">Totale del computo</span><b id="cp-totv"></b></div></div>';
+    h+='<div class="sh-nota">Scrivi il prezzo e vai alla riga dopo: si salva da solo. Le misure restano dentro la lavorazione.</div>';
+    box.innerHTML=h;
+    _cpConta();
+  }
+  async function _cpSalva(el){
+    if(!el||el.disabled||!sb||!sbUid)return;
+    const id=el.dataset.id;
+    const v=(compVociCache||[]).find(x=>String(x.id)===String(id)); if(!v)return;
+    const testo=String(el.value||"").trim();
+    const n=_numeroIt(testo);
+    if(testo!==""&&n==null){ toast("Questo prezzo non lo capisco: scrivilo così, 12,50"); el.focus(); return; }
+    if(n!=null&&n<0){ toast("Il prezzo non può essere sotto zero"); el.focus(); return; }
+    const p=n||0;
+    if(Math.abs((+v.prezzo_unitario||0)-p)<1e-9){ el.value=_prezzoCasella(p||""); return; }
+    el.classList.add("cp-salvo");
+    const {data,error}=await sb.from("gest_computo_voci").update({prezzo_unitario:p}).eq("id",id).eq("user_id",sbUid).select("id");
+    el.classList.remove("cp-salvo");
+    if(error){ toast("Prezzo non salvato: "+error.message); el.classList.add("cp-err"); return; }
+    if(!data||!data.length){ toast("Prezzo non salvato: nessuna riga scritta. Riprova."); el.classList.add("cp-err"); return; }
+    el.classList.remove("cp-err");
+    v.prezzo_unitario=p; v.importo=_cpImporto(v.quantita,p);
+    if(document.activeElement!==el)el.value=_prezzoCasella(p||"");
+    el.classList.add("cp-ok"); setTimeout(function(){el.classList.remove("cp-ok");},900);
+    _cpConta();
+    try{ rinfresca("computi"); }catch(_){}
+  }
+  document.addEventListener("input",function(e){
+    const t=e.target; if(t&&t.classList&&t.classList.contains("cp-in"))_cpConta();
+  });
+  document.addEventListener("change",function(e){
+    const t=e.target; if(t&&t.classList&&t.classList.contains("cp-in"))_cpSalva(t);
+  });
+  /* Invio = vai alla riga dopo (e la riga lasciata si salva da sola) */
+  document.addEventListener("keydown",function(e){
+    const t=e.target;
+    if(e.key!=="Enter"||!t||!t.classList||!t.classList.contains("cp-in"))return;
+    e.preventDefault();
+    const tutte=Array.from($$("#co-prezzi .cp-in:not([disabled])"));
+    const i=tutte.indexOf(t);
+    if(i>=0&&i<tutte.length-1){ tutte[i+1].focus(); try{tutte[i+1].select();}catch(_){} }
+    else t.blur();
+  });
+
   async function renderCompVoci(computoId){
     const box=$("#co-voci");if(!box)return;
     compVociCompId=computoId;
@@ -1717,6 +1857,7 @@
     compCapCache=rc.data||[];
     compVociCache=rv.data||[];
     compNavAggiorna(compVociCache.length);
+    try{ renderCompPrezzi(); }catch(e){ console.warn("[computo] tabella prezzi:",e); }
 
     const senzaCap=compVociCache.filter(v=>!v.capitolo_id);
     const gruppi=compCapCache.map(cap=>({cap:cap, voci:compVociCache.filter(v=>String(v.capitolo_id)===String(cap.id))}));

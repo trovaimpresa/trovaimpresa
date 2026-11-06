@@ -5468,3 +5468,48 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 #riepilogo #rie-primi .pp-primo .pp-es{margin:16px 0 0;font-size:17px}
 #riepilogo #rie-primi .pp-primo .pp-es b{color:#ff8800}
 @media(max-width:700px){#riepilogo #rie-primi .pp-primo{padding:20px 18px}#riepilogo #rie-primi .pp-primo h3{font-size:24px}#riepilogo #rie-primi .pp-primo .pp-bt button{flex:1 1 100%}}
+
+/* ============================================================
+   6 novembre 2026 — COMPUTO, PAGINA «PREZZI»: la tabella «Metti i prezzi»
+   (js/gest-computo.js, renderCompPrezzi). Una casella prezzo per riga.
+   Arancione = manca il prezzo (attesa), verde = tutti i prezzi ci sono.
+   Sotto i 700 px ogni riga va a capo: niente esce di lato sul telefono.
+   ============================================================ */
+.cp-testa{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--attesa-bg,#FFFBEB);border:1.5px solid var(--attesa,#D97706);border-radius:12px;padding:14px 18px;margin:4px 0 16px;font-size:16px}
+.cp-testa b{font-size:18px}
+.cp-testa.tutto{background:var(--ok-bg,#ECFDF5);border-color:var(--ok,#059669)}
+.cp-testa .cp-prev{font-size:18px;padding:12px 22px}
+.cp-azioni{margin:0 0 16px}
+.cp-azioni .quick-add{margin:0}
+.cp-tab{border:1px solid var(--bordo,#E2E8F0);border-radius:12px;overflow:hidden;background:var(--card,#fff)}
+.cp-r{display:grid;grid-template-columns:1fr 150px 170px 150px;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--bordo,#E2E8F0)}
+.cp-r:first-child{border-top:0}
+.cp-h{background:var(--sfondo,#F8FAFC);font-size:14px;font-weight:700;color:var(--testo-2,#475569);text-transform:uppercase;letter-spacing:.03em}
+.cp-h span:not(:first-child){text-align:right}
+.cp-cap{background:var(--sfondo,#F8FAFC);font-weight:700;font-size:17px;padding:12px 18px;border-top:1px solid var(--bordo,#E2E8F0)}
+.cp-d{font-size:17px;line-height:1.35}
+.cp-d small{display:block;font-size:14px;color:var(--testo-2,#475569);margin-top:3px}
+.cp-q{font-size:17px;font-variant-numeric:tabular-nums;text-align:right}
+.cp-p input.cp-in{width:100%;box-sizing:border-box;font-size:18px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bordo-forte,#cbd2da);text-align:right;font-variant-numeric:tabular-nums;margin:0}
+.cp-p input.cp-in:disabled{background:var(--sfondo,#F8FAFC);color:var(--testo-2,#475569)}
+.cp-p .cp-an{display:block;text-align:right;font-size:14px;color:var(--testo-2,#475569);margin-top:3px}
+.cp-r.vuota input.cp-in{border-color:var(--attesa,#D97706);background:var(--attesa-bg,#FFFBEB)}
+.cp-p input.cp-in.cp-ok{border-color:var(--ok,#059669)}
+.cp-p input.cp-in.cp-err{border-color:var(--err,#c0392b)}
+.cp-p input.cp-in.cp-salvo{opacity:.6}
+.cp-imp{font-size:17px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.cp-r.vuota .cp-imp{color:#B45309;font-weight:600;font-size:15px}
+.cp-tot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px;border-top:2px solid var(--testo,#0F172A);font-size:20px}
+.cp-tot b{font-size:24px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cp-lab{display:none}
+.cp-tab + .sh-nota{margin-top:14px}
+@media (max-width:700px){
+  .cp-h{display:none}
+  .cp-r{grid-template-columns:1fr 1fr;gap:10px 12px;padding:14px;align-items:end}
+  .cp-d{grid-column:1/-1}
+  .cp-q{text-align:left;padding-bottom:10px}
+  .cp-lab{display:block;font-size:14px;color:var(--testo-2,#475569);margin-bottom:4px;font-weight:500}
+  .cp-imp{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--bordo,#E2E8F0);padding-top:10px}
+  .cp-imp .cp-lab{margin:0}
+  .cp-tot{font-size:18px}
+}
