@@ -72,6 +72,23 @@
     ['10-candidature', '/candidature-lavoro']                    // chi cerca lavoro
   ];
 
+  /* 6 nov 2026 — I MARCHI PARTNER (affiliazione Awin).
+     Escono DOPO i cartelli pagati e PRIMA delle locandine: con nessun
+     pagante prendono il primo posto a destra. Servono a dare fiducia
+     (marchi famosi sulla pagina), non a guadagnare.
+     Per aggiungerne uno: una riga qui, coi numeri presi da Awin
+     → My Creative → Vedi dettagli (s = id banner, v = id marchio, q = tag).
+     Rowenta e Moulinex non hanno banner su Awin: per ora niente. */
+  var AWIN_ME = '3137864';
+  var PARTNER = [
+    { nome: 'Lampade.it', s: '4824370', v: '10404', q: '608702',
+      frase: 'Lampade e luci per la tua casa nuova \u2192' }   // banner inverno 300x250
+  ];
+  function linkAwin(p, cosa) {
+    return 'https://www.awin1.com/' + cosa + '.php?s=' + p.s + '&v=' + p.v
+         + '&q=' + p.q + '&r=' + AWIN_ME;
+  }
+
   try {
     /* --- non si pesta i piedi con gli altri ------------------------------ */
     if (window.SPAZI_CITTA_COMANDA) return;           // pagina citta': comanda lei
@@ -147,6 +164,16 @@
       d.style.width = largo + 'px';
       d.style[lato === 'sx' ? 'left' : 'right'] = '-' + (largo + BORDO) + 'px';
 
+      if (dati.partner) {
+        var P = dati.partner;
+        d.innerHTML = '<a class="ti-vg-partner" rel="sponsored noopener" target="_blank" href="'
+          + linkAwin(P, 'cread') + '">'
+          + '<p class="ti-vg-t">Partner di TrovaImpresa</p>'
+          + '<img src="' + linkAwin(P, 'cshow') + '" alt="' + P.nome + '" loading="lazy">'
+          + '<p class="ti-vg-f">' + P.frase + '</p></a>';
+        return d;
+      }
+
       var testa = dati.pagato
         ? '<p class="ti-vg-t">Impresa della tua città</p>' : '';
       var piede = dati.pagato
@@ -177,7 +204,11 @@
         '.ti-vetrina-guide img{width:100%;height:auto;display:block}' +
         '.ti-vg-t{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#8a97a6;' +
           'margin:0 0 6px 2px;font-weight:700}' +
-        '.ti-vg-s{font-size:12.5px;color:#9aa7b5;margin:6px 2px 0}';
+        '.ti-vg-s{font-size:12.5px;color:#9aa7b5;margin:6px 2px 0}' +
+        '.ti-vetrina-guide a.ti-vg-partner{padding:22px 24px 18px;text-align:center;text-decoration:none}' +
+        '.ti-vg-partner .ti-vg-t{margin:0 0 14px}' +
+        '.ti-vetrina-guide .ti-vg-partner img{width:420px;max-width:100%;margin:0 auto;border-radius:10px}' +
+        '.ti-vg-f{margin:14px 0 0;font-size:15px;font-weight:600;color:#0a2a4d}';
       document.head.appendChild(s);
     }
 
@@ -224,6 +255,7 @@
       if (!quante) return;
 
       var coda = pagati.slice();     // prima i paganti
+      var partner = PARTNER.slice(); // poi i marchi partner
       var iLoc = 0;
 
       for (var i = 0; i < quante; i++) {
@@ -238,6 +270,8 @@
               link: p.link_url || ('/profilo-impresa.html?id=' + p.impresa_id),
               alt: 'Spazio pubblicitario'
             };
+          } else if (partner.length) {
+            dati = { partner: partner.shift() };
           } else {
             var L = LOCANDINE[iLoc % LOCANDINE.length]; iLoc++;
             dati = { pagato: false, img: BASE_LOC + L[0] + '.svg', link: L[1], alt: '' };
