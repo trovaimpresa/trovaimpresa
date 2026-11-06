@@ -1137,13 +1137,14 @@
   /* i lavori dentro la cella: barretta di stato + titolo troncato */
   .cal-lavori{display:flex;flex-direction:column;gap:2px;margin-top:4px;min-width:0;overflow:hidden}
   .cal-lav{display:flex;align-items:center;gap:5px;min-width:0}
-  .cal-lav-bar{flex:0 0 auto;width:3px;height:11px;border-radius:2px;background:var(--testo-3)}
+  .cal-lav-bar{flex:0 0 auto;width:5px;height:14px;border-radius:2px;background:var(--testo-3)}   /* 6 nov 2026: 3px non si vedevano */
   .cal-lav-bar.ritardo{background:var(--err)}
   .cal-lav-bar.da_fare{background:var(--attesa)}
   .cal-lav-bar.in_corso{background:var(--info)}
   /* 12 agosto 2026 — le scadenze sul calendario: viola, per non confonderle
      con i lavori. Prima sul calendario non comparivano affatto. */
-  .cal-lav-bar.scad{background:#7C3AED}
+  /* 6 nov 2026 (ok di Alex): AZZURRE, non piu' viola — il viola vuol dire solo AI */
+  .cal-lav-bar.scad{background:#0891B2}
   .cal-lav-bar.fatto{background:var(--ok)}
   .cal-lav-t{flex:1;min-width:0;font-size:13px;color:var(--testo-2);line-height:1.25;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1151,7 +1152,7 @@
   .cal-legend{font-size:13px;color:var(--testo-3);font-weight:500;gap:16px}
   .cal-legend .dot{width:7px;height:7px}
   .dot.corso{background:var(--info)}
-  .dot.scad{background:#7C3AED}
+  .dot.scad{background:#0891B2}
   @media(max-width:880px){
     .cal-cell{min-height:74px;padding:4px}
     .cal-lav-t{font-size:13px}
