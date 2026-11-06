@@ -200,7 +200,7 @@
            delle ricariche (data-vai, come il Noleggio). Il numero e' quanti crediti
            restano: lo scrive js/gest-ai-moduli.js; grigio, perche' non e' «da fare». -->
       <button data-vai="/ricarica-crediti.html" id="tab-ricarica"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="18" height="12" rx="2"/><path d="M22 11v4"/><path d="M6 11v4M10 11v4"/></svg><span>Ricarica crediti</span><span class="tab-cnt cnt-crediti" id="cnt-crediti"></span></button>
-      <button data-tab="dalsito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v10a2 2 0 0 1-2 2h-3l-3 3-3-3H6a2 2 0 0 1-2-2z"/><path d="M8 9h8"/></svg><span>Richiesta preventivo sito</span><span class="tab-cnt" id="cnt-dalsito"></span></button>
+      <button data-tab="dalsito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v10a2 2 0 0 1-2 2h-3l-3 3-3-3H6a2 2 0 0 1-2-2z"/><path d="M8 9h8"/></svg><span>Richieste dal sito</span><span class="tab-cnt" id="cnt-dalsito"></span></button>
       <button data-tab="lavori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Lavori</span><span class="tab-cnt" id="cnt-lavori"></span></button>
       <button data-tab="preventivi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span>Preventivi</span><span class="tab-cnt" id="cnt-preventivi"></span></button>
       <button data-tab="fatture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg><span>Fatture</span></button>
@@ -481,7 +481,7 @@
          ricopiare il markup in tre file. -->
     <section id="chat"></section>
     <section id="dalsito">
-      <div class="sec-head"><h2>Richiesta preventivo sito</h2></div>
+      <div class="sec-head"><h2>Richieste dal sito</h2></div>
       <div class="gal-intro">Quando un cliente ti scrive dalla tua pagina su TrovaImpresa, la sua richiesta arriva qui. Tu la apri, leggi cosa gli serve e gli rispondi. Con un clic la trasformi in preventivo.</div>
       <div class="viste" id="ds-viste"></div>
       <div id="ds-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
@@ -676,7 +676,7 @@
 <script src="/js/cestino.js"></script>
 <script src="/js/foto-upload.js"></script>
 <script src="/js/gest-logo.js"></script>
-<script src="/js/invito-g2.js?v=6nov"></script>
+<script src="/js/invito-g2.js?v=6nov2"></script>
 <!-- ============================================================
      22 agosto 2026 — IL GESTIONALE È SPEZZATO IN QUATTRO PEZZI
      Il codice qui sotto era tutto dentro un file solo: 23.328 righe,
@@ -714,18 +714,18 @@
 <script src="/js/gest-capitolato.js"></script>
 <script src="/js/gest-galleria-mappa.js"></script>
 <script src="/js/gest-report.js"></script>
-<script src="/js/gest-riepilogo.js?v=6nov"></script>
+<script src="/js/gest-riepilogo.js?v=6nov2"></script>
 <script src="/js/gest-squadra.js?v=2"></script>
 <script src="/js/chat-squadra.js?v=3"></script>
 <script src="/js/chat-gest.js?v=3"></script>
 <script src="/js/gest-prev-controllo.js?v=2"></script>
 <script src="/js/gest-capo-tel.js?v=1"></script>
 <script src="/js/mappa-indirizzo.js?v=2"></script>
-<script src="/js/gest-azienda.js"></script>
+<script src="/js/gest-azienda.js?v=6nov2"></script>
 <script src="/js/gest-promemoria.js"></script>
-<script src="/js/gest-giornate.js?v=6"></script>
+<script src="/js/gest-giornate.js?v=6nov2"></script>
 <script src="/js/gest-parla.js?v=3"></script>
-<script src="/js/gest-fisco.js?v=6nov"></script>
+<script src="/js/gest-fisco.js?v=6nov2"></script>
 <script src="/js/gest-fisco-tasse.js"></script>
 <script src="/js/gest-fisco-vivere.js"></script>
 <script src="/js/gest-fisco-ai.js"></script>
@@ -745,13 +745,13 @@
 <script src="/js/gest-ingresso.js"></script>
 <script src="/js/gest-ai-moduli.js?v=6nov"></script>
 <script src="/js/gest-riepilogo-schede.js"></script>
-<script src="/js/gest-schede-clienti.js"></script>
+<script src="/js/gest-schede-clienti.js?v=6nov2"></script>
 <script src="/js/gest-carte-documenti.js"></script>
-<script src="/js/gest-richieste-chat.js"></script>
+<script src="/js/gest-richieste-chat.js?v=6nov2"></script>
 <script src="/js/gest-scadenze-pratiche.js?v=6nov"></script>
 <script src="/js/gest-commercialista.js"></script>
 <script src="/js/gest-elimina-reparto.js"></script>
-<script src="/js/gest-ore-spese.js"></script>
+<script src="/js/gest-ore-spese.js?v=6nov2"></script>
 <script src="/js/gest-preventivi.js"></script>
 <script src="/js/gest-cestino.js"></script>
 <script src="/js/gest-ricerca.js"></script>
@@ -768,10 +768,10 @@
 <script src="/js/gest-chat.js"></script>
 <script src="/js/ai-integrazione.js"></script>
 <script src="/js/fondatore.js"></script>
-<script src="/js/aiuti.js"></script>
-<script src="/js/gest-icone.js"></script>
+<script src="/js/aiuti.js?v=6nov2"></script>
+<script src="/js/gest-icone.js?v=6nov2"></script>
 <!-- 28/09/2026 — il menu corto: 8 voci in vista, le altre sotto «Altre N voci» -->
-<script src="/js/gest-menu-corto.js?v=6nov"></script>
+<script src="/js/gest-menu-corto.js?v=6nov2"></script>
 <script src="/js/gest-primi-passi.js"></script>
 <script src="/js/gest-bordo-blu.js?v=1" defer></script>
 <script src="/js/gest-dettato.js?v=1" defer></script>
