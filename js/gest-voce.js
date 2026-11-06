@@ -397,6 +397,14 @@
     return vecchio(t);
   }
 
+  /* 6 nov 2026 — la casella «Cosa facciamo?» del Noleggio (js/nol-assistente.js):
+     quello che scrivi fa la stessa strada di quello che dici. */
+  window.gestVoceEsegui = function (t) {
+    t = String(t || '').trim();
+    if (!t || lavora || ascolta) return false;
+    detto = t; esegui(t); return true;
+  };
+
   async function vecchio(t) {
     if (PAG === 'app' && (!window.AI || typeof window.AI.cantiere !== 'function')) {
       disegnaMsg('L\'assistente non si è caricato. Ricarica la pagina e riprova.', true); return;

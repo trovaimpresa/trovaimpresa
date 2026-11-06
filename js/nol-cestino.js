@@ -93,7 +93,12 @@
     if(!vis.length){
       box.innerHTML='<p style="color:#666;padding:8px">Niente che si chiami così, fra le '+cestCache.length+' cose nel cestino.</p>';return;
     }
-    box.innerHTML=vis.map(v=>
+    /* 6 nov 2026 (sera) — «Svuota il cestino», come nel gestionale principale
+       (js/gest-cestino.js). Con una ricerca scritta tocca solo le trovate. */
+    box.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:12px;margin:0 0 14px">'
+      +'<button type="button" id="nol-cz-svuota" style="font:inherit;font-size:18px;font-weight:700;border-radius:12px;padding:12px 20px;min-height:52px;cursor:pointer;background:#fff;color:#DC2626;border:2px solid #DC2626">🗑 '
+      +(q?('Elimina le '+vis.length+' trovate'):('Svuota il cestino ('+cestCache.length+')'))+'</button></div>'
+      +vis.map(v=>
       nolCard({col:v.x.col,
         titolo:esc(v.x.nome),
         eti:[{t:esc(v.x.lab.toUpperCase())}],
@@ -101,6 +106,8 @@
         pulsanti:`<div class="nol-azioni">
           <button class="nol-az nol-az-apri" data-action="cest-apri" data-i="${v.i}">Apri</button>
         </div>`})).join("");
+    const _sv=document.getElementById("nol-cz-svuota");
+    if(_sv)_sv.onclick=function(){cestSvuotaNol(vis.map(v=>v.x));};
   }
 
   /* la scheda di una cosa nel cestino: a tutta pagina come tutte le altre,
@@ -121,6 +128,21 @@
           ||'<tr><td colspan="2">Niente da mostrare.</td></tr>'}</table>
       </div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button></div>`);
+  }
+
+  async function cestSvuotaNol(lista){
+    if(!lista.length||!cestAcceso())return;
+    if(!confirm("Buttare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+" del cestino?\nQuesta volta non si torna indietro davvero."))return;
+    let fatti=0, ko=0;
+    for(const v of lista){
+      const {data,error}=await sb.raw(v.tab).delete().eq("id",v.id).eq("user_id",sbUid).select("id");
+      if(error||!data||!data.length)ko++; else fatti++;
+    }
+    await renderCestinoNol();
+    const t={};lista.forEach(v=>{const x=NOL_TIPI[v.tipo];if(x&&x.ricarica)t[v.tipo]=x.ricarica;});
+    Object.keys(t).forEach(k=>{try{t[k]();}catch(e){}});
+    toast(fatti?("Buttate per sempre: "+fatti):"Non ho buttato niente");
+    if(ko)alert("Buttate per sempre: "+fatti+".\n\n"+ko+(ko===1?" non è andata":" non sono andate")+": di solito vuol dire che è ancora collegata a qualcosa che non è nel cestino. Aprila e prova «Butta per sempre»: ti dice cosa manca.");
   }
 
   async function cestRimetti(i){

@@ -138,6 +138,10 @@
      «Foto 300»…) e sotto 50 righe alla volta, con «Mostra altre». */
   const CEST_PASSO=50;
   let cestMostra=CEST_PASSO, cestTipo="", cestChiave="";
+  /* 6 nov 2026 (sera) — SCEGLI COSA ELIMINARE / SVUOTA (vedi cestCzPulsanti).
+     Le chiavi delle scelte sono «tabella|id», non la posizione. */
+  let cestScegli=false, cestTabN={}, cestCzVis=[];
+  const cestScelti=new Set();
   /* 12 agosto 2026 (sera) — IL CESTINO NON GUARDAVA IL REPARTO.
      Chiedeva tutto quello che e' eliminato per QUESTO ACCOUNT, senza badare a
      dove stava: se hai due reparti — poniamo "Edilizia" e "Impianti" — dentro
@@ -291,6 +295,7 @@
     }
     const risposte=await Promise.all(CEST_COSE.map(cestChiedi));
     cestQui=risposte.reduce((s,x)=>s+(x.n||0),0);
+    cestTabN={}; risposte.forEach(function(x){ if(!x.ko)cestTabN[x.c.t]=x.n||0; });
     /* il pallino del menu conta TUTTO il cestino, non solo questo reparto:
        e' un "hai roba buttata via", non un conteggio di sezione. Quindi si
        aggiorna solo quando si sta guardando davvero tutto. */
@@ -380,10 +385,15 @@
             }).join("")
             +'</div>'
           : "")
+        +cestCzPulsanti(q,visTutte)
       : "");
     Array.prototype.forEach.call(document.querySelectorAll("#cest-riass [data-cesttipo]"),function(b){
       b.onclick=function(){cestTipo=b.getAttribute("data-cesttipo")||"";renderCestino(true);};
     });
+    const _czS=document.getElementById("cz-scegli");
+    if(_czS)_czS.onclick=function(){cestScegli=!cestScegli;if(!cestScegli)cestScelti.clear();renderCestino(true);};
+    const _czV=document.getElementById("cz-svuota");
+    if(_czV)_czV.onclick=function(){cestSvuota(q);};
 
     renderTabella({
       id:"cest", box:"#cest-list",
@@ -437,9 +447,249 @@
       const _ba=document.getElementById("cest-altre");
       if(_ba)_ba.onclick=function(){cestMostra+=CEST_PASSO;renderCestino(true);};
     }
+    cestCzVis=visTutte;
+    cestCzDecora(box,vis);
   }
 
   /* rimette a posto UNA riga */
+  /* ============================================================
+     6 nov 2026 (sera) — SCEGLI COSA ELIMINARE, E SVUOTA IL CESTINO
+
+     - «Scegli cosa eliminare»: le righe si toccano e si segnano in rosso;
+       in basso una barra con «Scegli tutte», «Elimina per sempre (n)»,
+       «Annulla».
+     - «Svuota il cestino»: tutto quello che corrisponde a quello che stai
+       guardando (tipo scelto, ricerca, questo reparto / tutti i reparti).
+     ⛔ Si passa SEMPRE da gest_cestino_elimina (con p_conferma:true), una
+        riga alla volta: la funzione del database fa i suoi controlli anche
+        cosi' — le fatture emesse e le cose con figli ancora vivi tornano
+        ok:false e NON vengono cancellate. Qui si contano e si dicono.
+     ⛔ Prima le foglie (in parallelo, 6 alla volta), poi le altre una per
+        una: due padri insieme si bloccano a vicenda sulle stesse righe.
+     Il cestino ne carica al massimo 200 per tipo: svuotando si va a giri,
+     ricaricando finche' non resta niente (o niente si puo' piu' togliere).
+     ============================================================ */
+  const CZ_SPUNTA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+  function cestCzChiave(x){return x.tab+"|"+x.id;}
+  function cestCzStile(){
+    if(document.getElementById("cz-stile"))return;
+    const st=document.createElement("style");st.id="cz-stile";
+    st.textContent=''
+      +'.cest-az{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 4px}'
+      +'.cest-az button{font:inherit;font-size:18px;font-weight:700;border-radius:12px;padding:12px 20px;cursor:pointer;min-height:52px}'
+      +'.cest-az .cz-sel{background:#fff;color:#0a2a4d;border:2px solid #0a2a4d}'
+      +'.cest-az .cz-sel.on{background:#0a2a4d;color:#fff}'
+      +'.cest-az .cz-svuota{background:#fff;color:#DC2626;border:2px solid #DC2626}'
+      +'#cest-list.cest-scegli .job{display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:12px;cursor:pointer}'
+      +'#cest-list.cest-scegli .job>*{grid-column:2}'
+      +'#cest-list.cest-scegli .job>.cz-box{grid-column:1;grid-row:1 / span 3;align-self:center;width:34px;height:34px;box-sizing:border-box;border:2.5px solid #0a2a4d;border-radius:8px;background:#fff;display:grid;place-items:center}'
+      +'#cest-list.cest-scegli .job>.cz-box svg{width:22px;height:22px;color:#fff;visibility:hidden}'
+      +'#cest-list.cest-scegli .job.cz-on{background:#FEF2F2!important;border-color:#DC2626!important}'
+      +'#cest-list.cest-scegli .job.cz-on>.cz-box{background:#DC2626;border-color:#DC2626}'
+      +'#cest-list.cest-scegli .job.cz-on>.cz-box svg{visibility:visible}'
+      +'#cest-list.cest-scegli .job-actions{display:none!important}'
+      +'#cz-barra{position:fixed;left:16px;right:16px;bottom:20px;z-index:700;display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:#0a2a4d;color:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 28px rgba(0,0,0,.3);max-width:1100px;margin:0 auto}'
+      +'#cz-barra b{font-size:20px;flex:1;min-width:140px}'
+      +'#cz-barra button{font:inherit;font-size:18px;font-weight:700;border-radius:12px;padding:12px 18px;cursor:pointer;min-height:52px}'
+      +'#cz-barra .cz-tutte{background:transparent;color:#fff;border:2px solid #fff}'
+      +'#cz-barra .cz-via{background:#DC2626;color:#fff;border:0}'
+      +'#cz-barra .cz-via:disabled{opacity:.45;cursor:not-allowed}'
+      +'#cz-barra .cz-annulla{background:#fff;color:#0a2a4d;border:0}'
+      +'#cestino{padding-bottom:110px}'
+      +'@media (max-width:880px){#cz-barra{left:10px;right:10px;bottom:84px;padding:12px}#cz-barra b{flex:1 1 100%}#cz-barra button{flex:1 1 0;font-size:16px;padding:10px 8px}#cestino{padding-bottom:200px}}'
+      +'#cz-ov{position:fixed;inset:0;z-index:2000;background:rgba(10,42,77,.55);display:grid;place-items:center;padding:20px}'
+      +'#cz-ov .cz-car{background:#fff;border-radius:18px;padding:28px 26px;max-width:460px;width:100%;text-align:center;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;color:#0a2a4d}'
+      +'#cz-ov .cz-t{font-size:24px;font-weight:700;margin:0 0 8px}'
+      +'#cz-ov .cz-n{font-size:20px;margin:0 0 16px}'
+      +'#cz-ov .cz-bar{height:14px;border-radius:8px;background:#E2E8F0;overflow:hidden;margin-bottom:18px}'
+      +'#cz-ov .cz-bar i{display:block;height:100%;width:0;background:#DC2626;transition:width .2s}'
+      +'#cz-ov button{font:inherit;font-size:18px;font-weight:700;border-radius:12px;padding:12px 24px;border:2px solid #0a2a4d;background:#fff;color:#0a2a4d;cursor:pointer;min-height:52px}';
+    document.head.appendChild(st);
+  }
+  /* i due pulsanti sopra l'elenco */
+  function cestCzPulsanti(q,visTutte){
+    if(!cestCache.length)return "";
+    cestCzStile();
+    const quante=cestCzQuante(q,visTutte);
+    const testo=q?("🗑 Elimina le "+visTutte.length+" trovate")
+      :(cestTipo?("🗑 Elimina tutte: «"+esc(cestTipo)+"» ("+quante+")"):("🗑 Svuota il cestino ("+quante+")"));
+    return '<div class="cest-az">'
+      +'<button type="button" id="cz-scegli" class="cz-sel'+(cestScegli?' on':'')+'">'
+      +(cestScegli?'✓ Stai scegliendo · Esci':'☑ Scegli cosa eliminare')+'</button>'
+      +(cestScegli?'':'<button type="button" id="cz-svuota" class="cz-svuota">'+testo+'</button>')
+      +'</div>';
+  }
+  /* quante ce ne sono davvero (non solo le 200 caricate per tipo) */
+  function cestCzQuante(q,visTutte){
+    if(q)return visTutte.length;
+    if(!cestTipo)return (cestQui==null?cestCache.length:cestQui);
+    const tabs={};cestCache.forEach(function(x){if(x.tipo===cestTipo)tabs[x.tab]=1;});
+    let n=0;Object.keys(tabs).forEach(function(t){n+=(cestTabN[t]||0);});
+    return Math.max(n,visTutte.length);
+  }
+  /* la casella su ogni riga, e la barra in basso */
+  function cestCzDecora(box,vis){
+    box.classList.toggle("cest-scegli",cestScegli);
+    const vecchia=document.getElementById("cz-barra");
+    if(!cestScegli){if(vecchia)vecchia.remove();return;}
+    cestCzStile();
+    const cards=box.querySelectorAll(":scope > .job");
+    Array.prototype.forEach.call(cards,function(c,k){
+      const v=vis[k];if(!v)return;
+      const key=cestCzChiave(v.x);
+      c.setAttribute("data-cz",key);
+      c.setAttribute("role","checkbox");
+      c.setAttribute("aria-checked",cestScelti.has(key)?"true":"false");
+      c.tabIndex=0;
+      const b=document.createElement("span");b.className="cz-box";b.innerHTML=CZ_SPUNTA;c.prepend(b);
+      c.classList.toggle("cz-on",cestScelti.has(key));
+    });
+    if(!box._czClick){
+      box._czClick=true;
+      const tocca=function(c){
+        const k=c.getAttribute("data-cz");
+        if(cestScelti.has(k))cestScelti.delete(k);else cestScelti.add(k);
+        c.classList.toggle("cz-on",cestScelti.has(k));
+        c.setAttribute("aria-checked",cestScelti.has(k)?"true":"false");
+        cestCzBarra();
+      };
+      box.addEventListener("click",function(e){
+        if(!cestScegli)return;
+        const c=e.target.closest(".job[data-cz]");if(!c)return;
+        e.preventDefault();e.stopPropagation();tocca(c);
+      },true);
+      box.addEventListener("keydown",function(e){
+        if(!cestScegli||(e.key!==" "&&e.key!=="Enter"))return;
+        const c=e.target.closest(".job[data-cz]");if(!c)return;
+        e.preventDefault();tocca(c);
+      });
+    }
+    cestCzBarra();
+  }
+  function cestCzBarra(){
+    const sez=document.getElementById("cestino");if(!sez)return;
+    let bar=document.getElementById("cz-barra");
+    if(!bar){bar=document.createElement("div");bar.id="cz-barra";sez.appendChild(bar);}
+    /* si contano solo le scelte che ci sono ancora */
+    const ci={};cestCache.forEach(function(x){ci[cestCzChiave(x)]=1;});
+    Array.from(cestScelti).forEach(function(k){if(!ci[k])cestScelti.delete(k);});
+    const n=cestScelti.size, tot=cestCzVis.length;
+    const tutte=tot>0&&cestCzVis.every(function(v){return cestScelti.has(cestCzChiave(v.x));});
+    bar.innerHTML='<b>'+(n?(n===1?'1 scelta':n+' scelte'):'Tocca le righe da eliminare')+'</b>'
+      +(tot?'<button type="button" class="cz-tutte">'+(tutte?'Togli tutte':'Scegli tutte e '+tot)+'</button>':'')
+      +'<button type="button" class="cz-via"'+(n?'':' disabled')+'>🗑 Elimina per sempre'+(n?' ('+n+')':'')+'</button>'
+      +'<button type="button" class="cz-annulla">Annulla</button>';
+    const bt=bar.querySelector(".cz-tutte");
+    if(bt)bt.onclick=function(){
+      cestCzVis.forEach(function(v){const k=cestCzChiave(v.x);if(tutte)cestScelti.delete(k);else cestScelti.add(k);});
+      renderCestino(true);
+    };
+    bar.querySelector(".cz-annulla").onclick=function(){cestScegli=false;cestScelti.clear();renderCestino(true);};
+    bar.querySelector(".cz-via").onclick=function(){
+      const lista=cestCache.filter(function(x){return cestScelti.has(cestCzChiave(x));});
+      if(!lista.length)return;
+      if(!gconfirm("Eliminare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+"?"
+        +"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali)."
+        +"\n\nQuesta volta spariscono davvero e non si recuperano più."))return;
+      const scelte=new Set(lista.map(cestCzChiave));
+      cestEliminaGiri(function(){return cestCache.filter(function(x){return scelte.has(cestCzChiave(x));});},lista.length,true);
+    };
+  }
+  /* «Svuota»: tutto quello che corrisponde a quello che si sta guardando */
+  function cestSvuota(q){
+    const tipo=cestTipo;
+    const quante=cestCzQuante(q,cestCzVis);
+    if(!quante)return;
+    const cosa=q?("le "+quante+" cose trovate con «"+cestQ+"»")
+      :(tipo?("tutte le "+quante+" «"+tipo+"»"):("tutte le "+quante+" cose del cestino"
+        +(cestVista!=="tutti"?" di questo reparto":"")));
+    if(!gconfirm("Eliminare per sempre "+cosa+"?"
+      +"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali)."
+      +"\n\nQuesta volta spariscono davvero e non si recuperano più."))return;
+    const scelta=function(){return cestCache.filter(function(x){
+      return (!q||(x.nome+" "+x.tipo).toLowerCase().includes(q))&&(!tipo||x.tipo===tipo);});};
+    cestEliminaGiri(scelta,quante,!!q);
+  }
+  /* una riga, senza domande: 'ok' | 'fiscale' | 'vivi' | 'errore' */
+  async function cestUnoSilenzioso(x){
+    let r=null;
+    try{ r=await sb.rpc("gest_cestino_elimina",{p_tabella:x.tab,p_id:x.id,p_conferma:true}); }
+    catch(e){ r={error:e}; }
+    if(r&&r.error){
+      const m=String((r.error.code||"")+" "+(r.error.message||r.error));
+      /* gia' andata via insieme al padre */
+      if(/non e'? ?nel cestino|non è nel cestino/i.test(m))return "ok";
+      /* le tabelle che la funzione non tratta (es. promemoria): solo le foglie,
+         con la stessa strada di cestDefinitivoFoglia */
+      if(x.foglia&&/PGRST202|Could not find the function|schema cache|non ammessa/i.test(m)){
+        const d=await sb.raw(x.tab).delete().eq("id",x.id).eq("user_id",sbUid).select("id");
+        if(d.error)return "errore";
+        if(d.data&&d.data.length)await cestPulisciFile(x);
+        return "ok";
+      }
+      return "errore";
+    }
+    const f=r&&r.data;
+    if(!f)return "errore";
+    if(f.ok===false)return f.fiscale?"fiscale":"vivi";
+    await cestPulisciFile(x,f.file);
+    return "ok";
+  }
+  async function cestEliminaGiri(sceltaFn,previsto,unGiroSolo){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    cestCzStile();
+    let fatti=0, fisc=0, vivi=0, err=0, stop=false;
+    const saltati=new Set();
+    const ov=document.createElement("div");ov.id="cz-ov";
+    ov.innerHTML='<div class="cz-car" role="status" aria-live="polite"><p class="cz-t">Sto eliminando…</p>'
+      +'<p class="cz-n">0 di '+previsto+'</p><div class="cz-bar"><i></i></div>'
+      +'<button type="button">Ferma</button></div>';
+    document.body.appendChild(ov);
+    ov.querySelector("button").onclick=function(){stop=true;this.disabled=true;this.textContent="Mi fermo…";};
+    const segna=function(){
+      const fatto=fatti+fisc+vivi+err;
+      ov.querySelector(".cz-n").textContent=fatti+" eliminate di "+previsto;
+      ov.querySelector(".cz-bar i").style.width=Math.min(100,Math.round(fatto*100/Math.max(1,previsto)))+"%";
+    };
+    const fai=async function(x){
+      if(stop)return 0;
+      const e=await cestUnoSilenzioso(x);
+      if(e==="ok"){fatti++;segna();return 1;}
+      saltati.add(cestCzChiave(x));
+      if(e==="fiscale")fisc++;else if(e==="vivi")vivi++;else err++;
+      segna();return 0;
+    };
+    try{
+      for(let giro=0;giro<60&&!stop;giro++){
+        const lista=sceltaFn().filter(function(x){return !saltati.has(cestCzChiave(x));});
+        if(!lista.length)break;
+        let nelGiro=0;
+        const foglie=lista.filter(function(x){return x.foglia;});
+        const altre=lista.filter(function(x){return !x.foglia;});
+        for(let k=0;k<foglie.length&&!stop;k+=6){
+          const pezzo=await Promise.all(foglie.slice(k,k+6).map(fai));
+          nelGiro+=pezzo.reduce(function(a,b){return a+b;},0);
+        }
+        for(let k=0;k<altre.length&&!stop;k++)nelGiro+=await fai(altre[k]);
+        if(unGiroSolo||!nelGiro)break;
+        await renderCestino();          /* ricarica: ne arrivano altre 200 per tipo */
+      }
+    }finally{
+      ov.remove();
+      cestScegli=false;cestScelti.clear();
+      _cestRicontaPallino();
+      await renderCestino();
+      rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
+    }
+    const resto=[];
+    if(fisc)resto.push(fisc+(fisc===1?" fattura già emessa: è":" fatture già emesse: sono")+" un documento fiscale, resta nel cestino.");
+    if(vivi)resto.push(vivi+(vivi===1?" cosa ha":" cose hanno")+" ancora dei pezzi collegati fuori dal cestino: per quelle usa «Elimina per sempre» sulla riga, ti dice cosa manca.");
+    if(err)resto.push(err+(err===1?" non è andata":" non sono andate")+" per un errore: riprova fra un attimo.");
+    if(stop)resto.unshift("Ti sei fermato a metà.");
+    toast(fatti?("Eliminate per sempre: "+fatti):"Non ho eliminato niente");
+    if(resto.length)alert("Eliminate per sempre: "+fatti+".\n\n"+resto.join("\n\n"));
+  }
+
   function cestRiga(tab,id){
     return sb.raw(tab).update({eliminato_il:null}).eq("id",id).eq("user_id",sbUid).select("id");
   }
