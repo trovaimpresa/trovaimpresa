@@ -64,7 +64,7 @@
        nessuna finestra aperta e, nel gestionale principale, solo nel
        Riepilogo. Quando si apre un modulo si nasconde, e torna dopo. */
     function puoStare() {
-      if (document.querySelector("#overlay.open,.ai-ov,#gp-ov:not([hidden])")) return false;
+      if (document.querySelector("#overlay.open,.ai-ov,#gp-ov:not([hidden]),.side.open")) return false;
       var rie = document.getElementById("riepilogo");
       if (rie && !rie.classList.contains("active")) return false;
       return true;

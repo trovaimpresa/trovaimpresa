@@ -50,7 +50,7 @@
       + ".side .menu-strumenti{display:none}"
       + "@media(max-width:880px){"
       +   "#appview .topbar{display:none!important}"
-      +   ".side.open .menu-strumenti{display:block;margin-top:14px;padding-top:12px;border-top:2px solid rgba(255,255,255,.35)}"
+      +   ".side.open .menu-strumenti{display:block;margin-top:-80px;padding:12px 0 120px;border-top:2px solid rgba(255,255,255,.35)}"
       +   ".side .menu-strumenti .ms-tit{font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#b7cae6;margin:4px 4px 8px}"
       +   ".side .menu-strumenti .ms-btn{display:flex;align-items:center;gap:13px;width:100%;min-height:52px;padding:10px 12px;margin:0 0 6px;"
       +     "background:transparent;border:2px solid rgba(255,255,255,.45);border-radius:10px;color:#fff;font:inherit;font-size:17px;font-weight:600;text-align:left;cursor:pointer}"

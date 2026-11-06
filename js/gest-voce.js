@@ -205,6 +205,8 @@
       || !!document.querySelector('.ai-ov')
       || !!document.querySelector('#gp-ov:not([hidden])')
       || !!document.querySelector('#chat.active')
+      /* 6 nov 2026 — sul telefono, col menu ☰ aperto, «Parla» copriva le voci */
+      || !!document.querySelector('.side.open')
       || (el('rie-fab-menu') && el('rie-fab-menu').style.display === 'block');
     if (nascosto && !ascolta && !lavora) { btn.style.display = 'none'; if (fbtn) fbtn.style.display = 'none'; chiudiBolla(); return; }
     btn.style.display = 'flex';
