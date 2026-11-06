@@ -1043,22 +1043,32 @@
      demolizione non cambia perche' cambi cantiere. */
   let pzCache=[], pzTimer=null;
   const PZ_MAX=1000;
+  /* 6 nov 2026 — si disegnano 60 schede alla volta, poi «Mostra altre».
+     Prima uscivano tutte e mille insieme: una pagina alta 130.000 pixel,
+     pesante sul telefono. La ricerca guarda sempre TUTTE le voci. */
+  const PZ_PASSO=60;
+  let pzMostra=PZ_PASSO;
 
-  async function renderPrezzario(){
+  async function renderPrezzario(daCache){
     filoMetti("prezzario","prezzario");
     const box=$("#pz-list");if(!box)return;
     const cnt=$("#cnt-prezzario");
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Prezzario","Accedi per usare il tuo prezzario.","");return;}
-    const {data,error}=await sb.from("gest_prezzi_propri").select("*")
-      .eq("user_id",sbUid).is("eliminato_il",null)
-      .order("usata_volte",{ascending:false}).limit(PZ_MAX);
-    if(error){
-      box.innerHTML='<div class="lm-vuoto">'+(_compManca(error)
-        ? ('Per il prezzario serve l\'aggiornamento del database: '+COMP_SQL_HTML)
-        : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
-      return;
+    /* 6 nov 2026 — «Mostra altre» e la ricerca non rileggono le mille voci
+       dal database: usano quelle gia' lette (daCache===true) */
+    if(!(daCache===true&&pzCache.length)){
+      const {data,error}=await sb.from("gest_prezzi_propri").select("*")
+        .eq("user_id",sbUid).is("eliminato_il",null)
+        .order("usata_volte",{ascending:false}).limit(PZ_MAX);
+      if(error){
+        box.innerHTML='<div class="lm-vuoto">'+(_compManca(error)
+          ? ('Per il prezzario serve l\'aggiornamento del database: '+COMP_SQL_HTML)
+          : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
+        return;
+      }
+      pzCache=data||[];
+      pzMostra=PZ_PASSO;
     }
-    pzCache=data||[];
     if(cnt)cnt.textContent=pzCache.length?String(pzCache.length):"";
     const q=String(($("#pz-cerca")&&$("#pz-cerca").value)||"").trim();
     const L=_ppFiltra(pzCache,q);
@@ -1087,7 +1097,9 @@
        ⚠️ Il pulsante × resta DENTRO la scheda: il gestore dei clic prende
        il `data-action` piu' interno, quindi cliccare la × cestina e non
        apre la voce. */
-    box.innerHTML=avviso+'<div class="pz-griglia">'+L.map(x=>
+    const Lv=L.slice(0,pzMostra);
+    const resto=L.length-Lv.length;
+    box.innerHTML=avviso+'<div class="pz-griglia">'+Lv.map(x=>
       '<div class="pz-card" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'">'
       +  '<div class="pz-testa">'
       +    (x.codice?'<span class="pz-cod">'+esc(x.codice)+'</span>':'<span class="pz-cod pz-cod--no">senza codice</span>')
@@ -1102,11 +1114,15 @@
       +  '</div>'
       +'</div>').join("")
       +'</div>'
-      +'<div class="sh-nota">'+L.length+(L.length===1?" voce":" voci")+(q?(" su "+pzCache.length):"")+'. Clicca una voce per correggerla.</div>';
+      +(resto>0?'<div style="text-align:center;margin:18px 0 6px"><button type="button" class="btn-primary" id="pz-altre" style="font-size:19px;font-weight:700;padding:14px 26px">Mostra altre '+Math.min(resto,PZ_PASSO)+' voci</button>'
+        +'<div class="sh-nota" style="margin-top:8px">Ne vedi '+Lv.length+' su '+L.length+'. Per trovarne una in fretta, scrivi una parola nella ricerca qui sopra.</div></div>'
+        :'<div class="sh-nota">'+L.length+(L.length===1?" voce":" voci")+(q?(" su "+pzCache.length):"")+'. Clicca una voce per correggerla.</div>');
+    const pa=$("#pz-altre");
+    if(pa)pa.onclick=function(){pzMostra+=PZ_PASSO;renderPrezzario(true);};
     const ce=$("#pz-cerca");
     if(ce&&!ce._agganciato){
       ce._agganciato=true;
-      ce.oninput=function(){clearTimeout(pzTimer);pzTimer=setTimeout(renderPrezzario,250);};
+      ce.oninput=function(){clearTimeout(pzTimer);pzMostra=PZ_PASSO;pzTimer=setTimeout(function(){renderPrezzario(true);},250);};
     }
   }
 
