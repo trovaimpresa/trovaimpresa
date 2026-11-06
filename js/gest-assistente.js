@@ -121,7 +121,7 @@
   }
 
   /* ---------------- il saluto ---------------- */
-  var nome = '';
+  var nome = '', nomeChiesto = false;
   function saluto() {
     var h = new Date().getHours();
     var s = h < 13 ? 'Buongiorno' : (h < 18 ? 'Buon pomeriggio' : 'Buonasera');
@@ -135,7 +135,8 @@
   }
   async function leggiNome() {
     try {
-      if (!window._gc) return;
+      if (!window._gc || nomeChiesto) return;
+      nomeChiesto = true;   /* ⚠️ si chiede UNA volta, ma solo quando _gc c'e': al primo giro spesso non c'e' ancora */
       var s = await window._gc.auth.getSession();
       var uid = s && s.data && s.data.session && s.data.session.user && s.data.session.user.id;
       if (!uid) return;
@@ -234,6 +235,7 @@
     var mic = document.querySelector('#barra-basso .bb-mic');
     if (mic) mic.classList.toggle('on', ascolta);
     if (!$('ass-box')) monta();
+    if (!nome && !nomeChiesto && window._gc) leggiNome();
     aiutoAllaChat();
     barra();
     rinomina(document.querySelector('nav.tabs button[data-tab="riepilogo"]'), 'Riepilogo', 'Assistente');
