@@ -5548,3 +5548,9 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
   .sheet--grande .sh-foot.co-foot{ flex-wrap:nowrap; }
   .sheet--grande .sh-foot.co-foot .btn,.sheet--grande .sh-foot.co-foot .btn-primary{ min-width:0; flex:1 1 0; }
 }
+/* un tasto del menu spento dal codice (style="display:none", es. «PDF di
+   tutti» con un capitolato solo) deve restare spento anche qui dentro */
+.co-menu button[style*="none"]{ display:none!important; }
+@media(max-width:900px){
+  .sheet--grande .sh-foot.co-foot .btn,.sheet--grande .sh-foot.co-foot .btn-primary{ padding:0 8px; white-space:normal; line-height:1.15; }
+}

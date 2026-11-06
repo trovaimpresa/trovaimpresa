@@ -207,6 +207,10 @@
      ⚠️ Elimina sta in fondo al menu, in rosso, separato: non si preme per
         sbaglio cercando «Duplica».
      ============================================================ */
+  function _capDaComputo(c){
+    if(!c||!c.preventivo_id||typeof prevCache==="undefined")return false;
+    return (prevCache||[]).some(function(p){return String(p.id)===String(c.preventivo_id);});
+  }
   function compBarraAzioni(c){
     const head=$("#sheet .sh-head"), foot=$("#sheet .sh-foot");
     if(!head||!foot||!c||!c.id)return;
@@ -230,6 +234,9 @@
       +'<div class="co-menu" role="menu">'
       +  doc.map(btn).join("")
       +  (copie.length?'<hr>'+copie.map(btn).join(""):'')
+      /* 6 nov 2026 — il capitolato si apre anche da qui, se da questo computo
+         e' gia' nato un preventivo (il capitolato vive dentro il preventivo) */
+      +  (_capDaComputo(c)?'<hr><button type="button" data-chiudi="1" data-action="prev-capitolato" data-id="'+esc(String(c.preventivo_id))+'">Capitolato del preventivo</button>':'')
       +  '<div class="co-menu-ctr"></div>'
       +  (via.length?'<hr>'+via.map(btn).join(""):'')
       +'</div></div>';

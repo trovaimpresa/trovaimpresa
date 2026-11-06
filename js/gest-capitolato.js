@@ -423,7 +423,20 @@
      /* le firme */
      +".cap-firma{margin-bottom:16px}"
      +".cap-firma-c{display:block;width:100%;aspect-ratio:10/3;border:2px dashed var(--bordo-forte);border-radius:12px;background:#fff;touch-action:none;cursor:crosshair}"
-     +".cap-firma-b{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}";
+     +".cap-firma-b{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}"
+     /* 6 nov 2026 — «Come vuoi cominciare?»: le tre strade in cima al capitolato vuoto */
+     +".cap-via{border:1.5px solid var(--blu);background:var(--blu-tenue,#F5F8FF);border-radius:14px;padding:18px 20px;margin:4px 0 18px}"
+     +".cap-via h4{margin:0 0 4px;font-size:20px;font-weight:800;color:var(--testo)}"
+     +".cap-via p{margin:0 0 14px;font-size:16px;color:var(--testo-2)}"
+     +".cap-via-tre{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}"
+     +".cap-via-b{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px 18px;border-radius:12px;border:1.5px solid var(--bordo-forte);background:var(--card);cursor:pointer;font-family:inherit}"
+     +".cap-via-b:hover{border-color:var(--blu)}"
+     +".cap-via-b b{font-size:18px;color:var(--testo)}"
+     +".cap-via-b span{font-size:15px;color:var(--testo-2);line-height:1.35}"
+     +".cap-via-b em{font-style:normal;font-size:14px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--ok-bg);color:var(--ok)}"
+     +".cap-via-b.ai em{background:#F3E8FF;color:#6D28D9}"
+     +"@media(max-width:700px){.cap-via-tre{grid-template-columns:1fr}}"
+     +"#cp-ctr-riga{display:none}";
     document.head.appendChild(s);
   }
 
@@ -460,6 +473,7 @@
     var c=el("cp-voci"); if(!c) return;
     var h=""; (voci&&voci.length?voci:[{}]).forEach(function(v,i){ h+=voceHtml(v,i); });
     c.innerHTML=h;
+    aggiornaVia();
   }
   function aggiungiVoci(voci){
     var c=el("cp-voci"); if(!c) return;
@@ -474,6 +488,7 @@
     voci.forEach(function(v,i){ h+=voceHtml(v,n+i); });
     c.insertAdjacentHTML("beforeend",h);
     rinumera();
+    aggiornaVia();
   }
 
   /* ---------- lo stato della finestra ---------- */
@@ -640,6 +655,19 @@
     var corpo=
       '<div class="cap-schede" id="cp-schede"></div>'
       +'<div class="sh-b" id="cp-ver" hidden></div>'
+      /* ⛔ 6 novembre 2026 — «COME VUOI COMINCIARE?»
+         Il capitolato vuoto mostrava per primi i due tasti dell'AI (a crediti),
+         mentre la strada gratis e piu' comoda — «Porta le voci dal preventivo» —
+         stava in fondo alla colonna di destra, e il modello in una tendina a
+         meta' della sinistra. Chiesto da Alessio: «piu' semplice, alla portata
+         di tutti». Adesso le tre strade stanno in cima, una accanto all'altra,
+         e il riquadro sparisce appena il capitolato ha delle voci (aggiornaVia).
+         I tre bottoni NON fanno niente di nuovo: chiamano le strade di sempre. */
+      +'<div class="cap-via" id="cp-via" hidden><h4>Come vuoi cominciare?</h4><p>Scegli uno dei tre: poi cambi quello che serve.</p><div class="cap-via-tre">'
+      +(nVoci?'<button type="button" class="cap-via-b" data-action="cap-voci-prev"><em>Gratis</em><b>Prendi le voci dal preventivo</b><span>'+nVoci+(nVoci===1?' lavorazione del preventivo diventa una voce':' lavorazioni del preventivo diventano le voci')+' del capitolato.</span></button>':'')
+      +'<button type="button" class="cap-via-b" data-action="cap-via-mod"><em>Gratis</em><b>Parti da un modello</b><span>Bagno, tetto, facciata, impianti\u2026 '+Object.keys(MODELLI).length+' modelli gi\u00e0 scritti.</span></button>'
+      +'<button type="button" class="cap-via-b ai" data-action="cap-via-ai"><em>1 credito</em><b>Scrivilo con l\'AI</b><span>Racconti il lavoro a parole e il capitolato si scrive da solo.</span></button>'
+      +'</div></div>'
       /* la riga dell'AI: stessa faccia di quella del preventivo */
       +'<div class="ai-riga" id="cp-ai">'
       +'<button type="button" class="ai-riga-apri" id="cp-ai-apri" aria-expanded="false" aria-controls="cp-ai-giu">'
@@ -705,6 +733,7 @@
       +'<button class="btn" data-action="cap-invia" data-id="'+esc(String(id))+'">📤 Invia al cliente</button>'
       +'<button class="btn" data-action="cap-pdf" data-id="'+esc(String(id))+'">📄 Scarica PDF</button>'
       +'<button class="btn-primary b-save" data-action="cap-salva" data-id="'+esc(String(id))+'">Salva capitolato</button>');
+    try{ barraCapitolato(id); }catch(e){ console.warn("[capitolato] barra:",e); }
     caricaForm();
     try{ ctrCapitolatoAccendi(); }catch(e){}   /* 1 nov 2026: rosso / arancio / verde */
     caricaVersioni(id);   /* 1 nov 2026: «Versioni (n)» compare quando arrivano */
@@ -718,6 +747,45 @@
       if(riga) riga.classList.toggle("ai-riga--aperta",apre);
       if(apre) setTimeout(function(){ var i=el("cp-ai-in"); if(i) i.focus(); },60);
     };
+  }
+
+  /* ⛔ 6 novembre 2026 — LA BARRA IN ALTO, COME NEL COMPUTO.
+     In fondo c'erano cinque o sei pulsanti (Controlla, Annulla, PDF di tutti,
+     Invia al cliente, Scarica PDF, Salva) su due righe. Adesso in alto c'e'
+     «Invia al cliente» e «Altro ▾» col resto; in fondo Annulla e Salva.
+     Si usano le classi del computo (.co-az, .co-altro, .co-menu, .co-foot,
+     css/gestionale.css): il menu si apre e si chiude con l'ascoltatore che
+     sta in js/gest-computo.js. I pulsanti NON si riscrivono: si SPOSTANO,
+     cosi' tengono le loro azioni (e «PDF di tutti» si accende ancora da
+     renderSchede, che lo cerca per id). */
+  function barraCapitolato(id){
+    var head=document.querySelector("#sheet .sh-head"), foot=document.querySelector("#sheet .sh-foot");
+    if(!head||!foot) return;
+    var inv=foot.querySelector('[data-action="cap-invia"]');
+    var pdf=foot.querySelector('[data-action="cap-pdf"]');
+    var tutti=foot.querySelector('#cp-pdf-tutti');
+    var ctr=foot.querySelectorAll(".ctr-tasto,.ctr-tasto-ai");
+    if(!inv||!pdf) return;
+    var az=document.createElement("div"); az.className="co-az";
+    az.innerHTML='<div class="co-altro"><button type="button" class="btn co-altro-b" aria-haspopup="true" aria-expanded="false">Altro \u25be</button><div class="co-menu" role="menu"></div></div>';
+    var menu=az.querySelector(".co-menu");
+    inv.className="btn-primary co-prev"; inv.textContent="Invia al cliente";
+    az.insertBefore(inv,az.firstChild);
+    pdf.textContent="Scarica il PDF"; menu.appendChild(pdf);
+    if(tutti){ tutti.textContent="Scarica il PDF di tutti"; menu.appendChild(tutti); }
+    menu.insertAdjacentHTML("beforeend","<hr>");
+    ctr.forEach(function(b){ menu.appendChild(b); });
+    menu.insertAdjacentHTML("beforeend",'<button type="button" data-action="cap-ctr">Controlla cosa manca con l\'AI \u00b7 1 credito</button>');
+    head.appendChild(az);
+    foot.classList.add("co-foot");
+  }
+  /* il riquadro «Come vuoi cominciare?» si vede solo finche' il capitolato
+     non ha voci; con lui si nasconde la riga dell'AI (la apre il terzo bottone) */
+  function aggiornaVia(){
+    var v=el("cp-via"), ai=el("cp-ai"); if(!v) return;
+    var vuoto=!haQualcosa();
+    v.hidden=!vuoto;
+    if(ai) ai.hidden=vuoto&&!ai.classList.contains("ai-riga--aperta");
   }
 
   /* ---------- le firme col dito ---------- */
@@ -1397,6 +1465,19 @@
       if(nt.value.indexOf(riga)>=0){ toast("È già nelle note"); return; }
       nt.value=(T(nt.value)?T(nt.value)+"\n":"")+riga;
       statoFirme(); toast("Aggiunto alle note ✔"); return;
+    }
+    if(a==="cap-via-mod"){
+      var sel=el("cp-modello"); if(!sel) return;
+      try{ sel.scrollIntoView({block:"center",behavior:"smooth"}); }catch(_){}
+      setTimeout(function(){ sel.focus(); try{ if(sel.showPicker) sel.showPicker(); }catch(_){} },350);
+      return;
+    }
+    if(a==="cap-via-ai"){
+      var rg=el("cp-ai"), ap=el("cp-ai-apri"); if(!rg||!ap) return;
+      rg.hidden=false;
+      if(!rg.classList.contains("ai-riga--aperta")) ap.click();
+      try{ rg.scrollIntoView({block:"start",behavior:"smooth"}); }catch(_){}
+      return;
     }
     if(a==="cap-sch") return cambiaScheda(+t.dataset.i);
     if(a==="cap-ver"){ _verAperto=!_verAperto; renderSchede(); renderVersioni(); return; }
