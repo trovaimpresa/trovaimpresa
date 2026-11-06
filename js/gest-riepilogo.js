@@ -43,10 +43,10 @@
     "💬":'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z"/>'
   };
   function rieFotoScegli(){
-    const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;gap:14px;align-items:center;width:100%;text-align:left;'
+    const c=(id,ic,t,d)=>'<button type="button" id="'+id+'" style="display:flex;flex-wrap:nowrap;gap:14px;align-items:center;width:100%;text-align:left;'
       +'border:2px solid #d9dfe7;border-radius:14px;padding:16px;margin-bottom:12px;background:#fff;font-size:21px;font-weight:700;cursor:pointer">'
       /* 6 nov 2026: icone disegnate, non emoji (sul telefono le emoji mandavano a capo la scritta) */
-      +'<span style="flex:0 0 auto;width:34px;height:34px;color:#0a2a4d"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(RIE_IC[ic]||"")+'</svg></span><span>'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
+      +'<span style="flex:0 0 auto;width:34px;height:34px;color:#0a2a4d"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(RIE_IC[ic]||"")+'</svg></span><span style="flex:1 1 auto;min-width:0">'+t+'<small style="display:block;font-weight:400;font-size:16px;color:#586574;margin-top:2px">'+d+'</small></span></button>';
     openSheetGrande("Cosa stai fotografando?",
       '<div class="sh-b"><p style="margin:0 0 14px;font-size:18px">Scegli, poi scatta o scegli la foto. L\'AI legge e riempie tutto. Costa 1 credito.</p>'
       +c("pf-forn","🧾","Fattura o bolla di un fornitore","Compila da sola la fattura da pagare")
