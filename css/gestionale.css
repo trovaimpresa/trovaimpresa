@@ -5513,3 +5513,38 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
   .cp-imp .cp-lab{margin:0}
   .cp-tot{font-size:18px}
 }
+
+/* ============================================================
+   6 novembre 2026 — COMPUTO: in alto «→ Crea il preventivo» grande e
+   «Altro ▾» col resto (js/gest-computo.js, compBarraAzioni). In fondo
+   restano solo Annulla e Salva.
+   ============================================================ */
+
+.sheet--grande .sh-head:has(.co-az) h3{ flex:1 1 auto; }
+.co-az{ display:flex; align-items:center; gap:10px; flex:0 0 auto; margin-left:auto; }
+.co-az .co-prev{ height:46px; padding:0 20px; font-size:17px; font-weight:700; white-space:nowrap; border-radius:12px; }
+.co-altro{ position:relative; }
+.co-altro-b{ height:46px; padding:0 16px; font-size:16px; font-weight:600; white-space:nowrap; }
+.co-menu{ display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:60;
+  background:var(--card,#fff); border:1px solid var(--bordo,#E2E8F0); border-radius:12px;
+  box-shadow:0 10px 30px rgba(15,23,42,.18); padding:6px; min-width:300px; max-width:calc(100vw - 32px); }
+.co-altro.aperto .co-menu{ display:block; }
+.co-menu button,.co-menu .btn{ display:block!important; width:100%!important; height:auto!important; min-height:0!important;
+  flex:none!important; margin:0!important; text-align:left!important; font-size:16px!important; font-weight:500!important;
+  line-height:1.3!important; padding:12px 14px!important; border:0!important; background:none!important;
+  box-shadow:none!important; border-radius:8px!important; color:var(--testo,#0F172A)!important; white-space:normal!important; cursor:pointer; }
+.co-menu button:hover,.co-menu button:focus-visible{ background:var(--sfondo,#F8FAFC)!important; }
+.co-menu .ctr-tasto-ai{ color:#6D28D9!important; }
+.co-menu .co-menu-del{ color:var(--err,#c0392b)!important; }
+.co-menu hr{ border:0; border-top:1px solid var(--bordo,#E2E8F0); margin:6px 0; }
+@media(max-width:900px){
+  .sheet--grande .sh-head .co-az{ order:3; flex:1 0 100%; margin-left:0; }
+  .co-az .co-prev{ flex:1 1 auto; }
+  .co-menu{ min-width:270px; }
+}
+/* in fondo Annulla e Salva stanno sulla stessa riga anche a 375 px:
+   senza, il minimo di 132 px per bottone li mandava uno sotto l'altro */
+@media(max-width:900px){
+  .sheet--grande .sh-foot.co-foot{ flex-wrap:nowrap; }
+  .sheet--grande .sh-foot.co-foot .btn,.sheet--grande .sh-foot.co-foot .btn-primary{ min-width:0; flex:1 1 0; }
+}

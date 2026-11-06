@@ -189,6 +189,71 @@
     });
   }
 
+  /* ============================================================
+     6 novembre 2026 — LA BARRA IN ALTO DEL COMPUTO: UN BOTTONE GRANDE E «ALTRO»
+     ============================================================
+     Prima in alto c'era una striscia di sei pulsanti che scorreva di lato:
+     «Crea il preventivo» — la cosa per cui si apre un computo da prezzare —
+     restava fuori dallo schermo. E in fondo i pulsanti erano cinque (Elimina,
+     Controlla, Controllo AI, Annulla, Salva): sul telefono coprivano META'
+     schermo. Scelto da Alessio sulle foto: in alto «→ Crea il preventivo»
+     grande e «Altro ▾» con tutto il resto; in fondo solo Annulla e Salva.
+     ⛔ Le voci vengono da compVoci(c), la stessa lista della scheda
+        nell'elenco: un posto solo per i nomi e le azioni. E siccome le leggo
+        da qui, la barra c'e' anche quando si torna da una lavorazione
+        (prima, tornando, la striscia in alto spariva: _azPendenti e' vuoto).
+     ⛔ I due tasti del controllo NON si riscrivono: si SPOSTANO dentro il
+        menu, cosi' restano quelli veri di ctrTastoHTML con le loro azioni.
+     ⚠️ Elimina sta in fondo al menu, in rosso, separato: non si preme per
+        sbaglio cercando «Duplica».
+     ============================================================ */
+  function compBarraAzioni(c){
+    const head=$("#sheet .sh-head"), foot=$("#sheet .sh-foot");
+    if(!head||!foot||!c||!c.id)return;
+    head.querySelectorAll(".sh-head-az,.co-az").forEach(function(x){x.remove();});
+    foot.querySelectorAll('[data-action="del-computo"]').forEach(function(x){x.remove();});
+    foot.classList.add("co-foot");
+    const voci=compVoci(c).filter(function(a){return a&&a.action&&a.action!=="edit-computo";});
+    const nome=function(t){ return esc(String(t||"").replace(/^[^\p{L}\p{N}]+/u,"")); };
+    const btn=function(a){
+      return '<button type="button" data-chiudi="1" data-action="'+esc(a.action)+'" data-id="'+esc(String(c.id))+'"'
+        +(a.del?' class="co-menu-del"':'')+'>'+(a.del?"Elimina il computo":nome(a.lab))+'</button>';
+    };
+    const doc=voci.filter(function(a){return ["comp-pdf","comp-gara","comp-analisi"].indexOf(a.action)>=0;});
+    const copie=voci.filter(function(a){return ["comp-dup","comp-variante"].indexOf(a.action)>=0;});
+    const via=voci.filter(function(a){return a.del;});
+    const prev=voci.find(function(a){return a.action==="comp-prev";});
+    const az=document.createElement("div");
+    az.className="co-az";
+    az.innerHTML=(prev?'<button type="button" class="btn-primary co-prev" data-chiudi="1" data-action="comp-prev" data-id="'+esc(String(c.id))+'">→ Crea il preventivo</button>':'')
+      +'<div class="co-altro"><button type="button" class="btn co-altro-b" aria-haspopup="true" aria-expanded="false">Altro ▾</button>'
+      +'<div class="co-menu" role="menu">'
+      +  doc.map(btn).join("")
+      +  (copie.length?'<hr>'+copie.map(btn).join(""):'')
+      +  '<div class="co-menu-ctr"></div>'
+      +  (via.length?'<hr>'+via.map(btn).join(""):'')
+      +'</div></div>';
+    head.appendChild(az);
+    const ctr=az.querySelector(".co-menu-ctr");
+    const tasti=foot.querySelectorAll(".ctr-tasto,.ctr-tasto-ai");
+    if(tasti.length){ ctr.insertAdjacentHTML("beforeend","<hr>"); tasti.forEach(function(t){ctr.appendChild(t);}); }
+    else ctr.remove();
+  }
+  /* il menu «Altro» si apre e si chiude da qui: un clic sul tasto lo apre,
+     qualunque altro clic (anche su una voce del menu) lo chiude */
+  document.addEventListener("click",function(e){
+    const b=e.target&&e.target.closest?e.target.closest(".co-altro-b"):null;
+    document.querySelectorAll(".co-altro.aperto").forEach(function(m){
+      if(!b||m!==b.parentElement){ m.classList.remove("aperto"); const t=m.querySelector(".co-altro-b"); if(t)t.setAttribute("aria-expanded","false"); }
+    });
+    if(b){ const m=b.parentElement; const on=m.classList.toggle("aperto"); b.setAttribute("aria-expanded",on?"true":"false"); }
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key!=="Escape")return;
+    const m=document.querySelector(".co-altro.aperto");
+    if(m){ m.classList.remove("aperto"); e.stopPropagation(); }
+  },true);
+
   /* ---- la scheda del computo ---- */
   async function computoForm(c){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -473,6 +538,7 @@
     /* quale computo e' aperto: le sue lavorazioni stanno in compVociCache,
        non nel modulo, e su un computo nuovo la cache e' ancora quella vecchia */
     ctrComputoId=(c&&c.id)?c.id:null;
+    if(!isNew){ try{ compBarraAzioni(c); }catch(e){ console.warn("[computo] barra azioni:",e); } }
     ctrAscolta('computo');
     bindSeg("co-tipo");
     bindSeg("co-stato");
@@ -1756,8 +1822,7 @@
       t.classList.toggle("tutto",!mancano);
       t.innerHTML=mancano
         ? '<span><b>'+(mancano===1?"Manca 1 prezzo":"Mancano "+mancano+" prezzi")+'</b> su '+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+'</span><span>Le righe arancioni sono da riempire</span>'
-        : '<span><b>Tutti i prezzi ci sono</b></span>'
-          +'<button type="button" class="btn-primary cp-prev" data-chiudi="1" data-action="comp-prev" data-id="'+esc(String(compVociCompId))+'">→ Crea il preventivo</button>';
+        : '<span><b>Tutti i prezzi ci sono</b></span><span>Ora puoi premere \u00ab\u2192 Crea il preventivo\u00bb in alto</span>';
     }
   }
   function renderCompPrezzi(){
