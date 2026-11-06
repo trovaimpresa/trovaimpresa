@@ -257,6 +257,37 @@
     a.appendChild(box);
   }
 
+  /* 6 nov 2026 — MARCHI PARTNER (affiliazione Awin), come nelle guide
+     (js/vetrina-guide.js). Servono a dare fiducia, non a guadagnare.
+     Numeri presi da Awin -> My Creative -> Vedi dettagli. */
+  var PARTNER_CITTA = {
+    'guide-dx': { nome: 'Lampade.it', s: '4824370', v: '10404', q: '608702' }  // inverno 300x250
+  };
+  function vestiPartner(a, P) {
+    var base = '.php?s=' + P.s + '&v=' + P.v + '&q=' + P.q + '&r=3137864';
+    a.setAttribute('href', 'https://www.awin1.com/cread' + base);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'sponsored noopener');
+    a.setAttribute('data-stato', 'partner');
+    a.style.background = '#fff';
+    a.style.border = '1px solid #e8edf3';
+    a.style.boxSizing = 'border-box';
+    a.style.containerType = 'inline-size';
+    var box = document.createElement('div');
+    box.style.cssText = 'position:relative;width:100%;height:100%;display:flex;flex-direction:column;'
+      + 'align-items:center;padding:8px 10px 10px;box-sizing:border-box';
+    var t = document.createElement('div');
+    t.textContent = 'Partner di TrovaImpresa';
+    t.style.cssText = 'font-size:clamp(10px,2.8cqw,13px);font-weight:700;letter-spacing:.4px;'
+      + 'text-transform:uppercase;color:#8a97a6;margin-bottom:6px';
+    var im = document.createElement('img');
+    im.loading = 'lazy'; im.alt = P.nome;
+    im.src = 'https://www.awin1.com/cshow' + base;
+    im.style.cssText = 'flex:1;min-height:0;max-width:100%;object-fit:contain;border-radius:8px';
+    box.appendChild(t); box.appendChild(im);
+    a.appendChild(box);
+  }
+
   async function avvia() {
     var venduti = await cercaVenduti();
     OSPITI = await cercaOspiti();
@@ -446,6 +477,15 @@
 
       var ann = venduti[v.spazio];
       var loc = LOCANDINE[v.spazio];
+
+      // 6 nov 2026: posto libero accanto alle guide -> marchio partner (Awin).
+      // Chi paga resta davanti; sul telefono non si vede (stato != venduto).
+      if (!ann && PARTNER_CITTA[v.spazio]) {
+        vestiPartner(a, PARTNER_CITTA[v.spazio]);
+        frecciaSu(a);
+        document.body.appendChild(a);
+        return;
+      }
 
       // 4 nov 2026: posto libero + prova dei loghi -> il logo di un'impresa
       if (!ann && OSPITI.length) {
