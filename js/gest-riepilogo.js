@@ -1058,7 +1058,7 @@
        loro con !important, e uno style scritto sull'elemento perderebbe */
     if(!document.getElementById("rie-extra-stile")){
       const st=document.createElement("style"); st.id="rie-extra-stile";
-      st.textContent="#rie-grid .rc-extra{display:none!important}";
+      st.textContent="#riepilogo #rie-grid .rie-card.rc-extra{display:none!important}";
       document.head.appendChild(st);
     }
     G.innerHTML = CV.length ? _cvHtml
