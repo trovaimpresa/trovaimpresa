@@ -416,11 +416,16 @@
      ⚠️ Le frasi da promemoria («ricordami di chiamare il Comune per la pratica»)
         restano al comando di sempre. E apre sempre una pratica NUOVA: per
         cambiarne una che c'e' gia' si usa la chat. */
-  var PAROLE_PRATICA = /\b(cilas?|scia|permesso di costruire|pdc|pratica|accatastament\w*|agibilit\w*|sanatoria|voltura|docfa|protocoll\w*|catast\w*|paesaggistic\w*|sue)\b/i;
-  var PAROLE_PROMEMORIA = /\b(ricord\w*|promemoria|chiamare|telefonare|scadenza|scade)\b/i;
+  /* «sue» da solo NON c'e' piu' (7/11): voleva dire anche «le sue finestre».
+     «pratica» vale solo come nome («la pratica», «nuova pratica»), non come
+     aggettivo («una soluzione pratica»). E fatture, preventivi, spese e ore
+     restano al comando di sempre anche se nominano una CILA. */
+  var PAROLE_PRATICA = /\b(cilas?|scia|permesso di costruire|pdc|accatastament\w*|agibilit\w*|sanatoria|voltura|docfa|protocoll\w*|catast\w*|paesaggistic\w*|sportello unico)\b|\b(nuova|la|una|questa|quella) pratica\b|\bpratica (di|per|del|della|dei|a|al)\b/i;
+  var PAROLA_SUE = /\bSUE\b/; /* solo in maiuscolo: «sue» minuscolo e' un possessivo */
+  var PAROLE_PROMEMORIA = /\b(ricord\w*|promemoria|chiamare|telefonare|scadenza|scade|fattur\w*|preventiv\w*|spes[ae]|ore|parcella|incass\w*)\b/i;
   function eUnaPratica(t) {
     return PAG === 'app' && typeof ruoloUtente !== 'undefined' && ruoloUtente === 'professionista'
-      && PAROLE_PRATICA.test(t) && !PAROLE_PROMEMORIA.test(t)
+      && (PAROLE_PRATICA.test(t) || PAROLA_SUE.test(t)) && !PAROLE_PROMEMORIA.test(t)
       && window.AI && typeof window.AI.pratica === 'function' && typeof window.AI.compilaLavoroDaChat === 'function';
   }
   async function praticaAVoce(t) {
