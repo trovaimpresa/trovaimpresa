@@ -2957,3 +2957,56 @@ collaudati sul sito vero (computer 1440 e telefono 375).
 4. Il Cestino del reparto giardiniere ha →2.562← cose buttate (quasi tutte voci
    del prezzario). Un «Svuota» per tipo l'ha proposto Claude: Alex non l'ha chiesto.
 5. La voce vera dal telefono: tocca ad Alex.
+
+# 7 NOVEMBRE 2026 — LA CHAT CON AI PIÙ FORTE, E LE PRATICHE DELLO STUDIO
+
+Chiesto da Alex: «controlla come funziona la AI, vedi i suoi punti deboli, potenziamola».
+Ispezione dal vivo (sul suo account, e su `?giro=1&tipo=professionista`) + registro vero
+di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati sul sito.
+
+## I difetti trovati dal vivo (tutti chiusi)
+1. Date confrontate a mente: il 7/11 un lavoro del 5/9 era «nei tempi». → il server scrive
+   `giorni_da_oggi` accanto a ogni riga (`segnaGiorni`), il modello legge e basta.
+2. Un'impresa vera ha scritto in ARABO: «non parlo arabo, scrivi in italiano». → regola LINGUA.
+3. Al geometra mandava il protocollo nello Scadenzario. → `PAROLE_RUOLO` per ruolo (il browser
+   manda `ruolo`, se no si legge `imprese.tipo`).
+4. ⛔ `cerca_per_nome` sulle fatture faceva `ilike` su `numero`, che e' INTEGER: errore 42883 a
+   ogni ricerca. Adesso testo con ilike su piu' caselle (`DOVE_SI_CERCA` e' un elenco) e il
+   numero con `.eq` solo se la parola e' fatta di cifre (`NUMERO_INTERO`).
+5. Non vedeva richieste dal sito, promemoria, note del calendario → nuovi in `ATTREZZI` con
+   `livello` ('account' = solo user_id; 'impresa' = `impresa_id` letto dal server: ⛔ il
+   fondatore per RLS vede le richieste di tutti, senza il filtro gliele mischierebbe).
+6. «Quanti lavori aperti» contava anche i finiti, e solo le ultime 25 righe → filtri `stato`,
+   `escludi_stato` (con `stato.is.null` dentro, se no il null sparisce), `dal`, `al`,
+   `prima_le_prossime`. Nuovo attrezzo `agenda` (cosa fare oggi in un giro solo).
+7. Costo →0,04-0,07← $ a domanda: le istruzioni fisse si rimandavano a ogni giro. → cache di
+   Anthropic: `sistemaPerClaude` (parte fissa con `cache_control`) + `STRUMENTI_IN_MEMORIA`.
+   Misurato dopo: →~0,02← $. Il costo nel registro conta anche i gettoni della cache.
+
+## Le pratiche dello studio
+- `netlify/functions/ai-pratica.mjs` (Haiku, 1 credito, stesse rpc dei crediti): testo o FOTO
+  (ricevuta SUE, visura, lettera del Comune) → caselle. Sta su Netlify e NON in ai-cantiere per
+  non ridistribuire a mano quella funzione. Tipi/stati = elenchi chiusi uguali a `PRATICA_TIPI`
+  / `PRATICA_STATI` di js/gest-scadenze-pratiche.js (anche in chat-gestionale.mjs: se cambiano,
+  si cambiano in TRE posti).
+- Nel modulo dello studio: la riga AI usa `AI.pratica`, pulsante «📷 Leggi un documento».
+- `AI.riempiPratica` (js/ai-integrazione.js): una macchina sola per chat, riga AI e foto.
+- Chat: `compila_lavoro` con le caselle della pratica (solo ruolo professionista),
+  `modifica_lavoro` (lavoro GIA' ESISTENTE, id controllato col reparto; il browser preme
+  `edit-job` e riempie solo le caselle dette — ⚠️ aspetta una casella `j-desc` NUOVA: la
+  finestra chiusa lascia le sue caselle nella pagina, al primo giro si riempiva quella).
+  Agenda studio: `pratiche_integrazioni_richieste`, `pratiche_al_comune` (`giorni_dal_deposito`).
+- «Depositata» scelta A MANO con la data vuota → oggi (`e.isTrusted`: se la mette l'AI no).
+- Pratica a «Integrazioni richieste» → al Salva `proponiScadenzaIntegrazioni`: scadenza a 30
+  giorni collegata, tipo «Integrazione richiesta dal Comune», avvisi email.
+
+## Banco
+`/home/claude/banco/banco.mjs` nel contenitore (75 prove, sulla versione vecchia 15 rosse).
+⚠️ I banchi vecchi in `prove-claude/` (`banco-attrezzi-30ago.mjs`) contavano su
+`DOVE_SI_CERCA` fatto di stringhe: adesso sono elenchi, possono diventare rossi per quello.
+
+## Aperto
+1. Il «Parla» (comando_voce in ai-cantiere) NON conosce le caselle della pratica.
+2. Le prove hanno consumato ~29 dei 50 messaggi di chat del mese di Alex, e hanno lasciato 23
+   chat di prova nell'archivio (cancellarle col × o dare il via a Claude).
+3. Modello della chat ancora Sonnet 4.5.
