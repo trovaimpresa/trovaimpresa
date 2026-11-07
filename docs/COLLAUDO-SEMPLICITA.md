@@ -135,30 +135,39 @@ Ogni riga ha due caselle: **PC** (1920) e **Tel** (380 px). `[ ]` = da fare · `
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 3 / 1 | [x] | [x] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
 | Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
+| Nessuna formula copiata in due posti | [x] | [x] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. La parola «reparto» nella nota non si vedeva (blu scuro su fondo blu).
+2. I crediti AI stavano sopra i reparti: sul telefono il primo reparto arrivava a 640 px.
+3. Tre larghezze diverse (640, 900, 1100 px): niente allineato.
+4. Stesso pulsante con due nomi: «Salva una copia dei dati»/«Backup», «Esporta dati»/«Esporta».
+5. «Ricarica» alto 38 px sul telefono.
+
+Fatto (push `3a6ab22`): crediti sotto i reparti; una colonna di 1000 px (misurato: tutto da 452 a 1452 px); «reparto» bianco; nomi uguali dentro e fuori («Salva una copia dei dati», «Scarica per Excel»; lo studio resta com'era, decisione del 30/09); «Ricarica» 44 px; scritte piccole a 17 px. Sul telefono il primo reparto ora sta a 428 px.
+
+Ancora aperto: «Sezione vuota» (un account senza reparti non l'ho visto), «Errori» e «salva/cestino» (creare e buttare un reparto sull'account vero: da fare insieme ad Alex, o su un reparto di prova). «Uguale alle altre sezioni»: si spunta col giro del menu.
 
 
 ## 3.2 — App · Assistente (era «Riepilogo»)
@@ -169,30 +178,41 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 0 / 1 / 1 | [x] | [x] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
 | Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
+| Nessuna formula copiata in due posti | [x] | [x] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [-] | [-] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Pallini ROSSI su cose in attesa (preventivi, bozze, richieste da leggere).
+2. Riquadri che si contraddicevano: «Niente da segnalare» / «Nessuna fattura da incassare» col pallino rosso.
+3. «Fotografa» era un pulsante da solo in mezzo alla pagina.
+4. In alto «Backup» (inglese) ed «Esporta»: altri nomi rispetto alla schermata dei reparti.
+
+Fatto (push `3a6ab22` + `8760c43`): pallino a tre colori (rosso = scaduto/in ritardo/in perdita, ambra = in attesa e scadenze entro 7 giorni, verde = a posto) dalla stessa fascia «Da sistemare», mai più «Niente da segnalare» sotto un pallino non verde; «Fotografa un foglio» fra le scorciatoie (il vecchio pulsante resta nascosto); nomi uguali. Provato dal vivo: giardiniere (artigiano) e giro dello studio tecnico.
+
+Conti: bozze 982,10 + 1.100,00 = 2.082,10 € uguale in Assistente e Fatture; da incassare 0 € uguale. I tre casi a mano (centesimi, IVA, ritenuta) si fanno nella sezione Fatture: l'Assistente legge gli stessi totali (`totaleFatt`).
+
+Ancora aperto: «Allineato» (le schede del riepilogo hanno larghezze loro, decise con Alex il 30/09 — da misurare nel giro del menu), «Sezione vuota» (reparto nuovo non visto), «Errori» (rete giù: c'è il banner rosso del 6/08, non riprovato oggi).
+La finestrella delle stelline «Come ti trovi col gestionale?» resta com'è: Alex non ha risposto alla domanda.
 
 
 ## 3.3 — App · Preventivi
@@ -1250,7 +1270,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 ---
 
-# 4. L'ORDINE DI LAVORO PROPOSTO (da far approvare ad Alex)
+# 3bis. DA GUARDARE NEL GIRO DEL MENU (trovati strada facendo)
+- Due elementi con lo stesso id `cnt-crediti`: il numero di «Ricarica crediti» e quello di «Crediti formativi» (studio). Uno dei due contatori può finire nel posto sbagliato.
+
+# 4. L'ORDINE DI LAVORO (approvato da Alex il 7 nov 2026)
 
 Prima quello che si usa di più (vedi 1.3), e prima di tutto la porta d'ingresso,
 perché è lì che oggi la gente si ferma.
@@ -1275,3 +1298,4 @@ perché è lì che oggi la gente si ferma.
 | data | sezione | cosa è cambiato | push |
 |---|---|---|---|
 | 7 nov 2026 | — | inventario e lista di controllo | → solo docs ← |
+| 7 nov 2026 | 3.1 Reparti · 3.2 Assistente | vedi le due schede qui sopra | →3a6ab22← →8760c43← |

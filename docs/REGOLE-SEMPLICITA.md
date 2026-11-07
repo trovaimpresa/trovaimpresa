@@ -16,6 +16,23 @@ ferme prima di cominciare.
 6. Niente spiegazioni addosso a cose che si capiscono da sole.
 7. Niente si cancella: si sposta (menu «...», «Tutto il resto»).
 
+## Decise il 7 nov 2026 (schermata dei reparti + Assistente)
+8. **Una colonna sola, misurata.** Nella schermata dei reparti tutto sta in
+   1000 px (sul 1920: da 452 a 1452 px). Niente blocchi con larghezze loro.
+9. **La cosa principale viene prima.** Quello che si usa ogni volta (i reparti)
+   sta in alto; il resto (crediti AI, note) sotto. Si sposta, non si cancella.
+10. **Un pulsante, un nome.** Lo stesso pulsante si chiama uguale dappertutto
+    (fuori, dentro, nel menu del telefono). Niente «Backup»: «Salva una copia
+    dei dati». Niente «Esporta»: «Scarica per Excel».
+11. **Pulsanti sul telefono alti almeno 44 px.**
+12. **Pallini a tre colori, sempre col perché.** Rosso = scaduto, in ritardo,
+    in perdita. Ambra = in attesa (preventivo fermo, bozza da mandare,
+    richiesta da leggere, scadenza entro 7 giorni). Verde = a posto. Sotto un
+    pallino rosso o ambra non si scrive mai «Niente da segnalare»: si scrive il
+    perché.
+13. **Un'azione, un posto.** Le scorciatoie stanno tutte insieme; niente
+    pulsanti da soli in mezzo alla pagina.
+
 ## Da decidere durante il lavoro
 - misure (testo, pulsanti, margini) — si misurano sulla prima sezione e valgono per tutte
 - dove sta il pulsante principale
