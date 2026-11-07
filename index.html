@@ -1475,6 +1475,15 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
                     <div class="c3-domande"><span>Sei un privato?</span><span>Devi fare dei lavori?</span><span>Vuoi dei preventivi?</span></div>
                     <h2 class="c3-titolo">Cerca in base alle tue esigenze</h2>
                     <p class="c3-sotto">Tre scelte e trovi chi ti serve: prima chi, poi che lavoro, poi dove.</p>
+                    <!-- 7 nov 2026: il video anche per i clienti, nel riquadro di ricerca. Apre la stessa finestra del riquadro Iscriviti (#v3-modale). -->
+                    <style>
+                    .c3-video{display:inline-flex;align-items:center;gap:12px;margin:16px auto 0;background:#fff;color:#0a2a4d;border:2px solid #ff8800;border-radius:999px;padding:7px 22px 7px 7px;cursor:pointer;font-family:inherit;font-size:18px;font-weight:800;box-shadow:0 6px 16px rgba(255,136,0,.18)}
+                    .c3-video b{flex:none;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#ff8800;color:#fff;font-size:17px;padding-left:3px}
+                    .c3-video small{font-size:15px;font-weight:600;color:#3b4a5c}
+                    .c3-video:hover{background:#fff4e6}
+                    @media(max-width:760px){.c3-video{font-size:16px;padding-right:16px;white-space:nowrap}.c3-video small{display:none}}
+                    </style>
+                    <button type="button" class="c3-video" onclick="var m=document.getElementById('v3-modale');if(m){m.classList.add('on');var v=document.getElementById('v3-video');if(v){var pr=v.play();if(pr&&pr.catch)pr.catch(function(){})}}"><b>&#9654;</b><span>Guarda come funziona <small>&middot; 40 secondi</small></span></button>
                 </div>
                 <div class="c3-passo c3-p1">
                     <div class="c3-lab"><span class="passo-n">1</span>Chi ti serve?</div>

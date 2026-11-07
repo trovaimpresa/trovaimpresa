@@ -24,6 +24,18 @@
     }
   } catch (e) { /* il contatore non deve mai rompere il banner */ }
 
+  /* 7 nov 2026 — VIDEO «Cos'è TrovaImpresa» + FASCIA NEGOZI su tutte le pagine
+     pubbliche indicizzate. Stessa strada del contatore: un file solo, niente
+     pagine da rigenerare. Cosa escludere lo decide js/promo-pagine.js. */
+  try {
+    if (!window.__tiPromoPagine && !document.querySelector('script[src*="promo-pagine"]')) {
+      var promo = document.createElement('script');
+      promo.src = '/js/promo-pagine.js?v=1';
+      promo.defer = true;
+      (document.head || document.documentElement).appendChild(promo);
+    }
+  } catch (e) { /* mai rompere il banner */ }
+
   /* ⛔ 23 ott 2026 — GOOGLE ANALYTICS SU TUTTE LE PAGINE PUBBLICHE.
      Il codice G-GQ0HDYPCXE stava solo su 18 pagine (home e professionisti):
      guide, mestiere+citta', forum e schede non venivano contate, e Analytics
