@@ -114,9 +114,9 @@
           +(f.telefono?'<div class="c-r"><span class="c-rt">Telefono</span><span class="c-rv">'+esc(f.telefono)+'</span></div>':'')
           +'</div>'
           +'<div class="card-acts">'
-          +(f.telefono?'<a class="btn" href="tel:'+esc(f.telefono)+'" onclick="event.stopPropagation()">📞 Chiama</a>':'')
-          +(waTel?'<button class="btn" data-action="sq-wa" data-wa="https://wa.me/'+waTel+'">WhatsApp</button>':'')
-          +'<button class="btn" data-action="forn-scheda" data-id="'+esc(String(f.id))+'">Apri scheda</button>'
+          /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): sulla riga solo «Apri»,
+             come nelle altre sezioni. Chiama e WhatsApp stanno nella scheda. */
+          +'<button class="btn" data-action="forn-scheda" data-id="'+esc(String(f.id))+'">Apri</button>'
           +'</div></div>';
       }).join("");
     }

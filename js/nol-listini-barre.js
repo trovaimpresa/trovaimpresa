@@ -124,7 +124,7 @@
       barra.className="nol-barra"; barra.id="barra-"+sez;
       barra.innerHTML='<input type="search" class="nol-cerca" data-cerca="'+sez+'" '+
         'autocomplete="off" spellcheck="false" placeholder="'+esc(invito)+'">'+
-        '<button type="button" class="btn add" data-action="nol-esporta" data-s="'+sez+'">&#10515; Esporta in Excel</button>'+
+        '<button type="button" class="btn add" data-action="nol-esporta" data-s="'+sez+'">&#11015; Scarica per Excel</button>'+
         '<span class="nol-conta" id="conta-'+sez+'"></span>';
       /* ⚠️ la barra va SUBITO SOPRA L'ELENCO, non sotto il titolo: cosi'
          sta attaccata alla cosa che filtra, anche dove in mezzo ci sono la

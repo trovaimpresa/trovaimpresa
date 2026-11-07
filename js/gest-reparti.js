@@ -170,7 +170,7 @@
         if(/Esporta/.test(t.textContent))t.textContent=b.classList.contains('tb-btn')?"Scarica per Excel":"⬇ Scarica per Excel";
       });
       const _rc=document.querySelector('[data-action="report-csv"]');
-      if(_rc)_rc.textContent="⬇ Scarica per Excel";
+      if(_rc)_rc.textContent="⬇ Scarica il report"; /* 7 nov: non come «Scarica per Excel» della barra, che fa un'altra cosa */
     }
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');

@@ -32,6 +32,22 @@ ferme prima di cominciare.
     perché.
 13. **Un'azione, un posto.** Le scorciatoie stanno tutte insieme; niente
     pulsanti da soli in mezzo alla pagina.
+14. **Ogni scheda ha un solo «Apri».** Le altre azioni stanno dentro, in alto
+    (la prima in blu). Sul telefono, se una scheda ha più pulsanti, vanno sotto
+    il testo, mai in una colonna a destra che schiaccia il nome.
+15. **Blu = in corso.** Un mezzo fuori, un lavoro avviato: non è un problema,
+    non è rosso.
+16. **Lo stesso numero è uguale in tutte le schermate.** Se due schermate
+    contano la stessa cosa (scadute, da incassare, cauzioni, bolli) usano la
+    stessa regola; se contano cose diverse lo scrivono («qui nel gestionale e
+    del Noleggio»). I noleggi ai tuoi reparti non si incassano e non si
+    fatturano, in nessuna schermata.
+17. **Le scritte che vendono si verificano coi conti.** «Il più conveniente»
+    solo se costa davvero meno degli altri.
+18. **Niente scritte sotto i 14 px, testi a 16.** Le etichette piccole
+    (stato) a 14, tutto il resto almeno 16. Niente tagliato con «…» sul
+    telefono: va a capo.
+19. **Uno zero è grigio.** Né verde né rosso, e senza segno.
 
 ## Da decidere durante il lavoro
 - misure (testo, pulsanti, margini) — si misurano sulla prima sezione e valgono per tutte

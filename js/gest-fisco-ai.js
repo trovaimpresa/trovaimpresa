@@ -58,7 +58,7 @@
           righe.push((pr.doy >= 60 ? "Incassato previsto a fine " + Y + " (se continua così): " + eur(pr.val) + ". " : "")
             + "Stima tasse e contributi dell'anno intero: " + eur(st.totale) + " (contributi " + eur(st.contrib.tot) + ", di cui fissi " + eur(st.contrib.fissi || 0) + "; " + st.cosa + " " + eur(st.imposta) + ").");
           if (pr.val > 0) righe.push("Il gestionale gli consiglia di mettere da parte " + Math.ceil(st.totale / pr.val * 100) + " € ogni 100 € incassati.");
-          const sc = ftScadenze(p, st, { ivaQ3: null, ivaMese: null });
+          const sc = ftScadenze(p, st, { ivaQ3: null, ivaMese: null, bollo: ftBolli(d.fatture) });
           if (sc.length) righe.push("Prossime scadenze calcolate dal gestionale (usa QUESTE date e cifre):\n" + sc.map(s => "- " + s.d.split("-").reverse().join("/") + ": " + s.cosa + (s.imp > 0 ? ", circa " + eur(s.imp) : "")).join("\n"));
         }
         if (st.calcolabile && p.regime === "forfettario" && !p.riduzione35 && inps)

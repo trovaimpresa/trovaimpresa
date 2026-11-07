@@ -179,3 +179,80 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #appview .ti-i{min-width:30px !important;min-height:30px !important;font-size:15px !important}
 /* 7 nov 2026 — SQUADRA: un documento SCADUTO e' rosso (prima giallo come «sta per scadere») */
 .job-note:has(.nota-scaduta){background:#FEF2F2 !important;border-color:#DC2626 !important;color:#991B1B !important;font-weight:700}
+/* 7 nov 2026 — CALENDARIO: il giorno di oggi si vede (bordo blu e la parola «Oggi») */
+#calendario .cal-cell.today{border:3px solid #0a2a4d !important;background:#eef4ff !important}
+#calendario .cal-cell.today::after{content:"Oggi";display:block;font-weight:800;color:#0a2a4d;font-size:15px}
+@media(max-width:880px){#calendario .cal-cell.today::after{display:none}}
+
+/* 7 nov 2026 — CHAT CON AI (semplicita'): «+» diventa «📎 Foto»; sul computer
+   l'archivio piu' largo e leggibile; sul telefono Foto · Parla · Manda in una riga. */
+#chat .chat-archivio{width:320px;flex:0 0 320px}
+#chat .chat-riga .cn{font-size:16px}
+#chat .chat-riga .cq{font-size:14.5px}
+#chat .chat-giorno,#chat .chat-vuoto{font-size:15px}
+#chat .chat-butta{width:36px;height:36px;font-size:18px}
+#chat #chat-piu{font-size:17px;white-space:nowrap}
+@media(max-width:880px){
+  #chat .chat-archivio{width:auto;flex:0 0 auto}
+}
+@media(max-width:760px){
+  #chat .asst-scrivi{display:grid!important;grid-template-columns:1fr 1fr 1.3fr;gap:8px}
+  #chat .asst-scrivi textarea{grid-column:1 / -1}
+  #chat .asst-scrivi > *{margin:0!important;width:auto!important}
+}
+
+/* 7 nov 2026 — TASSE E FISCO: uno zero e' grigio (non verde) */
+#fisco .fp-zero{color:#5f6b7a;font-weight:600}
+
+/* 7 nov 2026 — REPORT sul telefono: la griglia prendeva la larghezza del
+   grafico (581 px su 380) e tutta la pagina usciva dallo schermo. */
+#report .rep-card{min-width:0}
+@media(max-width:760px){
+  #report .rep-grid{grid-template-columns:minmax(0,1fr)!important}
+  #report .mlav-top{flex-wrap:wrap;gap:6px}
+  #report .mlav-top>b{white-space:normal;overflow:visible;flex:1 1 100%}
+}
+
+/* 7 nov 2026 — GALLERIA: foto grandi (sul 1920 erano 150 px), due per riga
+   sul telefono; i filtri «Mostra» e «Quando» non escono piu' dallo schermo. */
+#galleria .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+#galleria .thumbs .thumb{width:auto;height:auto;aspect-ratio:1 / 1}
+@media(max-width:760px){
+  #galleria .thumbs{grid-template-columns:1fr 1fr;gap:10px}
+  #galleria .filtri .filtro{flex-wrap:wrap;width:100%}
+  #galleria .filtri .filtro-lab{flex:1 1 100%}
+  #galleria .filtri .segm{flex:1 1 100%;flex-wrap:nowrap;max-width:100%;height:auto}
+  #galleria .filtri .segm button{flex:1 1 0;min-width:0;white-space:normal;padding:8px 4px;line-height:1.2}
+}
+
+/* 7 nov 2026 — MAPPA sul telefono: la riga sotto il cantiere va a capo */
+@media(max-width:760px){
+  #mappa .mp-r-sub{white-space:normal;overflow:visible;text-overflow:clip}
+  #mappa .mp-r-sub span{white-space:normal}
+}
+
+/* 7 nov 2026 — SCHEDE A RIGA SUL TELEFONO con piu' di un pulsante (Cestino,
+   e qualunque altra): nome in alto, poi i dettagli, poi i pulsanti. Prima i
+   pulsanti stavano nella colonna di destra e schiacciavano il nome. */
+@media(max-width:760px){
+  .wrap section .griglia-schede > .job:has(.job-actions > :nth-child(2)){grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"top" "stati" "meta" "az"!important}
+  .wrap section .griglia-schede > .job:has(.job-actions > :nth-child(2)) .job-actions{flex-wrap:wrap;margin-top:8px!important}
+  .wrap section .griglia-schede > .job .job-top{flex-wrap:wrap}
+  .wrap section .griglia-schede > .job .job-cli{flex:1 1 auto;min-width:60%}
+}
+#cestino #cest-search{width:100%;max-width:none;box-sizing:border-box}
+
+/* 7 nov 2026 — LA BARRA IN ALTO (computer): pulsanti 16 px alti 44,
+   «Salva una copia» e «Scarica per Excel» dentro «Altro», «← Reparti». */
+#appview .topbar .tb-actions .tb-btn,#appview .topbar .tb-altro-s{font-size:16px!important;min-height:44px;padding:0 14px!important;display:inline-flex;align-items:center;gap:6px}
+#appview .topbar .tb-back{width:auto;height:44px;padding:0 12px;gap:6px;display:inline-flex;align-items:center;font-size:16px;font-weight:700}
+.tb-altro{position:relative}
+.tb-altro>summary{list-style:none;cursor:pointer;background:rgba(10,42,77,.85);color:#fff;border:2px solid rgba(255,255,255,.65);border-radius:8px;font-weight:700}
+.tb-altro>summary::-webkit-details-marker{display:none}
+.tb-altro-pop{position:absolute;right:0;top:calc(100% + 6px);background:#0a2a4d;border:1px solid rgba(255,255,255,.4);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px}
+.tb-altro-pop .tb-btn{justify-content:flex-start}
+@media(max-width:760px){ #appview .topbar .tb-back-t{display:none} }
+
+/* 7 nov 2026 — CREDITI FORMATIVI (studio): il conto per tipo e gli anni a 16 px */
+#crediti .cred-tipo{font-size:16px}
+#crediti .chip{font-size:16px;min-height:40px}

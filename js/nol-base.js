@@ -74,10 +74,13 @@
     }
     const p=document.getElementById("p-"+id);
     if(p){
-      p.className="nrc-pall "+(male?"male":"bene");
+      /* 7 nov 2026: male puo' valere anche "corso" = pallino blu, lavoro in
+         corso normale (mezzi fuori dal cliente): non e' un problema */
+      const corso=male==="corso";
+      p.className="nrc-pall "+(corso?"corso":(male?"male":"bene"));
       /* chi non distingue bene rosso e verde deve poterlo leggere lo stesso */
-      p.title=male?"Qui c'\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto";
-      p.setAttribute("aria-label",male?"qualcosa che va male":"tutto a posto");
+      p.title=corso?"In corso, tutto normale":(male?"Qui c'\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto");
+      p.setAttribute("aria-label",corso?"in corso":(male?"qualcosa che va male":"tutto a posto"));
     }
   }
   /* quanti giorni sono passati da una data scritta come 2026-08-24 */

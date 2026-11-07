@@ -660,7 +660,9 @@
         };
       }),
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
-      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"",false,"ag")).join("")
+      /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): nella riga si vede CHI ci va
+         (era lo scopo della sezione) e l'importo, come nei Lavori */
+      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"",true,"ag",((OPS.find(o=>String(o.id)===String(l.operatore_id))||{}).nome)||(l.operatore_id?"":"nessuno assegnato"))).join("")
     });
   }
 

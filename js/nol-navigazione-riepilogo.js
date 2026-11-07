@@ -221,7 +221,7 @@
       v:(x.data_rientro_prevista&&x.data_rientro_prevista<oggiN)
         ?"in ritardo di "+ggRit(x)
         :(x.data_rientro_prevista?"rientra il "+fdate(x.data_rientro_prevista):"senza data")})),
-      ritardo.length>0);
+      fuori.length?"corso":false);   /* 7 nov 2026: blu; il rosso sta su «In ritardo» */
 
     nolDett("kn-ritardo",ritardo.slice()
       .sort((a,b)=>String(a.data_rientro_prevista).localeCompare(String(b.data_rientro_prevista)))

@@ -68,10 +68,12 @@
     const [{data:ff},{data:nn}]=await Promise.all([
       sb.from("nol_fatture").select("*").eq("user_id",sbUid).is("eliminato_il",null)
         .order("data",{ascending:false}),
-      sb.from("nol_noleggi").select("id,importo,fattura_id,eliminato_il").eq("user_id",sbUid)
+      sb.from("nol_noleggi").select("id,importo,fattura_id,eliminato_il,mestiere_id").eq("user_id",sbUid)
     ]);
     const F=ff||[];
-    const daFatt=(nn||[]).filter(n=>!n.eliminato_il&&(+n.importo||0)>0&&!n.fattura_id);
+    /* 7 nov 2026: i noleggi ai TUOI reparti (mestiere_id) non si fatturano:
+       contarli qui diceva «3 da fatturare» quando i clienti veri erano 2 */
+    const daFatt=(nn||[]).filter(n=>!n.eliminato_il&&!n.mestiere_id&&(+n.importo||0)>0&&!n.fattura_id);
     const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
     scrivi("kf-dafatturare",String(daFatt.length));
     scrivi("kf-daincassare",_eur(F.filter(f=>f.stato==="emessa").reduce((s,f)=>s+(+f.totale||0),0)));

@@ -372,9 +372,9 @@
         +(cestVista!=="tutti"?' in questo reparto':'')
         +(nascoste?(' <small>— ne mostro '+cestCache.length+', le più recenti</small>'):'')
         +(q?(' <small>· trovate '+visTutte.length+' con «'+esc(cestQ)+'»</small>'):'')
-        +'</div><div class="cest-nota">Restano qui finché non le rimetti a posto, e non si vedono da nessun\'altra parte del gestionale. '
-        +'Foto, video e documenti però continuano a occupare spazio finché non li elimini per sempre.'
-        +(altrove?(' <b>Altre '+altrove+' stanno in altri reparti:</b> per vederle scegli «Tutti i reparti» qui sopra.'):'')
+        /* 7 nov 2026: da 6 righe a 1 */
+        +'</div><div class="cest-nota">Si possono rimettere a posto.'
+        +(altrove?(' <b>Altre '+altrove+' stanno in altri reparti</b>: scegli «Tutti i reparti».'):'')
         +'</div></div>'
         /* le scelte per tipo: si vedono solo se i tipi sono almeno due */
         +(Object.keys(_perTipo).length>1

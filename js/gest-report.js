@@ -231,8 +231,8 @@
         <div class="rep-legend"><span><i style="background:var(--blu)"></i>Incassato</span><span><i style="background:var(--testo-3)"></i>Spese</span></div></div>
       ${/* Solo dati storici: da fare / in corso / fatti stanno già nel Riepilogo,
             che è la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
-      <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali storici</h3>
-        <p class="rep-sub">Da quando usi il gestionale</p><table class="rep-table">
+      <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali di questo reparto</h3>
+        <p class="rep-sub">Da quando usi il gestionale. Il margine conta solo i soldi già incassati.</p><table class="rep-table">
         <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(incAnno)}</td></tr>
         <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(totInc)}</td></tr>
         <tr><td>Spese nei lavori</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>

@@ -52,7 +52,7 @@
     const [rP, rA, rF, rS, rC, rR, rFF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_fatture").select("id,numero,anno,data,stato,data_pagata,cli_nome").eq("user_id", sbUid)
+      sb.from("gest_fatture").select("id,numero,anno,data,stato,data_pagata,cli_nome,bollo").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
       sb.from("gest_spese").select("importo,data").eq("user_id", sbUid).gte("data", da),
       sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at").eq("user_id", sbUid).gte("created_at", da),
@@ -152,18 +152,24 @@
 
   /* I PROSSIMI 3 MESI: entrate attese (fatture emesse non pagate, alla loro
      scadenza) e uscite (fornitori da pagare + scadenze fiscali stimate) */
+  /* 7 nov 2026: uno zero e' grigio, senza segno e senza verde */
+  function fvZero(v, segno, cls) {
+    return Math.abs(v) < 0.005 ? '<b class="fp-zero">0,00 €</b>' : '<b class="' + cls + '">' + segno + eur(v) + '</b>';
+  }
   function fvProssimi(d, p, gg) {
     const oggi = todayStr(), fine = fvIsoPiu(92);
     const Y0 = +oggi.slice(0, 4), M0 = +oggi.slice(5, 7);
     const chiavi = [0, 1, 2].map(i => { const m = M0 - 1 + i; return (Y0 + Math.floor(m / 12)) + "-" + String(m % 12 + 1).padStart(2, "0"); });
     const riga = {}; chiavi.forEach(k => { riga[k] = { in: 0, out: 0, fisco: 0, voci: [] }; });
-    let ritardo = 0;
+    let ritardo = 0, ritardoNol = 0;
     d.fatture.forEach(f => {
       if (f.stato !== "emessa") return;
       const t = d.tot[f.id] || {}; if ((+t.segno || 1) < 0) return;
       const v = +t.totale || 0; if (!(v > 0)) return;
       const sc = _giorniDopo(f.data, gg);
-      if (sc < oggi) { ritardo += v; return; }
+      /* «nol-…» = fatture del Noleggio: «Farsi pagare» non le conta,
+         quindi qui si dicono a parte (7 nov 2026) */
+      if (sc < oggi) { ritardo += v; if (String(f.id).indexOf("nol-") === 0) ritardoNol += v; return; }
       const k = sc.slice(0, 7); if (riga[k]) riga[k].in += v;
     });
     d.fornF.forEach(f => {
@@ -173,7 +179,7 @@
     });
     if (p && d.st) {
       const stAnno = ftStima(p, ftProiezione(d.incassi).val);
-      ftScadenze(p, stAnno, { ivaQ3: null, ivaMese: null }).forEach(s => {
+      ftScadenze(p, stAnno, { ivaQ3: null, ivaMese: null, bollo: ftBolli(d.fatture) }).forEach(s => {
         if (s.d > fine || !(s.imp > 0)) return;
         const k = s.d.slice(0, 7); if (riga[k]) { riga[k].fisco += s.imp; riga[k].voci.push(s.cosa); }
       });
@@ -184,14 +190,14 @@
       const r = riga[k], diff = r.in - r.out - r.fisco;
       if (diff < 0 && (!peggio || diff < peggio.diff)) peggio = { k, diff };
       h += `<div class="fv-mese${diff < 0 ? " sotto" : ""}"><div class="fv-mese-n">${FV_MESI[+k.slice(5, 7) - 1]}</div>
-        <div class="fv-riga"><span>Entrano</span><b class="fp-verde">+ ${eur(r.in)}</b></div>
-        <div class="fv-riga"><span>Fornitori</span><b>− ${eur(r.out)}</b></div>
-        <div class="fv-riga"><span>Tasse</span><b>− ${eur(r.fisco)}</b></div>
-        <div class="fv-riga tot"><span>Saldo</span><b class="${diff < 0 ? "fp-rosso" : "fp-verde"}">${diff < 0 ? "− " : "+ "}${eur(Math.abs(diff))}</b></div></div>`;
+        <div class="fv-riga"><span>Entrano</span>${fvZero(r.in, "+ ", "fp-verde")}</div>
+        <div class="fv-riga"><span>Fornitori</span>${fvZero(r.out, "− ", "")}</div>
+        <div class="fv-riga"><span>Tasse</span>${fvZero(r.fisco, "− ", "")}</div>
+        <div class="fv-riga tot"><span>Saldo</span>${fvZero(Math.abs(diff), diff < 0 ? "− " : "+ ", diff < 0 ? "fp-rosso" : "fp-verde")}</div></div>`;
     });
     h += `</div>`;
     if (ritardo > 0) {
-      h += `<div class="fp-cons giallo"><div>${fpIc("euro")}</div><div><b>In più ti devono ${eur(ritardo)} di fatture già scadute</b>Non li ho messi nei mesi perché non si sa quando arrivano. <button class="fp-link" data-action="fp-sez" data-v="pagare">Vai a «Farsi pagare»</button></div></div>`;
+      h += `<div class="fp-cons giallo"><div>${fpIc("euro")}</div><div><b>In più ti devono ${eur(ritardo)} di fatture già scadute${ritardoNol > 0 ? ": " + eur(ritardo - ritardoNol) + " qui nel gestionale e " + eur(ritardoNol) + " del Noleggio" : ""}</b>Non li ho messi nei mesi perché non si sa quando arrivano. <button class="fp-link" data-action="fp-sez" data-v="pagare">Vai a «Farsi pagare»</button></div></div>`;
     }
     if (peggio) {
       h += `<div class="fp-cons rosso"><div>${fpIc("avviso")}</div><div><b>A ${FV_MESI[+peggio.k.slice(5, 7) - 1]} escono più soldi di quanti ne entrano: ${eur(-peggio.diff)}</b>Muoviti adesso, non quel mese: sollecita chi ti deve dei soldi, chiedi un acconto sui lavori nuovi, oppure chiedi al fornitore di spostare una scadenza. Per le tasse si può chiedere di pagare a rate.</div></div>`;

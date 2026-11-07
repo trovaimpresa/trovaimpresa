@@ -94,6 +94,11 @@
     if(!r){toast("Richiesta non trovata, riprova");return;}
     const st=_dsSt(r), q=quando(_dsData(r),{neutro:true});
     const riga=(et,v)=>v?`<div class="field"><label>${et}</label><div>${esc(String(v))}</div></div>`:"";
+    /* 7 nov 2026: le azioni (Crea il preventivo, Segna chiusa) le porta la
+       finestra da sola, cosi' ci sono anche quando la richiesta si apre dal
+       Riepilogo o dalla ricerca. Quelle in attesa dalla scheda si buttano:
+       sono le stesse e uscirebbero doppie. */
+    _azPendenti=null;
     openSheetGrande("Richiesta dal sito — "+esc(r.nome||""),
       `<div class="sh-cols"><div class="sh-col">
         <div class="sh-b">
@@ -133,8 +138,11 @@
         </div>
         </div>
         </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Chiudi</button>
-       <button class="btn-primary b-save" data-action="ds-prev" data-id="${esc(String(r.id))}">Crea il preventivo</button>`);
+      /* 7 nov 2026: «Crea il preventivo» sta in alto (prima azione, blu),
+         arriva dalla scheda con «Apri». Se la richiesta e' gia' diventata
+         preventivo non c'e', ed e' giusto. */
+      `<button class="btn b-cancel" data-action="close">Chiudi</button>`,
+      dsVoci(r));
     const _go=$("#ds-risp-go"); if(_go)_go.onclick=function(){dsRisposta(r);};
     if(r._stato==="nuova"){
       if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();}

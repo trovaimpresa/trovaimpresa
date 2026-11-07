@@ -620,7 +620,14 @@ Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, ac
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Calendario: il pulsante per tornare a oggi era un puntino «•».
+2. Calendario sul computer: il giorno di oggi quasi non si vedeva (sul telefono c'è già il riquadro «Oggi · sabato 7 novembre»).
+3. Agenda operatore: nelle righe non c'era CHI ci va, e c'era il totale senza gli importi delle righe.
+4. Promemoria: a posto.
+
+Fatto (sul banco, nel prossimo push): «Oggi» al posto del puntino; oggi col bordo blu e la scritta; nell'Agenda «👷 nome» (o «nessuno assegnato») e l'importo su ogni riga.
+Conti: totale Agenda 2.330,50 € = somma dei 5 lavori (stessi del Lavori).
 
 
 ## 3.13 — App · Fornitori · Carte · spese
@@ -654,12 +661,22 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Fornitori: tre pulsanti blu uguali (colpa della regola «+ Nuovo blu» di oggi); «Fotografa una fattura» e «+ Fattura da pagare» fanno la stessa azione (`new-fattf`).
+2. Riga del fornitore con 3 pulsanti (Chiama, WhatsApp, Apri scheda).
+3. Carte: a posto.
+
+Fatto (sul banco, nel prossimo push): blu solo «+ Fattura da pagare» (a destra), gli altri due bianchi; sulla riga solo «Apri» (Chiama e WhatsApp stanno nella scheda: controllato).
+Controllato in tutto il file: nessun'altra sezione ha più di un «+ Nuovo» blu.
 
 
 ## 3.14 — App · Mezzi · Attrezzature (studio: Strumenti)
 
 **Le 3 cose che ci fa l'artigiano:** (a) aggiungere un mezzo · (b) segnare la revisione / il bollo · (c) vedere dove sta un attrezzo
+
+**Problemi trovati (7 nov, PC 1920 + tel 380):** sezione già pulita (un pulsante «+ Nuovo mezzo», righe con «Apri», niente fuori schermo). Un solo difetto: un mezzo con una scadenza passata aveva l'etichetta «Disponibile» in VERDE.
+**Fatto (ok di Alex):** con una scadenza passata l'etichetta diventa «Da rinnovare» in rosso (`mezzoCard` in js/gest-mezzi.js; manutenzione e fuori uso restano). Attrezzature: vuota, dice cosa fare, niente da cambiare.
+**Conti:** carburante (spesa e km/l) viene dalla vista, non rifatto qui: nessuna formula nuova.
 
 
 | | PC | Tel |
@@ -695,6 +712,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 **Le 3 cose che ci fa l'artigiano:** (a) dettare la giornata di tutti · (b) vedere i giorni di un operaio nel mese · (c) scaricare il PDF del mese
 
+**Problemi trovati (7 nov, PC 1920 + tel 380):** due pulsanti principali (blu «PDF del mese» + arancione «Compila la giornata»), e col mese vuoto il PDF uscirebbe bianco; «Oppure scrivila a mano» a 15 px.
+**Fatto (ok di Alex):** «PDF del mese» si vede solo se nel mese c'è almeno una giornata (`renderGiornate`); «scrivila a mano» a 17 px.
+**Conti:** i totali per persona e luogo stanno in `giorTotali`, usata sia a schermo sia nel PDF: una sola formula.
+
 
 | | PC | Tel |
 |---|:-:|:-:|
@@ -728,6 +749,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 ## 3.16 — App · Richieste dal sito
 
 **Le 3 cose che ci fa l'artigiano:** (a) leggere una richiesta nuova · (b) chiamare / scrivere al cliente · (c) farne un preventivo
+
+**Problemi trovati (7 nov):** sul TELEFONO la scheda era rotta (nome sotto l'etichetta «Nuova», pulsanti sopra le scritte: due pulsanti larghi nella colonna destra della riga). Due pulsanti uguali invece di uno. Schede «Da fare» e «Nuove» quasi uguali. Riquadro «2 richieste» doppione. Spiegazione di 3 righe.
+**Fatto (ok di Alex):** un solo «Apri» (`ds-apri` aggiunto ad `AZ_APERTURA`); dentro, in alto, «Crea il preventivo» (blu) e «Segna chiusa» — le porta la finestra da sola (`dsApri` passa `dsVoci(r)`), cosi' ci sono anche aprendo dal Riepilogo o dalla ricerca. Schede: Da fare · Fatte · Tutte. Via il riquadro del conteggio. Spiegazione in 1 riga.
+**Conti:** nessun conto in questa sezione.
 
 
 | | PC | Tel |
@@ -763,6 +788,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 **Le 3 cose che ci fa l'artigiano:** (a) fare una domanda sui miei numeri · (b) farmi riempire un modulo · (c) aprire la cosa che mi indica
 
+**Problemi trovati (7 nov):** il pulsante «+» (allega foto/PDF) non diceva cosa fa; sul telefono «+», «Parla», «Manda» su tre righe a tutta larghezza; sul computer archivio largo 244 px con titoli su 3 righe e scritte a 13-14 px; la × per buttare una chat era 26 px.
+**Fatto (ok di Alex):** «+» → «📎 Foto»; telefono: Foto · Parla · Manda in una riga; computer: archivio 320 px, scritte 15-16 px, × 36 px (css/gestionale-stile.css, js/gest-chat.js). La chat resta vuota, senza spiegazioni (decisione del 29 ago).
+**Conti:** «Ti restano N messaggi» viene da `chat_stato()` sul server: nessun conto nel browser.
+
 
 | | PC | Tel |
 |---|:-:|:-:|
@@ -796,6 +825,11 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 ## 3.18 — App · Tasse e fisco
 
 **Le 3 cose che ci fa l'artigiano:** (a) vedere quanto mi resta dopo le tasse · (b) sollecitare un cliente che non paga · (c) sapere le prossime scadenze
+
+**Conti rifatti a mano (7 nov, profilo forfettario artigiano, coeff 86%):** proiezione 43.900 × 365/311 = 51.522,51 ✓; reddito 44.309,36 → INPS 4.521,36 + 24% × 25.501,36 = 10.641,69 ✓; imposta 15% × 33.667,69 = 5.050,15 ✓; totale 15.691,84 ✓; al mese 1.307,65 ✓; «31 € ogni 100» = 30,46 arrotondato in su ✓; rata INPS 1.130,34 ✓; secondo acconto 2.525,08 + 3.060,17 = 5.585,24 ✓; mora 6.802 € × 10,40% × 120 gg = 232,57 ✓; legale 2.452 € × 1,6% × 87 gg = 9,35 ✓; «Quanto ti resta» 43.900 − 12.200 − 13.371,24 = 18.328,76 ✓.
+**Problemi trovati:** (1) «ti devono 18.878,61 € scaduti» in Quanto ti resta contro 17.353,00 € in Farsi pagare: la differenza era la fattura 1 del Noleggio (1.525,61 €), contata solo da una parte; (2) nei «prossimi 3 mesi» mancava il bollo delle fatture (28 € al 30/11) che «Le tue tasse» mette: la mappa dei bolli si costruiva solo lì; (3) «+ 0,00 €» in verde; (4) totale delle tasse in rosso.
+**Fatto (ok di Alex):** la riga dice «17.353,00 € qui nel gestionale e 1.525,61 € del Noleggio»; `ftBolli(ff)` in js/gest-fisco-tasse.js, usata da Le tue tasse, Quanto ti resta e Chat AI del fisco (una formula sola); zeri grigi (`fvZero`); totale tasse scuro con icona grigia.
+**Resta da decidere (non fatto):** «Farsi pagare» non vede le fatture del Noleggio (i solleciti stanno su `gest_fatture`).
 
 
 | | PC | Tel |
@@ -831,6 +865,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 **Le 3 cose che ci fa l'artigiano:** (a) vedere incassi e spese del mese · (b) vedere quanto ho guadagnato su un lavoro · (c) scaricare per il commercialista
 
+**Problemi trovati (7 nov):** sul TELEFONO la pagina usciva dallo schermo (la griglia prendeva i 581 px del grafico, schermo 380): totali tagliati; nomi dei lavori tagliati («PROVA …»); due «Scarica per Excel» (barra e Report) che fanno cose diverse; «Totali storici» non diceva di essere del solo reparto, e il margine negativo accanto a lavori tutti in guadagno non si capiva.
+**Fatto (ok di Alex):** griglia `minmax(0,1fr)` e nomi a capo sul telefono; il pulsante del Report si chiama «Scarica il report»; titolo «Totali di questo reparto» + «Il margine conta solo i soldi già incassati».
+**Conti:** Taglio albero 1.000 − 0 − 337,50 = 662,50 ✓; margine 0 − 337,50 = −337,50 ✓; incassato 0 ✓ (nel reparto giardiniere ci sono solo 2 fatture in bozza: controllato sul database).
+
 
 | | PC | Tel |
 |---|:-:|:-:|
@@ -864,6 +902,11 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 ## 3.20 — App · Galleria · Mappa
 
 **Le 3 cose che ci fa l'artigiano:** (a) trovare le foto di un lavoro · (b) vedere i cantieri sulla mappa · (c) aprire la strada per un cantiere
+
+**Galleria — problemi trovati (7 nov):** sul telefono i filtri «Mostra» e «Quando» uscivano dallo schermo (scritte tagliate); foto piccole (150 px sul 1920, una per riga a mezzo schermo sul telefono).
+**Fatto (ok di Alex):** filtri uno per riga sul telefono; foto in griglia, minimo 230 px sul computer, due per riga sul telefono (css/gestionale-stile.css).
+**Mappa — problemi trovati (7 nov):** sul telefono la riga sotto il cantiere tagliata («00 giorni fa · comun…»); «100 giorni fa» in rosso senza dire perché; avviso «cantieri senza distanza» di 4 righe.
+**Fatto (ok di Alex):** riga a capo sul telefono; «in ritardo (100 giorni fa)»; avviso in 2 righe (js/gest-galleria-mappa.js). Distanze: in linea d'aria, calcolate dal servizio mappe, nessun conto di soldi.
 
 
 | | PC | Tel |
@@ -899,6 +942,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 **Le 3 cose che ci fa l'artigiano:** (a) ritrovare una cosa buttata · (b) rimetterla a posto · (c) buttarla per sempre
 
+**Problemi trovati (7 nov):** sul TELEFONO schede rotte (nome in una colonna stretta, pulsanti «Rimetti a posto»/«Elimina per sempre» sopra le scritte) — stesso difetto di Richieste: la riga con due pulsanti li mette nella colonna di destra; spiegazione in alto di 6 righe (e diceva «Tutti i reparti qui sopra» mentre sta sotto); casella di ricerca tagliata.
+**Fatto (ok di Alex):** regola generale in css/gestionale-stile.css: sul telefono ogni scheda con 2+ pulsanti va in colonna (nome, dettagli, pulsanti) — vale per tutte le sezioni; spiegazione in 1 riga; ricerca a tutta larghezza.
+**Conti:** nessuno. Nota: i numeri accanto ai tipi («Voci del tuo elenco prezzi 200») contano le righe caricate (213 su 2.562), non tutte.
+
 
 | | PC | Tel |
 |---|:-:|:-:|
@@ -932,6 +979,8 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 ## 3.22 — App · Crediti formativi (solo studio)
 
 **Le 3 cose che ci fa l'artigiano:** (a) segnare un corso fatto · (b) vedere quanti crediti mancano · (c) scaricare l'attestato
+
+**Collaudo (7 nov, giro di prova studio):** conto 3 + 10 = 13 di 30, mancano 17 ✓. Un solo «+ Nuovo corso», righe con «Apri». Riquadro rosso a novembre con 13/30: giusto (sotto il 60% a fine anno è un problema vero). Unico difetto: il conto per tipo a 14 px e il pulsante dell'anno a 15 px → portati a 16.
 
 
 | | PC | Tel |
@@ -967,6 +1016,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 **Le 3 cose che ci fa l'artigiano:** (a) chiedere aiuto a una persona · (b) chiedere una cosa nuova · (c) comprare crediti AI
 
+**Ricarica crediti — conti rifatti (7 nov):** 19/150 = 12,7 c («circa 13») ✓; 45/400 = 11,25 c ✓; 99/1000 = 9,9 c («circa 10») ✓; messaggi 9/300 = 3 c ✓, 25/1000 = 2,5 c ✓, 69/3000 = 2,3 c ✓.
+**Problemi trovati:** sul pacchetto da 1.000 messaggi «Il più conveniente» — FALSO, quello da 3.000 costa meno a messaggio; scritte a 13–15 px; spiegazione in alto di 5 righe; colonna stretta (880 px) sul 1920.
+**Fatto (ok di Alex):** «Il più scelto»; tutto almeno 16 px (l'etichetta 15); colonna 1000 px; spiegazione in 2 righe (ricarica-crediti.html).
+
 
 | | PC | Tel |
 |---|:-:|:-:|
@@ -1000,6 +1053,9 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 ## 3.24 — App · Barra in alto: Dati azienda · Commercialista · Copia dei dati · Excel
 
 **Le 3 cose che ci fa l'artigiano:** (a) mettere logo, P.IVA, IBAN · (b) mandare i documenti al commercialista · (c) salvare una copia dei dati
+
+**Problemi trovati (7 nov, computer):** pulsanti a 13 px alti 34; cinque pulsanti tutti uguali, anche quelli rari; la freccia in alto a sinistra senza scritta.
+**Fatto (ok di Alex):** pulsanti 16 px alti 44; «Salva una copia» e «Scarica per Excel» dentro «Altro ▾» (si chiude toccando fuori); «← Reparti». Sul telefono le copie nel menu ☰ restano tutte e cinque.
 
 
 | | PC | Tel |
@@ -1035,6 +1091,10 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 **Le 3 cose che ci fa l'artigiano:** (a) vedere cosa esce e cosa rientra oggi · (b) vedere chi deve pagare · (c) vedere i mezzi fermi
 
+**Riepilogo — conti (7 nov, sul database):** da incassare = noleggi ESTERNI non pagati 630 + 1.050,50 = 1.680,50 ✓ (quello interno da 1.080 escluso, giusto); cauzioni in deposito 500 ✓.
+**Problemi trovati:** «Fuori adesso» col pallino rosso come «In ritardo» (doppione, e avere mezzi fuori è normale); righe sotto i titoli a 14 px e tagliate.
+**Fatto (ok di Alex):** `nolDett` accetta "corso" = pallino blu; «Fuori adesso» blu; righe a 16 px intere.
+
 
 | | PC | Tel |
 |---|:-:|:-:|
@@ -1066,6 +1126,9 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 
 ## 3.26 — Noleggio · Noleggi (+ Calendario)
+
+**Problemi trovati (7 nov):** nelle schede dei noleggi le due righe «sub2» (date / importo) avevano la stessa area della griglia e finivano UNA SOPRA L'ALTRA, illeggibili (PC e telefono); sul telefono «Apri» a destra stringeva il testo su 7 righe; il noleggio a un tuo reparto diceva «da pagare»; etichette a 13 px.
+**Fatto (ok di Alex):** righe in colonna (gestionale-noleggio.html); sul telefono «Apri» sotto; «al tuo reparto, non si incassa» (js/nol-salva-noleggio.js); etichette 14 px, Apri e barra 16 px; «Esporta in Excel» → «Scarica per Excel».
 
 **Le 3 cose che ci fa l'artigiano:** (a) fare un noleggio nuovo · (b) segnare il mezzo rientrato · (c) fare la fattura del noleggio
 
@@ -1101,6 +1164,8 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 ## 3.27 — Noleggio · Mezzi
 
+**Collaudo (7 nov):** un pulsante principale, riga con «Apri», listino giorno/settimana/mese/cauzione leggibile. Valgono le correzioni comuni delle liste (3.26).
+
 **Le 3 cose che ci fa l'artigiano:** (a) aggiungere un mezzo col prezzo · (b) vedere se è libero · (c) segnare manutenzione / revisione
 
 
@@ -1135,6 +1200,8 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 ## 3.28 — Noleggio · Clienti
 
+**Collaudo (7 nov):** «+ Nuovo cliente», righe con «Apri». Valgono le correzioni comuni delle liste (3.26).
+
 **Le 3 cose che ci fa l'artigiano:** (a) aggiungere un cliente · (b) vedere i suoi noleggi · (c) vedere quanto deve
 
 
@@ -1168,6 +1235,11 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 
 ## 3.29 — Noleggio · Fatture · Cauzioni
+
+**Conti (7 nov):** fattura n. 1 imponibile 1.250,50 + IVA 22% = 1.525,61 ✓ (= «Emesse, da incassare»).
+**Problemi trovati:** «Noleggi da fatturare 3» contava anche il noleggio a un tuo reparto, che non si fattura; spiegazione di 4 righe.
+**Fatto (ok di Alex):** escluso chi ha `mestiere_id` (js/nol-fatture.js) → 2; spiegazione in 2 righe.
+**Resta (non toccato):** la formula del totale del Noleggio (`fattnolTotali`) è separata da quella dell'App (vedi «doppioni» in cima).
 
 **Le 3 cose che ci fa l'artigiano:** (a) fare una fattura · (b) segnarla pagata · (c) restituire una cauzione
 
@@ -1237,6 +1309,9 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 ## 3.31 — Noleggio · Rendimento
 
+**Conti (7 nov):** reso 1.080 + 630 + 1.050,50 = 2.760,50 ✓. **Difetto:** «Ancora da incassare 2.760,50» contro 1.680,50 nel Riepilogo — qui contava anche il noleggio a un tuo reparto; e le cauzioni si contavano «non rientrato» invece di «in deposito» (due formule diverse per la stessa cosa).
+**Fatto:** stesse regole del Riepilogo (`mestiere_id` escluso, `cauStatoDi(x)==="in_deposito"`) in js/nol-verbale-rendimento.js → 1.680,50 e 500; spiegazione da 3 righe a 1.
+
 **Le 3 cose che ci fa l'artigiano:** (a) vedere quanto ha reso un mezzo · (b) vedere il mezzo che rende meno · (c) confrontare i mesi
 
 
@@ -1304,6 +1379,9 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
 
 ## 3.33 — Noleggio · Promemoria · Cestino
+
+**Problemi trovati (7 nov):** pulsanti «Segna fatto / Modifica / Elimina» a 13 px; etichette a 13 px in tutte le liste del Noleggio.
+**Fatto:** pulsanti 16 px alti 44, etichette 14 px (gestionale-noleggio.html). Nessuna scritta fuori schermo sul telefono in Calendario, Cauzioni, Documenti, Rendimento, Promemoria, Cestino, Prodotti, Magazzino, Movimenti, Fornitori.
 
 **Le 3 cose che ci fa l'artigiano:** (a) farsi ricordare una cosa · (b) ritrovare una cosa buttata · (c) rimetterla a posto
 

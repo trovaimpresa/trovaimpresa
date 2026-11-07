@@ -28,7 +28,7 @@
   /* L'azione che «apre» non si chiama uguale dappertutto: edit-prev,
      edit-mezzo, apri-cli, sq-edit, carta-dettaglio... sono tutte quella.
      Qui c'e' l'elenco, in un posto solo. */
-  const AZ_APERTURA=/^(edit-|apri-)|^(sq-edit|carta-dettaglio)$/;
+  const AZ_APERTURA=/^(edit-|apri-)|^(sq-edit|carta-dettaglio|ds-apri)$/; /* 7 nov 2026: + ds-apri (Richieste dal sito: un solo «Apri») */
   const AZ_APRI={};
   let _azPendenti=null;
   /* L'azione che «apre» non si chiama uguale dappertutto: edit-prev,
@@ -96,8 +96,8 @@
   }
   /* «Altro ▾» si chiude toccando fuori, o dopo aver scelto una voce */
   document.addEventListener("click",function(e){
-    document.querySelectorAll("details.sh-altro[open]").forEach(function(d){
-      if(!d.contains(e.target)||e.target.closest(".sh-altro-pop [data-action]"))d.removeAttribute("open");
+    document.querySelectorAll("details.sh-altro[open],details.tb-altro[open]").forEach(function(d){
+      if(!d.contains(e.target)||e.target.closest(".sh-altro-pop [data-action],.tb-altro-pop [data-action]"))d.removeAttribute("open");
     });
   });
   const SCHEDA_MENU={}; let _schedaMenuN=0;

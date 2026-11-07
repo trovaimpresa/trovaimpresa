@@ -496,8 +496,8 @@
   };
   /* Le viste devono coprire TUTTI gli stati: una richiesta con il preventivo
      gia' fatto finiva solo in "Tutte" e sembrava sparita. */
-  const DS_VISTE=[{k:"da_fare",lab:"Da fare"},{k:"nuove",lab:"Nuove"},{k:"fatte",lab:"Fatte"},{k:"tutte",lab:"Tutte"}];
-  let dsCache=[], dsFilter="da_fare";
+  const DS_VISTE=[{k:"da_fare",lab:"Da fare"},{k:"fatte",lab:"Fatte"},{k:"tutte",lab:"Tutte"}];
+  let dsCache=[], dsFilter="da_fare"; /* 7 nov 2026: «Nuove» tolta, era quasi uguale a «Da fare» */
 
   const _dsData=r=>String(r.created_at||"").slice(0,10);
   const _dsCosa=r=>r.categoria_lavoro||r.tipo_lavoro||"Richiesta di preventivo";
@@ -538,7 +538,7 @@
 
   function dsVoci(r){
     const v=[];
-    if(r._stato!=="preventivo")v.push({lab:"🧾 Crea il preventivo",action:"ds-prev",data:{id:r.id}});
+    if(r._stato!=="preventivo")v.push({lab:"🧾 Crea il preventivo",action:"ds-prev",data:{id:r.id},top:true,prima:true});
     v.push({lab:"📇 Vedi i contatti",action:"ds-apri",data:{id:r.id}});
     v.push({sep:true});
     if(r._stato==="chiusa")v.push({lab:"↩ Riapri",action:"ds-riapri",data:{id:r.id}});
@@ -603,7 +603,7 @@
           menu:dsVoci(r)
         };
       }),
-      totale:{testo:L.length+" "+(L.length===1?"richiesta":"richieste")},
+      /* 7 nov 2026: niente riquadro «2 richieste», il numero sta gia' accanto a «Da fare» */
       cards:()=>L.map(dsCard).join("")
     });
     contaDalSito();

@@ -383,7 +383,8 @@
   function schedaAzioniLavoro(l,withFoto,fatto,dp,menuTab){
     const az=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
     if(withFoto&&l.stato==="da_fare")az.push({lab:"▶ Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
-    if(withFoto&&!fatto)az.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
+    /* 7 nov 2026 — «Segna fatto» per primo nella finestra del lavoro (trovato nel collaudo dal vivo) */
+    if(withFoto&&!fatto)az.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true,prima:true});
     if(withFoto&&fatto)az.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     /* le voci che stavano nei «...»: le ha gia' preparate renderTabella */
     const extra=menuTab?((TAB_MENU[menuTab]||{})[String(l.id)]||[]):[];
@@ -395,7 +396,7 @@
     });
     return schedaUnPulsante(az)||schedaAzioni(az);
   }
-  function jobCardSupa(l,withFoto,opTel,conImp,menuTab){
+  function jobCardSupa(l,withFoto,opTel,conImp,menuTab,opNome){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     const late=inRitardo(l.stato,l.data_prevista);
     /* 7 nov 2026 — collaudo della semplicita': il pallino rosso diceva «Da fare».
@@ -411,6 +412,7 @@
         <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':(l.stato==="in_corso"?'blu':'rosso'))}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
       </div>
       <div class="job-meta">
+        ${opNome?`<span>👷 ${esc(opNome)}</span>`:""}
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
         <span>📅 ${fdate(l.data_prevista)}</span>
         ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo)}</span>`:""}

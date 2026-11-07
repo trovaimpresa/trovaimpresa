@@ -269,8 +269,12 @@
       const imp=+x.importo||0;
       if(!r){ orfani++; resoOrfani+=imp; return; }
       r.volte++; r.giorni+=_giorniDentro(x,dal,al); r.reso+=imp;
-      if(x.stato_pagamento==="pagato") r.incassato+=imp; else r.daPagare+=imp;
-      if(!x.data_rientro_effettivo) r.cauzioni+=(+x.cauzione||0);
+      /* 7 nov 2026 — stesse regole del Riepilogo, se no i due numeri non
+         combaciano (qui «da incassare» diceva 2.760,50, là 1.680,50):
+         · un noleggio a un TUO reparto (mestiere_id) non si incassa;
+         · la cauzione conta solo se e' davvero ancora in deposito. */
+      if(x.stato_pagamento==="pagato") r.incassato+=imp; else if(!x.mestiere_id) r.daPagare+=imp;
+      if((+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito") r.cauzioni+=(+x.cauzione||0);
     });
     const righe=Object.values(perMezzo).sort((a,b)=>b.reso-a.reso);
     rendDati={righe,dal,al,eti,gg,orfani,resoOrfani};

@@ -136,6 +136,12 @@
   @media(max-width:560px){.ai-risp{margin:0 0 16px;padding:16px}.ai-risp-tit{font-size:20px}.ai-risp-l li{font-size:16px}}
 
   .nascosto{display:none}
+  /* 7 nov 2026 — semplicita': colonna piu' larga, niente scritte sotto i 16 px */
+  .foglio{max-width:1000px}
+  .sotto,.rep-dice{max-width:none}
+  .sotto{font-size:18px}
+  .foglio .unitario,.foglio .parola,.foglio .rep-dice,.foglio li,.foglio .ct-et,.foglio .ct-nota,.foglio .torna{font-size:16px!important}
+  .foglio .etichetta{font-size:15px!important}
 </style>
 <style>/* 5 ott 2026: come il Gestionale - sfondo #e7eef8 e bordo blu scuro sulle schede */
 body{background:#e7eef8 !important}
@@ -153,11 +159,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
   <h1>Ricarica l&rsquo;AI</h1>
   <p class="sotto">
-    Qui ci sono <strong>due cose separate</strong>, e non si toccano fra loro:
-    i <strong>crediti</strong> servono all&rsquo;assistenza &mdash; &laquo;Compila con AI&raquo; e
-    &laquo;Genera con AI&raquo; &mdash; e i <strong>messaggi</strong> servono alla Chat con AI.
-    Tutte e due si rinnovano il primo del mese; quello che compri qui invece
-    <strong>non scade mai</strong>.
+    I <strong>crediti</strong> servono all&rsquo;assistenza (&laquo;Compila con AI&raquo;, &laquo;Genera con AI&raquo;),
+    i <strong>messaggi</strong> alla Chat con AI. Quello che compri <strong>non scade mai</strong>.
   </p>
 
   <div id="avvisi"></div>
@@ -307,7 +310,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
       </div>
 
       <div class="taglio consigliato">
-        <span class="etichetta">Il più conveniente</span>
+        <span class="etichetta">Il più scelto</span>
         <div class="crediti">1.000</div>
         <div class="parola">messaggi</div>
         <div class="prezzo">25 &euro;</div>

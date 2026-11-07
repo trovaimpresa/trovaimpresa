@@ -102,7 +102,7 @@ const _gIc = {
 #giornate .gv{display:flex;gap:10px;align-items:flex-start}
 #giornate .gv .t{flex:1;min-width:0}#giornate .gv .w{font-weight:700;font-size:16px;color:var(--testo,#0f172a)}#giornate .gv .c{font-size:15px;color:var(--testo-2,#475569);overflow-wrap:anywhere}
 #giornate .gv .az{display:flex;gap:4px;flex:none}
-#giornate .glink{background:none;border:0;color:var(--blu,#0066ff);text-decoration:underline;font-size:15px;cursor:pointer;padding:4px}
+#giornate .glink{background:none;border:0;color:var(--blu,#0066ff);text-decoration:underline;font-size:17px;cursor:pointer;padding:6px 4px}
 #giornate .glink.rosso{color:var(--err,#dc2626)}
 #giornate .gnota{font-size:14px;color:var(--testo-2,#475569)}
 #giornate .gmsg{font-size:15px}#giornate .gmsg:empty{display:none}
@@ -316,6 +316,8 @@ function giorDisegna(msg){
   if(giorProp) h+=giorDisegnaProp();
 
   h+=`<div class="gb"><h4>Il mese</h4>`;
+  /* 7 nov 2026: il PDF del mese si offre solo se nel mese c'e' qualcosa */
+  { const bp=document.querySelector('[data-gior="pdf"]'); if(bp) bp.style.display=date.length?"":"none"; }
   if(!date.length) h+=`<div class="gvuoto">Nessuna giornata in ${esc(_gMeseNome(giorMese))}.</div>`;
   date.forEach(d=>{
     h+=`<div class="gday"><div class="gd">${esc(_gData(d))}</div>`;

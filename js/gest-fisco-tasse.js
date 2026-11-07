@@ -191,6 +191,20 @@
     }
   }
 
+  /* 7 nov 2026 — i bolli per trimestre in UN posto solo: li usano «Le tue
+     tasse», «Quanto ti resta» (prossimi 3 mesi) e la Chat AI del fisco.
+     Prima solo «Le tue tasse» li contava, e novembre diceva due cifre diverse. */
+  function ftBolli(ff) {
+    const bollo = {};
+    (ff || []).forEach(f => {
+      const b = +f.bollo || 0; if (!(b > 0) || !f.data) return;
+      const k = f.data.slice(0, 4) + "-" + Math.ceil(+f.data.slice(5, 7) / 3);
+      if (!bollo[k]) bollo[k] = { eur: 0, n: 0 };
+      bollo[k].eur += b; bollo[k].n++;
+    });
+    return bollo;
+  }
+
   function ftScadenze(p, st, dati, tutte) {
     const indiv = p.forma === "ditta" || p.forma === "professionista";
     const inps = p.cassa === "artigiani" || p.cassa === "commercianti";
@@ -348,13 +362,7 @@
     const mesePrec = mm === 1 ? [(yy - 1), 12] : [yy, mm - 1];
     const mp = mesePrec[0] + "-" + String(mesePrec[1]).padStart(2, "0");
     /* i bolli per trimestre: conta la data della fattura. Chiave «2026-3» */
-    const bollo = {};
-    ff.forEach(f => {
-      const b = +f.bollo || 0; if (!(b > 0) || !f.data) return;
-      const k = f.data.slice(0, 4) + "-" + Math.ceil(+f.data.slice(5, 7) / 3);
-      if (!bollo[k]) bollo[k] = { eur: 0, n: 0 };
-      bollo[k].eur += b; bollo[k].n++;
-    });
+    const bollo = ftBolli(ff);
     return { profilo, presunto, dati: {
       incassi, ivaAnno, bollo,
       ivaQ3: ivaTra("2026-07-01", "2026-09-30"),
@@ -393,7 +401,7 @@
     h += `<div class="fp-tot">
       <div class="k-verde">${fpIc("euro")}<div><small>Incassato nel ${Y} finora</small><b>${eur(incassi)}</b></div></div>
       <div class="k-blu">${fpIc("grafico")}<div><small>${doy >= 60 ? "Se continui così, a fine anno" : "A inizio anno conto l'incassato"}</small><b>${eur(proiezione)}</b></div></div>
-      <div class="k-rosso">${fpIc("palazzo")}<div><small>Tasse e contributi dell'anno (stima)</small><b class="fp-rosso">${st.totale != null ? eur(st.totale) : "—"}</b></div></div>
+      <div class="k-neutro">${fpIc("palazzo")}<div><small>Tasse e contributi dell'anno (stima)</small><b>${st.totale != null ? eur(st.totale) : "—"}</b></div></div>
     </div>`;
 
     /* IL SALVADANAIO */

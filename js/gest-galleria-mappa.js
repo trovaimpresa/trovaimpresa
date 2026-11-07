@@ -518,7 +518,7 @@
       }
       const nonTrovati=pPart?righe.filter(r=>!r.p).length:0;
       box.innerHTML=
-        (nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Nel campo «Dove» del lavoro scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b> invece di <b>via verani 18</b>. Senza il comune la stessa via esiste in cento paesi e non posso sapere quale sia il tuo.</div>':"")
+        (nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Nel campo «Dove» del lavoro scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b>.</div>':"")
         +'<div class="mp-righe">'
         +righe.map(r=>{
           const q=quando(r.l.data_prevista);
@@ -528,7 +528,7 @@
             +  '<div class="mp-r-tit">'+esc(r.l.descrizione||"Lavoro")+'</div>'
             +  '<div class="mp-r-sub">'+esc(r.ind)
             +    (r.c?' · '+esc(r.c.nome||""):"")
-            +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+esc(q.testo)+'</span>'
+            +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+(rit?"in ritardo ("+esc(q.testo)+")":esc(q.testo))+'</span>'
             +    (r.ipotesi&&!r.sospetto?' · <span class="mp-ipotesi">comune ipotizzato: '+esc(comuneUff)+'</span>':"")
             +    (r.circa?' · <span class="mp-ipotesi">via trovata, numero no</span>':"")
             +    '</div>'

@@ -185,6 +185,7 @@
     border-radius:50%;box-shadow:0 0 0 3px #FFFFFF}
   #app-root .nrc .nrc-pall.male{background:#c62828}
   #app-root .nrc .nrc-pall.bene{background:#2e7d32}
+  #app-root .nrc .nrc-pall.corso{background:#1d4ed8}
   #app-root .nrc .nrc-n{font-size:44px;font-weight:800;line-height:1.05;letter-spacing:-1.5px;color:var(--ink)}
   #app-root .nrc .nrc-l{font-size:16px;color:#475569;margin-top:6px;line-height:1.4}
   #app-root .nrc .nrc-list{margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;
@@ -383,7 +384,7 @@
   #riepilogo .nrc-head{display:contents!important}
   #riepilogo .nrc-head svg{grid-area:ic;width:38px!important;height:38px!important;padding:8px!important;margin:0!important;border-radius:10px}
   #riepilogo .nrc-tit{grid-area:tit;font-size:16px!important;align-self:end}
-  #riepilogo .nrc-l{grid-area:l;font-size:14px!important;margin:0!important;border:0!important;padding:0!important;align-self:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #riepilogo .nrc-l{grid-area:l;font-size:16px!important;margin:0!important;border:0!important;padding:0!important;align-self:start;white-space:normal;overflow:visible} /* 7 nov 2026: 16 px, non tagliate */
   #riepilogo .nrc-n{grid-area:n;font-size:20px!important;margin:0!important;text-align:right;color:var(--testo,#0f172a)!important}
   #riepilogo .nrc-pall{grid-area:p;margin:0!important;position:static!important;width:18px!important;height:18px!important;flex:0 0 18px!important;box-shadow:none!important}
   #riepilogo .nrc-vuoto,#riepilogo .nrc > :not(.nrc-head):not(.nrc-n):not(.nrc-l){display:none!important}
@@ -599,7 +600,7 @@
     <section id="fatture">
       <div class="sec-head" id="fattnol-testa"><h2>Fatture</h2>
         <button class="btn add" data-action="new-fattnol">+ Nuova fattura</button></div>
-      <div class="gal-intro">Scegli il cliente e il mese: il gestionale mette dentro <b>tutti i suoi noleggi</b> di quel periodo, coi ratei per quelli a cavallo di due mesi. &Egrave; la <b>fattura differita riepilogativa</b> che i DDT ti permettono di fare — una al mese per cliente, entro il 15 del mese dopo, invece di una per ogni uscita.</div>
+      <div class="gal-intro">Scegli il cliente e il mese: il gestionale mette dentro <b>tutti i suoi noleggi</b> di quel periodo. Una fattura al mese per cliente, entro il 15 del mese dopo.</div>
       <div class="num-fila">
         <div class="num-c"><span class="num-d">Noleggi da fatturare</span><span class="num-n" id="kf-dafatturare">0</span><span class="num-s">Non ancora su nessuna fattura</span></div>
         <div class="num-c"><span class="num-d">Emesse, da incassare</span><span class="num-n" id="kf-daincassare">€ 0</span><span class="num-s">Fatture con un numero</span></div>
@@ -650,8 +651,8 @@
 
     <section id="rendimento">
       <div class="sec-head"><h2>Rendimento</h2>
-        <button class="btn add" data-action="rend-esporta">⤓ Esporta in Excel</button></div>
-      <div class="gal-intro">Quanto rende ogni mezzo, e quanto sta fermo. Un mezzo che non esce non &egrave; un mezzo che non rende: &egrave; un mezzo che <b>costa</b> — bollo, assicurazione, posto, verifiche. Per questo qui i fermi si vedono in rosso, non spariscono in fondo.</div>
+        <button class="btn add" data-action="rend-esporta">⬇ Scarica per Excel</button></div>
+      <div class="gal-intro">Quanto rende ogni mezzo, e quanto sta fermo. I mezzi fermi si vedono in rosso.</div>
       <div class="chiprow" id="rend-periodo">
         <button class="chip" data-v="mese">Questo mese</button>
         <button class="chip on" data-v="anno">Quest'anno</button>
@@ -994,9 +995,14 @@ body:has(#ti-fondatore) .sheet--grande{
 #app-root .nol-elenco > .nol-card .tit{grid-area:tit;justify-content:flex-start;align-items:center}
 #app-root .nol-elenco > .nol-card .tit strong{font-size:19px;font-weight:800}
 #app-root .nol-elenco > .nol-card .sub{grid-area:sub;font-size:16px}
-#app-root .nol-elenco > .nol-card .sub2{grid-area:sub2;font-size:16px}
+#app-root .nol-elenco > .nol-card .sub2{font-size:16px}
+/* 7 nov 2026: le righe «sub2» sono DUE nei noleggi: con la stessa area
+   finivano una sopra l'altra (scritte illeggibili). Ora vanno in colonna,
+   una per riga, e «Apri» sta a destra su tutte. */
+#app-root .nol-elenco > .nol-card{grid-template-areas:none!important;grid-template-rows:none!important}
+#app-root .nol-elenco > .nol-card > *:not(.nol-azioni){grid-area:auto!important;grid-column:1!important}
 #app-root .nol-elenco > .nol-card .sub:empty,#app-root .nol-elenco > .nol-card .sub2:empty{display:none}
-#app-root .nol-elenco > .nol-card .nol-azioni{grid-area:az;grid-row:1/-1;margin:0!important;padding:0!important;border:0!important;display:flex;flex-wrap:wrap;justify-content:flex-end;align-self:center}
+#app-root .nol-elenco > .nol-card .nol-azioni{grid-column:2;grid-row:1 / span 6;margin:0!important;padding:0!important;border:0!important;display:flex;flex-wrap:wrap;justify-content:flex-end;align-self:center}
 #app-root .nol-elenco > .nol-card .nol-az-apri{min-height:44px;background:#f3f8ff!important;color:#0066ff!important;border:2px solid #0066ff!important}
 /* I promemoria qui li disegna un'altra funzione (.grid > .card): stessa forma */
 #app-root #prom-list.grid{display:flex!important;flex-direction:column;gap:12px}
@@ -1007,12 +1013,21 @@ body:has(#ti-fondatore) .sheet--grande{
 #app-root #prom-list > .card p{font-size:16px;margin:0}
 #app-root #prom-list > .card .card-acts{border:0!important;margin:0!important;padding:0!important;flex:0 0 auto}
 @media(max-width:760px){
- #app-root .nol-elenco > .nol-card{grid-template-columns:minmax(0,1fr) auto;padding:14px 14px!important;column-gap:10px}
+ #app-root .nol-elenco > .nol-card{grid-template-columns:minmax(0,1fr)!important;padding:14px 14px!important;column-gap:10px}
+ /* 7 nov 2026: sul telefono «Apri» va sotto, a sinistra: a destra stringeva le scritte su 7 righe */
+ #app-root .nol-elenco > .nol-card > .nol-azioni{grid-column:1!important;grid-row:auto!important;justify-content:flex-start!important;margin-top:8px!important}
+ #app-root .nol-elenco > .nol-card .nol-az-apri{min-width:120px}
  #app-root #prom-list > .card{flex-direction:column!important;align-items:stretch;padding:14px!important}
 }
 /* il menu in alto: scritte piu' grandi (erano 14 px) */
 nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
 #app-root .nol-eti:empty{display:none}
+#app-root .nol-eti{font-size:14px!important}
+/* 7 nov 2026 — niente scritte sotto i 14 px nel Noleggio (pulsanti dei promemoria a 13, scritte del Rendimento a 13) */
+#app-root .card-acts button{font-size:16px!important;min-height:44px;padding:0 14px!important}
+#app-root .doc-bollino{font-size:14px!important}
+#app-root .stato,#app-root .filt-label,#app-root .money .sub,#app-root .money .l{font-size:15px!important}
+#app-root .nol-az-apri,#app-root .nol-barra .btn,#app-root .nol-conta{font-size:16px!important}
 /* 27 set 2026 — i due riquadri in cima al Riepilogo: stessa forma del
    modello 1 del gestionale principale (bordo blu pieno, icona nel tondo) */
 .nol-aiuto{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 18px}
@@ -1036,16 +1051,16 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
 <script src="/js/noleggio-prezzo.js"></script>
 <script src="/js/gest-logo.js"></script>
 <script src="/js/invito-g2.js"></script>
-<script src="/js/nol-base.js"></script>
-<script src="/js/nol-navigazione-riepilogo.js"></script>
+<script src="/js/nol-base.js?v=7nov1"></script>
+<script src="/js/nol-navigazione-riepilogo.js?v=7nov1"></script>
 <script src="/js/nol-numeri-conto-mezzi.js"></script>
 <script src="/js/nol-card-righe-stampa.js"></script>
 <script src="/js/nol-schede.js"></script>
 <script src="/js/nol-cauzione-contratti.js"></script>
-<script src="/js/nol-verbale-rendimento.js"></script>
-<script src="/js/nol-fatture.js"></script>
+<script src="/js/nol-verbale-rendimento.js?v=7nov1"></script>
+<script src="/js/nol-fatture.js?v=7nov1"></script>
 <script src="/js/nol-firme-documenti.js"></script>
-<script src="/js/nol-salva-noleggio.js"></script>
+<script src="/js/nol-salva-noleggio.js?v=7nov1"></script>
 <script src="/js/nol-lavori-fatture-pdf.js"></script>
 <script src="/js/nol-cestino.js?v=6nov1"></script>
 <script src="/js/nol-media-documenti.js"></script>
@@ -1054,7 +1069,7 @@ nav.tabs button{font-size:16.5px!important;padding:10px 14px 12px!important}
 <script src="/js/nol-moduli-azienda-agenda.js"></script>
 <script src="/js/nol-pannello-azioni.js"></script>
 <script src="/js/nol-supporto.js"></script>
-<script src="/js/nol-listini-barre.js"></script>
+<script src="/js/nol-listini-barre.js?v=7nov1"></script>
 <script src="/js/nol-avvio.js"></script>
 <script src="/js/caselle-controllo.js"></script>
 <!-- ⛔ 23 agosto 2026 — IL CANCELLO. Prima qui non c'era: chi si scriveva

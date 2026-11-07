@@ -429,7 +429,7 @@
        ⛔ La casella vera del file sta nascosta dentro la <label>: e' il
        modo di sempre di far diventare pulsante un campo file, senza
        inventare stili nuovi. */
-    +       '<label class="btn" id="chat-piu" for="chat-file" title="Allega una foto o un PDF" style="cursor:pointer">+</label>'
+    +       '<label class="btn" id="chat-piu" for="chat-file" title="Allega una foto o un PDF" style="cursor:pointer">📎 Foto</label>'
     +       '<input type="file" id="chat-file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display:none">'
     +       '<button class="btn btn-primary" type="button" id="chat-manda">Manda</button>'
     +     '</div>'

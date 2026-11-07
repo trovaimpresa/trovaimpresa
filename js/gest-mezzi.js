@@ -188,9 +188,14 @@
     const carbTesto=cb&&(+cb.spesa_totale)>0
       ? "⛽ "+eur2(cb.spesa_totale)+(cb.km_litro?" · "+String(cb.km_litro).replace(".",",")+" km/l":"")
       : "";
+    /* 7 nov 2026: con una scadenza passata l'etichetta non puo' dire
+       «Disponibile» in verde. Diventa «Da rinnovare» in rosso
+       (manutenzione e fuori uso restano: dicono gia' che non va). */
+    const etic=(sc&&sc.scadute>0&&(m.stato==="disponibile"||m.stato==="in_uso"||!m.stato))
+      ? {lab:"Da rinnovare",bg:"var(--err-bg)",fg:"var(--err)"} : st;
     return schedaJob({
       tono, titolo:esc(m.nome),
-      destra:`<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
+      destra:`<span class="stato" style="background:${etic.bg};color:${etic.fg}">${etic.lab}</span>`,
       meta:[cat, m.targa?"🔖 "+esc(m.targa):"", carbTesto, scTesto],
       nota:m.note?"📝 "+esc(m.note):"",
       azioni:[

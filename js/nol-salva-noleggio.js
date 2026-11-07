@@ -247,7 +247,8 @@
         <div class="sub2">${esc("Uscita "+fdate(x.data_uscita)+" · rientro previsto "+fdate(x.data_rientro_prevista)+(x.data_rientro_effettivo?" · rientrato il "+fdate(x.data_rientro_effettivo):""))}</div>
         <div class="sub2">${esc(_eur(x.importo)+(x.cauzione?" · cauzione "+_eur(x.cauzione)+
           (cauStatoDi(x)==="svincolata"?" (svincolata)":(cauDaSvincolare(x)?" DA SVINCOLARE":"")):"")+
-          " · "+(x.stato_pagamento==="pagato"?"pagato":"da pagare")+(x.danni?" · danni: "+x.danni:""))}</div>`,
+          /* 7 nov 2026: un noleggio a un TUO reparto non si incassa (vedi il Riepilogo) */
+          " · "+(x.mestiere_id?"al tuo reparto, non si incassa":(x.stato_pagamento==="pagato"?"pagato":"da pagare"))+(x.danni?" · danni: "+x.danni:""))}</div>`,
         pulsanti:nolPulsanti("noleggio",x.id)});
     }).join("");
   }
