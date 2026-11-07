@@ -197,7 +197,7 @@
     if(senzaPrezzo) avvisi.push(senzaPrezzo+(senzaPrezzo===1?" senza prezzo":" senza prezzo"));
     if(saltate) avvisi.push(saltate+(saltate===1?" riga saltata perché senza descrizione":" righe saltate perché senza descrizione"));
     if(!gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
-      +"Entrano come «A corpo»: la quantità è quella del file, le misure non ci sono.\n"
+      +"Entrano con la quantità scritta nel file (le misure pezzo per pezzo non ci sono).\n"
       +(avvisi.length?("\n⚠ "+avvisi.join("\n⚠ ")+"\n"):"")
       +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")) { toast("Importazione annullata"); return; }
 
@@ -643,7 +643,7 @@
     });
     if(!voci.length){toast("Non hai segnato nessuna riga: non entra niente.");return;}
     if(!gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
-      +"Entrano come «A corpo»: la quantità è quella del foglio, le misure non ci sono.\n"
+      +"Entrano con la quantità scritta nel foglio (le misure pezzo per pezzo non ci sono).\n"
       +(tolte?("\n⚠ "+tolte+(tolte===1?" riga l'hai tolta":" righe le hai tolte")+" e non entra"+(tolte===1?"":"no")+".\n"):"")
       +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")){toast("Non ho messo dentro niente");return;}
 
