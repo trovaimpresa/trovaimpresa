@@ -1471,3 +1471,5 @@ Primo giro: **22 problemi** (nessun errore in console, tutti i conti rifatti a m
 21 Ricarica: due uscite → una sola, «Torna al gestionale» alta 44 ·
 22 Ricarica sul telefono: «26 + 0» andava a capo male → griglia.
 Lasciato com'è (scelta): «metti da parte 31 € su 100» è 30,46 arrotondato in su apposta (meglio un euro in più da parte).
+
+Secondo giro dell'agente: 18 chiusi, 4 a metà, 2 nuovi (descrizione del preventivo più piccola dei numeri e non allineata). Chiusi: Report con la riga «il guadagno di ogni lavoro è sul suo prezzo, anche se non è ancora stato pagato»; Noleggio «+ Nuovo lavoro» e numeretti del menu a 16/14 px; Rendimento: anche la riga del mezzo dice «ai tuoi reparti 1.080,00 € (non si incassano)»; Ricarica: anche il «Torna al gestionale» in fondo alto 44; preventivo: la descrizione prende la stessa grandezza di quantità e prezzo e le caselle della riga sono alte uguali; tondini «i»: zona da toccare 44x44 centrata.

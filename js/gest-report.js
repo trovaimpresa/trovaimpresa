@@ -222,6 +222,7 @@
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
       ${avvisoOre}
       <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Importo del lavoro</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
+      <p class="rep-sub" style="margin:0 0 10px">Il guadagno di ogni lavoro è sul suo prezzo, anche se non è ancora stato pagato.</p>
       ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
       ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;
     box.innerHTML=`<div class="rep-grid">

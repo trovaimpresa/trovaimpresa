@@ -273,7 +273,7 @@
          combaciano (qui «da incassare» diceva 2.760,50, là 1.680,50):
          · un noleggio a un TUO reparto (mestiere_id) non si incassa;
          · la cauzione conta solo se e' davvero ancora in deposito. */
-      if(x.stato_pagamento==="pagato") r.incassato+=imp; else if(!x.mestiere_id) r.daPagare+=imp; else interni+=imp;
+      if(x.stato_pagamento==="pagato") r.incassato+=imp; else if(!x.mestiere_id) r.daPagare+=imp; else { interni+=imp; r.interni=(r.interni||0)+imp; }
       if((+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito") r.cauzioni+=(+x.cauzione||0);
     });
     const righe=Object.values(perMezzo).sort((a,b)=>b.reso-a.reso);
@@ -312,6 +312,7 @@
         ${fermo?"":`<div class="rend-barra"><i style="width:${uso||0}%;background:${col}"></i></div>`}
         ${fermo?"":`<div class="sub2">${esc("Incassato "+_eur(r.incassato)+
             (r.daPagare?" · da incassare "+_eur(r.daPagare):"")+
+            (r.interni?" · ai tuoi reparti "+_eur(r.interni)+" (non si incassano)":"")+
             (r.cauzioni?" · cauzioni in deposito "+_eur(r.cauzioni):""))}</div>`}`,
         pulsanti:nolPulsanti("mezzo",r.m.id)});
     }).join("");

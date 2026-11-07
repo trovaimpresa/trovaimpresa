@@ -269,9 +269,8 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #sheet .dato a{display:inline-flex;align-items:center;min-height:40px}
 #sheet a.mp-ap{display:inline-flex;align-items:center;min-height:44px;padding:0 12px}
 #sheet .btn{min-height:44px}
-.ti-i{min-width:36px;min-height:36px}
+.ti-i::after{transform:translate(-50%,-50%)!important} /* zona da toccare 44x44 CENTRATA sul tondino */
 @media(max-width:760px){
-  .ti-i{min-width:40px;min-height:40px}
   #agenda .filtro{flex-wrap:wrap;max-width:100%}
   #agenda #ag-op-sel{max-width:100%;min-width:0;width:100%}
   #mappa .mp-r-tit{white-space:normal;overflow:visible;text-overflow:clip}
@@ -281,7 +280,7 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 }
 .side small,.side #panel-sub,.side .side-group{font-size:14px!important}
 .side .tab-cnt,.side .ma-n{font-size:14px!important}
-.sheet .prev-riga textarea.pr-desc{resize:none;overflow:hidden;min-height:44px;line-height:1.35;padding:10px 12px;font-family:inherit;font-size:16px;box-sizing:border-box;width:100%;
+.sheet .prev-riga textarea.pr-desc{resize:none;overflow:hidden;min-height:52px;line-height:1.35;padding:13px 14px;font-family:inherit;font-size:18px;box-sizing:border-box;width:100%;
   color:var(--testo);background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);display:block}
 .sheet .prev-riga textarea.pr-desc:focus{outline:none;border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.12)}
-.sheet .prev-riga{align-items:start}
+.sheet .prev-riga{align-items:stretch}

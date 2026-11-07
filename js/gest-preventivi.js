@@ -1010,7 +1010,12 @@
    (era una casella di una riga: le descrizioni lunghe del prezzario non si
    leggevano). Cresce da sola; Invio non va a capo, come prima. */
 (function(){
-  function alza(t){ t.style.height="auto"; t.style.height=(t.scrollHeight+2)+"px"; }
+  function alza(t){
+    /* stessa grandezza delle caselle quantita' e prezzo accanto */
+    const q=t.parentElement&&t.parentElement.querySelector(".pr-qta");
+    if(q){ try{ t.style.fontSize=getComputedStyle(q).fontSize; }catch(_){} }
+    t.style.height="auto"; t.style.height=(t.scrollHeight+2)+"px";
+  }
   document.addEventListener("input",function(e){ const t=e.target; if(t&&t.matches&&t.matches("textarea.pr-desc"))alza(t); });
   document.addEventListener("keydown",function(e){ const t=e.target; if(e.key==="Enter"&&t&&t.matches&&t.matches("textarea.pr-desc"))e.preventDefault(); });
   new MutationObserver(function(){
