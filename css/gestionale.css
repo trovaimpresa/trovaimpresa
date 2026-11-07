@@ -5571,3 +5571,7 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 .prev-iva-tot{ font-size:14px; font-weight:500; color:var(--testo-2); margin-left:4px; white-space:nowrap; }
 @media (max-width:880px){ .prev-iva-tot{ display:block; margin-left:0; text-align:right; } }
 .prev-iva-card{ white-space:nowrap; }
+
+/* 7 nov 2026 — il pulsante acceso dei .seg in blu scuro qui, e non da
+   js/blu-scuro.js: quello lo fissava e, spento, restava blu con la scritta scura */
+.seg button.on{ background:#0a2a4d !important; border-color:#0a2a4d !important; color:#fff !important; }

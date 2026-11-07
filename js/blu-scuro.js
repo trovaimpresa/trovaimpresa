@@ -40,6 +40,11 @@
       if (el.nodeType !== 1 || el.id === 'ti-bolla' && false) return;
       var tag = el.tagName;
       if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'IMG' || tag === 'HEAD' || tag === 'META' || tag === 'LINK') return;
+      /* 7 nov 2026 — i pulsanti a scelta (.seg) cambiano colore quando li
+         tocchi: se qui si fissa il blu di quello acceso, quando si spegne
+         resta blu scuro con la scritta scura sopra, e non si legge piu'.
+         Il loro blu scuro lo da' il CSS (css/gestionale.css, .seg button.on). */
+      if (el.closest && el.closest('.seg')) return;
       var cs = window.getComputedStyle(el), v, i, st = el.style;
       v = FORTI[cs.color]; if (v) st.setProperty('color', v, 'important');
       v = FORTI[cs.backgroundColor] || CHIARI_SFONDO[cs.backgroundColor];
