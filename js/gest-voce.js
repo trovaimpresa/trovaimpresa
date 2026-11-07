@@ -525,7 +525,9 @@
         metti('cv-prezzo', virgola(c.prezzo_unitario));
       var q2 = Number(c.quantita);
       if (isFinite(q2) && q2 > 0) {
-        var corpo = document.querySelector('#cv-conta button[data-v="corpo"]');
+        /* 7 nov 2026: con un'unita' vera (m², m…) e' «Scrivo la quantità», non «A corpo» */
+        var _uv = String(c.unita || '').trim();
+        var corpo = document.querySelector('#cv-conta button[data-v="' + ((_uv && _uv !== 'corpo') ? 'scritta' : 'corpo') + '"]');
         if (corpo && !corpo.classList.contains('on')) corpo.click();
         await aspetta('cv-qta', 1000);
         metti('cv-qta', q2.toLocaleString('it-IT', { maximumFractionDigits: 3, useGrouping: false }));
