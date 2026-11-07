@@ -451,7 +451,7 @@
       <div><b>${esc(f.cli.nome || f.cli_nome || "Cliente")}</b><span>Fattura ${esc(fpNumFatt(f))} · ${g === 0 ? "scade oggi" : "scade fra " + g + (g === 1 ? " giorno" : " giorni")} (${fdate(f.scadenza)})</span></div>
       <div class="fp-riga-d"><b>${eur(f.importo)}</b>
         <button class="btn" data-action="fp-apri" data-id="${f.id}" data-v="1">${fpIc("messaggio")} Ricordaglielo</button>
-        <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Pagata</button></div>
+        <button class="btn" data-action="fp-pagato" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button></div>
     </div>`;
   }
 

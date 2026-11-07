@@ -241,8 +241,8 @@
         ${totFF?`<tr><td>Fatture dei fornitori</td><td style="color:var(--testo)">−${eur(totFF)}</td></tr>`:""}
         ${totNol?`<tr><td>Noleggio interno <span style="font-size:13px;color:var(--testo-3)">(mezzi del tuo Noleggio)</span></td><td style="color:var(--testo)">−${eur(totNol)}</td></tr>`:""}
         ${totMD?`<tr><td>Manodopera <span style="font-size:13px;color:var(--testo-3)">(ore × costo orario)</span></td><td style="color:var(--testo)">−${eur(totMD)}</td></tr>`:""}
-        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF-totNol-totMD>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte-totRif-totFF-totNol-totMD)}</td></tr></table></div>
-      <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per fatturato)</h3><table class="rep-table">
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF-totNol-totMD>=0?'var(--ok)':'var(--err)'}">${(m=>(m<0?'− ':'')+eur(Math.abs(m)))(totInc-totSp-totCarte-totRif-totFF-totNol-totMD)}</td></tr></table></div>
+      <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per valore dei lavori)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
       ${ruoloUtente==='professionista'?"":`
       <div class="rep-card"><h3>${_ICO_CARTA}Spese con le carte aziendali</h3>

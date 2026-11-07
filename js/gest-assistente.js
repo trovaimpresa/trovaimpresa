@@ -269,7 +269,14 @@
     rinomina(document.querySelector('nav.tabs button[data-tab="riepilogo"]'), 'Riepilogo', 'Assistente');
   }
 
-  function parti() { stato(); setInterval(stato, 500); }
+  /* 7 nov 2026: sul telefono la scritta grigia lunga della ricerca veniva tagliata */
+  function ricercaCorta() {
+    try {
+      var q = document.getElementById('ct-q');
+      if (q && window.matchMedia('(max-width:760px)').matches) q.placeholder = 'Cerca un nome';
+    } catch (e) {}
+  }
+  function parti() { ricercaCorta(); stato(); setInterval(stato, 500); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti);
   else parti();
 })();

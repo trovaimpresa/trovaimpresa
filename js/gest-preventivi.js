@@ -115,7 +115,7 @@
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
     }
     return `<div class="prev-riga" data-riga>
-      <input class="pr-desc" placeholder="Es. Demolizione tramezzo" value="${esc(r.descrizione||"")}">
+      <textarea class="pr-desc" rows="1" data-no-dettato placeholder="Es. Demolizione tramezzo">${esc(r.descrizione||"")}</textarea>
       <input class="pr-qta" type="text" inputmode="decimal" placeholder="Es. 12" value="${_numTesto(r.qta!=null?r.qta:1)}">
       <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Es. 24,00" value="${_prezzoCasella(r.prezzo)}" data-euro>
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
@@ -1005,3 +1005,15 @@
     renderCrediti();toast("Corso eliminato");
   }
 
+
+/* 7 nov 2026 — la descrizione della voce va a capo invece di essere tagliata
+   (era una casella di una riga: le descrizioni lunghe del prezzario non si
+   leggevano). Cresce da sola; Invio non va a capo, come prima. */
+(function(){
+  function alza(t){ t.style.height="auto"; t.style.height=(t.scrollHeight+2)+"px"; }
+  document.addEventListener("input",function(e){ const t=e.target; if(t&&t.matches&&t.matches("textarea.pr-desc"))alza(t); });
+  document.addEventListener("keydown",function(e){ const t=e.target; if(e.key==="Enter"&&t&&t.matches&&t.matches("textarea.pr-desc"))e.preventDefault(); });
+  new MutationObserver(function(){
+    document.querySelectorAll("textarea.pr-desc:not([data-alto])").forEach(function(t){ t.setAttribute("data-alto","1"); requestAnimationFrame(function(){alza(t);}); });
+  }).observe(document.documentElement,{childList:true,subtree:true});
+})();

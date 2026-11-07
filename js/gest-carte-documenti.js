@@ -106,7 +106,7 @@
     const dipName=(dipCache.find(d=>String(d.id)===String(c.dipendente_id))||{}).nome;
     openSheetGrande(`💳 ${esc(c.nome)}`,
       `<p style="color:var(--testo-2);font-size:1.05rem;margin-bottom:16px">${dipName?"Titolare: <b>"+esc(dipName)+"</b>":"Nessun titolare assegnato"}</p>
-      <div id="ct-saldo-box" style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;margin-bottom:22px">—</div>
+      <div id="ct-saldo-box" style="font-size:3rem;font-weight:700;margin-bottom:22px">—</div>
       <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:22px">
         <div style="font-weight:700;color:#0a2a4d;margin-bottom:14px;font-size:1.1rem">➕ Nuovo movimento</div>
         <div class="row2">
@@ -140,7 +140,7 @@
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
         <div>
           <div style="font-weight:600;color:#0a2a4d">${esc(m.causale||(m.tipo==="spesa"?"Spesa":"Ricarica"))}</div>
-          <div style="font-size:13px;color:#999">${fmtData(m.data)}${m.inserito_da?" · "+esc(m.inserito_da):""}</div>
+          <div style="font-size:15px;color:#64748b">${fmtData(m.data)}${m.inserito_da?" · "+esc(m.inserito_da):""}</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="font-weight:700;color:${colore}">${segno} ${eur(m.importo)}</div>

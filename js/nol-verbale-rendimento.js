@@ -263,7 +263,7 @@
     MZ.forEach(m=>perMezzo[m.id]={m,volte:0,giorni:0,reso:0,incassato:0,daPagare:0,cauzioni:0});
     /* ⚠️ i noleggi senza collegamento al mezzo (quelli vecchi, scritti col
        nome) non si buttano via: si contano a parte e si dice quanti sono. */
-    let orfani=0, resoOrfani=0;
+    let orfani=0, resoOrfani=0, interni=0;
     N.forEach(x=>{
       const r=perMezzo[x.mezzo_id];
       const imp=+x.importo||0;
@@ -273,7 +273,7 @@
          combaciano (qui «da incassare» diceva 2.760,50, là 1.680,50):
          · un noleggio a un TUO reparto (mestiere_id) non si incassa;
          · la cauzione conta solo se e' davvero ancora in deposito. */
-      if(x.stato_pagamento==="pagato") r.incassato+=imp; else if(!x.mestiere_id) r.daPagare+=imp;
+      if(x.stato_pagamento==="pagato") r.incassato+=imp; else if(!x.mestiere_id) r.daPagare+=imp; else interni+=imp;
       if((+x.cauzione||0)>0&&cauStatoDi(x)==="in_deposito") r.cauzioni+=(+x.cauzione||0);
     });
     const righe=Object.values(perMezzo).sort((a,b)=>b.reso-a.reso);
@@ -290,7 +290,7 @@
         <div class="money out"><div class="n">${esc(_eur(totDa))}</div><div class="l">Ancora da incassare</div><div class="sub">Di questi noleggi</div></div>
       </div>
       <div style="font-size:14px;color:#666;margin:12px 0 0">
-        Incassato ${esc(_eur(totInc))} · cauzioni ancora in deposito ${esc(_eur(totCau))}${
+        Incassato ${esc(_eur(totInc))}${interni?" · ai tuoi reparti "+esc(_eur(interni))+" (non si incassano)":""} · cauzioni ancora in deposito ${esc(_eur(totCau))}${
           fermi?' · <b class="rend-fermi">'+fermi+(fermi===1?" mezzo fermo":" mezzi fermi")+"</b>":""}${
           orfani?" · "+orfani+(orfani===1?" noleggio":" noleggi")+" senza mezzo collegato ("+esc(_eur(resoOrfani))+")":""}
       </div>`;

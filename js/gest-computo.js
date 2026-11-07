@@ -415,7 +415,7 @@
     const lavOpts=(rlv.data||[]).map(x=>'<option value="'+esc(x.id)+'"'+(String(x.id)===String(c.lavoro_id||"")?" selected":"")+'>'
       +esc(x.descrizione||"(senza nome)")+'</option>').join("");
 
-    openSheetGrande(isNew?_cm('nuovo'):("Computo "+(c.numero?("n. "+c.numero):"")+" — "+(c.titolo||"")),
+    openSheetGrande(isNew?_cm('nuovo'):("Computo"+(c.numero?(" n. "+c.numero):"")+" — "+(c.titolo||"")),
        /* ============================================================
           20 agosto 2026 — LA SCALA DEL COMPUTO
           ============================================================

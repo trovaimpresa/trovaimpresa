@@ -1446,3 +1446,28 @@ perché è lì che oggi la gente si ferma.
 | 7 nov 2026 | — | inventario e lista di controllo | → solo docs ← |
 | 7 nov 2026 | 3.1 Reparti · 3.2 Assistente | vedi le due schede qui sopra | →3a6ab22← →8760c43← |
 | 7 nov 2026 | 3.3–3.11 (senza 3.10) + 3.7 | vedi le schede; collaudo dal vivo trovato 1 difetto: nel lavoro aperto «Segna fatto» non era per primo (sistemato, va nel prossimo push) | →fecdb00← |
+
+
+## Giro dell'agente separato — 7 nov 2026, sera
+Primo giro: **22 problemi** (nessun errore in console, tutti i conti rifatti a mano tornano). Chiusi:
+1 descrizioni delle voci del preventivo tagliate → casella che va a capo (`textarea.pr-desc`, cresce da sola, Invio non va a capo) ·
+2 saldo della carta in carattere Times (Playfair mai caricato) → carattere del gestionale; data a 15 px ·
+3 Agenda operatore: tendina fuori schermo sul telefono → larga quanto lo schermo ·
+4–5 scheda lavoro: testi a 13 px → 15; «Apri in Google Maps» 21 px → 44; «Cosa è stato fatto (consuntivo)» → «Cosa è stato fatto» (lo studio tiene la parola) ·
+6 titolo del computo con doppio spazio → corretto, va a capo sul telefono ·
+7 schede cliente/fornitore: etichette 13,5 → 15; collegamenti telefono/email alti 40; pulsanti 44 ·
+8 tondini «i» 30 px → 40 sul telefono; + e − della mappa 40 ·
+9 titolo in Mappa tagliato → va a capo ·
+10 scritta della ricerca tagliata sul telefono → «Cerca un nome» ·
+11 numeretti del menu 13 px → 14; id doppio `cnt-crediti` → Crediti formativi ora `cnt-cfp` ·
+12 Report: «Migliori clienti (per fatturato)» contava i lavori → «(per valore dei lavori)»; margine col segno «−» ·
+13 «Pagata» / «Ha pagato» → sempre «Ha pagato» ·
+14 nomi nel Cestino tagliati a metà parola → «…» ·
+15 Noleggio: pallino verde su uno zero → grigio ·
+16 titoli dei riquadri soldi tagliati → vanno a capo ·
+17 pulsanti di stato tagliati nella scheda (telefono) → due per riga ·
+18–19 pulsanti e scritte a 13 px nelle schede e nella barra del Noleggio → 15–16 ·
+20 Rendimento: mancavano 1.080 € senza dire perché → «ai tuoi reparti 1.080,00 € (non si incassano)» ·
+21 Ricarica: due uscite → una sola, «Torna al gestionale» alta 44 ·
+22 Ricarica sul telefono: «26 + 0» andava a capo male → griglia.
+Lasciato com'è (scelta): «metti da parte 31 € su 100» è 30,46 arrotondato in su apposta (meglio un euro in più da parte).

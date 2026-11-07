@@ -142,6 +142,16 @@
   .sotto{font-size:18px}
   .foglio .unitario,.foglio .parola,.foglio .rep-dice,.foglio li,.foglio .ct-et,.foglio .ct-nota,.foglio .torna{font-size:16px!important}
   .foglio .etichetta{font-size:15px!important}
+  /* 7 nov 2026 — una sola uscita: «Torna al gestionale» nella barra, grande.
+     La freccia «Indietro» che il sito mette in cima faceva lo stesso. */
+  .ti-back-riga{display:none!important}
+  .barra a{font-size:16px!important;min-height:44px;display:inline-flex;align-items:center;padding:0 16px!important}
+  /* sul telefono «26 + 0» resta su una riga, e «= 26» va sotto tutto insieme */
+  @media(max-width:520px){
+    .conto{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start}
+    .ct-voce{min-width:0}
+    .ct-tot{grid-column:1 / -1}
+  }
 </style>
 <style>/* 5 ott 2026: come il Gestionale - sfondo #e7eef8 e bordo blu scuro sulle schede */
 body{background:#e7eef8 !important}

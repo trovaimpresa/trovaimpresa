@@ -37,7 +37,7 @@
         <div class="thumbs" id="th-prima"></div></div>
       <div class="field"><label>Stato</label><div class="seg" id="j-stato">
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
-      <div class="field"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
+      <div class="field"><label>Cosa è stato fatto</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
       <div class="field"><label>📷 Foto lavoro FATTO (operatore)</label>
         <select id="op-dopo"><option value="">— chi l'ha fatto —</option>${dipOpts}</select>
         <input type="file" id="up-dopo" accept="image/*" multiple style="display:none">

@@ -77,9 +77,13 @@
       /* 7 nov 2026: male puo' valere anche "corso" = pallino blu, lavoro in
          corso normale (mezzi fuori dal cliente): non e' un problema */
       const corso=male==="corso";
-      p.className="nrc-pall "+(corso?"corso":(male?"male":"bene"));
+      /* 7 nov 2026: uno zero (nessun mezzo libero, 0,00 € incassati) non e'
+         «tutto a posto»: pallino grigio */
+      const nEl=document.getElementById(id);
+      const zero=!male&&nEl&&/^\s*0(?:,00)?\s*(?:€)?\s*$/.test(String(nEl.textContent||"").replace(/\u00a0/g," "));
+      p.className="nrc-pall "+(corso?"corso":(male?"male":(zero?"zero":"bene")));
       /* chi non distingue bene rosso e verde deve poterlo leggere lo stesso */
-      p.title=corso?"In corso, tutto normale":(male?"Qui c'\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto");
+      p.title=zero?"Niente":corso?"In corso, tutto normale":(male?"Qui c'\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto");
       p.setAttribute("aria-label",corso?"in corso":(male?"qualcosa che va male":"tutto a posto"));
     }
   }

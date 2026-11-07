@@ -498,7 +498,7 @@
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
       </div>
       <div class="sh-b sh-b-b">
-      <div class="field campo-titolo"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
+      <div class="field campo-titolo"><label>${ruoloUtente==='professionista'?"Cosa è stato fatto (consuntivo)":"Cosa è stato fatto"}</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       </div>
       </div><div class="sh-col">

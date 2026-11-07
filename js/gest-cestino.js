@@ -337,7 +337,7 @@
         const _p=CEST_PADRE[x.c.t];
         cestCache.push({tab:x.c.t, ic:x.c.ic, foglia:!!x.c.foglia,
           tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?(x.c.t==='gest_lavori'?_lav():x.c.labImp):x.c.lab,
-          nome:nome.slice(0,80),
+          nome:nome.length>80?nome.slice(0,79).trimEnd()+"…":nome,
           quando:r.eliminato_il, id:r.id, path:r.storage_path||null,
           padre:(_p&&r[_p[1]])?{tab:_p[0], col:_p[1], id:r[_p[1]], lab:_p[2]}:null});
       });
