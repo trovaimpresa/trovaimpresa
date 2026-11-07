@@ -1020,8 +1020,7 @@
         const c=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
         totCli[p.id]=c.totale;
       }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        const iva=_centPerc(base,+p.iva_perc||0);
-        totCli[p.id]=_cent2(base+iva);
+        totCli[p.id]=prevContiImpresa(base,p.iva_perc).totale;
       }else{
         totCli[p.id]=base;   /* aliquota non indicata: resta com'era */
       }
@@ -1061,14 +1060,20 @@
             `<span class="lav-bar ${PREV_BAR[p.stato]||"da_fare"}" title="${PREV_LAB[p.stato]||p.stato}"></span><span class="c-nome">${esc(p.titolo||"—")}</span>`,
             esc(cliMap[p.cliente_id]||"—"),
             {h:PREV_VERBO[p.stato]+" "+q.testo,cls:q.classe},
-            eur(totCli[p.id]||0)+'<small class="prev-iva">'+(ruoloUtente==='professionista'?'da incassare':(_conIva(p)?'IVA inclusa':'IVA esclusa'))+'</small>'
+            /* 7 nov 2026 — collaudo della semplicita': nella riga il numero grande e'
+               SEMPRE senza IVA, come il totale in cima; se l'IVA e' indicata, sotto
+               piccolo «con IVA …» (la cifra del PDF). Prima si mischiavano. */
+            (ruoloUtente==='professionista'
+              ? eur(totCli[p.id]||0)+'<small class="prev-iva">da incassare</small>'
+              : eur(tot[p.id]||0)+'<small class="prev-iva">IVA esclusa</small>'
+                +(_conIva(p)?'<small class="prev-iva prev-coniva">con IVA '+eur2(totCli[p.id]||0)+'</small>':''))
           ],
           menu:prevVoci(p)
         };
       }),
       numeri:prevNumeri(prevCache,totCli),
       totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)+sommaEt},
-      cards:()=>L.map(p=>prevCard(p,cliMap,totCli,_conIva(p))).join("")
+      cards:()=>L.map(p=>prevCard(p,cliMap,totCli,_conIva(p),tot)).join("")
     });
   }
 
@@ -1112,7 +1117,7 @@
     ]);
   }
   /* sotto 880px: la card di prima, con le stesse azioni del menu */
-  function prevCard(p,cliMap,tot,conIva){
+  function prevCard(p,cliMap,tot,conIva,imp){
     /* 7 nov 2026 — sotto l'importo si dice SEMPRE se l'IVA c'e' o no: nella
        stessa lista stavano 982,10 con l'IVA e 2.800 senza, uguali a vedersi */
     const et=ruoloUtente==='professionista'?'da incassare':(conIva?'IVA inclusa':'IVA esclusa');
@@ -1121,7 +1126,9 @@
       <div class="job-meta">
         ${p.cliente_id?`<span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>`:""}
         <span>📅 ${fdate(p.data)}</span>
-        <span class="prev-tot">${eur2(tot[p.id]||0)}</span><span class="prev-iva-card">${et}</span></div>
+        ${(ruoloUtente!=='professionista'&&imp)
+          ? `<span class="prev-tot">${eur2(imp[p.id]||0)}</span><span class="prev-iva-card">IVA esclusa${conIva?` · con IVA ${eur2(tot[p.id]||0)}`:""}</span>`
+          : `<span class="prev-tot">${eur2(tot[p.id]||0)}</span><span class="prev-iva-card">${et}</span>`}</div>
       ${/* 16 agosto 2026 — la nota non si mostra piu' in anteprima: era un
             muro di testo giallo che faceva la scheda alta il doppio delle
             vicine, e tagliato a meta' non si leggeva comunque. Si legge
@@ -1141,7 +1148,9 @@
   function prevVoci(p){
     /* 1 novembre 2026 — «Invia al cliente»: link, WhatsApp, email, QR e firma col dito.
        Sta in js/gest-invia-cliente.js. E' il primo: e' quello che si fa piu' spesso. */
-    const v=[{lab:"📤 Invia al cliente",action:"prev-invia",data:{id:p.id}},{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
+    /* 7 nov 2026 — «top:true» = sta in vista in alto nella finestra (le 3 cose
+       di tutti i giorni); le altre vanno in «Altro ▾» (gest-schede-clienti.js) */
+    const v=[{lab:"📤 Invia al cliente",action:"prev-invia",data:{id:p.id},top:true},{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
     /* la lettera d'incarico è un obbligo di legge per i tecnici: sta accanto al PDF */
     if(ruoloUtente==='professionista')v.push({lab:"📝 Lettera d'incarico",action:"prev-incarico",data:{id:p.id}});
     /* per chi lavora in cantiere il gemello è la conferma d'ordine */
@@ -1151,12 +1160,12 @@
     v.push({lab:"📋 Capitolato",action:"prev-capitolato",data:{id:p.id}});
     if(p.stato==="bozza")v.push({lab:"📤 Segna inviato",action:"prev-stato",data:{id:p.id,v:"inviato"}});
     if(p.stato==="bozza"||p.stato==="inviato"){
-      v.push({lab:"✔ Accettato → crea lavoro",action:"prev-to-lavoro",data:{id:p.id}});
+      v.push({lab:"✔ Accettato → crea lavoro",action:"prev-to-lavoro",data:{id:p.id},top:true});
       v.push({lab:"✕ Rifiutato",action:"prev-stato",data:{id:p.id,v:"rifiutato"}});
     }
     /* 12 agosto 2026 (sera) — la scorciatoia che mancava: dal preventivo alla
        fattura, senza rifare la strada lunga da "Fatture -> + Nuova". */
-    v.push({lab:"\ud83e\uddfe Crea la fattura da qui",action:"prev-to-fatt",data:{id:p.id}});
+    v.push({lab:"\ud83e\uddfe Crea la fattura da qui",action:"prev-to-fatt",data:{id:p.id},top:true});
     if(p.stato==="rifiutato")v.push({lab:"↩ Riapri",action:"prev-stato",data:{id:p.id,v:"bozza"}});
     v.push({sep:true});
     v.push({lab:"✏ Modifica",action:"edit-prev",data:{id:p.id}});

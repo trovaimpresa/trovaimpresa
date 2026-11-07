@@ -398,14 +398,17 @@
   function jobCardSupa(l,withFoto,opTel,conImp,menuTab){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     const late=inRitardo(l.stato,l.data_prevista);
-    const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
+    /* 7 nov 2026 — collaudo della semplicita': il pallino rosso diceva «Da fare».
+       Il colore sta solo dove c'e' anche la parola: rosso = «In ritardo»,
+       blu = «In corso», ambra = «Da fare», verde = «Fatto». */
+    const lavLab=fatto?"Fatto":(late?"In ritardo":(l.stato==="in_corso"?"In corso":"Da fare"));
     const dp=esc(l.data_prevista||"");
     const dots=menuTab?`<span class="job-menu"><button class="lav-dots" data-action="tab-menu" data-tab="${menuTab}" data-id="${esc(String(l.id))}" title="Altre azioni">&#8943;</button></span>`:"";
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div>
         ${conImp&&+l.importo?`<span class="job-imp">${eur(l.importo)}</span>`:""}</div>
       <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':'rosso')}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
+        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':(l.stato==="in_corso"?'blu':'rosso'))}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
       </div>
       <div class="job-meta">
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
@@ -586,9 +589,10 @@
     const dp=l.data_prevista||"", fatto=l.stato==="fatto", fs=l.fatt_stato||"none";
     const v=[];
     if(l.stato==="da_fare")v.push({lab:"\u25b6 Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
-    if(!fatto)v.push({lab:"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
+    /* 7 nov 2026 — «top:true» = in vista nella finestra del lavoro (gest-schede-clienti.js) */
+    if(!fatto)v.push({lab:"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp},top:true});
     else v.push({lab:"\u21a9 Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
-    v.push({lab:"\ud83d\udcf7 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
+    v.push({lab:"\ud83d\udcf7 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"},top:true});
     /* il verbale di sopralluogo è roba da tecnici: nasce dalle foto della pratica */
     if(ruoloUtente==='professionista')v.push({lab:"\ud83d\udccb Verbale di sopralluogo",action:"verbale",data:{id:l.id}});
     if(l.dove)v.push({lab:"\ud83d\uddfa Mappa",action:"map",data:{q:l.dove}});
@@ -599,7 +603,7 @@
     if(ruoloUtente!=='professionista')v.push({lab:"🎨 Scelte del cliente",action:"scelte-cliente",data:{id:l.id}});
     v.push({sep:true});
     v.push({lab:"\ud83d\udcc4 Scarica PDF",action:"pdf",data:{id:l.id}});
-    if(fatto)v.push({lab:(fs==="none"&&!_lavFatturati.has(String(l.id)))?"\ud83e\uddfe Crea fattura":"\ud83e\uddfe Apri fattura",action:"fatt",data:{id:l.id}});
+    if(fatto)v.push({lab:(fs==="none"&&!_lavFatturati.has(String(l.id)))?"\ud83e\uddfe Crea fattura":"\ud83e\uddfe Apri fattura",action:"fatt",data:{id:l.id},top:true,prima:true});
     v.push({sep:true});
     v.push({lab:"\ud83d\uddd1 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
     return v;

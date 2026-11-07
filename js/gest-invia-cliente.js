@@ -74,7 +74,7 @@
       out.totale=["Netto a pagare",eur2(cp.totale)];
       out.totale_nota="Netto a pagare";
     }else if(p.iva_perc!=null&&p.iva_perc!==""){
-      var perc=+p.iva_perc||0, iva=_centPerc(tot,perc), fin=_cent2(tot+iva);
+      var _pc=prevContiImpresa(tot,p.iva_perc), perc=_pc.perc, iva=_pc.iva, fin=_pc.totale;
       out.totali.push(["Imponibile",eur2(tot)]);
       if(perc) out.totali.push(["IVA "+_pct(perc)+"%",eur2(iva)]);
       out.totale=["Totale",eur2(fin)];

@@ -157,11 +157,60 @@
       +   _rigaDato("Codice destinatario",c.sdi_codice)
       +   _rigaDato("PEC",c.sdi_pec)
       + '</div>'
-      + '</div></div>',
+      + '</div></div>'
+      /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): i suoi lavori,
+         preventivi e fatture, qui dentro. Prima per vederli bisognava cercare
+         il nome nella casella in alto. Si riempie da sola (cliStoria). */
+      + '<div class="sh-b" id="cli-storia"><div class="sh-tit">I suoi lavori, preventivi e fatture</div><div class="campo-aiuto">Sto guardando…</div></div>',
       '<button class="btn b-cancel" data-action="close">Chiudi</button>'
       + '<button class="btn" data-action="doc-cli" data-id="'+esc(c.id)+'">&#128206; Documenti</button>'
       + '<button class="btn-primary" data-action="edit-cli" data-id="'+esc(c.id)+'">&#9998; Modifica</button>');
+    cliStoria(c.id);
   }
+
+  /* 7 nov 2026 — I SUOI LAVORI, PREVENTIVI E FATTURE (scheda del cliente).
+     Solo lettura: toccando una riga si apre con window.apriCosa (gest-ricerca.js),
+     la stessa porta della ricerca in alto e della Chat.
+     ⛔ I soldi NON si ricalcolano qui: si leggono dalle viste del database
+     (gest_preventivi_totali, gest_fatture_totali), le stesse di Chat ed email.
+     Preventivi = senza IVA (come l'elenco Preventivi), fatture = totale del
+     documento (come l'elenco Fatture), lavori = importo del lavoro.
+     Le righe nel Cestino non arrivano: `sb` le salta da solo (js/cestino.js). */
+  async function cliStoria(cid){
+    const box=$("#cli-storia"); if(!box||!sb||!sbUid)return;
+    try{
+      const [rl,rp,rf]=await Promise.all([
+        sb.from("gest_lavori").select("id,descrizione,stato,data_prevista,importo").eq("user_id",sbUid).eq("cliente_id",cid).order("data_prevista",{ascending:false}).limit(30),
+        sb.from("gest_preventivi").select("id,numero,titolo,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30),
+        sb.from("gest_fatture").select("id,numero,anno,stato,data").eq("user_id",sbUid).eq("cliente_id",cid).order("data",{ascending:false}).limit(30)
+      ]);
+      if(rl.error||rp.error||rf.error)throw (rl.error||rp.error||rf.error);
+      const L=rl.data||[], P=rp.data||[], F=rf.data||[];
+      const [tp,tf]=await Promise.all([
+        P.length?sb.from("gest_preventivi_totali").select("preventivo_id,imponibile,totale").in("preventivo_id",P.map(x=>x.id)):{data:[]},
+        F.length?sb.from("gest_fatture_totali").select("fattura_id,totale").in("fattura_id",F.map(x=>x.id)):{data:[]}
+      ]);
+      const totP={};((tp&&tp.data)||[]).forEach(t=>{totP[t.preventivo_id]=t;});
+      const totF={};((tf&&tf.data)||[]).forEach(t=>{totF[t.fattura_id]=t;});
+      const STL={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto",bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato",emessa:"Emessa",pagata:"Pagata"};
+      const riga=(tipo,id,t,sotto,v)=>'<button type="button" class="cs-riga" data-cs-tipo="'+tipo+'" data-cs-id="'+esc(String(id))+'">'
+        +'<span class="cs-t">'+esc(t)+'<small>'+esc(sotto)+'</small></span><span class="cs-v">'+v+'</span></button>';
+      const gruppo=(tit,arr)=>arr.length?'<div class="cs-gr">'+tit+' ('+arr.length+')</div>'+arr.join(""):"";
+      const html=
+        gruppo("Lavori",L.map(l=>riga("lav",l.id,l.descrizione||"Lavoro",((typeof inRitardo==="function"&&inRitardo(l.stato,l.data_prevista))?"In ritardo":(STL[l.stato]||l.stato||""))+" · "+fdate(l.data_prevista),+l.importo?eur2(+l.importo):"")))
+       +gruppo("Preventivi",P.map(p=>{const t=totP[p.id];return riga("prev",p.id,"N. "+(p.numero||"—")+" — "+(p.titolo||""),(STL[p.stato]||p.stato||"")+" · "+fdate(p.data),t?eur2(+t.imponibile||0)+' <small>IVA esclusa</small>':"");}))
+       +gruppo("Fatture",F.map(f=>{const t=totF[f.id];return riga("fatt",f.id,f.numero?("Fattura n. "+f.numero+"/"+(f.anno||"")):"Fattura in bozza",(STL[f.stato]||f.stato||"")+" · "+fdate(f.data),t?eur2(+t.totale||0):"");}));
+      box.innerHTML='<div class="sh-tit">I suoi lavori, preventivi e fatture</div>'
+        +(html||'<div class="campo-aiuto">Ancora niente per questo cliente.</div>');
+    }catch(e){
+      box.innerHTML='<div class="sh-tit">I suoi lavori, preventivi e fatture</div><div class="campo-aiuto">Non riesco a leggerli adesso. Riprova fra poco, oppure cerca il nome nella casella in alto.</div>';
+    }
+  }
+  document.addEventListener("click",function(e){
+    const b=e.target.closest(".cs-riga[data-cs-tipo]"); if(!b)return;
+    if(typeof window.apriCosa==="function"&&window.apriCosa(b.getAttribute("data-cs-tipo"),b.getAttribute("data-cs-id")))return;
+    toast("Non riesco ad aprirlo da qui: cercalo nella casella in alto.");
+  });
 
   async function docCliApri(id){
     if(!sbUid){toast("Devi essere loggato");return;}

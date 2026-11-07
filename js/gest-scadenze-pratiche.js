@@ -140,7 +140,7 @@
             id:s.id,
             click:apri,
             celle:[
-              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"Aperta")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
               esc(s.tipo_pratica),
               `🚚 ${esc(s._nome)}`,
               {h:q.testo,cls:q.classe}
@@ -153,7 +153,7 @@
             id:s.id,
             click:{action:"scad-persona",data:{id:s._opId}},
             celle:[
-              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"Aperta")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"In tempo")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
               esc(s.tipo_pratica||"—"),
               `👷 ${esc(rif)}`,
               {h:q.testo,cls:q.classe}
@@ -165,7 +165,7 @@
           id:s.id,
           click:{action:"edit-scad",data:{id:s.id}},
           celle:[
-            `<span class="lav-bar ${fatta?"fatto":(s.data_scadenza&&s.data_scadenza<oggi?"ritardo":(s.data_scadenza&&s.data_scadenza<=lim?"da_fare":"in_corso"))}" title="${fatta?"Fatta":(s.data_scadenza&&s.data_scadenza<oggi?"Scaduta":(s.data_scadenza&&s.data_scadenza<=lim?"In scadenza":"Aperta"))}"></span><span class="c-nome">${esc(s.titolo||"Scadenza")}</span>`,
+            `<span class="lav-bar ${fatta?"fatto":(s.data_scadenza&&s.data_scadenza<oggi?"ritardo":(s.data_scadenza&&s.data_scadenza<=lim?"da_fare":"in_corso"))}" title="${fatta?"Fatta":(s.data_scadenza&&s.data_scadenza<oggi?"Scaduta":(s.data_scadenza&&s.data_scadenza<=lim?"In scadenza":"In tempo"))}"></span><span class="c-nome">${esc(s.titolo||"Scadenza")}</span>`,
             esc(s.tipo_pratica||"—"),
             rif?esc(rif):`<span class="cli-nome vuoto">—</span>`,
             {h:q.testo,cls:q.classe}
@@ -182,29 +182,31 @@
       cards:()=>L.map(s=>scadCard(s,cliMap,oggi,lim,mezMap,lavMap)).join("")
     });
   }
+  /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): «Aperta» non si capiva:
+     adesso «In tempo»; i pulsanti delle righe si chiamano tutti «Apri». */
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
     if(s._mezzo){
-      let bgM="var(--sfondo)",fgM="var(--testo-2)",labM="Aperta",tonoM="t-neutro";
+      let bgM="var(--sfondo)",fgM="var(--testo-2)",labM="In tempo",tonoM="t-neutro";
       if(s.data_scadenza<oggi){bgM="var(--err-bg)";fgM="var(--err)";labM="Scaduta";tonoM="t-err";}
       else if(s.data_scadenza<=lim){bgM="var(--attesa-bg)";fgM="var(--attesa)";labM="In scadenza";tonoM="t-attesa";}
       return schedaJob({
         tono:tonoM, titolo:esc(s.titolo),
         destra:`<span class="stato" style="background:${bgM};color:${fgM}">${labM}</span>`,
         meta:["🚚 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
-        azioni:[{lab:"Apri la scheda",action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
+        azioni:[{lab:"Apri",action:"cal-vai",data:{tab:s._tab,azione:"edit-mezzo",id:s._mzId}}]
       });
     }
     if(s._persona){
-      let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="Aperta",tonoP="t-neutro";
+      let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="In tempo",tonoP="t-neutro";
       if(s.data_scadenza<oggi){bgP="var(--err-bg)";fgP="var(--err)";labP="Scaduta";tonoP="t-err";}
       else if(s.data_scadenza<=lim){bgP="var(--attesa-bg)";fgP="var(--attesa)";labP="In scadenza";tonoP="t-attesa";}
       return schedaJob({
         tono:tonoP, titolo:esc(s.titolo),
         destra:`<span class="stato" style="background:${bgP};color:${fgP}">${labP}</span>`,
         meta:["👷 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
-        azioni:[{lab:"Apri la scheda",action:"scad-persona",data:{id:s._opId}}]
+        azioni:[{lab:"Apri",action:"scad-persona",data:{id:s._opId}}]
       });
     }
     const fatta=s.stato==="fatta";
@@ -214,7 +216,7 @@
     /* dipCache tiene solo chi c'e' adesso in squadra: se il nome non si trova,
        quella persona e' stata tolta. Si dice, invece di lasciare il vuoto. */
     const opeNome=s.operatore_id?(((dipCache||[]).find(o=>String(o.id)===String(s.operatore_id))||{}).nome||"(persona non più in squadra)"):"";
-    let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta",tono="t-neutro";
+    let bg="var(--sfondo)",fg="var(--testo-2)",lab="In tempo",tono="t-neutro";
     if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";tono="t-ok";}
     else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";tono="t-err";}
     else if(s.data_scadenza&&s.data_scadenza<=lim){bg="var(--attesa-bg)";fg="var(--attesa)";lab="In scadenza";tono="t-attesa";}

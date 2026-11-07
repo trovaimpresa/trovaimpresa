@@ -30,6 +30,8 @@ async function gpBanner(){
     const tot=(data||[]).length,da=(data||[]).filter(x=>x.stato!=="controllato").length;
     let visti=gpVisti();if(!visti){gpSegnaVisti();visti=gpVisti();}   /* la prima volta nulla e' «nuovo» */
     const nuovi=(data||[]).filter(x=>x.stato==="controllato"&&x.controllato_il&&x.controllato_il>visti).length;
+    /* 7 nov 2026 — se non c'e' nessun preventivo da controllare, il riquadro non si vede */
+    if(!tot){b.innerHTML="";return;}
     b.innerHTML='<button type="button" class="gp-ban'+(da?" r":"")+(nuovi?" v":"")+'" data-gp="apri"><span>Preventivi da controllare</span><span class="gp-dx">'
       +(nuovi?'<span class="gp-nv">'+nuovi+(nuovi===1?" controllato":" controllati")+'</span>':"")
       +(da?'<span class="gp-n">'+da+'</span>':(!nuovi&&tot?'<span class="gp-ok">tutti controllati</span>':""))+'</span></button>';

@@ -492,7 +492,8 @@
     const meta=[
       "🧾 "+esc(fattNumero(f)),
       "📅 "+fdate(f.data),
-      "👤 "+esc(nome),
+      /* 7 nov 2026 — collaudo della semplicita': il cliente sta gia' nel titolo
+         della scheda, qui era scritto due volte. (`nome` resta: lo usa il titolo) */
       /* 9 agosto 2026 — questa riga vive dentro .fatt-info, che il traduttore
          salta apposta: la parola giusta va scelta qui. */
       nLav?("🛠 "+nLav+(ruoloUtente==='professionista'?(nLav===1?" pratica":" pratiche"):(nLav===1?" lavoro":" lavori"))):"",
@@ -500,26 +501,27 @@
         ? '<span'+(scaduta?' style="color:var(--err);font-weight:700"':'')+'>⏳ aspetti da '+gio+(gio===1?" giorno":" giorni")+'</span>'
         : "",
       f.tipo!=="fattura" ? "📄 "+FATT_TIPO_LAB[f.tipo] : "",
-      pdf?"":'<span style="color:var(--testo-3)">nessun PDF allegato</span>',
+      /* 7 nov 2026 — via «nessun PDF allegato»: non diceva niente di utile */
       /* 29/09/2026 — a che punto e' con lo SDI */
       f.sdi_stato ? '<span class="sdi-meta sdi-m-'+esc(f.sdi_stato)+'">✉ SDI: '+esc((typeof SDI_STATO_LAB!=="undefined"&&SDI_STATO_LAB[f.sdi_stato])||f.sdi_stato)+(f.sdi_ambiente==="test"?" (prova)":"")+'</span>' : ""
     ];
 
     const az=[];
-    if(f.stato==="bozza")   az.push({lab:"📤 Emetti",       action:"fatt-stato",data:{id:f.id,v:"emessa"}});
-    if(f.stato==="emessa")  az.push({lab:"💶 Segna pagata", action:"fatt-stato",data:{id:f.id,v:"pagata"}});
+    /* 7 nov 2026 — top/prima: cosa resta in vista nella finestra (gest-schede-clienti.js) */
+    if(f.stato==="bozza")   az.push({lab:"📤 Emetti",       action:"fatt-stato",data:{id:f.id,v:"emessa"},top:true,prima:true});
+    if(f.stato==="emessa")  az.push({lab:"💶 Segna pagata", action:"fatt-stato",data:{id:f.id,v:"pagata"},top:true,prima:true});
     if(f.stato==="pagata")  az.push({lab:"↩ Non pagata",    action:"fatt-stato",data:{id:f.id,v:"emessa"}});
     az.push({lab:"✏ Apri",     action:"edit-fatt",data:{id:f.id}});
     /* due PDF diversi, e i nomi di prima si scambiavano facilmente:
        uno lo CREA il gestionale, l'altro lo ALLEGHI tu se ce l'hai. */
-    az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id}});
+    az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id},top:true});
     /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
        lo SDI non la accetta */
     if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
     /* 29/09/2026 — la fattura parte allo SDI con un clic (js/gest-sdi.js) */
     const sdiPartita=!!(f.sdi_uuid&&f.sdi_stato!=="scartata");
     if(f.numero&&(f.stato==="emessa"||f.stato==="pagata"))
-      az.push({lab:sdiPartita?"✉ Stato SDI":"✉ Invia allo SDI",action:"fatt-sdi",data:{id:f.id}});
+      az.push({lab:sdiPartita?"✉ Stato SDI":"✉ Invia allo SDI",action:"fatt-sdi",data:{id:f.id},top:true});
     if(pdf) az.push({lab:"📄 Apri il PDF allegato",action:"open-fattura", data:{id:pdf.id}});
     else    az.push({lab:"📎 Allega un PDF tuo",   action:"upload-fattura",data:{id:f.id}});
     /* una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
@@ -533,7 +535,9 @@
       /* ⚠️ 28 agosto 2026 — eur2 e non eur: l'importo di una fattura si
          scrive coi centesimi (860,50 € usciva «861 €»). eur2 e' lo stesso
          che questa scheda usa gia' piu' sotto per il dettaglio. */
-      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare)+'</span>',
+      /* 7 nov 2026 — sotto l'importo si dice cos'e': nei Preventivi c'e' «IVA esclusa» */
+      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur2(c.daPagare)
+            +'<small class="fatt-imp-et">'+((+c.ritenuta>0)?"netto da incassare":"IVA compresa")+'</small></span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az

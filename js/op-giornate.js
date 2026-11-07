@@ -49,11 +49,14 @@
   function pannello(){
     var p = document.getElementById("mie-giornate");
     if (p) return p;
-    var dopo = document.getElementById("btn-rapido");
+    /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): «Le mie giornate»
+       sta IN FONDO, dopo le schede (Lavori, Foto…). Prima stava subito sotto
+       «Segna la giornata» e i lavori di oggi finivano a 1.100 px. */
+    var dopo = document.getElementById("op-p-archivio") || document.getElementById("btn-rapido");
     if (!dopo || !dopo.parentNode) return null;
     p = document.createElement("div");
     p.className = "panel hidden"; p.id = "mie-giornate";
-    dopo.parentNode.insertBefore(p, dopo.nextSibling);
+    dopo.parentNode.appendChild(p);
     p.addEventListener("click", function (ev) {
       var b = ev.target.closest("button"); if (!b) return;
       if (b.dataset.mg === "prev" || b.dataset.mg === "next") { mese = sposta(mese, b.dataset.mg === "next" ? 1 : -1); disegna(); }
@@ -109,7 +112,9 @@
         + '<div class="mg-mese"><button type="button" data-mg="prev" aria-label="Mese prima">‹</button><b>' + e(nomeMese(mese)) + '</b><button type="button" data-mg="next" aria-label="Mese dopo">›</button></div>'
         + '<div class="mg-tot"><span>Hai lavorato</span><b>' + n + (n === 1 ? " giorno" : " giorni") + '</b><span>' + (mese === ym(new Date()) ? "questo mese" : "in " + e(nomeMese(mese).toLowerCase())) + '</span></div>'
         + attesa + (righe || (attesa ? '' : '<div class="mg-vuoto">Nessuna giornata segnata in questo mese.</div>'))
-        + (scrive ? '<button type="button" class="btn-fill" data-mg="segna" style="margin-top:12px">Segna la giornata di oggi</button>'
+        /* 7 nov 2026 — chi puo' scrivere ha gia' «Segna la giornata» grande in alto:
+           qui era un doppione. Resta «Racconta la tua giornata» per chi non puo'. */
+        + (scrive ? ''
                   : (racconta ? modulo() : '<button type="button" class="btn-fill" data-mg="racconta" style="margin-top:12px">Racconta la tua giornata</button>'));
     } catch (err) {
       p.innerHTML = '<div class="label">Le mie giornate</div><div class="mg-vuoto">Non riesco a leggerle adesso.</div>';

@@ -65,14 +65,41 @@
        quella che apre la carta e' «carta-dettaglio». */
     return (voci||[]).filter(x=>x&&!x.sep);
   }
+  /* 7 nov 2026 — COLLAUDO DELLA SEMPLICITA' (ok di Alex).
+     Prima in alto c'erano TUTTE le azioni in fila (nel preventivo erano 8,
+     piccole, e sul telefono l'ultima finiva fuori dallo schermo).
+     Adesso: in vista al massimo AZ_IN_VISTA azioni — prima quelle segnate
+     «top:true» da chi le elenca (le cose di tutti i giorni), poi le altre
+     nell'ordine di sempre — e il resto dentro «Altro ▾», con in fondo anche
+     «Elimina» (prima stava in fondo a sinistra, nella barra di Salva).
+     Vale per tutte le finestre che arrivano da una scheda. */
+  const AZ_IN_VISTA=3;
   function azioniSopra(voci){
-    const v=_azUtili(voci).filter(x=>!x.del);
-    return v.length?`<div class="sh-head-az">${v.map(a=>_azBottone(a,"btn btn-sm")).join("")}</div>`:"";
+    const tutte=_azUtili(voci);
+    const v=tutte.filter(x=>!x.del);
+    const del=tutte.filter(x=>x.del);
+    if(!v.length&&!del.length)return "";
+    /* «prima:true» = la cosa piu' importante, va per prima (blu pieno) */
+    const ord=v.filter(x=>x.top&&x.prima).concat(v.filter(x=>x.top&&!x.prima),v.filter(x=>!x.top));
+    const vista=ord.slice(0,AZ_IN_VISTA), resto=ord.slice(AZ_IN_VISTA).concat(del);
+    let h=vista.map((a,i)=>_azBottone(a,"btn btn-sm"+(i===0?" az-prima":""))).join("");
+    if(resto.length){
+      h+=`<details class="sh-altro"><summary class="btn btn-sm">Altro ▾</summary>`
+        +`<div class="sh-altro-pop">${resto.map(a=>_azBottone(a,"btn btn-sm")).join("")}</div></details>`;
+    }
+    return `<div class="sh-head-az">${h}</div>`;
   }
+  /* «Elimina» adesso sta in «Altro ▾»: in fondo non resta niente. Il nome
+     resta perche' openSheetGrande lo chiama ancora. */
   function azioniElimina(voci){
-    const v=_azUtili(voci).filter(x=>x.del);
-    return v.map(a=>_azBottone(a,"btn sh-foot-sx")).join("");
+    return "";
   }
+  /* «Altro ▾» si chiude toccando fuori, o dopo aver scelto una voce */
+  document.addEventListener("click",function(e){
+    document.querySelectorAll("details.sh-altro[open]").forEach(function(d){
+      if(!d.contains(e.target)||e.target.closest(".sh-altro-pop [data-action]"))d.removeAttribute("open");
+    });
+  });
   const SCHEDA_MENU={}; let _schedaMenuN=0;
   const SCHEDA_BTN_MAX=2;
   function schedaAzioni(azioni){
@@ -335,7 +362,9 @@
       }),
       numeri:lavNumeri(TUTTI,oggi,_praPro),
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
-      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",false,"lav")).join("")
+      /* 7 nov 2026 — collaudo della semplicita': l'importo si vede su ogni riga,
+         se no il totale in cima non si capisce da dove viene */
+      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",true,"lav")).join("")
     });
   }
 

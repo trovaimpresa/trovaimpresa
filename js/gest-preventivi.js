@@ -147,6 +147,20 @@
   function impRiga(qta,prezzo){
     return _centMult((+qta||1),(+prezzo||0));
   }
+  /* 7 nov 2026 — COLLAUDO DELLA SEMPLICITA': L'IVA DEL PREVENTIVO IN UN POSTO SOLO.
+     Prima la stessa formula (IVA arrotondata al centesimo, poi sommata) era
+     scritta a mano in SEI punti: modulo, elenco, PDF, Invia al cliente e due
+     volte nella conferma d'ordine. Davano gia' lo stesso numero (provato su
+     12 preventivi veri e 7 casi a mano), ma bastava cambiarne uno.
+     ⛔ Solo per impresa e artigiano: lo studio ha calcolaParcella().
+     iva_perc vuota = «non indicata»: totale = imponibile, come sempre. */
+  function prevContiImpresa(imponibile,ivaPerc){
+    const conIva=!(ivaPerc==null||ivaPerc==="");
+    const perc=conIva?(+ivaPerc||0):0;
+    const iva=conIva?_centPerc(imponibile,perc):0;
+    return {imponibile:imponibile,conIva:conIva,perc:perc,iva:iva,
+            totale:conIva?_cent2(imponibile+iva):imponibile};
+  }
 
   function prevTotaleLive(){
     /* le righe di capitolo si saltano apposta. Senza il salto il conto
@@ -346,9 +360,8 @@
     /* il totale si somma sull'IVA GIA' arrotondata ai centesimi, se no le due
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
        1.100,05. Il cliente che rifa' la somma a mano trova l'errore. */
-    const perc=+sel.value||0;
-    const iva=_centPerc(imponibile,perc);
-    const tot=_cent2(imponibile+iva);
+    const _pc=prevContiImpresa(imponibile,sel.value);
+    const perc=_pc.perc, iva=_pc.iva, tot=_pc.totale;
     const riga=(et,v)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+eur2(v)+'</strong></div>';
     box.innerHTML = riga("Imponibile",imponibile)
       + riga("IVA "+_pct(perc)+"%",iva)

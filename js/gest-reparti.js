@@ -559,7 +559,11 @@
         /* ⚠️ scritto dal punto di vista di chi il computo lo RICEVE, non di
            chi lo fa. E senza mettere l'impresa in posizione di chi chiede. */
         /* 26 set 2026 — accorciato: quattro righe diventano una. */
-        if(i)i.innerHTML='Carichi il computo del geometra, ci metti <b>i tuoi prezzi</b> e con un clic diventa un <b>preventivo</b>.';
+        /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): la riga ripeteva
+           il riquadro «Ti è arrivato il computo del geometra?» subito sotto.
+           Resta il riquadro col pulsante; la riga si nasconde (solo impresa e
+           artigiano: lo studio tiene la sua). */
+        if(i){i.innerHTML='Carichi il computo del geometra, ci metti <b>i tuoi prezzi</b> e con un clic diventa un <b>preventivo</b>.';i.style.display='none';}
       }
       /* ============================================================
          ⛔ 29 agosto 2026 — DUE POSTI CHE NON CHIEDEVANO LA PAROLA A _cm()

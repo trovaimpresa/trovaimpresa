@@ -112,3 +112,70 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #landing .wrap>p:not(.landing-sub):not(.landing-nota-rep){font-size:17px !important}
 #landing .wrap>div[style*="border-top"] p{font-size:17px !important}
 #landing .ai-str-piu,#landing .ai-str-cta{min-height:44px !important;font-size:16px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;box-sizing:border-box !important}
+
+/* ═══ 7 nov 2026 — COLLAUDO DELLA SEMPLICITA', PREVENTIVI (ok di Alex) ═══
+   Valgono per tutte le sezioni, cosi' restano uguali fra loro:
+   - in testa a ogni sezione UN pulsante principale (blu scuro pieno, «+ Nuovo…»);
+     «Genera con AI» resta accanto, bianco col bordo;
+   - i filtri (Tutti, Bozze…) vanno a capo invece di tagliarsi;
+   - nella finestra aperta: al massimo 3 azioni in vista, grandi, il resto
+     (compreso Elimina) in «Altro ▾» (js/gest-schede-clienti.js);
+   - sul telefono la barra in fondo sta su due righe da due. */
+#appview .sec-head .btn.add{background:#0a2a4d !important;color:#fff !important;border:2px solid #0a2a4d !important;font-size:18px !important;font-weight:700 !important;min-height:50px !important;padding:0 22px !important}
+#appview .sec-head .btn.btn-ai{background:#fff !important;color:#0a2a4d !important;border:2px solid #0a2a4d !important;font-size:17px !important;font-weight:700 !important;min-height:50px !important}
+#appview .sec-head .btn.btn-ai *{color:#0a2a4d !important;stroke:#0a2a4d !important}
+#appview .viste{flex-wrap:wrap !important;overflow:visible !important}
+#appview .viste .vista{min-height:44px !important;font-size:17px !important}
+.sheet .sh-head-az{overflow:visible !important;flex-wrap:wrap !important;row-gap:8px}
+.sheet .sh-head-az .btn{height:auto !important;min-height:48px !important;font-size:17px !important;padding:0 16px !important}
+.sheet .sh-head-az .btn.az-prima{background:#0a2a4d !important;color:#fff !important;border-color:#0a2a4d !important}
+.sheet .sh-head-az .btn.az-prima *{color:#fff !important;stroke:#fff !important}
+.sheet .sh-altro{position:relative;flex:0 0 auto}
+.sheet .sh-altro>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center}
+.sheet .sh-altro>summary::-webkit-details-marker{display:none}
+.sheet .sh-altro-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:#fff;border:2px solid #0a2a4d;border-radius:12px;padding:8px;display:grid;gap:6px;min-width:280px;box-shadow:0 10px 30px rgba(10,42,77,.2)}
+.sheet .sh-altro-pop .btn{width:100%;justify-content:flex-start;text-align:left}
+.ctr-ai-corto{display:none}
+.prev-coniva{font-weight:600 !important;color:#475569 !important}
+.prev-iva-card{white-space:normal !important}
+@media(max-width:880px){
+  .sheet .sh-altro{flex:1 1 100%}
+  .sheet .sh-altro>summary{width:100%;justify-content:center;box-sizing:border-box}
+  .sheet .sh-altro-pop{left:0;right:0;min-width:0;max-width:none}
+  .sheet--grande .sh-foot{display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important;padding:10px 12px !important;box-sizing:border-box !important;width:100% !important}
+  .sheet--grande .sh-foot>*{width:auto !important;margin:0 !important;min-height:48px !important;font-size:16px !important}
+  .ctr-ai-lungo{display:none}
+  .ctr-ai-corto{display:inline}
+  #preventivi .job{grid-template-columns:1fr !important;grid-template-areas:none !important}
+  #preventivi .job>*{grid-column:1/-1 !important;grid-row:auto !important;width:100% !important}
+  #preventivi .job .ja{width:100% !important;min-height:48px !important}
+}
+/* 7 nov 2026 — LAVORI: «+ Nuovo…» sempre nello stesso posto (a destra) in tutte
+   le sezioni; il pallino blu = «In corso» (prima era ambra come «Da fare») */
+#appview .sec-head .btn.add{order:10}
+.pall.blu{background:var(--blu) !important}
+/* 7 nov 2026 — CLIENTI: casella di ricerca grande; nella scheda del cliente
+   l'elenco dei suoi lavori, preventivi e fatture (gest-commercialista.js) */
+#clienti #cli-search{font-size:17px !important;min-height:48px !important;width:100% !important;max-width:560px}
+#cli-storia .cs-gr{font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#475569;margin:14px 0 6px}
+#cli-storia .cs-riga{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;padding:10px 14px;margin:0 0 6px;background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;font:inherit;font-size:17px;text-align:left;color:#0a2a4d;cursor:pointer;box-sizing:border-box}
+#cli-storia .cs-riga:hover{border-color:#0a2a4d}
+#cli-storia .cs-t{display:flex;flex-direction:column;min-width:0}
+#cli-storia .cs-t small{font-size:15px;color:#475569;font-weight:500}
+#cli-storia .cs-v{font-weight:700;white-space:nowrap;text-align:right}
+#cli-storia .cs-v small{display:block;font-size:14px;font-weight:600;color:#475569}
+/* 7 nov 2026 — FATTURE.
+   - DIFETTO: la descrizione delle voci era larga 72 px. Il 30/09 era stata
+     messa su tutta la riga (.fatt-riga .fr-desc), ma poi js/gest-dettato.js
+     l'ha chiusa dentro <span class="dt-box"> col microfono: il figlio della
+     griglia e' diventato lo span, e la regola non lo prendeva piu'.
+   - sotto l'importo «IVA compresa» o «netto da incassare»;
+   - le (i) degli aiuti piu' grandi da toccare (erano 19 px). */
+.fatt-riga>.dt-box{grid-column:1 / -1 !important;display:block !important;width:100% !important}
+.fatt-riga>.dt-box>textarea,.fatt-riga .fr-desc{width:100% !important;min-height:84px;font-size:17px !important}
+.fatt-riga{grid-template-columns:110px 140px 130px 48px}
+@media(max-width:760px){.fatt-riga{grid-template-columns:1fr 1fr 88px 44px}}
+.job-imp .fatt-imp-et{display:block;font-size:14px;font-weight:600;color:#475569;text-align:right}
+#appview .ti-i{min-width:30px !important;min-height:30px !important;font-size:15px !important}
+/* 7 nov 2026 — SQUADRA: un documento SCADUTO e' rosso (prima giallo come «sta per scadere») */
+.job-note:has(.nota-scaduta){background:#FEF2F2 !important;border-color:#DC2626 !important;color:#991B1B !important;font-weight:700}

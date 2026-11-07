@@ -161,12 +161,13 @@
     }else if(p.iva_perc!=null&&p.iva_perc!==""){
       /* 9 agosto 2026 — impresa con l'aliquota indicata: il cliente vede il
          totale FINITO, non solo l'imponibile. È la cifra che gli interessa. */
-      const perc=+p.iva_perc||0;
-      const ivaVal=_centPerc(tot,perc);
+      const _pc=prevContiImpresa(tot,p.iva_perc);
+      const perc=_pc.perc;
+      const ivaVal=_pc.iva;
       /* stessa regola del riquadro nel gestionale e della conferma d'ordine:
          si somma l'IVA già arrotondata, se no i tre documenti dello stesso
          lavoro escono con totali diversi di un centesimo */
-      const finito=_cent2(tot+ivaVal);
+      const finito=_pc.totale;
       const hBox=perc?30:18;
       if(y+hBox>272){doc.addPage();y=20;}
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
@@ -660,9 +661,11 @@
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
     let imponibile=0; righe.forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
-    const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    const ivaVal=perc?_centPerc(imponibile,perc):0;
-    const totale=_cent2(imponibile+ivaVal);
+    /* 7 nov 2026 — la formula sta in prevContiImpresa (gest-preventivi.js) */
+    const _pc=prevContiImpresa(imponibile,p.iva_perc);
+    const perc=_pc.conIva?_pc.perc:null;
+    const ivaVal=_pc.iva;
+    const totale=_cent2(_pc.totale);
     const mem=ordLeggiMem();
 
     /* come nella lettera d'incarico: i titoli dei capitoli restano, senza il
@@ -729,9 +732,11 @@
     c=await cliDelDocumento(p.cliente_id);
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let imponibile=0;(rr||[]).forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
-    const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    const ivaVal=perc?_centPerc(imponibile,perc):0;
-    const totale=_cent2(imponibile+ivaVal);
+    /* 7 nov 2026 — la formula sta in prevContiImpresa (gest-preventivi.js) */
+    const _pc=prevContiImpresa(imponibile,p.iva_perc);
+    const perc=_pc.conIva?_pc.perc:null;
+    const ivaVal=_pc.iva;
+    const totale=_cent2(_pc.totale);
 
     const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};
     const dati={oggetto:V("or-ogg")||p.titolo||"Lavori", dove:V("or-dove"), opere:V("or-opere"),

@@ -463,8 +463,9 @@
     /* la barretta dice lo stato dei documenti senza dover leggere:
        rossa se qualcosa è già scaduto, arancione se sta per scadere */
     const tono=scaduti.length?"t-err":(av.length?"t-attesa":(o.attivo?"t-ok":"t-neutro"));
+    /* 7 nov 2026 — scaduto = problema vero = rosso (classe nota-scaduta, css in gestionale-stile.css) */
     const nota=scaduti.length
-      ? "⚠ "+esc(scaduti.length===1
+      ? '<span class="nota-scaduta"></span>'+"⚠ "+esc(scaduti.length===1
                  ? (scaduti[0].lab+" "+scaduti[0].fin)
                  : (scaduti.map(x=>x.lab).join(", ")+" scaduti"))
       : (av.length?"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", ")):"");

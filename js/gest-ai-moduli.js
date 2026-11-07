@@ -1581,7 +1581,9 @@
             PREMUTO, non il fatto che sia invisibile. */
          + (CTR_AI_SEZIONI.indexOf(tipo)>=0
             ? '<button type="button" class="btn ctr-tasto-ai" data-action="ctr-ai" data-ctr="'+tipo+'">'
-              + ctrAiLabel()+'</button>'
+              /* 7 nov 2026 — sul telefono la scritta lunga andava su tre righe:
+                 li' si legge la corta (CSS in gestionale-stile.css) */
+              + '<span class="ctr-ai-lungo">'+ctrAiLabel()+'</span><span class="ctr-ai-corto">✨ Controllo AI · 1 credito</span></button>'
             : "");
   }
 
@@ -1706,7 +1708,7 @@
         +'<div class="ctr-ai-sub">'+esc((e&&e.message)||"Riprova fra un attimo.")+'</div>');
     }finally{
       ctrAiInCorso=false;
-      if(tasto){ tasto.disabled=false; tasto.textContent=ctrAiLabel(); }
+      if(tasto){ tasto.disabled=false; tasto.innerHTML='<span class="ctr-ai-lungo">'+ctrAiLabel()+'</span><span class="ctr-ai-corto">✨ Controllo AI · 1 credito</span>'; }
     }
   }
   function ctrAiRiquadroVia(){

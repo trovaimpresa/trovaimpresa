@@ -107,7 +107,7 @@ function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
 function gateCapo(){
   const t=document.getElementById("gate-titolo");
   if(t)t.textContent="Questa è l'app di chi lavora con te";
-  $("#gate-msg").textContent="Non è la tua: qui entra il tuo operaio, con il suo account, e vede i lavori del giorno. Tu lo inviti dal gestionale: Squadra → «+ Persona» → menu dei tre puntini → «Copia link» o «Invia su WhatsApp».";
+  $("#gate-msg").textContent="Non è la tua: qui entra il tuo operaio, con il suo account, e vede i lavori del giorno. Tu lo inviti dal gestionale: Squadra → «+ Nuova persona», poi apri la sua scheda e fagli inquadrare il QR.";
   const b=document.getElementById("gate-btn");
   if(b){ b.textContent="← Torna al gestionale"; b.setAttribute("href","gestionale-app.html"); }
   show("gate");

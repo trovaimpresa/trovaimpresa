@@ -246,7 +246,19 @@ La finestrella delle stelline «Come ti trovi col gestionale?» resta com'è: Al
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Due pulsanti principali («+ Nuovo preventivo» bianco, «Genera con AI» viola più forte).
+2. Nell'elenco prezzi mischiati: 982,10 CON IVA accanto a 2.800,00 SENZA, totale in cima senza.
+3. Telefono: filtri tagliati («Acce…»), titolo schiacciato da «Bozza», schede alte mezzo schermo.
+4. Preventivo aperto: 8 pulsanti piccoli (15 px) in fila; sul telefono «Crea la fattura» fuori schermo.
+5. Telefono: in fondo 5 pulsanti uno sotto l'altro (266 px, un terzo dello schermo).
+6. La formula dell'IVA del preventivo copiata in 6 posti.
+
+Clic contati (prima): nuovo preventivo 1 · mandarlo al cliente 2 (Apri → Invia) · diventa lavoro 2 (Apri → Accettato).
+
+Fatto (sul banco, push a fine giornata): un pulsante principale blu per sezione (vale per tutte); righe sempre «IVA esclusa» + «con IVA …» sotto; filtri a capo; nella finestra 3 azioni in vista (Invia, Accettato → lavoro, Crea la fattura) e il resto + Elimina in «Altro ▾» (vale per tutte le finestre); telefono: barra in fondo 2×2 (135 px), AI «Controllo AI · 1 credito»; formula IVA unica `prevContiImpresa()` (gest-preventivi.js) usata da modulo, elenco, PDF, Invia al cliente, conferma d'ordine.
+Conti: 7 casi a mano + 12 preventivi veri del database = schermo, banco e vista `gest_preventivi_totali` uguali; un sabotaggio della formula viene accusato.
+Da fare dopo il push: collaudo dal vivo, computer e telefono, e spunta delle caselle.
 
 
 ## 3.4 — App · Lavori (artigiano: Interventi · studio: Pratiche)
@@ -280,7 +292,18 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Pallino rosso con scritta «Da fare» sui lavori in ritardo; «In corso» ambra come «Da fare».
+2. Totale in cima (2.330,50 €) ma nessun importo nelle righe.
+3. «+ Nuovo» a destra qui, a sinistra nei Preventivi.
+4. Lavoro aperto: 9 pulsanti piccoli in alto.
+5. Telefono: filtri tagliati («Pro…»).
+
+Clic contati (prima): nuovo lavoro 1 · segnarlo finito 2 (Apri → Segna fatto) · fattura del lavoro 3 (Apri → … → Crea fattura).
+
+Fatto (sul banco, push a fine giornata): scritta «In ritardo» col rosso, pallino blu per «In corso»; importo su ogni riga; «+ Nuovo…» sempre a destra (tutte le sezioni); finestra: in vista Segna fatto · Foto · Avvia, e quando è finito Crea fattura (per prima) · Foto · Riapri, il resto in «Altro ▾».
+Conti: 300 + 400 + 1.000 + 450,50 + 180 = 2.330,50 € = totale a schermo = database.
+Da fare dopo il push: collaudo dal vivo, computer e telefono.
 
 
 ## 3.5 — App · Clienti
@@ -314,7 +337,16 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Quattro pulsanti in alto («+ Privato», «+ Azienda», «+ Condominio», «Compila con AI»), nessuno principale; il tipo si sceglie già dentro il modulo.
+2. La scheda del cliente non mostrava i suoi lavori, preventivi e fatture (bisognava cercare il nome in alto).
+3. Casella «Cerca nome…» con la scritta piccola.
+
+Clic contati (prima): aggiungere 1 · telefono 1 (Apri) · lavori e fatture del cliente 3+ (casella in alto, scrivere, scegliere).
+
+Fatto (sul banco, push a fine giornata): un solo «+ Nuovo cliente» blu; casella di ricerca a 17 px; nella scheda del cliente il riquadro «I suoi lavori, preventivi e fatture» (`cliStoria` in gest-commercialista.js), righe che si aprono con `window.apriCosa`. Alex ha risposto «ok» alla domanda se lo voleva.
+Provato DAL VIVO sui dati veri (iniettato nella pagina): lavoro 450,50 €, preventivo 805,00 € IVA esclusa, fatture 982,10 € e 1.100,00 € — uguali alle altre sezioni e alle viste del database; preventivo, fattura e lavoro si aprono.
+Da fare dopo il push: collaudo dal vivo, computer e telefono.
 
 
 ## 3.6 — App · Fatture
@@ -348,7 +380,18 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. DIFETTO: descrizione delle voci larga 72 px (il microfono `dt-box` aveva rotto la regola del 30/09).
+2. Riga dell'elenco: cliente scritto due volte, «nessun PDF allegato» inutile.
+3. Sotto l'importo non si diceva se l'IVA è dentro.
+4. Le (i) degli aiuti alte 19 px.
+
+Clic contati (prima): nuova fattura 1 · segnarla pagata 2 (Apri → Segna pagata) · PDF 2 · SDI 2.
+
+Fatto (sul banco, push a fine giornata): descrizione su tutta la riga; cliente una volta sola; «IVA compresa» / «netto da incassare»; (i) da 30 px; in vista Emetti o Segna pagata · Crea il PDF · Invia allo SDI, resto in «Altro ▾».
+Conti: 7 casi a mano (due aliquote coi centesimi 155,20; sconto 990; ritenuta 4% 2.750 → 2.650; IVA 4% 32,09; zero; bollo 102; nota di credito) verdi con `fattConti` del sito vero; 19 fatture vere = vista `gest_fatture_totali` (attenzione: nella vista `totale` è il NETTO da incassare, `totale_documento` il totale della fattura).
+Sospetti da guardare (non difetti, non toccati): la ritenuta non è arrotondata al centesimo prima di togliere (con 4% e 20% non succede mai niente; con aliquote strane potrebbe sbagliare di 1 centesimo); `fattConti` usa il regime dell'azienda di oggi, il PDF quello scritto sulla fattura.
+Da fare dopo il push: collaudo dal vivo, computer e telefono; la fattura del Noleggio (`fattnolTotali`) si guarda con la sezione Noleggio.
 
 
 ## 3.7 — App · Computo metrico (+ Prezzario + Stati di avanzamento)
@@ -382,7 +425,13 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. La stessa spiegazione due volte (riga sotto il titolo + riquadro «Ti è arrivato il computo del geometra?»).
+Il computo aperto era già semplice: in vista «Crea il preventivo», il resto in «Altro ▾».
+
+Fatto (sul banco): riga nascosta per impresa e artigiano (resta il riquadro col pulsante arancione). Studio invariato.
+Conti a mano: 2 × 4,50 × 2,70 = 24,30 − porta 0,90 × 2,10 = 1,89 → 22,41 m² × 22 € = 493,02 € − ribasso 10% = 443,72 € = schermo = vista `gest_computo_totali`.
+Ancora da guardare: SAL e Prezzario (pagine del computo con numeri a 14 px).
 
 
 ## 3.8 — App · Squadra (studio: Collaboratori)
@@ -416,7 +465,14 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Prima delle persone tre riquadri (spiegazione app, «Preventivi da controllare» vuoto, numero WhatsApp).
+2. «Visita medica scaduta» in giallo come «sta per scadere».
+3. «+ Persona» diverso dagli altri «+ Nuovo…».
+
+Fatto (sul banco, push a fine giornata): persone in cima, sotto la card dell'app e il numero WhatsApp; «Preventivi da controllare» solo se c'è qualcosa; scaduto rosso; «+ Nuova persona» (anche nel messaggio dell'app operaio, js/op-base.js).
+Conti: nessun conto in questa sezione (il costo orario si guarda con Giornate e Report).
+Da fare dopo il push: collaudo dal vivo, computer e telefono.
 
 
 ## 3.9 — App operaio · Prima schermata: Timbratura + Segna la giornata
@@ -450,7 +506,12 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima, telefono 380 — visto dal browser di Alex, dove l'app si apre come «david»; niente premuto):
+1. «Segna la giornata» due volte (pulsante grande + «Segna la giornata di oggi» dentro «Le mie giornate»).
+2. «Le mie giornate» fra il pulsante e i lavori: i lavori di oggi arrivavano a 1.100 px.
+
+Fatto (sul banco, push a fine giornata): un solo «Segna la giornata»; «Le mie giornate» in fondo (js/op-giornate.js). Misurato: niente esce dallo schermo, pulsanti ≥ 44 px, unica scritta sotto 16 px «Indietro» (15 px).
+⚠️ Non provati dal vivo (servono le azioni vere dell'operaio): Entrata/Uscita, Segna la giornata, foto, spese. Da provare con Alex o con un operaio vero.
 
 
 ## 3.10 — App operaio · Schede Lavori · Foto · Preventivi · Chat · Archivio
@@ -518,7 +579,14 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
-Problemi trovati: _(si scrive dopo la foto del «prima»)_
+Problemi trovati (7 nov 2026, prima):
+1. Pulsanti con due nomi («Apri la scheda» / «Apri»).
+2. «Aperta» per le scadenze lontane: non si capiva.
+3. «+ Nuova scadenza» bianco (sistemato dalla regola generale).
+
+Clic contati (prima e dopo): nuova scadenza 1 · cosa scade (filtro «Prossime») 1 · segnarla fatta 2.
+Fatto (sul banco, push a fine giornata): tutti «Apri»; «In tempo» al posto di «Aperta». Colori già giusti: Scaduta rosso, In scadenza ambra, Fatta verde.
+Da fare dopo il push: collaudo dal vivo, computer e telefono.
 
 
 ## 3.12 — App · Calendario · Agenda operatore · Promemoria

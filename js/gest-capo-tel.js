@@ -48,7 +48,8 @@ if(!document.getElementById("gt-stile")){
 }
 (function(){let n=0;const t=setInterval(function(){n++;
   if(typeof sbUid!=="undefined"&&sbUid&&typeof sb!=="undefined"&&sb){clearInterval(t);
-    const g=document.getElementById("gp-banner");
+    /* 7 nov 2026 — il numero WhatsApp sta SOTTO le persone e la card dell'app */
+    const g=document.querySelector("#squadra .app-op-card")||document.getElementById("dip-list")||document.getElementById("gp-banner");
     if(g&&!document.getElementById("gt-box")){const d=document.createElement("div");d.id="gt-box";g.parentNode.insertBefore(d,g.nextSibling);}
     gtDisegna();}
   else if(n>40)clearInterval(t);},1000);})();
