@@ -223,27 +223,27 @@ La finestrella delle stelline «Come ti trovi col gestionale?» resta com'è: Al
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [x] | [x] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
+| Nessuna formula copiata in due posti | [x] | [x] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -269,27 +269,27 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono, e spunta delle cas
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [x] | [x] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
+| Nessuna formula copiata in due posti | [-] | [-] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -303,7 +303,7 @@ Clic contati (prima): nuovo lavoro 1 · segnarlo finito 2 (Apri → Segna fatto)
 
 Fatto (sul banco, push a fine giornata): scritta «In ritardo» col rosso, pallino blu per «In corso»; importo su ogni riga; «+ Nuovo…» sempre a destra (tutte le sezioni); finestra: in vista Segna fatto · Foto · Avvia, e quando è finito Crea fattura (per prima) · Foto · Riapri, il resto in «Altro ▾».
 Conti: 300 + 400 + 1.000 + 450,50 + 180 = 2.330,50 € = totale a schermo = database.
-Da fare dopo il push: collaudo dal vivo, computer e telefono.
+Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
 
 ## 3.5 — App · Clienti
@@ -314,27 +314,27 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono.
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 1 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [-] | [-] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
+| Nessuna formula copiata in due posti | [-] | [-] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -346,7 +346,7 @@ Clic contati (prima): aggiungere 1 · telefono 1 (Apri) · lavori e fatture del 
 
 Fatto (sul banco, push a fine giornata): un solo «+ Nuovo cliente» blu; casella di ricerca a 17 px; nella scheda del cliente il riquadro «I suoi lavori, preventivi e fatture» (`cliStoria` in gest-commercialista.js), righe che si aprono con `window.apriCosa`. Alex ha risposto «ok» alla domanda se lo voleva.
 Provato DAL VIVO sui dati veri (iniettato nella pagina): lavoro 450,50 €, preventivo 805,00 € IVA esclusa, fatture 982,10 € e 1.100,00 € — uguali alle altre sezioni e alle viste del database; preventivo, fattura e lavoro si aprono.
-Da fare dopo il push: collaudo dal vivo, computer e telefono.
+Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
 
 ## 3.6 — App · Fatture
@@ -357,27 +357,27 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono.
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [x] | [x] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
 | Nessuna formula copiata in due posti | [ ] | [ ] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -402,27 +402,27 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono; la fattura del Nol
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [x] | [x] |
+| Lo stesso numero è uguale OVUNQUE | [x] | [x] |
 | Nessuna formula copiata in due posti | [ ] | [ ] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -442,27 +442,27 @@ Ancora da guardare: SAL e Prezzario (pagine del computo con numeri a 14 px).
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 1 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [-] | [-] |
+| Lo stesso numero è uguale OVUNQUE | [-] | [-] |
+| Nessuna formula copiata in due posti | [-] | [-] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -472,7 +472,7 @@ Problemi trovati (7 nov 2026, prima):
 
 Fatto (sul banco, push a fine giornata): persone in cima, sotto la card dell'app e il numero WhatsApp; «Preventivi da controllare» solo se c'è qualcosa; scaduto rosso; «+ Nuova persona» (anche nel messaggio dell'app operaio, js/op-base.js).
 Conti: nessun conto in questa sezione (il costo orario si guarda con Giornate e Report).
-Da fare dopo il push: collaudo dal vivo, computer e telefono.
+Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
 
 ## 3.9 — App operaio · Prima schermata: Timbratura + Segna la giornata
@@ -483,27 +483,27 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono.
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 2 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [-] | [-] |
+| Lo stesso numero è uguale OVUNQUE | [-] | [-] |
+| Nessuna formula copiata in due posti | [-] | [-] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima, telefono 380 — visto dal browser di Alex, dove l'app si apre come «david»; niente premuto):
@@ -556,27 +556,27 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | | PC | Tel |
 |---|:-:|:-:|
 | **Semplicità** | | |
-| Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
-| UN solo pulsante principale, ben visibile | [ ] | [ ] |
-| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
-| Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
-| Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
+| Si capisce in 3 secondi a cosa serve | [x] | [x] |
+| UN solo pulsante principale, ben visibile | [x] | [x] |
+| Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 2 | [ ] | [ ] |
+| Parole semplici, di cantiere, niente inglese | [x] | [x] |
+| Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
-| Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
+| Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
-| Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
-| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
+| Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
+| Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
-| Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
-| Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Ogni conto rifatto A MANO con almeno 3 casi | [-] | [-] |
+| Lo stesso numero è uguale OVUNQUE | [-] | [-] |
+| Nessuna formula copiata in due posti | [-] | [-] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
-| Console senza errori | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
+| Console senza errori | [x] | [x] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
 Problemi trovati (7 nov 2026, prima):
@@ -586,7 +586,7 @@ Problemi trovati (7 nov 2026, prima):
 
 Clic contati (prima e dopo): nuova scadenza 1 · cosa scade (filtro «Prossime») 1 · segnarla fatta 2.
 Fatto (sul banco, push a fine giornata): tutti «Apri»; «In tempo» al posto di «Aperta». Colori già giusti: Scaduta rosso, In scadenza ambra, Fatta verde.
-Da fare dopo il push: collaudo dal vivo, computer e telefono.
+Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
 
 ## 3.12 — App · Calendario · Agenda operatore · Promemoria
@@ -1367,3 +1367,4 @@ perché è lì che oggi la gente si ferma.
 |---|---|---|---|
 | 7 nov 2026 | — | inventario e lista di controllo | → solo docs ← |
 | 7 nov 2026 | 3.1 Reparti · 3.2 Assistente | vedi le due schede qui sopra | →3a6ab22← →8760c43← |
+| 7 nov 2026 | 3.3–3.11 (senza 3.10) + 3.7 | vedi le schede; collaudo dal vivo trovato 1 difetto: nel lavoro aperto «Segna fatto» non era per primo (sistemato, va nel prossimo push) | →fecdb00← |
