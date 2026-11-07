@@ -383,6 +383,23 @@
         </div>
       </div>`;
   }
+  /* ⛔ 7 nov 2026 — UNA CASELLA IN MENO DA RICORDARE. Quando la pratica passa
+     a «Depositata» e la data di deposito e' vuota, ci si mette oggi (si
+     cambia se serve). Se una data c'e' gia', non si tocca. */
+  if(!window._praticaDataAuto){
+    window._praticaDataAuto=true;
+    document.addEventListener("change",function(e){
+      const t=e.target;
+      /* solo quando lo sceglie LUI: se lo ha messo l'AI, una data non detta
+         resta vuota (isTrusted e' falso per gli eventi del programma) */
+      if(!e.isTrusted||!t||t.id!=="j-pr-stato"||t.value!=="depositata")return;
+      const d=document.getElementById("j-pr-data");
+      if(!d||d.value)return;
+      d.value=todayStr();
+      d.dispatchEvent(new Event("input",{bubbles:true}));
+      try{toast("Data di deposito: oggi. Cambiala se serve.");}catch(_){}
+    });
+  }
   /* Legge i campi della pratica dal form. Se non è un professionista
      restituisce un oggetto vuoto, così non finisce niente nel salvataggio. */
   function leggiCampiPratica(){

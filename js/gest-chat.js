@@ -384,7 +384,9 @@
       scrivi('ai', 'Il modulo non riesco ad aprirtelo: ricarica la pagina e riprova.');
       return false;
     }
-    return !!window.AI[quale](m.campi);
+    /* 7 nov 2026 — con l'id il modulo e' quello di un lavoro che C'E' GIA'
+       (modifica_lavoro): l'id l'ha controllato il server col reparto. */
+    return !!window.AI[quale](m.campi, m.id || null);
   }
 
   /* ------------------------------------------------------------------

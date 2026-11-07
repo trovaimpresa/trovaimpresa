@@ -282,6 +282,12 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
     if (o.al  && FORMA_GIORNO.test(String(o.al)))  q.al  = String(o.al);
   }
   if (o.vuoto === 'visto_il' && cosa === 'richieste_sito') q.vuoto = 'visto_il';
+  if (cosa === 'lavori' && o.statoPratica && PRATICA_STATI_OK.indexOf(String(o.statoPratica)) >= 0) q.statoPratica = String(o.statoPratica);
+  if (cosa === 'lavori' && o.praticheAlComune) q.inPratica = ['depositata', 'istruttoria', 'integrazioni'];
+  if (q.statoPratica || q.inPratica) {
+    q.ordine = 'pratica_data_dep';
+    if (campi.indexOf('pratica_stato') < 0) q.campi = campi + ',pratica_tipo,pratica_stato,pratica_comune,pratica_protocollo,pratica_data_dep';
+  }
   if (o.parola) {
     const v = parolaPulita(o.parola);
     const testo = DOVE_SI_CERCA[cosa] || [];
@@ -370,10 +376,40 @@ const MODULI = {
   preventivo: { caselle: ['titolo'], serve: 'titolo', manca: 'manca il titolo del preventivo' }
 };
 const CASELLE_LAVORO = MODULI.lavoro.caselle;    // per chi lo chiedeva prima
+
+/* ⛔ 7 nov 2026 — LE CASELLE DELLA PRATICA (solo studio tecnico).
+   Tipo e stato sono TENDINE, ma con un elenco CHIUSO e scritto qui uguale a
+   PRATICA_TIPI / PRATICA_STATI di js/gest-scadenze-pratiche.js: non c'e' un id
+   da indovinare, quindi si possono riempire. Una parola fuori elenco si butta.
+   ⚠️ Se cambia l'elenco nel gestionale, va cambiato anche qui. */
+const PRATICA_TIPI_OK  = ['CILA', 'CILAS', 'SCIA', 'SCIA alternativa al PdC', 'Permesso di Costruire', 'Autorizzazione paesaggistica', "Agibilita'", 'Sanatoria', 'Accatastamento', 'Voltura', 'Altro'];
+const PRATICA_STATI_OK = ['da_preparare', 'depositata', 'istruttoria', 'integrazioni', 'approvata', 'archiviata'];
+const CASELLE_PRATICA  = ['pratica_tipo', 'pratica_stato', 'pratica_comune', 'pratica_protocollo', 'pratica_data_dep', 'catasto_foglio', 'catasto_particella', 'catasto_sub'];
+
+/* pura: prende quello che ha detto Claude e tiene solo le caselle buone */
+function casellePratica(d) {
+  const fuori = {};
+  const x = d || {};
+  CASELLE_PRATICA.forEach(function (k) {
+    if (x[k] === null || x[k] === undefined) return;
+    let v = String(x[k]).trim().slice(0, 120);
+    if (!v) return;
+    if (k === 'pratica_tipo') {
+      const nn = function (z) { return z.toLowerCase().normalize('NFD').replace(/[^a-z]/g, ''); };
+      const giusto = PRATICA_TIPI_OK.find(function (t) { return nn(t) === nn(v); });
+      if (!giusto) return; v = giusto;
+    }
+    if (k === 'pratica_stato') { v = v.toLowerCase(); if (PRATICA_STATI_OK.indexOf(v) < 0) return; }
+    if (k === 'pratica_data_dep' && !FORMA_DATA.test(v)) return;
+    if (/^catasto_/.test(k)) { v = v.slice(0, 20); }
+    fuori[k] = v;
+  });
+  return fuori;
+}
 const LUNGHEZZA_MAX  = 300;
 const FORMA_DATA     = /^\d{4}-\d{2}-\d{2}$/;
 
-function costruisciModulo(tipo, dati) {
+function costruisciModulo(tipo, dati, opzioni) {
   const m = MODULI[tipo];
   if (!m) return { errore: 'modulo che non conosco: ' + String(tipo) };
   const d = dati || {};
@@ -385,6 +421,18 @@ function costruisciModulo(tipo, dati) {
     if (k === 'data' && !FORMA_DATA.test(v)) return;   // vedi la nota sopra
     campi[k] = v;
   });
+  /* ⛔ 7 nov 2026 — la pratica dello studio: le caselle passano dal filtro
+     chiuso qui sopra, e SOLO se chi chiede e' uno studio tecnico. */
+  if (tipo === 'lavoro' && opzioni && opzioni.ruolo === 'professionista') {
+    Object.assign(campi, casellePratica(d));
+  }
+  /* ⛔ 7 nov 2026 — modificare un lavoro che c'e' gia': l'id e' quello vero,
+     controllato dal server prima di arrivare qui. Si cambiano SOLO le caselle
+     dette: quindi la descrizione non serve. */
+  if (opzioni && opzioni.modifica) {
+    if (!Object.keys(campi).length) return { errore: 'non mi hai detto cosa cambiare' };
+    return { tipo: tipo, id: String(opzioni.modifica), campi: campi };
+  }
   if (!campi[m.serve]) return { errore: m.manca };
   if (tipo === 'preventivo') {
     const voci = [];
@@ -506,6 +554,8 @@ async function esegui(clientDati, q) {
   if (q.dal && q.colData) sel = sel.gte(q.colData, q.dal);
   if (q.al && q.colData) sel = sel.lte(q.colData, q.colData === 'created_at' ? q.al + 'T23:59:59' : q.al);
   if (q.vuoto) sel = sel.is(q.vuoto, null);
+  if (q.statoPratica) sel = sel.eq('pratica_stato', q.statoPratica);
+  if (q.inPratica) sel = sel.in('pratica_stato', q.inPratica);
   if (!q.soloConta) {
     /* ⛔ 30 agosto 2026 — le righe di un documento vanno lette 1, 2, 3 e non
        al contrario: un preventivo letto dal fondo non si capisce. Per tutto
@@ -581,7 +631,8 @@ const FILTRI_SCHEMA = {
   escludi_stato: { type:'string', description:'tutte TRANNE quelle in questo stato (es. lavori aperti = escludi «fatto»)' },
   dal:           { type:'string', description:'dalla data AAAA-MM-GG (compresa), sulla data principale di quella cosa' },
   al:            { type:'string', description:'fino alla data AAAA-MM-GG (compresa)' },
-  prima_le_prossime: { type:'boolean', description:'true = dalla data più vecchia/vicina alla più lontana (per le cose da fare); di base sono dalle più recenti' }
+  prima_le_prossime: { type:'boolean', description:'true = dalla data più vecchia/vicina alla più lontana (per le cose da fare); di base sono dalle più recenti' },
+  stato_pratica: { type:'string', description:'SOLO studio tecnico, su lavori: da_preparare, depositata, istruttoria, integrazioni, approvata, archiviata' }
 };
 const STRUMENTI = [
   {
@@ -639,9 +690,35 @@ const STRUMENTI = [
         data:        { type:'string', description:'la data prevista, SOLO nella forma AAAA-MM-GG. Se non la sai con certezza, non metterla.' },
         importo:     { type:'string', description:'l\'importo in euro, solo il numero' },
         cliente:     { type:'string', description:'il nome del cliente, scritto come sta nel gestionale' },
-        operatore:   { type:'string', description:'il nome di chi ci va' }
+        operatore:   { type:'string', description:'il nome di chi ci va' },
+        pratica_tipo:       { type:'string', description:'SOLO studio tecnico: CILA, CILAS, SCIA, SCIA alternativa al PdC, Permesso di Costruire, Autorizzazione paesaggistica, Agibilita\', Sanatoria, Accatastamento, Voltura, Altro' },
+        pratica_stato:      { type:'string', description:'SOLO studio tecnico: da_preparare, depositata, istruttoria, integrazioni, approvata, archiviata' },
+        pratica_comune:     { type:'string', description:'SOLO studio tecnico: il Comune, senza «Comune di»' },
+        pratica_protocollo: { type:'string', description:'SOLO studio tecnico: il numero di protocollo, solo se detto o letto' },
+        pratica_data_dep:   { type:'string', description:'SOLO studio tecnico: data di deposito AAAA-MM-GG' },
+        catasto_foglio:     { type:'string' },
+        catasto_particella: { type:'string' },
+        catasto_sub:        { type:'string' }
       },
       required: ['descrizione']
+    }
+  },
+  {
+    // ⛔ 7 nov 2026 — come compila_lavoro, ma su un lavoro (o pratica) che C'E' GIA'
+    name: 'modifica_lavoro',
+    description: 'Apre nel gestionale un lavoro (per lo studio: una pratica) CHE ESISTE GIÀ, con dentro SOLO le caselle da cambiare («spostalo a giovedì», «segna il protocollo 4567 sulla CILA di Rossi», «è stata depositata ieri»). Serve l\'id vero del lavoro letto prima con cerca_per_nome o elenco_cose. NON salva: l\'utente guarda e preme Salva lui. Metti solo le caselle che cambiano.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id:          { type:'string', description:'l\'id del lavoro, letto con un attrezzo' },
+        descrizione: { type:'string' }, dove: { type:'string' },
+        data:        { type:'string', description:'nuova data prevista AAAA-MM-GG' },
+        importo:     { type:'string' },
+        pratica_tipo: { type:'string' }, pratica_stato: { type:'string' }, pratica_comune: { type:'string' },
+        pratica_protocollo: { type:'string' }, pratica_data_dep: { type:'string' },
+        catasto_foglio: { type:'string' }, catasto_particella: { type:'string' }, catasto_sub: { type:'string' }
+      },
+      required: ['id']
     }
   },
   {
@@ -749,12 +826,26 @@ async function agenda(clientDati, uid, reparto, oggi, base) {
     note_calendario_7:     ['note_calendario', { dal: oggi, al: giornoPiu(oggi, 7), prossime: true }],
     richieste_non_aperte:  ['richieste_sito',  { vuoto: 'visto_il', quanti: 10 }]
   };
+  /* ⛔ 7 nov 2026 — allo studio tecnico serve sapere quali pratiche sono
+     FERME AL COMUNE: integrazioni da mandare (le piu' urgenti) e quelle
+     depositate o in istruttoria, dalla piu' vecchia. */
+  if (base && base.ruolo === 'professionista') {
+    pezzi.pratiche_integrazioni_richieste = ['lavori', { statoPratica: 'integrazioni', prossime: true }];
+    pezzi.pratiche_al_comune = ['lavori', { praticheAlComune: true, prossime: true }];
+  }
   const nomi = Object.keys(pezzi);
   const esiti = await Promise.all(nomi.map(function (k) {
     const p = pezzi[k];
     const q = costruisciLettura(p[0], uid, reparto, Object.assign({}, base, p[1]));
     return esegui(clientDati, q).then(function (r) {
       if (r.righe) r.righe = segnaGiorni(r.righe, (ATTREZZI[p[0]] || {}).data, oggi);
+      if (r.righe && (p[1].statoPratica || p[1].praticheAlComune)) {
+        /* per le pratiche conta da quanti giorni sono state DEPOSITATE */
+        r.righe = r.righe.map(function (x) {
+          const g = segnaGiorni([{ d: x.pratica_data_dep }], 'd', oggi)[0].giorni_da_oggi;
+          return g === undefined ? x : Object.assign({}, x, { giorni_dal_deposito: -g });
+        });
+      }
       return r;
     }, function (e) { return { errore: (e && e.message) || 'non risponde' }; });
   }));
@@ -907,6 +998,7 @@ function istruzioniFisse() {
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
     'Sai aprire questi cinque moduli e basta: lavoro, cliente, scadenza, fornitore, preventivo.',
+    'SE TI CHIEDE DI CAMBIARE UN LAVORO CHE C\'È GIÀ («spostalo a giovedì», «metti l\'importo a 800», «è finito», «segna il protocollo»): trovalo con `cerca_per_nome` (o `elenco_cose`), poi `modifica_lavoro` col suo id e SOLO le caselle che cambiano. Non aprire un lavoro nuovo al posto di uno che esiste. Se ne trovi più di uno che può essere quello, chiedi quale.',
     'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
     '',
@@ -927,7 +1019,7 @@ function istruzioniFisse() {
    domanda, 0,042 $. La parte DEL GIORNO (reparto, sezione, calendario,
    parole del ruolo) cambia e va dopo, fuori dalla memoria. */
 const PAROLE_RUOLO = {
-  professionista: 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale: usa SOLO le sue, senza dire che sono al posto di altre: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nello Scadenzario. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri.',
+  professionista: 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale: usa SOLO le sue, senza dire che sono al posto di altre: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nello Scadenzario. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri. COMPILARE LE PRATICHE PER LUI: quando ti dice una pratica nuova («CILA bagno Rossi via Roma 3 Rieti») usa `compila_lavoro` riempiendo ANCHE pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep e i dati catastali che ti ha detto; quando ti dice una novità su una pratica che c\'è («la CILA di Rossi è stata protocollata ieri, prot. 4567», «il Comune ha chiesto le integrazioni») usa `modifica_lavoro`. Se ti manda con il «+» la foto o il PDF della ricevuta di deposito, della visura catastale o della lettera del Comune, leggila e riempi le caselle da lì: protocollo, foglio, particella e subalterno SOLO se si leggono bene, mai indovinati. Per «cosa ho fermo al Comune», «quali pratiche aspettano» usa `agenda` (pratiche_integrazioni_richieste e pratiche_al_comune, con giorni_dal_deposito) o `elenco_cose` su lavori con `stato_pratica`. Le integrazioni richieste sono la cosa più urgente: dillo per prime.',
   artigiano: 'QUESTO ISCRITTO È UN ARTIGIANO: nel suo menu la voce si chiama «Lavori e interventi» e il computo «Computo da prezzare».',
   impresa: 'QUESTO ISCRITTO È UN\'IMPRESA: nel suo menu la voce si chiama «Lavori» e il computo «Computo da prezzare».'
 };
@@ -1343,7 +1435,7 @@ export default async function (req) {
         const inp = t.input || {};
         let esito;
         const base = { ruolo: ruolo, impresaId: impresaId };
-        const filtri = { stato: inp.stato, escludiStato: inp.escludi_stato, dal: inp.dal, al: inp.al, prossime: inp.prima_le_prossime === true };
+        const filtri = { stato: inp.stato, escludiStato: inp.escludi_stato, dal: inp.dal, al: inp.al, prossime: inp.prima_le_prossime === true, statoPratica: inp.stato_pratica };
         if (t.name === 'conta_cose') {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, Object.assign({ soloConta: true }, base, filtri)));
         } else if (t.name === 'elenco_cose') {
@@ -1352,6 +1444,26 @@ export default async function (req) {
         } else if (t.name === 'cerca_per_nome') {
           esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, Object.assign({ parola: inp.parola }, base)));
           if (esito.righe) esito.righe = segnaGiorni(esito.righe, (ATTREZZI[inp.cosa] || {}).data, oggi);
+        } else if (t.name === 'modifica_lavoro') {
+          /* ⛔ 7 nov 2026 — PRIMA si controlla che il lavoro sia suo e di
+             questo reparto (stessi due filtri di sempre), POI si prepara il
+             modulo. Un id inventato o di un altro reparto non apre niente. */
+          if (modulo && !daSistemare) {
+            esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
+          } else if (!inp.id) {
+            esito = { errore: 'mi serve l\'id vero del lavoro: cercalo prima' };
+          } else {
+            const ql = costruisciLettura('lavori', uid, mestiere_id, { quanti: 1 });
+            ql.filtri.id = String(inp.id);
+            const rl = await esegui(dati, ql);
+            if (rl.errore || !rl.righe || rl.righe.length !== 1) {
+              esito = { errore: 'quel lavoro non e\' in questo reparto, oppure non esiste' };
+            } else {
+              const m = costruisciModulo('lavoro', inp, { ruolo: ruolo, modifica: inp.id });
+              if (m.errore) esito = { errore: m.errore };
+              else { modulo = m; daSistemare = false; esito = { ok: true, aperto: 'gli ho aperto «' + (rl.righe[0].descrizione || 'il lavoro') + '» con le caselle cambiate: salva lui' }; }
+            }
+          }
         } else if (t.name === 'agenda') {
           esito = await agenda(dati, uid, mestiere_id, oggi, base);
         } else if (t.name === 'dentro_al_documento') {
@@ -1407,7 +1519,7 @@ export default async function (req) {
              se sta in MODULI: cosi' aggiungerne uno domani e' una riga
              sola, e uno inventato non passa. */
           const quale = t.name.slice(8);
-          const m = costruisciModulo(quale, inp);
+          const m = costruisciModulo(quale, inp, { ruolo: ruolo });
           /* ⚠️ un modulo per volta, MA se il primo aveva un nome che non
              esiste Claude puo' richiamare l'attrezzo una volta per
              sistemarlo: quello e' il giro che serve, non un doppione. */
@@ -1522,4 +1634,4 @@ export default async function (req) {
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
 export { costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
-export { istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
+export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };

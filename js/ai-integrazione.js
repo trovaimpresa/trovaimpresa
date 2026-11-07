@@ -234,6 +234,33 @@
   /* finiscono. Restituisce l'oggetto con le voci; null se i crediti     */
   /* sono finiti (l'avviso l'ha gia' mostrato mostraUpgrade).            */
   /* ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------ */
+  /* AI.pratica — 7 novembre 2026 (studio tecnico)                       */
+  /* La pratica scritta a parole, o la foto di un documento (ricevuta,   */
+  /* visura, lettera del Comune) → le caselle del modulo. 1 credito.     */
+  /* file = {tipo, dati:<base64>} o null. Restituisce l'oggetto pulito;  */
+  /* null se i crediti sono finiti (l'avviso l'ha gia' dato).            */
+  /* ------------------------------------------------------------------ */
+  AI.pratica = async function (testo, file) {
+    const token = getToken();
+    if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
+    let res;
+    try {
+      res = await fetch('/.netlify/functions/ai-pratica', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testo: testo || '', file: file || null }),
+      });
+    } catch (e) {
+      throw new Error('Non riesco a raggiungere l\'assistente: controlla la connessione e riprova.');
+    }
+    const body = await res.json().catch(function () { return {}; });
+    if (res.status === 402) { await caricaStato(); mostraUpgrade(body.reason); return null; }
+    if (!res.ok) throw new Error(body.error || 'L\'assistente non ha risposto. Riprova fra un attimo.');
+    if (AI.stato && typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+    return body.dati || {};
+  };
+
   const CAPITOLATO_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-capitolato';
   AI.capitolato = async function (testo, modo) {
     const token = getToken();
@@ -787,12 +814,57 @@
     // select popolati in modo asincrono: imposta il valore solo quando l'opzione compare
     impostaSelectQuando(document.getElementById('j-cliente'), d.cliente, 3000);
     impostaSelectQuando(document.getElementById('j-operaio'), d.operatore, 3000);
+    riempiPratica(d, primo);
 
     avviso('Modulo compilato, controlla i dati e premi Salva');
     if (primo.el) primo.el.focus();
     return true;
   }
   AI.riempiLavoro = riempiLavoro;
+
+  /* ==================================================================
+     ⛔ 7 novembre 2026 — LE CASELLE DELLA PRATICA (studio tecnico)
+     Le usa la chat, la riga «Scrivi la pratica a parole» dentro il modulo
+     e la foto del documento. Una macchina sola: le caselle stanno qui.
+     ⚠️ «Tipo» e «A che punto sta» sono tendine con un elenco CHIUSO: si
+        sceglie solo se l'opzione c'e' davvero, se no la casella resta com'e'.
+     ⚠️ Nel modulo di un lavoro qualsiasi (impresa, artigiano) queste caselle
+        non esistono: riempiCampo torna indietro senza fare niente.
+     Restituisce i nomi delle caselle riempite (per dire «ho messo…»).
+     ================================================================== */
+  const CASELLE_PRATICA = [
+    ['j-pr-comune', 'pratica_comune',     'Comune'],
+    ['j-pr-prot',   'pratica_protocollo', 'N. protocollo'],
+    ['j-pr-data',   'pratica_data_dep',   'Data di deposito'],
+    ['j-cat-fog',   'catasto_foglio',     'Foglio'],
+    ['j-cat-par',   'catasto_particella', 'Particella'],
+    ['j-cat-sub',   'catasto_sub',        'Subalterno']
+  ];
+  function scegliOpzione(id, val) {
+    const el = document.getElementById(id);
+    if (!el || val == null || String(val).trim() === '') return null;
+    const v = String(val).trim();
+    const norm = function (x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[^a-z]/g, ''); };
+    const op = Array.prototype.find.call(el.options || [], function (o) { return o.value === v || norm(o.value) === norm(v) || norm(o.textContent) === norm(v); });
+    if (!op || !op.value) return null;
+    el.value = op.value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return el;
+  }
+  function riempiPratica(d, primo) {
+    const messi = [];
+    if (!d) return messi;
+    if (scegliOpzione('j-pr-tipo', d.pratica_tipo)) messi.push('Tipo di pratica');
+    if (scegliOpzione('j-pr-stato', d.pratica_stato)) messi.push('A che punto sta');
+    CASELLE_PRATICA.forEach(function (c) {
+      let v = d[c[1]];
+      if (c[1] === 'pratica_data_dep' && v && !/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return;
+      const el = riempiCampo(c[0], v, primo);
+      if (el) { el.dispatchEvent(new Event('input', { bubbles: true })); messi.push(c[2]); }
+    });
+    return messi;
+  }
+  AI.riempiPratica = riempiPratica;
 
   /* ==================================================================
      ⛔ LA PORTA DELLA CHAT — gradino 3, 29 agosto 2026.
@@ -891,8 +963,35 @@
     return true;
   };
 
-  AI.compilaLavoroDaChat = function (d) {
+  AI.compilaLavoroDaChat = function (d, idEsistente) {
     chiudiTutto();
+    /* ⛔ 7 nov 2026 — MODIFICARE un lavoro che c'e' gia'. Si preme lo stesso
+       «Modifica» di sempre (data-action edit-job): il modulo si apre coi suoi
+       dati veri dal database, e qui si cambiano SOLO le caselle dette.
+       A salvare e' lui. */
+    if (idEsistente) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.hidden = true;
+      b.setAttribute('data-action', 'edit-job');
+      b.setAttribute('data-id', String(idEsistente));
+      document.body.appendChild(b);
+      b.click();
+      setTimeout(function () { b.remove(); }, 0);
+      quandoCompare('j-desc', function () {
+        setTimeout(function () {
+          const primo = { el: null };
+          ['descrizione', 'dove', 'data', 'importo'].forEach(function (k, i) {
+            const id = ['j-desc', 'j-dove', 'j-data', 'j-imp'][i];
+            const el = riempiCampo(id, d && d[k], primo);
+            if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+          riempiPratica(d, primo);
+          avviso('Ho cambiato le caselle: controlla e premi Salva');
+          if (primo.el) primo.el.focus();
+        }, 120);
+      }, 80);
+      return true;
+    }
     if (typeof window.gestApriModuloAI === 'function') {
       window.gestApriModuloAI('lavoro', false);
     } else {

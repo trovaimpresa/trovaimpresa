@@ -221,8 +221,8 @@
       +   '<span class="ai-riga-c">1 credito</span>'
       + '</button>'
       + '<div class="ai-riga-giu" id="ai-riga-giu" hidden>'
-      +   '<label class="ai-riga-lab" for="ai-riga-in">Scrivi o parla come al telefono</label>'
-      +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(m.esempio) + '"></textarea>'
+      +   '<label class="ai-riga-lab" for="ai-riga-in">'+(pro?'Scrivi o parla come al telefono, oppure fotografa la ricevuta o la visura':'Scrivi o parla come al telefono')+'</label>'
+      +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(pro?'CILA bagno per Rossi, via Roma 3 Rieti, depositata ieri prot. 4567, foglio 12 particella 345 sub 2':m.esempio) + '"></textarea>'
       /* ⛔ 22 agosto 2026 — LE MISURE, SCRITTE PRIMA DI SCRIVERE.
          Alessio aveva chiesto un preventivo per un bagno senza dire quanto
          era grande: l'AI si e' data da sola «bagno standard di circa 8 mq»
@@ -245,6 +245,11 @@
          (js/gest-ai-cantiere.js). Nasce nascosto: compare solo dove il
          browser sa ascoltare. */
       +     (typeof aiMicHTML==="function"?aiMicHTML("ai-riga-mic"):"")
+      /* ⛔ 7 nov 2026 — solo allo studio: la FOTO di un documento (ricevuta
+         di deposito, visura catastale, lettera del Comune) riempie la
+         pratica. Stessa riga, stesso credito, stesse caselle. */
+      +     (pro?'<button type="button" class="ai-riga-go ai-riga-doc" id="ai-riga-doc">📷 Leggi un documento</button>'
+              +'<input type="file" id="ai-riga-file" accept="image/*,application/pdf" hidden>':'')
       +     '<span class="ai-riga-st" id="ai-riga-st"></span>'
       +   '</div>'
       + '</div>'
@@ -273,6 +278,28 @@
     })();
   }
 
+  /* 7 nov 2026 — le caselle della pratica: le riempie la macchina di
+     js/ai-integrazione.js (AI.riempiPratica), qui si illuminano */
+  function aiPraticaCaselle(d,messi){
+    if(!window.AI||typeof window.AI.riempiPratica!=="function"||!d) return;
+    const ids={"Tipo di pratica":"j-pr-tipo","A che punto sta":"j-pr-stato","Comune":"j-pr-comune","N. protocollo":"j-pr-prot","Data di deposito":"j-pr-data","Foglio":"j-cat-fog","Particella":"j-cat-par","Subalterno":"j-cat-sub"};
+    window.AI.riempiPratica(d,null).forEach(function(n){
+      messi.push(n);
+      const el=document.getElementById(ids[n]); if(el) _aiIllumina(el);
+    });
+  }
+  async function aiFileInBase64(f){
+    let file=f;
+    if(/^image\//.test(f.type)&&typeof window.preparaFileUpload==="function"){
+      const p=await window.preparaFileUpload(f,{lato:1600,qualita:0.82,formato:"jpeg"});
+      if(p&&p.errore) throw new Error(p.errore);
+      if(p&&p.file) file=p.file;
+    }
+    if(file.size>5*1024*1024) throw new Error("Il file è troppo grande: massimo 5 MB.");
+    const tipo=(file.type||f.type||"").toLowerCase()||"image/jpeg";
+    const dati=await new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]||"");r.onerror=()=>ko(new Error("Non riesco a leggere il file."));r.readAsDataURL(file);});
+    return {tipo:tipo==="image/jpg"?"image/jpeg":tipo,dati:dati};
+  }
   function _aiIllumina(el){
     if(!el) return;
     el.classList.add("ai-pieno");
@@ -327,7 +354,10 @@
       go.disabled=true; go.textContent="Ci penso io...";
       st.className="ai-riga-st"; st.textContent="";
       try{
-        const d=await window.AI.dati(m.feature,testo);
+        /* ⛔ 7 nov 2026 — lo studio passa dall'AI della pratica, che riempie
+           anche tipo, stato, Comune, protocollo e catasto. */
+        const pratica = ruoloUtente==='professionista' && tipo==='lavoro' && window.AI && typeof window.AI.pratica==="function";
+        const d=pratica ? await window.AI.pratica(testo,null) : await window.AI.dati(m.feature,testo);
         if(d===null){ go.disabled=false; go.textContent=prima; return; }  /* crediti finiti: l'avviso l'ha già dato l'AI */
         const messi=[];
         m.campi.forEach(c=>{
@@ -349,13 +379,15 @@
            che ha le righe) si riempiono qui: `extra` aggiunge al conto quello
            che ha messo, cosi' il messaggio finale resta uno solo. */
         if(typeof m.extra==="function") m.extra(d,messi);
+        if(pratica) aiPraticaCaselle(d,messi);
         if(!messi.length){
           st.className="ai-riga-st ai-riga-st--err";
           st.textContent="Non ho capito niente di utile. Prova a scriverlo con più dettagli: cosa, dove, quando, quanto.";
         }else{
           st.className="ai-riga-st ai-riga-st--ok";
           st.textContent="Ho riempito "+messi.length+(messi.length===1?" casella: ":" caselle: ")
-            + messi.join(", ") + ". Controlla e correggi quello che serve, poi salva tu.";
+            + messi.join(", ") + ". Controlla e correggi quello che serve, poi salva tu."
+            + ((pratica&&d&&d.nota)?" — "+d.nota:"");
         }
       }catch(e){
         st.className="ai-riga-st ai-riga-st--err";
@@ -363,6 +395,50 @@
       }
       go.disabled=false; go.textContent=prima;
     };
+
+    /* ⛔ 7 nov 2026 — «📷 Leggi un documento» (solo studio). La foto si
+       rimpicciolisce con la stessa preparaFileUpload delle altre foto, il PDF
+       passa com'e'. Le caselle si riempiono come col testo. */
+    const doc=$("#ai-riga-doc"), fileIn=$("#ai-riga-file");
+    if(doc&&fileIn){
+      doc.onclick=()=>fileIn.click();
+      fileIn.onchange=async function(){
+        const f=fileIn.files&&fileIn.files[0]; fileIn.value="";
+        if(!f) return;
+        const prima=doc.textContent;
+        doc.disabled=true; go.disabled=true; doc.textContent="Sto leggendo...";
+        st.className="ai-riga-st"; st.textContent="";
+        try{
+          const file=await aiFileInBase64(f);
+          const d=await window.AI.pratica(inp.value.trim(),file);
+          if(d!==null){
+            if(d&&d.leggibile===false){
+              st.className="ai-riga-st ai-riga-st--err";
+              st.textContent="Questo documento non riesco a leggerlo bene. Prova con una foto più dritta e con più luce.";
+            }else{
+              const messi=[];
+              m.campi.forEach(c=>{
+                const v=d[c.da]; if(v===undefined||v===null||String(v).trim()==="") return;
+                const el=document.getElementById(c.id); if(!el) return;
+                if(el.value&&String(el.value).trim()!==""&&c.id!=="j-data") return;   /* quello che hai scritto tu non si tocca */
+                if(c.tendina){ _aiTendina(el,v,3000,()=>_aiIllumina(el)); }
+                else { el.value=String(v); el.dispatchEvent(new Event("input",{bubbles:true})); _aiIllumina(el); }
+                messi.push(c.nome);
+              });
+              aiPraticaCaselle(d,messi);
+              st.className="ai-riga-st "+(messi.length?"ai-riga-st--ok":"ai-riga-st--err");
+              st.textContent=messi.length
+                ? "Dal documento ho riempito: "+messi.join(", ")+". Controlla, poi salva tu."+(d.nota?" — "+d.nota:"")
+                : "Nel documento non ho trovato dati della pratica.";
+            }
+          }
+        }catch(e){
+          st.className="ai-riga-st ai-riga-st--err";
+          st.textContent=(e&&e.message)?e.message:"Non ci sono riuscito. Riprova fra un attimo.";
+        }
+        doc.disabled=false; go.disabled=false; doc.textContent=prima;
+      };
+    }
 
     inp.addEventListener("keydown",e=>{
       /* Invio manda, Maiuscole+Invio va a capo: nel modulo si scrive una
