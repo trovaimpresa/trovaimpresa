@@ -3006,7 +3006,7 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
 `DOVE_SI_CERCA` fatto di stringhe: adesso sono elenchi, possono diventare rossi per quello.
 
 ## Aperto
-1. Il «Parla» (comando_voce in ai-cantiere) NON conosce le caselle della pratica.
+1. ~~Il «Parla» non conosce la pratica~~ CHIUSO il 7/11: in `js/gest-voce.js` (`eUnaPratica` / `praticaAVoce`), se e' uno studio e la frase parla di una pratica (e non di un promemoria) si passa da `AI.pratica` invece di comando_voce. Apre sempre una pratica NUOVA. Provato dal vivo: tutte le caselle giuste.
 2. Le prove hanno consumato ~29 dei 50 messaggi di chat del mese di Alex, e hanno lasciato 23
    chat di prova nell'archivio (cancellarle col × o dare il via a Claude).
 3. Modello della chat ancora Sonnet 4.5.
