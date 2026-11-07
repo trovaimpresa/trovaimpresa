@@ -50,8 +50,69 @@
     return /gest_comput|gest_prezzi_propri/i.test(m) || /schema cache|does not exist|relation/i.test(m);
   }
 
+  /* ============================================================
+     7 nov 2026 — IL FILE DEL GEOMETRA IN UN TOCCO SOLO
+     Prima erano tre passi: «Nuovo computo», scrivere il titolo e «Crea»,
+     poi «Carica qui il computo del geometra». Adesso c'e' un riquadro in
+     cima alla lista: si sceglie il file e il gestionale crea il computo da
+     solo (titolo = nome del file) e ci carica dentro le lavorazioni, con la
+     STESSA compImporta/compImportaPdf di sempre.
+     Non allo studio tecnico: il computo lo fa lui, non lo riceve.
+     ============================================================ */
+  function compGeometraBox(){
+    const sez=$("#computi"); if(!sez)return;
+    let b=$("#comp-geometra");
+    if(ruoloUtente==='professionista'){ if(b)b.remove(); return; }
+    if(b)return;
+    const viste=$("#comp-viste"); if(!viste)return;
+    viste.insertAdjacentHTML("beforebegin",
+       '<div id="comp-geometra" class="comp-geometra">'
+      +  '<div class="cg-testo"><div class="cg-tit">Ti è arrivato il computo del geometra?</div>'
+      +  '<div class="cg-sotto">Caricalo qui (PDF o Excel): le lavorazioni entrano da sole, tu metti solo i prezzi.</div></div>'
+      +  '<button type="button" class="cg-btn" data-action="comp-geometra">\u2b06 Carica il file del geometra</button>'
+      +  '<input type="file" id="comp-file-lista" accept=".xlsx,.xlsm,.xls,.csv,.pdf" style="display:none">'
+      +'</div>');
+  }
+  let compGeometraInCorso=false;
+  function compGeometraApri(){
+    const f=$("#comp-file-lista"); if(!f)return;
+    f.value="";
+    f.onchange=function(){ const file=f.files&&f.files[0]; if(file)compGeometraCrea(file); };
+    f.click();
+  }
+  async function compGeometraCrea(file){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(compGeometraInCorso){toast("Sto già caricando un file, un attimo…");return;}
+    compGeometraInCorso=true;
+    try{
+      /* il titolo dal nome del file: via l'estensione e i trattini */
+      let titolo=String(file.name||"").replace(/\.[a-z0-9]+$/i,"").replace(/[_\-]+/g," ").replace(/\s+/g," ").trim().slice(0,80);
+      if(!titolo)titolo="Computo del geometra";
+      titolo=titolo.charAt(0).toUpperCase()+titolo.slice(1);
+      toast("Creo il computo «"+titolo+"»…");
+      const {data:nc,error}=await sb.from("gest_computi").insert({
+        user_id:sbUid, mestiere_id:curMestiere(), titolo:titolo,
+        data:todayStr(), tipo:"privato", stato:"bozza"
+      }).select().single();
+      if(error||!nc){toast("Non sono riuscito a creare il computo: "+((error&&error.message)||"riprova"));return;}
+      await renderComputi();
+      const c=compCache.find(x=>String(x.id)===String(nc.id))||nc;
+      await computoForm(c);
+      /* l'importazione legge compVociCompId: si aspetta che il computo
+         aperto sia proprio questo (renderCompVoci lo scrive) */
+      const fine=Date.now()+5000;
+      while(String(compVociCompId)!==String(nc.id)&&Date.now()<fine){ await new Promise(r=>setTimeout(r,100)); }
+      if(String(compVociCompId)!==String(nc.id)){toast("Il computo è nato: aprilo e premi «Carica qui il computo del geometra»");return;}
+      if(/\.pdf$/i.test(file.name||"")) await compImportaPdf(file);
+      else await compImporta(file);
+    }catch(e){
+      toast("Non sono riuscito a caricare il file: "+((e&&e.message)||"riprova"));
+    }finally{ compGeometraInCorso=false; }
+  }
+
   async function renderComputi(){
     filoMetti("computi","computi");
+    compGeometraBox();
     const box=$("#comp-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun computo","Accedi per creare i computi metrici.",
       _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>');return;}

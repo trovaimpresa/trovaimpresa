@@ -5575,3 +5575,14 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 /* 7 nov 2026 — il pulsante acceso dei .seg in blu scuro qui, e non da
    js/blu-scuro.js: quello lo fissava e, spento, restava blu con la scritta scura */
 .seg button.on{ background:#0a2a4d !important; border-color:#0a2a4d !important; color:#fff !important; }
+
+/* 7 nov 2026 — il riquadro «Ti è arrivato il computo del geometra?» in cima ai computi */
+.comp-geometra{ margin:16px 0 12px; border:3px solid #ff8a00; border-radius:16px; padding:20px 22px; background:#fff;
+  display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+.comp-geometra .cg-testo{ flex:1; min-width:240px; }
+.comp-geometra .cg-tit{ font-size:22px; font-weight:700; color:#0a2a4d; }
+.comp-geometra .cg-sotto{ font-size:17px; color:#475467; margin-top:4px; }
+.comp-geometra .cg-btn{ font-size:19px; font-weight:700; padding:15px 24px; border-radius:12px; background:#ff8a00; color:#fff;
+  border:0; cursor:pointer; font-family:inherit; }
+.comp-geometra .cg-btn:hover{ background:#e67a00; }
+@media (max-width:880px){ .comp-geometra .cg-btn{ width:100%; } }

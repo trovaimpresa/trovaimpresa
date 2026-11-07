@@ -132,6 +132,7 @@
     if(a==="crono-pdf")return cronoPdf(ctrComputoId);
     if(a==="var-pdf")return variantePdf(ctrComputoId);
     if(a==="comp-importa")return compApriFile();
+    if(a==="comp-geometra")return compGeometraApri();   /* 7 nov 2026 — il file del geometra dalla lista */
     if(a==="cp-metti")return compPdfMetti();
     if(a==="cp-tutte"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=true;});return;}
     if(a==="cp-nessuna"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=false;});return;}
