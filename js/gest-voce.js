@@ -383,6 +383,8 @@
     var dove = navigazioneLocale(t);
     if (dove) { vaiA(dove); return; }
     if (PAG === 'op') { raccontaGiornata(t); return; }
+    /* 7 nov 2026 — una pratica detta dallo studio va dritta all'AI della pratica */
+    if (eUnaPratica(t)) return praticaAVoce(t);
 
     /* 3 nov 2026 — PRIMA l'aiutante gratis (gest-parla.js): giornate, spese,
        promemoria e note in una finestra. Se non c'e' niente di questo, o non
@@ -405,7 +407,36 @@
     detto = t; esegui(t); return true;
   };
 
+  /* ⛔ 7 nov 2026 — LA PRATICA A VOCE (studio tecnico).
+     «Nuova CILA per Rossi, via Roma 3 Rieti, depositata ieri protocollo 4567»:
+     il comando a voce di prima riempiva solo descrizione e indirizzo. Se chi
+     parla e' uno studio e la frase parla di una pratica, si passa dall'AI della
+     pratica (netlify/functions/ai-pratica.mjs), che riempie anche tipo, stato,
+     Comune, protocollo e catasto. Stesso credito (1), non uno in piu'.
+     ⚠️ Le frasi da promemoria («ricordami di chiamare il Comune per la pratica»)
+        restano al comando di sempre. E apre sempre una pratica NUOVA: per
+        cambiarne una che c'e' gia' si usa la chat. */
+  var PAROLE_PRATICA = /\b(cilas?|scia|permesso di costruire|pdc|pratica|accatastament\w*|agibilit\w*|sanatoria|voltura|docfa|protocoll\w*|catast\w*|paesaggistic\w*|sue)\b/i;
+  var PAROLE_PROMEMORIA = /\b(ricord\w*|promemoria|chiamare|telefonare|scadenza|scade)\b/i;
+  function eUnaPratica(t) {
+    return PAG === 'app' && typeof ruoloUtente !== 'undefined' && ruoloUtente === 'professionista'
+      && PAROLE_PRATICA.test(t) && !PAROLE_PROMEMORIA.test(t)
+      && window.AI && typeof window.AI.pratica === 'function' && typeof window.AI.compilaLavoroDaChat === 'function';
+  }
+  async function praticaAVoce(t) {
+    lavora = true; etichetta(); disegnaPenso();
+    var d = null;
+    try { d = await window.AI.pratica(t, null); }
+    catch (e) { lavora = false; etichetta(); disegnaMsg((e && e.message) || 'Non ho capito. Riprova.', true); return; }
+    lavora = false; etichetta();
+    if (d === null) { chiudiBolla(); return; }   /* crediti finiti: l'avviso l'ha gia' dato */
+    if (!d || d.leggibile === false || !d.descrizione) { disegnaMsg('Non ho capito la pratica. Dimmi almeno che pratica è e per chi.', true); return; }
+    if (!window.AI.compilaLavoroDaChat(d)) { disegnaMsg('Il modulo non riesco ad aprirlo. Ricarica la pagina e riprova.', true); return; }
+    chiudiBolla();
+  }
+
   async function vecchio(t) {
+    if (eUnaPratica(t)) return praticaAVoce(t);
     if (PAG === 'app' && (!window.AI || typeof window.AI.cantiere !== 'function')) {
       disegnaMsg('L\'assistente non si è caricato. Ricarica la pagina e riprova.', true); return;
     }
