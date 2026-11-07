@@ -1413,8 +1413,11 @@
         doc.text(dLin,X[2]+1.5,y+3);
         y+=testa+1.4;
         doc.setFontSize(7.1);
+        /* 7 nov 2026 — «a corpo» solo se lo e' davvero (unita' corpo o vuota):
+           una quantita' scritta a mano in m² non e' un corpo */
         if(v.quantita_manuale){
-          doc.setTextColor(110);doc.text("a corpo",X[2]+4,y+2.6);doc.setTextColor(0);y+=3.3;
+          const _u=String(v.unita||"").trim();
+          if(!_u||_u==="corpo"){doc.setTextColor(110);doc.text("a corpo",X[2]+4,y+2.6);doc.setTextColor(0);y+=3.3;}
         }else if(!righeM.length){
           doc.setTextColor(110);doc.text("nessuna misura",X[2]+4,y+2.6);doc.setTextColor(0);y+=3.3;
         }

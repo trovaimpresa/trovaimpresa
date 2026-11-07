@@ -2019,7 +2019,7 @@
       +'<span class="cm-testo">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(_umSchermo(v.unita)):"")
       +    ' × '+eur2(v.prezzo_unitario)
-      +    (v.quantita_manuale?' · a corpo':(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
+      +    (v.quantita_manuale?(_cvModo(v)==="corpo"?' · a corpo':' · quantità scritta'):(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
       +  '</small></span>'
       +'<b>'+eur2(v.importo)+'</b>'
       +(tot>1?bottoneFreccia(v,-1,i===0,i===tot-1)+bottoneFreccia(v,1,i===0,i===tot-1):"")
@@ -2357,6 +2357,51 @@
     if(dopo)dopo.after(blocco); else col.appendChild(blocco);
   }
 
+  /* ---- 7 nov 2026 — i tre modi di contare la quantita' ---- */
+  function _cvModo(v){
+    if(!v||!v.quantita_manuale)return "misure";
+    const u=String(v.unita||"").trim();
+    return (!u||u==="corpo")?"corpo":"scritta";
+  }
+  const CV_NOTE={
+    misure:"La quantità la fa la somma delle misure qui a fianco: una riga per ogni pezzo.",
+    scritta:"Sai già quanto è? Scrivila e basta. Se poi vuoi le misure pezzo per pezzo, scegli «Dalle misure».",
+    corpo:"Quando non c'è niente da misurare: una voce a forfait, le spese generali."
+  };
+  function _cvConta(){
+    const m=segVal("cv-conta")||"misure";
+    const manuale=(m!=="misure");
+    const box=$("#cv-qta-box"); if(box)box.style.display=manuale?"":"none";
+    const mis=$("#cv-misure");  if(mis)mis.style.opacity=manuale?"0.45":"1";
+    const n=$("#cv-conta-nota"); if(n)n.textContent=CV_NOTE[m]||"";
+    _cvConto();
+  }
+  function _cvConto(){
+    const out=$("#cv-conto"), um=$("#cv-qta-um"); if(!out)return;
+    const u=(($("#cv-uni")&&$("#cv-uni").value)||"").trim();
+    const uS=(typeof _umSchermo==="function")?_umSchermo(u):u;
+    if(um)um.textContent=uS;
+    const q=_numIt("#cv-qta"), p=_numIt("#cv-prezzo");
+    if(q==null||p==null||!q){out.textContent="";return;}
+    /* stesso conto della vista gest_computo_voci_calc: quantita' a tre
+       decimali per il prezzo, arrotondato al centesimo */
+    const imp=_cent2(Math.round(q*1000)/1000*p);
+    out.innerHTML=esc(_misLetta(q)+(uS?" "+uS:""))+" × "+esc(eur2(p))+" = <b>"+esc(eur2(imp))+"</b>";
+  }
+  async function _cvSalvaEPoi(dove){
+    const desc=String(($("#cv-desc")&&$("#cv-desc").value)||"").trim();
+    if(!desc){toast("Scrivi prima la descrizione della lavorazione");const d=$("#cv-desc");if(d)d.focus();return;}
+    /* per scrivere le misure il modo dev'essere «Dalle misure» */
+    if(dove==="misure"){ const b=$('#cv-conta button[data-v="misure"]'); if(b&&!b.classList.contains("on"))b.click(); }
+    await compVoceSalva(null);
+    setTimeout(()=>{
+      const box=$(dove==="misure"?"#cv-misure":"#cv-analisi"); if(!box)return;
+      const b=box.closest(".sh-b")||box;
+      try{ b.scrollIntoView({block:"start"}); }catch(_){}
+      const primo=box.querySelector("input:not([type=hidden]),select"); if(primo)primo.focus();
+    },700);
+  }
+
   async function compVoceForm(voceId){
     if(!compVociCompId){toast("Apri prima il computo");return;}
     const computoId=compVociCompId;
@@ -2418,15 +2463,22 @@
          Invece di combattere col foglio di stile, i DUE PULSANTI: e' il
          componente che funziona gia' in tutto il gestionale, si tocca senza
          mirare, e si capisce senza leggere. */
+      /* 7 nov 2026 — TRE MODI, NON DUE. Chi sa gia' che sono 35 m² doveva
+         scegliere «A corpo» (che vuol dire un'altra cosa) o inventarsi una
+         misura. «Scrivo la quantità» e «A corpo» nel database sono la stessa
+         cosa (quantita_manuale = true): cambia solo come si legge. Si
+         riconoscono dall'unita': «corpo» o vuota = a corpo, le altre = scritta. */
       +'<div class="sh-b"><div class="sh-tit">Come si conta la quantità</div>'
-      +  '<div class="field"><div class="seg" id="cv-conta">'
-      +    '<button data-v="misure"'+(v.quantita_manuale?'':' class="on"')+'>Dalle misure</button>'
-      +    '<button data-v="corpo"'+(v.quantita_manuale?' class="on"':'')+'>A corpo</button>'
+      +  '<div class="field"><div class="seg seg-3" id="cv-conta">'
+      +    '<button data-v="misure"'+(_cvModo(v)==="misure"?' class="on"':'')+'>Dalle misure</button>'
+      +    '<button data-v="scritta"'+(_cvModo(v)==="scritta"?' class="on"':'')+'>Scrivo la quantità</button>'
+      +    '<button data-v="corpo"'+(_cvModo(v)==="corpo"?' class="on"':'')+'>A corpo</button>'
       +  '</div>'
-      +  '<div class="sh-nota">Con <b>Dalle misure</b> la quantità la fa la somma delle misure qui a fianco, e non si scrive a mano. <b>A corpo</b> serve quando non c\'è niente da misurare: una voce a forfait, le spese generali.</div>'
+      +  '<div class="sh-nota" id="cv-conta-nota"></div>'
       +  '</div>'
       +  '<div class="field" id="cv-qta-box" style="'+(v.quantita_manuale?"":"display:none")+'">'
-      +    '<label>Quantità</label><input type="text" inputmode="decimal" id="cv-qta"'+_noAuto()+' value="'+(v.quantita!=null?_misTesto(v.quantita):"")+'" placeholder="1" style="max-width:180px"></div>'
+      +    '<label>Quantità</label><div style="display:flex;gap:10px;align-items:center"><input type="text" inputmode="decimal" id="cv-qta"'+_noAuto()+' value="'+(v.quantita!=null&&v.quantita_manuale?_misTesto(v.quantita):"")+'" placeholder="Es. 35" style="max-width:180px"><span id="cv-qta-um" style="font-size:18px;font-weight:600"></span></div>'
+      +    '<div id="cv-conto" style="margin-top:10px;font-size:18px"></div></div>'
       +'</div>'
 
       +(pubblico
@@ -2452,7 +2504,8 @@
       +'</div><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Le misure</div>'
       +  '<div class="lav-media" id="cv-misure">'+(isNew
-          ? '<div class="lm-vuoto">Salva prima la lavorazione: poi qui ci scrivi le misure, una riga per ogni pezzo.</div>'
+          ? '<div class="lm-vuoto" style="margin-bottom:10px">Una riga per ogni pezzo: la quantità la fa il gestionale.</div>'
+            +'<button type="button" class="btn" id="cv-prima-misura">+ Scrivi la prima misura</button>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
       +'</div>'
       /* ============================================================
@@ -2464,7 +2517,8 @@
          ============================================================ */
       +'<div class="sh-b"><div class="sh-tit">Come è fatto il prezzo</div>'
       +  '<div class="lav-media" id="cv-analisi">'+(isNew
-          ? '<div class="lm-vuoto">Salva prima la lavorazione: poi, se non sta nel prezzario, qui ci costruisci il prezzo.</div>'
+          ? '<div class="lm-vuoto" style="margin-bottom:10px">Se il prezzo non sta nel prezzario, qui lo costruisci: materiali, manodopera, noli.</div>'
+            +'<button type="button" class="btn" id="cv-prima-analisi">+ Costruisci il prezzo</button>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
       +'</div>'
       +'</div></div>',
@@ -2475,16 +2529,28 @@
 
     if(!isNew){ try{ compVoceSemplice(v); }catch(e){ console.warn("[computo] lavorazione:",e); } }
     bindSeg("cv-conta");
-    /* i due pulsanti accendono/spengono il campo della quantita' e sbiadiscono
-       le misure, che con "a corpo" non contano piu' */
+    /* i tre pulsanti accendono/spengono il campo della quantita' e sbiadiscono
+       le misure, che con la quantita' scritta non contano piu' */
     $$("#cv-conta button").forEach(bt=>{
       const prima=bt.onclick;
       bt.onclick=()=>{ if(prima)prima();
-        const corpo=(segVal("cv-conta")==="corpo");
-        const box=$("#cv-qta-box"); if(box)box.style.display=corpo?"":"none";
-        const mis=$("#cv-misure");  if(mis)mis.style.opacity=corpo?"0.45":"1";
+        /* «A corpo» con l'unita' vuota la mette a «corpo»: cosi' riaprendo
+           la lavorazione si ritrova lo stesso pulsante acceso */
+        if(segVal("cv-conta")==="corpo"){ const u=$("#cv-uni"); if(u&&!u.value)u.value="corpo";
+          const q=$("#cv-qta"); if(q&&!q.value.trim())q.value="1"; }
+        _cvConta();
       };
     });
+    ["#cv-qta","#cv-prezzo"].forEach(sel=>{ const e=$(sel); if(e)e.addEventListener("input",_cvConto); });
+    const _u=$("#cv-uni"); if(_u)_u.addEventListener("change",_cvConto);
+    _cvConta();
+    /* 7 nov 2026 — le misure e il prezzo si cominciano SUBITO. Prima c'era
+       «Salva prima la lavorazione»: un salvataggio in piu' che nessuno capiva.
+       Il pulsante salva lui (stessa compVoceSalva di sempre, che dopo la
+       creazione riapre la lavorazione con le misure pronte) e poi porta li'. */
+    const _pm=$("#cv-prima-misura"), _pa=$("#cv-prima-analisi");
+    if(_pm)_pm.onclick=()=>_cvSalvaEPoi("misure");
+    if(_pa)_pa.onclick=()=>_cvSalvaEPoi("analisi");
     /* la ricerca parte da sola mentre scrivi, ma non a ogni lettera: 250 ms di
        pausa, se no su un prezzario grosso si fanno dieci viaggi per una parola */
     const _ce=$("#pp-cerca");
@@ -3217,7 +3283,8 @@
     if(!sbUid||!compVociCompId)return;
     const desc=String(($("#cv-desc")&&$("#cv-desc").value)||"").trim();
     if(!desc){toast("Scrivi la descrizione della lavorazione");return;}
-    const aCorpo=(segVal("cv-conta")==="corpo");
+    /* «Scrivo la quantità» e «A corpo» si salvano uguali: quantita_manuale */
+    const aCorpo=(segVal("cv-conta")==="corpo"||segVal("cv-conta")==="scritta");
     const row={
       user_id:sbUid, computo_id:compVociCompId,
       capitolo_id:($("#cv-cap")&&$("#cv-cap").value)||null,
