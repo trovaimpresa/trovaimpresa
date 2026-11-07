@@ -659,6 +659,37 @@
     }catch(_){}
   }
 
+  /* ===== 7 novembre 2026 — LE INTEGRAZIONI NON SI BUCANO =====
+     Quando una pratica passa a «Integrazioni richieste», il Comune di solito
+     da' 30 giorni per mandarle: scaduti quelli la pratica si archivia. Qui si
+     propone la scadenza collegata alla pratica (avvisi per email come le
+     altre). La data si cambia dallo Scadenzario, se il Comune ne ha dato
+     un'altra. Se c'e' gia' una scadenza aperta di integrazioni per questa
+     pratica, non si chiede di nuovo. */
+  async function proponiScadenzaIntegrazioni(lavId,dati){
+    try{
+      if(!sb||!sbUid||!lavId||ruoloUtente!=='professionista')return;
+      const {data:gia,error}=await sb.from("gest_scadenze").select("id,tipo_pratica,stato")
+        .eq("user_id",sbUid).eq("lavoro_id",lavId);
+      if(error)return;
+      if((gia||[]).some(x=>x.tipo_pratica==="Integrazione richiesta dal Comune"&&x.stato!=="fatta"))return;
+      const t=new Date(todayStr()+"T12:00:00");t.setDate(t.getDate()+30);
+      const data=t.toISOString().slice(0,10);
+      const desc=String((dati&&dati.descrizione)||"").trim();
+      const tipo=String((dati&&dati.pratica_tipo)||"").trim();
+      const titolo=("Integrazioni "+(tipo?tipo+" ":"")+(desc?"— "+desc:"")).trim();
+      if(!gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi dallo Scadenzario."))return;
+      const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
+        tipo_pratica:"Integrazione richiesta dal Comune",lavoro_id:lavId,
+        cliente_id:(dati&&dati.cliente_id)||null,data_scadenza:data,stato:"aperta",avvisa:true};
+      let {error:e2}=await sb.from("gest_scadenze").insert(row);
+      if(e2&&(e2.message||"").indexOf("avvisa")>=0){ delete row.avvisa; ({error:e2}=await sb.from("gest_scadenze").insert(row)); }
+      if(e2){toast("Scadenza non creata: "+e2.message);return;}
+      rinfresca("scadenzario","riepilogo");
+      toast("Scadenza delle integrazioni creata ✔ Te la ricordo per email");
+    }catch(_){}
+  }
+
   /* ===== 9 agosto 2026 — Scadenze dentro la scheda della pratica =====
      Per un tecnico la pratica NON è una riga di lavoro: è un fascicolo con
      delle date che non si possono bucare. Qui, dentro la scheda, si vedono le
@@ -818,6 +849,7 @@
          subito dal toast verde e nessuno lo leggeva */
       toast(avvisoPratica?"Creato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔"));
       if(!editing.fattura)await proponiScadenzaPratica(realId,obj);
+      if(obj.pratica_stato==="integrazioni")await proponiScadenzaIntegrazioni(realId,obj);
       return;
     }
     if(editing && editing.realId){
@@ -855,6 +887,17 @@
       }else{
         mod.data_fatto=null;
       }
+      /* 7 nov 2026 — lo stato della pratica PRIMA di salvare: la scadenza
+         delle integrazioni si propone solo quando ci si ARRIVA adesso */
+      let _statoPraticaPrima=null;
+      if(mod.pratica_stato==="integrazioni"){
+        try{
+          const {data:_s}=await sb.from("gest_lavori").select("pratica_stato")
+            .eq("id",editing.realId).eq("user_id",sbUid).maybeSingle();
+          _statoPraticaPrima=_s?_s.pratica_stato:null;
+        }catch(e){}
+      }
+      const _idPratica=editing.realId;
       let {data:okJob,error}=await sb.from('gest_lavori').update(mod).eq('id', editing.realId).eq('user_id',sbUid).select('id');
       let avvisoPratica2=false;
       if(error&&eColonnaPraticaMancante(error)){
@@ -906,6 +949,8 @@
         ? (fotoKo===1?"Lavoro aggiornato, ma 1 foto non è salita: resta nel telefono e ci riprovo al prossimo salvataggio"
                      :"Lavoro aggiornato, ma "+fotoKo+" foto non sono salite: restano nel telefono e ci riprovo al prossimo salvataggio")
         : (avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔"));
+      if(mod.pratica_stato==="integrazioni"&&_statoPraticaPrima!=="integrazioni"&&!avvisoPratica2)
+        await proponiScadenzaIntegrazioni(_idPratica,mod);
       /* NIENTE proposta di scadenza qui: si chiede solo alla CREAZIONE.
          Prima si ripresentava a OGNI modifica, e rispondendo No tornava
          identica al salvataggio dopo, all'infinito. (9/8/2026) */
