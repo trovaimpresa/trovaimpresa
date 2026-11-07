@@ -691,7 +691,7 @@
       /* 9 ott 2026 — «FOTOGRAFA»: un solo punto d'ingresso per le foto.
          Non decide l'AI che foto è (costerebbe un credito in più): scegli tu. */
       ra.insertAdjacentHTML("afterbegin",
-        '<button type="button" class="btn-primary" id="rie-foto" hidden style="font-size:19px;font-weight:700;padding:13px 20px;margin-bottom:14px">📷 Fotografa</button>');
+        '<button type="button" class="btn-primary" id="rie-foto" style="display:none;font-size:19px;font-weight:700;padding:13px 20px;margin-bottom:14px">📷 Fotografa</button>');
       /* 7 nov 2026 — il pulsante resta (nascosto) per chi lo chiama per id:
          in vista c'e' la scorciatoia «Fotografa un foglio» dell'Assistente. */
       const _bF=ra.querySelector("#rie-foto");
