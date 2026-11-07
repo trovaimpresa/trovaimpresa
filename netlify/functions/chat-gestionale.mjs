@@ -76,17 +76,21 @@ const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
 //    Sarebbero stati cinque attrezzi che rispondono sempre «errore» senza
 //    che nessuno capisse perche'.
 const ATTREZZI = {
-  lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato', ordine:'data_prevista', nome:'i lavori' },
-  preventivi:   { tabella:'gest_preventivi',        campi:'id,numero,titolo,stato,data',                        ordine:'data',          nome:'i preventivi' },
-  fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome,cliente_id',      ordine:'data',          nome:'le fatture' },
+  /* ⛔ 7 nov 2026 — `data` dice quale colonna e' LA data di quella cosa: serve
+     ai filtri «dal/al» e a scrivere accanto a ogni riga `giorni_da_oggi`,
+     cosi' il modello non confronta piu' le date a mente (dal vivo aveva
+     detto «nei tempi» un lavoro previsto due mesi prima). */
+  lavori:       { tabella:'gest_lavori',            campi:'id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,cliente_id', ordine:'data_prevista', data:'data_prevista', nome:'i lavori' },
+  preventivi:   { tabella:'gest_preventivi',        campi:'id,numero,titolo,stato,data,cliente_id',             ordine:'data',          data:'data',          nome:'i preventivi' },
+  fatture:      { tabella:'gest_fatture',           campi:'id,numero,anno,data,stato,cli_nome,cliente_id,data_pagata', ordine:'data',   data:'data',          nome:'le fatture' },
   clienti:      { tabella:'gest_clienti',           campi:'id,nome,tipo,citta',                                 ordine:'nome',          nome:'i clienti' },
   fornitori:    { tabella:'gest_fornitori',         campi:'id,nome,categoria,telefono',                         ordine:'nome',          nome:'i fornitori' },
-  scadenze:     { tabella:'gest_scadenze',          campi:'id,titolo,data_scadenza,stato',                      ordine:'data_scadenza', nome:'le scadenze' },
-  computi:      { tabella:'gest_computi',           campi:'id,numero,titolo,stato,data',                        ordine:'data',          nome:'i computi' },
-  sal:          { tabella:'gest_sal',               campi:'id,numero,stato,data',                               ordine:'data',          nome:'gli stati di avanzamento' },
+  scadenze:     { tabella:'gest_scadenze',          campi:'id,titolo,data_scadenza,stato',                      ordine:'data_scadenza', data:'data_scadenza', nome:'le scadenze' },
+  computi:      { tabella:'gest_computi',           campi:'id,numero,titolo,stato,data',                        ordine:'data',          data:'data',          nome:'i computi' },
+  sal:          { tabella:'gest_sal',               campi:'id,numero,stato,data',                               ordine:'data',          data:'data',          nome:'gli stati di avanzamento' },
   mezzi:        { tabella:'gest_mezzi',             campi:'id,nome,targa,stato',                                ordine:'nome',          nome:'i mezzi' },
   operatori:    { tabella:'gest_operatori',         campi:'id,nome,mansione',                                   ordine:'nome',          nome:'le persone della squadra' },
-  fatture_fornitori: { tabella:'gest_fatture_fornitori', campi:'id,numero,importo,scadenza,stato',              ordine:'scadenza',      nome:'le fatture dei fornitori' },
+  fatture_fornitori: { tabella:'gest_fatture_fornitori', campi:'id,numero,importo,scadenza,stato',              ordine:'scadenza',      data:'scadenza',      nome:'le fatture dei fornitori' },
 
   // ⛔ 30 agosto 2026 — SETTE COSE CHE C'ERANO GIA' E NESSUNO LEGGEVA.
   //    Un commento di questo file diceva che le tabelle figlie «il reparto
@@ -105,13 +109,34 @@ const ATTREZZI = {
      «3 ore». Le ore vere erano →15←, in →3← segnature. Aveva contato le
      RIGHE. Il nome dell'attrezzo diceva «le ore lavorate» e quindi
      contarle sembrava la cosa giusta: adesso dice cosa e' una riga. */
-  ore:               { tabella:'gest_ore',               campi:'id,data,ore,operatore_id,lavoro_id',                                  ordine:'data',          nome:'le segnature delle ore (ATTENZIONE: ogni riga e\' una segnatura, e la colonna `ore` dice quante ore sono. Contare le righe NON da\' le ore)' },
-  rapportini:        { tabella:'gest_rapportini',        campi:'id,data,lavoro_id,materiali,note',                                    ordine:'data',          nome:'i rapportini di cantiere' },
+  ore:               { tabella:'gest_ore',               campi:'id,data,ore,operatore_id,lavoro_id',                                  ordine:'data',          data:'data', nome:'le segnature delle ore (ATTENZIONE: ogni riga e\' una segnatura, e la colonna `ore` dice quante ore sono. Contare le righe NON da\' le ore)' },
+  rapportini:        { tabella:'gest_rapportini',        campi:'id,data,lavoro_id,materiali,note',                                    ordine:'data',          data:'data', nome:'i rapportini di cantiere' },
   preventivi_totali: { tabella:'gest_preventivi_totali', campi:'preventivo_id,imponibile,iva,totale,n_righe',                          ordine:'totale',        nome:'quanto vale ogni preventivo', cestino:false },
   fatture_totali:    { tabella:'gest_fatture_totali',    campi:'fattura_id,imponibile,iva,totale,totale_documento,ritenuta,segno',     ordine:'totale',        nome:'quanto vale ogni fattura',    cestino:false },
   mezzi_scadenze:    { tabella:'gest_mezzi_scadenze',    campi:'mezzo_id,nome,targa,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo', ordine:'prossima_data', nome:'le scadenze dei mezzi', cestino:false },
-  rifornimenti:      { tabella:'gest_rifornimenti',      campi:'id,data,mezzo_id,importo,litri,km,distributore',                       ordine:'data',          nome:'i rifornimenti di carburante', cestino:false },
-  carte_saldo:       { tabella:'gest_carte_saldo',       campi:'carta_id,nome,stato,saldo',                                           ordine:'saldo',         nome:'il saldo delle carte',        cestino:false }
+  rifornimenti:      { tabella:'gest_rifornimenti',      campi:'id,data,mezzo_id,importo,litri,km,distributore',                       ordine:'data',          data:'data', nome:'i rifornimenti di carburante', cestino:false },
+  carte_saldo:       { tabella:'gest_carte_saldo',       campi:'carta_id,nome,stato,saldo',                                           ordine:'saldo',         nome:'il saldo delle carte',        cestino:false },
+
+  /* ⛔ 7 nov 2026 — TRE COSE CHE LA CHAT NON VEDEVA E LA GENTE CHIEDE.
+     Dal registro vero: «guarda le richieste dal sito: cosa devo fare oggi?»
+     e la chat rispondeva «non ho accesso».
+     ⚠️ `livello` cambia il PRIMO filtro, mai lo toglie:
+        'account' → promemoria e prezzi sono di tutto il gestionale, non di
+                    un reparto: si filtra sull'utente e basta;
+        'impresa' → le richieste dal sito sono indirizzate alla SCHEDA
+                    (imprese.id). Si filtra su quell'id, letto dal server
+                    col gettone dell'iscritto, MAI arrivato dal browser.
+                    ⛔ Serve davvero: il fondatore per regola RLS vede le
+                    richieste di TUTTI, quindi senza questo filtro la chat
+                    di Alessio gliele mischierebbe.
+     ⚠️ Le richieste si leggono da `preventivi_safe`: la vista SENZA email e
+        telefono del cliente. Alla chat non servono e non devono uscire. */
+  promemoria:      { tabella:'promemoria',       campi:'id,testo,data,ora,stato',  ordine:'data', data:'data', livello:'account', nome:'i promemoria (di tutto il gestionale, non di un reparto). stato: aperto o fatto' },
+  note_calendario: { tabella:'gest_note',        campi:'id,data,testo',            ordine:'data', data:'data', cestino:false,   nome:'le note scritte sui giorni del calendario' },
+  richieste_sito:  { tabella:'preventivi_safe',  campi:'id,nome,citta,categoria_lavoro,tipo_lavoro,descrizione,urgenza,budget,data_preferita,created_at,risposta_at,visto_il',
+                     ordine:'created_at', data:'created_at', livello:'impresa', cestino:false,
+                     nome:'le richieste di preventivo arrivate dai clienti del sito (di tutta l\'attivita\', non di un reparto). visto_il vuoto = non ancora aperta' }
+
 };
 // ---------------------------------------------------------------------
 // ⛔ 30 agosto 2026 — QUELLO CHE STA DENTRO UN DOCUMENTO.
@@ -179,19 +204,42 @@ function costruisciLetturaFiglio(cosa, uid, idPadre, opzioni) {
   return q;
 }
 
-// il campo su cui cerca «cerca_per_nome», per ogni cosa
+// ---------------------------------------------------------------------
+// ⛔ 7 nov 2026 — DOVE CERCA «cerca_per_nome», ADESSO SU PIU' CASELLE.
+//
+// Prima era UNA casella per cosa, e per le fatture era `numero`: ma
+// `gest_fatture.numero` e' un NUMERO INTERO, e `ilike` su un intero fa
+// rispondere Postgres «operator does not exist: integer ~~* unknown»
+// (provato il 7 nov dal vivo). Quindi «cercami la fattura 15» o «le
+// fatture di Rossi» davano SEMPRE errore. Stessa cosa per preventivi e SAL.
+// Adesso: le caselle di TESTO si cercano con ilike (anche piu' d'una:
+// un lavoro si trova dalla descrizione O dall'indirizzo), e il numero
+// intero si cerca solo se la parola e' fatta di cifre, con l'uguale.
+// ---------------------------------------------------------------------
 const DOVE_SI_CERCA = {
-  lavori:'descrizione', preventivi:'titolo', fatture:'numero', clienti:'nome',
-  fornitori:'nome', scadenze:'titolo', computi:'titolo', sal:'numero',
-  mezzi:'nome', operatori:'nome', fatture_fornitori:'numero',
-  mezzi_scadenze:'nome', rifornimenti:'distributore', carte_saldo:'nome', rapportini:'note'
+  lavori:['descrizione','dove'], preventivi:['titolo'], fatture:['cli_nome'], clienti:['nome','citta'],
+  fornitori:['nome','categoria'], scadenze:['titolo'], computi:['titolo','numero'], sal:[],
+  mezzi:['nome','targa'], operatori:['nome'], fatture_fornitori:['numero'],
+  mezzi_scadenze:['nome','targa'], rifornimenti:['distributore'], carte_saldo:['nome'], rapportini:['note'],
+  promemoria:['testo'], note_calendario:['testo'], richieste_sito:['nome','categoria_lavoro','tipo_lavoro','descrizione','citta']
 };
+const NUMERO_INTERO = { fatture:'numero', preventivi:'numero', sal:'numero' };
+const FORMA_STATO = /^[a-z_]{2,20}$/;
+const FORMA_GIORNO = /^\d{4}-\d{2}-\d{2}$/;
+
+/* la parola entra dentro un filtro `or(...)` di PostgREST: virgole,
+   parentesi e asterischi lo spezzerebbero. Si tolgono, non si scappano. */
+function parolaPulita(x) {
+  return String(x == null ? '' : x).replace(/[,()*%\\:"']/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+}
 
 // ---------------------------------------------------------------------
 // ⛔ IL CUORE: qui nasce OGNI lettura, e qui ci sono i due filtri.
 //    E' una funzione pura apposta — il banco la puo' chiamare da sola,
 //    senza database, e controllare che i filtri ci siano sempre.
 //    Se un domani si aggiunge un attrezzo, passa comunque da qui.
+// ⛔ 7 nov 2026: i filtri NUOVI (stato, date) si AGGIUNGONO ai due di
+//    sempre e non li possono mai togliere: stanno in chiavi diverse.
 // ---------------------------------------------------------------------
 function costruisciLettura(cosa, uid, reparto, opzioni) {
   const o = opzioni || {};
@@ -199,32 +247,76 @@ function costruisciLettura(cosa, uid, reparto, opzioni) {
   // il nome della tabella NON arriva mai da Claude: o e' nell'elenco o niente
   if (!a) return { errore: 'non lo so guardare: ' + String(cosa) };
   if (!uid) return { errore: 'manca chi sta chiedendo' };
-  if (!reparto) return { errore: 'manca il reparto' };
+  let filtri;
+  if (a.livello === 'impresa') {
+    if (!o.impresaId) return { errore: 'non trovo la tua scheda su TrovaImpresa, quindi non vedo le richieste' };
+    filtri = { impresa_id: String(o.impresaId) };
+  } else if (a.livello === 'account') {
+    filtri = { user_id: uid };
+  } else {
+    if (!reparto) return { errore: 'manca il reparto' };
+    // ⛔ TUTTI E DUE, SEMPRE. Non e' negoziabile.
+    filtri = { user_id: uid, mestiere_id: reparto };
+  }
+  let campi = a.campi;
+  if (cosa === 'lavori' && o.ruolo === 'professionista') {
+    campi += ',pratica_tipo,pratica_stato,pratica_comune,pratica_protocollo,pratica_data_dep';
+  }
   const q = {
     tabella: a.tabella,
-    campi: a.campi,
-    // ⛔ TUTTI E DUE, SEMPRE. Non e' negoziabile.
-    filtri: { user_id: uid, mestiere_id: reparto },
-    // ⛔ E IL CESTINO FUORI, SEMPRE.
-    //    Tutte e undici queste tabelle hanno `eliminato_il`: quello che
-    //    l'iscritto butta nel cestino resta nel database. Senza questo,
-    //    alla domanda «quante fatture ho» la chat conterebbe anche quelle
-    //    buttate e direbbe un numero che sullo schermo non c'e'. Due
-    //    schermate, due numeri: il difetto delle fatture del 13 agosto.
-    // ⛔ 30 agosto 2026 — IL CESTINO SI TOGLIE SOLO DOVE C'E'.
-    //    Era `true` fisso: bastava aggiungere una vista senza `eliminato_il`
-    //    e ogni domanda su quella avrebbe risposto «errore». La scelta non
-    //    puo' arrivare da Claude ne' dal browser: sta nell'elenco chiuso.
+    campi: campi,
+    filtri: filtri,
+    // ⛔ E IL CESTINO FUORI, SEMPRE (dove la colonna c'e').
     senzaCestino: a.cestino !== false,
     ordine: a.ordine,
+    crescente: !!o.prossime,
     limite: Math.min(Math.max(parseInt(o.quanti, 10) || RIGHE_MAX, 1), RIGHE_MAX),
     soloConta: !!o.soloConta
   };
+  // stato: solo parole fatte di lettere minuscole e trattino basso
+  if (o.stato && FORMA_STATO.test(String(o.stato))) q.stato = String(o.stato);
+  if (o.escludiStato && FORMA_STATO.test(String(o.escludiStato))) q.escludiStato = String(o.escludiStato);
+  if (a.data) {
+    q.colData = a.data;
+    if (o.dal && FORMA_GIORNO.test(String(o.dal))) q.dal = String(o.dal);
+    if (o.al  && FORMA_GIORNO.test(String(o.al)))  q.al  = String(o.al);
+  }
+  if (o.vuoto === 'visto_il' && cosa === 'richieste_sito') q.vuoto = 'visto_il';
   if (o.parola) {
-    const campo = DOVE_SI_CERCA[cosa];
-    if (campo) q.contiene = { campo: campo, valore: String(o.parola).slice(0, 80) };
+    const v = parolaPulita(o.parola);
+    const testo = DOVE_SI_CERCA[cosa] || [];
+    const pezzi = [];
+    if (v) testo.forEach(function (c) { pezzi.push(c + '.ilike.*' + v + '*'); });
+    const cifre = String(o.parola).replace(/[^0-9]/g, '');
+    if (NUMERO_INTERO[cosa] && cifre && cifre.length <= 9 && /^\D*\d+\D*$/.test(String(o.parola).trim())) {
+      pezzi.push(NUMERO_INTERO[cosa] + '.eq.' + cifre);
+    }
+    if (!pezzi.length) return { errore: 'per questa cosa si cerca solo col numero' };
+    q.oppure = pezzi.join(',');
   }
   return q;
+}
+
+/* ⛔ 7 nov 2026 — I GIORNI LI CONTA IL SERVER, NON IL MODELLO.
+   Accanto a ogni riga con una data si scrive `giorni_da_oggi`:
+   negativo = gia' passato, 0 = oggi, positivo = fra quanti giorni.
+   Pura: il banco la prova da sola. */
+function segnaGiorni(righe, campo, oggiISO) {
+  if (!Array.isArray(righe) || !campo) return righe;
+  const base = Date.parse(String(oggiISO) + 'T00:00:00Z');
+  if (isNaN(base)) return righe;
+  return righe.map(function (r) {
+    const v = r && r[campo] ? String(r[campo]).slice(0, 10) : '';
+    if (!FORMA_GIORNO.test(v)) return r;
+    const t = Date.parse(v + 'T00:00:00Z');
+    if (isNaN(t)) return r;
+    return Object.assign({}, r, { giorni_da_oggi: Math.round((t - base) / 86400000) });
+  });
+}
+function giornoPiu(oggiISO, n) {
+  const t = Date.parse(String(oggiISO) + 'T12:00:00Z');
+  if (isNaN(t)) return '';
+  return new Date(t + n * 86400000).toISOString().slice(0, 10);
 }
 
 // ---------------------------------------------------------------------
@@ -405,10 +497,19 @@ async function esegui(clientDati, q) {
   Object.keys(q.filtri).forEach(function(k) { sel = sel.eq(k, q.filtri[k]); });
   if (q.senzaCestino) sel = sel.is('eliminato_il', null);
   if (q.contiene) sel = sel.ilike(q.contiene.campo, '%' + q.contiene.valore + '%');
+  if (q.oppure) sel = sel.or(q.oppure);
+  if (q.stato) sel = sel.eq('stato', q.stato);
+  /* ⚠️ `neq` da solo butta via anche le righe con lo stato VUOTO (in SQL
+     null <> 'fatto' non e' vero): un lavoro senza stato e' un lavoro da
+     fare, quindi si tiene. */
+  if (q.escludiStato) sel = sel.or('stato.is.null,stato.neq.' + q.escludiStato);
+  if (q.dal && q.colData) sel = sel.gte(q.colData, q.dal);
+  if (q.al && q.colData) sel = sel.lte(q.colData, q.colData === 'created_at' ? q.al + 'T23:59:59' : q.al);
+  if (q.vuoto) sel = sel.is(q.vuoto, null);
   if (!q.soloConta) {
     /* ⛔ 30 agosto 2026 — le righe di un documento vanno lette 1, 2, 3 e non
        al contrario: un preventivo letto dal fondo non si capisce. Per tutto
-       il resto resta «prima le piu' recenti». */
+       il resto resta «prima le piu' recenti», salvo `prossime`. */
     if (q.ordine) sel = sel.order(q.ordine, { ascending: !!q.crescente, nullsFirst: false });
     sel = sel.limit(q.limite);
   }
@@ -469,16 +570,34 @@ function calendarioProssimo(oggiISO, quanti) {
 // gli attrezzi come li vede Claude
 // ---------------------------------------------------------------------
 const ELENCO_COSE = Object.keys(ATTREZZI);
+/* ⛔ 7 nov 2026 — i filtri. Gli stati veri del database: lavori da_fare /
+   in_corso / fatto · preventivi bozza / inviato / accettato / rifiutato ·
+   fatture bozza / emessa / pagata · scadenze aperta / fatta · promemoria
+   aperto / fatto. Sul server ogni valore passa da FORMA_STATO e FORMA_GIORNO:
+   quello che non ha la forma giusta si butta, non si gira al database. */
+const FILTRI_SCHEMA = {
+  cosa:          { type:'string', enum: ELENCO_COSE },
+  stato:         { type:'string', description:'solo quelle in questo stato. lavori: da_fare, in_corso, fatto · preventivi: bozza, inviato, accettato, rifiutato · fatture: bozza, emessa, pagata · scadenze: aperta, fatta · promemoria: aperto, fatto' },
+  escludi_stato: { type:'string', description:'tutte TRANNE quelle in questo stato (es. lavori aperti = escludi «fatto»)' },
+  dal:           { type:'string', description:'dalla data AAAA-MM-GG (compresa), sulla data principale di quella cosa' },
+  al:            { type:'string', description:'fino alla data AAAA-MM-GG (compresa)' },
+  prima_le_prossime: { type:'boolean', description:'true = dalla data più vecchia/vicina alla più lontana (per le cose da fare); di base sono dalle più recenti' }
+};
 const STRUMENTI = [
   {
     name: 'conta_cose',
-    description: 'Conta quante cose di un tipo ci sono nel reparto aperto. Usalo per domande come «quanti lavori ho aperti».',
-    input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE } }, required:['cosa'] }
+    description: 'Conta quante cose di un tipo ci sono nel reparto aperto. Con `stato` o `escludi_stato` conta solo quelle in quello stato: per «quanti lavori ho aperti» usa escludi_stato «fatto». Con `dal`/`al` conta solo quelle in quelle date.',
+    input_schema: { type:'object', properties: FILTRI_SCHEMA, required:['cosa'] }
   },
   {
     name: 'elenco_cose',
-    description: 'Dà l\'elenco delle cose di un tipo nel reparto aperto, dalle più recenti. Usalo quando serve vedere quali sono, non solo quante.',
-    input_schema: { type:'object', properties: { cosa: { type:'string', enum: ELENCO_COSE }, quanti: { type:'integer' } }, required:['cosa'] }
+    description: 'Dà l\'elenco delle cose di un tipo nel reparto aperto, dalle più recenti (o dalle più vicine con `prima_le_prossime`). Ogni riga con una data porta `giorni_da_oggi`: negativo = già passato, 0 = oggi. Filtra con `stato`, `escludi_stato`, `dal`, `al` quando la domanda parla di uno stato o di un periodo: senza filtri vedi solo le ultime 25.',
+    input_schema: { type:'object', properties: Object.assign({ quanti: { type:'integer' } }, FILTRI_SCHEMA), required:['cosa'] }
+  },
+  {
+    name: 'agenda',
+    description: 'IN UN COLPO SOLO: i lavori in ritardo (non fatti e con la data già passata), i lavori dei prossimi 14 giorni, le scadenze scadute e dei prossimi 30 giorni, i promemoria da fare, le note del calendario della settimana e le richieste dal sito non ancora aperte. Ogni cosa ha già `giorni_da_oggi`. USALO per «cosa devo fare oggi/questa settimana», «cosa ho in ritardo», «cosa mi sono dimenticato». Per i soldi chiama anche `liquidita_30_giorni`.',
+    input_schema: { type:'object', properties: {} }
   },
   {
     name: 'soldi_del_reparto',
@@ -604,6 +723,50 @@ const STRUMENTI = [
   }
 ];
 
+/* ⛔ 7 nov 2026 — gli attrezzi sono uguali per tutti: il segno della
+   memoria sull'ULTIMO tiene in memoria tutta la lista (e' la regola di
+   Anthropic: si mette in memoria tutto quello che viene prima del segno). */
+const STRUMENTI_IN_MEMORIA = STRUMENTI.map(function (t, i) {
+  return i === STRUMENTI.length - 1 ? Object.assign({}, t, { cache_control: { type: 'ephemeral' } }) : t;
+});
+
+/* ---------------------------------------------------------------------
+   ⛔ 7 nov 2026 — L'AGENDA: «cosa devo fare oggi» in un giro solo.
+   Prima la chat doveva fare 4-5 domande al database (lavori, scadenze…),
+   e i promemoria e le richieste dal sito non li vedeva proprio. Ogni pezzo
+   passa da costruisciLettura, quindi porta i suoi filtri come tutti.
+   Le date le conta il server (giorni_da_oggi), non il modello.
+   ⚠️ Un pezzo che non risponde non ferma gli altri: si scrive il suo errore.
+   --------------------------------------------------------------------- */
+async function agenda(clientDati, uid, reparto, oggi, base) {
+  const ieri = giornoPiu(oggi, -1);
+  const pezzi = {
+    lavori_in_ritardo:     ['lavori',          { escludiStato: 'fatto', al: ieri, prossime: true }],
+    lavori_prossimi_14:    ['lavori',          { escludiStato: 'fatto', dal: oggi, al: giornoPiu(oggi, 14), prossime: true }],
+    scadenze_scadute:      ['scadenze',        { escludiStato: 'fatta', al: ieri, prossime: true }],
+    scadenze_prossime_30:  ['scadenze',        { escludiStato: 'fatta', dal: oggi, al: giornoPiu(oggi, 30), prossime: true }],
+    promemoria_da_fare:    ['promemoria',      { escludiStato: 'fatto', al: giornoPiu(oggi, 7), prossime: true }],
+    note_calendario_7:     ['note_calendario', { dal: oggi, al: giornoPiu(oggi, 7), prossime: true }],
+    richieste_non_aperte:  ['richieste_sito',  { vuoto: 'visto_il', quanti: 10 }]
+  };
+  const nomi = Object.keys(pezzi);
+  const esiti = await Promise.all(nomi.map(function (k) {
+    const p = pezzi[k];
+    const q = costruisciLettura(p[0], uid, reparto, Object.assign({}, base, p[1]));
+    return esegui(clientDati, q).then(function (r) {
+      if (r.righe) r.righe = segnaGiorni(r.righe, (ATTREZZI[p[0]] || {}).data, oggi);
+      return r;
+    }, function (e) { return { errore: (e && e.message) || 'non risponde' }; });
+  }));
+  const fuori = { oggi: oggi };
+  nomi.forEach(function (k, i) {
+    const r = esiti[i];
+    fuori[k] = r.errore ? { errore: r.errore } : r.righe;
+    if (r.righe && r.righe.length >= RIGHE_MAX) fuori[k + '_avviso'] = 'ce ne sono almeno ' + RIGHE_MAX + ': il conto e\' parziale';
+  });
+  return fuori;
+}
+
 // ---------------------------------------------------------------------
 // ⛔ 30 agosto 2026 — L'ALLEGATO (il «+» della chat)
 //
@@ -682,15 +845,21 @@ AIUTO VERO. «Assistenza diretta» (in fondo al menu): scrivi e risponde una per
 //    se Claude sbaglia un'aliquota o una regola di sicurezza, la figura
 //    la fa lui, non Claude.
 // ---------------------------------------------------------------------
-function istruzioni(sezione, nomeReparto, oggi) {
+function istruzioniFisse() {
   return [
     'Sei la chat di aiuto dentro il gestionale di TrovaImpresa, usato da imprese edili, artigiani, studi tecnici, negozi di materiali e noleggi.',
     'Rispondi in italiano, corto e pratico, a passaggi numerati quando servono. Chi ti legge non è un tecnico di informatica.',
-    'Stai guardando il reparto «' + (nomeReparto || 'quello aperto') + '»' + (sezione ? ', sezione «' + sezione + '»' : '') + '.',
-    // ⛔ IL CALENDARIO GIA' SCRITTO: vedi la nota sopra calendarioProssimo.
-    //    Il primo della fila e' oggi. Il conto non lo fa lui: legge.
-    'IL CALENDARIO, così non devi contare. Oggi è il primo della fila: ' + calendarioProssimo(oggi, 14) + '.',
-    '⛔ La data del modulo PRENDILA DA QUESTA FILA, copiando il pezzo dopo l\'uguale. Non contarla a mente: sbaglieresti il giorno della settimana. Se ti chiede una data più in là della fila, conta di sette in sette partendo da una riga della fila.',
+    // ⛔ 7 nov 2026 — LA LINGUA. Dal registro vero: un'impresa ha scritto in
+    //    arabo e la chat ha risposto «non parlo arabo, scrivi in italiano».
+    //    Falso, e la perdi. Molti artigiani in Italia sono stranieri.
+    'LINGUA: rispondi SEMPRE nella lingua in cui ti scrive (arabo, rumeno, albanese, inglese, spagnolo…), mai «scrivi in italiano». I nomi dei pulsanti restano in italiano fra «», come li vede sullo schermo, con accanto la traduzione fra parentesi.',
+    // ⛔ 7 nov 2026 — LE DATE. Dal vivo: «l'unico nei tempi e' quello del 5
+    //    settembre» detto il 7 novembre. Il modello non confronta le date.
+    '⛔ LE DATE NON SI CONFRONTANO A MENTE. Ogni riga con una data ti arriva col campo `giorni_da_oggi`: negativo = già passato (se non è fatto è IN RITARDO di tanti giorni), 0 = oggi, positivo = fra tanti giorni. Usa SOLO quello per dire «in ritardo», «oggi», «fra 3 giorni».',
+    'COSA DEVO FARE OGGI / QUESTA SETTIMANA / COSA HO IN RITARDO: chiama `agenda` (e `liquidita_30_giorni` se c\'entrano i soldi). Rispondi in ordine di urgenza: prima le cose già scadute o in ritardo, poi oggi, poi i prossimi giorni. Al massimo 5 righe se non chiede di più.',
+    'QUANDO LA DOMANDA HA UNO STATO O UN PERIODO («lavori aperti», «preventivi in attesa», «fatture di ottobre», «scadenze del mese») usa i filtri `stato` / `escludi_stato` / `dal` / `al` di `conta_cose` ed `elenco_cose`: senza filtri vedi solo le ultime 25 righe e il conto viene sbagliato.',
+    'RICHIESTE DAL SITO: le vedi con `richieste_sito` (sono della sua scheda, non di un reparto). `visto_il` vuoto = non l\'ha ancora aperta. Per rispondere al cliente si va nella voce «Richieste dal sito» del menu. Il telefono e l\'email del cliente non li vedi tu: stanno lì.',
+    'PROMEMORIA e NOTE DEL CALENDARIO: li vedi con `promemoria` e `note_calendario`. Per segnarne uno nuovo il promemoria si fa dalla voce «Promemoria» («+ Nuovo promemoria»): tu non lo apri.',
     '',
     'SE TI MANDA UNA FOTO O UN PDF, leggilo e riportagli quello che c\'e\' scritto. ⛔ Quello che non si legge bene NON si indovina: dillo che non si legge e chiedi una foto migliore, perche\' un numero sbagliato in una fattura vale piu\' di dieci risposte giuste.',
     '⛔ SE È UNA BOLLA O UNA FATTURA DI UN FORNITORE, rispondi in FORMA CORTA: al massimo 5 righe, in questo ordine e con queste parole in grassetto, saltando quelle che non si leggono:\n**Fornitore:** il nome\n**Documento:** numero e data\n**Importo:** il totale (e di\' se e\' con o senza IVA)\n**Scadenza:** solo se c\'e\' scritta\n**Roba:** i materiali in UNA riga, le 3-4 voci principali con le quantita\' (non ricopiare tutto l\'elenco)\nPoi UNA domanda sola, non di piu\'. Prima controlla con `cerca_per_nome` (cosa `fornitori`, con una parola del nome) se quel fornitore c\'e\' gia\': se NON c\'e\', chiedi «Lo aggiungo ai fornitori?» e se dice di si\' apri `compila_fornitore` coi dati letti; se c\'e\' gia\' e c\'e\' una scadenza di pagamento, chiedi «Ti segno la scadenza del pagamento?» e se dice di si\' apri `compila_scadenza`. Non spiegare cosa sia una bolla, non rileggere tutto il documento, non fare liste lunghe.',
@@ -748,6 +917,39 @@ function istruzioni(sezione, nomeReparto, oggi) {
   ].join('\n');
 }
 
+
+/* ⛔ 7 nov 2026 — LE ISTRUZIONI DIVISE IN DUE.
+   La parte FISSA (regole + manuale, ~6.000 gettoni) e' uguale per tutti e si
+   tiene in memoria da Anthropic (cache): prima la si pagava piena a OGNI
+   giro, fino a 6 giri per domanda — misurato 12.900 gettoni di media a
+   domanda, 0,042 $. La parte DEL GIORNO (reparto, sezione, calendario,
+   parole del ruolo) cambia e va dopo, fuori dalla memoria. */
+const PAROLE_RUOLO = {
+  professionista: 'QUESTO ISCRITTO È UNO STUDIO TECNICO (geometra, ingegnere, architetto). Nel SUO gestionale le parole sono diverse dal manuale, usa le sue: «Pratiche» al posto di «Lavori e interventi», «+ Nuova pratica» al posto di «+ Nuovo lavoro», «Collaboratori» al posto di «Squadra», «Strumenti» al posto di «Attrezzature», «Computo metrico» (non «da prezzare»); in più ha «Crediti formativi». NON ha «Mezzi» né «Carte»: non mandarlo lì. Dentro il modulo della pratica c\'è il riquadro «Dati della pratica»: «Tipo di pratica» (CILA, CILAS, SCIA, Permesso di costruire, paesaggistica, agibilità, sanatoria, accatastamento, voltura), «A che punto sta» (da preparare, depositata, in istruttoria, integrazioni richieste, approvata, archiviata), «Comune», «N. protocollo», «Data di deposito», «Dati catastali». Il protocollo del Comune va LÌ, non nelle note e non nello Scadenzario. Le pratiche lette con gli attrezzi hanno anche pratica_tipo, pratica_stato, pratica_comune, pratica_protocollo, pratica_data_dep. Il suo preventivo ha il riquadro della parcella (compenso, cassa, spese, IVA, ritenuta) e il PDF esce come PARCELLA. Con lo studio parla di pratiche, incarichi e onorari, non di cantieri.',
+  artigiano: 'QUESTO ISCRITTO È UN ARTIGIANO: nel suo menu la voce si chiama «Lavori e interventi» e il computo «Computo da prezzare».',
+  impresa: 'QUESTO ISCRITTO È UN\'IMPRESA: nel suo menu la voce si chiama «Lavori» e il computo «Computo da prezzare».'
+};
+function istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo) {
+  return [
+    'Stai guardando il reparto «' + (nomeReparto || 'quello aperto') + '»' + (sezione ? ', sezione «' + sezione + '»' : '') + '.',
+    // ⛔ IL CALENDARIO GIA' SCRITTO: vedi la nota sopra calendarioProssimo.
+    //    Il primo della fila e' oggi. Il conto non lo fa lui: legge.
+    'IL CALENDARIO, così non devi contare. Oggi è il primo della fila: ' + calendarioProssimo(oggi, 14) + '.',
+    '⛔ La data del modulo PRENDILA DA QUESTA FILA, copiando il pezzo dopo l\'uguale. Non contarla a mente: sbaglieresti il giorno della settimana. Se ti chiede una data più in là della fila, conta di sette in sette partendo da una riga della fila.',
+    PAROLE_RUOLO[ruolo] || PAROLE_RUOLO.impresa
+  ].join('\n');
+}
+function istruzioni(sezione, nomeReparto, oggi, ruolo) {
+  return istruzioniFisse() + '\n\n' + istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo);
+}
+/* i due pezzi come li vuole Anthropic: il primo con la memoria accesa */
+function sistemaPerClaude(sezione, nomeReparto, oggi, ruolo) {
+  return [
+    { type: 'text', text: istruzioniFisse(), cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: istruzioniDelGiorno(sezione, nomeReparto, oggi, ruolo) }
+  ];
+}
+
 // ---------------------------------------------------------------------
 // =====================================================================
 // ⛔ 30 agosto 2026 — UN GIRO CON CLAUDE, ASCOLTATO MENTRE PARLA
@@ -779,18 +981,26 @@ async function unGiro(corpo, manda) {
   if (!r.ok) {
     let messaggio = 'Anthropic HTTP ' + r.status;
     try { const d = await r.json(); if (d && d.error && d.error.message) messaggio = d.error.message; } catch (e) {}
-    return { errore: messaggio, blocchi: [], tin: 0, tout: 0, testo: '' };
+    return { errore: messaggio, blocchi: [], tin: 0, tout: 0, cw: 0, cr: 0, testo: '' };
   }
 
   const lettore = r.body.getReader();
   const dec = new TextDecoder();
-  let resto = '', tin = 0, tout = 0, testo = '', errore = null;
+  let resto = '', tin = 0, tout = 0, cw = 0, cr = 0, testo = '', errore = null;
   const blocchi = [], mezziAttrezzi = {};
 
   const evento = function (riga) {
     let o; try { o = JSON.parse(riga); } catch (e) { return; }
     if (o.type === 'message_start') {
-      tin += (o.message && o.message.usage && o.message.usage.input_tokens) || 0; return;
+      const u = (o.message && o.message.usage) || {};
+      tin += u.input_tokens || 0;
+      /* ⛔ 7 nov 2026 — con la memoria (cache) accesa una parte dell'ingresso
+         arriva contata a parte: scritta in memoria (costa 1,25 volte) o
+         letta dalla memoria (costa un decimo). Senza contarle il registro
+         dei soldi direbbe un costo piu' basso del vero. */
+      cw  += u.cache_creation_input_tokens || 0;
+      cr  += u.cache_read_input_tokens || 0;
+      return;
     }
     if (o.type === 'content_block_start') {
       const b = o.content_block || {};
@@ -833,7 +1043,7 @@ async function unGiro(corpo, manda) {
       evento(riga.slice(5).trim());
     }
   }
-  return { errore: errore, blocchi: blocchi.filter(Boolean), tin: tin, tout: tout, testo: testo.trim() };
+  return { errore: errore, blocchi: blocchi.filter(Boolean), tin: tin, tout: tout, cw: cw, cr: cr, testo: testo.trim() };
 }
 
 // ---------------------------------------------------------------------
@@ -879,9 +1089,9 @@ export default async function (req) {
      della risposta (vedi la nota al punto 6). */
   const oraDomanda = new Date().toISOString();
 
-  let domanda, conversazione_id, mestiere_id, sezione, allegato;
+  let domanda, conversazione_id, mestiere_id, sezione, allegato, ruoloDetto;
   try {
-    ({ domanda, conversazione_id, mestiere_id, sezione, allegato } = JSON.parse((await req.text()) || '{}'));
+    ({ domanda, conversazione_id, mestiere_id, sezione, allegato, ruolo: ruoloDetto } = JSON.parse((await req.text()) || '{}'));
   } catch { return rispondi(400, { error: 'Body JSON non valido.' }); }
   if (!domanda || !String(domanda).trim()) return rispondi(400, { error: 'La domanda è vuota.' });
   if (!conversazione_id || !mestiere_id)   return rispondi(400, { error: 'Parametri mancanti.' });
@@ -922,6 +1132,21 @@ export default async function (req) {
   // letto col client dei dati: se non e' suo, la RLS non lo fa vedere e
   // qui non arriva niente.
   let nomeReparto = null;
+  /* ⛔ 7 nov 2026 — CHI E' (impresa, artigiano, studio tecnico) e qual e' la
+     sua scheda. Letto col gettone suo, mai preso dal browser per la scheda.
+     Il ruolo serve solo alle PAROLE (pratiche/lavori): quello che dice il
+     browser vale solo se e' uno dei tre, se no si usa il database.
+     ⚠️ Se la lettura non va, la chat va avanti lo stesso: senza la scheda
+        non vede le richieste dal sito, e basta. */
+  let impresaId = null, ruolo = 'impresa';
+  const promessaScheda = conTempo(
+    dati.from('imprese').select('id,tipo').eq('user_id', uid).limit(1),
+    TEMPO_ACCESSO, 'scheda').then(function (r) {
+      if (r && !r.error && r.data && r.data[0]) {
+        impresaId = r.data[0].id;
+        if (['impresa', 'artigiano', 'professionista'].indexOf(r.data[0].tipo) >= 0) ruolo = r.data[0].tipo;
+      }
+    }, function () {});
   try {
     const r = await conTempo(
       dati.from('gest_mestieri').select('id,nome').eq('id', mestiere_id).eq('user_id', uid).maybeSingle(),
@@ -929,6 +1154,8 @@ export default async function (req) {
     if (r && !r.error && r.data) nomeReparto = r.data.nome || null;
     else return rispondi(403, { error: 'Questo reparto non è tuo.' });
   } catch (e) { return rispondi(403, { error: 'Non riesco a verificare il reparto. Riprova.' }); }
+  await promessaScheda;
+  if (['impresa', 'artigiano', 'professionista'].indexOf(ruoloDetto) >= 0) ruolo = ruoloDetto;
 
   // ---- 4. ha il Gestionale AI? e quanti messaggi gli restano? ------------------
   let stato = null;
@@ -1027,7 +1254,7 @@ export default async function (req) {
     role: 'user',
     content: pezzoAllegato ? [pezzoAllegato, { type: 'text', text: domanda }] : domanda
   }]);
-  let risposta = '', tin = 0, tout = 0, errore = null;
+  let risposta = '', tin = 0, tout = 0, cw = 0, cr = 0, errore = null;
 
   /* ⛔ IL MODULO DA APRIRE (gradino 3). Resta `null` per tutti i messaggi
      che sono solo domande: solo `compila_lavoro` lo riempie, e ne passa
@@ -1085,13 +1312,15 @@ export default async function (req) {
             //    Era 1500, cioe' poco piu' di una pagina. Alzare il tetto NON
             //    costa di piu': si paga quello che scrive davvero.
             max_tokens: 4000,
-            system: istruzioni(sezione, nomeReparto, oggi),
-            tools: STRUMENTI,
+            system: sistemaPerClaude(sezione, nomeReparto, oggi, ruolo),
+            tools: STRUMENTI_IN_MEMORIA,
             messages: messaggi
           }, giroManda(!!risposta));
 
           tin  += g.tin;
           tout += g.tout;
+          cw   += g.cw || 0;
+          cr   += g.cr || 0;
           if (g.errore) { errore = g.errore; break; }
 
           const blocchi = g.blocchi;
@@ -1111,12 +1340,18 @@ export default async function (req) {
       for (const t of chieste) {
         const inp = t.input || {};
         let esito;
+        const base = { ruolo: ruolo, impresaId: impresaId };
+        const filtri = { stato: inp.stato, escludiStato: inp.escludi_stato, dal: inp.dal, al: inp.al, prossime: inp.prima_le_prossime === true };
         if (t.name === 'conta_cose') {
-          esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { soloConta: true }));
+          esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, Object.assign({ soloConta: true }, base, filtri)));
         } else if (t.name === 'elenco_cose') {
-          esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { quanti: inp.quanti }));
+          esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, Object.assign({ quanti: inp.quanti }, base, filtri)));
+          if (esito.righe) esito.righe = segnaGiorni(esito.righe, (ATTREZZI[inp.cosa] || {}).data, oggi);
         } else if (t.name === 'cerca_per_nome') {
-          esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, { parola: inp.parola }));
+          esito = await esegui(dati, costruisciLettura(inp.cosa, uid, mestiere_id, Object.assign({ parola: inp.parola }, base)));
+          if (esito.righe) esito.righe = segnaGiorni(esito.righe, (ATTREZZI[inp.cosa] || {}).data, oggi);
+        } else if (t.name === 'agenda') {
+          esito = await agenda(dati, uid, mestiere_id, oggi, base);
         } else if (t.name === 'dentro_al_documento') {
           /* ⛔ PRIMA IL PADRE, COL REPARTO. Se la fattura non e' sua o e' di
              un altro reparto, qui non esce niente e i figli non si toccano. */
@@ -1229,8 +1464,9 @@ export default async function (req) {
       }
 
       // ---- 8. si scrive nel registro (solo il server puo') ------------
-      // ⚠️ Sonnet 4.5: 3 $ per milione in ingresso, 15 in uscita.
-      const costo = (tin * 3 / 1e6) + (tout * 15 / 1e6);
+      // ⚠️ Sonnet 4.5: 3 $ per milione in ingresso, 15 in uscita; la memoria
+      //    3,75 $ quando si scrive e 0,30 $ quando si legge.
+      const costo = (tin * 3 / 1e6) + (cw * 3.75 / 1e6) + (cr * 0.30 / 1e6) + (tout * 15 / 1e6);
       try {
         /* ⛔ 30 agosto 2026 (sera): i due orari devono essere DIVERSI, se no
            l'ordine fra domanda e risposta non e' garantito (vedi il punto 6).
@@ -1249,7 +1485,7 @@ export default async function (req) {
           { created_at: oraRisposta,
             user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
             ruolo: 'ai', testo: risposta || null, sezione: sezione || null,
-            tokens_input: tin, tokens_output: tout, costo_usd: costo, errore: errore }
+            tokens_input: tin + cw + cr, tokens_output: tout, costo_usd: costo, errore: errore }
         ]);
       } catch (e) { console.error('[chat] registro:', e && e.message); }
 
@@ -1284,3 +1520,4 @@ export default async function (req) {
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
 export { costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };

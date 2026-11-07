@@ -781,6 +781,10 @@
           conversazione_id: chiacchierata(),
           mestiere_id: mid,
           sezione: sezioneAperta(),
+          /* 7 nov 2026 — impresa, artigiano o studio: serve alla chat per
+             usare le PAROLE giuste (pratiche/lavori). Non apre niente: chi
+             e' l'iscritto lo decide il server dal gettone. */
+          ruolo: (typeof ruoloUtente !== 'undefined') ? ruoloUtente : null,
           allegato: allegatoDaMandare
         })
       });
