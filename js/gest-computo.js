@@ -2474,10 +2474,10 @@
       +    '<button data-v="scritta"'+(_cvModo(v)==="scritta"?' class="on"':'')+'>Scrivo la quantità</button>'
       +    '<button data-v="corpo"'+(_cvModo(v)==="corpo"?' class="on"':'')+'>A corpo</button>'
       +  '</div>'
-      +  '<div class="sh-nota" id="cv-conta-nota"></div>'
+      +  '<div class="sh-nota" id="cv-conta-nota" style="margin-top:10px"></div>'
       +  '</div>'
       +  '<div class="field" id="cv-qta-box" style="'+(v.quantita_manuale?"":"display:none")+'">'
-      +    '<label>Quantità</label><div style="display:flex;gap:10px;align-items:center"><input type="text" inputmode="decimal" id="cv-qta"'+_noAuto()+' value="'+(v.quantita!=null&&v.quantita_manuale?_misTesto(v.quantita):"")+'" placeholder="Es. 35" style="max-width:180px"><span id="cv-qta-um" style="font-size:18px;font-weight:600"></span></div>'
+      +    '<label>Quantità</label><div style="display:flex;flex-wrap:nowrap;gap:10px;align-items:center"><input type="text" inputmode="decimal" id="cv-qta"'+_noAuto()+' value="'+(v.quantita!=null&&v.quantita_manuale?_misTesto(v.quantita):"")+'" placeholder="Es. 35" style="flex:0 0 170px;width:170px;max-width:170px"><span id="cv-qta-um" style="font-size:18px;font-weight:600;white-space:nowrap"></span></div>'
       +    '<div id="cv-conto" style="margin-top:10px;font-size:18px"></div></div>'
       +'</div>'
 
@@ -2536,8 +2536,16 @@
       bt.onclick=()=>{ if(prima)prima();
         /* «A corpo» con l'unita' vuota la mette a «corpo»: cosi' riaprendo
            la lavorazione si ritrova lo stesso pulsante acceso */
-        if(segVal("cv-conta")==="corpo"){ const u=$("#cv-uni"); if(u&&!u.value)u.value="corpo";
-          const q=$("#cv-qta"); if(q&&!q.value.trim())q.value="1"; }
+        const u=$("#cv-uni"), q=$("#cv-qta");
+        if(segVal("cv-conta")==="corpo"){
+          if(u&&!u.value){u.value="corpo";u.dataset.auto="1";}
+          if(q&&!q.value.trim()){q.value="1";q.dataset.auto="1";}
+        }else{
+          /* tornando indietro si toglie solo quello che aveva messo «A corpo» */
+          if(u&&u.dataset.auto&&u.value==="corpo"){u.value="";}
+          if(q&&q.dataset.auto&&q.value.trim()==="1"){q.value="";}
+          if(u)delete u.dataset.auto; if(q)delete q.dataset.auto;
+        }
         _cvConta();
       };
     });
