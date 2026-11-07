@@ -970,6 +970,10 @@
        dati veri dal database, e qui si cambiano SOLO le caselle dette.
        A salvare e' lui. */
     if (idEsistente) {
+      /* ⚠️ la finestra chiusa lascia le sue caselle nella pagina: si aspetta
+         una casella «Cosa c'e' da fare» NUOVA, se no si riempie quella vecchia
+         e poi il modulo vero arriva sopra, vuoto (visto nel collaudo dal vivo). */
+      const vecchia = document.getElementById('j-desc');
       const b = document.createElement('button');
       b.type = 'button'; b.hidden = true;
       b.setAttribute('data-action', 'edit-job');
@@ -977,7 +981,10 @@
       document.body.appendChild(b);
       b.click();
       setTimeout(function () { b.remove(); }, 0);
-      quandoCompare('j-desc', function () {
+      let giri = 80;
+      (function aspetta() {
+        const el = document.getElementById('j-desc');
+        if (!el || el === vecchia) { if (giri-- > 0) setTimeout(aspetta, 60); return; }
         setTimeout(function () {
           const primo = { el: null };
           ['descrizione', 'dove', 'data', 'importo'].forEach(function (k, i) {
@@ -989,7 +996,7 @@
           avviso('Ho cambiato le caselle: controlla e premi Salva');
           if (primo.el) primo.el.focus();
         }, 120);
-      }, 80);
+      })();
       return true;
     }
     if (typeof window.gestApriModuloAI === 'function') {
