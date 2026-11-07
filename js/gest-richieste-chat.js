@@ -142,7 +142,7 @@
          arriva dalla scheda con «Apri». Se la richiesta e' gia' diventata
          preventivo non c'e', ed e' giusto. */
       `<button class="btn b-cancel" data-action="close">Chiudi</button>`,
-      dsVoci(r));
+      dsVoci(r).filter(v=>!v||v.action!=="ds-apri"));   /* «Vedi i contatti» qui dentro c'e' gia' */
     const _go=$("#ds-risp-go"); if(_go)_go.onclick=function(){dsRisposta(r);};
     if(r._stato==="nuova"){
       if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();}

@@ -256,3 +256,6 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 /* 7 nov 2026 — CREDITI FORMATIVI (studio): il conto per tipo e gli anni a 16 px */
 #crediti .cred-tipo{font-size:16px}
 #crediti .chip{font-size:16px;min-height:40px}
+
+/* 7 nov 2026 — la ricerca dentro le sezioni, sul telefono, a tutta larghezza */
+@media(max-width:760px){ .wrap section .lav-search{width:100%;max-width:none;box-sizing:border-box} }
