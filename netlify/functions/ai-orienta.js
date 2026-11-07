@@ -140,7 +140,8 @@ exports.handler = async function (event) {
       },
       body: JSON.stringify({
         /* il modello si puo' cambiare da Netlify senza toccare il codice */
-        model: process.env.AI_ORIENTA_MODELLO || 'claude-opus-4-5',
+        /* 7 nov 2026: Haiku e non Opus — scegliere fra 4 pagine non chiede il modello piu' caro */
+        model: process.env.AI_ORIENTA_MODELLO || 'claude-haiku-4-5-20251001',
         /* ⚠️ 200, non 1000: la risposta e' un JSON di tre campi. Era la voce
            di spesa piu' grossa di questa function, e non serviva a niente. */
         max_tokens: 200,

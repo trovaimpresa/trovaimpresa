@@ -529,6 +529,22 @@
                                   d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
     if(daFatt.length)    DA.push({g:2,male:1,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
                                   d:"Valgono "+eur(totDaFatt)+" e non sono ancora in nessuna fattura",go:"fatture"});
+    /* 7 nov 2026 — LE FATTURE IN BOZZA DIMENTICATE. Una bozza non e' «da
+       incassare» (non e' emessa) e non e' «da fatturare» (il lavoro e' gia'
+       dentro una fattura): quei soldi non comparivano da nessuna parte.
+       Visto sul reparto giardiniere di Alex: 2 bozze, 2.082,10 €, ferme da
+       70 e 97 giorni, con «Da incassare 0» e «Da fatturare 0».
+       Si avvisa solo dopo 7 giorni: una bozza di ieri e' lavoro in corso. */
+    const limBozza = _giorniDopo(oggi,-7);
+    const bozzeFerme = FT.filter(f=>f.stato==="bozza"&&fattSegno(f)>0&&String(f.data||String(f.created_at||"").slice(0,10)||oggi)<limBozza);
+    if(bozzeFerme.length){
+      const totBozze=bozzeFerme.reduce((s,f)=>s+totaleFatt(f),0);
+      const piuVecchia=bozzeFerme.reduce((m,f)=>{const d=String(f.data||String(f.created_at||"").slice(0,10));return (!m||d<m)?d:m;},"");
+      const gg=piuVecchia?Math.round((new Date(oggi)-new Date(piuVecchia))/86400000):0;
+      const da=gg>=60?("più di "+Math.floor(gg/30)+" mesi"):(gg+" giorni");
+      DA.push({g:2,male:1,t:nn(bozzeFerme.length,"fattura in bozza mai mandata","fatture in bozza mai mandate"),
+               d:eur2(totBozze)+" fermi da "+da,go:"fatture"});
+    }
     if(ritardo.length)   DA.push({g:1,male:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
                                   d:"La data prevista è già passata",go:"lavori"});
     if(scScadute.length) DA.push({g:1,male:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
@@ -643,7 +659,7 @@
           + '<div style="font-size:26px;font-weight:700;margin:6px 0 4px">'+esc(_p.t)+'</div>'
           + (_dett(_p.d)?'<div style="font-size:18px;color:#586574;margin-bottom:12px">'+esc(_dett(_p.d))+'</div>':'<div style="margin-bottom:12px"></div>')
           + '<button type="button" class="btn-primary" style="font-size:19px;padding:13px 20px;margin:4px 8px 0 0" '
-          +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemarlo</button>'
+          +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemare</button>'
           + (_chatOk?'<button type="button" class="btn" id="rie-chiedi-ai" style="font-size:19px;padding:13px 20px;margin:4px 0 0">Chiedi all\'AI cosa fare oggi</button>':'')
           + '</div>';
         /* 6 nov 2026 — la prima cosa sta gia' grande in «Parti da qui»:

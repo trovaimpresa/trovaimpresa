@@ -5565,3 +5565,7 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 @media(min-width:901px){
   .sheet--grande .sh-cols .cv-a-capo{ break-before:column; -webkit-column-break-before:always; }
 }
+
+/* 7 nov 2026 — preventivi: si dice sempre se l'importo ha l'IVA dentro o no */
+.prev-iva-card{ font-size:14px; font-weight:600; color:var(--testo-2); }
+.prev-iva-tot{ font-size:14px; font-weight:500; color:var(--testo-2); margin-left:4px; }

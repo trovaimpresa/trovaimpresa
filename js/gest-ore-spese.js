@@ -1031,7 +1031,16 @@
       : (p.iva_perc!=null&&p.iva_perc!=="");
     const L=prevCache.filter(p=>prevFilter==="tutti"||p.stato===prevFilter);
     const conta={};PREV_VISTE.forEach(v=>conta[v.k]=prevCache.filter(p=>v.k==="tutti"||p.stato===v.k).length);
-    const somma=L.reduce((s,p)=>s+(totCli[p.id]||0),0);
+    /* 7 nov 2026 — IL TOTALE IN CIMA MISCHIAVA MELE E PERE. Sommava il totale
+       con l'IVA dei preventivi che hanno l'aliquota e l'imponibile di quelli
+       che non ce l'hanno: 982,10 (IVA inclusa) + 2.800 (IVA esclusa) =
+       3.782,10, un numero che non e' ne' l'uno ne' l'altro. Per le imprese
+       adesso si sommano gli imponibili, e lo si scrive. Lo studio tecnico
+       resta sul «da incassare» della parcella, che e' sempre lo stesso conto. */
+    const somma=ruoloUtente==='professionista'
+      ? L.reduce((s,p)=>s+(totCli[p.id]||0),0)
+      : L.reduce((s,p)=>s+(tot[p.id]||0),0);
+    const sommaEt=ruoloUtente==='professionista'?'':' <small class="prev-iva-tot">IVA esclusa</small>';
     renderTabella({
       id:"prev", box:"#prev-list",
       viste:"#prev-viste", visteDef:PREV_VISTE, vista:prevFilter, conta:conta, azioneVista:"prev-filtro",
@@ -1052,14 +1061,14 @@
             `<span class="lav-bar ${PREV_BAR[p.stato]||"da_fare"}" title="${PREV_LAB[p.stato]||p.stato}"></span><span class="c-nome">${esc(p.titolo||"—")}</span>`,
             esc(cliMap[p.cliente_id]||"—"),
             {h:PREV_VERBO[p.stato]+" "+q.testo,cls:q.classe},
-            eur(totCli[p.id]||0)+(_conIva(p)?'<small class="prev-iva">'+(ruoloUtente==='professionista'?'da incassare':'IVA inclusa')+'</small>':"")
+            eur(totCli[p.id]||0)+'<small class="prev-iva">'+(ruoloUtente==='professionista'?'da incassare':(_conIva(p)?'IVA inclusa':'IVA esclusa'))+'</small>'
           ],
           menu:prevVoci(p)
         };
       }),
       numeri:prevNumeri(prevCache,totCli),
-      totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)},
-      cards:()=>L.map(p=>prevCard(p,cliMap,totCli)).join("")
+      totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)+sommaEt},
+      cards:()=>L.map(p=>prevCard(p,cliMap,totCli,_conIva(p))).join("")
     });
   }
 
@@ -1103,13 +1112,16 @@
     ]);
   }
   /* sotto 880px: la card di prima, con le stesse azioni del menu */
-  function prevCard(p,cliMap,tot){
+  function prevCard(p,cliMap,tot,conIva){
+    /* 7 nov 2026 — sotto l'importo si dice SEMPRE se l'IVA c'e' o no: nella
+       stessa lista stavano 982,10 con l'IVA e 2.800 senza, uguali a vedersi */
+    const et=ruoloUtente==='professionista'?'da incassare':(conIva?'IVA inclusa':'IVA esclusa');
     return `<div class="job">
       <div class="job-top"><div class="job-cli">N. ${esc(String(p.numero||"—"))} — ${esc(p.titolo||"")}</div><span class="stato ${p.stato}">${PREV_LAB[p.stato]||p.stato}</span></div>
       <div class="job-meta">
         ${p.cliente_id?`<span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>`:""}
         <span>📅 ${fdate(p.data)}</span>
-        <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
+        <span class="prev-tot">${eur2(tot[p.id]||0)}</span><span class="prev-iva-card">${et}</span></div>
       ${/* 16 agosto 2026 — la nota non si mostra piu' in anteprima: era un
             muro di testo giallo che faceva la scheda alta il doppio delle
             vicine, e tagliato a meta' non si leggeva comunque. Si legge

@@ -213,7 +213,14 @@ exports.handler = async function(event) {
     const risposta = data.content?.[0]?.text ?? '';
     const tin = data.usage?.input_tokens || 0;
     const tout = data.usage?.output_tokens || 0;
-    const costo_usd = (tin * 3 / 1e6) + (tout * 15 / 1e6);
+    /* 7 nov 2026 — il costo si conta con le tariffe del modello che ha
+       risposto davvero. Prima era sempre Sonnet (3/15 $ per milione) anche
+       quando girava Haiku (1/5): l'assistenza risultava pagata tre volte
+       il vero (difetto visto il 29 ago, mai sistemato). */
+    const haiku = /haiku/.test(apiBody.model);
+    const costo_usd = haiku
+      ? (tin * 1 / 1e6) + (tout * 5 / 1e6)
+      : (tin * 3 / 1e6) + (tout * 15 / 1e6);
 
     await logRichiesta({ risposta, tokens_input: tin, tokens_output: tout, costo_usd });
 
