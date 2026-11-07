@@ -18,9 +18,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/gestionale.css?v=20261107d">
+<link rel="stylesheet" href="/css/gestionale.css?v=20261107e">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="/css/gestionale-stile.css?v=8">
+<link rel="stylesheet" href="/css/gestionale-stile.css?v=9">
 
 <!-- 23 agosto 2026 — IL GESTIONALE COME APP SUL TELEFONO.
      Da qui il telefono capisce che questa pagina puo' diventare un'icona
@@ -111,6 +111,12 @@
          una bugia, ed e' esattamente l'errore dei reparti che sparivano
          il 14 agosto: uno che ce l'ha legge che non ce l'ha. Meglio non
          dire niente che dire il falso. -->
+    <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>
+    <div class="panels" id="panels"></div>
+    <button class="new-rep-btn" data-action="new-panel"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Aggiungi un reparto</button>
+    <!-- 7 nov 2026 — COLLAUDO DELLA SEMPLICITA' (ok di Alex): la striscia dei crediti
+         scende SOTTO i reparti. Prima stava sopra, e sul telefono il primo reparto
+         compariva a meta' schermo. Non e' cambiato niente dentro: solo il posto. -->
     <div id="ai-striscia" class="ai-str" hidden>
       <div class="ai-str-riga">
         <span class="ai-str-mk">AI</span>
@@ -139,9 +145,6 @@
       </details>
       <div class="ai-str-giu" id="ai-str-giu" hidden></div>
     </div>
-    <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>
-    <div class="panels" id="panels"></div>
-    <button class="new-rep-btn" data-action="new-panel"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Aggiungi un reparto</button>
     <p class="landing-nota-rep">Un <b>reparto</b> serve solo per tenere separate due attività, per esempio idraulica e giardinaggio.</p>
     <p style="text-align:center;font-size:14px;color:var(--testo-2);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--bordo)">
@@ -714,7 +717,7 @@
 <script src="/js/gest-capitolato.js"></script>
 <script src="/js/gest-galleria-mappa.js"></script>
 <script src="/js/gest-report.js"></script>
-<script src="/js/gest-riepilogo.js?v=7nov1"></script>
+<script src="/js/gest-riepilogo.js?v=7nov2"></script>
 <script src="/js/gest-squadra.js?v=2"></script>
 <script src="/js/chat-squadra.js?v=3"></script>
 <script src="/js/chat-gest.js?v=3"></script>
@@ -741,10 +744,10 @@
 <script src="/js/decreto-parametri.js"></script>
 <script src="/js/gest-decreto.js"></script>
 <script src="/js/gest-base.js"></script>
-<script src="/js/gest-reparti.js?v=6nov3"></script>
+<script src="/js/gest-reparti.js?v=7nov1"></script>
 <script src="/js/gest-ingresso.js"></script>
 <script src="/js/gest-ai-moduli.js?v=6nov"></script>
-<script src="/js/gest-riepilogo-schede.js"></script>
+<script src="/js/gest-riepilogo-schede.js?v=7nov1"></script>
 <script src="/js/gest-schede-clienti.js?v=6nov2"></script>
 <script src="/js/gest-carte-documenti.js"></script>
 <script src="/js/gest-richieste-chat.js?v=6nov2"></script>
@@ -778,6 +781,6 @@
 <script src="/js/correggi-giornata.js?v=3" defer></script>
 <script src="/js/gest-voce.js?v=7nov1" defer></script>
 <!-- 6 nov 2026 — la casella «Cosa facciamo?», il menu dell'assistente, il microfono nella barra del telefono -->
-<script src="/js/gest-assistente.js?v=6nov8" defer></script>
+<script src="/js/gest-assistente.js?v=7nov1" defer></script>
 </body>
 </html>

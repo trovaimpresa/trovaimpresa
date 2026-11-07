@@ -232,6 +232,17 @@
      niente: e' rosso il preventivo fermo da PIU' DI UNA SETTIMANA, non quello
      di ieri. */
   let _rieMale=new Set();
+  /* 7 nov 2026 — COLLAUDO DELLA SEMPLICITA': TRE COLORI, NON DUE.
+     Prima il pallino era rosso o verde: un preventivo in attesa, una bozza
+     da mandare o una richiesta da leggere diventavano ROSSI come un lavoro
+     in ritardo. La regola del gestionale e' «colore = stato»: rosso solo i
+     problemi veri (scaduto, in ritardo, in perdita), AMBRA le cose in
+     attesa, verde tutto a posto.
+     ⛔ La regola resta in un posto solo: la fascia «Da sistemare».
+       g:1 + male -> rosso (_rieMale) · g:2 + male -> ambra (_rieAttesa).
+     _rieMotivo: la frase della fascia per quella sezione. Serve a non far
+     scrivere «Niente da segnalare» sotto un pallino che non e' verde. */
+  let _rieAttesa=new Set(), _rieMotivo={};
   /* ============================================================
      ⛔ 22 agosto 2026 — QUALI RIGHE DI `gest_foto` NON SONO FOTO
      ============================================================
@@ -268,16 +279,32 @@
                +   '<span class="rc-rv'+(r.cls?" "+r.cls:"")+'">'+esc(r.v||"")+'</span>'
                + '</div>';
         }).join("")+'</div>'
-      : '<div class="rc-vuoto">'+esc(o.vuoto||"Niente da segnalare")+'</div>';
-    const male=(o.male!=null)?!!o.male:(o.tono==="err"||_rieMale.has(o.tab));
+      : null;
+    /* stato del pallino: «male» (rosso) · «attesa» (ambra) · «bene» (verde).
+       o.stato vince; poi o.male esplicito (vero = rosso); poi la fascia. */
+    const stato=o.stato
+      ? o.stato
+      : (o.male!=null)
+        ? (o.male?"male":"bene")
+        : ((o.tono==="err"||_rieMale.has(o.tab))?"male":(_rieAttesa.has(o.tab)?"attesa":"bene"));
+    /* sotto un pallino rosso o ambra non si scrive mai «Niente da segnalare»:
+       si scrive il perche' (la frase della fascia, o o.motivo), e se un
+       perche' non c'e' non si scrive niente: lo dice gia' l'etichetta. */
+    const motivo=(stato!=="bene")?(_rieMotivo[o.tab]||o.motivo||""):"";
+    const corpoOk=corpo!==null
+      ? corpo
+      : (stato!=="bene"
+          ? (motivo?'<div class="rc-vuoto rc-motivo '+stato+'">'+esc(motivo)+'</div>':'')
+          : '<div class="rc-vuoto">'+esc(o.vuoto||"Niente da segnalare")+'</div>');
+    const TIT={male:"Qui c\u2019\u00e8 un problema",attesa:"Qui c\u2019\u00e8 qualcosa che aspetta",bene:"Qui \u00e8 tutto a posto"};
     return '<div class="rie-card t-'+(o.tono||"neutro")+(righe.length?"":" vuota")+'" data-action="rie-go" data-go="'+o.tab+'">'
          +   '<div class="rc-head">'+rieIco(o.tab)+'<span class="rc-tit">'+esc(o.titolo)+'</span>'
-         +     '<i class="rc-pall '+(male?"male":"bene")+'"'
-         +       ' title="'+(male?"Qui c\u2019\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto")+'"'
-         +       ' aria-label="'+(male?"qualcosa che va male":"tutto a posto")+'"></i></div>'
+         +     '<i class="rc-pall '+stato+'"'
+         +       ' title="'+TIT[stato]+'"'
+         +       ' aria-label="'+TIT[stato]+'"></i></div>'
          +   '<div class="rc-n">'+esc(String(o.n))+'</div>'
          +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
-         +   corpo
+         +   corpoOk
          + '</div>';
   }
 

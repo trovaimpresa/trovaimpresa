@@ -166,7 +166,14 @@
        al loro posto le pratiche e le scadenze che arrivano */
     { t: 'Cosa scade questo mese?', fa: function () { allaChat('Quali scadenze e pratiche ho nei prossimi 30 giorni?'); }, solo: 'studio' },
     { t: 'Fattura da un preventivo', fa: function () { allaChat('Voglio fare la fattura partendo da un preventivo: quali preventivi ho che posso fatturare? Dimmi come si fa.'); } },
-    { t: 'Quanto devo incassare?', fa: function () { allaChat('Quanto devo ancora incassare e da chi?'); } }
+    { t: 'Quanto devo incassare?', fa: function () { allaChat('Quanto devo ancora incassare e da chi?'); } },
+    /* 7 nov 2026 — collaudo della semplicita' (ok di Alex): «Fotografa» era
+       un pulsante da solo in mezzo alla pagina. Sta qui con le altre cose da
+       fare; apre la stessa scelta di prima (rieFotoScegli, gest-riepilogo.js). */
+    { t: '📷 Fotografa un foglio', fa: function () {
+        if (typeof rieFotoScegli === 'function') rieFotoScegli();
+        else { var b = document.getElementById('rie-foto'); if (b) b.click(); }
+      } }
   ];
 
   function chiSono() {

@@ -1506,6 +1506,10 @@
 }
 .rie-card .rc-pall.male{ background:var(--err); }
 .rie-card .rc-pall.bene{ background:var(--ok); }
+.rie-card .rc-pall.attesa{ background:#F59E0B; } /* 7 nov 2026: ambra = in attesa */
+.rie-card .rc-vuoto.rc-motivo{ font-weight:700; }
+.rie-card .rc-vuoto.rc-motivo.male{ color:#B91C1C; }
+.rie-card .rc-vuoto.rc-motivo.attesa{ color:#92400E; }
 .rie-card.vuota .rc-pall{ box-shadow:0 0 0 3px #FCFDFE; }
 
 .rc-caricamento{ padding:40px 4px; font-size:17px; color:var(--testo-3); }

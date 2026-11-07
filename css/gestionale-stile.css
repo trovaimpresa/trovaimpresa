@@ -98,3 +98,17 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 /* 1 nov 2026: il numero dei crediti nel menu e' GRIGIO, non arancione: non e' una cosa da fare */
 #appview .side .tabs button .tab-cnt.cnt-crediti{background:rgba(255,255,255,.2) !important;color:#fff !important}
 #appview .side .tabs button.active .tab-cnt.cnt-crediti{background:rgba(10,42,77,.15) !important;color:#0a2a4d !important}
+
+/* ═══ 7 nov 2026 — COLLAUDO DELLA SEMPLICITA', SCHERMATA DEI REPARTI (ok di Alex) ═══
+   - tutto su UNA colonna sola, larga 1000 px e misurata: prima c'erano tre
+     larghezze diverse (640, 900, 1100 px) e niente stava allineato;
+   - la parola «reparto» nella nota era blu scuro su fondo blu: non si vedeva;
+   - «Ricarica» sul telefono era alto 38 px: troppo piccolo da toccare;
+   - le scritte piccole sotto i 16 px salgono. */
+#landing .wrap>*{max-width:1000px !important;width:100% !important;margin-left:auto !important;margin-right:auto !important;box-sizing:border-box !important}
+#landing .wrap>#ai-striscia{margin-top:28px !important}
+#landing .landing-nota-rep b{color:#fff !important}
+#landing .landing-sub{font-size:19px !important}
+#landing .wrap>p:not(.landing-sub):not(.landing-nota-rep){font-size:17px !important}
+#landing .wrap>div[style*="border-top"] p{font-size:17px !important}
+#landing .ai-str-piu,#landing .ai-str-cta{min-height:44px !important;font-size:16px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;box-sizing:border-box !important}

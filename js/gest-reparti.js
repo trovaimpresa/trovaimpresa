@@ -157,8 +157,18 @@
     applicaNomeGestionale();
     /* 30 set 2026 — parole semplici per artigiano e impresa (lo studio resta com'era) */
     if(ruoloUtente!=='professionista'){
-      const _bj=document.querySelector('[data-action="export-json"]');
-      if(_bj&&/Backup/.test(_bj.textContent))_bj.textContent="Salva una copia dei dati";
+      /* 7 nov 2026 — collaudo della semplicita': lo STESSO pulsante aveva due
+         nomi (fuori «Salva una copia dei dati», dentro «Backup»; fuori
+         «Esporta dati», dentro «Esporta»). querySelector ne prendeva uno solo:
+         adesso tutti, e lo stesso nome dappertutto. Lo studio resta com'era. */
+      document.querySelectorAll('[data-action="export-json"]').forEach(function(b){
+        var t=b.querySelector('span')||b;
+        if(/Backup/.test(t.textContent))t.textContent=b.classList.contains('tb-btn')?"Salva una copia":"Salva una copia dei dati";
+      });
+      document.querySelectorAll('[data-action="export-excel"]').forEach(function(b){
+        var t=b.querySelector('span')||b;
+        if(/Esporta/.test(t.textContent))t.textContent=b.classList.contains('tb-btn')?"Scarica per Excel":"⬇ Scarica per Excel";
+      });
       const _rc=document.querySelector('[data-action="report-csv"]');
       if(_rc)_rc.textContent="⬇ Scarica per Excel";
     }

@@ -631,7 +631,12 @@
     /* ⛔ QUALI SEZIONI VANNO MALE: si prende da qui e da nessun'altra parte,
        cioe' dalla stessa lista che leggi nella fascia. «Lavoro in programma
        oggi» NON e' un guaio, e infatti non ha il segno «male». */
-    _rieMale=new Set(DA.filter(x=>x.male&&x.go).map(x=>x.go));
+    _rieMale=new Set(DA.filter(x=>x.male&&x.go&&+x.g===1).map(x=>x.go));
+    /* 7 nov 2026 — g:2 e' «da guardare», non «va male»: pallino AMBRA.
+       Se la stessa sezione ha anche un guaio vero, vince il rosso. */
+    _rieAttesa=new Set(DA.filter(x=>x.male&&x.go&&+x.g!==1&&!_rieMale.has(x.go)).map(x=>x.go));
+    _rieMotivo={};
+    DA.forEach(function(x){ if(x.male&&x.go&&!_rieMotivo[x.go]) _rieMotivo[x.go]=x.t; });
 
     const ra=$("#rie-alert");
     if(ra){
@@ -686,7 +691,9 @@
       /* 9 ott 2026 — «FOTOGRAFA»: un solo punto d'ingresso per le foto.
          Non decide l'AI che foto è (costerebbe un credito in più): scegli tu. */
       ra.insertAdjacentHTML("afterbegin",
-        '<button type="button" class="btn-primary" id="rie-foto" style="font-size:19px;font-weight:700;padding:13px 20px;margin-bottom:14px">📷 Fotografa</button>');
+        '<button type="button" class="btn-primary" id="rie-foto" hidden style="font-size:19px;font-weight:700;padding:13px 20px;margin-bottom:14px">📷 Fotografa</button>');
+      /* 7 nov 2026 — il pulsante resta (nascosto) per chi lo chiama per id:
+         in vista c'e' la scorciatoia «Fotografa un foglio» dell'Assistente. */
       const _bF=ra.querySelector("#rie-foto");
       if(_bF)_bF.onclick=rieFotoScegli;
       const _bAI=ra.querySelector("#rie-chiedi-ai");
@@ -904,7 +911,7 @@
                       ? daFatt2.length+(daFatt2.length===1?" emesso e non ancora fatturato":" emessi e non ancora fatturati")
                       : _plur(SA.length,"stato di avanzamento","stati di avanzamento"),
                 tono: daFatt2.length?"attesa":(SA.length?"ok":"neutro"),
-                male: daFatt2.length>0,
+                stato: daFatt2.length>0?"attesa":"bene",
                 vuoto:"Nessuno stato di avanzamento",
                 /* i conti passano da salConti + compRiepilogoDa, come nell'elenco,
                    nella scheda e nel PDF: nessuna formula copiata */
@@ -924,7 +931,9 @@
       tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
       /* rosso gia' a sette giorni: una scadenza che scade lunedi' non si
          sistema lunedi'. Trenta giorni invece sono ancora tempo. */
-      male: scAperte.some(x=>x.data_scadenza<=lim7),
+      /* 7 nov 2026 — scaduta = rosso; entro 7 giorni = ambra («in scadenza»,
+         come dice la regola dei colori della guida del gestionale). */
+      stato: scAperte.some(x=>x.data_scadenza<oggi)?"male":(scAperte.some(x=>x.data_scadenza<=lim7)?"attesa":"bene"),
       vuoto:"Nessuna scadenza in arrivo",
       righe: scAperte.slice(0,2).map(x=>{const q=quando(x.data_scadenza);return{
         t:(x.titolo||"Scadenza")+(x._persona?" · "+x._nome:""), v:x.data_scadenza<oggi?"scaduta":q.testo,
@@ -1018,7 +1027,7 @@
         C.push(rieCard({
           tab:"dalsito", titolo:"Richieste dal sito", n:nuove, dati:DS.length>0,
           lab:nuove?_plur(nuove,"richiesta da leggere","richieste da leggere"):"tutte lette",
-          tono:"neutro", male:nuove>0, righe:[]
+          tono:"neutro", stato:nuove>0?"attesa":"bene", motivo:"Da aprire e rispondere", righe:[]
         }));
       }catch(e){}
     }
@@ -1032,7 +1041,7 @@
           C.push(rieCard({
             tab:"promemoria", titolo:"Promemoria", n:ap.length, dati:true,
             lab:pass?(pass+(pass===1?" già passato":" già passati")):"da fare",
-            tono:"neutro", male:pass>0, righe:[]
+            tono:"neutro", male:pass>0, motivo:"Da guardare o segnare fatto", righe:[]
           }));
         }
       }catch(e){}
