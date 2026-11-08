@@ -512,7 +512,7 @@ async def assistenza(r):
     await salva(r, "asst-invia", "Premi «Invia». La risposta arriva qui.")
     await r.aspetta(2.6)
 
-COPIONI = {f.__name__: f for f in [riepilogo, preventivi, computi, lavori, fatture, clienti, calendario,
+COPIONI = {f.__name__: f for f in [preventivi, computi, lavori, fatture, clienti, calendario,
            giornate, dalsito, promemoria, scadenzario, agenda, squadra, mezzi, attrezzature, fisco,
            prezzario, sal, fornitori, carte, report, galleria, cestino, richieste, assistenza]}
 

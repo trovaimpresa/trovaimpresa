@@ -69,6 +69,9 @@
   var GENERICA = "Qui trovi «%s». Clicca per aprirla.";
 
   var videoCi = {};          /* data-tab -> true, letto da elenco.json */
+  /* 8 nov 2026, scelta di Alex: il ▶ dell'«Assistente» (la prima voce) non apre
+     un video ma la guida «Guidami». La voce «Guidami» in fondo al menu non c'e' piu'. */
+  var VOCE_GUIDA = "riepilogo";
 
   /* ---------- stile ---------- */
   (function () {
@@ -86,6 +89,10 @@
       + ".side nav.tabs button.active .tut-dot{border-color:#0a2a4d;color:#0a2a4d}"
       + "nav.tabs button .tab-cnt{order:98}"
       + "nav.tabs button .tab-cnt:not(:empty)~.tut-dot{margin-left:10px}"
+      /* nel menu a sinistra il ▶ sta sempre nello stesso punto, in colonna,
+         anche quando la voce ha il numerino o il nome va a capo */
+      + ".side nav.tabs button[data-tab]:has(.tut-dot){padding-right:54px!important}"
+      + ".side nav.tabs button .tut-dot{position:absolute;right:12px;top:50%;transform:translateY(-50%);margin:0!important}"
 
       /* il riquadro del video, a tutta pagina */
       + "#tut-player{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;position:fixed;inset:0;z-index:9000;background:rgba(6,20,40,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}"
@@ -139,11 +146,13 @@
     var bt = m.querySelectorAll("button[data-tab]");
     Array.prototype.forEach.call(bt, function (b) {
       var t = b.dataset.tab, c = b.querySelector(".tut-dot");
-      if (!videoCi[t]) { if (c) c.remove(); return; }
+      var guida = t === VOCE_GUIDA;
+      if (!videoCi[t] && !guida) { if (c) c.remove(); return; }
       if (c) return;
       c = document.createElement("span");
       c.className = "tut-dot"; c.setAttribute("role", "button");
-      c.setAttribute("title", "Guarda come si fa"); c.setAttribute("aria-label", "Guarda il video: " + nomeVoce(b));
+      if (guida) { c.classList.add("tut-dot-guida"); c.setAttribute("title", "Guidami: ti mostro dove cliccare"); c.setAttribute("aria-label", "Guidami: ti mostro dove cliccare"); }
+      else { c.setAttribute("title", "Guarda come si fa"); c.setAttribute("aria-label", "Guarda il video: " + nomeVoce(b)); }
       c.innerHTML = PLAY;
       b.appendChild(c);
     });
@@ -154,7 +163,8 @@
     if (!d) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
     var b = d.closest("button[data-tab]");
-    apriVideo(b.dataset.tab, nomeVoce(b));
+    if (d.classList.contains("tut-dot-guida")) avviaGuida();
+    else apriVideo(b.dataset.tab, nomeVoce(b));
   }, true);
 
   /* ---------- il video ---------- */
@@ -288,7 +298,6 @@
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   function parti() {
-    mettiGuidami();
     fetch(CARTELLA + "elenco.json", { cache: "no-cache" })
       .then(function (r) { return r.ok ? r.json() : []; })
       .catch(function () { return []; })
@@ -297,7 +306,7 @@
         mettiPuntini();
         /* il menu viene rimontato da altri file (menu corto, ruolo): si ripassa */
         var nav = menu();
-        if (nav) new MutationObserver(function () { mettiPuntini(); mettiGuidami(); }).observe(nav, { childList: true, subtree: true });
+        if (nav) new MutationObserver(function () { mettiPuntini(); }).observe(nav, { childList: true, subtree: true });
       });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(parti, 0); });

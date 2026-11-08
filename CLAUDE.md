@@ -3036,3 +3036,8 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
   rifa' i video con la sua voce (ogni frase legata al testo del sottotitolo; il
   copione aspetta che la frase finisca). Se si cambia un copione, si rilancia
   `tools/tutorial/frasi.py video/tutorial/frasi.json` dopo la registrazione.
+- 8 nov 2026 (sera), scelte di Alex: niente voce (pagina `registra-voce.html`
+  tolta: «non sono capace a parlare fluido»); il ▶ dell'«Assistente» apre la
+  guida «Guidami» (`VOCE_GUIDA` in gest-tutorial.js) e la voce «Guidami» in fondo
+  al menu non c'e' piu'; tolto il video dell'Assistente; i ▶ del menu stanno in
+  colonna (posizione fissa a destra, anche con il numerino).
