@@ -93,6 +93,9 @@
          anche quando la voce ha il numerino o il nome va a capo */
       + ".side nav.tabs button[data-tab]:has(.tut-dot){padding-right:54px!important}"
       + ".side nav.tabs button .tut-dot{position:absolute;right:12px;top:50%;transform:translateY(-50%);margin:0!important}"
+      /* e il numerino arancione sta anche lui in colonna, subito a sinistra del ▶ */
+      + ".side nav.tabs button[data-tab]:has(.tut-dot) .tab-cnt{position:absolute;right:50px;top:50%;transform:translateY(-50%);margin:0!important}"
+      + ".side nav.tabs button[data-tab]:has(.tut-dot):has(.tab-cnt:not(:empty)){padding-right:86px!important}"
 
       /* il riquadro del video, a tutta pagina */
       + "#tut-player{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;position:fixed;inset:0;z-index:9000;background:rgba(6,20,40,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}"
