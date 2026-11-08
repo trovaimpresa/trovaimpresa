@@ -3111,3 +3111,4 @@ per 10 anni. Il PDF firmato lo teniamo NOI: Openapi lo cancella dopo 90 giorni.
   (30 verdi, gestionale e pagina del cliente, computer e telefono, zero errori, niente
   sotto 13 px). SQL provato su Postgres 16: il browser non scrive, un altro non vede,
   il preventivo cancellato lascia la firma.
+- 8 nov 2026 (sera), decisione di Alex: **la firma SMS si paga SOLO coi crediti comprati**. Funzione `consume_ai_credit_pagati` (`sql/firma-sms-crediti-comprati.sql`, migrazione `firma_sms_crediti_comprati_8nov2026`): plan 'base' → solo `credits_extra`; abbonati 'ai'/'ai_pro' → prima la quota del mese, poi i comprati. I 30 regalati non valgono. `consume_ai_credit` non toccata. Collaudo fino in fondo fatto lo stesso giorno: firma DONE, PDF nel deposito, link firmato, email consegnata.

@@ -364,7 +364,7 @@
     var nomeCli=T(_inv.cli&&_inv.cli.nome), parti=nomeCli.split(/\s+/);
     var errore=f&&f.stato==="ERROR"?'<div class="aic-banda aic-banda--attesa" style="margin-bottom:8px"><b>L\'ultima volta non è andata:</b> '+esc(f.errore||"errore")+'</div>':'';
     return '<div class="sh-b">'+tit+fattaHtml+sotto+errore
-      +'<div class="campo-aiuto" style="font-size:15px;margin-bottom:4px">Il cliente riceve un codice sul telefono e firma un PDF vero. Vale più della firma col dito. Costa '+SMS_COSTO+' crediti.</div>'
+      +'<div class="campo-aiuto" style="font-size:15px;margin-bottom:4px">Il cliente riceve un codice sul telefono e firma un PDF vero. Vale più della firma col dito. Costa '+SMS_COSTO+' crediti comprati (quelli in regalo non valgono).</div>'
       +smsCampo("sms-nome","Nome di chi firma",prima.nome||(parti.length>1?parti.slice(0,-1).join(" "):nomeCli))
       +smsCampo("sms-cognome","Cognome",prima.cognome||(parti.length>1?parti[parti.length-1]:""))
       +smsCampo("sms-cell","Cellulare",prima.cellulare||T(_inv.cli&&_inv.cli.telefono),"tel","Il codice arriva qui.")

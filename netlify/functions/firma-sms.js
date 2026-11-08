@@ -113,16 +113,17 @@ exports.handler = async (event) => {
     try { pdf = await costruisci(link.dati, firmatario); }
     catch (e) { console.error('[firma-sms] pdf', e && e.message); return rispondi(500, { error: 'Non riesco a preparare il PDF. Riprova.' }); }
 
-    // ---- i crediti, col gettone dell'impresa
+    // ---- i crediti, col gettone dell'impresa. SOLO crediti pagati (8 nov 2026):
+    // Openapi fa pagare la firma a TrovaImpresa, i 30 in regalo non la coprono.
     const utente = createClient(URL_SB, ANON, { global: { headers: { Authorization: 'Bearer ' + token } }, auth: { persistSession: false, autoRefreshToken: false } });
     let consumo;
     try {
-      const r = await utente.rpc('consume_ai_credit', { p_feature: 'firma_sms', p_cost: COSTO });
+      const r = await utente.rpc('consume_ai_credit_pagati', { p_feature: 'firma_sms', p_cost: COSTO });
       if (r.error) throw r.error;
       consumo = r.data;
     } catch (e) { console.error('[firma-sms] crediti:', e && e.message); return rispondi(500, { error: 'Non riesco a controllare i crediti. Riprova.' }); }
     if (!consumo || !consumo.ok) {
-      const mess = { no_credits: 'Servono ' + COSTO + ' crediti e non ne hai abbastanza. Li ricarichi da «Ricarica crediti».', plan_without_ai: 'I crediti non sono attivi sul tuo account.', subscription_expired: 'Il tuo abbonamento è scaduto.', no_account: 'Account non trovato.' };
+      const mess = { no_paid_credits: 'La firma con codice SMS si paga coi crediti comprati: i crediti in regalo del mese non valgono. Servono ' + COSTO + ' crediti: li ricarichi da «Ricarica crediti».', no_credits: 'Servono ' + COSTO + ' crediti e non ne hai abbastanza. Li ricarichi da «Ricarica crediti».', plan_without_ai: 'I crediti non sono attivi sul tuo account.', subscription_expired: 'Il tuo abbonamento è scaduto.', no_account: 'Account non trovato.' };
       return rispondi(402, { error: mess[consumo && consumo.reason] || 'Crediti non disponibili.', reason: consumo && consumo.reason, remaining: (consumo && consumo.remaining) || 0 });
     }
     const logId = consumo.log_id || null;
