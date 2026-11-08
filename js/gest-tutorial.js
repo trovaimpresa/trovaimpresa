@@ -27,7 +27,7 @@
 
   /* Le parole della guida, una riga per voce. Corte e semplici. */
   var PAROLE = {
-    riepilogo:   "Questa e' la pagina di partenza. Scrivi o parla e ti aiuta lui: preventivi, fatture, giornate.",
+    riepilogo:   "Questa e' la pagina di partenza. Scrivi o parla come ti viene: ti aiuta lui.",
     preventivi:  "Qui fai i preventivi e li mandi al cliente. Quando accetta, diventano un lavoro.",
     computi:     "Qui fai il computo metrico, voce per voce, anche coi prezzari regionali.",
     lavori:      "Qui ci sono tutti i tuoi lavori: quelli da fare, in corso e finiti.",
