@@ -284,3 +284,14 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
   color:var(--testo);background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);display:block}
 .sheet .prev-riga textarea.pr-desc:focus{outline:none;border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.12)}
 .sheet .prev-riga{align-items:stretch}
+
+/* 8 nov 2026 — PREZZARIO: «Apri» al posto della ×, ricerca e importa grandi,
+   sul telefono il nome della voce fino a 3 righe */
+#pz-list .pz-apri{font-size:16px;min-height:44px;padding:0 18px}
+#prezzario #pz-cerca{font-size:17px;min-height:48px}
+#prezzario [data-action="pz-importa"]{font-size:16px;min-height:44px}
+@media(max-width:760px){ #pz-list .pz-desc{-webkit-line-clamp:3!important} }
+/* 8 nov 2026 — STATI DI AVANZAMENTO: «Fai un SAL» a 16 px, alto 44 */
+#sal .btn-primary{font-size:16px;min-height:44px}
+/* 8 nov 2026 — Chiedi una funzione: «Manda la richiesta» alto 48 */
+#richieste .btn-primary,#richieste [data-action="rq-manda"]{font-size:17px;min-height:48px}

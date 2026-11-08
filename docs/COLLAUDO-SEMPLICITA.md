@@ -1476,3 +1476,11 @@ Secondo giro dell'agente: 18 chiusi, 4 a metà, 2 nuovi (descrizione del prevent
 
 Terzo giro dell agente (7 nov, notte): tutti e 7 i punti chiusi, nessun problema nuovo, zero errori in console. **Collaudo chiuso a ZERO problemi.**
 Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel menu compare solo dopo aver aperto il Cestino.
+
+
+## 8 nov 2026 — Prezzario e Stati di avanzamento (erano rimasti indietro)
+**Prezzario — problemi:** una × su ogni voce che la buttava con un tocco (dentro la voce c'è già «Metti nel cestino»); la scritta diceva «vedi le 1000» ma se ne vedono 60 alla volta; ricerca e «Importa» a 14 px; sul telefono nome della voce tagliato a una riga e mezza.
+**Fatto (ok di Alex):** «Apri» al posto della ×; «ne vedi 60 alla volta, le più usate prima»; ricerca 17 px alta 48, Importa 16 px alto 44; sul telefono fino a 3 righe.
+**Stati di avanzamento — conti:** SAL n. 10 (reparto «progetto casa»): 12,50 m² × 32,64 € = 408,00 € ✓ (nessun ribasso), uguale in elenco e nel riquadro in alto.
+**Problemi:** «Fai un SAL» a 14 px → 16, alto 44. Il pulsante «📄 PDF» accanto ad «Apri» RESTA: decisione del 19 agosto (il PDF è il motivo per cui l'elenco esiste).
+**Chiedi una funzione · Assistenza diretta (8 nov):** funzionano; troppo da leggere. Fatto (ok di Alex): spiegazioni da 3 righe a 1 in tutte e due (anche nelle copie del Noleggio), «Cosa succede dopo» in 1 riga, «Manda la richiesta» alto 48.

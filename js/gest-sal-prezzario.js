@@ -1087,7 +1087,7 @@
     /* niente tagli silenziosi: se il prezzario e' piu' grande di quanto ne
        tiriamo giu', si dice invece di far credere che siano tutte */
     const avviso=(pzCache.length>=PZ_MAX)
-      ? '<div class="sh-nota">Il prezzario ha almeno '+PZ_MAX+' voci: qui sotto vedi le '+PZ_MAX+' che usi di più. Cerca una parola per trovare le altre.</div>' : "";
+      ? '<div class="sh-nota">Il prezzario ha più di '+PZ_MAX+' voci: ne vedi '+PZ_PASSO+' alla volta, le più usate prima. Cerca una parola per trovare le altre.</div>' : "";
     /* ===== 18 agosto 2026 — LE VOCI DIVENTANO SCHEDE =====
        Prima erano righe sottili prese in prestito dalle spese: il PREZZO —
        cioe' la sola cosa che cerchi quando apri il prezzario — stava in
@@ -1103,7 +1103,8 @@
       '<div class="pz-card" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'">'
       +  '<div class="pz-testa">'
       +    (x.codice?'<span class="pz-cod">'+esc(x.codice)+'</span>':'<span class="pz-cod pz-cod--no">senza codice</span>')
-      +    '<button type="button" class="rdel pz-x" data-action="del-prezzo" data-id="'+esc(String(x.id))+'" title="Metti nel cestino">&times;</button>'
+      /* 8 nov 2026: niente × che butta con un tocco: «Apri», e dentro c'e' «Metti nel cestino» */
+      +    '<button type="button" class="btn btn-sm pz-x pz-apri" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'">Apri</button>'
       +  '</div>'
       +  '<div class="pz-desc">'+esc(x.descrizione||"(senza descrizione)")+'</div>'
       +  '<div class="pz-prezzo">'+eur2(x.prezzo_unitario)+(x.unita?'<small> / '+esc(x.unita)+'</small>':'')+'</div>'
