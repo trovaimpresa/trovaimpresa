@@ -48,6 +48,7 @@
 
 const { schedule } = require('@netlify/functions');
 const { createClient } = require('@supabase/supabase-js');
+const { avvisaTelefoni } = require('./lib/push-avvisi');
 
 const SITO = 'https://trovaimpresa.com/gestionale-app.html';
 
@@ -684,13 +685,22 @@ const handler = async function () {
     /* -----------------------------------------------------------------------
        4. Una busta per persona
        ----------------------------------------------------------------------- */
-    let inviate = 0, niente = 0, giaOggi = 0, senzaEmail = 0, conCappello = 0;
+    /* chi ha almeno un telefono acceso per gli avvisi del mattino */
+    const conTelefono = new Set();
+    try {
+      const rt = await sb.from('gest_avvisi_sera').select('user_id').eq('mattina', true).in('user_id', utenti);
+      if (!rt.error) (rt.data || []).forEach(x => conTelefono.add(String(x.user_id)));
+    } catch (_) {}
+    let inviate = 0, telefoni = 0, niente = 0, giaOggi = 0, senzaEmail = 0, conCappello = 0;
     let senzaRegistro = false;
     const errori = [];
 
     for (const imp of imprese) {
       const uid = String(imp.user_id);
-      if (spento(uid)) { niente++; continue; }
+      /* 8 nov 2026: chi ha spento l'EMAIL ma ha acceso il TELEFONO riceve
+         solo la notifica */
+      const soloTelefono = spento(uid) && conTelefono.has(String(uid));
+      if (spento(uid) && !soloTelefono) { niente++; continue; }
 
       const a     = azPerUte[uid] || {};
       const ggPag = (+a.giorni_pagamento) || 30;
@@ -864,7 +874,7 @@ const handler = async function () {
         const { data: u } = await sb.auth.admin.getUserById(uid);
         email = u && u.user ? u.user.email : null;
       } catch (e) { errori.push('getUserById ' + uid + ': ' + e.message); }
-      if (!email) { senzaEmail++; continue; }
+      if (!email && !soloTelefono) { senzaEmail++; continue; }
 
       /* ⛔ PALETTO 1 — AL MASSIMO UNA EMAIL AL GIORNO.
          Si prende il posto PRIMA di chiamare l'AI e prima di mandare: se una
@@ -901,7 +911,17 @@ const handler = async function () {
         if (d.cappello) conCappello++;
       }
 
-      const res = await fetch('https://api.resend.com/emails', {
+      /* 8 nov 2026 — LO STESSO AVVISO SUL TELEFONO (chi l'ha acceso in Dati
+         azienda). Parte PRIMA dell'email e non dipende da lei: se Resend ha
+         finito le 100 email del giorno, il telefono suona lo stesso. */
+      const sulTelefono = await avvisaTelefoni(sb, uid, 'mattina', {
+        titolo: d.completo ? 'La tua settimana' : 'Buongiorno',
+        testo: oggetto(d).replace(/^(La tua settimana|TrovaImpresa) — /, ''),
+        url: '/gestionale-app.html'
+      });
+      if (sulTelefono) telefoni++;
+
+      const res = soloTelefono ? { ok: false, text: async () => 'email spenta: solo telefono' } : await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
                    'Content-Type': 'application/json' },
@@ -911,12 +931,15 @@ const handler = async function () {
         })
       });
       if (!res.ok) {
-        errori.push('Resend ' + email + ': ' + (await res.text()));
-        await sb.from('gest_promemoria_inviati').delete()
-          .eq('user_id', uid).eq('giorno', oggi);
-        continue;
-      }
-      inviate++;
+        if (!soloTelefono) errori.push('Resend ' + email + ': ' + (await res.text()));
+        /* se il telefono l'ha ricevuto, l'avviso c'e' stato: si segna come
+           mandato (niente doppione domani). Se no, domani si riprova. */
+        if (!sulTelefono) {
+          await sb.from('gest_promemoria_inviati').delete()
+            .eq('user_id', uid).eq('giorno', oggi);
+          continue;
+        }
+      } else inviate++;
 
       /* ⛔ PALETTO 2 — LA STESSA COSA NON SI RIPETE.
          Si segna DOPO che l'email e' partita davvero, e nei registri VECCHI:
@@ -952,7 +975,7 @@ const handler = async function () {
 
     return { statusCode: 200, body: JSON.stringify({
       ok: true, giorno: oggi, quadroCompleto: completo,
-      emailInviate: inviate, conCappello, nienteDaDire: niente,
+      emailInviate: inviate, telefoni, conCappello, nienteDaDire: niente,
       giaMandataOggi: giaOggi, senzaEmail,
       registro: senzaRegistro ? 'TABELLA MANCANTE — rischio doppioni' : 'attivo',
       interruttore: colonnaInterruttore ? 'attivo' : 'colonna mancante, tutti accesi',

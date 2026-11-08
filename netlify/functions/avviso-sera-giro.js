@@ -22,7 +22,7 @@ const handler = async () => {
   const sb = createClient(URL, KEY);
   const now = adessoRoma();
   const r = await sb.from('gest_avvisi_sera').select('id,user_id,endpoint,p256dh,auth,ora,ultimo_giorno')
-    .eq('attivo', true).lte('ora', now.ora).or('ultimo_giorno.is.null,ultimo_giorno.lt.' + now.giorno).limit(500);
+    .eq('attivo', true).eq('sera', true).lte('ora', now.ora).or('ultimo_giorno.is.null,ultimo_giorno.lt.' + now.giorno).limit(500);
   if (r.error) { console.error('avviso-sera-giro:', r.error.message); return { statusCode: 500, body: 'db' }; }
   const righe = r.data || [];
   const utenti = [...new Set(righe.map(x => x.user_id))];

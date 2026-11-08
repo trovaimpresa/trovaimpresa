@@ -101,7 +101,7 @@ const avHtml=`
         <div class="sh-tit">Le mie email di avviso</div>
         <label for="a-rieplun" style="display:flex;gap:12px;align-items:flex-start;font-size:17px;line-height:1.6;cursor:pointer;padding:4px 0">
           <input type="checkbox" id="a-rieplun"${a.riepilogo_lunedi===false?"":" checked"} style="width:24px;height:24px;margin:2px 0 0;flex:0 0 auto;cursor:pointer">
-          <span>Mandami l'<b>email di avviso</b> la mattina alle 7:30</span>
+          <span>Mandami l'<b>email di avviso</b> la mattina presto</span>
         </label>
         <div class="sh-nota">Arriva <b>una sola email al giorno</b>, e solo se c'è qualcosa da dire: niente email a vuoto.</div>
         <div id="a-av-box" style="margin-top:14px">
@@ -218,12 +218,15 @@ const avHtml=`
       </div>`}
 
       ${avHtml}
+      ${window.avvTelHtml?window.avvTelHtml():""}
 
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-azienda">Salva</button>`);
     /* 1 nov 2026: caselle rosse e verdi anche qui (js/gest-ai-moduli.js) */
     try{ if(typeof ctrAscolta==="function") ctrAscolta("azienda"); }catch(e){}
+    /* 8 nov 2026: gli avvisi sul telefono (js/gest-avvisi-telefono.js) */
+    try{ if(window.avvTelDisegna) window.avvTelDisegna(); }catch(e){}
   }
   async function saveAzienda(){
     if(!sbUid){toast("Devi essere loggato");return;}

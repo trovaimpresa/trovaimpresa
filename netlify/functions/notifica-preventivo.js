@@ -1,3 +1,5 @@
+const { createClient } = require('@supabase/supabase-js');
+const { avvisaTelefoni } = require('./lib/push-avvisi');
 // Ogni tipo di iscritto ha il suo pannello: il pulsante dell'email deve
 // portarlo dove sta davvero la richiesta.
 const PANNELLI = {
@@ -78,6 +80,7 @@ exports.handler = async function(event) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const nomeTesto = String(nome || '').replace(/[\r\n<>]/g, ' ').slice(0, 80);
+  const cittaTesto = String(citta || '').replace(/[\r\n<>]/g, ' ').slice(0, 40);
   nome = escH(nome); categoria_lavoro = escH(categoria_lavoro); citta = escH(citta);
   descrizione = escH(descrizione); data_preferita = escH(data_preferita);
   urgenza = escH(urgenza); budget = escH(budget);
@@ -86,9 +89,25 @@ exports.handler = async function(event) {
   try {
     // "tipo" serve a mandare ognuno al SUO pannello: prima il pulsante dell'email
     // portava tutti su pannello-artigiano, anche negozi e professionisti.
-    const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${impresa_id}&select=nome,nome_attivita,email,tipo`, { headers: sbHeaders });
+    const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${impresa_id}&select=nome,nome_attivita,email,tipo,user_id`, { headers: sbHeaders });
     const imprese = await impresaRes.json();
     const impresa = imprese[0];
+
+    /* 8 nov 2026 — SUBITO SUL TELEFONO, se l'impresa l'ha acceso (Dati azienda →
+       «Gli avvisi sul telefono»). Prima dell'email e indipendente da lei:
+       il tetto delle 100 email al giorno qui non conta. Mai un errore. */
+    if (impresa && impresa.user_id) {
+      try {
+        const sbc = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const chi = nomeTesto ? nomeTesto : 'Un cliente';
+        const dove = cittaTesto;
+        await avvisaTelefoni(sbc, impresa.user_id, 'richieste', {
+          titolo: 'Nuova richiesta di preventivo',
+          testo: chi + (dove ? ' · ' + dove : '') + ' — tocca per rispondere',
+          url: '/' + (PANNELLI[impresa.tipo] || 'pannello-artigiano.html')
+        });
+      } catch (e) { console.error('push richiesta:', e.message); }
+    }
 
     if (!impresa || !impresa.email) {
       return { statusCode: 404, body: 'Email impresa non trovata' };

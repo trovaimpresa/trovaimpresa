@@ -643,7 +643,7 @@ async function giorSeraLeggi(){
   const s=await giorSeraIscrizione();
   if(!s){ giorSera={si:false,ora:"18:30"}; return; }
   const r=await giorSeraChiama({azione:"stato",endpoint:s.endpoint});
-  giorSera={si:!!r.acceso,ora:r.ora||"18:30"};
+  giorSera={si:!!r.acceso&&r.sera!==false,ora:r.ora||"18:30"};  /* 8 nov 2026: acceso = la SERA accesa (il telefono puo' avere solo gli altri avvisi) */
 }
 function _gB64(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); const b=atob(s+"===".slice((s.length+3)%4)); return Uint8Array.from(b,c=>c.charCodeAt(0)); }
 async function giorSeraAccendi(){
@@ -658,7 +658,7 @@ async function giorSeraAccendi(){
     if(!kb.chiave) throw new Error("chiave");
     let sub=await reg.pushManager.getSubscription();
     if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_gB64(kb.chiave)});
-    const r=await giorSeraChiama({azione:"iscrivi",sub:sub.toJSON(),ora});
+    const r=await giorSeraChiama({azione:"iscrivi",sub:sub.toJSON(),ora,sera:true});
     if(!r.ok){ giorDisegna({t:r.error,k:"err"}); return; }
     giorSera={si:true,ora:r.ora||ora};
     giorDisegna({t:"Accesa: ogni sera alle "+giorSera.ora+" il telefono ti chiede com'è andata.",k:"ok"});
@@ -802,7 +802,7 @@ document.addEventListener("click",async e=>{
   if(a==="squadra"){ const t=document.querySelector('nav.tabs button[data-tab="squadra"]'); if(t) t.click(); return; }
   if(a==="sera-parla"){ giorDallaSera=false; const v=document.getElementById("gv-btn"); if(v) v.click(); else { const t=document.getElementById("gior-voce"); if(t) t.focus(); } giorDisegna(); return; }
   if(a==="sera-accendi"){ b.disabled=true; await giorSeraAccendi(); return; }
-  if(a==="sera-spegni"){ b.disabled=true; await giorSeraChiama({azione:"spegni"}); try{ const r=await navigator.serviceWorker.getRegistration("/"); const x=r&&await r.pushManager.getSubscription(); if(x) await x.unsubscribe(); }catch(e){} giorSera={si:false,ora:"18:30"}; giorDisegna({t:"Domanda della sera spenta su questo telefono.",k:"ok"}); return; }
+  if(a==="sera-spegni"){ b.disabled=true; const rs=await giorSeraChiama({azione:"spegni",solo:"sera"}); if(!(rs&&rs.resta)){ try{ const r=await navigator.serviceWorker.getRegistration("/"); const x=r&&await r.pushManager.getSubscription(); if(x) await x.unsubscribe(); }catch(e){} } giorSera={si:false,ora:"18:30"}; giorDisegna({t:"Domanda della sera spenta su questo telefono.",k:"ok"}); return; }
   if(a==="sera-prova"){ b.disabled=true; const r=await giorSeraChiama({azione:"prova"}); _gSeraMsg(r.ok?"Mandata: fra qualche secondo il telefono suona.":(r.error||"Non è partita."),r.ok?"ok":"err"); b.disabled=false; return; }
   if(a==="cdl-salva"){ b.disabled=true; await giorCdlSalva(); b.disabled=false; return; }
   if(a==="cdl-prova"){ b.disabled=true; await giorCdlProva(); b.disabled=false; return; }

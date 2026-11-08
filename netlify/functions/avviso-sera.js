@@ -35,7 +35,11 @@ exports.handler = async (event) => {
       if (!/^https:\/\//.test(s.endpoint || '') || !k.p256dh || !k.auth) return no(400, 'Iscrizione non valida.');
       const ora = ORA.test(b.ora || '') ? b.ora : '18:30';
       // lo stesso telefono passa a chi lo usa adesso
-      const r = await sb.from('gest_avvisi_sera').upsert({ user_id: uid, endpoint: s.endpoint, p256dh: k.p256dh, auth: k.auth, ora, attivo: true }, { onConflict: 'endpoint' }).select('id');
+      /* 8 nov 2026: chi si iscrive puo' dire subito cosa vuole (sera, mattina,
+         richieste). Se non lo dice, resta come prima: solo la sera. */
+      const riga = { user_id: uid, endpoint: s.endpoint, p256dh: k.p256dh, auth: k.auth, ora, attivo: true };
+      for (const c of ['sera', 'mattina', 'richieste']) if (typeof b[c] === 'boolean') riga[c] = b[c];
+      const r = await sb.from('gest_avvisi_sera').upsert(riga, { onConflict: 'endpoint' }).select('id');
       if (r.error) return no(500, 'Non salvato: ' + r.error.message);
       return ok({ ok: true, ora });
     }
@@ -45,19 +49,44 @@ exports.handler = async (event) => {
       return ok({ ok: true });
     }
     if (b.azione === 'spegni') {
+      /* 8 nov 2026: dalle Giornate si spegne SOLO la sera; se il telefono
+         riceve anche gli altri avvisi, la riga resta. */
+      if (b.solo === 'sera') {
+        const r0 = await sb.from('gest_avvisi_sera').select('id,mattina,richieste').eq('user_id', uid).eq('endpoint', String(b.endpoint || '')).maybeSingle();
+        if (!r0.error && r0.data && (r0.data.mattina || r0.data.richieste)) {
+          await sb.from('gest_avvisi_sera').update({ sera: false }).eq('id', r0.data.id);
+          return ok({ ok: true, resta: true });
+        }
+      }
       await sb.from('gest_avvisi_sera').delete().eq('user_id', uid).eq('endpoint', String(b.endpoint || ''));
       return ok({ ok: true });
     }
     if (b.azione === 'stato') {
-      const r = await sb.from('gest_avvisi_sera').select('ora').eq('user_id', uid).eq('endpoint', String(b.endpoint || '')).maybeSingle();
-      return ok({ acceso: !!r.data, ora: r.data ? r.data.ora : null });
+      let r = await sb.from('gest_avvisi_sera').select('ora,sera,mattina,richieste').eq('user_id', uid).eq('endpoint', String(b.endpoint || '')).maybeSingle();
+      if (r.error) r = await sb.from('gest_avvisi_sera').select('ora').eq('user_id', uid).eq('endpoint', String(b.endpoint || '')).maybeSingle();
+      const d = r.data || null;
+      return ok({ acceso: !!d, ora: d ? d.ora : null,
+        sera: d ? d.sera !== false : false, mattina: !!(d && d.mattina), richieste: !!(d && d.richieste) });
+    }
+    /* 8 nov 2026 — cosa vuole ricevere QUESTO telefono */
+    if (b.azione === 'scegli') {
+      const v = {};
+      for (const c of ['sera', 'mattina', 'richieste']) if (typeof b[c] === 'boolean') v[c] = b[c];
+      if (!Object.keys(v).length) return no(400, 'Niente da cambiare.');
+      const r = await sb.from('gest_avvisi_sera').update(v).eq('user_id', uid).eq('endpoint', String(b.endpoint || '')).select('id');
+      if (r.error) return no(500, 'Non salvato: ' + r.error.message);
+      if (!r.data || !r.data.length) return no(404, 'Su questo telefono le notifiche non sono accese.');
+      return ok({ ok: true });
     }
     if (b.azione === 'prova') {
       if (Date.now() - (ultimaProva[uid] || 0) < 60000) return no(429, 'Aspetta un minuto e riprova.');
       ultimaProva[uid] = Date.now();
       const r = await sb.from('gest_avvisi_sera').select('id,endpoint,p256dh,auth').eq('user_id', uid).eq('endpoint', String(b.endpoint || '')).maybeSingle();
       if (!r.data) return no(404, 'Su questo telefono le notifiche non sono accese.');
-      try { await manda(sb, r.data, { titolo: "Com'è andata oggi?", testo: 'Tocca e raccontalo a voce: ci penso io a segnarlo.', url: '/gestionale-app.html?sera=1#giornate' }); }
+      const msgProva = b.tipo === 'avvisi'
+        ? { titolo: 'TrovaImpresa', testo: 'Prova riuscita: gli avvisi arriveranno così.', url: '/gestionale-app.html' }
+        : { titolo: "Com'è andata oggi?", testo: 'Tocca e raccontalo a voce: ci penso io a segnarlo.', url: '/gestionale-app.html?sera=1#giornate' };
+      try { await manda(sb, r.data, msgProva); }
       catch (e) {
         if (e.statusCode === 404 || e.statusCode === 410) { await sb.from('gest_avvisi_sera').delete().eq('id', r.data.id); return no(410, 'Il telefono non accetta più le notifiche: riaccendile.'); }
         throw e;
