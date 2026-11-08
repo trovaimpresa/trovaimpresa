@@ -20,7 +20,7 @@
    5. PDF CON LOGO E COLORE DELL'IMPRESA + «Pagina x di y».
    6. FIRMA SUL TELEFONO: l'impresa e il cliente firmano col dito. E' una firma
       elettronica SEMPLICE (non qualificata): vale come prova di accordo, non come
-      la firma digitale con Openapi, che arriva dopo. La firma vale SOLO per il testo
+      la firma con codice SMS di Openapi (8 nov 2026, «Invia al cliente»). La firma vale SOLO per il testo
       che c'era quando e' stata fatta: se il capitolato cambia, la firma decade.
    7. L'AI CONTROLLA cosa manca o puo' far discutere (1 credito, stessa funzione).
 

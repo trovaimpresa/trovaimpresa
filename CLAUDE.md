@@ -3062,3 +3062,49 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
   compariva mai. Il client non la usa piu'; la funzione nel database e' rimasta
   (la migrazione per toglierla e' stata bloccata: da fare a mano se si vuole).
 
+
+# 8 NOVEMBRE 2026 — LA FIRMA CON CODICE SMS (Openapi, EU-SES)
+
+Chiesta da Alex («nel gestionale era rimasto da fare la firma digitale»). Scelte sue:
+**si pagano 5 crediti AI** (a Openapi costa ~0,49 €; 150 crediti = 19 €), si parte da
+**preventivo e capitolato** dentro «Invia al cliente». La firma col dito RESTA.
+
+⚠️ Non e' la «firma digitale» qualificata (quella chiede al cliente un certificato suo):
+e' la firma elettronica con codice SMS (EU-SES, eIDAS) + registro delle prove di Openapi
+per 10 anni. Il PDF firmato lo teniamo NOI: Openapi lo cancella dopo 90 giorni.
+
+| pezzo | file |
+|---|---|
+| riquadro «Firma con codice SMS» (modulo → aspetta → firmato + «Scarica il PDF firmato») | `js/gest-invia-cliente.js` (colonna destra) |
+| la porta dell'impresa: crea / stato / annulla | `netlify/functions/firma-sms.js` |
+| Openapi ci avvisa (`?f=<id>&k=<chiave>`) | `netlify/functions/firma-sms-notifica.js` |
+| il PDF da firmare, fatto dal SERVER con pdf-lib | `netlify/functions/lib/firma-pdf.js` |
+| pezzi in comune (chiamata a Openapi, «aggiorna», email) | `netlify/functions/lib/firma-sms-comune.js` |
+| pulsante «Firma con codice SMS» per il cliente | `preventivo-cliente.html` + `netlify/functions/preventivo-cliente.js` (`firma_sms`) |
+| dove arriva il cliente dopo | `firma-fatta.html` (noindex) |
+| tabella `gest_firme_sms` + deposito privato `firme-sms` | `sql/firma-sms.sql` (riga in PROVE di fondatore.js) |
+
+- ⛔ **Il PDF lo fa il server** dalla fotografia `gest_preventivi_link.dati`. Il browser
+  manda solo preventivo + nome, cognome, cellulare, email. `dati_hash` = impronta della
+  fotografia: alla firma il link si segna «Firmato da X (codice SMS)» SOLO se l'impronta
+  e' ancora quella. Se il preventivo e' cambiato, la firma resta sul PDF di prima.
+- ⛔ `gest_firme_sms` la scrive solo il server (niente insert/update per authenticated).
+- Crediti: `consume_ai_credit('firma_sms',5)` col gettone dell'impresa PRIMA di Openapi;
+  se Openapi rifiuta → `refund_ai_credit`. Una firma aperta per la stessa versione si
+  RIUSA (non si paga due volte). «Annulla e rifai» non rimborsa (Openapi l'ha gia' fatta pagare).
+- La firma va sull'ULTIMA pagina, a x=70 y=420 (`FIRMA_POS`): meta' pagina vuota apposta,
+  perche' non si sa ancora se Openapi conta dall'alto o dal basso. **Da guardare alla prima
+  prova vera** e correggere se cade storta.
+- Variabili Netlify: `OPENAPI_FIRMA_TOKEN` (scope esignature EU-SES + GET signatures) e
+  `OPENAPI_FIRMA_URL` (`https://test.esignature.openapi.com` in prova,
+  `https://esignature.openapi.com` vera). Senza: risponde 503 «non ancora accesa» e il
+  gestionale lo dice. In prova il riquadro mostra la striscia «PROVA».
+- Dipendenza nuova `pdf-lib` 1.17.1 in package.json. ⚠️ `package-lock.json` NON e' stato
+  toccato apposta: e' gia' fuori passo (ci risolve supabase-js 2.110.0) e rifarlo avrebbe
+  cambiato le versioni di tutte le funzioni.
+- Banchi (nel contenitore di Claude): `banco-firma/banco.js` (33 verdi, finto Supabase +
+  finta Openapi; sabotaggi: impronta e rimborso accusati) e `banco-firma/pagina.py`
+  (30 verdi, gestionale e pagina del cliente, computer e telefono, zero errori, niente
+  sotto 13 px). SQL provato su Postgres 16: il browser non scrive, un altro non vede,
+  il preventivo cancellato lascia la firma.
+- ⚠️ NON provato contro Openapi vero: il formato delle risposte viene dalla documentazione.

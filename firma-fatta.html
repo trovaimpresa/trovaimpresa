@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Firma — TrovaImpresa</title>
+<style>
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f1f5f9;color:#0f172a;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+  .box{background:#fff;border-radius:16px;box-shadow:0 6px 24px rgba(10,42,77,.12);padding:36px 28px;max-width:520px;width:100%;text-align:center}
+  .tondo{width:84px;height:84px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center}
+  .tondo.ok{background:#dcfce7}.tondo.no{background:#fef3c7}
+  h1{font-size:28px;margin:0 0 12px}
+  p{font-size:19px;line-height:1.5;margin:0 0 10px;color:#334155}
+</style>
+</head>
+<body>
+<!-- Pagina dove arriva il cliente dopo la firma con codice SMS (Openapi).
+     ?annullata=1 = ha chiuso senza firmare. -->
+<div class="box" id="box">
+  <div class="tondo ok" id="tondo"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+  <h1 id="tit">Firmato, grazie!</h1>
+  <p id="txt">La firma è arrivata all'impresa.</p>
+  <p>Puoi chiudere questa pagina.</p>
+</div>
+<script>
+  if(/[?&]annullata=1/.test(location.search)){
+    document.getElementById("tondo").className="tondo no";
+    document.getElementById("tondo").innerHTML='<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="3" stroke-linecap="round"><path d="M12 7v6"/><path d="M12 17h.01"/></svg>';
+    document.getElementById("tit").textContent="Non hai firmato";
+    document.getElementById("txt").textContent="Nessun problema: puoi riaprire il link che ti ha mandato l'impresa e firmare quando vuoi.";
+  }
+</script>
+</body>
+</html>

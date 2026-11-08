@@ -5,6 +5,7 @@
   "dependencies": {
     "@netlify/functions": "^2.8.1",
     "@supabase/supabase-js": "2.39.8",
+    "pdf-lib": "1.17.1",
     "stripe": "^14.0.0"
   },
   "description": "",

@@ -25,6 +25,14 @@
       la versione nuova: la firma vecchia si toglie.
    ⛔ Nel messaggio al cliente NIENTE riga «con TrovaImpresa» (decisione di
       Alex del 26 set): solo il nome dell'impresa.
+
+   8 NOVEMBRE 2026 — LA FIRMA CON CODICE SMS (Openapi)
+   Nella colonna di destra, «Firma con codice SMS»: il cliente riceve un
+   codice sul telefono e firma un PDF vero. 5 crediti AI (deciso da Alex).
+   Il PDF lo fa il SERVER dalla fotografia (netlify/functions/firma-sms.js):
+   da qui partono solo il numero del preventivo e i dati di chi firma.
+   Tabella: gest_firme_sms (sql/firma-sms.sql), si legge e basta.
+   Il PDF firmato sta nel deposito privato «firme-sms».
    ===================================================================== */
 (function(){
   "use strict";
@@ -167,8 +175,9 @@
     }
     /* aperta dal capitolato: i capitolati vanno dentro (se il cliente non ha gia' firmato) */
     if(opz.capitolati&&!(link&&link.firmato_il)) caps.forEach(function(c){ sel.caps[c.id]=true; });
-    _inv={p:p,righe:(res[0].data||[]),az:res[1].data||{},cli:res[2]||{},link:link,caps:caps,sel:sel,cambiato:false};
+    _inv={p:p,righe:(res[0].data||[]),az:res[1].data||{},cli:res[2]||{},link:link,caps:caps,sel:sel,cambiato:false,sms:null,smsFatta:null,smsOk:true};
     if(!(await salvaFoto())) return;
+    await smsLeggi();
     invDisegna();
   }
 
@@ -219,6 +228,7 @@
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">Il cliente</div>'+statoHtml()+'</div>'
       +'</div><div class="sh-col">'
+      +smsHtml()
       +'<div class="sh-b"><div class="sh-tit">QR da inquadrare</div>'
       +  '<div id="inv-qr" style="display:inline-block;background:#fff;padding:8px;border:1px solid var(--bordo);border-radius:var(--r)"></div>'
       +  '<div class="campo-aiuto">Il cliente lo inquadra col telefono e apre preventivo e capitolato.</div>'
@@ -296,6 +306,130 @@
     w.document.close();
   }
 
+  /* =================== LA FIRMA CON CODICE SMS =================== */
+  var SMS_COSTO=5;
+  var SMS_FINITE={DONE:1,ANNULLATA:1,ERROR:1,CANCELLED:1};
+  async function smsLeggi(){
+    var r=await sb.from("gest_firme_sms").select("*").eq("preventivo_id",_inv.p.id).eq("user_id",sbUid)
+      .order("creato_il",{ascending:false}).limit(10);
+    if(r.error){ _inv.smsOk=false; _inv.sms=null; _inv.smsFatta=null; return; }   /* tabella non ancora creata: il riquadro non si vede */
+    _inv.smsOk=true;
+    var l=r.data||[];
+    _inv.smsFatta=l.filter(function(x){ return x.stato==="DONE"; })[0]||null;
+    /* quella su cui si lavora: l'aperta, se c'e'; se no l'ultima */
+    _inv.sms=l.filter(function(x){ return !SMS_FINITE[x.stato]; })[0]||l[0]||null;
+  }
+  function smsCampo(id,etich,val,tipo,aiuto){
+    return '<label style="display:block;margin:8px 0 4px;font-size:15px;font-weight:600">'+esc(etich)+'</label>'
+      +'<input id="'+id+'" type="'+(tipo||"text")+'" value="'+esc(val||"")+'" autocomplete="off" style="width:100%;box-sizing:border-box;min-height:48px;border:1.5px solid var(--bordo);border-radius:var(--r);padding:0 12px;font-family:inherit;font-size:16px;color:var(--testo);background:#fff">'
+      +(aiuto?'<div class="campo-aiuto">'+esc(aiuto)+'</div>':'');
+  }
+  function smsChi(f){ var x=(f&&f.firmatario)||{}; return [x.nome,x.cognome].filter(Boolean).join(" "); }
+  function smsHtml(){
+    if(!_inv.smsOk) return "";
+    var f=_inv.sms, fatta=_inv.smsFatta, l=_inv.link;
+    var tit='<div class="sh-tit">Firma con codice SMS</div>';
+    var prova=function(x){ return x&&x.ambiente==="prova"?'<div class="aic-banda aic-banda--attesa" style="margin-top:8px"><b>PROVA.</b> È la firma di prova di Openapi: non vale davvero.</div>':''; };
+
+    /* la firmata (resta sempre: e' un documento) */
+    var fattaHtml=fatta?('<div class="aic-banda aic-banda--ok"><b>Firmato con codice SMS</b> da '+esc(smsChi(fatta))
+        +(fatta.firmato_il?' il '+esc(oraIt(fatta.firmato_il)):'')+'.</div>'
+        +(fatta.pdf_path?'<button type="button" class="aic-btn aic-btn--pieno" data-action="inv-sms-pdf" style="margin-top:10px">'+_AIC_SVG.file+'<span>Scarica il PDF firmato</span></button>'
+          :'<div class="aic-banda aic-banda--attesa" style="margin-top:10px">Il PDF firmato sta arrivando.<button type="button" class="aic-btn" data-action="inv-sms-stato" data-sms="'+esc(fatta.id)+'">Controlla adesso</button></div>')
+        +prova(fatta)):'';
+
+    /* il link e' firmato (col dito, o con l'SMS della versione di adesso): niente da chiedere */
+    if(l&&l.firmato_il){
+      return '<div class="sh-b">'+tit+(fattaHtml||'<div class="campo-aiuto" style="font-size:15px">Il cliente ha già firmato col dito. Se cambi il preventivo e mandi la versione nuova, puoi chiedergli la firma con SMS.</div>')+'</div>';
+    }
+    var sotto=fatta?'<div class="campo-aiuto" style="font-size:15px;margin-top:12px">Questa firma è della versione di prima. Per la versione nuova:</div>':'';
+
+    if(f&&!SMS_FINITE[f.stato]){
+      var fir2=f.firmatario||{};
+      return '<div class="sh-b">'+tit+fattaHtml+sotto
+        +'<div class="aic-banda aic-banda--attesa"'+(fatta?' style="margin-top:8px"':'')+'><b>Aspetta la firma</b> di '+esc(smsChi(f))
+        +'. Il codice arriva al '+esc(String(fir2.cellulare||"").replace(/^\+39(\d{3})(\d+)$/,"+39 $1 $2"))+'.</div>'
+        +'<div class="campo-aiuto" style="font-size:15px">Mandagli questo link: apre il documento e gli arriva il codice per firmare. Lo trova anche sul link normale del preventivo.</div>'
+        +'<div class="aic-fila" style="margin-top:10px">'
+        +  '<button type="button" class="aic-btn aic-btn--pieno" data-action="inv-sms-wa">'+_AIC_SVG.wa+'<span>Manda su WhatsApp</span></button>'
+        +  '<button type="button" class="aic-btn" data-action="inv-sms-copia">'+_AIC_SVG.copia+'<span>Copia link</span></button>'
+        +'</div>'
+        +'<div class="aic-fila" style="margin-top:10px">'
+        +  '<button type="button" class="aic-btn" data-action="inv-sms-stato">Controlla adesso</button>'
+        +  '<button type="button" class="aic-btn" data-action="inv-sms-annulla">Annulla e rifai</button>'
+        +'</div>'+prova(f)+'</div>';
+    }
+    /* il modulo: nome e cognome dal cliente, cellulare dalla scheda (o da chi ha firmato prima) */
+    var prima=(fatta&&fatta.firmatario)||(f&&f.firmatario)||{};
+    var nomeCli=T(_inv.cli&&_inv.cli.nome), parti=nomeCli.split(/\s+/);
+    var errore=f&&f.stato==="ERROR"?'<div class="aic-banda aic-banda--attesa" style="margin-bottom:8px"><b>L\'ultima volta non è andata:</b> '+esc(f.errore||"errore")+'</div>':'';
+    return '<div class="sh-b">'+tit+fattaHtml+sotto+errore
+      +'<div class="campo-aiuto" style="font-size:15px;margin-bottom:4px">Il cliente riceve un codice sul telefono e firma un PDF vero. Vale più della firma col dito. Costa '+SMS_COSTO+' crediti.</div>'
+      +smsCampo("sms-nome","Nome di chi firma",prima.nome||(parti.length>1?parti.slice(0,-1).join(" "):nomeCli))
+      +smsCampo("sms-cognome","Cognome",prima.cognome||(parti.length>1?parti[parti.length-1]:""))
+      +smsCampo("sms-cell","Cellulare",prima.cellulare||T(_inv.cli&&_inv.cli.telefono),"tel","Il codice arriva qui.")
+      +smsCampo("sms-email","Email (se vuoi)",prima.email||T(_inv.cli&&_inv.cli.email),"email")
+      +'<button type="button" class="aic-btn aic-btn--pieno" data-action="inv-sms-crea" style="margin-top:12px">Prepara la firma · '+SMS_COSTO+' crediti</button>'
+      +'</div>';
+  }
+  async function smsChiama(corpo){
+    var s=await sb.auth.getSession(), tk=s&&s.data&&s.data.session&&s.data.session.access_token;
+    if(!tk){ toast("Sessione scaduta: rientra e riprova"); return null; }
+    try{
+      var r=await fetch("/.netlify/functions/firma-sms",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tk},body:JSON.stringify(corpo)});
+      var j=null; try{ j=await r.json(); }catch(_){}
+      if(!r.ok||!j||!j.ok){
+        toast((j&&j.error)||"Non ha funzionato: riprova");
+        if(j&&j.campo){ var c=document.getElementById("sms-"+({cellulare:"cell"}[j.campo]||j.campo)); if(c){ c.style.borderColor="#dc2626"; c.focus(); } }
+        if(j&&j.firma){ smsLeggi().then(invDisegna); }
+        return null;
+      }
+      return j;
+    }catch(e){ toast("Non riesco a collegarmi: controlla la connessione"); return null; }
+  }
+  async function smsCrea(btn){
+    var v=function(id){ var x=document.getElementById(id); return x?x.value:""; };
+    var corpo={azione:"crea",preventivo_id:_inv.p.id,nome:v("sms-nome"),cognome:v("sms-cognome"),cellulare:v("sms-cell"),email:v("sms-email")};
+    if(!T(corpo.nome)||!T(corpo.cognome)||!T(corpo.cellulare)){ toast("Scrivi nome, cognome e cellulare di chi firma"); return; }
+    if(btn){ btn.disabled=true; btn.textContent="Preparo il PDF…"; }
+    var j=await smsChiama(corpo);
+    if(btn){ btn.disabled=false; btn.textContent="Prepara la firma · "+SMS_COSTO+" crediti"; }
+    if(!j) return;
+    await smsLeggi();
+    toast(j.gia?"La firma era già pronta: mandagli il link ✔":"Firma pronta ✔ Mandagli il link");
+    segnaInviato();
+    invDisegna();
+  }
+  async function smsStato(azione,btn){
+    var id=(btn&&btn.dataset&&btn.dataset.sms)||(_inv.sms&&_inv.sms.id);
+    if(!id) return;
+    if(azione==="annulla"&&!gconfirm("Annullare questa firma? Il link che hai mandato non varrà più. I crediti non tornano.")) return;
+    if(btn) btn.disabled=true;
+    var j=await smsChiama({azione:azione,id:id});
+    if(btn) btn.disabled=false;
+    if(!j) return;
+    if(azione==="annulla") toast("Annullata. Puoi prepararne una nuova.");
+    else toast(j.firma.stato==="DONE"?"Firmato ✔":"Ancora da firmare");
+    /* si rilegge tutto: la firma e, se e' firmata, anche il link del cliente */
+    await smsLeggi();
+    if(j.firma.stato==="DONE"){
+      var r=await sb.from("gest_preventivi_link").select("*").eq("preventivo_id",_inv.p.id).eq("user_id",sbUid).maybeSingle();
+      if(r.data) _inv.link=r.data;
+    }
+    invDisegna();
+  }
+  async function smsPdf(){
+    var f=_inv.smsFatta; if(!f||!f.pdf_path) return;
+    var r=await sb.storage.from("firme-sms").createSignedUrl(f.pdf_path,600,{download:"firmato-"+String(f.titolo||"documento").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,60)+".pdf"});
+    if(r.error||!r.data){ toast("Non riesco ad aprire il PDF: riprova"); return; }
+    window.open(r.data.signedUrl,"_blank","noopener");
+  }
+  function smsMessaggio(){
+    var p=_inv.p, nome=T(_inv.az.nome);
+    return "Buongiorno, per firmare "+((ruoloUtente==="professionista")?"la parcella":"il preventivo")+" n. "+(p.numero||"")
+      +" apra questo link: le arriverà un codice sul telefono.\n"+_inv.sms.url_firma+(nome?"\n\n"+nome:"");
+  }
+
   /* ---------- i pulsanti ---------- */
   document.addEventListener("click",function(e){
     var t=e.target.closest&&e.target.closest("[data-action]"); if(!t) return;
@@ -318,6 +452,17 @@
     if(a==="inv-pdf"){ if(typeof prevControllaEManda==="function") prevControllaEManda(_inv.p.id); return; }
     if(a==="inv-qr-stampa"){ stampaQr(); segnaInviato(); return; }
     if(a==="inv-nuova"){ versioneNuova(); return; }
+    if(a==="inv-sms-crea"){ smsCrea(t); return; }
+    if(a==="inv-sms-stato"){ smsStato("stato",t); return; }
+    if(a==="inv-sms-annulla"){ smsStato("annulla",t); return; }
+    if(a==="inv-sms-pdf"){ smsPdf(); return; }
+    if(a==="inv-sms-copia"){ if(_inv.sms&&_inv.sms.url_firma) _aicCopia(_inv.sms.url_firma); return; }
+    if(a==="inv-sms-wa"){
+      if(!_inv.sms||!_inv.sms.url_firma) return;
+      var tel2=typeof waCleanTel==="function"?waCleanTel((_inv.sms.firmatario||{}).cellulare||(_inv.cli&&_inv.cli.telefono)):"";
+      window.open(tel2?("https://wa.me/"+tel2+"?text="+encodeURIComponent(smsMessaggio())):("https://wa.me/?text="+encodeURIComponent(smsMessaggio())),"_blank","noopener");
+      return;
+    }
   });
   document.addEventListener("change",function(e){
     var c=e.target.closest&&e.target.closest("[data-inv-sel]"); if(!c||!_inv) return;

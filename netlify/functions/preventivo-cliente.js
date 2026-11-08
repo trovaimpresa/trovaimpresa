@@ -109,8 +109,24 @@ exports.handler = async (event) => {
         aperture: (link.aperture || 0) + 1
       }).eq('token', t);
 
+      // 8 nov 2026 — la firma con codice SMS, se l'impresa l'ha preparata
+      // per QUESTA versione (stessa impronta della fotografia)
+      let firmaSms = null;
+      if (!link.firmato_il) {
+        try {
+          const impronta = crypto.createHash('sha256').update(JSON.stringify(dati)).digest('hex');
+          const { data: fs } = await sb.from('gest_firme_sms').select('url_firma, stato, dati_hash')
+            .eq('preventivo_id', link.preventivo_id).eq('user_id', link.user_id)
+            .in('stato', ['WAIT_VALIDATION', 'WAIT_SIGN', 'WAIT_SIGNERS', 'WAIT_OTP'])
+            .order('creato_il', { ascending: false }).limit(1);
+          const f = fs && fs[0];
+          if (f && f.url_firma && f.dati_hash === impronta && /^https:\/\//.test(f.url_firma)) firmaSms = f.url_firma;
+        } catch (e) { /* la tabella puo' non esserci ancora: si va avanti senza */ }
+      }
+
       return rispondi(200, Object.assign({}, dati, {
         capitolati,
+        firma_sms: firmaSms,
         firmato_il: link.firmato_il,
         firma_nome: link.firma_nome || null,
         firma_img: link.firmato_il ? (link.firma_img || null) : null

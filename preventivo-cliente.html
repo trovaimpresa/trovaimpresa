@@ -184,8 +184,13 @@
       return '<div class="banda"><b>Firmato da '+esc(S.firma_nome||"")+'</b> il '+esc(ora(S.firmato_il))+'.'
         +(S.firma_img?'<img src="'+esc(S.firma_img)+'" alt="Firma">':'')+'</div>';
     }
-    return '<div class="firma" id="firma">'
-      +'<button type="button" class="bott bott--ok" id="apri-firma">Accetto e firmo</button>'
+    /* 8 nov 2026: se l'impresa ha preparato la firma con codice SMS, e' la prima strada */
+    var sms=(S.firma_sms&&/^https:\/\//.test(S.firma_sms))
+      ?'<a class="bott bott--ok" href="'+esc(S.firma_sms)+'" style="display:block;text-align:center;text-decoration:none">Firma con codice SMS</a>'
+        +'<p style="font-size:16px;color:#475569;margin:8px 0 18px">Ti arriva un codice sul telefono e firmi il documento.</p>'
+      :'';
+    return '<div class="firma" id="firma">'+sms
+      +'<button type="button" class="bott'+(sms?'':' bott--ok')+'" id="apri-firma">'+(sms?'Oppure firma col dito':'Accetto e firmo')+'</button>'
       +'<div id="modulo-firma" hidden><div class="carta">'
       +  '<h2>Accetto e firmo</h2>'
       +  '<label for="f-nome">Nome e cognome</label><input type="text" id="f-nome" autocomplete="name" maxlength="120">'

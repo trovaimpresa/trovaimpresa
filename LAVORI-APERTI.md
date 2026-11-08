@@ -31,7 +31,7 @@ Ultimo aggiornamento: 5 novembre 2026 (sera) — riassunto di ottobre e inizio n
 ### 🔴 DA FARE
 1. **Fattura elettronica allo SDI in produzione** — costruita e provata in prova. Aspetta Alex: la accende quando tante imprese useranno il gestionale (decisione del 16 ott).
 2. **Fatture ricevute dal vivo** — mai provate contro Openapi vero.
-3. **Firma digitale vera con Openapi** — oggi c'e' solo la firma col dito (firma semplice).
+3. **Firma con codice SMS (Openapi, EU-SES)** — COSTRUITA l'8 nov 2026 (vedi CLAUDE.md, «8 NOVEMBRE 2026 — LA FIRMA CON CODICE SMS»). Manca: la chiave Openapi su Netlify (`OPENAPI_FIRMA_TOKEN` + `OPENAPI_FIRMA_URL`), la prova vera in sandbox (dove cade la firma nella pagina), poi la chiave vera.
 4. **Lavoro Edilizia vuoto** — 0 offerte di lavoro, 35 subappalti (5 nov). Idea: email alle imprese iscritte per invitarle a pubblicare un'offerta gratis.
 5. **Il quaderno** — da tenere aggiornato a fine sessione (questa sezione).
 
