@@ -3010,3 +3010,22 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
 2. Le prove hanno consumato ~29 dei 50 messaggi di chat del mese di Alex, e hanno lasciato 23
    chat di prova nell'archivio (cancellarle col × o dare il via a Claude).
 3. Modello della chat ancora Sonnet 4.5.
+
+# 8 NOVEMBRE 2026 — I VIDEO TUTORIAL E LA GUIDA «GUIDAMI»
+
+- `js/gest-tutorial.js`: puntino ▶ su ogni voce del menu che ha un video, e la
+  voce «Guidami» (sotto Aiuto) che illumina le voci una per una. La guida legge
+  il menu com'è in quel momento: se una voce si sposta o nasce, la segue da sola.
+- Caricato da `gestionale-app.html` e da `gestionale-noleggio.html` (qui con
+  `data-cartella="/video/tutorial/noleggio/"`: cartella ancora vuota, quindi solo
+  la guida, niente puntini).
+- I video stanno in `video/tutorial/<data-tab>.mp4` (computer) e
+  `<data-tab>-tel.mp4` (telefono); `elenco.json` dice quali esistono. I
+  sottotitoli sono stampati dentro, in una fascia blu sotto lo schermo.
+- ⛔ Li fa `tools/tutorial/registra.py` (Playwright + ffmpeg): apre il gestionale
+  VERO servito in locale con `tools/tutorial/finto-supabase.js` (dati di esempio:
+  «Edil Rossi», «Giulia Bianchi»). Quando cambia una schermata, si rifà il suo
+  video: `python3 -m http.server 8765` nella cartella del sito, poi
+  `python3 tools/tutorial/registra.py preventivi` (o `tutti`). Serve
+  `LANG=it_IT.UTF-8` (già nello script) se no le date escono all'americana.
+- `/tools/*` è già bloccato da netlify.toml: lo script non va online.
