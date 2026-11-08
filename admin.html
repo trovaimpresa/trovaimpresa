@@ -1068,6 +1068,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
             <thead>
               <tr>
                 <th>Cliente</th>
+                <th>Mandata a</th>
                 <th>Email</th>
                 <th>Telefono</th>
                 <th>Tipo lavoro</th>
@@ -1076,7 +1077,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
                 <th>Azioni</th>
               </tr>
             </thead>
-            <tbody id="table-preventivi"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+            <tbody id="table-preventivi"><tr><td colspan="8" class="loading">Caricamento...</td></tr></tbody>
           </table>
         </div></div>
       </div>
@@ -4726,10 +4727,24 @@ function apriMestieriCitta(){
 
 // CARICA PREVENTIVI
 async function caricaPreventivi() {
-  const { data, error } = await sb.from('preventivi_safe').select('*').order('created_at', { ascending: false });
-  if (error) {
-    console.error(error);
-    _erroreTabella('table-preventivi', 7, 'Non riesco a leggere i preventivi: ' + (error.message || 'errore sconosciuto'));
+  /* 8 nov 2026 — prima leggeva `preventivi_safe` col permesso del browser:
+     email e telefono restavano vuoti e non si sapeva A CHI era arrivata la
+     richiesta. Adesso passa da admin-dati (come le imprese) e dice per chi e'
+     e se l'impresa ha risposto. Nel gestionale del fondatore queste richieste
+     non compaiono piu' (js/gest-carte-documenti.js, dsCarica): stanno qui. */
+  let data;
+  try {
+    const [pr, im] = await Promise.all([
+      adminLista('preventivi'),
+      (tutteImprese && tutteImprese.length) ? Promise.resolve(tutteImprese) : adminLista('imprese')
+    ]);
+    data = pr;
+    var nomi = {};
+    (im || []).forEach(function (i) { nomi[String(i.id)] = i; });
+    data.forEach(function (p) { p._imp = nomi[String(p.impresa_id)] || null; });
+  } catch (e) {
+    console.error(e);
+    _erroreTabella('table-preventivi', 8, 'Non riesco a leggere le richieste: ' + (e.message || 'errore sconosciuto'));
     return;
   }
   document.getElementById('stat-preventivi').textContent = data?.length || 0;
@@ -4738,19 +4753,26 @@ async function caricaPreventivi() {
   renderCrescita();   /* la seconda linea del grafico si aggiorna da sola */
   const tbody = document.getElementById('table-preventivi');
   if (!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
     return;
   }
-  tbody.innerHTML = data.map(p => `
+  tbody.innerHTML = data.map(p => {
+    const imp = p._imp;
+    const perChi = imp
+      ? `<a href="/profilo-impresa?id=${encodeURIComponent(imp.id)}" target="_blank" rel="noopener"><strong>${esc(imp.nome_attivita || imp.nome || ('Impresa ' + imp.id))}</strong></a><div style="font-size:0.78rem;color:var(--light)">${esc(imp.citta || '')}</div>`
+      : '–';
+    return `
     <tr>
-      <td><strong>${esc(p.nome)}</strong></td>
-      <td>${esc(p.email)}</td>
-      <td>${esc(p.telefono)||'–'}</td>
-      <td>${esc(p.tipo_lavoro)||'–'}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.descrizione)||'–'}</td>
-      <td style="font-size:0.78rem;color:var(--light)">${_data(p.created_at)}</td>
+      <td><strong>${esc([p.nome, p.cognome].filter(Boolean).join(' '))}</strong><div style="font-size:0.78rem;color:var(--light)">${esc(p.citta || '')}</div></td>
+      <td>${perChi}</td>
+      <td>${p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : '–'}</td>
+      <td>${p.telefono ? `<a href="tel:${esc(p.telefono)}">${esc(p.telefono)}</a>` : '–'}</td>
+      <td>${esc(p.categoria_lavoro || p.tipo_lavoro) || '–'}</td>
+      <td style="max-width:260px;white-space:normal">${esc(p.descrizione) || '–'}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${_data(p.created_at)}<div style="margin-top:4px;font-weight:700;color:${p.risposta_at ? '#1e8e3e' : '#b45309'}">${p.risposta_at ? "L'impresa ha risposto" : 'Ancora senza risposta'}</div></td>
       <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo('${p.id}')">🗑️</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 /* ===== 6 settembre 2026 — RICHIESTE DEI CLIENTI =====
