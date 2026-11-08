@@ -505,9 +505,17 @@
 
   async function dsCarica(){
     if(!sb||!sbUid)return [];
+    /* 8 nov 2026: SOLO le richieste mandate alla TUA scheda. Prima si fidava
+       della regola del database, ma il fondatore per quella regola vede le
+       richieste di TUTTO il sito: nel suo gestionale finivano i clienti delle
+       altre imprese (Trieste, Ottaviano...). */
+    const mie=await sb.from("imprese").select("id").eq("user_id",sbUid);
+    const ids=((mie&&mie.data)||[]).map(x=>x.id);
+    if(!ids.length)return [];
     const [r1,r2]=await Promise.all([
       sb.from("preventivi")
         .select("id,nome,cognome,citta,via,categoria_lavoro,tipo_lavoro,descrizione,data_preferita,urgenza,budget,foto,mq,piano,note_aggiuntive,risposta_at,created_at")
+        .in("impresa_id",ids)
         .order("created_at",{ascending:false}).limit(300),
       sb.from("gest_dalsito").select("preventivo_id,stato,preventivo_creato_id").eq("user_id",sbUid)
     ]);
