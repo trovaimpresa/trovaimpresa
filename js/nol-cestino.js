@@ -173,6 +173,28 @@
   /* js/cestino.js chiama questa quando qualcosa entra nel cestino: e' l'unico
      punto da cui passano TUTTE le cancellazioni, cosi' non se ne dimentica
      nessuna e il pallino non resta indietro. */
+  /* 8 nov 2026 — il numerino accanto a «Cestino» si vede SUBITO, come
+     nell'App, e non solo dopo aver aperto il Cestino. Una domanda piccola
+     per tabella (solo il conto, nessuna riga). Se una tabella non risponde
+     il numerino resta com'e': «non lo so» non e' «zero». */
+  (function cestContaAvvio(prove){
+    prove=prove||0;
+    const st=(window.cestinoStato&&window.cestinoStato())||null;
+    const pronto=(typeof sb!=="undefined")&&sb&&(typeof sbUid!=="undefined")&&sbUid&&cestAcceso()&&!(st&&st.attesa>0);
+    if(!pronto){ if(prove<40) setTimeout(function(){cestContaAvvio(prove+1);},1500); return; }
+    if(cestCache.length) return;
+    Promise.all(CEST_COSE.map(async c=>{
+      try{
+        const r=await sb.raw(c.t).select("id",{count:"exact",head:true}).eq("user_id",sbUid).not("eliminato_il","is",null);
+        return (r&&!r.error&&typeof r.count==="number")?r.count:null;
+      }catch(e){ return null; }
+    })).then(function(n){
+      if(n.some(x=>x===null)) return;
+      if(cestCache.length) return;
+      cestSegnaPallino(n.reduce((a,b)=>a+b,0));
+    });
+  })();
+
   window.segnaCestinoDaRifare=function(){
     if($("#cestino")&&$("#cestino").classList.contains("active")) renderCestinoNol();
     else cestSegnaPallino((parseInt($("#cnt-cestino")?$("#cnt-cestino").textContent:"0")||0)+1);

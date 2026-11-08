@@ -1484,3 +1484,5 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 **Stati di avanzamento — conti:** SAL n. 10 (reparto «progetto casa»): 12,50 m² × 32,64 € = 408,00 € ✓ (nessun ribasso), uguale in elenco e nel riquadro in alto.
 **Problemi:** «Fai un SAL» a 14 px → 16, alto 44. Il pulsante «📄 PDF» accanto ad «Apri» RESTA: decisione del 19 agosto (il PDF è il motivo per cui l'elenco esiste).
 **Chiedi una funzione · Assistenza diretta (8 nov):** funzionano; troppo da leggere. Fatto (ok di Alex): spiegazioni da 3 righe a 1 in tutte e due (anche nelle copie del Noleggio), «Cosa succede dopo» in 1 riga, «Manda la richiesta» alto 48.
+**Noleggio, numerino del Cestino (8 nov):** si vedeva solo dopo aver aperto il Cestino. Ora si conta all avvio (solo il conto, una domanda per tabella; se una non risponde resta com era).
+**Telefono (8 nov):** Prezzario, Stati di avanzamento, Chiedi una funzione, Assistenza: niente fuori schermo, niente sotto i 14 px, pulsanti >= 40, zero errori.
