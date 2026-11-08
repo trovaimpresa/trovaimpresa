@@ -50,6 +50,9 @@ const PER_LOTTO = 100;
    che di tempo ne ha 15 minuti invece di 10 secondi. */
 const MAX_DESTINATARI = 1000;
 const PAUSA_FRA_LOTTI_MS = 600;
+/* 8 nov 2026: quante email programmate partono al giorno (deve restare
+   uguale a TETTO_GIORNO di invia-coda-email.js). */
+const TETTO_GIORNO = 70;
 
 function aspetta(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -98,7 +101,19 @@ function cliccabili(html) {
 function testoInHtml(testo, emailDest) {
   const paragrafi = String(testo || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
   const corpo = paragrafi
-    .map(p => '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#12233a">' + cliccabili(esc(p).replace(/\n/g, '<br>')) + '</p>')
+    .map(p => {
+      /* 8 nov 2026 — il PULSANTE arancione. Un paragrafo scritto cosi':
+           [PULSANTE Apri il gestionale https://trovaimpresa.com/...]
+         diventa un bottone grande. Solo indirizzi https: niente javascript:. */
+      const b = p.match(/^\[PULSANTE\s+([^\]]+?)\s+(https:\/\/[^\s\]]+)\]$/);
+      if (b) {
+        return '<div style="text-align:center;margin:8px 0 22px">'
+          + '<a href="' + esc(b[2]).replace(/"/g, '&quot;') + '" style="display:inline-block;background:#ff8800;color:#ffffff;'
+          + 'font-size:18px;font-weight:800;text-decoration:none;padding:16px 30px;border-radius:12px">'
+          + esc(b[1]) + '</a></div>';
+      }
+      return '<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#12233a">' + cliccabili(esc(p).replace(/\n/g, '<br>')) + '</p>';
+    })
     .join('');
   return '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f7fb">'
     + '<div style="max-width:600px;margin:0 auto;padding:28px 22px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">'
@@ -278,8 +293,8 @@ exports.handler = async function (event) {
   const ADMIN_PASS = process.env.ADMIN_PASS || '';
   const RESEND = (process.env.RESEND_API_KEY || '').trim();
 
-  let u, p, gruppo, oggetto, testo, solo_conteggio, azione;
-  try { ({ u, p, gruppo, oggetto, testo, solo_conteggio, azione } = JSON.parse(event.body || '{}')); }
+  let u, p, gruppo, oggetto, testo, solo_conteggio, azione, parte_dal, campagna_id;
+  try { ({ u, p, gruppo, oggetto, testo, solo_conteggio, azione, parte_dal, campagna_id } = JSON.parse(event.body || '{}')); }
   catch { return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Body JSON non valido.' }) }; }
 
   /* 27 set 2026: freno sui tentativi (netlify/functions/lib/admin-freno.js) */
@@ -306,6 +321,47 @@ exports.handler = async function (event) {
       .limit(100);
     if (e) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura storico: ' + e.message }) };
     return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, email: data || [] }) };
+  }
+
+  /* ============================================================
+     8 nov 2026 — LE EMAIL PROGRAMMATE (50 al giorno)
+     'programmate' = elenco delle campagne in coda, con quante partite
+     'ferma'       = ferma una campagna: chi non l'ha ancora ricevuta
+                     non la riceve piu'. Quelle partite restano partite.
+     La spedizione vera la fa ogni mattina invia-coda-email.js.
+     ============================================================ */
+  if (azione === 'programmate') {
+    const { data: camp, error: ec } = await sb.from('email_campagne')
+      .select('id, created_at, oggetto, testo, gruppo, parte_dal, totale, stato')
+      .order('parte_dal', { ascending: false }).order('id', { ascending: false }).limit(30);
+    if (ec) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura programmate: ' + ec.message }) };
+    const ids = (camp || []).map(c => c.id);
+    const conti = {};
+    if (ids.length) {
+      const { data: righe, error: er } = await sb.from('email_coda')
+        .select('campagna_id, stato').in('campagna_id', ids).limit(100000);
+      if (er) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Lettura coda: ' + er.message }) };
+      for (const r of righe || []) {
+        const c = conti[r.campagna_id] || (conti[r.campagna_id] = { attesa: 0, inviata: 0, errore: 0, saltata: 0 });
+        c[r.stato] = (c[r.stato] || 0) + 1;
+      }
+    }
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({
+      success: true, per_giorno: TETTO_GIORNO,
+      campagne: (camp || []).map(c => Object.assign({}, c, { conti: conti[c.id] || { attesa: 0, inviata: 0, errore: 0, saltata: 0 } }))
+    }) };
+  }
+  if (azione === 'ferma') {
+    const id = Number(campagna_id);
+    if (!id) return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Campagna mancante.' }) };
+    const { data: tolte, error: e1 } = await sb.from('email_coda')
+      .update({ stato: 'saltata', errore: 'fermata da admin' })
+      .eq('campagna_id', id).eq('stato', 'attesa').select('id');
+    if (e1) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Non riesco a fermarla: ' + e1.message }) };
+    const { data: c2, error: e2 } = await sb.from('email_campagne')
+      .update({ stato: 'fermata' }).eq('id', id).select('id');
+    if (e2 || !c2 || !c2.length) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Campagna non trovata.' }) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, tolte: (tolte || []).length }) };
   }
 
   // ---- chi riceve ----
@@ -390,6 +446,49 @@ exports.handler = async function (event) {
   if (!oggetto || !String(oggetto).trim() || !testo || !String(testo).trim()) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Oggetto o testo mancante.' }) };
   }
+  // ---- 8 nov 2026: PROGRAMMA invece di spedire subito ----
+  if (azione === 'programma') {
+    if (gruppo === 'prova') {
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'La prova si manda subito, non si programma.' }) };
+    }
+    if (!destinatari.length) {
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Nessun destinatario in questo gruppo.' }) };
+    }
+    const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+    let giorno = /^\d{4}-\d{2}-\d{2}$/.test(String(parte_dal || '')) ? String(parte_dal) : oggi;
+    if (giorno < oggi) giorno = oggi;
+    // una persona sola volta, anche se la sua email compare due volte
+    const visti = new Set();
+    const unici = destinatari.filter(i => {
+      const k = String(i.email).trim().toLowerCase();
+      if (visti.has(k)) return false; visti.add(k); return true;
+    });
+    const { data: camp, error: ec } = await sb.from('email_campagne').insert({
+      oggetto: String(oggetto), testo: String(testo), gruppo,
+      parte_dal: giorno, totale: unici.length
+    }).select('id').single();
+    if (ec || !camp) return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Non riesco a salvarla: ' + (ec ? ec.message : 'nessuna riga') }) };
+    const righe = unici.map(i => ({
+      campagna_id: camp.id,
+      impresa_id: i.id || null,
+      email: String(i.email).trim(),
+      oggetto: riempi(oggetto, i),
+      html: testoInHtml(riempi(testo, i), i.email)
+    }));
+    for (let k = 0; k < righe.length; k += 500) {
+      const { error: ei } = await sb.from('email_coda').insert(righe.slice(k, k + 500));
+      if (ei) {
+        // meglio niente che una campagna a meta': si butta via tutta
+        await sb.from('email_campagne').delete().eq('id', camp.id);
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Non riesco a metterla in coda: ' + ei.message }) };
+      }
+    }
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({
+      success: true, programmate: righe.length, parte_dal: giorno,
+      giorni: Math.ceil(righe.length / TETTO_GIORNO), per_giorno: TETTO_GIORNO
+    }) };
+  }
+
   if (!RESEND) {
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Manca RESEND_API_KEY: le email non possono partire.' }) };
   }

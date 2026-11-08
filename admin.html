@@ -496,6 +496,15 @@
   .st-btn{font-family:inherit;font-size:16px;font-weight:800;padding:15px 26px;border-radius:12px;border:none;cursor:pointer}
   .st-prova{background:#fff;color:#0066ff;border:2px solid #0066ff}
   .st-vero{background:#0066ff;color:#fff}
+  .st-prog{background:#1b8a3f;color:#fff}
+  .ep-riga{background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .ep-testa{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .ep-ogg{font-weight:800;font-size:17px;color:#0a1a2e;flex:1;min-width:200px}
+  .ep-barra{height:12px;background:#eef2f7;border-radius:6px;overflow:hidden;margin:12px 0 8px}
+  .ep-barra div{height:100%;background:#1b8a3f}
+  .ep-info{font-size:16px;color:#3d4b5c}
+  .ei-tag.verde{background:#e7f7ec;color:#1b6b34}
+  .ei-tag.grigio{background:#eef2f7;color:#3d4b5c}
   .st-btn:disabled{opacity:.5;cursor:default}
   #st-esito:not(:empty){margin-top:22px;padding:18px 20px;border-radius:12px;border:2px solid;font-size:15.5px;line-height:1.7}
   #st-esito.ok{background:#f2fbf5;border-color:#b5e2c5}
@@ -1667,6 +1676,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         <div style="background:#e7f0ff;border:2px solid #b7d4ff;border-radius:14px;padding:18px 20px;margin-bottom:24px;line-height:1.7;font-size:15px">
           Nel testo puoi usare queste parole magiche: verranno sostituite per ognuno.<br>
           <b>[NOME]</b> il nome dell'attività &nbsp;·&nbsp; <b>[CITTA]</b> la sua città &nbsp;·&nbsp; <b>[ATTIVA]</b> il link per attivare la scheda (solo per chi non ha confermato) &nbsp;·&nbsp; <b>[PAGINA_CITTA]</b> la pagina della sua città &nbsp;·&nbsp; <b>[PANNELLO]</b> dove entra per caricare il logo<br>
+          Per un <b>pulsante arancione</b> scrivi da solo in un paragrafo: <b>[PULSANTE Apri il gestionale https://trovaimpresa.com/...]</b><br>
           Lascia una <b>riga vuota</b> fra un paragrafo e l'altro. Niente asterischi o simboli: scrivi come parli.
         </div>
 
@@ -1714,11 +1724,25 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <button class="st-btn st-vero" onclick="inviaAnnuncio()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg> Invia a tutti</button>
         </div>
 
+        <!-- 8 nov 2026: PROGRAMMA, 70 al giorno (netlify/functions/invia-coda-email.js) -->
+        <div style="background:#f2fbf5;border:2px solid #b5e2c5;border-radius:14px;padding:18px 20px;margin-top:24px">
+          <div style="font-size:18px;font-weight:800;color:#0a1a2e">Programma: 70 al giorno</div>
+          <div class="st-nota" style="margin-top:4px">Partono ogni mattina, 70 per volta. Le altre email del giorno restano libere per le conferme d'iscrizione.</div>
+          <label class="st-lab" style="font-size:16px">Da che giorno parte</label>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+            <input type="date" id="st-parte" class="st-campo" style="width:auto;min-width:220px">
+            <button class="st-btn st-prog" onclick="programmaAnnuncio()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Programma</button>
+          </div>
+        </div>
+
         <div id="st-esito"></div>
 
         <div style="background:#fffaf0;border:2px solid #f0d9a8;border-radius:14px;padding:18px 20px;margin-top:26px;line-height:1.7;font-size:15px">
           <b>Prima di premere "Invia a tutti"</b>, manda sempre la prova a te stesso e controlla come è venuta nella tua casella. Una volta partita non si torna indietro.
         </div>
+
+        <div style="font-size:20px;font-weight:800;color:#0a1a2e;margin:32px 0 12px">Email programmate</div>
+        <div id="ep-lista"><div class="ei-vuoto">Carico…</div></div>
 
       </div>
     </div>
@@ -2163,7 +2187,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
-  if (id === 'scrivi-tutti') contaDestinatari();
+  if (id === 'scrivi-tutti') { contaDestinatari(); preparaProgramma(); caricaProgrammate(); }
   if (id === 'email-inviate') caricaEmailInviate();
   if (!fromPopstate && (!history.state || history.state.section !== id)) history.pushState({section: id}, '');
 }
@@ -2876,6 +2900,86 @@ async function inviaAnnuncio(modo) {
     : '<b>Inviata a ' + j.inviate + ' ' + (j.inviate === 1 ? 'persona' : 'persone') + '.</b><br>Se qualcuno non la riceve, controlla che la sua email sia scritta bene.';
 }
 
+// ===== EMAIL PROGRAMMATE — 8 nov 2026 =====
+// Le email vanno in coda e ogni mattina ne partono 50
+// (netlify/functions/invia-coda-email.js).
+function _domaniIso() {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  return d.toLocaleDateString('sv-SE');
+}
+function preparaProgramma() {
+  const c = document.getElementById('st-parte');
+  if (c && !c.value) c.value = _domaniIso();
+  if (c) c.min = new Date().toLocaleDateString('sv-SE');
+}
+function _dataBella(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+async function programmaAnnuncio() {
+  const esito = document.getElementById('st-esito');
+  const gruppo = document.getElementById('st-gruppo').value;
+  const oggetto = document.getElementById('st-oggetto').value.trim();
+  const testo = document.getElementById('st-testo').value.trim();
+  const parte = document.getElementById('st-parte').value;
+  esito.className = ''; esito.textContent = '';
+  if (!oggetto || !testo) { esito.className = 'ko'; esito.textContent = 'Scrivi prima oggetto e testo.'; return; }
+  if (!parte) { esito.className = 'ko'; esito.textContent = 'Scegli da che giorno parte.'; return; }
+  const c = await annuncioFetch({ gruppo, solo_conteggio: true, oggetto, testo });
+  if (!c.success) { esito.className = 'ko'; esito.textContent = c.error || 'Errore'; return; }
+  const giorni = Math.ceil(c.quanti / 70);
+  if (!confirm('Programmo questa email per ' + c.quanti + ' persone.\n\nParte ' + _dataBella(parte) + ', 70 al giorno: ci vogliono ' + giorni + (giorni === 1 ? ' giorno' : ' giorni') + '.\n\nHai già fatto la prova su di te?')) return;
+  const bottoni = document.querySelectorAll('.st-btn');
+  bottoni.forEach(b => b.disabled = true);
+  esito.textContent = 'La metto in coda…';
+  const j = await annuncioFetch({ azione: 'programma', gruppo, oggetto, testo, parte_dal: parte });
+  bottoni.forEach(b => b.disabled = false);
+  if (!j.success) { esito.className = 'ko'; esito.innerHTML = '<b>Non è stata programmata.</b><br>' + (j.error || 'errore sconosciuto'); return; }
+  esito.className = 'ok';
+  esito.innerHTML = '<b>Programmata per ' + j.programmate + ' ' + (j.programmate === 1 ? 'persona' : 'persone') + '.</b><br>'
+    + 'Parte ' + _dataBella(j.parte_dal) + ' alle 8:30, ' + j.per_giorno + ' al giorno: finisce in ' + j.giorni + (j.giorni === 1 ? ' giorno.' : ' giorni.');
+  caricaProgrammate();
+}
+let _programmate = [];
+async function caricaProgrammate() {
+  const box = document.getElementById('ep-lista');
+  if (!box) return;
+  const j = await annuncioFetch({ azione: 'programmate' });
+  if (!j.success) { box.innerHTML = '<div class="ei-vuoto">Non riesco a leggerle: ' + (j.error || '') + '</div>'; return; }
+  _programmate = j.campagne || [];
+  if (!_programmate.length) { box.innerHTML = '<div class="ei-vuoto">Nessuna email programmata.</div>'; return; }
+  const esc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const perG = j.per_giorno || 70;
+  box.innerHTML = _programmate.map((c, i) => {
+    const k = c.conti || {};
+    const fatte = (k.inviata || 0) + (k.saltata || 0) + (k.errore || 0);
+    const tot = c.totale || fatte + (k.attesa || 0) || 1;
+    const perc = Math.round(fatte * 100 / tot);
+    const mancano = k.attesa || 0;
+    const tag = c.stato === 'finita' ? '<span class="ei-tag verde">finita</span>'
+      : c.stato === 'fermata' ? '<span class="ei-tag grigio">fermata</span>'
+      : (c.parte_dal > new Date().toLocaleDateString('sv-SE') ? '<span class="ei-tag prova">in attesa</span>' : '<span class="ei-tag">in corso</span>');
+    let info = (k.inviata || 0) + ' partite su ' + c.totale;
+    if (c.stato === 'attiva' && mancano) info += ' · mancano ' + Math.ceil(mancano / perG) + (Math.ceil(mancano / perG) === 1 ? ' giorno' : ' giorni');
+    info += (c.parte_dal > new Date().toLocaleDateString('sv-SE') ? ' · parte ' : ' · partita ') + _dataBella(c.parte_dal);
+    return '<div class="ep-riga" id="ep-' + i + '">'
+      + '<div class="ep-testa"><span class="ep-ogg">' + esc(c.oggetto) + '</span>' + tag
+      + (c.stato === 'attiva' ? '<button type="button" class="st-mini rosso" onclick="fermaProgrammata(' + i + ')">Ferma</button>' : '')
+      + '</div>'
+      + '<div class="ep-barra"><div style="width:' + perc + '%"></div></div>'
+      + '<div class="ep-info">' + info + '</div>'
+      + '</div>';
+  }).join('');
+}
+async function fermaProgrammata(i) {
+  const c = _programmate[i]; if (!c) return;
+  if (!confirm('Fermo «' + c.oggetto + '»?\n\nChi non l\'ha ancora ricevuta non la riceverà più.')) return;
+  const j = await annuncioFetch({ azione: 'ferma', campagna_id: c.id });
+  if (!j.success) { alert('Non sono riuscito a fermarla: ' + (j.error || '')); return; }
+  caricaProgrammate();
+}
+
 // ===== DA DOVE ARRIVANO (4 settembre 2026) =====
 // Legge la vista arrivi_per_canale attraverso la function admin-arrivi:
 // visite_sito non e' leggibile con la chiave anon (ha solo la regola di
@@ -3044,6 +3148,8 @@ async function caricaEmailInviate() {
     const quando = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     const tag = e.modo === 'prova'
       ? '<span class="ei-tag prova">prova</span>'
+      : e.modo === 'programmata'
+      ? '<span class="ei-tag verde">programmata · ' + e.quanti + ' ' + (e.quanti === 1 ? 'persona' : 'persone') + '</span>'
       : '<span class="ei-tag">' + e.quanti + ' ' + (e.quanti === 1 ? 'persona' : 'persone') + ' · ' + (gruppoNome[e.gruppo] || e.gruppo || '') + '</span>';
     return '<div class="ei-riga" id="ei-' + i + '">'
       + '<div class="ei-testa"><span class="ei-data">' + quando + '</span>'
