@@ -3051,3 +3051,14 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
   ⛔ dsCarica filtra per `impresa_id` delle PROPRIE imprese: il fondatore per RLS
   vede tutte le richieste del sito, che stanno nell'Admin («Mandata a»).
   Fuori: professionisti (incarichi_richieste, il gestionale non li legge).
+  8 nov 2026 (notte): anche gli STUDI TECNICI. Le richieste di incarico
+  (`incarichi_richieste`, id uuid) entrano in «Richieste dal sito» del gestionale
+  (`dsIncarichi` in gest-carte-documenti.js, righe con `_inc:true`; contatti e
+  documenti letti dalla riga, niente function) e lo stato sta nella COLONNA `stato`
+  della riga (nuova/vista/preventivo/chiusa; `risposta_at` = «Risposto»), scritta
+  direttamente (RLS update owner). Pannello: `js/avviso-incarichi.js` (badge vero,
+  «Segna chiusa»/«Riapri», numerino). ⛔ Trovato: `segna_incarico_visto(bigint)`
+  non poteva funzionare (id uuid) e il «Ho visto» cercava un id di sole cifre: non
+  compariva mai. Il client non la usa piu'; la funzione nel database e' rimasta
+  (la migrazione per toglierla e' stata bloccata: da fare a mano se si vuole).
+

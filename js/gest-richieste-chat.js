@@ -99,7 +99,7 @@
        Riepilogo o dalla ricerca. Quelle in attesa dalla scheda si buttano:
        sono le stesse e uscirebbero doppie. */
     _azPendenti=null;
-    openSheetGrande("Richiesta dal sito — "+esc(r.nome||""),
+    openSheetGrande((r._inc?"Richiesta di incarico — ":"Richiesta dal sito — ")+esc(r.nome||""),
       `<div class="sh-cols"><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">Chi ha scritto</div>
@@ -129,6 +129,7 @@
         ${riga("Piano",r.piano)}
         ${riga("Altro",r.note_aggiuntive)}
         ${r.foto?`<div class="field"><label>Foto</label><a href="${esc(r.foto)}" target="_blank" rel="noopener">Apri la foto</a></div>`:""}
+        ${r._inc&&r.documenti&&r.documenti.length?`<div class="field"><label>Documenti del cliente</label><div style="display:flex;flex-wrap:wrap;gap:8px">${r.documenti.map((d,i)=>`<button class="btn" type="button" data-ds-doc="${esc(String(d))}">Documento ${i+1}</button>`).join("")}</div></div>`:""}
         </div>
         <div class="sh-b" style="border:2px solid #7c5cff;background:#f6f3ff">
         <div class="sh-tit">\u2728 Risposta pronta</div>
@@ -144,6 +145,12 @@
       `<button class="btn b-cancel" data-action="close">Chiudi</button>`,
       dsVoci(r).filter(v=>!v||v.action!=="ds-apri"));   /* «Vedi i contatti» qui dentro c'e' gia' */
     const _go=$("#ds-risp-go"); if(_go)_go.onclick=function(){dsRisposta(r);};
+    document.querySelectorAll("[data-ds-doc]").forEach(b=>b.onclick=async function(){
+      const w=window.open("","_blank");
+      const {data,error}=await sb.storage.from("documenti-incarichi").createSignedUrl(b.dataset.dsDoc,3600);
+      if(error||!data){if(w)w.close();toast("Non riesco ad aprire il documento");return;}
+      if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,"_blank");
+    });
     if(r._stato==="nuova"){
       if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();}
     }
@@ -180,6 +187,21 @@
     return parole.filter(w=>d.indexOf(w.length>6?w.slice(0,w.length-1):w)>=0).length;
   }
 
+  /* 8 nov 2026: i contatti di una richiesta. Per i preventivi li da' la
+     function; per gli incarichi dei professionisti stanno gia' nella riga. */
+  async function dsContattiDi(r){
+    if(r&&r._inc)return {email:r.email||"",telefono:r.telefono||""};
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(!session)return {email:"",telefono:""};
+      const rc=await fetch("/.netlify/functions/contatto-preventivo",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+        body:JSON.stringify({preventivo_id:Number(r.id)})});
+      if(rc.ok)return await rc.json();
+    }catch(e){}
+    return {email:"",telefono:""};
+  }
+
   async function dsRisposta(r){
     const box=$("#ds-risp-box"); if(!box)return;
     box.innerHTML='<p style="margin:0;font-size:17px">Sto scrivendo la risposta\u2026 (10 secondi)</p>';
@@ -203,13 +225,7 @@
         +"\n\nRICHIESTA DEL CLIENTE\n"+campi
         +"\n\nPREZZI DELL'IMPRESA\n"+(prezzi||"(nessun prezzo salvato: non fare cifre)");
       /* i contatti, per i pulsanti WhatsApp ed Email */
-      let c={email:"",telefono:""};
-      try{
-        const rc=await fetch("/.netlify/functions/contatto-preventivo",{method:"POST",
-          headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-          body:JSON.stringify({preventivo_id:Number(r.id)})});
-        if(rc.ok)c=await rc.json();
-      }catch(e){}
+      const c=await dsContattiDi(r);
       const res=await fetch("https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-risposta",{method:"POST",
         headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
         body:JSON.stringify({input:input})});
@@ -243,6 +259,10 @@
     const box=$("#ds-contatti");if(!box)return;
     box.innerHTML="Un attimo…";
     try{
+      const ri=dsCache.find(x=>String(x.id)===String(pid));
+      let c;
+      if(ri&&ri._inc)c={email:ri.email||"",telefono:ri.telefono||""};
+      else{
       const {data:{session}}=await sb.auth.getSession();
       if(!session)throw new Error("sessione scaduta, rientra");
       const res=await fetch("/.netlify/functions/contatto-preventivo",{
@@ -251,7 +271,8 @@
         body:JSON.stringify({preventivo_id:Number(pid)})
       });
       if(!res.ok)throw new Error(await res.text());
-      const c=await res.json();
+      c=await res.json();
+      }
       const tel=(c.telefono||"").replace(/[\s\-+]/g,"").replace(/^39/,"");
       box.innerHTML=
         (c.email?`<div><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>`:"")
@@ -271,18 +292,7 @@
     if(!r){toast("Richiesta non trovata, riprova");return;}
     const mid=curMestiere();
     if(!mid){toast("Apri prima un reparto");return;}
-    let contatti={email:"",telefono:""};
-    try{
-      const {data:{session}}=await sb.auth.getSession();
-      if(session){
-        const res=await fetch("/.netlify/functions/contatto-preventivo",{
-          method:"POST",
-          headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-          body:JSON.stringify({preventivo_id:Number(r.id)})
-        });
-        if(res.ok)contatti=await res.json();
-      }
-    }catch(e){}
+    const contatti=await dsContattiDi(r);
 
     const nomeCli=[r.nome,r.cognome].filter(Boolean).join(" ").trim()||"Cliente dal sito";
     let cliId=null;
@@ -312,7 +322,7 @@
     await prevForm(null,{
       cliente_id:cliId,
       titolo:_dsCosa(r),
-      note:"Richiesta arrivata da TrovaImpresa il "+fdate(_dsData(r))+".\n"+(desc||"")
+      note:(r._inc?"Richiesta di incarico arrivata da TrovaImpresa il ":"Richiesta arrivata da TrovaImpresa il ")+fdate(_dsData(r))+".\n"+(desc||"")
     });
     if(await dsSegna(r.id,"preventivo")){r._stato="preventivo";}
     rinfresca("dalsito","clienti");

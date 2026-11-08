@@ -534,13 +534,53 @@
       if(st==="nuova"&&r.visto_il)st="vista";          /* letta dal pannello («Ho visto») */
       if(r.risposta_at&&(st==="nuova"||st==="vista"))st="risposto";
       return Object.assign({},r,{_stato:st,_prevId:(s&&s.preventivo_creato_id)||null});
-    });
+    }).concat(await dsIncarichi(ids))
+      .sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
   }
+
+  /* 8 nov 2026 — LE RICHIESTE DI INCARICO DEGLI STUDI TECNICI.
+     Ai professionisti il cliente non manda un «preventivo» ma un incarico
+     (tabella incarichi_richieste, id uuid). Lo stato sta nella riga stessa
+     (colonna stato: nuova / vista / preventivo / chiusa / risposta_inviata),
+     cosi' pannello e gestionale leggono la stessa cosa. Email e telefono
+     si leggono direttamente: la regola del database li fa vedere solo al
+     professionista a cui e' mandata. Per imprese e artigiani torna vuoto. */
+  async function dsIncarichi(ids){
+    try{
+      const r=await sb.from("incarichi_richieste")
+        .select("id,nome,email,telefono,prestazione,comune,urgenza,note,documenti,stato,risposta_at,visto_il,created_at")
+        .in("professionista_id",ids).order("created_at",{ascending:false}).limit(300);
+      if(r.error)return [];
+      return (r.data||[]).map(x=>{
+        let st=["vista","preventivo","chiusa"].includes(x.stato)?x.stato:"nuova";
+        if(st==="nuova"&&x.visto_il)st="vista";
+        if(x.risposta_at&&(st==="nuova"||st==="vista"))st="risposto";
+        return {id:String(x.id),_inc:true,nome:x.nome,citta:x.comune,categoria_lavoro:x.prestazione,
+          descrizione:x.note,urgenza:x.urgenza,risposta_at:x.risposta_at,visto_il:x.visto_il,
+          created_at:x.created_at,email:x.email,telefono:x.telefono,
+          documenti:Array.isArray(x.documenti)?x.documenti:[],_stato:st,_prevId:null};
+      });
+    }catch(e){return [];}
+  }
+  const dsEInc=pid=>{const r=dsCache.find(x=>String(x.id)===String(pid));return !!(r&&r._inc);};
 
   /* Segna lo stato. Ogni scrittura verificata con .select("id"): senza,
      una scrittura bloccata dalle regole e' identica a una riuscita. */
   async function dsSegna(pid,stato,extra){
     if(!sb||!sbUid)return false;
+    if(dsEInc(pid)){
+      /* incarico: lo stato sta nella riga stessa, la vede anche il pannello */
+      const agg={stato:stato};
+      const r0=dsCache.find(x=>String(x.id)===String(pid));
+      if(r0&&!r0.visto_il)agg.visto_il=new Date().toISOString();
+      const {data,error}=await sb.from("incarichi_richieste").update(agg).eq("id",String(pid)).select("id");
+      if(error||!data||!data.length){
+        toast("Non sono riuscito a salvare: "+((error&&error.message)||"nessuna riga scritta"));
+        return false;
+      }
+      if(r0&&agg.visto_il)r0.visto_il=agg.visto_il;
+      return true;
+    }
     const riga=Object.assign({user_id:sbUid,preventivo_id:Number(pid),stato:stato,letta_il:new Date().toISOString()},extra||{});
     const {data,error}=await sb.from("gest_dalsito")
       .upsert(riga,{onConflict:"user_id,preventivo_id"}).select("id");
