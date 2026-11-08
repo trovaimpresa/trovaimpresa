@@ -53,7 +53,12 @@
       '.ti-qui button.ca{background:none;border:0;color:#fff;font:inherit;font-size:17px;font-weight:700;text-decoration:underline;cursor:pointer;padding:6px}',
       '@media(max-width:700px){.ti-qui .in{gap:10px;padding:14px 16px}.ti-qui .tx{font-size:20px}',
       '.ti-qui a.va{width:100%;text-align:center;box-sizing:border-box;font-size:18px}}',
-      '.ti-cambia{display:inline-block;margin:4px 0 22px;color:#fff;font-size:19px;font-weight:700;text-decoration:underline}'
+      '.ti-dove{background:#ff8800;color:#fff;font-family:inherit}',
+      '.ti-dove .in{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap}',
+      '.ti-dove svg{width:28px;height:28px;flex:0 0 auto}',
+      '.ti-dove .tx{font-size:22px;font-weight:800}',
+      '.ti-dove button{background:#0a2a4d;color:#fff;border:0;font:inherit;font-weight:800;font-size:19px;padding:11px 24px;border-radius:12px;cursor:pointer}',
+      '@media(max-width:700px){.ti-dove .in{gap:10px;padding:10px 14px}.ti-dove .tx{font-size:19px}.ti-dove button{font-size:17px;padding:10px 18px}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -85,12 +90,18 @@
       h1.appendChild(sp);
     }
     var h2 = document.querySelector('.hero-h2');
-    if (h2) {
-      h2.textContent = 'Imprese, artigiani e professionisti di ' + nome + ' e provincia';
-      var a = document.createElement('a');
-      a.className = 'ti-cambia'; a.href = '/?nazionale=1&scegli=1'; a.textContent = 'Cambia città';
-      a.addEventListener('click', function (e) { e.preventDefault(); scegliCitta(); });
-      h2.insertAdjacentElement('afterend', a);
+    if (h2) h2.textContent = 'Imprese, artigiani e professionisti di ' + nome + ' e provincia';
+    // 8 nov 2026 (Alessio): «Cambia citta'» sta IN ALTO, sopra il logo, dove
+    // lo si cerca. Una fascia arancione: «Stai guardando X» + pulsante.
+    var nav = document.querySelector('nav.navbar, nav, header');
+    if (nav && !document.querySelector('.ti-dove')) {
+      var f = document.createElement('div'); f.className = 'ti-dove';
+      var inn = document.createElement('div'); inn.className = 'in'; inn.innerHTML = PIN;
+      var tx = document.createElement('span'); tx.className = 'tx'; tx.textContent = 'Stai guardando ' + nome;
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Cambia città';
+      b.addEventListener('click', scegliCitta);
+      inn.appendChild(tx); inn.appendChild(b); f.appendChild(inn);
+      nav.insertAdjacentElement('beforebegin', f);
     }
     try { document.title = "L'edilizia a " + nome + ' — imprese e artigiani | TrovaImpresa'; } catch (e) {}
   }
