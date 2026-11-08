@@ -3029,3 +3029,10 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
   `python3 tools/tutorial/registra.py preventivi` (o `tutti`). Serve
   `LANG=it_IT.UTF-8` (già nello script) se no le date escono all'americana.
 - `/tools/*` è già bloccato da netlify.toml: lo script non va online.
+- 8 nov 2026 (dopo): LA VOCE DI ALESSIO. `registra-voce.html` (noindex, non
+  collegata da nessuna parte) gli fa leggere le frasi di `video/tutorial/frasi.json`
+  una alla volta e le tiene nel browser (IndexedDB); alla fine scarica
+  `voce-tutorial.zip`. Poi: `VOCE=/cartella/dello/zip python3 tools/tutorial/registra.py tutti`
+  rifa' i video con la sua voce (ogni frase legata al testo del sottotitolo; il
+  copione aspetta che la frase finisca). Se si cambia un copione, si rilancia
+  `tools/tutorial/frasi.py video/tutorial/frasi.json` dopo la registrazione.

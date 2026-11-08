@@ -1,0 +1,1254 @@
+[
+{
+"id": "71cd8919f5",
+"testo": "Entra nel tuo reparto: premi «Apri».",
+"video": [
+"riepilogo",
+"preventivi",
+"computi",
+"lavori",
+"fatture",
+"clienti",
+"calendario",
+"giornate",
+"dalsito",
+"promemoria",
+"scadenzario",
+"agenda",
+"squadra",
+"mezzi",
+"attrezzature",
+"fisco",
+"prezzario",
+"sal",
+"fornitori",
+"carte",
+"report",
+"galleria",
+"cestino",
+"richieste",
+"assistenza"
+],
+"titolo": "Assistente"
+},
+{
+"id": "5ef0102e5b",
+"testo": "Questa è la pagina di partenza: l'Assistente.",
+"video": [
+"riepilogo"
+],
+"titolo": "Assistente"
+},
+{
+"id": "9e6fc2bcc1",
+"testo": "Scrivi o parla come ti viene: «fammi un preventivo per un bagno».",
+"video": [
+"riepilogo"
+],
+"titolo": "Assistente"
+},
+{
+"id": "1a6f195360",
+"testo": "Oppure tocca uno di questi bottoni per partire subito.",
+"video": [
+"riepilogo"
+],
+"titolo": "Assistente"
+},
+{
+"id": "b87825600b",
+"testo": "Sotto ci sono i primi passi: seguili uno alla volta.",
+"video": [
+"riepilogo"
+],
+"titolo": "Assistente"
+},
+{
+"id": "4a96a47dd1",
+"testo": "Nel menu premi «Preventivi».",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "31fed64988",
+"testo": "Qui trovi tutti i tuoi preventivi: bozze, inviati e accettati.",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "da5c5031d5",
+"testo": "Per farne uno nuovo premi «+ Nuovo preventivo».",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "4c83af9326",
+"testo": "Scrivi il titolo del lavoro.",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "780f49b227",
+"testo": "Scegli il cliente dall'elenco.",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "e7c2544a0c",
+"testo": "Scrivi le voci: cosa fai, quanti metri, e il prezzo.",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "d6151ecaad",
+"testo": "Per un'altra voce premi «+ Aggiungi voce».",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "6b98cf7285",
+"testo": "Scegli l'IVA. Il totale si calcola da solo.",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "ab9fb85d6a",
+"testo": "Premi «Crea preventivo». Fatto!",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "3b9cb0b231",
+"testo": "Il preventivo è nella lista. Aprilo per scaricare il PDF e mandarlo al cliente.",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "cf76ecd61d",
+"testo": "Apri il menu ☰ e premi «Preventivi».",
+"video": [
+"preventivi"
+],
+"titolo": "Preventivi"
+},
+{
+"id": "528fda65c3",
+"testo": "Nel menu premi «Computo da prezzare».",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "1dde0e53a0",
+"testo": "Qui fai il computo metrico, o carichi quello che ti manda il geometra.",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "8cb04a7355",
+"testo": "Per farne uno tuo premi «+ Crea il primo computo».",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "538a7a354e",
+"testo": "Scrivi il titolo, il cliente e dove si fa il lavoro.",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "5118631cb4",
+"testo": "Premi «Crea computo».",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "f930985db8",
+"testo": "Dentro aggiungi le voci, anche prese dal prezzario della tua regione.",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "da6f5c5c61",
+"testo": "Apri il menu ☰ e premi «Computo da prezzare».",
+"video": [
+"computi"
+],
+"titolo": "Computo da prezzare"
+},
+{
+"id": "a35ab3c738",
+"testo": "Nel menu premi «Lavori».",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "5967186391",
+"testo": "Qui vedi tutti i lavori: in ritardo, di oggi, prossimi, da incassare.",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "9ba9d69afd",
+"testo": "Per un lavoro nuovo premi «+ Nuovo lavoro».",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "998981efcc",
+"testo": "Scrivi cosa c'è da fare e dove.",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "d8f3ac5bdd",
+"testo": "Scegli il cliente e scrivi quanto vale il lavoro.",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "2ade2244e0",
+"testo": "Premi «Crea lavoro». Fatto!",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "2af812ae1d",
+"testo": "Il lavoro è in lista. Quando lo finisci, da qui fai la fattura.",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "0761858e93",
+"testo": "Apri il menu ☰ e premi «Lavori».",
+"video": [
+"lavori"
+],
+"titolo": "Lavori"
+},
+{
+"id": "46fb51405a",
+"testo": "Nel menu premi «Fatture».",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "1bad4c5f54",
+"testo": "Qui vedi le fatture: bozze, da incassare, scadute e pagate.",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "1ef2907a88",
+"testo": "Per una fattura nuova premi «+ Nuova fattura».",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "2b705b62ea",
+"testo": "Il modo più veloce: falla nascere da un preventivo accettato.",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "fa9a013cc3",
+"testo": "Scegli il preventivo e premi «Continua».",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "d5011b41a3",
+"testo": "Le righe ci sono già, con quantità e prezzi. Non devi riscrivere niente.",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "304c713999",
+"testo": "Controlla e premi «Crea fattura». Fatto!",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "a2d2a6c7d2",
+"testo": "Poi la scarichi in PDF o la mandi allo SDI.",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "65389239a1",
+"testo": "Apri il menu ☰ e premi «Fatture».",
+"video": [
+"fatture"
+],
+"titolo": "Fatture"
+},
+{
+"id": "3178f5fa5e",
+"testo": "Nel menu premi «Clienti».",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "7a8c417bb9",
+"testo": "Qui c'è la rubrica dei tuoi clienti.",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "35745fdc5b",
+"testo": "Per un cliente nuovo premi «+ Nuovo cliente».",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "8eada86cf4",
+"testo": "Scrivi nome e telefono.",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "b37ed6866c",
+"testo": "Poi l'indirizzo e la città.",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "083c7582be",
+"testo": "Premi «Crea». Fatto!",
+"video": [
+"clienti",
+"mezzi",
+"attrezzature",
+"carte"
+],
+"titolo": "Clienti"
+},
+{
+"id": "397d86750c",
+"testo": "Il cliente lo ritrovi qui e nei preventivi.",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "d684297245",
+"testo": "Apri il menu ☰ e premi «Clienti».",
+"video": [
+"clienti"
+],
+"titolo": "Clienti"
+},
+{
+"id": "3b4681f4a1",
+"testo": "Nel menu premi «Calendario».",
+"video": [
+"calendario"
+],
+"titolo": "Calendario"
+},
+{
+"id": "befbf35d7a",
+"testo": "Qui vedi i lavori e le scadenze giorno per giorno.",
+"video": [
+"calendario"
+],
+"titolo": "Calendario"
+},
+{
+"id": "e39efe68c0",
+"testo": "Con le frecce cambi mese. «Oggi» ti riporta a oggi.",
+"video": [
+"calendario"
+],
+"titolo": "Calendario"
+},
+{
+"id": "8a593b7b29",
+"testo": "Tocca un giorno per vedere cosa c'è.",
+"video": [
+"calendario"
+],
+"titolo": "Calendario"
+},
+{
+"id": "1361d4a7ea",
+"testo": "Apri il menu ☰ e premi «Calendario».",
+"video": [
+"calendario"
+],
+"titolo": "Calendario"
+},
+{
+"id": "a7794b0804",
+"testo": "Apri «Tutto il resto» e premi «Giornate».",
+"video": [
+"giornate"
+],
+"titolo": "Giornate"
+},
+{
+"id": "89344f8ee1",
+"testo": "Qui segni le giornate della tua squadra.",
+"video": [
+"giornate"
+],
+"titolo": "Giornate"
+},
+{
+"id": "ae0190bafa",
+"testo": "Racconta la giornata a voce o scrivendo: chi c'era e cosa avete fatto.",
+"video": [
+"giornate"
+],
+"titolo": "Giornate"
+},
+{
+"id": "4a379232b1",
+"testo": "Premi «Compila la giornata» e si riempie da sola.",
+"video": [
+"giornate"
+],
+"titolo": "Giornate"
+},
+{
+"id": "006b57d7e5",
+"testo": "A fine mese trovi i giorni di ognuno e scarichi il PDF.",
+"video": [
+"giornate"
+],
+"titolo": "Giornate"
+},
+{
+"id": "1d15e0e13b",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Giornate».",
+"video": [
+"giornate"
+],
+"titolo": "Giornate"
+},
+{
+"id": "4bc0a860fb",
+"testo": "Apri «Tutto il resto» e premi «Richieste dal sito».",
+"video": [
+"dalsito"
+],
+"titolo": "Richieste dal sito"
+},
+{
+"id": "67666daa11",
+"testo": "Qui arrivano i clienti che ti scrivono dalla tua pagina su TrovaImpresa.",
+"video": [
+"dalsito"
+],
+"titolo": "Richieste dal sito"
+},
+{
+"id": "631fbf0149",
+"testo": "Vedi chi ha scritto, cosa gli serve e i suoi contatti.",
+"video": [
+"dalsito"
+],
+"titolo": "Richieste dal sito"
+},
+{
+"id": "634e96bae2",
+"testo": "Da qui gli fai il preventivo con un clic.",
+"video": [
+"dalsito"
+],
+"titolo": "Richieste dal sito"
+},
+{
+"id": "fd1a39a974",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Richieste dal sito».",
+"video": [
+"dalsito"
+],
+"titolo": "Richieste dal sito"
+},
+{
+"id": "8937bddd11",
+"testo": "Apri «Tutto il resto» e premi «Promemoria».",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "d337aa2803",
+"testo": "Qui scrivi le cose da ricordare. Ti arriva l'avviso al momento giusto.",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "6369c824e6",
+"testo": "Premi «+ Scrivi il primo promemoria».",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "43b72278d6",
+"testo": "Scrivi cosa devi ricordare e il giorno.",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "0393a73239",
+"testo": "Scegli quando avvisarti e se si ripete.",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "214959ec9a",
+"testo": "Premi «Salva». Fatto!",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "aa7fc35527",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Promemoria».",
+"video": [
+"promemoria"
+],
+"titolo": "Promemoria"
+},
+{
+"id": "85581f007e",
+"testo": "Apri «Tutto il resto» e premi «Scadenzario».",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "b3bd58d671",
+"testo": "Qui tieni le scadenze: DURC, assicurazioni, revisioni, visite.",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "d6b7136437",
+"testo": "Premi «+ Aggiungi la prima scadenza».",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "cc447e3056",
+"testo": "Scrivi cos'è, scegli il tipo e la data.",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "60cac3746d",
+"testo": "Se si ripete, scegli ogni quanto.",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "21a87ec36d",
+"testo": "Premi «Crea». Ti avvisiamo prima che scada.",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "786bf0b950",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Scadenzario».",
+"video": [
+"scadenzario"
+],
+"titolo": "Scadenzario"
+},
+{
+"id": "91f88fe928",
+"testo": "Apri «Tutto il resto» e premi «Agenda operatore».",
+"video": [
+"agenda"
+],
+"titolo": "Agenda operatore"
+},
+{
+"id": "e1e53f4a52",
+"testo": "Qui vedi i lavori da fare, operaio per operaio.",
+"video": [
+"agenda"
+],
+"titolo": "Agenda operatore"
+},
+{
+"id": "c3fca0e965",
+"testo": "In «Ore fatte» vedi le ore segnate da ognuno.",
+"video": [
+"agenda"
+],
+"titolo": "Agenda operatore"
+},
+{
+"id": "cfaf88fb2a",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Agenda operatore».",
+"video": [
+"agenda"
+],
+"titolo": "Agenda operatore"
+},
+{
+"id": "2c3129e142",
+"testo": "Apri «Tutto il resto» e premi «Squadra».",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "29f61e1548",
+"testo": "Qui metti i tuoi operai.",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "29ac47aa19",
+"testo": "Premi «+ Aggiungi la prima persona».",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "87e0455c0c",
+"testo": "Scrivi nome, telefono e mansione.",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "fc800e96cc",
+"testo": "Il costo all'ora serve a sapere quanto ti costa ogni lavoro.",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "0c50ea3bfc",
+"testo": "Premi «Aggiungi». Fatto!",
+"video": [
+"squadra",
+"fornitori"
+],
+"titolo": "Squadra"
+},
+{
+"id": "38c93b28d2",
+"testo": "Dall'app operaio lui segna le ore e le foto dal telefono.",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "59a98825a0",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Squadra».",
+"video": [
+"squadra"
+],
+"titolo": "Squadra"
+},
+{
+"id": "7317913801",
+"testo": "Apri «Tutto il resto» e premi «Mezzi».",
+"video": [
+"mezzi"
+],
+"titolo": "Mezzi"
+},
+{
+"id": "65b8f26bc6",
+"testo": "Qui tieni i mezzi, con assicurazione e revisione.",
+"video": [
+"mezzi"
+],
+"titolo": "Mezzi"
+},
+{
+"id": "91d3d60d5b",
+"testo": "Premi «+ Aggiungi il primo mezzo».",
+"video": [
+"mezzi"
+],
+"titolo": "Mezzi"
+},
+{
+"id": "d1ffe36e71",
+"testo": "Scrivi il nome, il tipo e la targa.",
+"video": [
+"mezzi"
+],
+"titolo": "Mezzi"
+},
+{
+"id": "87a9881085",
+"testo": "Metti le date di assicurazione e revisione: ti avvisiamo prima.",
+"video": [
+"mezzi"
+],
+"titolo": "Mezzi"
+},
+{
+"id": "5701538b97",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Mezzi».",
+"video": [
+"mezzi"
+],
+"titolo": "Mezzi"
+},
+{
+"id": "c93a8b6e3e",
+"testo": "Apri «Tutto il resto» e premi «Attrezzature».",
+"video": [
+"attrezzature"
+],
+"titolo": "Attrezzature"
+},
+{
+"id": "58186acbbc",
+"testo": "Qui tieni ponteggi, betoniere e attrezzi.",
+"video": [
+"attrezzature"
+],
+"titolo": "Attrezzature"
+},
+{
+"id": "625b0cce08",
+"testo": "Premi «+ Aggiungi la prima attrezzatura».",
+"video": [
+"attrezzature"
+],
+"titolo": "Attrezzature"
+},
+{
+"id": "ef31e1d7e8",
+"testo": "Scrivi il nome e il tipo.",
+"video": [
+"attrezzature"
+],
+"titolo": "Attrezzature"
+},
+{
+"id": "6b78abfab7",
+"testo": "Nelle note scrivi dove si trova.",
+"video": [
+"attrezzature"
+],
+"titolo": "Attrezzature"
+},
+{
+"id": "5d46529d5a",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Attrezzature».",
+"video": [
+"attrezzature"
+],
+"titolo": "Attrezzature"
+},
+{
+"id": "18a62f0a12",
+"testo": "Apri «Tutto il resto» e premi «Tasse e fisco».",
+"video": [
+"fisco"
+],
+"titolo": "Tasse e fisco"
+},
+{
+"id": "8fe015e4f0",
+"testo": "In cima vedi subito se c'è qualcosa da fare adesso.",
+"video": [
+"fisco"
+],
+"titolo": "Tasse e fisco"
+},
+{
+"id": "cc3c86cf9f",
+"testo": "«Farsi pagare»: chi ti deve soldi e da quanto.",
+"video": [
+"fisco"
+],
+"titolo": "Tasse e fisco"
+},
+{
+"id": "69475ac119",
+"testo": "«Le tue tasse»: quanto mettere da parte e le date da non dimenticare.",
+"video": [
+"fisco"
+],
+"titolo": "Tasse e fisco"
+},
+{
+"id": "410ca1bf57",
+"testo": "«Quanto ti resta»: quello che ti rimane in tasca, tolte le tasse.",
+"video": [
+"fisco"
+],
+"titolo": "Tasse e fisco"
+},
+{
+"id": "e803407476",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Tasse e fisco».",
+"video": [
+"fisco"
+],
+"titolo": "Tasse e fisco"
+},
+{
+"id": "718b68b3a5",
+"testo": "Apri «Tutto il resto» e premi «Prezzario».",
+"video": [
+"prezzario"
+],
+"titolo": "Prezzario"
+},
+{
+"id": "1ff2df2a5f",
+"testo": "Qui tieni i tuoi prezzi. Puoi anche importarli da Excel.",
+"video": [
+"prezzario"
+],
+"titolo": "Prezzario"
+},
+{
+"id": "c0c8e1354e",
+"testo": "Per una voce nuova premi «+ Nuova voce».",
+"video": [
+"prezzario"
+],
+"titolo": "Prezzario"
+},
+{
+"id": "81b05f27fd",
+"testo": "Scegli l'unità, scrivi la descrizione e il prezzo.",
+"video": [
+"prezzario"
+],
+"titolo": "Prezzario"
+},
+{
+"id": "7c95594aa9",
+"testo": "Premi «Crea la voce». La ritrovi nei preventivi.",
+"video": [
+"prezzario"
+],
+"titolo": "Prezzario"
+},
+{
+"id": "48920d3dc8",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Prezzario».",
+"video": [
+"prezzario"
+],
+"titolo": "Prezzario"
+},
+{
+"id": "7b2190ac0d",
+"testo": "Apri «Tutto il resto» e premi «Stati di avanzamento».",
+"video": [
+"sal"
+],
+"titolo": "Stati di avanzamento"
+},
+{
+"id": "6994b834d0",
+"testo": "Qui trovi tutti i SAL dei tuoi computi, in un posto solo.",
+"video": [
+"sal"
+],
+"titolo": "Stati di avanzamento"
+},
+{
+"id": "ed2d3118bb",
+"testo": "Vedi quali sono da fatturare e quali già fatturati.",
+"video": [
+"sal"
+],
+"titolo": "Stati di avanzamento"
+},
+{
+"id": "49288a592d",
+"testo": "Il SAL si fa dentro il computo: da qui ci vai con un clic.",
+"video": [
+"sal"
+],
+"titolo": "Stati di avanzamento"
+},
+{
+"id": "d5d7e640d9",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Stati di avanzamento».",
+"video": [
+"sal"
+],
+"titolo": "Stati di avanzamento"
+},
+{
+"id": "e498dc29d3",
+"testo": "Apri «Tutto il resto» e premi «Fornitori».",
+"video": [
+"fornitori"
+],
+"titolo": "Fornitori"
+},
+{
+"id": "a1eed5dd2f",
+"testo": "Qui tieni i fornitori e le loro fatture.",
+"video": [
+"fornitori"
+],
+"titolo": "Fornitori"
+},
+{
+"id": "c8280a3816",
+"testo": "Una fattura di carta? Fotografala e si legge da sola.",
+"video": [
+"fornitori"
+],
+"titolo": "Fornitori"
+},
+{
+"id": "6740a50011",
+"testo": "Per un fornitore nuovo premi «+ Nuovo fornitore».",
+"video": [
+"fornitori"
+],
+"titolo": "Fornitori"
+},
+{
+"id": "9cb94fb9d7",
+"testo": "Scrivi il nome, il tipo e il telefono.",
+"video": [
+"fornitori"
+],
+"titolo": "Fornitori"
+},
+{
+"id": "cc36136f7f",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Fornitori».",
+"video": [
+"fornitori"
+],
+"titolo": "Fornitori"
+},
+{
+"id": "a6e6400963",
+"testo": "Apri «Tutto il resto» e premi «Carte».",
+"video": [
+"carte"
+],
+"titolo": "Carte"
+},
+{
+"id": "276e60add8",
+"testo": "Qui segni le carte aziendali e le spese fatte con ognuna.",
+"video": [
+"carte"
+],
+"titolo": "Carte"
+},
+{
+"id": "de3e9b0711",
+"testo": "Premi «+ Aggiungi la prima carta».",
+"video": [
+"carte"
+],
+"titolo": "Carte"
+},
+{
+"id": "5f54efb70d",
+"testo": "Dai un nome alla carta.",
+"video": [
+"carte"
+],
+"titolo": "Carte"
+},
+{
+"id": "0ac38a0071",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Carte».",
+"video": [
+"carte"
+],
+"titolo": "Carte"
+},
+{
+"id": "bbec2f12cd",
+"testo": "Apri «Tutto il resto» e premi «Report».",
+"video": [
+"report"
+],
+"titolo": "Report"
+},
+{
+"id": "0e4e888471",
+"testo": "Qui vedi quanto hai incassato e quanto hai speso.",
+"video": [
+"report"
+],
+"titolo": "Report"
+},
+{
+"id": "718ad23ec3",
+"testo": "Lavoro per lavoro, vedi quanto ci hai guadagnato davvero.",
+"video": [
+"report"
+],
+"titolo": "Report"
+},
+{
+"id": "b8dd29fe1b",
+"testo": "Con «Scarica il report» lo porti al commercialista.",
+"video": [
+"report"
+],
+"titolo": "Report"
+},
+{
+"id": "32a31cdfe8",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Report».",
+"video": [
+"report"
+],
+"titolo": "Report"
+},
+{
+"id": "81efe9d18b",
+"testo": "Apri «Tutto il resto» e premi «Galleria».",
+"video": [
+"galleria"
+],
+"titolo": "Galleria"
+},
+{
+"id": "9ad03ebab5",
+"testo": "Qui ci sono le foto e i video dei cantieri.",
+"video": [
+"galleria"
+],
+"titolo": "Galleria"
+},
+{
+"id": "5ca367fdc3",
+"testo": "Premi «Carica foto o video» per aggiungerne.",
+"video": [
+"galleria"
+],
+"titolo": "Galleria"
+},
+{
+"id": "26a2b9a296",
+"testo": "Le dividi in «prima del lavoro» e «a lavoro finito».",
+"video": [
+"galleria"
+],
+"titolo": "Galleria"
+},
+{
+"id": "80dcdb5901",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Galleria».",
+"video": [
+"galleria"
+],
+"titolo": "Galleria"
+},
+{
+"id": "6eaea916a7",
+"testo": "Apri «Tutto il resto» e premi «Cestino».",
+"video": [
+"cestino"
+],
+"titolo": "Cestino"
+},
+{
+"id": "269599f724",
+"testo": "Qui finisce quello che butti. Niente è perso.",
+"video": [
+"cestino"
+],
+"titolo": "Cestino"
+},
+{
+"id": "2adf414ec3",
+"testo": "Hai buttato qualcosa per sbaglio? Premi «Rimetti a posto».",
+"video": [
+"cestino"
+],
+"titolo": "Cestino"
+},
+{
+"id": "7ee01f1ea2",
+"testo": "È tornato al suo posto. Fatto!",
+"video": [
+"cestino"
+],
+"titolo": "Cestino"
+},
+{
+"id": "249fbbd607",
+"testo": "Apri il menu ☰, poi «Tutto il resto» e premi «Cestino».",
+"video": [
+"cestino"
+],
+"titolo": "Cestino"
+},
+{
+"id": "fdb9fabbfb",
+"testo": "In fondo al menu premi «Chiedi una funzione».",
+"video": [
+"richieste"
+],
+"titolo": "Chiedi una funzione"
+},
+{
+"id": "7213f04dad",
+"testo": "Ti manca qualcosa nel gestionale? Scrivilo qui.",
+"video": [
+"richieste"
+],
+"titolo": "Chiedi una funzione"
+},
+{
+"id": "3298c60dba",
+"testo": "Premi «Manda la richiesta». La costruiamo noi.",
+"video": [
+"richieste"
+],
+"titolo": "Chiedi una funzione"
+},
+{
+"id": "17d52e81ee",
+"testo": "Apri il menu ☰: in fondo premi «Chiedi una funzione».",
+"video": [
+"richieste"
+],
+"titolo": "Chiedi una funzione"
+},
+{
+"id": "9c8a31a02e",
+"testo": "In fondo al menu premi «Assistenza diretta».",
+"video": [
+"assistenza"
+],
+"titolo": "Assistenza diretta"
+},
+{
+"id": "44059a6410",
+"testo": "Hai un problema? Scrivi qui. Ti rispondiamo di persona.",
+"video": [
+"assistenza"
+],
+"titolo": "Assistenza diretta"
+},
+{
+"id": "01fcca5c4c",
+"testo": "Premi «Invia». La risposta arriva qui.",
+"video": [
+"assistenza"
+],
+"titolo": "Assistenza diretta"
+},
+{
+"id": "90f40ae931",
+"testo": "Apri il menu ☰: in fondo premi «Assistenza diretta».",
+"video": [
+"assistenza"
+],
+"titolo": "Assistenza diretta"
+}
+]
