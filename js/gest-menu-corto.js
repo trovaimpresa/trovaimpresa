@@ -202,6 +202,7 @@
       if (g !== lavoro) g.style.display = "none";
     });
 
+    var ultimaAttiva = "";
     function apri(si) {
       box.hidden = !si;
       btn.setAttribute("aria-expanded", si ? "true" : "false");
@@ -223,11 +224,20 @@
           g.textContent = (sq && /Collaboratori/.test(sq.textContent)) ? "Collaboratori e strumenti" : "Squadra e mezzi";
         }
       });
+      /* 8 nov 2026 (Alex): «Tutto il resto» serve solo ad aprire e chiudere,
+         niente numerino. Gli avvisi restano sulle voci dentro. */
       var n = btn.querySelector(".ma-n");
-      n.textContent = avvisi; n.hidden = !avvisi;
+      n.textContent = ""; n.hidden = true;
       btn.hidden = !voci.length;
-      /* la sezione aperta sta qui dentro? allora si apre */
-      if (box.querySelector("button[data-tab].active") && box.hidden) apri(true);
+      /* la sezione aperta sta qui dentro? allora si apre — ma SOLO quando si
+         cambia sezione. Prima si riapriva a ogni giro (bastava che il menu
+         cambiasse una classe) e chiuderlo a mano non funzionava piu'. */
+      var att = box.querySelector("button[data-tab].active");
+      var chiave = att ? att.dataset.tab : "";
+      if (chiave !== ultimaAttiva) {
+        ultimaAttiva = chiave;
+        if (att && box.hidden) apri(true);
+      }
     }
     btn.addEventListener("click", function () { apri(box.hidden); });
 
