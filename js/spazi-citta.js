@@ -13,6 +13,66 @@
 (function () {
   'use strict';
 
+  // ---- 8 nov 2026: IL CONTATORE DEI LOGHI IN PROVA --------------------------
+  // Conta viste e clic di ogni logo (rpc conta_logo, tabella loghi_statistiche).
+  // "Visto" = meta' logo sullo schermo per 1 secondo, una volta per visita.
+  // ⚠️ Lo STESSO blocco sta in js/loghi-ospiti.js e in js/spazi-citta.js:
+  // il primo che parte lo crea, l'altro lo riusa. Se lo cambi, cambia tutti e due.
+  window.tiContaLogo = window.tiContaLogo || (function () {
+    var URL_RPC = 'https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/rpc/conta_logo';
+    var KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
+    var lista = [], orologio = null, inizio = Date.now();
+    function manda(id, tipo) {
+      try {
+        fetch(URL_RPC, {
+          method: 'POST',
+          headers: { apikey: KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_impresa: Number(id), p_tipo: tipo }),
+          keepalive: true
+        }).catch(function () {});
+      } catch (e) {}
+    }
+    function giaVisto(id) {
+      try {
+        var k = 'ti-logo-visto-' + id;
+        if (sessionStorage.getItem(k)) return true;
+        sessionStorage.setItem(k, '1');
+      } catch (e) {}
+      return false;
+    }
+    function aMeta(el) {
+      if (!el.isConnected) return false;
+      var r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return false;
+      var H = window.innerHeight || document.documentElement.clientHeight;
+      var W = window.innerWidth || document.documentElement.clientWidth;
+      var alto = Math.min(r.bottom, H) - Math.max(r.top, 0);
+      var largo = Math.min(r.right, W) - Math.max(r.left, 0);
+      if (alto <= 0 || largo <= 0) return false;
+      return (alto * largo) / (r.width * r.height) >= 0.5;
+    }
+    function giro() {
+      var ora = Date.now();
+      lista = lista.filter(function (x) {
+        if (!x.el.isConnected) return false;
+        if (aMeta(x.el)) {
+          if (!x.da) x.da = ora;
+          else if (ora - x.da >= 1000) { if (!giaVisto(x.id)) manda(x.id, 'vista'); return false; }
+        } else x.da = 0;
+        return true;
+      });
+      if (!lista.length || ora - inizio > 300000) { clearInterval(orologio); orologio = null; }
+    }
+    return function (el, id) {
+      if (!el || !id || el.getAttribute('data-conta-logo')) return;
+      el.setAttribute('data-conta-logo', String(id));
+      el.addEventListener('click', function () { manda(id, 'clic'); });
+      lista.push({ el: el, id: id, da: 0 });
+      if (!orologio) orologio = setInterval(giro, 500);
+    };
+  })();
+
+
   var SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R';
 
@@ -255,6 +315,7 @@
     tx.appendChild(nm); tx.appendChild(ms);
     box.appendChild(top); box.appendChild(lg); box.appendChild(tx);
     a.appendChild(box);
+    window.tiContaLogo(a, o.id);
   }
 
   /* 6 nov 2026 — MARCHI PARTNER (affiliazione Awin), come nelle guide

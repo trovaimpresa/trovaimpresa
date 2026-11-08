@@ -54,7 +54,7 @@
 (function () {
   if (window.__loghiOspiti || document.querySelector('script[src*="loghi-ospiti"]')) return;
   var s = document.createElement('script');
-  s.src = '/js/loghi-ospiti.js?v=2';
+  s.src = '/js/loghi-ospiti.js?v=3';
   s.defer = true;
   document.head.appendChild(s);
 })();
