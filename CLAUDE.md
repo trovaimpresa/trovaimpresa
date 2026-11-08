@@ -3092,9 +3092,13 @@ per 10 anni. Il PDF firmato lo teniamo NOI: Openapi lo cancella dopo 90 giorni.
 - Crediti: `consume_ai_credit('firma_sms',5)` col gettone dell'impresa PRIMA di Openapi;
   se Openapi rifiuta → `refund_ai_credit`. Una firma aperta per la stessa versione si
   RIUSA (non si paga due volte). «Annulla e rifai» non rimborsa (Openapi l'ha gia' fatta pagare).
-- La firma va sull'ULTIMA pagina, a x=70 y=420 (`FIRMA_POS`): meta' pagina vuota apposta,
-  perche' non si sa ancora se Openapi conta dall'alto o dal basso. **Da guardare alla prima
-  prova vera** e correggere se cade storta.
+- La firma va sull'ULTIMA pagina, a x=50 y=140 (`FIRMA_POS`), subito sotto «Firma del
+  cliente:». ✅ Provato dal vivo l'8 nov: Openapi conta in punti PDF DALL'ALTO (con y=420
+  cadeva a meta' pagina). In prova la pagina di firma offre nome scritto E disegnato, poi il
+  codice SMS al numero scritto: ⛔ nelle prove usare il cellulare di Alex, mai uno inventato.
+- ✅ Dal vivo l'8 nov: richiesta presa da Openapi, l'avviso `firma-sms-notifica` e' arrivato
+  (stato passato da solo a WAIT_SIGNERS), il PDF si legge giusto. Manca la prova fino in fondo
+  (codice SMS → DONE → PDF firmato nel deposito).
 - Variabili Netlify: `OPENAPI_FIRMA_TOKEN` (scope esignature EU-SES + GET signatures) e
   `OPENAPI_FIRMA_URL` (`https://test.esignature.openapi.com` in prova,
   `https://esignature.openapi.com` vera). Senza: risponde 503 «non ancora accesa» e il
@@ -3107,4 +3111,3 @@ per 10 anni. Il PDF firmato lo teniamo NOI: Openapi lo cancella dopo 90 giorni.
   (30 verdi, gestionale e pagina del cliente, computer e telefono, zero errori, niente
   sotto 13 px). SQL provato su Postgres 16: il browser non scrive, un altro non vede,
   il preventivo cancellato lascia la firma.
-- ⚠️ NON provato contro Openapi vero: il formato delle risposte viene dalla documentazione.

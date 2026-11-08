@@ -7,9 +7,10 @@
 // (con le funzioni del PDF del preventivo). Si mettono solo in pagina.
 //
 // L'ultima pagina e' quella della firma: in alto il testo di accettazione,
-// sotto un grande spazio vuoto dove Openapi mette la firma del cliente.
-// Lo spazio e' grande apposta: la posizione (FIRMA_POS) e' a meta' pagina,
-// cosi' cade nel vuoto sia se Openapi conta dall'alto sia dal basso.
+// sotto lo spazio vuoto dove Openapi mette la firma del cliente.
+// FIRMA_POS: Openapi conta in punti PDF DALL'ALTO della pagina (provato dal
+// vivo l'8 nov 2026: con y=420 il riquadro cadeva a meta' pagina, lontano
+// da «Firma del cliente:», che sta a circa 115 punti dall'alto).
 //
 // ⛔ Il carattere Helvetica del PDF conosce solo le lettere «europee»
 //    (WinAnsi): € , à, è, «», — ci sono; emoji e frecce no. Ogni lettera
@@ -20,7 +21,7 @@ const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const A4 = [595.28, 841.89];
 const M = 50;                       // margine
 const LARGO = A4[0] - 2 * M;
-const FIRMA_POS = { x: 70, y: 420 }; // a meta' dell'ultima pagina
+const FIRMA_POS = { x: 50, y: 140 }; // subito sotto «Firma del cliente:»
 
 const BLU = rgb(0.04, 0.16, 0.30);
 const GRIGIO = rgb(0.35, 0.38, 0.45);
