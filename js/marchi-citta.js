@@ -1,4 +1,6 @@
-/* 6 nov 2026 — FASCIA MARCHI nelle 106 pagine città (imprese-<città>).
+/* 8 nov 2026: al computer i marchi li sposta ai lati js/marchi-lati.js
+   (caricato da qui); questa fascia resta per il telefono.
+   6 nov 2026 — FASCIA MARCHI nelle 106 pagine città (imprese-<città>).
    Stessa fascia della home (index.html, #ti-marchi): loghi dei negozi
    presi da Awin, per dare fiducia. Titolo onesto, NON «partner».
    Va subito PRIMA di «Quanto costano i lavori» (#costi-lavori), cioè dopo
@@ -76,6 +78,14 @@
         '<p>Finiti i lavori, arreda e attrezza casa dai marchi che conosci.</p>' +
         '<div class="tmc-grid">' + carte + '</div>';
       prima.parentNode.insertBefore(sez, prima);
+      /* 8 nov 2026: al computer i marchi vanno ai lati, separati (scelta di
+         Alex). La fascia resta per il telefono e per chi non trova posto. */
+      if (!document.querySelector('script[src*="marchi-lati"]')) {
+        var ml = document.createElement('script');
+        ml.src = '/js/marchi-lati.js?v=1';
+        ml.defer = true;
+        document.head.appendChild(ml);
+      }
     } catch (e) { /* la pagina non si rompe mai per questa fascia */ }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avvio); else avvio();
