@@ -34,7 +34,7 @@
   // Cosi' si alternano e si spargono lungo la pagina invece di ammucchiarsi.
   var AWIN_ME = '3137864';
   var TELEFONO = '(max-width:1100px)';
-  var STACCO = 34;      // spazio fra il cartello sopra e il marchio
+  var STACCO = 64;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato)
   var BORDO = 20;       // distanza dal bordo dello schermo, se il lato e' vuoto
   var MAX_L = 380;      // larghezza massima della carta
   var MIN_L = 220;      // sotto questa non si mostra
