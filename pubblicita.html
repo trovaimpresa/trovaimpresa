@@ -229,7 +229,7 @@
   <p>Scegli lo spazio e la città. Il tuo banner resta online e si rinnova da solo: disdici quando vuoi.</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Posizioni per città</div></div>
+    <div class="hero-stat"><div class="hero-stat-num" id="num-posizioni">14</div><div class="hero-stat-label">Posizioni per città</div></div>
     <div class="hero-stat"><div class="hero-stat-num">€5</div><div class="hero-stat-label">Al mese da</div></div>
   </div>
 </section>
@@ -448,6 +448,17 @@ const PREZZI_MENSILI = (function () {
   SPAZI_TI.SPAZI.forEach(function (s) { o[s.id] = SPAZI_TI.prezzoDi(s.id); });
   return o;
 })();
+// 8 nov 2026 — il numero in cima lo conta l'elenco, non si scrive a mano.
+(function () {
+  var el = document.getElementById('num-posizioni');
+  if (el) el.textContent = Object.keys(PREZZI_MENSILI).length;
+})();
+// 8 nov 2026 — prezzi all'italiana: €17 resta €17, 45.9 diventa €45,90.
+function euro(n) {
+  n = Number(n) || 0;
+  return '€' + (Number.isInteger(n) ? String(n)
+    : n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+}
 const MISURE_FASCIA = (function () {
   var o = {};
   SPAZI_TI.SPAZI.forEach(function (s) { o[s.id] = SPAZI_TI.misuraDi(s.id); });
@@ -683,7 +694,7 @@ function aggiornaPrezziPeriodo() {
   ['1','3','6','12'].forEach(function(k){
     var el = document.getElementById('pz-' + k);
     var p = spazioSel ? calcolaPrezzo(spazioSel, k) : null;
-    el.textContent = p != null ? '€' + p : '—';
+    el.textContent = p != null ? euro(p) : '—';
   });
 }
 
@@ -693,12 +704,12 @@ function aggiornaRiepilogo() {
   document.getElementById('r-citta').textContent = cittaSel || '—';
   document.getElementById('r-periodo').textContent = PERIODI[periodoSel].label;
   var tot = (spazioSel && cittaSel) ? calcolaPrezzo(spazioSel, periodoSel) : 0;
-  document.getElementById('r-totale').textContent = '€' + (tot || 0);
+  document.getElementById('r-totale').textContent = euro(tot);
 }
 
 function aggiornaOrdine() {
   var tot = (spazioSel && cittaSel) ? calcolaPrezzo(spazioSel, periodoSel) : 0;
-  document.getElementById('ord-totale').textContent = '€' + (tot || 0);
+  document.getElementById('ord-totale').textContent = euro(tot);
   var rows = '';
   rows += '<div class="ord-row"><span>Posizione</span><span>' + (spazioSel ? latoLabel(spazioSel) : '—') + '</span></div>';
   rows += '<div class="ord-row"><span>Sezione</span><span>' + (spazioSel ? fasciaDiSpazio(spazioSel) : '—') + '</span></div>';
