@@ -492,7 +492,9 @@
     nuova:      {lab:"Nuova",            bar:"da_fare",  tono:"t-attesa", bg:"var(--attesa-bg)", fg:"var(--attesa)"},
     vista:      {lab:"Vista",            bar:"in_corso", tono:"t-neutro", bg:"var(--info-bg)",   fg:"var(--info)"},
     preventivo: {lab:"Preventivo fatto", bar:"fatto",    tono:"t-ok",     bg:"var(--ok-bg)",     fg:"var(--ok)"},
-    chiusa:     {lab:"Chiusa",           bar:"fatto",    tono:"t-neutro", bg:"var(--sfondo)",    fg:"var(--testo-2)"}
+    chiusa:     {lab:"Chiusa",           bar:"fatto",    tono:"t-neutro", bg:"var(--sfondo)",    fg:"var(--testo-2)"},
+    /* 8 nov 2026: risposta mandata dal pannello (preventivi.risposta_at) */
+    risposto:   {lab:"Risposto dal sito", bar:"fatto",    tono:"t-ok",     bg:"var(--ok-bg)",     fg:"var(--ok)"}
   };
   /* Le viste devono coprire TUTTI gli stati: una richiesta con il preventivo
      gia' fatto finiva solo in "Tutte" e sembrava sparita. */
@@ -514,7 +516,7 @@
     if(!ids.length)return [];
     const [r1,r2]=await Promise.all([
       sb.from("preventivi")
-        .select("id,nome,cognome,citta,via,categoria_lavoro,tipo_lavoro,descrizione,data_preferita,urgenza,budget,foto,mq,piano,note_aggiuntive,risposta_at,created_at")
+        .select("id,nome,cognome,citta,via,categoria_lavoro,tipo_lavoro,descrizione,data_preferita,urgenza,budget,foto,mq,piano,note_aggiuntive,risposta_at,visto_il,created_at")
         .in("impresa_id",ids)
         .order("created_at",{ascending:false}).limit(300),
       sb.from("gest_dalsito").select("preventivo_id,stato,preventivo_creato_id").eq("user_id",sbUid)
@@ -526,7 +528,12 @@
     const m={};(r2.data||[]).forEach(s=>{m[String(s.preventivo_id)]=s;});
     return (r1.data||[]).map(r=>{
       const s=m[String(r.id)];
-      return Object.assign({},r,{_stato:(s&&s.stato)||"nuova",_prevId:(s&&s.preventivo_creato_id)||null});
+      /* 8 nov 2026 — uno stato solo col pannello: se l'impresa ha gia' risposto
+         dal pannello e qui non l'ha ne' chiusa ne' trasformata, vale «Risposto». */
+      let st=(s&&s.stato)||"nuova";
+      if(st==="nuova"&&r.visto_il)st="vista";          /* letta dal pannello («Ho visto») */
+      if(r.risposta_at&&(st==="nuova"||st==="vista"))st="risposto";
+      return Object.assign({},r,{_stato:st,_prevId:(s&&s.preventivo_creato_id)||null});
     });
   }
 
@@ -541,6 +548,8 @@
       toast("Non sono riuscito a salvare: "+((error&&error.message)||"nessuna riga scritta"));
       return false;
     }
+    /* 8 nov 2026: vista qui = vista anche nel pannello (spegne l'avviso rosso) */
+    try{ await sb.rpc("segna_preventivo_visto",{p_id:Number(pid)}); }catch(e){}
     return true;
   }
 
@@ -579,13 +588,13 @@
     const conta={
       da_fare:aperte.length,
       nuove:dsCache.filter(r=>r._stato==="nuova").length,
-      fatte:dsCache.filter(r=>r._stato==="preventivo"||r._stato==="chiusa").length,
+      fatte:dsCache.filter(r=>r._stato==="preventivo"||r._stato==="chiusa"||r._stato==="risposto").length,
       tutte:dsCache.length
     };
     let L=dsCache;
     if(dsFilter==="da_fare")L=aperte;
     else if(dsFilter==="nuove")L=dsCache.filter(r=>r._stato==="nuova");
-    else if(dsFilter==="fatte")L=dsCache.filter(r=>r._stato==="preventivo"||r._stato==="chiusa");
+    else if(dsFilter==="fatte")L=dsCache.filter(r=>r._stato==="preventivo"||r._stato==="chiusa"||r._stato==="risposto");
 
     renderTabella({
       id:"ds", box:"#ds-list",

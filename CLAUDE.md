@@ -3041,3 +3041,13 @@ di `gest_chat_messaggi`. →6← push, tutti controllati su Netlify e collaudati
   guida «Guidami» (`VOCE_GUIDA` in gest-tutorial.js) e la voce «Guidami» in fondo
   al menu non c'e' piu'; tolto il video dell'Assistente; i ▶ del menu stanno in
   colonna (posizione fissa a destra, anche con il numerino).
+- 8 nov 2026 (sera): RICHIESTE DAL SITO, UNO STATO SOLO fra pannello e gestionale.
+  Lo stato sta in `gest_dalsito` (nuova/vista/preventivo/chiusa); la lettura in
+  `preventivi.visto_il` (rpc `segna_preventivo_visto`); la risposta dal pannello
+  in `preventivi.risposta_at`. Gestionale (`dsCarica`): visto_il -> «Vista»,
+  risposta_at -> «Risposto dal sito» (in «Fatte»); ogni dsSegna segna anche visto.
+  Pannelli impresa e artigiano: `js/richieste-stato.js` avvolge caricaPreventivi e
+  apriModal senza toccarle (bollino vero, «Segna chiusa»/«Riapri», numerino).
+  ⛔ dsCarica filtra per `impresa_id` delle PROPRIE imprese: il fondatore per RLS
+  vede tutte le richieste del sito, che stanno nell'Admin («Mandata a»).
+  Fuori: professionisti (incarichi_richieste, il gestionale non li legge).
