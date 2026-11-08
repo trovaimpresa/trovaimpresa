@@ -62,6 +62,17 @@
 
   function nomeBello(c) { return c.charAt(0).toUpperCase() + c.slice(1); }
 
+  // 8 nov 2026: «Cambia citta'» apre subito la finestra per scegliere la
+  // citta' (quella di js/citta-obbligatoria.js) e porta alla pagina nuova.
+  // Prima mandava alla nazionale e la scelta non si trovava piu'.
+  function scegliCitta() {
+    function apri() {
+      if (!window.TICitta || !window.TICitta.chiedi) { location.href = '/?nazionale=1'; return; }
+      window.TICitta.chiedi(function (c) { location.href = '/?citta=' + encodeURIComponent(c); });
+    }
+    if (window.TICitta) apri(); else window.addEventListener('load', apri);
+  }
+
   // 3. pagina citta': il titolo dice dove sei, e la scelta si ricorda
   function paginaCitta() {
     var nome = nomeBello(citta);
@@ -77,7 +88,8 @@
     if (h2) {
       h2.textContent = 'Imprese, artigiani e professionisti di ' + nome + ' e provincia';
       var a = document.createElement('a');
-      a.className = 'ti-cambia'; a.href = '/?nazionale=1'; a.textContent = 'Cambia città';
+      a.className = 'ti-cambia'; a.href = '/?nazionale=1&scegli=1'; a.textContent = 'Cambia città';
+      a.addEventListener('click', function (e) { e.preventDefault(); scegliCitta(); });
       h2.insertAdjacentElement('afterend', a);
     }
     try { document.title = "L'edilizia a " + nome + ' — imprese e artigiani | TrovaImpresa'; } catch (e) {}
@@ -96,11 +108,7 @@
     var va = document.createElement('a'); va.className = 'va'; va.href = '/?citta=' + encodeURIComponent(nome);
     va.textContent = 'Vai alla pagina di ' + nome;
     var ca = document.createElement('button'); ca.type = 'button'; ca.className = 'ca'; ca.textContent = 'Cambia città';
-    ca.addEventListener('click', function () {
-      d.remove();
-      var inp = document.getElementById('sb-citta');
-      if (inp) { inp.value = ''; inp.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(function () { inp.focus(); }, 400); }
-    });
+    ca.addEventListener('click', function () { scegliCitta(); });
     in_.appendChild(t); in_.appendChild(va); in_.appendChild(ca);
     d.appendChild(in_);
     nav.insertAdjacentElement('afterend', d);
@@ -125,6 +133,7 @@
 
   pronta(function () {
     if (citta) { paginaCitta(); return; }
+    if (p.get('scegli') === '1') { scegliCitta(); return; }
     if (home && !bot && !p.has('nazionale')) cercaPosizione();
   });
 })();
