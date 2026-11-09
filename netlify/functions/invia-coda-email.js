@@ -24,7 +24,13 @@
 const { schedule } = require('@netlify/functions');
 const { createClient } = require('@supabase/supabase-js');
 
-const TETTO_GIORNO = 70;          // uguale a TETTO_GIORNO di invia-annuncio.js (8 nov: Alex ha scelto 70)
+const TETTO_GIORNO = 50;          // uguale a TETTO_GIORNO di invia-annuncio.js
+/* 9 nov 2026: con 70 il tetto di Resend e' stato superato (105 su 100):
+   oltre alle programmate partono iscrizioni, conferme, prove e le email
+   RICEVUTE (Resend conta anche quelle). Alex ha chiesto di mandarne meno.
+   Il LUNEDI' ne partono 10 in meno, perche' alle 5:30 UTC escono anche
+   i riepiloghi settimanali del gestionale (riepilogo-lunedi.js). */
+const MENO_IL_LUNEDI = 10;
 const MITTENTE = 'TrovaImpresa <info@trovaimpresa.com>';
 /* 8 nov 2026: ogni giorno che parte qualcosa, una COPIA va ad Alessio
    (la prima mail del giro, con in cima quante ne sono partite). */
@@ -55,7 +61,9 @@ const handler = async () => {
     .select('quanti').gte('created_at', inizioGiornoRoma());
   if (eg) { console.error('invia-coda-email: storico', eg.message); return { statusCode: 500, body: 'db' }; }
   const usate = (giaOggi || []).reduce((t, r) => t + (Number(r.quanti) || 0), 0);
-  const posto = TETTO_GIORNO - usate - 1;   // -1: la copia di controllo per Alessio
+  const lunedi = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Rome', weekday: 'short' }) === 'Mon';
+  const tetto = TETTO_GIORNO - (lunedi ? MENO_IL_LUNEDI : 0);
+  const posto = tetto - usate - 1;   // -1: la copia di controllo per Alessio
   if (posto <= 0) { console.log('invia-coda-email: tetto gia\' pieno oggi', { usate }); return { statusCode: 200, body: 'pieno' }; }
 
   // 2. le campagne attive gia' partite, dalla piu' vecchia

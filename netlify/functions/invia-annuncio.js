@@ -52,7 +52,7 @@ const MAX_DESTINATARI = 1000;
 const PAUSA_FRA_LOTTI_MS = 600;
 /* 8 nov 2026: quante email programmate partono al giorno (deve restare
    uguale a TETTO_GIORNO di invia-coda-email.js). */
-const TETTO_GIORNO = 70;
+const TETTO_GIORNO = 50;   // 9 nov 2026: era 70, superato il tetto di Resend
 
 function aspetta(ms) { return new Promise(r => setTimeout(r, ms)); }
 

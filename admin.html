@@ -1724,10 +1724,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <button class="st-btn st-vero" onclick="inviaAnnuncio()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg> Invia a tutti</button>
         </div>
 
-        <!-- 8 nov 2026: PROGRAMMA, 70 al giorno (netlify/functions/invia-coda-email.js) -->
+        <!-- 8 nov 2026: PROGRAMMA, 50 al giorno (netlify/functions/invia-coda-email.js) -->
         <div style="background:#f2fbf5;border:2px solid #b5e2c5;border-radius:14px;padding:18px 20px;margin-top:24px">
-          <div style="font-size:18px;font-weight:800;color:#0a1a2e">Programma: 70 al giorno</div>
-          <div class="st-nota" style="margin-top:4px">Partono ogni mattina, 70 per volta. Le altre email del giorno restano libere per le conferme d'iscrizione.</div>
+          <div style="font-size:18px;font-weight:800;color:#0a1a2e">Programma: 50 al giorno</div>
+          <div class="st-nota" style="margin-top:4px">Partono ogni mattina, 50 per volta (il lunedì 40). Le altre email del giorno restano libere per le conferme d'iscrizione.</div>
           <label class="st-lab" style="font-size:16px">Da che giorno parte</label>
           <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
             <input type="date" id="st-parte" class="st-campo" style="width:auto;min-width:220px">
@@ -2928,8 +2928,8 @@ async function programmaAnnuncio() {
   if (!parte) { esito.className = 'ko'; esito.textContent = 'Scegli da che giorno parte.'; return; }
   const c = await annuncioFetch({ gruppo, solo_conteggio: true, oggetto, testo });
   if (!c.success) { esito.className = 'ko'; esito.textContent = c.error || 'Errore'; return; }
-  const giorni = Math.ceil(c.quanti / 70);
-  if (!confirm('Programmo questa email per ' + c.quanti + ' persone.\n\nParte ' + _dataBella(parte) + ', 70 al giorno: ci vogliono ' + giorni + (giorni === 1 ? ' giorno' : ' giorni') + '.\n\nHai già fatto la prova su di te?')) return;
+  const giorni = Math.ceil(c.quanti / 50);
+  if (!confirm('Programmo questa email per ' + c.quanti + ' persone.\n\nParte ' + _dataBella(parte) + ', 50 al giorno: ci vogliono ' + giorni + (giorni === 1 ? ' giorno' : ' giorni') + '.\n\nHai già fatto la prova su di te?')) return;
   const bottoni = document.querySelectorAll('.st-btn');
   bottoni.forEach(b => b.disabled = true);
   esito.textContent = 'La metto in coda…';
