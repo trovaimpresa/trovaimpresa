@@ -96,6 +96,7 @@ exports.handler = async function (event) {
     return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, email }) };
   } catch (e) {
     console.error('[bacheca-pubblica]', e);
+    if (e && e.code === 'TI001') return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Nel testo non mettere link: descrivi il lavoro a parole.' }) };
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: "Errore durante l'invio. Riprova." }) };
   }
 };

@@ -548,6 +548,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
     if(!comune){incMsg('Indica il comune dell\'immobile.','error');return;}
     if(!nome){incMsg('Inserisci il tuo nome.','error');return;}
     if(!telefono){incMsg('Inserisci un recapito telefonico.','error');return;}
+    if(/(https?:\/\/|www\.|wa\.me\/|\b[A-Za-z0-9-]{2,}\.(com|it|net|org|eu|ly|xyz|info|link|app|site|online|shop|click|biz|store)\b)/i.test(String(note+' '+nome).replace(/\S+@\S+/g,' ').replace(/(https?:\/\/)?(www\.)?trovaimpresa\.(com|it)\S*/gi,' '))){incMsg('Per sicurezza su TrovaImpresa non si possono mandare link. Togli il link e scrivi a parole: i documenti puoi allegarli qui.','error');return;}
     const btn=document.getElementById('inc-invia');btn.disabled=true;btn.textContent='⏳ Invio...';
     try{
       const documenti=[];

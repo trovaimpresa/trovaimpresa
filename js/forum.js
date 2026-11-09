@@ -416,7 +416,7 @@
         .select('id').then(function (res) {
           el.disabled = false;
           if (res.error) {
-            return messaggio(msg, res.error.code === '23505' ? 'Hai già risposto a questa richiesta.' : 'Non sono riuscito a pubblicare la risposta. Riprova.', 'err');
+            return messaggio(msg, res.error.code === '23505' ? 'Hai già risposto a questa richiesta.' : res.error.code === 'TI001' ? 'Per sicurezza su TrovaImpresa non si possono mettere link. Scrivi a parole.' : 'Non sono riuscito a pubblicare la risposta. Riprova.', 'err');
           }
           var nuovo = res.data && res.data[0] ? res.data[0] : res.data;
           if (nuovo && nuovo.id) fetch('/.netlify/functions/bacheca-avviso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ risposta_id: nuovo.id }) }).catch(function () { });
@@ -438,6 +438,7 @@
           var d = res && res.data;
           if (!d || d.ok !== true) {
             var e = d && d.err, t = 'Non sono riuscito a pubblicare. Riprova.';
+            if (res && res.error && res.error.code === 'TI001') e = 'link';
             if (e === 'link') t = 'Niente link, email o numeri di telefono. Per farti trovare, iscriviti gratis come impresa.';
             else if (e === 'limite') t = 'Hai scritto molte risposte: riprova fra un po\'.';
             else if (e === 'chiusa') t = 'Questa richiesta non accetta più risposte.';

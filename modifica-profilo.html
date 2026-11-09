@@ -2166,7 +2166,7 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
 
       } catch (err) {
         console.error('Errore salvataggio:', err);
-        showError('❌ Errore durante il salvataggio: ' + err.message);
+        showError(/mandare link/.test(err.message || '') ? '❌ Nella descrizione non si possono scrivere link. Il tuo sito mettilo nel campo «Sito web».' : '❌ Errore durante il salvataggio: ' + err.message);
         window.scrollTo(0, 0);
       } finally {
         btn.disabled = false;

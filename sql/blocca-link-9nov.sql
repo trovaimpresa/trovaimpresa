@@ -1,0 +1,4 @@
+-- 9 nov 2026: gia' applicato su Supabase (migration blocca_link_nei_messaggi).
+-- Funzioni public.testo_ha_link(text) e public.blocca_link() + trigger «blocca_link»
+-- su preventivi, incarichi_richieste, richieste_clienti, chat_messaggi, messaggi,
+-- bacheca_richieste, bacheca_risposte, imprese(descrizione). Errore: codice TI001.
