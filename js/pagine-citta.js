@@ -42,7 +42,7 @@
   try {
     if (/^\/imprese-/.test(location.pathname)) {
       var m = document.createElement('script');
-      m.src = '/js/marchi-citta.js?v=4';
+      m.src = '/js/marchi-citta.js?v=5';
       m.defer = true;
       document.head.appendChild(m);
     }

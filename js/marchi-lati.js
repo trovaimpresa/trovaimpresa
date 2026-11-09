@@ -13,8 +13,8 @@
      quello che gli e' stato assegnato. Se il vuoto non basta, scende.
    - Un lato dove ci sono i loghi delle imprese che restano fermi mentre si
      scorre (js/loghi-ospiti.js, .ti-osp) non si usa: si coprirebbero.
-   - Un marchio che non trova posto resta nella fascia: niente si perde.
-     La fascia sparisce solo quando tutti e quattro sono ai lati.
+   - TUTTI O NESSUNO (9 nov 2026): se ai lati non ci stanno tutti, restano
+     tutti nella fascia. La fascia sparisce solo quando sono tutti ai lati.
    - Un marchio che la pagina mostra gia' altrove (es. Lampade.it accanto alle
      guide, js/vetrina-guide.js) non si ripete.
    Per aggiungere un marchio: una riga in MARCHI (id Awin = awinmid), logo
@@ -267,7 +267,16 @@
         if (q === carte.length) break;
       }
     }
-    piazza(meglio, tel, ost);
+    var messi = piazza(meglio, tel, ost);
+
+    // 9 nov 2026 (Alex): TUTTI O NESSUNO. Se ai lati non ci stanno tutti i
+    // marchi da mettere, non se ne mette nessuno: restano tutti insieme nella
+    // fascia, larghi su tutta la riga. Prima ne finiva uno solo ai lati (spesso
+    // in fondo alla pagina) e nella fascia restava un buco (Forum, Lavoro Edilizia).
+    var daMettere = carte.filter(function (c) { return !c.saltato; }).length;
+    if (!tel && messi < daMettere) {
+      carte.forEach(function (c) { c.messo = false; c.el.style.display = 'none'; });
+    }
 
     // la fascia cambia altezza: gli altri file rimisurano, poi rimisuriamo noi
     if (aggiornaFascia() && ++scosse <= 4) {

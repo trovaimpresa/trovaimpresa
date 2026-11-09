@@ -29,7 +29,7 @@
     '#ti-marchi-citta h2::before,#ti-marchi-citta h2::after{display:none !important;content:none !important}' +
     '#ti-marchi-citta h2{margin:0 0 8px;line-height:1.2;color:#fff !important;text-align:center;font-size:32px;font-weight:900}' +
     '#ti-marchi-citta > p{margin:0;color:#ffb35c !important;text-align:center;font-size:18px;font-weight:600}' +
-    '#ti-marchi-citta .tmc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;margin-top:24px}' +
+    '#ti-marchi-citta .tmc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-top:24px}' +
     '#ti-marchi-citta .tmc-card{display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;' +
       'color:#0a2a4d;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.45);transition:transform .2s,box-shadow .2s}' +
     '#ti-marchi-citta .tmc-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(255,136,0,.35)}' +
@@ -82,7 +82,7 @@
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
         var ml = document.createElement('script');
-        ml.src = '/js/marchi-lati.js?v=2';
+        ml.src = '/js/marchi-lati.js?v=3';
         ml.defer = true;
         document.head.appendChild(ml);
       }
