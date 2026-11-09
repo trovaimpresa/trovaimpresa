@@ -1,6 +1,6 @@
 {
   "_cosa_e": "Fotografia delle imprese per citta (e per regione), usata da genera-mestiere-citta.js quando la shell non arriva su internet. Presa da imprese_pubbliche con l MCP Supabase.",
-  "fotografia_del": "2026-11-04",
+  "fotografia_del": "2026-11-09",
   "citta": {
     "Roma": [
       {
@@ -84,14 +84,16 @@
         "id": 95,
         "nome": "Lares Srls",
         "mestiere": "Ristrutturazione",
-        "mestieri": null,
+        "mestieri": [
+          "Ristrutturazione"
+        ],
         "tipo": "impresa",
-        "citta": "Roma",
+        "citta": "San Gregorio da Sassola",
         "regione": "Lazio",
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": null
+        "descrizione": "Lares Srl è una rete impresa di fatto che unisce gli studi tecnico-professionali, imprese edili, impiantistiche, e singoli artigiani.\n\nIl nostro studio tecnico in grado di realizzare i progetti architettonici, effettuare i calcoli strutturali e seguire qualsiasi tipo di pratica urbanistica. Nell'ambi"
       },
       {
         "id": 132,
@@ -225,12 +227,11 @@
       {
         "id": 297,
         "nome": "Arif",
-        "mestiere": "Ristrutturazione completa",
+        "mestiere": "Ristrutturazione",
         "mestieri": [
-          "Ristrutturazione completa",
-          "Pavimenti e piastrelle"
+          "Ristrutturazione"
         ],
-        "tipo": "artigiano",
+        "tipo": "impresa",
         "citta": "Roma",
         "regione": "Lazio",
         "valutazione_media": 0,
@@ -242,32 +243,34 @@
         "id": 317,
         "nome": "BRGROUP",
         "mestiere": "ingegnere_strutturale",
-        "mestieri": null,
+        "mestieri": [
+          "ingegnere_strutturale"
+        ],
         "tipo": "professionista",
         "citta": "Roma",
         "regione": "Lazio",
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": null
+        "descrizione": "Studio di Ristrutturazioni e Servizi Tecnici\nSiamo una realtà specializzata nel settore delle ristrutturazioni e delle lavorazioni edili e metalmeccaniche, composta da una squadra di operai qualificati e professionisti con competenze specifiche nei diversi settori di intervento.\n\nDisponiamo di un'esp"
       }
     ],
     "Milano": [
       {
         "id": 49,
-        "nome": "NK elettrici",
+        "nome": "",
         "mestiere": "Impianti elettrici",
         "mestieri": [
           "Impianti elettrici",
           "Antennista / Allarmi"
         ],
         "tipo": "artigiano",
-        "citta": "Cologno Monzese",
+        "citta": "Milano",
         "regione": "Lombardia",
         "valutazione_media": 0,
         "piano": "free",
         "verificata": false,
-        "descrizione": "buongiorno \nsono elettricista impianti elettrici e citofoni \nistallazione di ventilatore \nmanutenzione \nSalve a tutti sono un elettricista e mi occupo con passione e massima serietà di interventi"
+        "descrizione": "i nostri competenze, elettricista e antennista/impianti elettrici civile e industriale elettricista , antennista da Milano e tutte la provincia è mi occupo con passione e massima serietà di interventi elettrici per case, appartamenti e piccoli condomini. Milano e provincia 🔧 Cosa posso fare per voi:✅"
       },
       {
         "id": 111,
@@ -513,7 +516,7 @@
         "citta": "Torino",
         "regione": "Piemonte",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       },
@@ -528,7 +531,7 @@
         "citta": "Torino",
         "regione": "Piemonte",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -545,7 +548,7 @@
         "citta": "Torino",
         "regione": "Piemonte",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       },
@@ -651,6 +654,32 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Stiamo selezionando tecnici installatori di impianti fotovoltaici qualificati DM 37/08 da inserire nel circuito CasaSenzaGas con la possibilità di diventare partner ufficiale."
+      },
+      {
+        "id": 321,
+        "nome": "sm costruzioni",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Torino",
+        "regione": "Piemonte",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
+      },
+      {
+        "id": 322,
+        "nome": "saih costruzioni srls",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Pinerolo",
+        "regione": "Piemonte",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Napoli": [
@@ -758,7 +787,7 @@
         "citta": "Palermo",
         "regione": "Sicilia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       },
@@ -884,7 +913,7 @@
         "citta": "Bologna",
         "regione": "Emilia-Romagna",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Ristrutturazione, cartongesso, rifiniture."
       },
@@ -945,6 +974,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Costruzioni edili ristrutturazioni interni ed esterni opere murarie anche in pietra a faccia vista intonaci posa pavimento rifacimento bagni"
+      },
+      {
+        "id": 328,
+        "nome": "S.h Montaggi",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Bologna",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "Imbianchino con esperienza, disponibili per lavori su Bologna e provincia.\nCi occupiamo di:\nImbiancatura Pareti su Bologna e provincia\nMontaggio Cartongesso Bologna\nRasature pareti Bologna\nLavori di facciate: applicazione di isolamento a pannelli, guaina, tegole\nFalegnameria: montaggio di porte inter"
       }
     ],
     "Firenze": [
@@ -1024,6 +1068,19 @@
         "piano": "premium",
         "verificata": false,
         "descrizione": "La Home Star offre ristrutturazione case con chiavi in mano.Da8 piccoli ai grandi lavori."
+      },
+      {
+        "id": 323,
+        "nome": "P.R. COSTRUZIONI SRL",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Noci",
+        "regione": "Puglia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Catania": [
@@ -1064,7 +1121,7 @@
         "citta": "Verona",
         "regione": "Veneto",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": null
       }
@@ -1245,6 +1302,21 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Impresa edile a Brescia e provincia. Specializzati in cartongesso, controsoffitti, stuccatura e tinteggiatura. Lavori per privati, preventivi gratuiti e prezzi competitivi. Contattaci!"
+      },
+      {
+        "id": 326,
+        "nome": "Atlas Ristrutturazione è tinteggiatura",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Villanuova sul Clisi",
+        "regione": "Lombardia",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Parma": [],
@@ -1307,7 +1379,7 @@
         "citta": "Bergamo",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Impresa HENRICH G, specializzata in lavori di pavimentazione, rivestimenti, tinteggiatura"
       },
@@ -1578,6 +1650,19 @@
         "piano": "premium",
         "verificata": false,
         "descrizione": "impresa edile multi servizi"
+      },
+      {
+        "id": 319,
+        "nome": "Muzio",
+        "mestiere": "Cottimisti",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "L'Aquila",
+        "regione": "Abruzzo",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "La Spezia": [
@@ -1709,7 +1794,7 @@
         "citta": "Mantova",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Ci occupiamo principalmente di cancelli , inferiate , Recinzioni"
       }
@@ -1860,7 +1945,7 @@
         "citta": "Pavia",
         "regione": "Lombardia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "Siamo professionali e affidabili,curiamo nostri lavori con massima attenzione in tempi brevi e puntuali."
       },
@@ -2024,6 +2109,22 @@
         "piano": "free",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 318,
+        "nome": "EdilMultiservicePro",
+        "mestiere": "Cartongesso",
+        "mestieri": [
+          "Ristrutturazione completa",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "Fusignano",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": "EdilMultiservicePro è il partner di riferimento per le ristrutturazioni chiavi in mano nelle province di Ravenna e Bologna. \nI nostri servizi principali includono:\n Ristrutturazioni complete chiavi in mano\n Opere in cartongesso e riorganizzazione degli spazi\n Posa di pavimenti e rivestimenti\n Tintegg"
       }
     ],
     "Reggio Calabria": [
@@ -2075,6 +2176,19 @@
         "piano": "premium",
         "verificata": false,
         "descrizione": null
+      },
+      {
+        "id": 320,
+        "nome": "Impresa edile Sinani",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Rimini",
+        "regione": "Emilia-Romagna",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Rovigo": [],
@@ -2092,7 +2206,7 @@
         "citta": "Salerno",
         "regione": "Campania",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": "A.G.S. è presente sul territorio da molti anni, opera nel campo dell'idraulica, termoidraulica, spazzacamino, fabbri, elettricisti e edilizia in generale, con servizio di pronto intervento 24h/24h tutto l'anno compreso festivi con massimo 1h di attesa.\nL'esperienza lavorativa acquisita nel lungo perc"
       },
@@ -2295,7 +2409,7 @@
         "citta": "Trapani",
         "regione": "Sicilia",
         "valutazione_media": 0,
-        "piano": "premium",
+        "piano": "free",
         "verificata": false,
         "descrizione": ""
       }
@@ -2345,6 +2459,19 @@
         "piano": "free",
         "verificata": false,
         "descrizione": "Nuovi costruzioni, Ristrutturazione"
+      },
+      {
+        "id": 327,
+        "nome": "3FRATELLI BERISHA",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Treviso",
+        "regione": "Veneto",
+        "valutazione_media": 0,
+        "piano": "free",
+        "verificata": false,
+        "descrizione": null
       }
     ],
     "Udine": [],
@@ -2588,9 +2715,11 @@
         "id": 95,
         "nome": "Lares Srls",
         "mestiere": "Ristrutturazione",
-        "mestieri": null,
+        "mestieri": [
+          "Ristrutturazione"
+        ],
         "tipo": "impresa",
-        "citta": "Roma",
+        "citta": "San Gregorio da Sassola",
         "regione": "Lazio",
         "piano": "free"
       },
@@ -2734,12 +2863,11 @@
       {
         "id": 297,
         "nome": "Arif",
-        "mestiere": "Ristrutturazione completa",
+        "mestiere": "Ristrutturazione",
         "mestieri": [
-          "Ristrutturazione completa",
-          "Pavimenti e piastrelle"
+          "Ristrutturazione"
         ],
-        "tipo": "artigiano",
+        "tipo": "impresa",
         "citta": "Roma",
         "regione": "Lazio",
         "piano": "free"
@@ -2748,7 +2876,9 @@
         "id": 317,
         "nome": "BRGROUP",
         "mestiere": "ingegnere_strutturale",
-        "mestieri": null,
+        "mestieri": [
+          "ingegnere_strutturale"
+        ],
         "tipo": "professionista",
         "citta": "Roma",
         "regione": "Lazio",
@@ -2758,14 +2888,14 @@
     "Lombardia": [
       {
         "id": 49,
-        "nome": "NK elettrici",
+        "nome": "",
         "mestiere": "Impianti elettrici",
         "mestieri": [
           "Impianti elettrici",
           "Antennista / Allarmi"
         ],
         "tipo": "artigiano",
-        "citta": "Cologno Monzese",
+        "citta": "Milano",
         "regione": "Lombardia",
         "piano": "free"
       },
@@ -2813,7 +2943,7 @@
         "tipo": "impresa",
         "citta": "Pavia",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 102,
@@ -2827,7 +2957,7 @@
         "tipo": "artigiano",
         "citta": "Mantova",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 103,
@@ -2841,7 +2971,7 @@
         "tipo": "artigiano",
         "citta": "Bergamo",
         "regione": "Lombardia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 111,
@@ -3255,6 +3385,18 @@
         "citta": "Magenta",
         "regione": "Lombardia",
         "piano": "free"
+      },
+      {
+        "id": 326,
+        "nome": "Atlas Ristrutturazione è tinteggiatura",
+        "mestiere": "Ristrutturazione completa",
+        "mestieri": [
+          "Ristrutturazione completa"
+        ],
+        "tipo": "artigiano",
+        "citta": "Villanuova sul Clisi",
+        "regione": "Lombardia",
+        "piano": "free"
       }
     ],
     "Liguria": [
@@ -3361,7 +3503,7 @@
         "tipo": "artigiano",
         "citta": "Torino",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 105,
@@ -3373,7 +3515,7 @@
         "tipo": "impresa",
         "citta": "Torino",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 107,
@@ -3387,7 +3529,7 @@
         "tipo": "artigiano",
         "citta": "Torino",
         "regione": "Piemonte",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 109,
@@ -3541,6 +3683,26 @@
         ],
         "tipo": "impresa",
         "citta": "Moncalieri",
+        "regione": "Piemonte",
+        "piano": "free"
+      },
+      {
+        "id": 321,
+        "nome": "sm costruzioni",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Torino",
+        "regione": "Piemonte",
+        "piano": "free"
+      },
+      {
+        "id": 322,
+        "nome": "saih costruzioni srls",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Pinerolo",
         "regione": "Piemonte",
         "piano": "free"
       }
@@ -3698,6 +3860,16 @@
         "citta": "Apricena",
         "regione": "Puglia",
         "piano": "free"
+      },
+      {
+        "id": 323,
+        "nome": "P.R. COSTRUZIONI SRL",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Noci",
+        "regione": "Puglia",
+        "piano": "free"
       }
     ],
     "Marche": [
@@ -3848,7 +4020,7 @@
         "tipo": "impresa",
         "citta": "Trapani",
         "regione": "Sicilia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 101,
@@ -3862,7 +4034,7 @@
         "tipo": "artigiano",
         "citta": "Palermo",
         "regione": "Sicilia",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 126,
@@ -3983,7 +4155,7 @@
         "tipo": "artigiano",
         "citta": "Salerno",
         "regione": "Campania",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 114,
@@ -4090,7 +4262,7 @@
         "tipo": "impresa",
         "citta": "Verona",
         "regione": "Veneto",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 110,
@@ -4179,6 +4351,16 @@
         "citta": "Treviso",
         "regione": "Veneto",
         "piano": "free"
+      },
+      {
+        "id": 327,
+        "nome": "3FRATELLI BERISHA",
+        "mestiere": "Altro",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Treviso",
+        "regione": "Veneto",
+        "piano": "free"
       }
     ],
     "Friuli-Venezia Giulia": [
@@ -4238,7 +4420,7 @@
         "tipo": "artigiano",
         "citta": "Bologna",
         "regione": "Emilia-Romagna",
-        "piano": "premium"
+        "piano": "free"
       },
       {
         "id": 116,
@@ -4370,6 +4552,41 @@
         "citta": "Bibbiano",
         "regione": "Emilia-Romagna",
         "piano": "free"
+      },
+      {
+        "id": 318,
+        "nome": "EdilMultiservicePro",
+        "mestiere": "Cartongesso",
+        "mestieri": [
+          "Ristrutturazione completa",
+          "Cartongesso"
+        ],
+        "tipo": "artigiano",
+        "citta": "Fusignano",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
+      },
+      {
+        "id": 320,
+        "nome": "Impresa edile Sinani",
+        "mestiere": "Ristrutturazione",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "Rimini",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
+      },
+      {
+        "id": 328,
+        "nome": "S.h Montaggi",
+        "mestiere": "Ristrutturazione",
+        "mestieri": [
+          "Ristrutturazione"
+        ],
+        "tipo": "impresa",
+        "citta": "Bologna",
+        "regione": "Emilia-Romagna",
+        "piano": "free"
       }
     ],
     "Abruzzo": [
@@ -4397,6 +4614,16 @@
         "citta": "L'Aquila",
         "regione": "Abruzzo",
         "piano": "premium"
+      },
+      {
+        "id": 319,
+        "nome": "Muzio",
+        "mestiere": "Cottimisti",
+        "mestieri": null,
+        "tipo": "impresa",
+        "citta": "L'Aquila",
+        "regione": "Abruzzo",
+        "piano": "free"
       }
     ],
     "Basilicata": [
