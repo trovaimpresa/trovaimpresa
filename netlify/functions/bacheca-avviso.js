@@ -38,7 +38,7 @@ exports.handler = async function (event) {
       cornice('Hai una nuova risposta',
         '<p><b>' + esc(r.impresa_nome || 'Un\'impresa') + '</b> ha risposto alla tua richiesta «' + esc(q.titolo) + '»:</p>' +
         '<p style="background:#f4f8ff;border-left:4px solid #0066ff;padding:10px 14px;border-radius:6px">' + esc(anteprima) + '</p>' +
-        bottone(url, 'Leggi e rispondi')));
+        bottone(url, 'Leggi e rispondi') + require('./lib/avviso-sicurezza')('cliente')));
     return ok({ ok: true });
   } catch (e) {
     console.error('[bacheca-avviso]', e);

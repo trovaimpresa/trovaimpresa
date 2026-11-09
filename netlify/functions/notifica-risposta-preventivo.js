@@ -85,6 +85,7 @@ exports.handler = async function(event) {
               🌐 Vai a TrovaImpresa →
             </a>
           </div>
+          ${require('./lib/avviso-sicurezza')('cliente')}
           <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
             Ricevi questa email perché hai inviato una richiesta di preventivo su TrovaImpresa.
           </p>

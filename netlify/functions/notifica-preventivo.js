@@ -76,6 +76,15 @@ exports.handler = async function(event) {
       return { statusCode: 403, body: 'Nessuna richiesta appena arrivata per questa impresa' };
     }
   }
+  /* 9 nov 2026 — il testo dell'email arriva da qui, non dal database: senza
+     questo controllo uno poteva salvare una richiesta pulita e poi far
+     partire l'email con dentro un link trappola. */
+  {
+    const haLink = require('./lib/niente-link');
+    if ([nome, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget].some(haLink)) {
+      return { statusCode: 400, body: 'Niente link nei messaggi' };
+    }
+  }
   const escH = v => String(v == null ? '' : v)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -188,6 +197,7 @@ exports.handler = async function(event) {
               📂 Apri il pannello e rispondi →
             </a>
           </div>
+          ${require('./lib/avviso-sicurezza')('impresa')}
           <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
             Ricevi questa email perché sei registrato come impresa su TrovaImpresa.
           </p>

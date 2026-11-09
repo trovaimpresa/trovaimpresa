@@ -146,6 +146,7 @@ exports.handler = async (event) => {
     const nome = String(corpo.nome || '').replace(/\s+/g, ' ').trim().slice(0, 120);
     const firma = String(corpo.firma || '');
     if (nome.length < 3) return rispondi(400, { error: 'Scrivi il tuo nome e cognome.' });
+    if (require('./lib/niente-link')(nome)) return rispondi(400, { error: 'Scrivi solo nome e cognome, senza link.' });
     if (!corpo.accetto) return rispondi(400, { error: 'Spunta la casella per dire che accetti.' });
     if (!FIRMA_OK.test(firma) || firma.length < 200) return rispondi(400, { error: 'Manca la firma: firma col dito nel riquadro.' });
     if (firma.length > FIRMA_MAX) return rispondi(400, { error: 'La firma è troppo grande. Cancellala e rifalla.' });

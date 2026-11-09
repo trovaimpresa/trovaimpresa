@@ -2744,7 +2744,10 @@ async function apriConversazioneAdmin(uid, q) {
     // «Supporto gestionale» leggeresti frasi scritte dal sito senza saperlo
     const da = (!admin && _origine(m) !== q)
       ? '<div style="font-size:13.5px;color:#b26a00;font-weight:700;margin-top:5px">' + esc(SUPP[_origine(m)].etichetta) + '</div>' : '';
-    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + _allegatoAdmin(m) + da + '</div>';
+    /* 9 nov 2026 — un link in un messaggio arrivato: avviso giallo, non si apre a cuor leggero */
+    const linkAvviso = (!admin && _haLinkAdmin(m.messaggio))
+      ? '<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#fff4d6;border:1px solid #f0c36d;color:#7a4b00;font-size:14px;font-weight:700;white-space:normal">⚠️ Contiene un link: non aprirlo se non sei sicuro di chi te lo manda</div>' : '';
+    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + linkAvviso + _allegatoAdmin(m) + da + '</div>';
     // ⚠️ 15 agosto 2026 — QUI LE PAROLE SI SPEZZAVANO A META' («alessi / o»).
     // La bolla diceva "largo al massimo il 75%", ma il 75% del contenitore —
     // che a sua volta era largo quanto il suo contenuto, cioe' quanto la
@@ -3585,6 +3588,13 @@ async function caricaClientiCercano(){
     if(err) err.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600;margin-bottom:16px">Non sono riuscito a leggere i dati: ' + String(e.message || e).replace(/</g,'&lt;') + '</div>';
   }
 }
+function _haLinkAdmin(t){ /* 9 nov 2026: stessa regola del database (testo_ha_link) */
+  var x=String(t||'').replace(/\S+@\S+/g,' ').replace(/(https?:\/\/)?(www\.)?trovaimpresa\.(com|it)\S*/gi,' ');
+  if(/(https?:\/\/|www\.|wa\.me\/|t\.me\/)/i.test(x)) return true;
+  if(/\b[A-Za-z0-9-]{2,}\.(com|it|net|org|eu|ly|xyz|top|info|link|app|site|online|shop|click|ru|cn|biz|store|live|gl|tk|ml|ga|cf|gq|ws|cc)\b/.test(x)) return true;
+  return /\b[A-Za-z0-9-]{2,}\.(io|me|co|to)\//.test(x);
+}
+
 function ccPeriodo(g, el){
   _ccGiorni = g;
   document.querySelectorAll('#cc-per .rqa-f').forEach(b => b.classList.remove('on'));

@@ -269,6 +269,7 @@ exports.handler = async function (event) {
                 Nome, telefono ed email del cliente compaiono solo se premi il pulsante.
                 Se il lavoro non ti interessa, non fare niente: i suoi dati restano dove sono.
               </p>
+              ${require('./lib/avviso-sicurezza')('impresa')}
               <p style="font-size:13px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
                 Ricevi questa email perché sei iscritto a TrovaImpresa nella zona indicata dal cliente.
                 Il link vale 60 giorni ed è solo tuo.

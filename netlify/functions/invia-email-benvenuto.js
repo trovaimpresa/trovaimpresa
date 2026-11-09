@@ -307,6 +307,7 @@ exports.handler = async function(event) {
             '</tr></table>' +
             bloccoSondaggio +
             '<p style="margin:0 0 16px;">Resto a disposizione per qualsiasi necessit&agrave; o chiarimento tramite questo indirizzo email.</p>' +
+            require('./lib/avviso-sicurezza')('impresa') +
             '<p style="margin:0;">Un cordiale saluto,<br><strong>Il Team di TrovaImpresa.it</strong></p>' +
           '</td></tr>' +
           '<tr><td style="background:#0a2a4d;padding:18px 32px;text-align:center;color:#a9c9f5;font-size:13px;line-height:1.5;">' +
@@ -390,6 +391,7 @@ exports.handler = async function(event) {
 <tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
   ${pillole}
 </td></tr>
+<tr><td style="padding:12px 20px 0">${require('./lib/avviso-sicurezza')('impresa')}</td></tr>
 <tr><td style="padding:6px 20px 16px;text-align:center;font-size:14px;color:#25384d">Il Team di <b>TrovaImpresa</b></td></tr>
 <tr><td style="background:#0a2a4d;padding:14px 24px;text-align:center;color:#a9c9f5;font-size:12px;line-height:1.5">&copy; 2026 TrovaImpresa &middot; Rieti (RI) &middot; <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> &middot; <a href="https://trovaimpresa.com/privacy-policy.html" style="color:#a9c9f5">Privacy</a></td></tr>
 </table></td></tr></table></body></html>`;
@@ -407,6 +409,7 @@ exports.handler = async function(event) {
 <tr><td class="pad" style="padding:14px 20px 4px;text-align:center">
   ${pillole}
 </td></tr>
+<tr><td style="padding:12px 20px 0">${require('./lib/avviso-sicurezza')('impresa')}</td></tr>
 <tr><td style="padding:6px 20px 16px;text-align:center;font-size:14px;color:#25384d">Il Team di <b>TrovaImpresa</b></td></tr>
 <tr><td style="background:#0a2a4d;padding:14px 24px;text-align:center;color:#a9c9f5;font-size:12px;line-height:1.5">&copy; 2026 TrovaImpresa Gestionale &middot; Rieti (RI) &middot; <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> &middot; <a href="https://trovaimpresa.com/privacy-policy.html" style="color:#a9c9f5">Privacy</a></td></tr>
 </table></td></tr></table></body></html>`;

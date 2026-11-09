@@ -132,7 +132,7 @@ exports.handler = async (event) => {
       html = pagina('Hai un messaggio nuovo',
         '<p>Ciao <b>' + esc(nomeImpresa) + '</b>,</p><p><b>' + esc(chi) + '</b> ti ha scritto dalla tua scheda su TrovaImpresa:</p>'
         + riquadro(ultimo.testo)
-        + '<p style="color:#5b6574;font-size:15px">Chi risponde presto di solito prende il lavoro. Rispondi dal tuo pannello, nella sezione Messaggi.</p>',
+        + '<p style="color:#5b6574;font-size:15px">Chi risponde presto di solito prende il lavoro. Rispondi dal tuo pannello, nella sezione Messaggi.</p>' + require('./lib/avviso-sicurezza')('impresa'),
         'Apri il pannello e rispondi', 'https://trovaimpresa.com/' + (PANNELLI[imp.tipo] || 'pannello-impresa.html') + '#messaggi');
     } else {
       const dalCliente = msgs.find(x => x.mittente === 'cliente' && x.cliente_email);
@@ -144,7 +144,7 @@ exports.handler = async (event) => {
         '<p>Ciao' + (dalCliente.cliente_nome ? ' <b>' + esc(dalCliente.cliente_nome) + '</b>' : '') + ',</p>'
         + '<p><b>' + esc(nomeImpresa) + '</b> ha risposto al tuo messaggio su TrovaImpresa:</p>'
         + riquadro(ultimo.testo)
-        + '<p style="color:#5b6574;font-size:15px">Tocca il pulsante per leggere tutta la conversazione e rispondere. Il link è solo tuo: non girarlo ad altri.</p>',
+        + '<p style="color:#5b6574;font-size:15px">Tocca il pulsante per leggere tutta la conversazione e rispondere. Il link è solo tuo: non girarlo ad altri.</p>' + require('./lib/avviso-sicurezza')('cliente'),
         'Leggi e rispondi', link);
     }
 
