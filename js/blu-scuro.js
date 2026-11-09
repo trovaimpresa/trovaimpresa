@@ -36,6 +36,18 @@
 
     var LATI = ['Top', 'Right', 'Bottom', 'Left'];
 
+    /* 9 nov 2026 — i colori messi qui restavano attaccati anche quando
+       l'elemento cambiava classe (bottone acceso -> spento): «30 giorni»
+       in admin restava blu scuro con la scritta scura, illeggibile.
+       Adesso ci si ricorda cosa si e' messo; se la classe cambia lo si
+       toglie e si ricalcola sul colore vero del CSS. */
+    var MESSI = new WeakMap();
+    function rifai(el) {
+      var messi = MESSI.get(el);
+      if (messi) { for (var k = 0; k < messi.length; k++) el.style.removeProperty(messi[k]); MESSI.delete(el); }
+      fix(el);
+    }
+
     function fix(el) {
       if (el.nodeType !== 1 || el.id === 'ti-bolla' && false) return;
       var tag = el.tagName;
@@ -46,23 +58,25 @@
          Il loro blu scuro lo da' il CSS (css/gestionale.css, .seg button.on). */
       if (el.closest && el.closest('.seg')) return;
       var cs = window.getComputedStyle(el), v, i, st = el.style;
-      v = FORTI[cs.color]; if (v) st.setProperty('color', v, 'important');
+      var messi = MESSI.get(el) || [];
+      function metti(prop, val) { st.setProperty(prop, val, 'important'); if (messi.indexOf(prop) < 0) messi.push(prop); MESSI.set(el, messi); }
+      v = FORTI[cs.color]; if (v) metti('color', v);
       v = FORTI[cs.backgroundColor] || CHIARI_SFONDO[cs.backgroundColor];
-      if (v) st.setProperty('background-color', v, 'important');
+      if (v) metti('background-color', v);
       var bi = cs.backgroundImage;
-      if (bi && bi !== 'none' && FORTI_RE.test(bi)) { FORTI_RE.lastIndex = 0; st.setProperty('background-image', bi.replace(FORTI_RE, BLU), 'important'); }
+      if (bi && bi !== 'none' && FORTI_RE.test(bi)) { FORTI_RE.lastIndex = 0; metti('background-image', bi.replace(FORTI_RE, BLU)); }
       FORTI_RE.lastIndex = 0;
       for (i = 0; i < 4; i++) {
         var L = LATI[i];
         if (parseFloat(cs['border' + L + 'Width']) > 0) {
           var c = cs['border' + L + 'Color'];
           v = FORTI[c] || CHIARI_BORDO[c];
-          if (v) st.setProperty('border-' + L.toLowerCase() + '-color', v, 'important');
+          if (v) metti('border-' + L.toLowerCase() + '-color', v);
         }
       }
       if (tag === 'svg' || el.ownerSVGElement) {
-        v = FORTI[cs.fill]; if (v) st.setProperty('fill', v, 'important');
-        v = FORTI[cs.stroke]; if (v) st.setProperty('stroke', v, 'important');
+        v = FORTI[cs.fill]; if (v) metti('fill', v);
+        v = FORTI[cs.stroke]; if (v) metti('stroke', v);
       }
     }
 
@@ -88,8 +102,12 @@
       tutto(document);
       try {
         new MutationObserver(function (muts) {
-          for (var i = 0; i < muts.length; i++) if (muts[i].addedNodes && muts[i].addedNodes.length) programma(muts[i].addedNodes);
-        }).observe(document.documentElement, { childList: true, subtree: true });
+          for (var i = 0; i < muts.length; i++) {
+            var m = muts[i];
+            if (m.type === 'attributes') { try { rifai(m.target); var f = m.target.querySelectorAll('*'); for (var j = 0; j < f.length; j++) rifai(f[j]); } catch (e) {} }
+            else if (m.addedNodes && m.addedNodes.length) programma(m.addedNodes);
+          }
+        }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
       } catch (e) {}
       setTimeout(function () { tutto(document); }, 1200);
     }
