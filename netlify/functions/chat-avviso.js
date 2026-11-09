@@ -66,7 +66,7 @@ function riquadro(testo) {
 
 async function mandaEmail(a, oggetto, html) {
   if (!process.env.RESEND_API_KEY || !a) return false;
-  const r = await fetch('https://api.resend.com/emails', {
+  const r = await require('./lib/resend-riserva')('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: 'TrovaImpresa <info@trovaimpresa.com>', to: [a], subject: oggetto, html })

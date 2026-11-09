@@ -30,7 +30,7 @@ function normalizzaComune(s) {
 function inviaEmail(to, subject, html, replyTo) {
   const payload = { from: 'TrovaImpresa <info@trovaimpresa.com>', to: [to], subject, html };
   if (replyTo) payload.reply_to = [replyTo];
-  return fetch('https://api.resend.com/emails', {
+  return require('./lib/resend-riserva')('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,

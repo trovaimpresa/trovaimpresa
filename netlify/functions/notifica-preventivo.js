@@ -229,7 +229,7 @@ exports.handler = async function(event) {
     }
     console.log('[DEBUG] Resend pre-fetch — from:', fromAddr, '| to:', toAddr);
 
-    const res = await fetch('https://api.resend.com/emails', {
+    const res = await require('./lib/resend-riserva')('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,

@@ -60,7 +60,14 @@ const handler = async () => {
   const { data: giaOggi, error: eg } = await sb.from('admin_email_inviate')
     .select('quanti').gte('created_at', inizioGiornoRoma());
   if (eg) { console.error('invia-coda-email: storico', eg.message); return { statusCode: 500, body: 'db' }; }
-  const usate = (giaOggi || []).reduce((t, r) => t + (Number(r.quanti) || 0), 0);
+  let usate = (giaOggi || []).reduce((t, r) => t + (Number(r.quanti) || 0), 0);
+  /* 9 nov 2026: contano anche le email rimaste indietro ieri e rimandate
+     stamattina da invia-riserva.js (tabella email_riserva) */
+  {
+    const { count: riserva } = await sb.from('email_riserva').select('id', { count: 'exact', head: true })
+      .gte('inviata_il', inizioGiornoRoma());
+    usate += riserva || 0;
+  }
   const lunedi = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Rome', weekday: 'short' }) === 'Mon';
   const tetto = TETTO_GIORNO - (lunedi ? MENO_IL_LUNEDI : 0);
   const posto = tetto - usate - 1;   // -1: la copia di controllo per Alessio
