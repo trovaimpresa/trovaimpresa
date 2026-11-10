@@ -58,6 +58,16 @@ import { createClient } from '@supabase/supabase-js';
 const TEMPO_ACCESSO  = 8000;    // ms — tetto sui controlli d'accesso
 const TEMPO_CLAUDE   = 30000;   // ms — tetto su una risposta di Claude
 const GIRI_MAX       = 6;       // quante volte Claude puo' chiedere dati
+/* ⛔ 10 nov 2026 — I PREZZI DI UN COMPUTO VALGONO 5 MESSAGGI (deciso da Alex).
+   Misurato dal vivo: un pezzo da 30 righe costa 0,13–0,16 $ di AI, una
+   domanda normale molto meno. Il conto dei messaggi compresi lo fa
+   `chat_stato` CONTANDO le righe «utente» del mese in gest_chat_messaggi
+   (anche quelle svuotate: svuotare non azzera il contatore). Quindi qui si
+   scrivono 4 righe «utente» in piu', gia' svuotate e in una conversazione
+   a parte: contano, e non si vedono ne' nella chat ne' nell'archivio.
+   Chi sta usando i messaggi COMPRATI ne scala altri 4 con la stessa
+   funzione di sempre. */
+const PESO_PREZZI = 5;
 const RIGHE_ZERO_MAX = 30;      // righe a zero di un computo, per pezzo (10 nov 2026)
 const RIGHE_MAX      = 25;      // righe per attrezzata: piu' di cosi' non serve
 const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
@@ -1138,7 +1148,7 @@ function istruzioniFisse() {
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
     'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo`. ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
-    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (30 righe). Dopo, DUE righe: quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
+    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (30 righe). Dopo, DUE righe e poi, su una riga a parte, la frase «Questo pezzo vale 5 messaggi.»: quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
     'COME SCRIVI: testo semplice. Niente righe di trattini (---), niente titoli col cancelletto (#), niente tabelle. Il grassetto solo per i numeri e i nomi che contano.',
     'SE CHIEDE QUALE documento ha dentro qualcosa («quale computo ha le lavorazioni», «in quale preventivo ho messo il ponteggio») NON elencarli tutti chiedendo quale: guarda dentro con `dentro_al_documento` (anche più documenti nello stesso giro) e rispondi tu.',
@@ -1885,6 +1895,8 @@ export default async function (req) {
       // ⚠️ Sonnet 4.5: 3 $ per milione in ingresso, 15 in uscita; la memoria
       //    3,75 $ quando si scrive e 0,30 $ quando si legge.
       const costo = (tin * 3 / 1e6) + (cw * 3.75 / 1e6) + (cr * 0.30 / 1e6) + (tout * 15 / 1e6);
+      /* vale 5 solo se la schermata dei prezzi si e' aperta davvero */
+      const peso = (risposta && modulo && modulo.tipo === 'computo' && modulo.campi && Array.isArray(modulo.campi.prezzi)) ? PESO_PREZZI : 1;
       try {
         /* ⛔ 30 agosto 2026 (sera): i due orari devono essere DIVERSI, se no
            l'ordine fra domanda e risposta non e' garantito (vedi il punto 6).
@@ -1892,6 +1904,20 @@ export default async function (req) {
            e' finita: sono anche piu' veri cosi'. La riga del massimo tiene
            l'ordine anche nel caso impossibile di una risposta istantanea. */
         const oraRisposta = new Date(Math.max(Date.now(), Date.parse(oraDomanda) + 1)).toISOString();
+        if (peso > 1) {
+          const aParte = globalThis.crypto.randomUUID();
+          const inPiu = [];
+          for (let i = 1; i < peso; i++) inPiu.push({
+            created_at: new Date(Date.parse(oraDomanda) + i + 1).toISOString(),
+            user_id: uid, mestiere_id: mestiere_id, conversazione_id: aParte, ruolo: 'utente',
+            testo: '[conto: i prezzi di un computo valgono ' + peso + ' messaggi]',
+            sezione: sezione || null, come_pagato: comePagato, eliminato_il: oraRisposta });
+          const rp = await server.from('gest_chat_messaggi').insert(inPiu);
+          if (rp && rp.error) console.error('[chat] peso dei prezzi non scritto:', rp.error.message);
+          if (comePagato === 'comprato') {
+            for (let i = 1; i < peso; i++) { const c2 = await chiamaRpc(dati, 'consume_chat_message', {}); if (c2.errore || !c2.dati || c2.dati.ok !== true) break; }
+          }
+        }
         await server.from('gest_chat_messaggi').insert([
           { created_at: oraDomanda,
             user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
@@ -1916,7 +1942,7 @@ export default async function (req) {
            comprende sia i compresi sia i messaggi comprati, e questo
            messaggio ha consumato uno dei due. Prima si toglieva solo per i
            compresi perche' i crediti erano un contatore a parte. */
-        restanti: Math.max((stato.restanti || 0) - 1, 0)
+        restanti: Math.max((stato.restanti || 0) - peso, 0)
       });
       chiuso = true;
       try { controller.close(); } catch (e) {}
