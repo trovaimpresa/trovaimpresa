@@ -49,13 +49,26 @@
     fisco.addEventListener("click", function () { location.href = "/gestionale-app#fisco"; });
     prima.after(fisco);
 
+    /* 10 nov 2026: Giornate e Acquisti stanno nel gestionale principale (stesso
+       account): qui due porte, come «Tasse e fisco». Niente copie da tenere uguali. */
+    var porte = [["Giornate", "giornate"], ["Acquisti", "acquisti"]];
+    var ultimo = fisco;
+    porte.forEach(function (p) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "nol-fisco nol-porta";
+      b.textContent = p[0];
+      b.addEventListener("click", function () { location.href = "/gestionale-app#" + p[1]; });
+      ultimo.after(b); ultimo = b;
+    });
+
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "nol-altro";
     btn.setAttribute("aria-expanded", "false");
     btn.innerHTML = '<span class="ma-t"></span><span class="ma-n" hidden></span>'
       + '<svg class="ma-f" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-    fisco.after(btn);
+    ultimo.after(btn);
 
     /* 3. le altre, dopo il pulsante, segnate come «nascoste» */
     var altre = Array.prototype.slice.call(nav.querySelectorAll("button[data-tab]")).filter(function (b) {

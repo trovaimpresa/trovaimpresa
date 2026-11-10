@@ -574,14 +574,18 @@
   });
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza","promemoria","giornate","fisco"].includes(_deepTab))_deepTab=null; /* 29/09/2026 «fisco»: ci arriva il Noleggio */
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza","promemoria","giornate","fisco","acquisti"].includes(_deepTab))_deepTab=null; /* 29/09/2026 «fisco»: ci arriva il Noleggio. 10/11/2026 «giornate» e «acquisti» anche */
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
     if(ruoloUtente==='professionista'&&tabNascosto(_deepTab)){_deepTab=null;return;}
-    const b=document.querySelector('nav.tabs button[data-tab="'+_deepTab+'"]');
+    /* 10/11/2026: «acquisti» non e' una sezione: e' la finestra «Acquisti del mese»,
+       che sta in Fornitori. Si apre Fornitori e poi la finestra. */
+    const acq=_deepTab==="acquisti";
+    const b=document.querySelector('nav.tabs button[data-tab="'+(acq?"fornitori":_deepTab)+'"]');
     _deepTab=null;
     if(b)b.click();
+    if(acq&&typeof acqApri==="function")setTimeout(function(){try{acqApri();}catch(e){}},300);
   }
   function goHome(){
     cur=null;
