@@ -222,6 +222,8 @@ async function giorCarica(){
     const rc=await sb.from("gest_azienda").select("cdl_email,cdl_invio,cdl_ultimo").eq("user_id",sbUid).maybeSingle();
     if(!rc.error) giorCdl={email:(rc.data&&rc.data.cdl_email)||"",invio:!!(rc.data&&rc.data.cdl_invio),ultimo:(rc.data&&rc.data.cdl_ultimo)||""};
   }catch(e){}
+  /* 10 nov 2026 — foto, spese, benzina e fatture del mese (js/gest-giornate-extra.js) */
+  if(typeof gxCarica==="function"){ try{ await gxCarica(); }catch(e){} }
   giorContatore();
 }
 /* il numero accanto a «Giornate» nel menu: quante ne aspettano il capo */
@@ -319,9 +321,10 @@ function giorDisegna(msg){
   /* 7 nov 2026: il PDF del mese si offre solo se nel mese c'e' qualcosa */
   { const bp=document.querySelector('[data-gior="pdf"]'); if(bp) bp.style.display=date.length?"":"none"; }
   if(!date.length) h+=`<div class="gvuoto">Nessuna giornata in ${esc(_gMeseNome(giorMese))}.</div>`;
+  if(date.length&&typeof gxHtmlTotali==="function") h+=gxHtmlTotali();
   date.forEach(d=>{
     h+=`<div class="gday"><div class="gd">${esc(_gData(d))}</div>`;
-    giorRighe.filter(g=>g.data===d).forEach(g=>{
+    giorRighe.filter(g=>g.data===d).forEach((g,gi)=>{
       const chi=[...new Set(g.ore.map(o=>giorNomeOp(o.operatore_id)))];
       const mezze=g.ore.filter(o=>(+o.ore||0)<GIOR_ORE_GIORNO).map(o=>giorNomeOp(o.operatore_id)+" "+String(+o.ore).replace(".",",")+" ore");
       const L=_gNomeLav(giorLavoro(g.lavoro_id));
@@ -334,6 +337,8 @@ function giorDisegna(msg){
       if(giorConferma===g.k){
         h+=`<div class="gconf">Cancello questa giornata e le sue ore? <button type="button" class="si" data-gior="del-si" data-k="${esc(g.k)}">Sì, cancella</button><button type="button" class="btn" data-gior="del-no">No</button></div>`;
       }
+      /* 10 nov 2026 — cosa c'e' in questa giornata e i quattro pulsanti */
+      if(typeof gxHtmlGiorno==="function") h+=gxHtmlGiorno(g,gi===0);
     });
     h+=`</div>`;
   });

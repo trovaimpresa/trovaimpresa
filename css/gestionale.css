@@ -5739,3 +5739,52 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 @media(min-width:881px){
   #appview .wrap > section:not(#chat){ padding-bottom:110px; }
 }
+
+
+/* ================================================================
+   10 novembre 2026 — LA GIORNATA AL CENTRO (js/gest-giornate-extra.js)
+   Ogni giorno e' una scheda col bordo blu; sotto il racconto quello che
+   c'e' (etichette celesti) e i quattro pulsanti. In cima al mese i totali
+   blu. Niente sotto i 16 px, pulsanti alti 50.
+   ================================================================ */
+#giornate .gday{ border:1.6px solid #0a2a4d !important; border-radius:12px; padding:16px 18px !important; margin:0 0 14px; background:#fff; gap:10px; }
+#giornate .gday .gd{ font-size:16px; }
+#giornate .gday .gv .w{ font-size:20px; }
+#giornate .gday .gv .c{ font-size:17px; color:#0b1220; }
+#giornate .gday .gv ~ .gv{ border-top:1px solid var(--bordo,#e2e8f0); padding-top:14px; margin-top:6px; }
+#giornate .gx-tot{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:0 0 16px; }
+#giornate .gx-tot div{ background-color:#0a2a4d;
+  background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:40px 40px; border-radius:12px; padding:12px 16px; }
+#giornate .gx-tot b{ display:block; font-size:24px; color:#fff; font-variant-numeric:tabular-nums; white-space:nowrap; }
+#giornate .gx-tot span{ font-size:16px; color:#dbe6f3; }
+#giornate .gx-ha{ display:flex; flex-wrap:wrap; gap:8px; }
+#giornate .gx-ha > *{ display:inline-flex; align-items:center; gap:7px; background:#EEF4FB; border:0; border-radius:999px;
+  padding:8px 14px; font:inherit; font-size:16px; font-weight:700; color:#0a2a4d; min-height:40px; text-align:left; }
+#giornate .gx-ha button{ cursor:pointer; }
+#giornate .gx-ha button:hover{ background:#DCE8F6; }
+#giornate .gx-ha svg{ width:18px; height:18px; flex:none; }
+#giornate .gx-btn{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+#giornate .gx-btn button{ display:flex; align-items:center; justify-content:center; gap:9px; min-height:50px;
+  border:1.6px solid #0a2a4d; background:#fff; color:#0a2a4d; border-radius:10px; font:inherit; font-size:17px; font-weight:700; cursor:pointer; }
+#giornate .gx-btn button:hover{ background:#EEF4FB; }
+#giornate .gx-btn button:focus-visible, #giornate .gx-ha button:focus-visible{ outline:3px solid #9cc2ff; outline-offset:2px; }
+#giornate .gx-btn svg{ width:22px; height:22px; flex:none; }
+.gx-lista{ border:1px solid var(--bordo,#e2e8f0); border-radius:12px; padding:4px 14px; margin-bottom:16px; }
+.gx-riga{ display:flex; align-items:center; gap:12px; padding:12px 0; font-size:17px; }
+.gx-riga + .gx-riga{ border-top:1px solid var(--bordo,#e2e8f0); }
+.gx-riga .t{ flex:1; min-width:0; overflow-wrap:anywhere; color:var(--testo,#0b1220); }
+.gx-riga b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.gx-link{ background:none; border:0; font:inherit; font-size:16px; color:#B91C1C; text-decoration:underline; cursor:pointer; min-height:44px; padding:0 4px; }
+.gx-si{ background:#DC2626; color:#fff; border:0; border-radius:8px; font:inherit; font-size:16px; font-weight:700; min-height:44px; padding:0 14px; cursor:pointer; }
+.gx-vuoto{ font-size:17px; color:var(--testo,#0b1220); margin:6px 0 0; }
+.gx-griglia{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+.gx-griglia img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; border:1px solid var(--bordo,#e2e8f0); display:block; }
+@media(max-width:760px){
+  #giornate .gx-btn{ grid-template-columns:1fr 1fr; }
+  #giornate .gx-tot{ grid-template-columns:1fr 1fr; }
+  #giornate .gx-tot b{ font-size:19px; }
+  #giornate .gx-tot div{ padding:12px 12px; }
+  #giornate .gday .gv{ flex-direction:column; gap:4px; }
+  .gx-griglia{ grid-template-columns:1fr 1fr; }
+}
