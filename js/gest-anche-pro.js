@@ -9,9 +9,10 @@
    COME FUNZIONA
    - Non si scrive niente nel database e il tipo dell'iscritto NON cambia:
      e' solo la FACCIA con cui si vede il gestionale. I dati sono gli stessi.
-   - La scelta resta su questo telefono/computer (localStorage, una chiave
-     per utente). js/gest-reparti.js la legge in logRuoloUtente(), subito
-     dopo aver letto il tipo vero, e mette ruoloUtente='professionista'.
+   - 10 nov 2026 (sera): la scelta sta nel database, imprese.faccia_gestionale
+     ('professionista' o vuoto), e segue l'utente su tutti i dispositivi.
+     localStorage ne tiene una copia. js/gest-reparti.js la legge in
+     logRuoloUtente(), subito dopo il tipo vero, e mette ruoloUtente='professionista'.
    - Si torna indietro dallo stesso pulsante.
    ⛔ Vale solo per chi e' impresa o artigiano. Lo studio tecnico non lo vede.
    ⛔ File non chiuso in una funzione: usa openSheetGrande, closeSheet, esc
@@ -74,7 +75,7 @@ function apApri() {
     + '</div></div><div class="sh-col"><div class="sh-b"><div class="sh-tit">Cosa resta uguale</div>'
     + '<p class="ap-testo"><b>I tuoi dati restano tutti</b>: clienti, lavori, preventivi e fatture.</p>'
     + '<p class="ap-testo">Torni indietro quando vuoi, dallo <b>stesso pulsante</b> nel menu.</p>'
-    + '<p class="ap-testo">La scelta vale su questo telefono o computer.</p>'
+    + '<p class="ap-testo">La scelta vale su tutti i tuoi telefoni e computer.</p>'
     + '</div></div></div>',
     '<button class="btn b-cancel" data-action="close">No, resto così</button><button class="btn-primary" data-ap="accendi">Sì, mostrami lo studio tecnico</button>');
 }
@@ -83,9 +84,20 @@ document.addEventListener("click", function (e) {
   const a = b.dataset.ap;
   if (a === "apri") return apApri();
   if (a === "accendi" || a === "spegni") {
-    try { if (a === "accendi") localStorage.setItem(apChiave(), "professionista"); else localStorage.removeItem(apChiave()); }
-    catch (er) { if (typeof toast === "function") toast("Su questo telefono non riesco a ricordare la scelta"); return; }
     b.disabled = true; b.textContent = "Un attimo…";
-    location.reload();
+    (async function () {
+      /* prima il database (vale su tutti i dispositivi), poi la copia qui */
+      try {
+        if (typeof sb !== "undefined" && sb && apUid) {
+          const r = await sb.from("imprese").update({ faccia_gestionale: a === "accendi" ? "professionista" : null }).eq("user_id", apUid).select("id");
+          if (r.error || !r.data || !r.data.length) {
+            if (typeof toast === "function") toast("Non riesco a salvare la scelta: " + ((r.error && r.error.message) || "riprova"));
+            b.disabled = false; b.textContent = "Riprova"; return;
+          }
+        }
+        if (a === "accendi") localStorage.setItem(apChiave(), "professionista"); else localStorage.removeItem(apChiave());
+      } catch (er) {}
+      location.reload();
+    })();
   }
 });

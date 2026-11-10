@@ -121,7 +121,10 @@
   /* Legge la categoria (tipo) dell'utente loggato — stesso metodo dei pannelli: tabella 'imprese', campo 'tipo', chiave user_id */
   async function logRuoloUtente(uid){
     if(!sb||!uid){console.log('[gestionale] ruolo utente: nessun utente loggato');return;}
-    const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
+    /* 10 nov 2026 — anche la «faccia» (Sei anche un professionista?), che segue
+       l'utente su tutti i dispositivi. Se la colonna manca si legge come prima. */
+    let {data,error}=await sb.from('imprese').select('tipo,faccia_gestionale').eq('user_id',uid).maybeSingle();
+    if(error&&/faccia_gestionale/.test(error.message||'')){({data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle());}
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
     /* 24 set 2026 — nel giro (dati finti) il mestiere lo dice l'indirizzo:
@@ -145,6 +148,18 @@
        uno studio tecnico. Il tipo vero non cambia e nel database non si
        scrive niente: e' la scelta salvata su questo telefono. */
     window._tiTipoVero=ruoloUtente;
+    /* 10 nov 2026 (sera): la scelta sta nel database (imprese.faccia_gestionale).
+       Chi l'aveva fatta prima solo su questo telefono la ritrova e la si porta
+       nel database una volta sola. */
+    window._tiFaccia=(data&&data.faccia_gestionale)||null;
+    try{
+      if(!window._tiFaccia&&localStorage.getItem('ti_faccia_'+uid)==='professionista'&&data&&('faccia_gestionale' in data)){
+        window._tiFaccia='professionista';
+        sb.from('imprese').update({faccia_gestionale:'professionista'}).eq('user_id',uid).select('id').then(function(){},function(){});
+      }
+      if(window._tiFaccia==='professionista')localStorage.setItem('ti_faccia_'+uid,'professionista');
+      else if(data&&('faccia_gestionale' in data))localStorage.removeItem('ti_faccia_'+uid);
+    }catch(_e){}
     try{if((ruoloUtente==='impresa'||ruoloUtente==='artigiano')&&!TI_GIRO&&localStorage.getItem('ti_faccia_'+uid)==='professionista')ruoloUtente='professionista';}catch(_e){}
     try{if(typeof ancheProDisegna==="function")ancheProDisegna(uid);}catch(_e){}
     try{var _vq=new URLSearchParams(location.search).get("vedi");if(_vq!==null){_vq?sessionStorage.setItem("ti_vedi_tipo",_vq):sessionStorage.removeItem("ti_vedi_tipo");}}catch(_e){}
