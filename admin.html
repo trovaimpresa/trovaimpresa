@@ -4586,7 +4586,11 @@ function renderImprese(lista) {
       <td>${esc(_mestieri(i).slice(0,2).join(', '))}${_mestieri(i).length>2?' +altri':''}</td>
       <td>${i.verificata
             ? '<span class="badge badge-v">✅ Verificata</span>'
-            : '<span style="color:var(--light);font-weight:600">Non verificata</span>'}</td>
+            : '<span style="color:var(--light);font-weight:600">Non verificata</span>'}${
+          /* 10 nov 2026 — esito del controllo P.IVA (netlify/functions/verifica-piva.js) */
+          i.piva_stato==='non_valida' ? '<br><small style="color:#c0392b;font-weight:700">P.IVA sbagliata o cessata</small>'
+          : i.piva_stato==='non_trovata' ? '<br><small style="color:var(--light)">P.IVA non nel registro imprese</small>'
+          : (i.piva_stato==='valida' && i.piva_nome) ? '<br><small style="color:var(--light)">Risulta: '+esc(i.piva_nome)+'</small>' : ''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${_data(i.created_at)}</td>
       <td>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">Apri la scheda</button>
