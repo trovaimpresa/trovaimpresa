@@ -295,6 +295,7 @@
     "gest-avviso-sera.sql":             "gest_avvisi_sera gest_avvisi_sera.ultimo_giorno", /* app_chiavi_push NON si controlla: e' chiusa agli utenti apposta (chiave privata), quindi da qui risulterebbe sempre mancante */
     "gest-avvisi-telefono.sql":         "gest_avvisi_sera.sera gest_avvisi_sera.mattina gest_avvisi_sera.richieste gest_avvisi_sera.ultimo_mattina",
     "gest-giornate-consulente-proposte.sql": "gest_giornate_proposte gest_azienda.cdl_email gest_azienda.cdl_invio gest_azienda.cdl_ultimo gest_azienda.cdl_prova gest_giornate_proposte_freno()",
+    "gest-acquisti.sql": "gest_acquisti",
     "gest-capitolato-versioni.sql":     "gest_capitolato_versioni gest_capitolato_versioni_controlla() gest_capitolato_versioni_pota()",
     "gest-scadenze-pratiche.sql":       "gest_scadenze.lavoro_id gest_scadenze.avvisi gest_scadenze.avvisa",
     "gest-scadenze-ripeti.sql":         "gest_scadenze.ripeti_mesi",
