@@ -435,23 +435,71 @@ function costruisciModulo(tipo, dati, opzioni) {
   }
   if (!campi[m.serve]) return { errore: m.manca };
   if (tipo === 'preventivo') {
-    const voci = [];
-    (Array.isArray(d.voci) ? d.voci : []).slice(0, 30).forEach(function (v) {
-      if (!v) return;
-      const desc = String(v.descrizione == null ? '' : v.descrizione).trim().slice(0, 200);
-      if (!desc) return;
-      const voce = { descrizione: desc };
-      const un = String(v.unita == null ? '' : v.unita).trim().slice(0, 12);
-      if (un) voce.unita = un;
-      const q = Number(v.quantita);
-      if (isFinite(q) && q > 0 && q < 1000000) voce.quantita = q;
-      const pz = (v.prezzo_unitario === null || v.prezzo_unitario === undefined || v.prezzo_unitario === '') ? NaN : Number(v.prezzo_unitario);
-      if (isFinite(pz) && pz >= 0 && pz < 10000000) voce.prezzo_unitario = pz;
-      voci.push(voce);
-    });
+    const voci = pulisciVoci(d.voci, false);
     if (voci.length) campi.voci = voci;
   }
   return { tipo: tipo, campi: campi };
+}
+
+/* ⛔ 10 nov 2026 — LE VOCI SI PULISCONO IN UN POSTO SOLO.
+   Le usano il preventivo e il computo: max 30, testi corti, numeri veri.
+   Un prezzo che non c'e' resta VUOTO, mai 0. Solo per il computo passa anche
+   `prezzo_da`: da quale voce del SUO prezzario viene il prezzo (lo legge
+   l'utente nella schermata di controllo, prima di far entrare la riga). */
+function pulisciVoci(lista, conFonte) {
+  const voci = [];
+  (Array.isArray(lista) ? lista : []).slice(0, 30).forEach(function (v) {
+    if (!v) return;
+    const desc = String(v.descrizione == null ? '' : v.descrizione).trim().slice(0, 200);
+    if (!desc) return;
+    const voce = { descrizione: desc };
+    const un = String(v.unita == null ? '' : v.unita).trim().slice(0, 12);
+    if (un) voce.unita = un;
+    const q = Number(v.quantita);
+    if (isFinite(q) && q > 0 && q < 1000000) voce.quantita = q;
+    const pz = (v.prezzo_unitario === null || v.prezzo_unitario === undefined || v.prezzo_unitario === '') ? NaN : Number(v.prezzo_unitario);
+    if (isFinite(pz) && pz >= 0 && pz < 10000000) voce.prezzo_unitario = pz;
+    if (conFonte && voce.prezzo_unitario !== undefined) {
+      const da = String(v.prezzo_da == null ? '' : v.prezzo_da).trim().slice(0, 160);
+      if (da) voce.prezzo_da = da;
+    }
+    voci.push(voce);
+  });
+  return voci;
+}
+
+/* ⛔ 10 nov 2026 — IL COMPUTO DALLA CHAT. Due lavori, tutti e due SENZA
+   scrivere niente: il browser apre la schermata «Controlla…» (la stessa del
+   PDF del geometra) e a far entrare le righe e' l'utente, una spunta per riga.
+   - `aggiungi`: lavorazioni nuove, in un computo che c'e' (id) o in uno nuovo
+     (titolo): quello nuovo nasce solo quando lui preme «Metti dentro».
+   - `prezzi`: prezzi per le righe che ci sono gia' e sono a zero. Qui passa
+     solo la proposta: quale riga e' davvero del computo, e se e' ancora a
+     zero, lo decide il browser sul computo aperto (e la RLS sotto). */
+const FORMA_ID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+function costruisciComputo(modo, dati, idVero, titoloVero) {
+  const d = dati || {};
+  if (modo === 'prezzi') {
+    if (!idVero) return { errore: 'mi serve l\'id vero del computo: cercalo prima' };
+    const prezzi = [];
+    (Array.isArray(d.prezzi) ? d.prezzi : []).slice(0, 60).forEach(function (r) {
+      if (!r || !FORMA_ID.test(String(r.voce_id || ''))) return;
+      const pz = Number(r.prezzo_unitario);
+      if (!isFinite(pz) || pz <= 0 || pz >= 10000000) return;
+      const riga = { voce_id: String(r.voce_id), prezzo_unitario: pz, sicuro: r.sicuro !== false };
+      const da = String(r.prezzo_da == null ? '' : r.prezzo_da).trim().slice(0, 160);
+      if (da) riga.prezzo_da = da;
+      prezzi.push(riga);
+    });
+    if (!prezzi.length) return { errore: 'non c\'e\' nessun prezzo da proporre' };
+    return { tipo: 'computo', id: String(idVero), campi: { titolo: String(titoloVero || '').slice(0, 200), prezzi: prezzi } };
+  }
+  const voci = pulisciVoci(d.voci, true);
+  if (!voci.length) return { errore: 'manca almeno una lavorazione' };
+  if (idVero) return { tipo: 'computo', id: String(idVero), campi: { titolo: String(titoloVero || '').slice(0, 200), voci: voci } };
+  const titolo = String(d.titolo == null ? '' : d.titolo).trim().slice(0, 120);
+  if (!titolo) return { errore: 'per un computo nuovo manca il titolo' };
+  return { tipo: 'computo', campi: { titolo: titolo, voci: voci } };
 }
 
 // ---------------------------------------------------------------------
@@ -794,6 +842,58 @@ const STRUMENTI = [
     }
   },
   {
+    // ⛔ 10 nov 2026 — come compila_preventivo: non scrive niente
+    name: 'compila_computo',
+    description: 'Prepara delle LAVORAZIONI da AGGIUNGERE a un computo: gli apre la schermata «Controlla le lavorazioni», dove lui guarda riga per riga e preme «Metti dentro». NON scrive niente. Se il computo c\'è già passa il suo `id` vero (letto con cerca_per_nome o elenco_cose su computi); se è nuovo passa `titolo` (nasce solo quando lui conferma). PRIMA cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione. Il prezzo lo metti SOLO se l\'hai letto fra i suoi, con la STESSA unità di misura, e in `prezzo_da` scrivi la voce da cui l\'hai preso; altrimenti lascialo fuori. La quantità solo se te l\'ha detta o si ricava dalle sue misure.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id:     { type:'string', description:'l\'id del computo che c\'è già, letto con un attrezzo' },
+        titolo: { type:'string', description:'solo per un computo NUOVO' },
+        voci: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              descrizione:     { type:'string' },
+              unita:           { type:'string', description:'m², m, cad, ore, a corpo…' },
+              quantita:        { type:'number' },
+              prezzo_unitario: { type:'number', description:'euro per unità, SOLO se è un prezzo suo che hai letto' },
+              prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene il prezzo, come sta scritta (corta)' }
+            },
+            required: ['descrizione']
+          }
+        }
+      },
+      required: ['voci']
+    }
+  },
+  {
+    // ⛔ 10 nov 2026 — i prezzi sulle righe che ci sono gia': non scrive niente
+    name: 'prezzi_computo',
+    description: 'Propone i PREZZI per le lavorazioni di un computo che sono ancora a zero (il caso del computo del geometra: le righe ci sono, mancano i prezzi). Gli apre la schermata «Controlla i prezzi»: lui mette la spunta e conferma. NON scrive niente. PRIMA leggi le righe con `dentro_al_documento` (voci_del_computo) e cerca i SUOI prezzi con `miei_prezzi`. Proponi un prezzo SOLO per le righe a zero e SOLO se la voce del suo prezzario è la stessa lavorazione con la STESSA unità di misura. `sicuro: false` quando la voce è simile ma non sei certo che sia quella: lui la vedrà senza spunta. Le righe per cui non trovi niente lasciale fuori.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id: { type:'string', description:'l\'id vero del computo' },
+        prezzi: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              voce_id:         { type:'string', description:'l\'id della riga del computo, letto con dentro_al_documento' },
+              prezzo_unitario: { type:'number' },
+              prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene, come sta scritta (corta)' },
+              sicuro:          { type:'boolean' }
+            },
+            required: ['voce_id', 'prezzo_unitario']
+          }
+        }
+      },
+      required: ['id', 'prezzi']
+    }
+  },
+  {
     name: 'miei_prezzi',
     description: 'Legge la LISTA DEI PREZZI di chi chiede (quelli che ha salvato lui: voce, unità, prezzo). Usalo prima di fare un preventivo, con una parola della voce («piastrelle», «tinteggiatura»). Senza parola dà quelli che usa di più.',
     input_schema: { type:'object', properties: { parola: { type:'string' } } }
@@ -906,7 +1006,7 @@ REPARTI. Il gestionale e' diviso in reparti (per esempio «giardiniere» e «idr
 
 IL MENU A SINISTRA (sul telefono si apre col pulsante ☰ in alto a destra). In vista: «Assistente» (la pagina di partenza, con la casella «Cosa facciamo?» e le cose da guardare oggi), «Preventivi», «Computo da prezzare» (o «Computo metrico»), «Lavori e interventi», «Fatture», «Clienti», «Calendario». Tutte le altre voci stanno sotto «Tutto il resto», divise in gruppi: Chat con AI, Giornate, Richieste dal sito, Promemoria, Scadenzario, Agenda operatore; Squadra, Mezzi, Attrezzature; Tasse e fisco, Prezzario, Stati di avanzamento, Fornitori, Carte, Report, Crediti formativi; Galleria, Mappa, Cestino. In fondo, sotto «Aiuto»: «Chiedi una funzione» e «Assistenza diretta». Sul telefono c'e' anche la barra in basso: Oggi, Lavori, il microfono grande al centro, Preventivi, Menu.
 
-LA BARRA IN ALTO (computer): «Dati azienda» (nome, P.IVA, logo, IBAN: vanno compilati PRIMA di fare PDF e fatture), «Commercialista» (gli mandi i documenti), «Backup» (salva una copia di tutti i dati), «Esporta» (Excel), «Aiuto» (apre questa chat). Sopra c'e' la ricerca: «Cerca un nome: cliente, lavoro, preventivo, fattura». Sul telefono questi pulsanti stanno in fondo al menu ☰.
+LA BARRA IN ALTO (computer): «Dati azienda» (nome, P.IVA, logo, IBAN: vanno compilati PRIMA di fare PDF e fatture), «Commercialista» (gli mandi i documenti), «Salva una copia dei dati», «Scarica per Excel» (stanno sotto «Altro»), «Aiuto» (apre questa chat). Sopra c'e' la ricerca: «Cerca un nome: cliente, lavoro, preventivo, fattura». Sul telefono questi pulsanti stanno in fondo al menu ☰.
 
 PARLA. Il pulsante «Parla» (sul telefono il microfono grande in basso) ascolta: racconti la giornata come viene («oggi Wahid e Luis da Rossi, 8 ore, spesi 45 euro di sabbia, domani chiamare il commercialista») e lui la divide in schede (giornata, spesa, promemoria) da controllare; poi «Salva tutto». Se dici «fammi un preventivo» o «apri le fatture» apre la cosa giusta. Nelle caselle di testo lunghe c'e' anche il microfono piccolo per dettare.
 
@@ -918,7 +1018,7 @@ FATTURE. «+ Nuova fattura» e «Fatture ricevute» (le fatture dei fornitori ch
 
 LAVORI E INTERVENTI. «+ Nuovo lavoro» o «Compila con AI» (lo descrivi e l'AI riempie il modulo). Schede: Tutti, In ritardo, Oggi, Prossimi, Da incassare, Archivio. Ogni lavoro ha «Apri»; dentro ci sono note, foto, spese, ore, e il menu con mappa, WhatsApp, PDF, fattura, elimina. Un preventivo accettato diventa lavoro con «Accettato, crea lavoro».
 
-COMPUTO. «+ Nuovo computo», oppure si carica il computo del geometra (Excel, CSV o PDF) e lo si prezza col proprio prezzario. Dal menu del computo: «Apri il computo», «Scarica il PDF», «Scarica l'analisi dei prezzi», «Crea il preventivo», «Duplica», «Crea la variante», «Elimina». Gli «Stati di avanzamento» (SAL) nascono dentro un computo.
+COMPUTO. «+ Nuovo computo», oppure si carica il computo del geometra (Excel, CSV o PDF) e lo si prezza col proprio prezzario. Dentro il computo le righe si chiamano LAVORAZIONI: «+ Aggiungi lavorazione» (non «Aggiungi voce»), «Carica qui il computo del geometra», «+ Aggiungi capitolo», «€ Prendi i prezzi dal prezzario» (riempie solo le righe a zero, cercando il codice di tariffa), e «Aggiungi con l'AI» (ti porta in questa chat). Dal menu del computo: «Apri il computo», «Scarica il PDF», «Scarica l'analisi dei prezzi», «Crea il preventivo», «Duplica», «Crea la variante», «Elimina». Gli «Stati di avanzamento» (SAL) nascono dentro un computo.
 
 CLIENTI. «+ Privato», «+ Azienda», «+ Condominio», oppure «Compila con AI». Ogni cliente ha la sua scheda con lavori, preventivi, fatture e cosa deve ancora pagare.
 
@@ -997,7 +1097,11 @@ function istruzioniFisse() {
     'E se ti chiede di aggiungere un CLIENTE nuovo, uguale, con `compila_cliente`.',
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
-    'Sai aprire questi cinque moduli e basta: lavoro, cliente, scadenza, fornitore, preventivo.',
+    'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo`. ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
+    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra): 1) trovalo; 2) leggi le righe con `dentro_al_documento` (voci_del_computo); 3) cerca i SUOI prezzi con `miei_prezzi`; 4) chiama `prezzi_computo` solo per le righe a zero. Vedi al massimo 25 righe: se il computo ne ha di più dillo, e digli che per i codici di tariffa c\'è anche il pulsante «€ Prendi i prezzi dal prezzario» dentro il computo.',
+    'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
+    '⛔ NON RACCONTARE COSA STAI FACENDO: niente «Cerco prima i tuoi prezzi…», «Ora guardo il computo…». Usa gli attrezzi in silenzio e scrivi solo la risposta finale.',
+    'Sai aprire questi moduli e basta: lavoro, cliente, scadenza, fornitore, preventivo, e la schermata di controllo del computo.',
     'SE TI CHIEDE DI CAMBIARE UN LAVORO CHE C\'È GIÀ («spostalo a giovedì», «metti l\'importo a 800», «è finito», «segna il protocollo»): trovalo con `cerca_per_nome` (o `elenco_cose`), poi `modifica_lavoro` col suo id e SOLO le caselle che cambiano. Non aprire un lavoro nuovo al posto di uno che esiste. Se ne trovi più di uno che può essere quello, chiedi quale.',
     'Quando nel modulo ci metti il nome di un cliente o di una persona della squadra, scrivilo COME STA NEL GESTIONALE, non come lo scriveresti tu: se non sei sicuro di come e\' scritto, cercalo prima con `cerca_per_nome`. Un nome «sistemato» non si attacca a nessuno.',
     '',
@@ -1506,6 +1610,37 @@ export default async function (req) {
                        filtri: { user_id: uid }, senzaCestino: true, ordine: 'usata_volte', limite: RIGHE_MAX, soloConta: false };
           if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
           esito = uid ? await esegui(dati, qp) : { errore: 'manca chi sta chiedendo' };
+        } else if (t.name === 'compila_computo' || t.name === 'prezzi_computo') {
+          /* ⛔ 10 nov 2026 — QUI NON SI SCRIVE NIENTE. Se c'e' un id, PRIMA si
+             controlla che il computo sia suo e di questo reparto (i due filtri
+             di sempre): un id inventato o di un altro reparto non apre niente. */
+          const modoC = t.name === 'prezzi_computo' ? 'prezzi' : 'aggiungi';
+          if (modulo && !daSistemare) {
+            esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
+          } else {
+            let idOk = null, titoloOk = '', fermo = null;
+            if (inp.id) {
+              const qc = costruisciLettura('computi', uid, mestiere_id, { quanti: 1 });
+              if (qc.errore) fermo = qc.errore;
+              else {
+                qc.filtri.id = String(inp.id);
+                const rc = await esegui(dati, qc);
+                if (rc.errore || !rc.righe || rc.righe.length !== 1) fermo = 'quel computo non e\' in questo reparto, oppure non esiste';
+                else { idOk = rc.righe[0].id; titoloOk = rc.righe[0].titolo || ''; }
+              }
+            }
+            if (fermo) esito = { errore: fermo };
+            else {
+              const mc = costruisciComputo(modoC, inp, idOk, titoloOk);
+              if (mc.errore) esito = { errore: mc.errore };
+              else {
+                modulo = mc; daSistemare = false;
+                esito = { ok: true, aperto: modoC === 'prezzi'
+                  ? 'gli ho aperto la schermata «Controlla i prezzi» con ' + mc.campi.prezzi.length + ' prezzi proposti: mette la spunta e conferma lui'
+                  : 'gli ho aperto la schermata «Controlla le lavorazioni» con ' + mc.campi.voci.length + ' righe: le fa entrare lui col pulsante «Metti dentro»' };
+              }
+            }
+          }
         } else if (t.name.indexOf('compila_') === 0 && MODULI[t.name.slice(8)]) {
           /* ⛔ QUI NON SI SCRIVE NIENTE. Si prepara solo il modulo che
              aprira' il browser, e a salvarlo sara' l'iscritto. Il
@@ -1633,5 +1768,5 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };

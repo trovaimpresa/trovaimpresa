@@ -2184,6 +2184,8 @@
       +    '<button type="button" class="btn-primary" data-action="comp-importa">\u2b06 '
       +      (ruoloUtente==='professionista'?'Importa le lavorazioni da Excel':'Carica qui il computo del geometra')+'</button>'
       +    '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Le scrivo io, una per una</button>'
+      /* 10 nov 2026 — anche da vuoto: lo dici all'AI e le prepara lei */
+      +    '<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai">Aggiungi con l\'AI</button>'
       +  '</div>'
       +  _fileIn
       +  (compCapNuovo?'':'<div class="co-vuoto-poi"><button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>'
@@ -2201,6 +2203,10 @@
        pulsante che non fa mai niente. */
     const _btnPrezzi=Array.from(compVociCache).some(function(v){return !(+v.prezzo_unitario);})
       ? '<button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
+        /* 10 nov 2026 — le righe senza codice di tariffa il pulsante qui sopra
+           non le trova: l'AI le cerca per descrizione dentro il tuo prezzario
+           e te le propone da controllare (js/gest-computo-ai.js) */
+        +'<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai-prezzi">Metti i prezzi con l\'AI</button>'
       : '';
 
     box.innerHTML=(_niente ? _cassetta : (
@@ -2208,6 +2214,7 @@
       +h+piede
       +'<div class="comp-azioni">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
+      +  '<button type="button" class="btn-ghost quick-add cai-btn" data-action="comp-ai">Aggiungi con l\'AI</button>'
       /* ⚠️ 18 agosto 2026 — quando il computo te lo manda gia' fatto un
          progettista, le voci sono ottanta e riscriverle a mano e' una serata.
          Qui si caricano da un Excel in un colpo. */

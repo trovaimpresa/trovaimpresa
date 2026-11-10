@@ -1486,3 +1486,11 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 **Chiedi una funzione · Assistenza diretta (8 nov):** funzionano; troppo da leggere. Fatto (ok di Alex): spiegazioni da 3 righe a 1 in tutte e due (anche nelle copie del Noleggio), «Cosa succede dopo» in 1 riga, «Manda la richiesta» alto 48.
 **Noleggio, numerino del Cestino (8 nov):** si vedeva solo dopo aver aperto il Cestino. Ora si conta all avvio (solo il conto, una domanda per tabella; se una non risponde resta com era).
 **Telefono (8 nov):** Prezzario, Stati di avanzamento, Chiedi una funzione, Assistenza: niente fuori schermo, niente sotto i 14 px, pulsanti >= 40, zero errori.
+
+
+## 10 nov 2026 — Il computo con l'AI (ok di Alex sulle foto)
+**Giro dal vivo prima di cominciare:** 28 sezioni aperte da computer e da telefono, zero errori in console, niente fuori schermo; conti del computo rifatti a mano (22,41 × 22,00 = 493,02; ribasso 10% → 443,72).
+**Buco trovato:** la Chat con AI non sapeva scrivere in un computo («non ho questo attrezzo»), chiamava «+ Aggiungi voce» il pulsante «+ Aggiungi lavorazione» e raccontava i suoi passi.
+**Fatto:** attrezzi `compila_computo` e `prezzi_computo` in `chat-gestionale.mjs` (non scrivono niente); file nuovo `js/gest-computo-ai.js` con le schermate «Controlla le lavorazioni» e «Controlla i prezzi» (stesse righe del PDF del geometra, entra solo chi ha la spunta, un prezzo già messo non si tocca); nel computo i pulsanti viola «Aggiungi con l'AI» e «Metti i prezzi con l'AI», che portano alla chat.
+**Limite detto ad Alex:** i prezzi con l'AI vedono 25 righe per volta.
+**Telefono:** niente sotto i 14 px, niente fuori schermo, pulsanti alti 50.

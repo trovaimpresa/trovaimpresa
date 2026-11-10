@@ -771,6 +771,14 @@
     return true;
   };
 
+  /* 10 nov 2026 — la porta della chat per il computo: la schermata di
+     controllo la apre js/gest-computo-ai.js. Qui non si scrive niente. */
+  AI.compilaComputoDaChat = function (d, id) {
+    chiudiTutto();
+    if (typeof window.gestComputoDaAI !== 'function') return false;
+    return !!window.gestComputoDaAI(d, id || null);
+  };
+
   function compilaCliente() {
     if (typeof window.gestApriModuloAI === 'function') { window.gestApriModuloAI('cliente'); return; }
     pannelloCompila(

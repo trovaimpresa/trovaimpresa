@@ -373,7 +373,10 @@
        insieme agli altri: qui si preme il campanello, non si apre la porta. */
     scadenza:  'compilaScadenzaDaChat',
     fornitore: 'compilaFornitoreDaChat',
-    preventivo: 'compilaPreventivoDaChat'
+    preventivo: 'compilaPreventivoDaChat',
+    /* 10 nov 2026 — lavorazioni o prezzi per un computo: si apre la
+       schermata di controllo di js/gest-computo-ai.js */
+    computo: 'compilaComputoDaChat'
   };
 
   function apriModulo(m) {

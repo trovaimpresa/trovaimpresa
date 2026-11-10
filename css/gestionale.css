@@ -5590,3 +5590,31 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
   border:0; cursor:pointer; font-family:inherit; }
 .comp-geometra .cg-btn:hover{ background:#e67a00; }
 @media (max-width:880px){ .comp-geometra .cg-btn{ width:100%; } }
+
+
+/* ================================================================
+   10 novembre 2026 — IL COMPUTO CON L'AI (js/gest-computo-ai.js)
+   Viola = AI, come in tutto il gestionale. Le righe di controllo sono
+   le .cp-riga del PDF del geometra: qui solo quello che hanno in piu'.
+   Niente sotto i 14 px.
+   ================================================================ */
+.comp-azioni .quick-add.cai-btn, .co-vuoto-due .quick-add.cai-btn{
+  background:#F5F3FF; border:1.5px solid #6D28D9; color:#5B21B6;
+}
+.comp-azioni .quick-add.cai-btn:hover, .co-vuoto-due .quick-add.cai-btn:hover{
+  background:#EDE9FE; border-color:#5B21B6; color:#4C1D95;
+}
+.cai-riga .cai-desc{ font-size:17px; line-height:1.45; font-weight:600; color:var(--testo); margin:8px 0 4px; word-break:break-word; }
+.cp-riga .cp-campi.cai-campi{ grid-template-columns:1fr 1fr 1fr; }
+.cp-riga .cp-campi.cai-campi--due{ grid-template-columns:1fr 1fr; }
+.cai-riga .cai-fisso{ font-size:17px; font-weight:700; color:var(--testo); padding:10px 0; font-variant-numeric:tabular-nums; }
+.cai-riga .cp-orig{ font-size:15px; }
+.cai-riga .cai-manca{ color:#92400E; border-top:0; padding-top:0; margin-top:4px; font-weight:600; }
+.cai-totale{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  margin-top:6px; padding:14px 16px; border:1px solid var(--bordo); border-radius:12px;
+  font-size:17px; font-weight:600; color:var(--testo); background:var(--card); }
+.cai-totale b{ font-size:22px; font-variant-numeric:tabular-nums; }
+@media(max-width:760px){
+  .cp-riga .cp-campi.cai-campi{ grid-template-columns:1fr 1fr; }
+  .cai-totale{ flex-direction:column; gap:2px; }
+}
