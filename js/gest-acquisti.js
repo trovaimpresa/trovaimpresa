@@ -239,7 +239,7 @@ function acqCorpoHTML(errore) {
     /* a schermo le ULTIME salvate stanno in cima (nel PDF resta l'ordine dei giorni) */
     + acqRighe.slice().reverse().map(function (r) {
       const q = (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + r.unita : "") : "";
-      return '<div class="gx-riga"><span class="t">' + esc(r.descrizione) + '<small>' + esc(acqData(r.data) + (acqFornNomi[String(r.fornitore_id)] ? " · " + acqFornNomi[String(r.fornitore_id)] : "")) + '</small></span>'
+      return '<div class="gx-riga"><span class="t">' + esc(r.descrizione) + '<small>' + esc(acqData(r.data) + (acqFornNomi[String(r.fornitore_id)] ? " · " + acqFornNomi[String(r.fornitore_id)] : "") + (r.fattura_id ? " · fattura" : " · bolla")) + '</small></span>'
         + '<b>' + esc(q) + '</b>'
         + '<button type="button" class="acq-x" data-acq="togli" data-id="' + esc(String(r.id)) + '" aria-label="Togli ' + esc(r.descrizione) + '">' + ACQ_IC.x + '</button></div>';
     }).join("") + '</div></div></div></div>';
@@ -302,11 +302,12 @@ async function acqPdfDoc() {
     tabella("1. Tutto quello che è stato comprato", ["Prodotto", "Quantità"],
       somma.map(function (g) { return [g.nome, acqQuantoTxt(g)]; }), [130, 50], [false, true]);
   }
-  tabella("2. Riga per riga", ["Giorno", "Fornitore", "Prodotto", "Quantità"],
+  /* 10 nov 2026: si vede se la riga viene da una bolla o da una fattura */
+  tabella("2. Riga per riga", ["Giorno", "Fornitore", "Foglio", "Prodotto", "Quantità"],
     acqRighe.map(function (r) {
-      return [acqData(r.data), acqFornNomi[String(r.fornitore_id)] || "", r.descrizione,
+      return [acqData(r.data), acqFornNomi[String(r.fornitore_id)] || "", r.fattura_id ? "Fattura" : "Bolla", r.descrizione,
         (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + r.unita : "") : ""];
-    }), [22, 55, 68, 35], [false, false, false, true]);
+    }), [20, 45, 20, 65, 30], [false, false, false, false, true]);
   return doc;
 }
 function acqPdfNome() { return "Acquisti " + acqMeseNome(acqMese) + ".pdf"; }

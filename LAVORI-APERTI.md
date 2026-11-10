@@ -1526,3 +1526,12 @@ Restano: punto 4 (Giornate da soli), punto 5 (app operaio installabile + chat co
 - Da segnare: cosa c'è in fattura e non in nessuna bolla (in rosso), cosa c'è in bolla e non in fattura, quantità diverse.
 - Base già pronta: `gest_acquisti` (righe di merce lette dalla foto con `ai-fattura`, collegate a `fattura_id`). Da decidere: come tenere separate le righe «da bolla» da quelle «da fattura» (oggi una bolla senza importo salva solo la merce).
 - Vale anche per la pagina «Giornate di cantiere» di Alex su Claude.
+
+### 10 nov 2026 (sera) — FATTO: bolle contro fatture
+- `js/gest-bolle-fatture.js`: in «Acquisti del mese» il riquadro «Bolle e fatture» (per fornitore: bolle accanto alla fattura, rosso = in fattura e non in bolla o in più) e nel PDF la parte «3. Bolle e fatture».
+- Righe di bolla = `gest_acquisti.fattura_id` vuoto; di fattura = pieno. Nomi accoppiati anche se scritti diversi (stesse parole, stessa unità). Fornitore senza bolle: non accusa niente.
+- «Tutto quello che hai comprato» non conta più due volte la stessa merce (bolla + fattura).
+- La bolla dell'operaio entra solo dopo «Leggi la bolla» del capo.
+- Banco nel contenitore di Claude: `/home/claude/banco-bf/banco.js` (13 verdi, 2 sabotaggi accusati).
+- Fatti oggi anche: app operaio installabile (Cantiere), «Scrivi al capo», giornata completa con foto/spese/bolla da approvare, Giornate da soli (commit 4c2f4bc).
+- Restano: Squadra e Acquisti nel Noleggio; «Sei anche un professionista?» su tutti i dispositivi (colonna nel database, chiedere ad Alex); merce dalla foto di «Parla»; confronto anche nella pagina «Giornate di cantiere» su Claude.
