@@ -1495,3 +1495,4 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 **Limite detto ad Alex:** i prezzi con l'AI vedono 25 righe per volta.
 **Telefono:** niente sotto i 14 px, niente fuori schermo, pulsanti alti 50.
 **10 nov, secondo pezzo — la chat ti ci porta:** segnalino nuovo `[vai:SEZIONE]` / `[vai:SEZIONE:SCHEDA]` (elenco chiuso in `js/gest-chat.js`, il nome sul pulsante si legge dal menu) e `[apri:comp:ID]` per aprire un computo (`ctApriComp` in `js/gest-ricerca.js`). Riga «a corpo» senza quantità: entra con 1.
+**10 nov, grafica dell'Assistente (proposta C, scelta da Alex su 3 foto):** testata blu a quadretti su `#ass-box` (anche Noleggio), righe di «Poi ci sono anche» col fondo dello stato (rosso chiaro / giallo chiaro) e pallino; testo nero, bordo blu. Alex: le decisioni vecchie non sono obbligatorie, si possono riaprire.
