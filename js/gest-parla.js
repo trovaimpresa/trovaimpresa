@@ -409,6 +409,10 @@
     var cose = await capisci(t);
     if (!cose || !cose.length) return 'vecchio';
     cose = cose.slice(0, 20).map(pulisci);
+    /* 10 nov 2026 — da soli: «io» si capisce senza chiederlo (gest-giornate.js) */
+    if (typeof window.giorIoAuto === 'function' && cose.some(function (c) { return c.tipo === 'giornata' && c.chi.indexOf('IO') >= 0; })) {
+      try { await window.giorIoAuto(true); } catch (x) {}
+    }
     /* nel Noleggio non ci sono Giornate ne' cantieri: giornate, spese e note
        passano al Parla del Noleggio (scheda «Da aprire»). Restano i promemoria. */
     if (typeof giorScrivi !== 'function') cose = cose.map(function (c) {

@@ -88,8 +88,9 @@ const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
 const SUPA_KEY="sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R";
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 const $=s=>document.querySelector(s);
-let mode="register";
 const params=new URLSearchParams(location.search);
+/* 10 nov 2026 — dall'app dell'operaio («Entra») si arriva gia' su Accedi */
+let mode=params.get("accedi")?"login":"register";
 function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");}
 
 function show(which){["auth","redeem","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}

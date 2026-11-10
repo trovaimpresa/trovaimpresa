@@ -1,0 +1,35 @@
+{
+  "id": "/gestionale-operatore",
+  "name": "Cantiere TrovaImpresa",
+  "short_name": "Cantiere",
+  "description": "I lavori di oggi, le giornate, le foto e la chat col capo.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "/gestionale-operatore.html",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0A2A4D",
+  "theme_color": "#14324E",
+  "icons": [
+    {
+      "src": "/img/app/operaio-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/app/operaio-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/app/operaio-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

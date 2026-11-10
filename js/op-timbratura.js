@@ -169,7 +169,10 @@ function tmbDisegna(){
   b.classList.toggle("esci",  dentro);
   b.classList.toggle("entra", !dentro);
   const adesso = tmbOraHM(new Date().toISOString());
-  b.innerHTML = (dentro ? "⏹️ Uscita" : "▶️ Entrata")
+  /* 10 nov 2026 — niente emoji: icone disegnate (bianche sul tasto) */
+  const _IC_ENT='<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><path d="M7 4.5v15l12-7.5z"/></svg>';
+  const _IC_USC='<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>';
+  b.innerHTML = (dentro ? _IC_USC + "Uscita" : _IC_ENT + "Entrata")
     + '<small id="tmb-btn-sub">' + (righe.length ? "sono le " + adesso : "segna adesso, ore " + adesso) + "</small>";
 
   /* l'elenco della giornata */
@@ -178,10 +181,12 @@ function tmbDisegna(){
   box.innerHTML = righe.map(r =>
     '<div class="tmb-riga' + (r.attesa ? " attesa" : "") + '">'
     + '<span class="ic ' + (r.tipo === "entrata" ? "e" : "u") + '">'
-    + (r.tipo === "entrata" ? "▶️" : "⏹️") + "</span> "
+    + (r.tipo === "entrata"
+        ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="#1b5e20" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        : '<svg viewBox="0 0 24 24" width="15" height="15" fill="#b3261e" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>') + "</span> "
     + (r.tipo === "entrata" ? "Entrata" : "Uscita")
     + (r.attesa
-        ? " " + tmbOraHM(r.quando) + '<span class="att">⏳ da mandare</span>'
+        ? " " + tmbOraHM(r.quando) + '<span class="att">da mandare</span>'
         : '<span class="h">' + tmbOraHM(r.quando) + "</span>")
     + "</div>"
   ).join("")

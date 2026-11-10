@@ -92,6 +92,19 @@ function show(v){
   if(v==="agenda"&&window.opRender)opRender();   /* 11 ott 2026 — schede Lavori/Foto/Archivio */
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
+/* 10 nov 2026 — L'APP CON L'ICONA. Chi apre l'app dall'icona sul telefono
+   (soprattutto iPhone) non porta con se' l'accesso fatto in Safari: deve
+   rientrare con email e password. Prima gli si diceva «usa il link di
+   invito», che lui non ha piu' sotto mano. Adesso il pulsante porta dritto
+   all'accesso. Chi e' nuovo ha sempre il suo link. */
+function gateEntra(msg){
+  const t=document.getElementById("gate-titolo");
+  if(t)t.textContent="Entra nella tua agenda";
+  $("#gate-msg").textContent=msg||"Scrivi la tua email e la tua password. Sei nuovo? Apri il link che ti ha mandato la tua impresa.";
+  const b=document.getElementById("gate-btn");
+  if(b){b.textContent="Entra";b.setAttribute("href","gestionale-invito.html?accedi=1");}
+  show("gate");
+}
 
 /* ============================================================
    ⛔ 5 SETTEMBRE 2026 — IL CAPO CHE APRE QUESTA PAGINA
@@ -199,7 +212,8 @@ function applicaPermessi(){
   _mostra("#btn-video", puo("foto"));
   /* + Rapido: compare solo se c'e' almeno UNA cosa che questa persona puo'
      segnare, e solo se vede i lavori (senza, non c'e' niente su cui segnarla) */
-  _mostra("#btn-rapido", vediLavori && (puo("rapportini")||puo("pagamenti")));
+  /* 10 nov 2026: con «Lavori» basta, c'e' «La giornata completa» da mandare al capo */
+  _mostra("#btn-rapido", vediLavori);
   /* 6 set 2026 — la timbratura: stesso permesso dei rapportini (sono ore di
      lavoro), e serve essere un operatore vero: senza operatore_id la riga non
      passerebbe le regole del database e il pulsante darebbe errore ogni volta. */

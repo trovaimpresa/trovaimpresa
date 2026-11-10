@@ -62,6 +62,58 @@ function _gNomeLav(l){ return (l && (l.descrizione || l.dove)) || "Cantiere"; }
 function _gIoKey(){ return "gior_io_"+(typeof sbUid!=="undefined"?sbUid:""); }
 function _gIo(){ try{ return localStorage.getItem(_gIoKey())||""; }catch(e){ return ""; } }
 function _gSetIo(v){ try{ localStorage.setItem(_gIoKey(),v||""); }catch(e){} }
+/* ---------------------------------------------------------------------
+   10 nov 2026 — GIORNATE DA SOLI. Chi lavora da solo non deve sentirsi
+   chiedere «tu chi sei nella squadra?». giorIoAuto() decide da sola:
+   · Squadra vuota      -> mette il titolare in Squadra col suo nome
+                           (imprese.nome) e lo segna come «io»;
+   · una persona sola, che si chiama come il titolare -> e' lui.
+   Negli altri casi (ci sono dipendenti) la domanda resta.
+   La usano anche la finestra di «Parla» (gest-parla.js) e le schede scritte a mano.
+   --------------------------------------------------------------------- */
+let giorNomeTitolare = null;
+let giorIoProvato = false;
+async function giorLeggiTitolare(){
+  if(giorNomeTitolare!==null) return giorNomeTitolare;
+  giorNomeTitolare="";
+  try{
+    const r=await sb.from("imprese").select("nome").eq("user_id",sbUid).limit(1).maybeSingle();
+    giorNomeTitolare=String((r&&r.data&&r.data.nome)||"").trim();
+  }catch(e){}
+  return giorNomeTitolare;
+}
+async function giorIoAuto(subito){
+  if(_gIo()) return false;
+  const nome=await giorLeggiTitolare();
+  if(giorOps.length===1&&nome&&(_gNorm(giorOps[0].nome)===_gNorm(nome)||_gNorm(giorOps[0].nome).split(" ")[0]===_gNorm(nome).split(" ")[0])){
+    _gSetIo(giorOps[0].id); return true;
+  }
+  if(giorOps.length===0){
+    const N=(nome||"Io").replace(/^./,c=>c.toUpperCase()).slice(0,60);
+    /* dalle schede: entra in Squadra solo al «Salva» (giorScrivi), cosi' «Annulla» non lascia niente */
+    if(!subito){
+      if(!giorProp) return false;
+      giorIoNome=N; if(!giorNuovi.includes(N)) giorNuovi.push(N);
+      giorProp.forEach(c=>{ if(!c.chi.size||c.chi.has("IO")){ c.chi.delete("IO"); c.chi.add(N); } });
+      return true;
+    }
+    const {data,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id:_gMest(),nome:N}).select("id,nome,mestiere_id");
+    if(error||!data||!data.length) return false;
+    giorOps.push(data[0]); _gSetIo(data[0].id); return true;
+  }
+  return false;
+}
+window.giorIoAuto=giorIoAuto;
+/* la stessa decisione, senza attese (il nome del titolare e' gia' letto) */
+function giorIoSubito(){
+  const nome=giorNomeTitolare||"";
+  if(giorOps.length===1&&nome&&(_gNorm(giorOps[0].nome)===_gNorm(nome)||_gNorm(giorOps[0].nome).split(" ")[0]===_gNorm(nome).split(" ")[0])){ _gSetIo(giorOps[0].id); return; }
+  if(giorOps.length===0){
+    const N=(nome||"Io").replace(/^./,c=>c.toUpperCase()).slice(0,60);
+    giorIoNome=N; if(!giorNuovi.includes(N)) giorNuovi.push(N);
+    giorProp.forEach(c=>{ if(!c.chi.size||c.chi.has("IO")){ c.chi.delete("IO"); c.chi.add(N); } });
+  }
+}
 function _gMest(){ try{ return (typeof window.curMestiere==="function")?window.curMestiere():null; }catch(e){ return null; } }
 const _gIc = {
   pdf:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
@@ -214,7 +266,7 @@ async function giorCarica(){
   /* le giornate mandate dagli operai senza il permesso «Rapportini» */
   giorProposte=[];
   try{
-    const rp=await sb.from("gest_giornate_proposte").select("id,operatore_id,data,dove,cosa,creato_il").eq("user_id",sbUid).eq("stato","da_vedere").order("data",{ascending:false}).limit(50);
+    const rp=await sb.from("gest_giornate_proposte").select("*").eq("user_id",sbUid).eq("stato","da_vedere").order("data",{ascending:false}).limit(50);
     if(!rp.error) giorProposte=rp.data||[];
   }catch(e){}
   /* il consulente del lavoro */
@@ -294,10 +346,11 @@ function giorDisegna(msg){
   if(tot.length) h+=`<div class="gt">${tot.map(([n,t])=>`<div><span>${esc(n)}</span><b>${t.g}</b><span>${t.g===1?"giorno":"giorni"}</span></div>`).join("")}</div>`;
 
   if(giorProposte.length){
-    h+=`<div class="gb gpro"><h4>Da approvare (${giorProposte.length})</h4><div class="gnota">Le hanno mandate i tuoi operai. «Approva» le mette nel mese con 8 ore.</div>`;
+    h+=`<div class="gb gpro"><h4>Da approvare (${giorProposte.length})</h4><div class="gnota">Le hanno mandate i tuoi operai. «Approva» le mette nel mese con 8 ore, insieme a foto, spese e bolle.</div>`;
     giorProposte.forEach(p=>{
       h+=`<div class="gpr"><div class="w">${esc(giorNomeOp(p.operatore_id))} · ${esc(_gData(p.data))}</div>
         <div class="c"><b>${esc(p.dove)}</b>${p.cosa?" — "+esc(p.cosa):""}</div>
+        ${typeof gpcExtraHTML==="function"?gpcExtraHTML(p):""}
         <div class="grow"><button type="button" class="gsi" data-gior="pro-si" data-id="${esc(p.id)}">Approva</button><button type="button" class="gno" data-gior="pro-no" data-id="${esc(p.id)}">Scarta</button></div></div>`;
     });
     h+=`</div>`;
@@ -397,7 +450,16 @@ function giorDisegna(msg){
 }
 
 function giorDisegnaProp(){
+  if(!_gIo()&&giorOps.length<=1&&giorProp){
+    if(giorNomeTitolare===null){
+      if(!giorIoProvato){ giorIoProvato=true; giorLeggiTitolare().then(()=>{ if(giorProp){ giorLeggiProp(); giorDisegna(); } }).catch(()=>{}); }
+    } else giorIoSubito();
+  }
   const io=_gIo();
+  /* da soli: nelle schede vuote c'e' gia' lui */
+  if(io&&io!=="-"&&giorOps.length===1&&giorProp){
+    const o1=giorOps.find(x=>String(x.id)===String(io)), n=o1&&o1.nome; if(n) giorProp.forEach(c=>{ if(!c.chi.size||c.chi.has("IO")){ c.chi.delete("IO"); c.chi.add(n); } });
+  }
   const serveIo=giorProp.some(c=>c.chi.has("IO"))&&!io;
   let h=`<div class="gb gprop"><h4>Controlla e salva</h4>`;
   if(serveIo){
@@ -530,7 +592,8 @@ async function giorScrivi(schede){
   schede.forEach(c=>c.nomi.forEach(n=>{ const k=n+"|"+c.data; quante[k]=(quante[k]||0)+1; }));
   for(const c of schede){
     /* 3. il cantiere: un lavoro che c'e' gia', o uno nuovo */
-    const lav=await giorTrovaLavoro(c.dove,c.data);
+    /* 10 nov 2026: se la scheda porta gia' il lavoro (giornata mandata dal telefono), si usa quello */
+    const lav=(c.lavoro_id&&giorLav.find(l=>String(l.id)===String(c.lavoro_id)))||await giorTrovaLavoro(c.dove,c.data);
     const mid=lav.mestiere_id||mest;
     /* 4. il rapportino */
     const rr=await sb.from("gest_rapportini").insert({user_id:sbUid,mestiere_id:mid,lavoro_id:lav.id,data:c.data,note:c.cosa.trim()||null}).select("id");
@@ -580,13 +643,18 @@ async function giorProApprova(id){
   if(!nome){ giorDisegna({t:"Questa persona non è più in Squadra: scarta la giornata.",k:"err"}); return; }
   try{
     await giorAssicura();
-    await giorScrivi([{data:p.data,nomi:[nome.nome],dove:p.dove,cosa:p.cosa||""}]);
+    await giorScrivi([{data:p.data,nomi:[nome.nome],dove:p.dove,cosa:p.cosa||"",lavoro_id:p.lavoro_id||null}]);
   }catch(e){ giorDisegna({t:e.message,k:"err"}); return; }
+  /* 10 nov 2026 — la giornata completa: foto, spese e bolle mandate dal telefono */
+  let extraMsg="";
+  if(typeof gpcApprovaExtra==="function"){
+    try{ extraMsg=await gpcApprovaExtra(p,nome.nome); }catch(e){ extraMsg=" Attenzione: "+e.message; }
+  }
   const r=await sb.from("gest_giornate_proposte").update({stato:"approvata",visto_il:new Date().toISOString()}).eq("id",p.id).eq("user_id",sbUid).select("id");
   await renderGiornate();
   giorDisegna(r.error||!r.data||!r.data.length
     ?{t:"Giornata scritta, ma non riesco a toglierla da «Da approvare»: non approvarla di nuovo.",k:"err"}
-    :{t:"Approvata ✔ "+nome.nome+", "+_gData(p.data),k:"ok"});
+    :{t:"Approvata ✔ "+nome.nome+", "+_gData(p.data)+extraMsg,k:extraMsg.indexOf("Attenzione")>=0?"err":"ok"});
 }
 async function giorProScarta(id){
   const r=await sb.from("gest_giornate_proposte").update({stato:"scartata",visto_il:new Date().toISOString()}).eq("id",id).eq("user_id",sbUid).select("id");

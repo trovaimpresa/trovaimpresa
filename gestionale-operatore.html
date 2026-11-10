@@ -6,6 +6,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>La tua agenda — Gestionale</title>
+<!-- 10 nov 2026 — l'app dell'operaio con la sua icona sul telefono -->
+<link rel="manifest" href="/manifest-operaio.json">
+<meta name="theme-color" content="#14324E">
+<link rel="apple-touch-icon" href="/img/app/operaio-apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cantiere">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="robots" content="noindex, nofollow">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/cestino.js"></script>
@@ -402,7 +410,7 @@
         <span class="tmb-ore" id="tmb-ore">0h 00m</span>
       </div>
       <div class="tmb-vuoto" id="tmb-vuoto">Oggi non hai ancora timbrato.</div>
-      <button class="tmb-btn entra" id="tmb-btn">▶️ Entrata<small id="tmb-btn-sub"></small></button>
+      <button class="tmb-btn entra" id="tmb-btn"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><path d="M7 4.5v15l12-7.5z"/></svg>Entrata<small id="tmb-btn-sub"></small></button>
       <div id="tmb-lista"></div>
     </div>
 
@@ -606,20 +614,22 @@
 
 <div id="toast"></div>
 
-<script src="/js/op-base.js?v=7nov1"></script>
-<script src="/js/op-agenda-giorno.js"></script>
+<script src="/js/op-base.js?v=10nov1"></script>
+<script src="/js/op-agenda-giorno.js?v=10nov1"></script>
 <script src="/js/op-spese-foto.js"></script>
 <script src="/js/op-rapido-voce.js"></script>
 <script src="/js/op-rapportini.js"></script>
 <script src="/js/op-giornate.js?v=7nov1"></script>
-<script src="/js/op-salvataggio-lavoro.js"></script>
+<script src="/js/op-giornata-completa.js?v=1"></script>
+<script src="/js/op-salvataggio-lavoro.js?v=10nov1"></script>
 <script src="/js/op-schede.js?v=2"></script>
 <script src="/js/op-preventivi.js?v=1"></script>
 <script src="/js/chat-squadra.js?v=3"></script>
 <script src="/js/op-chat.js?v=3"></script>
+<script src="/js/op-chat-vista.js?v=1"></script>
 <script src="/js/mappa-indirizzo.js?v=2"></script>
 <script src="/js/op-mappa.js?v=2"></script>
-<script src="/js/op-timbratura.js"></script>
+<script src="/js/op-timbratura.js?v=10nov1"></script>
 <script src="/js/op-avvio.js"></script>
 <script src="/js/freccia-indietro.js"></script>
 <script src="/js/gest-bordo-blu.js?v=1" defer></script>
@@ -628,5 +638,6 @@
 <script src="/js/gest-voce.js?v=6nov9" defer></script>
 <!-- 5 nov 2026: caselle rosse e verdi, come negli altri gestionali (avvisa e non blocca) -->
 <script src="/js/caselle-operaio.js?v=1" defer></script>
+<script src="/js/op-installa.js?v=1" defer></script>
 </body>
 </html>

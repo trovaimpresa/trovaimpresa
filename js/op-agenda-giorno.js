@@ -1,7 +1,7 @@
 // [SPOSTATO] op-agenda-giorno.js: era dentro op-core.js, righe 269-627, spostato identico.
 
 async function boot(session){
-  if(!session){gate("Per entrare usa il link che ti ha mandato la tua impresa.");return;}
+  if(!session){gateEntra();return;}
   MIO.uid=session.user.id;
   const {data:membri,error}=await sb.from("gest_membri")
     .select("impresa_id,operatore_id,ruolo,stato,permessi").eq("membro_id",MIO.uid).eq("stato","attivo");

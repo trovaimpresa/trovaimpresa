@@ -1519,3 +1519,10 @@ Punto 2 di «Giornate al centro» chiuso (vedi docs/COLLAUDO-SEMPLICITA.md). Res
 
 ### 10 nov 2026 — Squadra come Giornate e «Sei anche un professionista?»: FATTI
 Restano: punto 4 (Giornate da soli), punto 5 (app operaio installabile + chat col capo, in programma per la sera del 10 nov), Squadra del Noleggio. «Sei anche un professionista?» ricorda la scelta solo sul telefono: se serve su tutti i dispositivi va messa nel database.
+
+### 10 nov 2026 (sera) — IN PROGRAMMA, chiesto da Alex: BOLLE CONTRO FATTURE A FINE MESE
+- Le bolle fotografate (app operaio e «Giornate di cantiere») a fine mese vanno in un **resoconto nel PDF**: tutto quello che si è preso, riga per riga (somma delle righe uguali, come «Acquisti del mese»).
+- Poi il **confronto con le fatture** che il fornitore manda al capo: bolle e fatture devono combaciare. Perché: tante volte il fornitore aggiunge materiali in fattura e nessuno se ne accorge.
+- Da segnare: cosa c'è in fattura e non in nessuna bolla (in rosso), cosa c'è in bolla e non in fattura, quantità diverse.
+- Base già pronta: `gest_acquisti` (righe di merce lette dalla foto con `ai-fattura`, collegate a `fattura_id`). Da decidere: come tenere separate le righe «da bolla» da quelle «da fattura» (oggi una bolla senza importo salva solo la merce).
+- Vale anche per la pagina «Giornate di cantiere» di Alex su Claude.

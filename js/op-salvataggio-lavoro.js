@@ -58,7 +58,7 @@ $("#btn-fatto").onclick=async()=>{
 };
 
 /* esci */
-$("#btn-esci").onclick=async()=>{await sb.auth.signOut();gate("Sei uscito. Per rientrare apri il tuo link di invito.");};
+$("#btn-esci").onclick=async()=>{await sb.auth.signOut();gateEntra("Sei uscito. Per rientrare scrivi la tua email e la tua password.");};
 $("#nav-agenda").onclick=()=>{renderCal();renderDay();show("agenda");};
 $("#nav-clienti").onclick=async()=>{await loadClienti();show("clienti");};
 $("#nav-scadenze").onclick=async()=>{await loadScadenze();show("scadenze");};
