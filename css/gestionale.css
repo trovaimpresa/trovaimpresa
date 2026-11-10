@@ -5673,3 +5673,69 @@ textarea.ctr-verde{background-position:right 10px top 12px !important}
 #riepilogo .ro-riga.grave:hover{ background:#FEE2E2 !important; }
 #riepilogo .ro-riga.attesa:hover{ background:#FEF3C7 !important; }
 #riepilogo .rie-parti{ background:#EEF4FB !important; }
+
+
+/* ================================================================
+   10 novembre 2026 — GLI ELENCHI PIU' VIVI (ok di Alex sulle foto).
+   Stessa mano della testata dell'Assistente, su Lavori, Preventivi,
+   Fatture e tutte le sezioni fatte allo stesso modo.
+   1. La riga del TOTALE e' blu a quadretti, scritte bianche.
+   2. La scheda APERTA e' blu e si appoggia sulla riga del totale
+      (sul telefono le schede vanno su due righe: li' e' tonda).
+   3. Lo STATO e' un'etichetta col suo colore: rosso chiaro = in ritardo,
+      giallo = da fare / in attesa, celeste = in corso, verde = fatto.
+      ⚠️ Il celeste NON e' #DBEAFE/#1E40AF: js/blu-scuro.js li riscrive.
+   4. Il pulsante principale e' blu scuro come tutto il resto (era rimasto
+      l'azzurro #0066ff su qualche sezione).
+   5. La riga di spiegazione sotto il titolo: nera, 16 px (era grigia, 14).
+   6. In fondo agli elenchi resta lo spazio per il pulsante «Parla», che
+      prima copriva lo stato dell'ultima riga.
+   ================================================================ */
+.wrap section .tab-tot{
+  background-color:#0a2a4d !important;
+  background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) !important;
+  background-size:40px 40px !important;
+  border-color:#0a2a4d !important;
+}
+/* ⚠️ col `body` davanti: piu' su c'e' `.wrap section .tab-tot span{color:…!important}`
+   e a parita' di forza vinceva lui (scritta scura sul blu, vista col controllo
+   dei contrasti prima di pubblicare). */
+body .wrap section .tab-tot, body .wrap section .tab-tot *,
+body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !important; }
+
+.wrap section .viste .vista.on{ background:#0a2a4d !important; color:#fff !important; border-radius:10px 10px 0 0; }
+.wrap section .viste .vista.on *{ color:#fff !important; }
+.wrap section .viste .vista.on .v-cnt{ background:transparent !important; }
+@media(max-width:760px){
+  .wrap section .viste .vista.on{ border-radius:10px; }
+}
+
+.st{ padding:6px 14px 6px 10px !important; border-radius:999px !important; background:#F1F5F9; }
+.st .lab{ font-weight:700 !important; color:#334155 !important; }
+.st .pall{ box-shadow:none !important; }
+.st:has(.pall.ritardo){ background:#FEE2E2 !important; }
+.st:has(.pall.ritardo) .lab{ color:#991B1B !important; }
+.st:has(.pall.rosso){ background:#FEF3C7 !important; }
+.st:has(.pall.rosso) .lab{ color:#92400E !important; }
+.st:has(.pall.blu){ background:#E0ECF9 !important; }
+.st:has(.pall.blu) .lab{ color:#0a2a4d !important; }
+.st:has(.pall.verde){ background:#DCFCE7 !important; }
+.st:has(.pall.verde) .lab{ color:#166534 !important; }
+
+/* lo stato scritto come parola (preventivi, fatture, lavori): stessa
+   etichetta e stessi colori dei pallini qui sopra */
+.wrap section .job .stato{ padding:6px 14px !important; border-radius:999px !important; font-weight:700 !important; border:0 !important; background:#F1F5F9 !important; color:#334155 !important; }
+.wrap section .job .stato.ritardo{ background:#FEE2E2 !important; color:#991B1B !important; }
+.wrap section .job .stato.bozza, .wrap section .job .stato.da_fare, .wrap section .job .stato.emessa{ background:#FEF3C7 !important; color:#92400E !important; }
+.wrap section .job .stato.inviato, .wrap section .job .stato.in_corso{ background:#E0ECF9 !important; color:#0a2a4d !important; }
+.wrap section .job .stato.accettato, .wrap section .job .stato.fatto, .wrap section .job .stato.pagata{ background:#DCFCE7 !important; color:#166534 !important; }
+
+#appview .btn-primary{ background:#0a2a4d !important; border-color:#0a2a4d !important; }
+#appview .btn-primary:hover{ background:#07203b !important; }
+
+.wrap section p.ti-sez{ font-size:16px !important; color:#0b1220 !important; }
+
+@media(min-width:881px){
+  #appview .wrap > section:not(#chat){ padding-bottom:110px; }
+}
