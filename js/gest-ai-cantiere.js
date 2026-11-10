@@ -152,7 +152,7 @@ function ffFotoHTML(){
   return '<div class="sh-b aic-box" id="ff-foto">'
     +'<div class="sh-tit">Fotografala e la riempio io</div>'
     +'<p class="sh-nota" style="margin-top:0">Fai la foto alla fattura o alla bolla, oppure scegli il PDF. '
-    +'Leggo io fornitore, numero, data, importo e scadenza. Costa <b>1 credito</b>.</p>'
+    +'Leggo io fornitore, numero, data, importo, scadenza e <b>la merce comprata</b>. Costa <b>1 credito</b>.</p>'
     +'<div class="aic-fila">'
     +  '<label class="aic-btn aic-btn--pieno">'+_AIC_SVG.cam+'<span>Fai la foto</span>'
     +    '<input type="file" id="ff-foto-cam" accept="image/*" capture="environment" hidden></label>'
@@ -201,7 +201,14 @@ async function ffFotoLeggi(file){
     const dati=await _aicBase64(blob);
     const nomi=(typeof fornCache!=="undefined"?fornCache:[]).map(x=>x.nome).filter(Boolean).slice(0,60);
     const testo="Leggi questa fattura di un fornitore."+(nomi.length?"\nFornitori gia' in rubrica (se e' uno di questi, scrivi il nome IDENTICO): "+nomi.join(" | "):"");
-    d=await window.AI.cantiere("dati_fattura_fornitore",testo,{tipo:tipo,dati:dati},true);
+    /* 10 nov 2026: «ai-fattura» legge anche le righe della merce */
+    try{
+      d=await window.AI.cantiere("dati_fattura_fornitore",testo,{tipo:tipo,dati:dati},true,"ai-fattura");
+    }catch(e1){
+      /* se la funzione nuova non risponde si legge come prima (senza la
+         merce): un errore rimborsa il credito, quindi non si paga due volte */
+      d=await window.AI.cantiere("dati_fattura_fornitore",testo,{tipo:tipo,dati:dati},true);
+    }
   }catch(e){
     _aicSt(st,(e&&e.message)||"Non ci sono riuscito. Riprova fra un attimo.","err");
   }
@@ -243,6 +250,13 @@ function ffRiempi(d,st){
   const note=document.getElementById("ff-note");
   if(note&&!note.value.trim()&&d.cosa){_ffMetti("ff-note",d.cosa);messi.push("note");}
 
+  /* 10 nov 2026 — la merce, riga per riga (js/gest-acquisti.js) */
+  let nMerce=0;
+  if(typeof acqPulisci==="function"&&typeof acqBoxMetti==="function"){
+    nMerce=acqBoxMetti(acqPulisci(d.righe),true);
+    if(nMerce)messi.push(nMerce===1?"1 riga di merce":nMerce+" righe di merce");
+  }
+
   const sel=document.getElementById("ff-forn");
   const f=_ffTrovaFornitore(d.fornitore,d.partita_iva);
   const nuovo=document.getElementById("ff-foto-nuovo");
@@ -280,6 +294,7 @@ function ffRiempi(d,st){
   if(!messi.length){_aicSt(st,"Non ho trovato niente da leggere. Rifai la foto più dritta e con più luce.","err");return;}
   let msg="Ho riempito: "+messi.join(", ")+". Controlla, poi premi «Aggiungi».";
   if(+d.imponibile>0&&+d.totale>0&&Math.abs(d.imponibile-d.totale)>0.009)msg+=" L'importo è il totale da pagare, IVA compresa ("+_ffImporto(d.imponibile)+" € senza IVA).";
+  if(nMerce&&!(+d.totale>0))msg="Ho letto "+(nMerce===1?"1 riga":nMerce+" righe")+" di merce. È una bolla senza importo: controlla e premi «Aggiungi», la merce va negli Acquisti del mese.";
   if(doppia){_aicSt(st,"Attenzione: una fattura con questo numero di questo fornitore è già registrata. Controlla di non segnarla due volte.","err");return;}
   _aicSt(st,msg,"ok");
 }

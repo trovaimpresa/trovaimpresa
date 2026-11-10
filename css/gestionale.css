@@ -5788,3 +5788,48 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #giornate .gday .gv{ flex-direction:column; gap:4px; }
   .gx-griglia{ grid-template-columns:1fr 1fr; }
 }
+
+/* =====================================================================
+   10 nov 2026 — GLI ACQUISTI DEL MESE (js/gest-acquisti.js)
+   Il riquadro «Cosa hai comprato» nel modulo della fattura e la finestra
+   «Acquisti del mese». Testo da 16 in su, tasti da 48.
+   ===================================================================== */
+#acq-box .acq-testa,
+#acq-box .acq-r{ display:grid; grid-template-columns:minmax(0,1fr) 100px 130px 56px; gap:8px; align-items:center; }
+#acq-box .acq-testa{ font-size:15px; font-weight:700; color:var(--testo-2,#475569); margin:4px 0 6px; }
+#acq-box .acq-r{ margin-bottom:8px; }
+#acq-box .acq-r input{ width:100%; min-width:0; height:56px; font-family:inherit; font-size:19px; padding:0 14px; border:1px solid #cbd5e1; border-radius:13px; background:#fff; color:var(--testo,#0b1220); }
+#acq-box .acq-r input:focus{ outline:3px solid #BFD4EE; outline-offset:1px; border-color:#0a2a4d; }
+#acq-box .acq-q{ text-align:right; font-variant-numeric:tabular-nums; }
+#acq-box #acq-righe:empty{ display:none; }
+#acq-box .aic-btn{ margin-top:4px; }
+#acq-box .acq-x{ width:56px; height:56px; border-radius:13px; }
+.acq-x{ width:48px; height:48px; flex:none; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--bordo,#cbd5e1); border-radius:10px; background:#fff; color:#475569; cursor:pointer; font-size:16px; font-weight:700; }
+.acq-x:hover{ background:#FEF2F2; border-color:#FCA5A5; color:#B91C1C; }
+.acq-x:focus-visible{ outline:3px solid #BFD4EE; outline-offset:2px; }
+.acq-x.acq-x--sicuro{ width:auto; padding:0 14px; background:#B91C1C; border-color:#B91C1C; color:#fff; }
+
+.acq-mese{ display:flex; align-items:center; justify-content:center; gap:14px; margin:0 0 16px; }
+.acq-mese b{ font-size:22px; color:#0a2a4d; min-width:210px; text-align:center; }
+.acq-mese button{ width:50px; height:50px; border-radius:12px; border:1.5px solid var(--bordo,#cbd5e1); background:#fff; color:#0a2a4d; font-size:28px; line-height:1; cursor:pointer; }
+.acq-mese button:hover{ background:#E0ECF9; }
+.acq-mese button:focus-visible{ outline:3px solid #BFD4EE; outline-offset:2px; }
+.acq-tot{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:0 0 16px; }
+.acq-tot div{ background-color:#0a2a4d;
+  background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:40px 40px; border-radius:14px; padding:14px 16px; }
+.sheet .acq-tot b, .acq-tot b{ display:block; font-size:24px; color:#fff; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.sheet .acq-tot span, .acq-tot span{ font-size:16px; color:#dbe6f3; }
+#acq-corpo .gx-riga .t small{ display:block; font-size:15px; color:var(--testo-2,#475569); margin-top:2px; }
+#acq-corpo .gx-lista{ margin-bottom:0; }
+.acq-vuoto{ text-align:center; padding:28px 16px; font-size:17px; color:var(--testo-2,#475569); line-height:1.55; }
+.acq-vuoto b{ display:block; font-size:20px; color:#0a2a4d; margin-bottom:6px; }
+.acq-vuoto .btn-primary{ display:block; margin:18px auto 0; min-height:50px; }
+@media (max-width:640px){
+  #acq-box .acq-testa{ display:none !important; }
+  #acq-box .acq-r{ grid-template-columns:minmax(0,1fr) minmax(0,1fr) 56px; padding-bottom:10px; border-bottom:1px solid var(--bordo,#e2e8f0); }
+  #acq-box .acq-r .acq-n{ grid-column:1 / -1; }
+  .acq-tot{ grid-template-columns:1fr 1fr; }
+  .acq-tot div:nth-child(3){ grid-column:1 / -1; }
+  .acq-mese b{ min-width:0; flex:1; font-size:20px; }
+}

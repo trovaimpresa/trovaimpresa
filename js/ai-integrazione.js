@@ -203,12 +203,14 @@
   /* sono finiti (l'avviso l'ha gia' mostrato mostraUpgrade).            */
   /* ------------------------------------------------------------------ */
   const CANTIERE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-cantiere';
-  AI.cantiere = async function (feature, testo, file, json) {
+  /* 10 nov 2026: «funzione» = un'altra funzione fatta allo stesso modo
+     (es. 'ai-fattura'). Senza, resta ai-cantiere come prima. */
+  AI.cantiere = async function (feature, testo, file, json, funzione) {
     const token = getToken();
     if (!token) throw new Error('Sessione scaduta: rientra nel gestionale e riprova.');
     let res;
     try {
-      res = await fetch(CANTIERE_URL, {
+      res = await fetch(funzione ? CANTIERE_URL.replace(/ai-cantiere$/, funzione) : CANTIERE_URL, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
         body: JSON.stringify({ feature: feature, input: testo, file: file || null }),

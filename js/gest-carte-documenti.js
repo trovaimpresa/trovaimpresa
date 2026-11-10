@@ -448,17 +448,32 @@
       +'<div class="field"><label>Lavoro collegato (facoltativo)</label><select id="ff-lav">'+lavOps+'</select></div>'
       +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
+      /* 10 nov 2026 — la merce comprata, riga per riga (js/gest-acquisti.js) */
+      +(typeof acqBoxHTML==="function"?acqBoxHTML():'')
       +'</div></div>',
       ctrTastoHTML('fattfornitore')
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-fattf" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button>');
     ctrAscolta('fattfornitore');
     if(isNew&&typeof ffFotoVia==="function")ffFotoVia();
+    if(typeof acqTesta==="function")acqTesta();
+    if(!isNew&&typeof acqBoxCarica==="function")acqBoxCarica(f.id);
   }
   async function saveFattf(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const fornitore_id=$("#ff-forn").value;if(!fornitore_id){toast("Scegli il fornitore");return;}
-    const importo=_numIt("#ff-imp")||0;if(!(importo>0)){toast("Scrivi l'importo della fattura, per esempio 1.200,50");return;}
+    const importo=_numIt("#ff-imp")||0;
+    if(!(importo>0)){
+      /* 10 nov 2026 — una BOLLA non ha importo: non e' una fattura da
+         pagare. Si salva solo la merce, che va negli Acquisti del mese. */
+      if(!id&&typeof acqLeggi==="function"&&acqLeggi().length){
+        const nb=await acqSalva(null,{fornitore_id,lavoro_id:$("#ff-lav").value||null,data:$("#ff-data").value||todayStr()},false);
+        if(nb<0)return;
+        if(typeof ffFotoAllega==="function")ffFotoAllega(fornitore_id);
+        closeSheet();toast("Bolla registrata: la merce è negli Acquisti del mese ✔");return;
+      }
+      toast("Scrivi l'importo della fattura, per esempio 1.200,50");return;
+    }
     const row={fornitore_id,numero:$("#ff-num").value.trim()||null,data:$("#ff-data").value||todayStr(),
       importo,scadenza:$("#ff-scad").value||null,lavoro_id:$("#ff-lav").value||null,note:$("#ff-note").value.trim()||null};
     const {data,error}=id
@@ -468,6 +483,9 @@
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     /* la foto letta dall'AI resta fra i documenti del fornitore */
     if(!id&&typeof ffFotoAllega==="function")ffFotoAllega(fornitore_id);
+    /* la merce comprata: si salva con la fattura (prima di chiudere, perche'
+       le righe si leggono dal modulo) */
+    if(typeof acqSalva==="function")await acqSalva(data[0].id,row,!!id);
     closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornata ✔":"Fattura registrata ✔");
   }
 

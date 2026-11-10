@@ -1513,3 +1513,6 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 ## 10 nov 2026 — IN PROGRAMMA (chiesto da Alex)
 - **Giornate al centro** (in corso): ogni giornata con Foto · Spesa · Benzina e km · Fattura o bolla; poi lista degli acquisti del mese in PDF (dalle righe lette sulle foto di fatture e bolle: «guanti 10 paia, malta 20 sacchi»); Squadra fatta come Giornate; uso da soli; app operaio con l'icona sul telefono e chat col capo.
 - **«Sei anche un professionista?»**: nel menu del gestionale impresa e artigiano un pulsante che, se sì, aggiunge le voci dello studio tecnico (Computo metrico vero al posto di «Computo da prezzare», pratiche, crediti formativi e le altre voci del professionista). Da fare dopo le Giornate.
+
+### 10 nov 2026 — Acquisti del mese: FATTO
+Punto 2 di «Giornate al centro» chiuso (vedi docs/COLLAUDO-SEMPLICITA.md). Restano: punto 3 Squadra come Giornate, punto 4 uso da soli, punto 5 app operaio installabile con chat col capo. Poi «Sei anche un professionista?».

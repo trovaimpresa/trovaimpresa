@@ -1501,3 +1501,13 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 **10 nov, prezzi del computo = 5 messaggi (deciso da Alex):** un pezzo da 30 righe costa 0,13–0,16 $ di AI; il server scrive 4 righe «utente» in più (già svuotate, conversazione a parte) così `chat_stato` le conta; chi usa i messaggi comprati ne scala altri 4. La spunta ce l'hanno solo i prezzi trovati per codice di tariffa.
 **10 nov, Giornate: si corregge anche quello scritto a mano.** Il racconto dettato passava già dall'AI; la casella «Cosa avete fatto» di «Oppure scrivila a mano» e quella di «modifica» no (provato dal vivo: restava «abiamo taliato»). Ora `js/correggi-giornata.js` conosce `gior-cosa-N` e `gior-mod-t`, e i loro Salva.
 **10 nov, la giornata al centro (ok di Alex sulla foto):** in Giornate ogni giorno è una scheda con quello che c'è (foto, spese, benzina e km, fatture) e quattro pulsanti: Foto · Spesa · Benzina e km · Fattura o bolla. In cima al mese i totali. Nessuna tabella nuova: `gest_foto`, `gest_spese`, `gest_rifornimenti`, `gest_fatture_fornitori`. File `js/gest-giornate-extra.js`.
+
+## 10 nov 2026 — Acquisti del mese (punto 2 di «Giornate al centro»)
+
+- Tabella nuova `gest_acquisti` (sql/gest-acquisti.sql, già eseguita su Supabase).
+- Funzione nuova su Supabase `ai-fattura` (già pubblicata): legge la fattura come prima E le righe della merce. `ai-cantiere` non è stata toccata; se `ai-fattura` non risponde il modulo legge come prima, senza merce.
+- Modulo «Fattura da pagare»: riquadro «Cosa hai comprato» (js/gest-acquisti.js). Una bolla senza importo salva solo la merce.
+- «Acquisti del mese» in Fornitori e in Giornate: somma le righe uguali, PDF da scaricare o inviare.
+- Provato: somma e modi di contare (pa = paia, sac = sacchi) con Node; salvataggio, lista e PDF sul sito vero con 9 righe finte poi tolte; lettura di una fattura finta con 5 prodotti, trasporto e riga di solo testo: 5 righe giuste su 5, trasporto e testo saltati, 6,6 secondi.
+- Da sapere: «30 gg d.f.f.m.» è stato letto come 30 giorni secchi (06/12) e non fine mese (31/12). Succedeva già prima: la scadenza va sempre controllata.
+- Non fatto: le righe di merce dalla foto fatta con «Parla» (js/gest-parla.js) e il Noleggio (non ha i Fornitori).
