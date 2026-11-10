@@ -3112,3 +3112,10 @@ per 10 anni. Il PDF firmato lo teniamo NOI: Openapi lo cancella dopo 90 giorni.
   sotto 13 px). SQL provato su Postgres 16: il browser non scrive, un altro non vede,
   il preventivo cancellato lascia la firma.
 - 8 nov 2026 (sera), decisione di Alex: **la firma SMS si paga SOLO coi crediti comprati**. Funzione `consume_ai_credit_pagati` (`sql/firma-sms-crediti-comprati.sql`, migrazione `firma_sms_crediti_comprati_8nov2026`): plan 'base' → solo `credits_extra`; abbonati 'ai'/'ai_pro' → prima la quota del mese, poi i comprati. I 30 regalati non valgono. `consume_ai_credit` non toccata. Collaudo fino in fondo fatto lo stesso giorno: firma DONE, PDF nel deposito, link firmato, email consegnata.
+
+# 10 NOVEMBRE 2026 — ANTI-TRUFFA: AVVISO NELLE CHAT E «SEGNALA»
+
+- Riquadro giallo «🔒 Per la tua sicurezza» sopra la chat del cliente (`#chat-sicurezza` in profilo-impresa.html) e sopra la chat dei 3 pannelli (`.msg-sicurezza`). Nelle email c'era gia' dal 9 nov (`netlify/functions/lib/avviso-sicurezza.js`), con la riga in piu' «non ti manda inviti a riunioni».
+- «⚑ Segnala questa conversazione»: `js/segnala-chat.js` (in profilo-impresa per il cliente, si monta da solo dentro `#chat-aperta` nei pannelli, caricato DOPO pannelli-messaggi.js). Rpc `segnala_chat(p_conv, p_motivo)` (`sql/segnala-chat.sql`, migrazione `segnala_chat_10nov2026`): manda solo codice chat + motivo, impresa/cliente/ultimi 6 messaggi li legge il database; scrive in `segnalazioni` (colonne nuove tipo, riferimento, da, avvisata_il). Una volta al giorno per chat e per parte, max 30/ora sul sito.
+- Email ad Alessio: `netlify/functions/segnala-avviso.js`, riceve solo l'id, parte se tipo='chat', meno di 10 minuti, avvisata_il vuoto (segnato PRIMA di mandare).
+- Il blocco dei link e' doppio nel database (trigger `trg_blocca_link` del 4 nov e `blocca_link` del 9 nov su alcune tabelle): non fa danni, da pulire con calma.

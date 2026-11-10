@@ -291,6 +291,7 @@
     "gest-scelte.sql":                  "gest_scelte gest_scelte_link gest_scelte_controlla_lavoro()",
     "gest-preventivi-link.sql":         "gest_preventivi_link gest_preventivi_link_controlla()",
     "firma-sms.sql":                    "gest_firme_sms",
+    "segnala-chat.sql":                 "segnalazioni.tipo segnalazioni.riferimento segnalazioni.da segnalazioni.avvisata_il segnala_chat()",
     "gest-mie-giornate.sql":            "gest_mie_giornate()",
     "gest-avviso-sera.sql":             "gest_avvisi_sera gest_avvisi_sera.ultimo_giorno", /* app_chiavi_push NON si controlla: e' chiusa agli utenti apposta (chiave privata), quindi da qui risulterebbe sempre mancante */
     "gest-avvisi-telefono.sql":         "gest_avvisi_sera.sera gest_avvisi_sera.mattina gest_avvisi_sera.richieste gest_avvisi_sera.ultimo_mattina",

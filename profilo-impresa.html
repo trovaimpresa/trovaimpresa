@@ -1005,6 +1005,8 @@ body .prezzo-box,body .seo-box,body .card,body .nol-card,body .piano-card,body .
             <input type="text" id="chat-testo" placeholder="Scrivi un messaggio...">
             <button class="chat-btn" onclick="inviaMessaggioChat()">Invia</button>
           </div>
+          <!-- 10 nov 2026: «Segnala questa conversazione» (js/segnala-chat.js) -->
+          <div id="chat-segnala"></div>
           <!-- ⛔ 2 SETTEMBRE 2026, deciso da Alessio: «cancella solo dalla mia
                parte». Prima questo bottone diceva «Elimina conversazione» e
                cancellava le righe dal database PER TUTTI E DUE: il cliente
@@ -2605,6 +2607,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 
 <!-- CHAT CON L'IMPRESA -->
+<script src="/js/segnala-chat.js?v=1"></script>
 <script>
 (function(){
   function chatEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -2637,6 +2640,13 @@ document.addEventListener('DOMContentLoaded',function(){
     const t=await r.text();
     return t?JSON.parse(t):null;
   }
+  /* 10 nov 2026 — «Segnala questa conversazione»: il codice della chat sta solo in questo browser */
+  if(window.tiSegnala)tiSegnala.monta(document.getElementById('chat-segnala'),{chi:'cliente',invia:function(m){
+    const conv=localStorage.getItem('chat_'+getImpresaId());
+    if(!conv)return null;
+    return chatRpc('segnala_chat',{p_conv:conv,p_motivo:m});
+  }});
+
 
   async function caricaMessaggiChat(conv,soloNuovi){
     try{
