@@ -5905,3 +5905,9 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 /* 10 nov 2026 (2) — il pulsante «Sei anche un professionista?» sale nella barra in alto dei reparti */
 .lt-btn.anche-pro-alto{ display:inline-flex; align-items:center; gap:6px; border-color:#FF8800; }
 .lt-btn.anche-pro-alto svg{ flex:none; }
+
+/* 10 nov 2026 (3) — il pulsante nel menu di sinistra: la scatola cresce col testo */
+#appview aside.side button.anche-pro{ height:auto !important; min-height:60px; max-height:none !important; white-space:normal !important; overflow:visible; align-items:center; box-sizing:border-box; padding:12px 14px; line-height:1.3; flex:none; }
+#appview aside.side button.anche-pro span{ flex:1; min-width:0; white-space:normal; }
+#appview aside.side button.anche-pro b{ display:block; white-space:normal; overflow-wrap:break-word; font-size:17px; }
+#appview aside.side button.anche-pro small{ display:block; white-space:normal; font-size:15px; }

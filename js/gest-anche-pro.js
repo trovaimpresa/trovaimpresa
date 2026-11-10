@@ -39,6 +39,23 @@ function ancheProDisegna(uid) {
     barra.insertBefore(b, barra.firstChild);
   }
   b.innerHTML = AP_IC + (apAttiva() ? "Torna al " + apNomeVero() : "Sei anche un professionista?");
+  apLato();
+}
+/* 10 nov 2026 (3) — Alessio: «o entrambe». Lo stesso pulsante resta anche in
+   fondo al menu di sinistra, dentro il reparto. La scatola cresce col testo
+   (prima il testo usciva dal bordo). */
+function apLato() {
+  const side = document.querySelector("#appview aside.side"); if (!side) return;
+  let l = document.getElementById("anche-pro-lato");
+  if (!apPuo()) { if (l) l.remove(); return; }
+  if (!l) {
+    l = document.createElement("button"); l.type = "button"; l.id = "anche-pro-lato"; l.className = "anche-pro"; l.dataset.ap = "apri";
+    const nav = side.querySelector("nav.tabs");
+    if (nav && nav.nextSibling) side.insertBefore(l, nav.nextSibling); else side.appendChild(l);
+  }
+  const on = apAttiva();
+  l.innerHTML = AP_IC + '<span><b>' + (on ? "Torna al " + apNomeVero() : "Sei anche un professionista?") + '</b>'
+    + '<small>' + (on ? "Adesso vedi lo studio tecnico" : "Geometra, architetto, ingegnere") + '</small></span>';
 }
 function apApri() {
   const on = apAttiva();
