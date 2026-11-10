@@ -5901,3 +5901,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .side .anche-pro small{ font-size:15px; color:#dbe6f3; margin-top:2px; }
 .sheet .ap-testo, .ap-testo{ font-size:18px; line-height:1.55; margin:0 0 12px; color:var(--testo,#0b1220); }
 .sheet .ap-lista, .ap-lista{ margin:0; padding-left:22px; font-size:18px; line-height:1.7; color:var(--testo,#0b1220); }
+
+/* 10 nov 2026 (2) — il pulsante «Sei anche un professionista?» sale nella barra in alto dei reparti */
+.lt-btn.anche-pro-alto{ display:inline-flex; align-items:center; gap:6px; border-color:#FF8800; }
+.lt-btn.anche-pro-alto svg{ flex:none; }

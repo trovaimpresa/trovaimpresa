@@ -17,7 +17,7 @@
    ⛔ File non chiuso in una funzione: usa openSheetGrande, closeSheet, esc
       solo DENTRO le funzioni.
    ===================================================================== */
-const AP_IC = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M15 10h.01"/></svg>';
+const AP_IC = '<svg viewBox="0 0 24 24" class="ti-ic" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M15 10h.01"/></svg>';
 let apUid = "";
 function apChiave(uid) { return "ti_faccia_" + (uid || apUid || ""); }
 function apAttiva(uid) { try { return localStorage.getItem(apChiave(uid)) === "professionista"; } catch (e) { return false; } }
@@ -27,17 +27,18 @@ function apNomeVero() { return String(window._tiTipoVero || "").toLowerCase() ==
 /* la chiama logRuoloUtente (js/gest-reparti.js) quando sa chi sei */
 function ancheProDisegna(uid) {
   if (uid) apUid = uid;
-  const side = document.querySelector("#appview aside.side"); if (!side) return;
+  /* 10 nov 2026 (2) — Alessio: «perché non lo mettiamo qui, in alto?».
+     Sta nella barra in alto della pagina dei reparti, insieme a Dati azienda,
+     Noleggio e App operaio. Dal menu di sinistra e' stato tolto. */
+  const vicino = document.querySelector('.lt-btn[data-action="appoperaio"]');
+  const barra = vicino && vicino.parentElement; if (!barra) return;
   let b = document.getElementById("anche-pro");
   if (!apPuo()) { if (b) b.remove(); return; }
   if (!b) {
-    b = document.createElement("button"); b.type = "button"; b.id = "anche-pro"; b.className = "anche-pro"; b.dataset.ap = "apri";
-    const nav = side.querySelector("nav.tabs");
-    if (nav && nav.nextSibling) side.insertBefore(b, nav.nextSibling); else side.appendChild(b);
+    b = document.createElement("button"); b.type = "button"; b.id = "anche-pro"; b.className = "lt-btn anche-pro-alto"; b.dataset.ap = "apri";
+    barra.insertBefore(b, barra.firstChild);
   }
-  const on = apAttiva();
-  b.innerHTML = AP_IC + '<span><b>' + (on ? "Torna al " + apNomeVero() : "Sei anche un professionista?") + '</b>'
-    + '<small>' + (on ? "Adesso vedi lo studio tecnico" : "Geometra, architetto, ingegnere") + '</small></span>';
+  b.innerHTML = AP_IC + (apAttiva() ? "Torna al " + apNomeVero() : "Sei anche un professionista?");
 }
 function apApri() {
   const on = apAttiva();
