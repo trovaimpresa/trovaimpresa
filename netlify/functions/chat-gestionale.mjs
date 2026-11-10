@@ -58,6 +58,7 @@ import { createClient } from '@supabase/supabase-js';
 const TEMPO_ACCESSO  = 8000;    // ms — tetto sui controlli d'accesso
 const TEMPO_CLAUDE   = 30000;   // ms — tetto su una risposta di Claude
 const GIRI_MAX       = 6;       // quante volte Claude puo' chiedere dati
+const RIGHE_ZERO_MAX = 30;      // righe a zero di un computo, per pezzo (10 nov 2026)
 const RIGHE_MAX      = 25;      // righe per attrezzata: piu' di cosi' non serve
 const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
 
@@ -613,7 +614,10 @@ async function esegui(clientDati, q) {
        al contrario: un preventivo letto dal fondo non si capisce. Per tutto
        il resto resta «prima le piu' recenti», salvo `prossime`. */
     if (q.ordine) sel = sel.order(q.ordine, { ascending: !!q.crescente, nullsFirst: false });
-    sel = sel.limit(q.limite);
+    /* 10 nov 2026 — `salta`: per leggere un computo lungo a pezzi (righe
+       31-60, 61-90…). Senza, resta il limite di sempre. */
+    if (q.salta > 0) sel = sel.range(q.salta, q.salta + q.limite - 1);
+    else sel = sel.limit(q.limite);
   }
   const r = await sel;
   if (r && r.error) return { errore: r.error.message };
@@ -898,6 +902,24 @@ const STRUMENTI = [
     }
   },
   {
+    // 10 nov 2026 — il computo LUNGO del geometra: solo le righe a zero, a pezzi
+    name: 'righe_senza_prezzo',
+    description: 'Dà le lavorazioni di un computo che sono ANCORA SENZA PREZZO (a zero), 30 per volta, in ordine, con id, codice di tariffa, descrizione, unità e quantità. Dice anche quante ne restano dopo. Con `salta` leggi il pezzo successivo (salta: 30 per le righe dalla 31 in poi). USALO, al posto di dentro_al_documento, quando deve mettere i prezzi a un computo.',
+    input_schema: { type:'object', properties: { id: { type:'string', description:'l\'id vero del computo' }, salta: { type:'integer', description:'quante righe a zero saltare dall\'inizio (0, 30, 60…)' } }, required:['id'] }
+  },
+  {
+    // 10 nov 2026 — tante ricerche nel prezzario in un colpo solo
+    name: 'cerca_prezzi',
+    description: 'Cerca nel SUO prezzario TANTE lavorazioni in un colpo solo (fino a 30). Per ognuna dai una `parola` (la più precisa della descrizione: «intonaco», «massetto», «battiscopa») e, se la riga del computo ha un codice di tariffa, anche il `codice`. Per ognuna torna: le voci con lo STESSO codice (se ci sono: sono quelle giuste) e le 5 voci più usate che contengono la parola, ognuna con descrizione, unità e prezzo. USALO al posto di tanti `miei_prezzi` quando le lavorazioni sono più di tre.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        cerca: { type:'array', items: { type:'object', properties: { parola: { type:'string' }, codice: { type:'string' } }, required:['parola'] } }
+      },
+      required: ['cerca']
+    }
+  },
+  {
     name: 'miei_prezzi',
     description: 'Legge la LISTA DEI PREZZI di chi chiede (quelli che ha salvato lui: voce, unità, prezzo). Usalo prima di fare un preventivo, con una parola della voce («piastrelle», «tinteggiatura»). Senza parola dà quelli che usa di più.',
     input_schema: { type:'object', properties: { parola: { type:'string' } } }
@@ -1104,7 +1126,7 @@ function istruzioniFisse() {
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
     'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo`. ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
-    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra): 1) trovalo; 2) leggi le righe con `dentro_al_documento` (voci_del_computo); 3) cerca i SUOI prezzi con `miei_prezzi`; 4) chiama `prezzi_computo` solo per le righe a zero. Vedi al massimo 25 righe: se il computo ne ha di più dillo, e digli che per i codici di tariffa c\'è anche il pulsante «€ Prendi i prezzi dal prezzario» dentro il computo.',
+    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra): 1) trovalo con `cerca_per_nome` su computi; 2) leggi le righe a zero con `righe_senza_prezzo` (30 per volta); 3) cerca TUTTE le lavorazioni insieme con UNA chiamata a `cerca_prezzi` (parola + codice di tariffa se c\'è); 4) chiama `prezzi_computo`. Regole: se c\'è una voce con lo STESSO codice e la stessa unità, è quella (`sicuro: true`); se la trovi solo per parola, `sicuro: true` solo quando è chiaramente la stessa lavorazione con la stessa unità, altrimenti `sicuro: false`; se non c\'è niente di adatto lascia fuori la riga. `prezzo_da` corto (massimo 60 caratteri). ⛔ UN PEZZO PER MESSAGGIO: 30 righe e basta. Se `restano_dopo_queste` è più di zero, dillo nella risposta: «Ne restano N: quando hai confermato questi, premi di nuovo "Metti i prezzi con l\'AI"». Se ti chiede di «continuare» o «le altre», rileggi con `righe_senza_prezzo`: quelle già confermate non tornano; se tornano le stesse a cui non avevi trovato un prezzo, usa `salta` per andare avanti.',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
     'COME SCRIVI: testo semplice. Niente righe di trattini (---), niente titoli col cancelletto (#), niente tabelle. Il grassetto solo per i numeri e i nomi che contano.',
     'SE CHIEDE QUALE documento ha dentro qualcosa («quale computo ha le lavorazioni», «in quale preventivo ho messo il ponteggio») NON elencarli tutti chiedendo quale: guarda dentro con `dentro_al_documento` (anche più documenti nello stesso giro) e rispondi tu.',
@@ -1618,6 +1640,55 @@ export default async function (req) {
                        filtri: { user_id: uid }, senzaCestino: true, ordine: 'usata_volte', limite: RIGHE_MAX, soloConta: false };
           if (inp.parola) qp.contiene = { campo: 'descrizione', valore: String(inp.parola).slice(0, 60) };
           esito = uid ? await esegui(dati, qp) : { errore: 'manca chi sta chiedendo' };
+        } else if (t.name === 'righe_senza_prezzo') {
+          /* ⛔ PRIMA il computo, coi due filtri di sempre (utente e reparto):
+             se non e' suo o e' di un altro reparto le righe non si toccano. */
+          if (!inp.id) {
+            esito = { errore: 'mi serve l\'id vero del computo: cercalo prima' };
+          } else {
+            const qc = costruisciLettura('computi', uid, mestiere_id, { quanti: 1 });
+            let suo = false;
+            if (!qc.errore) { qc.filtri.id = String(inp.id); const rc = await esegui(dati, qc); suo = !rc.errore && rc.righe && rc.righe.length === 1; }
+            if (!suo) {
+              esito = { errore: 'quel computo non e\' in questo reparto, oppure non esiste' };
+            } else {
+              const salta = Math.min(Math.max(parseInt(inp.salta, 10) || 0, 0), 5000);
+              const base0 = { tabella: 'gest_computo_voci_calc', filtri: { user_id: uid, computo_id: String(inp.id) },
+                              oppure: 'prezzo_unitario.is.null,prezzo_unitario.eq.0' };
+              const [rr, rq] = await Promise.all([
+                esegui(dati, Object.assign({ campi: 'id,ordine,codice,descrizione,unita,quantita', ordine: 'ordine', crescente: true, limite: RIGHE_ZERO_MAX, salta: salta, soloConta: false }, base0)),
+                esegui(dati, Object.assign({ campi: 'id', soloConta: true }, base0))
+              ]);
+              if (rr.errore || rq.errore) esito = { errore: rr.errore || rq.errore };
+              else {
+                const righe = (rr.righe || []).map(function (v) {
+                  return { id: v.id, codice: v.codice || undefined, descrizione: String(v.descrizione || '').slice(0, 150), unita: v.unita || undefined, quantita: v.quantita };
+                });
+                esito = { righe: righe, a_zero_in_tutto: rq.quanti, lette_dalla: salta + 1, restano_dopo_queste: Math.max(0, rq.quanti - salta - righe.length) };
+              }
+            }
+          }
+        } else if (t.name === 'cerca_prezzi') {
+          /* i prezzi sono dell'utente (user_id), come in `miei_prezzi`.
+             Ogni ricerca passa da `esegui`, col gettone dell'iscritto. */
+          const lista = (Array.isArray(inp.cerca) ? inp.cerca : []).slice(0, 30);
+          if (!uid) esito = { errore: 'manca chi sta chiedendo' };
+          else if (!lista.length) esito = { errore: 'manca cosa cercare' };
+          else {
+            const taglia = function (r) { return { descrizione: String(r.descrizione || '').slice(0, 110), unita: r.unita || undefined, prezzo_unitario: r.prezzo_unitario, codice: r.codice || undefined }; };
+            const fatti = await Promise.all(lista.map(async function (c) {
+              const parola = String((c && c.parola) || '').trim().slice(0, 40);
+              const codice = String((c && c.codice) || '').trim().slice(0, 40);
+              const out = { parola: parola };
+              const baseP = { tabella: 'gest_prezzi_propri', campi: 'codice,descrizione,unita,prezzo_unitario', senzaCestino: true, ordine: 'usata_volte', soloConta: false };
+              const lavori = [];
+              if (codice) lavori.push(esegui(dati, Object.assign({}, baseP, { filtri: { user_id: uid, codice: codice }, limite: 3 })).then(function (r) { if (r.righe && r.righe.length) { out.codice = codice; out.stesso_codice = r.righe.map(taglia); } }));
+              if (parola) lavori.push(esegui(dati, Object.assign({}, baseP, { filtri: { user_id: uid }, contiene: { campo: 'descrizione', valore: parola }, limite: 5 })).then(function (r) { out.con_la_parola = (r.righe || []).map(taglia); }));
+              await Promise.all(lavori);
+              return out;
+            }));
+            esito = { risultati: fatti };
+          }
         } else if (t.name === 'compila_computo' || t.name === 'prezzi_computo') {
           /* ⛔ 10 nov 2026 — QUI NON SI SCRIVE NIENTE. Se c'e' un id, PRIMA si
              controlla che il computo sia suo e di questo reparto (i due filtri
@@ -1696,7 +1767,7 @@ export default async function (req) {
         risultati.push({
           type: 'tool_result',
           tool_use_id: t.id,
-          content: JSON.stringify(esito).slice(0, 12000),
+          content: JSON.stringify(esito).slice(0, (t.name === 'cerca_prezzi' || t.name === 'righe_senza_prezzo') ? 30000 : 12000),
           is_error: !!esito.errore
         });
       }
