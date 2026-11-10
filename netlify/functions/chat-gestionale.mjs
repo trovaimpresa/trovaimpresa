@@ -457,6 +457,10 @@ function pulisciVoci(lista, conFonte) {
     if (un) voce.unita = un;
     const q = Number(v.quantita);
     if (isFinite(q) && q > 0 && q < 1000000) voce.quantita = q;
+    /* 10 nov 2026, visto nel collaudo dal vivo: una riga «a corpo» senza
+       quantita' entrava nel computo a 0 e valeva zero anche col prezzo.
+       «A corpo» vuol dire UNO. Solo per il computo: il preventivo resta com'era. */
+    else if (conFonte && /^(a\s+)?corpo$/i.test(un)) voce.quantita = 1;
     const pz = (v.prezzo_unitario === null || v.prezzo_unitario === undefined || v.prezzo_unitario === '') ? NaN : Number(v.prezzo_unitario);
     if (isFinite(pz) && pz >= 0 && pz < 10000000) voce.prezzo_unitario = pz;
     if (conFonte && voce.prezzo_unitario !== undefined) {
