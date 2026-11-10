@@ -1511,3 +1511,9 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 - Provato: somma e modi di contare (pa = paia, sac = sacchi) con Node; salvataggio, lista e PDF sul sito vero con 9 righe finte poi tolte; lettura di una fattura finta con 5 prodotti, trasporto e riga di solo testo: 5 righe giuste su 5, trasporto e testo saltati, 6,6 secondi.
 - Da sapere: «30 gg d.f.f.m.» è stato letto come 30 giorni secchi (06/12) e non fine mese (31/12). Succedeva già prima: la scadenza va sempre controllata.
 - Non fatto: le righe di merce dalla foto fatta con «Parla» (js/gest-parla.js) e il Noleggio (non ha i Fornitori).
+
+## 10 nov 2026 — Squadra fatta come Giornate (punto 3) e «le ultime in cima»
+
+- Squadra: una scheda grande per persona (js/gest-squadra-giornate.js) coi giorni del mese presi da gest_ore, striscia di quadretti, avvisi, tre tasti (Giornate, Messaggi, Scheda). «Giornate» apre il mese della persona. Niente di nuovo nel database. Se il file non si carica resta la tabella di prima.
+- Regola nuova di Alessio: «le giornate salvate, le fatture o le foto in cima devono rimanere sempre le ultime salvate, altrimenti bisogna sempre scorrere». Applicata a: fatture da pagare (prima per scadenza, ora per data di salvataggio; pagate in fondo), foto e spese dentro Giornate, righe degli Acquisti del mese, giorni della persona in Squadra. Giornate era già così.
+- Non fatto: la Squadra del Noleggio (è un file diverso).

@@ -236,7 +236,8 @@ function acqCorpoHTML(errore) {
     }).join("") + '</div></div></div>';
   h += '<div class="sh-col"><div class="sh-b"><div class="sh-tit">Riga per riga</div>'
     + '<p class="sh-nota" style="margin-top:0">Se una riga è sbagliata, toglila qui.</p><div class="gx-lista">'
-    + acqRighe.map(function (r) {
+    /* a schermo le ULTIME salvate stanno in cima (nel PDF resta l'ordine dei giorni) */
+    + acqRighe.slice().reverse().map(function (r) {
       const q = (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + r.unita : "") : "";
       return '<div class="gx-riga"><span class="t">' + esc(r.descrizione) + '<small>' + esc(acqData(r.data) + (acqFornNomi[String(r.fornitore_id)] ? " · " + acqFornNomi[String(r.fornitore_id)] : "")) + '</small></span>'
         + '<b>' + esc(q) + '</b>'
@@ -332,7 +333,7 @@ document.addEventListener("input", function (e) {
 document.addEventListener("click", async function (e) {
   const b = e.target && e.target.closest && e.target.closest("[data-acq]"); if (!b) return;
   const a = b.dataset.acq;
-  if (a === "mese") return acqApri(b.dataset.mese || (typeof giorMese !== "undefined" && document.getElementById("giornate") && document.getElementById("giornate").classList.contains("on") ? giorMese : ""));
+  if (a === "mese") return acqApri(b.dataset.mese || (typeof giorMese !== "undefined" && document.getElementById("giornate") && document.getElementById("giornate").classList.contains("active") ? giorMese : ""));
   if (a === "piu-riga") {
     const box = document.getElementById("acq-righe"); if (!box) return;
     box.insertAdjacentHTML("beforeend", acqRigaHTML({})); acqTesta();

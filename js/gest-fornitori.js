@@ -83,7 +83,10 @@
       });
     }catch(e){}
     /* aperte prima (per scadenza), pagate in fondo */
-    fattfCache.sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(a.scadenza||"9999").localeCompare(String(b.scadenza||"9999")));
+    /* 10 nov 2026 — regola di Alessio: in cima le ULTIME salvate (prima erano
+       in ordine di scadenza). Le pagate restano in fondo; le scadute si
+       vedono lo stesso, dal rosso e dal riassunto qui sopra. */
+    fattfCache.sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(b.created_at||"").localeCompare(String(a.created_at||"")));
     const aperte=fattfCache.filter(f=>f.stato!=="pagata");
     const totAp=aperte.reduce((sm,f)=>sm+(+f.importo||0),0);
     const scadute=aperte.filter(f=>f.scadenza&&f.scadenza<oggi);

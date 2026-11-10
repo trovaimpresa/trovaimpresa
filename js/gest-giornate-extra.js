@@ -64,6 +64,9 @@ async function gxCarica() {
     tenta(sb.from("gest_fatture_fornitori").select("id,lavoro_id,data,importo,numero").eq("user_id", sbUid).gte("data", da).lt("data", a)),
     tenta(sb.from("gest_mezzi").select("id,nome,mestiere_id").eq("user_id", sbUid).order("nome"))
   ]);
+  /* 10 nov 2026 — regola di Alessio: in cima sempre le ULTIME salvate */
+  const ultimePrima = (x, y) => String(y.created_at || "").localeCompare(String(x.created_at || ""));
+  foto.sort(ultimePrima); spese.sort(ultimePrima);
   gxDati = { foto, spese, rif, fatt, mezzi };
 }
 async function gxRicarica() {

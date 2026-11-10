@@ -5833,3 +5833,56 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .acq-tot div:nth-child(3){ grid-column:1 / -1; }
   .acq-mese b{ min-width:0; flex:1; font-size:20px; }
 }
+
+/* =====================================================================
+   10 nov 2026 — LA SQUADRA FATTA COME LE GIORNATE (js/gest-squadra-giornate.js)
+   Una scheda grande per persona: nome, giorni del mese, tre tasti.
+   ===================================================================== */
+.sqg-testa{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 0 16px; }
+.sqg-nav{ display:flex; align-items:center; gap:10px; }
+.sqg-nav b{ font-size:21px; color:#0a2a4d; min-width:190px; text-align:center; }
+.sqg-nav button{ width:50px; height:50px; border-radius:12px; border:1.5px solid var(--bordo,#cbd5e1); background:#fff; color:#0a2a4d; font-size:28px; line-height:1; cursor:pointer; }
+.sqg-nav button:hover{ background:#E0ECF9; }
+.sqg-nav button:focus-visible, .sqg-btn button:focus-visible{ outline:3px solid #BFD4EE; outline-offset:2px; }
+.sqg-tot{ font-size:17px; color:var(--testo-2,#475569); }
+.sqg-griglia{ display:grid; grid-template-columns:repeat(auto-fill,minmax(400px,1fr)); gap:16px; }
+.sqg-card{ border:1.6px solid #0a2a4d; border-radius:14px; background:#fff; padding:18px 20px; display:flex; flex-direction:column; gap:12px; min-width:0; }
+.sqg-card.ha-rosso{ border-color:#B91C1C; }
+.sqg-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+#appview .sqg-card h3, .sqg-card h3{ font-size:23px; margin:0; color:#0a2a4d; overflow-wrap:anywhere; }
+.sqg-sotto{ font-size:16px; color:var(--testo-2,#475569); margin-top:2px; }
+.sqg-dx{ display:flex; align-items:center; gap:8px; flex:none; }
+.sqg-mese{ display:flex; align-items:baseline; gap:8px; }
+.sqg-mese b{ font-size:34px; line-height:1; color:#0a2a4d; font-variant-numeric:tabular-nums; }
+.sqg-mese span{ font-size:17px; color:var(--testo,#0b1220); }
+.sqg-striscia{ display:grid; grid-template-columns:repeat(31,1fr); gap:3px; }
+.sqg-striscia i{ display:block; aspect-ratio:1/1; border-radius:3px; background:#E8EDF4; }
+.sqg-striscia i.fest{ background:#F4F6FA; }
+.sqg-striscia i.si{ background:#0a2a4d; }
+.sqg-striscia i.oggi{ outline:2px solid #FF8800; outline-offset:1px; }
+.sqg-avv{ font-size:16px; font-weight:700; border-radius:10px; padding:8px 12px; }
+.sqg-avv.rosso{ background:#FEF2F2; color:#991B1B; }
+.sqg-avv.giallo{ background:#FFFBEB; color:#92400E; }
+.sqg-btn{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:auto; }
+.sqg-btn button{ min-height:50px; border-radius:12px; border:1.5px solid #0a2a4d; background:#fff; color:#0a2a4d; font-family:inherit; font-size:17px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 8px; }
+.sqg-btn button:hover{ background:#E0ECF9; }
+.sqg-btn button.pri{ background:#0a2a4d; color:#fff; }
+.sqg-btn button svg{ flex:none; }
+.sqg-card .stato{ font-size:14px; }
+.sqg-griglia{ margin-bottom:20px; }
+.sqg-btn button.pri:hover{ background:#123a66; }
+.sqg-btn button.invito{ grid-column:1 / -1; border-color:#C2410C; color:#9A3412; background:#FFF7ED; }
+#sqg-corpo .sqg-striscia{ margin:0 0 18px; gap:4px; }
+#sqg-corpo .gx-riga .t small{ display:block; font-size:15px; color:var(--testo-2,#475569); margin-top:2px; }
+#sqg-corpo .gx-lista{ margin-bottom:0; }
+@media (max-width:640px){
+  .sqg-griglia{ grid-template-columns:1fr; }
+  .sqg-nav{ width:100%; } .sqg-nav b{ flex:1; min-width:0; font-size:20px; }
+  .sqg-card{ padding:16px; }
+  .sqg-btn button{ font-size:16px; gap:5px; }
+  .sqg-btn button:not(.invito) svg{ display:none; }
+  .sqg-striscia{ grid-template-columns:repeat(16,1fr); }
+}
+#sqg-corpo .sqg-striscia i{ background:#D5DEEA; }
+#sqg-corpo .sqg-striscia i.fest{ background:#EEF2F7; }
+#sqg-corpo .sqg-striscia i.si{ background:#0a2a4d; }

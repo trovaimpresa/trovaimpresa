@@ -54,3 +54,5 @@ ferme prima di cominciare.
 - dove sta il pulsante principale
 - quanti clic al massimo per le cose di tutti i giorni
 - l'elenco delle parole vietate e delle parole giuste
+
+- 10 nov 2026 — In ogni elenco, in cima ci stanno le ULTIME cose salvate (giornate, fatture, foto, spese): non si deve scorrere per vedere quello che si è appena messo.

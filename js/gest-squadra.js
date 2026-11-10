@@ -62,6 +62,16 @@
     });
     if(dipQ){const q=dipQ.toLowerCase();
       L=L.filter(o=>[o.nome,o.telefono,o.mansione,SQ_RUOLO[o.ruolo]].some(x=>(x||"").toLowerCase().includes(q)));}
+    /* 10 nov 2026 — la Squadra fatta come le Giornate: una scheda grande
+       per persona coi giorni del mese (js/gest-squadra-giornate.js). Se quel
+       file non si e' caricato resta la tabella di prima, qui sotto. */
+    if(typeof sqgDisegna==="function"){
+      box.className="";
+      return sqgDisegna(L,box,dipQ?tabVuotoCerca(dipQ):tabVuoto("Chi lavora con te",
+        "Nome, mansione in cantiere e costo orario. Qui metti anche visita medica, formazione sicurezza e documenti: quando una data si avvicina te lo dice il Riepilogo, senza che tu debba ricordartelo.",
+        _SVGV+'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+        {t:"+ Aggiungi la prima persona",a:"new-dip"}));
+    }
     renderTabella({
       id:"dip", box:"#dip-list",
       vuoto:dipQ?tabVuotoCerca(dipQ):tabVuoto("Chi lavora con te",
