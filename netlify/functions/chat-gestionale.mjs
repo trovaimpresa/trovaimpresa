@@ -615,6 +615,9 @@ async function esegui(clientDati, q) {
   if (q.senzaCestino) sel = sel.is('eliminato_il', null);
   if (q.contiene) sel = sel.ilike(q.contiene.campo, '%' + q.contiene.valore + '%');
   if (q.dentro) sel = sel.in(q.dentro.campo, q.dentro.valori);
+  /* tutte le parole devono esserci (10 nov 2026: con una parola sola «scavo»
+     tornavano le 5 voci piu' usate, e quella giusta non c'era) */
+  if (q.contieneTutte) q.contieneTutte.valori.forEach(function (w) { sel = sel.ilike(q.contieneTutte.campo, '%' + w + '%'); });
   if (q.oppure) sel = sel.or(q.oppure);
   if (q.stato) sel = sel.eq('stato', q.stato);
   /* ⚠️ `neq` da solo butta via anche le righe con lo stato VUOTO (in SQL
@@ -896,7 +899,7 @@ const STRUMENTI = [
   {
     // ⛔ 10 nov 2026 — i prezzi sulle righe che ci sono gia': non scrive niente
     name: 'prezzi_computo',
-    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (mette la spunta e conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che hai scelto. `sicuro: true` solo se è chiaramente la STESSA lavorazione con la STESSA unità di misura; `sicuro: false` se è simile ma non sei certo (lui la vedrà senza spunta). Le righe senza una candidata adatta NON metterle. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. Le righe trovate per codice le aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
+    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (mette la spunta e conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che hai scelto. `sicuro: true` solo se è chiaramente la STESSA lavorazione con la STESSA unità di misura; `sicuro: false` se è la stessa lavorazione ma non sei certo della variante (lui la vedrà senza spunta). ⛔ Una voce di un\'ALTRA lavorazione (scavo aperto per uno scavo obbligato, potatura di alberi per una siepe) NON si propone nemmeno senza spunta: la riga resta fuori. Le righe senza una candidata adatta NON metterle. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. Le righe trovate per codice le aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
     input_schema: {
       type: 'object',
       properties: {
@@ -918,7 +921,7 @@ const STRUMENTI = [
   {
     // 10 nov 2026 — tante ricerche nel prezzario in un colpo solo
     name: 'cerca_prezzi',
-    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e UNA `parola` (la più precisa della descrizione: «intonaco», «massetto», «battiscopa», «siepi»). Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
+    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): devono esserci TUTTE nella voce. Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
     input_schema: {
       type: 'object',
       properties: {
@@ -1715,10 +1718,12 @@ export default async function (req) {
             const LETTERE = 'abcde';
             const fatti = await Promise.all(lista.map(async function (c) {
               const n = parseInt(c && c.n, 10);
-              const parola = String((c && c.parola) || '').trim().slice(0, 40);
-              if (!memoC.righe[n] || !parola) return { n: n, voci: [] };
+              /* solo lettere e numeri: una virgola o un % dentro la parola
+                 cambierebbero la ricerca */
+              const parole = String((c && c.parola) || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 3; }).slice(0, 3);
+              if (!memoC.righe[n] || !parole.length) return { n: n, voci: [] };
               const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario', filtri: { user_id: uid },
-                contiene: { campo: 'descrizione', valore: parola }, senzaCestino: true, ordine: 'usata_volte', limite: 12, soloConta: false });
+                contieneTutte: { campo: 'descrizione', valori: parole }, senzaCestino: true, ordine: 'usata_volte', limite: 12, soloConta: false });
               /* prima le voci con la STESSA unita' della riga: sono le sole che
                  possono essere «sicure» */
               const tutte = (r.righe || []).filter(function (x) { return +x.prezzo_unitario > 0; });
