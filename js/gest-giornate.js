@@ -416,7 +416,7 @@ function giorDisegnaProp(){
         <button type="button" class="gchip nuovo" data-gior="piu" data-i="${i}">+ nuovo</button></div>
         ${giorAggiungi===i?`<div class="grow" style="margin-top:8px"><input type="text" id="gior-nuovo" placeholder="Nome"><button type="button" class="btn" data-gior="piu-ok" data-i="${i}" style="flex:0 0 auto">Aggiungi</button></div>`:""}
         ${giorNuovi.length?'<div class="gnota" style="margin-top:6px">I nomi col «+» non sono ancora in Squadra: se li lasci accesi, al Salva li aggiungo io.</div>':""}</div>
-      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" placeholder="Spese e note qui">${esc(c.cosa)}</textarea></div>
+      <div><div class="glab">Cosa avete fatto</div><textarea data-f="cosa" id="gior-cosa-${i}" placeholder="Spese e note qui">${esc(c.cosa)}</textarea></div>
       ${giorProp.length>1?`<button type="button" class="glink rosso" data-gior="togli" data-i="${i}" style="align-self:flex-start">Togli questa</button>`:""}
     </div>`;
   });

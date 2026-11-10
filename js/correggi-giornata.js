@@ -40,6 +40,19 @@
     'rv-ok': ['rv-testo'],
     'mg-manda': ['mg-cosa']
   };
+  /* 10 nov 2026 — LE GIORNATE DEL GESTIONALE. Chiesto da Alessio: «anche nel
+     gestionale giornate di cantiere dovrebbe correggere cosa scrive o cosa
+     detta». Il racconto in alto passava gia' dall'AI; la casella «Cosa avete
+     fatto» scritta A MANO e quella di «modifica» no. Le schede sono piu' di
+     una, quindi le caselle si chiamano gior-cosa-0, gior-cosa-1… */
+  function eCampo(id) { return !!id && (CAMPI.indexOf(id) >= 0 || /^gior-cosa-\d+$/.test(id) || id === 'gior-mod-t'); }
+  function campiGiornate(quale) {
+    if (quale === 'mod-salva') return ['gior-mod-t'];
+    if (quale !== 'salva') return null;
+    var ids = [];
+    document.querySelectorAll('#giornate textarea[id^="gior-cosa-"]').forEach(function (t) { ids.push(t.id); });
+    return ids.length ? ids : null;
+  }
   var SALVA_AZIONE = {
     'save-job': ['j-desc', 'j-note', 'j-svolto'],
     'save-note': ['day-note'],
@@ -138,7 +151,7 @@
         microfono, la correzione la fa quando lo spegni, non adesso. */
   document.addEventListener('focusout', function (e) {
     var ta = e.target;
-    if (!ta || CAMPI.indexOf(ta.id) < 0) return;
+    if (!ta || !eCampo(ta.id)) return;
     setTimeout(function () {
       if (document.activeElement === ta || micAcceso(ta)) return;
       correggi(ta);
@@ -153,7 +166,7 @@
         if (!b.classList || !b.classList.contains('dt-mic')) return;
         if (m.oldValue && m.oldValue.indexOf('dt-mic--on') >= 0 && !b.classList.contains('dt-mic--on')) {
           var ta = b.parentNode && b.parentNode.querySelector('textarea');
-          if (ta && CAMPI.indexOf(ta.id) >= 0) setTimeout(function () { correggi(ta); }, 300);
+          if (ta && eCampo(ta.id)) setTimeout(function () { correggi(ta); }, 300);
         }
       });
     }).observe(document.body, { attributes: true, attributeFilter: ['class'], attributeOldValue: true, subtree: true });
@@ -173,9 +186,9 @@
       return;
     }
     if (lascia) return;
-    var btn = e.target.closest && e.target.closest('button[id],button[data-action]');
+    var btn = e.target.closest && e.target.closest('button[id],button[data-action],button[data-gior]');
     if (!btn) return;
-    var elenco = SALVA[btn.id] || SALVA_AZIONE[btn.getAttribute('data-action')];
+    var elenco = SALVA[btn.id] || SALVA_AZIONE[btn.getAttribute('data-action')] || campiGiornate(btn.getAttribute('data-gior'));
     if (!elenco) return;
     var tas = elenco.map(casella).filter(function (ta) { return ta && (daFare(ta) || s(ta.id).corso); });
     if (!tas.length) return;                     /* niente da correggere: salva come prima */
