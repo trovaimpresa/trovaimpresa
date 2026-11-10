@@ -492,6 +492,11 @@
   .st-campo::placeholder{color:#7a8698;opacity:1}
   textarea.st-campo{resize:vertical;min-height:280px}
   .st-nota{font-size:16px;color:#3d4b5c;margin-top:8px}
+  .st-noemail{background:#fff4f2;border:2px solid #f3c2bb;border-radius:14px;padding:16px 18px;margin-top:16px}
+  .st-noemail-tit{font-size:18px;font-weight:800;color:#8f1d12}
+  .st-noemail-r{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #f3d6d1;font-size:16px}
+  .st-noemail-r small{display:block;color:#3d4b5c;font-size:15px}
+  .st-noemail-r em{font-style:normal;color:#8f1d12;white-space:nowrap;font-size:15px}
   .st-bottoni{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
   .st-btn{font-family:inherit;font-size:16px;font-weight:800;padding:15px 26px;border-radius:12px;border:none;cursor:pointer}
   .st-prova{background:#fff;color:#0066ff;border:2px solid #0066ff}
@@ -1727,6 +1732,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         </select>
         <div id="st-quanti" class="st-nota">—</div>
 
+        <!-- 10 nov 2026: chi ha premuto «Non voglio più email» (imprese.email_promo = false).
+             A loro «Scrivi a tutti» NON scrive: qui si vede chi sono. -->
+        <div id="st-noemail" class="st-noemail" hidden></div>
+
         <label class="st-lab">Oggetto</label>
         <input id="st-oggetto" class="st-campo" placeholder="Oggetto dell'email">
 
@@ -2871,7 +2880,29 @@ async function annuncioFetch(payload) {
 }
 
 // Quanti sono e chi e' il primo: si vede prima di spedire.
+/* 10 nov 2026 — chi non vuole piu' email: lo dice la riga dell'impresa
+   (email_promo = false, email_promo_tolta_il), la scrive niente-email.html */
+async function disegnaNoEmail() {
+  const box = document.getElementById('st-noemail'); if (!box) return;
+  let lista = [];
+  try { lista = tutteImprese || []; } catch (e) {}
+  if (!lista.length) { try { lista = await adminLista('imprese'); } catch (e) { box.hidden = true; return; } }
+  const tolti = lista.filter(function (i) { return i.email_promo === false; })
+    .sort(function (a, b) { return String(b.email_promo_tolta_il || '').localeCompare(String(a.email_promo_tolta_il || '')); });
+  box.hidden = false;
+  if (!tolti.length) { box.innerHTML = '<div class="st-noemail-tit">Nessuno ha chiesto di non ricevere più email</div>'; return; }
+  const data = function (d) { if (!d) return ''; const x = new Date(d); return isNaN(x) ? '' : x.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  box.innerHTML = '<div class="st-noemail-tit">Non vogliono più email: <b>' + tolti.length + '</b></div>'
+    + '<div class="st-nota" style="margin:2px 0 10px">A loro «Scrivi a tutti» non scrive più.</div>'
+    + tolti.map(function (i) {
+        return '<div class="st-noemail-r"><span><b>' + esc(i.nome_attivita || i.nome || 'Senza nome') + '</b>'
+          + '<small>' + esc(i.email || '') + (i.citta ? ' · ' + esc(i.citta) : '') + '</small></span>'
+          + '<em>' + esc(data(i.email_promo_tolta_il) ? 'dal ' + data(i.email_promo_tolta_il) : '') + '</em></div>';
+      }).join('');
+}
+
 async function contaDestinatari() {
+  disegnaNoEmail();
   const box = document.getElementById('st-quanti');
   if (!box) return;
   const gruppo = document.getElementById('st-gruppo').value;
