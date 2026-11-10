@@ -188,6 +188,7 @@
       if(!id)return false;
       if(tipo==="prev"){ ctApriPrev(id); return true; }
       if(tipo==="fatt"){ ctApriFatt(id); return true; }
+      if(tipo==="comp"){ ctApriComp(id); return true; }   /* 10 nov 2026 */
       const AZ={cli:"apri-cli",lav:"edit-job"};
       const a=AZ[tipo]; if(!a)return false;
       const b=document.createElement("button");
@@ -208,6 +209,17 @@
     if(error){toast("Non riesco ad aprire il preventivo: "+error.message);return;}
     if(!data){toast("Questo preventivo non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
     prevForm(data);
+  }
+  /* 10 nov 2026 — il computo si apre dalla SUA sezione: computoForm vuole la
+     riga di compCache (quella del reparto aperto), non una letta a parte. */
+  async function ctApriComp(id){
+    ctChiudi();
+    const voce=document.querySelector('nav.tabs button[data-tab="computi"]');
+    if(voce&&!voce.classList.contains("active"))voce.click();
+    await renderComputi();
+    const c=(compCache||[]).find(x=>String(x.id)===String(id));
+    if(!c){toast("Questo computo non c'è più in questo reparto: forse è nel Cestino");return;}
+    computoForm(c);
   }
   async function ctApriFatt(id){
     ctChiudi();

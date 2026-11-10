@@ -1494,3 +1494,4 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 **Fatto:** attrezzi `compila_computo` e `prezzi_computo` in `chat-gestionale.mjs` (non scrivono niente); file nuovo `js/gest-computo-ai.js` con le schermate «Controlla le lavorazioni» e «Controlla i prezzi» (stesse righe del PDF del geometra, entra solo chi ha la spunta, un prezzo già messo non si tocca); nel computo i pulsanti viola «Aggiungi con l'AI» e «Metti i prezzi con l'AI», che portano alla chat.
 **Limite detto ad Alex:** i prezzi con l'AI vedono 25 righe per volta.
 **Telefono:** niente sotto i 14 px, niente fuori schermo, pulsanti alti 50.
+**10 nov, secondo pezzo — la chat ti ci porta:** segnalino nuovo `[vai:SEZIONE]` / `[vai:SEZIONE:SCHEDA]` (elenco chiuso in `js/gest-chat.js`, il nome sul pulsante si legge dal menu) e `[apri:comp:ID]` per aprire un computo (`ctApriComp` in `js/gest-ricerca.js`). Riga «a corpo» senza quantità: entra con 1.

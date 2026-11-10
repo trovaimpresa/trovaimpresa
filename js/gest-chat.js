@@ -176,6 +176,7 @@
      anche i <br> le righe venivano doppie. Si converte solo il grassetto. */
   function testoRisposta(t) {
     return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
+      .replace(SEGNALINO_VAI, pulsanteVai)
       .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata)
       /* 6 nov 2026 — due segnalini senza id: quando non sa, e quando gli
          racconti la giornata (vedi passaAllAssistenza e dividiRacconto) */
@@ -339,8 +340,61 @@
      diventa un pulsante che porta chissa' dove.
      ⚠️ I tipi sono quattro e non di piu': sono quelli che il gestionale
      sa gia' aprire da soli. */
-  var TIPI_APRIBILI = { lav:'Aprilo', prev:'Apri il preventivo', fatt:'Apri la fattura', cli:'Apri il cliente' };
-  var SEGNALINO = /\[apri:(lav|prev|fatt|cli):([0-9a-fA-F-]{36})\]/g;
+  var TIPI_APRIBILI = { lav:'Aprilo', prev:'Apri il preventivo', fatt:'Apri la fattura', cli:'Apri il cliente', comp:'Apri il computo' };
+  var SEGNALINO = /\[apri:(lav|prev|fatt|cli|comp):([0-9a-fA-F-]{36})\]/g;
+
+  /* ============================================================
+     ⛔ 10 nov 2026 — «VAI A…»: LA CHAT TI CI PORTA, NON TE LO SPIEGA.
+     ============================================================
+     Dal collaudo dal vivo: alla domanda sulle bozze la chat rispondeva
+     «vai in Fatture → scheda Bozze → …». Giusto, ma sono tre cose da
+     trovare. Adesso scrive [vai:fatture:bozze] e qui diventa un pulsante.
+     ⛔ ELENCO CHIUSO: una sezione o una scheda che non sta qui sotto non
+        diventa un pulsante (il segnalino sparisce e basta).
+     ⚠️ Il nome sul pulsante si legge DAL MENU, cosi' lo studio vede
+        «Pratiche» e l'artigiano «Lavori e interventi» senza scriverlo due
+        volte. Una voce che per questo iscritto non esiste non fa pulsante.
+     ⚠️ Le schede (bozze, scadute…) sono le stesse chiavi che usano le
+        sezioni: se cambiano la', vanno cambiate anche qui. */
+  var SEGNALINO_VAI = /\[vai:([a-z]+)(?::([a-z_]+))?\]/g;
+  var VAI = {
+    fatture:     { az:'fatt-vista',  v:{ bozze:'Bozze', incassare:'Da incassare', scadute:'Scadute', pagate:'Pagate' } },
+    preventivi:  { az:'prev-filtro', v:{ bozza:'Bozze', inviato:'Inviati', accettato:'Accettati', rifiutato:'Rifiutati' } },
+    lavori:      { az:'lav-vista',   v:{ ritardo:'In ritardo', oggi:'Oggi', prossimi:'Prossimi', incassare:'Da incassare', archivio:'Archivio' } },
+    scadenzario: { az:'scad-vista',  v:{ scadute:'Scadute', prossime:'Prossime', fatte:'Fatte' } },
+    computi:{}, clienti:{}, calendario:{}, promemoria:{}, dalsito:{}, giornate:{}, agenda:{},
+    squadra:{}, mezzi:{}, attrezzature:{}, fisco:{}, prezzario:{}, sal:{}, fornitori:{},
+    carte:{}, report:{}, galleria:{}, mappa:{}, cestino:{}, assistenza:{}, richieste:{}
+  };
+  function voceDelMenu(sez) {
+    var b = document.querySelector('nav.tabs button[data-tab="' + sez + '"]');
+    if (!b || b.hidden || getComputedStyle(b).display === 'none') return null;
+    return b;
+  }
+  function pulsanteVai(tutto, sez, vista) {
+    var cfg = VAI[sez]; if (!cfg) return '';
+    var b = voceDelMenu(sez); if (!b) return '';
+    var s = b.querySelector('span');
+    var nome = String((s || b).textContent || '').replace(/\s+/g, ' ').trim();
+    if (!nome) return '';
+    var lab = 'Vai a ' + nome, v = '';
+    if (vista && cfg.v && cfg.v[vista]) { v = vista; lab += ' · ' + cfg.v[vista]; }
+    return ' <button class="chip" type="button" data-vai="' + sez + '"' + (v ? ' data-vai-v="' + v + '"' : '') + '>' + esc(lab) + '</button>';
+  }
+  function vaiA(btn) {
+    var sez = btn.getAttribute('data-vai'), v = btn.getAttribute('data-vai-v');
+    var cfg = VAI[sez], b = cfg && voceDelMenu(sez);
+    if (!b) { scrivi('ai', 'Questa voce non riesco ad aprirtela da qui: cercala nel menu.'); return; }
+    b.click(); window.scrollTo(0, 0);
+    if (!v || !cfg.az) return;
+    /* la scheda si accende quando la sezione ha finito di disegnarsi */
+    var fine = Date.now() + 4000;
+    (function prova() {
+      var c = document.querySelector('#' + sez + ' [data-action="' + cfg.az + '"][data-v="' + v + '"]');
+      if (c) { c.click(); return; }
+      if (Date.now() < fine) setTimeout(prova, 200);
+    })();
+  }
   function pulsanteApri(tutto, tipo, id) {
     var lab = TIPI_APRIBILI[tipo];
     if (!lab) return tutto;
@@ -488,6 +542,8 @@
       if (pa) return passaAllAssistenza(pa);
       var ra = e.target.closest('[data-racconto]');
       if (ra) return dividiRacconto(ra);
+      var va = e.target.closest('[data-vai]');
+      if (va) return vaiA(va);
       var b = e.target.closest('[data-apri]'); if (!b) return;
       var ok = (typeof window.apriCosa === 'function')
         && window.apriCosa(b.getAttribute('data-apri'), b.getAttribute('data-apri-id'));
