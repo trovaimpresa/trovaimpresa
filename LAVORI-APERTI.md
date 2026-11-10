@@ -1509,3 +1509,7 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 - [3 set] Ispettore del lunedì; email gestionale a 89 imprese; archivio «Email inviate» in admin; allegati foto/PDF nella chat di assistenza (gestionale + 4 pannelli); Personalizza pannello a tutta pagina; risposta alle recensioni + pagina `recensioni-impresa.html`; guide infissi/pavimento/imbiancare/cappotto con la Tariffa Lazio
 - [2 set] Lista dei 10: chiusi 1, 2, 3, 5, 6 (pastiglie mestieri, linguetta recensioni, limit 50, bollino P.IVA, titolo/descrizione foto)
 - [1 set] Banchi rossi del 31 ago; testata nuova su 3 pannelli; copertina; WhatsApp mostrato; meta e sitemap
+
+## 10 nov 2026 — IN PROGRAMMA (chiesto da Alex)
+- **Giornate al centro** (in corso): ogni giornata con Foto · Spesa · Benzina e km · Fattura o bolla; poi lista degli acquisti del mese in PDF (dalle righe lette sulle foto di fatture e bolle: «guanti 10 paia, malta 20 sacchi»); Squadra fatta come Giornate; uso da soli; app operaio con l'icona sul telefono e chat col capo.
+- **«Sei anche un professionista?»**: nel menu del gestionale impresa e artigiano un pulsante che, se sì, aggiunge le voci dello studio tecnico (Computo metrico vero al posto di «Computo da prezzare», pratiche, crediti formativi e le altre voci del professionista). Da fare dopo le Giornate.
