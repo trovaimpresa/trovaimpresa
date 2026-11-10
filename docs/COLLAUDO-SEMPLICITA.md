@@ -1517,3 +1517,9 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 - Squadra: una scheda grande per persona (js/gest-squadra-giornate.js) coi giorni del mese presi da gest_ore, striscia di quadretti, avvisi, tre tasti (Giornate, Messaggi, Scheda). «Giornate» apre il mese della persona. Niente di nuovo nel database. Se il file non si carica resta la tabella di prima.
 - Regola nuova di Alessio: «le giornate salvate, le fatture o le foto in cima devono rimanere sempre le ultime salvate, altrimenti bisogna sempre scorrere». Applicata a: fatture da pagare (prima per scadenza, ora per data di salvataggio; pagate in fondo), foto e spese dentro Giornate, righe degli Acquisti del mese, giorni della persona in Squadra. Giornate era già così.
 - Non fatto: la Squadra del Noleggio (è un file diverso).
+
+## 10 nov 2026 — «Sei anche un professionista?»
+
+- Pulsante in fondo al menu di sinistra, solo per impresa e artigiano (js/gest-anche-pro.js). Se dice sì, il gestionale si vede come studio tecnico (Computo metrico vero, Pratiche, Parcella, Crediti formativi) ma Mezzi, Carte e Giornate restano dove sono.
+- Niente nel database: il tipo dell'iscritto non cambia. La scelta sta nel telefono (localStorage `ti_faccia_<utente>`), la legge logRuoloUtente in js/gest-reparti.js. Si torna indietro dallo stesso pulsante.
+- Limite detto ad Alessio: la scelta vale per quel telefono o computer, non segue l'utente sugli altri. Per farla seguire serve una colonna nel database.

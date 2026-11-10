@@ -5886,3 +5886,18 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 #sqg-corpo .sqg-striscia i{ background:#D5DEEA; }
 #sqg-corpo .sqg-striscia i.fest{ background:#EEF2F7; }
 #sqg-corpo .sqg-striscia i.si{ background:#0a2a4d; }
+
+/* =====================================================================
+   10 nov 2026 — «Sei anche un professionista?» (js/gest-anche-pro.js)
+   Il pulsante in fondo al menu di sinistra e il testo della sua finestra.
+   ===================================================================== */
+.side .anche-pro{ display:flex; align-items:center; gap:12px; width:calc(100% - 28px); margin:14px 14px 18px; padding:14px; min-height:56px;
+  background:transparent; border:1.6px solid rgba(255,255,255,.75); border-radius:12px; color:#fff; text-align:left; cursor:pointer; font-family:inherit; }
+.side .anche-pro:hover{ background:rgba(255,255,255,.10); }
+.side .anche-pro:focus-visible{ outline:3px solid #FF8800; outline-offset:2px; }
+.side .anche-pro svg{ flex:none; color:#fff; }
+.side .anche-pro span{ display:flex; flex-direction:column; min-width:0; }
+.side .anche-pro b{ font-size:17px; line-height:1.25; color:#fff; }
+.side .anche-pro small{ font-size:15px; color:#dbe6f3; margin-top:2px; }
+.sheet .ap-testo, .ap-testo{ font-size:18px; line-height:1.55; margin:0 0 12px; color:var(--testo,#0b1220); }
+.sheet .ap-lista, .ap-lista{ margin:0; padding-left:22px; font-size:18px; line-height:1.7; color:var(--testo,#0b1220); }

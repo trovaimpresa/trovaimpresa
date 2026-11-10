@@ -140,6 +140,13 @@
     if(!ruoloUtente&&!_tipoChiesto)_chiediTipo(uid);
     /* Barra FONDATORE: "Vedi come" fa provare le altre categorie senza cambiare
        account. È solo una vista: i dati mostrati restano i propri. */
+    /* 10 nov 2026 — «Sei anche un professionista?» (js/gest-anche-pro.js):
+       un'impresa o un artigiano puo' scegliere di VEDERE il gestionale come
+       uno studio tecnico. Il tipo vero non cambia e nel database non si
+       scrive niente: e' la scelta salvata su questo telefono. */
+    window._tiTipoVero=ruoloUtente;
+    try{if((ruoloUtente==='impresa'||ruoloUtente==='artigiano')&&!TI_GIRO&&localStorage.getItem('ti_faccia_'+uid)==='professionista')ruoloUtente='professionista';}catch(_e){}
+    try{if(typeof ancheProDisegna==="function")ancheProDisegna(uid);}catch(_e){}
     try{var _vq=new URLSearchParams(location.search).get("vedi");if(_vq!==null){_vq?sessionStorage.setItem("ti_vedi_tipo",_vq):sessionStorage.removeItem("ti_vedi_tipo");}}catch(_e){}
     try{var _vc=sessionStorage.getItem("ti_vedi_tipo");if(_vc)ruoloUtente=_vc;}catch(_e){}
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
@@ -265,10 +272,17 @@
      questa sezione (scadenze delle verifiche). Restano nascosti solo i mezzi
      con la targa e le carte carburante. */
   const TAB_NASCOSTI_PRO=['mezzi','carte'];
+  /* 10 nov 2026 — un'impresa o un artigiano che ha scelto «Sei anche un
+     professionista?» vede le schermate dello studio MA non perde le sue:
+     Mezzi e Carte restano, e Giornate resta in vista. */
+  function _facciaScelta(){
+    var v=String(window._tiTipoVero||'').toLowerCase();
+    return ruoloUtente==='professionista'&&(v==='impresa'||v==='artigiano');
+  }
   function adattaMenuProfessionista(){
     if(ruoloUtente!=='professionista')return;
     try{
-      TAB_NASCOSTI_PRO.forEach(function(t){
+      tabNascosti().forEach(function(t){
         document.querySelectorAll('[data-tab="'+t+'"]').forEach(function(el){ el.style.display='none'; });
       });
       /* Squadra -> Collaboratori */
@@ -292,8 +306,10 @@
       /* 6 nov 2026 — le «Giornate» sono le giornate di cantiere degli operai:
          per uno studio non sono roba di tutti i giorni. Scendono dentro
          «Altre voci» (gruppo «Ogni giorno»): non spariscono, si trovano li'. */
-      window._tiInAltre=['giornate'];
-      if(typeof window.menuCortoInAltre==='function')window.menuCortoInAltre('giornate');
+      if(!_facciaScelta()){
+        window._tiInAltre=['giornate'];
+        if(typeof window.menuCortoInAltre==='function')window.menuCortoInAltre('giornate');
+      }
       /* 30/09/2026 — in Mezzi la frase mandava a «Attrezzature», ma per gli studi
          la voce si chiama «Strumenti» (come nel menu). */
       var _miz=document.querySelector('#mezzi .gal-intro b');
@@ -320,7 +336,7 @@
       });
       /* se l'utente era già dentro una sezione nascosta, lo riporto al riepilogo */
       var attivo=document.querySelector('[data-tab].active');
-      if(attivo && TAB_NASCOSTI_PRO.indexOf(attivo.getAttribute('data-tab'))>=0){
+      if(attivo && tabNascosto(attivo.getAttribute('data-tab'))){
         var home=document.querySelector('[data-tab="riepilogo"]');
         if(home)home.click();
       }
@@ -471,7 +487,7 @@
      ⚠️ NON si guarda il `display` del pulsante: il Riepilogo puo' disegnarsi
      prima che il menu sia stato adattato, e si leggerebbe «acceso» per tutti. */
   function tabNascosti(){
-    if(ruoloUtente==='professionista')return TAB_NASCOSTI_PRO;
+    if(ruoloUtente==='professionista')return _facciaScelta()?[]:TAB_NASCOSTI_PRO;
     if(ruoloUtente==='artigiano')return TAB_NASCOSTI_ART.concat(TAB_APPALTI_ART);
     return [];
   }

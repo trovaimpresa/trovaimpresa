@@ -578,7 +578,7 @@
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
-    if(ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(_deepTab)>=0){_deepTab=null;return;}
+    if(ruoloUtente==='professionista'&&tabNascosto(_deepTab)){_deepTab=null;return;}
     const b=document.querySelector('nav.tabs button[data-tab="'+_deepTab+'"]');
     _deepTab=null;
     if(b)b.click();

@@ -1516,3 +1516,6 @@ sono rientrate. La **D** e' nata oggi. I numeri sono quelli del prompt del 5 set
 
 ### 10 nov 2026 — Acquisti del mese: FATTO
 Punto 2 di «Giornate al centro» chiuso (vedi docs/COLLAUDO-SEMPLICITA.md). Restano: punto 3 Squadra come Giornate, punto 4 uso da soli, punto 5 app operaio installabile con chat col capo. Poi «Sei anche un professionista?».
+
+### 10 nov 2026 — Squadra come Giornate e «Sei anche un professionista?»: FATTI
+Restano: punto 4 (Giornate da soli), punto 5 (app operaio installabile + chat col capo, in programma per la sera del 10 nov), Squadra del Noleggio. «Sei anche un professionista?» ricorda la scelta solo sul telefono: se serve su tutti i dispositivi va messa nel database.
