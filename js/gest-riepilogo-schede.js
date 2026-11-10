@@ -340,7 +340,8 @@
         const q=quando(p.data,{neutro:true});          /* neutro: qui il rosso non c'entra */
         const g=_giorniA(p.data), att=g===null?0:-g;   /* giorni di attesa */
         const cls=att>14?"q-attesa":q.classe;          /* oltre due settimane: ambra */
-        const imp=tot[p.id]||0;
+        /* 10 nov 2026 — il numero che legge il cliente: meno lo sconto, piu' l'IVA */
+        const imp=ruoloUtente==='professionista'?(tot[p.id]||0):prevTotaleCliente(tot[p.id]||0,p);
         return rigaCompatta({
           id:p.id, action:"rie-prev", bar:"da_fare",
           titolo:p.titolo||"Preventivo",

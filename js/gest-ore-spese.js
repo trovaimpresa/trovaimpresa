@@ -1019,10 +1019,10 @@
       if(ruoloUtente==='professionista'){
         const c=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
         totCli[p.id]=c.totale;
-      }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        totCli[p.id]=prevContiImpresa(base,p.iva_perc).totale;
       }else{
-        totCli[p.id]=base;   /* aliquota non indicata: resta com'era */
+        /* 10 nov 2026 — meno lo sconto, piu' l'IVA se c'e' (senza aliquota e
+           senza sconto resta la somma delle voci, com'era) */
+        totCli[p.id]=prevTotaleCliente(base,p);
       }
     });
     const _conIva=p=>ruoloUtente==='professionista'

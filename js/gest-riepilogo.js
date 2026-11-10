@@ -450,9 +450,9 @@
       const base=totPrev[p.id]||0;
       if(ruoloUtente==='professionista'){
         totPrev[p.id]=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait).totale;
-      }else if(p.iva_perc!=null&&p.iva_perc!==""){
-        const iva=_centPerc(base,+p.iva_perc||0);
-        totPrev[p.id]=_cent2(base+iva);
+      }else{
+        /* 10 nov 2026 — meno lo sconto, piu' l'IVA: la formula e' una sola */
+        totPrev[p.id]=prevTotaleCliente(base,p);
       }
     });
 

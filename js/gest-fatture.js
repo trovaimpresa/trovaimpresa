@@ -1435,6 +1435,11 @@
          un'ipotesi — e se non ce n'e' resta da scegliere. */
       cassa_tipo: _uc.tipo||null,
       spese: +p.spese_forfait||0,
+      /* 10 nov 2026 — lo sconto del preventivo passa in fattura come euro:
+         la fattura lo toglie dall'imponibile riga per riga, come il preventivo. */
+      sconto: (typeof prevSconto==="function")
+        ? (prevSconto((rr||[]).filter(r=>!_rigaSezione(r)).reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0),p)||0)
+        : 0,
       /* i titoli dei capitoli NON passano in fattura: una fattura elettronica
          ha righe di DettaglioLinee, e una riga da 0 € col nome di un capitolo
          è rumore dentro un file che va allo SDI. Il conto non cambia (una

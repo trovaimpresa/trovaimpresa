@@ -370,7 +370,7 @@
     </section>
 
     <section id="fatture">
-      <div class="sec-head"><h2>Fatture</h2><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-ric-apri="1">📥 Fatture ricevute <span id="ric-badge" class="ric-badge" hidden></span></button><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div></div>
+      <div class="sec-head"><h2>Fatture</h2><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-ric-apri="1">📥 Fatture ricevute <span id="ric-badge" class="ric-badge" hidden></span></button><button class="btn" data-rp-apri="1">🧾 Ricevuta di pagamento</button><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div></div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div class="viste" id="fatt-viste"></div>
       <div id="fatt-body"></div>
@@ -717,18 +717,20 @@
         pezzi al loro posto e confronta col file di prima, byte per byte.
      ============================================================ -->
 <script src="/js/centesimi.js"></script>
-<script src="/js/gest-fatture.js?v=7nov1"></script>
+<script src="/js/gest-fatture.js?v=10nov-sconto"></script>
 <script src="/js/gest-sdi.js"></script>
 <script src="/js/gest-ricevute.js"></script>
+<!-- 10 nov 2026 — le ricevute di pagamento (documento NON fiscale), chieste da Spazio Giardino -->
+<script src="/js/gest-ricevute-pagamento.js?v=10nov1"></script>
 <script src="/js/gest-computo.js?v=10nov1"></script>
 <script src="/js/gest-sal-prezzario.js?v=8nov1"></script>
 <script src="/js/gest-computo-pdf.js?v=7nov2"></script>
 <script src="/js/gest-computo-ai.js?v=10nov2"></script>
-<script src="/js/gest-documenti-pdf.js?v=7nov1"></script>
-<script src="/js/gest-capitolato.js"></script>
+<script src="/js/gest-documenti-pdf.js?v=10nov-sconto"></script>
+<script src="/js/gest-capitolato.js?v=10nov-sconto"></script>
 <script src="/js/gest-galleria-mappa.js?v=7nov1"></script>
 <script src="/js/gest-report.js?v=7nov2"></script>
-<script src="/js/gest-riepilogo.js?v=7nov3"></script>
+<script src="/js/gest-riepilogo.js?v=10nov-sconto"></script>
 <script src="/js/gest-squadra.js?v=10nov1"></script>
 <script src="/js/gest-squadra-giornate.js?v=10nov1"></script>
 <script src="/js/gest-anche-pro.js?v=10nov3"></script>
@@ -751,7 +753,7 @@
 <script src="/js/gest-fornitori.js?v=10nov1"></script>
 <script src="/js/gest-mezzi.js?v=7nov1"></script>
 <script src="/js/gest-ai-cantiere.js?v=10nov1"></script>
-<script src="/js/gest-invia-cliente.js?v=7nov1"></script>
+<script src="/js/gest-invia-cliente.js?v=10nov-sconto"></script>
 <!-- il punto delle migliaia nelle caselle in euro: basta `data-euro` sulla casella -->
 <script src="/js/euro-casella.js"></script>
 <!-- Le tavole del decreto parametri (DM 17 giugno 2016): servono solo agli
@@ -763,15 +765,15 @@
 <script src="/js/gest-reparti.js?v=10nov1"></script>
 <script src="/js/gest-ingresso.js?v=10nov1"></script>
 <script src="/js/gest-ai-moduli.js?v=7nov1"></script>
-<script src="/js/gest-riepilogo-schede.js?v=7nov4"></script>
+<script src="/js/gest-riepilogo-schede.js?v=10nov-sconto"></script>
 <script src="/js/gest-schede-clienti.js?v=7nov4"></script>
 <script src="/js/gest-carte-documenti.js?v=10nov1"></script>
 <script src="/js/gest-richieste-chat.js?v=8nov1"></script>
 <script src="/js/gest-scadenze-pratiche.js?v=7nov1"></script>
 <script src="/js/gest-commercialista.js?v=7nov1"></script>
 <script src="/js/gest-elimina-reparto.js?v=7nov1"></script>
-<script src="/js/gest-ore-spese.js?v=7nov2"></script>
-<script src="/js/gest-preventivi.js?v=7nov3"></script>
+<script src="/js/gest-ore-spese.js?v=10nov-sconto"></script>
+<script src="/js/gest-preventivi.js?v=10nov-sconto"></script>
 <script src="/js/gest-cestino.js?v=7nov1"></script>
 <script src="/js/gest-ricerca.js?v=10nov1"></script>
 <script src="/js/gest-finestre-eventi.js?v=7nov1"></script>

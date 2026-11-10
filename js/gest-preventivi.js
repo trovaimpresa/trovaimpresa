@@ -154,12 +154,50 @@
      12 preventivi veri e 7 casi a mano), ma bastava cambiarne uno.
      ⛔ Solo per impresa e artigiano: lo studio ha calcolaParcella().
      iva_perc vuota = «non indicata»: totale = imponibile, come sempre. */
-  function prevContiImpresa(imponibile,ivaPerc){
+  /* 10 nov 2026 — LO SCONTO DEL PREVENTIVO (chiesto da Spazio Giardino).
+     Il terzo numero e' lo sconto in euro, gia' calcolato da prevSconto():
+     si toglie dalla somma delle voci PRIMA dell'IVA, come nella fattura.
+     Chi non passa lo sconto (o passa 0) ha i conti identici a prima.
+     `voci` = somma delle voci, `imponibile` = voci meno sconto. */
+  function prevContiImpresa(somma,ivaPerc,sconto){
+    const sc=+sconto||0;
+    const imponibile=sc?_cent2(somma-sc):somma;
     const conIva=!(ivaPerc==null||ivaPerc==="");
     const perc=conIva?(+ivaPerc||0):0;
     const iva=conIva?_centPerc(imponibile,perc):0;
-    return {imponibile:imponibile,conIva:conIva,perc:perc,iva:iva,
+    return {voci:somma,sconto:sc,imponibile:imponibile,conIva:conIva,perc:perc,iva:iva,
             totale:conIva?_cent2(imponibile+iva):imponibile};
+  }
+  /* Lo sconto in EURO di un preventivo, dalla somma delle voci.
+     ⛔ La stessa regola sta nella vista gest_preventivi_totali
+        (sql/2026-11-10-sconto-preventivi-e-ricevute.sql): se cambi qui,
+        cambia anche li'.
+     · sconto_perc > 0 → la percentuale, arrotondata al centesimo
+     · altrimenti      → gli euro fissi di «sconto»
+     · mai sotto zero e mai piu' grande delle voci (un preventivo negativo
+       non esiste). Lo studio (parcella) non ha lo sconto. */
+  function prevSconto(somma,p){
+    p=p||{};
+    if(typeof ruoloUtente!=="undefined"&&ruoloUtente==='professionista')return 0;
+    const perc=+p.sconto_perc||0;
+    let s=perc>0?_centPerc(somma,perc):_cent2(+p.sconto||0);
+    if(!(s>0))return 0;
+    if(s>somma)s=somma;
+    return s;
+  }
+  /* come si scrive lo sconto sul foglio: «Sconto 10%» o «Sconto» */
+  function prevScontoEtichetta(p){
+    const perc=+(p&&p.sconto_perc)||0;
+    return perc>0?"Sconto "+_pct(perc)+"%":"Sconto";
+  }
+  /* la somma delle voci, saltando i capitoli: per chi ha le righe in mano */
+  function prevSommaVoci(righe){
+    let t=0;(righe||[]).forEach(function(r){ if(!_rigaSezione(r))t+=impRiga(r.qta,r.prezzo); });
+    return t;
+  }
+  /* il totale da mostrare in un elenco: voci meno sconto, piu' IVA se c'e' */
+  function prevTotaleCliente(somma,p){
+    return prevContiImpresa(somma,p&&p.iva_perc,prevSconto(somma,p)).totale;
   }
 
   function prevTotaleLive(){
@@ -316,11 +354,17 @@
   }
   function eColonnaParcellaMancante(err){
     const m=(err&&err.message)||"";
-    return /cassa_perc|iva_perc|ritenuta|spese_forfait/i.test(m) && /column|schema cache/i.test(m);
+    return /cassa_perc|iva_perc|ritenuta|spese_forfait|sconto/i.test(m) && /column|schema cache/i.test(m);
   }
-  function senzaCampiParcella(obj){
+  /* 10 nov 2026 — se manca SOLO lo sconto (SQL del 10 nov non ancora
+     eseguito) si toglie solo lo sconto: l'IVA, che c'e', si salva lo stesso. */
+  function senzaCampiParcella(obj,err){
     const o=Object.assign({},obj);
-    ["cassa_perc","iva_perc","ritenuta","ritenuta_perc","spese_forfait"].forEach(k=>delete o[k]);
+    const m=(err&&err.message)||"";
+    const soloSconto=/sconto/i.test(m)&&!/cassa_perc|iva_perc|ritenuta|spese_forfait/i.test(m);
+    (soloSconto?["sconto","sconto_perc"]
+               :["cassa_perc","iva_perc","ritenuta","ritenuta_perc","spese_forfait","sconto","sconto_perc"])
+      .forEach(k=>delete o[k]);
     return o;
   }
 
@@ -334,6 +378,17 @@
      resta esattamente come prima, "IVA esclusa".
      In edilizia il 10% è il caso più comune (ristrutturazione), il 4% la
      prima casa: le stesse aliquote già usate dalle fatture (IVA_SCELTE). */
+  /* 10 nov 2026 — cosa si e' perso davvero riprovando senza le colonne che
+     mancano. Prima l'avviso partiva sempre; adesso parte solo se c'era
+     qualcosa di scritto (uno sconto vuoto che non si salva non e' una perdita). */
+  function prevCosaPerso(obj,err){
+    const tolto=senzaCampiParcella(obj,err);
+    const persi=Object.keys(obj).filter(k=>!(k in tolto)&&obj[k]!=null&&obj[k]!==""&&obj[k]!==false&&obj[k]!==0);
+    if(!persi.length)return "";
+    if(ruoloUtente==='professionista')return "Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL";
+    if(persi.every(k=>/^sconto/.test(k)))return "Salvato, ma lo sconto NON è stato registrato: manca un aggiornamento del database";
+    return "Salvato, ma l'aliquota IVA NON è stata registrata: manca un aggiornamento del database";
+  }
   function bloccoIvaImpresa(p){
     if(ruoloUtente==='professionista')return "";   /* loro hanno la parcella */
     p=p||{};
@@ -341,9 +396,18 @@
     const opz=[["","— non indicata (prezzi IVA esclusa)"],["22","22% — ordinaria"],
                ["10","10% — ristrutturazione"],["4","4% — prima casa"],["0","0% — non applicata"]]
       .map(o=>'<option value="'+o[0]+'" '+(o[0]===val?'selected':'')+'>'+o[1]+'</option>').join("");
+    /* 10 nov 2026 \u2014 LO SCONTO (chiesto da Spazio Giardino): in % o in euro.
+       Si salva in sconto_perc (la %) o in sconto (gli euro): uno solo dei due. */
+    const scPerc=+p.sconto_perc||0, scEur=+p.sconto||0;
+    const scTipo=scPerc>0?"perc":(scEur>0?"eur":"perc");
+    const scVal=scPerc>0?_pct(scPerc):(scEur>0?_pct(scEur):"");
     return '<div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">'
-      +'<label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">\ud83d\udcb6 IVA e totale</label>'
+      +'<label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">\ud83d\udcb6 IVA, sconto e totale</label>'
       +'</div>'
+      +'<div class="field"><label for="pv-sconto">Sconto</label>'
+      +'<div style="display:flex;gap:10px"><input id="pv-sconto" type="text" inputmode="decimal" placeholder="Es. 10" value="'+esc(scVal)+'" style="flex:1">'
+      +'<select id="pv-sconto-tipo" style="max-width:120px"><option value="perc" '+(scTipo==="perc"?"selected":"")+'>%</option><option value="eur" '+(scTipo==="eur"?"selected":"")+'>\u20ac</option></select></div>'
+      +'<div class="campo-aiuto">Lascia vuoto se non fai sconto.</div></div>'
       +'<div class="field"><label>Aliquota IVA</label><select id="pv-iva-imp">'+opz+'</select>'
       +'<div class="campo-aiuto">Scegliendo un\'aliquota, sul PDF il cliente vede anche il <b>totale finito</b>. Lasciandola su "non indicata" il preventivo resta come prima.</div></div>'
       +'<div id="pv-riep-imp" class="prev-somma" style="text-align:left;line-height:1.9"></div>';
@@ -352,27 +416,49 @@
     if(ruoloUtente==='professionista')return;
     const box=$("#pv-riep-imp"); if(!box)return;
     const sel=$("#pv-iva-imp");
-    if(!sel||sel.value===""){box.innerHTML="";return;}
-    let imponibile=0;
+    let somma=0;
     $$("#prev-righe [data-riga]").forEach(d=>{
-      imponibile += impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0));
+      if(d.hasAttribute("data-sezione"))return;
+      somma += impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0));
     });
+    const scDati=leggiScontoModulo();
+    const sconto=prevSconto(somma,scDati);
+    const conIva=!!(sel&&sel.value!=="");
+    /* niente IVA e niente sconto: il riquadro resta vuoto, come prima */
+    if(!conIva&&!sconto){box.innerHTML="";return;}
     /* il totale si somma sull'IVA GIA' arrotondata ai centesimi, se no le due
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
        1.100,05. Il cliente che rifa' la somma a mano trova l'errore. */
-    const _pc=prevContiImpresa(imponibile,sel.value);
-    const perc=_pc.perc, iva=_pc.iva, tot=_pc.totale;
-    const riga=(et,v)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+eur2(v)+'</strong></div>';
-    box.innerHTML = riga("Imponibile",imponibile)
-      + riga("IVA "+_pct(perc)+"%",iva)
-      + '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
-      + '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale per il cliente</strong></span><strong>'+eur2(tot)+'</strong></div>';
+    const _pc=prevContiImpresa(somma,conIva?sel.value:null,sconto);
+    const riga=(et,v,st)=>'<div style="display:flex;justify-content:space-between;gap:12px'+(st||"")+'"><span>'+et+'</span><strong>'+v+'</strong></div>';
+    let h="";
+    if(sconto){
+      h+=riga("Totale voci",eur2(somma));
+      h+=riga(prevScontoEtichetta(scDati),"− "+eur2(sconto),";color:#15803d");
+    }
+    if(conIva){
+      h+=riga("Imponibile",eur2(_pc.imponibile));
+      h+=riga("IVA "+_pct(_pc.perc)+"%",eur2(_pc.iva));
+    }
+    h+='<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
+      +'<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>'
+      +(conIva?'Totale per il cliente':'Totale scontato (IVA esclusa)')+'</strong></span><strong>'+eur2(_pc.totale)+'</strong></div>';
+    box.innerHTML=h;
+  }
+  /* lo sconto scritto nel modulo, nella forma del database */
+  function leggiScontoModulo(){
+    const inp=$("#pv-sconto"), tipo=$("#pv-sconto-tipo");
+    if(!inp)return {sconto:null,sconto_perc:null};
+    const v=_numIt("#pv-sconto")||0;
+    if(!(v>0))return {sconto:null,sconto_perc:null};
+    if(tipo&&tipo.value==="eur")return {sconto:_cent2(v),sconto_perc:null};
+    return {sconto:null,sconto_perc:Math.min(v,100)};
   }
   function leggiCampiIvaImpresa(){
     if(ruoloUtente==='professionista')return {};
     const sel=$("#pv-iva-imp");
     if(!sel)return {};
-    return {iva_perc: sel.value===""?null:(+sel.value||0)};
+    return Object.assign({iva_perc: sel.value===""?null:(+sel.value||0)},leggiScontoModulo());
   }
 
   async function prevForm(p,preset,aiApri){
@@ -491,6 +577,10 @@
       $("#prev-righe").addEventListener("input",aggiornaRiepilogoIvaImpresa);
       const selIva=$("#pv-iva-imp");
       if(selIva)selIva.addEventListener("change",aggiornaRiepilogoIvaImpresa);
+      /* 10 nov 2026 — lo sconto: il conto si rifà mentre si scrive */
+      const scIn=$("#pv-sconto"), scTi=$("#pv-sconto-tipo");
+      if(scIn)scIn.addEventListener("input",aggiornaRiepilogoIvaImpresa);
+      if(scTi)scTi.addEventListener("change",aggiornaRiepilogoIvaImpresa);
       aggiornaRiepilogoIvaImpresa();
     }
     /* la riga dell'AI si accende per ultima, quando le caselle ci sono gia' */
@@ -571,9 +661,9 @@
       const mod=Object.assign({titolo,cliente_id,data,note},parcella);
       let {data:okPrev,error}=await sb.from("gest_preventivi").update(mod).eq("id",id).eq("user_id",sbUid).select("id");
       if(error&&eColonnaParcellaMancante(error)){
-        const rip=await sb.from("gest_preventivi").update(senzaCampiParcella(mod)).eq("id",id).eq("user_id",sbUid).select("id");
+        const rip=await sb.from("gest_preventivi").update(senzaCampiParcella(mod,error)).eq("id",id).eq("user_id",sbUid).select("id");
+        if(!rip.error)avvisoParcella=prevCosaPerso(mod,error);
         okPrev=rip.data;error=rip.error;
-        if(!error)avvisoParcella=true;
       }
       if(error){toast("Errore: "+error.message);return;}
       if(!okPrev||!okPrev.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
@@ -611,9 +701,9 @@
       const nuovo=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"},parcella);
       let {data:np,error}=await sb.from("gest_preventivi").insert(nuovo).select().single();
       if(error&&eColonnaParcellaMancante(error)){
-        const rip=await sb.from("gest_preventivi").insert(senzaCampiParcella(nuovo)).select().single();
+        const rip=await sb.from("gest_preventivi").insert(senzaCampiParcella(nuovo,error)).select().single();
+        if(!rip.error)avvisoParcella=prevCosaPerso(nuovo,error);
         np=rip.data;error=rip.error;
-        if(!error)avvisoParcella=true;
       }
       if(error){toast("Errore: "+error.message);return;}
       pid=np.id;
@@ -625,9 +715,7 @@
       if(eDelP){toast("Le voci nuove sono salvate, ma le vecchie non si sono cancellate: adesso sono doppie. Riapri e salva di nuovo.");return;}
     }
     closeSheet();rinfresca("preventivi","riepilogo");
-    toast(persiSez?AVVISO_SEZIONI:(avvisoParcella?(ruoloUtente==='professionista'
-            ?"Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL"
-            :"Salvato, ma l'aliquota IVA NON è stata registrata: manca un aggiornamento del database"):(id?"Preventivo aggiornato ✔":"Preventivo creato ✔")));
+    toast(persiSez?AVVISO_SEZIONI:(avvisoParcella||(id?"Preventivo aggiornato ✔":"Preventivo creato ✔")));
   }
   /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
      Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
@@ -772,7 +860,11 @@
       candidate=cand||[];
     }
     const {data:rr}=await sb.from("gest_preventivo_righe").select("descrizione,qta,prezzo").eq("preventivo_id",id).order("ordine");
-    const tot=(rr||[]).reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0);
+    /* 10 nov 2026 — con lo sconto, l'importo del lavoro e' quello SCONTATO
+       (sempre IVA esclusa): e' la cifra che il cliente ha accettato. */
+    const _somma=(rr||[]).reduce((s,r)=>s+impRiga(r.qta,r.prezzo),0);
+    const _scLav=prevSconto(_somma,p);
+    const tot=_scLav?_cent2(_somma-_scLav):_somma;
 
     if(!candidate.length){
       if(!gconfirm("Il cliente ha accettato? Creo "+(pro?"la pratica":"il lavoro")+" dal preventivo N. "+p.numero+"."))return;
@@ -789,7 +881,7 @@
       +'</select></div>'
       +'<p class="sh-nota" style="margin-bottom:0">'+(pro
           ?'Il compenso del preventivo ('+eur2(tot)+') — senza cassa, spese e IVA — diventa l\'importo della pratica.'
-          :'Il totale delle voci del preventivo ('+eur2(tot)+'), IVA esclusa, diventa l\'importo del lavoro.')+'</p>'
+          :'Il totale delle voci del preventivo'+(_scLav?' meno lo sconto':'')+' ('+eur2(tot)+'), IVA esclusa, diventa l\'importo del lavoro.')+'</p>'
       +'</div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="ptl-conferma" data-id="'+esc(String(id))+'" data-tot="'+tot+'">Collega</button>');

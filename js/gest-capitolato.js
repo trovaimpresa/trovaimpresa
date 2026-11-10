@@ -1255,10 +1255,13 @@
     try{ var ri=await sb.from("imprese").select("colore_header,personalizzazione").eq("user_id",sbUid).maybeSingle(); col=coloreImpresa(ri&&ri.data); }catch(e){}
     var c=_stato.cli||{};
     var rr=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
-    var imponibile=0; ((rr&&rr.data)||[]).forEach(function(r){ imponibile+=impRiga(r.qta,r.prezzo); });
+    var somma=0; ((rr&&rr.data)||[]).forEach(function(r){ somma+=impRiga(r.qta,r.prezzo); });
+    /* 10 nov 2026 — con lo sconto del preventivo (prevContiImpresa) */
     var perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
-    var ivaVal=perc?_centPerc(imponibile,perc):0;
-    var totale=_cent2(imponibile+ivaVal);
+    var _pcCap=prevContiImpresa(somma,perc==null?null:perc,prevSconto(somma,p));
+    var imponibile=_pcCap.imponibile;
+    var ivaVal=_pcCap.iva;
+    var totale=_cent2(_pcCap.totale);
 
     var doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
     var M=18, R=210-M, L=R-M, y=20;

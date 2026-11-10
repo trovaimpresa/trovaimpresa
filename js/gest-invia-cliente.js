@@ -81,16 +81,25 @@
       if(cp.ritenuta) out.totali.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%","- "+eur2(cp.ritenuta)]);
       out.totale=["Netto a pagare",eur2(cp.totale)];
       out.totale_nota="Netto a pagare";
-    }else if(p.iva_perc!=null&&p.iva_perc!==""){
-      var _pc=prevContiImpresa(tot,p.iva_perc), perc=_pc.perc, iva=_pc.iva, fin=_pc.totale;
-      out.totali.push(["Imponibile",eur2(tot)]);
-      if(perc) out.totali.push(["IVA "+_pct(perc)+"%",eur2(iva)]);
-      out.totale=["Totale",eur2(fin)];
-      out.totale_nota=perc?"IVA "+_pct(perc)+"% compresa":"Totale";
-      out.nota_iva="I prezzi delle singole voci sono al netto dell'IVA.";
     }else{
-      out.totale=["Totale",eur2(tot)];
-      out.totale_nota="IVA esclusa";
+      /* 10 nov 2026 — lo sconto: stessa regola del PDF (prevSconto) */
+      var sc=prevSconto(tot,p);
+      var conIva=(p.iva_perc!=null&&p.iva_perc!=="");
+      var _pc=prevContiImpresa(tot,conIva?p.iva_perc:null,sc), perc=_pc.perc;
+      if(sc){
+        out.totali.push(["Totale voci",eur2(tot)]);
+        out.totali.push([prevScontoEtichetta(p),"- "+eur2(sc)]);
+      }
+      if(conIva){
+        out.totali.push(["Imponibile",eur2(_pc.imponibile)]);
+        if(perc) out.totali.push(["IVA "+_pct(perc)+"%",eur2(_pc.iva)]);
+        out.totale=["Totale",eur2(_pc.totale)];
+        out.totale_nota=perc?"IVA "+_pct(perc)+"% compresa":"Totale";
+        out.nota_iva="I prezzi delle singole voci sono al netto dell'IVA.";
+      }else{
+        out.totale=["Totale",eur2(_pc.totale)];
+        out.totale_nota="IVA esclusa";
+      }
     }
     return out;
   }

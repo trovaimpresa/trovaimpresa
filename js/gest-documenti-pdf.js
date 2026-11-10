@@ -158,26 +158,32 @@
       doc.text("NETTO A PAGARE",R-88,ry+4);
       doc.text(eurPdf(cp.totale),R-2,ry+4,{align:"right"});
       y+=hBox+10;
-    }else if(p.iva_perc!=null&&p.iva_perc!==""){
+    }else if((p.iva_perc!=null&&p.iva_perc!=="")||prevSconto(tot,p)){
       /* 9 agosto 2026 — impresa con l'aliquota indicata: il cliente vede il
-         totale FINITO, non solo l'imponibile. È la cifra che gli interessa. */
-      const _pc=prevContiImpresa(tot,p.iva_perc);
+         totale FINITO, non solo l'imponibile. È la cifra che gli interessa.
+         10 nov 2026 — e se c'e' lo sconto, la riga dello sconto prima
+         dell'imponibile (stessa regola del modulo: prevContiImpresa). */
+      const sconto=prevSconto(tot,p);
+      const conIva=(p.iva_perc!=null&&p.iva_perc!=="");
+      const _pc=prevContiImpresa(tot,conIva?p.iva_perc:null,sconto);
       const perc=_pc.perc;
-      const ivaVal=_pc.iva;
       /* stessa regola del riquadro nel gestionale e della conferma d'ordine:
          si somma l'IVA già arrotondata, se no i tre documenti dello stesso
          lavoro escono con totali diversi di un centesimo */
       const finito=_pc.totale;
-      const hBox=perc?30:18;
+      const vociBox=[];
+      if(sconto){vociBox.push(["Totale voci",eurPdf(tot)]);vociBox.push([prevScontoEtichetta(p),"- "+eurPdf(sconto)]);}
+      if(conIva){vociBox.push(["Imponibile",eurPdf(_pc.imponibile)]);
+                 if(perc)vociBox.push(["IVA "+_pct(perc)+"%",eurPdf(_pc.iva)]);}
+      const hBox=vociBox.length*6+18;
       if(y+hBox>272){doc.addPage();y=20;}
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
       doc.setFont("helvetica","normal");doc.setFontSize(9.5);
       let ry=y+7;
-      doc.text("Imponibile",R-88,ry);doc.text(eurPdf(tot),R-2,ry,{align:"right"});ry+=6;
-      if(perc){doc.text("IVA "+_pct(perc)+"%",R-88,ry);doc.text(eurPdf(ivaVal),R-2,ry,{align:"right"});ry+=6;}
+      vociBox.forEach(function(v){doc.text(v[0],R-88,ry);doc.text(v[1],R-2,ry,{align:"right"});ry+=6;});
       doc.setDrawColor(31,111,92);doc.line(R-88,ry-3,R-2,ry-3);
       doc.setFont("helvetica","bold");doc.setFontSize(11.5);
-      doc.text("TOTALE",R-88,ry+4);doc.text(eurPdf(finito),R-2,ry+4,{align:"right"});
+      doc.text(conIva?"TOTALE":"TOTALE (IVA esclusa)",R-88,ry+4);doc.text(eurPdf(finito),R-2,ry+4,{align:"right"});
       y+=hBox+10;
     }else{
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-70,y,70,12);doc.setLineWidth(.2);
@@ -660,9 +666,12 @@
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
-    let imponibile=0; righe.forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
-    /* 7 nov 2026 — la formula sta in prevContiImpresa (gest-preventivi.js) */
-    const _pc=prevContiImpresa(imponibile,p.iva_perc);
+    let somma=0; righe.forEach(r=>{somma+=impRiga(r.qta,r.prezzo);});
+    /* 7 nov 2026 — la formula sta in prevContiImpresa (gest-preventivi.js)
+       10 nov 2026 — con lo sconto del preventivo */
+    const sconto=prevSconto(somma,p);
+    const _pc=prevContiImpresa(somma,p.iva_perc,sconto);
+    const imponibile=_pc.imponibile;
     const perc=_pc.conIva?_pc.perc:null;
     const ivaVal=_pc.iva;
     const totale=_cent2(_pc.totale);
@@ -701,6 +710,7 @@
       +'<div class="sh-b">'
       +'<div class="sh-tit">Il prezzo concordato</div>'
       +'<div class="prev-somma" style="text-align:left;line-height:1.9">'
+      +  (sconto?riga("Totale voci",somma)+'<div style="display:flex;justify-content:space-between;gap:12px;color:#15803d"><span>'+esc(prevScontoEtichetta(p))+'</span><strong>− '+eur2(sconto)+'</strong></div>':"")
       +  riga("Imponibile",imponibile)
       +  (perc?riga("IVA "+_pct(perc)+"%",ivaVal):"")
       +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
@@ -731,9 +741,12 @@
     let c={};
     c=await cliDelDocumento(p.cliente_id);
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
-    let imponibile=0;(rr||[]).forEach(r=>{imponibile+=impRiga(r.qta,r.prezzo);});
-    /* 7 nov 2026 — la formula sta in prevContiImpresa (gest-preventivi.js) */
-    const _pc=prevContiImpresa(imponibile,p.iva_perc);
+    let somma=0;(rr||[]).forEach(r=>{somma+=impRiga(r.qta,r.prezzo);});
+    /* 7 nov 2026 — la formula sta in prevContiImpresa (gest-preventivi.js)
+       10 nov 2026 — con lo sconto del preventivo */
+    const sconto=prevSconto(somma,p);
+    const _pc=prevContiImpresa(somma,p.iva_perc,sconto);
+    const imponibile=_pc.imponibile;
     const perc=_pc.conIva?_pc.perc:null;
     const ivaVal=_pc.iva;
     const totale=_cent2(_pc.totale);
@@ -811,11 +824,13 @@
     }
 
     titoletto("Corrispettivo");
-    const voci=[["Imponibile",imponibile]];
+    const voci=[];
+    if(sconto){voci.push(["Totale voci",somma]);voci.push([prevScontoEtichetta(p),-sconto]);}
+    voci.push(["Imponibile",imponibile]);
     if(perc)voci.push(["IVA "+_pct(perc)+"%",ivaVal]);
     if(y+voci.length*5.5+18>272){doc.addPage();y=20;}
     doc.setFont("helvetica","normal");doc.setFontSize(9.5);
-    voci.forEach(function(v){doc.text(v[0],M+2,y);doc.text(eurPdf(v[1]),R-2,y,{align:"right"});y+=5.5;});
+    voci.forEach(function(v){doc.text(v[0],M+2,y);doc.text((v[1]<0?"- "+eurPdf(-v[1]):eurPdf(v[1])),R-2,y,{align:"right"});y+=5.5;});
     doc.setDrawColor(31,111,92);doc.line(M+2,y-2,R-2,y-2);y+=3;
     doc.setFont("helvetica","bold");doc.setFontSize(11);
     doc.text("TOTALE",M+2,y+2);doc.text(eurPdf(totale),R-2,y+2,{align:"right"});
