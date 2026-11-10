@@ -442,6 +442,22 @@ function costruisciModulo(tipo, dati, opzioni) {
   return { tipo: tipo, campi: campi };
 }
 
+/* 10 nov 2026 — DUE UNITA' DI MISURA SONO LA STESSA? «mq», «m²», «m2», «MQ.»
+   si'; «m²» e «m³» no; una vuota non e' uguale a niente (nel dubbio no:
+   un prezzo al m² su una riga in metri e' un conto sbagliato che sembra giusto). */
+function normaUnita(u) {
+  let x = String(u == null ? '' : u).toLowerCase().trim().replace(/²/g, '2').replace(/³/g, '3').replace(/[\s.\/]/g, '');
+  const pari = { mq: 'm2', metriquadri: 'm2', metroquadro: 'm2', mc: 'm3', metricubi: 'm3', metrocubo: 'm3', ml: 'm', mt: 'm', metri: 'm', metro: 'm',
+                 cad: 'cad', cadauno: 'cad', n: 'cad', nr: 'cad', num: 'cad', pz: 'cad', pezzi: 'cad', pezzo: 'cad',
+                 h: 'h', ora: 'h', ore: 'h', kg: 'kg', q: 'q', ql: 'q', qli: 'q', t: 't', ton: 't',
+                 acorpo: 'corpo', corpo: 'corpo', ac: 'corpo', gg: 'g', giorno: 'g', giorni: 'g', giornata: 'g' };
+  return pari[x] || x;
+}
+function stessaUnita(a, b) {
+  const x = normaUnita(a), y = normaUnita(b);
+  return !!x && !!y && x === y;
+}
+
 /* ⛔ 10 nov 2026 — LE VOCI SI PULISCONO IN UN POSTO SOLO.
    Le usano il preventivo e il computo: max 30, testi corti, numeri veri.
    Un prezzo che non c'e' resta VUOTO, mai 0. Solo per il computo passa anche
@@ -598,6 +614,7 @@ async function esegui(clientDati, q) {
   Object.keys(q.filtri).forEach(function(k) { sel = sel.eq(k, q.filtri[k]); });
   if (q.senzaCestino) sel = sel.is('eliminato_il', null);
   if (q.contiene) sel = sel.ilike(q.contiene.campo, '%' + q.contiene.valore + '%');
+  if (q.dentro) sel = sel.in(q.dentro.campo, q.dentro.valori);
   if (q.oppure) sel = sel.or(q.oppure);
   if (q.stato) sel = sel.eq('stato', q.stato);
   /* ⚠️ `neq` da solo butta via anche le righe con lo stato VUOTO (in SQL
@@ -879,42 +896,33 @@ const STRUMENTI = [
   {
     // ⛔ 10 nov 2026 — i prezzi sulle righe che ci sono gia': non scrive niente
     name: 'prezzi_computo',
-    description: 'Propone i PREZZI per le lavorazioni di un computo che sono ancora a zero (il caso del computo del geometra: le righe ci sono, mancano i prezzi). Gli apre la schermata «Controlla i prezzi»: lui mette la spunta e conferma. NON scrive niente. PRIMA leggi le righe con `dentro_al_documento` (voci_del_computo) e cerca i SUOI prezzi con `miei_prezzi`. Proponi un prezzo SOLO per le righe a zero e SOLO se la voce del suo prezzario è la stessa lavorazione con la STESSA unità di misura. `sicuro: false` quando la voce è simile ma non sei certo che sia quella: lui la vedrà senza spunta. Le righe per cui non trovi niente lasciale fuori.',
+    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (mette la spunta e conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che hai scelto. `sicuro: true` solo se è chiaramente la STESSA lavorazione con la STESSA unità di misura; `sicuro: false` se è simile ma non sei certo (lui la vedrà senza spunta). Le righe senza una candidata adatta NON metterle. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. Le righe trovate per codice le aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
     input_schema: {
       type: 'object',
       properties: {
         id: { type:'string', description:'l\'id vero del computo' },
-        prezzi: {
+        scelte: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              voce_id:         { type:'string', description:'l\'id della riga del computo, letto con dentro_al_documento' },
-              prezzo_unitario: { type:'number' },
-              prezzo_da:       { type:'string', description:'la voce del suo prezzario da cui viene, come sta scritta (corta)' },
-              sicuro:          { type:'boolean' }
-            },
-            required: ['voce_id', 'prezzo_unitario']
-          }
+          items: { type:'object', properties: { n: { type:'integer' }, k: { type:'string' }, sicuro: { type:'boolean' } }, required:['n','k'] }
         }
       },
-      required: ['id', 'prezzi']
+      required: ['id']
     }
   },
   {
     // 10 nov 2026 — il computo LUNGO del geometra: solo le righe a zero, a pezzi
     name: 'righe_senza_prezzo',
-    description: 'Dà le lavorazioni di un computo che sono ANCORA SENZA PREZZO (a zero), 30 per volta, in ordine, con id, codice di tariffa, descrizione, unità e quantità. Dice anche quante ne restano dopo. Con `salta` leggi il pezzo successivo (salta: 30 per le righe dalla 31 in poi). USALO, al posto di dentro_al_documento, quando deve mettere i prezzi a un computo.',
-    input_schema: { type:'object', properties: { id: { type:'string', description:'l\'id vero del computo' }, salta: { type:'integer', description:'quante righe a zero saltare dall\'inizio (0, 30, 60…)' } }, required:['id'] }
+    description: 'PRIMO PASSO per mettere i prezzi a un computo. Legge le lavorazioni ANCORA A ZERO, 30 per volta. Quelle che hanno un codice di tariffa uguale a una voce del SUO prezzario (stessa unità) le sistema DA SOLO il gestionale: tu non le vedi, ti dice solo quante sono (`trovate_per_codice`). Ti torna le ALTRE, ognuna col suo numero `n`, descrizione e unità: per quelle devi cercare tu con `cerca_prezzi`. Dice anche quante ne restano dopo questo pezzo.',
+    input_schema: { type:'object', properties: { id: { type:'string', description:'l\'id vero del computo' }, salta: { type:'integer', description:'quante righe a zero saltare dall\'inizio (di solito 0)' } }, required:['id'] }
   },
   {
     // 10 nov 2026 — tante ricerche nel prezzario in un colpo solo
     name: 'cerca_prezzi',
-    description: 'Cerca nel SUO prezzario TANTE lavorazioni in un colpo solo (fino a 30). Per ognuna dai una `parola` (la più precisa della descrizione: «intonaco», «massetto», «battiscopa») e, se la riga del computo ha un codice di tariffa, anche il `codice`. Per ognuna torna: le voci con lo STESSO codice (se ci sono: sono quelle giuste) e le 5 voci più usate che contengono la parola, ognuna con descrizione, unità e prezzo. USALO al posto di tanti `miei_prezzi` quando le lavorazioni sono più di tre.',
+    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e UNA `parola` (la più precisa della descrizione: «intonaco», «massetto», «battiscopa», «siepi»). Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
     input_schema: {
       type: 'object',
       properties: {
-        cerca: { type:'array', items: { type:'object', properties: { parola: { type:'string' }, codice: { type:'string' } }, required:['parola'] } }
+        cerca: { type:'array', items: { type:'object', properties: { n: { type:'integer' }, parola: { type:'string' } }, required:['n','parola'] } }
       },
       required: ['cerca']
     }
@@ -1126,7 +1134,7 @@ function istruzioniFisse() {
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
     'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo`. ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
-    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra): 1) trovalo con `cerca_per_nome` su computi; 2) leggi le righe a zero con `righe_senza_prezzo` (30 per volta); 3) cerca TUTTE le lavorazioni insieme con UNA chiamata a `cerca_prezzi` (parola + codice di tariffa se c\'è); 4) chiama `prezzi_computo`. Regole: se c\'è una voce con lo STESSO codice e la stessa unità, è quella (`sicuro: true`); se la trovi solo per parola, `sicuro: true` solo quando è chiaramente la stessa lavorazione con la stessa unità, altrimenti `sicuro: false`; se non c\'è niente di adatto lascia fuori la riga. `prezzo_da` corto (massimo 60 caratteri). ⛔ UN PEZZO PER MESSAGGIO: 30 righe e basta. Se `restano_dopo_queste` è più di zero, dillo nella risposta: «Ne restano N: quando hai confermato questi, premi di nuovo "Metti i prezzi con l\'AI"». Se ti chiede di «continuare» o «le altre», rileggi con `righe_senza_prezzo`: quelle già confermate non tornano; se tornano le stesse a cui non avevi trovato un prezzo, usa `salta` per andare avanti.',
+    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (30 righe). Dopo, DUE righe: quanti prezzi proposti, e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
     'COME SCRIVI: testo semplice. Niente righe di trattini (---), niente titoli col cancelletto (#), niente tabelle. Il grassetto solo per i numeri e i nomi che contano.',
     'SE CHIEDE QUALE documento ha dentro qualcosa («quale computo ha le lavorazioni», «in quale preventivo ho messo il ponteggio») NON elencarli tutti chiedendo quale: guarda dentro con `dentro_al_documento` (anche più documenti nello stesso giro) e rispondi tu.',
@@ -1488,6 +1496,10 @@ export default async function (req) {
      che sono solo domande: solo `compila_lavoro` lo riempie, e ne passa
      UNO SOLO — due moduli aperti insieme sono due finestre sovrapposte. */
   let modulo = null;
+  /* 10 nov 2026 — il computo che sta prezzando in QUESTO messaggio: le righe
+     lette (n → id), le voci candidate (n → lettera → prezzo) e quelle
+     trovate per codice. Vive il tempo di un messaggio. */
+  let memoC = null;
   /* vero quando il modulo aperto ha un nome che non esiste: solo allora
      Claude puo' rifarlo una volta, col nome giusto */
   let daSistemare = false;
@@ -1647,8 +1659,8 @@ export default async function (req) {
             esito = { errore: 'mi serve l\'id vero del computo: cercalo prima' };
           } else {
             const qc = costruisciLettura('computi', uid, mestiere_id, { quanti: 1 });
-            let suo = false;
-            if (!qc.errore) { qc.filtri.id = String(inp.id); const rc = await esegui(dati, qc); suo = !rc.errore && rc.righe && rc.righe.length === 1; }
+            let suo = null;
+            if (!qc.errore) { qc.filtri.id = String(inp.id); const rc = await esegui(dati, qc); if (!rc.errore && rc.righe && rc.righe.length === 1) suo = rc.righe[0]; }
             if (!suo) {
               esito = { errore: 'quel computo non e\' in questo reparto, oppure non esiste' };
             } else {
@@ -1661,39 +1673,100 @@ export default async function (req) {
               ]);
               if (rr.errore || rq.errore) esito = { errore: rr.errore || rq.errore };
               else {
-                const righe = (rr.righe || []).map(function (v) {
-                  return { id: v.id, codice: v.codice || undefined, descrizione: String(v.descrizione || '').slice(0, 150), unita: v.unita || undefined, quantita: v.quantita };
+                /* ⛔ IL CODICE DI TARIFFA LO GUARDA IL SERVER, NON IL MODELLO.
+                   Stesso codice + stessa unita' + un prezzo solo = e' quella voce.
+                   Costa una lettura invece di migliaia di gettoni, e non sbaglia. */
+                const tutte = rr.righe || [];
+                const codici = Array.from(new Set(tutte.map(function (v) { return String(v.codice || '').trim(); }).filter(Boolean))).slice(0, 60);
+                let perCodice = {};
+                if (codici.length) {
+                  const rp = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'codice,descrizione,unita,prezzo_unitario', filtri: { user_id: uid },
+                    dentro: { campo: 'codice', valori: codici }, senzaCestino: true, ordine: 'usata_volte', limite: 300, soloConta: false });
+                  (rp.righe || []).forEach(function (r) { const c = String(r.codice || '').trim(); (perCodice[c] = perCodice[c] || []).push(r); });
+                }
+                memoC = { id: String(inp.id), titolo: suo.titolo || '', righe: {}, auto: [], candidati: {} };
+                const daCercare = [];
+                tutte.forEach(function (v, i) {
+                  const n = salta + i + 1;
+                  const cand = perCodice[String(v.codice || '').trim()] || [];
+                  const buone = cand.filter(function (r) { return +r.prezzo_unitario > 0 && stessaUnita(r.unita, v.unita); });
+                  const prezziDiversi = Array.from(new Set(buone.map(function (r) { return +r.prezzo_unitario; })));
+                  if (buone.length && prezziDiversi.length === 1) {
+                    memoC.auto.push({ voce_id: v.id, prezzo_unitario: +buone[0].prezzo_unitario, sicuro: true,
+                      prezzo_da: ('codice ' + String(v.codice).trim() + ' · ' + String(buone[0].descrizione || '')).slice(0, 160) });
+                    return;
+                  }
+                  memoC.righe[n] = { id: v.id, unita: v.unita || '' };
+                  daCercare.push({ n: n, descrizione: String(v.descrizione || '').slice(0, 140), unita: v.unita || undefined });
                 });
-                esito = { righe: righe, a_zero_in_tutto: rq.quanti, lette_dalla: salta + 1, restano_dopo_queste: Math.max(0, rq.quanti - salta - righe.length) };
+                esito = { trovate_per_codice: memoC.auto.length, da_cercare: daCercare, a_zero_in_tutto: rq.quanti,
+                          restano_dopo_queste: Math.max(0, rq.quanti - salta - tutte.length) };
               }
             }
           }
         } else if (t.name === 'cerca_prezzi') {
           /* i prezzi sono dell'utente (user_id), come in `miei_prezzi`.
              Ogni ricerca passa da `esegui`, col gettone dell'iscritto. */
-          const lista = (Array.isArray(inp.cerca) ? inp.cerca : []).slice(0, 30);
+          const lista = (Array.isArray(inp.cerca) ? inp.cerca : []).slice(0, RIGHE_ZERO_MAX);
           if (!uid) esito = { errore: 'manca chi sta chiedendo' };
+          else if (!memoC) esito = { errore: 'prima leggi le righe con righe_senza_prezzo' };
           else if (!lista.length) esito = { errore: 'manca cosa cercare' };
           else {
-            const taglia = function (r) { return { descrizione: String(r.descrizione || '').slice(0, 110), unita: r.unita || undefined, prezzo_unitario: r.prezzo_unitario, codice: r.codice || undefined }; };
+            const LETTERE = 'abcde';
             const fatti = await Promise.all(lista.map(async function (c) {
+              const n = parseInt(c && c.n, 10);
               const parola = String((c && c.parola) || '').trim().slice(0, 40);
-              const codice = String((c && c.codice) || '').trim().slice(0, 40);
-              const out = { parola: parola };
-              const baseP = { tabella: 'gest_prezzi_propri', campi: 'codice,descrizione,unita,prezzo_unitario', senzaCestino: true, ordine: 'usata_volte', soloConta: false };
-              const lavori = [];
-              if (codice) lavori.push(esegui(dati, Object.assign({}, baseP, { filtri: { user_id: uid, codice: codice }, limite: 3 })).then(function (r) { if (r.righe && r.righe.length) { out.codice = codice; out.stesso_codice = r.righe.map(taglia); } }));
-              if (parola) lavori.push(esegui(dati, Object.assign({}, baseP, { filtri: { user_id: uid }, contiene: { campo: 'descrizione', valore: parola }, limite: 5 })).then(function (r) { out.con_la_parola = (r.righe || []).map(taglia); }));
-              await Promise.all(lavori);
-              return out;
+              if (!memoC.righe[n] || !parola) return { n: n, voci: [] };
+              const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario', filtri: { user_id: uid },
+                contiene: { campo: 'descrizione', valore: parola }, senzaCestino: true, ordine: 'usata_volte', limite: 12, soloConta: false });
+              /* prima le voci con la STESSA unita' della riga: sono le sole che
+                 possono essere «sicure» */
+              const tutte = (r.righe || []).filter(function (x) { return +x.prezzo_unitario > 0; });
+              const uguali = tutte.filter(function (x) { return stessaUnita(x.unita, memoC.righe[n].unita); });
+              const altre = tutte.filter(function (x) { return uguali.indexOf(x) < 0; });
+              const scelte = uguali.concat(altre).slice(0, 5);
+              memoC.candidati[n] = {};
+              return { n: n, voci: scelte.map(function (x, i) {
+                const k = LETTERE[i];
+                memoC.candidati[n][k] = { prezzo: +x.prezzo_unitario, descrizione: String(x.descrizione || ''), unita: x.unita || '' };
+                return { k: k, d: String(x.descrizione || '').slice(0, 100), u: x.unita || undefined, p: x.prezzo_unitario };
+              }) };
             }));
             esito = { risultati: fatti };
           }
-        } else if (t.name === 'compila_computo' || t.name === 'prezzi_computo') {
+        } else if (t.name === 'prezzi_computo') {
+          /* ⛔ QUI NON SI SCRIVE NIENTE, e il prezzo NON lo scrive il modello:
+             lui dice quale candidata (n + lettera), il numero lo mette il server
+             dalla voce del prezzario che ha letto lui stesso. */
+          if (modulo && !daSistemare) {
+            esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
+          } else if (!memoC || String(inp.id || '') !== memoC.id) {
+            esito = { errore: 'prima leggi le righe di QUESTO computo con righe_senza_prezzo' };
+          } else {
+            const prezzi = memoC.auto.slice();
+            let scartate = 0;
+            (Array.isArray(inp.scelte) ? inp.scelte : []).slice(0, RIGHE_ZERO_MAX).forEach(function (sc) {
+              const n = parseInt(sc && sc.n, 10), k = String((sc && sc.k) || '').trim().toLowerCase();
+              const riga = memoC.righe[n], cand = memoC.candidati[n] && memoC.candidati[n][k];
+              if (!riga || !cand) { scartate++; return; }
+              if (prezzi.some(function (p) { return p.voce_id === riga.id; })) return;
+              /* «sicuro» lo puo' essere solo con la stessa unita': lo controlla il server */
+              prezzi.push({ voce_id: riga.id, prezzo_unitario: cand.prezzo, prezzo_da: cand.descrizione.slice(0, 160),
+                            sicuro: sc.sicuro !== false && stessaUnita(cand.unita, riga.unita) });
+            });
+            const mc = costruisciComputo('prezzi', { prezzi: prezzi }, memoC.id, memoC.titolo);
+            if (mc.errore) esito = { errore: 'non ho trovato nessun prezzo adatto nel suo prezzario: diglielo' };
+            else {
+              modulo = mc; daSistemare = false;
+              const sicuri = mc.campi.prezzi.filter(function (p) { return p.sicuro; }).length;
+              esito = { ok: true, aperto: 'gli ho aperto «Controlla i prezzi»: ' + mc.campi.prezzi.length + ' prezzi proposti (' + memoC.auto.length + ' per codice di tariffa, ' + sicuri + ' con la spunta, ' + (mc.campi.prezzi.length - sicuri) + ' senza spunta da guardare)' + (scartate ? '; ' + scartate + ' scelte non valide scartate' : '') + '. Conferma lui.' };
+            }
+          }
+        } else if (t.name === 'compila_computo') {
           /* ⛔ 10 nov 2026 — QUI NON SI SCRIVE NIENTE. Se c'e' un id, PRIMA si
              controlla che il computo sia suo e di questo reparto (i due filtri
              di sempre): un id inventato o di un altro reparto non apre niente. */
-          const modoC = t.name === 'prezzi_computo' ? 'prezzi' : 'aggiungi';
+          const modoC = 'aggiungi';
           if (modulo && !daSistemare) {
             esito = { errore: 'un modulo per volta: questo non l\'ho aperto' };
           } else {
@@ -1847,5 +1920,5 @@ export default async function (req) {
 
 // per il banco: le parti pure si provano da sole, senza database
 export { ATTREZZI, DOVE_SI_CERCA, STRUMENTI, costruisciLettura, FIGLI, costruisciLetturaFiglio, ripulisciAllegato };
-export { costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
+export { stessaUnita, costruisciComputo, pulisciVoci, costruisciModulo, CASELLE_LAVORO, MODULI, calendarioProssimo, scegliNome, nomiDelReparto, esegui, istruzioni, chiamaRpc, unGiro };
 export { casellePratica, PRATICA_TIPI_OK, PRATICA_STATI_OK, istruzioniFisse, istruzioniDelGiorno, sistemaPerClaude, segnaGiorni, giornoPiu, agenda, parolaPulita, STRUMENTI_IN_MEMORIA, PAROLE_RUOLO };
