@@ -689,6 +689,8 @@
       return;
     }
     var compresi = Math.max(n - messaggiComprati, 0);
+    /* 10 nov 2026: il fondatore non ha limite (chat_stato gli da' 100000) */
+    if (compresi >= 10000) { sotto.innerHTML = 'Messaggi <b>senza limite</b>'; return; }
     sotto.innerHTML = 'Ti restano <b>' + compresi + '</b> messaggi compresi questo mese' + comprati;
   }
 
