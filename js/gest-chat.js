@@ -174,8 +174,18 @@
   /* ⚠️ NIENTE <br>: `.asst-msg` nel foglio comune ha gia'
      `white-space:pre-wrap`, quindi gli a capo li tiene da solo. Mettendoci
      anche i <br> le righe venivano doppie. Si converte solo il grassetto. */
+  /* 10 nov 2026 — visto dal vivo: nella risposta restava scritta una riga
+     «---» (il divisore del markdown) e i titoli coi cancelletti. Qui non
+     si disegna il markdown: la riga di trattini si toglie, il titolo
+     diventa grassetto, e tre a capo di fila tornano due. */
+  function pulisciMarkdown(t) {
+    return String(t == null ? '' : t)
+      .replace(/^[ \t]*(?:-{3,}|\*{3,}|_{3,})[ \t]*$/gm, '')
+      .replace(/^[ \t]*#{1,4}[ \t]+(.+?)[ \t]*$/gm, '**$1**')
+      .replace(/\n{3,}/g, '\n\n');
+  }
   function testoRisposta(t) {
-    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
+    return esc(pulisciMarkdown(t)).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(SEGNALINO, pulsanteApri)
       .replace(SEGNALINO_VAI, pulsanteVai)
       .replace(SEGNALINO_WA, pulsanteWa).replace(SEGNALINO_PAG, pulsantePagata)
       /* 6 nov 2026 — due segnalini senza id: quando non sa, e quando gli
