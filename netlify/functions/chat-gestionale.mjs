@@ -68,7 +68,11 @@ const GIRI_MAX       = 6;       // quante volte Claude puo' chiedere dati
    Chi sta usando i messaggi COMPRATI ne scala altri 4 con la stessa
    funzione di sempre. */
 const PESO_PREZZI = 5;
-const RIGHE_ZERO_MAX = 30;      // righe a zero di un computo, per pezzo (10 nov 2026)
+/* ⛔ 10 nov 2026 (sera) — 20, non 30. Dal vivo un pezzo da 30 righe ha
+   lavorato 35 secondi: Netlify taglia la risposta a 30 (errore 504), i
+   prezzi erano pronti ma non sono mai arrivati, e i 5 messaggi si erano
+   scalati lo stesso. */
+const RIGHE_ZERO_MAX = 20;      // righe a zero di un computo, per pezzo
 const RIGHE_MAX      = 25;      // righe per attrezzata: piu' di cosi' non serve
 const STORIA_MAX     = 20;      // messaggi di chiacchierata che si rimandano
 
@@ -926,7 +930,7 @@ const STRUMENTI = [
   {
     // 10 nov 2026 — il computo LUNGO del geometra: solo le righe a zero, a pezzi
     name: 'righe_senza_prezzo',
-    description: 'PRIMO PASSO per mettere i prezzi a un computo. Legge le lavorazioni ANCORA A ZERO, 30 per volta. Quelle che hanno un codice di tariffa uguale a una voce del SUO prezzario (stessa unità) le sistema DA SOLO il gestionale: tu non le vedi, ti dice solo quante sono (`trovate_per_codice`). Ti torna le ALTRE, ognuna col suo numero `n`, descrizione e unità: per quelle devi cercare tu con `cerca_prezzi`. Dice anche quante ne restano dopo questo pezzo.',
+    description: 'PRIMO PASSO per mettere i prezzi a un computo. Legge le lavorazioni ANCORA A ZERO, 20 per volta. Quelle che hanno un codice di tariffa uguale a una voce del SUO prezzario (stessa unità) le sistema DA SOLO il gestionale: tu non le vedi, ti dice solo quante sono (`trovate_per_codice`). Ti torna le ALTRE, ognuna col suo numero `n`, descrizione e unità: per quelle devi cercare tu con `cerca_prezzi`. Dice anche quante ne restano dopo questo pezzo.',
     input_schema: { type:'object', properties: { id: { type:'string', description:'l\'id vero del computo' }, salta: { type:'integer', description:'quante righe a zero saltare dall\'inizio (di solito 0)' } }, required:['id'] }
   },
   {
@@ -1148,7 +1152,7 @@ function istruzioniFisse() {
     'E se ti chiede di segnare una SCADENZA (una revisione, un\'assicurazione, un pagamento) usa `compila_scadenza`; per un FORNITORE nuovo `compila_fornitore` — anche coi dati che hai appena letto su una bolla che ti ha mandato.',
     'SE TI CHIEDE UN PREVENTIVO: 1) cerca i SUOI prezzi con `miei_prezzi` (una parola per ogni lavoro: «piastrelle», «demolizione»…); 2) se ha già fatto un preventivo simile, guardalo (`cerca_per_nome` su preventivi, poi `dentro_al_documento`) e usa quei prezzi; 3) apri il modulo con `compila_preventivo`. ⛔ I PREZZI NON SI INVENTANO: se una voce non ha un prezzo suo, lasciala SENZA prezzo e diglielo in una riga («per X e Y non ho un tuo prezzo, mettili tu»). ⛔ Le misure non si inventano: se mancano (quanti mq?) chiedile PRIMA di aprire il modulo. Dopo averlo aperto scrivi poche righe: quante voci, quali prezzi hai preso dai SUOI e quali mancano. Non salvi niente: salva lui.',
     'SE TI CHIEDE DI METTERE LAVORAZIONI IN UN COMPUTO («nel computo di Rossi aggiungi…», «fammi un computo per…»): 1) se il computo c\'è già trovalo con `cerca_per_nome` su computi; 2) cerca i SUOI prezzi con `miei_prezzi`, una parola per lavorazione (falle tutte insieme); 3) chiama `compila_computo`. ⛔ Fallo SUBITO con quello che sai: una riga senza prezzo o senza quantità entra lo stesso e la completa lui nella schermata di controllo. NON fermarti a fare domande prima; le cose che mancano dille DOPO, in una riga («per la siepe non ho un tuo prezzo al metro: mettilo tu»). ⛔ I prezzi non si inventano e un prezzo con un\'altra unità di misura (al m² su una riga in metri) non si usa.',
-    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (30 righe). Dopo, DUE righe (di quanti messaggi vale NON parlare: lo scrive il gestionale): quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
+    'SE TI CHIEDE DI METTERE I PREZZI A UN COMPUTO CHE HA GIÀ LE RIGHE (il computo del geometra), TRE PASSI e basta: 1) trova il computo con `cerca_per_nome` su computi; 2) `righe_senza_prezzo`: le righe col codice di tariffa uguale le sistema da solo il gestionale; per quelle in `da_cercare` fai UNA chiamata a `cerca_prezzi` con una parola per riga; 3) `prezzi_computo` con le tue scelte (n + lettera). Se `da_cercare` è vuoto salta la ricerca e chiama subito `prezzi_computo`. ⛔ UN PEZZO PER MESSAGGIO (20 righe). Dopo, DUE righe (di quanti messaggi vale NON parlare: lo scrive il gestionale): quanti prezzi proposti (quanti per codice con la spunta, quanti per descrizione SENZA spunta da guardare uno per uno), e se `restano_dopo_queste` è più di zero: «Ne restano N: conferma questi e premi di nuovo "Metti i prezzi con l\'AI"».',
     'Dopo `compila_computo` o `prezzi_computo` scrivi DUE righe al massimo: quante righe, quanti prezzi presi dai SUOI, cosa manca. Non rileggergli l\'elenco: ce l\'ha davanti.',
     'COME SCRIVI: testo semplice. Niente righe di trattini (---), niente titoli col cancelletto (#), niente tabelle. Il grassetto solo per i numeri e i nomi che contano.',
     'SE CHIEDE QUALE documento ha dentro qualcosa («quale computo ha le lavorazioni», «in quale preventivo ho messo il ponteggio») NON elencarli tutti chiedendo quale: guarda dentro con `dentro_al_documento` (anche più documenti nello stesso giro) e rispondi tu.',
@@ -1514,6 +1518,9 @@ export default async function (req) {
      lette (n → id), le voci candidate (n → lettera → prezzo) e quelle
      trovate per codice. Vive il tempo di un messaggio. */
   let memoC = null;
+  let prezziFatti = null;   /* 10 nov 2026: i prezzi sono pronti, la chiusura la scrive il server */
+  const T0 = Date.now();     /* quando e' partita la risposta: Netlify la taglia a 30 s */
+  let tempoScaduto = false;
   /* vero quando il modulo aperto ha un nome che non esiste: solo allora
      Claude puo' rifarlo una volta, col nome giusto */
   let daSistemare = false;
@@ -1713,8 +1720,9 @@ export default async function (req) {
                   memoC.righe[n] = { id: v.id, unita: v.unita || '' };
                   daCercare.push({ n: n, descrizione: String(v.descrizione || '').slice(0, 320), unita: v.unita || undefined });
                 });
+                memoC.restano = Math.max(0, rq.quanti - salta - tutte.length);
                 esito = { trovate_per_codice: memoC.auto.length, da_cercare: daCercare, a_zero_in_tutto: rq.quanti,
-                          restano_dopo_queste: Math.max(0, rq.quanti - salta - tutte.length) };
+                          restano_dopo_queste: memoC.restano };
               }
             }
           }
@@ -1786,6 +1794,11 @@ export default async function (req) {
             else {
               modulo = mc; daSistemare = false;
               const sicuri = mc.campi.prezzi.filter(function (p) { return p.sicuro; }).length;
+              /* ⛔ 10 nov 2026 (sera): la chiusura la scrive il SERVER, senza
+                 rimandare la palla a Claude. Era un giro intero (5-10 secondi)
+                 solo per scrivere due righe, ed e' quello che faceva sforare i
+                 30 secondi di Netlify. */
+              prezziFatti = { tot: mc.campi.prezzi.length, sicuri: sicuri, restano: memoC.restano || 0 };
               esito = { ok: true, aperto: 'gli ho aperto «Controlla i prezzi»: ' + mc.campi.prezzi.length + ' prezzi proposti (' + memoC.auto.length + ' trovati per codice di tariffa e con la spunta, ' + (mc.campi.prezzi.length - sicuri) + ' scelti per descrizione e SENZA spunta: li deve guardare lui uno per uno)' + (scartate ? '; ' + scartate + ' scelte non valide scartate' : '') + '. Conferma lui.' };
             }
           }
@@ -1873,6 +1886,23 @@ export default async function (req) {
       }
       messaggi.push({ role: 'assistant', content: blocchi });
       messaggi.push({ role: 'user', content: risultati });
+      if (prezziFatti) {
+        const dopo = prezziFatti.tot - prezziFatti.sicuri;
+        const chiusa = prezziFatti.tot + (prezziFatti.tot === 1 ? ' prezzo proposto' : ' prezzi proposti')
+          + ' (' + prezziFatti.sicuri + ' per codice di tariffa, con la spunta; ' + dopo + ' per descrizione, SENZA spunta: guardali uno per uno).'
+          + (prezziFatti.restano > 0 ? '\nNe restano ' + prezziFatti.restano + ': conferma questi e premi di nuovo «Metti i prezzi con l\'AI».' : '');
+        risposta = risposta ? (risposta + '\n\n' + chiusa) : chiusa;
+        try { manda({ pezzo: '\n\n' + chiusa }); } catch (e) {}
+        break;
+      }
+      /* ⛔ 10 nov 2026 (sera) — oltre i 22 secondi non si parte con un altro
+         giro: Netlify taglia a 30 e la risposta andrebbe persa (pagata e mai
+         vista). Ci si ferma, si dice perche', e si rimborsa. */
+      if (Date.now() - T0 > 22000) {
+        tempoScaduto = true;
+        errore = 'Ci ho messo troppo e mi sono fermato prima di perdere il lavoro. Riprova: non ti ho contato niente.';
+        break;
+      }
         }
       } catch (e) {
         errore = e && e.message;
@@ -1884,7 +1914,7 @@ export default async function (req) {
       //    Stessa regola di prima: si scala prima di chiamare Claude e si
       //    rimborsa se fallisce. Far pagare un messaggio mai arrivato e' il
       //    modo piu' veloce per farsi disdire il piano.
-      if (errore && !risposta && scontrino) {
+      if (errore && (!risposta || tempoScaduto) && scontrino) {
         // ⚠️ 14 set 2026: il rimborso va su chat_extra, non sui crediti
         const rimb = await chiamaRpc(dati, 'refund_chat_message',
           { p_log_id: scontrino, p_error: String(errore).slice(0, 300) });
@@ -1911,6 +1941,17 @@ export default async function (req) {
            e' finita: sono anche piu' veri cosi'. La riga del massimo tiene
            l'ordine anche nel caso impossibile di una risposta istantanea. */
         const oraRisposta = new Date(Math.max(Date.now(), Date.parse(oraDomanda) + 1)).toISOString();
+        /* ⛔ 10 nov 2026 (sera): una risposta FALLITA non si conta. Il conto
+           dei messaggi compresi (chat_stato) conta le righe «utente» del mese:
+           se si scrivesse anche questa, il messaggio si pagherebbe lo stesso.
+           Si scrive solo la riga dell'AI, con l'errore e la domanda dentro. */
+        const fallito = !!(errore && (!risposta || tempoScaduto));
+        if (fallito) {
+          await server.from('gest_chat_messaggi').insert([{ created_at: oraRisposta,
+            user_id: uid, mestiere_id: mestiere_id, conversazione_id: conversazione_id,
+            ruolo: 'ai', testo: (risposta ? risposta + '\n\n' : '') + '(Non riuscita, non contata: «' + String(domanda).slice(0, 300) + '»)',
+            sezione: sezione || null, tokens_input: tin + cw + cr, tokens_output: tout, costo_usd: costo, errore: errore }]);
+        } else {
         if (peso > 1) {
           const aParte = globalThis.crypto.randomUUID();
           const inPiu = [];
@@ -1938,18 +1979,19 @@ export default async function (req) {
             ruolo: 'ai', testo: risposta || null, sezione: sezione || null,
             tokens_input: tin + cw + cr, tokens_output: tout, costo_usd: costo, errore: errore }
         ]);
+        }
       } catch (e) { console.error('[chat] registro:', e && e.message); }
 
       manda({
         fine: true,
-        errore: (errore && !risposta) ? errore : null,
+        errore: (errore && (!risposta || tempoScaduto)) ? errore : null,
         modulo: modulo,
         come_pagato: comePagato,
         /* ⚠️ 14 set 2026: si toglie 1 in tutti e due i casi. `restanti`
            comprende sia i compresi sia i messaggi comprati, e questo
            messaggio ha consumato uno dei due. Prima si toglieva solo per i
            compresi perche' i crediti erano un contatore a parte. */
-        restanti: Math.max((stato.restanti || 0) - peso, 0)
+        restanti: (errore && (!risposta || tempoScaduto)) ? (stato.restanti || 0) : Math.max((stato.restanti || 0) - peso, 0)
       });
       chiuso = true;
       try { controller.close(); } catch (e) {}
