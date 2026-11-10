@@ -161,7 +161,7 @@
       if(!v)return;                                   /* non è una riga di questo computo */
       if(+v.prezzo_unitario>0){giaPiene++;return;}    /* un prezzo già messo non si tocca */
       if(righe.some(function(x){return String(x.v.id)===String(v.id);}))return;
-      righe.push({v:v,prezzo:+p.prezzo_unitario,da:p.prezzo_da||"",sicuro:p.sicuro!==false});
+      righe.push({v:v,prezzo:+p.prezzo_unitario,da:p.prezzo_da||"",sicuro:p.sicuro!==false,varianti:p.varianti===true});
     });
     if(!righe.length){
       toast(giaPiene?"Quelle lavorazioni hanno già il loro prezzo: non ho toccato niente.":"Non ho trovato righe a zero a cui proporre un prezzo.");
@@ -179,13 +179,15 @@
         +  '<div class="field"><label>Prezzo unitario</label><input class="cai-prz" inputmode="decimal" value="'+esc(caiTesto(r.prezzo))+'" autocomplete="off"></div>'
         +'</div>'
         +'<div class="cp-orig">Preso dal tuo prezzario'+(r.da?(': «'+esc(r.da)+'»'):'')+'</div>'
-        +(r.sicuro?'':'<div class="cp-orig cai-manca">Qui il prezzo non è sicuro: può non essere la stessa lavorazione. Guardala tu, e se va bene metti la spunta.</div>')
+        +(r.sicuro?'':'<div class="cp-orig cai-manca">'+(r.varianti
+            ? 'Attento: nel tuo prezzario questa voce ha più varianti con prezzi diversi. Controlla che sia quella giusta, poi metti la spunta.'
+            : 'Scelto dalla descrizione, non dal codice: guardalo tu, e se va bene metti la spunta.')+'</div>')
         +'</div>';
     };
     openSheetGrande("Controlla i prezzi",
        '<div class="sh-b sh-centro"><div class="sh-tit">'+righe.length+(righe.length===1?" prezzo proposto":" prezzi proposti")+' per «'+esc(c.titolo||"il computo")+'»</div>'
-      +  '<div class="sh-nota">Li ha scelti l\'AI dentro il tuo prezzario, solo per le righe che erano a zero. Il prezzo lo puoi correggere. Entra solo chi ha la spunta.'
-      +    (incerte?('<br>⚠ <b>'+incerte+'</b> '+(incerte===1?'riga è senza spunta':'righe sono senza spunta')+': lì il prezzo non è sicuro.'):'')+'</div>'
+      +  '<div class="sh-nota">Solo per le righe che erano a zero. Con la spunta: stesso codice di tariffa del tuo prezzario. Senza spunta: scelti dall\'AI dalla descrizione, guardali tu. Il prezzo lo puoi correggere.'
+      +    (incerte?('<br>⚠ <b>'+incerte+'</b> '+(incerte===1?'riga è senza spunta':'righe sono senza spunta')+': quelle guardale una per una.'):'')+'</div>'
       +  '<div id="cai-lista">'+righe.map(riga).join("")+'</div>'
       +'</div>',
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
