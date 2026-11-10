@@ -42,9 +42,38 @@
        Adesso ci si ricorda cosa si e' messo; se la classe cambia lo si
        toglie e si ricalcola sul colore vero del CSS. */
     var MESSI = new WeakMap();
+    /* 10 nov 2026 — IL PULSANTE «INVIA» DIVENTAVA BIANCO SU GRIGIO.
+       In admin il pulsante ha scritto `background:var(--verde)`. Qui sopra,
+       cambiando sezione, si TOGLIEVA il colore messo da noi con
+       removeProperty('background-color'): ma quando il colore del pagina
+       arriva da una variabile, togliere un pezzo di «background» si porta
+       via TUTTO il «background» scritto dalla pagina. Restava il grigio del
+       browser con la scritta bianca sopra: «Invia» non si leggeva.
+       Adesso, prima di mettere un colore, ci si segna com'era scritto
+       (anche la forma lunga con la variabile) e lo si rimette uguale. */
+    var CORTE = {
+      'background-color': ['background'], 'background-image': ['background'],
+      'border-top-color': ['border-top', 'border-color', 'border'], 'border-right-color': ['border-right', 'border-color', 'border'],
+      'border-bottom-color': ['border-bottom', 'border-color', 'border'], 'border-left-color': ['border-left', 'border-color', 'border']
+    };
+    function ricorda(st, prop) {
+      var r = { p: prop, v: st.getPropertyValue(prop), pri: st.getPropertyPriority(prop), sh: null, shv: '' };
+      if (!r.v && CORTE[prop]) {
+        for (var i = 0; i < CORTE[prop].length; i++) {
+          var sv = st.getPropertyValue(CORTE[prop][i]);
+          if (sv && /var\(/.test(sv)) { r.sh = CORTE[prop][i]; r.shv = sv; r.pri = st.getPropertyPriority(CORTE[prop][i]); break; }
+        }
+      }
+      return r;
+    }
     function rifai(el) {
       var messi = MESSI.get(el);
-      if (messi) { for (var k = 0; k < messi.length; k++) el.style.removeProperty(messi[k]); MESSI.delete(el); }
+      if (messi) {
+        var st = el.style, k, r;
+        for (k = 0; k < messi.length; k++) { r = messi[k]; if (!r.sh) { if (r.v) st.setProperty(r.p, r.v, r.pri); else st.removeProperty(r.p); } }
+        for (k = 0; k < messi.length; k++) { r = messi[k]; if (r.sh) st.setProperty(r.sh, r.shv, r.pri); }
+        MESSI.delete(el);
+      }
       fix(el);
     }
 
@@ -59,7 +88,12 @@
       if (el.closest && el.closest('.seg')) return;
       var cs = window.getComputedStyle(el), v, i, st = el.style;
       var messi = MESSI.get(el) || [];
-      function metti(prop, val) { st.setProperty(prop, val, 'important'); if (messi.indexOf(prop) < 0) messi.push(prop); MESSI.set(el, messi); }
+      function metti(prop, val) {
+        var gia = false;
+        for (var q = 0; q < messi.length; q++) if (messi[q].p === prop) gia = true;
+        if (!gia) messi.push(ricorda(st, prop));
+        st.setProperty(prop, val, 'important'); MESSI.set(el, messi);
+      }
       v = FORTI[cs.color]; if (v) metti('color', v);
       v = FORTI[cs.backgroundColor] || CHIARI_SFONDO[cs.backgroundColor];
       if (v) metti('background-color', v);
