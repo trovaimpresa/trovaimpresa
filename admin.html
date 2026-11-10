@@ -817,6 +817,19 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
           <div><div class="stat-num" id="stat-oggi">–</div><div class="stat-lbl">Iscritti oggi</div></div>
           <span class="stat-freccia">›</span>
         </div>
+        <!-- 10 nov 2026 (richiesta di Alex) — accanto a «Iscritti oggi»: le imprese che si
+             sono iscritte DAL GESTIONALE (vetrina_attiva = false, lo stesso segno del
+             bollino «Dal gestionale» nell'elenco Imprese) e i clienti iscritti agli avvisi. -->
+        <div class="stat-card apri" data-va="imprese" data-origine="gestionale">
+          <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg></div>
+          <div><div class="stat-num" id="stat-dal-gest">–</div><div class="stat-lbl">Iscritti dal gestionale</div><div class="stat-conf" id="stat-dal-gest-sub"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
+        <div class="stat-card apri" data-va="clienti-iscritti">
+          <div class="stat-icon b"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <div><div class="stat-num" id="stat-clienti-iscr">–</div><div class="stat-lbl">Clienti iscritti</div><div class="stat-conf" id="stat-clienti-iscr-sub"></div></div>
+          <span class="stat-freccia">›</span>
+        </div>
         <div class="stat-card apri" data-va="imprese">
           <div class="stat-icon o"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></div>
           <div><div class="stat-num" id="stat-settimana">–</div><div class="stat-lbl">Iscritti 7 giorni</div></div>
@@ -4292,6 +4305,12 @@ function apriSezione(id) {
 document.addEventListener('click', function (ev) {
   var c = ev.target && ev.target.closest ? ev.target.closest('.stat-card.apri') : null;
   if (c) apriSezione(c.getAttribute('data-va'));
+  /* 10 nov 2026 — «Iscritti dal gestionale» apre Imprese gia' filtrate */
+  if (c && c.getAttribute('data-origine')) {
+    var o = c.getAttribute('data-origine');
+    var metti = function () { var f = document.getElementById('imp-filtro-origine'); if (f) { f.value = o; try { applicaFiltriImprese(); } catch (e) {} } };
+    metti(); setTimeout(metti, 600); setTimeout(metti, 1500);
+  }
 });
 
 /* ============================================================
@@ -4465,6 +4484,11 @@ async function caricaImprese() {
   const settimanaFa = new Date(Date.now() - 7 * 24 * 3600 * 1000);
   _set('stat-oggi', impreseVere.filter(i => i.created_at && new Date(i.created_at).toLocaleDateString('sv-SE') === oggiStr).length);
   _set('stat-settimana', impreseVere.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
+  /* 10 nov 2026 — iscritti DAL GESTIONALE: stesso segno del bollino «Dal gestionale» */
+  const dalGest = impreseVere.filter(i => i.vetrina_attiva === false);
+  _set('stat-dal-gest', dalGest.length);
+  _set('stat-dal-gest-sub', 'oggi ' + dalGest.filter(i => i.created_at && new Date(i.created_at).toLocaleDateString('sv-SE') === oggiStr).length
+    + ' · 7 giorni ' + dalGest.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
   _set('stat-premium', impreseVere.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
   /* 31 ott 2026: prima contava la colonna vecchia gestionale_attivo (sempre 0).
      Adesso lo stesso conto di «Chi usa il gestionale»: entrate negli ultimi 7 giorni. */
@@ -5771,6 +5795,12 @@ function renderClientiIscritti() {
 
   const nClienti = new Set(AVVCLI.map(a => String(a.email).toLowerCase())).size;
   _set('badge-clienti-iscritti', nClienti);
+  /* 10 nov 2026 — anche in Dashboard, accanto a «Iscritti oggi» */
+  _set('stat-clienti-iscr', nClienti);
+  const _oggiC = new Date().toLocaleDateString('sv-SE'), _setteC = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+  const _mail = l => new Set(l.map(a => String(a.email).toLowerCase())).size;
+  _set('stat-clienti-iscr-sub', 'oggi ' + _mail(AVVCLI.filter(a => a.creato_il && new Date(a.creato_il).toLocaleDateString('sv-SE') === _oggiC))
+    + ' · 7 giorni ' + _mail(AVVCLI.filter(a => a.creato_il && new Date(a.creato_il) >= _setteC)));
 
   const lista = AVVCLI.filter(a => {
     if (ft && a.tipo !== ft) return false;
