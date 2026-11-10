@@ -472,6 +472,64 @@ function stessaUnita(a, b) {
   return !!x && !!y && x === y;
 }
 
+/* ⛔ 10 nov 2026 (sera) — LA VARIANTE STA IN FONDO. Nel prezzario le varianti
+   della stessa voce hanno lo STESSO inizio lungo e cambiano solo dopo l'ultimo
+   «:» («...: doccia», «...: lavabo», «...: spessore 2 cm», «...: per ogni cm in
+   piu'»). Al modello arrivavano i primi 220 caratteri: la variante non la
+   vedeva mai, e sceglieva a caso. Qui si legge la coda, la si fa vedere, e la
+   si usa per scartare le varianti sbagliate. */
+function codaVoce(desc) {
+  const t = String(desc || '').trim();
+  const i = t.lastIndexOf(':');
+  if (i < 0) return '';
+  const c = t.slice(i + 1).trim().replace(/[;.]+$/, '').trim();
+  return (c.length >= 2 && c.length <= 140) ? c : '';
+}
+function normaCoda(c) {
+  return String(c || '').toLowerCase().replace(/[’']/g, ' ').replace(/[^a-z0-9àèéìòù,.\s]/g, ' ')
+    .replace(/(\d),(\d)/g, '$1.$2').replace(/\s+/g, ' ').trim();
+}
+/* «per ogni cm in piu'», «maggiorazione», «aumento o diminuzione»: e' un
+   SUPPLEMENTO, non la lavorazione. Le due cose non si scambiano mai. */
+function eSupplemento(desc) {
+  return /per\s+ogni\b[^:]{0,40}\b(in\s+pi[uù]|in\s+meno|oltre)|\bmaggiorazion|\baumento\s+o\s+diminuzion/i.test(String(desc || ''));
+}
+/* le misure scritte nella coda: «spessore 3 cm» -> ["3cm"], «diam. 20 mm» -> ["20mm"] */
+function misureCoda(c) {
+  const out = [];
+  String(c || '').toLowerCase().replace(/(\d+(?:[.,]\d+)?)\s*(mm|cm|m²|mq|m³|mc|m|kg|kw|w|l|lt|°c|%)(?![a-z])/g, function (_, n, u) {
+    out.push(String(+n.replace(',', '.')) + u.replace('mq', 'm²').replace('mc', 'm³').replace('lt', 'l'));
+    return _;
+  });
+  return out;
+}
+/* Dice se la candidata e' la stessa variante della riga del computo:
+   'si' (coda uguale), 'no' (supplemento contro lavorazione, misure diverse,
+   coda diversa sulla stessa voce), '?' (non si sa). */
+function stessaVariante(rigaDesc, candDesc) {
+  if (eSupplemento(rigaDesc) !== eSupplemento(candDesc)) return 'no';
+  const a = codaVoce(rigaDesc), b = codaVoce(candDesc);
+  if (!a || !b) return '?';
+  const na = normaCoda(a), nb = normaCoda(b);
+  const ia = String(rigaDesc).slice(0, 60).toLowerCase(), ib = String(candDesc).slice(0, 60).toLowerCase();
+  const stessaTesta = ia === ib && ia.length >= 40;
+  /* coda uguale vale solo sulla STESSA voce: «per ogni cm in piu'» c'e' sotto
+     cento lavorazioni diverse */
+  if (na === nb) return stessaTesta ? 'si' : '?';
+  const ma = misureCoda(a), mb = misureCoda(b);
+  if (ma.length && mb.length && !ma.some(function (x) { return mb.indexOf(x) >= 0; })) return 'no';
+  /* stesso inizio lungo e coda diversa = un'altra variante della stessa voce */
+  if (stessaTesta) return 'no';
+  return '?';
+}
+/* come la si fa vedere al modello: l'inizio e, se e' lunga, anche la coda */
+function mostraVoce(desc, quanto) {
+  const t = String(desc || '').trim(), c = codaVoce(t);
+  if (t.length <= quanto) return t;
+  if (!c) return t.slice(0, quanto);
+  return t.slice(0, Math.max(60, quanto - c.length - 5)) + ' … : ' + c;
+}
+
 /* ⛔ 10 nov 2026 — LE VOCI SI PULISCONO IN UN POSTO SOLO.
    Le usano il preventivo e il computo: max 30, testi corti, numeri veri.
    Un prezzo che non c'e' resta VUOTO, mai 0. Solo per il computo passa anche
@@ -914,7 +972,7 @@ const STRUMENTI = [
   {
     // ⛔ 10 nov 2026 — i prezzi sulle righe che ci sono gia': non scrive niente
     name: 'prezzi_computo',
-    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che è la STESSA lavorazione (leggi tutta la descrizione: profondità, spessore, tipo di terreno, altezza). ⛔ Una voce di un\'ALTRA lavorazione (scavo aperto per uno scavo obbligato, alberi per una siepe) NON si propone: la riga resta fuori. Se due candidate sono varianti della stessa voce e non sai quale, scegli la più vicina: lui la vede SENZA spunta e decide. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. La spunta ce l\'hanno solo le righe trovate per codice di tariffa, che aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
+    description: 'TERZO PASSO. Gli apre la schermata «Controlla i prezzi» (conferma lui: NON scrive niente). Passa l\'`id` del computo e le tue `scelte`: per ogni riga il suo `n` e la lettera `k` della voce candidata che è la STESSA lavorazione (leggi tutta la descrizione: profondità, spessore, tipo di terreno, altezza; la `variante` della riga e la parte dopo «…:» della candidata devono essere la STESSA cosa — «per ogni cm in più» è un supplemento e non va mai su una lavorazione, e viceversa). ⛔ Una voce di un\'ALTRA lavorazione (scavo aperto per uno scavo obbligato, alberi per una siepe) NON si propone: la riga resta fuori. Se due candidate sono varianti della stessa voce e non sai quale, scegli la più vicina: lui la vede SENZA spunta e decide. Il prezzo non lo scrivi tu: lo prende il gestionale dalla voce scelta. La spunta ce l\'hanno solo le righe trovate per codice di tariffa, che aggiunge da solo il gestionale: chiama questo attrezzo ANCHE con `scelte` vuote se ce ne sono.',
     input_schema: {
       type: 'object',
       properties: {
@@ -936,7 +994,7 @@ const STRUMENTI = [
   {
     // 10 nov 2026 — tante ricerche nel prezzario in un colpo solo
     name: 'cerca_prezzi',
-    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): devono esserci TUTTE nella voce. Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
+    description: 'SECONDO PASSO. Cerca nel SUO prezzario, in un colpo solo, le righe che ti ha dato `righe_senza_prezzo`: per ognuna dai il suo `n` e in `parola` DUE o TRE parole che la distinguono dalle altre, staccate da uno spazio («scavo obbligata roccia», «intonaco civile», «potatura siepi»): devono esserci TUTTE nella voce. Se la riga ha `variante` (quello che c\'è dopo l\'ultimo «:», per esempio «doccia» o «spessore 4 cm»), una delle parole è quella («adduzione collettore doccia»). Una parola sola è troppo larga. Per ogni riga tornano fino a 5 voci candidate, ognuna con una lettera `k` (a, b, c…), descrizione, unità e prezzo. Poi scegli con `prezzi_computo`.',
     input_schema: {
       type: 'object',
       properties: {
@@ -1717,8 +1775,10 @@ export default async function (req) {
                       prezzo_da: ('codice ' + String(v.codice).trim() + ' · ' + String(buone[0].descrizione || '')).slice(0, 160) });
                     return;
                   }
-                  memoC.righe[n] = { id: v.id, unita: v.unita || '' };
-                  daCercare.push({ n: n, descrizione: String(v.descrizione || '').slice(0, 320), unita: v.unita || undefined });
+                  memoC.righe[n] = { id: v.id, unita: v.unita || '', desc: String(v.descrizione || '') };
+                  const cv = codaVoce(v.descrizione);
+                  daCercare.push({ n: n, descrizione: mostraVoce(v.descrizione, 320), unita: v.unita || undefined,
+                                   variante: cv || undefined, supplemento: eSupplemento(v.descrizione) || undefined });
                 });
                 memoC.restano = Math.max(0, rq.quanti - salta - tutte.length);
                 esito = { trovate_per_codice: memoC.auto.length, da_cercare: daCercare, a_zero_in_tutto: rq.quanti,
@@ -1742,18 +1802,20 @@ export default async function (req) {
               const parole = String((c && c.parola) || '').toLowerCase().replace(/[^a-z0-9àèéìòù ]/g, ' ').split(/\s+/).filter(function (w) { return w.length >= 3; }).slice(0, 3);
               if (!memoC.righe[n] || !parole.length) return { n: n, voci: [] };
               const r = await esegui(dati, { tabella: 'gest_prezzi_propri', campi: 'descrizione,unita,prezzo_unitario', filtri: { user_id: uid },
-                contieneTutte: { campo: 'descrizione', valori: parole }, senzaCestino: true, ordine: 'usata_volte', limite: 12, soloConta: false });
-              /* prima le voci con la STESSA unita' della riga: sono le sole che
-                 possono essere «sicure» */
-              const tutte = (r.righe || []).filter(function (x) { return +x.prezzo_unitario > 0; });
-              const uguali = tutte.filter(function (x) { return stessaUnita(x.unita, memoC.righe[n].unita); });
-              const altre = tutte.filter(function (x) { return uguali.indexOf(x) < 0; });
-              const scelte = uguali.concat(altre).slice(0, 5);
+                contieneTutte: { campo: 'descrizione', valori: parole }, senzaCestino: true, ordine: 'usata_volte', limite: 40, soloConta: false });
+              /* prima la STESSA variante (coda uguale), poi la stessa unita';
+                 le varianti sicuramente sbagliate (supplemento al posto della
+                 lavorazione, misura diversa) non si fanno nemmeno vedere */
+              const rd = memoC.righe[n].desc;
+              const tutte = (r.righe || []).filter(function (x) { return +x.prezzo_unitario > 0 && stessaVariante(rd, x.descrizione) !== 'no'; });
+              const voto = function (x) { return (stessaVariante(rd, x.descrizione) === 'si' ? 2 : 0) + (stessaUnita(x.unita, memoC.righe[n].unita) ? 1 : 0); };
+              const scelte = tutte.map(function (x, i) { return { x: x, v: voto(x), i: i }; })
+                .sort(function (a, b) { return (b.v - a.v) || (a.i - b.i); }).map(function (o) { return o.x; }).slice(0, 5);
               memoC.candidati[n] = {};
               return { n: n, voci: scelte.map(function (x, i) {
                 const k = LETTERE[i];
                 memoC.candidati[n][k] = { prezzo: +x.prezzo_unitario, descrizione: String(x.descrizione || ''), unita: x.unita || '' };
-                return { k: k, d: String(x.descrizione || '').slice(0, 220), u: x.unita || undefined, p: x.prezzo_unitario };
+                return { k: k, d: mostraVoce(x.descrizione, 260), u: x.unita || undefined, p: x.prezzo_unitario };
               }) };
             }));
             esito = { risultati: fatti };
@@ -1781,7 +1843,13 @@ export default async function (req) {
                  spunta ce l'ha solo il codice di tariffa. La mette lui, guardando.
                  E una voce con un'altra unita' di misura non si propone proprio. */
               if (!stessaUnita(cand.unita, riga.unita)) { scartate++; return; }
-              const sorelle = Object.keys(memoC.candidati[n]).filter(function (kk) {
+              /* ⛔ 10 nov 2026 (sera): «per ogni cm in piu'» preso al prezzo della
+                 voce da 3 cm, quattro sanitari diversi tutti a 162,8. Una
+                 variante che non combacia NON si propone: meglio la riga vuota
+                 che un prezzo sbagliato con l'aria giusta. */
+              const sv = stessaVariante(riga.desc, cand.descrizione);
+              if (sv === 'no') { scartate++; return; }
+              const sorelle = sv === 'si' ? 0 : Object.keys(memoC.candidati[n]).filter(function (kk) {
                 const o = memoC.candidati[n][kk];
                 return kk !== k && o.prezzo !== cand.prezzo && stessaUnita(o.unita, cand.unita)
                   && o.descrizione.slice(0, 40).toLowerCase() === cand.descrizione.slice(0, 40).toLowerCase();
