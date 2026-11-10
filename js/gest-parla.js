@@ -158,7 +158,8 @@
     return '<label>' + lab + '<input type="' + ty + '" data-f="' + f + '" value="' + e(v) + '"' + extra + '></label>';
   }
   function scheda(c, i) {
-    var h = '<div class="gp-c" style="--c:' + COLORI[c.tipo] + '" data-i="' + i + '"><div class="gp-tipo">' + NOMI[c.tipo] + '</div>';
+    var bolla = c.tipo === 'spesa' && c.importo == null && c.merce && c.merce.length;
+    var h = '<div class="gp-c" style="--c:' + (bolla ? '#0066FF' : COLORI[c.tipo]) + '" data-i="' + i + '"><div class="gp-tipo">' + (bolla ? 'Bolla del fornitore' : NOMI[c.tipo]) + '</div>';
     if (c.mod) {
       if (c.tipo === 'giornata') h += '<div class="gp-due">' + campo('Giorno', 'data', c.data, 'date') + campo('Cantiere', 'dove', c.dove, 'dove') + '</div>'
         + campo('Chi c\'era (separati da virgola)', 'chi', c.chi.map(function (n) { return n === 'IO' ? 'io' : n; }).join(', '))
@@ -179,8 +180,11 @@
       var nuovi = c.chi.filter(function (n) { return n !== 'IO' && !ops().some(function (o) { return o.nome === n; }); });
       if (nuovi.length) h += '<div class="gp-nota">' + e(nuovi.join(', ')) + (nuovi.length === 1 ? ' non è' : ' non sono') + ' ancora in Squadra: lo aggiungo io.</div>';
     }
-    if (c.tipo === 'spesa') h += '<div class="gp-tit">' + (c.importo == null ? 'Quanto?' : e(euro(c.importo))) + ' · ' + e(c.descrizione || 'spesa') + '</div>'
+    if (c.tipo === 'spesa') h += '<div class="gp-tit">' + (c.importo == null ? (c.merce && c.merce.length ? e(c.fornitore || 'Bolla') : 'Quanto?') : e(euro(c.importo)) + ' · ' + e(c.descrizione || 'spesa')) + '</div>'
       + '<div class="gp-r"><span>Cantiere</span>' + (c.dove ? e(c.dove) : '<b style="color:#DC2626">da scegliere: premi «Cambia»</b>') + '</div><div class="gp-r"><span>Giorno</span>' + e(maiu(giorno(c.data))) + '</div>'
+      + (c.fornitore && !(c.importo == null && c.fornitoreId) ? '<div class="gp-r"><span>Fornitore</span>' + e(c.fornitore) + (c.fornitoreId ? '' : ' <i>(nuovo: lo aggiungo ai tuoi fornitori)</i>') + '</div>' : '')
+      + (c.merce && c.merce.length ? '<div class="gp-r"><span>Merce (' + c.merce.length + ')</span>' + c.merce.slice(0, 6).map(function (m) { return e(m.nome) + (m.quantita != null ? ' · ' + e(String(m.quantita).replace('.', ',')) + (m.unita ? ' ' + e(m.unita) : '') : ''); }).join('<br>') + (c.merce.length > 6 ? '<br><i>e altre ' + (c.merce.length - 6) + '</i>' : '') + '</div>'
+        + '<div class="gp-nota">' + (c.importo == null ? 'È una bolla senza prezzo: la merce va negli Acquisti del mese, per il confronto con la fattura.' : 'La merce va anche negli Acquisti del mese.') + '</div>' : '')
       + (c.foto ? '<div class="gp-nota">La foto resta fra i documenti del cantiere.</div>' : '');
     if (c.tipo === 'promemoria') h += '<div class="gp-tit">' + e(c.testo) + '</div><div class="gp-r"><span>Quando</span>' + e(maiu(giorno(c.data))) + (c.ora ? ' alle ' + e(c.ora) : '') + '</div>';
     if (c.tipo === 'nota') h += '<div class="gp-tit">' + e(c.dove || 'cantiere da scegliere') + '</div><div class="gp-r">' + e(c.testo) + '</div>';
@@ -270,7 +274,7 @@
         if (!c.dove) return 'In una giornata manca il cantiere: premi «Cambia».';
       }
       if (c.tipo === 'spesa') {
-        if (c.importo == null) return 'In una spesa manca quanto hai speso: premi «Cambia».';
+        if (c.importo == null && !(c.merce && c.merce.length)) return 'In una spesa manca quanto hai speso: premi «Cambia».';
         if (!c.descrizione) return 'In una spesa manca cosa hai comprato: premi «Cambia».';
         if (!c.dove) return 'Una spesa va su un cantiere: premi «Cambia» e scegli quale.';
       }
@@ -306,8 +310,13 @@
         var c = resto[k], r;
         if (c.tipo === 'spesa') {
           var lav = await giorTrovaLavoro(c.dove, c.data);
-          r = await sb.from('gest_spese').insert({ user_id: sbUid, lavoro_id: lav.id, descrizione: c.descrizione, importo: c.importo, data: c.data }).select('id');
-          if (r && !r.error && r.data && r.data.length && c.foto) await salvaFoto(c, lav.id);
+          if (c.importo != null) {
+            r = await sb.from('gest_spese').insert({ user_id: sbUid, lavoro_id: lav.id, descrizione: c.descrizione, importo: c.importo, data: c.data }).select('id');
+          } else r = { data: [{ id: 'bolla' }] };   /* bolla senza prezzo: solo merce e foto */
+          if (r && !r.error && r.data && r.data.length) {
+            if (c.merce && c.merce.length) { conto.merce = (conto.merce || 0) + await salvaMerce(c, lav.id); c.merce = []; }
+            if (c.foto) await salvaFoto(c, lav.id);
+          }
         }
         if (c.tipo === 'promemoria') {
           r = await sb.from('promemoria').insert({ user_id: sbUid, testo: c.testo, data: c.data, ora: c.ora || null, avvisa_giorni: 0, stato: 'aperto', inviato: false }).select('id');
@@ -321,7 +330,8 @@
           r = await sb.from('gest_lavori').update({ note: prima ? prima + '\n' + riga : riga }).eq('id', l.id).eq('user_id', sbUid).select('id');
         }
         if (!r || r.error || !r.data || !r.data.length) throw new Error(NOMI[c.tipo] + ' non salvata: ' + ((r && r.error && r.error.message) || 'nessuna riga scritta') + '.');
-        togli(c); conto[c.tipo]++;
+        togli(c);
+        if (c.tipo === 'spesa' && c.importo == null) conto.bolla = (conto.bolla || 0) + 1; else conto[c.tipo]++;
       }
     } catch (x) {
       P.msg = { t: ((x && x.message) || 'Non salvato. Riprova.') + (fatto(conto) ? ' Il resto è salvato: ' + fatto(conto) + '.' : ''), k: 'err' };
@@ -338,6 +348,8 @@
     if (c.spesa) p.push(c.spesa + (c.spesa === 1 ? ' spesa' : ' spese'));
     if (c.promemoria) p.push(c.promemoria + ' promemoria');
     if (c.nota) p.push(c.nota + (c.nota === 1 ? ' nota' : ' note'));
+    if (c.bolla) p.push(c.bolla + (c.bolla === 1 ? ' bolla' : ' bolle'));
+    if (c.merce) p.push(c.merce + (c.merce === 1 ? ' riga di merce' : ' righe di merce'));
     return p.join(', ');
   }
   function rinfrescaTutto() {
@@ -362,6 +374,37 @@
       if (ins.error && typeof _fileOrfano === 'function') await _fileOrfano('gestionale-foto', path);
     } catch (x) {}
   }
+  /* i fornitori della rubrica (Fornitori del gestionale) */
+  async function fornitoriMiei() {
+    if (typeof fornCache !== 'undefined' && fornCache && fornCache.length) return fornCache;
+    try { var r = await sb.from('gest_fornitori').select('id,nome,piva').eq('user_id', sbUid).order('nome'); return (r && r.data) || []; } catch (x) { return []; }
+  }
+  function normF(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\b(srl|s r l|spa|s p a|snc|sas|srls)\b/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function trovaFornitore(lista, nome, piva) {
+    var p = String(piva || '').replace(/\D/g, '');
+    if (p.length >= 11) { var x = lista.find(function (f) { return String(f.piva || '').replace(/\D/g, '') === p; }); if (x) return x; }
+    var n = normF(nome); if (!n) return null;
+    return lista.find(function (f) { return normF(f.nome) === n; })
+      || lista.find(function (f) { var m = normF(f.nome); return m.length > 3 && (n.indexOf(m) >= 0 || m.indexOf(n) >= 0); }) || null;
+  }
+  /* la merce della bolla negli Acquisti del mese (gest_acquisti, riga di bolla:
+     fattura_id vuoto). Se il fornitore non c'e' in rubrica lo si aggiunge: e'
+     scritto sulla scheda prima di «Salva tutto». */
+  async function salvaMerce(c, lavId) {
+    if (!c.merce || !c.merce.length) return 0;
+    var fid = c.fornitoreId;
+    if (!fid && c.fornitore) {
+      var nf = await sb.from('gest_fornitori').insert({ user_id: sbUid, mestiere_id: typeof curMestiere === 'function' ? curMestiere() : null, nome: maiu(c.fornitore).slice(0, 120), piva: c.piva || null }).select('id,nome,piva');
+      if (nf && !nf.error && nf.data && nf.data.length) { fid = nf.data[0].id; try { if (typeof fornCache !== 'undefined') fornCache.push(nf.data[0]); } catch (x) {} }
+    }
+    var righe = c.merce.map(function (r) {
+      return { user_id: sbUid, mestiere_id: typeof curMestiere === 'function' ? curMestiere() : null, fattura_id: null, fornitore_id: fid || null, lavoro_id: lavId || null,
+               data: c.data, descrizione: r.nome, quantita: r.quantita, unita: r.unita || null, prezzo_unitario: r.prezzo_unitario, importo: r.importo };
+    });
+    var ins = await sb.from('gest_acquisti').insert(righe).select('id');
+    if (!ins || ins.error || !ins.data || ins.data.length !== righe.length) throw new Error('Merce non salvata: ' + ((ins && ins.error && ins.error.message) || 'nessuna riga') + '.');
+    return righe.length;
+  }
   function b64(blob) {
     return new Promise(function (ok, ko) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1]); }; r.onerror = ko; r.readAsDataURL(blob); });
   }
@@ -381,7 +424,13 @@
       if (!pr.compressa && /heic|heif/i.test(file.type || file.name || '')) throw new Error('Questa foto è in un formato che non riesco a leggere (HEIC). Scattala dal pulsante «Foto».');
       if (!pr.compressa && ['image/jpeg', 'image/png', 'image/webp'].indexOf(file.type) >= 0) tipo = file.type;
       if (blob.size > 5 * 1024 * 1024) throw new Error('La foto è troppo grande.');
-      var d = await window.AI.cantiere('dati_fattura_fornitore', "Leggi questa bolla (o fattura, o scontrino) di un fornitore di materiale.", { tipo: tipo, dati: await b64(blob) }, true);
+      /* 10 nov 2026: «ai-fattura» legge anche la MERCE riga per riga; se non
+         risponde si legge come prima (un errore rimborsa il credito) */
+      var forn = await fornitoriMiei();
+      var testoAI = "Leggi questa bolla (o fattura, o scontrino) di un fornitore di materiale." + (forn.length ? "\nFornitori gia' in rubrica (se e' uno di questi, scrivi il nome IDENTICO): " + forn.map(function (f) { return f.nome; }).slice(0, 60).join(" | ") : "");
+      var dati64 = await b64(blob), d;
+      try { d = await window.AI.cantiere('dati_fattura_fornitore', testoAI, { tipo: tipo, dati: dati64 }, true, 'ai-fattura'); }
+      catch (x1) { d = await window.AI.cantiere('dati_fattura_fornitore', testoAI, { tipo: tipo, dati: dati64 }, true); }
       if (!P) return;
       P.leggendo = false;
       if (!d) { chiudi(); return; }   /* crediti finiti: la finestra l'ha gia' aperta l'AI */
@@ -392,9 +441,12 @@
         tipo: 'spesa', data: DATA.test(d.data || '') && d.data <= oggi() ? d.data : oggi(),
         descrizione: maiu(((d.cosa || 'Materiale') + (d.fornitore ? ' — ' + d.fornitore : '')).slice(0, 300)),
         importo: isFinite(tot) && tot > 0 ? Math.round(tot * 100) / 100 : null,
-        dove: cant.length === 1 ? nomeLav(cant[0]) : '', fornitore: d.fornitore || '', foto: blob, fotoTipo: tipo
+        dove: cant.length === 1 ? nomeLav(cant[0]) : '', fornitore: d.fornitore || '', foto: blob, fotoTipo: tipo,
+        merce: typeof acqPulisci === 'function' ? acqPulisci(d.righe) : [],
+        fornitoreId: (trovaFornitore(forn, d.fornitore, d.partita_iva) || {}).id || null, piva: String(d.partita_iva || '').replace(/\D/g, '')
       }];
-      if (P.cose[0].importo == null) P.msg = { t: 'Sulla bolla non c\'è il prezzo: premi «Cambia» e scrivi quanto hai speso.', k: 'err' };
+      /* una bolla senza prezzo con la merce letta va bene cosi': la merce va negli Acquisti del mese */
+      if (P.cose[0].importo == null && !P.cose[0].merce.length) P.msg = { t: 'Sulla bolla non c\'è il prezzo: premi «Cambia» e scrivi quanto hai speso.', k: 'err' };
       disegna();
     } catch (x) {
       if (!P) return;

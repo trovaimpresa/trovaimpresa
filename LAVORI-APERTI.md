@@ -1535,3 +1535,5 @@ Restano: punto 4 (Giornate da soli), punto 5 (app operaio installabile + chat co
 - Banco nel contenitore di Claude: `/home/claude/banco-bf/banco.js` (13 verdi, 2 sabotaggi accusati).
 - Fatti oggi anche: app operaio installabile (Cantiere), «Scrivi al capo», giornata completa con foto/spese/bolla da approvare, Giornate da soli (commit 4c2f4bc).
 - Restano: Squadra e Acquisti nel Noleggio; «Sei anche un professionista?» su tutti i dispositivi (colonna nel database, chiedere ad Alex); merce dalla foto di «Parla»; confronto anche nella pagina «Giornate di cantiere» su Claude.
+- [10 nov sera] FATTO: la foto della bolla con «Parla» (js/gest-parla.js) legge anche la merce con ai-fattura: bolla senza prezzo = scheda blu «Bolla del fornitore», merce in gest_acquisti (riga di bolla) col fornitore (se manca in rubrica lo aggiunge al «Salva tutto»). Con prezzo resta anche la spesa. Nel Noleggio non cambia niente (non ha gli Acquisti).
+- [10 nov sera] DECISO con Alex: Squadra come Giornate e Acquisti NON si portano nel Noleggio per ora (il Noleggio non ha Giornate né Fatture da pagare: andrebbero costruite prima).
