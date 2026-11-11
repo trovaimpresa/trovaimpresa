@@ -468,14 +468,14 @@ Ancora da guardare: SAL e Prezzario (pagine del computo con numeri a 14 px).
 | Si capisce in 3 secondi a cosa serve | [x] | [x] |
 | UN solo pulsante principale, ben visibile | [x] | [x] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
-| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 1 | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 1 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
-| Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
+| Errori in italiano chiaro, che dicono come rimediare | [x] | [x] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
 | Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
@@ -486,7 +486,7 @@ Ancora da guardare: SAL e Prezzario (pagine del computo con numeri a 14 px).
 | **Funziona** | | |
 | Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
 | Console senza errori | [x] | [x] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [x] | [x] |
 
 Problemi trovati (7 nov 2026, prima):
 1. Prima delle persone tre riquadri (spiegazione app, «Preventivi da controllare» vuoto, numero WhatsApp).
@@ -497,6 +497,12 @@ Fatto (sul banco, push a fine giornata): persone in cima, sotto la card dell'app
 Conti: nessun conto in questa sezione (il costo orario si guarda con Giornate e Report).
 Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
+**11 nov 2026 — ripreso:**
+Provato sul sito vero: persona di prova aggiunta (nome mancante → casella rossa), nel cestino («Eliminare «PROVA COLLAUDO» dalla squadra? … Va nel cestino»), ripresa (avvisa che dal telefono non entra più), buttata per sempre.
+DIFETTO NEL DATABASE trovato: «Elimina per sempre» di una persona (e di un mezzo) dava «structure of query does not match function result type». `_gest_cascata` restituisce gli id come uuid, ma `gest_rifornimenti` ha l'id bigint. Corretto con `sql/cestino-id-non-uuid.sql` (migrazione `cestino_id_non_uuid_11nov2026`, ok di Alex): l'id conta solo se è uuid; se una tabella con id di altro tipo si cancellasse a catena e avesse figli, la funzione si ferma. Riprovato dal vivo: «Eliminato per sempre».
+Anche: «Operaio3519095949» attaccati → «Operaio · numero», il numero si tocca.
+Allineamento: 405–1789 invece di 413–1797 solo perché qui c'è la barra di scorrimento (8 px): non è un difetto.
+La casella «Cerca nome, ruolo, telefono» resta: la ricerca in alto non cerca le persone.
 
 ## 3.9 — App operaio · Prima schermata: Timbratura + Segna la giornata
 
