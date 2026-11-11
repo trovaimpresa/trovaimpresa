@@ -542,6 +542,11 @@ Problemi trovati (7 nov 2026, prima, telefono 380 — visto dal browser di Alex,
 Fatto (sul banco, push a fine giornata): un solo «Segna la giornata»; «Le mie giornate» in fondo (js/op-giornate.js). Misurato: niente esce dallo schermo, pulsanti ≥ 44 px, unica scritta sotto 16 px «Indietro» (15 px).
 ⚠️ Non provati dal vivo (servono le azioni vere dell'operaio): Entrata/Uscita, Segna la giornata, foto, spese. Da provare con Alex o con un operaio vero.
 
+**11 nov 2026 (sera) — ripreso dal vivo** (aperta da Alex, l'app si vede «come david»):
+Clic veri: Entrata 1 · Uscita 1 · ore della giornata 4 (Segna la giornata → Ore → lavoro → Conferma, con 8 già messo). Senza rete la timbratura va in coda sul telefono e parte da sola (`tmb_coda_v1`). Niente sotto i 14 px; telefono tutto dal 14 al 361.
+Prova lasciata: una timbratura di david di 1 minuto (18:44–18:45 dell'11 nov). Le timbrature non si cancellano apposta (sono il registro): si vede nelle Giornate.
+Problemi trovati: (1) sul telefono «Metti l'app sul telefono» stava sopra la timbratura e spingeva «Entrata» sotto lo schermo; (2) sul computer l'app era una striscia di 520 px con le scritte piccole.
+Fatto (anteprima, in attesa dell'ok): il riquadro dell'icona va sotto «Scrivi al capo»; sopra i 1000 px tutto ingrandito di 1,35 (la colonna passa da 492 a 664 px).
 
 ## 3.10 — App operaio · Schede Lavori · Foto · Preventivi · Chat · Archivio
 

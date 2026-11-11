@@ -66,6 +66,10 @@
   .esci{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:15px;font-weight:bold;cursor:pointer;}
 
   .wrap{max-width:520px;margin:0 auto;padding:14px;}
+  /* 11 nov 2026 — collaudo 3.9: sul computer (1920) l'app era una striscia
+     stretta con le scritte piccole. Sopra i 1000 px si ingrandisce tutto
+     insieme, come un telefono visto da vicino: stesse proporzioni. */
+  @media (min-width:1000px){ body{ zoom:1.35; } }
 
   /* NAV SEZIONI */
   .app-nav{display:flex;justify-content:center;gap:8px;padding:14px 14px 0;max-width:520px;margin:0 auto;}
@@ -639,6 +643,6 @@
 <script src="/js/gest-voce.js?v=11nov2" defer></script>
 <!-- 5 nov 2026: caselle rosse e verdi, come negli altri gestionali (avvisa e non blocca) -->
 <script src="/js/caselle-operaio.js?v=1" defer></script>
-<script src="/js/op-installa.js?v=1" defer></script>
+<script src="/js/op-installa.js?v=2" defer></script>
 </body>
 </html>

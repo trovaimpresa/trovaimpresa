@@ -88,8 +88,15 @@
         '<li><span class="opi-n">2</span>' + ic("tel") + '<span>Tocca <b>Aggiungi a schermata Home</b> (o <b>Installa app</b>)</span></li>' +
         '</ol><button type="button" class="opi-dopo">Dopo</button>';
     }
+    /* 11 nov 2026 — collaudo 3.9: il riquadro stava SOPRA la timbratura e
+       spingeva «Entrata» sotto lo schermo, ogni volta finche' non si premeva
+       «Dopo». Adesso sta sotto i tre pulsanti grandi (timbratura, giornata,
+       scrivi al capo), prima delle schede. */
+    var tabs = dove.querySelector(".op-tabs");
     var tmb = document.getElementById("tmb-card");
-    if(tmb && tmb.parentNode === dove) dove.insertBefore(box, tmb); else dove.insertBefore(box, dove.firstChild);
+    if(tabs && tabs.parentNode === dove) dove.insertBefore(box, tabs);
+    else if(tmb && tmb.parentNode === dove) dove.insertBefore(box, tmb.nextSibling);
+    else dove.insertBefore(box, dove.firstChild);
     var b = box.querySelector(".opi-btn");
     if(b) b.onclick = async function(){
       if(!richiesta) return;
