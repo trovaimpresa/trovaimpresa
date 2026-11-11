@@ -37,6 +37,7 @@ let giorOps = [];          /* operatori {id,nome,mestiere_id} */
 let giorLav = [];          /* lavori {id,descrizione,dove,stato,mestiere_id} */
 let giorRighe = [];        /* le giornate del mese, gia' raggruppate */
 let giorProp = null;       /* le schede da controllare [{data,chi:Set(nomi),dove,cosa}] */
+let giorUltima = null;   /* «Come ieri»: l'ultima giornata prima di oggi */
 let giorNuovi = [];        /* nomi detti che non sono in squadra */
 let giorOccupato = false;
 let giorConferma = null;   /* chiave della riga da cancellare */
@@ -154,6 +155,9 @@ const _gIc = {
 #giornate .gv{display:flex;gap:10px;align-items:flex-start}
 #giornate .gv .t{flex:1;min-width:0}#giornate .gv .w{font-weight:700;font-size:16px;color:var(--testo,#0f172a)}#giornate .gv .c{font-size:15px;color:var(--testo-2,#475569);overflow-wrap:anywhere}
 #giornate .gv .az{display:flex;gap:4px;flex:none}
+#giornate .gieri{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;box-sizing:border-box;background:#fff;color:#0a2a4d;border:2px solid #0a2a4d;border-radius:12px;padding:12px 16px;cursor:pointer;text-align:left;font:inherit}
+#giornate .gieri b{font-size:19px;font-weight:800}
+#giornate .gieri span{font-size:16px;color:#334155;line-height:1.35}
 #giornate .glink{background:none;border:0;color:var(--blu,#0066ff);text-decoration:underline;font-size:17px;cursor:pointer;padding:6px 4px}
 #giornate .glink.rosso{color:var(--err,#dc2626)}
 #giornate .gnota{font-size:14px;color:var(--testo-2,#475569)}
@@ -272,6 +276,28 @@ async function giorCarica(){
     }
   }catch(e){}
   /* le giornate mandate dagli operai senza il permesso «Rapportini» */
+  /* 11 nov 2026 — «COME IERI»: chi c'era e dove, l'ultima volta che hai
+     scritto una giornata prima di oggi (anche se era il mese scorso). Si
+     ripropone uguale con la data di oggi; il cosa-si-e'-fatto resta vuoto. */
+  giorUltima=null;
+  try{
+    const oggi=_gOggi();
+    const ru=await sb.from("gest_ore").select("data").eq("user_id",sbUid).is("eliminato_il",null).lt("data",oggi).order("data",{ascending:false}).limit(1);
+    const dU=!ru.error&&ru.data&&ru.data[0]&&ru.data[0].data;
+    if(dU){
+      const rg=await sb.from("gest_ore").select("operatore_id,lavoro_id,rapportino_id").eq("user_id",sbUid).is("eliminato_il",null).eq("data",dU);
+      if(!rg.error&&rg.data&&rg.data.length){
+        const per={};
+        rg.data.forEach(o=>{ const k=String(o.lavoro_id||""); (per[k]||(per[k]=new Set())).add(String(o.operatore_id||"")); });
+        const schede=Object.keys(per).map(k=>{
+          const l=giorLavoro(k);
+          const chi=new Set([...per[k]].map(id=>giorOps.find(x=>String(x.id)===id)).filter(Boolean).map(o=>o.nome));
+          return {dove:l?_gNomeLav(l):"",chi};
+        }).filter(c=>c.dove&&c.chi.size);
+        if(schede.length) giorUltima={data:dU,schede};
+      }
+    }
+  }catch(e){ giorUltima=null; }
   giorProposte=[];
   try{
     const rp=await sb.from("gest_giornate_proposte").select("*").eq("user_id",sbUid).eq("stato","da_vedere").order("data",{ascending:false}).limit(50);
@@ -373,6 +399,7 @@ function giorDisegna(msg){
     <textarea id="gior-voce" placeholder="«Oggi io, Wahid e Luis a Campoloniano, rifatto il tetto»">${esc(giorVoce)}</textarea>
     <button type="button" class="gbig" data-gior="compila" ${giorOccupato?"disabled":""}>${giorOccupato?"Ci penso…":"Compila la giornata"}</button>
     <div class="gmsg ${msg&&msg.k||""}" id="gior-msg">${esc(msg&&msg.t||"")}</div>
+    ${!giorProp&&giorUltima?giorIeriHTML():""}
     ${giorProp?"":'<button type="button" class="glink" data-gior="mano" style="align-self:flex-start">Oppure scrivila a mano</button>'}
   </div>`;
 
@@ -515,6 +542,12 @@ function giorLeggiProp(){
    --------------------------------------------------------------------- */
 async function giorToken(){
   try{ const r=await sb.auth.getSession(); return r&&r.data&&r.data.session&&r.data.session.access_token; }catch(e){ return null; }
+}
+function giorIeriHTML(){
+  const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
+  const tit=giorUltima.data===_gYmd(ieri)?"Come ieri":"Come "+_gData(giorUltima.data);
+  const det=giorUltima.schede.map(c=>[...c.chi].join(", ")+" · "+c.dove).join(" — ");
+  return `<button type="button" class="gieri" data-gior="ieri"><b>${esc(tit)}</b><span>${esc(det)}</span></button>`;
 }
 function giorDaNome(n){
   const k=_gNorm(n); if(!k) return null;
@@ -847,6 +880,7 @@ document.addEventListener("click",async e=>{
   const a=b.dataset.gior;
   if(a==="prev"||a==="next"){ giorProp=null; giorConferma=null; giorModifica=null; giorMese=_gSposta(giorMese,a==="next"?1:-1); renderGiornate(); return; }
   if(a==="compila") return giorCompila();
+  if(a==="ieri"&&giorUltima){ giorLeggiProp(); giorNuovi=[]; giorProp=giorUltima.schede.map(c=>({data:_gOggi(),chi:new Set(c.chi),dove:c.dove,cosa:""})); giorDisegna({t:"Stessa squadra e stesso cantiere, con la data di oggi. Controlla e premi «Salva».",k:"ok"}); return; }
   if(a==="mano"){ giorLeggiProp(); giorNuovi=[]; giorProp=[{data:_gOggi(),chi:new Set(),dove:"",cosa:""}]; giorDisegna(); return; }
   if(a==="annulla"){ giorProp=null; giorNuovi=[]; giorAggiungi=null; giorDisegna(); return; }
   if(a==="togli"){ giorLeggiProp(); giorProp.splice(+b.dataset.i,1); giorDisegna(); return; }
