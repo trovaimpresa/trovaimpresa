@@ -283,6 +283,9 @@
       stato, pagata_il:$("#nf-pagata").value||null,
       note:$("#nf-note").value.trim()||null};
     let fid=id;
+    /* 11 nov 2026 — la spunta verde se la fattura diventa pagata adesso */
+    let eraPagata=false;
+    if(id){ try{ const {data:pr}=await sb.from("nol_fatture").select("stato").eq("id",id).eq("user_id",sbUid).maybeSingle(); eraPagata=!!(pr&&pr.stato==="pagata"); }catch(_){} }
     if(id){
       const {error}=await sb.from("nol_fatture").update(dati).eq("id",id).eq("user_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
@@ -302,7 +305,8 @@
       }
     }
     closeSheet(); loadFattureNol(); loadNoleggi();
-    toast(id?"Fattura aggiornata ✔":"Fattura creata ✔");
+    if(stato==="pagata"&&!eraPagata&&typeof window.tiSpunta==="function") window.tiSpunta("Fattura pagata");
+    else toast(id?"Fattura aggiornata ✔":"Fattura creata ✔");
   }
 
   /* ---- la fattura su carta e in PDF: stesso motore di tutto il resto ---- */

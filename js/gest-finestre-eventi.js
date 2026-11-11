@@ -627,7 +627,9 @@
          premevi "✔ Segna fatto", compariva il messaggio, e la riga restava
          li' com'era: sembrava che non avesse funzionato e si ripremeva. Sul
          calendario il pallino restava del colore vecchio. */
-      rinfresca("lavori","riepilogo","agenda","calendario");toast("Stato: "+(statoLabel[v]||v));return;
+      rinfresca("lavori","riepilogo","agenda","calendario");
+      if(v==="fatto"&&typeof window.tiSpunta==="function")window.tiSpunta("Lavoro finito"); else toast("Stato: "+(statoLabel[v]||v));
+      return;
     }
     /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,
        e la fattura non esisteva da nessuna parte. Ora apre la fattura vera, con

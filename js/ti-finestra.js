@@ -199,6 +199,37 @@
       });
   }, true);
 
+
+  /* 11 nov 2026 — LA SPUNTA. Quando incassi una fattura o chiudi un lavoro
+     compare per un attimo una spunta verde che si disegna. Sobria: niente
+     coriandoli, non blocca niente (i clic passano), sparisce da sola.
+     Chi ha chiesto al telefono «riduci il movimento» la vede ferma. */
+  window.tiSpunta = function (testo) {
+    try {
+      if (!document.getElementById('ti-spunta-css')) {
+        var st = document.createElement('style'); st.id = 'ti-spunta-css';
+        st.textContent = '.ti-spunta{position:fixed;left:50%;top:42%;z-index:100000;transform:translate(-50%,-50%) scale(.9);opacity:0;pointer-events:none;'
+          + 'background:#fff;border-radius:22px;box-shadow:0 18px 50px rgba(10,42,77,.22);padding:28px 40px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;'
+          + 'font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;white-space:nowrap;transition:opacity .22s ease-out,transform .22s ease-out}'
+          + '.ti-spunta.su{opacity:1;transform:translate(-50%,-50%) scale(1)}'
+          + '.ti-spunta svg{width:84px;height:84px}'
+          + '.ti-spunta circle{fill:#1e8e3e}'
+          + '.ti-spunta path{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:ti-spunta-tira .45s .12s ease-out forwards}'
+          + '.ti-spunta b{font-size:22px;font-weight:800;color:#0b1220}'
+          + '@keyframes ti-spunta-tira{to{stroke-dashoffset:0}}'
+          + '@media(prefers-reduced-motion:reduce){.ti-spunta{transition:none}.ti-spunta path{animation:none;stroke-dashoffset:0}}';
+        document.head.appendChild(st);
+      }
+      var v = document.querySelector('.ti-spunta'); if (v) v.remove();
+      var d = document.createElement('div'); d.className = 'ti-spunta'; d.setAttribute('role', 'status');
+      d.innerHTML = '<svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="26"/><path d="M15 27l7 7 15-16"/></svg><b></b>';
+      d.querySelector('b').textContent = testo || 'Fatto';
+      document.body.appendChild(d);
+      requestAnimationFrame(function () { d.classList.add('su'); });
+      setTimeout(function () { d.classList.remove('su'); setTimeout(function () { d.remove(); }, 260); }, 1300);
+    } catch (_) {}
+  };
+
   window.tiModuloScritto = haScritto;
   window.tiModuloPulito = pulisci;
 })();

@@ -53,7 +53,7 @@ $("#btn-fatto").onclick=async()=>{
   $("#btn-fatto").disabled=false;
   if(!r.ok){toast(r.msg);return;}
   curLavoro.stato="fatto";const l=LAVORI.find(x=>x.id===curLavoro.id);if(l){l.stato="fatto";l.data_fatto=ymd(new Date());}
-  toast("Segnato come fatto ✔");
+  if(typeof window.tiSpunta==="function") window.tiSpunta("Lavoro finito"); else toast("Segnato come fatto ✔");
   openLavoro(curLavoro.id);
 };
 

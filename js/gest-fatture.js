@@ -1266,7 +1266,8 @@
     if(_nuovoNum!=null){f.numero=_nuovoNum;f.anno=patch.anno;}
     await fattSincronizzaLavori(id,v);
     rinfresca("fatture","riepilogo","lavori");
-    toast(v==="emessa"?("Fattura n. "+f.numero+"/"+fattAnno(f)+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
+    if(v==="pagata"&&typeof window.tiSpunta==="function")window.tiSpunta("Fattura pagata");
+    else toast(v==="emessa"?("Fattura n. "+f.numero+"/"+fattAnno(f)+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
   }
 
   /* 8 ottobre 2026 — IL PULSANTE «SEGNA COME PAGATA» DELLA CHAT.
