@@ -3168,3 +3168,12 @@ Tre push, tutti controllati su Netlify e collaudati sul sito vero:
 - **Le foto a 1920**: il browser dell'app mostra solo un pezzo dello schermo. Si usa il finto Supabase
   (`prove-claude/banchi-fissi/computo/finto-impresa.js`) con `prove-claude/attrezzi/anteprima.js`:
   `node anteprima.js <sito> gestionale-app.html 1920 1080 out.png "<codice>"` (il cancello e' spento).
+
+# 11 NOVEMBRE 2026 (sera) — LA REVISIONE, PARTE 3 E 4
+
+- **`tiSpunta(testo,{rosso,sotto,vai,bott,durata})`** in `js/ti-finestra.js` (caricato in tutti e 3 i gestionali): spunta verde che si disegna e sparisce da sola in →1,3← s; con `rosso` e' una X rossa; con `vai` resta finche' non tocchi un pulsante. Usata SOLO sui momenti di traguardo (fattura pagata/emessa, lavoro finito, preventivo accettato, giornata salvata, mezzo rientrato, giornata mandata dall'operaio, primi passi finiti, fattura fornitore contro le bolle). ⛔ Non metterla sui salvataggi normali: se esce sempre non dice piu' niente.
+- **Primi passi** (`js/gest-primi-passi.js`): 3 passi — cliente, preventivo (Parla/Scrivi con l'AI), mandalo al cliente (`gestInviaCliente` sull'ultimo preventivo). Il passo 3 conta i preventivi con stato diverso da `bozza`.
+- **«Il tuo mese»** in cima all'Assistente: i numeri li calcola `gest-riepilogo.js` (`window._tiMese`), li scrive `window.assMese` in `gest-assistente.js`. Incassato = lo stesso `incMese` del Report (SENZA IVA). Giornate = `giorGruppi()` di `gest-giornate.js` (la regola di cosa e' una giornata sta li', una volta sola). Preventivi accettati = colonna nuova **`gest_preventivi.accettato_il`**, la scrive il trigger `trg_gest_preventivi_accettato_il` (`sql/preventivi-accettato-il.sql`, gia' eseguito, riga in PROVE). Per i preventivi accettati prima dell'11 nov si usa la data del preventivo.
+- **Bolle contro fatture**: `bfControllaFattura(fornitore,data)` in `gest-bolle-fatture.js` si chiama dopo il salvataggio di una fattura fornitore; nell'Assistente la riga rossa usa `acqCaricaMese` + `bfConfronta` (mese in corso e scorso), azione `rie-bolle` → `acqApri(mese)`.
+- **Banchi**: `prove-claude/` sta GIA' dentro la copia nella nuvola (`/home/claude/trovaimpresa/prove-claude`): `bash prove-claude/banchi-fissi/gira-conti.sh` (34 verdi). Per fotografare i PDF veri: `attrezzi/anteprima-pdf.js` (come anteprima.js, ma serve jsPDF da `/home/claude/lib` e salva i PDF accanto alla foto).
+- Il finto Supabase (`finto-impresa.js`) adesso sa `count`, `lt`, `gt`.

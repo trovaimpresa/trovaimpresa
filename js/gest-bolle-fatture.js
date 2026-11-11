@@ -245,7 +245,7 @@ function bfPdf(doc) {
   doc.setDrawColor(255, 136, 0); doc.setLineWidth(.8); doc.line(M, y, W - M, y); y += 8;
   doc.setFont("helvetica", "normal"); doc.setFontSize(11);
   const prob = lista.reduce(function (s, f) { return s + f.problemi; }, 0);
-  if (lista.every(function (f) { return !f.nBolle; })) { doc.text(T("Nessuna bolla fotografata in questo mese: non c'e' niente da confrontare."), M, y); return; }
+  if (lista.every(function (f) { return !f.nBolle; })) { doc.text(T("Nessuna bolla fotografata in questo mese: non c'è niente da confrontare."), M, y); return; }
   doc.setFont("helvetica", "bold");
   if (prob) doc.setTextColor(170, 30, 30);
   doc.text(T(prob ? prob + (prob === 1 ? " cosa in fattura non torna con le bolle." : " cose in fattura non tornano con le bolle.") : "Le fatture tornano con le bolle."), M, y);
@@ -278,7 +278,7 @@ function bfPdf(doc) {
     y += 6;
   });
   pagina(12); doc.setFontSize(9.5); doc.setTextColor(80, 80, 80);
-  doc.text(doc.splitTextToSize(T("Il confronto e' fatto sulle righe lette dalle foto: i nomi possono essere scritti in modo diverso. Le righe in rosso vanno guardate sui fogli veri prima di pagare."), W - 2 * M), M, y);
+  doc.text(doc.splitTextToSize(T("Il confronto è fatto sulle righe lette dalle foto: i nomi possono essere scritti in modo diverso. Le righe in rosso vanno guardate sui fogli veri prima di pagare."), W - 2 * M), M, y);
   doc.setTextColor(0, 0, 0);
 }
 

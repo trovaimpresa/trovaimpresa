@@ -238,7 +238,7 @@ function acqCorpoHTML(errore) {
     + '<p class="sh-nota" style="margin-top:0">Se una riga è sbagliata, toglila qui.</p><div class="gx-lista">'
     /* a schermo le ULTIME salvate stanno in cima (nel PDF resta l'ordine dei giorni) */
     + acqRighe.slice().reverse().map(function (r) {
-      const q = (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + r.unita : "") : "";
+      const q = (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + acqUnita(r.unita) : "") : "";
       return '<div class="gx-riga"><span class="t">' + esc(r.descrizione) + '<small>' + esc(acqData(r.data) + (acqFornNomi[String(r.fornitore_id)] ? " · " + acqFornNomi[String(r.fornitore_id)] : "") + (r.fattura_id ? " · fattura" : " · bolla")) + '</small></span>'
         + '<b>' + esc(q) + '</b>'
         + '<button type="button" class="acq-x" data-acq="togli" data-id="' + esc(String(r.id)) + '" aria-label="Togli ' + esc(r.descrizione) + '">' + ACQ_IC.x + '</button></div>';
@@ -306,7 +306,7 @@ async function acqPdfDoc() {
   tabella("2. Riga per riga", ["Giorno", "Fornitore", "Foglio", "Prodotto", "Quantità"],
     acqRighe.map(function (r) {
       return [acqData(r.data), acqFornNomi[String(r.fornitore_id)] || "", r.fattura_id ? "Fattura" : "Bolla", r.descrizione,
-        (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + r.unita : "") : ""];
+        (r.quantita !== null && r.quantita !== undefined) ? acqQta(+r.quantita) + (r.unita ? " " + acqUnita(r.unita) : "") : ""];
     }), [20, 45, 20, 65, 30], [false, false, false, false, true]);
   return doc;
 }

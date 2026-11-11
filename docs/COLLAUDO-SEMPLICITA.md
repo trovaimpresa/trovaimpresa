@@ -184,7 +184,7 @@ Ancora aperto: «Sezione vuota» (un account senza reparti non l'ho visto), «Er
 | Le 3 cose tipiche in pochi clic — clic contati: 0 / 1 / 1 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
-| Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
+| Sezione vuota: dice cosa fare e ha il pulsante | [x] | [x] |
 | Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
@@ -723,7 +723,7 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Si capisce in 3 secondi a cosa serve | [ ] | [ ] |
 | UN solo pulsante principale, ben visibile | [ ] | [ ] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [ ] | [ ] |
-| Le 3 cose tipiche in pochi clic — clic contati: _ / _ / _ | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 2 / 0 / 1 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [ ] | [ ] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [ ] | [ ] |
 | Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
@@ -732,14 +732,14 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 | Testi, pulsanti e icone GRANDI sul 1920 | [ ] | [ ] |
 | Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [ ] | [ ] |
-| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [ ] | [ ] |
+| Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [ ] | [ ] |
 | **Conti** | | |
 | Ogni conto rifatto A MANO con almeno 3 casi | [ ] | [ ] |
 | Lo stesso numero è uguale OVUNQUE | [ ] | [ ] |
 | Nessuna formula copiata in due posti | [ ] | [ ] |
 | **Funziona** | | |
-| Provato DAL VIVO sul sito vero, account di Alex | [ ] | [ ] |
+| Provato DAL VIVO sul sito vero, account di Alex | [x] | [-] |
 | Console senza errori | [ ] | [ ] |
 | Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
 
@@ -1523,3 +1523,16 @@ Da sapere (non un difetto provato): nel Noleggio il numeretto del Cestino nel me
 - Pulsante in fondo al menu di sinistra, solo per impresa e artigiano (js/gest-anche-pro.js). Se dice sì, il gestionale si vede come studio tecnico (Computo metrico vero, Pratiche, Parcella, Crediti formativi) ma Mezzi, Carte e Giornate restano dove sono.
 - Niente nel database: il tipo dell'iscritto non cambia. La scelta sta nel telefono (localStorage `ti_faccia_<utente>`), la legge logRuoloUtente in js/gest-reparti.js. Si torna indietro dallo stesso pulsante.
 - Limite detto ad Alessio: la scelta vale per quel telefono o computer, non segue l'utente sugli altri. Per farla seguire serve una colonna nel database.
+
+
+## 11 nov 2026 — revisione del 10 nov, parte 3 e 4
+
+Provato oggi (finto Supabase a 1920 e 375 + sito vero, account di Alex):
+- **Assistente**: reparto vuoto = «Il tuo primo preventivo in 3 passi» con un solo pulsante per il passo di adesso (sezione vuota: fatto). «Il tuo mese» (incassato senza IVA = lo stesso `incMese` del Report, giornate = `giorGruppi` come la sezione Giornate, preventivi accettati = `accettato_il`). Riga rossa «N cose in fattura non tornano con le bolle» (stessa `bfConfronta` di Acquisti del mese, mese in corso e mese scorso).
+- **Giornate**: «Come ieri» (solo se l'ultima giornata è di questa settimana) → Salva → giornata di oggi scritta: provato. Telefono 375: niente fuori schermo, niente sotto 13 px. Dal vivo sul sito: si apre (Tel dal vivo non provato: `[-]`).
+- **Fatture**: sul telefono «8.000,00 €» usciva dal riquadro (la riga «Telefono» era spuntata per sbaglio): adesso sotto i 520 px i riquadri vanno a una colonna.
+- **PDF veri** (fatti girare col codice vero e jsPDF vero, letti pagina per pagina): preventivo con sconto (830,00 − 1% = 821,70; IVA 22% = 180,77; totale 1.002,47 €: giusto), ricevuta (1.250,50 € «milleduecentocinquanta/50»: giusto), Acquisti del mese (3 pagine; corretto «10 sacco» → «10 sacchi» e «e'» → «è»).
+- **Studio tecnico e Noleggio a 1920**: zero errori, zero testi sotto 13 px, niente fuori schermo.
+- **Spunta verde / X rossa** (`tiSpunta` in js/ti-finestra.js): fattura pagata, fattura emessa, lavoro finito, preventivo accettato, giornata salvata, mezzo rientrato (Noleggio), giornata mandata (app operaio), primi passi finiti, fattura del fornitore contro le bolle.
+
+Non provato: la voce «Parla» (il microfono nel browser dell'app è bloccato: la prova la fa Alex dal telefono) e la foto di una bolla letta dall'AI sul sito vero (costa un credito: da fare con Alex).

@@ -16,11 +16,15 @@ Ultimo aggiornamento: 11 novembre 2026 (mattina) — riassunto di ottobre e iniz
 - Parte 1, i 7 difetti (Parla, domanda prima di uscire, sconto, clienti della ricevuta, «professionista» sul telefono, zero grigio, «1 messaggio») + nome del saluto «Alex».
 - Parte 2: punto 8 (pulizia dati, col conto), 9 (finestra nostra), 10 (3 pulsanti + Altro), 11 (Excel del noleggio nel ⋯), 13 (14 px).
 
-### 🔴 DA FARE (in quest'ordine)
-1. **Punto 12** — collaudo semplicità (`docs/COLLAUDO-SEMPLICITA.md`, 125 verdi / 491 aperte): sezione per sezione, spuntare solo il provato.
-2. **Parte 3** — una per volta, ognuna con foto e ok: 14 primo minuto guidato · 15 spunta animata · 16 «Il tuo mese» · 17 «Come ieri» nelle Giornate · 18 bolle contro fatture.
-3. **Parte 4** — da provare davvero: PDF di preventivo con sconto, ricevuta, Acquisti del mese · foto di una bolla letta dall'AI e «Parla» (dal telefono di Alex) · faccia studio tecnico e Noleggio a 1920. Dati «PROVA», da togliere alla fine col conto.
-4. App operaio: la domanda prima di uscire guarda i bottoni «Annulla»/«Indietro» per scritta: provarla su un modulo vero dell'operaio.
+- Parte 3 (11 nov, sera): 14 primi passi a 3 (cliente, preventivo, invio) · 15 spunta verde e X rossa (`tiSpunta`, anche bolle contro fatture, preventivo accettato, fattura emessa, giornate, rientro mezzo, app operaio) · 16 «Il tuo mese» in cima all'Assistente (+ colonna `gest_preventivi.accettato_il`) · 17 «Come ieri» in Giornate · 18 riga rossa bolle/fatture nell'Assistente.
+- Parte 4: PDF veri (preventivo con sconto, ricevuta, Acquisti del mese) letti pagina per pagina; studio e Noleggio a 1920 senza errori. Nessun dato «PROVA» creato sul database vero (le prove sono state fatte sul finto Supabase): niente da togliere.
+- Fatture sul telefono: i riquadri non escono piu' dallo schermo.
+
+### 🔴 DA FARE
+1. **Punto 12** — collaudo semplicita' (`docs/COLLAUDO-SEMPLICITA.md`): ancora la gran parte delle righe aperte. Ripartire da 3.3 Preventivi, sezione per sezione, spuntare solo il provato.
+2. **Da provare con Alex**: la voce «Parla» dal telefono, e la foto di una bolla/fattura letta dall'AI sul sito vero (1 credito) → deve uscire la spunta verde o la X rossa.
+3. **Da proporre ad Alex con le foto** (non toccato): il Noleggio ha i SUOI «Primi passi» a 5 e non ha «Il tuo mese». Portarci la stessa idea (3 passi: cliente, noleggio, contratto mandato; mese: incassato, noleggi, mezzi fuori).
+4. App operaio: la domanda prima di uscire guarda i bottoni «Annulla»/«Indietro» per scritta: provarla su un modulo vero dell'operaio. Il banco `gira-operatore.sh` e' scaduto (cerca `TMB_CODA_KEY` e `js/op-core.js` che non ci sono piu'): va aggiornato.
 
 ## 🆕 5 NOVEMBRE 2026 — DOVE SIAMO (riassunto di ottobre e inizio novembre)
 
