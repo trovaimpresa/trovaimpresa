@@ -283,7 +283,9 @@ async function giorCarica(){
   try{
     const oggi=_gOggi();
     const ru=await sb.from("gest_ore").select("data").eq("user_id",sbUid).is("eliminato_il",null).lt("data",oggi).order("data",{ascending:false}).limit(1);
-    const dU=!ru.error&&ru.data&&ru.data[0]&&ru.data[0].data;
+    let dU=!ru.error&&ru.data&&ru.data[0]&&ru.data[0].data;
+    /* piu' vecchia di una settimana non e' «come ieri»: non si propone */
+    if(dU&&(new Date(oggi+"T12:00")-new Date(dU+"T12:00"))/864e5>7) dU=null;
     if(dU){
       const rg=await sb.from("gest_ore").select("operatore_id,lavoro_id,rapportino_id").eq("user_id",sbUid).is("eliminato_il",null).eq("data",dU);
       if(!rg.error&&rg.data&&rg.data.length){
