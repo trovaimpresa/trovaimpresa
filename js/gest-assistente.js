@@ -41,6 +41,15 @@
     + '#ass-box{background:#fff;border:2px solid #0a2a4d;border-radius:18px;padding:22px 24px;margin:0 0 18px;box-shadow:0 6px 24px rgba(10,42,77,.10)}'
     + '#ass-box .ass-ciao{font-size:32px;font-weight:700;color:#0a2a4d;margin:0;line-height:1.2}'
     + '#ass-box .ass-data{font-size:18px;color:#475569;margin:2px 0 18px}'
+    + '#ass-box .ass-mese{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin:-6px 0 20px}'
+    + '#ass-box .ass-mese-t{font-size:18px;font-weight:700;color:#fff;margin-right:2px}'
+    + '#ass-box .ass-mese button{display:inline-flex;align-items:baseline;gap:7px;background:#eef3fa;border:0;border-radius:12px;padding:9px 14px;font:inherit;font-size:18px;color:#0f172a;cursor:pointer}'
+    + '#ass-box .ass-mese button:hover{background:#e1eaf6}'
+    + '#ass-box .ass-mese b{font-size:20px;font-weight:800;color:#0a2a4d}'
+    + '@media(max-width:700px){#ass-box .ass-mese{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}'
+    +   '#ass-box .ass-mese-t{grid-column:1/-1}'
+    +   '#ass-box .ass-mese button{flex-direction:column;align-items:center;gap:2px;padding:10px 6px;font-size:15px;text-align:center;line-height:1.2}'
+    +   '#ass-box .ass-mese b{font-size:19px}}'
     + '#ass-box .ass-tit{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:700;color:#0a2a4d;margin:0 0 12px}'
     + '#ass-box .ass-av{width:44px;height:44px;border-radius:50%;background:#0a2a4d;display:grid;place-items:center;flex:0 0 44px}'
     + '#ass-box .ass-av svg{width:24px;height:24px;color:#ff8800}'
@@ -181,6 +190,28 @@
     catch (e) { return 'impresa'; }
   }
   var montatoPer = '';
+  /* 11 nov 2026 — IL TUO MESE, in una riga. I numeri li calcola il
+     Riepilogo (gest-riepilogo.js, window._tiMese) con le sue regole: qui si
+     scrivono e basta. Tutti a zero = la riga non c'e'. Ogni numero porta
+     alla sua sezione. */
+  var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  window.assMese = function () {
+    var el = $('ass-mese'), d = window._tiMese;
+    if (!el) return;
+    if (!d || (!(d.inc > 0) && !(d.acc > 0) && !(d.gg > 0))) { el.hidden = true; el.innerHTML = ''; return; }
+    var euro = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true }).format(+d.inc || 0);
+    var pz = [];
+    pz.push('<button type="button" data-ass-vai="fatture" title="Incassato questo mese, senza IVA: lo stesso numero del Report"><b>' + euro + '</b> incassati</button>');
+    if (d.gg != null) pz.push('<button type="button" data-ass-vai="giornate"><b>' + d.gg + '</b> ' + (d.gg === 1 ? 'giornata' : 'giornate') + '</button>');
+    pz.push('<button type="button" data-ass-vai="preventivi"><b>' + d.acc + '</b> ' + (d.acc === 1 ? 'preventivo accettato' : 'preventivi accettati') + '</button>');
+    el.innerHTML = '<span class="ass-mese-t">' + MESI[new Date().getMonth()] + ':</span>' + pz.join('');
+    el.hidden = false;
+  };
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('[data-ass-vai]') : null;
+    if (b) vai(b.getAttribute('data-ass-vai'));
+  });
+
   function monta() {
     var sez = $('riepilogo'); if (!sez || $('ass-box')) return;
     montatoPer = chiSono();
@@ -192,6 +223,7 @@
     box.innerHTML =
         '<h2 class="ass-ciao">' + saluto() + '</h2>'
       + '<div class="ass-data">' + oggi() + '</div>'
+      + '<div class="ass-mese" id="ass-mese" hidden></div>'
       + '<div class="ass-tit"><span class="ass-av">' + STELLA + '</span>Cosa facciamo?</div>'
       + '<div class="ass-riga">'
       +   '<textarea id="ass-testo" data-no-dettato rows="1" placeholder="Scrivi o parla come ti viene…" aria-label="Cosa facciamo?"></textarea>'
@@ -204,6 +236,7 @@
       + '<div class="ass-nota">Se l\'assistente non sa rispondere, ti prepara la domanda per l\'assistenza.</div>';
     var intro = sez.querySelector('.rie-intro');
     if (intro) intro.after(box); else sez.insertBefore(box, sez.firstChild);
+    window.assMese();
 
     $('ass-manda').addEventListener('click', function () { allaChat($('ass-testo').value); });
     $('ass-testo').addEventListener('keydown', function (e) {

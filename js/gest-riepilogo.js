@@ -410,6 +410,29 @@
     const nolReale  = x => (x.fase || 'fuori') !== 'prenotato';
     const speseNol  = NOLR.filter(x=>nolReale(x) && thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
     const speseMese = speseLav+speseCarte+speseRif+speseForn+speseNol;
+    /* 11 nov 2026 — «IL TUO MESE» in cima all'Assistente: lo STESSO incassato
+       del Report qui sotto (incMese), i preventivi accettati QUESTO mese
+       (accettato_il; per quelli vecchi senza data, la data del preventivo) e
+       le giornate con la stessa regola della sezione Giornate (giorGruppi). */
+    try{
+      const accMese=PV.filter(p=>p.stato==="accettato"&&thisMonth(String(p.accettato_il||p.data||"").slice(0,10))).length;
+      window._tiMese={inc:incMese,acc:accMese,gg:null,mid:mid};
+      if(typeof window.assMese==="function") window.assMese();
+      (async()=>{
+        try{
+          const m=todayStr().slice(0,7), a=m+"-01";
+          const d=new Date(+m.slice(0,4),+m.slice(5,7),1), b=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-01";
+          const ro=await sb.from("gest_ore").select("id,data,lavoro_id,rapportino_id").eq("user_id",sbUid).eq("mestiere_id",mid).gte("data",a).lt("data",b);
+          if(ro.error||typeof giorGruppi!=="function") return;
+          const ids=[...new Set((ro.data||[]).map(o=>o.rapportino_id).filter(Boolean))];
+          const rap={};
+          if(ids.length){ const rr=await sb.from("gest_rapportini").select("id,eliminato_il").in("id",ids); if(rr.error) return; (rr.data||[]).forEach(r=>{rap[r.id]=r;}); }
+          if(!window._tiMese||window._tiMese.mid!==mid) return;
+          window._tiMese.gg=Object.keys(giorGruppi(ro.data||[],rap)).length;
+          if(typeof window.assMese==="function") window.assMese();
+        }catch(_){}
+      })();
+    }catch(_){}
     const utile     = incMese-speseMese;
     /* la scheda Report compare quando c'e' stato ALMENO UN movimento di soldi,
        anche di mesi passati: una fattura pagata, una spesa, un movimento di

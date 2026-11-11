@@ -198,6 +198,20 @@ const _gIc = {
 /* ---------------------------------------------------------------------
    LETTURA
    --------------------------------------------------------------------- */
+/* 11 nov 2026 — COSA E' UNA GIORNATA, scritto in un posto solo: un
+   rapportino, oppure le ore sciolte di un cantiere in un giorno. La usa
+   questa sezione e la usa «Il tuo mese» in cima all'Assistente: cosi' i due
+   numeri non possono dire cose diverse. */
+function giorGruppi(ore,rap){
+  const gruppi={};
+  (ore||[]).forEach(o=>{
+    if(o.rapportino_id){ const r=rap[o.rapportino_id]; if(!r||r.eliminato_il) return; }
+    const k=o.rapportino_id||("L"+o.lavoro_id+"|"+o.data);
+    if(!gruppi[k]) gruppi[k]={k,data:o.data,lavoro_id:o.lavoro_id,rapportino_id:o.rapportino_id||null,ore:[],cosa:""};
+    gruppi[k].ore.push(o);
+  });
+  return gruppi;
+}
 async function giorCarica(){
   const a=giorMese+"-01", b=_gSposta(giorMese,1)+"-01";
   const [ro,rl,rh]=await Promise.all([
@@ -215,13 +229,7 @@ async function giorCarica(){
     if(rr.error) throw new Error(rr.error.message);
     (rr.data||[]).forEach(r=>{ rap[r.id]=r; });
   }
-  const gruppi={};
-  ore.forEach(o=>{
-    if(o.rapportino_id){ const r=rap[o.rapportino_id]; if(!r||r.eliminato_il) return; }
-    const k=o.rapportino_id||("L"+o.lavoro_id+"|"+o.data);
-    if(!gruppi[k]) gruppi[k]={k,data:o.data,lavoro_id:o.lavoro_id,rapportino_id:o.rapportino_id||null,ore:[],cosa:""};
-    gruppi[k].ore.push(o);
-  });
+  const gruppi=giorGruppi(ore,rap);
   Object.values(gruppi).forEach(g=>{
     const r=g.rapportino_id&&rap[g.rapportino_id];
     g.cosa=r?[r.note,r.materiali?("Materiali: "+r.materiali):""].filter(Boolean).join(" · "):"";
