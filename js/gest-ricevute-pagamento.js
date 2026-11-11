@@ -81,7 +81,11 @@
   async function leggiClienti() {
     try {
       const { data } = await sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,cod_fiscale,piva")
-        .eq("user_id", sbUid).is("eliminato_il", null).order("nome");
+        .eq("user_id", sbUid).is("eliminato_il", null)
+        /* 11 nov 2026 — la stessa regola della sezione Clienti: i clienti del
+           reparto aperto piu' quelli senza reparto. Prima uscivano tutti (10). */
+        .or(_cliOr(curMestiere()))
+        .order("nome");
       _clienti = data || [];
     } catch (_) { _clienti = []; }
   }

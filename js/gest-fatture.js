@@ -560,7 +560,7 @@
 
     const [{data:ff},{data:cls},{data:az},{data:lav}]=await Promise.all([
       sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
-      sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(mid)).order("nome"),
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
       sb.from("gest_lavori").select("id,descrizione,dove,stato,importo,data_fatto,data_prevista,cliente_id")
         .eq("user_id",sbUid).eq("mestiere_id",mid).eq("stato","fatto")
@@ -828,7 +828,7 @@
     let righe=[];
     if(sb&&sbUid){
       if(!fattCliCache.length){
-        const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+        const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
         fattCliCache=data||[];
       }
       if(!fattAzienda){
@@ -1494,7 +1494,7 @@
     if(gia&&gia.length){
       const {data:f}=await sb.from("gest_fatture").select("*").eq("id",gia[0].fattura_id).maybeSingle();
       if(f){closeSheet();
-        if(!fattCliCache.length){const {data:c}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");fattCliCache=c||[];}
+        if(!fattCliCache.length){const {data:c}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");fattCliCache=c||[];}
         fattForm(f);toast("Questo lavoro è già in una fattura: te l'ho aperta");return;}
     }
     const {data:l}=await sb.from("gest_lavori").select("*").eq("id",lavoroId).eq("user_id",sbUid).maybeSingle();

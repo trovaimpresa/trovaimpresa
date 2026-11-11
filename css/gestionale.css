@@ -5911,3 +5911,10 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 #appview aside.side button.anche-pro span{ flex:1; min-width:0; white-space:normal; }
 #appview aside.side button.anche-pro b{ display:block; white-space:normal; overflow-wrap:break-word; font-size:17px; }
 #appview aside.side button.anche-pro small{ display:block; white-space:normal; font-size:15px; }
+
+/* 11 nov 2026 — «Sei anche un professionista?» sul TELEFONO: stava in cima a
+   ogni schermata e rubava spazio. Sul telefono resta solo nella schermata dei
+   reparti (barra in alto) e dentro il menu ☰ quando lo apri. */
+@media(max-width:880px){
+  #appview aside.side:not(.open) #anche-pro-lato{ display:none !important; }
+}

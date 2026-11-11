@@ -680,7 +680,7 @@
        pacchetto che ha pagato c'e' ancora, e che il mese prossimo i
        compresi tornano mentre i comprati restano quelli. */
     var comprati = messaggiComprati > 0
-      ? ' &middot; piu\' <b>' + messaggiComprati + '</b> comprati'
+      ? ' &middot; piu\' <b>' + messaggiComprati + '</b> ' + (messaggiComprati === 1 ? 'comprato' : 'comprati')
       : '';
     if (modoAssaggio) {
       sotto.innerHTML = 'Prova: ti '
@@ -691,7 +691,7 @@
     var compresi = Math.max(n - messaggiComprati, 0);
     /* 10 nov 2026: il fondatore non ha limite (chat_stato gli da' 100000) */
     if (compresi >= 10000) { sotto.innerHTML = 'Messaggi <b>senza limite</b>'; return; }
-    sotto.innerHTML = 'Ti restano <b>' + compresi + '</b> messaggi compresi questo mese' + comprati;
+    sotto.innerHTML = (compresi === 1 ? 'Ti resta <b>1</b> messaggio compreso' : 'Ti restano <b>' + compresi + '</b> messaggi compresi') + ' questo mese' + comprati;
   }
 
   async function aggiornaSotto() {
@@ -739,7 +739,7 @@
       box.innerHTML = righe.map(function (c) {
         return '<div class="chat-riga' + (c.conversazione_id === qui ? ' aperta' : '') + '" data-conv="' + esc(c.conversazione_id) + '">'
           + '<span class="ct"><span class="cn">' + esc(c.titolo) + '</span>'
-          + '<span class="cq">' + esc(quandoInParole(c.quando)) + ' &middot; ' + (c.messaggi || 0) + ' messaggi</span></span>'
+          + '<span class="cq">' + esc(quandoInParole(c.quando)) + ' &middot; ' + (c.messaggi || 0) + ((c.messaggi || 0) === 1 ? ' messaggio' : ' messaggi') + '</span></span>'
           + '<button class="chat-butta" type="button" title="Butta questa chat" data-butta="' + esc(c.conversazione_id) + '">&times;</button>'
           + '</div>';
       }).join('');

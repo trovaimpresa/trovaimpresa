@@ -295,3 +295,6 @@ html body .wrap section .griglia-schede > .job.job,html body #carte-list > .card
 #sal .btn-primary{font-size:16px;min-height:44px}
 /* 8 nov 2026 — Chiedi una funzione: «Manda la richiesta» alto 48 */
 #richieste .btn-primary,#richieste [data-action="rq-manda"]{font-size:17px;min-height:48px}
+/* 11 nov 2026 — regola 19: uno zero e' grigio (prima «0 da fare» era arancione) */
+#landing .pc3:not(.c-dafare) .pc3-num b{color:#9fb2c9 !important}
+.pc3:not(.c-dafare) .pc3-num b{color:#64748b}

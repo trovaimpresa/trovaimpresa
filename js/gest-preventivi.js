@@ -405,7 +405,7 @@
       +'<label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">\ud83d\udcb6 IVA, sconto e totale</label>'
       +'</div>'
       +'<div class="field"><label for="pv-sconto">Sconto</label>'
-      +'<div style="display:flex;gap:10px"><input id="pv-sconto" type="text" inputmode="decimal" placeholder="Es. 10" value="'+esc(scVal)+'" style="flex:1">'
+      +'<div class="ctr-riga" style="display:flex;gap:10px"><input id="pv-sconto" type="text" inputmode="decimal" placeholder="Es. 10" value="'+esc(scVal)+'" style="flex:1">'
       +'<select id="pv-sconto-tipo" style="max-width:120px"><option value="perc" '+(scTipo==="perc"?"selected":"")+'>%</option><option value="eur" '+(scTipo==="eur"?"selected":"")+'>\u20ac</option></select></div>'
       +'<div class="campo-aiuto">Lascia vuoto se non fai sconto.</div></div>'
       +'<div class="field"><label>Aliquota IVA</label><select id="pv-iva-imp">'+opz+'</select>'

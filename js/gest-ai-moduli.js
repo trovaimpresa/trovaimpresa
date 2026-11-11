@@ -617,7 +617,7 @@
       /* dove attaccare l'orecchio: uscendo da una di queste si guarda
          solo quella. Le righe delle voci nascono dopo, percio' si
          ascolta il contenitore (vedi ctrAscolta). */
-      caselle:"#pv-tit,#pv-cli,#pv-data,#pv-iva-imp,#pv-rit",
+      caselle:"#pv-tit,#pv-cli,#pv-data,#pv-iva-imp,#pv-rit,#pv-sconto,#pv-sconto-tipo",
       dentro:["#prev-righe"],
       regole:ctrRegolePreventivo
     },
@@ -739,6 +739,24 @@
         dice:"Il preventivo non ha nemmeno una voce. Così non si salva, e al cliente non arriva niente."});
     }
 
+    /* --- lo sconto (11 nov 2026): con 150% o con piu' euro del totale il
+       preventivo andava a 0 € senza dire niente a nessuno --- */
+    const sc=$("#pv-sconto");
+    if(sc&&sc.value.trim()){
+      const v=_numeroIt(sc.value), tipo=($("#pv-sconto-tipo")||{}).value||"perc";
+      let somma=0;
+      $$("#prev-righe [data-riga]").forEach(function(r){
+        if(r.hasAttribute("data-sezione"))return;
+        somma+=impRiga(_numRiga(r,".pr-qta",1),_numRiga(r,".pr-prezzo",0));
+      });
+      if(v!=null&&v<0) out.push({el:sc,grave:"rosso",
+        dice:"Lo sconto non può essere negativo. Se vuoi aggiungere qualcosa, mettilo nelle voci."});
+      else if(tipo==="perc"&&v!=null&&v>=100) out.push({el:sc,grave:"rosso",
+        dice:"Uno sconto del "+_pct(v)+"% porta il preventivo a 0 €: al cliente arriva un lavoro regalato."});
+      else if(tipo==="eur"&&v!=null&&somma>0&&v>=somma) out.push({el:sc,grave:"rosso",
+        dice:"Lo sconto ("+eur2(v)+") è uguale o più grande del totale delle voci ("+eur2(somma)+"): il preventivo va a 0 €."});
+    }
+
     /* --- il cliente --- */
     const cli=$("#pv-cli");
     if(cli&&!cli.value) out.push({el:cli,grave:"arancio",
@@ -805,6 +823,15 @@
       const primo=$("#fatt-righe .fr-desc");
       if(primo) out.push({el:primo,grave:"rosso",
         dice:"La fattura non ha nemmeno una voce. Così non si salva."});
+    }
+
+    /* --- lo sconto (11 nov 2026): piu' grande del lavoro = fattura a 0 € --- */
+    const fsc=$("#fa-sconto");
+    if(fsc&&fsc.value.trim()){
+      const v=_numIt("#fa-sconto")||0;
+      if(v<0) out.push({el:fsc,grave:"rosso",dice:"Lo sconto non può essere negativo."});
+      else if(conDescrizione&&imponibile>0&&v>=imponibile) out.push({el:fsc,grave:"rosso",
+        dice:"Lo sconto ("+eur2(v)+") è uguale o più grande del totale delle voci ("+eur2(imponibile)+"): la fattura va a 0 €."});
     }
 
     /* --- la data: una fattura col domani sopra non si emette --- */
@@ -930,7 +957,7 @@
     const rib=$("#co-rib");
     if(rib&&rib.value.trim()){
       const r=_numeroIt(rib.value);
-      if(r!=null&&r>100) out.push({el:rib,grave:"rosso",
+      if(r!=null&&r>=100) out.push({el:rib,grave:"rosso",
         dice:"Un ribasso oltre il 100% non esiste: vorrebbe dire pagare il cliente per lavorare."});
       else if(r!=null&&r<0) out.push({el:rib,grave:"rosso",
         dice:"Il ribasso non può essere negativo. Se stai aggiungendo qualcosa, va messo nelle lavorazioni."});
@@ -1448,7 +1475,7 @@
     msg.appendChild(mk); msg.appendChild(tx);
     /* dentro una voce il messaggio va sotto tutta la riga: di fianco alle
        tre caselle non ci sta, e a capo in mezzo diventa illeggibile */
-    const riga=s.el.closest?s.el.closest("[data-riga]"):null;
+    const riga=s.el.closest?s.el.closest("[data-riga],.ctr-riga"):null;   /* .ctr-riga: caselle affiancate (sconto + %/€) */
     const dopo=riga||s.el;
     dopo.parentNode.insertBefore(msg,dopo.nextSibling);
   }

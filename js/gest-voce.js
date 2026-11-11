@@ -53,7 +53,7 @@
   var css = ''
     + '#gv-btn{position:fixed;right:22px;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;'
     +   'background:var(--blu,#0066FF);color:#fff;border:0;border-radius:40px;padding:16px 24px;'
-    +   'font-size:21px;font-weight:700;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer}'
+    +   'font-size:21px;font-weight:700;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer;transition:bottom .2s ease}'
     + '#gv-btn svg,#gv-foto svg{width:26px;height:26px;flex:none}'
     + '#gv-foto{position:fixed;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;background:#fff;color:var(--blu,#0066FF);'
     +   'border:2px solid var(--blu,#0066FF);border-radius:40px;padding:14px 22px;font-size:21px;font-weight:700;'
@@ -197,6 +197,40 @@
   }
 
   /* ---------------- quando si vede ---------------- */
+  var CLIC = 'button,a[href],input:not([type=hidden]),select,textarea,[role=button],[data-action],summary';
+  function copreQualcosa(alto, basso, sx, dx) {
+    /* si guarda cosa c'e' SOTTO il rettangolo di «Parla», in 15 punti */
+    var sotto = null, H = window.innerHeight;
+    for (var ix = 0; ix < 5; ix++) for (var iy = 0; iy < 3; iy++) {
+      var x = sx + 4 + (dx - sx - 8) * ix / 4, y = alto + 6 + (basso - alto - 12) * iy / 2;
+      if (y < 0 || y > H) continue;
+      var pila = document.elementsFromPoint(x, y) || [];
+      for (var k = 0; k < pila.length; k++) {
+        var e = pila[k];
+        if (e === btn || btn.contains(e) || bolla.contains(e)) continue;
+        var cl = e.closest ? e.closest(CLIC) : null;
+        if (!cl || cl === btn) continue;
+        if (cl.closest('#barra-basso,#gv-bolla,.side')) break;
+        if (getComputedStyle(cl).position === 'fixed') break;
+        var r = cl.getBoundingClientRect();
+        if (!sotto || r.top < sotto.top) sotto = r;
+        break;
+      }
+    }
+    return sotto;
+  }
+  function liberaSotto(basso) {
+    var h = btn.offsetHeight || 56, w = btn.offsetWidth || 130, H = window.innerHeight, W = window.innerWidth;
+    var dx = W - 22, sx = dx - w, b = basso;
+    for (var giro = 0; giro < 4; giro++) {
+      var r = copreQualcosa(H - b - h - 4, H - b + 4, sx, dx);
+      if (!r) return b;
+      var nuovo = Math.ceil(H - r.top + 10);
+      if (nuovo + h > H * 0.75) return basso;   /* non c'e' posto sopra: resta dov'era */
+      b = nuovo;
+    }
+    return b;
+  }
   function posiziona() {
     var av = el(PAG === 'op' ? 'app' : 'appview');
     var nascosto = !vis(av)
@@ -216,6 +250,11 @@
     if (barra && vis(barra)) basso = Math.max(basso, barra.offsetHeight + 12);
     var fabBox = el('rie-fab-box'), fab = el('rie-fab');
     if (fab && fabBox && fabBox.style.display !== 'none') basso = Math.max(basso, 22 + fab.offsetHeight + 12);
+    /* 11 nov 2026 — NESSUN PULSANTE FISSO COPRE UN ALTRO PULSANTE.
+       Nell'app operaio «Parla» stava sopra la scritta di «Entrata» della
+       Timbratura. Adesso, se sotto «Parla» c'e' un pulsante (o una casella),
+       «Parla» sale sopra quel pulsante. Quando non copre piu' niente torna giu'. */
+    basso = liberaSotto(basso);
     btn.style.bottom = basso + 'px';
     if (fbtn) { fbtn.style.bottom = basso + 'px'; fbtn.style.right = (22 + btn.offsetWidth + 12) + 'px'; }
     bolla.style.bottom = (basso + btn.offsetHeight + 12) + 'px';
@@ -607,4 +646,9 @@
   posiziona();
   setInterval(posiziona, 700);
   window.addEventListener('resize', posiziona);
+  /* mentre si scorre: «Parla» si sposta subito, non dopo 700 ms */
+  var _scorre = 0;
+  window.addEventListener('scroll', function () {
+    if (_scorre) return; _scorre = requestAnimationFrame(function () { _scorre = 0; posiziona(); });
+  }, { passive: true, capture: true });
 })();
