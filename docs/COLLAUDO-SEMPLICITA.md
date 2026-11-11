@@ -581,6 +581,10 @@ Fatto (anteprima, in attesa dell'ok): il riquadro dell'icona va sotto «Scrivi a
 
 Problemi trovati: _(si scrive dopo la foto del «prima»)_
 
+**11 nov 2026 (sera) — collaudo dal vivo** (come «david»):
+Clic veri: aprire il lavoro 1 (si tocca la scheda) · scrivere al capo 1 («Scrivi al capo» o la Chat) · spesa con la carta 2-3 (Segna la giornata → La giornata completa). Mappa nel lavoro giusta. Foto, Preventivi, Chat: vuote dicono cosa fare. Niente sotto i 14 px.
+Problemi trovati: (1) nel lavoro «‹ Torna» scritto piccolo, mentre la prima schermata ha «← Indietro» (due modi di uscire); (2) in Archivio i lavori del giorno stavano SOPRA il calendario: toccavi un giorno e il risultato cambiava fuori dallo schermo.
+Fatto (anteprima, in attesa dell'ok): «← Indietro» uguale alla prima schermata; prima il calendario, sotto i lavori del giorno.
 
 ## 3.11 — App · Scadenzario
 
