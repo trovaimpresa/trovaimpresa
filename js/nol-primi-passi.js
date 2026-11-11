@@ -21,14 +21,16 @@
      solo. Chiede «Hai imparato: vuoi che lo togliamo?». Chi usava gia' il
      gestionale prima (e il riquadro non l'ha mai visto) non lo vede. */
   var VISTO = "ti-primi-passi-nol-visto", TIENI = "ti-primi-passi-nol-tieni";
+  /* ⛔ 11 nov 2026 — TRE PASSI SOLI, come nel gestionale imprese: il mezzo,
+     il cliente, il primo noleggio (che fa nascere il contratto). Dati
+     azienda e fattura li trova da solo; i dati azienda hanno gia' il loro
+     richiamo, e il contratto li chiede quando servono. */
   var PASSI = [
-    { tit: "Scrivi i dati della tua azienda", sotto: "Nome, partita IVA, indirizzo: finiscono su contratti e fatture.", az: "azienda" },
-    { tit: "Aggiungi il tuo primo mezzo",     sotto: "Quello che dai a noleggio, col suo prezzo al giorno.", tab: "mezzi" },
-    { tit: "Aggiungi il tuo primo cliente",   sotto: "Chi prende il mezzo. Lo scrivi una volta sola.", tab: "clienti-nol" },
-    { tit: "Fai il primo noleggio",           sotto: "Scegli mezzo, cliente e date: il contratto lo fa il gestionale.", tab: "noleggi" },
-    { tit: "Fai la prima fattura",            sotto: "Scegli il cliente e il mese: i noleggi da fatturare li trova da solo.", tab: "fatture" }
+    { tit: "Aggiungi il tuo primo mezzo",   sotto: "Quello che dai a noleggio, col suo prezzo al giorno.", tab: "mezzi" },
+    { tit: "Aggiungi il tuo primo cliente", sotto: "Chi prende il mezzo. Lo scrivi una volta sola.", tab: "clienti-nol" },
+    { tit: "Fai il primo noleggio",         sotto: "Scegli mezzo, cliente e date: il contratto lo fa il gestionale.", tab: "noleggi" }
   ];
-  var sb = null, uid = null, ultimo = 0, inCorso = false;
+  var sb = null, uid = null, ultimo = 0, inCorso = false, primaQuanti = null;
 
   function leggi(k) { try { return localStorage.getItem(k) === "1"; } catch (_) { return false; } }
   function segna(k) { try { localStorage.setItem(k, "1"); } catch (_) {} }
@@ -56,11 +58,9 @@
     inCorso = true;
     try {
       var res = await Promise.all([
-        (async function () { try { var r = await sb.from("gest_azienda").select("nome").eq("user_id", uid).maybeSingle(); return r.error ? null : (r.data && String(r.data.nome || "").trim() ? 1 : 0); } catch (_) { return null; } })(),
         conta("gest_mezzi", function (q) { return q.eq("noleggiabile", true); }),
         conta("gest_clienti"),
-        conta("nol_noleggi"),
-        conta("nol_fatture")
+        conta("nol_noleggi")
       ]);
       ultimo = Date.now();
       if (res.some(function (x) { return x === null; })) { if (box) box.remove(); return; }
@@ -73,25 +73,29 @@
 
       var righe = PASSI.map(function (p, i) {
         var fatto = fatti[i], ora = i === prossimo;
-        var dove = p.az ? "Dati azienda" : nomeMenu(p.tab, p.tab);
-        var att = p.az ? 'data-action="' + p.az + '"' : 'data-pp-tab="' + p.tab + '"';
         return '<div class="pp-riga' + (fatto ? " fatto" : "") + (ora ? " ora" : "") + '">'
           + '<span class="pp-num">' + (fatto ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : (i + 1)) + '</span>'
           + '<span class="pp-t"><b>' + p.tit + '</b><small>' + (fatto ? "Fatto" : p.sotto) + '</small></span>'
-          + (fatto ? "" : '<button type="button" class="' + (ora ? "btn-primary" : "btn") + ' pp-vai" ' + att + '>' + (ora ? "Inizia da qui" : "Apri " + dove) + '</button>')
+          + (!fatto && ora ? '<button type="button" class="btn-primary pp-vai" data-pp-tab="' + p.tab + '">Inizia da qui</button>' : '')
           + '</div>';
       }).join("");
 
       var html = finito && !leggi(TIENI)
-        ? '<div class="pp-fine"><b>Bravo, hai fatto tutti i passi!</b><span>Hai imparato a usare il gestionale. Vuoi che togliamo l\'aiuto?</span>'
+        ? '<div class="pp-fine"><b>Bravo, hai fatto il tuo primo noleggio!</b><span>Il contratto lo trovi nella scheda del noleggio. Vuoi che togliamo l\'aiuto?</span>'
           + '<div class="pp-fine-btn"><button type="button" class="btn-primary" data-pp-chiudi="1">Sì, toglilo</button>'
           + '<button type="button" class="btn" data-pp-tieni="1">Tienilo ancora</button></div></div>'
-        : '<div class="pp-testa"><div><b>' + (finito ? 'Primi passi: tutti fatti' : 'Primi passi') + '</b><span>' + quanti + ' fatti su ' + PASSI.length + (finito ? '' : ' · segui i numeri, uno alla volta') + '</span></div>'
-        + '<button type="button" class="pp-chiudi" data-pp-chiudi="1">Togli l\'aiuto</button></div>'
-        + '<div class="pp-barra"><i style="width:' + Math.round(quanti / PASSI.length * 100) + '%"></i></div>'
-        + '<div class="pp-lista">' + righe + '</div>';
+        : '<div class="pp-primo pp-tre"><div class="pp-tre-testa"><div><h3>' + (finito ? 'Fatto: il primo noleggio è partito' : 'Il tuo primo noleggio in 3 passi') + '</h3>'
+          + '<p>Mezzo, cliente, noleggio. Ci vogliono pochi minuti.</p></div>'
+          + '<button type="button" class="pp-chiudi" data-pp-chiudi="1">Togli l\'aiuto</button></div>'
+          + '<div class="pp-barra"><i style="width:' + Math.round(quanti / PASSI.length * 100) + '%"></i></div>'
+          + '<div class="pp-conto"><b>' + quanti + '</b> ' + (quanti === 1 ? 'fatto' : 'fatti') + ' su <b>' + PASSI.length + '</b></div></div>'
+          + '<div class="pp-dentro"><div class="pp-lista">' + righe + '</div></div>';
+      if (finito && primaQuanti !== null && primaQuanti < PASSI.length && typeof window.tiSpunta === "function")
+        window.tiSpunta("Hai fatto il tuo primo noleggio!", { durata: 2200 });
+      primaQuanti = quanti;
       if (!box) { box = document.createElement("div"); box.id = "rie-primi"; dopo.parentNode.insertBefore(box, dopo); }
       box.innerHTML = html;
+      box.classList.toggle("pp-ha-primo", !(finito && !leggi(TIENI)));
     } finally { inCorso = false; }
   }
 
