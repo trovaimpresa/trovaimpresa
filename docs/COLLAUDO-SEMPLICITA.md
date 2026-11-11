@@ -456,6 +456,10 @@ Fatto (sul banco): riga nascosta per impresa e artigiano (resta il riquadro col 
 Conti a mano: 2 × 4,50 × 2,70 = 24,30 − porta 0,90 × 2,10 = 1,89 → 22,41 m² × 22 € = 493,02 € − ribasso 10% = 443,72 € = schermo = vista `gest_computo_totali`.
 Ancora da guardare: SAL e Prezzario (pagine del computo con numeri a 14 px).
 
+Collaudo dal vivo (11 nov 2026) sul computo da 88 voci («progetto casa»), senza toccare niente: scritte tutte ≥14 px (solo le «i» a 13), Prezzario a pezzi da 60, SAL ok. Sistemato:
+2. Telefono: la fila dei passi restava all'inizio, al passo 6 non si vedeva dove eri → `compPag` mette il passo aperto al centro.
+3. Tolte due spiegazioni inutili: «Da qui comincia tutto…» e «clicca per rinominare» sotto i capitoli (si rinomina lo stesso cliccando il nome).
+
 
 ## 3.8 — App · Squadra (studio: Collaboratori)
 

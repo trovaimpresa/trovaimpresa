@@ -485,7 +485,6 @@
 
       +'<div class="copag'+(isNew?"":" on")+'" data-p="1">'
       +'<div class="sh-b"><div class="sh-tit">Le lavorazioni</div>'
-      +  '<div class="sh-nota">Da qui comincia tutto: il conto del lavoro, riga per riga.</div>'
       +  '<div class="lav-media" id="co-voci">'
       +    (isNew
         ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti i capitoli, le lavorazioni e le loro misure.</div>'
@@ -1873,6 +1872,10 @@
        non sia successo niente */
     const corpo=document.querySelector("#sheet .sh-body");
     if(corpo)corpo.scrollTop=0;
+    /* 11 nov 2026 — collaudo 3.7: sul telefono la fila dei passi scorre di
+       lato e restava ferma all'inizio: al passo 6 non si vedeva dove eri.
+       Adesso il passo aperto si mette al centro della fila. */
+    try{ nav.scrollLeft=Math.max(0,b.offsetLeft-(nav.clientWidth-b.offsetWidth)/2); }catch(e){}
   }
 
   /* quante lavorazioni ci sono adesso: senza lavorazioni prezzi, ribasso e
@@ -2118,7 +2121,7 @@
             +  '<b>'+(g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")+'</b>'
             +  '<small class="sp-forn">'+(g.cap.sicurezza
                  ? "quello che c'è qui dentro NON si ribassa"
-                 : "clicca per rinominare")+'</small></span>'
+                 : "")+'</small></span>'
             +'<b>'+eur2(sub)+'</b>'
             +'<button type="button" class="rdel" data-action="comp-cap-del" data-id="'+esc(String(g.cap.id))+'" title="Elimina il capitolo (le lavorazioni restano)">×</button></div>';
       }else if(compCapCache.length&&g.voci.length){
