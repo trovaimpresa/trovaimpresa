@@ -65,8 +65,10 @@
       const em=((rf.error||rff.error).message)||"";
       const msg=/gest_fornitori|gest_fatture_fornitori|schema cache|does not exist/i.test(em)
         ? "La sezione Fornitori ha bisogno di un aggiornamento del database: esegui sql/gest-fornitori.sql su Supabase (SQL Editor → Run)."
-        : "Non riesco a leggere i fornitori: controlla la connessione e riprova.";
-      box.innerHTML='<div class="rie-errore"><b>'+esc(msg)+'</b></div>';
+        : "";
+      /* 11 nov 2026 — collaudo 3.13: senza rete, lo stesso riquadro di Lavori e Clienti, col Riprova */
+      if(msg)box.innerHTML='<div class="rie-errore"><b>'+esc(msg)+'</b></div>';
+      else listaNonLetta(box,"i fornitori","fornitori");
       if(lst)lst.innerHTML="";if(rr)rr.innerHTML="";if(tt)tt.style.display="none";
       return;
     }

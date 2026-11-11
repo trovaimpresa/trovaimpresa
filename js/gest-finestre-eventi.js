@@ -897,7 +897,10 @@
     if(a==="del-forn"){
       if(!sbUid){toast("Devi essere loggato");return;}
       const nf=fattfCache.filter(x=>String(x.fornitore_id)===String(id)).length;
-      if(!(await gconfirm(nf?`Eliminare questo fornitore? Verranno eliminate anche le sue ${nf} fatture registrate.`:"Eliminare questo fornitore?")))return;
+      /* 11 nov 2026 — collaudo 3.13: dice quale fornitore e che va nel Cestino */
+      const _fo=(fornCache||[]).find(x=>String(x.id)===String(id));
+      if(!(await window.chiediCestino(_fo&&_fo.nome?"«"+_fo.nome+"»":"questo fornitore",
+        nf?(nf===1?"Ci va anche la sua fattura registrata. ":"Ci vanno anche le sue "+nf+" fatture registrate. ")+"Li riprendi dal Cestino quando vuoi.":"")))return;
       const {data:okDf2,error}=await sb.from("gest_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDf2||!okDf2.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
@@ -905,18 +908,20 @@
          mettiamo via a mano, se no restavano vive e continuavano a contare
          nel "da pagare" agganciate a un fornitore che non c'e' più. */
       try{ await sb.from("gest_fatture_fornitori").delete().eq("fornitore_id",id).eq("user_id",sbUid); }catch(e){}
-      closeSheet();renderFornitori();rinfresca("riepilogo");toast("Fornitore eliminato");return;
+      closeSheet();renderFornitori();rinfresca("riepilogo");toast("Fornitore nel cestino: lo riprendi da lì");return;
     }
     if(a==="new-fattf")return fattfForm(null);
     if(a==="edit-fattf")return fattfForm(fattfCache.find(x=>String(x.id)===String(id)));
     if(a==="save-fattf")return saveFattf(id||null);
     if(a==="del-fattf"){
       if(!sbUid){toast("Devi essere loggato");return;}
-      if(!(await gconfirm("Eliminare questa fattura?")))return;
+      const _ff=(fattfCache||[]).find(x=>String(x.id)===String(id))||{}, _fn=((fornCache||[]).find(x=>String(x.id)===String(_ff.fornitore_id))||{}).nome;
+      const _nf="la fattura"+(_ff.numero?" n. "+_ff.numero:"")+(_fn?" di «"+_fn+"»":"");
+      if(!(await window.chiediCestino(_nf,"La riprendi dal Cestino quando vuoi.")))return;
       const {data:okDff,error}=await sb.from("gest_fatture_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDff||!okDff.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
-      renderFornitori();rinfresca("riepilogo");toast("Fattura eliminata");return;
+      renderFornitori();rinfresca("riepilogo");toast("Fattura nel cestino: la riprendi da lì");return;
     }
     if(a==="fattf-stato"){
       if(!sbUid){toast("Devi essere loggato");return;}

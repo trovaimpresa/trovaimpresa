@@ -1503,6 +1503,15 @@
     },120);
   }
   window.campoManca=campoManca;
+  /* 11 nov 2026 — collaudo 3.13: la domanda prima di mettere nel Cestino.
+     Dice COSA (il nome tra « ») e DOVE va (regola 22). Una sola funzione:
+     prima ogni sezione scriveva la sua «Eliminare questo...?». */
+  window.chiediCestino=async function(nome,sotto){
+    const tit="Mettere nel cestino "+(nome||"questa voce")+"?";
+    const s=sotto||"Lo riprendi dal Cestino quando vuoi.";
+    if(typeof window.tiChiedi==="function")return window.tiChiedi(s,{titolo:tit,si:"S\u00ec, nel cestino",no:"No",rosso:true});
+    return gconfirm(tit+"\n\n"+s);
+  };
 
   /* ============================================================
      IL VERDE E IL «VIA LIBERA» — 1 nov 2026 (idea di Alessio)

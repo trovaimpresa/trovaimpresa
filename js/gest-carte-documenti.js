@@ -13,10 +13,13 @@
     if(!cur){box.innerHTML="";return;}
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">💳</div><p>Nessuna carta</p><small>Accedi per gestire le carte aziendali</small></div>`;return;}
     const mid=curMestiere();
-    const [{data:cs},{data:sd}]=await Promise.all([
+    const [rcs,rsd]=await Promise.all([
       sb.from("gest_carte").select("id,nome,dipendente_id,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
       sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid)
     ]);
+    /* 11 nov 2026 — collaudo 3.13: senza rete diceva «nessuna carta» (regola 20) */
+    if(letturaKo(rcs,rsd)){listaNonLetta(box,"le carte","carte");return;}
+    const cs=rcs.data, sd=rsd.data;
     carteCache=cs||[];
     const saldoMap=Object.fromEntries((sd||[]).map(s=>[s.carta_id,s.saldo]));
     if(!carteCache.length){
@@ -89,13 +92,15 @@
   }
   async function delCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!(await gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
-        ? "Eliminare questa carta? Finisce nel Cestino e puoi rimetterla a posto. I movimenti restano registrati."
-        : "Eliminare questa carta? Anche i movimenti registrati andranno persi.")))return;
+    const _c=(carteCache||[]).find(x=>String(x.id)===String(id));
+    const _nm=_c&&_c.nome?"la carta «"+_c.nome+"»":"questa carta";
+    if(window.cestinoAttivo&&window.cestinoAttivo()){
+      if(!(await window.chiediCestino(_nm,"I movimenti restano registrati. La riprendi dal Cestino quando vuoi.")))return;
+    }else if(!(await gconfirm("Eliminare "+_nm+"? Anche i movimenti registrati andranno persi.")))return;
     const {data,error}=await sb.from("gest_carte").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminata: nessuna riga rimossa");return;}
-    renderCarte();toast("Carta eliminata");
+    renderCarte();toast(window.cestinoAttivo&&window.cestinoAttivo()?"Carta nel cestino: la riprendi da lì":"Carta eliminata");
   }
 
   /* dettaglio carta: saldo + movimenti, si apre dalla lista carte */
@@ -111,8 +116,8 @@
         <div style="font-weight:700;color:#0a2a4d;margin-bottom:14px;font-size:1.1rem">➕ Nuovo movimento</div>
         <div class="row2">
           <div class="field"><label style="font-size:1rem">Tipo</label><select id="mv-tipo" style="font-size:1.05rem;padding:10px">
-            <option value="ricarica" selected>Ricarica (aggiunge soldi)</option><option value="spesa">Spesa (toglie soldi)</option></select></div>
-          <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="text" id="mv-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px" data-euro></div>
+            <option value="spesa" selected>Spesa (toglie soldi)</option><option value="ricarica">Ricarica (aggiunge soldi)</option></select></div>
+          <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="text" id="mv-importo" inputmode="decimal" style="font-size:1.05rem;padding:10px" data-euro></div>
         </div>
         <div class="field"><label style="font-size:1rem">Per cosa</label><input id="mv-causale" placeholder="Es. Viti e tasselli, ricarica mensile..." style="font-size:1.05rem;padding:10px"></div>
         <button class="btn btn-primary" style="width:100%;font-size:1.05rem;padding:12px" data-action="save-movimento" data-id="${id}">+ Aggiungi movimento</button>
@@ -132,7 +137,7 @@
     const saldo=(sd&&sd.saldo)||0;
     const vuota=saldo<=0;
     if(saldoBox)saldoBox.innerHTML=`${vuota?'<div style="background:var(--err);color:#fff;font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:center">⚠️ SENZA SOLDI — ricarica la carta</div>':""}<span style="color:${vuota?"var(--err)":"#0a2a4d"}">${eur(saldo)}</span>`;
-    if(!movimentiCartaCache.length){lista.innerHTML='<div style="color:#999;font-size:0.9rem;text-align:center;padding:14px">Nessun movimento ancora</div>';return;}
+    if(!movimentiCartaCache.length){lista.innerHTML='<div style="color:var(--testo-2);font-size:15px;text-align:center;padding:14px">Nessun movimento ancora</div>';return;}
     const fmtData=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
     lista.innerHTML=movimentiCartaCache.map(m=>{
       const segno=m.tipo==="spesa"?"−":"+";
@@ -153,7 +158,7 @@
     if(!cartaAttivaId||!sbUid){toast("Devi essere loggato");return;}
     const tipo=$("#mv-tipo").value;
     const importo=_numIt("#mv-importo")||0;
-    if(!importo||importo<=0){toast("Scrivi l'importo, per esempio 12,50");return;}
+    if(!importo||importo<=0){campoManca($("#mv-importo"),"Manca l'importo: scrivilo qui, per esempio 12,50.");return;}
     /* lo stesso tetto che c'e' nell'app dell'operaio: e' la stessa colonna del
        database, e un dito appoggiato sullo zero non deve passare da una parte
        e fermarsi dall'altra */
@@ -168,7 +173,14 @@
   }
   async function eliminaMovimentoCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!(await gconfirm("Eliminare questo movimento?")))return;
+    /* 11 nov 2026 — collaudo 3.13: i movimenti NON vanno nel Cestino
+       (alimentano il saldo): la domanda dice quale e che sparisce davvero */
+    const _m=(movimentiCartaCache||[]).find(x=>String(x.id)===String(id))||{};
+    const _nm="«"+(_m.causale||(_m.tipo==="spesa"?"Spesa":"Ricarica"))+"» ("+(_m.tipo==="spesa"?"−\u00a0":"+\u00a0")+String(eur(_m.importo||0)).replace(/ /g,"\u00a0")+")";
+    const _ok=(typeof window.tiChiedi==="function")
+      ?await window.tiChiedi("Non va nel Cestino: sparisce e il saldo della carta cambia.",{titolo:"Eliminare per sempre "+_nm+"?",si:"Sì, elimina",no:"No",rosso:true})
+      :await gconfirm("Eliminare per sempre "+_nm+"? Il saldo della carta cambia.");
+    if(!_ok)return;
     const {data,error}=await sb.from("gest_carte_movimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}

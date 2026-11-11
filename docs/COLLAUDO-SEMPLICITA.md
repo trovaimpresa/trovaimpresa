@@ -718,6 +718,12 @@ Problemi trovati (7 nov 2026, prima):
 Fatto (sul banco, nel prossimo push): blu solo «+ Fattura da pagare» (a destra), gli altri due bianchi; sulla riga solo «Apri» (Chiama e WhatsApp stanno nella scheda: controllato).
 Controllato in tutto il file: nessun'altra sezione ha più di un «+ Nuovo» blu.
 
+Collaudo dal vivo (11 nov 2026): le correzioni del 7 nov sono online. Trovati e sistemati:
+4. Carta, nuovo movimento: partiva da «Ricarica» → parte da «Spesa» (la cosa di tutti i giorni); tolto lo «0» grigio che sembrava scritto; importo vuoto → casella rossa (campoManca).
+5. Eliminare fornitore, fattura del fornitore, carta: la domanda dice quale e che va nel Cestino (`window.chiediCestino`, in gest-ai-moduli.js: una funzione sola).
+6. Eliminare un movimento della carta: NON va nel Cestino (alimenta il saldo) → «Eliminare per sempre «Gasolio» (− 42,50 €)? Il saldo della carta cambia».
+7. Senza rete Carte diceva «nessuna carta» → riquadro «Non riesco a leggere» col Riprova (regola 20); anche Fornitori ha il Riprova.
+
 
 ## 3.14 — App · Mezzi · Attrezzature (studio: Strumenti)
 
