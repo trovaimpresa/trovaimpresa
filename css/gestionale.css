@@ -5953,7 +5953,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 @media(max-width:520px){ #fatture .fatt-summary{ grid-template-columns:1fr; } }
 
 /* 11 nov 2026 — collaudo 3.5: telefono ed email dei clienti si toccano */
-.job-meta a.cli-link{color:var(--blu,#0066ff);text-decoration:underline;text-underline-offset:3px;padding:6px 0;font-weight:600}
+.job-meta a.cli-link,.sqg-sotto a.cli-link{color:var(--blu,#0066ff);text-decoration:underline;text-underline-offset:3px;padding:6px 0;font-weight:600}
 
 /* 11 nov 2026 — collaudo 3.6: i riquadri delle Fatture sono 3 e devono
    riempire la colonna. Con auto-fit la riga rossa (che occupa tutta la

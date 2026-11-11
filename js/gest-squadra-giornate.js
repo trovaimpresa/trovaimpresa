@@ -92,7 +92,11 @@ function sqgCard(o) {
   }
   return '<div class="sqg-card' + (scaduti.length ? " ha-rosso" : "") + '">'
     + '<div class="sqg-top"><div><h3>' + (nome || "—") + '</h3>'
-    + '<div class="sqg-sotto">' + esc(o.mansione || (typeof SQ_RUOLO !== "undefined" && SQ_RUOLO[o.ruolo]) || "") + (o.telefono ? (o.mansione ? " · " : "") + esc(o.telefono) : "") + '</div></div>'
+    /* 11 nov 2026 — collaudo 3.8: «Operaio3519095949» attaccati (il punto
+       si metteva solo con la mansione scritta a mano); il numero si tocca */
+    + '<div class="sqg-sotto">' + [esc(o.mansione || (typeof SQ_RUOLO !== "undefined" && SQ_RUOLO[o.ruolo]) || ""),
+        o.telefono ? '<a class="cli-link" href="tel:' + esc(String(o.telefono).replace(/[^\d+]/g, "")) + '">' + esc(o.telefono) + '</a>' : ""
+      ].filter(Boolean).join(" · ") + '</div></div>'
     + '<div class="sqg-dx"><span class="stato ' + (o.attivo ? "fatto" : "bozza") + '">' + (o.attivo ? "Attivo" : "Invitato") + '</span>' + altro + '</div></div>'
     + '<div class="sqg-mese"><b>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + (d.lavori.size === 1 ? " cantiere" : " cantieri") : "") + '</span></div>'
     + sqgStriscia(sqgMese, d.giorni)
