@@ -80,6 +80,33 @@
     .piccolo a{color:#0066ff}
     [hidden]{display:none!important}
   </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&display=swap">
+<style id="conferma-stile-c">
+/* 11 nov 2026 — la pagina di conferma nello STILE C (come registrazione e accesso):
+   fondo chiaro, scheda blu a quadretti col filo arancione, IBM Plex, tutto grande. */
+body{background:#e7eef8!important;font-family:'IBM Plex Sans',Inter,system-ui,sans-serif!important}
+.container{background-color:#0a2a4d!important;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px)!important;background-size:40px 40px!important;border-top:4px solid #ff8800!important;border-radius:20px!important;box-shadow:0 10px 34px rgba(10,42,77,.25)!important;max-width:620px!important;padding:44px 44px 36px!important;color:#fff}
+.container .logo{display:none!important} /* il logo c'e' gia' nella barra in alto */
+.cerchio{width:96px!important;height:96px!important;font-size:52px!important}
+.cerchio.ok{background:#ff8800!important}
+.cerchio.ko{background:#fff!important;color:#ff8800!important}
+.cerchio.attesa{background:rgba(255,255,255,.1)!important}
+.rotella{border-color:rgba(255,255,255,.25)!important;border-top-color:#ff8800!important}
+h1{color:#fff!important;font-size:32px!important;font-weight:700}
+p{color:rgba(255,255,255,.85)!important;font-size:19px!important}
+.btn{background:#ff8800!important;color:#fff!important;border-radius:14px!important;font:700 20px 'IBM Plex Sans',Inter,sans-serif!important;padding:18px 36px!important;min-width:280px;box-shadow:0 6px 18px rgba(255,136,0,.3)}
+.btn:hover{background:#ff9a26!important}
+.btn-chiaro{background:transparent!important;border:2px solid rgba(255,255,255,.7)!important;box-shadow:none}
+.btn-arancio{background:#ff8800!important}
+input[type=email]{background:#fff!important;color:#0a2a4d!important;border:2px solid transparent!important;border-radius:12px!important;font-size:18px!important;padding:16px!important}
+input[type=email]:focus{border-color:#ff8800!important;box-shadow:0 0 0 4px rgba(255,136,0,.25)}
+.msg{font-size:17px!important}
+.msg.ok{color:#7ee2a8!important}
+.msg.err{color:#ffb3a8!important}
+.piccolo{color:rgba(255,255,255,.7)!important;font-size:15px!important}
+.piccolo a{color:#ffb35c!important}
+@media (max-width:600px){.container{padding:30px 18px 26px!important;margin-top:18px!important}h1{font-size:26px!important}.btn{min-width:0;width:100%}}
+</style>
 </head>
 <body>
   <div class="container">
