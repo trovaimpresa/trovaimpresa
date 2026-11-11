@@ -161,12 +161,12 @@
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
-    if(a==="del-foto"){if(confirm("Eliminare questa foto?"))deleteFoto(t.dataset.id);return;}
+    if(a==="del-foto"){if((await tiChiedi("Eliminare questa foto?")))deleteFoto(t.dataset.id);return;}
     if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderGalleria();return;}
     if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
-    if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
+    if(a==="del-job"){if((await gconfirm("Eliminare questo lavoro?"))){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -192,7 +192,7 @@
     if(a==="new-cli")return cliForm(null);
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
+    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if((await gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?"))){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
     if(a==="new-scad")return scadForm(null);
     if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
     if(a==="save-scad")return saveScad(id);
@@ -203,7 +203,7 @@
       if(error){toast("Errore: "+error.message);return;}
       renderScadenze();toast(v==="fatta"?"Scadenza completata ✔":"Riaperta");return;
     }
-    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if((await gconfirm("Eliminare questa scadenza?"))){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
@@ -212,14 +212,14 @@
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="sq-revoca"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
-      if(!gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale."))return;
+      if(!(await gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale.")))return;
       const {error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
       renderDip();toast("Accesso rimosso");return;
     }
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
-    if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
+    if(a==="del-dip"){if((await tiChiedi("Eliminare questa persona?"))){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
   });

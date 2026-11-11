@@ -354,7 +354,7 @@
   }
 
   async function docCliElimina(id){
-    if(!gconfirm("Eliminare questo documento?"))return;
+    if(!(await gconfirm("Eliminare questo documento?")))return;
     const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
     const {error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}

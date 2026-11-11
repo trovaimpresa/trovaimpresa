@@ -275,7 +275,7 @@
 
   async function docElimina(id){
     const d=docCache.find(x=>String(x.id)===String(id)); if(!d) return;
-    if(!confirm("Buttare «"+(d.nome_file||"questo documento")+"»?\n"+cestFrase())) return;
+    if(!(await tiChiedi("Buttare «"+(d.nome_file||"questo documento")+"»?\n"+cestFrase()))) return;
     const {error}=await sb.from("nol_media").delete().eq("id",d.id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!cestAcceso()){ try{ await sb.storage.from(MEDIA_BUCKET[d.genere]||"gestionale-foto").remove([d.storage_path]); }catch(e){} }

@@ -585,27 +585,27 @@
       renderCestino(true);
     };
     bar.querySelector(".cz-annulla").onclick=function(){cestScegli=false;cestScelti.clear();renderCestino(true);};
-    bar.querySelector(".cz-via").onclick=function(){
+    bar.querySelector(".cz-via").onclick=async function(){
       const lista=cestCache.filter(function(x){return cestScelti.has(cestCzChiave(x));});
       if(!lista.length)return;
-      if(!gconfirm("Eliminare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+"?"
+      if(!(await gconfirm("Eliminare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+"?"
         +"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali)."
-        +"\n\nQuesta volta spariscono davvero e non si recuperano più."))return;
+        +"\n\nQuesta volta spariscono davvero e non si recuperano più.")))return;
       const scelte=new Set(lista.map(cestCzChiave));
       cestEliminaGiri(function(){return cestCache.filter(function(x){return scelte.has(cestCzChiave(x));});},lista.length,true);
     };
   }
   /* «Svuota»: tutto quello che corrisponde a quello che si sta guardando */
-  function cestSvuota(q){
+  async function cestSvuota(q){
     const tipo=cestTipo;
     const quante=cestCzQuante(q,cestCzVis);
     if(!quante)return;
     const cosa=q?("le "+quante+" cose trovate con «"+cestQ+"»")
       :(tipo?("tutte le "+quante+" «"+tipo+"»"):("tutte le "+quante+" cose del cestino"
         +(cestVista!=="tutti"?" di questo reparto":"")));
-    if(!gconfirm("Eliminare per sempre "+cosa+"?"
+    if(!(await gconfirm("Eliminare per sempre "+cosa+"?"
       +"\n\nLe fatture già emesse restano nel cestino (sono documenti fiscali)."
-      +"\n\nQuesta volta spariscono davvero e non si recuperano più."))return;
+      +"\n\nQuesta volta spariscono davvero e non si recuperano più.")))return;
     const scelta=function(){return cestCache.filter(function(x){
       return (!q||(x.nome+" "+x.tipo).toLowerCase().includes(q))&&(!tipo||x.tipo===tipo);});};
     cestEliminaGiri(scelta,quante,!!q);
@@ -687,7 +687,7 @@
     if(err)resto.push(err+(err===1?" non è andata":" non sono andate")+" per un errore: riprova fra un attimo.");
     if(stop)resto.unshift("Ti sei fermato a metà.");
     toast(fatti?("Eliminate per sempre: "+fatti):"Non ho eliminato niente");
-    if(resto.length)alert("Eliminate per sempre: "+fatti+".\n\n"+resto.join("\n\n"));
+    if(resto.length)tiAvviso("Eliminate per sempre: "+fatti+".\n\n"+resto.join("\n\n"));
   }
 
   function cestRiga(tab,id){
@@ -729,9 +729,9 @@
         const p=(pd||[])[0];
         if(p&&p.eliminato_il){
           const q=p.nome?(" «"+p.nome+"»"):"";
-          if(gconfirm("Questa cosa sta dentro il "+x.padre.lab+q+", che è ancora nel cestino.\n\n"
+          if((await gconfirm("Questa cosa sta dentro il "+x.padre.lab+q+", che è ancora nel cestino.\n\n"
             +"Se rimetto a posto solo questa, non la vedrai da nessuna parte.\n\n"
-            +"Rimetto a posto anche il "+x.padre.lab+"?")) padreDaTirareSu=p;
+            +"Rimetto a posto anche il "+x.padre.lab+"?"))) padreDaTirareSu=p;
         }
       }catch(e){}
     }
@@ -852,7 +852,7 @@
       const _num=(prova.fiscali&&prova.fiscali.length?prova.fiscali:[prova.fiscale]);
       const _elenco=_num.map(function(n){return "n. "+n;}).join(", ");
       const _diretta=(x.tab==="gest_fatture");
-      alert((_diretta
+      tiAvviso((_diretta
           ? "Questa \u00e8 la fattura "+_elenco+": \u00e8 un documento fiscale.\n\n"
           : "Dentro \u00ab"+x.nome+"\u00bb c'\u00e8 una fattura gi\u00e0 emessa ("+_elenco+"), "
             +"che \u00e8 un documento fiscale.\n\n")
@@ -863,7 +863,7 @@
       return;
     }
     if(prova.ok===false){
-      alert("Non posso eliminare \u00ab"+x.nome+"\u00bb per sempre.\n\n"
+      tiAvviso("Non posso eliminare \u00ab"+x.nome+"\u00bb per sempre.\n\n"
         +"Ci sono ancora collegate delle cose che NON sono nel cestino:\n"
         +cestElenco(prova.vivi)
         +"\n\nSe la cancellassi adesso sparirebbero anche loro. Mettile prima nel cestino, poi riprova.");
@@ -878,8 +878,8 @@
     const scoll=(prova.scollegate||[]).length
       ? "\n\nQueste restano ma perdono il collegamento:\n"+cestElenco(prova.scollegate)
       : "";
-    if(!gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?"+insieme+scoll
-        +"\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9."))return;
+    if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?"+insieme+scoll
+        +"\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9.")))return;
 
     const {data:fatto,error}=await sb.rpc("gest_cestino_elimina",
       {p_tabella:x.tab,p_id:x.id,p_conferma:true});
@@ -920,7 +920,7 @@
   /* via di riserva: vale solo finche' non e' stato eseguito
      sql/gest-cestino-elimina.sql, e solo sulle cose senza figli */
   async function cestDefinitivoFoglia(x){
-    if(!gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9."))return;
+    if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9.")))return;
     const {data,error}=await sb.raw(x.tab).delete().eq("id",x.id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga trovata");return;}
@@ -1120,19 +1120,19 @@
       /* le misure ci sono sempre: sono il punto di partenza di quello che
          cambierai. E si chiede una volta sola, con parole chiare. */
       conMisure=true;
-      if(!gconfirm("Faccio la variante del computo «"+(c.titolo||"")+"»?\n\n"
+      if(!(await gconfirm("Faccio la variante del computo «"+(c.titolo||"")+"»?\n\n"
         +"Nasce una COPIA con dentro tutto: capitoli, lavorazioni, prezzi e misure. "
         +"Li cambi come sono andati davvero i lavori.\n\n"
         +"Il computo di partenza NON si tocca, e nella variante trovi la pagina "
-        +"«Cosa è cambiato» con le differenze e quanto costa in più o in meno."))return;
+        +"«Cosa è cambiato» con le differenze e quanto costa in più o in meno.")))return;
     }else if(mis.length){
-      conMisure=gconfirm("Copio anche le misure?\n\n"
+      conMisure=(await gconfirm("Copio anche le misure?\n\n"
         +"SÌ  → il computo nuovo arriva identico, con tutte le "+mis.length+" misure già dentro. "
         +"Serve quando il lavoro è lo stesso (il secondo appartamento uguale) e devi solo correggere quello che cambia.\n\n"
         +"NO  → arrivano capitoli, lavorazioni, prezzi e unità di misura, ma le quantità partono da zero. "
-        +"Serve quando è lo stesso tipo di lavoro su un edificio diverso.");
+        +"Serve quando è lo stesso tipo di lavoro su un edificio diverso."));
     }else{
-      if(!gconfirm("Faccio una copia del computo «"+(c.titolo||"")+"»?"))return;
+      if(!(await gconfirm("Faccio una copia del computo «"+(c.titolo||"")+"»?")))return;
     }
 
     const {data:cap,error:eC}=await sb.from("gest_computo_capitoli")
@@ -1270,9 +1270,9 @@
     if(!sbUid)return;
     const c=compCache.find(x=>String(x.id)===String(id))||{};
     const conCestino=(window.cestinoAttivo&&window.cestinoAttivo());
-    if(!gconfirm(conCestino
+    if(!(await gconfirm(conCestino
       ? "Mettere il computo «"+(c.titolo||"")+"» nel cestino?\n\nLo ritrovi nel Cestino e lo puoi rimettere a posto quando vuoi."
-      : "Eliminare il computo «"+(c.titolo||"")+"»?\n\nSe ne vanno anche i suoi capitoli, le lavorazioni e le misure, e non si recupera."))return;
+      : "Eliminare il computo «"+(c.titolo||"")+"»?\n\nSe ne vanno anche i suoi capitoli, le lavorazioni e le misure, e non si recupera.")))return;
     const {data,error}=await sb.from("gest_computi").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}

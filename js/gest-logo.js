@@ -52,7 +52,7 @@
     });
   }
 
-  function avviso(t) { try { if (window.toast) window.toast(t); else alert(t); } catch (e) { alert(t); } }
+  function avviso(t) { try { if (window.toast) window.toast(t); else tiAvviso(t); } catch (e) { tiAvviso(t); } }
 
   async function carica(file) {
     if (!file || IN_CORSO) return;

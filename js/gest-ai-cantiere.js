@@ -725,7 +725,7 @@ async function scSalva(id){
 
 async function scElimina(id){
   const s=_scRighe.find(x=>String(x.id)===String(id));
-  if(!gconfirm("Eliminare «"+((s&&s.titolo)||"questa scelta")+"»? Il cliente non la vedrà più."))return;
+  if(!(await gconfirm("Eliminare «"+((s&&s.titolo)||"questa scelta")+"»? Il cliente non la vedrà più.")))return;
   const {data,error}=await sb.from("gest_scelte").delete().eq("id",id).eq("user_id",sbUid).select("id");
   if(error){toast("Errore: "+error.message);return;}
   if(!data||!data.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
@@ -759,7 +759,7 @@ async function scWhatsApp(){
 }
 async function scRiapri(){
   if(!_scLink)return;
-  if(!gconfirm("Riaprire le scelte? Il cliente potrà cambiarle e dovrà confermarle di nuovo."))return;
+  if(!(await gconfirm("Riaprire le scelte? Il cliente potrà cambiarle e dovrà confermarle di nuovo.")))return;
   const {data,error}=await sb.from("gest_scelte_link").update({confermato_il:null}).eq("lavoro_id",_scLav.id).eq("user_id",sbUid).select("lavoro_id");
   if(error||!data||!data.length){toast("Non riaperte: "+((error&&error.message)||"riprova"));return;}
   toast("Riaperte ✔");scApri(_scLav.id);

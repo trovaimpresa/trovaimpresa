@@ -225,7 +225,7 @@ async function rapButtaVia(id,bottone){
     if(prova.error){
       const m=(prova.error.code||"")+" "+(prova.error.message||"");
       if(/PGRST202|Could not find the function|schema cache/i.test(m)){
-        alert("Non ho buttato via niente.\n\nQuesta cosa non è ancora accesa sul server: "
+        tiAvviso("Non ho buttato via niente.\n\nQuesta cosa non è ancora accesa sul server: "
              +"dillo al tuo capo, deve lanciare sql/gest-rapportini-cestino.sql su Supabase.");
         return;
       }
@@ -248,7 +248,7 @@ async function rapButtaVia(id,bottone){
          +", "+_oreTxt(ore)+" in tutto.\n\n")
       : "Non ci sono ore attaccate.\n\n";
     msg+="Finisce nel Cestino: il tuo capo può rimetterlo a posto dal gestionale.";
-    if(!confirm(msg))return;
+    if(!(await tiChiedi(msg)))return;
 
     const fatto=await sb.rpc("gest_rapportino_cestina",{p_id:id,p_conferma:true});
     if(fatto.error){toast("Non buttato via: "+(fatto.error.message||"errore"));return;}

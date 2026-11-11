@@ -243,7 +243,7 @@
 
   async function mediaElimina(id){
     const m=mediaCache.find(x=>String(x.id)===String(id)); if(!m) return;
-    if(!confirm("Buttare "+(m.genere==="video"?"questo video":"questa foto")+"?\n"+cestFrase())) return;
+    if(!(await tiChiedi("Buttare "+(m.genere==="video"?"questo video":"questa foto")+"?\n"+cestFrase()))) return;
     const {error}=await sb.from("nol_media").delete().eq("id",m.id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     /* ⚠️ col cestino acceso il FILE non si tocca: se no, rimettendo a posto

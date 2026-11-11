@@ -575,10 +575,10 @@
     caricaForm();
     return c;
   }
-  function eliminaScheda(){
+  async function eliminaScheda(){
     if(_stato.lista.length<2) return;
     var c=attivo();
-    if(!gconfirm('Elimino il capitolato «'+(c.nome||"Capitolato")+'»? Le sue voci, le foto e le firme si perdono.')) return;
+    if(!(await gconfirm('Elimino il capitolato «'+(c.nome||"Capitolato")+'»? Le sue voci, le foto e le firme si perdono.'))) return;
     _stato.lista.splice(_stato.att,1);
     _stato.att=Math.max(0,_stato.att-1);
     caricaForm();
@@ -1056,9 +1056,9 @@
     }).join("")||'<div class="campo-aiuto">Vuota.</div>';
     d.hidden=false;
   }
-  function ripristinaVersione(i){
+  async function ripristinaVersione(i){
     var v=(_stato.ver||[])[i]; if(!v) return;
-    if(!gconfirm("Rimetto nelle caselle la versione di "+quandoVer((v.capitolato&&v.capitolato.aggiornato)||v.creato_il).toLowerCase()+"? Diventa vera solo quando premi «Salva capitolato».")) return;
+    if(!(await gconfirm("Rimetto nelle caselle la versione di "+quandoVer((v.capitolato&&v.capitolato.aggiornato)||v.creato_il).toLowerCase()+"? Diventa vera solo quando premi «Salva capitolato»."))) return;
     _stato.lista=normalizza(v.capitolato); _stato.att=0;
     caricaForm();
     toast("Versione rimessa nelle caselle. Premi «Salva capitolato» per tenerla");
@@ -1507,7 +1507,7 @@
     if(a==="cap-prev-sep"){
       var g=gruppiPreventivo().filter(function(x){ return x.sez&&x.righe.length; });
       if(g.length<2) return;
-      if(!gconfirm("Creo "+g.length+" capitolati, uno per ogni capitolo del preventivo. Continuo?")) return;
+      if(!(await gconfirm("Creo "+g.length+" capitolati, uno per ogni capitolo del preventivo. Continuo?"))) return;
       var corr=sync();
       /* se il capitolato che si vede e' ancora vuoto, viene sostituito dal primo */
       if(corr&&!nonVuoto(pulisci(corr))&&_stato.lista.length===1){ _stato.lista=[]; _stato.att=0; }
@@ -1527,12 +1527,12 @@
     }
     if(a==="cap-firma-del") return cancellaPad(t.dataset.k);
   });
-  document.addEventListener("change",function(e){
+  document.addEventListener("change",async function(e){
     var t=e.target; if(!t||!t.id) return;
     if(t.id==="cp-file"){ if(t.files&&t.files.length) aggiungiAllegati(t.files); return; }
     if(t.id==="cp-modello"){
       var m=MODELLI[t.value]; if(!m) return;
-      if(haQualcosa()&&!gconfirm("Questo modello sostituisce le voci che hai già scritto. Continuo?")){ t.value=""; return; }
+      if(haQualcosa()&&!(await gconfirm("Questo modello sostituisce le voci che hai già scritto. Continuo?"))){ t.value=""; return; }
       riempiVoci(m.voci.map(copiaVoce));
       var nm=el("cp-nome");
       if(nm&&/^Capitolato( \d+)?$/.test(T(nm.value)||"Capitolato")){ nm.value=m.nome.split(" — ")[0]; nomeScheda(); }

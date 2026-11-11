@@ -2362,7 +2362,7 @@
     toast("Capitolo aggiunto ✔");
   }
   async function compCapDel(id){
-    if(!gconfirm("Eliminare questo capitolo?\n\nLe lavorazioni che ci stanno dentro NON si perdono: restano nel computo, in fondo, senza capitolo."))return;
+    if(!(await gconfirm("Eliminare questo capitolo?\n\nLe lavorazioni che ci stanno dentro NON si perdono: restano nel computo, in fondo, senza capitolo.")))return;
     const {error}=await sb.from("gest_computo_capitoli").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     await renderCompVoci(compVociCompId);
@@ -2371,7 +2371,7 @@
   }
   async function compVoceDel(id){
     const v=compVociCache.find(x=>String(x.id)===String(id))||{};
-    if(!gconfirm("Eliminare la lavorazione «"+(v.descrizione||"")+"»?\n\nSe ne vanno anche le sue misure, e non si recupera."))return;
+    if(!(await gconfirm("Eliminare la lavorazione «"+(v.descrizione||"")+"»?\n\nSe ne vanno anche le sue misure, e non si recupera.")))return;
     const {error}=await sb.from("gest_computo_voci").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     await renderCompVoci(compVociCompId);
@@ -2829,7 +2829,7 @@
   }
   async function ppDel(id){
     const x=ppCache.find(v=>String(v.id)===String(id))||{};
-    if(!gconfirm("Togliere «"+(x.descrizione||"")+"» dal tuo prezzario?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano."))return;
+    if(!(await gconfirm("Togliere «"+(x.descrizione||"")+"» dal tuo prezzario?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano.")))return;
     /* .delete() e' quello giusto: js/cestino.js lo trasforma da solo in una
        data su eliminato_il, come per tutte le altre tabelle del gestionale.
        Scriverci la data a mano qui vorrebbe dire avere la regola in due posti. */
@@ -2986,9 +2986,9 @@
        una scelta: il computo esce piu' grande del vero e non se ne accorge
        nessuno, perche' il numero e' verosimile. Qui si chiede, e basta. */
     if(segVal("cm-verso")!=="meno" && /porta|finestr|vuot|foro|fori|apertur|nicchi|detra|luce/i.test(desc)){
-      if(!gconfirm("Questa misura si chiama «"+desc+"»: sembra un vuoto da togliere.\n\n"
+      if(!(await gconfirm("Questa misura si chiama «"+desc+"»: sembra un vuoto da togliere.\n\n"
         +"Così com'è viene SOMMATA, non sottratta.\n\n"
-        +"Vai avanti lo stesso e la aggiungo in più?"))return;
+        +"Vai avanti lo stesso e la aggiungo in più?")))return;
     }
     const bt=$('[data-action="comp-mis-add"]');
     compMisSalvo=true;
@@ -3320,7 +3320,7 @@
        riscritto — la stessa bugia di sopra, ma dentro una domanda a cui si
        risponde sì. Quale riga si sta togliendo si vede già: è quella su cui
        hai premuto la ×. */
-    if(!gconfirm("Tolgo questa riga dal prezzo?"))return;
+    if(!(await gconfirm("Tolgo questa riga dal prezzo?")))return;
     const res=await sb.from("gest_analisi_righe").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}

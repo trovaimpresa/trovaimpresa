@@ -289,7 +289,7 @@
   }
 
   async function versioneNuova(){
-    if(!gconfirm("Mandare la versione nuova? La firma del cliente si toglie e dovrà firmare di nuovo.")) return;
+    if(!(await gconfirm("Mandare la versione nuova? La firma del cliente si toglie e dovrà firmare di nuovo."))) return;
     var up=await sb.from("gest_preventivi_link").update({firmato_il:null,dati:fotografia()})
       .eq("preventivo_id",_inv.p.id).eq("user_id",sbUid).select("*");
     if(up.error||!up.data||!up.data.length){ toast("Non aggiornato: "+((up.error&&up.error.message)||"riprova")); return; }
@@ -412,7 +412,7 @@
   async function smsStato(azione,btn){
     var id=(btn&&btn.dataset&&btn.dataset.sms)||(_inv.sms&&_inv.sms.id);
     if(!id) return;
-    if(azione==="annulla"&&!gconfirm("Annullare questa firma? Il link che hai mandato non varrà più. I crediti non tornano.")) return;
+    if(azione==="annulla"&&!(await gconfirm("Annullare questa firma? Il link che hai mandato non varrà più. I crediti non tornano."))) return;
     if(btn) btn.disabled=true;
     var j=await smsChiama({azione:azione,id:id});
     if(btn) btn.disabled=false;

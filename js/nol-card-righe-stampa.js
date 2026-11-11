@@ -381,8 +381,8 @@
     /* 29/09/2026 — una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
     if(tipo==="fattnol"&&d.sdi_uuid&&d.sdi_stato!=="scartata"){toast("Questa fattura è già partita allo SDI: non si elimina. Per correggerla serve una nota di credito.");return;}
     const come=d.nome||d.descrizione||d.mezzo||"questa scheda";
-    if(!confirm("Eliminare "+t.che.toLowerCase()+" «"+come+"»?\n"+
-                (t.avviso?t.avviso+"\n":"")+cestFrase())) return;
+    if(!(await tiChiedi("Eliminare "+t.che.toLowerCase()+" «"+come+"»?\n"+
+                (t.avviso?t.avviso+"\n":"")+cestFrase()))) return;
     const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     t.ricarica(); renderRiepilogoNegozio(); toast(t.che+(t.femm?" eliminata":" eliminato"));

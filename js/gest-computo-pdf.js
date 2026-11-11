@@ -196,10 +196,10 @@
         : " righe saltate perché senza quantità (di solito sono i totali in fondo)"));
     if(senzaPrezzo) avvisi.push(senzaPrezzo+(senzaPrezzo===1?" senza prezzo":" senza prezzo"));
     if(saltate) avvisi.push(saltate+(saltate===1?" riga saltata perché senza descrizione":" righe saltate perché senza descrizione"));
-    if(!gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
+    if(!(await gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
       +"Entrano con la quantità scritta nel file (le misure pezzo per pezzo non ci sono).\n"
       +(avvisi.length?("\n⚠ "+avvisi.join("\n⚠ ")+"\n"):"")
-      +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")) { toast("Importazione annullata"); return; }
+      +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?"))) { toast("Importazione annullata"); return; }
 
     const messe=await _compScriviVoci(cid,voci);
     if(messe==null)return;
@@ -642,10 +642,10 @@
       });
     });
     if(!voci.length){toast("Non hai segnato nessuna riga: non entra niente.");return;}
-    if(!gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
+    if(!(await gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
       +"Entrano con la quantità scritta nel foglio (le misure pezzo per pezzo non ci sono).\n"
       +(tolte?("\n⚠ "+tolte+(tolte===1?" riga l'hai tolta":" righe le hai tolte")+" e non entra"+(tolte===1?"":"no")+".\n"):"")
-      +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")){toast("Non ho messo dentro niente");return;}
+      +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?"))){toast("Non ho messo dentro niente");return;}
 
     const messe=await _compScriviVoci(cid,voci);
     if(messe==null)return;
@@ -916,11 +916,11 @@
 
     /* ---- 6. si chiede, poi si scrive ---- */
     const restano=aZero.length-pieni.length;
-    if(!gconfirm("Ho trovato il prezzo per "+pieni.length+(pieni.length===1?" lavorazione":" lavorazioni")
+    if(!(await gconfirm("Ho trovato il prezzo per "+pieni.length+(pieni.length===1?" lavorazione":" lavorazioni")
       +" su "+aZero.length+" a 0,00 €.\n\n"
       +"Li prendo da «"+fonte+"», solo dove il codice e l'unità di misura combaciano.\n"
       +(restano?("\nLe altre "+restano+" le lascio a zero e ti dico una per una perché.\n"):"")
-      +"\nI prezzi già scritti non li tocco. Vado?")){toast("Non ho toccato niente");return;}
+      +"\nI prezzi già scritti non li tocco. Vado?"))){toast("Non ho toccato niente");return;}
 
     let messe=0;
     for(let i=0;i<pieni.length;i+=10){

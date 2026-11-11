@@ -815,7 +815,7 @@
     if(prova.error){
       const m=(prova.error.code||"")+" "+(prova.error.message||"");
       if(/PGRST202|Could not find the function|schema cache/i.test(m)){
-        alert("Non ho buttato via niente.\n\nPer poter buttare via un rapportino serve un aggiornamento del database: "
+        tiAvviso("Non ho buttato via niente.\n\nPer poter buttare via un rapportino serve un aggiornamento del database: "
              +"esegui sql/gest-rapportini-cestino.sql su Supabase (SQL Editor → Run) e ricarica questa pagina.");
         return;
       }
@@ -838,7 +838,7 @@
          +", "+_oreTesto(ore)+" in tutto.\nIl margine di questo lavoro cambia.\n\n")
       : "Non ci sono ore attaccate a questo rapportino.\n\n";
     msg+="Se sbagli lo rimetti a posto dal Cestino, e le ore tornano su insieme a lui.";
-    if(!gconfirm(msg))return;
+    if(!(await gconfirm(msg)))return;
 
     const fatto=await sb.rpc("gest_rapportino_cestina",{p_id:id,p_conferma:true});
     if(fatto.error){toast("Non buttato via: "+(fatto.error.message||"errore"));return;}

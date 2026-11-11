@@ -645,8 +645,8 @@
       const tipo=String((dati&&dati.pratica_tipo)||"").trim();
       const desc=String((dati&&dati.descrizione)||"").trim();
       const titolo=titoloScadenza(tipo,desc,pro);
-      if(!gconfirm("Vuoi che ti ricordi la data del "+fdate(data)+"?\n\n"
-        +"Creo la scadenza \""+titolo+"\" collegata a "+(pro?"questa pratica":"questo lavoro")+" e ti avviso per email 30 giorni prima, 7 giorni prima e il giorno prima."))return;
+      if(!(await gconfirm("Vuoi che ti ricordi la data del "+fdate(data)+"?\n\n"
+        +"Creo la scadenza \""+titolo+"\" collegata a "+(pro?"questa pratica":"questo lavoro")+" e ti avviso per email 30 giorni prima, 7 giorni prima e il giorno prima.")))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
         tipo_pratica:pro?"Presentazione pratica":"Consegna lavori",lavoro_id:lavId,
         cliente_id:(dati&&dati.cliente_id)||null,data_scadenza:data,stato:"aperta",avvisa:true};
@@ -680,7 +680,7 @@
       const desc=String((dati&&dati.descrizione)||"").trim();
       const tipo=String((dati&&dati.pratica_tipo)||"").trim();
       const titolo=("Integrazioni "+(tipo?tipo+" ":"")+(desc?"— "+desc:"")).trim();
-      if(!gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi dallo Scadenzario."))return;
+      if(!(await gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi dallo Scadenzario.")))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
         tipo_pratica:"Integrazione richiesta dal Comune",lavoro_id:lavId,
         cliente_id:(dati&&dati.cliente_id)||null,data_scadenza:data,stato:"aperta",avvisa:true};

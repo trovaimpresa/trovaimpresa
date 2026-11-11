@@ -100,7 +100,7 @@
 
   .ai-str-riga{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px}
   .ai-str-mk{flex:0 0 auto;background:var(--blu-tenue);color:var(--blu-scuro);
-    font-size:13px;font-weight:800;letter-spacing:.6px;padding:5px 10px;border-radius:8px}
+    font-size:14px;font-weight:800;letter-spacing:.6px;padding:5px 10px;border-radius:8px}
   .ai-str--pochi  .ai-str-mk{background:var(--attesa-bg);color:var(--attesa)}
   .ai-str--spenta .ai-str-mk{background:var(--sfondo);color:var(--testo-3)}
   .ai-str-txt{flex:1 1 200px;font-size:15px;color:var(--testo-2);line-height:1.4}
@@ -144,7 +144,7 @@
   .ai-str-c{min-width:140px}
   .ai-str-cn{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.1;color:var(--testo)}
   .ai-str-ce{font-size:14px;font-weight:600;color:var(--testo-2);margin-top:2px}
-  .ai-str-cx{font-size:13px;color:var(--testo-3);margin-top:1px}
+  .ai-str-cx{font-size:14px;color:var(--testo-3);margin-top:1px}
 
   .ai-str-tit{font-size:16px;font-weight:800;color:var(--testo);margin-bottom:10px}
   .ai-str-posti{list-style:none;margin:0;padding:0;display:grid;
@@ -154,8 +154,8 @@
     border-radius:var(--r);padding:14px 16px}
   .ai-str-pt{font-size:15px;font-weight:800;color:var(--testo);margin-bottom:4px}
   .ai-str-pc{font-size:14px;color:var(--testo-2);line-height:1.5}
-  .ai-str-pd{font-size:13.5px;color:var(--testo-3);line-height:1.5;margin-top:6px}
-  .ai-str-pp{font-size:13px;font-weight:700;color:var(--blu-scuro);
+  .ai-str-pd{font-size:14px;color:var(--testo-3);line-height:1.5;margin-top:6px}
+  .ai-str-pp{font-size:14px;font-weight:700;color:var(--blu-scuro);
     background:var(--blu-tenue);display:inline-block;padding:3px 9px;
     border-radius:20px;margin-top:8px}
   .ai-str-b{margin-top:10px;display:block;width:100%;background:var(--blu);color:#fff;
@@ -189,15 +189,15 @@
     font-family:inherit;text-align:left}
   .ai-riga-apri:hover{background:var(--blu-tenue)}
   .ai-riga-mk{flex:0 0 auto;background:var(--blu-tenue);color:var(--blu-scuro);
-    font-size:13px;font-weight:800;letter-spacing:.6px;padding:3px 8px;border-radius:6px}
+    font-size:14px;font-weight:800;letter-spacing:.6px;padding:3px 8px;border-radius:6px}
   .ai-riga--aperta .ai-riga-mk{background:var(--blu);color:#fff}
   .ai-riga-t{flex:1 1 auto;font-size:14px;font-weight:700;color:var(--testo-2)}
   .ai-riga--aperta .ai-riga-t{color:var(--testo)}
-  .ai-riga-c{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--testo-3)}
+  .ai-riga-c{flex:0 0 auto;font-size:14px;font-weight:700;color:var(--testo-3)}
 
   .ai-riga-giu{padding:0 13px 13px}
   .ai-riga-giu[hidden]{display:none}
-  .ai-riga-lab{display:block;font-size:13px;font-weight:600;
+  .ai-riga-lab{display:block;font-size:14px;font-weight:600;
     color:var(--testo-2);margin-bottom:5px}
   .ai-riga-giu textarea{width:100%;font-family:inherit;font-size:15px;
     line-height:1.5;color:var(--testo);background:var(--card);
@@ -210,7 +210,7 @@
     padding:11px 18px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
   .ai-riga-go:hover{background:var(--blu-hover)}
   .ai-riga-go:disabled{background:var(--bordo-forte);cursor:not-allowed}
-  .ai-riga-st{flex:1 1 200px;font-size:13.5px;line-height:1.45;color:var(--testo-2)}
+  .ai-riga-st{flex:1 1 200px;font-size:14px;line-height:1.45;color:var(--testo-2)}
   .ai-riga-st--ok{color:var(--ok);font-weight:600}
   .ai-riga-st--err{color:var(--err);font-weight:600}
 
@@ -916,7 +916,7 @@
   /* 12 agosto 2026 (sera) — era 12,5 px: l'unico testo di tutto il gestionale
      sotto la soglia dei 13. Sta scritto in cima alla pagina («Reparto attivo»)
      su fondo blu, che e' gia' il caso peggiore da leggere. 13,5 px. */
-  .tb-id .tb-sub{display:block;font-size:13.5px;font-weight:500;color:#C8DFF8;line-height:1.35}
+  .tb-id .tb-sub{display:block;font-size:14px;font-weight:500;color:#C8DFF8;line-height:1.35}
   .tb-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
   .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
     height:34px;padding:0 12px;border:none;border-radius:var(--r);
@@ -3574,7 +3574,7 @@ body:has(#ti-fondatore) .sheet--grande{
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:3px; min-height:56px; padding:6px 2px;
     background:none; border:none; border-radius:10px;
-    font-family:inherit; font-size:13px; font-weight:600;
+    font-family:inherit; font-size:14px; font-weight:600;
     color:var(--testo-2); cursor:pointer; line-height:1.15;
     overflow:hidden;
   }
@@ -5917,4 +5917,12 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
    reparti (barra in alto) e dentro il menu ☰ quando lo apri. */
 @media(max-width:880px){
   #appview aside.side:not(.open) #anche-pro-lato{ display:none !important; }
+}
+
+/* 11 nov 2026 — scritte della barra in basso a 14 px (regola 18). A 14 px
+   «Preventivi» non ci stava piu' (usciva «Prevent…»): via i 2 px di bordo
+   interno e lettere appena piu' strette, cosi' ci sta anche su un 360. */
+@media(max-width:880px){
+  .barra-basso button{ padding-left:0; padding-right:0; }
+  .barra-basso button span{ letter-spacing:-.3px; }
 }

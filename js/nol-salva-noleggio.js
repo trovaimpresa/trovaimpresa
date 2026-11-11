@@ -28,7 +28,7 @@
     const gia=$("#nn-effettivo")&&$("#nn-effettivo").value;
     if(bloccato&&!gia){
       toast("Non si può: "+(mSel.nome||"questo mezzo")+" "+bloccato);
-      alert("Questo mezzo non si può noleggiare.\n\n"+(mSel.nome||"Il mezzo")+" "+bloccato+".\n\n"
+      tiAvviso("Questo mezzo non si può noleggiare.\n\n"+(mSel.nome||"Il mezzo")+" "+bloccato+".\n\n"
            +"Apri la scheda del mezzo e mettila a posto: la data dell'ultima verifica periodica, "
            +"l'assicurazione, oppure togli la spunta «Fuori servizio».");
       return;
@@ -41,7 +41,7 @@
        del «il cliente richiama venerdi». */
     if((segVal("nn-fase")||"fuori")!=="prenotato" && !$("#nn-uscita").value){
       toast("Manca la data di uscita");
-      alert("Manca la data di uscita.\n\n"
+      tiAvviso("Manca la data di uscita.\n\n"
         +"Un noleggio già fuori o già rientrato senza data di uscita fa uscire "
         +"il contratto e il DDT senza data, e il conto non si può fare.\n\n"
         +"Se il mezzo non è ancora partito, mettilo su «Prenotato».");
@@ -64,8 +64,8 @@
     if(altri.length){
       const elenco=altri.map(x=>"· "+(x.cliente||"un altro cliente")+", dal "+fdate(x.data_uscita)+
         (x.data_rientro_prevista?" al "+fdate(x.data_rientro_prevista):" (senza rientro previsto)")).join("\n");
-      if(!confirm("Questo mezzo è già impegnato in quei giorni:\n\n"+elenco+
-                  "\n\nSalvare lo stesso?")) return;
+      if(!(await tiChiedi("Questo mezzo è già impegnato in quei giorni:\n\n"+elenco+
+                  "\n\nSalvare lo stesso?"))) return;
     }
     const nomeM=selM.selectedOptions[0]?selM.selectedOptions[0].dataset.nome:"";
     const nomeC=selC.selectedOptions[0]?selC.selectedOptions[0].dataset.nome:"";
@@ -80,8 +80,8 @@
       const totS=_cent(conto.totaleEuro);
       if(Math.abs(impS-totS)>=0.005){
         const d=_cent(impS-totS);
-        if(!confirm("Stai facendo pagare "+_eur(impS)+", ma il conto dice "+_eur(totS)+".\n\n"
-          +"Sono "+_eur(Math.abs(d))+(d>0?" in più":" in meno")+".\n\nVa bene così?")) return;
+        if(!(await tiChiedi("Stai facendo pagare "+_eur(impS)+", ma il conto dice "+_eur(totS)+".\n\n"
+          +"Sono "+_eur(Math.abs(d))+(d>0?" in più":" in meno")+".\n\nVa bene così?"))) return;
       }
     }
 
@@ -144,7 +144,7 @@
        dire non poter rispondere, fra un anno, a chi te lo chiede. */
     if(cauChiusa&&($("#nn-cau-rest")&&$("#nn-cau-rest").value==="")&&
        ($("#nn-cau-tratt")&&$("#nn-cau-tratt").value==="")){
-      if(!confirm("Stai chiudendo la cauzione senza scrivere quanto hai restituito.\n\nSalvare lo stesso?")) return;
+      if(!(await tiChiedi("Stai chiudendo la cauzione senza scrivere quanto hai restituito.\n\nSalvare lo stesso?"))) return;
     }
     const scrivi=(d)=>id
       ? sb.from("nol_noleggi").update(d).eq("id",id).eq("user_id",sbUid)

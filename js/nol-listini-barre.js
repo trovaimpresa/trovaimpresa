@@ -116,6 +116,24 @@
   const NOL_BARRA_DI={};
   NOL_BARRE.forEach(b=>{NOL_BARRA_DI[b[0]]=b;});
 
+  /* il menu «⋯» delle sezioni del noleggio (11 nov 2026) */
+  (function(){
+    if(document.getElementById("nol-piu-css"))return;
+    const st=document.createElement("style"); st.id="nol-piu-css";
+    st.textContent='.nol-piu{position:relative;display:inline-block;flex:none}'
+      +'.nol-piu>summary{list-style:none;cursor:pointer;min-width:52px;min-height:48px;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;line-height:1;padding:0 14px}'
+      +'.nol-piu>summary::-webkit-details-marker{display:none}'
+      +'.nol-piu-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:50;min-width:260px;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.22);padding:6px}'
+      +'.nol-piu-menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:12px 14px;border:0;background:#fff;border-radius:10px;font:inherit;font-size:17px;font-weight:700;color:#0a2a4d;text-align:left;cursor:pointer}'
+      +'.nol-piu-menu button:hover{background:#eaf2ff;color:#0047b3}';
+    document.head.appendChild(st);
+    document.addEventListener("click",function(e){
+      document.querySelectorAll(".nol-piu[open]").forEach(function(d){
+        if(!d.contains(e.target)||e.target.closest(".nol-piu-menu button"))d.removeAttribute("open");
+      });
+    });
+  })();
+
   function nolMettiBarre(){
     NOL_BARRE.forEach(([sez,tipo,invito,idCorpo])=>{
       const box=$("#"+(idCorpo||sez+"-body"));
@@ -124,7 +142,10 @@
       barra.className="nol-barra"; barra.id="barra-"+sez;
       barra.innerHTML='<input type="search" class="nol-cerca" data-cerca="'+sez+'" '+
         'autocomplete="off" spellcheck="false" placeholder="'+esc(invito)+'">'+
-        '<button type="button" class="btn add" data-action="nol-esporta" data-s="'+sez+'">&#11015; Scarica per Excel</button>'+
+        /* 11 nov 2026 — «Scarica per Excel» non sta piu' in vista in ogni
+           sezione: e' dentro il menu «⋯» (regola 7: si sposta, non si cancella) */
+        '<details class="nol-piu"><summary class="btn" aria-label="Altre azioni" title="Altre azioni">&#8943;</summary>'+
+        '<div class="nol-piu-menu"><button type="button" data-action="nol-esporta" data-s="'+sez+'">&#11015; Scarica per Excel</button></div></details>'+
         '<span class="nol-conta" id="conta-'+sez+'"></span>';
       /* ⚠️ la barra va SUBITO SOPRA L'ELENCO, non sotto il titolo: cosi'
          sta attaccata alla cosa che filtra, anche dove in mezzo ci sono la

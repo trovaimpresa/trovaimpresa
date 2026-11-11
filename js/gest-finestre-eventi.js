@@ -75,7 +75,7 @@
     t.click();
   });
 
-  document.addEventListener("click",e=>{
+  document.addEventListener("click",async e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
     /* i pulsanti in fondo alla finestra: prima si chiude, poi si fa.
@@ -108,12 +108,12 @@
     if(a==="verbale")return verbaleForm(id);
     if(a==="verbale-pdf")return verbalePdf(id);
     if(a==="ore-add")return oreAdd();
-    if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
+    if(a==="ore-del"){if((await gconfirm("Eliminare questa riga di ore?")))return oreDel(id);return;}
     if(a==="rap-del")return rapCestina(id);   /* la domanda la fa lui: gli serve il numero delle ore */
     if(a==="asst-invia")return asstInvia();
     if(a==="asst-allega")return asstScegliFile();
     if(a==="asst-togli-file")return asstTogliFile();
-    if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
+    if(a==="spesa-del"){if((await tiChiedi("Eliminare questa spesa?")))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();
     if(a==="new-computo")return computoForm(null);
@@ -253,7 +253,7 @@
     if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
     if(a==="prev-to-fatt")return fattDaPreventivoId(id);
-    if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
+    if(a==="del-prev"){if((await gconfirm("Eliminare questo preventivo?")))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevControllaEManda(id);
     if(a==="prev-incarico")return incaricoForm(id);
     if(a==="incarico-pdf")return incaricoPdf(id);
@@ -558,7 +558,7 @@
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
-    if(a==="del-foto"){if(confirm("Eliminare questa foto?"))deleteFoto(t.dataset.id);return;}
+    if(a==="del-foto"){if((await tiChiedi("Eliminare questa foto?")))deleteFoto(t.dataset.id);return;}
     if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;segmOn("#gal-tipo",t.dataset.v);renderGalleria();return;}
     if(a==="gal-media"){galFilter.media=t.dataset.v;segmOn("#gal-media",t.dataset.v);renderGalleria();return;}
     if(a==="gal-nuovo"){galCaricaLavori().then(galUploadForm);return;}
@@ -574,8 +574,8 @@
       return;
     }
     if(a==="gal-carica")return galCarica();
-    if(a==="gal-del-foto"){if(confirm("Eliminare questa foto?"))galDelFoto(t.dataset.id);return;}
-    if(a==="gal-del-video"){if(confirm("Eliminare questo video?"))galDelVideo(t.dataset.id);return;}
+    if(a==="gal-del-foto"){if((await tiChiedi("Eliminare questa foto?")))galDelFoto(t.dataset.id);return;}
+    if(a==="gal-del-video"){if((await tiChiedi("Eliminare questo video?")))galDelVideo(t.dataset.id);return;}
     if(a==="gal-play"){const u=galVideoCache[t.dataset.id];if(u)window.open(u,"_blank");else toast("Video non ancora pronto, riprova tra un attimo");return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
     /* 6 set 2026 — le due linguette di Agenda operatore: «Da fare» e «Ore fatte» */
@@ -601,9 +601,9 @@
        avrebbe tolto il lavoro dallo schermo lasciandolo su Supabase. Quella
        vera e' "del-job-supa". */
     if(a==="del-job-supa"){
-      if(!gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
+      if(!(await gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
           ? "Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto."
-          : "Eliminare questo lavoro? L'azione non si può annullare."))return;
+          : "Eliminare questo lavoro? L'azione non si può annullare.")))return;
       const {data:foto}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",id).eq("user_id",sbUid);
       /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
       if(foto&&foto.length&&!(window.cestinoAttivo&&window.cestinoAttivo())){
@@ -718,10 +718,10 @@
          fornitore. E tornano su insieme al mezzo, perché CEST_FIGLI adesso
          sa che sono figlie sue. */
       const {count:nSc}=await sb.from("gest_scadenze").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("mezzo_id",id);
-      if(!gconfirm(
+      if(!(await gconfirm(
           (usi?`Questo mezzo è collegato a ${usi} lavori. `:"")
           +(nSc?`Ha ${nSc} ${nSc===1?"scadenza":"scadenze"} (revisione, assicurazione, bollo…): ${nSc===1?"va":"vanno"} nel Cestino insieme a lui e ${nSc===1?"torna":"tornano"} se lo rimetti a posto.\n\n`:"")
-          +"Eliminare questo mezzo?"))return;
+          +"Eliminare questo mezzo?")))return;
       const {data,error}=await sb.from("gest_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
@@ -743,7 +743,7 @@
     if(a==="lm-add")return mezzoLavoroAdd();
     if(a==="lm-del"){
       if(!sbUid){toast("Devi essere loggato");return;}
-      if(!confirm("Togliere questo mezzo dal lavoro?"))return;
+      if(!(await tiChiedi("Togliere questo mezzo dal lavoro?")))return;
       const {data,error}=await sb.from("gest_lavoro_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non rimosso: nessuna riga eliminata");return;}
@@ -758,7 +758,7 @@
          della scadenza si riscrive quello della pratica, e quello che c'era
          scritto e non ancora salvato va perso. Prima non lo diceva nessuno
          (il commento qui sopra sosteneva pure il contrario). Ora si avvisa. */
-      if(!gconfirm("Apro il modulo della scadenza al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?"))return;
+      if(!(await gconfirm("Apro il modulo della scadenza al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
       const lavId=id;
       const l=(lavCache||[]).find(x=>String(x.id)===String(lavId));
       return scadForm(null,{lavoro_id:lavId,cliente_id:(l&&l.cliente_id)||null});
@@ -830,7 +830,7 @@
       renderScadenze();rinfresca("riepilogo","calendario");
       toast(v==="fatta"?("Scadenza completata ✔"+_rip):"Riaperta");return;
     }
-    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();rinfresca("calendario","riepilogo");toast("Scadenza eliminata");}return;}
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if((await gconfirm("Eliminare questa scadenza?"))){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();rinfresca("calendario","riepilogo");toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-edit")return squadraApri(id);
@@ -840,7 +840,7 @@
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="sq-revoca"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
-      if(!gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale."))return;
+      if(!(await gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale.")))return;
       const {data:okRev,error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
@@ -876,7 +876,7 @@
     if(a==="del-forn"){
       if(!sbUid){toast("Devi essere loggato");return;}
       const nf=fattfCache.filter(x=>String(x.fornitore_id)===String(id)).length;
-      if(!gconfirm(nf?`Eliminare questo fornitore? Verranno eliminate anche le sue ${nf} fatture registrate.`:"Eliminare questo fornitore?"))return;
+      if(!(await gconfirm(nf?`Eliminare questo fornitore? Verranno eliminate anche le sue ${nf} fatture registrate.`:"Eliminare questo fornitore?")))return;
       const {data:okDf2,error}=await sb.from("gest_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDf2||!okDf2.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
@@ -891,7 +891,7 @@
     if(a==="save-fattf")return saveFattf(id||null);
     if(a==="del-fattf"){
       if(!sbUid){toast("Devi essere loggato");return;}
-      if(!gconfirm("Eliminare questa fattura?"))return;
+      if(!(await gconfirm("Eliminare questa fattura?")))return;
       const {data:okDff,error}=await sb.from("gest_fatture_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDff||!okDff.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
@@ -911,7 +911,7 @@
     if(a==="quick-cli"){
       /* stesso motivo di scad-da-pratica: la finestra è una sola e questa
          prende il posto di quella aperta (9/8/2026) */
-      if(!gconfirm("Apro il modulo del cliente al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?"))return;
+      if(!(await gconfirm("Apro il modulo del cliente al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?")))return;
       return cliForm(null);
     }
     if(a==="close")return closeSheet();

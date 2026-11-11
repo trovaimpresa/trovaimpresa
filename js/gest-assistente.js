@@ -102,7 +102,7 @@
   function allaChat(testo) {
     testo = String(testo || '').trim();
     if (!testo) { var t = $('ass-testo'); if (t) t.focus(); return; }
-    if (!vai('chat')) { alert('La chat non è disponibile: ricarica la pagina.'); return; }
+    if (!vai('chat')) { tiAvviso('La chat non è disponibile: ricarica la pagina.'); return; }
     var fine = Date.now() + 5000;
     (function prova() {
       var c = $('chat-domanda'), m = $('chat-manda');

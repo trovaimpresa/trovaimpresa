@@ -53,7 +53,7 @@
   var css = ''
     + '#gv-btn{position:fixed;right:22px;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;'
     +   'background:var(--blu,#0066FF);color:#fff;border:0;border-radius:40px;padding:16px 24px;'
-    +   'font-size:21px;font-weight:700;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer;transition:bottom .2s ease}'
+    +   'font-size:21px;font-weight:700;font-family:"IBM Plex Sans",Inter,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer}'
     + '#gv-btn svg,#gv-foto svg{width:26px;height:26px;flex:none}'
     + '#gv-foto{position:fixed;bottom:22px;z-index:800;display:flex;align-items:center;gap:10px;background:#fff;color:var(--blu,#0066FF);'
     +   'border:2px solid var(--blu,#0066FF);border-radius:40px;padding:14px 22px;font-size:21px;font-weight:700;'

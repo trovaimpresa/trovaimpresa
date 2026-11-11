@@ -121,7 +121,14 @@
   /* Solo professionista: i testi dei toast/confirm passano dalla mappa _FRASI (un solo punto qui).
      Artigiano e negozio restano invariati. Non tocca il contenuto utente già interpolato (numeri, nomi). */
   function _msgPro(m){return ruoloUtente==='professionista'?_swapPratiche(String(m)):m;}
-  function gconfirm(m){return confirm(_msgPro(m));}
+  /* 11 nov 2026 — la finestra nostra (js/ti-finestra.js) al posto di quella
+     grigia del browser. Da' una Promise: chi la usa scrive `await gconfirm(...)`. */
+  function gconfirm(m){
+    m=_msgPro(m);
+    const via=/^(elimin|butt|togli|cancell|rimuov)/i.test(String(m).trim());
+    if(typeof window.tiChiedi!=="function")return Promise.resolve(window.confirm(m));
+    return window.tiChiedi(m,{si:via?"Sì, elimina":"Sì",no:"No",rosso:via});
+  }
 
   /* Passo 1 separazione reparti: ogni panel ha un mestiere_id (gest_mestieri) */
   let mestieriBackfilled=false;

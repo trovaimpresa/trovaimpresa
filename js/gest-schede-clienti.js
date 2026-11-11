@@ -868,7 +868,7 @@
           ? "\n\nFinisce nel Cestino e puoi rimetterlo a posto; "+restano.join(" e ")+" restano."
           : "\n\nEliminarlo comunque?")
       : "Eliminare questo cliente?";
-    if(!gconfirm(msg))return;
+    if(!(await gconfirm(msg)))return;
     const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}

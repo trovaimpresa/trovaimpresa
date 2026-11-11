@@ -867,7 +867,7 @@
     const tot=_scLav?_cent2(_somma-_scLav):_somma;
 
     if(!candidate.length){
-      if(!gconfirm("Il cliente ha accettato? Creo "+(pro?"la pratica":"il lavoro")+" dal preventivo N. "+p.numero+"."))return;
+      if(!(await gconfirm("Il cliente ha accettato? Creo "+(pro?"la pratica":"il lavoro")+" dal preventivo N. "+p.numero+".")))return;
       return _prevCreaLavoro(id,p,tot);
     }
     /* c'e' già qualcosa aperto per quel cliente: si sceglie */
@@ -1090,7 +1090,7 @@
      quindi l'await deve stare qui dentro */
   async function delCred(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!gconfirm("Eliminare questo corso dal registro?"))return;
+    if(!(await gconfirm("Eliminare questo corso dal registro?")))return;
     const {data,error}=await sb.from("gest_crediti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}

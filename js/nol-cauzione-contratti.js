@@ -258,7 +258,7 @@
      stampava lo stesso. Adesso chiede, come già fa per un mezzo promesso
      due volte: si può stampare uguale — capita di riempirla a mano davanti
      al cliente — ma sapendo cosa manca. */
-  function nolContrattoPronto(n){
+  async function nolContrattoPronto(n){
     const chi=(Array.isArray(n&&n.operatori)?n.operatori:[])
       .filter(o=>o&&o.nome&&String(o.nome).trim());
     const manca=[];
@@ -266,14 +266,14 @@
     if(!(n&&n.contratto_num&&String(n.contratto_num).trim()))
       manca.push("· il numero del contratto");
     if(!manca.length) return true;
-    return confirm("Il contratto non è completo. Manca:\n\n"+manca.join("\n")+
-      "\n\nStamparlo lo stesso?");
+    return (await tiChiedi("Il contratto non è completo. Manca:\n\n"+manca.join("\n")+
+      "\n\nStamparlo lo stesso?"));
   }
 
   async function nolContrattoStampa(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     n=await nolContrattoNumero(n);
-    if(!nolContrattoPronto(n)) return;
+    if(!(await nolContrattoPronto(n))) return;
     return nolDocStampa(await nolContrattoDati(n));
   }
   function nolDocStampa(dati){
@@ -352,7 +352,7 @@
   async function nolContrattoPdf(n){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     n=await nolContrattoNumero(n);
-    if(!nolContrattoPronto(n)) return;
+    if(!(await nolContrattoPronto(n))) return;
     return nolDocPdf(await nolContrattoDati(n));
   }
   function nolDocPdf(dati){

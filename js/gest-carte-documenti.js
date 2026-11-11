@@ -89,9 +89,9 @@
   }
   async function delCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
+    if(!(await gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
         ? "Eliminare questa carta? Finisce nel Cestino e puoi rimetterla a posto. I movimenti restano registrati."
-        : "Eliminare questa carta? Anche i movimenti registrati andranno persi."))return;
+        : "Eliminare questa carta? Anche i movimenti registrati andranno persi.")))return;
     const {data,error}=await sb.from("gest_carte").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminata: nessuna riga rimossa");return;}
@@ -168,7 +168,7 @@
   }
   async function eliminaMovimentoCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!gconfirm("Eliminare questo movimento?"))return;
+    if(!(await gconfirm("Eliminare questo movimento?")))return;
     const {data,error}=await sb.from("gest_carte_movimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
@@ -320,7 +320,7 @@
 
   async function eliminaRifornimento(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!gconfirm("Eliminare questo pieno?"))return;
+    if(!(await gconfirm("Eliminare questo pieno?")))return;
     const r=rifCache.find(x=>String(x.id)===String(id));
     const {data,error}=await sb.from("gest_rifornimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
@@ -403,7 +403,7 @@
     await renderDocLavoro(docLavId);
   }
   async function lavDocElimina(id){
-    if(!gconfirm("Eliminare questo documento?"))return;
+    if(!(await gconfirm("Eliminare questo documento?")))return;
     const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
     /* la .select('id') fa da cancello: se la RLS blocca, PostgREST tocca zero
        righe e risponde OK — senza questo si direbbe «eliminato» a vuoto. */

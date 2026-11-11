@@ -210,7 +210,7 @@
   async function elimina(id) {
     const r = _lista.find(function (x) { return String(x.id) === String(id); });
     if (!r) return;
-    if (!gconfirm("Elimino la ricevuta N. " + r.numero + "/" + r.anno + " di " + (r.cli_nome || "") + "?")) return;
+    if (!(await gconfirm("Elimino la ricevuta N. " + r.numero + "/" + r.anno + " di " + (r.cli_nome || "") + "?"))) return;
     const { error } = await sb.from(TAB).update({ eliminato_il: new Date().toISOString() }).eq("id", id).eq("user_id", sbUid);
     if (error) { toast("Non eliminata: " + error.message); return; }
     toast("Ricevuta eliminata");

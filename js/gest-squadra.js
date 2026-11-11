@@ -894,7 +894,7 @@ ${vecchi?`
     if(incerto)msg+="ATTENZIONE: non sono riuscito a controllare tutto, la connessione non ha risposto.\n\n";
     if(acc)msg+="Perde anche l'accesso al gestionale dal telefono.\n\n";
     msg+=fraseCestino()+"\n\nContinuare?";
-    if(!gconfirm(msg))return;
+    if(!(await gconfirm(msg)))return;
     /* ===== 12 agosto 2026 (notte) — L'ACCESSO DAL TELEFONO =====
        Prima qui c'era una riga sola, dentro un try/catch che non serviva a
        niente: Supabase su errore NON lancia, restituisce {error}, e quell'error
@@ -910,7 +910,7 @@ ${vecchi?`
        Adesso: la revoca si controlla davvero e, se non riesce, NON si elimina
        nessuno. E se e' la cancellazione a fallire, l'accesso torna com'era. */
     if(!membroLetto){
-      alert("Non ho eliminato «"+nome+"».\n\nNon sono riuscito a controllare se ha l'accesso "
+      tiAvviso("Non ho eliminato «"+nome+"».\n\nNon sono riuscito a controllare se ha l'accesso "
         +"al gestionale dal telefono: la connessione non ha risposto.\n\nNon elimino nessuno "
         +"finché non lo so: se ce l'avesse, resterebbe dentro e tu non la vedresti più in "
         +"elenco per fermarla. Riprova fra un momento.");
@@ -920,14 +920,14 @@ ${vecchi?`
       const rev=await sb.from("gest_membri").update({stato:"revocato"})
         .eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
       if(rev&&rev.error){
-        alert("Non ho eliminato «"+nome+"».\n\nNon sono riuscito a togliergli l'accesso dal "
+        tiAvviso("Non ho eliminato «"+nome+"».\n\nNon sono riuscito a togliergli l'accesso dal "
           +"telefono: "+(rev.error.message||"la connessione non ha risposto")+"\n\nSe la "
           +"eliminassi adesso, continuerebbe a entrare dal telefono e tu non la vedresti "
           +"più in elenco per fermarla. Riprova fra un momento.");
         return;
       }
       if(!(rev&&rev.data&&rev.data.length)){
-        alert("Non ho eliminato «"+nome+"».\n\nHo provato a togliergli l'accesso dal telefono "
+        tiAvviso("Non ho eliminato «"+nome+"».\n\nHo provato a togliergli l'accesso dal telefono "
           +"ma non ho trovato nessuna riga da cambiare. Prima usa «🚫 Rimuovi accesso» sulla "
           +"sua scheda, controlla che diventi «Nessun accesso», poi rielimina.");
         return;
@@ -948,7 +948,7 @@ ${vecchi?`
     if(error||!ok||!ok.length){
       const tornato=await _rimettiAccesso();
       const perche=error?(error.message||"errore"):"non ho trovato nessuna riga da eliminare";
-      alert("«"+nome+"» NON è stata eliminata: "+perche+"\n\n"
+      tiAvviso("«"+nome+"» NON è stata eliminata: "+perche+"\n\n"
         +(tornato
           ? "L'accesso dal telefono è rimasto com'era. Riprova fra un momento."
           : "⚠️ ATTENZIONE: le avevo già tolto l'accesso dal telefono e non sono riuscito a "

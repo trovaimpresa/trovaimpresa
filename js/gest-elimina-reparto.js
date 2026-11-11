@@ -138,14 +138,14 @@
        ⚠️ E' la stessa famiglia della bugia del 12 agosto («sono gia' nel
           Cestino, vai a riprenderle» quando non c'erano). */
     if(!sb||!sbUid){
-      alert("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
+      tiAvviso("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
         +"Non risulti collegato: senza collegamento posso toglierlo da questa "
         +"schermata, ma nel database resterebbe — e ricomparirebbe alla "
         +"prossima apertura.\n\nRientra da trovaimpresa.com e riprova.");
       return;
     }
     if(!p.mestiere_id){
-      alert("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
+      tiAvviso("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
         +"Questa scheda ha perso il collegamento con il database: se la "
         +"togliessi dallo schermo tornerebbe alla prossima apertura.\n\n"
         +"Ricarica la pagina (Ctrl+F5) e riprova. Se torna anche dopo, "
@@ -171,7 +171,7 @@
     if(sb&&sbUid&&p.mestiere_id){
       const bloccanti=repartoBloccanti(dentro.righe);
       if(bloccanti.length){
-        alert("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
+        tiAvviso("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
           +"Su queste parti il Cestino non è ancora installato, e per non perdere "
           +"niente per sempre l'eliminazione è bloccata:\n  •  "+bloccanti.join("\n  •  ")
           +"\n\nEsegui i file della cartella sql/ su Supabase e riprova.");
@@ -187,7 +187,7 @@
     msg+=conCestino
       ? "Va tutto nel Cestino: se sbagli puoi rimetterlo a posto da lì.\n\nContinuare?"
       : "ATTENZIONE: il Cestino non è attivo. Sparisce tutto per sempre e non si può tornare indietro.\n\nContinuare?";
-    if(!gconfirm(msg))return;
+    if(!(await gconfirm(msg)))return;
 
     if(sb&&sbUid&&p.mestiere_id){
       /* ===== 12 agosto 2026 (sera) — LA PROMESSA ADESSO E' VERA =====

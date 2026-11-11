@@ -598,7 +598,7 @@
   }
 
   async function salElimina(id){
-    if(!gconfirm("Buttare questo stato di avanzamento nel cestino?"))return;
+    if(!(await gconfirm("Buttare questo stato di avanzamento nel cestino?")))return;
     const res=await sb.from("gest_sal").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
@@ -714,7 +714,7 @@
     const rs=await sb.from("gest_sal").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     if(rs.error){toast("Non riesco a leggere lo stato di avanzamento: "+rs.error.message);return;}
     const s=rs.data; if(!s){toast("Stato di avanzamento non trovato");return;}
-    if(s.fattura_id&&!gconfirm("Da questo stato di avanzamento hai già creato una fattura.\n\nSe ne fai un'altra stai chiedendo due volte gli stessi soldi.\n\nNe faccio un'altra lo stesso?"))return;
+    if(s.fattura_id&&!(await gconfirm("Da questo stato di avanzamento hai già creato una fattura.\n\nSe ne fai un'altra stai chiedendo due volte gli stessi soldi.\n\nNe faccio un'altra lo stesso?")))return;
 
     const rcp=await sb.from("gest_computi").select("*").eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
     if(rcp.error){toast("Non riesco a leggere il computo: "+rcp.error.message);return;}
@@ -1193,7 +1193,7 @@
   }
   async function delPrezzo(id){
     const x=pzCache.find(v=>String(v.id)===String(id))||{};
-    if(!gconfirm((_cestOn()?"Mettere «":"Eliminare «")+(x.descrizione||"")+"»?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano."))return;
+    if(!(await gconfirm((_cestOn()?"Mettere «":"Eliminare «")+(x.descrizione||"")+"»?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano.")))return;
     const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     closeSheet();
@@ -1323,10 +1323,10 @@
       const pr=(function(){for(let i=0;i<Math.min(righe.length,10);i++){
         const r=righe[i]||[];if(r.some(c=>String(c||"").trim()))return r;}return [];})();
       const mostra=(i,lab)=>lab+": "+(String((pr[i]!=null?pr[i]:"")).trim()||"(vuoto)");
-      if(!gconfirm("Il file non ha una riga di intestazione riconoscibile.\n\n"
+      if(!(await gconfirm("Il file non ha una riga di intestazione riconoscibile.\n\n"
         +"Leggo le colonne in quest'ordine, e la prima riga verrebbe fuori così:\n\n"
         +mostra(0,"Codice")+"\n"+mostra(1,"Descrizione")+"\n"+mostra(2,"Unità")+"\n"+mostra(3,"Prezzo")
-        +"\n\nSe non è così, annulla: metti nel file una riga con scritto Codice, Descrizione, U.M., Prezzo e riprova.\n\nVado avanti?")){
+        +"\n\nSe non è così, annulla: metti nel file una riga con scritto Codice, Descrizione, U.M., Prezzo e riprova.\n\nVado avanti?"))){
         _pzEsito("Importazione annullata. Aggiungi al file una riga di intestazione con <b>Codice · Descrizione · U.M. · Prezzo</b> e riprova.","err");
         return;
       }
@@ -1529,7 +1529,7 @@
     const c=compCache.find(x=>String(x.id)===String(id));
     if(!c){toast("Computo non trovato");return;}
     if(c.preventivo_id){
-      if(!gconfirm("Da questo computo hai già creato un preventivo.\n\nNe faccio un altro?"))return;
+      if(!(await gconfirm("Da questo computo hai già creato un preventivo.\n\nNe faccio un altro?")))return;
     }
     compPrevInCorso=true;
     const _btPrev=$('[data-action="comp-prev"]');
@@ -1576,9 +1576,9 @@
     const senzaMisure=voci.filter(v=>!(Math.round((+v.quantita||0)*1000)/1000));
     if(senzaMisure.length){
       const q=senzaMisure.length;
-      if(!gconfirm(q===1
+      if(!(await gconfirm(q===1
         ? "La lavorazione «"+String(senzaMisure[0].descrizione||"senza descrizione").slice(0,60)+"» non ha ancora le misure, quindi vale 0 €.\n\nNel preventivo non la porto: se ci finisse, il cliente se la vedrebbe conteggiata una volta a prezzo pieno.\n\nVuoi creare lo stesso il preventivo con le altre?"
-        : "Ci sono "+q+" lavorazioni senza misure, che valgono 0 €.\n\nNel preventivo non le porto: se ci finissero, il cliente se le vedrebbe conteggiate una volta a prezzo pieno ciascuna.\n\nVuoi creare lo stesso il preventivo con le altre?")){_libera();return;}
+        : "Ci sono "+q+" lavorazioni senza misure, che valgono 0 €.\n\nNel preventivo non le porto: se ci finissero, il cliente se le vedrebbe conteggiate una volta a prezzo pieno ciascuna.\n\nVuoi creare lo stesso il preventivo con le altre?"))){_libera();return;}
     }
     /* ⚠️ 19 agosto 2026 — L'ORDINE DEL COMPUTO NON ARRIVAVA AL PREVENTIVO.
        Difetto vero, riprodotto al banco (prove/banco_computo_preventivo.js).

@@ -1292,7 +1292,7 @@
     const avviso=f&&f.numero
       ? "Questa fattura ha il numero "+f.numero+"/"+fattAnno(f)+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso?"
       : "Eliminare questa bozza di fattura?";
-    if(!gconfirm(avviso))return;
+    if(!(await gconfirm(avviso)))return;
     await fattSincronizzaLavori(id,"none");
     const {data:okEl,error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}

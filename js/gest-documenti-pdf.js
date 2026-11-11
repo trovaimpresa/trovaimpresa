@@ -267,7 +267,7 @@
   function polizzaFerma(pol){
     const l=pol.mancano;
     const elenco=l.length===1?l[0]:l.slice(0,-1).join(", ")+" e "+l[l.length-1];
-    alert("Non posso preparare la lettera d'incarico.\n\n"
+    tiAvviso("Non posso preparare la lettera d'incarico.\n\n"
       +"Nei Dati azienda manca "+elenco+".\n\n"
       +"La legge (art. 9 comma 4 del DL 1/2012) vuole che gli estremi della tua "
       +"polizza professionale siano scritti nella lettera che firma il cliente.\n\n"
@@ -279,7 +279,7 @@
      foglio da firmare intestato a nessuno. */
   function incaricoClienteOk(c){
     if(c&&String(c.nome||"").trim())return true;
-    alert("Non posso preparare la lettera d'incarico.\n\n"
+    tiAvviso("Non posso preparare la lettera d'incarico.\n\n"
       +"Questo preventivo non ha un cliente collegato, e la lettera deve dire "
       +"chi è il committente che la firma.\n\n"
       +"Apri il preventivo, scegli il cliente e salva: poi riprova.");
@@ -402,7 +402,7 @@
     /* polizza scaduta: si avvisa e si lascia decidere. Può capitare di dover
        consegnare la lettera il giorno stesso del rinnovo, e bloccare tutto
        sarebbe peggio del problema. */
-    if(pol.scaduta&&!gconfirm("La tua polizza professionale risulta scaduta il "+fdate(pol.scad)+".\n\nSe stampi adesso, la lettera che firma il cliente riporterà questa data.\n\nVuoi stamparla lo stesso?"))return;
+    if(pol.scaduta&&!(await gconfirm("La tua polizza professionale risulta scaduta il "+fdate(pol.scad)+".\n\nSe stampi adesso, la lettera che firma il cliente riporterà questa data.\n\nVuoi stamparla lo stesso?")))return;
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let tot=0;(rr||[]).forEach(r=>{tot+=impRiga(r.qta,r.prezzo);});
     const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);

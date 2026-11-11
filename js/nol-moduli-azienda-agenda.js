@@ -177,7 +177,7 @@
       n=(data||[]).length;
     }
     const msg=n?`Stai per eliminare il reparto «${p.nome}» e le sue ${n} pratiche. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». L'operazione è definitiva. Continuare?`;
-    if(!gconfirm(msg))return;
+    if(!(await gconfirm(msg)))return;
     if(sb&&sbUid&&p.mestiere_id){
       await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
       await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
