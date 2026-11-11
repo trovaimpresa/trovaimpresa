@@ -619,6 +619,27 @@
                                       ? "Forse va sollecitato"
                                       : "Forse vanno sollecitati",go:"preventivi"});
 
+    /* 11 nov 2026 — BOLLE CONTRO FATTURE: se in una fattura di un fornitore
+       c'e' merce in piu' o che non e' in nessuna bolla (questo mese o il
+       mese scorso), lo dice qui. Stessa bfConfronta di «Acquisti del mese»;
+       si legge con acqCaricaMese, cioe' le stesse righe che vedi aprendolo.
+       Senza bolle fotografate non si dice niente. */
+    if(typeof bfConfronta==="function"&&typeof acqCaricaMese==="function"){
+      try{
+        const _m0=todayStr().slice(0,7), _d=new Date(+_m0.slice(0,4),+_m0.slice(5,7)-2,1);
+        const _m1=_d.getFullYear()+"-"+String(_d.getMonth()+1).padStart(2,"0");
+        for(const _m of [_m0,_m1]){
+          if(await acqCaricaMese(_m)) continue;
+          const _bf=bfConfronta(acqRighe,acqFornNomi).filter(f=>f.problemi&&f.nBolle&&f.nFatture);
+          const _n=_bf.reduce((s,f)=>s+f.problemi,0);
+          if(!_n) continue;
+          DA.push({g:1,male:1,t:nn(_n,"cosa in fattura non torna con le bolle","cose in fattura non tornano con le bolle")+(_m===_m1?" (mese scorso)":""),
+            d:_bf.map(f=>f.nome).slice(0,3).join(", "),act:"rie-bolle",mese:_m});
+          break;
+        }
+      }catch(_){}
+    }
+
     /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
        IVA i PDF di preventivi e fatture escono senza intestazione, quindi è la
        prima cosa da fare appena ci si iscrive. */
@@ -687,7 +708,7 @@
           + '<div style="font-size:26px;font-weight:700;margin:6px 0 4px">'+esc(_p.t)+'</div>'
           + (_dett(_p.d)?'<div style="font-size:18px;color:#586574;margin-bottom:12px">'+esc(_dett(_p.d))+'</div>':'<div style="margin-bottom:12px"></div>')
           + '<button type="button" class="btn-primary" style="font-size:19px;padding:13px 20px;margin:4px 8px 0 0" '
-          +   (_p.act?'data-action="'+_p.act+'"':'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemare</button>'
+          +   (_p.act?'data-action="'+_p.act+'"'+(_p.mese?' data-mese="'+_p.mese+'"':''):'data-action="rie-go" data-go="'+_p.go+'"')+'>Vai a sistemare</button>'
           + (_chatOk?'<button type="button" class="btn" id="rie-chiedi-ai" style="font-size:19px;padding:13px 20px;margin:4px 0 0">Chiedi all\'AI cosa fare oggi</button>':'')
           + '</div>';
         /* 6 nov 2026 — la prima cosa sta gia' grande in «Parti da qui»:
@@ -700,7 +721,7 @@
           + _RS.map(function(r,i){
               return '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'"'
             +   (i>=5?' data-ro-piu="1" style="display:none"':'')+' '
-            +   (r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
+            +   (r.act?'data-action="'+r.act+'"'+(r.mese?' data-mese="'+r.mese+'"':''):'data-action="rie-go" data-go="'+r.go+'"')+'>'
             +   '<span class="ro-testo">'+esc(r.t)+(_dett(r.d)?'<span class="ro-dett">'+esc(_dett(r.d))+'</span>':'')+'</span>'
             +   '<span class="ro-freccia">›</span>'
             + '</div>';}).join("")

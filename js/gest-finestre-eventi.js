@@ -296,6 +296,7 @@
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non è una scheda del menu — quindi apro direttamente quella. */
     if(a==="rie-azienda")return aziendaForm();
+    if(a==="rie-bolle")return (typeof acqApri==="function")?acqApri(t.dataset.mese||""):null;
     if(a==="rie-piu"){
       $$('#rie-alert [data-ro-piu]').forEach(function(x){x.style.display="";});
       const tt=$("#ro-piu-tasto"); if(tt)tt.remove();
