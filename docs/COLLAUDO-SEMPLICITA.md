@@ -860,6 +860,8 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 **Fatto (ok di Alex):** «+» → «📎 Foto»; telefono: Foto · Parla · Manda in una riga; computer: archivio 320 px, scritte 15-16 px, × 36 px (css/gestionale-stile.css, js/gest-chat.js). La chat resta vuota, senza spiegazioni (decisione del 29 ago).
 **Conti:** «Ti restano N messaggi» viene da `chat_stato()` sul server: nessun conto nel browser.
 
+**Collaudo dal vivo (11 nov 2026, senza mandare messaggi):** le correzioni del 7 nov sono online. Sistemato: la × buttava la chat al primo tocco e la chat NON va nel Cestino → adesso chiede «Buttare la chat «…»? Non va nel Cestino: non si recupera» (`svuotaUna`). Buttate le 24 chat dei miei collaudi (dal 6 al 10 nov); restano le 9 più vecchie.
+
 
 | | PC | Tel |
 |---|:-:|:-:|

@@ -791,6 +791,16 @@
 
   async function svuotaUna(conv) {
     if (!conv || !window._gc) return;
+    /* 11 nov 2026 — collaudo 3.17: la × buttava subito, e la chat NON va
+       nel Cestino. Un tocco sbagliato e la perdevi. Adesso chiede, col nome. */
+    var riga = document.querySelector('.chat-riga[data-conv="' + (window.CSS && CSS.escape ? CSS.escape(conv) : conv) + '"] .cn');
+    var tit = riga ? riga.textContent.trim() : '';
+    if (tit.length > 60) tit = tit.slice(0, 57) + '…';
+    var dom = 'Buttare la chat' + (tit ? ' «' + tit + '»' : '') + '?';
+    var ok = (typeof window.tiChiedi === 'function')
+      ? await window.tiChiedi('Non va nel Cestino: non si recupera.', { titolo: dom, si: 'Sì, buttala', no: 'No', rosso: true })
+      : window.confirm(dom + ' Non si recupera.');
+    if (!ok) return;
     try {
       var r = await window._gc.rpc('chat_svuota', { p_conversazione: conv });
       if (r && r.error) throw r.error;
