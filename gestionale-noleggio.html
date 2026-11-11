@@ -272,6 +272,7 @@
   .cal-head h2{font-size:18px;font-weight:700;text-transform:capitalize}
   .cal-nav{display:flex;gap:6px}
   .cal-nav button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer;color:var(--accent-d);font-weight:700}
+  .cal-nav button[data-action="cal-today"]{width:auto;padding:0 14px;font-size:16px} /* 11 nov 2026: «Oggi» al posto del puntino, come nell'App */
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
   .cal-dow{text-align:center;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
   .cal-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:62px;padding:5px;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:3px}
@@ -547,7 +548,7 @@
           <button class="btn asst-allega" data-action="asst-allega" title="Allega una foto, uno screenshot o un PDF" aria-label="Allega un file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
           <button class="btn btn-primary" data-action="asst-invia">Invia</button>
         </div>
-        <div class="asst-sotto"><span class="asst-tasti">Invio manda · per andare a capo <b>Maiusc + Invio</b></span></div>
+        <div class="asst-sotto"></div>
         <input type="file" id="asst-file" accept="image/*,application/pdf" hidden>
         <div class="asst-chip" id="asst-chip" hidden></div>
         <div class="asst-nota" id="asst-nota"></div>
@@ -591,7 +592,7 @@
 
     <section id="calendario">
       <div class="cal-head"><h2 id="cal-title">—</h2>
-        <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">•</button><button data-action="cal-next">›</button></div></div>
+        <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">Oggi</button><button data-action="cal-next">›</button></div></div>
       <div class="cal-oggi" id="cal-oggi"></div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-legend"><span><i class="dot prenot"></i>Prenotato</span><span><i class="dot esce"></i>Esce</span><span><i class="dot rientra"></i>Rientra</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Lavoro da fare</span><span><i class="dot done"></i>Lavoro fatto</span><span><i class="dot scad"></i>Scadenza</span><span>📌 Nota</span></div>
@@ -633,7 +634,7 @@
 
     <section id="cauzioni">
       <div class="sec-head"><h2>Cauzioni</h2></div>
-      <div class="gal-intro">I soldi che tieni in deposito per conto dei clienti. <b>Non sono tuoi</b>: al rientro tornano indietro, meno i danni che il verbale di riconsegna ha messo nero su bianco. Qui vedi quanti ne hai in mano e quali devi ancora rendere.</div>
+      <div class="gal-intro">I soldi che tieni per conto dei clienti: al rientro li rendi, meno i danni scritti nel verbale.</div>
       <div class="num-fila">
         <div class="num-c"><span class="num-d">In deposito adesso</span><span class="num-n" id="kc-mano">€ 0</span><span class="num-s">Soldi che devi restituire</span></div>
         <div class="num-c"><span class="num-d">Restituite</span><span class="num-n" id="kc-svincolate">€ 0</span><span class="num-s">Gi&agrave; tornate al cliente</span></div>
@@ -664,7 +665,7 @@
 
     <section id="documenti">
       <div class="sec-head"><h2>Contratti e documenti</h2></div>
-      <div class="gal-intro">Le cinque carte di ogni noleggio: il contratto, il verbale di consegna e quello di riconsegna, e i due DDT. Qui si vede a colpo d'occhio a quale noleggio manca quale foglio.</div>
+      <div class="gal-intro">Le cinque carte di ogni noleggio: qui vedi a quale manca quale foglio.</div>
       <input type="text" id="documenti-search" placeholder="Cerca: mezzo, cliente o numero di contratto" autocomplete="off" spellcheck="false"
              style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:16px;font-family:inherit;margin-bottom:16px">
       <div id="documenti-body" class="nol-elenco"></div>
@@ -672,7 +673,7 @@
 
     <section id="media">
       <div class="sec-head"><h2>Foto e video</h2></div>
-      <div class="gal-intro">Com'è uscito e com'è tornato. Si fotografa e si filma il mezzo alla consegna, e di nuovo al rientro: se al rientro c'è un danno che prima non c'era, la prova sta qui. Le foto vengono rimpicciolite da sole e i video ridotti, per non riempire lo spazio.</div>
+      <div class="gal-intro">Il mezzo alla consegna e al rientro: se torna con un danno, la prova sta qui.</div>
       <input type="text" id="media-search" placeholder="Cerca: mezzo o cliente" autocomplete="off" spellcheck="false"
              style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:16px;font-family:inherit;margin-bottom:16px">
       <div id="media-peso" style="font-size:14px;color:#666;margin-bottom:14px"></div>
@@ -681,7 +682,7 @@
 
     <section id="cestino">
       <div class="sec-head"><h2>Cestino</h2></div>
-      <div class="gal-intro">Tutto quello che elimini dal gestionale passa di qui e resta a disposizione: finché è nel cestino non è perso. Apri una riga per rimetterla a posto.</div>
+      <div class="gal-intro">Apri una riga per rimetterla a posto: finché è qui non è persa.</div>
       <input type="text" id="cest-search" placeholder="Cerca nel cestino: nome o tipo" autocomplete="off" spellcheck="false"
              style="width:100%;max-width:520px;padding:11px 13px;border:1px solid #d5dee8;border-radius:10px;font-size:16px;font-family:inherit;margin-bottom:16px">
       <div id="cest-body" class="nol-elenco"></div>
@@ -689,7 +690,7 @@
 
     <section id="galleria">
       <div class="sec-head"><h2>Galleria foto</h2></div>
-      <div class="gal-intro">Tutte le foto del reparto, divise per cantiere. Le foto <b>Da fare</b> le mette il capo per mostrarti il lavoro; le foto <b>Fatto</b> le caricate voi a lavoro finito. Usa i filtri qui sotto per trovarle.</div>
+      <div class="gal-intro">Tutte le foto del reparto, divise per cantiere.</div>
       <div class="filt-label">Filtra per tipo di foto</div>
       <div class="chiprow" id="gal-tipo">
         <button class="chip on" data-action="gal-tipo" data-v="">Tutte</button>
@@ -1078,10 +1079,10 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
 <script src="/js/nol-cestino.js?v=11nov2"></script>
 <script src="/js/nol-media-documenti.js"></script>
 <script src="/js/nol-registratore-calendario.js"></script>
-<script src="/js/nol-giornata-squadra-promemoria.js?v=11nov37"></script>
+<script src="/js/nol-giornata-squadra-promemoria.js?v=11nov45"></script>
 <script src="/js/nol-moduli-azienda-agenda.js"></script>
-<script src="/js/nol-pannello-azioni.js?v=11nov37"></script>
-<script src="/js/nol-supporto.js"></script>
+<script src="/js/nol-pannello-azioni.js?v=11nov45"></script>
+<script src="/js/nol-supporto.js?v=11nov45"></script>
 <script src="/js/nol-listini-barre.js?v=11nov2"></script>
 <script src="/js/nol-avvio.js"></script>
 <script src="/js/caselle-controllo.js"></script>

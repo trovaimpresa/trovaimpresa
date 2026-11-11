@@ -1607,3 +1607,16 @@ Provato oggi (finto Supabase a 1920 e 375 + sito vero, account di Alex):
 - **Spunta verde / X rossa** (`tiSpunta` in js/ti-finestra.js): fattura pagata, fattura emessa, lavoro finito, preventivo accettato, giornata salvata, mezzo rientrato (Noleggio), giornata mandata (app operaio), primi passi finiti, fattura del fornitore contro le bolle.
 
 Non provato: la voce «Parla» (il microfono nel browser dell'app è bloccato: la prova la fa Alex dal telefono) e la foto di una bolla letta dall'AI sul sito vero (costa un credito: da fare con Alex).
+
+## 11 nov 2026 (sera) — 3.18 → 3.33 tutte insieme (Alex: «falle tutte insieme senza chiedermi ogni volta»)
+Provate dal vivo sul suo account, computer 1440 e telefono 390, senza salvare niente. Le correzioni del 7 nov sono tutte online; nessuna scritta fuori schermo, nessun errore di rete.
+**App:**
+- 3.18 Tasse e fisco, 3.19 Report, 3.21 Cestino, 3.22 Crediti formativi (nascosto per l'artigiano: giusto), 3.24 Barra in alto: niente da cambiare.
+- 3.20 Galleria: eliminare una foto/video diceva «Eliminare questa foto?» ma va nel Cestino → `chiediCestino` + «Foto nel cestino: la riprendi da lì» (regola 22).
+- 3.23 Assistenza diretta: tolte le scritte «Invio manda · Maiusc+Invio» e «I messaggi nuovi compaiono da soli» (decisione del 29 ago: niente spiegazioni nelle chat). Anche nel Noleggio.
+**Noleggio:**
+- Calendario: il pulsante per tornare a oggi era «•» → «Oggi» (come nell'App, 3.12).
+- Spiegazioni da 3-4 righe ridotte a una: Cauzioni, Contratti e documenti, Foto e video, Cestino, Galleria.
+- Promemoria vuoto: la riga sotto era a 13 px → 15.
+- Eliminare una foto: ora dice se va nel Cestino (`cestFrase`).
+- Riepilogo, Clienti, Mezzi, Noleggi, Fatture, Prodotti, Magazzino, Fornitori, Movimenti, Rendimento: a posto.

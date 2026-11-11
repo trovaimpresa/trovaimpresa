@@ -564,7 +564,7 @@
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
-    if(a==="del-foto"){if((await tiChiedi("Eliminare questa foto?")))deleteFoto(t.dataset.id);return;}
+    if(a==="del-foto"){/* 11 nov 2026 — regola 22: dice dove va */if((await (window.cestinoAttivo&&window.cestinoAttivo()?window.chiediCestino("questa foto","La riprendi dal Cestino quando vuoi."):tiChiedi("Eliminare per sempre questa foto?"))))deleteFoto(t.dataset.id);return;}
     if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;segmOn("#gal-tipo",t.dataset.v);renderGalleria();return;}
     if(a==="gal-media"){galFilter.media=t.dataset.v;segmOn("#gal-media",t.dataset.v);renderGalleria();return;}
     if(a==="gal-nuovo"){galCaricaLavori().then(galUploadForm);return;}
@@ -580,8 +580,8 @@
       return;
     }
     if(a==="gal-carica")return galCarica();
-    if(a==="gal-del-foto"){if((await tiChiedi("Eliminare questa foto?")))galDelFoto(t.dataset.id);return;}
-    if(a==="gal-del-video"){if((await tiChiedi("Eliminare questo video?")))galDelVideo(t.dataset.id);return;}
+    if(a==="gal-del-foto"){/* 11 nov 2026 — regola 22: dice dove va */if((await (window.cestinoAttivo&&window.cestinoAttivo()?window.chiediCestino("questa foto","La riprendi dal Cestino quando vuoi."):tiChiedi("Eliminare per sempre questa foto?"))))galDelFoto(t.dataset.id);return;}
+    if(a==="gal-del-video"){/* 11 nov 2026 — regola 22: dice dove va */if((await (window.cestinoAttivo&&window.cestinoAttivo()?window.chiediCestino("questo video","La riprendi dal Cestino quando vuoi."):tiChiedi("Eliminare per sempre questo video?"))))galDelVideo(t.dataset.id);return;}
     if(a==="gal-play"){const u=galVideoCache[t.dataset.id];if(u)window.open(u,"_blank");else toast("Video non ancora pronto, riprova tra un attimo");return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
     /* 6 set 2026 — le due linguette di Agenda operatore: «Da fare» e «Ore fatte» */

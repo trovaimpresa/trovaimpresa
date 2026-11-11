@@ -472,7 +472,7 @@
       const {data:tolte,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Foto non eliminata: "+error.message);return;}
       if(!tolte||!tolte.length){toast("Foto non eliminata: non hai i permessi su questa riga");return;}
-      let avviso="Foto eliminata";
+      let avviso=(window.cestinoAttivo&&window.cestinoAttivo())?"Foto nel cestino: la riprendi da lì":"Foto eliminata";
       if(sup.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
         const {error:eRm}=await sb.storage.from("gestionale-foto").remove([sup.storage_path]);
         /* la riga non c'e' più: il file resta orfano nel bucket, ma la foto

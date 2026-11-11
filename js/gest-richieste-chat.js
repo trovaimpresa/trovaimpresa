@@ -579,7 +579,7 @@
     }
     asstDisegna();
     const nota=$("#asst-nota");
-    if(nota)nota.textContent="I messaggi nuovi compaiono da soli, non serve ricaricare la pagina.";
+    if(nota)nota.textContent="";
     asstVedetta();
   }
 

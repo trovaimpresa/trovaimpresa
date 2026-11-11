@@ -653,7 +653,7 @@
     const {data:tolte,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Foto non eliminata: "+error.message);return;}
     if(!tolte||!tolte.length){toast("Foto non eliminata: non hai i permessi su questa riga");return;}
-    let avviso="Foto eliminata";
+    let avviso=(window.cestinoAttivo&&window.cestinoAttivo())?"Foto nel cestino: la riprendi da lì":"Foto eliminata";
     if(r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
       const {error:eRm}=await sb.storage.from("gestionale-foto").remove([r.storage_path]);
       if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
@@ -667,7 +667,7 @@
     const {data:tolte,error}=await sb.from("gest_video").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Video non eliminato: "+error.message);return;}
     if(!tolte||!tolte.length){toast("Video non eliminato: non hai i permessi su questa riga");return;}
-    let avviso="Video eliminato";
+    let avviso=(window.cestinoAttivo&&window.cestinoAttivo())?"Video nel cestino: lo riprendi da lì":"Video eliminato";
     if(r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
       const {error:eRm}=await sb.storage.from("gestionale-video").remove([r.storage_path]);
       if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;

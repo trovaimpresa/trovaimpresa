@@ -129,7 +129,7 @@
     if(!supCache.length)box.innerHTML='<div class="asst-vuoto">Leggo…</div>';
     if(!await supLeggi(true)){box.innerHTML='<div class="asst-vuoto">Non riesco a leggere i messaggi: controlla la connessione e riprova.</div>';return;}
     supDisegna();
-    const nota=$("#asst-nota");if(nota)nota.textContent="I messaggi nuovi compaiono da soli, non serve ricaricare la pagina.";
+    const nota=$("#asst-nota");if(nota)nota.textContent="";
   }
   function supFileCambiato(){
     const i=$("#asst-file");const f=i&&i.files&&i.files[0];const chip=$("#asst-chip");

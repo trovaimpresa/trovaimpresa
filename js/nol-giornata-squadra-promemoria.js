@@ -261,7 +261,7 @@
     const oggi=todayStr(), lim=_giorniDopo(oggi,7);
     box.innerHTML=L.length
       ? L.map(p=>promCard(p,oggi,lim)).join("")
-      : '<div class="empty"><div class="ic">🔔</div><p>Nessun promemoria</p><small>Pagare l’F24, rendere una cauzione, portare il rimorchio alla revisione: scrivilo qui e te lo ricordo per email</small></div>';
+      : '<div class="empty"><div class="ic">🔔</div><p>Nessun promemoria</p><small style="font-size:15px">Pagare l’F24, rendere una cauzione, portare il rimorchio alla revisione: scrivilo qui e te lo ricordo per email</small></div>';
 
     /* il pallino sulla voce del menu: quelli da fare entro 30 giorni, rosso se
        almeno uno e' gia' passato */

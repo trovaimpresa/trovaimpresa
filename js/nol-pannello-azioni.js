@@ -161,7 +161,7 @@
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
-    if(a==="del-foto"){if((await tiChiedi("Eliminare questa foto?")))deleteFoto(t.dataset.id);return;}
+    if(a==="del-foto"){if((await tiChiedi("Eliminare questa foto?\n"+(typeof cestFrase==="function"?cestFrase():""))))deleteFoto(t.dataset.id);return;}
     if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderGalleria();return;}
     if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
