@@ -76,14 +76,20 @@
     const _MZCOL="id,nome,categoria,tipo,targa,stato,note,noleggiabile,codice,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi,fuori_servizio";
     const _MZCORTO="id,nome,categoria,tipo,targa,stato,note";
     const _leggiMezzi=async col=>await sb.from("gest_mezzi").select(col).eq("user_id",sbUid).or(_cliOr(mid)).order("nome");
-    const [rmz,{data:vw},{data:cb}]=await Promise.all([
+    const [rmz,{data:vw},{data:cb},rsx]=await Promise.all([
       _leggiMezzi(_MZCOL).then(r=>(r.error&&/column|schema cache/i.test(r.error.message||""))?_leggiMezzi(_MZCORTO):r),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
-      sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid)
+      sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid),
+      /* 11 nov 2026 — collaudo 3.14: QUALI sono scadute, non solo quante */
+      sb.from("gest_scadenze").select("mezzo_id,titolo,tipo_pratica,data_scadenza,stato").eq("user_id",sbUid)
+        .not("mezzo_id","is",null).lt("data_scadenza",todayStr())
     ]);
     mezziCache=(rmz&&rmz.data)||[];
     carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
+    mezziScaduteMap={};
+    ((rsx&&!rsx.error&&rsx.data)||[]).forEach(x=>{ if(x.stato==="fatta")return;
+      (mezziScaduteMap[x.mezzo_id]=mezziScaduteMap[x.mezzo_id]||[]).push({t:x.tipo_pratica||x.titolo||"Scadenza",d:x.data_scadenza}); });
     return Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
   }
 
@@ -128,7 +134,7 @@
                {lab:attrezzo?"Matricola":"Targa",w:"16%",cls:"c-chi"},
                {lab:"Stato",w:"20%"},{lab:"Prossima scadenza",w:"22%",cls:"c-cli"}],
       righe:L.map(m=>{
-        const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
+        const md=mezzoDate(m,scadMap[m.id]), st=mezzoEtichetta(m,md);
         return {
           id:m.id,
           click:{action:"edit-mezzo",data:{id:m.id}},
@@ -137,7 +143,7 @@
             esc(m.tipo||"—"),
             esc(m.targa||"—"),
             `<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
-            cellaScadenza(scadMap[m.id])
+            cellaScadenza(md)
           ],
           menu:[
             attrezzo?null:{lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
@@ -152,18 +158,53 @@
     });
   }
   const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"manutenzione",lab:"In manutenzione"}];
+  /* 11 nov 2026 — collaudo 3.14. Le date scritte NEL MODULO del mezzo
+     (assicurazione, revisione, collaudo, verifica) non entravano nella
+     vista gest_mezzi_scadenze, che conta solo le righe dello Scadenzario:
+     un'assicurazione scaduta lasciava il mezzo «Disponibile» in verde.
+     E la riga diceva «1 scadenza scaduta» senza dire quale.
+     Qui le due fonti si mettono insieme: scadute (con nome e data) e la
+     prossima. Le stesse quattro date di calAltreDate (calendario). */
+  let mezziScaduteMap={};
+  function mezzoDate(m,sc){
+    const oggi=todayStr(), scad=[], fut=[];
+    const piuMesi=(d,n)=>{const x=new Date(d+"T12:00:00");const g=x.getDate();x.setMonth(x.getMonth()+n);if(x.getDate()<g)x.setDate(0);
+      return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+    const mod=[["assicurazione_scad","Assicurazione"],["revisione_scad","Revisione"],["collaudo_scad","Collaudo"]]
+      .filter(c=>m[c[0]]).map(c=>({t:c[1],d:m[c[0]]}));
+    if(m.verifica_ultima&&(+m.verifica_mesi||0)>0)mod.push({t:"Verifica periodica",d:piuMesi(m.verifica_ultima,+m.verifica_mesi)});
+    mod.forEach(x=>(x.d<oggi?scad:fut).push(x));
+    const nMod=scad.length;
+    (mezziScaduteMap[m.id]||[]).forEach(x=>scad.push(x));
+    if(sc&&sc.prossima_data)fut.push({t:sc.prossimo_tipo||sc.prossimo_titolo||"Scadenza",d:sc.prossima_data});
+    scad.sort((a,b)=>a.d.localeCompare(b.d)); fut.sort((a,b)=>a.d.localeCompare(b.d));
+    /* se lo Scadenzario dice di piu' di quelle lette (lettura fallita), il numero resta */
+    const nSc=Math.max(scad.length, ((sc&&sc.scadute)||0)+nMod);
+    return {scadute:scad, n:nSc, prossima:fut[0]||null};
+  }
+  function mezzoScaduteTesto(md){
+    if(!md.n)return "";
+    const nomi=md.scadute.map(x=>x.t);
+    if(!nomi.length)return md.n+" "+(md.n===1?"scadenza scaduta":"scadenze scadute");
+    if(nomi.length===1)return nomi[0]+": scadeva il "+fdate(md.scadute[0].d);
+    return "Scadute: "+nomi.slice(0,3).join(", ")+(nomi.length>3?" e altre "+(nomi.length-3):"");
+  }
   /* colonna "Prossima scadenza": il tipo sopra, il quando sotto.
      Rosso se è già passata, ambra se casca entro 30 giorni: prima il rosso
      scattava solo col conteggio delle scadute e l'ambra a 7 giorni. */
-  function cellaScadenza(sc){
-    if(!sc||!sc.prossima_data){
-      if(sc&&sc.scadute>0)return `<span class="cli-nome q-passato">${sc.scadute} ${sc.scadute===1?"scaduta":"scadute"}</span>`;
-      return `<span class="cli-nome vuoto">—</span>`;
-    }
-    const g=_giorniA(sc.prossima_data), q=quando(sc.prossima_data);
+  function cellaScadenza(md){
+    if(md.n)return `<span class="cli-nome q-passato">${esc(mezzoScaduteTesto(md))}</span>`;
+    if(!md.prossima)return `<span class="cli-nome vuoto">—</span>`;
+    const g=_giorniA(md.prossima.d), q=quando(md.prossima.d);
     const cls=g<0?"q-passato":(g<=30?"q-attesa":"q-futuro");
-    const eti=sc.prossimo_tipo||sc.prossimo_titolo||"Scadenza";
-    return `<span class="cli-nome">${esc(eti)}</span><span class="cli-dove ${cls}">${q.testo}</span>`;
+    return `<span class="cli-nome">${esc(md.prossima.t)}</span><span class="cli-dove ${cls}">${q.testo}</span>`;
+  }
+  /* l'etichetta dello stato: con una scadenza passata non puo' dire
+     «Disponibile» in verde (7 nov), e adesso vale anche nella tabella */
+  function mezzoEtichetta(m,md){
+    const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
+    return (md.n&&(m.stato==="disponibile"||m.stato==="in_uso"||!m.stato))
+      ? {lab:"Da rinnovare",bg:"var(--err-bg)",fg:"var(--err)"} : st;
   }
   function mezzoCard(m,sc){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
@@ -174,12 +215,13 @@
     /* la barretta a sinistra dice come sta il mezzo senza leggere:
        rossa se ha scadenze già passate, arancione se una arriva entro 7 giorni */
     let scTesto="", tono="t-ok";
-    if(sc&&sc.scadute>0){
+    const md=mezzoDate(m,sc);
+    if(md.n){
       tono="t-err";
-      scTesto=`<span style="color:var(--err);font-weight:700">⚠ ${sc.scadute} ${sc.scadute===1?"scadenza scaduta":"scadenze scadute"}</span>`;
-    }else if(sc&&sc.prossima_data){
-      const g=_giorniA(sc.prossima_data);
-      const eti=sc.prossimo_tipo||sc.prossimo_titolo||"Scadenza";
+      scTesto=`<span style="color:var(--err);font-weight:700">⚠ ${esc(mezzoScaduteTesto(md))}</span>`;
+    }else if(md.prossima){
+      const g=_giorniA(md.prossima.d);
+      const eti=md.prossima.t;
       const quando=g===0?"oggi":(g===1?"tra 1 giorno":"tra "+g+" giorni");
       if(g<=7)tono="t-attesa";
       scTesto=`<span style="color:${g<=7?"var(--attesa)":"var(--muted)"};font-weight:${g<=7?"700":"400"}">📅 ${esc(eti)} ${quando}</span>`;
@@ -191,8 +233,7 @@
     /* 7 nov 2026: con una scadenza passata l'etichetta non puo' dire
        «Disponibile» in verde. Diventa «Da rinnovare» in rosso
        (manutenzione e fuori uso restano: dicono gia' che non va). */
-    const etic=(sc&&sc.scadute>0&&(m.stato==="disponibile"||m.stato==="in_uso"||!m.stato))
-      ? {lab:"Da rinnovare",bg:"var(--err-bg)",fg:"var(--err)"} : st;
+    const etic=mezzoEtichetta(m,md);
     return schedaJob({
       tono, titolo:esc(m.nome),
       destra:`<span class="stato" style="background:${etic.bg};color:${etic.fg}">${etic.lab}</span>`,
@@ -253,14 +294,14 @@
         </div>
         ${STRU?"":`<div class="sh-b">
         <div class="sh-tit">Le scadenze</div>
-        <p class="sh-nota" style="margin-top:0">Si scrivono qui <b>una volta sola</b>: le vede anche il Noleggio, e con l'assicurazione scaduta il mezzo non si può dare a nessuno. Le altre scadenze (bollo, tagliando, quello che vuoi) si aggiungono dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>
+        <p class="sh-nota" style="margin-top:0">Bollo, tagliando e le altre: pulsante <b>＋ Scadenza</b> qui in alto.</p>
         <div class="row2">
           <div class="field"><label>Assicurazione, scade il</label><input type="date" id="m-assic" value="${esc(m.assicurazione_scad||"")}"></div>
           <div class="field"><label>Revisione, scade il</label><input type="date" id="m-revis" value="${esc(m.revisione_scad||"")}"></div></div>
         <div class="row2">
           <div class="field"><label>Collaudo, scade il</label><input type="date" id="m-collaudo" value="${esc(m.collaudo_scad||"")}"></div>
           <div class="field"><label>Ultima verifica periodica</label><input type="date" id="m-vdata" value="${esc(m.verifica_ultima||"")}"></div></div>
-        <div class="field"><label>La verifica si ripete ogni quanti mesi</label><input type="number" id="m-vmesi" min="0" max="120" value="${m.verifica_mesi==null?"":esc(m.verifica_mesi)}" placeholder="0 = non è soggetto"></div>
+        <div class="field"><label>La verifica si ripete ogni quanti mesi</label><input type="number" id="m-vmesi" min="0" max="120" value="${!(+m.verifica_mesi)?"":esc(m.verifica_mesi)}" placeholder="Vuoto se non serve"></div>
         </div>`}
         <div class="sh-b">
         <div class="sh-tit">Note</div>

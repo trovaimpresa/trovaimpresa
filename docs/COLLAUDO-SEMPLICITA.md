@@ -733,6 +733,11 @@ Collaudo dal vivo (11 nov 2026): le correzioni del 7 nov sono online. Trovati e 
 **Fatto (ok di Alex):** con una scadenza passata l'etichetta diventa «Da rinnovare» in rosso (`mezzoCard` in js/gest-mezzi.js; manutenzione e fuori uso restano). Attrezzature: vuota, dice cosa fare, niente da cambiare.
 **Conti:** carburante (spesa e km/l) viene dalla vista, non rifatto qui: nessuna formula nuova.
 
+**Collaudo dal vivo (11 nov 2026), trovato e sistemato:**
+- Le date scritte nel modulo del mezzo (assicurazione, revisione, collaudo, verifica) NON entravano nella vista `gest_mezzi_scadenze` (conta solo lo Scadenzario): un'assicurazione scaduta lasciava il mezzo «Disponibile». Adesso `mezzoDate()` in js/gest-mezzi.js mette insieme le due fonti (stesse 4 date del calendario): riga e tabella dicono QUALE e quando («⚠ Assicurazione: scadeva il 15/10/2026»), stato «Da rinnovare» anche nella tabella, prossima scadenza compresa quella del modulo.
+- Modulo: la spiegazione di 3 righe → una («Bollo, tagliando e le altre: pulsante + Scadenza qui in alto»); «ogni quanti mesi» non mostra più «0».
+- ⚠️ Da guardare: il Riepilogo e gli avvisi email leggono ancora la sola vista? (non controllato).
+
 
 | | PC | Tel |
 |---|:-:|:-:|
