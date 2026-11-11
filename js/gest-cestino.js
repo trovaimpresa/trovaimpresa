@@ -7,7 +7,15 @@
     {t:"gest_lavori",      lab:"Pratiche e lavori", labImp:"Lavori",        campo:"descrizione", ic:"🧰"},
     {t:"gest_clienti",     lab:"Clienti",           campo:"nome",           ic:"👤"},
     {t:"gest_preventivi",  lab:"Preventivi",        campo:"titolo",         ic:"📄"},
-    {t:"gest_fatture",     lab:"Fatture",           campo:"numero",         ic:"🧾"},
+    /* 11 nov 2026 — collaudo 3.6: una bozza non ha numero e il Cestino
+       scriveva «del 11/11/2026» e basta. Adesso dice che cos'e'. */
+    {t:"gest_fatture",     lab:"Fatture",           campo:"numero",         ic:"🧾",
+     nome:function(r){
+       const chi=String(r.cli_nome||"").trim();
+       const cosa=r.tipo==="nota_credito"?"Nota di credito":"Fattura";
+       return (r.numero?(cosa+" n. "+r.numero+(r.anno?"/"+r.anno:"")):(cosa+" in bozza"))
+         +(r.data?" del "+fdate(r.data):"")+(chi?" — "+chi:"");
+     }},
     {t:"gest_scadenze",    lab:"Scadenze",          campo:"titolo",         ic:"⏰", foglia:true},
     {t:"gest_mestieri",    lab:"Reparti",           campo:"nome",           ic:"🗂"},
     {t:"gest_mezzi",       lab:"Mezzi e strumenti", campo:"nome",           ic:"🚚"},
@@ -816,7 +824,18 @@
     gest_carte_movimenti:"movimenti della carta", gest_rifornimenti:"rifornimenti"
   };
   function cestElenco(v){
-    return (v||[]).map(function(x){return "\u2022 "+x.n+" "+(CEST_NOMI[x.tabella]||x.tabella);}).join("\n");
+    /* 11 nov 2026 — «1 righe della fattura»: con 1 si usa il singolare */
+    const UNO={gest_fattura_righe:"riga della fattura",gest_preventivo_righe:"riga del preventivo",
+      gest_lavori:"lavoro/pratica",gest_clienti:"cliente",gest_preventivi:"preventivo",gest_fatture:"fattura",
+      gest_scadenze:"scadenza",gest_mestieri:"reparto",gest_mezzi:"mezzo o strumento",gest_operatori:"persona",
+      gest_carte:"carta aziendale",gest_fornitori:"fornitore",gest_fatture_fornitori:"fattura fornitore",
+      gest_spese:"spesa",gest_ore:"ora lavorata",gest_crediti:"credito formativo",gest_computi:"computo",
+      gest_computo_capitoli:"capitolo del computo",gest_computo_voci:"voce del computo",
+      gest_computo_misure:"misura del computo",gest_prezzi_propri:"voce del tuo elenco prezzi",
+      gest_rapportini:"rapportino di cantiere",gest_foto:"foto o documento",gest_video:"video",gest_note:"nota",
+      gest_fattura_lavori:"collegamento fattura-lavoro",gest_lavoro_mezzi:"mezzo usato",
+      gest_carte_movimenti:"movimento della carta",gest_rifornimenti:"rifornimento"};
+    return (v||[]).map(function(x){return "\u2022 "+x.n+" "+((+x.n===1&&UNO[x.tabella])||CEST_NOMI[x.tabella]||x.tabella);}).join("\n");
   }
 
   async function cestDefinitivo(i){

@@ -377,25 +377,25 @@ Provato col finto Supabase a 1920 e 375: zero errori.
 | Si capisce in 3 secondi a cosa serve | [x] | [x] |
 | UN solo pulsante principale, ben visibile | [x] | [x] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
-| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
-| Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
-| Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
+| Sezione vuota: dice cosa fare e ha il pulsante | [x] | [x] |
+| Errori in italiano chiaro, che dicono come rimediare | [x] | [x] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
 | Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
 | **Conti** | | |
 | Ogni conto rifatto A MANO con almeno 3 casi | [x] | [x] |
 | Lo stesso numero è uguale OVUNQUE | [x] | [x] |
-| Nessuna formula copiata in due posti | [ ] | [ ] |
+| Nessuna formula copiata in due posti | [x] | [x] |
 | **Funziona** | | |
 | Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
 | Console senza errori | [x] | [x] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [x] | [x] |
 
 Problemi trovati (7 nov 2026, prima):
 1. DIFETTO: descrizione delle voci larga 72 px (il microfono `dt-box` aveva rotto la regola del 30/09).
@@ -410,6 +410,12 @@ Conti: 7 casi a mano (due aliquote coi centesimi 155,20; sconto 990; ritenuta 4%
 Sospetti da guardare (non difetti, non toccati): la ritenuta non è arrotondata al centesimo prima di togliere (con 4% e 20% non succede mai niente; con aliquote strane potrebbe sbagliare di 1 centesimo); `fattConti` usa il regime dell'azienda di oggi, il PDF quello scritto sulla fattura.
 Da fare dopo il push: collaudo dal vivo, computer e telefono; la fattura del Noleggio (`fattnolTotali`) si guarda con la sezione Noleggio.
 
+**11 nov 2026 — ripreso:**
+Clic veri: nuova 2 (Nuova fattura → «Vuota» o «Da lavori finiti») · pagata 2 · PDF/SDI 2.
+Provato sul sito vero: bozza di prova 3 × 12,35 = 37,05 + IVA 10% 3,71 = 40,76 €; modificata a 4 × 12,35 = 49,40 + 4,94 = 54,34 €; nel cestino, ripresa, buttata per sempre.
+Problemi trovati: (1) i 3 riquadri stretti a sinistra (la griglia teneva 6 colonne); (2) «mancano le n.1…» senza dire cosa fare; (3) voce mancante = riquadro «La fattura non è stata salvata… manda questa schermata ad Alessio» (l'iscritto non sa chi è; anche in Galleria); (4) la formula della ritenuta copiata in fattTotaleLive; (5) bozza: «Eliminare questa bozza di fattura?» senza nome; nel Cestino «del 11/11/2026» e «1 righe della fattura»; (6) sul telefono i riquadri alti spingevano l'elenco sotto lo schermo.
+Fatto: 3 colonne piene; «…eliminata per sempre: se l'avevi mandata al cliente, dillo al commercialista»; campoManca sulla voce, errori veri → «scrivici da Aiuto → Assistenza diretta»; fattTotaleLive usa fattConti (ritenuta chiusa al centesimo, con 4% e 20% non cambia niente); «Mettere nel cestino la bozza di «cliente» del …?»; Cestino: «Fattura in bozza del … — cliente», singolare con 1; telefono: un riquadro = una riga.
+Noleggio: la sua fattura (`fattnolTotali`) resta per la 3.29.
 
 ## 3.7 — App · Computo metrico (+ Prezzario + Stati di avanzamento)
 

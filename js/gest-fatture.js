@@ -375,7 +375,11 @@
        gia' state mandate allo SDI e il cliente ha gia' versato quella cifra
        all'Erario. Il segno e' lo stesso delle spese, spese_regime. */
     const baseRit=b.art15?((b.compensoNetto||0)+(b.speseIva||0)):b.compenso;
-    const ritenuta=baseRit*(+f.ritenuta_perc||0)/100;
+    /* 11 nov 2026 — collaudo 3.6: la ritenuta si chiude al centesimo, come
+       la stampano PDF e file per lo SDI. Con 4% e 20% non cambia niente
+       (il terzo decimale non e' mai 5); con un'aliquota strana il netto a
+       schermo poteva scostarsi di 1 centesimo da «totale meno ritenuta». */
+    const ritenuta=_cent2(baseRit*(+f.ritenuta_perc||0)/100);
     /* Due numeri diversi, e mescolarli è un errore che lo SDI vede subito:
        - totale     = quanto vale il documento (imponibile scontato + IVA + bollo)
        - daPagare   = quanto ti bonifica davvero il cliente, tolta la ritenuta
@@ -500,7 +504,7 @@
       f.stato==="emessa"&&gio!=null
         ? '<span'+(scaduta?' style="color:var(--err);font-weight:700"':'')+'>⏳ aspetti da '+gio+(gio===1?" giorno":" giorni")+'</span>'
         : "",
-      f.tipo!=="fattura" ? "📄 "+FATT_TIPO_LAB[f.tipo] : "",
+      (f.tipo&&f.tipo!=="fattura"&&FATT_TIPO_LAB[f.tipo]) ? "📄 "+FATT_TIPO_LAB[f.tipo] : "",
       /* 7 nov 2026 — via «nessun PDF allegato»: non diceva niente di utile */
       /* 29/09/2026 — a che punto e' con lo SDI */
       f.sdi_stato ? '<span class="sdi-meta sdi-m-'+esc(f.sdi_stato)+'">✉ SDI: '+esc((typeof SDI_STATO_LAB!=="undefined"&&SDI_STATO_LAB[f.sdi_stato])||f.sdi_stato)+(f.sdi_ambiente==="test"?" (prova)":"")+'</span>' : ""
@@ -654,7 +658,11 @@
         const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")
           +(buchi.length>6?(" …e altre "+(buchi.length-6)):"");
         buchiTesto=(buchi.length===1?"manca la ":"mancano le ")+elenco
-          +(nCest?(nCest===buchi.length?" — "+(nCest===1?"è nel Cestino":"sono nel Cestino"):" — qualcuna è nel Cestino"):"");
+          +(nCest?(nCest===buchi.length?" — "+(nCest===1?"è nel Cestino":"sono nel Cestino"):" — qualcuna è nel Cestino")
+            /* 11 nov 2026 — collaudo 3.6: se non sono nel Cestino non c'e'
+               niente da aprire, ma si dice cosa fare (regola: dire DOVE) */
+            :(buchi.length===1?" — è stata eliminata per sempre: se l'avevi mandata al cliente, dillo al commercialista"
+                               :" — sono state eliminate per sempre: se le avevi mandate ai clienti, dillo al commercialista"));
         buchiTono="err";
       }
     }catch(e){}
@@ -799,13 +807,14 @@
        lo SDI. Prima la formula era riscritta qui a mano, e in forfettario
        l'anteprima sommava un'IVA che il salvataggio poi azzerava: leggevi
        1.832 e salvavi 1.502. */
-    const b=fattBasi(f,R);
+    /* 11 nov 2026 — collaudo 3.6: ritenuta, totale e netto li fa fattConti,
+       la stessa funzione di elenco, PDF e file per lo SDI. Prima qui la
+       formula della ritenuta era ricopiata a mano: una seconda copia. */
+    const c=fattConti(f,R), b=c;
     const forf=fattForfettario();
-    /* stessa base di fattConti: sul netto dopo lo sconto se la fattura e' nuova,
-       sul lordo se e' nata prima del 13 agosto */
-    const ritE=(b.art15?((b.compensoNetto||0)+(b.speseIva||0)):b.compenso)*f.ritenuta_perc/100;
-    const tot=b.imponibile+b.iva+f.bollo;        /* quanto vale il documento */
-    const netto=tot-ritE;                        /* quanto ti bonificano davvero */
+    const ritE=c.ritenuta;
+    const tot=c.totale;                          /* quanto vale il documento */
+    const netto=c.daPagare;                      /* quanto ti bonificano davvero */
     const el=$("#fatt-somma");
     if(el)el.innerHTML=
         '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Prezzo senza IVA')+'</span><b>'+eur2(b.compenso)+'</b></div>'
@@ -997,8 +1006,10 @@
       box.id="fatt-errore";box.className="fatt-errore";
       b.insertBefore(box,b.firstChild);
     }
-    box.innerHTML="<b>La fattura non e\u2019 stata salvata.</b><br>"+esc(testo)
-      +"<br><br>Quello che hai scritto e\u2019 ancora qui: correggi e riprova, oppure manda questa schermata ad Alessio.";
+    /* 11 nov 2026 — collaudo 3.6: l'iscritto non sa chi e' «Alessio» (il
+       gestionale non parla di lui): si manda all'Assistenza diretta. */
+    box.innerHTML="<b>La fattura non \u00e8 stata salvata.</b><br>"+esc(testo)
+      +"<br><br>Quello che hai scritto \u00e8 ancora qui: correggi e riprova. Se non si sistema, scrivici da Aiuto \u2192 Assistenza diretta.";
     b.scrollTop=0;
     try{console.error("[FATTURA]",testo);}catch(e){}
   }
@@ -1063,7 +1074,7 @@
         ordine:i
       });
     });
-    if(!righe.length){fattErrore("Manca almeno una voce: scrivi una descrizione, la quantità e il prezzo.");return;}
+    if(!righe.length){campoManca($("#fatt-righe [data-riga] .fr-desc"),"Manca almeno una voce: scrivi cosa hai fatto, la quantità e il prezzo.");return;}
 
     const cliente_id=$("#fa-cli").value||null;
     const data=$("#fa-data").value||todayStr();
@@ -1302,12 +1313,17 @@
     const avviso=f&&f.numero
       ? "Questa fattura ha il numero "+f.numero+"/"+fattAnno(f)+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso?"
       : "Eliminare questa bozza di fattura?";
-    if(!(await gconfirm(avviso)))return;
+    /* 11 nov 2026 — collaudo 3.6: la bozza dice di chi e' e che va nel Cestino */
+    const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
+    if(f&&!f.numero&&_cest&&typeof window.tiChiedi==="function"){
+      const _chi=String(f.cli_nome||((fattCliCache||[]).find(c=>String(c.id)===String(f.cliente_id))||{}).nome||"").trim();
+      if(!(await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino la bozza"+(_chi?" di «"+_chi+"»":"")+" del "+fdate(f.data)+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
+    }else if(!(await gconfirm(avviso)))return;
     await fattSincronizzaLavori(id,"none");
     const {data:okEl,error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okEl||!okEl.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
-    rinfresca("fatture","riepilogo","lavori");toast("Fattura eliminata");
+    rinfresca("fatture","riepilogo","lavori");toast(_cest?"Fattura nel cestino: la riprendi da lì":"Fattura eliminata");
   }
 
   /* ---------- le tre origini ----------

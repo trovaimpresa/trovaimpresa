@@ -548,7 +548,7 @@
          una pagina vuota senza sapere perché. */
       const m=(err&&(err.message||err.toString()))||"errore sconosciuto";
       if(box)box.innerHTML='<div class="mp-avviso"><b>La mappa si &egrave; fermata.</b><br>'
-        +esc(m)+'<br><br>Manda questa schermata ad Alessio: con questa scritta si capisce cosa sistemare.</div>';
+        +esc(m)+'<br><br>Se non si sistema, scrivici da Aiuto → Assistenza diretta e manda questa schermata: con questa scritta si capisce cosa sistemare.</div>';
       try{console.error("[MAPPA]",err);}catch(e){}
     }finally{ mpInCorso=false; }
   }
