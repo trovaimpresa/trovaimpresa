@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/gestionale.css?v=11nov4">
+<link rel="stylesheet" href="/css/gestionale.css?v=11nov5">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=30">
 
@@ -423,7 +423,7 @@
            Prima erano tre («+ Privato», «+ Azienda», «+ Condominio»), ma il tipo si
            sceglie gia' dentro il modulo (#c-tipo-box): facevano la stessa cosa. -->
       <button class="btn add" data-action="new-cli" data-tipo="privato" title="Privato, azienda o condominio: lo scegli dentro">+ Nuovo cliente</button><button class="btn btn-ai" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()"><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> Compila con AI</button></div></div>
-      <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
+      <input type="text" id="cli-search" class="lav-search" hidden style="display:none" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
       <input type="file" id="forn-doc-file" multiple style="display:none">
@@ -732,7 +732,7 @@
 <script src="/js/gest-galleria-mappa.js?v=7nov1"></script>
 <script src="/js/gest-report.js?v=7nov2"></script>
 <script src="/js/gest-riepilogo.js?v=11nov2"></script>
-<script src="/js/gest-squadra.js?v=11nov2"></script>
+<script src="/js/gest-squadra.js?v=11nov34"></script>
 <script src="/js/gest-squadra-giornate.js?v=10nov1"></script>
 <script src="/js/gest-anche-pro.js?v=10nov4"></script>
 <script src="/js/gest-altro.js?v=11nov2"></script>
@@ -754,8 +754,8 @@
 <script src="/js/gest-fisco-tasse.js?v=7nov1"></script>
 <script src="/js/gest-fisco-vivere.js?v=7nov1"></script>
 <script src="/js/gest-fisco-ai.js?v=7nov1"></script>
-<script src="/js/gest-fornitori.js?v=11nov2"></script>
-<script src="/js/gest-mezzi.js?v=7nov1"></script>
+<script src="/js/gest-fornitori.js?v=11nov34"></script>
+<script src="/js/gest-mezzi.js?v=11nov34"></script>
 <script src="/js/gest-ai-cantiere.js?v=11nov2"></script>
 <script src="/js/gest-invia-cliente.js?v=11nov2"></script>
 <!-- il punto delle migliaia nelle caselle in euro: basta `data-euro` sulla casella -->
@@ -770,17 +770,17 @@
 <script src="/js/gest-ingresso.js?v=10nov1"></script>
 <script src="/js/gest-ai-moduli.js?v=11nov33"></script>
 <script src="/js/gest-riepilogo-schede.js?v=10nov-sconto"></script>
-<script src="/js/gest-schede-clienti.js?v=11nov33"></script>
-<script src="/js/gest-carte-documenti.js?v=11nov9"></script>
+<script src="/js/gest-schede-clienti.js?v=11nov34"></script>
+<script src="/js/gest-carte-documenti.js?v=11nov34"></script>
 <script src="/js/gest-richieste-chat.js?v=8nov1"></script>
 <script src="/js/gest-scadenze-pratiche.js?v=11nov33"></script>
-<script src="/js/gest-commercialista.js?v=11nov2"></script>
+<script src="/js/gest-commercialista.js?v=11nov34"></script>
 <script src="/js/gest-elimina-reparto.js?v=11nov2"></script>
 <script src="/js/gest-ore-spese.js?v=11nov33"></script>
 <script src="/js/gest-preventivi.js?v=11nov33"></script>
 <script src="/js/gest-cestino.js?v=11nov2"></script>
 <script src="/js/gest-ricerca.js?v=10nov1"></script>
-<script src="/js/gest-finestre-eventi.js?v=11nov33"></script>
+<script src="/js/gest-finestre-eventi.js?v=11nov34"></script>
 <script src="/js/gest-avvio.js"></script>
 
 <!-- ===== IL CANCELLO — 23 agosto 2026 =====

@@ -273,7 +273,7 @@
     ctrAscolta('mezzo');
   }
   async function saveMezzo(id){
-    const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
+    const nome=$("#m-nome").value.trim();if(!nome){campoManca($("#m-nome"),"Manca il nome: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     /* per lo studio la spunta non c'e': la categoria viaggia nel campo nascosto
        messo dal modulo, così il salvataggio non deve indovinarla */

@@ -831,9 +831,15 @@
      Al loro posto la sola ricerca, che qui è l'unico modo utile di restringere. */
   let cliQ="", dipQ="";
   function cliVoci(c){
+    /* 11 nov 2026 — collaudo 3.5: in cima alla scheda il pulsante blu era
+       «Mappa» anche per un cliente senza indirizzo (una mappa del nome, che
+       non serve a niente). Adesso: prima «Chiama» se c'e' il telefono, e
+       «Mappa» solo se c'e' un indirizzo. */
+    const ind=cliIndirizzo(c), tel=String(c.telefono||"").trim();
     return [
       {lab:"👁 Apri scheda",action:"apri-cli",data:{id:c.id}},
-      {lab:"🗺 Mappa",action:"map",data:{q:cliIndirizzo(c)||c.nome}},
+      tel?{lab:"📞 Chiama",action:"chiama",data:{q:tel},top:true,prima:true}:null,
+      ind?{lab:"🗺 Mappa",action:"map",data:{q:ind},top:true}:null,
       {sep:true},
       {lab:"🗑 Elimina",action:"del-cli",data:{id:c.id},del:true}
     ];
@@ -859,8 +865,9 @@
       titolo:esc(c.nome)+tag,
       meta:[ind?"📍 "+esc(ind):"",
             c.referente?"👤 "+esc(c.referente):"",
-            c.telefono?"📞 "+esc(c.telefono):"",
-            c.email?"✉️ "+esc(c.email):"",
+            /* 11 nov 2026 — collaudo 3.5: il numero si tocca e chiama, l'email si tocca e scrive */
+            c.telefono?'📞 <a class="cli-link" href="tel:'+esc(String(c.telefono).replace(/[^\d+]/g,""))+'">'+esc(c.telefono)+'</a>':"",
+            c.email?'✉️ <a class="cli-link" href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>':"",
             fisc?"🧾 "+fisc:""],
       azioni:cliVoci(c)
     });
@@ -888,17 +895,29 @@
     const restano=[];
     if(nLav)restano.push(pro?"le pratiche":"i lavori");
     if(nFat)restano.push(nFat===1?"la fattura":"le fatture");
+    /* 11 nov 2026 — collaudo 3.5: «2 lavori collegate» → l'accordo segue
+       la prima cosa dell'elenco (lavori/pratiche/fatture) */
+    const _coll=nLav?(pro?(nLav===1?"collegata":"collegate"):(nLav===1?"collegato":"collegati")):(nFat===1?"collegata":"collegate");
+    const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
+    const _c=(typeof cliCache!=="undefined"?cliCache:[]).find(x=>String(x.id)===String(id));
+    const _nm=_c&&_c.nome?"«"+String(_c.nome).slice(0,80)+"»":"questo cliente";
+    if(_cest&&typeof window.tiChiedi==="function"){
+      const _sotto=(pezzi.length?"Collegati: "+pezzi.join(" e ")+". Restano dove sono.\n":"")
+        +"Lo riprendi dal Cestino quando vuoi.";
+      if(!(await window.tiChiedi(_sotto,{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
+    }else{
     const msg=pezzi.length
-      ? "Questo cliente ha "+pezzi.join(" e ")+" collegate."
+      ? "Questo cliente ha "+pezzi.join(" e ")+" "+_coll+"."
         +(window.cestinoAttivo&&window.cestinoAttivo()
           ? "\n\nFinisce nel Cestino e puoi rimetterlo a posto; "+restano.join(" e ")+" restano."
           : "\n\nEliminarlo comunque?")
       : "Eliminare questo cliente?";
     if(!(await gconfirm(msg)))return;
+    }
     const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-    renderClienti();toast("Cliente eliminato");
+    renderClienti();toast(_cest?"Cliente nel cestino: lo riprendi da lì":"Cliente eliminato");
   }
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;

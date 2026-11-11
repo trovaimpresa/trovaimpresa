@@ -77,7 +77,7 @@
     ctrAscolta('carta');
   }
   async function saveCarta(id){
-    const nome=$("#ct-nome").value.trim();if(!nome){toast("Scrivi il nome della carta");return;}
+    const nome=$("#ct-nome").value.trim();if(!nome){campoManca($("#ct-nome"),"Manca il nome della carta: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const dipendente_id=$("#ct-dip").value||null, stato=$("#ct-stato").value, note=$("#ct-note").value.trim()||null;
     const {data,error}=id

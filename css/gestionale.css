@@ -5951,3 +5951,6 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 /* 11 nov 2026 — Fatture sul telefono: in due colonne «8.000,00 €» usciva dal
    riquadro (la cifra a 30px non ci sta in 160px). Sotto i 520px una colonna. */
 @media(max-width:520px){ #fatture .fatt-summary{ grid-template-columns:1fr; } }
+
+/* 11 nov 2026 — collaudo 3.5: telefono ed email dei clienti si toccano */
+.job-meta a.cli-link{color:var(--blu,#0066ff);text-decoration:underline;text-underline-offset:3px;padding:6px 0;font-weight:600}

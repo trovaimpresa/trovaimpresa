@@ -524,6 +524,7 @@
     if(a==="abbonamento")return apriAbbonamento(t);
     if(a==="save-azienda")return saveAzienda();
     if(a==="pdf")return generaPdf(id);
+    if(a==="chiama"){const n=String(t.dataset.q||"").replace(/[^\d+]/g,"");if(n)location.href="tel:"+n;return;}
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);

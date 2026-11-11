@@ -366,7 +366,7 @@
 
   async function saveCli(id){
     const v=q=>{const e=$(q);return e?String(e.value||"").trim():"";};
-    const nome=v("#c-nome");if(!nome){toast("Scrivi il nome");return;}
+    const nome=v("#c-nome");if(!nome){campoManca($("#c-nome"),"Manca il nome: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={nome,
       tipo:(($("#c-tipo-box")||{}).dataset||{}).tipo||"privato",
@@ -410,7 +410,7 @@
        <button class="btn-primary b-save" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button>`);
   }
   async function saveDip(id){
-    const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
+    const nome=$("#d-nome").value.trim();if(!nome){campoManca($("#d-nome"),"Manca il nome: scrivilo qui.");return;}
     if(id)db().dipendenti=db().dipendenti.map(d=>d.id===id?{...d,nome}:d);else db().dipendenti.push({id:uid(),nome});
     await save();closeSheet();renderAll();toast("Salvato ✔");
   }
@@ -470,7 +470,7 @@
     _panelAnteprima();
   }
   async function savePanel(){
-    const nome=$("#p-nome").value.trim();if(!nome){toast("Scrivi il nome del reparto");return;}
+    const nome=$("#p-nome").value.trim();if(!nome){campoManca($("#p-nome"),"Manca il nome del reparto: scrivilo qui.");return;}
     const c=COLORI[nuovoSel.col]||COLORI[0], id=uid();
     let mestiere_id=null;
     if(sb&&sbUid){

@@ -329,14 +329,14 @@ Provato col finto Supabase a 1920 e 375: tutto come nelle foto, zero errori.
 | Si capisce in 3 secondi a cosa serve | [x] | [x] |
 | UN solo pulsante principale, ben visibile | [x] | [x] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
-| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 1 | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 1 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
-| Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
-| Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
+| Sezione vuota: dice cosa fare e ha il pulsante | [x] | [x] |
+| Errori in italiano chiaro, che dicono come rimediare | [x] | [x] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
 | Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
@@ -347,7 +347,7 @@ Provato col finto Supabase a 1920 e 375: tutto come nelle foto, zero errori.
 | **Funziona** | | |
 | Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
 | Console senza errori | [x] | [x] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [x] | [x] |
 
 Problemi trovati (7 nov 2026, prima):
 1. Quattro pulsanti in alto («+ Privato», «+ Azienda», «+ Condominio», «Compila con AI»), nessuno principale; il tipo si sceglie già dentro il modulo.
@@ -360,6 +360,11 @@ Fatto (sul banco, push a fine giornata): un solo «+ Nuovo cliente» blu; casell
 Provato DAL VIVO sui dati veri (iniettato nella pagina): lavoro 450,50 €, preventivo 805,00 € IVA esclusa, fatture 982,10 € e 1.100,00 € — uguali alle altre sezioni e alle viste del database; preventivo, fattura e lavoro si aprono.
 Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
+**11 nov 2026 — ripreso:**
+Misurato: dal 413 al 1797 px sul 1920. Provato sul sito vero: cliente di prova creato, città aggiunta, nel cestino, ripreso, buttato per sempre.
+Problemi trovati: (1) due caselle «Cerca» una sopra l'altra (quella in alto cerca già nei clienti, anche P.IVA e codice fiscale); (2) telefono ed email nella lista non si toccavano; (3) nella scheda il pulsante blu era «Mappa», anche senza indirizzo; (4) «Scrivi il nome» nero (anche Squadra, Fornitori, Mezzi, Carte, Reparto); (5) «Eliminare questo cliente?» senza nome, e «2 lavori collegate».
+Fatto (anteprima, in attesa dell'ok): casella dei Clienti nascosta come quella dei Lavori; telefono ed email toccabili; nella scheda «Chiama» blu (se c'è il numero), «Mappa» solo con l'indirizzo; campoManca sul nome in 6 moduli; «Mettere nel cestino «nome»? Collegati: 1 lavoro. Restano dove sono.»
+Provato col finto Supabase a 1920 e 375: zero errori.
 
 ## 3.6 — App · Fatture
 

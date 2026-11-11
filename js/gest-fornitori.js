@@ -348,7 +348,7 @@
     toast("Negozio collegato: ricordati di salvare ✔");
   }
   async function saveForn(id){
-    const nome=$("#fo-nome").value.trim();if(!nome){toast("Scrivi il nome del fornitore");return;}
+    const nome=$("#fo-nome").value.trim();if(!nome){campoManca($("#fo-nome"),"Manca il nome del fornitore: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={nome,categoria:$("#fo-cat").value||null,telefono:$("#fo-tel").value.trim()||null,
       email:$("#fo-email").value.trim()||null,piva:$("#fo-piva").value.trim()||null,

@@ -718,7 +718,7 @@ ${vecchi?`
     return m.id;
   }
   async function squadraAdd(){
-    const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
+    const nome=$("#d-nome").value.trim();if(!nome){campoManca($("#d-nome"),"Manca il nome: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
     /* 14 agosto 2026 — un ruolo vuoto non si scrive mai (vedi squadraForm) */
@@ -764,7 +764,7 @@ ${vecchi?`
   }
   async function squadraSave(id){
     if(!id)return;
-    const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
+    const nome=$("#d-nome").value.trim();if(!nome){campoManca($("#d-nome"),"Manca il nome: scrivilo qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
     /* 14 agosto 2026 — un ruolo vuoto non si scrive mai (vedi squadraForm) */
