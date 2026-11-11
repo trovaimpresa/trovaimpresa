@@ -597,14 +597,14 @@ Fatto (anteprima, in attesa dell'ok): «← Indietro» uguale alla prima scherma
 | Si capisce in 3 secondi a cosa serve | [x] | [x] |
 | UN solo pulsante principale, ben visibile | [x] | [x] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
-| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 2 | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 1 / 2 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
-| Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
-| Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
+| Sezione vuota: dice cosa fare e ha il pulsante | [x] | [x] |
+| Errori in italiano chiaro, che dicono come rimediare | [x] | [x] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
 | Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
@@ -615,7 +615,7 @@ Fatto (anteprima, in attesa dell'ok): «← Indietro» uguale alla prima scherma
 | **Funziona** | | |
 | Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
 | Console senza errori | [x] | [x] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [x] | [x] |
 
 Problemi trovati (7 nov 2026, prima):
 1. Pulsanti con due nomi («Apri la scheda» / «Apri»).
@@ -626,6 +626,10 @@ Clic contati (prima e dopo): nuova scadenza 1 · cosa scade (filtro «Prossime»
 Fatto (sul banco, push a fine giornata): tutti «Apri»; «In tempo» al posto di «Aperta». Colori già giusti: Scaduta rosso, In scadenza ambra, Fatta verde.
 Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
+**11 nov 2026 (sera) — ripreso:**
+Provato sul sito vero: scadenza di prova (30/06/2027, senza email) creata, segnata fatta (2 clic: Apri → Segna fatta), nel cestino, ripresa, buttata per sempre. Le righe dei mezzi aprono la scheda del mezzo.
+Problemi trovati: (1) «Scrivi il titolo» nero anche col tipo già scelto (DURC); (2) «Eliminare questa scadenza?» senza nome.
+Fatto: se il titolo è vuoto si usa il tipo (una casella in meno) e nella riga il tipo non si ripete; data mancante → casella rossa; «Mettere nel cestino «nome»?». Anche nel Noleggio (lì il messaggio resta, senza casella rossa).
 
 ## 3.12 — App · Calendario · Agenda operatore · Promemoria
 

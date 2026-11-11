@@ -409,8 +409,15 @@
       <button class="b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveScad(id){
-    const titolo=$("#s-tit").value.trim();if(!titolo){toast("Scrivi il titolo");return;}
-    const data_scadenza=$("#s-data").value;if(!data_scadenza){toast("Inserisci la data di scadenza");return;}
+    /* 11 nov 2026 — collaudo 3.11: se il titolo e' vuoto ma il tipo e'
+       scelto (DURC, Revisione…) il titolo e' il tipo: una casella in meno.
+       Quello che manca davvero si segna sulla casella (campoManca). */
+    const _manca=(sel,frase)=>{ if(typeof campoManca==="function") campoManca($(sel),frase); else toast(frase); };
+    let titolo=$("#s-tit").value.trim();
+    const _tipo=$("#s-tipo")?$("#s-tipo").value:"";
+    if(!titolo&&_tipo&&!/^altro$/i.test(_tipo)) titolo=_tipo;
+    if(!titolo){_manca("#s-tit","Manca cosa scade: scrivilo qui.");return;}
+    const data_scadenza=$("#s-data").value;if(!data_scadenza){_manca("#s-data","Manca la data della scadenza: mettila qui.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const tipo_pratica=$("#s-tipo")?$("#s-tipo").value:"";
     const cliente_id=($("#s-cli")&&$("#s-cli").value)?$("#s-cli").value:null;

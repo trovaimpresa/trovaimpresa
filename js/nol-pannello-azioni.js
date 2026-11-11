@@ -203,7 +203,15 @@
       if(error){toast("Errore: "+error.message);return;}
       renderScadenze();toast(v==="fatta"?"Scadenza completata ✔":"Riaperta");return;
     }
-    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if((await gconfirm("Eliminare questa scadenza?"))){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}
+      /* 11 nov 2026 — collaudo 3.11: la domanda dice QUALE scadenza (regola 22) */
+      const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
+      const _sc=((typeof scadCache!=="undefined"?scadCache:[])||[]).find(x=>String(x.id)===String(id));
+      const _nm=_sc&&_sc.titolo?"«"+String(_sc.titolo).slice(0,80)+"»":"questa scadenza";
+      const _ok=(_cest&&typeof window.tiChiedi==="function")
+        ?await window.tiChiedi("La riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true})
+        :await gconfirm("Eliminare "+_nm+"?");
+      if(_ok){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast(_cest?"Scadenza nel cestino: la riprendi da lì":"Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
