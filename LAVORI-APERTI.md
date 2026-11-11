@@ -23,8 +23,11 @@ Ultimo aggiornamento: 11 novembre 2026 (mattina) — riassunto di ottobre e iniz
 ### 🔴 DA FARE
 1. **Punto 12** — collaudo semplicita' (`docs/COLLAUDO-SEMPLICITA.md`): ancora la gran parte delle righe aperte. Ripartire da 3.3 Preventivi, sezione per sezione, spuntare solo il provato.
 2. **Da provare con Alex**: la voce «Parla» dal telefono, e la foto di una bolla/fattura letta dall'AI sul sito vero (1 credito) → deve uscire la spunta verde o la X rossa.
-3. **Da proporre ad Alex con le foto** (non toccato): il Noleggio ha i SUOI «Primi passi» a 5 e non ha «Il tuo mese». Portarci la stessa idea (3 passi: cliente, noleggio, contratto mandato; mese: incassato, noleggi, mezzi fuori).
-4. App operaio: la domanda prima di uscire guarda i bottoni «Annulla»/«Indietro» per scritta: provarla su un modulo vero dell'operaio. Il banco `gira-operatore.sh` e' scaduto (cerca `TMB_CODA_KEY` e `js/op-core.js` che non ci sono piu'): va aggiornato.
+3. App operaio: la domanda prima di uscire guarda i bottoni «Annulla»/«Indietro» per scritta: provarla su un modulo vero dell'operaio.
+
+### ✅ FATTO DOPO (11 nov, sera)
+- Noleggio: primi passi a 3 (mezzo, cliente, primo noleggio) con la barra — online →276f73d←. «Il tuo mese» NON messo nel Noleggio: le card del suo Riepilogo dicono gia' incassato del mese e mezzi fuori.
+- Banchi dell'app operaio aggiornati (erano ciechi: cercavano `js/op-core.js`, che non c'e' piu'). `pezzi-core.js` adesso prende i pezzi `js/op-*.js` dalla pagina stessa, col `?v=`. Verdi: apertura reparti →17←, app operaio →46←, timbratura →20←, prima schermata →10← (i lavori stanno in «Lavori di adesso», il calendario dentro «Archivio»).
 
 ## 🆕 5 NOVEMBRE 2026 — DOVE SIAMO (riassunto di ottobre e inizio novembre)
 
