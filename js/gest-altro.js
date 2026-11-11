@@ -53,6 +53,11 @@
       barra.appendChild(alt);
     }
     var menu = alt.querySelector('.lt-altro-menu');
+    /* chi e' dei tre ma e' finito nel menu torna fuori: gest-anche-pro.js
+       mette il suo pulsante accanto ad «App operaio», che sta nel menu */
+    Array.prototype.slice.call(menu.children).forEach(function (b) {
+      if (FUORI.indexOf(b.getAttribute('data-action')) >= 0 || FUORI.indexOf(b.id) >= 0) barra.insertBefore(b, barra.firstChild);
+    });
     /* chi non e' dei tre va nel menu, nell'ordine in cui stava */
     Array.prototype.slice.call(barra.children).forEach(function (b) {
       if (b === alt || !b.classList.contains('lt-btn')) return;
@@ -72,7 +77,7 @@
   function parti() {
     sistema();
     var barra = document.querySelector('#landing .lt-actions:not(.lt-actions--sx)');
-    if (barra && window.MutationObserver) new MutationObserver(function () { sistema(); }).observe(barra, { childList: true });
+    if (barra && window.MutationObserver) new MutationObserver(function () { sistema(); }).observe(barra, { childList: true, subtree: true });
     try { stretto.addEventListener('change', sistema); } catch (e) { if (stretto.addListener) stretto.addListener(sistema); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', parti); else parti();
