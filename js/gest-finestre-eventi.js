@@ -250,7 +250,7 @@
          schermo comparivano due totali diversi */
       aggiornaRiepilogoParcella();aggiornaRiepilogoIvaImpresa();}return;}
     if(a==="prev-filtro"){prevFilter=t.dataset.v;renderPreventivi();return;}
-    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo aggiornato ✔");});return;}
+    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}rinfresca("preventivi","riepilogo");if(t.dataset.v==="accettato"&&typeof window.tiSpunta==="function")window.tiSpunta("Preventivo accettato");else toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
     if(a==="prev-to-fatt")return fattDaPreventivoId(id);
     if(a==="del-prev"){if((await gconfirm("Eliminare questo preventivo?")))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}

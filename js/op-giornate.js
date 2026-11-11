@@ -168,7 +168,7 @@
     mese = racconta.data.slice(0, 7);
     racconta = null;
     await disegna();
-    if (typeof toast === "function") { try { toast("Mandata al capo ✔"); } catch (x) {} }
+    if (typeof toast === "function") { try { if (typeof window.tiSpunta === "function") window.tiSpunta("Mandata al capo"); else toast("Mandata al capo ✔"); } catch (x) {} }
   }
 
   /* parte quando l'app sa chi sei, e si ridisegna quando chiudi

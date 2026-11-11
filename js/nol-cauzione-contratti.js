@@ -66,7 +66,8 @@
     if(b.dataset.v==="rientrato" && !d.value){
       d.value=todayStr();
       d.dispatchEvent(new Event("change",{bubbles:true}));
-      toast("Rientro segnato oggi. Se è rientrato prima, correggi la data.");
+      if(typeof window.tiSpunta==="function") window.tiSpunta("Mezzo rientrato",{sotto:"Segnato oggi. Se è rientrato prima, correggi la data.",durata:2600});
+      else toast("Rientro segnato oggi. Se è rientrato prima, correggi la data.");
     }
   });
   document.addEventListener("change",e=>{

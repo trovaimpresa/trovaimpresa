@@ -281,3 +281,29 @@ function bfPdf(doc) {
   doc.text(doc.splitTextToSize(T("Il confronto e' fatto sulle righe lette dalle foto: i nomi possono essere scritti in modo diverso. Le righe in rosso vanno guardate sui fogli veri prima di pagare."), W - 2 * M), M, y);
   doc.setTextColor(0, 0, 0);
 }
+
+/* 11 nov 2026 — IL CONTROLLO SUBITO, quando registri la fattura di un
+   fornitore (js/gest-carte-documenti.js). Torna true se ha mostrato
+   qualcosa (spunta verde o X rossa), false se non c'era niente da dire. */
+async function bfControllaFattura(fornitoreId, data) {
+  try {
+    if (typeof window.tiSpunta !== "function" || typeof acqCaricaMese !== "function") return false;
+    const mese = String(data || "").slice(0, 7); if (!/^\d{4}-\d{2}$/.test(mese)) return false;
+    const err = await acqCaricaMese(mese); if (err) return false;
+    const mie = acqRighe.filter(function (r) { return String(r.fornitore_id || "") === String(fornitoreId); });
+    const f = bfConfronta(mie, acqFornNomi)[0];
+    if (!f || !f.nBolle || !f.nFatture) return false;
+    const nome = f.nome && f.nome !== "Fornitore" ? f.nome : "";
+    if (f.problemi) {
+      window.tiSpunta(f.problemi + (f.problemi === 1 ? " cosa in fattura non torna" : " cose in fattura non tornano"), {
+        rosso: true, bott: "Guarda il confronto",
+        sotto: (nome ? "Fattura di " + nome + ": " : "") + "c'è merce in più o che non è in nessuna bolla.",
+        vai: function () { if (typeof acqApri === "function") acqApri(mese); }
+      });
+      return true;
+    }
+    if (f.attenzioni) return false;
+    window.tiSpunta("La fattura torna con le bolle", { sotto: (nome ? nome + " · " : "") + f.voci.length + (f.voci.length === 1 ? " riga uguale" : " righe, tutte uguali") });
+    return true;
+  } catch (e) { return false; }
+}

@@ -897,7 +897,7 @@
     const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:scelto}).eq("id",id).eq("user_id",sbUid).select("id");
     rinfresca("preventivi","lavori","riepilogo");
     if(eAcc||!okAcc||!okAcc.length){toast("Collegato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
-    toast("Preventivo collegato ✔");
+    if(typeof window.tiSpunta==="function")window.tiSpunta("Preventivo accettato",{sotto:"Collegato al lavoro"});else toast("Preventivo collegato ✔");
   }
   async function _prevCreaLavoro(id,p,tot){
     /* 21 ott 2026 — il lavoro nasceva senza indirizzo anche quando il cliente
@@ -917,7 +917,8 @@
     const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid).select("id");
     rinfresca("preventivi","lavori","riepilogo");
     if(eAcc||!okAcc||!okAcc.length){toast("Creato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
-    toast(ruoloUtente==='professionista'?"Pratica creata dal preventivo ✔":"Lavoro creato dal preventivo ✔");
+    const _msgL=ruoloUtente==='professionista'?"Pratica creata dal preventivo":"Lavoro creato dal preventivo";
+    if(typeof window.tiSpunta==="function")window.tiSpunta("Preventivo accettato",{sotto:_msgL});else toast(_msgL+" ✔");
   }
 
   /* ===== 9 agosto 2026 — CREDITI FORMATIVI (CFP) =====

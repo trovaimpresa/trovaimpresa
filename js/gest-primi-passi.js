@@ -33,7 +33,7 @@
     { k: "preventivi", tit: "Fai il preventivo",             sotto: "Lo scrive l'AI: tu controlli e salvi.", tab: "preventivi", ai: 1 },
     { k: "invio",      tit: "Mandalo al cliente",            sotto: "Con WhatsApp o email. Lui lo apre dal telefono e lo firma.", tab: "preventivi", invia: 1 }
   ];
-  var ultimo = 0, inCorso = false, ultimoPrev = null;
+  var ultimo = 0, inCorso = false, ultimoPrev = null, primaQuanti = null;
 
   function leggi(k) { try { return localStorage.getItem(k) === "1"; } catch (_) { return false; } }
   function segna(k) { try { localStorage.setItem(k, "1"); } catch (_) {} }
@@ -80,6 +80,10 @@
       var finito = quanti === PASSI.length;
       if (finito && !leggi(VISTO)) { if (box) box.remove(); return; }   /* chi lo sapeva gia' usare */
       if (!finito) segna(VISTO);
+      /* 11 nov 2026 — l'ultimo passo fatto ADESSO, davanti ai suoi occhi: la spunta */
+      if (finito && primaQuanti !== null && primaQuanti < PASSI.length && typeof window.tiSpunta === "function")
+        window.tiSpunta("Hai mandato il tuo primo preventivo!", { durata: 2200 });
+      primaQuanti = quanti;
       var prossimo = fatti.indexOf(false);
 
       var puoParlare = !!document.getElementById("gv-btn");

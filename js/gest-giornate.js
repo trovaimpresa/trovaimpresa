@@ -639,6 +639,7 @@ async function giorSalva(){
   giorMese=schede[0].data.slice(0,7);
   await renderGiornate();
   giorDisegna({t:fatte===1?"Giornata salvata ✔":fatte+" giornate salvate ✔",k:"ok"});
+  if(fatte>0&&typeof window.tiSpunta==="function") window.tiSpunta(fatte===1?"Giornata salvata":fatte+" giornate salvate");
 }
 
 /* ---------------------------------------------------------------------

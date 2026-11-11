@@ -485,8 +485,16 @@
     if(!id&&typeof ffFotoAllega==="function")ffFotoAllega(fornitore_id);
     /* la merce comprata: si salva con la fattura (prima di chiudere, perche'
        le righe si leggono dal modulo) */
-    if(typeof acqSalva==="function")await acqSalva(data[0].id,row,!!id);
-    closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornata ✔":"Fattura registrata ✔");
+    let nAcq=0;
+    if(typeof acqSalva==="function")nAcq=await acqSalva(data[0].id,row,!!id);
+    closeSheet();renderFornitori();rinfresca("riepilogo");
+    /* 11 nov 2026 — appena registrata, la fattura si confronta con le bolle
+       dello stesso fornitore nello stesso mese (stessa bfConfronta di
+       «Acquisti del mese»). Torna: spunta verde. Merce in piu' o che non e'
+       in nessuna bolla: X rossa che resta finche' non la tocchi. Nessuna
+       bolla: non si dice niente, non c'e' niente da confrontare. */
+    if(nAcq>0&&fornitore_id&&typeof bfControllaFattura==="function"&&await bfControllaFattura(fornitore_id,row.data||todayStr()))return;
+    toast(id?"Aggiornata ✔":"Fattura registrata ✔");
   }
 
   /* ============================================================

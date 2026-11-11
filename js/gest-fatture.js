@@ -1267,6 +1267,7 @@
     await fattSincronizzaLavori(id,v);
     rinfresca("fatture","riepilogo","lavori");
     if(v==="pagata"&&typeof window.tiSpunta==="function")window.tiSpunta("Fattura pagata");
+    else if(v==="emessa"&&typeof window.tiSpunta==="function")window.tiSpunta("Fattura emessa",{sotto:"Numero "+f.numero+"/"+fattAnno(f)});
     else toast(v==="emessa"?("Fattura n. "+f.numero+"/"+fattAnno(f)+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
   }
 

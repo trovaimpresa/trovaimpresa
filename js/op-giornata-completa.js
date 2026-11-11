@@ -231,7 +231,8 @@
     if (GC.bolle.length) pezzi.push(GC.bolle.length === 1 ? "1 bolla" : GC.bolle.length + " bolle");
     GC = null;
     if (typeof rvChiudi === "function") rvChiudi();
-    if (typeof toast === "function") toast("Mandata al capo" + (pezzi.length ? ", con " + pezzi.join(", ") : ""));
+    if (typeof window.tiSpunta === "function") window.tiSpunta("Mandata al capo", pezzi.length ? { sotto: "Con " + pezzi.join(", ") } : null);
+    else if (typeof toast === "function") toast("Mandata al capo" + (pezzi.length ? ", con " + pezzi.join(", ") : ""));
   }
 
   /* la freccia «‹» rifà la schermata: prima si tiene quello che ha scritto */

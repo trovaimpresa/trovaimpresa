@@ -5947,3 +5947,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
  #riepilogo #rie-primi .pp-tre{padding:20px 16px}
  #riepilogo #rie-primi .pp-tre h3{font-size:24px}
 }
+
+/* 11 nov 2026 — Fatture sul telefono: in due colonne «8.000,00 €» usciva dal
+   riquadro (la cifra a 30px non ci sta in 160px). Sotto i 520px una colonna. */
+@media(max-width:520px){ #fatture .fatt-summary{ grid-template-columns:1fr; } }
