@@ -3123,3 +3123,48 @@ per 10 anni. Il PDF firmato lo teniamo NOI: Openapi lo cancella dopo 90 giorni.
   `netlify/functions/verifica-piva.js` (ogni ora, minuto 23): cifra di controllo gratis → 'non_valida'; registro imprese con Openapi Company IT-start SOLO se c'e' `OPENAPI_COMPANY_TOKEN` su Netlify (valida → bollino; cessata → non_valida; non trovata → 'non_trovata', senza bollino). Senza token le P.IVA giuste restano da controllare.
   ⛔ NON usare VIES: conosce solo le P.IVA abilitate al commercio estero. Provato: la P.IVA di Alessio e quella di REDIR SRL, vere, risultano INVALID.
   Al 10 nov: 86 P.IVA scritte, 9 con la cifra di controllo sbagliata (errori di battitura), 97 imprese pubbliche senza P.IVA. L'admin mostra l'esito sotto «Verificata».
+
+# 11 NOVEMBRE 2026 — LA REVISIONE DEL 10 NOV: PARTE 1 E PARTE 2 ONLINE
+
+Tre push, tutti controllati su Netlify e collaudati sul sito vero:
+→83bc76e← (7 difetti), →479c262← (finestre, Altro, Excel, 14 px), →ef58797← (Professionista fuori da Altro).
+
+## Cosa c'e' di nuovo
+- **`js/ti-finestra.js`** (caricato per primo nei 3 gestionali): la finestra NOSTRA.
+  `await tiChiedi(testo,{si,no,rosso})` → true/false; `tiAvviso(testo)`.
+  ⛔ **`gconfirm()` adesso restituisce una Promise**: si scrive SEMPRE `await gconfirm(...)`,
+  dentro una funzione `async`. Sono stati convertiti →~85← punti (alert, confirm, gconfirm) in
+  →33← file con un attrezzo che legge il codice (acorn) e mette `async` dove serve.
+  Chi scrive un `confirm(` nuovo nel gestionale sbaglia: usare `tiChiedi`.
+- **La domanda prima di uscire** (sempre in ti-finestra.js): se in un modulo hai SCRITTO qualcosa
+  (eventi `input` veri, non i valori messi dal codice) e premi Indietro/Annulla (`data-action="close"`,
+  `.sh-back`, `.ti-back`) chiede «Hai scritto qualcosa: esco senza salvare?». Dentro `#sheet` conta
+  SOLO `data-action="close"`: un «Annulla» con un'altra azione chiude un pezzo del modulo.
+  I pulsanti Salva/Invia/Manda/Crea/Registra azzerano il segno.
+- **«Parla» non copre nessun pulsante** (`js/gest-voce.js`, `liberaSotto`): guarda in 15 punti cosa
+  c'e' sotto; se c'e' un pulsante o una casella, sale sopra (massimo al 75% dello schermo).
+- **Sconto**: regola rossa «DA CORREGGERE» in preventivo (≥100% o euro ≥ totale voci), fattura e
+  computo (≥100%). Classe `.ctr-riga` = caselle affiancate, il messaggio va sotto la riga.
+- **Clienti per reparto**: ricevuta e fatture usano `_cliOr()` come la sezione Clienti.
+- **Schermata reparti** (`js/gest-altro.js`, solo computer): fuori «Sei anche un professionista?»,
+  «Dati azienda», «Noleggio»; il resto sotto «Altro ▾». Sul telefono resta tutto nel «Menu».
+  ⚠️ `gest-anche-pro.js` mette il suo pulsante accanto ad «App operaio», che sta nel menu: gest-altro
+  lo riporta fuori (osservatore con `subtree:true`).
+- **Noleggio**: «Scarica per Excel» dentro il menu «⋯» (`.nol-piu`) di ogni sezione.
+- **14 px**: barra in basso del telefono (con `letter-spacing:-.3px`, se no «Prevent…»), bollino AI,
+  «Reparto attivo», righe AI.
+- Zero grigio nei reparti; «1 messaggio»; «Sei anche un professionista?» sul telefono solo nel menu.
+- Nome del saluto: `imprese.nome` del fondatore = «Alex» (era «luigi»).
+- **Pulizia dati**: tolti PROVA di Claude, reparto «Prova Tasse e fisco» (con 16 fatture), 22 chat di
+  prova, Cestino svuotato. Righe dell'account: →16.823← → →13.857←; Cestino →2.569← → →0←.
+
+## Come si lavora da oggi (vale piu' delle righe vecchie qui sopra)
+- **Il push lo fa Claude** da una copia del repo nella nuvola (`/home/claude/trovaimpresa`, collegata
+  con add_repo). Dopo il push si allinea la cartella di Alex: `device_request_delete_permission` sulla
+  cartella, poi `git fetch`, `git update-ref refs/heads/main origin/main`, `git read-tree origin/main`,
+  `git checkout origin/main -- <file cambiati>`. Cosi' il suo `git status` resta pulito.
+- ⛔ Nella cartella di Alex i file sono CRLF e il repo e' LF: lavorando dalla VM Linux tutti i file
+  sembrano cambiati. Si scrivono i file in LF, mai `git add -A` dalla cartella collegata.
+- **Le foto a 1920**: il browser dell'app mostra solo un pezzo dello schermo. Si usa il finto Supabase
+  (`prove-claude/banchi-fissi/computo/finto-impresa.js`) con `prove-claude/attrezzi/anteprima.js`:
+  `node anteprima.js <sito> gestionale-app.html 1920 1080 out.png "<codice>"` (il cancello e' spento).

@@ -4,11 +4,23 @@ Il quaderno dei lavori a metà. UN solo file, sempre questo.
 Ogni sessione lo aggiorna alla fine: sposta le voci finite in FATTO, aggiunge quelle nuove.
 Ogni voce ha: [da quando] cosa · dove · cosa manca.
 
-Ultimo aggiornamento: 5 novembre 2026 (sera) — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
+Ultimo aggiornamento: 11 novembre 2026 (mattina) — riassunto di ottobre e inizio novembre qui sotto. Le sezioni piu' giu' (dal 29 settembre in poi) sono STORIA: prima di riprenderne una, controllare qui se e' gia' chiusa.
 
 
 
 
+
+## 🆕 11 NOVEMBRE 2026 — LA REVISIONE DEL 10 NOV (lista di Alex, 21 punti)
+
+### ✅ FATTO E ONLINE
+- Parte 1, i 7 difetti (Parla, domanda prima di uscire, sconto, clienti della ricevuta, «professionista» sul telefono, zero grigio, «1 messaggio») + nome del saluto «Alex».
+- Parte 2: punto 8 (pulizia dati, col conto), 9 (finestra nostra), 10 (3 pulsanti + Altro), 11 (Excel del noleggio nel ⋯), 13 (14 px).
+
+### 🔴 DA FARE (in quest'ordine)
+1. **Punto 12** — collaudo semplicità (`docs/COLLAUDO-SEMPLICITA.md`, 125 verdi / 491 aperte): sezione per sezione, spuntare solo il provato.
+2. **Parte 3** — una per volta, ognuna con foto e ok: 14 primo minuto guidato · 15 spunta animata · 16 «Il tuo mese» · 17 «Come ieri» nelle Giornate · 18 bolle contro fatture.
+3. **Parte 4** — da provare davvero: PDF di preventivo con sconto, ricevuta, Acquisti del mese · foto di una bolla letta dall'AI e «Parla» (dal telefono di Alex) · faccia studio tecnico e Noleggio a 1920. Dati «PROVA», da togliere alla fine col conto.
+4. App operaio: la domanda prima di uscire guarda i bottoni «Annulla»/«Indietro» per scritta: provarla su un modulo vero dell'operaio.
 
 ## 🆕 5 NOVEMBRE 2026 — DOVE SIAMO (riassunto di ottobre e inizio novembre)
 
