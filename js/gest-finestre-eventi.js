@@ -689,6 +689,7 @@
     if(a==="cal-prev"){cal=new Date(cal.getFullYear(),cal.getMonth()-1,1);renderCal();return;}
     if(a==="cal-next"){cal=new Date(cal.getFullYear(),cal.getMonth()+1,1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
+    if(a==="cal-ritardo"){filter.vista="ritardo";const b=document.querySelector('nav.tabs button[data-tab="lavori"]');if(b)b.click();else renderJobs();return;}
     if(a==="new-cli")return cliForm(null,t.dataset.tipo||"privato");
     if(a==="commercialista")return commForm();
     if(a==="save-comm")return saveComm();

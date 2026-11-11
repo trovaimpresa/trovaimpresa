@@ -671,6 +671,13 @@ Problemi trovati (7 nov 2026, prima):
 Fatto (sul banco, nel prossimo push): «Oggi» al posto del puntino; oggi col bordo blu e la scritta; nell'Agenda «👷 nome» (o «nessuno assegnato») e l'importo su ogni riga.
 Conti: totale Agenda 2.330,50 € = somma dei 5 lavori (stessi del Lavori).
 
+Collaudo dal vivo (11 nov 2026): le correzioni del 7 nov sono online. Trovati e sistemati:
+5. Calendario: i lavori in ritardo stavano nei mesi passati e il mese sembrava vuoto → riga rossa «⚠ N lavori in ritardo · Vedi» in cima, porta a Lavori filtrato (stessa regola `lavFiltra`).
+6. Giorno aperto: titolo «12/11/2026» → «Giovedì 12 novembre 2026»; «Nessun lavoro in questa data» → «Niente in programma».
+7. Giorno aperto: «Nota / promemoria del giorno» → «Nota del giorno» (la nota non avvisa, i Promemoria sì).
+8. Agenda: «Da fare» due volte → la linguetta in alto si chiama «Lavori».
+9. Tolto il promemoria «PROVA di Claude» rimasto da settembre.
+
 
 ## 3.13 — App · Fornitori · Carte · spese
 

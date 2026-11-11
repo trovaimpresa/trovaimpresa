@@ -654,6 +654,17 @@
       html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
+    /* 11 nov 2026 — collaudo 3.12: i lavori in ritardo stanno in mesi
+       passati, e il calendario del mese sembrava vuoto. Una riga rossa in
+       cima li dice e porta a Lavori gia' filtrato. La regola e' quella di
+       Lavori (lavFiltra), non una copia. */
+    const rit=$("#cal-rit");
+    if(rit){
+      const n=(typeof lavFiltra==="function")?lavFiltra(calJobs,"ritardo",todayStr()).length:0;
+      const pro=typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista";
+      rit.textContent=n?"⚠ "+n+" "+(n===1?(pro?"pratica":"lavoro"):(pro?"pratiche":"lavori"))+" in ritardo · Vedi":"";
+      rit.hidden=!n;
+    }
     calListaTelefono(y,m,days);
   }
 
@@ -796,7 +807,7 @@
       return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="Apri il lavoro"><i class="dot ${dot}"></i>
         <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
         <span class="stato ${cls}">${lab}</span></div>`;}).join("")
-      :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
+      :`<p style="color:var(--muted);font-size:15px;margin-bottom:12px">Niente in programma.</p>`;
     /* le scadenze di quel giorno: sola lettura, ma almeno si vedono */
     const scDel=calScad.filter(x=>x.data===ds);
     /* 12 agosto 2026 (sera) — queste righe usano .day-job, che nel CSS ha la
@@ -818,10 +829,12 @@
        testata col titolo e del piede fermo. Il contenuto e' lo stesso: cambia
        solo la porta da cui passa — qui titolo, corpo e azioni vanno separati,
        perche' e' cosi' che openSheetGrande li vuole nelle imprese. */
-    openSheetGrande(fdate(ds),
+    /* 11 nov 2026 — collaudo 3.12: il titolo era «12/11/2026» */
+    const dd=new Date(ds+"T12:00:00"), GG=["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+    openSheetGrande(GG[dd.getDay()]+" "+dd.getDate()+" "+mesi[dd.getMonth()].toLowerCase()+" "+dd.getFullYear(),
       `<div class="day-jobs">${list}${listSc}</div>
-      <div class="field"><label>📌 Nota / promemoria del giorno</label>
-        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(noteCache[ds]||"")}</textarea></div>`,
+      <div class="field"><label>📌 Nota del giorno</label>
+        <textarea id="day-note" placeholder="Scrivi qui cosa ti serve ricordare quel giorno">${esc(noteCache[ds]||"")}</textarea></div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>
         <button class="btn b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
         <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button>`);

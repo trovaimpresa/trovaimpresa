@@ -5973,3 +5973,10 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #fatture .fatt-summary .fatt-tot .l{ grid-area:l; margin-top:0; }
   #fatture .fatt-summary .fatt-tot .sub{ grid-area:sub; }
 }
+
+/* 11 nov 2026 — collaudo 3.12: la riga rossa dei lavori in ritardo in cima
+   al calendario. Stessi colori della riga rossa di Fatture. */
+#calendario .cal-rit{display:block;background:#FDECEC;border:1px solid #F3B8B8;color:#B42318;
+  border-radius:12px;padding:14px 18px;font-size:16px;font-weight:700;line-height:1.4;margin:0 0 14px;cursor:pointer}
+#calendario .cal-rit[hidden]{display:none}
+#calendario .cal-rit:hover{background:#FBDADA}

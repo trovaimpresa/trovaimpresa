@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/gestionale.css?v=11nov7">
+<link rel="stylesheet" href="/css/gestionale.css?v=11nov8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=30">
 
@@ -311,11 +311,11 @@
       <!-- ===== 6 settembre 2026 — LE ORE ENTRANO QUI =====
            Scelta di Alessio: NON una voce nuova nel menu (sarebbe la 25ª).
            «Agenda operatore» è già la sezione che si legge persona per
-           persona: «Da fare» è quello che deve ancora fare, «Ore fatte» è
+           persona: «Lavori» è quello che deve ancora fare, «Ore fatte» è
            quello che ha fatto. Stessa sezione, due linguette. -->
       <div class="sec-head"><h2>Agenda operatore</h2>
         <div class="segm" id="ag-vista">
-          <button class="on" data-action="ag-vista" data-v="lavori">Da fare</button>
+          <button class="on" data-action="ag-vista" data-v="lavori">Lavori</button>
           <button data-action="ag-vista" data-v="ore">Ore fatte</button>
         </div>
       </div>
@@ -351,6 +351,7 @@
     <section id="calendario">
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button class="btn" data-action="cal-prev">‹</button><button class="btn" data-action="cal-today">Oggi</button><button class="btn" data-action="cal-next">›</button></div></div>
+      <div class="cal-rit" id="cal-rit" data-action="cal-ritardo" hidden></div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span><i class="dot scad"></i>Scadenza</span><span><svg class="ti-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Nota</span></div>
     </section>
@@ -770,7 +771,7 @@
 <script src="/js/gest-ingresso.js?v=10nov1"></script>
 <script src="/js/gest-ai-moduli.js?v=11nov33"></script>
 <script src="/js/gest-riepilogo-schede.js?v=10nov-sconto"></script>
-<script src="/js/gest-schede-clienti.js?v=11nov34"></script>
+<script src="/js/gest-schede-clienti.js?v=11nov38"></script>
 <script src="/js/gest-carte-documenti.js?v=11nov34"></script>
 <script src="/js/gest-richieste-chat.js?v=8nov1"></script>
 <script src="/js/gest-scadenze-pratiche.js?v=11nov37"></script>
@@ -780,7 +781,7 @@
 <script src="/js/gest-preventivi.js?v=11nov33"></script>
 <script src="/js/gest-cestino.js?v=11nov35"></script>
 <script src="/js/gest-ricerca.js?v=10nov1"></script>
-<script src="/js/gest-finestre-eventi.js?v=11nov37"></script>
+<script src="/js/gest-finestre-eventi.js?v=11nov38"></script>
 <script src="/js/gest-avvio.js"></script>
 
 <!-- ===== IL CANCELLO — 23 agosto 2026 =====
