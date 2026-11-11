@@ -196,6 +196,8 @@
     /* la rilettura dell'AI: costa un credito, quindi parte solo da qui */
     if(a==="ctr-ai"){ctrAiGuarda(t.dataset.ctr||"preventivo");return;}
     if(a==="ds-filtro"){dsFilter=t.dataset.v||"da_fare";renderDalSito();return;}
+    /* 11 nov 2026 — collaudo 3.16: dalla pagina vuota si va a vedere la propria scheda pubblica */
+    if(a==="ds-mia-pagina"){if(dsMieIds&&dsMieIds.length)window.open("/profilo-impresa.html?id="+encodeURIComponent(dsMieIds[0]),"_blank","noopener");return;}
     if(a==="ds-apri")return dsApri(id);
     if(a==="ds-contatti")return dsContatti(id);
     if(a==="ds-prev")return dsCreaPreventivo(id);

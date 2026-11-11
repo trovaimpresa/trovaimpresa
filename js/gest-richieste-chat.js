@@ -81,7 +81,7 @@
   async function contaDalSito(){
     if(!sb||!sbUid){setCnt("#cnt-dalsito",0);return;}
     try{
-      const L=dsCache.length?dsCache:await dsCarica();
+      const L=dsCache.length?dsCache:((await dsCarica())||[]);
       const n=L.filter(r=>r._stato==="nuova").length;
       setCnt("#cnt-dalsito",n,"attesa");
       _rieDalSito=n; try{ rieVociExtra(); }catch(e){}

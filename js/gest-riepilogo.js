@@ -1066,7 +1066,7 @@
       return !!b && b.style.display!=="none" && !tabNascosto(t);};
     if(_menuVisto("dalsito")){
       try{
-        const DS=(typeof dsCache!=="undefined"&&dsCache.length)?dsCache:await dsCarica();
+        const DS=(typeof dsCache!=="undefined"&&dsCache.length)?dsCache:((await dsCarica())||[]);
         const nuove=DS.filter(r=>r._stato==="nuova").length;
         C.push(rieCard({
           tab:"dalsito", titolo:"Richieste dal sito", n:nuove, dati:DS.length>0,

@@ -537,7 +537,7 @@
   /* Le viste devono coprire TUTTI gli stati: una richiesta con il preventivo
      gia' fatto finiva solo in "Tutte" e sembrava sparita. */
   const DS_VISTE=[{k:"da_fare",lab:"Da fare"},{k:"fatte",lab:"Fatte"},{k:"tutte",lab:"Tutte"}];
-  let dsCache=[], dsFilter="da_fare"; /* 7 nov 2026: «Nuove» tolta, era quasi uguale a «Da fare» */
+  let dsCache=[], dsFilter="da_fare", dsMieIds=[]; /* 7 nov 2026: «Nuove» tolta, era quasi uguale a «Da fare» */
 
   const _dsData=r=>String(r.created_at||"").slice(0,10);
   const _dsCosa=r=>r.categoria_lavoro||r.tipo_lavoro||"Richiesta di preventivo";
@@ -550,7 +550,11 @@
        richieste di TUTTO il sito: nel suo gestionale finivano i clienti delle
        altre imprese (Trieste, Ottaviano...). */
     const mie=await sb.from("imprese").select("id").eq("user_id",sbUid);
+    /* 11 nov 2026 — collaudo 3.16: senza rete diceva «ancora nessuna
+       richiesta» (regola 20). null = non letto, e lo dice. */
+    if(!mie||mie.error)return null;
     const ids=((mie&&mie.data)||[]).map(x=>x.id);
+    dsMieIds=ids;
     if(!ids.length)return [];
     const [r1,r2]=await Promise.all([
       sb.from("preventivi")
@@ -559,10 +563,7 @@
         .order("created_at",{ascending:false}).limit(300),
       sb.from("gest_dalsito").select("preventivo_id,stato,preventivo_creato_id").eq("user_id",sbUid)
     ]);
-    if(r1.error){
-      toast("Non riesco a leggere le richieste dal sito: "+(r1.error.message||"il database non risponde"));
-      return [];
-    }
+    if(r1.error)return null;
     const m={};(r2.data||[]).forEach(s=>{m[String(s.preventivo_id)]=s;});
     return (r1.data||[]).map(r=>{
       const s=m[String(r.id)];
@@ -661,7 +662,9 @@
   async function renderDalSito(){
     const box=$("#ds-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML="";return;}
-    dsCache=await dsCarica();
+    const letti=await dsCarica();
+    if(letti===null){dsCache=[];listaNonLetta(box,"le richieste dal sito","dalsito","#ds-viste");return;}
+    dsCache=letti;
     const aperte=dsCache.filter(r=>r._stato==="nuova"||r._stato==="vista");
     const conta={
       da_fare:aperte.length,
@@ -682,7 +685,7 @@
         dsCache.length?"Prova a cambiare vista qui sopra."
           :"Quando un cliente ti scrive dalla tua pagina su TrovaImpresa, la richiesta compare qui dentro: chi ha scritto, cosa gli serve e i suoi contatti. Da qui gli fai il preventivo con un clic.",
         _SVGV+'<path d="M3 12h4l2 5 4-13 2 8h6"/></svg>',
-        null),
+        (!dsCache.length&&dsMieIds.length)?{t:"Guarda la tua pagina",a:"ds-mia-pagina"}:null),
       colonne:[{lab:"Arrivata",w:"18%"},{lab:"Chi ha scritto",w:"26%"},{lab:"Cosa chiede",w:"32%"},{lab:"Dove",w:"24%"}],
       righe:L.map(r=>{
         const st=_dsSt(r), q=quando(_dsData(r),{neutro:true});

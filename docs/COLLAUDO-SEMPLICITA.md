@@ -820,6 +820,8 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 **Fatto (ok di Alex):** un solo «Apri» (`ds-apri` aggiunto ad `AZ_APERTURA`); dentro, in alto, «Crea il preventivo» (blu) e «Segna chiusa» — le porta la finestra da sola (`dsApri` passa `dsVoci(r)`), cosi' ci sono anche aprendo dal Riepilogo o dalla ricerca. Schede: Da fare · Fatte · Tutte. Via il riquadro del conteggio. Spiegazione in 1 riga.
 **Conti:** nessun conto in questa sezione.
 
+**Collaudo dal vivo (11 nov 2026):** le correzioni del 7 nov sono online (sul tuo account nessuna richiesta). Sistemato: senza rete diceva «Ancora nessuna richiesta» → «Non riesco a leggere» col Riprova (`dsCarica` torna null, regola 20; chi la chiama altrove usa `||[]`); la pagina vuota ha il pulsante «Guarda la tua pagina» (apre la scheda pubblica).
+
 
 | | PC | Tel |
 |---|:-:|:-:|
