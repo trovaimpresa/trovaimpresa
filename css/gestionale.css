@@ -5926,3 +5926,24 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .barra-basso button{ padding-left:0; padding-right:0; }
   .barra-basso button span{ letter-spacing:-.3px; }
 }
+
+/* 11 nov 2026 — PRIMI PASSI: i tre passi (cliente, preventivo, invio) */
+#riepilogo #rie-primi .pp-tre{margin:0 0 14px}
+#riepilogo #rie-primi .pp-tre-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+#riepilogo #rie-primi .pp-tre p{margin:0}
+#riepilogo #rie-primi .pp-tre .pp-chiudi{color:#dbe6f3}
+#riepilogo #rie-primi .pp-tre .pp-barra{background:rgba(255,255,255,.18);height:14px;margin:18px 0 8px}
+#riepilogo #rie-primi .pp-tre .pp-barra i{background:#ff8800}
+#riepilogo #rie-primi .pp-conto{font-size:18px;color:#dbe6f3}
+#riepilogo #rie-primi .pp-conto b{color:#fff;font-weight:800}
+#riepilogo #rie-primi .pp-bott{display:flex;gap:10px;flex:0 0 auto;flex-wrap:wrap}
+#riepilogo #rie-primi .pp-parla2{display:inline-flex;align-items:center;gap:8px;background:#ff8800!important;border-color:#ff8800!important;color:#0a2a4d!important}
+#riepilogo #rie-primi .pp-parla2 svg{width:22px;height:22px}
+#riepilogo #rie-primi .pp-es2{display:block;font-style:normal;margin-top:6px;color:#334155}
+#riepilogo #rie-primi .pp-vai[disabled]{opacity:.55;cursor:default}
+@media(max-width:700px){
+ #riepilogo #rie-primi .pp-bott{margin-left:54px;width:calc(100% - 54px)}
+ #riepilogo #rie-primi .pp-bott .pp-vai{flex:1;margin-left:0;width:auto}
+ #riepilogo #rie-primi .pp-tre{padding:20px 16px}
+ #riepilogo #rie-primi .pp-tre h3{font-size:24px}
+}
