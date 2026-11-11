@@ -226,14 +226,14 @@ La finestrella delle stelline «Come ti trovi col gestionale?» resta com'è: Al
 | Si capisce in 3 secondi a cosa serve | [x] | [x] |
 | UN solo pulsante principale, ben visibile | [x] | [x] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
-| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
-| Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
-| Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
+| Sezione vuota: dice cosa fare e ha il pulsante | [x] | [x] |
+| Errori in italiano chiaro, che dicono come rimediare | [x] | [x] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
 | Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
@@ -244,7 +244,7 @@ La finestrella delle stelline «Come ti trovi col gestionale?» resta com'è: Al
 | **Funziona** | | |
 | Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
 | Console senza errori | [x] | [x] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [x] | [x] |
 
 Problemi trovati (7 nov 2026, prima):
 1. Due pulsanti principali («+ Nuovo preventivo» bianco, «Genera con AI» viola più forte).
@@ -260,6 +260,12 @@ Fatto (sul banco, push a fine giornata): un pulsante principale blu per sezione 
 Conti: 7 casi a mano + 12 preventivi veri del database = schermo, banco e vista `gest_preventivi_totali` uguali; un sabotaggio della formula viene accusato.
 Da fare dopo il push: collaudo dal vivo, computer e telefono, e spunta delle caselle.
 
+**11 nov 2026 — ripreso (ok di Alex sulle foto):**
+Misurato: titolo, filtri, lista e schede dal 413 al 1797 px sul 1920; dal 16 al 359 sul telefono. Clic: nuovo 1 · al cliente 2 (Apri → Invia) · lavoro 2 (Apri → Accettato).
+Provato sul sito vero: preventivo di prova 3 × 12,35 = 37,05 €; modificato a 4 × 12,35 = 49,40 €; nel cestino; ripreso (49,40 €); buttato per sempre. Zero errori in console.
+Problemi trovati: (1) senza rete la lista diceva «Ancora nessun preventivo — Crea il primo» (stesso difetto in Lavori, Clienti e Fatture); (2) Salva senza titolo: solo un messaggino scuro di 2 secondi, casella non segnata; (3) «Eliminare questo preventivo?» non diceva quale e faceva credere che sparisse.
+Fatto: `listaNonLetta()` + `letturaKo()` (js/gest-schede-clienti.js), riquadro rosso con Riprova (`lista-riprova`) in Preventivi, Lavori, Clienti, Fatture — la lista di prima non si cancella; `campoManca()` (js/gest-ai-moduli.js): casella rossa con la frase sotto, ci va il cursore, messaggio rosso; «Mettere nel cestino «titolo»? Lo riprendi dal Cestino quando vuoi.» + «Preventivo nel cestino: lo riprendi da lì».
+Provato col finto Supabase a 1920 e 375: le 4 liste senza rete → riquadro rosso, Riprova → lista giusta; titolo e voce mancanti segnati; domanda del cestino col nome. Zero errori.
 
 ## 3.4 — App · Lavori (artigiano: Interventi · studio: Pratiche)
 
@@ -272,14 +278,14 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono, e spunta delle cas
 | Si capisce in 3 secondi a cosa serve | [x] | [x] |
 | UN solo pulsante principale, ben visibile | [x] | [x] |
 | Le cose rare non stanno in mezzo (menu «...» o più in basso) | [x] | [x] |
-| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [ ] | [ ] |
+| Le 3 cose tipiche in pochi clic — clic contati: 1 / 2 / 2 | [x] | [x] |
 | Parole semplici, di cantiere, niente inglese | [x] | [x] |
 | Niente spiegazioni addosso a cose che si capiscono da sole | [x] | [x] |
-| Sezione vuota: dice cosa fare e ha il pulsante | [ ] | [ ] |
-| Errori in italiano chiaro, che dicono come rimediare | [ ] | [ ] |
+| Sezione vuota: dice cosa fare e ha il pulsante | [x] | [x] |
+| Errori in italiano chiaro, che dicono come rimediare | [x] | [x] |
 | **Grafica** | | |
 | Testi, pulsanti e icone GRANDI sul 1920 | [x] | [x] |
-| Allineato sulla stessa colonna sinistra e destra (misurato) | [ ] | [ ] |
+| Allineato sulla stessa colonna sinistra e destra (misurato) | [x] | [x] |
 | Uguale alle altre sezioni (testata, pulsanti, misure) | [x] | [x] |
 | Telefono 380 px: niente fuori schermo, pulsanti facili, niente scritte tagliate | [x] | [x] |
 | Colori = stato (rosso problema, ambra attesa, verde fatto, blu in corso) | [x] | [x] |
@@ -290,7 +296,7 @@ Da fare dopo il push: collaudo dal vivo, computer e telefono, e spunta delle cas
 | **Funziona** | | |
 | Provato DAL VIVO sul sito vero, account di Alex | [x] | [x] |
 | Console senza errori | [x] | [x] |
-| Salvare, modificare, cestino, recuperare: tutto funziona | [ ] | [ ] |
+| Salvare, modificare, cestino, recuperare: tutto funziona | [x] | [x] |
 
 Problemi trovati (7 nov 2026, prima):
 1. Pallino rosso con scritta «Da fare» sui lavori in ritardo; «In corso» ambra come «Da fare».
@@ -305,6 +311,12 @@ Fatto (sul banco, push a fine giornata): scritta «In ritardo» col rosso, palli
 Conti: 300 + 400 + 1.000 + 450,50 + 180 = 2.330,50 € = totale a schermo = database.
 Collaudo dal vivo (push `fecdb00`, 7 nov sera): computer 1920 e telefono 380, account di Alex, console vuota, niente fuori schermo. Restano vuote le caselle che non si possono provare senza cambiare dati veri (salva/cestino/recupera) o che non si sono viste (sezione vuota, errori).
 
+**11 nov 2026 — ripreso:**
+Misurato: tutto dal 413 al 1797 px sul 1920. Clic veri: nuovo 1 · finito 2 (Apri → Segna fatto) · fattura 2 (Apri → Crea fattura, che da finito è la prima).
+Provato sul sito vero: lavoro di prova 123,45 € (totale 2.150,50 → 2.273,95 €), modificato a 200 € (2.350,50 €), segnato fatto («Finiti e non ancora incassati 200,00 €»), nel cestino, ripreso, buttato per sempre. «Oggi» vuoto: «Niente in programma per oggi».
+Problemi trovati: (1) Salva senza descrizione: «Compila Descrizione e Data» nero; (2) il correttore delle parole fermava il primo «Crea lavoro» senza dirlo; (3) dopo ogni lavoro con data: «ti avviso 30 giorni prima…» anche per un lavoro fra 9 giorni; (4) «Eliminare questo lavoro?» senza il nome; (5) il messaggio copriva i pulsanti in fondo alla finestra (tutte le finestre).
+Fatto: campoManca su descrizione, data, importo; «Ho corretto le parole: guarda e premi di nuovo «Crea lavoro»» (vale anche per Noleggio e app operaio); avvisi solo quelli che arriveranno davvero (lavoro di oggi: nessuna domanda); «Mettere nel cestino «nome»?»; il messaggio sta sopra la barra dei pulsanti.
+Provato col finto Supabase a 1920 e 375: tutto come nelle foto, zero errori.
 
 ## 3.5 — App · Clienti
 
@@ -1445,6 +1457,7 @@ perché è lì che oggi la gente si ferma.
 |---|---|---|---|
 | 7 nov 2026 | — | inventario e lista di controllo | → solo docs ← |
 | 7 nov 2026 | 3.1 Reparti · 3.2 Assistente | vedi le due schede qui sopra | →3a6ab22← →8760c43← |
+| 11 nov 2026 | 3.3 Preventivi · 3.4 Lavori | errori senza rete, caselle che mancano, cestino col nome, messaggio sopra i pulsanti | → in attesa dell'ok ← |
 | 7 nov 2026 | 3.3–3.11 (senza 3.10) + 3.7 | vedi le schede; collaudo dal vivo trovato 1 difetto: nel lavoro aperto «Segna fatto» non era per primo (sistemato, va nel prossimo push) | →fecdb00← |
 
 

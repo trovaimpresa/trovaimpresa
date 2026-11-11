@@ -765,6 +765,7 @@
     ['Eliminare questo lavoro?','Eliminare questa pratica?'],
     ['Eliminare questo condominio?','Eliminare questo cliente?'],
     ['lavori collegati. Eliminarlo comunque?','pratiche collegate. Eliminarlo comunque?'],
+    ['Lavoro nel cestino','Pratica nel cestino'],
     ['Lavoro eliminato','Pratica eliminata'],
     ['Persona eliminata','Collaboratore eliminato'],
 

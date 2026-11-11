@@ -251,6 +251,28 @@
       ${o.nota?`<div class="job-note">${o.nota}</div>`:""}
       <div class="job-actions">${schedaUnPulsante(o.azioni)||schedaAzioni(o.azioni)}</div></div>`;
   }
+  /* 11 nov 2026 — collaudo della semplicita' (3.3): QUANDO LA RETE NON
+     RISPONDE LA LISTA NON PUO' DIRE «ANCORA NESSUNO». Preventivi, Lavori,
+     Clienti e Fatture leggevano senza guardare l'errore: senza connessione
+     la lista arrivava vuota e la schermata diceva «Ancora nessun preventivo
+     — Crea il primo», cioe' una bugia che fa rifare il lavoro da capo (e nei
+     Clienti fa nascere i doppioni). Adesso un riquadro rosso dice che i dati
+     ci sono e ha il pulsante Riprova, come il Riepilogo dal 6 agosto.
+       box   il contenitore della lista (selettore o elemento)
+       cosa  «i preventivi», «i lavori», …
+       tab   la sezione da ridisegnare con Riprova (chiave di RENDER_TAB)
+       viste i filtri sopra la lista, da svuotare (facoltativo) */
+  function listaNonLetta(box,cosa,tab,viste){
+    const b=typeof box==="string"?document.querySelector(box):box;
+    if(viste){const v=typeof viste==="string"?document.querySelector(viste):viste;if(v)v.innerHTML="";}
+    if(!b)return;
+    b.style.display="block";
+    b.innerHTML='<div class="rie-errore"><b>Non riesco a leggere '+cosa+'.</b> '
+      +'La connessione non risponde: i tuoi dati sono al sicuro, non sono spariti. '
+      +'<button class="btn" data-action="lista-riprova" data-tab="'+tab+'">Riprova</button></div>';
+  }
+  /* vero se una delle risposte di Supabase e' arrivata con un errore */
+  function letturaKo(){ for(let i=0;i<arguments.length;i++){const r=arguments[i];if(!r||r.error)return true;} return false; }
   function tabVuotoCerca(q){
     /* il pulsante per togliere la ricerca: senza, chi cerca una cosa che non
        c'e' resta davanti a una schermata vuota senza capire che basta
@@ -299,14 +321,18 @@
        console). Si aspetta di essere dentro un reparto. */
     if(!curMestiere())return;
     const oggi=todayStr();
-    const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
+    let _r3=[];
+    try{ _r3=await Promise.all([
       /* Per gli studi si legge tutta la riga ("*") invece dell'elenco fisso: servono
          anche i campi della pratica per riaprirli in modifica. Con "*" non si rischia
          l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
       sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).or(_cliOr(curMestiere()))
-    ]);
+    ]); }catch(e){}
+    /* 11 nov 2026 — senza rete non si dice «nessun lavoro» (listaNonLetta) */
+    if(letturaKo(_r3[0],_r3[1],_r3[2])){listaNonLetta(box,"i lavori","lavori",viste);return;}
+    const lav=_r3[0].data, ops=_r3[1].data, cls=_r3[2].data;
     const TUTTI=lav||[];
     lavCache=TUTTI;
     lavTel=Object.fromEntries((ops||[]).map(o=>[o.id,o.telefono||""]));
@@ -877,7 +903,11 @@
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
     if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun cliente","Accedi per gestire i clienti.");return;}
-    const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome");
+    let _rC=null; try{ _rC=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(curMestiere())).order("nome"); }catch(e){}
+    /* 11 nov 2026 — senza rete non si dice «nessun cliente»: si rischierebbe di
+       riscriverli tutti da capo. E cliCache resta quella di prima (le tendine). */
+    if(letturaKo(_rC)){listaNonLetta(box,"i clienti","clienti");return;}
+    const data=_rC.data;
     cliCache=data||[];
     let L=cliCache;
     if(cliQ){

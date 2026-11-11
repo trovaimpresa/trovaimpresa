@@ -253,7 +253,7 @@
     if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}rinfresca("preventivi","riepilogo");if(t.dataset.v==="accettato"&&typeof window.tiSpunta==="function")window.tiSpunta("Preventivo accettato");else toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
     if(a==="prev-to-fatt")return fattDaPreventivoId(id);
-    if(a==="del-prev"){if((await gconfirm("Eliminare questo preventivo?")))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
+    if(a==="del-prev"){/* 11 nov 2026 — collaudo 3.3: la domanda dice QUALE preventivo e che va nel Cestino, non che sparisce */const _pv=((typeof prevCache!=="undefined"?prevCache:[])||[]).find(x=>String(x.id)===String(id));const _nm=_pv&&_pv.titolo?"«"+_pv.titolo+"»":"questo preventivo";const _ok=(typeof window.tiChiedi==="function")?await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true}):await gconfirm("Mettere nel cestino "+_nm+"?");if(_ok)sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo nel cestino: lo riprendi da lì");});return;}
     if(a==="prev-pdf")return prevControllaEManda(id);
     if(a==="prev-incarico")return incaricoForm(id);
     if(a==="incarico-pdf")return incaricoPdf(id);
@@ -292,6 +292,8 @@
     /* click su una scheda del Riepilogo: entra nella sezione corrispondente,
        come se avessi cliccato la voce nel menu di sinistra. */
     if(a==="rie-go"){const b=document.querySelector('nav.tabs button[data-tab="'+t.dataset.go+'"]');if(b){b.click();window.scrollTo(0,0);}return;}
+    /* 11 nov 2026 — collaudo 3.3: Riprova del riquadro rosso delle liste (listaNonLetta) */
+    if(a==="lista-riprova"){const f=RENDER_TAB[t.dataset.tab];t.disabled=true;t.textContent="Riprovo…";if(f)Promise.resolve(f()).catch(()=>{});return;}
     if(a==="rie-riprova"){const g=$("#rie-grid");if(g)g.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';renderRiepilogo();renderContatori();return;}
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non è una scheda del menu — quindi apro direttamente quella. */
@@ -602,7 +604,13 @@
        avrebbe tolto il lavoro dallo schermo lasciandolo su Supabase. Quella
        vera e' "del-job-supa". */
     if(a==="del-job-supa"){
-      if(!(await gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
+      /* 11 nov 2026 — collaudo 3.4: la domanda dice QUALE lavoro (regola 22) */
+      const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
+      const _lv=((typeof lavCache!=="undefined"?lavCache:[])||[]).find(x=>String(x.id)===String(id));
+      const _nm=_lv&&_lv.descrizione?"«"+String(_lv.descrizione).slice(0,80)+"»":"";
+      if(_cest&&_nm&&typeof window.tiChiedi==="function"){
+        if(!(await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino "+_nm+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
+      }else if(!(await gconfirm(_cest
           ? "Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto."
           : "Eliminare questo lavoro? L'azione non si può annullare.")))return;
       const {data:foto}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",id).eq("user_id",sbUid);
@@ -615,7 +623,7 @@
       const {data:okDel,error}=await sb.from("gest_lavori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDel||!okDel.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      renderAll();toast("Lavoro eliminato ✔");return;
+      renderAll();toast(_cest?"Lavoro nel cestino: lo riprendi da lì":"Lavoro eliminato ✔");return;
     }
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){

@@ -558,23 +558,31 @@
     }
     const mid=curMestiere();
 
-    const [{data:ff},{data:cls},{data:az},{data:lav}]=await Promise.all([
+    let _r4=[];
+    try{ _r4=await Promise.all([
       sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
       sb.from("gest_clienti").select("*").eq("user_id",sbUid).or(_cliOr(mid)).order("nome"),
       sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
       sb.from("gest_lavori").select("id,descrizione,dove,stato,importo,data_fatto,data_prevista,cliente_id")
         .eq("user_id",sbUid).eq("mestiere_id",mid).eq("stato","fatto")
-    ]);
+    ]); }catch(e){}
+    /* 11 nov 2026 — senza rete non si dice «nessuna fattura» e i riquadri non
+       scrivono 0,00 € da incassare (listaNonLetta) */
+    if(letturaKo(_r4[0],_r4[1],_r4[2],_r4[3])){if(sum)sum.innerHTML="";body.className="";listaNonLetta(body,"le fatture","fatture",viste);return;}
+    const ff=_r4[0].data, cls=_r4[1].data, az=_r4[2].data, lav=_r4[3].data;
     fattCache=ff||[]; fattCliCache=cls||[]; fattAzienda=az||null;
     fattRighe={}; fattLavori={}; fatturaPdfCache={};
 
     const ids=fattCache.map(f=>f.id);
     if(ids.length){
-      const [{data:rr},{data:fl},{data:pdfs}]=await Promise.all([
+      let _r3=[];
+      try{ _r3=await Promise.all([
         sb.from("gest_fattura_righe").select("*").eq("user_id",sbUid).in("fattura_id",ids).order("ordine"),
         sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("fattura_id",ids),
         sb.from("gest_foto").select("id,fattura_id,storage_path,created_at").eq("user_id",sbUid).eq("tipo","fattura").in("fattura_id",ids)
-      ]);
+      ]); }catch(e){}
+      if(letturaKo(_r3[0],_r3[1])){if(sum)sum.innerHTML="";body.className="";listaNonLetta(body,"le fatture","fatture",viste);return;}
+      const rr=_r3[0].data, fl=_r3[1].data, pdfs=_r3[2]&&_r3[2].data;
       (rr||[]).forEach(r=>{(fattRighe[r.fattura_id]=fattRighe[r.fattura_id]||[]).push(r);});
       (fl||[]).forEach(x=>{(fattLavori[x.fattura_id]=fattLavori[x.fattura_id]||[]).push(x.lavoro_id);});
       /* il registro per il menu dei Lavori: chi è già dentro una fattura */

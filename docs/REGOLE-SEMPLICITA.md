@@ -56,3 +56,9 @@ ferme prima di cominciare.
 - l'elenco delle parole vietate e delle parole giuste
 
 - 10 nov 2026 — In ogni elenco, in cima ci stanno le ULTIME cose salvate (giornate, fatture, foto, spese): non si deve scorrere per vedere quello che si è appena messo.
+
+## Decise l'11 nov 2026 (Preventivi)
+20. **Senza rete una lista non dice «vuoto».** Se la lettura non riesce si usa `listaNonLetta()`: riquadro rosso «Non riesco a leggere…, i tuoi dati sono al sicuro» con Riprova. Mai «Ancora nessun…» e mai cifre a zero.
+21. **Una casella che manca si segna sulla casella.** `campoManca(casella, "Manca …: scrivilo qui.")`: rossa, frase sotto, cursore dentro. Niente messaggino nero che sparisce.
+22. **Buttare dice cosa e dove va.** «Mettere nel cestino «nome»? Lo riprendi dal Cestino quando vuoi.» Se va davvero via per sempre, si dice «per sempre».
+

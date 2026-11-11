@@ -194,7 +194,13 @@
     if (!tas.length) return;                     /* niente da correggere: salva come prima */
     e.preventDefault(); e.stopImmediatePropagation();
     Promise.all(tas.map(correggi)).then(function (cambiati) {
-      if (cambiati.some(Boolean)) return;         /* cambiato: guardalo e ripremi Salva */
+      /* 11 nov 2026 — collaudo 3.4: prima si fermava zitto, e chi aveva premuto
+         «Crea lavoro» credeva di aver salvato. Adesso lo dice. */
+      if (cambiati.some(Boolean)) {
+        var nome = (btn.innerText || btn.textContent || 'Salva').replace(/\s+/g, ' ').trim();
+        try { if (typeof toast === 'function') toast('Ho corretto le parole: guarda e premi di nuovo «' + nome + '»'); } catch (_) {}
+        return;
+      }
       lascia = true;
       try { btn.click(); } finally { lascia = false; }
     });

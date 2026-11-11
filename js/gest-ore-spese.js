@@ -990,7 +990,8 @@
     filoMetti("preventivi","preventivi");
     const box=$("#prev-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo</p><small>Accedi per creare i preventivi</small></div>`;return;}
-    const [{data:pv},{data:cl}]=await Promise.all([
+    let _rPv,_rCl;
+    try{ [_rPv,_rCl]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
       /* 9 agosto 2026 — si leggono ANCHE i clienti nel cestino: prima il
          preventivo di un cliente cestinato mostrava un trattino e non si
@@ -999,12 +1000,18 @@
         ? sb.raw("gest_clienti").select("id,nome,eliminato_il")
         : sb.from("gest_clienti").select("id,nome")
       ).eq("user_id",sbUid).or(_cliOr(curMestiere()))
-    ]);
+    ]); }catch(e){}
+    /* 11 nov 2026 — senza rete non si dice «Ancora nessun preventivo» (listaNonLetta) */
+    if(letturaKo(_rPv)){listaNonLetta(box,"i preventivi","preventivi","#prev-viste");return;}
+    const pv=_rPv.data, cl=_rCl&&_rCl.data;
     prevCache=pv||[];
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,(c.nome||"")+(c.eliminato_il?" (nel cestino)":"")]));
     let tot={};
     if(prevCache.length){
-      const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id));
+      let _rRr=null; try{ _rRr=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id)); }catch(e){}
+      /* senza le voci i totali uscirebbero a 0,00 €: meglio dire che non si leggono */
+      if(letturaKo(_rRr)){listaNonLetta(box,"i preventivi","preventivi","#prev-viste");return;}
+      const rr=_rRr.data;
       (rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     }
     /* ===== 9 agosto 2026 — a schermo lo STESSO numero del PDF =====

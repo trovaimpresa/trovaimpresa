@@ -285,6 +285,17 @@
     t.textContent=_msgPro(isErr?traduciErrore(s):s);
     t.classList.remove("ok","err");
     if(isErr)t.classList.add("err");else if(isOk)t.classList.add("ok");
+    /* 11 nov 2026 — collaudo 3.4: con una finestra aperta il messaggio
+       copriva i pulsanti in fondo («Crea lavoro», «Salva»), proprio quelli da
+       premere dopo averlo letto. Adesso si mette sopra la barra dei pulsanti. */
+    try{
+      let su=0;
+      document.querySelectorAll(".sh-foot").forEach(function(f){
+        if(!f.offsetParent)return; const r=f.getBoundingClientRect();
+        if(r.height&&r.top<innerHeight)su=Math.max(su,innerHeight-r.top);
+      });
+      t.style.bottom=su?(su+12)+"px":"";
+    }catch(_){}
     t.classList.add("show");
     clearTimeout(t._t);
     t._t=setTimeout(()=>t.classList.remove("show"),isErr?5000:2600);

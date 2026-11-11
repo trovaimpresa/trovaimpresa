@@ -645,8 +645,15 @@
       const tipo=String((dati&&dati.pratica_tipo)||"").trim();
       const desc=String((dati&&dati.descrizione)||"").trim();
       const titolo=titoloScadenza(tipo,desc,pro);
+      /* 11 nov 2026 — collaudo 3.4: si dicono solo gli avvisi che arriveranno
+         davvero. Per un lavoro fra 9 giorni «30 giorni prima» non parte mai, e
+         per un lavoro di oggi non ne parte nessuno: allora non si chiede. */
+      const _gg=Math.round((new Date(data+"T12:00:00")-new Date(todayStr()+"T12:00:00"))/864e5);
+      const _av=[[30,"30 giorni prima"],[7,"7 giorni prima"],[1,"il giorno prima"]].filter(x=>_gg>=x[0]).map(x=>x[1]);
+      if(!_av.length)return;
+      const _avT=_av.length===1?_av[0]:_av.slice(0,-1).join(", ")+" e "+_av[_av.length-1];
       if(!(await gconfirm("Vuoi che ti ricordi la data del "+fdate(data)+"?\n\n"
-        +"Creo la scadenza \""+titolo+"\" collegata a "+(pro?"questa pratica":"questo lavoro")+" e ti avviso per email 30 giorni prima, 7 giorni prima e il giorno prima.")))return;
+        +"Creo la scadenza \""+titolo+"\" collegata a "+(pro?"questa pratica":"questo lavoro")+" e ti avviso per email "+_avT+".")))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
         tipo_pratica:pro?"Presentazione pratica":"Consegna lavori",lavoro_id:lavId,
         cliente_id:(dati&&dati.cliente_id)||null,data_scadenza:data,stato:"aperta",avvisa:true};
@@ -823,9 +830,11 @@
     if(editing&&editing.supa){
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
-      if(!descrizione||!data_prevista){toast("Compila Descrizione e Data");return;}
+      /* 11 nov 2026 — collaudo 3.4: la casella che manca si segna (campoManca) */
+      if(!descrizione){campoManca($("#j-desc"),"Manca cosa c'è da fare: scrivilo qui.");return;}
+      if(!data_prevista){campoManca($("#j-data"),"Manca la data: mettila qui.");return;}
       const importo=_numIt("#j-imp")||0;
-      if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
+      if(editing.fattura&&!(importo>0)){campoManca($("#j-imp"),"Manca l'importo: scrivilo qui.");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id},

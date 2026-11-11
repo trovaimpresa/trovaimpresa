@@ -1480,6 +1480,30 @@
     dopo.parentNode.insertBefore(msg,dopo.nextSibling);
   }
 
+  /* 11 nov 2026 — collaudo della semplicita' (3.3): «MANCA QUALCOSA» NON
+     PUO' ESSERE UNA SCRITTA NERA CHE SPARISCE. Prima un Salva senza titolo
+     diceva «Scrivi il titolo…» in un messaggino scuro per due secondi, e la
+     casella da riempire restava uguale alle altre. Adesso la casella diventa
+     rossa con la frase sotto, la pagina ci va sopra e il cursore ci entra;
+     il segno se ne va appena si scrive. Il messaggino resta, ma rosso. */
+  function campoManca(el,dice){
+    if(typeof el==="string") el=document.querySelector(el);
+    toast("Attenzione: "+String(dice).charAt(0).toLowerCase()+String(dice).slice(1));
+    if(!el) return;
+    try{ ctrTogli(el); ctrSegna({el:el,grave:"rosso",dice:dice}); }catch(e){}
+    if(!el._mancaAscolta){
+      el._mancaAscolta=true;
+      const via=function(){ try{ ctrTogli(el); }catch(e){} el._mancaAscolta=false;
+        el.removeEventListener("input",via); el.removeEventListener("change",via); };
+      el.addEventListener("input",via); el.addEventListener("change",via);
+    }
+    setTimeout(function(){
+      try{ el.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){}
+      try{ el.focus({preventScroll:true}); }catch(e){ try{ el.focus(); }catch(_){} }
+    },120);
+  }
+  window.campoManca=campoManca;
+
   /* ============================================================
      IL VERDE E IL «VIA LIBERA» — 1 nov 2026 (idea di Alessio)
      Una casella scritta bene diventa VERDE, una sbagliata ROSSA (o

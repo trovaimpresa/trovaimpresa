@@ -635,7 +635,7 @@
 
   async function savePrev(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    const titolo=$("#pv-tit").value.trim();if(!titolo){toast("Scrivi il titolo del preventivo");return;}
+    const titolo=$("#pv-tit").value.trim();if(!titolo){campoManca($("#pv-tit"),"Manca il titolo del preventivo: scrivilo qui.");return;}
     const righe=[];
     $$("#prev-righe [data-riga]").forEach((d,i)=>{
       const el=d.querySelector(".pr-desc");
@@ -652,7 +652,7 @@
       righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),sezione:false,ordine:i});
     });
     /* un preventivo fatto di soli titoli non è un preventivo */
-    if(!righe.filter(r=>!_rigaSezione(r)).length){toast("Aggiungi almeno una voce");return;}
+    if(!righe.filter(r=>!_rigaSezione(r)).length){campoManca($("#prev-righe [data-riga]:not([data-sezione]) .pr-desc"),"Manca almeno una voce: scrivi qui cosa fai.");return;}
     const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=prevNoteLette();
     let pid=id, vecchieVoci=[];
     const parcella=Object.assign({},leggiCampiParcella(),leggiCampiIvaImpresa());
