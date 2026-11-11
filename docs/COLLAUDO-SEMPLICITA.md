@@ -780,6 +780,8 @@ Problemi trovati: _(si scrive dopo la foto del «prima»)_
 **Fatto (ok di Alex):** «PDF del mese» si vede solo se nel mese c'è almeno una giornata (`renderGiornate`); «scrivila a mano» a 17 px.
 **Conti:** i totali per persona e luogo stanno in `giorTotali`, usata sia a schermo sia nel PDF: una sola formula.
 
+**Collaudo dal vivo (11 nov 2026):** già in ordine (PC e telefono, niente fuori schermo, ultime in cima). Sistemato: la domanda per cancellare diceva «Cancello questa giornata e le sue ore?» ma va nel Cestino → «Mettere nel cestino la giornata di sab 29 agosto (david)? La riprendi dal Cestino» (regola 22). Tolta la giornata di prova del 15 agosto («RAPPORTINO DI PROVA»).
+
 
 | | PC | Tel |
 |---|:-:|:-:|

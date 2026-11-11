@@ -425,7 +425,7 @@ function giorDisegna(msg){
         h+=`<div class="gcard"><textarea id="gior-mod-t">${esc(g.cosa)}</textarea><div class="grow"><button type="button" class="gbig blu" data-gior="mod-salva" data-k="${esc(g.k)}">Salva</button><button type="button" class="btn" data-gior="mod-no" style="flex:0 0 auto">Annulla</button></div></div>`;
       }
       if(giorConferma===g.k){
-        h+=`<div class="gconf">Cancello questa giornata e le sue ore? <button type="button" class="si" data-gior="del-si" data-k="${esc(g.k)}">Sì, cancella</button><button type="button" class="btn" data-gior="del-no">No</button></div>`;
+        h+=`<div class="gconf">Mettere nel cestino la giornata di ${esc(_gData(g.data).toLowerCase())} (${esc(chi.join(", "))})? La riprendi dal Cestino. <button type="button" class="si" data-gior="del-si" data-k="${esc(g.k)}">Sì, nel cestino</button><button type="button" class="btn" data-gior="del-no">No</button></div>`;
       }
       /* 10 nov 2026 — cosa c'e' in questa giornata e i quattro pulsanti */
       if(typeof gxHtmlGiorno==="function") h+=gxHtmlGiorno(g,gi===0);
