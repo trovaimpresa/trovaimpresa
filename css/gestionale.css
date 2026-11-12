@@ -5986,3 +5986,11 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 @media(max-width:880px){
   .job-meta a.cli-link,.sqg-sotto a.cli-link,a.cli-link{ display:inline-block; min-height:44px; line-height:22px; padding:11px 0; box-sizing:border-box; }
 }
+
+/* 12 nov 2026 — «Assistente» nella barra in basso: su un telefono da 360 px
+   mancava 1 px e usciva «Assistent…». Sotto i 380 px: meno bordo ai lati e
+   lettere appena piu' strette (misurato: 67 px in un pulsante da 71). */
+@media(max-width:380px){
+  nav#barra-basso.barra-basso{ padding-left:2px!important; padding-right:2px!important; gap:0!important; }
+  nav#barra-basso.barra-basso button span{ letter-spacing:-.5px; }
+}

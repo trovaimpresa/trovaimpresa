@@ -269,7 +269,7 @@
   /* ---------------- la barra in basso del telefono ---------------- */
   function barra() {
     var bb = $('barra-basso'); if (!bb || bb.querySelector('.bb-mic')) return;
-    rinomina(bb.querySelector('[data-vai="riepilogo"]'), 'Riepilogo', 'Oggi');
+    rinomina(bb.querySelector('[data-vai="riepilogo"]'), 'Riepilogo', 'Assistente');   /* 12 nov 2026 — un pulsante, un nome (regola 10): era «Oggi» */
     if (!($('gv-btn') || window.SpeechRecognition || window.webkitSpeechRecognition)) return;
     var m = document.createElement('button');
     m.type = 'button'; m.className = 'bb-mic'; m.setAttribute('aria-label', 'Parla');
