@@ -637,9 +637,9 @@
       <div class="sec-head"><h2>Cauzioni</h2></div>
       <div class="gal-intro">I soldi che tieni per conto dei clienti: al rientro li rendi, meno i danni scritti nel verbale.</div>
       <div class="num-fila">
-        <div class="num-c"><span class="num-d">In deposito adesso</span><span class="num-n" id="kc-mano">€ 0</span><span class="num-s">Soldi che devi restituire</span></div>
-        <div class="num-c"><span class="num-d">Restituite</span><span class="num-n" id="kc-svincolate">€ 0</span><span class="num-s">Gi&agrave; tornate al cliente</span></div>
-        <div class="num-c"><span class="num-d">Trattenute per danni</span><span class="num-n" id="kc-trattenute">€ 0</span><span class="num-s">Rimaste a te</span></div>
+        <div class="num-c"><span class="num-d">In deposito adesso</span><span class="num-n" id="kc-mano">—</span><span class="num-s">Soldi che devi restituire</span></div>
+        <div class="num-c"><span class="num-d">Restituite</span><span class="num-n" id="kc-svincolate">—</span><span class="num-s">Gi&agrave; tornate al cliente</span></div>
+        <div class="num-c"><span class="num-d">Trattenute per danni</span><span class="num-n" id="kc-trattenute">—</span><span class="num-s">Rimaste a te</span></div>
       </div>
       <div class="filt-label">Mostra</div>
       <div class="chiprow" id="cau-filtro">
@@ -1066,6 +1066,10 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
   #nol-menu-btn,#nol-menu-x,#nol-menu-tit{display:none}
   .az-corto{display:none}
   @media(min-width:881px){#barra-basso{display:none!important}}
+  /* 12 nov 2026 (terzo giro) — con una finestra aperta la barra in basso copriva «Salva» e «Annulla» */
+  body:has(.overlay.open) #barra-basso{display:none!important}
+  /* 12 nov 2026 (terzo giro) — «Oggi» era tagliato («Ogg») sotto la freccia */
+  .wrap section .cal-nav button[data-action="cal-today"],.cal-nav button[data-action="cal-today"]{width:auto!important;min-width:76px;padding:0 14px!important;white-space:nowrap;flex:0 0 auto}
   @media(max-width:880px){
     header.top nav.tabs{display:none!important}
     .az-lungo{display:none}.az-corto{display:inline}

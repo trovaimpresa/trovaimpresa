@@ -941,6 +941,10 @@
       .order("data",{ascending:false});
     if(error){
       $("#cred-riass").innerHTML="";
+      /* 12 nov 2026 (terzo giro) — regole 20 e 23: senza rete niente «esegui
+         il file sql»; quella frase resta solo se la tabella manca davvero. */
+      const _credManca=/42P01|PGRST205|does not exist|schema cache/i.test(String(error.code||"")+" "+String(error.message||""));
+      if(!_credManca&&typeof nonLettaHTML==="function"){box.innerHTML=nonLettaHTML("i crediti formativi","crediti");return;}
       box.innerHTML=tabVuoto("Serve un aggiornamento del database",
         "Per tenere il registro dei crediti formativi esegui sql/gest-ore-e-crediti.sql su Supabase (SQL Editor → Run). Poi ricarica la pagina.",
         _SVGV+'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>');

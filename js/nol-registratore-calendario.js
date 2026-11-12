@@ -300,11 +300,23 @@
     if(sb&&sbUid){
       /* 24 agosto 2026 — anche qui, niente piu' filtro per reparto: tutti i
          lavori dell'azienda sul calendario, come le fatture. */
-      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid);
-      calJobs=data||[];
-      const {data:nn}=await sb.from("nol_noleggi")
+      const {data,error:_eCalJ}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid);
+      const {data:nn,error:_eCalN}=await sb.from("nol_noleggi")
         .select("id,mezzo,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo,importo,stato_pagamento,fase")
         .eq("user_id",sbUid);
+      /* 12 nov 2026 (terzo giro) — regole 20 e 23: senza rete il calendario
+         non dice «0 noleggi in ritardo» e non si svuota: riquadro rosso con
+         Riprova. I dati letti prima restano dove sono. */
+      if(_eCalJ||_eCalN){
+        const _g=$("#cal-grid"), _o=$("#cal-oggi");
+        if(_o)_o.innerHTML="";
+        if(_g&&typeof nolNonLetto==="function"){
+          nolNonLetto(_g,"il calendario",renderCal);
+          const _r=_g.querySelector(".rie-errore"); if(_r)_r.style.gridColumn="1 / -1";
+        }
+        return;
+      }
+      calJobs=data||[];
       calNol=nn||[];
       try{ calScadNol=await calScadenzeNol(); }catch(e){ calScadNol=[]; }
     } else { calJobs=[]; calNol=[]; calScadNol=[]; }

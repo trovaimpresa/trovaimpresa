@@ -83,6 +83,12 @@
       /* ⚠️ se una tabella non ha risposto, «non lo so» non e' «zero»: il
          pallino non si riscrive, se no direbbe meno del vero. */
       if(!risposte.some(x=>x.ko)) cestSegnaPallino(cestCache.length);
+      /* 12 nov 2026 (terzo giro) — regola 20: se nessuna tabella ha risposto
+         non si dice «Il cestino è vuoto»: riquadro rosso con Riprova. */
+      else if(!cestCache.length&&typeof nolNonLetto==="function"){
+        nolNonLetto(box,"il cestino",renderCestinoNol);
+        return;
+      }
     }
     const q=(cestQ||"").trim().toLowerCase();
     const vis=cestCache.map((x,i)=>({x:x,i:i}))
