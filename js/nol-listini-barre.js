@@ -6,11 +6,12 @@
      nolElimina, che il controllo ce l'ha. */
   async function loadProdotti(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("neg_prodotti")
+    const {data,error}=await sb.from("neg_prodotti")
       .select("*")
       .eq("user_id",sbUid).order("nome");
     const prods=data||[], box=$("#prodotti-body");
     if(!box) return;
+    if(error){nolNonLetto(box,"i prodotti",loadProdotti);return;}   /* 12 nov 2026 — regola 20 */
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto. Aggiungine uno.</p>';return;}
     box.innerHTML=prods.map(p=>{
       const sotto=(p.quantita??0)<=(p.soglia_minima??0);
@@ -24,10 +25,11 @@
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
   async function loadMagazzino(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("neg_prodotti")
+    const {data,error}=await sb.from("neg_prodotti")
       .select("id,nome,quantita,soglia_minima").eq("user_id",sbUid).order("nome");
     const prods=data||[], box=$("#magazzino-body");
     if(!box) return;
+    if(error){nolNonLetto(box,"il magazzino",loadMagazzino);return;}   /* 12 nov 2026 — regola 20 */
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto in magazzino.</p>';return;}
     box.innerHTML=prods.map(p=>{
       const q=p.quantita??0, s=p.soglia_minima??0, sotto=q<=s;
@@ -44,10 +46,11 @@
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
   async function loadFornitori(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("neg_fornitori")
+    const {data,error}=await sb.from("neg_fornitori")
       .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
     const f=data||[], box=$("#fornitori-body");
     if(!box) return;
+    if(error){nolNonLetto(box,"i fornitori",loadFornitori);return;}   /* 12 nov 2026 — regola 20 */
     if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
     box.innerHTML=f.map(x=>
       nolCard({col:"#1565c0",
@@ -60,10 +63,11 @@
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("neg_movimenti")
+    const {data,error}=await sb.from("neg_movimenti")
       .select("id,tipo,prodotto,quantita,importo,controparte,data_mov,note").eq("user_id",sbUid).order("data_mov",{ascending:false});
     const m=data||[], box=$("#movimenti-body");
     if(!box) return;
+    if(error){nolNonLetto(box,"i movimenti",loadMovimenti);return;}   /* 12 nov 2026 — regola 20 */
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun movimento.</p>';return;}
     box.innerHTML=m.map(x=>{
       const ETI={vendita:["#2e7d32","↑","VENDITA"],acquisto:["#e65100","↓","ACQUISTO"],

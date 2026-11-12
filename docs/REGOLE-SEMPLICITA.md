@@ -62,3 +62,7 @@ ferme prima di cominciare.
 21. **Una casella che manca si segna sulla casella.** `campoManca(casella, "Manca …: scrivilo qui.")`: rossa, frase sotto, cursore dentro. Niente messaggino nero che sparisce.
 22. **Buttare dice cosa e dove va.** «Mettere nel cestino «nome»? Lo riprendi dal Cestino quando vuoi.» Se va davvero via per sempre, si dice «per sempre».
 
+## Decise il 12 nov 2026 (secondo giro del controllore)
+23. **La regola 20 vale anche per i numeri.** Senza rete un numero non va a zero: trattino «—», pallino grigio e riquadro rosso con Riprova. E mai una parola tecnica («TypeError», «esegui il file sql»).
+24. **Lo stato di una cosa è uguale in tutti i gestionali.** Un mezzo fuori a noleggio non è «Disponibile» nell'App.
+

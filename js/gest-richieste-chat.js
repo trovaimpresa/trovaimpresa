@@ -346,9 +346,11 @@
     }
     _rqSegnaViste();          /* apri la sezione = hai visto le risposte */
     if(!sb||!sbUid){lista.innerHTML="";return;}
-    const {data}=await sb.from("gest_richieste")
+    const {data,error}=await sb.from("gest_richieste")
       .select("id,testo,stato,risposta,created_at")
       .eq("user_id",sbUid).order("created_at",{ascending:false});
+    /* 12 nov 2026 (secondo giro) — regola 20: senza rete non si dice «compariranno» */
+    if(error){lista.innerHTML=nonLettaHTML("le tue richieste","richieste");return;}
     const R=data||[];
     if(!R.length){
       lista.innerHTML=`<div class="gal-intro" style="margin-top:22px">Qui sotto compariranno le cose che ci hai chiesto, con lo stato di ognuna.</div>`;

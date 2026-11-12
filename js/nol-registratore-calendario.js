@@ -332,5 +332,5 @@
     if(box) box.innerHTML=
       `<button class="cal-oggi-b esce"   data-action="open-day" data-d="${oggi}"><b>${o.escono.length}</b> escono oggi</button>`+
       `<button class="cal-oggi-b rientra" data-action="open-day" data-d="${oggi}"><b>${o.rientrano.length}</b> rientri previsti</button>`+
-      `<button class="cal-oggi-b ritardo" data-action="open-day" data-d="${oggi}"><b>${o.ritardi.length}</b> in ritardo</button>`;
+      `<button class="cal-oggi-b ritardo" data-action="open-day" data-d="${oggi}"><b>${o.ritardi.length}</b> ${o.ritardi.length===1?"noleggio":"noleggi"} in ritardo</button>`;
   }

@@ -56,6 +56,9 @@
     fuori_uso:{lab:"Fuori uso",bg:"var(--sfondo)",fg:"var(--testo-2)"}
   };
   let mezziCache=[], mezziFilter="tutti", attrezzFilter="tutti";
+  /* 12 nov 2026 (secondo giro) — i noleggi aperti di ogni mezzo: nel Noleggio
+     l'escavatore era «In ritardo · 73 giorni», qui «Disponibile» in verde. */
+  let mezziNolMap={};
 
   /* Mezzi e attrezzature stanno in due sezioni diverse: un furgone e un
      ponteggio non hanno niente in comune. La lettura dal database è una
@@ -76,18 +79,31 @@
     const _MZCOL="id,nome,categoria,tipo,targa,stato,note,noleggiabile,codice,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi,fuori_servizio";
     const _MZCORTO="id,nome,categoria,tipo,targa,stato,note";
     const _leggiMezzi=async col=>await sb.from("gest_mezzi").select(col).eq("user_id",sbUid).or(_cliOr(mid)).order("nome");
-    const [rmz,{data:vw},{data:cb},rsx]=await Promise.all([
+    const [rmz,{data:vw},{data:cb},rsx,rnl]=await Promise.all([
       _leggiMezzi(_MZCOL).then(r=>(r.error&&/column|schema cache/i.test(r.error.message||""))?_leggiMezzi(_MZCORTO):r),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid),
       /* 11 nov 2026 — collaudo 3.14: QUALI sono scadute, non solo quante */
       sb.from("gest_scadenze").select("mezzo_id,titolo,tipo_pratica,data_scadenza,stato").eq("user_id",sbUid)
-        .not("mezzo_id","is",null).lt("data_scadenza",todayStr())
+        .not("mezzo_id","is",null).lt("data_scadenza",todayStr()),
+      /* i noleggi: se la tabella non c'e' o non risponde, rnl resta vuoto e non cambia niente */
+      Promise.resolve(sb.from("nol_noleggi").select("mezzo_id,fase,data_uscita,data_rientro_prevista,data_rientro_effettivo").eq("user_id",sbUid).not("mezzo_id","is",null)).then(r=>r,()=>null)
     ]);
     window._mezziKo=!!(!rmz||rmz.error);
     mezziCache=(rmz&&rmz.data)||[];
     carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
+    /* stessa regola del Noleggio (nolFaseDi + peso): in ritardo batte fuori, fuori batte prenotato */
+    mezziNolMap={};
+    {const _og=todayStr();
+     ((rnl&&!rnl.error&&rnl.data)||[]).forEach(x=>{
+       const f=x.fase||(x.data_rientro_effettivo?"rientrato":((x.data_uscita&&x.data_uscita>_og)?"prenotato":"fuori"));
+       if(f==="rientrato")return;
+       const rit=(f==="fuori"&&x.data_rientro_prevista&&x.data_rientro_prevista<_og)
+         ?Math.round((new Date(_og)-new Date(x.data_rientro_prevista))/86400000):0;
+       const peso=f==="fuori"?(rit?3:2):1, p=mezziNolMap[x.mezzo_id];
+       if(!p||peso>p.peso||(peso===p.peso&&rit>p.rit))mezziNolMap[x.mezzo_id]={peso:peso,rit:rit};
+     });}
     mezziScaduteMap={};
     ((rsx&&!rsx.error&&rsx.data)||[]).forEach(x=>{ if(x.stato==="fatta")return;
       (mezziScaduteMap[x.mezzo_id]=mezziScaduteMap[x.mezzo_id]||[]).push({t:x.tipo_pratica||x.titolo||"Scadenza",d:x.data_scadenza}); });
@@ -206,8 +222,16 @@
      «Disponibile» in verde (7 nov), e adesso vale anche nella tabella */
   function mezzoEtichetta(m,md){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
-    return (md.n&&(m.stato==="disponibile"||m.stato==="in_uso"||!m.stato))
-      ? {lab:"Da rinnovare",bg:"var(--err-bg)",fg:"var(--err)"} : st;
+    const _libero=(m.stato==="disponibile"||m.stato==="in_uso"||!m.stato);
+    if(md.n&&_libero) return {lab:"Da rinnovare",bg:"var(--err-bg)",fg:"var(--err)"};
+    /* 12 nov 2026 — un mezzo fuori a noleggio non e' «Disponibile» (blu = in corso, regola 15) */
+    const _nl=mezziNolMap[m.id];
+    if(_nl&&_libero){
+      if(_nl.peso===3) return {lab:"In ritardo · "+_nl.rit+(_nl.rit===1?" giorno":" giorni"),bg:"var(--err-bg)",fg:"var(--err)"};
+      if(_nl.peso===2) return {lab:"Fuori a noleggio",bg:"var(--info-bg)",fg:"var(--info)"};
+      return {lab:"Prenotato",bg:"var(--attesa-bg)",fg:"var(--attesa)"};
+    }
+    return st;
   }
   function mezzoCard(m,sc){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;

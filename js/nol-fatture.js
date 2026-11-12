@@ -375,7 +375,7 @@
     const box=$("#documenti-body"); if(!box) return;
     const {data,error}=await sb.from("nol_noleggi").select("*")
       .eq("user_id",sbUid).order("data_uscita",{ascending:false});
-    if(error){box.innerHTML='<p style="color:#666;padding:8px">'+esc(error.message)+'</p>';return;}
+    if(error){nolNonLetto(box,"i contratti e i documenti",loadDocumenti);return;}   /* 12 nov 2026 — regola 20: niente «TypeError» */
     docsCache=data||[];
     const q=(docsQ||"").trim().toLowerCase();
     const vis=docsCache.filter(x=>!q||((x.mezzo||"")+" "+(x.cliente||"")+" "+(x.contratto_num||"")).toLowerCase().includes(q));

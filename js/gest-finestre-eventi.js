@@ -733,16 +733,19 @@
          fornitore. E tornano su insieme al mezzo, perché CEST_FIGLI adesso
          sa che sono figlie sue. */
       const {count:nSc}=await sb.from("gest_scadenze").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("mezzo_id",id);
-      if(!(await gconfirm(
-          (usi?`Questo mezzo è collegato a ${usi} lavori. `:"")
-          +(nSc?`Ha ${nSc} ${nSc===1?"scadenza":"scadenze"} (revisione, assicurazione, bollo…): ${nSc===1?"va":"vanno"} nel Cestino insieme a lui e ${nSc===1?"torna":"tornano"} se lo rimetti a posto.\n\n`:"")
-          +"Eliminare questo mezzo?")))return;
+      /* 12 nov 2026 (secondo giro) — regola 22: la domanda dice QUALE mezzo e DOVE va */
+      const _mzD=((typeof mezziCache!=="undefined"?mezziCache:[])||[]).find(x=>String(x.id)===String(id));
+      const _nmD=_mzD&&_mzD.nome?"«"+_mzD.nome+"»":"questo mezzo";
+      const _cestD=!!(window.cestinoAttivo&&window.cestinoAttivo());
+      const _sottoD=(usi?`È collegato a ${usi} ${usi===1?"lavoro":"lavori"}. `:"")
+          +(nSc?`Ha ${nSc} ${nSc===1?"scadenza":"scadenze"} (revisione, assicurazione, bollo…): ${nSc===1?"va":"vanno"} nel Cestino insieme a lui e ${nSc===1?"torna":"tornano"} se lo rimetti a posto. `:"");
+      if(!(await window.chiediVia(_nmD,true,_cestD?(_sottoD+"Lo riprendi dal Cestino quando vuoi."):undefined)))return;
       const {data,error}=await sb.from("gest_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
       try{ await sb.from("gest_scadenze").delete().eq("mezzo_id",id).eq("user_id",sbUid); }catch(e){}
       renderMezzi();renderAttrezzature();renderScadenze();
-      toast(nSc?("Eliminato — con "+nSc+(nSc===1?" scadenza":" scadenze")):"Eliminato");return;
+      toast(_cestD?("Mezzo nel cestino"+(nSc?(" con "+nSc+(nSc===1?" scadenza":" scadenze")):"")+": lo riprendi da lì"):"Eliminato");return;
     }
     if(a==="new-carta")return cartaForm(null);
     if(a==="edit-carta")return cartaForm(carteCache.find(c=>String(c.id)===String(id)));

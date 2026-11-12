@@ -160,12 +160,31 @@
        gest_mezzi, insieme a quelli del gestionale: qui si mostrano solo
        quelli con la spunta «lo noleggio» (noleggiabile), se no nel listino
        del Noleggio comparirebbe anche il furgone dell'impresa. */
-    const {data:mezzi}=await sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true);
+    const {data:mezzi,error:_eMz}=await sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true);
     const MZ=mezzi||[];
     scrivi("kn-mezzi",MZ.length);
-    const {data:nol}=await sb.from("nol_noleggi")
+    const {data:nol,error:_eNl}=await sb.from("nol_noleggi")
       .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase,cauzione,cauzione_stato,mestiere_id")
       .eq("user_id",sbUid);
+    /* 12 nov 2026 (secondo giro) — regola 20: senza rete niente numeri a zero
+       e niente «Tutto sotto controllo». Trattino al posto dei numeri, pallini
+       grigi e il riquadro rosso sopra le schede. */
+    {const _k=document.getElementById("kn-mezzi"), _g=_k?_k.closest(".nrc-grid"):null;
+     let _nl=document.getElementById("rie-nonletto");
+     if(_eMz||_eNl){
+       ["kn-mezzi","kn-fuori","kn-ritardo","kn-liberi","kn-prenotati","kn-incasso","kn-daincassare","kn-cauzioni"].forEach(i=>{
+         scrivi(i,"\u2014");
+         const n=document.getElementById(i); if(n)n.classList.remove("nrc-zero");
+         const p=document.getElementById("p-"+i); if(p){p.className="nrc-pall zero";p.title="Non letto";p.setAttribute("aria-label","non letto");}
+         const d=document.getElementById("d-"+i); if(d){d.className="nrc-vuoto";d.innerHTML="";}
+       });
+       if(!_nl&&_g){_nl=document.createElement("div");_nl.id="rie-nonletto";_nl.style.marginBottom="14px";_g.parentNode.insertBefore(_nl,_g);}
+       if(_nl)nolNonLetto(_nl,"i numeri del noleggio",renderRiepilogoNegozio);
+       if($("#rie-ritardi"))$("#rie-ritardi").innerHTML="";
+       if($("#rie-scadenze"))$("#rie-scadenze").innerHTML="";
+       return;
+     }
+     if(_nl)_nl.remove();}
     const N=nol||[], oggiN=todayStr();
     /* ⚠️ «fuori adesso» vuol dire dal cliente. Un mezzo PRENOTATO e' ancora
        in piazzale: contarlo fra quelli fuori direbbe una bugia. */

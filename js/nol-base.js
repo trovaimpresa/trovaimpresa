@@ -80,6 +80,8 @@
       /* 7 nov 2026: uno zero (nessun mezzo libero, 0,00 € incassati) non e'
          «tutto a posto»: pallino grigio */
       const nEl=document.getElementById(id);
+      /* 12 nov 2026 — regola 19: anche il NUMERO a zero e' grigio, non solo il pallino */
+      if(nEl)nEl.classList.toggle("nrc-zero",/^\s*0(?:,00)?\s*(?:€)?\s*$/.test(String(nEl.textContent||"").replace(/\u00a0/g," ")));
       const zero=!male&&nEl&&/^\s*0(?:,00)?\s*(?:€)?\s*$/.test(String(nEl.textContent||"").replace(/\u00a0/g," "));
       p.className="nrc-pall "+(corso?"corso":(male?"male":(zero?"zero":"bene")));
       /* chi non distingue bene rosso e verde deve poterlo leggere lo stesso */

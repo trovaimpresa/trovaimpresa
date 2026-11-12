@@ -5994,3 +5994,27 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   nav#barra-basso.barra-basso{ padding-left:2px!important; padding-right:2px!important; gap:0!important; }
   nav#barra-basso.barra-basso button span{ letter-spacing:-.5px; }
 }
+
+/* ============================================================
+   12 nov 2026 — secondo giro del controllore (telefono)
+   ============================================================ */
+/* Lavoro · «Registro delle ore»: su 375 px la casella «Ore» e «+ Aggiungi»
+   uscivano a destra (385 su 375). Una sotto l'altra, larghe quanto la finestra. */
+@media(max-width:560px){
+  .sheet .spesa-add.ore-add, .spesa-add.ore-add{ grid-template-columns:minmax(0,1fr)!important; }
+  .spesa-add.ore-add > *{ min-width:0!important; width:100%!important; box-sizing:border-box; }
+}
+/* Computo vuoto: «Carica qui il computo del geometra» era tagliato. Va a capo. */
+@media(max-width:560px){
+  .co-vuoto-due{ flex-direction:column; align-items:stretch; }
+  .co-vuoto-due button{ white-space:normal!important; height:auto!important; min-height:52px; line-height:1.25; padding-top:13px!important; padding-bottom:13px!important; text-align:center; }
+}
+/* numero ed email da toccare: 44 px anche dentro le schede aperte */
+@media(max-width:700px){
+  .sheet a[href^="tel:"], .sheet a[href^="mailto:"]{ display:inline-flex; align-items:center; min-height:44px!important; box-sizing:border-box; }
+}
+/* la «i» di aiuto resta tonda (nelle finestre un'altra regola la allungava a 44):
+   il dito ha comunque 44 px grazie al ::after scritto in js/aiuti.js */
+@media(max-width:560px){
+  .sheet .ti-i, .ti-i{ height:28px!important; min-height:28px!important; max-height:28px!important; }
+}

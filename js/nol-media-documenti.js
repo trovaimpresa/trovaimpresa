@@ -115,12 +115,15 @@
   async function loadMedia(){
     if(!(sb&&sbUid)) return;
     const box=$("#media-body"); if(!box) return;
-    const {data:nol}=await sb.from("nol_noleggi")
+    const {data:nol,error:_eMn}=await sb.from("nol_noleggi")
       .select("id,mezzo,mezzo_id,cliente,data_uscita,data_rientro_prevista,data_rientro_effettivo")
       .eq("user_id",sbUid).order("data_uscita",{ascending:false});
+    if(_eMn){nolNonLetto(box,"le foto e i video",loadMedia);return;}   /* 12 nov 2026 — regola 20 */
     const N=nol||[];
     let M=[];
     const {data:med,error}=await sb.from("nol_media").select("*").eq("user_id",sbUid);
+    /* la frase «esegui il file sql» vale solo se la tabella manca davvero: senza rete si dice Riprova */
+    if(error&&!/does not exist|schema cache|relation|column/i.test(error.message||"")){nolNonLetto(box,"le foto e i video",loadMedia);return;}
     if(error){
       box.innerHTML='<p style="color:#666;padding:8px">Le foto del noleggio non sono ancora accese: esegui <b>sql/noleggio-foto-video.sql</b> su Supabase e ricarica la pagina.</p>';
       if($("#media-peso"))$("#media-peso").textContent="";

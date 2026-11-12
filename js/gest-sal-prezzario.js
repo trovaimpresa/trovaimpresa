@@ -1197,7 +1197,7 @@
   }
   async function delPrezzo(id){
     const x=pzCache.find(v=>String(v.id)===String(id))||{};
-    if(!(await gconfirm((_cestOn()?"Mettere «":"Eliminare «")+(x.descrizione||"")+"»?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano.")))return;
+    if(!(await gconfirm((_cestOn()?"Mettere nel cestino «":"Eliminare per sempre «")+(x.descrizione||"")+"»?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano.")))return;
     const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     closeSheet();

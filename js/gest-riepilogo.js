@@ -779,7 +779,9 @@
 
     C.push(rieCard({
       tab:"preventivi", titolo:"Preventivi", n:attesa.length, dati:PV.length>0,
-      lab:_plur(attesa.length,"in attesa di risposta","in attesa di risposta"), tono:attesa.length?"attesa":"ok",
+      /* 12 nov 2026 — una bozza mai mandata non aspetta nessuna risposta */
+      lab:(attesa.length&&attesa.every(p=>p.stato==="bozza"))?_plur(attesa.length,"bozza da mandare","bozze da mandare")
+          :(attesa.some(p=>p.stato==="bozza")?"da mandare o in attesa di risposta":"in attesa di risposta"), tono:attesa.length?"attesa":"ok",
       vuoto:"Nessun preventivo in attesa",
       righe: attesa.slice(0,2).map(p=>({
         t:p.titolo||"Preventivo", v:totPrev[p.id]?eur(totPrev[p.id]):"",

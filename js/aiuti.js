@@ -407,17 +407,19 @@
     var s2 = document.createElement('style');
     s2.id = 'ti-aiuto-css';
     s2.textContent =
-      '.ti-i{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;' +
-      'min-width:19px;padding:0;margin:0 0 0 5px;border:1.5px solid currentColor;border-radius:50%;' +
+      '.ti-i{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;position:relative;' +
+      'min-width:24px;padding:0;margin:0 0 0 5px;border:1.5px solid currentColor;border-radius:50%;' +
       /* ⚠️ 13 px e' il minimo in tutto il gestionale (regola dislessia), e
          questa «i» stava a 11. Piccola com'era non si distingueva nemmeno
          da un puntino sporco sullo schermo. 14 agosto 2026. */
-      'background:transparent;color:#8a94a6;font:700 13px/1 Georgia,serif;cursor:help;' +
+      /* 12 nov 2026 — regola 18: niente sotto i 14 px. La «i» passa a 15. */
+      'background:transparent;color:#8a94a6;font:700 15px/1 Georgia,serif;cursor:help;' +
       'vertical-align:middle;opacity:.75;flex:none}' +
       '.ti-i:hover,.ti-i[aria-expanded=true]{opacity:1;color:#0b4bc4}' +
       '.ti-i:focus-visible{outline:2px solid #0b4bc4;outline-offset:2px}' +
       '.job-actions>.ti-i{margin-left:auto;align-self:center}' +
-      '@media (max-width:560px){.ti-i{width:22px;height:22px;min-width:22px;font-size:13px;opacity:1}}' +
+      /* sul telefono il cerchio resta piccolo ma il dito ha 44 px (::after invisibile) */
+      '@media (max-width:560px){.ti-i{width:28px;height:28px;min-width:28px;font-size:15px;opacity:1}.ti-i::after{content:"";position:absolute;inset:-8px}}' +
       /* ⛔ 22 agosto 2026 — LA RIGA CHE PRESENTA LA SEZIONE, SUL TELEFONO.
          Le frasi qui sopra (AIUTI_TAB) spiegano una per una le 24 voci del
          menu, e finora si leggevano SOLO passandoci sopra col mouse: sul

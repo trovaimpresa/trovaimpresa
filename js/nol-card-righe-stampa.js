@@ -380,8 +380,8 @@
     const t=NOL_TIPI[tipo]; if(!t||!t.tab) return;
     /* 29/09/2026 — una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
     if(tipo==="fattnol"&&d.sdi_uuid&&d.sdi_stato!=="scartata"){toast("Questa fattura è già partita allo SDI: non si elimina. Per correggerla serve una nota di credito.");return;}
-    const come=d.nome||d.descrizione||d.mezzo||"questa scheda";
-    if(!(await tiChiedi("Eliminare "+t.che.toLowerCase()+" «"+come+"»?\n"+
+    const come=d.nome||d.descrizione||d.mezzo||d.prodotto||"";
+    if(!(await tiChiedi("Eliminare "+(come?t.che.toLowerCase()+" «"+come+"»":(t.femm?"questa ":"questo ")+t.che.toLowerCase())+"?\n"+
                 (t.avviso?t.avviso+"\n":"")+cestFrase()))) return;
     const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}

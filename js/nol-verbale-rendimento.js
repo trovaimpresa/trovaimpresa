@@ -253,10 +253,11 @@
     if(!(sb&&sbUid)) return;
     const box=$("#rendimento-body"); if(!box) return;
     const {dal,al,eti,gg}=rendIntervallo();
-    const [{data:mezzi},{data:nol}]=await Promise.all([
+    const [{data:mezzi,error:_eRm},{data:nol,error:_eRn}]=await Promise.all([
       sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome"),
       sb.from("nol_noleggi").select("*").eq("user_id",sbUid)
     ]);
+    if(_eRm||_eRn){nolNonLetto(box,"il rendimento",loadRendimento);return;}   /* 12 nov 2026 — regola 20 */
     const MZ=mezzi||[], N=(nol||[]).filter(x=>x.data_uscita&&x.data_uscita<=al&&
       ((x.data_rientro_effettivo||x.data_rientro_prevista||al)>=dal));
     const perMezzo={};
