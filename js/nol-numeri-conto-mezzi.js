@@ -439,8 +439,22 @@
 
   async function loadMezzi(){
     if(!(sb&&sbUid)) return;
-    const {data,error:_eMz}=await sb.from("gest_mezzi")
-      .select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome");
+    /* 12 nov 2026 — lo stato del mezzo si legge anche dai noleggi aperti, con
+       la stessa regola del Riepilogo e dell'elenco Noleggi (nolFaseDi): prima
+       un mezzo fuori da 68 giorni qui risultava «DISPONIBILE». */
+    const [{data,error:_eMz},_rNl]=await Promise.all([
+      sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome"),
+      sb.from("nol_noleggi").select("mezzo_id,fase,data_uscita,data_rientro_prevista,data_rientro_effettivo").eq("user_id",sbUid)
+    ]);
+    const _oggiMz=todayStr(), _fuoriDi={};
+    ((_rNl&&!_rNl.error&&_rNl.data)||[]).forEach(n=>{
+      if(!n.mezzo_id)return;
+      const f=nolFaseDi(n); if(f==="rientrato")return;
+      const rit=(f==="fuori"&&n.data_rientro_prevista&&n.data_rientro_prevista<_oggiMz)
+        ?Math.round((new Date(_oggiMz)-new Date(n.data_rientro_prevista))/86400000):0;
+      const peso=f==="fuori"?(rit?3:2):1, p=_fuoriDi[n.mezzo_id];
+      if(!p||peso>p.peso||(peso===p.peso&&rit>p.rit))_fuoriDi[n.mezzo_id]={peso:peso,rit:rit};
+    });
     const m=data||[], box=$("#mezzi-body");
     if(!box) return;
     if(_eMz){nolNonLetto(box,"i mezzi",loadMezzi);return;}
@@ -448,10 +462,16 @@
     const col={disponibile:"#2e7d32",in_uso:"#e65100",noleggiato:"#e65100",manutenzione:"#757575",fuori_uso:"#757575"};
     box.innerHTML=m.map(x=>{
       const sc=mezzoEtichettaScad(x);
-      const c=sc?sc.col:(col[x.stato]||"#757575");
+      const fn=(x.stato==="manutenzione"||x.stato==="fuori_uso")?null:_fuoriDi[x.id];
+      let c,et;
+      if(fn&&fn.peso===3){c="#c62828";et="IN RITARDO · "+fn.rit+(fn.rit===1?" giorno":" giorni");}
+      else if(fn&&fn.peso===2){c="#e65100";et="FUORI";}
+      else if(sc){c=sc.col;et=sc.testo;}
+      else if(fn){c=(typeof FASE_ETI!=="undefined"&&FASE_ETI.prenotato)?FASE_ETI.prenotato.c:"#1565c0";et="PRENOTATO";}
+      else{c=col[x.stato]||"#757575";et=(x.stato||"").toUpperCase();}
       return nolCard({col:c,
         titolo:esc(x.nome||"—"),
-        eti:[{t:esc(sc?sc.testo:(x.stato||"").toUpperCase())}],
+        eti:[{t:esc(et)}],
         corpo:`${sc?`<div class="sub2" style="color:${sc.col};font-weight:600">${esc(mezzoBloccato(x)?("Non si può noleggiare: "+mezzoBloccato(x)):"")}</div>`:""}
         <div class="sub">${esc([x.tipo,x.codice?"cod. "+x.codice:""].filter(Boolean).join(" · "))||""}</div>
         <div class="sub2">${esc("Al giorno "+_eur(x.tariffa_giorno||0)+" · a settimana "+_eur(x.tariffa_settimana||0)+" · al mese "+_eur(x.tariffa_mese||0)+(x.cauzione?" · cauzione "+_eur(x.cauzione):""))}</div>`,

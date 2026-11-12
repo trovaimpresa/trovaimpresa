@@ -172,8 +172,12 @@
     const prenotati=N.filter(x=>nolFaseDi(x)==="prenotato");
     const fuori=N.filter(x=>nolFaseDi(x)==="fuori");
     const ritardo=fuori.filter(x=>x.data_rientro_prevista&&x.data_rientro_prevista<oggiN);
-    scrivi("kn-fuori",fuori.length);
-    scrivi("kn-ritardo",ritardo.length);
+    /* 12 nov 2026 — si contano i MEZZI, non i noleggi: con un mezzo solo e due
+       noleggi aperti diceva «A parco 1 · Fuori adesso 2». Un noleggio vecchio
+       senza il collegamento al mezzo conta per sé. */
+    const _mezziDi=A=>{const s={};A.forEach(x=>{s[x.mezzo_id||("n"+x.id)]=1;});return Object.keys(s).length;};
+    scrivi("kn-fuori",_mezziDi(fuori));
+    scrivi("kn-ritardo",_mezziDi(ritardo));
     scrivi("kn-prenotati",prenotati.length);
     /* liberi = i mezzi che non sono fuori in questo momento */
     /* ⚠️ liberi NON e' «mezzi meno noleggi aperti»: un noleggio vecchio puo'
