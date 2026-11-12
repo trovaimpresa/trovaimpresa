@@ -321,9 +321,11 @@
   /* 6 nov 2026 — MARCHI PARTNER (affiliazione Awin), come nelle guide
      (js/vetrina-guide.js). Servono a dare fiducia, non a guadagnare.
      Numeri presi da Awin -> My Creative -> Vedi dettagli. */
-  var PARTNER_CITTA = {
-    'guide-dx': { nome: 'Lampade.it', s: '4824370', v: '10404', q: '608702' }  // inverno 300x250
-  };
+  /* 12 nov 2026 (Alex): «Lampade e' stato messo al posto di uno spazio:
+     toglilo da li', dagli la stessa grafica degli altri e rimetti la mia
+     locandina». Gli spazi sono delle imprese e delle locandine: i marchi
+     stanno ai lati con la loro carta (js/marchi-lati.js). Elenco vuoto. */
+  var PARTNER_CITTA = {};
   function vestiPartner(a, P) {
     var base = '.php?s=' + P.s + '&v=' + P.v + '&q=' + P.q + '&r=3137864';
     a.setAttribute('href', 'https://www.awin1.com/cread' + base);

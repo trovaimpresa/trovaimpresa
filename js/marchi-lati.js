@@ -27,18 +27,19 @@
   var MARCHI = [
     { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023', lato: 'sx', dopo: 0 },
     { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 0 },
-    { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 0 },
-    { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 0 },
-    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 0 }
+    { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 1 },
+    { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 1 },
+    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 2 }
   ];
   // «dopo»: sotto quale cartello del suo lato va (0 = il primo dall'alto).
-  // 12 nov 2026 (Alex): «metterli in basso e' brutto, non da' valore ne' a me
-  // ne' a loro». Adesso stanno tutti IN ALTO, uno sotto l'altro, alternati
-  // sinistra/destra, subito sotto i primi cartelli: niente piu' sparsi fino
-  // in fondo alla pagina. Vevor per primo (e' il piu' adatto all'edilizia).
+  // 12 nov 2026 (Alex): «metterli in basso e' brutto» e poi «non c'e' bisogno
+  // di metterli ammucchiati in cima»: vanno IN MEZZO agli spazi delle imprese.
+  // Ogni marchio va subito sotto il cartello numero «dopo» del suo lato
+  // (sinistra: sotto il 1°, il 2°, il 3°; destra: sotto il 1° e il 2°), cosi'
+  // si alternano cartello, marchio, cartello, marchio. Vevor per primo.
   var AWIN_ME = '3137864';
   var TELEFONO = '(max-width:1100px)';
-  var STACCO = 64;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato)
+  var STACCO = 40;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato)
   var BORDO = 20;       // distanza dal bordo dello schermo, se il lato e' vuoto
   var MAX_L = 380;      // larghezza massima della carta
   var MIN_L = 220;      // sotto questa non si mostra

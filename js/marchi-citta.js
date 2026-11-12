@@ -87,7 +87,7 @@
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
         var ml = document.createElement('script');
-        ml.src = '/js/marchi-lati.js?v=5';
+        ml.src = '/js/marchi-lati.js?v=6';
         ml.defer = true;
         document.head.appendChild(ml);
       }

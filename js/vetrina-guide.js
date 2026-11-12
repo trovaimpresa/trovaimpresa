@@ -80,10 +80,9 @@
      → My Creative → Vedi dettagli (s = id banner, v = id marchio, q = tag).
      Rowenta e Moulinex non hanno banner su Awin: per ora niente. */
   var AWIN_ME = '3137864';
-  var PARTNER = [
-    { nome: 'Lampade.it', s: '4824370', v: '10404', q: '608702',
-      frase: 'Lampade e luci per la tua casa nuova \u2192' }   // banner inverno 300x250
-  ];
+  /* 12 nov 2026 (Alex): niente marchi al posto degli spazi: tornano le
+     locandine. Lampade.it ha la carta come gli altri (js/marchi-lati.js). */
+  var PARTNER = [];
   function linkAwin(p, cosa) {
     return 'https://www.awin1.com/' + cosa + '.php?s=' + p.s + '&v=' + p.v
          + '&q=' + p.q + '&r=' + AWIN_ME;
