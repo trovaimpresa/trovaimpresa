@@ -6037,3 +6037,5 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #sheet .spesa-row:has(> .cm-testo) > .cm-testo{ flex:1 1 100%; min-width:0; }
   #sheet .spesa-row:has(> .cm-testo) > *{ max-width:100%; }
 }
+/* l'Assistente ha una regola con l'id che vinceva: lo zero grigio vale anche lì */
+#riepilogo:has(#rie-grid) .rie-card .rc-n.zero-grigio{ color:#5f6b7a !important; }
