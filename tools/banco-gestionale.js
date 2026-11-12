@@ -22,10 +22,14 @@
    COSA SERVE: i pacchetti «playwright» e «@supabase/supabase-js» (il
    banco li cerca anche in /tmp/banco e in /opt/npm-tools).
 
-   ⚠️ COSA NON GUARDA (serve ancora l'occhio): i conti, le sezioni piene
-   di dati veri (il database finto è VUOTO: un numero che va a zero senza
-   rete, o una riga lunga che esce dallo schermo, qui non si vedono), le
-   domande di «elimina», i PDF, la Chat con AI, «Parla», l'app dell'operaio.
+   I DATI FINTI stanno in tools/banco-dati-finti.js: poche righe inventate
+   per tabella, con dentro apposta i casi scomodi (nomi lunghissimi, un
+   lavoro in ritardo, un mezzo fuori da troppo, una fattura scaduta).
+
+   ⚠️ COSA NON GUARDA (serve ancora l'occhio): se i conti sono GIUSTI (guarda
+   solo che non vadano a zero senza rete), se «elimina» fa quello che dice
+   (risponde sempre No), i PDF, la Chat con AI, «Parla», l'app dell'operaio,
+   lo studio tecnico.
    ====================================================================== */
 "use strict";
 const http = require("http"), fs = require("fs"), path = require("path");
@@ -77,7 +81,39 @@ function rigaFinta(tabella) {
   if (tabella === "imprese") return [{ id: 1, user_id: UID, email: "banco@trovaimpresa.test", nome_attivita: "Impresa di prova", nome: "Mario Prova", mestiere: "Muratore", mestieri: ["Muratore"], telefono: "3331234567", descrizione: "Impresa di prova del banco: serve solo a far aprire il gestionale senza chiedere di completare il profilo. Non esiste davvero.", logo_url: "/img/trovaimpresa-logo.svg", email_confermata: true, premium_pagato: true, vetrina_attiva: true, tipo: "artigiano", ruolo: "artigiano", piano: "premium", premium_scadenza: "2099-12-31", chat_pro: true, chat_pro_scadenza: "2099-12-31", gest_prova_fine: "2099-12-31", gest_piano_scelto: "premium", citta: "Rieti", attivo: true, stato: "attivo" }];
   if (tabella === "gest_mestieri") return [{ id: REPARTO, user_id: UID, nome: "reparto di prova", icona: "wrench", ordine: 1, created_at: "2026-01-01T00:00:00Z" }];
   if (tabella === "gest_azienda") return [{ user_id: UID, ragione_sociale: "Impresa di prova", giorni_pagamento: 30 }];
-  return [];
+  return DATI[tabella] || [];
+}
+const DATI = require("./banco-dati-finti.js")(UID, REPARTO);
+/* i filtri di PostgREST che il gestionale usa davvero: senza, il Cestino
+   (eliminato_il non vuoto) riceverebbe tutte le righe vive, e una scheda
+   riceverebbe le righe di un'altra. Una colonna che la riga finta non ha
+   non filtra (meglio una riga in più che una sezione vuota per sbaglio). */
+function filtra(righe, parametri) {
+  let out = righe;
+  for (const [col, espr] of parametri) {
+    if (["select", "order", "limit", "offset", "or", "and", "on_conflict", "columns"].includes(col)) continue;
+    let e = espr, nega = false;
+    if (e.startsWith("not.")) { nega = true; e = e.slice(4); }
+    const i = e.indexOf("."), op = i < 0 ? e : e.slice(0, i), val = i < 0 ? "" : e.slice(i + 1);
+    out = out.filter(r => {
+      const ha = Object.prototype.hasOwnProperty.call(r, col), v = r[col];
+      let ok;
+      if (op === "is") ok = val === "null" ? (v == null) : String(v) === val;
+      else if (!ha) return true;
+      else if (op === "eq") ok = String(v) === val;
+      else if (op === "neq") ok = String(v) !== val;
+      else if (op === "in") ok = val.replace(/^\(|\)$/g, "").split(",").map(x => x.replace(/^"|"$/g, "")).includes(String(v));
+      else if (op === "gte") ok = v != null && String(v) >= val;
+      else if (op === "gt") ok = v != null && String(v) > val;
+      else if (op === "lte") ok = v != null && String(v) <= val;
+      else if (op === "lt") ok = v != null && String(v) < val;
+      else if (op === "ilike" || op === "like") ok = new RegExp("^" + val.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/%/g, ".*") + "$", "i").test(String(v == null ? "" : v));
+      else return true;
+      return nega ? !ok : ok;
+    });
+  }
+  const lim = parametri.get("limit"); if (lim) out = out.slice(0, +lim);
+  return out;
 }
 async function collega(page, stato) {
   /* stato.rete === false  →  il database non risponde (come senza internet) */
@@ -95,9 +131,10 @@ async function collega(page, stato) {
       if (u.pathname.startsWith("/rest/v1/")) {
         if (!stato.rete) return route.abort("internetdisconnected");
         const m = route.request().method();
-        if (m !== "GET" && m !== "HEAD") { stato.scritture.push(m + " " + u.pathname); }
+        /* le rpc sono letture; gest_accessi è il registro «è entrato», lo scrive la pagina da sola */
+        if (m !== "GET" && m !== "HEAD" && !/\/rpc\/|\/gest_accessi$/.test(u.pathname)) { stato.scritture.push(m + " " + u.pathname); }
         const tab = u.pathname.replace("/rest/v1/", "").replace(/^rpc\//, "rpc:");
-        const righe = m === "GET" ? rigaFinta(tab) : [];
+        const righe = (m === "GET" || m === "HEAD") ? filtra(rigaFinta(tab), u.searchParams) : [];
         const uno = /vnd\.pgrst\.object/.test(route.request().headers()["accept"] || "");
         if (tab.startsWith("rpc:")) return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: "null" });
         if (uno) return righe.length ? route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(righe[0]) })
@@ -236,8 +273,57 @@ async function giro(browser, base, nome, larghezza) {
   await page.evaluate(() => { const c = document.querySelector("#sheet [data-action=close]"); if (c && c.offsetParent) c.click(); }); await aspetta(page, 500);
   fatto.push(chi + ": " + finestre + " finestre «nuovo» provate");
 
+  /* 2b — le schede PIENE: si apre la prima riga di ogni sezione. La finestra sta nello schermo,
+     «Salva» si tocca, e la domanda di «elimina» dice COSA (col nome) e DOVE va (regola 22).
+     Alla domanda risponde sempre «No» il banco stesso. */
+  await page.evaluate(() => {
+    window.__domande = [];
+    const no = (t) => { window.__domande.push(String(t)); return Promise.resolve(false); };
+    window.tiChiedi = (s, o) => no(((o && o.titolo) ? o.titolo + "\n" : "") + s);
+    if (typeof window.gconfirm === "function") window.gconfirm = (t) => no(t);
+    window.confirm = (t) => { window.__domande.push(String(t)); return false; };
+  });
+  let schede = 0, domande = 0;
+  for (const t of sezioni) {
+    await page.evaluate(() => { const c = document.querySelector("#sheet [data-action=close]"); if (c && c.offsetParent) c.click(); }); await aspetta(page, 400);
+    await P.apri(page, t); await aspetta(page, 800);
+    const aperta = await page.evaluate(() => { const b = [...document.querySelectorAll("section.active button, section.active [data-action]")].find(x => x.offsetParent && x.innerText.trim() === "Apri"); if (!b) return false; b.click(); return true; });
+    if (!aperta) continue;
+    await aspetta(page, 1600);
+    const f = await page.evaluate(() => {
+      const sh = document.getElementById("sheet"); if (!sh || !sh.offsetParent) return null;
+      const corpo = sh.querySelector(".sh-body") || sh; corpo.scrollTop = 99999; if (sh.parentElement) sh.parentElement.scrollTop = 99999;
+      const sv = [...sh.querySelectorAll("button")].filter(x => x.offsetParent && /^(Salva|Crea)/.test(x.innerText.trim())).pop();
+      let coperto = "";
+      if (sv) { const r = sv.getBoundingClientRect(), su = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (!(su && (su === sv || sv.contains(su)))) coperto = (su && (su.innerText || su.className || su.tagName).toString().trim().slice(0, 25)) || "fuori dallo schermo"; }
+      const el = sh.querySelector('.sh-head [data-action*="del"], [data-action="nol-elim"]');
+      const n = window.__domande.length; if (el) el.click();
+      return { coperto, largo: corpo.scrollWidth - corpo.clientWidth, elimina: !!el, n };
+    });
+    if (!f) continue;
+    schede++;
+    if (f.coperto) segna(chi + " · scheda " + t, "«Salva» non si può toccare: sopra c'è «" + f.coperto + "»");
+    if (telefono && f.largo > 2) segna(chi + " · scheda " + t, "la scheda scorre di lato (" + f.largo + " px)");
+    const m = await page.evaluate(misura);
+    if (m.piccole.length) segna(chi + " · scheda " + t, "scritte sotto i 14 px: " + m.piccole.slice(0, 3).join("; "));
+    if (f.elimina) {
+      await aspetta(page, 1500);
+      const d = await page.evaluate(n => window.__domande.slice(n), f.n);
+      if (!d.length) segna(chi + " · scheda " + t, "«elimina» non fa nessuna domanda");
+      else { domande++; const q = d[0];
+        if (!/«[^»]+»|\bn(umero|\.) ?\d|bozza/i.test(q)) segna(chi + " · scheda " + t, "la domanda di «elimina» non dice il nome: «" + q.split("\n")[0].slice(0, 70) + "»");
+        if (!/cestino|per sempre/i.test(q)) segna(chi + " · scheda " + t, "la domanda di «elimina» non dice dove va: «" + q.split("\n")[0].slice(0, 70) + "»"); }
+    }
+  }
+  await page.evaluate(() => { const c = document.querySelector("#sheet [data-action=close]"); if (c && c.offsetParent) c.click(); }); await aspetta(page, 500);
+  if (stato.scritture.length) segna(chi, "il banco ha fatto partire " + stato.scritture.length + " scritture: " + stato.scritture.slice(0, 3).join(", "));
+  fatto.push(chi + ": " + schede + " schede piene aperte, " + domande + " domande di «elimina» lette");
+
   /* 3 — senza rete (solo una volta per pagina, sul computer): riquadro rosso, mai «vuoto» */
   if (!telefono) {
+    /* prima di staccare la rete si fa rileggere tutto e si tiene da parte quello che c'era scritto */
+    const prima = {};
+    for (const t of sezioni) { await P.apri(page, t); await aspetta(page, 700); prima[t] = await page.evaluate(t => { const s = document.getElementById(t); return s ? s.textContent.replace(/\s+/g, " ") : ""; }, t); }
     stato.rete = false;
     for (const t of sezioni) { await P.apri(page, t); await aspetta(page, 150); await P.ridisegna(page, t); }
     await aspetta(page, 30000);   /* il gestionale riprova da solo 7 secondi a domanda */
@@ -249,7 +335,11 @@ async function giro(browser, base, nome, larghezza) {
       const v = r.txt.match(VIETATE); if (v) segna(chi + " · " + t + " senza rete", "parola tecnica: «" + v[0] + "»");
       /* «vuoto» si accusa solo se il riquadro rosso NON c'è: col database finto le sezioni
          erano già vuote prima di staccare la rete, e la frase di prima può restare sotto il riquadro */
-      const z = !r.rosso && r.txt.match(VUOTO); if (z) segna(chi + " · " + t + " senza rete", "dice «" + z[0] + "» invece di «non riesco a leggere»");
+      const z = r.txt.match(VUOTO);
+      if (z && (!r.rosso || !(prima[t] || "").includes(z[0]))) segna(chi + " · " + t + " senza rete", "dice «" + z[0] + "» invece di «non riesco a leggere»");
+      /* regola 23: senza rete un numero non va a zero. Si contano gli zeri prima e dopo. */
+      const zeri = s => (String(s).match(/(^|[^\d.,])0,00\s?€|€\s?0(?![\d.,])|(^|\s)0 (noleggi|mezzi|lavori|fatture|preventivi|clienti|scadenze)/g) || []).length;
+      if (r.rosso && zeri(r.txt) > zeri(prima[t] || "")) segna(chi + " · " + t + " senza rete", "un numero è andato a zero (prima " + zeri(prima[t] || "") + " zeri, dopo " + zeri(r.txt) + ")");
     }
     stato.rete = true;
     fatto.push(chi + ": " + sezioni.length + " sezioni provate senza rete");

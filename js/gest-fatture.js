@@ -1311,7 +1311,7 @@
   async function eliminaFattura(id){
     const f=fattCache.find(x=>String(x.id)===String(id));
     const avviso=f&&f.numero
-      ? "Questa fattura ha il numero "+f.numero+"/"+fattAnno(f)+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso?"
+      ? "Questa fattura ha il numero "+f.numero+"/"+fattAnno(f)+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso la fattura "+f.numero+"/"+fattAnno(f)+(f.cli_nome?" di «"+f.cli_nome+"»":"")+"? "+((window.cestinoAttivo&&window.cestinoAttivo())?"Va nel Cestino: la riprendi quando vuoi.":"Non va nel Cestino: non si recupera.")   /* 12 nov 2026 (banco): regola 22, dice chi e dove va */
       : "Eliminare questa bozza di fattura?";
     /* 11 nov 2026 — collaudo 3.6: la bozza dice di chi e' e che va nel Cestino */
     const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());

@@ -27,6 +27,7 @@ on:
       - 'js/cestino.js'
       - 'css/gestionale.css'
       - 'tools/banco-gestionale.js'
+      - 'tools/banco-dati-finti.js'
   workflow_dispatch:
 
 permissions:
@@ -35,7 +36,7 @@ permissions:
 jobs:
   banco:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 

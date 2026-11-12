@@ -6039,3 +6039,8 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 }
 /* l'Assistente ha una regola con l'id che vinceva: lo zero grigio vale anche lì */
 #riepilogo:has(#rie-grid) .rie-card .rc-n.zero-grigio{ color:#5f6b7a !important; }
+
+/* 12 nov 2026 (trovato dal banco coi dati finti) — regola 18: i pulsanti piccoli («Pagata», «Modifica»
+   nelle fatture dei fornitori) erano a 13,5 px; sul telefono si toccano su 44 px */
+.btn-sm{ font-size:14px; }
+@media(max-width:880px){ .btn-sm{ min-height:44px; height:auto; } }

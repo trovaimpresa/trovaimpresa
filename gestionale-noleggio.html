@@ -719,7 +719,7 @@
 <div class="toast" id="toast"></div>
 </div>
 
-<link rel="stylesheet" href="/css/gestionale.css?v=12nov24">
+<link rel="stylesheet" href="/css/gestionale.css?v=12nov25">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=30">
 <style>
@@ -1099,6 +1099,8 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
   @media(max-width:480px){#app-root header.top .brand h1{font-size:22px!important}#app-root header.top .brand{gap:10px!important}}
   /* 12 nov 2026 (terzo giro) — a 360 px il titolo finiva 7 px sotto le tre righe; e i due riquadri del Rendimento uscivano di 8 px */
   @media(max-width:374px){.wrap section .cal-nav button[data-action="cal-today"],.cal-nav button[data-action="cal-today"]{min-width:60px;padding:0 8px!important}.wrap section .cal-nav{gap:4px}#app-root header.top .brand h1{font-size:19px!important}#app-root header.top .brand{gap:8px!important}#rendimento .money-row{grid-template-columns:1fr!important}}
+  /* 12 nov 2026 (trovato dal banco coi dati finti) — con un importo a quattro cifre i due riquadri del Rendimento uscivano anche a 375 px */
+  @media(max-width:400px){#rendimento .money-row{grid-template-columns:1fr!important}}
   /* 12 nov 2026 (terzo giro) — sul telefono «Parla» che galleggia copriva la casella dove si scrive */
   @media(max-width:880px){body:has(#assistenza.active) #gv-btn,body:has(#richieste.active) #gv-btn,body:has(#assistenza.active) #gv-foto,body:has(#richieste.active) #gv-foto{display:none!important}}
   /* 12 nov 2026 (terzo giro) — regola 19: uno zero è grigio (Calendario, Fatture, Magazzino) */
