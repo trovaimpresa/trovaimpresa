@@ -217,6 +217,10 @@
     if (!(await window.chiediVia("la ricevuta N. " + r.numero + "/" + r.anno + (r.cli_nome ? " di " + r.cli_nome : ""), true, "La riprendi dal Cestino quando vuoi."))) return;
     const { error } = await sb.from(TAB).update({ eliminato_il: new Date().toISOString() }).eq("id", id).eq("user_id", sbUid);
     if (error) { toast("Non eliminata: " + error.message); return; }
+    /* 12 nov 2026 (sera) — provato dal vivo: qui si scrive eliminato_il a mano,
+       quindi js/cestino.js non lo sa e il Cestino restava «vuoto» finche' non
+       si cambiava vista. Glielo si dice: lista da rifare e pallino +1. */
+    if (typeof window.segnaCestinoDaRifare === "function") window.segnaCestinoDaRifare(1);
     toast((window.cestinoAttivo && window.cestinoAttivo()) ? "Ricevuta nel cestino: la riprendi da lì" : "Ricevuta eliminata");
     await apri();
   }
