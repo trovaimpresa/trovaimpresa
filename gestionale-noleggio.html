@@ -719,7 +719,7 @@
 <div class="toast" id="toast"></div>
 </div>
 
-<link rel="stylesheet" href="/css/gestionale.css?v=12nov20">
+<link rel="stylesheet" href="/css/gestionale.css?v=12nov22">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=30">
 <style>
@@ -1056,6 +1056,41 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
 .nol-cta .tab-cnt{position:absolute;top:10px;right:12px}
 .nol-cta .tab-cnt:empty{display:none}
 @media(max-width:760px){.nol-aiuto{grid-template-columns:1fr;gap:10px}.nol-cta{min-height:78px}}
+
+  /* ============================================================
+     12 nov 2026 — IL MENU DEL TELEFONO (js/nol-menu-telefono.js)
+     Sul telefono niente più striscia da scorrere di lato: pulsante con
+     le tre righe in alto, menu a tutto schermo, barra fissa in basso.
+     Sul computer (sopra gli 880 px) tutto questo è nascosto.
+     ============================================================ */
+  #nol-menu-btn,#nol-menu-x,#nol-menu-tit{display:none}
+  .az-corto{display:none}
+  @media(min-width:881px){#barra-basso{display:none!important}}
+  @media(max-width:880px){
+    header.top nav.tabs{display:none!important}
+    .az-lungo{display:none}.az-corto{display:inline}
+    #app-root header.top .top-in{row-gap:12px!important;flex-wrap:wrap!important}
+    #app-root header.top .top-in > .brand{flex:1 1 0!important;min-width:0}
+    #nol-menu-btn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:53px;min-height:53px;padding:0;color:#0a2a4d;background:#fff;border:0;border-radius:12px;cursor:pointer}
+    #app-root header.top .nol-top-azioni{flex:1 1 100%!important;display:flex!important;gap:10px!important}
+    #app-root header.top .nol-top-azioni > button{min-width:0;justify-content:center;font-size:16px!important;white-space:nowrap}
+    #app-root header.top .nol-top-azioni > button[data-action="azienda"]{flex:0 0 auto!important;padding:0 10px!important}
+    #app-root header.top .nol-top-azioni > button[data-action="new-nol"]{flex:1 1 0!important;padding:0 6px!important}
+    /* il menu aperto: la stessa nav, in colonna, a tutto schermo */
+    body.nol-menu-on header.top nav.tabs{display:flex!important;flex-direction:column;position:fixed;inset:0;z-index:9998;background:#0a2a4d;padding:84px 16px 120px;overflow-y:auto;gap:8px;align-items:stretch}
+    body.nol-menu-on header.top nav.tabs button{display:flex!important;align-items:center;width:100%;min-height:54px;padding:0 16px!important;font-size:18px!important;font-weight:700;color:#fff!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:12px!important;text-align:left;justify-content:flex-start;white-space:normal;flex:none}
+    body.nol-menu-on header.top nav.tabs button.active{background:#ff8a00!important;color:#0a2a4d!important;border-color:#ff8a00!important}
+    body.nol-menu-on header.top nav.tabs button.nol-altro,body.nol-menu-on header.top nav.tabs button[data-tab="galleria"]{display:none!important}
+    body.nol-menu-on #nol-menu-x{display:inline-flex;position:fixed;top:16px;right:16px;z-index:9999;min-height:48px;padding:0 18px;align-items:center;font-weight:700;font-size:17px;color:#0a2a4d;background:#fff;border:0;border-radius:12px;cursor:pointer}
+    body.nol-menu-on #nol-menu-tit{display:block;position:fixed;top:26px;left:20px;z-index:9999;color:#fff;font-weight:800;font-size:24px}
+    body.nol-menu-on{overflow:hidden}
+    /* la barra in basso: stessa forma dell'App (css/gestionale.css), qui senza l'angolo del fumetto */
+    nav#barra-basso.barra-basso{padding-right:6px!important;z-index:9999}
+    #barra-basso,#barra-basso button,#barra-basso span,#nol-menu-x,#nol-menu-tit{font-family:"IBM Plex Sans",Inter,system-ui,sans-serif!important}
+    #app-root{padding-bottom:92px}
+    /* il pulsante «Parla» che galleggia sta sopra la barra, non addosso */
+    #gv-btn,#gv-foto{bottom:98px!important}
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1097,6 +1132,7 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
 <script src="/js/gest-icone.js"></script>
 <!-- 29/09/2026 — menu corto e Primi passi anche nel Noleggio -->
 <script src="/js/nol-menu-corto.js?v=10nov1"></script>
+<script src="/js/nol-menu-telefono.js?v=12nov22"></script>
 <script src="/js/nol-primi-passi.js?v=11nov1"></script>
 <script src="/js/nol-sdi.js"></script>
 <script src="/js/gest-bordo-blu.js?v=1" defer></script>

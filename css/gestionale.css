@@ -6018,3 +6018,10 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 @media(max-width:560px){
   .sheet .ti-i, .ti-i{ height:28px!important; min-height:28px!important; max-height:28px!important; }
 }
+/* Computo sul telefono: i passi dal 3 al 6 erano nascosti a destra. Su due
+   colonne si vedono tutti; non resta attaccato in alto, su tre righe
+   coprirebbe troppo schermo. Anteprima approvata da Alex il 12 nov 2026. */
+@media(max-width:560px){
+  .conav{ display:grid!important; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); overflow:visible!important; position:static!important; margin:0 0 18px!important; padding:4px 0!important; gap:0 4px; border:1px solid var(--bordo); border-radius:12px; }
+  .conav-v{ white-space:normal!important; text-align:left; justify-content:flex-start; min-height:48px; padding:8px 6px!important; gap:6px!important; font-size:15px!important; line-height:1.2; min-width:0; }
+}
