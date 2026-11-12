@@ -41,13 +41,16 @@
     const box=$("#dip-list");if(!box)return;
     if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
     if(!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Accedi per gestire la squadra","Entra nel pannello per invitare le persone.");return;}
-    const [{data:ops},{data:membri},{data:docsAll},{data:msgNuovi}]=await Promise.all([
+    const _rD=await Promise.all([
       sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()),
       sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi"),
       sb.from("gest_operatore_documenti").select("*"),
       /* 11 ott 2026 — messaggi della chat generale non ancora letti, per persona */
       sb.from("gest_messaggi").select("operatore_id").eq("autore","operaio").is("letto_il",null).is("lavoro_id",null)
     ]);
+    /* 12 nov 2026 — regola 20: senza rete non si dice «Chi lavora con te» vuoto */
+    if(letturaKo(_rD[0])){listaNonLetta(box,"la squadra","squadra");return;}
+    const [{data:ops},{data:membri},{data:docsAll},{data:msgNuovi}]=_rD;
     const nB={};(msgNuovi||[]).forEach(function(m){nB[m.operatore_id]=(nB[m.operatore_id]||0)+1;});
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
     const dB={};(docsAll||[]).forEach(function(d){(dB[d.operatore_id]=dB[d.operatore_id]||[]).push(d);});

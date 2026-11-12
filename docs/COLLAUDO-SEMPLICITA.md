@@ -1620,3 +1620,9 @@ Provate dal vivo sul suo account, computer 1440 e telefono 390, senza salvare ni
 - Promemoria vuoto: la riga sotto era a 13 px → 15.
 - Eliminare una foto: ora dice se va nel Cestino (`cestFrase`).
 - Riepilogo, Clienti, Mezzi, Noleggi, Fatture, Prodotti, Magazzino, Fornitori, Movimenti, Rendimento: a posto.
+
+## 12 nov 2026 — giro del controllore separato (computer 1440 e telefono 390)
+Trovati 14 difetti (3 gravi). Niente sotto i 14 px, niente fuori schermo, nessun errore al caricamento; le modifiche dell'11 nov funzionano.
+**Gravi, corretti oggi (regola 20, senza rete):** il riquadro rosso «Non riesco a leggere… Riprova» adesso c'è anche in Mezzi, Attrezzature, Squadra, Scadenzario, Calendario, Agenda, Report, Promemoria, Galleria, Mappa, Cestino e in «Da fare adesso» di Tasse e fisco (diceva «Niente di urgente»). Noleggio: funzione nuova `nolNonLetto` in js/nol-base.js, usata da Mezzi, Clienti, Noleggi, Fatture (i tre riquadri mostrano «—», non 0,00 €), Cauzioni, Promemoria.
+**Ancora aperti:** Noleggio: il mezzo è «Disponibile» in Mezzi ma in ritardo nel Riepilogo, e «Fuori adesso» conta i noleggi; senza rete manca Riprova in Computo, Prezzario, SAL, Assistenza, Farsi pagare, Giornate (e si legge «TypeError»); casella rossa che manca in Promemoria e Nuova voce del Prezzario; domande di «elimina» senza nome (ore, spesa, pieno, documento, ricevuta; Noleggio: lavoro, persona); Report «−0,00 €»; Report «Ore per operatore» vuoto con manodopera 56,25 €; «primo preventivo in 3 passi» nei reparti già avviati; Cestino vuoto con la spiegazione doppia; telefono: numero in Squadra alto 31 px; «Oggi» / «Assistente»; Mappa scritte a 12 px.
+Da fare dopo il push: prova dal vivo senza rete, sezione per sezione.

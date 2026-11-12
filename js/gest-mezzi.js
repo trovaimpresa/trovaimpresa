@@ -85,6 +85,7 @@
       sb.from("gest_scadenze").select("mezzo_id,titolo,tipo_pratica,data_scadenza,stato").eq("user_id",sbUid)
         .not("mezzo_id","is",null).lt("data_scadenza",todayStr())
     ]);
+    window._mezziKo=!!(!rmz||rmz.error);
     mezziCache=(rmz&&rmz.data)||[];
     carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
     mezziScaduteMap={};
@@ -107,6 +108,8 @@
       return;
     }
     const scadMap=await caricaMezziCache();
+    /* 12 nov 2026 — regola 20: senza rete non si dice «I mezzi» vuoti */
+    if(window._mezziKo){listaNonLetta(box,attrezzo?(STRU?"gli strumenti":"le attrezzature"):"i mezzi",attrezzo?"attrezzature":"mezzi",attrezzo?"#attr-viste":"#mezzi-viste");return;}
     const tutti=mezziCache.filter(m=> attrezzo ? m.categoria==="attrezzatura" : m.categoria!=="attrezzatura");
     const filtro=attrezzo?attrezzFilter:mezziFilter;
     const filtra=(A,v)=>v==="manutenzione"?A.filter(m=>m.stato==="manutenzione"):A.slice();

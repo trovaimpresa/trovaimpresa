@@ -577,7 +577,8 @@
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
-    if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];}
+    let _calKo=false;   /* 12 nov 2026 — regola 20 */
+    if(sb&&sbUid){const {data,error:_eCal}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];_calKo=!!_eCal;}
     else calJobs=[];
     /* ===== 12 agosto 2026 — LE SCADENZE SUL CALENDARIO =====
        Il calendario leggeva UNA tabella sola: i lavori. Le scadenze — DURC,
@@ -653,7 +654,9 @@
       const note=noteCache[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}</div></div>`;
     }
+    $("#cal-grid").style.display="";
     $("#cal-grid").innerHTML=html;
+    if(_calKo){listaNonLetta("#cal-grid","il calendario","calendario");}
     /* 11 nov 2026 — collaudo 3.12: i lavori in ritardo stanno in mesi
        passati, e il calendario del mese sembrava vuoto. Una riga rossa in
        cima li dice e porta a Lavori gia' filtrato. La regola e' quella di

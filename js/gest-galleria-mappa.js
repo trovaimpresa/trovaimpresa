@@ -80,11 +80,14 @@
       if(selLav)selLav.innerHTML='<option value="">'+esc(_msgPro("Tutti i cantieri"))+'</option>';
       galVuoto(box);return;
     }
-    const [{data:foto},{data:video},{data:lavori}]=await Promise.all([
+    const _rG=await Promise.all([
       sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
       sb.from("gest_video").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
       sb.from("gest_lavori").select("id,descrizione,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
     ]);
+    /* 12 nov 2026 — regola 20: senza rete non si dice «Nessuna foto» */
+    if(letturaKo(_rG[0],_rG[2])){listaNonLetta(box,"le foto","galleria");return;}
+    const [{data:foto},{data:video},{data:lavori}]=_rG;
     const lavArr=(lavori||[]);
     const lavName=Object.fromEntries(lavArr.map(l=>[l.id,l.descrizione||"Lavoro"]));
     const lavIds=new Set(lavArr.map(l=>l.id));
@@ -365,8 +368,10 @@
          poi TUTTE le distanze erano sbagliate — e credibili, che e' peggio.
          E siccome il punto dell'ufficio serve anche a restringere la ricerca
          dei cantieri alla zona giusta, sbagliava pure quelli. */
-      const {data:az}=await sb.from("gest_azienda")
+      const {data:az,error:_eMp}=await sb.from("gest_azienda")
         .select("nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).maybeSingle();
+      /* 12 nov 2026 — regola 20: senza rete non si chiede un indirizzo che c'e' gia' */
+      if(_eMp){if(avviso)avviso.innerHTML="";listaNonLetta(box,"la mappa","mappa");return;}
       const partenzaTxt=azIndirizzo(az).trim();
       /* Anche senza l'indirizzo dell'ufficio la carta si vede lo stesso, con i pin
          dei cantieri: mancano solo i chilometri, perché non c'e' da dove misurarli. */

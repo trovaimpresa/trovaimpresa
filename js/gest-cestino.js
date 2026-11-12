@@ -313,6 +313,8 @@
        sessione: il menu diceva 10 con 12 cose nel Cestino, cioe' MENO del vero,
        che e' il verso sbagliato in cui sbagliare. */
     const _incerto=risposte.some(x=>x.ko);
+    /* 12 nov 2026 — regola 20: se non ha risposto NESSUNA tabella non si dice «Il cestino è vuoto» */
+    if(risposte.length&&risposte.every(x=>x.ko)){listaNonLetta(box,"il cestino","cestino");return;}
     if(cestVista==="tutti"&&!_incerto){
       cestTotale=cestQui;
       cestContato=true;

@@ -117,6 +117,13 @@
     backfillMestieri();
   }
   async function save(){try{await window.storage.set(KEY,JSON.stringify(state));}catch(e){toast("Errore salvataggio");}}
+  /* 12 nov 2026 — regola 20 anche nel Noleggio: senza rete una lista non dice «vuoto» */
+  function nolNonLetto(box,cosa,rifai){
+    if(!box)return;
+    box.innerHTML='<div class="rie-errore"><b>Non riesco a leggere '+cosa+'.</b> La connessione non risponde: i tuoi dati sono al sicuro, non sono spariti. <button class="btn" type="button">Riprova</button></div>';
+    const b=box.querySelector("button");
+    if(b)b.onclick=function(){b.disabled=true;b.textContent="Riprovo…";Promise.resolve(rifai()).catch(function(){});};
+  }
   function toast(m){const t=$("#toast");t.textContent=_msgPro(m);t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
   /* Solo professionista: i testi dei toast/confirm passano dalla mappa _FRASI (un solo punto qui).
      Artigiano e negozio restano invariati. Non tocca il contenuto utente già interpolato (numeri, nomi). */

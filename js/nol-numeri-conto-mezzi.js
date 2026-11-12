@@ -439,10 +439,11 @@
 
   async function loadMezzi(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("gest_mezzi")
+    const {data,error:_eMz}=await sb.from("gest_mezzi")
       .select("*").eq("user_id",sbUid).eq("noleggiabile",true).order("nome");
     const m=data||[], box=$("#mezzi-body");
     if(!box) return;
+    if(_eMz){nolNonLetto(box,"i mezzi",loadMezzi);return;}
     if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun mezzo. Aggiungine uno.</p>';return;}
     const col={disponibile:"#2e7d32",in_uso:"#e65100",noleggiato:"#e65100",manutenzione:"#757575",fuori_uso:"#757575"};
     box.innerHTML=m.map(x=>{

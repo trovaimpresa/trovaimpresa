@@ -91,7 +91,7 @@
     if(!cur){box.innerHTML="";return;}
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Accedi per gestire lo scadenzario</small></div>`;return;}
     const mid=curMestiere();
-    const [{data:sc},{data:cl},{data:mz},{data:lvNomi}]=await Promise.all([
+    const _rS=await Promise.all([
       /* "*" invece dell'elenco fisso: se sql/gest-scadenze-pratiche.sql non è ancora
          stato eseguito, le colonne nuove semplicemente non arrivano e la sezione
          non si rompe (stessa scelta già fatta per le pratiche). */
@@ -103,6 +103,9 @@
          scadenza collegata sembrerebbe (ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)") pur esistendo. */
       sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
+    /* 12 nov 2026 — regola 20: senza rete non si dice «Aggiungi la prima scadenza» */
+    if(letturaKo(_rS[0])){listaNonLetta(box,"le scadenze","scadenzario");return;}
+    const [{data:sc},{data:cl},{data:mz},{data:lvNomi}]=_rS;
     scadCache=sc||[];
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const mezMap=Object.fromEntries((mz||[]).map(m=>[m.id,m.nome]));

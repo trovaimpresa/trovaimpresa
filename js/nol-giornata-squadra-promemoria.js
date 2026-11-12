@@ -244,7 +244,7 @@
        non c'e'. */
     const {data,error}=await sb.from("promemoria").select("*")
       .eq("user_id",sbUid).is("eliminato_il",null).order("data",{ascending:true});
-    if(error){toast("Promemoria non letti: "+error.message);return;}
+    if(error){nolNonLetto(box,"i promemoria",renderPromemoria);return;}   /* 12 nov 2026 — regola 20 */
     promCache=data||[];
 
     const filtra=(A,v)=>v==="aperti"?A.filter(p=>p.stato!=="fatto")

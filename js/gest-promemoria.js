@@ -107,7 +107,7 @@
       .select("*").eq("user_id", sbUid)
       .is("eliminato_il", null)
       .order("data", { ascending: true });
-    if (error) { toast("Promemoria non letti: " + error.message); return; }
+    if (error) { listaNonLetta(box, "i promemoria", "promemoria"); return; }   /* 12 nov 2026 — regola 20 */
     promCache = data || [];
 
     const oggi = todayStr();

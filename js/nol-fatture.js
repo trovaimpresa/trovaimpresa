@@ -65,11 +65,16 @@
   async function loadFattureNol(){
     if(!(sb&&sbUid)) return;
     const box=$("#fattnol-body"); if(!box) return;
-    const [{data:ff},{data:nn}]=await Promise.all([
+    const _rFn=await Promise.all([
       sb.from("nol_fatture").select("*").eq("user_id",sbUid).is("eliminato_il",null)
         .order("data",{ascending:false}),
       sb.from("nol_noleggi").select("id,importo,fattura_id,eliminato_il,mestiere_id").eq("user_id",sbUid)
     ]);
+    if(!_rFn[0]||_rFn[0].error){
+      ["kf-dafatturare","kf-daincassare","kf-incassate"].forEach(function(id){const e=$("#"+id);if(e)e.textContent="—";});
+      nolNonLetto(box,"le fatture",loadFattureNol);return;
+    }
+    const [{data:ff},{data:nn}]=_rFn;
     const F=ff||[];
     /* 7 nov 2026: i noleggi ai TUOI reparti (mestiere_id) non si fatturano:
        contarli qui diceva «3 da fatturare» quando i clienti veri erano 2 */

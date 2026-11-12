@@ -380,8 +380,9 @@
   async function loadCauzioni(){
     if(!(sb&&sbUid)) return;
     const box=$("#cauzioni-body"); if(!box) return;
-    const {data}=await sb.from("nol_noleggi").select("*").eq("user_id",sbUid)
+    const {data,error:_eCz}=await sb.from("nol_noleggi").select("*").eq("user_id",sbUid)
       .order("data_uscita",{ascending:false});
+    if(_eCz){nolNonLetto(box,"le cauzioni",loadCauzioni);return;}
     /* ⚠️ un noleggio senza cauzione qui non c'entra niente: sparisce, invece
        di allungare l'elenco con righe da zero euro. */
     const N=(data||[]).filter(x=>(+x.cauzione||0)>0);

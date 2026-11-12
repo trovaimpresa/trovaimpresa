@@ -372,6 +372,8 @@
       [L, T] = await Promise.all([fpCaricaAperte(), typeof ftCarica === "function" ? ftCarica() : Promise.resolve(null)]);
     } catch (_) { box.innerHTML = ""; return; }
     if (mio !== fpGiro) return;
+    /* 12 nov 2026 — regola 20: senza rete non si dice «Niente di urgente» */
+    if (L && L.errore) { box.innerHTML = '<div class="rie-errore"><b>Non riesco a leggere fatture e tasse.</b> La connessione non risponde: i tuoi dati sono al sicuro, non sono spariti. <button class="btn" data-action="lista-riprova" data-tab="fisco">Riprova</button></div>'; return; }
 
     let sc = null;
     if (T && T.profilo) {

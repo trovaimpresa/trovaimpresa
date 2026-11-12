@@ -186,10 +186,11 @@
      cliente nuovo creato da qui nasce nel reparto in cui stai. */
   async function loadClientiNol(){
     if(!(sb&&sbUid)) return;
-    const {data}=await sb.from("gest_clienti")
+    const {data,error:_eCl}=await sb.from("gest_clienti")
       .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
     const c=data||[], box=$("#clienti-nol-body");
     if(!box) return;
+    if(_eCl){nolNonLetto(box,"i clienti",loadClientiNol);return;}
     if(!c.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun cliente. Aggiungine uno.</p>';return;}
     box.innerHTML=c.map(x=>
       nolCard({col:"#1565c0",
@@ -221,9 +222,10 @@
   async function loadNoleggi(){
     if(!(sb&&sbUid)) return;
     await popolaSelectNoleggi();
-    const {data}=await sb.from("nol_noleggi").select("*").eq("user_id",sbUid).order("data_uscita",{ascending:false});
+    const {data,error:_eNl}=await sb.from("nol_noleggi").select("*").eq("user_id",sbUid).order("data_uscita",{ascending:false});
     const n=data||[], box=$("#noleggi-body"), oggi=new Date().toISOString().slice(0,10);
     if(!box) return;
+    if(_eNl){nolNonLetto(box,"i noleggi",loadNoleggi);return;}
     if(!n.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun noleggio.</p>';return;}
     box.innerHTML=n.map(x=>{
       let col,et;
