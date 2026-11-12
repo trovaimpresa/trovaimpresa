@@ -1091,6 +1091,8 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
     /* il pulsante «Parla» che galleggia sta sopra la barra, non addosso */
     #gv-btn,#gv-foto{bottom:98px!important}
   }
+  /* dentro una sezione il pulsante diventa «← Riepilogo»: col titolo a 22 px non finisce sotto le tre righe */
+  @media(max-width:480px){#app-root header.top .brand h1{font-size:22px!important}#app-root header.top .brand{gap:10px!important}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
