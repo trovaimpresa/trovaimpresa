@@ -182,9 +182,8 @@
     L.forEach(l=>{if(!l.cliente_id||!(+l.importo))return;perCli[l.cliente_id]=(perCli[l.cliente_id]||0)+(+l.importo||0);});
     const topCli=Object.entries(perCli).sort((a,b)=>b[1]-a[1]).slice(0,5);
     /* ore per operatore */
-    const perOp={};
-    L.forEach(l=>{if(!l.operatore_id||!(+l.ore))return;perOp[l.operatore_id]=(perOp[l.operatore_id]||0)+(+l.ore||0);});
-    const opRows=Object.entries(perOp).sort((a,b)=>b[1]-a[1]);
+    /* 12 nov 2026 — spostato piu' sotto, dopo caricaManodopera: le ore si contano
+       dalle stesse righe che fanno il costo della manodopera. */
     const totInc=_daLavori
       ? L.filter(l=>l.fatt_stato==="pagata").reduce((s,l)=>s+(+l.importo||0),0)
       : pagate.reduce((s,f)=>s+(impFatt[f.id]||0),0);
@@ -199,6 +198,15 @@
        (riga sopra) e poi non lo usava. */
     const ffPer={};FF.forEach(x=>{if(x.lavoro_id)ffPer[x.lavoro_id]=(ffPer[x.lavoro_id]||0)+(+x.importo||0);});
     const _md=await caricaManodopera(mid,L);
+    /* 12 nov 2026 — ORE PER OPERATORE dalle righe di gest_ore, come la manodopera.
+       Prima guardava solo la casella «ore» del lavoro: con le ore segnate riga
+       per riga usciva «Manodopera 56,25 €» e sotto «Segna le ore nei lavori».
+       Stessa regola di costoManodopera: se un lavoro ha righe valgono quelle,
+       se no vale la sua casella. Chi non ha il nome finisce in «Senza nome». */
+    const perOp={}, _conRigheOp={};
+    (_md.righe||[]).forEach(o=>{const h=+o.ore||0;if(!h||!o.lavoro_id)return;_conRigheOp[String(o.lavoro_id)]=1;const k=o.operatore_id!=null?String(o.operatore_id):"";perOp[k]=(perOp[k]||0)+h;});
+    L.forEach(l=>{if(_conRigheOp[String(l.id)]||!(+l.ore))return;const k=l.operatore_id?String(l.operatore_id):"";perOp[k]=(perOp[k]||0)+(+l.ore||0);});
+    const opRows=Object.entries(perOp).sort((a,b)=>b[1]-a[1]);
     /* 12 agosto 2026 (sera) — il costo della manodopera di TUTTI i lavori del
        Report. Serve ai "Totali storici" qui sotto: la manodopera entrava nel
        margine di ogni singolo lavoro ma NON nel margine totale, cosi' sommando
@@ -264,7 +272,7 @@
           : `<tr><td colspan="2" style="color:var(--muted)">Nessuna spesa registrata sulle carte.</td></tr>`}
         </table></div>`}
       <div class="rep-card"><h3>${_ICO_OROLOGIO}Ore per operatore</h3><table class="rep-table">
-        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||"—")}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
+        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||(id?"—":"Senza nome"))}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
     </div>`;
   }
 

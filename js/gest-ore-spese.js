@@ -501,7 +501,8 @@
          una riga che non serviva a niente.) */
       const oreLette=!!(ore && !ore.error && ore.data);
       const md=costoManodopera((ore&&ore.data)||[],lavori,tariffe);
-      return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe, oreLette:oreLette};
+      /* 12 nov 2026 — «righe»: le ore lette, per chi deve contarle per persona (Report) */
+      return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe, oreLette:oreLette, righe:(ore&&ore.data)||[]};
     }catch(e){ return vuoto; }
   }
 
