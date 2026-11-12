@@ -21,6 +21,8 @@
   le pagine `.html` in cima (pannelli, gestionale, pagine città) ·
   `sql/` · `netlify/functions/` · `js/` · `css/` ·
   `tools/controllo-push.js` (da lanciare PRIMA di ogni blocco git) ·
+  `tools/banco-gestionale.js` (dal 12 nov 2026: da lanciare dopo OGNI modifica al
+  gestionale, app o noleggio — regola 25 di `docs/REGOLE-SEMPLICITA.md`) ·
   `prove-claude/` (rapporti e fogli di lavoro: **in `.gitignore`, non va online**).
 - ⛔ Da qui NON si lancia nessun comando git, nemmeno in sola lettura.
 - ⛔ **AGGIORNATO il 4 set 2026**: i banchi di prova adesso stanno **QUI**, in

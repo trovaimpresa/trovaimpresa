@@ -1,0 +1,54 @@
+# ======================================================================
+# 12 novembre 2026 — IL BANCO DEL GESTIONALE GIRA DA SOLO A OGNI PUSH
+# ======================================================================
+# Ogni volta che cambia un file del gestionale (app o noleggio), GitHub
+# apre le due pagine in un browser vero, con un database finto, e rifa'
+# i controlli del collaudo: senza rete niente «vuoto», sul telefono
+# niente fuori schermo e «Salva» che si tocca, campo che manca rosso,
+# niente scritte sotto i 14 px. Cosa guarda e cosa no: tools/banco-gestionale.js
+#
+# ⚠️ NON ferma la pubblicazione su Netlify: avvisa. Se trova difetti la
+# riga del commit su GitHub diventa rossa e arriva un'email.
+# ⚠️ NON costa crediti Netlify: gira sui computer di GitHub.
+#
+# Per lanciarlo a mano: GitHub → Actions → «Banco del gestionale» → Run workflow.
+# ======================================================================
+name: Banco del gestionale
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gestionale-app.html'
+      - 'gestionale-noleggio.html'
+      - 'js/gest-*.js'
+      - 'js/nol-*.js'
+      - 'js/gate-gestionale.js'
+      - 'js/cestino.js'
+      - 'css/gestionale.css'
+      - 'tools/banco-gestionale.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  banco:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepara il browser
+        run: |
+          mkdir -p /tmp/banco && cd /tmp/banco
+          npm init -y > /dev/null
+          npm i --no-save playwright @supabase/supabase-js@2
+          npx playwright install --with-deps chromium
+
+      - name: Fa girare il banco
+        run: node tools/banco-gestionale.js

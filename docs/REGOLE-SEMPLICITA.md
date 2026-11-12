@@ -66,3 +66,6 @@ ferme prima di cominciare.
 23. **La regola 20 vale anche per i numeri.** Senza rete un numero non va a zero: trattino «—», pallino grigio e riquadro rosso con Riprova. E mai una parola tecnica («TypeError», «esegui il file sql»).
 24. **Lo stato di una cosa è uguale in tutti i gestionali.** Un mezzo fuori a noleggio non è «Disponibile» nell'App.
 
+
+## Decisa il 12 nov 2026 (terzo giro del controllore)
+25. **Dopo ogni modifica al gestionale gira il banco.** `node tools/banco-gestionale.js` rifà da solo, in un browser vero e con un database finto, i controlli delle regole 11, 18, 20, 21 e 23 su App e Noleggio (computer, telefono a 375 e a 360 px). Si lancia PRIMA del push; su GitHub parte da solo a ogni push (Actions → «Banco del gestionale»). Se dice rosso, non è finito. Quello che il banco non guarda (conti, sezioni piene di dati, «elimina», PDF, Chat) resta da provare dal vivo.

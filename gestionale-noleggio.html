@@ -1098,7 +1098,7 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
   /* dentro una sezione il pulsante diventa «← Riepilogo»: col titolo a 22 px non finisce sotto le tre righe */
   @media(max-width:480px){#app-root header.top .brand h1{font-size:22px!important}#app-root header.top .brand{gap:10px!important}}
   /* 12 nov 2026 (terzo giro) — a 360 px il titolo finiva 7 px sotto le tre righe; e i due riquadri del Rendimento uscivano di 8 px */
-  @media(max-width:374px){#app-root header.top .brand h1{font-size:19px!important}#app-root header.top .brand{gap:8px!important}#rendimento .money-row{grid-template-columns:1fr!important}}
+  @media(max-width:374px){.wrap section .cal-nav button[data-action="cal-today"],.cal-nav button[data-action="cal-today"]{min-width:60px;padding:0 8px!important}.wrap section .cal-nav{gap:4px}#app-root header.top .brand h1{font-size:19px!important}#app-root header.top .brand{gap:8px!important}#rendimento .money-row{grid-template-columns:1fr!important}}
   /* 12 nov 2026 (terzo giro) — sul telefono «Parla» che galleggia copriva la casella dove si scrive */
   @media(max-width:880px){body:has(#assistenza.active) #gv-btn,body:has(#richieste.active) #gv-btn,body:has(#assistenza.active) #gv-foto,body:has(#richieste.active) #gv-foto{display:none!important}}
   /* 12 nov 2026 (terzo giro) — regola 19: uno zero è grigio (Calendario, Fatture, Magazzino) */
