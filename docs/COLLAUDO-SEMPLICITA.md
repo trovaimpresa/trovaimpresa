@@ -1628,6 +1628,7 @@ Trovati 14 difetti (3 gravi). Niente sotto i 14 px, niente fuori schermo, nessun
 **12 nov, domande di «elimina» (regola 22):** funzione nuova `chiediVia(cosa,nelCestino,sotto)` in js/gest-ai-moduli.js. Nel Cestino: riga di ore, spesa, documento (lavoro, cliente, fornitore), corso. Per sempre: pieno, ricevuta; nel Noleggio lavoro e persona (col nome).
 **12 nov, ritocchi:** Report: gli zeri sono grigi e senza segno (`_repZero`); Cestino vuoto: una riga sola; telefono: numero ed email da toccare alti 44 px (`a.cli-link`). «Preve…» nella barra in basso NON è un difetto: sul telefono vero (360, 370, 375 px) «Preventivi» ci sta, lo tagliava solo il riquadro di prova con la barra di scorrimento.
 **12 nov, deciso da Alex:** il pulsante in basso sul telefono si chiama «Assistente» come nel menu (era «Oggi»).
-**Ancora aperti:** Report «Ore per operatore» vuoto con manodopera 56,25 €; «primo preventivo in 3 passi» nei reparti già avviati; Mappa scritte a 12 px.
+**12 nov, deciso da Alex:** «Il tuo primo preventivo in 3 passi» non si vede più a chi ha già una fattura emessa o un lavoro finito (js/gest-primi-passi.js).
+**Ancora aperti:** Report «Ore per operatore» vuoto con manodopera 56,25 €; Mappa scritte a 12 px.
 Provato dal vivo dopo il push (→8b05aba←): 12 sezioni dell'App e 6 del Noleggio mostrano il riquadro rosso senza rete e con «Riprova» tornano i dati; console pulita.
 **12 nov, Noleggio — mezzo «Disponibile» ma fuori (corretto):** in Mezzi lo stato si legge anche dai noleggi aperti con `nolFaseDi` (IN RITARDO · N giorni / FUORI / PRENOTATO, stesse parole e colori dell'elenco Noleggi); nel Riepilogo «Fuori adesso» e «In ritardo» contano i mezzi, non i noleggi.

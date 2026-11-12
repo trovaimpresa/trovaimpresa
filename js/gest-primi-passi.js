@@ -79,6 +79,17 @@
       var quanti = fatti.filter(Boolean).length;
       var finito = quanti === PASSI.length;
       if (finito && !leggi(VISTO)) { if (box) box.remove(); return; }   /* chi lo sapeva gia' usare */
+      /* 12 nov 2026 — deciso con Alex: chi e' gia' partito non vede piu' i primi
+         passi. «Partito» = ha una fattura emessa o un lavoro finito, anche se il
+         preventivo non l'ha mai mandato da qui. Se la lettura non riesce non si
+         nasconde niente (resta la regola di prima). */
+      if (!finito) {
+        var gia = await Promise.all([
+          conta("gest_fatture", function (q) { return nonButtato(q).in("stato", ["emessa", "pagata"]); }),
+          conta("gest_lavori", function (q) { return nonButtato(q).eq("stato", "fatto"); })
+        ]);
+        if (gia[0] > 0 || gia[1] > 0) { if (box) box.remove(); return; }
+      }
       if (!finito) segna(VISTO);
       /* 11 nov 2026 — l'ultimo passo fatto ADESSO, davanti ai suoi occhi: la spunta */
       if (finito && primaQuanti !== null && primaQuanti < PASSI.length && typeof window.tiSpunta === "function")
