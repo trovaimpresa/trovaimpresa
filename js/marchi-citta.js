@@ -16,7 +16,8 @@
     { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613' },
     { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici', c: '#8a9bb0' },
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa', c: '#d0021b' },
-    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' }
+    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' },
+    { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200' }
   ];
   var AWIN_ME = '3137864';
 
@@ -87,7 +88,7 @@
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
         var ml = document.createElement('script');
-        ml.src = '/js/marchi-lati.js?v=6';
+        ml.src = '/js/marchi-lati.js?v=7';
         ml.defer = true;
         document.head.appendChild(ml);
       }

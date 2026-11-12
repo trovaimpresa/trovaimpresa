@@ -1,4 +1,4 @@
-/* 8 nov 2026 — I MARCHI (Comet, Rowenta, Moulinex, Lampade.it; 12 nov + Vevor) AI LATI.
+/* 8 nov 2026 — I MARCHI (Comet, Rowenta, Moulinex, Lampade.it; 12 nov + Vevor e Trotec) AI LATI.
    Prima stavano tutti insieme in una fascia in mezzo alla pagina.
    Scelta di Alex: separati, uno per volta, nei posti vuoti ai lati della
    pagina, SOTTO i cartelli destinati alle imprese, sparsi a riempire.
@@ -29,7 +29,8 @@
     { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 0 },
     { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 1 },
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 1 },
-    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 2 }
+    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 2 },
+    { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200', lato: 'dx', dopo: 2 }
   ];
   // «dopo»: sotto quale cartello del suo lato va (0 = il primo dall'alto).
   // 12 nov 2026 (Alex): «metterli in basso e' brutto» e poi «non c'e' bisogno
