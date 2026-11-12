@@ -523,7 +523,7 @@
         </div>
         <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
       </div>
-      <div class="mini-title">Mezzi in ritardo</div>
+      <div class="mini-title">Noleggi in ritardo</div>
       <div id="rie-ritardi" class="nol-elenco"></div>
       <div class="mini-title">Scadenze dei mezzi</div>
       <div id="rie-scadenze" class="nol-elenco"></div>
@@ -719,7 +719,7 @@
 <div class="toast" id="toast"></div>
 </div>
 
-<link rel="stylesheet" href="/css/gestionale.css?v=12nov22">
+<link rel="stylesheet" href="/css/gestionale.css?v=12nov23">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=30">
 <style>
@@ -1097,6 +1097,14 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
   }
   /* dentro una sezione il pulsante diventa «← Riepilogo»: col titolo a 22 px non finisce sotto le tre righe */
   @media(max-width:480px){#app-root header.top .brand h1{font-size:22px!important}#app-root header.top .brand{gap:10px!important}}
+  /* 12 nov 2026 (terzo giro) — a 360 px il titolo finiva 7 px sotto le tre righe; e i due riquadri del Rendimento uscivano di 8 px */
+  @media(max-width:374px){#app-root header.top .brand h1{font-size:19px!important}#app-root header.top .brand{gap:8px!important}#rendimento .money-row{grid-template-columns:1fr!important}}
+  /* 12 nov 2026 (terzo giro) — sul telefono «Parla» che galleggia copriva la casella dove si scrive */
+  @media(max-width:880px){body:has(#assistenza.active) #gv-btn,body:has(#richieste.active) #gv-btn,body:has(#assistenza.active) #gv-foto,body:has(#richieste.active) #gv-foto{display:none!important}}
+  /* 12 nov 2026 (terzo giro) — regola 19: uno zero è grigio (Calendario, Fatture, Magazzino) */
+  .nol-zero{color:#5f6b7a!important}
+  /* regola 11: il pallino «Guidami» nel menu del telefono si tocca su 44 px */
+  @media(max-width:880px){body.nol-menu-on .tut-dot{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1110,21 +1118,21 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
 <script src="/js/nol-base.js?v=12nov20"></script>
 <script src="/js/nol-navigazione-riepilogo.js?v=12nov21"></script>
 <script src="/js/nol-numeri-conto-mezzi.js?v=12nov2"></script>
-<script src="/js/nol-card-righe-stampa.js?v=12nov20"></script>
+<script src="/js/nol-card-righe-stampa.js?v=12nov30"></script>
 <script src="/js/nol-schede.js"></script>
 <script src="/js/nol-cauzione-contratti.js?v=11nov9"></script>
-<script src="/js/nol-verbale-rendimento.js?v=12nov20"></script>
-<script src="/js/nol-fatture.js?v=12nov20"></script>
+<script src="/js/nol-verbale-rendimento.js?v=12nov30"></script>
+<script src="/js/nol-fatture.js?v=12nov30"></script>
 <script src="/js/nol-firme-documenti.js"></script>
-<script src="/js/nol-salva-noleggio.js?v=12nov1"></script>
+<script src="/js/nol-salva-noleggio.js?v=12nov30"></script>
 <script src="/js/nol-lavori-fatture-pdf.js"></script>
-<script src="/js/nol-cestino.js?v=11nov2"></script>
+<script src="/js/nol-cestino.js?v=12nov30"></script>
 <script src="/js/nol-media-documenti.js?v=12nov20"></script>
-<script src="/js/nol-registratore-calendario.js?v=12nov20"></script>
+<script src="/js/nol-registratore-calendario.js?v=12nov30"></script>
 <script src="/js/nol-giornata-squadra-promemoria.js?v=12nov9"></script>
 <script src="/js/nol-moduli-azienda-agenda.js"></script>
 <script src="/js/nol-pannello-azioni.js?v=12nov4"></script>
-<script src="/js/nol-supporto.js?v=12nov3"></script>
+<script src="/js/nol-supporto.js?v=12nov30"></script>
 <script src="/js/nol-listini-barre.js?v=12nov20"></script>
 <script src="/js/nol-avvio.js"></script>
 <script src="/js/caselle-controllo.js"></script>
@@ -1137,7 +1145,7 @@ nav.tabs button .tab-cnt,nav.tabs .cnt,nav.tabs button span[class*=cnt]{font-siz
 <script src="/js/fondatore.js"></script>
 <script src="/js/gest-icone.js"></script>
 <!-- 29/09/2026 — menu corto e Primi passi anche nel Noleggio -->
-<script src="/js/nol-menu-corto.js?v=10nov1"></script>
+<script src="/js/nol-menu-corto.js?v=12nov30"></script>
 <script src="/js/nol-menu-telefono.js?v=12nov22"></script>
 <script src="/js/nol-primi-passi.js?v=11nov1"></script>
 <script src="/js/nol-sdi.js"></script>

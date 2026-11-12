@@ -302,7 +302,7 @@
          +     '<i class="rc-pall '+stato+'"'
          +       ' title="'+TIT[stato]+'"'
          +       ' aria-label="'+TIT[stato]+'"></i></div>'
-         +   '<div class="rc-n">'+esc(String(o.n))+'</div>'
+         +   '<div class="rc-n'+(/^0(,00)?(\s|\u00a0)*€?$/.test(String(o.n))?' zero-grigio':'')+'">'+esc(String(o.n))+'</div>'
          +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
          +   corpoOk
          + '</div>';

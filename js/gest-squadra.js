@@ -71,14 +71,14 @@
     if(typeof sqgDisegna==="function"){
       box.className="";
       return sqgDisegna(L,box,dipQ?tabVuotoCerca(dipQ):tabVuoto("Chi lavora con te",
-        "Nome, mansione in cantiere e costo orario. Qui metti anche visita medica, formazione sicurezza e documenti: quando una data si avvicina te lo dice il Riepilogo, senza che tu debba ricordartelo.",
+        "Nome, mansione in cantiere e costo orario. Qui metti anche visita medica, formazione sicurezza e documenti: quando una data si avvicina te lo dice l'Assistente, senza che tu debba ricordartelo.",
         _SVGV+'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
         {t:"+ Aggiungi la prima persona",a:"new-dip"}));
     }
     renderTabella({
       id:"dip", box:"#dip-list",
       vuoto:dipQ?tabVuotoCerca(dipQ):tabVuoto("Chi lavora con te",
-        "Nome, mansione in cantiere e costo orario. Qui metti anche visita medica, formazione sicurezza e documenti: quando una data si avvicina te lo dice il Riepilogo, senza che tu debba ricordartelo.",
+        "Nome, mansione in cantiere e costo orario. Qui metti anche visita medica, formazione sicurezza e documenti: quando una data si avvicina te lo dice l'Assistente, senza che tu debba ricordartelo.",
         _SVGV+'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
         {t:"+ Aggiungi la prima persona",a:"new-dip"}),
       colonne:[{lab:"Nome",w:"24%"},{lab:"Mansione",w:"18%",cls:"c-chi"},{lab:"Telefono",w:"18%",cls:"c-chi"},
@@ -242,7 +242,7 @@
       h+='<button type="button" class="btn doc-aggiungi" data-doc="nuovo">+ Nuovo attestato o corso</button>';
     }
     h+='<div class="sh-nota">'+(_doc.opId?"Ogni attestato si salva subito.":"Si salvano quando premi Aggiungi.")
-      +" Con la data di scadenza ti avvisa il Riepilogo, come per la visita medica.</div>";
+      +" Con la data di scadenza ti avvisa l'Assistente, come per la visita medica.</div>";
     box.innerHTML=h;
     if(_doc.edit!==null){const t=document.getElementById("dd-tipo");if(t&&!t.value)t.focus();}
   }

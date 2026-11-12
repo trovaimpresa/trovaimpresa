@@ -6025,3 +6025,15 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .conav{ display:grid!important; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); overflow:visible!important; position:static!important; margin:0 0 18px!important; padding:4px 0!important; gap:0 4px; border:1px solid var(--bordo); border-radius:12px; }
   .conav-v{ white-space:normal!important; text-align:left; justify-content:flex-start; min-height:48px; padding:8px 6px!important; gap:6px!important; font-size:15px!important; line-height:1.2; min-width:0; }
 }
+
+/* 12 nov 2026 (terzo giro) — regola 19: uno zero è grigio, ovunque (Fatture, Assistente, Squadra) */
+.zero-grigio,.fatt-tot .n.zero-grigio,.rie-card .rc-n.zero-grigio,.sqg-mese b.zero-grigio{ color:#5f6b7a !important; }
+/* regola 11: i filtri a tendina (Agenda, Galleria) e quantità/prezzo della fattura alti 44 px sul telefono */
+@media(max-width:880px){ select.filtro-sel,.fr-qta,.fr-prezzo{ min-height:44px; } }
+/* 12 nov 2026 (terzo giro) — Computo sul telefono: la riga della lavorazione va a capo
+   (nome sopra, importo e «×» sotto) invece di spingere la «×» fuori dallo schermo */
+@media(max-width:880px){
+  #sheet .spesa-row:has(> .cm-testo){ flex-wrap:wrap; }
+  #sheet .spesa-row:has(> .cm-testo) > .cm-testo{ flex:1 1 100%; min-width:0; }
+  #sheet .spesa-row:has(> .cm-testo) > *{ max-width:100%; }
+}

@@ -25,7 +25,10 @@
     if(!sb||!sbUid){lista.innerHTML="";return;}
     const {data,error}=await sb.from("gest_richieste").select("id,testo,stato,risposta,created_at")
       .eq("user_id",sbUid).order("created_at",{ascending:false});
-    if(error){lista.innerHTML='<div class="gal-intro" style="margin-top:22px">Non riesco a leggere le tue richieste: controlla la connessione e riprova.</div>';return;}
+    if(error){ /* 12 nov 2026 (terzo giro) — regola 20: riquadro rosso con Riprova */
+      if(typeof nolNonLetto==="function") nolNonLetto(lista,"le tue richieste",supRichieste);
+      else lista.innerHTML='<div class="gal-intro" style="margin-top:22px">Non riesco a leggere le tue richieste: controlla la connessione e riprova.</div>';
+      return;}
     const R=data||[];
     try{localStorage.setItem(SUP_VISTE,JSON.stringify(R.filter(r=>String(r.risposta||"").trim()).map(r=>String(r.id))));}catch(e){}
     supCnt("#cnt-richieste",0);

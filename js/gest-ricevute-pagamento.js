@@ -173,9 +173,12 @@
     const altro = sel && sel.value === "__altro";
     const cli = (!altro && sel && sel.value) ? _clienti.find(function (c) { return String(c.id) === sel.value; }) : null;
     const nome = altro ? (document.getElementById("rp-nome").value || "").trim() : (cli ? cli.nome : "");
-    if (!nome) { toast("Scegli il cliente o scrivi il nome di chi paga"); return; }
+    if (!nome) { /* 12 nov 2026 (terzo giro) — regola 21 */
+      if (typeof campoManca === "function") campoManca(altro ? "#rp-nome" : "#rp-cli", altro ? "Manca il nome di chi paga: scrivilo qui." : "Manca il cliente: sceglilo qui.");
+      else toast("Scegli il cliente o scrivi il nome di chi paga");
+      return; }
     const importo = _cent2(_numIt("#rp-imp") || 0);
-    if (!(importo > 0)) { toast("Scrivi l'importo ricevuto"); return; }
+    if (!(importo > 0)) { if (typeof campoManca === "function") campoManca("#rp-imp", "Manca l'importo ricevuto: scrivilo qui."); else toast("Scrivi l'importo ricevuto"); return; }
     const data = document.getElementById("rp-data").value || todayStr();
     const anno = +String(data).slice(0, 4);
     if (btn) btn.disabled = true;

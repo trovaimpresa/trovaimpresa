@@ -98,7 +98,7 @@ function sqgCard(o) {
         o.telefono ? '<a class="cli-link" href="tel:' + esc(String(o.telefono).replace(/[^\d+]/g, "")) + '">' + esc(o.telefono) + '</a>' : ""
       ].filter(Boolean).join(" · ") + '</div></div>'
     + '<div class="sqg-dx"><span class="stato ' + (o.attivo ? "fatto" : "bozza") + '">' + (o.attivo ? "Attivo" : "Invitato") + '</span>' + altro + '</div></div>'
-    + '<div class="sqg-mese"><b>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + (d.lavori.size === 1 ? " cantiere" : " cantieri") : "") + '</span></div>'
+    + '<div class="sqg-mese"><b' + (ng ? '' : ' class="zero-grigio"') + '>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + (d.lavori.size === 1 ? " cantiere" : " cantieri") : "") + '</span></div>'
     + sqgStriscia(sqgMese, d.giorni)
     + avviso
     + (o.nuovi ? '<div class="sqg-avv rosso">' + o.nuovi + (o.nuovi === 1 ? " messaggio nuovo" : " messaggi nuovi") + '</div>' : "")

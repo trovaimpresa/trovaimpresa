@@ -566,7 +566,7 @@
       const gg=piuVecchia?Math.round((new Date(oggi)-new Date(piuVecchia))/86400000):0;
       const da=gg>=60?("più di "+Math.floor(gg/30)+" mesi"):(gg+" giorni");
       DA.push({g:2,male:1,t:nn(bozzeFerme.length,"fattura in bozza mai mandata","fatture in bozza mai mandate"),
-               d:eur2(totBozze)+" fermi da "+da,go:"fatture"});
+               d:eur2(totBozze)+(bozzeFerme.length>1?", la più vecchia ferma da ":" fermi da ")+da,go:"fatture"});   /* 12 nov 2026 (terzo giro): «fermi da più di 3 mesi» valeva solo per la più vecchia */
     }
     if(ritardo.length)   DA.push({g:1,male:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
                                   d:"La data prevista è già passata",go:"lavori"});

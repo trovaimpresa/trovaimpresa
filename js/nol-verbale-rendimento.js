@@ -387,7 +387,7 @@
     /* ⚠️ un noleggio senza cauzione qui non c'entra niente: sparisce, invece
        di allungare l'elenco con righe da zero euro. */
     const N=(data||[]).filter(x=>(+x.cauzione||0)>0);
-    const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
+    const scrivi=(id,txt)=>{const e=$("#"+id);if(e){e.textContent=txt;e.classList.toggle("nol-zero",/^(€\s*)?0(,00)?(\s|\u00a0)*€?$/.test(String(txt)));}};
     const inMano=N.filter(x=>cauStatoDi(x)==="in_deposito");
     const chiuse=N.filter(x=>cauStatoDi(x)==="svincolata");
     scrivi("kc-mano",_eur(inMano.reduce((s,x)=>s+(+x.cauzione||0),0)));

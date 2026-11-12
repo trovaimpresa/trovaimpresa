@@ -79,7 +79,7 @@
     /* 7 nov 2026: i noleggi ai TUOI reparti (mestiere_id) non si fatturano:
        contarli qui diceva «3 da fatturare» quando i clienti veri erano 2 */
     const daFatt=(nn||[]).filter(n=>!n.eliminato_il&&!n.mestiere_id&&(+n.importo||0)>0&&!n.fattura_id);
-    const scrivi=(id,txt)=>{const e=$("#"+id);if(e)e.textContent=txt;};
+    const scrivi=(id,txt)=>{const e=$("#"+id);if(e){e.textContent=txt;e.classList.toggle("nol-zero",/^(€\s*)?0(,00)?(\s|\u00a0)*€?$/.test(String(txt)));}};
     scrivi("kf-dafatturare",String(daFatt.length));
     scrivi("kf-daincassare",_eur(F.filter(f=>f.stato==="emessa").reduce((s,f)=>s+(+f.totale||0),0)));
     scrivi("kf-incassate",_eur(F.filter(f=>f.stato==="pagata").reduce((s,f)=>s+(+f.totale||0),0)));
@@ -254,7 +254,7 @@
   async function salvaFatturaNol(id){
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const sel=$("#nf-cliente");
-    if(!sel||!sel.value){toast("Scegli il cliente");return;}
+    if(!sel||!sel.value){nolCampoManca(sel||"#nf-cliente","Manca il cliente: sceglilo qui.");return;}
     const righe=fattnolRighe
       .filter(r=>String(r.voce||"").trim()||(+r.importo||0))
       .map(r=>({noleggio_id:r.noleggio_id||null,voce:String(r.voce||"").trim(),

@@ -380,9 +380,20 @@
     const t=NOL_TIPI[tipo]; if(!t||!t.tab) return;
     /* 29/09/2026 — una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
     if(tipo==="fattnol"&&d.sdi_uuid&&d.sdi_stato!=="scartata"){toast("Questa fattura è già partita allo SDI: non si elimina. Per correggerla serve una nota di credito.");return;}
-    const come=d.nome||d.descrizione||d.mezzo||d.prodotto||"";
-    if(!(await tiChiedi("Eliminare "+(come?t.che.toLowerCase()+" «"+come+"»":(t.femm?"questa ":"questo ")+t.che.toLowerCase())+"?\n"+
-                (t.avviso?t.avviso+"\n":"")+cestFrase()))) return;
+    /* 12 nov 2026 (terzo giro) — regola 22: la domanda dice COSA col nome
+       (la fattura col numero e il cliente, il noleggio col cliente: tre
+       noleggi dello stesso escavatore si chiamavano uguale) e DOVE va, con
+       le stesse parole dell'App («Mettere nel cestino «…»?»). */
+    let come=d.nome||d.descrizione||d.mezzo||d.prodotto||"";
+    if(tipo==="fattnol") come=(d.numero?"n. "+d.numero:"bozza senza numero")+(d.cliente?" di "+d.cliente:"");
+    else if(tipo==="noleggio"&&d.mezzo&&d.cliente) come=d.mezzo+" · "+d.cliente;
+    const _cosa=(come?t.che.toLowerCase()+" «"+come+"»":(t.femm?"questa ":"questo ")+t.che.toLowerCase());
+    const _art=come?(t.femm?"la ":(/^[aeiou]/i.test(t.che)?"l'":"il ")):"";
+    const _nelCest=(typeof cestAcceso==="function")&&cestAcceso();
+    const _dom=_nelCest
+      ? "Mettere nel cestino "+_art+_cosa+"?\n"+(t.avviso?t.avviso+"\n":"")+(t.femm?"La":"Lo")+" riprendi dal Cestino quando vuoi."
+      : "Eliminare per sempre "+_art+_cosa+"?\n"+(t.avviso?t.avviso+"\n":"")+"Non va nel Cestino: non si recupera.";
+    if(!(await tiChiedi(_dom))) return;
     const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     t.ricarica(); renderRiepilogoNegozio(); toast(t.che+(t.femm?" eliminata":" eliminato"));

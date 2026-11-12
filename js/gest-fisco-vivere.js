@@ -110,10 +110,10 @@
     const resta = tasse != null ? incassi - sp.tot - tasse : null;
     h += `<h3 class="fp-h3">Quanto ti resta in tasca nel ${Y}</h3><div class="fv-conto">
       <div class="fv-riga"><span>Hai incassato</span><b>${eur(incassi)}</b></div>
-      <div class="fv-riga meno"><span>Spese segnate nel gestionale</span><b>− ${eur(sp.tot)}</b></div>
+      <div class="fv-riga meno"><span>Spese segnate nel gestionale</span>${fvZero(sp.tot, "− ", "")}</div>
       <div class="fv-riga meno"><span>Tasse e contributi su questi incassi (stima)</span><b>${tasse != null ? "− " + eur(tasse) : "chiedi al commercialista"}</b></div>
-      <div class="fv-riga tot"><span>Ti resta</span><b class="${resta != null && resta < 0 ? "fp-rosso" : "fp-verde"}">${resta != null ? eur(resta) : "—"}</b></div>
-      ${resta != null ? `<div class="fv-sotto">Cioè circa <b>${eur(resta / mesi)}</b> al mese${incassi > 0 ? ` · su ogni 100 € incassati te ne restano <b>${Math.round(resta / incassi * 100)} €</b>` : ""}.</div>` : ""}
+      <div class="fv-riga tot"><span>Ti resta</span>${resta != null ? fvZero(Math.abs(resta), resta < 0 ? "− " : "", resta < 0 ? "fp-rosso" : "fp-verde") : "<b>—</b>"}</div>
+      ${resta != null ? `<div class="fv-sotto">Cioè circa <b>${(resta < 0 ? "− " : "") + eur(Math.abs(resta / mesi))}</b> al mese${incassi > 0 ? ` · su ogni 100 € incassati te ne restano <b>${Math.round(resta / incassi * 100)} €</b>` : ""}.</div>` : ""}
     </div>`;
     if (!p) {
       h += `<div class="fp-cons giallo"><div>${fpIc("matita")}</div><div><b>Manca il tuo profilo fiscale</b>Senza non posso stimare le tasse. <button class="fp-link" data-action="ft-profilo">Compilalo adesso</button> (6 domande).</div></div>`;
@@ -121,7 +121,11 @@
     if (sp.tot === 0 && incassi > 0) {
       h += `<div class="fp-cons giallo"><div>${fpIc("doc")}</div><div><b>Non hai segnato nessuna spesa quest'anno</b>Materiali, gasolio, fatture dei fornitori: se non li segni nel gestionale, qui sembra che ti resti più di quello che hai davvero.</div></div>`;
     }
-    if (resta != null && resta < 0) {
+    /* 12 nov 2026 (terzo giro) — regola 3: senza incassi non è «lavorare in
+       perdita» (rosso), sono solo i contributi fissi che si pagano lo stesso. */
+    if (resta != null && resta < 0 && !(incassi > 0)) {
+      h += `<div class="fp-cons giallo"><div>${fpIc("avviso")}</div><div><b>Ancora nessun incasso quest'anno</b>Il meno qui sopra sono i contributi fissi: si pagano anche senza incassi. Quando segni pagata la prima fattura il conto si aggiorna.</div></div>`;
+    } else if (resta != null && resta < 0) {
       h += `<div class="fp-cons rosso"><div>${fpIc("salvagente")}</div><div><b>Quest'anno stai lavorando in perdita</b>Spese e tasse superano quello che incassi. Guarda qui sotto «Il prezzo giusto»: probabilmente chiedi troppo poco.</div></div>`;
     }
 

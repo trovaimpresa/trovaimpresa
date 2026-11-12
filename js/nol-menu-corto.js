@@ -46,7 +46,7 @@
     fisco.type = "button";
     fisco.className = "nol-fisco";
     fisco.textContent = "Tasse e fisco";
-    fisco.addEventListener("click", function () { location.href = "/gestionale-app#fisco"; });
+    fisco.addEventListener("click", function () { try { sessionStorage.setItem("ti_dal_noleggio", "1"); } catch (e) {} location.href = "/gestionale-app#fisco"; });
     prima.after(fisco);
 
     /* 10 nov 2026: Giornate e Acquisti stanno nel gestionale principale (stesso
@@ -58,7 +58,7 @@
       b.type = "button";
       b.className = "nol-fisco nol-porta";
       b.textContent = p[0];
-      b.addEventListener("click", function () { location.href = "/gestionale-app#" + p[1]; });
+      b.addEventListener("click", function () { try { sessionStorage.setItem("ti_dal_noleggio", "1"); } catch (e) {} location.href = "/gestionale-app#" + p[1]; });
       ultimo.after(b); ultimo = b;
     });
 

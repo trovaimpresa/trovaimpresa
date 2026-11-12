@@ -18,7 +18,7 @@
 
   async function salvaNoleggio(id){
     const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
-    if(!selM.value){toast("Scegli un mezzo");return;}
+    if(!selM.value){nolCampoManca(selM,"Manca il mezzo: sceglilo qui.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     /* ⛔ IL CONTROLLO CHE VALE. Un mezzo con la verifica periodica o
        l'assicurazione scaduta non esce di qui. Vale solo sui noleggi ancora

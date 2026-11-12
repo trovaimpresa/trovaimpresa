@@ -141,9 +141,9 @@
         tutti.length?"Prova a cambiare filtro qui sopra."
           :(attrezzo
             ? (STRU
-               ? "Stazione totale, distanziometro laser, termocamera, livello. Con le date delle tarature: il Riepilogo ti avvisa prima che scadano."
-               : "Ponteggi, betoniere, trabattelli, trapani. Con le date delle verifiche periodiche: il Riepilogo ti avvisa prima che scadano.")
-            : "Furgoni, escavatori, auto. Con le date di revisione, assicurazione e bollo, e i rifornimenti: il Riepilogo ti avvisa prima che scadano."),
+               ? "Stazione totale, distanziometro laser, termocamera, livello. Con le date delle tarature: l'Assistente ti avvisa prima che scadano."
+               : "Ponteggi, betoniere, trabattelli, trapani. Con le date delle verifiche periodiche: l'Assistente ti avvisa prima che scadano.")
+            : "Furgoni, escavatori, auto. Con le date di revisione, assicurazione e bollo, e i rifornimenti: l'Assistente ti avvisa prima che scadano."),
         attrezzo
           ? _SVGV+'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
           : _SVGV+'<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
@@ -311,7 +311,7 @@
         <div class="sh-tit">${STRU?"La taratura":"Dove sta di casa"}</div>
         ${STRU
           ? `<input type="hidden" id="m-cat" value="${esc(cat)}">
-             <p class="sh-nota" style="margin-top:0">La <b>taratura</b> e le verifiche periodiche si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda dello strumento: il Riepilogo ti avvisa prima che scadano, e una misura presa con uno strumento fuori taratura non vale.</p>`
+             <p class="sh-nota" style="margin-top:0">La <b>taratura</b> e le verifiche periodiche si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda dello strumento: l'Assistente ti avvisa prima che scadano, e una misura presa con uno strumento fuori taratura non vale.</p>`
           : `<label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
           <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
           <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>

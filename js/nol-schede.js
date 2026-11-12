@@ -40,7 +40,7 @@
 
   async function salvaProdotto(id){
     const nome=$("#np-nome").value.trim();
-    if(!nome){toast("Scrivi il nome del prodotto");return;}
+    if(!nome){nolCampoManca("#np-nome","Manca il nome del prodotto: scrivilo qui.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={nome,
       prezzo:_numIt($("#np-prezzo").value),
@@ -140,7 +140,7 @@
 
   async function salvaFornitore(id){
     const nome=$("#nf-nome").value.trim();
-    if(!nome){toast("Scrivi il nome");return;}
+    if(!nome){nolCampoManca("#nf-nome","Manca il nome del fornitore: scrivilo qui.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={nome,
       telefono:$("#nf-telefono").value.trim()||null,
@@ -182,7 +182,7 @@
 
   async function salvaMovimento(id){
     const prodotto=$("#nm-prodotto").value.trim();
-    if(!prodotto){toast("Scrivi il prodotto");return;}
+    if(!prodotto){nolCampoManca("#nm-prodotto","Manca il prodotto: scrivilo qui.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={tipo:$("#nm-tipo").value, prodotto,
       quantita:_numIt($("#nm-quantita").value),
@@ -307,7 +307,7 @@
 
   async function salvaMezzo(id){
     const nome=$("#nz-nome").value.trim();
-    if(!nome){toast("Scrivi il nome del mezzo");return;}
+    if(!nome){nolCampoManca("#nz-nome","Manca il nome del mezzo: scrivilo qui.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={nome,
       codice:$("#nz-codice").value.trim()||null,
@@ -393,7 +393,7 @@
 
   async function salvaClienteNol(id){
     const nome=$("#ncl-nome").value.trim();
-    if(!nome){toast("Scrivi il nome");return;}
+    if(!nome){nolCampoManca("#ncl-nome","Manca il nome del cliente: scrivilo qui.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const dati={nome,
       telefono:$("#ncl-telefono").value.trim()||null,

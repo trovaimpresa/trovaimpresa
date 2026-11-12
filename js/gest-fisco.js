@@ -297,11 +297,29 @@
     const extra = scadute.reduce((s, f) => s + f.interessi + (f.b2b ? FP_SPESE_FISSE : 0), 0);
     if (typeof setCnt === "function") setCnt("#cnt-fisco", scadute.length, "err");
 
+    /* 12 nov 2026 (terzo giro) — regola 16: le fatture scadute del Noleggio
+       qui non si contano («Quanto ti resta» invece sì): si dicono a parte,
+       con la stessa regola dei giorni di pagamento. */
+    let nolScadute = 0;
+    try {
+      if (typeof ftNolFatture === "function" && typeof _giorniDopo === "function") {
+        const _N = await ftNolFatture(new Date().getFullYear());
+        if (mio !== fpGiro) return;
+        const _oggi = todayStr(), _gg = (+((typeof fpAzienda !== "undefined" && fpAzienda) || {}).giorni_pagamento) || 30;
+        (_N.fatture || []).forEach(f => {
+          if (f.stato !== "emessa" || !f.data) return;
+          const v = +((_N.tot || {})[f.id] || {}).totale || 0;
+          if (v > 0 && _giorniDopo(f.data, _gg) < _oggi) nolScadute += v;
+        });
+      }
+    } catch (_) {}
+
     let h = `<div class="fp-tot">
       <div class="k-rosso">${fpIc("euro")}<div><small>Ti devono (scadute) · tutti i reparti</small><b>${eur(devono)}</b></div></div>
       <div class="k-giallo">${fpIc("persone")}<div><small>Clienti in ritardo</small><b>${new Set(scadute.map(f => f.cliente_id || f.cli_nome)).size}</b></div></div>
       <div class="k-verde">${fpIc("grafico")}<div><small>Interessi e spese che ti spettano</small><b class="fp-verde">+ ${eur(extra)}</b></div></div>
     </div>`;
+    if (nolScadute > 0) h += `<div class="fp-cons giallo"><div>${fpIc("euro")}</div><div><b>In più, nel Noleggio: ${eur(nolScadute)} di fatture scadute</b>Qui sopra non sono contate. <button class="fp-link" data-action="noleggio">Vai al Noleggio</button></div></div>`;
 
     if (!fpCache.length) {
       h += tabVuoto("Nessuno ti deve niente",

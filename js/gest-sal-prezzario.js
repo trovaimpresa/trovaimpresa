@@ -418,7 +418,7 @@
         +      'font-size:17px;font-weight:700;color:var(--testo,#22303f);'
         +      'background:var(--card,#fff);border:1.5px solid var(--bordo-forte,#cbd2da);'
         +      'border-radius:10px">'
-        +  '<small style="color:var(--testo2,#5a6672)">'
+        +  '<small style="font-size:14px;color:var(--testo2,#5a6672)">'
         +    'su '+_misLetta(v.quantita)+(v.unita?" "+esc(v.unita):"")
         +    ' previsti × '+eur2(v.prezzo_unitario)
         +    (prima!=null?(' · l\'ultima volta: '+_misLetta(prima)):'')
@@ -1073,7 +1073,7 @@
       pzCache=data||[];
       pzMostra=PZ_PASSO;
     }
-    if(cnt)cnt.textContent=pzCache.length?String(pzCache.length):"";
+    if(cnt)cnt.textContent="";   /* 12 nov 2026 (terzo giro): «1000» accanto a Prezzario sembrava mille cose da fare */
     const q=String(($("#pz-cerca")&&$("#pz-cerca").value)||"").trim();
     const L=_ppFiltra(pzCache,q);
 

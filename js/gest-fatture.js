@@ -668,7 +668,7 @@
     }catch(e){}
 
     const box=(n,l,sub,tono,azione)=>'<div class="fatt-tot'+(tono?" t-"+tono:"")
-      +(azione?'" '+azione+' style="cursor:pointer':'')+'"><div class="n">'+n+'</div>'
+      +(azione?'" '+azione+' style="cursor:pointer':'')+'"><div class="n'+(/^0,00(\s|&nbsp;|\u00a0)*€?$/.test(String(n))?' zero-grigio':'')+'">'+n+'</div>'
       +'<div class="l">'+l+'</div>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';
     if(sum)sum.innerHTML=
         box(eur2(tInc),"Da incassare",emesse.length+(emesse.length===1?" fattura emessa":" fatture emesse"),scadute.length?"err":"attesa")
