@@ -272,8 +272,9 @@
     renderDocForn();
   }
   async function fornDocElimina(id){
-    if(!(await window.chiediVia("questo documento",true,"Lo riprendi dal Cestino quando vuoi.")))return;
-    const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    /* 12 nov 2026 — regola 22: la domanda dice il nome del documento */
+    const {data:r}=await sb.from("gest_foto").select("storage_path,nome_file").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(!(await window.chiediVia(r&&r.nome_file?("«"+String(r.nome_file).slice(0,80)+"»"):"questo documento",true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const {data:okD,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okD||!okD.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}

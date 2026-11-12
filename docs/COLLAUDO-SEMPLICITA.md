@@ -1631,6 +1631,7 @@ Trovati 14 difetti (3 gravi). Niente sotto i 14 px, niente fuori schermo, nessun
 **12 nov, deciso da Alex:** «Il tuo primo preventivo in 3 passi» non si vede più a chi ha già una fattura emessa o un lavoro finito (js/gest-primi-passi.js).
 **12 nov, Report «Ore per operatore»:** contava solo la casella «ore» del lavoro; ora conta le righe di gest_ore, le stesse della manodopera (`righe` da caricaManodopera).
 **Lasciato com'è (scelta di Alex):** le scritte «Leaflet / OpenStreetMap» a 12 px nella Mappa: è la firma della cartina.
+**12 nov, ultime quattro:** Noleggio: casella rossa nel Promemoria (`nolCampoManca` in js/nol-base.js); la domanda di «elimina» dice il nome del documento (lavoro, cliente, fornitore); Report: ore con la virgola; le ricevute di pagamento eliminate compaiono nel Cestino e si riprendono (CEST_COSE).
 **Giro del controllore chiuso il 12 nov 2026:** 15 difetti trovati, 13 corretti, 1 non era un difetto, 1 lasciato per scelta.
 Provato dal vivo dopo il push (→8b05aba←): 12 sezioni dell'App e 6 del Noleggio mostrano il riquadro rosso senza rete e con «Riprova» tornano i dati; console pulita.
 **12 nov, Noleggio — mezzo «Disponibile» ma fuori (corretto):** in Mezzi lo stato si legge anche dai noleggi aperti con `nolFaseDi` (IN RITARDO · N giorni / FUORI / PRENOTATO, stesse parole e colori dell'elenco Noleggi); nel Riepilogo «Fuori adesso» e «In ritardo» contano i mezzi, non i noleggi.

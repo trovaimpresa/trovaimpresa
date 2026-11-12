@@ -124,6 +124,18 @@
     const b=box.querySelector("button");
     if(b)b.onclick=function(){b.disabled=true;b.textContent="Riprovo…";Promise.resolve(rifai()).catch(function(){});};
   }
+  /* 12 nov 2026 — regola 21 anche nel Noleggio: la casella che manca diventa
+     rossa, con la frase sotto e il cursore dentro. Si spegne appena si scrive. */
+  function nolCampoManca(sel,dice){
+    const el=typeof sel==="string"?document.querySelector(sel):sel;
+    if(!el){toast(dice);return;}
+    el.classList.add("ctr-rosso");
+    let m=el.parentElement?el.parentElement.querySelector(".nol-manca"):null;
+    if(!m){m=document.createElement("div");m.className="nol-manca";m.style.cssText="color:var(--err,#b91c1c);font-size:15px;font-weight:600;margin-top:6px";el.insertAdjacentElement("afterend",m);}
+    m.textContent=dice;
+    try{el.focus();}catch(e){}
+    if(!el._nolManca){el._nolManca=true;const via=function(){el.classList.remove("ctr-rosso");const x=el.parentElement&&el.parentElement.querySelector(".nol-manca");if(x)x.remove();};el.addEventListener("input",via);el.addEventListener("change",via);}
+  }
   function toast(m){const t=$("#toast");t.textContent=_msgPro(m);t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
   /* Solo professionista: i testi dei toast/confirm passano dalla mappa _FRASI (un solo punto qui).
      Artigiano e negozio restano invariati. Non tocca il contenuto utente già interpolato (numeri, nomi). */

@@ -313,8 +313,8 @@
   async function salvaPromemoria(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const v=s=>{const e=$(s);return e?String(e.value||"").trim():"";};
-    const testo=v("#p-testo"); if(!testo){toast("Scrivi cosa ti devo ricordare");return;}
-    const data=v("#p-data");   if(!data){toast("Metti il giorno");return;}
+    const testo=v("#p-testo"); if(!testo){nolCampoManca("#p-testo","Manca cosa ti devo ricordare: scrivilo qui.");return;}
+    const data=v("#p-data");   if(!data){nolCampoManca("#p-data","Manca il giorno: sceglilo qui.");return;}
     const row={user_id:sbUid,testo:testo,note:v("#p-note")||null,data:data,
                ora:v("#p-ora")||null,
                avvisa_giorni:parseInt(v("#p-avvisa"),10)||0,

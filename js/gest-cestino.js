@@ -17,6 +17,14 @@
          +(r.data?" del "+fdate(r.data):"")+(chi?" — "+chi:"");
      }},
     {t:"gest_scadenze",    lab:"Scadenze",          campo:"titolo",         ic:"⏰", foglia:true},
+    /* 12 nov 2026 — le ricevute di pagamento. «Elimina» le metteva gia' da
+       parte (eliminato_il), ma qui non comparivano: non si potevano riprendere.
+       Il numero non si doppia: la numerazione conta anche quelle eliminate. */
+    {t:"gest_ricevute_pagamento", lab:"Ricevute di pagamento", campo:"numero", ic:"🧾", foglia:true,
+     nome:function(r){
+       const chi=String(r.cli_nome||"").trim();
+       return "Ricevuta N. "+r.numero+(r.anno?"/"+r.anno:"")+(r.data?" del "+fdate(r.data):"")+(chi?" — "+chi:"");
+     }},
     {t:"gest_mestieri",    lab:"Reparti",           campo:"nome",           ic:"🗂"},
     {t:"gest_mezzi",       lab:"Mezzi e strumenti", campo:"nome",           ic:"🚚"},
     {t:"gest_operatori",   lab:"Persone",           campo:"nome",           ic:"👷"},

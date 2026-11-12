@@ -210,11 +210,11 @@
   async function elimina(id) {
     const r = _lista.find(function (x) { return String(x.id) === String(id); });
     if (!r) return;
-    /* 12 nov 2026 — regola 22: le ricevute non si riprendono dal Cestino, e si dice */
-    if (!(await window.chiediVia("la ricevuta N. " + r.numero + "/" + r.anno + (r.cli_nome ? " di " + r.cli_nome : ""), false))) return;
+    /* 12 nov 2026 — regola 22: va nel Cestino (dal 12 nov ci compare davvero) */
+    if (!(await window.chiediVia("la ricevuta N. " + r.numero + "/" + r.anno + (r.cli_nome ? " di " + r.cli_nome : ""), true, "La riprendi dal Cestino quando vuoi."))) return;
     const { error } = await sb.from(TAB).update({ eliminato_il: new Date().toISOString() }).eq("id", id).eq("user_id", sbUid);
     if (error) { toast("Non eliminata: " + error.message); return; }
-    toast("Ricevuta eliminata");
+    toast((window.cestinoAttivo && window.cestinoAttivo()) ? "Ricevuta nel cestino: la riprendi da lì" : "Ricevuta eliminata");
     await apri();
   }
 

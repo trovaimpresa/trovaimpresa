@@ -272,7 +272,7 @@
           : `<tr><td colspan="2" style="color:var(--muted)">Nessuna spesa registrata sulle carte.</td></tr>`}
         </table></div>`}
       <div class="rep-card"><h3>${_ICO_OROLOGIO}Ore per operatore</h3><table class="rep-table">
-        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||(id?"—":"Senza nome"))}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
+        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||(id?"—":"Senza nome"))}</td><td>${String(Math.round(v*10)/10).replace(".",",")} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
     </div>`;
   }
 
