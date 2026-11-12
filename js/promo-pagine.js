@@ -113,7 +113,7 @@
       /* la fascia dei negozi: la disegna marchi-citta.js (stesso elenco ovunque) */
       if (!document.getElementById('ti-marchi') && !document.querySelector('script[src*="marchi-citta"]')) {
         var m = document.createElement('script');
-        m.src = '/js/marchi-citta.js?v=5';
+        m.src = '/js/marchi-citta.js?v=6';
         m.defer = true;
         document.head.appendChild(m);
       }

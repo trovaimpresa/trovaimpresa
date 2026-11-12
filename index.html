@@ -1893,7 +1893,7 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
       #ti-marchi{background:url(/img/sfondo-negozi.svg) repeat,linear-gradient(160deg,#3a4350 0%,#232a33 100%);background-size:360px 360px,auto;padding:64px 20px;margin-top:40px;border-top:4px solid #ff8800;border-bottom:4px solid #ff8800}
       #ti-marchi h2{font-size:40px;font-weight:900;text-align:center;margin-bottom:12px;color:#fff}
       #ti-marchi .why-container > p{text-align:center;color:#ffb35c;margin-bottom:36px;font-size:20px;font-weight:600}
-      #ti-marchi .ti-marchi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+      #ti-marchi .ti-marchi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px}
       #ti-marchi .ti-marchio{display:flex;flex-direction:column;align-items:center;text-align:center;
         text-decoration:none;color:inherit;padding:18px}
       #ti-marchi .ti-marchio-logo{display:flex;align-items:center;justify-content:center;width:100%;
@@ -1905,6 +1905,7 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
         #ti-marchi .why-container > p{font-size:16px;margin-bottom:24px}
         #ti-marchi h2{font-size:24px}
         #ti-marchi .ti-marchi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        #ti-marchi .ti-marchio:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 6px)}
         #ti-marchi .ti-marchio{padding:14px}
         #ti-marchi .ti-marchio-logo{height:80px}
         #ti-marchi .ti-marchio h3{font-size:16px;margin:0}
@@ -1952,6 +1953,10 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
                 <a class="feature-card ti-marchio" style="--c:#e5233b" href="https://www.awin1.com/cread.php?awinmid=10404&amp;awinaffid=3137864" target="_blank" rel="sponsored nofollow noopener">
                     <span class="ti-marchio-top"><span class="ti-marchio-logo"><img src="/img/marchi/lampade-it.webp" alt="Lampade.it" width="168" height="59" loading="lazy"></span></span>
                     <h3>Lampade.it</h3><p>Lampade e luci</p><span class="ti-marchio-btn">Vai al negozio →</span>
+                </a>
+                <a class="feature-card ti-marchio" style="--c:#ff5023" href="https://www.awin1.com/cread.php?awinmid=118433&amp;awinaffid=3137864" target="_blank" rel="sponsored nofollow noopener">
+                    <span class="ti-marchio-top"><span class="ti-marchio-logo"><img src="/img/marchi/vevor.webp" alt="Vevor" width="168" height="60" loading="lazy"></span></span>
+                    <h3>Vevor</h3><p>Attrezzi e macchinari da cantiere</p><span class="ti-marchio-btn">Vai al negozio →</span>
                 </a>
             </div>
         </div>
@@ -2530,7 +2535,7 @@ body .guide-costi-home a[href^="/quanto-costa"][style],body a[style*="border-top
         posto da guardare è il pannello di Netlify, non questo file. -->
 <script src="/js/recensioni-sito.js" defer></script>
 <script src="/js/fb-browser-bar.js?v=2" defer></script>
-<script src="/js/marchi-lati.js?v=3" defer></script>
+<script src="/js/marchi-lati.js?v=4" defer></script>
 <script src="/js/locandine-home.js" defer></script>
 <script src="/js/spazi-elenco.js"></script>
 <script src="/js/spazi-citta.js?v=2" defer></script>

@@ -15,7 +15,8 @@
     { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613' },
     { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici', c: '#8a9bb0' },
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa', c: '#d0021b' },
-    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' }
+    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' },
+    { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023' }
   ];
   var AWIN_ME = '3137864';
 
@@ -46,7 +47,9 @@
       '#ti-marchi-citta .tmc-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}' +
       '#ti-marchi-citta .tmc-top{padding:14px 10px;border-bottom-width:4px}#ti-marchi-citta .tmc-logo{height:70px;border-radius:12px}' +
       '#ti-marchi-citta .tmc-cosa{display:none}#ti-marchi-citta .tmc-nome{font-size:17px;margin:10px 8px 8px}' +
-      '#ti-marchi-citta .tmc-btn{font-size:13px;padding:11px 2px;margin:0 8px 12px;white-space:nowrap}}';
+      '#ti-marchi-citta .tmc-btn{font-size:13px;padding:11px 2px;margin:0 8px 12px;white-space:nowrap}' +
+      /* 12 nov: con 5 marchi l'ultimo resta solo: prende tutta la riga */
+      '#ti-marchi-citta .tmc-card:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 6px)}}';
 
   function avvio() {
     try {
@@ -82,7 +85,7 @@
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
         var ml = document.createElement('script');
-        ml.src = '/js/marchi-lati.js?v=3';
+        ml.src = '/js/marchi-lati.js?v=4';
         ml.defer = true;
         document.head.appendChild(ml);
       }
