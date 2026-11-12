@@ -12,11 +12,11 @@
 (function () {
   'use strict';
   var MARCHI = [
+    { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023' },
     { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613' },
     { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici', c: '#8a9bb0' },
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa', c: '#d0021b' },
-    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' },
-    { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023' }
+    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci', c: '#e5233b' }
   ];
   var AWIN_ME = '3137864';
 
@@ -85,7 +85,7 @@
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
         var ml = document.createElement('script');
-        ml.src = '/js/marchi-lati.js?v=4';
+        ml.src = '/js/marchi-lati.js?v=5';
         ml.defer = true;
         document.head.appendChild(ml);
       }

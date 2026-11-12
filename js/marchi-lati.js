@@ -25,14 +25,17 @@
   window.__tiMarchiLati = true;
 
   var MARCHI = [
-    { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'sx', dopo: 0 },
-    { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'dx', dopo: 1 },
-    { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'sx', dopo: 3 },
-    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'dx', dopo: 4 },
-    { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023', lato: 'sx', dopo: 6 }
+    { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023', lato: 'sx', dopo: 0 },
+    { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 0 },
+    { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 0 },
+    { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 0 },
+    { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 0 }
   ];
   // «dopo»: sotto quale cartello del suo lato va (0 = il primo dall'alto).
-  // Cosi' si alternano e si spargono lungo la pagina invece di ammucchiarsi.
+  // 12 nov 2026 (Alex): «metterli in basso e' brutto, non da' valore ne' a me
+  // ne' a loro». Adesso stanno tutti IN ALTO, uno sotto l'altro, alternati
+  // sinistra/destra, subito sotto i primi cartelli: niente piu' sparsi fino
+  // in fondo alla pagina. Vevor per primo (e' il piu' adatto all'edilizia).
   var AWIN_ME = '3137864';
   var TELEFONO = '(max-width:1100px)';
   var STACCO = 64;      // spazio fra un marchio e i cartelli sopra e sotto (8 nov: 34 era troppo attaccato)
@@ -221,11 +224,11 @@
         if (col.length) {
           var rif = col[Math.min(c.m.dopo, col.length - 1)];
           x = lato === 'sx' ? rif.left : rif.right;      // stessa colonna dei cartelli
-          y0 = Math.max(rif.bot + STACCO, ultimo + SFALSA);
+          y0 = rif.bot + STACCO;
         } else {
           // lato vuoto: colonna a 20 px dal bordo, sparsi lungo la pagina
           x = BORDO;
-          y0 = Math.max(inizio, ultimo + passo);
+          y0 = inizio;
         }
         var x0 = lato === 'sx' ? x : cw - x - L, x1 = x0 + L;
         if (x0 < 0 || x1 > cw) continue;
