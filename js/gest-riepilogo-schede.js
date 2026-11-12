@@ -130,6 +130,13 @@
     if(!sb||!sbUid||!cur)return;
     const mid=curMestiere();if(!mid)return;
     const oggi=todayStr(), lim30=_giorniDopo(oggi,30);
+    /* 12 nov 2026 (terzo giro) — il numerino di «Computo da prezzare» compariva solo dopo
+       aver aperto la sezione. Si conta qui, all'ingresso, con la stessa regola: le bozze.
+       A parte dalle altre domande: se la tabella dei computi manca, il resto non si ferma. */
+    (async()=>{try{
+      const rc=await sb.from("gest_computi").select("stato").eq("user_id",sbUid).eq("mestiere_id",mid);
+      if(!rc.error&&mid===curMestiere())setCnt("#cnt-computi",(rc.data||[]).filter(c=>c.stato==="bozza").length,"attesa");
+    }catch(_){}})();
     try{
       const [{data:lav},{data:pv},{data:mz},{data:vw},{data:sc},{data:ff}]=await Promise.all([
         sb.from("gest_lavori").select("stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid),

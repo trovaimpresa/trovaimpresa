@@ -145,7 +145,9 @@
     compTot={};(rt&&rt.data||[]).forEach(r=>{compTot[r.computo_id]=r;});
     compCli={};(rl&&rl.data||[]).forEach(c=>{compCli[c.id]=(c.nome||"")+(c.eliminato_il?" (nel cestino)":"");});
 
-    const cnt=$("#cnt-computi");if(cnt)cnt.textContent=compCache.length?String(compCache.length):"";
+    /* 12 nov 2026: stesso numero che si vede all'ingresso (renderContatori): le bozze da prezzare */
+    if(typeof setCnt==="function")setCnt("#cnt-computi",compCache.filter(c=>c.stato==="bozza").length,"attesa");
+    else{const cnt=$("#cnt-computi");if(cnt)cnt.textContent=compCache.length?String(compCache.length):"";}
 
     const L=compCache.filter(c=>compFiltro==="tutti"||c.stato===compFiltro);
     const conta={};COMP_VISTE.forEach(v=>conta[v.k]=compCache.filter(c=>v.k==="tutti"||c.stato===v.k).length);

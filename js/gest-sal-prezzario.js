@@ -127,7 +127,7 @@
      il netto uscirebbe senza ribasso, cioe' piu' alto del vero. Se il computo
      non c'e' (o e' nel cestino) il SAL non si mostra proprio.
      ============================================================ */
-  const SAL_VISTE=[{k:"tutti",lab:"Tutti"},{k:"da",lab:"Da fatturare"},{k:"fatt",lab:"Fatturati"}];
+  const SAL_VISTE=[{k:"tutti",lab:"Tutti"},{k:"da",lab:"Non fatturati"},{k:"fatt",lab:"Fatturati"}];
   let salTuttiCache=[], salTuttiComp={}, salTuttiTot={}, salTuttiCli={}, salFiltro="tutti";
 
   function salFiltra(L,k){
