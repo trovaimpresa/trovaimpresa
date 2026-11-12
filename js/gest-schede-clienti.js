@@ -271,6 +271,12 @@
       +'La connessione non risponde: i tuoi dati sono al sicuro, non sono spariti. '
       +'<button class="btn" data-action="lista-riprova" data-tab="'+tab+'">Riprova</button></div>';
   }
+  /* 12 nov 2026 — lo stesso riquadro, per chi lo deve mettere dentro una scatola sua */
+  function nonLettaHTML(cosa,tab){
+    return '<div class="rie-errore"><b>Non riesco a leggere '+cosa+'.</b> '
+      +'La connessione non risponde: i tuoi dati sono al sicuro, non sono spariti. '
+      +'<button class="btn" data-action="lista-riprova" data-tab="'+tab+'">Riprova</button></div>';
+  }
   /* vero se una delle risposte di Supabase e' arrivata con un errore */
   function letturaKo(){ for(let i=0;i<arguments.length;i++){const r=arguments[i];if(!r||r.error)return true;} return false; }
   function tabVuotoCerca(q){

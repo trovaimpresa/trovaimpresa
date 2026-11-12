@@ -127,7 +127,7 @@
     if(_at&&!_at._agg){_at._agg=true;_at.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();supInvia();}});}
     if(!sb||!sbUid){box.innerHTML='<div class="asst-vuoto">Accedi per scrivere.</div>';return;}
     if(!supCache.length)box.innerHTML='<div class="asst-vuoto">Leggo…</div>';
-    if(!await supLeggi(true)){box.innerHTML='<div class="asst-vuoto">Non riesco a leggere i messaggi: controlla la connessione e riprova.</div>';return;}
+    if(!await supLeggi(true)){nolNonLetto(box,"i messaggi",supAssistenza);return;}   /* 12 nov 2026 — regola 20 */
     supDisegna();
     const nota=$("#asst-nota");if(nota)nota.textContent="";
   }

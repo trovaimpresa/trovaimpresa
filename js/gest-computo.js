@@ -130,6 +130,8 @@
     if(rc.error){
       compTabellaOk=false;
       $("#comp-viste").innerHTML="";
+      /* 12 nov 2026 — regola 20: riquadro rosso con Riprova, niente «TypeError» */
+      if(!_compManca(rc.error)){box.innerHTML=nonLettaHTML("i computi","computi");return;}
       box.innerHTML=tabVuoto(
         _compManca(rc.error)?"Questa sezione non è ancora accesa":"Non riesco a leggere i computi",
         _compManca(rc.error)

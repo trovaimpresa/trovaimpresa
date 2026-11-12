@@ -65,7 +65,7 @@
     if(rs.error){
       box.innerHTML='<div class="lm-vuoto">'+(_salManca(rs.error)
         ? 'La contabilità dei lavori non è ancora accesa. Esegui <b>sql/gest-sal.sql</b> su Supabase e riapri il computo.'
-        : 'Non riesco a leggere gli stati di avanzamento: '+esc(rs.error.message))+'</div>';
+        : 'Non riesco a leggere gli stati di avanzamento: controlla la connessione e riapri il computo.')+'</div>';
       return;
     }
 
@@ -215,6 +215,8 @@
       const err=rs.error||rc.error||rt.error;
       if(viste)viste.innerHTML="";
       box.style.display="block";
+      /* 12 nov 2026 — regola 20: riquadro rosso con Riprova, niente «TypeError» */
+      if(!_salManca(err)){box.innerHTML=nonLettaHTML("gli stati di avanzamento","sal");return;}
       box.innerHTML=tabVuoto(
         _salManca(err)?"La contabilità dei lavori non è ancora accesa":"Non riesco a leggere gli stati di avanzamento",
         _salManca(err)
@@ -1061,6 +1063,8 @@
         .eq("user_id",sbUid).is("eliminato_il",null)
         .order("usata_volte",{ascending:false}).limit(PZ_MAX);
       if(error){
+        /* 12 nov 2026 — regola 20 */
+        if(!_compManca(error)){box.innerHTML=nonLettaHTML("il prezzario","prezzario");return;}
         box.innerHTML='<div class="lm-vuoto">'+(_compManca(error)
           ? ('Per il prezzario serve l\'aggiornamento del database: '+COMP_SQL_HTML)
           : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
@@ -1168,7 +1172,7 @@
   async function savePrezzo(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const desc=String(($("#pz-desc")&&$("#pz-desc").value)||"").trim();
-    if(!desc){toast("Scrivi almeno la descrizione della voce");return;}
+    if(!desc){campoManca("#pz-desc","Manca la descrizione della voce: scrivila qui.");return;}   /* 12 nov 2026 — regola 21 */
     const riga={
       descrizione:desc,
       codice:String(($("#pz-cod")&&$("#pz-cod").value)||"").trim()||null,

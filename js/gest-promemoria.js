@@ -231,9 +231,9 @@
     const v = s => { const e = $(s); return e ? String(e.value || "").trim() : ""; };
 
     const testo = v("#p-testo");
-    if (!testo) { toast("Scrivi cosa ti devo ricordare"); return; }
+    if (!testo) { campoManca("#p-testo", "Manca cosa ti devo ricordare: scrivilo qui."); return; }   /* 12 nov 2026 — regola 21 */
     const data = v("#p-data");
-    if (!data) { toast("Metti il giorno"); return; }
+    if (!data) { campoManca("#p-data", "Manca il giorno: sceglilo qui."); return; }
 
     const row = {
       user_id: sbUid,

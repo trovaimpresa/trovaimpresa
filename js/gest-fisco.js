@@ -288,7 +288,7 @@
        qualunque reparto arrivino (stessa regola dei Promemoria). */
     const L = await fpCaricaAperte();
     if (mio !== fpGiro) return;
-    if (L.errore) { box.innerHTML = tabVuoto("Farsi pagare", "Non riesco a leggere le fatture: " + esc(L.errore)); return; }
+    if (L.errore) { box.innerHTML = nonLettaHTML("le fatture", "fisco"); return; }   /* 12 nov 2026 — regola 20 */
     fpCache = L.lista;
 
     const scadute = fpCache.filter(f => f.ritardo > 0).sort((a, b) => b.ritardo - a.ritardo);

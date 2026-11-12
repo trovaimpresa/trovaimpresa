@@ -367,7 +367,7 @@ async function renderGiornate(){
   if(typeof sb==="undefined"||!sb||!sbUid){ box.innerHTML='<div class="gb"><div class="gvuoto">Accedi per segnare le giornate.</div></div>'; return; }
   if(!giorSera) giorSeraLeggi().then(()=>{ if(document.getElementById("gior-box")&&!giorProp) giorDisegna(); }).catch(()=>{});
   try{ await giorCarica(); }
-  catch(e){ box.innerHTML='<div class="gb"><div class="gmsg err">Non riesco a leggere le giornate: '+esc(e.message||"")+'. Riprova fra un attimo.</div></div>'; return; }
+  catch(e){ box.innerHTML='<div class="gb">'+nonLettaHTML("le giornate","giornate")+'</div>'; return; }   /* 12 nov 2026 — regola 20 */
   giorDisegna();
 }
 

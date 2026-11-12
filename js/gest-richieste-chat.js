@@ -574,7 +574,7 @@
     if(!asstCache.length)box.innerHTML='<div class="asst-vuoto">Leggo…</div>';
     const ok=await asstLeggi(true);
     if(!ok){
-      box.innerHTML='<div class="asst-vuoto">Non riesco a leggere i messaggi: controlla la connessione e riprova.</div>';
+      box.innerHTML=nonLettaHTML("i messaggi","assistenza");   /* 12 nov 2026 — regola 20 */
       return;
     }
     asstDisegna();

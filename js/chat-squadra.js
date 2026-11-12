@@ -107,7 +107,7 @@ async function chatMonta(el,ctx){
   };
   const carica=async(giu)=>{
     const {data,error}=await chatQuery(ctx).order("created_at",{ascending:true}).limit(300);
-    if(error){lista.innerHTML='<div class="ch-vuoto">Non riesco a leggere i messaggi: '+esc(error.message)+'</div>';return;}
+    if(error){lista.innerHTML='<div class="ch-vuoto">Non riesco a leggere i messaggi: controlla la connessione e riprova.</div>';return;}
     const nuovoMsgs=data||[],f=chatFirma(nuovoMsgs),cambiato=f!==firma;
     const eraFine=lista.scrollHeight-lista.scrollTop-lista.clientHeight<80;
     msgs=nuovoMsgs;
