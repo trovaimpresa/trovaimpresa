@@ -272,7 +272,7 @@
     renderDocForn();
   }
   async function fornDocElimina(id){
-    if(!(await gconfirm("Eliminare questo documento?")))return;
+    if(!(await window.chiediVia("questo documento",true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
     const {data:okD,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}

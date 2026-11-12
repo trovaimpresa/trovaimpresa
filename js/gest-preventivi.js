@@ -1091,7 +1091,7 @@
      quindi l'await deve stare qui dentro */
   async function delCred(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!(await gconfirm("Eliminare questo corso dal registro?")))return;
+    if(!(await window.chiediVia("questo corso",true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const {data,error}=await sb.from("gest_crediti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}

@@ -332,8 +332,9 @@
 
   async function eliminaRifornimento(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!(await gconfirm("Eliminare questo pieno?")))return;
     const r=rifCache.find(x=>String(x.id)===String(id));
+    /* 12 nov 2026 — regola 22: i pieni non passano dal Cestino, e si dice */
+    if(!(await window.chiediVia(r&&r.data?("il pieno del "+fdate(r.data)):"questo pieno",false)))return;
     const {data,error}=await sb.from("gest_rifornimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
@@ -415,7 +416,7 @@
     await renderDocLavoro(docLavId);
   }
   async function lavDocElimina(id){
-    if(!(await gconfirm("Eliminare questo documento?")))return;
+    if(!(await window.chiediVia("questo documento",true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
     /* la .select('id') fa da cancello: se la RLS blocca, PostgREST tocca zero
        righe e risponde OK — senza questo si direbbe «eliminato» a vuoto. */

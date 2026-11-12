@@ -1513,6 +1513,15 @@
     return gconfirm(tit+"\n\n"+s);
   };
 
+  /* 12 nov 2026 — regola 22 per tutte le altre domande: se la cosa va nel
+     Cestino lo dice (chiediCestino), se no dice «per sempre». */
+  window.chiediVia=async function(cosa,nelCestino,sotto){
+    if(nelCestino&&window.cestinoAttivo&&window.cestinoAttivo())return window.chiediCestino(cosa,sotto);
+    const tit="Eliminare per sempre "+(cosa||"questa voce")+"?", s="Non va nel Cestino: non si recupera.";
+    if(typeof window.tiChiedi==="function")return window.tiChiedi(s,{titolo:tit,si:"S\u00ec, elimina",no:"No",rosso:true});
+    return gconfirm(tit+"\n\n"+s);
+  };
+
   /* ============================================================
      IL VERDE E IL «VIA LIBERA» — 1 nov 2026 (idea di Alessio)
      Una casella scritta bene diventa VERDE, una sbagliata ROSSA (o

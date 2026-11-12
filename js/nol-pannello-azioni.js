@@ -166,7 +166,7 @@
     if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
-    if(a==="del-job"){if((await gconfirm("Eliminare questo lavoro?"))){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
+    if(a==="del-job"){if((await gconfirm("Eliminare per sempre "+(function(){const j=db().lavori.find(l=>l.id===id);const n=j&&(j.desc||j.descrizione||j.titolo||j.cosa);return n?("«"+String(n).slice(0,80)+"»"):"questo lavoro";})()+"?\nNon va nel Cestino: non si recupera."))){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -227,7 +227,7 @@
     }
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
-    if(a==="del-dip"){if((await tiChiedi("Eliminare questa persona?"))){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
+    if(a==="del-dip"){if((await gconfirm("Eliminare per sempre "+(function(){const d=db().dipendenti.find(x=>x.id===id);return d&&d.nome?("«"+d.nome+"»"):"questa persona";})()+"?\nNon va nel Cestino: non si recupera."))){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
   });

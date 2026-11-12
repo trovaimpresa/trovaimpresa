@@ -108,12 +108,12 @@
     if(a==="verbale")return verbaleForm(id);
     if(a==="verbale-pdf")return verbalePdf(id);
     if(a==="ore-add")return oreAdd();
-    if(a==="ore-del"){if((await gconfirm("Eliminare questa riga di ore?")))return oreDel(id);return;}
+    if(a==="ore-del"){if((await window.chiediVia("questa riga di ore",true,"La riprendi dal Cestino quando vuoi.")))return oreDel(id);return;}
     if(a==="rap-del")return rapCestina(id);   /* la domanda la fa lui: gli serve il numero delle ore */
     if(a==="asst-invia")return asstInvia();
     if(a==="asst-allega")return asstScegliFile();
     if(a==="asst-togli-file")return asstTogliFile();
-    if(a==="spesa-del"){if((await tiChiedi("Eliminare questa spesa?")))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
+    if(a==="spesa-del"){if((await window.chiediVia("questa spesa",true,"La riprendi dal Cestino quando vuoi.")))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();
     if(a==="new-computo")return computoForm(null);
