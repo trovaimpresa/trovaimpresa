@@ -20,6 +20,11 @@
      ============================================================ */
 
   let repData=null;
+  /* 12 nov 2026 — regola 19: uno zero è grigio e senza segno (prima «−0,00 €») */
+  function _repZero(v,segno){
+    return (+v||0)===0 ? '<td style="color:var(--testo-3)">'+eur(0)+'</td>'
+                       : '<td style="color:var(--testo)">'+segno+eur(v)+'</td>';
+  }
   async function renderReport(){
     const box=$("#rep-body");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun dato","Accedi per vedere i report.",
@@ -237,10 +242,10 @@
             che è la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
       <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali di questo reparto</h3>
         <p class="rep-sub">Da quando usi il gestionale. Il margine conta solo i soldi già incassati.</p><table class="rep-table">
-        <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(incAnno)}</td></tr>
-        <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(totInc)}</td></tr>
-        <tr><td>Spese nei lavori</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
-        <tr><td>Spese con le carte</td><td style="color:var(--testo)">−${eur(totCarte)}</td></tr>
+        <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td>${_repZero(incAnno,"")}</tr>
+        <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td>${_repZero(totInc,"")}</tr>
+        <tr><td>Spese nei lavori</td>${_repZero(totSp,"−")}</tr>
+        <tr><td>Spese con le carte</td>${_repZero(totCarte,"−")}</tr>
         ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
         ${totFF?`<tr><td>Fatture dei fornitori</td><td style="color:var(--testo)">−${eur(totFF)}</td></tr>`:""}
         ${totNol?`<tr><td>Noleggio interno <span style="font-size:13px;color:var(--testo-3)">(mezzi del tuo Noleggio)</span></td><td style="color:var(--testo)">−${eur(totNol)}</td></tr>`:""}

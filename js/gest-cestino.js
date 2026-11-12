@@ -420,7 +420,7 @@
               "Ci sono però "+altrove+" cose eliminate in altri reparti: scegli «Tutti i reparti» qui sopra per vederle.",
               _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>')
           : tabVuoto("Il cestino è vuoto",
-            "Qui finisce tutto quello che elimini dal gestionale. Finché è qui non è perso: si rimette a posto con un clic.",
+            "Quello che elimini finisce qui.",   /* 12 nov 2026 — la spiegazione lunga c'è già sopra (regola 6) */
             _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>')),
       colonne:[{lab:"Che cos'era",w:"42%"},{lab:"Tipo",w:"26%",cls:"c-chi"},{lab:"Eliminato",w:"32%"}],
       righe:vis.map(function(v){

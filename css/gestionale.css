@@ -5980,3 +5980,9 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   border-radius:12px;padding:14px 18px;font-size:16px;font-weight:700;line-height:1.4;margin:0 0 14px;cursor:pointer}
 #calendario .cal-rit[hidden]{display:none}
 #calendario .cal-rit:hover{background:#FBDADA}
+
+/* 12 nov 2026 — regola 11: sul telefono il numero e l'email da toccare sono
+   alti 44 px (prima 31 in Squadra e 38 in Clienti). */
+@media(max-width:880px){
+  .job-meta a.cli-link,.sqg-sotto a.cli-link,a.cli-link{ display:inline-block; min-height:44px; line-height:22px; padding:11px 0; box-sizing:border-box; }
+}
