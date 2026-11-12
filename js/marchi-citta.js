@@ -59,7 +59,9 @@
          sta prima del <footer>, dopo il riquadro del video. */
       var cittaPag = /^\/imprese-/.test(location.pathname);
       var prima = cittaPag ? document.getElementById('costi-lavori') : document.querySelector('footer');
-      if (!prima) return;
+      /* 12 nov 2026: le pagine senza <footer> (es. guida-codice-sdi) la
+         mettono in fondo, invece di restarne senza. Le citta' no. */
+      if (!prima && cittaPag) return;
 
       var st = document.createElement('style');
       st.textContent = CSS;
@@ -80,7 +82,7 @@
       sez.innerHTML = '<h2>Materiali ed elettrodomestici dai migliori negozi</h2>' +
         '<p>Finiti i lavori, arreda e attrezza casa dai marchi che conosci.</p>' +
         '<div class="tmc-grid">' + carte + '</div>';
-      prima.parentNode.insertBefore(sez, prima);
+      if (prima) prima.parentNode.insertBefore(sez, prima); else document.body.appendChild(sez);
       /* 8 nov 2026: al computer i marchi vanno ai lati, separati (scelta di
          Alex). La fascia resta per il telefono e per chi non trova posto. */
       if (!document.querySelector('script[src*="marchi-lati"]')) {
