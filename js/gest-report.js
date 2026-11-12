@@ -22,7 +22,7 @@
   let repData=null;
   /* 12 nov 2026 — regola 19: uno zero è grigio e senza segno (prima «−0,00 €») */
   function _repZero(v,segno){
-    return (+v||0)===0 ? '<td style="color:var(--testo-3)">'+eur(0)+'</td>'
+    return (+v||0)===0 ? '<td style="color:#5f6b7a">'+eur(0)+'</td>'   /* lo stesso grigio di .fp-zero in Tasse e fisco */
                        : '<td style="color:var(--testo)">'+segno+eur(v)+'</td>';
   }
   async function renderReport(){
