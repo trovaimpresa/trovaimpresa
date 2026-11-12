@@ -162,7 +162,7 @@
        del Noleggio comparirebbe anche il furgone dell'impresa. */
     const {data:mezzi,error:_eMz}=await sb.from("gest_mezzi").select("*").eq("user_id",sbUid).eq("noleggiabile",true);
     const MZ=mezzi||[];
-    scrivi("kn-mezzi",MZ.length);
+    if(!_eMz)scrivi("kn-mezzi",MZ.length);   /* 12 nov 2026 — senza rete non scrive 0 mentre aspetta */
     const {data:nol,error:_eNl}=await sb.from("nol_noleggi")
       .select("id,mezzo,mezzo_id,cliente,data_rientro_prevista,data_rientro_effettivo,importo,data_uscita,stato_pagamento,fase,cauzione,cauzione_stato,mestiere_id")
       .eq("user_id",sbUid);
