@@ -1863,12 +1863,35 @@ Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]`
 banco-correttore e banco-copia-computo verdi; controllo-push «tutto a posto».
 Foto viste da Alex (ok alle 14:51) per fattura, ricevuta e lavoro dell'App; quelle del Noleggio mandate dopo.
 
-**Da provare dal vivo (reparto «ferramenta», «PROVA CONTROLLORE»), NON ancora fatto:**
-- fattura in BOZZA (mai emetterla): salvare scadenza/modo/IBAN, riaprirla, PDF;
-- ricevuta legata a una fattura: serve una fattura EMESSA, e di prova non se ne emettono →
-  dal vivo si può provare solo che la tendina NON esce per un cliente senza fatture emesse;
-- lavoro creato da un preventivo di prova: le voci dentro il lavoro;
-- Noleggio: bozza con nota «PROVA CONTROLLORE», riquadro Pagamento, PDF.
+**ESITO — online il 13 nov, push →68316ea← (uno solo per il codice; un secondo push porta solo queste righe).**
+Netlify pubblicato; nel sorgente `?v=13nov4` (11 volte nell'App, 5 nel Noleggio) e `FATT_MODI` in gest-fatture.js.
+
+**Provato dal vivo (reparto «ferramenta», cliente «PROVA CONTROLLORE»):**
+- [x] Fattura nuova «Vuota, la scrivo io»: «Da pagare entro» nasce a data + 30 (13/11 → 13/12); cambiando la data
+      a 10/11 la scadenza va da sola al 10/12; con «Assegno» la casella IBAN sparisce. Salvata come BOZZA: nel
+      database `scadenza 2026-12-31`, `modo_pagamento assegno`, `iban` vuoto. Riaperta: valori giusti.
+- [x] PDF della bozza (letto il testo, senza scaricare il file): «Pagamento · Da pagare entro il 31/12/2026 · Come si paga Assegno».
+- [x] Ricevuta: per un cliente senza fatture emesse la tendina «Per quale fattura da saldare» NON esce.
+- [x] Lavoro creato da un preventivo di prova (N. 9001, 2 voci): dentro il lavoro «Le voci del preventivo N. 9001»,
+      30,00 € + 25,50 € = 55,50 €. «Apri il preventivo» apre il preventivo giusto.
+- [x] Noleggio, fattura in BOZZA con nota «PROVA CONTROLLORE»: scadenza proposta a +30, «Contanti» nasconde l'IBAN,
+      salvata con `scadenza` e `modo_pagamento`; nessun numero consumato (contatore fermo a 1).
+- [x] Pulizia: tutto cancellato anche dal Cestino. Contato dal database: 0 righe in clienti, fatture, righe,
+      preventivi, lavori, nol_fatture.
+
+**NON provato dal vivo (solo col banco):**
+- la casella IBAN piena e l'IBAN nel PDF e nel file SdI (sull'account vero i Dati azienda non hanno l'IBAN, e non se ne scrive uno finto);
+- la ricevuta che segna pagata una fattura e l'acconto (serve una fattura EMESSA: di prova non se ne emettono);
+- il PDF e il file SdI della fattura del Noleggio; le email del lunedì e del mattino con la scadenza nuova;
+- la «liquidità» della Chat con AI con una scadenza cambiata a mano.
+
+**TRAPPOLA nuova:** nella pagina del Noleggio `sb.from(tabella).delete()` NON cancella: mette nel Cestino
+(anche le tabelle gest_). Per togliere davvero: `sb.raw(tabella).delete()` per le tabelle nol_, e la funzione
+`gest_cestino_elimina` (p_conferma:true) per le gest_. Un `select` dal browser non vede le righe nel Cestino:
+il conto delle righe rimaste si fa dal database.
+
+**Visto dal vivo, per il GRUPPO 3:** nel Noleggio c'è una fattura emessa «n. 1» (nota «DATI DI PROVA») ma il
+contatore `gest_azienda.num_fattura` è ancora 1: la prossima fattura emessa prenderebbe di nuovo il numero 1.
 
 **Visto passando, per il GRUPPO 3:** i numeri delle fatture sono DAVVERO separati. Il Noleggio prende
 il numero dal contatore `gest_azienda.num_fattura` (js/nol-fatture.js), l'App dal più alto dell'anno + 1
