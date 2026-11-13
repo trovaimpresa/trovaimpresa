@@ -2101,3 +2101,32 @@ nell'app dell'operaio.
 - `tools/banco-dati-finti.js`: un rapportino del telefono sul lavoro «Riparazione perdita bagno» (ore collegate),
   un computo col SAL n. 2 emesso. `tools/banco-gestionale.js`: il finto risponde a `lavoro_voci_senza_prezzi`.
 - Versioni `?v=13nov8` sui js toccati (e fondatore.js), css `?v=13nov7`.
+
+**Provato col banco**: banco-gruppo4 VERDE (59; sulla versione di PRIMA 46 rossi), banco-gestionale App e Noleggio
+ZERO difetti (1440/375/360), banco-soldi (36), banco-preventivo (38), banco-noleggio (31), banco-correttore e
+banco-copia-computo zero difetti; controllo-push «tutto a posto».
+
+**ESITO — online il 13 nov, push →9c20484← (tutto il gruppo).** Netlify: deploy «ready» alle 20:38 col commit 9c20484.
+Database: colonna `gest_rapportini.firma_cliente` e funzione `lavoro_voci_senza_prezzi` ci sono (controllato).
+
+**Provato sul sito vero (13 nov, 20:40, browser dell'app, reparto «ferramenta», nome «PROVA CONTROLLORE»):**
+- [x] App con `?fresco=`: 9 file a `13nov8`, `rapfApri` e `pdfFirme` ci sono.
+- [x] `lavoro_voci_senza_prezzi` dal browser: le 2 voci del preventivo collegato, senza prezzi.
+- [x] Ore: squadra vuota → «Chi le ha fatte» si vede, con «Alex (io)» e «＋ Un'altra persona…», nasce su «io», giorno di oggi.
+      «Un'altra persona» = PROVA CONTROLLORE, 2,5 ore → nel database la riga ha il suo operatore_id, e la persona è entrata in Squadra.
+- [x] Rapportino: «＋ Rapportino da far firmare», ore di quel giorno lette dal registro (2,5 h), firma col dito,
+      «Scarica il PDF» → nel database `firma_cliente` con disegno, nome e impronta; PDF (testi letti senza
+      scaricare): dati azienda, cliente col CAP, ore, materiali, «Il cliente · PROVA CONTROLLORE · Firmato il …».
+      «Torna al lavoro» riapre il lavoro, la riga dice «Firmato da PROVA CONTROLLORE».
+- [x] Scheda lavoro PDF: «Cosa comprende il lavoro · Posa pavimento di prova 12,5 mq · Trasporto di prova 1 a corpo», senza prezzi.
+- [x] Giornate PDF: nome, P.IVA, indirizzo, telefono, email in testa.
+- [x] Capitolato con 2 voci (il caso del controllore): PDF di 2 pagine, la seconda comincia con «5. Varianti…» e poi le firme.
+- [x] Noleggio con `?fresco=`: scheda cliente PDF con i dati azienda; verbale di riconsegna di un noleggio vero
+      (solo i dati, niente salvato): la pagina 2 comincia con «DICHIARAZIONI», le firme non sono più da sole.
+- [x] Pulizia: cliente, lavoro, preventivo (+2 righe e capitolato), ore, rapportino, persona in Squadra cancellati per
+      sempre dal database: 0 righe. Tolta dal browser la memoria «ultima persona scelta».
+- NON provati dal vivo: il SAL in PDF (serve un computo con un SAL: solo banco); il verbale di sopralluogo dello studio
+  (solo letto il codice: stessa regola del capitolato); l'app dell'operaio con le voci (serve un account operaio:
+  provata solo col banco e la foto); il telefono vero; la firma vera col dito (fatta con eventi finti del puntatore).
+- Visto dal vivo, limite: un rapportino fatto dal gestionale ha le ore «sciolte» del registro: nella riga del
+  rapportino si legge «0 h» (le ore stanno in «aggiunte da te»), mentre nel PDF le ore del giorno ci sono. Da decidere.
