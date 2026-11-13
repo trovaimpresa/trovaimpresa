@@ -2023,3 +2023,20 @@ Foto viste da Alex (ok alle 18:45): cliente computer e telefono, PDF fattura, co
   rientrato ha DDT 4 e 5, la fattura del Noleggio ha la riga col noleggio.
 - `js/nol-sdi.js`: porta per il banco `window.__nolSdiXmlPerProva` (non scrive niente).
 - Versioni `?v=13nov7` sui file toccati.
+
+**Provato col banco**: banco-noleggio VERDE (31), banco-gestionale App e Noleggio ZERO difetti (1440/375/360), banco-soldi (36),
+banco-preventivo (38), banco-correttore e banco-copia-computo verdi; nell'App `fattProssimoNumero` dà 3 nell'anno di oggi
+(fatture finte n. 1 e 2) e 1 in un anno nuovo; controllo-push «tutto a posto».
+
+**ESITO — online il 13 nov, push →3a01b9b← (tutto il gruppo).** Netlify: deploy «ready» alle 19:15 col commit 3a01b9b.
+Nel database `fattura_prossimo_numero` c'è e risponde (Alex: 16 nel 2026, 1 nel 2027).
+
+**NON provato sul sito vero:** in questa sessione il browser del computer di Alex non era raggiungibile (né quello
+dell'app né Chrome) e il controllo del sorgente con WebFetch non ha avuto il permesso. Da fare nella prossima sessione,
+nel Noleggio con una BOZZA «PROVA CONTROLLORE» (poi buttata per sempre):
+- aprire un cliente esistente: CAP/Città/Provincia/Codice destinatario/PEC; NON salvare dati finti sul cliente vero
+  (al massimo: aprire e chiudere), oppure un cliente «PROVA CONTROLLORE» poi eliminato anche dal Cestino;
+- fattura in BOZZA di un noleggio con DDT: PDF con «Documenti di trasporto» (testi letti senza scaricare);
+- contratto PDF: «TOTALE (IVA esclusa)»; Cestino: la riga del noleggio col cliente;
+- il numero: NON si emette una fattura di prova. Si controlla solo che l'App e il Noleggio chiamino la funzione
+  (sorgente con ?fresco=) — la domanda «Prende il numero 16…» si vede premendo Emessa+Salva e poi «No, resta bozza».
