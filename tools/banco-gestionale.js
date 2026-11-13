@@ -136,6 +136,13 @@ async function collega(page, stato) {
         const tab = u.pathname.replace("/rest/v1/", "").replace(/^rpc\//, "rpc:");
         const righe = (m === "GET" || m === "HEAD") ? filtra(rigaFinta(tab), u.searchParams) : [];
         const uno = /vnd\.pgrst\.object/.test(route.request().headers()["accept"] || "");
+        /* 13 nov 2026: il numero della fattura (una serie sola App + Noleggio) */
+        if (tab === "rpc:fattura_prossimo_numero") {
+          let a = 0; try { a = +JSON.parse(route.request().postData() || "{}").p_anno || 0; } catch (_) {}
+          const nn = [].concat((DATI.gest_fatture || []).filter(f => +f.anno === a).map(f => +f.numero || 0),
+            (DATI.nol_fatture || []).filter(f => String(f.data || "").slice(0, 4) === String(a) && /^\d+$/.test(String(f.numero || ""))).map(f => +f.numero));
+          return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(Math.max(0, ...nn) + 1) });
+        }
         if (tab.startsWith("rpc:")) return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: "null" });
         if (uno) return righe.length ? route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(righe[0]) })
           : route.fulfill({ status: 406, headers: cors, contentType: "application/json", body: JSON.stringify({ code: "PGRST116", message: "0 rows", details: "The result contains 0 rows" }) });

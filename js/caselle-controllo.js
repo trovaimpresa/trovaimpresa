@@ -97,7 +97,7 @@
     "a-iban": function (v) { return !v || ibanOk(v) ? null : ["rosso", "Questo IBAN non torna: c'è una cifra sbagliata o ne manca una (in Italia sono 27 caratteri). Il cliente pagherebbe sul conto sbagliato."]; },
     /* Cliente */
     "ncl-nome": obbligatorio("Manca il nome del cliente: senza, questa scheda non la ritrovi più."),
-    "ncl-piva": piva, "ncl-email": email, "ncl-telefono": telefono,
+    "ncl-piva": piva, "ncl-cf": piva, "ncl-email": email, "ncl-telefono": telefono,
     /* Mezzo */
     "nz-nome": obbligatorio("Manca il nome del mezzo: nei noleggi uscirebbe una riga vuota."),
     "nz-tora": euro, "nz-tgiorno": euro, "nz-tsett": euro, "nz-tmese": euro, "nz-toraextra": euro,

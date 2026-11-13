@@ -1975,3 +1975,51 @@ Misurato a 360, 375, 600, 800, 1024, 1280, 1440, 1920 e con la colonna forzata a
 **Visto passando:** in «ferramenta» il riquadro del reparto dice «1 lavoro in tutto» anche a reparto vuoto di prove:
 da guardare (un lavoro vecchio, oppure il conto prende qualcosa dal Cestino).
 
+
+## 13 nov 2026 (sera) — lista «MANCA», GRUPPO 3: il Noleggio (voci 11, 13, 14, 15 + numeri delle fatture da guardare)
+Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]` da fare.
+
+Foto viste da Alex (ok alle 18:45): cliente computer e telefono, PDF fattura, contratto, scheda cliente, Cestino, importo del noleggio.
+
+[x] 11. Cliente del Noleggio: codice destinatario e PEC.
+   - `schedaClienteNol` (js/nol-schede.js) a due colonne come nell'App: «Chi è», «Dove sta» (Via e numero, CAP, Città,
+     Provincia), «Dati per la fattura» (Partita IVA, Codice fiscale, Codice destinatario, PEC). Sono le colonne che
+     `gest_clienti` aveva già (`cap citta prov cod_fiscale sdi_codice sdi_pec`): NIENTE SQL.
+   - `salvaClienteNol`: codice destinatario in maiuscolo e di 7 caratteri, CAP di 5 cifre (altrimenti `nolCampoManca`);
+     `.select("id")` e «Non salvato» se il database non scrive niente.
+   - Un vecchio cliente con il codice fiscale scritto nella casella «P.IVA / Codice Fiscale» (16 caratteri con lettere):
+     si vede nella casella «Codice fiscale» e al «Salva» ci va (`nolCfVecchio`). La voce («Parla») fa lo stesso.
+   - Dove si vede: elenco clienti (indirizzo intero, C.F.), PDF/stampa della scheda cliente, contratto, fattura
+     (anche Codice destinatario e PEC). L'indirizzo intero passa da `nolAzIndirizzo` (js/nol-base.js), la stessa dell'azienda.
+   - Prima il file SdI del Noleggio chiedeva CAP, città, codice destinatario e PEC del cliente, ma non c'era dove scriverli.
+[x] 13. Fattura del Noleggio: elenca i DDT.
+   - `nolDdtDiFattura(righe)` (js/nol-fatture.js, UN posto solo): dai noleggi delle righe prende DDT di consegna e di
+     rientro (numero, data, mezzo, righe). Torna null se non riesce a leggere.
+   - PDF/stampa: riquadro «Documenti di trasporto» (Attrezzatura · DDT n. · Data · Consegna o rientro), subito dopo le
+     Prestazioni; la nota dice «elencati qui sotto». Senza DDT: «Nessun DDT registrato per i noleggi di questa fattura».
+   - File SdI (js/nol-sdi.js): `<DatiDDT>` (NumeroDDT, DataDDT, RiferimentoNumeroLinea) dentro `<DatiGenerali>`. Se i DDT
+     non si leggono, il controllo lo dice e la fattura non parte.
+   - Il disegnatore dei PDF (`nolDocPdf`) accetta `pesi` (larghezze delle colonne) e una tabella senza `intro`.
+[x] 14. Contratto: i prezzi sono più IVA.
+   - Contratto: «TOTALE (IVA esclusa)» e «IVA: non compresa: si aggiunge in fattura». Scheda noleggio PDF:
+     «IMPORTO (IVA esclusa)». Modulo del noleggio: «Importo € (IVA esclusa)». (La fattura prende quell'importo come imponibile.)
+[x] 15. Cestino del Noleggio: la riga dice mezzo · cliente · dal giorno di uscita (`nolNomeNoleggio`, js/nol-card-righe-stampa.js),
+   uguale alla domanda di «elimina». Il nome nel Cestino non si taglia più a 80 lettere (ora 160).
+[x] NUMERI DELLE FATTURE — Alex: «Una serie sola».
+   - Funzione nuova del database `fattura_prossimo_numero(p_user, p_anno)` (`sql/2026-11-13-fattura-numero-unico.sql`,
+     migrazione `fattura_numero_unico_13nov2026` PASSATA, riga in PROVE): il più alto dell'anno fra `gest_fatture` e
+     `nol_fatture` (Cestino compreso) + 1. La usano l'App (`fattProssimoNumero`) e il Noleggio (al salvataggio).
+     Controllato sul database: per Alex il prossimo del 2026 è 16, del 2027 è 1.
+   - Noleggio: prima di dare il numero chiede «Emettere la fattura? Prende il numero N del 2026 (stessa serie delle
+     fatture dell'App)», come l'App. Il contatore `gest_azienda.num_fattura` resta nel database ma non si usa più.
+   - Se la lettura del numero fallisce, NON si assegna niente e si dice.
+   - ⚠️ Resta: nel Noleggio di Alex c'è la fattura emessa «n. 1» del 29/09/2026 con la nota «DATI DI PROVA». Nell'App, nel
+     database, del 2026 c'è solo la n. 15: oggi nessun doppione. Non si tocca (una fattura emessa non si elimina).
+
+**Attrezzi**
+- Banco nuovo `node tools/banco-noleggio.js` (Noleggio a 1440 e 375): 31 prove. Sulla versione di PRIMA: 25 rossi
+  (le 3 del numero aggiunte dopo).
+- `tools/banco-gestionale.js`: il finto risponde a `fattura_prossimo_numero`. `tools/banco-dati-finti.js`: il noleggio
+  rientrato ha DDT 4 e 5, la fattura del Noleggio ha la riga col noleggio.
+- `js/nol-sdi.js`: porta per il banco `window.__nolSdiXmlPerProva` (non scrive niente).
+- Versioni `?v=13nov7` sui file toccati.

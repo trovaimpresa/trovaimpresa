@@ -375,19 +375,57 @@
     closeSheet(); loadMezzi(); renderRiepilogoNegozio(); toast(id?"Mezzo aggiornato ✔":"Mezzo aggiunto ✔");
   }
 
+  /* 13 nov 2026 (lista «MANCA», voce 11) — IL CLIENTE DEL NOLEGGIO CON I
+     DATI PER LA FATTURA. Prima c'erano una casella «Indirizzo» sola e una
+     «P.IVA / Codice Fiscale» sola: il file per lo SdI (js/nol-sdi.js) chiedeva
+     CAP, città, codice destinatario e PEC, e non c'era dove scriverli.
+     Adesso il modulo e' a due colonne come quello dell'App (stesse colonne di
+     gest_clienti: cap, citta, prov, cod_fiscale, sdi_codice, sdi_pec), cosi'
+     un cliente scritto qui va bene anche nell'App e viceversa.
+     Una vecchia «P.IVA / Codice Fiscale» con dentro un codice fiscale (16
+     caratteri) si mostra nella casella giusta e al «Salva» ci va. */
+  function nolCfVecchio(c){
+    const p=String(c.piva||"").replace(/\s+/g,"").toUpperCase();
+    return (!c.cod_fiscale&&/^[A-Z0-9]{16}$/.test(p)&&/[A-Z]/.test(p))?p:"";
+  }
   function schedaClienteNol(c){
     const isNew=!c; c=c||{};
     const v=(k)=>esc(c[k]==null?"":c[k]);
+    const cfV=nolCfVecchio(c);
+    const pivaV=cfV?"":v('piva'), cfVal=cfV?esc(cfV):v('cod_fiscale');
     openSheet(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>${nolPulsantiScheda("cliente",c.id||"")}
-      <div class="field"><label>Nome / Ragione sociale *</label><input id="ncl-nome" value="${v('nome')}" placeholder="Es. Rossi Costruzioni srl"></div>
-      <div class="row2">
-        <div class="field"><label>Telefono</label><input id="ncl-telefono" value="${v('telefono')}" placeholder="Numero"></div>
-        <div class="field"><label>Email</label><input id="ncl-email" value="${v('email')}" placeholder="Indirizzo email"></div>
+      <div class="sh-cols"><div class="sh-col">
+      <div class="sh-b">
+        <div class="sh-tit">Chi è</div>
+        <div class="field"><label>Nome / Ragione sociale *</label><input id="ncl-nome" value="${v('nome')}" placeholder="Es. Rossi Costruzioni srl"></div>
+        <div class="row2">
+          <div class="field"><label>Telefono</label><input id="ncl-telefono" type="tel" value="${v('telefono')}" placeholder="Numero"></div>
+          <div class="field"><label>Email</label><input id="ncl-email" type="email" value="${v('email')}" placeholder="Indirizzo email"></div>
+        </div>
+        <div class="field"><label>Note</label><input id="ncl-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
       </div>
-      <div class="field"><label>Indirizzo</label><input id="ncl-indirizzo" value="${v('indirizzo')}" placeholder="Via, numero, città"></div>
-      <div class="field"><label>P.IVA / Codice Fiscale</label><input id="ncl-piva" value="${v('piva')}" placeholder="Per la fattura"></div>
-      <div class="field"><label>Note</label><input id="ncl-note" value="${v('note')}" placeholder="Quello che serve ricordare"></div>
+      <div class="sh-b">
+        <div class="sh-tit">Dove sta</div>
+        <div class="field"><label>Via e numero</label><input id="ncl-indirizzo" value="${v('indirizzo')}" placeholder="Es. Via Roma, 12"></div>
+        <div class="row2">
+          <div class="field"><label>CAP</label><input id="ncl-cap" value="${v('cap')}" placeholder="Es. 02100" inputmode="numeric" maxlength="5"></div>
+          <div class="field"><label>Città</label><input id="ncl-citta" value="${v('citta')}" placeholder="Es. Rieti"></div>
+        </div>
+        <div class="field"><label>Provincia</label><input id="ncl-prov" value="${v('prov')}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+      </div>
+      </div><div class="sh-col">
+      <div class="sh-b">
+        <div class="sh-tit">Dati per la fattura</div>
+        <div class="row2">
+          <div class="field"><label>Partita IVA</label><input id="ncl-piva" value="${pivaV}" placeholder="Se è un'azienda" inputmode="numeric"></div>
+          <div class="field"><label>Codice fiscale</label><input id="ncl-cf" value="${cfVal}" placeholder="Se è un privato" style="text-transform:uppercase"></div>
+        </div>
+        <div class="field"><label>Codice destinatario</label><input id="ncl-sdi" value="${v('sdi_codice')}" placeholder="7 caratteri" maxlength="7" style="text-transform:uppercase"></div>
+        <div class="field"><label>PEC</label><input id="ncl-pec" type="email" value="${v('sdi_pec')}" placeholder="cliente@pec.it"></div>
+        <div class="sh-nota">Te li dà il cliente. Uno dei due basta. Se non ha né l'uno né l'altro — capita con i privati — scrivi <b>0000000</b>: la fattura gli arriva nel cassetto fiscale.</div>
+      </div>
       ${nolDocBlocco("cliente",c.id||"")}
+      </div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="save-clinol" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
@@ -395,21 +433,33 @@
   async function salvaClienteNol(id){
     const nome=$("#ncl-nome").value.trim();
     if(!nome){nolCampoManca("#ncl-nome","Manca il nome del cliente: scrivilo qui.");return;}
+    const sdi=($("#ncl-sdi").value||"").replace(/\s+/g,"").toUpperCase();
+    if(sdi&&sdi.length!==7){nolCampoManca("#ncl-sdi","Il codice destinatario è di 7 caratteri (oppure 0000000).");return;}
+    const cap=($("#ncl-cap").value||"").trim();
+    if(cap&&!/^\d{5}$/.test(cap)){nolCampoManca("#ncl-cap","Il CAP è di 5 cifre, es. 02100.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
+    const vv=s=>{const e=$(s);return e?(e.value.trim()||null):null;};
     const dati={nome,
-      telefono:$("#ncl-telefono").value.trim()||null,
-      email:$("#ncl-email").value.trim()||null,
-      indirizzo:$("#ncl-indirizzo").value.trim()||null,
-      piva:$("#ncl-piva").value.trim()||null,
-      note:$("#ncl-note").value.trim()||null};
+      telefono:vv("#ncl-telefono"),
+      email:vv("#ncl-email"),
+      indirizzo:vv("#ncl-indirizzo"),
+      cap:cap||null,
+      citta:vv("#ncl-citta"),
+      prov:(vv("#ncl-prov")||"").toUpperCase()||null,
+      piva:(vv("#ncl-piva")||"").replace(/\s+/g,"")||null,
+      cod_fiscale:(vv("#ncl-cf")||"").replace(/\s+/g,"").toUpperCase()||null,
+      sdi_codice:sdi||null,
+      sdi_pec:vv("#ncl-pec"),
+      note:vv("#ncl-note")};
     /* 24 agosto 2026 — prima un cliente nuovo nasceva "nel reparto in cui
        stai", cosi' lo vedeva anche il gestionale imprese. Il Noleggio non
        ha piu' un reparto: nasce senza, e lo vede comunque tutta l'azienda,
        in ogni reparto del gestionale imprese. */
-    const {error}=id
-      ? await sb.from("gest_clienti").update(dati).eq("id",id).eq("user_id",sbUid)
-      : await sb.from("gest_clienti").insert({user_id:sbUid,...dati});
+    const {data:ok,error}=id
+      ? await sb.from("gest_clienti").update(dati).eq("id",id).eq("user_id",sbUid).select("id")
+      : await sb.from("gest_clienti").insert({user_id:sbUid,...dati}).select("id");
     if(error){toast("Errore: "+error.message);return;}
+    if(!ok||!ok.length){toast("Non salvato: il database non ha scritto niente. Riprova.");return;}
     closeSheet(); loadClientiNol(); toast(id?"Cliente aggiornato ✔":"Cliente aggiunto ✔");
   }
 
@@ -549,7 +599,7 @@
       <div class="nol-riq nol-cam">
         <h4>Quanto si fa pagare</h4>
         <div class="nol-due">
-          <div><label>Importo €</label><input id="nn-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00" data-eu></div>
+          <div><label>Importo € (IVA esclusa)</label><input id="nn-importo" inputmode="decimal" value="${v('importo')}" placeholder="0,00" data-eu></div>
           <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">La cauzione sta nel riquadro qui sotto: &egrave; un deposito, non un incasso.</p></div>
         </div>
         <p style="margin:8px 0 0;font-size:13px;color:#666">L'importo lo puoi sempre correggere a mano: quello che scrivi qui è quello che si fa pagare.</p>

@@ -185,8 +185,9 @@
     blocchi.push({t:"coppie",titolo:"Le parti",righe:[
       ["LOCATORE",A.nome||"—"],
       ["CONDUTTORE",C.nome||n.cliente||"—"],
-      ["Indirizzo",C.indirizzo||null],
-      ["P.IVA / Cod. Fiscale",C.piva||null],
+      ["Indirizzo",nolAzIndirizzo(C)||null],
+      ["P.IVA",C.piva||null],
+      ["Codice fiscale",C.cod_fiscale||null],
       ["Telefono",C.telefono||null],
       ["Email",C.email||null]
     ]});
@@ -207,7 +208,13 @@
 
     blocchi.push({t:"coppie",titolo:"Corrispettivo",
       righe:righeConto.concat([
-        ["TOTALE",_eur(n.importo)],
+        /* 13 nov 2026 (lista «MANCA», voce 14) — l'importo del noleggio e'
+           SENZA IVA: la fattura del Noleggio (js/nol-fatture.js) prende
+           questo numero come imponibile e l'IVA la aggiunge sopra. Il
+           contratto non lo diceva, e un privato poteva leggerlo «tutto
+           compreso». */
+        ["TOTALE (IVA esclusa)",_eur(n.importo)],
+        ["IVA","non compresa: si aggiunge in fattura"],
         ["Cauzione (in deposito, non entra nel totale)",n.cauzione?_eur(n.cauzione):"nessuna"],
         ["Pagamento",n.stato_pagamento==="pagato"?"Pagato":"Da pagare"]
       ])});
@@ -298,10 +305,10 @@
         h+='<h2>'+esc(b.titolo)+'</h2>'+b.corpo.map(x=>'<p>'+esc(x)+'</p>').join("");
       }
       if(b.t==="tabella"){
-        h+='<h2>'+esc(b.titolo)+'</h2><p>'+esc(b.intro)+'</p><table class="griglia"><tr>'
+        h+='<h2>'+esc(b.titolo)+'</h2>'+(b.intro?'<p>'+esc(b.intro)+'</p>':'')+'<table class="griglia"><tr>'
           + b.colonne.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr>'
           + b.righe.map(r=>'<tr>'+r.map(c=>'<td>'+(String(c||"").trim()?esc(c):'&nbsp;')+'</td>').join("")+'</tr>').join("")
-          + '</table><p class="pic">'+esc(b.nota)+'</p>';
+          + '</table>'+(b.nota?'<p class="pic">'+esc(b.nota)+'</p>':'');
       }
       if(b.t==="numerato"){
         h+='<h2>'+esc(b.titolo)+'</h2><ol>'
@@ -416,12 +423,14 @@
       }
       if(b.t==="tabella"){
         salta(30); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
-        testo(b.intro,M,L,9.5,"normal",60); y+=3;
+        if(b.intro){testo(b.intro,M,L,9.5,"normal",60); y+=3;} else y+=4;
         /* ⛔ 23 agosto: le colonne erano fisse per quattro e sommavano l'84%
            della riga — su una tabella da tre la tabella finiva a meta'
            foglio. Adesso le larghezze si scelgono in base a quante sono. */
         const nc=b.colonne.length;
-        const pesi = nc===4 ? [.32,.28,.24,.16]
+        /* 13 nov 2026: una tabella puo' dire le sue larghezze (b.pesi) */
+        const pesi = (Array.isArray(b.pesi)&&b.pesi.length===nc) ? b.pesi
+                   : nc===4 ? [.32,.28,.24,.16]
                    : nc===3 ? [.46,.32,.22]
                    : nc===2 ? [.55,.45]
                    : b.colonne.map(()=>1/nc);

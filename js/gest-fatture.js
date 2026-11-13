@@ -474,20 +474,19 @@
      (rete che cade) la fattura restava BOZZA con il numero gia' consumato, e
      quel numero non lo usava piu' nessuno. Adesso questa funzione lo calcola
      e basta; a scriverlo e' chi cambia lo stato, in una volta sola. */
+  /* 13 nov 2026 (lista «MANCA», gruppo 3) — UNA SERIE SOLA con il Noleggio.
+     Il numero lo dà il database: fattura_prossimo_numero (sql/2026-11-13-
+     fattura-numero-unico.sql) guarda le fatture dell'App E del Noleggio di
+     quell'anno, Cestino compreso, e dà il più alto + 1. Prima qui si contava
+     solo gest_fatture, e il Noleggio aveva un suo contatore: due «n. 1».
+     Se la lettura fallisce NON si tira a indovinare: dare per buono "0+1"
+     vorrebbe dire assegnare il numero 1 a una fattura di dicembre. */
   async function fattProssimoNumero(f){
     if(f.numero)return f.numero;
-    const anno=(f.data||todayStr()).slice(0,4);
-    /* sb.raw: si guardano ANCHE le fatture nel cestino. Se no, eliminata la
-       n.7 la fattura dopo riprendeva il 7 e sbatteva contro il numero già
-       occupato da quella nel cestino: non si emetteva più niente per tutto l'anno. */
-    const _sbF=(sb.raw||sb.from.bind(sb));
-    const {data,error}=await _sbF("gest_fatture").select("numero")
-      .eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
-      .order("numero",{ascending:false}).limit(1);
-    /* se la lettura fallisce NON si tira a indovinare: dare per buono "0+1"
-       vorrebbe dire assegnare il numero 1 a una fattura di dicembre */
-    if(error){toast("Numero non assegnato: "+error.message);return null;}
-    return ((data&&data[0]&&+data[0].numero)||0)+1;
+    const anno=+((f.data||todayStr()).slice(0,4));
+    const {data,error}=await sb.rpc("fattura_prossimo_numero",{p_user:sbUid,p_anno:anno});
+    if(error||!(+data>0)){toast("Numero non assegnato: "+((error&&error.message)||"il database non ha risposto. Riprova."));return null;}
+    return +data;
   }
 
   /* ---------- la scheda della fattura ---------- */

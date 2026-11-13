@@ -187,7 +187,7 @@
   async function loadClientiNol(){
     if(!(sb&&sbUid)) return;
     const {data,error:_eCl}=await sb.from("gest_clienti")
-      .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
+      .select("id,nome,telefono,email,indirizzo,cap,citta,prov,piva,cod_fiscale,note").eq("user_id",sbUid).order("nome");
     const c=data||[], box=$("#clienti-nol-body");
     if(!box) return;
     if(_eCl){nolNonLetto(box,"i clienti",loadClientiNol);return;}
@@ -195,8 +195,8 @@
     box.innerHTML=c.map(x=>
       nolCard({col:"#1565c0",
         titolo:esc(x.nome||"—"),
-        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:""].filter(Boolean).join(" · "))||""}</div>
-        ${x.indirizzo?`<div class="sub2">${esc(x.indirizzo)}</div>`:""}
+        corpo:`<div class="sub">${esc([x.telefono?"☎ "+x.telefono:"",x.email||"",x.piva?"P.IVA "+x.piva:"",x.cod_fiscale?"C.F. "+x.cod_fiscale:""].filter(Boolean).join(" · "))||""}</div>
+        ${nolAzIndirizzo(x)?`<div class="sub2">${esc(nolAzIndirizzo(x))}</div>`:""}
         ${x.note?`<div class="sub2">${esc(x.note)}</div>`:""}`,
         pulsanti:nolPulsanti("cliente",x.id)})).join("");
   }

@@ -623,7 +623,9 @@
     } else if (az === 'cliente') {
       await aspetta('ncl-nome', 2000);
       metti('ncl-nome', p.nome); metti('ncl-indirizzo', p.indirizzo); metti('ncl-telefono', p.telefono);
-      metti('ncl-email', p.email); metti('ncl-piva', p.piva);
+      metti('ncl-email', p.email);
+      /* 13 nov 2026: un codice fiscale (16 caratteri con lettere) va nella sua casella */
+      if (p.piva && /^[A-Za-z0-9]{16}$/.test(String(p.piva).replace(/\s/g, '')) && /[A-Za-z]/.test(p.piva)) metti('ncl-cf', p.piva); else metti('ncl-piva', p.piva);
     } else if (az === 'fornitore') {
       await aspetta('nf-nome', 2000);
       metti('nf-nome', p.nome); metti('nf-indirizzo', p.indirizzo); metti('nf-telefono', p.telefono);

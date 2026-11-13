@@ -171,7 +171,8 @@
       ["Cauzione",soldi(d.cauzione)],["Note",e(d.note)]];
     if(tipo==="cliente") r=[
       ["Nome",e(d.nome)],["Telefono",e(d.telefono)],["Email",e(d.email)],
-      ["Indirizzo",e(d.indirizzo)],["P.IVA / Cod. Fiscale",e(d.piva)],["Note",e(d.note)]];
+      ["Indirizzo",e(nolAzIndirizzo(d))],["P.IVA",e(d.piva)],["Codice fiscale",e(d.cod_fiscale)],
+      ["Codice destinatario",e(d.sdi_codice)],["PEC",e(d.sdi_pec)],["Note",e(d.note)]];
     if(tipo==="noleggio"){
       /* ⛔ 28 agosto 2026 — le date si scrivono all'italiana anche qui.
          Nel Cestino uscivano grezze («2026-08-08») mentre due righe sopra,
@@ -185,7 +186,7 @@
          ["Km uscita",e(d.km_uscita)],["Km rientro",e(d.km_rientro)]];
       const dp=d.dettaglio_prezzo;
       if(dp&&Array.isArray(dp.righe)) dp.righe.forEach(x=>r.push([x.voce+"  ("+x.dettaglio+")",_eur(x.importo)]));
-      r.push(["IMPORTO",soldi(d.importo)]);
+      r.push(["IMPORTO (IVA esclusa)",soldi(d.importo)]);
       r.push(["Cauzione (deposito, a parte)",soldi(d.cauzione)]);
       r.push(["Cauzione, in che forma",CAU_FORMA[d.cauzione_forma]||null]);
       r.push(["Cauzione, stato",(+d.cauzione||0)>0?CAU_STATO[cauStatoDi(d)]:null]);
@@ -379,6 +380,13 @@
   }
 
   /* ---- ELIMINA ---- */
+  /* 13 nov 2026 — il nome di un noleggio, uguale nella domanda di
+     «elimina» e nel Cestino: «Escavatore · Rossi · dal 05/03/2026». */
+  function nolNomeNoleggio(d){
+    d=d||{};
+    return [d.mezzo||"Noleggio",d.cliente||"",d.data_uscita?"dal "+fdate(d.data_uscita):""]
+      .filter(Boolean).join(" · ");
+  }
   async function nolElimina(tipo,d){
     const t=NOL_TIPI[tipo]; if(!t||!t.tab) return;
     /* 29/09/2026 — una fattura gia' partita allo SDI esiste per il Fisco: non si butta */
@@ -389,7 +397,7 @@
        le stesse parole dell'App («Mettere nel cestino «…»?»). */
     let come=d.nome||d.descrizione||d.mezzo||d.prodotto||"";
     if(tipo==="fattnol") come=(d.numero?"n. "+d.numero:"bozza senza numero")+(d.cliente?" di "+d.cliente:"");
-    else if(tipo==="noleggio"&&d.mezzo&&d.cliente) come=d.mezzo+" · "+d.cliente;
+    else if(tipo==="noleggio") come=nolNomeNoleggio(d);
     const _cosa=(come?t.che.toLowerCase()+" «"+come+"»":(t.femm?"questa ":"questo ")+t.che.toLowerCase());
     const _art=come?(t.femm?"la ":(/^[aeiou]/i.test(t.che)?"l'":"il ")):"";
     const _nelCest=(typeof cestAcceso==="function")&&cestAcceso();

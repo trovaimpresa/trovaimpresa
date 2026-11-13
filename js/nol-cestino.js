@@ -16,7 +16,12 @@
   const CEST_COSE=[
     {t:"gest_mezzi",    lab:"Mezzo",           tipo:"mezzo",     col:"#2e7d32"},
     {t:"gest_clienti",  lab:"Cliente",         tipo:"cliente",   col:"#1565c0"},
-    {t:"nol_noleggi",   lab:"Noleggio",        tipo:"noleggio",  col:"#e65100"},
+    /* 13 nov 2026 (lista «MANCA», voce 15) — tre noleggi dello stesso
+       escavatore nel Cestino si chiamavano tutti «Escavatore»: adesso c'e'
+       anche il cliente e il giorno di uscita, come nella domanda di
+       «elimina» (nolElimina in js/nol-card-righe-stampa.js). */
+    {t:"nol_noleggi",   lab:"Noleggio",        tipo:"noleggio",  col:"#e65100",
+     nome:r=>nolNomeNoleggio(r)},
     {t:"neg_prodotti",  lab:"Prodotto",        tipo:"prodotto",  col:"#1565c0"},
     {t:"neg_fornitori", lab:"Fornitore",       tipo:"fornitore", col:"#1565c0"},
     {t:"neg_movimenti", lab:"Movimento",       tipo:"movimento", col:"#757575"},
@@ -89,7 +94,7 @@
       cestCache=[];
       risposte.forEach(x=>x.righe.forEach(r=>cestCache.push({
         tab:x.c.t, tipo:x.c.tipo, lab:x.c.lab, col:x.c.col,
-        nome:(x.c.nome?x.c.nome(r):cestNome(r)).slice(0,80), quando:r.eliminato_il, id:r.id, riga:r
+        nome:(x.c.nome?x.c.nome(r):cestNome(r)).slice(0,160),   /* 13 nov: 80 tagliava il cliente e la data */ quando:r.eliminato_il, id:r.id, riga:r
       })));
       cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
       /* ⚠️ se una tabella non ha risposto, «non lo so» non e' «zero»: il

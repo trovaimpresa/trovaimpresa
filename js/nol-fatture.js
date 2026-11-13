@@ -151,7 +151,7 @@
         </div></div>
         <div class="nol-due" style="margin-top:10px">
           <div><label>Pagata il</label><input type="date" id="nf-pagata" value="${v('pagata_il')}"></div>
-          <div><label>&nbsp;</label><p style="margin:0;font-size:13px;color:#666;padding-top:9px">Il numero si prende dal contatore dell'azienda quando la metti su <b>Emessa</b>, se non lo scrivi tu.</p></div>
+          <div><label>&nbsp;</label><p style="margin:0;font-size:15px;color:#555;padding-top:9px">Il numero arriva da solo quando la metti su <b>Emessa</b>: è la stessa serie delle fatture dell'App.</p></div>
         </div>
       </div>
 
@@ -307,16 +307,22 @@
     let stato=segVal("nf-stato")||"bozza";
     let numero=$("#nf-numero").value.trim()||null;
     let data=$("#nf-data").value||null;
-    /* ⛔ il numero si consuma dal contatore dell'azienda, come il DDT, e
-       SOLO quando la fattura smette di essere una bozza: una bozza che si
-       prende un numero e poi si butta lascia un buco nella numerazione. */
-    if(stato!=="bozza"&&!numero){
-      const {data:az}=await sb.from("gest_azienda").select("num_fattura").eq("user_id",sbUid).maybeSingle();
-      const n=(az&&az.num_fattura)||1;
-      numero=String(n);
-      await sb.from("gest_azienda").update({num_fattura:n+1}).eq("user_id",sbUid);
-    }
+    /* ⛔ il numero arriva SOLO quando la fattura smette di essere una bozza:
+       una bozza che si prende un numero e poi si butta lascia un buco.
+       13 nov 2026 (lista «MANCA», gruppo 3) — UNA SERIE SOLA con l'App,
+       decisa da Alex. Prima c'era il contatore gest_azienda.num_fattura, che
+       non sapeva niente delle fatture dell'App e non ripartiva a gennaio: due
+       «n. 1» con la stessa partita IVA. Adesso il numero lo dà il database
+       (fattura_prossimo_numero, sql/2026-11-13-fattura-numero-unico.sql), lo
+       stesso dell'App: più alto dell'anno fra App e Noleggio + 1. */
     if(stato!=="bozza"&&!data) data=todayStr();
+    if(stato!=="bozza"&&!numero){
+      const {data:pn,error:ePn}=await sb.rpc("fattura_prossimo_numero",{p_user:sbUid,p_anno:+String(data).slice(0,4)});
+      if(ePn||!(+pn>0)){toast("Numero non assegnato: "+((ePn&&ePn.message)||"il database non ha risposto. Riprova."));return;}
+      if(!(await tiChiedi("Prende il numero "+pn+" del "+String(data).slice(0,4)+" (stessa serie delle fatture dell'App).\nUna fattura emessa non si elimina più: se è sbagliata serve la nota di credito.",
+        {titolo:"Emettere la fattura?",si:"Sì, emetti",no:"No, resta bozza"}))) return;
+      numero=String(pn);
+    }
     const dati={cliente_id:sel.value,
       cliente:sel.selectedOptions[0]?sel.selectedOptions[0].dataset.nome:null,
       numero,data,
@@ -356,6 +362,43 @@
     else toast(id?"Fattura aggiornata ✔":"Fattura creata ✔");
   }
 
+  /* ================================================================
+     13 nov 2026 (lista «MANCA», voce 13) — I DDT CHE LA FATTURA CITA.
+     La fattura differita riepilogativa diceva «documentate dai documenti
+     di trasporto richiamati» ma non li elencava: il numero del DDT stava
+     solo in coda ad alcune righe, e quello di rientro mai. Adesso si
+     leggono dai noleggi delle righe (nol_noleggi.ddt_uscita_num / _data,
+     ddt_rientro_num / _data) e si elencano: nel PDF e nel file per lo SdI
+     (<DatiDDT>, con le righe a cui si riferiscono).
+     UN posto solo: la usano js/nol-fatture.js (PDF/stampa) e js/nol-sdi.js.
+     Torna null se non riesce a leggere: chi la usa non scrive «nessun DDT». */
+  async function nolDdtDiFattura(righe){
+    righe=Array.isArray(righe)?righe:[];
+    const ids=[...new Set(righe.map(r=>r&&r.noleggio_id).filter(Boolean))];
+    if(!ids.length) return [];
+    let res=null;
+    try{
+      const q=(sb.raw||sb.from.bind(sb));
+      res=await q("nol_noleggi").select("id,mezzo,ddt_uscita_num,ddt_uscita_data,data_uscita,ddt_rientro_num,ddt_rientro_data,data_rientro_effettivo").in("id",ids);
+    }catch(e){res=null;}
+    if(!res||res.error) return null;
+    const per={}; (res.data||[]).forEach(n=>{per[n.id]=n;});
+    const out=[], visti={};
+    const metti=(num,data,tipo,mezzo,linea)=>{
+      if(!num) return;
+      const k=tipo+"|"+num;
+      if(!visti[k]){visti[k]={num:String(num),data:data||null,tipo,mezzo:mezzo||"",linee:[]};out.push(visti[k]);}
+      if(visti[k].linee.indexOf(linea)<0) visti[k].linee.push(linea);
+    };
+    righe.forEach((r,i)=>{
+      const n=r&&per[r.noleggio_id]; if(!n) return;
+      metti(n.ddt_uscita_num, n.ddt_uscita_data||n.data_uscita, "consegna", n.mezzo, i+1);
+      metti(n.ddt_rientro_num, n.ddt_rientro_data||n.data_rientro_effettivo, "rientro", n.mezzo, i+1);
+    });
+    return out;
+  }
+  window.nolDdtDiFattura=nolDdtDiFattura;
+
   /* ---- la fattura su carta e in PDF: stesso motore di tutto il resto ---- */
   async function nolFatturaDati(f){
     const [{data:az},{data:cl}]=await Promise.all([
@@ -375,8 +418,11 @@
 
     blocchi.push({t:"coppie",titolo:"Cliente",righe:[
       ["Ragione sociale",C.nome||f.cliente||"—"],
-      ["Indirizzo",C.indirizzo||null],
-      ["P.IVA / Cod. Fiscale",C.piva||null],
+      ["Indirizzo",nolAzIndirizzo(C)||null],
+      ["P.IVA",C.piva||null],
+      ["Codice fiscale",C.cod_fiscale||null],
+      ["Codice destinatario",C.sdi_codice||null],
+      ["PEC",C.sdi_pec||null],
       ["Email",C.email||null],
       ["Periodo fatturato",(f.periodo_dal&&f.periodo_al)?(fdate(f.periodo_dal)+" — "+fdate(f.periodo_al)):null]
     ]});
@@ -385,7 +431,16 @@
       intro:"Noleggio di attrezzature. Gli importi sono al netto dell'IVA.",
       colonne:["Descrizione","Periodo e giorni","Importo"],
       righe:righe.map(r=>[r.voce||"",r.dettaglio||"",_eur(r.importo)]),
-      nota:"Le attrezzature sono state consegnate e riconsegnate con i documenti di trasporto richiamati sopra."});
+      nota:"Le attrezzature sono state consegnate e riconsegnate con i documenti di trasporto elencati qui sotto."});
+
+    {
+      const ddt=await nolDdtDiFattura(righe);
+      if(ddt&&ddt.length) blocchi.push({t:"tabella",titolo:"Documenti di trasporto",
+        colonne:["Attrezzatura","DDT n.","Data","Consegna o rientro"], pesi:[.46,.14,.18,.22],
+        righe:ddt.map(d=>[d.mezzo,d.num,d.data?fdate(String(d.data).slice(0,10)):"",d.tipo==="consegna"?"Consegna":"Rientro"])});
+      else if(ddt) blocchi.push({t:"testo",titolo:"Documenti di trasporto",
+        corpo:["Nessun DDT registrato per i noleggi di questa fattura."]});
+    }
 
     blocchi.push({t:"coppie",titolo:"Totali",righe:[
       ["Imponibile",_eur(f.imponibile)],

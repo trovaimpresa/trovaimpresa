@@ -92,7 +92,9 @@
     if (!f) return null;
     var az = (await sb.from("gest_azienda").select("*").eq("user_id", uid).maybeSingle()).data || {};
     var cli = f.cliente_id ? ((await sb.from("gest_clienti").select("*").eq("id", f.cliente_id).eq("user_id", uid).maybeSingle()).data || {}) : {};
-    return { f: f, az: az, cli: cli };
+    /* 13 nov 2026 — i DDT che la fattura cita (js/nol-fatture.js) */
+    var ddt = (typeof window.nolDdtDiFattura === "function") ? await window.nolDdtDiFattura((Array.isArray(f.righe) ? f.righe : []).filter(function (r) { return String(r.voce || "").trim() || (+r.importo || 0); })) : [];
+    return { f: f, az: az, cli: cli, ddt: ddt };
   }
 
   /* ---- il controllo: quello che lo SDI controllerebbe ---- */
@@ -102,6 +104,7 @@
     if (!f.numero) m.push("La fattura è ancora una bozza: prima va emessa, così prende il numero.");
     if (!f.data) m.push("Manca la data della fattura.");
     if (!righe.length) m.push("La fattura non ha nessuna riga.");
+    if (D.ddt === null) m.push("Non riesco a leggere i DDT dei noleggi di questa fattura: controlla la rete e riprova.");
     righe.forEach(function (r, i) { if (!String(r.voce || "").trim()) m.push("La riga n. " + (i + 1) + " non ha descrizione."); });
     if (!(+f.iva_perc > 0)) m.push("L'IVA è a 0%. Lo SDI in questo caso vuole sapere PERCHÉ (per il nolo a caldo in edilizia è il reverse charge, con un codice preciso) e il gestionale non può indovinarlo. Per ora questa fattura va mandata dal commercialista.");
     var imp = Math.round((+f.imponibile || 0) * 100), iva = Math.round((+f.iva || 0) * 100), perc = +f.iva_perc || 0;
@@ -135,6 +138,8 @@
   }
 
   /* ---- il file (FatturaPA 1.2.2, FPR12) ---- */
+  /* 13 nov 2026: porta per il banco (tools/banco-noleggio.js), non scrive niente */
+  window.__nolSdiXmlPerProva = function (D) { return costruisci(D); };
   function costruisci(D) {
     var f = D.f, az = D.az, cli = D.cli;
     var righe = (Array.isArray(f.righe) ? f.righe : []).filter(function (r) { return String(r.voce || "").trim() || (+r.importo || 0); });
@@ -176,7 +181,16 @@
     x += "        <ImportoTotaleDocumento>" + num(f.totale) + "</ImportoTotaleDocumento>\n";
     var causale = taglia(f.note, 200);
     if (causale) x += "        <Causale>" + xesc(causale) + "</Causale>\n";
-    x += "      </DatiGeneraliDocumento>\n    </DatiGenerali>\n    <DatiBeniServizi>\n";
+    x += "      </DatiGeneraliDocumento>\n";
+    /* 13 nov 2026 — fattura differita: i DDT che cita, con le righe a cui si
+       riferiscono. Le righe senza noleggio non hanno DDT. */
+    (D.ddt || []).forEach(function (d) {
+      if (!d.num || !d.data) return;
+      x += "      <DatiDDT>\n        <NumeroDDT>" + xesc(taglia(d.num, 20)) + "</NumeroDDT>\n        <DataDDT>" + xesc(String(d.data).slice(0, 10)) + "</DataDDT>\n";
+      (d.linee || []).forEach(function (l) { x += "        <RiferimentoNumeroLinea>" + l + "</RiferimentoNumeroLinea>\n"; });
+      x += "      </DatiDDT>\n";
+    });
+    x += "    </DatiGenerali>\n    <DatiBeniServizi>\n";
     righe.forEach(function (r, i) {
       var d = taglia(r.voce, 900) + (String(r.dettaglio || "").trim() ? " — " + taglia(r.dettaglio, 90) : "");
       x += "      <DettaglioLinee>\n        <NumeroLinea>" + (i + 1) + "</NumeroLinea>\n        <Descrizione>" + xesc(taglia(d, 1000)) + "</Descrizione>\n";
