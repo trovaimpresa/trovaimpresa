@@ -600,6 +600,8 @@ body.modo-gest .reg-due{display:block!important}
         '</div>';
       document.body.appendChild(c);
       document.getElementById('sc-email').textContent = email;
+      /* 13 nov 2026: se la mail torna indietro (casella che non esiste) compare il box per correggerla */
+      try { window.sorvegliaRimbalzo && window.sorvegliaRimbalzo(email, userId); } catch (e) {}
 
       /* i bottoni della domanda: uno solo, un tocco, e finisce li'. */
       (function () {
@@ -645,7 +647,7 @@ body.modo-gest .reg-due{display:block!important}
         attesa = true; b.disabled = true; b.textContent = '⏳ Invio in corso...';
         try {
           const { error } = await supabaseClient.auth.resend({
-            type: 'signup', email: email,
+            type: 'signup', email: (document.getElementById('sc-email').textContent || email),
             options: { emailRedirectTo: window.location.origin + '/login-impresa.html'
                       /* 15 set 2026: anche il RIMANDA deve riportare al gestionale.
                          Senza questo pezzo, chi si perdeva la prima email e chiedeva
@@ -850,6 +852,7 @@ body.modo-gest .reg-due{display:block!important}
 <script src="/cookie-banner.js"></script>
 <script src="/js/fb-browser-bar.js?v=2" defer></script>
 <script src="/js/controllo-doppioni.js"></script>
+<script src="/js/email-sbagliata.js?v=1"></script>
 <footer style="background:#0a2a4d;color:white;font-size:13px;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a><br>P.IVA 01285950570 | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/meta-modulo-aperto.js" defer></script>
