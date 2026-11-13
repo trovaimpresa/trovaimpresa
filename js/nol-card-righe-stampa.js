@@ -396,7 +396,12 @@
     if(!(await tiChiedi(_dom))) return;
     const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
-    t.ricarica(); renderRiepilogoNegozio(); toast(t.che+(t.femm?" eliminata":" eliminato"));
+    /* 13 nov 2026 (quarto giro) — la finestra si CHIUDE. Restava aperta sulla
+       scheda appena buttata: premendo «Salva» diceva «Cliente aggiornato» su
+       una cosa che era nel Cestino. */
+    try{ closeSheet(); }catch(_){}
+    t.ricarica(); renderRiepilogoNegozio();
+    toast(t.che+(_nelCest?" nel cestino: "+(t.femm?"la":"lo")+" riprendi da lì":(t.femm?" eliminata":" eliminato")));
   }
 
   /* un gestore solo per tutti e cinque i pulsanti, di tutte e tre le schede */

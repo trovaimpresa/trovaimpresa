@@ -1021,9 +1021,17 @@
        sbagliata. Ora si mostra il totale finito, quello che il cliente legge.
        Per gli studi resta il "da incassare" della parcella (compenso + cassa
        + spese + IVA - ritenuta): anche li' è la cifra del documento. */
+    /* 13 nov 2026 (quarto giro) — «IVA esclusa» E' SENZA IVA MA CON LO SCONTO.
+       L'elenco mostrava la somma delle voci (467,97 €) come «IVA esclusa»,
+       mentre il preventivo aperto e il PDF dicono 444,57 € (meno lo sconto).
+       `impNetto` e' l'imponibile dopo lo sconto, dalla stessa formula del
+       preventivo (prevContiImpresa): vale per la riga, per la scheda sul
+       telefono e per il totale in cima. Senza sconto e' uguale a prima. */
+    const impNetto={};
     const totCli={};
     prevCache.forEach(function(p){
       const base=tot[p.id]||0;
+      impNetto[p.id]=ruoloUtente==='professionista'?base:prevContiImpresa(base,p.iva_perc,prevSconto(base,p)).imponibile;
       if(ruoloUtente==='professionista'){
         const c=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
         totCli[p.id]=c.totale;
@@ -1046,7 +1054,7 @@
        resta sul «da incassare» della parcella, che e' sempre lo stesso conto. */
     const somma=ruoloUtente==='professionista'
       ? L.reduce((s,p)=>s+(totCli[p.id]||0),0)
-      : L.reduce((s,p)=>s+(tot[p.id]||0),0);
+      : L.reduce((s,p)=>s+(impNetto[p.id]||0),0);
     const sommaEt=ruoloUtente==='professionista'?'':' <small class="prev-iva-tot">IVA esclusa</small>';
     renderTabella({
       id:"prev", box:"#prev-list",
@@ -1073,7 +1081,7 @@
                piccolo «con IVA …» (la cifra del PDF). Prima si mischiavano. */
             (ruoloUtente==='professionista'
               ? eur(totCli[p.id]||0)+'<small class="prev-iva">da incassare</small>'
-              : eur(tot[p.id]||0)+'<small class="prev-iva">IVA esclusa</small>'
+              : eur(impNetto[p.id]||0)+'<small class="prev-iva">IVA esclusa</small>'
                 +(_conIva(p)?'<small class="prev-iva prev-coniva">con IVA '+eur2(totCli[p.id]||0)+'</small>':''))
           ],
           menu:prevVoci(p)
@@ -1081,7 +1089,7 @@
       }),
       numeri:prevNumeri(prevCache,totCli),
       totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)+sommaEt},
-      cards:()=>L.map(p=>prevCard(p,cliMap,totCli,_conIva(p),tot)).join("")
+      cards:()=>L.map(p=>prevCard(p,cliMap,totCli,_conIva(p),impNetto)).join("")
     });
   }
 
