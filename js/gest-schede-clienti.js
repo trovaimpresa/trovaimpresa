@@ -698,7 +698,7 @@
       sb.from("promemoria").select("id,testo,data,stato").eq("user_id",sbUid).is("eliminato_il",null),
       sb.from("gest_mezzi").select("id,nome,tipo,assicurazione_scad,revisione_scad,collaudo_scad,verifica_ultima,verifica_mesi")
         .eq("user_id",sbUid).or(_cliOr(mid)).is("eliminato_il",null),
-      sb.from("gest_fatture").select("id,numero,data,cli_nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+      sb.from("gest_fatture").select("id,numero,data,scadenza,cli_nome").eq("user_id",sbUid).eq("mestiere_id",mid)
         .eq("stato","emessa").is("eliminato_il",null).not("numero","is",null),
       sb.from("gest_fatture_fornitori").select("id,numero,scadenza,stato,fornitore_id").eq("user_id",sbUid).eq("mestiere_id",mid)
         .is("eliminato_il",null).neq("stato","pagata"),
@@ -723,7 +723,7 @@
     const gg=(raz&&raz.data&&+raz.data.giorni_pagamento)||30;
     ok(rf).forEach(x=>{ if(!x.data)return;
       const d=new Date(x.data+"T12:00:00");d.setDate(d.getDate()+gg);
-      out.push({id:x.id,titolo:(x.cli_nome||"cliente")+" · fattura "+x.numero,data:ymd(d.getFullYear(),d.getMonth(),d.getDate()),fatta:false,
+      out.push({id:x.id,titolo:(x.cli_nome||"cliente")+" · fattura "+x.numero,data:x.scadenza||ymd(d.getFullYear(),d.getMonth(),d.getDate()),fatta:false,
         _pre:"",_lab:"Da incassare: ",_az:vai("fatture","edit-fatt",x.id)}); });
     const fn={};ok(rfo).forEach(x=>{fn[x.id]=x.nome;});
     ok(rff).forEach(x=>{ if(!x.scadenza)return;

@@ -411,7 +411,19 @@
   function fattNumero(f){
     return fattNum(f);
   }
-  function fattScadenza(f,gg){ return f.data?_giorniDopo(f.data,gg):""; }
+  /* 13 nov 2026 (lista «MANCA», n. 1) — la scadenza, il modo di pagamento e
+     l'IBAN stanno SULLA fattura. Una fattura di prima non li ha: vale la
+     regola di sempre (data + i giorni dei Dati azienda, bonifico se c'e'
+     l'IBAN). ⛔ Chi vuole sapere «entro quando» chiama fattScadenza, e basta. */
+  const FATT_MODI=[["bonifico","Bonifico","MP05"],["contanti","Contanti","MP01"],["assegno","Assegno","MP02"],
+                   ["carta","Carta / POS","MP08"],["riba","Ri.Ba. (ricevuta bancaria)","MP12"]];
+  function fattScadenza(f,gg){ return f.scadenza||(f.data?_giorniDopo(f.data,gg):""); }
+  function fattModo(f){
+    const az=fattAzienda||{};
+    const m=f.modo_pagamento||((f.iban||az.iban)?"bonifico":"");
+    return FATT_MODI.find(x=>x[0]===m)||null;
+  }
+  function fattIban(f){ return String(f.iban||(fattAzienda||{}).iban||"").trim(); }
   function fattScaduta(f,gg){
     if(f.stato!=="emessa")return false;
     const sc=fattScadenza(f,gg);
@@ -955,6 +967,22 @@
       +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
       + '</div>'
 
+      + (function(){
+          const _gg=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
+          const _sc=f.scadenza||_giorniDopo(f.data||todayStr(),_gg);
+          const _mo=(fattModo(f)||FATT_MODI[0])[0];
+          return '<div class="sh-b"><div class="sh-tit">Pagamento</div>'
+          +   '<div class="row2">'
+          +     '<div class="field"><label for="fa-scad">Da pagare entro</label><input type="date" id="fa-scad" value="'+esc(_sc)+'"></div>'
+          +     '<div class="field"><label for="fa-modo">Come si paga</label><select id="fa-modo">'
+          +       FATT_MODI.map(m=>'<option value="'+m[0]+'"'+(m[0]===_mo?' selected':'')+'>'+esc(m[1])+'</option>').join("")
+          +     '</select></div>'
+          +   '</div>'
+          +   '<div class="field" id="fa-iban-wrap"'+((_mo==="bonifico"||_mo==="riba")?'':' style="display:none"')+'><label for="fa-iban">IBAN dove ricevi il bonifico</label>'
+          +     '<input type="text" id="fa-iban"'+_noAuto()+' value="'+esc(fattIban(f))+'" placeholder="IT00 X000 0000 0000 0000 0000 000"></div>'
+          + '</div>';
+        })()
+
       + '<div class="sh-b"><div class="sh-tit">Note</div>'
       +   '<div class="field"><textarea id="fa-note" placeholder="Condizioni di pagamento, riferimenti, esclusioni...">'+esc(f.note||"")+'</textarea></div>'
       +   '<div class="sh-nota">Compaiono in fondo al PDF.</div>'
@@ -991,6 +1019,20 @@
       e.addEventListener("change",fattTotaleLive);
     });
     fattTotaleLive();
+    /* 13 nov 2026 — il riquadro «Pagamento»: l'IBAN si vede solo se serve,
+       e la scadenza segue la data finche' non la tocchi tu. */
+    const _fm=$("#fa-modo"), _fs=$("#fa-scad"), _fd=$("#fa-data");
+    if(_fm)_fm.addEventListener("change",function(){
+      const w=$("#fa-iban-wrap");if(w)w.style.display=(_fm.value==="bonifico"||_fm.value==="riba")?"":"none";
+    });
+    if(_fs&&_fd){
+      const _ggF=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
+      let _dataPrima=_fd.value;
+      _fd.addEventListener("change",function(){
+        if(_fd.value&&_dataPrima&&_fs.value===_giorniDopo(_dataPrima,_ggF))_fs.value=_giorniDopo(_fd.value,_ggF);
+        if(_fd.value)_dataPrima=_fd.value;
+      });
+    }
   }
   let fattLavoriInCorso=null, fattSalInCorso=null;
 
@@ -1087,6 +1129,14 @@
       ritenuta_perc:_numIt("#fa-rit")||0,
       note:$("#fa-note").value.trim()||null
     };
+    /* 13 nov 2026 — il pagamento: entro quando, come, e su quale IBAN.
+       L'IBAN si scrive solo se serve (bonifico, Ri.Ba.). */
+    if($("#fa-scad")){
+      testata.scadenza=$("#fa-scad").value||null;
+      testata.modo_pagamento=$("#fa-modo").value||null;
+      const _conIban=testata.modo_pagamento==="bonifico"||testata.modo_pagamento==="riba";
+      testata.iban=_conIban?(($("#fa-iban").value||"").replace(/\s+/g," ").trim().toUpperCase()||null):null;
+    }
     /* cassa e spese: i campi ci sono solo per gli studi. Si scrivono solo se
        ci sono davvero, se no una fattura di un'impresa li azzererebbe. */
     if($("#fa-cassa")){
@@ -1314,6 +1364,18 @@
       await fattCambiaStato(id,"pagata");
       return true;
     }catch(_){ return false; }
+  };
+
+  /* 13 nov 2026 (lista «MANCA», n. 2) — LA PORTA PER LA RICEVUTA DI PAGAMENTO.
+     js/gest-ricevute-pagamento.js chiede: «quali fatture di questo cliente
+     aspettano ancora i soldi, e quanto?». Il «quanto» e' fattConti, come
+     dappertutto: la ricevuta non rifa' nessun conto. */
+  window.fattAperteDi=async function(clienteId){
+    try{
+      if(!fattCache.length)await renderFatture();
+      return fattCache.filter(f=>f.stato==="emessa"&&f.numero&&fattSegno(f)>0&&String(f.cliente_id)===String(clienteId))
+        .map(f=>({id:f.id,numero:f.numero,anno:fattAnno(f),daPagare:fattConti(f).daPagare}));
+    }catch(_){ return []; }
   };
 
   async function eliminaFattura(id){
@@ -1710,14 +1772,24 @@
     }
     y+=6;
 
-    /* pagamento e note */
-    if(az.iban){
-      spazio(20);
-      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Pagamento",M,y);y+=5.5;
-      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-      doc.text("Bonifico — IBAN "+az.iban,M,y);y+=4.5;
-      if(f.numero)doc.text("Causale: fattura n. "+f.numero+"/"+fattAnno(f),M,y),y+=4.5;
-      doc.setTextColor(0);y+=3;
+    /* pagamento e note — 13 nov 2026: entro quando, come, e l'IBAN */
+    {
+      const _gg=(+az.giorni_pagamento)||30, _sc=fattScadenza(f,_gg), _mo=fattModo(f), _ib=fattIban(f);
+      const _righe=[];
+      if(_sc&&f.stato!=="pagata")_righe.push(["Da pagare entro il",fdate(_sc)]);
+      if(_mo)_righe.push(["Come si paga",_mo[1].replace(/ \(.*$/,"")]);
+      if(_mo&&(_mo[0]==="bonifico"||_mo[0]==="riba")&&_ib)_righe.push(["IBAN",_ib]);
+      if(_mo&&_mo[0]==="bonifico"&&_ib&&f.numero)_righe.push(["Causale","fattura n. "+f.numero+"/"+fattAnno(f)]);
+      if(_righe.length){
+        spazio(10+_righe.length*5);
+        doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Pagamento",M,y);y+=5.5;
+        doc.setFontSize(9.5);
+        _righe.forEach(r=>{
+          doc.setFont("helvetica","normal");doc.setTextColor(90);doc.text(r[0],M,y);
+          doc.setFont("helvetica","bold");doc.setTextColor(0);doc.text(String(r[1]),M+36,y);y+=5;
+        });
+        doc.setFont("helvetica","normal");doc.setTextColor(0);y+=3;
+      }
     }
     if(f.note){
       const _rn=doc.splitTextToSize(f.note,Rx-M);
@@ -2146,18 +2218,23 @@
     });
     x+='    </DatiBeniServizi>\n';
 
-    if((az.iban||"").trim()){
+    /* 13 nov 2026 — modo e scadenza sono quelli scritti SULLA fattura
+       (fattModo, fattScadenza). Una fattura di prima non li ha: resta
+       bonifico se c'e' l'IBAN, e niente blocco se non c'e', come sempre. */
+    const _moX=fattModo(f), _ibX=fattIban(f).replace(/\s+/g,"").toUpperCase();
+    const _bonX=_moX&&_moX[0]==="bonifico";
+    if(_moX&&(!_bonX||_ibX)){
       const gg=(+az.giorni_pagamento)||30;
       x+='    <DatiPagamento>\n      <CondizioniPagamento>TP02</CondizioniPagamento>\n';
       x+='      <DettaglioPagamento>\n';
-      x+='        <ModalitaPagamento>MP05</ModalitaPagamento>\n';
-      x+='        <DataScadenzaPagamento>'+xesc(_giorniDopo(f.data,gg))+'</DataScadenzaPagamento>\n';
+      x+='        <ModalitaPagamento>'+_moX[2]+'</ModalitaPagamento>\n';
+      x+='        <DataScadenzaPagamento>'+xesc(fattScadenza(f,gg))+'</DataScadenzaPagamento>\n';
       /* mai negativo: su una fattura vecchia azzerata dallo sconto la ritenuta
          e' calcolata sul lordo e supera il documento. Il totale non si tocca
          (e' gia' stato mandato allo SDI cosi'), ma un importo da pagare sotto
          zero e' comunque una cosa che non esiste. */
       x+='        <ImportoPagamento>'+xnum(Math.max(0,c.daPagare))+'</ImportoPagamento>\n';
-      x+='        <IBAN>'+xesc(az.iban.replace(/\s+/g,"").toUpperCase())+'</IBAN>\n';
+      if(_bonX)x+='        <IBAN>'+xesc(_ibX)+'</IBAN>\n';
       x+='      </DettaglioPagamento>\n    </DatiPagamento>\n';
     }
 

@@ -279,7 +279,7 @@
     const [rm,rp,rf,raz]=await Promise.all([
       sb.from("gest_mezzi").select("*").eq("user_id",sbUid).is("eliminato_il",null),
       sb.from("promemoria").select("id,testo,data,stato").eq("user_id",sbUid).is("eliminato_il",null),
-      sb.from("nol_fatture").select("id,numero,data,cliente,stato").eq("user_id",sbUid).is("eliminato_il",null).eq("stato","emessa"),
+      sb.from("nol_fatture").select("id,numero,data,scadenza,cliente,stato").eq("user_id",sbUid).is("eliminato_il",null).eq("stato","emessa"),
       sb.from("gest_azienda").select("giorni_pagamento").eq("user_id",sbUid).maybeSingle()
     ]);
     const out=[];
@@ -289,7 +289,7 @@
       testo:"Promemoria: "+(p.testo||""),az:'data-action="edit-prom" data-id="'+esc(String(p.id))+'"'}); });
     const gg=(raz&&raz.data&&+raz.data.giorni_pagamento)||30;
     ok(rf).forEach(f=>{ if(!f.data)return; const d=new Date(f.data+"T12:00:00"); d.setDate(d.getDate()+gg);
-      out.push({data:ymd(d.getFullYear(),d.getMonth(),d.getDate()),
+      out.push({data:f.scadenza||ymd(d.getFullYear(),d.getMonth(),d.getDate()),
         testo:"Da incassare: "+(f.cliente||"cliente")+(f.numero?" · fattura "+f.numero:""),
         az:'data-action="nol-mod" data-t="fattnol" data-id="'+esc(String(f.id))+'"'}); });
     return out;

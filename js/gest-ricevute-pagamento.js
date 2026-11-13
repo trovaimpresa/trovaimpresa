@@ -13,6 +13,9 @@
    «📥 Fatture ricevute» (che sono un'altra cosa: le fatture dei fornitori).
    Tabella: gest_ricevute_pagamento (sql/2026-11-10-sconto-preventivi-e-ricevute.sql).
    Numerate da 1 ogni anno. In cima all'elenco le ULTIME fatte.
+   13 nov 2026 — si lega a una fattura da saldare del cliente (colonne
+   fattura_id e fattura_nome, sql/2026-11-13-fattura-pagamento.sql): se la
+   copre, la fattura diventa pagata.
 
    Chiuso dentro la sua funzione: i nomi qui dentro non si scontrano con la
    pagina. Usa della pagina: sb, sbUid, esc, eur2, eurPdf, toast, fdate,
@@ -26,6 +29,7 @@
   const NON_FISCALE = "Documento non fiscale: non sostituisce la fattura elettronica né lo scontrino elettronico.";
   let _lista = [];
   let _clienti = [];
+  let _aperte = [];   /* le fatture da saldare del cliente scelto nel modulo */
 
   function pronto() { return typeof sb !== "undefined" && sb && typeof sbUid !== "undefined" && sbUid; }
   function tabellaManca(e) {
@@ -100,7 +104,7 @@
       + _lista.map(function (r) {
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--linea,#e5e7eb);flex-wrap:wrap">'
           + '<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:17px">N. ' + esc(r.numero + "/" + r.anno) + ' — ' + esc(r.cli_nome || "—") + '</div>'
-          + '<div style="color:var(--testo-2,#64748b);font-size:15px">' + esc(fdate(r.data)) + (r.causale ? " · " + esc(r.causale) : "") + (r.metodo ? " · " + esc(r.metodo) : "") + '</div></div>'
+          + '<div style="color:var(--testo-2,#64748b);font-size:15px">' + esc(fdate(r.data)) + (r.causale ? " · " + esc(r.causale) : "") + (r.fattura_nome && String(r.causale || "").indexOf(r.fattura_nome) < 0 ? " · fattura " + esc(r.fattura_nome) : "") + (r.metodo ? " · " + esc(r.metodo) : "") + '</div></div>'
           + '<div style="font-weight:800;font-size:18px;white-space:nowrap">' + eur2(r.importo) + '</div>'
           + '<div style="display:flex;gap:8px">'
           + '<button type="button" class="btn" data-rp-pdf="' + esc(r.id) + '">PDF</button>'
@@ -138,6 +142,8 @@
       '<div class="sh-b"><div class="sh-tit">Chi ha pagato e quanto</div>'
       + '<div class="field"><label for="rp-cli">Cliente</label><select id="rp-cli">' + opz + '</select>'
       + '<input id="rp-nome" placeholder="Nome e cognome di chi paga" style="display:none;margin-top:8px" autocomplete="off"></div>'
+      + '<div class="field" id="rp-fatt-wrap" style="display:none"><label for="rp-fatt">Per quale fattura da saldare</label><select id="rp-fatt"></select>'
+      + '<div id="rp-fatt-dice" class="campo-aiuto" style="font-size:15px"></div></div>'
       + '<div class="row2">'
       + '<div class="field"><label for="rp-imp">Importo ricevuto (€)</label><input id="rp-imp" type="text" inputmode="decimal" placeholder="Es. 500,00" data-euro></div>'
       + '<div class="field"><label for="rp-data">Data</label><input id="rp-data" type="date" value="' + todayStr() + '"></div></div>'
@@ -155,6 +161,48 @@
       nome.style.display = sel.value === "__altro" ? "" : "none";
       if (sel.value === "__altro") nome.focus();
     });
+    /* 13 nov 2026 (lista «MANCA», n. 2) — la ricevuta si lega alla fattura.
+       Scelto il cliente escono le sue fatture ancora da saldare; scelta la
+       fattura, importo e «Per» si riempiono da soli. Se quello che ha dato
+       (con le ricevute di prima) copre la fattura, al salvataggio la fattura
+       diventa pagata — con la funzione di sempre (window.chatSegnaPagata). */
+    const fSel = document.getElementById("rp-fatt"), fWrap = document.getElementById("rp-fatt-wrap");
+    _aperte = [];
+    const fattDice = function () {
+      const d = document.getElementById("rp-fatt-dice"); if (!d) return;
+      const f = _aperte.find(function (x) { return String(x.id) === fSel.value; });
+      if (!f) { d.textContent = ""; return; }
+      const v = _cent2(_numIt("#rp-imp") || 0), resta = _cent2(f.resta - v);
+      d.innerHTML = !(v > 0) ? "" : (resta <= 0.004
+        ? '<b style="color:var(--ok,#15803d)">✔ Con questa ricevuta la fattura risulta pagata.</b>'
+        : '<b style="color:var(--attesa,#b45309)">È un acconto: restano da pagare ' + eur2(resta) + '.</b>');
+    };
+    const fattCarica = async function () {
+      _aperte = [];
+      if (sel.value && sel.value !== "__altro" && typeof window.fattAperteDi === "function") {
+        const a = await window.fattAperteDi(sel.value);
+        _aperte = (a || []).map(function (f) {
+          const gia = _lista.filter(function (r) { return String(r.fattura_id || "") === String(f.id); })
+            .reduce(function (t, r) { return t + (+r.importo || 0); }, 0);
+          return { id: f.id, nome: "n. " + f.numero + "/" + f.anno, resta: _cent2(Math.max(0, f.daPagare - gia)) };
+        }).filter(function (f) { return f.resta > 0; });
+      }
+      fWrap.style.display = _aperte.length ? "" : "none";
+      fSel.innerHTML = '<option value="">— nessuna fattura —</option>'
+        + _aperte.map(function (f) { return '<option value="' + esc(f.id) + '">' + esc(f.nome.replace(/^n/, "N")) + ' — ' + eur2(f.resta) + '</option>'; }).join("");
+      fattDice();
+    };
+    sel.addEventListener("change", fattCarica);
+    fSel.addEventListener("change", function () {
+      const f = _aperte.find(function (x) { return String(x.id) === fSel.value; });
+      const imp = document.getElementById("rp-imp"), cau = document.getElementById("rp-caus");
+      if (f) {
+        imp.value = String(f.resta.toFixed(2)).replace(".", ",");
+        if (!cau.value.trim() || /^(Saldo|Acconto) fattura n\. /.test(cau.value)) cau.value = "Saldo fattura " + f.nome;
+      }
+      fattDice();
+    });
+    document.getElementById("rp-imp").addEventListener("input", fattDice);
     /* in contanti la legge mette un tetto: sotto i 5.000 € */
     const cont = function () {
       const box = document.getElementById("rp-avv-cont"); if (!box) return;
@@ -199,9 +247,20 @@
         metodo: document.getElementById("rp-met").value || null,
         note: (document.getElementById("rp-note").value || "").trim() || null
       };
+      /* 13 nov 2026 — la fattura a cui si lega (solo se e' di QUESTO cliente) */
+      const fSel = document.getElementById("rp-fatt");
+      const fatt = (cli && fSel && fSel.value) ? _aperte.find(function (x) { return String(x.id) === fSel.value; }) : null;
+      if (fatt) { riga.fattura_id = fatt.id; riga.fattura_nome = fatt.nome; }
       const { data: nuovaR, error } = await sb.from(TAB).insert(riga).select().single();
       if (error) throw error;
-      toast("Ricevuta N. " + numero + "/" + anno + " salvata ✔");
+      /* se con questa ricevuta la fattura e' coperta, diventa pagata: lo fa
+         la funzione di sempre delle Fatture, non questa pagina */
+      let pagata = false;
+      if (fatt && importo >= fatt.resta - 0.004 && typeof window.chatSegnaPagata === "function") {
+        try { pagata = await window.chatSegnaPagata(fatt.id); } catch (_) { pagata = false; }
+      }
+      toast("Ricevuta N. " + numero + "/" + anno + " salvata ✔"
+        + (fatt ? (pagata ? " — fattura " + fatt.nome + " pagata" : " — fattura " + fatt.nome + ": resta da saldare") : ""));
       await pdf(nuovaR);
       await apri();
     } catch (e) {
@@ -285,6 +344,10 @@
       doc.setFont("helvetica", "bold"); doc.text("Per:", M, y);
       doc.setFont("helvetica", "normal");
       const cl = doc.splitTextToSize(r.causale, R - M - 22); doc.text(cl, M + 22, y); y += cl.length * 5.5 + 3;
+    }
+    if (r.fattura_nome && String(r.causale || "").indexOf(r.fattura_nome) < 0) {
+      doc.setFont("helvetica", "bold"); doc.text("Fattura:", M, y);
+      doc.setFont("helvetica", "normal"); doc.text(r.fattura_nome, M + 22, y); y += 8.5;
     }
     if (r.metodo) {
       doc.setFont("helvetica", "bold"); doc.text("Pagato con:", M, y);

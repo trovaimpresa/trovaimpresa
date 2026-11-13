@@ -229,7 +229,7 @@
   async function fpCaricaAperte() {
     const [rF, rA, rS] = await Promise.all([
       sb.from("gest_fatture")
-        .select("id,numero,anno,data,stato,cliente_id,cli_nome,cli_piva,cli_cod_fiscale,cli_indirizzo,cli_cap,cli_citta,cli_prov,cli_pec")
+        .select("id,numero,anno,data,scadenza,stato,cliente_id,cli_nome,cli_piva,cli_cod_fiscale,cli_indirizzo,cli_cap,cli_citta,cli_prov,cli_pec")
         .eq("user_id", sbUid).eq("stato", "emessa").is("eliminato_il", null).not("numero", "is", null),
       sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_solleciti").select("*").eq("user_id", sbUid).is("eliminato_il", null).order("inviato_il", { ascending: true })
@@ -254,7 +254,7 @@
       const importo = (+t.segno || 1) > 0 ? (+t.totale || 0) : 0;
       const c = cli[f.cliente_id] || {};
       const b2b = c.tipo ? c.tipo === "azienda" : !!String(f.cli_piva || c.piva || "").trim();
-      const scadenza = _giorniDopo(f.data, gg);
+      const scadenza = f.scadenza || _giorniDopo(f.data, gg);
       const ritardo = -(_giorniA(scadenza) || 0);
       const sol = fpSolleciti.filter(s => s.fattura_id === f.id);
       const ultimo = sol.length ? sol[sol.length - 1] : null;
@@ -309,7 +309,7 @@
         (_N.fatture || []).forEach(f => {
           if (f.stato !== "emessa" || !f.data) return;
           const v = +((_N.tot || {})[f.id] || {}).totale || 0;
-          if (v > 0 && _giorniDopo(f.data, _gg) < _oggi) nolScadute += v;
+          if (v > 0 && (f.scadenza || _giorniDopo(f.data, _gg)) < _oggi) nolScadute += v;
         });
       }
     } catch (_) {}

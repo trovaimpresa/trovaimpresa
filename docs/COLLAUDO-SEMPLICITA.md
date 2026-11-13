@@ -1798,3 +1798,78 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
 - 30 Parcella: riga sotto la ritenuta a 15 px.
 - 25 resta NON riprodotto.
 - Banco: App e Noleggio zero difetti (1440, 375, 360).
+
+## 13 nov 2026 (pomeriggio) — lista «MANCA», GRUPPO 1: i soldi (voci 1, 2, 5)
+Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]` da fare.
+
+**STATO: database a posto (il file sql l'ha lanciato Alex dal SQL Editor alle 16:31, controllato:
+8 colonne e `chat_liquidita` nuova), poi push.** L'esito del push e della prova dal vivo è in fondo a questo capitolo.
+
+[x] 1. Fattura: scadenza, modo di pagamento, IBAN (anche nel PDF).
+   - Colonne nuove `gest_fatture.scadenza / modo_pagamento / iban` (e uguali su `nol_fatture`).
+   - `js/gest-fatture.js`: riquadro «Pagamento» nel modulo (colonna destra, prima delle Note):
+     «Da pagare entro», «Come si paga» (Bonifico, Contanti, Assegno, Carta / POS, Ri.Ba.),
+     «IBAN dove ricevi il bonifico» (si vede solo con bonifico e Ri.Ba.; nasce con l'IBAN dei
+     Dati azienda). La scadenza nasce = data + giorni di pagamento dei Dati azienda e segue
+     la data finché non la si tocca.
+   - ⛔ UN posto solo: `fattScadenza(f,gg)` (= `f.scadenza`, se no data + giorni), `fattModo(f)`,
+     `fattIban(f)`, elenco `FATT_MODI` (col codice SdI). Una fattura di prima non ha le colonne
+     piene: vale la regola di prima (bonifico se c'è l'IBAN in Dati azienda).
+   - PDF: blocco «Pagamento» con «Da pagare entro il», «Come si paga», «IBAN», «Causale».
+   - File per lo SdI: `ModalitaPagamento` e `DataScadenzaPagamento` presi dalla fattura
+     (MP05 bonifico, MP01 contanti, MP02 assegno, MP08 carta, MP12 Ri.Ba.); l'IBAN solo col bonifico.
+   - Regola 16 (stesso numero ovunque): ora leggono `f.scadenza` prima di «data + giorni» anche
+     Riepilogo (`gest-riepilogo.js`), Agenda (`gest-schede-clienti.js`), Farsi pagare (`gest-fisco.js`),
+     «Quanto ti resta» (`gest-fisco-vivere.js`, `gest-fisco-tasse.js`), il calendario del Noleggio
+     (`nol-registratore-calendario.js`) e le email `riepilogo-lunedi.js` e `promemoria-mattina.js`.
+   - NOLEGGIO (`js/nol-fatture.js`, `js/nol-sdi.js`): stesso riquadro «Pagamento» nella fattura,
+     stesso blocco nel PDF/stampa, stessi codici nello SdI. L'elenco dei modi è `NOL_MODI`
+     (copia di `FATT_MODI`: il Noleggio non carica gest-fatture.js — se ne aggiungi uno, in tutti e due).
+   - `chat_liquidita` (Chat con AI, «liquidità a 30 giorni»): la funzione corretta
+     (`coalesce(f.scadenza, f.data + giorni)`) è scritta in fondo a `sql/2026-11-13-fattura-pagamento.sql`.
+     Prima stava solo nel database. Va applicata insieme alle colonne.
+   - TRAPPOLA: in questa sessione `apply_migration` è stata rifiutata dal controllo della sessione
+     (non da Supabase). Non si aggira: il file sql lo lancia Alex dal SQL Editor, poi si controlla con una lettura.
+[x] 2. Ricevuta di pagamento: si lega alla fattura e la segna pagata.
+   - Colonne nuove `gest_ricevute_pagamento.fattura_id / fattura_nome`.
+   - `js/gest-ricevute-pagamento.js`: scelto il cliente esce «Per quale fattura da saldare» (solo
+     se quel cliente ha fatture emesse non pagate). Scelta la fattura, importo e «Per» si
+     riempiono («Saldo fattura n. 1/2026»). Sotto dice «✔ Con questa ricevuta la fattura risulta
+     pagata» oppure «È un acconto: restano da pagare …» (conta anche le ricevute di prima).
+   - Al salvataggio: se la somma copre la fattura la segna pagata con la funzione di sempre
+     (`window.chatSegnaPagata` → `fattCambiaStato`). Un acconto NON tocca la fattura.
+   - Porta nuova in `js/gest-fatture.js`: `window.fattAperteDi(clienteId)` (il «quanto» è `fattConti`).
+   - Limiti detti ad Alex: la data «pagata il» è quella di OGGI, non quella scritta sulla ricevuta;
+     buttando la ricevuta la fattura NON torna «da saldare» (si fa a mano con «↩ Non pagata»).
+   - Nel Noleggio le ricevute di pagamento non ci sono: niente da replicare.
+[x] 5. Lavoro dal preventivo: porta anche le voci.
+   - `renderLavPreventivo` in `js/gest-scadenze-pratiche.js`: dentro il lavoro (e la pratica dello
+     studio) il riquadro «Le voci del preventivo N. …» con quantità × prezzo, importo, sconto,
+     totale IVA esclusa e «Apri il preventivo» (`data-action="lav-prev-apri"`).
+   - ⛔ Le voci NON si copiano: si leggono dal preventivo collegato (`gest_preventivi.lavoro_id`).
+     Conti: `impRiga`, `prevSconto`. Vale sia per «crea lavoro» sia per «collega a un lavoro che c'è».
+   - Non fatto apposta: le voci NON vanno nell'app dell'operaio (si vedrebbero i prezzi) e non
+     sono nel PDF «scheda lavoro». Da chiedere ad Alex se le vuole lì senza prezzi.
+
+**Attrezzi**
+- Banco nuovo `node tools/banco-soldi.js` (App a 1440 e 375): 36 prove. Sulla versione di PRIMA: 22 rossi.
+- `tools/banco-dati-finti.js`: fatture con `scadenza/modo_pagamento/iban`, il preventivo 2 collegato
+  al lavoro «Tinteggiatura soggiorno» con 3 voci; `banco-gestionale.js`: l'azienda finta ha IBAN e indirizzo.
+- Per le foto dei PDF: il banco non scarica jsPDF. Si serve a mano
+  (`npm i --no-save jspdf@2.5.1` in /tmp/banco e una `page.route("**/jspdf.umd.min.js")`), poi `pdftoppm`.
+- Versioni: `?v=13nov4` sui file toccati, in gestionale-app.html e gestionale-noleggio.html.
+
+**Provato**: banco-gestionale (App e Noleggio, 1440/375/360) ZERO difetti; banco-soldi VERDE;
+banco-correttore e banco-copia-computo verdi; controllo-push «tutto a posto».
+Foto viste da Alex (ok alle 14:51) per fattura, ricevuta e lavoro dell'App; quelle del Noleggio mandate dopo.
+
+**Da provare dal vivo (reparto «ferramenta», «PROVA CONTROLLORE»), NON ancora fatto:**
+- fattura in BOZZA (mai emetterla): salvare scadenza/modo/IBAN, riaprirla, PDF;
+- ricevuta legata a una fattura: serve una fattura EMESSA, e di prova non se ne emettono →
+  dal vivo si può provare solo che la tendina NON esce per un cliente senza fatture emesse;
+- lavoro creato da un preventivo di prova: le voci dentro il lavoro;
+- Noleggio: bozza con nota «PROVA CONTROLLORE», riquadro Pagamento, PDF.
+
+**Visto passando, per il GRUPPO 3:** i numeri delle fatture sono DAVVERO separati. Il Noleggio prende
+il numero dal contatore `gest_azienda.num_fattura` (js/nol-fatture.js), l'App dal più alto dell'anno + 1
+in `gest_fatture` (`fattProssimoNumero`). Due serie con gli stessi numeri: decide Alex.

@@ -185,10 +185,19 @@
     });
     x += "      <DatiRiepilogo>\n        <AliquotaIVA>" + num(perc) + "</AliquotaIVA>\n        <ImponibileImporto>" + num(f.imponibile) + "</ImponibileImporto>\n";
     x += "        <Imposta>" + num(f.iva) + "</Imposta>\n        <EsigibilitaIVA>I</EsigibilitaIVA>\n      </DatiRiepilogo>\n    </DatiBeniServizi>\n";
-    var iban = pul(az.iban);
-    if (/^IT\d{2}[A-Z]\d{10}[A-Z0-9]{12}$/.test(iban)) {
-      x += "    <DatiPagamento>\n      <CondizioniPagamento>TP02</CondizioniPagamento>\n      <DettaglioPagamento>\n        <ModalitaPagamento>MP05</ModalitaPagamento>\n";
-      x += "        <ImportoPagamento>" + num(f.totale) + "</ImportoPagamento>\n        <IBAN>" + xesc(iban) + "</IBAN>\n      </DettaglioPagamento>\n    </DatiPagamento>\n";
+    /* 13 nov 2026 — modo, scadenza e IBAN sono quelli scritti sulla fattura
+       (js/nol-fatture.js). Una fattura di prima: bonifico con l'IBAN dei
+       Dati azienda, come sempre. */
+    var iban = pul(f.iban || az.iban);
+    var ibanOk = /^IT\d{2}[A-Z]\d{10}[A-Z0-9]{12}$/.test(iban);
+    var modi = window.NOL_MODI || [];
+    var modo = null;
+    for (var mi = 0; mi < modi.length; mi++) if (modi[mi][0] === (f.modo_pagamento || "bonifico")) modo = modi[mi];
+    var bon = !modo || modo[0] === "bonifico";
+    if (bon ? ibanOk : !!modo) {
+      x += "    <DatiPagamento>\n      <CondizioniPagamento>TP02</CondizioniPagamento>\n      <DettaglioPagamento>\n        <ModalitaPagamento>" + (modo ? modo[2] : "MP05") + "</ModalitaPagamento>\n";
+      if (f.scadenza) x += "        <DataScadenzaPagamento>" + xesc(f.scadenza) + "</DataScadenzaPagamento>\n";
+      x += "        <ImportoPagamento>" + num(f.totale) + "</ImportoPagamento>\n" + (bon ? "        <IBAN>" + xesc(iban) + "</IBAN>\n" : "") + "      </DettaglioPagamento>\n    </DatiPagamento>\n";
     }
     x += "  </FatturaElettronicaBody>\n</p:FatturaElettronica>\n";
     return x;

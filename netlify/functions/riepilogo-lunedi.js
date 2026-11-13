@@ -418,7 +418,7 @@ const handler = async function () {
         .select('user_id, mestiere_id, titolo, tipo_pratica, data_scadenza, stato')
         .in('user_id', utenti).lte('data_scadenza', fra7), f)),
       senzaCestino(f => vivi(sb.from('gest_fatture')
-        .select('id, user_id, numero, data, stato, sconto, bollo, ritenuta_perc, cliente_id')
+        .select('id, user_id, numero, data, scadenza, stato, sconto, bollo, ritenuta_perc, cliente_id')
         .in('user_id', utenti).eq('stato', 'emessa'), f)),
       /* ⛔ 29 agosto 2026 — QUI C'ERA SCRITTO `titolo`, E QUELLA COLONNA NON
          ESISTE: in `gest_lavori` si chiama `descrizione`. PostgREST rispondeva
@@ -490,10 +490,10 @@ const handler = async function () {
       const scadenze = tutteScad.filter(s => s.giorni >= 0).sort((x, y) => x.giorni - y.giorni);
 
       const fatture = (qFatt.data || [])
-        .filter(f => f.user_id === uid && f.data && giorniDopo(f.data, ggPag) < oggi)
+        .filter(f => f.user_id === uid && f.data && (f.scadenza || giorniDopo(f.data, ggPag)) < oggi)
         .map(f => ({ numero: f.numero, cliente: nomeCli[String(f.cliente_id)] || '',
                      totale: totaleFattura(f),
-                     giorniRitardo: quantiGiorni(giorniDopo(f.data, ggPag), oggi) }))
+                     giorniRitardo: quantiGiorni(f.scadenza || giorniDopo(f.data, ggPag), oggi) }))
         .sort((x, y) => y.giorniRitardo - x.giorniRitardo);
 
       const lavori = (qLav.data || [])

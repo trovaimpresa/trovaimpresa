@@ -253,6 +253,7 @@
      ⚠️ SI GUARDA IL NOME, NON IL VALORE. Una colonna che esiste ma e'
         vuota e' legittima; una che non esiste e' un aggiornamento mancante. */
   var PROVE = {
+    "2026-11-13-fattura-pagamento.sql": "gest_fatture.scadenza gest_fatture.modo_pagamento gest_fatture.iban nol_fatture.scadenza nol_fatture.modo_pagamento nol_fatture.iban gest_ricevute_pagamento.fattura_id gest_ricevute_pagamento.fattura_nome",
     "aggiungi-commercialista.sql":      "gest_azienda.comm_studio gest_azienda.comm_nome gest_azienda.comm_tel gest_azienda.comm_email gest_azienda.comm_pec gest_azienda.comm_note",
     "chat-avvisi.sql":                  "chat_avvisi",
     "capitolato-nel-preventivo.sql":    "gest_preventivi.capitolato",

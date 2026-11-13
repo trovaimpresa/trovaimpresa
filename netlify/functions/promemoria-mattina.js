@@ -617,7 +617,7 @@ const handler = async function () {
     if (completo) {
       const r = await Promise.all([
         senzaCestino(f => vivi(sb.from('gest_fatture')
-          .select('id, user_id, numero, data, stato, cliente_id')
+          .select('id, user_id, numero, data, scadenza, stato, cliente_id')
           .in('user_id', utenti).eq('stato', 'emessa'), f)),
         senzaCestino(f => vivi(sb.from('gest_lavori')
           .select('user_id, descrizione, stato, data_prevista, cliente_id')
@@ -838,10 +838,10 @@ const handler = async function () {
         : [];
       const fatture = (completo && voglio('fatture'))
         ? (qFatt.data || [])
-            .filter(f => String(f.user_id) === uid && f.data && giorniDopo(f.data, ggPag) < oggi)
+            .filter(f => String(f.user_id) === uid && f.data && (f.scadenza || giorniDopo(f.data, ggPag)) < oggi)
             .map(f => ({ numero: f.numero, cliente: nomeCli[String(f.cliente_id)] || '',
                          totale: totali[String(f.id)] || 0,
-                         giorniRitardo: quantiGiorni(giorniDopo(f.data, ggPag), oggi) }))
+                         giorniRitardo: quantiGiorni(f.scadenza || giorniDopo(f.data, ggPag), oggi) }))
             .sort((x, y) => y.giorniRitardo - x.giorniRitardo)
         : [];
       const lavori = (completo && voglio('lavori'))

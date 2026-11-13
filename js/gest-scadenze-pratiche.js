@@ -507,6 +507,7 @@
       <div class="field"><label>Stato</label><div class="seg" id="j-stato">
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
       </div>
+      <div class="sh-b" id="lav-prev-wrap" style="display:none"></div>
       <div class="sh-b sh-b-b">
       <div class="field campo-titolo"><label>${ruoloUtente==='professionista'?"Cosa è stato fatto (consuntivo)":"Cosa è stato fatto"}</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
@@ -603,6 +604,50 @@
     const _imp=$("#j-imp");
     if(_imp)_imp.addEventListener("input",function(){ if(oreLavoroId)renderOreBlock(oreLavoroId); });
   }
+  /* ===== 13 nov 2026 (lista «MANCA», n. 5) — LE VOCI DEL PREVENTIVO NEL LAVORO =====
+     Il lavoro nato da un preventivo portava solo il titolo: per sapere cosa
+     c'era da fare si doveva riaprire il preventivo. Adesso le voci si LEGGONO
+     dal preventivo collegato (gest_preventivi.lavoro_id) e si mostrano qui.
+     ⛔ Non si copiano: restano in un posto solo. Se il preventivo cambia,
+        qui si vede subito. I conti sono quelli di sempre (impRiga, prevSconto). */
+  async function renderLavPreventivo(lavoroId){
+    const box=$("#lav-prev-wrap");if(!box)return;
+    box.style.display="none";box.innerHTML="";
+    if(!sb||!sbUid||!lavoroId)return;
+    try{
+      const {data:pp,error}=await sb.from("gest_preventivi").select("*")
+        .eq("user_id",sbUid).eq("lavoro_id",lavoroId).is("eliminato_il",null).order("created_at",{ascending:false});
+      if(error||!pp||!pp.length)return;
+      const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,descrizione,qta,prezzo,sezione,ordine")
+        .in("preventivo_id",pp.map(p=>p.id)).order("ordine");
+      const pro=ruoloUtente==='professionista';
+      const num=n=>String(+(+n||0).toFixed(3)).replace(".",",");
+      let h="";
+      pp.forEach(function(p){
+        const R=(rr||[]).filter(r=>String(r.preventivo_id)===String(p.id));
+        if(!R.length)return;
+        const voci=R.filter(r=>!r.sezione);
+        const somma=voci.reduce((t,r)=>t+impRiga(r.qta,r.prezzo),0);
+        const sc=(typeof prevSconto==="function")?prevSconto(somma,p):0;
+        h+='<div class="sh-tit">'+(pro?'Le prestazioni del preventivo N. ':'Le voci del preventivo N. ')+esc(String(p.numero||""))+'</div>'
+          +'<div class="lpv-lista">'
+          + R.map(function(r){
+              if(r.sezione)return '<div class="lpv-sez">'+esc(r.descrizione||"")+'</div>';
+              const q=(+r.qta)||1;
+              return '<div class="lpv-riga"><div class="lpv-d">'+esc(r.descrizione||"")
+                +'<small>'+num(q)+' × '+eur2(+r.prezzo||0)+'</small></div>'
+                +'<div class="lpv-t">'+eur2(impRiga(r.qta,r.prezzo))+'</div></div>';
+            }).join("")
+          +(sc?'<div class="lpv-riga"><div class="lpv-d">Sconto</div><div class="lpv-t">− '+eur2(sc)+'</div></div>':'')
+          +'<div class="lpv-riga lpv-tot"><div class="lpv-d">Totale, IVA esclusa</div><div class="lpv-t">'+eur2(_cent2(somma-sc))+'</div></div>'
+          +'</div>'
+          +'<button type="button" class="btn quick-add" data-action="lav-prev-apri" data-id="'+esc(String(p.id))+'">Apri il preventivo</button>';
+      });
+      if(!h)return;
+      box.innerHTML=h;box.style.display="";
+    }catch(_){}
+  }
+
   /* ===== 9 agosto 2026 — La scadenza proposta da sola =====
      Un tecnico che salva una pratica con una data ha appena scritto una cosa
      da non dimenticare. Invece di lasciargliela ricopiare a mano nello

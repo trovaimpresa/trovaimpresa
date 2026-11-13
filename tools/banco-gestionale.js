@@ -80,7 +80,7 @@ function sessioneFinta() {
 function rigaFinta(tabella) {
   if (tabella === "imprese") return [{ id: 1, user_id: UID, email: "banco@trovaimpresa.test", nome_attivita: "Impresa di prova", nome: "Mario Prova", mestiere: "Muratore", mestieri: ["Muratore"], telefono: "3331234567", descrizione: "Impresa di prova del banco: serve solo a far aprire il gestionale senza chiedere di completare il profilo. Non esiste davvero.", logo_url: "/img/trovaimpresa-logo.svg", email_confermata: true, premium_pagato: true, vetrina_attiva: true, tipo: "artigiano", ruolo: "artigiano", piano: "premium", premium_scadenza: "2099-12-31", chat_pro: true, chat_pro_scadenza: "2099-12-31", gest_prova_fine: "2099-12-31", gest_piano_scelto: "premium", citta: "Rieti", attivo: true, stato: "attivo" }];
   if (tabella === "gest_mestieri") return [{ id: REPARTO, user_id: UID, nome: "reparto di prova", icona: "wrench", ordine: 1, created_at: "2026-01-01T00:00:00Z" }];
-  if (tabella === "gest_azienda") return [{ user_id: UID, ragione_sociale: "Impresa di prova", giorni_pagamento: 30 }];
+  if (tabella === "gest_azienda") return [{ user_id: UID, ragione_sociale: "Impresa di prova", nome: "Impresa di prova", piva: "00000000009", indirizzo: "Via del Cantiere 10", cap: "02100", citta: "Rieti", prov: "RI", iban: "IT60 X054 2811 1010 0000 0123 456", giorni_pagamento: 30 }];
   return DATI[tabella] || [];
 }
 const DATI = require("./banco-dati-finti.js")(UID, REPARTO);

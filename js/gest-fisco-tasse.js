@@ -315,14 +315,14 @@
   async function ftNolFatture(Y) {
     const vuoto = { fatture: [], tot: {}, errore: false };
     try {
-      const r = await sb.from("nol_fatture").select("id,numero,data,stato,pagata_il,cliente,imponibile,iva,totale")
+      const r = await sb.from("nol_fatture").select("id,numero,data,scadenza,stato,pagata_il,cliente,imponibile,iva,totale")
         .eq("user_id", sbUid).in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01");
       if (r.error) return { ...vuoto, errore: true };
       const out = { fatture: [], tot: {}, errore: false };
       (r.data || []).forEach(n => {
         const id = "nol-" + n.id;
         const a = String(n.data || "").slice(0, 4);
-        out.fatture.push({ id, numero: n.numero, anno: a ? +a : null, data: n.data, stato: n.stato, data_pagata: n.pagata_il, cli_nome: n.cliente, bollo: 0 });
+        out.fatture.push({ id, numero: n.numero, anno: a ? +a : null, data: n.data, scadenza: n.scadenza || null, stato: n.stato, data_pagata: n.pagata_il, cli_nome: n.cliente, bollo: 0 });
         out.tot[id] = { fattura_id: id, imponibile: +n.imponibile || 0, iva: +n.iva || 0, totale: +n.totale || 0, segno: 1 };
       });
       return out;

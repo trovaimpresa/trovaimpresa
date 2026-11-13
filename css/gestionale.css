@@ -6068,3 +6068,13 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   #mappa .segm{ display:flex; flex:1 1 100%; width:100%; }
   #mappa .segm button{ flex:1 1 0; min-width:0; height:auto; min-height:44px; padding:6px 8px; white-space:normal; line-height:1.25; }
 }
+
+/* 13 nov 2026 — le voci del preventivo dentro il lavoro (lista «MANCA», n. 5) */
+.lpv-lista{border:1px solid var(--linea,#e5e7eb);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.lpv-riga{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:11px 14px;border-bottom:1px solid var(--linea,#e5e7eb);font-size:16px}
+.lpv-riga:last-child{border-bottom:0}
+.lpv-d{min-width:0;flex:1;overflow-wrap:anywhere}
+.lpv-d small{display:block;font-size:14px;color:var(--testo-2,#64748b);margin-top:2px}
+.lpv-t{font-weight:800;white-space:nowrap}
+.lpv-sez{padding:9px 14px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;background:#f6f8fb;border-bottom:1px solid var(--linea,#e5e7eb)}
+.lpv-tot{background:#f6f8fb;font-weight:800}

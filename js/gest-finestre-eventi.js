@@ -539,6 +539,7 @@
     if(a==="fatt-da-prev")return fattDaPreventivoScegli();
     if(a==="fatt-da-prev-ok")return fattDaPreventivoConferma();
     if(a==="edit-fatt"){const f=fattCache.find(x=>String(x.id)===String(id));if(f)fattForm(f);return;}
+    if(a==="lav-prev-apri"){const _pp=prevCache.find(x=>String(x.id)===String(id));closeSheet();if(_pp)return prevForm(_pp);const _bt=document.querySelector('nav.tabs button[data-tab="preventivi"]');if(_bt)_bt.click();return;}
     if(a==="save-fatt")return saveFattura(id||null);
     if(a==="fatt-riga-add"){$("#fatt-righe").insertAdjacentHTML("beforeend",fattRigaHtml());fattTotaleLive();return;}
     if(a==="fatt-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();fattTotaleLive();}return;}
@@ -558,7 +559,7 @@
          filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
       const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
       if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
-      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);}return;}
+      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);renderLavPreventivo(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();

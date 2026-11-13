@@ -52,7 +52,7 @@
     const [rP, rA, rF, rS, rC, rR, rFF, rN] = await Promise.all([
       sb.from("gest_fisco_profilo").select("*").eq("user_id", sbUid).maybeSingle(),
       sb.from("gest_azienda").select("*").eq("user_id", sbUid).maybeSingle(),
-      sb.from("gest_fatture").select("id,numero,anno,data,stato,data_pagata,cli_nome,bollo").eq("user_id", sbUid)
+      sb.from("gest_fatture").select("id,numero,anno,data,scadenza,stato,data_pagata,cli_nome,bollo").eq("user_id", sbUid)
         .in("stato", ["emessa", "pagata"]).is("eliminato_il", null).gte("data", (Y - 1) + "-01-01"),
       sb.from("gest_spese").select("importo,data").eq("user_id", sbUid).gte("data", da),
       sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at").eq("user_id", sbUid).gte("created_at", da),
@@ -170,7 +170,7 @@
       if (f.stato !== "emessa") return;
       const t = d.tot[f.id] || {}; if ((+t.segno || 1) < 0) return;
       const v = +t.totale || 0; if (!(v > 0)) return;
-      const sc = _giorniDopo(f.data, gg);
+      const sc = f.scadenza || _giorniDopo(f.data, gg);
       /* «nol-…» = fatture del Noleggio: «Farsi pagare» non le conta,
          quindi qui si dicono a parte (7 nov 2026) */
       if (sc < oggi) { ritardo += v; if (String(f.id).indexOf("nol-") === 0) ritardoNol += v; return; }

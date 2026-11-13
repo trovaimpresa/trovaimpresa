@@ -379,7 +379,7 @@
     const daFatt   = L.filter(l=>l.stato==="fatto"&&!_giaInFatt.has(String(l.id))&&(l.fatt_stato||"none")==="none"&&+l.importo>0);
     const totDaFatt= daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     const ggPag    = (AZ&&+AZ.giorni_pagamento)||30;
-    const scadenza = f=>f.data?_giorniDopo(f.data,ggPag):"";
+    const scadenza = f=>f.scadenza||(f.data?_giorniDopo(f.data,ggPag):"");
     /* una nota di credito non e' un credito: non puo' essere scaduta */
     const scadute  = daInc.filter(f=>{const sc=scadenza(f);return fattSegno(f)>0&&sc&&sc<oggi;});
     /* 9 agosto 2026 — l'utile si fa sull'IMPONIBILE, non sul totale incassato.

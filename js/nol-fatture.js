@@ -155,7 +155,18 @@
         </div>
       </div>
 
-      <div class="field"><label>Note</label><input id="nf-note" value="${v('note')}" placeholder="Modalità di pagamento, riferimenti, reverse charge…"></div>
+      <div class="nol-riq nol-cam">
+        <h4>Pagamento</h4>
+        <div class="nol-due">
+          <div><label for="nf-scad">Da pagare entro</label><input type="date" id="nf-scad" value="${v('scadenza')}"></div>
+          <div><label for="nf-modo">Come si paga</label><select id="nf-modo">
+            ${NOL_MODI.map(m=>`<option value="${m[0]}"${(f.modo_pagamento||"bonifico")===m[0]?" selected":""}>${esc(m[1])}</option>`).join("")}
+          </select></div>
+        </div>
+        <div id="nf-iban-wrap" style="margin-top:10px${nolModoConIban(f.modo_pagamento||"bonifico")?"":";display:none"}"><label for="nf-iban">IBAN dove ricevi il bonifico</label><input id="nf-iban" value="${v('iban')}" placeholder="IT00 X000 0000 0000 0000 0000 000" autocomplete="off"></div>
+      </div>
+
+      <div class="field"><label>Note</label><input id="nf-note" value="${v('note')}" placeholder="Riferimenti, reverse charge…"></div>
 
       <div class="nol-azioni">
         <button type="button" class="nol-az nol-az-apri" data-action="fattnol-stampa" data-id="${f.id||""}">Stampa la fattura</button>
@@ -184,7 +195,33 @@
     }
     bindSeg("nf-stato");
     fattnolDisegnaRighe();
+    /* 13 nov 2026 — il riquadro «Pagamento»: una fattura senza scadenza e
+       senza IBAN li prende dai Dati azienda (data + giorni di pagamento);
+       la scadenza segue la data finche' non la tocchi tu. */
+    try{
+      const {data:azP}=await sb.from("gest_azienda").select("iban,giorni_pagamento").eq("user_id",sbUid).maybeSingle();
+      const gg=(azP&&+azP.giorni_pagamento)||30;
+      const sc=$("#nf-scad"), ib=$("#nf-iban"), da=$("#nf-data"), mo=$("#nf-modo");
+      if(!sc||!ib||!mo)return;
+      if(!sc.value)sc.value=_giorniDopo((da&&da.value)||todayStr(),gg);
+      if(!ib.value&&!f.modo_pagamento&&azP&&azP.iban)ib.value=azP.iban;
+      mo.addEventListener("change",function(){ const w=$("#nf-iban-wrap"); if(w)w.style.display=nolModoConIban(mo.value)?"":"none"; });
+      if(da){
+        let prima=da.value||todayStr();
+        da.addEventListener("change",function(){
+          if(da.value&&sc.value===_giorniDopo(prima,gg))sc.value=_giorniDopo(da.value,gg);
+          if(da.value)prima=da.value;
+        });
+      }
+    }catch(_){}
   }
+  /* i modi di pagamento: gli STESSI della fattura dell'App (FATT_MODI in
+     js/gest-fatture.js, che il Noleggio non carica). Il terzo e' il codice
+     che vuole lo SDI. Se ne aggiungi uno, aggiungilo in tutti e due. */
+  const NOL_MODI=[["bonifico","Bonifico","MP05"],["contanti","Contanti","MP01"],["assegno","Assegno","MP02"],
+                  ["carta","Carta / POS","MP08"],["riba","Ri.Ba. (ricevuta bancaria)","MP12"]];
+  function nolModoConIban(m){ return m==="bonifico"||m==="riba"; }
+  window.NOL_MODI=NOL_MODI;
 
   function fattnolDisegnaRighe(){
     const box=$("#nf-righe"); if(!box) return;
@@ -287,6 +324,11 @@
       righe, imponibile, iva_perc:perc, iva, totale:_cent(imponibile+iva),
       stato, pagata_il:$("#nf-pagata").value||null,
       note:$("#nf-note").value.trim()||null};
+    if($("#nf-scad")){
+      dati.scadenza=$("#nf-scad").value||null;
+      dati.modo_pagamento=$("#nf-modo").value||null;
+      dati.iban=nolModoConIban(dati.modo_pagamento)?(($("#nf-iban").value||"").replace(/\s+/g," ").trim().toUpperCase()||null):null;
+    }
     let fid=id;
     /* 11 nov 2026 — la spunta verde se la fattura diventa pagata adesso */
     let eraPagata=false;
@@ -354,8 +396,21 @@
     const testo=["Fattura differita riepilogativa emessa ai sensi dell'art. 21 comma 4 lettera a) del D.P.R. 633/1972, relativa alle consegne effettuate nel periodo indicato e documentate dai documenti di trasporto richiamati."];
     if(perc===0) testo.push("Operazione senza applicazione dell'IVA: l'imposta è assolta dal committente ove ricorra il regime di inversione contabile.");
     if(f.note) testo.push(f.note);
-    if(A.iban) testo.push("Pagamento con bonifico su IBAN "+A.iban+".");
     blocchi.push({t:"testo",titolo:"Note",corpo:testo});
+    /* 13 nov 2026 — il pagamento: entro quando, come, e l'IBAN. Una fattura
+       di prima non li ha: bonifico se nei Dati azienda c'e' l'IBAN. */
+    {
+      const modo=f.modo_pagamento||((f.iban||A.iban)?"bonifico":"");
+      const M=NOL_MODI.find(m=>m[0]===modo);
+      const iban=String(f.iban||A.iban||"").trim();
+      const sc=f.scadenza||(f.data?_giorniDopo(f.data,+A.giorni_pagamento||30):"");
+      const rp=[
+        ["Da pagare entro il",(sc&&f.stato!=="pagata")?fdate(sc):null],
+        ["Come si paga",M?M[1].replace(/ \(.*$/,""):null],
+        ["IBAN",(M&&nolModoConIban(M[0])&&iban)?iban:null]
+      ];
+      if(rp.some(r=>r[1]))blocchi.push({t:"coppie",titolo:"Pagamento",righe:rp});
+    }
 
     return {blocchi,titolo:"Fattura "+(f.numero?"n. "+f.numero:"bozza")+" — "+(C.nome||f.cliente||"cliente")};
   }
