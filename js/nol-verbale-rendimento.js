@@ -58,7 +58,7 @@
 
     const blocchi=[];
     blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
-      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||""].filter(Boolean),
+      sotto:[A.piva?"P.IVA "+A.piva:"",nolAzIndirizzo(A)].filter(Boolean),
       titolo:rientro?"VERBALE DI RICONSEGNA":"VERBALE DI CONSEGNA",
       dettaglio:fdate(quando)+(ora?" alle "+String(ora).slice(0,5):"")+
         (n.contratto_num?"   ·   contratto n. "+n.contratto_num:"")});
@@ -127,7 +127,7 @@
 
     const blocchi=[];
     blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
-      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+      sotto:[A.piva?"P.IVA "+A.piva:"",nolAzIndirizzo(A),
              [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
       titolo:"DOCUMENTO DI TRASPORTO",
       dettaglio:(num?"N. "+num:"N. da assegnare")+"   ·   del "+fdate(data||todayStr())+
@@ -136,7 +136,7 @@
     blocchi.push({t:"coppie",titolo:"Mittente e destinatario",righe:[
       ["Mittente",mitt],
       ["Destinatario",dest],
-      ["Indirizzo di destinazione",rientro?(A.indirizzo||null):(n.luogo||C.indirizzo||null)],
+      ["Indirizzo di destinazione",rientro?(nolAzIndirizzo(A)||null):(n.luogo||C.indirizzo||null)],
       ["P.IVA / Cod. Fiscale del cliente",C.piva||null]
     ]});
 

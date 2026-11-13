@@ -480,9 +480,8 @@
       voci.forEach(function(v){
         let desc=String((v&&v.descrizione)||"").trim();
         if(!desc) return;
-        /* l'unita' di misura non ha una casella sua nel preventivo: va in
-           coda alla descrizione, come faceva gia' il salvataggio dell'AI. */
-        if(v.unita) desc+=" ("+String(v.unita).trim()+")";
+        /* 13 nov 2026 — l'unita' di misura adesso ha la sua casella (.pr-um):
+           non va piu' in coda alla descrizione. */
         /* ⚠️ il prezzo che l'AI NON sa resta una casella VUOTA, non «0,00».
            Zero e' un prezzo deciso, e in fondo al preventivo verrebbe
            sommato come tale: una voce regalata senza che nessuno l'abbia
@@ -493,6 +492,7 @@
         box.insertAdjacentHTML("beforeend",prevRigaHtml({
           descrizione: desc,
           qta:    (v.quantita==null||v.quantita==="")?1:(+v.quantita||0),
+          unita:  v.unita||null,
           prezzo: pz
         }));
         _aiIllumina(box.lastElementChild);

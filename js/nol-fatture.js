@@ -368,7 +368,7 @@
     const perc=f.iva_perc==null?22:+f.iva_perc;
     const blocchi=[];
     blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
-      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+      sotto:[A.piva?"P.IVA "+A.piva:"",nolAzIndirizzo(A),
              [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
       titolo:"FATTURA",
       dettaglio:(f.numero?"N. "+f.numero:"(bozza, senza numero)")+"   ·   del "+fdate(f.data||todayStr())});

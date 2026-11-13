@@ -1541,7 +1541,9 @@
          è rumore dentro un file che va allo SDI. Il conto non cambia (una
          riga di capitolo vale sempre zero), cambia solo che non c'è. */
       _righe:(rr||[]).filter(r=>!_rigaSezione(r)).map((r,i)=>({
-        descrizione:r.descrizione, qta:+r.qta||1, prezzo:+r.prezzo||0,
+        /* 13 nov 2026 — la fattura non ha la casella dell'unita': per non
+           perderla va in coda alla descrizione («Posa pavimento (m²)») */
+        descrizione:String(r.descrizione||"")+((typeof prevUnitaTesto==="function"&&prevUnitaTesto(r.unita))?" ("+prevUnitaTesto(r.unita)+")":""), qta:+r.qta||1, prezzo:+r.prezzo||0,
         /* 9 agosto 2026 — l'aliquota promessa nel preventivo (e firmata nella
            conferma d'ordine) deve arrivare uguale in fattura: prima partiva
            sempre dal 10% di default anche se il preventivo diceva 22 o 4. */

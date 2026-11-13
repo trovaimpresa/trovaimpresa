@@ -52,7 +52,8 @@
     const _mancaPiva=!String(az.piva||"").trim();
     const _bozza=_mancaAz||_mancaPiva;
     let c={};
-    c=await cliDelDocumento(p.cliente_id,"nome,indirizzo,referente");
+    /* 13 nov 2026 (lista «MANCA», n. 10) — anche CAP, citta' e provincia */
+    c=await cliDelDocumento(p.cliente_id,"nome,indirizzo,cap,citta,prov,referente");
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
@@ -83,7 +84,7 @@
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Spett.le",M,y);y+=6;
     doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(c.nome||"—",M,y);y+=5;
     doc.setFontSize(9);doc.setTextColor(90);
-    if(c.indirizzo){doc.text(c.indirizzo,M,y);y+=4.5;}
+    { const _ci=cliIndirizzo(c); if(_ci){const _il=doc.splitTextToSize(_ci,R-M);doc.text(_il,M,y);y+=_il.length*4.5;} }
     if(c.referente){doc.text("Rif. "+c.referente,M,y);y+=4.5;}
     doc.setTextColor(0);y+=4;
     doc.setFont("helvetica","bold");doc.setFontSize(11);
@@ -113,7 +114,9 @@
         return;
       }
       const rt=impRiga(r.qta,r.prezzo);tot+=rt;
-      const lines=doc.splitTextToSize(r.descrizione,R-M-72);
+      /* 13 nov 2026 (n. 3) — accanto alla quantita' c'e' l'unita' («85,5 mq»):
+         la descrizione lascia 14 mm in piu' alla colonna della quantita' */
+      const lines=doc.splitTextToSize(r.descrizione,R-M-86);
       const rowH=lines.length*5+4;
       if(y+rowH>270){doc.addPage();y=20;}
       doc.setDrawColor(210);doc.rect(M,y,R-M,rowH);
@@ -127,7 +130,7 @@
          virgola e toglie la coda della virgola mobile (0,1+0,2 non diventa
          0,30000000000000004), senza aggiungere decimali che non ci sono —
          una quantità di 1 resta «1», non «1,00». */
-      doc.text(_numTesto(+r.qta||1),R-60,y+5,{align:"right"});
+      doc.text(_numTesto(+r.qta||1)+(prevUnitaPdf(r.unita)?" "+prevUnitaPdf(r.unita):""),R-60,y+5,{align:"right"});
       doc.text(eurPdf(r.prezzo),R-32,y+5,{align:"right"});
       doc.text(eurPdf(rt),R-2,y+5,{align:"right"});
       y+=rowH;
@@ -194,6 +197,22 @@
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Note e condizioni",M,y);y+=5.5;
       doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
       const nl=doc.splitTextToSize(p.note,R-M);doc.text(nl,M,y);y+=nl.length*4.5;doc.setTextColor(0);
+    }
+    /* ===== 13 nov 2026 (lista «MANCA», n. 4) — LA FIRMA «PER ACCETTAZIONE» =====
+       Il cliente che dice si' deve poter firmare questo foglio: data a
+       sinistra, firma a destra. Il blocco non si spezza fra due pagine e non
+       finisce sopra la riga piccola in fondo (che sta a 286). */
+    {
+      const hF=30;
+      if(y+hF+8>280){doc.addPage();y=24;}else{y+=10;}
+      doc.setTextColor(0);doc.setFont("helvetica","bold");doc.setFontSize(10);
+      doc.text("Per accettazione",M,y);
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      doc.text("Data",M,y+9);doc.text("Firma del cliente",R-80,y+9);
+      doc.setDrawColor(120);doc.setLineWidth(.3);
+      doc.line(M,y+22,M+55,y+22);doc.line(R-80,y+22,R,y+22);
+      doc.setLineWidth(.2);doc.setTextColor(0);
+      y+=hF;
     }
     doc.setFontSize(7.5);doc.setTextColor(140);
     const ivaIndicata=(!isParcella&&p.iva_perc!=null&&p.iva_perc!=="");

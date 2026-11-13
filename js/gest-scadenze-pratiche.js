@@ -618,7 +618,7 @@
       const {data:pp,error}=await sb.from("gest_preventivi").select("*")
         .eq("user_id",sbUid).eq("lavoro_id",lavoroId).is("eliminato_il",null).order("created_at",{ascending:false});
       if(error||!pp||!pp.length)return;
-      const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,descrizione,qta,prezzo,sezione,ordine")
+      const {data:rr}=await sb.from("gest_preventivo_righe").select("*")
         .in("preventivo_id",pp.map(p=>p.id)).order("ordine");
       const pro=ruoloUtente==='professionista';
       const num=n=>String(+(+n||0).toFixed(3)).replace(".",",");
@@ -635,7 +635,7 @@
               if(r.sezione)return '<div class="lpv-sez">'+esc(r.descrizione||"")+'</div>';
               const q=(+r.qta)||1;
               return '<div class="lpv-riga"><div class="lpv-d">'+esc(r.descrizione||"")
-                +'<small>'+num(q)+' × '+eur2(+r.prezzo||0)+'</small></div>'
+                +'<small>'+num(q)+((typeof prevUnitaTesto==="function"&&prevUnitaTesto(r.unita))?' '+esc(prevUnitaTesto(r.unita)):'')+' × '+eur2(+r.prezzo||0)+'</small></div>'
                 +'<div class="lpv-t">'+eur2(impRiga(r.qta,r.prezzo))+'</div></div>';
             }).join("")
           +(sc?'<div class="lpv-riga"><div class="lpv-d">Sconto</div><div class="lpv-t">− '+eur2(sc)+'</div></div>':'')

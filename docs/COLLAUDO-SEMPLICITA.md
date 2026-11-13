@@ -1896,3 +1896,48 @@ contatore `gest_azienda.num_fattura` è ancora 1: la prossima fattura emessa pre
 **Visto passando, per il GRUPPO 3:** i numeri delle fatture sono DAVVERO separati. Il Noleggio prende
 il numero dal contatore `gest_azienda.num_fattura` (js/nol-fatture.js), l'App dal più alto dell'anno + 1
 in `gest_fatture` (`fattProssimoNumero`). Due serie con gli stessi numeri: decide Alex.
+
+## 13 nov 2026 (sera) — lista «MANCA», GRUPPO 2: il preventivo (voci 3, 4, 10)
+Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]` da fare.
+Foto viste da Alex (ok alle 17:14): modulo al computer e al telefono, PDF preventivo, PDF e Dati azienda del Noleggio.
+
+[x] 3. Preventivo: unità di misura e totale di riga.
+   - Colonna nuova `gest_preventivo_righe.unita` (testo, può restare vuota). File `sql/2026-11-13-preventivo-unita.sql`,
+     migrazione `preventivo_unita_13nov2026` (questa volta `apply_migration` è PASSATA), riga in PROVE di js/fondatore.js.
+   - `js/gest-preventivi.js`: ogni voce è su DUE righe — sopra la descrizione con la ×, sotto quantità · unità · prezzo ·
+     «= totale». La tendina è la STESSA del computo (`UNITA` di gest-computo.js → `PREV_UNITA`). Stile in fondo a css/gestionale.css.
+   - ⛔ Il totale di riga NON è un conto nuovo: è `impRiga()`. L'unità non entra in nessun conto.
+   - Attrezzi nuovi, in un posto solo: `prevUnita(u)` (porta «mq», «M2», «ore» alla voce della tendina; una che non
+     conosce resta com'è), `prevUnitaTesto(u)` («corpo» → «a corpo»), `prevQtaTesto(r)` («85,5 m²»), `prevUnitaPdf(u)` («mq», via `_umPdf`).
+   - ⛔ `_scriviRighePrev` mette «unita» su TUTTE le righe (stessa regola di «sezione») e, se la colonna mancasse,
+     salva senza e lo dice. Chi scrive righe di preventivo passa da lì (anche `gestSalvaPreventivoAI`, che prima scriveva da sola).
+   - L'unità NON va più in coda alla descrizione: l'AI del modulo (`aiRiempiPreventivo`), il preventivo dal computo
+     (gest-sal-prezzario.js) e «Porta le ore nella parcella» (unità «ora») la mettono nella sua casella.
+     I preventivi di prima restano com'erano («… (mq)» nella descrizione, tendina vuota).
+   - Dove si vede: PDF preventivo («85,5 mq» nella colonna Q.tà), dentro il lavoro (`renderLavPreventivo`: «60 m² × 9,50 €»),
+     pagina del cliente e PDF della firma SMS (fotografia `invConti`), capitolato («Porta le voci»: «quantità 85,5 m²»),
+     Excel («Unità»), Chat con AI (`righe_preventivo` legge anche `unita`).
+   - Preventivo → fattura: la fattura NON ha la casella dell'unità. Per non perderla va tra parentesi in fondo alla
+     descrizione («Posa pavimento (m²)»). Detto ad Alex.
+[x] 4. PDF preventivo: firma «per accettazione».
+   - In fondo a `prevPdf` (anche parcella): «Per accettazione», «Data ____», «Firma del cliente ____». Il blocco non si
+     spezza fra due pagine e non finisce sopra la riga piccola a 286.
+[x] 10. CAP e città.
+   - Cliente: preventivo (`prevPdf`), scheda lavoro (`generaPdf` in gest-elimina-reparto.js), SAL (`salPdf`) usano
+     `cliIndirizzo(c)` (via, CAP città (PR)) e vanno a capo se è lungo.
+   - Noleggio: `nolAzIndirizzo(a)` in js/nol-base.js (copia di `azIndirizzo` dell'App, che il Noleggio non carica) in
+     contratto, cauzione, verbale, DDT, fattura e nel PDF del lavoro. Nel DDT di rientro anche la destinazione.
+   - Noleggio, Dati azienda: caselle nuove CAP, Città, Provincia («Indirizzo» si chiama «Via e numero»). Sono le stesse
+     tre colonne dell'App (`gest_azienda.cap / citta / prov`).
+   - NON fatto: i 5 PDF del computo scrivono «Committente: nome - via» su UNA riga sola (senza a capo): con CAP e città
+     rischia di uscire dal foglio. Non era nella voce 10. Da decidere.
+
+**Attrezzi**
+- Banco nuovo `node tools/banco-preventivo.js` (App e Noleggio a 1440 e 375): 38 prove. Sulla versione di PRIMA: 18 rossi.
+  Per i PDF raccoglie i testi avvolgendo `window.jspdf.jsPDF` (⚠️ `jsPDF.API.text` NON esiste: `text` sta sul documento,
+  si avvolge il costruttore). Serve jsPDF in /tmp/banco.
+- `tools/banco-dati-finti.js`: le voci dei preventivi finti hanno `unita` (m², corpo, una vuota).
+- Versioni: `?v=13nov5` sui file toccati (13 nell'App, 8 nel Noleggio).
+
+**Provato col banco**: banco-preventivo VERDE (38); banco-gestionale App e Noleggio ZERO difetti; banco-soldi VERDE (36);
+banco-correttore e banco-copia-computo zero difetti; controllo-push «tutto a posto».

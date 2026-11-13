@@ -357,7 +357,8 @@
     const {data:lav}=await sb.from("gest_lavori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     if(!lav){toast("Lavoro non trovato");return;}
     let c={};
-    c=await cliDelDocumento(lav.cliente_id,"nome,indirizzo,referente");
+    /* 13 nov 2026 (lista «MANCA», n. 10) — anche CAP, citta' e provincia */
+    c=await cliDelDocumento(lav.cliente_id,"nome,indirizzo,cap,citta,prov,referente");
     /* il numero NON si assegna qui: scaricare il PDF non deve impegnare
        un numero di fattura. Lo assegna assegnaNumFatt() quando segni "Emessa". */
     const numFatt=lav.num_fatt||null;
@@ -389,7 +390,7 @@
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Cliente",M,y);y+=6;
     doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(c.nome||"—",M,y);y+=5;
     doc.setFontSize(9);doc.setTextColor(90);
-    if(c.indirizzo){doc.text(c.indirizzo,M,y);y+=4.5;}
+    { const _ci=cliIndirizzo(c); if(_ci){const _il=doc.splitTextToSize(_ci,R-M);doc.text(_il,M,y);y+=_il.length*4.5;} }
     if(c.referente){doc.text("Rif. "+c.referente,M,y);y+=4.5;}
     doc.setTextColor(0);y+=8;
     doc.setFillColor(31,111,92);doc.rect(M,y,R-M,8,"F");

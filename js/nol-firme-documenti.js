@@ -324,7 +324,7 @@
 
     const blocchi=[];
     blocchi.push({t:"testata",azienda:A.nome||"(compila i Dati azienda)",
-      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+      sotto:[A.piva?"P.IVA "+A.piva:"",nolAzIndirizzo(A),
              [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
       titolo:svincolo?"QUIETANZA DI SVINCOLO CAUZIONE":"RICEVUTA DI DEPOSITO CAUZIONALE",
       dettaglio:"del "+fdate(quando)+(n.contratto_num?"   ·   contratto n. "+n.contratto_num:"")});

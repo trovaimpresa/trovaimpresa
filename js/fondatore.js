@@ -286,6 +286,7 @@
     "gest-permessi-collaboratori.sql":  "gest_puo_sezione()",
     "gest-pratiche-professionisti.sql": "gest_lavori.pratica_tipo gest_lavori.pratica_protocollo gest_lavori.pratica_comune gest_lavori.pratica_data_dep gest_lavori.pratica_stato gest_lavori.catasto_foglio gest_lavori.catasto_particella gest_lavori.catasto_sub",
     "gest-preventivo-sezioni.sql":      "gest_preventivo_righe.sezione",
+    "2026-11-13-preventivo-unita.sql":  "gest_preventivo_righe.unita",
     "gest-rapportini-cestino.sql":      "gest_rapportino_cestina()",
     "gest-rapportini.sql":              "gest_ore.rapportino_id gest_rapportini",
     "gest-sal-fattura.sql":             "gest_sal.fattura_id",

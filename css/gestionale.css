@@ -6078,3 +6078,44 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .lpv-t{font-weight:800;white-space:nowrap}
 .lpv-sez{padding:9px 14px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;background:#f6f8fb;border-bottom:1px solid var(--linea,#e5e7eb)}
 .lpv-tot{background:#f6f8fb;font-weight:800}
+
+
+/* ===== 13 nov 2026 (lista «MANCA», n. 3) — LA VOCE DEL PREVENTIVO SU DUE RIGHE =====
+   Sopra la descrizione, larga tutta, con la × accanto. Sotto, in fila:
+   quantita' · unita' di misura · prezzo · «= totale della voce».
+   Si legge come una moltiplicazione: 85,5 m² × 32,40 = 2.770,20 €.
+   ⚠️ Le regole di prima («.sheet .prev-riga», quattro colonne) valgono ancora
+   per chi non ha .pr-um: qui si cambia solo la riga che ha la tendina. */
+.sheet .prev-riga:not(.prev-riga-cap){
+  grid-template-columns:110px 124px 150px 1fr 52px;
+  grid-template-areas:"desc desc desc desc del"
+                      "qta  um   prezzo tot tot";
+  gap:8px 10px; margin-bottom:18px;
+}
+.sheet .prev-riga:not(.prev-riga-cap) .pr-desc  { grid-area:desc; }
+.sheet .prev-riga:not(.prev-riga-cap) .pr-qta   { grid-area:qta; }
+.sheet .prev-riga:not(.prev-riga-cap) .pr-um    { grid-area:um; }
+.sheet .prev-riga:not(.prev-riga-cap) .pr-prezzo{ grid-area:prezzo; }
+.sheet .prev-riga:not(.prev-riga-cap) .pr-tot   { grid-area:tot; }
+.sheet .prev-riga:not(.prev-riga-cap) .rdel     { grid-area:del; min-height:52px; }
+.sheet .prev-riga select.pr-um{
+  width:100%; min-height:52px; font-family:inherit; font-size:18px; color:var(--testo,#0f172a);
+  padding:0 8px 0 12px; border:1.5px solid var(--bordo-forte,#cbd5e1); border-radius:12px; background:var(--card,#fff);
+}
+.sheet .prev-riga select.pr-um:focus{ outline:none; border-color:var(--blu,#0066ff); box-shadow:0 0 0 3px rgba(0,102,255,.12); }
+.sheet .prev-riga .pr-tot{
+  align-self:center; text-align:right; font-size:18px; font-weight:800; white-space:nowrap;
+  font-variant-numeric:tabular-nums; color:var(--testo,#0f172a); min-width:0;
+}
+@media(max-width:560px){
+  .sheet .prev-riga:not(.prev-riga-cap){
+    grid-template-columns:88px 98px 1fr 48px;
+    grid-template-areas:"desc desc desc   del"
+                        "qta  um   prezzo prezzo"
+                        "tot  tot  tot    tot";
+    gap:8px;
+  }
+  .sheet .prev-riga:not(.prev-riga-cap) .pr-qta{ padding-left:10px; padding-right:8px; }
+  .sheet .prev-riga select.pr-um{ padding:0 4px 0 8px; font-size:17px; }
+  .sheet .prev-riga:not(.prev-riga-cap) .rdel{ min-height:48px; }
+}

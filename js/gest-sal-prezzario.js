@@ -830,7 +830,8 @@
 
     const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     const az=azLetta||{};
-    const cli=await cliDelDocumento(comp.cliente_id,"nome,indirizzo,referente");
+    /* 13 nov 2026 (lista «MANCA», n. 10) — anche CAP, citta' e provincia */
+    const cli=await cliDelDocumento(comp.cliente_id,"nome,indirizzo,cap,citta,prov,referente");
 
     /* ---- i conti: le stesse funzioni della schermata, nessuna copia ---- */
     const oggi =compRiepilogoDa(t.maturato,            t.oneri_sicurezza,           t.importo_manodopera, comp);
@@ -924,7 +925,7 @@
       doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Spett.le",M,y);y+=5.5;
       doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(String(cli.nome),M,y);y+=5;
       doc.setFontSize(8.5);doc.setTextColor(90);
-      if(cli.indirizzo){doc.text(String(cli.indirizzo),M,y);y+=4.2;}
+      { const _ci=cliIndirizzo(cli); if(_ci){const _il=doc.splitTextToSize(_ci,R-M);doc.text(_il,M,y);y+=_il.length*4.2;} }
       if(cli.referente){doc.text("Rif. "+cli.referente,M,y);y+=4.2;}
       doc.setTextColor(0);y+=4;
     }
@@ -1633,7 +1634,9 @@
            scrittura di piu' righe insieme, tutte devono avere le STESSE
            chiavi, se no le altre finiscono a NULL e salta tutto. */
         righe.push({user_id:sbUid, sezione:false,
-          descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+_umPdf(v.unita)+")":""),
+          /* 13 nov 2026 — l'unita' va nella sua colonna, non in coda alla descrizione */
+          descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)"),
+          unita:v.unita||null,
           qta:_q(v),
           prezzo:+v.prezzo_unitario||0,
           ordine:righe.length});

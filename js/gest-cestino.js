@@ -1500,7 +1500,7 @@
     add(_pro?"Collaboratori":"Squadra",D.ops.map(o=>({Reparto:mN[o.mestiere_id]||"",Nome:o.nome||"",Telefono:o.telefono||""})));
     const tot={};D.righe.forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+impRiga(r.qta,r.prezzo);});
     add("Preventivi",D.prev.map(p=>({Numero:p.numero,Titolo:p.titolo||"",Reparto:mN[p.mestiere_id]||"",Cliente:cN[p.cliente_id]||"",Data:p.data||"",Stato:p.stato||"","Totale €":tot[p.id]||0,Note:p.note||""})));
-    add("Voci preventivi",D.righe.map(r=>({"N. preventivo":pN[r.preventivo_id]||"",Descrizione:r.descrizione||"","Q.tà":+r.qta||1,"Prezzo €":+r.prezzo||0,"Totale €":impRiga(r.qta,r.prezzo)})));
+    add("Voci preventivi",D.righe.map(r=>({"N. preventivo":pN[r.preventivo_id]||"",Descrizione:r.descrizione||"","Q.tà":+r.qta||1,"Unità":r.unita||"","Prezzo €":+r.prezzo||0,"Totale €":impRiga(r.qta,r.prezzo)})));
     add("Spese",D.spese.map(s=>({Lavoro:lN[s.lavoro_id]||"",Descrizione:s.descrizione||"","Importo €":+s.importo||0,Data:s.data||""})));
     const zN=Object.fromEntries(D.mezzi.map(m=>[m.id,m.nome||""]));
     const zCat={mezzo:"Mezzo",attrezzatura:"Attrezzatura"};

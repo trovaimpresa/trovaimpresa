@@ -175,7 +175,7 @@
     const blocchi=[];
     blocchi.push({t:"testata",
       azienda:A.nome||"(compila i Dati azienda)",
-      sotto:[A.piva?"P.IVA "+A.piva:"",A.indirizzo||"",
+      sotto:[A.piva?"P.IVA "+A.piva:"",nolAzIndirizzo(A),
              [A.tel?"Tel "+A.tel:"",A.email||""].filter(Boolean).join("   ")].filter(Boolean),
       titolo:"CONTRATTO DI NOLEGGIO",
       dettaglio:(caldo?"a caldo (con operatore)":"a freddo (senza operatore)")+

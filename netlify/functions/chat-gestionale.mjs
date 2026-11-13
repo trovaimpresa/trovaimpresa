@@ -180,7 +180,7 @@ const FIGLI = {
   },
   righe_preventivo: {
     tabella: 'gest_preventivo_righe', padre: 'preventivi', chiave: 'preventivo_id',
-    campi: 'id,ordine,sezione,descrizione,qta,prezzo', ordine: 'ordine', crescente: true,
+    campi: 'id,ordine,sezione,descrizione,qta,unita,prezzo', ordine: 'ordine', crescente: true,
     nome: 'le righe di un preventivo'
   },
   spese_del_lavoro: {

@@ -962,6 +962,7 @@
       return {descrizione: chi?(voce+" — "+chi):voce,
               qta: Math.round(g.ore*100)/100,
               prezzo: (tariffa===null?"":tariffa),
+              unita:"ora",
               sezione:false, ordine:i};
     });
 

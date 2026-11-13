@@ -196,7 +196,10 @@
       <p style="font-size:13px;color:var(--muted);margin:-8px 0 14px">Compaiono in cima a ogni PDF fattura. Sono i dati dell'azienda multiservizi.</p>
       <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
       <div class="field"><label>P.IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="01234567890"></div>
-      <div class="field"><label>Indirizzo</label><input id="a-ind" value="${esc(a.indirizzo||"")}" placeholder="Via, numero, città"></div>
+      <div class="field"><label>Via e numero</label><input id="a-ind" value="${esc(a.indirizzo||"")}" placeholder="Es. Via Roma 12"></div>
+      <div class="row2"><div class="field"><label>CAP</label><input id="a-cap" value="${esc(a.cap||"")}" placeholder="Es. 02100" inputmode="numeric" maxlength="5"></div>
+      <div class="field"><label>Città</label><input id="a-citta" value="${esc(a.citta||"")}" placeholder="Es. Rieti"></div></div>
+      <div class="field"><label>Provincia</label><input id="a-prov" value="${esc(a.prov||"")}" placeholder="Es. RI" maxlength="2" style="text-transform:uppercase"></div>
       <div class="row2"><div class="field"><label>Telefono</label><input id="a-tel" value="${esc(a.tel||"")}"></div>
       <div class="field"><label>Email</label><input id="a-email" value="${esc(a.email||"")}"></div></div>
       <div class="field"><label>IBAN (per i bonifici)</label><input id="a-iban" value="${esc(a.iban||"")}" placeholder="IT.."></div>
@@ -207,6 +210,8 @@
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={user_id:sbUid,
       nome:$("#a-nome").value.trim(),piva:$("#a-piva").value.trim(),indirizzo:$("#a-ind").value.trim(),
+      /* 13 nov 2026 — CAP, citta' e provincia: le stesse tre colonne dell'App */
+      cap:$("#a-cap").value.trim()||null,citta:$("#a-citta").value.trim()||null,prov:$("#a-prov").value.trim().toUpperCase()||null,
       tel:$("#a-tel").value.trim(),email:$("#a-email").value.trim(),iban:$("#a-iban").value.trim(),
       num_fatt:(aziendaRow&&aziendaRow.num_fatt!=null)?aziendaRow.num_fatt:1};
     const {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
@@ -223,7 +228,7 @@
     const {data:lav}=await sb.from("gest_lavori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     if(!lav){toast("Lavoro non trovato");return;}
     let c={};
-    if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
+    if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,cap,citta,prov,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
     let numFatt=lav.num_fatt;
     if(!numFatt){
       numFatt=az.num_fatt||1;
@@ -236,7 +241,7 @@
     let y=20;
     doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",az.indirizzo||"",[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",nolAzIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
     doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("FATTURA",R,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
@@ -247,7 +252,7 @@
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Cliente",M,y);y+=6;
     doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(c.nome||"—",M,y);y+=5;
     doc.setFontSize(9);doc.setTextColor(90);
-    if(c.indirizzo){doc.text(c.indirizzo,M,y);y+=4.5;}
+    { const _ci=nolAzIndirizzo(c); if(_ci){const _il=doc.splitTextToSize(_ci,R-M);doc.text(_il,M,y);y+=_il.length*4.5;} }
     if(c.referente){doc.text("Rif. "+c.referente,M,y);y+=4.5;}
     doc.setTextColor(0);y+=8;
     doc.setFillColor(31,111,92);doc.rect(M,y,R-M,8,"F");

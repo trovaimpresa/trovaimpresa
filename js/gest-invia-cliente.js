@@ -69,7 +69,7 @@
     righe.forEach(function(r){
       if(_rigaSezione(r)){ out.righe.push({sez:true,d:T(r.descrizione)}); return; }
       var rt=impRiga(r.qta,r.prezzo); tot+=rt;
-      out.righe.push({d:T(r.descrizione),q:_numTesto(+r.qta||1)+" × "+eur2(+r.prezzo||0),t:eur2(rt)});
+      out.righe.push({d:T(r.descrizione),q:prevQtaTesto(r)+" × "+eur2(+r.prezzo||0),t:eur2(rt)});
     });
     if(ruoloUtente==="professionista"){
       var cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);

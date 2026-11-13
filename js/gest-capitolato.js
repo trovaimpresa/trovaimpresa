@@ -596,7 +596,8 @@
     });
     return g;
   }
-  function qtaTesto(r){ var q=+r.qta; return (q&&q!==1)?String(q).replace(".",","):""; }
+  /* 13 nov 2026 — con l'unita' di misura: «85,5 m²»; «1 m²» si scrive, «1» da solo no */
+  function qtaTesto(r){ var q=+r.qta, u=(typeof prevUnitaTesto==="function")?prevUnitaTesto(r.unita):""; return (q&&(q!==1||u))?String(q).replace(".",",")+(u?" "+u:""):""; }
   function rigaTesto(r){ var q=qtaTesto(r); var d=T(r.descrizione); if(d.length>130) d=d.slice(0,130).replace(/\s+\S*$/,"")+"…"; return d+(q?" — quantità "+q:""); }
   function voceDaRiga(r){
     var q=qtaTesto(r);

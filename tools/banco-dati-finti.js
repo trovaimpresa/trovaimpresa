@@ -41,11 +41,11 @@ module.exports = function datiFinti(UID, REPARTO) {
     Object.assign(base(402, 10), { mestiere_id: REPARTO, cliente_id: id(102), lavoro_id: id(302), numero: 2, titolo: "Tinteggiatura soggiorno", note: "", stato: "accettato", data: g(-10), cassa_perc: 0, iva_perc: 22, ritenuta: false, ritenuta_perc: 0, spese_forfait: 0, capitolato: null, sconto: 0, sconto_perc: 0, accettato_il: null })
   ];
   const prevRighe = [
-    { id: id(411), user_id: UID, preventivo_id: id(401), descrizione: "Demolizione e rimozione dei pavimenti esistenti, compreso il trasporto a discarica", qta: 85.5, prezzo: 32.4, ordine: 1, sezione: false },
-    { id: id(412), user_id: UID, preventivo_id: id(401), descrizione: "Posa pavimento in gres", qta: 85.5, prezzo: 48, ordine: 2, sezione: false },
-    { id: id(413), user_id: UID, preventivo_id: id(402), descrizione: "Tinteggiatura pareti", qta: 60, prezzo: 9.5, ordine: 1, sezione: false },
-    { id: id(414), user_id: UID, preventivo_id: id(402), descrizione: "Stuccatura e carteggiatura delle crepe", qta: 1, prezzo: 120, ordine: 2, sezione: false },
-    { id: id(415), user_id: UID, preventivo_id: id(402), descrizione: "Tinteggiatura soffitto", qta: 22, prezzo: 5, ordine: 3, sezione: false }
+    { id: id(411), user_id: UID, preventivo_id: id(401), descrizione: "Demolizione e rimozione dei pavimenti esistenti, compreso il trasporto a discarica", qta: 85.5, unita: "m²", prezzo: 32.4, ordine: 1, sezione: false },
+    { id: id(412), user_id: UID, preventivo_id: id(401), descrizione: "Posa pavimento in gres", qta: 85.5, unita: "m²", prezzo: 48, ordine: 2, sezione: false },
+    { id: id(413), user_id: UID, preventivo_id: id(402), descrizione: "Tinteggiatura pareti", qta: 60, unita: "m²", prezzo: 9.5, ordine: 1, sezione: false },
+    { id: id(414), user_id: UID, preventivo_id: id(402), descrizione: "Stuccatura e carteggiatura delle crepe", qta: 1, unita: "corpo", prezzo: 120, ordine: 2, sezione: false },
+    { id: id(415), user_id: UID, preventivo_id: id(402), descrizione: "Tinteggiatura soffitto", qta: 22, unita: null, prezzo: 5, ordine: 3, sezione: false }
   ];
   const fatt = (n, numero, stato, giorniFa, cli, pagata) => Object.assign(base(n, giorniFa), { mestiere_id: REPARTO, cliente_id: cli.id, anno: anno, numero: numero, tipo: "fattura", data: g(-giorniFa), stato: stato, data_pagata: pagata || null, cli_nome: cli.nome, cli_piva: cli.piva, cli_cod_fiscale: cli.cod_fiscale, cli_indirizzo: cli.indirizzo, cli_cap: cli.cap, cli_citta: cli.citta, cli_prov: cli.prov, cli_sdi: "", cli_pec: "", regime_fiscale: "RF01", ritenuta_perc: 0, bollo: 0, sconto: 0, note: "", cassa_perc: 0, cassa_tipo: null, spese: 0, spese_iva: 0, spese_regime: null, scadenza: null, modo_pagamento: null, iban: null, sdi_uuid: null, sdi_stato: null, sdi_esito: null, sdi_inviata_il: null, sdi_aggiornata_il: null, sdi_ambiente: null });
   const fatture = [

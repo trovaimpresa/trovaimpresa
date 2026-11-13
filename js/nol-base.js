@@ -38,6 +38,19 @@
   const FATT_ETICHETTA={none:"Da fatturare",emessa:"Emessa, da incassare",pagata:"Pagata"};
   const FATT_COLORE={none:"#e65100",emessa:"#1565c0",pagata:"#2e7d32"};
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  /* 13 nov 2026 (lista «MANCA», n. 10) — L'INDIRIZZO COMPLETO, in un posto solo.
+     Nei PDF del Noleggio usciva solo la via: CAP, citta' e provincia stanno in
+     tre colonne loro (le stesse dell'App: gest_azienda.cap / citta / prov).
+     E' la copia di azIndirizzo() dell'App (js/gest-azienda.js), che il Noleggio
+     non carica. Chi ha scritto tutto dentro la via non perde niente. */
+  function nolAzIndirizzo(a){
+    if(!a)return "";
+    const via=String(a.indirizzo||"").trim();
+    const coda=[String(a.cap||"").trim(),String(a.citta||"").trim()].filter(Boolean).join(" ");
+    const pr=String(a.prov||"").trim();
+    if(!coda&&!pr)return via;
+    return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ");
+  }
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 
   /* ================================================================

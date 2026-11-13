@@ -90,7 +90,28 @@
      Scrive le voci di un preventivo. Torna {error, persi}: «persi» sono i
      capitoli lasciati fuori perché la colonna non c'è ancora — le
      lavorazioni si salvano lo stesso, che è la cosa che conta. */
+  /* 13 nov 2026 — la colonna «unita» manca (42703 che la nomina) */
+  function _eUnitaMancante(e){
+    if(!e)return false;
+    const t=(String(e.message||"")+" "+String(e.code||"")+" "+String(e.details||"")).toLowerCase();
+    if(t.indexOf("23502")>=0)return false;
+    return t.indexOf("unita")>=0;
+  }
+  let _prevUnitaPersa=false;
   async function _scriviRighePrev(righe){
+    /* ⛔ «unita» su TUTTE le righe (stessa regola di «sezione»: le chiavi
+       devono combaciare). E se la colonna non c'e' ancora, si salva senza:
+       le voci non si perdono, si perde solo la parola accanto alla quantita'. */
+    righe=(righe||[]).map(r=>Object.assign({},r,{unita:(r.unita!=null&&String(r.unita).trim())?prevUnita(r.unita):null}));
+    _prevUnitaPersa=false;
+    {
+      const r0=await sb.from("gest_preventivo_righe").insert(righe);
+      if(!r0.error)return {error:null,persi:0};
+      if(_eUnitaMancante(r0.error)){
+        _prevUnitaPersa=righe.some(r=>r.unita);
+        righe=righe.map(r=>{const x=Object.assign({},r);delete x.unita;return x;});
+      }else if(!_eSezioneMancante(r0.error))return {error:r0.error,persi:0};
+    }
     if(!righe||!righe.length)return {error:null,persi:0};
     const {error}=await sb.from("gest_preventivo_righe").insert(righe);
     if(!error)return {error:null,persi:0};
@@ -104,6 +125,46 @@
   const AVVISO_SEZIONI="I capitoli non sono stati salvati: manca l'aggiornamento del database "
     +"(esegui sql/gest-preventivo-sezioni.sql su Supabase). Le lavorazioni ci sono tutte.";
 
+  /* ===== 13 nov 2026 (lista «MANCA», n. 3) — L'UNITA' DI MISURA E IL TOTALE DI RIGA =====
+     Una voce diceva «85,5 · 32,40» e basta: 85,5 che cosa? E quanto fa la
+     riga si leggeva solo sul PDF. Adesso ogni voce ha la sua unita' (la
+     STESSA tendina del computo: m, m², m³, kg, cad, ora…) e a destra il suo
+     totale, che cambia mentre scrivi.
+     ⛔ Il totale di riga NON e' un conto nuovo: e' impRiga(), quello di sempre.
+     ⛔ L'unita' non entra in nessun conto: e' una parola accanto alla quantita'.
+     Colonna: gest_preventivo_righe.unita (sql/2026-11-13-preventivo-unita.sql).
+     Se la colonna non c'e' ancora, _scriviRighePrev salva senza e lo dice. */
+  const PREV_UNITA=(typeof UNITA!=="undefined")?UNITA:["m","m²","m³","kg","q","t","cad","n.","corpo","ora","giorno","l"];
+  /* porta un'unita' scritta in qualunque modo («mq», «M2», «ore») a quella
+     della tendina; una che non conosce resta com'e' (al massimo 12 lettere) */
+  function prevUnita(u){
+    const s=String(u==null?"":u).trim(); if(!s)return "";
+    if(PREV_UNITA.indexOf(s)>=0)return s;
+    const piatta=x=>(typeof _uniPiatta==="function")?_uniPiatta(x):String(x).toLowerCase().replace(/\s+/g,"");
+    const k=piatta(s);
+    if(k==="ore"||k==="h")return "ora";
+    if(k==="giorni"||k==="gg"||k==="giornata"||k==="giornate")return "giorno";
+    if(k==="acorpo"||k==="ac")return "corpo";
+    for(let i=0;i<PREV_UNITA.length;i++){ if(piatta(PREV_UNITA[i])===k)return PREV_UNITA[i]; }
+    return s.slice(0,12);
+  }
+  /* come si legge accanto alla quantita': «85,5 m²», «1 a corpo» */
+  function prevUnitaTesto(u){ const s=prevUnita(u); return s==="corpo"?"a corpo":s; }
+  /* la quantita' con la sua unita', per chi la scrive a schermo */
+  function prevQtaTesto(r){ const u=prevUnitaTesto(r&&r.unita); return _numTesto(+(r&&r.qta)||1)+(u?" "+u:""); }
+  /* e per il foglio stampato: «mq» e «mc», come nel computo (_umPdf) */
+  function prevUnitaPdf(u){ const s=prevUnitaTesto(u); return (s&&typeof _umPdf==="function")?_umPdf(s):s; }
+  function prevUnitaOpts(u){
+    const s=prevUnita(u);
+    return '<option value="">unità</option>'
+      +PREV_UNITA.map(x=>'<option value="'+esc(x)+'"'+(x===s?" selected":"")+'>'+esc(x==="corpo"?"a corpo":x)+'</option>').join("")
+      +((s&&PREV_UNITA.indexOf(s)<0)?'<option value="'+esc(s)+'" selected>'+esc(s)+'</option>':"");
+  }
+  function prevRigaTotTesto(d){
+    const pz=d.querySelector(".pr-prezzo");
+    if(!pz||!String(pz.value||"").trim())return "";
+    return "= "+eur2(impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0)));
+  }
   function prevRigaHtml(r){
     r=r||{};prevRigheCount++;
     /* la riga di capitolo si scrive e si cancella come tutte le altre: una
@@ -116,9 +177,11 @@
     }
     return `<div class="prev-riga" data-riga>
       <textarea class="pr-desc" rows="1" data-no-dettato placeholder="Es. Demolizione tramezzo">${esc(r.descrizione||"")}</textarea>
-      <input class="pr-qta" type="text" inputmode="decimal" placeholder="Es. 12" value="${_numTesto(r.qta!=null?r.qta:1)}">
-      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Es. 24,00" value="${_prezzoCasella(r.prezzo)}" data-euro>
-      <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
+      <input class="pr-qta" type="text" inputmode="decimal" placeholder="Es. 12" aria-label="Quantità" value="${_numTesto(r.qta!=null?r.qta:1)}">
+      <select class="pr-um" aria-label="Unità di misura">${prevUnitaOpts(r.unita)}</select>
+      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo" aria-label="Prezzo di una unità" value="${_prezzoCasella(r.prezzo)}" data-euro>
+      <div class="pr-tot" aria-label="Totale della voce">${(r.prezzo==null||r.prezzo==="")?"":"= "+eur2(impRiga(r.qta!=null?r.qta:1,r.prezzo))}</div>
+      <button type="button" class="rdel" data-action="prev-riga-del" aria-label="Togli questa voce">×</button></div>`;
   }
   /* ============================================================
      ⛔ 22 agosto 2026 — IL TOTALE E' LA SOMMA DI QUELLO CHE SI STAMPA
@@ -206,6 +269,8 @@
        ma è meglio che qui si legga la regola invece di fidarsi di un caso. */
     let t=0;$$("#prev-righe [data-riga]").forEach(d=>{
       if(d.hasAttribute("data-sezione"))return;
+      /* 13 nov 2026 — il totale della riga, accanto alla riga (stesso impRiga) */
+      const tr=d.querySelector(".pr-tot"); if(tr)tr.textContent=prevRigaTotTesto(d);
       t+=impRiga(_numRiga(d,".pr-qta",1),_numRiga(d,".pr-prezzo",0));});
     const el=$("#prev-somma");if(el)el.textContent="Totale: "+eur2(t);
     return t;
@@ -649,10 +714,11 @@
          _scriviRighePrev). Se la colonna non c'è ancora, _scriviRighePrev
          riscrive senza e lo dice. */
       if(d.hasAttribute("data-sezione")){
-        righe.push({descrizione,qta:0,prezzo:0,sezione:true,ordine:i});
+        righe.push({descrizione,qta:0,prezzo:0,unita:null,sezione:true,ordine:i});
         return;
       }
-      righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),sezione:false,ordine:i});
+      const um=d.querySelector(".pr-um");
+      righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),unita:(um&&prevUnita(um.value))||null,sezione:false,ordine:i});
     });
     /* un preventivo fatto di soli titoli non è un preventivo */
     if(!righe.filter(r=>!_rigaSezione(r)).length){campoManca($("#prev-righe [data-riga]:not([data-sezione]) .pr-desc"),"Manca almeno una voce: scrivi qui cosa fai.");return;}
@@ -718,7 +784,7 @@
       if(eDelP){toast("Le voci nuove sono salvate, ma le vecchie non si sono cancellate: adesso sono doppie. Riapri e salva di nuovo.");return;}
     }
     closeSheet();rinfresca("preventivi","riepilogo");
-    toast(persiSez?AVVISO_SEZIONI:(avvisoParcella||(id?"Preventivo aggiornato ✔":"Preventivo creato ✔")));
+    toast(persiSez?AVVISO_SEZIONI:(_prevUnitaPersa?"Preventivo salvato, ma le unità di misura no: riprova fra qualche minuto.":(avvisoParcella||(id?"Preventivo aggiornato ✔":"Preventivo creato ✔"))));
   }
   /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
      Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
@@ -729,8 +795,8 @@
       if(!titolo) return {ok:false, error:"Titolo mancante"};
       const righe=(Array.isArray(voci)?voci:[]).map((v,i)=>{
         let desc=(v.descrizione||"").trim();
-        if(v.unita) desc+=" ("+String(v.unita).trim()+")";
-        return {user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, ordine:i};
+        /* 13 nov 2026 — l'unita' ha la sua colonna: non va piu' in coda alla descrizione */
+        return {user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, unita:v.unita?prevUnita(v.unita):null, sezione:false, ordine:i};
       }).filter(r=>r.descrizione);
       if(!righe.length) return {ok:false, error:"Nessuna voce valida"};
       /* ===== 13 agosto 2026 — IL NUMERO NON GUARDAVA NE' L'ANNO NE' IL REPARTO
@@ -757,7 +823,7 @@
       }catch(e){ return {ok:false, error:"Numero non assegnato: riprova"}; }
       const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,note:note||null,data:todayStr(),stato:"bozza",numero}).select().single();
       if(error) return {ok:false, error:error.message};
-      const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
+      const {error:e2}=await _scriviRighePrev(righe.map(r=>({...r,preventivo_id:np.id})));
       if(e2) return {ok:false, error:e2.message};
       rinfresca("preventivi","riepilogo");
       return {ok:true, id:np.id};
