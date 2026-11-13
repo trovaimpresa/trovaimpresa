@@ -1655,3 +1655,95 @@ Trovati 24 difetti (5 gravi: 4 nel Noleggio, 1 nell'App). Console e rete senza e
 **Non provato:** le ricevute eliminate nel Cestino (non ce n'erano), se «elimina» fa quello che dice (sempre risposto No), PDF, «Parla», app operaio, studio tecnico.
 **12 nov (sera), il banco automatico:** `tools/banco-gestionale.js` (regola 25). Apre gestionale-app e gestionale-noleggio a 1440, 375 e 360 px con utente e database finti: 44 sezioni misurate per larghezza, 14 finestre «nuovo» (Salva si tocca, niente fuori schermo, casella rossa a modulo vuoto), 44 sezioni senza rete (riquadro rosso con Riprova, niente parole tecniche). Sabotato apposta in tre punti (barra sopra «Salva», Cestino «vuoto» senza rete, casella non rossa): li ha accusati tutti e tre. Al primo giro ha trovato un difetto mio: a 360 px il pulsante «Oggi» allargato faceva uscire il Calendario di 6 px (corretto). Su GitHub parte da solo a ogni push che tocca il gestionale (`.github/workflows/banco-gestionale.yml`): non ferma Netlify, avvisa.
 **12 nov (notte), il banco coi dati finti:** `tools/banco-dati-finti.js` — poche righe INVENTATE per 24 tabelle (colonne vere, lette dal database il 12 nov), con dentro apposta i casi scomodi: nomi lunghissimi, un lavoro in ritardo, un mezzo fuori da troppo, una fattura scaduta, una giacenza a zero. Il finto database applica i filtri (reparto, cestino, stato). In più il banco adesso apre la prima scheda di ogni sezione (23 schede: sta nello schermo, «Salva» si tocca), legge 19 domande di «elimina» (devono dire il nome e dove va) e senza rete confronta il prima e il dopo (niente «vuoto» nuovo, nessun numero che va a zero). **Al primo giro ha trovato 3 difetti veri, corretti:** Fornitori dell'App, «Pagata» e «Modifica» a 13,5 px (`.btn-sm` a 14 px, 44 px sul telefono); Rendimento del Noleggio che usciva di 7 px anche a 375 px con un importo a quattro cifre; la domanda di «elimina» di una fattura emessa non diceva dove va (ora «Va nel Cestino: la riprendi quando vuoi»). Il giro intero dura circa 15 minuti.
+
+
+## 13 nov 2026 — quarto giro del controllore separato
+Due liste. La prima («non funziona») si corregge, partendo dai 6 più gravi, uno alla volta. La seconda («manca») NON si fa da soli: prima Alex dice quali vuole.
+Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perché).
+
+### Lista «NON FUNZIONA» — i 6 più gravi
+1. Noleggio: una fattura eliminata non compare in nessun Cestino, ma la
+   domanda dice «la riprendi dal Cestino». In js/nol-cestino.js l'elenco
+   CEST_COSE non ha nol_fatture.
+2. Lavoro: al «Salva» il correttore cambia le parole. Titolo
+   «PROVA CONTROLLORE Preventivo» diventato «Preventivo controllore prova.»;
+   da «Cosa è stato fatto» ha tolto due parole. Non deve toccare nomi,
+   maiuscole e parole che non capisce, e mai il titolo.
+3. Studio tecnico, variante del computo: la copia non porta le righe
+   dell'analisi dei prezzi (gest_analisi_righe), il prezzo diventa 0,00 €
+   e la variante esce «−100%». Guarda anche «Duplica».
+4. Telefono, Chat con AI: «Manda» e «Parla» stanno sotto la barra in basso,
+   si vedono solo scorrendo la pagina.
+5. Noleggio: dopo «Elimina» la finestra resta aperta (nolElimina in
+   js/nol-card-righe-stampa.js non la chiude). Premendo «Salva» dice
+   «Cliente aggiornato» su una scheda che è nel Cestino.
+6. Preventivi, elenco: mostra il totale senza lo sconto come «IVA esclusa»
+   (467,97 € invece di 444,57 €). Il «con IVA» accanto è giusto.
+
+### Lista «NON FUNZIONA» — gli altri
+7. Giornate conta la manodopera delle ore «Senza nome» (168,75 €), il lavoro
+   dice che non entrano nel margine. E un lavoro nel Cestino resta contato
+   in Giornate.
+8. Cestino del Noleggio: l'ora è in UTC, un'ora indietro.
+9. Lavoro nel Cestino con ore e spese: «Elimina per sempre» rifiuta, bisogna
+   rimetterlo a posto e buttare ore e spese una per una.
+10. «Emetti» dà il numero alla fattura senza chiedere conferma.
+11. Noleggio, mezzo nuovo: nasce «NON SI PUÒ DARE» per la verifica periodica,
+    il modulo non lo dice.
+12. PDF «scheda noleggio»: il titolo esce dalla pagina coi nomi lunghi.
+13. Finestra SdI: «Torna alla fattura», ma il codice destinatario sta nel
+    cliente. «Apri il cliente» non apre «Dati per la fattura».
+14. Conferma d'ordine: l'aiuto copre «Scarica la conferma» e dice
+    «al fornitore» (js/aiuti.js, voce ordine-pdf). Va al cliente.
+15. Computo, «Scrivo la quantità»: dopo dice «scrivici le misure» e
+    «la quantità è zero», ma il conto è giusto.
+16. Domande di «elimina per sempre»: parole tecniche (gest_sal_righe,
+    gest_preventivi_link, gest_analisi_righe) e «Insieme a lei» per un maschile.
+17. Domande di «elimina» senza nome: SAL, spesa, corso.
+18. Chat buttata: dice «non si recupera» ma i messaggi restano nel database.
+19. Noleggio: «Salva» è in fondo alla finestra, nell'App resta in vista.
+20. Fattura: «Segna pagata» (la regola è «Ha pagato»).
+21. Il «Sì» ha 4 nomi: «Sì», «Sì, elimina», «Sì, nel cestino», «Sì, buttala».
+22. «7.5 ore» col punto (PDF scheda lavoro e dentro il lavoro).
+23. SAL: «−0,00 €» e «non da ultima volta».
+24. Accenti: «e'» nel conto del Noleggio, «si.» nel contratto,
+    «Modalita'» in conferma d'ordine e lettera d'incarico, «Agibilita'».
+25. Assistente: «Bravo, hai mandato il tuo primo preventivo!» con soli bozze.
+26. SdI: «Hai finito gli invii» a chi non ne ha mai avuti.
+27. Verbale di consegna: tutte le voci «A posto» anche se non toccate.
+28. Studio, telefono, Mappa: «Tutte le pratiche» esce dallo schermo (375 e 360).
+29. Parcella, schermo e PDF: «Totale imponibile 1.056,00» ma l'IVA è contata
+    su 1.040 (senza le spese). Sembra un errore.
+30. Parcella: riga sotto la ritenuta a 13 px.
+31. Studio, Preventivi vuoto: «diventa un lavoro» (lì è una pratica).
+
+### Lista «MANCA» (prima chiedere ad Alex quali vuole)
+1. Fattura: scadenza, modo di pagamento, IBAN (anche nel PDF).
+2. Ricevuta di pagamento: non si lega alla fattura e non la segna pagata.
+3. Preventivo: unità di misura e totale di riga.
+4. PDF preventivo: firma «per accettazione».
+5. Lavoro dal preventivo: porta solo il titolo, non le voci.
+6. Rapportino da far firmare al cliente dal gestionale.
+7. Ore sul lavoro: scegliere chi le ha fatte.
+8. Email vera col PDF allegato (oggi apre solo il programma di posta).
+9. Dati azienda nei PDF di Giornate, scheda cliente, scheda noleggio.
+10. CAP e città del cliente nei PDF di preventivo, scheda lavoro, SAL;
+    quelli dell'azienda nei PDF del Noleggio.
+11. Cliente del Noleggio: codice destinatario e PEC.
+12. SAL in PDF: le firme.
+13. Fattura del Noleggio: cita i DDT ma non li elenca.
+14. Contratto di noleggio: dire se i prezzi sono più IVA.
+15. Cestino del Noleggio: la riga del noleggio senza il cliente.
+16. Capitolato e verbale: firme da sole a pagina 2.
+17. Parcella e incarico: albo e numero di iscrizione.
+18. Parcella PDF: totale del documento prima della ritenuta.
+19. Crediti formativi: traguardo fisso a 30 CFP, non si sceglie.
+20. Scheda pratica PDF: mancano tipo, stato, comune, protocollo, catasto.
+
+
+### Da guardare (non provato dal controllore)
+- Fatture del Noleggio e dell'App: numeri separati? (nel Noleggio c'è una
+  «n. 1», nell'App l'ultima è la 15).
+- «Duplica» del computo perde i prezzi come la variante?
+
+### Diario del quarto giro

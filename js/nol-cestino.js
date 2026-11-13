@@ -22,6 +22,12 @@
     {t:"neg_movimenti", lab:"Movimento",       tipo:"movimento", col:"#757575"},
     {t:"gest_lavori",   lab:"Lavoro / fattura",tipo:"fattura",   col:"#7C3AED"},
     {t:"nol_media",     lab:"Foto o video",    tipo:"media",     col:"#00838f"},
+    /* 13 nov 2026 (quarto giro) — la fattura del Noleggio (nol_fatture) finiva
+       nel cestino (js/cestino.js la conosce dal 23 agosto) ma qui non era in
+       elenco: la domanda diceva «la riprendi dal Cestino» e nel Cestino non
+       c'era. Il nome e' lo stesso della domanda: «n. 3 di Rossi». */
+    {t:"nol_fatture",   lab:"Fattura",         tipo:"fattnol",   col:"#7C3AED",
+     nome:r=>(r.numero?"Fattura n. "+r.numero:"Fattura in bozza")+(r.cliente?" di "+r.cliente:"")},
     /* 14 settembre 2026 — senza questa riga un promemoria buttato spariva e
        basta: la riga restava nel database con eliminato_il scritto, ma nel
        Cestino non la vedeva nessuno e non si poteva rimettere a posto. */
@@ -77,7 +83,7 @@
       cestCache=[];
       risposte.forEach(x=>x.righe.forEach(r=>cestCache.push({
         tab:x.c.t, tipo:x.c.tipo, lab:x.c.lab, col:x.c.col,
-        nome:cestNome(r).slice(0,80), quando:r.eliminato_il, id:r.id, riga:r
+        nome:(x.c.nome?x.c.nome(r):cestNome(r)).slice(0,80), quando:r.eliminato_il, id:r.id, riga:r
       })));
       cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
       /* ⚠️ se una tabella non ha risposto, «non lo so» non e' «zero»: il
