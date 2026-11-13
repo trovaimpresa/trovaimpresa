@@ -349,7 +349,11 @@ async function giro(browser, base, nome, larghezza) {
   await ctx.close();
 }
 
-(async () => {
+/* 13 nov 2026 — gli attrezzi del banco servono anche a chi fa le FOTO
+   (tools/foto-gestionale.js): se il file e' chiamato da un altro, non parte
+   il giro, presta solo il sito finto e il database finto. */
+if (require.main !== module) { module.exports = { servi, collega, PAGINE, chromium, aspetta }; }
+else (async () => {
   const quali = process.argv[2] && PAGINE[process.argv[2]] ? [process.argv[2]] : Object.keys(PAGINE);
   const srv = await servi(), base = "http://127.0.0.1:" + srv.address().port;
   const browser = await chromium.launch();

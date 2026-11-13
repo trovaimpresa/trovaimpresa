@@ -1662,22 +1662,22 @@ Due liste. La prima («non funziona») si corregge, partendo dai 6 più gravi, u
 Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perché).
 
 ### Lista «NON FUNZIONA» — i 6 più gravi
-1. Noleggio: una fattura eliminata non compare in nessun Cestino, ma la
+[x] 1. Noleggio: una fattura eliminata non compare in nessun Cestino, ma la
    domanda dice «la riprendi dal Cestino». In js/nol-cestino.js l'elenco
    CEST_COSE non ha nol_fatture.
-2. Lavoro: al «Salva» il correttore cambia le parole. Titolo
+[x] 2. Lavoro: al «Salva» il correttore cambia le parole. Titolo
    «PROVA CONTROLLORE Preventivo» diventato «Preventivo controllore prova.»;
    da «Cosa è stato fatto» ha tolto due parole. Non deve toccare nomi,
    maiuscole e parole che non capisce, e mai il titolo.
-3. Studio tecnico, variante del computo: la copia non porta le righe
+[x] 3. Studio tecnico, variante del computo: la copia non porta le righe
    dell'analisi dei prezzi (gest_analisi_righe), il prezzo diventa 0,00 €
    e la variante esce «−100%». Guarda anche «Duplica».
-4. Telefono, Chat con AI: «Manda» e «Parla» stanno sotto la barra in basso,
+[ ] 4. Telefono, Chat con AI: «Manda» e «Parla» stanno sotto la barra in basso,
    si vedono solo scorrendo la pagina.
-5. Noleggio: dopo «Elimina» la finestra resta aperta (nolElimina in
+[x] 5. Noleggio: dopo «Elimina» la finestra resta aperta (nolElimina in
    js/nol-card-righe-stampa.js non la chiude). Premendo «Salva» dice
    «Cliente aggiornato» su una scheda che è nel Cestino.
-6. Preventivi, elenco: mostra il totale senza lo sconto come «IVA esclusa»
+[x] 6. Preventivi, elenco: mostra il totale senza lo sconto come «IVA esclusa»
    (467,97 € invece di 444,57 €). Il «con IVA» accanto è giusto.
 
 ### Lista «NON FUNZIONA» — gli altri
@@ -1747,3 +1747,11 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
 - «Duplica» del computo perde i prezzi come la variante?
 
 ### Diario del quarto giro
+**13 nov (mattina), i 6 più gravi — corretti nel codice, banco verde, NON ancora online (manca il push) e NON ancora provati sul sito vero:**
+- **1** `js/nol-cestino.js`: `nol_fatture` in `CEST_COSE` (tipo `fattnol`), col nome della domanda: «Fattura n. 3 di Rossi» / «Fattura in bozza di …».
+- **2** `js/correggi-giornata.js`: il titolo del lavoro (`j-desc`) non passa più dal correttore; guardia nuova `fedele()` — se la risposta dell'AI tocca una parola con la maiuscola o un numero, o fa sparire una parola, si butta e il testo resta com'era. Banco nuovo `node tools/banco-correttore.js` (12 prove).
+- **3** `compDuplica` in `js/gest-cestino.js`: «Duplica» e «Crea la variante» copiano le righe di `gest_analisi_righe` e le due percentuali (spese generali, utile). Banco nuovo `node tools/banco-copia-computo.js`: prima della modifica 4 rossi, dopo 0. Risponde anche a «Duplica perde i prezzi?»: sì, li perdeva, stessa funzione.
+- **5** `nolElimina` in `js/nol-card-righe-stampa.js`: dopo l'eliminazione chiude la finestra; il messaggio dice «nel cestino: la riprendi da lì».
+- **6** `renderPreventivi` in `js/gest-ore-spese.js`: «IVA esclusa» è l'imponibile DOPO lo sconto (`impNetto`, da `prevContiImpresa`), nella riga, nella scheda del telefono e nel totale in cima.
+- **4** (Chat con AI sul telefono): riprodotto su un telefono corto (375×560: «Manda» a 547 px, la barra in basso comincia a 493). Foto prima/dopo mandata ad Alex, **in attesa del suo ok**. Proposta: sul telefono la colonna della chat è alta quanto lo schermo libero, i messaggi scorrono dentro, casella e pulsanti restano sopra la barra.
+- Attrezzo nuovo: `node tools/foto-gestionale.js <app|noleggio> <sezione> <larghezza> <file.png> [css-di-prova]` — le foto «come viene» col sito e il database finti del banco.
