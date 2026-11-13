@@ -563,12 +563,15 @@
         <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0" data-euro></div></div>
       <div class="field campo-titolo" id="ore-wrap" style="display:none"><label>⏱ Registro delle ore</label>
         <div class="spese-list" id="ore-list"></div>
-        <div class="spesa-add ore-add">
-          <input id="or-data" type="date" title="Che giorno">
-          <input id="or-ore" type="text" inputmode="decimal" placeholder="Ore (es. 2,5)">
-          <select id="or-chi" title="Chi ci ha lavorato (facoltativo)"><option value="">— chi —</option></select>
-          <button type="button" class="btn" data-action="ore-add">+ Aggiungi</button></div>
-        <input id="or-nota" placeholder="Cosa hai fatto (facoltativo)" style="margin-top:6px;width:100%">
+        <!-- 13 nov 2026 (lista «MANCA», n. 7) — «Chi le ha fatte» si vede SEMPRE,
+             anche con la squadra vuota: ci sono «io» e «un'altra persona». -->
+        <div class="ore-add2">
+          <label class="ore-c"><span>Che giorno</span><input id="or-data" type="date"></label>
+          <label class="ore-c"><span>Quante ore</span><input id="or-ore" type="text" inputmode="decimal" placeholder="Es. 2,5"></label>
+          <label class="ore-c ore-c--tutta"><span>Chi le ha fatte</span><select id="or-chi"><option value="">Scegli chi</option></select></label>
+          <label class="ore-c ore-c--tutta" id="or-chi-nuovo-box" style="display:none"><span>Nome della persona</span><input id="or-chi-nuovo" placeholder="Nome e cognome"></label>
+          <label class="ore-c ore-c--tutta"><span>Cosa ha fatto (se vuoi)</span><input id="or-nota" placeholder="Es. Posa piastrelle bagno"></label>
+          <button type="button" class="btn ore-c--tutta" data-action="ore-add">+ Aggiungi le ore</button></div>
         <div class="margine-box" id="ora-box"></div>
         <!-- 22 agosto 2026 — IL PONTE FRA LE ORE E LA PARCELLA.
              Le ore si segnavano e finivano li': il conto per la parcella si
@@ -577,7 +580,9 @@
         <button type="button" class="btn quick-add" id="ore-in-parcella" data-action="ore-parcella" style="display:none;margin-top:10px">💶 Porta le ore nella parcella</button></div>
       <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>Rapportini di giornata</label>
         <div class="spese-list" id="rap-list"></div>
-        <div class="campo-aiuto">Li scrive chi sta in cantiere, dal telefono. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme. Per correggere le ore senza toccare il rapportino usa il registro qui sopra.</div></div>
+        <!-- 13 nov 2026 (lista «MANCA», n. 6) — il rapportino da far firmare al cliente -->
+        <button type="button" class="btn quick-add" data-action="rapf-nuovo" style="margin-top:8px">＋ Rapportino da far firmare</button>
+        <div class="campo-aiuto">Li scrive la squadra dal telefono, oppure tu qui: il cliente firma col dito sullo schermo. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme.</div></div>
       <div class="field campo-titolo"><label>Fattura</label>
         <div class="j-fatt-info">${
           (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"

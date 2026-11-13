@@ -366,142 +366,154 @@
   function nolDocPdf(dati){
     if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non è disponibile adesso");return;}
     const {blocchi,titolo}=dati;
-    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
-    const M=16, R=210-M, L=R-M; let y=20;
-    const salta=(h)=>{ if(y+h>282){doc.addPage();y=20;} };
-    /* ⛔ 23 agosto 2026 — LE FACCINE NEL PDF.
-       Provando il PDF per davvero (prima il banco bloccava jsPDF e non si
-       provava mai) e' saltato fuori che «⚠️ Nessuna foto allegata» sul
-       foglio diventava «& þ Nessuna foto allegata»: i caratteri fuori dal
-       Latin-1 le font standard del PDF non li sanno scrivere e li storpiano.
-       Qui si tolgono, e le virgolette e i trattini strani si raddrizzano. */
-    const pulisci=(t)=>String(t==null?"":t)
-      .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
-      .replace(/[–—]/g,"-").replace(/…/g,"...")
-      .replace(/[^\x00-\xFF€]/g,"")
-      .replace(/[ \t]{2,}/g," ").trim();
-    const testo=(t,x,larg,size,stile,col)=>{
-      doc.setFont("helvetica",stile||"normal");doc.setFontSize(size||10);
-      doc.setTextColor(col==null?30:col);
-      const linee=doc.splitTextToSize(pulisci(t),larg);
-      linee.forEach(l=>{ salta(6); doc.text(l,x,y); y+=size>=13?6.5:5; });
-    };
-    blocchi.forEach(b=>{
-      if(b.t==="testata"){
-        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(pulisci(b.azienda),M,y);
-        doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(pulisci(b.titolo),R,y,{align:"right"});
-        y+=6;
-        doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(110);
-        const n1=b.sotto.length;
-        b.sotto.forEach((x,i)=>doc.text(pulisci(x),M,y+i*4.2));
-        doc.text(pulisci(b.dettaglio),R,y,{align:"right"});
-        y+=Math.max(n1*4.2,5)+4;
-        doc.setDrawColor(60);doc.setLineWidth(.5);doc.line(M,y,R,y);doc.setLineWidth(.2);y+=7;
-        doc.setTextColor(30);
-        return;
-      }
-      if(b.t==="coppie"){
-        const r=b.righe.filter(x=>x[1]!=null&&x[1]!=="");
-        if(!r.length) return;
-        salta(14); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
-        r.forEach(x=>{
-          salta(8);
-          doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(110);
-          doc.text(pulisci(x[0]),M,y);
-          doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(30);
-          const linee=doc.splitTextToSize(pulisci(x[1]),L-74);
-          doc.text(linee,M+74,y);
-          y+=Math.max(6,linee.length*5);
-          doc.setDrawColor(225);doc.line(M,y-2.5,R,y-2.5);
-        });
-        y+=4; return;
-      }
-      if(b.t==="testo"){
-        salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
-        b.corpo.forEach(p=>{ testo(p,M,L,9.5,"normal",60); y+=2.5; });
-        y+=3; return;
-      }
-      if(b.t==="tabella"){
-        salta(30); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
-        if(b.intro){testo(b.intro,M,L,9.5,"normal",60); y+=3;} else y+=4;
-        /* ⛔ 23 agosto: le colonne erano fisse per quattro e sommavano l'84%
-           della riga — su una tabella da tre la tabella finiva a meta'
-           foglio. Adesso le larghezze si scelgono in base a quante sono. */
-        const nc=b.colonne.length;
-        /* 13 nov 2026: una tabella puo' dire le sue larghezze (b.pesi) */
-        const pesi = (Array.isArray(b.pesi)&&b.pesi.length===nc) ? b.pesi
-                   : nc===4 ? [.32,.28,.24,.16]
-                   : nc===3 ? [.46,.32,.22]
-                   : nc===2 ? [.55,.45]
-                   : b.colonne.map(()=>1/nc);
-        const larg=pesi.map(p=>L*p);
-        /* ⛔ e le celle si scrivevano su UNA riga sola: «Documenti a bordo:
-           libretto, dichiarazione CE» usciva tagliato a meta' su un verbale
-           che si firma. Adesso vanno a capo e la riga si alza. */
-        const riga=(cel,grassetto)=>{
-          doc.setFont("helvetica",grassetto?"bold":"normal");doc.setFontSize(9);
-          const linee=cel.map((c,i)=>doc.splitTextToSize(pulisci(c),larg[i]-3).slice(0,4));
-          const quante=Math.max(1,...linee.map(l=>l.length));
-          const alta=4+quante*4;
-          salta(alta+4);
+    /* 13 nov 2026 (lista «MANCA», n. 16) — le firme mai da sole su una pagina:
+       se la prima volta finiscono da sole, il foglio si rifà e il blocco
+       prima delle firme va a capo pagina insieme a loro. */
+    const componi=(porta)=>{
+      const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+      const M=16, R=210-M, L=R-M; let y=20;
+      const salta=(h)=>{ if(y+h>282){doc.addPage();y=20;} };
+      /* ⛔ 23 agosto 2026 — LE FACCINE NEL PDF.
+         Provando il PDF per davvero (prima il banco bloccava jsPDF e non si
+         provava mai) e' saltato fuori che «⚠️ Nessuna foto allegata» sul
+         foglio diventava «& þ Nessuna foto allegata»: i caratteri fuori dal
+         Latin-1 le font standard del PDF non li sanno scrivere e li storpiano.
+         Qui si tolgono, e le virgolette e i trattini strani si raddrizzano. */
+      const pulisci=(t)=>String(t==null?"":t)
+        .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
+        .replace(/[–—]/g,"-").replace(/…/g,"...")
+        .replace(/[^\x00-\xFF€]/g,"")
+        .replace(/[ \t]{2,}/g," ").trim();
+      const testo=(t,x,larg,size,stile,col)=>{
+        doc.setFont("helvetica",stile||"normal");doc.setFontSize(size||10);
+        doc.setTextColor(col==null?30:col);
+        const linee=doc.splitTextToSize(pulisci(t),larg);
+        linee.forEach(l=>{ salta(6); doc.text(l,x,y); y+=size>=13?6.5:5; });
+      };
+      let sole=-1;
+      blocchi.forEach((b,ib)=>{
+        if(porta>=0&&ib===porta&&y>20){ doc.addPage(); y=20; }
+        if(b.t==="testata"){
+          doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(pulisci(b.azienda),M,y);
+          doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(pulisci(b.titolo),R,y,{align:"right"});
+          y+=6;
+          doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(110);
+          const n1=b.sotto.length;
+          b.sotto.forEach((x,i)=>doc.text(pulisci(x),M,y+i*4.2));
+          doc.text(pulisci(b.dettaglio),R,y,{align:"right"});
+          y+=Math.max(n1*4.2,5)+4;
+          doc.setDrawColor(60);doc.setLineWidth(.5);doc.line(M,y,R,y);doc.setLineWidth(.2);y+=7;
           doc.setTextColor(30);
-          let x=M;
-          cel.forEach((c,i)=>{ doc.rect(x,y-4,larg[i],alta);
-            linee[i].forEach((ln,k)=>doc.text(ln,x+1.5,y+1+k*4));
-            x+=larg[i]; });
-          y+=alta;
-        };
-        doc.setDrawColor(150);
-        riga(b.colonne,true);
-        b.righe.forEach(r=>riga(r,false));
-        y+=3; if(b.nota){ testo(b.nota,M,L,9,"normal",110); y+=3; } return;
-      }
-      if(b.t==="numerato"){
-        salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
-        b.righe.forEach((x,i)=>{
-          salta(10);
-          doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(30);
-          doc.text(pulisci((i+1)+". "+x[0]),M,y); y+=4.6;
-          testo(x[1].replace("⚠️ ",""),M+4,L-4,9,"normal",60); y+=2.5;
-        });
-        y+=2; return;
-      }
-      if(b.t==="firme"){
-        salta(56);
-        if(b.vessatorie){ testo(b.vessatorie,M,L,9,"normal",110); y+=8; }
-        const meta=(L-10)/2;
-        /* ⛔ 23 agosto: il disegno della firma va SOPRA la riga, non un nome
-           scritto a macchina. Se non c'e', resta lo spazio bianco per
-           firmare a penna, come prima. */
-        const segno=(img,x)=>{ if(!img) return;
-          try{ doc.addImage(img,"PNG",x,y-17,Math.min(meta,58),16); }catch(e){} };
-        y+=17;
-        segno(b.colonne[0][2],M); segno(b.colonne[1][2],M+meta+10);
-        doc.setDrawColor(60);
-        doc.line(M,y,M+meta,y); doc.line(M+meta+10,y,R,y); y+=4.5;
-        doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(30);
-        doc.text(pulisci(b.colonne[0][0]),M,y); doc.text(pulisci(b.colonne[1][0]),M+meta+10,y); y+=4.5;
-        /* ⚠️ 23 agosto: sotto la riga della firma mancava il NOME, che sulla
-           carta stampata c'era: due fogli uguali che dicevano cose diverse. */
-        doc.setFontSize(8.5);doc.setTextColor(110);
-        if(b.colonne[0][1]) doc.text(pulisci(b.colonne[0][1]),M,y);
-        if(b.colonne[1][1]) doc.text(pulisci(b.colonne[1][1]),M+meta+10,y);
-        y+=10;
-        if(b.secondaFirma){
-          /* ⛔ 24 agosto 2026: stessa correzione della carta. La seconda
-             firma va nella colonna DESTRA, quella del Conduttore. E
-             l'etichetta va a capo da sola: in mezza pagina non ci sta su
-             una riga sola, e prima finiva tagliata. */
-          salta(30);
-          const x2=M+meta+10;
-          y+=17; segno(b.secondaFirmaImg,x2);
-          doc.line(x2,y,R,y); y+=4.5;
-          doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(110);
-          doc.splitTextToSize(pulisci(b.secondaFirma),meta).forEach(l=>{ doc.text(l,x2,y); y+=4; });
+          return;
         }
-        return;
-      }
-    });
+        if(b.t==="coppie"){
+          const r=b.righe.filter(x=>x[1]!=null&&x[1]!=="");
+          if(!r.length) return;
+          salta(14); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+          r.forEach(x=>{
+            salta(8);
+            doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(110);
+            doc.text(pulisci(x[0]),M,y);
+            doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(30);
+            const linee=doc.splitTextToSize(pulisci(x[1]),L-74);
+            doc.text(linee,M+74,y);
+            y+=Math.max(6,linee.length*5);
+            doc.setDrawColor(225);doc.line(M,y-2.5,R,y-2.5);
+          });
+          y+=4; return;
+        }
+        if(b.t==="testo"){
+          salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+          b.corpo.forEach(p=>{ testo(p,M,L,9.5,"normal",60); y+=2.5; });
+          y+=3; return;
+        }
+        if(b.t==="tabella"){
+          salta(30); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+          if(b.intro){testo(b.intro,M,L,9.5,"normal",60); y+=3;} else y+=4;
+          /* ⛔ 23 agosto: le colonne erano fisse per quattro e sommavano l'84%
+             della riga — su una tabella da tre la tabella finiva a meta'
+             foglio. Adesso le larghezze si scelgono in base a quante sono. */
+          const nc=b.colonne.length;
+          /* 13 nov 2026: una tabella puo' dire le sue larghezze (b.pesi) */
+          const pesi = (Array.isArray(b.pesi)&&b.pesi.length===nc) ? b.pesi
+                     : nc===4 ? [.32,.28,.24,.16]
+                     : nc===3 ? [.46,.32,.22]
+                     : nc===2 ? [.55,.45]
+                     : b.colonne.map(()=>1/nc);
+          const larg=pesi.map(p=>L*p);
+          /* ⛔ e le celle si scrivevano su UNA riga sola: «Documenti a bordo:
+             libretto, dichiarazione CE» usciva tagliato a meta' su un verbale
+             che si firma. Adesso vanno a capo e la riga si alza. */
+          const riga=(cel,grassetto)=>{
+            doc.setFont("helvetica",grassetto?"bold":"normal");doc.setFontSize(9);
+            const linee=cel.map((c,i)=>doc.splitTextToSize(pulisci(c),larg[i]-3).slice(0,4));
+            const quante=Math.max(1,...linee.map(l=>l.length));
+            const alta=4+quante*4;
+            salta(alta+4);
+            doc.setTextColor(30);
+            let x=M;
+            cel.forEach((c,i)=>{ doc.rect(x,y-4,larg[i],alta);
+              linee[i].forEach((ln,k)=>doc.text(ln,x+1.5,y+1+k*4));
+              x+=larg[i]; });
+            y+=alta;
+          };
+          doc.setDrawColor(150);
+          riga(b.colonne,true);
+          b.righe.forEach(r=>riga(r,false));
+          y+=3; if(b.nota){ testo(b.nota,M,L,9,"normal",110); y+=3; } return;
+        }
+        if(b.t==="numerato"){
+          salta(16); testo(b.titolo.toUpperCase(),M,L,11,"bold"); y+=1;
+          b.righe.forEach((x,i)=>{
+            salta(10);
+            doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(30);
+            doc.text(pulisci((i+1)+". "+x[0]),M,y); y+=4.6;
+            testo(x[1].replace("⚠️ ",""),M+4,L-4,9,"normal",60); y+=2.5;
+          });
+          y+=2; return;
+        }
+        if(b.t==="firme"){
+          if(y+56>282&&porta<0) sole=ib-1;
+          salta(56);
+          if(b.vessatorie){ testo(b.vessatorie,M,L,9,"normal",110); y+=8; }
+          const meta=(L-10)/2;
+          /* ⛔ 23 agosto: il disegno della firma va SOPRA la riga, non un nome
+             scritto a macchina. Se non c'e', resta lo spazio bianco per
+             firmare a penna, come prima. */
+          const segno=(img,x)=>{ if(!img) return;
+            try{ doc.addImage(img,"PNG",x,y-17,Math.min(meta,58),16); }catch(e){} };
+          y+=17;
+          segno(b.colonne[0][2],M); segno(b.colonne[1][2],M+meta+10);
+          doc.setDrawColor(60);
+          doc.line(M,y,M+meta,y); doc.line(M+meta+10,y,R,y); y+=4.5;
+          doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(30);
+          doc.text(pulisci(b.colonne[0][0]),M,y); doc.text(pulisci(b.colonne[1][0]),M+meta+10,y); y+=4.5;
+          /* ⚠️ 23 agosto: sotto la riga della firma mancava il NOME, che sulla
+             carta stampata c'era: due fogli uguali che dicevano cose diverse. */
+          doc.setFontSize(8.5);doc.setTextColor(110);
+          if(b.colonne[0][1]) doc.text(pulisci(b.colonne[0][1]),M,y);
+          if(b.colonne[1][1]) doc.text(pulisci(b.colonne[1][1]),M+meta+10,y);
+          y+=10;
+          if(b.secondaFirma){
+            /* ⛔ 24 agosto 2026: stessa correzione della carta. La seconda
+               firma va nella colonna DESTRA, quella del Conduttore. E
+               l'etichetta va a capo da sola: in mezza pagina non ci sta su
+               una riga sola, e prima finiva tagliata. */
+            salta(30);
+            const x2=M+meta+10;
+            y+=17; segno(b.secondaFirmaImg,x2);
+            doc.line(x2,y,R,y); y+=4.5;
+            doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(110);
+            doc.splitTextToSize(pulisci(b.secondaFirma),meta).forEach(l=>{ doc.text(l,x2,y); y+=4; });
+          }
+          return;
+        }
+      });
+      return {doc:doc,sole:sole};
+    };
+    let _c=componi(-1);
+    if(_c.sole>=0) _c=componi(_c.sole);
+    const doc=_c.doc;
     doc.save(titolo.replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g,"-")+".pdf");
     toast("Contratto scaricato ✔");
   }

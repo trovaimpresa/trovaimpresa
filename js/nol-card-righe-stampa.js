@@ -296,12 +296,25 @@
            (d.nome||[d.mezzo,d.cliente].filter(Boolean).join(" · ")||"senza nome");
   }
 
+  /* 13 nov 2026 (lista «MANCA», n. 9) — I DATI DELL'AZIENDA NELLE SCHEDE.
+     La scheda cliente, la scheda noleggio e le altre leggevano
+     state.azienda.nome, che nel Noleggio non c'e' (state.azienda e' solo il
+     vecchio contatore): il foglio usciva senza intestazione. Adesso si
+     leggono i Dati azienda veri, con P.IVA, indirizzo intero, telefono. */
+  async function nolAzDati(){
+    try{ const r=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(); return (r&&r.data)||{}; }
+    catch(e){ return {}; }
+  }
+  function nolAzRighe(a){
+    return [a.piva?"P.IVA "+a.piva:"", nolAzIndirizzo(a), [a.tel?"Tel "+a.tel:"", a.email||""].filter(Boolean).join("   ")].filter(Boolean);
+  }
+
   /* ---- STAMPA: una finestra pulita, senza il resto della pagina ---- */
-  function nolStampa(tipo,d){
+  async function nolStampa(tipo,d){
     const righe=nolRighe(tipo,d);
-    const az=(state.azienda&&state.azienda.nome)?state.azienda.nome:"";
     const w=window.open("","_blank","width=900,height=1000");
     if(!w){toast("Il browser ha bloccato la finestra di stampa");return;}
+    const A=await nolAzDati(), az=A.nome||"";
     w.document.write(`<!doctype html><html lang="it"><head><meta charset="utf-8">
       <title>${esc(nolTitolo(tipo,d))}</title><style>
       body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#222;margin:32px;font-size:15px}
@@ -321,8 +334,9 @@
 .ti-ic-solo{width:1em;height:1em;vertical-align:-.08em;color:var(--hc,#0066ff)}
 </style>
 </head><body>
+      ${az?`<div class="az"><b style="color:#222;font-size:17px">${esc(az)}</b><br>${nolAzRighe(A).map(esc).join("<br>")}</div>`:""}
       <h1>${esc(nolTitolo(tipo,d))}</h1>
-      <div class="az">${esc(az)}</div>
+      <div style="height:14px"></div>
       <table>${righe.map(x=>`<tr><td class="l">${esc(x[0])}</td><td class="v">${esc(x[1])}</td></tr>`).join("")}</table>
       </body></html>`);
     w.document.close();
@@ -333,19 +347,26 @@
   }
 
   /* ---- PDF: la stessa scheda, ma da tenere ---- */
-  function nolPdf(tipo,d){
+  async function nolPdf(tipo,d){
     if(!(window.jspdf&&window.jspdf.jsPDF)){toast("Il PDF non è disponibile adesso");return;}
     const righe=nolRighe(tipo,d);
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
     const M=18, R=210-M; let y=22;
-    const az=(state.azienda&&state.azienda.nome)?state.azienda.nome:"";
+    const A=await nolAzDati();
+    /* l'intestazione dell'azienda, come contratto e fattura */
+    if(A.nome){
+      doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(30);doc.text(String(A.nome),M,y);y+=5.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(110);
+      nolAzRighe(A).forEach(t=>{doc.text(String(t),M,y);y+=4.3;});
+      y+=2;doc.setDrawColor(60);doc.setLineWidth(.4);doc.line(M,y,R,y);doc.setLineWidth(.2);y+=10;
+      doc.setTextColor(30);
+    }
     doc.setFont("helvetica","bold");doc.setFontSize(16);
     /* 13 nov 2026 (quarto giro) — coi nomi lunghi il titolo usciva dal foglio:
        adesso va a capo */
     const _tit=doc.splitTextToSize(String(nolTitolo(tipo,d)),R-M);
     doc.text(_tit,M,y); y+=7*_tit.length;
-    if(az){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(110);doc.text(az,M,y);y+=6;}
-    doc.setTextColor(30); y+=2;
+    doc.setTextColor(30); y+=4;
     righe.forEach(x=>{
       if(y>272){doc.addPage();y=22;}
       doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(110);

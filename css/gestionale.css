@@ -6139,3 +6139,32 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
   .sheet .prev-riga select.pr-um{ font-size:18px; padding:0 8px 0 12px; }
   .sheet .prev-riga:not(.prev-riga-cap) .rdel{ min-height:52px; }
 }
+
+/* 13 nov 2026 (lista «MANCA», n. 7) — il registro delle ore: «Chi le ha fatte»
+   sempre in vista, ogni casella col suo nome sopra. Due colonne: giorno e ore;
+   il resto a tutta riga. */
+.ore-add2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 12px;margin-top:10px}
+.ore-add2 .ore-c{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ore-add2 .ore-c>span{font-size:14px;font-weight:700;color:var(--testo-2)}
+.ore-add2 input,.ore-add2 select{width:100%;min-width:0;box-sizing:border-box;font-family:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);min-height:44px}
+.ore-add2 .ore-c--tutta{grid-column:1/-1}
+.ore-add2 .btn{min-height:44px;justify-self:start}
+
+/* 13 nov 2026 (lista «MANCA», n. 6) — il rapportino da far firmare (js/gest-rapportino-firma.js) */
+.rapf-ora{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:16px}
+.rapf-ora--tot{border-bottom:0;font-weight:800}
+.rapf-ore-v{font-size:16px;color:var(--testo-2);padding:8px 0}
+.rapf-pad{display:block;width:100%;aspect-ratio:10/3;border:2px dashed var(--bordo-forte,#94a3b8);border-radius:12px;background:#fff;touch-action:none;cursor:crosshair}
+.rapf-firma-img{display:block;max-width:100%;max-height:160px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px;box-sizing:border-box}
+.rapf-firma-b{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.rapf-st{font-size:16px;line-height:1.5;color:var(--testo-2);margin-top:8px}
+.rapf-st--ok{color:var(--ok,#15803d);font-weight:700}
+.rapf-st--err{color:var(--err,#b91c1c);font-weight:700}
+.rapf-riga-st{display:block;font-size:14px;font-weight:700;margin-top:4px}
+.rapf-riga-st--ok{color:var(--ok,#15803d)}
+.rapf-riga-st--err{color:var(--err,#b91c1c)}
+.rapf-az{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+@media (max-width:760px){.rapf-az .btn,.rapf-firma-b .btn,#rap-wrap [data-action="rapf-nuovo"]{min-height:44px}}
+/* la riga si misura sulla COLONNA, non sullo schermo (regola del 13 nov) */
+#ore-wrap{container-type:inline-size}
+@container (max-width:420px){ .ore-add2{grid-template-columns:minmax(0,1fr)} }

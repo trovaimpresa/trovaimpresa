@@ -982,7 +982,13 @@
     if(k.ritenuta)voci.push(["Ritenuta di garanzia "+_pct(k.perc)+"%",k.ritenuta,true,false]);
 
     const hBox=voci.length*6+16;
-    if(y+hBox>272){doc.addPage();y=20;}
+    /* 13 nov 2026 (lista «MANCA», n. 12) — le firme in fondo. Il riquadro dei
+       conti, le note e le firme stanno insieme: se non ci stanno nella pagina,
+       vanno tutti alla pagina dopo (mai le firme da sole). */
+    const _pdfF=(typeof PDF_FIRME_ALTE==="number")?PDF_FIRME_ALTE:34;
+    const hNote=s.note?doc.splitTextToSize(String(s.note),R-M).length*4.5+8:0;
+    const hCoda=hBox+8+(comp.tipo==="pubblico"?8:0)+hNote+_pdfF+12;
+    if(y+hBox>272||(y+hCoda>280&&hCoda<250)){doc.addPage();y=20;}
     doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-108,y,108,hBox);doc.setLineWidth(.2);
     let ry=y+7;
     doc.setFontSize(9);
@@ -1013,6 +1019,14 @@
       doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Note",M,y);y+=5;
       doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
       doc.text(nl,M,y);y+=nl.length*4.5;doc.setTextColor(0);
+    }
+
+    /* le firme */
+    if(y+_pdfF+12>280){doc.addPage();y=20;}
+    y+=6;doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text((az.citta?az.citta+", ":"")+"li "+fdate(s.data||todayStr()),M,y);doc.setTextColor(0);
+    if(typeof pdfFirme==="function"){
+      y=pdfFirme(doc,y,M,R,[{etichetta:"L'Impresa",nome:az.nome||""},{etichetta:"Il Direttore dei lavori"},{etichetta:"Il Committente",nome:cli.nome||""}]);
     }
 
     /* la nota in fondo e il numero di pagina, su ogni foglio */

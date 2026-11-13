@@ -294,6 +294,13 @@
 <style id="op-leggibile">
   body{color:#0b1220}
   #gate-msg,.tmb-vuoto,.empty-state,.rap-data,.rap-nota,.istr{font-size:18px!important;line-height:1.5!important;color:#1f2937!important}
+  /* 13 nov 2026 (gruppo 4) — le voci del lavoro, senza prezzi */
+  #lv-voci .label{margin-top:16px}
+  .op-voci{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
+  .op-voce{display:flex;justify-content:space-between;gap:14px;padding:12px 14px;border-bottom:1px solid #eef0f3;font-size:18px;line-height:1.4;color:#1f2937}
+  .op-voce:last-child{border-bottom:0}
+  .op-voce b{white-space:nowrap}
+  .op-voce-sez{padding:10px 14px;font-size:16px;font-weight:800;background:#f3f4f6;color:#1f2937}
   .rap-nota b{color:#0b1220!important}
   .tmb-tit{font-size:19px!important;color:#0b1220!important}
   .tmb-stato b,#tmb-stato-t{font-size:18px!important;color:#0b1220!important}
@@ -523,6 +530,8 @@
       <div class="meta" id="lv-meta"></div>
       <div class="label">Cosa devi fare</div>
       <div class="istr" id="lv-istr">—</div>
+      <!-- 13 nov 2026 (gruppo 4) — le voci del preventivo, SENZA prezzi (js/op-agenda-giorno.js, opVoci) -->
+      <div id="lv-voci"></div>
       <div id="lv-mappa"></div>
     </div>
 
@@ -624,7 +633,7 @@
 <div id="toast"></div>
 
 <script src="/js/op-base.js?v=10nov1"></script>
-<script src="/js/op-agenda-giorno.js?v=10nov1"></script>
+<script src="/js/op-agenda-giorno.js?v=13nov8"></script>
 <script src="/js/op-spese-foto.js"></script>
 <script src="/js/op-rapido-voce.js"></script>
 <script src="/js/op-rapportini.js"></script>

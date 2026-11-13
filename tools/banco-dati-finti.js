@@ -34,7 +34,9 @@ module.exports = function datiFinti(UID, REPARTO) {
     Object.assign(base(302, 20), { mestiere_id: REPARTO, cliente_id: id(102), operatore_id: null, descrizione: "Tinteggiatura soggiorno", dove: "Via Roma 1, Rieti", data_prevista: g(5), data_fatto: null, stato: "in_corso", lavoro_svolto: "", note: "", ore: 0, importo: 800, fatt_stato: "none", num_fatt: null, fatt_data: null, fatt_iva_perc: null, fatt_sconto_perc: null, data_fatt_emessa: null }),
     Object.assign(base(303, 90), { mestiere_id: REPARTO, cliente_id: id(102), operatore_id: id(201), descrizione: "Riparazione perdita bagno", dove: "Via Roma 1, Rieti", data_prevista: g(-70), data_fatto: g(-68), stato: "fatto", lavoro_svolto: "Sostituito il flessibile", note: "", ore: 3, importo: 250, fatt_stato: "emessa", num_fatt: 1, fatt_data: g(-60), fatt_iva_perc: 22, fatt_sconto_perc: 0, data_fatt_emessa: g(-60) })
   ];
-  const ore = [Object.assign(base(351), { mestiere_id: REPARTO, lavoro_id: id(303), operatore_id: id(201), data: g(-68), ore: 3, nota: "", rapportino_id: null })];
+  const ore = [Object.assign(base(351), { mestiere_id: REPARTO, lavoro_id: id(303), operatore_id: id(201), data: g(-68), ore: 3, nota: "", rapportino_id: id(381) })];
+  /* 13 nov 2026 (gruppo 4) — un rapportino del telefono, non ancora firmato dal cliente */
+  const rapportini = [Object.assign(base(381, 68), { mestiere_id: REPARTO, lavoro_id: id(303), data: g(-68), note: "Sostituito il flessibile del lavabo e controllato lo scarico", materiali: "1 flessibile, 2 raccordi", creato_da: id(201), firma_cliente: null })];
   const spese = [Object.assign(base(361), { lavoro_id: id(303), descrizione: "Flessibile e raccordi", importo: 18.9, data: g(-68), fornitore_id: id(701), inserito_da: "Capo", creato_da: UID })];
   const preventivi = [
     Object.assign(base(401, 25), { mestiere_id: REPARTO, cliente_id: id(101), lavoro_id: null, numero: 1, titolo: LUNGO, note: "", stato: "bozza", data: g(-25), cassa_perc: 0, iva_perc: 10, ritenuta: false, ritenuta_perc: 0, spese_forfait: 0, capitolato: null, sconto: 0, sconto_perc: 0, accettato_il: null }),
@@ -73,6 +75,16 @@ module.exports = function datiFinti(UID, REPARTO) {
   const carteSaldo = [{ carta_id: id(751), user_id: UID, mestiere_id: REPARTO, nome: "Carta carburante", dipendente_id: id(201), stato: "attiva", saldo: 320.4 }];
   const promemoria = [{ id: 1, user_id: UID, testo: "Chiamare il commercialista per la scadenza dell'acconto e portargli le fatture del mese", data: g(2), inviato: false, created_at: ts(-3), ora: null, note: "", avvisa_giorni: 0, ripeti_mesi: null, stato: "da_fare", eliminato_il: null }];
 
+  /* 13 nov 2026 (gruppo 4) — un computo con un SAL emesso, per il PDF del SAL */
+  const computi = [Object.assign(base(951, 40), { mestiere_id: REPARTO, cliente_id: id(102), titolo: "Bagno via Roma", oggetto: "Rifacimento completo del bagno", luogo: "Via Roma 1, Rieti", numero: 1, tipo: "privato", ribasso_perc: 0, stato: "bozza" })];
+  const sal = [Object.assign(base(961, 3), { mestiere_id: REPARTO, computo_id: id(951), numero: 2, data: g(-3), stato: "emesso", periodo_dal: g(-30), periodo_al: g(-3), note: "", ritenuta_perc: 5 })];
+  const salTotali = [{ sal_id: id(961), user_id: UID, maturato: 8450, oneri_sicurezza: 0, importo_manodopera: 0, maturato_precedente: 5000, oneri_sicurezza_precedenti: 0, manodopera_precedente: 0, numero_precedente: 1, ritenuta_perc: 5 }];
+  const salRighe = [
+    { sal_id: id(961), user_id: UID, ordine: 1, codice: "A.01", descrizione: "Demolizione del pavimento e del rivestimento esistenti, compreso il trasporto a discarica", unita: "m2", quantita_eseguita: 40, quantita_computo: 40, prezzo_unitario: 100, importo: 4000, oltre_computo: false },
+    { sal_id: id(961), user_id: UID, ordine: 2, codice: "B.02", descrizione: "Rifacimento impianto idrico e di scarico", unita: "corpo", quantita_eseguita: 1, quantita_computo: 1, prezzo_unitario: 3000, importo: 3000, oltre_computo: false },
+    { sal_id: id(961), user_id: UID, ordine: 3, codice: "C.03", descrizione: "Posa pavimento in gres", unita: "m2", quantita_eseguita: 29, quantita_computo: 30, prezzo_unitario: 50, importo: 1450, oltre_computo: false }
+  ];
+
   /* ---- Noleggio ---- */
   const nolClienti = [Object.assign(base(801), { nome: "Edilizia di prova Costruzioni Generali Srl", telefono: "3330000005", email: "info@esempio.test", documento: "", note: "", indirizzo: "Via Appia 200, Latina", piva: "00000000003", migrato_in: null })];
   const nol = (n, extra) => Object.assign(base(n), { mezzo: mezzi[0].nome, cliente: nolClienti[0].nome, mezzo_id: id(601), cliente_id: id(801), data_uscita: g(-30), data_rientro_prevista: g(-20), data_rientro_effettivo: null, importo: 1050.5, cauzione: 500, stato_pagamento: "da_pagare", danni: "", note: "", ora_uscita: null, ora_rientro: null, contaore_uscita: null, contaore_rientro: null, km_uscita: null, km_rientro: null, consumi: null, dettaglio_prezzo: null, importo_calcolato: null, contratto_num: null, contratto_data: null, operatori: null, dichiarazione_il: null, tipo_nolo: "freddo", stato_consegna: "", stato_rientro: "", contratto_firmato_il: null, luogo: "", check_uscita: null, check_rientro: null, verbale_uscita_il: null, verbale_rientro_il: null, firma_uscita: null, firma_rientro: null, ddt_uscita_num: null, ddt_uscita_data: null, ddt_rientro_num: null, ddt_rientro_data: null, fase: "fuori", uscita_confermata_il: ts(-30), prenotazione_nota: "", cauzione_forma: "", cauzione_rif: "", cauzione_ricevuta_il: g(-30), cauzione_stato: "in_deposito", cauzione_svincolata_il: null, cauzione_restituita: 0, cauzione_trattenuta: 0, cauzione_motivo: "", fattura_id: null, firma_uscita_img: null, firma_rientro_img: null, firma_contr_img: null, firma_contr2_img: null, firma_contr_nome: null, firma_contr_il: null, mestiere_id: null }, extra || {});
@@ -92,11 +104,12 @@ module.exports = function datiFinti(UID, REPARTO) {
   ];
 
   return {
-    gest_clienti: clienti, gest_operatori: operatori, gest_lavori: lavori, gest_ore: ore, gest_spese: spese,
+    gest_clienti: clienti, gest_operatori: operatori, gest_lavori: lavori, gest_ore: ore, gest_rapportini: rapportini, gest_spese: spese,
     gest_preventivi: preventivi, gest_preventivo_righe: prevRighe,
     gest_fatture: fatture, gest_fattura_righe: fattRighe, gest_fatture_totali: fattTotali,
     gest_mezzi: mezzi, gest_scadenze: scadenze, gest_mezzi_scadenze: mezziScad,
     gest_fornitori: fornitori, gest_fatture_fornitori: fattForn,
+    gest_computi: computi, gest_sal: sal, gest_sal_totali: salTotali, gest_sal_righe_calc: salRighe,
     gest_carte: carte, gest_carte_saldo: carteSaldo, promemoria: promemoria,
     nol_clienti: nolClienti, nol_noleggi: noleggi, nol_fatture: nolFatture,
     neg_fornitori: negFornitori, neg_prodotti: negProdotti, neg_movimenti: negMovimenti

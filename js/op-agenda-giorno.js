@@ -354,6 +354,27 @@ function renderDay(){
 function esc(s){return(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
 /* ===== dettaglio ===== */
+/* 13 nov 2026 (gruppo 4, chiesto da Alex) — LE VOCI DEL LAVORO, SENZA PREZZI.
+   Cosa c'e' da fare e quanto: le voci del preventivo collegato al lavoro.
+   ⛔ Le legge la funzione del database lavoro_voci_senza_prezzi, che dei
+   prezzi non restituisce niente: l'operaio non legge gest_preventivo_righe.
+   Se non ci sono voci (o la funzione non risponde) il riquadro non c'e'. */
+async function opVoci(lavoroId){
+  const box=document.getElementById("lv-voci"); if(!box)return;
+  box.innerHTML="";
+  try{
+    const r=await sb.rpc("lavoro_voci_senza_prezzi",{p_lavoro:lavoroId});
+    if(r.error||!Array.isArray(r.data)||!r.data.length)return;
+    if(!curLavoro||curLavoro.id!==lavoroId)return;
+    const U={"m2":"m²","mq":"m²","m3":"m³","mc":"m³","corpo":"a corpo","ora":"ore","ore":"ore"};
+    box.innerHTML='<div class="label">Le voci del lavoro</div><div class="op-voci">'
+      +r.data.map(v=>{
+        if(v.sezione)return '<div class="op-voce-sez">'+esc(v.descrizione||"")+'</div>';
+        const q=(+v.qta)||1, u=v.unita?(U[String(v.unita).toLowerCase()]||v.unita):"";
+        return '<div class="op-voce"><span>'+esc(v.descrizione||"")+'</span><b>'+String(+q.toFixed(3)).replace(".",",")+(u?" "+esc(u):"")+'</b></div>';
+      }).join("")+'</div>';
+  }catch(e){}
+}
 async function openLavoro(id){
   const l=LAVORI.find(x=>x.id===id);if(!l)return;
   curLavoro=l;
@@ -367,6 +388,7 @@ async function openLavoro(id){
   $("#lv-note").value=l.lavoro_svolto||"";
   $("#lv-foto").innerHTML="";
   show("lavoro");
+  opVoci(l.id);
   renderRapportino();
   renderMieSpese();   /* 5 set 2026 — le spese che ha segnato lui su questo lavoro */
   caricaFoto(l.id);

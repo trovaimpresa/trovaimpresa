@@ -2043,3 +2043,61 @@ Nel database `fattura_prossimo_numero` c'è e risponde (Alex: 16 nel 2026, 1 nel
 - [x] App con `?fresco=`: `fattProssimoNumero` usa la funzione nuova e dà 16.
 - NON provati: il «Salva» del cliente con dati nuovi (niente dati finti sul cliente vero), il PDF scaricato, il file SdI vero,
   il telefono vero.
+
+
+## 13 nov 2026 (notte) — lista «MANCA», GRUPPO 4: i PDF e il lavoro (voci 6, 7, 9, 12, 16)
+Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]` da fare.
+
+Foto viste da Alex (ok alle 20:21): ore e rapportino a computer e telefono, la firma, PDF del rapportino, SAL,
+capitolato, verbale del Noleggio, dati azienda, scheda lavoro con le voci, app dell'operaio.
+Domanda in più, risposta di Alex: le voci del preventivo SENZA prezzi vanno sia nel PDF «scheda lavoro» sia
+nell'app dell'operaio.
+
+[x] 6. Rapportino da far firmare al cliente dal gestionale.
+   - File nuovo `js/gest-rapportino-firma.js` (dopo gest-ore-spese.js). Dentro il lavoro, riquadro «Rapportini
+     di giornata»: «＋ Rapportino da far firmare» e, su ogni rapportino (anche quelli della squadra), «Fai firmare
+     al cliente» oppure «✓ Firmato da …» / «Cambiato dopo la firma: va firmato di nuovo».
+   - Finestra grande a due colonne: giorno, cosa è stato fatto, materiali, chi c'era e quante ore (LETTE dal
+     registro del lavoro di quel giorno: le ore non si scrivono qui) · nome di chi firma + tela per il dito.
+   - La firma sta in `gest_rapportini.firma_cliente` (jsonb {img, nome, data, hash}), colonna nuova
+     (`sql/2026-11-13-rapportino-firma-voci.sql`, migrazione `rapportino_firma_voci_13nov2026` PASSATA, riga in PROVE).
+     ⛔ L'impronta (hash) è fatta di giorno + testi + ore: se uno cambia, la firma non vale più, il PDF esce senza.
+   - PDF «RAPPORTINO DI LAVORO»: dati azienda, cliente, lavoro, cosa è stato fatto, ore per persona, materiali,
+     firme («L'impresa» / «Il cliente» con disegno, nome e «Firmato il»). Il PDF salva prima.
+   - `pdfFirme(doc,y,M,R,colonne)` (stesso file): il disegnatore delle firme dei PDF dell'App, usato da
+     rapportino e SAL.
+   - Non fatto: la firma dal telefono dell'operaio (si firma dal gestionale del titolare).
+[x] 7. Ore sul lavoro: scegliere chi le ha fatte.
+   - Il registro delle ore (gest-scadenze-pratiche.js + gest-ore-spese.js, `oreRiempiChi`/`oreChiId`): ogni casella
+     col suo nome sopra; «Chi le ha fatte» si vede SEMPRE (prima spariva a squadra vuota); dentro la squadra,
+     «io» (il titolare, se non è già in squadra) e «＋ Un'altra persona…» (casella del nome).
+     Al «+ Aggiungi le ore» io / persona nuova entrano in Squadra (gest_operatori), come fa Giornate.
+   - È obbligatoria: senza, la casella diventa rossa (`campoManca`). Si ricorda l'ultima scelta; con la squadra
+     vuota nasce su «io». Il giorno nasce su oggi.
+   - La riga si misura sulla colonna (@container su #ore-wrap): sotto 420 px una casella per riga.
+[x] 9. Dati azienda nei PDF.
+   - Giornate (`giorPdf`, App): nome, P.IVA, indirizzo intero, telefono ed email sotto il logo.
+   - Noleggio, schede in PDF e stampa (`nolPdf` / `nolStampa`, js/nol-card-righe-stampa.js: scheda cliente,
+     scheda noleggio, giornata, mezzo…): leggevano `state.azienda.nome`, che nel Noleggio non c'è → uscivano
+     SENZA intestazione. Adesso leggono gest_azienda (`nolAzDati`, `nolAzRighe` con `nolAzIndirizzo`).
+[x] 12. SAL in PDF: le firme — «L'Impresa», «Il Direttore dei lavori», «Il Committente» con luogo e data.
+   Riquadro dei conti, note e firme stanno insieme: se non ci stanno, vanno tutti alla pagina dopo.
+[x] 16. Le firme non da sole su una pagina — capitolato (gest-capitolato.js), verbale di sopralluogo dello studio
+   (gest-documenti-pdf.js) e tutti i fogli del Noleggio che passano da `nolDocPdf` (contratto, verbali, DDT,
+   cauzione). Come: il foglio si compone; se le firme finiscono da sole sulla pagina nuova, si ricompone e
+   l'ultimo articolo (blocco) va a capo pagina insieme a loro.
+[x] In più: le voci del preventivo SENZA prezzi.
+   - Funzione nuova del database `lavoro_voci_senza_prezzi(p_lavoro)` (security definer): solo descrizione,
+     quantità, unità, capitolo. La chiama chi può LEGGERE quel lavoro (titolare, «Fatture», «Lavori» se il
+     lavoro è suo o se è preposto/segretaria). ⛔ L'operaio non legge gest_preventivo_righe: i prezzi non escono
+     nemmeno dal browser. Provato sul database vero: titolare 5 righe, estraneo 0, anon non può chiamarla.
+   - PDF «scheda lavoro» (`generaPdf`): «Cosa comprende il lavoro» con quantità e unità, prima del TOTALE.
+   - App dell'operaio (`opVoci` in js/op-agenda-giorno.js + `#lv-voci` in gestionale-operatore.html): «Le voci
+     del lavoro» sotto «Cosa devi fare».
+
+**Attrezzi**
+- Banco nuovo `node tools/banco-gruppo4.js` (App a 1440 e 375, Noleggio a 1440): 59 prove. Sulla versione di
+  PRIMA: 46 rossi. I testi dei PDF si leggono con la PAGINA dove stanno (avvolge addPage/setPage).
+- `tools/banco-dati-finti.js`: un rapportino del telefono sul lavoro «Riparazione perdita bagno» (ore collegate),
+  un computo col SAL n. 2 emesso. `tools/banco-gestionale.js`: il finto risponde a `lavoro_voci_senza_prezzi`.
+- Versioni `?v=13nov8` sui js toccati (e fondatore.js), css `?v=13nov7`.

@@ -143,6 +143,15 @@ async function collega(page, stato) {
             (DATI.nol_fatture || []).filter(f => String(f.data || "").slice(0, 4) === String(a) && /^\d+$/.test(String(f.numero || ""))).map(f => +f.numero));
           return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(Math.max(0, ...nn) + 1) });
         }
+        /* 13 nov 2026 (gruppo 4): le voci del preventivo del lavoro, senza prezzi */
+        if (tab === "rpc:lavoro_voci_senza_prezzi") {
+          let L = ""; try { L = String(JSON.parse(route.request().postData() || "{}").p_lavoro || ""); } catch (_) {}
+          const pp = (DATI.gest_preventivi || []).filter(p => String(p.lavoro_id) === L && !p.eliminato_il);
+          const out = [];
+          pp.forEach(p => (DATI.gest_preventivo_righe || []).filter(r => r.preventivo_id === p.id).sort((a, b) => a.ordine - b.ordine)
+            .forEach(r => out.push({ preventivo_numero: p.numero, descrizione: r.descrizione, qta: r.qta, unita: r.unita, sezione: !!r.sezione, ordine: r.ordine })));
+          return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(out) });
+        }
         if (tab.startsWith("rpc:")) return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: "null" });
         if (uno) return righe.length ? route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(righe[0]) })
           : route.fulfill({ status: 406, headers: cors, contentType: "application/json", body: JSON.stringify({ code: "PGRST116", message: "0 rows", details: "The result contains 0 rows" }) });

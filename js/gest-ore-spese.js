@@ -639,15 +639,12 @@
     }
     oreTabellaOk=true;
     const righe=data||[];
-    /* la tendina di chi ci ha lavorato: gli stessi nomi della squadra */
-    const selChi=$("#or-chi");
-    if(selChi){
-      const nomi=(dipCache||[]);
-      selChi.style.display=nomi.length?"":"none";
-      const v=selChi.value;
-      selChi.innerHTML='<option value="">— chi —</option>'+nomi.map(d=>'<option value="'+d.id+'">'+esc(d.nome)+'</option>').join("");
-      selChi.value=v;
-    }
+    /* la tendina di chi ci ha lavorato: gli stessi nomi della squadra.
+       13 nov 2026 (lista «MANCA», n. 7) — si vede SEMPRE. Con la squadra vuota
+       prima spariva, e le ore restavano «senza nome». Adesso ci sono anche
+       «io» (il titolare, se non e' gia' in squadra) e «un'altra persona»:
+       al «+ Aggiungi» entrano in Squadra, come fa Giornate. */
+    await oreRiempiChi();
     const nomeDi=id=>{const d=(dipCache||[]).find(x=>String(x.id)===String(id));return d?d.nome:"";};
     const tot=righe.reduce((s,x)=>s+(+x.ore||0),0);
     $("#ore-list").innerHTML=righe.length?righe.map(x=>{
@@ -732,9 +729,9 @@
     lista.innerHTML='<p class="fatt-empty">Leggo…</p>';
 
     const [r1,r2]=await Promise.all([
-      sb.from("gest_rapportini").select("id,data,materiali,note,creato_da")
+      sb.from("gest_rapportini").select("*")
         .eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("data",{ascending:false}),
-      sb.from("gest_ore").select("ore,operatore_id,rapportino_id")
+      sb.from("gest_ore").select("ore,operatore_id,rapportino_id,data")
         .eq("user_id",sbUid).eq("lavoro_id",lavoroId)
     ]);
 
@@ -751,11 +748,18 @@
     const ore=oreOk?(r2.data||[]):[];
 
     if(!raps.length){
-      lista.innerHTML='<p class="fatt-empty">Nessun rapportino dal cantiere. Li scrive chi ha il permesso <b>Rapportini</b>, dal telefono, dentro il lavoro.</p>';
+      lista.innerHTML='<p class="fatt-empty">Nessun rapportino. Li scrive la squadra dal telefono, oppure lo scrivi tu qui sotto e lo fai firmare al cliente.</p>';
       return;
     }
 
-    const nomeDi=id=>{const d=(dipCache||[]).find(x=>String(x.id)===String(id));return d?d.nome:"";};
+    /* 13 nov 2026 (lista «MANCA», n. 6) — i nomi anche di chi non e' nella
+       squadra di questo reparto: servono a dire se la firma vale ancora */
+    const _nomi={};(dipCache||[]).forEach(d=>{_nomi[d.id]=d.nome;});
+    const _ignoti=[...new Set(ore.map(o=>o.operatore_id).filter(i=>i&&!_nomi[i]))];
+    if(_ignoti.length){ try{ const ro=await sb.from("gest_operatori").select("id,nome").in("id",_ignoti); ((ro&&ro.data)||[]).forEach(o=>{_nomi[o.id]=o.nome;}); }catch(_){} }
+    const nomeDi=id=>_nomi[id]||"";
+    const oreDelGiorno=d=>{ const per={}; ore.forEach(o=>{ if(String(o.data)!==String(d))return; const n=nomeDi(o.operatore_id)||"Senza nome"; per[n]=(per[n]||0)+(+o.ore||0); });
+      return Object.keys(per).map(n=>({nome:n,ore:Math.round(per[n]*100)/100})); };
     /* ore raggruppate per rapportino, e per persona dentro ognuno */
     const perRap={}, perRapChi={};
     ore.forEach(o=>{
@@ -781,6 +785,15 @@
       if(r.materiali)bits.push('<small class="sp-forn">Usato: '+esc(r.materiali)+'</small>');
       if(r.note)     bits.push('<small class="sp-forn">'+esc(r.note)+'</small>');
       if(!bits.length)bits.push('<small class="sp-forn">Nessun dettaglio scritto.</small>');
+      /* 13 nov 2026 (lista «MANCA», n. 6) — la firma del cliente */
+      const fc=r.firma_cliente;
+      if(fc&&fc.img){
+        const ok=oreOk&&typeof rapfFirmaValida==="function"&&rapfFirmaValida(r,oreDelGiorno(r.data));
+        bits.push(ok?'<span class="rapf-riga-st rapf-riga-st--ok">✓ Firmato da '+esc(fc.nome||"il cliente")+'</span>'
+                    :'<span class="rapf-riga-st rapf-riga-st--err">Cambiato dopo la firma: va firmato di nuovo</span>');
+      }
+      bits.push('<span class="rapf-az"><button type="button" class="btn quick-add" data-action="rapf-apri" data-id="'+esc(k)+'">'
+        +(fc&&fc.img?'Apri e scarica il PDF':'Fai firmare al cliente')+'</button></span>');
       const oreTxt=oreOk?_oreTesto(perRap[k]||0):"—";
       return '<div class="spesa-row"><span><b class="'+q.classe+'">'+esc(q.testo)+'</b> · '
         +esc(fdate(r.data))+bits.join("")+'</span><b>'+oreTxt+'</b>'
@@ -869,6 +882,56 @@
     toast(righe?("Nel cestino: rapportino e "+_oreTesto(ore)):"Rapportino nel cestino");
   }
 
+  /* «Chi le ha fatte»: la squadra, poi io, poi un'altra persona */
+  async function oreRiempiChi(){
+    const sel=$("#or-chi"); if(!sel)return;
+    const nomi=(dipCache||[]);
+    let tit="";
+    try{ if(typeof giorLeggiTitolare==="function") tit=await giorLeggiTitolare(); }catch(_){}
+    const io=(typeof _gIo==="function")?_gIo():"";
+    const norm=x=>String(x||"").toLowerCase().trim();
+    const ioInSquadra=nomi.some(d=>String(d.id)===String(io)||(tit&&norm(d.nome)===norm(tit)));
+    let v=sel.value||"";
+    if(!v){ try{ v=localStorage.getItem("ore_chi_"+sbUid)||""; }catch(_){} }
+    if(!v&&!nomi.length) v="__io__";
+    const d=$("#or-data"); if(d&&!d.value) d.value=todayStr();
+    sel.innerHTML='<option value="">Scegli chi</option>'
+      +nomi.map(d=>'<option value="'+esc(String(d.id))+'">'+esc(d.nome)+(String(d.id)===String(io)?' (io)':'')+'</option>').join("")
+      +(ioInSquadra?'':'<option value="__io__">'+esc(tit?tit+' (io)':'Io')+'</option>')
+      +'<option value="__nuovo__">＋ Un\'altra persona…</option>';
+    if([...sel.options].some(o=>o.value===v)&&v!=="__nuovo__") sel.value=v;
+    oreChiCambia();
+  }
+  function oreChiCambia(){
+    const sel=$("#or-chi"), box=$("#or-chi-nuovo-box"); if(!sel||!box)return;
+    box.style.display=sel.value==="__nuovo__"?"":"none";
+  }
+  document.addEventListener("change",e=>{ if(e.target&&e.target.id==="or-chi"){ oreChiCambia(); if(e.target.value==="__nuovo__"){ const n=$("#or-chi-nuovo"); if(n)n.focus(); } } });
+  /* la persona scelta, come id di gest_operatori: la crea se serve */
+  async function oreChiId(){
+    const sel=$("#or-chi"); if(!sel)return {id:null};
+    const v=sel.value;
+    if(!v) return {manca:true};
+    if(v!=="__io__"&&v!=="__nuovo__") return {id:v};
+    let nome="";
+    if(v==="__nuovo__"){
+      nome=String(($("#or-chi-nuovo")||{}).value||"").trim();
+      if(!nome){ campoManca("#or-chi-nuovo","Manca il nome della persona: scrivilo qui."); return {stop:true}; }
+    }else{
+      try{ if(typeof giorLeggiTitolare==="function") nome=await giorLeggiTitolare(); }catch(_){}
+      nome=nome||"Io";
+    }
+    nome=nome.charAt(0).toUpperCase()+nome.slice(1);
+    const gia=(dipCache||[]).find(d=>String(d.nome||"").toLowerCase().trim()===nome.toLowerCase());
+    if(gia) return {id:gia.id};
+    const {data,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id:curMestiere(),nome:nome.slice(0,60)}).select("id,nome");
+    if(error||!data||!data.length){ toast("Non riesco ad aggiungere "+nome+" alla squadra: "+((error&&error.message)||"nessuna riga")); return {stop:true}; }
+    if(Array.isArray(dipCache)) dipCache.push({id:data[0].id,nome:data[0].nome,ruolo:"operaio",permessi:{},docs:[]});
+    if(v==="__io__"&&typeof _gSetIo==="function") _gSetIo(data[0].id);
+    const n=$("#or-chi-nuovo"); if(n) n.value="";
+    return {id:data[0].id,nuovo:nome};
+  }
+
   async function oreAdd(){
     if(!sbUid||!oreLavoroId)return;
     if(!oreTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-ore-e-crediti.sql)");return;}
@@ -877,13 +940,18 @@
     if(!(ore>0)){toast("Scrivi quante ore, per esempio 2,5");return;}
     /* una riga sola di 1.250 ore e' un dito scivolato, non una giornata */
     if(ore>24){toast("Sono tante: una riga sola non può avere più di 24 ore");return;}
+    const chi=await oreChiId();
+    if(chi.manca){ campoManca("#or-chi","Manca chi le ha fatte: sceglilo qui."); return; }
+    if(chi.stop) return;
     const obj={user_id:sbUid,mestiere_id:curMestiere(),lavoro_id:oreLavoroId,
       data:$("#or-data").value||todayStr(), ore,
       nota:$("#or-nota").value.trim()||null,
-      operatore_id:($("#or-chi")&&$("#or-chi").value)||null};
+      operatore_id:chi.id||null};
     const {error}=await sb.from("gest_ore").insert(obj);
     if(error){toast("Errore: "+error.message);return;}
+    try{ localStorage.setItem("ore_chi_"+sbUid,String(chi.id||"")); }catch(_){}
     $("#or-ore").value="";$("#or-nota").value="";
+    const _sel=$("#or-chi"); if(_sel) _sel.value=String(chi.id||"");
     await renderOreBlock(oreLavoroId);
     renderRapportiniBlock(oreLavoroId);   /* la riga «aggiunte da te» deve restare vera */
     await _oreSalvaTotale();

@@ -406,6 +406,31 @@
     doc.setFontSize(10);doc.text(lines,M+2,y+6);doc.text(eurPdf(l.importo),R-2,y+6,{align:"right"});
     if(detStr){doc.setFontSize(8.5);doc.setTextColor(120);doc.text(detStr,M+2,y+6+lines.length*5);doc.setTextColor(0);}
     y+=rowH+4;
+    /* 13 nov 2026 (gruppo 4, chiesto da Alex) — LE VOCI DEL PREVENTIVO, SENZA
+       PREZZI: cosa comprende il lavoro, quanto, in che unita'. Le legge la
+       funzione del database lavoro_voci_senza_prezzi (la stessa dell'app
+       dell'operaio): i prezzi da li' non escono proprio. */
+    try{
+      const rv=await sb.rpc("lavoro_voci_senza_prezzi",{p_lavoro:id});
+      const voci=(rv&&!rv.error&&Array.isArray(rv.data))?rv.data:[];
+      if(voci.length){
+        y+=4; if(y+20>262){doc.addPage();y=20;}
+        doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Cosa comprende il lavoro",M,y);y+=6;
+        doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+        voci.forEach(v=>{
+          if(v.sezione){ if(y+10>262){doc.addPage();y=20;} doc.setFont("helvetica","bold");doc.text(doc.splitTextToSize(String(v.descrizione||""),R-M),M,y+1);doc.setFont("helvetica","normal");y+=6;return; }
+          const q=(+v.qta)||1, u=(typeof prevUnitaPdf==="function"?prevUnitaPdf(v.unita):(v.unita||""));
+          const qt=String(+q.toFixed(3)).replace(".",",")+(u?" "+u:"");
+          const dl=doc.splitTextToSize(String(v.descrizione||""),R-M-40);
+          const h=dl.length*4.6+2.4;
+          if(y+h>262){doc.addPage();y=20;}
+          doc.text(dl,M,y);doc.text(qt,R,y,{align:"right"});
+          y+=h;doc.setDrawColor(225);doc.line(M,y-3,R,y-3);
+        });
+        y+=4;
+      }
+    }catch(e){}
+    if(y+26>272){doc.addPage();y=20;}
     doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-70,y,70,12);doc.setLineWidth(.2);
     doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("TOTALE",R-68,y+7.6);doc.text(eurPdf(l.importo),R-2,y+7.6,{align:"right"});
     y+=22;

@@ -876,6 +876,19 @@ async function giorPdf(){
   if(typeof window.gestLogoPdf==="function"){ try{ y=await window.gestLogoPdf(doc,M,y)||y; }catch(e){} }
   const T=s=>String(s==null?"":s).replace(/[^\x00-\xFF€]/g,"");
   const pagina=hh=>{ if(y+hh>282){ doc.addPage(); y=20; } };
+  /* 13 nov 2026 (lista «MANCA», n. 9) — i dati dell'azienda in testa, come
+     negli altri fogli: il consulente del lavoro deve sapere di chi e' */
+  try{
+    const ra=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    const az=ra&&ra.data;
+    if(az&&az.nome){
+      doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.text(T(az.nome),M,y); y+=5.5;
+      doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(90);
+      [az.piva?"P.IVA "+az.piva:"",(typeof azIndirizzo==="function"?azIndirizzo(az):az.indirizzo)||"",[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+        .filter(Boolean).forEach(t=>{ doc.text(T(t),M,y); y+=4.5; });
+      doc.setTextColor(0); y+=6;
+    }
+  }catch(e){}
   doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.text(T("Giornate di lavoro - "+_gMeseNome(giorMese)),M,y); y+=6;
   doc.setDrawColor(255,136,0); doc.setLineWidth(.8); doc.line(M,y,W-M,y); y+=10;
   function tabella(titolo,cols,righe,larg){

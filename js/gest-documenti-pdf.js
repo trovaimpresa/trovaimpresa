@@ -1047,123 +1047,133 @@
       immagini.push({d,w:m.w,h:m.h});
     }
 
-    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
-    const M=18, R=210-M, L=R-M;
-    let y=20;
-    const paragrafo=(txt,size,grassetto,colore)=>{
-      const stile=()=>{doc.setFont("helvetica",grassetto?"bold":"normal");
-                       doc.setFontSize(size||9.5);
-                       doc.setTextColor(colore==null?0:colore);};
-      stile();
-      doc.splitTextToSize(String(txt),L).forEach(function(riga){
-        if(y+4.6>272){doc.addPage();y=20;stile();}
-        doc.text(riga,M,y); y+=4.6;
-      });
-      doc.setTextColor(0);
-    };
-    const titoletto=t=>{ y+=4; if(y+10>272){doc.addPage();y=20;} paragrafo(t,10.5,true); y+=1.5; };
-
-    /* intestazione */
-    y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
-    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
-    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    let hy=y+6;
-    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
-      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
-    doc.setTextColor(0);
-    y=hy+6;doc.setDrawColor(210);doc.line(M,y,R,y);y+=9;
-
-    doc.setFont("helvetica","bold");doc.setFontSize(15);
-    doc.text("VERBALE DI SOPRALLUOGO",105,y,{align:"center"});y+=8;
-
-    /* i dati in testa */
-    doc.setFont("helvetica","normal");doc.setFontSize(9.5);
-    const testa=[["Data",fdate(dati.data)+(dati.ora?"  ore "+dati.ora:"")],
-                 ["Luogo",dati.luogo||"—"],
-                 ["Pratica",l.descrizione||"—"],
-                 ["Committente",cli.nome||"—"]];
-    testa.forEach(function(r){
-      if(y+6>272){doc.addPage();y=20;}
-      doc.setFont("helvetica","bold");doc.text(r[0],M,y);
-      doc.setFont("helvetica","normal");
-      doc.splitTextToSize(String(r[1]),L-32).forEach(function(riga,i){
-        doc.text(riga,M+32,y+(i*4.6));
-      });
-      y+=Math.max(6,doc.splitTextToSize(String(r[1]),L-32).length*4.6+1.4);
-    });
-    y+=2;doc.setDrawColor(210);doc.line(M,y,R,y);y+=4;
-
-    if(dati.presenti){
-      titoletto("Presenti al sopralluogo");
-      dati.presenti.split("\n").map(x=>x.trim()).filter(Boolean).forEach(function(r){
-        paragrafo(r.charAt(0)==="-"?r:("- "+r));
-      });
-    }
-
-    titoletto("Stato dei luoghi e rilievi");
-    if(dati.rilievi){
-      const punti=dati.rilievi.split("\n").map(x=>x.trim()).filter(Boolean);
-      if(punti.length>1)punti.forEach(function(r,i){ paragrafo((i+1)+". "+r.replace(/^[-\d.\s]+/,"")); });
-      else paragrafo(punti[0]);
-    }else{
-      paragrafo("—");
-    }
-
-    /* le foto: due per riga, mantenendo le proporzioni */
-    if(immagini.length){
-      titoletto("Documentazione fotografica");
-      const larg=(L-6)/2, HMAX=70;
-      /* Le misure si calcolano PRIMA, tutte. Due cose che prima sbagliavano:
-         1) col tetto di 70 mm si accorciava l'altezza ma non la larghezza, e
-            una foto verticale del telefono usciva schiacciata: su un verbale
-            che deve provare lo stato dei luoghi è un difetto serio;
-         2) il salto pagina guardava solo la PRIMA foto della riga, quindi una
-            seconda foto più alta finiva sotto il bordo del foglio. */
-      const dim=immagini.map(function(im){
-        let w=larg, h=larg*(im.h/im.w);
-        if(h>HMAX){ h=HMAX; w=HMAX*(im.w/im.h); }   /* si scala anche la larghezza */
-        return {w:w,h:h};
-      });
-      for(let i=0;i<immagini.length;i+=2){
-        const a=dim[i], b=dim[i+1];
-        const hRiga=Math.max(a.h, b?b.h:0);
-        if(y+hRiga+10>272){doc.addPage();y=20;}
-        [i,i+1].forEach(function(k,col){
-          if(k>=immagini.length)return;
-          const d=dim[k];
-          /* centrata nella sua colonna: le verticali non restano appiccicate a sinistra */
-          const x=M+col*(larg+6)+(larg-d.w)/2;
-          try{ doc.addImage(immagini[k].d,"JPEG",x,y,d.w,d.h,undefined,"FAST"); }catch(e){}
-          doc.setFontSize(8);doc.setTextColor(120);
-          doc.text("Foto "+(k+1),M+col*(larg+6),y+hRiga+4);
-          doc.setTextColor(0);
+    /* 13 nov 2026 (lista «MANCA», n. 16) — le firme mai da sole su una pagina:
+       se la prima volta finiscono da sole, il foglio si rifà e l'ultimo
+       capitolo va a capo pagina insieme a loro. */
+    const componi=async(porta)=>{
+      const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+      const M=18, R=210-M, L=R-M;
+      let y=20;
+      const paragrafo=(txt,size,grassetto,colore)=>{
+        const stile=()=>{doc.setFont("helvetica",grassetto?"bold":"normal");
+                         doc.setFontSize(size||9.5);
+                         doc.setTextColor(colore==null?0:colore);};
+        stile();
+        doc.splitTextToSize(String(txt),L).forEach(function(riga){
+          if(y+4.6>272){doc.addPage();y=20;stile();}
+          doc.text(riga,M,y); y+=4.6;
         });
-        y+=hRiga+10;
+        doc.setTextColor(0);
+      };
+      let nTit=0;
+      const titoletto=t=>{ nTit++; y+=4; if((porta&&nTit===porta)||y+10>272){doc.addPage();y=20;} paragrafo(t,10.5,true); y+=1.5; };
+
+      /* intestazione */
+      y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
+      doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      let hy=y+6;
+      [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+        .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+      doc.setTextColor(0);
+      y=hy+6;doc.setDrawColor(210);doc.line(M,y,R,y);y+=9;
+
+      doc.setFont("helvetica","bold");doc.setFontSize(15);
+      doc.text("VERBALE DI SOPRALLUOGO",105,y,{align:"center"});y+=8;
+
+      /* i dati in testa */
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+      const testa=[["Data",fdate(dati.data)+(dati.ora?"  ore "+dati.ora:"")],
+                   ["Luogo",dati.luogo||"—"],
+                   ["Pratica",l.descrizione||"—"],
+                   ["Committente",cli.nome||"—"]];
+      testa.forEach(function(r){
+        if(y+6>272){doc.addPage();y=20;}
+        doc.setFont("helvetica","bold");doc.text(r[0],M,y);
+        doc.setFont("helvetica","normal");
+        doc.splitTextToSize(String(r[1]),L-32).forEach(function(riga,i){
+          doc.text(riga,M+32,y+(i*4.6));
+        });
+        y+=Math.max(6,doc.splitTextToSize(String(r[1]),L-32).length*4.6+1.4);
+      });
+      y+=2;doc.setDrawColor(210);doc.line(M,y,R,y);y+=4;
+
+      if(dati.presenti){
+        titoletto("Presenti al sopralluogo");
+        dati.presenti.split("\n").map(x=>x.trim()).filter(Boolean).forEach(function(r){
+          paragrafo(r.charAt(0)==="-"?r:("- "+r));
+        });
       }
-    }
 
-    if(dati.concl){
-      titoletto("Conclusioni");
-      paragrafo(dati.concl);
-    }
+      titoletto("Stato dei luoghi e rilievi");
+      if(dati.rilievi){
+        const punti=dati.rilievi.split("\n").map(x=>x.trim()).filter(Boolean);
+        if(punti.length>1)punti.forEach(function(r,i){ paragrafo((i+1)+". "+r.replace(/^[-\d.\s]+/,"")); });
+        else paragrafo(punti[0]);
+      }else{
+        paragrafo("—");
+      }
 
-    /* firme dei presenti: blocco unico */
-    const hFirme=6+14+6+10;
-    y+=6;
-    if(y+hFirme>280){doc.addPage();y=20;}
-    paragrafo("Il presente verbale, redatto in contraddittorio fra i presenti, documenta lo stato dei luoghi alla data sopra indicata.",8.8,false,90);
-    y+=6;
-    paragrafo((dati.firmaLuogo?dati.firmaLuogo+", ":"")+"li "+fdate(dati.data),9.5,false);
-    y+=12;
-    doc.setDrawColor(120);
-    doc.line(M,y,M+70,y);
-    doc.line(R-70,y,R,y);
-    y+=5;
-    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    doc.text("Il tecnico",M,y);
-    doc.text("Il committente",R-70,y);
-    doc.setTextColor(0);
+      /* le foto: due per riga, mantenendo le proporzioni */
+      if(immagini.length){
+        titoletto("Documentazione fotografica");
+        const larg=(L-6)/2, HMAX=70;
+        /* Le misure si calcolano PRIMA, tutte. Due cose che prima sbagliavano:
+           1) col tetto di 70 mm si accorciava l'altezza ma non la larghezza, e
+              una foto verticale del telefono usciva schiacciata: su un verbale
+              che deve provare lo stato dei luoghi è un difetto serio;
+           2) il salto pagina guardava solo la PRIMA foto della riga, quindi una
+              seconda foto più alta finiva sotto il bordo del foglio. */
+        const dim=immagini.map(function(im){
+          let w=larg, h=larg*(im.h/im.w);
+          if(h>HMAX){ h=HMAX; w=HMAX*(im.w/im.h); }   /* si scala anche la larghezza */
+          return {w:w,h:h};
+        });
+        for(let i=0;i<immagini.length;i+=2){
+          const a=dim[i], b=dim[i+1];
+          const hRiga=Math.max(a.h, b?b.h:0);
+          if(y+hRiga+10>272){doc.addPage();y=20;}
+          [i,i+1].forEach(function(k,col){
+            if(k>=immagini.length)return;
+            const d=dim[k];
+            /* centrata nella sua colonna: le verticali non restano appiccicate a sinistra */
+            const x=M+col*(larg+6)+(larg-d.w)/2;
+            try{ doc.addImage(immagini[k].d,"JPEG",x,y,d.w,d.h,undefined,"FAST"); }catch(e){}
+            doc.setFontSize(8);doc.setTextColor(120);
+            doc.text("Foto "+(k+1),M+col*(larg+6),y+hRiga+4);
+            doc.setTextColor(0);
+          });
+          y+=hRiga+10;
+        }
+      }
 
+      if(dati.concl){
+        titoletto("Conclusioni");
+        paragrafo(dati.concl);
+      }
+
+      /* firme dei presenti: blocco unico */
+      const hFirme=6+14+6+10;
+      y+=6;
+      let sole=0;
+      if(y+hFirme>280){ sole=nTit; doc.addPage();y=20;}
+      paragrafo("Il presente verbale, redatto in contraddittorio fra i presenti, documenta lo stato dei luoghi alla data sopra indicata.",8.8,false,90);
+      y+=6;
+      paragrafo((dati.firmaLuogo?dati.firmaLuogo+", ":"")+"li "+fdate(dati.data),9.5,false);
+      y+=12;
+      doc.setDrawColor(120);
+      doc.line(M,y,M+70,y);
+      doc.line(R-70,y,R,y);
+      y+=5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      doc.text("Il tecnico",M,y);
+      doc.text("Il committente",R-70,y);
+      doc.setTextColor(0);
+      return {doc:doc,sole:sole};
+    };
+    let _c=await componi(0);
+    if(_c.sole) _c=await componi(_c.sole);
+    const doc=_c.doc;
     doc.save("verbale-sopralluogo-"+fdate(dati.data).replace(/\//g,"-")+"-"+String(l.descrizione||"pratica").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     closeSheet();
     toast("Verbale scaricato ✅");

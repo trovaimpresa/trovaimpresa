@@ -1286,7 +1286,15 @@
       doc.setTextColor(0);
     }
     var nArt=0;
-    function titoletto(t){ nArt++; y+=4; if(y+10>272){ nuovaPagina(); } paragrafo(nArt+". "+t,10.5,true,col); y+=1.5; }
+    /* 13 nov 2026 (lista «MANCA», n. 16) — LE FIRME MAI DA SOLE SU UNA PAGINA.
+       Il foglio si compone due volte se serve: la prima volta si guarda se le
+       firme finiscono da sole sulla pagina nuova; se si', la seconda volta
+       l'ultimo articolo va a capo pagina insieme alle firme. */
+    var _firmeSole={}, _porta={}, _capCorrente=0;
+    function titoletto(t){ nArt++; y+=4;
+      if(_porta[_capCorrente]&&nArt===_porta[_capCorrente]){ nuovaPagina(); }
+      else if(y+10>272){ nuovaPagina(); }
+      paragrafo(nArt+". "+t,10.5,true,col); y+=1.5; }
 
     /* le allegate: si scaricano prima, cosi' un file mancante non rompe il PDF a meta' */
     var foto={};
@@ -1304,7 +1312,7 @@
     }
 
     async function scriviCapitolato(dati,indice){
-      nArt=0;
+      nArt=0; _capCorrente=indice;
       if(indice>0) doc.addPage();
       fascia(); y=20;
       /* intestazione impresa */
@@ -1386,7 +1394,7 @@
       }
 
       /* le firme: un blocco unico, che non si spezza fra due pagine */
-      if(y+50>280){ nuovaPagina(); }
+      if(y+50>280){ if(!_porta[indice]) _firmeSole[indice]=nArt; nuovaPagina(); }
       y+=8;
       paragrafo((T(az.citta)?az.citta+", ":"")+"li "+fdate(todayStr()),9.5,false);
       y+=16;
@@ -1427,6 +1435,11 @@
     }
 
     for(var n=0;n<daFare.length;n++) await scriviCapitolato(daFare[n],n);
+    if(Object.keys(_firmeSole).length){
+      _porta=_firmeSole; _firmeSole={};
+      doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"}); y=20;
+      for(var n2=0;n2<daFare.length;n2++) await scriviCapitolato(daFare[n2],n2);
+    }
 
     /* il piede di ogni pagina */
     var tot=doc.getNumberOfPages();
