@@ -6057,3 +6057,14 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
    nelle fatture dei fornitori) erano a 13,5 px; sul telefono si toccano su 44 px */
 .btn-sm{ font-size:14px; }
 @media(max-width:880px){ .btn-sm{ min-height:44px; height:auto; } }
+
+/* 13 nov 2026 (quarto giro) — Mappa sul telefono, studio tecnico: «Pratiche da
+   fare · Tutte le pratiche» sono piu' lunghe di «Lavori da fare · Tutti i
+   lavori» e a 375 e 360 px uscivano dallo schermo. Sotto i 520 px la scritta
+   «Mostra» va sopra e i due pulsanti si dividono la riga (e vanno a capo
+   dentro, se serve). */
+@media(max-width:520px){
+  #mappa .filtri .filtro{ flex-wrap:wrap; width:100%; }
+  #mappa .segm{ display:flex; flex:1 1 100%; width:100%; }
+  #mappa .segm button{ flex:1 1 0; min-width:0; height:auto; min-height:44px; padding:6px 8px; white-space:normal; line-height:1.25; }
+}

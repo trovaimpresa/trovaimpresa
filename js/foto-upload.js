@@ -98,7 +98,7 @@
        all'utente cosa fare invece di mandare un upload che fallisce */
     function intatto_o_errore(){
       if(eImmagine(file) && file.size > MAX_BYTE){
-        return { errore: "Questa foto non si riesce a ridurre e pesa piu' di 15 MB. Dal telefono salvala come JPG (o fai una foto piu' piccola) e riprova." };
+        return { errore: "Questa foto non si riesce a ridurre e pesa più di 15 MB. Dal telefono salvala come JPG (o fai una foto piu' piccola) e riprova." };
       }
       return intatto;
     }

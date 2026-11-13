@@ -798,7 +798,7 @@
     if (tit.length > 60) tit = tit.slice(0, 57) + '…';
     var dom = 'Buttare la chat' + (tit ? ' «' + tit + '»' : '') + '?';
     var ok = (typeof window.tiChiedi === 'function')
-      ? await window.tiChiedi('Non va nel Cestino: non si recupera.', { titolo: dom, si: 'Sì, buttala', no: 'No', rosso: true })
+      ? await window.tiChiedi('Non va nel Cestino: non si recupera.', { titolo: dom, si: 'Sì, elimina', no: 'No', rosso: true })
       : window.confirm(dom + ' Non si recupera.');
     if (!ok) return;
     try {

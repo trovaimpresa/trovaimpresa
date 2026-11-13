@@ -113,7 +113,7 @@
     if(a==="asst-invia")return asstInvia();
     if(a==="asst-allega")return asstScegliFile();
     if(a==="asst-togli-file")return asstTogliFile();
-    if(a==="spesa-del"){if((await window.chiediVia("questa spesa",true,"La riprendi dal Cestino quando vuoi.")))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
+    if(a==="spesa-del"){/* 13 nov 2026 (quarto giro) — la domanda dice QUALE spesa: il nome si legge dalla riga toccata */const _rs=t.closest(".spesa-row"),_ns=_rs&&_rs.querySelector("span"),_nb=_rs&&_rs.querySelector("b");let _nomeSp="";if(_ns){const _c=_ns.cloneNode(true);_c.querySelectorAll("small").forEach(x=>x.remove());_nomeSp=_c.textContent.trim().slice(0,80);}if((await window.chiediVia(_nomeSp?("la spesa «"+_nomeSp+"»"+(_nb?" da "+_nb.textContent.trim():"")):"questa spesa",true,"La riprendi dal Cestino quando vuoi.")))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();
     if(a==="new-computo")return computoForm(null);
@@ -709,7 +709,20 @@
         const {data:r}=await sb.from("gest_clienti").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
         pieno=r||null;
       }
-      return cliForm(pieno||cliCache.find(c=>c.id===id));
+      const _rCli=await cliForm(pieno||cliCache.find(c=>c.id===id));
+      /* 13 nov 2026 (quarto giro) — chi arriva dalla finestra dello SDI deve
+         trovare APERTO «Dati per la fattura» (codice destinatario, PEC,
+         partita IVA): prima si apriva la scheda e bisognava cercarlo. */
+      if(t.dataset.fisc){
+        setTimeout(function(){
+          const _ap=document.getElementById("c-fisc-apri"), _bx=document.getElementById("c-fisc-box");
+          if(_ap&&_ap.style.display!=="none")_ap.click();
+          else if(_bx)_bx.style.display="";
+          const _cs=document.getElementById("c-sdi");
+          if(_cs){ try{_cs.scrollIntoView({block:"center"});}catch(_){} }
+        },250);
+      }
+      return _rCli;
     }
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli")return delCli(id);

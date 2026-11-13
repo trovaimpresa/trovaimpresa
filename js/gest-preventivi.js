@@ -302,7 +302,7 @@
           <input type="checkbox" id="pv-rit" ${(!forf&&rit)?"checked":""} ${forf?"disabled":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
           <span>Applica la ritenuta d'acconto del 20%</span>
         </label>
-        <p style="font-size:13px;color:var(--testo-3,#7a8896);line-height:1.55;margin:8px 0 0">
+        <p style="font-size:15px;color:var(--testo-2,#475569);line-height:1.55;margin:8px 0 0">
           ${forf
             ? "In regime forfettario la ritenuta d'acconto <strong>non si applica</strong>: sulla fattura va scritto che il compenso non &egrave; soggetto a ritenuta."
             : "Va messa solo se il cliente &egrave; <strong>azienda, professionista o condominio</strong>. Se il cliente &egrave; un privato, lasciala vuota."}
@@ -334,7 +334,10 @@
          stanno dentro questo numero ma l'IVA non ce l'hanno (art. 15), quindi
          chi provasse a farci sopra il 22% non tornerebbe. */
       riga(c.spese?"Totale imponibile":"Imponibile IVA", c.imponibile) +
-      (c.iva?riga("IVA", c.iva):"") +
+      /* 13 nov 2026 (quarto giro) — sopra c'e' «Totale imponibile 1.056,00» e
+         l'IVA e' contata su 1.040 (le spese sono fuori IVA): sembrava un
+         errore. Con le spese la riga dice su quanto e' contata. */
+      (c.iva?riga(c.spese?("IVA (su "+eur2(c.baseIva)+": le spese sono fuori IVA)"):"IVA", c.iva):"") +
       (c.ritenuta?riga("Ritenuta d'acconto", c.ritenuta, true):"") +
       `<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>` +
       `<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Da incassare</strong></span><strong>${eur2(c.totale)}</strong></div>`;
@@ -1095,7 +1098,9 @@
      quindi l'await deve stare qui dentro */
   async function delCred(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!(await window.chiediVia("questo corso",true,"Lo riprendi dal Cestino quando vuoi.")))return;
+    /* 13 nov 2026 (quarto giro) — la domanda dice QUALE corso */
+    const _cr=credCache.find(x=>String(x.id)===String(id));
+    if(!(await window.chiediVia(_cr&&_cr.titolo?("il corso «"+String(_cr.titolo).slice(0,80)+"»"):"questo corso",true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const {data,error}=await sb.from("gest_crediti").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}

@@ -331,7 +331,14 @@
       x = Math.max(m, r.left);
       y = r.bottom + m;
     }
-    if (y + b.height > window.innerHeight - m) y = Math.max(m, window.innerHeight - b.height - m);
+    /* 13 nov 2026 (quarto giro) — un pulsante in fondo a destra («Scarica la
+       conferma») aveva la nuvoletta ADDOSSO: di lato non ci stava, sotto
+       nemmeno, e veniva risalita fino a coprirlo. Se sotto non c'e' posto va
+       SOPRA al pulsante. */
+    if (y + b.height > window.innerHeight - m) {
+      var sopra = r.top - b.height - m;
+      y = (y > r.top && sopra >= m) ? sopra : Math.max(m, window.innerHeight - b.height - m);
+    }
     /* 9 agosto 2026 — su telefono il riquadro usciva a destra: qui lo si
        riporta dentro, sempre, qualunque strada abbia preso sopra. */
     x = Math.min(x, window.innerWidth - b.width - m);

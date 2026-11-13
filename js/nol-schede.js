@@ -257,7 +257,8 @@
           <div><label>Ultima verifica periodica</label><input id="nz-vdata" type="date" value="${v('verifica_ultima')}"></div>
           <div><label>Ogni quanti mesi</label><input id="nz-vmesi" inputmode="numeric" value="${m.verifica_mesi==null?12:esc(m.verifica_mesi)}" placeholder="12"></div>
         </div>
-        <p style="margin:8px 0 0;font-size:13px;color:#666">12, 24 o 36 mesi secondo il tipo di macchina, l'età e quanto si usa. <b>Metti 0</b> se questo mezzo non è soggetto a verifica (art. 71 c.11 e allegato VII del D.Lgs 81/08).</p>
+        <p style="margin:8px 0 0;font-size:14px;color:#666">12, 24 o 36 mesi secondo il tipo di macchina, l'età e quanto si usa. <b>Metti 0</b> se questo mezzo non è soggetto a verifica (art. 71 c.11 e allegato VII del D.Lgs 81/08).</p>
+        <p id="nz-vnota" style="margin:8px 0 0;font-size:15px;font-weight:700;color:#c62828">Senza la data dell'ultima verifica il mezzo resta «NON SI PUÒ DARE»: scrivi la data, oppure metti 0 nei mesi.</p>
         <div class="field" style="margin-top:10px"><label>Chi l'ha fatta</label><input id="nz-vente" value="${v('verifica_ente')}" placeholder="INAIL, ASL, oppure il nome del soggetto abilitato"></div>
         <div class="nol-due">
           <div><label>Assicurazione, scade il</label><input id="nz-assic" type="date" value="${v('assicurazione_scad')}"></div>
@@ -641,3 +642,17 @@
     nolMostraCauzione();
     nolAggiornaConto();
   }
+
+  /* 13 nov 2026 (quarto giro) — un mezzo nuovo nasceva «NON SI PUÒ DARE» (manca
+     la data dell'ultima verifica periodica) e il modulo non lo diceva. La
+     riga rossa sotto le due caselle si vede solo finche' la data manca e i
+     mesi non sono 0. */
+  function nzVerificaNota(){
+    const n=document.getElementById("nz-vnota"); if(!n) return;
+    const d=document.getElementById("nz-vdata"), m=document.getElementById("nz-vmesi");
+    const mesi=m?parseInt(String(m.value).replace(/\D/g,"")||"0",10):12;
+    n.style.display=(d&&!d.value&&mesi>0)?"":"none";
+  }
+  document.addEventListener("input",function(e){ if(e.target&&(e.target.id==="nz-vdata"||e.target.id==="nz-vmesi")) nzVerificaNota(); });
+  document.addEventListener("change",function(e){ if(e.target&&(e.target.id==="nz-vdata"||e.target.id==="nz-vmesi")) nzVerificaNota(); });
+  try{ new MutationObserver(function(){ if(document.getElementById("nz-vnota")) nzVerificaNota(); }).observe(document.getElementById("overlay")||document.body,{childList:true,subtree:true}); }catch(_){}

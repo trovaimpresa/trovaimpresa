@@ -600,7 +600,9 @@
   }
 
   async function salElimina(id){
-    if(!(await gconfirm("Buttare questo stato di avanzamento nel cestino?")))return;
+    /* 13 nov 2026 (quarto giro) — la domanda dice QUALE stato di avanzamento */
+    const _sl=salCache.find(x=>String(x.id)===String(id));
+    if(!(await window.chiediVia("lo stato di avanzamento"+(_sl&&_sl.numero?(" n. "+_sl.numero):""),true,"Lo riprendi dal Cestino quando vuoi.")))return;
     const res=await sb.from("gest_sal").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}

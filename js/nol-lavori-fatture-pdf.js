@@ -170,7 +170,7 @@
     return nolCard({col:FATT_COLORE[st],
       titolo:esc(l.descrizione||"Lavoro"),
       eti:[{t:esc(FATT_ETICHETTA[st].toUpperCase())}],
-      corpo:`<div class="sub">${_eur(l.importo)}${l.ore?" · "+esc(String(l.ore))+" ore":""}</div>
+      corpo:`<div class="sub">${_eur(l.importo)}${l.ore?" · "+esc(String(l.ore).replace(".",","))+" ore":""}</div>
       <div class="sub2">📅 ${fdate(l.data_fatto||l.data_prevista)}${pdf?" · 📄 fattura allegata":""}</div>`,
       pulsanti:nolPulsanti("fattura",l.id)});
   }

@@ -150,7 +150,7 @@
 
   async function cestSvuotaNol(lista){
     if(!lista.length||!cestAcceso())return;
-    if(!(await tiChiedi("Buttare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+" del cestino?\nQuesta volta non si torna indietro davvero.")))return;
+    if(!(await tiChiedi("Buttare per sempre "+(lista.length===1?"1 cosa":lista.length+" cose")+" del cestino?\nQuesta volta non si torna indietro davvero.",{si:"Sì, elimina",no:"No",rosso:true})))return;
     let fatti=0, ko=0;
     for(const v of lista){
       const {data,error}=await sb.raw(v.tab).delete().eq("id",v.id).eq("user_id",sbUid).select("id");
@@ -178,7 +178,7 @@
 
   async function cestPerSempre(i){
     const v=cestCache[i]; if(!v||!cestAcceso()) return;
-    if(!(await tiChiedi("Buttare per sempre «"+v.nome+"»?\nQuesta volta non si torna indietro davvero."))) return;
+    if(!(await tiChiedi("Buttare per sempre «"+v.nome+"»?\nQuesta volta non si torna indietro davvero.",{si:"Sì, elimina",no:"No",rosso:true}))) return;
     /* sb.raw e non sb.from: qui la cancellazione deve essere vera */
     const {error}=await sb.raw(v.tab).delete().eq("id",v.id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}

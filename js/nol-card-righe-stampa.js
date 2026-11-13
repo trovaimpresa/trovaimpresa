@@ -339,7 +339,10 @@
     const M=18, R=210-M; let y=22;
     const az=(state.azienda&&state.azienda.nome)?state.azienda.nome:"";
     doc.setFont("helvetica","bold");doc.setFontSize(16);
-    doc.text(nolTitolo(tipo,d),M,y); y+=7;
+    /* 13 nov 2026 (quarto giro) — coi nomi lunghi il titolo usciva dal foglio:
+       adesso va a capo */
+    const _tit=doc.splitTextToSize(String(nolTitolo(tipo,d)),R-M);
+    doc.text(_tit,M,y); y+=7*_tit.length;
     if(az){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(110);doc.text(az,M,y);y+=6;}
     doc.setTextColor(30); y+=2;
     righe.forEach(x=>{
@@ -353,7 +356,7 @@
       y+=Math.max(7,linee.length*5.5);
       doc.setDrawColor(230);doc.line(M,y-3,R,y-3);
     });
-    const nome=nolTitolo(tipo,d).replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g,"-");
+    const nome=nolTitolo(tipo,d).replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g,"-").slice(0,80);
     doc.save(nome+".pdf");
   }
 
@@ -393,7 +396,7 @@
     const _dom=_nelCest
       ? "Mettere nel cestino "+_art+_cosa+"?\n"+(t.avviso?t.avviso+"\n":"")+(t.femm?"La":"Lo")+" riprendi dal Cestino quando vuoi."
       : "Eliminare per sempre "+_art+_cosa+"?\n"+(t.avviso?t.avviso+"\n":"")+"Non va nel Cestino: non si recupera.";
-    if(!(await tiChiedi(_dom))) return;
+    if(!(await tiChiedi(_dom,{si:_nelCest?"Sì, nel cestino":"Sì, elimina",no:"No",rosso:true}))) return;
     const {error}=await sb.from(t.tab).delete().eq("id",d.id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     /* 13 nov 2026 (quarto giro) — la finestra si CHIUDE. Restava aperta sulla

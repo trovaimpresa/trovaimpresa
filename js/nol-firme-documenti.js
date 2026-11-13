@@ -129,6 +129,7 @@
       <p style="margin:0 0 10px;font-size:14px;color:#666">${rientro
         ? "Le stesse voci della consegna, ricontrollate una per una. Quello che qui &egrave; segnato DANNO e alla consegna no, &egrave; un danno del cliente."
         : "Si controlla insieme al cliente, voce per voce. &Egrave; questa la carta che al rientro vale."}</p>
+      <div style="margin:0 0 10px"><button type="button" class="nol-az" data-verb-tutte="${momento}" style="min-height:44px;font-size:15px">✓ Controllato tutto: tutte a posto</button></div>
       <div class="verb-lista">${lista.map((x,i)=>`
         <div class="verb-riga">
           <div class="verb-voce">${esc(x.voce)}</div>
@@ -211,6 +212,17 @@
 
   /* i clic sulla lista di controllo: delegati, come tutto il resto */
   document.addEventListener("click",e=>{
+    /* 13 nov 2026 (quarto giro) — le voci nascono «non controllate». Chi ha
+       guardato tutto e non ha trovato niente lo dice con un tocco solo: mette
+       «A posto» SOLO sulle voci ancora vuote, non tocca usura e danni. */
+    const tt=e.target.closest("[data-verb-tutte]");
+    if(tt){
+      const m0=tt.dataset.verbTutte, l0=(docsCheck&&docsCheck[m0])||[];
+      l0.forEach((x,i)=>{ if(!x.stato){ x.stato="ok";
+        const sg0=document.querySelector('.verb-seg[data-mom="'+m0+'"][data-i="'+i+'"]');
+        if(sg0) sg0.querySelectorAll("button").forEach(bb=>bb.classList.toggle("on",bb.dataset.v==="ok")); } });
+      return;
+    }
     const b=e.target.closest(".verb-seg button"); if(!b) return;
     const sg=b.closest(".verb-seg"), mom=sg.dataset.mom, i=+sg.dataset.i;
     sg.querySelectorAll("button").forEach(x=>x.classList.remove("on"));

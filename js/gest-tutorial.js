@@ -27,12 +27,12 @@
 
   /* Le parole della guida, una riga per voce. Corte e semplici. */
   var PAROLE = {
-    riepilogo:   "Questa e' la pagina di partenza. Scrivi o parla come ti viene: ti aiuta lui.",
+    riepilogo:   "Questa è la pagina di partenza. Scrivi o parla come ti viene: ti aiuta lui.",
     preventivi:  "Qui fai i preventivi e li mandi al cliente. Quando accetta, diventano un lavoro.",
     computi:     "Qui fai il computo metrico, voce per voce, anche coi prezzari regionali.",
     lavori:      "Qui ci sono tutti i tuoi lavori: quelli da fare, in corso e finiti.",
     fatture:     "Qui fai le fatture e vedi chi ti deve ancora pagare.",
-    clienti:     "Qui c'e' la rubrica dei tuoi clienti, con telefono, indirizzo e lavori fatti.",
+    clienti:     "Qui c'è la rubrica dei tuoi clienti, con telefono, indirizzo e lavori fatti.",
     calendario:  "Qui vedi i lavori e le scadenze giorno per giorno.",
     chat:        "Qui scrivi una domanda e l'AI ti risponde guardando i tuoi dati.",
     giornate:    "Qui segni le giornate della squadra. A fine mese esce il PDF.",
@@ -44,7 +44,7 @@
     mezzi:       "Qui ci sono i tuoi mezzi, con revisioni e assicurazioni.",
     attrezzature:"Qui ci sono le attrezzature e dove si trovano.",
     fisco:       "Qui vedi le tasse da mettere da parte e le date da non dimenticare.",
-    prezzario:   "Qui tieni i tuoi prezzi, cosi' i preventivi si fanno prima.",
+    prezzario:   "Qui tieni i tuoi prezzi, così i preventivi si fanno prima.",
     sal:         "Qui ci sono gli stati di avanzamento dei lavori.",
     fornitori:   "Qui ci sono i fornitori e le loro fatture.",
     carte:       "Qui segni le spese fatte con la carta.",
@@ -52,10 +52,10 @@
     crediti:     "Qui tieni i crediti formativi.",
     galleria:    "Qui ci sono le foto dei cantieri.",
     mappa:       "Qui vedi i cantieri sulla mappa.",
-    cestino:     "Qui finisce quello che butti. Si puo' recuperare.",
+    cestino:     "Qui finisce quello che butti. Si può recuperare.",
     richieste:   "Ti manca qualcosa? Scrivilo qui e lo costruiamo.",
     /* noleggio */
-    "clienti-nol": "Qui c'e' la rubrica dei clienti del noleggio.",
+    "clienti-nol": "Qui c'è la rubrica dei clienti del noleggio.",
     noleggi:     "Qui registri i noleggi: chi ha preso il mezzo, quando lo riporta, quanto paga.",
     prodotti:    "Qui ci sono i prodotti che vendi o noleggi.",
     magazzino:   "Qui vedi quanta merce hai e quella sotto scorta.",

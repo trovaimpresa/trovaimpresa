@@ -26,7 +26,7 @@ const B = require("./banco-gestionale.js");
     const barra = document.getElementById("barra-basso"), bb = barra && getComputedStyle(barra).display !== "none" ? Math.round(barra.getBoundingClientRect().top) : null;
     return { altoSchermo: H, barraInBasso: bb, manda: r("chat-manda"), casella: r("chat-domanda"), scorre: document.documentElement.scrollHeight - H };
   });
-  console.log(JSON.stringify(m));
+  console.log(JSON.stringify(m), await page.title());
   await page.screenshot({ path: file });
   await browser.close(); srv.close();
 })().catch(e => { console.error(e); process.exit(2); });

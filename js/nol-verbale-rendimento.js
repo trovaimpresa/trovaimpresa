@@ -25,15 +25,19 @@
      trentasei pulsanti, e con «Usura normale» andavano a capo tutti */
   const VERBALE_BREVI={ok:"A posto",usura:"Usura",danno:"Danno"};
 
-  /* la lista di partenza: tutte le voci a posto, da correggere a mano */
+  /* 13 nov 2026 (quarto giro) — LA LISTA DI PARTENZA E' «NON CONTROLLATO».
+     Prima nasceva tutta «A posto»: un verbale mai toccato usciva in PDF
+     con dodici «A posto» firmabili. Adesso una voce vale solo se qualcuno
+     l'ha toccata; le altre escono «Non controllato».
+     ⚠️ I verbali gia' salvati restano come sono (li' «ok» e' scritto). */
   function verbaleVuoto(){
-    return VERBALE_VOCI.map(v=>({voce:v,stato:"ok",nota:""}));
+    return VERBALE_VOCI.map(v=>({voce:v,stato:"",nota:""}));
   }
   /* ⚠️ se un domani si aggiunge una voce, i verbali gia' scritti non la
      hanno: si mette in coda invece di far sparire quello che c'era. */
   function verbaleNormalizza(lista){
     const dentro=Array.isArray(lista)?lista.slice():[];
-    VERBALE_VOCI.forEach(v=>{ if(!dentro.some(x=>x.voce===v)) dentro.push({voce:v,stato:"ok",nota:""}); });
+    VERBALE_VOCI.forEach(v=>{ if(!dentro.some(x=>x.voce===v)) dentro.push({voce:v,stato:"",nota:""}); });
     return dentro;
   }
 
@@ -76,7 +80,7 @@
         ? "Le stesse voci controllate alla consegna, ricontrollate una per una alla riconsegna."
         : "Controllo eseguito in contraddittorio al momento della consegna.",
       colonne:["Che cosa","Come sta","Note"],
-      righe:lista.map(x=>[x.voce,VERBALE_STATI[x.stato]||x.stato,x.nota||""]),
+      righe:lista.map(x=>[x.voce,VERBALE_STATI[x.stato]||x.stato||"Non controllato",x.nota||""]),
       nota:mm.length
         ? "Allegate "+mm.filter(x=>x.genere==="foto").length+" foto e "+
           mm.filter(x=>x.genere==="video").length+" video, scattati in questo momento."

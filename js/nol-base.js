@@ -148,7 +148,12 @@
     m=_msgPro(m);
     const via=/^(elimin|butt|togli|cancell|rimuov)/i.test(String(m).trim());
     if(typeof window.tiChiedi!=="function")return Promise.resolve(window.confirm(m));
-    return window.tiChiedi(m,{si:via?"Sì, elimina":"Sì",no:"No",rosso:via});
+    /* 13 nov 2026 (quarto giro) — il «Sì» che butta ha DUE nomi soli in tutto
+       il gestionale: «Sì, nel cestino» se la cosa si riprende, «Sì, elimina»
+       se va via per sempre. */
+    const butta=via||/^(mett|mand|spost)/i.test(String(m).trim());
+    const cest=butta&&/cestino/i.test(String(m))&&!/per sempre|non va nel cestino|non si torna indietro/i.test(String(m));
+    return window.tiChiedi(m,{si:cest?"Sì, nel cestino":(via?"Sì, elimina":"Sì"),no:"No",rosso:via||cest});
   }
 
   /* Passo 1 separazione reparti: ogni panel ha un mestiere_id (gest_mestieri) */

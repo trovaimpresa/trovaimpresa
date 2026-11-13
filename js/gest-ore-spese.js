@@ -347,14 +347,14 @@
          affatto. Adesso il caso "nessun costo orario" ha la sua frase e dice cosa fare. */
       +(oreSenzaNome
           ? (mediaSquadra>0
-              ? `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
+              ? `<span class="sp-forn" style="flex-basis:100%">${String(oreSenzaNome).replace(".",",")} ore senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
               /* 12 agosto 2026 (notte) — questa frase diceva "la manodopera non
                  entra nel margine", e da quando la media si fa sui soli vivi
                  poteva stare sotto una manodopera che invece c'era eccome (le
                  ore INTESTATE a qualcuno si contano lo stesso, anche se quel
                  qualcuno e' nel Cestino). Adesso parla solo delle ore che
                  riguarda davvero, cioe' quelle senza nome. */
-              : `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`)
+              : `<span class="sp-forn" style="flex-basis:100%">${String(oreSenzaNome).replace(".",",")} ore senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`)
           : "")
       /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere il margine
          qui sopra e' scritto SENZA la manodopera, e senza questa riga

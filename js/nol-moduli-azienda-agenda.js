@@ -256,7 +256,7 @@
     doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
     const descr=(repNome?repNome+" — ":"")+(l.descrizione||l.lavoroSvolto||"Prestazione di servizi");
     const lines=doc.splitTextToSize(descr,R-M-42);
-    const det=[];if(l.dataFatto||l.dataPrevista)det.push("Data "+fdate(l.dataFatto||l.dataPrevista));if(l.ore)det.push(l.ore+" ore");
+    const det=[];if(l.dataFatto||l.dataPrevista)det.push("Data "+fdate(l.dataFatto||l.dataPrevista));if(l.ore)det.push(String(l.ore).replace(".",",")+" ore");
     const detStr=det.join("   ·   ");
     const rowH=lines.length*5+(detStr?5:0)+6;
     doc.setDrawColor(210);doc.rect(M,y,R-M,rowH);

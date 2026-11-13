@@ -239,6 +239,22 @@ async function giorCarica(){
     g.cosa=r?[r.note,r.materiali?("Materiali: "+r.materiali):""].filter(Boolean).join(" · "):"";
   });
   giorRighe=Object.values(gruppi).sort((x,y)=>x.data.localeCompare(y.data));
+  /* 13 nov 2026 (quarto giro) — UN LAVORO NEL CESTINO NON SI CONTA. Le sue
+     ore restavano in Giornate (le ore non vanno nel Cestino col lavoro).
+     Si chiede al database quali lavori del mese sono ancora vivi (sb.from
+     salta il Cestino) e di che reparto sono: le giornate dei lavori buttati
+     escono dall'elenco e dai conti. Se la lettura cade non si toglie niente. */
+  giorLavVivi=null;
+  try{
+    const _idsL=[...new Set(giorRighe.map(g=>g.lavoro_id).filter(Boolean))];
+    if(_idsL.length){
+      const _rv=await sb.from("gest_lavori").select("id,mestiere_id").in("id",_idsL);
+      if(!_rv.error){
+        giorLavVivi={}; (_rv.data||[]).forEach(l=>{ giorLavVivi[String(l.id)]=String(l.mestiere_id||""); });
+        giorRighe=giorRighe.filter(g=>!g.lavoro_id||(String(g.lavoro_id) in giorLavVivi));
+      }
+    }else giorLavVivi={};
+  }catch(e){ giorLavVivi=null; }
   /* il costo orario: le tariffe di TUTTI (anche chi sta nel Cestino, le sue ore
      restano) e la media dei vivi — la stessa costiOrari() del margine dei
      lavori (gest-ore-spese.js). Se la lettura cade, niente costi: meglio
@@ -266,7 +282,7 @@ async function giorCarica(){
         const sp={},ff={};
         (rs.data||[]).forEach(x=>{sp[x.lavoro_id]=(sp[x.lavoro_id]||0)+(+x.importo||0);});
         (rf.data||[]).forEach(x=>{ff[x.lavoro_id]=(ff[x.lavoro_id]||0)+(+x.importo||0);});
-        const md=costoManodopera(rh2.data||[],[],giorTariffe).per;
+        const md=giorManodopera(rh2.data||[]).per;
         (rl2.data||[]).forEach(l=>{
           const imp=+l.importo||0; if(imp<=0) return;
           const speso=imp-margineLavoro(imp,sp[l.id],ff[l.id],md[String(l.id)]);
@@ -322,10 +338,31 @@ function giorContatore(){
   if(!c){ c=document.createElement("span"); c.className="tab-cnt gior-cnt"; b.appendChild(c); }
   c.textContent=giorProposte.length;
 }
+/* 13 nov 2026 (quarto giro) — LA MANODOPERA SI CONTA COME NEL LAVORO.
+   Le ore «senza nome» (o di chi non ha il costo orario) valgono la media del
+   REPARTO di quel lavoro, la stessa di caricaManodopera() in
+   gest-ore-spese.js. Prima qui si usava la media di TUTTO l'account: in un
+   reparto senza costi orari Giornate diceva 168,75 € e la scheda del lavoro
+   diceva «non entrano nel margine». Adesso dicono lo stesso numero. */
+let giorLavVivi=null;
+function giorManodopera(righe){
+  const out={per:{},senzaNome:{}};
+  if(!(typeof costoManodopera==="function"&&giorTariffe.letto)) return out;
+  if(!giorLavVivi) return costoManodopera(righe,[],giorTariffe);   /* reparti non letti: come prima */
+  const perRep={};
+  (righe||[]).forEach(r=>{ const mid=giorLavVivi[String(r.lavoro_id)]; if(mid===undefined) return; (perRep[mid]=perRep[mid]||[]).push(r); });
+  Object.keys(perRep).forEach(mid=>{
+    let somma=0,n=0;
+    giorOps.forEach(o=>{ if(String(o.mestiere_id||"")===mid){ const c=+o.costo_orario||0; if(c>0){somma+=c;n++;} } });
+    const m=costoManodopera(perRep[mid],[],{per:giorTariffe.per,media:n?somma/n:0});
+    Object.assign(out.per,m.per); Object.assign(out.senzaNome,m.senzaNome);
+  });
+  return out;
+}
 /* quanto e' costata la manodopera, cantiere per cantiere, nel mese */
 function giorCostiCantieri(){
   const righe=[]; giorRighe.forEach(g=>g.ore.forEach(o=>righe.push({lavoro_id:g.lavoro_id,operatore_id:o.operatore_id,ore:o.ore})));
-  const m=(typeof costoManodopera==="function"&&giorTariffe.letto)?costoManodopera(righe,[],giorTariffe):{per:{},senzaNome:{}};
+  const m=giorManodopera(righe);
   const can={};
   giorRighe.forEach(g=>{
     const k=String(g.lavoro_id);

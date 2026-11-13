@@ -1276,6 +1276,14 @@
     if(v==="emessa"&&!f.numero){
       _nuovoNum=await fattProssimoNumero(f);
       if(_nuovoNum==null)return;
+      /* 13 nov 2026 (quarto giro) — «Emetti» dava il numero al primo tocco.
+         Una fattura emessa non si elimina piu': prima si chiede, dicendo
+         quale numero prende. */
+      if(typeof window.tiChiedi==="function"){
+        const _annoE=+((f.data||todayStr()).slice(0,4));
+        if(!(await window.tiChiedi("Prende il numero "+_nuovoNum+"/"+_annoE+".\nUna fattura emessa non si elimina più: se è sbagliata serve la nota di credito.",
+          {titolo:"Emettere la fattura?",si:"Sì, emetti",no:"No, resta bozza"})))return;
+      }
       patch.numero=_nuovoNum;
       patch.anno=+((f.data||todayStr()).slice(0,4));
     }
@@ -1890,9 +1898,9 @@
       const sdi=(cli.sdi_codice||f.cli_sdi||"").trim();
       const pec=(cli.sdi_pec||f.cli_pec||"").trim();
       if(!sdi&&!pec)
-        m.push("Il cliente non ha né codice destinatario né PEC. Se non li ha davvero, scrivi 0000000 nel codice destinatario: la fattura gli arriverà nel suo cassetto fiscale.");
+        m.push("Il cliente non ha né codice destinatario né PEC. Se non li ha davvero, scrivi 0000000 nel codice destinatario: la fattura gli arriverà nel suo cassetto fiscale — Clienti.");
       if(sdi&&sdi!=="0000000"&&sdi.length!==7)
-        m.push("Il codice destinatario del cliente deve essere di 7 caratteri (o 0000000 se non ce l'ha).");
+        m.push("Il codice destinatario del cliente deve essere di 7 caratteri (o 0000000 se non ce l'ha) — Clienti.");
     }
 
     /* --- le righe --- */
@@ -2178,7 +2186,7 @@
          act:'data-action="azienda"',
          test:function(t){ return /Dati azienda/i.test(t); }},
         {k:"cliente", tit:"La scheda del cliente", tasto:"Apri il cliente",
-         act:'data-action="edit-cli" data-id="'+esc(f.cliente_id||"")+'"',
+         act:'data-action="edit-cli" data-fisc="1" data-id="'+esc(f.cliente_id||"")+'"',
          test:function(t){ return /Clienti\.|scheda in Clienti/i.test(t); }},
         {k:"fattura", tit:"Questa fattura", tasto:"Torna alla fattura",
          act:'data-action="edit-fatt" data-id="'+esc(f.id)+'"',

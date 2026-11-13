@@ -141,7 +141,7 @@
       if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
       if(cp.cassa)   righeTot.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
       righeTot.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
-      if(cp.iva)     righeTot.push(["IVA "+_pct(p.iva_perc)+"%",cp.iva,false]);
+      if(cp.iva)     righeTot.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
       if(cp.ritenuta)righeTot.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%",cp.ritenuta,true]);
       const hBox=righeTot.length*6+16;
       if(y+hBox>272){doc.addPage();y=20;}
@@ -354,7 +354,7 @@
       +  (cp.cassa?riga("Cassa previdenziale",cp.cassa):"")
       +  '<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>'
       +  riga(cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile)
-      +  (cp.iva?riga("IVA",cp.iva):"")
+      +  (cp.iva?riga(cp.spese?("IVA (su "+eur2(cp.baseIva)+")"):"IVA",cp.iva):"")
       +  (cp.ritenuta?riga("Ritenuta d\'acconto",cp.ritenuta,true):"")
       +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       +  '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Netto a pagare</strong></span><strong>'+eur2(cp.totale)+'</strong></div>'
@@ -500,7 +500,7 @@
     if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
     if(cp.cassa)   vociC.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
     vociC.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
-    if(cp.iva)     vociC.push(["IVA "+_pct(p.iva_perc)+"%",cp.iva,false]);
+    if(cp.iva)     vociC.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
     if(cp.ritenuta)vociC.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%",cp.ritenuta,true]);
     spazio(vociC.length*5.5+18);
     doc.setFont("helvetica","normal");doc.setFontSize(9.5);
