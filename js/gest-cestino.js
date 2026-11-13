@@ -1258,6 +1258,12 @@
                per descrizione, una riga corretta risulterebbe «tolta» e
                «nuova» insieme. */
             oneri_sicurezza:v.oneri_sicurezza,note:v.note},
+            /* 13 nov 2026 (quarto giro) — le percentuali dell'analisi dei
+               prezzi (spese generali e utile). Si nominano solo se la riga
+               di partenza le ha: su un database senza l'aggiornamento la
+               copia continua a funzionare. */
+            ("an_spese_perc" in v)?{an_spese_perc:v.an_spese_perc}:{},
+            ("an_utile_perc" in v)?{an_utile_perc:v.an_utile_perc}:{},
             variante?{origine_id:v.id}:{}))
         ).select("id,ordine,descrizione");
         if(e3)throw e3;
@@ -1280,6 +1286,36 @@
         for(let i=0;i<righe.length;i+=200){
           const {error:e4}=await sb.from("gest_computo_misure").insert(righe.slice(i,i+200));
           if(e4)throw e4;
+        }
+      }
+      /* 5) 13 nov 2026 (quarto giro) — L'ANALISI DEI PREZZI.
+         Una lavorazione col prezzo fatto dall'analisi (materiali, manodopera,
+         noli) il prezzo NON ce l'ha scritto: lo calcola il database dalle
+         righe di gest_analisi_righe. La copia non le portava: il prezzo
+         diventava 0,00 € e la variante usciva «−100%». Si copiano SEMPRE,
+         nella copia e nella variante: sono il prezzo, non le misure.
+         Se la tabella non c'e' (database senza l'aggiornamento) non c'e'
+         niente da copiare e si va avanti. */
+      if(idVoci.length){
+        let an=[];
+        for(let i=0;i<idVoci.length;i+=200){
+          const ra=await sb.from("gest_analisi_righe").select("*")
+            .eq("user_id",sbUid).in("voce_id",idVoci.slice(i,i+200)).order("ordine");
+          if(ra.error){
+            if(/does not exist|schema cache|relation|gest_analisi/i.test(String(ra.error.message||""))){an=[];break;}
+            throw ra.error;
+          }
+          an=an.concat(ra.data||[]);
+        }
+        const righeAn=an.map(r=>({user_id:sbUid,voce_id:mappaVoci[r.voce_id],
+          ordine:r.ordine,tipo:r.tipo,descrizione:r.descrizione,unita:r.unita,
+          quantita:r.quantita,prezzo_unitario:r.prezzo_unitario,note:r.note}));
+        /* una riga senza la sua lavorazione nuova vorrebbe dire un prezzo
+           sbagliato in silenzio: meglio non fare la copia */
+        if(righeAn.some(r=>!r.voce_id))throw new Error("non ritrovo una lavorazione dell'analisi dei prezzi");
+        for(let i=0;i<righeAn.length;i+=200){
+          const {error:e5}=await sb.from("gest_analisi_righe").insert(righeAn.slice(i,i+200));
+          if(e5)throw e5;
         }
       }
     }catch(err){
