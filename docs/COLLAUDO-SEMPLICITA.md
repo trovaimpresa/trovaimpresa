@@ -2031,12 +2031,15 @@ banco-preventivo (38), banco-correttore e banco-copia-computo verdi; nell'App `f
 **ESITO — online il 13 nov, push →3a01b9b← (tutto il gruppo).** Netlify: deploy «ready» alle 19:15 col commit 3a01b9b.
 Nel database `fattura_prossimo_numero` c'è e risponde (Alex: 16 nel 2026, 1 nel 2027).
 
-**NON provato sul sito vero:** in questa sessione il browser del computer di Alex non era raggiungibile (né quello
-dell'app né Chrome) e il controllo del sorgente con WebFetch non ha avuto il permesso. Da fare nella prossima sessione,
-nel Noleggio con una BOZZA «PROVA CONTROLLORE» (poi buttata per sempre):
-- aprire un cliente esistente: CAP/Città/Provincia/Codice destinatario/PEC; NON salvare dati finti sul cliente vero
-  (al massimo: aprire e chiudere), oppure un cliente «PROVA CONTROLLORE» poi eliminato anche dal Cestino;
-- fattura in BOZZA di un noleggio con DDT: PDF con «Documenti di trasporto» (testi letti senza scaricare);
-- contratto PDF: «TOTALE (IVA esclusa)»; Cestino: la riga del noleggio col cliente;
-- il numero: NON si emette una fattura di prova. Si controlla solo che l'App e il Noleggio chiamino la funzione
-  (sorgente con ?fresco=) — la domanda «Prende il numero 16…» si vede premendo Emessa+Salva e poi «No, resta bozza».
+**Provato sul sito vero (13 nov, 19:55, browser dell'app, account di Alex) — NIENTE salvato:**
+- [x] Noleggio con `?fresco=`: 10 file a `13nov7`, le funzioni nuove ci sono.
+- [x] Cliente vero aperto e chiuso senza salvare: CAP, Città, Provincia, Codice fiscale, Codice destinatario, PEC; due colonne.
+- [x] Cestino: «escavatore · Edilizia Bianchi srl · dal 29/08/2026» (letto sui noleggi veri).
+- [x] Contratto (dati, senza PDF): «TOTALE (IVA esclusa): 1.050,50 €», «IVA: non compresa: si aggiunge in fattura».
+- [x] Fattura n. 1 (senza DDT): blocco «Documenti di trasporto» presente («Nessun DDT»). Con un noleggio vero col DDT n. 1
+      (fattura solo in memoria): riga «escavatore · 1 · 24/08/2026 · Consegna».
+- [x] Numero: `fattura_prossimo_numero` dal browser = 16. Fattura nuova, «Emessa» + «Salva»: «Emettere la fattura? Prende il
+      numero 16 del 2026 (stessa serie delle fatture dell'App)» → «No, resta bozza»: niente salvato (nol_fatture resta 1).
+- [x] App con `?fresco=`: `fattProssimoNumero` usa la funzione nuova e dà 16.
+- NON provati: il «Salva» del cliente con dati nuovi (niente dati finti sul cliente vero), il PDF scaricato, il file SdI vero,
+  il telefono vero.
