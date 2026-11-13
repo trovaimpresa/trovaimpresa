@@ -2167,3 +2167,22 @@ e finestra del traguardo (computer e telefono), PDF scheda pratica.
 - Versioni `?v=13nov9` sui js toccati, css `?v=13nov8`.
 - Visto e NON toccato: nel modulo del preventivo, sul telefono, la riga «IVA (su …: le spese sono fuori IVA)» va a capo e
   l'importo scende sotto (c'era già prima).
+
+**Provato col banco**: banco-gruppo5 VERDE (34), banco-gestionale App e Noleggio ZERO difetti (1440/375/360), banco-soldi (36),
+banco-preventivo (38), banco-noleggio (31), banco-gruppo4 (59), banco-correttore e banco-copia-computo zero difetti;
+controllo-push «tutto a posto». Database: colonne `albo_nome` e `albo_numero` ci sono (controllato).
+
+**ESITO — online il 13 nov, push →b0883c2← (tutto il gruppo).** Rebase sopra →08f1fee← dell'altra sessione (nessun file in comune).
+Nel sorgente `?v=13nov9` 8 volte nell'App, css `?v=13nov8`, `azAlbo` in gest-azienda.js.
+
+**Provato sul sito vero (13 nov, 21:30, browser dell'app) — NIENTE salvato:**
+- [x] Account di Alex (artigiano): Dati azienda SENZA casella dell'albo e senza traguardo CFP; `azAlbo` vuota anche con dati;
+      `calcolaParcella(1000, 4%, 22%, ritenuta)` = netto 1.068,80 (come sempre) e documento 1.268,80.
+- [x] Giro dello studio (`?giro=1&tipo=professionista`, dati finti): Dati azienda con «Albo o Ordine» e «Numero di iscrizione»;
+      Crediti formativi «13 di 30 CFP» + «Cambia il traguardo» → finestra grande, con 20 dice «Ti mancano 7 CFP» (chiusa senza salvare);
+      parcella a schermo e PDF: «Totale imponibile 3.825,00 · IVA 808,50 · Totale documento 4.633,50 · Ritenuta − 700,00 ·
+      Netto 3.933,50»; scheda pratica PDF: CILA · Depositata · Roma · PG/2026/0012345 · 09/09/2026 · Foglio 512 · Particella 88 · Sub 14.
+- Pulizia: nessuna riga creata (il giro non salva, sull'account vero non si è salvato niente): →0← righe da togliere.
+- NON provati dal vivo: l'albo dentro i PDF (il giro e l'account vero non hanno l'albo scritto: provato solo col banco);
+  la lettera d'incarico nel giro (si ferma perché il giro non ha la polizza: giusto così; provata col banco); la fattura dello
+  studio con l'albo (banco); il Salva vero dell'albo e del traguardo (sull'account vero di uno studio); il telefono vero.
