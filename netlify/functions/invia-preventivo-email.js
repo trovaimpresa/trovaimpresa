@@ -157,7 +157,7 @@ exports.handler = async function (event) {
         reply_to: /^[^\s@<>]+@[^\s@<>]+$/.test(risposte) ? risposte : undefined,
         subject: (studio ? 'Parcella' : 'Preventivo') + ' n. ' + (+p.numero || '') + (titolo ? ' — ' + titolo : ''),
         html: corpo({ nomeImpresa, cosa, titolo, conCap, link: SITO + '/preventivo-cliente?t=' + encodeURIComponent(link.token), contatti }),
-        attachments: [{ filename: nomeFile, content: buf.toString('base64') }]
+        attachments: [{ filename: nomeFile, content: buf.toString('base64'), content_type: 'application/pdf' }]
       })
     });
     const risp = await rr.json().catch(() => ({}));

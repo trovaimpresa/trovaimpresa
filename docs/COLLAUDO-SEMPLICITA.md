@@ -2225,3 +2225,34 @@ Foto viste da Alex (ok alle 21:40): finestra «Invia al cliente» prima/dopo (co
 **Provato col banco**: banco-email-pdf VERDE (49), banco-gestionale App e Noleggio ZERO difetti (1440/375/360),
 banco-soldi (36), banco-preventivo (38), banco-noleggio (31), banco-gruppo4 (59), banco-gruppo5 (34), banco-correttore e
 banco-copia-computo zero difetti; controllo-push «tutto a posto». Database: tabella `gest_email_documenti` creata.
+
+**ESITO — online il 13 nov, push →47a148e← (tutto il gruppo).** Netlify «ready» su quel commit; nel sorgente
+`gest-invia-cliente.js?v=13nov10` e `gest-documenti-pdf.js?v=13nov10`.
+
+**Provato sul sito vero (13 nov, 22:03, browser dell'app, account di Alex, reparto «ferramenta»):**
+- [x] Cliente «PROVA CONTROLLORE» (email info@trovaimpresa.com, 02100 Rieti) + preventivo n. 7 con una voce.
+      «Apri» → «Invia al cliente» → «Email con PDF»: riquadro con «A: info@trovaimpresa.com», «Allegato:
+      preventivo-7-prova-controllore.pdf», risposta a Pintoalessio@hotmail.it → «Sì, manda» → «Mandata a
+      info@trovaimpresa.com alle 22:03, col PDF allegato. Oggi puoi mandarne ancora 4.»
+- [x] Email vera letta col connettore Resend: consegnata; mittente «"Alessio" <info@trovaimpresa.com>» (il nome dei Dati
+      azienda), Reply-To dei Dati azienda, oggetto «Preventivo n. 7 — …», link `preventivo-cliente?t=…`, allegato
+      `preventivo-7.pdf` di →487.620← byte. Deposito: →0← file rimasti in email-documenti. Registro: →1← riga.
+      Il preventivo è passato da «Bozza» a «Inviato».
+- [~] L'allegato arrivava come «application/octet-stream» (si apre lo stesso): aggiunto `content_type: 'application/pdf'`
+      nel push del diario. Provato col banco, NON con un'altra email vera.
+- Pulizia: cliente, preventivo, righe, link, riga del registro tolti per sempre (anche niente nel Cestino) → →0← righe.
+- NON provati dal vivo (solo banco): cliente senza email, Dati azienda senza P.IVA (bozza), tetto di →5← per impresa e di
+  →20← per il sito, quota di Resend finita, il telefono vero, il collaboratore (rifiutato apposta).
+
+## 13 nov 2026 (notte) — prove sul sito vero di quello che era passato solo dal banco
+
+**A. SAL in PDF con le firme e il CAP — [x] PASSATA dal vivo** (22:05, reparto «ferramenta»).
+Computo «PROVA CONTROLLORE» col cliente PROVA CONTROLLORE (02100 Rieti), una voce 10 m² × 20 €, SAL n. 1 con 5 m².
+PDF letto avvolgendo `window.jspdf.jsPDF` con `save` spento (nessun file scaricato): →1← pagina; «L'Impresa», «Il Direttore
+dei lavori», «Il Committente» tutte a pagina 1, la stessa dei conti (Importo maturato, Importo del presente SAL, Ritenuta
+di garanzia 0,5%, NETTO DA PAGARE); cliente «PROVA CONTROLLORE / 02100 Rieti (RI)». Nome del file «BOZZA-SAL-1-…» (il SAL
+era in bozza: giusto). Poi computo, voce, SAL e righe tolti per sempre → →0←.
+
+**B. Studio tecnico con l'albo** — [ ] aspetta l'account da studio di prova di Alex.
+**C. App dell'operaio, «Le voci del lavoro»** — [ ] aspetta che Alex si inviti come operaio.
+**D. IBAN e fattura emessa** — non toccate, come chiesto: restano provate solo col banco.
