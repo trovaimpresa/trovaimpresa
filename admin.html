@@ -952,7 +952,7 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
         </div>
         <div class="stat-card apri" data-va="imprese">
           <div class="stat-icon r"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></div>
-          <div><div class="stat-num" id="stat-mail-nc">–</div><div class="stat-lbl">Email mai confermate</div><div class="stat-conf giu">non si vedono sul sito</div></div>
+          <div><div class="stat-num" id="stat-mail-nc">–</div><div class="stat-lbl">Email mai confermate</div><div class="stat-conf giu">non si vedono sul sito</div><div class="stat-conf" id="stat-mail-nc-sub"></div></div>
           <span class="stat-freccia">›</span>
         </div>
         <div class="stat-card apri" data-va="chientra">
@@ -4546,6 +4546,12 @@ async function caricaImprese() {
   _set('stat-senza-descr-conf', 'su ' + tot);
 
   _set('stat-mail-nc', impreseVere.filter(i => i.email_confermata !== true).length);
+  /* 13 nov 2026 — quanti dei NON confermati sono di oggi e degli ultimi 7 giorni:
+     le email «Nuova iscrizione» ad Alex partono solo dopo la conferma, cosi' i conti tornano */
+  { const nc = impreseVere.filter(i => i.email_confermata !== true && i.created_at);
+    const oggiNc = nc.filter(i => new Date(i.created_at).toLocaleDateString('sv-SE') === new Date().toLocaleDateString('sv-SE')).length;
+    const setteNc = nc.filter(i => new Date(i.created_at) >= new Date(Date.now() - 7 * 24 * 3600 * 1000)).length;
+    _set('stat-mail-nc-sub', 'oggi ' + oggiNc + ' · 7 giorni ' + setteNc); }
 
   /* «Premium attivi» sono tutti regalati finche' nessuno ha pagato:
      dirlo evita di leggere quel numero come se fossero incassi. */
