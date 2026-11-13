@@ -1941,3 +1941,37 @@ Foto viste da Alex (ok alle 17:14): modulo al computer e al telefono, PDF preven
 
 **Provato col banco**: banco-preventivo VERDE (38); banco-gestionale App e Noleggio ZERO difetti; banco-soldi VERDE (36);
 banco-correttore e banco-copia-computo zero difetti; controllo-push «tutto a posto».
+
+**ESITO — online il 13 nov. Primo push →06f69ee← (tutto il gruppo). Secondo push: solo lo stile della riga + queste righe.**
+Netlify pubblicato; nel sorgente `?v=13nov5` 13 volte nell'App e 8 nel Noleggio, `prevUnita` in gest-preventivi.js.
+
+**DIFETTO MIO, trovato dal vivo dopo il primo push e corretto col secondo:** in una finestra stretta il modulo è già a
+due colonne e la colonna delle voci è larga 225 px: il totale della voce usciva TAGLIATO («= 375,0…»). Il banco misura a
+1440, 375 e 360 e non lo vedeva. Cura: lo stile della riga non guarda più lo schermo (`@media`) ma la COLONNA
+(`@container` su `#prev-righe`), con tre misure: stretta (< 300 px), media (telefono), larga (da 560 px).
+Misurato a 360, 375, 600, 800, 1024, 1280, 1440, 1920 e con la colonna forzata a 257 px: niente tagliato, niente fuori.
+⛔ REGOLA: una riga dentro una finestra a colonne si misura sulla colonna, non sullo schermo. `?v=13nov6` sul css.
+
+**Provato dal vivo (reparto «ferramenta», cliente «PROVA CONTROLLORE», preventivo in BOZZA n. 1):**
+- [x] Preventivo nuovo dal modulo: 12,5 m² × 30 → «= 375,00 €»; «a corpo» × 80 → «= 80,00 €»; totale 455,00 €.
+      Nel database: `unita` «m²» e «corpo». Riaperto: tendine e totali giusti.
+- [x] PDF del preventivo (testi letti senza scaricare): «12,5 mq», «1 a corpo», cliente «Via di Prova 1, 02100 Rieti (RI)»,
+      in fondo «Per accettazione · Data · Firma del cliente».
+- [x] Lavoro collegato al preventivo: «12,5 m² × 30,00 €», «1 a corpo × 80,00 €», totale 455,00 €.
+- [x] PDF scheda lavoro: cliente con CAP, città e provincia.
+- [x] Preventivo → fattura (modulo aperto e chiuso SENZA salvare): «Posa pavimento di prova (m²)», «Trasporto di prova (a corpo)».
+- [x] Noleggio: testata della fattura «Via Dante Alighieri, 5, 02100 Rieti (RI)»; nei Dati azienda le caselle CAP, Città,
+      Provincia arrivano piene (finestra aperta e chiusa senza salvare).
+- [x] Pulizia: tutto cancellato anche dal Cestino, contato dal database (vedi il riassunto in chat).
+
+**NON provato dal vivo (solo col banco o per niente):**
+- il PDF del SAL col CAP del cliente (serve un computo con un SAL: provato solo leggendo il codice, stessa riga della scheda lavoro);
+- contratto, cauzione, verbale e DDT del Noleggio (stessa funzione `nolAzIndirizzo` della fattura, che è provata);
+- il «Salva» dei Dati azienda del Noleggio con CAP e città nuovi (non si scrivono dati finti sull'account vero);
+- la pagina del cliente e il PDF della firma SMS con l'unità; il capitolato «Porta le voci»; l'Excel; la Chat con AI
+  che legge `unita`; l'AI che riempie la tendina (costa crediti); il preventivo nato dal computo e «Porta le ore»;
+- il telefono vero: le misure sono del banco (375 e 360).
+
+**Visto passando:** in «ferramenta» il riquadro del reparto dice «1 lavoro in tutto» anche a reparto vuoto di prove:
+da guardare (un lavoro vecchio, oppure il conto prende qualcosa dal Cestino).
+
