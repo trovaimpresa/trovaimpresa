@@ -196,7 +196,8 @@ function mostra(quale){
   /* 4 nov 2026: dall'email «Attiva il tuo profilo» (iscritti mai confermati)
      si arriva con ?attiva=1&email=...: stessa casella, ma senza dire
      «il link non vale piu'» a chi un link non l'ha mai aperto. */
-  if (!token_hash && p.get('attiva') === '1') {
+  if (!token_hash && p.get('attiva') === '1') { mostraAttiva(); return; }
+  function mostraAttiva() {
     const sc = document.getElementById('scaduto');
     sc.querySelector('h1').textContent = 'Attiva il tuo profilo';
     sc.querySelector('.cerchio').textContent = '✓';
@@ -206,8 +207,11 @@ function mostra(quale){
     const em = p.get('email');
     if (em) document.getElementById('email').value = em;
     document.getElementById('rimanda').textContent = 'Mandami il link di attivazione';
-    mostra('scaduto'); return;
+    mostra('scaduto');
   }
+  /* 13 nov 2026: il promemoria «attiva il profilo» ora porta il codice diretto
+     (type=magiclink&prom=1). Aprirlo vale come la conferma dell'iscrizione. */
+  const PROMEMORIA = p.get('prom') === '1';
   if (!token_hash) { mostra('scaduto'); return; }
 
   try {
@@ -225,14 +229,16 @@ function mostra(quale){
        buttato. Per questo chi si iscriveva dalla porta del gestionale
        atterrava lo stesso sul sito.
        La decisione va presa QUI, guardando chi e'. */
-    if (type === 'email') adattaAlGestionale();
+    if (type === 'email' || PROMEMORIA) adattaAlGestionale();
     /* 11 settembre 2026 — il benvenuto parte DA QUI, non piu' dalla pagina di
        registrazione: prima arrivava insieme alla conferma e diceva «completa
        il tuo profilo» a uno che nel profilo non poteva ancora entrare.
        Solo per l'iscrizione ('email'), mai per il recupero password. */
-    if (type === 'email') mandaBenvenuto();
+    if (type === 'email' || PROMEMORIA) mandaBenvenuto();
   } catch (e) {
     // link scaduto, già usato, o indirizzo storpiato dal programma di posta
+    // 13 nov: dal promemoria niente «non vale piu'»: la casella per farselo mandare
+    if (PROMEMORIA) { mostraAttiva(); return; }
     mostra('scaduto');
   }
 })();
