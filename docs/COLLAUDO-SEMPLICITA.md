@@ -2130,3 +2130,40 @@ Database: colonna `gest_rapportini.firma_cliente` e funzione `lavoro_voci_senza_
   provata solo col banco e la foto); il telefono vero; la firma vera col dito (fatta con eventi finti del puntatore).
 - Visto dal vivo, limite: un rapportino fatto dal gestionale ha le ore «sciolte» del registro: nella riga del
   rapportino si legge «0 h» (le ore stanno in «aggiunte da te»), mentre nel PDF le ore del giorno ci sono. Da decidere.
+
+
+## 13 nov 2026 (notte) — lista «MANCA», GRUPPO 5: lo studio tecnico (voci 17, 18, 19, 20)
+Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]` da fare.
+
+Foto viste da Alex (ok alle 20:57): Dati azienda, PDF parcella, lettera d'incarico, parcella a schermo, Crediti formativi
+e finestra del traguardo (computer e telefono), PDF scheda pratica.
+
+[x] 17. Parcella e incarico: albo e numero di iscrizione.
+   - Colonne nuove `gest_azienda.albo_nome / albo_numero` (`sql/2026-11-13-studio-albo.sql`, migrazione
+     `studio_albo_13nov2026` PASSATA, riga in PROVE di js/fondatore.js).
+   - Dati azienda (solo studio): riquadro «Iscrizione all'albo» (Albo o Ordine · Numero di iscrizione), prima della polizza.
+     Il Salva le scrive solo se le caselle ci sono (come la polizza: un'impresa non le azzera).
+   - ⛔ UNA riga sola, in un posto: `azAlbo(az)` in js/gest-azienda.js → «Ordine degli Ingegneri di Rieti, n. A1234».
+     Vuota se il ruolo non è «professionista». La usano: PDF parcella (`prevPdf`), lettera d'incarico (in testa e fra i
+     dati del professionista), PDF fattura (`fatturaPdf`), PDF scheda pratica (`generaPdf`).
+[x] 18. Parcella: totale del documento prima della ritenuta.
+   - `calcolaParcella` restituisce anche `documento` = imponibile + IVA (la formula NON è cambiata: è una somma di due
+     numeri che c'erano già). Netto = documento − ritenuta.
+   - «Totale documento» (in grassetto, solo se c'è la ritenuta) prima della ritenuta in: riepilogo a schermo del
+     preventivo, PDF parcella, modulo e PDF della lettera d'incarico, pagina del cliente (`invConti`).
+[x] 19. Crediti formativi: il traguardo si sceglie.
+   - C'era già, ma solo nei Dati azienda (`gest_azienda.cfp_obiettivo`): il controllore non l'ha trovato.
+   - Ora nella sezione: pulsante «Cambia il traguardo» accanto al numero → finestra grande a due colonne (traguardo a
+     sinistra, «Il 2026: fatti / traguardo / ti mancano» a destra, si aggiorna mentre scrivi). Salva = upsert di
+     `cfp_obiettivo` (stessa colonna: Dati azienda e Riepilogo dicono lo stesso). Niente SQL.
+   - Resta «per anno»: per architetti e geometri l'obbligo è sul triennio (60 CFP). Da decidere con Alex.
+[x] 20. Scheda pratica PDF: riquadro «Dati della pratica» (tipo, a che punto sta, Comune, protocollo, depositata il,
+   Foglio · Particella · Sub) sotto il cliente, solo i dati scritti, solo per lo studio.
+
+**Attrezzi**
+- Banco nuovo `node tools/banco-gruppo5.js` (studio a 1440 e 375, artigiano a 1440): 34 prove. Sulla versione di PRIMA
+  si ferma alla prima prova (non ci sono le caselle dell'albo). Fa finta del ruolo con una `route` di `imprese` dopo
+  `B.collega`, e cambia i dati finti avvolgendo `banco-dati-finti.js` nella cache di require.
+- Versioni `?v=13nov9` sui js toccati, css `?v=13nov8`.
+- Visto e NON toccato: nel modulo del preventivo, sul telefono, la riga «IVA (su …: le spese sono fuori IVA)» va a capo e
+  l'importo scende sotto (c'era già prima).

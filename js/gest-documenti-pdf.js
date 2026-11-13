@@ -73,7 +73,8 @@
     doc.setFont("helvetica","bold");doc.setFontSize(16);
     doc.text(az.nome||"(il nome della tua attivita' va nei Dati azienda)",M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    /* 13 nov 2026 (n. 17) — nella parcella anche l'albo e il numero (azAlbo: solo studio) */
+    let hy=y+6;[azAlbo(az),az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
     const isParcella = (ruoloUtente==='professionista');
     doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text(isParcella?"PARCELLA":"PREVENTIVO",R,y,{align:"right"});
@@ -145,6 +146,8 @@
       if(cp.cassa)   righeTot.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
       righeTot.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
       if(cp.iva)     righeTot.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
+      /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
+      if(cp.ritenuta)righeTot.push(["Totale documento",cp.documento,false,true]);
       if(cp.ritenuta)righeTot.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%",cp.ritenuta,true]);
       const hBox=righeTot.length*6+16;
       if(y+hBox>272){doc.addPage();y=20;}
@@ -152,8 +155,10 @@
       let ry=y+7;
       doc.setFont("helvetica","normal");doc.setFontSize(9.5);
       righeTot.forEach(function(r){
+        if(r[3])doc.setFont("helvetica","bold");
         doc.text(r[0],R-88,ry);
         doc.text((r[2]?"- ":"")+eurPdf(r[1]),R-2,ry,{align:"right"});
+        if(r[3])doc.setFont("helvetica","normal");
         ry+=6;
       });
       doc.setDrawColor(31,111,92);doc.line(R-88,ry-3,R-2,ry-3);
@@ -374,6 +379,7 @@
       +  '<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>'
       +  riga(cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile)
       +  (cp.iva?riga(cp.spese?("IVA (su "+eur2(cp.baseIva)+")"):"IVA",cp.iva):"")
+      +  (cp.ritenuta?riga("<strong>Totale documento</strong>",cp.documento):"")
       +  (cp.ritenuta?riga("Ritenuta d\'acconto",cp.ritenuta,true):"")
       +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       +  '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Netto a pagare</strong></span><strong>'+eur2(cp.totale)+'</strong></div>'
@@ -467,7 +473,7 @@
     doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;
-    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+    [azAlbo(az),az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
       .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
     y=hy+6;
@@ -489,6 +495,8 @@
     if(c.referente)cliRighe.push("Nella persona di "+c.referente);
 
     const proRighe=[az.nome];
+    /* 13 nov 2026 (n. 17) — chi firma dice a quale albo e' iscritto */
+    if(azAlbo(az))proRighe.push(azAlbo(az));
     if(azIndirizzo(az))proRighe.push(azIndirizzo(az));
     if(az.piva)proRighe.push("P.IVA "+az.piva);
     if(az.cod_fiscale)proRighe.push("C.F. "+az.cod_fiscale);
@@ -520,12 +528,16 @@
     if(cp.cassa)   vociC.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
     vociC.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
     if(cp.iva)     vociC.push(["IVA "+_pct(p.iva_perc)+"%"+(cp.spese?" su "+eurPdf(cp.baseIva):""),cp.iva,false]);
+    /* 13 nov 2026 (n. 18) — il totale del documento, prima della ritenuta */
+    if(cp.ritenuta)vociC.push(["Totale documento",cp.documento,false,true]);
     if(cp.ritenuta)vociC.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%",cp.ritenuta,true]);
     spazio(vociC.length*5.5+18);
     doc.setFont("helvetica","normal");doc.setFontSize(9.5);
     vociC.forEach(function(v){
+      if(v[3])doc.setFont("helvetica","bold");
       doc.text(v[0],M+2,y);
       doc.text((v[2]?"- ":"")+eurPdf(v[1]),R-2,y,{align:"right"});
+      if(v[3])doc.setFont("helvetica","normal");
       y+=5.5;
     });
     doc.setDrawColor(31,111,92);doc.line(M+2,y-2,R-2,y-2);y+=3;

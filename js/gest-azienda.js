@@ -62,6 +62,17 @@
     return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ");
   }
 
+  /* ===== 13 nov 2026 (lista «MANCA», n. 17) — L'ALBO E IL NUMERO DI ISCRIZIONE =====
+     Solo per lo studio tecnico. Una riga sola, scritta in UN posto, usata da
+     parcella, lettera d'incarico, fattura e scheda pratica:
+     «Ordine degli Ingegneri di Rieti, n. A1234». Impresa e artigiano: vuota. */
+  function azAlbo(a){
+    if(!a||ruoloUtente!=='professionista')return "";
+    const n=String(a.albo_nome||"").trim(), q=String(a.albo_numero||"").trim();
+    if(!n&&!q)return "";
+    return n&&q?(n+", n. "+q):(n||("Iscrizione all'albo n. "+q));
+  }
+
   async function aziendaForm(){
     aziendaRow=null;
     if(sb&&sbUid){
@@ -194,6 +205,12 @@ const avHtml=`
 
       ${ruoloUtente==='professionista'?`
       <div class="sh-b">
+        <div class="sh-tit">Iscrizione all'albo</div>
+        <div class="field"><label>Albo o Ordine</label><input id="a-albo" value="${esc(a.albo_nome||"")}" placeholder="Es. Ordine degli Ingegneri di Rieti"></div>
+        <div class="field"><label>Numero di iscrizione</label><input id="a-albo-n" value="${esc(a.albo_numero||"")}" placeholder="Es. A1234" style="max-width:220px"></div>
+        <div class="sh-nota">Esce sotto il tuo nome nella parcella, nella lettera d'incarico, nella fattura e nella scheda della pratica.</div>
+      </div>
+      <div class="sh-b">
         <div class="sh-tit">Polizza professionale</div>
         <div class="field"><label>Compagnia assicurativa</label><input id="a-pol-comp" value="${esc(a.pol_compagnia||"")}" placeholder="Es. Generali Italia"></div>
         <div class="field"><label>Numero di polizza</label><input id="a-pol-num" value="${esc(a.pol_numero||"")}" placeholder="Come sul certificato"></div>
@@ -291,6 +308,12 @@ const avHtml=`
       row.pol_massimale = polM===""?null:Math.min(999999999,Math.max(0,_numeroIt(polM)||0));
       row.pol_scadenza  = ($("#a-pol-scad")?$("#a-pol-scad").value:"")||null;
     }
+    /* 13 nov 2026 — albo e numero: le caselle ci sono solo per lo studio,
+       quindi si scrivono solo se ci sono (come la polizza) */
+    if($("#a-albo")||$("#a-albo-n")){
+      row.albo_nome   = v("#a-albo")||null;
+      row.albo_numero = v("#a-albo-n")||null;
+    }
     /* riepilogo del lunedì: la casella c'e' per tutti i ruoli, quindi qui non
        serve la precauzione della patente e della polizza */
     if($("#a-rieplun"))row.riepilogo_lunedi=!!$("#a-rieplun").checked;
@@ -313,7 +336,8 @@ const avHtml=`
     const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti","cfp_obiettivo",
                "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec",
                "pol_compagnia","pol_numero","pol_massimale","pol_scadenza",
-               "riepilogo_lunedi","avvisi_esclusi","avvisi_solo_lunedi","tariffa_oraria"];
+               "riepilogo_lunedi","avvisi_esclusi","avvisi_solo_lunedi","tariffa_oraria",
+               "albo_nome","albo_numero"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);

@@ -103,6 +103,8 @@
     if(a==="new-cred")return credForm(null);
     if(a==="edit-cred")return credForm(credCache.find(c=>String(c.id)===String(id)));
     if(a==="save-cred")return saveCred(id);
+    if(a==="cred-traguardo")return credTraguardo();
+    if(a==="save-cred-traguardo")return saveCredTraguardo();
     if(a==="cred-anno"){credAnno=t.dataset.v;renderCrediti();return;}
     if(a==="del-cred")return delCred(id);
     if(a==="verbale")return verbaleForm(id);

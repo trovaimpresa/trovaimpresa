@@ -369,7 +369,7 @@
     y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    let hy=y+6;[azAlbo(az),az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
     /* 9 agosto 2026 — questo NON è una fattura.
        La colonna num_fatt non si scrive più da nessuna parte (il numero lo
@@ -393,6 +393,28 @@
     { const _ci=cliIndirizzo(c); if(_ci){const _il=doc.splitTextToSize(_ci,R-M);doc.text(_il,M,y);y+=_il.length*4.5;} }
     if(c.referente){doc.text("Rif. "+c.referente,M,y);y+=4.5;}
     doc.setTextColor(0);y+=8;
+    /* ===== 13 nov 2026 (lista «MANCA», n. 20) — I DATI DELLA PRATICA =====
+       Tipo, a che punto sta, Comune, protocollo, deposito e catasto: quello
+       che il cliente chiede al telefono. Solo lo studio; solo i dati scritti. */
+    if(_pro){
+      const _tipo=lav.pratica_tipo?(lav.pratica_tipo==="Agibilita'"?"Agibilità":lav.pratica_tipo):"";
+      const _sta=((typeof PRATICA_STATI!=="undefined"?PRATICA_STATI:[]).find(x=>x[0]===lav.pratica_stato)||[])[1]||"";
+      const _cat=[lav.catasto_foglio?"Foglio "+lav.catasto_foglio:"",lav.catasto_particella?"Particella "+lav.catasto_particella:"",lav.catasto_sub?"Sub "+lav.catasto_sub:""].filter(Boolean).join("  ·  ");
+      const _dp=[["Tipo di pratica",_tipo],["A che punto sta",_sta],["Comune",lav.pratica_comune||""],
+                 ["N. protocollo",lav.pratica_protocollo||""],["Depositata il",lav.pratica_data_dep?fdate(lav.pratica_data_dep):""],
+                 ["Dati catastali",_cat]].filter(x=>String(x[1]).trim());
+      if(_dp.length){
+        doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Dati della pratica",M,y);y+=6;
+        doc.setFontSize(9.5);
+        _dp.forEach(function(r){
+          const vl=doc.splitTextToSize(String(r[1]),R-M-44);
+          doc.setFont("helvetica","normal");doc.setTextColor(90);doc.text(r[0],M,y);
+          doc.setFont("helvetica","bold");doc.setTextColor(0);doc.text(vl,M+44,y);
+          y+=vl.length*5+0.6;
+        });
+        doc.setFont("helvetica","normal");y+=6;
+      }
+    }
     doc.setFillColor(31,111,92);doc.rect(M,y,R-M,8,"F");
     doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9.5);
     doc.text("Descrizione",M+2,y+5.5);doc.text("Importo",R-2,y+5.5,{align:"right"});

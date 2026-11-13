@@ -1638,7 +1638,7 @@
     doc.text(az.nome||"La tua azienda",M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;
-    [az.piva?"P.IVA "+az.piva:"", az.cod_fiscale?"C.F. "+az.cod_fiscale:"", azIndirizzo(az),
+    [(typeof azAlbo==="function"?azAlbo(az):""), az.piva?"P.IVA "+az.piva:"", az.cod_fiscale?"C.F. "+az.cod_fiscale:"", azIndirizzo(az),
      [az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
       .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
 

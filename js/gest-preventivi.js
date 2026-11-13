@@ -320,9 +320,12 @@
     const iva        = _centPerc(baseIva,ivaPerc);
     const ritenuta   = conRitenuta ? r2(compenso)*ritPerc/100 : 0;  /* solo sul compenso */
     const totale     = imponibile + iva - ritenuta;
+    /* 13 nov 2026 (lista «MANCA», n. 18) — il TOTALE DEL DOCUMENTO: imponibile
+       + IVA, prima di togliere la ritenuta. E' la cifra della fattura; il netto
+       e' quello che arriva sul conto. Si legge da qui, non si rifa' altrove. */
     return {compenso:r2(compenso),cassa:r2(cassa),spese:r2(spese),baseIva:r2(baseIva),
             imponibile:r2(imponibile),
-            iva:r2(iva),ritenuta:r2(ritenuta),totale:r2(totale)};
+            iva:r2(iva),documento:r2(r2(imponibile)+r2(iva)),ritenuta:r2(ritenuta),totale:r2(totale)};
   }
   function bloccoParcella(p){
     if(ruoloUtente!=='professionista')return "";
@@ -403,6 +406,8 @@
          l'IVA e' contata su 1.040 (le spese sono fuori IVA): sembrava un
          errore. Con le spese la riga dice su quanto e' contata. */
       (c.iva?riga(c.spese?("IVA (su "+eur2(c.baseIva)+": le spese sono fuori IVA)"):"IVA", c.iva):"") +
+      /* 13 nov 2026 (n. 18) — con la ritenuta, prima il totale del documento */
+      (c.ritenuta?`<div style="display:flex;justify-content:space-between;gap:12px"><span><strong>Totale documento</strong></span><strong>${eur2(c.documento)}</strong></div>`:"") +
       (c.ritenuta?riga("Ritenuta d'acconto", c.ritenuta, true):"") +
       `<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>` +
       `<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Da incassare</strong></span><strong>${eur2(c.totale)}</strong></div>`;
@@ -1054,7 +1059,9 @@
     const tono=(mancano===0&&deont>0)?"ok":((mancano===0||perc>=60)?"attesa":"err");
     $("#cred-riass").innerHTML=
       '<div class="cred-box cred-'+tono+'">'
-      +'<div class="cred-num">'+String(Math.round(fatti*100)/100).replace(".",",")+' <small>di '+credObiettivo+' CFP</small></div>'
+      /* 13 nov 2026 (lista «MANCA», n. 19) — il traguardo si cambia da qui */
+      +'<div class="cred-testa"><div class="cred-num">'+String(Math.round(fatti*100)/100).replace(".",",")+' <small>di '+credObiettivo+' CFP</small></div>'
+      +'<button type="button" class="btn cred-cambia" data-action="cred-traguardo">Cambia il traguardo</button></div>'
       +'<div class="cred-barra"><span style="width:'+perc+'%"></span></div>'
       +'<div class="cred-msg">'+(mancano===0
           ? "Obiettivo "+credAnno+" raggiunto: sei a posto."
@@ -1109,6 +1116,48 @@
     });
   }
 
+  /* ===== 13 nov 2026 (lista «MANCA», n. 19) — IL TRAGUARDO SI SCEGLIE =====
+     Era nei Dati azienda (gest_azienda.cfp_obiettivo) e da qui non si vedeva:
+     il controllore l'ha letto come «fisso a 30». Adesso si cambia dalla
+     sezione. Stessa colonna, quindi Dati azienda e Riepilogo dicono lo stesso. */
+  function credTraguardo(){
+    const fatti=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno).reduce((s,c)=>s+(+c.crediti||0),0);
+    openSheetGrande("Il traguardo dei crediti",
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Quanti crediti ti servono ogni anno</div>'
+      +'<div class="field"><label>Traguardo (CFP all\'anno)</label><input type="number" id="cr-trag" inputmode="numeric" min="1" max="999" value="'+credObiettivo+'" style="max-width:160px"></div>'
+      +'<p class="sh-nota" style="margin-bottom:0">Di norma <b>30</b> per ingegneri e architetti, <b>20</b> per i geometri. Controlla il regolamento del tuo Ordine.</p>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Il '+esc(credAnno||todayStr().slice(0,4))+'</div>'
+      +'<div class="prev-somma" id="cr-trag-conto" style="text-align:left;line-height:1.9"></div>'
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-cred-traguardo">Salva</button>');
+    const conto=function(){
+      const box=$("#cr-trag-conto"); if(!box)return;
+      const ob=parseInt(($("#cr-trag")||{}).value,10)||0;
+      const n=v=>String(Math.round(v*100)/100).replace(".",",");
+      const riga=(a,b)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+a+'</span><strong>'+b+'</strong></div>';
+      box.innerHTML=riga("Crediti fatti",n(fatti)+" CFP")+riga("Traguardo",ob>0?ob+" CFP":"—")
+        +riga(ob>0&&fatti>=ob?"Sei a posto":"Ti mancano",ob>0?(fatti>=ob?"✓":n(Math.max(0,ob-fatti))+" CFP"):"—");
+    };
+    conto();
+    const inp=$("#cr-trag"); if(inp)inp.addEventListener("input",conto);
+  }
+  async function saveCredTraguardo(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const inp=$("#cr-trag"), ob=parseInt(inp?inp.value:"",10);
+    if(!(ob>0&&ob<1000)){ if(typeof campoManca==="function")campoManca(inp,"Manca il traguardo: scrivi quanti crediti ti servono."); else toast("Scrivi quanti crediti ti servono"); return; }
+    const {data,error}=await sb.from("gest_azienda").upsert({user_id:sbUid,cfp_obiettivo:ob},{onConflict:"user_id"}).select("user_id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
+    closeSheet();renderCrediti();toast("Traguardo: "+ob+" CFP all'anno ✔");
+  }
+
   function credForm(c){
     const isNew=!c;c=c||{};
     const tipoOpts=CRED_TIPI.map(t=>'<option value="'+esc(t)+'" '+(t===c.tipo?'selected':'')+'>'+esc(t)+'</option>').join("");
@@ -1133,7 +1182,7 @@
          _numIt, come i prezzi del computo: 2,5 e 2.5 vanno bene tutti e due. */
       +'<div class="field"><label>Crediti (CFP)</label><input type="text" inputmode="decimal" id="cr-cfp"'+_noAuto()+' value="'+(c.crediti!=null?String(c.crediti).replace(".",","):"")+'" placeholder="Es. 2,5"></div></div>'
       +'<div class="field"><label>Note</label><textarea id="cr-note" placeholder="Numero attestato, dove l\'hai salvato...">'+esc(c.note||"")+'</textarea></div>'
-      +'<p class="sh-nota" style="margin-bottom:0">L\'obiettivo annuo (di norma 30 CFP, 20 per i geometri) si imposta nei <b>Dati azienda</b>.</p>'
+      +'<p class="sh-nota" style="margin-bottom:0">Il traguardo dell\'anno si cambia in cima alla sezione, con «Cambia il traguardo».</p>'
       +'</div>'
       +'</div></div>',
       ctrTastoHTML('corso')
