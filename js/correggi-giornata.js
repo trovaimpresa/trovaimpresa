@@ -31,8 +31,12 @@
      hanno un data-action (3 nov 2026: lavoro, nota del giorno, promemoria).
      ⛔ Fuori apposta: computo e prezzario (il testo del prezzario non si
      tocca, regola del 20 ago) e i documenti con valore legale. */
+  /* 13 nov 2026 (quarto giro) — ⛔ «j-desc» NON C'E' PIU': e' il titolo del
+     lavoro («Cosa c'è da fare»). Il correttore l'aveva girato: «PROVA
+     CONTROLLORE Preventivo» era diventato «Preventivo controllore prova.».
+     Un titolo e' un nome: non si corregge mai. */
   var CAMPI = ['rap-materiali', 'rap-note', 'lv-note', 'rv-testo',
-               'j-desc', 'j-note', 'j-svolto', 'day-note', 'p-note', 'mg-cosa'];
+               'j-note', 'j-svolto', 'day-note', 'p-note', 'mg-cosa'];
   var SALVA = {
     'btn-rap-salva': ['rap-materiali', 'rap-note'],
     'btn-salva': ['lv-note'],
@@ -54,7 +58,7 @@
     return ids.length ? ids : null;
   }
   var SALVA_AZIONE = {
-    'save-job': ['j-desc', 'j-note', 'j-svolto'],
+    'save-job': ['j-note', 'j-svolto'],
     'save-note': ['day-note'],
     'save-prom': ['p-note']
   };
@@ -107,6 +111,69 @@
     } catch (e) { return null; }
   }
 
+  /* 13 nov 2026 (quarto giro) — LA GUARDIA. L'AI ha l'ordine di non togliere
+     niente e di non toccare i nomi, ma ogni tanto lo fa lo stesso (ha tolto
+     due parole da «Cosa è stato fatto»). Qui si controlla la risposta PRIMA
+     di metterla nella casella: se non e' fedele si butta e il testo resta
+     come l'hai scritto.
+       a) le parole con una maiuscola (nomi, sigle, «PROVA CONTROLLORE») e
+          quelle con un numero devono esserci ancora, scritte uguali;
+       b) nessuna parola deve sparire: ogni parola di prima deve avere la sua
+          di dopo (uguale, o quasi uguale se era sbagliata, o attaccata:
+          «carton gesso» → «cartongesso», o il numero: «tre» → «3»). */
+  var CG_NUMERI = 'zero uno una un due tre quattro cinque sei sette otto nove dieci undici dodici tredici quattordici quindici sedici diciassette diciotto diciannove venti trenta quaranta cinquanta sessanta settanta ottanta novanta cento mille mezzo mezza'.split(' ');
+  var CG_UNITA = { metri: 'm', metro: 'm', centimetri: 'cm', centimetro: 'cm', millimetri: 'mm', chili: 'kg', chilo: 'kg', kili: 'kg', kilo: 'kg', chilogrammi: 'kg', litri: 'l', litro: 'l', quintali: 'q', quintale: 'q', ore: 'h', ora: 'h', quadri: 'mq', quadrati: 'mq', quadro: 'mq', quadrato: 'mq', cubi: 'mc', cubo: 'mc', euro: '€' };
+  var CG_VUOTE = ['ehm', 'eh', 'uhm', 'mmm', 'ah', 'boh', 'cioè', 'cioe'];
+  function cgParole(t) { return String(t).match(/[0-9A-Za-zÀ-ÖØ-öø-ÿ']+/g) || []; }
+  function cgDist(a, b) {
+    if (Math.abs(a.length - b.length) > 2) return 9;
+    var r = [], i, j;
+    for (j = 0; j <= b.length; j++) r[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      var prec = r[0]; r[0] = i;
+      for (j = 1; j <= b.length; j++) {
+        var su = r[j];
+        r[j] = Math.min(r[j] + 1, r[j - 1] + 1, prec + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prec = su;
+      }
+    }
+    return r[b.length];
+  }
+  function fedele(prima, dopo) {
+    var p = cgParole(prima), d = cgParole(dopo), i;
+    var dMin = d.map(function (w) { return w.toLowerCase(); });
+    var haCifre = /\d/.test(dopo), dopoMin = dopo.toLowerCase();
+    /* a) maiuscole e numeri: uguali identici. La prima parola del testo e
+          quella dopo un punto hanno la maiuscola per forza: non contano. */
+    var dopoPunto = true, re = /([0-9A-Za-zÀ-ÖØ-öø-ÿ']+)|([.!?\n])/g, m;
+    while ((m = re.exec(prima))) {
+      if (m[2]) { dopoPunto = true; continue; }
+      var w = m[1];
+      var tutteGrandi = w.length >= 2 && w === w.toUpperCase() && w !== w.toLowerCase();
+      var protetta = /\d/.test(w) || tutteGrandi || (!dopoPunto && /[A-ZÀ-Ö]/.test(w));
+      dopoPunto = false;
+      if (protetta && d.indexOf(w) < 0) return false;
+    }
+    /* b) nessuna parola sparisce */
+    for (i = 0; i < p.length; i++) {
+      var x = p[i].toLowerCase().replace(/^'+|'+$/g, '');
+      if (x.length < 3 || CG_VUOTE.indexOf(x) >= 0) continue;
+      if (dMin.indexOf(x) >= 0) continue;
+      if (CG_NUMERI.indexOf(x) >= 0 && haCifre) continue;
+      if (CG_UNITA[x] && (dMin.indexOf(CG_UNITA[x]) >= 0 || dopoMin.indexOf(CG_UNITA[x]) >= 0)) continue;
+      var trovata = false, quanto = x.length <= 4 ? 1 : 2;
+      for (var k = 0; k < dMin.length && !trovata; k++) {
+        var y = dMin[k];
+        if (y.length > x.length && y.indexOf(x) >= 0) trovata = true;        /* attaccata a un'altra */
+        else if (cgDist(x, y) <= quanto) trovata = true;                     /* era scritta male */
+      }
+      if (!trovata) return false;
+    }
+    return true;
+  }
+  /* si prova fuori dal browser: tools/banco-correttore.js */
+  if (typeof window !== 'undefined') window._cgFedele = fedele;
+
   /* torna true se ha CAMBIATO il testo */
   function correggi(ta) {
     var x = s(ta.id);
@@ -133,6 +200,8 @@
         if (!res.ok || !b.result) { x.fatto = mandato; riga(ta, ''); return false; }
         var nuovo = String(b.result).trim();
         if (nuovo === mandato.trim()) { x.fatto = mandato; riga(ta, ''); return false; }
+        /* la risposta ha toccato un nome o ha tolto una parola: non si usa */
+        if (!fedele(mandato, nuovo)) { x.fatto = mandato; riga(ta, ''); return false; }
         x.prima = mandato;
         ta.value = nuovo; x.fatto = nuovo;
         ta.dispatchEvent(new Event('input', { bubbles: true }));
