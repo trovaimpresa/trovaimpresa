@@ -22,6 +22,7 @@
 //    Netlify si rifiuta di pubblicare il sito.
 // =====================================================================
 const { schedule } = require('@netlify/functions');
+const { linkDiretti, haLinkVecchio, mettiDiretto } = require('./lib/link-attiva');
 const { createClient } = require('@supabase/supabase-js');
 
 const TETTO_GIORNO = 50;          // uguale a TETTO_GIORNO di invia-annuncio.js
@@ -100,10 +101,20 @@ const handler = async () => {
       }
 
       if (daMandare.length) {
+        /* 13 nov 2026 — [ATTIVA]: il codice di attivazione si crea ADESSO, mentre la
+           mail parte (creato al momento della programmazione sarebbe gia' scaduto).
+           La copia per Alessio resta col link vecchio: con quello diretto, aprendola
+           attiverebbe il profilo di un altro. */
+        let diretti = {};
+        const conAttiva = daMandare.filter(m => haLinkVecchio(m.html)).map(m => m.email);
+        if (conAttiva.length) {
+          try { diretti = await linkDiretti(conAttiva, URL, KEY); } catch (e) { diretti = {}; }
+        }
         const r = await fetch('https://api.resend.com/emails/batch', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-          body: JSON.stringify(daMandare.map(m => ({ from: MITTENTE, to: [m.email], subject: m.oggetto, html: m.html })))
+          body: JSON.stringify(daMandare.map(m => ({ from: MITTENTE, to: [m.email], subject: m.oggetto,
+            html: mettiDiretto(m.html, diretti[String(m.email).toLowerCase()]) })))
         });
         const risposta = await r.json().catch(() => ({}));
         if (!r.ok) {

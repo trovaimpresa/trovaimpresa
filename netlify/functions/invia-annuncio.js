@@ -279,30 +279,10 @@ function linkPaginaCitta(imp) {
    ⚠️ Il codice scade (tempo «Email OTP Expiration» di Supabase). Se lo apre
    tardi, conferma.html con prom=1 NON dice «link scaduto»: mostra la vecchia
    casella «Mandami il link di attivazione». Mai un vicolo cieco.
-   ⚠️ Solo per gli invii SUBITO: le campagne PROGRAMMATE partono giorni dopo,
-   il codice sarebbe gia' scaduto, quindi li' resta il link vecchio. */
-function linkAttivaVecchio(imp) {
-  return 'https://trovaimpresa.com/conferma.html?attiva=1&email=' + encodeURIComponent(imp.email || '');
-}
-async function linkDiretti(destinatari, SUPABASE_URL, KEY) {
-  const mappa = {};
-  const H = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };
-  for (let k = 0; k < destinatari.length; k += 10) {
-    await Promise.all(destinatari.slice(k, k + 10).map(async (imp) => {
-      try {
-        const r = await fetch(SUPABASE_URL + '/auth/v1/admin/generate_link', {
-          method: 'POST', headers: H, body: JSON.stringify({ type: 'magiclink', email: imp.email })
-        });
-        if (!r.ok) return;
-        const j = await r.json();
-        const h = j.hashed_token || (j.properties && j.properties.hashed_token);
-        if (h) mappa[String(imp.email).toLowerCase()] = 'https://trovaimpresa.com/conferma.html?token_hash='
-          + encodeURIComponent(h) + '&type=magiclink&prom=1&email=' + encodeURIComponent(imp.email);
-      } catch (e) { /* resta il link vecchio */ }
-    }));
-  }
-  return mappa;
-}
+   Le campagne PROGRAMMATE si salvano col link vecchio: lo cambia
+   invia-coda-email.js nel momento in cui la mail parte (lib/link-attiva.js). */
+const { linkVecchio, linkDiretti } = require('./lib/link-attiva');
+function linkAttivaVecchio(imp) { return linkVecchio(imp.email); }
 
 function riempi(testo, imp, diretti) {
   const nome = (imp.nome_attivita || imp.nome || '').trim() || 'utente';
@@ -538,7 +518,7 @@ exports.handler = async function (event) {
 
   // ---- invio, un gruppo da 100 alla volta ----
   const diretti = /\[ATTIVA\]/.test(String(testo) + String(oggetto))
-    ? await linkDiretti(destinatari, SUPABASE_URL, SUPABASE_KEY) : null;
+    ? await linkDiretti(destinatari.map(i => i.email), SUPABASE_URL, SUPABASE_KEY) : null;
   const lotto = destinatari.map(i => ({
     from: MITTENTE,
     to: [i.email],
