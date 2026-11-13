@@ -1681,17 +1681,17 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
    (467,97 € invece di 444,57 €). Il «con IVA» accanto è giusto.
 
 ### Lista «NON FUNZIONA» — gli altri
-[ ] 7. Giornate conta la manodopera delle ore «Senza nome» (168,75 €), il lavoro
+[x] 7. Giornate conta la manodopera delle ore «Senza nome» (168,75 €), il lavoro
    dice che non entrano nel margine. E un lavoro nel Cestino resta contato
    in Giornate.
 [x] 8. Cestino del Noleggio: l'ora è in UTC, un'ora indietro.
 [x] 9. Lavoro nel Cestino con ore e spese: «Elimina per sempre» rifiuta, bisogna
    rimetterlo a posto e buttare ore e spese una per una.
-[ ] 10. «Emetti» dà il numero alla fattura senza chiedere conferma.
-[ ] 11. Noleggio, mezzo nuovo: nasce «NON SI PUÒ DARE» per la verifica periodica,
+[x] 10. «Emetti» dà il numero alla fattura senza chiedere conferma.
+[x] 11. Noleggio, mezzo nuovo: nasce «NON SI PUÒ DARE» per la verifica periodica,
     il modulo non lo dice.
-[ ] 12. PDF «scheda noleggio»: il titolo esce dalla pagina coi nomi lunghi.
-[ ] 13. Finestra SdI: «Torna alla fattura», ma il codice destinatario sta nel
+[x] 12. PDF «scheda noleggio»: il titolo esce dalla pagina coi nomi lunghi.
+[x] 13. Finestra SdI: «Torna alla fattura», ma il codice destinatario sta nel
     cliente. «Apri il cliente» non apre «Dati per la fattura».
 [x] 14. Conferma d'ordine: l'aiuto copre «Scarica la conferma» e dice
     «al fornitore» (js/aiuti.js, voce ordine-pdf). Va al cliente.
@@ -1699,22 +1699,22 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
     «la quantità è zero», ma il conto è giusto.
 [x] 16. Domande di «elimina per sempre»: parole tecniche (gest_sal_righe,
     gest_preventivi_link, gest_analisi_righe) e «Insieme a lei» per un maschile.
-[ ] 17. Domande di «elimina» senza nome: SAL, spesa, corso.
-[ ] 18. Chat buttata: dice «non si recupera» ma i messaggi restano nel database.
-[ ] 19. Noleggio: «Salva» è in fondo alla finestra, nell'App resta in vista.
+[x] 17. Domande di «elimina» senza nome: SAL, spesa, corso.
+[x] 18. Chat buttata: dice «non si recupera» ma i messaggi restano nel database.
+[x] 19. Noleggio: «Salva» è in fondo alla finestra, nell'App resta in vista.
 [x] 20. Fattura: «Segna pagata» (la regola è «Ha pagato»).
-[ ] 21. Il «Sì» ha 4 nomi: «Sì», «Sì, elimina», «Sì, nel cestino», «Sì, buttala».
-[ ] 22. «7.5 ore» col punto (PDF scheda lavoro e dentro il lavoro).
+[x] 21. Il «Sì» ha 4 nomi: «Sì», «Sì, elimina», «Sì, nel cestino», «Sì, buttala».
+[x] 22. «7.5 ore» col punto (PDF scheda lavoro e dentro il lavoro).
 [x] 23. SAL: «−0,00 €» e «non da ultima volta».
 [~] 24. Accenti: «e'» nel conto del Noleggio, «si.» nel contratto,
     «Modalita'» in conferma d'ordine e lettera d'incarico, «Agibilita'».
 [-] 25. Assistente: «Bravo, hai mandato il tuo primo preventivo!» con soli bozze.
 [x] 26. SdI: «Hai finito gli invii» a chi non ne ha mai avuti.
-[ ] 27. Verbale di consegna: tutte le voci «A posto» anche se non toccate.
-[ ] 28. Studio, telefono, Mappa: «Tutte le pratiche» esce dallo schermo (375 e 360).
-[ ] 29. Parcella, schermo e PDF: «Totale imponibile 1.056,00» ma l'IVA è contata
+[x] 27. Verbale di consegna: tutte le voci «A posto» anche se non toccate.
+[x] 28. Studio, telefono, Mappa: «Tutte le pratiche» esce dallo schermo (375 e 360).
+[x] 29. Parcella, schermo e PDF: «Totale imponibile 1.056,00» ma l'IVA è contata
     su 1.040 (senza le spese). Sembra un errore.
-[ ] 30. Parcella: riga sotto la ritenuta a 13 px.
+[x] 30. Parcella: riga sotto la ritenuta a 13 px.
 [x] 31. Studio, Preventivi vuoto: «diventa un lavoro» (lì è una pratica).
 
 ### Lista «MANCA» (prima chiedere ad Alex quali vuole)
@@ -1778,3 +1778,23 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
 - 26 SdI: «Per mandare la fattura servono gli invii allo SDI» (va bene anche per chi non ne ha mai avuti).
 - 31 Studio, Preventivi vuoto: «diventa una pratica».
 - Banco: App e Noleggio zero difetti; banco-correttore e banco-copia-computo verdi.
+
+**13 nov, terzo gruppo — Alex: «vai avanti, ti do ok per tutto» (06:44). Fatti gli altri 15:**
+- 7 Giornate (`giorManodopera` in js/gest-giornate.js): le ore senza nome valgono la media del REPARTO del lavoro, come nella scheda del lavoro (`caricaManodopera`); prima la media di tutto l'account (168,75 € contro «non entrano nel margine»). Le giornate di un lavoro nel Cestino escono dall'elenco e dai conti (`giorLavVivi`).
+- 10 «Emetti» (`fattCambiaStato`): prima chiede «Emettere la fattura? Prende il numero N/anno. Una fattura emessa non si elimina più» — «Sì, emetti» / «No, resta bozza».
+- 11 Noleggio, modulo del mezzo: riga rossa «Senza la data dell'ultima verifica il mezzo resta NON SI PUÒ DARE: scrivi la data, oppure metti 0 nei mesi» (si vede solo finché la data manca).
+- 12 PDF «scheda noleggio» (`nolPdf`): il titolo va a capo.
+- 13 Finestra SdI: i due messaggi sul codice destinatario finiscono sotto «La scheda del cliente»; «Apri il cliente» apre già aperto «Dati per la fattura» (`data-fisc`).
+- 14 la nuvoletta dell'aiuto va SOPRA il pulsante se sotto non c'è posto (`posiziona` in js/aiuti.js).
+- 17 la domanda di «elimina» dice il nome: SAL («lo stato di avanzamento n. 2»), spesa («la spesa «…» da 120,00 €»), corso («il corso «…»»).
+- 18 Chat buttata: `chat_svuota` cancella anche il TESTO (migrazione `chat_butta_davvero_13nov2026`, file `sql/chat-butta-davvero.sql`). La riga resta per il conto dei messaggi del mese. Vale da oggi: le chat buttate prima non sono state toccate.
+- 19 Noleggio, «Salva» in vista: le regole dell'altezza divisa per lo zoom perdevano contro css/gestionale.css; riscritte con `#overlay` davanti. Misurato: 1440×900 «Salva» finisce a 883; 375×700 a 688; 360×640 a 628.
+- 21 il «Sì» che butta ha DUE nomi: «Sì, nel cestino» e «Sì, elimina» (via «Sì, buttala»; `gconfirm` sceglie da solo; nel Noleggio le tre domande che dicevano solo «Sì»).
+- 22 ore con la virgola: PDF scheda lavoro (App e Noleggio), lavori del Noleggio, riga delle ore senza nome.
+- 24 accenti nei testi di «Guidami» (js/gest-tutorial.js) e in foto-upload. «e'» nel conto del Noleggio: cercato in tutte le scritte dei file caricati dal Noleggio, NON trovato — forse è in un conto già salvato nel database.
+- 27 Verbale di consegna: le voci nascono «Non controllato» (in PDF esce così); pulsante nuovo «✓ Controllato tutto: tutte a posto» che riempie solo le voci vuote. I verbali già salvati restano com'erano.
+- 28 Mappa sul telefono (studio): «Pratiche da fare · Tutte le pratiche» stanno nello schermo a 375 e 360 (misurato: 16–359 e 16–344 px).
+- 29 Parcella: con le spese (fuori IVA) la riga dice «IVA 22% su 1.040,00» (schermo, PDF parcella, lettera d'incarico, pagina del cliente). La formula NON è cambiata.
+- 30 Parcella: riga sotto la ritenuta a 15 px.
+- 25 resta NON riprodotto.
+- Banco: App e Noleggio zero difetti (1440, 375, 360).
