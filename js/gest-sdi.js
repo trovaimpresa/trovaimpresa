@@ -119,7 +119,7 @@ async function fattSdiVai(id, btn) {
 /* ── i pacchetti di invii (gestionale gratis) ─────────────────────────── */
 function sdiVendi(prova, id) {
   openSheetGrande("Invii allo SDI",
-    '<div class="sh-b"><div class="sdi-conferma"><b>Hai finito gli invii allo SDI</b>'
+    '<div class="sh-b"><div class="sdi-conferma"><b>Per mandare la fattura servono gli invii allo SDI</b>'
     + '<span>Compra un pacchetto: non scade e lo usi quando vuoi.</span></div>'
     + '<div class="sh-nota">Con il gestionale con assistenza AI e chat gli invii sono già compresi.</div></div>',
     '<button class="btn b-cancel" data-action="close">Chiudi</button>'

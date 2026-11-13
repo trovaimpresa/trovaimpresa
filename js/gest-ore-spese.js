@@ -1061,7 +1061,7 @@
       viste:"#prev-viste", visteDef:PREV_VISTE, vista:prevFilter, conta:conta, azioneVista:"prev-filtro",
       vuoto:tabVuoto(
         prevCache.length?"Nessun preventivo con questo filtro":"Ancora nessun preventivo",
-        prevCache.length?"Prova a cambiare vista qui sopra.":"Righe con quantità e prezzo, totale con l’IVA e il PDF pronto da mandare al cliente. Quando il cliente accetta, il preventivo diventa un lavoro con un clic.",
+        prevCache.length?"Prova a cambiare vista qui sopra.":"Righe con quantità e prezzo, totale con l’IVA e il PDF pronto da mandare al cliente. Quando il cliente accetta, il preventivo diventa "+(ruoloUtente==='professionista'?"una pratica":"un lavoro")+" con un clic.",
         _SVGV+'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
         prevCache.length?null:{t:"+ Crea il primo preventivo",a:"new-prev"}),
       colonne:[{lab:"N.",w:"6%"},{lab:"Preventivo",w:"32%"},{lab:"Cliente",w:"24%",cls:"c-cli"},

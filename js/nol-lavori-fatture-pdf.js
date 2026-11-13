@@ -27,7 +27,7 @@
         ${l.stato==="da_fare"?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
         ${!fatto?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
         ${fatto&&fs==="none"?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">📄 Fattura emessa</button>`:""}
-        ${fs==="emessa"?`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Segna pagata</button>`:""}
+        ${fs==="emessa"?`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Ha pagato</button>`:""}
         ${fs==="pagata"?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
         <button class="ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
         <button class="ja del" data-action="del-job" data-id="${l.id}">🗑</button>

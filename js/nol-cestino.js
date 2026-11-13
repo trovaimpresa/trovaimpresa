@@ -47,8 +47,14 @@
   }
   function cestQuando(iso){
     if(!iso) return "";
-    const d=String(iso).slice(0,10), o=String(iso).slice(11,16);
-    return fdate(d)+(o?" alle "+o:"");
+    /* 13 nov 2026 (quarto giro) — l'ora era quella di Greenwich (un'ora o due
+       indietro): si prendevano i caratteri dalla data del database, che e'
+       in UTC. Adesso e' l'ora dell'orologio di chi guarda. */
+    const t=new Date(iso);
+    if(isNaN(t)){ const d0=String(iso).slice(0,10); return fdate(d0); }
+    const due=n=>String(n).padStart(2,"0");
+    const d=t.getFullYear()+"-"+due(t.getMonth()+1)+"-"+due(t.getDate());
+    return fdate(d)+" alle "+due(t.getHours())+":"+due(t.getMinutes());
   }
   function cestSegnaPallino(n){
     const e=$("#cnt-cestino"); if(!e) return;
@@ -134,7 +140,7 @@
         <button class="nol-az nol-az-apri" data-action="cest-su" data-i="${i}">Rimetti a posto</button>
         <button class="nol-az nol-az-rosso" data-action="cest-mai" data-i="${i}">Butta per sempre</button>
       </div>
-      <div class="nol-riq nol-cam"><h4>${esc(v.lab)} — buttato il ${esc(cestQuando(v.quando))}</h4>
+      <div class="nol-riq nol-cam"><h4>${esc(v.lab)} — nel cestino dal ${esc(cestQuando(v.quando))}</h4>
         <table class="cest-righe">${righe.map(r=>
           `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")
           ||'<tr><td colspan="2">Niente da mostrare.</td></tr>'}</table>
@@ -167,7 +173,7 @@
     await renderCestinoNol();
     const t=NOL_TIPI[v.tipo]; if(t&&t.ricarica) t.ricarica();
     renderRiepilogoNegozio();
-    toast(v.lab+" rimesso a posto ✔");
+    toast(v.lab+(/a$/.test(v.lab.split(" ")[0])?" rimessa":" rimesso")+" a posto ✔");
   }
 
   async function cestPerSempre(i){
@@ -179,7 +185,7 @@
     closeSheet();
     cestCache.splice(i,1); cestSegnaPallino(cestCache.length);
     await renderCestinoNol();
-    toast(v.lab+" buttato per sempre");
+    toast(v.lab+(/a$/.test(v.lab.split(" ")[0])?" buttata":" buttato")+" per sempre");
   }
 
   /* js/cestino.js chiama questa quando qualcosa entra nel cestino: e' l'unico

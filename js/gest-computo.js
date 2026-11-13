@@ -2885,6 +2885,11 @@
       return;
     }
     compMisCache=data||[];
+    /* 13 nov 2026 (quarto giro) — con «Scrivo la quantità» o «A corpo» il conto
+       e' giusto ma qui sotto diceva «la quantità è zero»: non e' vero, vale
+       quella scritta a mano. */
+    const _vv=(compVociCache||[]).find(x=>String(x.id)===String(voceId));
+    const _vMan=!!(_vv&&_vv.quantita_manuale);
     const tot=compMisCache.reduce((s,m)=>s+(+m.quantita||0),0);
     const pezzo=(v,lab)=>v==null?"":(" "+lab+" "+_misTesto(v));
     const righe=compMisCache.length?compMisCache.map(m=>
@@ -2897,7 +2902,7 @@
         +'</small></span>'
       +'<b'+(m.detrai?' style="color:var(--err,#c0392b)"':'')+'>'+_misLetta(m.quantita)+'</b>'
       +'<button type="button" class="rdel" data-action="comp-mis-del" data-id="'+esc(String(m.id))+'" title="Elimina la misura">×</button></div>'
-    ).join(""):'<p class="fatt-empty">Nessuna misura: la quantità è zero.</p>';
+    ).join(""):'<p class="fatt-empty">'+(_vMan?'Nessuna misura: vale la quantità che hai scritto tu.':'Nessuna misura: la quantità è zero.')+'</p>';
 
     /* ⚠️ LA CORREZIONE DI UNA MISURA. 10 agosto 2026.
        Prima una misura sbagliata si poteva solo cancellare e riscrivere da capo:
@@ -3402,7 +3407,7 @@
     rinfresca("computi");
     /* appena creata si resta dentro: le misure sono il motivo per cui si e'
        aperta questa schermata, e adesso si possono scrivere */
-    if(!id){ await compVoceForm(nuovoId); toast("Lavorazione creata ✔ Ora scrivici le misure"); return; }
+    if(!id){ await compVoceForm(nuovoId); toast(aCorpo?"Lavorazione creata ✔":"Lavorazione creata ✔ Ora scrivici le misure"); return; }
     toast("Lavorazione salvata ✔");
     await compTornaAlComputo();
   }

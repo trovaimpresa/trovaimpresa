@@ -513,7 +513,7 @@
     const az=[];
     /* 7 nov 2026 — top/prima: cosa resta in vista nella finestra (gest-schede-clienti.js) */
     if(f.stato==="bozza")   az.push({lab:"📤 Emetti",       action:"fatt-stato",data:{id:f.id,v:"emessa"},top:true,prima:true});
-    if(f.stato==="emessa")  az.push({lab:"💶 Segna pagata", action:"fatt-stato",data:{id:f.id,v:"pagata"},top:true,prima:true});
+    if(f.stato==="emessa")  az.push({lab:"💶 Ha pagato", action:"fatt-stato",data:{id:f.id,v:"pagata"},top:true,prima:true});
     if(f.stato==="pagata")  az.push({lab:"↩ Non pagata",    action:"fatt-stato",data:{id:f.id,v:"emessa"}});
     az.push({lab:"✏ Apri",     action:"edit-fatt",data:{id:f.id}});
     /* due PDF diversi, e i nomi di prima si scambiavano facilmente:

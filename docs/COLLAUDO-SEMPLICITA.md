@@ -1681,41 +1681,41 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
    (467,97 € invece di 444,57 €). Il «con IVA» accanto è giusto.
 
 ### Lista «NON FUNZIONA» — gli altri
-7. Giornate conta la manodopera delle ore «Senza nome» (168,75 €), il lavoro
+[ ] 7. Giornate conta la manodopera delle ore «Senza nome» (168,75 €), il lavoro
    dice che non entrano nel margine. E un lavoro nel Cestino resta contato
    in Giornate.
-8. Cestino del Noleggio: l'ora è in UTC, un'ora indietro.
-9. Lavoro nel Cestino con ore e spese: «Elimina per sempre» rifiuta, bisogna
+[x] 8. Cestino del Noleggio: l'ora è in UTC, un'ora indietro.
+[x] 9. Lavoro nel Cestino con ore e spese: «Elimina per sempre» rifiuta, bisogna
    rimetterlo a posto e buttare ore e spese una per una.
-10. «Emetti» dà il numero alla fattura senza chiedere conferma.
-11. Noleggio, mezzo nuovo: nasce «NON SI PUÒ DARE» per la verifica periodica,
+[ ] 10. «Emetti» dà il numero alla fattura senza chiedere conferma.
+[ ] 11. Noleggio, mezzo nuovo: nasce «NON SI PUÒ DARE» per la verifica periodica,
     il modulo non lo dice.
-12. PDF «scheda noleggio»: il titolo esce dalla pagina coi nomi lunghi.
-13. Finestra SdI: «Torna alla fattura», ma il codice destinatario sta nel
+[ ] 12. PDF «scheda noleggio»: il titolo esce dalla pagina coi nomi lunghi.
+[ ] 13. Finestra SdI: «Torna alla fattura», ma il codice destinatario sta nel
     cliente. «Apri il cliente» non apre «Dati per la fattura».
-14. Conferma d'ordine: l'aiuto copre «Scarica la conferma» e dice
+[x] 14. Conferma d'ordine: l'aiuto copre «Scarica la conferma» e dice
     «al fornitore» (js/aiuti.js, voce ordine-pdf). Va al cliente.
-15. Computo, «Scrivo la quantità»: dopo dice «scrivici le misure» e
+[x] 15. Computo, «Scrivo la quantità»: dopo dice «scrivici le misure» e
     «la quantità è zero», ma il conto è giusto.
-16. Domande di «elimina per sempre»: parole tecniche (gest_sal_righe,
+[x] 16. Domande di «elimina per sempre»: parole tecniche (gest_sal_righe,
     gest_preventivi_link, gest_analisi_righe) e «Insieme a lei» per un maschile.
-17. Domande di «elimina» senza nome: SAL, spesa, corso.
-18. Chat buttata: dice «non si recupera» ma i messaggi restano nel database.
-19. Noleggio: «Salva» è in fondo alla finestra, nell'App resta in vista.
-20. Fattura: «Segna pagata» (la regola è «Ha pagato»).
-21. Il «Sì» ha 4 nomi: «Sì», «Sì, elimina», «Sì, nel cestino», «Sì, buttala».
-22. «7.5 ore» col punto (PDF scheda lavoro e dentro il lavoro).
-23. SAL: «−0,00 €» e «non da ultima volta».
-24. Accenti: «e'» nel conto del Noleggio, «si.» nel contratto,
+[ ] 17. Domande di «elimina» senza nome: SAL, spesa, corso.
+[ ] 18. Chat buttata: dice «non si recupera» ma i messaggi restano nel database.
+[ ] 19. Noleggio: «Salva» è in fondo alla finestra, nell'App resta in vista.
+[x] 20. Fattura: «Segna pagata» (la regola è «Ha pagato»).
+[ ] 21. Il «Sì» ha 4 nomi: «Sì», «Sì, elimina», «Sì, nel cestino», «Sì, buttala».
+[ ] 22. «7.5 ore» col punto (PDF scheda lavoro e dentro il lavoro).
+[x] 23. SAL: «−0,00 €» e «non da ultima volta».
+[~] 24. Accenti: «e'» nel conto del Noleggio, «si.» nel contratto,
     «Modalita'» in conferma d'ordine e lettera d'incarico, «Agibilita'».
-25. Assistente: «Bravo, hai mandato il tuo primo preventivo!» con soli bozze.
-26. SdI: «Hai finito gli invii» a chi non ne ha mai avuti.
-27. Verbale di consegna: tutte le voci «A posto» anche se non toccate.
-28. Studio, telefono, Mappa: «Tutte le pratiche» esce dallo schermo (375 e 360).
-29. Parcella, schermo e PDF: «Totale imponibile 1.056,00» ma l'IVA è contata
+[-] 25. Assistente: «Bravo, hai mandato il tuo primo preventivo!» con soli bozze.
+[x] 26. SdI: «Hai finito gli invii» a chi non ne ha mai avuti.
+[ ] 27. Verbale di consegna: tutte le voci «A posto» anche se non toccate.
+[ ] 28. Studio, telefono, Mappa: «Tutte le pratiche» esce dallo schermo (375 e 360).
+[ ] 29. Parcella, schermo e PDF: «Totale imponibile 1.056,00» ma l'IVA è contata
     su 1.040 (senza le spese). Sembra un errore.
-30. Parcella: riga sotto la ritenuta a 13 px.
-31. Studio, Preventivi vuoto: «diventa un lavoro» (lì è una pratica).
+[ ] 30. Parcella: riga sotto la ritenuta a 13 px.
+[x] 31. Studio, Preventivi vuoto: «diventa un lavoro» (lì è una pratica).
 
 ### Lista «MANCA» (prima chiedere ad Alex quali vuole)
 1. Fattura: scadenza, modo di pagamento, IBAN (anche nel PDF).
@@ -1756,3 +1756,25 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
 - **4** (Chat con AI sul telefono): riprodotto su un telefono corto (375×560: «Manda» a 547 px, la barra in basso comincia a 493). Foto prima/dopo mandata ad Alex, **in attesa del suo ok**. Proposta: sul telefono la colonna della chat è alta quanto lo schermo libero, i messaggi scorrono dentro, casella e pulsanti restano sopra la barra.
 - Attrezzo nuovo: `node tools/foto-gestionale.js <app|noleggio> <sezione> <larghezza> <file.png> [css-di-prova]` — le foto «come viene» col sito e il database finti del banco.
 - **4, ok di Alex sulla foto (13 nov, 06:05) — fatto** in `css/gestionale.css`: sotto gli 880 px `#chat .chat-col` è alta `100dvh − 284px`, i messaggi scorrono dentro. Misurato col file vero su 4 telefoni (375×560, 375×700, 360×640, 390×844): «Manda» finisce sempre 18 px sopra la barra. Banco dell'App: zero difetti.
+
+**13 nov, i 6 più gravi ONLINE (push →e9dbef3←) e provati sul sito vero, reparto «ferramenta», nome «PROVA CONTROLLORE»:**
+- 6: preventivo 3 × 155,99 € con sconto 5% e IVA 22% → nell'elenco «444,57 € IVA esclusa · con IVA 542,38 €» (prima 467,97).
+- 2: lavoro col titolo «PROVA CONTROLLORE Preventivo» → salvato identico; «Cosa è stato fatto» con un nome, una marca e una parola inventata → salvato identico.
+- 4: a 375×560 «Manda» finisce a 455 px, la barra in basso comincia a 493.
+- 1 e 5 (Noleggio): fattura in bozza creata, «Elimina» → la finestra si chiude, messaggio «Fattura nel cestino: la riprendi da lì», nel Cestino c'è «Fattura in bozza di …» e si apre con le sue righe.
+- 3: NON provato dal vivo (serve un computo con l'analisi dei prezzi nello studio; le prove vere sono solo in «ferramenta»). Provato col banco `banco-copia-computo.js`.
+- Pulizia: preventivo, lavoro e fattura di prova eliminati anche dal Cestino. In «ferramenta» il Cestino dice 0; nel Noleggio «Il cestino è vuoto».
+
+**13 nov, secondo gruppo (gli altri «non funziona») — `[x]` fatto, `[~]` a metà, `[-]` non fatto, `[ ]` da fare:**
+- 8 `cestQuando` (js/nol-cestino.js): l'ora è quella dell'orologio di chi guarda, non UTC.
+- 9 `cestDefinitivo` (js/gest-cestino.js): un lavoro con ore e spese si elimina per sempre con UNA domanda che dice quante ore e quante spese se ne vanno. Solo per ore e spese: con altro collegato resta il rifiuto.
+- 14 js/aiuti.js `ordine-pdf`: «al cliente». **Resta da fare** l'aiuto che copre «Scarica la conferma» (si vede: serve la foto).
+- 15 Computo, «Scrivo la quantità»: niente più «Ora scrivici le misure» né «la quantità è zero» («vale la quantità che hai scritto tu»).
+- 16 nomi a schermo per `gest_sal_righe`, `gest_preventivi_link`, `gest_analisi_righe`; una tabella senza nome dice «altre cose collegate», mai il nome tecnico; «Insieme se ne va anche» al posto di «Insieme a lei». Noleggio: «Fattura buttata», «rimessa».
+- 20 «Ha pagato» al posto di «Segna pagata» (Farsi pagare, menu della fattura, lavori del Noleggio).
+- 23 SAL: «non dall'ultima volta»; con zero niente meno davanti («0,00 €»).
+- 24 a metà: «Modalità di pagamento» (conferma d'ordine e lettera d'incarico), «sì.» nel contratto di noleggio, «Agibilità» a schermo (nel database resta il valore di prima, per non perdere le pratiche già salvate). **Resta** «e'» nel conto del Noleggio: non l'ho ancora trovato.
+- 25 NON riprodotto: sull'account di prova ci sono 4 preventivi, tutti bozze, e «Bravo…» esce solo se ce n'è uno non in bozza. Da rifare col controllore: in che reparto e con quali preventivi l'ha visto.
+- 26 SdI: «Per mandare la fattura servono gli invii allo SDI» (va bene anche per chi non ne ha mai avuti).
+- 31 Studio, Preventivi vuoto: «diventa una pratica».
+- Banco: App e Noleggio zero difetti; banco-correttore e banco-copia-computo verdi.

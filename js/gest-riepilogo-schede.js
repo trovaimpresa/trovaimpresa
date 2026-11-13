@@ -423,7 +423,7 @@
         ${opNome?`<span>👷 ${esc(opNome)}</span>`:""}
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
         <span>📅 ${fdate(l.data_prevista)}</span>
-        ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo)}</span>`:""}
+        ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_stato)?`<span>🏛 ${esc((PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"")}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_protocollo)?`<span>N. ${esc(l.pratica_protocollo)}</span>`:""}
       </div>

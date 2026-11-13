@@ -160,7 +160,7 @@
     /* --- i PDF che si scaricano --- */
     'incarico-pdf':      'La lettera d’incarico da far firmare al cliente prima di iniziare: oggetto, compenso, tempi e gli estremi della tua polizza.',
     'verbale-pdf':       'Il verbale di sopralluogo in PDF, con data, luogo e quello che hai rilevato.',
-    'ordine-pdf':        'La conferma d’ordine in PDF da mandare al fornitore.'
+    'ordine-pdf':        'La conferma d’ordine in PDF da mandare al cliente.'
   };
 
   /* le stesse azioni, dette a uno studio tecnico (vedi AIUTI_TAB_STUDIO) */

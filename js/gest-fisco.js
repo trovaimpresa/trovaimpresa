@@ -625,7 +625,7 @@
       <div class="field"><label>Quando hai ricevuto i soldi</label><input id="fp-data-pag" type="date" value="${todayStr()}" max="${todayStr()}"></div>
       <div class="sh-nota">La fattura diventa <b>pagata</b> anche nella sezione Fatture e nei lavori collegati.</div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
-       <button class="btn-primary" data-action="fp-pagato-ok" data-id="${f.id}">${fpIc("spunta")} Segna pagata</button>`);
+       <button class="btn-primary" data-action="fp-pagato-ok" data-id="${f.id}">${fpIc("spunta")} Ha pagato</button>`);
   }
 
   // ---------------------------------------------------------------------

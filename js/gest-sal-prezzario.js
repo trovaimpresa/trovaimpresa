@@ -433,7 +433,7 @@
     openSheetGrande(isNew?"Nuovo stato di avanzamento":("SAL n. "+(s.numero||"")),
        '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Quello che hai fatto</div>'
-      +  '<div class="sh-nota">In ogni casella scrivi <b>quanto hai fatto dall\'inizio del lavoro</b>, non da ultima volta. Il gestionale toglie da solo quello che avevi già chiesto.</div>'
+      +  '<div class="sh-nota">In ogni casella scrivi <b>quanto hai fatto dall\'inizio del lavoro</b>, non dall\'ultima volta. Il gestionale toglie da solo quello che avevi già chiesto.</div>'
       +  '<div id="sal-voci">'+(salVociCache.length
           ? salVociCache.map(rigaVoce).join("")
           : '<div class="lm-vuoto">Questo computo non ha ancora lavorazioni.</div>')+'</div>'
@@ -518,7 +518,7 @@
 
     box.innerHTML=
        '<div class="qe-r"><span>Fatto dall\'inizio</span><b>'+eur2(k.maturato)+'</b></div>'
-      +'<div class="qe-r"><span>Già chiesto coi SAL prima</span><b>−'+eur2(k.precedente)+'</b></div>'
+      +'<div class="qe-r"><span>Già chiesto coi SAL prima</span><b>'+(k.precedente?'−':'')+eur2(k.precedente)+'</b></div>'
       +'<div class="qe-r"><span>Questo stato di avanzamento</span><b>'+eur2(k.lordo)+'</b></div>'
       +(k.ritenuta?'<div class="qe-r"><span>Ritenuta di garanzia '+String(k.perc).replace(".",",")+'%</span><b>−'+eur2(k.ritenuta)+'</b></div>':'')
       +'<div class="qe-r qe-r--tot"><span><b>Da chiedere adesso</b></span><b>'+eur2(k.netto)+'</b></div>'

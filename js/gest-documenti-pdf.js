@@ -555,7 +555,7 @@
     y+=2;
     paragrafo(polCoda,8.8,false,90);
 
-    titoletto("Modalita' di pagamento");
+    titoletto("Modalità di pagamento");
     let testoPag=INC_PAG_TESTO[dati.pagamento]||INC_PAG_TESTO.saldo;
     if(az.iban)testoPag+=" Il pagamento avverra' tramite bonifico bancario sull'IBAN "+az.iban+".";
     if(az.giorni_pagamento)testoPag+=" Le fatture si intendono da saldare entro "+az.giorni_pagamento+" giorni dalla data di emissione.";
@@ -839,7 +839,7 @@
       ? "Il corrispettivo si intende IVA esclusa. Il prezzo è fisso e invariabile per le opere sopra indicate."
       : "Il prezzo è fisso e invariabile per le opere sopra indicate, comprensivo di IVA nella misura riportata.",8.8,false,90);
 
-    titoletto("Modalita' di pagamento");
+    titoletto("Modalità di pagamento");
     let tp=ORD_PAG_TESTO[dati.pagamento]||ORD_PAG_TESTO["30-40-30"];
     if(az.iban)tp+=" Il pagamento avverra' tramite bonifico bancario sull'IBAN "+az.iban+".";
     if(az.giorni_pagamento)tp+=" Le fatture si intendono da saldare entro "+az.giorni_pagamento+" giorni dalla data di emissione.";

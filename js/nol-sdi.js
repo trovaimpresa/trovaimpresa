@@ -249,7 +249,7 @@
   /* ---- i pacchetti di invii (gestionale gratis) ---- */
   function vendi(prova, id) {
     finestra("Invii allo SDI",
-      '<div class="nsdi-conf"><b>Hai finito gli invii allo SDI</b><span>Compra un pacchetto: non scade e lo usi quando vuoi.</span></div>'
+      '<div class="nsdi-conf"><b>Per mandare la fattura servono gli invii allo SDI</b><span>Compra un pacchetto: non scade e lo usi quando vuoi.</span></div>'
       + '<div class="nsdi-nota">Con il gestionale con assistenza AI e chat gli invii sono già compresi.</div>',
       '<button type="button" class="nsdi-b" data-nsdi-chiudi="1">Chiudi</button>'
       + (prova ? '<button type="button" class="nsdi-b" data-nsdi-vai="' + esc(id) + '">Prova lo stesso (PROVA)</button>' : '')

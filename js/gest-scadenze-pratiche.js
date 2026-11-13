@@ -372,7 +372,7 @@
   function bloccoPratica(job,dentroBox){
     if(ruoloUtente!=='professionista')return "";
     job=job||{};
-    const tipi=PRATICA_TIPI.map(t=>`<option value="${esc(t)}" ${t===(job.pratica_tipo||"")?"selected":""}>${t||"— scegli —"}</option>`).join("");
+    const tipi=PRATICA_TIPI.map(t=>`<option value="${esc(t)}" ${t===(job.pratica_tipo||"")?"selected":""}>${(t==="Agibilita'"?"Agibilità":t)||"— scegli —"}</option>`).join("");
     const stati=PRATICA_STATI.map(s=>`<option value="${s[0]}" ${s[0]===(job.pratica_stato||"da_preparare")?"selected":""}>${s[1]}</option>`).join("");
     return `
       ${dentroBox?"":`<div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:4px">

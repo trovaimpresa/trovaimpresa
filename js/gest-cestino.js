@@ -831,7 +831,10 @@
     gest_foto:"foto e documenti", gest_video:"video", gest_note:"note",
     gest_fattura_righe:"righe della fattura", gest_preventivo_righe:"righe del preventivo",
     gest_fattura_lavori:"collegamenti fattura-lavoro", gest_lavoro_mezzi:"mezzi usati",
-    gest_carte_movimenti:"movimenti della carta", gest_rifornimenti:"rifornimenti"
+    gest_carte_movimenti:"movimenti della carta", gest_rifornimenti:"rifornimenti",
+    /* 13 nov 2026 (quarto giro) — tre nomi di tabella uscivano a schermo */
+    gest_sal:"stati di avanzamento", gest_sal_righe:"righe dello stato di avanzamento",
+    gest_preventivi_link:"link mandati al cliente", gest_analisi_righe:"righe dell'analisi dei prezzi"
   };
   function cestElenco(v){
     /* 11 nov 2026 — «1 righe della fattura»: con 1 si usa il singolare */
@@ -844,11 +847,13 @@
       gest_computo_misure:"misura del computo",gest_prezzi_propri:"voce del tuo elenco prezzi",
       gest_rapportini:"rapportino di cantiere",gest_foto:"foto o documento",gest_video:"video",gest_note:"nota",
       gest_fattura_lavori:"collegamento fattura-lavoro",gest_lavoro_mezzi:"mezzo usato",
-      gest_carte_movimenti:"movimento della carta",gest_rifornimenti:"rifornimento"};
-    return (v||[]).map(function(x){return "\u2022 "+x.n+" "+((+x.n===1&&UNO[x.tabella])||CEST_NOMI[x.tabella]||x.tabella);}).join("\n");
+      gest_carte_movimenti:"movimento della carta",gest_rifornimenti:"rifornimento",
+      gest_sal:"stato di avanzamento",gest_sal_righe:"riga dello stato di avanzamento",
+      gest_preventivi_link:"link mandato al cliente",gest_analisi_righe:"riga dell'analisi dei prezzi"};
+    return (v||[]).map(function(x){return "\u2022 "+x.n+" "+((+x.n===1&&UNO[x.tabella])||CEST_NOMI[x.tabella]||(+x.n===1?"altra cosa collegata":"altre cose collegate"));}).join("\n");
   }
 
-  async function cestDefinitivo(i){
+  async function cestDefinitivo(i,_secondoGiro){
     const x=cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
 
@@ -891,6 +896,22 @@
         +"Se \u00e8 sbagliata, la strada giusta \u00e8 la nota di credito.");
       return;
     }
+    /* 13 nov 2026 (quarto giro) — UN LAVORO CON ORE E SPESE. Prima rifiutava:
+       bisognava rimetterlo a posto e buttare ore e spese una per una. Le ore
+       e le spese sono pezzi del lavoro: si chiede una volta sola, col conto
+       di cosa se ne va, e se dice Sì si buttano insieme. Solo per ore e
+       spese: se c'e' collegato altro (una fattura, un preventivo) resta il
+       rifiuto di prima. */
+    if(prova.ok===false && !_secondoGiro && x.tab==="gest_lavori" && (prova.vivi||[]).length
+       && prova.vivi.every(function(v){return v.tabella==="gest_ore"||v.tabella==="gest_spese";})){
+      if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nHa ancora dentro:\n"
+        +cestElenco(prova.vivi)+"\n\nSe ne vanno anche loro. Questa volta sparisce davvero e non si recupera pi\u00f9.")))return;
+      for(const v of prova.vivi){
+        const r=await sb.from(v.tabella).delete().eq("user_id",sbUid).eq("lavoro_id",x.id).select("id");
+        if(r.error){toast("Non eliminato: "+r.error.message);return;}
+      }
+      return cestDefinitivo(i,true);
+    }
     if(prova.ok===false){
       tiAvviso("Non posso eliminare \u00ab"+x.nome+"\u00bb per sempre.\n\n"
         +"Ci sono ancora collegate delle cose che NON sono nel cestino:\n"
@@ -900,14 +921,14 @@
     }
 
     const insieme=(prova.anteprima||[]).length
-      ? "\n\nInsieme a lei se ne va (\u00e8 gi\u00e0 tutto nel cestino):\n"+cestElenco(prova.anteprima)
+      ? "\n\nInsieme se ne va anche (\u00e8 gi\u00e0 tutto nel cestino):\n"+cestElenco(prova.anteprima)
       : "";
     /* le righe che sopravvivono ma perdono il riferimento: non bloccano, ma
        l'utente deve saperlo prima, non scoprirlo dopo su una fattura senza cliente */
     const scoll=(prova.scollegate||[]).length
       ? "\n\nQueste restano ma perdono il collegamento:\n"+cestElenco(prova.scollegate)
       : "";
-    if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?"+insieme+scoll
+    if(!_secondoGiro&&!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?"+insieme+scoll
         +"\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9.")))return;
 
     const {data:fatto,error}=await sb.rpc("gest_cestino_elimina",

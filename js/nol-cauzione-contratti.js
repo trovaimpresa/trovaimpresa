@@ -151,7 +151,7 @@
     ["Uso","L'attrezzatura va usata solo per l'impiego a cui è destinata, nel luogo indicato, da personale formato e — dove previsto — abilitato. È vietato modificarla o manometterne i dispositivi di sicurezza."],
     ["Custodia","La custodia è a carico del Conduttore per tutta la durata del noleggio, compresi i giorni di fermo e di non utilizzo."],
     ["Manutenzione","Sono a carico del Conduttore i controlli giornalieri, i rabbocchi e i materiali di consumo. La manutenzione programmata resta a carico del Locatore."],
-    ["Guasti","Il Conduttore avvisa subito il Locatore e sospende l'uso. Il guasto da normale usura non si addebita; quello da uso improprio si."],
+    ["Guasti","Il Conduttore avvisa subito il Locatore e sospende l'uso. Il guasto da normale usura non si addebita; quello da uso improprio sì."],
     ["Danni e smarrimento","⚠️ Al rientro si confronta lo stato con quello della consegna. I danni eccedenti la normale usura, e lo smarrimento, sono a carico del Conduttore al valore di riparazione o di sostituzione."],
     ["Cauzione","La cauzione viene restituita al rientro, dopo il controllo, al netto di eventuali danni e importi non pagati."],
     ["Ritardo nella riconsegna","⚠️ Oltre la data di rientro concordata il noleggio continua alla stessa tariffa, senza bisogno di ulteriore accordo, salvo il maggior danno."],

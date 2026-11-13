@@ -383,7 +383,7 @@
           click:{action:"edit-job",data:{id:l.id}},
           celle:[
             `<span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span>`
-              +((_praPro&&l.pratica_tipo)?`<span class="pra-tag">${esc(l.pratica_tipo)}</span>`:""),
+              +((_praPro&&l.pratica_tipo)?`<span class="pra-tag">${esc(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)}</span>`:""),
             cellaCliente(cliName[l.cliente_id],l.dove),
             {h:q.testo,cls:q.classe},
             _praPro?(_staPra?esc(_staPra):"\u2014"):esc(opName[l.operatore_id]||"\u2014"),
