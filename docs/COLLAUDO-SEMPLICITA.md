@@ -2186,3 +2186,42 @@ Nel sorgente `?v=13nov9` 8 volte nell'App, css `?v=13nov8`, `azAlbo` in gest-azi
 - NON provati dal vivo: l'albo dentro i PDF (il giro e l'account vero non hanno l'albo scritto: provato solo col banco);
   la lettera d'incarico nel giro (si ferma perché il giro non ha la polizza: giusto così; provata col banco); la fattura dello
   studio con l'albo (banco); il Salva vero dell'albo e del traguardo (sull'account vero di uno studio); il telefono vero.
+
+## 13 nov 2026 (notte) — lista «MANCA», GRUPPO 6: l'email vera col PDF (voce 8)
+Caselle: `[x]` fatto e provato col banco · `[~]` fatto, manca un pezzo · `[ ]` da fare.
+
+Risposta su Resend data ad Alex e approvata (21:27): →1← email per invio (niente copia all'impresa), tetti →5← al giorno
+per impresa e →20← al giorno per tutto il sito, quota finita = l'email NON parte e NON si mette da parte per domani.
+Contatore di Resend alle 21:30: →19← su →100← oggi (12 mandate, 7 ricevute), →871← su →3.000← nel mese.
+Foto viste da Alex (ok alle 21:40): finestra «Invia al cliente» prima/dopo (conferma, mandata, email finite), computer
+1440 e telefono 375, e l'email che riceve il cliente.
+
+[x] 8. Email vera col PDF allegato.
+   - Dove si preme: «Invia al cliente» → «Email con PDF» (al posto di «Email») → riquadro «Manda per email» (a chi va,
+     nome dell'allegato, link per firmare, dove arriva la risposta) → «Sì, manda». Esiti nel riquadro: verde «Mandata a …
+     alle …, col PDF allegato. Oggi puoi mandarne ancora N»; giallo per cliente senza email, Dati azienda senza nome o
+     P.IVA (sarebbe una BOZZA), email del giorno finite, errore. Il vecchio mailto resta come «Il tuo programma di posta»
+     accanto a WhatsApp. Sotto i pulsanti: «Ultima email mandata a … il …».
+   - Il PDF è lo STESSO di «Scarica PDF»: `prevPdf(id,{blob:true,p})` in js/gest-documenti-pdf.js restituisce
+     {blob,nome,bozza,mancano} invece di scaricarlo. Il browser lo carica in `gestionale-foto/<uid>/email-documenti/`.
+   - Server nuovo `netlify/functions/invia-preventivo-email.js`. NON si fida del browser: gettone → utente; preventivo
+     suo; destinatario = email del cliente del preventivo letta da `gest_clienti`; testo fisso scritto lì (titolo e nome
+     impresa disinnescati: niente HTML, niente link estranei); file nella sua cartella, `%PDF-`, ≤ 5 MB; tetti contati in
+     `gest_email_documenti`; dopo l'invio il PDF si cancella dal deposito (anche quando non parte).
+     Mittente «"Nome impresa" <info@trovaimpresa.com>», risposta all'email dei Dati azienda. Niente riga «con TrovaImpresa».
+     Quota di Resend finita (429 «quota») → `codice:'quota'`, niente registro, niente coda.
+   - Tabella nuova `gest_email_documenti` (`sql/email-documenti.sql`, migrazione `email_documenti_13nov2026` PASSATA, riga
+     in PROVE di js/fondatore.js). La scrive solo il server; il browser legge le sue.
+   - ⚠️ Limite voluto: la può usare solo il TITOLARE (il server confronta il preventivo e la cartella con l'utente che
+     chiama). Un collaboratore riceve «Preventivo non trovato».
+   - Fattura: oggi non esiste un «manda al cliente» per le fatture, quindi fuori.
+
+**Attrezzi**
+- Banco nuovo `node tools/banco-email-pdf.js` (`server` / `pagina`): 27 prove sulla funzione (Supabase e Resend finti) +
+  11 per larghezza sulla finestra vera (1440 e 375, PDF vero di jsPDF da /tmp/banco) = →49←. Sulla versione di PRIMA: rosso
+  (la funzione e il pulsante non ci sono). Sabotaggi accusati: destinatario preso dal browser, tetto per impresa tolto.
+- Versioni `?v=13nov10` su gest-invia-cliente.js, gest-documenti-pdf.js, fondatore.js (App e Noleggio).
+
+**Provato col banco**: banco-email-pdf VERDE (49), banco-gestionale App e Noleggio ZERO difetti (1440/375/360),
+banco-soldi (36), banco-preventivo (38), banco-noleggio (31), banco-gruppo4 (59), banco-gruppo5 (34), banco-correttore e
+banco-copia-computo zero difetti; controllo-push «tutto a posto». Database: tabella `gest_email_documenti` creata.

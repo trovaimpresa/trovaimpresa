@@ -32,9 +32,14 @@
      verbaleForm · verbalePdf
      ============================================================ */
 
-  async function prevPdf(id){
+  /* 13 nov 2026 (lista «MANCA», n. 8): con opz.blob il PDF NON si scarica:
+     torna {blob, nome, bozza, mancano} per l'email col PDF allegato
+     (js/gest-invia-cliente.js). Il foglio e' lo stesso identico di «Scarica PDF».
+     opz.p serve quando il preventivo non e' in prevCache (aperto dal capitolato). */
+  async function prevPdf(id,opz){
+    opz=opz||{};
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
-    const p=prevCache.find(x=>x.id===id);if(!p)return;
+    const p=prevCache.find(x=>x.id===id)||opz.p;if(!p)return;
     const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     /* ⚠️ IL MURO ALLA FINE — tolto il 14 agosto 2026.
        Qui c'era: niente Dati azienda, niente PDF. Lo stop arrivava nel
@@ -230,7 +235,12 @@
     /* «BOZZA» sta anche nel NOME DEL FILE: e' quello che si legge nella
        cartella dei download e nell'allegato dell'email, cioe' l'ultimo
        posto in cui ci si puo' ancora accorgere prima di mandarlo. */
-    doc.save((_bozza?"BOZZA-":"")+(isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    const _nomeFile=(_bozza?"BOZZA-":"")+(isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
+    if(opz.blob){
+      return {blob:doc.output("blob"),nome:_nomeFile,bozza:_bozza,
+        mancano:[_mancaAz?"il nome dell'attività":"",_mancaPiva?"la partita IVA":""].filter(Boolean).join(" e ")};
+    }
+    doc.save(_nomeFile);
     if(_bozza){
       toast("Scaricato, ma è una BOZZA: senza "
         +[_mancaAz?"il nome dell'attività":"", _mancaPiva?"la partita IVA":""].filter(Boolean).join(" e ")

@@ -294,6 +294,7 @@
     "gest-scelte.sql":                  "gest_scelte gest_scelte_link gest_scelte_controlla_lavoro()",
     "gest-preventivi-link.sql":         "gest_preventivi_link gest_preventivi_link_controlla()",
     "firma-sms.sql":                    "gest_firme_sms",
+    "email-documenti.sql":              "gest_email_documenti",
     "segnala-chat.sql":                 "segnalazioni.tipo segnalazioni.riferimento segnalazioni.da segnalazioni.avvisata_il segnala_chat()",
     "piva-verificata.sql":              "imprese.piva_stato imprese.piva_controllata_il imprese.piva_nome imprese_proteggi_verifica()",
     "gest-mie-giornate.sql":            "gest_mie_giornate()",

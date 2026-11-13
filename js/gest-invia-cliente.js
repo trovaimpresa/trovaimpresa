@@ -186,9 +186,10 @@
     }
     /* aperta dal capitolato: i capitolati vanno dentro (se il cliente non ha gia' firmato) */
     if(opz.capitolati&&!(link&&link.firmato_il)) caps.forEach(function(c){ sel.caps[c.id]=true; });
-    _inv={p:p,righe:(res[0].data||[]),az:res[1].data||{},cli:res[2]||{},link:link,caps:caps,sel:sel,cambiato:false,sms:null,smsFatta:null,smsOk:true};
+    _inv={p:p,righe:(res[0].data||[]),az:res[1].data||{},cli:res[2]||{},link:link,caps:caps,sel:sel,cambiato:false,sms:null,smsFatta:null,smsOk:true,mail:null,mailUltimo:null,mailMio:""};
     if(!(await salvaFoto())) return;
     await smsLeggi();
+    await mailLeggi();
     invDisegna();
   }
 
@@ -233,9 +234,10 @@
       +  '<button type="button" class="aic-btn aic-btn--pieno" data-action="inv-copia">'+_AIC_SVG.copia+'<span>Copia link</span></button></div>'
       +  '<div class="aic-fila" style="margin-top:12px">'
       +    '<button type="button" class="aic-btn" data-action="inv-wa">'+_AIC_SVG.wa+'<span>WhatsApp</span></button>'
-      +    '<button type="button" class="aic-btn" data-action="inv-email"><svg class="aic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg><span>Email</span></button>'
+      +    '<button type="button" class="aic-btn" data-action="inv-mail-apri"'+(_inv.mail&&_inv.mail.stato==="invio"?' disabled':'')+'>'+SVG_MAIL+'<span>Email con PDF</span></button>'
       +    '<button type="button" class="aic-btn" data-action="inv-pdf">'+_AIC_SVG.file+'<span>PDF</span></button>'
       +  '</div>'
+      +  '<div id="inv-mail">'+mailHtml()+'</div>'
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">Il cliente</div>'+statoHtml()+'</div>'
       +'</div><div class="sh-col">'
@@ -264,6 +266,114 @@
     if(!(await caricaQr())){ box.textContent="Il QR non si carica: controlla la connessione."; return; }
     box.innerHTML="";
     try{ new window.QRCode(box,{text:url,width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M}); }catch(e){}
+  }
+
+  /* =================== L'EMAIL VERA COL PDF (13 nov 2026, lista «MANCA» n. 8) ===================
+     «Email con PDF» → conferma → il gestionale fa lo STESSO PDF di «Scarica PDF»
+     (prevPdf con {blob:true}), lo mette nel deposito privato e chiama
+     netlify/functions/invia-preventivo-email.js. Da qui partono solo il numero del
+     preventivo e il percorso del file: destinatario, testo e controlli li fa il server.
+     Tetti: 5 al giorno per impresa, 20 per tutto il sito (le email di Resend sono
+     100 al giorno per tutto il sito, conferme d'iscrizione comprese).
+     Quando non si può mandare, si dice perché e si offrono WhatsApp e il programma
+     di posta (il vecchio mailto, che resta). */
+  var SVG_MAIL='<svg class="aic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
+  function mailNomeFile(){
+    var p=_inv.p, c=_inv.cli||{};
+    return (ruoloUtente==="professionista"?"parcella-":"preventivo-")+(p.numero||"")+"-"+String(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
+  }
+  function mailRisposte(){ return T(_inv.az.email)||T(_inv.mailMio)||""; }
+  function mailAltre(){
+    return '<div class="aic-fila" style="margin-top:10px">'
+      +'<button type="button" class="aic-btn" data-action="inv-wa">'+_AIC_SVG.wa+'<span>WhatsApp</span></button>'
+      +'<button type="button" class="aic-btn" data-action="inv-email">'+SVG_MAIL+'<span>Il tuo programma di posta</span></button></div>';
+  }
+  function mailHtml(){
+    var m=_inv.mail||{}, s=m.stato, a=T(_inv.cli&&_inv.cli.email);
+    var ultimo=_inv.mailUltimo?'<div class="campo-aiuto" style="margin-top:10px">Ultima email mandata a '+esc(_inv.mailUltimo.a)+' il '+esc(oraIt(_inv.mailUltimo.creato_il))+'.</div>':'';
+    if(s==="conferma"||s==="invio"){
+      var r=mailRisposte();
+      return '<div class="aic-banda" style="margin-top:12px;background:#fff;border:1.5px solid var(--blu,#0066ff)">'
+        +'<div style="font-weight:700;font-size:17px;margin-bottom:8px">Manda per email</div>'
+        +'<div style="margin:4px 0"><b>A:</b> '+esc(a)+'</div>'
+        +'<div style="margin:4px 0"><b>Allegato:</b> '+esc(mailNomeFile())+'</div>'
+        +'<div style="margin:4px 0"><b>Nel testo:</b> il link per vederlo e firmarlo dal telefono</div>'
+        +(r?'<div class="campo-aiuto" style="margin-top:6px">Se il cliente risponde, la risposta arriva a '+esc(r)+'.</div>':'')
+        +'<div class="aic-fila" style="margin-top:12px">'
+        +  '<button type="button" class="aic-btn" data-action="inv-mail-annulla"'+(s==="invio"?' disabled':'')+'>Annulla</button>'
+        +  '<button type="button" class="aic-btn aic-btn--pieno" data-action="inv-mail-manda"'+(s==="invio"?' disabled':'')+'>'+SVG_MAIL+'<span>'+(s==="invio"?"Sto mandando…":"Sì, manda")+'</span></button>'
+        +'</div></div>';
+    }
+    if(s==="mandato"){
+      return '<div class="aic-banda aic-banda--ok" style="margin-top:12px"><b>Mandata a '+esc(m.a)+'</b> alle '+esc(m.ora)+', col PDF allegato.'
+        +(m.restano!=null?'<div style="margin-top:4px">Oggi puoi mandarne ancora '+m.restano+'.</div>':'')+'</div>';
+    }
+    if(s==="senza"){
+      return '<div class="aic-banda aic-banda--attesa" style="margin-top:12px"><b>Il cliente non ha l\'email.</b> Scrivila nella sua scheda in Clienti, poi riprova.'
+        +mailAltre()+'</div>';
+    }
+    if(s==="bozza"){
+      return '<div class="aic-banda aic-banda--attesa" style="margin-top:12px"><b>Il PDF è ancora una bozza:</b> mancano '+esc(m.mancano||"")+' nei Dati azienda. Una bozza non si manda al cliente.'
+        +'<div class="aic-fila" style="margin-top:10px"><button type="button" class="aic-btn" data-action="azienda">Apri Dati azienda</button></div></div>';
+    }
+    if(s==="finita"){
+      var perche=m.perche==="impresa"?"Oggi hai già mandato 5 email: è il massimo al giorno."
+        :"Oggi le email del sito sono finite.";
+      return '<div class="aic-banda aic-banda--attesa" style="margin-top:12px"><b>'+perche+'</b> Domani si riparte. Intanto mandalo con WhatsApp o col tuo programma di posta.'
+        +mailAltre()+'</div>';
+    }
+    if(s==="errore"){
+      return '<div class="aic-banda aic-banda--attesa" style="margin-top:12px"><b>Non è partita.</b> '+esc(m.testo||"Riprova fra poco.")
+        +mailAltre()+'</div>';
+    }
+    return ultimo;
+  }
+  function mailRidisegna(){
+    var box=document.getElementById("inv-mail"); if(box) box.innerHTML=mailHtml();
+    var b=document.querySelector('[data-action="inv-mail-apri"]'); if(b) b.disabled=!!(_inv.mail&&_inv.mail.stato==="invio");
+  }
+  async function mailLeggi(){
+    _inv.mailUltimo=null;
+    try{ var ss=await sb.auth.getSession(); _inv.mailMio=ss&&ss.data&&ss.data.session&&ss.data.session.user&&ss.data.session.user.email||""; }catch(e){}
+    try{
+      var r=await sb.from("gest_email_documenti").select("a,creato_il").eq("preventivo_id",_inv.p.id).eq("user_id",sbUid)
+        .order("creato_il",{ascending:false}).limit(1);
+      if(!r.error&&r.data&&r.data[0]) _inv.mailUltimo=r.data[0];
+    }catch(e){}
+  }
+  function mailApri(){
+    if(!_inv.sel.prev){ toast("L'email porta il PDF del preventivo: spunta il preventivo in «Cosa mandi»"); return; }
+    if(!T(_inv.cli&&_inv.cli.email)){ _inv.mail={stato:"senza"}; mailRidisegna(); return; }
+    var manca=[!T(_inv.az.nome)?"il nome dell'attività":"",!T(_inv.az.piva)?"la partita IVA":""].filter(Boolean);
+    if(manca.length){ _inv.mail={stato:"bozza",mancano:manca.join(" e ")}; mailRidisegna(); return; }
+    _inv.mail={stato:"conferma"}; mailRidisegna();
+  }
+  async function mailManda(){
+    if(!_inv.mail||_inv.mail.stato!=="conferma") return;
+    _inv.mail={stato:"invio"}; mailRidisegna();
+    var fine=function(m){ _inv.mail=m; mailRidisegna(); };
+    try{
+      var pdf=await window.prevPdf(_inv.p.id,{blob:true,p:_inv.p});
+      if(!pdf||!pdf.blob) return fine({stato:"errore",testo:"Non riesco a fare il PDF: controlla la connessione."});
+      if(pdf.bozza) return fine({stato:"bozza",mancano:pdf.mancano});
+      var percorso=sbUid+"/email-documenti/"+_inv.p.id+"-"+Date.now()+".pdf";
+      var up=await sb.storage.from("gestionale-foto").upload(percorso,pdf.blob,{contentType:"application/pdf",upsert:false});
+      if(up.error) return fine({stato:"errore",testo:"Il PDF non si carica: "+(up.error.message||"riprova")});
+      var ss=await sb.auth.getSession(), tk=ss&&ss.data&&ss.data.session&&ss.data.session.access_token;
+      var r=await fetch("/.netlify/functions/invia-preventivo-email",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+(tk||"")},
+        body:JSON.stringify({preventivo_id:_inv.p.id,percorso:percorso,nome_file:pdf.nome})});
+      var j=await r.json().catch(function(){ return {}; });
+      if(r.ok&&j.ok){
+        var d=new Date();
+        _inv.mailUltimo={a:j.a,creato_il:d.toISOString()};
+        fine({stato:"mandato",a:j.a,ora:String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"),restano:j.restano});
+        segnaInviato(); return;
+      }
+      if(j.codice==="senza_email") return fine({stato:"senza"});
+      if(j.codice==="impresa"||j.codice==="sito"||j.codice==="quota") return fine({stato:"finita",perche:j.codice});
+      return fine({stato:"errore",testo:j.error||"Riprova fra poco."});
+    }catch(e){ fine({stato:"errore",testo:"Problema di rete: riprova fra poco."}); }
   }
 
   /* quando lo mandi, se era una bozza diventa «Inviato» */
@@ -460,6 +570,9 @@
       location.href="mailto:"+mail.replace(/[^A-Za-z0-9.@_+-]/g,"")+"?subject="+encodeURIComponent(ogg)+"&body="+encodeURIComponent(testoMessaggio());
       segnaInviato(); return;
     }
+    if(a==="inv-mail-apri"){ mailApri(); return; }
+    if(a==="inv-mail-annulla"){ _inv.mail=null; mailRidisegna(); return; }
+    if(a==="inv-mail-manda"){ mailManda(); return; }
     if(a==="inv-pdf"){ if(typeof prevControllaEManda==="function") prevControllaEManda(_inv.p.id); return; }
     if(a==="inv-qr-stampa"){ stampaQr(); segnaInviato(); return; }
     if(a==="inv-nuova"){ versioneNuova(); return; }
