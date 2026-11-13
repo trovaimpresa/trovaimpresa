@@ -1672,7 +1672,7 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
 [x] 3. Studio tecnico, variante del computo: la copia non porta le righe
    dell'analisi dei prezzi (gest_analisi_righe), il prezzo diventa 0,00 €
    e la variante esce «−100%». Guarda anche «Duplica».
-[ ] 4. Telefono, Chat con AI: «Manda» e «Parla» stanno sotto la barra in basso,
+[x] 4. Telefono, Chat con AI: «Manda» e «Parla» stanno sotto la barra in basso,
    si vedono solo scorrendo la pagina.
 [x] 5. Noleggio: dopo «Elimina» la finestra resta aperta (nolElimina in
    js/nol-card-righe-stampa.js non la chiude). Premendo «Salva» dice
@@ -1755,3 +1755,4 @@ Caselle: `[ ]` da fare · `[x]` corretto e provato · `[-]` non fatto (col perch
 - **6** `renderPreventivi` in `js/gest-ore-spese.js`: «IVA esclusa» è l'imponibile DOPO lo sconto (`impNetto`, da `prevContiImpresa`), nella riga, nella scheda del telefono e nel totale in cima.
 - **4** (Chat con AI sul telefono): riprodotto su un telefono corto (375×560: «Manda» a 547 px, la barra in basso comincia a 493). Foto prima/dopo mandata ad Alex, **in attesa del suo ok**. Proposta: sul telefono la colonna della chat è alta quanto lo schermo libero, i messaggi scorrono dentro, casella e pulsanti restano sopra la barra.
 - Attrezzo nuovo: `node tools/foto-gestionale.js <app|noleggio> <sezione> <larghezza> <file.png> [css-di-prova]` — le foto «come viene» col sito e il database finti del banco.
+- **4, ok di Alex sulla foto (13 nov, 06:05) — fatto** in `css/gestionale.css`: sotto gli 880 px `#chat .chat-col` è alta `100dvh − 284px`, i messaggi scorrono dentro. Misurato col file vero su 4 telefoni (375×560, 375×700, 360×640, 390×844): «Manda» finisce sempre 18 px sopra la barra. Banco dell'App: zero difetti.
