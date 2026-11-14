@@ -2475,3 +2475,9 @@ Netlify: pubblicato. Account info@, reparto «ferramenta», tutto col nome «PRO
 **Pulizia.** Lavoro, ore, spese, rapportino, preventivo (con riga e link), cliente, persona: eliminati anche dal Cestino
 (il Cestino di «ferramenta» è vuoto). Resta da togliere →1← riga del registro email (`gest_email_documenti`): il database
 ha chiesto la conferma ad Alex e non è arrivata in tempo.
+
+### 14 nov 2026 (19:45) — dopo il secondo push (commit →8df5099←)
+- [x] **3 Cestino, la cosa giusta.** Provato sul sito vero: lavoro «PROVA CONTROLLORE lavoro 2» con 2 spese e 1 rapportino
+  vivi → nel Cestino → «Elimina per sempre» → Sì: via il lavoro, le spese e il rapportino, Cestino vuoto, nient'altro toccato.
+- **Pulizia finale, contata dal database:** lavori, ore, spese, rapportini, clienti, persone, preventivi, righe, link,
+  registro email, file dell'email = →0←. (La riga del registro email tolta alle 19:45 con la conferma di Alex.)
