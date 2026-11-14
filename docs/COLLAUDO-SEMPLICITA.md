@@ -2253,6 +2253,29 @@ dei lavori», «Il Committente» tutte a pagina 1, la stessa dei conti (Importo 
 di garanzia 0,5%, NETTO DA PAGARE); cliente «PROVA CONTROLLORE / 02100 Rieti (RI)». Nome del file «BOZZA-SAL-1-…» (il SAL
 era in bozza: giusto). Poi computo, voce, SAL e righe tolti per sempre → →0←.
 
-**B. Studio tecnico con l'albo** — [ ] aspetta l'account da studio di prova di Alex.
-**C. App dell'operaio, «Le voci del lavoro»** — [ ] aspetta che Alex si inviti come operaio.
+**B. Studio tecnico con l'albo — [x] PASSATA dal vivo** (14 nov, 03:20). Account di prova creato da Alex con
+rieticitta@gmail.com dalla porta del gestionale (`registrazione-professionista.html?da=gestionale`, scheda pubblica spenta).
+- Dati azienda dal modulo vero → «Salva»: nel database `albo_nome` «Collegio dei Geometri di Rieti», `albo_numero`
+  «PROVA-123», polizza di prova (compagnia, numero, massimale, scadenza 2027-12-31). Niente IBAN, niente P.IVA.
+- Parcella con ritenuta (cliente «azienda», cassa 5%, IVA 22%, 1.000 €), PDF letto senza scaricarlo: riga
+  «Collegio dei Geometri di Rieti, n. PROVA-123»; 1.000,00 · cassa 50,00 · imponibile 1.050,00 · IVA 231,00 · Totale
+  documento 1.281,00 · ritenuta − 200,00 · NETTO 1.081,00 (giusto). Il PDF esce come BOZZA perché manca la P.IVA: voluto.
+- Lettera d'incarico: →2← pagine, albo due volte (in testa e fra i dati del professionista), polizza dentro.
+- Scheda pratica PDF: albo + «Dati della pratica» (CILA · Depositata · PROVA/1 · Depositata il 10/11/2026).
+- Pulizia: preventivi, righe, link, pratiche e clienti a →0←; albo e polizza svuotati. L'account rieticitta resta (vuoto).
+- ⚠️ TROVATO: chi entra dalla PORTA DEL GESTIONALE viene fermato da «Completa il profilo per aprire il gestionale»
+  (gate-gestionale.js, `VOCI_PROFILO`): chiede mestiere, città, telefono, descrizione ≥ 100 caratteri e LOGO, anche se la
+  sua scheda pubblica è spenta. Per la prova la scheda dell'account di prova è stata riempita a mano (vetrina sempre spenta).
+  E `gest_prova_fine` è nata vuota. Da decidere con Alex: per chi viene dalla porta del gestionale forse bastano nome ed
+  email confermata.
+
+**C. App dell'operaio, «Le voci del lavoro» — [x] PASSATA dal vivo, sul TELEFONO VERO di Alex** (14 nov, 03:29).
+Da Squadra in «ferramenta» (account info@): «PROVA CONTROLLORE Operaio» (operaio, permessi di base, codice d'invito).
+Alex si è registrato dal suo iPhone con pintoluzemilia@gmail.com dal link d'invito. Lavoro di oggi assegnato a lui +
+preventivo collegato con una sezione e due voci con prezzo. Foto di Alex: «Le voci del lavoro» → «PROVA CONTROLLORE
+Demolizioni» (sezione), «togliere le piastrelle 12 m²», «portare via le macerie 1 a corpo»: NESSUN prezzo.
+Visto e non toccato: nella lista «Lavori di adesso» la scheda ha come titolo «Rieti» (il luogo) e non il cliente, perché
+l'operaio non ha il permesso «clienti».
+Pulizia: persona tolta da Squadra (gest_operatori + gest_membri), lavoro, preventivo, righe e cliente → →0←. L'account
+pintoluzemilia resta, senza impresa collegata.
 **D. IBAN e fattura emessa** — non toccate, come chiesto: restano provate solo col banco.
