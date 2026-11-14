@@ -444,6 +444,28 @@
   .cc-freccia { align-self:center; font-size:2.2rem; color:var(--light); }
   .cc-nota { color:var(--mid); font-size:1.02rem; margin-top:14px; }
   @media(max-width:1100px){ .cc-grid { flex-direction:column; } .cc-freccia { transform:rotate(90deg); } }
+  /* 14 nov 2026 - «Clienti per categoria» */
+  .cpc-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+  .cpc-tabs .rqa-f{font-size:18px;padding:12px 22px}
+  .cpc-per{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .cpc-per .rqa-f{font-size:16px}
+  .cpc-tab{width:100%;border-collapse:collapse;font-size:18px}
+  .cpc-tab th{text-align:left;color:#5b6b80;font-weight:700;padding:10px;border-bottom:2px solid #e2e8f0}
+  .cpc-tab td{padding:13px 10px;border-bottom:1px solid #eef2f7}
+  .cpc-tab td:first-child{font-weight:700}
+  .cpc-tab .top{color:#0066ff;font-weight:800}
+  .cpc-tab .neg{color:#b3261e;font-weight:800}
+  .cpc-due{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
+  .cpc-graf{display:flex;align-items:flex-end;gap:10px;height:200px;margin-top:34px;border-bottom:2px solid #e2e8f0}
+  .cpc-bar{flex:1;background:#0066ff;border-radius:6px 6px 0 0;position:relative;min-height:2px}
+  .cpc-bar i{position:absolute;top:-24px;left:0;right:0;text-align:center;font-style:normal;font-size:15px;font-weight:700}
+  .cpc-lab{display:flex;gap:10px;margin-top:6px}.cpc-lab span{flex:1;text-align:center;font-size:13px;color:#5b6b80}
+  .cpc-li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #eef2f7;font-size:18px}
+  .cpc-li small{color:#5b6b80;font-size:15px}
+  .cpc-pill{background:#e8f0ff;color:#0066ff;border-radius:20px;padding:4px 12px;font-weight:800;font-size:16px;white-space:nowrap}
+  .cpc-rosso{background:#fff1f2;border-color:#fecdd3 !important}
+  .cpc-rosso .cpc-pill{background:#ffe4e6;color:#b3261e}
+  @media(max-width:900px){.cpc-due{grid-template-columns:1fr}.cpc-tab{font-size:15px}.cpc-tab th,.cpc-tab td{padding:8px 5px}}
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <style>
@@ -632,6 +654,10 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       <div class="nav-item" onclick="showSection('clienti-cercano',this)">
         <span class="nav-icon">📈</span> Clienti che cercano
       </div>
+      <!-- 14 novembre 2026 - artigiani, imprese e professionisti divisi. -->
+      <div class="nav-item" onclick="showSection('clienti-categoria',this)">
+        <span class="nav-icon">📊</span> Clienti per categoria
+      </div>
       <!-- 27 ottobre 2026 - i clienti che lasciano l'email nel riquadro «Avvisami gratis» delle ricerche. -->
       <div class="nav-item" onclick="showSection('clienti-iscritti',this)">
         <span class="nav-icon"><svg class="ti-ic ti-ic-solo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span> Clienti iscritti
@@ -778,6 +804,25 @@ body .stat-card,body .chart-card,body .table-wrap,body .cre-card,body .loc-card,
       </div>
       <p class="cc-nota">Si contano le <b>persone</b>, non i clic: chi cerca dieci volte vale uno.</p>
       <p class="cc-nota" id="cc-dal"></p>
+    </div>
+
+    <!-- CLIENTI PER CATEGORIA (14 novembre 2026) - legge admin-clienti-categoria.js -->
+    <div class="section" id="sec-clienti-categoria">
+      <div class="topbar">
+        <div class="topbar-title">📊 Clienti per categoria</div>
+      </div>
+      <div class="cpc-tabs" id="cpc-tabs">
+        <button type="button" class="rqa-f on" onclick="cpcVista('confronto',this)">⚖️ A confronto</button>
+        <button type="button" class="rqa-f" onclick="cpcVista('artigiano',this)">🔧 Artigiani</button>
+        <button type="button" class="rqa-f" onclick="cpcVista('impresa',this)">🏗️ Imprese</button>
+        <button type="button" class="rqa-f" onclick="cpcVista('professionista',this)">📐 Professionisti</button>
+      </div>
+      <div class="cpc-per" id="cpc-per">
+        <button type="button" class="rqa-f" onclick="cpcPeriodo(7,this)">7 giorni</button>
+        <button type="button" class="rqa-f on" onclick="cpcPeriodo(30,this)">30 giorni</button>
+        <button type="button" class="rqa-f" onclick="cpcPeriodo(0,this)">Da sempre</button>
+      </div>
+      <div id="cpc-corpo"><div class="loading">Caricamento...</div></div>
     </div>
 
     <!-- DASHBOARD -->
@@ -2207,6 +2252,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'chientra') caricaChiEntra();
   if (id === 'ricerche') caricaRicerche();
   if (id === 'clienti-cercano') caricaClientiCercano();
+  if (id === 'clienti-categoria') caricaCategorie();
   if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
@@ -3644,6 +3690,98 @@ function ccPeriodo(g, el){
   document.querySelectorAll('#cc-per .rqa-f').forEach(b => b.classList.remove('on'));
   if(el) el.classList.add('on');
   caricaClientiCercano();
+}
+
+/* 14 novembre 2026 - «Clienti per categoria». Artigiani, imprese e
+   professionisti divisi: visite alle schede, ricerche, contatti, preventivi,
+   chat, andamento per settimana, cosa guardano, cosa cercano e cosa cercano
+   senza trovarlo. Legge admin-clienti-categoria (funzione SQL
+   admin_clienti_categoria, solo service role). */
+let _cpcGiorni = 30, _cpcVista = 'confronto', _cpcDati = null;
+const _CPC = { artigiano:'🔧 Artigiani', impresa:'🏗️ Imprese', professionista:'📐 Professionisti' };
+async function caricaCategorie(){
+  const box = document.getElementById('cpc-corpo');
+  if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try{
+    const res = await fetch('/.netlify/functions/admin-clienti-categoria', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP, giorni: _cpcGiorni })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    _cpcDati = j.data || {};
+    disegnaCategorie();
+  }catch(e){
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _uEsc(e.message) + '</div>';
+  }
+}
+function cpcPeriodo(g, el){
+  _cpcGiorni = g;
+  document.querySelectorAll('#cpc-per .rqa-f').forEach(b => b.classList.remove('on'));
+  if(el) el.classList.add('on');
+  caricaCategorie();
+}
+function cpcVista(v, el){
+  _cpcVista = v;
+  document.querySelectorAll('#cpc-tabs .rqa-f').forEach(b => b.classList.remove('on'));
+  if(el) el.classList.add('on');
+  disegnaCategorie();
+}
+function _cpcNome(t){ t = String(t || '').replace(/_/g,' ').trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1) : '—'; }
+function _cpcLista(titolo, righe, vuota, rosso){
+  const dentro = (righe && righe.length)
+    ? righe.map(r => '<div class="cpc-li"><span>' + _uEsc(_cpcNome(r.k)) + (r.dove ? ' <small>a ' + _uEsc(r.dove) + '</small>' : '') + '</span><span class="cpc-pill">' + _rvNum(r.n) + '</span></div>').join('')
+    : '<div style="color:#5b6b80;font-size:16px">' + vuota + '</div>';
+  return '<div class="mv-card' + (rosso ? ' cpc-rosso' : '') + '"><div style="font-size:20px;font-weight:800;margin-bottom:10px' + (rosso ? ';color:#b3261e' : '') + '">' + titolo + '</div>' + dentro + '</div>';
+}
+function disegnaCategorie(){
+  const box = document.getElementById('cpc-corpo');
+  if(!box || !_cpcDati) return;
+  const C = _cpcDati.categorie || {};
+  const per = _cpcGiorni ? 'negli ultimi ' + _cpcGiorni + ' giorni' : 'da quando si conta';
+  const dal = _cpcDati.conta_da ? '<div class="st-nota" style="margin:16px 0 0">Visite e ricerche si contano dal <b>' + new Date(_cpcDati.conta_da).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) + '</b>.</div>' : '';
+
+  if(_cpcVista === 'confronto'){
+    const tipi = ['artigiano','impresa','professionista'];
+    const riga = (nome, chiave, neg) => {
+      const val = tipi.map(t => Number((C[t] || {})[chiave]) || 0);
+      const max = Math.max.apply(null, val);
+      return '<tr><td>' + nome + '</td>' + val.map(v => '<td class="' + (neg ? 'neg' : (v && v === max ? 'top' : '')) + '">' + _rvNum(v) + '</td>').join('') + '</tr>';
+    };
+    box.innerHTML = '<div class="mv-card"><div style="font-size:20px;font-weight:800;margin-bottom:12px">Le tre categorie a confronto, ' + per + '</div>'
+      + '<table class="cpc-tab"><tr><th></th>' + tipi.map(t => '<th>' + _CPC[t] + '</th>').join('') + '</tr>'
+      + riga('Iscritti','iscritti') + riga('Visite alle schede','visite') + riga('Ricerche','ricerche')
+      + riga('Contatti (telefono, WhatsApp, sito, email)','contatti') + riga('Richieste preventivo / incarico','preventivi')
+      + riga('Chat aperte','chat') + riga('Ricerche finite a vuoto','vuote',true)
+      + '</table></div>' + dal;
+    return;
+  }
+
+  const d = C[_cpcVista] || {};
+  const vis = Number(d.visite) || 0, prima = Number(d.visite_prima) || 0;
+  let trend = '';
+  if(_cpcGiorni && (vis || prima)){
+    trend = vis > prima ? '<span style="color:#1b8a3f;font-weight:800">▲</span> erano ' + _rvNum(prima) + ' nel periodo prima'
+          : vis < prima ? '<span style="color:#b3261e;font-weight:800">▼</span> erano ' + _rvNum(prima) + ' nel periodo prima'
+          : 'come nel periodo prima';
+  }
+  const ct = d.contatti_tipo || {};
+  const dettCont = ['telefono','whatsapp','sito','email'].filter(k => ct[k]).map(k => _rvNum(ct[k]) + ' ' + k).join(' · ') || 'telefono, WhatsApp, sito, email';
+  const sett = d.settimane || [];
+  const max = Math.max.apply(null, sett.map(s => Number(s.n) || 0)) || 1;
+  const graf = '<div class="cpc-graf">' + sett.map(s => '<div class="cpc-bar" style="height:' + Math.round((Number(s.n) || 0) / max * 100) + '%"><i>' + _rvNum(s.n) + '</i></div>').join('') + '</div>'
+    + '<div class="cpc-lab">' + sett.map(s => '<span>' + new Date(s.s + 'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short'}) + '</span>').join('') + '</div>';
+
+  box.innerHTML = '<div class="u-numeri">'
+    + '<div class="u-num"><div class="v">' + _rvNum(vis) + '</div><div class="e"><b>Visite alle schede</b><br>' + trend + '</div></div>'
+    + '<div class="u-num viola"><div class="v">' + _rvNum(d.ricerche) + '</div><div class="e"><b>Ricerche</b><br>' + _rvNum(d.vuote) + ' senza risultati</div></div>'
+    + '<div class="u-num verde"><div class="v">' + _rvNum(d.contatti) + '</div><div class="e"><b>Contatti</b><br>' + dettCont + '</div></div>'
+    + '<div class="u-num arancio"><div class="v">' + _rvNum((Number(d.preventivi) || 0) + (Number(d.chat) || 0)) + '</div><div class="e"><b>' + (_cpcVista === 'professionista' ? 'Incarichi e chat' : 'Preventivi e chat') + '</b><br>' + _rvNum(d.preventivi) + (_cpcVista === 'professionista' ? ' incarichi' : ' preventivi') + ' · ' + _rvNum(d.chat) + ' chat</div></div>'
+    + '</div>'
+    + '<div class="cpc-due"><div class="mv-card"><div style="font-size:20px;font-weight:800">Visite alle schede, settimana per settimana</div>' + graf + '</div>'
+    + _cpcLista('Cosa guardano di più', d.guardati, 'Nessuna visita nel periodo.') + '</div>'
+    + '<div class="cpc-due">' + _cpcLista('Cosa cercano di più', d.cercati, 'Nessuna ricerca nel periodo.')
+    + _cpcLista('🔴 Cercato ma non trovato', d.non_trovati, 'Nessuna ricerca a vuoto: bene.', true) + '</div>' + dal;
 }
 
 async function caricaRicerche(){
