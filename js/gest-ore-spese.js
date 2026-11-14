@@ -279,6 +279,34 @@
      ============================================================ */
   const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(_cent2(n));
 
+  /* 14 nov 2026 (quinto giro, n. 2) — le righe sotto il margine che spiegano le
+     ore contate alla media: prima quelle senza nome, poi una riga per ogni
+     persona senza costo orario, col pulsante che apre la sua scheda. */
+  function margineRigheOre(oreSenzaNome,senzaCosto,mediaSquadra){
+    const _h=n=>String(Math.round((+n||0)*100)/100).replace(".",",")+((+n===1)?" ora":" ore");
+    const ids=Object.keys(senzaCosto||{});
+    const diPersone=ids.reduce((s,k)=>s+(+senzaCosto[k]||0),0);
+    const anonime=Math.round(((+oreSenzaNome||0)-diPersone)*100)/100;
+    let out="";
+    if(anonime>0){
+      out+=(mediaSquadra>0
+        ? `<span class="sp-forn" style="flex-basis:100%">${_h(anonime)} senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
+        : `<span class="sp-forn" style="flex-basis:100%">${_h(anonime)} senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`);
+    }
+    ids.forEach(function(k){
+      const p=(dipCache||[]).find(d=>String(d.id)===String(k));
+      const nome=p&&p.nome?String(p.nome):"";
+      const chi=nome?esc(nome):"una persona che non è più in squadra";
+      out+=`<span class="sp-forn marg-senza-costo" style="flex-basis:100%">`
+        +(mediaSquadra>0
+          ? `${_h(senzaCosto[k])} di ${chi}: non ha il costo orario, le conto al costo medio della squadra (${eur2(mediaSquadra)} l'ora).`
+          : `${_h(senzaCosto[k])} di ${chi} non entrano nel margine: non ha il costo orario.`)
+        +(nome?` <button type="button" class="btn marg-scheda" data-action="sq-edit" data-id="${esc(String(k))}">Scrivi il costo orario di ${chi}</button>`:"")
+        +`</span>`;
+    });
+    return out;
+  }
+
   /* ---- SPESE / MARGINE per lavoro ---- */
   let speseLavoroId=null;
   async function renderSpeseBlock(lavoroId,importo){
@@ -289,11 +317,13 @@
        e arriva dal default del DB), quindi se manca la data della spesa si usa quella. */
     /* fornitore_id è arrivato con la Fase 2 dei Fornitori: se la colonna
        manca (migrazione non eseguita) si rilegge senza, niente si rompe */
+    /* 14 nov 2026 (quinto giro, n. 8) — le ultime salvate in cima (regola del
+       10 nov): erano lette dalla piu' vecchia. Il grafico si ordina da se'. */
     let conForn=true;
-    let r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at,fornitore_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
+    let r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at,fornitore_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
     if(r.error&&/fornitore_id/i.test(r.error.message||"")&&/column|schema cache/i.test(r.error.message||"")){
       conForn=false;
-      r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
+      r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
     }
     const sp=r.data||[];
     /* la tendina del fornitore, riempita dall'anagrafica (facoltativa) */
@@ -321,12 +351,13 @@
     /* 12 agosto 2026 — la manodopera entra nel margine: ore x costo orario
        della persona che le ha fatte, media della squadra per le ore senza
        nome. Prima il costo orario si compilava e non serviva a niente. */
-    let md=0, oreSenzaNome=0, mediaSquadra=0, oreLette=true;
+    let md=0, oreSenzaNome=0, mediaSquadra=0, oreLette=true, senzaCosto={};
     try{
       const _l=[{id:lavoroId, ore:_numIt("#j-ore")||0}];
       const _m=await caricaManodopera(curMestiere(),_l);
       md=_m.per[String(lavoroId)]||0;
       oreSenzaNome=_m.senzaNome[String(lavoroId)]||0;
+      senzaCosto=(_m.senzaCosto&&_m.senzaCosto[String(lavoroId)])||{};
       mediaSquadra=(_m.tariffe&&+_m.tariffe.media)||0;
       oreLette=(_m.oreLette!==false);
     }catch(e){ oreLette=false; }
@@ -345,17 +376,14 @@
       /* 12 agosto 2026 (sera) — la riga sotto diceva "contate al costo medio della
          squadra" anche quando la media era ZERO, cioe' quando non le stava contando
          affatto. Adesso il caso "nessun costo orario" ha la sua frase e dice cosa fare. */
-      +(oreSenzaNome
-          ? (mediaSquadra>0
-              ? `<span class="sp-forn" style="flex-basis:100%">${String(oreSenzaNome).replace(".",",")} ore senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
-              /* 12 agosto 2026 (notte) — questa frase diceva "la manodopera non
-                 entra nel margine", e da quando la media si fa sui soli vivi
-                 poteva stare sotto una manodopera che invece c'era eccome (le
-                 ore INTESTATE a qualcuno si contano lo stesso, anche se quel
-                 qualcuno e' nel Cestino). Adesso parla solo delle ore che
-                 riguarda davvero, cioe' quelle senza nome. */
-              : `<span class="sp-forn" style="flex-basis:100%">${String(oreSenzaNome).replace(".",",")} ore senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`)
-          : "")
+      /* 14 nov 2026 (quinto giro, n. 2) — DUE CASI, DUE FRASI. Diceva «7,5 ore
+         senza il nome di chi le ha fatte» anche quando il nome c'era e mancava
+         il costo orario della persona (succede sempre con «＋ Un'altra
+         persona…», che nasce senza costo): mandava a cercare la cosa
+         sbagliata. Adesso le ore davvero senza nome hanno la frase di prima;
+         quelle di una persona senza costo dicono CHI e' e portano alla sua
+         scheda. Il conto e' lo stesso di prima. */
+      +margineRigheOre(oreSenzaNome,senzaCosto,mediaSquadra)
       /* ⛔ 22 agosto 2026 — se le ore non si sono potute leggere il margine
          qui sopra e' scritto SENZA la manodopera, e senza questa riga
          sembrerebbe un margine vero. Meglio saperlo che crederci. */
@@ -418,7 +446,10 @@
                 totale scritto su gest_lavori.ore (le versioni vecchie facevano
                 cosi') non deve valere zero. */
   function costoManodopera(righeOre, lavori, tariffe){
-    const perLav={}, conRighe={}, senzaNome={};
+    /* 14 nov 2026 (quinto giro, n. 2) — «senzaCosto» dice DI CHI sono le ore
+       contate alla media perche' la PERSONA non ha il costo orario (il nome
+       c'e'). Serve solo alla frase sotto il margine: il conto non cambia. */
+    const perLav={}, conRighe={}, senzaNome={}, senzaCosto={};
     (righeOre||[]).forEach(function(o){
       const h=+o.ore||0; if(!h)return;
       const k=String(o.lavoro_id||"");
@@ -427,7 +458,8 @@
       const chi=(o.operatore_id!=null)?String(o.operatore_id):"";
       let c;
       if(chi&&tariffe.per[chi]!=null&&tariffe.per[chi]>0){ c=tariffe.per[chi]; }
-      else { c=tariffe.media; senzaNome[k]=(senzaNome[k]||0)+h; }
+      else { c=tariffe.media; senzaNome[k]=(senzaNome[k]||0)+h;
+             if(chi&&tariffe.per[chi]!=null){ const m=(senzaCosto[k]=senzaCosto[k]||{}); m[chi]=(m[chi]||0)+h; } }
       perLav[k]=(perLav[k]||0)+h*(+c||0);
     });
     (lavori||[]).forEach(function(l){
@@ -436,7 +468,7 @@
       const h=+l.ore||0;
       if(h>0){ perLav[k]=h*tariffe.media; senzaNome[k]=h; }
     });
-    return {per:perLav, senzaNome:senzaNome};
+    return {per:perLav, senzaNome:senzaNome, senzaCosto:senzaCosto};
   }
   function margineLavoro(importo,spese,fattForn,manodopera){
     return (+importo||0)-(+spese||0)-(+fattForn||0)-(+manodopera||0);
@@ -502,7 +534,7 @@
       const oreLette=!!(ore && !ore.error && ore.data);
       const md=costoManodopera((ore&&ore.data)||[],lavori,tariffe);
       /* 12 nov 2026 — «righe»: le ore lette, per chi deve contarle per persona (Report) */
-      return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe, oreLette:oreLette, righe:(ore&&ore.data)||[]};
+      return {per:md.per, senzaNome:md.senzaNome, senzaCosto:md.senzaCosto||{}, tariffe:tariffe, oreLette:oreLette, righe:(ore&&ore.data)||[]};
     }catch(e){ return vuoto; }
   }
 
@@ -975,6 +1007,10 @@
     const v=String(campo.value||"").trim();
     const tot=v===""?null:(_numeroIt(v)||0);  /* vuoto = nessuna ora, non zero finto */
     try{ await sb.from("gest_lavori").update({ore:tot}).eq("id",oreLavoroId).eq("user_id",sbUid); }catch(e){}
+    /* 14 nov 2026 (quinto giro, n. 2) — il margine si rifa' a ogni cambio di ore:
+       aggiunte 2 ore, la riga sotto diceva ancora 7,5. Di qui passano tutte le
+       strade che cambiano le ore (aggiungi, togli, rapportino nel cestino). */
+    try{ if(speseLavoroId&&String(speseLavoroId)===String(oreLavoroId)&&$("#margine-box")) await renderSpeseBlock(oreLavoroId); }catch(e){}
   }
 
   /* ============================================================

@@ -244,17 +244,10 @@ async function giorCarica(){
      Si chiede al database quali lavori del mese sono ancora vivi (sb.from
      salta il Cestino) e di che reparto sono: le giornate dei lavori buttati
      escono dall'elenco e dai conti. Se la lettura cade non si toglie niente. */
-  giorLavVivi=null;
-  try{
-    const _idsL=[...new Set(giorRighe.map(g=>g.lavoro_id).filter(Boolean))];
-    if(_idsL.length){
-      const _rv=await sb.from("gest_lavori").select("id,mestiere_id").in("id",_idsL);
-      if(!_rv.error){
-        giorLavVivi={}; (_rv.data||[]).forEach(l=>{ giorLavVivi[String(l.id)]=String(l.mestiere_id||""); });
-        giorRighe=giorRighe.filter(g=>!g.lavoro_id||(String(g.lavoro_id) in giorLavVivi));
-      }
-    }else giorLavVivi={};
-  }catch(e){ giorLavVivi=null; }
+  /* 14 nov 2026 (quinto giro, n. 4) — la regola sta in giorLavoriVivi(), qui
+     sotto: la usa anche la Squadra (js/gest-squadra-giornate.js). */
+  giorLavVivi=await giorLavoriVivi(giorRighe.map(g=>g.lavoro_id));
+  if(giorLavVivi) giorRighe=giorRighe.filter(g=>!g.lavoro_id||(String(g.lavoro_id) in giorLavVivi));
   /* il costo orario: le tariffe di TUTTI (anche chi sta nel Cestino, le sue ore
      restano) e la media dei vivi — la stessa costiOrari() del margine dei
      lavori (gest-ore-spese.js). Se la lettura cade, niente costi: meglio
@@ -345,6 +338,20 @@ function giorContatore(){
    reparto senza costi orari Giornate diceva 168,75 € e la scheda del lavoro
    diceva «non entrano nel margine». Adesso dicono lo stesso numero. */
 let giorLavVivi=null;
+/* UN LAVORO NEL CESTINO NON SI CONTA — la regola, in UN posto solo.
+   Dati gli id dei lavori, torna {id: reparto} dei soli lavori ancora VIVI
+   (sb.from salta il Cestino). Torna null se la lettura cade: chi chiama in
+   quel caso non toglie niente. La usano Giornate e Squadra. */
+async function giorLavoriVivi(ids){
+  try{
+    const _idsL=[...new Set((ids||[]).filter(Boolean).map(String))];
+    if(!_idsL.length) return {};
+    const _rv=await sb.from("gest_lavori").select("id,mestiere_id").in("id",_idsL);
+    if(_rv.error) return null;
+    const vivi={}; (_rv.data||[]).forEach(l=>{ vivi[String(l.id)]=String(l.mestiere_id||""); });
+    return vivi;
+  }catch(e){ return null; }
+}
 function giorManodopera(righe){
   const out={per:{},senzaNome:{}};
   if(!(typeof costoManodopera==="function"&&giorTariffe.letto)) return out;

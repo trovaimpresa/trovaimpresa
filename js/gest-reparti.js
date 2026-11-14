@@ -64,11 +64,11 @@
     if(!box)return;               /* la finestra e' gia' stata chiusa */
     box.innerHTML="";
     if(!ok){
-      box.textContent="Il QR non si e' potuto disegnare (manca la linea). Usa il link qui sotto o «Invia su WhatsApp».";
+      box.textContent="Il QR non si è potuto disegnare (manca la linea). Usa il link qui sotto o «Invia su WhatsApp».";
       return;
     }
     try{ new window.QRCode(box,{text:link,width:220,height:220,correctLevel:window.QRCode.CorrectLevel.M}); }
-    catch(_){ box.textContent="Il QR non si e' potuto disegnare. Usa il link qui sotto."; }
+    catch(_){ box.textContent="Il QR non si è potuto disegnare. Usa il link qui sotto."; }
   }
 
   let ruoloUtente=null;

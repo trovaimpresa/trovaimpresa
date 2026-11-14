@@ -45,7 +45,9 @@ function cercaFile(rel) {
 }
 const { chromium } = cerca("playwright");
 const SUPA_UMD = cercaFile("@supabase/supabase-js/dist/umd/supabase.js");
-const RADICE = path.resolve(__dirname, "..");
+/* 14 nov 2026 — BANCO_RADICE: il banco può servire un'ALTRA copia del sito (per
+   esempio quella di prima di una correzione, per vedere il rosso). */
+const RADICE = process.env.BANCO_RADICE ? path.resolve(process.env.BANCO_RADICE) : path.resolve(__dirname, "..");
 const SUPA_HOST = "nacvrsgkyfavykxjxszu.supabase.co";
 const UID = "00000000-0000-4000-8000-00000000b4c0";
 const REPARTO = "idbanco0000001";
@@ -111,6 +113,13 @@ function filtra(righe, parametri) {
       else return true;
       return nega ? !ok : ok;
     });
+  }
+  /* 14 nov 2026 — anche l'ORDINE, come il database vero (order=colonna.desc):
+     senza, «le ultime in cima» non si poteva provare. */
+  const ord = parametri.get("order");
+  if (ord) {
+    const chiavi = ord.split(",").map(x => { const p = x.split("."); return { c: p[0], giu: p[1] === "desc" }; });
+    out = out.slice().sort((a, b) => { for (const k of chiavi) { const x = a[k.c], y = b[k.c]; if (x === y) continue; if (x == null) return 1; if (y == null) return -1; const v = (typeof x === "number" && typeof y === "number") ? x - y : String(x).localeCompare(String(y)); if (v) return k.giu ? -v : v; } return 0; });
   }
   const lim = parametri.get("limit"); if (lim) out = out.slice(0, +lim);
   return out;
@@ -368,7 +377,7 @@ async function giro(browser, base, nome, larghezza) {
 /* 13 nov 2026 — gli attrezzi del banco servono anche a chi fa le FOTO
    (tools/foto-gestionale.js): se il file e' chiamato da un altro, non parte
    il giro, presta solo il sito finto e il database finto. */
-if (require.main !== module) { module.exports = { servi, collega, PAGINE, chromium, aspetta }; }
+if (require.main !== module) { module.exports = { servi, collega, PAGINE, chromium, aspetta, DATI, UID, REPARTO }; }
 else (async () => {
   const quali = process.argv[2] && PAGINE[process.argv[2]] ? [process.argv[2]] : Object.keys(PAGINE);
   const srv = await servi(), base = "http://127.0.0.1:" + srv.address().port;

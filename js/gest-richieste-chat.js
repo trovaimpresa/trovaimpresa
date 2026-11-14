@@ -216,7 +216,7 @@
       const prezzi=(pz||[]).filter(x=>x.descrizione&&x.prezzo_unitario!=null)
         .map(x=>"- "+String(x.descrizione).slice(0,110)+": "+x.prezzo_unitario+" euro"+(x.unita?" al "+x.unita:"")
           +(x.fonte==="mio"?" (prezzo mio)":" (riferimento "+(x.fonte||"prezzario")+", indicativo)")).join("\n");
-      const campi=[["Lavoro",_dsCosa(r)],["Descrizione",r.descrizione],["Citta'",r.citta],
+      const campi=[["Lavoro",_dsCosa(r)],["Descrizione",r.descrizione],["Città",r.citta],
         ["Metri quadri",r.mq],["Piano",r.piano],["Urgenza",r.urgenza],["Quando serve",r.data_preferita],
         ["Budget del cliente",r.budget],["Altro",r.note_aggiuntive],["Foto allegata",r.foto?"si":""]]
         .filter(x=>x[1]).map(x=>x[0]+": "+x[1]).join("\n");

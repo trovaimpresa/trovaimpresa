@@ -384,15 +384,18 @@
     /* quante ce ne sono negli ALTRI reparti: si dice, se no uno crede che il
        cestino sia vuoto e invece sta solo guardando un pannello */
     const altrove=(cestVista!=="tutti"&&cestTotale!=null)?Math.max(0,cestTotale-totVero):0;
-    if($("#cest-riass"))$("#cest-riass").innerHTML=cestGuastoHTML()+((totVero||q||altrove)
-      ? '<div class="cest-testa"><div><b>'+totVero+'</b> '
-        +(totVero===1?'cosa eliminata':'cose eliminate')
-        +(cestVista!=="tutti"?' in questo reparto':'')
+    if($("#cest-riass"))$("#cest-riass").innerHTML=cestGuastoHTML()+((totVero||q)   /* 14 nov 2026: con zero il riquadro non serve, lo dice gia' la scritta grande sotto */
+      /* 14 nov 2026 (quinto giro, n. 12) — con zero non si dice «0 cose
+         eliminate… Si possono rimettere a posto», e «Altre 1 stanno» va al
+         singolare. */
+      ? '<div class="cest-testa"><div>'+(totVero
+          ? '<b>'+totVero+'</b> '+(totVero===1?'cosa eliminata':'cose eliminate')+(cestVista!=="tutti"?' in questo reparto':'')
+          : (cestVista!=="tutti"?'In questo reparto non hai eliminato niente':'Non hai eliminato niente'))
         +(nascoste?(' <small>— ne mostro '+cestCache.length+', le più recenti</small>'):'')
         +(q?(' <small>· trovate '+visTutte.length+' con «'+esc(cestQ)+'»</small>'):'')
         /* 7 nov 2026: da 6 righe a 1 */
-        +'</div><div class="cest-nota">Si possono rimettere a posto.'
-        +(altrove?(' <b>Altre '+altrove+' stanno in altri reparti</b>: scegli «Tutti i reparti».'):'')
+        +'</div><div class="cest-nota">'+(totVero?(totVero===1?'Si può rimettere a posto.':'Si possono rimettere a posto.'):'')
+        +(altrove?(' <b>'+(altrove===1?(totVero?'Un\'altra sta':'Una cosa sta')+' in un altro reparto':(totVero?'Altre ':'')+altrove+(totVero?'':' cose')+' stanno in altri reparti')+'</b>: scegli «Tutti i reparti».'):'')
         +'</div></div>'
         /* le scelte per tipo: si vedono solo se i tipi sono almeno due */
         +(Object.keys(_perTipo).length>1
@@ -425,7 +428,8 @@
             {t:"Mostra tutto",a:"cerca-azzera"})
         : (altrove
           ? tabVuoto("In questo reparto non hai eliminato niente",
-              "Ci sono però "+altrove+" cose eliminate in altri reparti: scegli «Tutti i reparti» qui sopra per vederle.",
+              (altrove===1?"C'è però 1 cosa eliminata in un altro reparto: scegli «Tutti i reparti» qui sopra per vederla."
+                          :"Ci sono però "+altrove+" cose eliminate in altri reparti: scegli «Tutti i reparti» qui sopra per vederle."),
               _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>')
           : tabVuoto("Il cestino è vuoto",
             "Quello che elimini finisce qui.",   /* 12 nov 2026 — la spiegazione lunga c'è già sopra (regola 6) */
@@ -451,7 +455,7 @@
         return schedaJob({
           tono:"t-neutro", titolo:x.ic+" "+esc(x.nome),
           destra:'<span class="stato" style="background:var(--sfondo);color:var(--testo-2)">'+esc(x.tipo)+'</span>',
-          meta:["🗑 eliminato "+quando(String(x.quando||"").slice(0,10),{neutro:true}).testo],
+          meta:["🗑 "+cestEliminato(x)+" "+quando(String(x.quando||"").slice(0,10),{neutro:true}).testo],
           azioni:[{lab:"↩ Rimetti a posto",action:"cest-ripristina",data:{id:String(i)}}]
             .concat([{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}])
         });
@@ -853,6 +857,16 @@
     return (v||[]).map(function(x){return "\u2022 "+x.n+" "+((+x.n===1&&UNO[x.tabella])||CEST_NOMI[x.tabella]||(+x.n===1?"altra cosa collegata":"altre cose collegate"));}).join("\n");
   }
 
+  /* 14 nov 2026 (quinto giro, n. 12) — «Fattura … eliminato oggi»: la parola
+     segue la cosa (una fattura e' eliminata, le ore sono eliminate). */
+  function cestEliminato(x){
+    const t=String((x&&x.tab)||""), n=String((x&&x.nome)||"");
+    if(t==="gest_ore") return "eliminate";
+    if(/^(gest_fatture|gest_scadenze|gest_ricevute_pagamento|gest_operatori|gest_carte|gest_fatture_fornitori|gest_spese|gest_prezzi_propri|gest_note)$/.test(t)) return "eliminata";
+    if(t==="gest_lavori"&&typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista") return "eliminata";
+    if(/^(Nota|Fattura|Ricevuta|Foto|Pratica)\b/i.test(n)) return "eliminata";
+    return "eliminato";
+  }
   async function cestDefinitivo(i,_secondoGiro){
     const x=cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -903,7 +917,11 @@
        spese: se c'e' collegato altro (una fattura, un preventivo) resta il
        rifiuto di prima. */
     if(prova.ok===false && !_secondoGiro && x.tab==="gest_lavori" && (prova.vivi||[]).length
-       && prova.vivi.every(function(v){return v.tabella==="gest_ore"||v.tabella==="gest_spese";})){
+       /* 14 nov 2026 (quinto giro, n. 3) — anche il RAPPORTINO e' un pezzo del
+          lavoro: prima un lavoro con un rapportino non si eliminava (e dal
+          Cestino il rapportino non si poteva nemmeno buttare). Stessa strada,
+          UNA domanda sola che dice cosa se ne va. */
+       && prova.vivi.every(function(v){return v.tabella==="gest_ore"||v.tabella==="gest_spese"||v.tabella==="gest_rapportini";})){
       if(!(await gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nHa ancora dentro:\n"
         +cestElenco(prova.vivi)+"\n\nSe ne vanno anche loro. Questa volta sparisce davvero e non si recupera pi\u00f9.")))return;
       for(const v of prova.vivi){
@@ -1457,7 +1475,7 @@
         "Data fatto":l.data_fatto||"",Ore:+l.ore||0,"Importo €":+l.importo||0,
         "Stato fattura":l.fatt_stato||"none",Consuntivo:l.lavoro_svolto||"",Note:l.note||""};
       if(_pro){
-        r["Tipo pratica"]=l.pratica_tipo||"";
+        r["Tipo pratica"]=(l.pratica_tipo==="Agibilita'"?"Agibilità":l.pratica_tipo)||"";   /* 14 nov 2026: nel database resta com'e', si cambia solo quello che si legge */
         r["A che punto"]=(PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"";
         r["Comune"]=l.pratica_comune||"";
         r["N. protocollo"]=l.pratica_protocollo||"";

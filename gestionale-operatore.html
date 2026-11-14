@@ -18,7 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/ti-finestra.js?v=11nov9"></script>
 <script src="/js/cestino.js"></script>
-<script src="/js/foto-upload.js?v=13nov3"></script>
+<script src="/js/foto-upload.js?v=14nov1"></script>
 <script src="/js/euro-casella.js"></script>
 <style>
   :root{
@@ -322,6 +322,20 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/css/gestionale-stile.css?v=30">
 <!-- 11/10/2026 — LE SCHEDE Lavori · Foto · Archivio: rosso = da fare, verde = fatto -->
+<!-- 14 nov 2026 (quinto giro, n. 10) — «PARLA» NON COPRE PIU' IL TESTO.
+     Il pulsante «Parla» sta fermo in basso a destra e sul telefono finiva
+     sopra le scritte (nella prima schermata copriva «Metti l'app sul
+     telefono»). Adesso sul telefono ha una striscia sua in fondo: la pagina
+     finisce sopra la striscia, e sotto «Parla» non passa piu' nessuna scritta. -->
+<style id="op-parla-striscia">
+/* la striscia c'e' solo dove c'e' «Parla» (dentro un lavoro il pulsante non
+   si vede: li' la pagina resta com'era) */
+@media (max-width:600px){
+  body:has(#gv-btn:not([style*="display: none"])){padding-bottom:92px}
+  body:has(#gv-btn:not([style*="display: none"]))::after{content:"";position:fixed;left:0;right:0;bottom:0;height:86px;background:var(--bg,#f4f6f9);border-top:1.5px solid #d5dbe5;z-index:790}
+  body:has(#gv-btn:not([style*="display: none"])) #toast{bottom:100px;z-index:795}
+}
+</style>
 <style id="op-schede">
   .op-tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:4px 0 14px}
   .op-tabs button{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 4px;font:inherit;font-size:18px;font-weight:800;color:#0b1220;cursor:pointer}
@@ -645,7 +659,7 @@
 <script src="/js/chat-squadra.js?v=3"></script>
 <script src="/js/op-chat.js?v=3"></script>
 <script src="/js/op-chat-vista.js?v=1"></script>
-<script src="/js/mappa-indirizzo.js?v=2"></script>
+<script src="/js/mappa-indirizzo.js?v=14nov1"></script>
 <script src="/js/op-mappa.js?v=2"></script>
 <script src="/js/op-timbratura.js?v=10nov1"></script>
 <script src="/js/op-avvio.js"></script>

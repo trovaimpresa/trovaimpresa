@@ -91,7 +91,7 @@
           esc(o.mansione||SQ_RUOLO[o.ruolo]||"—"),
           esc(o.telefono||"—"),
           dipBadge(o),
-          `<span class="stato ${o.attivo?"fatto":"da_fare"}">${o.attivo?"Attivo":"Invitato"}</span>`,
+          `<span class="stato ${o.attivo?"fatto":(o.codice?"da_fare":"bozza")}">${dipStato(o)}</span>`,
           ""
         ],
         menu:dipVoci(o)
@@ -265,7 +265,7 @@
     const tipo=v("#dd-tipo");
     if(!tipo){toast("Scrivi il nome dell'attestato o del corso");return;}
     const ini=v("#dd-ini"),sc=v("#dd-scad");
-    if(ini&&sc&&sc<ini){toast("La scadenza non puo' essere prima dell'inizio");return;}
+    if(ini&&sc&&sc<ini){toast("La scadenza non può essere prima dell'inizio");return;}
     const rec={tipo:tipo.slice(0,80),numero:v("#dd-num").slice(0,40),inizio:ini,scadenza:sc,note:v("#dd-note").slice(0,200)};
     const id=_doc.edit;
     if(_doc.opId){
@@ -452,6 +452,10 @@
   function dipNuovi(o){
     return o&&o.nuovi?' <span class="stato da_fare" style="background:#fdecea;color:#b3261e;margin-left:6px">'+o.nuovi+(o.nuovi===1?' nuovo messaggio':' nuovi messaggi')+'</span>':'';
   }
+  /* 14 nov 2026 (quinto giro, n. 5) — LO STATO DELLA PERSONA, in un posto solo.
+     Chi nasce da «＋ Un'altra persona…» nelle ore non ha nessun invito: usciva
+     «Invitato» lo stesso. Senza codice d'invito adesso dice «Senza invito». */
+  function dipStato(o){ return o&&o.attivo?"Attivo":(o&&o.codice?"Invitato":"Senza invito"); }
   function dipVoci(o){
     const v=[{lab:"\ud83d\udcac Messaggi"+(o.nuovi?" ("+o.nuovi+")":""),action:"chat-squadra",data:{id:o.id,nome:o.nome||""}},
              {lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}}];
@@ -484,7 +488,7 @@
       : (av.length?"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", ")):"");
     return schedaJob({
       tono, titolo:esc(o.nome),
-      destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${o.attivo?"Attivo":"Invitato"}</span>`+dipNuovi(o),
+      destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${dipStato(o)}</span>`+dipNuovi(o),
       meta:[o.mansione?"👷 "+esc(o.mansione):"", o.telefono?"📞 "+esc(o.telefono):""],
       nota, azioni:dipVoci(o)
     });
@@ -754,7 +758,7 @@ ${vecchi?`
       await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",opId).eq("user_id",sbUid);
     }
     const errDoc=await docScriviNuovi(opId);
-    if(errDoc){toast("La persona e' salvata ma gli attestati no: "+errDoc+". Premi di nuovo Aggiungi per riprovare.");return;}
+    if(errDoc){toast("La persona è salvata ma gli attestati no: "+errDoc+". Premi di nuovo Aggiungi per riprovare.");return;}
     const codice=sbRand();
     const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:opId,codice,stato:"invitato",ruolo,permessi});
     if(e2){

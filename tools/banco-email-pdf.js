@@ -33,7 +33,7 @@ function mondo() {
         { id: "p4", user_id: UID, numero: 9, titolo: "Guarda su www.truffa.xyz subito", cliente_id: "c1", eliminato_il: null }
       ],
       gest_clienti: [
-        { id: "c1", user_id: UID, email: "Cliente.Vero@Esempio.test" },
+        { id: "c1", user_id: UID, email: "Cliente.Vero@Esempio.test", nome: "Rossi Mario & Figli" },
         { id: "c2", user_id: UID, email: "" },
         { id: "c9", user_id: ALTRO, email: "suo@esempio.test" }
       ],
@@ -114,7 +114,7 @@ async function parteServer() {
   ok(!/vittima|truffa/.test(JSON.stringify(m)), "niente di quello che manda il browser finisce nell'email");
   ok(m.reply_to === "ufficio@edilprova.test", "la risposta va all'email dei Dati azienda", m.reply_to);
   ok(/^"Edil Prova Srl" <info@trovaimpresa\.com>$/.test(m.from || ""), "mittente: nome dell'impresa", m.from);
-  ok(m.attachments && m.attachments[0] && Buffer.from(m.attachments[0].content, "base64").slice(0, 5).toString() === "%PDF-" && m.attachments[0].filename === "preventivo-7.pdf" && m.attachments[0].content_type === "application/pdf", "PDF allegato, segnato come PDF");
+  ok(m.attachments && m.attachments[0] && Buffer.from(m.attachments[0].content, "base64").slice(0, 5).toString() === "%PDF-" && m.attachments[0].filename === "preventivo-7-rossi-mario-figli.pdf" && m.attachments[0].content_type === "application/pdf", "PDF allegato, segnato come PDF, col nome che dice la finestra (preventivo-7-rossi-mario-figli.pdf)", m.attachments && m.attachments[0] && m.attachments[0].filename);
   ok(/preventivo-cliente\?t=TOKEN123/.test(m.html || ""), "nel testo c'è il link per firmare");
   ok(!/<b>nuovo<\/b>/.test(m.html || "") && /&lt;b&gt;nuovo/.test(m.html || ""), "titolo scritto dall'impresa: niente HTML vero");
   ok(!/con TrovaImpresa/i.test(m.html || ""), "niente riga «con TrovaImpresa»");

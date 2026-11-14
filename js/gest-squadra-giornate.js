@@ -50,8 +50,14 @@ async function sqgLeggi(m) {
   const a = m + "-01", b = sqgSposta(m, 1) + "-01";
   const r = await sb.from("gest_ore").select("data,ore,operatore_id,lavoro_id").eq("user_id", sbUid).is("eliminato_il", null).gte("data", a).lt("data", b);
   if (r.error) return null;
+  /* 14 nov 2026 (quinto giro, n. 4) — UN LAVORO NEL CESTINO NON SI CONTA:
+     la stessa regola di Giornate (giorLavoriVivi, in js/gest-giornate.js).
+     Se la lettura dei lavori cade non si toglie niente. */
+  let vivi = null;
+  if (typeof giorLavoriVivi === "function") vivi = await giorLavoriVivi((r.data || []).map(function (x) { return x.lavoro_id; }));
   (r.data || []).forEach(function (x) {
     if (!x.operatore_id || !x.data) return;
+    if (vivi && x.lavoro_id && !(String(x.lavoro_id) in vivi)) return;
     const k = String(x.operatore_id);
     const g = out[k] || (out[k] = { giorni: {}, ore: 0, lavori: new Set(), righe: [] });
     g.giorni[x.data] = (g.giorni[x.data] || 0) + (+x.ore || 0);
@@ -97,7 +103,7 @@ function sqgCard(o) {
     + '<div class="sqg-sotto">' + [esc(o.mansione || (typeof SQ_RUOLO !== "undefined" && SQ_RUOLO[o.ruolo]) || ""),
         o.telefono ? '<a class="cli-link" href="tel:' + esc(String(o.telefono).replace(/[^\d+]/g, "")) + '">' + esc(o.telefono) + '</a>' : ""
       ].filter(Boolean).join(" · ") + '</div></div>'
-    + '<div class="sqg-dx"><span class="stato ' + (o.attivo ? "fatto" : "bozza") + '">' + (o.attivo ? "Attivo" : "Invitato") + '</span>' + altro + '</div></div>'
+    + '<div class="sqg-dx"><span class="stato ' + (o.attivo ? "fatto" : "bozza") + '">' + (typeof dipStato === "function" ? dipStato(o) : (o.attivo ? "Attivo" : "Invitato")) + '</span>' + altro + '</div></div>'
     + '<div class="sqg-mese"><b' + (ng ? '' : ' class="zero-grigio"') + '>' + ng + '</b><span>' + (ng === 1 ? "giorno" : "giorni") + " a " + sqgMeseNome(sqgMese, true) + (d.lavori.size ? " · " + d.lavori.size + (d.lavori.size === 1 ? " cantiere" : " cantieri") : "") + '</span></div>'
     + sqgStriscia(sqgMese, d.giorni)
     + avviso

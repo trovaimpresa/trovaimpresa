@@ -592,9 +592,12 @@
           /* 21 ott 2026 — il testo diceva «usa il pulsante Crea fattura sulla
              scheda del lavoro», ma quel pulsante non c'e': «Crea fattura» sta
              nel menu «…» della riga, e compare solo quando il lavoro e' FATTO.
-             E si leggeva anche a lavoro gia' fatturato. Trovato nel collaudo. */
+             E si leggeva anche a lavoro gia' fatturato. Trovato nel collaudo.
+             14 nov 2026 (quinto giro, n. 11) — nella riga adesso c'e' solo
+             «Apri»: «Crea fattura» sta IN ALTO in questa finestra, quando il
+             lavoro e' Fatto. La frase dice quello. */
           (job.id&&(job.fattStato||"none")==="none")
-            ?' Quando '+(ruoloUtente==='professionista'?'la pratica':'il lavoro')+' è finit'+(ruoloUtente==='professionista'?'a':'o')+', segnal'+(ruoloUtente==='professionista'?'a':'o')+' <b>Fatto</b>: poi nel menu <b>…</b> della riga trovi <b>Crea fattura</b>.'
+            ?' Quando '+(ruoloUtente==='professionista'?'la pratica':'il lavoro')+' è finit'+(ruoloUtente==='professionista'?'a':'o')+', segnal'+(ruoloUtente==='professionista'?'a':'o')+' <b>Fatto</b>: poi qui in alto trovi <b>Crea fattura</b>.'
             :''}</div></div>
       </div>
       </div></div>`,

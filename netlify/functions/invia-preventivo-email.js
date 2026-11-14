@@ -105,10 +105,11 @@ exports.handler = async function (event) {
     if (!p || p.eliminato_il) return r(404, { error: 'Preventivo non trovato.' });
 
     // ---- il destinatario lo dice il database ----
-    let a = '';
+    let a = '', nomeCliente = '';
     if (p.cliente_id) {
-      const { data: c } = await db.from('gest_clienti').select('email').eq('id', p.cliente_id).eq('user_id', user.id).maybeSingle();
+      const { data: c } = await db.from('gest_clienti').select('email,nome').eq('id', p.cliente_id).eq('user_id', user.id).maybeSingle();
       a = T(c && c.email).toLowerCase();
+      nomeCliente = T(c && c.nome);
     }
     if (!/^[^\s@<>,;"]+@[^\s@<>,;"]+\.[a-z]{2,}$/i.test(a)) return r(422, { codice: 'senza_email', error: 'Il cliente non ha un\'email valida.' });
 
@@ -144,7 +145,12 @@ exports.handler = async function (event) {
     const risposte = T(az && az.email) || T(user.email);
     const tel = T(az && az.tel).replace(/[^\d+ ]/g, '').slice(0, 20);
     const contatti = [tel ? 'Tel. ' + esc(tel) : '', /^[^\s@<>]+@[^\s@<>]+$/.test(risposte) ? esc(risposte) : ''].filter(Boolean).join(' · ');
-    const nomeFile = (studio ? 'parcella-' : 'preventivo-') + (+p.numero || '') + '.pdf';
+    // 14 nov 2026 (quinto giro, n. 13): lo STESSO nome che la finestra fa vedere
+    // («Allegato: preventivo-1-rossi-mario.pdf») e che ha il PDF scaricato
+    // (js/gest-documenti-pdf.js, _nomeFile). Prima arrivava «preventivo-1.pdf».
+    // Il nome lo fa il server dai dati del database, non da quello che manda il browser.
+    const nomeFile = (studio ? 'parcella-' : 'preventivo-') + (+p.numero || '') + '-'
+      + (nomeCliente || 'cliente').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 80) + '.pdf';
     const daNome = (nomeImpresa || 'La tua impresa').replace(/["<>\\]/g, '').slice(0, 60);
 
     // ---- si manda ----

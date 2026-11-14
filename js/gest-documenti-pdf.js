@@ -69,14 +69,14 @@
       doc.setFillColor(192,57,43);doc.rect(0,0,210,11,"F");
       doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(10);
       doc.text("BOZZA - NON DA CONSEGNARE: mancano "
-        +[_mancaAz?"il nome dell'attivita'":"", _mancaPiva?"la partita IVA":""].filter(Boolean).join(" e "),
+        +[_mancaAz?"il nome dell'attività":"", _mancaPiva?"la partita IVA":""].filter(Boolean).join(" e "),
         105,7.2,{align:"center"});
       doc.setTextColor(0);
       y=26;
     }
     y=window.gestLogoPdf?await window.gestLogoPdf(doc,M,y):y;   /* 27 set 2026 — il logo (js/gest-logo.js) */
     doc.setFont("helvetica","bold");doc.setFontSize(16);
-    doc.text(az.nome||"(il nome della tua attivita' va nei Dati azienda)",M,y);
+    doc.text(az.nome||"(il nome della tua attività va nei Dati azienda)",M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     /* 13 nov 2026 (n. 17) — nella parcella anche l'albo e il numero (azAlbo: solo studio) */
     let hy=y+6;[azAlbo(az),az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
@@ -895,10 +895,10 @@
     paragrafo("Ogni lavorazione non prevista nella presente conferma d'ordine dovrà essere concordata per iscritto fra le parti, con indicazione del relativo prezzo, prima della sua esecuzione. In mancanza di accordo scritto, l'Impresa non è tenuta a eseguirla e il Committente non è tenuto a pagarla.");
 
     titoletto("Obblighi del Committente");
-    paragrafo("Il Committente garantisce all'Impresa il libero accesso ai luoghi, la disponibilita' di acqua ed energia elettrica di cantiere, e dichiara di aver ottenuto ogni autorizzazione o titolo edilizio eventualmente necessario per le opere oggetto della presente.");
+    paragrafo("Il Committente garantisce all'Impresa il libero accesso ai luoghi, la disponibilità di acqua ed energia elettrica di cantiere, e dichiara di aver ottenuto ogni autorizzazione o titolo edilizio eventualmente necessario per le opere oggetto della presente.");
 
     titoletto("Garanzia sulle opere");
-    paragrafo("L'Impresa garantisce le opere eseguite a regola d'arte ai sensi degli artt. 1667 e 1669 del codice civile. Eventuali difformita' o vizi dovranno essere denunciati dal Committente entro i termini di legge.");
+    paragrafo("L'Impresa garantisce le opere eseguite a regola d'arte ai sensi degli artt. 1667 e 1669 del codice civile. Eventuali difformità o vizi dovranno essere denunciati dal Committente entro i termini di legge.");
 
     titoletto("Recesso");
     paragrafo("Il Committente può recedere in qualunque momento, tenendo indenne l'Impresa delle spese sostenute, dei lavori eseguiti e del mancato guadagno, ai sensi dell'art. 1671 del codice civile.");

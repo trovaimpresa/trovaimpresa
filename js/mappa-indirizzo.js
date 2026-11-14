@@ -22,7 +22,9 @@ function mappaHtml(ind,citta){
   if(window.__mappaInd)return;window.__mappaInd=1;
   const st=document.createElement("style");
   st.textContent=".mp-prev{margin:8px 0 12px}.mp-fr{width:100%;height:220px;border:2px solid #0a2a4d;border-radius:12px;display:block;background:#e7eef8}"
-    +".mp-ap{display:block;text-align:center;margin-top:8px;font-size:17px;font-weight:700;color:#0a2a4d;text-decoration:underline}";
+    /* 14 nov 2026 (quinto giro, n. 10) — «Apri in Google Maps» era una riga di testo alta 20 px:
+       sul telefono non si prendeva col dito (regola 11: almeno 44). Adesso e' un pulsante. */
+    +".mp-ap{display:flex;align-items:center;justify-content:center;min-height:48px;box-sizing:border-box;margin-top:8px;padding:8px 14px;border:2px solid #0a2a4d;border-radius:12px;background:#fff;text-align:center;font-size:17px;font-weight:700;color:#0a2a4d;text-decoration:none}";
   document.head.appendChild(st);
   /* gestionale: ogni volta che si apre un modulo con #j-dove, ci si aggancia */
   let timer=null;

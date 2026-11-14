@@ -655,9 +655,28 @@
       ]);
       const setVivi=new Set((vivi||[]).map(x=>+x.numero));
       const setTutti=new Set((tutti||[]).map(x=>+x.numero));
+      /* 14 nov 2026 (quinto giro, n. 1) — L'ALLARME FALSO. Dal 13 nov i numeri
+         sono UNA serie sola, App + Noleggio (sql/2026-11-13-fattura-numero-unico.sql),
+         ma qui si guardavano solo le fatture dell'App: il numero preso da una
+         fattura del Noleggio diventava «manca la n. 3 — eliminata per sempre,
+         dillo al commercialista». Adesso si contano anche quelle del Noleggio,
+         con la stessa regola della funzione che da' il numero: l'anno e' quello
+         della data, il numero vale solo se e' fatto di cifre. Se questa lettura
+         cade NON si dice niente: meglio un avviso in meno che un allarme falso. */
+      const setNolCest=new Set();
+      const rNol=await _raw("nol_fatture").select("numero,data,eliminato_il").eq("user_id",sbUid)
+        .gte("data",anno+"-01-01").lte("data",anno+"-12-31");
+      if(rNol.error) throw rNol.error;
+      (rNol.data||[]).forEach(x=>{
+        if(!/^[0-9]{1,9}$/.test(String(x.numero==null?"":x.numero)))return;
+        const n=+x.numero; setTutti.add(n);
+        if(x.eliminato_il) setNolCest.add(n); else setVivi.add(n);
+      });
       const massimo=setTutti.size?Math.max.apply(null,Array.from(setTutti)):0;
       const buchi=[];
-      for(let n=1;n<=massimo;n++) if(!setVivi.has(n)) buchi.push({n:n, cestino:setTutti.has(n)});
+      /* «cestino» = si riprende dal Cestino dell'App (la riga si clicca);
+         «nol» = e' una fattura del Noleggio, nel Cestino del Noleggio */
+      for(let n=1;n<=massimo;n++) if(!setVivi.has(n)) buchi.push({n:n, cestino:setTutti.has(n)&&!setNolCest.has(n), nol:setNolCest.has(n)});
       /* 30 settembre 2026 — NEL «GIRO» NIENTE AVVISO SUI NUMERI MANCANTI.
          Le fatture finte del giro partono da numeri a meta' (25, 12, 8):
          chi guardava la prova vedeva una riga rossa «mancano le n.1...»
@@ -668,8 +687,10 @@
         buchiNelCestino=nCest;
         const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")
           +(buchi.length>6?(" …e altre "+(buchi.length-6)):"");
+        const nNol=buchi.filter(b=>b.nol).length;
         buchiTesto=(buchi.length===1?"manca la ":"mancano le ")+elenco
           +(nCest?(nCest===buchi.length?" — "+(nCest===1?"è nel Cestino":"sono nel Cestino"):" — qualcuna è nel Cestino")
+            :nNol?(nNol===buchi.length?" — "+(nNol===1?"è nel Cestino del Noleggio":"sono nel Cestino del Noleggio"):" — qualcuna è nel Cestino del Noleggio")
             /* 11 nov 2026 — collaudo 3.6: se non sono nel Cestino non c'e'
                niente da aprire, ma si dice cosa fare (regola: dire DOVE) */
             :(buchi.length===1?" — è stata eliminata per sempre: se l'avevi mandata al cliente, dillo al commercialista"
@@ -1386,7 +1407,7 @@
     const _cest=!!(window.cestinoAttivo&&window.cestinoAttivo());
     if(f&&!f.numero&&_cest&&typeof window.tiChiedi==="function"){
       const _chi=String(f.cli_nome||((fattCliCache||[]).find(c=>String(c.id)===String(f.cliente_id))||{}).nome||"").trim();
-      if(!(await window.tiChiedi("Lo riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino la bozza"+(_chi?" di «"+_chi+"»":"")+" del "+fdate(f.data)+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
+      if(!(await window.tiChiedi("La riprendi dal Cestino quando vuoi.",{titolo:"Mettere nel cestino la bozza"+(_chi?" di «"+_chi+"»":"")+" del "+fdate(f.data)+"?",si:"Sì, nel cestino",no:"No",rosso:true})))return;
     }else if(!(await gconfirm(avviso)))return;
     await fattSincronizzaLavori(id,"none");
     const {data:okEl,error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid).select("id");

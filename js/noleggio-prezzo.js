@@ -149,7 +149,7 @@
        "1 settimana" — che allo sportello sembrerebbe un errore. */
     disponibili.sort(function (a, b) { return a.p.giorni - b.p.giorni; });
     if (!disponibili.length) {
-      return { righe: [], totale: 0, avviso: 'Questo mezzo non ha nessuna tariffa: il conto non si puo\' fare.' };
+      return { righe: [], totale: 0, avviso: 'Questo mezzo non ha nessuna tariffa: il conto non si può fare.' };
     }
 
     /* costo[i] = quanto costa, al minimo, coprire i giorni */
@@ -226,7 +226,7 @@
         a  === null || a  === undefined || a  === '') return null;
     var fatte = numIt(a) - numIt(da);
     if (fatte < 0) {
-      avvisi.push(cfg.nome + ': la lettura del rientro (' + numIt(a) + ') e\' piu\' bassa di quella dell\'uscita (' +
+      avvisi.push(cfg.nome + ': la lettura del rientro (' + numIt(a) + ') è più bassa di quella dell\'uscita (' +
                   numIt(da) + '). Non l\'ho contata: controlla i due numeri.');
       return null;
     }
@@ -244,7 +244,7 @@
     var tariffaE = numIt(mezzo[cfg.campoTariffa]);            /* in EURO, com'e' scritta */
     var tariffa  = cent(mezzo[cfg.campoTariffa]);             /* in centesimi, per le scritte */
     if (tariffa <= 0) {
-      avvisi.push(cfg.nome + ': ' + extra + ' ' + cfg.unita + ' oltre il compreso, ma su questo mezzo non c\'e\' la tariffa. Non le ho contate.');
+      avvisi.push(cfg.nome + ': ' + extra + ' ' + cfg.unita + ' oltre il compreso, ma su questo mezzo non c\'è la tariffa. Non le ho contate.');
       return null;
     }
     return {
@@ -275,7 +275,7 @@
       return { giorni: null, righe: [], totale: 0, totaleEuro: 0,
                cauzione: numIt(noleggio.cauzione || mezzo.cauzione),
                suPrevisione: suPrevisione,
-               avvisi: ['Metti la data di uscita e quella di rientro: senza, il conto non si puo\' fare.'] };
+               avvisi: ['Metti la data di uscita e quella di rientro: senza, il conto non si può fare.'] };
     }
 
     var giorni = giorniFra(noleggio.data_uscita, fine);
@@ -289,7 +289,7 @@
       return { giorni: giorni, righe: [], totale: 0, totaleEuro: 0,
                cauzione: numIt(noleggio.cauzione || mezzo.cauzione),
                suPrevisione: suPrevisione,
-               avvisi: ['Il rientro e\' prima dell\'uscita. Controlla le due date.'] };
+               avvisi: ['Il rientro è prima dell\'uscita. Controlla le due date.'] };
     }
 
     /* ---- il tempo ---- */
@@ -298,7 +298,7 @@
       var m1 = minuti(noleggio.ora_uscita), m2 = minuti(noleggio.ora_rientro);
       if (m1 !== null && m2 !== null && m2 > m1) tempo = tempoAOre(m2 - m1, mezzo);
       if (m1 !== null && m2 !== null && m2 <= m1) {
-        avvisi.push('L\'ora del rientro non e\' dopo quella dell\'uscita: ho contato una giornata intera.');
+        avvisi.push('L\'ora del rientro non è dopo quella dell\'uscita: ho contato una giornata intera.');
       }
     }
     if (!tempo) tempo = tempoAGiorni(giorni, mezzo);
@@ -354,7 +354,7 @@
     righe.forEach(function (r) { totale += r.centesimi; });
 
     if (suPrevisione) {
-      avvisi.push('Il mezzo e\' ancora fuori: questo e\' il conto sul rientro PREVISTO. Quando rientra, si rifa\' da solo sui giorni veri.');
+      avvisi.push('Il mezzo è ancora fuori: questo è il conto sul rientro PREVISTO. Quando rientra, si rifà da solo sui giorni veri.');
     }
 
     return {

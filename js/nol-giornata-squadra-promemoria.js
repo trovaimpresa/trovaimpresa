@@ -133,7 +133,7 @@
       const inv=mB[o.id], att=inv&&inv.stato==="attivo", codice=inv?inv.codice:"";
       const link=inviteLink(codice);
       const wa="https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link);
-      return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
+      return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":(codice?"Invitato":"Senza invito")}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
         <div class="card-acts"><button data-action="sq-edit" data-id="${o.id}">Modifica</button>
         ${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
         <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>

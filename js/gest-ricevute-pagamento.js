@@ -301,7 +301,7 @@
     let y = 20;
     y = window.gestLogoPdf ? await window.gestLogoPdf(doc, M, y) : y;
     doc.setFont("helvetica", "bold"); doc.setFontSize(16);
-    doc.text(az.nome || "(il nome della tua attivita' va nei Dati azienda)", M, y);
+    doc.text(az.nome || "(il nome della tua attività va nei Dati azienda)", M, y);
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(90);
     let hy = y + 6;
     const indAz = (typeof azIndirizzo === "function") ? azIndirizzo(az) : "";

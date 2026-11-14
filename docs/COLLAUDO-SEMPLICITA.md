@@ -2402,3 +2402,49 @@ rapportini, persone = →0←. Anche la riga del registro dell'email di prova (`
 (18:07, dopo la conferma di Alex): →0← righe. Email di prova mandate: →1←, a info@trovaimpresa.com.
 Visto e non toccato: nell'account rieticitta c'è ancora il reparto «PROVA CONTROLLORE Studio» (del quarto giro); nel Cestino
 di info@ c'è →1← cosa in un altro reparto (non mia).
+
+## 14 nov 2026 (sera) — sistemati i 13 «NON FUNZIONA» del quinto giro
+Le liste «DIFFICILE» e «MANCA» non sono state toccate. Nessun conto è cambiato: controlli, ordine e scritte.
+Legenda: [x] fatto e provato · [~] a metà · [-] non fatto. Il numero è quello della lista «1. NON FUNZIONA» qui sopra.
+
+**Come è stato provato.** Banco nuovo `tools/banco-quinto-giro.js` (apre l'App e l'app dell'operaio col database finto,
+a 1440 e 375, e rifà i difetti cliccando): sulla versione di PRIMA →44← rossi, DOPO →62← verdi e zero rossi.
+Per vedere il rosso: `BANCO_RADICE=<cartella col sito di prima> node tools/banco-quinto-giro.js`.
+Tutti gli altri banchi verdi (gestionale 1440/375/360, soldi 36, preventivo 38, noleggio 31, gruppo4 59, gruppo5 34,
+email-pdf 49, correttore, copia-computo, profilo 9). `controllo-push`: «tutto a posto».
+Foto prima/dopo (computer 1440 e telefono 375) mandate ad Alex in 3 gruppi; il suo «pubblica» alle 19:07.
+
+- [x] **1. Fatture, allarme falso.** `js/gest-fatture.js`: i buchi si cercano contando anche `nol_fatture` (stessa regola
+  di `fattura_prossimo_numero`: anno dalla data, numero solo se fatto di cifre). Una fattura del Noleggio nel suo Cestino
+  dice «è nel Cestino del Noleggio». Un buco vero si dice ancora. Se la lettura del Noleggio cade non si dice niente.
+- [x] **2. Lavoro, margine.** `js/gest-ore-spese.js`: `costoManodopera` dice anche DI CHI sono le ore contate alla media
+  perché la persona non ha il costo orario (`senzaCosto`); la frase (`margineRigheOre`) dice chi è e ha il pulsante
+  «Scrivi il costo orario di …» che apre la sua scheda. Il margine si rifà a ogni cambio di ore (`_oreSalvaTotale`).
+  Il conto è quello di prima (7,5 ore × 22,50 € = 168,75 €, uguale prima e dopo).
+  ⚠️ Il pulsante apre la scheda della persona e chiude il lavoro: una modifica al lavoro non salvata si perde.
+- [x] **3. Cestino, lavoro con un rapportino.** `cestDefinitivo`: il rapportino è un pezzo del lavoro come ore e spese.
+  Una domanda sola con l'elenco di cosa se ne va, poi va.
+- [x] **4. Squadra, giornate di un lavoro nel Cestino.** La regola è una sola: `giorLavoriVivi()` in `js/gest-giornate.js`,
+  usata da Giornate e da Squadra (`sqgLeggi`).
+- [x] **5. Squadra, «Invitato».** `dipStato(o)` in `js/gest-squadra.js`: senza codice d'invito dice «Senza invito».
+  Anche nel Noleggio.
+- [x] **6. Noleggio, accenti.** `js/noleggio-prezzo.js`, 7 avvisi. Solo le scritte.
+- [x] **7. Altri accenti.** PDF preventivo e conferma d'ordine, ricevuta, Squadra, QR, foto, Richieste dal sito, Excel
+  («Agibilità»: nel database resta «Agibilita'»).
+- [x] **8. Lavoro, spese.** Le ultime salvate in cima (`order created_at desc`). Il grafico si ordina da sé.
+- [x] **9. Cliente dell'App, CAP.** `saveCli`: 5 cifre o vuoto, con `campoManca` sulla casella.
+- [x] **10. App dell'operaio.** «Apri in Google Maps» è un pulsante alto 48 px (`js/mappa-indirizzo.js`, vale anche
+  nell'App). «Parla» sul telefono ha una striscia sua in fondo (`<style id="op-parla-striscia">` in
+  `gestionale-operatore.html`), solo dove il pulsante si vede: sotto «Parla» non passa più nessuna scritta.
+- [x] **11. Lavoro, frase.** «…segnalo Fatto: poi qui in alto trovi Crea fattura» (provato: nel lavoro fatto c'è).
+- [x] **12. Cestino, scritte.** Con zero non c'è più il riquadro «0 cose eliminate… Si possono rimettere a posto»;
+  «Una cosa sta in un altro reparto»; la bozza «La riprendi»; fattura «eliminata» (`cestEliminato`).
+- [x] **13. Email con PDF.** `netlify/functions/invia-preventivo-email.js`: l'allegato si chiama come dice la finestra
+  (`preventivo-1-nome-cliente.pdf`). Il nome lo fa il server dal database.
+
+**Attrezzi del banco cambiati:** `tools/banco-gestionale.js` presta anche `DATI`, `UID`, `REPARTO`, sa servire un'altra
+copia del sito (`BANCO_RADICE`) e il database finto adesso ORDINA (`order=colonna.desc`).
+
+**NON provato col banco:** il nome dell'allegato nell'email vera e tutto quello che chiede il sito vero.
+Le prove dal vivo (reparto «ferramenta», nome «PROVA CONTROLLORE») si fanno DOPO la pubblicazione: l'esito lo scrivo
+qui sotto col prossimo push.
