@@ -2448,3 +2448,30 @@ copia del sito (`BANCO_RADICE`) e il database finto adesso ORDINA (`order=colonn
 **NON provato col banco:** il nome dell'allegato nell'email vera e tutto quello che chiede il sito vero.
 Le prove dal vivo (reparto «ferramenta», nome «PROVA CONTROLLORE») si fanno DOPO la pubblicazione: l'esito lo scrivo
 qui sotto col prossimo push.
+
+### 14 nov 2026 (19:10–19:25) — le prove sul sito vero, dopo la pubblicazione (commit →77d6366←)
+Netlify: pubblicato. Account info@, reparto «ferramenta», tutto col nome «PROVA CONTROLLORE».
+- [x] **1 Fatture.** La n. 1 (che è una fattura del Noleggio) non è più data per mancante. Restano «mancano le n. 2 … 14»:
+  sono buchi VERI di questo account di prova (c'è solo la n. 15), eliminate per sempre in prove vecchie.
+- [x] **2 Margine.** «7,5 ore di PROVA CONTROLLORE Operaio non entrano nel margine: non ha il costo orario» + pulsante
+  che apre la sua scheda; aggiunte 2 ore → 9,5 da solo.
+- [x] **3 Cestino, rapportino.** UNA domanda: «Ha ancora dentro: 2 ore lavorate, 2 spese, 1 rapportino di cantiere».
+  ⛔ **MA la prova ha trovato un difetto vero, più grave** (c'era dal 13 nov, anche con sole ore e spese): detto Sì, per
+  sempre se ne andava LA COSA SBAGLIATA. Buttando ore/spese/rapportino il Cestino si ridisegna, l'elenco cambia ordine e
+  il secondo giro andava «per numero»: è stata eliminata per sempre una riga di ore al posto del lavoro (dato di prova).
+  Corretto: al secondo giro si passa la cosa, non il suo posto (`cestDefinitivo(i,true,x)`). Il banco adesso sposta
+  l'elenco apposta: senza la correzione 2 rossi (eliminava una fattura in bozza), con la correzione →64← verdi.
+  [~] La correzione aspetta il secondo push: sul sito vero non è ancora provata.
+- [x] **4 Squadra, giornate.** Lavoro vivo: «1 giorno a novembre · 1 cantiere». Lavoro nel Cestino: «0 giorni a novembre».
+- [x] **5 Squadra.** «Senza invito».
+- [x] **8 Spese.** L'ultima salvata in cima.
+- [x] **9 CAP.** «0210» rifiutato sulla casella («Il CAP è di 5 cifre, es. 02100.»), «02100» salvato.
+- [x] **11 Frase.** «…poi qui in alto trovi Crea fattura».
+- [x] **12 Cestino.** «1 cosa eliminata in questo reparto · Si può rimettere a posto».
+- [x] **13 Email.** Finestra: «Allegato: preventivo-1-prova-controllore.pdf». Arrivato (letto da Resend):
+  «preventivo-1-prova-controllore.pdf», application/pdf. Email di prova mandate: →1←, a info@trovaimpresa.com.
+- [-] **6, 7 accenti e 10 app dell'operaio:** dal vivo no (serve un mezzo fuori nel Noleggio e un operaio vero col suo
+  telefono). Controllato che i file nuovi sono online; il resto solo banco.
+**Pulizia.** Lavoro, ore, spese, rapportino, preventivo (con riga e link), cliente, persona: eliminati anche dal Cestino
+(il Cestino di «ferramenta» è vuoto). Resta da togliere →1← riga del registro email (`gest_email_documenti`): il database
+ha chiesto la conferma ad Alex e non è arrivata in tempo.

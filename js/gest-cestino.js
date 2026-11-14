@@ -867,8 +867,14 @@
     if(/^(Nota|Fattura|Ricevuta|Foto|Pratica)\b/i.test(n)) return "eliminata";
     return "eliminato";
   }
-  async function cestDefinitivo(i,_secondoGiro){
-    const x=cestCache[+i];if(!x)return;
+  /* ⛔ 14 nov 2026 (sera) — «_x»: al secondo giro la cosa da eliminare si passa
+     LEI, non il suo posto nell'elenco. Buttando ore, spese e rapportino il
+     Cestino si ridisegna e l'elenco cambia ordine: col solo numero «i» al
+     secondo giro si eliminava PER SEMPRE la cosa finita in quel posto (una
+     riga di ore al posto del lavoro). Trovato nella prova sul sito vero: il
+     banco col database finto non ridisegnava e non lo vedeva. */
+  async function cestDefinitivo(i,_secondoGiro,_x){
+    const x=_x||cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
 
     /* primo giro: non cancella niente, chiede solo cosa succederebbe */
@@ -928,7 +934,7 @@
         const r=await sb.from(v.tabella).delete().eq("user_id",sbUid).eq("lavoro_id",x.id).select("id");
         if(r.error){toast("Non eliminato: "+r.error.message);return;}
       }
-      return cestDefinitivo(i,true);
+      return cestDefinitivo(i,true,x);
     }
     if(prova.ok===false){
       tiAvviso("Non posso eliminare \u00ab"+x.nome+"\u00bb per sempre.\n\n"

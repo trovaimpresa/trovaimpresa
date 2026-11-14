@@ -31,6 +31,9 @@ D.gest_ore.push(Object.assign(base(352), { mestiere_id: REP, lavoro_id: id(302),
 // n. 8 — due spese sullo stesso lavoro: la più nuova deve stare in cima
 D.gest_spese.push(Object.assign(base(362, 9), { lavoro_id: id(302), descrizione: "Spesa VECCHIA", importo: 10, data: g(-9), fornitore_id: null, inserito_da: "Capo", creato_da: UID }));
 D.gest_spese.push(Object.assign(base(363, 1), { lavoro_id: id(302), descrizione: "Spesa NUOVA", importo: 20, data: g(-1), fornitore_id: null, inserito_da: "Capo", creato_da: UID }));
+// n. 3 — il lavoro buttato ha anche una spesa e un rapportino ancora vivi
+D.gest_spese.push(Object.assign(base(364, 2), { lavoro_id: id(304), descrizione: "Spesa del lavoro buttato", importo: 5, data: g(-2), fornitore_id: null, inserito_da: "Capo", creato_da: UID }));
+D.gest_rapportini.push(Object.assign(base(382, 2), { mestiere_id: REP, lavoro_id: id(304), data: g(-2), note: "Rapportino del lavoro buttato", materiali: "", creato_da: id(201), firma_cliente: null }));
 // n. 4 — un lavoro nel Cestino, con le ore di Giovanni di questo mese
 D.gest_lavori.push(Object.assign({}, D.gest_lavori[1], { id: id(304), descrizione: "Lavoro BUTTATO", eliminato_il: g(0) + "T09:00:00+00:00" }));
 D.gest_ore.push(Object.assign(base(353), { mestiere_id: REP, lavoro_id: id(304), operatore_id: id(201), data: giornoMese, ore: 8, nota: "", rapportino_id: null }));
@@ -66,7 +69,16 @@ async function apriApp(browser, base0, W, stato) {
     if (m === "GET" || m === "HEAD" || m === "OPTIONS" || /^rpc\//.test(tab)) return route.fallback();
     stato.scritte.push({ m, tab, corpo, q: u.search });
     if (m === "POST" && tab === "gest_ore" && corpo) { const riga = Object.assign(base(900 + stato.scritte.length), Array.isArray(corpo) ? corpo[0] : corpo); D.gest_ore.push(riga); stato.aggiunte.push(riga); }
-    if (m === "PATCH" || m === "DELETE") stato.buttati.add(tab);
+    if (m === "PATCH" || m === "DELETE") {
+      stato.buttati.add(tab);
+      /* buttare nel cestino (PATCH eliminato_il) lo fa davvero: così il Cestino, ridisegnandosi,
+         cambia l'ordine dell'elenco come sul sito vero */
+      const lid = (u.searchParams.get("lavoro_id") || "").replace(/^eq\./, "");
+      if (m === "PATCH" && corpo && corpo.eliminato_il && lid && D[tab]) D[tab].forEach(r => { if (String(r.lavoro_id) === lid && !r.eliminato_il) r.eliminato_il = new Date(Date.now() + 60000).toISOString(); });
+      /* …e l'elenco del Cestino CAMBIA sotto i piedi, come sul sito vero dove si ridisegna:
+         in cima finisce un'altra cosa (un'esca). Chi al secondo giro va «per numero» elimina l'esca. */
+      if (m === "PATCH" && lid && !stato.esca) { stato.esca = true; await page.evaluate(() => { try { cestCache.unshift({ tab: "gest_ore", id: "00000000-0000-4000-8000-00000000e5ca", nome: "ESCA", tipo: "Ore lavorate", ic: "", foglia: true }); } catch (e) {} }).catch(() => {}); }
+    }
     const riga = Object.assign({ id: id(990) }, Array.isArray(corpo) ? corpo[0] : corpo);
     const uno = /vnd\.pgrst\.object/.test(r.headers()["accept"] || "");
     return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(uno ? riga : [riga]) });
@@ -169,6 +181,8 @@ async function apriApp(browser, base0, W, stato) {
       await page.evaluate(() => { const o = document.getElementById("tif-ov"); const b = o && [...o.querySelectorAll("button")].find(x => /^S[ìi]/i.test(x.innerText.trim())); if (b) b.click(); }); await B.aspetta(page, 2500);
       const dom2 = await page.evaluate(() => { const o = document.getElementById("tif-ov"); return o && o.offsetParent !== null ? o.innerText.replace(/\s+/g, " ") : ""; });
       const conferme = stato.rpc.filter(x => x && x.p_conferma === true).length;
+      const sbagliate = stato.rpc.filter(x => x && (x.p_tabella !== "gest_lavori" || x.p_id !== id(304)));
+      prova(sbagliate.length === 0, "(3) …e per sempre se ne va IL LAVORO, non la cosa finita al suo posto nell'elenco", sbagliate);
       prova(stato.buttati.has("gest_rapportini") && conferme === 1 && !/per sempre\?/.test(dom2), "(3) …detto Sì se ne va tutto, senza una seconda domanda", { buttati: [...stato.buttati], conferme, dom2 });
     }
     /* le ore aggiunte in questo giro escono: il giro dopo riparte pulito */
@@ -179,7 +193,7 @@ async function apriApp(browser, base0, W, stato) {
   /* ---------- n. 12 — il Cestino VUOTO in questo reparto, con 1 cosa in un altro ---------- */
   console.log("\nCestino: niente in questo reparto, 1 cosa in un altro");
   {
-    ["gest_lavori", "gest_fatture"].forEach(tb => D[tb].forEach(r => { r.eliminato_il = null; }));
+    ["gest_lavori", "gest_fatture", "gest_ore", "gest_spese", "gest_rapportini"].forEach(tb => D[tb].forEach(r => { r.eliminato_il = null; }));
     D.gest_clienti.push(Object.assign({}, D.gest_clienti[1], { id: id(103), nome: "Cliente di un altro reparto", mestiere_id: "altroreparto01", eliminato_il: g(0) + "T09:00:00+00:00" }));
     const stato = { rpc: [], scritte: [], aggiunte: [], buttati: new Set() };
     const { ctx, page, P } = await apriApp(browser, base0, 1440, stato);
