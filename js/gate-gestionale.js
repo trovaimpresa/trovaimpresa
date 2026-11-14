@@ -503,7 +503,7 @@
   var PROFILO_MINIMO_ATTIVO = BASE_APERTA;
   var DESCR_MIN = 100;           /* caratteri minimi della descrizione */
   var DESCR_MAX_FREE = 200;      /* il piano Free non ne accetta di piu' (vedi modifica-profilo.html) */
-  var COLONNE_PROFILO = 'nome_attivita, nome, mestiere, mestieri, citta, telefono, descrizione, logo_url, email_confermata, piano, premium_scadenza, premium_pagato';
+  var COLONNE_PROFILO = 'nome_attivita, nome, mestiere, mestieri, citta, telefono, descrizione, logo_url, email_confermata, piano, premium_scadenza, premium_pagato, vetrina_attiva';
   var _gpRiga = null, _gpProva = false, _gpAperto = null;
 
   function _pieno(v){ return v!==null && v!==undefined && String(v).trim()!==''; }
@@ -534,11 +534,22 @@
     {id:'logo',        etichetta:'Logo',                come:'file',  aiuto:'Il tuo marchio o una foto', ok:function(r){return _pieno(r.logo_url);}},
     {id:'email',       etichetta:'Email confermata',    come:'email', aiuto:'Controlla la tua posta', ok:function(r){return r.email_confermata===true;}}
   ];
+  /* 14 nov 2026 (chiesto da Alex) — CHI HA LA SCHEDA PUBBLICA SPENTA (e' entrato
+     dalla porta del gestionale, ?da=gestionale) non deve riempire una vetrina che
+     nessuno vede: per lui bastano il nome e l'email confermata. Mestiere, citta',
+     telefono, descrizione e logo servono alla scheda pubblica: si chiedono quando
+     la accende (allora vetrina_attiva torna true e valgono tutte e 7).
+     Solo `false` esatto conta: colonna mancante o vuota = tutte e 7, come prima. */
+  var VOCI_SENZA_VETRINA=['nome','email'];
+  function vociPer(r){
+    if(r && r.vetrina_attiva===false) return VOCI_PROFILO.filter(function(v){ return VOCI_SENZA_VETRINA.indexOf(v.id)>=0; });
+    return VOCI_PROFILO;
+  }
   /* l'unico punto che decide se un profilo basta: il banco lo chiama da qui */
   function profiloMinimo(riga){
-    var r=riga||{}, fatte=0, mancanti=[];
-    VOCI_PROFILO.forEach(function(v){ if(v.ok(r)) fatte++; else mancanti.push(v.id); });
-    return {fatte:fatte, totale:VOCI_PROFILO.length, completo:fatte===VOCI_PROFILO.length, mancanti:mancanti};
+    var r=riga||{}, fatte=0, mancanti=[], voci=vociPer(r);
+    voci.forEach(function(v){ if(v.ok(r)) fatte++; else mancanti.push(v.id); });
+    return {fatte:fatte, totale:voci.length, completo:fatte===voci.length, mancanti:mancanti};
   }
   window._profiloMinimo=profiloMinimo;
   window._telefonoValido=telefonoValido;
@@ -597,7 +608,7 @@
     q('gp-conta').textContent = esito.fatte+' di '+esito.totale;
     q('gp-barra').style.width = Math.round(esito.fatte/esito.totale*100)+'%';
     var box=q('gp-righe'); box.innerHTML='';
-    VOCI_PROFILO.forEach(function(v){ box.appendChild(rigaProfilo(v, v.ok(_gpRiga))); });
+    vociPer(_gpRiga).forEach(function(v){ box.appendChild(rigaProfilo(v, v.ok(_gpRiga))); });
     q('gp-avanti').onclick=avantiProfilo;
     if(_gpAperto) apriEditor(_gpAperto,true);
   }

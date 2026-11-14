@@ -2279,3 +2279,15 @@ l'operaio non ha il permesso «clienti».
 Pulizia: persona tolta da Squadra (gest_operatori + gest_membri), lavoro, preventivo, righe e cliente → →0←. L'account
 pintoluzemilia resta, senza impresa collegata.
 **D. IBAN e fattura emessa** — non toccate, come chiesto: restano provate solo col banco.
+
+## 14 nov 2026 — «Completa il profilo»: chi ha la scheda pubblica spenta entra con nome ed email
+Trovato nella prova B: chi si iscrive dalla porta del gestionale (`?da=gestionale`, `vetrina_attiva=false`) veniva fermato da
+«Completa il profilo per aprire il gestionale» con 7 voci (anche descrizione ≥ 100 caratteri e logo) per una vetrina che
+nessuno vede. Deciso con Alex (foto prima/dopo dal sito vero, ok alle 03:37).
+- js/gate-gestionale.js: `vociPer(r)` — con `vetrina_attiva === false` (solo il false VERO) bastano «nome» ed «email
+  confermata»; altrimenti le 7 di sempre. Usata da `profiloMinimo` (che decide) e da `disegnaProfilo` (che disegna).
+  `vetrina_attiva` aggiunta a `COLONNE_PROFILO`. Chi accende la scheda pubblica torna a 7 voci.
+- `?v=14nov1` su gate-gestionale.js in App e Noleggio.
+- Banco nuovo `node tools/banco-profilo-gestionale.js`: 9 verdi; sulla versione di PRIMA 3 rossi.
+- Resta aperto: `gest_prova_fine` nasce vuota anche dalla porta del gestionale (da vedere se serve ancora, ora che il
+  gestionale base è gratis).
