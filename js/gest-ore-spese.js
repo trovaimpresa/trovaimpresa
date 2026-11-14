@@ -718,12 +718,16 @@
     const imp=_numIt("#j-imp")||0;
     const box=$("#ora-box");
     if(!box)return;
-    if(!tot){box.innerHTML='<span>Segna le ore qui sopra: ti dico quanto rende un\'ora.</span>';return;}
-    if(!imp){box.innerHTML='<span>Ore totali: <b>'+_oreTesto(tot)+'</b></span><span>Metti l\'importo per sapere quanto rendono.</span>';return;}
+    /* 14 nov 2026 (quinto giro, lista «DIFFICILE» n. 1) — «Rende 182,11 € l'ora»
+       sembrava il GUADAGNO, ma e' l'importo diviso le ore: le spese non sono
+       tolte (il guadagno vero e' il Margine, piu' su). Il conto e' lo stesso,
+       cambia la parola: «Incassi … per ogni ora». */
+    if(!tot){box.innerHTML='<span>Segna le ore qui sopra: ti dico quanto incassi per ogni ora.</span>';return;}
+    if(!imp){box.innerHTML='<span>Ore totali: <b>'+_oreTesto(tot)+'</b></span><span>Metti l\'importo per sapere quanto incassi per ogni ora.</span>';return;}
     const perOra=imp/tot;
     box.innerHTML='<span>'+(pro?'Compenso':'Lavoro')+': '+eur2(imp)+'</span>'
       +'<span>Ore: <b>'+_oreTesto(tot)+'</b></span>'
-      +'<span>Rende <b>'+eur2(perOra)+' l\'ora</b></span>';
+      +'<span>Incassi <b>'+eur2(perOra)+'</b> per ogni ora</span>';
   }
   function _oreTesto(n){
     const v=Math.round((+n||0)*100)/100;

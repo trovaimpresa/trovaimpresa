@@ -622,7 +622,7 @@
       regole:ctrRegolePreventivo
     },
     fattura:{
-      caselle:"#fa-cli,#fa-data,#fa-bollo,#fa-sconto",
+      caselle:"#fa-cli,#fa-data,#fa-bollo,#fa-sconto,#fa-iban",
       dentro:["#fatt-righe"],
       regole:ctrRegoleFattura
     },
@@ -838,6 +838,11 @@
     const dt=$("#fa-data");
     if(dt&&dt.value&&dt.value>todayStr()) out.push({el:dt,grave:"rosso",
       dice:"La data è nel futuro. Una fattura si emette il giorno stesso o prima, non domani: al commercialista salta subito all'occhio."});
+
+    /* --- 14 nov 2026: bonifico (o Ri.Ba.) senza IBAN --- */
+    const fmo=$("#fa-modo"), fib=$("#fa-iban");
+    if(fmo&&fib&&(fmo.value==="bonifico"||fmo.value==="riba")&&!fib.value.trim()) out.push({el:fib,grave:"arancio",
+      dice:"Manca l'IBAN: nel PDF esce «Bonifico» ma il cliente non sa dove pagare. Scrivilo qui o nei Dati azienda."});
 
     /* --- il bollo del forfettario: 2 € sopra i 77,47 € --- */
     if(typeof fattForfettario==="function"&&fattForfettario()){

@@ -50,7 +50,7 @@ const FOTO = process.env.FOTO || "";
 const foto = async (page, nome, sel) => { if (!FOTO) return; try { if (sel) { await page.evaluate(ss => { for (const s of ss) { const e = [...document.querySelectorAll(s)].pop(); if (e) { e.scrollIntoView({ block: "center" }); break; } } }, [].concat(sel)); await B.aspetta(page, 300); } await page.screenshot({ path: path.join(FOTO, nome + "-" + page.viewportSize().width + ".png") }); } catch (e) {} };
 const testo = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); return e ? e.innerText.replace(/\s+/g, " ").trim() : null; }, sel);
 
-async function apriApp(browser, base0, W, stato) {
+async function apriApp(browser, base0, W, stato, senzaIban) {
   const ctx = await browser.newContext(W < 800 ? { viewport: { width: W, height: 800 }, isMobile: true, hasTouch: true } : { viewport: { width: W, height: 900 } });
   const page = await ctx.newPage();
   page.on("dialog", d => d.dismiss().catch(() => {}));
@@ -66,6 +66,8 @@ async function apriApp(browser, base0, W, stato) {
       const risposta = vivi.length ? { ok: false, vivi: vivi } : (corpo && corpo.p_conferma ? { ok: true, file: [] } : { ok: true, anteprima: [{ tabella: "gest_rapportini", n: 1 }, { tabella: "gest_ore", n: 2 }], scollegate: [] });
       return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(risposta) });
     }
+    /* un'impresa che NON ha scritto l'IBAN nei Dati azienda */
+    if (senzaIban && m === "GET" && tab === "gest_azienda") { const az = { user_id: UID, ragione_sociale: "Impresa di prova", nome: "Impresa di prova", piva: "00000000009", indirizzo: "Via del Cantiere 10", cap: "02100", citta: "Rieti", prov: "RI", iban: null, giorni_pagamento: 30 }; const uno1 = /vnd\.pgrst\.object/.test(r.headers()["accept"] || ""); return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(uno1 ? az : [az]) }); }
     if (m === "GET" || m === "HEAD" || m === "OPTIONS" || /^rpc\//.test(tab)) return route.fallback();
     stato.scritte.push({ m, tab, corpo, q: u.search });
     if (m === "POST" && tab === "gest_ore" && corpo) { const riga = Object.assign(base(900 + stato.scritte.length), Array.isArray(corpo) ? corpo[0] : corpo); D.gest_ore.push(riga); stato.aggiunte.push(riga); }
@@ -128,6 +130,9 @@ async function apriApp(browser, base0, W, stato) {
     prova(agg === "ok" && stato.aggiunte.length === 1 && /9,5 ore di Luca/.test(m), "(2) aggiunte 2 ore: la riga si aggiorna da sola (9,5 ore)", { agg, m });
     await foto(page, "2-margine-dopo-2-ore", "#margine-box");
     await foto(page, "8-spese", "#spese-list");
+    const ora = await testo(page, "#ora-box") || "";
+    await foto(page, "D1-incassi-ora", "#ora-box");
+    prova(/Incassi/.test(ora) && /per ogni ora/.test(ora) && !/Rende/.test(ora), "(DIFFICILE 1) Lavoro: non dice più «Rende … l'ora» ma «Incassi … per ogni ora»", ora);
     const sp = await page.evaluate(() => [...document.querySelectorAll("#spese-list .spesa-row > span")].map(e => e.firstChild ? e.firstChild.textContent.trim() : ""));
     prova(sp[0] === "Spesa NUOVA" && sp[1] === "Spesa VECCHIA", "(8) Lavoro: le spese nuove stanno in cima", sp);
     const fr = await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); return e ? e.innerText.replace(/\s+/g, " ") : null; });
@@ -187,6 +192,38 @@ async function apriApp(browser, base0, W, stato) {
     }
     /* le ore aggiunte in questo giro escono: il giro dopo riparte pulito */
     stato.aggiunte.forEach(r => { const i = D.gest_ore.indexOf(r); if (i >= 0) D.gest_ore.splice(i, 1); });
+    await ctx.close();
+  }
+
+  /* ---------- lista «DIFFICILE» n. 8 — fattura con Bonifico e senza IBAN ---------- */
+  for (const W of [1440, 375]) {
+    console.log("\nFattura senza IBAN a " + W + " px");
+    const stato = { rpc: [], scritte: [], aggiunte: [], buttati: new Set() };
+    const { ctx, page, P } = await apriApp(browser, base0, W, stato, true);
+    await P.apri(page, "fatture"); await B.aspetta(page, 1800);
+    const r = await page.evaluate(async () => {
+      const f = fattCache.find(x => x.stato === "bozza"); await fattForm(f); await new Promise(r => setTimeout(r, 700));
+      const q = s => document.querySelector(s), a = q("#fa-iban-manca"), mo = q("#fa-modo"), ib = q("#fa-iban"); if (!mo || !ib) return { manca: "il riquadro Pagamento" };
+      const vede = () => !!a && getComputedStyle(a).display !== "none" && a.getBoundingClientRect().height > 0;
+      const o = { modo: mo.value, iban: ib.value };
+      mo.value = "bonifico"; mo.dispatchEvent(new Event("change", { bubbles: true })); o.vuoto = vede(); o.dice = a ? a.innerText : ""; o.px = a ? parseFloat(getComputedStyle(a).fontSize) : 0; o.fuori = a ? a.getBoundingClientRect().right > innerWidth + 1 : false;
+      return o;
+    });
+    await foto(page, "D8-iban", "#fa-iban-manca");
+    prova(!r.manca && r.vuoto && /Manca l'IBAN/.test(r.dice || ""), "(DIFFICILE 8) Bonifico senza IBAN: sotto la casella c'è «Manca l'IBAN…»", r);
+    if (!r.manca) prova(r.px >= 14 && !r.fuori, "(DIFFICILE 8) l'avviso si legge (≥14 px) e sta nello schermo", r);
+    const r2 = await page.evaluate(async () => {
+      const q = s => document.querySelector(s), a = q("#fa-iban-manca"), mo = q("#fa-modo"), ib = q("#fa-iban");
+      const vede = () => !!a && getComputedStyle(a).display !== "none" && a.getBoundingClientRect().height > 0;
+      const o = {};
+      const b = document.querySelector('#sheet [data-action="ctr-guarda"]'); if (b) b.click(); await new Promise(r => setTimeout(r, 900));
+      o.controllo = /Manca l'IBAN: nel PDF/.test(document.querySelector("#sheet").innerText);
+      ib.value = "IT60 X054 2811 1010 0000 0123 456"; ib.dispatchEvent(new Event("input", { bubbles: true })); o.conIban = vede();
+      ib.value = ""; ib.dispatchEvent(new Event("input", { bubbles: true })); mo.value = "contanti"; mo.dispatchEvent(new Event("change", { bubbles: true })); o.contanti = vede();
+      return o;
+    });
+    prova(r2.controllo, "(DIFFICILE 8) «Controlla che sia giusto» lo dice anche lui", r2);
+    prova(r2.conIban === false && r2.contanti === false, "(DIFFICILE 8) scritto l'IBAN, o coi contanti, l'avviso sparisce", r2);
     await ctx.close();
   }
 

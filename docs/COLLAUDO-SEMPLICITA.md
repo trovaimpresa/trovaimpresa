@@ -2481,3 +2481,13 @@ ha chiesto la conferma ad Alex e non è arrivata in tempo.
   vivi → nel Cestino → «Elimina per sempre» → Sì: via il lavoro, le spese e il rapportino, Cestino vuoto, nient'altro toccato.
 - **Pulizia finale, contata dal database:** lavori, ore, spese, rapportini, clienti, persone, preventivi, righe, link,
   registro email, file dell'email = →0←. (La riga del registro email tolta alle 19:45 con la conferma di Alex.)
+
+## 14 nov 2026 (sera, 2) — lista «DIFFICILE»: le due voci dei soldi (n. 1 e n. 8)
+Scelte con Alex («si» alle 19:44, «pubblica» alle 19:56 dopo le foto a 1440 e 375).
+- [x] **n. 1 «Rende 182,11 € l'ora».** Adesso «Incassi … per ogni ora» (`renderOreBlock`, `js/gest-ore-spese.js`).
+  Il conto è lo stesso (importo diviso ore): cambiano solo le parole. Il guadagno vero resta il Margine.
+- [x] **n. 8 Fattura con «Bonifico» senza IBAN.** Sotto la casella esce in ambra «Manca l'IBAN: il cliente non sa dove
+  pagare. Scrivilo qui, o una volta per tutte nei Dati azienda.» (`#fa-iban-manca`, `js/gest-fatture.js`), e lo dice anche
+  «Controlla che sia giusto» (`ctrRegoleFattura`, arancio). Avvisa, non blocca. Con l'IBAN scritto o coi contanti sparisce.
+Banco `tools/banco-quinto-giro.js`: sulla versione di prima →8← rossi, adesso →74← verdi.
+Le altre voci della lista «DIFFICILE» e la lista «MANCA» restano da decidere con Alex.

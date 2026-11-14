@@ -6171,3 +6171,6 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 /* la riga si misura sulla COLONNA, non sullo schermo (regola del 13 nov) */
 #ore-wrap{container-type:inline-size}
 @container (max-width:420px){ .ore-add2{grid-template-columns:minmax(0,1fr)} }
+
+/* 14 nov 2026 — fattura: «Manca l'IBAN» sotto la casella (ambra = da guardare, non blocca) */
+.sheet .campo-aiuto.fa-iban-manca{ color:#92400E!important; background:#FEF3C7; border-radius:10px; padding:10px 12px; font-weight:600; }

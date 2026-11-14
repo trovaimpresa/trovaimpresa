@@ -999,7 +999,8 @@
           +     '</select></div>'
           +   '</div>'
           +   '<div class="field" id="fa-iban-wrap"'+((_mo==="bonifico"||_mo==="riba")?'':' style="display:none"')+'><label for="fa-iban">IBAN dove ricevi il bonifico</label>'
-          +     '<input type="text" id="fa-iban"'+_noAuto()+' value="'+esc(fattIban(f))+'" placeholder="IT00 X000 0000 0000 0000 0000 000"></div>'
+          +     '<input type="text" id="fa-iban"'+_noAuto()+' value="'+esc(fattIban(f))+'" placeholder="IT00 X000 0000 0000 0000 0000 000">'
+          +     '<div class="campo-aiuto fa-iban-manca" id="fa-iban-manca" style="display:none">Manca l\'IBAN: il cliente non sa dove pagare. Scrivilo qui, o una volta per tutte nei Dati azienda.</div></div>'
           + '</div>';
         })()
 
@@ -1042,9 +1043,22 @@
     /* 13 nov 2026 — il riquadro «Pagamento»: l'IBAN si vede solo se serve,
        e la scadenza segue la data finche' non la tocchi tu. */
     const _fm=$("#fa-modo"), _fs=$("#fa-scad"), _fd=$("#fa-data");
+    /* 14 nov 2026 (quinto giro, lista «DIFFICILE» n. 8) — BONIFICO SENZA IBAN.
+       Nel PDF usciva «Come si paga: Bonifico» e nessun IBAN, senza un avviso:
+       il cliente non sa dove pagare. Adesso, se serve l'IBAN e la casella e'
+       vuota, sotto c'e' scritto. Non blocca: avvisa. */
+    const _fi=$("#fa-iban");
+    const _ibanAvviso=function(){
+      const w=$("#fa-iban-wrap"), a=$("#fa-iban-manca"); if(!w||!a||!_fm||!_fi)return;
+      const serve=(_fm.value==="bonifico"||_fm.value==="riba");
+      a.style.display=(serve&&!_fi.value.trim())?"":"none";
+    };
     if(_fm)_fm.addEventListener("change",function(){
       const w=$("#fa-iban-wrap");if(w)w.style.display=(_fm.value==="bonifico"||_fm.value==="riba")?"":"none";
+      _ibanAvviso();
     });
+    if(_fi)_fi.addEventListener("input",_ibanAvviso);
+    _ibanAvviso();
     if(_fs&&_fd){
       const _ggF=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
       let _dataPrima=_fd.value;
