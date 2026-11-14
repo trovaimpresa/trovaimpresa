@@ -2491,3 +2491,17 @@ Scelte con Alex («si» alle 19:44, «pubblica» alle 19:56 dopo le foto a 1440 
   «Controlla che sia giusto» (`ctrRegoleFattura`, arancio). Avvisa, non blocca. Con l'IBAN scritto o coi contanti sparisce.
 Banco `tools/banco-quinto-giro.js`: sulla versione di prima →8← rossi, adesso →74← verdi.
 Le altre voci della lista «DIFFICILE» e la lista «MANCA» restano da decidere con Alex.
+
+### 14 nov 2026 (20:00) — le due voci «DIFFICILE» provate sul sito vero (commit →9fb17c4←)
+- [x] n. 1: nel lavoro «…ti dico quanto incassi per ogni ora».
+- [x] n. 8: fattura nuova con Bonifico e senza IBAN (l'account non ce l'ha nei Dati azienda): esce «Manca l'IBAN…»;
+  scritto l'IBAN sparisce. Niente salvato (fatture del reparto: →0←).
+
+## 14 nov 2026 (sera, 3) — lista «MANCA» n. 3: il costo orario chiesto subito
+Chiesto da Alex («facciamolo adesso», «pubblica» alle 20:21 dopo le foto a 1440 e 375).
+- [x] Nelle ore del lavoro, con «＋ Un'altra persona…», accanto al nome c'è «Quanto ti costa all'ora (€)»
+  (`#or-chi-costo`, in `js/gest-scadenze-pratiche.js`; lo legge `oreChiId` in `js/gest-ore-spese.js`).
+  Pieno: la persona nasce col costo e le sue ore entrano nel margine. Vuoto: nasce lo stesso (il margine dice che manca).
+  Scritto male o sotto zero: si ferma, con `campoManca` sulla casella (stessa regola di `dipCostoStorto`).
+  Per «Io» non si chiede. Una persona che c'è già con quel nome non viene toccata.
+Banco `tools/banco-quinto-giro.js`: sulla versione di prima →8← rossi, adesso →84← verdi.

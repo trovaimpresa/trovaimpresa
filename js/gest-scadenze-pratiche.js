@@ -569,7 +569,11 @@
           <label class="ore-c"><span>Che giorno</span><input id="or-data" type="date"></label>
           <label class="ore-c"><span>Quante ore</span><input id="or-ore" type="text" inputmode="decimal" placeholder="Es. 2,5"></label>
           <label class="ore-c ore-c--tutta"><span>Chi le ha fatte</span><select id="or-chi"><option value="">Scegli chi</option></select></label>
-          <label class="ore-c ore-c--tutta" id="or-chi-nuovo-box" style="display:none"><span>Nome della persona</span><input id="or-chi-nuovo" placeholder="Nome e cognome"></label>
+          <!-- 14 nov 2026 (lista «MANCA», n. 3) — il costo orario si chiede SUBITO, quando
+               la persona nasce da qui: se no la sua manodopera non entra mai nel margine.
+               Si può lasciare vuoto: la persona nasce lo stesso e il margine dice che manca. -->
+          <label class="ore-c" id="or-chi-nuovo-box" style="display:none"><span>Nome della persona</span><input id="or-chi-nuovo" placeholder="Nome e cognome"></label>
+          <label class="ore-c" id="or-chi-costo-box" style="display:none"><span>Quanto ti costa all'ora (€)</span><input id="or-chi-costo" type="text" inputmode="decimal" placeholder="Es. 22,50"></label>
           <label class="ore-c ore-c--tutta"><span>Cosa ha fatto (se vuoi)</span><input id="or-nota" placeholder="Es. Posa piastrelle bagno"></label>
           <button type="button" class="btn ore-c--tutta" data-action="ore-add">+ Aggiungi le ore</button></div>
         <div class="margine-box" id="ora-box"></div>

@@ -71,6 +71,7 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     if (m === "GET" || m === "HEAD" || m === "OPTIONS" || /^rpc\//.test(tab)) return route.fallback();
     stato.scritte.push({ m, tab, corpo, q: u.search });
     if (m === "POST" && tab === "gest_ore" && corpo) { const riga = Object.assign(base(900 + stato.scritte.length), Array.isArray(corpo) ? corpo[0] : corpo); D.gest_ore.push(riga); stato.aggiunte.push(riga); }
+    if (m === "POST" && tab === "gest_operatori" && corpo) { const riga = Object.assign(base(950 + stato.scritte.length), { telefono: "", mansione: "", costo_orario: null }, Array.isArray(corpo) ? corpo[0] : corpo); D.gest_operatori.push(riga); stato.persone.push(riga); const uno2 = /vnd\.pgrst\.object/.test(r.headers()["accept"] || ""); return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(uno2 ? riga : [riga]) }); }
     if (m === "PATCH" || m === "DELETE") {
       stato.buttati.add(tab);
       /* buttare nel cestino (PATCH eliminato_il) lo fa davvero: così il Cestino, ridisegnandosi,
@@ -96,7 +97,7 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
   const browser = await B.chromium.launch();
   for (const W of [1440, 375]) {
     console.log("\nApp a " + W + " px");
-    const stato = { rpc: [], scritte: [], aggiunte: [], buttati: new Set() };
+    const stato = { rpc: [], scritte: [], aggiunte: [], persone: [], buttati: new Set() };
     const { ctx, page, P } = await apriApp(browser, base0, W, stato);
     const ridisegna = async (t) => { await P.ridisegna(page, t); await B.aspetta(page, 1200); };
 
@@ -135,6 +136,26 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     prova(/Incassi/.test(ora) && /per ogni ora/.test(ora) && !/Rende/.test(ora), "(DIFFICILE 1) Lavoro: non dice più «Rende … l'ora» ma «Incassi … per ogni ora»", ora);
     const sp = await page.evaluate(() => [...document.querySelectorAll("#spese-list .spesa-row > span")].map(e => e.firstChild ? e.firstChild.textContent.trim() : ""));
     prova(sp[0] === "Spesa NUOVA" && sp[1] === "Spesa VECCHIA", "(8) Lavoro: le spese nuove stanno in cima", sp);
+    /* lista «MANCA» n. 3 — il costo orario chiesto subito a chi nasce da «＋ Un'altra persona…» */
+    const co = await page.evaluate(async () => {
+      const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)), sel = q("#or-chi"); if (!sel) return { manca: "il modulo delle ore" };
+      const vede = e => !!e && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().height > 0;
+      const o = { primaNascosta: !vede(q("#or-chi-costo-box")) };
+      sel.value = "__nuovo__"; sel.dispatchEvent(new Event("change", { bubbles: true })); await W(200);
+      const c = q("#or-chi-costo"); o.siVede = vede(q("#or-chi-costo-box")) && vede(q("#or-chi-nuovo-box")); if (!c) return o;
+      const r = c.getBoundingClientRect(); o.alto = Math.round(r.height); o.fuori = r.right > innerWidth + 1; o.px = parseFloat(getComputedStyle(q("#or-chi-costo-box span")).fontSize);
+      q("#or-chi-nuovo").value = "Marta Nuova"; q("#or-ore").value = "2"; c.value = "abc"; await oreAdd(); await W(700);
+      o.storto = (q("#or-chi-costo-box") || {}).innerText.replace(/\s+/g, " ");
+      return o;
+    });
+    await foto(page, "M3-costo-orario", "#or-chi-costo");
+    prova(!co.manca && co.primaNascosta && co.siVede, "(MANCA 3) con «＋ Un'altra persona…» esce anche «Quanto ti costa all'ora»", co);
+    if (co.siVede) prova(co.px >= 14 && !co.fuori && (W > 800 || co.alto >= 44), "(MANCA 3) la casella si legge e si tocca", co);
+    prova(stato.persone.length === 0 && /Non ho capito il costo orario/.test(co.storto || ""), "(MANCA 3) un costo scritto male («abc») ferma tutto e lo dice sulla casella", { persone: stato.persone.length, dice: co.storto });
+    const co2 = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)); const c = q("#or-chi-costo"); if (!c) return {}; c.value = "18,50"; c.dispatchEvent(new Event("input", { bubbles: true })); q("#or-ore").value = "2"; await oreAdd(); await W(1800); return { m: q("#margine-box").innerText.replace(/\s+/g, " "), vuota: q("#or-chi-costo") ? q("#or-chi-costo").value : null }; });
+    const marta = stato.persone[0] || {};
+    prova(stato.persone.length === 1 && marta.nome === "Marta Nuova" && marta.costo_orario === 18.5, "(MANCA 3) la persona nasce col suo costo orario (18,50)", marta);
+    prova(!/Marta/.test(co2.m || "x Marta") && /Manodopera/.test(co2.m || ""), "(MANCA 3) …e le sue ore entrano nel margine senza avvisi", co2.m);
     const fr = await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); return e ? e.innerText.replace(/\s+/g, " ") : null; });
     await foto(page, "11-frase", "#sheet .campo-aiuto b");
     await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); if (e) e.scrollIntoView({ block: "center" }); }); await foto(page, "11-frase");
@@ -192,13 +213,14 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     }
     /* le ore aggiunte in questo giro escono: il giro dopo riparte pulito */
     stato.aggiunte.forEach(r => { const i = D.gest_ore.indexOf(r); if (i >= 0) D.gest_ore.splice(i, 1); });
+    stato.persone.forEach(r => { const i = D.gest_operatori.indexOf(r); if (i >= 0) D.gest_operatori.splice(i, 1); });
     await ctx.close();
   }
 
   /* ---------- lista «DIFFICILE» n. 8 — fattura con Bonifico e senza IBAN ---------- */
   for (const W of [1440, 375]) {
     console.log("\nFattura senza IBAN a " + W + " px");
-    const stato = { rpc: [], scritte: [], aggiunte: [], buttati: new Set() };
+    const stato = { rpc: [], scritte: [], aggiunte: [], persone: [], buttati: new Set() };
     const { ctx, page, P } = await apriApp(browser, base0, W, stato, true);
     await P.apri(page, "fatture"); await B.aspetta(page, 1800);
     const r = await page.evaluate(async () => {
@@ -232,7 +254,7 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
   {
     ["gest_lavori", "gest_fatture", "gest_ore", "gest_spese", "gest_rapportini"].forEach(tb => D[tb].forEach(r => { r.eliminato_il = null; }));
     D.gest_clienti.push(Object.assign({}, D.gest_clienti[1], { id: id(103), nome: "Cliente di un altro reparto", mestiere_id: "altroreparto01", eliminato_il: g(0) + "T09:00:00+00:00" }));
-    const stato = { rpc: [], scritte: [], aggiunte: [], buttati: new Set() };
+    const stato = { rpc: [], scritte: [], aggiunte: [], persone: [], buttati: new Set() };
     const { ctx, page, P } = await apriApp(browser, base0, 1440, stato);
     await P.apri(page, "cestino"); await B.aspetta(page, 2500);
     const tt = await page.evaluate(() => ((document.querySelector("#cest-riass") || {}).innerText || "") + " ¦ " + ((document.querySelector("#cest-list") || {}).innerText || ""));

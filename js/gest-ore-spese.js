@@ -941,6 +941,7 @@
   function oreChiCambia(){
     const sel=$("#or-chi"), box=$("#or-chi-nuovo-box"); if(!sel||!box)return;
     box.style.display=sel.value==="__nuovo__"?"":"none";
+    const boxC=$("#or-chi-costo-box"); if(boxC) boxC.style.display=sel.value==="__nuovo__"?"":"none";
   }
   document.addEventListener("change",e=>{ if(e.target&&e.target.id==="or-chi"){ oreChiCambia(); if(e.target.value==="__nuovo__"){ const n=$("#or-chi-nuovo"); if(n)n.focus(); } } });
   /* la persona scelta, come id di gest_operatori: la crea se serve */
@@ -949,10 +950,19 @@
     const v=sel.value;
     if(!v) return {manca:true};
     if(v!=="__io__"&&v!=="__nuovo__") return {id:v};
-    let nome="";
+    let nome="", costo=null;
     if(v==="__nuovo__"){
       nome=String(($("#or-chi-nuovo")||{}).value||"").trim();
       if(!nome){ campoManca("#or-chi-nuovo","Manca il nome della persona: scrivilo qui."); return {stop:true}; }
+      /* 14 nov 2026 (lista «MANCA», n. 3) — il costo orario, se l'ha scritto. Vuoto va
+         bene (nessun costo); scritto male o sotto zero si ferma, come nella scheda
+         della persona (dipCostoStorto): un refuso non deve diventare un costo. */
+      const tc=String(($("#or-chi-costo")||{}).value||"").trim();
+      if(tc!==""){
+        costo=_numIt("#or-chi-costo");
+        if(costo==null){ campoManca("#or-chi-costo","Non ho capito il costo orario: scrivilo come 22,50."); return {stop:true}; }
+        if(costo<0){ campoManca("#or-chi-costo","Il costo orario non può essere negativo."); return {stop:true}; }
+      }
     }else{
       try{ if(typeof giorLeggiTitolare==="function") nome=await giorLeggiTitolare(); }catch(_){}
       nome=nome||"Io";
@@ -960,11 +970,12 @@
     nome=nome.charAt(0).toUpperCase()+nome.slice(1);
     const gia=(dipCache||[]).find(d=>String(d.nome||"").toLowerCase().trim()===nome.toLowerCase());
     if(gia) return {id:gia.id};
-    const {data,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id:curMestiere(),nome:nome.slice(0,60)}).select("id,nome");
+    const {data,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id:curMestiere(),nome:nome.slice(0,60)},costo!=null?{costo_orario:costo}:{})).select("id,nome");
     if(error||!data||!data.length){ toast("Non riesco ad aggiungere "+nome+" alla squadra: "+((error&&error.message)||"nessuna riga")); return {stop:true}; }
-    if(Array.isArray(dipCache)) dipCache.push({id:data[0].id,nome:data[0].nome,ruolo:"operaio",permessi:{},docs:[]});
+    if(Array.isArray(dipCache)) dipCache.push({id:data[0].id,nome:data[0].nome,costo_orario:costo,ruolo:"operaio",permessi:{},docs:[]});
     if(v==="__io__"&&typeof _gSetIo==="function") _gSetIo(data[0].id);
     const n=$("#or-chi-nuovo"); if(n) n.value="";
+    const nc=$("#or-chi-costo"); if(nc) nc.value="";
     return {id:data[0].id,nuovo:nome};
   }
 
