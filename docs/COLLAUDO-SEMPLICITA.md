@@ -2291,3 +2291,114 @@ nessuno vede. Deciso con Alex (foto prima/dopo dal sito vero, ok alle 03:37).
 - Banco nuovo `node tools/banco-profilo-gestionale.js`: 9 verdi; sulla versione di PRIMA 3 rossi.
 - Resta aperto: `gest_prova_fine` nasce vuota anche dalla porta del gestionale (da vedere se serve ancora, ora che il
   gestionale base è gratis).
+
+
+## 14 nov 2026 — quinto giro del controllore separato
+Solo trovare, niente codice toccato. Tre liste in fondo a questo capitolo.
+
+**Come è stato fatto.** Banchi: tutti VERDI (gestionale 1440/375/360, soldi 36, preventivo 38, noleggio 31, gruppo4 59,
+gruppo5 34, email-pdf 49, correttore, copia-computo, profilo 9). Misure in più con un giro mio (App impresa, App studio,
+Noleggio a 375 e 1920; app dell'operaio a 375 con un operaio finto): ogni sezione e ogni finestra che si apre da lì.
+Dal vivo, account info@, reparto «ferramenta», nome «PROVA CONTROLLORE»: cliente → preventivo (3 voci, sconto 7,5%, IVA 22%)
+→ PDF → «Email con PDF» → lavoro → spese, ore, rapportino → fattura in BOZZA (2 aliquote, bollo, ritenuta) → PDF → Cestino.
+Studio: giro `?giro=1&tipo=professionista` a 1440 e 375.
+
+**Va bene (provato dal vivo):** i conti del preventivo e della fattura tornano al centesimo, uguali in modulo, elenco, PDF e
+dentro il lavoro (1.476,60 − 110,75 = 1.365,85; IVA 300,49; 1.666,34. Fattura a 2 aliquote: IVA 293,83, bollo 2,00, ritenuta
+54,63, netto 1.607,05). «Email con PDF»: arrivata, mittente e risposta giusti, allegato ora «application/pdf», deposito a 0.
+«Totale documento» della parcella c'è. «Cambia il traguardo» c'è. Nessuna scritta sotto i 14 px e nessuna finestra piccola
+trovata (l'unico `openSheet` piccolo è il QR della persona). Niente esce dallo schermo a 375, 1440, 1920.
+
+### 1. NON FUNZIONA
+1. **Fatture, avviso «manca la n. …» falso.** Da quando i numeri sono una serie sola (App + Noleggio), l'App cerca i buchi
+   solo fra le SUE fatture (`gest-fatture.js`, riga 652: legge solo `gest_fatture`). Una fattura emessa dal Noleggio diventa
+   «manca la n. 3 — è stata eliminata per sempre: dillo al commercialista». Rifatto col banco (App n. 1, 2, 4 · Noleggio n. 3).
+   Dal vivo in «ferramenta»: «mancano le n. 1 … e altre 8». Peso: **spavento sui soldi** (un allarme fiscale falso). Foto 01.
+2. **Lavoro, margine: «7,5 ore senza il nome di chi le ha fatte».** Le ore il nome ce l'hanno: è la PERSONA che non ha il
+   costo orario. Succede sempre con «＋ Un'altra persona…» (nasce senza costo). E la riga non si aggiorna: aggiunte altre 2 ore,
+   dice ancora 7,5. Peso: **soldi** (il margine è più alto del vero e la frase manda a cercare la cosa sbagliata).
+3. **Cestino: un lavoro con un rapportino non si elimina per sempre.** «Non posso… Mettile prima nel cestino»: ma il lavoro
+   è già nel Cestino e non si apre. Bisogna rimetterlo a posto, buttare il rapportino con la ×, ributtare il lavoro. Con ore
+   e spese invece chiede e va. Col «Rapportino da far firmare» capita spesso. Peso: **fastidio**.
+4. **Squadra conta le giornate di un lavoro nel Cestino.** Lavoro buttato: Squadra diceva ancora «2 giorni a novembre ·
+   1 cantiere». (In Giornate era stato corretto il 13 nov; qui no.) Peso: **soldi** (giornate da pagare sbagliate).
+5. **Squadra: «Invitato» a chi non è mai stato invitato.** La persona nata da «＋ Un'altra persona…» nelle ore esce con
+   l'etichetta «Invitato». Peso: **fastidio**.
+6. **Noleggio, il conto: accenti sbagliati (è il n. 24 mai trovato).** `js/noleggio-prezzo.js`, 7 avvisi: «Il mezzo e'
+   ancora fuori: questo e' il conto… si rifa' da solo», «non si puo' fare», «e' piu' bassa», «non c'e' la tariffa»,
+   «Il rientro e' prima», «non e' dopo». Peso: **fastidio**. Foto 02.
+7. **Altri accenti rimasti (n. 24):** PDF preventivo e ricevuta «(il nome della tua attivita' va nei Dati azienda)» e
+   «il nome dell'attivita'»; Squadra «non puo' essere prima», «La persona e' salvata»; QR «non si e' potuto disegnare»;
+   foto «piu' piccola»; Richieste dal sito «Citta'»; Excel «Agibilita'». Peso: **fastidio**.
+8. **Lavoro: le spese nuove finiscono in fondo.** `gest_spese` è letta dalla più vecchia. La regola dice: le ultime in cima.
+   (Le ore invece sono giuste.) Peso: **fastidio**.
+9. **Cliente dell'App: CAP di 4 cifre accettato** («0210», salvato e stampato nel PDF). Nel Noleggio viene rifiutato.
+   Peso: **fastidio** (e il file per lo SdI lo rifiuterebbe).
+10. **App dell'operaio, telefono: «Apri in Google Maps» è alto 20 px** (regola: 44). E nella prima schermata il pulsante
+    «Parla» copre il testo di «Metti l'app sul telefono». Peso: **fastidio**. Foto 07 e 08.
+11. **Lavoro: «nel menu … della riga trovi Crea fattura».** Nella riga del lavoro quel menu non c'è più: c'è solo «Apri».
+    Peso: **fastidio** (manda a cercare un pulsante che non esiste).
+12. **Cestino, scritte:** «0 cose eliminate in questo reparto · Si possono rimettere a posto», «Altre 1 stanno in altri
+    reparti», «la bozza… Lo riprendi», fattura «eliminato oggi». Peso: **fastidio**.
+13. **Email con PDF:** la finestra dice «Allegato: preventivo-1-prova-controllore.pdf», arriva «preventivo-1.pdf».
+    Peso: **fastidio**.
+
+### 2. DIFFICILE
+1. **«Rende 182,11 € l'ora»** (lavoro): è l'importo diviso le ore, senza togliere le spese. Direi: «Incassi 182,11 € per
+   ogni ora» oppure toglierei le spese (qui 166,05 €). Peso: **soldi** (sembra il guadagno).
+2. **«Scarica PDF» apre «Controllo prima di mandare»** con «Sistemo / Mando lo stesso». Non sto mandando: direi «Scarico lo
+   stesso». E dopo la finestra del preventivo si chiude: tornerei dov'ero. Peso: fastidio.
+3. **Studio, elenco preventivi:** una BOZZA dice «702,65 € da incassare». Direi «netto» (da incassare è per le fatture).
+   Peso: fastidio. Foto 06.
+4. **Studio, parcella sul telefono:** «IVA (su 3.675,00 €: le spese sono fuori IVA)» va a capo su tre righe e la cifra
+   scende sotto (ANCORA LÌ). Direi «IVA 22%» e sotto, piccolo, «su 3.675,00 €». Peso: fastidio.
+5. **Studio, parole da impresa:** «Reparti», «Reparto attivo», «Dati azienda», «Giornate». Direi «Dati dello studio».
+6. **Crediti formativi:** «13 di 30 CFP» e sotto «Ti mancano 17 crediti»: due parole per la stessa cosa. E «CFP» non è spiegato.
+7. **Dopo «Accettato → crea lavoro»** resti in Preventivi. Direi: «Lavoro creato. Aprilo» con un pulsante.
+8. **Fattura con «Bonifico» senza IBAN:** esce nel PDF «Come si paga: Bonifico» e nessun IBAN, senza avviso.
+   Direi: «Manca l'IBAN: scrivilo qui o nei Dati azienda». Peso: **soldi** (il cliente non sa dove pagare).
+9. **Clienti in ordine alfabetico:** il cliente appena salvato non è in cima. Se è voluto, va bene; se no, come gli altri elenchi.
+10. **Schermata dei reparti:** «esportali quando vuoi dal pulsante in alto». La regola dice «Scarica per Excel».
+11. **Unità di misura:** «cad», «q», «t», «l», «n.» senza spiegazione. Direi «cad (l'uno)», «q (quintali)».
+12. **Lavoro, testi lunghi addosso:** «Lo stato lo decide la fattura, non questo modulo…» e la spiegazione dei rapportini
+    (4 righe). Regola 6: toglierei o accorcerei a una riga.
+13. **PDF:** gli importi escono «1.666,34 EUR» e non «€».
+14. **Email al cliente:** comincia sempre «Buongiorno,» anche di sera. Direi «Gentile cliente,».
+15. **App dell'operaio:** sette riquadri prima di «Segna come fatto»; titoli tutti in MAIUSCOLO; «Indietro» anche nella prima
+    schermata.
+
+### 3. MANCA
+1. **L'avviso dei numeri mancanti nel Noleggio** (oggi solo nell'App, e sbagliato: vedi 1.1).
+2. **Un pulsante «Butta anche il rapportino»** quando si elimina per sempre un lavoro (vedi 1.3).
+3. **Il costo orario chiesto subito** quando nasce una persona da «＋ Un'altra persona…» (se no la manodopera non entra mai nel margine).
+4. **Crediti formativi sul triennio** (60 CFP per architetti e geometri): c'è solo l'anno.
+5. **Rapportino fatto dal gestionale: le sue ore.** Nella riga dice «0 h» (le ore sono nel registro, il PDF le ha). ANCORA LÌ.
+6. **«Manda al cliente» per la fattura** (c'è solo per il preventivo).
+7. **L'unità di misura nella fattura** (oggi va fra parentesi nella descrizione).
+8. **Il controllo del CAP** nel cliente dell'App (5 cifre), come nel Noleggio.
+
+### «RESTANO APERTI» del quarto giro
+- n. 24 accenti: **ancora lì** — trovato dov'è (1.6 e 1.7).
+- n. 25 «Bravo, hai mandato il tuo primo preventivo!»: **non visto** (oggi tutti i preventivi dell'account sono bozze).
+  Dal codice: il conto è su TUTTO l'account, non sul reparto. Esce se in un altro reparto c'è un preventivo non in bozza
+  (anche solo «rifiutato»).
+- IVA che va a capo sul telefono: **ancora lì** (2.4).
+- CFP per anno/triennio: **ancora lì** (3.4).
+- Rapportino «0 h»: **ancora lì** (3.5).
+- «1 lavoro in tutto» in ferramenta: **è vero**, non è un difetto. È «Fornitura materiale villetta via Roma» del 29 ago, stato «fatto».
+
+### NON provato
+- App dell'operaio e studio tecnico con gli account VERI (serve la password di Alex): provati solo col banco e col giro.
+- «Completa il profilo» dal vivo: solo banco (9 verdi).
+- L'albo nei PDF dal vivo: solo banco (gruppo5 verde).
+- Noleggio dal vivo: solo banco e misure (niente salvato sul sito vero).
+- Fattura EMESSA, file per lo SdI, IBAN, ricevuta che salda: non si emette e non si scrive un IBAN finto.
+- Chat con AI, «Parla», firma SMS, AI dei moduli (costano crediti). Telefono vero. Il 1920 solo come misure.
+- Senza rete: solo banco.
+
+### Pulizia
+Tutto eliminato anche dal Cestino, contato dal database: clienti, lavori, preventivi, righe, link, fatture, ore, spese,
+rapportini, persone = →0←. Anche la riga del registro dell'email di prova (`gest_email_documenti`) è stata tolta
+(18:07, dopo la conferma di Alex): →0← righe. Email di prova mandate: →1←, a info@trovaimpresa.com.
+Visto e non toccato: nell'account rieticitta c'è ancora il reparto «PROVA CONTROLLORE Studio» (del quarto giro); nel Cestino
+di info@ c'è →1← cosa in un altro reparto (non mia).
