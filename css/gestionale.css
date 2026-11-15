@@ -6174,3 +6174,8 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 
 /* 14 nov 2026 — fattura: «Manca l'IBAN» sotto la casella (ambra = da guardare, non blocca) */
 .sheet .campo-aiuto.fa-iban-manca{ color:#92400E!important; background:#FEF3C7; border-radius:10px; padding:10px 12px; font-weight:600; }
+
+/* 15 nov 2026 (sesto giro, n. 2) — «Scrivi il costo orario di …» nel margine del
+   lavoro: con un nome lungo la scritta usciva dal pulsante sul telefono.
+   Va a capo (regola 18), il pulsante cresce in altezza e non tocca la frase sopra. */
+.sheet .marg-senza-costo .marg-scheda{ white-space:normal; height:auto; min-height:44px; max-width:100%; padding-top:9px; padding-bottom:9px; line-height:1.25; text-align:center; overflow-wrap:anywhere; margin-top:8px; }

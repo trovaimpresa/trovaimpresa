@@ -2505,3 +2505,127 @@ Chiesto da Alex («facciamolo adesso», «pubblica» alle 20:21 dopo le foto a 1
   Scritto male o sotto zero: si ferma, con `campoManca` sulla casella (stessa regola di `dipCostoStorto`).
   Per «Io» non si chiede. Una persona che c'è già con quel nome non viene toccata.
 Banco `tools/banco-quinto-giro.js`: sulla versione di prima →8← rossi, adesso →84← verdi.
+
+«14 nov, 20:35 — MANCA n. 3 provata sul sito vero (commit 85e0485): persona nata
+con costo 18,50, manodopera 37,00 € nel margine, «abc» rifiutato. Pulizia: →0← righe.»
+
+## 15 nov 2026 — sesto giro del controllore separato
+Solo trovare, niente codice toccato. Ricontrollati i commit →77d6366← · →8df5099← · →9fb17c4← · →85e0485←.
+
+**Come è stato fatto.** Banchi: tutti VERDI (quinto-giro →84←, gestionale 1440/375/360 zero difetti, soldi 36, preventivo 38,
+noleggio 31, gruppo4 59, gruppo5 34, email-pdf 49, correttore, copia-computo, profilo 9). `controllo-push`: «tutto a posto».
+Sulla versione di prima il banco nuovo dà →60← rossi. Sonde mie col database finto (App a 375, 1440, 1920; app dell'operaio a
+375 e 360). Dal vivo, account info@, reparto «ferramenta», nome «PROVA CONTROLLORE»: margine, pulsante del costo orario,
+persona che c'è già, Cestino con altre cose dentro, Squadra.
+
+**Va bene (provato).**
+- Cestino: «Elimina per sempre» su un lavoro con ore e spese, con ALTRE cose nel Cestino (cliente, spesa, ore, persona,
+  fattura in bozza): se ne va solo il lavoro coi suoi pezzi. Banco e sito vero. «Scegli cosa eliminare» e «Svuota il cestino»
+  non hanno quel difetto (non vanno «per numero»); un lavoro con pezzi vivi con «Svuota» resta lì e i pezzi non si toccano.
+- Cestino, parole: lavoro e cliente «eliminato», fattura, spesa, persona «eliminata», ore «eliminate».
+- Margine: i numeri sono quelli di prima (stessa prova su prima e dopo: manodopera 438,75 €, margine 361,25 €). Due persone
+  senza costo: due righe, due pulsanti. Persona nel Cestino: «una persona che non è più in squadra», senza pulsante.
+- Costo orario chiesto subito: «abc» e «-5» rifiutati sulla casella; «22.50» e «20 €» capiti; per «Io» non si chiede.
+- App dell'operaio (banco): striscia di «Parla» a posto, il toast sta sopra la striscia, dentro un lavoro la striscia non c'è,
+  «Apri in Google Maps» alto 48 px. Niente sotto i 14 px, niente fuori dallo schermo.
+- CAP: «0210» rifiutato, «02100» salvato. Nel database nessun cliente ha oggi un CAP sbagliato (→0← su →24←).
+- Misure a 375, 1440, 1920 dei pezzi nuovi (ore, margine, avviso IBAN, CAP, Cestino): niente sotto i 14 px, niente fuori.
+
+### 1. NON FUNZIONA
+1. **Lavoro, «Scrivi il costo orario di …»: perdi quello che non hai salvato, senza domanda.** Cambiato l'importo (1.000 →
+   7.777), premuto il pulsante: si apre la scheda della persona, il lavoro si chiude, nessun «esco senza salvare». Riaperto:
+   1.000. Chiusa la scheda torni all'elenco, non al lavoro. Banco e sito vero. (Per «＋ nuovo cliente» la domanda c'è.)
+   Peso: **soldi** (un importo o delle note persi) e fastidio.
+2. **Lo stesso pulsante sul telefono: la scritta esce dal pulsante.** Con un nome oltre le 16 lettere («Alessandro
+   Mastrogiovanni», «PROVA CONTROLLORE Operaio») a 375 e a 360 la scritta non va a capo e sborda a destra e a sinistra.
+   «Mario Rossi» ci sta. Peso: **fastidio** (regola 18).
+3. **Email con PDF, impresa con «Sei anche un professionista?» acceso.** La finestra dice «Allegato: parcella-1-….pdf» e il
+   PDF è una parcella; il server guarda solo il tipo vero: l'email dice «Preventivo n. 1» e l'allegato si chiama
+   «preventivo-1-….pdf». Letto nel codice (`invia-preventivo-email.js`, riga 140), email non mandata. Peso: **fastidio**.
+4. **Email con PDF, nome del cliente oltre 80 lettere.** La finestra fa vedere il nome intero, l'email lo taglia a 80.
+   Peso: fastidio piccolo.
+5. **Accenti rimasti.** Chat della squadra «Il messaggio e' salvato»; app dell'operaio «La chat generale non e'
+   disponibile»; due caselle con l'esempio «cosa NON e' compreso» e «le criticita' riscontrate» (`gest-documenti-pdf.js`);
+   studio: la scadenza nasce col titolo «Integrazioni Agibilita'» (`gest-scadenze-pratiche.js`, righe 712 e 755).
+   Peso: **fastidio**.
+6. **Scritte.** «1 ora di Mario: … **le** conto al costo medio» (una sola ora: «la conto»). Nel Cestino una foto dice
+   «eliminato» (letto nel codice: il nome del file non comincia con «Foto»). Peso: fastidio.
+7. **Il banco nuovo non vede 6 rotture fatte apposta** (resta →84← verdi): ore «eliminato» e spesa senza «eliminata»;
+   lettura del Noleggio rotta e ignorata; «Senza invito» tolto dal Noleggio; toast rimesso sotto la striscia di «Parla»;
+   costo orario negativo accettato; avviso IBAN in «Controlla che sia giusto» anche coi contanti. Ne vede 2: il Cestino
+   «per numero» e il conto della manodopera cambiato. Peso: **rischio** (un difetto può tornare senza che nessuno lo veda).
+
+### 2. DIFFICILE
+1. **Persona che c'è già con quel nome.** Scrivi «luca», costo 25: le ore vanno al Luca che c'è, il costo è ignorato, dice
+   solo «Ore aggiunte». Sotto, il margine dice ancora «non ha il costo orario». E nome e costo restano scritti nelle due
+   caselle nascoste: la volta dopo te li ritrovi. Direi: «Luca c'è già: il costo si scrive nella sua scheda» e caselle vuote.
+2. **Fatture, se il Noleggio non si legge.** Provato: con un buco vero (manca la n. 3) e la lettura rotta, l'avviso sparisce
+   e non dice niente. È un buco piccolo ma vero. Direi: «Non riesco a controllare i numeri delle fatture: riprova».
+3. **Fatture, avviso misto** (dal codice): se un numero è nel Cestino del Noleggio e un altro è sparito davvero, dice solo
+   «qualcuna è nel Cestino del Noleggio» e non dice più «dillo al commercialista».
+4. **CAP di un cliente straniero.** «CH-6900» e «SW1A 1AA» sono rifiutati, nell'App e nel Noleggio. Si salva solo lasciando
+   vuoto, ma la frase non lo dice. Problema piccolo. Direi: «Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.»
+5. **Nome dell'allegato.** Finestra ed email dicono lo stesso, ma gli accenti spariscono: «Niccolò D'Amico» →
+   «niccol-d-amico», «Società … S.r.l.» → «societ-…-s-r-l-.pdf».
+6. **Persona aggiunta da un altro telefono o computer.** Finché non ricarichi la pagina, le sue ore sono «di una persona
+   che non è più in squadra». Visto sul sito vero.
+7. **Costo orario:** «1.000» diventa 1.000 € l'ora; «18,555» resta con tre decimali.
+8. **Striscia di «Parla»:** porta via 86 px fissi in fondo (su 700).
+
+### 3. MANCA
+1. La domanda «esco senza salvare» sul pulsante del costo orario (vedi 1.1).
+2. Nel banco: le 6 prove del punto 1.7, più un nome lungo sul pulsante e una persona che c'è già.
+3. Nel Noleggio la schermata Squadra non c'è: «Senza invito» lì non si vede mai (il pezzo c'è nel codice ma non è usato).
+4. Il paese del cliente (serve per il CAP estero).
+
+### NON provato
+- App dell'operaio con un operaio vero e un telefono vero: solo banco. Telefono vecchio senza «:has()»: non provato; dal
+  codice resta com'era prima (Parla sopra il testo), usabile.
+- Accenti del conto del Noleggio dal vivo (serve un mezzo fuori): solo letti nel file.
+- Email vera: non mandata (→0←). I punti 1.3 e 1.4 sono dal codice e da un conto fatto a parte.
+- Nel Cestino: pratica dello studio, nota di credito, ricevuta, foto: solo dal codice.
+- Studio tecnico e Noleggio dal vivo. Fattura emessa, IBAN salvato. Chat con AI, «Parla».
+
+### Pulizia
+Create in «ferramenta»: 2 clienti, 2 lavori, 1 persona, 3 righe di ore, 3 spese. Tutto eliminato anche dal Cestino.
+Contato dal database: clienti, lavori, persone, ore, spese, rapportini, preventivi, fatture = →0←. Email mandate: →0←.
+
+## 15 nov 2026 — sistemati i NON FUNZIONA del sesto giro
+Le liste «DIFFICILE» e «MANCA» non sono state toccate (si decidono con Alex, una per volta). Nessun conto è cambiato.
+Legenda: [x] fatto e provato · [~] a metà · [-] non fatto. Il numero è quello della lista «1. NON FUNZIONA» qui sopra.
+
+**Come è stato provato.** `tools/banco-quinto-giro.js`: sulla versione di PRIMA →18← rossi, DOPO →138← verdi e zero rossi.
+`tools/banco-email-pdf.js`: →62← verdi (erano 49). Tutti gli altri banchi verdi (gestionale 1440/375/360 zero difetti,
+soldi 36, preventivo 38, noleggio 31, gruppo4 59, gruppo5 34, correttore, copia-computo, profilo 9).
+`controllo-push`: «tutto a posto». Misure del pulsante a 360, 375, 1440 e 1920: scritta dentro, 14 px, alto 44 o più.
+
+- [x] **1. Lavoro, «Scrivi il costo orario di …».** `js/gest-finestre-eventi.js`, azione «sq-edit»: se il pulsante è
+  premuto DENTRO un lavoro, prima chiede («Apro la scheda di Luca al posto di questo lavoro. Se hai scritto qualcosa
+  senza salvare, va perso. Quando chiudi la scheda torni al lavoro. Continuare?»). No: resti nel lavoro, quello che hai
+  scritto c'è. Sì: si apre la scheda; quando la chiudi (Salva, Annulla, freccia, clic fuori) torni NEL LAVORO
+  (`_tornaAlLavoro` + `closeSheet`). Riaprire un lavoro adesso è una funzione sola, `lavoroApri(id)` (la usa anche
+  «edit-job»). Dalla Squadra la scheda si apre come prima, senza domanda. Nello studio dice «pratica».
+- [x] **2. Lo stesso pulsante sul telefono.** `css/gestionale.css` (`.marg-scheda`): la scritta va a capo, il pulsante
+  cresce e non tocca la frase sopra. Provato con «Alessandro Mastrogiovanni» a 375 e 360.
+- [x] **3. Email con PDF, «Sei anche un professionista?».** `netlify/functions/invia-preventivo-email.js`: `eStudio()`
+  guarda il tipo E `imprese.faccia_gestionale` (solo per impresa e artigiano, come `js/gest-reparti.js`). Oggetto, testo
+  e allegato dicono «parcella» come la finestra. Se la colonna non c'è si legge come prima.
+- [x] **4. Nome del cliente nel file.** Una regola sola, `nomeFileCliente()`: in `js/gest-documenti-pdf.js` (la usano il
+  PDF e la finestra «Invia al cliente») e, uguale, nella funzione dell'email. Massimo 80 lettere in tutti e tre i posti,
+  gli accenti non spariscono («Niccolò D'Amico» → `niccolo-d-amico`, DIFFICILE n. 5), niente trattino in coda
+  («…S.r.l.» → `…-s-r-l.pdf`). Il banco dell'email confronta le due funzioni su 9 nomi.
+- [x] **5. Accenti.** Chat della squadra, app dell'operaio, i due esempi nelle caselle di `gest-documenti-pdf.js`.
+  Il titolo della scadenza nasce «Agibilità» (`praticaTipoScritto` in `js/gest-scadenze-pratiche.js`, nei due punti);
+  nel database il tipo resta «Agibilita'».
+- [x] **6. Scritte.** Con una sola ora «la conto», «non entra», «contata» (`margineRigheOre`). Cestino: una foto è
+  «eliminata»; un documento resta «eliminato» (`cestEliminato` guarda la tabella `gest_foto` e il tipo).
+- [x] **7. Il banco.** Prove nuove in `tools/banco-quinto-giro.js` (sigla «S6»). Ognuna diventa ROSSA rompendo apposta
+  il codice (una rottura per volta, su una copia del sito):
+  a) ore/spesa nel Cestino con la parola sbagliata → 4 rossi · b) tolto «if(rNol.error) throw» → 2 rossi ·
+  c) toast rimesso sotto la striscia di «Parla» → 1 rosso · d) costo orario negativo accettato nelle ore → 6 rossi,
+  nella scheda della persona → 4 rossi · e) avviso IBAN anche coi contanti → 2 rossi · f) pulsante senza «a capo» →
+  1 rosso (a 375) · g) persona che c'è già non riconosciuta → 4 rossi. In più: tolta la domanda → 6 rossi; tolto il
+  ritorno al lavoro → 2 rossi; «le conto» → 2 rossi; foto «eliminato» → 2 rossi.
+  Il banco adesso prova il Cestino anche sul computer (prima solo la fattura, solo sul telefono).
+
+**NON provato col banco:** l'email vera con la parcella e col nome lungo; tutto quello che chiede il sito vero.

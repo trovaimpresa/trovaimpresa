@@ -681,6 +681,12 @@
   function _paroleChiave(s){
     return _senzaAccenti(s).replace(/[^a-z0-9]+/g," ").trim();
   }
+  /* 15 nov 2026 (sesto giro, n. 5) — nel database il tipo resta «Agibilita'»
+     (con l'apostrofo): quello che si SCRIVE in un titolo ha l'accento vero. */
+  function praticaTipoScritto(t){
+    t=String(t||"").trim();
+    return t==="Agibilita'"?"Agibilità":t;
+  }
   function titoloScadenza(tipo,desc,pro){
     tipo=String(tipo||"").trim();
     desc=String(desc||"").trim();
@@ -709,7 +715,7 @@
       if(error)return;                                   /* colonna non ancora creata: zitto */
       if((gia||[]).some(x=>x.data_scadenza===data))return;
       const pro=ruoloUtente==='professionista';
-      const tipo=String((dati&&dati.pratica_tipo)||"").trim();
+      const tipo=praticaTipoScritto((dati&&dati.pratica_tipo)||"");   /* 15 nov 2026: nel titolo «Agibilità» */
       const desc=String((dati&&dati.descrizione)||"").trim();
       const titolo=titoloScadenza(tipo,desc,pro);
       /* 11 nov 2026 — collaudo 3.4: si dicono solo gli avvisi che arriveranno
@@ -752,7 +758,7 @@
       const t=new Date(todayStr()+"T12:00:00");t.setDate(t.getDate()+30);
       const data=t.toISOString().slice(0,10);
       const desc=String((dati&&dati.descrizione)||"").trim();
-      const tipo=String((dati&&dati.pratica_tipo)||"").trim();
+      const tipo=praticaTipoScritto((dati&&dati.pratica_tipo)||"");   /* 15 nov 2026: nel titolo «Agibilità» */
       const titolo=("Integrazioni "+(tipo?tipo+" ":"")+(desc?"— "+desc:"")).trim();
       if(!(await gconfirm("Il Comune ha chiesto le integrazioni.\n\nDi solito ci sono 30 giorni per mandarle: ti segno la scadenza al "+fdate(data)+"?\n\nTe la ricordo per email 7 giorni prima e il giorno prima. Se il Comune ti ha dato un'altra data, la cambi dallo Scadenzario.")))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),

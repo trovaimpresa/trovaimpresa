@@ -357,6 +357,7 @@
           tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?(x.c.t==='gest_lavori'?_lav():x.c.labImp):x.c.lab,
           nome:nome.length>80?nome.slice(0,79).trimEnd()+"…":nome,
           quando:r.eliminato_il, id:r.id, path:r.storage_path||null,
+          sotto:(x.c.t==="gest_foto")?String(r.tipo||""):"",   /* 15 nov 2026: foto o documento (cestEliminato) */
           padre:(_p&&r[_p[1]])?{tab:_p[0], col:_p[1], id:r[_p[1]], lab:_p[2]}:null});
       });
     });
@@ -862,6 +863,10 @@
   function cestEliminato(x){
     const t=String((x&&x.tab)||""), n=String((x&&x.nome)||"");
     if(t==="gest_ore") return "eliminate";
+    /* 15 nov 2026 (sesto giro, n. 6) — una foto e' «eliminata» (anche la foto di
+       una fattura); solo il documento resta «eliminato». Il nome del file non
+       comincia quasi mai con «Foto»: si guarda la tabella. */
+    if(t==="gest_foto") return String((x&&x.sotto)||"")==="documento"?"eliminato":"eliminata";
     if(/^(gest_fatture|gest_scadenze|gest_ricevute_pagamento|gest_operatori|gest_carte|gest_fatture_fornitori|gest_spese|gest_prezzi_propri|gest_note)$/.test(t)) return "eliminata";
     if(t==="gest_lavori"&&typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista") return "eliminata";
     if(/^(Nota|Fattura|Ricevuta|Foto|Pratica)\b/i.test(n)) return "eliminata";

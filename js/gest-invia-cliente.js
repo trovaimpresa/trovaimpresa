@@ -280,7 +280,7 @@
   var SVG_MAIL='<svg class="aic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
   function mailNomeFile(){
     var p=_inv.p, c=_inv.cli||{};
-    return (ruoloUtente==="professionista"?"parcella-":"preventivo-")+(p.numero||"")+"-"+String(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
+    return (ruoloUtente==="professionista"?"parcella-":"preventivo-")+(p.numero||"")+"-"+nomeFileCliente(c.nome)+".pdf";
   }
   function mailRisposte(){ return T(_inv.az.email)||T(_inv.mailMio)||""; }
   function mailAltre(){

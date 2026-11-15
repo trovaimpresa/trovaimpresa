@@ -42,12 +42,28 @@ D.gest_lavori.push(Object.assign({}, D.gest_lavori[1], { id: id(305), descrizion
 // n. 12 — una fattura in bozza nel Cestino
 D.gest_fatture.push(Object.assign({}, D.gest_fatture[2], { id: id(505), eliminato_il: g(0) + "T09:30:00+00:00" }));
 
+/* ---------- 15 nov 2026 — SESTO GIRO: i casi che il banco non vedeva ---------- */
+// (S6 f, S6 6) Alessandro: nome oltre 16 lettere, senza costo orario, UNA sola ora su un lavoro suo
+D.gest_operatori.push(Object.assign({}, D.gest_operatori[0], { id: id(203), nome: "Alessandro Mastrogiovanni", costo_orario: null, telefono: "", mansione: "" }));
+D.gest_ore.push(Object.assign(base(354), { mestiere_id: REP, lavoro_id: id(305), operatore_id: id(203), data: "2025-01-10", ore: 1, nota: "", rapportino_id: null }));
+// (S6 a) nel Cestino anche ore, una spesa, una foto e un documento (di un lavoro VIVO)
+const NEL_CESTINO = g(0) + "T08:30:00+00:00";
+D.gest_ore.push(Object.assign(base(355), { mestiere_id: REP, lavoro_id: id(302), operatore_id: id(201), data: "2025-01-11", ore: 3, nota: "ORE NEL CESTINO", rapportino_id: null, eliminato_il: NEL_CESTINO }));
+D.gest_spese.push(Object.assign(base(365, 3), { lavoro_id: id(302), descrizione: "SPESA NEL CESTINO", importo: 7, data: g(-3), fornitore_id: null, inserito_da: "Capo", creato_da: UID, eliminato_il: NEL_CESTINO }));
+D.gest_foto = (D.gest_foto || []).concat([
+  Object.assign(base(371, 3), { mestiere_id: REP, lavoro_id: id(302), nome_file: "IMG_2041.jpg", tipo: "dopo", storage_path: UID + "/prova/IMG_2041.jpg", eliminato_il: NEL_CESTINO }),
+  Object.assign(base(372, 3), { mestiere_id: REP, lavoro_id: id(302), nome_file: "Contratto firmato.pdf", tipo: "documento", storage_path: UID + "/prova/contratto.pdf", eliminato_il: NEL_CESTINO })
+]);
+
 let rossi = 0, verdi = 0;
 const prova = (ok, cosa, visto) => { if (ok) { verdi++; console.log("  ✔ " + cosa); } else { rossi++; console.log("  ✘ " + cosa + (visto !== undefined ? " — visto: " + JSON.stringify(visto).slice(0, 300) : "")); } };
 const clic = (page, azione, dati) => page.evaluate(([a, d]) => { const b = document.createElement("button"); b.dataset.action = a; Object.keys(d || {}).forEach(k => b.dataset[k] = d[k]); document.body.appendChild(b); b.click(); b.remove(); }, [azione, dati || {}]);
 /* FOTO=/una/cartella → il banco lascia anche le foto dei punti che si vedono */
 const FOTO = process.env.FOTO || "";
 const foto = async (page, nome, sel) => { if (!FOTO) return; try { if (sel) { await page.evaluate(ss => { for (const s of ss) { const e = [...document.querySelectorAll(s)].pop(); if (e) { e.scrollIntoView({ block: "center" }); break; } } }, [].concat(sel)); await B.aspetta(page, 300); } await page.screenshot({ path: path.join(FOTO, nome + "-" + page.viewportSize().width + ".png") }); } catch (e) {} };
+/* la finestra delle domande (js/ti-finestra.js): cosa dice, e premere Sì o No */
+const domanda = (page) => page.evaluate(() => { const o = document.getElementById("tif-ov"); if (!o) return ""; const cs = getComputedStyle(o), r = o.getBoundingClientRect(); return (cs.display !== "none" && cs.visibility !== "hidden" && r.height > 0) ? o.innerText.replace(/\s+/g, " ") : ""; });
+const rispondi = (page, si) => page.evaluate((si) => { const o = document.getElementById("tif-ov"); const b = o && [...o.querySelectorAll("button")].find(x => (si ? /^S[ìi]/i : /^No/i).test(x.innerText.trim())); if (b) b.click(); return !!b; }, si);
 const testo = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); return e ? e.innerText.replace(/\s+/g, " ").trim() : null; }, sel);
 
 async function apriApp(browser, base0, W, stato, senzaIban) {
@@ -66,6 +82,8 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
       const risposta = vivi.length ? { ok: false, vivi: vivi } : (corpo && corpo.p_conferma ? { ok: true, file: [] } : { ok: true, anteprima: [{ tabella: "gest_rapportini", n: 1 }, { tabella: "gest_ore", n: 2 }], scollegate: [] });
       return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(risposta) });
     }
+    /* (S6 b) il Noleggio non si legge: il database risponde «errore» */
+    if (stato.nolRotto && m === "GET" && tab === "nol_fatture") return route.fulfill({ status: 500, headers: cors, contentType: "application/json", body: JSON.stringify({ message: "il banco ha rotto apposta la lettura di nol_fatture", code: "XX000" }) });
     /* un'impresa che NON ha scritto l'IBAN nei Dati azienda */
     if (senzaIban && m === "GET" && tab === "gest_azienda") { const az = { user_id: UID, ragione_sociale: "Impresa di prova", nome: "Impresa di prova", piva: "00000000009", indirizzo: "Via del Cantiere 10", cap: "02100", citta: "Rieti", prov: "RI", iban: null, giorni_pagamento: 30 }; const uno1 = /vnd\.pgrst\.object/.test(r.headers()["accept"] || ""); return route.fulfill({ status: 200, headers: cors, contentType: "application/json", body: JSON.stringify(uno1 ? az : [az]) }); }
     if (m === "GET" || m === "HEAD" || m === "OPTIONS" || /^rpc\//.test(tab)) return route.fallback();
@@ -113,6 +131,15 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     t = await testo(page, "#fatture") || "";
     prova(/manca la n\.3/.test(t) && /eliminata per sempre/.test(t), "(1) un buco VERO si dice ancora: «manca la n.3 — è stata eliminata per sempre»", (t.match(/manca[^·]{0,120}/) || [""])[0]);
     NOL3.eliminato_il = null; D.nol_fatture.push(NOL3);
+    /* (S6 b) la lettura del Noleggio CADE: la n. 3 è del Noleggio e l'App non lo può sapere.
+       Non deve dire «eliminata per sempre: dillo al commercialista» (un allarme falso). */
+    stato.nolRotto = true; await ridisegna("fatture");
+    t = await testo(page, "#fatture") || "";
+    prova(!/manca(no)? l[ae] n\./.test(t) && !/eliminat[ae] per sempre/.test(t), "(S6 b) Fatture: se il Noleggio non si legge, NON dice «manca la n. 3 — eliminata per sempre»", (t.match(/manca[^·]{0,140}/) || [""])[0]);
+    prova(/Da incassare/.test(t) && /305,00/.test(t), "(S6 b) …e le fatture si vedono lo stesso (da incassare 305,00 €)", t.slice(0, 200));
+    stato.nolRotto = false; await ridisegna("fatture");
+    t = await testo(page, "#fatture") || "";
+    prova(!/manca(no)? l[ae] n\./.test(t), "(S6 b) …tornata la lettura, tutto come prima (nessun «manca»)", (t.match(/manca[^·]{0,120}/) || [""])[0]);
 
     /* ---------- n. 2, 8, 11 — dentro il LAVORO ---------- */
     await P.apri(page, "lavori"); await B.aspetta(page, 1200);
@@ -152,10 +179,21 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     prova(!co.manca && co.primaNascosta && co.siVede, "(MANCA 3) con «＋ Un'altra persona…» esce anche «Quanto ti costa all'ora»", co);
     if (co.siVede) prova(co.px >= 14 && !co.fuori && (W > 800 || co.alto >= 44), "(MANCA 3) la casella si legge e si tocca", co);
     prova(stato.persone.length === 0 && /Non ho capito il costo orario/.test(co.storto || ""), "(MANCA 3) un costo scritto male («abc») ferma tutto e lo dice sulla casella", { persone: stato.persone.length, dice: co.storto });
+    /* (S6 d) il costo orario NEGATIVO: si ferma come «abc», e lo dice sulla casella */
+    const neg = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)); const c = q("#or-chi-costo"); if (!c) return { manca: true }; q("#or-chi-nuovo").value = "Marta Nuova"; q("#or-ore").value = "2"; c.value = "-5"; await oreAdd(); await W(700); return { dice: (q("#or-chi-costo-box") || {}).innerText.replace(/\s+/g, " ") }; });
+    prova(!neg.manca && stato.persone.length === 0 && stato.aggiunte.length === 1 && /non può essere negativo/.test(neg.dice || ""), "(S6 d) un costo orario negativo («-5») ferma tutto: niente persona, niente ore, e lo dice sulla casella", { persone: stato.persone.length, ore: stato.aggiunte.length, dice: neg.dice });
     const co2 = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)); const c = q("#or-chi-costo"); if (!c) return {}; c.value = "18,50"; c.dispatchEvent(new Event("input", { bubbles: true })); q("#or-ore").value = "2"; await oreAdd(); await W(1800); return { m: q("#margine-box").innerText.replace(/\s+/g, " "), vuota: q("#or-chi-costo") ? q("#or-chi-costo").value : null }; });
     const marta = stato.persone[0] || {};
     prova(stato.persone.length === 1 && marta.nome === "Marta Nuova" && marta.costo_orario === 18.5, "(MANCA 3) la persona nasce col suo costo orario (18,50)", marta);
     prova(!/Marta/.test(co2.m || "x Marta") && /Manodopera/.test(co2.m || ""), "(MANCA 3) …e le sue ore entrano nel margine senza avvisi", co2.m);
+    /* (S6 g) una persona che C'È GIÀ con quel nome («luca senzacosto», costo 25): non nasce un doppione,
+       la scheda di Luca non viene toccata, le ore vanno a lui */
+    const nPers = stato.persone.length, nOre = stato.aggiunte.length, nScr = stato.scritte.length;
+    const gia = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)), sel = q("#or-chi"); if (!sel) return { manca: true }; sel.value = "__nuovo__"; sel.dispatchEvent(new Event("change", { bubbles: true })); await W(200); q("#or-chi-nuovo").value = "luca senzacosto"; q("#or-chi-costo").value = "25"; q("#or-ore").value = "1"; await oreAdd(); await W(1500); return {}; });
+    const oraGia = stato.aggiunte[stato.aggiunte.length - 1] || {};
+    const toccati = stato.scritte.slice(nScr).filter(x => x.tab === "gest_operatori");
+    prova(!gia.manca && stato.persone.length === nPers && toccati.length === 0, "(S6 g) persona che c'è già («luca senzacosto»): non nasce un doppione e la sua scheda non si tocca", { nuove: stato.persone.length - nPers, toccati: toccati.map(x => x.m) });
+    prova(stato.aggiunte.length === nOre + 1 && oraGia.operatore_id === id(202), "(S6 g) …e le ore vanno al Luca che c'è", oraGia);
     const fr = await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); return e ? e.innerText.replace(/\s+/g, " ") : null; });
     await foto(page, "11-frase", "#sheet .campo-aiuto b");
     await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); if (e) e.scrollIntoView({ block: "center" }); }); await foto(page, "11-frase");
@@ -163,11 +201,46 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     await clic(page, "edit-job", { id: id(305) }); await B.aspetta(page, 2000);
     const alto = await page.evaluate(() => { const h = document.querySelector("#sheet .sh-head"); return h ? h.innerText.replace(/\s+/g, " ") : ""; });
     prova(/Crea fattura/.test(alto), "(11) e «Crea fattura» sta davvero in alto nel lavoro fatto", alto);
-    /* il pulsante di Luca apre la sua scheda */
+    /* (S6 f, S6 6) nel lavoro 305 c'è Alessandro Mastrogiovanni: nome lungo, UNA sola ora */
+    const lungo = await page.evaluate(() => { const b = document.querySelector('#margine-box [data-action="sq-edit"]'); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(), c = b.closest(".marg-senza-costo").getBoundingClientRect(); return { t: b.innerText, alto: Math.round(r.height), scritta: b.scrollWidth, pulsante: b.clientWidth, sx: Math.round(r.left), dx: Math.round(r.right), contSx: Math.round(c.left), contDx: Math.round(c.right), schermo: innerWidth, px: parseFloat(getComputedStyle(b).fontSize), riga: b.closest(".marg-senza-costo").innerText.replace(/\s+/g, " ") }; });
+    await foto(page, "S6-nome-lungo", '#margine-box [data-action="sq-edit"]');
+    prova(!!lungo && /Alessandro Mastrogiovanni/.test(lungo.t), "(S6 f) c'è il pulsante «Scrivi il costo orario di Alessandro Mastrogiovanni»", lungo);
+    if (lungo) prova(lungo.scritta <= lungo.pulsante + 1 && lungo.sx >= lungo.contSx - 1 && lungo.dx <= lungo.contDx + 1 && lungo.dx <= lungo.schermo && lungo.px >= 14 && (W > 800 || lungo.alto >= 44), "(S6 f) nome lungo: la scritta sta DENTRO il pulsante (va a capo) e il pulsante dentro il riquadro", lungo);
+    if (lungo) prova(/1 ora di Alessandro Mastrogiovanni/.test(lungo.riga) && /la conto al costo medio/.test(lungo.riga) && !/le conto/.test(lungo.riga), "(S6 6) con una sola ora dice «la conto», non «le conto»", lungo.riga);
+    /* (S6 1) il pulsante di Luca: prima CHIEDE, poi apre la scheda, e chiusa la scheda si torna nel lavoro */
     await clic(page, "edit-job", { id: id(302) }); await B.aspetta(page, 2200);
-    await page.evaluate(() => { const b = document.querySelector('#margine-box [data-action="sq-edit"]'); if (b) b.click(); }); await B.aspetta(page, 1500);
-    const scheda = await page.evaluate(() => { const s = document.querySelector("#sheet"); const c = document.querySelector("#d-costo"); return { t: s ? s.innerText.slice(0, 200).replace(/\s+/g, " ") : "", nome: (document.querySelector("#d-nome") || {}).value || "", costo: !!c }; });
-    prova(/Luca Senzacosto/.test(scheda.nome + scheda.t), "(2) il pulsante apre la scheda di Luca", scheda);
+    const scriviImporto = () => page.evaluate(() => { const c = document.querySelector("#j-imp"); if (!c) return null; c.value = "7777"; c.dispatchEvent(new Event("input", { bubbles: true })); return c.value; });
+    const premi = () => page.evaluate(() => { const b = document.querySelector('#margine-box [data-action="sq-edit"]'); if (b) b.click(); return !!b; });
+    const dove = () => page.evaluate(() => ({ aperta: document.querySelector("#overlay").classList.contains("open"), persona: (document.querySelector("#sheet #d-nome") || {}).value || "", lavoro: !!document.querySelector("#sheet #j-imp"), importo: (document.querySelector("#sheet #j-imp") || {}).value || "", margine: !!document.querySelector("#sheet #margine-box") }));
+    await scriviImporto(); await premi(); await B.aspetta(page, 900);
+    let dq = await domanda(page), qui = await dove();
+    await foto(page, "S6-domanda");
+    prova(/Luca Senzacosto/.test(dq) && /senza salvare, va perso/.test(dq) && /Continuare\?/.test(dq), "(S6 1) «Scrivi il costo orario di …» CHIEDE prima di chiudere il lavoro", dq);
+    prova(qui.lavoro && !qui.persona, "(S6 1) …e finché non rispondi il lavoro resta aperto", qui);
+    await rispondi(page, false); await B.aspetta(page, 700);
+    qui = await dove();
+    prova(qui.aperta && qui.lavoro && /7\.?777/.test(qui.importo) && !qui.persona, "(S6 1) detto No: resti nel lavoro e quello che avevi scritto (7.777) c'è ancora", qui);
+    await premi(); await B.aspetta(page, 900); await rispondi(page, true); await B.aspetta(page, 1800);
+    qui = await dove();
+    await foto(page, "S6-scheda-persona");
+    prova(/Luca Senzacosto/.test(qui.persona) && !qui.lavoro, "(S6 1) detto Sì: si apre la scheda di Luca", qui);
+    await page.evaluate(() => { const b = document.querySelector('#sheet [data-action="close"]'); if (b) b.click(); }); await B.aspetta(page, 2800);
+    qui = await dove();
+    await foto(page, "S6-tornato-al-lavoro");
+    prova(qui.aperta && qui.lavoro && qui.margine && !qui.persona, "(S6 1) chiusa la scheda (Annulla) torni NEL LAVORO, non all'elenco", qui);
+    /* e dalla Squadra la scheda si apre senza domande e, chiusa, non riapre nessun lavoro */
+    await page.evaluate(() => { try { closeSheet(); } catch (e) {} }); await B.aspetta(page, 400);
+    await clic(page, "sq-edit", { id: id(202) }); await B.aspetta(page, 1500);
+    dq = await domanda(page); qui = await dove();
+    prova(!dq && /Luca Senzacosto/.test(qui.persona), "(S6 1) fuori dal lavoro la scheda si apre subito, senza domanda", { dq, qui });
+    await page.evaluate(() => { const b = document.querySelector('#sheet [data-action="close"]'); if (b) b.click(); }); await B.aspetta(page, 1500);
+    qui = await dove();
+    prova(!qui.aperta, "(S6 1) …e chiusa lì non riapre nessun lavoro", qui);
+    /* (S6 d) anche nella scheda della persona un costo negativo non si salva */
+    await clic(page, "sq-edit", { id: id(202) }); await B.aspetta(page, 1500);
+    const nScr2 = stato.scritte.length;
+    const negS = await page.evaluate(async (i) => { const c = document.querySelector("#d-costo"); if (!c) return { manca: true }; c.value = "-5"; await squadraSave(i); await new Promise(r => setTimeout(r, 900)); return { aperta: !!document.querySelector("#sheet #d-nome") && document.querySelector("#overlay").classList.contains("open"), toast: (document.querySelector("#toast") || {}).innerText || "" }; }, id(202));
+    prova(!negS.manca && stato.scritte.slice(nScr2).filter(x => x.tab === "gest_operatori").length === 0 && negS.aperta, "(S6 d) scheda della persona: un costo orario negativo non si salva", { negS, scritte: stato.scritte.slice(nScr2).map(x => x.m + " " + x.tab) });
     await page.evaluate(() => { try { closeSheet(); } catch (e) {} }); await B.aspetta(page, 400);
 
     /* ---------- n. 4 e n. 5 — SQUADRA ---------- */
@@ -197,6 +270,10 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     await P.apri(page, "cestino"); await B.aspetta(page, 2500);
     const ce = await page.evaluate(() => ({ riass: (document.querySelector("#cest-riass") || {}).innerText || "", lista: (document.querySelector("#cest-list") || {}).innerText || "", i: (typeof cestCache !== "undefined" ? cestCache : []).findIndex(x => x.tab === "gest_lavori" && /BUTTATO/.test(x.nome)) }));
     await foto(page, "12-cestino");
+    /* (S6 a, S6 6) ogni cosa ha la SUA parola, sul computer e sul telefono */
+    const parola = (nome) => { const mm = ce.lista.split(nome)[1] || ""; return (mm.match(/eliminat[oae]\b/) || [""])[0]; };
+    [["Fattura in bozza", "eliminata", "(S6 a) Cestino: la fattura è «eliminata»"], ["Lavoro BUTTATO", "eliminato", "(S6 a) Cestino: il lavoro è «eliminato»"], ["SPESA NEL CESTINO", "eliminata", "(S6 a) Cestino: la spesa è «eliminata»"], ["ORE NEL CESTINO", "eliminate", "(S6 a) Cestino: le ore sono «eliminate»"], ["IMG_2041.jpg", "eliminata", "(S6 6) Cestino: una foto è «eliminata»"], ["Contratto firmato.pdf", "eliminato", "(S6 6) Cestino: un documento resta «eliminato»"]]
+      .forEach(([nome, vuole, dice]) => prova(parola(nome) === vuole, dice, parola(nome) || "(non c'è nel Cestino)"));
     if (W < 800) prova(/eliminata/.test(ce.lista) && !/in bozza[^\n]*\n[^\n]*eliminato /.test(ce.lista), "(12) Cestino: la fattura è «eliminata», non «eliminato»", (ce.lista.match(/Fattura[\s\S]{0,80}/) || [""])[0]);
     prova(ce.i >= 0, "il lavoro buttato è nel Cestino", ce.riass);
     if (ce.i >= 0) {
@@ -246,13 +323,26 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     });
     prova(r2.controllo, "(DIFFICILE 8) «Controlla che sia giusto» lo dice anche lui", r2);
     prova(r2.conIban === false && r2.contanti === false, "(DIFFICILE 8) scritto l'IBAN, o coi contanti, l'avviso sparisce", r2);
+    /* (S6 e) coi contanti e senza IBAN anche «Controlla che sia giusto» NON deve parlare di IBAN */
+    const r3 = await page.evaluate(async () => {
+      const q = s => document.querySelector(s), mo = q("#fa-modo"), ib = q("#fa-iban"); if (!mo || !ib) return { manca: true };
+      ib.value = ""; mo.value = "contanti"; mo.dispatchEvent(new Event("change", { bubbles: true }));
+      const regole = (typeof ctrRegoleFattura === "function") ? ctrRegoleFattura().map(x => x.dice) : null;
+      const b = document.querySelector('#sheet [data-action="ctr-guarda"]'); if (b) b.click(); await new Promise(r => setTimeout(r, 900));
+      const o = { modo: mo.value, regole, schermo: /Manca l'IBAN: nel PDF/.test(document.querySelector("#sheet").innerText) };
+      mo.value = "bonifico"; mo.dispatchEvent(new Event("change", { bubbles: true }));
+      o.bonifico = (typeof ctrRegoleFattura === "function") ? ctrRegoleFattura().some(x => /Manca l'IBAN/.test(x.dice)) : null;
+      return o;
+    });
+    prova(!r3.manca && r3.modo === "contanti" && r3.schermo === false && !(r3.regole || []).some(x => /IBAN/.test(x)), "(S6 e) coi contanti «Controlla che sia giusto» NON dice «Manca l'IBAN»", r3);
+    prova(r3.bonifico === true, "(S6 e) …e col bonifico torna a dirlo", r3);
     await ctx.close();
   }
 
   /* ---------- n. 12 — il Cestino VUOTO in questo reparto, con 1 cosa in un altro ---------- */
   console.log("\nCestino: niente in questo reparto, 1 cosa in un altro");
   {
-    ["gest_lavori", "gest_fatture", "gest_ore", "gest_spese", "gest_rapportini"].forEach(tb => D[tb].forEach(r => { r.eliminato_il = null; }));
+    ["gest_lavori", "gest_fatture", "gest_ore", "gest_spese", "gest_rapportini", "gest_foto"].forEach(tb => D[tb].forEach(r => { r.eliminato_il = null; }));
     D.gest_clienti.push(Object.assign({}, D.gest_clienti[1], { id: id(103), nome: "Cliente di un altro reparto", mestiere_id: "altroreparto01", eliminato_il: g(0) + "T09:00:00+00:00" }));
     const stato = { rpc: [], scritte: [], aggiunte: [], persone: [], buttati: new Set() };
     const { ctx, page, P } = await apriApp(browser, base0, 1440, stato);
@@ -285,6 +375,16 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     });
     prova(!a.manca, "c'è «Parla» e c'è «Metti l'app sul telefono»", a.manca);
     if (!a.manca) prova(a.striscia != null && a.striscia <= a.parlaSu && !a.coperte.length, "(10) «Parla» ha la sua striscia in fondo: non sta più sopra le scritte", a);
+    /* (S6 c) un messaggio (toast) deve stare SOPRA la striscia di «Parla», non dietro */
+    const ts = await page.evaluate(async () => {
+      const e = document.getElementById("toast"), b = document.getElementById("gv-btn"); if (!e || !b || typeof toast !== "function") return { manca: true };
+      toast("Messaggio di prova del banco"); await new Promise(r => setTimeout(r, 500));
+      const r = e.getBoundingClientRect(), st = getComputedStyle(document.body, "::after"), cs = getComputedStyle(e);
+      const striscia = st.position === "fixed" && st.content !== "none" ? innerHeight - parseFloat(st.height) : null;
+      return { giu: Math.round(r.bottom), striscia, z: +cs.zIndex, zStriscia: +st.zIndex, parlaSu: Math.round(b.getBoundingClientRect().top), vede: +cs.opacity > 0.5, testo: e.innerText };
+    });
+    await foto(page, "S6-operaio-toast");
+    prova(!ts.manca && ts.vede && ts.striscia != null && ts.giu <= ts.striscia && ts.giu <= ts.parlaSu && ts.z > ts.zStriscia, "(S6 c) app dell'operaio: il messaggio sta sopra la striscia di «Parla» (non dietro, non sotto)", ts);
     const idl = await page.evaluate(() => { const l = (typeof LAVORI !== "undefined" ? LAVORI : []).find(x => x.dove); return l ? l.id : null; });
     if (idl) { await page.evaluate(i => openLavoro(i), idl); await B.aspetta(page, 2500); }
     const mp = await page.evaluate(() => { const e = document.querySelector(".mp-ap"); if (!e) return null; e.scrollIntoView({ block: "center" }); const r = e.getBoundingClientRect(); return { alto: Math.round(r.height), px: parseFloat(getComputedStyle(e).fontSize) }; });
@@ -302,6 +402,15 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
   const SCRITTE = [["js/gest-documenti-pdf.js", /attivita'|disponibilita'|difformita'/], ["js/gest-ricevute-pagamento.js", /attivita'/], ["js/gest-squadra.js", /non puo' essere|persona e' salvata/], ["js/gest-reparti.js", /non si e' potuto/], ["js/foto-upload.js", /piu' piccola/], ["js/gest-richieste-chat.js", /\["Citta'"/], ["js/gest-cestino.js", /r\["Tipo pratica"\]=l\.pratica_tipo\|\|""/]];
   SCRITTE.forEach(([f, re]) => { const v = leggi(f).match(re); prova(!v, "(7) " + f + ": accenti a posto", v && v[0]); });
   prova(/"Agibilita'"/.test(leggi("js/gest-scadenze-pratiche.js")), "(7) nel database «Agibilita'» resta com'è (PRATICA_TIPI non toccato)");
+  /* 15 nov 2026 — sesto giro, n. 5: gli accenti rimasti */
+  [["js/chat-squadra.js", /messaggio e\\?' salvato/], ["js/op-chat.js", /non e\\?' disponibile/], ["js/gest-documenti-pdf.js", /NON e\\?' compreso|criticita\\?' riscontrate/]]
+    .forEach(([f, re]) => { const v = leggi(f).match(re); prova(!v, "(S6 5) " + f + ": accenti a posto", v && v[0]); });
+  const sp = leggi("js/gest-scadenze-pratiche.js");
+  const tit = (sp.match(/const tipo=[^\n]*\n(?:[^\n]*\n){0,2}?[^\n]*const titolo=/g) || []);
+  prova(tit.length === 2 && tit.every(x => /praticaTipoScritto\(/.test(x)), "(S6 5) i due titoli di scadenza (data prevista e integrazioni) passano da praticaTipoScritto", tit.length);
+  const fn = sp.match(/function praticaTipoScritto\(t\)\{[\s\S]*?\n  \}/);
+  const scritto = fn ? new Function("return (" + fn[0] + ")")() : () => "";
+  prova(scritto("Agibilita'") === "Agibilità" && scritto("SCIA") === "SCIA" && scritto("") === "", "(S6 5) nel titolo «Agibilita'» si scrive «Agibilità» (il resto non cambia)", scritto("Agibilita'"));
 
   await browser.close(); srv.close();
   console.log("\n" + verdi + " verdi, " + rossi + " rossi\n");

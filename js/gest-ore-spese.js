@@ -284,14 +284,15 @@
      persona senza costo orario, col pulsante che apre la sua scheda. */
   function margineRigheOre(oreSenzaNome,senzaCosto,mediaSquadra){
     const _h=n=>String(Math.round((+n||0)*100)/100).replace(".",",")+((+n===1)?" ora":" ore");
+    const _una=n=>(+n===1);   /* 15 nov 2026 (sesto giro, n. 6): con una sola ora «la conto», «non entra» */
     const ids=Object.keys(senzaCosto||{});
     const diPersone=ids.reduce((s,k)=>s+(+senzaCosto[k]||0),0);
     const anonime=Math.round(((+oreSenzaNome||0)-diPersone)*100)/100;
     let out="";
     if(anonime>0){
       out+=(mediaSquadra>0
-        ? `<span class="sp-forn" style="flex-basis:100%">${_h(anonime)} senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
-        : `<span class="sp-forn" style="flex-basis:100%">${_h(anonime)} senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`);
+        ? `<span class="sp-forn" style="flex-basis:100%">${_h(anonime)} senza il nome di chi le ha fatte: ${_una(anonime)?"contata":"contate"} al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
+        : `<span class="sp-forn" style="flex-basis:100%">${_h(anonime)} senza il nome di chi le ha fatte: ${_una(anonime)?"questa non entra":"queste non entrano"} nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`);
     }
     ids.forEach(function(k){
       const p=(dipCache||[]).find(d=>String(d.id)===String(k));
@@ -299,8 +300,8 @@
       const chi=nome?esc(nome):"una persona che non è più in squadra";
       out+=`<span class="sp-forn marg-senza-costo" style="flex-basis:100%">`
         +(mediaSquadra>0
-          ? `${_h(senzaCosto[k])} di ${chi}: non ha il costo orario, le conto al costo medio della squadra (${eur2(mediaSquadra)} l'ora).`
-          : `${_h(senzaCosto[k])} di ${chi} non entrano nel margine: non ha il costo orario.`)
+          ? `${_h(senzaCosto[k])} di ${chi}: non ha il costo orario, ${_una(senzaCosto[k])?"la":"le"} conto al costo medio della squadra (${eur2(mediaSquadra)} l'ora).`
+          : `${_h(senzaCosto[k])} di ${chi} non ${_una(senzaCosto[k])?"entra":"entrano"} nel margine: non ha il costo orario.`)
         +(nome?` <button type="button" class="btn marg-scheda" data-action="sq-edit" data-id="${esc(String(k))}">Scrivi il costo orario di ${chi}</button>`:"")
         +`</span>`;
     });

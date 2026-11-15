@@ -160,6 +160,42 @@ async function parteServer() {
   nuovo(); W.file[per(W, "i.pdf")] = PDF; W.resendRisposta = { status: 422, body: { message: "bad" } };
   x = await chiama("tok-mio", { preventivo_id: "p1", percorso: per(W, "i.pdf") });
   ok(x.code === 502 && !x.j.ok && W.tab.gest_email_documenti.length === 0, "Resend rifiuta: errore, niente registro");
+
+  // ---- 15 nov 2026 (sesto giro, n. 3 e n. 4) ----
+  // 13. impresa con «Sei anche un professionista?» acceso: l'email dice «parcella» come la finestra
+  nuovo(); W.file[per(W, "l.pdf")] = PDF; W.tab.imprese[0].faccia_gestionale = "professionista";
+  x = await chiama("tok-mio", { preventivo_id: "p1", percorso: per(W, "l.pdf") });
+  let mm = W.resend[0] || {};
+  ok(x.code === 200 && /^Parcella n\. 7/.test(mm.subject || "") && mm.attachments[0].filename === "parcella-7-rossi-mario-figli.pdf" && /la parcella n\. 7/.test(mm.html || "") && !/preventivo n\. 7/i.test(mm.html || ""),
+    "impresa che è anche professionista: oggetto, testo e allegato dicono «parcella»", (mm.subject || "") + " · " + (mm.attachments && mm.attachments[0] && mm.attachments[0].filename));
+  nuovo(); W.file[per(W, "l2.pdf")] = PDF; W.tab.imprese[0].tipo = "professionista";
+  x = await chiama("tok-mio", { preventivo_id: "p1", percorso: per(W, "l2.pdf") });
+  ok(x.code === 200 && /^Parcella n\. 7/.test((W.resend[0] || {}).subject || ""), "professionista vero: «Parcella» (come prima)");
+  nuovo(); W.file[per(W, "l3.pdf")] = PDF; W.tab.imprese[0].tipo = "negozio"; W.tab.imprese[0].faccia_gestionale = "professionista";
+  x = await chiama("tok-mio", { preventivo_id: "p1", percorso: per(W, "l3.pdf") });
+  ok(x.code === 200 && /^Preventivo n\. 7/.test((W.resend[0] || {}).subject || ""), "la faccia vale solo per impresa e artigiano (come nel gestionale)");
+  // 14. il nome del cliente nel file: stessa regola del gestionale, accenti compresi
+  const src = fs.readFileSync(path.join(SITO, "js/gest-documenti-pdf.js"), "utf8");
+  const mf = src.match(/function nomeFileCliente\(nome\)\{[\s\S]*?\n  \}/);
+  ok(!!mf, "js/gest-documenti-pdf.js ha nomeFileCliente");
+  const delGest = mf ? new Function("return (" + mf[0] + ")")() : () => "";
+  ok(/nomeFileCliente\(c\.nome\)/.test(src.slice(src.indexOf("const _nomeFile="), src.indexOf("const _nomeFile=") + 200)), "il PDF (prevPdf) fa il nome con nomeFileCliente");
+  ok(/nomeFileCliente\(c\.nome\)/.test(fs.readFileSync(path.join(SITO, "js/gest-invia-cliente.js"), "utf8").split("function mailNomeFile")[1].slice(0, 300)), "la finestra (mailNomeFile) fa il nome con nomeFileCliente");
+  const NOMI = ["Niccolò D'Amico", "Società Edile Übel S.r.l.", "Rossi Mario & Figli", "", "   ", "Condominio " + "Via dei Mille Fiori ".repeat(8) + "scala B", "ÀÈÌÒÙ àèéìòù ç ñ", "—", null];
+  let uguali = true, dove = "";
+  for (const n of NOMI) { if (F._nomeFileCliente(n) !== delGest(n)) { uguali = false; dove = String(n); } }
+  ok(uguali, "server e gestionale fanno lo stesso nome su " + NOMI.length + " clienti", dove);
+  ok(delGest("Niccolò D'Amico") === "niccolo-d-amico", "«Niccolò D'Amico» → niccolo-d-amico (gli accenti non spariscono)", delGest("Niccolò D'Amico"));
+  ok(delGest("Società Edile Übel S.r.l.") === "societa-edile-ubel-s-r-l", "«Società … S.r.l.» → societa-…-s-r-l (niente trattino in coda)", delGest("Società Edile Übel S.r.l."));
+  ok(delGest("") === "cliente" && delGest("—") === "cliente", "senza nome: «cliente»");
+  const lungo = "Condominio " + "Via dei Mille Fiori ".repeat(8) + "scala B";
+  ok(delGest(lungo).length <= 80 && !/-$/.test(delGest(lungo)), "nome oltre 80 lettere: tagliato a 80 anche nel gestionale", String(delGest(lungo).length));
+  nuovo(); W.file[per(W, "m.pdf")] = PDF; W.tab.gest_clienti[0].nome = lungo;
+  x = await chiama("tok-mio", { preventivo_id: "p1", percorso: per(W, "m.pdf") });
+  ok(x.code === 200 && W.resend[0].attachments[0].filename === "preventivo-7-" + delGest(lungo) + ".pdf", "nome lungo: l'allegato dell'email è quello che dice la finestra", W.resend[0] && W.resend[0].attachments[0].filename);
+  nuovo(); W.file[per(W, "n.pdf")] = PDF; W.tab.gest_clienti[0].nome = "Niccolò D'Amico";
+  x = await chiama("tok-mio", { preventivo_id: "p1", percorso: per(W, "n.pdf") });
+  ok(x.code === 200 && W.resend[0].attachments[0].filename === "preventivo-7-niccolo-d-amico.pdf", "nome con gli accenti: allegato «preventivo-7-niccolo-d-amico.pdf»", W.resend[0] && W.resend[0].attachments[0].filename);
 }
 
 /* ------------------------- la finestra ------------------------- */

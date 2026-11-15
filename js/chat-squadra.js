@@ -176,7 +176,7 @@ async function chatMonta(el,ctx){
     const tel=chatTel(ctx.telDestinatario);
     const url=(tel?("https://wa.me/"+tel):"https://wa.me/")+"?text="+encodeURIComponent(msg.replace(/\n{3,}/g,"\n\n"));
     av.innerHTML='<a class="ch-wa" href="'+url+'" target="_blank" rel="noopener">Avvisa '+esc(ctx.destinatario||"l'altro")+' su WhatsApp</a>'
-      +'<div class="ch-nota">Il messaggio e\' salvato. Questo pulsante serve solo a farglielo sapere subito.</div>';
+      +'<div class="ch-nota">Il messaggio è salvato. Questo pulsante serve solo a farglielo sapere subito.</div>';
   };
   _chatTimer=setInterval(()=>{
     if(!document.body.contains(el)){clearInterval(_chatTimer);_chatTimer=null;return;}

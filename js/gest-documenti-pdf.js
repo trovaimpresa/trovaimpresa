@@ -36,6 +36,20 @@
      torna {blob, nome, bozza, mancano} per l'email col PDF allegato
      (js/gest-invia-cliente.js). Il foglio e' lo stesso identico di «Scarica PDF».
      opz.p serve quando il preventivo non e' in prevCache (aperto dal capitolato). */
+
+  /* 15 nov 2026 (sesto giro, n. 4) — il pezzo del nome del file che viene dal
+     cliente. ⛔ STESSA REGOLA in tre posti: il PDF (prevPdf, qui sotto), la
+     finestra «Invia al cliente» (mailNomeFile in js/gest-invia-cliente.js, che
+     chiama questa) e l'email (nomeFileCliente in
+     netlify/functions/invia-preventivo-email.js). Gli accenti non spariscono
+     («Niccolò» → «niccolo»), massimo 80 lettere, niente trattino in testa o in
+     coda. Se la tocchi, tocca anche quella del server: tools/banco-email-pdf.js
+     le confronta. */
+  function nomeFileCliente(nome){
+    const s=String(nome==null?"":nome).normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,80).replace(/^-+|-+$/g,"");
+    return s||"cliente";
+  }
   async function prevPdf(id,opz){
     opz=opz||{};
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
@@ -235,7 +249,7 @@
     /* «BOZZA» sta anche nel NOME DEL FILE: e' quello che si legge nella
        cartella dei download e nell'allegato dell'email, cioe' l'ultimo
        posto in cui ci si puo' ancora accorgere prima di mandarlo. */
-    const _nomeFile=(_bozza?"BOZZA-":"")+(isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
+    const _nomeFile=(_bozza?"BOZZA-":"")+(isParcella?"parcella-":"preventivo-")+p.numero+"-"+nomeFileCliente(c.nome)+".pdf";
     if(opz.blob){
       return {blob:doc.output("blob"),nome:_nomeFile,bozza:_bozza,
         mancano:[_mancaAz?"il nome dell'attività":"",_mancaPiva?"la partita IVA":""].filter(Boolean).join(" e ")};
@@ -745,7 +759,7 @@
       +'</div>'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Condizioni particolari</div>'
-      +'<div class="field"><textarea id="or-note" rows="4" placeholder="Quello che vale solo per questo lavoro: cosa NON e\' compreso, chi fornisce i materiali, smaltimento macerie, ponteggio...">'+esc(p.note||"")+'</textarea></div>'
+      +'<div class="field"><textarea id="or-note" rows="4" placeholder="Quello che vale solo per questo lavoro: cosa NON è compreso, chi fornisce i materiali, smaltimento macerie, ponteggio...">'+esc(p.note||"")+'</textarea></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
@@ -1001,7 +1015,7 @@
       +'</div>'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Che cosa hai visto</div>'
-      +'<div class="field"><textarea id="vb-rilievi" rows="8" placeholder="Lo stato dei luoghi, le misure prese, le criticita\' riscontrate. Una riga per punto: nel PDF diventano un elenco numerato."></textarea></div>'
+      +'<div class="field"><textarea id="vb-rilievi" rows="8" placeholder="Lo stato dei luoghi, le misure prese, le criticità riscontrate. Una riga per punto: nel PDF diventano un elenco numerato."></textarea></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'

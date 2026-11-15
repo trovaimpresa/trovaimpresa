@@ -502,7 +502,32 @@
       setTimeout(function(){_b.scrollTop=0;},250);
     }
   }
-  function closeSheet(){$("#overlay").classList.remove("open");}
+  /* 15 nov 2026 (sesto giro, n. 1) — «Scrivi il costo orario di …» dentro un
+     lavoro apre la scheda della persona AL POSTO del lavoro (la finestra e' una
+     sola). Quando quella scheda si chiude — Salva, Annulla, la freccia, il
+     clic fuori — si torna nel lavoro da cui si era partiti, non all'elenco.
+     Il lavoro da riaprire sta qui; si usa una volta sola. */
+  var _tornaAlLavoro=null;
+  function closeSheet(){
+    $("#overlay").classList.remove("open");
+    const _lid=_tornaAlLavoro; _tornaAlLavoro=null;
+    /* solo se a chiudersi e' proprio la scheda della persona */
+    if(_lid&&document.querySelector("#sheet #d-nome"))lavoroApri(_lid);
+  }
+  /* Riapre un lavoro salvato rileggendolo dal database (e' l'azione «edit-job»:
+     sta qui perche' la usano in due). */
+  async function lavoroApri(id){
+    closeSheet();
+    /* 12 agosto 2026 — maybeSingle + il controllo. Prima era .single(): se la
+       riga non c'era piu' (eliminata da un altro dispositivo, o finita nel
+       Cestino mentre l'elenco a schermo era vecchio) data restava null, e la
+       riga dopo leggeva data.data_prevista su null. Risultato: la finestra si
+       chiudeva e NON SUCCEDEVA NIENTE, senza un messaggio. Mancava anche il
+       filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
+    const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
+    if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
+    jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);renderLavPreventivo(data.id);}
+  }
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
 
   document.addEventListener("click",async e=>{
@@ -551,17 +576,7 @@
     if(a==="fatt-xml")return fatturaXml(id);
     if(a==="fatt-sdi")return fattSdi(id);   /* 29/09/2026 — js/gest-sdi.js */
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){
-      closeSheet();
-      /* 12 agosto 2026 — maybeSingle + il controllo. Prima era .single(): se la
-         riga non c'era piu' (eliminata da un altro dispositivo, o finita nel
-         Cestino mentre l'elenco a schermo era vecchio) data restava null, e la
-         riga dopo leggeva data.data_prevista su null. Risultato: la finestra si
-         chiudeva e NON SUCCEDEVA NIENTE, senza un messaggio. Mancava anche il
-         filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
-      const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
-      if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
-      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);renderDocLavoro(data.id);renderLavPreventivo(data.id);}return;}
+    if(a==="edit-job")return lavoroApri(id);   /* 15 nov 2026: la funzione sta sopra, accanto a closeSheet */
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
@@ -875,7 +890,21 @@
       if(_ok){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();rinfresca("calendario","riepilogo");toast(_cest?"Scadenza nel cestino: la riprendi da lì":"Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
-    if(a==="sq-edit")return squadraApri(id);
+    if(a==="sq-edit"){
+      /* 15 nov 2026 (sesto giro, n. 1) — dal margine di un lavoro: la scheda
+         della persona prende il posto del lavoro, e quello che nel lavoro non
+         e' salvato si perde. Si chiede, come per «＋ nuovo cliente» (quick-cli),
+         e chiusa la scheda si torna nel lavoro (vedi _tornaAlLavoro). */
+      const _lid=(t.closest("#sheet")&&typeof editing!=="undefined"&&editing&&editing.realId)?editing.realId:null;
+      if(!_lid)return squadraApri(id);
+      const _pp=(dipCache||[]).find(d=>String(d.id)===String(id));
+      const _chi=_pp&&_pp.nome?"di "+String(_pp.nome).slice(0,60):"della persona";
+      const _pro=(typeof ruoloUtente!=="undefined"&&ruoloUtente==="professionista");   /* nello studio il lavoro si chiama pratica */
+      if(!(await gconfirm("Apro la scheda "+_chi+" al posto di "+(_pro?"questa pratica":"questo lavoro")+".\n\nSe hai scritto qualcosa senza salvare, va perso. Quando chiudi la scheda torni "+(_pro?"alla pratica":"al lavoro")+". Continuare?")))return;
+      await squadraApri(id);
+      if(document.querySelector("#sheet #d-nome")&&$("#overlay").classList.contains("open"))_tornaAlLavoro=_lid;
+      return;
+    }
     if(a==="sq-save")return squadraSave(id);
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
     if(a==="sq-qr"){mostraQrInvito(t.dataset.link,t.dataset.nome||"");return;}

@@ -31,7 +31,7 @@ async function opChatBadge(){
 }
 async function opRenderChat(){
   const box=document.getElementById("op-chat-box");if(!box)return;
-  if(!MIO.operatoreId){box.innerHTML='<div class="empty-state">La chat generale non e\' disponibile per questo accesso. Puoi scrivere dentro ogni lavoro.</div>';return;}
+  if(!MIO.operatoreId){box.innerHTML='<div class="empty-state">La chat generale non è disponibile per questo accesso. Puoi scrivere dentro ogni lavoro.</div>';return;}
   await opCapoCarica();
   chatMonta(box,opChatCtx(null));
 }

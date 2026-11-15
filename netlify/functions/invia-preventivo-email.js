@@ -41,6 +41,28 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 /* testo scritto dall'impresa: corto, senza link estranei, senza a capo */
+// 15 nov 2026 (sesto giro, n. 3) — «studio» come lo vede il gestionale
+// (js/gest-reparti.js): il professionista vero, oppure l'impresa o l'artigiano
+// che ha acceso «Sei anche un professionista?» (imprese.faccia_gestionale).
+// Cosi' finestra, PDF ed email dicono tutti «parcella» o tutti «preventivo».
+function eStudio(imp) {
+  if (!imp) return false;
+  if (imp.tipo === 'professionista') return true;
+  return (imp.tipo === 'impresa' || imp.tipo === 'artigiano') && imp.faccia_gestionale === 'professionista';
+}
+
+// 15 nov 2026 (sesto giro, n. 4) — il pezzo del nome del file che viene dal
+// cliente. ⛔ STESSA REGOLA in tre posti: qui, in js/gest-documenti-pdf.js
+// (nomeFileCliente, usata dal PDF e dalla finestra «Invia al cliente»).
+// Gli accenti non spariscono («Niccolò» → «niccolo»), massimo 80 lettere,
+// niente trattino in testa o in coda. Se la tocchi, toccale tutte e due:
+// tools/banco-email-pdf.js le confronta.
+function nomeFileCliente(nome) {
+  const s = String(nome == null ? '' : nome).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 80).replace(/^-+|-+$/g, '');
+  return s || 'cliente';
+}
+
 function pulito(s, max) {
   const t = T(s).replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').slice(0, max || 120);
   return haLink(t) ? '' : t;
@@ -131,13 +153,19 @@ exports.handler = async function (event) {
     if (buf.slice(0, 5).toString('latin1') !== '%PDF-') return r(400, { error: 'Il file non è un PDF.' });
 
     // ---- il resto dal database ----
-    const [{ data: az }, { data: link }, { data: imp }] = await Promise.all([
+    const [{ data: az }, { data: link }, impR] = await Promise.all([
       db.from('gest_azienda').select('nome,email,tel').eq('user_id', user.id).maybeSingle(),
       db.from('gest_preventivi_link').select('token,dati').eq('preventivo_id', prevId).eq('user_id', user.id).maybeSingle(),
-      db.from('imprese').select('tipo').eq('user_id', user.id).limit(1).maybeSingle()
+      db.from('imprese').select('tipo,faccia_gestionale').eq('user_id', user.id).limit(1).maybeSingle()
     ]);
+    // 15 nov 2026 (sesto giro, n. 3): se la colonna «faccia_gestionale» non c'e'
+    // si legge come prima, col solo tipo (stesso paracadute di js/gest-reparti.js).
+    let imp = impR.data;
+    if (impR.error && /faccia_gestionale/.test(impR.error.message || '')) {
+      imp = (await db.from('imprese').select('tipo').eq('user_id', user.id).limit(1).maybeSingle()).data;
+    }
     if (!link || !link.token) return r(409, { error: 'Il link del preventivo non c\'è: riapri «Invia al cliente».' });
-    const studio = imp && imp.tipo === 'professionista';
+    const studio = eStudio(imp);
     const nomeImpresa = pulito(az && az.nome, 80);
     const titolo = pulito(p.titolo, 120);
     const cosa = (studio ? 'la parcella' : 'il preventivo') + ' n. ' + (+p.numero || '');
@@ -149,8 +177,7 @@ exports.handler = async function (event) {
     // («Allegato: preventivo-1-rossi-mario.pdf») e che ha il PDF scaricato
     // (js/gest-documenti-pdf.js, _nomeFile). Prima arrivava «preventivo-1.pdf».
     // Il nome lo fa il server dai dati del database, non da quello che manda il browser.
-    const nomeFile = (studio ? 'parcella-' : 'preventivo-') + (+p.numero || '') + '-'
-      + (nomeCliente || 'cliente').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 80) + '.pdf';
+    const nomeFile = (studio ? 'parcella-' : 'preventivo-') + (+p.numero || '') + '-' + nomeFileCliente(nomeCliente) + '.pdf';
     const daNome = (nomeImpresa || 'La tua impresa').replace(/["<>\\]/g, '').slice(0, 60);
 
     // ---- si manda ----
@@ -183,3 +210,5 @@ exports.handler = async function (event) {
   }
 };
 exports._corpo = corpo;   // per il banco e le foto
+exports._nomeFileCliente = nomeFileCliente;   // 15 nov 2026: il banco la confronta con quella del gestionale
+exports._eStudio = eStudio;
