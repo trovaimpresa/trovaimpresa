@@ -26,16 +26,18 @@
 
   var MARCHI = [
     { id: 118433, nome: 'Vevor',     logo: 'vevor.webp',      w: 168, h: 60, cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023', lato: 'sx', dopo: 0 },
-    { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 1 },
+    { id: 23030, nome: 'Comet',      logo: 'comet.webp',      w: 120, h: 60, cosa: 'Elettrodomestici e illuminazione', c: '#e30613', lato: 'dx', dopo: 2 },
     { id: 23309, nome: 'Rowenta',    logo: 'rowenta.webp',    w: 168, h: 65, cosa: 'Piccoli elettrodomestici',         c: '#8a9bb0', lato: 'sx', dopo: 3 },
     { id: 9450,  nome: 'Moulinex',   logo: 'moulinex.webp',   w: 168, h: 93, cosa: 'Cucina e casa',                    c: '#d0021b', lato: 'dx', dopo: 3 },
     { id: 10404, nome: 'Lampade.it', logo: 'lampade-it.webp', w: 168, h: 59, cosa: 'Lampade e luci',                   c: '#e5233b', lato: 'sx', dopo: 2 },
-    { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200', lato: 'dx', dopo: 6 },
-    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae', lato: 'sx', dopo: 6 }
+    { id: 115365, nome: 'Trotec',    logo: 'trotec.webp',     w: 168, h: 22, cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200', lato: 'dx', dopo: 0 },
+    { id: 126387, nome: 'Vonroc',    logo: 'vonroc.webp',     w: 168, h: 84, cosa: 'Elettroutensili per casa e giardino', c: '#35beae', lato: 'sx', dopo: 1 }
   ];
   // 15 nov 2026 (Alex: «qui e' tutto vuoto e sopra e' tutto pieno, distribuire
   // meglio»): i marchi si alternano destra/sinistra e scendono fino in fondo,
-  // non piu' tutti nei primi tre buchi.
+  // non piu' tutti nei primi tre buchi. Poi (Alex): niente marchi in fondo,
+  // finivano a cavallo della riga del forum ed erano troppo grandi accanto
+  // ai cartelli piccoli delle recensioni: si stanno nei buchi grandi in alto.
   // «dopo»: sotto quale cartello del suo lato va (0 = il primo dall'alto).
   // 12 nov 2026 (Alex): «metterli in basso e' brutto» e poi «non c'e' bisogno
   // di metterli ammucchiati in cima»: vanno IN MEZZO agli spazi delle imprese.
