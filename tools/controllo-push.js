@@ -307,7 +307,8 @@ const CODE_PRIVATE     = ['.md', '.sql', '.csv', '.py', '.txt', '.json'];
    Noleggio (icona sulla schermata Home). Senza questa riga il controllo lo
    scambiava per un file privato e fermava la pubblicazione. */
 /* ⚠️ 10 nov 2026 — manifest-operaio.json: l'icona dell'app dell'operaio. */
-const PUBBLICI_APPOSTA = new Set(['robots.txt', 'ads.txt', 'llms.txt', 'manifest.json', 'manifest-noleggio.json', 'manifest-operaio.json',
+/* ⚠️ 15 nov 2026 — manifest-sito.json: l'icona dell'app di tutto il sito (TrovaImpresa sul telefono). */
+const PUBBLICI_APPOSTA = new Set(['robots.txt', 'ads.txt', 'llms.txt', 'manifest.json', 'manifest-noleggio.json', 'manifest-operaio.json', 'manifest-sito.json',
                                   'c670fbe9c5c6a2205488dd36e94bd040.txt']);
 /* Attrezzi da riga di comando: non li carica nessuna pagina, ma hanno
    l'estensione .js come i file veri del sito, quindi vanno detti a mano. */
