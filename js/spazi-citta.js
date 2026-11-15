@@ -109,7 +109,7 @@
 
   // I due spazi grossi in alto: se nessuno li ha comprati, ci va la locandina.
   var LOC_ALTO = {
-    'hero-sx': { file: '01-vetrina', link: '/#registrati' },
+    'hero-sx': { file: '01-vetrina', link: '/iscriviti.html' },   // 15 nov: «Iscriviti gratis» porta all'iscrizione vera (prima scorreva solo la pagina)
     'hero-dx': { file: '05-diretto', link: '/cerca-imprese' }
   };
 
@@ -218,6 +218,11 @@
       + '.ti-cliccabile:hover{box-shadow:0 10px 26px rgba(0,0,0,.22)}'
       + '.ti-cliccabile:hover img{transform:scale(1.04)}'
       + '.ti-cliccabile:active img{transform:scale(.99)}'
+      + '.ti-vendi{position:absolute;left:0;right:0;bottom:0;z-index:2;background:#ff8800;color:#fff;font-weight:800;'
+      + 'font-size:clamp(12px,1vw,17px);letter-spacing:.03em;text-align:center;height:32px;line-height:32px;padding:0 8px;white-space:nowrap;overflow:hidden;cursor:pointer;'
+      + 'box-shadow:0 -2px 6px rgba(0,0,0,.2)}.ti-vendi:hover{background:#e06a00}'
+      + '.ti-cliccabile:has(.ti-vendi) .ti-frec{bottom:40px}'
+      + '.ti-cliccabile:has(.ti-vendi)>img{height:calc(100% - 32px) !important}'
       + '.ti-frec{position:absolute;right:8px;bottom:8px;width:26px;height:26px;'
       + 'border-radius:50%;background:rgba(255,255,255,.92);'
       + 'box-shadow:0 1px 4px rgba(0,0,0,.25);display:flex;align-items:center;'
@@ -237,6 +242,23 @@
     d.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
                 + '<path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>';
     a.appendChild(d);
+  }
+
+  // 15 nov 2026 (Alex): sulle locandine degli spazi liberi si scrive che lo
+  // spazio si compra. La fascia in alto porta al listino gia' sullo spazio e
+  // sulla citta' giusti; il resto della locandina porta dove portava prima.
+  function bandaVendita(a, spazio) {
+    stileCartelli();
+    if (a.querySelector('.ti-vendi')) return;
+    if (getComputedStyle(a).position === 'static') a.style.position = 'relative';
+    var citta = (new URLSearchParams(location.search).get('citta') || '').trim();
+    var dove = '/pubblicita?spazio=' + encodeURIComponent(spazio) + (citta ? '&citta=' + encodeURIComponent(citta) : '');
+    var b = document.createElement('span');
+    b.className = 'ti-vendi';
+    b.setAttribute('role', 'link');
+    b.textContent = 'Spazio da acquistare \u2192';
+    b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); location.href = dove; });
+    a.appendChild(b);
   }
 
   var cssMesso = false;
@@ -586,6 +608,7 @@
 
       a.appendChild(im);
       frecciaSu(a);
+      if (!ann) bandaVendita(a, v.spazio);
       document.body.appendChild(a);
       if (ann && ann.id) guardaQuando(a, ann.id);
     });
@@ -644,6 +667,7 @@
     // non si tocca niente: non si sposta un cartello che sta gia' al posto giusto.
     if (getComputedStyle(a).position === 'static') a.style.position = 'relative';
     frecciaSu(a);
+    bandaVendita(a, a.getAttribute('data-spazio-id'));
   }
 
   // Il cartello di CHI HA PAGATO in uno dei due spazi grossi in alto.

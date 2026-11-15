@@ -57,8 +57,9 @@
       '.ti-dove .in{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap}',
       '.ti-dove svg{width:28px;height:28px;flex:0 0 auto}',
       '.ti-dove .tx{font-size:22px;font-weight:800}',
+      '.ti-dove a.naz{background:#fff;color:#0a2a4d;font-weight:800;font-size:19px;padding:11px 24px;border-radius:12px;text-decoration:none}',
       '.ti-dove button{background:#0a2a4d;color:#fff;border:0;font:inherit;font-weight:800;font-size:19px;padding:11px 24px;border-radius:12px;cursor:pointer}',
-      '@media(max-width:700px){.ti-dove .in{gap:10px;padding:10px 14px}.ti-dove .tx{font-size:19px}.ti-dove button{font-size:17px;padding:10px 18px}}'
+      '@media(max-width:700px){.ti-dove .in{gap:10px;padding:10px 14px}.ti-dove .tx{font-size:19px}.ti-dove button,.ti-dove a.naz{font-size:17px;padding:10px 18px}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -100,7 +101,10 @@
       var tx = document.createElement('span'); tx.className = 'tx'; tx.textContent = 'Stai guardando ' + nome;
       var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Cambia città';
       b.addEventListener('click', scegliCitta);
-      inn.appendChild(tx); inn.appendChild(b); f.appendChild(inn);
+      // 15 nov 2026 (Alex): da qui si torna anche alla pagina nazionale
+      var naz = document.createElement('a'); naz.className = 'naz'; naz.href = '/?nazionale=1';
+      naz.textContent = 'Torna alla pagina nazionale';
+      inn.appendChild(tx); inn.appendChild(b); inn.appendChild(naz); f.appendChild(inn);
       nav.insertAdjacentElement('beforebegin', f);
     }
     try { document.title = "L'edilizia a " + nome + ' — imprese e artigiani | TrovaImpresa'; } catch (e) {}
