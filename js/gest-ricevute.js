@@ -103,7 +103,7 @@
         + 'Se non arriva niente, controlla che il codice destinatario <b>' + CODICE + '</b> sia registrato all\'Agenzia delle Entrate.</div>';
     } else {
       corpo += '<div class="ric-sommario">' + (nuove ? (nuove === 1 ? "1 nuova da vedere" : nuove + " nuove da vedere") : "Tutte viste") + '</div>'
-        + (da ? '<div class="sh-nota">' + (da === 1 ? "1 fattura è" : da + " fatture sono") + ' <b>da sbloccare</b>: non hai invii a disposizione. <a href="/ricarica-crediti.html">Compra un pacchetto di invii</a> (50 a 7,90 €).</div>' : '')
+        + (da ? '<div class="sh-nota">' + (da === 1 ? "1 fattura è" : da + " fatture sono") + ' <b>da sbloccare</b>: non hai invii a disposizione. <a href="/ricarica-crediti.html">Compra un pacchetto di invii</a> (50 a 9,90 €).</div>' : '')
         + '<div class="ric-lista">' + _lista.map(cardRicevuta).join("") + '</div>';
     }
     return corpo + '</div>';

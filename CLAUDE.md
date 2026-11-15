@@ -3188,4 +3188,11 @@ Tre push, tutti controllati su Netlify e collaudati sul sito vero:
 - Dipendente: lordo = incassi − spese; 9,19%, detrazioni da lavoro, taglio del cuneo 2026. Con «Dipendente in cassa edile»: trattenuta operaio 1,3972% e costo per la ditta (INPS, INAIL, cassa edile 8,4272%, TFR). Percentuali Cassa Edile di RIETI 2026 (tabella ufficiale); INPS 33,68% e INAIL 7,5% sono medie e l'impresa le cambia: si ricordano in localStorage (`ti_fc_ditta`), NON nel database.
 - Tutti i numeri di legge sono le costanti `FC_*` in cima al file, con la fonte.
 - Banco: `prove-claude/banchi-fissi/banco-fisco-confronto.html` (?p=forf&apri=1&inc=40000&spese=8000).
-- ⛔ add_repo con permesso di push e' stato rifiutato in questa sessione: il push l'ha lanciato Alessio.
+- Il push lo fa Claude dal clone in nuvola (`/home/claude/trovaimpresa`, add_repo con push).
+
+# 15 NOVEMBRE 2026 (sera, 2) — FATTURA ELETTRONICA: PREZZI E PAGINE GOOGLE
+
+- I pacchetti SDI veri (Stripe e gestionale) sono →9,90← € (50) e →29← € (200). Le pagine pubbliche dicevano ancora →7,90←/→24←: corrette (prezzi, gestionale, migliori-gestionali-gratis, gest-ricevute.js).
+- `software-fatturazione-elettronica-edilizia.html`, `software-gestionale-imprese-edili.html` e il generatore `dati-gestionale-problema.js` dicevano «non manda la fattura allo SDI»: falso dal 5 nov. Ora dicono che la manda con un clic.
+- Margine: 50 invii ≈ →6← € (Openapi 0,07 €/invio + Stripe), 200 invii ≈ →14← €.
+- ⛔ Se cambiano i prezzi dei pacchetti, cambiarli in TUTTI questi file e in `js/gest-sdi.js`.

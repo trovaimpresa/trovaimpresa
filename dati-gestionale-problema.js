@@ -510,7 +510,7 @@ module.exports = [
   ctaTesto: 'Fai la prossima fattura qui e guarda il file XML che esce. Se il commercialista lo accetta senza dire niente, hai finito di cercare.',
   sommario: `fatturazione elettronica pensata per l'edilizia: prepara il <strong>file XML per lo SDI</strong>
     con l'<strong>IVA al 10% riga per riga</strong>, la ritenuta, il bollo e la cassa previdenziale.
-    Il file lo mandi tu o il commercialista.
+    E la manda allo SDI con un clic.
     <span class="price-big">Gratis per sempre, con l'AI dentro</span>`,
 
   sezioni: [
@@ -535,11 +535,11 @@ module.exports = [
     { h2: 'Il file XML, e chi lo manda', blocchi: [
       `Il gestionale prepara il <strong>file XML nel formato che vuole lo SDI</strong> e il PDF di cortesia
        per il cliente.`,
-      { t:'nota', x:`<strong>Una cosa che non fa, detta prima e non dopo:</strong> non manda la fattura allo
-        SDI al posto tuo e non fa da intermediario fiscale. Prepara il file corretto, tu lo carichi dove lo
-        carichi adesso, oppure lo giri al commercialista.` },
-      `È una scelta, non una mancanza: fare da intermediario fiscale vuol dire prendersi responsabilità che
-       poi si pagano nel prezzo. Preferiamo che il file sia giusto e che il canale resti il tuo.`
+      { t:'nota', x:`<strong>E la manda lui allo SDI, con un clic.</strong> Poi ti dice se è stata consegnata o
+        scartata, e se è scartata ti dice perché. Le fatture dei tuoi fornitori arrivano nella sezione
+        «Fatture ricevute». L'invio si paga a pacchetto: 50 invii a 9,90 €, 200 a 29 €, e non scadono.` },
+      `Se preferisci, il file lo puoi sempre scaricare e darlo al commercialista, o caricarlo
+       gratis sul sito dell'Agenzia delle Entrate.`
     ]},
 
     { h2: 'I quattro numeri che di solito nessuno ti dice', blocchi: [
@@ -579,9 +579,9 @@ module.exports = [
 
   faq: [
     { d:'Il programma manda la fattura allo SDI?',
-      r:`No. Prepara il file XML nel formato richiesto dallo SDI, con l'IVA riga per riga, la ritenuta, il
-         bollo e la cassa previdenziale. La trasmissione resta a te o al tuo commercialista: il programma
-         non fa da intermediario fiscale.` },
+      r:`Sì, con un clic. Prepara il file XML con l'IVA riga per riga, la ritenuta, il bollo e la cassa
+         previdenziale, lo manda allo SDI e ti dice se è stata consegnata o scartata. L'invio si paga a
+         pacchetto: 50 invii a 9,90 €, 200 a 29 €.` },
     { d:"Gestisce l'IVA agevolata al 10% dell'edilizia?",
       r:`Sì, e la sceglie riga per riga. Nella stessa fattura possono convivere il 10% sulle manutenzioni e
          il 22% dove serve, come richiede il lavoro edile.` },
