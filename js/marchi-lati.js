@@ -79,6 +79,13 @@
   stile.textContent = CSS;
   (document.head || document.documentElement).appendChild(stile);
 
+  // 15 nov 2026: sulla home nazionale i marchi stanno negli spazi di
+  // js/locandine-home.js (al posto delle locandine di Alex). Qui ci si ferma:
+  // resta solo il CSS che nasconde la fascia quando quel file lo dice.
+  var NAZIONALE = /^\/(index(\.html)?)?$/.test(location.pathname) &&
+    !(new URLSearchParams(location.search).get('citta') || '').trim();
+  if (NAZIONALE) { document.documentElement.classList.remove('ti-marchi-lati'); return; }
+
   var carte = [];
   var scosse = 0;   // quante volte abbiamo fatto rimisurare la pagina (mai all'infinito)
 

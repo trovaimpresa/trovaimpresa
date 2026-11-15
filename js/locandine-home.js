@@ -22,24 +22,87 @@
   var TELEFONO = '(max-width:1100px)';
 
   // Chi sta dove. Ogni posto ha la sua locandina, sempre la stessa.
+  // 15 nov 2026 (Alex): «i miei spazi erano solo dimostrativi»: al posto delle
+  // sue locandine ci vanno i marchi famosi (Awin) e, dove avanzano, gli annunci
+  // Google. I marchi non stanno piu' sparsi ai lati: js/marchi-lati.js sulla
+  // home nazionale si ferma e lascia fare a questo file.
+  var AWIN_ME = '3137864';
+  var ADS_CLIENT = 'ca-pub-3621975687116775', ADS_SLOT = '7886156385';
+  var M = {
+    vevor:   { id: 118433, nome: 'Vevor',      logo: 'vevor.webp',      cosa: 'Attrezzi e macchinari da cantiere', c: '#ff5023' },
+    comet:   { id: 23030,  nome: 'Comet',      logo: 'comet.webp',      cosa: 'Elettrodomestici e illuminazione',  c: '#e30613' },
+    rowenta: { id: 23309,  nome: 'Rowenta',    logo: 'rowenta.webp',    cosa: 'Piccoli elettrodomestici',          c: '#8a9bb0' },
+    moulinex:{ id: 9450,   nome: 'Moulinex',   logo: 'moulinex.webp',   cosa: 'Cucina e casa',                     c: '#d0021b' },
+    lampade: { id: 10404,  nome: 'Lampade.it', logo: 'lampade-it.webp', cosa: 'Lampade e luci',                    c: '#e5233b' },
+    trotec:  { id: 115365, nome: 'Trotec',     logo: 'trotec.webp',     cosa: 'Deumidificatori, misuratori e utensili', c: '#ffe200' },
+    vonroc:  { id: 126387, nome: 'Vonroc',     logo: 'vonroc.webp',     cosa: 'Elettroutensili per casa e giardino', c: '#35beae' }
+  };
+
+  // Chi sta dove. marchio = carta del negozio, google = annuncio Google.
+  // In alto, negli spazi piu' grandi, i marchi piu' vicini all'edilizia (Alex, 15 nov).
   var IN_ALTO = [
-    { spazio: 'hero-sx', file: '01-vetrina', link: '/#registrati' },
-    { spazio: 'hero-dx', file: '05-diretto', link: '/cerca-imprese' }
+    { spazio: 'hero-sx', marchio: 'vevor' },
+    { spazio: 'hero-dx', marchio: 'trotec' }
   ];
   var IN_COLONNA = [
-    { sez: '#categorie',        lato: 'sx', passo: 1, file: '02-gestionale',  link: '/software-gestionale-imprese-edili' },
-    { sez: '#categorie',        lato: 'dx', passo: 1, file: '03-computo',     link: '/software-gestionale-imprese-edili' },
-    { sez: '#registrati',       lato: 'sx', passo: 2, file: '07-bandi',       link: '/bandi' },
-    { sez: '#registrati',       lato: 'dx', passo: 2, file: '08-subappalti',  link: '/subappalto' },
-    { sez: '.guide-costi-home', lato: 'sx', passo: 3, file: '13-blog',        link: '/blog' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, file: '06-guide',       link: '/costi-ristrutturazione' },
-    { sez: '.why-section',      lato: 'sx', passo: 4, file: '09-offerte',     link: '/offerte-lavoro' },
-    { sez: '.why-section',      lato: 'dx', passo: 4, file: '14-recensioni',  link: '/cerca-imprese' },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, file: '11-citta',       link: '/citta' },
-    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 1, file: '04-preventivi',  link: '/software-gestionale-imprese-edili' },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 0, file: '10-candidature', link: '/candidature-lavoro' },
-    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 1, file: '12-chi-cerchi',  link: '/cerca-artigiani' }
+    { sez: '#registrati',       lato: 'sx', passo: 2, marchio: 'vonroc' },
+    { sez: '#registrati',       lato: 'dx', passo: 2, marchio: 'lampade' },
+    { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'comet' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, marchio: 'rowenta' },
+    { sez: '.why-section',      lato: 'sx', passo: 4, marchio: 'moulinex' },
+    { sez: '.why-section',      lato: 'dx', passo: 4, google: true },
+    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, google: true },
+    { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 1, google: true },
+    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 0, google: true },
+    { sez: '#ti-recensioni',    lato: 'dx', passo: 5, pila: 1, google: true }
   ];
+
+  var CSS = '.tlm{display:flex;flex-direction:column;width:100%;height:100%;background:#fff;border:2px solid #ff8800;' +
+      'border-radius:14px;overflow:hidden;text-decoration:none;color:#0a2a4d;box-sizing:border-box;font-family:inherit;line-height:1.15}' +
+    '.tlm *{box-sizing:border-box}' +
+    '.tlm-sopra{background:#ff8800;color:#fff;font-weight:800;font-size:clamp(10px,3.4cqw,14px);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;text-align:center}' +
+    '.tlm-mid{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6% 8%;' +
+      'background-color:#0a2a4d;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);' +
+      'background-size:28px 28px;border-bottom:5px solid var(--c,#ff8800)}' +
+    '.tlm-logo{width:100%;height:100%;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.3)}' +
+    '.tlm-logo img{max-width:85%;max-height:80%;object-fit:contain;display:block}' +
+    '.tlm-giu{display:flex;align-items:center;gap:10px;padding:8px 12px}' +
+    '.tlm-nome{flex:1;min-width:0;text-align:left;font-weight:900;font-size:clamp(14px,5cqw,24px)}' +
+    '.tlm-nome small{display:block;font-weight:500;font-size:clamp(11px,3.2cqw,15px);color:#3d4b5f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '.tlm-btn{background:#ff8800;color:#fff;font-weight:900;font-size:clamp(12px,3.8cqw,17px);padding:9px 12px;border-radius:10px;white-space:nowrap}' +
+    '.tlm:hover .tlm-btn{background:#e06a00}' +
+    '.tlm-box{container-type:inline-size}a.tlm-box,a.tlm-box *{text-decoration:none !important}' +
+    '.tlg{width:100%;height:100%;display:flex;flex-direction:column;background:transparent}' +
+    '.tlg small{display:block;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.06em;color:#8a94a3;text-transform:uppercase;text-align:center;margin-bottom:4px}' +
+    '.tlg.vuoto{visibility:hidden}';
+
+  function cartaMarchio(m) {
+    return '<span class="tlm" style="--c:' + m.c + '"><span class="tlm-sopra">Negozio consigliato</span>' +
+      '<span class="tlm-mid"><span class="tlm-logo"><img src="/img/marchi/' + m.logo + '" alt="' + m.nome + '"></span></span>' +
+      '<span class="tlm-giu"><span class="tlm-nome">' + m.nome + '<small>' + m.cosa + '</small></span>' +
+      '<span class="tlm-btn">Vai al negozio →</span></span></span>';
+  }
+  function linkMarchio(m) { return 'https://www.awin1.com/cread.php?awinmid=' + m.id + '&awinaffid=' + AWIN_ME; }
+
+  // l'annuncio Google parte solo quando lo spazio si vede ed ha la sua misura
+  function accendiGoogle(box) {
+    if (box.getAttribute('data-acceso') === '1') return;
+    var r = box.getBoundingClientRect();
+    if (r.width < 120 || r.height < 80) return;
+    box.setAttribute('data-acceso', '1');
+    var w = Math.floor(r.width), h = Math.floor(r.height) - 20;
+    box.innerHTML = '<div class="tlg"><small>Pubblicit&agrave;</small><ins class="adsbygoogle" style="display:inline-block;width:' + w +
+      'px;height:' + h + 'px" data-ad-client="' + ADS_CLIENT + '" data-ad-slot="' + ADS_SLOT + '"></ins></div>';
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+    // se Google non ha niente da mostrare, lo spazio resta vuoto (niente scritta da sola)
+    var ins = box.querySelector('ins');
+    var guarda = setInterval(function () {
+      var st = ins.getAttribute('data-ad-status');
+      if (st === 'unfilled') { box.querySelector('.tlg').classList.add('vuoto'); clearInterval(guarda); }
+      if (st === 'filled') clearInterval(guarda);
+    }, 1000);
+    setTimeout(function () { clearInterval(guarda); }, 30000);
+  }
 
   // --- solo home nazionale ------------------------------------------------
   var percorso = window.location.pathname.replace(/index\.html$/, '');
@@ -54,6 +117,7 @@
 
   // --- avvio ---------------------------------------------------------------
   function avvia() {
+    var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     var alto = [];
     IN_ALTO.forEach(function (v) {
       var a = document.querySelector('a.pub-link[data-spazio-id="' + v.spazio + '"]');
@@ -78,48 +142,43 @@
     a.style.setProperty('padding', '0', 'important');
     a.style.setProperty('border', 'none', 'important');
     a.style.setProperty('overflow', 'hidden', 'important');
-    a.style.cursor = 'pointer';
-    a.setAttribute('href', v.link);
-    a.setAttribute('rel', 'noopener');
-    a.setAttribute('data-locandina', v.file);
-
-    var img = document.createElement('img');
-    img.alt = 'TrovaImpresa';
-    img.src = BASE + v.file + '.svg';
-    img.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block;border-radius:inherit';
-    a.appendChild(img);
-
-    a.addEventListener('click', function () {
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'locandina_click', { locandina: v.file });
-      }
-    });
+    a.style.setProperty('background', 'transparent', 'important');
+    a.classList.add('tlm-box');
+    if (v.marchio) {
+      var m = M[v.marchio];
+      a.setAttribute('href', linkMarchio(m));
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'sponsored nofollow noopener');
+      a.setAttribute('data-marchio', v.marchio);
+      a.innerHTML = cartaMarchio(m);
+    } else {
+      a.removeAttribute('href');
+      a.setAttribute('data-google', '1');
+      a.style.cursor = 'default';
+    }
   }
 
   function creaColonna() {
     IN_COLONNA.forEach(function (v) {
       if (!document.querySelector(v.sez)) return;
-      var a = document.createElement('a');
-      a.className = 'ti-loc-col';
+      var a = document.createElement(v.marchio ? 'a' : 'div');
+      a.className = 'ti-loc-col tlm-box';
       a.setAttribute('data-sez', v.sez);
       a.setAttribute('data-lato', v.lato);
       a.setAttribute('data-passo', v.passo);
       a.setAttribute('data-pila', v.pila === undefined ? -1 : v.pila);
-      a.setAttribute('href', v.link);
-      a.setAttribute('rel', 'noopener');
-      a.setAttribute('data-locandina', v.file);
-      a.style.cssText = 'position:absolute;display:none;border-radius:12px;overflow:hidden;'
-        + 'z-index:5;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12)';
-      var img = document.createElement('img');
-      img.alt = 'TrovaImpresa';
-      img.src = BASE + v.file + '.svg';
-      img.style.cssText = 'width:100%;height:100%;object-fit:fill;display:block';
-      a.appendChild(img);
-      a.addEventListener('click', function () {
-        if (typeof window.gtag === 'function') {
-          window.gtag('event', 'locandina_click', { locandina: v.file });
-        }
-      });
+      a.style.cssText = 'position:absolute;display:none;border-radius:14px;overflow:hidden;z-index:5';
+      if (v.marchio) {
+        var m = M[v.marchio];
+        a.setAttribute('href', linkMarchio(m));
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'sponsored nofollow noopener');
+        a.setAttribute('data-marchio', v.marchio);
+        a.style.boxShadow = '0 2px 12px rgba(0,0,0,.12)';
+        a.innerHTML = cartaMarchio(m);
+      } else {
+        a.setAttribute('data-google', '1');
+      }
       document.body.appendChild(a);
     });
   }
@@ -163,7 +222,9 @@
     var hero = document.querySelector('.hero-inner');
     var largaOk = hero ? Math.min(LARGA, Math.round(spazioLibero(hero))) : 0;
     alto.forEach(function (o) {
-      if (telefono) { o.a.style.setProperty('display', 'flex', 'important'); return; }
+      // sul telefono i marchi stanno nella fascia in mezzo alla pagina: in cima,
+      // prima del titolo, la prima cosa vista sarebbe la pubblicita'
+      if (telefono) { o.a.style.setProperty('display', 'none', 'important'); return; }
       if (largaOk < MINIMA) { o.a.style.setProperty('display', 'none', 'important'); return; }
       o.a.style.setProperty('display', 'flex', 'important');
       o.a.style.setProperty('width', largaOk + 'px', 'important');
@@ -226,5 +287,25 @@
         o.a.style.setProperty(o.lato === 'sx' ? 'left' : 'right', bordoComune + 'px', 'important');
       });
     }
+
+    // i marchi sono ai lati? allora la fascia dei marchi in mezzo alla pagina
+    // si nasconde (stessa regola di js/marchi-lati.js: tutti o nessuno)
+    var marchi = document.querySelectorAll('[data-marchio]'), tutti = marchi.length > 0;
+    for (var q = 0; q < marchi.length; q++) {
+      var rr = marchi[q].getBoundingClientRect();
+      if (!rr.width || !rr.height) { tutti = false; break; }
+    }
+    // se non ci stanno tutti ai lati, i marchi restano tutti nella fascia: niente doppioni
+    if (!tutti) for (var z = 0; z < marchi.length; z++) marchi[z].style.setProperty('display', 'none', 'important');
+    var prima = document.documentElement.classList.contains('ti-marchi-lati');
+    document.documentElement.classList.toggle('ti-marchi-lati', tutti && !telefono);
+    // nascondere o mostrare la fascia cambia l'altezza della pagina: si rimisura
+    if (prima !== document.documentElement.classList.contains('ti-marchi-lati')) {
+      setTimeout(function () { sistema(alto); }, 0);
+      return;
+    }
+
+    var gg = document.querySelectorAll('[data-google="1"]');
+    for (var g = 0; g < gg.length; g++) accendiGoogle(gg[g]);
   }
 })();
