@@ -72,10 +72,10 @@
     ]},
 
     { id: 'imprese-sx', fascia: 'imprese', lato: 'Sinistra', pagine: [
-      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto a «Scegli la categoria»', ancora: '#categorie', passo: 1 }
+      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto a «Cerchi idee per casa?», subito sotto la ricerca', ancora: '#le-idee', passo: 1 }
     ]},
     { id: 'imprese-dx', fascia: 'imprese', lato: 'Destra', pagine: [
-      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto a «Scegli la categoria»', ancora: '#categorie', passo: 1 }
+      { pagina: 'index.html', citta: true, dove: 'Nella pagina della tua città, accanto a «Cerchi idee per casa?», subito sotto la ricerca', ancora: '#le-idee', passo: 1 }
     ]},
 
     // ATTENZIONE: questi due si vedono in DUE posti. Non e' un errore, e'

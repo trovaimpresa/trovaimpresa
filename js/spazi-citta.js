@@ -148,8 +148,8 @@
   }
 
   var POSTI = postiDaElenco() || [
-    { sez: '#categorie',     lato: 'sx', passo: 1, spazio: 'imprese-sx' },
-    { sez: '#categorie',     lato: 'dx', passo: 1, spazio: 'imprese-dx' },
+    { sez: '#le-idee',       lato: 'sx', passo: 1, spazio: 'imprese-sx' },
+    { sez: '#le-idee',       lato: 'dx', passo: 1, spazio: 'imprese-dx' },
     { sez: '#registrati',    lato: 'sx', passo: 2, spazio: 'inserzioni-sx' },
     { sez: '#registrati',    lato: 'dx', passo: 2, spazio: 'inserzioni-dx' },
     { sez: '.guide-costi-home', lato: 'sx', passo: 3, spazio: 'guide-sx' },
