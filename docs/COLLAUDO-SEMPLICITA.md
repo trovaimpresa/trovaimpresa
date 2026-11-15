@@ -2759,3 +2759,11 @@ Account info@, reparto «ferramenta», nome «PROVA CONTROLLORE».
 **Pulizia.** Lavoro, ore, 2 persone eliminati per sempre. Contato dal database: lavori, persone, clienti
 «PROVA CONTROLLORE» = →0←; ore del reparto = →0←. Email mandate: →0←.
 **Restano da decidere con Alex:** DIFFICILE 8; MANCA 3 e 4.
+
+## 15 nov 2026 (8) — lista «DIFFICILE» del sesto giro: n. 8, la striscia di «Parla» nell'app dell'operaio
+Scelta con Alex («si» alle 17:15, foto prima/dopo a 375 approvate e «pubblica» alle 17:22).
+- [x] Sul telefono la striscia in fondo passa da 86 a 64 px; «Parla» è alto 48 e sta a 8 px dal fondo; i messaggi
+  (toast) restano sopra la striscia (`<style id="op-parla-striscia">` in `gestionale-operatore.html`). Sul computer niente.
+Banco `tools/banco-quinto-giro.js`: 3 prove nuove «S6 D8». Sulla versione di prima →1← rosso, adesso →189← verdi.
+Gli altri banchi verdi. `controllo-push`: «tutto a posto». Il banco lungo del gestionale non è stato rilanciato:
+App e Noleggio non sono stati toccati.

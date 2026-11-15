@@ -331,9 +331,14 @@
 /* la striscia c'e' solo dove c'e' «Parla» (dentro un lavoro il pulsante non
    si vede: li' la pagina resta com'era) */
 @media (max-width:600px){
-  body:has(#gv-btn:not([style*="display: none"])){padding-bottom:92px}
-  body:has(#gv-btn:not([style*="display: none"]))::after{content:"";position:fixed;left:0;right:0;bottom:0;height:86px;background:var(--bg,#f4f6f9);border-top:1.5px solid #d5dbe5;z-index:790}
-  body:has(#gv-btn:not([style*="display: none"])) #toast{bottom:100px;z-index:795}
+  /* 15 nov 2026 (sesto giro, DIFFICILE 8) — la striscia era alta 86 px: su un
+     telefono si mangiava una riga e mezza di lavoro. Adesso 64: «Parla» e'
+     alto 48 (si tocca bene) e sta a 8 px dal fondo e dal bordo della striscia. */
+  body:has(#gv-btn:not([style*="display: none"])){padding-bottom:70px}
+  body:has(#gv-btn:not([style*="display: none"]))::after{content:"";position:fixed;left:0;right:0;bottom:0;height:64px;background:var(--bg,#f4f6f9);border-top:1.5px solid #d5dbe5;z-index:790}
+  body:has(#gv-btn:not([style*="display: none"])) #toast{bottom:78px;z-index:795}
+  #gv-btn{bottom:8px!important;padding:11px 20px!important;min-height:48px}
+  #gv-foto{bottom:8px!important;padding:9px 18px!important;min-height:48px}
 }
 </style>
 <style id="op-schede">

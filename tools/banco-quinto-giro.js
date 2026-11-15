@@ -451,6 +451,11 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     });
     prova(!a.manca, "c'è «Parla» e c'è «Metti l'app sul telefono»", a.manca);
     if (!a.manca) prova(a.striscia != null && a.striscia <= a.parlaSu && !a.coperte.length, "(10) «Parla» ha la sua striscia in fondo: non sta più sopra le scritte", a);
+    /* S6 D8 (15 nov 2026) — la striscia di «Parla» è più bassa (64 px, era 86) e «Parla» resta comodo da toccare */
+    const d8 = await page.evaluate(() => { const b = document.getElementById("gv-btn"), rb = b.getBoundingClientRect(), st = getComputedStyle(document.body, "::after"); return { alta: parseFloat(st.height), parla: Math.round(rb.height), su: Math.round(rb.top), giu: Math.round(innerHeight - rb.bottom), px: parseFloat(getComputedStyle(b).fontSize), schermo: innerHeight, fuori: rb.right > innerWidth || rb.left < 0 }; });
+    prova(d8.alta <= 64, "(S6 D8) operaio: la striscia di «Parla» è alta al massimo 64 px (era 86)", d8);
+    prova(d8.parla >= 48 && d8.px >= 14 && !d8.fuori, "(S6 D8) …«Parla» è alto almeno 48 px, scritta da 14 in su, dentro lo schermo", d8);
+    prova(d8.su >= d8.schermo - d8.alta && d8.giu >= 6, "(S6 D8) …e sta tutto dentro la sua striscia, staccato dal fondo", d8);
     /* (S6 c) un messaggio (toast) deve stare SOPRA la striscia di «Parla», non dietro */
     const ts = await page.evaluate(async () => {
       const e = document.getElementById("toast"), b = document.getElementById("gv-btn"); if (!e || !b || typeof toast !== "function") return { manca: true };
