@@ -2644,3 +2644,12 @@ Netlify: pubblicato (i →9← file nuovi letti online). Account info@, reparto 
 **Pulizia (06:41, con l'ok di Alex).** Cliente, lavoro, persona, ore, preventivo (con riga e link), riga del registro email:
 eliminati. Contato dal database: clienti, lavori, persone, ore, spese, rapportini, preventivi, righe, link, registro email,
 file dell'email, fatture del reparto = →0←. «Sei anche un professionista?» è spento com'era.
+
+## 15 nov 2026 (2) — lista «DIFFICILE» del sesto giro: n. 1, persona che c'è già
+Scelta con Alex («si» alle 06:46, foto a 1440 e 375 approvate alle 06:59).
+- [x] Nelle ore, «＋ Un'altra persona…» con un nome che c'è già (maiuscole a parte) e un costo scritto: le ore vanno a
+  quella persona, la sua scheda non si tocca, e sotto «Chi le ha fatte» esce in ambra «Luca c'è già in squadra: le ore
+  sono andate a Luca. Il costo orario si scrive nella sua scheda.» (`oreGiaAvviso`, `#or-chi-gia`, in
+  `js/gest-ore-spese.js`). Resta finché non cambi persona o non aggiungi altre ore. Nome e costo non restano più nelle due
+  caselle nascoste. Senza costo scritto non esce niente.
+Banco `tools/banco-quinto-giro.js`: sulla versione di prima →8← rossi, adesso →146← verdi.

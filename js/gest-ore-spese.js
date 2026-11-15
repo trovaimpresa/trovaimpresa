@@ -951,7 +951,7 @@
     const v=sel.value;
     if(!v) return {manca:true};
     if(v!=="__io__"&&v!=="__nuovo__") return {id:v};
-    let nome="", costo=null;
+    let nome="", costo=null, costoScritto=false;
     if(v==="__nuovo__"){
       nome=String(($("#or-chi-nuovo")||{}).value||"").trim();
       if(!nome){ campoManca("#or-chi-nuovo","Manca il nome della persona: scrivilo qui."); return {stop:true}; }
@@ -960,6 +960,7 @@
          della persona (dipCostoStorto): un refuso non deve diventare un costo. */
       const tc=String(($("#or-chi-costo")||{}).value||"").trim();
       if(tc!==""){
+        costoScritto=true;
         costo=_numIt("#or-chi-costo");
         if(costo==null){ campoManca("#or-chi-costo","Non ho capito il costo orario: scrivilo come 22,50."); return {stop:true}; }
         if(costo<0){ campoManca("#or-chi-costo","Il costo orario non può essere negativo."); return {stop:true}; }
@@ -970,7 +971,19 @@
     }
     nome=nome.charAt(0).toUpperCase()+nome.slice(1);
     const gia=(dipCache||[]).find(d=>String(d.nome||"").toLowerCase().trim()===nome.toLowerCase());
-    if(gia) return {id:gia.id};
+    if(gia){
+      /* 15 nov 2026 (sesto giro, DIFFICILE n. 1) — la persona C'E' GIA': le ore
+         vanno a lei e la sua scheda non si tocca. Prima il costo scritto spariva
+         senza dirlo, e nome e costo restavano nelle due caselle nascoste (te li
+         ritrovavi la volta dopo). Adesso le caselle si svuotano e, se avevi
+         scritto un costo, oreAdd lo dice sotto «Chi le ha fatte». */
+      if(v==="__nuovo__"){
+        const n0=$("#or-chi-nuovo"); if(n0) n0.value="";
+        const c0=$("#or-chi-costo"); if(c0) c0.value="";
+        return {id:gia.id, gia:String(gia.nome||nome), costoIgnorato:costoScritto};
+      }
+      return {id:gia.id};
+    }
     const {data,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id:curMestiere(),nome:nome.slice(0,60)},costo!=null?{costo_orario:costo}:{})).select("id,nome");
     if(error||!data||!data.length){ toast("Non riesco ad aggiungere "+nome+" alla squadra: "+((error&&error.message)||"nessuna riga")); return {stop:true}; }
     if(Array.isArray(dipCache)) dipCache.push({id:data[0].id,nome:data[0].nome,costo_orario:costo,ruolo:"operaio",permessi:{},docs:[]});
@@ -988,6 +1001,7 @@
     if(!(ore>0)){toast("Scrivi quante ore, per esempio 2,5");return;}
     /* una riga sola di 1.250 ore e' un dito scivolato, non una giornata */
     if(ore>24){toast("Sono tante: una riga sola non può avere più di 24 ore");return;}
+    oreGiaAvviso("");
     const chi=await oreChiId();
     if(chi.manca){ campoManca("#or-chi","Manca chi le ha fatte: sceglilo qui."); return; }
     if(chi.stop) return;
@@ -1003,8 +1017,24 @@
     await renderOreBlock(oreLavoroId);
     renderRapportiniBlock(oreLavoroId);   /* la riga «aggiunte da te» deve restare vera */
     await _oreSalvaTotale();
+    if(typeof oreChiCambia==="function") oreChiCambia();   /* le due caselle di «Un'altra persona» tornano nascoste */
+    if(chi.costoIgnorato) oreGiaAvviso(chi.gia+" c'è già in squadra: le ore sono andate a "+chi.gia+". Il costo orario si scrive nella sua scheda.");
     toast("Ore aggiunte ✔");
   }
+  /* 15 nov 2026 (DIFFICILE n. 1) — la riga ambra sotto «Chi le ha fatte»: resta
+     finche' non cambi persona o non aggiungi altre ore (un toast spariva in 2,6 s).
+     Vuota = si toglie. Stesso stile dell'avviso «Manca l'IBAN». */
+  function oreGiaAvviso(testo){
+    const vecchio=document.getElementById("or-chi-gia"); if(vecchio) vecchio.remove();
+    if(!testo) return;
+    const sel=$("#or-chi"); if(!sel) return;
+    const d=document.createElement("div");
+    /* subito sotto la tendina, largo quanto il modulo (ore-c--tutta: la griglia delle ore) */
+    d.id="or-chi-gia"; d.className="campo-aiuto fa-iban-manca ore-c--tutta"; d.textContent=testo;
+    const riga=sel.closest("label.ore-c");
+    if(riga) riga.insertAdjacentElement("afterend",d); else sel.parentNode.appendChild(d);
+  }
+  document.addEventListener("change",e=>{ if(e.target&&e.target.id==="or-chi") oreGiaAvviso(""); });
   async function oreDel(id){
     if(!sbUid)return;
     const {error}=await sb.from("gest_ore").delete().eq("id",id).eq("user_id",sbUid);

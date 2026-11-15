@@ -189,11 +189,22 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     /* (S6 g) una persona che C'È GIÀ con quel nome («luca senzacosto», costo 25): non nasce un doppione,
        la scheda di Luca non viene toccata, le ore vanno a lui */
     const nPers = stato.persone.length, nOre = stato.aggiunte.length, nScr = stato.scritte.length;
-    const gia = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)), sel = q("#or-chi"); if (!sel) return { manca: true }; sel.value = "__nuovo__"; sel.dispatchEvent(new Event("change", { bubbles: true })); await W(200); q("#or-chi-nuovo").value = "luca senzacosto"; q("#or-chi-costo").value = "25"; q("#or-ore").value = "1"; await oreAdd(); await W(1500); return {}; });
+    const gia = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)), sel = q("#or-chi"); if (!sel) return { manca: true }; sel.value = "__nuovo__"; sel.dispatchEvent(new Event("change", { bubbles: true })); await W(200); q("#or-chi-nuovo").value = "luca senzacosto"; q("#or-chi-costo").value = "25"; q("#or-ore").value = "1"; await oreAdd(); await W(1500);
+      const a = q("#or-chi-gia"), vede = e => !!e && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().height > 0;
+      if (a) a.scrollIntoView({ block: "center" });
+      const o = { dice: a ? a.innerText.replace(/\s+/g, " ") : "", siVede: vede(a), px: a ? parseFloat(getComputedStyle(a).fontSize) : 0, fuori: a ? a.getBoundingClientRect().right > innerWidth + 1 : false, nome: (q("#or-chi-nuovo") || {}).value, costo: (q("#or-chi-costo") || {}).value, nascoste: !vede(q("#or-chi-nuovo-box")) && !vede(q("#or-chi-costo-box")), scelto: (q("#or-chi") || {}).value };
+      return o; });
+    await foto(page, "D1-persona-che-ce-gia", "#or-chi-gia");
     const oraGia = stato.aggiunte[stato.aggiunte.length - 1] || {};
     const toccati = stato.scritte.slice(nScr).filter(x => x.tab === "gest_operatori");
     prova(!gia.manca && stato.persone.length === nPers && toccati.length === 0, "(S6 g) persona che c'è già («luca senzacosto»): non nasce un doppione e la sua scheda non si tocca", { nuove: stato.persone.length - nPers, toccati: toccati.map(x => x.m) });
     prova(stato.aggiunte.length === nOre + 1 && oraGia.operatore_id === id(202), "(S6 g) …e le ore vanno al Luca che c'è", oraGia);
+    /* (DIFFICILE 1, sesto giro) lo dice, e le due caselle si svuotano */
+    prova(gia.siVede && /Luca Senzacosto c'è già/.test(gia.dice || "") && /si scrive nella sua scheda/.test(gia.dice || ""), "(S6 D1) persona che c'è già con un costo scritto: lo dice («Luca … c'è già … il costo orario si scrive nella sua scheda»)", gia);
+    prova(gia.px >= 14 && !gia.fuori, "(S6 D1) l'avviso si legge (≥14 px) e sta nello schermo", gia);
+    prova(gia.nome === "" && gia.costo === "" && gia.nascoste && gia.scelto === id(202), "(S6 D1) nome e costo NON restano nelle caselle nascoste, e la tendina resta su Luca", gia);
+    const gia2 = await page.evaluate(async () => { const q = s => document.querySelector(s), W = ms => new Promise(r => setTimeout(r, ms)), sel = q("#or-chi"); sel.value = "__nuovo__"; sel.dispatchEvent(new Event("change", { bubbles: true })); await W(200); const tolto = !q("#or-chi-gia"); q("#or-chi-nuovo").value = "LUCA SENZACOSTO"; q("#or-ore").value = "1"; await oreAdd(); await W(1500); return { tolto, dopo: !!q("#or-chi-gia"), nome: (q("#or-chi-nuovo") || {}).value }; });
+    prova(gia2.tolto && !gia2.dopo && gia2.nome === "", "(S6 D1) cambiando persona l'avviso sparisce; senza costo scritto non esce (le ore vanno a Luca e basta)", gia2);
     const fr = await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); return e ? e.innerText.replace(/\s+/g, " ") : null; });
     await foto(page, "11-frase", "#sheet .campo-aiuto b");
     await page.evaluate(() => { const e = [...document.querySelectorAll("#sheet .campo-aiuto")].find(x => /Crea fattura/.test(x.textContent)); if (e) e.scrollIntoView({ block: "center" }); }); await foto(page, "11-frase");
