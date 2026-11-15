@@ -371,7 +371,7 @@
     /* 14 nov 2026 (quinto giro, n. 9) — il CAP e' di 5 cifre: «0210» veniva
        salvato e stampato nel PDF. Stessa regola del cliente del Noleggio
        (salvaClienteNol): vuoto va bene, sbagliato si segna sulla casella. */
-    if(v("#c-cap")&&!/^\d{5}$/.test(v("#c-cap"))){campoManca($("#c-cap"),"Il CAP è di 5 cifre, es. 02100.");return;}
+    if(v("#c-cap")&&!/^\d{5}$/.test(v("#c-cap"))){campoManca($("#c-cap"),"Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={nome,
       tipo:(($("#c-tipo-box")||{}).dataset||{}).tipo||"privato",

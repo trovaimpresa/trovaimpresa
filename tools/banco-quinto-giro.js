@@ -295,6 +295,12 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     const scritto = stato.scritte.slice(prima).filter(x => x.tab === "gest_clienti");
     prova(!cap.manca && scritto.length === 0, "(9) Cliente: un CAP di 4 cifre NON si salva", scritto.map(x => x.corpo && x.corpo.cap));
     prova(/5 cifre/.test(cap.dice || ""), "(9) …e lo dice sulla casella («Il CAP è di 5 cifre»)", cap.dice);
+    /* S6 D4 (15 nov 2026) — CAP di un cliente estero: la frase dice cosa fare, nell'App e nel Noleggio */
+    prova(/Cliente estero\? Lascialo vuoto\./.test(cap.dice || ""), "(S6 D4) Cliente: la frase del CAP dice «Cliente estero? Lascialo vuoto.»", cap.dice);
+    const capEst = await page.evaluate(async () => { const q = s => document.querySelector(s); q("#c-cap").value = "CH-6900"; await saveCli(null); await new Promise(r => setTimeout(r, 900)); const c = q("#c-cap"); const f = c && (c.closest(".field") || c.parentNode); return { dice: f ? f.innerText.replace(/\s+/g, " ") : "" }; });
+    prova(stato.scritte.slice(prima).filter(x => x.tab === "gest_clienti").length === 0 && /Lascialo vuoto/.test(capEst.dice || ""), "(S6 D4) …un CAP estero («CH-6900») non si salva e la frase resta", capEst.dice);
+    { const fsN = require("fs"), pN = require("path"); const radN = process.env.BANCO_RADICE || pN.join(__dirname, ".."); let nolS = ""; try { nolS = fsN.readFileSync(pN.join(radN, "js", "nol-schede.js"), "utf8"); } catch (e) {} const appS = fsN.readFileSync(pN.join(radN, "js", "gest-commercialista.js"), "utf8"); const FR = "Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.";
+      prova(nolS.includes(FR) && appS.includes(FR), "(S6 D4) …la stessa frase, uguale, nell'App e nel Noleggio", [nolS.includes(FR), appS.includes(FR)]); }
     const cap5 = await page.evaluate(async () => { document.querySelector("#c-cap").value = "02100"; await saveCli(null); await new Promise(r => setTimeout(r, 900)); return 1; });
     prova(stato.scritte.slice(prima).some(x => x.tab === "gest_clienti" && x.corpo && x.corpo.cap === "02100"), "(9) …con 5 cifre si salva", stato.scritte.slice(prima).map(x => x.tab));
     await page.evaluate(() => { try { closeSheet(); } catch (e) {} }); await B.aspetta(page, 400);

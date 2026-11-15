@@ -436,7 +436,7 @@
     const sdi=($("#ncl-sdi").value||"").replace(/\s+/g,"").toUpperCase();
     if(sdi&&sdi.length!==7){nolCampoManca("#ncl-sdi","Il codice destinatario è di 7 caratteri (oppure 0000000).");return;}
     const cap=($("#ncl-cap").value||"").trim();
-    if(cap&&!/^\d{5}$/.test(cap)){nolCampoManca("#ncl-cap","Il CAP è di 5 cifre, es. 02100.");return;}
+    if(cap&&!/^\d{5}$/.test(cap)){nolCampoManca("#ncl-cap","Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const vv=s=>{const e=$(s);return e?(e.value.trim()||null):null;};
     const dati={nome,

@@ -2685,3 +2685,13 @@ Foto a 1440 e 375 approvate da Alex alle 07:51, «pubblica» alle 07:54. Banco d
 fatture di prova). Solo banco; dopo il push si controlla che i file nuovi siano online.
 **Restano da decidere con Alex:** DIFFICILE 4 (CAP estero: proposta «Il CAP è di 5 cifre. Cliente estero? Lascialo
 vuoto.», in attesa del suo sì), 6, 7, 8; MANCA 3 e 4.
+
+## 15 nov 2026 (5) — lista «DIFFICILE» del sesto giro: n. 4, CAP di un cliente estero
+Scelta con Alex («si» alle 08:45, foto a 1440 e 375 approvate e «pubblica» alle 10:13).
+- [x] Cambiata solo la frase sotto la casella del CAP, nell'App (`js/gest-commercialista.js`) e nel Noleggio
+  (`js/nol-schede.js`): «Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.» La regola non cambia: 5 cifre o vuoto.
+Banco `tools/banco-quinto-giro.js`: 3 prove nuove «S6 D4» (frase giusta; «CH-6900» non si salva; frase uguale nei due
+gestionali). Sulla versione di prima →6← rossi, adesso →168← verdi. Gli altri banchi verdi. `controllo-push`: «tutto a posto».
+[~] NON provato col banco: la casella del Noleggio nel browser (lì il banco confronta solo il testo nel file).
+[-] Il paese del cliente (MANCA 4) non è stato fatto: un CAP estero continua a non potersi scrivere.
+**Restano da decidere con Alex:** DIFFICILE 6, 7, 8; MANCA 3 e 4.
