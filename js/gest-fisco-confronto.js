@@ -53,7 +53,8 @@
 
   /* i punti delle migliaia messi a mano: il browser a «9726» non li mette */
   function fcP(n) { return String(Math.round(+n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-  function fcE(n) { return fcP(n) + " €"; }
+  /* lo spazio prima di € non va mai a capo (sul telefono stretto il € restava da solo) */
+  function fcE(n) { return fcP(n) + "\u00a0€"; }
   function fcNum(v) { return +String(v == null ? "" : v).replace(/[^\d]/g, "") || 0; }
   /* una percentuale scritta a mano: «33,68», «7.5», «7,5 %» */
   function fcPerc(v) { const n = parseFloat(String(v == null ? "" : v).replace(",", ".").replace(/[^\d.]/g, "")); return isFinite(n) ? Math.min(100, Math.max(0, n)) : 0; }

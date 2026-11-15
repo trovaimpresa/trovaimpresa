@@ -6216,6 +6216,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 .fc-resta b{font-size:19px;font-variant-numeric:tabular-nums}
 .fc-ditta{grid-column:1/-1;border-top:1px dashed var(--bordo);margin-top:6px;padding-top:10px;font-size:17px;font-weight:600}
 .fc-ditta>div{display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-variant-numeric:tabular-nums}
+.fc-ditta>div>span:last-child,.fc-ditta>div>b{white-space:nowrap}
 .fc-ditta .fc-ditta-t{font-size:19px;font-weight:800;padding-bottom:6px;align-items:baseline}
 .fc-ditta .fc-ditta-t b{font-size:24px;white-space:nowrap}
 .fc-esito{display:flex;gap:12px;align-items:flex-start;background:var(--blu);color:#fff;border-radius:14px;padding:16px 18px;margin-top:14px;font-size:19px;font-weight:600;line-height:1.4}
