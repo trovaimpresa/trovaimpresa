@@ -154,7 +154,7 @@ window.pdfFirme = pdfFirme;
       if (rr.error || !rr.data) { toast("Non riesco a leggere il rapportino: riprova fra un momento."); return; }
       r = rr.data;
     }
-    const cli = await cliDelDocumento(rl.data.cliente_id, "nome,indirizzo,cap,citta,prov,referente");
+    const cli = await cliDelDocumento(rl.data.cliente_id, "nome,indirizzo,cap,citta,prov,paese,referente");
     const ore = await leggiOre(lavoroId, r.data || todayStr());
     _rf = { id: rapId || null, lavoro: rl.data, cli: cli || {}, ore: ore, firma: r.firma_cliente || null };
     _pad = null;

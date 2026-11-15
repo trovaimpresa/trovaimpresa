@@ -408,10 +408,13 @@
         <div class="sh-tit">Dove sta</div>
         <div class="field"><label>Via e numero</label><input id="ncl-indirizzo" value="${v('indirizzo')}" placeholder="Es. Via Roma, 12"></div>
         <div class="row2">
-          <div class="field"><label>CAP</label><input id="ncl-cap" value="${v('cap')}" placeholder="Es. 02100" inputmode="numeric" maxlength="5"></div>
+          <div class="field"><label>CAP</label><input id="ncl-cap" value="${v('cap')}" ${window.paeseEstero&&window.paeseEstero(c)?'placeholder="Es. CH-6900" maxlength="12"':'placeholder="Es. 02100" inputmode="numeric" maxlength="5"'}></div>
           <div class="field"><label>Città</label><input id="ncl-citta" value="${v('citta')}" placeholder="Es. Rieti"></div>
         </div>
-        <div class="field"><label>Provincia</label><input id="ncl-prov" value="${v('prov')}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+        <div class="row2">
+          <div class="field"><label>Paese</label>${window.paeseTendina?window.paeseTendina("ncl-paese",c.paese):""}</div>
+          <div class="field"${window.paeseEstero&&window.paeseEstero(c)?' style="display:none"':''}><label>Provincia</label><input id="ncl-prov" value="${v('prov')}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+        </div>
       </div>
       </div><div class="sh-col">
       <div class="sh-b">
@@ -436,7 +439,9 @@
     const sdi=($("#ncl-sdi").value||"").replace(/\s+/g,"").toUpperCase();
     if(sdi&&sdi.length!==7){nolCampoManca("#ncl-sdi","Il codice destinatario è di 7 caratteri (oppure 0000000).");return;}
     const cap=($("#ncl-cap").value||"").trim();
-    if(cap&&!/^\d{5}$/.test(cap)){nolCampoManca("#ncl-cap","Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.");return;}
+    /* 15 nov 2026 (MANCA 4) — il paese, come nell'App (js/gest-commercialista.js) */
+    const estero=window.paeseEstero?window.paeseEstero(($("#ncl-paese")||{}).value):"";
+    if(!estero&&cap&&!/^\d{5}$/.test(cap)){nolCampoManca("#ncl-cap","Il CAP è di 5 cifre. Cliente estero? Scegli il suo paese qui sotto.");return;}
     if(!(sb&&sbUid)){toast("Devi essere collegato");return;}
     const vv=s=>{const e=$(s);return e?(e.value.trim()||null):null;};
     const dati={nome,
@@ -445,7 +450,8 @@
       indirizzo:vv("#ncl-indirizzo"),
       cap:cap||null,
       citta:vv("#ncl-citta"),
-      prov:(vv("#ncl-prov")||"").toUpperCase()||null,
+      prov:estero?null:((vv("#ncl-prov")||"").toUpperCase()||null),
+      paese:estero||null,
       piva:(vv("#ncl-piva")||"").replace(/\s+/g,"")||null,
       cod_fiscale:(vv("#ncl-cf")||"").replace(/\s+/g,"").toUpperCase()||null,
       sdi_codice:sdi||null,

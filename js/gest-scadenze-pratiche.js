@@ -1110,11 +1110,14 @@
         <div class="sh-tit">Dove sta</div>
         <div class="field"><label>Via e numero</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Es. Via Roma, 12"></div>
         <div class="row2">
-          <div class="field"><label>CAP</label><input id="c-cap" value="${esc(c.cap||"")}" placeholder="Es. 02100" inputmode="numeric"></div>
+          <div class="field"><label>CAP</label><input id="c-cap" value="${esc(c.cap||"")}" ${window.paeseEstero&&window.paeseEstero(c)?'placeholder="Es. CH-6900" maxlength="12"':'placeholder="Es. 02100" inputmode="numeric" maxlength="5"'}></div>
           <div class="field"><label>Città</label><input id="c-citta" value="${esc(c.citta||"")}" placeholder="Es. Rieti"></div>
         </div>
-        <div class="field"><label>Provincia</label>
-          <input id="c-prov" value="${esc(c.prov||"")}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+        <div class="row2">
+          <div class="field"><label>Paese</label>${window.paeseTendina?window.paeseTendina("c-paese",c.paese):""}</div>
+          <div class="field"${window.paeseEstero&&window.paeseEstero(c)?' style="display:none"':''}><label>Provincia</label>
+            <input id="c-prov" value="${esc(c.prov||"")}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+        </div>
       </div>
 
       <button type="button" class="btn" id="c-fisc-apri" style="width:100%;min-height:54px;height:auto;white-space:normal;line-height:1.35;padding:12px 16px;font-size:18px;font-weight:700;justify-content:flex-start;text-align:left;${_fiscAperto?'display:none':''}">+ Dati per la fattura <span style="font-weight:400">(codice fiscale, partita IVA, PEC)</span></button>

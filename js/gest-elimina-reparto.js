@@ -358,7 +358,7 @@
     if(!lav){toast("Lavoro non trovato");return;}
     let c={};
     /* 13 nov 2026 (lista «MANCA», n. 10) — anche CAP, citta' e provincia */
-    c=await cliDelDocumento(lav.cliente_id,"nome,indirizzo,cap,citta,prov,referente");
+    c=await cliDelDocumento(lav.cliente_id,"nome,indirizzo,cap,citta,prov,paese,referente");
     /* il numero NON si assegna qui: scaricare il PDF non deve impegnare
        un numero di fattura. Lo assegna assegnaNumFatt() quando segni "Emessa". */
     const numFatt=lav.num_fatt||null;

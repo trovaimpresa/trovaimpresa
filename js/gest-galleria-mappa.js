@@ -391,7 +391,7 @@
         /* stessa storia dell'ufficio: senza CAP, citta' e provincia l'indirizzo
            del cliente e' mezzo indirizzo, e il pin finisce dall'altra parte
            d'Italia */
-        sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).or(_cliOr(curMestiere()))
+        sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,paese").eq("user_id",sbUid).or(_cliOr(curMestiere()))
       ]);
       const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
       /* ATTENZIONE: qui la lista dei lavori NON si può chiamare L.

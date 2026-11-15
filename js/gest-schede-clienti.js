@@ -874,8 +874,10 @@
     const via=(c.indirizzo||"").trim();
     const coda=[(c.cap||"").trim(),(c.citta||"").trim()].filter(Boolean).join(" ");
     const pr=(c.prov||"").trim();
-    if(!coda&&!pr)return via;
-    return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ");
+    /* 15 nov 2026 (MANCA 4) — cliente estero: in coda il paese («, Svizzera») */
+    const pa=window.paeseCoda?window.paeseCoda(c):"";
+    if(!coda&&!pr)return via+(via?pa:"");
+    return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ")+pa;
   }
   function cliCard(c){
     const fisc=[c.piva?"P.IVA "+esc(c.piva):"", c.cod_fiscale?"C.F. "+esc(c.cod_fiscale):""].filter(Boolean).join(" · ");

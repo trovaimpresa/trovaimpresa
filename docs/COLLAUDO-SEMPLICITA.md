@@ -2775,14 +2775,40 @@ Netlify: pubblicato (stato «ready»). App dell'operaio aperta sul sito vero a 3
 - [-] Non provato su un telefono vero in mano: solo il telefono finto del browser. La voce non si può provare da qui.
 Niente scritto nel database. Finestra rimessa a «desktop».
 
+## 15 nov 2026 (9) — lista «MANCA» del sesto giro: n. 4, il paese del cliente
+Scelta con Alex («si» alle 17:35; foto a 1440 e 375, App e Noleggio, approvate e «pubblica» alle 17:54).
+Deciso con lui: adesso solo la scheda e la stampa; il file per lo SdI di un cliente estero NON si fa (si ferma e lo dice),
+finché il commercialista non conferma le regole (paese, CAP 00000, codice XXXXXXX).
+- [x] Scheda cliente, App (`js/gest-scadenze-pratiche.js`, `js/gest-commercialista.js`) e Noleggio (`js/nol-schede.js`):
+  tendina «Paese», parte da «Italia». Con un paese estero il CAP si scrive libero («CH-6900», massimo 12 caratteri) e la
+  casella Provincia sparisce. Con «Italia» resta la regola di prima: 5 cifre o vuoto.
+  Il pezzo è uno solo, `js/gest-paese.js` (`paeseTendina`, `paeseEstero`, `paeseNome`, `paeseCoda`, `paeseEsteroSdi`,
+  `paeseAdatta`), caricato dalle due pagine.
+- [x] Database: `gest_clienti.paese`, due lettere, VUOTO = Italia (`sql/2026-11-15-clienti-paese.sql`, migrazione
+  `clienti_paese_15nov2026`, riga in `PROVE`). I clienti di prima non cambiano.
+- [x] La frase sotto il CAP sbagliato: «Il CAP è di 5 cifre. Cliente estero? Scegli il suo paese qui sotto.» (era
+  «Lascialo vuoto», DIFFICILE 4), uguale nell'App e nel Noleggio.
+- [x] Indirizzo stampato: in coda «, Svizzera» (`cliIndirizzo` in `js/gest-schede-clienti.js`; preventivo, incarico,
+  capitolato, fattura, ricevuta, SAL, rapportino). Per l'Italia niente.
+- [x] File per lo SdI, App (`fattXmlControllo`, vale anche per l'invio con Openapi) e Noleggio (`js/nol-sdi.js`): con un
+  cliente estero una riga sola, «Il cliente è estero (Svizzera): il file per lo SdI di questa fattura fallo fare al
+  commercialista.», al posto degli errori italiani (CAP, partita IVA di 11 cifre).
+- [x] «Controlla che sia giusto» sulla scheda cliente: per un estero non segna partita IVA, codice fiscale, CAP, SDI.
+Banco `tools/banco-quinto-giro.js`: 13 prove nuove «S6 M4» (e le 3 «S6 D4» con la frase nuova). Sulla versione di prima
+→30← rossi, adesso →215← verdi. Banco del gestionale, App e Noleggio: zero difetti. Soldi 36, preventivo 38, noleggio 31,
+gruppo4 59, gruppo5 34, email-pdf 62, correttore, copia-computo, profilo 9: verdi. `controllo-push`: «tutto a posto».
+Misure a 375 e 1440: tendina a 18-21 px, alta 62 o più, niente fuori dallo schermo.
+[-] NON fatto apposta: il paese dentro il file per lo SdI (aspetta il commercialista); il paese nella fotografia della
+fattura (`gest_fatture.cli_*`): il PDF lo legge dalla scheda del cliente.
+
 ## DOVE SIAMO ALLA FINE DEL 15 NOV 2026 (per la sessione dopo)
 Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e online.
 **Restano da decidere con Alex, una per volta:**
 - MANCA 3: nel Noleggio la schermata Squadra non c'è («Senza invito» lì non si vede mai).
-- MANCA 4: il paese del cliente (serve per il CAP estero; tocca anche PDF e file per lo SdI).
+- MANCA 4: FATTA (capitolo 9). Resta solo il file per lo SdI di un cliente estero: serve la conferma del commercialista.
 **Trovato oggi e NON toccato (da proporre):**
 - nei rapportini «chi non è più in squadra» usa ancora la squadra in memoria (stessa cura della DIFFICILE 6);
 - dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola;
-- nel Noleggio la casella del CAP accetta al massimo 5 caratteri, nell'App no.
-Numeri: `tools/banco-quinto-giro.js` →189← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
+- (chiusa col capitolo 9: adesso il CAP è al massimo 5 caratteri per l'Italia e 12 per l'estero, in tutti e due.)
+Numeri: `tools/banco-quinto-giro.js` →215← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
 `node tools/banco-gestionale.js app` e poi `node tools/banco-gestionale.js noleggio` (tutto insieme supera i 10 minuti).

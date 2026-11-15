@@ -591,7 +591,7 @@
   const CTR_MAPPA={
     cliente:{ "c-nome":"nome", "c-tel":"telefono", "c-email":"email",
               "c-piva":"piva", "c-cf":"cod_fiscale",
-              "c-sdi":"sdi_codice", "c-pec":"sdi_pec" },
+              "c-sdi":"sdi_codice", "c-pec":"sdi_pec", "c-paese":"paese" },
     fornitore:{ "fo-nome":"nome", "fo-piva":"piva",
                 "fo-tel":"telefono", "fo-email":"email" }
   };
@@ -993,8 +993,14 @@
     if(!L.get("c-nome")) out.push({campo:"c-nome",grave:"rosso",
       dice:"Manca il nome. Senza, questa scheda non la ritrovi più e nei documenti esce vuota."});
 
+    /* 15 nov 2026 (MANCA 4) — cliente estero: partita IVA, codice fiscale, CAP
+       e codice SDI non hanno la forma italiana. Qui non si controllano: il file
+       per lo SdI di un cliente estero il gestionale non lo fa (paeseEsteroSdi). */
+    const estero=!!(window.paeseEstero&&window.paeseEstero(L.get("c-paese")));
+
     /* --- di che cosa ha bisogno, secondo quello che è --- */
     const nPiva=ctrCifre(L.get("c-piva")), nCf=L.get("c-cf");
+    if(!estero){
 
     if(tipo==='azienda'){
       if(!nPiva) out.push({campo:"c-piva",grave:"rosso",
@@ -1028,6 +1034,7 @@
       dice:"Il CAP ha 5 cifre: qui ce ne sono "+ctrCifre(hCap).length+"."});
     if(hProv&&!/^[A-Za-z]{2}$/.test(hProv)) out.push({campo:"c-prov",grave:"arancio",
       dice:"La provincia si scrive con 2 lettere (es. RI, RM)."});
+    }
 
     /* --- come lo si chiama --- */
     const hTel=L.get("c-tel"), hMail=L.get("c-email"), hPec2=L.get("c-pec");

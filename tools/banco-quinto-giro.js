@@ -333,14 +333,51 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     prova(!cap.manca && scritto.length === 0, "(9) Cliente: un CAP di 4 cifre NON si salva", scritto.map(x => x.corpo && x.corpo.cap));
     prova(/5 cifre/.test(cap.dice || ""), "(9) …e lo dice sulla casella («Il CAP è di 5 cifre»)", cap.dice);
     /* S6 D4 (15 nov 2026) — CAP di un cliente estero: la frase dice cosa fare, nell'App e nel Noleggio */
-    prova(/Cliente estero\? Lascialo vuoto\./.test(cap.dice || ""), "(S6 D4) Cliente: la frase del CAP dice «Cliente estero? Lascialo vuoto.»", cap.dice);
+    /* 15 nov 2026 (S6 M4): da quando c'è la tendina «Paese» la frase manda lì */
+    prova(/Cliente estero\? Scegli il suo paese qui sotto\./.test(cap.dice || ""), "(S6 D4) Cliente: la frase del CAP dice «Cliente estero? Scegli il suo paese qui sotto.»", cap.dice);
     const capEst = await page.evaluate(async () => { const q = s => document.querySelector(s); q("#c-cap").value = "CH-6900"; await saveCli(null); await new Promise(r => setTimeout(r, 900)); const c = q("#c-cap"); const f = c && (c.closest(".field") || c.parentNode); return { dice: f ? f.innerText.replace(/\s+/g, " ") : "" }; });
-    prova(stato.scritte.slice(prima).filter(x => x.tab === "gest_clienti").length === 0 && /Lascialo vuoto/.test(capEst.dice || ""), "(S6 D4) …un CAP estero («CH-6900») non si salva e la frase resta", capEst.dice);
-    { const fsN = require("fs"), pN = require("path"); const radN = process.env.BANCO_RADICE || pN.join(__dirname, ".."); let nolS = ""; try { nolS = fsN.readFileSync(pN.join(radN, "js", "nol-schede.js"), "utf8"); } catch (e) {} const appS = fsN.readFileSync(pN.join(radN, "js", "gest-commercialista.js"), "utf8"); const FR = "Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.";
+    prova(stato.scritte.slice(prima).filter(x => x.tab === "gest_clienti").length === 0 && /Scegli il suo paese/.test(capEst.dice || ""), "(S6 D4) …con «Italia» un CAP estero («CH-6900») non si salva e la frase resta", capEst.dice);
+    { const fsN = require("fs"), pN = require("path"); const radN = process.env.BANCO_RADICE || pN.join(__dirname, ".."); let nolS = ""; try { nolS = fsN.readFileSync(pN.join(radN, "js", "nol-schede.js"), "utf8"); } catch (e) {} const appS = fsN.readFileSync(pN.join(radN, "js", "gest-commercialista.js"), "utf8"); const FR = "Il CAP è di 5 cifre. Cliente estero? Scegli il suo paese qui sotto.";
       prova(nolS.includes(FR) && appS.includes(FR), "(S6 D4) …la stessa frase, uguale, nell'App e nel Noleggio", [nolS.includes(FR), appS.includes(FR)]); }
     const cap5 = await page.evaluate(async () => { document.querySelector("#c-cap").value = "02100"; await saveCli(null); await new Promise(r => setTimeout(r, 900)); return 1; });
     prova(stato.scritte.slice(prima).some(x => x.tab === "gest_clienti" && x.corpo && x.corpo.cap === "02100"), "(9) …con 5 cifre si salva", stato.scritte.slice(prima).map(x => x.tab));
     await page.evaluate(() => { try { closeSheet(); } catch (e) {} }); await B.aspetta(page, 400);
+
+    /* ---------- S6 M4 (15 nov 2026) — IL PAESE DEL CLIENTE ---------- */
+    { const it = stato.scritte.slice(prima).filter(x => x.tab === "gest_clienti" && x.corpo && x.corpo.cap === "02100").pop();
+      prova(!!it && "paese" in it.corpo && it.corpo.paese === null, "(S6 M4) Cliente italiano: il paese resta vuoto (vuoto = Italia)", it && it.corpo && it.corpo.paese);
+      await clic(page, "new-cli"); await B.aspetta(page, 1200);
+      const prima2 = stato.scritte.length;
+      const est = await page.evaluate(async () => { const q = s => document.querySelector(s); const sel = q("#c-paese"); if (!sel) return { manca: true };
+        const parte = sel.value, provPrima = q("#c-prov").offsetParent !== null;
+        q("#c-nome").value = "PROVA PAESE"; sel.value = "CH"; sel.dispatchEvent(new Event("change", { bubbles: true }));
+        q("#c-cap").value = "CH-6900"; q("#c-citta").value = "Lugano"; q("#c-prov").value = "RI";
+        const provDopo = q("#c-prov").offsetParent !== null, px = parseFloat(getComputedStyle(sel).fontSize), alto = Math.round(sel.getBoundingClientRect().height);
+        await saveCli(null); await new Promise(r => setTimeout(r, 900));
+        return { parte, provPrima, provDopo, px, alto, aperta: !!q("#c-cap") }; });
+      await foto(page, "m4-paese", "#c-paese");
+      const sc = stato.scritte.slice(prima2).filter(x => x.tab === "gest_clienti").map(x => x.corpo || {}).pop() || {};
+      prova(!est.manca && est.parte === "IT", "(S6 M4) Cliente: c'è la tendina «Paese» e parte da Italia", est);
+      prova(est.provPrima === true && est.provDopo === false, "(S6 M4) …con un paese estero la casella della provincia sparisce", est);
+      prova(sc.cap === "CH-6900" && sc.paese === "CH", "(S6 M4) …e il CAP estero («CH-6900») si salva, col paese «CH»", { cap: sc.cap, paese: sc.paese });
+      prova(sc.paese === "CH" && sc.prov === null, "(S6 M4) …senza provincia", sc.prov);
+      prova(est.px >= 14 && (W > 800 || est.alto >= 44), "(S6 M4) …la tendina è leggibile (14 px o più, sul telefono alta 44 o più)", [est.px, est.alto]);
+      await page.evaluate(() => { try { closeSheet(); } catch (e) {} }); await B.aspetta(page, 400);
+      const ind = await page.evaluate(() => { const c = { indirizzo: "Via Cantonale 12", cap: "CH-6900", citta: "Lugano" }; return typeof cliIndirizzo !== "function" ? null : [cliIndirizzo(Object.assign({ paese: "CH" }, c)), cliIndirizzo(Object.assign({ paese: null }, c)), cliIndirizzo(Object.assign({ paese: "IT" }, c))]; });
+      prova(!!ind && /Lugano, Svizzera$/.test(ind[0]) && /Lugano$/.test(ind[1]) && /Lugano$/.test(ind[2]), "(S6 M4) Indirizzo stampato: «…Lugano, Svizzera» per l'estero, niente paese per l'Italia", ind);
+      await P.apri(page, "fatture"); await B.aspetta(page, 1500);
+      const sdi = await page.evaluate(() => { try { const C = fattCliCache[0]; if (!C) return { vuota: true }; const era = C.paese; const f = { id: "prova-m4", numero: 9, anno: 2026, data: "2026-11-15", cliente_id: C.id, stato: "emessa" };
+        C.paese = "CH"; const est = fattXmlControllo(f); C.paese = null; const ita = fattXmlControllo(f); C.paese = era; return { est, ita }; } catch (e) { return { errore: String(e) }; } });
+      const FRS = "Il cliente è estero (Svizzera): il file per lo SdI di questa fattura fallo fare al commercialista.";
+      prova(!!sdi.est && sdi.est.includes(FRS), "(S6 M4) File per lo SdI: con un cliente estero si ferma e dice «fallo fare al commercialista»", sdi.est || sdi);
+      prova(!!sdi.est && !sdi.est.some(x => /Clienti\.$/.test(x)), "(S6 M4) …senza gli errori «italiani» (CAP di 5 cifre, partita IVA di 11…)", sdi.est);
+      prova(!!sdi.ita && !sdi.ita.some(x => /estero/.test(x)), "(S6 M4) …con un cliente italiano la frase non esce", sdi.ita);
+      const fsM = require("fs"), pM = require("path"), rd = n => { try { return fsM.readFileSync(pM.join(RADICE, n), "utf8"); } catch (e) { return ""; } };
+      const nolS = rd("js/nol-schede.js"), nolX = rd("js/nol-sdi.js"), nolH = rd("gestionale-noleggio.html"), appH = rd("gestionale-app.html");
+      prova(/paeseTendina\("ncl-paese"/.test(nolS) && /paese:estero\|\|null/.test(nolS), "(S6 M4) Noleggio: la stessa tendina nella scheda cliente, e il paese si salva", null);
+      prova(/paeseEsteroSdi\(cli\)/.test(nolX), "(S6 M4) Noleggio: anche lì il file per lo SdI si ferma per un cliente estero", null);
+      prova(/\/js\/gest-paese\.js/.test(nolH) && /\/js\/gest-paese\.js/.test(appH), "(S6 M4) …il pezzo del paese è uno solo, caricato dall'App e dal Noleggio", null);
+    }
 
     /* ---------- n. 3 e n. 12 — CESTINO ---------- */
     await P.apri(page, "cestino"); await B.aspetta(page, 2500);

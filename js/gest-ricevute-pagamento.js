@@ -84,7 +84,7 @@
   }
   async function leggiClienti() {
     try {
-      const { data } = await sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,cod_fiscale,piva")
+      const { data } = await sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov,paese,cod_fiscale,piva")
         .eq("user_id", sbUid).is("eliminato_il", null)
         /* 11 nov 2026 — la stessa regola della sezione Clienti: i clienti del
            reparto aperto piu' quelli senza reparto. Prima uscivano tutti (10). */
@@ -293,7 +293,7 @@
     let c = null;
     if (r.cliente_id) {
       try {
-        const { data } = await sb.from("gest_clienti").select("nome,indirizzo,cap,citta,prov,cod_fiscale,piva").eq("id", r.cliente_id).eq("user_id", sbUid).maybeSingle();
+        const { data } = await sb.from("gest_clienti").select("nome,indirizzo,cap,citta,prov,paese,cod_fiscale,piva").eq("id", r.cliente_id).eq("user_id", sbUid).maybeSingle();
         c = data || null;
       } catch (_) {}
     }
@@ -321,7 +321,7 @@
     doc.text(r.cli_nome || "—", M, y); y += 6;
     doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(90);
     if (c) {
-      const luogo = [c.cap, c.citta].filter(Boolean).join(" ") + (c.prov ? " (" + c.prov + ")" : "");
+      const luogo = [c.cap, c.citta].filter(Boolean).join(" ") + (c.prov ? " (" + c.prov + ")" : "") + (window.paeseCoda ? window.paeseCoda(c) : "");
       const ind = [c.indirizzo, luogo].map(function (x) { return String(x || "").trim(); }).filter(Boolean).join(", ");
       if (ind) { doc.text(ind, M, y); y += 4.8; }
       if (c.piva) { doc.text("P.IVA " + c.piva, M, y); y += 4.8; }

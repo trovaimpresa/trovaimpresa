@@ -257,6 +257,7 @@
     "aggiungi-commercialista.sql":      "gest_azienda.comm_studio gest_azienda.comm_nome gest_azienda.comm_tel gest_azienda.comm_email gest_azienda.comm_pec gest_azienda.comm_note",
     "chat-avvisi.sql":                  "chat_avvisi",
     "capitolato-nel-preventivo.sql":    "gest_preventivi.capitolato",
+    "2026-11-15-clienti-paese.sql":     "gest_clienti.paese",
     "preventivi-accettato-il.sql":      "gest_preventivi.accettato_il",
     "fatture-ricevute.sql":             "gest_sdi_ricezione gest_fatture_ricevute",
     "capitolo-costi-sicurezza.sql":     "gest_computo_capitoli.sicurezza gest_computo_totali",

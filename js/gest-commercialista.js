@@ -371,12 +371,16 @@
     /* 14 nov 2026 (quinto giro, n. 9) — il CAP e' di 5 cifre: «0210» veniva
        salvato e stampato nel PDF. Stessa regola del cliente del Noleggio
        (salvaClienteNol): vuoto va bene, sbagliato si segna sulla casella. */
-    if(v("#c-cap")&&!/^\d{5}$/.test(v("#c-cap"))){campoManca($("#c-cap"),"Il CAP è di 5 cifre. Cliente estero? Lascialo vuoto.");return;}
+    /* 15 nov 2026 (MANCA 4) — il paese: per un cliente estero il CAP si scrive
+       libero («CH-6900») e la provincia non c'e'. Vuoto nel database = Italia. */
+    const estero=window.paeseEstero?window.paeseEstero(v("#c-paese")):"";
+    if(!estero&&v("#c-cap")&&!/^\d{5}$/.test(v("#c-cap"))){campoManca($("#c-cap"),"Il CAP è di 5 cifre. Cliente estero? Scegli il suo paese qui sotto.");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={nome,
       tipo:(($("#c-tipo-box")||{}).dataset||{}).tipo||"privato",
       indirizzo:v("#c-ind"), referente:v("#c-ref"), telefono:v("#c-tel"), email:v("#c-email")||null,
-      cap:v("#c-cap")||null, citta:v("#c-citta")||null, prov:v("#c-prov").toUpperCase()||null,
+      cap:v("#c-cap")||null, citta:v("#c-citta")||null, prov:estero?null:(v("#c-prov").toUpperCase()||null),
+      paese:estero||null,
       piva:v("#c-piva")||null, cod_fiscale:v("#c-cf").toUpperCase()||null,
       sdi_codice:v("#c-sdi").toUpperCase()||null, sdi_pec:v("#c-pec")||null};
 
@@ -385,7 +389,7 @@
       :await sb.from("gest_clienti").insert({...row,user_id:sbUid,mestiere_id:curMestiere()}).select("id");
     /* se le colonne fiscali non ci sono ancora nel database, salvo il resto
        invece di far fallire tutto — stessa rete dei Dati azienda */
-    const OPZ=["tipo","email","cap","citta","prov","piva","cod_fiscale","sdi_codice","sdi_pec"];
+    const OPZ=["tipo","email","cap","citta","prov","paese","piva","cod_fiscale","sdi_codice","sdi_pec"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);

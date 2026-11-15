@@ -121,6 +121,8 @@
     if (!String(az.citta || "").trim()) m.push("Manca la città della tua sede — Dati azienda.");
 
     if (!f.cliente_id) m.push("La fattura non ha un cliente.");
+    /* 15 nov 2026 (MANCA 4) — cliente estero: come nell'App (js/gest-fatture.js) */
+    else if (window.paeseEsteroSdi && window.paeseEsteroSdi(cli)) m.push(window.paeseEsteroSdi(cli));
     else {
       var cp = pul(cli.piva), cc = pul(cli.cod_fiscale);
       if (!cp && !cc) m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Clienti.");

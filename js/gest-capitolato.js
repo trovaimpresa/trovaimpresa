@@ -1336,7 +1336,7 @@
       doc.setTextColor(0); y+=10;
 
       /* le parti */
-      var cliInd=[T(c.indirizzo),[T(c.cap),T(c.citta)].filter(Boolean).join(" ")+(T(c.prov)?" ("+String(c.prov).toUpperCase()+")":"")].filter(function(x){ return x&&x.trim(); }).join(", ");
+      var cliInd=[T(c.indirizzo),[T(c.cap),T(c.citta)].filter(Boolean).join(" ")+(T(c.prov)?" ("+String(c.prov).toUpperCase()+")":"")].filter(function(x){ return x&&x.trim(); }).join(", ")+(window.paeseCoda?window.paeseCoda(c):"");
       var cliRighe=[c.nome||"—"];
       if(cliInd) cliRighe.push(cliInd);
       if(c.piva) cliRighe.push("P.IVA "+c.piva);

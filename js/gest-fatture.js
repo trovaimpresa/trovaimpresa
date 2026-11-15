@@ -1725,7 +1725,8 @@
     doc.setFontSize(9);doc.setTextColor(90);
     const cInd=[f.cli_indirizzo||cli.indirizzo||"",
                 [f.cli_cap||cli.cap||"", f.cli_citta||cli.citta||""].filter(Boolean).join(" ")
-                 +((f.cli_prov||cli.prov)?" ("+(f.cli_prov||cli.prov)+")":"")].filter(x=>x.trim());
+                 +((f.cli_prov||cli.prov)?" ("+(f.cli_prov||cli.prov)+")":"")
+                 +(window.paeseCoda?window.paeseCoda(cli):"")].filter(x=>x.trim());
     cInd.forEach(t=>{doc.text(t,M,y);y+=4.5;});
     const cFisc=[(f.cli_piva||cli.piva)?"P.IVA "+(f.cli_piva||cli.piva):"",
                  (f.cli_cod_fiscale||cli.cod_fiscale)?"C.F. "+(f.cli_cod_fiscale||cli.cod_fiscale):""].filter(Boolean).join("   ");
@@ -2017,6 +2018,10 @@
 
     /* --- chi riceve: il cliente --- */
     if(!f.cliente_id)                m.push("La fattura non ha un cliente.");
+    /* 15 nov 2026 (MANCA 4) — cliente estero: il file per lo SdI qui non si fa
+       (paese, CAP 00000, codice XXXXXXX: regole da far confermare al
+       commercialista). Si dice una cosa sola, invece di sei errori italiani. */
+    else if(window.paeseEsteroSdi&&window.paeseEsteroSdi(cli)) m.push(window.paeseEsteroSdi(cli));
     else{
       const piva=(cli.piva||f.cli_piva||"").trim();
       const cf  =(cli.cod_fiscale||f.cli_cod_fiscale||"").trim();

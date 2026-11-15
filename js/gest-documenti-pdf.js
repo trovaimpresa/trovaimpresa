@@ -72,7 +72,7 @@
     const _bozza=_mancaAz||_mancaPiva;
     let c={};
     /* 13 nov 2026 (lista «MANCA», n. 10) — anche CAP, citta' e provincia */
-    c=await cliDelDocumento(p.cliente_id,"nome,indirizzo,cap,citta,prov,referente");
+    c=await cliDelDocumento(p.cliente_id,"nome,indirizzo,cap,citta,prov,paese,referente");
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
@@ -512,7 +512,7 @@
     /* --- le parti --- */
     const cliRighe=[c.nome||"—"];
     const cliInd=[(c.indirizzo||"").trim(),[(c.cap||"").trim(),(c.citta||"").trim()].filter(Boolean).join(" ")+((c.prov||"").trim()?" ("+String(c.prov).toUpperCase()+")":"")]
-      .filter(x=>x&&x.trim()).join(", ");
+      .filter(x=>x&&x.trim()).join(", ")+(window.paeseCoda?window.paeseCoda(c):"");
     if(cliInd)cliRighe.push(cliInd);
     if(c.piva)cliRighe.push("P.IVA "+c.piva);
     if(c.cod_fiscale)cliRighe.push("C.F. "+c.cod_fiscale);
@@ -848,7 +848,7 @@
 
     /* le parti */
     const cliInd=[(c.indirizzo||"").trim(),[(c.cap||"").trim(),(c.citta||"").trim()].filter(Boolean).join(" ")+((c.prov||"").trim()?" ("+String(c.prov).toUpperCase()+")":"")]
-      .filter(x=>x&&x.trim()).join(", ");
+      .filter(x=>x&&x.trim()).join(", ")+(window.paeseCoda?window.paeseCoda(c):"");
     const cliRighe=[c.nome||"—"];
     if(cliInd)cliRighe.push(cliInd);
     if(c.piva)cliRighe.push("P.IVA "+c.piva);

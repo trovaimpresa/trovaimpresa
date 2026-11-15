@@ -831,7 +831,7 @@
     const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     const az=azLetta||{};
     /* 13 nov 2026 (lista «MANCA», n. 10) — anche CAP, citta' e provincia */
-    const cli=await cliDelDocumento(comp.cliente_id,"nome,indirizzo,cap,citta,prov,referente");
+    const cli=await cliDelDocumento(comp.cliente_id,"nome,indirizzo,cap,citta,prov,paese,referente");
 
     /* ---- i conti: le stesse funzioni della schermata, nessuna copia ---- */
     const oggi =compRiepilogoDa(t.maturato,            t.oneri_sicurezza,           t.importo_manodopera, comp);
