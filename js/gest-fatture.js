@@ -652,6 +652,13 @@
        controllare. Prima l'avviso spariva e basta: un buco vero passava zitto.
        Adesso si dice, con «Riprova». Niente allarme falso e niente silenzio. */
     let buchiNonLetti=false;
+    /* 15 nov 2026 (sesto giro, DIFFICILE n. 3) — L'AVVISO MISTO. Se i numeri
+       mancanti non stanno tutti nello stesso posto (uno nel Cestino del
+       Noleggio, uno sparito davvero) si diceva solo «qualcuna è nel Cestino»
+       e «dillo al commercialista» non usciva più. Adesso ogni gruppo ha la
+       sua riga: dove sono quelle che si riprendono, e quali sono eliminate
+       per sempre. Vuoto = i buchi sono tutti dello stesso tipo (frase di prima). */
+    let buchiRighe=[];
     try{
       const _raw=(sb.raw||sb.from.bind(sb));
       const [rVivi,rTutti]=await Promise.all([
@@ -704,6 +711,16 @@
             :(buchi.length===1?" — è stata eliminata per sempre: se l'avevi mandata al cliente, dillo al commercialista"
                                :" — sono state eliminate per sempre: se le avevi mandate ai clienti, dillo al commercialista"));
         buchiTono="err";
+        const _nn=A=>A.slice(0,6).map(b=>"n."+b.n).join(", ")+(A.length>6?(" …e altre "+(A.length-6)):"");
+        const gCest=buchi.filter(b=>b.cestino), gNol=buchi.filter(b=>b.nol), gPersi=buchi.filter(b=>!b.cestino&&!b.nol);
+        if([gCest,gNol,gPersi].filter(g=>g.length).length>1){
+          buchiTesto=(buchi.length===1?"manca la ":"mancano le ")+elenco;
+          if(gCest.length) buchiRighe.push((gCest.length===1?"la ":"le ")+_nn(gCest)+(gCest.length===1?" è nel Cestino":" sono nel Cestino")+": da lì si riprende");
+          if(gNol.length) buchiRighe.push((gNol.length===1?"la ":"le ")+_nn(gNol)+(gNol.length===1?" è nel Cestino del Noleggio":" sono nel Cestino del Noleggio"));
+          if(gPersi.length) buchiRighe.push((gPersi.length===1?"la ":"le ")+_nn(gPersi)
+            +(gPersi.length===1?" è stata eliminata per sempre: se l'avevi mandata al cliente, dillo al commercialista"
+                               :" sono state eliminate per sempre: se le avevi mandate ai clienti, dillo al commercialista"));
+        }
       }
     }catch(e){ buchiNonLetti=true; }
 
@@ -734,7 +751,8 @@
     if(buchiTono==="err") avvisi.push(buchiTesto);
     if(sum&&avvisi.length)
       sum.innerHTML+='<div class="fatt-avviso"'+(buchiNelCestino?' data-action="vai-sezione" data-go="cestino" style="cursor:pointer"':'')+'>⚠ '
-        +esc(avvisi.join(" · "))+(buchiNelCestino?" · apri il Cestino":"")+'</div>';
+        +esc(avvisi.join(" · "))+(buchiNelCestino?" · apri il Cestino":"")
+        +(buchiTono==="err"?buchiRighe.map(r=>'<div class="fatt-avviso-riga">'+esc(r)+'</div>').join(""):"")+'</div>';
     /* i numeri non si sono potuti controllare: una riga sua, col pulsante (nel giro di prova no) */
     if(sum&&buchiNonLetti&&!window.TI_GIRO)
       sum.innerHTML+='<div class="fatt-avviso fatt-avviso--riprova"><span>⚠ Non riesco a controllare i numeri delle fatture: riprova.</span>'

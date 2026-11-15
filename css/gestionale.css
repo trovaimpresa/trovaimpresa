@@ -6183,3 +6183,6 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 /* 15 nov 2026 (sesto giro, DIFFICILE n. 2) — «Non riesco a controllare i numeri delle fatture» col suo «Riprova» */
 #fatture .fatt-avviso.fatt-avviso--riprova{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 #fatture .fatt-avviso.fatt-avviso--riprova .btn{ min-height:44px; padding:0 18px; font-size:16px; font-weight:700; white-space:nowrap; }
+
+/* 15 nov 2026 (sesto giro, DIFFICILE n. 3) — numeri mancanti in posti diversi: una riga per gruppo */
+#fatture .fatt-avviso .fatt-avviso-riga{ margin-top:6px; font-weight:600; }

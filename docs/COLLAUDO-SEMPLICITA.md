@@ -2672,3 +2672,11 @@ Netlify: pubblicato (file nuovi letti online). Account info@, reparto «ferramen
   rompere la lettura): solo banco.
 **Pulizia.** Lavoro, ore, persona eliminati. Contato dal database: clienti, lavori, persone, ore, spese, rapportini,
 preventivi, fatture del reparto = →0←. Email mandate: →0←.
+
+## 15 nov 2026 (4) — lista «DIFFICILE» del sesto giro: n. 3, Fatture, avviso misto
+Scelta con Alex («si» alle 07:39).
+- [x] Se i numeri mancanti non stanno tutti nello stesso posto, sotto «mancano le n.3, n.5» esce una riga per gruppo:
+  «la n.3 è nel Cestino del Noleggio» · «la n.5 è stata eliminata per sempre: se l'avevi mandata al cliente, dillo al
+  commercialista» (`buchiRighe`, `.fatt-avviso-riga`, in `js/gest-fatture.js`). Con buchi tutti dello stesso tipo la
+  frase resta quella di prima.
+Banco `tools/banco-quinto-giro.js`: sulla versione di prima →4← rossi, adesso →162← verdi.

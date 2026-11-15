@@ -127,9 +127,21 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     NOL3.eliminato_il = g(0) + "T10:00:00+00:00"; await ridisegna("fatture");
     t = await testo(page, "#fatture") || "";
     prova(/manca la n\.3/.test(t) && /Cestino del Noleggio/.test(t), "(1) la n. 3 del Noleggio nel suo Cestino → «manca la n.3 — è nel Cestino del Noleggio»", (t.match(/manca[^·]{0,120}/) || [""])[0]);
+    /* (S6 D3) L'AVVISO MISTO: la n. 3 è nel Cestino del Noleggio E la n. 5 è sparita davvero (c'è la n. 6) */
+    const F6 = Object.assign({}, D.gest_fatture[0], { id: id(506), numero: 6, stato: "emessa", data: g(-1) });
+    const T6 = Object.assign({}, D.gest_fatture_totali[0], { fattura_id: id(506) });
+    D.gest_fatture.push(F6); D.gest_fatture_totali.push(T6); await ridisegna("fatture");
+    const mi = await page.evaluate(() => { const e = [...document.querySelectorAll("#fatture .fatt-avviso")].find(x => /manca/.test(x.innerText)); if (!e) return { manca: true }; e.scrollIntoView({ block: "center" }); const rr = [...e.querySelectorAll(".fatt-avviso-riga")]; return { t: e.innerText.replace(/\s+/g, " "), righe: rr.map(x => x.innerText.replace(/\s+/g, " ")), px: Math.min.apply(null, rr.map(x => parseFloat(getComputedStyle(x).fontSize)).concat([99])), fuori: e.getBoundingClientRect().right > innerWidth + 1 }; });
+    await foto(page, "D3-avviso-misto", "#fatture .fatt-avviso-riga");
+    prova(!mi.manca && /mancano le n\.3, n\.5/.test(mi.t || ""), "(S6 D3) avviso misto: dice quali mancano (n.3 e n.5)", mi);
+    prova((mi.righe || []).some(x => /la n\.3 è nel Cestino del Noleggio/.test(x)), "(S6 D3) …una riga dice che la n.3 è nel Cestino del Noleggio", mi.righe);
+    prova((mi.righe || []).some(x => /la n\.5 è stata eliminata per sempre/.test(x) && /dillo al commercialista/.test(x)), "(S6 D3) …e un'altra che la n.5 è eliminata per sempre: «dillo al commercialista» non sparisce più", mi.righe);
+    if (!mi.manca) prova(mi.px >= 14 && !mi.fuori, "(S6 D3) le righe si leggono (≥14 px) e stanno nello schermo", mi);
+    D.gest_fatture.splice(D.gest_fatture.indexOf(F6), 1); D.gest_fatture_totali.splice(D.gest_fatture_totali.indexOf(T6), 1);
     D.nol_fatture.splice(D.nol_fatture.indexOf(NOL3), 1); await ridisegna("fatture");
     t = await testo(page, "#fatture") || "";
     prova(/manca la n\.3/.test(t) && /eliminata per sempre/.test(t), "(1) un buco VERO si dice ancora: «manca la n.3 — è stata eliminata per sempre»", (t.match(/manca[^·]{0,120}/) || [""])[0]);
+    prova(!(await page.evaluate(() => !!document.querySelector("#fatture .fatt-avviso-riga"))), "(S6 D3) con un buco solo la frase resta quella di prima, senza righe in più");
     NOL3.eliminato_il = null; D.nol_fatture.push(NOL3);
     /* (S6 b) la lettura del Noleggio CADE: la n. 3 è del Noleggio e l'App non lo può sapere.
        Non deve dire «eliminata per sempre: dillo al commercialista» (un allarme falso). */
