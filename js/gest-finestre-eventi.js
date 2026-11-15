@@ -571,6 +571,7 @@
     if(a==="fatt-riga-add"){$("#fatt-righe").insertAdjacentHTML("beforeend",fattRigaHtml());fattTotaleLive();return;}
     if(a==="fatt-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();fattTotaleLive();}return;}
     if(a==="fatt-stato")return fattCambiaStato(id,t.dataset.v);
+    if(a==="fatt-riprova")return renderFatture();   /* 15 nov 2026: «Non riesco a controllare i numeri delle fatture» */
     if(a==="del-fatt")return eliminaFattura(id);
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-xml")return fatturaXml(id);

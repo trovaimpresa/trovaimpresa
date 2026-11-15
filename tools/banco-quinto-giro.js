@@ -137,9 +137,19 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     t = await testo(page, "#fatture") || "";
     prova(!/manca(no)? l[ae] n\./.test(t) && !/eliminat[ae] per sempre/.test(t), "(S6 b) Fatture: se il Noleggio non si legge, NON dice «manca la n. 3 — eliminata per sempre»", (t.match(/manca[^·]{0,140}/) || [""])[0]);
     prova(/Da incassare/.test(t) && /305,00/.test(t), "(S6 b) …e le fatture si vedono lo stesso (da incassare 305,00 €)", t.slice(0, 200));
-    stato.nolRotto = false; await ridisegna("fatture");
+    /* (S6 D2) …e NON sta zitto: dice che non riesce a controllare, col pulsante «Riprova» */
+    const nr = await page.evaluate(() => { const e = document.querySelector("#fatture .fatt-avviso--riprova"), b = e && e.querySelector('[data-action="fatt-riprova"]'); if (!e || !b) return { manca: true }; e.scrollIntoView({ block: "center" }); const r = e.getBoundingClientRect(), rb = b.getBoundingClientRect(); return { dice: e.innerText.replace(/\s+/g, " "), px: parseFloat(getComputedStyle(e).fontSize), pxB: parseFloat(getComputedStyle(b).fontSize), alto: Math.round(rb.height), fuori: r.right > innerWidth + 1 || rb.right > innerWidth + 1 }; });
+    await foto(page, "D2-numeri-non-letti", "#fatture .fatt-avviso--riprova");
+    prova(!nr.manca && /Non riesco a controllare i numeri delle fatture/.test(nr.dice || ""), "(S6 D2) Fatture: se il Noleggio non si legge lo DICE («Non riesco a controllare i numeri delle fatture») con «Riprova»", nr);
+    if (!nr.manca) prova(nr.px >= 14 && nr.pxB >= 14 && !nr.fuori && (W > 800 || nr.alto >= 44), "(S6 D2) la riga e il pulsante si leggono e si toccano", nr);
+    /* torna la lettura e premo «Riprova»: la riga se ne va, e non resta nessun «manca» */
+    stato.nolRotto = false;
+    await page.evaluate(() => { const b = document.querySelector('#fatture [data-action="fatt-riprova"]'); if (b) b.click(); }); await B.aspetta(page, 1800);
     t = await testo(page, "#fatture") || "";
-    prova(!/manca(no)? l[ae] n\./.test(t), "(S6 b) …tornata la lettura, tutto come prima (nessun «manca»)", (t.match(/manca[^·]{0,120}/) || [""])[0]);
+    prova(!/Non riesco a controllare/.test(t) && !/manca(no)? l[ae] n\./.test(t), "(S6 D2) tornata la lettura, «Riprova» toglie la riga (e nessun «manca»)", (t.match(/(Non riesco|manca)[^·]{0,120}/) || [""])[0]);
+    /* con tutto a posto la riga non c'è mai */
+    await ridisegna("fatture");
+    prova(!(await page.evaluate(() => !!document.querySelector("#fatture .fatt-avviso--riprova"))), "(S6 D2) quando le letture riescono la riga non esce");
 
     /* ---------- n. 2, 8, 11 — dentro il LAVORO ---------- */
     await P.apri(page, "lavori"); await B.aspetta(page, 1200);

@@ -6179,3 +6179,7 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
    lavoro: con un nome lungo la scritta usciva dal pulsante sul telefono.
    Va a capo (regola 18), il pulsante cresce in altezza e non tocca la frase sopra. */
 .sheet .marg-senza-costo .marg-scheda{ white-space:normal; height:auto; min-height:44px; max-width:100%; padding-top:9px; padding-bottom:9px; line-height:1.25; text-align:center; overflow-wrap:anywhere; margin-top:8px; }
+
+/* 15 nov 2026 (sesto giro, DIFFICILE n. 2) — «Non riesco a controllare i numeri delle fatture» col suo «Riprova» */
+#fatture .fatt-avviso.fatt-avviso--riprova{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+#fatture .fatt-avviso.fatt-avviso--riprova .btn{ min-height:44px; padding:0 18px; font-size:16px; font-weight:700; white-space:nowrap; }

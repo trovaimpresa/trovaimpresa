@@ -2653,3 +2653,12 @@ Scelta con Alex («si» alle 06:46, foto a 1440 e 375 approvate alle 06:59).
   `js/gest-ore-spese.js`). Resta finché non cambi persona o non aggiungi altre ore. Nome e costo non restano più nelle due
   caselle nascoste. Senza costo scritto non esce niente.
 Banco `tools/banco-quinto-giro.js`: sulla versione di prima →8← rossi, adesso →146← verdi.
+
+## 15 nov 2026 (3) — lista «DIFFICILE» del sesto giro: n. 2, Fatture se il Noleggio non si legge
+Scelta con Alex («si» alle 07:07).
+- [x] Se una lettura dei numeri cade (le fatture dell'App o quelle del Noleggio) esce una riga sua: «Non riesco a
+  controllare i numeri delle fatture: riprova.» col pulsante «Riprova» (`buchiNonLetti`, `.fatt-avviso--riprova`,
+  azione «fatt-riprova», in `js/gest-fatture.js`). Niente allarme falso («manca la n. 3») e niente silenzio.
+  Con le letture a posto la riga non esce. Nel giro di prova non esce.
+Banco `tools/banco-quinto-giro.js`: sulla versione di prima →2← rossi, adesso →152← verdi. Banco del gestionale: zero
+difetti. Gli altri banchi verdi. `controllo-push`: «tutto a posto».

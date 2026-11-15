@@ -647,12 +647,20 @@
        scritto non c'e' niente da aprire: il riquadro resta fermo, perche'
        un tasto che non porta da nessuna parte e' il difetto di prima. */
     let buchiTesto="numerate nel corso dell'anno", buchiTono="neutro", buchiNelCestino=0;
+    /* 15 nov 2026 (sesto giro, DIFFICILE n. 2) — se una delle letture cade (le
+       fatture dell'App o quelle del Noleggio) i numeri NON si possono
+       controllare. Prima l'avviso spariva e basta: un buco vero passava zitto.
+       Adesso si dice, con «Riprova». Niente allarme falso e niente silenzio. */
+    let buchiNonLetti=false;
     try{
       const _raw=(sb.raw||sb.from.bind(sb));
-      const [{data:vivi},{data:tutti}]=await Promise.all([
+      const [rVivi,rTutti]=await Promise.all([
         sb.from("gest_fatture").select("numero").eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null),
         _raw("gest_fatture").select("numero").eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
       ]);
+      if(rVivi.error) throw rVivi.error;
+      if(rTutti.error) throw rTutti.error;
+      const vivi=rVivi.data, tutti=rTutti.data;
       const setVivi=new Set((vivi||[]).map(x=>+x.numero));
       const setTutti=new Set((tutti||[]).map(x=>+x.numero));
       /* 14 nov 2026 (quinto giro, n. 1) — L'ALLARME FALSO. Dal 13 nov i numeri
@@ -697,7 +705,7 @@
                                :" — sono state eliminate per sempre: se le avevi mandate ai clienti, dillo al commercialista"));
         buchiTono="err";
       }
-    }catch(e){}
+    }catch(e){ buchiNonLetti=true; }
 
     const box=(n,l,sub,tono,azione)=>'<div class="fatt-tot'+(tono?" t-"+tono:"")
       +(azione?'" '+azione+' style="cursor:pointer':'')+'"><div class="n'+(/^0,00(\s|&nbsp;|\u00a0)*€?$/.test(String(n))?' zero-grigio':'')+'">'+n+'</div>'
@@ -727,6 +735,10 @@
     if(sum&&avvisi.length)
       sum.innerHTML+='<div class="fatt-avviso"'+(buchiNelCestino?' data-action="vai-sezione" data-go="cestino" style="cursor:pointer"':'')+'>⚠ '
         +esc(avvisi.join(" · "))+(buchiNelCestino?" · apri il Cestino":"")+'</div>';
+    /* i numeri non si sono potuti controllare: una riga sua, col pulsante (nel giro di prova no) */
+    if(sum&&buchiNonLetti&&!window.TI_GIRO)
+      sum.innerHTML+='<div class="fatt-avviso fatt-avviso--riprova"><span>⚠ Non riesco a controllare i numeri delle fatture: riprova.</span>'
+        +'<button type="button" class="btn" data-action="fatt-riprova">Riprova</button></div>';
 
     const filtra=(A,v)=>
         v==="bozze"    ? A.filter(f=>f.stato==="bozza")
