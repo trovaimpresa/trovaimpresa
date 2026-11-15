@@ -238,6 +238,13 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     const lungo = await page.evaluate(() => { const b = document.querySelector('#margine-box [data-action="sq-edit"]'); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(), c = b.closest(".marg-senza-costo").getBoundingClientRect(); return { t: b.innerText, alto: Math.round(r.height), scritta: b.scrollWidth, pulsante: b.clientWidth, sx: Math.round(r.left), dx: Math.round(r.right), contSx: Math.round(c.left), contDx: Math.round(c.right), schermo: innerWidth, px: parseFloat(getComputedStyle(b).fontSize), riga: b.closest(".marg-senza-costo").innerText.replace(/\s+/g, " ") }; });
     await foto(page, "S6-nome-lungo", '#margine-box [data-action="sq-edit"]');
     prova(!!lungo && /Alessandro Mastrogiovanni/.test(lungo.t), "(S6 f) c'è il pulsante «Scrivi il costo orario di Alessandro Mastrogiovanni»", lungo);
+    /* S6 D6 (15 nov 2026) — persona aggiunta da un ALTRO telefono: in memoria non c'è (la tolgo da dipCache),
+       nel database sì. Il margine deve rileggere la squadra e scrivere il suo nome, non «non è più in squadra». */
+    const altroTel = await page.evaluate(async (lav) => { const W = ms => new Promise(r => setTimeout(r, ms)); const prima = dipCache.length; dipCache = dipCache.filter(d => !/Mastrogiovanni/.test(d.nome || "")); const tolta = dipCache.length === prima - 1; await renderSpeseBlock(lav, 0); await W(600); const m = document.querySelector("#margine-box"); const o = { tolta, dice: m ? m.innerText.replace(/\s+/g, " ") : "", pulsante: !!document.querySelector('#margine-box [data-action="sq-edit"]'), tornata: dipCache.some(d => /Mastrogiovanni/.test(d.nome || "")) }; try { await renderDip(); } catch (e) {} return o; }, id(305));
+    prova(altroTel.tolta && /Alessandro Mastrogiovanni/.test(altroTel.dice) && !/non è più in squadra/.test(altroTel.dice), "(S6 D6) persona aggiunta da un altro telefono: il margine la chiama per nome, non «non è più in squadra»", altroTel.dice);
+    prova(altroTel.pulsante && altroTel.tornata, "(S6 D6) …c'è il pulsante «Scrivi il costo orario di …» e la persona è tornata nella squadra in memoria", altroTel);
+    const manodD6 = await page.evaluate(() => (document.querySelector("#margine-box").innerText.match(/Manodopera: [^M]*/) || [""])[0].replace(/\s+/g, " ").trim());
+    prova(manodD6 === ((altroTel.dice.match(/Manodopera: [^M]*/) || [""])[0].replace(/\s+/g, " ").trim()), "(S6 D6) …e la manodopera è la stessa di prima (il conto non cambia)", manodD6);
     if (lungo) prova(lungo.scritta <= lungo.pulsante + 1 && lungo.sx >= lungo.contSx - 1 && lungo.dx <= lungo.contDx + 1 && lungo.dx <= lungo.schermo && lungo.px >= 14 && (W > 800 || lungo.alto >= 44), "(S6 f) nome lungo: la scritta sta DENTRO il pulsante (va a capo) e il pulsante dentro il riquadro", lungo);
     if (lungo) prova(/1 ora di Alessandro Mastrogiovanni/.test(lungo.riga) && /la conto al costo medio/.test(lungo.riga) && !/le conto/.test(lungo.riga), "(S6 6) con una sola ora dice «la conto», non «le conto»", lungo.riga);
     /* (S6 1) il pulsante di Luca: prima CHIEDE, poi apre la scheda, e chiusa la scheda si torna nel lavoro */
@@ -282,7 +289,9 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
     await foto(page, "4-5-squadra", page.viewportSize().width < 800 ? [".sqg-card .sqg-top"] : ["#squadra h2"]);
     const gio = sq.find(x => /Giovanni/.test(x.nome || "")) || {}, luca = sq.find(x => /Luca/.test(x.nome || "")) || {};
     prova(/^0 giorni/.test(gio.mese || "") && !/cantier/.test(gio.mese || ""), "(4) Squadra: le giornate di un lavoro nel Cestino non si contano (Giovanni: 0 giorni)", gio);
-    prova(/^1 giorno/.test(luca.mese || ""), "(4) …e quelle di un lavoro vivo sì (Luca: 1 giorno)", luca);
+    /* 15 nov 2026 — era «1 giorno» fisso: passava solo perché la Squadra a schermo era VECCHIA (le ore date a Luca
+       più su, oggi, non c'erano ancora). Da quando il margine rilegge la squadra (S6 D6) qui si vede il numero vero. */
+    prova(/^[1-9]\d* giorn/.test(luca.mese || ""), "(4) …e quelle di un lavoro vivo sì (Luca: almeno 1 giorno)", luca);
     prova(luca.stato === "Senza invito", "(5) Squadra: chi non è mai stato invitato non è «Invitato»", luca);
     prova(gio.stato === "Invitato", "(5) …chi ha l'invito resta «Invitato»", gio);
 

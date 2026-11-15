@@ -2703,3 +2703,15 @@ Netlify: pubblicato (stato «ready», i due file nuovi letti online con la frase
 - [~] Noleggio: dal vivo solo letto il file online (frase dentro, versione `15nov4` nella pagina). La casella non è stata aperta.
 - [-] Cliente salvato col CAP vuoto: non provato dal vivo (per non creare righe); lo prova il banco.
 **Pulizia.** Niente creato. Contato dal database: clienti «PROVA CONTROLLORE» = →0←. Email mandate: →0←.
+
+## 15 nov 2026 (6) — lista «DIFFICILE» del sesto giro: n. 6, persona aggiunta da un altro telefono
+Scelta con Alex («si» alle 10:57).
+- [x] Quando il margine trova ore di una persona che in memoria non c'è, prima rilegge la squadra (una volta per persona):
+  se c'è, esce col suo nome e col pulsante «Scrivi il costo orario di …»; se davvero non c'è (è nel Cestino) resta
+  «una persona che non è più in squadra» (`margineSquadraFresca`, in `js/gest-ore-spese.js`). Il conto non cambia.
+Banco `tools/banco-quinto-giro.js`: 3 prove nuove «S6 D6». Sulla versione di prima →4← rossi, adesso →174← verdi.
+La prova «(4) Luca: 1 giorno» guardava una Squadra vecchia a schermo: ora chiede «almeno 1 giorno».
+Banco del gestionale (App): zero difetti. Gli altri banchi verdi. `controllo-push`: «tutto a posto».
+[-] NON fatto: nei rapportini la stessa frase («chi non è più in squadra») usa ancora la squadra in memoria.
+[-] Trovato e NON toccato: dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola.
+**Restano da decidere con Alex:** DIFFICILE 7, 8; MANCA 3 e 4.

@@ -282,6 +282,20 @@
   /* 14 nov 2026 (quinto giro, n. 2) — le righe sotto il margine che spiegano le
      ore contate alla media: prima quelle senza nome, poi una riga per ogni
      persona senza costo orario, col pulsante che apre la sua scheda. */
+  /* 15 nov 2026 (sesto giro, DIFFICILE 6) — una persona aggiunta da un altro
+     telefono o computer: qui la squadra in memoria (dipCache) e' quella di
+     quando hai aperto la pagina, e le sue ore diventavano «di una persona che
+     non è più in squadra». Prima di scriverlo si rilegge la squadra, UNA volta
+     per persona: se c'e', esce col suo nome e col pulsante; se davvero non
+     c'e' (e' nel Cestino) la frase resta quella. Il conto non cambia. */
+  const _margGiaCercati={};
+  async function margineSquadraFresca(senzaCosto){
+    const ignoti=Object.keys(senzaCosto||{}).filter(k=>!_margGiaCercati[k]&&!(dipCache||[]).some(d=>String(d.id)===String(k)));
+    if(!ignoti.length||typeof renderDip!=="function")return false;
+    ignoti.forEach(k=>{_margGiaCercati[k]=true;});
+    try{ await renderDip(); }catch(e){}
+    return true;
+  }
   function margineRigheOre(oreSenzaNome,senzaCosto,mediaSquadra){
     const _h=n=>String(Math.round((+n||0)*100)/100).replace(".",",")+((+n===1)?" ora":" ore");
     const _una=n=>(+n===1);   /* 15 nov 2026 (sesto giro, n. 6): con una sola ora «la conto», «non entra» */
@@ -362,6 +376,7 @@
       mediaSquadra=(_m.tariffe&&+_m.tariffe.media)||0;
       oreLette=(_m.oreLette!==false);
     }catch(e){ oreLette=false; }
+    await margineSquadraFresca(senzaCosto);   /* DIFFICILE 6: persona aggiunta da un altro telefono */
     const imp=($("#j-imp")?(_numIt("#j-imp")||0):(+importo||0));
     const marg=margineLavoro(imp,tot,totFF,md);
     /* ⚠️ 18 agosto 2026 — «Spese: −0,00 €». Il meno era scritto a mano
