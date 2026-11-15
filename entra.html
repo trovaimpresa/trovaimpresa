@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrovaImpresa</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/img/trovaimpresa-logo.svg">
+<!-- 15 nov 2026 — LA PORTA DELL'APP SUL TELEFONO
+     L'icona «TrovaImpresa» sulla schermata Home (manifest-sito.json, start_url)
+     apre questa pagina, non la home. Qui si guarda soltanto chi sei:
+     - impresa, artigiano o professionista gia' entrato  -> il suo pannello
+     - cliente, o non ancora entrato                              -> la home, come prima
+     Non si vede niente: dura un attimo. Se qualcosa va storto (rete lenta,
+     errore) si va comunque alla home, mai una pagina bianca.
+     I pannelli sono gli stessi di login-impresa.html (PANNELLI): se cambiano
+     la', cambiarli anche qui. -->
+<link rel="manifest" href="/manifest-sito.json">
+<link rel="apple-touch-icon" href="/img/app/trovaimpresa-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TrovaImpresa">
+<style>html,body{margin:0;background:#fff}</style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  var andato = false;
+  function vai(dove) {
+    if (andato) return;
+    andato = true;
+    location.replace(dove);
+  }
+  // Rete lenta o libreria che non arriva: dopo 4 secondi si va alla home.
+  setTimeout(function () { vai('/'); }, 4000);
+
+  var PANNELLI = {
+    artigiano: '/pannello-artigiano.html',
+    impresa: '/pannello-impresa.html',
+    professionista: '/pannello-professionisti.html'
+  };
+
+  try {
+    var sb = supabase.createClient(
+      'https://nacvrsgkyfavykxjxszu.supabase.co',
+      'sb_publishable_TnPNRwYVQu3IlwY4GpZsUg_okv0sI0R'
+    );
+    sb.auth.getSession().then(function (r) {
+      var utente = r && r.data && r.data.session && r.data.session.user;
+      if (!utente) return vai('/');
+      return sb.from('imprese').select('tipo').eq('user_id', utente.id).maybeSingle()
+        .then(function (q) {
+          var tipo = q && q.data && q.data.tipo;
+          vai(PANNELLI[tipo] || '/');
+        });
+    }).catch(function () { vai('/'); });
+  } catch (e) {
+    vai('/');
+  }
+})();
+</script>
+</body>
+</html>
