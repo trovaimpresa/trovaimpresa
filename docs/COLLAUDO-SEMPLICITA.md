@@ -2821,14 +2821,45 @@ nome «PROVA CONTROLLORE».
 per l'azienda non cambia niente. Una prova in più nel banco: →217← verdi. Banco del Noleggio 31, banco lungo del
 Noleggio zero difetti, `controllo-push` «tutto a posto».
 
+### 15 nov 2026 (18:45) — MANCA 4, le due righe rimaste (commit →244e1bc←)
+- [x] Noleggio, elenco clienti, sul sito vero: «PROVA CONTROLLORE Estero · Via Cantonale 12, 75001 Paris, Francia».
+**Pulizia.** Cliente, preventivo di prova n. 9901 e la sua riga eliminati per sempre. Contato dal database: clienti,
+preventivi, righe, lavori, persone «PROVA CONTROLLORE» = →0←; clienti con un paese scritto = →0←. Email mandate: →0←.
+
+## 15 nov 2026 (10) — lista «MANCA» del sesto giro: n. 3, la Squadra nel Noleggio
+Scelta con Alex («si» alle 18:20; foto a 1440 e 375 approvate, «ok» alle 18:24).
+- [x] Nel menu del Noleggio c'è la voce «Squadra» (`js/nol-menu-corto.js`): è una porta, come «Giornate» e «Acquisti».
+  Apre la Squadra del gestionale principale (`/gestionale-app#squadra`), dove si vede chi è «Senza invito»; in cima
+  c'è «← Torna al Noleggio». La Squadra resta una sola: niente copia da tenere uguale.
+  Sul telefono sta nel Menu, dopo «Acquisti». Sul computer sta dentro «Altre voci», per prima: in vista non ci stava
+  (la riga è già piena fino ad «Acquisti»).
+- [-] NON toccato: il vecchio pezzo della Squadra dentro il Noleggio (`squadraForm`, `squadraAdd`… in
+  `js/nol-giornata-squadra-promemoria.js`) resta lì, non usato.
+Banco `tools/banco-quinto-giro.js`: 11 prove nuove «S6 M3» (a 1920, 1440 e 375, nel browser: la voce c'è, si legge,
+toccata porta a `#squadra` col ricordo del Noleggio). Sulla versione di prima rosso (3 rossi, poi il banco si ferma:
+la voce non c'è). Adesso →228← verdi. Banco del Noleggio 31, banco lungo del Noleggio zero difetti, `controllo-push`
+«tutto a posto». Misure: 16,5 px e alta 52 sul computer; 18 px e alta 53 sul telefono; niente fuori dallo schermo.
+
+### 15 nov 2026 (19:10) — MANCA 3 provata sul sito vero (commit →c64b622←)
+Netlify: pubblicato (`nol-menu-corto.js?v=15nov9` letto online). Account info@, nome «PROVA CONTROLLORE».
+- [x] Creata una persona senza invito nel reparto «ferramenta». Dal Noleggio: «Altre 11 voci» → «Squadra» → si apre
+  `/gestionale-app#squadra`, sezione Squadra, con la riga «PROVA CONTROLLORE Operaio · Operaio · Senza invito» e in cima
+  «← Torna al Noleggio». Toccato: torna al Noleggio.
+- [x] A 375 sul sito vero: «Squadra» nel Menu, 18 px, alta 53, da 19 a 356: dentro lo schermo.
+**Trovato e NON toccato:** sul computer, quando «Altre N voci» ha il numerino rosso, il pulsante va su una seconda
+riga (a 1440 e a 1920). C'era già prima di oggi.
+**Pulizia.** Persona eliminata per sempre. Contato dal database: persone, clienti, lavori, preventivi
+«PROVA CONTROLLORE» = →0←. Email mandate: →0←.
+
 ## DOVE SIAMO ALLA FINE DEL 15 NOV 2026 (per la sessione dopo)
 Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e online.
 **Restano da decidere con Alex, una per volta:**
-- MANCA 3: nel Noleggio la schermata Squadra non c'è («Senza invito» lì non si vede mai).
+- MANCA 3: FATTA (capitolo 10).
 - MANCA 4: FATTA (capitolo 9). Resta solo il file per lo SdI di un cliente estero: serve la conferma del commercialista.
 **Trovato oggi e NON toccato (da proporre):**
+- Noleggio sul computer: «Altre N voci» col numerino rosso va su una seconda riga;
 - nei rapportini «chi non è più in squadra» usa ancora la squadra in memoria (stessa cura della DIFFICILE 6);
 - dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola;
 - (chiusa col capitolo 9: adesso il CAP è al massimo 5 caratteri per l'Italia e 12 per l'estero, in tutti e due.)
-Numeri: `tools/banco-quinto-giro.js` →217← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
+Numeri: `tools/banco-quinto-giro.js` →228← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
 `node tools/banco-gestionale.js app` e poi `node tools/banco-gestionale.js noleggio` (tutto insieme supera i 10 minuti).
