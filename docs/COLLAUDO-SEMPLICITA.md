@@ -2767,3 +2767,22 @@ Scelta con Alex («si» alle 17:15, foto prima/dopo a 375 approvate e «pubblica
 Banco `tools/banco-quinto-giro.js`: 3 prove nuove «S6 D8». Sulla versione di prima →1← rosso, adesso →189← verdi.
 Gli altri banchi verdi. `controllo-push`: «tutto a posto». Il banco lungo del gestionale non è stato rilanciato:
 App e Noleggio non sono stati toccati.
+
+### 15 nov 2026 (17:30) — DIFFICILE 8 provata sul sito vero (commit →cea56a1←)
+Netlify: pubblicato (stato «ready»). App dell'operaio aperta sul sito vero a 375x812 (telefono finto del browser).
+- [x] Striscia alta 64 px; «Parla» alto 48, a 8 px dal fondo, scritta a 19 px, dentro lo schermo; la pagina finisce
+  70 px sopra il fondo; un messaggio (toast) finisce a 734, sopra la striscia che comincia a 748.
+- [-] Non provato su un telefono vero in mano: solo il telefono finto del browser. La voce non si può provare da qui.
+Niente scritto nel database. Finestra rimessa a «desktop».
+
+## DOVE SIAMO ALLA FINE DEL 15 NOV 2026 (per la sessione dopo)
+Lista «DIFFICILE» del sesto giro: →1, 2, 3, 4, 5, 6, 7, 8← tutte fatte e online.
+**Restano da decidere con Alex, una per volta:**
+- MANCA 3: nel Noleggio la schermata Squadra non c'è («Senza invito» lì non si vede mai).
+- MANCA 4: il paese del cliente (serve per il CAP estero; tocca anche PDF e file per lo SdI).
+**Trovato oggi e NON toccato (da proporre):**
+- nei rapportini «chi non è più in squadra» usa ancora la squadra in memoria (stessa cura della DIFFICILE 6);
+- dopo aver aggiunto ore in un lavoro, la schermata Squadra non si aggiorna da sola;
+- nel Noleggio la casella del CAP accetta al massimo 5 caratteri, nell'App no.
+Numeri: `tools/banco-quinto-giro.js` →189← verdi; `tools/banco-email-pdf.js` →62←. Per il banco lungo:
+`node tools/banco-gestionale.js app` e poi `node tools/banco-gestionale.js noleggio` (tutto insieme supera i 10 minuti).
