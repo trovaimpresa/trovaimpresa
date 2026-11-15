@@ -45,11 +45,15 @@
     { spazio: 'hero-dx', marchio: 'trotec' }
   ];
   var IN_COLONNA = [
-    { sez: '#registrati',       lato: 'sx', passo: 2, marchio: 'vonroc' },
-    { sez: '#registrati',       lato: 'dx', passo: 2, marchio: 'lampade' },
-    { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'comet' },
-    { sez: '.guide-costi-home', lato: 'dx', passo: 3, marchio: 'rowenta' },
-    { sez: '.why-section',      lato: 'sx', passo: 4, marchio: 'moulinex' },
+    // 15 nov 2026 (Alex): «devono essere 14». Sulla home nazionale #categorie non
+    // c'e', quindi la coppia del passo 1 si aggancia a «Cerchi idee per casa?».
+    { sez: '#le-idee',          lato: 'sx', passo: 1, marchio: 'vonroc' },
+    { sez: '#le-idee',          lato: 'dx', passo: 1, marchio: 'lampade' },
+    { sez: '#registrati',       lato: 'sx', passo: 2, marchio: 'comet' },
+    { sez: '#registrati',       lato: 'dx', passo: 2, marchio: 'rowenta' },
+    { sez: '.guide-costi-home', lato: 'sx', passo: 3, marchio: 'moulinex' },
+    { sez: '.guide-costi-home', lato: 'dx', passo: 3, google: true },
+    { sez: '.why-section',      lato: 'sx', passo: 4, google: true },
     { sez: '.why-section',      lato: 'dx', passo: 4, google: true },
     { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 0, google: true },
     { sez: '#ti-recensioni',    lato: 'sx', passo: 5, pila: 1, google: true },
