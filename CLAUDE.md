@@ -3179,3 +3179,13 @@ Tre push, tutti controllati su Netlify e collaudati sul sito vero:
 - **Bolle contro fatture**: `bfControllaFattura(fornitore,data)` in `gest-bolle-fatture.js` si chiama dopo il salvataggio di una fattura fornitore; nell'Assistente la riga rossa usa `acqCaricaMese` + `bfConfronta` (mese in corso e scorso), azione `rie-bolle` → `acqApri(mese)`.
 - **Banchi**: `prove-claude/` sta GIA' dentro la copia nella nuvola (`/home/claude/trovaimpresa/prove-claude`): `bash prove-claude/banchi-fissi/gira-conti.sh` (34 verdi). Per fotografare i PDF veri: `attrezzi/anteprima-pdf.js` (come anteprima.js, ma serve jsPDF da `/home/claude/lib` e salva i PDF accanto alla foto).
 - Il finto Supabase (`finto-impresa.js`) adesso sa `count`, `lt`, `gt`.
+
+# 15 NOVEMBRE 2026 (sera) — TASSE E FISCO: «CHI PAGA PIÙ TASSE?»
+
+- File nuovo `js/gest-fisco-confronto.js` (dopo gest-fisco-tasse.js in gestionale-app.html), stile `.fc-*` in fondo a `css/gestionale.css`. Pulsante nuovo, il primo di «Ti serve aiuto?» (`ftStrumenti`), azione `fc-apri`.
+- Confronta sugli stessi incassi e spese: Forfettario, Ordinario, Srl (non per il professionista) e Dipendente. Forfettario e ordinario sono `ftStima()`: i conti NON sono rifatti.
+- Srl: un socio solo che lavora e tira fuori tutto l'utile (IRES 24%, IRAP 3,9%, dividendi 26%, INPS artigiani). Esce sempre la piu' cara: manca il caso «lascio i soldi in societa'» (proposto ad Alessio, non ancora chiesto).
+- Dipendente: lordo = incassi − spese; 9,19%, detrazioni da lavoro, taglio del cuneo 2026. Con «Dipendente in cassa edile»: trattenuta operaio 1,3972% e costo per la ditta (INPS, INAIL, cassa edile 8,4272%, TFR). Percentuali Cassa Edile di RIETI 2026 (tabella ufficiale); INPS 33,68% e INAIL 7,5% sono medie e l'impresa le cambia: si ricordano in localStorage (`ti_fc_ditta`), NON nel database.
+- Tutti i numeri di legge sono le costanti `FC_*` in cima al file, con la fonte.
+- Banco: `prove-claude/banchi-fissi/banco-fisco-confronto.html` (?p=forf&apri=1&inc=40000&spese=8000).
+- ⛔ add_repo con permesso di push e' stato rifiutato in questa sessione: il push l'ha lanciato Alessio.

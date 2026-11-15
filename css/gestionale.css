@@ -6186,3 +6186,47 @@ body .wrap section .tab-tot span, body .wrap section .tab-tot b{ color:#fff !imp
 
 /* 15 nov 2026 (sesto giro, DIFFICILE n. 3) — numeri mancanti in posti diversi: una riga per gruppo */
 #fatture .fatt-avviso .fatt-avviso-riga{ margin-top:6px; font-weight:600; }
+
+/* 15/11/2026 — Tasse e fisco: «Chi paga più tasse?» (js/gest-fisco-confronto.js)
+ */
+.fc-q{font-size:21px;font-weight:800;margin-bottom:10px}
+.fc-tasti{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.fc-tasti .fp-chip{white-space:nowrap}
+.sheet.fisco-sh .fc-tasti .fp-chip{font-size:19px;color:#0b1220;padding:10px 18px}
+.sheet.fisco-sh .fc-tasti .fp-chip.on{color:#fff}
+.fc-campi{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.fc-campi .field{margin:0}
+.fc-campi input{width:100%;box-sizing:border-box;font-variant-numeric:tabular-nums}
+.fc-opz{margin-bottom:14px}
+#fc-ditta-campi{margin-bottom:20px}
+#fc-ditta-campi[hidden]{display:none}
+.fc-riga{display:grid;grid-template-columns:1fr auto;column-gap:16px;row-gap:8px;align-items:end;background:var(--card);border:1px solid var(--bordo);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+.fc-riga.meglio{border-color:var(--ok);background:var(--ok-bg)}
+.fc-riga.no{opacity:.75}
+.fc-nome b{display:block;font-size:24px;font-weight:800;line-height:1.15}
+.fc-nome small,.fc-cifra small{display:block;font-size:16px;font-weight:600;color:#0b1220}
+.fc-cifra{text-align:right}
+.fc-cifra b{font-size:34px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fc-riga.meglio .fc-cifra b{color:var(--ok)}
+.fc-barra{grid-column:1/-1;height:14px;border-radius:999px;background:var(--sfondo);overflow:hidden}
+.fc-riga.meglio .fc-barra{background:#fff}
+.fc-barra i{display:block;height:100%;border-radius:999px;background:var(--blu);transition:width .25s}
+.fc-riga.meglio .fc-barra i{background:var(--ok)}
+.fc-dett{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:17px;font-weight:600}
+.fc-resta b{font-size:19px;font-variant-numeric:tabular-nums}
+.fc-ditta{grid-column:1/-1;border-top:1px dashed var(--bordo);margin-top:6px;padding-top:10px;font-size:17px;font-weight:600}
+.fc-ditta>div{display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-variant-numeric:tabular-nums}
+.fc-ditta .fc-ditta-t{font-size:19px;font-weight:800;padding-bottom:6px;align-items:baseline}
+.fc-ditta .fc-ditta-t b{font-size:24px;white-space:nowrap}
+.fc-esito{display:flex;gap:12px;align-items:flex-start;background:var(--blu);color:#fff;border-radius:14px;padding:16px 18px;margin-top:14px;font-size:19px;font-weight:600;line-height:1.4}
+.fc-esito b{display:block;font-size:23px;font-weight:800;color:#fff}
+.fc-esito .fp-ic{width:28px;height:28px;flex:0 0 auto;margin-top:2px}
+@media(max-width:640px){
+  .fc-campi{grid-template-columns:1fr}
+  .sheet.fisco-sh .fc-tasti .fp-chip{flex:1 1 30%;text-align:center;justify-content:center;padding:10px 6px;font-size:17px}
+  .sheet.fisco-sh .fc-opz .fp-chip{flex:1 1 100%}
+  .fc-riga{grid-template-columns:1fr;padding:14px}
+  .fc-cifra{text-align:left}
+  .fc-cifra b{font-size:30px}
+  .fc-dett{flex-direction:column;gap:4px}
+}

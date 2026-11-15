@@ -464,6 +464,7 @@
 
   function ftStrumenti() {
     return `<h3 class="fp-h3">Ti serve aiuto?</h3><div class="ft-strum">
+      <button class="ft-str" data-action="fc-apri"><span class="t-blu">${fpIc("bilancia")}</span><b>Chi paga più tasse?</b><small>Forfettario, ordinario, Srl o dipendente</small></button>
       <button class="ft-str" data-action="ft-ravv"><span class="t-rosso">${fpIc("orologio")}</span><b>Ho pagato in ritardo</b><small>Quanto costa il ravvedimento</small></button>
       <button class="ft-str" data-action="ft-lettera"><span class="t-blu">${fpIc("busta")}</span><b>Mi è arrivata una lettera</b><small>Avviso bonario o cartella: cosa fare</small></button>
       <button class="ft-str" data-action="ft-iva"><span class="t-viola">${fpIc("calcolo")}</span><b>Quale IVA metto?</b><small>10%, 22%, 4% o reverse charge: 3 domande</small></button>
