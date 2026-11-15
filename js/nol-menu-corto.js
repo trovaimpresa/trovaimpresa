@@ -75,6 +75,16 @@
       var t = b.dataset.tab;
       return PRINCIPALI.indexOf(t) < 0 && FISSE.indexOf(t) < 0;
     });
+    /* 15 nov 2026 (sesto giro, MANCA 3) — LA SQUADRA. E' una sola per tutta
+       l'azienda e sta nel gestionale principale: qui c'e' la porta, e li' si vede
+       chi e' «Senza invito». Sta fra le «altre voci» (la prima): in vista, sul
+       computer, mandava «Altre N voci» su una seconda riga. */
+    var sq = document.createElement("button");
+    sq.type = "button";
+    sq.className = "nol-fisco nol-porta";
+    sq.textContent = "Squadra";
+    sq.addEventListener("click", function () { try { sessionStorage.setItem("ti_dal_noleggio", "1"); } catch (e) {} location.href = "/gestionale-app#squadra"; });
+    altre.unshift(sq);
     var dopo = btn;
     altre.forEach(function (b) { b.classList.add("nol-altra"); dopo.after(b); dopo = b; });
 

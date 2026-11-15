@@ -531,6 +531,27 @@ async function apriApp(browser, base0, W, stato, senzaIban) {
   const scritto = fn ? new Function("return (" + fn[0] + ")")() : () => "";
   prova(scritto("Agibilita'") === "Agibilità" && scritto("SCIA") === "SCIA" && scritto("") === "", "(S6 5) nel titolo «Agibilita'» si scrive «Agibilità» (il resto non cambia)", scritto("Agibilita'"));
 
+  /* ---------- S6 M3 (15 nov 2026) — NOLEGGIO: la porta «Squadra» ---------- */
+  console.log("\nNoleggio: la voce «Squadra»");
+  for (const W of [1920, 1440, 375]) {
+    const tel = W < 800, PN = B.PAGINE.noleggio;
+    const ctx = await browser.newContext(tel ? { viewport: { width: W, height: 780 }, isMobile: true, hasTouch: true } : { viewport: { width: W, height: 800 } });
+    const page = await ctx.newPage(); await B.collega(page, { rete: true, scritture: [] });
+    await page.goto(base0 + PN.url, { waitUntil: "domcontentloaded" }); await PN.entra(page); await B.aspetta(page, 1500);
+    const chiuso = await page.evaluate(() => { const nav = document.querySelector("nav.tabs"), su = e => Math.round(e.getBoundingClientRect().top); const alt = nav.querySelector(".nol-altro"), acq = [...nav.querySelectorAll(".nol-porta")].find(b => /Acquisti/.test(b.textContent)); const sq = [...nav.querySelectorAll("button")].find(b => b.textContent.trim() === "Squadra"); return { ce: !!sq, tab: sq ? (sq.dataset.tab || "") : null, vista: !!sq && sq.offsetParent !== null, stessaRiga: !!alt && !!acq && alt.previousElementSibling === acq && alt.nextElementSibling === sq, conta: alt ? alt.textContent.replace(/\s+/g, " ").trim() : "" }; });
+    prova(chiuso.ce && chiuso.tab === "", "(S6 M3) Noleggio a " + W + ": nel menu c'è la voce «Squadra» (una porta, non una sezione)", chiuso);
+    if (!tel) prova(chiuso.stessaRiga && !chiuso.vista, "(S6 M3) …sul computer sta dentro «Altre voci», per prima: le voci in vista restano quelle di prima (fino ad «Acquisti»)", chiuso);
+    await page.evaluate(tel => { (tel ? document.getElementById("nol-menu-btn") : document.querySelector("nav.tabs .nol-altro")).click(); }, tel); await B.aspetta(page, 600);
+    const ap = await page.evaluate(() => { const sq = [...document.querySelectorAll("nav.tabs button")].find(b => b.textContent.trim() === "Squadra"); if (!sq || sq.offsetParent === null) return { nonSiVede: true }; sq.scrollIntoView({ block: "center" }); const r = sq.getBoundingClientRect(); return { px: parseFloat(getComputedStyle(sq).fontSize), alto: Math.round(r.height), fuori: r.left < 0 || r.right > innerWidth + 1 }; });
+    await foto(page, "M3-squadra-" + W, "nav.tabs .nol-altra");
+    prova(!ap.nonSiVede && ap.px >= 14 && !ap.fuori && (!tel || ap.alto >= 44), "(S6 M3) …aperto il menu si legge e si tocca (14 px o più" + (tel ? ", alta 44 o più" : "") + ", dentro lo schermo)", ap);
+    await page.evaluate(() => { [...document.querySelectorAll("nav.tabs button")].find(b => b.textContent.trim() === "Squadra").click(); });
+    await page.waitForURL(/gestionale-app/, { timeout: 8000 }).catch(() => {});
+    const arr = await page.evaluate(() => { let r = ""; try { r = sessionStorage.getItem("ti_dal_noleggio"); } catch (e) {} return { url: location.pathname + location.hash, ricordo: r }; }).catch(e => ({ errore: String(e) }));
+    prova(/gestionale-app/.test(arr.url || "") && /#squadra$/.test(arr.url || "") && arr.ricordo === "1", "(S6 M3) …toccata, porta alla Squadra dell'App e si ricorda da dove vieni («← Torna al Noleggio»)", arr);
+    await ctx.close();
+  }
+
   await browser.close(); srv.close();
   console.log("\n" + verdi + " verdi, " + rossi + " rossi\n");
   process.exit(rossi ? 1 : 0);
